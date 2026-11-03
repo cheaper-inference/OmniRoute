@@ -48,12 +48,24 @@ const BUILT_IN_ALIASES: Record<string, string> = {
   "fireworks/accounts/fireworks/models/kimi-k2": "moonshotai/Kimi-K2",
   "kimi-k2": "moonshotai/Kimi-K2",
 
-  // Qwen — the model ships only under the `-preview` id (bailian-coding-plan, qoder,
-  // qwen-cloud-token-plan). Without this, the bare id missed MODEL_SPECS and
-  // the context preflight fell back to contextManager's `default: 128000`, rejecting
-  // prompts the model's real 1M window accepts. Drop this line if Alibaba ever ships a
-  // distinct GA `qwen3.8-max` — it would no longer be the same model.
+  // Qwen — preview-only providers (bailian-coding-plan, qoder, qwen-cloud-token-plan)
+  // still serve the model solely under the `-preview` id; without this rewrite the
+  // bare id missed MODEL_SPECS there and the context preflight fell back to
+  // contextManager's `default: 128000`. Providers that list the GA id as-is
+  // (alibaba, qwen-cloud, kilocode, clinepass, xkiro, opencode-go — #14181) are
+  // exempted by the provider-aware check in resolveModelAlias.
   "qwen3.8-max": "qwen3.8-max-preview",
+
+  // OpenCode Zen rotated its free DeepSeek snapshot on 2026-10-18: the upstream
+  // catalog now serves `deepseek-v4.1-flash-free` and rejects the old id with
+  // `400 Model is unavailable`. Clients pinned to the old id keep working.
+  "deepseek-v4-flash-free": "deepseek-v4.1-flash-free",
+
+  // OpenCode Zen deprecated its free MiMo V2.5 snapshot on 2026-10-21: the
+  // upstream answers the old id with `410 Model mimo-v2.5-free has been
+  // deprecated. Use mimo-v2.6-flash-free instead.` Clients pinned to the old id
+  // keep working.
+  "mimo-v2.5-free": "mimo-v2.6-flash-free",
 
   // Mistral short aliases
   "mistral-large": "mistral-large-latest",

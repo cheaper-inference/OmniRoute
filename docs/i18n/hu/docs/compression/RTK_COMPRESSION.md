@@ -1,6 +1,6 @@
 # RTK Compression (Magyar)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -25,22 +25,24 @@ Kombinált:       1 - (1 - 0.80) * (1 - 0.46) = 89.2% megtakarítás
 Tartomány:       1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Mit tömörít?
+## Mit tömörít
 
-A beépített katalógus jelenleg 49 szűrőt tartalmaz a következő kategóriákban:
+A beépített katalógus jelenleg 56 szűrőt tartalmaz a következő kategóriákban:
 
-| Kategória | Példák                                                            |
-| --------- | ----------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-tesztek, Cargo-tesztek       |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`   | `ls`, `find`, `grep`, általános shellnaplók                       |
-| `docker`  | `docker ps`, Docker-naplók                                        |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
-| `generic` | JSON-kimenet, veremkövetések, általános kimeneti tartalékmegoldás |
+| Kategória | Példák                                                               |
+| --------- | -------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                    |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tesztek         |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx        |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler        |
+| `shell`   | `ls`, `find`, `grep`, általános shell-naplók                         |
+| `docker`  | `docker ps`, Docker-naplók                                           |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                              |
+| `generic` | JSON-kimenet, veremnyomok (stack trace), általános kimeneti tartalék |
 
-Az `open-sse/services/compression/engines/rtk/commandDetector.ts` fájlban található érzékelő a szűrő kiválasztása előtt osztályozza a kimenetet. A szűrők parancsminta vagy kimeneti reguláris kifejezés alapján is illeszkedhetnek, ha egy parancsosztály önmagában nem elegendő.
+Az `open-sse/services/compression/engines/rtk/commandDetector.ts` fájlban található detektor a
+szűrő kiválasztása előtt osztályozza a kimenetet. A szűrők parancsminta vagy kimeneti reguláris
+kifejezés alapján is illeszkedhetnek, ha a parancsosztály önmagában nem elegendő.
 
 ## Szűrőfeloldás
 
@@ -326,59 +328,60 @@ node --import tsx/esm --test \
 
 ## Intenzitási szintek (v3.8.16+)
 
-Az RTK **3 intenzitási szintet** támogat, amelyek különböző kompromisszumot kínálnak a **tömörítés agresszivitása** és a **biztonság** között. A szint a motor konfigurációjának `config.intensity` beállításával adható meg.
+Az RTK **3 intenzitási szintet** támogat, amelyek a **tömörítés agresszivitása** és a **biztonság** között egyensúlyoznak. A szint a motor konfigurációjában a `config.intensity` beállítással adható meg.
 
 ### A 3 szint
 
-| Szint                  | Csonkítási küszöb    | Tokenmegtakarítás | Kockázat        | Leginkább ehhez ajánlott                    |
-| ---------------------- | -------------------- | ----------------- | --------------- | ------------------------------------------- |
-| `minimal`              | 24 sor szakaszonként | ~20-40%           | Nagyon alacsony | Éles környezet kritikus kontextussal        |
-| `standard` (alapérték) | 24 sor szakaszonként | ~50-70%           | Alacsony        | Mindennapi kódolási munkamenetek            |
-| `aggressive`           | 16 sor szakaszonként | ~70-90%           | Közepes         | Hosszú munkamenetek, maximális megtakarítás |
+| Szint                        | Csonkítási küszöbérték | Token-megtakarítás | Kockázat        | Ajánlott felhasználás                       |
+| ---------------------------- | ---------------------- | ------------------ | --------------- | ------------------------------------------- |
+| `minimal`                    | 24 sor szekciónként    | ~20-40%            | Nagyon alacsony | Kritikus kontextust igénylő éles környezet  |
+| `standard` (alapértelmezett) | 24 sor szekciónként    | ~50-70%            | Alacsony        | Napi kódolási munkamenetek                  |
+| `aggressive`                 | 16 sor szekciónként    | ~70-90%            | Közepes         | Hosszú munkamenetek, maximális megtakarítás |
 
 ### Hol történik a csonkítás
 
-A csonkítási küszöb a `lineFilter.ts` működésére van hatással:
+A csonkítási küszöbérték a `lineFilter.ts`-re van hatással:
 
 ```ts
-// Az open-sse/services/compression/engines/rtk/index.ts:329-330 fájlból
+// Forrás: open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Minden szakasz **eleje** és **vége** megmarad; a középső tartalom kiesik, amikor a csonkítás életbe lép.
+Minden szekció **eleje** és **vége** megmarad; a középső tartalom kerül eldobásra, amikor a csonkítás életbe lép.
 
-### Mi marad meg, és mi kerül eltávolításra
+### Mi marad meg és mi kerül kivágásra
 
-| Tartalom                                | minimal       | standard      | aggressive    |
-| --------------------------------------- | ------------- | ------------- | ------------- |
-| Hibák / veremkövetések                  | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Sikertelen tesztek                      | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Buildelési hibák                        | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Sikeres tesztek (részletes)             | ✅ megmarad   | 🟡 összevonva | 🟡 összevonva |
-| Rutinszerű kimenet (információs naplók) | 🟡 összevonva | 🟡 összevonva | ❌ eldobva    |
-| Folyamatjelző sávok                     | 🟡 összevonva | ❌ eldobva    | ❌ eldobva    |
-| Fejléc / ASCII-grafika                  | 🟡 összevonva | ❌ eldobva    | ❌ eldobva    |
+| Tartalom                    | minimal        | standard       | aggressive     |
+| --------------------------- | -------------- | -------------- | -------------- |
+| Hibák / stack trace-ek      | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Teszthibák                  | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Build-hibák                 | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Sikeres tesztek (részletes) | ✅ megmarad    | 🟡 összecsukva | 🟡 összecsukva |
+| Rutin kimenet (info naplók) | 🟡 összecsukva | 🟡 összecsukva | ❌ eldobva     |
+| Folyamatjelző sávok         | 🟡 összecsukva | ❌ eldobva     | ❌ eldobva     |
+| Banner / ASCII-grafika      | 🟡 összecsukva | ❌ eldobva     | ❌ eldobva     |
 
 ### A megfelelő intenzitás kiválasztása
 
 ```
-                  Katasztrofális lenne a kontextus elvesztése?
+              Katasztrofális a kontextus elvesztése?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    IGEN         NEM       NEM BIZTOS
+    IGEN         NEM      NEM BIZTOS
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Mennyire fontos  Először próbáld a `standard`
-      │      az áteresztés?   szintet (az esetek 80%-ában
-      │           │          működik)
+      │      Mennyire kritikus  Próbáld ki először
+      │      az átbocsátó-      a `standard` szintet
+      │      képesség?          (az esetek 80%-ában
+      │           │             működik)
       │      ┌────┴────┐
       │      │         │
-      │  ALACSONY    MAGAS
+      │   ALACSONY   MAGAS
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -388,7 +391,7 @@ Minden szakasz **eleje** és **vége** megmarad; a középső tartalom kiesik, a
 
 ### Az intenzitás konfigurálása
 
-**Kombinációnként** (a kombináció konfigurációjában):
+**Kombónként** (a kombó konfigurációjában):
 
 ```json
 {
@@ -403,9 +406,9 @@ Minden szakasz **eleje** és **vége** megmarad; a középső tartalom kiesik, a
 
 **Programozottan**:
 
-Az `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) egy
-`CompressionEngine`, és nem rendelkezik `updateConfig` metódussal. Ehelyett a regisztrációs segédfüggvényen keresztül
-frissítsd a motor konfigurációját:
+A `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) egy
+`CompressionEngine`, és nem rendelkezik `updateConfig` metódussal. A motor
+konfigurációját helyette a registry segédfüggvényen keresztül frissítsd:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -415,14 +418,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### A hatás ellenőrzése
 
-Használd az **ellenőrzési kaput** (lásd alább) annak megerősítéséhez, hogy a szűrő biztonságos a kiválasztott intenzitással:
+Használd a **Verify Gate**-et (lásd lent), hogy meggyőződj arról, hogy a szűrő biztonságos a választott intenzitáson:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("A szűrők meghiúsultak agresszív intenzitás mellett");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

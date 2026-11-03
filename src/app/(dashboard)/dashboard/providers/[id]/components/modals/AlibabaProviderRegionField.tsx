@@ -1,27 +1,41 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Input, Modal, Select } from "@/shared/components";
+import { Button, Input, Modal, Select } from "@/shared/components";
 import {
   getDefaultAlibabaProviderRegion,
   isAlibabaRegionalProvider,
   type AlibabaProviderRegion,
 } from "@/shared/constants/alibabaProviderRegions";
+import {
+  isXiaomiTokenPlanProvider,
+  type XiaomiTokenPlanRegion,
+} from "@/shared/constants/xiaomiTokenPlanRegions";
 import { providerText } from "../../providerPageHelpers";
 
 export function getProviderRegionConfig(provider?: string) {
   const isAlibabaRegional = isAlibabaRegionalProvider(provider);
+  const isXiaomiTokenPlan = isXiaomiTokenPlanProvider(provider);
   const isBedrock = provider === "bedrock";
   return {
     defaultRegion: isAlibabaRegional
       ? getDefaultAlibabaProviderRegion(provider)
-      : isBedrock
-        ? "eu-west-2"
-        : "us-central1",
+      : isXiaomiTokenPlan
+        ? "sgp"
+        : isBedrock
+          ? "eu-west-2"
+          : "us-central1",
     isAlibabaRegional,
+    isXiaomiTokenPlan,
     showsRegion:
-      isAlibabaRegional || isBedrock || provider === "vertex" || provider === "vertex-partner",
+      isAlibabaRegional ||
+      isXiaomiTokenPlan ||
+      isBedrock ||
+      provider === "vertex" ||
+      provider === "vertex-partner",
   };
 }
 
@@ -61,23 +75,80 @@ export function AlibabaProviderRegionChoices({
       </p>
 
       {choices.map((choice) => (
-        <button
+        <Button
           key={choice.value}
-          type="button"
+          variant="outline"
           data-region={choice.value}
           onClick={() => onSelect(choice.value)}
-          className="w-full rounded-lg border border-border p-4 text-left transition-colors hover:bg-sidebar"
+          className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
         >
           <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined mt-0.5 text-primary" aria-hidden="true">
-              {choice.icon}
-            </span>
+            <Icon name={choice.icon} className="mt-0.5 text-primary" />
             <div className="min-w-0 flex-1">
               <h3 className="mb-1 font-semibold">{choice.label}</h3>
               <p className="text-sm text-text-muted">{choice.description}</p>
             </div>
           </div>
-        </button>
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+export function XiaomiTokenPlanRegionChoices({
+  onSelect,
+}: {
+  onSelect: (value: XiaomiTokenPlanRegion) => void;
+}) {
+  const t = useTranslations("providers");
+  const choices: Array<{
+    description: string;
+    icon: string;
+    label: string;
+    value: XiaomiTokenPlanRegion;
+  }> = [
+    {
+      value: "sgp",
+      label: "Singapore",
+      description: providerText(t, "xiaomiRegionSgpDesc", "token-plan-sgp.xiaomimimo.com cluster"),
+      icon: "public",
+    },
+    {
+      value: "ams",
+      label: "Amsterdam",
+      description: providerText(t, "xiaomiRegionAmsDesc", "token-plan-ams.xiaomimimo.com cluster"),
+      icon: "public",
+    },
+    {
+      value: "cn",
+      label: "China",
+      description: providerText(t, "xiaomiRegionCnDesc", "token-plan-cn.xiaomimimo.com cluster"),
+      icon: "location_on",
+    },
+  ];
+
+  return (
+    <div className="space-y-3" data-testid="xiaomi-region-step">
+      <p className="mb-4 text-sm text-text-muted">
+        {providerText(t, "xiaomiRegionPrompt", "Which Token Plan cluster issued your API key?")}
+      </p>
+
+      {choices.map((choice) => (
+        <Button
+          key={choice.value}
+          variant="outline"
+          data-region={choice.value}
+          onClick={() => onSelect(choice.value)}
+          className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
+        >
+          <div className="flex items-start gap-3">
+            <Icon name={choice.icon} className="mt-0.5 text-primary" />
+            <div className="min-w-0 flex-1">
+              <h3 className="mb-1 font-semibold">{choice.label}</h3>
+              <p className="text-sm text-text-muted">{choice.description}</p>
+            </div>
+          </div>
+        </Button>
       ))}
     </div>
   );
@@ -98,16 +169,18 @@ export function useAlibabaProviderRegionStep<T extends RegionFormData>({
   onClose: () => void;
   setFormData: Dispatch<SetStateAction<T>>;
 }) {
-  const { defaultRegion, isAlibabaRegional, showsRegion } = getProviderRegionConfig(provider);
+  const { defaultRegion, isAlibabaRegional, isXiaomiTokenPlan, showsRegion } =
+    getProviderRegionConfig(provider);
+  const isRegionStepProvider = isAlibabaRegional || isXiaomiTokenPlan;
   const [stepState, setStepState] = useState({
-    complete: !isAlibabaRegional,
+    complete: !isRegionStepProvider,
     isOpen,
     provider,
   });
   const wasOpenRef = useRef(false);
 
   if (stepState.isOpen !== isOpen || stepState.provider !== provider) {
-    setStepState({ complete: !isOpen || !isAlibabaRegional, isOpen, provider });
+    setStepState({ complete: !isOpen || !isRegionStepProvider, isOpen, provider });
   }
 
   useEffect(() => {
@@ -120,16 +193,25 @@ export function useAlibabaProviderRegionStep<T extends RegionFormData>({
     }));
   }, [defaultRegion, isOpen, setFormData, showsRegion]);
 
-  if (!isAlibabaRegional || stepState.complete) return null;
+  if (!isRegionStepProvider || stepState.complete) return null;
   return (
     <Modal isOpen={isOpen} title={title} onClose={onClose} size="md">
-      <AlibabaProviderRegionChoices
-        provider={provider}
-        onSelect={(region) => {
-          setFormData((current) => ({ ...current, region }));
-          setStepState((current) => ({ ...current, complete: true }));
-        }}
-      />
+      {isXiaomiTokenPlan ? (
+        <XiaomiTokenPlanRegionChoices
+          onSelect={(region) => {
+            setFormData((current) => ({ ...current, region }));
+            setStepState((current) => ({ ...current, complete: true }));
+          }}
+        />
+      ) : (
+        <AlibabaProviderRegionChoices
+          provider={provider}
+          onSelect={(region) => {
+            setFormData((current) => ({ ...current, region }));
+            setStepState((current) => ({ ...current, complete: true }));
+          }}
+        />
+      )}
     </Modal>
   );
 }
@@ -178,8 +260,38 @@ export function ProviderRegionField({
   hideAlibaba?: boolean;
 }) {
   const t = useTranslations("providers");
-  const { defaultRegion, isAlibabaRegional, showsRegion } = getProviderRegionConfig(provider);
+  const { defaultRegion, isAlibabaRegional, isXiaomiTokenPlan, showsRegion } =
+    getProviderRegionConfig(provider);
   if (!showsRegion || (hideAlibaba && isAlibabaRegional)) return null;
+  if (isXiaomiTokenPlan && !isAlibabaRegional) {
+    return (
+      <Select
+        label={providerText(t, "xiaomiTokenPlanRegionLabel", "Token Plan region")}
+        value={value}
+        placeholder=""
+        options={[
+          {
+            value: "sgp",
+            label: providerText(t, "xiaomiTokenPlanRegionSgp", "Singapore"),
+          },
+          {
+            value: "ams",
+            label: providerText(t, "xiaomiTokenPlanRegionAms", "Amsterdam (Europe)"),
+          },
+          {
+            value: "cn",
+            label: providerText(t, "xiaomiTokenPlanRegionCn", "China (Beijing)"),
+          },
+        ]}
+        onChange={(event) => onChange(event.target.value)}
+        hint={providerText(
+          t,
+          "xiaomiTokenPlanRegionHint",
+          "Token Plan keys only work on the cluster that issued them."
+        )}
+      />
+    );
+  }
   if (isAlibabaRegional) {
     return (
       <AlibabaProviderRegionField

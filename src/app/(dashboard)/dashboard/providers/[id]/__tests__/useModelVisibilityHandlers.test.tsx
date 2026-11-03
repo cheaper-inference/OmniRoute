@@ -119,4 +119,72 @@ describe("useModelVisibilityHandlers", () => {
     ).toBe(false);
     expect(hook.get().modelTestStatus["claude-opus-4-8"]).toBe("error");
   });
+
+  it("#17071 reports a skipped probe as info without marking the model failed", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      json: () =>
+        Promise.resolve({
+          status: "error",
+          skipped: true,
+          error: "Skipped: non-chat generation model",
+        }),
+    } as Response);
+
+    const hook = renderHook();
+
+    await act(async () => {
+      await hook.get().onTestModel("agnes-image-2.5-flash", "agnes/agnes-image-2.5-flash");
+    });
+
+    expect(notify.info).toHaveBeenCalledWith("Skipped: non-chat generation model");
+    expect(notify.error).not.toHaveBeenCalled();
+    expect(hook.get().modelTestStatus["agnes-image-2.5-flash"]).toBeUndefined();
+  });
+
+  it("clears models for both storage alias and canonical providerId when they differ", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true)
+    );
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ cleared: true }),
+    } as Response);
+
+    let latestResult: HookResult | null = null;
+    function CustomWrapper() {
+      const result = useModelVisibilityHandlers({
+        ...baseProps,
+        providerId: "antigravity",
+        providerStorageAlias: "ag",
+      });
+      React.useEffect(() => {
+        latestResult = result;
+      });
+      return null;
+    }
+
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const root = createRoot(el);
+    act(() => {
+      root.render(<CustomWrapper />);
+    });
+    roots.push({ root, el });
+
+    await act(async () => {
+      await latestResult!.handleClearAllModels();
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/provider-models?provider=ag&all=true", {
+      method: "DELETE",
+    });
+    expect(fetchMock).toHaveBeenCalledWith("/api/provider-models?provider=antigravity&all=true", {
+      method: "DELETE",
+    });
+    expect(notify.success).toHaveBeenCalledWith("clearAllModelsSuccess");
+  });
 });

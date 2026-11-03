@@ -9,8 +9,25 @@
 
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
+import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
+import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
+
+// #14483 building blocks for the authority/educational-framing co-occurrence rule.
+// Kept as plain alternations of fixed phrases (single-word gaps only via \s+).
+const AUTHORITY_FRAMING =
+  "(?:safe\\s+(?:educational|research)\\s+context|as\\s+an?\\s+(?:researcher|red[-\\s]?teamer)" +
+  "|for\\s+(?:testing|research|educational)\\s+purposes\\s+only|controlled\\s+test\\s+scenario)";
+const BYPASS_REQUEST =
+  "(?:(?:ignore|bypass|disable|disregard|override|drop|turn\\s+off)\\s+(?:all\\s+)?(?:of\\s+)?" +
+  "(?:your|the|any)\\s+(?:safety\\s+|ethical\\s+|content\\s+)?" +
+  "(?:guidelines|restrictions|rules|filters|guardrails|safeguards|policies|limitations)" +
+  "|uncensored\\s+(?:outputs?|responses?|answers?|replies|content|mode)" +
+  "|update\\s+your\\s+behaviou?r" +
+  "|(?:respond|answer|reply|proceed|continue|operate|act)\\s+without\\s+(?:any\\s+)?" +
+  "(?:restrictions|limits|limitations|filters|censorship|guardrails))";
+const AUTHORITY_WINDOW = 300;
 
 /** @type {Array<{name: string, pattern: RegExp, severity: string}>} */
 const INJECTION_PATTERNS = [
@@ -54,6 +71,26 @@ const INJECTION_PATTERNS = [
       /\b(base64\s+decode|rot13|hex\s+decode|unicode\s+escape)\b.*\b(instruction|prompt|command)\b/i,
     severity: "medium",
   },
+  {
+    // #14483 (LEDGER-12): "authority / educational framing" jailbreak family from the
+    // 2026-09-21 live promptfoo red-team run. Attacks claim a fictional
+    // safety/research authority ("safe educational context", "as a researcher",
+    // "for testing purposes only") AND ask the model to drop its rules
+    // ("ignore your guidelines", "uncensored outputs", "update your behavior").
+    //
+    // Either half alone is ordinary traffic ("best uncensored model?", "as a
+    // researcher, summarize this paper"), so the rule is a CO-OCCURRENCE: the
+    // framing and the bypass request must both appear, in either order, within
+    // AUTHORITY_WINDOW characters. Every alternative is a fixed phrase and the only
+    // variable-length gap is a bounded, lazy `[\s\S]{0,N}?` (ReDoS rule).
+    name: "authority_educational_framing",
+    pattern: new RegExp(
+      `\\b(?:${AUTHORITY_FRAMING}\\b[\\s\\S]{0,${AUTHORITY_WINDOW}}?\\b${BYPASS_REQUEST}` +
+        `|${BYPASS_REQUEST}\\b[\\s\\S]{0,${AUTHORITY_WINDOW}}?\\b${AUTHORITY_FRAMING})\\b`,
+      "i"
+    ),
+    severity: "medium",
+  },
 ];
 
 /**
@@ -79,7 +116,7 @@ const SCAN_GAP = "\n[GAP]\n";
 
 // ─── PII Patterns ────────────────────────────────────────────────────
 
-/** @type {Array<{name: string, pattern: RegExp, replacement: string}>} */
+/** @type {Array<{name: string, pattern: RegExp, replacement: string, validate?: (match: string, context: string) => boolean}>} */
 const PII_PATTERNS = [
   {
     name: "email",
@@ -101,6 +138,18 @@ const PII_PATTERNS = [
     pattern: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
     replacement: "[CARD_REDACTED]",
   },
+
+  // GDPR (EU) and POPIA (ZA) identifiers, shared with the response-side sanitizer
+  // (src/shared/utils/piiPatterns.ts). Each match is redacted only when its
+  // validator accepts it, and the group sits ahead of the generic phone pattern so a
+  // validated ID keeps its own label. Order numbers, timestamps and identifiers such as
+  // `gpt4o` or `gh12abc` stay untouched.
+  ...buildGdprPopiaRules().map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+    validate: rule.validate,
+  })),
   {
     name: "phone_br",
     pattern: /\b\(?\d{2}\)?\s?\d{4,5}-?\d{4}\b/g,
@@ -264,16 +313,43 @@ function detectInjection(text) {
 }
 
 /**
+ * Built-in rules narrowed to the operator's per-type selection (null = all),
+ * followed by any pre-compiled custom rules.
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options]
+ */
+function resolvePiiRules(options) {
+  const enabled = options?.enabledTypes ?? null;
+  const builtins = enabled
+    ? PII_PATTERNS.filter((rule) => enabled.has(PII_REQUEST_TYPE_ALIASES[rule.name] ?? rule.name))
+    : PII_PATTERNS;
+  const custom = (options?.customRules ?? []).map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+  }));
+  return custom.length > 0 ? [...builtins, ...custom] : builtins;
+}
+
+/**
  * Scan and optionally redact PII from text.
  * @param {string} text
  * @param {boolean} redact - If true, replaces PII with placeholders
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options] - per-type selection and custom rules
  * @returns {{ text: string, detections: Array<{type: string, count: number}> }}
  */
-function processPII(text, redact = false) {
+function processPII(text, redact = false, options = undefined) {
   const detections = [];
   let processed = text;
 
-  for (const rule of PII_PATTERNS) {
+  for (const rule of resolvePiiRules(options)) {
+    if (rule.validate) {
+      const validated = redactValidatedMatches(processed, rule, redact);
+      if (validated.count > 0) {
+        detections.push({ type: rule.name, count: validated.count });
+        processed = validated.text;
+      }
+      continue;
+    }
     const matches = text.match(rule.pattern);
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
@@ -284,6 +360,27 @@ function processPII(text, redact = false) {
   }
 
   return { text: processed, detections };
+}
+
+/**
+ * Count (and optionally redact) only the matches the rule's validator accepts.
+ * @param {string} text
+ * @param {{ pattern: RegExp, replacement: string, validate: (match: string, context: string) => boolean }} rule
+ * @param {boolean} redact
+ * @returns {{ text: string, count: number }}
+ */
+function redactValidatedMatches(text, rule, redact) {
+  let count = 0;
+  let output = "";
+  let cursor = 0;
+  for (const match of text.matchAll(rule.pattern)) {
+    const index = match.index ?? 0;
+    if (!rule.validate(match[0], precedingContext(text, index))) continue;
+    count++;
+    output += text.slice(cursor, index) + rule.replacement;
+    cursor = index + match[0].length;
+  }
+  return { text: redact ? output + text.slice(cursor) : text, count };
 }
 
 /**

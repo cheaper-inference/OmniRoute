@@ -1,6 +1,6 @@
 # Remote Mode (Yorùbá)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -237,171 +237,147 @@ asopọ̀ náà yóò fi hàn bí èyí tó ń ṣiṣẹ́.
 
 ---
 
-## Ṣíṣàkóso àwọn token
+## Ṣíṣàkóso tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ó tẹ secret náà jáde LẸ́Ẹ̀KAN ṢOṢO — ṣe àdàkọ rẹ̀ báyìí
-omniroute tokens list                 # tí a bò mọ́lẹ̀: id, name, scope, prefix, status, expiry
-omniroute tokens revoke <id|prefix>   # fagilé lẹ́sẹ̀kẹsẹ̀
-omniroute tokens scopes               # ṣàlàyé àwọn scope mẹ́tẹ̀ẹ̀ta
+#   ↳ ń fi àṣírí hàn ẸẸKAN — dà á kọ sílẹ̀ nísinsìnyí
+omniroute tokens list                 # ìbòjú: id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # fagilé lẹsẹkẹsẹ
+omniroute tokens scopes               # ṣàlàyé àwọn ìwọ̀n mẹ́ta
 ```
 
-Àwọn àṣẹ `tokens` nílò credential **admin**. O tún lè ṣàkóso àwọn token nínú
-dashboard lábẹ́ **Settings → Access Tokens** (ṣẹ̀dá, fagilé, ṣe àdàkọ lẹ́ẹ̀kan ṣoṣo).
+Àwọn àṣẹ `tokens` nílò credential **admin**. O tún lè ṣàkóso tokens ní dashboard lábẹ́ **Settings → Access Tokens** (ṣẹ̀dá, fagilé, dà-ẹ̀ẹ̀kan).
+
+A kò lè ṣẹ̀dá token pẹ̀lú àṣẹ tí ó ju èyí tí olùṣẹ̀dá rẹ̀ ní lọ. Token `admin` operator nìkan ló lè ṣẹ̀dá: ìgbà dashboard, CLI ti agbègbè lórí server fúnra rẹ̀, tàbí `omniroute connect` pẹ̀lú ọ̀rọ̀ aṣínà. Àwọn credential ẹ̀rọ (`admin` access token, tàbí kọ́kọ́rọ́ API pẹ̀lú ìwọ̀n `manage`/`admin`) lè ṣẹ̀dá àwọn token `write` àti `read` nìkan; tí wọ́n bá béèrè `--scope admin`, wọ́n máa dá `403` padà. Pípa wíwọlé kò ṣí ṣíṣẹ̀dá sílẹ̀: access token ti ìwọ̀n èyíkéyìí jẹ́ credential tí àwọn route tí ó máa ń nílò ìjẹ́rìí nígbà gbogbo ń gbà, nítorí náà ìpè àìmọ̀ ń gba `401` ní ìwọ̀n èyíkéyìí.
 
 ---
 
-## Ṣíṣètò CLI coding láti inú katalogi jíjìn
+## Ṣíṣètò CLI coding láti katalogi jíjìnnà
 
-`omniroute configure` máa ń ka katalogi model tó wà láàyè ti **olupin tó ń ṣiṣẹ́**
-ó sì máa ń kọ config sórí ẹ̀rọ **rẹ**.
+`omniroute configure` ń ka katalogi model ààyè ti **server tí ó ń ṣiṣẹ́** ó sì ń kọ config sórí **kọ̀mpútà rẹ**.
 
 ```bash
 omniroute configure codex
 #   Àwọn olùpèsè: glm, kmc, ollamacloud, opencode-go, …
-#   Olùpèsè: glm
-#   ID model: glm/glm-5.2
-#   ✔ Ti kọ ~/.codex/glm52.config.toml
-#   Lo ó:  codex --profile glm52
+#   Provider: glm
+#   Model id: glm/glm-5.2
+#   ✔ A kọ ~/.codex/glm52.config.toml
+#   Lò ó: codex --profile glm52
 
-# láìsí ìbánisọ̀rọ̀
+# láìsí ìbáníṣọ̀rọ̀
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# fi model tí a sábà ń lò sí òkè picker ìbánisọ̀rọ̀
+# pa model tí a máa ń lò déédéé mọ́ ní òkè olùyàn ìbáníṣọ̀rọ̀
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Picker náà ń pa àwọn ID model nìkan mọ́ (kì í ṣe URL tàbí credential láé) nínú fáìlì
-`model-preferences.json` agbègbè, tí a pín ní ìbámu pẹ̀lú context àti target CLI.
-Àwọn favorite máa ń hàn ṣáájú àwọn àṣàyàn àìpẹ́; lo `--unfavorite` láti yọ model
-tí a yàn kúrò nínú àkójọ context/target yẹn.
+Olùyàn náà ń tọ́jú model IDs nìkan (kì í ṣe URLs tàbí credential) nínú faili `model-preferences.json` ti agbègbè, tí a pín ní ìbámu pẹ̀lú ipò àti ibi-àfojúsùn CLI. Àwọn àyànfẹ́ ni a ń fihàn ṣáájú àwọn yíyàn àìpẹ́; lo `--unfavorite` láti yọ model tí a yàn kúrò nínú àkójọ ipò/ibi-àfojúsùn náà.
 
-Profile tí a kọ ń tọ́ka sí key inference nípasẹ̀ env var
-(`OMNIROUTE_API_KEY`) — a kì í kọ secret náà sí disk láé. Fún ìṣètò Codex ìpìlẹ̀
-lẹ́ẹ̀kan ṣoṣo (block `[model_providers.omniroute]`), wo
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Profile tí a kọ ń tọ́ka sí kọ́kọ́rọ́ inference nípasẹ̀ env var (`OMNIROUTE_API_KEY`). A kì í kọ àṣírí sórí disk. Fún ìṣètò Codex ipilẹ̀ ní ẹ̀ẹ̀kan (block `[model_providers.omniroute]`), wo [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Ṣíṣe CLI kan lòdì sí ẹ̀rọ jíjìn (láìkọ config)
+### Bíbẹ̀rẹ̀ CLI lórí jíjìnnà (laisi kikọ config)
 
-`omniroute run <target>` tún ń bọ̀wọ̀ fún context tó ń ṣiṣẹ́: URL ìpìlẹ̀ jíjìn
-àti credential context ni a máa ń fi sínú process tí a ṣẹ̀dá nìkan.
+`omniroute run <target>` tún ń bọ̀wọ̀ fún ipò tí ń ṣiṣẹ́: a ń fi base URL jíjìnnà àti credential ipò náà sínú ìlànà tí a bẹ̀rẹ̀ nìkan.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → ẹ̀rọ jíjìn
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Ṣàyẹ̀wò ohun gangan tí a ó ṣẹ̀dá (ÀWỌN ORÚKỌ KEY env nìkan, kì í ṣe àwọn value láé):
+# Wo gangan ohun tí a óò bẹ̀rẹ̀ (àwọn orúkọ env KEY nìkan, kì í ṣe iye):
 omniroute run codex --dry-run --json
 ```
 
-Àwọn target: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(orísun kan ṣoṣo: `bin/cli/cli-manifest.mjs`). Qwen àti Gemini ń ṣiṣẹ́ pẹ̀lú home
-àdádó fún ìgbà díẹ̀ tí a máa yọ kúrò nígbà tí wọ́n bá jáde, nítorí náà ìbẹ̀rẹ̀ náà
-kì í fọwọ́ kan — tàbí jo sínú — config irinṣẹ́ ti ara ẹni rẹ.
+Àwọn ibi-àfojúsùn: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (orísun kan: `bin/cli/cli-manifest.mjs`). Qwen àti Gemini ń ṣiṣẹ́ nínú ilé ìgbà díẹ̀ tí a yà sọ́tọ̀ tí a ń parẹ́ nígbà tí wọ́n bá jáde, nítorí náà ìbẹ̀rẹ̀ kì í fọwọ́ kan tàbí wọ inú ìṣètò irinṣẹ́ ti ara ẹni rẹ.
 
 ### Àwọn àṣẹ ìṣètò fún CLI kọ̀ọ̀kan
 
-CLI kọ̀ọ̀kan tí a ṣe àtìlẹ́yìn fún ní àṣẹ ìṣètò tó mọ nípa ẹ̀rọ jíjìn (gbogbo wọn
-ń bọ̀wọ̀ fún context tó ń ṣiṣẹ́, tàbí `--remote <url> --api-key <key>`):
+CLI kọ̀ọ̀kan tí a ń ṣe àtìlẹ́yìn fún ní àṣẹ ìṣètò tí ó mọ̀ nípa jíjìnnà (gbogbo wọn ń bọ̀wọ̀ fún ipò tí ń ṣiṣẹ́, tàbí `--remote <url> --api-key <key>`):
 
-| CLI         | Àṣẹ                        | Ohun tí ó kọ                                                                                                                                                                    |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | àwọn prófáìlì `~/.codex/<name>.config.toml` (fún awoṣe kọ̀ọ̀kan)                                                                                                                  |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (fún awoṣe kọ̀ọ̀kan)                                                                                                                    |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — olùpèsè `omniroute` tó bá openai mu pẹ̀lú gbogbo awoṣe inú àkójọ (ṣiṣẹ́ `opencode -m omniroute/<model>`)                                     |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (ipò CLI) + ó tẹ àwọn ètò ẹ̀kún VS Code jáde láti lẹ̀ mọ́ ọn (ó bá OpenAI mu, Base URL **láìsí** `/v1`)                                 |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + àwọn ètò VS Code `kilocode.*` — ó bá OpenAI mu, Base URL **pẹ̀lú** `/v1`                                                                 |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **pẹ̀lú** `/v1`, kọ́kọ́rọ́ nípasẹ̀ `${{ secrets.OMNIROUTE_API_KEY }}`                       |
-| Cursor      | `omniroute setup-cursor`   | ó tẹ àwọn ìgbésẹ̀ inú ètò jáde (Settings → Models → Override OpenAI Base URL **pẹ̀lú** `/v1` + kọ́kọ́rọ́ + awoṣe). Àtúnṣe Cursor jẹ́ SQLite tí kò ṣe kedere — pánẹ́ẹ̀lì ìfọ̀rọ̀wérọ̀ nìkan |
-| Roo Code    | `omniroute setup-roo`      | ó kọ JSON àgbéwọlé Roo (`~/.omniroute/roo-settings.json`) + ó ṣètò `roo-cline.autoImportSettingsPath` + ó tẹ àwọn ìgbésẹ̀ UI jáde (ó bá OpenAI mu, Base URL **pẹ̀lú** `/v1`)      |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — olùpèsè `openai-compat`, `base_url` **pẹ̀lú** `/v1`, kọ́kọ́rọ́ nípasẹ̀ `$OMNIROUTE_API_KEY`                                                           |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **láìsí** `/v1` + `GOOSE_MODEL`) + ìtọ́sọ́nà env                                                           |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **láìsí** `/v1` + `model: openai/<id>`) + ìtọ́sọ́nà env (`aider --message --yes`)                                                          |
-| Qwen Code   | `omniroute setup-qwen`     | àkọọ́lẹ̀ V4 `modelProviders.openai` nínú `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` nínú `~/.qwen/.env`                                                                        |
+| CLI         | Àṣẹ                        | Ohun tí ó ń kọ                                                                                                                                                             |
+| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | profiles `~/.codex/<name>.config.toml` (fún model kọ̀ọ̀kan)                                                                                                                  |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (fún model kọ̀ọ̀kan)                                                                                                               |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: olùpèsè `omniroute` tí ó bá openai mu pẹ̀lú gbogbo model katalogi (sáré `opencode -m omniroute/<model>`)                                |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (ipò CLI) + ń tẹ̀ àwọn ètò extension VS Code jáde láti lẹ̀ (ó bá OpenAI mu, Base URL **láìsí** `/v1`)                             |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + àwọn ètò VS Code `kilocode.*`: ó bá OpenAI mu, Base URL **pẹ̀lú** `/v1`                                                             |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **pẹ̀lú** `/v1`, kọ́kọ́rọ́ nípasẹ̀ `${{ secrets.OMNIROUTE_API_KEY }}`                   |
+| Cursor      | `omniroute setup-cursor`   | ń tẹ̀ àwọn ìgbésẹ̀ inú app jáde (Settings → Models → Override OpenAI Base URL **pẹ̀lú** `/v1` + kọ́kọ́rọ́ + model). Config Cursor jẹ́ SQLite àìhàn, nítorí náà chat panel nìkan   |
+| Roo Code    | `omniroute setup-roo`      | ń kọ JSON ìkó wọlé Roo (`~/.omniroute/roo-settings.json`) + ń ṣètò `roo-cline.autoImportSettingsPath` + ń tẹ àwọn ìgbésẹ̀ UI jáde (ó bá OpenAI mu, Base URL **pẹ̀lú** `/v1`) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: olùpèsè `openai-compat`, `base_url` **pẹ̀lú** `/v1`, kọ́kọ́rọ́ nípasẹ̀ `$OMNIROUTE_API_KEY`                                                       |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **pẹ̀lú** `/v1`, Zed ń ka kọ́kọ́rọ́ láti `$OMNIROUTE_API_KEY` (a kì í kọ ọ́)            |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **láìsí** `/v1` + `GOOSE_MODEL`) + env recipe                                                       |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **láìsí** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                      |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` ìwọlé V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` nínú `~/.qwen/.env`                                                                         |
 
 ```bash
-# OpenCode (olùpèsè tó bá openai mu, gbogbo awoṣe inú àkójọ, VPS jíjìn)
+# OpenCode (olùpèsè tí ó bá openai mu, gbogbo model katalogi, VPS jíjìnnà)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # pa àwọn awoṣe tó bá mu nìkan mọ́
-opencode -m omniroute/glm/glm-5.2 "..."          # kọ́kọ́ ṣe export OMNIROUTE_API_KEY
+omniroute setup-opencode --only glm,kimi        # pa àwọn model tí ó bá mu mọ́ nìkan
+opencode -m omniroute/glm/glm-5.2 "..."          # kọ́kọ́ okeere OMNIROUTE_API_KEY
 ```
 
-> OpenCode tún ní ìṣọ̀kan **plugin** tó ní agbára púpọ̀ sí i: `omniroute setup opencode`
-> (tó ti mọ̀ nípa jíjìn báyìí nípasẹ̀ `--remote`) ń fi `@omniroute/opencode-plugin` sílẹ̀.
-> `setup-opencode` ni àṣàyàn tó fẹ́ẹ̀rẹ́ tó sì bá openai mu. A tọ́ka sí kọ́kọ́rọ́ API
-> nípasẹ̀ `{env:OMNIROUTE_API_KEY}` — a kì í kọ ọ́ sí disiki láéláé.
+> OpenCode tún ní ìsopọ̀ **plugin** tí ó lọ́rọ̀ jù: `omniroute setup opencode` (tí ó mọ̀ nípa jíjìnnà nísinsìnyí nípasẹ̀ `--remote`) ń fi `@omniroute/opencode-plugin` sí.
+> `setup-opencode` jẹ́ àrọ́pò fúyẹ́ tí ó bá openai mu. A ń tọ́ka kọ́kọ́rọ́ API nípasẹ̀ `{env:OMNIROUTE_API_KEY}`, a kì í kọ ọ́ sórí disk.
 >
-> Lórí OpenCode v2, lo `@omniroute/opencode-plugin-v2` dípò rẹ̀: àkójọ kan náà,
-> àdéhùn olùgbéjáde tó yàtọ̀. Ó máa ń ka kọ́kọ́rọ́ láti ibi ìpamọ́ ẹ̀rí OpenCode fúnra rẹ̀
-> nígbà tí ìṣọ̀kan náà bá sopọ̀, nítorí náà gateway jíjìn kò nílò kọ́kọ́rọ́ kankan nínú
-> `opencode.json` rárá.
+> Lórí OpenCode v2, lo `@omniroute/opencode-plugin-v2` dípò rẹ̀: katalogi kan náà, àdéhùn loader yàtọ̀. Ó ń ka kọ́kọ́rọ́ láti ibi ìpamọ́ credential OpenCode fúnra rẹ̀ nígbà tí a bá so ìsopọ̀ náà pọ̀, nítorí náà gateway jíjìnnà kò nílò kọ́kọ́rọ́ kankan nínú `opencode.json`.
 
 ---
 
-## Ṣíṣàkóso àwọn àyíká (yípadà láàárín àwọn olupin)
+## Ṣiṣakoso awọn ipo (yipada laarin awọn olupin)
 
-**Àyíká** jẹ́ olupin tí a ti fipamọ́ (baseUrl + ẹ̀rí ìdánimọ̀ + àyè ìwọlé). `omniroute connect`
-ń ṣẹ̀dá ọ̀kan, ó sì ń mú un ṣiṣẹ́; láti ìgbà náà lọ, gbogbo àṣẹ ni yóò máa tọ́ka sí i. Ṣàkóso wọn,
-kí o sì yípadà láàárín wọn pẹ̀lú `omniroute contexts`:
+Ìpò kan (context) jẹ́ olupin tí a ti fipamọ́ (baseUrl + credential + scope). `omniroute connect` nṣẹda ọkan ti o si mu u ṣiṣẹ; lati igba naa gbogbo aṣẹ yoo fojusi rẹ. Ṣakoso ati yipada laarin wọn pẹlu `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # gbogbo àwọn àyíká; èyí tí ń ṣiṣẹ́ ni a fi ● sàmì sí
-omniroute contexts current         # olupin tí ń ṣiṣẹ́, ipò ìfàṣẹsí, àyè ìwọlé
+omniroute contexts list            # gbogbo awọn ipo; eyi ti nṣiṣẹ lọwọ ni a samisi ●
+omniroute contexts current         # olupin ti nṣiṣẹ lọwọ, ipo ijẹrisi, ipari
 ```
 
 ```text
-  | Orúkọ  | URL Ìpìlẹ̀                 | Ìfàṣẹsí | Àyè Ìwọlé | Àpèjúwe
-● | vps     | http://100.67.86.91:20128 | token   | admin     | OmniRoute jíjìnnà (…)
-  | default | http://localhost:20128    | ✗       |           |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Yí àwọn olupin padà** — gbogbo àṣẹ tó bá tẹ̀lé yóò lo àyíká tí ń ṣiṣẹ́:
+**Yipada awọn olupin** — gbogbo aṣẹ ti o tẹle yoo tẹle ipo ti nṣiṣẹ lọwọ:
 
 ```bash
-omniroute contexts use vps         # → gbogbo àṣẹ yóò tọ́ka sí VPS jíjìnnà báyìí
-omniroute tokens list              #   (ń ṣiṣẹ́ lórí VPS náà)
+omniroute contexts use vps         # → gbogbo awọn aṣẹ bayi yoo lu VPS latọna jijin
+omniroute tokens list              #   (ṣiṣẹ lodi si VPS)
 
-omniroute contexts use default     # → padà sí localhost
-omniroute tokens list              #   (ń ṣiṣẹ́ lórí olupin agbègbè)
+omniroute contexts use default     # → pada si localhost
+omniroute tokens list              #   (ṣiṣẹ lodi si olupin agbegbe)
 ```
 
-**Fi àyíká kan kún un lọ́wọ́** (dípò `connect`), ṣàyẹ̀wò rẹ̀, tàbí tún un lórúkọ:
+**Fi ipo kan kun pẹlu ọwọ** (dipo `connect`), ṣayẹwo, tabi tun lorukọ:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
   --access-token oma_live_xxxx --scope write --description "staging box"
-omniroute contexts show staging    # gbogbo àlàyé fún àyíká kan
+omniroute contexts show staging    # awọn alaye kikun fun ipo kan
 omniroute contexts rename staging stg
 ```
 
-**Yọ àyíká kan kúrò** — yóò béèrè ìmúdájú; fi `--yes` ránṣẹ́ láti fo ìgbésẹ̀ náà
-(ó pọn dandan fún àwọn script / shell tí kì í ṣe ìbánisọ̀rọ̀, èyí tí yóò kọ̀ láìléwu bí bẹ́ẹ̀ kọ́):
+**Yọ ipo kan kuro** — yoo beere fun ijẹrisi; kọja `--yes` lati foju rẹ (o nilo fun awọn iwe afọwọkọ / awọn ikarahun ti kii ṣe ibaraẹnisọrọ, eyiti yoo kọ lailewu bibẹẹkọ):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> A kò lè yọ `default` (localhost) kúrò. Bí a bá yọ àyíká tí ń ṣiṣẹ́ kúrò,
-> yóò padà sí `default`. Ìmọ̀ràn: yíyọ àyíká kan kúrò yóò pa ẹ̀rí ìdánimọ̀ tí a fipamọ́ sí **agbègbè** rẹ̀ nìkan —
-> fagilé token náà lórí olupin pẹ̀lú `omniroute tokens revoke <id>` láti fòpin sí
-> ìwọlé náà ní tòótọ́.
+> `default` (localhost) ko le yọ kuro. Yiyọ ipo ti nṣiṣẹ lọwọ yoo pada si `default`. Imọran: yiyọ ipo kan kuro nikan npa iwe-ẹri ti a ti fipamọ **agbegbe** rẹ — fagilee ami-ẹri naa lori olupin pẹlu `omniroute tokens revoke <id>` lati pa iwọle patapata.
 
-**Gbé àwọn àyíká jáde / wọlé** (fún àpẹẹrẹ, láti gbé wọn láàárín àwọn ẹ̀rọ). Àwọn àyíká tuntun máa ń tọ́jú
-ìtọ́kasí keychain nìkan; a kì í ṣe ẹ̀dà àwọn ẹ̀rí ìdánimọ̀ sínú ohun tí a gbé jáde nígbà tí
-keychain OS bá wà:
+**Ṣe okeere / gbe wọle awọn ipo** (fun apẹẹrẹ lati gbe wọn laarin awọn ẹrọ). Awọn okeere npa awọn iwe-ẹri kuro nipasẹ aiyipada, pẹlu awọn iwe-ẹri ti o fipamọ nipasẹ ifasẹhin faili. Lo `--include-secrets` ni gbangba nigbati o ba nilo afẹyinti ti o ni iwe-ẹri ti o le gbe:
 
 ```bash
-omniroute contexts export --out contexts.json     # àìyípadà: stdout
-omniroute contexts import contexts.json            # kọ lé e lórí; --merge láti pa àwọn tó ti wà mọ́
-omniroute contexts migrate --yes                  # gbé àwọn token plaintext àtijọ́ lọ sí keychain
+omniroute contexts export --out contexts.json     # ti yọ kuro; ibi ti aiyipada: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # kọ lori; --merge lati tọju eyi ti o wa tẹlẹ
+omniroute contexts migrate --yes                  # gbe awọn ami-ẹri plaintext atijọ si keychain
 ```
 
-Lórí àwọn ètò headless tí kò ní keychain OS tó ṣeé lò, CLI yóò padà lo
-`config.json` pẹ̀lú mode `0600`, yóò sì tẹ ìkìlọ̀ ẹ̀ẹ̀kan ṣoṣo jáde. Ka àwọn ohun tí a gbé jáde láti
-ọ̀nà àfidípò yẹn (àti gbogbo config àtijọ́ ṣáájú ìṣílọ) sí ohun ìkọ̀kọ̀.
+`--include-secrets` nyanju awọn itọkasi keychain ṣaaju ṣiṣe okeere ati pe yoo kuna ti ko ba le ka iwe-ẹri eyikeyi ti a tọka si. `--no-secrets` nigbagbogbo ni ipo akọkọ. Awọn faili okeere ni a kọ ni atomiki pẹlu ipo `0600`. Tọju okeere ti o ni aṣiri ni gbangba bi ohun elo aṣiri. Lori awọn eto ti ko ni ori laisi keychain OS ti o wulo, CLI yoo pada si `config.json` pẹlu ipo `0600` ati pe yoo tẹ ikilọ ẹyọkan kan; okeere aiyipada yoo wa ni piparẹ ni ipo yii.
 
 ---
 

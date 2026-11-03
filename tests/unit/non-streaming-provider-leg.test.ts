@@ -1,74 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  runNonStreamingProviderLeg,
-  type ChatCoreExecutorResult,
-  type ProviderLegInput,
-} from "../../open-sse/handlers/chatCore/nonStreamingProviderLeg.ts";
+import { runNonStreamingProviderLeg } from "../../open-sse/handlers/chatCore/nonStreamingProviderLeg.ts";
 import {
   buildAssistantMessageCacheKey,
   clearReasoningCacheAll,
   lookupReasoning,
 } from "../../open-sse/services/reasoningCache.ts";
-
-/* -- helpers --------------------------------------------------------------- */
-
-function makeResponse(
-  body: string | object,
-  status = 200,
-  headers: Record<string, string> = {}
-): Response {
-  const text = typeof body === "string" ? body : JSON.stringify(body);
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    statusText: status === 200 ? "OK" : "Error",
-    headers: new Headers({ "content-type": "application/json", ...headers }),
-    text: async () => text,
-    clone() {
-      return { ...this, text: async () => text } as unknown as Response;
-    },
-    body: null,
-  } as unknown as Response;
-}
-
-function makeExecutorResult(
-  responseBody: unknown,
-  status = 200,
-  headers: Record<string, string> = {}
-): ChatCoreExecutorResult {
-  return {
-    response: makeResponse(responseBody, status, headers),
-    url: "https://api.openai.com/v1/chat/completions",
-    headers: {},
-    transformedBody: responseBody,
-  };
-}
-
-function baseInput(overrides: Partial<ProviderLegInput> = {}): ProviderLegInput {
-  return {
-    phase: "initial",
-    sourceBody: {
-      model: "gpt-4o",
-      messages: [{ role: "user", content: "hi" }],
-    },
-    expectedConnectionId: undefined,
-    allowAccountRotation: true,
-    allowModelFallback: true,
-    executeProviderRequest: async () =>
-      makeExecutorResult({
-        id: "chatcmpl-test",
-        choices: [{ message: { role: "assistant", content: "Hello!" }, finish_reason: "stop" }],
-        usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
-      }),
-    setRequestWireState: () => {},
-    provider: "openai",
-    model: "gpt-4o",
-    connectionId: "conn-test",
-    ...overrides,
-  };
-}
+import { baseInput, makeExecutorResult } from "./_helpers/nonStreamingProviderLegFixtures.ts";
 
 /* -- characterization tests ------------------------------------------------ */
 
@@ -490,6 +429,7 @@ test("setRequestWireState receives updated body on fallback", async () => {
   const wireStates: Array<{ translatedBody: Record<string, unknown>; effectiveModel: string }> = [];
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -643,6 +583,7 @@ test("empty content initial with fallback enabled -> retries with next model", a
   let executorCallCount = 0;
   const executedModels: string[] = [];
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -804,6 +745,7 @@ test("upstream error type is preserved in ChatCoreErrorResult", async () => {
 test("connection mismatch before fallback -> 409, no fallback executor call", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -835,6 +777,7 @@ test("connection mismatch before fallback -> 409, no fallback executor call", as
 test("connection mismatch after fallback -> 409, fallback result discarded", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -916,6 +859,7 @@ test("dynamic connection: ID changes between initial and retry -> 409 on retry p
 test("model-unavailable fallback returns real parsed response, usage, headers, winning connection/model", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -961,6 +905,7 @@ test("model-unavailable fallback returns real parsed response, usage, headers, w
 test("empty content fallback returns real parsed response, usage, headers", async () => {
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -1000,6 +945,7 @@ test("setRequestWireState is called before initial, retry, and fallback executor
   const wireStates: string[] = [];
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",
@@ -1085,6 +1031,7 @@ test("empty-content fallback with invalid SSE body is 502, not 200 empty", async
   const sseBody = 'data: {"error":{"message":"Devin CLI not found"}}\n\n';
   let executorCallCount = 0;
   const input = baseInput({
+    clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
     allowModelFallback: true,
     provider: "gemini",
     model: "gemini-3-pro",

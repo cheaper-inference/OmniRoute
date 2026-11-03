@@ -129,13 +129,27 @@ async function getPrefixToNode(): Promise<Map<string, string> | null> {
   }
 }
 
+/** API-key connection scope as a set; null when the key is not connection-restricted. */
+function toAllowedConnectionSet(ids: string[] | null | undefined): Set<string> | null {
+  return Array.isArray(ids) && ids.length > 0 ? new Set(ids) : null;
+}
+
+function filterAllowedConnections(rows: any[], allowed: Set<string> | null): any[] {
+  return allowed ? rows.filter((c: any) => allowed.has(String(c?.id))) : rows;
+}
+
+/** The synthetic no-auth connection counts only when the key scope names it. */
+function isSyntheticNoAuthAllowed(allowed: Set<string> | null): boolean {
+  return !allowed || allowed.has(SYNTHETIC_NOAUTH_CONNECTION_ID);
+}
+
 /**
  * Resolve whether `provider/model` has at least one usable active connection.
  * Returns `null` when the credential store is unavailable (unit tests / early boot).
  *
  * Two-step resolve before querying `provider_connections`:
- *   1. alias→canonical id (#10702: the column stores the id, e.g. "opencode"
- *      for the "oc" alias — an alias-keyed query returned zero rows);
+ *   1. alias→canonical id (#10702: the column stores the id, not the alias —
+ *      an alias-keyed query returned zero rows);
  *   2. public prefix→node id via the provider-prefix index (#re-land 932002580:
  *      a compatible node's rows are stored under its generated
  *      `openai-compatible-chat-<uuid>` id while the operator-facing model id
@@ -152,10 +166,21 @@ async function getPrefixToNode(): Promise<Map<string, string> | null> {
  * is treated as usable (the key requirement does not apply — a noauth row
  * carries no API key by design).
  */
-export async function hasUsableCredentialsForModel(model: string): Promise<boolean | null> {
+export async function hasUsableCredentialsForModel(
+  model: string,
+  options: {
+    /**
+     * API-key connection scope: when a non-empty list is given, only those
+     * connection ids count, and the synthetic no-auth connection only when the
+     * list names it (same rule as credential selection in chat).
+     */
+    allowedConnectionIds?: string[] | null;
+  } = {}
+): Promise<boolean | null> {
   const rawProvider = typeof model === "string" ? model.split("/")[0]?.trim() : "";
   if (!rawProvider) return null;
   const provider = resolveProviderId(rawProvider);
+  const allowed = toAllowedConnectionSet(options.allowedConnectionIds);
   const isNoAuth = isNoAuthProviderKey(rawProvider, provider);
   try {
     const { getProviderConnections } = await loadProvidersModule();
@@ -163,8 +188,9 @@ export async function hasUsableCredentialsForModel(model: string): Promise<boole
     const providerIds = resolveProviderCredentialIds(provider, prefixToNode);
     let sawStoredRow = false;
     for (const providerId of providerIds) {
-      const connections = await getProviderConnections({ provider: providerId, isActive: true });
-      if (!Array.isArray(connections)) return null;
+      const rows = await getProviderConnections({ provider: providerId, isActive: true });
+      if (!Array.isArray(rows)) return null;
+      const connections = filterAllowedConnections(rows, allowed);
       // This candidate has no rows — the next candidate (mapped node id) may
       // still hold the operator's connection.
       if (connections.length === 0) continue;
@@ -180,7 +206,7 @@ export async function hasUsableCredentialsForModel(model: string): Promise<boole
     // unusable; no-auth providers still work through the synthetic "noauth"
     // connection (and a noauth provider with stored rows can only have been
     // rejected via a terminal status in the loop above).
-    return isNoAuth && !sawStoredRow;
+    return isNoAuth && !sawStoredRow && isSyntheticNoAuthAllowed(allowed);
   } catch {
     return null;
   }

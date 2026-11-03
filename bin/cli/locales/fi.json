@@ -123,7 +123,9 @@
       "maxCostOpt": "Enimmäiskustannus päivässä (USD)",
       "allowedModelsOpt": "Pilkuilla eroteltu luettelo sallituista malleista",
       "nothingToSet": "Käytäntökenttiä ei annettu. Käytä valintaa --rate-limit, --max-cost tai --allowed-models.",
-      "updated": "Käytäntö päivitettiin."
+      "updated": "Käytäntö päivitettiin.",
+      "modelAccessModeOpt": "Mallien käyttötila (all | restricted)",
+      "unrestrictedOpt": "Salli kaikki mallit (--model-access-mode all)"
     },
     "expiration": {
       "title": "Avaimen vanheneminen",
@@ -254,6 +256,7 @@
     "log": "Näytä palvelinlokit suoraan",
     "no_recovery": "Poista automaattinen uudelleenkäynnistys käytöstä kaatumisen jälkeen (virheenkorjaustila)",
     "max_restarts": "Kaatumisen jälkeisten uudelleenkäynnistysten enimmäismäärä 30 sekunnin sisällä ennen luovuttamista (oletus: 2)",
+    "headless": "Suorita vain välityspalvelinmoottori: hallintapaneeli poistettu käytöstä (404), valinnaiset alijärjestelmät ohitetaan (asettaa OMNIROUTE_HEADLESS=1)",
     "tray": "Käynnistä ilmaisinalueella (vain työpöytäympäristössä, valinnainen)",
     "no_tray": "Poista ilmaisinalueen kuvake käytöstä",
     "ready_timeout": "Valmiustarkistuksen aikakatkaisu millisekunteina (myös OMNIROUTE_READY_TIMEOUT_MS, oletus 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Synkronoi määritykset OmniRoute-instanssien välillä",
     "push": {
-      "description": "Lähetä määritykset pilveen tai etäinstanssiin",
-      "target": "Kohde (cloud tai context:name)",
-      "bundle": "Synkronoitavat paketin osat",
-      "dryRun": "Esikatsele ottamatta käyttöön"
+      "description": "Lähetä määritykset pilveen tai etäinstanssiin"
     },
     "pull": {
-      "description": "Nouda määritykset pilvestä tai etäinstanssista",
-      "source": "Lähde (cloud tai context:name)",
-      "merge": "Yhdistä olemassa oleviin määrityksiin",
-      "replace": "Korvaa olemassa olevat määritykset",
-      "dryRun": "Esikatsele ottamatta käyttöön"
-    },
-    "diff": {
-      "source": "Lähdekonteksti",
-      "target": "Kohdekonteksti"
+      "description": "Nouda määritykset pilvestä tai etäinstanssista"
     },
     "bundle": {
       "description": "Vie määritykset pakettitiedostona",
-      "include": "Sisällytettävät osat (pilkuilla eroteltuina)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Tuo pakettitiedosto",
       "dryRun": "Vahvista ottamatta käyttöön"
-    },
-    "initialize": {
-      "fromCloud": "Alusta pilvivarmuuskopiosta"
     },
     "tokens": {
       "description": "Hallitse synkronointitunnuksia",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Ohita vahvistus"
       }
-    },
-    "resolve": {
-      "description": "Ratkaise synkronointiristiriidat vuorovaikutteisesti"
     }
   },
   "config": {

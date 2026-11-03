@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Button from "@/shared/components/Button";
 
 interface HeaderTableProps {
   headers: Record<string, string>;
@@ -16,38 +25,40 @@ export function HeaderTable({ headers }: HeaderTableProps) {
     <div>
       <div className="mb-2 flex items-center gap-2">
         <span className="text-xs text-text-muted">{t("sensitiveHeaders")}</span>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={masked ? "visibility" : "visibility_off"}
+          aria-pressed={!masked}
           onClick={() => setMasked((m) => !m)}
-          className="text-xs text-blue-400 hover:text-blue-300 focus-ring rounded"
         >
           {masked ? t("show") : t("hide")}
-        </button>
+        </Button>
       </div>
-      <table className="w-full text-xs font-mono border-collapse bg-surface">
-        <thead>
-          <tr className="border-b border-border">
-            <th className="text-left px-2 py-1 text-text-muted font-medium">{t("name")}</th>
-            <th className="text-left px-2 py-1 text-text-muted font-medium">{t("value")}</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="min-w-0 font-mono text-xs" scrollbarLabel={t("headersTable")}>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t("name")}</TableHead>
+            <TableHead>{t("value")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {Object.entries(headers).map(([name, value]) => {
             const isSensitive = SENSITIVE.test(name);
             const display = masked && isSensitive ? "••••••••" : value;
             return (
-              <tr key={name} className="border-b border-border/50 hover:bg-bg-subtle">
-                <td className="px-2 py-1 text-text-muted select-text">{name}</td>
-                <td
-                  className={`px-2 py-1 break-all select-text ${isSensitive ? "text-amber-400" : "text-text-main"}`}
+              <TableRow key={name}>
+                <TableCell className="select-text text-text-muted">{name}</TableCell>
+                <TableCell
+                  className={`whitespace-normal break-all select-text ${isSensitive ? "text-warning" : "text-text-main"}`}
                 >
                   {display}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

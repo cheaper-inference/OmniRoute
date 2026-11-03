@@ -3,7 +3,17 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Card, ModelSelectField, Toggle } from "@/shared/components";
+import { Field } from "@omniroute/ui-kit/field";
+
+import {
+  Card,
+  Collapsible,
+  Input,
+  ModelSelectField,
+  Select,
+  Textarea,
+  Toggle,
+} from "@/shared/components";
 import {
   MODALITY_BRIDGE_DEFAULTS,
   resolveVisionBridgeRuntimeSettings,
@@ -142,30 +152,26 @@ export default function ModalityBridgeVisionTab() {
           description={t("visionBridgeRerouteTextOnlyDesc")}
         />
 
-        <div>
-          <label className="text-sm font-medium" htmlFor="modality-bridge-mode">
-            {t("modalityBridgeMode")}
-          </label>
-          <select
-            id="modality-bridge-mode"
-            data-testid="modality-bridge-mode"
-            className="mt-1 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm"
-            value={settings.modalityBridgeVisionMode}
-            onChange={(event) =>
-              void update({ modalityBridgeVisionMode: event.target.value as VisionBridgeMode })
-            }
-          >
-            <option value="auto">{t("modalityBridgeModeAuto")}</option>
-            <option value="describe">{t("modalityBridgeModeDescribe")}</option>
-            <option value="reroute">{t("modalityBridgeModeReroute")}</option>
-          </select>
-          <p className="mt-1 text-xs text-text-muted">
-            {settings.modalityBridgeVisionMode === "auto" && t("modalityBridgeModeAutoHint")}
-            {settings.modalityBridgeVisionMode === "describe" &&
-              t("modalityBridgeModeDescribeHint")}
-            {settings.modalityBridgeVisionMode === "reroute" && t("modalityBridgeModeRerouteHint")}
-          </p>
-        </div>
+        <Select
+          id="modality-bridge-mode"
+          data-testid="modality-bridge-mode"
+          label={t("modalityBridgeMode")}
+          value={settings.modalityBridgeVisionMode}
+          onChange={(event) =>
+            void update({ modalityBridgeVisionMode: event.target.value as VisionBridgeMode })
+          }
+          hint={
+            settings.modalityBridgeVisionMode === "auto"
+              ? t("modalityBridgeModeAutoHint")
+              : settings.modalityBridgeVisionMode === "describe"
+                ? t("modalityBridgeModeDescribeHint")
+                : t("modalityBridgeModeRerouteHint")
+          }
+        >
+          <option value="auto">{t("modalityBridgeModeAuto")}</option>
+          <option value="describe">{t("modalityBridgeModeDescribe")}</option>
+          <option value="reroute">{t("modalityBridgeModeReroute")}</option>
+        </Select>
 
         <ModelSelectField
           label={t("modalityBridgeVisionModel")}
@@ -195,13 +201,10 @@ export default function ModalityBridgeVisionTab() {
           description={t("modalityBridgeTaskAwareDesc")}
         />
 
-        <div>
-          <label className="block text-sm font-medium" htmlFor="modality-bridge-prompt">
-            {t("modalityBridgePrompt")}
-          </label>
-          <textarea
+        <Field label={t("modalityBridgePrompt")} htmlFor="modality-bridge-prompt">
+          <Textarea
             id="modality-bridge-prompt"
-            className="mt-1 min-h-[100px] w-full rounded-control border border-border bg-surface px-3 py-2 text-sm"
+            className="min-h-[100px]"
             value={settings.modalityBridgeVisionPrompt}
             onChange={(event) =>
               setLocal({ modalityBridgeVisionPrompt: event.currentTarget.value })
@@ -212,13 +215,10 @@ export default function ModalityBridgeVisionTab() {
               void update({ modalityBridgeVisionPrompt: value });
             }}
           />
-        </div>
+        </Field>
 
-        <details className="rounded-control border border-border p-3">
-          <summary className="cursor-pointer text-sm font-medium">
-            {t("modalityBridgeAdvanced")}
-          </summary>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Collapsible title={t("modalityBridgeAdvanced")} icon="tune">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <NumberField
               testId="modality-bridge-timeout"
               label={t("modalityBridgeTimeoutMs")}
@@ -253,19 +253,17 @@ export default function ModalityBridgeVisionTab() {
                 )
               }
             />
-            <div>
-              <NumberField
-                testId="modality-bridge-max-chars"
-                label={t("visionMaxCharsLabel")}
-                min={0}
-                max={50000}
-                placeholder="0"
-                value={settings.modalityBridgeVisionMaxChars}
-                onChange={(value) => setLocal({ modalityBridgeVisionMaxChars: value })}
-                onBlur={(raw) => commitMaxChars(raw)}
-              />
-              <p className="mt-1 text-xs text-text-muted">{t("visionMaxCharsHint")}</p>
-            </div>
+            <NumberField
+              testId="modality-bridge-max-chars"
+              label={t("visionMaxCharsLabel")}
+              hint={t("visionMaxCharsHint")}
+              min={0}
+              max={50000}
+              placeholder="0"
+              value={settings.modalityBridgeVisionMaxChars}
+              onChange={(value) => setLocal({ modalityBridgeVisionMaxChars: value })}
+              onBlur={(raw) => commitMaxChars(raw)}
+            />
             <div className="md:col-span-2">
               <Toggle
                 checked={settings.modalityBridgeCacheEnabled}
@@ -309,7 +307,7 @@ export default function ModalityBridgeVisionTab() {
               }
             />
           </div>
-        </details>
+        </Collapsible>
 
         <ModalityBridgeStatsRow kind="vision" />
         <ModalityBridgeTestButton />
@@ -331,6 +329,7 @@ interface NumberFieldProps {
   onChange: (value: number) => void;
   onBlur: (raw: string) => void;
   placeholder?: string;
+  hint?: string;
 }
 
 function NumberField({
@@ -342,21 +341,20 @@ function NumberField({
   onChange,
   onBlur,
   placeholder,
+  hint,
 }: NumberFieldProps) {
   return (
-    <label className="block text-sm font-medium">
-      {label}
-      <input
-        type="number"
-        data-testid={testId}
-        min={min}
-        max={max}
-        placeholder={placeholder}
-        value={value}
-        onChange={(event) => onChange(Number.parseInt(event.currentTarget.value, 10) || 0)}
-        onBlur={(event) => onBlur(event.currentTarget.value)}
-        className="mt-1 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm"
-      />
-    </label>
+    <Input
+      type="number"
+      label={label}
+      hint={hint}
+      data-testid={testId}
+      min={min}
+      max={max}
+      placeholder={placeholder}
+      value={value}
+      onChange={(event) => onChange(Number.parseInt(event.currentTarget.value, 10) || 0)}
+      onBlur={(event) => onBlur(event.currentTarget.value)}
+    />
   );
 }

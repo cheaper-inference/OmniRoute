@@ -1,6 +1,6 @@
 # Memory System (Igbo)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
 
 ---
 
@@ -163,37 +163,39 @@ Tebụl `memory_vec_meta` (migration `083_memory_vec.sql`) na-echekwa:
 - `last_reset_at` — timestamp nke reset zuru ezu ikpeazụ.
 - `vec_loaded` — ọkọlọtọ 0/1 na-egosi ma sqlite-vec ebulitere nke ọma.
 
-## Mgbatị ntọala
+## Mgbakwunye ntọala
 
-E nwere mpaghara embedding na vector itoolu dị na `MemorySettingsExtended` n'ime
+E nwere oghere itoolu maka embedding na vector na `MemorySettingsExtended` dị na
 `src/shared/schemas/memory.ts`, nke a na-echekwa site na `src/lib/db/settings.ts`:
 
-| Mpaghara                 | Ụdị                                                | Ndabara  | Nkọwa                                                                |
-| ------------------------ | -------------------------------------------------- | -------- | -------------------------------------------------------------------- |
-| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"` | Isi mmalite embedding a ga-eji                                       |
-| `embeddingProviderModel` | `string \| null`                                   | `null`   | Provider/model n'ụdị `provider/model`                                |
-| `customBaseUrl`          | `string \| null`                                   | `null`   | URL ntọala endpoint dakọtara na OpenAI maka Memory naanị             |
-| `customModelId`          | `string \| null`                                   | `null`   | ID model a na-eziga na endpoint ahaziri iche                         |
-| `transformersEnabled`    | `boolean`                                          | `false`  | Nhọrọ ịbanye maka Transformers.js (MiniLM, ~400MB)                   |
-| `staticEnabled`          | `boolean`                                          | `false`  | Nhọrọ ịbanye maka model static potion-base-8M nke ime obodo          |
-| `rerankEnabled`          | `boolean`                                          | `false`  | Mee ka usoro nhazigharị pořzọ rụọ ọrụ (na-agbakwunye +200-500ms/req) |
-| `rerankProviderModel`    | `string \| null`                                   | `null`   | Provider/model maka nhazigharị n'ụdị `provider/model`                |
-| `vectorStore`            | `"sqlite-vec" \| "qdrant" \| "auto"`               | `"auto"` | Backend vector a ga-eji                                              |
+| Oghere                   | Ụdị                                                | Ndabara  | Nkọwa                                                               |
+| ------------------------ | -------------------------------------------------- | -------- | ------------------------------------------------------------------- |
+| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"` | Isi mmalite embedding a ga-eji                                      |
+| `embeddingProviderModel` | `string \| null`                                   | `null`   | Onye na-eweta/ụdị n'ụdị `provider/model`                            |
+| `customBaseUrl`          | `string \| null`                                   | `null`   | URL ntọala endpoint dakọtara na OpenAI maka Memory naanị            |
+| `customModelId`          | `string \| null`                                   | `null`   | ID ụdị e zigara na endpoint ahaziri iche                            |
+| `transformersEnabled`    | `boolean`                                          | `false`  | Nhọrọ iji Transformers.js (MiniLM, ~400MB)                          |
+| `staticEnabled`          | `boolean`                                          | `false`  | Nhọrọ iji ụdị mpaghara static potion-base-8M                        |
+| `rerankEnabled`          | `boolean`                                          | `false`  | Mee ka usoro nhazigharị ọkwa rụọ ọrụ (na-agbakwunye +200-500ms/req) |
+| `rerankProviderModel`    | `string \| null`                                   | `null`   | Onye na-eweta/ụdị nhazigharị ọkwa n'ụdị `provider/model`            |
+
+`rerankProviderModel` ka `POST /v1/rerank` na-ekpebi (a na-akpọ ya site na loopback), ya mere ọ na-anabata ihe ọ bụla route ahụ na-anabata: ụdị nhazigharị ọkwa igwe ojii ahọpụtara (`cohere/rerank-v3.5`, `jina-ai/jina-reranker-v3.5`, …) ma ọ bụ node onye na-eweta dakọtara na OpenAI n'ụdị `<node-prefix>/<model>` (dịka `skilled-mini/bge-reranker-v2-m3` maka igbe TEI/Infinity). Node loopback, na aha host ndị edepụtara na `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (dịka aha ọrụ Docker/Compose), tozuru oke mgbe niile; node dị na host ọzọ (LAN, Tailscale) na-achọkwa feature flag `RERANK_REMOTE_PROVIDER_NODES` ma ga-agafe iwu URL mbupụ nke onye na-eweta — lee [Feature Flags](../reference/FEATURE_FLAGS.md). Nhọrọ dị na dashboard na-egosi ndị na-eweta ahọpụtara tinyere node mpaghara; enwere ike ịtọ eriri `provider/model` ọ bụla ziri ezi ozugbo site na `PUT /api/settings/memory`.
+| `vectorStore` | `"sqlite-vec" \| "qdrant" \| "auto"` | `"auto"` | Backend vector a ga-eji |
 
 A na-eme ka ndị a dị site na `GET /PUT /api/settings/memory` (schema `MemorySettingsExtendedSchema`).
 
 Maka isi mmalite `remote`, Memory na-anabatakwa ntọala `customBaseUrl` na
-`customModelId` nke bụ nhọrọ. Ha abụọ na-ahọrọ endpoint `/embeddings` dakọtara
-na OpenAI na model n'agbanweghị ndekọ embedding zuru ụwa ọnụ. A na-ahazi endpoint
-ahụ ka ọ bụrụ otu ụkpụrụ tupu eji ya, a na-enyochakwa ya site na iwu URL ọpụpụ
-nke provider: HTTP(S) dị mkpa, a na-ajụ ozi nnweta etinyere n'ime URL na eriri
-ajụjụ, ebe adreesị metadata cloud ka na-anọgide na mgbochi. Uru efu na-edobe
-provider ndekọ ahọpụtara. A na-asachapụ njehie ndị e weghachiri na dashboard,
-a dịghịkwa edekọ ozi nnweta endpoint na log.
+`customModelId` ndị bụ nhọrọ. Ha abụọ jikọtara ọnụ na-ahọrọ endpoint `/embeddings`
+na ụdị dakọtara na OpenAI na-agbanweghị ndekọ embedding zuru ụwa ọnụ. A na-ahazi
+endpoint ahụ tupu eji ya ma nyochaa ya site n'iwu URL mbupụ nke onye na-eweta: achọrọ
+HTTP(S), a na-ajụ credential ndị agbakwunyere na query string, ebe adreesị
+cloud-metadata ka na-anọgide na mgbochi. Uru efu na-edobe onye na-eweta ahọpụtara na
+ndekọ. A na-asachapụ njehie ndị e weghachiri na dashboard, a naghịkwa edekọ credential
+endpoint n'ime log.
 
-> **TODO (D20):** Scope `global` (ịkekọrịta ncheta n'etiti API keys niile)
-> arụbeghị ọrụ na mbipụta a. Ọ chọrọ mgbanwe schema na ụzọ nchọta zuru ụwa ọnụ.
-> Soro ya dị ka ọrụ dị iche.
+> **TODO (D20):** Scope `global` (ịkekọrịta memory n'etiti API key niile) ka
+> etinyebeghị n'ụdị a. Ọ chọrọ mgbanwe schema na ụzọ retrieval zuru ụwa ọnụ.
+> Sochie ya iche.
 
 ## Ọkwa Nchekwa
 
@@ -892,28 +894,28 @@ Iji hapụ ya ka ọ ghara ịrụ ọrụ, naanị debe `autoSummarize` na ndab
 
 ---
 
-## Usoro Onye Na-enye MemoryBackend
+## Usoro Onye-Na-enye MemoryBackend
 
 > **Isi mmalite nke eziokwu:** `src/lib/memory/backend.ts`, `src/lib/memory/genericBackend.ts`, `src/lib/memory/manager.ts`
 > **Nnwale:** `src/lib/memory/__tests__/generic-backend.test.ts`
 
-Usoro onye na-enye MemoryBackend na-etinye **oyi akwa abstraction backend a pụrụ itinye ma wepụ** n'elu injin ebe nchekwa dị ugbu a. Kama ijikọ ya na naanị otu mmejuputa nchekwa, sistemụ ebe nchekwa na-akwado ọtụtụ backend ugbu a (SQLite, Obsidian, Notion, backend HTTP ahaziri iche) yana nhazi ụzọ primary/fallback.
+Usoro onye-na-enye MemoryBackend na-etinye **oyi akwa nkewa backend a pụrụ ịgbanwe** n'elu injin ebe nchekwa dị adị. Kama ijikọ ya naanị na otu mmejuputa nchekwa, sistemụ ebe nchekwa na-akwado ọtụtụ backend ugbu a (SQLite, Obsidian, Notion, backend HTTP ahaziri iche), yana nhazi ụzọ primary/fallback.
 
-### Nhazi Ụlọ
+### Nhazi ụlọ
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                    Ụzọ API                               │
+│                    Ụzọ API                                │
 │            (src/app/api/memory/route.ts)                  │
 └──────────────────────┬───────────────────────────────────┘
                        │
 ┌──────────────────────▼───────────────────────────────────┐
 │                   MemoryManager                           │
-│           Onye nhazi singleton (manager.ts)               │
+│           Onye nhazi Singleton (manager.ts)               │
 │                                                          │
-│  Nke Mbụ ──► Backend A  (dịka SQLite)                    │
-│  Ndabere ───► Backend B  (dịka Obsidian)                 │
-│              Backend C  (dịka Notion site na GenericBackend) │
+│  Primary ──► Backend A  (dịka SQLite)                    │
+│  Fallback ─► Backend B  (dịka Obsidian)                  │
+│             Backend C  (dịka Notion site na GenericBackend)│
 └──────────────────────┬───────────────────────────────────┘
                        │
         ┌──────────────┼──────────────┐
@@ -943,7 +945,7 @@ interface MemoryBackend {
   // Ọchụchọ
   search(config: SearchConfig): Promise<Memory[]>;
 
-  // Ọnọdụ arụmọrụ
+  // Ọnọdụ ahụike
   health(): Promise<HealthCheckResult>;
 
   // Usoro ndụ (nhọrọ)
@@ -954,41 +956,41 @@ interface MemoryBackend {
 
 #### MemoryManager (`manager.ts`)
 
-Onye nhazi singleton nke:
+Onye nhazi Singleton nke:
 
-- **Na-edebanye** backend site na `register(backend)` — a na-akpọ ya n'oge mbido site na `index.ts`
+- **Na-edebanye** backend site na `register(backend)` — a na-akpọ ya n'oge mmalite site na `index.ts`
 - **Na-ahazi** primary + fallback site na `configure(primary, fallbacks)`
-- **Na-eduzi** CRUD/ọchụchọ gaa na primary, jiri usoro fallback mgbe ọ dara
-- **Na-enyocha ọnọdụ arụmọrụ** nke backend niile n'oge dị iche iche
+- **Na-eduzi** CRUD/ọchụchọ gaa na primary, jiri usoro fallback mgbe ọdịda mere
+- **Na-enyocha ahụike** backend niile kwa oge
 
 **Omume fallback:**
 
-| Ọrụ      | Primary                  | Fallbacks                         |
-| -------- | ------------------------ | --------------------------------- |
-| `create` | ✅ Naanị primary         | ❌                                |
-| `get`    | ✅ Buru ụzọ nwaa primary | ✅ Jiri fallback ma ọ bụrụ null   |
-| `update` | ✅ Naanị primary         | ✅ Mmekọrịta fire-and-forget      |
-| `delete` | ✅ Naanị primary         | ✅ Mmekọrịta fire-and-forget      |
-| `list`   | ✅ Naanị primary         | ❌                                |
-| `search` | ✅ Primary buru ụzọ      | ✅ Jiri fallback mgbe njehie mere |
+| Ọrụ      | Primary                  | Fallbacks                       |
+| -------- | ------------------------ | ------------------------------- |
+| `create` | ✅ Naanị primary         | ❌                              |
+| `get`    | ✅ Buru ụzọ nwaa primary | ✅ Jiri fallback ma ọ bụrụ null |
+| `update` | ✅ Naanị primary         | ✅ Mmekọrịta fire-and-forget    |
+| `delete` | ✅ Naanị primary         | ✅ Mmekọrịta fire-and-forget    |
+| `list`   | ✅ Naanị primary         | ❌                              |
+| `search` | ✅ Primary na mbụ        | ✅ Fallback ma njehie mee       |
 
 #### GenericMemoryBackend (`genericBackend.ts`)
 
-Njikọ HTTP izugbe nke na-eme ka REST API ọ bụla kwekọọ na MemoryBackend. Ọ bara uru maka:
+Njikọ HTTP izugbe nke na-eme ka REST API ọ bụla rụọ ọrụ dị ka MemoryBackend. Ọ bara uru maka:
 
 - **Notion** — jikọọ site na Notion API
 - **Obsidian** — jikọọ site na Obsidian Local REST API
-- **Backend ahaziri iche** — ọrụ ọ bụla na-enye API ebe nchekwa RESTful
+- **Backend ahaziri iche** — ọrụ ọ bụla nke na-enye API ebe nchekwa RESTful
 
 **Nhazi:**
 
 ```typescript
 interface GenericBackendConfig {
-  baseUrl: string;           // URL ntọala nke API azụọrụ
-  apiKey?: string;           // Token Bearer maka nyocha njirimara
-  headers?: Record<string, string>;  // Nkụnyeisi HTTP ahaziri ahazi
-  timeout?: number;          // Oge nkwụsị arịrịọ (ndabara: 30000ms)
-  backendType?: string;      // Maka ndekọ ihe omume
+  baseUrl: string;           // URL ntọala nke API backend
+  apiKey?: string;           // Bearer token maka nkwenye njirimara
+  headers?: Record<string, string>;  // HTTP headers ahaziri iche
+  timeout?: number;          // Oge njedebe arịrịọ (ndabara: 30000ms)
+  backendType?: string;      // Maka ndekọ
 
   // Mgbanwe endpoint (ndabara na-eji usoro REST)
   endpoints?: {
@@ -1001,30 +1003,30 @@ interface GenericBackendConfig {
     health?: string;   // ndabara: "/health"
   };
 
-  // Nhazi njikọ aha paramita ajụjụ
+  // Mmekọrịta aha query parameter
   queryParams?: {
     query?/apiKeyId?/limit?/offset?/strategy?/maxTokens?/type?/sessionId?/orderBy?/orderDir?/options?
   };
 
-  // Nhazi njikọ aha paramita ụzọ
+  // Mmekọrịta aha path parameter
   pathParams?: {
     id?/memoryId?
   };
 }
 ```
 
-**Azụọrụ ndị amaara** ahazirilarị na `KNOWN_BACKENDS`:
+A haziela **backend ndị a ma ama** tupu oge eruo na `KNOWN_BACKENDS`:
 
 ```typescript
-createKnownBackend("obsidian"); // → GenericMemoryBackend na-arụtụ aka na localhost:27123
-createKnownBackend("notion"); // → GenericMemoryBackend na-arụtụ aka na api.notion.com/v1
+createKnownBackend("obsidian"); // → GenericMemoryBackend nke e duziri na localhost:27123
+createKnownBackend("notion"); // → GenericMemoryBackend nke e duziri na api.notion.com/v1
 ```
 
-#### Azụọrụ Ndị E Wunyere N'ime Ya
+#### Backend Ndị E Wuru N'ime Ya
 
 ##### SQLiteBackend (`sqliteBackend.ts`)
 
-Azụọrụ bụ isi ndabara. Ọ na-ekpuchi ebe nchekwa memori dị ugbu a nke dabeere na SQLite site n'iji `src/lib/memory/store.ts`. A na-edebanye aha ya na-akpaghị aka mgbe usoro na-amalite.
+Backend primary ndabara. Ọ na-ekpuchi ebe nchekwa SQLite dị adị site na iji `src/lib/memory/store.ts`. A na-edebanye ya na-akpaghị aka n'oge mmalite.
 
 ```typescript
 import { sqliteBackend } from "./sqliteBackend";
@@ -1033,38 +1035,98 @@ memoryManager.register(sqliteBackend);
 
 ##### ObsidianBackend (`obsidianBackend.ts`)
 
-Ọ na-ekpuchi njikọta Obsidian dị ugbu a (`src/lib/memory/obsidianBackend.ts`). Ọ na-ejikọta na vault Obsidian site na Obsidian Local REST API.
+Ọ na-ekpuchi njikọ Obsidian dị adị (`src/lib/memory/obsidianBackend.ts`). Ọ na-ejikọ na vault Obsidian site na Obsidian Local REST API.
+
+##### ClaudeMemBackend (`claudeMemBackend.ts`)
+
+Ihe nkwụnye maka worker [claude-mem](https://github.com/thedotmack/claude-mem) dị na mpaghara — plugin ebe nchekwa
+Claude Code / Codex / Cursor nke na-edekọ nnọkọ ide koodu dị ka "nlebanya".
+Mgbe e debanyere ya, ụzọ REST `/api/memory` na ọchụchọ ebe nchekwa A2A nwere ike ịgụ na ide
+otu ebe nchekwa ahụ hooks nke claude-mem na-ejuputa.
+
+Worker ahụ na-ejikọta naanị na loopback, nke nchedo SSRF nke `GenericMemoryBackend` na-ama ụma ajụ.
+Ihe nkwụnye a anaghị ebelata nchedo ahụ: e tinyere host ahụ ozugbo ka ọ bụrụ `127.0.0.1`, ma schema
+nhazi (`ClaudeMemBackendConfigSchema`, `.strict()`) na-anabata naanị:
+
+| Igodo       | Ụdị    | Ndabara | Nkọwa                                                                                                                    |
+| ----------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `port`      | ọnụọgụ | —       | Achọrọ ya, 1024–65535. ọdụ ụgbọ mmiri nke onye ọrụ claude-mem sitere na faịlụ ntọala ya (ndabara `37700 + uid % 100`).   |
+| `project`   | eriri  | —       | Ọrụ ngo claude-mem a ga-eji. Ọ bụrụ na edoghị ya → igodo OmniRoute API ọ bụla ga-ejikọta na ọrụ ngo nke ya (`apiKeyId`). |
+| `timeoutMs` | ọnụọgụ | `5000`  | Oge njedebe maka arịrịọ ọ bụla, 100–30000.                                                                               |
+
+Mee ka ọ rụọ ọrụ site na `PUT /api/settings/memory` ma malitegharị OmniRoute (a na-edebanye azụọrụ
+naanị otu ugboro, n'ime `initMemoryBackends()`):
+
+```json
+{
+  "backendConfigs": { "claude-mem": { "port": 37701, "project": "OmniRoute" } },
+  "fallbackBackends": ["claude-mem"]
+}
+```
+
+Jiri `"primaryBackend": "claude-mem"` kama nke ahụ iji mee ya ebe nchekwa maka REST API. A na-edekọ
+nhazi na-ezighi ezi (`claude-mem.backend.invalid_config`) ma hapụ ya, ya mere SQLite ga-anọgide bụrụ nke mbụ.
+
+Njikọ na oke:
+
+- ID bụ `claude-mem:<observationId>`; `get`/`delete` na-eleghara ID nke azụọrụ ndị ọzọ anya n'emeghị
+  oku netwọkụ.
+- `create` → `POST /api/memory/save`; mpaghara OmniRoute (`apiKeyId`, `sessionId`, `type`,
+  `key`, `metadata`) na-aga n'ime `metadata.omniroute` nke claude-mem ma laghachi dịka ha dị mgbe a gụrụ ha.
+- `search` → `GET /api/search?format=json&type=observations`, a na-ebelata ya ruo `maxTokens`
+  (mkpụrụedemede / 4). `list` → endpoint nlele nke onye ọrụ nwere peeji (`total` bụ oke ala — onye ọrụ
+  na-eweghachi `hasMore`, ọ bụghị ọnụọgụ).
+- Nlele ndị hook jidere na-ejikọta `discovery` → `factual`, `decision` → `procedural`, na
+  `bugfix`/`feature`/`refactor`/`change` → `episodic`.
+- **Enweghị mmelite** (`update()` na-eweghachi `false`; nlele anaghị agbanwe agbanwe) na **enweghị TTL**
+  (a na-eleghara `expiresAt` anya). claude-mem na-ewepụ nchekwa ndị yiri onwe ha kama ime upsert site na `key`.
+- Ntinye prompt (`retrieval.ts`) na ngwa MCP `omniroute_memory_*` ka na-agụ SQLite
+  ozugbo — ha anaghị agafe `memoryManager`, ya mere azụọrụ a anaghị enye ha data.
+
+**Iduzi oku LLM nke claude-mem n'onwe ya site na OmniRoute.** claude-mem na-eji LLM abịakọrọ nlele
+(ndabara: Claude Agent SDK). Enwere ike iduzi provider `openai-compatible` ya gaa na
+OmniRoute kama, iji nweta ndabere combo na nsuso ụgwọ. N'ime `~/.claude-mem/settings.json`:
+
+```json
+{
+  "CLAUDE_MEM_PROVIDER": "openai-compatible",
+  "CLAUDE_MEM_OPENAI_COMPAT_BASE_URL": "http://localhost:20128/v1",
+  "CLAUDE_MEM_OPENAI_COMPAT_API_KEY": "<igodo OmniRoute API>",
+  "CLAUDE_MEM_OPENAI_COMPAT_MODEL": "<model ma ọ bụ combo OmniRoute>"
+}
+```
 
 ### Ntọala
 
-A na-echekwa ntọala azụọrụ memori na tebụl ntọala ngwa ahụ ma na-ejikwa ha site na `src/lib/memory/settings.ts`:
+A na-echekwa ntọala azụọrụ ebe nchekwa na tebụl ntọala ngwa ma na-ejikwa ha site na `src/lib/memory/settings.ts`:
 
-| Ntọala         | Igodo Env/Config         | Ndabara    | Nkọwa                             |
-| -------------- | ------------------------ | ---------- | --------------------------------- |
-| Azụọrụ bụ isi  | `memoryPrimaryBackend`   | `"sqlite"` | ID nke azụọrụ bụ isi              |
-| Azụọrụ ndabere | `memoryFallbackBackends` | `[]`       | ID azụọrụ ndabere ahaziri n'usoro |
-| Nhazi azụọrụ   | `memoryBackendConfigs`   | `{}`       | Mgbanwe nhazi maka azụọrụ ọ bụla  |
+| Ntọala         | Igodo Env/Nhazi          | Ndabara    | Nkọwa                            |
+| -------------- | ------------------------ | ---------- | -------------------------------- |
+| Azụọrụ mbụ     | `memoryPrimaryBackend`   | `"sqlite"` | ID nke azụọrụ mbụ                |
+| Azụọrụ ndabere | `memoryFallbackBackends` | `[]`       | ID azụọrụ ndabere n'usoro        |
+| Nhazi azụọrụ   | `memoryBackendConfigs`   | `{}`       | Mgbanwe nhazi maka azụọrụ ọ bụla |
 
-A na-ahazi ntọala site na `normalizeMemorySettings()` ma na-echekwa ya na cache na `getMemorySettings()`.
+A na-eme ka ntọala kwekọọ site na `normalizeMemorySettings()` ma tinye ya na cache na `getMemorySettings()`.
 
-### Usoro Mbido
+### Usoro Mmalite
 
 ```
-Mbido ngwa
-  → mbubata index.ts (mmetụta n'akụkụ): na-edebanye aha SQLiteBackend
+Mmalite ngwa
+  → index.ts na-ebubata (mmetụta-akụkụ): na-edebanye SQLiteBackend
   → a na-akpọ initMemoryBackends() site na usoro ndụ ngwa:
-      1. Bulite ntọala (getMemorySettings)
-      2. Hazie azụọrụ bụ isi + azụọrụ ndabere
-      3. Bido azụọrụ niile (nyocha ahụike)
+      1. Budata ntọala (getMemorySettings)
+      1b. Debanye azụọrụ ndị ahọpụtara dị na backendConfigs (claude-mem)
+      2. Hazie nke mbụ + ndabere
+      3. Bido azụọrụ niile (nnwale ahụike)
       4. Dị njikere maka arịrịọ
 ```
 
 ### Ịgbakwunye Azụọrụ Ọhụrụ
 
-1. **Mejuputa interface `MemoryBackend`** na `src/lib/memory/<name>Backend.ts`
-2. **Bupụ** site na `src/lib/memory/index.ts`
-3. **Debanye aha** site na `memoryManager.register(yourBackend)` mgbe usoro na-amalite
-4. **Hazie** site na ntọala: tọọ `memoryPrimaryBackend` ka ọ bụrụ ID azụọrụ gị
+1. **Mejuputa interface `MemoryBackend`** n'ime `src/lib/memory/<name>Backend.ts`
+2. **Bupụta** site na `src/lib/memory/index.ts`
+3. **Debanye** site na `memoryManager.register(yourBackend)` n'oge mmalite
+4. **Hazie** site na ntọala: debe `memoryPrimaryBackend` ka ọ bụrụ ID azụọrụ gị
 5. **Nwalee** site n'iji `src/lib/memory/__tests__/generic-backend.test.ts` dịka ntụaka
 
 #### Ọmụmaatụ: Azụọrụ Brain
@@ -1087,7 +1149,7 @@ memoryManager.register(brainBackend);
 
 ### Nkwenye
 
-#### Nnwale nkeji
+#### Nnwale unit
 
 ```bash
 npx vitest run src/lib/memory/__tests__/generic-backend.test.ts --reporter=verbose
@@ -1096,15 +1158,15 @@ npx vitest run src/lib/memory/__tests__/generic-backend.test.ts --reporter=verbo
 Nsonaazụ a tụrụ anya ya: **nnwale 35, ha niile gafere** nke gụnyere:
 
 - Constructor (2)
-- Nnyocha ahụike (4) — ịga nke ọma, ọdịda 500, njehie netwọkụ, igbu oge
-- Mbido (2) — ịga nke ọma, ọdịda
-- Mepụta (2) — endpoint ndabara, endpoint ahaziri ahazi
-- Nweta (4) — ịga nke ọma, 404 → null, tụpụ njehie na-abụghị 404, paramita ụzọ ahaziri ahazi
-- Melite (2) — ịga nke ọma, 404 → false
-- Hichapụ (2) — ịga nke ọma, 404 → false
-- Depụta (2) — paramita ajụjụ, aha paramita ahaziri ahazi
-- Chọọ (3) — paramita ajụjụ, endpoint ahaziri ahazi, ịgbanwe options ka ọ bụrụ usoro e nwere ike ichekwa
-- Nkụnyeisi nyocha njirimara (2) — token Bearer, nkụnyeisi ahaziri ahazi
+- Nnwale ahụike (4) — ihe ịga nke ọma, ọdịda 500, njehie netwọkụ, latency
+- Initialize (2) — ihe ịga nke ọma, ọdịda
+- Create (2) — endpoint ndabara, endpoint ahaziri iche
+- Get (4) — ihe ịga nke ọma, 404 → null, nke na-abụghị 404 na-atụpụta njehie, path params ahaziri iche
+- Update (2) — ihe ịga nke ọma, 404 → false
+- Delete (2) — ihe ịga nke ọma, 404 → false
+- List (2) — query params, aha param ahaziri iche
+- Search (3) — query params, endpoint ahaziri iche, serialization nhọrọ
+- Header njirimara (2) — Bearer token, header ahaziri iche
 - Factory (1)
 
 #### Nnyocha ụdị

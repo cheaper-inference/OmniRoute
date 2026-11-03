@@ -1,6 +1,6 @@
 # CORS Configuration & Security (Čeština)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -60,11 +60,11 @@ případě**, a to kvůli jednomu konkrétnímu implementačnímu faktu:
 
 Co to znamená pro jednotlivá rozhraní, a to i při `CORS_ALLOW_ALL=true`:
 
-| Rozhraní                                   | Mechanismus ověřování         | Dopad CORS se zástupným znakem                                                                                                                                                                                             |
-| ------------------------------------------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Řídicí panel / MANAGEMENT `/api/*`         | Relace pomocí cookie          | Zdroj je vrácen, ale **bez `Allow-Credentials`** prohlížeč **zablokuje** ověřené čtení. Škodlivý web z jiného zdroje **nemůže číst** vaše ověřené odpovědi řídicího panelu a soubor cookie relace není zpřístupněn.        |
-| Klientské API `/v1/*`, `/v1beta/*`         | Hlavička Bearer / `x-api-key` | Již je tolerantní **záměrně** (`relaxForTokenAuth`): prohlížeče nikdy automaticky nepřipojují `Authorization`/`x-api-key`, takže stránka útočníka nemůže váš klíč poskytnout. `CORS_ALLOW_ALL` toto oprávnění nerozšiřuje. |
-| Veřejné pouze pro čtení (`/api/health`, …) | Žádný                         | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                      |
+| Rozhraní                                   | Mechanismus ověřování         | Dopad CORS se zástupným znakem                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Řídicí panel / MANAGEMENT `/api/*`         | Relace pomocí cookie          | Zdroj je vrácen, ale **bez `Allow-Credentials`** prohlížeč **zablokuje** ověřené čtení. Škodlivý web z jiného zdroje **nemůže číst** vaše ověřené odpovědi řídicího panelu a soubor cookie relace není zpřístupněn.                                                                                                                                                           |
+| Klientské API `/v1/*`, `/v1beta/*`         | Hlavička Bearer / `x-api-key` | Již je tolerantní **záměrně** (`relaxForTokenAuth`): prohlížeče nikdy automaticky nepřipojují `Authorization`/`x-api-key`, takže stránka útočníka nemůže váš klíč poskytnout. Vrácení zdroje platí jen tehdy, když byl předložený klíč ověřen; anonymní odpovědi (`REQUIRE_API_KEY=false`) zachovávají seznam povolených zdrojů. `CORS_ALLOW_ALL` toto oprávnění nerozšiřuje. |
+| Veřejné pouze pro čtení (`/api/health`, …) | Žádný                         | Necitlivé; zástupný znak je neškodný.                                                                                                                                                                                                                                                                                                                                         |
 
 **Zbytkové** vystavení při `CORS_ALLOW_ALL=true` je tedy omezeno na: (a)
 neověřená čtení již veřejně dostupných dat z jiného zdroje a (b) povolení
@@ -126,31 +126,74 @@ restartu.
   nepřipojují automaticky. CORS zde nepředstavuje smysluplnou bariéru — bariérou je
   klíč API — proto je toto rozhraní záměrně permisivní, aby klienti v prohlížečích
   a Electronu mohli číst odpovědi, ke kterým již mají oprávnění.
+  Uvolněné vrácení zdroje se řídí ověřeným klíčem, nikoli pouhou přítomností hlavičky:
+  když `REQUIRE_API_KEY=false` obslouží požadavek anonymně, jeho úspěšná odpověď
+  zachovává seznam povolených zdrojů, který při chybě přístup zamítá. Zamítnutí
+  ověření (401) zůstávají čitelná, aby klienti mohli zobrazit odvolaný nebo chybně
+  zadaný klíč (#5242): vlastní odpověď 401 z pipeline vrácení zdroje zachovává a trasa,
+  která klíč sama odmítne poté, co jej pipeline obsloužila jako anonymní (`/v1/models`
+  a `/v1beta/models` s nakonfigurovaným ověřováním správy, trasy omezené na vlastníka
+  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` a trasy kandidátů
+  auto-combo), přidá vrácení zdroje k této odpovědi 401 pomocí
+  `credentialRejectionHeaders()`. Vrácení zdroje závisí na tom, zda požadavek nese
+  hlavičku s přihlašovacími údaji (`Authorization`, `x-api-key`, `x-goog-api-key` nebo
+  soubor cookie `auth_token`), nikoli na tom, kterou z nich trasa zkontrolovala, a nikdy
+  se nekombinuje s `Access-Control-Allow-Credentials`; tělo je pevná chybová obálka.
+  Trasy pro správu pod `/api/v1/` chráněné pomocí `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) vrácení zdroje nepřidávají:
+  při `REQUIRE_API_KEY=false` nejsou jejich odpovědi 401/403 čitelné z jiného zdroje.
 - **Relace používající soubory cookie (řídicí panel):** je chráněna výchozím
   nastavením, které při chybě přístup zamítne, **a také** absencí
   `Access-Control-Allow-Credentials` na sdílené cestě. Zdroje pro správu / řídicí
   panel nezahrnujte do žádné permisivní konfigurace; musí zůstat striktně uzavřené
   při selhání.
 
-## Příklad: reverzní proxy server před OmniRoute
+## Handshaky WebSocket (`/v1/responses`, `/v1/ws`)
 
-CORS vynucuje samotný OmniRoute, takže proxy server by obecně **neměl** přidávat
-ani přepisovat hlavičky `Access-Control-*` (duplicitní hlavičky způsobují problémy
-v prohlížečích). Ukončete TLS a předejte požadavek dál — odpověď na předběžný
-požadavek nechte na OmniRoute:
+Prohlížeče na WebSocket CORS neuplatňují, a proto transporty WebSocket, které vracejí
+výstup inference, kontrolují hlavičku `Origin` handshaku samy
+(`src/server/origin/wsOrigin.ts`): WebSocket pro Responses (`/v1/responses`) a,
+pokud OmniRoute běží přes `npm start` / `npm run dev`, také most `/v1/ws` a
+`/api/v1/ws`, který streamuje `/v1/chat/completions`, `/v1/messages` a
+`/v1/responses` jako rámce. Most si u `/api/v1/ws?handshake=1` vyžádá verdikt a
+upgrade odmítne, pokud tato trasa kontrolu neprovedla. Handshake je přijat, když:
+
+- nemá hlavičku `Origin` (Codex CLI, SDK a další klienti mimo prohlížeč);
+- hlavičku `Origin` připouští výše uvedený seznam povolených zdrojů
+  (`CORS_ALLOWED_ORIGINS`, nastavení `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- hlavička `Origin` je jedním z vlastních veřejných zdrojů OmniRoute (nakonfigurovaná
+  veřejná základní URL, přeposlaný zdroj důvěryhodné proxy nebo přímý hostitel
+  loopback/LAN zadaný jako IP literál nebo `localhost` — tytéž kandidáty používá
+  kontrola mutací řídicího panelu); nebo
+- nese platný klíč API, stejně jako na rozhraní HTTP `/v1/*`.
+
+Cokoli jiného dostane `403 ws_origin_forbidden`. Soubor cookie relace řídicího panelu
+nečiní cizí `Origin` výjimkou, protože jej prohlížeč připojí k socketu jakékoli stránky.
+`localhost` na jiném portu se nepovažuje za stejný zdroj; takové vývojové zdroje
+přidejte do `CORS_ALLOWED_ORIGINS`.
+
+## Příklad: reverzní proxy před OmniRoute
+
+CORS vynucuje samotný OmniRoute, takže proxy by obecně **neměla** přidávat ani
+přepisovat hlavičky `Access-Control-*` (duplicitní hlavičky způsobují problémy v prohlížečích). Ukončete TLS
+a předejte požadavek dál — odpověď na preflight požadavky nechte na OmniRoute:
 
 ```nginx
-# nginx — předejte požadavek OmniRoute; zde NEVKLÁDEJTE Access-Control-*
+# nginx — předejte požadavek do OmniRoute; zde NEVKLÁDEJTE Access-Control-*
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Nenastavujte X-Forwarded-For na 127.0.0.1 — vyřadilo by to ochranu tras omezených na loopback.
+    # Zachovejte hlavičky pro předávání: proxy na stejném hostiteli se připojuje z adresy zpětné smyčky a právě tyto
+    # hlavičky sdělují OmniRoute, že volající není místní operátor. Pokud proxy nepřidá žádnou z nich,
+    # bude každý vzdálený volající vypadat jako místní. Nikdy také nenastavujte X-Forwarded-For na 127.0.0.1.
 }
 ```
 
-Povolené zdroje prohlížeče nastavte v OmniRoute (`CORS_ALLOWED_ORIGINS` nebo na
-kartě Zabezpečení), nikoli v proxy serveru.
+Povolené zdroje pro prohlížeče nastavte v OmniRoute (`CORS_ALLOWED_ORIGINS` nebo na
+kartě Security), nikoli v proxy.
 
 ## Zdrojové soubory
 
@@ -163,6 +206,7 @@ kartě Zabezpečení), nikoli v proxy serveru.
 | Varovný banner řídicího panelu                            | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Pole Povolené zdroje CORS                                 | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS pro jednotlivé trasy Cloud-Agent (výjimka)           | `src/lib/cloudAgent/api.ts`                                          |
+| Kontrola hlavičky `Origin` při handshaku WebSocket        | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Viz také
 

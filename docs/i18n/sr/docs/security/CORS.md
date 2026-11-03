@@ -1,6 +1,6 @@
 # CORS Configuration & Security (Српски)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -57,11 +57,11 @@ zbog jedne konkretne implementacione činjenice:
 
 Šta to znači za svaku površinu, čak i uz `CORS_ALLOW_ALL=true`:
 
-| Površina                                  | Mehanizam autentifikacije      | Efekat CORS džokera                                                                                                                                                                                                                          |
-| ----------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kontrolna tabla / UPRAVLJANJE `/api/*`    | Sesija zasnovana na kolačiću   | Izvorište se vraća, ali **bez `Allow-Credentials`** pregledač **blokira** čitanje sa akreditivima. Zlonamerna lokacija sa drugog izvorišta **ne može da čita** vaše autentifikovane odgovore kontrolne table, a kolačić sesije nije izložen. |
-| Klijentski API `/v1/*`, `/v1beta/*`       | Bearer / zaglavlje `x-api-key` | Već je dopuštajuće **po dizajnu** (`relaxForTokenAuth`): pregledači nikada automatski ne dodaju `Authorization`/`x-api-key`, pa stranica napadača ne može da prosledi vaš ključ. `CORS_ALLOW_ALL` ovo ne proširuje.                          |
-| Javno, samo za čitanje (`/api/health`, …) | Nema                           | Nije osetljivo; džoker je bezopasan.                                                                                                                                                                                                         |
+| Površina                                  | Mehanizam autentifikacije      | Efekat CORS džokera                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kontrolna tabla / UPRAVLJANJE `/api/*`    | Sesija zasnovana na kolačiću   | Izvorište se vraća, ali **bez `Allow-Credentials`** pregledač **blokira** čitanje sa akreditivima. Zlonamerna lokacija sa drugog izvorišta **ne može da čita** vaše autentifikovane odgovore kontrolne table, a kolačić sesije nije izložen.                                                                                                                      |
+| Klijentski API `/v1/*`, `/v1beta/*`       | Bearer / zaglavlje `x-api-key` | Već je dopuštajuće **po dizajnu** (`relaxForTokenAuth`): pregledači nikada automatski ne dodaju `Authorization`/`x-api-key`, pa stranica napadača ne može da prosledi vaš ključ. Izvorište se vraća samo kada je predočeni ključ potvrđen; anonimni odgovori (`REQUIRE_API_KEY=false`) zadržavaju listu dozvoljenih izvorišta. `CORS_ALLOW_ALL` ovo ne proširuje. |
+| Javno, samo za čitanje (`/api/health`, …) | Nema                           | Nije osetljivo; džoker je bezopasan.                                                                                                                                                                                                                                                                                                                              |
 
 Prema tome, **preostala** izloženost opcije `CORS_ALLOW_ALL=true` ograničena je na: (a)
 čitanje već neautentifikovanih podataka između različitih izvorišta **bez akreditiva** i (b)
@@ -122,30 +122,73 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 - **Bearer / `x-api-key` (површина за закључивање `/v1/*`):** прегледачи их никада не прилажу
   аутоматски. CORS овде није значајна препрека — API кључ представља
   препреку — због чега је та површина намерно пермисивна како би прегледачки и
-  Electron клијенти могли да читају одговоре на које већ имају право.
+  Electron клијенти могли да читају одговоре на које већ имају право. Ублажено враћање
+  изворишта прати потврђени кључ, а не пуко присуство заглавља: када
+  `REQUIRE_API_KEY=false` анонимно опслужи захтев, његов успешан одговор задржава листу
+  дозвољених изворишта која је подразумевано затворена. Одбијања аутентификације (401)
+  остају читљива како би клијенти могли да прикажу опозван или погрешно унет кључ (#5242):
+  сопствени 401 цевовода задржава враћање изворишта, а рута која сама одбије кључ након
+  што га је цевовод опслужио као анониман (`/v1/models` и `/v1beta/models` уз
+  конфигурисану управљачку аутентификацију, руте ограничене на власника `/v1/files`,
+  `/v1/batches`, `/v1/media`, `/v1/session-leases` и руте кандидата за auto-combo) додаје
+  враћање изворишта том 401 преко `credentialRejectionHeaders()`. Враћање изворишта зависи
+  од тога да ли захтев садржи заглавље са акредитивима (`Authorization`, `x-api-key`,
+  `x-goog-api-key` или колачић `auth_token`), а не од тога које је од њих рута проверила,
+  и никада се не комбинује са `Access-Control-Allow-Credentials`; тело је фиксни омотач
+  грешке. Управљачке руте под `/api/v1/` заштићене са `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) не додају враћање изворишта: уз
+  `REQUIRE_API_KEY=false` њихови 401/403 нису читљиви из других изворишта.
 - **Сесија са колачићима (контролна табла):** заштићена је подразумеваним режимом који у случају
   грешке забрањује приступ **и** одсуством заглавља `Access-Control-Allow-Credentials` на дељеној
   путањи. Немојте укључивати изворе за управљање/контролну таблу у било коју пермисивну
   конфигурацију; за њих приступ мора остати строго подразумевано забрањен.
 
+## WebSocket руковања (`/v1/responses`, `/v1/ws`)
+
+Прегледачи не примењују CORS на WebSocket, па WebSocket транспорти који враћају излаз
+закључивања сами проверавају `Origin` руковања (`src/server/origin/wsOrigin.ts`):
+Responses WebSocket (`/v1/responses`) и, када се OmniRoute покреће преко `npm start` /
+`npm run dev`, мост `/v1/ws` и `/api/v1/ws`, који стримује `/v1/chat/completions`,
+`/v1/messages` и `/v1/responses` као оквире. Мост тражи пресуду од
+`/api/v1/ws?handshake=1` и одбија надоградњу осим ако је та рута извршила проверу.
+Руковање се прихвата када:
+
+- нема заглавље `Origin` (Codex CLI, SDK-ови и други клијенти који нису прегледачи);
+- `Origin` дозвољава горња листа дозвољених изворишта (`CORS_ALLOWED_ORIGINS`,
+  подешавање `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- је `Origin` једно од сопствених јавних изворишта OmniRoute-а (конфигурисани јавни
+  основни URL, прослеђено извориште поузданог проксија или директан loopback/LAN хост
+  наведен као IP литерал или `localhost` — исти кандидати које користи провера измена на
+  контролној табли); или
+- садржи важећи API кључ, као на HTTP површини `/v1/*`.
+
+Све остало добија `403 ws_origin_forbidden`. Колачић сесије контролне табле не изузима
+страни `Origin`, јер га прегледач прилаже сокету било које странице. `localhost` на
+другом порту не сматра се истим извориштем; таква развојна изворишта додајте у
+`CORS_ALLOWED_ORIGINS`.
+
 ## Пример: реверзни прокси испред OmniRoute-а
 
-CORS примењује сам OmniRoute, тако да прокси углавном **не би требало** да додаје или
-преписује заглавља `Access-Control-*` (дуплирана заглавља ометају прегледаче). Завршите TLS
-и проследите захтев — препустите OmniRoute-у да одговори на прелиминарни захтев:
+CORS примењује сам OmniRoute, па прокси углавном **не треба** да додаје нити
+преписује `Access-Control-*` заглавља (двострука заглавља онемогућавају рад прегледача). Завршите TLS
+и проследите саобраћај — нека OmniRoute одговори на предзахтев:
 
 ```nginx
-# nginx — проследите ка OmniRoute-у; овде НЕ убацујте Access-Control-*
+# nginx — прослеђивање ка OmniRoute-у; овде НЕ умећите Access-Control-*
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # НЕ постављајте X-Forwarded-For на 127.0.0.1 — тиме се онемогућава заштита рута за локалну петљу.
+    # Задржите заглавља за прослеђивање: прокси на истом хосту повезује се преко повратне спреге,
+    # а она указују OmniRoute-у да позивалац није локални оператор. Ако прокси не додаје ниједно од њих,
+    # сваки удаљени позивалац изгледа као локални. Такође, никада не постављајте X-Forwarded-For на 127.0.0.1.
 }
 ```
 
-Подесите дозвољене изворе прегледача у OmniRoute-у (`CORS_ALLOWED_ORIGINS` или на картици
-Security), а не у проксију.
+Подесите дозвољена порекла за прегледаче у OmniRoute-у (`CORS_ALLOWED_ORIGINS` или на
+картици Security), а не у проксију.
 
 ## Изворне датотеке
 
@@ -158,6 +201,7 @@ Security), а не у проксију.
 | Банер упозорења на контролној табли                 | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Поље CORS Allowed Origins                           | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS по рути за Cloud-Agent (изузетак)              | `src/lib/cloudAgent/api.ts`                                          |
+| Провера `Origin` при WebSocket руковању             | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Види такође
 

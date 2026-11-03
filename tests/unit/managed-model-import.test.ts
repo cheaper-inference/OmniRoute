@@ -9,6 +9,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 const { getModelAliases, setModelAlias } = await import("@/lib/db/models");
 const localDb = { getModelAliases, setModelAlias };
 const { importManagedModels } = await import("../../src/lib/providerModels/managedModelImport.ts");
@@ -28,6 +29,45 @@ test.beforeEach(async () => {
 test.after(() => {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("sync preserves a disabled sibling catalog for later reactivation but prunes deleted accounts", async () => {
+  const active = await providersDb.createProviderConnection({
+    provider: "codex",
+    name: "active",
+    authType: "oauth",
+    isActive: true,
+  });
+  const disabled = await providersDb.createProviderConnection({
+    provider: "codex",
+    name: "disabled",
+    authType: "oauth",
+    isActive: false,
+  });
+  for (const id of [disabled.id, "deleted-account"]) {
+    await modelsDb.replaceSyncedAvailableModelsForConnection("codex", id, [
+      { id: "gpt-6-astra", name: "Astra" },
+    ]);
+  }
+  await importManagedModels({
+    providerId: "codex",
+    connectionId: active.id,
+    mode: "sync",
+    fetchedModels: [{ id: "gpt-6-astra", name: "Astra" }],
+  });
+  assert.equal(
+    (await modelsDb.getSyncedAvailableModelsForConnection("codex", disabled.id)).length,
+    1
+  );
+  assert.deepEqual(
+    await modelsDb.getSyncedAvailableModelsForConnection("codex", "deleted-account"),
+    []
+  );
+  await providersDb.updateProviderConnection(disabled.id, { isActive: true });
+  assert.equal(
+    (await modelsDb.getSyncedAvailableModelsForConnection("codex", disabled.id))[0].id,
+    "gpt-6-astra"
+  );
 });
 
 test("sync mode builds aliases from provider-level synced available models", async () => {
@@ -129,6 +169,7 @@ test("sync keeps a same-id manual model as the user-configurable metadata overri
       id: "shared-model",
       name: "Operator configuration",
       source: "manual",
+      endpointCapabilitySource: "operator",
       apiFormat: "responses",
       supportedEndpoints: ["responses"],
       targetFormat: "claude",

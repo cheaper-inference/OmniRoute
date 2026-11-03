@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type Key } from "react";
 import { useTranslations } from "next-intl";
 import Card from "../Card";
-import { getModelColor } from "@/shared/constants/colors";
+import { getSeriesColor } from "./chartColors";
 import {
   fmtCompact as fmt,
   fmtCost,
@@ -11,6 +11,17 @@ import {
 } from "@/shared/utils/formatting";
 import { PROVIDER_COLORS } from "./chartColors";
 import { ChartLoadingCard, DarkTooltip, useRecharts } from "./rechartsCore";
+
+type DonutSegment = { name: string; value: number; fill: string; fullName?: string };
+type CompactDonutCardProps = {
+  pieData: DonutSegment[];
+  title: string;
+  formatter: (value: number) => string;
+  valueClassName?: string;
+  labelClassName?: string;
+  getLegendKey?: (segment: DonutSegment, index: number) => Key;
+  getLegendTitle?: (segment: DonutSegment) => string;
+};
 
 function CompactDonutCard({
   pieData,
@@ -20,7 +31,7 @@ function CompactDonutCard({
   labelClassName = "",
   getLegendKey,
   getLegendTitle,
-}) {
+}: CompactDonutCardProps) {
   const recharts = useRecharts();
 
   if (!recharts) {
@@ -95,7 +106,7 @@ export function AccountDonut({ byAccount }) {
     return data.slice(0, 8).map((item, i) => ({
       name: item.account,
       value: item.totalTokens,
-      fill: getModelColor(i),
+      fill: getSeriesColor(i),
     }));
   }, [data]);
 
@@ -125,7 +136,7 @@ export function ApiKeyDonut({ byApiKey }) {
       name: maskApiKeyLabel(item.apiKeyName, item.apiKeyId),
       fullName: item.apiKeyName || item.apiKeyId || t("unknownApiKey"),
       value: item.totalTokens,
-      fill: getModelColor(i),
+      fill: getSeriesColor(i),
     }));
   }, [data, t]);
 
@@ -186,7 +197,7 @@ export function ProviderCostDonut({ byProvider }) {
       pieData={pieData}
       title={t("chartCostByProvider")}
       formatter={fmtCost}
-      valueClassName="text-amber-500"
+      valueClassName="text-warning"
       labelClassName="capitalize"
     />
   );

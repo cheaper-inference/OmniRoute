@@ -1,6 +1,6 @@
 # RTK Compression (اردو)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -29,12 +29,12 @@ Caveman ان پٹ:         46% بچت
 
 ## یہ کیا کمپریس کرتا ہے
 
-بلٹ اِن کیٹلاگ میں فی الحال ان زمروں میں 49 فلٹرز شامل ہیں:
+بلٹ اِن کیٹلاگ فی الحال ان زمروں میں 56 فلٹرز فراہم کرتا ہے:
 
 | زمرہ      | مثالیں                                                        |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`، `git branch`، `git diff`، `git log`             |
-| `test`    | Vitest، Jest، Pytest، Playwright، Go ٹیسٹس، Cargo ٹیسٹس       |
+| `test`    | Vitest، Jest، Pytest، PHPUnit، Playwright، Go، Cargo tests    |
 | `build`   | TypeScript، ESLint، Biome، Prettier، Vite، Webpack، Turbo، Nx |
 | `package` | `npm install`، `npm audit`، `pip`، `uv sync`، Poetry، Bundler |
 | `shell`   | `ls`، `find`، `grep`، عمومی شیل لاگز                          |
@@ -42,9 +42,9 @@ Caveman ان پٹ:         46% بچت
 | `infra`   | Terraform، OpenTofu، `systemctl status`                       |
 | `generic` | JSON آؤٹ پٹ، اسٹیک ٹریسز، عمومی آؤٹ پٹ فال بیک                |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` میں موجود ڈیٹیکٹر فلٹر منتخب کرنے
-سے پہلے آؤٹ پٹ کی درجہ بندی کرتا ہے۔ جب کمانڈ کلاس کافی نہ ہو تو فلٹرز کمانڈ پیٹرن یا آؤٹ پٹ ریجیکس
-کی بنیاد پر بھی مماثلت تلاش کر سکتے ہیں۔
+`open-sse/services/compression/engines/rtk/commandDetector.ts` میں موجود ڈیٹیکٹر فلٹر کے
+انتخاب سے پہلے آؤٹ پٹ کی درجہ بندی کرتا ہے۔ جب کمانڈ کلاس کافی نہ ہو تو فلٹرز کمانڈ پیٹرن یا
+آؤٹ پٹ regex کے ذریعے بھی میچ کر سکتے ہیں۔
 
 ## فلٹر کا تعین
 
@@ -354,58 +354,58 @@ node --import tsx/esm --test \
 
 ---
 
-## شدت کی سطحیں (v3.8.16+)
+## شدت کے درجات (v3.8.16+)
 
-RTK **شدت کی 3 سطحوں** کو سپورٹ کرتا ہے جو **کمپریشن کی جارحیت** اور **حفاظت** کے درمیان توازن قائم کرتی ہیں۔ سطح انجن کنفگ میں `config.intensity` کے ذریعے سیٹ کی جاتی ہے۔
+RTK **3 شدت کے درجات** کی معاونت کرتا ہے جو **کمپریشن کی جارحیت** اور **حفاظت** کے درمیان توازن قائم کرتے ہیں۔ یہ درجہ انجن کنفیگ میں `config.intensity` کے ذریعے سیٹ کیا جاتا ہے۔
 
-### 3 سطحیں
+### 3 درجے
 
-| سطح                 | تراشنے کی حد       | ٹوکن کی بچت | خطرہ    | بہترین استعمال                 |
-| ------------------- | ------------------ | ----------- | ------- | ------------------------------ |
-| `minimal`           | فی سیکشن 24 لائنیں | ~20-40%     | بہت کم  | اہم سیاق و سباق والی پروڈکشن   |
-| `standard` (ڈیفالٹ) | فی سیکشن 24 لائنیں | ~50-70%     | کم      | روزمرہ کوڈنگ سیشنز             |
-| `aggressive`        | فی سیکشن 16 لائنیں | ~70-90%     | درمیانہ | طویل سیشنز، زیادہ سے زیادہ بچت |
+| درجہ                | کٹوتی کی حد       | ٹوکن بچت | خطرہ    | کس کے لیے بہترین               |
+| ------------------- | ----------------- | -------- | ------- | ------------------------------ |
+| `minimal`           | 24 سطریں فی سیکشن | ~20-40%  | بہت کم  | اہم سیاق کے ساتھ پروڈکشن       |
+| `standard` (طے شدہ) | 24 سطریں فی سیکشن | ~50-70%  | کم      | روزانہ کے کوڈنگ سیشنز          |
+| `aggressive`        | 16 سطریں فی سیکشن | ~70-90%  | درمیانہ | طویل سیشنز، زیادہ سے زیادہ بچت |
 
-### تراشنا کہاں ہوتا ہے
+### کٹوتی کہاں ہوتی ہے
 
-تراشنے کی حد `lineFilter.ts` پر اثر انداز ہوتی ہے:
+کٹوتی کی حد `lineFilter.ts` کو متاثر کرتی ہے:
 
 ```ts
-// open-sse/services/compression/engines/rtk/index.ts:329-330 سے
+// ماخذ: open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-ہر سیکشن کا **ابتدائی** اور **آخری** دونوں حصہ محفوظ رکھا جاتا ہے؛ تراشنا فعال ہونے پر درمیانی مواد ہٹا دیا جاتا ہے۔
+ہر سیکشن کا **آغاز (head)** اور **انجام (tail)** دونوں محفوظ رکھے جاتے ہیں؛ کٹوتی نافذ ہونے پر درمیانی مواد حذف کر دیا جاتا ہے۔
 
-### کیا باقی رہتا ہے بمقابلہ کیا کاٹا جاتا ہے
+### کیا رہتا ہے اور کیا کٹ جاتا ہے
 
-| مواد                        | minimal       | standard      | aggressive    |
-| --------------------------- | ------------- | ------------- | ------------- |
-| ایررز / اسٹیک ٹریسز         | ✅ محفوظ      | ✅ محفوظ      | ✅ محفوظ      |
-| ٹیسٹ کی ناکامیاں            | ✅ محفوظ      | ✅ محفوظ      | ✅ محفوظ      |
-| بِلڈ ایررز                  | ✅ محفوظ      | ✅ محفوظ      | ✅ محفوظ      |
-| کامیاب ٹیسٹس (تفصیلی)       | ✅ محفوظ      | 🟡 مختصر کردہ | 🟡 مختصر کردہ |
-| معمول کا آؤٹ پٹ (انفو لاگز) | 🟡 مختصر کردہ | 🟡 مختصر کردہ | ❌ حذف شدہ    |
-| پروگریس بارز                | 🟡 مختصر کردہ | ❌ حذف شدہ    | ❌ حذف شدہ    |
-| بینر / ASCII آرٹ            | 🟡 مختصر کردہ | ❌ حذف شدہ    | ❌ حذف شدہ    |
+| مواد                        | minimal      | standard     | aggressive   |
+| --------------------------- | ------------ | ------------ | ------------ |
+| خرابیاں / اسٹیک ٹریسز       | ✅ محفوظ     | ✅ محفوظ     | ✅ محفوظ     |
+| ٹیسٹ ناکامیاں               | ✅ محفوظ     | ✅ محفوظ     | ✅ محفوظ     |
+| بلڈ خرابیاں                 | ✅ محفوظ     | ✅ محفوظ     | ✅ محفوظ     |
+| ٹیسٹ کامیابیاں (تفصیلی)     | ✅ محفوظ     | 🟡 سمیٹا گیا | 🟡 سمیٹا گیا |
+| معمول کی آؤٹ پٹ (انفو لاگز) | 🟡 سمیٹا گیا | 🟡 سمیٹا گیا | ❌ حذف شدہ   |
+| پروگریس بارز                | 🟡 سمیٹا گیا | ❌ حذف شدہ   | ❌ حذف شدہ   |
+| بینر / ASCII آرٹ            | 🟡 سمیٹا گیا | ❌ حذف شدہ   | ❌ حذف شدہ   |
 
 ### درست شدت کا انتخاب
 
 ```
-                  کیا سیاق و سباق کا ضائع ہونا تباہ کن ہے؟
+                  کیا سیاق کھونا تباہ کن ہے؟
                   │
       ┌───────────┼───────────┐
       │           │           │
-    ہاں          نہیں       یقین نہیں
+     ہاں        نہیں       غیر یقینی
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      تھروپُٹ کتنا     پہلے `standard` آزمائیں
-      │      اہم ہے؟          (80% صورتوں میں
-      │           │          کارگر ہے)
+      │      تھروپٹ کتنی     پہلے `standard` آزمائیں
+      │      اہم ہے؟         (80% صورتوں میں کام
+      │           │          کرتا ہے)
       │      ┌────┴────┐
       │      │         │
       │     کم        زیادہ
@@ -416,9 +416,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### شدت کی کنفگریشن
+### شدت کی ترتیب دینا
 
-**فی کومبو** (کومبو کنفگ میں):
+**فی کومبو** (کومبو کنفیگ میں):
 
 ```json
 {
@@ -434,8 +434,8 @@ config.intensity === "aggressive" ? 16 : 24,
 **پروگرامی طور پر**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ایک
-`CompressionEngine` ہے اور اس میں کوئی `updateConfig` میتھڈ نہیں ہے۔ اس کے بجائے رجسٹری ہیلپر کے ذریعے
-انجن کی کنفگ اپ ڈیٹ کریں:
+`CompressionEngine` ہے اور اس میں کوئی `updateConfig` طریقہ موجود نہیں ہے۔ اس کے بجائے رجسٹری ہیلپر کے ذریعے انجن کی کنفیگ
+اپڈیٹ کریں:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -445,7 +445,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### اثر کی تصدیق
 
-یہ تصدیق کرنے کے لیے **تصدیقی گیٹ** (نیچے دیکھیں) استعمال کریں کہ آپ کا فلٹر آپ کی منتخب کردہ شدت پر محفوظ ہے:
+اپنی منتخب شدت پر اپنے فلٹر کی حفاظت کی تصدیق کے لیے **Verify Gate** (ذیل میں دیکھیں) استعمال کریں:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

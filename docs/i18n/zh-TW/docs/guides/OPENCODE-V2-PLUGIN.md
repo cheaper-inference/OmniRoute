@@ -1,6 +1,6 @@
 # OpenCode v2 plugin — install and configure (中文 (繁體))
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/OPENCODE-V2-PLUGIN.md) · 🇪🇹 [am](../../../am/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇦 [ar](../../../ar/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇦🇿 [az](../../../az/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇧🇬 [bg](../../../bg/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇧🇩 [bn](../../../bn/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇨🇿 [cs](../../../cs/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇩🇰 [da](../../../da/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇩🇪 [de](../../../de/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇬🇷 [el](../../../el/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇪🇸 [es](../../../es/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇪🇪 [et](../../../et/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇷 [fa](../../../fa/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇫🇮 [fi](../../../fi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇫🇷 [fr](../../../fr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇪 [ga](../../../ga/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [gu](../../../gu/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇬 [ha](../../../ha/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇱 [he](../../../he/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [hi](../../../hi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇭🇷 [hr](../../../hr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇭🇺 [hu](../../../hu/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇦🇲 [hy](../../../hy/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇩 [id](../../../id/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇬 [ig](../../../ig/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇹 [it](../../../it/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇯🇵 [ja](../../../ja/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇬🇪 [ka](../../../ka/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇰🇭 [km](../../../km/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [kn](../../../kn/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇰🇷 [ko](../../../ko/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇱🇹 [lt](../../../lt/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇱🇻 [lv](../../../lv/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [ml](../../../ml/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [mr](../../../mr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇲🇾 [ms](../../../ms/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇲🇹 [mt](../../../mt/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇲🇲 [my](../../../my/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇵 [ne](../../../ne/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇱 [nl](../../../nl/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇴 [no](../../../no/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [or](../../../or/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [pa](../../../pa/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇭 [phi](../../../phi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇱 [pl](../../../pl/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇹 [pt](../../../pt/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇷🇴 [ro](../../../ro/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇷🇺 [ru](../../../ru/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇱🇰 [si](../../../si/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇰 [sk](../../../sk/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇮 [sl](../../../sl/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇷🇸 [sr](../../../sr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇪 [sv](../../../sv/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇰🇪 [sw](../../../sw/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [ta](../../../ta/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [te](../../../te/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇹🇭 [th](../../../th/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇹🇷 [tr](../../../tr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇰 [ur](../../../ur/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇺🇿 [uz](../../../uz/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇻🇳 [vi](../../../vi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇬 [yo](../../../yo/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/OPENCODE-V2-PLUGIN.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/OPENCODE-V2-PLUGIN.md) · 🇪🇹 [am](../../../am/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇦 [ar](../../../ar/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇦🇿 [az](../../../az/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇧🇬 [bg](../../../bg/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇧🇩 [bn](../../../bn/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇧🇦 [bs](../../../bs/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇨🇿 [cs](../../../cs/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇩🇰 [da](../../../da/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇩🇪 [de](../../../de/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇬🇷 [el](../../../el/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇪🇸 [es](../../../es/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇪🇪 [et](../../../et/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇷 [fa](../../../fa/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇫🇮 [fi](../../../fi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇫🇷 [fr](../../../fr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇪 [ga](../../../ga/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [gu](../../../gu/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇬 [ha](../../../ha/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇱 [he](../../../he/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [hi](../../../hi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇭🇷 [hr](../../../hr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇭🇺 [hu](../../../hu/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇦🇲 [hy](../../../hy/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇩 [id](../../../id/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇬 [ig](../../../ig/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇹 [it](../../../it/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇯🇵 [ja](../../../ja/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇬🇪 [ka](../../../ka/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇰🇭 [km](../../../km/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [kn](../../../kn/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇰🇷 [ko](../../../ko/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇱🇹 [lt](../../../lt/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇱🇻 [lv](../../../lv/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [ml](../../../ml/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [mr](../../../mr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇲🇾 [ms](../../../ms/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇲🇹 [mt](../../../mt/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇲🇲 [my](../../../my/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇵 [ne](../../../ne/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇱 [nl](../../../nl/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇴 [no](../../../no/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [or](../../../or/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [pa](../../../pa/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇭 [phi](../../../phi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇱 [pl](../../../pl/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇹 [pt](../../../pt/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇷🇴 [ro](../../../ro/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇷🇺 [ru](../../../ru/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇱🇰 [si](../../../si/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇰 [sk](../../../sk/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇮 [sl](../../../sl/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇷🇸 [sr](../../../sr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇸🇪 [sv](../../../sv/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇰🇪 [sw](../../../sw/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [ta](../../../ta/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇮🇳 [te](../../../te/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇹🇭 [th](../../../th/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇹🇷 [tr](../../../tr/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇵🇰 [ur](../../../ur/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇺🇿 [uz](../../../uz/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇻🇳 [vi](../../../vi/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇳🇬 [yo](../../../yo/docs/guides/OPENCODE-V2-PLUGIN.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/OPENCODE-V2-PLUGIN.md)
 
 ---
 
@@ -71,24 +71,32 @@
 
 ## 選項
 
-| 金鑰                             | 預設值                                   | 說明                                                                                  |
-| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                            | 提供者 ID、整合項目 ID，以及模型顯示時所使用的前綴                                    |
-| `baseURL`                        | 必填                                     | 閘道根網址，僅限 `http(s)`；會在需要時加入 `/v1` 後綴                                 |
-| `apiKey`                         | 已連線的憑證，其次為 `OMNIROUTE_API_KEY` | `/v1/*` 的聊天金鑰                                                                    |
-| `managementReadToken`            | 回退使用 `apiKey`                        | `/api/*` 的金鑰——通常與聊天金鑰**不同**                                               |
-| `displayName`                    | `"OmniRoute"`                            | 選擇器中的提供者名稱                                                                  |
-| `timeoutMs`                      | `10000`                                  | 各端點的擷取逾時時間（自動組合使用 5 秒）                                             |
-| `modelCacheTtlMs`                | `300000`                                 | 目錄快取 TTL；磁碟快照可加速冷啟動                                                    |
-| `timeouts`                       | 回退使用 `timeoutMs`                     | 各端點的時間預算（毫秒）：`models`、`combos`、`autoCombos`、`enrichment`              |
-| `enrichment`                     | `true`                                   | 擷取名稱、定價與免費方案額度                                                          |
-| `providerTag`                    | `true`                                   | 在顯示名稱前加上其路由目標的上游提供者                                                |
-| `usableOnly`                     | `false`                                  | 僅保留閘道回報為已佈建的提供者                                                        |
-| `visibleModels` / `hiddenModels` | `[]`                                     | 精確比對或後綴比對的允許清單；拒絕規則優先                                            |
-| `geminiSanitization`             | `true`                                   | 從工具結構描述中移除 Gemini 不接受的 JSON-Schema 關鍵字（含 `$ref` 的工具會原樣轉送） |
-| `apiFormat.allowAnthropic`       | `false`                                  | 透過 Anthropic API 區塊路由允許清單中的 ID                                            |
-| `apiFormat.anthropicModels`      | `[]`                                     | 路由至 Anthropic 的完整模型 ID                                                        |
-| `logLevel` / `startupDebug`      | `warn` / `false`                         | 記錄器詳細程度                                                                        |
+| 鍵                               | 預設值                                   | 說明                                                                                              |
+| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                            | 提供者 ID、整合 ID，以及模型顯示時使用的前綴                                                      |
+| `baseURL`                        | 必填                                     | 閘道根網址，僅支援 `http(s)`；會在需要時加上 `/v1` 後綴                                           |
+| `apiKey`                         | 已連線的認證，接著是 `OMNIROUTE_API_KEY` | 用於 `/v1/*` 的聊天金鑰                                                                           |
+| `managementReadToken`            | 後援使用 `apiKey`                        | 用於 `/api/*` 的金鑰——通常與前者**不同**                                                          |
+| `displayName`                    | `"OmniRoute"`                            | 選擇器中顯示的提供者名稱                                                                          |
+| `timeoutMs`                      | `10000`                                  | 各端點的擷取逾時時間（自動組合使用 5 秒）                                                         |
+| `modelCacheTtlMs`                | `300000`                                 | 目錄快取 TTL；磁碟快照可加速冷啟動                                                                |
+| `timeouts`                       | 後援使用 `timeoutMs`                     | 各端點的時間預算（毫秒）：`models`、`combos`、`autoCombos`、`enrichment`                          |
+| `enrichment`                     | `true`                                   | 擷取名稱、定價與免費方案額度                                                                      |
+| `providerTag`                    | `true`                                   | 在顯示名稱前加上其路由至的上游提供者                                                              |
+| `usableOnly`                     | `false`                                  | 僅保留閘道回報為已佈建的提供者                                                                    |
+| `combosSource`                   | `"api"`                                  | `"models"` 會略過 `/api/combos`，並發布 `/v1/models` 的組合資料列；成員層級的篩選器會保留 `"api"` |
+| `showcasePerOwner`               | `10`                                     | 預設檢視中每個提供者保留的精選項目數                                                              |
+| `freshPerOwner`                  | `10`                                     | 預設檢視中每個提供者保留的新項目數                                                                |
+| `freshWindowDays`                | `90`                                     | 新項目分支的新鮮度時間範圍（天）                                                                  |
+| `usageMemory`                    | `true`                                   | 根據 30 天使用情況分析，還原由靜態篩選移除的具名項目（需要管理權杖）                              |
+| `visibleModels` / `hiddenModels` | `[]`                                     | 精確或後綴比對的允許清單；拒絕規則優先；`*` 會發布完整目錄（其他篩選器仍會套用）                  |
+| `geminiSanitization`             | `true`                                   | 從工具結構描述中移除 Gemini 不接受的 JSON-Schema 關鍵字（使用 `$ref` 的工具會原樣轉送）           |
+| `apiFormat.allowAnthropic`       | `false`                                  | 透過 Anthropic API 區塊路由允許清單中的 ID                                                        |
+| `apiFormat.anthropicModels`      | `[]`                                     | 路由至 Anthropic 的完整模型 ID                                                                    |
+| `logLevel` / `startupDebug`      | `warn` / `false`                         | 記錄器詳細程度                                                                                    |
+
+使用記憶功能預設為開啟。若沒有管理權杖，該功能將維持停用狀態
+（啟動時會記錄一則通知），且不會還原任何項目。
 
 ## 目錄如何保持最新
 
@@ -105,11 +113,14 @@
 
 ## 疑難排解
 
-| 症狀                             | 原因                                                                                        |
-| -------------------------------- | ------------------------------------------------------------------------------------------- |
-| 選擇器未顯示任何 OmniRoute 模型  | 未解析出金鑰（請檢查啟動警告），或閘道無法連線                                              |
-| 顯示原始模型 ID，沒有組合或定價  | 管理端點拒絕了權杖——請設定 `managementReadToken`                                            |
-| 工作階段固定至 `opencode-<id>/…` | v1 外掛程式發布的是 `opencode-<id>`；v2 則直接發布 `<id>`，因此請在 `<id>/…` 下重新選取模型 |
+| 症狀                                | 原因                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| 選擇器未顯示任何 OmniRoute 模型     | 未解析到金鑰（請檢查啟動警告），或無法連線至閘道                                            |
+| 顯示原始模型 ID，沒有組合與價格資訊 | 管理端點拒絕權杖 — 請設定 `managementReadToken`                                             |
+| `freeOnly` 目錄很短或為空           | 沒有管理權杖，或權杖遭拒絕 — 請查看主機日誌中的重新整理摘要行（`unmatched-free` 計數）      |
+| 工作階段固定於 `opencode-<id>/…`    | v1 外掛程式發布的是 `opencode-<id>`；v2 則直接發布 `<id>`，因此請在 `<id>/…` 下重新選取模型 |
+
+環境變數必須傳遞至 opencode 伺服器程序：當主機以服務方式執行時，執行 `opencode models` 的 shell 與伺服器環境並不相同，因此請在伺服器讀取金鑰的位置匯出該金鑰。
 
 ## 另請參閱
 

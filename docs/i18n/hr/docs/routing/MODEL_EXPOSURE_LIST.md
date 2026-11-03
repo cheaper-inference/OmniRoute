@@ -1,63 +1,50 @@
 # Model Exposure Allow/Deny List (Hrvatski)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../routing/MODEL_EXPOSURE_LIST.md) · 🇪🇹 [am](../../../am/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇦 [ar](../../../ar/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇦🇿 [az](../../../az/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇧🇬 [bg](../../../bg/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇧🇩 [bn](../../../bn/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇨🇿 [cs](../../../cs/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇩🇰 [da](../../../da/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇩🇪 [de](../../../de/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇬🇷 [el](../../../el/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇪🇸 [es](../../../es/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇪🇪 [et](../../../et/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇷 [fa](../../../fa/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇫🇮 [fi](../../../fi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇫🇷 [fr](../../../fr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇪 [ga](../../../ga/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [gu](../../../gu/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇬 [ha](../../../ha/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇱 [he](../../../he/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [hi](../../../hi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇭🇺 [hu](../../../hu/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇦🇲 [hy](../../../hy/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇩 [id](../../../id/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇬 [ig](../../../ig/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇹 [it](../../../it/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇯🇵 [ja](../../../ja/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇬🇪 [ka](../../../ka/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇰🇭 [km](../../../km/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [kn](../../../kn/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇰🇷 [ko](../../../ko/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇱🇹 [lt](../../../lt/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇱🇻 [lv](../../../lv/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [ml](../../../ml/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [mr](../../../mr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇲🇾 [ms](../../../ms/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇲🇹 [mt](../../../mt/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇲🇲 [my](../../../my/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇵 [ne](../../../ne/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇱 [nl](../../../nl/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇴 [no](../../../no/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [or](../../../or/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [pa](../../../pa/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇭 [phi](../../../phi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇱 [pl](../../../pl/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇹 [pt](../../../pt/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇷🇴 [ro](../../../ro/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇷🇺 [ru](../../../ru/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇱🇰 [si](../../../si/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇰 [sk](../../../sk/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇮 [sl](../../../sl/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇷🇸 [sr](../../../sr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇪 [sv](../../../sv/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇰🇪 [sw](../../../sw/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [ta](../../../ta/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [te](../../../te/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇹🇭 [th](../../../th/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇹🇷 [tr](../../../tr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇰 [ur](../../../ur/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇺🇿 [uz](../../../uz/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇻🇳 [vi](../../../vi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇬 [yo](../../../yo/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/MODEL_EXPOSURE_LIST.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../routing/MODEL_EXPOSURE_LIST.md) · 🇪🇹 [am](../../../am/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇦 [ar](../../../ar/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇦🇿 [az](../../../az/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇧🇬 [bg](../../../bg/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇧🇩 [bn](../../../bn/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇧🇦 [bs](../../../bs/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇨🇿 [cs](../../../cs/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇩🇰 [da](../../../da/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇩🇪 [de](../../../de/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇬🇷 [el](../../../el/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇪🇸 [es](../../../es/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇪🇪 [et](../../../et/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇷 [fa](../../../fa/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇫🇮 [fi](../../../fi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇫🇷 [fr](../../../fr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇪 [ga](../../../ga/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [gu](../../../gu/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇬 [ha](../../../ha/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇱 [he](../../../he/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [hi](../../../hi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇭🇺 [hu](../../../hu/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇦🇲 [hy](../../../hy/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇩 [id](../../../id/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇬 [ig](../../../ig/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇹 [it](../../../it/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇯🇵 [ja](../../../ja/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇬🇪 [ka](../../../ka/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇰🇭 [km](../../../km/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [kn](../../../kn/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇰🇷 [ko](../../../ko/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇱🇹 [lt](../../../lt/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇱🇻 [lv](../../../lv/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [ml](../../../ml/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [mr](../../../mr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇲🇾 [ms](../../../ms/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇲🇹 [mt](../../../mt/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇲🇲 [my](../../../my/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇵 [ne](../../../ne/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇱 [nl](../../../nl/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇴 [no](../../../no/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [or](../../../or/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [pa](../../../pa/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇭 [phi](../../../phi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇱 [pl](../../../pl/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇹 [pt](../../../pt/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇷🇴 [ro](../../../ro/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇷🇺 [ru](../../../ru/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇱🇰 [si](../../../si/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇰 [sk](../../../sk/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇮 [sl](../../../sl/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇷🇸 [sr](../../../sr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇸🇪 [sv](../../../sv/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇰🇪 [sw](../../../sw/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [ta](../../../ta/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇮🇳 [te](../../../te/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇹🇭 [th](../../../th/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇹🇷 [tr](../../../tr/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇵🇰 [ur](../../../ur/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇺🇿 [uz](../../../uz/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇻🇳 [vi](../../../vi/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇳🇬 [yo](../../../yo/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/MODEL_EXPOSURE_LIST.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/MODEL_EXPOSURE_LIST.md)
 
 ---
 
-> Opcionalno, prema zadanim postavkama isključeno (ako su `modelVisibilityAllowlist`/`modelVisibilityDenylist` oba prazna,
-> katalog `/v1/models` I svaki skup kandidata `auto/*` ostaju identični na razini bajtova). Srodno postavkama
-> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`), namijenjeno operatorima koji žele prilagođen
-> popis modela iz razloga koji nemaju veze s troškovima.
+> Opt-in, isključeno prema zadanim postavkama (`modelVisibilityAllowlist`/`modelVisibilityDenylist` oba prazna ostavlja `/v1/models` katalog AND svaki `auto/*` skup kandidata bajt-identičan). Brat `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) za operatere koji žele odabrani popis modela iz razloga koji nemaju nikakve veze s cijenom.
 
 ## Zašto ovo postoji
 
-`hidePaidModels` odgovara na pitanje „je li ovaj model besplatan?”, a `hideAutoCombos` na pitanje „treba li
-uopće oglašavati virtualne ID-ove `auto/*`?” — nijedna od tih postavki ne omogućuje operatoru odabir proizvoljnog
-podskupa modela (npr. prikazivanje točno onih modela koje određeni Claude Code / OpenCode klijent treba vidjeti,
-neovisno o cijenama). #11481 to omogućuje putem dviju neovisnih, opcionalnih postavki u obliku polja nizova znakova.
+`hidePaidModels` odgovara "je li ovaj model besplatan?" a `hideAutoCombos` odgovara "treba li uopće reklamirati `auto/*` virtualne ID-ove?" — niti dopušta operateru da upravlja proizvoljnim podskupom modela (npr. predstavljanje točno onih modela koje određeni Claude kod / OpenCode klijent treba vidjeti, neovisno o cijenama). #11481 dodaje to kao dvije neovisne, opt-in postavke niza nizova.
 
-## Postavke
+## postavke
 
-| Ključ                      | Vrsta      | Zadano | Značenje                                                                       |
-| -------------------------- | ---------- | ------ | ------------------------------------------------------------------------------ |
-| `modelVisibilityDenylist`  | `string[]` | `[]`   | Unosi koji se podudaraju s kandidatom skrivaju ga iz kataloga/skupa kandidata. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`   | Kada nije prazno, izloženi ostaju SAMO kandidati koji se podudaraju s unosima. |
+| Ključ                      | Tip        | Zadano | Značenje                                                                |
+| -------------------------- | ---------- | ------ | ----------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`   | Unosi koji odgovaraju kandidatu skrivaju ga od catalog/candidate skupa. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`   | Kada nisu prazni, ONLY unosi koji odgovaraju kandidatu ostaju izloženi. |
 
-Obje prihvaćaju do 500 unosa od najviše 200 znakova po unosu (provjereno Zodom u
-`src/shared/validation/settingsSchemas.ts`). Unos je jedno od sljedećeg:
+Oba prihvaćaju do 500 unosa do 200 znakova svaki (provjereno Zod-om u `src/shared/validation/settingsSchemas.ts`). Unos je ili:
 
-- točan ID iz kataloga — `"gpt-4o"` (samo ID modela) ili `"openai/gpt-4o"` (s prefiksom pružatelja), ili
-- glob uzorak koji upotrebljava `*`/`?` — npr. `"openai/gpt-4*"` ili `"anthropic/*"` — koji se obrađuje
-  istim zajedničkim matcherom `globToRegex()` (`src/shared/utils/globPattern.ts`) koji već upotrebljavaju
-  mapiranja kombinacija po modelu u `ModelRoutingSection` i `freeModels.ts::matchesOnlyPaidModels`.
+- točan ID kataloga — `"gpt-4o"` (goli ID modela) ili `"openai/gpt-4o"` (prefiks pružatelja), ili
+- glob uzorak koji koristi `*`/`?` — npr. `"openai/gpt-4*"` ili `"anthropic/*"` — razriješen putem istog zajedničkog `globToRegex()` podudaranja (`src/shared/utils/globPattern.ts`) koji već koriste `ModelRoutingSection` kombinirana mapiranja po modelu i `freeModels.ts::matchesOnlyPaidModels`.
 
-Prioritet: popis zabrana provjerava se prvi (zabranjeni unos uvijek je skriven, čak i ako se također
-podudara s popisom dopuštenja); kada popis dopuštenja nije prazan, zadržavaju se samo unosi koji se s njim podudaraju.
+Prioritet: najprije se provjerava popis odbijenih unosa (odbijeni unos je uvijek skriven, čak i ako odgovara popisu dozvoljenih); kada popis dopuštenih nije prazan, opstaju samo unosi koji odgovaraju.
 
-## Dvije kontrolne točke, ne jedna
+## Dvije prigušne točke, ne jedna
 
-Pouka iz #6512 (filtriranje kataloga samo pomoću `hidePaidModels` i dalje je dopuštalo da `auto/*` usmjeri zahtjev
-na plaćeni model jer se skup kandidata kombinacije izrađivao neovisno) jednako se primjenjuje i ovdje.
-Predikat podudaranja `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) poziva se na OBA mjesta:
+Lekcija iz #6512 ( `hidePaidModels` -only kataloški filtar i dalje dopušta `auto/*` u usmjeravanje na plaćeni model, budući da je skup kombiniranih kandidata izgrađen neovisno) primjenjuje se identično i ovdje. Odgovarajući predikat `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) poziva se iz BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — sam popis `/v1/models`, na istih 5 kontrolnih točaka po izvoru
-  koje već kontrolira `shouldHidePaid()` (statički `PROVIDER_MODELS`, sinkronizirani retci pružatelja,
-  prilagođeni retci, retci podržani aliasima, retci upravljanih pričuvnih opcija).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — poziva se
-  iz `virtualFactory.ts::buildPreparedPool`, neposredno nakon odgovarajućeg poziva
-  `filterPaidOnlyCandidates()`, tako da zabranjeni model nikada ne može biti odabran ni u skup kandidata
-  `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — sam `/v1/models` popis, na istih 5 točaka prigušenja po izvoru `shouldHidePaid()` već ulazi (statički `PROVIDER_MODELS`, redovi sinkroniziranih pružatelja usluga, prilagođeni redovi, redovi podržani aliasima, reci upravljanih zamjenskih izvora).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — pozvan iz `virtualFactory.ts::buildPreparedPool`, odmah nakon ekvivalentnog `filterPaidOnlyCandidates()` poziva, tako da odbijeni model nikada ne može biti odabran ni u skup `auto/*` kandidata.
 
-## Što se NE filtrira
+## Što je NOT filtrirano
 
-Odražava postojeće ponašanje postavke `hideAutoCombos`: ID modela poslan **izričito** (ne putem `auto/*`
-i ne otkriven putem popisa kataloga) nikada se ne blokira pri otpremi — filtriraju se samo
-oglašavanje i članstvo u skupu kandidata. To je neovisno o postavci `hidePaidModels`;
-operator može željeti prilagođen skup iz razloga koji nemaju veze s troškovima, pa se obje
-postavke kombiniraju kao neovisni filtri povezani logičkim I, kao i postojeća kombinacija više zastavica u
-`catalog.ts`.
+Zrcali `hideAutoCombos`-ovo postojeće ponašanje: ID modela je poslan** eksplicitno** (ne putem `auto/*`-a i nije otkriveno kroz popis u katalogu) nikad se ne blokira pri slanju — filtrira se samo advertisement/candidate-pool članstvo. Ovo je neovisno o `hidePaidModels`; operater može htjeti odabrani skup iz razloga koji nemaju nikakve veze s cijenom, tako da se obje postavke sastavljaju kao nezavisni AND-ed filtri, isto kao i postojeći sastav s više oznaka u `catalog.ts`.
 
-Izvoz postavki (`GET /api/settings/export-json`) uključuje oba polja neizmijenjena, kao i svako drugo
-polje postavki — za razliku od filtra za izvoz koraka kombinacije postavke `hidePaidModels`, ovdje ne postoji rizik
-ponovnog učitavanja: zabranjeni ID ugrađen u izvezeni korak kombinacije predstavlja operatorov vlastiti izričiti odabir usmjeravanja,
-a ne nešto što granica izvoza treba ukloniti.
+Izvoz postavki (`GET /api/settings/export-json`) doslovno uključuje oba niza, kao i svako drugo polje postavki — za razliku od `hidePaidModels`-ovog filtra za izvoz kombiniranih koraka, ovdje nema rizika od ponovne hidracije: odbijeni ID ugrađen u izvezeni kombinirani korak operatorov je eksplicitni izbor usmjeravanja, a ne nešto što granica izvoza treba ukloniti.
+
+## Popis samo za kombinacije (`exposeCombosOnly`)
+
+Zasebni Booleov, također opt-in i `false` prema zadanim postavkama, za implementacije gdje su kombinacije javna površina modela, a pružatelji samo pozadina. Kada je `true`, javni popis (`GET /v1/models`, `GET /v1` i druge `/v1` rute otkrivanja izgrađene na `getUnifiedModelsResponse()`) zadržava samo retke sa `owned_by: "combo"`: korisničkim kombinacijama plus ugrađenim `auto/*` kombinacijama (osim ako ih `hideAutoCombos` ne skriva). Koristi isti test retka kao `catalogScope: "combos"` po ključu, a vlastiti allow/deny/scope filtri ključa i dalje se primjenjuju na vrhu.
+
+Uključite ga** Postavke → Usmjeravanje → Modeli API popis** , ili sa `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Kao i gornji popisi, mijenja samo oglas:
+
+- eksplicitni `provider/model` id i dalje se šalje, a `GET /v1/models/{id}` ga i dalje rješava;
+- katalog nadzorne ploče (`GET /api/models/catalog`, koji koriste birači modela) nije sužen;
+- ne zrcali se u skupove `auto/*` kandidata, tako da `auto/*` kombinacije zadržavaju svoj puni skup.

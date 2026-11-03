@@ -1,6 +1,6 @@
 # RTK Compression (Latviešu)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -27,24 +27,24 @@ Secīgi:           1 - (1 - 0.80) * (1 - 0.46) = ietaupīti 89.2%
 Diapazons:        1 - (1 - 0.60..0.90) * (1 - 0.46) = ietaupīti 78.4-94.6%
 ```
 
-## Ko tas saspiež
+## Ko Tas Saspiež
 
-Iebūvētajā katalogā pašlaik ir iekļauti 49 filtri šādās kategorijās:
+Iebūvētais katalogs pašlaik ietver 56 filtrus šādās kategorijās:
 
-| Kategorija | Piemēri                                                       |
-| ---------- | ------------------------------------------------------------- |
-| `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, Playwright, Go testi, Cargo testi       |
-| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, vispārīgi čaulas žurnāli                |
-| `docker`   | `docker ps`, Docker žurnāli                                   |
-| `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON izvade, steka izsekojumi, vispārīga izvades atkāpe       |
+| Kategorija | Piemēri                                                           |
+| ---------- | ----------------------------------------------------------------- |
+| `git`      | `git status`, `git branch`, `git diff`, `git log`                 |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testi        |
+| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
+| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
+| `shell`    | `ls`, `find`, `grep`, vispārīgi čaulas žurnāli                    |
+| `docker`   | `docker ps`, Docker žurnāli                                       |
+| `infra`    | Terraform, OpenTofu, `systemctl status`                           |
+| `generic`  | JSON izvade, steka trasējumi, vispārīgs izvades rezerves variants |
 
 Detektors failā `open-sse/services/compression/engines/rtk/commandDetector.ts` klasificē izvadi
-pirms filtra izvēles. Filtri var arī nodrošināt atbilstību pēc komandas parauga vai izvades regulārās izteiksmes, ja ar komandas
-klasi nepietiek.
+pirms filtru izvēles. Filtri var tikt saskaņoti arī pēc komandas šablona vai izvades regulārās
+izteiksmes, ja komandas klase vien nepietiek.
 
 ## Filtru noteikšana
 
@@ -352,15 +352,15 @@ node --import tsx/esm --test \
 
 ## Intensitātes līmeņi (v3.8.16+)
 
-RTK atbalsta **3 intensitātes līmeņus**, kas nodrošina kompromisu starp **saspiešanas agresivitāti** un **drošību**. Līmenis tiek iestatīts, izmantojot `config.intensity` dzinēja konfigurācijā.
+RTK atbalsta **3 intensitātes līmeņus**, kas līdzsvaro **kompresijas agresivitāti** un **drošību**. Līmenis tiek iestatīts ar `config.intensity` dzinēja konfigurācijā.
 
 ### 3 līmeņi
 
-| Līmenis                  | Saīsināšanas slieksnis | Pilnvarvienību ietaupījums | Risks     | Vispiemērotākais                          |
-| ------------------------ | ---------------------- | -------------------------- | --------- | ----------------------------------------- |
-| `minimal`                | 24 rindas katrā sadaļā | ~20-40%                    | Ļoti zems | Produkcijai ar kritiski svarīgu kontekstu |
-| `standard` (noklusējums) | 24 rindas katrā sadaļā | ~50-70%                    | Zems      | Ikdienas programmēšanas sesijām           |
-| `aggressive`             | 16 rindas katrā sadaļā | ~70-90%                    | Vidējs    | Ilgām sesijām, maksimālam ietaupījumam    |
+| Līmenis                  | Saīsināšanas slieksnis | Tokenu ietaupījums | Risks     | Vislabāk piemērots               |
+| ------------------------ | ---------------------- | ------------------ | --------- | -------------------------------- |
+| `minimal`                | 24 rindas sadaļā       | ~20-40%            | Ļoti zems | Produkcija ar kritisku kontekstu |
+| `standard` (noklusējums) | 24 rindas sadaļā       | ~50-70%            | Zems      | Ikdienas kodēšanas sesijas       |
+| `aggressive`             | 16 rindas sadaļā       | ~70-90%            | Vidējs    | Garas sesijas, maks. ietaupījums |
 
 ### Kur notiek saīsināšana
 
@@ -372,40 +372,40 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tiek saglabāts gan katras sadaļas **sākums**, gan **beigas**; kad tiek aktivizēta saīsināšana, vidusdaļas saturs tiek atmests.
+Tiek saglabātas gan katras sadaļas **sākums**, gan **beigas**; vidējā daļa tiek atmesta, kad iestājas saīsināšana.
 
-### Kas tiek saglabāts un kas tiek nogriezts
+### Kas paliek un kas tiek izgriezts
 
-| Saturs                                   | minimal       | standard      | aggressive    |
-| ---------------------------------------- | ------------- | ------------- | ------------- |
-| Kļūdas / steka trasējumi                 | ✅ saglabāti  | ✅ saglabāti  | ✅ saglabāti  |
-| Testu kļūmes                             | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
-| Būvējuma kļūdas                          | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
-| Veiksmīgi testi (detalizēti)             | ✅ saglabāti  | 🟡 sakļauti   | 🟡 sakļauti   |
-| Ikdienišķa izvade (informācijas žurnāli) | 🟡 sakļauta   | 🟡 sakļauta   | ❌ atmesta    |
-| Progresa joslas                          | 🟡 sakļautas  | ❌ atmestas   | ❌ atmestas   |
-| Reklāmkarogs / ASCII māksla              | 🟡 sakļauti   | ❌ atmesti    | ❌ atmesti    |
+| Saturs                        | minimal       | standard      | aggressive    |
+| ----------------------------- | ------------- | ------------- | ------------- |
+| Kļūdas / steka trasējumi      | ✅ saglabāti  | ✅ saglabāti  | ✅ saglabāti  |
+| Testu neveiksmes              | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
+| Būvēšanas kļūdas              | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
+| Veiksmīgie testi (detalizēti) | ✅ saglabāti  | 🟡 sakļauti   | 🟡 sakļauti   |
+| Rutīnas izvade (info žurnāli) | 🟡 sakļauta   | 🟡 sakļauta   | ❌ atmesta    |
+| Progresa joslas               | 🟡 sakļautas  | ❌ atmestas   | ❌ atmestas   |
+| Baneris / ASCII māksla        | 🟡 sakļauts   | ❌ atmests    | ❌ atmests    |
 
-### Piemērotās intensitātes izvēle
+### Pareizās intensitātes izvēle
 
 ```
-                  Vai konteksta zaudēšana būtu katastrofāla?
+              Vai konteksta zudums būtu katastrofāls?
                   │
-      ┌───────────┼───────────┐
-      │           │           │
-     JĀ          NĒ        NAV SKAIDRS
-      │           │           │
-      ▼           │           │
-   minimal        │           │
-      │           │           │
-      │           ▼           ▼
-      │      Cik kritiski    Vispirms izmēģiniet `standard`
-      │      svarīga ir      (darbojas 80% gadījumu)
-      │      caurlaidspēja?
+      ┌───────────┼────────────┐
+      │           │            │
+     JĀ          NĒ       NAV SKAIDRS
+      │           │            │
+      ▼           │            │
+   minimal        │            │
+      │           │            │
+      │           ▼            ▼
+      │      Cik kritiska    Vispirms izmēģiniet
+      │      ir caurlaid-    `standard`
+      │      spēja?          (der 80% gadījumu)
       │           │
       │      ┌────┴────┐
       │      │         │
-      │     ZEMA      AUGSTA
+      │    ZEMA      AUGSTA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -415,7 +415,7 @@ Tiek saglabāts gan katras sadaļas **sākums**, gan **beigas**; kad tiek aktivi
 
 ### Intensitātes konfigurēšana
 
-**Katrai kombinācijai** (kombinācijas konfigurācijā):
+**Katram combo** (combo konfigurācijā):
 
 ```json
 {
@@ -431,8 +431,8 @@ Tiek saglabāts gan katras sadaļas **sākums**, gan **beigas**; kad tiek aktivi
 **Programmatiski**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ir
-`CompressionEngine`, un tam nav `updateConfig` metodes. Tā vietā atjauniniet dzinēja konfigurāciju,
-izmantojot reģistra palīgfunkciju:
+`CompressionEngine`, un tam nav `updateConfig` metodes. Tā vietā atjauniniet
+dzinēja konfigurāciju, izmantojot reģistra palīgfunkciju:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -440,16 +440,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Ietekmes pārbaude
+### Efekta pārbaude
 
-Izmantojiet **verifikācijas vārteju** (skatiet tālāk), lai apstiprinātu, ka filtrs ir drošs izvēlētajā intensitātē:
+Izmantojiet **Verify Gate** (skatīt tālāk), lai pārliecinātos, ka filtrs ir drošs pie jūsu izvēlētās intensitātes:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtri neizturēja pārbaudi agresīvajā intensitātē");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

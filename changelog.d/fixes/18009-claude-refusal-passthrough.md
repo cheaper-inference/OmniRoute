@@ -1,0 +1,1 @@
+- **fix(stream):** Claude refusals reach the client — a turn that ends with `stop_reason: "refusal"` and no content is no longer rewritten into a retried 502 "empty content" error, so the client sees the refusal and its `stop_details` on both streaming and non-streaming requests (#18009).

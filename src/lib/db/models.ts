@@ -7,6 +7,7 @@
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
 
 import { getDbInstance } from "./core";
+import { isSyncedAtFresh } from "./models/syncedCatalogFreshness";
 import { getProviderConnectionsCount, touchConnectionSyncedModelsAt } from "./providers";
 import { type JsonRecord, getKeyValue } from "./models/shared";
 import {
@@ -15,7 +16,7 @@ import {
   type SyncedAvailableModelInput,
 } from "./models/synced";
 import {
-  deleteSyncedAvailableModelsForProvider,
+  deleteSyncedAvailableModelsForProvider as deleteSyncedAvailableModelsForProviderInternal,
   finishSyncedAvailableModelsWrite,
   persistCanonicalSyncedAvailableModels,
 } from "./models/syncedAvailableModelPersistence";
@@ -52,18 +53,42 @@ export {
   setModelAlias,
   deleteModelAlias,
   deleteModelAliasesForProvider,
+  getManagedModelAliasNames,
+  markManagedModelAlias,
+  unmarkManagedModelAlias,
 } from "./models/aliases";
 export { getMitmAlias, setMitmAliasAll } from "./models/mitmAlias";
 export type { SyncedAvailableModel } from "./models/synced";
 export {
   getCustomModelVisionOverride,
   listCustomModelVisionOverrides,
+  buildCustomModelVisionOverrides,
+  readCustomModelsByProvider,
+  type CustomModelsByProvider,
   type CustomModelVisionOverrideMap,
   type CustomModelVisionDatabase,
   type CustomModelVisionOverrideReadOptions,
 } from "./models/customVisionOverride";
+export {
+  getSyncedAvailableModelVision,
+  listSyncedAvailableModelVision,
+  type SyncedAvailableModelVisionMap,
+  type SyncedAvailableModelVisionDatabase,
+  type SyncedAvailableModelVisionReadOptions,
+} from "./models/syncedAvailableModelVision";
 
 // ──────────────── Custom Models ────────────────
+
+function notifyQuotaCombosForProvider(providerId: string): void {
+  void (async () => {
+    try {
+      const { syncQuotaCombosForProvider } = await import("./quotaPools");
+      await syncQuotaCombosForProvider(providerId);
+    } catch {
+      // Non-fatal: quota combo sync errors should not break model operations
+    }
+  })();
+}
 
 export async function getCustomModels(providerId?: string) {
   const db = getDbInstance();
@@ -134,6 +159,7 @@ export async function addCustomModel(
     dimensions?: number;
     supportedInputTypes?: string[];
     modelType?: "chat" | "embedding" | "image" | "rerank";
+    endpointCapabilitySource?: "declared" | "inferred" | "defaulted" | "operator";
   }
 ) {
   const db = getDbInstance();
@@ -152,6 +178,8 @@ export async function addCustomModel(
     source,
     apiFormat,
     supportedEndpoints,
+    endpointCapabilitySource:
+      extraMeta?.endpointCapabilitySource || (source === "manual" ? "operator" : "defaulted"),
     ...(targetFormat ? { targetFormat } : {}),
     ...(tokenLimits.inputTokenLimit != null
       ? { inputTokenLimit: tokenLimits.inputTokenLimit }
@@ -175,6 +203,7 @@ export async function addCustomModel(
     "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('customModels', ?, ?)"
   ).run(providerId, JSON.stringify(models));
   finishModelCatalogWriteWithBackup();
+  notifyQuotaCombosForProvider(providerId);
   return model;
 }
 
@@ -233,7 +262,16 @@ export async function replaceCustomModels(
       name: m.name || m.id,
       source: m.source || "auto-sync",
       apiFormat: m.apiFormat || (prev as any)?.apiFormat || "chat-completions",
-      supportedEndpoints: m.supportedEndpoints || (prev as any)?.supportedEndpoints || ["chat"],
+      supportedEndpoints:
+        (prev as any)?.endpointCapabilitySource === "operator"
+          ? (prev as any).supportedEndpoints
+          : m.supportedEndpoints || (prev as any)?.supportedEndpoints || ["chat"],
+      endpointCapabilitySource:
+        (prev as any)?.endpointCapabilitySource === "operator"
+          ? "operator"
+          : (m as any).endpointCapabilitySource ||
+            (prev as any)?.endpointCapabilitySource ||
+            "defaulted",
       // #2905: preserve a per-model targetFormat override (new value wins, else prev).
       ...(m.targetFormat
         ? { targetFormat: m.targetFormat }
@@ -295,6 +333,7 @@ export async function replaceCustomModels(
   }
 
   finishModelCatalogWriteWithBackup();
+  notifyQuotaCombosForProvider(providerId);
   return merged;
 }
 
@@ -338,6 +377,7 @@ export async function deleteImportedCustomModels(providerId: string): Promise<st
   );
   for (const modelId of removedIds) removeModelCompatOverride(providerId, modelId);
   finishModelCatalogWriteWithBackup();
+  notifyQuotaCombosForProvider(providerId);
   return removedIds;
 }
 
@@ -369,17 +409,11 @@ export async function removeCustomModel(providerId: string, modelId: string) {
 
   removeModelCompatOverride(providerId, modelId);
   finishModelCatalogWriteWithBackup();
+  notifyQuotaCombosForProvider(providerId);
   return true;
 }
 
-// ──────────────── Synced Available Models ────────────────
-// Storage: namespace = 'syncedAvailableModels', key = '<providerId>:<connectionId>'
-// Each connection stores its own model list. Reads union across all connections
-// for a provider. Deleting a connection removes only its models.
-
-/**
- * Get synced available models for a specific provider connection.
- */
+// syncedAvailableModels keys are `<providerId>:<connectionId>`.
 export async function getSyncedAvailableModelsForConnection(
   providerId: string,
   connectionId: string
@@ -399,9 +433,20 @@ export async function getSyncedAvailableModelsForConnection(
   }
 }
 
-/**
- * Get all synced available models for a provider, unioned across all connections.
- */
+/** Read only the active selected Antigravity account's fresh catalog, never its siblings. */
+export async function getFreshAntigravityModelsForConnection(
+  connectionId: string
+): Promise<SyncedAvailableModel[]> {
+  const row = getDbInstance()
+    .prepare(
+      `SELECT provider, synced_models_at AS syncedModelsAt FROM provider_connections
+       WHERE id = ? AND is_active = 1 AND provider IN ('antigravity', 'agy')`
+    )
+    .get(connectionId) as { provider: string; syncedModelsAt: string | null } | undefined;
+  if (!row || !isSyncedAtFresh(row.syncedModelsAt)) return [];
+  return getSyncedAvailableModelsForConnection(row.provider, connectionId);
+}
+
 export async function getSyncedAvailableModels(
   providerId: string
 ): Promise<SyncedAvailableModel[]> {
@@ -421,6 +466,28 @@ export async function getSyncedAvailableModels(
     }
   }
   return Array.from(map.values());
+}
+
+/** OpenCode and OpenCode Zen synced ids. Excludes opencode-go (`opencode%` would match it). */
+export function readSyncedOpencodeFamilyModelIds(): Set<string> {
+  const ids = new Set<string>();
+  const rows = getDbInstance()
+    .prepare(
+      "SELECT value FROM key_value WHERE namespace = 'syncedAvailableModels' AND (key LIKE ? OR key LIKE ?)"
+    )
+    .all("opencode:%", "opencode-zen:%");
+  for (const row of rows) {
+    const { value } = getKeyValue(row);
+    if (!value) continue;
+    try {
+      for (const model of normalizeSyncedAvailableModels(JSON.parse(value))) {
+        if (model.id) ids.add(model.id);
+      }
+    } catch {
+      // A malformed blob must not sink the rest of the catalog.
+    }
+  }
+  return ids;
 }
 
 export const SYNCED_AVAILABLE_MODELS_MALFORMED = Symbol("syncedAvailableModelsMalformed");
@@ -460,9 +527,6 @@ export async function getSyncedAvailableModelsByConnection(
   return result;
 }
 
-/**
- * Get all synced available models across all providers.
- */
 export async function getAllSyncedAvailableModels(): Promise<
   Record<string, SyncedAvailableModel[]>
 > {
@@ -549,6 +613,7 @@ export async function replaceSyncedAvailableModelsForConnection(
   const key = `${providerId}:${connectionId}`;
   const normalizedModels = normalizeSyncedAvailableModels(models, providerId);
   persistCanonicalSyncedAvailableModels(key, normalizedModels, normalizeSyncedAvailableModels);
+  notifyQuotaCombosForProvider(providerId);
   // #12849: stamp the sync time on every successful sync — even a re-sync that
   // returns an unchanged list proves the catalog is still current, so staleness
   // gating in getActiveSyncedCatalog must not treat it as aging regardless.
@@ -605,14 +670,13 @@ export async function removeSyncedAvailableModel(
   });
 
   removeModel();
-  if (removedAny) finishSyncedAvailableModelsWrite();
+  if (removedAny) {
+    finishSyncedAvailableModelsWrite();
+    notifyQuotaCombosForProvider(providerId);
+  }
   return removedAny;
 }
 
-/**
- * Delete all synced models for a specific connection.
- * Returns the remaining unioned list for the provider.
- */
 export async function deleteSyncedAvailableModelsForConnection(
   providerId: string,
   connectionId: string
@@ -622,7 +686,10 @@ export async function deleteSyncedAvailableModelsForConnection(
   const result = db
     .prepare("DELETE FROM key_value WHERE namespace = 'syncedAvailableModels' AND key = ?")
     .run(key);
-  if (result.changes > 0) finishSyncedAvailableModelsWrite();
+  if (result.changes > 0) {
+    finishSyncedAvailableModelsWrite();
+    notifyQuotaCombosForProvider(providerId);
+  }
   return getSyncedAvailableModels(providerId);
 }
 
@@ -649,12 +716,13 @@ export async function cleanupProviderModelsAfterConnectionDelete(
   return { remainingConnections, removedImportedModelIds, remainingSyncedModels };
 }
 
-export { deleteSyncedAvailableModelsForProvider };
+export async function deleteSyncedAvailableModelsForProvider(providerId: string): Promise<number> {
+  const changes = await deleteSyncedAvailableModelsForProviderInternal(providerId);
+  if (changes > 0) notifyQuotaCombosForProvider(providerId);
+  return changes;
+}
 
-/**
- * Prune stale synced available models for a provider, keeping only the specified allowed connection IDs.
- * Returns the number of keys deleted.
- */
+/** Prune synced rows whose connection id is not in `allowedConnectionIds`. Returns keys deleted. */
 export async function pruneStaleSyncedAvailableModelsForProvider(
   providerId: string,
   allowedConnectionIds: string[]
@@ -672,7 +740,10 @@ export async function pruneStaleSyncedAvailableModelsForProvider(
     )
     .run(`${keyPrefix}%`, ...allowedKeys);
   const changes = Number(result.changes || 0);
-  if (changes > 0) finishSyncedAvailableModelsWrite();
+  if (changes > 0) {
+    finishSyncedAvailableModelsWrite();
+    notifyQuotaCombosForProvider(providerId);
+  }
   return changes;
 }
 
@@ -720,13 +791,20 @@ export async function updateCustomModel(
     // llama.cpp connection's auto-discovered embedding model had no way to be
     // marked "supports embeddings" because it had never been explicitly
     // imported as a custom model first.
-    models.push({
-      id: modelId,
-      name: modelId,
-      source: "manual",
-      apiFormat: "chat-completions",
-      supportedEndpoints: ["chat"],
-    });
+    // Endpoint-only edits are virtual overlays, not manually declared chat
+    // models. Do not persist guessed name/apiFormat fields: doing so would
+    // overwrite the real synced metadata when catalog rows are merged.
+    if (Object.keys(updates).length === 1 && "supportedEndpoints" in updates) {
+      models.push({ id: modelId, source: "endpoint-override" });
+    } else {
+      models.push({
+        id: modelId,
+        name: modelId,
+        source: "manual",
+        apiFormat: "chat-completions",
+        supportedEndpoints: ["chat"],
+      });
+    }
     index = models.length - 1;
   }
 
@@ -766,6 +844,9 @@ export async function updateCustomModel(
   // id-based heuristic in getCustomVisionCapabilityFields().
   applyTriStateBooleanOverride(next, updates, "supportsVision");
   applyTriStateBooleanOverride(next, updates, "isFree");
+  if (updates.supportedEndpoints !== undefined) {
+    next.endpointCapabilitySource = "operator";
+  }
   if (updates.compatByProtocol !== undefined) {
     if (mergedCompat && compatByProtocolHasEntries(mergedCompat)) {
       next.compatByProtocol = mergedCompat;
@@ -808,6 +889,46 @@ export async function updateCustomModel(
 
   finishModelCatalogWriteWithBackup();
   return next;
+}
+
+/**
+ * Reset ONLY endpoint tags to the latest discovered catalog. This deliberately
+ * preserves visibility, aliases, output limits and other operator settings.
+ * The row created solely for endpoint editing is removed entirely.
+ */
+export async function resetModelEndpointOverride(
+  providerId: string,
+  modelId: string
+): Promise<boolean> {
+  const db = getDbInstance();
+  const rows = await getCustomModels(providerId);
+  if (!Array.isArray(rows)) return false;
+  const index = rows.findIndex((row) => row.id === modelId);
+  if (index < 0 || rows[index].endpointCapabilitySource !== "operator") return false;
+  const discovered = (await getSyncedAvailableModels(providerId)).find((m) => m.id === modelId);
+  if (!discovered) return false;
+
+  if (rows[index].source === "endpoint-override") {
+    rows.splice(index, 1);
+  } else {
+    rows[index] = {
+      ...rows[index],
+      supportedEndpoints: discovered.supportedEndpoints || ["chat"],
+      endpointCapabilitySource: discovered.endpointCapabilitySource || "defaulted",
+    };
+  }
+  if (rows.length === 0) {
+    db.prepare("DELETE FROM key_value WHERE namespace = 'customModels' AND key = ?").run(
+      providerId
+    );
+  } else {
+    db.prepare(
+      "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('customModels', ?, ?)"
+    ).run(providerId, JSON.stringify(rows));
+  }
+  finishModelCatalogWriteWithBackup();
+  notifyQuotaCombosForProvider(providerId);
+  return true;
 }
 
 /** Single custom model row from key_value customModels, or null */

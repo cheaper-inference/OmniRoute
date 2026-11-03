@@ -1,6 +1,6 @@
 # Providers — ChatGPT Web (Codex) (Ελληνικά)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../providers/CHATGPT_WEB.md) · 🇪🇹 [am](../../../am/docs/providers/CHATGPT_WEB.md) · 🇸🇦 [ar](../../../ar/docs/providers/CHATGPT_WEB.md) · 🇦🇿 [az](../../../az/docs/providers/CHATGPT_WEB.md) · 🇧🇬 [bg](../../../bg/docs/providers/CHATGPT_WEB.md) · 🇧🇩 [bn](../../../bn/docs/providers/CHATGPT_WEB.md) · 🇨🇿 [cs](../../../cs/docs/providers/CHATGPT_WEB.md) · 🇩🇰 [da](../../../da/docs/providers/CHATGPT_WEB.md) · 🇩🇪 [de](../../../de/docs/providers/CHATGPT_WEB.md) · 🇪🇸 [es](../../../es/docs/providers/CHATGPT_WEB.md) · 🇪🇪 [et](../../../et/docs/providers/CHATGPT_WEB.md) · 🇮🇷 [fa](../../../fa/docs/providers/CHATGPT_WEB.md) · 🇫🇮 [fi](../../../fi/docs/providers/CHATGPT_WEB.md) · 🇫🇷 [fr](../../../fr/docs/providers/CHATGPT_WEB.md) · 🇮🇪 [ga](../../../ga/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [gu](../../../gu/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ha](../../../ha/docs/providers/CHATGPT_WEB.md) · 🇮🇱 [he](../../../he/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [hi](../../../hi/docs/providers/CHATGPT_WEB.md) · 🇭🇷 [hr](../../../hr/docs/providers/CHATGPT_WEB.md) · 🇭🇺 [hu](../../../hu/docs/providers/CHATGPT_WEB.md) · 🇦🇲 [hy](../../../hy/docs/providers/CHATGPT_WEB.md) · 🇮🇩 [id](../../../id/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ig](../../../ig/docs/providers/CHATGPT_WEB.md) · 🇮🇹 [it](../../../it/docs/providers/CHATGPT_WEB.md) · 🇯🇵 [ja](../../../ja/docs/providers/CHATGPT_WEB.md) · 🇬🇪 [ka](../../../ka/docs/providers/CHATGPT_WEB.md) · 🇰🇭 [km](../../../km/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [kn](../../../kn/docs/providers/CHATGPT_WEB.md) · 🇰🇷 [ko](../../../ko/docs/providers/CHATGPT_WEB.md) · 🇱🇹 [lt](../../../lt/docs/providers/CHATGPT_WEB.md) · 🇱🇻 [lv](../../../lv/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ml](../../../ml/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [mr](../../../mr/docs/providers/CHATGPT_WEB.md) · 🇲🇾 [ms](../../../ms/docs/providers/CHATGPT_WEB.md) · 🇲🇹 [mt](../../../mt/docs/providers/CHATGPT_WEB.md) · 🇲🇲 [my](../../../my/docs/providers/CHATGPT_WEB.md) · 🇳🇵 [ne](../../../ne/docs/providers/CHATGPT_WEB.md) · 🇳🇱 [nl](../../../nl/docs/providers/CHATGPT_WEB.md) · 🇳🇴 [no](../../../no/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [or](../../../or/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [pa](../../../pa/docs/providers/CHATGPT_WEB.md) · 🇵🇭 [phi](../../../phi/docs/providers/CHATGPT_WEB.md) · 🇵🇱 [pl](../../../pl/docs/providers/CHATGPT_WEB.md) · 🇵🇹 [pt](../../../pt/docs/providers/CHATGPT_WEB.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/providers/CHATGPT_WEB.md) · 🇷🇴 [ro](../../../ro/docs/providers/CHATGPT_WEB.md) · 🇷🇺 [ru](../../../ru/docs/providers/CHATGPT_WEB.md) · 🇱🇰 [si](../../../si/docs/providers/CHATGPT_WEB.md) · 🇸🇰 [sk](../../../sk/docs/providers/CHATGPT_WEB.md) · 🇸🇮 [sl](../../../sl/docs/providers/CHATGPT_WEB.md) · 🇷🇸 [sr](../../../sr/docs/providers/CHATGPT_WEB.md) · 🇸🇪 [sv](../../../sv/docs/providers/CHATGPT_WEB.md) · 🇰🇪 [sw](../../../sw/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ta](../../../ta/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [te](../../../te/docs/providers/CHATGPT_WEB.md) · 🇹🇭 [th](../../../th/docs/providers/CHATGPT_WEB.md) · 🇹🇷 [tr](../../../tr/docs/providers/CHATGPT_WEB.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/providers/CHATGPT_WEB.md) · 🇵🇰 [ur](../../../ur/docs/providers/CHATGPT_WEB.md) · 🇺🇿 [uz](../../../uz/docs/providers/CHATGPT_WEB.md) · 🇻🇳 [vi](../../../vi/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [yo](../../../yo/docs/providers/CHATGPT_WEB.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/providers/CHATGPT_WEB.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/providers/CHATGPT_WEB.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../providers/CHATGPT_WEB.md) · 🇪🇹 [am](../../../am/docs/providers/CHATGPT_WEB.md) · 🇸🇦 [ar](../../../ar/docs/providers/CHATGPT_WEB.md) · 🇦🇿 [az](../../../az/docs/providers/CHATGPT_WEB.md) · 🇧🇬 [bg](../../../bg/docs/providers/CHATGPT_WEB.md) · 🇧🇩 [bn](../../../bn/docs/providers/CHATGPT_WEB.md) · 🇧🇦 [bs](../../../bs/docs/providers/CHATGPT_WEB.md) · 🇨🇿 [cs](../../../cs/docs/providers/CHATGPT_WEB.md) · 🇩🇰 [da](../../../da/docs/providers/CHATGPT_WEB.md) · 🇩🇪 [de](../../../de/docs/providers/CHATGPT_WEB.md) · 🇪🇸 [es](../../../es/docs/providers/CHATGPT_WEB.md) · 🇪🇪 [et](../../../et/docs/providers/CHATGPT_WEB.md) · 🇮🇷 [fa](../../../fa/docs/providers/CHATGPT_WEB.md) · 🇫🇮 [fi](../../../fi/docs/providers/CHATGPT_WEB.md) · 🇫🇷 [fr](../../../fr/docs/providers/CHATGPT_WEB.md) · 🇮🇪 [ga](../../../ga/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [gu](../../../gu/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ha](../../../ha/docs/providers/CHATGPT_WEB.md) · 🇮🇱 [he](../../../he/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [hi](../../../hi/docs/providers/CHATGPT_WEB.md) · 🇭🇷 [hr](../../../hr/docs/providers/CHATGPT_WEB.md) · 🇭🇺 [hu](../../../hu/docs/providers/CHATGPT_WEB.md) · 🇦🇲 [hy](../../../hy/docs/providers/CHATGPT_WEB.md) · 🇮🇩 [id](../../../id/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [ig](../../../ig/docs/providers/CHATGPT_WEB.md) · 🇮🇹 [it](../../../it/docs/providers/CHATGPT_WEB.md) · 🇯🇵 [ja](../../../ja/docs/providers/CHATGPT_WEB.md) · 🇬🇪 [ka](../../../ka/docs/providers/CHATGPT_WEB.md) · 🇰🇭 [km](../../../km/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [kn](../../../kn/docs/providers/CHATGPT_WEB.md) · 🇰🇷 [ko](../../../ko/docs/providers/CHATGPT_WEB.md) · 🇱🇹 [lt](../../../lt/docs/providers/CHATGPT_WEB.md) · 🇱🇻 [lv](../../../lv/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ml](../../../ml/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [mr](../../../mr/docs/providers/CHATGPT_WEB.md) · 🇲🇾 [ms](../../../ms/docs/providers/CHATGPT_WEB.md) · 🇲🇹 [mt](../../../mt/docs/providers/CHATGPT_WEB.md) · 🇲🇲 [my](../../../my/docs/providers/CHATGPT_WEB.md) · 🇳🇵 [ne](../../../ne/docs/providers/CHATGPT_WEB.md) · 🇳🇱 [nl](../../../nl/docs/providers/CHATGPT_WEB.md) · 🇳🇴 [no](../../../no/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [or](../../../or/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [pa](../../../pa/docs/providers/CHATGPT_WEB.md) · 🇵🇭 [phi](../../../phi/docs/providers/CHATGPT_WEB.md) · 🇵🇱 [pl](../../../pl/docs/providers/CHATGPT_WEB.md) · 🇵🇹 [pt](../../../pt/docs/providers/CHATGPT_WEB.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/providers/CHATGPT_WEB.md) · 🇷🇴 [ro](../../../ro/docs/providers/CHATGPT_WEB.md) · 🇷🇺 [ru](../../../ru/docs/providers/CHATGPT_WEB.md) · 🇱🇰 [si](../../../si/docs/providers/CHATGPT_WEB.md) · 🇸🇰 [sk](../../../sk/docs/providers/CHATGPT_WEB.md) · 🇸🇮 [sl](../../../sl/docs/providers/CHATGPT_WEB.md) · 🇷🇸 [sr](../../../sr/docs/providers/CHATGPT_WEB.md) · 🇸🇪 [sv](../../../sv/docs/providers/CHATGPT_WEB.md) · 🇰🇪 [sw](../../../sw/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [ta](../../../ta/docs/providers/CHATGPT_WEB.md) · 🇮🇳 [te](../../../te/docs/providers/CHATGPT_WEB.md) · 🇹🇭 [th](../../../th/docs/providers/CHATGPT_WEB.md) · 🇹🇷 [tr](../../../tr/docs/providers/CHATGPT_WEB.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/providers/CHATGPT_WEB.md) · 🇵🇰 [ur](../../../ur/docs/providers/CHATGPT_WEB.md) · 🇺🇿 [uz](../../../uz/docs/providers/CHATGPT_WEB.md) · 🇻🇳 [vi](../../../vi/docs/providers/CHATGPT_WEB.md) · 🇳🇬 [yo](../../../yo/docs/providers/CHATGPT_WEB.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/providers/CHATGPT_WEB.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/providers/CHATGPT_WEB.md)
 
 ---
 
@@ -33,26 +33,16 @@
 Η διοχέτευση απαιτείται μόνο για κύκλους αλληλεπίδρασης με εργαλεία. Κάθε αναφερόμενη διαδρομή, συμπεριλαμβανομένης της `pro`, μπορεί να χρησιμοποιεί την
 ίδια τοπική δυνατότητα εργαλείων που δεσμεύεται ανά κύκλο αλληλεπίδρασης, όταν έχουν διαμορφωθεί η διοχέτευση και ο σύνδεσμος.
 
-## Ρύθμιση μέσω του πίνακα ελέγχου
+## Ρύθμιση πίνακα ελέγχου
 
 1. Ανοίξτε τον πάροχο **ChatGPT Web (Codex)** και προσθέστε μια σύνδεση.
-2. Επικολλήστε την πλήρη κεφαλίδα Cookie του ChatGPT, το αναγνωριστικό διοχέτευσης, το κλειδί χρόνου εκτέλεσης και το όνομα του προσαρμοσμένου συνδέσμου.
-   Οι νέες ρυθμίσεις με δυνατότητα χρήσης εργαλείων πρέπει να χρησιμοποιούν έναν νεοδημιουργημένο σύνδεσμο με το ακριβές όνομα
-   `OmniRoute Codex v2`, με την επιλογή Authentication ορισμένη σε None και την επιλογή Permissions ορισμένη σε Allow all
-   actions.
-3. Εκτελέστε τον έλεγχο σύνδεσης. Το OmniRoute ανοίγει μια Temporary Chat που υποστηρίζεται από πρόγραμμα περιήγησης και εντοπίζει
-   αν τα Sol και Pro είναι διαθέσιμα για τον λογαριασμό.
-4. Αποθηκεύστε τη σύνδεση. Το OmniRoute αντικαθιστά το cookie που επικολλήθηκε με την επαληθευμένη
-   κατάσταση αποθήκευσης Playwright και την αποθηκεύει μαζί με το κλειδί χρόνου εκτέλεσης μέσω της κρυπτογραφημένης
-   αφαίρεσης διαπιστευτηρίων.
+2. Επικολλήστε ολόκληρη την κεφαλίδα Cookie του ChatGPT, το αναγνωριστικό tunnel, το κλειδί runtime και το προσαρμοσμένο όνομα connector. Οι νέες ρυθμίσεις με δυνατότητα χρήσης εργαλείων πρέπει να χρησιμοποιούν έναν νέο connector με όνομα ακριβώς `OmniRoute Codex v2`, με το Authentication ορισμένο σε None και το Permissions ορισμένο σε Allow all actions.
+3. Εκτελέστε τον έλεγχο σύνδεσης. Το OmniRoute ανοίγει μια προσωρινή συνομιλία που υποστηρίζεται από πρόγραμμα περιήγησης και εντοπίζει αν τα Sol και Pro είναι διαθέσιμα για τον λογαριασμό.
+4. Αποθηκεύστε τη σύνδεση. Το OmniRoute αντικαθιστά το cookie που επικολλήθηκε με την επαληθευμένη κατάσταση αποθήκευσης του Playwright και την αποθηκεύει μαζί με το κλειδί runtime μέσω της κρυπτογραφημένης αφαίρεσης διαπιστευτηρίων.
 
-Το ανεπεξέργαστο cookie δεν διατηρείται μετά από επιτυχή αποθήκευση. Όταν λήξει η συνεδρία, ανοίξτε
-τη σύνδεση, επικολλήστε μια νέα πλήρη κεφαλίδα Cookie και εκτελέστε ξανά τον έλεγχο. Η κατάσταση διαγνωστικού ελέγχου
-στο παράθυρο διαλόγου επεξεργασίας αναφέρει ξεχωριστά το πρόγραμμα περιήγησης, την κατάσταση αποθήκευσης, τη σύνδεση, την Temporary Chat, τη διοχέτευση,
-τον σύνδεσμο και την πλήρη αμφίδρομη εκτέλεση εργαλείου.
+Το ανεπεξέργαστο cookie δεν διατηρείται μετά από μια επιτυχημένη αποθήκευση. Όταν λήξει η περίοδος σύνδεσης, ανοίξτε τη σύνδεση, επικολλήστε μια νέα, πλήρη κεφαλίδα Cookie και εκτελέστε ξανά τον έλεγχο. Η κατάσταση διαγνωστικού ελέγχου στο παράθυρο διαλόγου επεξεργασίας αναφέρει ξεχωριστά το πρόγραμμα περιήγησης, την κατάσταση αποθήκευσης, τη σύνδεση στον λογαριασμό, την προσωρινή συνομιλία, το tunnel, τον connector και τη δοκιμή πλήρους διαδρομής του εργαλείου. Για να αυτοματοποιήσετε τις ενημερώσεις των cookie όταν γίνεται εναλλαγή περιόδων σύνδεσης, ανατρέξτε στο συνοδευτικό εργαλείο στην ενότητα [Επέκταση συγχρονισμού περιόδου σύνδεσης προγράμματος περιήγησης](../guides/SESSION-SYNC-EXTENSION.md).
 
-> Μην υποβάλλετε ποτέ σε commit πραγματικό cookie, κλειδί χρόνου εκτέλεσης, κατάσταση αποθήκευσης ή διακριτικό δυνατότητας. Οι τιμές δοκιμών και
-> τεκμηρίωσης πρέπει να είναι πάντοτε σύμβολα κράτησης θέσης.
+> Μην υποβάλλετε ποτέ σε αποθετήριο ένα πραγματικό cookie, κλειδί runtime, κατάσταση αποθήκευσης ή διακριτικό δυνατοτήτων. Οι τιμές δοκιμών και τεκμηρίωσης πρέπει πάντα να είναι σύμβολα κράτησης θέσης.
 
 ## Μοντέλα και συνδυασμοί
 
@@ -129,7 +119,7 @@ VNC μπορεί να χρησιμοποιηθεί για ανάκτηση. Το
 
 ## Επαλήθευση
 
-Εκτελέστε τους ελέγχους παρόχου χωρίς να καλέσετε τον καταργημένο πάροχο:
+Εκτελέστε τους ελέγχους του παρόχου χωρίς να καλέσετε τον παροπλισμένο πάροχο:
 
 ```bash
 node --import tsx/esm --test \\
@@ -138,7 +128,7 @@ node --import tsx/esm --test \\
   tests/unit/chatgpt-web-environment-double-unescape.test.ts
 ```
 
-Οι έλεγχοι παλινδρόμησης για την κατάργηση βρίσκονται στα:
+Οι έλεγχοι προστασίας από παλινδρόμηση του παροπλισμού βρίσκονται στα:
 
 - `tests/unit/chatgpt-web-retirement.test.ts`
 - `tests/unit/chatgpt-web-runtime-block.test.ts`

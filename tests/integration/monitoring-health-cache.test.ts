@@ -3,7 +3,7 @@
  *
  * Health is a frequently-polled endpoint; rebuilding it on the request path
  * (DB reads + status aggregation) starves GET /healthz (#12532). The route
- * caches the payload for HEALTH_PAYLOAD_TTL_MS (1s). After the first fill,
+ * caches the payload for HEALTH_PAYLOAD_TTL_MS (30s). After the first fill,
  * expired entries are served immediately (stale-while-revalidate) and
  * refreshed off the request path. DELETE (circuit-breaker reset) invalidates
  * the cache so the next GET rebuilds. We assert via `timestamp`.
@@ -62,10 +62,56 @@ test("GET within the TTL serves the cached payload (identical timestamp)", async
 
 test("expired cache is served immediately (stale-while-revalidate)", async () => {
   __test_resetMonitoringHealthPayloadCache();
-  const t1 = await healthTimestamp();
-  await new Promise((r) => setTimeout(r, 1100)); // TTL is 1000ms
-  const t2 = await healthTimestamp();
-  assert.equal(t2, t1, "after the 1s TTL the stale cached payload must be returned immediately");
+  const dateNow = Date.now;
+  let now = dateNow();
+  Date.now = () => now;
+  try {
+    const t1 = await healthTimestamp();
+    now += 31_000;
+    const t2 = await healthTimestamp();
+    assert.equal(t2, t1, "an expired payload must be returned while its refresh runs");
+    let refreshed = t2;
+    const deadline = performance.now() + 5_000;
+    while (refreshed === t1 && performance.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      refreshed = await healthTimestamp();
+    }
+    assert.notEqual(refreshed, t1, "the expired payload must refresh in the background");
+  } finally {
+    Date.now = dateNow;
+  }
+});
+
+test("a 15-second dashboard poll stays inside the health payload refresh window", async () => {
+  __test_resetMonitoringHealthPayloadCache();
+  const dateNow = Date.now;
+  let now = dateNow();
+  Date.now = () => now;
+  try {
+    const initial = await healthTimestamp();
+    now += 15_000;
+    await healthTimestamp();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    assert.equal(await healthTimestamp(), initial, "dashboard polling must not rebuild every 15s");
+  } finally {
+    Date.now = dateNow;
+  }
+});
+
+test("concurrent cold-cache GETs share one health payload rebuild", async () => {
+  __test_resetMonitoringHealthPayloadCache();
+  const toISOString = Date.prototype.toISOString;
+  let timestampSequence = 0;
+  Date.prototype.toISOString = function () {
+    return `${toISOString.call(this)}-${++timestampSequence}`;
+  };
+  try {
+    const responses = await Promise.all([GET(authedRequest()), GET(authedRequest())]);
+    const payloads = await Promise.all(responses.map((response) => response.json()));
+    assert.equal(payloads[0].timestamp, payloads[1].timestamp);
+  } finally {
+    Date.prototype.toISOString = toISOString;
+  }
 });
 
 test("DELETE (circuit-breaker reset) invalidates the cache immediately", async () => {

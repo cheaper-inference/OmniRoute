@@ -12,11 +12,7 @@
 
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { listCustomHosts } from "@/lib/db/inspectorCustomHosts";
-import {
-  getHttpProxyHandle,
-  getSystemProxyState,
-  isTlsInterceptEnabled,
-} from "@/lib/inspector/captureState";
+import { getHttpProxyHandle, getSystemProxyState } from "@/lib/inspector/captureState";
 
 export async function GET(): Promise<Response> {
   try {
@@ -38,9 +34,6 @@ export async function GET(): Promise<Response> {
         applied: systemProxy.applied,
         guardUntil: systemProxy.guardUntil,
         port: systemProxy.port,
-      },
-      tlsIntercept: {
-        enabled: isTlsInterceptEnabled(),
       },
     });
   } catch (err) {

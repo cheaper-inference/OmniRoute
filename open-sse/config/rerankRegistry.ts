@@ -1,3 +1,5 @@
+import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+
 /**
  * Rerank Provider Registry
  *
@@ -128,6 +130,16 @@ export const RERANK_PROVIDERS = {
       { id: "Qwen/Qwen3-Reranker-0.6B", name: "Qwen3 Reranker 0.6B" },
     ],
   },
+
+  // NaN.Builders rerank is Cohere-compatible (POST /v1/rerank, {model,query,documents,top_n});
+  // the upstream exposes a single model id, literally "rerank".
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/rerank",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "rerank", name: "NaN Rerank" }],
+  },
 };
 
 const RERANK_PROVIDER_ALIASES = {
@@ -168,7 +180,7 @@ export function getRerankProvider(providerId) {
  * Returns { provider, model }
  */
 export function parseRerankModel(modelStr) {
-  if (!modelStr) return { provider: null, model: null };
+  if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   const slashIdx = modelStr.indexOf("/");
   if (slashIdx > 0) {

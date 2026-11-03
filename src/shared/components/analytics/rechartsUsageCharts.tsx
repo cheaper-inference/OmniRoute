@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import Card from "../Card";
-import { getModelColor } from "@/shared/constants/colors";
+import { CHART_SERIES, getSeriesColor } from "./chartColors";
 import { fmtCompact as fmt, fmtCost } from "@/shared/utils/formatting";
 import { ChartLoadingCard, DarkTooltip, useRecharts } from "./rechartsCore";
 
@@ -67,18 +67,18 @@ function DailyTrendChartBody({ chartData, hasCost }) {
             <YAxis
               yAxisId="cost"
               orientation="right"
-              tick={{ fontSize: 8, fill: "#f59e0b" }}
+              tick={{ fontSize: 8, fill: CHART_SERIES.cost }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `$${v.toFixed(2)}`}
               width={36}
             />
           )}
-          <Tooltip content={<CostTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+          <Tooltip content={<CostTooltip />} cursor={{ fill: "var(--color-surface-2)" }} />
           <Bar
             dataKey={t("chartInput")}
             stackId="a"
-            fill="var(--color-primary)"
+            fill={CHART_SERIES.input}
             opacity={0.7}
             radius={[0, 0, 0, 0]}
             animationDuration={600}
@@ -86,7 +86,7 @@ function DailyTrendChartBody({ chartData, hasCost }) {
           <Bar
             dataKey={t("chartOutput")}
             stackId="a"
-            fill="#10b981"
+            fill={CHART_SERIES.output}
             opacity={0.7}
             radius={[3, 3, 0, 0]}
             animationDuration={600}
@@ -96,7 +96,7 @@ function DailyTrendChartBody({ chartData, hasCost }) {
               yAxisId="cost"
               type="monotone"
               dataKey={t("chartCost")}
-              stroke="#f59e0b"
+              stroke={CHART_SERIES.cost}
               strokeWidth={2}
               dot={false}
               animationDuration={600}
@@ -106,14 +106,14 @@ function DailyTrendChartBody({ chartData, hasCost }) {
       </ResponsiveContainer>
       <div className="flex items-center gap-4 mt-2 text-[10px] text-text-muted">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-primary/70" /> {t("chartInput")}
+          <span className="w-2 h-2 rounded-full bg-chart-1/70" /> {t("chartInput")}
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-500/70" /> {t("chartOutput")}
+          <span className="w-2 h-2 rounded-full bg-chart-4/70" /> {t("chartOutput")}
         </span>
         {hasCost && (
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-amber-500/70" /> {t("chartCost")} ($)
+            <span className="w-2 h-2 rounded-full bg-chart-5/70" /> {t("chartCost")} ($)
           </span>
         )}
       </div>
@@ -135,7 +135,7 @@ function CostTooltip({
   const t = useTranslations("analytics");
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-white/10 bg-surface px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg border border-border bg-surface px-3 py-2 text-xs shadow-lg">
       {label && <div className="font-semibold text-text-main mb-1">{label}</div>}
       {payload.map((entry, i) => (
         <div key={i} className="flex items-center gap-1.5 text-text-muted">
@@ -198,7 +198,7 @@ function WeeklyPatternBody({ chartData, title }) {
           />
           <Tooltip
             content={<DarkTooltip formatter={fmt} />}
-            cursor={{ fill: "rgba(255,255,255,0.04)" }}
+            cursor={{ fill: "var(--color-surface-2)" }}
           />
           <Bar
             dataKey="Tokens"
@@ -285,8 +285,8 @@ function ModelOverTimeChartBody({ chartData, models }) {
               type="monotone"
               dataKey={m}
               stackId="1"
-              stroke={getModelColor(i)}
-              fill={getModelColor(i)}
+              stroke={getSeriesColor(i)}
+              fill={getSeriesColor(i)}
               fillOpacity={0.4}
               strokeWidth={1.5}
               animationDuration={600}
@@ -299,7 +299,7 @@ function ModelOverTimeChartBody({ chartData, models }) {
           <span key={m} className="flex items-center gap-1">
             <span
               className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: getModelColor(i) }}
+              style={{ backgroundColor: getSeriesColor(i) }}
             />
             {m}
           </span>

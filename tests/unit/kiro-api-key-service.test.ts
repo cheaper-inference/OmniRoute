@@ -3,11 +3,21 @@ import assert from "node:assert/strict";
 
 import { KiroService } from "../../src/lib/oauth/services/kiro.ts";
 
-test("KiroService.validateApiKey validates via ListAvailableProfiles with API_KEY token type", async () => {
+// Validation proves the key on the Amazon Q model catalog first; ListAvailableProfiles is
+// only a best-effort profileArn discovery that runs after that proof succeeds.
+function modelCatalogOk(): Response {
+  return new Response(JSON.stringify({ models: [] }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+test("KiroService.validateApiKey discovers the profile via ListAvailableProfiles with API_KEY token type", async () => {
   const service = new KiroService();
   const originalFetch = globalThis.fetch;
 
   globalThis.fetch = (async (url: string, init?: RequestInit) => {
+    if (String(url).includes("/ListAvailableModels")) return modelCatalogOk();
     assert.equal(url, "https://q.eu-central-1.amazonaws.com");
     const headers = init?.headers as Record<string, string>;
     assert.equal(headers.Authorization, "Bearer kiro-api-key");
@@ -40,14 +50,16 @@ test("KiroService.validateApiKey accepts API keys when profile discovery is deni
   const service = new KiroService();
   const originalFetch = globalThis.fetch;
 
-  globalThis.fetch = (async () =>
-    new Response(
-      JSON.stringify({
-        __type: "com.amazon.aws.codewhisperer#AccessDeniedException",
-        message: "API key authentication is not supported for this operation.",
-      }),
-      { status: 403, headers: { "Content-Type": "application/json" } }
-    )) as typeof fetch;
+  globalThis.fetch = (async (url: string) =>
+    String(url).includes("/ListAvailableModels")
+      ? modelCatalogOk()
+      : new Response(
+          JSON.stringify({
+            __type: "com.amazon.aws.codewhisperer#AccessDeniedException",
+            message: "API key authentication is not supported for this operation.",
+          }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
+        )) as typeof fetch;
 
   try {
     const credential = await service.validateApiKey(" kiro-api-key ", "us-east-1");

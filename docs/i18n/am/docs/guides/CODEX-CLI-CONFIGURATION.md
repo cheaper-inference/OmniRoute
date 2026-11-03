@@ -1,6 +1,6 @@
 # Codex CLI — Configuration with OmniRoute (አማርኛ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CODEX-CLI-CONFIGURATION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇦 [bs](../../../bs/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CODEX-CLI-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CODEX-CLI-CONFIGURATION.md)
 
 ---
 
@@ -272,9 +272,9 @@ codex -p chat     # cx/gpt-5.5, ምንም ጥረት አልተቀመጠም (የ�
 
 ---
 
-## በ`omniroute setup-codex` ፕሮፋይሎችን በራስ-ሰር ማመንጨት
+## `omniroute setup-codex`ን በመጠቀም ፕሮፋይሎችን በራስ-ሰር ማመንጨት
 
-OmniRouteን በVPS ላይ ካስኬዱ፣ ከቀጥታ የሞዴል ካታሎጉ የፕሮፋይል ፋይሎችን በራስ-ሰር ማመንጨት ይችላሉ፦
+OmniRouteን በVPS ላይ ካስኬዱ፣ ከቀጥታው የሞዴል ካታሎግ የፕሮፋይል ፋይሎችን በራስ-ሰር ማመንጨት ይችላሉ፦
 
 ```bash
 # ከVPS (በፖርት 20128 ላይ ያለውን አካባቢያዊ OmniRoute ይጠቀማል)
@@ -283,7 +283,7 @@ omniroute setup-codex
 # ከማንኛውም ማሽን — ወደ VPSዎ ያመልክቱ
 omniroute setup-codex --remote http://100.x.x.x:20128 --api-key sk-xxx
 
-# ፋይሎችን ሳይጽፉ ቅድመ-ዕይታ
+# ፋይሎችን ሳይጽፉ ቅድመ-እይታ ያድርጉ
 omniroute setup-codex --remote http://100.x.x.x:20128 --dry-run
 
 # የGLM እና Kimi ፕሮፋይሎችን ብቻ ያመንጩ
@@ -293,9 +293,26 @@ omniroute setup-codex --only glm,kimi
 omniroute setup-codex --codex-home /path/to/.codex
 ```
 
-ትዕዛዙ `/v1/models`ን ያመጣል፣ ለሚታወቁ ሞዴሎች የተስተካከሉ ፕሮፋይሎችን ይጠቀማል፣ ለሌሎች ተኳዃኝ የጽሑፍ ሞዴሎች ደግሞ ወደ ካታሎግ ሜታዳታ ይመለሳል፤ ለእያንዳንዱም `~/.codex/<name>.config.toml`ን ይጽፋል። ኢደምፖተንት ነው — እንደገና ማስኬድ ደህንነቱ የተጠበቀ ነው።
+ትዕዛዙ `/v1/models`ን ያመጣል፣ ለሚታወቁ ሞዴሎች የተስተካከሉ ፕሮፋይሎችን ይጠቀማል፣ ለሌሎች ተኳዃኝ የጽሑፍ ሞዴሎች ወደ ካታሎግ ሜታዳታ ይመለሳል፣ እና ለእያንዳንዱ `~/.codex/<name>.config.toml`ን ይጽፋል። ኢድምፖተንት ነው — እንደገና ማስኬድ ደህንነቱ የተጠበቀ ነው።
 
-OmniRoute የአቅራቢ ሞዴል ማግኘት/ማስመጣት ቀጥታ ካታሎጉን በተሳካ ሁኔታ ከቀየረ በኋላ እነዚህን ተመሳሳይ የፕሮፋይል ፋይሎች **በራስ-ሰር ማመሳሰል**ም ይችላል። ይህ **በምርጫ የሚነቃ ሲሆን በነባሪነት ጠፍቷል**፦ ከ**CLI Code ዳሽቦርድ** ("CLI profile auto-sync" → Codex) ያብሩት፣ ወይም `OMNIROUTE_AUTO_SYNC_CODEX_PROFILES=true`ን ያዘጋጁ (`CLI_ALLOW_CONFIG_WRITES`ንም ያከብራል፤ ይህም በነባሪነት በርቷል)። ሲነቃ የተለዩ `~/.codex/*.config.toml` የፕሮፋይል ፋይሎችን ብቻ ይጽፋል፤ ንቁ/ነባሪውን `~/.codex/config.toml`፣ የCodex-lb ቅንብሮችን፣ ማረጋገጫን ወይም የአቅራቢ ምርጫን በፍጹም አይቀይርም።
+መሠረታዊው `config.toml` የ`model_providers.omniroute` ትርጉም ከሌለው፣ ግልጽ
+`setup-codex` የተመረጠውን አካባቢያዊ ወይም የርቀት መጨረሻ ነጥብ በመጠቀም ይህን ትርጉም
+በእያንዳንዱ በሚመነጭ ተደራቢ ውቅር ውስጥ ያካትታል። መሠረታዊውን ፋይል ሳይቀይር ይተወዋል። ነባር የአቅራቢ
+ትርጉም የመጨረሻ ነጥቡን እና የማረጋገጫ ቅንብሮቹን ጨምሮ ይወረሳል። ልክ ያልሆነ
+መሠረታዊ TOML ፕሮፋይሎች ከመጻፋቸው በፊት ማመንጨቱን ያቆማል።
+
+`--api-key` ወይም `OMNIROUTE_API_KEY`ን ሲያቀርቡ፣ አዲስ የተገለጸ አቅራቢ
+`env_key = "OMNIROUTE_API_KEY"`ን ይጠቅሳል፤ ቁልፉ ራሱ ፈጽሞ አይቀመጥም ወይም በቅድመ-እይታው
+ውስጥ አይታተምም። Codexን በሚያስጀምሩበት አካባቢ ያንን ተለዋዋጭ ያዘጋጁ። ቁልፍ
+ካላቀረቡ፣ ማረጋገጫ የማይፈልጉ ጥያቄዎችን እንዲቀበል ለተዋቀረ OmniRoute አዲሱ ትርጉም
+የቁልፍ መስፈርት አይኖረውም።
+
+ከታች የተገለጸው በምርጫ የሚነቃ የካታሎግ ራስ-ሰር ማመሳሰል ቀድሞ
+በተደራቢ ውቅር ውስጥ ያሉ የአቅራቢ ትርጉሞችን ይጠብቃል፣ ነገር ግን አዲስ የአቅራቢ ቅንብሮችን
+አያስጀምርም፤ መጀመሪያ አቅራቢውን በግልጽ ማዋቀር ወይም በዳሽቦርዱ በኩል ያዋቅሩ። ነባር የአቅራቢ ቅንብሮች
+በኦፕሬተር የሚተዳደሩ ማረጋገጫዎችን ሊይዙ ስለሚችሉ ከደረቅ-ሙከራ ቅድመ-እይታዎች ይቀራሉ።
+
+የአቅራቢ ሞዴል ፍለጋ/ማስመጣት በተሳካ ሁኔታ የቀጥታውን ካታሎግ ከቀየረ በኋላ፣ OmniRoute እነዚህን ተመሳሳይ የፕሮፋይል ፋይሎች **በራስ-ሰር ማመሳሰል** ይችላል። ይህ **በምርጫ የሚነቃ ሲሆን በነባሪነት ጠፍቷል**፦ ከ**CLI Code ዳሽቦርድ** ("የCLI ፕሮፋይል ራስ-ሰር ማመሳሰል" → Codex) ያብሩት፣ ወይም `OMNIROUTE_AUTO_SYNC_CODEX_PROFILES=true`ን ያዘጋጁ (`CLI_ALLOW_CONFIG_WRITES`ንም ያከብራል፣ ይህም በነባሪነት በርቷል)። ሲነቃ የተለዩ `~/.codex/*.config.toml` የፕሮፋይል ፋይሎችን ብቻ ይጽፋል፤ ንቁ/ነባሪውን `~/.codex/config.toml`፣ የCodex-lb ቅንብሮችን፣ ማረጋገጫን ወይም የአቅራቢ ምርጫን ፈጽሞ አይቀይርም።
 
 ---
 

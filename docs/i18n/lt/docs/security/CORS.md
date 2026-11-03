@@ -1,6 +1,6 @@
 # CORS Configuration & Security (Lietuvių)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -57,11 +57,11 @@ dėl vieno konkretaus įgyvendinimo ypatumo:
 
 Ką tai reiškia kiekvienai sąsajai, net kai nustatyta `CORS_ALLOW_ALL=true`:
 
-| Sąsaja                                   | Autentifikavimo mechanizmas   | CORS pakaitos simbolio poveikis                                                                                                                                                                                                                   |
-| ---------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Prietaisų skydelis / MANAGEMENT `/api/*` | Slapuku pagrįsta sesija       | Šaltinis grąžinamas, tačiau **be `Allow-Credentials`** naršyklė **blokuoja** skaitymą su kredencialais. Kenkėjiška kito šaltinio svetainė **negali perskaityti** autentifikuotų prietaisų skydelio atsakymų, o sesijos slapukas neatskleidžiamas. |
-| Kliento API `/v1/*`, `/v1beta/*`         | Bearer / `x-api-key` antraštė | Jau yra liberalus **pagal projektą** (`relaxForTokenAuth`): naršyklės niekada automatiškai neprideda `Authorization`/`x-api-key`, todėl užpuoliko puslapis negali pateikti jūsų rakto. `CORS_ALLOW_ALL` šios prieigos neišplečia.                 |
-| Viešas tik skaitymui (`/api/health`, …)  | Nėra                          | Duomenys nėra jautrūs; pakaitos simbolis nepavojingas.                                                                                                                                                                                            |
+| Sąsaja                                   | Autentifikavimo mechanizmas   | CORS pakaitos simbolio poveikis                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prietaisų skydelis / MANAGEMENT `/api/*` | Slapuku pagrįsta sesija       | Šaltinis grąžinamas, tačiau **be `Allow-Credentials`** naršyklė **blokuoja** skaitymą su kredencialais. Kenkėjiška kito šaltinio svetainė **negali perskaityti** autentifikuotų prietaisų skydelio atsakymų, o sesijos slapukas neatskleidžiamas.                                                                                                                                 |
+| Kliento API `/v1/*`, `/v1beta/*`         | Bearer / `x-api-key` antraštė | Jau yra liberalus **pagal projektą** (`relaxForTokenAuth`): naršyklės niekada automatiškai neprideda `Authorization`/`x-api-key`, todėl užpuoliko puslapis negali pateikti jūsų rakto. Atspindėjimas taikomas tik tada, kai pateiktas raktas patvirtintas; anoniminiai atsakymai (`REQUIRE_API_KEY=false`) išlaiko leidžiamųjų sąrašą. `CORS_ALLOW_ALL` šios prieigos neišplečia. |
+| Viešas tik skaitymui (`/api/health`, …)  | Nėra                          | Duomenys nėra jautrūs; pakaitos simbolis nepavojingas.                                                                                                                                                                                                                                                                                                                            |
 
 Taigi **likusi** `CORS_ALLOW_ALL=true` keliama rizika apsiriboja: (a)
 skaitymu iš kitų šaltinių **be kredencialų**, kai skaitomi ir taip neautentifikuoti duomenys, ir (b)
@@ -123,29 +123,74 @@ nepaleidžiant sistemos iš naujo.
   automatiškai. CORS čia nėra reikšmingas barjeras — barjeras yra API raktas —
   todėl ši sąsaja sąmoningai yra mažiau ribojama, kad naršyklės ir
   „Electron“ klientai galėtų skaityti atsakymus, kuriuos jie jau turi teisę gauti.
+  Sušvelnintas atspindėjimas priklauso nuo patvirtinto rakto, o ne vien nuo antraštės
+  buvimo: kai `REQUIRE_API_KEY=false` užklausą aptarnauja anonimiškai, sėkmingas jos
+  atsakymas išlaiko fail-closed leidžiamųjų sąrašą. Autentifikavimo atmetimai (401)
+  lieka skaitomi, kad klientai galėtų parodyti atšauktą ar klaidingai įvestą raktą
+  (#5242): paties konvejerio 401 išlaiko atspindėjimą, o maršrutas, kuris pats atmeta
+  raktą po to, kai konvejeris užklausą aptarnavo kaip anoniminę (`/v1/models` ir
+  `/v1beta/models`, kai sukonfigūruotas valdymo autentifikavimas, savininkui priskirti
+  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ir auto-combo
+  kandidatų maršrutai), prideda atspindėjimą prie to 401 per
+  `credentialRejectionHeaders()`. Atspindėjimas priklauso nuo to, ar užklausoje yra
+  kredencialų antraštė (`Authorization`, `x-api-key`, `x-goog-api-key` arba slapukas
+  `auth_token`), o ne nuo to, kurią iš jų patikrino maršrutas, ir niekada nederinamas su
+  `Access-Control-Allow-Credentials`; turinys yra fiksuotas klaidos vokas. Valdymo
+  maršrutai po `/api/v1/`, saugomi `requireManagementAuth()` (`/api/v1/management/*`,
+  `/api/v1/registered-keys`), atspindėjimo neprideda: esant `REQUIRE_API_KEY=false`, jų
+  401/403 negalima perskaityti iš kito šaltinio.
 - **Slapukų seansas (valdymo skydelis):** apsaugotas numatytąja uždara nuostata **ir**
   tuo, kad bendrame kelyje nėra `Access-Control-Allow-Credentials`. Neįtraukite
   administravimo / valdymo skydelio šaltinių į jokią mažiau ribojančią konfigūraciją; jiems turi būti taikoma
   būtent uždara numatytoji nuostata.
 
-## Pavyzdys: atvirkštinis tarpinis serveris prieš „OmniRoute“
+## WebSocket rankos paspaudimai (`/v1/responses`, `/v1/ws`)
 
-CORS užtikrina pats „OmniRoute“, todėl tarpinis serveris paprastai **neturėtų** pridėti ar
+Naršyklės WebSocket ryšiams CORS netaiko, todėl WebSocket transportai, grąžinantys
+išvadų rezultatus, patys tikrina rankos paspaudimo `Origin`
+(`src/server/origin/wsOrigin.ts`): „Responses“ WebSocket (`/v1/responses`) ir, kai
+„OmniRoute“ paleidžiamas per `npm start` / `npm run dev`, `/v1/ws` ir
+`/api/v1/ws` tiltas, kuris srautu perduoda `/v1/chat/completions`, `/v1/messages` ir
+`/v1/responses` kaip kadrus. Tiltas sprendimo klausia `/api/v1/ws?handshake=1` ir
+atsisako atnaujinti ryšį, nebent tas maršrutas atliko patikrą. Rankos paspaudimas
+priimamas, kai:
+
+- jame nėra `Origin` antraštės (Codex CLI, SDK ir kiti ne naršyklės klientai);
+- `Origin` leidžia aukščiau aprašytas leidžiamųjų sąrašas (`CORS_ALLOWED_ORIGINS`,
+  nustatymas `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` yra vienas iš paties „OmniRoute“ viešųjų šaltinių (sukonfigūruotas viešasis
+  bazinis URL, patikimo tarpinio serverio persiųstas šaltinis arba tiesioginis
+  loopback / LAN pagrindinis kompiuteris, nurodytas kaip IP literalas arba `localhost` —
+  tie patys kandidatai, kuriuos naudoja valdymo skydelio pakeitimų patikra); arba
+- jame yra galiojantis API raktas, kaip HTTP `/v1/*` sąsajoje.
+
+Visa kita gauna `403 ws_origin_forbidden`. Valdymo skydelio sesijos slapukas
+neatleidžia svetimo `Origin`, nes naršyklė jį prideda prie bet kurio puslapio lizdo.
+`localhost` kitame prievade nelaikomas tuo pačiu šaltiniu; tokius kūrimo šaltinius
+pridėkite prie `CORS_ALLOWED_ORIGINS`.
+
+## Pavyzdys: atvirkštinis tarpinis serveris prieš OmniRoute
+
+CORS užtikrina pati OmniRoute, todėl tarpinis serveris paprastai **neturėtų** pridėti ar
 perrašyti `Access-Control-*` antraščių (dvigubos antraštės sutrikdo naršyklių veikimą). Užbaikite TLS
-ir persiųskite užklausą — leiskite „OmniRoute“ atsakyti į išankstinę užklausą:
+ryšį ir persiųskite užklausą — leiskite OmniRoute atsakyti į išankstinę užklausą:
 
 ```nginx
-# „nginx“ — persiųskite į „OmniRoute“; čia NEĮTERPKITE Access-Control-*
+# nginx — persiųsti į OmniRoute; čia NEĮTERPKITE Access-Control-*
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # NENUSTATYKITE X-Forwarded-For į 127.0.0.1 — taip apeinama vietinio grįžtamojo ryšio maršrutų apsauga.
+    # Išsaugokite persiuntimo antraštes: tame pačiame pagrindiniame kompiuteryje veikiantis tarpinis serveris jungiasi iš grįžtamojo ryšio adreso, o jos
+    # nurodo OmniRoute, kad užklausą pateikė ne vietinis operatorius. Jei tarpinis serveris neprideda nė vienos iš jų,
+    # visi nuotoliniai užklausų teikėjai atrodo kaip vietiniai. Taip pat niekada nenustatykite X-Forwarded-For reikšmės į 127.0.0.1.
 }
 ```
 
-Leidžiamus naršyklės šaltinius nustatykite „OmniRoute“ (`CORS_ALLOWED_ORIGINS` arba
-skirtuke „Security“), o ne tarpiniame serveryje.
+Leidžiamas naršyklių kilmės vietas nustatykite OmniRoute (`CORS_ALLOWED_ORIGINS` arba
+skirtuke „Sauga“), o ne tarpiniame serveryje.
 
 ## Šaltinio failai
 
@@ -158,6 +203,7 @@ skirtuke „Security“), o ne tarpiniame serveryje.
 | Valdymo skydelio įspėjamoji reklamjuostė                            | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Leidžiamų CORS šaltinių laukas                                      | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | „Cloud-Agent“ kiekvieno maršruto CORS (išimtis)                     | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket rankos paspaudimo `Origin` patikra                        | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Taip pat žr.
 

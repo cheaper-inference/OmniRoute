@@ -1,16 +1,12 @@
 # Embedded Services (ქართული)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
-> **ვერსია:** v3.8.44
-> **ბოლო განახლება:** 2026-07-03
-> **აუდიტორია:** ინჟინრები, რომლებიც ამატებენ, უვლიან ან გამართავენ ჩაშენებულ სერვისებს (9Router, CLIProxyAPI, Mux, Bifrost).
+> **ვერსია:** v3.8.44** ბოლო განახლება:** 2026-10-28** აუდიტორია:** ინჟინრები ამატებენ, ინარჩუნებენ ან ახდენენ ჩაშენებულ სერვისებს (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-ჩაშენებული სერვისები არის ლოკალურად დაინსტალირებული დამხმარე პროცესული ხელსაწყოები, რომლებსაც OmniRoute აყენებს, ზედამხედველობს და
-წარმოადგენს სრულფასოვან მარშრუტიზაციის სამიზნეებად. გარე პროვაიდერებისგან განსხვავებით (რომლებთანაც ინტერნეტით,
-API-გასაღებების მეშვეობით მყარდება კავშირი), ჩაშენებული სერვისები OmniRoute-ის იმავე კომპიუტერზე მუშაობს და loopback-ის მეშვეობით ურთიერთობს.
+ჩაშენებული სერვისები არის ადგილობრივად დაინსტალირებული პროცესის გვერდითი ინსტრუმენტები, რომლებსაც OmniRoute აინსტალირებს, ზედამხედველობს და ავლენს, როგორც პირველი კლასის მარშრუტიზაციის სამიზნეებს. გარე პროვაიდერებისგან განსხვავებით (რომლებიც ინტერნეტის საშუალებით მიიღწევა API კლავიშების საშუალებით), ჩაშენებული სერვისები მუშაობს იმავე აპარატზე, როგორც OmniRoute და ურთიერთობს loopback-ის საშუალებით.
 
 ---
 
@@ -31,46 +27,49 @@ API-გასაღებების მეშვეობით მყარ�
 
 ### რატომ ჩაშენებული სერვისები?
 
-ჩაშენებულია ხუთი სერვისი:
+ჩართულია რვა სერვისი:
 
-| სერვისი         | npm პაკეტი                                       | ნაგულისხმევი პორტი | დანიშნულება                                                                                                                                                                                                                         |
-| --------------- | ------------------------------------------------ | :----------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                        |       20130        | AI-მარშრუტიზატორი, რომელიც OmniRoute-ს შეუძლია გამოიყენოს ქვეპროვაიდერად. მოდელები ხელმისაწვდომია ფორმატით `9router/{sub}/{model}`                                                                                                  |
-| **CLIProxyAPI** | GitHub-ის გამოშვების ბინარული ფაილი (`cliproxy`) |        8317        | ლოკალური პროქსი-ადაპტერი Anthropic CLI-ის ავთენტიფიკაციის ნაკადებისთვის. უზრუნველყოფს სარეზერვო მარშრუტიზაციას OAuth-ტოკენების ვადის ამოწურვისას                                                                                    |
-| **Mux**         | `mux` (headless `mux server`)                    |        8322        | ლოკალური აგენტების ორკესტრირების დემონი (coder/mux). იმართება მხოლოდ სასიცოცხლო ციკლი — არ არის მარშრუტიზაციის სამიზნე (LLM-ის პროქსირების გარეშე).                                                                                 |
-| **Bifrost**     | `@maximhq/bifrost`                               |        8080        | Go-ზე შექმნილი AI-კარიბჭის სარელეო ბექენდი. მუშაობისას ავტომატურად აირჩევა სარელეო მარშრუტის (`/v1/relay/`) მიერ                                                                                                                    |
-| **Dario**       | `@askalf/dario`                                  |        3456        | Claude-ის გამოწერის პროქსი — CLIProxyAPI-ის ალტერნატივა/სარეზერვო საშუალება Claude-Code-ის ფორმატის ტრაფიკისთვის; ჩასმული გასაღები ხდება `DARIO_ADMIN_TOKEN`, რომელიც მის `/admin/*` OAuth-ის მართვის სიბრტყეზე წვდომას აკონტროლებს |
+| სერვისი         | npm პაკეტი                             | ნაგულისხმევი პორტი | მიზანი                                                                                                                                                                                                                                                                                                                                      |
+| --------------- | -------------------------------------- | :----------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 როუტერი**   | `9router`                              |       20130        | AI როუტერი, რომელიც OmniRoute შეუძლია გამოიყენოს როგორც ქვეპროვაიდერი. მოდელები გამოფენილია როგორც `9router/{sub}/{model}`                                                                                                                                                                                                                  |
+| **CLIProxyAPI** | GitHub გამოშვების ორობითი (`cliproxy`) |        8317        | ადგილობრივი პროქსი ადაპტერი Anthropic CLI auth ნაკადებისთვის. უზრუნველყოფს სარეზერვო მარშრუტიზაციას, როდესაც OAuth ტოკენების ვადა ამოიწურება                                                                                                                                                                                                |
+| **მუქს**        | `mux` (უთავო `mux server`)             |        8322        | ადგილობრივი აგენტი-ორკესტრირების დემონი (coder/mux). სასიცოცხლო ციკლით იმართება მხოლოდ — და არა მარშრუტიზაციის სამიზნე ( LLM პროქსირების გარეშე).                                                                                                                                                                                           |
+| **ბიფროსტი**    | `@maximhq/bifrost`                     |        8080        | გადადით AI-gateway relay backend-ზე. გაშვებისას, ავტომატურად არჩეულია სარელეო მარშრუტით (`/v1/relay/`)                                                                                                                                                                                                                                      |
+| **დარიო**       | `@askalf/dario`                        |        3456        | Claude-subscription proxy — alternative/failover to CLIProxyAPI კლოდ-კოდის ფორმის ტრაფიკისთვის; შეყვანილი გასაღები ხდება `DARIO_ADMIN_TOKEN` რომელიც აფერხებს მის `/admin/*` OAuth საკონტროლო სიბრტყეს                                                                                                                                      |
+| **ღია-ვა**      | `@open-wa/wa-automate`                 |        8323        | WhatsApp ვებ ავტომატიზაცია (უფასო Chromium Puppeteer-ის მეშვეობით). სასიცოცხლო ციკლით იმართება მხოლოდ — და არა მარშრუტიზაციის სამიზნე.                                                                                                                                                                                                      |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                   |       20135        | სწრაფი შეკუმშვის sidecar — real LLMLingua-2 ONNX მოდელი ( Microsoft's ალგორითმის JS/TS პორტი). `open-sse/services/compression/engines/llmlingua/index.ts` აგზავნის `/compress` HTTP ზე და უბრუნდება პროცესის მუშა ძაფების უკანა ნაწილს, როდესაც გვერდითი კარა დაშვებულია. სასიცოცხლო ციკლის მართვა მხოლოდ — არ არის მარშრუტიზაციის სამიზნე. |
+| **sing-box**    | GitHub გამოშვების ორობითი (`singbox`)  |       20140        | TPROXY sidecar მხარდაჭერილი `applyTproxy()` ის გამჭვირვალე-პროქსი ჩარევა (`src/mitm/tproxy/setup.ts`). ინსტალერი ჩამოტვირთავს ჩამაგრებულ, საკონტროლო ჯამით დამოწმებულ გამოშვებას. სასიცოცხლო ციკლით იმართება მხოლოდ — და არა მარშრუტიზაციის სამიზნე ( LLM proxying არ არის)                                                                 |
 
-ხუთივე ერთსა და იმავე ზედამხედველობის მოდელს იყენებს:
+რვავე ერთსა და იმავე საზედამხედველო მოდელს მიჰყვება:
 
-- OmniRoute მათ აყენებს `DATA_DIR/services/{name}/`-ში (OmniRoute-ის საკუთარი `package.json`-ისგან იზოლირებულად)
-- OmniRoute მათ შვილ პროცესებად უშვებს და აკონტროლებს
-- OmniRoute შვილ პროცესის გარემოში სვამს დროებით API-გასაღებს და მას შეფერხების გარეშე ცვლის (სადაც შესაძლებელია)
-- მართვის ყველა მარშრუტი (`/api/services/*`) არის **მხოლოდ ლოკალური (LOCAL_ONLY)** — ხელმისაწვდომია მხოლოდ loopback-იდან (მკაცრი წესი #17)
+- OmniRoute აყენებს მათ `DATA_DIR/services/{name}/` ქვეშ (იზოლირებულია OmniRoute საკუთარი `package.json` ისგან)
+- OmniRoute ქვირითობს და აკონტროლებს მათ ბავშვის პროცესების დროს
+- OmniRoute შეჰყავს ეფემერული API გასაღები ბავშვის გარემოში და აბრუნებს მას შეფერხების გარეშე (სადაც შესაძლებელია)
+- მართვის ყველა მარშრუტი (`/api/services/*`) არის**LOCAL_ONLY** — ხელმისაწვდომია მხოლოდ loopback-დან (მყარი წესი #17)
 
-### ძირითადი გადაწყვეტილებები (დიზაინის გეგმიდან)
+### ძირითადი გადაწყვეტილებები (საპროექტო გეგმიდან)
 
-| გადაწყვეტილება                                          | მნიშვნელობა                                                                         |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| საინფორმაციო პანელიდან 9Router-ის მშობლიურ UI-ზე წვდომა | უკუპროქსი მისამართზე `/dashboard/providers/services/9router/embed/*`                |
-| ინსტალაციის მექანიზმი                                   | `npm install {package}` `execFile`-ის მეშვეობით (shell-ის ინტერპოლაციის გარეშე)     |
-| გამოყენების რეჟიმი                                      | პროვაიდერი მარშრუტიზაციის ძრავში რეგისტრირებულია ფორმატით `9router/{sub}/{model}`   |
-| API-გასაღების მართვა                                    | OmniRoute აგენერირებს, შიფრავს საცავში (AES-256-GCM) და გარემოს მეშვეობით გადასცემს |
-| საინფორმაციო პანელის მდებარეობა                         | `/dashboard/providers/services` (სამი ჩანართი)                                      |
-| ავტომატური გაშვება                                      | გადამრთველი თითოეული სერვისისთვის, ნაგულისხმევად გამორთული                          |
+| გადაწყვეტილება                          | ღირებულება                                                                                |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- |
+| დაფაზე წვდომა 9 როუტერის მშობლიურ UI ზე | შებრუნებული პროქსი `/dashboard/providers/services/9router/embed/*` ზე                     |
+| სამონტაჟო მექანიზმი                     | `npm install {package}` `execFile` ით (ჭურვის ინტერპოლაციის გარეშე)                       |
+| მოხმარების რეჟიმი                       | პროვაიდერი რეგისტრირებულია როგორც `9router/{sub}/{model}` მარშრუტირების ძრავაში           |
+| API გასაღების მენეჯმენტი                | OmniRoute წარმოქმნის, შიფრავს დასვენების დროს (AES-256-GCM) და ინექციებს env-ის მეშვეობით |
+| დაფის მდებარეობა                        | `/dashboard/providers/services` (სამი ჩანართი)                                            |
+| ავტომატური დაწყება                      | გადართვა თითო სერვისზე, ნაგულისხმევი OFF                                                  |
 
 ---
 
-## 2. არქიტექტურა — 4 დონე
+## 2. არქიტექტურა — 4 ფენა
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  დონე 1 — UI                                                       │
-│  /dashboard/providers/services  (ჩანართები: CLIProxyAPI | 9Router | Mux)│
-│  ჟურნალები რეალურ დროში (SSE), გაშვება/შეჩერება/გადატვირთვა/განახლება, პარამეტრები, ინსტალაცია│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               გარსი + ჩანართების მარშრუტიზაცია ?tab=-ით│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -78,7 +77,7 @@ API-გასაღებების მეშვეობით მყარ�
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  დონე 2 — API (LOCAL_ONLY — მხოლოდ loopback)                       │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -87,72 +86,74 @@ API-გასაღებების მეშვეობით მყარ�
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (უკუ HTTP + WebSocket პროქსი → 9Router upstream)                │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  კარიბჭე: LOCAL_ONLY_API_PREFIXES შეიცავს "/api/services/"-სა და   │
-│        "/dashboard/providers/services/*/embed/"-ს                  │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ პროცესშიდა გამოძახებები
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  დონე 3 — ServiceSupervisor (src/lib/services/)                    │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   ზოგადი ზედამხედველი (child_process.spawn)  │
-│    ├── ინსტალაცია: execFile('npm', ['install', pkg, '--prefix'])   │
-│    ├── გაშვება:    spawn(node, [entrypoint], {env, cwd})           │
-│    ├── API გასაღები: crypto.randomBytes(32) → env NINEROUTER_API_KEY│
-│    ├── პორტი:      20130 9Router-ისთვის (კონფიგურირებადი)          │
-│    ├── ჟურნალები:  stdio რგოლური ბუფერი 5 MB → SSE მოვლენები       │
-│    ├── მდგომარეობა: HTTP GET /health ყოველ 2–5 წმ-ში, ზარმაცი აღდგენა│
-│    └── სიცოცხლის ციკლი: SIGTERM 15 წმ → SIGKILL                    │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       პროცესის დაწყებისას ყველა SERVICES[]-ის ინიციალიზაცია│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       პერიოდული GET /v1/models → service_models ცხრილი│
-│  ringBuffer.ts      ციკლური ჟურნალის ბუფერი (5 MB თითო სერვისზე)   │
-│  healthCheck.ts     HTTP მდგომარეობის პერიოდული შემოწმება           │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
-│                      (ინსტალატორის ადაპტერები)                     │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI-თან თავსებადი HTTP (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  დონე 4 — პროვაიდერი / მარშრუტიზაცია                               │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    თითოეული მოთხოვნისას ხელახლა პოულობს პორტსა და API გასაღებს (კეშირების გარეშე).│
-│    პროქსირებამდე მოდელის id-დან შლის "9router/" პრეფიქსს.           │
-│    აბრუნებს 503 service_not_running-ს, თუ ზედამხედველი "running" მდგომარეობაში არ არის.│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    ჩანაწერი "9router"-ისთვის: isEmbeddedService: true              │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    მოდელები ინახება როგორც "9router/{sub}/{model}" (პრეფიქსით).     │
-│    სინქრონიზდება ყოველ 5 წუთში modelSync.ts-ის მიერ.                │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux იმართება მხოლოდ სიცოცხლის ციკლის დონეზე (დონეები 1-3) — ის არის აგენტების│
-│  ორკესტრირების დემონი და არა LLM პროქსი, ამიტომ მას არ აქვს მე-4 დონის│
-│  შემსრულებლის/პროვაიდერის ჩანაწერი და არასოდეს არის მარშრუტიზაციის სამიზნე.│
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### ძირითადი საწყისი ფაილები
+### ძირითადი წყარო ფაილები
 
-| ფაილი                                       | როლი                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | ძირითადი კლასი: სიცოცხლის ციკლი, დაბლოკვა, მდგომარეობა, რგოლური ბუფერი |
-| `src/lib/services/bootstrap.ts`             | პროცესის დონის რეგისტრაცია და ავტომატური გაშვება                       |
-| `src/lib/services/registry.ts`              | Singleton რუკა `tool → supervisor`                                     |
-| `src/lib/services/apiKey.ts`                | გასაღების გენერაცია, AES-256-GCM დაშიფვრა შენახვისას                   |
-| `src/lib/services/modelSync.ts`             | მოდელების პერიოდული სინქრონიზაცია (5 წთ) + მოთხოვნისამებრ              |
-| `src/lib/services/ringBuffer.ts`            | 5 MB-იანი წრიული ჟურნალის ბუფერი SSE გამოწერით                         |
-| `src/lib/services/healthCheck.ts`           | HTTP მდგომარეობის შემოწმება (კონფიგურირებადი ინტერვალი)                |
-| `src/lib/services/installers/ninerouter.ts` | npm-ით 9Router-ის დაყენება/განახლება/წაშლა                             |
-| `src/lib/services/installers/cliproxy.ts`   | npm-ით CLIProxyAPI-ის დაყენება/განახლება/წაშლა                         |
-| `src/lib/services/installers/mux.ts`        | npm-ით Mux-ის დაყენება/განახლება/წაშლა                                 |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` დამხმარე ფუნქცია                               |
-| `src/app/api/services/[name]/logs/route.ts` | საერთო SSE ჟურნალების endpoint                                         |
-| `open-sse/executors/ninerouter.ts`          | პროვაიდერის executor (ფენა 4)                                          |
+| ფაილი                                       | როლი                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | ძირითადი კლასი: სიცოცხლის ციკლი, საკეტი, ჯანმრთელობა, რგოლის ბუფერი |
+| `src/lib/services/bootstrap.ts`             | პროცესის დონის რეგისტრაცია და ავტომატური დაწყება                    |
+| `src/lib/services/registry.ts`              | სინგლტონის რუკა `tool → supervisor`                                 |
+| `src/lib/services/apiKey.ts`                | გასაღების გენერაცია, AES-256-GCM დაშიფვრა დასვენების დროს           |
+| `src/lib/services/modelSync.ts`             | მოდელის პერიოდული სინქრონიზაცია (5 წთ) + მოთხოვნით                  |
+| `src/lib/services/ringBuffer.ts`            | 5 MB წრიული ჟურნალის ბუფერი SSE გამოწერით                           |
+| `src/lib/services/healthCheck.ts`           | HTTP ჯანმრთელობის ზონდი (კონფიგურირებადი ინტერვალი)                 |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall 9 როუტერისთვის                         |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall CLIProxyAPI სთვის                      |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall მუქსისთვის                             |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall open-wa-სთვის                          |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall LLMLingua სთვის                        |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` დამხმარე                                    |
+| `src/app/api/services/[name]/logs/route.ts` | გაზიარებული SSE ჟურნალის საბოლოო წერტილი                            |
+| `open-sse/executors/ninerouter.ts`          | პროვაიდერის შემსრულებელი (ფენა 4)                                   |
 
 ---
 
@@ -209,59 +210,52 @@ API-გასაღებების მეშვეობით მყარ�
 
 ---
 
-## 4. API ცნობარი
+## 4. API მითითება
 
-ყველა მარშრუტი `/api/services/`-ის ქვეშ არის **LOCAL_ONLY** (მხოლოდ loopback,
-მკაცრი წესი #17). არა-loopback მოთხოვნები ავტორიზაციის ტოკენის მიუხედავად იღებს
-`403 LOCAL_ONLY` პასუხს.
+ყველა მარშრუტი `/api/services/` ქვეშ არის**LOCAL_ONLY** (მხოლოდ loopback, მკაცრი წესი #17). Non-loopback მოთხოვნები იღებენ `403 LOCAL_ONLY` ავტორიზაციის ნიშნის მიუხედავად.
 
-### 4.1 9Router-ის საბოლოო წერტილები (11 მარშრუტი)
+### 4.1 9 როუტერის ბოლო წერტილები (11 მარშრუტი)
 
 #### `POST /api/services/9router/install`
 
-დააინსტალირეთ 9Router npm-იდან. ქმნის `DATA_DIR/services/9router/`-ს საკუთარი
-`package.json`-ითა და `node_modules/`-ით. არ ეწინააღმდეგება OmniRoute-ის საკუთარ
-დამოკიდებულებებს.
+დააინსტალირეთ 9 როუტერი npm-დან. ქმნის `DATA_DIR/services/9router/` საკუთარი `package.json` ით და `node_modules/`. არ ეწინააღმდეგება OmniRoute ის საკუთარ დეპებს.
 
-**მოთხოვნის სხეული** (ყველა არასავალდებულოა):
+**მოითხოვეთ სხეული** (ყველა სურვილისამებრ):
 
 ```json
 { "version": "latest" }
 ```
 
-| ველი      | ტიპი     | ნაგულისხმევი | აღწერა                                       |
-| --------- | -------- | ------------ | -------------------------------------------- |
-| `version` | `string` | `"latest"`   | დასაინსტალირებელი npm ვერსიის ტეგი ან semver |
+| ველი      | ტიპი     | ნაგულისხმევი | აღწერა                                        |
+| --------- | -------- | ------------ | --------------------------------------------- |
+| `version` | `string` | `"latest"`   | npm ვერსიის ტეგი ან სემვერი დასაინსტალირებლად |
 
 **პასუხები:**
 
-| სტატუსი | აღწერა                                                            |
-| ------- | ----------------------------------------------------------------- |
-| `200`   | `{ ok: true, installedVersion: "x.y.z", path: "..." }`            |
-| `400`   | მოთხოვნის არასწორი სხეული (Zod ვალიდაციის წარუმატებლობა)          |
-| `409`   | ინსტალაცია უკვე მიმდინარეობს (ბლოკირება დაკავებულია)              |
-| `500`   | npm install ვერ შესრულდა — გასაგები შეცდომისთვის იხილეთ `message` |
+| სტატუსი | აღწერა                                                                |
+| ------- | --------------------------------------------------------------------- |
+| `200`   | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                |
+| `400`   | არასწორი მოთხოვნის ორგანო (Zod ვალიდაციის წარუმატებლობა)              |
+| `409`   | უკვე დაყენებულია (დაბლოკვა შეჩერებულია)                               |
+| `500`   | npm ინსტალაცია ვერ მოხერხდა — იხილეთ `message` მეგობრული შეცდომისთვის |
 
-**შენიშვნები:** იყენებს `execFile('npm', [...])`-ს — shell-ისა და ინტერპოლაციის
-გარეშე (მკაცრი წესი #13). EACCES შეცდომები წარმოდგენილია გასაგები შეტყობინებების
-სახით.
+**შენიშვნები:** იყენებს `execFile('npm', [...])` — ჭურვის გარეშე, ინტერპოლაციის გარეშე (მყარი წესი #13). EACCES შეცდომები გამოჩნდება, როგორც მეგობრული შეტყობინებები.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-გაუშვით 9Router. თუ ზედამხედველი ჯერ რეგისტრირებული არ არის, არეგისტრირებს მას,
-შემდეგ კი იძახებს `supervisor.start()`-ს. უკვე გაშვებულ მდგომარეობაში იდემპოტენტურია.
+გაუშვით 9 როუტერი. რეგისტრირებს ზედამხედველს, თუ უკვე არ არის დარეგისტრირებული, მაშინ რეკავს `supervisor.start()`. იდემპოტენტი, როცა უკვე გაშვებულია.
 
-**მოთხოვნის სხეული:** არ არის
+**მოითხოვეთ სხეული:** არცერთი
 
 **პასუხები:**
 
-| სტატუსი | აღწერა                                                       |
-| ------- | ------------------------------------------------------------ |
-| `200`   | `ServiceStatus` ობიექტი (იხილეთ სქემა ქვემოთ)                |
-| `409`   | 9Router არ არის დაინსტალირებული (`status: "not_installed"`)  |
-| `503`   | გაშვება ვერ შესრულდა (პროცესის შეცდომა — იხილეთ `lastError`) |
+| სტატუსი | აღწერა                                                        |
+| ------- | ------------------------------------------------------------- |
+| `200`   | `ServiceStatus` ობიექტი (იხ. სქემა ქვემოთ)                    |
+| `409`   | 9 როუტერი არ არის დაინსტალირებული (`status: "not_installed"`) |
+| `503`   | დაწყება ვერ მოხერხდა (პროცესის შეცდომა — იხილეთ `lastError`)  |
 
 **ServiceStatus სქემა:**
 
@@ -281,37 +275,34 @@ API-გასაღებების მეშვეობით მყარ�
 
 #### `POST /api/services/9router/stop`
 
-კორექტულად გააჩერეთ 9Router. აგზავნის SIGTERM-ს, ელოდება 15 წმ-ს, ხოლო თუ პროცესი
-ჯერ კიდევ ცოცხალია, აგზავნის SIGKILL-ს. უკვე გაჩერებულ მდგომარეობაში იდემპოტენტურია.
+მოხდენილად გააჩერეთ 9 როუტერი. აგზავნის SIGTERM, ელოდება 15 წუთს, შემდეგ SIGKILL თუ ჯერ კიდევ ცოცხალია. იდემპოტენტური, როცა უკვე გაჩერებულია.
 
-**მოთხოვნის სხეული:** არ არის
+**მოითხოვეთ სხეული:** არცერთი
 
 **პასუხები:**
 
-| სტატუსი | აღწერა                             |
-| ------- | ---------------------------------- |
-| `200`   | `ServiceStatus` (state: "stopped") |
-| `503`   | გაჩერება მოულოდნელად ვერ შესრულდა  |
+| სტატუსი | აღწერა                                   |
+| ------- | ---------------------------------------- |
+| `200`   | `ServiceStatus` (მდგომარეობა: "გაჩერდა") |
+| `503`   | გაჩერება მოულოდნელად ვერ მოხერხდა        |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-ოპერაციის ბლოკირების ფარგლებში `stop()`-ისა და შემდეგ `start()`-ის ეკვივალენტურია.
+ექვივალენტურია `stop()` შემდეგ `start()` ოპერაციული საკეტის ქვეშ.
 
-**მოთხოვნის სხეული:** არ არის
+**მოითხოვეთ სხეული:** არცერთი
 
-**პასუხები:** იგივეა, რაც `start`-ისთვის (აბრუნებს საბოლოო `ServiceStatus`-ს).
+**პასუხები:** იგივეა, რაც `start` (აბრუნებს საბოლოო `ServiceStatus`).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-აახლებს 9Router-ს npm-ის უფრო ახალ ვერსიამდე. თუ სერვისი გაშვებულია, ჯერ ის
-ჩერდება, შემდეგ სრულდება npm install (ახალი ვერსიის იმავე ადგილას ინსტალაციით),
-რის შემდეგაც სერვისი ხელახლა იშვება.
+განაახლებს 9 როუტერს უფრო ახალ npm ვერსიაზე. თუ სერვისი გაშვებულია, ის ჯერ ჩერდება, გაშვებულია npm ინსტალაცია (უფრო ახალი ვერსიის ადგილზე ინსტალაცია) და შემდეგ სერვისი გადაიტვირთება.
 
-**მოთხოვნის სხეული** (ყველა არასავალდებულოა):
+**მოითხოვეთ სხეული** (ყველა სურვილისამებრ):
 
 ```json
 { "version": "latest" }
@@ -323,42 +314,39 @@ API-გასაღებების მეშვეობით მყარ�
 | ------- | --------------------------------------------------------------- |
 | `200`   | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
 | `400`   | არასწორი სხეული                                                 |
-| `500`   | npm update ვერ შესრულდა                                         |
+| `500`   | npm განახლება ვერ მოხერხდა                                      |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-აგენერირებს ახალ API გასაღებს 9Router-ისთვის, შიფრავს მას შენახვისას და ხელახლა უშვებს სერვისს
-(თუ ის გაშვებულია), რათა სერვისმა ახალი გასაღები თავისი გარემოდან მიიღოს. ძველი გასაღები
-დაუყოვნებლივ უქმდება.
+აგენერირებს ახალ API გასაღებს 9Router-ისთვის, შიფრავს მას დასვენების დროს და განაახლებს სერვისს (თუ გაშვებულია), რათა ის აიღებს ახალ გასაღებს გარემოდან. ძველი გასაღები დაუყოვნებლივ გაუქმებულია.
 
-**მოთხოვნის სხეული:** არ არის
+**მოითხოვეთ სხეული:** არცერთი
 
 **პასუხები:**
 
 | სტატუსი | აღწერა                                     |
 | ------- | ------------------------------------------ |
 | `200`   | `{ keyRotated: true, restarted: boolean }` |
-| `500`   | როტაცია ვერ შესრულდა                       |
+| `500`   | როტაცია ვერ მოხერხდა                       |
 
-**უსაფრთხოება:** ახალი გასაღები პასუხში არასოდეს ბრუნდება (ავტორიზაციის მონაცემები არ ჟონავს).
-ის დაშიფრულად (AES-256-GCM) ინახება `version_manager` ცხრილში.
+**უსაფრთხოება:** ახალი გასაღები არასოდეს დაბრუნდება პასუხში (არ არის ავტორიზაციის გაჟონვა). ის ინახება დაშიფრული (AES-256-GCM) `version_manager` ცხრილში.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-აბრუნებს გაერთიანებულ მიმდინარე + DB სტატუსს, მათ შორის ვერსიის მეტამონაცემებსა და API გასაღების წინასწარ ხედს.
+აბრუნებს გაერთიანებულ ცოცხალი + DB სტატუსს, ვერსიის მეტამონაცემების და API გასაღების გადახედვის ჩათვლით.
 
 **პასუხები:**
 
 | სტატუსი | აღწერა                         |
 | ------- | ------------------------------ |
-| `200`   | იხილეთ ქვემოთ მოცემული სქემა   |
-| `500`   | სტატუსის წაკითხვა ვერ შესრულდა |
+| `200`   | იხილეთ სქემა ქვემოთ            |
+| `500`   | სტატუსის წაკითხვა ვერ მოხერხდა |
 
-**პასუხის სქემა:**
+**რეაგირების სქემა:**
 
 ```json
 {
@@ -382,10 +370,9 @@ API-გასაღებების მეშვეობით მყარ�
 
 #### `POST /api/services/9router/auto-start`
 
-ავტომატური გაშვების ალმის გადართვა. როდესაც `enabled: true`, სერვისი ავტომატურად
-გაეშვება OmniRoute-ის მომდევნო ჩატვირთვისას (თუ სერვისი დაინსტალირებულია).
+გადართეთ ავტომატური დაწყების დროშა. როდესაც `enabled: true`, სერვისი ავტომატურად დაიწყება შემდეგ ჯერზე OmniRoute ჩატვირთვისას (თუ სერვისი დაინსტალირებულია).
 
-**მოთხოვნის სხეული:**
+**მოითხოვეთ სხეული:**
 
 ```json
 { "enabled": true }
@@ -402,31 +389,27 @@ API-გასაღებების მეშვეობით მყარ�
 
 #### `GET /api/services/9router/logs`
 
-9Router-ის stdout/stderr ცირკულარული ბუფერიდან მიმდინარე ჟურნალების SSE ნაკადი.
+SSE ცოცხალი ჟურნალების ნაკადი 9Router-ის stdout/stderr რგოლის ბუფერიდან.
 
-**მოთხოვნის პარამეტრები:**
+**შეკითხვის პარამეტრები:**
 
-| პარამეტრი | ტიპი      | ნაგულისხმევი | აღწერა                                                                                 |
-| --------- | --------- | ------------ | -------------------------------------------------------------------------------------- |
-| `tail`    | `integer` | 200          | თავდაპირველად გასაგზავნი ისტორიული ხაზების რაოდენობა (მაქს. 1000)                      |
-| `filter`  | `string`  | არ არის      | რეგისტრისგან დამოუკიდებელი ქვესტრიქონის ფილტრი (regex-ის გარეშე — დაცულია ReDoS-ისგან) |
+| პარამ    | ტიპი      | ნაგულისხმევი | აღწერა                                                                  |
+| -------- | --------- | ------------ | ----------------------------------------------------------------------- |
+| `tail`   | `integer` | 200          | რამდენი ისტორიული ხაზი უნდა გაიგზავნოს პირველმა (მაქსიმუმ 1000)         |
+| `filter` | `string`  | არცერთი      | ქეისისადმი მგრძნობიარე ქვესტრიქონის ფილტრი (regex — ReDoS-safe არ არის) |
 
 **SSE მოვლენები:**
 
-| მოვლენა     | მონაცემები  | აღწერა                              |
+| ღონისძიება  | მონაცემები  | აღწერა                              |
 | ----------- | ----------- | ----------------------------------- |
-| `snapshot`  | `LogLine[]` | საწყისი ისტორიული ბოლო ნაწილი       |
-| `log`       | `LogLine`   | მიმდინარე ჟურნალის ხაზი             |
-| `heartbeat` | `{}`        | კავშირის შენარჩუნება ყოველ 15 წამში |
+| `snapshot`  | `LogLine[]` | საწყისი ისტორიული კუდი              |
+| `log`       | `LogLine`   | ცოცხალი შესვლის ხაზი                |
+| `heartbeat` | `{}`        | შეინარჩუნეთ სიცოცხლე ყოველ 15 წამში |
 
 **LogLine სქემა:**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **პასუხები:**
@@ -434,88 +417,134 @@ API-გასაღებების მეშვეობით მყარ�
 | სტატუსი | აღწერა                                                     |
 | ------- | ---------------------------------------------------------- |
 | `200`   | `text/event-stream`                                        |
-| `400`   | `filter` პარამეტრი ზედმეტად გრძელია (> 200 სიმბოლო)        |
-| `404`   | სერვისი ვერ მოიძებნა (ზედამხედველი რეგისტრირებული არ არის) |
+| `400`   | `filter` პარამეტრი ძალიან გრძელია (> 200 სიმბოლო)          |
+| `404`   | სერვისი ვერ მოიძებნა (ზედამხედველი არ არის რეგისტრირებული) |
 
 ---
 
-### 4.2 CLIProxyAPI-ის საბოლოო წერტილები (10 მარშრუტი)
+### 4.2 CLIProxyAPI საბოლოო წერტილი (10 მარშრუტი)
 
-CLIProxyAPI-ს აქვს 9Router-ის მსგავსი საბოლოო წერტილების სტრუქტურა, `rotate-key`-ის გარეშე, დამატებული
-`accounts`, `provider-expose` და `auto-restart-adopted`-ით. ახლა ის იღებს
-გამოყოფილ მონაცემთა სიბრტყის API გასაღებს, რომელიც გაშვებისას ინერგება (`needsApiKey: true`
-`bootstrap.ts`-ში, გამოიყენება მოდელების სინქრონიზაციისთვის); `status` ნაკლებ ველს შეიცავს.
+CLIProxyAPI აქვს იგივე ბოლო წერტილის ფორმა, როგორც 9როუტერს მინუს `rotate-key`, პლუს `accounts`, `provider-expose` და `auto-restart-adopted`. ახლა ის იღებს სპეციალურ მონაცემთა სიბრტყის API კლავიშს, რომელიც ინექცირდება ქვირითის დროს (`needsApiKey: true` in `bootstrap.ts`, გამოიყენება მოდელის სინქრონიზაციისთვის); `status` მოიცავს ნაკლებ ველებს.
 
-| მეთოდი | გზა                                 | აღწერა                                            |
-| ------ | ----------------------------------- | ------------------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | CLIProxyAPI-ის ინსტალაცია npm-იდან                |
-| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI-ის გაშვება                            |
-| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI-ის შეჩერება                           |
-| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI-ის ხელახლა გაშვება                    |
-| `POST` | `/api/services/cliproxy/update`     | უფრო ახალ ვერსიამდე განახლება                     |
-| `GET`  | `/api/services/cliproxy/status`     | მიმდინარე + DB სტატუსი (`apiKeyMasked`-ის გარეშე) |
-| `POST` | `/api/services/cliproxy/auto-start` | ავტომატური გაშვების გადართვა                      |
+| მეთოდი | ბილიკი                              | აღწერა                                         |
+| ------ | ----------------------------------- | ---------------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | დააინსტალირეთ CLIProxyAPI npm-დან              |
+| `POST` | `/api/services/cliproxy/start`      | დაიწყე CLIProxyAPI                             |
+| `POST` | `/api/services/cliproxy/stop`       | შეაჩერე CLIProxyAPI                            |
+| `POST` | `/api/services/cliproxy/restart`    | გადატვირთეთ CLIProxyAPI                        |
+| `POST` | `/api/services/cliproxy/update`     | განაახლეთ ახალ ვერსიაზე                        |
+| `GET`  | `/api/services/cliproxy/status`     | ცოცხალი + DB სტატუსი ( `apiKeyMasked` არ არის) |
+| `POST` | `/api/services/cliproxy/auto-start` | ავტომატური დაწყების გადართვა                   |
 
-გაზიარებული `GET /api/services/{name}/logs` საბოლოო წერტილი (იხილეთ §4.1) მუშაობს ოთხივე
-სერვისისთვის `[name]` დინამიკური სეგმენტის გამოყენებით.
+გაზიარებული `GET /api/services/{name}/logs` საბოლოო წერტილი (იხ. §4.1) მუშაობს ოთხივე სერვისზე `[name]` დინამიური სეგმენტის გამოყენებით.
 
 ---
 
-### 4.3 Mux-ის საბოლოო წერტილები (8 მარშრუტი)
+### 4.3 Mux საბოლოო წერტილები (8 მარშრუტი)
 
-Mux-ს აქვს CLIProxyAPI-ის მსგავსი საბოლოო წერტილების სტრუქტურა — API-ის
-ზედაპირზე `rotate-key` მარშრუტი არ არის (bearer ტოკენი გენერირდება ისევე, როგორც 9Router-ის შემთხვევაში,
-`getOrCreateApiKey("mux")`-ის მეშვეობით და ინერგება `MUX_SERVER_AUTH_TOKEN` გარემოს ცვლადის საშუალებით, თუმცა
-მისი როტაციისთვის გამოყოფილი საბოლოო წერტილი ჯერ არ არსებობს). Mux მხოლოდ სასიცოცხლო ციკლის დონეზე იმართება:
-9Router-ისგან განსხვავებით, მას არ აქვს მე-4 ფენის შემსრულებელი და არასოდეს რეგისტრირდება მარშრუტიზაციის პროვაიდერად.
+Mux-ს აქვს იგივე საბოლოო წერტილის ფორმა, როგორც CLIProxyAPI — no `rotate-key` მარშრუტი API ზედაპირზე (მიმტანი ჟეტონი გენერირდება ისევე, როგორც 9Router-ის `getOrCreateApiKey("mux")` მეშვეობით და ინექცია ხდება `MUX_SERVER_AUTH_TOKEN` env var-ის მეშვეობით, მაგრამ ჯერ არ არის გამოყოფილი ბრუნვის საბოლოო წერტილი). Mux იმართება მხოლოდ სასიცოცხლო ციკლით: 9Router-ისგან განსხვავებით, მას არ აქვს Layer 4 შემსრულებელი და არასოდეს არის რეგისტრირებული, როგორც მარშრუტიზაციის პროვაიდერი.
 
-| მეთოდი | გზა                            | აღწერა                                   |
-| ------ | ------------------------------ | ---------------------------------------- |
-| `POST` | `/api/services/mux/install`    | Mux-ის ინსტალაცია npm-იდან (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Mux-ის გაშვება (`mux server`)            |
-| `POST` | `/api/services/mux/stop`       | Mux-ის შეჩერება                          |
-| `POST` | `/api/services/mux/restart`    | Mux-ის ხელახლა გაშვება                   |
-| `POST` | `/api/services/mux/update`     | npm-ის უფრო ახალ ვერსიამდე განახლება     |
-| `GET`  | `/api/services/mux/status`     | მიმდინარე + DB სტატუსი                   |
-| `POST` | `/api/services/mux/auto-start` | ავტომატური გაშვების გადართვა             |
+| მეთოდი | ბილიკი                         | აღწერა                                  |
+| ------ | ------------------------------ | --------------------------------------- |
+| `POST` | `/api/services/mux/install`    | დააინსტალირეთ Mux npm-დან (`npm i mux`) |
+| `POST` | `/api/services/mux/start`      | დაწყება Mux (`mux server`)              |
+| `POST` | `/api/services/mux/stop`       | შეაჩერე მუქსი                           |
+| `POST` | `/api/services/mux/restart`    | გადატვირთეთ Mux                         |
+| `POST` | `/api/services/mux/update`     | განაახლეთ npm ახალ ვერსიაზე             |
+| `GET`  | `/api/services/mux/status`     | ცოცხალი + DB სტატუსი                    |
+| `POST` | `/api/services/mux/auto-start` | ავტომატური დაწყების გადართვა            |
 
 ---
 
-### 4.4 Bifrost-ის საბოლოო წერტილები (8 მარშრუტი)
+### 4.4 ბიფროსტის საბოლოო წერტილები (8 მარშრუტი)
 
-Bifrost არის Go-ზე დაფუძნებული AI-კარიბჭის სარელეო ბეკენდი (`@maximhq/bifrost`). ის იყენებს
-CLIProxyAPI-ის მსგავს საბოლოო წერტილების სტრუქტურას (`rotate-key`-ის გარეშე — Bifrost თავის პროვაიდერის
-გასაღებებს თავად მართავს `config.json`-ში, მისი `-app-dir`-ის ქვეშ).
+Bifrost არის Go AI-gateway-ის სარელეო უკანა ნაწილი (`@maximhq/bifrost`). ის იყენებს იმავე საბოლოო წერტილის ფორმას, როგორც CLIProxyAPI (არც `rotate-key` — Bifrost მართავს საკუთარ პროვაიდერის კლავიშებს `config.json` ში მისი `-app-dir` ქვეშ).
 
-| მეთოდი | გზა                                | აღწერა                                                                             |
-| ------ | ---------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Bifrost-ის დაყენება npm-იდან (`@maximhq/bifrost`)                                  |
-| `POST` | `/api/services/bifrost/start`      | Bifrost-ის გაშვება 8080 პორტზე (ნაგულისხმევი)                                      |
-| `POST` | `/api/services/bifrost/stop`       | Bifrost-ის გაჩერება                                                                |
-| `POST` | `/api/services/bifrost/restart`    | Bifrost-ის ხელახლა გაშვება                                                         |
-| `POST` | `/api/services/bifrost/update`     | უფრო ახალ ვერსიაზე განახლება                                                       |
-| `GET`  | `/api/services/bifrost/status`     | მიმდინარე + DB სტატუსი                                                             |
-| `POST` | `/api/services/bifrost/auto-start` | ავტომატური გაშვების გადართვა                                                       |
-| `GET`  | `/api/services/bifrost/logs`       | SSE ჟურნალის ბოლო ჩანაწერები (საერთო `[name]/logs` დინამიკური მარშრუტის მეშვეობით) |
+| მეთოდი | ბილიკი                             | აღწერა                                                            |
+| ------ | ---------------------------------- | ----------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | დააინსტალირეთ Bifrost npm-დან (`@maximhq/bifrost`)                |
+| `POST` | `/api/services/bifrost/start`      | Bifrost-ის დაწყება 8080 პორტზე (ნაგულისხმევი)                     |
+| `POST` | `/api/services/bifrost/stop`       | შეაჩერე ბიფროსტი                                                  |
+| `POST` | `/api/services/bifrost/restart`    | გადატვირთეთ Bifrost                                               |
+| `POST` | `/api/services/bifrost/update`     | განაახლეთ ახალ ვერსიაზე                                           |
+| `GET`  | `/api/services/bifrost/status`     | ცოცხალი + DB სტატუსი                                              |
+| `POST` | `/api/services/bifrost/auto-start` | ავტომატური დაწყების გადართვა                                      |
+| `GET`  | `/api/services/bifrost/logs`       | SSE ჟურნალის კუდი (გაზიარებული `[name]/logs` დინამიური მარშრუტით) |
 
-**მარშრუტიზაციის დაკავშირება:** როდესაც `BIFROST_BASE_URL` დაყენებული არ არის და ზედამხედველობის ქვეშ მყოფი Bifrost-ის
-ეგზემპლარი გაშვებულია, `getBifrostRoutingConfig()` (`routingBackend.ts`-ში) ავტომატურად
-იყენებს `http://127.0.0.1:{port}`-ს რეტრანსლატორის საბაზო URL-ად. ცხადად მითითებულ `BIFROST_BASE_URL` გარემოს ცვლადს
-ყოველთვის ენიჭება უპირატესობა.
+**მარშრუტის გაყვანილობა:** როდესაც `BIFROST_BASE_URL` არ არის დაყენებული და ზედამხედველობის ქვეშ მყოფი Bifrost ინსტანცია მუშაობს, `getBifrostRoutingConfig()` ( `routingBackend.ts` ში) ავტომატურად იყენებს `http://127.0.0.1:{port}` როგორც სარელეო ბაზის URL. აშკარა `BIFROST_BASE_URL` env ყოველთვის უპირატესობას ანიჭებს.
 
 ---
 
-### 4.5 Dario-ს საბოლოო წერტილები (12 მარშრუტი)
+### 4.5 დარიოს ბოლო წერტილები (12 მარშრუტი)
 
-სიცოცხლის ციკლის იგივე სტრუქტურა, რაც სხვა სერვისებში (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`), დამატებული ტოკენით დაცული OAuth-ის
-მართვის შრით `admin/`-ის ქვეშ: `admin/accounts`, `admin/import-from-omniroute`,
-`admin/login-start`, `admin/login-complete` (ყველა დაცულია `DARIO_ADMIN_TOKEN`-ით).
+იგივე სასიცოცხლო ციკლის ფორმა, როგორც სხვა სერვისები (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) პლუს სიმბოლური კარიბჭე OAuth კონტროლის სიბრტყე `admin/` ქვეშ: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (ყველა `DARIO_ADMIN_TOKEN` უკან).
 
-### 4.6 უკუპროქსი (9Router-ის მართვის პანელის ჩაშენება)
+### 4.6 ღია-wa საბოლოო წერტილი (7 მარშრუტი)
 
-მართვის პანელი 9Router-ის ვებინტერფეისს iframe-ში შიდა უკუპროქსის საშუალებით
-აჩაშენებს შემდეგ მისამართზე:
+open-wa (`@open-wa/wa-automate`) მართავს უთავო Chromium ინსტანციას (Puppeteer-ის მეშვეობით) WhatsApp ვებ-ის ავტომატიზაციისთვის. ის იყენებს იმავე საბოლოო წერტილის ფორმას, როგორც Mux ( `rotate-key` მარშრუტი ჯერ არ არის). ის სასიცოცხლო ციკლით იმართება მხოლოდ — და არა მარშრუტიზაციის სამიზნე, არც ფენის 4 executor/provider ჩანაწერი.
+
+| მეთოდი | ბილიკი                            | აღწერა                                                            |
+| ------ | --------------------------------- | ----------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | დააინსტალირეთ open-wa npm-დან (`@open-wa/wa-automate`)            |
+| `POST` | `/api/services/openwa/start`      | დაწყება open-wa პორტზე 8323 (ნაგულისხმევი)                        |
+| `POST` | `/api/services/openwa/stop`       | შეწყვიტე გახსნა                                                   |
+| `POST` | `/api/services/openwa/restart`    | გადატვირთეთ open-wa                                               |
+| `POST` | `/api/services/openwa/update`     | განაახლეთ ახალ ვერსიაზე                                           |
+| `GET`  | `/api/services/openwa/status`     | ცოცხალი + DB სტატუსი                                              |
+| `POST` | `/api/services/openwa/auto-start` | ავტომატური დაწყების გადართვა                                      |
+| `GET`  | `/api/services/openwa/logs`       | SSE ჟურნალის კუდი (გაზიარებული `[name]/logs` დინამიური მარშრუტით) |
+
+**API გასაღები:** შეყვანილი, როგორც `WA_KEY` — open-wa-ის ზოგადი `WA_*` -prefixed env გადაფარავს მას `--key`/`-k` CLI ვარიანტზე (`dist/cli/setup.js::envArgs()`, დამოწმებული დაინსტალირებული 4.76.0 პაკეტის მიხედვით). `generateServiceApiKey()` მიერ გენერირებული პრეფიქსით `ow_`. open-wa კითხულობს კლავიშს `key`/`api_key` HTTP სათაურიდან (არა `Authorization: Bearer`); `/api-docs*` აშკარად გათავისუფლებულია შემოწმებისგან (`setupAuthenticationLayer` in `dist/cli/server.js`), ამიტომ ჯანმრთელობის ზონდს არ სჭირდება ავტორიზაციის სათაური.
+
+**დაწყვილება:** open-wa არაოფიციალურია და არ არის დაკავშირებული WhatsApp — თან, დაკავშირებული ნომერი შეიცავს WhatsApp ის საკუთარი ავტომატიზაციის გამოვლენის აკრძალვის რისკს. პირველი დაწყებისას, დაწყვილების QR კოდი იბეჭდება stdout-ზე და გამოჩნდება არსებული Logs panel/SSE ნაკადის მეშვეობით — ამ ინტეგრაციაში ჯერ არ არის გამოყოფილი QR გამოსახულების საბოლოო წერტილი.
+
+---
+
+### 4.7 LLMLingua საბოლოო წერტილი (8 მარშრუტი)
+
+LLMLingua არის სწრაფი შეკუმშვის გვერდითი კარის შეფუთვა `@atjsh/llmlingua-2` (ნამდვილი ONNX ნიშნის კლასიფიკაციის მოდელი, გადმოწერილი Hugging Face-დან პირველი `/compress` ზარის დროს). ის იყენებს იმავე საბოლოო წერტილის ფორმას, როგორც Bifrost (არ არის API გასაღები — `needsApiKey: false`, ის არასოდეს ამუშავებს რწმუნებათა სიგელებს).
+
+| მეთოდი | ბილიკი                                         | აღწერა                                                                           |
+| ------ | ---------------------------------------------- | -------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-დააინსტალირეთ `@atjsh/llmlingua-2` + peers, დაწერეთ sidecar სერვერის სკრიპტი |
+| `POST` | `/api/services/llmlingua/start`                | გაუშვით გვერდითი კარა 20135 პორტზე (ნაგულისხმევი)                                |
+| `POST` | `/api/services/llmlingua/stop`                 | გააჩერეთ გვერდითი მანქანა                                                        |
+| `POST` | `/api/services/llmlingua/restart`              | გადატვირთეთ გვერდითი მანქანა                                                     |
+| `POST` | `/api/services/llmlingua/update`               | განაახლეთ პაკეტის უფრო ახალი ვერსია                                              |
+| `GET`  | `/api/services/llmlingua/status`               | ცოცხალი + DB სტატუსი                                                             |
+| `POST` | `/api/services/llmlingua/auto-start`           | ავტომატური დაწყების გადართვა                                                     |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | მიღებული (წინასწარ არსებული) ინსტანციის ავტომატური გადატვირთვის გადართვა         |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE ჟურნალის კუდი (გაზიარებული `[name]/logs` დინამიური მარშრუტით)                |
+
+**გვერდითი მანქანის კონტრაქტი:** სერვერის სკრიპტი ავლენს `GET /health` (მყისიერი — არ ელოდება მოდელს) და `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). მოდელი ზარმაცად იტვირთება პირველ `/compress` ზარზე.
+
+**შეკუმშვის გაყვანილობა:** `open-sse/services/compression/engines/llmlingua/index.ts` ს `httpSidecarBackend` უწოდებს `LLMLINGUA_BASE_URL` (ნაგულისხმევი `http://127.0.0.1:20135`) და იღებს მხოლოდ გვერდითი კარის პასუხს, როდესაც ის მკაცრად მოკლეა, ვიდრე შეყვანა; ნებისმიერი წარუმატებლობა (არ გაშვებული, დროის ამოწურვა, უპასუხისმგებლო ოპერაციების გარეშე) ბრუნდება პროცესის პროცესში მყოფი მუშა-თრედის უკანა ნაწილზე (`./worker.ts`).
+
+---
+
+### 4.8 sing-box endpoints (8 მარშრუტი)
+
+sing-box აქვს იგივე ბოლო წერტილის ფორმა, როგორც Mux — no `rotate-key` მარშრუტი, არ API გასაღების ინექცია (`needsApiKey: false` in `bootstrap.ts`). ის იმართება მხოლოდ სასიცოცხლო ციკლით: არასოდეს არის routing/LLM პროვაიდერი. `install()` ჩამოტვირთავს ოფიციალურ GitHub გამოშვების ორობითს (`SagerNet/sing-box`) დამაგრებული ვერსიისთვის (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) და ამოწმებს მის SHA256 იმავე ფაილში გამომცხვარ საკონტროლო ჯამთან შედარებით, სანამ მას დისკზე დაწერს — ნებისმიერი სხვა მოთხოვნილი ვერსია უარყოფილი იქნება.
+
+| მეთოდი | ბილიკი                                       | აღწერა                                                                    |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | ჩამოტვირთეთ + დაადასტურეთ ჩამაგრებული sing-box გამოშვება                  |
+| `POST` | `/api/services/singbox/start`                | დაიწყე სინგ-ბოქსი (`sing-box run -c config.json`)                         |
+| `POST` | `/api/services/singbox/stop`                 | Stop Sing-box                                                             |
+| `POST` | `/api/services/singbox/restart`              | გადატვირთეთ sing-box                                                      |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall დამაგრებული გამოშვება                                 |
+| `GET`  | `/api/services/singbox/status`               | ცოცხალი + DB სტატუსი                                                      |
+| `POST` | `/api/services/singbox/auto-start`           | ავტომატური დაწყების გადართვა                                              |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | გადართეთ ავტომატური გადატვირთვა მიღებული (წინასწარ არსებული) პროცესისთვის |
+| `GET`  | `/api/services/singbox/logs`                 | SSE ჟურნალის კუდი (გაზიარებული `[name]/logs` დინამიური მარშრუტით)         |
+
+**TPROXY გაყვანილობა:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) წერს `config.json` და იწყებს ზედამხედველს, სანამ `applyTproxy()` დააინსტალირებს TPROXY firewall-ის წესებს. თუ ზედამხედველი აკლია ან ვერ მიაღწევს `running`, ის ახლა იწერება შეცდომის დონეზე (ვიდრე ჩუმად გადაყლაპავს წარუმატებლობას), ასე რომ ოპერატორს შეუძლია თქვას, რომ TPROXY წესები იქნა გამოყენებული მათ უკან მომუშავე მსმენელის გარეშე.
+
+---
+
+### 4.9 უკუ პროქსი (9 როუტერის დაფის ჩაშენება)
+
+საინფორმაციო დაფა ათავსებს 9Router web UI ს iframe-ში შიდა საპირისპირო პროქსის მეშვეობით:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -523,18 +552,15 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 ეს პროქსი:
 
-- მოთხოვნას გადაამისამართებს `http://127.0.0.1:{port}/{path}`-ზე (მხოლოდ loopback)
-- შემომავალი მოთხოვნიდან შლის `cookie` და `authorization` სათაურებს (OmniRoute-ის სესიის გაჟონვის გარეშე)
-- 9Router-ის ავთენტიფიკაციისთვის ამატებს `Authorization: Bearer {apiKey}`-ს
-- პასუხიდან შლის `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` სათაურებს
-- HTML პასუხებს გარდაქმნის `<base href>`-ის ჩასამატებლად და აბსოლუტური გზების ნორმალიზებისთვის (`/foo` → `/dashboard/.../embed/foo`)
+- მოთხოვნის გადამისამართება `http://127.0.0.1:{port}/{path}` ზე (მხოლოდ loopback)
+- აშორებს შემომავალ `cookie` და `authorization` სათაურებს ( OmniRoute სესიის გაჟონვის გარეშე)
+- შეჰყავს `Authorization: Bearer {apiKey}` 9 როუტერის ავთენტიფიკაციისთვის
+- ზოლები `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` პასუხიდან
+- ხელახლა წერს HTML პასუხებს `<base href>` ინექციისთვის და აბსოლუტური ბილიკების ნორმალიზებისთვის (`/foo` → `/dashboard/.../embed/foo`)
 
-ჩაშენებული მართვის პანელის WebSocket-ის განახლებებს ცალკე პორტზე გაშვებული დამხმარე სერვერი
-ამუშავებს (იხილეთ `src/lib/services/embedWsProxy.ts`).
+ჩაშენებული საინფორმაციო დაფის WebSocket განახლებებს ამუშავებს კომპანიონი სერვერი სპეციალურ პორტზე (იხ. `src/lib/services/embedWsProxy.ts`).
 
-**უსაფრთხოება:** ჩაშენების პროქსის მარშრუტები კლასიფიცირებულია `LOCAL_ONLY_API_PREFIXES`-ის ქვეშ
-და მათზე წვდომა მხოლოდ loopback-იდანაა შესაძლებელი. თავდამსხმელი, რომელიც JWT-ს
-Cloudflare/Ngrok გვირაბის მეშვეობით მოიპოვებს, ჩაშენებულ სერვისებთან პროქსირებას ვერ შეძლებს.
+**უსაფრთხოება:** ჩაშენებული პროქსი მარშრუტები კლასიფიცირებულია `LOCAL_ONLY_API_PREFIXES` ქვეშ და მისი მიღწევა შესაძლებელია მხოლოდ loopback-დან. თავდამსხმელი, რომელიც იძენს JWT Cloudflare/Ngrok გვირაბის მეშვეობით, ვერ შეძლებს ჩაშენებულ სერვისებში პროქსი.
 
 ---
 

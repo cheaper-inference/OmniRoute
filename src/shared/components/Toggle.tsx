@@ -1,5 +1,6 @@
 "use client";
 
+import { Switch } from "@omniroute/ui-kit/switch";
 import { cn } from "@/shared/utils/cn";
 
 interface ToggleProps {
@@ -8,12 +9,22 @@ interface ToggleProps {
   label?: string;
   description?: string;
   disabled?: boolean;
+  /** `xs`/`sm` use the compact switch (`.ci-switch--compact`); `md`/`lg` the kit default. */
   size?: "xs" | "sm" | "md" | "lg";
   className?: string;
   title?: string;
   ariaLabel?: string;
 }
 
+/**
+ * Toggle — adapter over the kit Switch (`input[type=checkbox][role=switch]`).
+ *
+ * The accessible name is the visible `label` when there is one (set as aria-label because the
+ * kit's <label> wraps label + description, which would fold the description into the name; the
+ * description stays an aria-describedby). Unlabelled switches keep the legacy fallback chain
+ * `ariaLabel → description → title → "Toggle"`. `aria-checked` mirrors `checked` like the
+ * legacy button did, so `[aria-checked]` selectors keep working.
+ */
 export default function Toggle({
   checked = false,
   onChange,
@@ -25,78 +36,25 @@ export default function Toggle({
   title,
   ariaLabel,
 }: ToggleProps) {
-  const sizes = {
-    xs: {
-      track: "w-6 h-3",
-      thumb: "size-[8px]",
-      translate: "translate-x-3.5",
-    },
-    sm: {
-      track: "w-8 h-4",
-      thumb: "size-3",
-      translate: "translate-x-4",
-    },
-    md: {
-      track: "w-11 h-6",
-      thumb: "size-5",
-      translate: "translate-x-5",
-    },
-    lg: {
-      track: "w-14 h-7",
-      thumb: "size-6",
-      translate: "translate-x-7",
-    },
-  };
-
-  const handleClick = () => {
-    if (!disabled && onChange) {
-      onChange(!checked);
-    }
-  };
-
   return (
-    <div
+    <Switch
+      checked={checked}
+      onCheckedChange={(next) => {
+        if (!disabled) onChange?.(next);
+      }}
+      disabled={disabled}
+      label={label || undefined}
+      description={description || undefined}
+      aria-label={label || ariaLabel || description || title || "Toggle"}
+      aria-checked={checked}
+      title={title}
       className={cn(
-        "flex items-center gap-3",
-        disabled && "opacity-50 cursor-not-allowed",
+        (size === "xs" || size === "sm") && "ci-switch--compact",
+        // The kit dims only the label row (`.ci-switch[data-disabled]`); the bare control a
+        // label-less switch renders has no disabled look, so keep the legacy `opacity-50`.
+        disabled && !label && !description && "opacity-50",
         className
       )}
-    >
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-label={ariaLabel || label || description || title || "Toggle"}
-        title={title}
-        disabled={disabled}
-        onClick={handleClick}
-        className={cn(
-          "relative inline-flex shrink-0 cursor-pointer rounded-full",
-          "transition-colors duration-200 ease-in-out",
-          "border shadow-inner",
-          "focus:outline-none focus:ring-1 focus:ring-accent/30",
-          checked ? "border-primary bg-primary" : "border-border bg-surface-2 dark:bg-white/20",
-          sizes[size].track,
-          disabled && "cursor-not-allowed"
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none inline-block rounded-full bg-white shadow-sm",
-            "transform transition duration-200 ease-in-out",
-            checked ? sizes[size].translate : "translate-x-0.5",
-            sizes[size].thumb,
-            "mt-0.5"
-          )}
-        />
-      </button>
-      {(label || description) && (
-        <div className="flex flex-col">
-          {label && <span className="text-sm font-medium text-text-main">{label}</span>}
-          {description && <span className="text-xs text-text-muted">{description}</span>}
-        </div>
-      )}
-    </div>
+    />
   );
 }

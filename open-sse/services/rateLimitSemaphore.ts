@@ -181,6 +181,8 @@ export function acquire(
  * Mark a model as rate-limited for a given duration.
  * Existing running requests continue, but new acquisitions are blocked
  * until the cooldown expires. After expiry, the queue drains automatically.
+ * If the model is already cooling, the limit extends to the later expiry —
+ * a shorter cooldown never shortens it.
  *
  * @param {string} modelStr - The model identifier
  * @param {number} cooldownMs - How long to block (milliseconds)
@@ -190,7 +192,8 @@ export function markRateLimited(modelStr: string, cooldownMs: number): void {
   // gate.max, so the bare default here would reset a configured limit to 3 and the
   // post-cooldown drain would release that many queued requests at once.
   const gate = getGate(modelStr, gates.get(modelStr)?.max);
-  gate.rateLimitedUntil = Date.now() + cooldownMs;
+  // A shorter cooldown must not shorten an active limit — keep the later expiry.
+  gate.rateLimitedUntil = Math.max(gate.rateLimitedUntil ?? 0, Date.now() + cooldownMs);
 
   // Schedule drain after cooldown expires
   setTimeout(() => {
@@ -202,12 +205,14 @@ export function markRateLimited(modelStr: string, cooldownMs: number): void {
 }
 
 /**
- * Get stats for all tracked models (for monitoring/UI)
+ * Get stats for all tracked models (for monitoring/UI).
+ * Pass a prefix to return only gates in one namespace, such as `combo:`.
  * @returns {Object} Map of modelStr → { running, queued, max, rateLimitedUntil }
  */
-export function getStats(): Record<string, RateLimitStatsEntry> {
+export function getStats(prefix?: string): Record<string, RateLimitStatsEntry> {
   const stats: Record<string, RateLimitStatsEntry> = {};
   for (const [model, gate] of gates) {
+    if (prefix && !model.startsWith(prefix)) continue;
     stats[model] = {
       running: gate.running,
       queued: gate.queue.length,

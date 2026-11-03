@@ -1,117 +1,112 @@
-<svg viewBox="0 0 1200 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Works the second you install it — zero config. Three steps: 1. Install — npm install -g omniroute, one command, server on localhost port 20128. 2. Point your tool at http://localhost:20128/v1 — any OpenAI-compatible tool. 3. It answers — call model auto and get an instant reply with no API key, no signup, no configuration. Keyless provider OpenCode Free is pre-wired into the auto combo, so a fresh install responds out of the box.">
-  <desc>Animated flow card: three step tiles (Install, Point your tool, It answers) fade in left to right, a dot travels along the connectors between them in a loop, and the final check pulses.</desc>
+<svg viewBox="0 0 1200 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Install and start OmniRoute, connect an eligible provider with your own account, then configure your tool. Auto routing depends on eligible connections and provider limits.</title>
+  <desc id="d">Animated flow card: three step tiles (Install and start, Connect provider, Use your tool) fade in left to right, a dot travels along the connectors between them in a loop, and the final check pulses.</desc>
+  <style>
+@font-face{font-family:"CI Sans";font-style:normal;font-weight:400;src:url(data:font/woff2;base64,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) format("woff2")}
+@font-face{font-family:"CI Sans";font-style:normal;font-weight:600;src:url(data:font/woff2;base64,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) format("woff2")}
+@font-face{font-family:"CI Mono";font-style:normal;font-weight:500;src:url(data:font/woff2;base64,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) format("woff2")}
+:root{--bg:#fbfbf8;--surface:#ffffff;--ink:#040d10;--body:#031a1b;--muted:#575f5f;--border:rgba(4,13,16,0.24);--grid:rgba(4,13,16,0.06);--accent:#d8ff00;--accent-ink:#040d10;--ok:#087a4f;--ok-bg:#e8f7f0;--warn:#a75a00;--warn-bg:#fff3df;--err:#bf3636;--err-bg:#ffeded;--info:#2869d8;--info-bg:#edf4ff;--surface-subtle:#f7f7f2;--surface-muted:#eeeee8;--inverse-bg:#040d10;--inverse-text:#f1f7f7;--track:rgba(4,13,16,0.14);--accent-soft:rgba(216,255,0,0.22)}
+@media (prefers-color-scheme: dark){:root{--bg:#040d10;--surface:#0d191c;--ink:#ffffff;--body:#f1f7f7;--muted:#c7cbc5;--border:rgba(241,247,247,0.24);--grid:rgba(241,247,247,0.05);--accent:#d8ff00;--accent-ink:#040d10;--ok:#5dd6a5;--ok-bg:#0f3328;--warn:#f4cf8b;--warn-bg:#38280f;--err:#ff8f8f;--err-bg:#3b1919;--info:#8fbaff;--info-bg:#142b4f;--surface-subtle:#1e2c2f;--surface-muted:#394446;--inverse-bg:#040d10;--inverse-text:#f1f7f7;--track:rgba(241,247,247,0.2);--accent-soft:rgba(216,255,0,0.12)}}
+.kicker{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:12px;letter-spacing:0.18em;fill:var(--muted)}
+.headline{font-family: "CI Serif", "Instrument Serif", Georgia, "Times New Roman", serif;font-weight:400;font-size:72px;fill:var(--ink)}
+.sub{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:23px;fill:var(--body)}
+.body{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:14px;fill:var(--muted)}
+.mono{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:13px;fill:var(--body)}
+.num{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:32px;fill:var(--ink)}
+.lbl{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:10px;letter-spacing:0.16em;fill:var(--muted)}
+.foot{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:10px;letter-spacing:0.16em;fill:var(--muted)}
+.cmd{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:16px;fill:var(--accent-ink)}
+.bg{fill:var(--bg)} .surface{fill:var(--surface);stroke:var(--border)} .accent{fill:var(--accent)} .rule{stroke:var(--border)} .grid{stroke:var(--grid)}
+.h2{font-family: "CI Serif", "Instrument Serif", Georgia, "Times New Roman", serif;font-weight:400;font-size:40px;fill:var(--ink)}
+.h3{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:600;font-size:18px;fill:var(--ink)}
+.h4{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:600;font-size:14px;fill:var(--ink)}
+.cell{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:13px;fill:var(--body)}
+.small{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:11px;fill:var(--muted)}
+.num-sm{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:20px;fill:var(--ink)}
+.mono-sm{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:11px;fill:var(--body)}
+.mono-xs{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:9px;letter-spacing:0.08em;fill:var(--muted)}
+.term{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:13px;fill:var(--inverse-text)}
+.term-lg{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:16px;fill:var(--inverse-text)}
+.ok{fill:var(--ok)} .warn{fill:var(--warn)} .err{fill:var(--err)} .info{fill:var(--info)} .ok-bg{fill:var(--ok-bg)} .warn-bg{fill:var(--warn-bg)} .err-bg{fill:var(--err-bg)} .info-bg{fill:var(--info-bg)} .stroke-ok{stroke:var(--ok)} .stroke-warn{stroke:var(--warn)} .stroke-err{stroke:var(--err)} .stroke-info{stroke:var(--info)} .stroke-accent{stroke:var(--accent)} .stroke-ink{stroke:var(--ink)} .surface-subtle{fill:var(--surface-subtle)} .surface-muted{fill:var(--surface-muted)} .inverse{fill:var(--inverse-bg)} .track{fill:var(--track)} .accent-soft{fill:var(--accent-soft)} .ink{fill:var(--ink)} .body-fill{fill:var(--body)} .muted{fill:var(--muted)}
+  </style>
   <defs>
-    <pattern id="gridW" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>
+    <pattern id="wzc-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" class="grid" stroke-width="1"/>
     </pattern>
-    <radialGradient id="bgGlowW" cx="72%" cy="12%" r="60%">
-      <stop offset="0%" stop-color="#7ee787" stop-opacity="0.12"/>
-      <stop offset="55%" stop-color="#00cec9" stop-opacity="0.06"/>
-      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
-    </radialGradient>
   </defs>
-
-  <rect width="1200" height="430" fill="#0b0e14"/>
-  <rect width="1200" height="430" fill="url(#gridW)"/>
-  <rect width="1200" height="430" fill="url(#bgGlowW)"/>
-
-  <!-- header -->
-  <text x="40" y="56" font-family="Consolas, 'Courier New', monospace" font-size="13" letter-spacing="2.5" fill="#7ee787">WORKS THE SECOND YOU INSTALL IT</text>
-  <line x1="392" y1="51" x2="1160" y2="51" stroke="#232b38" stroke-width="1.5"/>
-  <text x="40" y="98" font-family="Inter, 'Segoe UI', Arial, Helvetica, system-ui, sans-serif" font-size="23" font-weight="600" fill="#c9d1d9">Fresh install → it already answers. <tspan fill="#7ee787" font-weight="800">Zero config.</tspan></text>
-
-  <!-- connectors (drawn under the tiles) -->
-  <g stroke="#2b3543" stroke-width="2" stroke-dasharray="5 5" fill="none">
-    <path id="cW1" d="M 372 218 L 432 218"/>
-    <path id="cW2" d="M 767 218 L 827 218"/>
+  <defs>
+    <path id="wzc-c1" d="M 372 218 L 432 218"/>
+    <path id="wzc-c2" d="M 767 218 L 827 218"/>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1200" height="430"/>
+  <rect x="0" y="0" width="1200" height="430" fill="url(#wzc-grid)"/>
+  <text x="40" y="56" class="kicker">CONNECT, THEN ROUTE</text>
+  <line x1="300" y1="51" x2="1160" y2="51" class="rule" stroke-width="1"/>
+  <text x="40" y="98" class="sub">Install → connect a provider → <tspan font-weight="600" style="fill:var(--ok)">route.</tspan></text>
+  <g class="rule" stroke-width="2" stroke-dasharray="5 5" fill="none">
+    <use href="#wzc-c1"/>
+    <use href="#wzc-c2"/>
   </g>
-  <!-- traveling dots along the connectors -->
-  <circle r="4" fill="#a78bfa">
-    <animateMotion dur="2.6s" begin="1.4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear">
-      <mpath href="#cW1"/>
-    </animateMotion>
+  <circle r="4" class="accent stroke-ink" stroke-width="1">
+    <animateMotion dur="2.6s" begin="1.4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wzc-c1"/></animateMotion>
     <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.6s" begin="1.4s" repeatCount="indefinite"/>
   </circle>
-  <circle r="4" fill="#7ee787">
-    <animateMotion dur="2.6s" begin="1.9s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear">
-      <mpath href="#cW2"/>
-    </animateMotion>
+  <circle r="4" class="ok">
+    <animateMotion dur="2.6s" begin="1.9s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wzc-c2"/></animateMotion>
     <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.6s" begin="1.9s" repeatCount="indefinite"/>
   </circle>
-
-  <g font-family="Inter, 'Segoe UI', Arial, Helvetica, system-ui, sans-serif">
-
-    <!-- step 1: install (blue) -->
-    <g opacity="0">
-      <animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.1s" fill="freeze"/>
-      <rect x="40" y="132" width="332" height="172" rx="14" fill="#161b22" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-      <rect x="40" y="148" width="4" height="140" rx="2" fill="#0984e3"/>
-      <circle cx="80" cy="172" r="15" fill="#74b9ff" fill-opacity="0.12"/>
-      <text x="80" y="178" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="15" font-weight="800" fill="#74b9ff">1</text>
-      <g transform="translate(108,161)" stroke="#74b9ff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M 11 2 L 11 15 M 6 10 L 11 15 L 16 10"/>
-        <path d="M 3 19 L 19 19"/>
-      </g>
-      <text x="140" y="179" font-size="18" font-weight="800" fill="#74b9ff">Install</text>
-      <text x="66" y="222" font-family="Consolas, 'Courier New', monospace" font-size="14" fill="#e6edf3">$ npm i -g omniroute</text>
-      <text x="66" y="258" font-size="13.5" fill="#a1a1aa">One command. Server boots on</text>
-      <text x="66" y="279" font-family="Consolas, 'Courier New', monospace" font-size="13" fill="#8b949e">localhost:20128</text>
-    </g>
-
-    <!-- step 2: point your tool (violet) -->
-    <g opacity="0">
-      <animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.5s" fill="freeze"/>
-      <rect x="435" y="132" width="332" height="172" rx="14" fill="#161b22" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-      <rect x="435" y="148" width="4" height="140" rx="2" fill="#8b5cf6"/>
-      <circle cx="475" cy="172" r="15" fill="#a78bfa" fill-opacity="0.12"/>
-      <text x="475" y="178" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="15" font-weight="800" fill="#a78bfa">2</text>
-      <g transform="translate(503,161)" stroke="#a78bfa" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M 8 6 L 5 9 A 4 4 0 0 0 5 15 L 8 18 M 14 6 L 17 9 A 4 4 0 0 1 17 15 L 14 18 M 8.5 12 L 13.5 12"/>
-      </g>
-      <text x="535" y="179" font-size="18" font-weight="800" fill="#a78bfa">Point your tool</text>
-      <text x="461" y="222" font-family="Consolas, 'Courier New', monospace" font-size="13" fill="#e6edf3">http://localhost:20128/v1</text>
-      <text x="461" y="258" font-size="13.5" fill="#a1a1aa">Any OpenAI-compatible tool —</text>
-      <text x="461" y="279" font-size="13.5" fill="#a1a1aa">Claude Code, Cursor, Cline…</text>
-    </g>
-
-    <!-- step 3: it answers (green) -->
-    <g opacity="0">
-      <animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.9s" fill="freeze"/>
-      <rect x="830" y="132" width="330" height="172" rx="14" fill="#161b22" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-      <rect x="830" y="132" width="330" height="172" rx="14" fill="none" stroke="#7ee787" stroke-width="1.5" opacity="0">
-        <animate attributeName="opacity" values="0;0.9;0" keyTimes="0;0.5;1" dur="2.6s" begin="3.2s" repeatCount="indefinite"/>
-      </rect>
-      <rect x="830" y="148" width="4" height="140" rx="2" fill="#22c55e"/>
-      <circle cx="870" cy="172" r="15" fill="#7ee787" fill-opacity="0.12"/>
-      <text x="870" y="178" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="15" font-weight="800" fill="#7ee787">3</text>
-      <g transform="translate(898,161)" stroke="#7ee787" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M 3 11 L 9 17 L 19 5"/>
-      </g>
-      <text x="930" y="179" font-size="18" font-weight="800" fill="#7ee787">It answers</text>
-      <text x="856" y="222" font-family="Consolas, 'Courier New', monospace" font-size="14" fill="#e6edf3">model: <tspan fill="#7ee787" font-weight="700">"auto"</tspan> → reply</text>
-      <text x="856" y="258" font-size="13.5" fill="#a1a1aa">Instant. OmniRoute builds a virtual</text>
-      <text x="856" y="279" font-size="13.5" fill="#a1a1aa">combo from keyless free providers.</text>
-    </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.1s" fill="freeze"/>
+    <rect x="40" y="132" width="332" height="172" rx="12" class="surface" stroke-width="1"/>
+    <rect x="40" y="148" width="4" height="140" rx="2" class="info"/>
+    <circle cx="80" cy="172" r="15" class="info-bg"/>
+    <text x="80" y="178" text-anchor="middle" class="cmd" style="fill:var(--info)">1</text>
+    <g transform="translate(108,161)" class="stroke-info" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M 11 2 L 11 15 M 6 10 L 11 15 L 16 10"/><path d="M 3 19 L 19 19"/></g>
+    <text x="140" y="179" class="h3">Install and start</text>
+    <text x="66" y="222" class="mono">$ npm i -g omniroute</text>
+    <text x="66" y="258" class="body">Then run omniroute; open</text>
+    <text x="66" y="279" class="mono" style="fill:var(--muted)">localhost:20128</text>
   </g>
-
-  <!-- "no ___" chips -->
-  <g font-family="Inter, 'Segoe UI', Arial, Helvetica, system-ui, sans-serif" font-size="13.5" font-weight="700" opacity="0">
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.5s" fill="freeze"/>
+    <rect x="435" y="132" width="332" height="172" rx="12" class="surface" stroke-width="1"/>
+    <rect x="435" y="148" width="4" height="140" rx="2" class="ink"/>
+    <circle cx="475" cy="172" r="15" class="surface-muted"/>
+    <text x="475" y="178" text-anchor="middle" class="cmd" style="fill:var(--ink)">2</text>
+    <g transform="translate(503,161)" class="stroke-ink" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M 8 6 L 5 9 A 4 4 0 0 0 5 15 L 8 18 M 14 6 L 17 9 A 4 4 0 0 1 17 15 L 14 18 M 8.5 12 L 13.5 12"/></g>
+    <text x="535" y="179" class="h3">Connect provider</text>
+    <text x="461" y="222" class="mono">Dashboard → Providers</text>
+    <text x="461" y="258" class="body">Use your own account or API key.</text>
+    <text x="461" y="279" class="body">Review provider terms and limits.</text>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.9s" fill="freeze"/>
+    <rect x="830" y="132" width="330" height="172" rx="12" class="surface" stroke-width="1"/>
+    <rect x="830" y="132" width="330" height="172" rx="12" fill="none" class="stroke-ok" stroke-width="1.5" opacity="0"><animate attributeName="opacity" values="0;0.9;0" keyTimes="0;0.5;1" dur="2.6s" begin="3.2s" repeatCount="indefinite"/></rect>
+    <rect x="830" y="148" width="4" height="140" rx="2" class="ok"/>
+    <circle cx="870" cy="172" r="15" class="ok-bg"/>
+    <text x="870" y="178" text-anchor="middle" class="cmd" style="fill:var(--ok)">3</text>
+    <g transform="translate(898,161)" class="stroke-ok" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M 3 11 L 9 17 L 19 5"/></g>
+    <text x="930" y="179" class="h3">Use your tool</text>
+    <text x="856" y="222" class="mono">localhost:20128/v1</text>
+    <text x="856" y="258" class="body">Set model to "auto"</text>
+    <text x="856" y="279" class="body">Eligible connections + fallback.</text>
+  </g>
+  <g opacity="0">
     <animate attributeName="opacity" values="0;1" dur="0.5s" begin="1.3s" fill="freeze"/>
     <g transform="translate(40,332)">
-      <rect x="0" y="0" width="168" height="34" rx="17" fill="#161b22" stroke="#7ee787" stroke-opacity="0.35" stroke-width="1"/>
-      <text x="24" y="22" fill="#c9d1d9">✕ no API key</text>
+      <rect x="0" y="0" width="168" height="34" rx="17" class="ok-bg stroke-ok" stroke-opacity="0.45" stroke-width="1"/>
+      <text x="24" y="22" class="h4">Your accounts</text>
     </g>
     <g transform="translate(224,332)">
-      <rect x="0" y="0" width="168" height="34" rx="17" fill="#161b22" stroke="#7ee787" stroke-opacity="0.35" stroke-width="1"/>
-      <text x="24" y="22" fill="#c9d1d9">✕ no signup</text>
+      <rect x="0" y="0" width="168" height="34" rx="17" class="ok-bg stroke-ok" stroke-opacity="0.45" stroke-width="1"/>
+      <text x="24" y="22" class="h4">Provider limits</text>
     </g>
     <g transform="translate(408,332)">
-      <rect x="0" y="0" width="188" height="34" rx="17" fill="#161b22" stroke="#7ee787" stroke-opacity="0.35" stroke-width="1"/>
-      <text x="24" y="22" fill="#c9d1d9">✕ no configuration</text>
+      <rect x="0" y="0" width="188" height="34" rx="17" class="ok-bg stroke-ok" stroke-opacity="0.45" stroke-width="1"/>
+      <text x="24" y="22" class="h4">Local routing</text>
     </g>
   </g>
-
-  <!-- footer -->
-  <text x="40" y="406" font-family="Consolas, 'Courier New', monospace" font-size="12" fill="#71717a">OpenCode Free is pre-wired into <tspan fill="#7ee787">auto</tspan> — a fresh install responds out of the box.</text>
-  <text x="1160" y="406" text-anchor="end" font-family="Consolas, 'Courier New', monospace" font-size="12" letter-spacing="1.5" fill="#71717a">$0 · MIT</text>
+  <text x="40" y="406" class="mono-sm" style="fill:var(--muted)"><tspan style="fill:var(--ok)">auto</tspan> uses eligible connections; availability and provider limits still apply.</text>
+  <text x="1160" y="406" text-anchor="end" class="kicker">$0 · MIT</text>
 </svg>

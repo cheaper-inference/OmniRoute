@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Card, Button, ConfirmModal } from "@/shared/components";
@@ -80,8 +82,8 @@ export function ApiKeyField({ name, serviceLabel, showReveal = false }: ApiKeyFi
     <>
       <Card padding="md">
         <div className="flex items-center gap-3 mb-3">
-          <div className="size-8 rounded-lg flex items-center justify-center bg-amber-500/10">
-            <span className="material-symbols-outlined text-amber-500 text-xl">key</span>
+          <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
+            <Icon name="key" size={20} />
           </div>
           <div>
             <h3 className="font-medium text-sm">{t("apiKey")}</h3>
@@ -92,14 +94,10 @@ export function ApiKeyField({ name, serviceLabel, showReveal = false }: ApiKeyFi
         {msg && (
           <div
             className={`flex items-center gap-1.5 mb-3 px-2 py-1.5 rounded text-xs ${
-              msg.ok
-                ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                : "bg-red-500/10 text-red-600 dark:text-red-400"
+              msg.ok ? "bg-success/10 text-success" : "bg-error/10 text-error"
             }`}
           >
-            <span className="material-symbols-outlined text-[12px]">
-              {msg.ok ? "check_circle" : "error"}
-            </span>
+            <Icon name={msg.ok ? "check_circle" : "error"} size={12} />
             {msg.text}
           </div>
         )}

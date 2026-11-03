@@ -1,6 +1,6 @@
 # CORS Configuration & Security (Ελληνικά)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -64,11 +64,11 @@
 
 Αυτό σημαίνει τα εξής για κάθε επιφάνεια, ακόμη και με `CORS_ALLOW_ALL=true`:
 
-| Επιφάνεια                                             | Μηχανισμός ελέγχου ταυτότητας | Επίδραση του CORS με χαρακτήρα μπαλαντέρ                                                                                                                                                                                                                                                 |
-| ----------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Πίνακας ελέγχου / MANAGEMENT `/api/*`                 | Συνεδρία μέσω cookie          | Η προέλευση επιστρέφεται, αλλά **χωρίς `Allow-Credentials`** ο browser **αποκλείει** τη διαπιστευμένη ανάγνωση. Ένας κακόβουλος ιστότοπος διαφορετικής προέλευσης **δεν μπορεί να διαβάσει** τις πιστοποιημένες αποκρίσεις του πίνακα ελέγχου σας και το cookie συνεδρίας δεν εκτίθεται. |
-| API πελάτη `/v1/*`, `/v1beta/*`                       | Κεφαλίδα Bearer / `x-api-key` | Είναι ήδη ανεκτικό **εκ σχεδιασμού** (`relaxForTokenAuth`): οι browsers δεν επισυνάπτουν ποτέ αυτόματα `Authorization`/`x-api-key`, επομένως η σελίδα ενός εισβολέα δεν μπορεί να παράσχει το κλειδί σας. Το `CORS_ALLOW_ALL` δεν διευρύνει αυτήν την πρόσβαση.                          |
-| Δημόσια πρόσβαση μόνο για ανάγνωση (`/api/health`, …) | Κανένας                       | Μη ευαίσθητη· ο χαρακτήρας μπαλαντέρ είναι ακίνδυνος.                                                                                                                                                                                                                                    |
+| Επιφάνεια                                             | Μηχανισμός ελέγχου ταυτότητας | Επίδραση του CORS με χαρακτήρα μπαλαντέρ                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Πίνακας ελέγχου / MANAGEMENT `/api/*`                 | Συνεδρία μέσω cookie          | Η προέλευση επιστρέφεται, αλλά **χωρίς `Allow-Credentials`** ο browser **αποκλείει** τη διαπιστευμένη ανάγνωση. Ένας κακόβουλος ιστότοπος διαφορετικής προέλευσης **δεν μπορεί να διαβάσει** τις πιστοποιημένες αποκρίσεις του πίνακα ελέγχου σας και το cookie συνεδρίας δεν εκτίθεται.                                                                                                                                                         |
+| API πελάτη `/v1/*`, `/v1beta/*`                       | Κεφαλίδα Bearer / `x-api-key` | Είναι ήδη ανεκτικό **εκ σχεδιασμού** (`relaxForTokenAuth`): οι browsers δεν επισυνάπτουν ποτέ αυτόματα `Authorization`/`x-api-key`, επομένως η σελίδα ενός εισβολέα δεν μπορεί να παράσχει το κλειδί σας. Η επιστροφή της προέλευσης εφαρμόζεται μόνο όταν το κλειδί που παρουσιάστηκε έχει επικυρωθεί· οι ανώνυμες αποκρίσεις (`REQUIRE_API_KEY=false`) διατηρούν τη λίστα επιτρεπόμενων. Το `CORS_ALLOW_ALL` δεν διευρύνει αυτήν την πρόσβαση. |
+| Δημόσια πρόσβαση μόνο για ανάγνωση (`/api/health`, …) | Κανένας                       | Μη ευαίσθητη· ο χαρακτήρας μπαλαντέρ είναι ακίνδυνος.                                                                                                                                                                                                                                                                                                                                                                                            |
 
 Επομένως, η **υπολειπόμενη** έκθεση του `CORS_ALLOW_ALL=true` περιορίζεται στα
 εξής: (α) μη διαπιστευμένες **αναγνώσεις** ήδη μη πιστοποιημένων δεδομένων μεταξύ
@@ -133,29 +133,78 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
   αυτόματα. Το CORS δεν αποτελεί ουσιαστικό εμπόδιο εδώ — το κλειδί API είναι το
   εμπόδιο — γι’ αυτό και αυτή η επιφάνεια είναι σκόπιμα ελαστική, ώστε τα προγράμματα-πελάτες προγράμματος περιήγησης και
   Electron να μπορούν να διαβάζουν αποκρίσεις τις οποίες δικαιούνται ήδη.
+  Η ελαστική επιστροφή της προέλευσης ακολουθεί το επικυρωμένο κλειδί και όχι την απλή
+  παρουσία της κεφαλίδας: όταν το `REQUIRE_API_KEY=false` εξυπηρετεί ένα αίτημα ανώνυμα,
+  η επιτυχής απόκρισή του διατηρεί τη λίστα επιτρεπόμενων που είναι κλειστή σε περίπτωση
+  αποτυχίας. Οι απορρίψεις ελέγχου ταυτότητας (401) παραμένουν αναγνώσιμες, ώστε τα
+  προγράμματα-πελάτες να μπορούν να εμφανίζουν ένα ανακληθέν ή λανθασμένα πληκτρολογημένο
+  κλειδί (#5242): η δική της απόκριση 401 της pipeline διατηρεί την επιστροφή της
+  προέλευσης, ενώ μια διαδρομή που απορρίπτει η ίδια το κλειδί αφού η pipeline εξυπηρέτησε
+  το αίτημα ως ανώνυμο (`/v1/models` και `/v1beta/models` με ρυθμισμένο έλεγχο ταυτότητας
+  διαχείρισης, οι διαδρομές με εμβέλεια κατόχου `/v1/files`, `/v1/batches`, `/v1/media`,
+  `/v1/session-leases` και οι διαδρομές υποψηφίων auto-combo) προσθέτει την επιστροφή
+  της προέλευσης σε αυτή την απόκριση 401 μέσω του `credentialRejectionHeaders()`. Η
+  επιστροφή εξαρτάται από το αν το αίτημα φέρει κεφαλίδα διαπιστευτηρίων
+  (`Authorization`, `x-api-key`, `x-goog-api-key` ή το cookie `auth_token`), όχι από το
+  ποια από αυτές έλεγξε η διαδρομή, και δεν συνδυάζεται ποτέ με
+  `Access-Control-Allow-Credentials`· το σώμα είναι ένα σταθερό περίβλημα σφάλματος. Οι
+  διαδρομές διαχείρισης κάτω από το `/api/v1/` που προστατεύονται από το
+  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) δεν
+  προσθέτουν την επιστροφή της προέλευσης: με `REQUIRE_API_KEY=false`, οι αποκρίσεις
+  401/403 τους δεν είναι αναγνώσιμες από διαφορετική προέλευση.
 - **Περίοδος λειτουργίας με cookie (ο πίνακας ελέγχου):** προστατεύεται από την προεπιλεγμένη ρύθμιση αποκλεισμού σε περίπτωση αστοχίας **και**
   από την απουσία του `Access-Control-Allow-Credentials` στην κοινόχρηστη διαδρομή. Μην συμπεριλαμβάνετε
   προελεύσεις διαχείρισης/πίνακα ελέγχου σε καμία ελαστική ρύθμιση παραμέτρων· πρέπει να παραμένουν αυστηρά
   αποκλεισμένες σε περίπτωση αστοχίας.
 
+## Χειραψίες WebSocket (`/v1/responses`, `/v1/ws`)
+
+Οι browsers δεν εφαρμόζουν CORS στο WebSocket, επομένως οι μεταφορές WebSocket που
+επιστρέφουν έξοδο εξαγωγής συμπερασμάτων ελέγχουν μόνες τους το `Origin` της χειραψίας
+(`src/server/origin/wsOrigin.ts`): το WebSocket του Responses (`/v1/responses`) και,
+όταν το OmniRoute εκτελείται μέσω `npm start` / `npm run dev`, η γέφυρα `/v1/ws` και
+`/api/v1/ws`, η οποία μεταδίδει τα `/v1/chat/completions`, `/v1/messages` και
+`/v1/responses` ως πλαίσια. Η γέφυρα ζητά την ετυμηγορία από το
+`/api/v1/ws?handshake=1` και αρνείται την αναβάθμιση της σύνδεσης, εκτός αν η
+συγκεκριμένη διαδρομή εκτέλεσε τον έλεγχο. Μια χειραψία γίνεται δεκτή όταν:
+
+- δεν έχει κεφαλίδα `Origin` (Codex CLI, SDK και άλλα προγράμματα-πελάτες εκτός browser)·
+- το `Origin` γίνεται δεκτό από την παραπάνω λίστα επιτρεπόμενων (`CORS_ALLOWED_ORIGINS`,
+  τη ρύθμιση `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`)·
+- το `Origin` είναι μία από τις δικές του δημόσιες προελεύσεις του OmniRoute (η
+  ρυθμισμένη δημόσια βασική διεύθυνση URL, η προωθημένη προέλευση ενός αξιόπιστου
+  διακομιστή μεσολάβησης ή ένας άμεσος κεντρικός υπολογιστής loopback/LAN που δίνεται
+  ως κυριολεκτική διεύθυνση IP ή ως `localhost` — οι ίδιοι υποψήφιοι που χρησιμοποιεί ο
+  έλεγχος μεταβολών του πίνακα ελέγχου)· ή
+- φέρει έγκυρο κλειδί API, όπως στην επιφάνεια HTTP `/v1/*`.
+
+Οτιδήποτε άλλο λαμβάνει `403 ws_origin_forbidden`. Ένα cookie συνεδρίας του πίνακα
+ελέγχου δεν εξαιρεί ένα ξένο `Origin`, επειδή ο browser το επισυνάπτει στο socket
+οποιασδήποτε σελίδας. Το `localhost` σε άλλη θύρα δεν αντιμετωπίζεται ως ίδια
+προέλευση· προσθέστε τέτοιες προελεύσεις ανάπτυξης στο `CORS_ALLOWED_ORIGINS`.
+
 ## Παράδειγμα: αντίστροφος διακομιστής μεσολάβησης μπροστά από το OmniRoute
 
 Το CORS επιβάλλεται από το ίδιο το OmniRoute, επομένως ο διακομιστής μεσολάβησης γενικά **δεν** πρέπει να προσθέτει ή να
 επανεγγράφει κεφαλίδες `Access-Control-*` (οι διπλές κεφαλίδες προκαλούν προβλήματα στα προγράμματα περιήγησης). Τερματίστε το TLS
-και προωθήστε το αίτημα — αφήστε το OmniRoute να απαντήσει στο αίτημα προκαταρκτικού ελέγχου:
+και προωθήστε την κίνηση — αφήστε το OmniRoute να απαντήσει στο αίτημα προκαταρκτικού ελέγχου:
 
 ```nginx
-# nginx — προώθηση στο OmniRoute· ΜΗΝ εισάγετε κεφαλίδες Access-Control-* εδώ
+# nginx — προώθηση στο OmniRoute· ΜΗΝ εισάγετε εδώ κεφαλίδες Access-Control-*
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # ΜΗΝ ορίσετε το X-Forwarded-For σε 127.0.0.1 — αυτό παρακάμπτει τον μηχανισμό προστασίας διαδρομών loopback.
+    # Διατηρήστε τις κεφαλίδες προώθησης: ένας διακομιστής μεσολάβησης στον ίδιο κεντρικό υπολογιστή συνδέεται από το loopback και αυτές
+    # ενημερώνουν το OmniRoute ότι ο καλών δεν είναι ο τοπικός διαχειριστής. Ένας διακομιστής μεσολάβησης που δεν προσθέτει καμία από αυτές
+    # κάνει κάθε απομακρυσμένο καλούντα να φαίνεται τοπικός. Επίσης, μην ορίζετε ποτέ το X-Forwarded-For σε 127.0.0.1.
 }
 ```
 
-Ορίστε τις επιτρεπόμενες προελεύσεις προγραμμάτων περιήγησης στο OmniRoute (`CORS_ALLOWED_ORIGINS` ή στην καρτέλα
-Security), όχι στον διακομιστή μεσολάβησης.
+Ορίστε τις επιτρεπόμενες προελεύσεις για προγράμματα περιήγησης στο OmniRoute (`CORS_ALLOWED_ORIGINS` ή στην
+καρτέλα Ασφάλεια) και όχι στον διακομιστή μεσολάβησης.
 
 ## Αρχεία προέλευσης
 
@@ -168,6 +217,7 @@ Security), όχι στον διακομιστή μεσολάβησης.
 | Banner προειδοποίησης πίνακα ελέγχου                    | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Πεδίο CORS Allowed Origins                              | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS ανά διαδρομή του Cloud-Agent (η εξαίρεση)          | `src/lib/cloudAgent/api.ts`                                          |
+| Έλεγχος `Origin` στη χειραψία WebSocket                 | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Δείτε επίσης
 

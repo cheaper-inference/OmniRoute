@@ -18,6 +18,8 @@
  * #8649 disconnect-aware wrapper's "Provider returned empty content" outcome.
  */
 import { buildErrorBody } from "./error.ts";
+import type { StreamFailureSnapshot } from "./streamErrorFormat.ts";
+import { buildStreamFailureSnapshot } from "./streamFailureSnapshot.ts";
 import { buildStreamSummaryFromEvents } from "./streamPayloadCollector.ts";
 
 type StructuredSSEEventLike = {
@@ -29,6 +31,8 @@ type StructuredSSEEventLike = {
 
 type StructuredSSECollectorLike = {
   getEvents: () => StructuredSSEEventLike[];
+  getEventCount: () => number;
+  getSummary: () => unknown;
   build: (summary?: unknown, opts?: { includeEvents?: boolean }) => unknown;
 };
 
@@ -44,23 +48,38 @@ type EmptyChoicesRejectContext = {
   targetFormat?: string;
   model?: string | null;
   usage?: unknown;
-  onFailure?: ((payload: {
-    status: number;
-    message: string;
-    code?: string;
-    type?: string;
-  }) => boolean | void | Promise<void>) | null;
-  onComplete?: ((payload: {
-    status: number;
-    usage: unknown;
-    responseBody?: unknown;
-    providerPayload?: unknown;
-    clientPayload?: unknown;
-    error?: string | null;
-    errorCode?: string | null;
-  }) => void) | null;
+  onFailure?:
+    | ((payload: {
+        status: number;
+        message: string;
+        code?: string;
+        type?: string;
+        streamSnapshot?: StreamFailureSnapshot;
+      }) => boolean | void | Promise<void>)
+    | null;
+  onComplete?:
+    | ((payload: {
+        status: number;
+        usage: unknown;
+        responseBody?: unknown;
+        providerPayload?: unknown;
+        clientPayload?: unknown;
+        error?: string | null;
+        errorCode?: string | null;
+      }) => void)
+    | null;
   clearPendingRequestFromStream?: () => void;
 };
+
+/**
+ * Shared empty-turn core (extracted literally from the #9268 guard below):
+ * a turn is empty when nothing valuable was forwarded AND no valid usage
+ * was accumulated. Imported by the flush-empty-retry classifier so both
+ * sites share one implementation.
+ */
+export function isEmptyTurnCore(forwardedValuableChunk: boolean, hasValidUsage: boolean): boolean {
+  return !forwardedValuableChunk && !hasValidUsage;
+}
 
 /**
  * Returns `true` when the empty-stream condition was detected and the caller
@@ -68,8 +87,7 @@ type EmptyChoicesRejectContext = {
  * stream legitimately forwarded content/usage and should complete normally.
  */
 export function rejectEmptyChoicesStream(ctx: EmptyChoicesRejectContext): boolean {
-  if (ctx.forwardedValuableChunk || ctx.hasValidUsage) return false;
-
+  if (!isEmptyTurnCore(ctx.forwardedValuableChunk, ctx.hasValidUsage)) return false;
   const error = new Error(
     "Provider returned empty content — stream forwarded no valuable chunks"
   ) as Error & { statusCode: number; code: string };
@@ -78,7 +96,12 @@ export function rejectEmptyChoicesStream(ctx: EmptyChoicesRejectContext): boolea
 
   if (ctx.onFailure) {
     try {
-      ctx.onFailure({ status: 502, message: error.message, code: "empty_content" });
+      ctx.onFailure({
+        status: 502,
+        message: error.message,
+        code: "empty_content",
+        streamSnapshot: buildStreamFailureSnapshot(ctx.providerPayloadCollector),
+      });
     } catch {
       // best-effort — must never break the stream error path
     }

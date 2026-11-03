@@ -16,6 +16,30 @@ import { MemoryType } from "./types";
 
 const log = logger("OBSIDIAN_BACKEND");
 
+/**
+ * Memory keys come from extracted conversation content and API bodies, so they are
+ * untrusted. Each key maps to exactly one flat file inside the vault: anything with a
+ * path separator, a NUL byte or a dot-segment would let the write escape it
+ * (GHSA-jj59-hx95-569p).
+ */
+function resolveVaultFilePath(path: typeof import("path"), vaultPath: string, key: string): string {
+  if (
+    typeof key !== "string" ||
+    key.trim() === "" ||
+    key === "." ||
+    key === ".." ||
+    /[\\/\0]/.test(key)
+  ) {
+    throw new Error("Invalid memory key for the Obsidian vault");
+  }
+  const vaultRoot = path.resolve(vaultPath);
+  const filePath = path.resolve(vaultRoot, `${key}.md`);
+  if (path.dirname(filePath) !== vaultRoot) {
+    throw new Error("Invalid memory key for the Obsidian vault");
+  }
+  return filePath;
+}
+
 /** Optional backend for Obsidian Vault */
 export class ObsidianBackend implements MemoryBackend {
   readonly id = "obsidian";
@@ -53,8 +77,7 @@ export class ObsidianBackend implements MemoryBackend {
     const path = await import("path");
 
     const id = crypto.randomUUID();
-    const fileName = `${input.key}.md`;
-    const filePath = path.join(this.vaultPath, fileName);
+    const filePath = resolveVaultFilePath(path, this.vaultPath, input.key);
 
     const frontmatter = [
       "---",
@@ -89,7 +112,9 @@ export class ObsidianBackend implements MemoryBackend {
     };
   }
 
-  async get(id: string): Promise<Memory | null> {
+  private async findNote(
+    id: string
+  ): Promise<{ filePath: string; content: string; frontmatter: string } | null> {
     if (!this.initialized) await this.initialize();
 
     const fs = await import("fs/promises");
@@ -110,94 +135,60 @@ export class ObsidianBackend implements MemoryBackend {
       const frontmatter = frontmatterMatch[1];
       const idMatch = frontmatter.match(/^id:\s*(.+)$/m);
       if (idMatch && idMatch[1].trim() === id) {
-        const body = content.replace(/^---\n[\s\S]*?\n---\n/, "");
-        return this.parseMemory(frontmatter, body, id);
+        return { filePath, content, frontmatter };
       }
     }
 
     return null;
   }
 
+  async get(id: string): Promise<Memory | null> {
+    const note = await this.findNote(id);
+    if (!note) return null;
+    const body = note.content.replace(/^---\n[\s\S]*?\n---\n/, "");
+    return this.parseMemory(note.frontmatter, body, id);
+  }
+
   async update(id: string, updates: Partial<Omit<Memory, "id" | "createdAt">>): Promise<boolean> {
-    if (!this.initialized) await this.initialize();
-
+    const note = await this.findNote(id);
+    if (!note) return false;
+    const { filePath, content, frontmatter } = note;
     const fs = await import("fs/promises");
-    const path = await import("path");
+    let newFrontmatter = frontmatter;
+    let newBody = content.replace(/^---\n[\s\S]*?\n---\n/, "");
 
-    const files = await fs.readdir(this.vaultPath);
-
-    for (const file of files) {
-      if (!file.endsWith(".md")) continue;
-
-      const filePath = path.join(this.vaultPath, file);
-      const content = await fs.readFile(filePath, "utf-8");
-
-      const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-      if (!frontmatterMatch) continue;
-
-      const frontmatter = frontmatterMatch[1];
-      const idMatch = frontmatter.match(/^id:\s*(.+)$/m);
-      if (idMatch && idMatch[1].trim() === id) {
-        let newFrontmatter = frontmatter;
-        let newBody = content.replace(/^---\n[\s\S]*?\n---\n/, "");
-
-        if (updates.content !== undefined) {
-          newBody = updates.content;
-        }
-
-        // Update frontmatter fields
-        const lines = newFrontmatter.split("\n").map((line) => {
-          if (updates.type !== undefined && line.startsWith("type:"))
-            return `type: ${updates.type}`;
-          if (updates.key !== undefined && line.startsWith("key:")) return `key: ${updates.key}`;
-          if (updates.metadata !== undefined && line.startsWith("metadata:"))
-            return `metadata: ${JSON.stringify(updates.metadata)}`;
-          if (updates.expiresAt !== undefined && line.startsWith("expiresAt:"))
-            return `expiresAt: ${updates.expiresAt?.toISOString() || "null"}`;
-          return line;
-        });
-
-        newFrontmatter = lines.join("\n");
-        newFrontmatter = newFrontmatter.replace(
-          /^updatedAt:.*$/m,
-          `updatedAt: ${new Date().toISOString()}`
-        );
-
-        const newContent = `---\n${newFrontmatter}\n---\n\n${newBody}`;
-        await fs.writeFile(filePath, newContent, "utf-8");
-        return true;
-      }
+    if (updates.content !== undefined) {
+      newBody = updates.content;
     }
 
-    return false;
+    // Update frontmatter fields
+    const lines = newFrontmatter.split("\n").map((line) => {
+      if (updates.type !== undefined && line.startsWith("type:")) return `type: ${updates.type}`;
+      if (updates.key !== undefined && line.startsWith("key:")) return `key: ${updates.key}`;
+      if (updates.metadata !== undefined && line.startsWith("metadata:"))
+        return `metadata: ${JSON.stringify(updates.metadata)}`;
+      if (updates.expiresAt !== undefined && line.startsWith("expiresAt:"))
+        return `expiresAt: ${updates.expiresAt?.toISOString() || "null"}`;
+      return line;
+    });
+
+    newFrontmatter = lines.join("\n");
+    newFrontmatter = newFrontmatter.replace(
+      /^updatedAt:.*$/m,
+      `updatedAt: ${new Date().toISOString()}`
+    );
+
+    const newContent = `---\n${newFrontmatter}\n---\n\n${newBody}`;
+    await fs.writeFile(filePath, newContent, "utf-8");
+    return true;
   }
 
   async delete(id: string): Promise<boolean> {
-    if (!this.initialized) await this.initialize();
-
+    const note = await this.findNote(id);
+    if (!note) return false;
     const fs = await import("fs/promises");
-    const path = await import("path");
-
-    const files = await fs.readdir(this.vaultPath);
-
-    for (const file of files) {
-      if (!file.endsWith(".md")) continue;
-
-      const filePath = path.join(this.vaultPath, file);
-      const content = await fs.readFile(filePath, "utf-8");
-
-      const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-      if (!frontmatterMatch) continue;
-
-      const frontmatter = frontmatterMatch[1];
-      const idMatch = frontmatter.match(/^id:\s*(.+)$/m);
-      if (idMatch && idMatch[1].trim() === id) {
-        await fs.unlink(filePath);
-        return true;
-      }
-    }
-
-    return false;
+    await fs.unlink(note.filePath);
+    return true;
   }
 
   async list(

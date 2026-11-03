@@ -42,6 +42,16 @@ test(
       requireAuthForModels: true,
       password: "",
     });
+    // Auto-combos are published only when they have an eligible connected target.
+    await providersDb.createProviderConnection({
+      provider: "openai",
+      authType: "apikey",
+      name: "openai-catalog-heartbeat-9199",
+      apiKey: "sk-catalog-heartbeat-fixture",
+      isActive: true,
+      testStatus: "active",
+      providerSpecificData: {},
+    });
     const apiKey = await apiKeysDb.createApiKey("catalog responsiveness", "machine-9199");
 
     let catalogSettled = false;
@@ -167,13 +177,28 @@ test(
       data?: Array<{
         root?: string;
         owned_by?: string;
-        pricing?: { input?: number; output?: number };
+        pricing?: Record<string, unknown>;
       }>;
     };
     assert.ok(Array.isArray(body.data));
     const priced = body.data.find(
       (model) => model.root === "gpt-4o" && model.owned_by === "openai"
     );
-    assert.deepEqual(priced?.pricing, { input: 1.25, output: 5 });
+    // The models.dev snapshot (input 1.25 / output 5) overrides the built-in gpt-4o row, so the
+    // legacy per-1M fields and the OpenRouter per-token strings both carry the snapshot rates.
+    // The catalog prices from the merged table cost accounting uses (defaults -> LiteLLM ->
+    // models.dev -> user), so the non-token rates the snapshot does not carry (cached,
+    // cache_creation, reasoning) come from the built-in row, and the cache rates also get their
+    // per-token strings (input_cache_read / input_cache_write).
+    assert.equal(priced?.pricing?.input, 1.25);
+    assert.equal(priced?.pricing?.output, 5);
+    assert.equal(priced?.pricing?.prompt, "0.00000125");
+    assert.equal(priced?.pricing?.completion, "0.000005");
+    const builtIn = (await import("../../src/shared/constants/pricing.ts"))
+      .DEFAULT_PRICING as Record<string, Record<string, Record<string, number>>>;
+    const builtInRow = builtIn.openai["gpt-4o"];
+    assert.equal(priced?.pricing?.cached, builtInRow.cached);
+    assert.equal(priced?.pricing?.cache_creation, builtInRow.cache_creation);
+    assert.equal(priced?.pricing?.reasoning, builtInRow.reasoning);
   }
 );

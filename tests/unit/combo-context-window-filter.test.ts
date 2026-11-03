@@ -542,3 +542,122 @@ test("#12273 unknown-context sole survivor does not restore hard-rejected target
     ["unit-unknown/mystery"]
   );
 });
+
+// Opt-in `outputLimitAdvisory`: a known output ceiling below `max_tokens` keeps a
+// target in its strategy position instead of removing it. Clients such as Claude Code send max_tokens as a
+// generous ceiling (128000), which otherwise strips every 64k-output model.
+test("outputLimitAdvisory keeps output-limited targets in strategy order instead of removing them", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      insufficient: capabilityEntryWithLimits(128_000, 128_000, 128),
+      sufficient: capabilityEntryWithLimits(128_000, 128_000, 4_096),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/insufficient"), target("unit-output-limit/sufficient")],
+    { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/insufficient", "unit-output-limit/sufficient"]
+  );
+});
+
+test("outputLimitAdvisory keeps strategy order when every target is output-limited", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      a: capabilityEntryWithLimits(128_000, 128_000, 128),
+      b: capabilityEntryWithLimits(128_000, 128_000, 256),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/a"), target("unit-output-limit/b")],
+    { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/a", "unit-output-limit/b"]
+  );
+});
+
+test("outputLimitAdvisory does not soften tool-calling mismatches", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      notools: { ...capabilityEntryWithLimits(128_000, 128_000, 4_096), tool_call: false },
+      tools: capabilityEntryWithLimits(128_000, 128_000, 128),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/notools"), target("unit-output-limit/tools")],
+    {
+      messages: [{ role: "user", content: "hello" }],
+      max_tokens: 512,
+      tools: [{ type: "function", function: { name: "lookup", parameters: {} } }],
+    },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/tools"]
+  );
+});
+
+test("combo config outputLimitAdvisory keeps an output-limited target in its priority slot", async () => {
+  saveModelsDevCapabilities({
+    // Separate providers: a 503 from one provider must not skip the other.
+    "unit-output-a": { insufficient: capabilityEntryWithLimits(128_000, 128_000, 128) },
+    "unit-output-b": { sufficient: capabilityEntryWithLimits(128_000, 128_000, 4_096) },
+  });
+  const run = async (config?: Record<string, unknown>) => {
+    const calls: string[] = [];
+    const response = await handleComboChat({
+      body: { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+      combo: {
+        name: "output-limit-advisory",
+        strategy: "priority",
+        models: ["unit-output-a/insufficient", "unit-output-b/sufficient"],
+        ...(config ? { config } : {}),
+      },
+      handleSingleModel: async (_body: Record<string, unknown>, modelStr: string) => {
+        calls.push(modelStr);
+        const ok = modelStr.endsWith("/insufficient");
+        return new Response(
+          JSON.stringify(ok ? { choices: [{ message: { content: "ok" } }] } : { error: "down" }),
+          { status: ok ? 200 : 503, headers: { "Content-Type": "application/json" } }
+        );
+      },
+      log: noopLog,
+    });
+    return { status: response.status, calls };
+  };
+
+  // The failing target may be retried, so assert on which targets are reached.
+  const strict = await run();
+  assert.notEqual(strict.status, 200);
+  assert.ok(!strict.calls.includes("unit-output-a/insufficient"));
+
+  const advisory = await run({ outputLimitAdvisory: true });
+  assert.equal(advisory.status, 200);
+  // Operator priority wins: the output-limited first step is tried first.
+  assert.deepEqual(advisory.calls, ["unit-output-a/insufficient"]);
+});
+
+test("combo config schema accepts boolean outputLimitAdvisory and rejects other types", async () => {
+  const { comboRuntimeConfigSchema } = await import("../../src/shared/validation/schemas/combo.ts");
+  assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: true }).success, true);
+  assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: "yes" }).success, false);
+});

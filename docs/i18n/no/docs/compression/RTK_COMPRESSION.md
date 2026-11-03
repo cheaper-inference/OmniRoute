@@ -1,6 +1,6 @@
 # RTK Compression (Norsk)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇩🇪 [de](../../../de/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -27,24 +27,24 @@ Stablet:          1 - (1 - 0.80) * (1 - 0.46) = 89.2% spart
 Intervall:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Hva den komprimerer
+## Hva det komprimerer
 
-Den innebygde katalogen leveres for øyeblikket med 49 filtre fordelt på disse kategoriene:
+Den innebygde katalogen leveres for øyeblikket med 56 filtre fordelt på disse kategoriene:
 
 | Kategori  | Eksempler                                                     |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-tester, Cargo-tester     |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-tester   |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, generiske skalllogger                   |
+| `shell`   | `ls`, `find`, `grep`, generiske shell-logger                  |
 | `docker`  | `docker ps`, Docker-logger                                    |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-utdata, stakksporinger, generisk reserve for utdata      |
+| `generic` | JSON-utdata, stakkspor, generisk reserve for utdata           |
 
 Detektoren i `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifiserer utdata
-før filtervalg. Filtre kan også samsvare etter kommandomønster eller regulært uttrykk for utdata når en
-kommandoklasse ikke er tilstrekkelig.
+før filtervalg. Filtre kan også matche på kommandomønster eller utdata-regex når en kommandoklasse
+ikke er nok.
 
 ## Filteroppløsning
 
@@ -356,19 +356,19 @@ node --import tsx/esm --test \
 
 ## Intensitetsnivåer (v3.8.16+)
 
-RTK støtter **3 intensitetsnivåer** som balanserer **komprimeringsaggressivitet** mot **sikkerhet**. Nivået angis via `config.intensity` i motorkonfigurasjonen.
+RTK støtter **3 intensitetsnivåer** som balanserer mellom **komprimeringsaggressivitet** og **sikkerhet**. Nivået settes via `config.intensity` i motorkonfigurasjonen.
 
 ### De 3 nivåene
 
-| Nivå                       | Terskel for avkorting | Tokenbesparelse | Risiko    | Best egnet for                     |
-| -------------------------- | --------------------- | --------------- | --------- | ---------------------------------- |
-| `minimal`                  | 24 linjer per seksjon | ~20-40%         | Svært lav | Produksjon med kritisk kontekst    |
-| `standard` (standardverdi) | 24 linjer per seksjon | ~50-70%         | Lav       | Daglige kodeøkter                  |
-| `aggressive`               | 16 linjer per seksjon | ~70-90%         | Middels   | Lange økter, maksimale besparelser |
+| Nivå                      | Trunkeringsterskel    | Token-besparelser | Risiko     | Best for                           |
+| ------------------------- | --------------------- | ----------------- | ---------- | ---------------------------------- |
+| `minimal`                 | 24 linjer per seksjon | ~20–40 %          | Veldig lav | Produksjon med kritisk kontekst    |
+| `standard` (standardvalg) | 24 linjer per seksjon | ~50–70 %          | Lav        | Daglige kodeøkter                  |
+| `aggressive`              | 16 linjer per seksjon | ~70–90 %          | Middels    | Lange økter, maksimale besparelser |
 
-### Hvor avkortingen skjer
+### Hvor trunkeringen skjer
 
-Terskelen for avkorting påvirker `lineFilter.ts`:
+Trunkeringsterskelen påvirker `lineFilter.ts`:
 
 ```ts
 // Fra open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -376,24 +376,24 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Både **begynnelsen** og **slutten** av hver seksjon bevares. Innhold i midten fjernes når avkortingen trer i kraft.
+Både **hodet** og **halen** til hver seksjon bevares; innholdet i midten droppes når trunkeringen trer i kraft.
 
-### Hva som beholdes kontra hva som fjernes
+### Hva som beholdes vs. hva som fjernes
 
-| Innhold                                   | minimal         | standard        | aggressive      |
-| ----------------------------------------- | --------------- | --------------- | --------------- |
-| Feil / stakksporinger                     | ✅ bevart       | ✅ bevart       | ✅ bevart       |
-| Mislykkede tester                         | ✅ bevart       | ✅ bevart       | ✅ bevart       |
-| Byggefeil                                 | ✅ bevart       | ✅ bevart       | ✅ bevart       |
-| Beståtte tester (detaljerte)              | ✅ bevart       | 🟡 slått sammen | 🟡 slått sammen |
-| Rutinemessige utdata (informasjonslogger) | 🟡 slått sammen | 🟡 slått sammen | ❌ fjernet      |
-| Fremdriftsindikatorer                     | 🟡 slått sammen | ❌ fjernet      | ❌ fjernet      |
-| Banner / ASCII-grafikk                    | 🟡 slått sammen | ❌ fjernet      | ❌ fjernet      |
+| Innhold                           | minimal      | standard     | aggressive   |
+| --------------------------------- | ------------ | ------------ | ------------ |
+| Feil / stakkspor                  | ✅ bevart    | ✅ bevart    | ✅ bevart    |
+| Testfeil                          | ✅ bevart    | ✅ bevart    | ✅ bevart    |
+| Byggefeil                         | ✅ bevart    | ✅ bevart    | ✅ bevart    |
+| Beståtte tester (utførlig)        | ✅ bevart    | 🟡 kollapset | 🟡 kollapset |
+| Rutinemessig utdata (info-logger) | 🟡 kollapset | 🟡 kollapset | ❌ droppet   |
+| Fremdriftsbjelker                 | 🟡 kollapset | ❌ droppet   | ❌ droppet   |
+| Banner / ASCII-kunst              | 🟡 kollapset | ❌ droppet   | ❌ droppet   |
 
-### Valg av riktig intensitet
+### Velge riktig intensitet
 
 ```
-                  Er tap av kontekst katastrofalt?
+                  Er det katastrofalt å miste kontekst?
                   │
       ┌───────────┼───────────┐
       │           │           │
@@ -404,8 +404,9 @@ Både **begynnelsen** og **slutten** av hver seksjon bevares. Innhold i midten f
       │           │           │
       │           ▼           ▼
       │      Hvor kritisk    Prøv `standard` først
-      │      er kapasiteten? (fungerer i 80 % av
-      │           │          tilfellene)
+      │      er gjennom-     (fungerer for 80 % av
+      │      strømning?      tilfellene)
+      │           │
       │      ┌────┴────┐
       │      │         │
       │     LAV       HØY
@@ -416,9 +417,9 @@ Både **begynnelsen** og **slutten** av hver seksjon bevares. Innhold i midten f
       └──────┴─────────┘
 ```
 
-### Konfigurering av intensitet
+### Konfigurere intensitet
 
-**Per kombinasjon** (i kombinasjonskonfigurasjonen):
+**Per kombo** (i kombo-konfigurasjonen):
 
 ```json
 {
@@ -434,8 +435,8 @@ Både **begynnelsen** og **slutten** av hver seksjon bevares. Innhold i midten f
 **Programmatisk**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) er en
-`CompressionEngine` og har ingen `updateConfig`-metode. Oppdater konfigurasjonen til en motor
-via registerhjelperen i stedet:
+`CompressionEngine` og har ingen `updateConfig`-metode. Oppdater en motors
+konfigurasjon via registerhjelperen i stedet:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -443,9 +444,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Verifisering av effekten
+### Verifisere effekten
 
-Bruk **verifiseringsporten** (se nedenfor) for å bekrefte at filteret er sikkert ved den valgte intensiteten:
+Bruk **Verify Gate** (se nedenfor) for å bekrefte at filteret ditt er trygt ved valgt intensitet:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

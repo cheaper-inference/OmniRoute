@@ -1,6 +1,6 @@
 # CORS Configuration & Security (සිංහල)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -58,11 +58,11 @@ OmniRoute හි නිරාවරණය **සාමාන්ය අවස්�
 
 `CORS_ALLOW_ALL=true` තිබුණද, එක් එක් පෘෂ්ඨය සඳහා මෙයින් අදහස් වන්නේ:
 
-| පෘෂ්ඨය                                | සත්යාපන යාන්ත්රණය           | වයිල්ඩ්කාඩ් CORS හි බලපෑම                                                                                                                                                                                                   |
-| ------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| උපකරණ පුවරුව / MANAGEMENT `/api/*`    | කුකී සැසිය                  | මූලය ප්රතිරාවය කරයි, නමුත් **`Allow-Credentials` නොමැති බැවින්** බ්රවුසරය අක්තපත්ර සහිත කියවීම **අවහිර කරයි**. ද්වේෂසහගත හරස්-මූල අඩවියකට ඔබේ සත්යාපිත උපකරණ පුවරු ප්රතිචාර **කියවිය නොහැකි** අතර සැසි කුකිය නිරාවරණය නොවේ. |
-| සේවාදායක API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` ශීර්ෂය | දැනටමත් **සැලසුම අනුව** ලිහිල්ය (`relaxForTokenAuth`): බ්රවුසර කිසි විටෙක `Authorization`/`x-api-key` ස්වයංක්රීයව අමුණන්නේ නැති බැවින් ප්රහාරකයෙකුගේ පිටුවකට ඔබේ යතුර සැපයිය නොහැක. `CORS_ALLOW_ALL` මෙය පුළුල් නොකරයි.     |
-| පොදු කියවීමට පමණක් (`/api/health`, …) | කිසිවක් නැත                 | සංවේදී නොවේ; වයිල්ඩ්කාඩ් එක හානිකර නොවේ.                                                                                                                                                                                    |
+| පෘෂ්ඨය                                | සත්යාපන යාන්ත්රණය           | වයිල්ඩ්කාඩ් CORS හි බලපෑම                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| උපකරණ පුවරුව / MANAGEMENT `/api/*`    | කුකී සැසිය                  | මූලය ප්රතිරාවය කරයි, නමුත් **`Allow-Credentials` නොමැති බැවින්** බ්රවුසරය අක්තපත්ර සහිත කියවීම **අවහිර කරයි**. ද්වේෂසහගත හරස්-මූල අඩවියකට ඔබේ සත්යාපිත උපකරණ පුවරු ප්රතිචාර **කියවිය නොහැකි** අතර සැසි කුකිය නිරාවරණය නොවේ.                                                                                                                             |
+| සේවාදායක API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` ශීර්ෂය | දැනටමත් **සැලසුම අනුව** ලිහිල්ය (`relaxForTokenAuth`): බ්රවුසර කිසි විටෙක `Authorization`/`x-api-key` ස්වයංක්රීයව අමුණන්නේ නැති බැවින් ප්රහාරකයෙකුගේ පිටුවකට ඔබේ යතුර සැපයිය නොහැක. ඉදිරිපත් කළ යතුර වලංගු කළ විට පමණක් මූලය ප්රතිරාවය කෙරේ; නිර්නාමික ප්රතිචාර (`REQUIRE_API_KEY=false`) අවසර ලැයිස්තුවම රඳවා ගනී. `CORS_ALLOW_ALL` මෙය පුළුල් නොකරයි. |
+| පොදු කියවීමට පමණක් (`/api/health`, …) | කිසිවක් නැත                 | සංවේදී නොවේ; වයිල්ඩ්කාඩ් එක හානිකර නොවේ.                                                                                                                                                                                                                                                                                                                |
 
 එබැවින් `CORS_ALLOW_ALL=true` හි **ඉතිරි** නිරාවරණය පහත දේවලට සීමා වේ: (a)
 දැනටමත් සත්යාපනය අවශ්ය නොවන දත්තවල අක්තපත්ර රහිත හරස්-මූල **කියවීම්**, සහ (b)
@@ -124,29 +124,69 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
   මේවා ස්වයංක්රීයව අමුණන්නේ නැත. මෙහිදී CORS අර්ථවත් බාධකයක් නොවේ — බාධකය වන්නේ API key එකයි —
   ඒ නිසා browser සහ Electron clients හට දැනටමත් හිමිකම් ඇති responses කියවීමට හැකි වන පරිදි
   එම surface එක හිතාමතාම ලිහිල් කර ඇත.
+  ලිහිල් කළ ප්රතිරාවය අනුගමනය කරන්නේ වලංගු කළ key එකයි, header එක තිබීම පමණක් නොවේ:
+  `REQUIRE_API_KEY=false` මඟින් request එකක් නිර්නාමිකව සේවය කරන විට, එහි සාර්ථක response
+  එක fail-closed අවසර ලැයිස්තුවම රඳවා ගනී. Auth ප්රතික්ෂේප කිරීම් (401) කියවිය හැකිව පවතින
+  බැවින් clients හට අවලංගු කළ හෝ වැරදියට ටයිප් කළ key එකක් පෙන්විය හැක (#5242): pipeline
+  එකේම 401 ප්රතිරාවය රඳවා ගන්නා අතර, pipeline එක request එක නිර්නාමික ලෙස සේවය කළ පසු key
+  එක තමන්ම ප්රතික්ෂේප කරන route එකක් (management auth වින්යාස කර ඇති විට `/v1/models` සහ
+  `/v1beta/models`, හිමිකරු-සීමිත `/v1/files`, `/v1/batches`, `/v1/media`,
+  `/v1/session-leases` සහ auto-combo අපේක්ෂක routes) `credentialRejectionHeaders()` හරහා
+  එම 401 එකට ප්රතිරාවය එක් කරයි. ප්රතිරාවය රඳා පවතින්නේ request එක credential header එකක්
+  (`Authorization`, `x-api-key`, `x-goog-api-key` හෝ `auth_token` cookie එක) රැගෙන යනවාද
+  යන්න මතය, route එක ඒවායින් කුමක් පරීක්ෂා කළේද යන්න මත නොවේ; එය කිසිවිටෙකත්
+  `Access-Control-Allow-Credentials` සමඟ යුගල නොකෙරේ; body එක ස්ථාවර දෝෂ envelope එකකි.
+  `requireManagementAuth()` මඟින් ආරක්ෂා කර ඇති `/api/v1/` යටතේ ඇති management routes
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) ප්රතිරාවය එක් නොකරයි:
+  `REQUIRE_API_KEY=false` සමඟ ඒවායේ 401/403 හරස්-මූලයකින් කියවිය නොහැක.
 - **Cookie session එක (dashboard එක):** fail-closed පෙරනිමියෙන් **සහ**
   හවුල් path එකේ `Access-Control-Allow-Credentials` නොමැති වීමෙන් ආරක්ෂා වේ.
   management/dashboard origins ඕනෑම ලිහිල් config එකකින් බැහැරව තබන්න; ඒවා නියත වශයෙන්ම
   fail-closed ලෙස පැවතිය යුතුය.
 
-## උදාහරණය: OmniRoute ඉදිරිපස ඇති reverse proxy එකක්
+## WebSocket handshakes (`/v1/responses`, `/v1/ws`) පිළිබඳව
 
-CORS OmniRoute විසින්ම බලාත්මක කරන බැවින්, proxy එක සාමාන්යයෙන්
-`Access-Control-*` headers එක් කිරීම හෝ නැවත ලිවීම **නොකළ යුතුය** (ද්විත්ව headers නිසා browsers ක්රියා නොකරයි).
-TLS අවසන් කර forward කරන්න — preflight එකට පිළිතුරු දීමට OmniRoute වෙත ඉඩ දෙන්න:
+බ්රවුසර WebSocket සඳහා CORS යොදන්නේ නැති බැවින්, inference ප්රතිදානය ආපසු ලබා දෙන
+WebSocket ප්රවාහන handshake එකේ `Origin` තමන්ම පරීක්ෂා කරයි
+(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) සහ, OmniRoute
+`npm start` / `npm run dev` හරහා ධාවනය වන විට, `/v1/ws` සහ `/api/v1/ws` පාලම — එය
+`/v1/chat/completions`, `/v1/messages` සහ `/v1/responses` frames ලෙස stream කරයි. පාලම
+තීන්දුව සඳහා `/api/v1/ws?handshake=1` වෙතින් විමසන අතර, එම route එක පරීක්ෂාව ධාවනය නොකළේ
+නම් සම්බන්ධතාවය upgrade කිරීම ප්රතික්ෂේප කරයි. handshake එකක් පිළිගනු ලබන්නේ:
+
+- එහි `Origin` header එකක් නොමැති විට (Codex CLI, SDKs සහ බ්රවුසර නොවන අනෙකුත් clients);
+- ඉහත අවසර ලැයිස්තුව `Origin` එක පිළිගන්නා විට (`CORS_ALLOWED_ORIGINS`, `corsOrigins`
+  සැකසුම, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` එක OmniRoute හි ම පොදු මූලයන්ගෙන් එකක් වන විට (වින්යාස කළ පොදු මූලික URL එක,
+  විශ්වාසදායක proxy එකක් forward කළ මූලය, හෝ IP literal එකක් ලෙස හෝ `localhost` ලෙස දී ඇති
+  සෘජු loopback/LAN host එකක් — dashboard වෙනස්කිරීම් පරීක්ෂාව භාවිත කරන එම අපේක්ෂකයන්ම); හෝ
+- HTTP `/v1/*` surface එකේ මෙන් වලංගු API key එකක් රැගෙන යන විට.
+
+අනෙක් සියල්ලට `403 ws_origin_forbidden` ලැබේ. Dashboard session cookie එකක් විදේශීය
+`Origin` එකක් නිදහස් නොකරයි, මන්ද බ්රවුසරය එය ඕනෑම පිටුවක socket එකට අමුණයි. වෙනත් port
+එකක ඇති `localhost` එකම මූලය ලෙස සලකනු නොලැබේ; එවැනි සංවර්ධන මූලයන්
+`CORS_ALLOWED_ORIGINS` වෙත එක් කරන්න.
+
+## උදාහරණය: OmniRoute ඉදිරියෙන් reverse proxy එකක්
+
+CORS, OmniRoute විසින්ම බලාත්මක කරන බැවින්, proxy එක සාමාන්යයෙන් `Access-Control-*` headers එක් කිරීම හෝ නැවත ලිවීම **නොකළ යුතුය** (headers දෙවරක් තිබීම browsers ක්රියා නොකරවයි). TLS අවසන් කර ඉදිරියට යොමු කරන්න — preflight ඉල්ලීමට OmniRoute හට පිළිතුරු දීමට ඉඩ දෙන්න:
 
 ```nginx
-# nginx — OmniRoute වෙත forward කරන්න; මෙහිදී Access-Control-* ඇතුළු නොකරන්න
+# nginx — OmniRoute වෙත ඉදිරියට යොමු කරන්න; මෙහිදී Access-Control-* ඇතුළු නොකරන්න
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # X-Forwarded-For 127.0.0.1 ලෙස සකසන්න එපා — එය loopback route guard එක අක්රිය කරයි.
+    # ඉදිරියට යැවීමේ headers තබාගන්න: එකම host එකෙහි ඇති proxy එකක් loopback වෙතින් සම්බන්ධ වන අතර,
+    # ඇමතුම්කරු local operator නොවන බව OmniRoute වෙත දන්වන්නේ ඒවාය. ඒවායින් කිසිවක් එක් නොකරන proxy එකක්
+    # සෑම දුරස්ථ ඇමතුම්කරුවෙකුම local ලෙස පෙනෙන්නට සලස්වයි. එසේම X-Forwarded-For කිසිවිටෙක 127.0.0.1 ලෙස සකසන්න එපා.
 }
 ```
 
-අවසර දිය යුතු browser origins proxy එකේ නොව, OmniRoute තුළ (`CORS_ALLOWED_ORIGINS` හෝ
-Security ටැබය) සකසන්න.
+අවසර දී ඇති browser origins, proxy එකෙහි නොව OmniRoute තුළ (`CORS_ALLOWED_ORIGINS` හෝ
+Security tab එකෙහි) සකසන්න.
 
 ## මූලාශ්ර ගොනු
 
@@ -159,6 +199,7 @@ Security ටැබය) සකසන්න.
 | Dashboard අනතුරු ඇඟවීමේ බැනරය                   | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins ක්ෂේත්රය                   | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | එක් එක් route සඳහා Cloud-Agent CORS (ව්යතිරේකය) | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket handshake `Origin` පරීක්ෂාව           | `src/server/origin/wsOrigin.ts`                                      |
 
 ## තවද බලන්න
 

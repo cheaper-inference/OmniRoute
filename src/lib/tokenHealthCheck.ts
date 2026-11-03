@@ -19,16 +19,14 @@ import {
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { getSettings } from "@/lib/db/settings";
 import { resolveGuardedProxyConfig } from "@/lib/tokenHealthCheckProxyGuard";
-import {
-  getAccessToken,
-  getDeprecationNotice,
-  supportsTokenRefresh,
-  isUnrecoverableRefreshError,
-  refreshCopilotToken,
-} from "@omniroute/open-sse/services/tokenRefresh.ts";
+import * as tokenRefresh from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { ROTATION_LOCK_GROUP } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { pickMaskedDisplayValue } from "@/shared/utils/maskEmail";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
-import { refreshGithubCopilotSubTokenIfNeeded } from "@/lib/tokenHealthCheckCopilot";
+import {
+  probeGitHubAccessToken,
+  refreshGithubCopilotSubTokenIfNeeded,
+} from "@/lib/tokenHealthCheckCopilot";
 import { checkCursorConnectionIfNeeded } from "@/lib/tokenHealthCheckCursor";
 import { checkKimiWebConnectionIfNeeded } from "@/lib/tokenHealthCheckKimi";
 import {
@@ -46,22 +44,12 @@ const TICK_MS = 60 * 1000; // sweep interval: every 60 seconds (restored — #77
 const DEFAULT_BATCH_SIZE = 20;
 const DEFAULT_HEALTH_CHECK_INTERVAL_MIN = 60; // default per-connection interval
 const EXPIRED_RETRY_MAX = 3; // max retry attempts for expired connections before giving up
-const ROTATING_REFRESH_PROVIDERS = new Set([
-  "codex",
-  "openai",
-  "kimi-coding",
-  "cline",
-  "kiro",
-  "amazon-q",
-  "gitlab-duo",
-  "claude",
-  "openference",
-]);
+// Derived from the rotation-lane map so the two lists cannot drift apart.
+const ROTATING_REFRESH_PROVIDERS = new Set(Object.keys(ROTATION_LOCK_GROUP));
 
 export function shouldNullRefreshTokenAfterUnrecoverable(provider: unknown): boolean {
   const id = String(provider || "").toLowerCase();
-  if (id === "claude") return false;
-  return ROTATING_REFRESH_PROVIDERS.has(id);
+  return ROTATING_REFRESH_PROVIDERS.has(id) && !preservesRefreshTokenOnUnrecoverable(id);
 }
 
 const EXPIRED_RETRY_BACKOFF_MIN = 5; // backoff between expired retries (minutes)
@@ -87,50 +75,14 @@ export function extractResolvedProxyConfig(resolvedProxy: unknown) {
   return resolvedProxy ?? null;
 }
 
-const NUMERIC_STRING = /^\d+(\.\d+)?$/;
+import {
+  getEffectiveTokenExpiryIso,
+  getEffectiveTokenExpiryMs,
+  parseTokenExpiryMs,
+  shouldMarkRefreshCapableExpired,
+} from "@/lib/tokenHealthCheckExpiry";
 
-/**
- * Normalize any stored token-expiry value to epoch milliseconds.
- *
- * `provider_connections.expires_at` / `token_expires_at` are TEXT columns, so a
- * numeric epoch written by an external sync tool reads back as a *string* —
- * and `new Date("1789012345678")` is an Invalid Date. Both numeric shapes are
- * accepted here with the seconds/ms heuristic the Copilot path already used,
- * before falling back to `Date` for ISO 8601 and other date strings.
- *
- * @returns epoch ms, or 0 when the value carries no usable time
- */
-export function parseTokenExpiryMs(expiresAt: unknown): number {
-  if (typeof expiresAt === "number") {
-    if (!Number.isFinite(expiresAt) || expiresAt <= 0) return 0;
-    return expiresAt < 1e12 ? expiresAt * 1000 : expiresAt;
-  }
-
-  if (typeof expiresAt === "string") {
-    const trimmed = expiresAt.trim();
-    if (!trimmed) return 0;
-
-    if (NUMERIC_STRING.test(trimmed)) {
-      const numeric = Number(trimmed);
-      if (!Number.isFinite(numeric) || numeric <= 0) return 0;
-      return numeric < 1e12 ? numeric * 1000 : numeric;
-    }
-
-    const parsed = new Date(trimmed).getTime();
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-
-  return 0;
-}
-
-function getEffectiveTokenExpiryIso(conn: any): string | null {
-  if (!conn || typeof conn !== "object") return null;
-  return conn.tokenExpiresAt || conn.expiresAt || null;
-}
-
-function getEffectiveTokenExpiryMs(conn: any): number {
-  return parseTokenExpiryMs(getEffectiveTokenExpiryIso(conn));
-}
+export { parseTokenExpiryMs, shouldMarkRefreshCapableExpired };
 
 const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000; // 5 minutes
 
@@ -590,6 +542,23 @@ export async function sweep(): Promise<number> {
 /**
  * Check a single connection and refresh if due.
  */
+async function getRefreshRecoveryUpdate(connectionId: string) {
+  // Refresh proves credentials work, not that inference quota has recovered. Read
+  // after the network call: an inference request may have set a cooldown meanwhile.
+  const current = await getProviderConnectionById(connectionId);
+  if (current?.rateLimitedUntil && Date.parse(current.rateLimitedUntil) > Date.now()) {
+    return {};
+  }
+  return {
+    testStatus: "active",
+    lastError: null,
+    lastErrorAt: null,
+    lastErrorType: null,
+    lastErrorSource: null,
+    errorCode: null,
+  };
+}
+
 export async function checkConnection(conn) {
   if (!conn?.id) return;
 
@@ -606,6 +575,10 @@ export async function checkConnection(conn) {
   // Determine interval (0 = disabled)
   const intervalMin = conn.healthCheckInterval ?? DEFAULT_HEALTH_CHECK_INTERVAL_MIN;
   if (intervalMin <= 0) return;
+  if (tokenRefresh.isPassiveCodex(conn.provider)) {
+    await tokenRefresh.getAccessToken(conn.provider, { ...conn, connectionId: conn.id });
+    return;
+  }
   if (!conn.isActive) {
     // #P0: allow expired connections with retry budget remaining to pass
     // through so transient OAuth failures can self-heal instead of being
@@ -661,7 +634,7 @@ export async function checkConnection(conn) {
   // Placed AFTER the terminal-status guard above, which makes this idempotent for free:
   // once marked "expired" the connection is skipped on every later sweep, so this writes
   // exactly once instead of rewriting the same reason each cycle.
-  const deprecation = getDeprecationNotice(String(conn.provider || ""));
+  const deprecation = tokenRefresh.getDeprecationNotice(String(conn.provider || ""));
   if (deprecation) {
     const now = new Date().toISOString();
     await updateProviderConnection(conn.id, {
@@ -767,12 +740,23 @@ export async function checkConnection(conn) {
         },
       };
 
-      const copilotResult = await refreshCopilotToken(
-        conn.accessToken,
-        healthCheckLog,
-        proxyConfig,
-        getCopilotTokenBaseUrl(conn)
-      );
+      // Rotate the Copilot sub-token only when it needs renewal or when an
+      // expired connection needs a recovery probe. A healthy sub-token still
+      // gets a cheap GitHub /user probe so a revoked access token demotes.
+      const shouldProbeCopilot = copilotAboutToExpire || conn.testStatus === "expired";
+
+      const copilotResult = shouldProbeCopilot
+        ? await tokenRefresh.refreshCopilotToken(
+            conn.accessToken,
+            healthCheckLog,
+            proxyConfig,
+            getCopilotTokenBaseUrl(conn)
+          )
+        : await probeGitHubAccessToken({
+            accessToken: conn.accessToken,
+            apiBaseUrl: getCopilotTokenBaseUrl(conn),
+            proxyConfig,
+          });
       if (copilotResult?.status === 401) {
         await updateProviderConnection(conn.id, {
           testStatus: "expired",
@@ -848,11 +832,29 @@ export async function checkConnection(conn) {
     //   - Cursor access-token-only imports (refresh is optional; deep-control stores one)
     //   - connections already in a terminal/specific state (expired/banned/credits_exhausted)
     //   - transient cooldown state (unavailable) owned by the request path
-    const refreshCapableNeedsReauth =
-      supportsTokenRefresh(conn.provider) &&
-      conn.provider !== "cursor" &&
-      (!conn.testStatus || conn.testStatus === "active") &&
-      !(conn.apiKey && conn.apiKey.length > 0); // API-key-only connections don't need refresh tokens
+    //   - long-lived credentials with no KNOWN expiry (#14261; see below)
+    //
+    // #14261: the missing piece was evidence. A refresh token is how a connection
+    // RECOVERS from expiry, not proof that it HAS expired, so its absence alone must
+    // not write a terminal state. Long-lived credentials of refresh-capable providers
+    // are legitimately refresh-less by design — `claude setup-token` mints a 1-year
+    // token with no refresh token — and those were condemned within one 60s tick of a
+    // successful request, then again after every self-heal.
+    //
+    // Gate on the SAME field the badge reads: this branch exists to stop testStatus
+    // from disagreeing with the badge, and the badge derives from
+    // tokenExpiresAt||expiresAt (getEffectiveTokenExpiryMs). When that expiry is
+    // unknown (0) the badge cannot claim "Token Expired" either, so there is no
+    // mismatch to correct and condemning the row is pure loss. Checking it here makes
+    // the two agree in BOTH directions instead of only one.
+    //
+    // Deliberately NOT a live probe: this path runs once per TICK_MS (60s) for every
+    // connection, so probing would add ~1440 upstream auth calls/day/connection — and
+    // Anthropic's own /api/oauth/usage rate-limits well below that.
+    const refreshCapableNeedsReauth = shouldMarkRefreshCapableExpired(
+      conn,
+      tokenRefresh.supportsTokenRefresh(conn.provider)
+    );
     if (refreshCapableNeedsReauth) {
       const now = new Date().toISOString();
       await updateProviderConnection(conn.id, {
@@ -892,7 +894,7 @@ export async function checkConnection(conn) {
     );
   }
 
-  if (!supportsTokenRefresh(conn.provider)) {
+  if (!tokenRefresh.supportsTokenRefresh(conn.provider)) {
     const now = new Date().toISOString();
     await updateProviderConnection(conn.id, { lastHealthCheckAt: now });
     log(
@@ -980,7 +982,7 @@ export async function checkConnection(conn) {
   let persistedResult: RefreshResultShape | null = null;
   let result: RefreshResultShape | null;
   try {
-    result = await getAccessToken(
+    result = await tokenRefresh.getAccessToken(
       conn.provider,
       credentials,
       healthCheckLog,
@@ -990,12 +992,7 @@ export async function checkConnection(conn) {
         const updateData: ConnectionUpdate = {
           accessToken: refreshResult.accessToken,
           lastHealthCheckAt: now,
-          testStatus: "active",
-          lastError: null,
-          lastErrorAt: null,
-          lastErrorType: null,
-          lastErrorSource: null,
-          errorCode: null,
+          ...(await getRefreshRecoveryUpdate(conn.id)),
           expiredRetryCount: null,
           expiredRetryAt: null,
         };
@@ -1107,7 +1104,7 @@ export async function checkConnection(conn) {
   // OpenAI Codex uses rotating one-time-use refresh tokens.
   // Once used, the old token is permanently invalidated.
   // Retrying will never succeed → deactivate and stop the loop.
-  if (isUnrecoverableRefreshError(result)) {
+  if (tokenRefresh.isUnrecoverableRefreshError(result)) {
     const currentConnection = await getProviderConnectionById(conn.id);
     const credentialsChangedSinceSweep =
       !!currentConnection &&
@@ -1192,12 +1189,7 @@ export async function checkConnection(conn) {
       const updateData: any = {
         accessToken: result.accessToken,
         lastHealthCheckAt: now,
-        testStatus: "active",
-        lastError: null,
-        lastErrorAt: null,
-        lastErrorType: null,
-        lastErrorSource: null,
-        errorCode: null,
+        ...(await getRefreshRecoveryUpdate(conn.id)),
         expiredRetryCount: null,
         expiredRetryAt: null,
       };

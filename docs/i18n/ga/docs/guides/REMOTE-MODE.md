@@ -1,6 +1,6 @@
 # Remote Mode (Gaeilge)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -248,176 +248,148 @@ dtí go dtaispeántar go bhfuil an nasc gníomhach.
 
 ---
 
-## Comharthaí a bhainistiú
+## Tocain a bhainistiú
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ priontálann sé an rún UAIR AMHÁIN — cóipeáil anois é
-omniroute tokens list                 # folaithe: aitheantas, ainm, scóip, réimír, stádas, dul in éag
+#   ↳ taispeánann sé an rúnda AON UAIR AMHÁIN — cóipeáil anois é
+omniroute tokens list                 # masctha: id, name, scope, prefix, status, expiry
 omniroute tokens revoke <id|prefix>   # cúlghair láithreach
 omniroute tokens scopes               # mínigh na trí scóip
 ```
 
-Teastaíonn dintiúr **riarthóra** ó na horduithe `tokens`. Is féidir leat
-comharthaí a bhainistiú sa phainéal freisin faoi **Socruithe → Comharthaí
-Rochtana** (cruthaigh, cúlghair, cóipeáil uair amháin).
+Éilíonn orduithe `tokens` creidiúint **admin**. Is féidir leat tocain a bhainistiú freisin sa dashboard faoi **Settings → Access Tokens** (cruthaigh, cúlghair, cóipeáil-aon-uair).
+
+Ní féidir tocan a mhint le níos mó pribhléide ná mar atá ag a chruthaitheoir. Ní féidir tocan `admin` a chruthú ach ag an oibreoir: seisiún dashboard, an CLI áitiúil ar an bhfreastalaí féin, nó `omniroute connect` leis an bpasfhocal. Ní féidir le creidiúintí meaisín (tocan rochtana `admin`, nó eochair API le scóip `manage`/`admin`) ach tocain `write` agus `read` a mhint; má iarrann siad `--scope admin`, tugann siad `403` ar ais. Ní oscailt an mhintlithe logáil isteach a dhíchumasú: is creidiúint é tocan rochtana de scóip ar bith a nglacann na bealaí a éilíonn fíordheimhniú i gcónaí leis, agus dá bhrí sin faigheann glao gan aitheantas `401` ar scóip ar bith.
 
 ---
 
-## CLI códúcháin a chumrú ón gcatalóg chianda
+## CLI códála a chumrú ón gcatalóg iargúlta
 
-Léann `omniroute configure` catalóg bheo samhlacha an **fhreastalaí ghníomhaigh**
-agus scríobhann sé cumraíocht ar **do** ríomhaire.
+Léann `omniroute configure` catalóg samhlacha beo an **fhreastalaí ghníomhach** agus scríobhann sé cumraíocht ar **do** ríomhaire.
 
 ```bash
 omniroute configure codex
 #   Soláthraithe: glm, kmc, ollamacloud, opencode-go, …
-#   Soláthraí: glm
-#   Aitheantas samhla: glm/glm-5.2
+#   Provider: glm
+#   Model id: glm/glm-5.2
 #   ✔ Scríobhadh ~/.codex/glm52.config.toml
 #   Úsáid é:  codex --profile glm52
 
-# neamh-idirghníomhach
+# gan idirghníomhú
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
 # coinnigh samhail a úsáidtear go minic ag barr an roghnóra idirghníomhaigh
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Ní choinníonn an roghnóir ach aitheantais samhlacha (ní choinníonn sé URLanna ná
-dintiúir choíche) sa chomhad áitiúil `model-preferences.json`, arna scópáil de
-réir comhthéacs agus sprice CLI. Taispeántar ceanáin roimh roghanna a rinneadh le
-déanaí; úsáid `--unfavorite` chun samhail roghnaithe a bhaint den liosta
-comhthéacs/sprice sin.
+Coinníonn an roghnóir ach ID-anna samhla (riamh URLanna nó creidiúintí) sa chomhad áitiúil `model-preferences.json`, scoipthe de réir comhthéacs agus sprioc CLI. Taispeántar na roghanna is fearr roimh roghanna le déanaí; úsáid `--unfavorite` chun samhail roghnaithe a bhaint den liosta comhthéacs/sprice sin.
 
-Tagraíonn an phróifíl scríofa don eochair tátail trí athróg timpeallachta
-(`OMNIROUTE_API_KEY`) — ní scríobhtar an rún ar diosca choíche. Le haghaidh
-bunshocrú aonuaire Codex (an bloc `[model_providers.omniroute]`), féach
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Tagraíonn an phróifíl scríofa don eochair inferens trí athróg comhshaoil (`OMNIROUTE_API_KEY`). Ní scríobhtar an rúnda ar an diosca riamh. Maidir leis an socrú bunúsach Codex aon uaire (bloc `[model_providers.omniroute]`), féach [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### CLI a sheoladh i gcoinne an chianfhreastalaí (gan cumraíocht a scríobh)
+### CLI a sheoladh i gcoinne an fhreastalaí iargúlta (gan cumraíocht a scríobh)
 
-Cloíonn `omniroute run <target>` leis an gcomhthéacs gníomhach freisin: ní
-instealltar an bun-URL cianda ná dintiúr an chomhthéacs ach amháin sa phróiseas
-a sceitear.
+Omhlaíonn `omniroute run <target>` an comhthéacs gníomhach freisin: instealltar an URL bonn iargúlta agus creidiúint an chomhthéacs isteach sa phróiseas a sheoltar amháin.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → cianfhreastalaí
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Réamhamharc beacht ar an méid a sceithfí (AINMNEACHA EOCHRACHA timpeallachta amháin, luachanna choíche):
+# Réamhamharc ar an rud a seolfar go beacht (ainmneacha KEY env amháin, ní luachanna):
 omniroute run codex --dry-run --json
 ```
 
-Spriocanna: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(foinse aonair: `bin/cli/cli-manifest.mjs`). Ritheann Qwen agus Gemini le
-heolaire baile sealadach leithlisithe a bhaintear nuair a scoirtear, mar sin ní
-bhaineann an seoladh le cumraíocht phearsanta d'uirlise — ná ní sceitheann sé
-isteach inti — choíche.
+Spriocanna: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (foinse amháin: `bin/cli/cli-manifest.mjs`). Ritheann Qwen agus Gemini i mbaile sealadach iargúlta a bhaintear ar scor, agus dá bhrí sin ní théann an seoladh i dteagmháil le do chumraíocht uirlise pearsanta ná ní shileann isteach inti riamh.
 
-### Orduithe socraithe de réir CLI
+### Orduithe socraithe do gach CLI
 
-Tá ordú socraithe atá feasach ar an gcianfhreastalaí ag gach CLI a dtacaítear
-leis (cloíonn siad uile leis an gcomhthéacs gníomhach, nó
-`--remote <url> --api-key <key>`):
+Tá ordú socraithe feasach ar iargúlacht ag gach CLI tacaithe (cloíonn siad uile leis an gcomhthéacs gníomhach, nó `--remote <url> --api-key <key>`):
 
-| CLI         | Ordú                       | An méid a scríobhann sé                                                                                                                                                                              |
-| ----------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | próifílí `~/.codex/<name>.config.toml` (ceann amháin in aghaidh na samhla)                                                                                                                           |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (ceann amháin in aghaidh na samhla)                                                                                                                        |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — an soláthraí `omniroute` atá comhoiriúnach le openai, le gach samhail sa chatalóg (rith `opencode -m omniroute/<model>`)                                        |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (mód CLI) + priontálann sé socruithe an eisínteachta VS Code lena ngreamú (comhoiriúnach le OpenAI, Bun-URL **gan** `/v1`)                                |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + socruithe VS Code `kilocode.*` — comhoiriúnach le OpenAI, Bun-URL **le** `/v1`                                                                               |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **le** `/v1`, eochair trí `${{ secrets.OMNIROUTE_API_KEY }}`                                                |
-| Cursor      | `omniroute setup-cursor`   | priontálann sé na céimeanna san aip (Settings → Models → Override OpenAI Base URL **le** `/v1` + eochair + samhail). Is SQLite teimhneach é cumraíocht Cursor — painéal comhrá amháin                |
-| Roo Code    | `omniroute setup-roo`      | scríobhann sé JSON iompórtála Roo (`~/.omniroute/roo-settings.json`) + socraíonn sé `roo-cline.autoImportSettingsPath` + priontálann sé céimeanna UI (comhoiriúnach le OpenAI, Bun-URL **le** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — soláthraí `openai-compat`, `base_url` **le** `/v1`, eochair trí `$OMNIROUTE_API_KEY`                                                                                  |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **gan** `/v1` + `GOOSE_MODEL`) + oideas timpeallachta                                                                         |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **gan** `/v1` + `model: openai/<id>`) + oideas timpeallachta (`aider --message --yes`)                                                                        |
-| Qwen Code   | `omniroute setup-qwen`     | iontráil V4 `modelProviders.openai` in `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` in `~/.qwen/.env`                                                                                               |
+| CLI         | Ordú                       | Cad a scríobhann sé                                                                                                                                                                                            |
+| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | próifílí `~/.codex/<name>.config.toml` (do gach samhail)                                                                                                                                                       |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (do gach samhail)                                                                                                                                                    |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: an soláthraí `omniroute` atá comhoiriúnach le openai le gach samhail sa chatalóg (rith `opencode -m omniroute/<model>`)                                                    |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (mód CLI) + priontálann sé socruithe síneadháin VS Code le greamú (comhoiriúnach le OpenAI, URL Bonn **gan** `/v1`)                                                 |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + socruithe VS Code `kilocode.*`: comhoiriúnach le OpenAI, URL Bonn **le** `/v1`                                                                                         |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **le** `/v1`, eochair trí `${{ secrets.OMNIROUTE_API_KEY }}`                                                           |
+| Cursor      | `omniroute setup-cursor`   | priontálann sé na céimeanna san aip (Settings → Models → Override OpenAI Base URL **le** `/v1` + eochair + samhail). Is SQLite dorcha atá i gcumraíocht Cursor, agus dá bhrí sin is é an panel comhrá amháin é |
+| Roo Code    | `omniroute setup-roo`      | scríobhann sé JSON allmhairithe Roo (`~/.omniroute/roo-settings.json`) + socraíonn `roo-cline.autoImportSettingsPath` + priontálann sé céimeanna UI (comhoiriúnach le OpenAI, URL Bonn **le** `/v1`)           |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: soláthraí `openai-compat`, `base_url` **le** `/v1`, eochair trí `$OMNIROUTE_API_KEY`                                                                                             |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **le** `/v1`, léann Zed an eochair ó `$OMNIROUTE_API_KEY` (ní scríobhtar riamh é)                                      |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **gan** `/v1` + `GOOSE_MODEL`) + env recipe                                                                                             |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **gan** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                                                            |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` iontráil V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` i `~/.qwen/.env`                                                                                                             |
 
 ```bash
-# OpenCode (soláthraí atá comhoiriúnach le openai, gach samhail sa chatalóg, VPS cianda)
+# OpenCode (soláthraí comhoiriúnach le openai, gach samhail sa chatalóg, VPS iargúlta)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # ná coinnigh ach samhlacha meaitseála
+omniroute setup-opencode --only glm,kimi        # coinnigh na samhlacha comhoiriúnacha amháin
 opencode -m omniroute/glm/glm-5.2 "..."          # easpórtáil OMNIROUTE_API_KEY ar dtús
 ```
 
-> Tá comhtháthú **breiseáin** níos saibhre ag OpenCode freisin: `omniroute setup opencode`
-> (a thacaíonn le cianúsáid anois trí `--remote`) a shuiteálann `@omniroute/opencode-plugin`.
-> Is é `setup-opencode` an rogha éadrom atá comhoiriúnach le openai. Déantar tagairt
-> don eochair API trí `{env:OMNIROUTE_API_KEY}` — ní scríobhtar ar diosca riamh í.
+> Tá comhtháthú **breiseáin** níos saibhre ag OpenCode freisin: suiteálann `omniroute setup opencode` (atá feasach ar iargúlacht anois trí `--remote`) `@omniroute/opencode-plugin`.
+> Is malartach éadrom comhoiriúnach le openai é `setup-opencode`. Tagraítear don eochair API trí `{env:OMNIROUTE_API_KEY}`, ní scríobhtar riamh ar an diosca í.
 >
-> Ar OpenCode v2, úsáid `@omniroute/opencode-plugin-v2` ina ionad: an chatalóg chéanna,
-> conradh lódála difriúil. Léann sé an eochair ó stór dintiúr OpenCode féin
-> nuair atá an comhtháthú nasctha, mar sin ní theastaíonn eochair ar bith ó gheata
-> cianda in `opencode.json`.
+> Ar OpenCode v2, úsáid `@omniroute/opencode-plugin-v2` ina ionad: an catalóg chéanna, conradh loader difriúil. Léann sé an eochair ó stór creidiúintí OpenCode féin nuair a bhíonn an comhtháthú ceangailte, agus dá bhrí sin ní gá aon eochair in `opencode.json` don gheata iargúlta.
 
 ---
 
-## Comhthéacsanna a bhainistiú (aistriú idir freastalaithe)
+## Bainistiú comhthéacsanna (athraigh idir freastalaithe)
 
-Is freastalaí sábháilte é **comhthéacs** (baseUrl + dintiúr + raon feidhme). Cruthaíonn `omniroute connect`
-ceann agus déanann sé gníomhach é; uaidh sin amach díríonn gach ordú air. Bainistigh iad agus
-aistrigh eatarthu le `omniroute contexts`:
+Is freastalaí sábháilte é **comhthéacs** (baseUrl + dintiúr + scóip). Cruthaíonn `omniroute connect` ceann amháin agus déanann sé gníomhach é; as sin amach díríonn gach ordú air. Bainistigh agus athraigh eatarthu le `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # gach comhthéacs; marcáiltear an ceann gníomhach le ●
-omniroute contexts current         # an freastalaí gníomhach, stádas fíordheimhnithe, raon feidhme
+omniroute contexts list            # gach comhthéacs; tá an ceann gníomhach marcáilte ●
+omniroute contexts current         # an freastalaí gníomhach, stádas fíordheimhnithe, scóip
 ```
 
 ```text
-  | Ainm    | Bun-URL                    | Fíordheimhniú | Raon feidhme | Cur síos
-● | vps     | http://100.67.86.91:20128 | token         | admin        | OmniRoute cianda (…)
-  | default | http://localhost:20128    | ✗             |              |
+  | Ainm    | URL Bunúsach              | Fíordheimhniú | Scóip | Cur Síos
+● | vps     | http://100.67.86.91:20128 | comhartha | riarthóir | OmniRoute cianda (…)
+  | réamhshocrú | http://localhost:20128    | ✗     |       |
 ```
 
-**Aistrigh freastalaithe** — leanann gach ordú ina dhiaidh sin an comhthéacs gníomhach:
+**Athraigh freastalaithe** — leanann gach ordú ina dhiaidh sin an comhthéacs gníomhach:
 
 ```bash
-omniroute contexts use vps         # → díríonn gach ordú anois ar an VPS cianda
-omniroute tokens list              #   (ritear é in aghaidh an VPS)
+omniroute contexts use vps         # → buaileann gach ordú an VPS cianda anois
+omniroute tokens list              #   (ritheann sé i gcoinne an VPS)
 
-omniroute contexts use default     # → ar ais go localhost
-omniroute tokens list              #   (ritear é in aghaidh an fhreastalaí logánta)
+omniroute contexts use default     # → ar ais chuig localhost
+omniroute tokens list              #   (ritheann sé i gcoinne an fhreastalaí áitiúil)
 ```
 
-**Cuir comhthéacs leis de láimh** (in ionad `connect`), scrúdaigh é, nó athainmnigh é:
+**Cuir comhthéacs leis de láimh** (in ionad `connect`), scrúdaigh, nó athainmnigh:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
-  --access-token oma_live_xxxx --scope write --description "staging box"
+  --access-token oma_live_xxxx --scope write --description "bosca stáitse"
 omniroute contexts show staging    # sonraí iomlána do chomhthéacs amháin
 omniroute contexts rename staging stg
 ```
 
-**Bain comhthéacs** — iarrtar deimhniú; tabhair `--yes` chun é a scipeáil
-(riachtanach do scripteanna / blaoscanna neamh-idirghníomhacha, a dhiúltaíonn go sábháilte murach sin):
+**Bain comhthéacs** — iarrann sé deimhniú; cuir `--yes` leis chun é a scipeáil
+(riachtanach do scripteanna / sliogáin neamh-idirghníomhacha, a dhiúltaíonn go sábháilte ar shlí eile):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> Ní féidir `default` (localhost) a bhaint. Má bhaintear an comhthéacs gníomhach, filleann sé
-> ar `default`. Leid: ní bhaineann baint comhthéacs ach an dintiúr sábháilte **logánta** —
-> cúlghair an comhartha ar an bhfreastalaí le `omniroute tokens revoke <id>` chun rochtain a
-> scor i ndáiríre.
+> Ní féidir `default` (localhost) a bhaint. Má bhaintear an comhthéacs gníomhach, filleann sé ar `default`. Leid: ní bhaineann baint comhthéacs ach an dintiúr sábháilte **áitiúil** — cúlghair an comhartha ar an bhfreastalaí le `omniroute tokens revoke <id>` chun rochtain a mharú i ndáiríre.
 
-**Easpórtáil / iompórtáil** comhthéacsanna (m.sh. chun iad a aistriú idir ríomhairí). Ní choinníonn comhthéacsanna nua
-ach tagairt don eochairshlabhra; ní chóipeáiltear dintiúir isteach san easpórtáil nuair atá
-eochairshlabhra an OS ar fáil:
+**Easpórtáil / Iompórtáil** comhthéacsanna (m.sh. chun iad a bhogadh idir meaisíní). Fágann easpórtálacha dintiúir ar lár de réir réamhshocraithe, lena n-áirítear dintiúir atá stóráilte ag an gcúlchiste comhaid. Bain úsáid as `--include-secrets` go sainráite nuair a bhíonn cúltaca iniompartha a bhfuil dintiúir air ag teastáil:
 
 ```bash
-omniroute contexts export --out contexts.json     # réamhshocrú: stdout
-omniroute contexts import contexts.json            # forscríobh; --merge chun na cinn atá ann a choinneáil
-omniroute contexts migrate --yes                  # bog comharthaí gnáth-théacs oidhreachta chuig an eochairshlabhra
+omniroute contexts export --out contexts.json     # curtha in eagar; ceann scríbe réamhshocraithe: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # forscríobh; --merge chun na cinn atá ann cheana a choinneáil
+omniroute contexts migrate --yes                  # bog comharthaí téacs soiléir oidhreachta chuig an eochairchain
 ```
 
-Ar chórais gan chomhéadan grafach nach bhfuil eochairshlabhra OS inúsáidte acu, filleann an CLI ar
-`config.json` le mód `0600` agus priontálann sé rabhadh aonuaire. Caith le heaspórtálacha ón
-gcúltaca sin (agus le haon chumraíocht oidhreachta roimh an asc imirce) mar ábhar rúnda.
+Réitíonn `--include-secrets` tagairtí eochairchain sula n-easpórtálann sé agus teipeann air má theipeann ar aon dintiúr tagartha a léamh. Bíonn tosaíocht ag `--no-secrets` i gcónaí. Scríobhtar comhaid easpórtála go adamhach le mód `0600`. Caith le heaspórtáil shainráite a bhfuil rún aici mar ábhar rúnda. Ar chórais gan cheann gan eochairchain OS inúsáidte, filleann an CLI ar `config.json` le mód `0600` agus priontálann sé rabhadh aonuaire; fanann easpórtáil réamhshocraithe curtha in eagar sa mhodh seo.
 
 ---
 

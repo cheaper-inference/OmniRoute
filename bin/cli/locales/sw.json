@@ -123,7 +123,9 @@
       "maxCostOpt": "Gharama ya juu kwa siku (USD)",
       "allowedModelsOpt": "Orodha ya miundo inayoruhusiwa iliyotenganishwa kwa koma",
       "nothingToSet": "Hakuna sehemu za sera zilizotolewa. Tumia --rate-limit, --max-cost, au --allowed-models.",
-      "updated": "Sera imesasishwa."
+      "updated": "Sera imesasishwa.",
+      "modelAccessModeOpt": "Hali ya ufikiaji wa modeli (all | restricted)",
+      "unrestrictedOpt": "Ruhusu modeli zote (--model-access-mode all)"
     },
     "expiration": {
       "title": "Kuisha kwa Muda wa Ufunguo",
@@ -254,6 +256,7 @@
     "log": "Onyesha kumbukumbu za seva ndani ya mstari",
     "no_recovery": "Zima uanzishaji upya kiotomatiki inapoharibika (hali ya utatuzi)",
     "max_restarts": "Idadi ya juu ya uanzishaji upya baada ya kuharibika ndani ya sekunde 30 kabla ya kukata tamaa (chaguo-msingi: 2)",
+    "headless": "Endesha injini ya proksi pekee: dashibodi imezimwa (404), mifumo midogo ya hiari inarukwa (huweka OMNIROUTE_HEADLESS=1)",
     "tray": "Anza katika trei ya mfumo (kompyuta pekee, kwa hiari)",
     "no_tray": "Zima ikoni ya trei ya mfumo",
     "ready_timeout": "Muda wa mwisho wa ukaguzi wa utayari kwa ms (pia OMNIROUTE_READY_TIMEOUT_MS, chaguo-msingi 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sawazisha usanidi kati ya matukio ya OmniRoute",
     "push": {
-      "description": "Tuma usanidi kwenye wingu au tukio la mbali",
-      "target": "Lengwa (cloud au context:name)",
-      "bundle": "Sehemu za kifurushi za kusawazisha",
-      "dryRun": "Hakiki bila kutekeleza"
+      "description": "Tuma usanidi kwenye wingu au tukio la mbali"
     },
     "pull": {
-      "description": "Pakua usanidi kutoka kwenye wingu au chanzo cha mbali",
-      "source": "Chanzo (wingu au context:name)",
-      "merge": "Unganisha na usanidi uliopo",
-      "replace": "Badilisha usanidi uliopo",
-      "dryRun": "Hakiki bila kutekeleza"
-    },
-    "diff": {
-      "source": "Muktadha wa chanzo",
-      "target": "Muktadha lengwa"
+      "description": "Pakua usanidi kutoka kwenye wingu au chanzo cha mbali"
     },
     "bundle": {
       "description": "Hamisha usanidi kama faili la kifurushi",
-      "include": "Sehemu za kujumuisha (zinazotenganishwa kwa koma)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Leta faili la kifurushi",
       "dryRun": "Thibitisha bila kutekeleza"
-    },
-    "initialize": {
-      "fromCloud": "Anzisha kutoka kwenye nakala rudufu ya wingu"
     },
     "tokens": {
       "description": "Dhibiti tokeni za usawazishaji",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Ruka uthibitishaji"
       }
-    },
-    "resolve": {
-      "description": "Tatua migongano ya usawazishaji kwa mwingiliano"
     }
   },
   "config": {

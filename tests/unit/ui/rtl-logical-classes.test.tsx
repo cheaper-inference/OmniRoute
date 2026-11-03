@@ -25,27 +25,27 @@ function src(rel: string) {
   return readFileSync(resolve(cwd, rel), "utf-8");
 }
 
-// ─── DashboardLayout.tsx ──────────────────────────────────────────────────────
+// ─── Dashboard shell ─────────────────────────────────────────────────────────
+// The hand-rolled mobile drawer (`start-0` + `.dashboard-sidebar-mobile` RTL anchoring in
+// globals.css) went away with the legacy shell (KEA-7886 F4). The kit shell's drawer is the kit
+// Sidebar's own Sheet, anchored by `side` (asserted in the "Kit shell" block below).
 
-describe("DashboardLayout — mobile sidebar drawer uses logical classes", () => {
-  const code = src("src/shared/components/layouts/DashboardLayout.tsx");
-
-  it('uses start-0 (not bare left-0) for the mobile sidebar drawer', () => {
-    // The drawer must anchor to the inline-start edge so it flips in RTL.
-    expect(code).toContain("start-0");
+describe("globals.css — no leftover hooks of the removed hand-rolled drawer", () => {
+  it("drops the .dashboard-sidebar-mobile RTL anchoring rules", () => {
+    expect(src("src/app/globals.css")).not.toContain(".dashboard-sidebar-mobile");
   });
+});
 
-  it('does not use bare left-0 for the mobile sidebar drawer', () => {
-    // "inset-y-0 left-0" is the old physical class that breaks RTL.
-    expect(code).not.toContain("inset-y-0 left-0");
-  });
+// ─── persistLocale.ts ───────────────────────────────────────────────────────
 
-  it('uses -translate-x-full only when combined with RTL-aware transform or logical alternative', () => {
-    // We keep -translate-x-full/translate-x-0 for slide animation but anchor
-    // with start-0 so physical translate still produces correct visual result
-    // in both LTR and RTL (the drawer always slides in from its own start edge).
-    // Just confirm start-0 is present (already asserted above).
-    expect(code).toContain("start-0");
+describe("persistLocale — flips <html> direction immediately on switch", () => {
+  const code = src("src/shared/lib/persistLocale.ts");
+
+  it("sets document.documentElement.dir from the RTL locale list", () => {
+    // router.refresh() never re-renders <html dir>, so the writer itself must
+    // flip direction or Arabic text renders inside a stale dir="ltr" tree.
+    expect(code).toContain("document.documentElement.dir");
+    expect(code).toContain("RTL_LOCALES");
   });
 });
 
@@ -54,13 +54,35 @@ describe("DashboardLayout — mobile sidebar drawer uses logical classes", () =>
 describe("Sidebar — collapse toggle button uses logical margin", () => {
   const code = src("src/shared/components/Sidebar.tsx");
 
-  it('uses ms-auto (not ml-auto) for the macOS collapse-toggle alignment', () => {
+  it("uses ms-auto (not ml-auto) for the macOS collapse-toggle alignment", () => {
     // ml-auto is a physical class; ms-auto mirrors in RTL.
     expect(code).toContain("ms-auto");
   });
 
-  it('does not use bare ml-auto in the collapse-toggle className', () => {
+  it("does not use bare ml-auto in the collapse-toggle className", () => {
     expect(code).not.toContain("ml-auto");
+  });
+});
+
+describe("Kit shell — the sidebar side follows the document direction", () => {
+  it("kit shell passes the RTL-aware side to the Sidebar", () => {
+    expect(src("src/shared/components/layouts/DashboardShell.tsx")).toContain(
+      "side={useSidebarSide()}"
+    );
+  });
+
+  it("cancels the kit's order:2 for side=right under RTL so the aside stays on the inline end", () => {
+    // `.ci-sidebar[data-side="right"] { order: 2 }` is physical: in an RTL flex row it would lay
+    // the aside out after the inset, i.e. on the visual LEFT. The utility layer wins over the
+    // kit's components layer, so `rtl:order-none` keeps the aside first = rightmost.
+    // Layout-level proof: tests/e2e/sidebar-rtl.spec.ts.
+    expect(src("src/shared/components/layouts/DashboardShell.tsx")).toContain("rtl:order-none");
+  });
+
+  it("useSidebarSide reads dir=rtl from <html> and anchors the sidebar right", () => {
+    const sidebar = src("src/shared/components/Sidebar.tsx");
+    expect(sidebar).toContain("export function useSidebarSide()");
+    expect(sidebar).toContain('document.documentElement.dir === "rtl" ? "right" : "left"');
   });
 });
 
@@ -69,49 +91,60 @@ describe("Sidebar — collapse toggle button uses logical margin", () => {
 describe("LanguageSelector — dropdown anchors to inline-end", () => {
   const code = src("src/shared/components/LanguageSelector.tsx");
 
-  it('uses end-0 (not right-0) for the dropdown panel', () => {
-    expect(code).toContain("end-0");
+  it('anchors the kit DropdownMenuContent to the inline end (align="end")', () => {
+    // KEA-7886: the hand-rolled absolute panel (`end-0`) became the kit DropdownMenu; its
+    // floating-ui positioning resolves align="end" against the element's direction, so it
+    // mirrors under dir=rtl without a physical offset class.
+    expect(code).toContain('align="end"');
   });
 
-  it('does not use bare right-0 for the dropdown panel', () => {
+  it("does not use bare right-0 for the dropdown panel", () => {
     expect(code).not.toContain("right-0");
   });
 
-  it('uses text-start (not text-left) for lang name text alignment', () => {
+  it("uses text-start (not text-left) for lang name text alignment", () => {
     expect(code).toContain("text-start");
   });
 
-  it('does not use text-left for lang name text alignment', () => {
+  it("does not use text-left for lang name text alignment", () => {
     expect(code).not.toContain("text-left");
   });
 });
 
 // ─── Select.tsx ───────────────────────────────────────────────────────────────
+// The Select adapter (KEA-7886) dropped its own absolutely-positioned chevron: the kit
+// (Radix) Select draws its chevron inside the trigger's flex row, and the native
+// `<option>`-children fallback uses the browser arrow with room reserved by
+// `.ci-select-native` in globals.css. The RTL contract moves with it: no physical
+// classes in the adapter, and the fallback reserves the chevron room on the inline end.
 
-describe("Select — chevron icon uses logical inset classes", () => {
+describe("Select — chevron room uses logical insets", () => {
   const code = src("src/shared/components/Select.tsx");
+  const css = src("src/app/globals.css");
+  const nativeRule = css.slice(css.indexOf(".ci-select-native {"));
+  const nativeBlock = nativeRule.slice(0, nativeRule.indexOf("}"));
 
-  it('uses end-0 (not right-0) for the chevron wrapper', () => {
-    expect(code).toContain("end-0");
+  it("the native fallback rule exists in globals.css", () => {
+    expect(nativeBlock).toContain(".ci-select-native {");
   });
 
-  it('does not use bare right-0 for the chevron wrapper', () => {
+  it("does not use bare right-0 for the chevron wrapper", () => {
     expect(code).not.toContain("right-0");
   });
 
-  it('uses pe-3 (not pr-3) for chevron wrapper padding', () => {
-    expect(code).toContain("pe-3");
+  it("reserves the chevron room with logical padding-inline (start end)", () => {
+    expect(nativeBlock).toMatch(/padding-inline:\s*[^;\s]+\s+[^;\s]+;/);
   });
 
-  it('does not use bare pr-3 for chevron wrapper padding', () => {
+  it("does not use bare pr-3 for chevron wrapper padding", () => {
     expect(code).not.toContain("pr-3");
   });
 
-  it('uses pe-10 (not pr-10) for the select element right-pad (space for chevron)', () => {
-    expect(code).toContain("pe-10");
+  it("does not use physical padding (padding / padding-left / padding-right) for the native select", () => {
+    expect(nativeBlock).not.toMatch(/(^|[\s;{])padding(-left|-right)?\s*:/);
   });
 
-  it('does not use bare pr-10 for the select element', () => {
+  it("does not use bare pr-10 for the select element", () => {
     expect(code).not.toContain("pr-10");
   });
 });

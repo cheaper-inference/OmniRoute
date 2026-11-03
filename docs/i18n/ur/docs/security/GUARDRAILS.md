@@ -1,26 +1,33 @@
 # Guardrails (اردو)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇸🇦 [ar](../../../ar/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇬🇷 [el](../../../el/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇱 [he](../../../he/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇸🇦 [ar](../../../ar/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇧🇦 [bs](../../../bs/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇬🇷 [el](../../../el/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇱 [he](../../../he/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
 
 ---
 
-> **مستند ماخذ:** `src/lib/guardrails/`
-> **آخری تازہ کاری:** 2026-08-29 — v3.8.51 (Video Bridge ٹرانسکرپٹ کا ماخذ کالر کی جانب سے بیان کیا جاتا ہے،
-> ابھی سرور سے تصدیق شدہ نہیں — #11661 کے مطابق وضاحت کی گئی)
+> **حقیقت کا ماخذ:** `src/lib/guardrails/`
+> **آخری تازہ کاری:** 2026-10-17 — v3.8.52 ([کوریج اور حدود](#coverage-and-limits) کا اضافہ:
+> کن روٹس اور رسپانس پاتھس تک ہکس پہنچتے ہیں، ضم شدہ غیر فعال ہیڈرز (#16412)، انجیکشن
+> بلاک موڈ بطور لازمی حد بندی (#16413)، اور post-call سے پہلے رسپانس کو کون کون دیکھتا ہے)
 
-Guardrails، OmniRoute اور اپ اسٹریم فراہم کنندگان کے درمیان حد پر حفاظت، پالیسی، اور مواد کی تبدیلیوں کو نافذ کرتے ہیں۔ ہر guardrail درخواست کے پے لوڈز (`preCall`) اور
-اپ اسٹریم جوابات (`postCall`) کا معائنہ کر سکتا ہے (اور اختیاری طور پر انہیں مسترد، تبدیل، یا تشریح شدہ کر سکتا ہے)۔
+گارڈریلز OmniRoute اور اپ اسٹریم فراہم کنندگان کے درمیان حد بندی پر حفاظت، پالیسی، اور
+مواد کی تبدیلیوں کو نافذ کرتے ہیں۔ ہر گارڈریل درخواست کے پے لوڈز (`preCall`) اور
+اپ اسٹریم جوابات (`postCall`) کا معائنہ کر سکتا ہے (اور اختیاری طور پر انہیں مسترد،
+تبدیل، یا تشریح بھی کر سکتا ہے)۔
 
-سسٹم **fail-open** ہے: اگر عمل درآمد کے دوران کوئی guardrail استثنا پیدا کرے، تو رجسٹری
-خرابی ریکارڈ کرتی ہے اور درخواست کو ناکام کرنے کے بجائے اگلے guardrail کے ساتھ جاری رہتی ہے۔
-بلاک کرنا ایک واضح فیصلہ (`block: true`) ہے، کبھی بھی اتفاقی نتیجہ نہیں۔
+یہ نظام **fail-open** ہے: اگر کوئی گارڈریل عمل کے دوران خرابی پھینکتا ہے، تو رجسٹری
+اس خرابی کو ریکارڈ کرتی ہے اور درخواست کو ناکام بنانے کے بجائے اگلے گارڈریل کے ساتھ
+جاری رکھتی ہے۔ بلاک کرنا ایک واضح فیصلہ ہے (`block: true`)، کبھی کوئی حادثہ نہیں۔
+واحد استثنا منسوخ شدہ درخواست ہے: جب کالر کا `signal` منسوخ ہو جاتا ہے، تو خرابی
+پھینکنے والا گارڈریل ہک رن کو نظرانداز کیے جانے کے بجائے مسترد کر دیتا ہے۔
 
-## بلٹ اِن Guardrails
+یہ ہکس ہر روٹ یا ہر جواب پر **نہیں** چلتے۔ کسی گارڈریل پر بطور سیکیورٹی کنٹرول انحصار
+کرنے سے پہلے [کوریج اور حدود](#coverage-and-limits) ضرور پڑھیں۔
 
-رجسٹری امپورٹ کے وقت ترجیحی ترتیب میں چھ guardrails خودکار طور پر لوڈ کرتی ہے
-(`registry.ts` → `registerDefaultGuardrails()` دیکھیں):
+## بلٹ ان گارڈریلز
 
-| ترجیح | نام                 | مرحلہ (مراحل)  | فائل                  |
+رجسٹری درآمد پر ترجیحی ترتیب میں چھ گارڈریلز کو آٹو لوڈ کرتی ہے (دیکھیں `registry.ts` → `registerDefaultGuardrails()`):
+
+| ترجیح | نام                 | اسٹیج          | فائل                  |
 | ----- | ------------------- | -------------- | --------------------- |
 | `5`   | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`   | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -29,594 +36,261 @@ Guardrails، OmniRoute اور اپ اسٹریم فراہم کنندگان کے �
 | `20`  | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`  | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-کم ترجیحی نمبر **پہلے** چلتے ہیں۔
+کم ترجیحی نمبر چلتے ہیں۔** پہلے** .
 
-### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
+### ویژن برج (`visionBridge.ts`) — موڈالٹی برج PR-1
 
-**غیر وژن ماڈلز** کے لیے بھیجی گئی، تصاویر پر مشتمل درخواستوں کو روکتا ہے اور یا تو
-پوری درخواست کو وژن کی صلاحیت رکھنے والے ماڈل کی جانب دوبارہ بھیجتا ہے، یا
-اپ اسٹریم کال سے پہلے تصویری حصوں کو ایک قابلِ ترتیب وژن ماڈل کی تیار کردہ متنی وضاحتوں سے بدل دیتا ہے۔ اس سے صرف متن سنبھالنے والے فراہم کنندگان شفاف انداز میں
-ملٹی موڈل پے لوڈز کو سنبھال سکتے ہیں۔
+GLM 5.3 بیس ماڈل اور `glm-5.3-{low,high,max}` میں واضح `supportsVision:false` registry/spec میٹا ڈیٹا ہے۔ GLM 5.3 فلیش کی مختلف حالتیں مقامی وژن ماڈلز ہی رہیں گی۔ Claude کوڈ کا `/v1/messages` راستہ مشترکہ `handleChat` پری کال گارڈریل چین میں داخل ہوتا ہے** پہلے** Claude-to-OpenAI ترجمہ؛ nested `Read` ٹول-نتائج کی تصاویر کو بیان یا ہینڈل کرنا ضروری ہے اس سے پہلے کہ ترجمہ انہیں OpenAI `image_url` مواد میں لے جائے (#17069)۔
 
-عمل:
+جس کا مقصد امیج بیئرنگ درخواستوں کو روکتا ہے۔** غیر وژن ماڈلز** اور یا تو پوری درخواست کو وژن کے قابل ماڈل کی طرف روٹ کرتا ہے یا اپ اسٹریم کال سے پہلے کنفیگر ایبل ویژن ماڈل کے ذریعہ تیار کردہ ٹیکسٹ ڈسکرپشن کے ساتھ تصویری حصوں کی جگہ لے لیتا ہے۔ یہ صرف ٹیکسٹ فراہم کرنے والوں کو ملٹی موڈل پے لوڈز کو شفاف طریقے سے ہینڈل کرنے دیتا ہے۔
 
-1. اگر ہدف ماڈل پہلے ہی وژن کو سپورٹ کرتا ہے تو اسے چھوڑ دیں (سوائے اس صورت کے کہ وہ
-   جبری bridge فہرست `isVisionBridgeForcedModel` میں موجود ہو)۔
-2. `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`) کے ذریعے تصویری حصے اخذ کریں، جو
-   `open-sse/utils/mediaParts.ts` میں موجود **متحدہ میڈیا
-   ڈیٹیکٹر** `detectMediaParts()` کو ذمہ داری سونپتا ہے — یہ combo مطابقتی فلٹر کے ساتھ مشترک
-   واحد مستند ماخذ ہے۔
-   اخذ کرنے کا عمل صرف ان بالائی سطح کے حصوں کی منظور شدہ فہرست تک محدود ہے جنہیں
-   `replaceImageParts` واپس جوڑ سکتا ہے (extract↔replace معاہدہ): OpenAI
-   `image_url`، Anthropic base64 `source.type:"base64"`، Anthropic URL
-   `source.type:"url"`، اور Responses API `input_image`۔ اندرونی طور پر موجود نتائج اور
-   صرف اشارے پر مشتمل ساختیں combo-filter کا مواد ہیں اور کبھی اخذ نہیں کی جاتیں۔
-   اگر کچھ نہ ملے تو چھوڑ دیں۔
-3. `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`) کے ذریعے رن ٹائم کنفیگریشن متعین کریں: نئی `modalityBridge*`
-   ترتیبات کی keys کو ترجیح حاصل ہے؛ پرانی `visionBridge*` keys ایک **ایک-سائیکل
-   fallback** (rollback window) کے طور پر برقرار رہتی ہیں۔ جب
-   bridge غیر فعال ہو تو کسی بھی میڈیا traversal سے پہلے چھوڑ دیں۔
-4. Mode selector (`modalityBridgeVisionMode`، ذیل کا جدول دیکھیں)
-   reroute یا describe کا فیصلہ کرتا ہے۔ Reroute صرف `model`
-   کو تبدیل کر کے `modifiedPayload` واپس کرتا ہے، نیز meta `{ rerouted, fromModel, toModel, imagesKept }`۔
-5. Describe کا راستہ: تصاویر کو `maxImages` تک محدود کریں، کام سے آگاہ prompt مرتب کریں،
-   describe cache سے رجوع کریں، وژن ماڈل کو **متوازی طور پر**
-   (`Promise.allSettled`) کال کریں، اور ان کی جگہ `[Image N]: <description>` کے متنی حصے شامل کریں۔
-   ناکام describe سے `null` ملتا ہے اور اصل تصویری حصہ
-   **محفوظ** رہتا ہے (#4012) — سوائے combo describe راستے کے، جب ہر
-   describe ناکام ہو؛ اس صورت میں تصدیق شدہ غیر وژن اپ اسٹریم کو اس کے بجائے
-   `(دستیاب نہیں — کوئی وژن کی صلاحیت رکھنے والا فراہم کنندہ منسلک نہیں)` stub ملتا ہے (#8430)۔
-6. `modifiedPayload` + meta (`imagesProcessed`، `descriptions`،
-   `processingTimeMs`، `visionModel`) واپس کریں۔
+بہاؤ:
 
-#### Mode selector (`modalityBridgeVisionMode`)
+1. اگر ٹارگٹ ماڈل پہلے سے ہی وژن کو سپورٹ کرتا ہے تو چھوڑ دیں (جب تک یہ جبری پل کی فہرست میں ظاہر نہ ہو `isVisionBridgeForcedModel`)۔
+2. تصویر کے پرزے `extractImageParts(messages)` (`visionBridgeHelpers.ts`) کے ذریعے نکالیں، جو کہ کو ڈیلیٹ کرتا ہے۔** متحد میڈیا ڈیٹیکٹر** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — سچائی کا واحد ذریعہ کومبو مطابقت فلٹر کے ساتھ اشتراک کیا گیا ہے۔ نکالنے کی اجازت ان شکلوں کے لیے دی گئی ہے `replaceImageParts` واپس کر سکتے ہیں (ایکسٹریکٹ ↔ کو کنٹریکٹ کی جگہ لے سکتا ہے): OpenAI `image_url`، Anthropic base64 `source.type:"base64"`، Anthropic URL `source.type:"url"`، اور جوابات API `input_image`۔ Claude کوڈ `tool_result.content` اور ریسپانس ٹول کے آؤٹ پٹس کے اندر اندر کی مماثل تصاویر کو بھی نکالا جاتا ہے اور ان کے اصل راستوں پر تبدیل کیا جاتا ہے۔ صرف اشارے کی شکلیں کومبو فلٹر مواد ہیں اور نکالی نہیں جاتی ہیں۔ اگر کوئی نہیں ملا تو چھوڑ دیں۔
+3. رن ٹائم تشکیل کو `resolveVisionBridgeRuntimeSettings()` کے ذریعے حل کریں (`src/shared/constants/modalityBridgeDefaults.ts`): نئی `modalityBridge*` سیٹنگز کیز جیتیں؛ میراثی `visionBridge*` چابیاں باقی رہتی ہیں۔** ایک سائیکل فال بیک** (رول بیک ونڈو)۔ پل کے غیر فعال ہونے پر کسی بھی میڈیا ٹراورسل سے پہلے چھوڑ دیں۔
+4. موڈ سلیکٹر (`modalityBridgeVisionMode`، نیچے دی گئی جدول دیکھیں) reroute بمقابلہ describe کا فیصلہ کرتا ہے۔ ری روٹ `modifiedPayload` صرف `model` تبدیل کرکے واپس کرتا ہے، علاوہ meta `{ rerouted, fromModel, toModel, imagesKept }`۔
+5. راستے کی وضاحت کریں: `maxImages` پر کیپ امیجز، ٹاسک اویئر پرامپٹ کمپوز کریں، ڈسکرائب کیشے سے مشورہ کریں، وژن ماڈل کو کال کریں** متوازی میں** (`Promise.allSettled`)، اور ان کی جگہ `[Image N]: <description>` ٹیکسٹ حصوں کو انجیکشن کریں۔ ایک ناکام وضاحت سے `null` حاصل ہوتا ہے : خام تصویر unknown/vision-capable اہداف (#4012) کے لیے محفوظ ہے، لیکن ایک** تصدیق شدہ متن صرف براہ راست ہدف** یا زیرو ویژن کومبو ہر غیر بیان شدہ تصویر کے لیے ایک واضح `(unavailable — no vision-capable provider connected)` ٹیکسٹ اسٹب حاصل کرتا ہے، بشمول جزوی ناکامیاں اور ڈسکرائب کال کیپ (#17069) سے آگے کی تصاویر۔ موجودہ تمام ناکام کامبو بیان کرتا ہے کہ فال بیک اپنی جگہ پر ہے (#8430)۔
+6. واپس `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`)۔
 
-| موڈ        | ڈیفالٹ | طرزِ عمل                                                                                                                                                                                                                                                                                                      |
-| ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔      | سابقہ heuristic، بلا تبدیلی (#6640/#7204): غیر combo/`auto/` ماڈلز بہترین وژن ماڈل کی جانب reroute ہوتے ہیں، سوائے اس کے کہ اصل ماڈل کے پاس پہلے ہی قابلِ استعمال credentials ہوں (تب describe کیا جاتا ہے)؛ combo اہداف ہمیشہ describe ہوتے ہیں۔                                                             |
-| `describe` |        | ہمیشہ describe کریں — reroute بلاک مکمل طور پر نظر انداز کر دیا جاتا ہے؛ صارف کا منتخب کردہ ماڈل ہمیشہ جواب دیتا ہے۔                                                                                                                                                                                          |
-| `reroute`  |        | جبری reroute: credential والے ماڈل کو برقرار رکھنے والا guard نظر انداز کر دیا جاتا ہے۔ reroute کے **ہدف** کا credential guard پھر بھی لاگو ہوتا ہے — جب کوئی قابلِ استعمال وژن ہدف موجود نہ ہو، تو درخواست describe کی جانب منتقل ہو جاتی ہے تاکہ خام تصاویر کبھی صرف متن والے backend تک نہ پہنچیں (#8430)۔ |
+#### موڈ سلیکٹر (`modalityBridgeVisionMode`)
 
-جبری موڈز، auto heuristic کے چلنے سے **پہلے** ہی عمل کو مختصر کر دیتے ہیں؛ `auto` کا طرزِ عمل
-PR-1 سے پہلے کے guardrail سے byte-identical ہے۔
+| موڈ        | طے شدہ | رویہ                                                                                                                                                                                                                                                                 |
+| ---------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔      | لیگیسی ہیورسٹک، اچھوتا (#6640/#7204): نان کامبو/`auto/` ماڈل بہترین وژن ماڈل کی طرف پھر جاتے ہیں جب تک کہ اصل ماڈل کے پاس پہلے سے قابل استعمال اسناد موجود نہ ہوں (پھر بیان کریں)؛ کومبو اہداف ہمیشہ بیان کرتے ہیں۔                                                  |
+| `describe` |        | ہمیشہ — کی وضاحت کریں ری روٹ بلاک کو مکمل طور پر چھوڑ دیا گیا ہے۔ صارف کا منتخب کردہ ماڈل ہمیشہ جواب دیتا ہے۔                                                                                                                                                        |
+| `reroute`  |        | زبردستی دوبارہ راستہ: کیپ-کریڈینشیلڈ-ماڈل گارڈ کو نظرانداز کیا گیا ہے۔ راستہ -** ہدف** کریڈینشل گارڈ پھر بھی — کا اطلاق کرتا ہے جب کوئی قابل استعمال وژن ٹارگٹ موجود نہ ہو، پل صرف متن والے ہدف پر خام تصاویر کو بیان کرنے یا بھیجنے کی بجائے واضح غلطی سے روکتا ہے۔ |
 
-#### کام سے آگاہ describe prompt (`modalityBridgeVisionTaskAware`)
+زبردستی موڈز شارٹ سرکٹ** پہلے** آٹو heuristic چلتا ہے؛ `auto` رویہ pre-PR-1 گارڈریل کے بائٹ جیسا ہے۔
 
-ڈیفالٹ **true** ہے۔ `composeVisionPrompt()` (`visionBridgeHelpers.ts`)، بنیادی
-describe prompt کے ساتھ **آخری صارف پیغام** کا متن (500 حروف تک محدود) شامل کرتا ہے،
-جس سے وضاحت اس جانب رہنمائی پاتی ہے جو صارف نے حقیقتاً پوچھا تھا
-(codex-vision-proxy pattern)، اور وژن ماڈل سے مرئی متن کو نقل کرنے کا کہا جاتا ہے۔
-flag بند ہونے پر — یا صارف کا متن موجود نہ ہونے پر — بنیادی prompt بلا تبدیلی استعمال ہوتا ہے۔
+#### API کلیدی دائرہ کار (`visionBridgeKeyScope.ts`)
 
-describe سیلف لوپ کی اپنی OpenAI-مطابقت پذیر درخواست (`callVisionModelSingle()`
-در `visionBridgeHelpers.ts`) ہمیشہ `image_url.detail: "high"` کی درخواست کرتی ہے —
-بلاشرط، ہر کالر/فراہم کنندہ کے لیے، اور کسی کلائنٹ سگنل سے مشروط نہیں۔
-کم تفصیل والی سیمپلنگ عین اسی متن کی نقل نویسی کے کام کے لیے OCR کی درستگی
-گھٹا دیتی ہے جس کا یہ پرامپٹ تقاضا کرتا ہے، اس لیے describe کال خود ہمیشہ اعلیٰ
-تفصیل کی درخواست کرتی ہے، خواہ اصل آنے والی درخواست نے کوئی بھی تفصیلی سطح استعمال
-کی ہو۔ یہ صرف داخلی describe درخواست کی باڈی کو متاثر کرتا ہے؛ اس سے یہ تبدیل
-نہیں ہوتا کہ OmniRoute بنیادی درخواست میں کالر کے اپنے `image_url.detail` کو کیسے
-آگے بھیجتا ہے — وہ ڈیفالٹ الگ سے لاگو ہوتا ہے، اور صرف شناخت شدہ OpenCode کلائنٹس
-کے لیے، `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) میں۔
-describe سیلف لوپ کی Anthropic وائر فارمیٹ شاخ میں کوئی `detail` فیلڈ نہیں ہے
-اور دونوں میں سے کسی ڈیفالٹ سے متاثر نہیں ہوتی۔
+جب کال کرنے والے کی API کلید `allowedConnections`، کوٹہ پولز (`allowedQuotas`) یا ماڈلز (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`) کو محدود کرتی ہے، تو برج صرف راستے کا انتخاب کرتا ہے اور ان ماڈلز کی وضاحت کرتا ہے جنہیں کلید استعمال کر سکتی ہے، کنکشنز پر کلید استعمال کر سکتی ہے۔ وضاحتی کال پھر ہمیشہ `x-omniroute-self-loop-key-id` ہیڈر کے ساتھ OmniRoute سیلف لوپ سے گزرتی ہے، لہذا موصول ہونے والی چیٹ کی درخواست اس کلید کے کنکشن اور ماڈل پالیسی کو دوبارہ نافذ کرتی ہے۔ `enforceApiKeyPolicy()` اس ہیڈر کو صرف سیلف لوپ بیئرر کے ساتھ مل کر اعزاز دیتا ہے، لہذا یہ صرف رسائی کو محدود کر سکتا ہے، اور ایک آئی ڈی جو حل نہیں کرتی اسے مسترد کر دیا جاتا ہے۔
 
-#### Describe آؤٹ پٹ کی حد (`modalityBridgeVisionMaxChars`)
+اگر کلید کے لیے کسی ویژن ماڈل کی اجازت نہیں ہے، a** تصدیق شدہ صرف ٹیکسٹ ہدف** تصویر کی درخواست کو مقامی طور پر صاف HTTP 400 کے ساتھ مسترد کر دیتا ہے بجائے اس کے کہ تصویری بائٹس کو کسی ناکارہ اپ اسٹریم (#17069) پر بھیجیں۔ نامعلوم یا مقامی وژن کی صلاحیت والے اہداف کے لیے، describe path اپنے سابقہ فیل-اوپن رویے (meta `{ skipped: true, reason: "no_permitted_vision_model" }`) کو برقرار رکھتا ہے۔ کلید کے بغیر درخواستیں، اور ان پابندیوں کے بغیر چابیاں، بالکل پہلے کی طرح برتاؤ کرتی ہیں۔
 
-| کلید                           | ڈیفالٹ | حد               |
+#### کام سے آگاہی پرامپٹ (`modalityBridgeVisionTaskAware`)
+
+طے شدہ** سچ** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) کے متن کو شامل کرتا ہے۔** آخری صارف کا پیغام** (500 حروف کو چھوٹا کیا گیا) بیس پرامپٹ کی وضاحت کرتا ہے، اس تفصیل کو آگے بڑھاتا ہے جو صارف نے اصل میں پوچھا تھا (کوڈیکس-وژن-پراکسی پیٹرن) اور وژن ماڈل سے مرئی متن کو نقل کرنے کے لیے کہتے ہیں۔ فلیگ آف — یا کوئی صارف ٹیکسٹ — کے ساتھ بیس پرامپٹ کو بغیر تبدیلی کے استعمال کیا جاتا ہے۔
+
+describe self-loop کی اپنی OpenAI- موافق درخواست (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) ہمیشہ `image_url.detail: "high"` — غیر مشروط طور پر درخواست کرتا ہے، ہر caller/provider کے لیے، کسی بھی کلائنٹ کے سگنل پر گیٹ نہیں کیا جاتا ہے۔ کم تفصیل کے نمونے لینے سے OCR درستگی بالکل اسی متن کی نقل کے کام کے لیے کم ہو جاتی ہے جس کے لیے یہ پرامپٹ پوچھتا ہے، اس لیے describe کال خود ہمیشہ اعلیٰ تفصیل کے لیے پوچھتا ہے، قطع نظر اس کے کہ اصل ان باؤنڈ درخواست کا استعمال کیا گیا ہے۔ یہ صرف اندرونی وضاحت کی درخواست کے جسم کو متاثر کرتا ہے۔ اس سے یہ تبدیل نہیں ہوتا ہے کہ OmniRoute کس طرح کال کرنے والے کے اپنے `image_url.detail` بنیادی درخواست — پر فارورڈ کرتا ہے کہ ڈیفالٹ الگ سے لاگو ہوتا ہے، اور صرف `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) میں پتہ چلنے والے OpenCode کلائنٹس کے لیے۔ describe self-loop کی Anthropic وائر فارمیٹ برانچ میں کوئی `detail` فیلڈ نہیں ہے اور یہ کسی بھی ڈیفالٹ سے متاثر نہیں ہوتا ہے۔
+
+#### آؤٹ پٹ کیپ کی وضاحت کریں (`modalityBridgeVisionMaxChars`)
+
+| چابی                           | طے شدہ | رینج             |
 | ------------------------------ | ------ | ---------------- |
-| `modalityBridgeVisionMaxChars` | `0`    | `0` یا 100–50000 |
+| `modalityBridgeVisionMaxChars` | `0`    | `0` یا 100-50000 |
 
-`0` (ڈیفالٹ) کا مطلب ہے **کوئی حد نہیں** — `callVisionModel()` کی واپس کردہ
-تفصیل بغیر کسی تبدیلی کے آگے بھیج دی جاتی ہے، جس سے موجودہ طرزِ عمل برقرار رہتا
-ہے۔ 100–50000 کی حد میں کوئی بھی قدر، تفصیل کو واپس
-`[Image N]: <description>` کے طور پر شامل کیے جانے سے پہلے `…` لاحقے کے ساتھ
-مختصر کر دیتی ہے (`src/lib/guardrails/visionBridge.ts` میں
-`VisionBridgeGuardrail.preCall()`)۔ ایسی تفصیل طلب OCR کارروائیوں کے لیے اسے
-بڑھائیں جہاں ڈاؤن اسٹریم ماڈل کو مکمل نقل نویسی درکار ہو؛ زیادہ گفتگو کرنے والے
-وژن ماڈلز پر ٹوکن کے استعمال کو محدود رکھنے کے لیے اسے کم کریں۔
-ڈیش بورڈ فیلڈ Vision ٹیب کے Advanced پینل میں موجود ہے
-(`ModalityBridgeVisionTab.tsx` میں `modality-bridge-max-chars`) اور 1 سے 99 کے
-درمیان کسی بھی قدر کو کم از کم 100 تک محدود کر دیتا ہے، جبکہ واضح `0` کو
-بغیر تبدیلی کے چھوڑتا ہے — `0` بذاتِ خود ایک درست Zod قدر ہے
-(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`)، محض
-"غیر مقرر" ڈیفالٹ نہیں۔
+`0` (پہلے سے طے شدہ) کا مطلب ہے۔** کوئی ٹوپی نہیں** — `callVisionModel()` کی طرف سے واپس کی گئی تفصیل موجودہ رویے کو محفوظ رکھتے ہوئے، غیر ترمیم شدہ سے گزری ہے۔ 100–50000 رینج میں کوئی بھی قدر `…` لاحقہ کے ساتھ تفصیل کو چھوٹا کر دیتی ہے اس سے پہلے کہ اسے `[Image N]: <description>` ( `src/lib/guardrails/visionBridge.ts` میں `VisionBridgeGuardrail.preCall()` ) کے طور پر تقسیم کیا جائے۔ اس کو تفصیل سے بھاری OCR کاموں کے لیے اٹھائیں جہاں ڈاؤن اسٹریم ماڈل کو مکمل نقل کی ضرورت ہوتی ہے۔ چیٹی ویژن ماڈلز پر ٹوکن کے استعمال کے لیے اسے کم کریں۔ ڈیش بورڈ فیلڈ ویژن ٹیب کے ایڈوانسڈ پینل (`modality-bridge-max-chars` میں `ModalityBridgeVisionTab.tsx`) پر رہتا ہے اور 1 اور 99 کے درمیان کسی بھی قدر کو 100 منزل تک بند کر دیتا ہے جبکہ واضح `0` کو چھوئے بغیر — `0` اپنے طور پر ایک درست Zod ویلیو ہے (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`")، نہیں ہے۔
 
-#### Describe کیش (`modalityBridge/bridgeCache.ts`)
+#### کیشے کی وضاحت کریں (`modalityBridge/bridgeCache.ts`)
 
-describe آؤٹ پٹس کے لیے اِن-میموری LRU + TTL کیش، جو پورے پروسیس میں مشترک ہے۔
-کلید = `sha256(imageRef + composedPrompt + configuredBridgeModel)`، طوالت-سابقہ
-فریمنگ کے ساتھ (فیلڈ کی حدود کے ٹکراؤ کے بغیر)۔ ماڈل جزو **ترتیب دیا گیا**
-بریج ماڈل ہے، نہ کہ وہ ماڈل جس نے حقیقتاً جواب دیا —
-`callVisionModel` داخلی طور پر فال بیک کر سکتا ہے، اور ہر کوشش کے لحاظ سے کلید
-بنانا کیش کو منتشر کر دے گا۔ ناکام describes کبھی کیش نہیں کیے جاتے۔ ترتیبات:
+آؤٹ پٹس کی وضاحت کے لیے ان میموری LRU + TTL کیشے، مشترکہ عمل میں۔ کلیدی = `sha256(imageRef + composedPrompt + configuredBridgeModel)` لمبائی-پریفکس فریمنگ کے ساتھ (کوئی فیلڈ-باؤنڈری تصادم نہیں)۔ ماڈل کا جزو ہے۔** تشکیل شدہ** برج ماڈل، وہ ماڈل نہیں جس نے اصل میں — `callVisionModel` جواب دیا ہو، اندرونی طور پر واپس گر سکتا ہے، اور فی کوشش کیچنگ کیش کو ٹکڑے ٹکڑے کر دے گی۔ ناکام وضاحتیں کبھی کیش نہیں ہوتی ہیں۔ ترتیبات:
 
-| کلید                            | ڈیفالٹ | حد      |
+| چابی                            | طے شدہ | رینج    |
 | ------------------------------- | ------ | ------- |
 | `modalityBridgeCacheEnabled`    | `true` | —       |
 | `modalityBridgeCacheTtlMinutes` | `60`   | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`  | 10–5000 |
 
-#### ریموٹ امیج نارملائزیشن (سیلف لوپ describe/base64 فیچ)
+#### ریموٹ امیج نارملائزیشن (سیلف لوپ describe/base64 بازیافت)
 
-جب بریج خود کوئی **ریموٹ** امیج فیچ کرتا ہے — Anthropic describe سیلف کال اور
-claude وائر فارمیٹ base64 تبدیلی (`ensureBase64ImagesForClaudeWire`)، دونوں
-`visionBridgeHelpers.ts` میں `fetchRemoteImageAsDataUri()` کے ذریعے — تو نتیجے
-میں حاصل ہونے والا ڈیٹا URI، وژن ماڈل کی درخواست میں شامل کیے جانے سے پہلے
-`normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) سے گزارا جاتا ہے۔
-ضرورت سے زیادہ بڑی امیجز کو **2048px طویل کنارے** تک گھٹا دیا جاتا ہے (اسی
-ری سائز حد کے مطابق جسے OpenAI/Anthropic پہلے ہی سرور کی جانب لاگو کرتے ہیں)،
-جس سے وژن ماڈل کو نظر آنے والی چیز تبدیل کیے بغیر اپ لوڈ بائٹس/تاخیر کم ہوتی ہے۔
-ری سائزنگ `sharp` استعمال کرتی ہے، جسے ڈائنامک امپورٹ کے ذریعے لوڈ کیا جاتا ہے:
-کسی ایسے پلیٹ فارم پر جہاں اس کی مقامی بائنری لوڈ ہونے میں ناکام ہو،
-`normalizeDataUri()` **کبھی استثنا نہیں پھینکتا** — یہ اصل بائٹس کو جوں کا توں
-آگے بھیجنے پر فال بیک کرتا ہے، لہٰذا describe/base64-تبدیلی کا راستہ ہمیشہ کام
-کرتا رہتا ہے۔ غیر امیج بائٹس (ایسا فیچ جس نے قابلِ ڈی کوڈ امیج واپس نہ کی ہو)
-بھی بغیر تبدیلی کے آگے بھیج دی جاتی ہیں۔ یہ نارملائزیشن صرف ان امیجز تک محدود
-ہے جنہیں بریج اپنی سیلف کال کے لیے فیچ کرتا ہے — اسے کالر کے خام پاس تھرو پے لوڈ
-پر کبھی لاگو نہیں کیا جاتا، جو صرف واضح اجازت پر تبدیلی کے اصول
-(Hard Rule #20) سے مطابقت رکھتا ہے۔
+جب پل لاتا ہے a** دور دراز** تصویر خود — Anthropic خود کال اور کلاڈ وائر فارمیٹ بیس64 کنورژن (`ensureBase64ImagesForClaudeWire`) کی وضاحت کرتی ہے، دونوں `visionBridgeHelpers.ts` — میں `fetchRemoteImageAsDataUri()` کے ذریعے نتیجہ خیز ڈیٹا URI وژن ماڈل کی درخواست میں سرایت کرنے سے پہلے `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) کے ذریعے منتقل کیا جاتا ہے۔ بڑے سائز کی تصاویر کو گھٹا کر a کر دیا گیا ہے۔** 2048px لمبا کنارہ** (ریسائز کیپ OpenAI/Anthropic سے مماثل پہلے سے ہی سرور سائیڈ کا اطلاق ہوتا ہے)، جو وژن ماڈل کے نظر آنے والے کو تبدیل کیے بغیر bytes/latency کو اپ لوڈ کرتا ہے۔ سائز تبدیل کرنے میں `sharp` استعمال ہوتا ہے، متحرک درآمد کے ذریعے لوڈ کیا جاتا ہے: ایک پلیٹ فارم پر جہاں اس کی مقامی بائنری لوڈ ہونے میں ناکام ہو جاتی ہے، `normalizeDataUri()`** کبھی نہیں پھینکتا** — یہ اصل بائٹس کے پاس تھرو پر واپس آتا ہے، لہذا describe/base64-conversion پاتھ ہمیشہ کام کرتا رہتا ہے۔ نان امیج بائٹس (ایک ایسی بازیافت جس نے ڈی کوڈ ایبل امیج واپس نہیں کیا) بھی اچھوتے ہوئے گزرے ہیں۔ اس نارملائزیشن کا دائرہ ان تصاویر کے لیے ہے جو پل اپنی خود کال — کے لیے لاتا ہے یہ کال کرنے والے کے خام پاس تھرو پے لوڈ پر کبھی بھی لاگو نہیں ہوتا، جو آپٹ ان اونلی میوٹیشن اصول (ہارڈ رول #20) کے مطابق ہوتا ہے۔
 
-#### ترتیبات کا اسکیما + مائیگریشن
+#### ترتیبات سکیما + منتقلی
 
-نئی `modalityBridge*` کلیدیں `updateSettingsSchema`
-(`src/shared/validation/settingsSchemas.ts`) میں Zod سے توثیق شدہ ہیں:
-`modalityBridgeVisionEnabled`، `modalityBridgeVisionMode`،
-`modalityBridgeVisionModel`، `modalityBridgeVisionTaskAware`،
-`modalityBridgeVisionPrompt`، `modalityBridgeVisionTimeout`،
-`modalityBridgeVisionMaxImages`، `modalityBridgeVisionMaxChars`،
-`modalityBridgeCache*` کی تینوں کلیدیں، اور Audio Bridge کے زیرِ استعمال
-`modalityBridgeAudio*` گروپ۔ مائیگریشن `141_modality_bridge_settings.sql`
-موجودہ لیگیسی `visionBridge*` اقدار کو مماثل نئی کلیدوں میں نقل کرتی ہے
-(آئیڈیم پوٹنٹ، اور آپریٹر کی مقرر کردہ `modalityBridge*` قدر کو کبھی اوور رائٹ
-نہیں کرتی)؛ لیگیسی کلیدیں ایک ریلیز سائیکل کے لیے ریڈ فال بیک کے طور پر قبول
-رہتی ہیں۔
+نئی `modalityBridge*` کیز `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCache*` تینوں اور آڈیو برج کے ذریعہ استعمال کردہ `modalityBridgeAudio*` گروپ میں Zod کی توثیق شدہ ہیں۔ مائیگریشن `141_modality_bridge_settings.sql` موجودہ لیگیسی `visionBridge*` اقدار کو مماثل نئی کلیدوں میں کاپی کرتا ہے (آئیڈیمپوٹینٹ، کبھی بھی آپریٹر کی سیٹ کردہ `modalityBridge*` ویلیو کو اوور رائٹ نہیں کرتا)؛ لیگیسی کیز ایک ریلیز سائیکل کے لیے ریڈ فال بیک کے طور پر قبول کی جاتی ہیں۔
 
-#### شفافیت ہیڈر + اعداد و شمار
+#### شفافیت ہیڈر + اعدادوشمار
 
-Describe سے تبدیل شدہ جوابات میں
-`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-شامل ہوتا ہے (`modalityBridge/bridgeStats.ts` میں
-`buildModalityBridgeHeader()` سے تیار کردہ، اور
-`src/sse/handlers/chatHelpers.ts` میں `withModalityBridgeHeader()` کے ذریعے
-لگایا گیا)۔ دوبارہ روٹ کی گئی درخواستوں کو **کوئی** ہیڈر نہیں ملتا — پے لوڈ
-بغیر تبدیلی کے تھا اور ماڈل کی تبدیلی پہلے ہی جوابی باڈی کے `model` فیلڈ میں
-نظر آتی ہے۔
+بیان-تبدیل شدہ جوابات `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` لے جاتے ہیں ( `modalityBridge/bridgeStats.ts` میں `buildModalityBridgeHeader()` کے ذریعے بنایا گیا، `src/sse/handlers/chatHelpers.ts` میں `withModalityBridgeHeader()` کے ذریعے مہر لگایا گیا)۔ ری روٹ شدہ درخواستیں ملتی ہیں۔** نہیں** ہیڈر — پے لوڈ اچھوت تھا اور ماڈل سویپ پہلے ہی ریسپانس باڈی کے `model` فیلڈ میں نظر آتا ہے۔
 
-`GET /api/modality-bridge/stats` (انتظامی توثیق، وہی درجہ جو
-`GET /api/settings` کا ہے) `vision`، `audio`، اور `video` کے لیے اِن-میموری
-فی موڈیلٹی کاؤنٹرز
-`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` واپس کرتا ہے۔
-`averageLatencyMs` اپنے مخرج کے طور پر تمام کوششوں کے بجائے `latencySamples`
-استعمال کرتا ہے؛ وقت بندی کے بغیر کوئی کارروائی فرضی صفر ملی سیکنڈ سیمپل تخلیق
-نہیں کرتی۔ `bridged` کامیاب تبدیلیوں کے لیے سابقہ مطابقت رکھنے والا عرف رہتا ہے؛
-ناکام کوششیں اسے نہیں بڑھاتیں۔
-کاؤنٹرز ڈیزائن کے مطابق پروسیس دوبارہ شروع ہونے پر ری سیٹ ہو جاتے ہیں
-(ٹیلی میٹری، اکاؤنٹنگ نہیں)۔
+`GET /api/modality-bridge/stats` (انتظام کی توثیق، `GET /api/settings` جیسا ہی درجہ) `vision`، `audio`، اور `video` کے لیے ان-میموری فی موڈیلٹی کاؤنٹرز `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` واپس کرتا ہے۔ `averageLatencyMs` `latencySamples` استعمال کرتا ہے، تمام کوششوں کو نہیں، اپنے اعشاریہ کے طور پر؛ ٹائمنگ کے بغیر آپریشن صفر ملی سیکنڈ کا نمونہ نہیں بناتا۔ `bridged` کامیاب تبادلوں کے لیے پسماندہ مطابقت پذیر عرف بنا ہوا ہے۔ ناکام کوششیں اس میں اضافہ نہیں کرتی ہیں۔ ڈیزائن کے ذریعہ دوبارہ شروع ہونے والے عمل پر کاؤنٹرز کو دوبارہ ترتیب دیا گیا (ٹیلی میٹری، اکاؤنٹنگ نہیں)۔
 
-#### ڈیش بورڈ کی تشکیل
+#### ڈیش بورڈ کنفیگریشن
 
-مخصوص ڈیش بورڈ صفحہ
-`/dashboard/settings/modality-bridge` ہے۔ اس کے URL کے ذریعے قابلِ رسائی `Vision`، `Audio`،
-اور `Video` ٹیبز، `tab` کی قدر تبدیل کرتے وقت query parameters محفوظ رکھتے ہیں۔
-Vision ٹیب فعال کاری، موڈ، ماڈل کا انتخاب (بشمول خودکار
-ڈیفالٹ)، ٹاسک سے آگاہ prompting، timeout/image/description-length/cache کی جدید
-حدود، runtime
-کاؤنٹرز، اور حفاظتی پابندیوں کے ساتھ ایک نمونہ درخواست فراہم کرتا ہے۔ Audio ٹیب بھی فعال ہے: یہ
-فعال کاری، Auto کے ساتھ صرف STT ماڈل picker، timeout/max-clip حدود، آڈیو
-کاؤنٹرز، اور ایک `input_audio` نمونہ ٹیسٹ فراہم کرتا ہے۔ Video ٹیب مکمل طور پر فعال ہے: یہ
-FFmpeg/ffprobe کی runtime حالت دکھاتا ہے — چار واضح UI حالتوں میں سے ایک (`unknown` جب
-probe جاری ہو یا مکمل نہ ہو سکا ہو، `restricted` ایسے non-loopback
-ڈیش بورڈ host پر جہاں probe کو client-side چھوڑ دیا جاتا ہے، `unavailable` جب probe
-کے بعد اس کی عدم دستیابی کی تصدیق ہو جائے، یا FFmpeg/ffprobe ورژنز کے ساتھ `available`) — فعال
-کاری/model/frame/video/timeout حدود کو برقرار رکھتا ہے، model picker کو vision-capable
-ماڈلز تک محدود کرتا ہے، اور ویڈیو کاؤنٹرز فراہم کرتا ہے۔
+سرشار ڈیش بورڈ صفحہ `/dashboard/settings/modality-bridge` ہے۔ اس کے URL ایڈریس ایبل `Vision`، `Audio`، اور `Video` ٹیبز `tab` ویلیو کو تبدیل کرتے وقت استفسار کے پیرامیٹرز کو محفوظ رکھتے ہیں۔ ویژن ٹیب قابلیت، موڈ، ماڈل سلیکشن (بشمول خودکار ڈیفالٹ)، ٹاسک سے آگاہی پرامپٹنگ، ایڈوانس timeout/image/description-length/cache حدود، رن ٹائم کاؤنٹرز، اور حفاظتی نمونے کی درخواست کو ظاہر کرتا ہے۔ آڈیو ٹیب بھی لائیو ہے: یہ قابلیت کو ظاہر کرتا ہے، آٹو کے ساتھ ایک STT-صرف ماڈل چننے والا، timeout/max-clip حدود، آڈیو کاؤنٹرز، اور `input_audio` نمونہ ٹیسٹ۔ ویڈیو ٹیب فعال ہے: یہ FFmpeg/ffprobe رن ٹائم اسٹیٹ — چار واضح UI حالتوں میں سے ایک کی اطلاع دیتا ہے (`unknown` جب کہ پروب فلائٹ میں ہے یا مکمل نہیں ہو سکی، `restricted` ایک نان لوپ بیک ڈیش بورڈ ہوسٹ پر جہاں پروب کو کلائنٹ سائیڈ چھوڑ دیا جاتا ہے، `unavailable` ایک بار پروب کی جانچ پڑتال اور اس کی تصدیق کے بعد FFmpeg/ffprobe ورژن غائب ہو جاتا ہے، — `available` محدود کرتا ہے، ماڈل چننے والے enable/model/frame/video/timeout وژن کے قابل ماڈلز میں فلٹر کرتا ہے، اور ویڈیو کاؤنٹرز کو بے نقاب کرتا ہے۔
 
-AI ترتیبات کے تحت سابقہ Vision Bridge کارڈ اب نئے صفحے کے لیے compatibility link ہے؛
-اب یہ فارم کی دوسری نقل کا مالک نہیں ہے۔ Media Providers بھی
-موجودہ Speech-to-Text playground کو ہٹائے بغیر Image-to-Text اور Speech-to-Text
-workflows کو متعلقہ Modality Bridge ٹیبز سے منسلک کرتا ہے۔
+AI سیٹنگز کے تحت سابقہ ویژن برج کارڈ نئے صفحہ کے لیے مطابقت کا لنک ہے۔ اس کے پاس اب فارم کی دوسری کاپی نہیں ہے۔ میڈیا فراہم کرنے والے موجودہ اسپیچ ٹو ٹیکسٹ پلے گراؤنڈ کو ہٹائے بغیر امیج ٹو ٹیکسٹ اور اسپیچ ٹو ٹیکسٹ ورک فلو کو متعلقہ موڈیلیٹی برج ٹیبز سے بھی جوڑ دیتے ہیں۔
 
-**Self-loop admission bypass:** جب describe call کو OmniRoute کے اپنے
-`/v1` self-loop (غیر معیاری provider model) کے ذریعے route کیا جاتا ہے، تو sub-request
-`x-omniroute-admission-bypass: internal` بھیجتی ہے اور resolved
-self-loop credential کے ساتھ authenticated ہوتی ہے — local mode میں مقامی `sk_omniroute`
-sentinel، یا operator کی ترتیب کردہ `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env key (#1350)، تاکہ
-`REQUIRE_API_KEY=true` deployments بھی describe call چلا سکیں۔ bypass
-صرف انہی عین credentials کے لیے قبول کیا جاتا ہے، اس لیے external clients اس
-header کو admission چھوڑنے کے لیے استعمال نہیں کر سکتے۔
+**سیلف لوپ داخلہ بائی پاس:** جب OmniRoute کے اپنے `/v1` سیلف لوپ (غیر معیاری پرووائیڈر ماڈل) کے ذریعے کال روٹس کی وضاحت کرتے ہیں، تو ذیلی درخواست `x-omniroute-admission-bypass: internal` بھیجتی ہے اور اس کی توثیق شدہ سیلف لوپ کریڈینشل — لوکل `sk_omniroute` سینٹینل کے ساتھ مقامی موڈ میں، یا آپریٹر کے ذریعے کنفیگر کردہ `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` keys ( `REQUIRE_API_KEY=true` /dep5g5) اب بھی describe کال چلا سکتا ہے۔ بائی پاس کا اعزاز صرف ان درست اسناد کے لیے دیا جاتا ہے، اس لیے بیرونی کلائنٹس داخلہ چھوڑنے کے لیے ہیڈر کا استعمال نہیں کر سکتے۔ (#1350)
 
-Legacy defaults، `src/shared/constants/visionBridgeDefaults.ts` میں موجود ہیں؛
-نئے mode/task-aware/cache defaults اور settings resolver
-`src/shared/constants/modalityBridgeDefaults.ts` میں موجود ہیں۔ guardrail ایک
-`deps` constructor option فراہم کرتا ہے تاکہ tests جعلی `getSettings` اور
-`callVisionModel` implementations inject کر سکیں۔
+لیگیسی ڈیفالٹس `src/shared/constants/visionBridgeDefaults.ts` میں رہتے ہیں ; نئے mode/task-aware/cache ڈیفالٹس اور سیٹنگز ریزولور `src/shared/constants/modalityBridgeDefaults.ts` میں رہتے ہیں۔ گارڈریل ایک `deps` کنسٹرکٹر آپشن کو بے نقاب کرتا ہے تاکہ ٹیسٹ جعلی `getSettings` اور `callVisionModel` کے نفاذ کو انجیکشن کر سکیں۔
 
-### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
+### آڈیو برج (`audioBridge.ts`) — موڈالٹی برج PR-3
 
-آڈیو پر مشتمل chat requests کو کسی ایسے target تک پہنچنے سے پہلے intercept کرتا ہے جس کے بارے میں
-یہ معلوم نہ ہو کہ وہ audio input قبول کرتا ہے۔ یہ کبھی بھی chat request کو reroute نہیں کرتا: audio parts کو
-موجودہ OpenAI-compatible multipart endpoint کے ذریعے transcribe کیا جاتا ہے اور
-منتخب chat model متنی transcripts کے ساتھ جاری رہتا ہے۔
+آڈیو بیئرنگ چیٹ کی درخواستوں کو کسی ایسے ہدف تک پہنچنے سے پہلے روکتا ہے جو آڈیو ان پٹ کو قبول کرنے کے لیے نہیں جانا جاتا ہے۔ یہ کبھی بھی چیٹ کی درخواست کو دوبارہ روٹ نہیں کرتا ہے: آڈیو پارٹس کو موجودہ OpenAI-مطابق ملٹی پارٹ اینڈ پوائنٹ کے ذریعے نقل کیا جاتا ہے اور منتخب کردہ چیٹ ماڈل ٹیکسٹ ٹرانسکرپٹس کے ساتھ جاری رہتا ہے۔
 
-عمل:
+بہاؤ:
 
-1. `getResolvedModelCapabilities()` کے ذریعے `supportsAudio` کو resolve کریں۔ واضح
-   provider-registry metadata کو ترجیح حاصل ہوتی ہے، اس کے بعد static model metadata، پھر synced
-   `modalities_input`۔ `audio` کے بغیر اعلان کردہ input list کی قدر `false` ہوتی ہے؛
-   capability کا کوئی ثبوت نہ ہونے پر قدر `null` رہتی ہے۔ `false` اور `null` دونوں
-   conservative bridge کو فعال کرتے ہیں، جبکہ `true` اسے bypass کرتا ہے۔
-2. `modalityBridgeAudio*` ترتیبات کو resolve کریں اور مشترکہ `detectMediaParts()`
-   detector کے ذریعے ہر message سے splice کیے جا سکنے والے top-level
-   audio parts اخذ کریں۔ معاون wire shapes میں OpenAI `input_audio`، `audio_url`، اور
-   `source.media_type: "audio/*"` شامل ہیں۔ Nested audio کو routing کے لیے detect کیا جاتا ہے لیکن
-   splice path کے ذریعے ہٹایا نہیں جاتا۔ کام کی حد `modalityBridgeAudioMaxClips` سے مقرر ہوتی ہے؛
-   بعد کے parts بغیر تبدیلی کے رہتے ہیں۔
-3. ترتیب کردہ `provider/model` کا لحاظ رکھیں، یا `selectAudioBridgeModel()` کو
-   stable catalog order میں `AUDIO_TRANSCRIPTION_PROVIDERS` کا جائزہ لینے دیں اور قابلِ استعمال
-   active provider credential والا پہلا ماڈل منتخب کرنے دیں۔
-4. `callAudioTranscription()`، base64/data-URI آڈیو کو multipart
-   `file` میں تبدیل کرتا ہے، یا DNS pinning اور 25 MB حد کے ساتھ public-only outbound
-   guard کے ذریعے remote `audio_url` download کرتا ہے۔ پھر یہ file اور منتخب
-   model کو local `/v1/audio/transcriptions` self-loop پر POST کرتا ہے، جسے
-   `resolveSelfLoopBearer()` کے ساتھ authenticate کیا جاتا ہے۔ موجودہ transcription route معمول کی
-   credential lookup، cooldown/rate-limit handling، اور provider dispatch انجام دیتا ہے۔
-5. کامیاب calls اپنے parts کو `[Audio N]: <transcript>` سے بدل دیتی ہیں۔ Calls
-   `Promise.allSettled` کے ساتھ چلتی ہیں: انفرادی failure اس اصل
-   audio part کو محفوظ رکھتی ہے (#4012 contract)۔ اگر ہر call ناکام ہو جائے اور target کے بارے میں ثابت ہو
-   کہ `supportsAudio === false` ہے، تو parts
-   `[Audio N]: (unavailable — no STT provider connected)` بن جاتے ہیں (#8430 contract)۔ کسی
-   نامعلوم target (`null`) کے لیے all-failure نتیجہ بغیر تبدیلی کے رہتا ہے۔ کوئی ثابت شدہ
-   text-only target جس کے پاس قابلِ استعمال STT credential نہ ہو، network call کیے بغیر یہی واضح
-   stub وصول کرتا ہے۔
+1. `supportsAudio` `getResolvedModelCapabilities()` کے ذریعے حل کریں۔ واضح فراہم کنندہ-رجسٹری میٹا ڈیٹا جیتتا ہے، پھر جامد ماڈل میٹا ڈیٹا، پھر مطابقت پذیر `modalities_input`۔ `audio` کے بغیر اعلان کردہ ان پٹ لسٹ ہے `false`؛ کوئی قابلیت کا ثبوت `null` باقی نہیں رہتا۔ `false` اور `null` دونوں قدامت پسند پل کو چالو کرتے ہیں، جبکہ `true` اسے نظرانداز کرتا ہے۔
+2. `modalityBridgeAudio*` ترتیبات کو حل کریں اور مشترکہ `detectMediaParts()` ڈیٹیکٹر کے ذریعے ہر پیغام سے الگ الگ اعلیٰ سطح کے آڈیو حصوں کو نکالیں۔ تعاون یافتہ تار کی شکلیں OpenAI `input_audio`، `audio_url` اور `source.media_type: "audio/*"` ہیں۔ نیسٹڈ آڈیو کا پتہ روٹنگ کے لیے ہوا ہے لیکن اسپلائس پاتھ سے نہیں ہٹایا گیا ہے۔ کام `modalityBridgeAudioMaxClips` کے ذریعے محدود ہے؛ بعد کے حصے اچھوتے رہتے ہیں۔
+3. ترتیب شدہ `provider/model` کا احترام کریں، یا `selectAudioBridgeModel()` `AUDIO_TRANSCRIPTION_PROVIDERS` مستحکم کیٹلاگ ترتیب میں چلنے دیں اور قابل استعمال فعال فراہم کنندہ کی سند کے ساتھ پہلا ماڈل منتخب کریں۔
+4. `callAudioTranscription()` base64/data-URI آڈیو کو ملٹی پارٹ `file` میں تبدیل کرتا ہے، یا DNS پننگ اور 25 MB باؤنڈ کے ساتھ عوامی صرف آؤٹ باؤنڈ گارڈ کے ذریعے ریموٹ `audio_url` ڈاؤن لوڈ کرتا ہے۔ اس کے بعد یہ فائل اور منتخب ماڈل کو مقامی `/v1/audio/transcriptions` سیلف لوپ میں POSTs ، `resolveSelfLoopBearer()` سے تصدیق شدہ۔ موجودہ ٹرانسکرپشن روٹ عام اسناد کی تلاش، cooldown/rate-limit ہینڈلنگ، اور فراہم کنندہ کی ترسیل کو انجام دیتا ہے۔
+5. کامیاب کالز اپنے حصوں کو `[Audio N]: <transcript>` سے بدل دیتی ہیں۔ کالز `Promise.allSettled` کے ساتھ چلتی ہیں: ایک انفرادی ناکامی اس اصل آڈیو حصے کو محفوظ رکھتی ہے (#4012 معاہدہ)۔ اگر ہر کال ناکام ہو جاتی ہے اور ہدف `supportsAudio === false` ثابت ہو جاتا ہے تو حصے `[Audio N]: (unavailable — no STT provider connected)` (#8430 معاہدہ) بن جاتے ہیں۔ ایک نامعلوم ہدف (`null`) کے لیے، ایک مکمل ناکامی کا نتیجہ اچھوتا رہتا ہے۔ قابل استعمال STT سند کے بغیر صرف ٹیکسٹ کا ثابت شدہ ہدف نیٹ ورک کال جاری کیے بغیر وہی واضح اسٹب وصول کرتا ہے۔
 
-کامیاب transcripts، process-wide Modality Bridge LRU/TTL cache استعمال کرتے ہیں۔
-key میں audio reference، مستحکم `audio-transcription` operation
-label، اور منتخب STT model شامل ہوتے ہیں؛ failures کو کبھی cache نہیں کیا جاتا۔ Audio attempts مشترکہ
-`bridged`، `cacheHits`، `failures`، اور `lastUsedAt` کاؤنٹرز update کرتی ہیں۔
-تبدیل شدہ responses میں
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` شامل ہوتا ہے؛ بغیر تبدیلی کی
-requests کو Audio Bridge segment نہیں ملتا۔
+کامیاب ٹرانسکرپٹس پراسیس وائڈ موڈالٹی برج LRU/TTL کیشے کا استعمال کرتی ہیں۔ کلید آڈیو حوالہ، مستحکم `audio-transcription` آپریشن لیبل، اور منتخب STT ماڈل کو یکجا کرتی ہے۔ ناکامیاں کبھی محفوظ نہیں ہوتیں۔ آڈیو کوششیں مشترکہ `bridged`، `cacheHits`، `failures`، اور `lastUsedAt` کاؤنٹرز کو اپ ڈیٹ کرتی ہیں۔ تبدیل شدہ ردعمل `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>` لے جاتے ہیں؛ اچھوتی درخواستوں کو آڈیو برج سیگمنٹ موصول نہیں ہوتا ہے۔
 
-Runtime ترتیبات DB-backed اور Zod-validated ہیں:
+رن ٹائم کی ترتیبات ڈی بی کی حمایت یافتہ اور زوڈ کی توثیق شدہ ہیں:
 
-| کلید                          | ڈیفالٹ  | حد             |
-| ----------------------------- | ------- | -------------- |
-| `modalityBridgeAudioEnabled`  | `true`  | —              |
-| `modalityBridgeAudioModel`    | `""`    | Auto یا STT ID |
-| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000    |
-| `modalityBridgeAudioMaxClips` | `3`     | 1–10           |
+| چابی                          | طے شدہ  | رینج          |
+| ----------------------------- | ------- | ------------- |
+| `modalityBridgeAudioEnabled`  | `true`  | —             |
+| `modalityBridgeAudioModel`    | `""`    | آٹو یا STT ID |
+| `modalityBridgeAudioTimeout`  | `60000` | 1000–300000   |
+| `modalityBridgeAudioMaxClips` | `3`     | 1–10          |
 
-مشترکہ cache بدستور `modalityBridgeCacheEnabled`،
-`modalityBridgeCacheTtlMinutes`، اور `modalityBridgeCacheMaxEntries` کے ذریعے کنٹرول ہوتی ہے۔
+مشترکہ کیشے `modalityBridgeCacheEnabled`، `modalityBridgeCacheTtlMinutes`، اور `modalityBridgeCacheMaxEntries` کے زیر کنٹرول رہتا ہے۔
 
-### Video Bridge (`videoBridge.ts`، `videoBridgePipeline.ts`)
+### ویڈیو پل (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-معلوم مقامی ویڈیو سپورٹ نہ رکھنے والے ہدف کو کال کیے جانے سے پہلے، Chat Completions کے `messages` اور Responses API کے `input` میں اعلیٰ سطحی ویڈیو حصوں کو روکتا ہے۔ معاون ساختوں میں `input_video`، `video_url`، `video_source`، HTTPS URLs، اور `data:video/*;base64,...` ڈیٹا URIs شامل ہیں۔ متن میں موجود سادہ فائل ناموں کو ویڈیو تصور نہیں کیا جاتا۔
+چیٹ کی تکمیل `messages` میں ٹاپ لیول ویڈیو پارٹس کو روکتا ہے اور API `input` کو جواب دیتا ہے اس سے پہلے کہ معلوم مقامی ویڈیو سپورٹ کو بلایا جائے۔ تعاون یافتہ شکلیں ہیں `input_video`, `video_url`, `video_source`, HTTPS URLs, اور `data:video/*;base64,...` ڈیٹا URIs۔ متن میں سادہ فائل ناموں کو ویڈیو کے طور پر نہیں سمجھا جاتا ہے۔
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) درخواست کی ٹریورسل، صلاحیت/پالیسی کی جانچ، فی درخواست مجموعہ بندی، اور جوابی پے لوڈ کا ذمہ دار ہے۔ فی ویڈیو کام — حصول، مکمل نتیجے کا کیش، فریموں کی ترتیب کی وضاحت (جو کالر کی فراہم کردہ آڈیو ٹرانسکرپٹ کو یکجا کرتی ہے)، اور فی کوشش میٹرکس/منسوخی/صفائی — `videoBridgePipeline.ts` میں `processVideoPart` کے پیچھے پوشیدہ ہے، جسے `preCall` کے لوپ کے اندر ہر ویڈیو حصے کے لیے ایک مرتبہ کال کیا جاتا ہے۔ یہ ماڈیول واضح پورٹ حدود `VideoMediaBrokerPort` (بائٹس حاصل کرنا اور نمونہ شدہ فریم نکالنا)، `VideoAudioTranscriptionPort` (کالر کی فراہم کردہ آڈیو ٹرانسکرپٹ کو نمونہ شدہ کیپشنز کے ساتھ یکجا کرنا)، اور `VideoDrilldownPort` (فریم ڈرل ڈاؤن کی استمراری حد؛ ابھی `processVideoPart` سے منسلک نہیں — فی الحال صرف علیحدہ `/api/modality-bridge/video/drilldown` روٹ ڈرل ڈاؤن اندراجات لکھتا ہے) بھی متعین کرتا ہے۔
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) درخواست ٹراورسل، capability/policy چیک، فی درخواست جمع، اور رسپانس پے لوڈ کا مالک ہے۔ فی ویڈیو ورک — حصول، مکمل نتیجہ کیش، ایک فریم ترتیب کو بیان کرتا ہے (جو کسی بھی کالر کے ذریعے اعلان کردہ آڈیو ٹرانسکرپٹ کو فیوز کرتا ہے) اور فی کوشش metrics/abort/cleanup — `videoBridgePipeline.ts` میں `processVideoPart` کے پیچھے چھپا ہوا ہے، جسے `preCall` کے لوپ کے اندر ایک بار فی ویڈیو حصہ کہا جاتا ہے۔ وہ ماڈیول واضح بندرگاہ کی حدود `VideoMediaBrokerPort` (بائٹس حاصل کرنا اور نمونے والے فریموں کو نکالنا)، `VideoAudioTranscriptionPort` (سیمپلڈ کیپشنز کے ساتھ کال کرنے والے کی طرف سے اعلان کردہ آڈیو ٹرانسکرپٹ کو فیوز کرنا)، اور `VideoDrilldownPort` (فریم ڈرل ڈاؤن پرسسٹینس باؤنڈری؛ ابھی تک `processVideoPart` میں وائرڈ نہیں کیا گیا — ) `/api/modality-bridge/video/drilldown` بھی وضاحت کرتا ہے۔
 
-عوامی `/v1` درخواست کا راستہ کبھی کسی ذیلی عمل کو درآمد یا شروع نہیں کرتا۔ ریموٹ ویڈیوز 50 MiB کی حد کے تحت ڈاؤن لوڈ کی جاتی ہیں؛ اِن لائن base64 ویڈیوز کے لیے فی ویڈیو ڈی کوڈ شدہ حجم کی محتاط حد 36 MiB ہے، تاکہ ماڈل/پیغامات/فریمنگ کا لفافہ 50 MiB کی عوامی JSON درخواست قبولیت کی حد کے اندر رہ سکے۔ مختص کرنے سے پہلے اِن لائن طوالت اور ڈی کوڈ شدہ حجم کے تخمینوں کی جانچ کی جاتی ہے۔ ابتدائی ریموٹ URL اور ہر ری ڈائریکٹ پر HTTPS لازم ہے، اور اس کے لیے DNS پننگ کے ساتھ موجودہ صرف عوامی آؤٹ باؤنڈ محافظ استعمال کیا جاتا ہے۔ اس کے بعد بائٹس عین داخلی `POST /api/modality-bridge/video/extract` بروکر حد کو عبور کرتی ہیں۔ یہ روٹ `LOCAL_ONLY` اور `SPAWN_CAPABLE` دونوں ہے، صرف فی عمل توثیق شدہ، قابل اعتماد loopback درخواست قبول کرتا ہے، اور کبھی کوئی URL، فائل سسٹم پاتھ، executable، یا دلائل کی فہرست قبول نہیں کرتا۔ API کی باڈی سائز پائپ لائن اور ہینڈلر کا افزایشی باڈی ریڈر آزادانہ طور پر 50 MiB کی بروکر اِن پٹ حد نافذ کرتے ہیں۔ اس کی محدود قطار ایک وقت میں ایک extraction چلاتی ہے، چار زیر التوا jobs کی اجازت دیتی ہے، اور زیر التوا اِن پٹ کو 100 MiB تک محدود رکھتی ہے۔
+The public `/v1` request path never imports or invokes a subprocess. Remote videos are downloaded under a 50 MiB bound; inline base64 videos have a conservative 36 MiB decoded per-video cap so the model/messages/framing envelope can remain inside the public JSON request admission limit of 50 MiB. Inline length and decoded-size estimates are checked before allocation. HTTPS is required on the initial remote URL and every redirect, using the existing public-only outbound guard with DNS pinning. The bytes then cross the exact internal `POST /api/modality-bridge/video/extract` broker boundary. That route is both `LOCAL_ONLY` and `SPAWN_CAPABLE`, accepts only a per-process authenticated, trusted-loopback request, and never accepts a URL, filesystem path, executable, or argument list. The API body-size pipeline and the handler's incremental body reader independently enforce a 50 MiB broker input cap. Its bounded queue runs one extraction at a time, allows four pending jobs, and caps pending input at 100 MiB.
 
-بروکر کے اندر، `ffprobe` ایک نجی مقامی فائل پڑھتا ہے؛ مقررہ format allowlist میں playlist اور manifest فارمیٹس شامل نہیں ہیں۔ اجازت یافتہ MOV-family containers کے لیے، بیرونی MOV data references بطور ڈیفالٹ غیر فعال رہتے ہیں، اور مقررہ کمانڈ انہیں فعال نہیں کرتی۔ `ffprobe` اور `ffmpeg` دونوں صرف `file` پر مشتمل protocol whitelist، ایک thread، مقررہ argument arrays، بغیر shell، اور `PATH` سے حل کیے گئے executables استعمال کرتے ہیں۔ attached-picture cover streams قابلِ پلے امیدوار نہیں ہیں۔ تمام قابلِ پلے streams کو حدود پر پورا اترنا ضروری ہے، اور deterministic کم ترین index fallback سے پہلے صریح default stream کو ترجیح دی جاتی ہے۔ ویڈیوز کو 600 سیکنڈ، فی dimension 8,192 pixels، اور 33,554,432 source pixels تک محدود رکھا جاتا ہے۔ FFmpeg وسطی مقامات سے 1–16 JPEG frames کا نمونہ لیتا ہے، چھوٹے inputs کو upscale کیے بغیر طویل کنارے کو زیادہ سے زیادہ 1,024 pixels تک گھٹاتا ہے، اور اسے کبھی URL نہیں دیا جاتا۔ بطور ڈیفالٹ sampling پالیسی `uniform` ہے۔ اختیاری `scene_aware` اور تجرباتی `segment_aware` پالیسیاں پہلے سے توثیق شدہ مقامی stream پر ایک اضافی مقررہ FFmpeg pass انجام دیتی ہیں، محدود `showinfo` scene timestamps منتخب کرتی ہیں، اور detector کی ناکامی، timeout، خراب output، یا خالی candidate set کی صورت میں deterministic انداز سے انہی uniform midpoints پر واپس آتی ہیں۔ Segment-aware موڈ توثیق شدہ scene intervals کے تناسب سے midpoint samples مختص کرتا ہے؛ segment-aware شواہد اور fallback رویے کی تفصیل ذیل میں دی گئی ہے۔ انتخاب کے بعد ہر پالیسی میں 16-frame کی سخت حد لاگو ہوتی ہے۔ جب scene-aware درخواست کا budget صرف ایک frame ہو تو یہ فعال مکمل ویڈیو یا focus window کا uniform midpoint استعمال کرتی ہے اور `policyEffective: uniform` رپورٹ کرتی ہے: ایک واحد منتخب scene frame دونوں زمانی سروں کو محفوظ نہیں رکھ سکتا۔ کالر اختیاری طور پر ایک محدود focus window (`start`/`end` سیکنڈز) فراہم کر سکتا ہے؛ حدود کو میڈیا کی مدت تک محدود کیا جاتا ہے، معکوس یا غیر محدود windows مسترد کر دی جاتی ہیں، اور تمام sampling پالیسیاں صرف normalized interval کے اندر انجام دی جاتی ہیں۔ نتیجے میں حاصل ہونے والی window کو sampling metadata اور غیر قابل اعتماد description prefix میں شامل کیا جاتا ہے، تاکہ downstream models کسی مرکوز اقتباس کو مکمل timeline سے ممتاز کر سکیں۔
+بروکر کے اندر، `ffprobe` ایک نجی مقامی فائل پڑھتا ہے۔ مقررہ فارمیٹ کی اجازت دینے والی فہرست میں پلے لسٹ اور مینی فیسٹ فارمیٹس شامل نہیں ہیں۔ اجازت یافتہ MOV-فیملی کنٹینرز کے لیے، بیرونی MOV ڈیٹا حوالہ جات بطور ڈیفالٹ غیر فعال رہتے ہیں، اور فکسڈ کمانڈ ان میں آپٹ ان نہیں کرتی ہے۔ `ffprobe` اور `ffmpeg` دونوں `file` -only پروٹوکول وائٹ لسٹ، ایک تھریڈ، فکسڈ آرگیومینٹ اری، کوئی شیل نہیں، اور `PATH` سے حل شدہ ایگزیکیوٹیبل استعمال کرتے ہیں۔ منسلک تصویری کور اسٹریمز چلانے کے قابل امیدوار نہیں ہیں۔ تمام پلے ایبل اسٹریمز کو حدود کو پورا کرنا چاہیے، اور ایک واضح ڈیفالٹ اسٹریم کو ڈیٹرمنسٹک لوسٹ انڈیکس فال بیک سے پہلے ترجیح دی جاتی ہے۔ ویڈیوز 600 سیکنڈز، 8,192 پکسلز فی ڈائمینشن، اور 33,554,432 سورس پکسلز تک محدود ہیں۔ FFmpeg نمونے 1-16 مڈپوائنٹ JPEG فریموں، چھوٹے ان پٹ کو بڑھائے بغیر لمبے کنارے کو زیادہ سے زیادہ 1,024 پکسلز تک سکیل کرتا ہے، اور کبھی بھی URL وصول نہیں کرتا ہے۔ نمونہ سازی پہلے سے طے شدہ طور پر `uniform` ہے۔ اختیاری `scene_aware` اور تجرباتی `segment_aware` پالیسیاں پہلے سے توثیق شدہ مقامی سٹریم پر ایک اضافی فکسڈ FFmpeg پاس کرتی ہیں، باؤنڈڈ `showinfo` منظر کے ٹائم سٹیمپ کو منتخب کرتی ہیں، اور ڈیٹیکٹر کی ناکامی، ٹائم آؤٹ، خراب آؤٹ پٹ، یا خالی امیدوار سیٹ پر اسی یکساں مڈ پوائنٹس پر متعین طور پر واپس آتی ہیں۔ سیگمنٹ آگاہی موڈ مڈ پوائنٹ کے نمونوں کو توثیق شدہ منظر کے وقفوں کے تناسب سے مختص کرتا ہے۔ طبقہ سے آگاہ ثبوت اور فال بیک رویے کی تفصیل ذیل میں دی گئی ہے۔ ہارڈ 16 فریم کیپ ہر پالیسی میں انتخاب کے بعد لاگو ہوتی ہے۔ جب منظر سے آگاہی کی درخواست کا صرف ایک فریم بجٹ ہوتا ہے، تو یہ فعال مکمل ویڈیو یا فوکس ونڈو کے یکساں مڈ پوائنٹ کا استعمال کرتا ہے اور `policyEffective: uniform` کی رپورٹ کرتا ہے: ایک منتخب منظر کا فریم دونوں وقتی سروں کو محفوظ نہیں رکھ سکتا۔ کال کرنے والا اختیاری طور پر ایک محدود فوکس ونڈو فراہم کر سکتا ہے (`start`/`end` سیکنڈز)؛ باؤنڈز کو میڈیا کے دورانیے کے ساتھ باندھ دیا جاتا ہے، الٹ یا غیر محدود ونڈوز کو مسترد کر دیا جاتا ہے، اور تمام نمونے لینے کی پالیسیاں صرف معمول کے وقفے کے اندر انجام دی جاتی ہیں۔ نتیجے میں آنے والی ونڈو کو نمونے لینے والے میٹا ڈیٹا میں اور ناقابل بھروسہ وضاحت کے سابقہ میں شامل کیا جاتا ہے تاکہ نیچے دھارے والے ماڈل مکمل ٹائم لائن سے مرکوز اقتباس کو الگ کر سکیں۔
 
-معنوی caption focus ایک علیحدہ، صریح ترتیب ہے۔ ڈیفالٹ `full` analysis mode موجودہ frame prompt کو برقرار رکھتا ہے اور درخواست کا متن کبھی caption model کو نہیں بھیجتا۔ `focused` mode میں، bridge اسی Chat یا Responses container سے صرف صارف کا لکھا ہوا تازہ ترین غیر خالی `text`/`input_text` پڑھتا ہے، اسے NFC میں normalize کرتا ہے، control characters اور whitespace کو سکیڑتا ہے، اور اسے 500 Unicode code points تک محدود کرتا ہے۔ خالی نتیجہ بالکل اسی `full` prompt پر واپس آ جاتا ہے۔ قابل استعمال hint کو ایک مخصوص untrusted-user-context block میں JSON کے طور پر serialize کیا جاتا ہے اور وہ صرف قابل مشاہدہ تفصیلات کو ترجیح دے سکتا ہے؛ وہ میڈیا میں نظر آنے یا سنائی دینے والی ہدایات پر عمل نہ کرنے سے متعلق علیحدہ تنبیہ کو override نہیں کر سکتا۔ متنی focus کبھی `start`/`end` اخذ نہیں کرتا اور نہ ہی temporal sampler کو تبدیل کرتا ہے۔
+سیمنٹک کیپشن فوکس ایک الگ، واضح ترتیب ہے۔ پہلے سے طے شدہ `full` تجزیہ موڈ موجودہ فریم پرامپٹ کو محفوظ رکھتا ہے اور کبھی بھی درخواست کے متن کو کیپشن ماڈل میں آگے نہیں بھیجتا ہے۔ `focused` موڈ میں، پل ایک ہی چیٹ یا رسپانس کنٹینر سے صرف تازہ ترین غیر خالی صارف کے تصنیف کردہ `text`/`input_text` کو پڑھتا ہے، اسے NFC پر معمول بناتا ہے، کنٹرول کریکٹرز اور وائٹ اسپیس کو ختم کرتا ہے، اور اسے 500 یونی کوڈ کوڈ پوائنٹس تک محدود کرتا ہے۔ ایک خالی نتیجہ عین `full` پرامپٹ پر واپس آتا ہے۔ قابل استعمال اشارے کو JSON کے طور پر ایک وقف شدہ ناقابل اعتماد صارف سیاق و سباق کے بلاک میں ترتیب دیا جاتا ہے اور یہ صرف قابل مشاہدہ تفصیلات کو ترجیح دے سکتا ہے۔ یہ میڈیا میں دکھائی دینے والی یا سنائی دینے والی مندرجہ ذیل ہدایات کے خلاف علیحدہ وارننگ کو اوور رائیڈ نہیں کر سکتا۔ متنی فوکس کبھی بھی `start`/`end` کا اندازہ نہیں لگاتا یا عارضی نمونے کو تبدیل نہیں کرتا ہے۔
 
-#### FU-07 ساختی segment کے شواہد
+#### FU-07 ساختی طبقہ ثبوت
 
-`segment_aware` پہلے سے توثیق شدہ مقامی video stream پر ایک محدود pre-analysis pass استعمال کرتا ہے۔ مقررہ filter chain پہلے چوڑائی کو زیادہ سے زیادہ 320 pixels تک scale کرتی ہے، scene changes اور منجمد intervals کا پتا لگاتی ہے، پھر blur، average luma، اور spatial/temporal information کے لیے فی سیکنڈ 1 frame کا نمونہ لیتی ہے۔ یہ pass 600 structural samples، ایک FFmpeg/filter thread، انہی صرف `file` پر مشتمل protocol اور container allowlists، 1 MiB process-output حد، اور بروکر کے مشترکہ abort/deadline کے اندر زیادہ سے زیادہ 30 سیکنڈ تک محدود ہے۔ یہ درخواست سے کبھی کوئی command، filter، path، یا URL قبول نہیں کرتا۔
+`segment_aware` پہلے سے توثیق شدہ مقامی ویڈیو سٹریم پر ایک پابند پری تجزیہ پاس استعمال کرتا ہے۔ فکسڈ فلٹر چین سب سے پہلے زیادہ سے زیادہ 320 پکسلز چوڑا ہوتا ہے، منظر میں ہونے والی تبدیلیوں اور منجمد وقفوں کا پتہ لگاتا ہے، پھر بلر، اوسط لوما، اور spatial/temporal معلومات کے لیے 1 فریم فی سیکنڈ پر نمونے لیتا ہے۔ پاس 600 ساختی نمونوں، ایک FFmpeg/filter دھاگے، ایک ہی `file` -only پروٹوکول اور کنٹینر کی اجازت دینے والی فہرستوں، 1 MiB پراسیس آؤٹ پٹ باؤنڈ، اور بروکر کے مشترکہ abort/deadline. کے اندر زیادہ سے زیادہ 30 سیکنڈ تک محدود ہے یہ کبھی بھی کوئی کمانڈ، فلٹر، راستہ، یا URL کی درخواست کو قبول نہیں کرتا ہے۔
 
-ساختی اقدار قطعی سیمپلنگ کے شواہد ہیں، معنوی ویڈیو فہم نہیں۔
-یہ موضوعات، افعال، کیپشنز، گفتگو، یا صارف کے ارادے کا استنباط نہیں کرتیں۔
-منظر اور فریز کی حدود سیگمنٹس بناتی ہیں؛ فریز کوریج، دھندلاپن،
-ایکسپوژر، مکانی تفصیل، اور زمانی تبدیلی صرف اس بات پر اثر انداز ہوتے ہیں کہ موجودہ
-1–16 فریم بجٹ کیسے مختص کیا جاتا ہے۔ مکمل طور پر فریز شدہ سیگمنٹ کو زیادہ سے زیادہ ایک فریم
-دیا جاتا ہے، جبکہ غیر فریز شدہ سیگمنٹس باقی بجٹ کے لیے مقابلہ کرتے ہیں۔ جب حدود
-فریموں سے زیادہ ہوں، تو ٹائم لائن کی یکساں کوریج برقرار رکھی جاتی ہے تاکہ ابتدائی تیز رفتار کٹس
-کسی طویل آخری سیگمنٹ کو چھپا نہ سکیں۔ فریز باؤنڈری کی 1 سیکنڈ کی
-تجزیاتی ریزولیوشن کے اندر موجود منظر کی حدود کو یکجا کر دیا جاتا ہے۔
+ساختی اقدار تعییناتی نمونے لینے کے ثبوت ہیں، سیمینٹک ویڈیو تفہیم نہیں۔ وہ مضامین، اعمال، عنوانات، تقریر، یا صارف کے ارادے کا اندازہ نہیں لگاتے ہیں۔ منظر اور منجمد حدود طبقات کی تشکیل کرتی ہیں۔ منجمد کوریج، دھندلاپن، نمائش، مقامی تفصیل، اور وقتی تبدیلی صرف اس بات پر اثر انداز ہوتی ہے کہ موجودہ 1-16 فریم بجٹ کو کیسے مختص کیا جاتا ہے۔ ایک مکمل طور پر منجمد طبقہ ایک فریم میں بند ہوتا ہے، جبکہ غیر منجمد طبقہ باقی بجٹ کے لیے مقابلہ کرتے ہیں۔ جب حدیں فریموں سے زیادہ ہو جاتی ہیں تو یکساں ٹائم لائن کوریج کو برقرار رکھا جاتا ہے تاکہ تیزی سے ابتدائی کٹوتیاں لمبے پچھلے حصے کو نہیں چھپا سکتیں۔ منجمد باؤنڈری کے 1 سیکنڈ کے تجزیہ کی قرارداد کے اندر منظر کی حدود کو یکجا کیا جاتا ہے۔
 
-غائب فلٹرز، خراب ساخت والے/خالی شواہد، ڈیٹیکٹر کی خرابی، یا محدود
-قبل از تجزیہ ٹائم آؤٹ کی صورت میں عین یکساں وسطی نقطے کی پالیسی پر کھلے انداز میں واپسی ہوتی ہے۔
-کالر کی منسوخی یا بروکر کی ڈیڈ لائن کی صورت میں یہ واپسی نہیں ہوتی: یہ زیرِ عمل
-ذیلی عمل کو ختم کرتی ہے، بعد میں فریم نکالنے سے روکتی ہے، اور نجی عارضی درخت
-کو `finally` میں ہٹا دیا جاتا ہے۔
+غائب فلٹرز، malformed/empty شواہد، ایک پتہ لگانے والے کی خرابی، یا باؤنڈڈ پری اینالیسس ٹائم آؤٹ بالکل یکساں مڈ پوائنٹ پالیسی کے لیے کھلے ہوئے ناکام رہتے ہیں۔ کالر اسقاط یا بروکر کی آخری تاریخ کھلنے میں ناکام نہیں ہوتی ہے: یہ ان فلائٹ ذیلی عمل کو ختم کرتا ہے، بعد میں فریم نکالنے سے روکتا ہے، اور نجی عارضی درخت کو `finally` میں ہٹا دیا جاتا ہے۔
 
-`scripts/perf/video-bridge-fu07-eval.ts` ڈی ڈپلیکیشن کے بعد کیپشن کال کی بچت،
-کثیف حرکت کے بجٹ کی تخصیص، دھندلاپن/ایکسپوژر/SI-TI شواہد، طویل اختتامی حصے کے ساتھ تیز رفتار کٹس،
-اور تدریجی فیڈ کے غلط مثبت نتائج کے لیے قطعی حقیقی FFmpeg
-فکسچرز بناتی ہے۔ یہ قبل از تجزیہ وال ٹائم، اور جہاں `/usr/bin/time`
-دستیاب ہو وہاں چائلڈ CPU اور چوٹی RSS ریکارڈ کرتی ہے۔ اس کے معیار کے جائزے صرف ساختی اوریکلز
-ہیں۔ حقیقی کیپشن ماڈل کا معیار `HOLD` رہتا ہے کیونکہ اس ہارنس کے پاس کوئی
-مجاز اینڈ پوائنٹ یا منجمد جج نہیں ہے۔ مالی بچت بھی `HOLD`
-رہتی ہے، جب تک `--caption-cost-per-call-usd` فی کال لاگت کا واضح مثبت
-تخمینہ فراہم نہ کرے؛ اسکرپٹ کبھی بھی ان میں سے کسی نتیجے کو من گھڑت طور پر تیار نہیں کرتی۔
+`scripts/perf/video-bridge-fu07-eval.ts` پوسٹ ڈیڈ اپ کیپشن کال سیونگز، ڈینس موشن بجٹ ایلوکیشن، blur/exposure/SI-TI شواہد، لمبی دم کے ساتھ تیزی سے کٹوتیوں، اور بتدریج دھندلا ہونے والے جھوٹے مثبتات کے لیے حقیقی FFmpeg فکسچر تیار کرتا ہے۔ یہ پری تجزیہ وال ٹائم اور جہاں `/usr/bin/time` دستیاب ہے، چائلڈ CPU اور peak RSS ریکارڈ کرتا ہے۔ اس کے معیار کی جانچ صرف ساختی اوریکلز ہیں۔ اصلی کیپشن-ماڈل کا معیار `HOLD` رہتا ہے کیونکہ اس استعمال کا کوئی مجاز اختتامی نقطہ یا منجمد جج نہیں ہے۔ زری بچت بھی `HOLD` رہتی ہے جب تک کہ `--caption-cost-per-call-usd` ایک واضح مثبت فی کال تخمینہ فراہم نہ کرے۔ اسکرپٹ کبھی بھی نتیجہ نہیں بناتا۔
 
-ہر فریم 4 MiB، تمام خام فریم مجموعی طور پر 23 MiB، اور
-سیریلائز شدہ بروکر جواب 32 MiB تک محدود ہے۔ ایک نجی عارضی ڈائریکٹری کو
-`finally` میں ہٹا دیا جاتا ہے۔ OmniRoute میں FFmpeg شامل نہیں ہے اور یہ کسی حسبِ ضرورت
-قابلِ اجرا فائل کا راستہ قبول نہیں کرتا۔ کیپشننگ سے پہلے، برج ایک محتاط بصری
-ڈی ڈپلیکیشن مرحلہ لاگو کرتا ہے: ہر JPEG کو 16×16 گرے اسکیل بفر تک گھٹایا جاتا ہے اور
-اس کا موازنہ صرف آخری برقرار رکھے گئے فریم سے کیا جاتا ہے۔ ایک سے زیادہ فریم کے مطلوبہ کیپشن بجٹ
-کے لیے، اخراج اس بجٹ سے زیادہ سے زیادہ دو گنا اور کبھی بھی 16 فریم سے زیادہ نہ ہونے والا
-محدود امیدوار پول فراہم کرتا ہے۔
-مطلوبہ حد صرف ڈی ڈپلیکیشن کے بعد لاگو کی جاتی ہے، اور جب بجٹ کم از کم
-دو ہو تو حتمی چھٹائی کے دوران پہلے اور آخری منتخب امیدوار محفوظ رکھے جاتے ہیں۔
-ورژن شدہ
-`grayscale-16x16-mean-cells-v2` پالیسی اوسط لیوما ڈیلٹا اور
-ان تھمب نیل سیلز کے تناسب میں سے بڑی قدر استعمال کرتی ہے جن کا نارملائزڈ ڈیلٹا کم از کم 0.05 ہو۔
-ڈپلیکیٹ حد مستقل 0.04 ہے، جسے رن ٹائم سیٹنگ کے طور پر ظاہر کرنے کے بجائے
-پیش گوئی کی صلاحیت کے لیے منتخب کیا گیا ہے۔ یہ ثانوی
-زیادہ کانٹراسٹ والا سگنل معمولی حرکت اور نمایاں متن کی ان تبدیلیوں کو محفوظ رکھتا ہے جنہیں
-صرف اوسط پر مبنی موازنہ چھپا سکتا ہے۔ موازنہ کار یا ڈیکوڈر کی خرابیوں کی صورت میں کھلے انداز میں
-واپسی ہوتی ہے اور کوریج برقرار رہتی ہے۔ آؤٹ پٹ میٹا ڈیٹا نکالے گئے امیدواروں، کامیابی سے استعمال ہونے والے
-فریموں، اور خارج کیے گئے بصری ڈپلیکیٹس کو الگ الگ ظاہر کرتا ہے۔
+ہر فریم 4 MiB تک محدود ہے، تمام خام فریم ایک ساتھ 23 MiB، اور سیریلائزڈ بروکر کا جواب 32 MiB تک ہے۔ ایک نجی عارضی ڈائریکٹری `finally` میں ہٹا دی گئی ہے۔ OmniRoute FFmpeg کو بنڈل نہیں کرتا ہے اور اپنی مرضی کے مطابق قابل عمل راستے کو قبول نہیں کرتا ہے۔ کیپشن دینے سے پہلے، پل ایک قدامت پسند بصری ڈیڈپلیکیشن پاس کا اطلاق کرتا ہے: ہر JPEG 16 × 16 گرے اسکیل بفر تک کم کر دیا جاتا ہے اور اس کا موازنہ صرف آخری فریم کے ساتھ کیا جاتا ہے۔ ایک فریم کے اوپر درخواست کردہ کیپشن بجٹ کے لیے، نکالنے والے امیدواروں کا پول اس بجٹ سے دوگنا تک فراہم کرتا ہے اور کبھی بھی 16 فریموں سے زیادہ نہیں۔ درخواست کی گئی ٹوپی صرف ڈپلیکیشن کے بعد لاگو ہوتی ہے، پہلے اور آخری منتخب امیدواروں کو حتمی پتلا کرنے کے دوران محفوظ کیا جاتا ہے جب بجٹ کم از کم دو ہو۔ ورژن شدہ `grayscale-16x16-mean-cells-v2` پالیسی میں لوما ڈیلٹا کے بڑے اور تھمب نیل سیلز کا تناسب استعمال کیا گیا ہے جن کا نارمل ڈیلٹا کم از کم 0.05 ہے۔ ڈپلیکیٹ تھریشولڈ مستقل 0.04 ہے، جسے رن ٹائم ترتیب کے طور پر ظاہر کرنے کے بجائے پیشین گوئی کے لیے منتخب کیا گیا ہے۔ یہ ثانوی ہائی کنٹراسٹ سگنل چھوٹی حرکت اور مرئی متن کی تبدیلیوں کو محفوظ رکھتا ہے جسے صرف اوسط موازنہ چھپا سکتا ہے۔ کمپیریٹر یا ڈیکوڈر کی غلطیاں کھلی ہوئی ہیں اور کوریج کو برقرار رکھتی ہیں۔ آؤٹ پٹ میٹا ڈیٹا نکالے گئے امیدواروں کو الگ کرتا ہے، کامیابی سے استعمال کیے گئے فریم، اور بصری ڈپلیکیٹس چھوڑے جاتے ہیں۔
 
-واضح طور پر نشان زد ویڈیو پارٹ ٹائم اسٹیمپ والی کانٹیکٹ شیٹ کی درخواست کر سکتا ہے۔
-برج زیادہ سے زیادہ 4 کالموں اور 16 فریموں پر مشتمل JPEG گرڈ بناتا ہے۔ ہر 512 پکسل سیل
-اپنے ماخذ کا ٹائم اسٹیمپ زیادہ کانٹراسٹ والی نچلی پٹی میں ثبت کرتا ہے، جبکہ وہی ٹائم اسٹیمپس
-بعد کے مراحل میں تعلق قائم کرنے اور آڈٹ کے لیے متنی میٹا ڈیٹا میں برقرار رہتے ہیں۔ مکمل
-JPEG بدستور 32 MiB تک محدود رہتا ہے۔ اگر `sharp` گرڈ کو ڈی کوڈ یا کمپوز نہ کر سکے، تو
-برج انفرادی JPEG فریموں پر واپس چلا جاتا ہے؛ کلائنٹ کی منسوخی پھر بھی
-شیٹ آپریشن تک منتقل ہوتی ہے۔
+واضح طور پر نشان زد ویڈیو کا حصہ ٹائم اسٹیمپ شدہ رابطہ شیٹ کی درخواست کر سکتا ہے۔ پل زیادہ سے زیادہ 4 کالم، 16 فریم JPEG گرڈ بناتا ہے۔ ہر 512-پکسل سیل اپنے سورس ٹائم اسٹیمپ کو ہائی کنٹراسٹ باٹم بینڈ میں جلاتا ہے، جبکہ وہی ٹائم اسٹیمپ ڈاون اسٹریم ایسوسی ایشن اور آڈٹ کے لیے ٹیکسٹول میٹا ڈیٹا میں رہتا ہے۔ مکمل JPEG 32 MiB پر محدود رہتا ہے۔ اگر `sharp` گرڈ کو ڈی کوڈ یا کمپوز نہیں کر سکتا، پل واپس انفرادی JPEG فریموں پر آ جاتا ہے۔ ایک کلائنٹ اسقاط اب بھی شیٹ آپریشن کے ذریعے پھیلاتا ہے۔
 
-پروموشن کے شواہد کو دانستہ طور پر مصنوعی کمپوزیشن
-مائیکرو بینچ مارک سے الگ رکھا گیا ہے۔ `scripts/perf/video-bridge-contact-sheet-eval.ts` حقیقی OpenAI سے مطابقت رکھنے والے وژن ماڈلز کے لیے
-اسکیما ورژن شدہ A/B ہارنس متعین کرتی ہے۔ یہ
-فراہم کنندہ کی رپورٹ کردہ ٹوکنز، ابتدا سے انتہا تک وال لیٹنسی (بشمول شیٹ کمپوزیشن)،
-ماڈل کالز کی تعداد، اور مینی فیسٹ میں متعین حقائق کے برقرار رہنے کی پیمائش کرتی ہے۔ خام ماڈل جوابات
-رپورٹ میں نہیں لکھے جاتے؛ صرف SHA-256 ڈائجسٹس اور مطابقت رکھنے والی فیکٹ IDs محفوظ رکھی جاتی ہیں۔
-ہارنس اس وقت تک کوئی نیٹ ورک یا بامعاوضہ ماڈل کال نہیں کرتی جب تک `--execute-real` پاس نہ کیا جائے اور
-`--model`، `OMNIROUTE_BASE_URL`، اور `OMNIROUTE_API_KEY` کنفیگر نہ ہوں۔ اس
-واضح حقیقی عمل درآمد کے بغیر، اس کا مشین کے ذریعے قابلِ مطالعہ فیصلہ `HOLD` رہتا ہے؛ صرف مصنوعی
-پے لوڈ/کال تعداد کی پیمائشیں پروموشن کا ثبوت نہیں ہیں۔
+پروموشن شواہد جان بوجھ کر مصنوعی مرکب مائکرو بینچ مارک سے الگ ہیں۔ `scripts/perf/video-bridge-contact-sheet-eval.ts` حقیقی OpenAI سے ہم آہنگ وژن ماڈلز کے لیے اسکیما ورژن والے A/B استعمال کی وضاحت کرتا ہے۔ یہ فراہم کنندہ کی اطلاع کردہ ٹوکنز، آخر سے آخر تک دیوار کی تاخیر (بشمول شیٹ کمپوزیشن)، ماڈل کال کی گنتی، اور مینی فیسٹ سے متعین حقائق کو برقرار رکھنے کی پیمائش کرتا ہے۔ خام ماڈل کے جوابات رپورٹ میں نہیں لکھے جاتے ہیں۔ صرف SHA-256 ہضم ہوتا ہے اور مماثل حقیقت IDs برقرار رکھا جاتا ہے۔ کنٹرول کوئی نیٹ ورک یا ادا شدہ ماڈل کال نہیں کرتا جب تک کہ `--execute-real` پاس نہ ہو جائے اور `--model`، `OMNIROUTE_BASE_URL`، اور `OMNIROUTE_API_KEY` کو کنفیگر نہ کیا جائے۔ اس واضح حقیقی رن کے بغیر، اس کا مشین پڑھنے کے قابل فیصلہ `HOLD` رہتا ہے؛ اکیلے مصنوعی payload/call-count پیمائش پروموشن کا ثبوت نہیں ہیں۔
 
-جب کالرز کے پاس پہلے سے ہم آہنگ متن موجود ہو تو وہ معاونت یافتہ ویڈیو
-پارٹ کے ساتھ ایک اختیاری `transcript.cues` ارے منسلک کر سکتے ہیں۔ ہر کیو میں `text`،
-پروب کیے گئے دورانیے کے اندر محدود `start`/`end` وقفہ، اور وائٹ لسٹ شدہ
-`source` (`client`، `embedded`، یا `audio-bridge`) ہونا ضروری ہے؛ `confidence` کی
-ڈیفالٹ قدر `1` ہے اور اسے `0` اور `1` کے درمیان رہنا چاہیے۔ بالکل یکساں کیوز کو یکجا کر دیا جاتا ہے۔
-OmniRoute اس میٹا ڈیٹا سے کبھی ٹرانسکرپشن شروع نہیں کرتا: توثیق شدہ کیوز کو
-ماخذ، اعتماد، اور وقفے کے ساتھ بیان کردہ نتیجے میں نقل کیا جاتا ہے، اور
-فریم کیپشنز کے ساتھ ناقابلِ اعتماد مشاہدات کے طور پر پیش کیا جاتا ہے۔ نامعتبر،
-حد سے باہر، یا ماخذی ثبوت سے خالی متن کو کیپشن اسٹریم میں شامل کرنے کے بجائے مسترد کر دیا جاتا ہے۔
-`source` فیلڈ فی الحال کالر کی جانب سے اعلان کردہ ہے، سرور سے تصدیق شدہ نہیں:
-OmniRoute یقینی بناتا ہے کہ قدر تین
-مجاز اسٹرنگز میں سے ایک ہو، لیکن ابھی تک رمزنگاری کے ذریعے اس بات کی تصدیق نہیں کرتا کہ
-`embedded` یا `audio-bridge` لیبل واقعی سرور کی ملکیت والے
-اخراج سے آیا ہے۔ جب تک یہ تصدیق دستیاب نہیں ہوتی، `source` کو ناقابلِ اعتماد اشارہ
-سمجھیں؛ اس کی بنیاد پر اجازت دینے کے فیصلے نہ کریں۔
+کال کرنے والے ایک اختیاری `transcript.cues` اری کو ایک معاون ویڈیو حصے کے ساتھ منسلک کر سکتے ہیں جب ان کے پاس پہلے سے منسلک متن موجود ہو۔ ہر ایک کیو میں `text`، جانچ کی مدت کے اندر ایک محدود `start`/`end` وقفہ، اور ایک وائٹ لسٹ شدہ `source` (`client`، `embedded`، یا `audio-bridge`) ہونا ضروری ہے۔ `confidence` `1` پر ڈیفالٹ ہے اور `0` اور `1` کے درمیان رہنا چاہیے۔ قطعی ڈپلیکیٹ اشارے منہدم ہو گئے ہیں۔ OmniRoute کبھی بھی اس میٹا ڈیٹا سے ٹرانسکرپشن شروع نہیں کرتا: توثیق شدہ اشارے بیان کردہ نتیجے میں ماخذ، اعتماد اور وقفہ کے ساتھ کاپی کیے جاتے ہیں، اور فریم کیپشن کے ساتھ ساتھ ناقابل اعتماد مشاہدات کے طور پر پیش کیے جاتے ہیں۔ کیپشن سٹریم میں گھل مل جانے کے بجائے غلط، حد سے باہر، یا پرووینس سے پاک متن کو مسترد کر دیا جاتا ہے۔ دونوں درخواست-باڈی ٹرانسکرپٹ چینلز `client` کو سپلائی کی جانے والی حقیقت کو معمول پر لاتے ہیں، بشمول خود دعویٰ کردہ `embedded` یا `audio-bridge` لیبل۔ صرف سرور کی ملکیت والا اڈاپٹر ہی کوڈ صرف `trustedSource` دلیل کے ذریعے ان قابل اعتماد لیبلز کو تفویض کر سکتا ہے۔ ایک درخواست JSON فیلڈ اس دلیل تک نہیں پہنچ سکتی۔ ٹرانسکرپٹ ٹیکسٹ میڈیا سے ماخوذ غیر بھروسہ مند مواد رہتا ہے، چاہے اس کی اصلیت کچھ بھی ہو، اور اسے کبھی بھی اجازت کا تعین نہیں کرنا چاہیے۔
 
-ایک ایڈوانسڈ کالر اسی ویڈیو کے لیے پہلے سے مجاز `audioTranscript` ٹریک
-فراہم کر سکتا ہے۔ فیوژن سیم بصری اور آڈیو مشاہدات کو ایک ہی ڈیڈ لائن اور
-ابارٹ سگنل کے تحت چلاتی ہے، انہیں مشترکہ ٹائم لائن پر ترتیب دیتی ہے، بالکل
-یکساں اندراجات کو یکجا کرتی ہے، اور صرف ایک شاخ کامیاب ہونے پر جزوی نتیجہ
-رپورٹ کرتی ہے۔ ایک نامعتبر `audioTranscript` اسی جزوی نتیجے میں تبدیل ہو جاتا ہے —
-بصری تفصیل برقرار رکھی جاتی ہے اور آڈیو شاخ ایک صاف کردہ ناکامی کوڈ درج کرتی ہے —
-بجائے اس کے کہ پوری ویڈیو ناکام ہو جائے۔ ہر شاخ کی دستیابی، جزوی فلیگ،
-اور صاف کردہ ناکامی کوڈز بیان کردہ نتیجے، گارڈ ریل میٹا ڈیٹا
-(`audioFusionRuns`/`audioFusionPartials`/
-`audioFusionFailureCodes`)، نتیجہ-کیش میٹا ڈیٹا، اور برج
-فیوژن کاؤنٹرز میں محفوظ رہتے ہیں۔ ڈیفالٹ Video Bridge راستہ اسپیچ-ٹو-ٹیکسٹ
-کو استعمال نہیں کرتا اور نہ ہی میڈیا کی دوسری نقل ڈاؤن لوڈ کرتا ہے؛ اس واضح ٹریک
-کے بغیر یہ صرف ویڈیو تک محدود رہتا ہے۔
+ایک اعلی درجے کا کالر اسی ویڈیو کے لیے `audioTranscript` ٹریک فراہم کر سکتا ہے۔ اسے کلائنٹ کے فراہم کردہ متن کے طور پر سمجھا جاتا ہے، سرور کی نقل کا ثبوت نہیں۔ فیوژن سیون بصری اور آڈیو مشاہدات کو ایک ڈیڈ لائن اور اسقاط سگنل کے تحت چلاتا ہے، انہیں ایک عام ٹائم لائن پر آرڈر کرتا ہے، صحیح ڈپلیکیٹ کو ختم کرتا ہے، اور جب صرف ایک طرف کامیاب ہوتا ہے تو جزوی نتیجہ کی اطلاع دیتا ہے۔ ایک غلط `audioTranscript` اس جزوی نتیجے میں کمی کرتا ہے — بصری تفصیل رکھی جاتی ہے اور آڈیو برانچ پوری ویڈیو کو ناکام کرنے کے بجائے ایک سینیٹائزڈ ناکامی کوڈ — ریکارڈ کرتی ہے۔ فی برانچ کی دستیابی، جزوی جھنڈا، اور سینیٹائزڈ ناکامی کوڈز بیان کردہ نتیجے میں، گارڈریل میٹا ڈیٹا (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`)، رزلٹ کیش میٹا ڈیٹا میں، اور برج فیوژن کاؤنٹرز میں محفوظ ہیں۔ پہلے سے طے شدہ ویڈیو برج کا راستہ اسپیچ ٹو ٹیکسٹ کی درخواست نہیں کرتا ہے یا دوسری میڈیا کاپی ڈاؤن لوڈ نہیں کرتا ہے۔ اس واضح ٹریک کے بغیر، یہ صرف ویڈیو رہتا ہے۔
 
-**ٹرانسکرپٹ برقرار رکھنا (#12150 P1)۔** جب بھی Video Bridge (جو خود آپٹ-اِن ہے)
-کوئی ٹرانسکرپٹ کیو رینڈر کرتا ہے، یہ خودکار طور پر لاگو ہوتا ہے — برقرار رکھنے
-کے لیے کوئی الگ فلیگ نہیں ہے۔ جب کوئی درخواست کسی بھی ٹرانسکرپٹ کیو
-(کالر کا اعلان کردہ `transcript` یا فیوز شدہ `audioTranscript`) کو رینڈر کرتی ہے،
-تو گارڈ ریل اسے `videoBridgeObserved` کے طور پر نشان زد کرتی ہے اور ویڈیو کی
-تفصیل کا ریڈیکٹ شدہ شیڈو بناتی ہے — ایک یکساں رینڈرنگ جس میں ہر کیو کی آزاد
-متنی باڈی کو `[redacted-video-transcript]` سے بدل دیا جاتا ہے، اور یہ تبدیلی
-اسٹرنگ تشکیل دینے سے پہلے اسٹرکچرڈ کیو فیلڈ میں کی جاتی ہے (فلیٹ کیے گئے متن
-کو کبھی پارس نہیں کیا جاتا، لہٰذا کیو کا کوئی مواد — خواہ مخاصمانہ ہو یا عام،
-بشمول `]` رکھنے والی باڈیز جیسے `[inaudible]`/`[music]` — باقی نہیں رہ سکتا)۔
-محفوظ کردہ کال-لاگ کی درخواست باڈی، مواد کی برابری سے مماثلت قائم کرتے ہوئے،
-ویڈیو سے اخذ کردہ ہر متنی حصے کو اس ریڈیکٹ شدہ شیڈو سے بدل دیتی ہے؛ `fullText`
-اینکر کو مکمل شدہ پری-کال گارڈ ریل پے لوڈ سے دوبارہ پڑھا جاتا ہے، اس لیے بعد کی
-چین گارڈ ریلز (PII اور کریڈینشل ماسکرز، ترجیحات 10/95) کی جانب سے تفصیلی متن
-کو وہیں دوبارہ لکھنے اور سسٹم-پرامپٹ/ہینڈ آف/میموری انجیکشن کی جانب سے پیغام
-اریے کی ساخت بدلنے کے بعد بھی مماثلت کامیاب رہتی ہے۔ ماڈل کو اپ اسٹریم بھیجی
-جانے والی باڈی میں کوئی تبدیلی نہیں ہوتی۔ ایک مشاہدہ شدہ درخواست کسی پائیدار
-Memory کو بھی پُر نہیں کرتی (درخواست اور جواب، دونوں سے اخذ کردہ استخراج چھوڑ
-دیا جاتا ہے)، اس لیے ماڈل کا اپنا جواب ٹرانسکرپٹ متن کو Memory میں بازگشت نہیں
-دے سکتا۔
+**نقل کی برقراری (#12150 P1)۔** یہ خود بخود لاگو ہوتا ہے جب بھی ویڈیو برج (خود آپٹ ان) ٹرانسکرپٹ کیو — پیش کرتا ہے کوئی علیحدہ برقرار رکھنے والا جھنڈا نہیں ہوتا ہے۔ جب کوئی درخواست کوئی ٹرانسکرپٹ کیو پیش کرتی ہے (ایک کالر کے ذریعہ اعلان کردہ `transcript` یا ایک فیوزڈ `audioTranscript`)، گارڈریل اسے `videoBridgeObserved` نشان لگاتا ہے اور ویڈیو کی تفصیل — کا ایک ریڈیکٹڈ شیڈو تیار کرتا ہے جس میں ایک جیسی رینڈرنگ ہوتی ہے جس میں ہر کیو کے فری ٹیکسٹ باڈی کو `[redacted-video-transcript]` سے تبدیل کیا جاتا ہے، اس سے پہلے strengt کی فیلڈ کو ذیلی ساخت کے طور پر بنایا جاتا ہے۔ (چپٹا متن کو پارس کرکے کبھی نہیں، لہذا کوئی بھی کیو مواد — مخالف یا عام نہیں، بشمول `]` پر مشتمل جسم جیسے `[inaudible]`/`[music]` — زندہ نہیں رہ سکتا)۔ مسلسل کال لاگ ریکوئسٹ باڈی اس ترمیم شدہ شیڈو کے لیے ہر ویڈیو سے اخذ کردہ ٹیکسٹ حصے کو تبدیل کرتی ہے، جو مواد کی مساوات سے مماثل ہے۔ `fullText` اینکر کو تیار شدہ پری کال گارڈریل پے لوڈ سے دوبارہ پڑھا جاتا ہے، اس لیے میچ پھر بھی کامیاب ہو جاتا ہے جب بعد میں چین گارڈریلز ( PII اور کریڈینشل ماسکرز، ترجیحات 10/95) تفصیل کے متن کو جگہ پر دوبارہ لکھتے ہیں اور system-prompt/handoff/memory انجیکشن کے بعد میسج اری کو دوبارہ شکل دیتا ہے۔ ماڈل کو اوپر کی طرف بھیجا گیا جسم کوئی تبدیلی نہیں ہے۔ ایک مشاہدہ شدہ درخواست میں کوئی پائیدار میموری بھی نہیں ہوتی ہے (درخواست- اور جواب سے ماخوذ نکالنے دونوں کو چھوڑ دیا جاتا ہے)، لہذا ماڈل کا اپنا جواب میموری میں ٹرانسکرپٹ ٹیکسٹ کی بازگشت نہیں کر سکتا۔
 
-برقرار رکھنے کی کچھ سطحیں اب بھی کھلی ہیں اور فالو اَپ (**P2**، #12430) کے لیے
-ٹریک کی جا رہی ہیں: تفصیلی-لاگ آرٹیفیکٹ میں خام پری-گارڈ ریل کلائنٹ-درخواست
-اسنیپ شاٹ؛ `previous_response_id` کا تسلسل فیل-کلوزڈ؛ اخذ کردہ پرامپٹ کی
-اندرونی ڈسپیچز جو ٹرانسکرپٹ کو ایک ترکیب کردہ اسٹرنگ پرامپٹ کے اندر شامل کرتی
-ہیں (پائپ لائن مراحل، کانٹیکسٹ-ہینڈ آف)؛ اور ماڈل کے ایسے جواب کی ریسپانس باڈی /
-سیمینٹک-کیش نقل جو ٹرانسکرپٹ کا اقتباس پیش کرتی ہے۔ یہ P1 کے محفوظ کردہ
-درخواست-باڈی + Memory دائرۂ کار سے باہر خام/ریسپانس-کلاس یا آپٹ-اِن سطحیں ہیں۔
+**خام ویڈیو فیلڈز (#12430)۔** جب پل کو فعال کیا جاتا ہے اور مقامی ویڈیو سپورٹ نامعلوم یا غیر حاضر ہے، وضاحت شدہ `transcript`/`audioTranscript` فیلڈز بھی `videoBridgeObserved` چالو کرتے ہیں، یہاں تک کہ وضاحت کی ناکامی یا `maxVideos` حد کے بعد بھی۔ `null` اور خالی تاروں کی گنتی؛ غیر حاضر فیلڈز اور غیر ویڈیو میٹا ڈیٹا ایسا نہیں کرتے ہیں۔ برقرار رکھی ہوئی کاپیاں ان فیلڈز کو رد کر دیتی ہیں یا درخواست کو چھوڑ دیتی ہیں، اور caches/Memory نظرانداز کر دیا جاتا ہے۔
 
-اندرونی `/api/modality-bridge/video/drilldown` لائف سائیکل ایک الگ،
-لوپ بیک/ٹوکن سے تصدیق شدہ کیش سبسٹریٹ ہے۔ ہر آپریشن کے لیے ایک
-کینونیکل مبہم پرنسپل ID بھی درکار ہے۔ کسی پروڈکشن کالر کو فعال کرنے سے پہلے،
-اسے یہ ID تصدیق شدہ ٹیننٹ سے اخذ کرنی چاہیے اور کلائنٹ کے منتخب کردہ
-قدر کو کبھی فارورڈ نہیں کرنا چاہیے۔ کیش کیز اس پرنسپل کو کینونیکل سیشن اور
-ویڈیو-ریفرنس IDs سے منسلک کرتی ہیں، صرف ان کی SHA-256 سے اخذ کردہ کیز محفوظ
-کرتی ہیں، اور پڑھنے اور حذف کرنے، دونوں کو اسی پرنسپل تک محدود رکھتی ہیں۔
-کیش ہر اندراج میں زیادہ سے زیادہ 16 اخذ کردہ JPEG فریمز محفوظ کرتی ہے، انہیں
-دس منٹ بعد زائد المیعاد کرتی ہے، اور محدود `start`/`end` ریڈز یا واضح سیشن
-ڈیلیشن کی معاونت کرتی ہے۔
+ان فال بیک راستوں پر، کال کرنے والے درست اشارے غیر معیاری فراہم کنندہ فیلڈز کے بجائے معاون `text`/`input_text` حصے بن جاتے ہیں۔ درخواست کے ذریعہ فراہم کردہ دونوں ٹریک غیر بھروسہ شدہ `client` مشاہدات بنتے ہیں، ایک واضح انتباہ کے ساتھ کہ ویڈیو کو بیان نہیں کیا گیا تھا اور میڈیا کے خلاف ٹائم اسٹیمپ کی تصدیق نہیں کی گئی تھی۔ موجودہ 256-cue/64-KiB کل اور فی کیو بجٹ دونوں ٹریکس پر ایک ساتھ لاگو ہوتے ہیں۔ ٹائم اسٹیمپ کو بروکر کی 600 سیکنڈ کی چھت اور فراہم کردہ فوکس ونڈو کے مطابق ہونا چاہیے۔ غلط ٹریکس کو مسترد کر دیا جاتا ہے، صوابدیدی متن کے طور پر فارورڈ نہیں کیا جاتا ہے۔ ایک درست بہن بھائی کو تب بھی استعمال کیا جا سکتا ہے جب تک کہ ان کے مشترکہ بجٹ سے زیادہ نہ ہو۔ Null/empty فیلڈز میں کوئی متن شامل نہیں ہوتا ہے۔ اس فال بیک کے ذریعہ کوئی میڈیا بازیافت یا نقل شامل نہیں کیا گیا ہے۔ ٹرانسکرپٹ ایکسٹینشن فیلڈز کو فال بیک ویڈیو کیریئر اور اس کے `video_url`/`source` آبجیکٹ سے ہٹا دیا جاتا ہے۔ OpenAI تار کی اجازت دینے والی فہرست سخت رہتی ہے۔ نامعلوم مقامی ویڈیو کیریئرز دستیاب رہتے ہیں اور معلوم صرف متن والے اہداف محفوظ مارکر رکھتے ہیں۔ سٹرکچرڈ ریڈیکشن شیڈو منسلک ٹرانسکرپٹ ٹیکسٹ کی حفاظت کرتے ہیں، جبکہ اصل کالر کی ملکیت والی درخواست میں کوئی تبدیلی نہیں ہوتی ہے۔ مقامی حمایت یافتہ اہداف اور غیر فعال پل اپنا موجودہ بائی پاس سلوک برقرار رکھتے ہیں۔
 
-ہر پرنسپل زیادہ سے زیادہ 16 اندراجات اور 64 MiB کینونیکل JPEG ڈیٹا تک محدود
-ہے۔ یہ حدود 64 اندراجات/256 MiB کی عالمی حد سے آزاد ہیں: پرنسپل کوٹے کا
-دباؤ عالمی LRU ایوکشن پر غور کیے جانے سے پہلے صرف اسی پرنسپل کے سب سے کم
-حالیہ استعمال شدہ اندراجات کو ایوکٹ کرتا ہے۔ زائد المیعاد اندراجات کو کیش
-سرگرمی کے دوران پرنسپل اور عالمی، دونوں اکاؤنٹنگ سے صاف کر دیا جاتا ہے، جبکہ
-منسوخی اور توثیقی ناکامی کسی جزوی متبادل کو کمٹ نہیں کرتیں۔
+اضافی برقرار رکھی ہوئی کاپیاں اسی مشاہدہ شدہ درخواست کے سگنل کا استعمال کرتی ہیں۔ خام پری گارڈریل کلائنٹ کی درخواست کا سنیپ شاٹ، میموری میں زیر التواء درخواست، اور ابتدائی مسترد شدہ درخواست کا لاگ ساختی طور پر ویڈیو حصوں میں ٹرانسکرپٹ فیلڈز کو تبدیل کرتا ہے۔ پائپ لائن کے مراحل اور سیاق و سباق کے ہینڈ آف کے ذریعہ ترکیب شدہ سٹرنگ پرامپٹس کو مستقل-درخواست-باڈی سنک پر دوبارہ ترتیب دیا جاتا ہے۔ مسلسل `video_content_removed` مارکر `previous_response_id` تسلسل کو ناکام بناتا ہے بجائے اس کے کہ جان بوجھ کر رد کر دیے گئے متن کو دوبارہ تشکیل دیا جائے۔ اگر ایک مشاہدہ شدہ درخواست لاگ ان کرنے سے پہلے اپنا فی پارٹ ریڈیکشن شیڈو کھو دیتی ہے، یا بعد میں درخواست کی تبدیلیوں کے بعد کئی ویڈیو شیڈو میں سے ایک بھی میچ کرنے میں ناکام ہو جاتا ہے، تو برقرار رکھی گئی درخواست کا حصہ جزوی طور پر ترمیم شدہ ٹرانسکرپٹ کو برقرار رکھنے کے بجائے مکمل طور پر خارج کر دیا جاتا ہے۔
 
-کیش غیر کینونیکل Base64، ضرورت سے زیادہ پیڈنگ، غیر JPEG میڈیا، خراب یا
-نامکمل JPEGs، اور ایسے JPEGs کو مسترد کرتی ہے جو محدود فل-امیج `sharp`
-ڈی کوڈ کے دوران تنبیہ پیدا کریں۔ یہ ہر قبول شدہ تصویر کو کینونیکل JPEG کے طور
-پر دوبارہ ان کوڈ کرتی ہے، کالر کی فیلڈز پر بھروسا کرنے کے بجائے ڈی کوڈ شدہ
-بائٹس سے چوڑائی اور اونچائی اخذ کرتی ہے، اور کسی بھی اختتامی پولی گلاٹ بائٹس
-کو برقرار رکھنے کے بجائے خارج کر دیتی ہے۔ صرف محدود کینونیکل کمپریسڈ بفر
-دونوں کوٹوں میں شمار کیا جاتا ہے۔ JSON وائر حد میں 32 MiB ڈی کوڈ شدہ اِن پٹ
-کی حد کے لیے Base64 اوور ہیڈ شامل ہے۔ ہر
-محفوظ شدہ اخذ کردہ نتیجہ اپنا توثیق شدہ JPEG فارمیٹ/ریزولوشن، سیمپلنگ پالیسی،
-ڈیریویشن ورژن، تخلیق کا وقت، سرور سے کمپیوٹ کردہ مواد ہیش، اور ہیش شدہ پیرنٹ
-ریفرنس کے ساتھ قابلِ اعتماد کالر کا پیرنٹ-مواد ہیش ریکارڈ کرتا ہے۔ ایٹامک کیش
-کمٹ سے پہلے غیر ہم وقت ڈی کوڈ/ہیش مراحل کے درمیان منسوخی کی جانچ کی جاتی ہے۔
+ایک مشاہدہ شدہ درخواست کے لیے، ایک ماڈل کا جواب نقل کے کسی بھی حصے کو بغیر ساختی کیو باؤنڈری کے حوالہ دے سکتا ہے۔ اس کے مستقل کال لاگ `responseBody` کی جگہ ایک اوشن مارکر ہے؛ تفصیلی پائپ لائن آرٹفیکٹ (جس میں upstream/client باڈیز اور اسٹریم چنکس شامل ہو سکتے ہیں) کو برقرار نہیں رکھا گیا ہے۔ اس درخواست کے لیے سیمنٹک، آئیڈیمپوٹینسی، اور ریجننگ-ری پلے کیشز کو بائی پاس پڑھتا اور لکھتا ہے۔ فراہم کنندہ کی درخواست اور کلائنٹ کے دکھائی دینے والے جواب میں کوئی تبدیلی نہیں ہوئی ہے۔ ابتدائی کیپ لائیو بائٹس کو عارضی بفر سے نکال دیا جاتا ہے جب تفصیلی آرٹفیکٹ کو چھوڑ دیا جاتا ہے۔ Kiro کی خراب شکل والی EventStream وارننگ صرف پے لوڈ بائٹ کی گنتی کی اطلاع دیتی ہے، کبھی بھی اس کے مواد یا JSON پارسر کی خام غلطی نہیں ہوتی۔ یہ دعویٰ نہیں کرتا کہ ہر غیر متعلقہ provider/plugin تشخیص کا آڈٹ کیا گیا ہے۔ وسیع تر برقرار رکھے ہوئے سنک سویپ کو #11658 میں ٹریک کیا گیا ہے۔
 
-یہ حصہ ابھی کسی پروڈکشن پروڈیوسر کو روٹ سے منسلک نہیں کرتا اور
-ملٹی-ریزولوشن ویریئنٹ کے انتخاب کی سہولت فراہم نہیں کرتا۔ اس لیے شفاف
-Video Bridge درخواست راستے پر کوئی اضافی کام عائد نہیں ہوتا، جبکہ ٹیننٹ سے
-منسلک پرنسپل ڈیریویشن اور مکمل FU-08 ملٹی-ریزولوشن لائف سائیکل کو مکمل طرزِ عمل
-کے طور پر دستاویز کرنے کے بجائے واضح فالو اَپ کام برقرار رکھا گیا ہے۔
+اندرونی `/api/modality-bridge/video/drilldown` لائف سائیکل ایک الگ، loopback/token-authenticated کیشے سبسٹریٹ ہے۔ ہر آپریشن کے لیے کینونیکل اوپیک پرنسپل ID کی بھی ضرورت ہوتی ہے۔ پروڈکشن کالر کو فعال کرنے سے پہلے، اسے ID کو مستند کرایہ دار سے اخذ کرنا چاہیے اور اسے کلائنٹ کے ذریعے منتخب کردہ قدر کو کبھی بھی آگے نہیں بھیجنا چاہیے۔ کیش کیز اس پرنسپل کو کیننیکل سیشن اور ویڈیو ریفرنس IDs سے منسلک کرتی ہیں، صرف ان کی SHA-256-derived کیز کو اسٹور کرتی ہیں، اور اسی پرنسپل کو پڑھنے اور حذف کرنے دونوں کا دائرہ کار رکھتی ہیں۔ کیش زیادہ سے زیادہ 16 ماخوذ JPEG فریمز فی اندراج ذخیرہ کرتا ہے، دس منٹ کے بعد ان کی میعاد ختم ہو جاتی ہے، اور باؤنڈڈ `start`/`end` ریڈز یا واضح سیشن کو حذف کرنے کی حمایت کرتا ہے۔
 
-فریمز کے لیے ترتیب وار کنفیگر کردہ Video ماڈل کے ذریعے کیپشن تیار کیے جاتے ہیں۔ ایک خالی
-Video اووررائیڈ، Vision کی ترتیب وراثت میں لیتی ہے؛ اگر دونوں خالی ہوں تو Vision
-آٹو راؤٹر مؤثر، وژن کی صلاحیت رکھنے والا ماڈل منتخب کرتا ہے۔ کامیاب کیپشنز
-اصل حصے کو ایک مستحکم `[Video description:` سابقے سے بدل دیتے ہیں، جو متن کو
-میڈیا سے اخذ کردہ ایک ناقابلِ اعتماد مشاہدے کے طور پر بھی نشان زد کرتا ہے اور بعد میں آنے والے
-ماڈلز کو میڈیا میں موجود ہدایات پر عمل نہ کرنے کی ہدایت دیتا ہے۔ فریم-کیپشن کیش کیز میں
-JPEG بائٹس، پرامپٹ، ٹائم اسٹیمپ، اور مؤثر ماڈل شامل ہوتے ہیں؛ صرف کامیاب
-کیپشنز کیش کیے جاتے ہیں۔ کیش اندراجات اصل کامیاب پروڈیوسر ماڈل کو برقرار رکھتے ہیں،
-جس میں فال بیک ماڈل بھی شامل ہے؛ جب مختلف فریمز مختلف ماڈلز کے ذریعے
-تیار کیے گئے ہوں تو برج `mixed` رپورٹ کرتا ہے۔ کیش ہٹ اس پروڈیوسر شناخت کو
-درخواست کردہ روٹنگ پلان کا نیا لیبل دینے کے بجائے دوبارہ استعمال کرتا ہے۔ مکمل ویڈیو کے نتیجے
-کی کیش کی ہر اس ان پٹ پر مبنی ہوتی ہے جو آؤٹ پٹ کو تبدیل کرتی ہے — پرامپٹ، مؤثر
-ماڈل، سیمپلنگ پالیسی، فریم کی تعداد، معنوی تجزیے کا موڈ، نارملائز کردہ فوکس ہنٹ کا SHA-256
-فنگر پرنٹ، فوکس ونڈو، `transcript`،
-`audioTranscript`، اور کانٹیکٹ شیٹ فلیگ — لہٰذا ان میں سے کسی بھی
-جہت کی تبدیلی کیش مس ہوتی ہے، کبھی بھی فرسودہ نتیجے کا دوبارہ استعمال نہیں۔ بصری ڈی ڈپ پالیسی
-کا ورژن، تھریش ہولڈ، اور محدود امیدوار فریمز کی تعداد بھی
-نتیجہ-کیش کی کلید اور میٹا ڈیٹا میں واضح طور پر شامل ہوتے ہیں؛ چنانچہ پالیسی میں تبدیلی کسی فرسودہ
-مکمل ویڈیو وضاحت کو دوبارہ استعمال نہیں کر سکتی۔ نتیجہ-کیش v4 میٹا ڈیٹا موڈ اور
-فنگر پرنٹ برقرار رکھتا ہے، خام صارف ٹاسک کبھی نہیں۔ گارڈ ریل میٹا ڈیٹا درخواست کردہ
-اور مؤثر دونوں تجزیاتی موڈز رپورٹ کرتا ہے؛ قابلِ استعمال صارف متن کے بغیر درخواست کردہ
-`focused` موڈ کو مؤثر طور پر `full` رپورٹ کیا جاتا ہے۔
+ہر پرنسپل 16 اندراجات اور کینونیکل JPEG ڈیٹا کے 64 MiB تک محدود ہے۔ وہ حدود عالمی 64-entry/256 MiB حد سے آزاد ہیں: پرنسپل کوٹہ کا دباؤ صرف اس پرنسپل کی کم از کم استعمال شدہ اندراجات کو خارج کرتا ہے جو عالمی LRU بے دخلی پر غور کیا جاتا ہے۔ میعاد ختم ہونے والی اندراجات کو کیش سرگرمی پر پرنسپل اور عالمی اکاؤنٹنگ دونوں سے ہٹا دیا جاتا ہے، جب کہ منسوخی اور توثیق کی ناکامی جزوی متبادل کا ارتکاب نہیں کرتی ہے۔
 
-گارڈ ریل ہر معاونت یافتہ ویڈیو حصے کو اخذ کرتا ہے، مگر
-`modalityBridgeVideoMaxVideos` سے زیادہ کی وضاحت نہیں کرتا۔ کسی ایسے ہدف کے لیے جس کے متعلق ثابت ہو کہ
-`supportsVideo === false` ہے، ناکام اور حد سے زائد ویڈیوز واضح محفوظ
-متنی نشانات میں تبدیل ہو جاتی ہیں، تاکہ کوئی خام ویڈیو باقی نہ رہے۔ جب صلاحیت نامعلوم ہو تو وہ حصے
-بغیر تبدیلی کے رہتے ہیں۔ `supportsVideo === true` والے اہداف برج کو بائی پاس کرتے ہیں۔
-کلائنٹ کی درخواست کا ابارٹ سگنل ڈاؤن لوڈ، بروکر قطار،
-ذیلی عمل، اور کیپشن کالز تک منتقل ہوتا ہے؛ ابارٹس ویڈیوز کے درمیان عمل روک دیتے ہیں اور خام
-میڈیا کی جانب کبھی فیل اوپن نہیں ہوتے۔
+کیشے غیر کینونیکل Base64، اضافی پیڈنگ، نان JPEG میڈیا، خراب یا کٹے ہوئے JPEGs، اور JPEGs کو مسترد کرتا ہے جو باؤنڈڈ فل امیج `sharp` ڈی کوڈ کے دوران انتباہ پیدا کرتا ہے۔ یہ ہر ایک قبول شدہ تصویر کو کیننیکل JPEG کے طور پر دوبارہ انکوڈ کرتا ہے، کالر فیلڈز پر بھروسہ کرنے کے بجائے ڈی کوڈ شدہ بائٹس سے چوڑائی اور اونچائی حاصل کرتا ہے، اور کسی بھی ٹریلنگ پولی گلوٹ بائٹس کو برقرار رکھنے کے بجائے مسترد کر دیتا ہے۔ دونوں کوٹوں سے صرف باؤنڈڈ کیننیکل کمپریسڈ بفر چارج کیا جاتا ہے۔ JSON وائر کی حد میں 32 MiB ڈی کوڈ ان پٹ سیلنگ کے لیے Base64 اوور ہیڈ شامل ہے۔ ہر ذخیرہ شدہ اخذ اس کی توثیق شدہ JPEG format/resolution، نمونے لینے کی پالیسی، اخذ کرنے والا ورژن، تخلیق کا وقت، سرور کے حساب سے مواد کا ہیش، اور ہیش شدہ پیرنٹ ریفرنس کے علاوہ قابل بھروسہ کالر کے والدین کے مواد کا ہیش ریکارڈ کرتا ہے۔ ایٹمک کیش کمٹ سے پہلے غیر مطابقت پذیر decode/hash مراحل کے درمیان منسوخی کی جانچ کی جاتی ہے۔
 
-رن ٹائم ترتیبات DB کی پشت پناہی رکھتی ہیں اور Zod کے ذریعے توثیق شدہ ہیں:
+یہ قسط ابھی تک کسی پروڈکشن پروڈیوسر کو روٹ سے نہیں جوڑتی ہے اور نہ ہی ملٹی ریزولوشن ویرینٹ سلیکشن فراہم کرتی ہے۔ اس وجہ سے شفاف ویڈیو برج کی درخواست کے راستے میں کوئی اضافی کام نہیں ہوتا ہے، جبکہ کرایہ دار کے پابند پرنسپل اخذ اور مکمل FU-08 ملٹی ریزولوشن لائف سائیکل مکمل رویے کے طور پر دستاویزی ہونے کی بجائے واضح فالو اپ کام رہتا ہے۔
 
-| کلید                                | ڈیفالٹ      | حد / رویہ                                                                                                |
-| ----------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | اختیاری رن ٹائم، آپٹ اِن                                                                                 |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` عمومی کیپشنز برقرار رکھتا ہے؛ `focused` محدود، ناقابلِ اعتماد تازہ ترین صارف سیاق استعمال کرتا ہے |
-| `modalityBridgeVideoModel`          | `""`        | Vision Bridge ماڈل وراثت میں لیں                                                                         |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                     |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`، `scene_aware`، یا متناسب `segment_aware`؛ ڈیٹیکٹر کی ناکامی پر `uniform` استعمال ہوتا ہے      |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                      |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                           |
+ترتیب شدہ ویڈیو ماڈل کے ساتھ فریموں کو ترتیب وار عنوان دیا گیا ہے۔ ایک خالی ویڈیو اوور رائیڈ وژن کی ترتیب کو وراثت میں دیتی ہے۔ اگر دونوں خالی ہیں، تو ویژن آٹو راؤٹر مؤثر وژن کے قابل ماڈل کا انتخاب کرتا ہے۔ کامیاب کیپشن اصل حصے کو ایک مستحکم `[Video description:` سابقہ سے بدل دیتے ہیں جو متن کو میڈیا سے حاصل کردہ ناقابل اعتماد مشاہدے کے طور پر بھی نشان زد کرتا ہے اور نیچے دھارے کے ماڈلز سے کہتا ہے کہ میڈیا میں پائی جانے والی ہدایات پر عمل نہ کریں۔ فریم کیپشن کیشے کیز میں JPEG بائٹس، پرامپٹ، ٹائم اسٹیمپ، اور موثر ماڈل شامل ہیں۔ صرف کامیاب سرخیوں کو کیش کیا جاتا ہے۔ کیش اندراجات حقیقی کامیاب پروڈیوسر ماڈل کو برقرار رکھتی ہیں، بشمول فال بیک ماڈل؛ پل `mixed` کی رپورٹ کرتا ہے جب مختلف ماڈلز کے ذریعہ مختلف فریم تیار کیے گئے تھے۔ ایک کیش ہٹ اس پروڈیوسر کی شناخت کو درخواست کردہ روٹنگ پلان کے طور پر ری لیبل کرنے کے بجائے دوبارہ استعمال کرتا ہے۔ پورے ویڈیو رزلٹ کیش کو ہر ان پٹ پر کلید کیا جاتا ہے جو آؤٹ پٹ — پرامپٹ، موثر ماڈل، نمونے لینے کی پالیسی، فریم کاؤنٹ، سیمنٹک تجزیہ موڈ، نارملائزڈ فوکس اشارے کا SHA-256 فنگر پرنٹ، فوکس ونڈو، `transcript`، `audioTranscript` اور کانٹیکٹ شیٹ فلیگ — کو تبدیل کرتا ہے، اس لیے ان میں سے کسی بھی کیچ کو تبدیل کرنے سے کبھی بھی کمی محسوس نہیں ہوتی۔ بصری ڈیڈ اپ پالیسی ورژن، حد، اور پابند امیدوار فریم کی گنتی نتیجہ کیش کلید اور میٹا ڈیٹا میں بھی واضح ہیں۔ اس لیے پالیسی میں تبدیلی ایک باسی پوری ویڈیو تفصیل کو دوبارہ استعمال نہیں کر سکتی۔ رزلٹ کیش v4 میٹا ڈیٹا موڈ اور فنگر پرنٹ کو برقرار رکھتا ہے، کبھی بھی خام صارف کا کام نہیں۔ گارڈریل میٹا ڈیٹا درخواست کردہ اور موثر تجزیہ کے طریقوں کی رپورٹ کرتا ہے۔ قابل استعمال صارف متن کے بغیر درخواست کردہ `focused` موڈ کو مؤثر طریقے سے `full` کے طور پر رپورٹ کیا جاتا ہے۔
 
-120 سیکنڈ سے زیادہ کی پرانی مستقل Video ٹائم آؤٹ اقدار کو
-بروکر کی آخری مہلت تک محدود کر دیا جاتا ہے؛ اس حد سے زیادہ کی نئی ترتیبات لکھنے کی درخواستیں مسترد کر دی جاتی ہیں۔
-`GET /api/modality-bridge/video/runtime` کو تصدیق یا رن ٹائم کی جانچ سے پہلے
-قابلِ اعتماد، مہر شدہ لوپ بیک مقام درکار ہوتا ہے، اور پھر مینجمنٹ
-آتھ درکار ہوتی ہے۔ یہ صرف `available`، صاف کردہ FFmpeg/ffprobe ورژنز، اور رن ٹائم
-دستیاب نہ ہونے پر ایک مقررہ وجہ واپس کرتا ہے۔ اندرونی اخراجی اینڈ پوائنٹ
-عوامی اپ لوڈ API نہیں ہے: قطار بھر جانے پر `503` کے ساتھ `Retry-After` واپس ہوتا ہے، کالر
-کے منقطع ہونے پر `499`، اور بروکر کی مقررہ آخری مہلت پر `504` واپس ہوتا ہے۔ تبدیل شدہ جوابات، Vision یا Audio حصوں کو حذف کیے بغیر،
-مرکزی `x-omniroute-modality-bridge` ہیڈر میں
-`video->text;model=<visionModel>;parts=<videos>` شامل کرتے ہیں۔
+گارڈریل ہر تعاون یافتہ ویڈیو حصے کو نکالتا ہے لیکن `modalityBridgeVideoMaxVideos` سے زیادہ کی وضاحت نہیں کرتا ہے۔ `supportsVideo === false` ثابت شدہ ہدف کے لیے، ناکام اور حد سے زیادہ ویڈیوز واضح محفوظ ٹیکسٹ مارکر بن جاتے ہیں تاکہ کوئی خام ویڈیو باقی نہ رہے۔ جب صلاحیت نامعلوم ہے، وہ حصے اپنے ویڈیو کیریئر کو برقرار رکھتے ہیں۔ کوئی بھی فال بیک ٹرانسکرپٹ مندرجہ بالا باؤنڈڈ ٹیکسٹ کنورژن کی پیروی کرتا ہے۔ `supportsVideo === true` والے اہداف پل کو بائی پاس کرتے ہیں۔ کلائنٹ کی درخواست اسقاط کا سگنل ڈاؤن لوڈ، بروکر کی قطار، ذیلی عمل، اور کیپشن کالز کے ذریعے پھیلتا ہے۔ ابارٹس ویڈیوز کے درمیان رک جاتے ہیں اور خام میڈیا کے لیے کبھی بھی ناکام نہیں ہوتے۔
 
-### PII ماسکر (`piiMasker.ts`)
+رن ٹائم کی ترتیبات ڈی بی کی حمایت یافتہ اور زوڈ کی توثیق شدہ ہیں:
 
-**دونوں** مراحل میں چلتا ہے۔
+| چابی                                | طے شدہ      | رینج/رویہ                                                                                                       |
+| ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | اختیاری رن ٹائم، آپٹ ان                                                                                         |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` عام کیپشنز کو محفوظ رکھتا ہے۔ `focused` پابند، ناقابل اعتماد تازہ ترین صارف سیاق و سباق استعمال کرتا ہے۔ |
+| `modalityBridgeVideoModel`          | `""`        | وژن برج ماڈل کو وراثت میں حاصل کریں۔                                                                            |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                            |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware`, یا متناسب `segment_aware`; ڈیٹیکٹر کی ناکامی `uniform` پر واپس آتی ہے۔                |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                             |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                  |
 
-- **`preCall`** پے لوڈ کو کلون کرتا ہے، `system`، `messages`، `input`، اور
-  `prompt` (سادہ اسٹرنگ آئٹمز سمیت) میں سے گزرتا ہے، اور اسٹرنگ `content`/`text`
-  فیلڈز پر `processPII()` (`@/shared/utils/inputSanitizer` سے) لاگو کرتا ہے۔ جب
-  `PII_REDACTION_ENABLED=true` ہو تو دریافت شدہ PII کو باہر جانے والے
-  پے لوڈ میں مخفی کر دیا جاتا ہے۔ یہ `INPUT_SANITIZER_MODE` سے آزاد ہے (جو صرف
-  پرامپٹ انجیکشن پالیسی کو کنٹرول کرتا ہے)۔ جب ریڈیکشن بند ہو تو کال مواد کو
-  دوبارہ لکھے بغیر شناخت کی تعداد ریکارڈ کرتی ہے۔
-- **`postCall`** جواب کو ڈیپ کلون کرتا ہے، `sanitizePIIResponse()` کے ساتھ
-  Responses-API ساخت کا ماسکر (`maskResponsesOutput` — جو
-  `output_text` اور `output[].content[].text` کا احاطہ کرتا ہے) چلاتا ہے۔ اگر کوئی ریڈیکشن ہو تو
-  ترمیم شدہ جواب اصل جواب کی جگہ لے لیتا ہے۔
+120 سیکنڈ سے اوپر کی ویڈیو ٹائم آؤٹ ویلیوز کو بروکر کی آخری تاریخ تک بند کر دیا گیا ہے۔ نئی ترتیبات اس حد سے اوپر لکھتی ہیں مسترد کردی جاتی ہیں۔ `GET /api/modality-bridge/video/runtime` تصدیق یا رن ٹائم پروبنگ سے پہلے بھروسہ مند اسٹیمپڈ لوپ بیک لوکلٹی کی ضرورت ہوتی ہے، پھر انتظامی تصدیق کی ضرورت ہوتی ہے۔ یہ صرف `available`، سینیٹائزڈ FFmpeg/ffprobe ورژن، اور رن ٹائم دستیاب نہ ہونے پر ایک مقررہ وجہ واپس کرتا ہے۔ اندرونی نکالنے کا اختتامی نقطہ عوامی اپ لوڈ API نہیں ہے: قطار سیچوریشن `503` پلس `Retry-After` واپس کرتا ہے، ایک کالر منقطع `499` واپس کرتا ہے، اور مقررہ بروکر کی آخری تاریخ `504` واپس کرتی ہے۔ تبدیل شدہ جوابات ویژن یا آڈیو سیگمنٹس کو ہٹائے بغیر `video->text;model=<visionModel>;parts=<videos>` کو مرکزی `x-omniroute-modality-bridge` ہیڈر میں شامل کرتے ہیں۔
 
-گارڈ ریل کبھی بلاک نہیں کرتا؛ یہ صرف تشریحی معلومات شامل کرتا (`meta.detections`،
-`meta.redacted`) یا متن دوبارہ لکھتا ہے۔
+### PII Masker (`piiMasker.ts`)
 
-### پرامپٹ انجیکشن (`promptInjection.ts`)
+پر چلتا ہے۔** دونوں** مراحل
 
-صارف کے فراہم کردہ مواد میں مخالفانہ ساختوں کا سراغ لگاتا ہے اور
-کنفیگر کردہ پالیسی نافذ کرتا ہے۔ رویہ ماحولیاتی متغیرات اور کنسٹرکٹر
-اختیارات کے ذریعے متعین ہوتا ہے:
+- **`preCall`** پے لوڈ کو کلون کرتا ہے، چلتا ہے `system`، `messages`، `input`، اور `prompt` (بشمول سادہ سٹرنگ آئٹمز)، اور `processPII()` ( `@/shared/utils/inputSanitizer` سے) سٹرنگ `content`/`text` فیلڈز پر لاگو کرتا ہے۔ جب `PII_REDACTION_ENABLED=true`، پتہ چلا PII آؤٹ باؤنڈ پے لوڈ میں رییکٹ کیا جاتا ہے۔ یہ `INPUT_SANITIZER_MODE` سے آزاد ہے (جو صرف پرامپٹ انجیکشن پالیسی کو کنٹرول کرتا ہے)۔ جب ریڈیکشن آف ہوتا ہے، کال ریکارڈ کا پتہ لگانے کی گنتی مواد کو دوبارہ لکھے بغیر۔
+- **`postCall`** ردعمل کو گہرا کلون کرتا ہے، `sanitizePIIResponse()` کے علاوہ Responses-API-شکل ماسکر چلاتا ہے (`maskResponsesOutput` — `output_text` اور `output[].content[].text` کا احاطہ کرتا ہے)۔ اگر کوئی رد عمل ہوتا ہے تو، ترمیم شدہ جواب اصل کی جگہ لے لیتا ہے۔
 
-| ترتیب      | ماحولیاتی متغیر                                                                                   | طے شدہ قدر | اثر                                                                                                                                                                                                              |
-| ---------- | ------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| فعال       | `INPUT_SANITIZER_ENABLED`                                                                         | `true`     | جب `false` ہو، تو guardrail فوراً عمل روک دیتا ہے۔                                                                                                                                                               |
-| موڈ        | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                   | `warn`     | انجیکشن پالیسی: `block`، `warn`، یا `log`۔ (`redact` پچھلی مطابقت کے لیے قبول کیا جاتا ہے، لیکن انجیکشن متن کو **نہیں** ہٹاتا؛ درخواست میں PII کی دوبارہ تحریر `PII_REDACTION_ENABLED` کے ذریعے کنٹرول ہوتی ہے۔) |
-| بلاک کی حد | `blockThreshold` آپشن / `INPUT_SANITIZER_BLOCK_THRESHOLD` (عرف `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | بلاک کرنے کے لیے درکار کم از کم شدت۔ طے شدہ ترتیب میں Medium صرف مشاہدے کے لیے ہے۔                                                                                                                               |
+ریل کبھی نہیں روکتی۔ یہ صرف تشریح کرتا ہے (`meta.detections`, `meta.redacted`) یا دوبارہ لکھتا ہے۔
 
-**موڈ کی ترجیحی ترتیب** (`getMode`): کالر کا `options.mode` →
-`INJECTION_GUARD_MODE` کا **DB فیچر فلیگ اوور رائیڈ** (Dashboard → Settings →
-Feature Flags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env →
-`warn`۔ لہٰذا ڈیش بورڈ اوور رائیڈ کو env متغیرات پر ترجیح حاصل ہوتی ہے، اس لیے Feature
-Flags UI چلتے ہوئے guard کو براہِ راست کنٹرول کرتا ہے (دوبارہ شروع کرنے کی ضرورت نہیں)۔ DB سے پڑھنے کا عمل fail-safe ہے:
-اگر اس میں خرابی آئے، تو guard واپس env پر مبنی رویے پر آ جاتا ہے، اور جب کوئی
-اوور رائیڈ مقرر نہ ہو تو رویہ صرف env پر مبنی حل کے عین مطابق ہوتا ہے۔
+#### فی قسم کا انتخاب، حسب ضرورت پیٹرن اور پتہ لگانے والے کاؤنٹر
 
-شناخت کے ذرائع:
+**ڈیش بورڈ → سیٹنگز → سیکورٹی → PII ماسکنگ** منتخب کرتا ہے _what_ نقاب پوش ہے۔ یہ ماسکنگ کو آن نہیں کرتا ہے: یہ اب بھی `PII_REDACTION_ENABLED` (request) اور `PII_RESPONSE_SANITIZATION` (response + SSE) ہے، دونوں بطور ڈیفالٹ آف ہیں۔
 
-1. `@/shared/utils/inputSanitizer` سے `sanitizeRequest()` (مشترکہ detector
-   سیٹ جو پائپ لائن میں دیگر مقامات پر بھی استعمال ہوتا ہے)۔
-2. بلٹ اِن `DEFAULT_GUARD_PATTERNS` (فی الحال `system_override_inline` اور
-   `markdown_system_block`، دونوں کی شدت `high` ہے)۔
-3. constructor آپشنز کے ذریعے فراہم کردہ اختیاری `customPatterns` (strings، regex،
-   یا `{ name, pattern, severity }` ریکارڈز)۔
+- **فی قسم کا انتخاب** — بلٹ ان آئی ڈیز `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) میں درج ہیں۔ غیر سیٹ کا مطلب ہے ہر قسم (اس ترتیب سے پہلے کا برتاؤ موجود تھا)۔ درخواست کے انجن کا `ssn_us` پیٹرن `ssn` پر نقشہ بناتا ہے۔ ٹیمپلیٹس (کم سے کم، معیاری، مالیاتی، برازیلین، USA، GDPR، POPIA، مکمل) صرف UI میں چیک باکسز کو بھرتے ہیں۔
+- **GDPR اور POPIA شناخت کنندگان** — بارہ بلٹ ان آئی ڈیز جو EU اور جنوبی افریقی ذاتی شناخت کنندگان کا احاطہ کرتی ہیں (نیچے جدول)۔ ان کے ریجیکس، توثیق کرنے والے اور دائرہ اختیار کے ٹیگز ایک ٹیبل میں رہتے ہیں، `src/shared/utils/piiPatterns.ts`، جسے ریسپانس سینیٹائزر (`src/lib/piiSanitizer.ts`) اور درخواست ماسکر (`src/shared/utils/inputSanitizer.ts`) دونوں استعمال کرتے ہیں۔ ایک میچ کو تب ہی درست کیا جاتا ہے جب اس کا توثیق کنندہ اسے قبول کرتا ہے۔ ہندسوں کی ایک ننگی رن کبھی بھی کافی نہیں ہوتی ہے۔ ایک آپریٹر جس نے ان ids کے موجود ہونے سے پہلے ایک تنگ انتخاب کو محفوظ کیا تھا وہ اس طرز عمل کو برقرار رکھتا ہے جب تک کہ نئی ids پر ٹک نہ لگ جائے۔
+- **اپنی مرضی کے پیٹرن** — 20 ریجیکس یا وائلڈ کارڈ پیٹرن تک (`*` = 64 غیر وائٹ اسپیس حروف تک، `?` = ایک)۔ میچز `[CUSTOM_REDACTED]` بن جاتے ہیں۔ ہر پیٹرن `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) سے گزرتا ہے: زیادہ سے زیادہ 500 حروف، جھنڈے `g i m s u` تک محدود، مرتب ہونا چاہیے، `safe-regex` کو پاس کرنا چاہیے (تباہ کن بیک ٹریکنگ)، اور خالی سٹرنگ یا ریڈیکشن پلیس ہولڈر سے مماثل نہیں ہونا چاہیے۔ ایک پیٹرن جو ناکام ہوجاتا ہے اسے محفوظ کرنے اور جانچنے پر انکار کردیا جاتا ہے، اور ایک ذخیرہ شدہ قطار جو ناکام ہوجاتی ہے اسے مرتب کرنے کے بجائے رن ٹائم پر چھوڑ دیا جاتا ہے۔ اپنی مرضی کے پیٹرن صرف اس وقت چلتے ہیں جب ماسکنگ آن ہو۔
+- **پتہ لگانے والے کاؤنٹر** — فی قسم کی گنتی (کبھی مماثل اقدار)، میموری میں رکھی جاتی ہے اور دوبارہ شروع کرنے پر دوبارہ ترتیب دیتی ہے (`src/lib/pii/piiDetectionStats.ts`)۔ وہ صرف اس وقت بڑھتے ہیں جب ماسکنگ آن ہو۔
 
-جب `mode === "block"` ہو **اور** کم از کم ایک شناخت شدت کی
-حد پر پورا اترتی ہو، تو `preCall` یہ واپس کرتا ہے: `{ block: true, message: "Request rejected:
-suspicious content detected" }`۔ `warn`/`log` موڈز میں guardrail لاگ کرتا ہے لیکن
-کال کی اجازت دیتا ہے۔ مشترکہ معاون `evaluatePromptInjection()` بھی export کیا جاتا ہے
-تاکہ ایسے کالرز prompts کا جائزہ لے سکیں جنہیں registry کے ذریعے گزرنے کی ضرورت نہ ہو۔
+ترتیبات `key_value` ٹیبل (namespace `pii_settings`، `src/lib/db/piiSettings.ts`) میں رہتی ہیں اور 1 s کیشے کے ذریعے پڑھی جاتی ہیں۔ API:
 
-**اسکین کی حد (v3.8.20):** detector مربوط prompt متن کے صرف **ابتدائی 16 KB** کا
-معائنہ کرتا ہے — `src/shared/utils/inputSanitizer.ts` میں
-`MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes)۔ `detectInjection()` اور
-`evaluatePromptInjection()` دونوں pattern loop چلانے سے پہلے
-`slice(0, MAX_INJECTION_SCAN_BYTES)` استعمال کرتے ہیں۔ انجیکشن ہدایات input کے آغاز کے قریب ہوتی ہیں، اس لیے یہ
-کثیر-سینکڑوں-KB payloads پر regex CPU/GC کو محدود کرتا ہے، جبکہ شناخت کمزور نہیں ہوتی (دیکھیے
-#3932، #4041)۔
+| طریقہ  | راستہ                    | مقصد                                                                              |
+| ------ | ------------------------ | --------------------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | فلیگ اسٹیٹ، `enabledTypes`، `customPatterns`، پتہ لگانے والے کاؤنٹرز              |
+| `PUT`  | `/api/settings/pii`      | `enabledTypes` (`null` = all) and/or `customPatterns` کو تبدیل کریں۔              |
+| `POST` | `/api/settings/pii/test` | زیادہ سے زیادہ 8 KB کے نمونے کے خلاف ایک پیٹرن کو خشک کریں۔ کچھ بھی محفوظ نہیں ہے |
 
-### اسنادی معلومات چھپانے والا (`credentialMasker.ts`)
+تینوں کو انتظامی توثیق کی ضرورت ہے اور Zod (`src/shared/validation/schemas/piiSettings.ts`) کے ساتھ باڈی کی توثیق کریں۔
 
-**دونوں** مراحل میں چلتا ہے اور طے شدہ chain میں آخری ہے (ترجیح `95`)۔ outbound payload (پیغام
-کا content، tool-call arguments، tool results) **اور** provider response سے
-معروف API-key / secret-token patterns کو مخفی کرتا ہے، تاکہ prompt میں چسپاں کی گئی اسنادی معلومات
-(یا tool result کے ذریعے واپس دہرائی گئی معلومات) upstream provider یا client کو واپس افشا نہ ہو۔
+#### GDPR (EU) اور POPIA (جنوبی افریقہ) شناخت کنندگان
 
-- **صرف واضح اجازت سے فعال**، PII redaction ہی کی روایت کے مطابق (Hard Rule #20 سے ملحق):
-  اس وقت تک غیر فعال رہتا ہے جب تک `settings.credentialRedactionEnabled === true` **یا**
-  `CREDENTIAL_REDACTION_ENABLED=true` نہ ہو۔ غیر فعال ہونے پر guardrail کوئی کارروائی نہیں کرتا —
-  یہ نہ کبھی بلاک کرتا ہے اور نہ دوبارہ تحریر کرتا ہے۔
-- `redactCredentials()` مکمل payload/response tree میں چلتا ہے (`walkValue()`،
-  prototype-pollution سے محفوظ، `WeakSet` کے ذریعے cycle-safe) اور مماثلتوں کو
-  `[REDACTED:<type>]` placeholder سے بدل دیتا ہے، جبکہ صرف انہی branches کو clone کرتا ہے جو واقعی
-  تبدیل ہوئی ہوں۔
-- `CREDENTIAL_PATTERNS` میں LLM provider keys (OpenAI، OpenAI-proj،
-  Anthropic، Google، Hugging Face، Replicate)، VCS/SaaS tokens (GitHub، Slack،
-  Linear، Notion، npm، Postman، Discord)، ادائیگی کی keys (Stripe، Square)، cloud
-  keys (AWS access key، Twilio، SendGrid، Mailgun)، private keys / JWTs،
-  اسنادی معلومات رکھنے والی connection strings (`mongodb://user:pass@...`، وغیرہ)، اور
-  عمومی `Authorization`/`x-api-key`/`api-key`/`apikey` header-value
-  pattern شامل ہیں۔ Header جیسی ساخت رکھنے والی keys (`authorization`، `x-api-key`، `api-key`،
-  `apikey`) کو عمومی text regex کے بجائے ساختی طور پر مخفی کیا جاتا ہے (صرف value، جبکہ
-  `Bearer `/`Basic ` جیسا scheme prefix برقرار رہتا ہے)۔
-- guardrail کبھی بلاک نہیں کرتا؛ یہ صرف دوبارہ تحریر (`modifiedPayload` /
-  `modifiedResponse`) اور تشریح (`meta.credentialsRedacted`، `meta.count`) کرتا ہے۔
+| آئی ڈی              | شناخت کنندہ              | توثیق                                                                               |
+| ------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
+| `iban`              | IBAN                     | معلوم ملک، اس ملک کے لیے درست لمبائی، ISO 13616 MOD-97-10                           |
+| `eu_vat`            | EU VAT نمبر              | معلوم رکن ریاست کا سابقہ اور اس ریاست کا نمبر فارمیٹ (کوئی VIES تلاش نہیں)          |
+| `es_dni_nie`        | ہسپانوی DNI / NIE        | کنٹرول لیٹر (ویلیو موڈ 23)؛ NIE `X/Y/Z` + 7 ہندسے ہے۔                               |
+| `it_codice_fiscale` | اطالوی کوڈیس مالیاتی     | odd/even پوزیشن ٹیبلز سے کنٹرول لیٹر                                                |
+| `pl_pesel`          | پولش PESEL               | وزنی چیکسم اور ایک انکوڈ شدہ تاریخ پیدائش جو موجود ہے۔                              |
+| `nl_bsn`            | ڈچ BSN                   | 11 پروف (وزن 9..2، -1)                                                              |
+| `de_steuer_id`      | جرمن Steuer-ID           | ISO 7064 Mod 11,10 پلس ہندسوں کے ڈھانچے کے قواعد (کوئی لیڈنگ 0 نہیں)                |
+| `se_personnummer`   | سویڈش شخصی نمبر          | آخری دس ہندسوں پر Luhn اور ایک قابل پیدائش تاریخ (10 یا 12 ہندسوں)                  |
+| `za_id`             | جنوبی افریقی ID نمبر     | تمام 13 ہندسوں پر Luhn، درست پیدائش month/day، شہریت کا ہندسہ 0 یا 1                |
+| `za_phone`          | جنوبی افریقی فون         | `+27` / `27` سابقہ، یا قومی `0..` فارم ایک جگہ یا ہائفن کے ساتھ لکھا جاتا ہے        |
+| `za_vat`            | جنوبی افریقی VAT نمبر    | `4` سے شروع ہونے والے 10 ہندسے** اور** اس سے پہلے کے 48 حروف میں "VAT" / "BTW"      |
+| `za_tax_ref`        | جنوبی افریقی ٹیکس ریفری۔ | `0` سے شروع ہونے والے 10 ہندسے -`3`، Luhn،** اور** "ٹیکس" / "SARS" پہلے 48 حروف میں |
 
-Regression guard: `tests/unit/credential-masker-guardrail.test.ts`۔
+چونکہ صرف ہندسوں کے فارمیٹس آرڈر نمبرز، بلڈ نمبرز اور ٹائم اسٹیمپ سے ٹکرا جاتے ہیں، اس لیے سب سے کمزور (`za_vat`، `za_tax_ref`) کو کلیدی لفظ کی ضرورت ہوتی ہے، اور ایک ننگے دس ہندسوں والے `0..` نمبر کو جنوبی افریقی فون نمبر نہیں سمجھا جاتا ہے۔ فاصلہ والے IBANs (`GB29 NWBK ...`) مماثل نہیں ہیں۔ اسٹریمنگ پاتھ پر کیو کو صرف موجودہ حصے کے اندر دیکھا جاتا ہے۔ آئی ڈیز فون کے عمومی نمونوں سے آگے ہیں، اس لیے ایک توثیق شدہ شناخت کنندہ اپنا پلیس ہولڈر (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...) رکھتا ہے۔ `gdpr` اور `popia` ٹیمپلیٹس بالترتیب EU اور جنوبی افریقی آئی ڈیز کا انتخاب کرتے ہیں۔ ماسکنگ خود آپٹ ان رہتی ہے (سخت اصول #20): یہاں کوئی بھی چیز فیچر فلیگ ڈیفالٹ کو تبدیل نہیں کرتی ہے۔
 
-## بنیادی کنٹریکٹ (`base.ts`)
+### پرامپٹ انجکشن (`promptInjection.ts`)
+
+صارف کے فراہم کردہ مواد میں مخالف ڈھانچے کا پتہ لگاتا ہے اور ترتیب شدہ پالیسی کو نافذ کرتا ہے۔ برتاؤ ماحولیاتی متغیرات اور تعمیر کنندگان کے اختیارات سے چلتا ہے:
+
+| ترتیب      | Env var                                                                                           | طے شدہ | اثر                                                                                                                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| فعال       | `INPUT_SANITIZER_ENABLED`                                                                         | `true` | جب `false`، guardrail شارٹ سرکٹ.                                                                                                                                                                                  |
+| موڈ        | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                   | `warn` | انجیکشن کی پالیسی: `block`، `warn`، یا `log`۔ (`redact` بیک کمپیٹ کے لیے قبول کیا جاتا ہے لیکن کرتا ہے۔** نہیں** پٹی انجکشن ٹیکسٹ؛ درخواست PII دوبارہ لکھنا `PII_REDACTION_ENABLED` کے ذریعہ کنٹرول کیا جاتا ہے۔) |
+| بلاک کی حد | `blockThreshold` آپشن / `INPUT_SANITIZER_BLOCK_THRESHOLD` (عرف `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high` | بلاک کرنے کے لیے کم از کم شدت درکار ہے۔ میڈیم ڈیفالٹ پر صرف مشاہدہ ہے۔                                                                                                                                            |
+
+**موڈ کی ترجیح** (`getMode`): کالر `options.mode` → `INJECTION_GUARD_MODE`**DB فیچر فلیگ اوور رائڈ** (ڈیش بورڈ → سیٹنگز → فیچر فلیگ) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. ایک ڈیش بورڈ اوور رائیڈ اس لیے env vars پر جیت جاتا ہے، لہذا فیچر فلیگز UI چلتے ہوئے گارڈ کو کنٹرول کرتا ہے (کوئی دوبارہ شروع نہیں)۔ DB ریڈ فیل سے محفوظ ہے: اگر اس میں غلطی ہوتی ہے، تو گارڈ env پر مبنی رویے پر واپس آجاتا ہے، اور جب کوئی اوور رائڈ سیٹ نہیں کیا جاتا ہے تو برتاؤ صرف env ریزولوشن کی طرح ہوتا ہے۔
+
+کھوج کے ذرائع:
+
+1. `sanitizeRequest()` سے `@/shared/utils/inputSanitizer` (مشترکہ ڈیٹیکٹر سیٹ جو پائپ لائن میں کہیں اور استعمال ہوتا ہے)۔
+2. بلٹ ان `DEFAULT_GUARD_PATTERNS` (فی الحال `system_override_inline` اور `markdown_system_block`، دونوں `high` شدت)۔
+3. اختیاری `customPatterns` کنسٹرکٹر کے اختیارات (سٹرنگس، ریجیکس، یا `{ name, pattern, severity }` ریکارڈز) کے ذریعے پاس کیا گیا۔
+
+جب `mode === "block"`** اور** کم از کم ایک پتہ لگانا شدت کی حد کو پورا کرتا ہے، `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }` لوٹاتا ہے۔ `warn`/`log` موڈز میں گارڈریل لاگ کرتا ہے لیکن کال کی اجازت دیتا ہے۔ مشترکہ مددگار `evaluatePromptInjection()` ان کال کرنے والوں کے لیے بھی برآمد کیا جاتا ہے جنہیں رجسٹری سے گزرے بغیر پرامپٹس کا جائزہ لینے کی ضرورت ہوتی ہے۔
+
+**اسکین باؤنڈ (v3.8.20):** ڈیٹیکٹر صرف معائنہ کرتا ہے۔** پہلے 16 KB** جوائنڈ پرامپٹ ٹیکسٹ — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 بائٹس) `src/shared/utils/inputSanitizer.ts` میں۔ پیٹرن لوپ چلانے سے پہلے `detectInjection()` اور `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` دونوں۔ انجیکشن کی ہدایات ان پٹ کے اوپری حصے کے قریب ہوتی ہیں، اس لیے یہ regex CPU/GC ملٹی سو KB پے لوڈز پر بغیر کسی کمزوری کا پتہ لگائے (cf. #3932, #4041) کیپ کرتا ہے۔
+
+### اسنادی ماسکر (`credentialMasker.ts`)
+
+پر چلتا ہے۔** دونوں** مراحل، پہلے سے طے شدہ سلسلہ میں آخری (ترجیح `95`)۔ آؤٹ باؤنڈ پے لوڈ (پیغام کا مواد، ٹول کال آرگیومنٹس، ٹول کے نتائج) سے معروف API کلید/خفیہ ٹوکن پیٹرن کو درست کرتا ہے۔** اور** فراہم کنندہ کا جواب، اس لیے پرامپٹ میں چسپاں کی گئی سند (یا ٹول کے نتیجے کے ذریعے واپس گونجتی ہے) اپ اسٹریم فراہم کنندہ یا کلائنٹ کو واپس نہیں لی جاتی ہے۔
+
+- **صرف آپٹ ان کریں۔** , وہی کنونشن جیسا کہ PII ریڈیکشن (سخت اصول #20-ملحقہ): غیر فعال ہے جب تک کہ `settings.credentialRedactionEnabled === true`** یا** `CREDENTIAL_REDACTION_ENABLED=true` اس کے بند ہونے کے ساتھ ہی، گارڈریل ایک no-op — ہے جو کبھی بلاک نہیں کرتا اور نہ ہی دوبارہ لکھتا ہے۔
+- `redactCredentials()` مکمل payload/response ٹری پر چلتا ہے (`walkValue()`, prototype-pollution-safe, cycl-safe via `WeakSet`) اور میچز کو `[REDACTED:<type>]` پلیس ہولڈر سے بدلتا ہے، صرف ان شاخوں کی کلوننگ کرتا ہے جو حقیقت میں تبدیل ہوئی ہیں۔
+- `CREDENTIAL_PATTERNS` LLM فراہم کنندہ کیز کا احاطہ کرتا ہے (OpenAI, OpenAI-proj , Anthropic, Google, Hugging Face , Replicate ) VCS/SaaS ٹوکنز (GitHub, Slack, Linear , Notion, npm , Postman , Discord) , ادائیگی کی کلیدیں (AWS, کلاؤڈ تک رسائی کی چابیاں ) Twilio، SendGrid، Mailgun)، نجی کلیدیں / JWTs، کریڈینشل بیئرنگ کنکشن سٹرنگز (`mongodb://user:pass@...`، وغیرہ)، اور ایک عام `Authorization`/`x-api-key`/`api-key`/`apikey` ہیڈر ویلیو پیٹرن۔ ہیڈر کی شکل والی چابیاں (`authorization`, `x-api-key`, `api-key`, `apikey`) کو عام ٹیکسٹ ریجیکس کے بجائے ساختی طور پر تبدیل کیا جاتا ہے (صرف قدر، اسکیم کا سابقہ جیسے `Bearer `/`Basic ` محفوظ)۔
+- ریل کبھی نہیں روکتی۔ یہ صرف دوبارہ لکھتا ہے (`modifiedPayload` / `modifiedResponse`) اور تشریح کرتا ہے (`meta.credentialsRedacted`, `meta.count`)۔
+
+رجعت کا محافظ: `tests/unit/credential-masker-guardrail.test.ts`۔
+
+## بنیادی معاہدہ (`base.ts`)
 
 ```typescript
 class BaseGuardrail {
@@ -632,11 +306,11 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // true چین کو فوری طور پر روک دیتا ہے
-  message?: string; // بلاک ہونے پر ظاہر کیا جاتا ہے
+  block?: boolean; // true زنجیر کو شارٹ سرکٹ کر دیتا ہے
+  message?: string; // بلاک کرنے کی صورت میں ظاہر کیا جاتا ہے
   meta?: Record<string, unknown> | null;
-  modifiedPayload?: TValue; // درخواست کو دوبارہ لکھنے کے لیے preCall کے ذریعے واپس کیا جاتا ہے
-  modifiedResponse?: TValue; // جواب کو دوبارہ لکھنے کے لیے postCall کے ذریعے واپس کیا جاتا ہے
+  modifiedPayload?: TValue; // درخواست کو از سر نو لکھنے کے لیے preCall کی جانب سے لوٹایا جاتا ہے
+  modifiedResponse?: TValue; // جواب کو از سر نو لکھنے کے لیے postCall کی جانب سے لوٹایا جاتا ہے
 }
 
 interface GuardrailContext {
@@ -655,79 +329,109 @@ interface GuardrailContext {
 }
 ```
 
-ایک گارڈ ریل `void`، `{}`، یا `{ block: false }` واپس کرکے "کوئی تبدیلی نہیں" کا اشارہ دیتی ہے۔ `modifiedPayload`/`modifiedResponse` واپس کرنے سے چین میں آگے آنے والی گارڈ ریلز تک پہنچنے والی قدر تبدیل ہو جاتی ہے۔
-`signal?: AbortSignal` کالر کے لائف سائیکل کو گارڈ ریلز تک پہنچاتا ہے۔ درخواست کا منسوخ ہونا دانستہ fail-open استثنا ہے: میڈیا برجز کام روک دیتے ہیں اور صفائی کرتے ہیں، مگر خام میڈیا کو ایسے ہدف کے لیے بحال نہیں کرتے جس کے بارے میں معلوم ہو کہ وہ اسے سپورٹ نہیں کرتا۔
+گارڈریل `void`، `{}`، یا `{ block: false }` میں سے کوئی بھی لوٹا کر "کوئی تبدیلی نہیں" کا اشارہ دیتا ہے۔ `modifiedPayload`/`modifiedResponse` لوٹانے سے زنجیر میں بہتی ہوئی قدر کو آگے کے گارڈریلز کے لیے بدل دیا جاتا ہے۔
+`signal?: AbortSignal` کال کرنے والے کے لائف سائیکل کو گارڈریلز تک پہنچاتا ہے۔ درخواست کا abort جان بوجھ کر رکھی گئی fail-open استثنا ہے: میڈیا برجز کام روک کر صفائی کر دیتے ہیں، اور خام میڈیا کو ایسے ہدف پر بحال نہیں کرتے جس کے بارے میں معلوم ہو کہ وہ اسے سپورٹ نہیں کرتا۔
 
 ## رجسٹری (`registry.ts`)
 
-سنگلٹن `guardrailRegistry` درج ذیل سہولیات فراہم کرتی ہے:
+سنگلٹن `guardrailRegistry` درج ذیل فراہم کرتا ہے:
 
-- `register(guardrail)` — ایک گارڈ ریل شامل کرتی ہے (یا نارملائزڈ نام کے لحاظ سے تبدیل کرتی ہے) اور
-  صعودی `priority` کے مطابق دوبارہ ترتیب دیتی ہے۔
+- `register(guardrail)` — ایک گارڈریل شامل کرتا ہے (یا نارملائز شدہ نام کی بنیاد پر تبدیل کر دیتا ہے) اور `priority` کی صعودی ترتیب کے مطابق دوبارہ ترتیب دیتا ہے۔
 - `clear()` / `list()` — انتظامی معاون فنکشنز۔
-- `runPreCallHooks(payload, context)` — فعال گارڈ ریلز پر تکرار کرتی ہے، پے لوڈ کو
-  `modifiedPayload` کے ذریعے آگے بڑھاتی ہے، اور پہلے `block: true` پر رک جاتی ہے۔
-- `runPostCallHooks(response, context)` — جواب کی جانب بھی یہی بہاؤ استعمال کرتی ہے۔
-- `resetGuardrailsForTests({ registerDefaults })` — حالت صاف کرتی ہے اور صاف ستھری ٹیسٹ علیحدگی کے لیے، اختیاری طور پر
-  ڈیفالٹس کو دوبارہ رجسٹر کرتی ہے۔
+- `runPreCallHooks(payload, context)` — فعال گارڈریلز پر چلتا ہے، پے لوڈ کو `modifiedPayload` کے ذریعے آگے منتقل کرتا ہے، اور پہلے `block: true` پر رک جاتا ہے۔
+- `runPostCallHooks(response, context)` — جواب کی طرف بھی وہی بہاؤ۔
+- `resetGuardrailsForTests({ registerDefaults })` — حالت صاف کرتا ہے اور اختیاری طور پر ڈیفالٹس کو دوبارہ رجسٹر کرتا ہے تاکہ ٹیسٹ کی صاف ستھری علیحدگی حاصل ہو۔
 
-دونوں رنرز `{ blocked, payload|response, results, guardrail?, message? }`
-واپس کرتے ہیں، جہاں `results`، `GuardrailExecutionResult` ریکارڈز کی ایک ارے ہے جس میں
-ہر گارڈ ریل کے `blocked`، `skipped`، `modified`، `error`، اور `meta` فیلڈز شامل ہوتے ہیں،
-جو ٹریسنگ کے لیے مفید ہیں۔
+دونوں رنرز `{ blocked, payload|response, results, guardrail?, message? }` لوٹاتے ہیں، جہاں `results` `GuardrailExecutionResult` ریکارڈز کی ایک صف ہے جس میں فی-گارڈریل `blocked`، `skipped`، `modified`، `error`، اور `meta` فیلڈز شامل ہیں، جو ٹریسنگ کے لیے مفید ہیں۔
 
-### ہر درخواست کے لیے گارڈ ریلز کو غیر فعال کرنا
+### فی-درخواست گارڈریلز کو غیر فعال کرنا
 
-`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` گارڈ ریل ناموں کی ایک
-نقل سے پاک فہرست یکجا کرتا ہے جنہیں موجودہ درخواست کے لیے چھوڑ دینا چاہیے۔
-ذرائع (سب اختیاری، سب ضم کیے جاتے ہیں):
+`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` ان گارڈریل ناموں کی ڈی-ڈپلیکیٹ شدہ فہرست مرتب کرتا ہے جنہیں موجودہ درخواست کے لیے چھوڑنا چاہیے۔ پانچ چینلز ہیں، جو اسی ترتیب سے پڑھے جاتے ہیں اور ایک ہی فہرست میں ملائے جاتے ہیں (ڈی-ڈپلیکیٹ کرتے وقت پہلا وقوع جیتتا ہے):
 
-- `apiKeyInfo.disabledGuardrails`
-- درخواست کی باڈی کا `disabledGuardrails` (اعلیٰ سطح پر)
-- درخواست کی باڈی کا `metadata.disabledGuardrails`
-- ہیڈر `x-omniroute-disabled-guardrails` (یا قدیمی
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. درخواست باڈی `disabledGuardrails` (ٹاپ لیول)
+3. درخواست باڈی `metadata.disabledGuardrails` (صرف جب `metadata` ایک آبجیکٹ ہو)
+4. ہیڈر `x-omniroute-disabled-guardrails`
+5. میراثی (legacy) ہیڈر `x-disabled-guardrails`
 
-اقدار اسٹرنگز کی ارے یا کوما سے جدا کی گئی اسٹرنگ ہو سکتی ہیں؛ ناموں کو
-لوئرکیس kebab-case میں نارملائز کیا جاتا ہے (`pii_masker` → `pii-masker`)۔ نتیجہ
-`context.disabledGuardrails` کے ذریعے رجسٹری کو دیا جاتا ہے، جو مماثل
-گارڈ ریلز کو چھوڑ دیتی ہے (`results` میں `skipped: true`)۔
+پانچوں چینلز ملائے جاتے ہیں، دونوں ہیڈرز بھی شامل ہیں: `x-omniroute-disabled-guardrails` اور `x-disabled-guardrails` دونوں بھیجنے سے ان کی فہرستوں کے یونین کو چھوڑ دیا جاتا ہے، اور ایک خالی جدید ہیڈر اب میراثی والے کو نہیں چھپاتا
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)، جسے
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805) میں درست کیا گیا)۔
 
-## عمل درآمد کی ترتیب
+قدریں اسٹرنگز کی صفیں یا کاما سے الگ شدہ اسٹرنگ ہو سکتی ہیں؛ ناموں کو trim کیا جاتا ہے اور چھوٹے حروف کے kebab-case میں نارملائز کیا جاتا ہے (`pii_masker` → `pii-masker`)، اور خالی اندراجات ہٹا دیے جاتے ہیں۔ نتیجہ `context.disabledGuardrails` کے ذریعے رجسٹری کو پہنچایا جاتا ہے، جو مماثل گارڈریلز کو چھوڑ دیتا ہے (`results` میں `skipped: true`)۔
 
-`src/sse/handlers/chat.ts` اور `open-sse/handlers/chatCore.ts` سے گزرنے والی ہر درخواست کے لیے:
+غیر فعال کرنے والی فہرست صرف **رجسٹری** پر اثر ڈالتی ہے۔ پرامپٹ-انجیکشن `block` موڈ ایک لازمی حد بندی ہے: انجیکشن-گارڈ مڈل ویئر
+(`src/middleware/promptInjectionGuard.ts`) `evaluatePromptInjection()` کو کسی بھی کالر کنٹرول شدہ غیر فعال فہرست کے بغیر بلاتا ہے (وہ مردہ
+`resolveDisabledGuardrails({ body })` کال جو یہ پہلے کیا کرتا تھا،
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934) میں ہٹا دی گئی تھی)، لہٰذا وہ درخواست جو `prompt-injection` کو غیر فعال کرتی ہے، `block` موڈ میں پھر بھی مسترد کر دی جاتی ہے۔ یہ عمداً ایسا ہی ڈیزائن کیا گیا ہے۔ غیر فعال چینلز کالر کے کنٹرول میں ہوتے ہیں (درخواست باڈی، میٹا ڈیٹا، ہیڈرز)، اور کالر کو کسی ایسے سیکیورٹی کنٹرول کو بند کرنے کی اجازت نہیں ہونی چاہیے جو آپریٹر نے مقرر کیا ہو
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413))۔ [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412) کا ہیڈر یونین صرف یہ بدلتا ہے کہ کون سے رجسٹری گارڈریلز چھوڑے جاتے ہیں؛ یہ کلائنٹ کو مڈل ویئر سے بچ کر نکلنے نہیں دیتا۔ فی-کلید اور فی-گروپ لازمی گارڈریل پالیسیاں v4 RFC [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417) میں ٹریک کی جا رہی ہیں۔
+دیکھیے [کوریج اور حدود](#coverage-and-limits)۔
 
-1. `resolveDisabledGuardrails(...)`، API کلید، باڈی، اور ہیڈرز سے نظر انداز کیے جانے والے عناصر کی فہرست بناتا ہے۔
-2. `guardrailRegistry.runPreCallHooks(body, ctx)` ترجیح کی صعودی ترتیب میں گارڈ ریلز چلاتا ہے:
-   - غیر فعال گارڈ ریلز کو `skipped` کے طور پر ریکارڈ کیا جاتا ہے۔
-   - ہر گارڈ ریل کا `preCall`، `modifiedPayload` کے ذریعے پے لوڈ دوبارہ لکھ سکتا ہے۔
-   - پہلا `block: true` سلسلے کو فوری طور پر روک دیتا ہے اور ہینڈلر گارڈ ریل کی جانب سے مسترد کیے جانے کا جواب واپس کرتا ہے۔
-3. (ممکنہ طور پر دوبارہ لکھا گیا) پے لوڈ کومبو روٹنگ اور اپ اسٹریم ڈسپیچ میں جاتا ہے۔
-4. جواب تیار ہونے کے بعد، `guardrailRegistry.runPostCallHooks(...)` جواب پر یہی سلسلہ چلاتا ہے۔ یہاں `block: true` اپ اسٹریم جواب کو خارج کر دیتا ہے۔
+## اجرا کی ترتیب
 
-خرابی پیدا کرنے والی گارڈ ریلز کو `error: <message>` کے ساتھ ریکارڈ کیا جاتا ہے اور `logger.warn` کے ذریعے لاگ کیا جاتا ہے، لیکن سلسلہ جاری رہتا ہے — یہ ڈیزائن کے لحاظ سے فیل-اوپن ہے۔
+ہر اس درخواست کے لیے جو `src/sse/handlers/chat.ts` اور `open-sse/handlers/chatCore.ts` سے گزرتی ہے (چیٹ فیملی روٹس جو [کوریج اور حدود](#coverage-and-limits) کے تحت درج ہیں):
+
+1. `resolveDisabledGuardrails(...)` API کلید، باڈی اور ہیڈرز سے نظرانداز کرنے کی فہرست بناتا ہے۔
+2. `guardrailRegistry.runPreCallHooks(body, ctx)` گارڈریلز کو بڑھتی ہوئی ترجیحی ترتیب میں چلاتا ہے:
+   - غیر فعال گارڈریلز `skipped` کے طور پر ریکارڈ کیے جاتے ہیں۔
+   - ہر گارڈریل کا `preCall` `modifiedPayload` کے ذریعے پے لوڈ کو دوبارہ لکھ سکتا ہے۔
+   - پہلا `block: true` چین کو شارٹ سرکٹ کر دیتا ہے اور ہینڈلر گارڈریل کی مستردگی کا جواب واپس کرتا ہے۔
+3. (ممکنہ طور پر دوبارہ لکھی گئی) پے لوڈ کومبو روٹنگ اور اپ اسٹریم ڈسپیچ میں بہتی ہے۔
+4. **صرف نان سٹریمنگ:** جواب مکمل ہونے کے بعد، `guardrailRegistry.runPostCallHooks(...)` جواب پر وہی چین چلاتا ہے۔ یہاں `block: true` اپ اسٹریم جواب کو خارج کر دیتا ہے اور HTTP 400 واپس کرتا ہے۔ سٹریم شدہ جوابات اس مرحلے کو مکمل طور پر نظرانداز کرتے ہیں۔
+
+جو گارڈریلز exception پھینکتے ہیں وہ `error: <message>` کے ساتھ ریکارڈ کیے جاتے ہیں اور `logger.warn` کے ذریعے لاگ کیے جاتے ہیں، لیکن چین جاری رہتی ہے — ڈیزائن کے مطابق فیل اوپن۔
+
+## کوریج اور حدود
+
+گارڈریل رجسٹری صرف چیٹ پائپ لائن میں جڑی ہوئی ہے۔ یہ حدود `tests/unit/guardrail-pipeline-wiring-characterization.test.ts` اور `tests/unit/guardrail-pipeline-characterization.test.ts` کے ذریعے مقرر کی گئی ہیں؛ جب رویہ تبدیل ہو تو ان ٹیسٹوں کو شعوری طور پر اپڈیٹ کریں۔
+
+### ہکس کہاں چلتے ہیں
+
+| ہک / کنٹرول                  | کن پر چلتا ہے                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `runPreCallHooks`            | وہ درخواستیں جنہیں `handleChat` ہینڈل کرتا ہے (`src/sse/handlers/chat.ts`): `/v1/chat/completions`، `/v1/completions`، `/v1/messages`، `/v1/responses` (اور `/v1/responses/*`)، `/v1/relay/chat/completions`، `/v1/providers/{provider}/chat/completions`، `/v1/api/chat`، `/v1/antigravity`، `/v1beta/models/*`، اور ٹیلیگرام چیٹ پراکسی۔ نیز ڈیش بورڈ ٹیسٹ اینڈ پوائنٹ `/api/guardrails/test`۔ پری کال بلاک HTTP 400 واپس کرتا ہے۔ |
+| `runPostCallHooks`           | صرف **نان سٹریمنگ** چیٹ جوابات (`open-sse/handlers/chatCore/nonStreamingResponse.ts`)۔ سٹریم شدہ جوابات کبھی اس تک نہیں پہنچتے۔                                                                                                                                                                                                                                                                                                      |
+| سٹریمنگ PII                  | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`)، جب `PII_RESPONSE_SANITIZATION` فعال ہو تو `streamingPipeline.ts` میں پائپ کی جاتی ہے۔ یہ گارڈریل نہیں ہے، اس لیے غیر فعال چینلز اس پر اثر انداز نہیں ہوتے۔                                                                                                                                                                                                             |
+| انجیکشن گارڈ مڈل ویئر (قدیم) | ہر پرامپٹ رکھنے والا `/v1` روٹ، بشمول چیٹ فیملی (دیکھیں [روٹ کوریج](#injection-guard-route-coverage--red-team-phase-8--block-d))۔ صرف پرامپٹ انجیکشن۔                                                                                                                                                                                                                                                                                |
+
+### کیا کور نہیں ہوتا
+
+- **میڈیا، ایمبیڈنگز اور ڈیٹا روٹس** (`/v1/images/*`، `/v1/embeddings`، `/v1/audio/*`، `/v1/videos/generations`، `/v1/music/generations`، `/v1/rerank`، `/v1/search`، `/v1/moderations`) کبھی رجسٹری تک نہیں پہنچتے۔ وہاں کوئی PII ماسکنگ، کریڈینشل ماسکنگ یا موڈالٹی برج نہیں چلتا۔ ان کی واحد جانچ قدیم انجیکشن گارڈ مڈل ویئر ہے۔
+- **سٹریم شدہ جوابات** کو کوئی پوسٹ کال گارڈریلز نہیں ملتے: نہ `pii-masker` یا `credential-masker` پوسٹ کال، اور نہ ہی پوسٹ کال بلاک۔ صرف سٹریمنگ PII ٹرانسفارم لاگو ہوتا ہے (جب `PII_RESPONSE_SANITIZATION` فعال ہو)۔ سٹریم شدہ جواب میں واپس آئی ہوئی کریڈینشل کو مسخ نہیں کیا جاتا۔
+- **غیر فعال چینلز بمقابلہ مڈل ویئر (ڈیزائن کے مطابق):** مڈل ویئر `evaluatePromptInjection()` کی اپنی کال کے ذریعے پرامپٹ انجیکشن کا جائزہ لیتا ہے، بغیر کوئی کالر کنٹرولڈ غیر فعال فہرست دیے۔ `block` موڈ ایک لازمی حد بندی ہے جسے کالر کنٹرولڈ غیر فعالیاں بائی پاس نہیں کر سکتیں، چیٹ فیملی روٹس پر بھی ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413))۔ `prompt-injection` کو غیر فعال کرنا صرف رجسٹری گارڈریل کو نظرانداز کرتا ہے۔
+
+### پوسٹ کال سے پہلے جواب کو کیا دیکھتا ہے
+
+نان سٹریمنگ راستے پر ترتیب یہ ہے: میموری ایکسٹریکشن → بلٹ اِن ٹول کا اجرا → پوسٹ کال گارڈریلز → پوسٹ کال بلاک ایگزٹ → سیمینٹک کیش اسٹور۔
+
+- **میموری ایکسٹریکشن** اور **ٹول کا اجراء** جواب کو اس سے پہلے دیکھ لیتے ہیں کہ پوسٹ-کال گارڈریلز اسے دوبارہ لکھ سکیں یا بلاک کر سکیں۔
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401) کے بعد سے، میموری
+  ایکسٹریکشن نکالے گئے متن کو `sanitizePII` سے گزارتی ہے جب
+  `PII_RESPONSE_SANITIZATION` فعال ہو (دونوں اسٹریمنگ اور غیر اسٹریمنگ صورتوں میں)، لیکن وہ جواب جسے پوسٹ-کال بعد میں بلاک کر دے، وہ اس وقت تک میموری اور
+  ٹولز کو پیش کیا جا چکا ہوتا ہے۔
+- **سیمینٹک کیشے** جواب کو پوسٹ-کال کے بعد محفوظ کرتا ہے، اس لیے یہ دوبارہ لکھا گیا جواب محفوظ کرتا ہے، اور بلاک شدہ جواب کبھی کیشے نہیں ہوتا۔ کیشے اندراجات فی API key کے لحاظ سے کلیدی (keyed) ہوتے ہیں۔
 
 ## کنفیگریشن
 
-بلٹ اِن گارڈ ریلز کے ذریعے پڑھے جانے والے ماحولیاتی متغیرات:
+بلٹ-ان گارڈ ریلز کے ذریعے پڑھے جانے والے ماحول کے متغیرات:
 
-| متغیر                                 | استعمال کنندہ              | اثر                                                                                                    |
-| ------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | تشخیص کو مکمل طور پر غیر فعال کرنے کے لیے `false` مقرر کریں۔                                           |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | انجیکشن پالیسی: `warn`، `block`، یا `log`۔ پرانی قدر `redact` انجیکشن متن کو دوبارہ نہیں لکھتی۔        |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`         | انجیکشن گارڈ کا موڈ؛ یہ DB فیچر فلیگ بھی ہے جو ماحولیاتی متغیرات کو **اوور رائیڈ** کرتا ہے (DB > ENV)۔ |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | کم از کم شدت جسے `MODE=block` مسترد کرتا ہے: `high` (ڈیفالٹ)، `medium`، یا `low`۔                      |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD` کا پرانا عرف۔                                                        |
-| `PII_REDACTION_ENABLED`               | `pii-masker`               | `true` ہونے پر، درخواست کا PII حذف کر دیا جاتا ہے (انجیکشن موڈ سے آزاد)۔                               |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (ڈاؤن اسٹریم) | جواب کی جانب ماسکر کے رویے کو کنٹرول کرتا ہے۔                                                          |
+| متغیر                                 | استعمال کرنے والا          | اثر                                                                                                  |
+| ------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | شناخت کو مکمل طور پر غیر فعال کرنے کے لیے `false` سیٹ کریں۔                                          |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | انجیکشن پالیسی: `warn`، `block`، یا `log`۔ پرانی قدر `redact` انجیکشن متن کو دوبارہ نہیں لکھتی۔      |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | انجیکشن گارڈ کے لیے موڈ؛ یہ ایک DB فیچر فلیگ بھی ہے جو env vars کو **اووررائیڈ** کرتا ہے (DB > ENV)۔ |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | کم از کم شدت جسے `MODE=block` مسترد کرتا ہے: `high` (طے شدہ)، `medium`، یا `low`۔                    |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD` کا پرانا متبادل نام۔                                               |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | جب `true` ہو، تو درخواست کی PII حذف کر دی جاتی ہے (انجیکشن موڈ سے آزاد)۔                             |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (ڈاؤن اسٹریم) | جواب کی جانب والے ماسکر کے رویے کو کنٹرول کرتا ہے۔                                                   |
 
-Modality Bridge گارڈ ریلز ماحولیاتی متغیرات کے بجائے DB کی معاونت والے سیٹنگز اسٹور (`getSettings()`) سے رن ٹائم کنفیگریشن پڑھتی ہیں۔ Vision کی بنیادی کلیدیں `modalityBridgeVisionEnabled`، `modalityBridgeVisionMode`، `modalityBridgeVisionModel`، `modalityBridgeVisionTaskAware`، `modalityBridgeVisionPrompt`، `modalityBridgeVisionTimeout`، `modalityBridgeVisionMaxImages`، `modalityBridgeVisionMaxChars`، `modalityBridgeCacheEnabled`، `modalityBridgeCacheTtlMinutes`، اور `modalityBridgeCacheMaxEntries` ہیں۔ پرانی `visionBridge*` کلیدیں صرف دستاویزی، ایک سائیکل کے ریڈ فال بیک کے طور پر قبول کی جاتی ہیں؛ ڈیش بورڈ رائٹس بنیادی کلیدیں استعمال کرتی ہیں۔ ڈیفالٹس اور فال بیک ریزالور `src/shared/constants/modalityBridgeDefaults.ts` میں موجود ہیں، جبکہ پرانے کانسٹنٹس `src/shared/constants/visionBridgeDefaults.ts` میں برقرار رکھے گئے ہیں۔
+Modality Bridge گارڈ ریلز رن ٹائم کنفیگریشن DB پر مبنی سیٹنگز اسٹور (`getSettings()`) سے پڑھتے ہیں، نہ کہ env vars سے۔ Vision کی بنیادی کلیدیں یہ ہیں: `modalityBridgeVisionEnabled`، `modalityBridgeVisionMode`، `modalityBridgeVisionModel`، `modalityBridgeVisionTaskAware`، `modalityBridgeVisionPrompt`، `modalityBridgeVisionTimeout`، `modalityBridgeVisionMaxImages`، `modalityBridgeVisionMaxChars`، `modalityBridgeCacheEnabled`، `modalityBridgeCacheTtlMinutes`، اور `modalityBridgeCacheMaxEntries`۔ پرانی `visionBridge*` کلیدیں صرف دستاویزی ایک سائیکل ریڈ فال بیک کے طور پر قبول کی جاتی ہیں؛ ڈیش بورڈ کی تحریریں بنیادی کلیدیں استعمال کرتی ہیں۔ طے شدہ اقدار اور فال بیک ریزالور `src/shared/constants/modalityBridgeDefaults.ts` میں موجود ہیں، جبکہ پرانی مستقلات `src/shared/constants/visionBridgeDefaults.ts` میں برقرار رکھی گئی ہیں۔
 
-Audio، `modalityBridgeAudioEnabled`، `modalityBridgeAudioModel`، `modalityBridgeAudioTimeout`، اور `modalityBridgeAudioMaxClips` کے ساتھ مشترکہ `modalityBridgeCache*` سیٹنگز استعمال کرتا ہے۔ Audio کے لیے پرانی کلیدوں کا کوئی فال بیک نہیں ہے کیونکہ یہ کلیدیں Modality Bridge اسکیما کے ساتھ متعارف کرائی گئی تھیں۔
+Audio یہ کلیدیں استعمال کرتا ہے: `modalityBridgeAudioEnabled`، `modalityBridgeAudioModel`، `modalityBridgeAudioTimeout`، اور `modalityBridgeAudioMaxClips`، اس کے علاوہ مشترک `modalityBridgeCache*` سیٹنگز بھی۔ Audio کے لیے کوئی پرانی کلید فال بیک موجود نہیں ہے کیونکہ یہ کلیدیں Modality Bridge اسکیما کے ساتھ متعارف کرائی گئی تھیں۔
 
-Video، `modalityBridgeVideoEnabled`، `modalityBridgeVideoAnalysisMode`، `modalityBridgeVideoModel`، `modalityBridgeVideoFrameCount`، `modalityBridgeVideoSamplingPolicy`، `modalityBridgeVideoMaxVideos`، اور `modalityBridgeVideoTimeout` کے ساتھ مشترکہ `modalityBridgeCache*` سیٹنگز استعمال کرتا ہے۔ یہ ڈیفالٹ طور پر غیر فعال ہے کیونکہ FFmpeg/ffprobe اختیاری آپریشنل انحصارات ہیں اور فریم کیپشننگ تاخیر اور ماڈل کی لاگت میں اضافہ کرتی ہے۔
+Video یہ کلیدیں استعمال کرتا ہے: `modalityBridgeVideoEnabled`، `modalityBridgeVideoAnalysisMode`، `modalityBridgeVideoModel`، `modalityBridgeVideoFrameCount`، `modalityBridgeVideoSamplingPolicy`، `modalityBridgeVideoMaxVideos`، اور `modalityBridgeVideoTimeout`، اس کے علاوہ مشترک `modalityBridgeCache*` سیٹنگز بھی۔ یہ طے شدہ طور پر غیر فعال ہے کیونکہ FFmpeg/ffprobe اختیاری آپریشنل انحصار ہیں اور فریم کیپشننگ تاخیر اور ماڈل لاگت میں اضافہ کرتی ہے۔
 
-## حسبِ ضرورت Guardrails
+## حسبِ منشا گارڈریلز
 
 ```typescript
 import { BaseGuardrail, guardrailRegistry } from "@/lib/guardrails";
@@ -750,11 +454,11 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 مراحل:
 
-1. `BaseGuardrail` کو توسیع دیتے ہوئے `src/lib/guardrails/myGuardrail.ts` بنائیں۔
-2. `preCall` اور/یا `postCall` نافذ کریں۔
-3. یا تو import کے وقت رجسٹر کریں (`registerDefaultGuardrails` سے push کریں) یا
-   runtime پر `guardrailRegistry.register(...)` کو کال کریں — registry اسی normalized نام والے
-   کسی بھی سابقہ guardrail کو بدل دیتی ہے۔
+1. `BaseGuardrail` کو extend کرتے ہوئے `src/lib/guardrails/myGuardrail.ts` بنائیں۔
+2. `preCall` اور/یا `postCall` implement کریں۔
+3. یا تو import کے وقت رجسٹر کریں (`registerDefaultGuardrails` سے push کر کے) یا
+   runtime پر `guardrailRegistry.register(...)` کو call کریں — رجسٹری
+   اسی normalized نام والے کسی بھی سابقہ گارڈریل کو بدل دیتی ہے۔
 4. `tests/unit/` کے تحت ٹیسٹ شامل کریں (موجودہ مثالیں:
    `tests/unit/guardrails-registry.test.ts`,
    `tests/unit/prompt-injection-guard.test.ts`,
@@ -762,57 +466,58 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 ## ٹیسٹنگ
 
-معلوم حالت سے آغاز کرنے کے لیے ٹیسٹس کے درمیان `resetGuardrailsForTests()` استعمال کریں۔
-خالی registry سے آغاز کرنے اور صرف زیرِ ٹیسٹ guardrails رجسٹر کرنے کے لیے
-`{ registerDefaults: false }` پاس کریں۔ Vision Bridge dependency
-injection (`deps.getSettings`, `deps.callVisionModel`) قبول کرتا ہے؛ Audio Bridge
-settings، capabilities، STT model کے انتخاب، credential
-کی جانچ، اور transcription کے لیے مساوی seams فراہم کرتا ہے۔ اس طرح ٹیسٹس DB
-یا network تک رسائی کے بغیر دونوں flows کو آزما سکتے ہیں۔
+معروف حالت سے آغاز کے لیے ٹیسٹس کے درمیان `resetGuardrailsForTests()` استعمال کریں۔
+خالی رجسٹری سے آغاز کے لیے `{ registerDefaults: false }` پاس کریں اور صرف وہی
+گارڈریلز رجسٹر کریں جو زیرِ آزمائش ہوں۔ Vision Bridge dependency injection قبول کرتا ہے
+(`deps.getSettings`، `deps.callVisionModel`)؛ Audio Bridge بھی settings، capabilities، STT ماڈل
+انتخاب، credential چیکس اور transcription کے لیے مساوی seams فراہم کرتا ہے۔ لہٰذا ٹیسٹس
+دونوں flows کو DB یا نیٹ ورک رسائی کے بغیر آزما سکتے ہیں۔
 
 ## مزید دیکھیے
 
-- `src/lib/guardrails/` — نفاذ
-- `src/shared/utils/inputSanitizer.ts` — مشترکہ detector جو
-  prompt-injection اور PII masking کو تقویت دیتا ہے
+- `src/lib/guardrails/` — implementation
+- `src/shared/utils/inputSanitizer.ts` — مشترکہ detector جو prompt-injection اور
+  PII masking کو طاقت دیتا ہے
 - `src/shared/constants/visionBridgeDefaults.ts` — Vision Bridge کی defaults اور
-  forced-bridge model کی فہرست
+  forced-bridge ماڈل فہرست
 - `src/shared/constants/modalityBridgeDefaults.ts` — مشترکہ Vision/Audio runtime defaults
-- `docs/architecture/RESILIENCE_GUIDE.md` — متعامد layer (circuit breaker، cooldowns)
-- `docs/reference/ENVIRONMENT.md` — env vars کا مکمل حوالہ
+- `docs/architecture/RESILIENCE_GUIDE.md` — متوازی layer (circuit breaker، cooldowns)
+- `docs/reference/ENVIRONMENT.md` — مکمل env var حوالہ
 
-## Injection-guard route coverage اور red-team (مرحلہ 8 · بلاک D)
+## Injection-guard روٹ کوریج اور red-team (Phase 8 · Block D)
 
-injection-guard (`createInjectionGuard` / `withInjectionGuard`) ان تمام routes کا احاطہ کرتا ہے
-جو user prompts قبول کرتے ہیں۔ یہ `INJECTION_GUARD_MODE` کا احترام کرتا ہے (default `warn` = صرف log؛
-`block` = HTTP 400 `SECURITY_001` واپس کرتا ہے)۔
+Injection-guard (`createInjectionGuard` / `withInjectionGuard`) ان تمام روٹس کو
+احاطہ کرتا ہے جو صارف کے prompts قبول کرتے ہیں۔ یہ `INJECTION_GUARD_MODE` کا احترام کرتا ہے
+(پہلے سے طے شدہ `warn` = صرف لاگ؛ `block` = HTTP 400 `SECURITY_001` لوٹاتا ہے)۔
 
-| قسم          | Routes                                                                                                                                               | Default mode |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| متن (موجودہ) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn         |
-| تخلیقی       | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn         |
-| ڈیٹا         | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn         |
+| قسم           | روٹس                                                                                                                                                 | پہلے سے طے شدہ mode |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Text (موجودہ) | `/v1/chat/completions`، `/v1/completions`، `/v1/relay/chat/completions`                                                                              | warn                |
+| Generative    | `/v1/messages`، `/v1/responses`، `/v1/images/generations`، `/v1/images/edits`، `/v1/videos/generations`، `/v1/music/generations`، `/v1/audio/speech` | warn                |
+| Data          | `/v1/embeddings`، `/v1/rerank`، `/v1/search`، `/v1/moderations`                                                                                      | warn                |
 
-متن اخذ کرنا (`extractMessageContents`) `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` کا احاطہ کرتا ہے۔
+Text extraction (`extractMessageContents`) `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` کو احاطہ کرتی ہے۔
 
-**Red-team (ہر شب، `nightly-llm-security.yml`):** promptfoo تصدیق کرتا ہے کہ ہر route
-`INJECTION_GUARD_MODE=block` میں OWASP-LLM corpus کو block کرتا ہے؛ garak probes چلاتا ہے (secret نہ ہونے پر چھوڑ دیتا ہے)۔
-`moderations` کو یکسانیت کے لیے شامل کیا گیا ہے — block-mode میں operators اسے
-`resolveDisabledGuardrails` کے ذریعے مستثنیٰ کر سکتے ہیں۔
+**Red-team (راتوں رات، `nightly-llm-security.yml`):** promptfoo تصدیق کرتا ہے کہ ہر روٹ
+`INJECTION_GUARD_MODE=block` میں OWASP-LLM corpus کو روکتا ہے؛ garak probes چلاتا ہے
+(secret کے بغیر skip کر دیتا ہے)۔ `moderations` کو یکسانی کے لیے شامل کیا گیا ہے۔ Block mode
+ایک لازمی حد بندی ہے: `evaluatePromptInjection()` اس per-request disable فہرست کو نظرانداز
+کرتا ہے جو middleware اسے پاس کرتا ہے، لہٰذا `disabledGuardrails` کسی روٹ کو اس سے
+**مستثنیٰ نہیں** کرتا ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413))۔
 
-ہر شب چلنے والے workflow (`.github/workflows/nightly-llm-security.yml`، cron + دستی
-dispatch) میں دو jobs ہیں:
+راتوں رات چلنے والا workflow (`.github/workflows/nightly-llm-security.yml`، cron + manual
+dispatch) کے دو jobs ہیں:
 
-- **`promptfoo-guard` (blocking)** — `INJECTION_GUARD_MODE=block` کے ساتھ
-  `promptfoo eval -c promptfooconfig.yaml` چلاتا ہے۔ ہر مخالفانہ case (مثلاً "ignore all
-  previous instructions…"، DAN-style jailbreaks) تصدیق کرتا ہے کہ response میں
-  `error.code === "SECURITY_001"` موجود ہے، یعنی guard نے واقعی request مسترد کی۔
+- **`promptfoo-guard` (روکنے والا)** — `INJECTION_GUARD_MODE=block` کے ساتھ
+  `promptfoo eval -c promptfooconfig.yaml` چلاتا ہے۔ ہر adversarial case (مثلاً "ignore all
+  previous instructions…"، DAN طرز کے jailbreaks) اس بات کا اثبات کرتا ہے کہ جواب میں
+  `error.code === "SECURITY_001"` موجود ہے، یعنی گارڈ نے واقعی درخواست مسترد کر دی۔
 - **`garak` (مشاورتی)** — مقامی OmniRoute instance (`http://localhost:20128/v1`) کے خلاف
-  garak کو `--probes promptinject,dan,leakreplay` کے ساتھ چلاتا ہے۔ اسے provider
-  secret (`PROMPTFOO_PROVIDER_KEY`) کے ذریعے مشروط کیا گیا ہے؛ یہ مؤدبانہ طور پر چھوڑ دیتا ہے اور اس کے آخر میں
-  `|| true` شامل ہے، لہٰذا یہ CI کو ناکام کیے بغیر رپورٹ کرتا ہے۔
+  garak `--probes promptinject,dan,leakreplay` چلاتا ہے۔ یہ provider secret
+  (`PROMPTFOO_PROVIDER_KEY`) پر مشروط ہے؛ شائستگی سے skip کرتا ہے اور اس کے ساتھ
+  `|| true` لگا ہوتا ہے، لہٰذا یہ CI کو fail کیے بغیر رپورٹ کرتا ہے۔
 
-guard helper (`createInjectionGuard` / `withInjectionGuard`) کی coverage
-ہر prompt رکھنے والے `/v1` route تک پھیلی ہوئی ہے؛ prompt کا متن
-`src/shared/utils/inputSanitizer.ts` میں موجود `extractMessageContents()` کے ذریعے
-`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` سے حاصل کیا جاتا ہے۔
+گارڈ helper (`createInjectionGuard` / `withInjectionGuard`) کی کوریج ہر prompt رکھنے والے
+`/v1` روٹ پر پھیلی ہوئی ہے؛ prompt کا متن `src/shared/utils/inputSanitizer.ts` میں موجود
+`extractMessageContents()` کے ذریعے
+`messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` سے نکالا جاتا ہے۔

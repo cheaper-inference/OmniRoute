@@ -66,6 +66,30 @@ The `electron/` workspace also exposes:
 - `npm run build:mac-x64` / `build:mac-arm64` — single-arch macOS builds
 - `npm run pack` — directory-only build for local testing (no installer)
 
+## Optional runtime packs
+
+Desktop builds can publish optional runtime archives alongside their installers.
+The installed server payload contains `optional-packs.index.json` (under
+`resources/app` on Windows and Linux). For the `browser-runtime` entry, read
+`packs[].tarball` and download **that exact filename from the same release**.
+Archive names include a SHA-256 digest; different builds can require different
+archives. Keep the downloaded filename unchanged.
+
+Copy the installed app's index and the selected archive into one directory, then
+use the CLI from the same release:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` displays installation and verification state, not the archive
+filename. The bundled index selects the archive. Installation verifies its
+archive checksum before extraction and its package checksums before replacing
+an installed pack. It reads local files; it does not download missing archives.
+Restart the application after installation. If the release has no matching
+asset, the optional pack is not available through that release's assets.
+
 ## Directory Layout
 
 ```
@@ -162,6 +186,30 @@ Persisted to `<DATA_DIR>/server.env`. `DATA_DIR` resolves to:
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` or `~/.omniroute`
 - macOS: `~/.omniroute`
+
+## Environment file lookup
+
+Before spawning the server, the main process (`getPreferredEnvFilePath()` in
+`electron/main.js`) picks **one** `.env` file: the first of these that exists.
+
+1. `$DATA_DIR/.env`, when `DATA_DIR` is set in the environment the app was launched with.
+2. `<resolved DATA_DIR>/.env`, using the same defaults as above: `%APPDATA%\omniroute\.env` on
+   Windows, `$XDG_CONFIG_HOME/omniroute/.env` or `~/.omniroute/.env` on Linux and macOS.
+3. `.env` in the process working directory.
+
+The main process reads only that file; later candidates are not merged in. The server
+environment is then built with this precedence (highest first):
+
+1. The Electron process environment (variables inherited from whatever launched the app).
+2. The selected `.env` file.
+3. `<DATA_DIR>/server.env` (the bootstrap secrets above).
+
+The process environment is captured when the app starts, so a system or user environment
+variable set while the app is running (including while it sits in the tray after its window is
+closed) does not reach the server until the app is fully quit and relaunched. For runtime knobs
+such as `CONTEXT_LENGTH_<PROVIDER>` (see
+[Environment Variables: Per-provider context length](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
+prefer the `.env` file, then fully quit (tray, **Quit**) and relaunch.
 
 ## Window & Tray
 

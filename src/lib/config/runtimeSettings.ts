@@ -5,6 +5,12 @@ import {
   type OperatorProviderErrorRule,
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import {
+  normalizeCliVersionOverrides,
+  setCliVersionOverrides,
+  type CliVersionOverrides,
+} from "@omniroute/open-sse/config/cliVersions.ts";
+import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -23,7 +29,8 @@ export type RuntimeReloadSection =
   | "systemTransforms"
   | "systemPrompt"
   | "authzBypass"
-  | "bannedSignals";
+  | "bannedSignals"
+  | "cliVersionOverrides";
 
 export interface RuntimeReloadChange {
   section: RuntimeReloadSection;
@@ -53,6 +60,7 @@ interface RuntimeSettingsSnapshot {
   authzBypass: AuthzBypassSnapshot;
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
+  cliVersionOverrides: CliVersionOverrides;
 }
 
 // Default bypass policy: kill-switch on, `/api/mcp/` bypassable. Mirrors the
@@ -81,15 +89,35 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   authzBypass: DEFAULT_AUTHZ_BYPASS_SNAPSHOT,
   customBannedSignals: [],
   providerErrorRules: null,
+  cliVersionOverrides: {},
 };
 
 let lastAppliedSnapshot: RuntimeSettingsSnapshot | null = null;
 
-// Module-local mirror of the current bypass policy. Read by the route guard
-// on every non-loopback hit to a LOCAL_ONLY path via `getAuthzBypassSnapshot`.
+// Shared bypass-policy store, read by the route guard on every non-loopback hit
+// to a LOCAL_ONLY path via `getAuthzBypassSnapshot`. Backed by `globalThis` —
+// NOT a plain module-local `let` — so every Next.js standalone-build webpack
+// chunk that imports this module (e.g. the settings-PATCH route's bundle vs.
+// the proxy route-guard's bundle) shares one object. A module-local `let`
+// would leave a manage-scope-configured bypass prefix invisible to whichever
+// bundle evaluates the route guard (#13995), the same class of defect
+// previously fixed via globalThis in systemPrompt.ts (#2470) and
+// modelDeprecation.ts (#5777).
+const AUTHZ_BYPASS_GLOBAL_KEY = "__omniroute_authzBypass_config__";
+const _authzBypassStore = globalThis as unknown as Record<string, AuthzBypassSnapshot | undefined>;
+
 // Initialised to the default so cold-boot requests (before any
 // `applyRuntimeSettings` call) behave identically to PR #2473.
-let currentAuthzBypass: AuthzBypassSnapshot = DEFAULT_AUTHZ_BYPASS_SNAPSHOT;
+function getCurrentAuthzBypass(): AuthzBypassSnapshot {
+  if (!_authzBypassStore[AUTHZ_BYPASS_GLOBAL_KEY]) {
+    _authzBypassStore[AUTHZ_BYPASS_GLOBAL_KEY] = DEFAULT_AUTHZ_BYPASS_SNAPSHOT;
+  }
+  return _authzBypassStore[AUTHZ_BYPASS_GLOBAL_KEY]!;
+}
+
+function setCurrentAuthzBypass(snapshot: AuthzBypassSnapshot): void {
+  _authzBypassStore[AUTHZ_BYPASS_GLOBAL_KEY] = snapshot;
+}
 
 function isTruthyEnvFlag(value: string | undefined): boolean {
   if (typeof value !== "string") return false;
@@ -233,7 +261,14 @@ function normalizeAuthzBypass(settings: Record<string, unknown>): AuthzBypassSna
         new Set(
           rawPrefixes
             .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
-            .filter((entry) => entry.length > 0 && entry.startsWith("/"))
+            // Defence-in-depth (Hard Rules #15/#17): the settings PATCH schema already
+            // refuses spawn-capable prefixes, but other write paths (legacy JSON import,
+            // full DB restore, hand-edited rows) bypass that schema. Never let one of
+            // them become a live bypass entry.
+            .filter(
+              (entry) =>
+                entry.length > 0 && entry.startsWith("/") && !isSpawnCapableBypassPrefix(entry)
+            )
         )
       )
     : [...DEFAULT_AUTHZ_BYPASS_SNAPSHOT.prefixes];
@@ -248,11 +283,11 @@ function normalizeAuthzBypass(settings: Record<string, unknown>): AuthzBypassSna
  * before the first `applyRuntimeSettings` call so cold-boot requests behave
  * identically to PR #2473. Mutated only by `applyAuthzBypassSection`.
  *
- * Hot-reload latency: <50 ms (no I/O, no async, pure read of module-local
- * state). Spec §Non-Functional Requirements / Performance.
+ * Hot-reload latency: <50 ms (no I/O, no async, pure read of the shared
+ * globalThis-backed store). Spec §Non-Functional Requirements / Performance.
  */
 export function getAuthzBypassSnapshot(): AuthzBypassSnapshot {
-  return currentAuthzBypass;
+  return getCurrentAuthzBypass();
 }
 
 export function buildRuntimeSettingsSnapshot(
@@ -284,6 +319,7 @@ export function buildRuntimeSettingsSnapshot(
     authzBypass: normalizeAuthzBypass(settings),
     customBannedSignals: normalizeStringArray(settings.customBannedSignals),
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
+    cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
   };
 }
 
@@ -391,7 +427,7 @@ async function applyCcBridgeTransformsSection(ccBridgeTransforms: unknown) {
  * (<50 ms hot-reload) is structurally satisfied by this shape.
  */
 function applyAuthzBypassSection(snapshot: AuthzBypassSnapshot) {
-  currentAuthzBypass = { enabled: snapshot.enabled, prefixes: [...snapshot.prefixes] };
+  setCurrentAuthzBypass({ enabled: snapshot.enabled, prefixes: [...snapshot.prefixes] });
 }
 
 async function applySystemTransformsSection(systemTransforms: unknown) {
@@ -446,8 +482,7 @@ async function applyModelsDevSyncSection(
   }
 
   const wasEnabled = previousSnapshot.modelsDevSyncEnabled === true;
-  const isEnabled =
-    isModelsDevSyncEnvForcedOn() || currentSnapshot.modelsDevSyncEnabled === true;
+  const isEnabled = isModelsDevSyncEnvForcedOn() || currentSnapshot.modelsDevSyncEnabled === true;
   const intervalChanged =
     previousSnapshot.modelsDevSyncInterval !== currentSnapshot.modelsDevSyncInterval;
 
@@ -608,11 +643,28 @@ export async function applyRuntimeSettings(
     setOperatorProviderErrorRules(currentSnapshot.providerErrorRules ?? undefined);
   }
 
+  // CLI client-version overrides: swap the shared leaf store the Claude Code /
+  // Codex identity presets read on every request. Cheap and idempotent, so it is
+  // safe on every settings write (dashboard edit, import-json, config restore).
+  //
+  // An ABSENT field is not the same as an empty one here. Both production
+  // callers pass getSettings() output, where the key is always present (default
+  // `{}`), but a caller holding a PARTIAL settings object must never be able to
+  // silently drop a value that goes onto the wire as a client fingerprint —
+  // unlike the visible toggles above, this one failing is invisible.
+  if (
+    settings.cliVersionOverrides !== undefined &&
+    (force || hasChanged(currentSnapshot.cliVersionOverrides, previousSnapshot.cliVersionOverrides))
+  ) {
+    setCliVersionOverrides(currentSnapshot.cliVersionOverrides);
+    markChanged("cliVersionOverrides");
+  }
+
   lastAppliedSnapshot = currentSnapshot;
   return changes;
 }
 
 export function resetRuntimeSettingsStateForTests() {
   lastAppliedSnapshot = null;
-  currentAuthzBypass = DEFAULT_AUTHZ_BYPASS_SNAPSHOT;
+  setCurrentAuthzBypass(DEFAULT_AUTHZ_BYPASS_SNAPSHOT);
 }

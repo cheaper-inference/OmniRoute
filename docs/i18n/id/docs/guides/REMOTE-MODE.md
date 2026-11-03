@@ -1,6 +1,6 @@
 # Remote Mode (Bahasa Indonesia)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -245,51 +245,44 @@ hingga koneksi ditampilkan sebagai aktif.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ mencetak secret SEKALI — salin sekarang
-omniroute tokens list                 # disamarkan: id, nama, cakupan, prefiks, status, kedaluwarsa
-omniroute tokens revoke <id|prefix>   # cabut segera
+#   ↳ mencetak rahasia SEKALI — salin sekarang
+omniroute tokens list                 # ditutupi: id, nama, cakupan, prefix, status, kedaluwarsa
+omniroute tokens revoke <id|prefix>   # cabut seketika
 omniroute tokens scopes               # menjelaskan ketiga cakupan
 ```
 
-Perintah `tokens` memerlukan kredensial **admin**. Anda juga dapat mengelola token
-di dasbor pada **Settings → Access Tokens** (buat, cabut, salin-sekali).
+Perintah `tokens` memerlukan kredensial **admin**. Anda juga dapat mengelola token di dashboard di bawah **Settings → Access Tokens** (buat, cabut, salin sekali).
+
+Sebuah token tidak pernah dapat diterbitkan dengan hak akses yang lebih besar daripada yang dimiliki pembuatnya. Token `admin` hanya dapat dibuat oleh operator — sesi dashboard, CLI lokal di server itu sendiri, atau `omniroute connect` dengan kata sandi. Kredensial mesin (token akses `admin`, atau kunci API dengan cakupan `manage`/`admin`) hanya dapat menerbitkan token `write` dan `read`; jika meminta `--scope admin`, mereka mendapat `403`. Menonaktifkan login tidak membuka penerbitan: token akses pada cakupan apa pun adalah kredensial yang diterima rute yang selalu terautentikasi, sehingga panggilan anonim mendapat `401` pada cakupan apa pun.
 
 ---
 
-## Mengonfigurasi CLI pemrograman dari katalog jarak jauh
+## Mengonfigurasi CLI coding dari katalog jarak jauh
 
-`omniroute configure` membaca katalog model live milik **server aktif** dan
-menulis konfigurasi pada mesin **Anda**.
+`omniroute configure` membaca katalog model langsung milik **server aktif** dan menulis konfigurasi di mesin **Anda**.
 
 ```bash
 omniroute configure codex
 #   Penyedia: glm, kmc, ollamacloud, opencode-go, …
 #   Penyedia: glm
 #   ID model: glm/glm-5.2
-#   ✔ Menulis ~/.codex/glm52.config.toml
+#   ✔ Ditulis ~/.codex/glm52.config.toml
 #   Gunakan:  codex --profile glm52
 
-# noninteraktif
+# non-interaktif
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# pertahankan model yang sering digunakan di bagian atas pemilih interaktif
+# simpan model yang sering dipakai di bagian atas pemilih interaktif
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Pemilih hanya menyimpan ID model (tidak pernah URL atau kredensial) dalam file
-lokal `model-preferences.json`, yang dicakup berdasarkan konteks dan target CLI.
-Favorit ditampilkan sebelum pilihan terbaru; gunakan `--unfavorite` untuk
-menghapus model yang dipilih dari daftar konteks/target tersebut.
+Pemilih hanya menyimpan ID model (tidak pernah URL atau kredensial) di file `model-preferences.json` lokal, dengan cakupan per konteks dan target CLI. Favorit ditampilkan sebelum pilihan terbaru; gunakan `--unfavorite` untuk menghapus model yang dipilih dari daftar konteks/target tersebut.
 
-Profil yang ditulis merujuk kunci inferensi melalui env var
-(`OMNIROUTE_API_KEY`) — secret tidak pernah ditulis ke disk. Untuk penyiapan
-dasar Codex satu kali (blok `[model_providers.omniroute]`), lihat
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Profil yang ditulis merujuk kunci inferensi melalui env var (`OMNIROUTE_API_KEY`) — rahasianya tidak pernah ditulis ke disk. Untuk penyiapan dasar Codex satu kali (blok `[model_providers.omniroute]`), lihat [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Menjalankan CLI terhadap layanan jarak jauh (tanpa menulis konfigurasi)
+### Menjalankan CLI terhadap server jarak jauh (tanpa menulis konfigurasi)
 
-`omniroute run <target>` juga mengikuti konteks aktif: URL dasar jarak jauh dan
-kredensial konteks hanya diinjeksi ke dalam proses yang dijalankan.
+`omniroute run <target>` juga menghormati konteks aktif: URL dasar jarak jauh dan kredensial konteks hanya disuntikkan ke proses yang dijalankan.
 
 ```bash
 omniroute connect 192.168.0.15
@@ -297,83 +290,72 @@ omniroute run claude   --model openai/gpt-5.4          # Claude Code → jarak j
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Pratinjau persis proses yang akan dijalankan (hanya NAMA KEY env, tidak pernah nilainya):
+# Pratinjau persis apa yang akan dijalankan (hanya NAMA env key, bukan nilainya):
 omniroute run codex --dry-run --json
 ```
 
-Target: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(sumber tunggal: `bin/cli/cli-manifest.mjs`). Qwen dan Gemini berjalan dengan
-home terisolasi sementara yang dihapus saat keluar, sehingga proses peluncuran
-tidak pernah menyentuh — atau membocorkan data ke — konfigurasi alat pribadi
-Anda.
+Target: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (sumber tunggal: `bin/cli/cli-manifest.mjs`). Qwen dan Gemini berjalan dengan home sementara yang terisolasi dan dihapus saat keluar, sehingga peluncuran tidak pernah menyentuh — atau bocor ke — konfigurasi alat pribadi Anda.
 
 ### Perintah penyiapan per CLI
 
-Setiap CLI yang didukung memiliki perintah penyiapan yang mendukung layanan
-jarak jauh (semuanya mengikuti konteks aktif, atau `--remote <url> --api-key <key>`):
+Setiap CLI yang didukung memiliki perintah penyiapan yang memahami jarak jauh (semuanya menghormati konteks aktif, atau `--remote <url> --api-key <key>`):
 
-| CLI         | Perintah                   | Yang ditulis                                                                                                                                                                                          |
-| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | profil `~/.codex/<name>.config.toml` (per model)                                                                                                                                                      |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (per model)                                                                                                                                                 |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — penyedia kompatibel OpenAI `omniroute` dengan setiap model dalam katalog (jalankan `opencode -m omniroute/<model>`)                                              |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (mode CLI) + mencetak pengaturan ekstensi VS Code untuk ditempelkan (kompatibel dengan OpenAI, URL Dasar **tanpa** `/v1`)                                  |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + pengaturan VS Code `kilocode.*` — kompatibel dengan OpenAI, URL Dasar **dengan** `/v1`                                                                        |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **dengan** `/v1`, kunci melalui `${{ secrets.OMNIROUTE_API_KEY }}`                                           |
-| Cursor      | `omniroute setup-cursor`   | mencetak langkah-langkah dalam aplikasi (Settings → Models → Override OpenAI Base URL **dengan** `/v1` + kunci + model). Konfigurasi Cursor berupa SQLite yang tidak transparan — hanya panel obrolan |
-| Roo Code    | `omniroute setup-roo`      | menulis JSON impor Roo (`~/.omniroute/roo-settings.json`) + menetapkan `roo-cline.autoImportSettingsPath` + mencetak langkah-langkah UI (kompatibel dengan OpenAI, URL Dasar **dengan** `/v1`)        |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — penyedia `openai-compat`, `base_url` **dengan** `/v1`, kunci melalui `$OMNIROUTE_API_KEY`                                                                              |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **tanpa** `/v1` + `GOOSE_MODEL`) + panduan env                                                                                 |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **tanpa** `/v1` + `model: openai/<id>`) + panduan env (`aider --message --yes`)                                                                                |
-| Qwen Code   | `omniroute setup-qwen`     | entri V4 `modelProviders.openai` dalam `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` dalam `~/.qwen/.env`                                                                                             |
+| CLI         | Perintah                   | Yang ditulis                                                                                                                                                                  |
+| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | profil `~/.codex/<name>.config.toml` (per model)                                                                                                                              |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (per model)                                                                                                                         |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — provider openai-compatible `omniroute` dengan setiap model katalog (jalankan `opencode -m omniroute/<model>`)                            |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (mode CLI) + mencetak pengaturan ekstensi VS Code untuk ditempel (OpenAI-compatible, Base URL **tanpa** `/v1`)                     |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + pengaturan VS Code `kilocode.*` — OpenAI-compatible, Base URL **dengan** `/v1`                                                        |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **dengan** `/v1`, kunci lewat `${{ secrets.OMNIROUTE_API_KEY }}`                     |
+| Cursor      | `omniroute setup-cursor`   | mencetak langkah di dalam aplikasi (Settings → Models → Override OpenAI Base URL **dengan** `/v1` + kunci + model). Konfigurasi Cursor adalah SQLite buram — hanya panel chat |
+| Roo Code    | `omniroute setup-roo`      | menulis JSON impor Roo (`~/.omniroute/roo-settings.json`) + mengatur `roo-cline.autoImportSettingsPath` + mencetak langkah UI (OpenAI-compatible, Base URL **dengan** `/v1`)  |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — provider `openai-compat`, `base_url` **dengan** `/v1`, kunci lewat `$OMNIROUTE_API_KEY`                                                        |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **dengan** `/v1`, kunci dibaca Zed dari `$OMNIROUTE_API_KEY` (tidak pernah ditulis)  |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **tanpa** `/v1` + `GOOSE_MODEL`) + resep env                                                           |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **tanpa** `/v1` + `model: openai/<id>`) + resep env (`aider --message --yes`)                                                          |
+| Qwen Code   | `omniroute setup-qwen`     | entri `modelProviders.openai` V4 di `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` di `~/.qwen/.env`                                                                           |
 
 ```bash
-# OpenCode (penyedia kompatibel dengan OpenAI, semua model katalog, VPS jarak jauh)
+# OpenCode (provider openai-compatible, semua model katalog, VPS jarak jauh)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # pertahankan hanya model yang cocok
+omniroute setup-opencode --only glm,kimi        # hanya simpan model yang cocok
 opencode -m omniroute/glm/glm-5.2 "..."          # ekspor OMNIROUTE_API_KEY terlebih dahulu
 ```
 
-> OpenCode juga memiliki integrasi **plugin** yang lebih lengkap: `omniroute setup opencode`
-> (kini mendukung jarak jauh melalui `--remote`) menginstal `@omniroute/opencode-plugin`.
-> `setup-opencode` adalah alternatif ringan yang kompatibel dengan OpenAI. Kunci API
-> direferensikan melalui `{env:OMNIROUTE_API_KEY}` — tidak pernah ditulis ke disk.
+> OpenCode juga memiliki integrasi **plugin** yang lebih kaya: `omniroute setup opencode` (kini mengenali jarak jauh melalui `--remote`) memasang `@omniroute/opencode-plugin`.
+> `setup-opencode` adalah alternatif yang ringan dan kompatibel dengan openai. Kunci API dirujuk melalui `{env:OMNIROUTE_API_KEY}` — tidak pernah ditulis ke disk.
 >
-> Di OpenCode v2, gunakan `@omniroute/opencode-plugin-v2` sebagai gantinya: katalog yang sama,
-> kontrak pemuat yang berbeda. Plugin ini membaca kunci dari penyimpanan kredensial milik
-> OpenCode ketika integrasi terhubung, sehingga gateway jarak jauh sama sekali tidak memerlukan
-> kunci dalam `opencode.json`.
+> Pada OpenCode v2, gunakan `@omniroute/opencode-plugin-v2` sebagai gantinya: katalog yang sama, kontrak loader yang berbeda. Plugin ini membaca kunci dari penyimpanan kredensial OpenCode sendiri ketika integrasi terhubung, sehingga gateway jarak jauh sama sekali tidak memerlukan kunci di `opencode.json`.
 
 ---
 
-## Mengelola konteks (beralih antarserver)
+## Mengelola konteks (beralih antar server)
 
-**Konteks** adalah server yang disimpan (baseUrl + kredensial + cakupan). `omniroute connect`
-membuat konteks dan menjadikannya aktif; sejak saat itu, setiap perintah menargetkannya. Kelola dan
-beralih antar-konteks dengan `omniroute contexts`:
+Sebuah **konteks** adalah server yang tersimpan (baseUrl + kredensial + scope). `omniroute connect` membuat satu dan menjadikannya aktif; setelah itu setiap perintah akan menargetkannya. Kelola dan beralih di antara konteks-konteks tersebut dengan `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # semua konteks; konteks aktif ditandai dengan ●
-omniroute contexts current         # server aktif, status autentikasi, cakupan
+omniroute contexts list            # semua konteks; yang aktif ditandai ●
+omniroute contexts current         # server aktif, status otentikasi, scope
 ```
 
 ```text
-  | Nama    | URL Dasar                  | Autentikasi | Cakupan | Deskripsi
-● | vps     | http://100.67.86.91:20128 | token       | admin   | OmniRoute Jarak Jauh (…)
-  | default | http://localhost:20128    | ✗           |         |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
 **Beralih server** — setiap perintah berikutnya mengikuti konteks aktif:
 
 ```bash
-omniroute contexts use vps         # → semua perintah kini mengakses VPS jarak jauh
-omniroute tokens list              #   (dijalankan terhadap VPS)
+omniroute contexts use vps         # → semua perintah sekarang mengenai VPS jarak jauh
+omniroute tokens list              #   (berjalan melawan VPS)
 
 omniroute contexts use default     # → kembali ke localhost
-omniroute tokens list              #   (dijalankan terhadap server lokal)
+omniroute tokens list              #   (berjalan melawan server lokal)
 ```
 
-**Tambahkan konteks secara manual** (alih-alih menggunakan `connect`), periksa, atau ganti namanya:
+**Tambahkan konteks secara manual** (bukan dengan `connect`), periksa, atau ganti nama:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
@@ -382,31 +364,24 @@ omniroute contexts show staging    # detail lengkap untuk satu konteks
 omniroute contexts rename staging stg
 ```
 
-**Hapus konteks** — meminta konfirmasi; berikan `--yes` untuk melewatinya
-(diperlukan untuk skrip / shell noninteraktif, yang jika tidak diberikan akan menolak secara aman):
+**Hapus konteks** — akan meminta konfirmasi; gunakan `--yes` untuk melewatinya (diperlukan untuk skrip / shell non-interaktif, yang jika tidak akan menolak dengan aman):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> `default` (localhost) tidak dapat dihapus. Menghapus konteks aktif akan kembali
-> ke `default`. Kiat: menghapus konteks hanya menghapus kredensial **lokal** yang tersimpan —
-> cabut token di server dengan `omniroute tokens revoke <id>` untuk benar-benar
-> memutus akses.
+> `default` (localhost) tidak dapat dihapus. Menghapus konteks aktif akan kembali ke `default`. Tips: menghapus konteks hanya akan menghapus kredensial tersimpan **lokal** — cabut token di server dengan `omniroute tokens revoke <id>` untuk benar-benar menghentikan akses.
 
-**Ekspor / impor** konteks (misalnya untuk memindahkannya antarmesin). Konteks baru hanya menyimpan
-referensi keychain; kredensial tidak disalin ke dalam ekspor jika keychain OS
-tersedia:
+**Ekspor / impor** konteks (misalnya untuk memindahkannya antar mesin). Ekspor secara default menghilangkan kredensial, termasuk kredensial yang disimpan oleh fallback file. Gunakan `--include-secrets` secara eksplisit saat diperlukan cadangan yang berisi kredensial portabel:
 
 ```bash
-omniroute contexts export --out contexts.json     # bawaan: stdout
-omniroute contexts import contexts.json            # timpa; gunakan --merge untuk mempertahankan yang sudah ada
+omniroute contexts export --out contexts.json     # disunting; tujuan default: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # timpa; --merge untuk mempertahankan yang sudah ada
 omniroute contexts migrate --yes                  # pindahkan token plaintext lama ke keychain
 ```
 
-Pada sistem headless tanpa keychain OS yang dapat digunakan, CLI akan beralih ke
-`config.json` dengan mode `0600` dan menampilkan peringatan satu kali. Perlakukan hasil ekspor dari
-mekanisme cadangan tersebut (dan konfigurasi lama sebelum migrasi) sebagai materi rahasia.
+`--include-secrets` menyelesaikan referensi keychain sebelum mengekspor dan akan gagal jika kredensial yang direferensikan tidak dapat dibaca. `--no-secrets` selalu diutamakan. File ekspor ditulis secara atomik dengan mode `0600`. Perlakukan ekspor yang secara eksplisit berisi rahasia sebagai materi rahasia. Pada sistem headless tanpa keychain OS yang dapat digunakan, CLI akan kembali menggunakan `config.json` dengan mode `0600` dan mencetak peringatan satu kali; ekspor default tetap disunting dalam mode ini.
 
 ---
 

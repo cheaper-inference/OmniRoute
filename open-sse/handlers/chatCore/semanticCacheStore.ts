@@ -57,10 +57,13 @@ export function storeSemanticCacheResponse(
     apiKeyId?: string;
     usage?: UsageLike;
     log?: LoggerLike;
+    videoTranscriptSensitive?: boolean;
   },
   deps: SemanticCacheStoreDeps = DEFAULT_DEPS
 ): void {
   if (
+    args.provider === "muse-code" ||
+    args.videoTranscriptSensitive ||
     !args.enabled ||
     !deps.isCacheableForWrite(args.body, args.headers) ||
     (deps.isTruncatedCompletion ?? defaultIsTruncatedCompletion)(args.translatedResponse) ||

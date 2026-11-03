@@ -1,3 +1,4 @@
+import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
 import type { getProviderCredentials } from "@/sse/services/auth.ts";
 import type { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
@@ -9,13 +10,21 @@ import type {
 } from "../../services/accountFallback.ts";
 import { createErrorResult } from "../../utils/error.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
+import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 import { recoverAnthropicThinkingSignature } from "./thinkingSignatureRecovery.ts";
 import {
+  isAnthropicThinkingSignatureError,
+  isAnthropicThinkingModifiedError,
+} from "./passthroughHelpers.ts";
+import {
   isModelUnavailableError,
-  getNextFamilyFallback as defaultGetNextFamilyFallback,
+  getNextEligibleFamilyFallback,
+  isFamilyFallbackEligible,
 } from "../../services/modelFamilyFallback.ts";
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
+import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
+import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -23,6 +32,7 @@ export interface ChatCoreExecutorResult {
   headers: Record<string, string>;
   transformedBody: unknown;
   transport?: string;
+  upstreamDiagnostic?: Record<string, unknown>;
   _executionCredentials?: Record<string, unknown>;
   _accountSemaphoreRelease?: () => void;
 }
@@ -40,6 +50,7 @@ export type ProviderExecutionOutcome =
       url: string;
       headers: Record<string, string>;
       transformedBody: unknown;
+      upstreamDiagnostic?: Record<string, unknown>;
       model: string;
       connectionId: string;
     }
@@ -47,6 +58,7 @@ export type ProviderExecutionOutcome =
       kind: "error";
       result: ChatCoreErrorResult;
       providerUsage: ProviderLegUsage | null;
+      upstreamDiagnostic?: Record<string, unknown>;
       model: string;
       connectionId: string;
     };
@@ -67,6 +79,12 @@ export interface PipelineConnectionContext {
   onCredentialsRefreshed: (next: Record<string, unknown>) => void | Promise<void>;
   assertManagedLeaseFence: (connectionId: string) => void;
   getProviderCredentials: typeof getProviderCredentials;
+  /**
+   * Connection allowlist the request was routed under (API key allowlist ∩ combo
+   * step allowlist ∩ quota pool). Account rotation must stay inside it; null means
+   * the request carried no constraint.
+   */
+  allowedConnections?: string[] | null;
   refreshCredentials?: (
     credentials: Record<string, unknown>
   ) => Promise<Record<string, unknown> | null>;
@@ -116,11 +134,21 @@ export interface ProviderExecutionPipelineInput {
   wire: PipelineWireState;
   state: PipelineStateHooks;
   sendProviderAttempt: (model: string, allowDedup: boolean) => Promise<ChatCoreExecutorResult>;
+  getLastOutboundBody?: (attempt: ChatCoreExecutorResult) => unknown;
+  onSignatureFailure?: (failure: {
+    status: number;
+    message: string;
+    outboundBody: unknown;
+    outboundBodyCaptured: boolean;
+    model: string;
+    recoveryAttempted: boolean;
+    recoverySucceeded: boolean;
+  }) => void;
   getNextFamilyFallback?: (
     currentModel: string,
     triedModels: Set<string>,
     providerHint?: string | null
-  ) => string | null;
+  ) => string | null | Promise<string | null>;
 }
 
 const LEASE_MISMATCH_STATUS = 409;
@@ -162,22 +190,29 @@ async function recordUpstreamRateLimit(
   connectionId: string,
   model: string,
   attempt: ChatCoreExecutorResult
-): Promise<void> {
-  if (!connectionId) return;
+): Promise<boolean> {
+  if (!connectionId) return false;
   const status = attempt.response.status;
   try {
     state.recordRateLimitHeaders(provider, connectionId, attempt.response.headers, status, model);
   } catch {
     // best-effort
   }
+  let capacity429 = false;
   try {
     const text = await attempt.response.clone().text();
+    capacity429 =
+      provider === "codex" && isTransientCodexCapacity429(status, text, attempt.response.headers);
     // parseRetryAfterFromBody JSON.parses a string and falls back to "unknown"
     // on non-JSON, so the raw text is the safest thing to hand over.
-    if (text) state.recordRateLimitBody(provider, connectionId, text, status, model);
+    // Do not turn one Codex model-capacity response into a shared quota pause.
+    if (text && !capacity429) {
+      state.recordRateLimitBody(provider, connectionId, text, status, model);
+    }
   } catch {
     // Body already consumed/unreadable — the header signal above still applied.
   }
+  return capacity429;
 }
 
 function leaseMismatch(model: string, connectionId: string): ProviderExecutionOutcome {
@@ -230,6 +265,7 @@ async function toOutcome(
       url: attempt.url,
       headers: attempt.headers,
       transformedBody: attempt.transformedBody,
+      upstreamDiagnostic: attempt.upstreamDiagnostic,
       model,
       connectionId,
     };
@@ -279,11 +315,12 @@ async function toOutcome(
       error: result.error,
       errorCode: result.errorCode,
       errorType: result.errorType,
-      rawMessage: message,
+      rawMessage: appendGoogleDailyQuotaViolation(message, body),
       upstreamErrorBody: body,
       upstreamHeaders: attempt.response.headers,
     },
     providerUsage: null,
+    upstreamDiagnostic: attempt.upstreamDiagnostic,
     model,
     connectionId,
   };
@@ -316,6 +353,7 @@ export async function runProviderExecutionPipeline(
 ): Promise<ProviderExecutionOutcome> {
   const { policy, target, connection, wire, state, sendProviderAttempt } = input;
   const maxAttempts = maxAttemptsFor(target.provider);
+  const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
   let attempts = 0;
   let lastAttempt: ChatCoreExecutorResult | null = null;
@@ -323,7 +361,29 @@ export async function runProviderExecutionPipeline(
   let authRefreshPending = false;
   let authRefreshed = false;
   let modelFallbackPending = false;
-  const resolveFamilyFallback = input.getNextFamilyFallback ?? defaultGetNextFamilyFallback;
+  const resolveFamilyFallback = async (
+    currentModel: string,
+    triedModels: Set<string>,
+    providerHint?: string | null
+  ) => {
+    const connectionId = currentConnectionId(connection);
+    if (!input.getNextFamilyFallback) {
+      return getNextEligibleFamilyFallback(
+        currentModel,
+        triedModels,
+        providerHint ?? target.provider,
+        connectionId
+      );
+    }
+
+    const excluded = new Set(triedModels);
+    while (true) {
+      const candidate = await input.getNextFamilyFallback(currentModel, excluded, providerHint);
+      if (!candidate || excluded.has(candidate)) return null;
+      if (isFamilyFallbackEligible(candidate, target.provider, connectionId)) return candidate;
+      excluded.add(candidate);
+    }
+  };
 
   while (
     attempts < maxAttempts ||
@@ -358,7 +418,7 @@ export async function runProviderExecutionPipeline(
     // updateFromHeaders/updateFromResponseBody pair only runs on the streaming
     // leg — the non-streaming leg returns this pipeline's error outcome straight
     // to the caller, so without this the reservoir was never drained (#12945).
-    await recordUpstreamRateLimit(
+    const codexCapacity429 = await recordUpstreamRateLimit(
       state,
       target.provider,
       currentConnectionId(connection),
@@ -379,16 +439,18 @@ export async function runProviderExecutionPipeline(
       const retryAfterMs = retryAfterMsFrom(attempt);
       if (failedId && !excludedIds.includes(failedId)) excludedIds.push(failedId);
       if (failedId) {
-        await state.onCodexScopeRateLimited?.({
-          failedConnectionId: failedId,
-          model: wire.currentModel || target.requestedModel || null,
-          rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
-          credentials: connection.getCredentials(),
-        });
+        if (!codexCapacity429) {
+          await state.onCodexScopeRateLimited?.({
+            failedConnectionId: failedId,
+            model: wire.currentModel || target.requestedModel || null,
+            rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
+            credentials: connection.getCredentials(),
+          });
+        }
         await state.onClearSessionAffinity?.({ failedConnectionId: failedId });
       }
       const nextCreds = await connection
-        .getProviderCredentials("codex", null, null, wire.currentModel, {
+        .getProviderCredentials("codex", null, allowedConnections, wire.currentModel, {
           excludeConnectionIds: [...excludedIds],
         })
         .catch(() => null);
@@ -423,7 +485,7 @@ export async function runProviderExecutionPipeline(
           );
         }
         const nextCreds = await connection
-          .getProviderCredentials("antigravity", null, null, wire.currentModel, {
+          .getProviderCredentials("antigravity", null, allowedConnections, wire.currentModel, {
             excludeConnectionIds: [...excludedIds],
           })
           .catch(() => null);
@@ -438,8 +500,10 @@ export async function runProviderExecutionPipeline(
     if (
       !authRefreshed &&
       (status === 401 || status === 403) &&
-      typeof connection.refreshCredentials === "function"
+      typeof connection.refreshCredentials === "function" &&
+      !(await shouldSkipCredentialRefresh(target.provider, attempt.response))
     ) {
+      if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
       const refreshed = await connection.refreshCredentials(connection.getCredentials());
       if (refreshed && (refreshed.accessToken || refreshed.copilotToken)) {
         connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
@@ -462,35 +526,87 @@ export async function runProviderExecutionPipeline(
       } catch {
         // keep statusText
       }
-      const signatureRecovery = await recoverAnthropicThinkingSignature({
-        provider: target.provider,
-        statusCode: status,
-        message: signatureMessage,
-        body: wire.body,
-        execute: async (recoveryBody) => {
-          if (recoveryBody && typeof recoveryBody === "object" && !Array.isArray(recoveryBody)) {
-            wire.setBodyAndModel(recoveryBody as Record<string, unknown>, wire.currentModel);
-          }
-          return sendProviderAttempt(wire.currentModel, false);
-        },
-        parseError: async (response) => {
-          let message = response.statusText || "upstream error";
-          let responseBody: unknown = null;
-          try {
-            responseBody = JSON.parse(await response.clone().text());
-            const err = (responseBody as { error?: { message?: unknown } } | null)?.error;
-            if (typeof err?.message === "string" && err.message) message = err.message;
-          } catch {
-            // keep statusText
-          }
-          return {
-            statusCode: response.status,
-            message,
-            retryAfterMs: null,
-            responseBody,
-          };
-        },
-      });
+      // Snapshot the first failed wire body before recovery sends a second request.
+      // The caller receives it only for the two thinking-block validation 400s
+      // recoverAnthropicThinkingSignature understands (signature rejection, #17324
+      // "cannot be modified").
+      const signatureFailure =
+        isAnthropicThinkingSignatureError({
+          provider: target.provider,
+          model: wire.currentModel,
+          status,
+          message: signatureMessage,
+        }) ||
+        isAnthropicThinkingModifiedError({
+          provider: target.provider,
+          status,
+          message: signatureMessage,
+        });
+      const capturedOutboundBody = signatureFailure
+        ? input.getLastOutboundBody?.(attempt)
+        : undefined;
+      const failedOutboundBody = capturedOutboundBody ?? attempt.transformedBody;
+      const outboundBodyCaptured = capturedOutboundBody !== undefined;
+      const failedModel = wire.currentModel;
+      let recoveryDispatchStarted = false;
+      let signatureRecovery;
+      try {
+        signatureRecovery = await recoverAnthropicThinkingSignature({
+          provider: target.provider,
+          model: wire.currentModel,
+          statusCode: status,
+          message: signatureMessage,
+          body: wire.body,
+          execute: async (recoveryBody) => {
+            recoveryDispatchStarted = true;
+            if (recoveryBody && typeof recoveryBody === "object" && !Array.isArray(recoveryBody)) {
+              wire.setBodyAndModel(recoveryBody as Record<string, unknown>, wire.currentModel);
+            }
+            return sendProviderAttempt(wire.currentModel, false);
+          },
+          parseError: async (response) => {
+            let message = response.statusText || "upstream error";
+            let responseBody: unknown = null;
+            try {
+              responseBody = JSON.parse(await response.clone().text());
+              const err = (responseBody as { error?: { message?: unknown } } | null)?.error;
+              if (typeof err?.message === "string" && err.message) message = err.message;
+            } catch {
+              // keep statusText
+            }
+            return {
+              statusCode: response.status,
+              message,
+              retryAfterMs: null,
+              responseBody,
+            };
+          },
+        });
+      } catch (error) {
+        if (signatureFailure) {
+          input.onSignatureFailure?.({
+            status,
+            message: signatureMessage,
+            outboundBody: failedOutboundBody,
+            outboundBodyCaptured,
+            model: failedModel,
+            recoveryAttempted: recoveryDispatchStarted,
+            recoverySucceeded: false,
+          });
+        }
+        throw error;
+      }
+      if (signatureFailure) {
+        input.onSignatureFailure?.({
+          status,
+          message: signatureMessage,
+          outboundBody: failedOutboundBody,
+          outboundBodyCaptured,
+          model: failedModel,
+          recoveryAttempted: signatureRecovery.attempted,
+          recoverySucceeded: signatureRecovery.succeeded,
+        });
+      }
       if (
         signatureRecovery.attempted &&
         signatureRecovery.succeeded &&
@@ -502,6 +618,7 @@ export async function runProviderExecutionPipeline(
           headers:
             (signatureRecovery.execution.headers as Record<string, string>) ?? attempt.headers,
           transformedBody: signatureRecovery.execution.transformedBody ?? attempt.transformedBody,
+          upstreamDiagnostic: signatureRecovery.execution.upstreamDiagnostic,
         };
         return toOutcome(
           lastAttempt,
@@ -525,13 +642,16 @@ export async function runProviderExecutionPipeline(
         // keep statusText
       }
       if (isModelUnavailableError(status, fallbackMessage, target.provider)) {
-        const nextModel = resolveFamilyFallback(
+        const nextModel = await resolveFamilyFallback(
           wire.currentModel,
           wire.triedModels,
           target.provider
         );
         if (nextModel) {
-          wire.setBodyAndModel({ ...wire.body, model: nextModel }, nextModel);
+          wire.body = { ...wire.body, model: nextModel };
+          wire.currentModel = nextModel;
+          wire.triedModels.add(nextModel);
+          wire.setBodyAndModel(wire.body, nextModel);
           modelFallbackPending = true;
           continue;
         }

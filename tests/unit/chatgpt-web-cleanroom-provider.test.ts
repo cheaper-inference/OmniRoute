@@ -6,6 +6,7 @@ import { ChatGptWebExecutor } from "../../open-sse/executors/chatgpt-web.ts";
 import { REGISTRY, getRegistryEntry } from "../../open-sse/config/providerRegistry.ts";
 import { hasSpecializedExecutor } from "../../open-sse/executors/index.ts";
 import { validateChatGptWebProvider } from "../../src/lib/providers/validation/chatgptWeb.ts";
+import { chatGptWebStorageStateFromCookieHeader } from "../../open-sse/utils/chatgptWebExecutorAdapter.ts";
 import { validateWebCookieProvider } from "../../src/lib/providers/validation/webCookie.ts";
 import { AI_PROVIDERS, WEB_COOKIE_PROVIDERS } from "../../src/shared/constants/providers.ts";
 import {
@@ -14,6 +15,9 @@ import {
 } from "../../src/shared/constants/chatgptWebRetirement.ts";
 
 const MODEL_IDS = [
+  "gpt-6",
+  "gpt-6-thinking",
+  "gpt-6-pro",
   "gpt-5-6",
   "gpt-5-6-thinking",
   "gpt-5-6-pro",
@@ -32,7 +36,13 @@ test("registers only the clean-room ChatGPT Web routes observed in the first-par
   );
   assert.equal(REGISTRY["chatgpt-web"], chatgpt_webProvider);
   assert.equal(getRegistryEntry("chatgpt-web"), chatgpt_webProvider);
-  assert.equal(WEB_COOKIE_PROVIDERS["chatgpt-web"].toolCalling, "none");
+  // #14948 intentionally changes this contract: client tools are now emulated via
+  // the `<tool>` envelope, and the catalog capability must match the registry.
+  assert.equal(WEB_COOKIE_PROVIDERS["chatgpt-web"].toolCalling, "emulated");
+  assert.equal(
+    chatgpt_webProvider.models.every((model) => model.toolCalling === true),
+    true
+  );
   assert.equal(AI_PROVIDERS["chatgpt-web"].id, "chatgpt-web");
   assert.equal(hasSpecializedExecutor("chatgpt-web"), true);
 });
@@ -90,6 +100,31 @@ test("validates encrypted-at-rest storage-state input without echoing secrets", 
   });
   assert.equal(invalid.valid, false);
   assert.equal(JSON.stringify(invalid).includes("do-not-echo"), false);
+});
+
+test("accepts a ChatGPT Cookie header and normalizes it to storage-state JSON", async () => {
+  const cookieHeader =
+    "__Secure-next-auth.session-token=session-value; cf_clearance=clearance-value";
+  const result = await validateChatGptWebProvider({ apiKey: cookieHeader });
+  const state = chatGptWebStorageStateFromCookieHeader(cookieHeader);
+
+  assert.deepEqual(result, { valid: true, error: null, unsupported: false });
+  assert.deepEqual(
+    state.cookies.map(({ name, value, domain }) => ({ name, value, domain })),
+    [
+      {
+        name: "__Secure-next-auth.session-token",
+        value: "session-value",
+        domain: ".chatgpt.com",
+      },
+      { name: "cf_clearance", value: "clearance-value", domain: ".chatgpt.com" },
+    ]
+  );
+  assert.deepEqual(state.origins, []);
+  assert.throws(() => chatGptWebStorageStateFromCookieHeader("other=value"));
+  assert.throws(() =>
+    chatGptWebStorageStateFromCookieHeader("__Secure-next-auth.session-token=x; malformed")
+  );
 });
 
 test("specialized executor delegates to the clean-room browser adapter", async () => {

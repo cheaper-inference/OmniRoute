@@ -1,5 +1,6 @@
 import { getProviderCredentials } from "@/sse/services/auth";
-import { recordCost } from "@/domain/costRules";
+import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
+import { recordSearchUsageCost } from "@omniroute/open-sse/handlers/search/reportedCost.ts";
 import * as defaultLog from "@/sse/utils/logger";
 import {
   getAllSearchProviders,
@@ -63,10 +64,10 @@ export class WebSearchExecutionError extends Error {
 
 async function resolveSearchCredentials(providerId: string) {
   const creds = await getProviderCredentials(providerId).catch(() => null);
-  if (creds) return creds;
+  if (creds && !isCredentialDiagnosticSentinel(creds)) return creds;
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
     const fallback = await getProviderCredentials(fallbackId).catch(() => null);
-    if (fallback) return fallback;
+    if (fallback && !isCredentialDiagnosticSentinel(fallback)) return fallback;
   }
   return null;
 }
@@ -297,11 +298,15 @@ export async function executeWebSearch(
     return result.data;
   });
 
-  if (!cached && input.apiKeyId && input.apiKeyId !== "local" && data.usage?.search_cost_usd > 0) {
+  if (!cached) {
     try {
-      recordCost(input.apiKeyId, data.usage.search_cost_usd);
-    } catch (error: any) {
-      log.warn("SEARCH", `Cost recording failed: ${error?.message || String(error)}`);
+      const apiKeyId = input.apiKeyId === "local" ? null : input.apiKeyId;
+      recordSearchUsageCost(apiKeyId, data.provider, data.usage);
+    } catch (error: unknown) {
+      log.warn(
+        "SEARCH",
+        `Cost recording failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

@@ -1,6 +1,6 @@
 # Remote Mode (Magyar)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -214,168 +214,147 @@ nem jelenik meg.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ a titkos értéket EGYSZER írja ki — másolja ki most
+#   ↳ egyszer írja ki a titkot — másolja ki most
 omniroute tokens list                 # maszkolva: azonosító, név, hatókör, előtag, állapot, lejárat
 omniroute tokens revoke <id|prefix>   # azonnali visszavonás
-omniroute tokens scopes               # a három hatókör ismertetése
+omniroute tokens scopes               # a három hatókör magyarázata
 ```
 
-A `tokens` parancsokhoz **admin** hitelesítő adat szükséges. A tokeneket
-az irányítópult **Settings → Access Tokens** részében is kezelheti (létrehozás, visszavonás, egyszeri másolás).
+A `tokens` parancsokhoz **admin** hitelesítő adat szükséges. A tokeneket az irányítópulton is kezelheti a **Beállítások → Hozzáférési tokenek** menüpontban (létrehozás, visszavonás, egyszeri másolás).
+
+Egy token soha nem kaphat több jogosultságot, mint a létrehozója. `admin` tokent csak az operátor hozhat létre: az irányítópult-munkamenet, a szerveren futó helyi CLI, vagy az `omniroute connect` jelszóval. A gépi hitelesítő adatok (`admin` hozzáférési token, vagy `manage`/`admin` hatókörű API-kulcs) csak `write` és `read` tokeneket hozhatnak létre; ha `--scope admin` hatókört kérnek, `403`-at kapnak. A bejelentkezés kikapcsolása nem nyitja meg a létrehozást: bármilyen hatókörű hozzáférési token olyan hitelesítő adat, amelyet a mindig hitelesített útvonalak elfogadnak, így egy névtelen hívás bármilyen hatókörnél `401`-et kap.
 
 ---
 
-## Kódolási CLI konfigurálása a távoli katalógusból
+## Kódoló CLI konfigurálása a távoli katalógusból
 
-Az `omniroute configure` beolvassa az **aktív szerver** élő modellkatalógusát, és konfigurációt ír
-az **Ön** gépére.
+Az `omniroute configure` az **aktív szerver** élő modellkatalógusát olvassa, és konfigurációt ír a **saját** gépére.
 
 ```bash
 omniroute configure codex
-#   Providers: glm, kmc, ollamacloud, opencode-go, …
-#   Provider: glm
-#   Model id: glm/glm-5.2
-#   ✔ Létrehozva: ~/.codex/glm52.config.toml
+#   Szolgáltatók: glm, kmc, ollamacloud, opencode-go, …
+#   Szolgáltató: glm
+#   Modellazonosító: glm/glm-5.2
+#   ✔ Megírva: ~/.codex/glm52.config.toml
 #   Használat:  codex --profile glm52
 
 # nem interaktív
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# egy gyakran használt modell megtartása az interaktív választó tetején
+# gyakran használt modell tartása az interaktív választó tetején
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-A választó kizárólag modellazonosítókat (URL-eket vagy hitelesítő adatokat soha) tárol a helyi
-`model-preferences.json` fájlban, kontextus és CLI-cél szerint elkülönítve. A kedvencek
-a legutóbbi választások előtt jelennek meg; a `--unfavorite` használatával távolíthat el egy kiválasztott modellt
-az adott kontextus-/céllistából.
+A választó csak modellazonosítókat tart meg (soha URL-t vagy hitelesítő adatot) a helyi `model-preferences.json` fájlban, kontextus és CLI-cél szerint elkülönítve. A kedvencek a legutóbbi választások elé kerülnek. A `--unfavorite` kapcsolóval eltávolítható a kiválasztott modell az adott kontextus/cél listájáról.
 
-A létrehozott profil környezeti változóval hivatkozik a következtetési kulcsra
-(`OMNIROUTE_API_KEY`) — a titkos érték soha nem kerül lemezre. A Codex egyszeri
-alapbeállításával (a `[model_providers.omniroute]` blokkal) kapcsolatban lásd:
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+A megírt profil a következtetési kulcsra környezeti változóval (`OMNIROUTE_API_KEY`) hivatkozik — a titkos kulcs soha nem kerül lemezre. Az egyszeri alapvető Codex-beállításhoz (a `[model_providers.omniroute]` blokk) lásd: [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### CLI indítása a távoli példányhoz (konfiguráció írása nélkül)
+### CLI indítása a távoli szerveren (nem ír konfigurációt)
 
-Az `omniroute run <target>` szintén figyelembe veszi az aktív kontextust: a távoli alap-URL
-és a kontextus hitelesítő adatai csak az elindított folyamatba kerülnek be.
+Az `omniroute run <target>` is tiszteletben tartja az aktív kontextust: a távoli alap-URL és a kontextus hitelesítő adata csak az elindított folyamatba kerül.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → távoli példány
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → távoli
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Annak pontos előnézete, hogy mi indulna el (csak a környezeti változók KULCSNEVEI, az értékek soha):
+# Pontos előnézet arról, mi indulna el (csak környezeti változó NEVEK, soha az értékek):
 omniroute run codex --dry-run --json
 ```
 
-Célok: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(egyetlen forrás: `bin/cli/cli-manifest.mjs`). A Qwen és a Gemini ideiglenes,
-elkülönített kezdőkönyvtárral fut, amely kilépéskor törlődik, így az indítás soha nem módosítja —
-és nem is szivárogtatja ki — a személyes eszközkonfigurációját.
+Célok: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (egyetlen forrás: `bin/cli/cli-manifest.mjs`). A Qwen és a Gemini ideiglenes, elkülönített kezdőkönyvtárral fut, amely kilépéskor törlődik, így az indítás soha nem érinti — és nem szivárog bele — a személyes eszközkonfigurációba.
 
-### CLI-nkénti beállítási parancsok
+### CLI-nkénti beállítóparancsok
 
-Minden támogatott CLI rendelkezik távoli környezetet kezelő beállítási paranccsal (mindegyik figyelembe veszi az aktív
-kontextust, illetve a `--remote <url> --api-key <key>` beállítást):
+Minden támogatott CLI-hez van távoli szervert ismerő beállítóparancs (mindegyik tiszteletben tartja az aktív kontextust, vagy a `--remote <url> --api-key <key>` megadást):
 
-| CLI         | Parancs                    | Amit ír                                                                                                                                                                                                |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profilok (modellenként)                                                                                                                                                  |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (modellenként)                                                                                                                                               |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — az `omniroute` OpenAI-kompatibilis szolgáltató az összes katalógusmodellel (futtatás: `opencode -m omniroute/<model>`)                                            |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI mód) + kiírja a beillesztendő VS Code-bővítménybeállításokat (OpenAI-kompatibilis, alap-URL `/v1` **nélkül**)                                          |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` beállítások — OpenAI-kompatibilis, alap-URL `/v1` **értékkel**                                                                            |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` `/v1` **értékkel**, kulcs a `${{ secrets.OMNIROUTE_API_KEY }}` használatával                                  |
-| Cursor      | `omniroute setup-cursor`   | kiírja az alkalmazáson belüli lépéseket (Settings → Models → Override OpenAI Base URL `/v1` **értékkel** + kulcs + modell). A Cursor konfigurációja átlátszatlan SQLite — csak a csevegőpanel          |
-| Roo Code    | `omniroute setup-roo`      | Roo-importálási JSON-t ír (`~/.omniroute/roo-settings.json`) + beállítja a `roo-cline.autoImportSettingsPath` értékét + kiírja a felületi lépéseket (OpenAI-kompatibilis, alap-URL `/v1` **értékkel**) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` szolgáltató, `base_url` `/v1` **értékkel**, kulcs a `$OMNIROUTE_API_KEY` használatával                                                                  |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` `/v1` **nélkül** + `GOOSE_MODEL`) + környezetbeállítási recept                                                                  |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` `/v1` **nélkül** + `model: openai/<id>`) + környezetbeállítási recept (`aider --message --yes`)                                                                 |
-| Qwen Code   | `omniroute setup-qwen`     | V4-es `modelProviders.openai` bejegyzés a `~/.qwen/settings.json` fájlban + `OMNIROUTE_API_KEY` a `~/.qwen/.env` fájlban                                                                               |
+| CLI         | Parancs                    | Mit ír                                                                                                                                                                                                   |
+| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profilok (modellenként)                                                                                                                                                    |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (modellenként)                                                                                                                                                 |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — az `omniroute` openai-kompatibilis szolgáltató az összes katalógusmodellel (futtatás: `opencode -m omniroute/<model>`)                                              |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI mód) + kiírja a beillesztendő VS Code bővítmény-beállításokat (OpenAI-kompatibilis, alap-URL **`/v1` végződés nélkül**)                                  |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` beállítások — OpenAI-kompatibilis, alap-URL **`/v1` végződéssel**                                                                           |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **`/v1` végződéssel**, a kulcs `${{ secrets.OMNIROUTE_API_KEY }}` hivatkozással                                 |
+| Cursor      | `omniroute setup-cursor`   | kiírja az alkalmazáson belüli lépéseket (Beállítások → Modellek → OpenAI Base URL felülírása **`/v1` végződéssel** + kulcs + modell). A Cursor konfigurációja átlátszatlan SQLite — csak a csevegőpanel  |
+| Roo Code    | `omniroute setup-roo`      | Roo importáló JSON-t ír (`~/.omniroute/roo-settings.json`), beállítja a `roo-cline.autoImportSettingsPath` értéket, és kiírja a felületi lépéseket (OpenAI-kompatibilis, alap-URL **`/v1` végződéssel**) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` szolgáltató, `base_url` **`/v1` végződéssel**, a kulcs `$OMNIROUTE_API_KEY` változóból                                                                    |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **`/v1` végződéssel**, a kulcsot a Zed olvassa a `$OMNIROUTE_API_KEY` változóból (soha nem íródik ki)           |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **`/v1` végződés nélkül** + `GOOSE_MODEL`) + környezeti recept                                                                    |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **`/v1` végződés nélkül** + `model: openai/<id>`) + környezeti recept (`aider --message --yes`)                                                                   |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` bejegyzés + `OMNIROUTE_API_KEY` a `~/.qwen/.env` fájlban                                                                                              |
 
 ```bash
-# OpenCode (OpenAI-kompatibilis szolgáltató, minden katalógusmodell, távoli VPS)
+# OpenCode (OpenAI-kompatibilis szolgáltató, az összes katalógusmodell, távoli VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # csak az egyező modellek megtartása
+omniroute setup-opencode --only glm,kimi        # csak az egyezőket tartja meg
 opencode -m omniroute/glm/glm-5.2 "..."          # előbb exportálja az OMNIROUTE_API_KEY változót
 ```
 
-> Az OpenCode gazdagabb **bővítményes** integrációval is rendelkezik: `omniroute setup opencode`
-> (mostantól távoli használatot is támogat a `--remote` kapcsolóval), amely telepíti az `@omniroute/opencode-plugin` csomagot.
-> A `setup-opencode` a könnyűsúlyú, OpenAI-kompatibilis alternatíva. Az API-kulcsra
-> a `{env:OMNIROUTE_API_KEY}` hivatkozik — soha nem írja lemezre.
+> Az OpenCode-nak gazdagabb **bővítmény**-integrációja is van: az `omniroute setup opencode` (már ismeri a távoli szervert a `--remote` kapcsolón keresztül) telepíti az `@omniroute/opencode-plugin` csomagot.
 >
-> OpenCode v2 esetén használja helyette az `@omniroute/opencode-plugin-v2` csomagot: ugyanaz a katalógus,
-> eltérő betöltői szerződés. Amikor az integráció csatlakoztatva van, a kulcsot az OpenCode saját hitelesítőadat-tárolójából
-> olvassa be, így egy távoli átjáró esetén egyáltalán nincs szükség kulcsra az
-> `opencode.json` fájlban.
+> A `setup-opencode` a könnyebb, OpenAI-kompatibilis alternatíva. Az API-kulcsra a `{env:OMNIROUTE_API_KEY}` hivatkozik — soha nem kerül lemezre.
+>
+> OpenCode v2 alatt helyette a `@omniroute/opencode-plugin-v2` csomagot használja: ugyanaz a katalógus, eltérő betöltési szerződés. Ha az integráció csatlakoztatva van, a kulcsot az OpenCode saját hitelesítő-tárából olvassa, így a távoli átjárónak egyáltalán nem kell kulcs az `opencode.json` fájlban.
 
 ---
 
-## Kontextusok kezelése (váltás a kiszolgálók között)
+## Kontextusok kezelése (váltás szerverek között)
 
-A **kontextus** egy mentett kiszolgáló (baseUrl + hitelesítő adat + hatókör). Az `omniroute connect`
-létrehoz egyet, és aktívvá teszi; ettől kezdve minden parancs ezt célozza. A kontextusokat az
-`omniroute contexts` paranccsal kezelheti, és válthat közöttük:
+A **kontextus** egy elmentett szerver (baseUrl + hitelesítő adat + hatókör). Az `omniroute connect`
+létrehoz egyet és aktívvá teszi; ettől kezdve minden parancs azt célozza meg. Kezelje és
+váltson közöttük az `omniroute contexts` paranccsal:
 
 ```bash
-omniroute contexts list            # az összes kontextus; az aktívat ● jelöli
-omniroute contexts current         # az aktív kiszolgáló, hitelesítési állapot és hatókör
+omniroute contexts list            # all contexts; the active one is marked ●
+omniroute contexts current         # the active server, auth status, scope
 ```
 
 ```text
-  | Név     | Alap URL                  | Hitelesítés | Hatókör | Leírás
-● | vps     | http://100.67.86.91:20128 | token       | admin   | Távoli OmniRoute (…)
-  | default | http://localhost:20128    | ✗           |         |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Váltás a kiszolgálók között** — minden ezt követő parancs az aktív kontextust használja:
+**Szerverek váltása** — minden további parancs az aktív kontextust követi:
 
 ```bash
-omniroute contexts use vps         # → mostantól minden parancs a távoli VPS-t célozza
-omniroute tokens list              #   (a VPS-en fut)
+omniroute contexts use vps         # → all commands now hit the remote VPS
+omniroute tokens list              #   (runs against the VPS)
 
-omniroute contexts use default     # → vissza a localhosthoz
-omniroute tokens list              #   (a helyi kiszolgálón fut)
+omniroute contexts use default     # → back to localhost
+omniroute tokens list              #   (runs against the local server)
 ```
 
-**Kontextus manuális hozzáadása** (a `connect` helyett), megtekintése vagy átnevezése:
+**Kontextus manuális hozzáadása** (a `connect` helyett), ellenőrzése vagy átnevezése:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
-  --access-token oma_live_xxxx --scope write --description "előkészítési kiszolgáló"
-omniroute contexts show staging    # egy kontextus teljes részletei
+  --access-token oma_live_xxxx --scope write --description "staging box"
+omniroute contexts show staging    # full details for one context
 omniroute contexts rename staging stg
 ```
 
-**Kontextus eltávolítása** — megerősítést kér; ennek kihagyásához adja meg a `--yes` kapcsolót
-(szkriptekhez / nem interaktív parancsértelmezőkhöz szükséges, amelyek enélkül biztonságosan elutasítják a műveletet):
+**Kontextus eltávolítása** — megerősítést kér; a `--yes` paraméterrel kihagyható
+(szükséges scriptek / nem interaktív shell-ek esetén, amelyek egyébként biztonságosan elutasítják):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> A `default` (localhost) nem távolítható el. Az aktív kontextus eltávolításakor a rendszer
-> visszavált a `default` kontextusra. Tipp: egy kontextus eltávolítása csak a **helyileg**
-> mentett hitelesítő adatot törli — a hozzáférés tényleges megszüntetéséhez vonja vissza
-> a tokent a kiszolgálón az `omniroute tokens revoke <id>` paranccsal.
+> A `default` (localhost) nem távolítható el. Az aktív kontextus eltávolítása esetén a rendszer visszavált a `default` kontextusra. Tipp: egy kontextus eltávolítása csak a **helyi** elmentett hitelesítő adatokat törli – a hozzáférés tényleges megszüntetéséhez vonja vissza a tokent a szerveren az `omniroute tokens revoke <id>` paranccsal.
 
-Kontextusok **exportálása / importálása** (például gépek közötti átvitelhez). Az új kontextusok
-csak egy kulcskarika-hivatkozást tárolnak tartósan; ha az operációs rendszer kulcskarikája
-elérhető, a hitelesítő adatok nem kerülnek bele az exportba:
+**Kontextusok exportálása / importálása** (pl. gépek közötti mozgatáshoz). Az exportálás alapértelmezetten kihagyja a hitelesítő adatokat, beleértve a fájl alapú tárolással mentett hitelesítő adatokat is. Használja az `--include-secrets` paramétert explicit módon, ha hordozható, hitelesítő adatokat tartalmazó biztonsági mentésre van szükség:
 
 ```bash
-omniroute contexts export --out contexts.json     # alapértelmezés: stdout
-omniroute contexts import contexts.json            # felülírás; a meglévők megtartásához: --merge
-omniroute contexts migrate --yes                  # régi egyszerű szöveges tokenek áthelyezése a kulcskarikába
+omniroute contexts export --out contexts.json     # redacted; default destination: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # overwrite; --merge to keep existing
+omniroute contexts migrate --yes                  # move legacy plaintext tokens to keychain
 ```
 
-Használható operációsrendszer-kulcskarika nélküli, grafikus felület nélküli rendszereken a CLI
-a `0600` móddal rendelkező `config.json` fájlra áll vissza, és egyszeri figyelmeztetést jelenít
-meg. Az ebből a tartalék megoldásból származó exportokat (és az áttelepítés előtti összes régi
-konfigurációt) bizalmas anyagként kezelje.
+Az `--include-secrets` feloldja a kulcstartó hivatkozásokat exportálás előtt, és hibát jelez, ha bármely hivatkozott hitelesítő adat nem olvasható. A `--no-secrets` mindig elsőbbséget élvez. Az exportált fájlok atomikusan, `0600` módban íródnak. Kezeljen minden explicit, titkos adatokat tartalmazó exportálást titkos anyagként. Fej nélküli rendszereken, használható OS kulcstartó nélkül, a CLI visszavált a `config.json` fájlra `0600` módban, és egyszeri figyelmeztetést nyomtat; az alapértelmezett exportálás ebben a módban is cenzúrázott marad.
 
 ---
 

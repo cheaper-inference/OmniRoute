@@ -6,10 +6,11 @@ import { type AccessScope } from "@/lib/accessTokens/scopes";
  * Policy (owner-confirmed 2026-06-19): infer from HTTP method —
  *   - GET/HEAD/OPTIONS → read
  *   - POST/PUT/PATCH/DELETE → write
- * with two admin overrides:
+ * with three admin overrides:
  *   - ADMIN_SCOPE_PREFIXES: admin for ANY method (inherently sensitive surfaces).
  *   - ADMIN_MUTATION_PREFIXES: admin only when mutating; GET/HEAD stay read so a
  *     `read` token can still inspect status under these prefixes.
+ *   - ADMIN_MUTATION_EXACT_PATHS: same as above, but for one route only (no sub-routes).
  *
  * This covers every existing management route with zero per-route edits. A NEW
  * mutating route nasce exigindo `write` por padrão (não `admin`) — quando uma
@@ -34,6 +35,25 @@ export const ADMIN_SCOPE_PREFIXES: readonly string[] = [
 export const ADMIN_MUTATION_PREFIXES: readonly string[] = [
   "/api/providers", // POST add provider / rotate key = admin; GET status = read
   "/api/cli-tools/apply", // writes config onto the host filesystem
+  // Creating/patching/regenerating an API key can attach the `manage` scope, and a
+  // manage-scoped key is full-access on every management route (including token mint),
+  // so a `write` token must not be able to reach it (GHSA-35gq-52m5-wgw2).
+  "/api/keys",
+];
+
+/**
+ * Require `admin` only for mutating methods on these EXACT paths (no sub-route matching).
+ *
+ * A write to the general settings route or to the login-settings route can change the
+ * operator's own authentication policy (login enforcement, the management password, OIDC
+ * identity, CORS origins, brute-force protection), so a delegated `write` token must not
+ * reach them; GET stays `read`. The other `/api/settings/*` sub-routes (proxies, combo
+ * defaults, model aliases, compression, purges…) are ordinary configuration and keep the
+ * method-inferred scope — matching `/api/settings` as a prefix would raise all of them.
+ */
+const ADMIN_MUTATION_EXACT_PATHS: readonly string[] = [
+  "/api/settings",
+  "/api/settings/require-login",
 ];
 
 const READ_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -45,6 +65,12 @@ function matchesPrefix(path: string, prefixes: readonly string[]): boolean {
   return prefixes.some((pre) => path === pre || path.startsWith(pre + "/"));
 }
 
+function matchesExactPath(path: string, paths: readonly string[]): boolean {
+  // A single trailing slash is the same route; anything deeper is a different route.
+  const normalized = path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+  return paths.includes(normalized);
+}
+
 /**
  * Determine the minimum access-token scope required to call `method path`.
  * Pure + deterministic — safe to unit test exhaustively.
@@ -54,9 +80,12 @@ export function inferRequiredScope(method: string, path: string): AccessScope {
   const p = path || "/";
 
   if (matchesPrefix(p, ADMIN_SCOPE_PREFIXES)) return "admin";
+  // Revealing a key hands back its plaintext secret — never a `read` operation.
+  if (matchesPrefix(p, ["/api/keys"]) && /\/reveal\/?$/.test(p)) return "admin";
 
   const isMutation = !READ_METHODS.has(m);
   if (isMutation && matchesPrefix(p, ADMIN_MUTATION_PREFIXES)) return "admin";
+  if (isMutation && matchesExactPath(p, ADMIN_MUTATION_EXACT_PATHS)) return "admin";
 
   return isMutation ? "write" : "read";
 }

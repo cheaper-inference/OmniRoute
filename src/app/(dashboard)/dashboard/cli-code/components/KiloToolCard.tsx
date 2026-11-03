@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useId } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import Image from "next/image";
 import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
+import { cn } from "@/shared/utils/cn";
+import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -22,6 +28,8 @@ export default function KiloToolCard({
   lastConfiguredAt,
 }) {
   const t = useTranslations("cliTools");
+  const modelInputId = useId();
+  const apiKeySelectId = useId();
   const [kiloStatus, setKiloStatus] = useState(null);
   const [checkingKilo, setCheckingKilo] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -225,8 +233,11 @@ export default function KiloToolCard({
 
   return (
     <Card padding="sm" className="overflow-hidden">
-      <div className="flex items-center justify-between hover:cursor-pointer" onClick={onToggle}>
-        <div className="flex items-center gap-3">
+      <div
+        className={cn("flex items-center justify-between hover:cursor-pointer", CARD_TOGGLE_CLASS)}
+        {...cardToggleProps(isExpanded, onToggle)}
+      >
+        <div className="flex min-w-0 items-center gap-3">
           <div className="size-8 rounded-lg flex items-center justify-center shrink-0">
             {tool.image ? (
               <Image
@@ -241,8 +252,8 @@ export default function KiloToolCard({
                 }}
               />
             ) : (
-              <span className="material-symbols-outlined text-xl" style={{ color: tool.color }}>
-                terminal
+              <span className="inline-flex" style={{ color: tool.color }}>
+                <Icon name="terminal" size={20} />
               </span>
             )}
           </div>
@@ -258,20 +269,18 @@ export default function KiloToolCard({
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.kilo")}</p>
           </div>
         </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="expand_more"
+          size={20}
+          className={cn("text-text-muted transition-transform", isExpanded && "rotate-180")}
+        />
       </div>
 
       {isExpanded && (
         <div className="mt-6 pt-6 border-t border-border">
           {checkingKilo && (
             <div className="flex items-center gap-2 text-text-muted text-sm">
-              <span className="material-symbols-outlined animate-spin text-base">
-                progress_activity
-              </span>
+              <Icon name="progress_activity" size={16} className="animate-spin" />
               <span>{t("checkingCli", { tool: "Kilo Code" })}</span>
             </div>
           )}
@@ -279,12 +288,12 @@ export default function KiloToolCard({
           {kiloStatus && !checkingKilo && (
             <div className="flex flex-col gap-4">
               {/* Runtime status */}
-              <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-secondary/50 border-border">
-                <span
-                  className={`material-symbols-outlined text-lg ${cliReady ? "text-green-500" : "text-yellow-500"}`}
-                >
-                  {cliReady ? "check_circle" : "warning"}
-                </span>
+              <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-subtle/50 border-border">
+                <Icon
+                  name={cliReady ? "check_circle" : "warning"}
+                  size={18}
+                  className={cliReady ? "text-success" : "text-warning"}
+                />
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-medium">
                     {cliReady
@@ -296,7 +305,7 @@ export default function KiloToolCard({
                   {kiloStatus.commandPath && (
                     <p className="text-xs text-text-muted">
                       {t("binary")}:{" "}
-                      <code className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">
+                      <code className="px-1 py-0.5 rounded bg-bg-subtle">
                         {kiloStatus.commandPath}
                       </code>
                     </p>
@@ -304,7 +313,7 @@ export default function KiloToolCard({
                   {kiloStatus.authPath && (
                     <p className="text-xs text-text-muted">
                       {t("auth")}:{" "}
-                      <code className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">
+                      <code className="px-1 py-0.5 rounded bg-bg-subtle">
                         {kiloStatus.authPath}
                       </code>
                     </p>
@@ -316,12 +325,10 @@ export default function KiloToolCard({
                 <>
                   {/* Current config info */}
                   {configStatus === "configured" && (
-                    <div className="flex items-start gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <span className="material-symbols-outlined text-green-500 text-lg">
-                        check_circle
-                      </span>
+                    <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
+                      <Icon name="check_circle" size={18} className="text-success" />
                       <div className="flex flex-col gap-1">
-                        <p className="text-sm text-green-700 dark:text-green-300">
+                        <p className="text-sm text-success">
                           {t("omnirouteConfiguredOpenAiCompatible")}
                         </p>
                         <p className="text-xs text-text-muted">
@@ -333,15 +340,14 @@ export default function KiloToolCard({
                   )}
 
                   {/* Model selection */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-text-muted">{t("model")}</label>
+                  <Field label={t("model")} htmlFor={modelInputId}>
                     <div className="flex items-center gap-2">
-                      <input
-                        type="text"
+                      <Input
+                        id={modelInputId}
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
                         placeholder={t("providerModelPlaceholder")}
-                        className="flex-1 px-3 py-2 bg-bg-secondary rounded-lg text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                        className="min-w-0 w-auto flex-1"
                       />
                       <Button
                         variant="outline"
@@ -355,33 +361,34 @@ export default function KiloToolCard({
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowManualConfigModal(true)}
+                        aria-label={t("manualConfig")}
+                        title={t("manualConfig")}
                       >
-                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                        <Icon name="edit" size={16} />
                       </Button>
                     </div>
-                  </div>
+                  </Field>
 
                   {/* API Key selection */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-text-muted">{t("apiKey")}</label>
+                  <Field label={t("apiKey")} htmlFor={apiKeySelectId}>
                     {apiKeys && apiKeys.length > 0 ? (
-                      <select
+                      <Select
+                        id={apiKeySelectId}
                         value={effectiveApiKeyId}
                         onChange={(e) => setSelectedApiKeyId(e.target.value)}
-                        className="px-3 py-2 bg-bg-secondary rounded-lg text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
                       >
                         {apiKeys.map((key) => (
                           <option key={key.id} value={key.id}>
                             {key.key}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     ) : (
                       <p className="text-sm text-text-muted">
                         {cloudEnabled ? t("noApiKeysAvailable") : t("usingDefaultOmniroute")}
                       </p>
                     )}
-                  </div>
+                  </Field>
 
                   {/* Action buttons */}
                   <div className="flex items-center gap-2 pt-2">
@@ -392,14 +399,12 @@ export default function KiloToolCard({
                       disabled={!selectedModel}
                       loading={applying}
                     >
-                      <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+                      <Icon name="save" size={14} className="mr-1" />
                       {configStatus === "configured" ? t("updateConfig") : t("applyConfig")}
                     </Button>
                     {configStatus === "configured" && (
                       <Button variant="outline" size="sm" onClick={handleReset} loading={restoring}>
-                        <span className="material-symbols-outlined text-[14px] mr-1">
-                          restart_alt
-                        </span>
+                        <Icon name="restart_alt" size={14} className="mr-1" />
                         {t("reset")}
                       </Button>
                     )}
@@ -408,35 +413,39 @@ export default function KiloToolCard({
                   {/* Message */}
                   {message && (
                     <div
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
                     >
-                      <span className="material-symbols-outlined text-[16px]">
-                        {message.type === "success" ? "check_circle" : "error"}
-                      </span>
+                      <Icon
+                        name={message.type === "success" ? "check_circle" : "error"}
+                        size={16}
+                      />
                       <span>{message.text}</span>
                     </div>
                   )}
 
                   {/* Backups section */}
                   <div className="border-t border-border pt-3 mt-1">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-expanded={showBackups}
                       onClick={() => setShowBackups(!showBackups)}
-                      className="flex items-center gap-2 text-sm text-text-muted hover:text-text transition-colors"
+                      className="gap-2 px-0 text-sm text-text-muted hover:text-text-main"
                     >
-                      <span
-                        className={`material-symbols-outlined text-[16px] transition-transform ${showBackups ? "rotate-90" : ""}`}
-                      >
-                        chevron_right
-                      </span>
-                      <span className="material-symbols-outlined text-[16px]">backup</span>
+                      <Icon
+                        name="chevron_right"
+                        size={16}
+                        className={cn("transition-transform", showBackups && "rotate-90")}
+                      />
+                      <Icon name="backup" size={16} />
                       {t("backups")} {backups.length > 0 && `(${backups.length})`}
-                    </button>
+                    </Button>
                     {showBackups && backups.length > 0 && (
                       <div className="mt-2 flex flex-col gap-1.5 pl-6">
                         {backups.map((b) => (
                           <div
                             key={b.id}
-                            className="flex items-center justify-between gap-2 p-2 rounded bg-bg-secondary/50 text-xs"
+                            className="flex items-center justify-between gap-2 p-2 rounded bg-bg-subtle/50 text-xs"
                           >
                             <div className="flex flex-col">
                               <span className="font-medium">{b.originalFile}</span>

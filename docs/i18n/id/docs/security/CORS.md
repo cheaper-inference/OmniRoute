@@ -1,6 +1,6 @@
 # CORS Configuration & Security (Bahasa Indonesia)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -57,11 +57,11 @@ karena satu fakta implementasi yang konkret:
 
 Artinya untuk setiap permukaan, bahkan dengan `CORS_ALLOW_ALL=true`:
 
-| Permukaan                           | Mekanisme autentikasi       | Dampak CORS wildcard                                                                                                                                                                                                                            |
-| ----------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dasbor / MANAGEMENT `/api/*`        | Sesi cookie                 | Origin dikembalikan, tetapi **tanpa `Allow-Credentials`** browser **memblokir** pembacaan dengan kredensial. Situs lintas origin berbahaya **tidak dapat membaca** respons dasbor terautentikasi Anda, dan cookie sesi tidak terekspos.         |
-| API Klien `/v1/*`, `/v1beta/*`      | Header Bearer / `x-api-key` | Sudah permisif **sesuai desain** (`relaxForTokenAuth`): browser tidak pernah melampirkan `Authorization`/`x-api-key` secara otomatis, sehingga halaman penyerang tidak dapat menyertakan kunci Anda. `CORS_ALLOW_ALL` tidak memperluas hal ini. |
-| Baca-saja publik (`/api/health`, …) | Tidak ada                   | Tidak sensitif; wildcard tidak berbahaya.                                                                                                                                                                                                       |
+| Permukaan                           | Mekanisme autentikasi       | Dampak CORS wildcard                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dasbor / MANAGEMENT `/api/*`        | Sesi cookie                 | Origin dikembalikan, tetapi **tanpa `Allow-Credentials`** browser **memblokir** pembacaan dengan kredensial. Situs lintas origin berbahaya **tidak dapat membaca** respons dasbor terautentikasi Anda, dan cookie sesi tidak terekspos.                                                                                                                                       |
+| API Klien `/v1/*`, `/v1beta/*`      | Header Bearer / `x-api-key` | Sudah permisif **sesuai desain** (`relaxForTokenAuth`): browser tidak pernah melampirkan `Authorization`/`x-api-key` secara otomatis, sehingga halaman penyerang tidak dapat menyertakan kunci Anda. Echo hanya berlaku jika kunci yang diberikan tervalidasi; respons anonim (`REQUIRE_API_KEY=false`) tetap memakai daftar izin. `CORS_ALLOW_ALL` tidak memperluas hal ini. |
+| Baca-saja publik (`/api/health`, …) | Tidak ada                   | Tidak sensitif; wildcard tidak berbahaya.                                                                                                                                                                                                                                                                                                                                     |
 
 Jadi, paparan **residual** dari `CORS_ALLOW_ALL=true` terbatas pada: (a)
 **pembacaan** lintas origin tanpa kredensial atas data yang memang sudah tidak memerlukan autentikasi, dan (b)
@@ -123,29 +123,74 @@ memulai ulang.
   ini secara otomatis. CORS bukanlah penghalang yang berarti di sini — kunci API-lah yang menjadi
   penghalang — karena itu permukaan ini sengaja dibuat permisif agar klien browser dan
   Electron dapat membaca respons yang memang berhak mereka akses.
+  Echo yang dilonggarkan mengikuti kunci yang tervalidasi, bukan sekadar keberadaan
+  header: ketika `REQUIRE_API_KEY=false` melayani permintaan secara anonim, respons
+  suksesnya tetap memakai daftar izin fail-closed. Penolakan autentikasi (401) tetap dapat
+  dibaca agar klien dapat menampilkan kunci yang dicabut atau salah ketik (#5242): 401
+  milik pipeline sendiri mempertahankan echo, dan rute yang menolak kunci itu sendiri
+  setelah pipeline melayaninya sebagai anonim (`/v1/models` dan `/v1beta/models` dengan
+  autentikasi manajemen yang dikonfigurasi, rute `/v1/files`, `/v1/batches`,
+  `/v1/media`, `/v1/session-leases` yang dibatasi per pemilik, serta rute kandidat
+  auto-combo) menambahkan echo ke 401 tersebut melalui `credentialRejectionHeaders()`.
+  Echo ditentukan oleh ada tidaknya header kredensial pada permintaan (`Authorization`,
+  `x-api-key`, `x-goog-api-key` atau cookie `auth_token`), bukan oleh header mana yang
+  diperiksa rute, dan tidak pernah dipasangkan dengan `Access-Control-Allow-Credentials`;
+  body-nya adalah amplop galat yang tetap. Rute manajemen di bawah `/api/v1/` yang
+  dijaga oleh `requireManagementAuth()` (`/api/v1/management/*`,
+  `/api/v1/registered-keys`) tidak menambahkan echo: dengan `REQUIRE_API_KEY=false`,
+  401/403 milik rute tersebut tidak dapat dibaca lintas origin.
 - **Sesi cookie (dasbor):** dilindungi oleh default fail-closed **dan**
   oleh tidak adanya `Access-Control-Allow-Credentials` pada jalur bersama. Jangan
   masukkan origin pengelolaan/dasbor ke konfigurasi permisif apa pun; origin tersebut harus tetap
   sepenuhnya fail-closed.
 
+## Handshake WebSocket (`/v1/responses`, `/v1/ws`)
+
+Browser tidak menerapkan CORS pada WebSocket, sehingga transport WebSocket yang
+mengembalikan keluaran inferensi memeriksa `Origin` handshake secara mandiri
+(`src/server/origin/wsOrigin.ts`): WebSocket Responses (`/v1/responses`) dan, ketika
+OmniRoute dijalankan melalui `npm start` / `npm run dev`, bridge `/v1/ws` dan
+`/api/v1/ws`, yang mengalirkan `/v1/chat/completions`, `/v1/messages` dan
+`/v1/responses` sebagai frame. Bridge meminta keputusan ke `/api/v1/ws?handshake=1` dan
+menolak melakukan upgrade kecuali rute tersebut telah menjalankan pemeriksaan. Handshake
+diterima ketika:
+
+- tidak memiliki header `Origin` (Codex CLI, SDK, dan klien non-browser lainnya);
+- `Origin` diizinkan oleh daftar izin di atas (`CORS_ALLOWED_ORIGINS`, pengaturan
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` adalah salah satu origin publik milik OmniRoute sendiri (URL dasar publik yang
+  dikonfigurasi, origin yang diteruskan oleh proxy tepercaya, atau host loopback/LAN
+  langsung yang diberikan sebagai literal IP atau `localhost` — kandidat yang sama dengan
+  yang digunakan pemeriksaan mutasi dasbor); atau
+- membawa kunci API yang valid, seperti pada permukaan HTTP `/v1/*`.
+
+Selain itu akan mendapat `403 ws_origin_forbidden`. Cookie sesi dasbor tidak
+membebaskan `Origin` asing, karena browser melampirkannya ke socket halaman mana pun.
+`localhost` pada port lain tidak dianggap sebagai origin yang sama; tambahkan origin
+pengembangan semacam itu ke `CORS_ALLOWED_ORIGINS`.
+
 ## Contoh: reverse proxy di depan OmniRoute
 
 CORS diberlakukan oleh OmniRoute sendiri, sehingga proxy umumnya **tidak boleh** menambahkan atau
-menulis ulang header `Access-Control-*` (header ganda merusak fungsi browser). Terminasi TLS
-dan teruskan — biarkan OmniRoute menjawab preflight:
+menulis ulang header `Access-Control-*` (header ganda menyebabkan masalah pada browser). Akhiri TLS
+dan teruskan — biarkan OmniRoute merespons preflight:
 
 ```nginx
 # nginx — teruskan ke OmniRoute; JANGAN menyisipkan Access-Control-* di sini
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # JANGAN menetapkan X-Forwarded-For ke 127.0.0.1 — hal itu menonaktifkan pengaman rute loopback.
+    # Pertahankan header penerusan: proxy pada host yang sama terhubung dari loopback, dan header tersebut
+    # memberi tahu OmniRoute bahwa pemanggil bukan operator lokal. Proxy yang tidak menambahkan satu pun
+    # header tersebut membuat setiap pemanggil jarak jauh terlihat lokal. Jangan pernah menetapkan X-Forwarded-For ke 127.0.0.1.
 }
 ```
 
-Tetapkan origin browser yang diizinkan di OmniRoute (`CORS_ALLOWED_ORIGINS` atau tab
-Security), bukan di proxy.
+Tetapkan origin browser yang diizinkan di OmniRoute (`CORS_ALLOWED_ORIGINS` atau
+tab Security), bukan di proxy.
 
 ## File sumber
 
@@ -158,6 +203,7 @@ Security), bukan di proxy.
 | Banner peringatan dasbor                         | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Kolom CORS Allowed Origins                       | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS per rute Cloud-Agent (pengecualian)         | `src/lib/cloudAgent/api.ts`                                          |
+| Pemeriksaan `Origin` pada handshake WebSocket    | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Lihat juga
 

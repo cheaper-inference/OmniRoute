@@ -1,0 +1,1 @@
+- **fix(sse):** a second 429 with a shorter cooldown no longer shortens the active cooldown on a combo target — the longest cooldown now wins ([#17116](https://github.com/diegosouzapw/OmniRoute/pull/17116)) — thanks @maxmad64bis

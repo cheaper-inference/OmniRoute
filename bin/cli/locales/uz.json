@@ -123,7 +123,9 @@
       "maxCostOpt": "Bir kunlik maksimal xarajat (USD)",
       "allowedModelsOpt": "Ruxsat etilgan modellarning vergul bilan ajratilgan ro‘yxati",
       "nothingToSet": "Siyosat maydonlari taqdim etilmadi. --rate-limit, --max-cost yoki --allowed-models parametridan foydalaning.",
-      "updated": "Siyosat yangilandi."
+      "updated": "Siyosat yangilandi.",
+      "modelAccessModeOpt": "Modelga kirish rejimi (all | restricted)",
+      "unrestrictedOpt": "Barcha modellarga ruxsat berish (--model-access-mode all)"
     },
     "expiration": {
       "title": "Kalitning amal qilish muddati",
@@ -254,6 +256,7 @@
     "log": "Server jurnallarini bevosita ko‘rsatish",
     "no_recovery": "Nosozlikdan keyin avtomatik qayta ishga tushirishni o‘chirish (nosozliklarni tuzatish rejimi)",
     "max_restarts": "Taslim bo‘lishdan oldin 30 soniya ichidagi nosozlikdan keyingi qayta ishga tushirishlarning maksimal soni (standart: 2)",
+    "headless": "Faqat proksi dvigatelini ishga tushirish: boshqaruv paneli o'chirilgan (404), ixtiyoriy quyi tizimlar o'tkazib yuboriladi (OMNIROUTE_HEADLESS=1 o'rnatadi)",
     "tray": "Tizim treyida ishga tushirish (faqat ish stoli versiyasida, ixtiyoriy)",
     "no_tray": "Tizim treyi belgisini o‘chirish",
     "ready_timeout": "Tayyorlik tekshiruvi uchun kutish vaqti, ms (shuningdek OMNIROUTE_READY_TIMEOUT_MS, standart qiymat 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "OmniRoute nusxalari oʻrtasida konfiguratsiyani sinxronlash",
     "push": {
-      "description": "Konfiguratsiyani bulutga yoki masofaviy nusxaga yuborish",
-      "target": "Maqsad (cloud yoki context:name)",
-      "bundle": "Sinxronlanadigan toʻplam qismlari",
-      "dryRun": "Qoʻllamasdan oldindan koʻrish"
+      "description": "Konfiguratsiyani bulutga yoki masofaviy nusxaga yuborish"
     },
     "pull": {
-      "description": "Konfiguratsiyani bulutdan yoki masofaviy nusxadan olish",
-      "source": "Manba (cloud yoki context:name)",
-      "merge": "Mavjud konfiguratsiya bilan birlashtirish",
-      "replace": "Mavjud konfiguratsiyani almashtirish",
-      "dryRun": "Qo‘llamasdan oldindan ko‘rish"
-    },
-    "diff": {
-      "source": "Manba konteksti",
-      "target": "Maqsad konteksti"
+      "description": "Konfiguratsiyani bulutdan yoki masofaviy nusxadan olish"
     },
     "bundle": {
       "description": "Konfiguratsiyani bundle fayli sifatida eksport qilish",
-      "include": "Kiritiladigan qismlar (vergul bilan ajratilgan)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Bundle faylini import qilish",
       "dryRun": "Qo‘llamasdan tekshirish"
-    },
-    "initialize": {
-      "fromCloud": "Bulutli zaxira nusxadan ishga tushirish"
     },
     "tokens": {
       "description": "Sinxronlash tokenlarini boshqarish",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Tasdiqlashni o‘tkazib yuborish"
       }
-    },
-    "resolve": {
-      "description": "Sinxronlash ziddiyatlarini interaktiv tarzda hal qilish"
     }
   },
   "config": {

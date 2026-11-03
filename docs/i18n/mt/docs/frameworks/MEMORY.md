@@ -1,6 +1,6 @@
 # Memory System (Malti)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
 
 ---
 
@@ -165,34 +165,35 @@ It-tabella `memory_vec_meta` (migrazzjoni `083_memory_vec.sql`) taħżen:
 
 ## Estensjoni tas-settings
 
-Disa' oqsma tal-embedding u tal-vetturi huma disponibbli f'`MemorySettingsExtended` fi
-`src/shared/schemas/memory.ts`, u jinżammu permezz ta' `src/lib/db/settings.ts`:
+Disa’ oqsma għall-embeddings u l-vetturi huma disponibbli f’`MemorySettingsExtended` fi
+`src/shared/schemas/memory.ts`, u jiġu ppersistiti permezz ta’ `src/lib/db/settings.ts`:
 
-| Qasam                    | Tip                                                | Valur default | Deskrizzjoni                                                                 |
-| ------------------------ | -------------------------------------------------- | ------------- | ---------------------------------------------------------------------------- |
-| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"`      | Liema sors tal-embedding għandu jintuża                                      |
-| `embeddingProviderModel` | `string \| null`                                   | `null`        | Fornitur/mudell fil-format `provider/model`                                  |
-| `customBaseUrl`          | `string \| null`                                   | `null`        | URL bażi ta' endpoint kompatibbli ma' OpenAI għall-memorja biss              |
-| `customModelId`          | `string \| null`                                   | `null`        | ID tal-mudell mibgħut lill-endpoint personalizzat                            |
-| `transformersEnabled`    | `boolean`                                          | `false`       | Għażla espliċita għal Transformers.js (MiniLM, ~400MB)                       |
-| `staticEnabled`          | `boolean`                                          | `false`       | Għażla espliċita għall-mudell lokali statiku potion-base-8M                  |
-| `rerankEnabled`          | `boolean`                                          | `false`       | Ippermetti l-pass ta' klassifikazzjoni mill-ġdid (iżid +200-500ms/req)       |
-| `rerankProviderModel`    | `string \| null`                                   | `null`        | Fornitur/mudell għall-klassifikazzjoni mill-ġdid fil-format `provider/model` |
-| `vectorStore`            | `"sqlite-vec" \| "qdrant" \| "auto"`               | `"auto"`      | Liema backend tal-vetturi għandu jintuża                                     |
+| Qasam                    | Tip                                                | Valur predefinit | Deskrizzjoni                                                                 |
+| ------------------------ | -------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------- |
+| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"`         | Liema sors tal-embedding għandu jintuża                                      |
+| `embeddingProviderModel` | `string \| null`                                   | `null`           | Fornitur/mudell fil-format `provider/model`                                  |
+| `customBaseUrl`          | `string \| null`                                   | `null`           | URL bażi ta’ endpoint kompatibbli ma’ OpenAI għall-Memorja biss              |
+| `customModelId`          | `string \| null`                                   | `null`           | ID tal-mudell mibgħut lill-endpoint personalizzat                            |
+| `transformersEnabled`    | `boolean`                                          | `false`          | Attivazzjoni fakultattiva għal Transformers.js (MiniLM, ~400MB)              |
+| `staticEnabled`          | `boolean`                                          | `false`          | Attivazzjoni fakultattiva għall-mudell lokali statiku potion-base-8M         |
+| `rerankEnabled`          | `boolean`                                          | `false`          | Ippermetti l-pass ta’ klassifikazzjoni mill-ġdid (iżid +200-500ms/req)       |
+| `rerankProviderModel`    | `string \| null`                                   | `null`           | Fornitur/mudell għall-klassifikazzjoni mill-ġdid fil-format `provider/model` |
 
-Dawn huma esposti permezz ta' `GET /PUT /api/settings/memory` (skema `MemorySettingsExtendedSchema`).
+`rerankProviderModel` jiġi riżolt minn `POST /v1/rerank` (imsejjaħ permezz ta’ loopback), għalhekk jaċċetta kull ħaġa li taċċetta dik ir-rotta: mudell cloud magħżul għall-klassifikazzjoni mill-ġdid (`cohere/rerank-v3.5`, `jina-ai/jina-reranker-v3.5`, …) jew nodu ta’ fornitur kompatibbli ma’ OpenAI bħala `<node-prefix>/<model>` (eż. `skilled-mini/bge-reranker-v2-m3` għal sistema TEI/Infinity). In-nodi loopback, u l-ismijiet tal-hosts elenkati f’`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (eż. isem ta’ servizz Docker/Compose), huma dejjem eliġibbli; nodu fuq host ieħor (LAN, Tailscale) jeħtieġ ukoll il-feature flag `RERANK_REMOTE_PROVIDER_NODES` u jrid jgħaddi mill-politika tal-URL ħerġin tal-fornitur — ara [Feature Flags](../reference/FEATURE_FLAGS.md). Is-selettur tad-dashboard jelenka fornituri magħżula flimkien man-nodi lokali; kwalunkwe string valida `provider/model` tista’ tiġi ssettjata direttament permezz ta’ `PUT /api/settings/memory`.
+| `vectorStore` | `"sqlite-vec" \| "qdrant" \| "auto"` | `"auto"` | Liema backend tal-vetturi għandu jintuża |
 
-Għas-sors `remote`, Memory jaċċetta wkoll is-settings fakultattivi `customBaseUrl` u
-`customModelId`. Flimkien dawn jagħżlu endpoint `/embeddings` u mudell kompatibbli
-ma' OpenAI mingħajr ma jibdlu r-reġistru globali tal-embeddings. L-endpoint jiġi
-normalizzat qabel l-użu u ċċekkjat mill-politika tal-URL outbound tal-fornitur: HTTP(S)
-huwa meħtieġ, il-kredenzjali inkorporati u s-strings tal-query jiġu rrifjutati, u
-l-indirizzi tal-metadata tal-cloud jibqgħu mblukkati. Il-valuri vojta jżommu l-fornitur
-magħżul mir-reġistru. L-iżbalji mibgħuta lura lid-dashboard jiġu sanitizzati u
-l-kredenzjali tal-endpoint qatt ma jiġu rreġistrati fil-logs.
+Dawn huma esposti permezz ta’ `GET /PUT /api/settings/memory` (schema `MemorySettingsExtendedSchema`).
 
-> **TODO (D20):** L-ambitu `global` (il-kondiviżjoni tal-memorji bejn l-API keys kollha)
-> mhuwiex implimentat f'din ir-rilaxx. Dan jeħtieġ bidliet fl-iskema u perkors globali
+Għas-sors `remote`, il-Memorja taċċetta wkoll is-settings fakultattivi `customBaseUrl` u
+`customModelId`. Flimkien jagħżlu endpoint `/embeddings` kompatibbli ma’ OpenAI u
+mudell mingħajr ma jibdlu r-reġistru globali tal-embeddings. L-endpoint jiġi
+normalizzat qabel l-użu u vverifikat mill-politika tal-URL ħerġin tal-fornitur: HTTP(S)
+huwa meħtieġ, kredenzjali inkorporati u strings ta’ query jiġu rrifjutati, u l-indirizzi
+tal-metadata tal-cloud jibqgħu mblukkati. Valuri vojta jżommu l-fornitur tar-reġistru magħżul. L-iżbalji
+rritornati lid-dashboard jiġu sanitizzati u l-kredenzjali tal-endpoint qatt ma jiġu rreġistrati fil-logs.
+
+> **TODO (D20):** L-ambitu `global` (il-kondiviżjoni tal-memorji bejn iċ-ċwievet API kollha) mhuwiex
+> implimentat f’din ir-rilaxx. Jeħtieġ bidliet fl-schema u perkors globali
 > għall-irkupru. Għandu jiġi segwit separatament.
 
 ## Saffi tal-ħażna
@@ -907,12 +908,12 @@ Biex tħalliha mitfija, sempliċement żomm `autoSummarize` fil-valur predefinit
 
 ---
 
-## Mudell ta’ Fornitur MemoryBackend
+## Mudell tal-Provider MemoryBackend
 
-> **Sors definittiv:** `src/lib/memory/backend.ts`, `src/lib/memory/genericBackend.ts`, `src/lib/memory/manager.ts`
+> **Sors awtorevoli:** `src/lib/memory/backend.ts`, `src/lib/memory/genericBackend.ts`, `src/lib/memory/manager.ts`
 > **Testijiet:** `src/lib/memory/__tests__/generic-backend.test.ts`
 
-Il-mudell ta’ fornitur MemoryBackend jintroduċi **saff ta’ astrazzjoni tal-backend li jista’ jinbidel** fuq il-magna eżistenti tal-memorja. Minflok ma tkun marbuta ma’ implimentazzjoni waħda tal-ħażna, is-sistema tal-memorja issa tappoġġja diversi backends (SQLite, Obsidian, Notion, backends HTTP personalizzati) b’routing konfigurabbli primarju/ta’ riżerva.
+Il-mudell tal-provider MemoryBackend jintroduċi **saff ta’ astrazzjoni tal-backend li jista’ jinbidel** fuq il-magna tal-memorja eżistenti. Minflok ma tkun marbuta ma’ implimentazzjoni waħda tal-ħażna, is-sistema tal-memorja issa tappoġġja diversi backends (SQLite, Obsidian, Notion, backends HTTP personalizzati) b’rottaġġ konfigurabbli primarju/alternattiv.
 
 ### Arkitettura
 
@@ -924,18 +925,19 @@ Il-mudell ta’ fornitur MemoryBackend jintroduċi **saff ta’ astrazzjoni tal-
                        │
 ┌──────────────────────▼───────────────────────────────────┐
 │                   MemoryManager                           │
-│       Orkestratur Singleton (manager.ts)                  │
+│        Orkestratur singleton (manager.ts)                 │
 │                                                          │
 │  Primarju ──► Backend A  (eż. SQLite)                    │
-│  Riżerva  ──► Backend B  (eż. Obsidian)                  │
-│               Backend C  (eż. Notion permezz ta’ GenericBackend)│
+│  Alternattiv ─► Backend B  (eż. Obsidian)                │
+│                Backend C  (eż. Notion permezz ta’         │
+│                            GenericBackend)                │
 └──────────────────────┬───────────────────────────────────┘
                        │
         ┌──────────────┼──────────────┐
         ▼              ▼              ▼
 ┌────────────┐ ┌────────────┐ ┌──────────────────┐
-│ Backend    │ │ Backend    │ │ Backend          │
-│ SQLite     │ │ Obsidian   │ │ GenericMemory    │
+│ Backend    │ │ Backend    │ │ Backend tal-     │
+│ SQLite     │ │ Obsidian   │ │ Memorja Ġeneriku│
 │            │ │            │ │ (HTTP)           │
 └────────────┘ └────────────┘ └──────────────────┘
 ```
@@ -959,7 +961,7 @@ interface MemoryBackend {
   // Tiftix
   search(config: SearchConfig): Promise<Memory[]>;
 
-  // Stat tas-sistema
+  // Saħħa
   health(): Promise<HealthCheckResult>;
 
   // Ċiklu tal-ħajja (fakultattiv)
@@ -970,31 +972,31 @@ interface MemoryBackend {
 
 #### MemoryManager (`manager.ts`)
 
-Orkestratur Singleton li:
+Orkestratur singleton li:
 
-- **Jirreġistra** backends permezz ta’ `register(backend)` — jissejjaħ waqt l-istartjar minn `index.ts`
-- **Jikkonfigura** il-backend primarju u dawk ta’ riżerva permezz ta’ `configure(primary, fallbacks)`
-- **Jidderieġi** CRUD/tiftix lejn il-backend primarju, b’katina ta’ riżerva f’każ ta’ ħsara
-- **Jiċċekkja l-istat tas-sistema** tal-backends kollha perjodikament
+- **Jirreġistra** l-backends permezz ta’ `register(backend)` — jissejjaħ waqt l-istartjar minn `index.ts`
+- **Jikkonfigura** l-backend primarju u dawk alternattivi permezz ta’ `configure(primary, fallbacks)`
+- **Jidderieġi** l-operazzjonijiet CRUD/ta’ tiftix lejn il-backend primarju, b’katina alternattiva f’każ ta’ falliment
+- **Jiċċekkja s-saħħa** tal-backends kollha perjodikament
 
-**Imġiba tar-riżerva:**
+**Imġiba alternattiva:**
 
-| Operazzjoni | Primarju                      | Riżervi                           |
-| ----------- | ----------------------------- | --------------------------------- |
-| `create`    | ✅ Primarju biss              | ❌                                |
-| `get`       | ✅ Ipprova l-primarju l-ewwel | ✅ Riżerva jekk ikun null         |
-| `update`    | ✅ Primarju biss              | ✅ Sinkronizzazzjoni bla stennija |
-| `delete`    | ✅ Primarju biss              | ✅ Sinkronizzazzjoni bla stennija |
-| `list`      | ✅ Primarju biss              | ❌                                |
-| `search`    | ✅ Primarju l-ewwel           | ✅ Riżerva f’każ ta’ żball        |
+| Operazzjoni | Primarju                      | Alternattivi                           |
+| ----------- | ----------------------------- | -------------------------------------- |
+| `create`    | ✅ Il-primarju biss           | ❌                                     |
+| `get`       | ✅ Ipprova l-primarju l-ewwel | ✅ Alternattiv jekk ir-riżultat null   |
+| `update`    | ✅ Il-primarju biss           | ✅ Sinkronizzazzjoni mingħajr stennija |
+| `delete`    | ✅ Il-primarju biss           | ✅ Sinkronizzazzjoni mingħajr stennija |
+| `list`      | ✅ Il-primarju biss           | ❌                                     |
+| `search`    | ✅ Il-primarju l-ewwel        | ✅ Alternattiv f’każ ta’ żball         |
 
 #### GenericMemoryBackend (`genericBackend.ts`)
 
 Konnettur HTTP ġeneriku li jadatta kwalunkwe REST API għal MemoryBackend. Utli għal:
 
-- **Notion** — qabbad permezz tan-Notion API
+- **Notion** — qabbad permezz tal-API ta’ Notion
 - **Obsidian** — qabbad permezz tal-Obsidian Local REST API
-- **Backends personalizzati** — kwalunkwe servizz li jesponi API RESTful tal-memorja
+- **Backends personalizzati** — kwalunkwe servizz li jesponi API tal-memorja RESTful
 
 **Konfigurazzjoni:**
 
@@ -1003,44 +1005,44 @@ interface GenericBackendConfig {
   baseUrl: string;           // URL bażi tal-API tal-backend
   apiKey?: string;           // Token Bearer għall-awtentikazzjoni
   headers?: Record<string, string>;  // Headers HTTP personalizzati
-  timeout?: number;          // Timeout tat-talba (default: 30000ms)
-  backendType?: string;      // Għal-logging
+  timeout?: number;          // Limitu taż-żmien tat-talba (valur predefinit: 30000ms)
+  backendType?: string;      // Għar-reġistrazzjoni
 
-  // Override tal-endpoints (id-defaults jużaw il-konvenzjonijiet REST)
+  // Sostituzzjonijiet tal-endpoints (il-valuri predefiniti jużaw il-konvenzjonijiet REST)
   endpoints?: {
-    search?: string;   // default: "/memories/search"
-    create?: string;   // default: "/memories"
-    list?: string;     // default: "/memories"
-    get?: string;      // default: "/memories/{id}"
-    update?: string;   // default: "/memories/{id}"
-    delete?: string;   // default: "/memories/{id}"
-    health?: string;   // default: "/health"
+    search?: string;   // valur predefinit: "/memories/search"
+    create?: string;   // valur predefinit: "/memories"
+    list?: string;     // valur predefinit: "/memories"
+    get?: string;      // valur predefinit: "/memories/{id}"
+    update?: string;   // valur predefinit: "/memories/{id}"
+    delete?: string;   // valur predefinit: "/memories/{id}"
+    health?: string;   // valur predefinit: "/health"
   };
 
-  // Mappings tal-ismijiet tal-parametri tal-query
+  // Korrispondenzi tal-ismijiet tal-parametri tal-query
   queryParams?: {
     query?/apiKeyId?/limit?/offset?/strategy?/maxTokens?/type?/sessionId?/orderBy?/orderDir?/options?
   };
 
-  // Mappings tal-ismijiet tal-parametri tal-path
+  // Korrispondenzi tal-ismijiet tal-parametri tal-path
   pathParams?: {
     id?/memoryId?
   };
 }
 ```
 
-**Backends magħrufa** huma kkonfigurati minn qabel f'`KNOWN_BACKENDS`:
+**Backends magħrufa** huma kkonfigurati minn qabel f’`KNOWN_BACKENDS`:
 
 ```typescript
 createKnownBackend("obsidian"); // → GenericMemoryBackend immirat lejn localhost:27123
 createKnownBackend("notion"); // → GenericMemoryBackend immirat lejn api.notion.com/v1
 ```
 
-#### Backends Inkorporati
+#### Backends Integrati
 
 ##### SQLiteBackend (`sqliteBackend.ts`)
 
-Il-backend primarju default. Jinkapsula l-ħażna tal-memorja eżistenti bbażata fuq SQLite billi juża `src/lib/memory/store.ts`. Jiġi rreġistrat awtomatikament waqt l-istartjar.
+Il-backend primarju predefinit. Jinkapsula l-ħażna tal-memorja eżistenti bbażata fuq SQLite billi juża `src/lib/memory/store.ts`. Jiġi rreġistrat awtomatikament waqt l-istartjar.
 
 ```typescript
 import { sqliteBackend } from "./sqliteBackend";
@@ -1049,41 +1051,101 @@ memoryManager.register(sqliteBackend);
 
 ##### ObsidianBackend (`obsidianBackend.ts`)
 
-Jinkapsula l-integrazzjoni eżistenti ma' Obsidian (`src/lib/memory/obsidianBackend.ts`). Jikkonnettja ma' vault ta' Obsidian permezz tal-Obsidian Local REST API.
+Jinkapsula l-integrazzjoni eżistenti ma’ Obsidian (`src/lib/memory/obsidianBackend.ts`). Jikkonnettja ma’ vault ta’ Obsidian permezz tal-Obsidian Local REST API.
+
+##### ClaudeMemBackend (`claudeMemBackend.ts`)
+
+Adapter għal worker lokali ta’ [claude-mem](https://github.com/thedotmack/claude-mem) — il-plugin tal-memorja għal
+Claude Code / Codex / Cursor li jaqbad is-sessjonijiet tal-kodifikazzjoni bħala "osservazzjonijiet".
+Meta jkun irreġistrat, ir-rotot REST `/api/memory` u t-tiftix tal-memorja A2A jistgħu jaqraw u jiktbu
+fl-istess ħażna li jimlew il-hooks ta’ claude-mem.
+
+Il-worker jintrabat ma’ loopback biss, li l-protezzjoni SSRF ta’ `GenericMemoryBackend` tirrifjuta apposta.
+Dan l-adapter ma jnaqqasx dik il-protezzjoni: il-host huwa ssettjat b’mod fiss għal `127.0.0.1` u l-iskema
+tal-konfigurazzjoni (`ClaudeMemBackendConfigSchema`, `.strict()`) taċċetta biss:
+
+| Ċavetta     | Tip    | Default | Noti                                                                                                                                                    |
+| ----------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `port`      | numru  | —       | Meħtieġ, 1024–65535. Il-port tal-worker claude-mem mill-fajl tas-settings tiegħu (default `37700 + uid % 100`).                                         |
+| `project`   | string | —       | Il-proġett claude-mem li għandu jintuża. Jekk mhux issettjat → kull ċavetta API ta’ OmniRoute tiġi mmappjata għall-proġett tagħha stess (l-`apiKeyId`). |
+| `timeoutMs` | numru  | `5000`  | Timeout għal kull talba, 100–30000.                                                                                                                     |
+
+Attivah permezz ta’ `PUT /api/settings/memory` u erġa’ ibda OmniRoute (il-backends jiġu rreġistrati
+darba biss, f’`initMemoryBackends()`):
+
+```json
+{
+  "backendConfigs": { "claude-mem": { "port": 37701, "project": "OmniRoute" } },
+  "fallbackBackends": ["claude-mem"]
+}
+```
+
+Minflok, uża `"primaryBackend": "claude-mem"` biex tagħmlu l-ħażna għall-API REST. Konfigurazzjoni
+invalida tiġi rreġistrata fil-log (`claude-mem.backend.invalid_config`) u maqbuża, għalhekk SQLite jibqa’ primarju.
+
+Immappjar u limiti:
+
+- L-IDs huma `claude-mem:<observationId>`; `get`/`delete` jinjoraw IDs ta’ backends oħra mingħajr
+  sejħa tan-network.
+- `create` → `POST /api/memory/save`; l-oqsma ta’ OmniRoute (`apiKeyId`, `sessionId`, `type`,
+  `key`, `metadata`) jiġu inklużi f’`metadata.omniroute` ta’ claude-mem u jibqgħu l-istess meta jerġgħu jinqraw.
+- `search` → `GET /api/search?format=json&type=observations`, maqtugħ għal `maxTokens`
+  (karattri / 4). `list` → l-endpoint tal-osservazzjonijiet paġinat tal-worker (`total` huwa limitu inferjuri — il-worker
+  jirritorna `hasMore`, mhux għadd).
+- L-osservazzjonijiet miġbura mill-hooks jimmappjaw `discovery` → `factual`, `decision` → `procedural`, u
+  `bugfix`/`feature`/`refactor`/`change` → `episodic`.
+- **Ebda aġġornamenti** (`update()` jirritorna `false`; l-osservazzjonijiet ma jistgħux jinbidlu) u **ebda TTL**
+  (`expiresAt` jiġi injorat). claude-mem ineħħi salvataggi identiċi duplikati minflok jagħmel upsert skont `key`.
+- L-injezzjoni fil-prompt (`retrieval.ts`) u l-għodod MCP `omniroute_memory_*` xorta jaqraw SQLite
+  direttament — ma jgħaddux minn `memoryManager`, għalhekk dan il-backend ma jipprovdilhomx data.
+
+**Direzzjonar tas-sejħiet LLM ta’ claude-mem stess permezz ta’ OmniRoute.** claude-mem jikkompressa l-osservazzjonijiet
+b’LLM (default: il-Claude Agent SDK). Il-provider `openai-compatible` tiegħu jista’ jiġi ppuntat lejn
+OmniRoute minflok, biex juża l-fallback tal-combo u t-traċċar tal-ispejjeż. F’`~/.claude-mem/settings.json`:
+
+```json
+{
+  "CLAUDE_MEM_PROVIDER": "openai-compatible",
+  "CLAUDE_MEM_OPENAI_COMPAT_BASE_URL": "http://localhost:20128/v1",
+  "CLAUDE_MEM_OPENAI_COMPAT_API_KEY": "<OmniRoute API key>",
+  "CLAUDE_MEM_OPENAI_COMPAT_MODEL": "<OmniRoute model or combo>"
+}
+```
 
 ### Settings
 
-Is-settings tal-backend tal-memorja jinħażnu fit-tabella tas-settings tal-app u jiġu ġestiti permezz ta' `src/lib/memory/settings.ts`:
+Is-settings tal-backend tal-memorja jinħażnu fit-tabella tas-settings tal-app u jiġu ġestiti permezz ta’ `src/lib/memory/settings.ts`:
 
-| Setting                          | Ċavetta tal-Env/Konfigurazzjoni | Default    | Deskrizzjoni                                   |
-| -------------------------------- | ------------------------------- | ---------- | ---------------------------------------------- |
-| Backend primarju                 | `memoryPrimaryBackend`          | `"sqlite"` | ID tal-backend primarju                        |
-| Backends ta' fallback            | `memoryFallbackBackends`        | `[]`       | IDs ordnati tal-backends ta' fallback          |
-| Konfigurazzjonijiet tal-backends | `memoryBackendConfigs`          | `{}`       | Override tal-konfigurazzjoni għal kull backend |
+| Setting                          | Ċavetta Env/Config       | Default    | Deskrizzjoni                                            |
+| -------------------------------- | ------------------------ | ---------- | ------------------------------------------------------- |
+| Backend primarju                 | `memoryPrimaryBackend`   | `"sqlite"` | ID tal-backend primarju                                 |
+| Backends fallback                | `memoryFallbackBackends` | `[]`       | IDs tal-backends fallback fl-ordni                      |
+| Konfigurazzjonijiet tal-backends | `memoryBackendConfigs`   | `{}`       | Sostituzzjonijiet tal-konfigurazzjoni għal kull backend |
 
-Is-settings jiġu normalizzati permezz ta' `normalizeMemorySettings()` u jinżammu fil-cache f'`getMemorySettings()`.
+Is-settings jiġu normalizzati permezz ta’ `normalizeMemorySettings()` u jinżammu fil-cache f’`getMemorySettings()`.
 
 ### Fluss tal-Inizjalizzazzjoni
 
 ```
-Bootstrap tal-app
-  → imports ta' index.ts (effett sekondarju): jirreġistraw SQLiteBackend
+Bidu tal-app
+  → imports ta’ index.ts (effett sekondarju): jirreġistraw SQLiteBackend
   → initMemoryBackends() tissejjaħ miċ-ċiklu tal-ħajja tal-app:
-      1. Tella' s-settings (getMemorySettings)
-      2. Ikkonfigura l-backend primarju + il-fallback
-      3. Inizjalizza l-backends kollha (kontroll tas-saħħa)
-      4. Lest għat-talbiet
+      1. Tgħabbi s-settings (getMemorySettings)
+      1b. Tirreġistra backends opt-in preżenti f’backendConfigs (claude-mem)
+      2. Tikkonfigura l-backend primarju + fallback
+      3. Tinizjalizza l-backends kollha (kontroll tas-saħħa)
+      4. Lesta għat-talbiet
 ```
 
-### Żieda ta' Backend Ġdid
+### Żieda ta’ Backend Ġdid
 
-1. **Implimenta l-interface `MemoryBackend`** f'`src/lib/memory/<name>Backend.ts`
+1. **Implimenta l-interface `MemoryBackend`** f’`src/lib/memory/<name>Backend.ts`
 2. **Esporta** minn `src/lib/memory/index.ts`
-3. **Irreġistra** b'`memoryManager.register(yourBackend)` waqt l-istartjar
+3. **Irreġistra** b’`memoryManager.register(yourBackend)` waqt il-bidu
 4. **Ikkonfigura** permezz tas-settings: issettja `memoryPrimaryBackend` għall-ID tal-backend tiegħek
 5. **Ittestja** billi tuża `src/lib/memory/__tests__/generic-backend.test.ts` bħala referenza
 
-#### Eżempju: Brain Backend
+#### Eżempju: Backend Brain
 
 ```typescript
 import { createGenericMemoryBackend } from "./genericBackend";
@@ -1109,17 +1171,17 @@ memoryManager.register(brainBackend);
 npx vitest run src/lib/memory/__tests__/generic-backend.test.ts --reporter=verbose
 ```
 
-Output mistenni: **35 test, kollha jgħaddu** li jkopru:
+Riżultat mistenni: **35 test, kollha jgħaddu** li jkopru:
 
 - Kostruttur (2)
 - Kontroll tas-saħħa (4) — suċċess, falliment 500, żball tan-network, latenza
 - Inizjalizzazzjoni (2) — suċċess, falliment
 - Ħolqien (2) — endpoint default, endpoint personalizzat
-- Kisba (4) — suċċess, 404 → null, non-404 jitfa' eċċezzjoni, parametri tal-path personalizzati
+- Get (4) — suċċess, 404 → null, non-404 jitfa’ eċċezzjoni, parametri personalizzati tal-path
 - Aġġornament (2) — suċċess, 404 → false
 - Tħassir (2) — suċċess, 404 → false
-- Elenkar (2) — parametri tal-query, ismijiet tal-parametri personalizzati
-- Tfittxija (3) — parametri tal-query, endpoint personalizzat, serializzazzjoni tal-options
+- Lista (2) — parametri tal-query, ismijiet personalizzati tal-parametri
+- Tiftix (3) — parametri tal-query, endpoint personalizzat, serializzazzjoni tal-għażliet
 - Headers tal-awtentikazzjoni (2) — token Bearer, headers personalizzati
 - Factory (1)
 

@@ -2,8 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { CLI_TOOLS } from "@/shared/constants/cliTools";
 import { CardSkeleton } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import EmptyState from "@/shared/components/EmptyState";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { CliToolCard, CliConceptCard, CliComparisonCard } from "@/shared/components/cli";
 import { useToolBatchStatuses } from "@/shared/hooks/cli/useToolBatchStatuses";
 
@@ -60,24 +65,22 @@ export default function CliAgentsPageClient({ machineId: _machineId }: CliAgents
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-bold text-text-main">{t("pageTitle")}</h1>
-          <p className="text-sm text-text-muted mt-1">{t("pageSubtitle")}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void refetch()}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-          aria-label={t("refreshDetection")}
-        >
-          <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-            refresh
-          </span>
-          {t("refreshDetection")}
-        </button>
-      </div>
+      <PageHeader
+        compact
+        title={t("pageTitle")}
+        description={t("pageSubtitle")}
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="refresh"
+            onClick={() => void refetch()}
+            aria-label={t("refreshDetection")}
+          >
+            {t("refreshDetection")}
+          </Button>
+        }
+      />
 
       {/* Concept card */}
       <CliConceptCard currentType="agent" />
@@ -87,33 +90,26 @@ export default function CliAgentsPageClient({ machineId: _machineId }: CliAgents
 
       {/* Search + filter bar */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[180px] max-w-sm">
-          <span
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[16px] text-text-muted pointer-events-none"
-            aria-hidden="true"
-          >
-            search
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="w-full pl-8 pr-3 py-1.5 text-sm bg-surface border border-black/10 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
-            aria-label={t("searchPlaceholder")}
-          />
-        </div>
+        <Input
+          type="search"
+          icon="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchPlaceholder")}
+          className="flex-1 min-w-[180px] max-w-sm"
+        />
 
-        <select
+        <Select
           value={detectionFilter}
           onChange={(e) => setDetectionFilter(e.target.value)}
-          className="px-2.5 py-1.5 text-sm bg-surface border border-black/10 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label={t("detectionFilterLabel")}
+          className="w-auto"
         >
           <option value={DETECTION_ALL}>{t("detectionAll")}</option>
           <option value={DETECTION_INSTALLED}>{t("detectionInstalled")}</option>
           <option value={DETECTION_NOT_INSTALLED}>{t("detectionNotInstalled")}</option>
-        </select>
+        </Select>
 
         <span className="text-xs text-text-muted whitespace-nowrap">
           {t("visibleCount", { count: filteredTools.length })}
@@ -128,14 +124,8 @@ export default function CliAgentsPageClient({ machineId: _machineId }: CliAgents
           ))}
         </div>
       ) : filteredTools.length === 0 ? (
-        <div
-          className="flex flex-col items-center justify-center py-16 gap-3 text-text-muted"
-          data-testid="empty-state"
-        >
-          <span className="material-symbols-outlined text-[40px]" aria-hidden="true">
-            search_off
-          </span>
-          <p className="text-sm">{t("emptyState")}</p>
+        <div data-testid="empty-state">
+          <EmptyState icon="search_off" title={t("emptyState")} />
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

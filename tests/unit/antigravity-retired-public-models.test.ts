@@ -32,13 +32,10 @@ const RETIRED_PUBLIC_MODELS = [
 ] as const;
 
 const EXPECTED_LEADING_MODEL_ORDER = [
-  "gemini-3.7-flash-high",
-  "gemini-3.7-flash-medium",
-  "gemini-3.7-flash-low",
-  "gemini-3.7-flash-tiered",
   "gemini-3.8-flash-high",
   "gemini-3.8-flash-medium",
   "gemini-3.8-flash-low",
+  "gemini-3.7-flash-tiered",
   "gemini-pro-agent",
   "gemini-3.1-pro-low",
   "gemini-3.1-flash-lite",
@@ -48,9 +45,9 @@ const EXPECTED_LEADING_MODEL_ORDER = [
 ] as const;
 
 const ACTIVE_FLASH_MODEL_IDS = [
-  "gemini-3.7-flash-high",
-  "gemini-3.7-flash-medium",
-  "gemini-3.7-flash-low",
+  "gemini-3.8-flash-high",
+  "gemini-3.8-flash-medium",
+  "gemini-3.8-flash-low",
 ] as const;
 
 test("Antigravity and AGY place their live Gemini Flash tiers first", () => {
@@ -115,7 +112,7 @@ test("Antigravity and AGY expose gemini-pro-agent and gemini-3.1-pro-high as cal
   );
 });
 
-test("Antigravity support catalogs expose every live Gemini 3.7 Flash tier", () => {
+test("Antigravity support catalogs expose every live Gemini 3.8 Flash tier", () => {
   const antigravityModelIds = new Set(ANTIGRAVITY_PUBLIC_MODELS.map((model) => model.id));
   const agyModelIds = new Set(AGY_PUBLIC_MODELS.map((model) => model.id));
   const cliAliases = new Set(CLI_TOOLS.antigravity.modelAliases);
@@ -154,7 +151,8 @@ test("Antigravity and AGY support metadata excludes retired Flash ids", () => {
   assert.equal(cliAliases.includes("gemini-3-flash"), false);
   assert.equal(cliModelIds.includes("gemini-3-flash"), false);
   assert.equal(agyFreeModelIds.includes("gemini-3-flash"), false);
-  assert.equal(pricing["gemini-3-flash"], undefined);
+  // Removed from static support metadata, but live discovery still admits it: keep it billable (#16570).
+  assert.ok(pricing["gemini-3-flash"], "gemini-3-flash must retain Antigravity billing coverage");
 
   for (const modelId of ACTIVE_FLASH_MODEL_IDS) {
     assert.equal(cliAliases.includes(modelId), true, `${modelId} must remain selectable`);

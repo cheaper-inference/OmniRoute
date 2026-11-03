@@ -5,8 +5,11 @@ const ANTIGRAVITY_CLI_RELEASE_URL =
 
 export const ANTIGRAVITY_VERSION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 export const ANTIGRAVITY_VERSION_FETCH_TIMEOUT_MS = 5_000;
-export const ANTIGRAVITY_IDE_FALLBACK_VERSION = "2.1.1";
-export const ANTIGRAVITY_CLI_FALLBACK_VERSION = "1.1.5";
+// Version floor for the IDE fingerprint. Cloud Code's fetchAvailableModels only returns quota
+// buckets for newer models (e.g. Gemini 3.7 Flash) to IDE clients >= 2.5.5, and the public
+// updater feed can lag behind that, so the resolver never reports anything older than this.
+export const ANTIGRAVITY_IDE_FALLBACK_VERSION = "2.5.5";
+export const ANTIGRAVITY_CLI_FALLBACK_VERSION = "1.3.4";
 
 type VersionCache = {
   fetchedAt: number;

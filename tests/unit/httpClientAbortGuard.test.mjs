@@ -4,7 +4,6 @@ import assert from "node:assert";
 import { test } from "node:test";
 import { EventEmitter } from "node:events";
 import { spawn } from "node:child_process";
-import { fileURLToPath } from "node:url";
 import {
   isClientAbortError,
   shouldSwallowUncaught,
@@ -116,6 +115,43 @@ test("shouldSwallowUncaught preserves crash semantics for genuine errors", () =>
   assert.equal(shouldSwallowUncaught(realErr, "uncaughtException"), false);
   const realErr2 = Object.assign(new Error("disk full"), { code: "ENOSPC" });
   assert.equal(shouldSwallowUncaught(realErr2, "uncaughtException"), false);
+});
+
+test("BodyTimeoutError from open-sse requires the exact timeout shape (#16817)", () => {
+  const timeout = Object.assign(new Error("Response body read timeout after 60000ms"), {
+    name: "BodyTimeoutError",
+  });
+  assert.equal(timeout.code, undefined);
+  assert.equal(sharedGuard.isRecoverableUpstreamTimeoutError(timeout), true);
+  assert.equal(shouldSwallowUncaught(timeout, "uncaughtException"), true);
+  assert.equal(shouldSwallowUncaught(timeout, "unhandledRejection"), true);
+  assert.equal(shouldSwallowUncaught(timeout, "unknownOrigin"), false);
+
+  for (const invalid of [
+    new Error("Response body read timeout after 60000ms"),
+    Object.assign(new Error("unrelated failure"), { name: "BodyTimeoutError" }),
+    Object.assign(new Error("Response body read timeout after 0ms"), { name: "BodyTimeoutError" }),
+    Object.assign(new Error("Response body read timeout after NaNms"), {
+      name: "BodyTimeoutError",
+    }),
+    Object.assign(new TypeError("programmer bug"), { name: "BodyTimeoutError" }),
+  ]) {
+    assert.equal(sharedGuard.isRecoverableUpstreamTimeoutError(invalid), false);
+    assert.equal(shouldSwallowUncaught(invalid, "unhandledRejection"), false);
+  }
+});
+
+test("process survives an actual unhandled BodyTimeoutError rejection (#16817)", async () => {
+  const { status, stdout, stderr } = await runGuardChild(`
+    const { installProcessCrashGuard } = await import(process.argv[1]);
+    installProcessCrashGuard();
+    const error = new Error("Response body read timeout after 60000ms");
+    error.name = "BodyTimeoutError";
+    Promise.reject(error);
+    setTimeout(() => { console.log("ALIVE"); process.exit(0); }, 60);
+  `);
+  assert.equal(status, 0, "child must survive the body timeout; stderr: " + stderr);
+  assert.match(stdout, /ALIVE/);
 });
 
 test("installProcessCrashGuard does not throw on import and is idempotent", () => {
@@ -262,6 +298,30 @@ test("installProcessCrashGuard() survives the real hedge-cancelled uncaughtExcep
   assert.match(stdout, /ALIVE/);
 });
 
+test("installProcessCrashGuard() survives the real RELAY_TIMEOUT unhandledRejection (2026-10-02 exit-7)", async () => {
+  // Production crash 2026-10-02 (exit code 7): a pooled relay attempt exceeded
+  // RELAY_FETCH_TIMEOUT_MS and open-sse/utils/proxyFetch.ts threw
+  //   Error: [ProxyFetch] Relay timed out after 25000ms (...)
+  //     code: 'RELAY_TIMEOUT', errorCode: 'relay_timeout', statusCode: 504
+  // The rejection escaped its execute chain (stack: proxyFetch -> executor
+  // execute x2 -> open-sse handler) as an unhandledRejection and the guard
+  // re-threw it because RELAY_TIMEOUT was not one of its benign classes.
+  const { status, stdout, stderr } = await runGuardChild(`
+    const { installProcessCrashGuard } = await import(process.argv[1]);
+    installProcessCrashGuard();
+    const timeoutErr = Object.assign(
+      new Error("[ProxyFetch] Relay timed out after 25000ms (https://relay.example)"),
+      { code: "RELAY_TIMEOUT", errorCode: "relay_timeout", statusCode: 504 }
+    );
+    Promise.reject(timeoutErr);
+    Promise.reject("RELAY_TIMEOUT");
+    process.once("exit", (code) => { if (code === 0) console.log("ALIVE"); });
+    setTimeout(() => process.exit(0), 50);
+  `);
+  assert.equal(status, 0, "child must survive the relay timeout; stderr: " + stderr);
+  assert.match(stdout, /ALIVE/);
+});
+
 test("installProcessCrashGuard still crashes on genuine errors (no over-swallowing)", async () => {
   const { status, stdout } = await runGuardChild(`
     const { installProcessCrashGuard } = await import(process.argv[1]);
@@ -295,9 +355,9 @@ test("isClientAbortError absorbs raw string abort reasons from streamHandler (un
 // code/message throws away the stack. The logger must receive the full
 // error object so the origin stays diagnosable.
 test("installProcessCrashGuard logs the full error object for swallowed errors", async () => {
-  const guardPath = fileURLToPath(
-    new URL("../../src/shared/utils/httpClientAbortGuard.mjs", import.meta.url)
-  );
+  // Same constraint as runGuardChild: the child must receive a file:// URL,
+  // not a filesystem path (bare "C:\..." breaks import() on Windows).
+  const guardUrl = new URL("../../src/shared/utils/httpClientAbortGuard.mjs", import.meta.url).href;
   const script = `
     const { installProcessCrashGuard } = await import(process.argv[1]);
     installProcessCrashGuard((level, ...args) => {
@@ -314,7 +374,7 @@ test("installProcessCrashGuard logs the full error object for swallowed errors",
     );
   `;
   const { status, stdout } = await new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["--input-type=module", "-e", script, guardPath], {
+    const child = spawn(process.execPath, ["--input-type=module", "-e", script, guardUrl], {
       stdio: ["ignore", "pipe", "pipe"],
     });
     let out = "";

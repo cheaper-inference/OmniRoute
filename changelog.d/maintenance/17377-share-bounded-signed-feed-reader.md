@@ -1,0 +1,1 @@
+- **refactor(radar):** the intel and offers feed syncs share one `readBoundedBytes()` leaf helper (10 MiB cap, Content-Length fast reject, stream cancel on overflow, buffered fallback and read-error propagation unchanged; signature verification untouched) ([#17377](https://github.com/diegosouzapw/OmniRoute/pull/17377)) — thanks @JxnLexn

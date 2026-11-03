@@ -1,3 +1,8 @@
+import { clearLegacyVisionOverride } from "@/lib/providerModels/visionOverrides";
+import {
+  listProviderOutputOverrides,
+  persistOutputTokenOverride,
+} from "@/lib/providerModels/outputTokenOverrides";
 import {
   getCustomModels,
   getAllCustomModels,
@@ -9,13 +14,16 @@ import {
   updateCustomModel,
   getModelCompatOverrides,
   mergeModelCompatOverride,
+  resetModelEndpointOverride,
   getHiddenModelsByProvider,
   type ModelCompatPatch,
 } from "@/lib/db/models";
+import { clearModelCompatOverrides } from "@/lib/db/models/compat";
 import {
   getModelContextOverrideRecord,
   setModelContextOverride,
   removeModelContextOverride,
+  listModelContextOverrides,
 } from "@/lib/db/modelContextOverrides";
 import {
   deleteManagedAvailableModelAliases,
@@ -27,10 +35,13 @@ import {
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
 } from "@/shared/constants/providers";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { getRegisteredEndpointAdapterStatuses } from "@/lib/providerModels/endpointAdapterAvailability";
+import { isHiddenForModality } from "@/shared/utils/modelVisibility";
 export const dynamic = "force-dynamic";
 import { providerModelMutationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import { normalizeNodeModelId } from "@/lib/providerModels/modelIdNormalization";
 
 function normalizeRequestedModelIds(
   searchParams: URLSearchParams,
@@ -48,24 +59,81 @@ function normalizeRequestedModelIds(
 }
 
 /**
+ * Run `action` on a model id as submitted, then (when it differs) on its
+ * node-normalized form, stopping at the first id the action handles. Legacy
+ * rows can still be stored under a prefixed id while writes store the bare
+ * upstream id, so id-addressed resets and deletes resolve both forms.
+ */
+async function tryEachIdForm(
+  submittedId: string,
+  normalizedId: string,
+  action: (id: string) => Promise<boolean>
+): Promise<boolean> {
+  if (await action(submittedId)) return true;
+  return normalizedId !== submittedId && (await action(normalizedId));
+}
+
+/**
+ * Hide or unhide each requested model under its stored (bare) id so a prefixed
+ * paste hits the same row the catalog emits. Returns every id form touched:
+ * managed aliases are keyed `<storagePrefix>/<storedId>`, so the alias layer
+ * gets both forms and a prefixed paste cannot leave the bare row's alias (or
+ * vice versa) pointing at a still-visible model.
+ */
+async function setHiddenByStoredIds(
+  provider: string,
+  modelIds: string[],
+  isHidden: boolean,
+  modality: string | undefined
+): Promise<string[]> {
+  const normalizedIds: string[] = [];
+  for (const requestedId of modelIds) {
+    const modelId = await normalizeNodeModelId(provider, requestedId);
+    normalizedIds.push(modelId);
+    const updatedModel = await updateCustomModel(provider, modelId, { isHidden });
+    if (!updatedModel) {
+      mergeModelCompatOverride(provider, modelId, { isHidden, modality });
+    }
+  }
+  return Array.from(new Set([...modelIds, ...normalizedIds]));
+}
+
+/**
+ * DELETE ?resetEndpoints=true: restore a model's endpoint override. Overrides
+ * follow the same write contract as the rows they annotate (bare upstream id),
+ * so the id resolves as submitted, then by its normalized form.
+ */
+async function resetEndpointOverrideResponse(provider: string, modelId: string) {
+  const normalizedId = await normalizeNodeModelId(provider, modelId);
+  const restored = await tryEachIdForm(modelId, normalizedId, (id) =>
+    resetModelEndpointOverride(provider, id)
+  );
+  if (!restored)
+    return Response.json(
+      { error: { message: "No endpoint override to reset", type: "not_found" } },
+      { status: 404 }
+    );
+  return Response.json({ restored: true, resetEndpoints: true });
+}
+
+/**
  * GET /api/provider-models?provider=<id>
  * List custom models (all providers if no provider param)
  */
 export async function GET(request) {
-  try {
-    // Require authentication for security
-    if (!(await isAuthenticated(request))) {
-      return Response.json(
-        { error: { message: "Authentication required", type: "invalid_api_key" } },
-        { status: 401 }
-      );
-    }
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
 
+  try {
     const { searchParams } = new URL(request.url);
     const provider = searchParams.get("provider");
 
     const models = provider ? await getCustomModels(provider) : await getAllCustomModels();
     const modelCompatOverrides = provider ? getModelCompatOverrides(provider) : [];
+    const modelOutputOverrides = listProviderOutputOverrides(provider);
+    const outputOverrides = new Map(
+      modelOutputOverrides.map((row) => [row.modelId, row.maxOutputTokenOverride])
+    );
     // #4125: surface the manual/auto context-window override (Feature 5004 table) on
     // each custom-model row so the UI can show/edit it without a second round trip.
     const modelsWithContextOverride =
@@ -73,13 +141,17 @@ export async function GET(request) {
         ? models.map((model: Record<string, unknown>) => {
             const modelId = typeof model?.id === "string" ? model.id : null;
             const record = modelId ? getModelContextOverrideRecord(provider, modelId) : null;
+            const outputOverride = modelId ? outputOverrides.get(modelId) : undefined;
+            const outputFields =
+              outputOverride === undefined ? {} : { maxOutputTokenOverride: outputOverride };
             return record
               ? {
                   ...model,
+                  ...outputFields,
                   contextWindowOverride: record.realContext,
                   contextWindowOverrideSource: record.source,
                 }
-              : model;
+              : { ...model, ...outputFields };
           })
         : models;
 
@@ -93,9 +165,30 @@ export async function GET(request) {
       }
     }
 
+    // #14337: the block above attaches the override to CUSTOM-model rows only.
+    // A synced/imported model has no `customModels` row, so its override — which
+    // the PUT compatOnly branch has always accepted — was never readable, and the
+    // UI had no value to show or edit. Return the provider's overrides directly
+    // so a row without a custom entry can still carry one.
+    const modelContextOverrides = provider
+      ? listModelContextOverrides()
+          .filter((override) => override.provider === provider)
+          .map((override) => ({
+            modelId: override.modelId,
+            contextWindowOverride: override.realContext,
+            contextWindowOverrideSource: override.source,
+          }))
+      : [];
+
     return Response.json({
       models: modelsWithContextOverride,
-      modelCompatOverrides,
+      modelCompatOverrides: modelCompatOverrides.map((override) => ({
+        ...override,
+        isHidden: isHiddenForModality(override, "chat"),
+      })),
+      modelContextOverrides,
+      modelOutputOverrides,
+      endpointAdapters: provider ? getRegisteredEndpointAdapterStatuses(provider) : {},
       hiddenModelsByProvider,
     });
   } catch {
@@ -111,6 +204,9 @@ export async function GET(request) {
  * Body: { provider, modelId, modelName? }
  */
 export async function POST(request) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
   let rawBody;
   try {
     rawBody = await request.json();
@@ -122,14 +218,6 @@ export async function POST(request) {
   }
 
   try {
-    // Require authentication for security
-    if (!(await isAuthenticated(request))) {
-      return Response.json(
-        { error: { message: "Authentication required", type: "invalid_api_key" } },
-        { status: 401 }
-      );
-    }
-
     const validation = validateBody(providerModelMutationSchema, rawBody);
     if (isValidationFailure(validation)) {
       return Response.json({ error: validation.error }, { status: 400 });
@@ -141,6 +229,7 @@ export async function POST(request) {
       source,
       apiFormat,
       supportedEndpoints,
+      endpointCapabilitySource,
       targetFormat,
       // #1294: persist the per-model token limits set in the add-model form.
       max_input_tokens: maxInputTokens,
@@ -155,9 +244,17 @@ export async function POST(request) {
       modelType,
     } = validation.data;
 
+    // Store the bare upstream id: a pasted/imported id can arrive already
+    // carrying the node prefix (copied from a prefixed listing), and storing
+    // it verbatim would stack another prefix at catalog emission
+    // (`<prefix>/<prefix>/<model>`). Scoped to compatible nodes — canonical
+    // providers' ids that begin with their own name are legitimate and pass
+    // through untouched.
+    const storedModelId = await normalizeNodeModelId(provider, modelId);
+
     const model = await addCustomModel(
       provider,
-      modelId,
+      storedModelId,
       modelName,
       source || "manual",
       apiFormat,
@@ -174,6 +271,7 @@ export async function POST(request) {
         ...(typeof dimensions === "number" && dimensions > 0 ? { dimensions } : {}),
         ...(Array.isArray(supportedInputTypes) ? { supportedInputTypes } : {}),
         ...(typeof modelType === "string" ? { modelType } : {}),
+        ...(endpointCapabilitySource ? { endpointCapabilitySource } : {}),
       }
     );
     return Response.json({ model });
@@ -191,6 +289,9 @@ export async function POST(request) {
  * Body: { provider, modelId, modelName?, apiFormat?, supportedEndpoints? }
  */
 export async function PUT(request) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
   let rawBody;
   try {
     rawBody = await request.json();
@@ -202,13 +303,6 @@ export async function PUT(request) {
   }
 
   try {
-    if (!(await isAuthenticated(request))) {
-      return Response.json(
-        { error: { message: "Authentication required", type: "invalid_api_key" } },
-        { status: 401 }
-      );
-    }
-
     const validation = validateBody(providerModelMutationSchema, rawBody);
     if (isValidationFailure(validation)) {
       return Response.json({ error: validation.error }, { status: 400 });
@@ -226,10 +320,16 @@ export async function PUT(request) {
       upstreamHeaders,
       compatByProtocol,
       contextWindowOverride,
+      maxOutputTokenOverride,
       supportsVision,
       generationConfig,
       isFree,
     } = validation.data;
+
+    // Same write-path contract as POST: address (and, with createIfMissing,
+    // create) the row under the bare upstream id so a prefixed paste cannot
+    // re-introduce a stacked custom row through the update verb.
+    const storedModelId = await normalizeNodeModelId(provider, modelId);
 
     const raw = rawBody as Record<string, unknown>;
     const updates: Record<string, unknown> = {};
@@ -258,15 +358,22 @@ export async function PUT(request) {
     let contextWindowOverrideResult: number | null | undefined;
     if ("contextWindowOverride" in raw) {
       if (contextWindowOverride == null) {
-        removeModelContextOverride(provider, modelId);
+        removeModelContextOverride(provider, storedModelId);
+        // Legacy overrides may be keyed by the id as it was submitted before
+        // normalization; clear that key too so a stale override cannot linger.
+        if (storedModelId !== modelId) removeModelContextOverride(provider, modelId);
         contextWindowOverrideResult = null;
       } else {
-        setModelContextOverride(provider, modelId, contextWindowOverride, "manual");
+        setModelContextOverride(provider, storedModelId, contextWindowOverride, "manual");
+        if (storedModelId !== modelId) removeModelContextOverride(provider, modelId);
         contextWindowOverrideResult = contextWindowOverride;
       }
     }
 
-    const model = await updateCustomModel(provider, modelId, updates, { createIfMissing: true });
+    const model = await updateCustomModel(provider, storedModelId, updates, {
+      createIfMissing: maxOutputTokenOverride === undefined || Object.keys(updates).length > 0,
+    });
+    clearLegacyVisionOverride(provider, modelId, updates);
 
     if (!model) {
       const rawKeys = Object.keys(raw);
@@ -285,6 +392,7 @@ export async function PUT(request) {
             "upstreamHeaders",
             "compatByProtocol",
             "contextWindowOverride",
+            "maxOutputTokenOverride",
             "apiFormat",
             "targetFormat",
             "supportsVision",
@@ -295,6 +403,7 @@ export async function PUT(request) {
           "upstreamHeaders" in raw ||
           "compatByProtocol" in raw ||
           "contextWindowOverride" in raw ||
+          "maxOutputTokenOverride" in raw ||
           "apiFormat" in raw ||
           "targetFormat" in raw ||
           "supportsVision" in raw);
@@ -345,10 +454,11 @@ export async function PUT(request) {
               : undefined;
         }
         if (Object.keys(patch).length > 0) {
-          mergeModelCompatOverride(provider, modelId, patch);
+          mergeModelCompatOverride(provider, storedModelId, patch);
         }
         return Response.json({
           ok: true,
+          ...persistOutputTokenOverride(provider, storedModelId, maxOutputTokenOverride),
           modelCompatOverrides: getModelCompatOverrides(provider),
           ...(contextWindowOverrideResult !== undefined
             ? { contextWindowOverride: contextWindowOverrideResult }
@@ -363,6 +473,7 @@ export async function PUT(request) {
 
     return Response.json({
       model,
+      ...persistOutputTokenOverride(provider, storedModelId, maxOutputTokenOverride),
       ...(contextWindowOverrideResult !== undefined
         ? { contextWindowOverride: contextWindowOverrideResult }
         : {}),
@@ -381,6 +492,9 @@ export async function PUT(request) {
  * Body: { isHidden: boolean, modelIds?: string[] }
  */
 export async function PATCH(request) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
   let rawBody;
   try {
     rawBody = await request.json();
@@ -392,13 +506,6 @@ export async function PATCH(request) {
   }
 
   try {
-    if (!(await isAuthenticated(request))) {
-      return Response.json(
-        { error: { message: "Authentication required", type: "invalid_api_key" } },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const provider = searchParams.get("provider");
     const body =
@@ -444,20 +551,19 @@ export async function PATCH(request) {
       );
     }
 
-    for (const modelId of modelIds) {
-      const updatedModel = await updateCustomModel(provider, modelId, { isHidden: body.isHidden });
-      if (!updatedModel) {
-        mergeModelCompatOverride(provider, modelId, { isHidden: body.isHidden, modality });
-      }
-    }
-
+    const aliasTargetIds = await setHiddenByStoredIds(provider, modelIds, body.isHidden, modality);
     const aliasChanges =
       body.isHidden === true
-        ? { removed: await deleteManagedAvailableModelAliases(provider, modelIds), assigned: [] }
+        ? {
+            removed: await deleteManagedAvailableModelAliases(provider, aliasTargetIds),
+            assigned: [],
+          }
         : {
             removed: [],
             assigned: (
-              await syncManagedAvailableModelAliases(provider, modelIds, { pruneMissing: false })
+              await syncManagedAvailableModelAliases(provider, aliasTargetIds, {
+                pruneMissing: false,
+              })
             ).assignedAliases,
           };
 
@@ -481,19 +587,15 @@ export async function PATCH(request) {
  * DELETE /api/provider-models?provider=<id>&model=<modelId>
  */
 export async function DELETE(request) {
-  try {
-    // Require authentication for security
-    if (!(await isAuthenticated(request))) {
-      return Response.json(
-        { error: { message: "Authentication required", type: "invalid_api_key" } },
-        { status: 401 }
-      );
-    }
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
 
+  try {
     const { searchParams } = new URL(request.url);
     const provider = searchParams.get("provider");
     const modelId = searchParams.get("model");
     const resetOverride = searchParams.get("resetOverride") === "true";
+    const resetEndpoints = searchParams.get("resetEndpoints") === "true";
 
     if (!provider) {
       return Response.json(
@@ -511,6 +613,7 @@ export async function DELETE(request) {
     const all = searchParams.get("all");
     if (all === "true") {
       await replaceCustomModels(provider, [], { allowEmpty: true });
+      clearModelCompatOverrides(provider);
       const syncedAvailableModelListsRemoved =
         await deleteSyncedAvailableModelsForProvider(provider);
       const removedAliases = await deleteManagedAvailableModelAliasesForProvider(provider);
@@ -533,16 +636,29 @@ export async function DELETE(request) {
       );
     }
 
+    if (resetEndpoints) return await resetEndpointOverrideResponse(provider, modelId);
+
     // Resetting a user-owned overlay must never delete the same-id synced base.
     // The normal delete action retains its existing behavior for a standalone
     // synced row, while the detail-page reset control uses resetOverride=true.
-    const removedCustom = await removeCustomModel(provider, modelId);
+    // Match the row the operator can see: the id as submitted, then its
+    // node-normalized form, so both legacy stacked rows and pasted prefixed
+    // ids resolve to the same delete.
+    const normalizedModelId = await normalizeNodeModelId(provider, modelId);
+    const modelIdForms = Array.from(new Set([modelId, normalizedModelId]));
+    const removedCustom = await tryEachIdForm(modelId, normalizedModelId, (id) =>
+      removeCustomModel(provider, id)
+    );
     const removedSynced =
-      removedCustom || resetOverride ? false : await removeSyncedAvailableModel(provider, modelId);
+      removedCustom || resetOverride
+        ? false
+        : await tryEachIdForm(modelId, normalizedModelId, (id) =>
+            removeSyncedAvailableModel(provider, id)
+          );
     const removed = removedCustom || removedSynced;
     if (resetOverride && removedCustom) {
-      removeModelContextOverride(provider, modelId);
-      const aliasChanges = await syncManagedAvailableModelAliases(provider, [modelId], {
+      modelIdForms.forEach((id) => removeModelContextOverride(provider, id));
+      const aliasChanges = await syncManagedAvailableModelAliases(provider, modelIdForms, {
         pruneMissing: false,
       });
       return Response.json({
@@ -552,7 +668,7 @@ export async function DELETE(request) {
       });
     }
 
-    const removedAliases = await deleteManagedAvailableModelAliases(provider, [modelId]);
+    const removedAliases = await deleteManagedAvailableModelAliases(provider, modelIdForms);
     return Response.json({ removed, aliasChanges: { removed: removedAliases, assigned: [] } });
   } catch (error) {
     console.error("Error removing provider model:", error);

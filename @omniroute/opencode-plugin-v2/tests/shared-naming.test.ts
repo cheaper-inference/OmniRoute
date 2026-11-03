@@ -49,11 +49,15 @@ test("formatFreeBudget: missing token/credit counts default to 0", () => {
   assert.equal(formatFreeBudget({ freeType: "recurring-daily" }), "0 tokens/day");
 });
 
-test("formatFreeBudget: unrecognised freeType falls through to the default branch", () => {
+test("formatFreeBudget: unknown future value renders its own name, never empty", () => {
   // `freeType` is populated from catalog data at runtime, so a value the
   // build doesn't know about is reachable even though TypeScript treats the
-  // `default:` arm as dead code for a well-typed caller.
-  assert.equal(formatFreeBudget({ freeType: "some-future-type" as FreeModelFreeType }), "");
+  // `default:` arm as dead code for a well-typed caller. The picker shows
+  // the value itself instead of an empty suffix.
+  assert.equal(
+    formatFreeBudget({ freeType: "some-future-type" as FreeModelFreeType }),
+    "(some-future-type)"
+  );
 });
 
 test("formatFreeBudget: sub-1K token count is not abbreviated", () => {
@@ -71,5 +75,12 @@ test("formatFreeBudget: the 999_999 rounding wart is fixed — promotes to 1M", 
   assert.equal(
     formatFreeBudget({ freeType: "recurring-daily", monthlyTokens: 999_999 }),
     "1M tokens/day"
+  );
+});
+
+test("formatFreeBudget: uncapped budget has no counters, label only", () => {
+  assert.equal(
+    formatFreeBudget({ freeType: "recurring-uncapped" as FreeModelFreeType }),
+    "(uncapped)"
   );
 });

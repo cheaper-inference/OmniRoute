@@ -1,16 +1,12 @@
 # Embedded Services (Kiswahili)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
-> **Toleo:** v3.8.44
-> **Ilisasishwa mwisho:** 2026-07-03
-> **Hadhira:** Wahandisi wanaoongeza, wanaodumisha, au wanaotatua hitilafu za huduma zilizopachikwa (9Router, CLIProxyAPI, Mux, Bifrost).
+> **Toleo:** v3.8.44** Mara ya mwisho kusasishwa:** 2026-10-28** Hadhira:** Wahandisi kuongeza, kudumisha, au kutatua huduma zilizopachikwa (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Huduma zilizopachikwa ni zana za mchakato-saidizi zinazosakinishwa ndani ya mashine ambazo OmniRoute husakinisha, husimamia, na
-huziweka wazi kama malengo kamili ya uelekezaji. Tofauti na watoa huduma wa nje (ambao hufikiwa kupitia intaneti
-kwa kutumia funguo za API), huduma zilizopachikwa huendeshwa kwenye mashine ileile kama OmniRoute na kuwasiliana kupitia loopback.
+Huduma zilizopachikwa ni zana za mchakato wa kando zilizosakinishwa ndani ya nchi ambazo OmniRoute husakinisha, kusimamia na kufichua kama shabaha za daraja la kwanza za uelekezaji. Tofauti na watoa huduma wa nje (ambao hufikiwa kupitia mtandao kupitia funguo za API ), huduma zilizopachikwa huendeshwa kwa mashine sawa na OmniRoute na huwasiliana kupitia loopback.
 
 ---
 
@@ -31,46 +27,49 @@ kwa kutumia funguo za API), huduma zilizopachikwa huendeshwa kwenye mashine ilei
 
 ### Kwa nini huduma zilizopachikwa?
 
-Huduma tano zimepachikwa:
+Huduma nane zimepachikwa:
 
-| Huduma          | Kifurushi cha npm                              | Porti chaguomsingi | Madhumuni                                                                                                                                                                                                   |
-| --------------- | ---------------------------------------------- | :----------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                      |       20130        | Kipanga njia cha AI ambacho OmniRoute inaweza kutumia kama mtoa huduma mdogo. Modeli huwekwa wazi kama `9router/{sub}/{model}`                                                                              |
-| **CLIProxyAPI** | Faili tekelezi ya toleo la GitHub (`cliproxy`) |        8317        | Adapta ya proksi ya ndani kwa mitiririko ya uthibitishaji ya Anthropic CLI. Hutoa uelekezaji wa akiba wakati tokeni za OAuth zinapoisha muda wake                                                           |
-| **Mux**         | `mux` (`mux server` isiyo na kiolesura)        |        8322        | Daemon ya ndani ya uratibu wa mawakala (coder/mux). Inadhibitiwa kwa mzunguko wa maisha pekee — si lengo la uelekezaji (hakuna uelekezaji wa proksi wa LLM).                                                |
-| **Bifrost**     | `@maximhq/bifrost`                             |        8080        | Mfumo wa nyuma wa upelekaji wa lango la AI ulioandikwa kwa Go. Unapoendeshwa, huchaguliwa kiotomatiki na njia ya upelekaji (`/v1/relay/`)                                                                   |
-| **Dario**       | `@askalf/dario`                                |        3456        | Proksi ya usajili wa Claude — mbadala/akiba ya CLIProxyAPI kwa trafiki yenye muundo wa Claude-Code; ufunguo unaodungwa huwa `DARIO_ADMIN_TOKEN` inayodhibiti uwanda wake wa udhibiti wa OAuth wa `/admin/*` |
+| Huduma                   | kifurushi cha npm                       | Mlango chaguomsingi | Kusudi                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------ | --------------------------------------- | :-----------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 Ruta**               | `9router`                               |        20130        | AI router ambayo OmniRoute inaweza kutumia kama mtoa huduma ndogo. Miundo iliyofichuliwa kama `9router/{sub}/{model}`                                                                                                                                                                                                                                     |
+| **CLIProxyAPI**          | GitHub kutolewa kwa binary (`cliproxy`) |        8317         | Adapta ya ndani ya seva mbadala ya mtiririko wa uandishi wa Anthropic CLI. Hutoa njia mbadala wakati tokeni OAuth zinaisha                                                                                                                                                                                                                                |
+| **Mux**                  | `mux` ( `mux server` isiyo na kichwa)   |        8322         | Daemon ya wakala-orchestration wa ndani (coder/mux). Lifecycle-inayosimamiwa tu — sio lengo la uelekezaji (hakuna proksi LLM ).                                                                                                                                                                                                                           |
+| **Bifrost**              | `@maximhq/bifrost`                      |        8080         | Nenda nyuma ya nyuma ya lango la AI. Wakati wa kukimbia, huchaguliwa kiotomatiki na njia ya relay (`/v1/relay/`)                                                                                                                                                                                                                                          |
+| **Dario**                | `@askalf/dario`                         |        3456         | Wakala wa usajili wa Claude — alternative/failover hadi CLIProxyAPI kwa trafiki yenye umbo la Claude-Code; ufunguo uliodungwa unakuwa `DARIO_ADMIN_TOKEN` ikifunga ndege yake ya kudhibiti `/admin/*` OAuth                                                                                                                                               |
+| **fungua-wa**            | `@open-wa/wa-automate`                  |        8323         | WhatsApp Web otomatiki (Chromium isiyo na kichwa kupitia Puppeteer). Lifecycle-inayosimamiwa tu — sio lengo la uelekezaji.                                                                                                                                                                                                                                |
+| **LLMLingua**            | `@atjsh/llmlingua-2`                    |        20135        | Kando ya kubana kwa haraka — halisi LLMLingua-2 ONNX modeli ( bandari JS/TS ya algoriti ya Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` hutuma `/compress` juu ya HTTP kwake, ikirudi nyuma kwa uzio wa nyuma wa mchakato wa mfanyakazi wakati gari la kando liko chini. Lifecycle-inayodhibitiwa tu — sio lengo la uelekezaji. |
+| **kisanduku cha kuimba** | GitHub kutolewa kwa binary (`singbox`)  |        20140        | TPROXY sidecar inaunga mkono uingiliaji wa wakala wa uwazi wa `applyTproxy()`(`src/mitm/tproxy/setup.ts`). Kisakinishi hupakua toleo lililobandikwa, lililothibitishwa na checksum. Lifecycle-inayodhibitiwa tu — sio lengo la uelekezaji (hakuna proksi ya LLM )                                                                                         |
 
-Zote tano hufuata modeli ileile ya usimamizi:
+Wote wanane wanafuata modeli sawa ya usimamizi:
 
-- OmniRoute huzisakinisha chini ya `DATA_DIR/services/{name}/` (zikiwa zimetengwa na `package.json` ya OmniRoute yenyewe)
-- OmniRoute huzianzisha na kuzifuatilia kama michakato-toto
-- OmniRoute hudunga ufunguo wa API wa muda mfupi katika mazingira ya mchakato-toto na kuubadilisha bila kusimamisha huduma (inapohusika)
-- Njia zote za usimamizi (`/api/services/*`) ni **LOCAL_ONLY** — zinaweza kufikiwa tu kupitia loopback (kanuni thabiti #17)
+- OmniRoute huziweka chini ya `DATA_DIR/services/{name}/` (zilizotengwa na OmniRoute mwenyewe `package.json`)
+- OmniRoute huzaa na kuzifuatilia kama mchakato wa mtoto
+- OmniRoute huingiza ufunguo wa API wa muda mfupi kwenye mazingira ya mtoto na kuzungusha bila muda wa kupumzika (inapohitajika)
+- Njia zote za usimamizi (`/api/services/*`) ni**LOCAL_ONLY** — kupatikana tu kutoka kwa loopback (sheria ngumu # 17)
 
-### Maamuzi muhimu (kutoka kwenye mpango wa usanifu)
+### Maamuzi muhimu (kutoka kwa mpango wa muundo)
 
-| Uamuzi                                         | Thamani                                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Ufikiaji wa dashibodi kwa UI asilia ya 9Router | Proksi ya kinyume katika `/dashboard/providers/services/9router/embed/*`                                |
-| Utaratibu wa usakinishaji                      | `npm install {package}` kupitia `execFile` (hakuna upachikaji wa shell)                                 |
-| Hali ya matumizi                               | Mtoa huduma amesajiliwa kama `9router/{sub}/{model}` katika injini ya uelekezaji                        |
-| Usimamizi wa ufunguo wa API                    | OmniRoute hutengeneza, husimba kwa njia fiche wakati umehifadhiwa (AES-256-GCM), na hudunga kupitia env |
-| Eneo la dashibodi                              | `/dashboard/providers/services` (vichupo vitatu)                                                        |
-| Kuwasha kiotomatiki                            | Kitufe cha kuwasha/kuzima kwa kila huduma, chaguomsingi ni OFF                                          |
+| Uamuzi                                     | Thamani                                                                            |
+| ------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Ufikiaji wa dashibodi kwa 9Router asili UI | Reverse proksi kwa `/dashboard/providers/services/9router/embed/*`                 |
+| Utaratibu wa ufungaji                      | `npm install {package}` kupitia `execFile` (hakuna tafsiri ya ganda)               |
+| Hali ya matumizi                           | Mtoa huduma aliyesajiliwa kama `9router/{sub}/{model}` katika injini ya uelekezaji |
+| API usimamizi muhimu                       | OmniRoute hutoa, husimba kwa njia fiche (AES-256-GCM), na kuingiza kupitia env     |
+| Mahali pa dashibodi                        | `/dashboard/providers/services` (tabo tatu)                                        |
+| Anza kiotomatiki                           | Geuza kwa kila huduma, OFF chaguomsingi                                            |
 
 ---
 
-## 2. Usanifu — tabaka 4
+## 2. Usanifu — 4 tabaka
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Tabaka 1 — UI                                                     │
-│  /dashboard/providers/services  (vichupo: CLIProxyAPI | 9Router | Mux)│
-│  Kumbukumbu mubashara (SSE), Anzisha/Simamisha/Anzisha upya/Sasisha, Mipangilio, Sakinisha│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Shell + uelekezaji wa vichupo kwa ?tab=│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -78,7 +77,7 @@ Zote tano hufuata modeli ileile ya usimamizi:
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Tabaka 2 — API (LOCAL_ONLY — loopback pekee)                      │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -87,72 +86,74 @@ Zote tano hufuata modeli ileile ya usimamizi:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (proksi ya kinyume ya HTTP + WebSocket → 9Router upstream)      │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Lango: LOCAL_ONLY_API_PREFIXES inajumuisha "/api/services/" na    │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ miito ya ndani ya mchakato
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Tabaka 3 — ServiceSupervisor (src/lib/services/)                  │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Msimamizi wa jumla (child_process.spawn)   │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
 │    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
 │    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
 │    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       20130 kwa 9Router (inaweza kusanidiwa)          │
-│    ├── logs:       bafa ya mzunguko ya stdio ya MB 5 → matukio ya SSE│
-│    ├── health:     HTTP GET /health kila sekunde 2–5, urejeshaji wa polepole│
-│    └── lifecycle:  SIGTERM sekunde 15 → SIGKILL                    │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Huanzisha SERVICES[] zote wakati mchakato unapoanza│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       GET /v1/models ya mara kwa mara → jedwali la service_models│
-│  ringBuffer.ts      Bafa ya kumbukumbu ya mzunguko (MB 5 kwa kila huduma)│
-│  healthCheck.ts     Uchunguzi wa afya wa HTTP kwa upigaji kura     │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
-│                      (adapta za kisakinishaji)                     │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP inayooana na OpenAI (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Tabaka 4 — Mtoa huduma / Uelekezaji                               │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Hutafuta tena port na API key kwa kila ombi (hakuna uhifadhi wa muda).│
-│    Huondoa kiambishi awali cha "9router/" kutoka kwa model id kabla ya kupitisha kwa proksi.│
-│    Hurejesha 503 service_not_running ikiwa msimamizi hayuko katika "running".│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Ingizo la "9router": isEmbeddedService: true                    │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Model huhifadhiwa kama "9router/{sub}/{model}" (ikiwa na kiambishi awali).│
-│    Husawazishwa kila dakika 5 na modelSync.ts.                     │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux inadhibitiwa katika mzunguko wa maisha PEKEE (Tabaka 1-3) — ni daemon ya│
-│  uratibu wa mawakala, si proksi ya LLM, kwa hivyo haina kitekelezaji/│
-│  ingizo la mtoa huduma la Tabaka 4 na kamwe hailengiwi na uelekezaji.│
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Faili muhimu za chanzo
+### Faili za chanzo muhimu
 
-| Faili                                       | Jukumu                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Darasa kuu: mzunguko wa maisha, kufuli, afya, bafa ya mviringo            |
-| `src/lib/services/bootstrap.ts`             | Usajili wa kiwango cha mchakato na kuanza kiotomatiki                     |
-| `src/lib/services/registry.ts`              | Ramani ya singleton `tool → supervisor`                                   |
-| `src/lib/services/apiKey.ts`                | Utengenezaji wa funguo, usimbaji fiche wa AES-256-GCM wakati wa kuhifadhi |
-| `src/lib/services/modelSync.ts`             | Usawazishaji wa mara kwa mara wa modeli (dakika 5) + unapohitajika        |
-| `src/lib/services/ringBuffer.ts`            | Bafa ya kumbukumbu ya mviringo ya MB 5 yenye usajili wa SSE               |
-| `src/lib/services/healthCheck.ts`           | Uchunguzi wa afya wa HTTP (muda unaweza kusanidiwa)                       |
-| `src/lib/services/installers/ninerouter.ts` | Kusakinisha/kusasisha/kuondoa 9Router kwa npm                             |
-| `src/lib/services/installers/cliproxy.ts`   | Kusakinisha/kusasisha/kuondoa CLIProxyAPI kwa npm                         |
-| `src/lib/services/installers/mux.ts`        | Kusakinisha/kusasisha/kuondoa Mux kwa npm                                 |
-| `src/app/api/services/9router/_lib.ts`      | Kisaidizi cha `getOrInitSupervisor()`                                     |
-| `src/app/api/services/[name]/logs/route.ts` | Endpointi ya pamoja ya kumbukumbu za SSE                                  |
-| `open-sse/executors/ninerouter.ts`          | Kitekelezaji cha mtoa huduma (Tabaka la 4)                                |
+| Faili                                       | Jukumu                                                                |
+| ------------------------------------------- | --------------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Darasa la msingi: mzunguko wa maisha, kufuli, afya, bafa ya pete      |
+| `src/lib/services/bootstrap.ts`             | Usajili wa kiwango cha mchakato na uanze kiotomatiki                  |
+| `src/lib/services/registry.ts`              | Ramani ya singleton `tool → supervisor`                               |
+| `src/lib/services/apiKey.ts`                | Uzalishaji wa ufunguo, usimbaji fiche AES-256-GCM wakati wa kupumzika |
+| `src/lib/services/modelSync.ts`             | Usawazishaji wa muundo wa mara kwa mara (dakika 5) + unapohitajika    |
+| `src/lib/services/ringBuffer.ts`            | 5 MB bafa ya logi ya duara yenye SSE kujiandikisha                    |
+| `src/lib/services/healthCheck.ts`           | uchunguzi wa afya HTTP (muda unaoweza kusanidiwa)                     |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall kwa 9Router                              |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall kwa CLIProxyAPI                          |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall kwa Mux                                  |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall kwa open-wa                              |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall kwa LLMLingua                            |
+| `src/app/api/services/9router/_lib.ts`      | msaidizi `getOrInitSupervisor()`                                      |
+| `src/app/api/services/[name]/logs/route.ts` | Mwisho wa kumbukumbu za SSE                                           |
+| `open-sse/executors/ninerouter.ts`          | Mtekelezaji mtoaji (Safu ya 4)                                        |
 
 ---
 
@@ -206,58 +207,54 @@ hali za mashindano wakati, kwa mfano, uanzishaji otomatiki na kitufe cha UI vina
 
 ---
 
-## 4. Rejeleo la API
+## 4. kumbukumbu ya API
 
-Njia zote zilizo chini ya `/api/services/` ni **LOCAL_ONLY** (loopback pekee, kanuni thabiti #17).
-Maombi yasiyotoka kwenye loopback hupokea `403 LOCAL_ONLY` bila kujali tokeni ya uthibitishaji.
+Njia zote chini ya `/api/services/` ni**LOCAL_ONLY** (Loopback tu, kanuni ngumu #17). Maombi yasiyo ya kitanzi hupokea `403 LOCAL_ONLY` bila kujali tokeni ya uthibitishaji.
 
-### 4.1 Vituo vya 9Router (njia 11)
+### 4.1 9Njia za mwisho za njia (njia 11)
 
 #### `POST /api/services/9router/install`
 
-Sakinisha 9Router kutoka npm. Huunda `DATA_DIR/services/9router/` ikiwa na
-`package.json` na `node_modules/` zake yenyewe. Haikinzani na vitegemezi vya OmniRoute.
+Sakinisha 9Router kutoka npm. Huunda `DATA_DIR/services/9router/` na `package.json` yake na `node_modules/`. Haipingani na deps za OmniRoute mwenyewe.
 
-**Mwili wa ombi** (vyote ni vya hiari):
+**Omba mwili** (yote ni hiari):
 
 ```json
 { "version": "latest" }
 ```
 
-| Sehemu    | Aina     | Chaguo-msingi | Maelezo                                       |
-| --------- | -------- | ------------- | --------------------------------------------- |
-| `version` | `string` | `"latest"`    | lebo ya toleo la npm au semver ya kusakinisha |
+| Shamba    | Aina     | Chaguomsingi | Maelezo                                    |
+| --------- | -------- | ------------ | ------------------------------------------ |
+| `version` | `string` | `"latest"`   | npm toleo la lebo au semver ya kusakinisha |
 
 **Majibu:**
 
-| Hali  | Maelezo                                                                      |
-| ----- | ---------------------------------------------------------------------------- |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                       |
-| `400` | Mwili wa ombi si sahihi (uthibitishaji wa Zod umeshindwa)                    |
-| `409` | Usakinishaji tayari unaendelea (kufuli imeshikiliwa)                         |
-| `500` | Usakinishaji wa npm umeshindwa — angalia `message` kwa hitilafu iliyoeleweka |
+| Hali  | Maelezo                                                                 |
+| ----- | ----------------------------------------------------------------------- |
+| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                  |
+| `400` | Mwili batili wa ombi (Zod uthibitishaji umeshindwa)                     |
+| `409` | Tayari inasakinisha (kufuli imeshikiliwa)                               |
+| `500` | npm kusakinisha kumeshindwa — tazama `message` kwa hitilafu ya kirafiki |
 
-**Maelezo:** Hutumia `execFile('npm', [...])` — hakuna shell, hakuna uingizaji wa thamani (kanuni thabiti #13).
-Hitilafu za EACCES huonyeshwa kama ujumbe unaoeleweka.
+**Vidokezo:** Hutumia `execFile('npm', [...])` — hakuna ganda, hakuna tafsiri (kanuni ngumu # 13). makosa EACCES yanaonekana kama ujumbe wa kirafiki.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Anzisha 9Router. Husajili msimamizi ikiwa bado hajasajiliwa, kisha huita
-`supervisor.start()`. Haina athari ya ziada ikiwa tayari inaendelea.
+Anzisha 9Router. Husajili msimamizi ikiwa bado hajasajiliwa, kisha piga simu `supervisor.start()`. Kutokuwa na uwezo wakati tayari unaendesha.
 
 **Mwili wa ombi:** hakuna
 
 **Majibu:**
 
-| Hali  | Maelezo                                                            |
-| ----- | ------------------------------------------------------------------ |
-| `200` | Objekti ya `ServiceStatus` (angalia skima hapa chini)              |
-| `409` | 9Router haijasakinishwa (`status: "not_installed"`)                |
-| `503` | Uanzishaji umeshindwa (hitilafu ya mchakato — angalia `lastError`) |
+| Hali  | Maelezo                                                    |
+| ----- | ---------------------------------------------------------- |
+| `200` | `ServiceStatus` kitu (tazama schema hapa chini)            |
+| `409` | 9Router haijasakinishwa (`status: "not_installed"`)        |
+| `503` | Kuanza kumeshindwa (kosa la mchakato — tazama `lastError`) |
 
-**Skima ya ServiceStatus:**
+**ServiceStatus schema:**
 
 ```json
 {
@@ -275,8 +272,7 @@ Anzisha 9Router. Husajili msimamizi ikiwa bado hajasajiliwa, kisha huita
 
 #### `POST /api/services/9router/stop`
 
-Simamisha 9Router kwa utaratibu. Hutuma SIGTERM, husubiri s 15, kisha hutuma SIGKILL ikiwa bado inaendelea.
-Haina athari ya ziada ikiwa tayari imesimama.
+Acha kwa neema 9Router. Hutuma SIGTERM, subiri sekunde 15, kisha SIGKILL ikiwa bado hai. Kutokuwa na uwezo wakati tayari kumesimamishwa.
 
 **Mwili wa ombi:** hakuna
 
@@ -284,28 +280,26 @@ Haina athari ya ziada ikiwa tayari imesimama.
 
 | Hali  | Maelezo                                 |
 | ----- | --------------------------------------- |
-| `200` | `ServiceStatus` (hali: "stopped")       |
-| `503` | Usimamishaji umeshindwa bila kutarajiwa |
+| `200` | `ServiceStatus` (jimbo: "kusimamishwa") |
+| `503` | Kuacha kumeshindwa bila kutarajiwa      |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Ni sawa na `stop()` ikifuatiwa na `start()` chini ya kufuli ya operesheni.
+Sawa na `stop()` kisha `start()` chini ya kufuli ya operesheni.
 
 **Mwili wa ombi:** hakuna
 
-**Majibu:** sawa na `start` (hurudisha `ServiceStatus` ya mwisho).
+**Majibu:** sawa na `start` (inarudisha `ServiceStatus` ya mwisho).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Husasisha 9Router hadi toleo jipya zaidi la npm. Ikiwa huduma inaendelea, husimamishwa
-kwanza, usakinishaji wa npm huendeshwa (ikisakinisha toleo jipya mahali palepale), kisha
-huduma huanzishwa upya.
+Inasasisha 9Router hadi toleo jipya zaidi la npm. Ikiwa huduma inaendesha, imesimamishwa kwanza, npm install inaendeshwa (kusanikisha toleo jipya zaidi mahali), na kisha huduma inaanza tena.
 
-**Mwili wa ombi** (vyote ni vya hiari):
+**Omba mwili** (yote ni hiari):
 
 ```json
 { "version": "latest" }
@@ -316,16 +310,14 @@ huduma huanzishwa upya.
 | Hali  | Maelezo                                                         |
 | ----- | --------------------------------------------------------------- |
 | `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400` | Mwili si sahihi                                                 |
-| `500` | Usasishaji wa npm umeshindwa                                    |
+| `400` | Mwili batili                                                    |
+| `500` | sasisho la npm limeshindwa                                      |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Huzalisha ufunguo mpya wa API kwa ajili ya 9Router, huusimba kwa njia fiche unapokuwa umehifadhiwa, na huanzisha upya huduma
-(ikiwa inaendeshwa) ili ichukue ufunguo mpya kutoka kwenye mazingira yake. Ufunguo wa zamani
-hubatilishwa mara moja.
+Huzalisha kitufe kipya API kwa 9Router, huisimba kwa njia fiche wakati wa kupumzika, na kuanzisha upya huduma (ikiwa inaendesha) ili ichukue ufunguo mpya kutoka kwa mazingira yake. Ufunguo wa zamani umebatilishwa mara moja.
 
 **Mwili wa ombi:** hakuna
 
@@ -334,25 +326,24 @@ hubatilishwa mara moja.
 | Hali  | Maelezo                                    |
 | ----- | ------------------------------------------ |
 | `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | Ubadilishaji wa ufunguo umeshindikana      |
+| `500` | Mzunguko umeshindwa                        |
 
-**Usalama:** Ufunguo mpya haurudishwi kamwe katika jibu (hakuna uvujaji wa kitambulisho).
-Huhifadhiwa ukiwa umesimbwa kwa njia fiche (AES-256-GCM) katika jedwali la `version_manager`.
+**Usalama:** Ufunguo mpya haurudishwi kamwe katika jibu (hakuna uvujaji wa kitambulisho). Imehifadhiwa kwa njia fiche (AES-256-GCM) kwenye jedwali la `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Hurejesha hali iliyounganishwa ya moja kwa moja + DB, ikijumuisha metadata ya toleo na onyesho la awali la ufunguo wa API.
+Hurejesha hali ya moja kwa moja + DB ikiwa ni pamoja na metadata ya toleo na onyesho la kukagua ufunguo wa API.
 
 **Majibu:**
 
-| Hali  | Maelezo                        |
-| ----- | ------------------------------ |
-| `200` | Tazama schema iliyo hapa chini |
-| `500` | Usomaji wa hali umeshindikana  |
+| Hali  | Maelezo                  |
+| ----- | ------------------------ |
+| `200` | Tazama schema hapa chini |
+| `500` | Imeshindwa kusoma hali   |
 
-**Schema ya jibu:**
+**Ratiba ya majibu:**
 
 ```json
 {
@@ -376,8 +367,7 @@ Hurejesha hali iliyounganishwa ya moja kwa moja + DB, ikijumuisha metadata ya to
 
 #### `POST /api/services/9router/auto-start`
 
-Hubadilisha hali ya alama ya kuanza kiotomatiki. Wakati `enabled: true`, huduma huanza kiotomatiki
-OmniRoute itakapowashwa tena (ikiwa huduma imesakinishwa).
+Geuza bendera ya kuanzisha kiotomatiki. Wakati `enabled: true`, huduma huanza moja kwa moja wakati ujao wa buti OmniRoute (ikiwa huduma imewekwa).
 
 **Mwili wa ombi:**
 
@@ -396,139 +386,178 @@ OmniRoute itakapowashwa tena (ikiwa huduma imesakinishwa).
 
 #### `GET /api/services/9router/logs`
 
-Mtiririko wa SSE wa kumbukumbu za moja kwa moja kutoka kwenye bafa ya mzunguko ya stdout/stderr ya 9Router.
+SSE mtiririko wa kumbukumbu za moja kwa moja kutoka kwa 9Router's stdout/stderr bafa ya pete.
 
 **Vigezo vya hoja:**
 
-| Kigezo   | Aina      | Chaguo-msingi | Maelezo                                                                                              |
-| -------- | --------- | ------------- | ---------------------------------------------------------------------------------------------------- |
-| `tail`   | `integer` | 200           | Idadi ya mistari ya kihistoria ya kutuma kwanza (kiwango cha juu 1000)                               |
-| `filter` | `string`  | hakuna        | Kichujio cha mfuatano mdogo kisichojali herufi kubwa au ndogo (hakuna regex — salama dhidi ya ReDoS) |
+| Param    | Aina      | Chaguomsingi | Maelezo                                                                    |
+| -------- | --------- | ------------ | -------------------------------------------------------------------------- |
+| `tail`   | `integer` | 200          | Ni mistari mingapi ya kihistoria ya kutuma kwanza (max 1000)               |
+| `filter` | `string`  | hakuna       | Kichujio cha kamba ndogo ambacho hakijali kisa (hakuna regex — ReDoS-safe) |
 
-**Matukio ya SSE:**
+**matukio SSE :**
 
-| Tukio       | Data        | Maelezo                                     |
-| ----------- | ----------- | ------------------------------------------- |
-| `snapshot`  | `LogLine[]` | Mwisho wa awali wa kumbukumbu za kihistoria |
-| `log`       | `LogLine`   | Mstari wa kumbukumbu wa moja kwa moja       |
-| `heartbeat` | `{}`        | Kudumisha muunganisho kila sekunde 15       |
+| Tukio       | Data        | Maelezo                               |
+| ----------- | ----------- | ------------------------------------- |
+| `snapshot`  | `LogLine[]` | Mkia wa awali wa kihistoria           |
+| `log`       | `LogLine`   | Mstari wa kumbukumbu wa moja kwa moja |
+| `heartbeat` | `{}`        | Weka hai kila baada ya sekunde 15     |
 
-**Schema ya LogLine:**
+**LogLine schema:**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **Majibu:**
 
-| Hali  | Maelezo                                          |
-| ----- | ------------------------------------------------ |
-| `200` | `text/event-stream`                              |
-| `400` | Kigezo cha `filter` ni kirefu mno (> herufi 200) |
-| `404` | Huduma haijapatikana (msimamizi hajasajiliwa)    |
+| Hali  | Maelezo                                       |
+| ----- | --------------------------------------------- |
+| `200` | `text/event-stream`                           |
+| `400` | kigezo `filter` kirefu sana (> char 200)      |
+| `404` | Huduma haijapatikana (msimamizi hajasajiliwa) |
 
 ---
 
-### 4.2 Vituo vya mwisho vya CLIProxyAPI (njia 10)
+### 4.2 CLIProxyAPI vituo vya mwisho (njia 10)
 
-CLIProxyAPI ina muundo sawa wa vituo vya mwisho kama 9Router bila `rotate-key`, pamoja na
-`accounts`, `provider-expose` na `auto-restart-adopted`. Sasa hupokea
-ufunguo maalum wa API wa safu ya data unaoingizwa wakati wa kuanzishwa (`needsApiKey: true` katika
-`bootstrap.ts`, unaotumika kwa usawazishaji wa modeli); `status` inajumuisha sehemu chache zaidi.
+CLIProxyAPI ina umbo la mwisho sawa na 9Router minus `rotate-key`, pamoja na `accounts`, `provider-expose` na `auto-restart-adopted`. Sasa inapokea ufunguo maalum wa ndege API unaodungwa kwenye spawn (`needsApiKey: true` in `bootstrap.ts`, inayotumika kwa usawazishaji wa kielelezo); `status` inajumuisha sehemu chache.
 
-| Mbinu  | Njia                                | Maelezo                                          |
-| ------ | ----------------------------------- | ------------------------------------------------ |
-| `POST` | `/api/services/cliproxy/install`    | Sakinisha CLIProxyAPI kutoka npm                 |
-| `POST` | `/api/services/cliproxy/start`      | Anzisha CLIProxyAPI                              |
-| `POST` | `/api/services/cliproxy/stop`       | Simamisha CLIProxyAPI                            |
-| `POST` | `/api/services/cliproxy/restart`    | Anzisha upya CLIProxyAPI                         |
-| `POST` | `/api/services/cliproxy/update`     | Sasisha hadi toleo jipya zaidi                   |
-| `GET`  | `/api/services/cliproxy/status`     | Hali ya moja kwa moja + DB (bila `apiKeyMasked`) |
-| `POST` | `/api/services/cliproxy/auto-start` | Badilisha hali ya kuanza kiotomatiki             |
+| Mbinu  | Njia                                | Maelezo                                            |
+| ------ | ----------------------------------- | -------------------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | Sakinisha CLIProxyAPI kutoka npm                   |
+| `POST` | `/api/services/cliproxy/start`      | Anza CLIProxyAPI                                   |
+| `POST` | `/api/services/cliproxy/stop`       | Acha CLIProxyAPI                                   |
+| `POST` | `/api/services/cliproxy/restart`    | Anzisha CLIProxyAPI                                |
+| `POST` | `/api/services/cliproxy/update`     | Sasisha hadi toleo jipya zaidi                     |
+| `GET`  | `/api/services/cliproxy/status`     | Hali ya moja kwa moja + DB (hakuna `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | Geuza kuanza-otomatiki                             |
 
-Kituo cha mwisho cha pamoja cha `GET /api/services/{name}/logs` (tazama §4.1) hufanya kazi kwa
-huduma zote nne kwa kutumia sehemu badilika ya `[name]`.
+Mwisho wa `GET /api/services/{name}/logs` ulioshirikiwa (ona §4.1) hufanya kazi kwa huduma zote nne kwa kutumia sehemu inayobadilika `[name]`.
 
 ---
 
-### 4.3 Vituo vya mwisho vya Mux (njia 8)
+### 4.3 Miisho ya Mux (njia 8)
 
-Mux ina muundo sawa wa vituo vya mwisho kama CLIProxyAPI — hakuna njia ya `rotate-key` katika uso wa
-API (tokeni ya bearer huzalishwa kwa njia sawa na ya 9Router kupitia
-`getOrCreateApiKey("mux")` na huingizwa kupitia kigezo cha mazingira cha `MUX_SERVER_AUTH_TOKEN`, lakini
-bado hakuna kituo maalum cha mwisho cha kubadilisha ufunguo). Mux hudhibitiwa kwa mzunguko wa maisha pekee: tofauti na
-9Router, haina kitekelezaji cha Safu ya 4 na haisajiliwi kamwe kama mtoa huduma wa uelekezaji.
+Mux ina umbo la mwisho sawa na CLIProxyAPI — no `rotate-key` njia katika uso API (ishara ya mtoaji inatolewa kwa njia sawa na 9Router's kupitia `getOrCreateApiKey("mux")` na hudungwa kupitia `MUX_SERVER_AUTH_TOKEN` env var, lakini hakuna mwisho maalum wa mzunguko). Mux inadhibitiwa na mzunguko wa maisha pekee: tofauti na 9Router, haina kitekelezaji cha Tabaka la 4 na haijasajiliwa kamwe kama mtoa huduma wa uelekezaji.
 
 | Mbinu  | Njia                           | Maelezo                                |
 | ------ | ------------------------------ | -------------------------------------- |
 | `POST` | `/api/services/mux/install`    | Sakinisha Mux kutoka npm (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Anzisha Mux (`mux server`)             |
-| `POST` | `/api/services/mux/stop`       | Simamisha Mux                          |
-| `POST` | `/api/services/mux/restart`    | Anzisha upya Mux                       |
-| `POST` | `/api/services/mux/update`     | Sasisha hadi toleo jipya zaidi la npm  |
-| `GET`  | `/api/services/mux/status`     | Hali ya moja kwa moja + DB             |
-| `POST` | `/api/services/mux/auto-start` | Badilisha hali ya kuanza kiotomatiki   |
+| `POST` | `/api/services/mux/start`      | Anza Mux (`mux server`)                |
+| `POST` | `/api/services/mux/stop`       | Acha Mux                               |
+| `POST` | `/api/services/mux/restart`    | Anzisha tena Mux                       |
+| `POST` | `/api/services/mux/update`     | Sasisha hadi toleo jipya la npm        |
+| `GET`  | `/api/services/mux/status`     | Live + DB status                       |
+| `POST` | `/api/services/mux/auto-start` | Geuza kuanza-otomatiki                 |
 
 ---
 
-### 4.4 Vituo vya mwisho vya Bifrost (njia 8)
+### 4.4 Miisho ya Bifrost (njia 8)
 
-Bifrost ni backend ya relay ya lango la AI iliyoandikwa kwa Go (`@maximhq/bifrost`). Hutumia muundo sawa
-wa vituo vya mwisho kama CLIProxyAPI (hakuna `rotate-key` — Bifrost hudhibiti funguo zake yenyewe za watoa huduma
-katika `config.json` chini ya `-app-dir` yake).
+Bifrost ni njia ya nyuma ya upeanaji wa lango la Go AI (`@maximhq/bifrost`). Inatumia umbo la mwisho sawa na CLIProxyAPI (hakuna `rotate-key` — Bifrost inadhibiti vitufe vyake vya mtoa huduma katika `config.json` chini ya `-app-dir` yake).
 
-| Mbinu  | Njia                               | Maelezo                                                                             |
-| ------ | ---------------------------------- | ----------------------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Sakinisha Bifrost kutoka npm (`@maximhq/bifrost`)                                   |
-| `POST` | `/api/services/bifrost/start`      | Anzisha Bifrost kwenye porti 8080 (chaguomsingi)                                    |
-| `POST` | `/api/services/bifrost/stop`       | Simamisha Bifrost                                                                   |
-| `POST` | `/api/services/bifrost/restart`    | Anzisha upya Bifrost                                                                |
-| `POST` | `/api/services/bifrost/update`     | Sasisha hadi toleo jipya zaidi                                                      |
-| `GET`  | `/api/services/bifrost/status`     | Hali ya moja kwa moja + DB                                                          |
-| `POST` | `/api/services/bifrost/auto-start` | Washa au zima uanzishaji otomatiki                                                  |
-| `GET`  | `/api/services/bifrost/logs`       | Mwisho wa kumbukumbu za SSE (kupitia njia inayobadilika ya pamoja ya `[name]/logs`) |
+| Mbinu  | Njia                               | Maelezo                                                                   |
+| ------ | ---------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Sakinisha Bifrost kutoka npm (`@maximhq/bifrost`)                         |
+| `POST` | `/api/services/bifrost/start`      | Anzisha Bifrost kwenye bandari 8080 (chaguo-msingi)                       |
+| `POST` | `/api/services/bifrost/stop`       | Acha Bifrost                                                              |
+| `POST` | `/api/services/bifrost/restart`    | Anzisha tena Bifrost                                                      |
+| `POST` | `/api/services/bifrost/update`     | Sasisha hadi toleo jipya zaidi                                            |
+| `GET`  | `/api/services/bifrost/status`     | Live + DB status                                                          |
+| `POST` | `/api/services/bifrost/auto-start` | Geuza kuanza-otomatiki                                                    |
+| `GET`  | `/api/services/bifrost/logs`       | SSE log tail (kupitia njia inayobadilika ya `[name]/logs` iliyoshirikiwa) |
 
-**Uunganishaji wa uelekezaji:** Wakati `BIFROST_BASE_URL` haijawekwa na nakala ya Bifrost
-inayosimamiwa inaendeshwa, `getBifrostRoutingConfig()` (katika `routingBackend.ts`) hutumia
-kiotomatiki `http://127.0.0.1:{port}` kama URL msingi ya relay. Kigezo cha mazingira cha
-`BIFROST_BASE_URL` kilichowekwa wazi hupewa kipaumbele kila wakati.
+**Uunganisho wa waya:** Wakati `BIFROST_BASE_URL` haijawekwa na mfano wa Bifrost unaosimamiwa unaendelea, `getBifrostRoutingConfig()` (in `routingBackend.ts`) hutumia `http://127.0.0.1:{port}` kiotomatiki kama msingi wa relay URL. `BIFROST_BASE_URL` env wazi daima huchukua nafasi ya kwanza.
 
 ---
 
-### 4.5 Endpointi za Dario (njia 12)
+### 4.5 Vituo vya mwisho vya Dario (njia 12)
 
-Muundo wa mzunguko wa maisha ni sawa na wa huduma nyingine (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`), pamoja na safu ya udhibiti ya OAuth
-inayohitaji tokeni chini ya `admin/`: `admin/accounts`, `admin/import-from-omniroute`,
-`admin/login-start`, `admin/login-complete` (zote zinalindwa na `DARIO_ADMIN_TOKEN`).
+Umbo la mzunguko wa maisha sawa na huduma zingine (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) pamoja na ndege ya kudhibiti OAuth iliyo na ishara chini ya `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start` `admin/login-complete` nyuma ya `DARIO_ADMIN_TOKEN`.
 
-### 4.6 Proksi ya kinyume (upachikaji wa dashibodi ya 9Router)
+### 4.6 sehemu za mwisho za wazi (njia 7)
 
-Dashibodi hupachika UI ya wavuti ya 9Router ndani ya iframe kupitia proksi ya ndani ya
-kinyume katika:
+open-wa (`@open-wa/wa-automate`) huendesha mfano wa Chromium usio na kichwa (kupitia Puppeteer) kugeuza WhatsApp Web otomatiki. Inatumia umbo la mwisho sawa na Mux (bado hakuna njia ya `rotate-key` ). Inadhibitiwa na mzunguko wa maisha tu — sio lengo la uelekezaji, hakuna ingizo la Tabaka 4 executor/provider.
+
+| Mbinu  | Njia                              | Maelezo                                                                   |
+| ------ | --------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | Sakinisha open-wa kutoka npm (`@open-wa/wa-automate`)                     |
+| `POST` | `/api/services/openwa/start`      | Anzisha open-wa kwenye bandari 8323 (chaguo-msingi)                       |
+| `POST` | `/api/services/openwa/stop`       | Acha kufungua-wa                                                          |
+| `POST` | `/api/services/openwa/restart`    | Anzisha tena open-wa                                                      |
+| `POST` | `/api/services/openwa/update`     | Sasisha hadi toleo jipya zaidi                                            |
+| `GET`  | `/api/services/openwa/status`     | Live + DB status                                                          |
+| `POST` | `/api/services/openwa/auto-start` | Geuza kuanza-otomatiki                                                    |
+| `GET`  | `/api/services/openwa/logs`       | SSE log tail (kupitia njia inayobadilika ya `[name]/logs` iliyoshirikiwa) |
+
+**API ufunguo:** hudungwa kama `WA_KEY` — open-wa ya generic `WA_*` -prefixed env kubatilisha ramani kwenye chaguo la `--key`/`-k` CLI (`dist/cli/setup.js::envArgs()`, imethibitishwa dhidi ya kifurushi kilichosakinishwa cha 4.76.0). Kiambishi awali `ow_` kinapotolewa `generateServiceApiKey()`. open-wa inasoma ufunguo nyuma kutoka kwa kichwa cha `key`/`api_key` HTTP (si `Authorization: Bearer`); `/api-docs*` imeondolewa kwa uwazi kutoka kwa hundi (`setupAuthenticationLayer` katika `dist/cli/server.js`), kwa hivyo uchunguzi wa afya hauhitaji kichwa cha maandishi.
+
+**Kuoanisha:** open-wa sio rasmi na haihusiani na WhatsApp — nambari iliyounganishwa ina hatari ya kupiga marufuku ugunduzi wa kiotomatiki wa WhatsApp. Mara ya kwanza, msimbo wa QR wa kuoanisha huchapishwa ili stdout na kuonyeshwa kupitia mkondo wa Kumbukumbu panel/SSE — hakuna mwisho maalum wa picha ya QR katika muunganisho huu.
+
+---
+
+### 4.7 LLMLingua vituo vya mwisho (njia 8)
+
+LLMLingua ni ufunikaji wa gari la kando la papo hapo `@atjsh/llmlingua-2` (mfano halisi wa uainishaji wa tokeni ONNX, uliopakuliwa kutoka kwa Hugging Face kwenye simu `/compress` ya kwanza). Inatumia umbo la mwisho sawa na Bifrost (hakuna ufunguo wa API — `needsApiKey: false`, haishughulikii vitambulisho kamwe).
+
+| Mbinu  | Njia                                           | Maelezo                                                                   |
+| ------ | ---------------------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-sakinisha `@atjsh/llmlingua-2` + rika, andika hati ya seva ya kando   |
+| `POST` | `/api/services/llmlingua/start`                | Anzisha gari la kando kwenye bandari 20135 (chaguo-msingi)                |
+| `POST` | `/api/services/llmlingua/stop`                 | Acha gari la pembeni                                                      |
+| `POST` | `/api/services/llmlingua/restart`              | Anzisha tena gari la kando                                                |
+| `POST` | `/api/services/llmlingua/update`               | Sasisha hadi toleo jipya la kifurushi                                     |
+| `GET`  | `/api/services/llmlingua/status`               | Live + DB status                                                          |
+| `POST` | `/api/services/llmlingua/auto-start`           | Geuza kuanza-otomatiki                                                    |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Geuza kuwasha upya kiotomatiki kwa mfano uliopitishwa (uliopo awali).     |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE log tail (kupitia njia inayobadilika ya `[name]/logs` iliyoshirikiwa) |
+
+**Mkataba wa gari la kando:** hati ya seva inafichua `GET /health` ( — papo hapo haingojei mfano) na `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Mfano hupakia kwa uvivu kwenye simu ya kwanza `/compress`.
+
+**Wiring ya mgandamizo:** `open-sse/services/compression/engines/llmlingua/index.ts`'s `httpSidecarBackend` huita `LLMLINGUA_BASE_URL` (default `http://127.0.0.1:20135`) na inakubali tu jibu la sidecar wakati ni fupi kabisa kuliko ingizo; kutofaulu yoyote (kutofanya kazi, kuisha kwa muda, jibu la no-op) kunarudi nyuma kwa msingi wa mchakato wa worker-thread (`./worker.ts`).
+
+---
+
+### 4.8 sehemu za mwisho za kisanduku cha kuimba (njia 8)
+
+kisanduku cha kuimba kina umbo la mwisho sawa na njia ya Mux — no `rotate-key`, hakuna kisanduku cha API (`needsApiKey: false` in `bootstrap.ts`). Inasimamiwa na mzunguko wa maisha pekee: kamwe sio mtoaji wa routing/LLM. `install()` hupakua toleo rasmi la GitHub binary (`SagerNet/sing-box`) kwa toleo lililobandikwa (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) na inathibitisha SHA256 yake dhidi ya hundi iliyookwa kwenye faili sawa kabla ya kuiandika kwa diski — toleo lingine lolote lililoombwa limekataliwa.
+
+| Mbinu  | Njia                                         | Maelezo                                                                   |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Pakua + thibitisha toleo lililobandikwa la kisanduku cha kuimba           |
+| `POST` | `/api/services/singbox/start`                | Anza kisanduku cha kuimba (`sing-box run -c config.json`)                 |
+| `POST` | `/api/services/singbox/stop`                 | Acha kisanduku cha kuimba                                                 |
+| `POST` | `/api/services/singbox/restart`              | Anzisha upya kisanduku cha kuimba                                         |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall toleo lililobandikwa                                  |
+| `GET`  | `/api/services/singbox/status`               | Live + DB status                                                          |
+| `POST` | `/api/services/singbox/auto-start`           | Geuza kuanza-otomatiki                                                    |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Geuza kuwasha upya kiotomatiki kwa mchakato uliopitishwa (uliopo awali).  |
+| `GET`  | `/api/services/singbox/logs`                 | SSE log tail (kupitia njia inayobadilika ya `[name]/logs` iliyoshirikiwa) |
+
+**TPROXY wiring:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) huandika `config.json` na kumwanzisha msimamizi kabla ya `applyTproxy()` kusakinisha sheria za ngome za TPROXY. Ikiwa msimamizi hayupo au atashindwa kufikia `running`, sasa inaingia katika kiwango cha makosa (badala ya kumeza kutofaulu kimya kimya) ili opereta aweze kusema kuwa sheria TPROXY zilitumika bila msikilizaji anayefanya kazi nyuma yao.
+
+---
+
+### 4.9 Wakala wa kinyume (9Router dashibodi iliyopachikwa)
+
+Dashibodi hupachika 9Router mtandao UI ndani ya iframe kupitia seva mbadala ya ndani kwa:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-Proksi hii:
+Wakala huyu:
 
-- Huelekeza ombi kwa `http://127.0.0.1:{port}/{path}` (loopback pekee)
-- Huondoa vichwa vinavyoingia vya `cookie` na `authorization` (hakuna uvujaji wa kipindi cha OmniRoute)
-- Huingiza `Authorization: Bearer {apiKey}` kwa ajili ya uthibitishaji wa 9Router
-- Huondoa `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` kutoka kwenye jibu
-- Huandika upya majibu ya HTML ili kuingiza `<base href>` na kusawazisha njia kamili (`/foo` → `/dashboard/.../embed/foo`)
+- Inasambaza ombi kwa `http://127.0.0.1:{port}/{path}` (kurudisha nyuma pekee)
+- Huondoa vichwa vya `cookie` na `authorization` zinazoingia (hakuna uvujaji wa kikao OmniRoute )
+- Huingiza `Authorization: Bearer {apiKey}` kwa uthibitishaji wa 9Router
+- Huondoa `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` kutoka kwa jibu
+- Huandika upya majibu HTML ili kuingiza `<base href>` na kurekebisha njia kabisa (`/foo` → `/dashboard/.../embed/foo`)
 
-Maboresho ya muunganisho wa WebSocket kwa dashibodi iliyopachikwa hushughulikiwa na seva
-saidizi kwenye porti maalum (angalia `src/lib/services/embedWsProxy.ts`).
+uboreshaji wa WebSocket kwa dashibodi iliyopachikwa hushughulikiwa na seva shirikishi kwenye mlango maalum (ona `src/lib/services/embedWsProxy.ts`).
 
-**Usalama:** Njia za proksi ya upachikaji zimeainishwa chini ya `LOCAL_ONLY_API_PREFIXES`
-na zinaweza kufikiwa kutoka loopback pekee. Mshambulizi anayepata JWT kupitia handaki la
-Cloudflare/Ngrok hawezi kutumia proksi kufikia huduma zilizopachikwa.
+**Usalama:** Njia za proksi zilizopachikwa zimeainishwa chini ya `LOCAL_ONLY_API_PREFIXES` na zinaweza kufikiwa tu kutoka kwa loopback. Mshambulizi anayepata JWT kupitia handaki ya Cloudflare/Ngrok hawezi kuwa proksi katika huduma zilizopachikwa.
 
 ---
 

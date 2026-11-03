@@ -1,6 +1,6 @@
 # RTK Compression (Deutsch)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../compression/RTK_COMPRESSION.md) · 🇪🇹 [am](../../../am/docs/compression/RTK_COMPRESSION.md) · 🇸🇦 [ar](../../../ar/docs/compression/RTK_COMPRESSION.md) · 🇦🇿 [az](../../../az/docs/compression/RTK_COMPRESSION.md) · 🇧🇬 [bg](../../../bg/docs/compression/RTK_COMPRESSION.md) · 🇧🇩 [bn](../../../bn/docs/compression/RTK_COMPRESSION.md) · 🇧🇦 [bs](../../../bs/docs/compression/RTK_COMPRESSION.md) · 🇨🇿 [cs](../../../cs/docs/compression/RTK_COMPRESSION.md) · 🇩🇰 [da](../../../da/docs/compression/RTK_COMPRESSION.md) · 🇬🇷 [el](../../../el/docs/compression/RTK_COMPRESSION.md) · 🇪🇸 [es](../../../es/docs/compression/RTK_COMPRESSION.md) · 🇪🇪 [et](../../../et/docs/compression/RTK_COMPRESSION.md) · 🇮🇷 [fa](../../../fa/docs/compression/RTK_COMPRESSION.md) · 🇫🇮 [fi](../../../fi/docs/compression/RTK_COMPRESSION.md) · 🇫🇷 [fr](../../../fr/docs/compression/RTK_COMPRESSION.md) · 🇮🇪 [ga](../../../ga/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [gu](../../../gu/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ha](../../../ha/docs/compression/RTK_COMPRESSION.md) · 🇮🇱 [he](../../../he/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [hi](../../../hi/docs/compression/RTK_COMPRESSION.md) · 🇭🇷 [hr](../../../hr/docs/compression/RTK_COMPRESSION.md) · 🇭🇺 [hu](../../../hu/docs/compression/RTK_COMPRESSION.md) · 🇦🇲 [hy](../../../hy/docs/compression/RTK_COMPRESSION.md) · 🇮🇩 [id](../../../id/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [ig](../../../ig/docs/compression/RTK_COMPRESSION.md) · 🇮🇹 [it](../../../it/docs/compression/RTK_COMPRESSION.md) · 🇯🇵 [ja](../../../ja/docs/compression/RTK_COMPRESSION.md) · 🇬🇪 [ka](../../../ka/docs/compression/RTK_COMPRESSION.md) · 🇰🇭 [km](../../../km/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [kn](../../../kn/docs/compression/RTK_COMPRESSION.md) · 🇰🇷 [ko](../../../ko/docs/compression/RTK_COMPRESSION.md) · 🇱🇹 [lt](../../../lt/docs/compression/RTK_COMPRESSION.md) · 🇱🇻 [lv](../../../lv/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ml](../../../ml/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [mr](../../../mr/docs/compression/RTK_COMPRESSION.md) · 🇲🇾 [ms](../../../ms/docs/compression/RTK_COMPRESSION.md) · 🇲🇹 [mt](../../../mt/docs/compression/RTK_COMPRESSION.md) · 🇲🇲 [my](../../../my/docs/compression/RTK_COMPRESSION.md) · 🇳🇵 [ne](../../../ne/docs/compression/RTK_COMPRESSION.md) · 🇳🇱 [nl](../../../nl/docs/compression/RTK_COMPRESSION.md) · 🇳🇴 [no](../../../no/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [or](../../../or/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [pa](../../../pa/docs/compression/RTK_COMPRESSION.md) · 🇵🇭 [phi](../../../phi/docs/compression/RTK_COMPRESSION.md) · 🇵🇱 [pl](../../../pl/docs/compression/RTK_COMPRESSION.md) · 🇵🇹 [pt](../../../pt/docs/compression/RTK_COMPRESSION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/compression/RTK_COMPRESSION.md) · 🇷🇴 [ro](../../../ro/docs/compression/RTK_COMPRESSION.md) · 🇷🇺 [ru](../../../ru/docs/compression/RTK_COMPRESSION.md) · 🇱🇰 [si](../../../si/docs/compression/RTK_COMPRESSION.md) · 🇸🇰 [sk](../../../sk/docs/compression/RTK_COMPRESSION.md) · 🇸🇮 [sl](../../../sl/docs/compression/RTK_COMPRESSION.md) · 🇷🇸 [sr](../../../sr/docs/compression/RTK_COMPRESSION.md) · 🇸🇪 [sv](../../../sv/docs/compression/RTK_COMPRESSION.md) · 🇰🇪 [sw](../../../sw/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [ta](../../../ta/docs/compression/RTK_COMPRESSION.md) · 🇮🇳 [te](../../../te/docs/compression/RTK_COMPRESSION.md) · 🇹🇭 [th](../../../th/docs/compression/RTK_COMPRESSION.md) · 🇹🇷 [tr](../../../tr/docs/compression/RTK_COMPRESSION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/compression/RTK_COMPRESSION.md) · 🇵🇰 [ur](../../../ur/docs/compression/RTK_COMPRESSION.md) · 🇺🇿 [uz](../../../uz/docs/compression/RTK_COMPRESSION.md) · 🇻🇳 [vi](../../../vi/docs/compression/RTK_COMPRESSION.md) · 🇳🇬 [yo](../../../yo/docs/compression/RTK_COMPRESSION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/compression/RTK_COMPRESSION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/compression/RTK_COMPRESSION.md)
 
 ---
 
@@ -29,22 +29,22 @@ Bereich:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Was komprimiert wird
 
-Der integrierte Katalog enthält derzeit 49 Filter in diesen Kategorien:
+Der integrierte Katalog enthält derzeit 56 Filter in den folgenden Kategorien:
 
 | Kategorie | Beispiele                                                     |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-Tests, Cargo-Tests       |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-Tests    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, generische Shell-Protokolle             |
-| `docker`  | `docker ps`, Docker-Protokolle                                |
+| `shell`   | `ls`, `find`, `grep`, generische Shell-Logs                   |
+| `docker`  | `docker ps`, Docker-Logs                                      |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-Ausgabe, Stacktraces, generischer Ausgabe-Fallback       |
+| `generic` | JSON-Ausgabe, Stacktraces, generischer Ausgabefallback        |
 
-Der Detektor in `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifiziert die Ausgabe
-vor der Filterauswahl. Filter können auch anhand von Befehlsmustern oder regulären Ausdrücken für Ausgaben übereinstimmen, wenn eine
-Befehlsklasse nicht ausreicht.
+Der Detektor in `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifiziert die
+Ausgabe vor der Filterauswahl. Filter können auch anhand eines Befehlsmusters oder eines
+Ausgabe-Regex abgeglichen werden, wenn eine Befehlsklasse allein nicht ausreicht.
 
 ## Filterauflösung
 
@@ -356,19 +356,19 @@ node --import tsx/esm --test \
 
 ## Intensitätsstufen (v3.8.16+)
 
-RTK unterstützt **3 Intensitätsstufen**, die einen Kompromiss zwischen **Komprimierungsaggressivität** und **Sicherheit** darstellen. Die Stufe wird über `config.intensity` in der Engine-Konfiguration festgelegt.
+RTK unterstützt **3 Intensitätsstufen**, die einen Kompromiss zwischen **Kompressionsaggressivität** und **Sicherheit** eingehen. Die Stufe wird über `config.intensity` in der Engine-Konfiguration festgelegt.
 
 ### Die 3 Stufen
 
-| Stufe                 | Kürzungsschwellenwert   | Token-Einsparung | Risiko      | Am besten geeignet für                 |
-| --------------------- | ----------------------- | ---------------- | ----------- | -------------------------------------- |
-| `minimal`             | 24 Zeilen pro Abschnitt | ~20-40%          | Sehr gering | Produktion mit kritischem Kontext      |
-| `standard` (Standard) | 24 Zeilen pro Abschnitt | ~50-70%          | Gering      | Tägliche Coding-Sitzungen              |
-| `aggressive`          | 16 Zeilen pro Abschnitt | ~70-90%          | Mittel      | Lange Sitzungen, maximale Einsparungen |
+| Stufe                 | Kürzungsschwelle        | Token-Einsparung | Risiko       | Am besten für                        |
+| --------------------- | ----------------------- | ---------------- | ------------ | ------------------------------------ |
+| `minimal`             | 24 Zeilen pro Abschnitt | ~20-40%          | Sehr niedrig | Produktion mit kritischem Kontext    |
+| `standard` (Standard) | 24 Zeilen pro Abschnitt | ~50-70%          | Niedrig      | Tägliche Coding-Sitzungen            |
+| `aggressive`          | 16 Zeilen pro Abschnitt | ~70-90%          | Mittel       | Lange Sitzungen, maximale Einsparung |
 
-### Wo die Kürzung erfolgt
+### Wo die Kürzung stattfindet
 
-Der Kürzungsschwellenwert wirkt sich auf `lineFilter.ts` aus:
+Die Kürzungsschwelle wirkt sich auf `lineFilter.ts` aus:
 
 ```ts
 // Aus open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -376,40 +376,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Sowohl der **Anfang** als auch das **Ende** jedes Abschnitts bleiben erhalten; Inhalte in der Mitte werden entfernt, sobald die Kürzung greift.
+Sowohl der **Anfang** als auch das **Ende** jedes Abschnitts bleiben erhalten; der mittlere Inhalt wird verworfen, sobald die Kürzung greift.
 
-### Was erhalten bleibt und was gekürzt wird
+### Was erhalten bleibt und was entfernt wird
 
-| Inhalt                           | minimal            | standard           | aggressive         |
-| -------------------------------- | ------------------ | ------------------ | ------------------ |
-| Fehler / Stacktraces             | ✅ beibehalten     | ✅ beibehalten     | ✅ beibehalten     |
-| Testfehlschläge                  | ✅ beibehalten     | ✅ beibehalten     | ✅ beibehalten     |
-| Build-Fehler                     | ✅ beibehalten     | ✅ beibehalten     | ✅ beibehalten     |
-| Erfolgreiche Tests (ausführlich) | ✅ beibehalten     | 🟡 zusammengefasst | 🟡 zusammengefasst |
-| Routineausgabe (Info-Logs)       | 🟡 zusammengefasst | 🟡 zusammengefasst | ❌ entfernt        |
-| Fortschrittsbalken               | 🟡 zusammengefasst | ❌ entfernt        | ❌ entfernt        |
-| Banner / ASCII-Art               | 🟡 zusammengefasst | ❌ entfernt        | ❌ entfernt        |
+| Inhalt                         | minimal            | standard           | aggressive         |
+| ------------------------------ | ------------------ | ------------------ | ------------------ |
+| Fehler / Stacktraces           | ✅ erhalten        | ✅ erhalten        | ✅ erhalten        |
+| Testfehlschläge                | ✅ erhalten        | ✅ erhalten        | ✅ erhalten        |
+| Build-Fehler                   | ✅ erhalten        | ✅ erhalten        | ✅ erhalten        |
+| Bestandene Tests (ausführlich) | ✅ erhalten        | 🟡 zusammengefasst | 🟡 zusammengefasst |
+| Routineausgaben (Info-Logs)    | 🟡 zusammengefasst | 🟡 zusammengefasst | ❌ verworfen       |
+| Fortschrittsbalken             | 🟡 zusammengefasst | ❌ verworfen       | ❌ verworfen       |
+| Banner / ASCII-Art             | 🟡 zusammengefasst | ❌ verworfen       | ❌ verworfen       |
 
-### Auswahl der richtigen Intensität
+### Die richtige Intensität wählen
 
 ```
-                  Wäre ein Kontextverlust katastrophal?
+                  Ist ein Kontextverlust katastrophal?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     JA          NEIN       UNSICHER
+     JA         NEIN       UNSICHER
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Wie wichtig     Zuerst `standard` testen
-      │      ist der         (funktioniert in 80 %
-      │      Durchsatz?      der Fälle)
-      │           │
+      │    Wie kritisch ist  Zuerst `standard`
+      │    der Durchsatz?    testen (funktioniert
+      │           │          in 80 % der Fälle)
       │      ┌────┴────┐
       │      │         │
-      │   GERING      HOCH
+      │   NIEDRIG    HOCH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -432,11 +431,11 @@ Sowohl der **Anfang** als auch das **Ende** jedes Abschnitts bleiben erhalten; I
 }
 ```
 
-**Programmatisch**:
+**Programmgesteuert**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ist eine
-`CompressionEngine` und besitzt keine `updateConfig`-Methode. Aktualisieren Sie die Konfiguration
-einer Engine stattdessen über die Registry-Hilfsfunktion:
+`CompressionEngine` und besitzt keine `updateConfig`-Methode. Aktualisieren Sie
+die Konfiguration einer Engine stattdessen über den Registry-Helper:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -444,16 +443,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Wirkung überprüfen
+### Die Wirkung überprüfen
 
-Verwenden Sie das **Verifizierungs-Gate** (siehe unten), um zu bestätigen, dass Ihr Filter bei der gewählten Intensität sicher ist:
+Verwenden Sie das **Verify Gate** (siehe unten), um zu bestätigen, dass Ihr Filter bei der gewählten Intensität sicher ist:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filter bei aggressiver Intensität fehlgeschlagen");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

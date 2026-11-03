@@ -108,7 +108,12 @@ export async function POST(request: Request) {
     }
 
     // ── Parse request body ─────────────────────────────────────────────
-    const rawBody = await request.json();
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json(buildErrorBody(400, "Invalid JSON body"), { status: 400 });
+    }
     const validation = validateBody(chaosSchema, rawBody);
     if (isValidationFailure(validation)) {
       return NextResponse.json(buildErrorBody(400, validation.error.message), {

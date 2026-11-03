@@ -1,6 +1,6 @@
 # Monitoring & Observability Guide (Українська)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../ops/MONITORING_GUIDE.md) · 🇪🇹 [am](../../../am/docs/ops/MONITORING_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/ops/MONITORING_GUIDE.md) · 🇦🇿 [az](../../../az/docs/ops/MONITORING_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/ops/MONITORING_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/ops/MONITORING_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/ops/MONITORING_GUIDE.md) · 🇩🇰 [da](../../../da/docs/ops/MONITORING_GUIDE.md) · 🇩🇪 [de](../../../de/docs/ops/MONITORING_GUIDE.md) · 🇬🇷 [el](../../../el/docs/ops/MONITORING_GUIDE.md) · 🇪🇸 [es](../../../es/docs/ops/MONITORING_GUIDE.md) · 🇪🇪 [et](../../../et/docs/ops/MONITORING_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/ops/MONITORING_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/ops/MONITORING_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/ops/MONITORING_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/ops/MONITORING_GUIDE.md) · 🇮🇱 [he](../../../he/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/ops/MONITORING_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/ops/MONITORING_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/ops/MONITORING_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/ops/MONITORING_GUIDE.md) · 🇮🇩 [id](../../../id/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/ops/MONITORING_GUIDE.md) · 🇮🇹 [it](../../../it/docs/ops/MONITORING_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/ops/MONITORING_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/ops/MONITORING_GUIDE.md) · 🇰🇭 [km](../../../km/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/ops/MONITORING_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/ops/MONITORING_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/ops/MONITORING_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/ops/MONITORING_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/ops/MONITORING_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/ops/MONITORING_GUIDE.md) · 🇲🇲 [my](../../../my/docs/ops/MONITORING_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/ops/MONITORING_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/ops/MONITORING_GUIDE.md) · 🇳🇴 [no](../../../no/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [or](../../../or/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/ops/MONITORING_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/ops/MONITORING_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/ops/MONITORING_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/ops/MONITORING_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/MONITORING_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/ops/MONITORING_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/ops/MONITORING_GUIDE.md) · 🇱🇰 [si](../../../si/docs/ops/MONITORING_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/ops/MONITORING_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/ops/MONITORING_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/ops/MONITORING_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/ops/MONITORING_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [te](../../../te/docs/ops/MONITORING_GUIDE.md) · 🇹🇭 [th](../../../th/docs/ops/MONITORING_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/ops/MONITORING_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/ops/MONITORING_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/ops/MONITORING_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/ops/MONITORING_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/MONITORING_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/MONITORING_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../ops/MONITORING_GUIDE.md) · 🇪🇹 [am](../../../am/docs/ops/MONITORING_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/ops/MONITORING_GUIDE.md) · 🇦🇿 [az](../../../az/docs/ops/MONITORING_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/ops/MONITORING_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/ops/MONITORING_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/ops/MONITORING_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/ops/MONITORING_GUIDE.md) · 🇩🇰 [da](../../../da/docs/ops/MONITORING_GUIDE.md) · 🇩🇪 [de](../../../de/docs/ops/MONITORING_GUIDE.md) · 🇬🇷 [el](../../../el/docs/ops/MONITORING_GUIDE.md) · 🇪🇸 [es](../../../es/docs/ops/MONITORING_GUIDE.md) · 🇪🇪 [et](../../../et/docs/ops/MONITORING_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/ops/MONITORING_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/ops/MONITORING_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/ops/MONITORING_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/ops/MONITORING_GUIDE.md) · 🇮🇱 [he](../../../he/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/ops/MONITORING_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/ops/MONITORING_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/ops/MONITORING_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/ops/MONITORING_GUIDE.md) · 🇮🇩 [id](../../../id/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/ops/MONITORING_GUIDE.md) · 🇮🇹 [it](../../../it/docs/ops/MONITORING_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/ops/MONITORING_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/ops/MONITORING_GUIDE.md) · 🇰🇭 [km](../../../km/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/ops/MONITORING_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/ops/MONITORING_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/ops/MONITORING_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/ops/MONITORING_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/ops/MONITORING_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/ops/MONITORING_GUIDE.md) · 🇲🇲 [my](../../../my/docs/ops/MONITORING_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/ops/MONITORING_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/ops/MONITORING_GUIDE.md) · 🇳🇴 [no](../../../no/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [or](../../../or/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/ops/MONITORING_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/ops/MONITORING_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/ops/MONITORING_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/ops/MONITORING_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/MONITORING_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/ops/MONITORING_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/ops/MONITORING_GUIDE.md) · 🇱🇰 [si](../../../si/docs/ops/MONITORING_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/ops/MONITORING_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/ops/MONITORING_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/ops/MONITORING_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/ops/MONITORING_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/ops/MONITORING_GUIDE.md) · 🇮🇳 [te](../../../te/docs/ops/MONITORING_GUIDE.md) · 🇹🇭 [th](../../../th/docs/ops/MONITORING_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/ops/MONITORING_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/ops/MONITORING_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/ops/MONITORING_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/ops/MONITORING_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/ops/MONITORING_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/MONITORING_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/MONITORING_GUIDE.md)
 
 ---
 
@@ -108,14 +108,14 @@ OmniRoute має **3 рівні моніторингу**:
 
 OmniRoute надає **дві** HTTP-точки перевірки стану. Вони не є взаємозамінними для оркестраторів.
 
-| Шлях                         | Призначення                                                                         | Навантаження                                  | Використання                                                                                   |
-| ---------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `GET /healthz`               | Перевірка активності/готовності життєвого циклу (`ok` / `starting` / `stopping`)    | Мінімальне (лише прапорець фази)              | **Готовність** Kubernetes; м’яка перевірка **активності**, якщо необхідно використовувати HTTP |
-| `GET /api/monitoring/health` | Поглиблене зведення системи й провайдерів (БД, купа, кількість записів каталогу, …) | Високе (синхронна робота з БД / моніторингом) | Панелі моніторингу, поглиблені blackbox-перевірки, вбудована перевірка стану Docker            |
+| Шлях                         | Призначення                                                                                      | Навантаження                                  | Використання                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `GET /healthz`               | Життєздатність/готовність життєвого циклу (`ok` / `starting` / `stopping`)                       | Мінімальне (лише прапорець фази)              | **Готовність** Kubernetes; м’яка перевірка **життєздатності**, якщо потрібно використовувати HTTP |
+| `GET /api/monitoring/health` | Розширений стан системи та зведення щодо провайдерів (БД, купа, кількість елементів каталогу, …) | Високе (синхронна робота з БД / моніторингом) | Панелі моніторингу, розширені blackbox-перевірки, вбудована перевірка стану Docker                |
 
-> **Примітка:** Матриці стану провайдерів, проблеми автопілота, монітори квот, стан токенів і докладні відомості про затримку, що виходять за межі `/api/monitoring/health`, доступні через **інструмент MCP** `observability_snapshot` або сторінки **панелі моніторингу** — окремих REST-маршрутів для них немає.
+> **Примітка:** Матриці стану провайдерів, проблеми автопілота, монітори квот, стан токенів і докладні відомості про затримку поза межами `/api/monitoring/health` доступні через **інструмент MCP** `observability_snapshot` або сторінки **панелі моніторингу** — окремих REST-маршрутів для них немає.
 
-Обидва маршрути виконуються в **тому самому циклі подій Node**, що й обробка запитів. Шлях із високим навантаженням на CPU (робота з великим каталогом `GET /v1/models`, стиснення довгого контексту / підрахунок токенів) може затримати **всі** HTTP-обробники, включно з `/healthz`. Зайнятий цикл подій ≠ непрацюючий процес. Краще усунути причину надмірного навантаження; налаштування проб лише зменшує кількість помилкових завершень процесу.
+Обидва маршрути виконуються в **тому самому циклі подій Node**, що й обробка запитів. Навантажений процесором шлях (робота з великим каталогом `GET /v1/models`, стиснення довгого контексту / підрахунок токенів) може затримати **всі** обробники HTTP, включно з `/healthz`. Зайнятий цикл подій ≠ мертвий процес. Краще усунути джерело навантаження; налаштування проб лише зменшує кількість помилкових завершень процесу.
 
 ### Полегшена проба для оркестратора
 
@@ -128,7 +128,7 @@ GET /healthz
 - **503** + `starting` / `stopping` під час запуску або завершення роботи
 - Реалізація: `src/app/healthz/route.ts` (без перевірки зв’язку з БД)
 
-### Стан системи (поглиблений)
+### Стан системи (розширена перевірка)
 
 ```bash
 GET /api/monitoring/health
@@ -158,45 +158,40 @@ GET /api/monitoring/health
 }
 ```
 
-#### `credentialHealth`: кеш проб і `test_status` у SQLite
+#### `credentialHealth`: кеш проб порівняно з `test_status` у SQLite
 
-`GET /api/monitoring/health` → `credentialHealth` — це **показник кешу проб у пам’яті**,
-а не актуальний дамп `provider_connections.test_status`. Після #12532 шлях
-обробки запиту зчитує лише `getCachedCredentialHealthSummary()`; фонові проби
-оновлюють кеш поза циклом подій.
+`GET /api/monitoring/health` → `credentialHealth` — це **показник кешу проб у пам’яті**, а не актуальний дамп `provider_connections.test_status`. Після #12532 шлях обробки запиту лише зчитує `getCachedCredentialHealthSummary()`; фонові проби оновлюють кеш поза циклом подій.
 
-| Рівень                          | Де                                                                    | Що це означає                                                                                                                                                                                                     |
-| ------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Показник кешу проб              | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Останні результати проб стану облікових даних, які досі зберігаються в пам’яті процесу. `source` завжди має значення `probe-cache`.                                                                               |
-| Відомості про невдалі з’єднання | `credentialHealth.failedConnections`                                  | Наявні **лише коли `failed > 0`**. Обмежений список рядків кешу зі `status=error` (`connectionId`, `status`, очищені `lastError` / `lastErrorType`). `failedOmitted` установлюється, коли список було обмежено.   |
-| Закріплений стан SQLite         | `credentialHealth.staleDbNonOkCount`                                  | Кількість **активних** (`is_active=1`) рядків з’єднань, у яких збережений `test_status` має відоме значення, відмінне від `ok` (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`). |
+| Рівень                            | Де                                                                    | Що це означає                                                                                                                                                                                                              |
+| --------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Показник кешу проб                | `credentialHealth.total` / `healthy` / `failed` / `unknown` / `stale` | Останні результати проб стану облікових даних, які все ще зберігаються в пам’яті процесу. `source` завжди має значення `probe-cache`.                                                                                      |
+| Відомості про невдалі підключення | `credentialHealth.failedConnections`                                  | Наявні **лише коли `failed > 0`**. Обмежений список рядків кешу зі `status=error` (`connectionId`, `status`, санітизовані `lastError` / `lastErrorType`). `failedOmitted` встановлюється, коли список було обмежено.       |
+| Закріплений стан SQLite           | `credentialHealth.staleDbNonOkCount`                                  | Кількість **активних** (`is_active=1`) рядків підключень, у яких збережений `test_status` має відоме значення, відмінне від нормального (`error`, `expired`, `credits_exhausted`, `banned`, `deactivated`, `unavailable`). |
 
 Ці два рівні можуть навмисно не збігатися:
 
-- Показник `failed=0`, тоді як `staleDbNonOkCount>0` — у SQLite досі зберігається
-  закріплений `test_status` (наприклад, `expired` або `credits_exhausted`), який
-  останній знімок кешу проб не враховує як `status=error`.
+- Показник `failed=0`, тоді як `staleDbNonOkCount>0` — у SQLite досі є закріплений
+  `test_status` (наприклад, `expired` або `credits_exhausted`), який останній
+  знімок кешу проб не враховує як `status=error`.
 - Показник `failed>0`, тоді як SQLite указує на нормальний стан — нещодавня проба
-  завершилася невдало та була кешована; рядок БД ще не оновлено або його було
-  очищено пізніше.
+  завершилася невдало та була кешована; рядок БД ще не оновлено або його було очищено пізніше.
 
-Не створюйте сповіщення лише на основі `provider_connections.test_status` під час
-збирання даних із цієї кінцевої точки. Використовуйте `failed` +
-`failedConnections` для поточних невдалих проб, а `staleDbNonOkCount` — коли
-потрібна кількість збережених закріплених станів.
+Не створюйте сповіщення лише на основі `provider_connections.test_status` під час збору даних із цієї
+кінцевої точки. Використовуйте `failed` + `failedConnections` для актуальних збоїв проб, а
+`staleDbNonOkCount` — коли потрібна кількість збережених закріплених станів.
 
 ### Рекомендації щодо проб Kubernetes
 
-OmniRoute — це **єдиний процес Node** (один цикл подій). Стандартна перевірка Docker `HEALTHCHECK` використовує полегшений маршрут `/healthz`. `/api/monitoring/health` є **надто ресурсомістким** для інтервалів перевірки активності kubelet.
+OmniRoute — це **єдиний процес Node** (один цикл подій). Стандартний `HEALTHCHECK` Docker звертається до полегшеної точки `/healthz`. `/api/monitoring/health` є **надто важкою** для інтервалів перевірки життєздатності kubelet.
 
-| Проба                          | Рекомендована ціль                                                                | Примітки                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Запуск**                     | HTTP `GET /healthz` із великим `failureThreshold` (або тривалим `startPeriod`)    | Холодний запуск і міграція SQLite можуть тривати понад кілька секунд                                                                                                                                                                                                                                                                                                                                               |
-| **Готовність**                 | HTTP `GET /healthz`                                                               | Стан життєвого циклу `ok` / `starting` / `stopping` (200 проти 503). Перевірка все одно нестабільна, якщо цикл заблокований навантаженням на CPU. **Відповідь 200 через кілька секунд не означає справний стан** (#10303) — це означає, що цикл подій був позбавлений ресурсів ще до запуску обробника, який повертає 3 байти                                                                                      |
-| **Життєздатність**             | HTTP `GET /livez` **або TCP** на основному порту сервісу (`PORT`, типово `20128`) | `/livez` перевіряє лише роботу процесу (завжди повертає 200, якщо обробник запускається). Він усе одно використовує той самий цикл подій — зайнятий ≠ мертвий, і виявляє виснаження циклу подій (#10303) не краще за TCP. Віддавайте перевагу **TCP**, якщо HTTP-проби перевищують час очікування під навантаженням каталогу/стиснення; у будь-якому разі **не** завершуйте pod через короткі затримки циклу подій |
-| **Поглиблена перевірка стану** | `GET /api/monitoring/health` із зовнішнього засобу перевірки                      | Не призначено для `livenessProbe` kubelet або `readinessProbe` із жорсткими обмеженнями                                                                                                                                                                                                                                                                                                                            |
+| Перевірка                        | Рекомендована ціль                                                               | Примітки                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| -------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Запуск**                       | HTTP `GET /healthz` із великим `failureThreshold` (або тривалим `startPeriod`)   | Холодний запуск + міграція SQLite можуть тривати понад кілька секунд                                                                                                                                                                                                                                                                                                                                                           |
+| **Готовність**                   | HTTP `GET /healthz`                                                              | Стан життєвого циклу `ok` / `starting` / `stopping` (200 або 503). Стан усе ще коливається, якщо цикл заблокований навантаженням на CPU. **Відповідь 200 через кілька секунд не означає справний стан** (#10303) — це означає, що цикл подій був позбавлений ресурсів до того, як запрацював 3-байтовий обробник                                                                                                               |
+| **Живучість**                    | HTTP `GET /livez` **або TCP** на основному порту служби (`PORT`, типово `20128`) | `/livez` перевіряє лише те, чи працює процес (завжди повертає 200, якщо обробник виконується). Він усе одно використовує той самий цикл подій — зайнятий ≠ мертвий, і він виявляє виснаження циклу подій (#10303) не краще за TCP. Віддавайте перевагу **TCP**, якщо HTTP-перевірки завершуються за тайм-аутом під навантаженням каталогу/стиснення; у будь-якому разі **не** завершуйте pod через короткі зупинки циклу подій |
+| **Глибока перевірка справності** | `GET /api/monitoring/health` із зовнішнього засобу перевірки                     | Не призначено для `livenessProbe` kubelet або `readinessProbe` із малими інтервалами                                                                                                                                                                                                                                                                                                                                           |
 
-Приклад конфігурації (адаптуйте порогові значення до навантаження під час холодного запуску та стиснення):
+Приклад структури (налаштуйте порогові значення відповідно до навантаження під час холодного запуску та стиснення):
 
 ```yaml
 ports:
@@ -222,27 +217,58 @@ livenessProbe:
   periodSeconds: 10
   timeoutSeconds: 3
   failureThreshold: 6
-  # Під час затримки циклу подій HTTP-запит до /livez усе одно може перевищити
-  # час очікування. TCP — консервативна альтернатива:
+  # Під час зупинки циклу подій HTTP /livez усе одно може завершитися за тайм-аутом. TCP —
+  # консервативна альтернатива:
   # tcpSocket:
   #   port: http
 ```
 
-**Не** спрямовуйте перевірку **життєздатності** kubelet на `/api/monitoring/health`. Цей шлях виконує реальну роботу з БД і моніторингом та даватиме хибнопозитивні результати під навантаженням.
+**Не** спрямовуйте перевірку **живучості** kubelet на `/api/monitoring/health`. Цей шлях виконує реальну роботу з БД/моніторингом і даватиме хибні спрацювання під навантаженням.
 
-Пов’язані матеріали: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (проби, коли цикл подій зайнятий), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (розрахунок цін каталогу, що захоплює ресурси), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (підрахунок токенів під час стиснення, що захоплює ресурси).
+Пов’язані матеріали: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (перевірки, коли цикл подій зайнятий), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (надмірне споживання ресурсів під час розрахунку цін каталогу), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (надмірне споживання ресурсів під час підрахунку токенів для стиснення).
 
-### Необов’язкова робота під час обробки запитів (пам’ять, навички, оновлення токенів)
+### Сторожовий таймер systemd (завислий цикл подій)
 
-Видобування даних із пам’яті, додавання навичок і оновлення токенів OAuth використовують **основний цикл подій Node** разом із `/healthz`. Це функції, які вмикаються на панелі керування (`memoryEnabled`, `skillsEnabled`), а не пул робочих процесів. Див. [Середовище — вартість для циклу подій](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
+На хості із systemd OmniRoute повідомляє диспетчеру служб, коли він готовий, і продовжує надсилати йому сигнали, щоб сервер, цикл подій якого завис, було завершено й перезапущено, а не залишено запущеним без ознак активності. Сигнали надходять із власного циклу подій сервера: коли він блокується, сигнали припиняються, і systemd перезапускає службу, щойно спливає `WatchdogSec` без отримання жодного сигналу.
+
+[`omniroute autostart enable`](../../bin/cli/tray/autostart.mjs) уже створює користувацький unit із цими параметрами. Створений вами unit (із типовим `Type=simple`) не матиме сторожового таймера, тому додайте такі рядки до його розділу `[Service]`:
+
+```ini
+[Service]
+Type=notify
+NotifyAccess=all
+WatchdogSec=180
+TimeoutStartSec=300
+```
+
+Згенерований unit установлює `Restart=on-failure`, тому також додайте цей рядок — без нього сторожовий таймер лише завершить завислу службу, але не перезапустить її.
+
+- `Type=notify`: служба вважається «запущеною», коли сервер надсилає `READY=1`, а не коли процес розгалужується. `TimeoutStartSec` обмежує тривалість повільного запуску.
+- `NotifyAccess=all`: сигнали надсилає процес сервера, який є дочірнім процесом супервізора `omniroute serve`.
+- `WatchdogSec`: сигнали надсилаються кожні 60 секунд, тому використовуйте значення **120 або більше**. Менші значення призводитимуть до перезапуску справного сервера.
+- Запускайте `omniroute serve` на передньому плані. `--daemon` від’єднує сервер від cgroup цього unit, і процедура обміну сповіщеннями ніколи не завершується.
+
+Після перезапуску перевірте, чи активний сторожовий таймер:
+
+```bash
+systemctl --user show omniroute -p WatchdogUSec -p WatchdogTimestamp
+```
+
+`WatchdogUSec` показує налаштовану затримку, а `WatchdogTimestamp` оновлюється щохвилини. Перезапуск, спричинений сторожовим таймером, записується як `Result=watchdog`. Щоб вимкнути сигнали, не змінюючи unit, установіть `OMNIROUTE_DISABLE_SD_NOTIFY=1`; за відсутності `NOTIFY_SOCKET` (термінал, Docker, Electron, Windows) нічого не надсилається.
+
+Сторожовий таймер перевіряє лише те, що цикл подій продовжує працювати. Сервер, який працює повільно, але цикл якого все ще виконується, не перезапускається.
+
+### Необов’язкова робота на шляху запиту (пам’ять, навички, оновлення токенів)
+
+Видобування пам’яті, ін’єкція навичок і оновлення токенів OAuth використовують **головний цикл подій Node** разом із `/healthz`. Це функції, які вмикаються на інформаційній панелі (`memoryEnabled`, `skillsEnabled`), а не пул робочих процесів. Див. [Середовище — навантаження на цикл подій](../reference/ENVIRONMENT.md#event-loop-cost-of-memory-skills-and-token-refresh-10349).
 
 ### Стан провайдерів
 
-> **REST-кінцева точка відсутня.** Дані про стан провайдерів доступні через інструмент MCP `observability_snapshot` або на сторінці панелі керування `/dashboard/providers`.
+> **Кінцева точка REST відсутня.** Дані про стан провайдерів доступні через інструмент MCP `observability_snapshot` або на сторінці інформаційної панелі `/dashboard/providers`.
 
 ### Відомості про провайдера
 
-> **REST-кінцева точка відсутня.** Докладні відомості про кожного провайдера доступні на сторінці панелі керування `/dashboard/providers`.
+> **Кінцева точка REST відсутня.** Детальні відомості про кожного провайдера доступні на сторінці інформаційної панелі `/dashboard/providers`.
 
 ---
 

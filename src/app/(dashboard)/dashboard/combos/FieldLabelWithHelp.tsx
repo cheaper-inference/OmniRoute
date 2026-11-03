@@ -1,6 +1,7 @@
 "use client";
 
-import Tooltip from "@/shared/components/Tooltip";
+import { Label } from "@omniroute/ui-kit/label";
+import InfoTooltip from "@/shared/components/InfoTooltip";
 
 type FieldLabelWithHelpProps = {
   label: string;
@@ -9,6 +10,11 @@ type FieldLabelWithHelpProps = {
   htmlFor?: string;
 };
 
+/**
+ * Field label row for the combo editor: the kit `Label` (tied to the control by `htmlFor`) and,
+ * beside it — not inside it, so the help text stays out of the control's accessible name — an
+ * `InfoTooltip` trigger that is keyboard reachable.
+ */
 export default function FieldLabelWithHelp({
   label,
   help,
@@ -16,17 +22,9 @@ export default function FieldLabelWithHelp({
   htmlFor,
 }: FieldLabelWithHelpProps) {
   return (
-    <div className="flex items-center gap-1 mb-0.5">
-      <label htmlFor={htmlFor} className="text-[10px] text-text-muted">
-        {label}
-      </label>
-      {showHelp && (
-        <Tooltip position="bottom" content={help}>
-          <span className="material-symbols-outlined text-[12px] text-text-muted cursor-help">
-            help
-          </span>
-        </Tooltip>
-      )}
+    <div className="mb-1 flex items-center gap-1">
+      <Label htmlFor={htmlFor}>{label}</Label>
+      {showHelp && <InfoTooltip text={help} />}
     </div>
   );
 }

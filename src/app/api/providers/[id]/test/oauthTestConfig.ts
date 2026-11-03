@@ -246,6 +246,12 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     checkExpiry: true,
     refreshable: true,
   },
+  "muse-code": {
+    // Minted Muse inference keys have no advertised expiry. Validate presence;
+    // remint from the stored dca token is the refresh path (CLIProxyAPI parity).
+    checkExpiry: true,
+    refreshable: true,
+  },
   kilocode: {
     // Kilo OAuth does not expose a stable user-info endpoint in all environments.
     // Validate using token presence/expiry as a lightweight auth check.
@@ -258,6 +264,7 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     checkExpiry: true,
   },
   cline: CLINE_OAUTH_TEST_CONFIG,
+  // cline API key connections (dual-auth path) use the default live-probe.
   // ClinePass reuses the same WorkOS OAuth flow and token lifecycle as Cline.
   clinepass: CLINE_OAUTH_TEST_CONFIG,
   kiro: {
@@ -275,6 +282,23 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     checkExpiry: true,
     refreshable: true,
   },
+  "codebuddy-intl": {
+    checkExpiry: true,
+    refreshable: true,
+  },
+  workbuddy: {
+    // WorkBuddy is a separate product from CodeBuddy CN (own host and account
+    // system) but shares the same plugin-auth protocol shape, so the same
+    // reasoning applies: validate on token presence + the refresh path.
+    //
+    // Deliberately NOT a live probe against GET /v3/config. That endpoint
+    // answers 200 with `data.models: null` for an unauthenticated caller
+    // (verified 2026-09-19), so a 2xx there proves reachability, not auth —
+    // it would turn a dead token green. Real connectivity is exercised by
+    // every /v2/chat/completions request.
+    checkExpiry: true,
+    refreshable: true,
+  },
   "devin-cli": {
     // Same gap as grok-cli #7610: absent from this table, so "Test Connection"
     // always fell through to "Provider test not supported" and left a working
@@ -284,6 +308,14 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     // token to rotate either. Validate on token presence/expiry; real
     // connectivity is proven by every chat/completions request.
     checkExpiry: true,
+  },
+  freebuff: {
+    // Freebuff login yields a long-lived Codebuff session token with no refresh
+    // grant or advertised expiry. Validate presence only — the upstream session
+    // probe (/api/v1/freebuff/session) allocates a session, so it is not a
+    // side-effect-free test; real connectivity is proven by chat requests.
+    checkExpiry: true,
+    refreshable: false,
   },
   "devin-desktop": {
     // Devin Desktop authentication is import-only: the copied API key has no

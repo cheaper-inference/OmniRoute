@@ -31,6 +31,11 @@ const NEWLY_VISION = [
   "moonshotai/Kimi-K2.7-Code",
   // claude-fable fragment
   "claude-fable-5",
+  // gemini-4 fragment — covers the Gemini 4.x generation (e.g. gemini-4-argon
+  // tiers) before registry/spec/models.dev rows land for them
+  "gemini-4-argon",
+  "gemini-4-argon-medium",
+  "gemini-4.1-flash",
 ];
 
 // ── Models that must remain non-vision ──────────────────────────────────────

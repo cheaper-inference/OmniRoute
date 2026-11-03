@@ -6,6 +6,7 @@
 // (parent owns the state + persistence). All mutations go through the pure
 // `compressionPipelineModel` so invariants (valid intensity, non-empty pipeline) hold.
 //
+import { useId } from "react";
 import {
   DndContext,
   closestCenter,
@@ -32,6 +33,9 @@ import {
   type EngineIntensities,
   type PipelineStep,
 } from "./compressionPipelineModel";
+import Button from "../Button";
+import Icon from "../Icon";
+import Select from "../Select";
 
 export type { PipelineStep } from "./compressionPipelineModel";
 
@@ -40,9 +44,6 @@ type Props = {
   onChange: (steps: PipelineStep[]) => void;
   engineIntensities: EngineIntensities;
 };
-
-const SELECT_CLASS =
-  "rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-main w-full";
 
 function SortableRow(props: {
   id: string;
@@ -70,55 +71,56 @@ function SortableRow(props: {
       data-testid={`pipeline-row-${props.index}`}
       className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2"
     >
-      <button
-        type="button"
+      {/* dnd-kit drag handle: its listeners/attributes ride on the kit Button. */}
+      <Button
+        variant="outline"
+        size="icon"
         aria-label={t("dragToReorder")}
         data-testid={`pipeline-drag-${props.index}`}
-        className="cursor-grab rounded-lg border border-border px-2 py-2 text-sm text-text-muted"
+        className="cursor-grab text-text-muted"
         {...attributes}
         {...listeners}
       >
-        ⠿
-      </button>
-      <select
+        <Icon name="drag_indicator" size={16} />
+      </Button>
+      <Select
         aria-label={t("engine")}
         value={props.step.engine}
         onChange={(event) => props.onPatch({ engine: event.target.value })}
-        className={SELECT_CLASS}
       >
         {props.engines.map((engine) => (
           <option key={engine} value={engine}>
             {engine}
           </option>
         ))}
-      </select>
-      <select
+      </Select>
+      <Select
         aria-label={t("intensity")}
         value={props.step.intensity ?? ""}
         onChange={(event) => props.onPatch({ intensity: event.target.value })}
-        className={SELECT_CLASS}
       >
         {allowedIntensities(props.step.engine, props.engineIntensities).map((intensity) => (
           <option key={intensity} value={intensity}>
             {intensity}
           </option>
         ))}
-      </select>
-      <button
-        type="button"
+      </Select>
+      <Button
+        variant="outline"
         onClick={props.onRemove}
         disabled={!props.canRemove}
         data-testid={`pipeline-remove-${props.index}`}
-        className="rounded-lg border border-border px-3 py-2 text-sm text-text-main disabled:opacity-50"
       >
         {t("removeStep")}
-      </button>
+      </Button>
     </div>
   );
 }
 
 export function CompressionPipelineEditor({ steps, onChange, engineIntensities }: Props) {
   const t = useTranslations("contextCombos");
+  // Same id on server and client; dnd-kit's default comes from a process-wide counter.
+  const dndContextId = useId();
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -141,16 +143,22 @@ export function CompressionPipelineEditor({ steps, onChange, engineIntensities }
     <div className="space-y-3" data-testid="compression-pipeline-editor">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-text-main">{t("pipeline")}</h3>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
+          icon="add"
           data-testid="pipeline-add-step"
           onClick={() => onChange(addLayer(steps, { engine: firstEngine }, engineIntensities))}
-          className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-main"
         >
           {t("addStep")}
-        </button>
+        </Button>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        id={dndContextId}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
           <div className="space-y-2">
             {steps.map((step, index) => (

@@ -12,6 +12,7 @@
  */
 
 import crypto from "crypto";
+import { canonicalJson, outputContractOf, SEMANTIC_CACHE_KEY_SCHEMA } from "@/lib/semanticCache";
 import {
   type SemanticCacheConfig,
   type SemanticCacheType,
@@ -27,6 +28,8 @@ import {
   type EmbeddingGenerator,
 } from "./embeddingClient.ts";
 import { synthesizeOpenAiSseFromJson } from "../../utils/jsonToSse.ts";
+import { conversationSignatureFields } from "../../utils/conversationSignatureFields.ts";
+import { isCompleteTextProjection } from "./semanticProjection";
 
 export interface CacheLookupParams {
   body: Record<string, unknown> & {
@@ -114,6 +117,7 @@ function normalizeMessagesForHash(conversation: unknown): Array<{ role: string; 
     return {
       role,
       content: stringifyValue(record.content),
+      ...conversationSignatureFields(record),
     };
   });
 }
@@ -132,16 +136,28 @@ export function generateDirectHash(
     provider?: string | null;
     cacheByModel?: boolean;
     cacheByProvider?: boolean;
-  }
+  },
+  // #14484 F1: behavior-changing generation constraints (tools/tool_choice/response_format)
+  // MUST participate in the Layer-1 hash — otherwise a response cached for a request with
+  // tools/a forced output contract gets replayed to a later request with identical messages
+  // but a different (or absent) contract, e.g. a tool_calls response served to a plain-chat
+  // request. Mirrors the #12307 fix already applied to the legacy signature path.
+  outputContract?: unknown
 ): string {
-  const payload = JSON.stringify({
-    model: scoping?.cacheByModel !== false ? model : "*",
-    provider: scoping?.cacheByProvider ? scoping.provider || "*" : "*",
-    cacheKey: scoping?.cacheKey || undefined,
-    messages: normalizeMessagesForHash(conversation),
-    temperature,
-    top_p: topP,
-  });
+  const payload = canonicalJson(
+    JSON.parse(
+      JSON.stringify({
+        schema: SEMANTIC_CACHE_KEY_SCHEMA,
+        model: scoping?.cacheByModel !== false ? model : "*",
+        provider: scoping?.cacheByProvider ? scoping.provider || "*" : "*",
+        cacheKey: scoping?.cacheKey || undefined,
+        messages: normalizeMessagesForHash(conversation),
+        temperature,
+        top_p: topP,
+        outputContract: outputContract ?? undefined,
+      })
+    )
+  );
 
   const digest = crypto.createHash("sha256").update(payload).digest("hex");
   return scoping?.apiKeyId ? `${scoping.apiKeyId}.${digest}` : digest;
@@ -249,13 +265,20 @@ export class SemanticCacheManager {
     const topP = typeof params.body.top_p === "number" ? params.body.top_p : 1;
 
     // ── Layer 1: Direct Hash Lookup ──
-    const directHash = generateDirectHash(params.model, conv, temp, topP, {
-      apiKeyId: params.apiKeyId,
-      cacheKey,
-      provider: params.provider,
-      cacheByModel: this.config.cacheByModel,
-      cacheByProvider: this.config.cacheByProvider,
-    });
+    const directHash = generateDirectHash(
+      params.model,
+      conv,
+      temp,
+      topP,
+      {
+        apiKeyId: params.apiKeyId,
+        cacheKey,
+        provider: params.provider,
+        cacheByModel: this.config.cacheByModel,
+        cacheByProvider: this.config.cacheByProvider,
+      },
+      outputContractOf(params.body)
+    );
 
     if (cacheTypeHeader !== "semantic") {
       try {
@@ -274,7 +297,16 @@ export class SemanticCacheManager {
     }
 
     // ── Layer 2: Semantic Vector Similarity Lookup ──
-    if (cacheTypeHeader === "direct" || !this.embeddingGenerator) {
+    if (
+      cacheTypeHeader === "direct" ||
+      !this.embeddingGenerator ||
+      outputContractOf(params.body) ||
+      !isCompleteTextProjection(
+        conv,
+        this.config.conversationHistoryDepth,
+        this.config.excludeSystemPrompt
+      )
+    ) {
       return { hit: false };
     }
 
@@ -316,7 +348,11 @@ export class SemanticCacheManager {
         threshold,
         1
       );
-      if (nearest.length > 0 && nearest[0].similarity >= threshold) {
+      if (
+        nearest.length > 0 &&
+        nearest[0].similarity >= threshold &&
+        nearest[0].entry.semanticProjectionVersion === 1
+      ) {
         return {
           hit: true,
           type: "semantic",
@@ -346,33 +382,52 @@ export class SemanticCacheManager {
     const temp = typeof params.body.temperature === "number" ? params.body.temperature : 0;
     const topP = typeof params.body.top_p === "number" ? params.body.top_p : 1;
 
-    const directHash = generateDirectHash(params.model, conv, temp, topP, {
-      apiKeyId: params.apiKeyId,
-      cacheKey,
-      provider: params.provider,
-      cacheByModel: this.config.cacheByModel,
-      cacheByProvider: this.config.cacheByProvider,
-    });
+    const directHash = generateDirectHash(
+      params.model,
+      conv,
+      temp,
+      topP,
+      {
+        apiKeyId: params.apiKeyId,
+        cacheKey,
+        provider: params.provider,
+        cacheByModel: this.config.cacheByModel,
+        cacheByProvider: this.config.cacheByProvider,
+      },
+      outputContractOf(params.body)
+    );
 
     const promptText = normalizeConversationForEmbedding(conv, {
       excludeSystemPrompt: this.config.excludeSystemPrompt,
       historyDepth: this.config.conversationHistoryDepth,
     });
 
-    // Custom TTL from header or config
+    // Custom TTL from header or config. #14484 F1: x-omniroute-cache-ttl is caller-supplied
+    // and was previously unbounded, letting a client pin a poisoned entry far past the
+    // configured cache lifetime; cap it at this.config.ttlMs.
     const ttlHeader = getHeader(params.headers, "x-omniroute-cache-ttl");
     let effectiveTtl = this.config.ttlMs;
     if (ttlHeader) {
       const parsed = Number(ttlHeader);
       if (Number.isFinite(parsed) && parsed > 0) {
-        effectiveTtl = parsed > 100000 ? parsed : parsed * 1000;
+        const normalized = parsed > 100000 ? parsed : parsed * 1000;
+        effectiveTtl = Math.min(normalized, this.config.ttlMs);
       }
     } else if (params.ttlMs && params.ttlMs > 0) {
       effectiveTtl = params.ttlMs;
     }
 
     let embedding: number[] | undefined;
-    if (this.embeddingGenerator && promptText) {
+    if (
+      this.embeddingGenerator &&
+      promptText &&
+      !outputContractOf(params.body) &&
+      isCompleteTextProjection(
+        conv,
+        this.config.conversationHistoryDepth,
+        this.config.excludeSystemPrompt
+      )
+    ) {
       const embedResult = await generateEmbeddingWithTimeout(promptText, this.embeddingGenerator, {
         model: this.config.embeddingModel,
         provider: this.config.embeddingProvider,
@@ -389,6 +444,7 @@ export class SemanticCacheManager {
       hash: directHash,
       signature: params.signature || undefined,
       embedding,
+      semanticProjectionVersion: embedding ? 1 : undefined,
       promptText,
       model: params.model,
       provider: params.provider,

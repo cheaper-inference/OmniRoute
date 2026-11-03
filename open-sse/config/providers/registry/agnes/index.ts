@@ -56,6 +56,11 @@ export const agnesProvider: RegistryEntry = {
       maxOutputTokens: 65536,
       supportsReasoning: true,
       supportedThinkingEfforts: [...AGNES_30_THINKING_EFFORTS],
+      // apihub lists agnes-3.0-flash-max as its own id. Free keys get 403
+      // "insufficient quota" on that SKU, while the base model accepts
+      // reasoning_effort=max. Fold only this suffix; other tiers are not
+      // separate catalog ids.
+      effortSuffixesThatFoldDespiteLiveCatalog: ["max"],
       supportsVision: true,
       toolCalling: true,
       interleavedField: "reasoning_content",

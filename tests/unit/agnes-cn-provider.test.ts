@@ -98,7 +98,9 @@ test("agnes-cn is a named OpenAI-style provider with openai-compat discovery", (
 
 test("PROVIDER_SEARCH_PAIRS and CATALOG_SIBLING_IDS do not pair agnes with agnes-cn", () => {
   const pairs = extractNamedConstLiteral(
-    readRepo("src/sse/services/auth.ts"),
+    // #15927 moved PROVIDER_SEARCH_PAIRS (with getProviderSearchPool) out of
+    // src/sse/services/auth.ts into the shared pool module used by combo discovery.
+    readRepo("open-sse/services/providerConnectionPool.ts"),
     "PROVIDER_SEARCH_PAIRS"
   );
   const siblings = extractNamedConstLiteral(
@@ -252,10 +254,10 @@ test("agnes-cn translate-path golden records China host", () => {
 test("every i18n locale has a nonempty agnes-cn onboarding description", () => {
   const messagesDir = path.join(REPO_ROOT, "src/i18n/messages");
   const files = fs.readdirSync(messagesDir).filter((file) => file.endsWith(".json"));
-  // 66 locales as of 2026-09 (config/i18n.json). This was 51 in the original PR —
+  // 67 locale files as of 2026-09-22 (config/i18n.json: 66 locales + en; bs added in #14187). This was 51 in the original PR —
   // 15 locales (am, ha, hy, ig, ka, km, kn, ml, my, ne, or, pa, si, uz, yo) never got
   // the key, which is exactly the i18n-new-key-coverage CI gate this fixes.
-  assert.equal(files.length, 66);
+  assert.equal(files.length, 67);
 
   for (const file of files) {
     const messages = JSON.parse(readRepo(`src/i18n/messages/${file}`));

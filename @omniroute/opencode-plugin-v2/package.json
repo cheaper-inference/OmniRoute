@@ -13,6 +13,7 @@
   },
   "files": [
     "dist",
+    "server.js",
     "README.md",
     "LICENSE"
   ],
@@ -23,10 +24,10 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "1.18.29",
+    "@opencode/plugin": "2.0.12",
     "@types/node": "^22.19.19",
     "tsup": "^8.5.1",
     "tsx": "^4.22.3",
@@ -39,12 +40,12 @@
   "author": "OmniRoute contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/diegosouzapw/OmniRoute.git",
+    "url": "https://github.com/cheaper-inference/OmniRoute.git",
     "directory": "@omniroute/opencode-plugin-v2"
   },
-  "homepage": "https://github.com/diegosouzapw/OmniRoute/tree/main/%40omniroute/opencode-plugin-v2#readme",
+  "homepage": "https://github.com/cheaper-inference/OmniRoute/tree/main/%40omniroute/opencode-plugin-v2#readme",
   "bugs": {
-    "url": "https://github.com/diegosouzapw/OmniRoute/issues"
+    "url": "https://github.com/cheaper-inference/OmniRoute/issues"
   },
   "keywords": [
     "omniroute",
@@ -62,9 +63,10 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.18.29 <2"
+    "@opencode/plugin": ">=2.0.12 <3"
   },
   "overrides": {
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "zod": "$zod"
   }
 }

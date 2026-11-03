@@ -27,9 +27,9 @@ function safeCapMaxOutputTokens(model: string, provider?: string | null): number
  *   - Preserve caller's max_tokens as response room (floored to MIN_RESPONSE_ROOM)
  *   - Target max_tokens = responseRoom + requestedBudget, capped at modelCap
  *   - fittedBudget = max_tokens - responseRoom (the thinking budget actually used)
- *   - If the cap squeezes fittedBudget below the Anthropic minimum, retry with
- *     responseRoom shrunk to MIN_RESPONSE_ROOM; if still below MIN, disable
- *     thinking entirely (cap too tight for any reasoning).
+ *   - If the cap squeezes fittedBudget below the Anthropic minimum, preserve
+ *     the target and fit the requested budget with MIN_RESPONSE_ROOM reserved;
+ *     if still below MIN, disable thinking entirely (cap too tight for reasoning).
  *
  * `provider` scopes the cap lookup to a provider-specific override (e.g. a
  * dashboard-set `max_output_tokens` for `opencode-go/qwen3.7-plus`) when the
@@ -65,22 +65,17 @@ export function fitThinkingToMaxTokens(
     };
   }
 
-  let responseRoom = Math.max(callerMaxTokens, MIN_RESPONSE_ROOM);
-  let target =
+  const responseRoom = Math.max(callerMaxTokens, MIN_RESPONSE_ROOM);
+  const target =
     modelCap === null
       ? responseRoom + requestedBudget
       : Math.min(responseRoom + requestedBudget, modelCap);
   let fittedBudget = target - responseRoom;
 
-  // If the cap squeezed thinking below Anthropic's floor, try shrinking
-  // response room to MIN_RESPONSE_ROOM to recover budget.
+  // If the cap squeezed thinking below Anthropic's floor, preserve the target
+  // and recover budget while reserving MIN_RESPONSE_ROOM for the response.
   if (fittedBudget < MIN_CLAUDE_THINKING_BUDGET && responseRoom > MIN_RESPONSE_ROOM) {
-    responseRoom = MIN_RESPONSE_ROOM;
-    target =
-      modelCap === null
-        ? responseRoom + requestedBudget
-        : Math.min(responseRoom + requestedBudget, modelCap);
-    fittedBudget = target - responseRoom;
+    fittedBudget = Math.min(requestedBudget, target - MIN_RESPONSE_ROOM);
   }
 
   // Cap too tight for any thinking — disable rather than send an invalid request.

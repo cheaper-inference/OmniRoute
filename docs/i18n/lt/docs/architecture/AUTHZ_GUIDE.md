@@ -1,15 +1,15 @@
 # Authorization Guide (Lietuvių)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
 
 ---
 
-> **Pirminis tiesos šaltinis:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Paskutinį kartą atnaujinta:** 2026-06-28 — v3.8.40
+> **Tiesos šaltinis:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
+> **Paskutinį kartą atnaujinta:** 2026-09-22 — aprėpties vardų sritys nurodo į MCP-SERVER.md
 
-OmniRoute turi maršrutus atpažįstančią autorizavimo seką, kuri kontroliuoja kiekvieną API užklausą. Klasifikavimas yra **deterministinis** ir **uždaras klaidos atveju** — viskas, ko nepavyksta klasifikuoti, priskiriama `MANAGEMENT` ir tam reikalinga sesija arba valdymo lygio prieigos raktas. Šiame puslapyje aprašomas modelis, skirtas maršrutus prižiūrintiems arba naujas galines prieigos vietas projektuojantiems inžinieriams.
+OmniRoute turi maršrutą atpažįstančią autorizacijos sistemą, kuri kontroliuoja kiekvieną API užklausą. Klasifikacija yra **deterministinė** ir **uždaroma gedimo atveju** — viskas, kas negali būti klasifikuota, tampa `MANAGEMENT` ir reikalauja sesijos arba valdymo lygio prieigos rakto. Šiame puslapyje paaiškinamas modelis inžinieriams, prižiūrintiems maršrutus arba kuriantiems naujus galinius taškus.
 
-![AuthZ seka (3 maršrutų klasės + strategijos vertinimas)](../diagrams/exported/authz-pipeline.svg)
+![Autorizacijos sistema (3 maršrutų klasės + politikos vertinimas)](../diagrams/exported/authz-pipeline.svg)
 
 > Šaltinis: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -23,7 +23,7 @@ Naudojamas su OpenAI / Anthropic / Gemini suderinamoms kliento API ir keliems va
 Authorization: Bearer <api-key>
 ```
 
-Tikrinamas naudojant `isValidApiKey()` / `extractApiKey()`, esančias `src/sse/services/auth.ts`, ir pakartotinai eksportuojamas per `src/shared/utils/apiAuth.ts`. Tikrintuvas taip pat priima `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` aplinkos kintamuosius kaip nuolatinius tiesioginio perdavimo raktus (problema #1350).
+Tikrinama naudojant `isValidApiKey()` / `extractApiKey()` faile `src/sse/services/auth.ts` ir pakartotinai eksportuojama per `src/shared/utils/apiAuth.ts`. Tikrintuvas taip pat priima `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` aplinkos kintamuosius kaip nuolatinius tiesioginio perdavimo raktus (problema #1350).
 
 ### 2. Valdymo skydelio sesija (auth_token slapukas)
 
@@ -33,80 +33,142 @@ Skirta valdymo skydelio puslapiams ir administravimo operacijoms.
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Slapukas laikomas sesija tik tada, kai JWT patikrinamas **ir** turi `authenticated: true`
+Slapukas laikomas sesija tik tada, kai JWT patikra sėkminga **ir** jame yra `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Kiekvienas
-slapuko naudotojas (maršruto apsauga, authz sekos atnaujinimas, WebSocket ryšio užmezgimas, tiesioginis
-serveris, `/api/settings/require-login`, `/api/auth/status`) naudoja šią pagalbinę funkciją.
-Egzistuoja ir kitų JWT, pasirašytų naudojant `JWT_SECRET` — Cursor CLI tiesioginis perdavimas raktų
-turėtojams išduoda žetonus su `iss "omniroute" / aud "cursor-cli"` — tačiau jie niekada nelaikomi sesijomis
+slapuko naudotojas (valdymo skydelio maršruto apsauga (`isDashboardSessionAuthenticated()`), autorizavimo konvejerio atnaujinimas, WebSocket ryšio užmezgimas, tiesioginis
+serveris, `/api/settings/require-login`, `/api/auth/status`) naudoja šį pagalbinį metodą.
+Yra ir kitų JWT, pasirašytų naudojant `JWT_SECRET` — Cursor CLI tiesioginio perdavimo mechanizmas raktų turėtojams generuoja
+`iss "omniroute" / aud "cursor-cli"` žetonus — ir jie niekada nelaikomi sesijomis
 (#13298).
 
-Tikrinama naudojant `isDashboardSessionAuthenticated()`, esančią `src/shared/utils/apiAuth.ts`. Seka automatiškai atnaujina JWT, kai iš jo 30 dienų galiojimo laikotarpio lieka mažiau nei 7 dienos.
+Patikrinama naudojant `isDashboardSessionAuthenticated()` faile `src/shared/utils/apiAuth.ts`. Konvejeris automatiškai atnaujina JWT, kai iš jo 30 dienų galiojimo laikotarpio lieka mažiau nei 7 dienos.
 
-Kai kurie valdymo maršrutai priima **bet kurį** režimą: slapuką ARBA `Bearer <key>`, kai API raktas turi `manage` (arba `admin`) aprėptį. Būtent tai suteikia galimybę naudoti „konfigūravimo per API iškvietimus“ darbo eigą, pridėtą v3.8.
+Sesija taip pat gali baigtis nepraėjus 30 dienų, nes kiekvienas žetonų išdavėjas naudoja `mintDashboardSessionToken` (išdavimo laiką `iat` ir identifikatorių `jti`), o tikrintuvas tikrina du nustatymus: `sessionsValidAfter`, kuris nustatomas pakeitus slaptažodį, todėl visos anksčiau išduotos sesijos nustoja galioti (slaptažodį pakeitusi naršyklė gauna naują slapuką), ir `revokedDashboardSessions`, į kurį `POST /api/auth/logout` įtraukia sesijos, iš kurios atsijungta, `jti`. Senesnės laidos sugeneruotos sesijos neturi nė vienos iš šių deklaracijų ir galioja iki pirmojo slaptažodžio pakeitimo. Jei nustatymų nuskaityti nepavyksta, sesija nelaikoma patikima.
 
-#### Pasirenkamas OIDC prisijungimo barjeras (#6973)
+Kai kurie valdymo maršrutai priima **bet kurį** režimą: slapuką ARBA `Bearer <key>`, kai API raktas turi `manage` (arba `admin`) aprėptį. Būtent tai įgalina „konfigūruojama per API iškvietimus“ darbo eigą, pridėtą v3.8 versijoje.
 
-Valdymo skydelio administratoriaus prisijungimas kartu su numatytuoju prisijungimu naudojant slaptažodį taip pat palaiko **pasirenkamą** OIDC (OpenID Connect) eigą — prisijungimas naudojant slaptažodį niekada nepašalinamas, tik papildomas:
+#### Pasirenkamas prisijungimo per OIDC barjeras (#6973)
 
-- Išjungta, nebent `settings.oidcEnabled === true` **ir** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` yra sukonfigūruoti (Nustatymai → Autentifikavimas).
-  Priešingu atveju `GET /api/auth/oidc/login` grąžina `400`.
-- `GET /api/auth/oidc/login` aptinka `authorization_endpoint` iš išdavėjo
+Valdymo skydelio administratoriaus prisijungimas taip pat palaiko **pasirenkamą** OIDC (OpenID Connect) eigą
+greta numatytojo prisijungimo slaptažodžiu — prisijungimas slaptažodžiu niekada nepašalinamas, tik
+papildomas:
+
+- Išjungta, nebent `settings.oidcEnabled === true` **ir** sukonfigūruoti visi
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` (Nustatymai → Autentifikavimas).
+  Kitu atveju `GET /api/auth/oidc/login` grąžina `400`.
+- `GET /api/auth/oidc/login` išdavėjo `authorization_endpoint` aptinka iš
   `/.well-known/openid-configuration` (jei nepavyksta, naudojamas
-  `<issuer>/authorize`), sukuria peradresavimo URI pagal gaunamą užklausą
-  (atsižvelgdamas į `x-forwarded-proto`) ir peradresuoja į IdP, kartu perduodamas atsitiktinę `state`
-  reikšmę, saugomą `httpOnly` `oidc_state` slapuke.
-- `GET /api/auth/oidc/callback` patikrina `state`, iškeičia autorizavimo
-  kodą ir patikrina ID žetono parašą naudodamas išdavėjo JWKS
-  (`jose` funkciją `createRemoteJWKSet`, talpykloje saugomą pagal kiekvieną JWKS URI), atlikdamas `issuer` / `audience`
-  patikras. Pasirenkamas `oidcAllowedSubjects` leidžiamųjų reikšmių sąrašas lyginamas su žetono
-  `sub` arba `email` deklaracija — į el. pašto deklaraciją atsižvelgiama tik tada, kai
-  `email_verified === true`, todėl IdP nepatvirtintas el. pašto adresas niekada negali
-  įveikti šio barjero.
-- Sėkmės atveju išduodamas **visiškai toks pats** 30 dienų `auth_token` JWT, kokį išduoda prisijungimas
-  naudojant slaptažodį (`src/app/api/auth/login/route.ts`), todėl likusi
-  valdymo skydelio sesijos seka (automatinis atnaujinimas, slapuko žymos) nesikeičia —
-  OIDC pakeičia tik tai, kaip išduodamas slapukas, o ne jo suteikiamas teises.
+  `<issuer>/authorize`), pagal gaunamą užklausą suformuoja peradresavimo URI
+  (atsižvelgiant į `x-forwarded-proto`) ir peradresuoja į IdP su atsitiktine `state`
+  reikšme, saugoma `httpOnly` `oidc_state` slapuke.
+- `GET /api/auth/oidc/callback` patikrina `state`, autorizacijos kodą iškeičia į
+  prieigos duomenis ir patikrina ID prieigos rakto parašą naudodamas išdavėjo JWKS
+  (`jose` funkciją `createRemoteJWKSet`, talpykloje saugomą pagal JWKS URI), kartu
+  atlikdamas `issuer` / `audience` patikras. Prieiga prie valdymo skydelio suteikiama
+  tik esant netuščiam `oidcAllowedSubjects` sąrašui, `oidcAdmissionClaim` politikai
+  arba abiem. Subjektų sąrašas atitinka `sub` arba `email` tik tada, kai
+  `email_verified === true`. Pasirenkamoje deklaracijos politikoje nurodomas taškais
+  atskirtas ID prieigos rakto deklaracijos kelias (pavyzdžiui, `realm_access.roles`)
+  ir priimtinų reikšmių masyvas; pagal kelią gauta deklaracija turi būti eilučių
+  masyvas, kuriame yra bent viena priimtina reikšmė. Jei sukonfigūruotos abi
+  politikos, abi patikros turi būti sėkmingos. Jei deklaracijų nėra arba jos
+  netinkamai suformuotos, prieiga atmetama, o nesant nė vienos politikos atgalinio
+  iškvietimo apdorojimas atsisako prijungti (`not_configured`). Esamos tik subjektų
+  sąrašu pagrįstos konfigūracijos ir toliau veikia nepakitusios.
+- Įprastai Keycloak srities vaidmenis įtraukia į prieigos, bet nebūtinai į ID
+  prieigos raktus. Norėdami reikalauti srities vaidmens `admin`, sukonfigūruokite
+  šio kliento protokolo susiejimą, kuris į jo **ID prieigos raktą** įtraukia
+  `realm_access.roles`, tada nustatykite `oidcAdmissionClaim` į
+  `{ "path": "realm_access.roles", "values": ["admin"] }`. Prieš įjungdami tik
+  vaidmeniu pagrįstą prieigą, patikrinkite faktinę šio kliento ID prieigos rakto
+  deklaraciją; programa neskaito prieigos rakto vaidmenų. IdP pusėje atliekamas
+  atsisakymas išduoti prieigos raktą gali papildyti šią programos patikrą, tačiau
+  jos nepakeičia.
+- Sėkmės atveju sugeneruojamas **visiškai toks pats** 30 dienų `auth_token` JWT,
+  kokį išduoda prisijungimas naudojant slaptažodį
+  (`src/app/api/auth/login/route.ts`), todėl likusi valdymo skydelio seanso apdorojimo
+  grandinė (automatinis atnaujinimas, slapukų vėliavėlės) nepakinta — OIDC pakeičia
+  tik slapuko sugeneravimo būdą, bet ne jo suteikiamas teises. IdP vaidmenų ar grupių
+  pakeitimai nepanaikina esamų OmniRoute seansų; jų galiojimo trukmę ir toliau lemia
+  atsijungimas, slaptažodžio pakeitimas arba seanso galiojimo pabaiga.
+- Kiekvienas `oidc*` nustatymas (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) yra įtrauktas į
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  atsako `400 PASSWORD_REQUIRED`, nebent užklausos turinyje valdymo slaptažodis
+  pateikiamas kaip `currentPassword` (jei jis neteisingas, grąžinama
+  `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` neleidžia _prisijungti_
+  naudojant slaptažodį (`POST /api/auth/login`), tačiau išsaugo slaptažodžio maišą,
+  o pakartotinai patvirtinant tapatybę `currentPassword` vis tiek tikrinamas pagal jį.
+- `corsOrigins` ir `bruteForceProtection` taip pat yra įtraukti į
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: susilpninus bet kurį iš jų, susilpnėja
+  prisijungimo apsauga, todėl jiems taikomas toks pats pakartotinis tapatybės
+  patvirtinimas naudojant `currentPassword` (jo paprašoma skirtuke „Sauga“), o
+  importuojant JSON jie pašalinami.
+- Kiekvieną saugos politikos raktą — `SECURITY_IMPACTING_SETTINGS_KEYS` įrašus,
+  kiekvieną `oidc*` raktą ir valdymo skydelio seanso būseną — per
+  `PATCH /api/settings` gali keisti **tik operatorius**: `manage` aprėptį turintis
+  API raktas arba `oma_` prieigos raktas atmetamas su `403`, net jei pateikiamas
+  teisingas `currentPassword`, o atsisakymas įrašomas į audito žurnalą kaip
+  `settings.update_failed` su `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` faile `src/lib/api/operatorCredential.ts`).
+  Įprastus nustatymus (temą, rodymo nuostatas) ir toliau gali keisti `manage` raktas
+  arba `admin` prieigos raktas. Kiekvienam paties `/api/settings` (taip pat
+  `/api/settings/require-login`) pakeitimui reikalinga ir prieigos rakto `admin`
+  aprėptis (`ADMIN_MUTATION_EXACT_PATHS` faile `src/server/authz/accessScopes.ts`,
+  tikslus kelio atitikimas); `GET` ir toliau naudoja `read`, o kiti
+  `/api/settings/*` antriniai maršrutai (tarpiniai serveriai, derinių numatytosios
+  reikšmės, modelių alternatyvūs pavadinimai, glaudinimas, valymas…) išlaiko pagal
+  metodą nustatomą `write` aprėptį.
+- `POST /api/settings/import-json` praleidžia šį pakartotinį tapatybės patvirtinimą,
+  todėl prieš įrašant pašalinami visi `IMPORT_STRIPPED_SETTINGS_KEYS` raktai
+  (tame pačiame faile): slaptažodis ir `currentPassword`, kiekvienas
+  `SECURITY_IMPACTING_SETTINGS_KEYS` įrašas bei valdymo skydelio seanso būsena
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Todėl importavus senesnę
+  atsarginę kopiją negalima atkurti seanso, kuris jau buvo nutrauktas pakeitus
+  slaptažodį arba atsijungus.
 
 ## Maršrutų klasės
 
-`src/server/authz/types.ts` apibrėžia tris klases; bet kuris maršrutas, kurio negalima deterministiškai klasifikuoti, priskiriamas `MANAGEMENT`.
+`src/server/authz/types.ts` apibrėžia tris klases. Bet koks maršrutas, kurio nepavyksta deterministiškai priskirti klasei, numatytai patenka į `MANAGEMENT`.
 
-| Klasė        | Aprašas                                                                                                                                                                      | Būtinas autentifikavimas                                               |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `PUBLIC`     | Aiškiai saugūs maršrutai — prisijungimas, atsijungimas, būsena, inicijavimas, veikimo patikra, pirminis parengimas.                                                          | Nereikalingas                                                          |
-| `CLIENT_API` | Modelių aptarnavimo galiniai taškai — `/api/v1/*`, `/api/v1beta/*` ir alternatyvūs maršrutai `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer raktas, kai įjungta galiojanti `REQUIRE_API_KEY` funkcijos žyma |
-| `MANAGEMENT` | Valdymo skydelio puslapiai, nustatymai, teikėjai, raktai, administravimo ir diagnostikos galiniai taškai.                                                                    | Valdymo skydelio sesija ARBA Bearer su `manage` aprėptimi              |
+| Klasė        | Aprašymas                                                                                                                                                               | Reikalingas autentifikavimas                                    |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `PUBLIC`     | Aiškiai saugūs maršrutai: prisijungimas, atsijungimas, būsena, inicializavimas, sveikatos patikra ir pradinės sąrankos paleidimas.                                      | Nėra                                                            |
+| `CLIENT_API` | Modelių aptarnavimo galiniai taškai: `/api/v1/*`, `/api/v1beta/*`, taip pat pseudonimai `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer raktas, kai įjungta funkcijos vėliava `REQUIRE_API_KEY`  |
+| `MANAGEMENT` | Valdymo skydelio puslapiai, nustatymai, teikėjai, raktai, administravimo ir diagnostikos galiniai taškai.                                                               | Valdymo skydelio sesija ARBA Bearer su `manage` taikymo sritimi |
 
-## Vykdymo seka
+Kai kurie `MANAGEMENT` veiksmai yra **tik operatoriui**: vien `manage` raktas nepakanka. Saugomų prisijungimo duomenų eksportas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), atsarginės kopijos atkūrimas virš dabartinių duomenų (`POST /api/db-backups/import`, įskaitant `dryRun=true`, `POST /api/db-backups` atkūrimas pagal id, `POST /api/settings/import-json`) ir atkūrimo taškų naikinimas (`DELETE /api/db-backups` valymas ir `PATCH /api/db-backups`, nes išsaugota saugojimo trukmė valdo automatinį išvalymą po kiekvienos atsarginės kopijos) reikalauja valdymo skydelio sesijos, vietinio CLI tapatybės arba kad prisijungimas būtų išjungtas. Sinchronizavimo žetono išdavimas (`POST /api/sync/tokens`) ir `admin` taikymo srities CLI prieigos žetono kūrimas (`POST /api/cli/tokens`) reikalauja valdymo skydelio sesijos arba vietinio CLI tapatybės visuose prisijungimo režimuose. API raktai bet kurios taikymo srities ir `oma_` prieigos žetonai nėra operatoriaus prisijungimo duomenys: kai jų reikia, jie gauna `403`. Patikra yra faile `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Prisijungimo nustatymų keitimas taip pat tik operatoriui: `POST /api/settings/require-login` (nustatyti administravimo slaptažodį / perjungti `requireLogin`) priima tik šiuos prisijungimo duomenis, kai slaptažodis jau yra. Pirminio paleidimo bootstrap langas (slaptažodžio dar nėra) lieka nepakitęs, o valdymo skydelio sesija, norėdama pakeisti slaptažodį, turi pateikti `currentPassword` (`403`, kai jo nėra arba jis neteisingas, įrašoma kaip `settings.update_failed`). Vietinis CLI ir egzempliorius su išjungtu prisijungimu išlaiko atkūrimo kelią ir gali nustatyti slaptažodį be jo, nes abu susieti su duomenų katalogą valdančiu serveriu.
+
+## Dujotiekis
 
 ```
-Gaunama užklausa → src/proxy.ts
-  → runAuthzPipeline(), esanti src/server/authz/pipeline.ts
-    1. Pašalinti patikimas vidines antraštes (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Sugeneruoti užklausos ID, klasifikuoti maršrutą naudojant classifyRoute()
-    3. Jei pathname == "/" → peradresuoti į /dashboard
-    4. Jei vykdomas užbaigimas (tvarkingas išjungimas) ir /api/* → 503
-    5. Jei ne GET /api/* → taikyti checkBodySize() apsaugą
-    6. Jei OPTIONS → CORS pirminė užklausa 204
-    7. Jei options.enforce == false → praleisti toliau su maršruto klasės antraštėmis
-    8. Kitu atveju: POLICIES[routeClass].evaluate(ctx)
-       - allow  → pridėti x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → JSON klaida su correlation_id (valdymo skydelio puslapiams → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Patikimos vidinės antraštės (apibrėžtos `src/server/authz/headers.ts`) yra **pašalinamos iš gaunamų užklausų** prieš klasifikuojant — klientai negali iš anksto nustatyti `x-omniroute-auth-*`, kad apsimestų kitu subjektu.
+Patikimos vidinės antraštės (apibrėžtos `src/server/authz/headers.ts`) yra** atimta nuo gaunamų užklausų** prieš klasifikuodami — klientai negali iš anksto užpildyti `x-omniroute-auth-*` kad galėtų apsimesti subjektu.
 
-### Politikų sutartys
+### Politikos sutartys
 
-Kiekviena maršrutų klasė turi politiką kataloge `src/server/authz/policies/`:
+Kiekviena maršruto klasė turi `src/server/authz/policies/` politiką:
 
 - **`publicPolicy`** (`policies/public.ts`) — visada grąžina `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — išskiria Bearer, patikrina naudodama `validateApiKey()`. Anoniminė prieiga leidžiama tik tada, kai galiojanti `REQUIRE_API_KEY` funkcijos žyma yra išjungta. Galiojanti žyma nustatoma naudojant `isRequireApiKeyEnabled()` (`DB funkcijos žymos perrašymas > process.env.REQUIRE_API_KEY > numatytoji reikšmė`), todėl valdymo skydelio funkcijų žymos ir aplinkos kintamieji nuosekliai valdo `/api/v1/*`, `/api/v1beta/*` ir alternatyvius maršrutus; sprendiklio klaidos užblokuoja prieigą. Kliento API maršrutuose leidžia valdymo skydelio sesijos užklausas (įskaitant `/api/v1/models`, kurį naudoja valdymo skydelio modelių katalogas).
-- **`managementPolicy`** (`policies/management.ts`) — priima valdymo skydelio sesiją, vidines modelių sinchronizavimo užklausas (atitinkančias `/api/providers/[name]/(sync-models|models)`) arba visiškai praleidžia patikrą, jei `isAuthRequired()` grąžina false. Kai pateiktas Bearer prieigos raktas yra netinkamas, grąžina 403 (`AUTH_001`), kitu atveju — 401. Be to, prieš bet kurią autentifikavimo šaką taiko maršrutų apsaugos lygius (LOCAL_ONLY / ALWAYS_PROTECTED) — žr. [Maršrutų apsaugos lygiai](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY` keliai, esantys `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šiuo metu: `/api/mcp/`), gali būti pasiekiami ne iš vietinio grįžtamojo ryšio adreso, kai Bearer raktas turi `manage` aprėptį; visi kiti `LOCAL_ONLY` keliai išlieka griežtai pasiekiami tik per vietinį grįžtamojo ryšio adresą, nepriklausomai nuo aprėpties.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ekstraktai Nenešėjas, patvirtina per `validateApiKey()`. Patenka į anoniminį tik tada, kai išjungta efektyvi `REQUIRE_API_KEY` funkcijos vėliavėlė. Veiksminga vėliavėlė išsprendžiama naudojant `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), todėl prietaisų skydelio funkcijų vėliavėlės ir aplinkos kintamieji nuosekliai valdo `/api/v1/*`, `/api/v1beta/*` ir slapyvardžius; sprendiklio gedimai nepavyksta uždaryti. Leidžia pateikti informacijos suvestinės seanso užklausas kliento API maršrutuose (įskaitant `/api/v1/models`, naudojamą prietaisų skydelio modelių kataloge). Kai Entra ID SSO yra įjungtas, nešėją, kuri struktūriškai yra Entra prieigos raktas (trys base64url segmentai, `RS*` alg, `kid`), tvarko SSO šaka.** prieš** `validateApiKey()` ir jo sprendimas yra galutinis. — jis niekada nepatenka į API rakto kelią arba į anoniminį atšaką, todėl tapatybės teikėjo gedimas negali tapti atvira prieiga. Statiniai API klavišai neturi įtakos. Žr. [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — priima prietaisų skydelio seansą, vidinio modelio sinchronizavimo užklausas (atitinka `/api/providers/[name]/(sync-models|models)`) arba visiškai praleidžia, jei `isAuthRequired()` grąžina false. Grąžina 403 (`AUTH_001`), kai yra nešiklio ženklas, bet jis negalioja, 401 kitu atveju. Taip pat įgyvendina maršruto apsaugos pakopas (LOCAL_ONLY / ALWAYS_PROTECTED) prieš bet kurią autentifikavimo šaką — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY keliai `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šiandien: `/api/mcp/`) gali būti pasiekiami be kilpos, kai nešiklio raktas turi `manage` sritį; visi kiti LOCAL_ONLY keliai išlieka griežti atgal, nepaisant taikymo srities.
 
-Sėkminga politika grąžina `AuthSubject`, kurio `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Tolesnės apdorojimo funkcijos gali jį nuskaityti naudodamos `assertAuth(request, "CLIENT_API")`, esančią `src/server/authz/assertAuth.ts`, užuot iš naujo vykdžiusios autentifikavimo logiką.
+Sėkminga politika grąžina `AuthSubject` su `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Tolesni tvarkytojai gali jį nuskaityti naudodami `assertAuth(request, "CLIENT_API")` `src/server/authz/assertAuth.ts` o ne pakartotinai paleisti autentifikavimo logiką.
 
 ## Viešųjų maršrutų sąrašas
 
@@ -199,36 +261,44 @@ Rinkinį pasirinkite pagal formą, o ne pagal patogumą. Vienas maršrutas įtra
 
 ## Aprėptys
 
-API raktai turi `scopes` masyvą (saugomą JSON formatu `api_keys.scopes`, žr. `src/lib/db/apiKeys.ts`).
+Trys vardų sritys. Kiekvienas tikrintojas skaito tik savo eilutes. Palyginimas,
+įskaitant tai, kodėl `manage` nepavyksta `scopeMatches` dėl `read:compression` ir kodėl `read` prieigos raktas negali `PATCH /api/keys/{id}`, yra
+[Trys aprėpties vardų sritys](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+
+API raktai turi `scopes` masyvą (saugomą kaip JSON `api_keys.scopes`, žr. `src/lib/db/apiKeys.ts`).
 
 ### Valdymo aprėptis
 
-- `manage` / `admin` — suteikia raktui prieigą prie valdymo API galinių taškų, kai jis siunčiamas kaip Bearer prieigos raktas.
+- `manage` / `admin` — `hasManageScope`. Nešėjo prieiga prie valdymo API maršrutų.
+- `mcp:connect`, `self:usage`, `self:account-quota` ir
+  `policy:bypass-provider-quota` yra adityvios tikslios atitikties aprėptys. Jos yra už `MANAGEMENT_API_KEY_SCOPES` ribų. `mcp:connect` atidaro tik
+  `/api/mcp/` negrįžtamojo ryšio išpjovą.
 
-### MCP aprėptys (`src/shared/constants/mcpScopes.ts`)
+### MCP įrankio aprėptys
 
-Kiekvienam MCP įrankiui per `MCP_TOOL_SCOPES` reikalingos konkrečios aprėptys. Visas sąrašas (`MCP_SCOPE_LIST`):
+Katalogas ir atitikimo taisyklės (identiška eilutė arba suteikta aprėptis, besibaigianti `*`):
+[MCP įrankio aprėptys](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
+`MCP_SCOPE_LIST` faile `src/shared/constants/mcpScopes.ts` yra originalus tipizuotas
+poaibis, o ne visas katalogas. Vykdymas vyksta
+`open-sse/mcp-server/scopeEnforcement.ts` po to, kai `resolveCallerScopeContext()`
+išsprendžia aprėptis iš MCP autentifikavimo informacijos, užklausos metaduomenų arba `OMNIROUTE_MCP_SCOPES`.
+Jis lieka išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+### Prieigos rakto aprėptys
 
-Tikrinant aprėptis faile `open-sse/mcp-server/server.ts`, kiekvieno įrankio aprėpčių sąrašas perduodamas į
-`evaluateToolScopes()` po to, kai `resolveCallerScopeContext()` nustato aprėptis pagal MCP autentifikavimo informaciją,
-užklausos metaduomenis arba `OMNIROUTE_MCP_SCOPES`.
+`read` / `write` / `admin` ant `oma_live_…` žetonų, reitinguojamų pagal `scopeSatisfies`
+(`src/lib/accessTokens/scopes.ts`). Šis reitingas taikomas tik prieigos rakto
+kredencialui. Žr. [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
 
-## Privalomo autentifikavimo perjungiklis
+## Reikalaujamo autentifikavimo jungiklis
 
-`isAuthRequired()` faile `src/shared/utils/apiAuth.ts` nustato, ar užklausai taikomas **koks nors** autentifikavimas:
+`isAuthRequired()` faile `src/shared/utils/apiAuth.ts` nusprendžia, ar užklausai apskritai taikomas **koks nors** autentifikavimas:
 
-- `settings.requireLogin === false` → autentifikavimas visuotinai išjungtas.
-- Nesukonfigūruotas slaptažodis **ir** nėra `INITIAL_PASSWORD` aplinkos kintamojo → pradinės sąrankos režimu leidžiama naudoti parengimo vedlį ir siųsti užklausas iš vietinio grįžtamojo ryšio adreso, tačiau išoriniame tinkle siunčiamoms užklausoms vis tiek reikia prisijungimo duomenų.
-- Bet kokia DB klaida → prieiga uždraudžiama (pagal numatytąją nuostatą užtikrinant saugumą).
+- `settings.requireLogin === false` → autentifikavimas visame pasaulyje išjungtas, išskyrus visada apsaugotą lygmenį (žr. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ir iškvietimus, kurie išduoda prisijungimo duomenis, kuriuos jis priima. Šie iškvietimai reikalauja tų pačių prisijungimo duomenų, kaip ir įjungus prisijungimą: sinchronizavimo žetonų išdavimas, CLI prieigos žetonų išdavimas bet kurios taikymo srities, API rakto su `manage`/`admin` taikymo sritimi kūrimas, tos srities suteikimas raktui arba tokio rakto perkūrimas ar rodymas (`requireCredentialForManagementScopedKey()` faile `src/lib/api/requireManagementAuth.ts`). Raktai tik išvadoms lieka atviri.
+- Slaptažodis nesukonfigūruotas **ir** nėra aplinkos kintamojo `INITIAL_PASSWORD` → bootstrap režimas leidžia pradinės sąrankos vedlį ir loopback užklausas, tačiau viešosios tinklo užklausos vis tiek reikalauja prisijungimo duomenų.
+- Bet kuri DB klaida → uždaro prieigą (saugu pagal numatytuosius nustatymus).
 
-Kliento API rakto reikalavimas tikrinamas naudojant `isRequireApiKeyEnabled()` faile `src/shared/utils/featureFlags.ts`, o ne tiesiogiai nuskaitant `process.env.REQUIRE_API_KEY`. Tai svarbu įdiegtuose egzemplioriuose: perjungus `REQUIRE_API_KEY` skiltyje Dashboard → Feature Flags, DB įrašoma pakeičianti nuostata, kuri iš karto paveikia `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ir kitas kliento API autentifikavimo patikras, naudojančias šią pagalbinę funkciją. Jei funkcijų požymių saugyklos nuskaityti nepavyksta, kliento API autentifikavimas uždraudžia prieigą ir reikalauja rakto.
+Kliento API raktų vykdymui naudojama `isRequireApiKeyEnabled()` iš `src/shared/utils/featureFlags.ts`, o ne tiesioginis `process.env.REQUIRE_API_KEY` nuskaitymas. Tai svarbu įdiegtiems egzemplioriams: `REQUIRE_API_KEY` perjungimas Dashboard → Feature Flags išsaugo DB perrašymą ir iš karto veikia `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ir kitus kliento API autentifikavimo patikrinimus, kurie naudoja šią pagalbinę funkciją. Jei funkcijų vėliavų saugyklos nepavyksta perskaityti, kliento API autentifikavimas uždaro prieigą ir reikalauja rakto.
 
 ## Nesuderinamas pakeitimas — v3.8.0
 
@@ -246,27 +316,27 @@ Galiniams taškams `/api/v1/agents/tasks/*` ir `/api/resilience/model-cooldowns`
 
 ## Derinimas
 
-Apdorojimo grandinė atsakymuose visada prideda šias antraštes:
+Dujotiekis visada antspauduoja atsakymus su:
 
 ```
-x-request-id:               <koreliacijos ID, pakartojamas klaidų atsakymų turinyje>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Autentifikuotų užklausų atveju aukštesnio lygio sistemos (apdorojimo funkcijos pusėje) užklausų antraštėse taip pat yra:
+Autentifikuotų užklausų užklausų antraštės taip pat apima:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<paskutiniai 4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (neprivaloma)
-x-omniroute-auth-scopes:    kableliais atskirtas sąrašas
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Apdorojimo funkcijose naudokite `assertAuth(req, expectedClass)` — ši funkcija išmeta `AuthzAssertionError` su kodu `AUTHZ_NOT_INITIALIZED`, jei tarpinė programinė įranga buvo apeita (tai naudinga bandymuose aptinkant konfigūracijos regresijas).
+Jei tarpinė programinė įranga buvo apeinama, naudokite `assertAuth(req, expectedClass)` viduje tvarkyklės — ji išmeta `AuthzAssertionError` su kodu `AUTHZ_NOT_INITIALIZED` (padeda užfiksuoti konfigūracijos regresijas testuose).
 
 ## Taip pat žr.
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — kiekvieno galinio taško autentifikavimo žymuo
-- [COMPLIANCE.md](../security/COMPLIANCE.md) — autentifikavimo įvykių audito žurnalas
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — išsami informacija apie MCP aprėpties užtikrinimą
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — autentifikavimo žymė kiekvienam galiniam taškui
+- [COMPLIANCE.md](../security/COMPLIANCE.md) — audito žurnalas autentifikavimo įvykiams
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — trys apimties vardų sritys ir MCP įrankių apimties katalogas
 - Šaltinis: `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`

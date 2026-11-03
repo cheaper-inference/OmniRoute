@@ -4,9 +4,11 @@
  * exclude retired static/imported rows while preserving operator-owned models.
  */
 
+import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
 import { ensureCursorAutoCatalogEntry } from "@/lib/providerModels/cursorAutoCatalog";
 import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPrecedence";
 import {
+  isDiscoveryImportedCustomSource,
   providerUsesCuratedModelsOnly,
   providerUsesExclusiveSyncedListing,
 } from "@/lib/providers/modelListingCapability";
@@ -60,7 +62,13 @@ export function mergeProviderModelListing(
   const curated =
     input.usesCuratedModelsOnly === true || providerUsesCuratedModelsOnly(input.providerId);
   const synced = curated ? [] : input.syncedModels.filter((m) => m?.id);
-  const custom = curated ? [] : input.customModels.filter((m) => m?.id);
+  // Curated only means "no upstream discovery endpoint" — the registry catalog is the
+  // whole lineup and there is nothing to sync. It does NOT mean the operator may not add
+  // ids by hand, so operator rows are kept for every provider (#18018); only rows a
+  // discovery sync imported are dropped on a curated provider (#8451).
+  const custom = input.customModels.filter(
+    (m) => m?.id && !(curated && isDiscoveryImportedCustomSource(m.source))
+  );
 
   const exclusive =
     !curated &&
@@ -68,7 +76,7 @@ export function mergeProviderModelListing(
       (providerUsesExclusiveSyncedListing(input.providerId) && synced.length > 0));
 
   if (exclusive) {
-    const cursor = providerUsesExclusiveSyncedListing(input.providerId);
+    const cursor = ["cursor", "cu"].includes(input.providerId.trim().toLowerCase());
     const registryById = new Map(input.registryModels.map((model) => [model.id, model]));
     const liveModels = synced.map((model) => ({
       ...(registryById.get(model.id) || {}),
@@ -89,11 +97,21 @@ export function mergeProviderModelListing(
         name: model.name || model.id,
         source: normalizeCustomSource(model.source),
       }));
-    return dedupeById(mergeModelsWithCustomPrecedence(withAuto, normalizedCustom));
+    const exclusiveMerged = dedupeById(mergeModelsWithCustomPrecedence(withAuto, normalizedCustom));
+    // Codex is exclusive since #15132, but the tier variants #13224 derives from the
+    // account's own discovered reasoning levels are live data, not static aliases:
+    // keep them, as /v1/models does.
+    return input.providerId === "codex"
+      ? appendSyncedEffortVariants(
+          exclusiveMerged.map((model) => ({ ...model, owned_by: "codex" }))
+        )
+      : exclusiveMerged;
   }
 
+  const syncedById = new Map(synced.map((model) => [model.id, model]));
   const builtInModels = input.registryModels.map((model) => ({
     ...model,
+    ...(input.providerId === "codex" ? syncedById.get(model.id) : {}),
     source: "system",
   }));
   const registryIds = new Set(builtInModels.map((model) => model.id));
@@ -112,7 +130,10 @@ export function mergeProviderModelListing(
     source: normalizeCustomSource(model.source),
   }));
 
-  return dedupeById(
+  const merged = dedupeById(
     mergeModelsWithCustomPrecedence([...builtInModels, ...syncedExtras], normalizedCustom)
   );
+  return input.providerId === "codex"
+    ? appendSyncedEffortVariants(merged.map((model) => ({ ...model, owned_by: "codex" })))
+    : merged;
 }

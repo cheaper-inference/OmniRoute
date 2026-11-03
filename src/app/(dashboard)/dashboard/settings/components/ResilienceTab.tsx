@@ -1,12 +1,15 @@
 "use client";
 
 import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Button, Card } from "@/shared/components";
+import { Button, Card, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 import AutoDisableCard from "./AutoDisableCard";
 import ModelLockoutCard from "./ModelLockoutCard";
+import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
 import { NumberField, BooleanField } from "./ResilienceFields";
+import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
 
 type RequestQueueSettings = {
   autoEnableApiKeyProviders: boolean;
@@ -75,6 +78,7 @@ type ResilienceResponse = {
   quotaShareConcurrencyLimit: QuotaShareConcurrencyLimitSettings;
   providerCooldown: ProviderCooldownSettings;
   credentialHealthCheck?: CredentialHealthCheckSettings;
+  tokenRefreshBreaker?: TokenRefreshBreakerValue;
 };
 
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
@@ -86,6 +90,9 @@ function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
     comboCooldownWait: json.comboCooldownWait,
     quotaShareConcurrencyLimit: json.quotaShareConcurrencyLimit,
     providerCooldown: json.providerCooldown,
+    // Older servers do not send the token-refresh section; keep undefined
+    // so the card can hide itself instead of showing a bogus default.
+    tokenRefreshBreaker: json.tokenRefreshBreaker,
     // Older servers do not send the credential-health section; keep undefined
     // so the card can hide itself instead of showing a bogus default.
     credentialHealthCheck: json.credentialHealthCheck,
@@ -134,7 +141,7 @@ function ProfileColumn({
   return (
     <div className="rounded-xl border border-border bg-bg-subtle p-4">
       <div className="mb-4 flex items-center gap-2">
-        <span className="material-symbols-outlined text-base text-primary">{icon}</span>
+        <Icon name={icon} size={16} className="text-primary" />
         <h3 className="text-sm font-semibold uppercase tracking-wide text-text-main">{title}</h3>
       </div>
       <div className="space-y-3">{children}</div>
@@ -200,7 +207,7 @@ function RequestQueueCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">speed</span>
+            <Icon name="speed" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceRequestQueueTitle")}</h2>
           </div>
           <SectionDescription
@@ -386,45 +393,40 @@ function ConnectionCooldownCard({
                 }))
               }
             />
-            <div className="flex flex-col gap-1">
-              <label className="flex items-center justify-between gap-2 text-sm">
-                <span className="text-text-muted">{t("resilienceUseUpstream429BreakerHints")}</span>
-                <select
-                  className="rounded border border-border-default bg-surface-1 px-2 py-1 text-sm font-mono"
-                  value={
-                    current.useUpstream429BreakerHints === true
-                      ? "on"
-                      : current.useUpstream429BreakerHints === false
-                        ? "off"
-                        : "default"
+            <Select
+              compact
+              label={t("resilienceUseUpstream429BreakerHints")}
+              hint={t("resilienceUseUpstream429BreakerHintsDesc")}
+              value={
+                current.useUpstream429BreakerHints === true
+                  ? "on"
+                  : current.useUpstream429BreakerHints === false
+                    ? "off"
+                    : "default"
+              }
+              onChange={(e) => {
+                const v = e.target.value;
+                const next: boolean | undefined =
+                  v === "on" ? true : v === "off" ? false : undefined;
+                setDraft((prev) => {
+                  const profile = { ...prev[key] };
+                  if (next === undefined) {
+                    delete (profile as { useUpstream429BreakerHints?: boolean })
+                      .useUpstream429BreakerHints;
+                  } else {
+                    (
+                      profile as { useUpstream429BreakerHints?: boolean }
+                    ).useUpstream429BreakerHints = next;
                   }
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    const next: boolean | undefined =
-                      v === "on" ? true : v === "off" ? false : undefined;
-                    setDraft((prev) => {
-                      const profile = { ...prev[key] };
-                      if (next === undefined) {
-                        delete (profile as { useUpstream429BreakerHints?: boolean })
-                          .useUpstream429BreakerHints;
-                      } else {
-                        (
-                          profile as { useUpstream429BreakerHints?: boolean }
-                        ).useUpstream429BreakerHints = next;
-                      }
-                      return { ...prev, [key]: profile };
-                    });
-                  }}
-                >
-                  <option value="default">{t("resilienceDefaultPerProvider")}</option>
-                  <option value="on">{t("resilienceAlwaysOn")}</option>
-                  <option value="off">{t("resilienceAlwaysOff")}</option>
-                </select>
-              </label>
-              <p className="text-xs text-text-muted">
-                {t("resilienceUseUpstream429BreakerHintsDesc")}
-              </p>
-            </div>
+                  return { ...prev, [key]: profile };
+                });
+              }}
+              options={[
+                { value: "default", label: t("resilienceDefaultPerProvider") },
+                { value: "on", label: t("resilienceAlwaysOn") },
+                { value: "off", label: t("resilienceAlwaysOff") },
+              ]}
+            />
             <NumberField
               label={t("resilienceMaxBackoffSteps")}
               value={current.maxBackoffSteps}
@@ -473,7 +475,7 @@ function ConnectionCooldownCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">timer_off</span>
+            <Icon name="timer_off" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceConnectionCooldownTitle")}</h2>
           </div>
           <SectionDescription
@@ -602,9 +604,7 @@ function ProviderBreakerCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">
-              electrical_services
-            </span>
+            <Icon name="electrical_services" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceProviderBreakerTitle")}</h2>
           </div>
           <SectionDescription
@@ -662,7 +662,7 @@ function WaitForCooldownCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">hourglass_top</span>
+            <Icon name="hourglass_top" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceWaitForCooldownTitle")}</h2>
           </div>
           <SectionDescription
@@ -764,7 +764,7 @@ function ComboCooldownWaitCard({
     <Card className="p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-xl text-primary">timer</span>
+          <Icon name="timer" size={20} className="text-primary" />
           <h2 className="text-lg font-bold">{title}</h2>
         </div>
         <ActionRow
@@ -876,7 +876,7 @@ function QuotaShareConcurrencyLimitCard({
     <Card className="p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-xl text-primary">filter_list</span>
+          <Icon name="filter_list" size={20} className="text-primary" />
           <h2 className="text-lg font-bold">{title}</h2>
         </div>
         <ActionRow
@@ -944,7 +944,7 @@ export function ProviderCooldownCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">timer</span>
+            <Icon name="timer" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceProviderCooldownTitle")}</h2>
           </div>
           <SectionDescription
@@ -1055,9 +1055,7 @@ function CredentialHealthCheckCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-xl text-primary">
-              health_and_safety
-            </span>
+            <Icon name="health_and_safety" size={20} className="text-primary" />
             <h2 className="text-lg font-bold">{t("resilienceCredentialHealthTitle")}</h2>
           </div>
           <SectionDescription
@@ -1176,9 +1174,7 @@ export default function ResilienceTab() {
         body: JSON.stringify(payload),
       });
       const json = await response.json();
-      if (!response.ok) {
-        throw new Error(json?.error?.message || json?.error || `HTTP ${response.status}`);
-      }
+      /* prettier-ignore */ throwIfResilienceSaveFailed(response.ok, json, tx("saveFailed", "Failed to save resilience settings"));
       setData(toResilienceResponse(json));
       notify.success(tx("savedSuccessfully", "Resilience settings updated."));
     } catch (error) {
@@ -1197,7 +1193,7 @@ export default function ResilienceTab() {
     return (
       <Card className="p-6">
         <div className="flex items-center gap-2 text-sm text-text-muted">
-          <span className="material-symbols-outlined animate-spin">progress_activity</span>
+          <Icon name="progress_activity" className="animate-spin" />
           {tx("loadingResilience", "Loading resilience settings...")}
         </div>
       </Card>
@@ -1255,6 +1251,15 @@ export default function ResilienceTab() {
         saving={savingSection === "providerCooldown"}
         onSave={(providerCooldown) => savePatch("providerCooldown", { providerCooldown })}
       />
+      {data.tokenRefreshBreaker && (
+        <TokenRefreshBreakerCard
+          value={data.tokenRefreshBreaker}
+          saving={savingSection === "tokenRefreshBreaker"}
+          onSave={(tokenRefreshBreaker) =>
+            savePatch("tokenRefreshBreaker", { tokenRefreshBreaker })
+          }
+        />
+      )}
       {data.credentialHealthCheck && (
         <CredentialHealthCheckCard
           value={data.credentialHealthCheck}

@@ -1,3 +1,6 @@
+import { sanitizePII } from "@/lib/piiSanitizer";
+import { isClaudeCodeClassifierRequest } from "./claudeClassifierCompat.ts";
+import { isNoMemoryRequested } from "./headers.ts";
 import { capMemoryExtractionText, MEMORY_EXTRACTION_TEXT_LIMIT } from "./logTruncation.ts";
 
 export function extractMemoryTextFromResponse(
@@ -131,6 +134,25 @@ export function resolveMemoryOwnerId(apiKeyInfo: Record<string, unknown> | null)
 }
 
 /**
+ * Memory owner for this request, or null when it must not touch Memory at all. A null
+ * owner disables injection and extraction. Covers the `x-omniroute-no-memory` opt-out and
+ * Claude Code's internal security-classifier turns: those are not user conversation, so
+ * their output format must not become a stored fact replayed into every later request.
+ */
+export function resolveRequestMemoryOwnerId(input: {
+  apiKeyInfo: Record<string, unknown> | null;
+  headers: Record<string, unknown> | Headers | null | undefined;
+  sourceFormat: string;
+  body: Record<string, unknown> | null | undefined;
+}): string | null {
+  const { apiKeyInfo, headers, sourceFormat, body } = input;
+  if (isNoMemoryRequested(headers) || isClaudeCodeClassifierRequest(sourceFormat, body)) {
+    return null;
+  }
+  return resolveMemoryOwnerId(apiKeyInfo);
+}
+
+/**
  * Pure decision for whether durable Memory should be extracted from this
  * request at all (#12150 P1b, surface 3). Wraps chatCore.ts's original inline
  * `memoryOwnerId && memorySettings?.enabled && memorySettings.maxTokens > 0`
@@ -218,7 +240,11 @@ export function runMemoryExtractionGate(input: {
     extractFacts(requestMemoryText, memoryOwnerId, pipelineSessionId);
   }
 
-  const responseMemoryText = extractMemoryTextFromResponse(responseBody ?? null);
+  // Both callers pass the response from before PII response sanitization (non-streaming:
+  // ahead of the post-call guardrails; streaming: upstream of the PII SSE transform), so
+  // apply the same sanitizer here. It is a no-op while PII_RESPONSE_SANITIZATION is off,
+  // and it works on the extracted text so the caller's response object stays untouched.
+  const responseMemoryText = sanitizePII(extractMemoryTextFromResponse(responseBody ?? null)).text;
   if (responseMemoryText) {
     extractFacts(responseMemoryText, memoryOwnerId, pipelineSessionId);
   }

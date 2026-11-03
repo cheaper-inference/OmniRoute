@@ -3,6 +3,7 @@ import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { getWalMaintenanceState } from "@/lib/db/walMaintenance";
 import { buildHealthPayload } from "@/lib/monitoring/observability";
+import { getEventLoopStallStats as readEventLoopStallStats } from "@/lib/healthzLag";
 import { readRunningBuildSha } from "@/lib/monitoring/buildSha";
 import { APP_CONFIG } from "@/shared/constants/config";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
@@ -21,16 +22,33 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 // fill, scrapes always receive the last payload immediately. An expired entry
 // is refreshed in the background — never by awaiting live credential probes.
 let healthPayloadCache: { payload: unknown; expiresAt: number } | null = null;
-let healthPayloadRefreshInFlight = false;
+let healthPayloadRefresh: Promise<unknown> | null = null;
 let healthPayloadCacheGeneration = 0;
-const HEALTH_PAYLOAD_TTL_MS = 1000;
+const HEALTH_PAYLOAD_TTL_MS = 30_000;
 
 /** Test-only: drop the in-process health payload cache. */
 export function __test_resetMonitoringHealthPayloadCache(): void {
   healthPayloadCache = null;
-  healthPayloadRefreshInFlight = false;
+  healthPayloadRefresh = null;
   healthPayloadCacheGeneration += 1;
+  deepHealthVerdictCache = null;
+  deepHealthRefreshInFlight = false;
 }
+
+/** Test-only: seed the deep-health verdict cache (proves TTL + status passthrough). */
+export function __test_seedDeepHealthVerdict(verdict: unknown, ttlMs = 30_000): void {
+  deepHealthVerdictCache = { verdict, expiresAt: Date.now() + ttlMs };
+}
+
+// Opt-in deep check (off unless DEEP_HEALTH_CHECK_ENABLED=1): an authenticated
+// caller may append ?deep=1 to sample the completions surface once per TTL.
+// Anonymous callers never trigger a probe; the flag gates the rest.
+function isDeepHealthOptedIn(request: Request): boolean {
+  if ((process.env.DEEP_HEALTH_CHECK_ENABLED ?? "").trim() !== "1") return false;
+  return new URL(request.url).searchParams.get("deep") === "1";
+}
+let deepHealthVerdictCache: { verdict: unknown; expiresAt: number } | null = null;
+let deepHealthRefreshInFlight = false;
 
 // GHSA-mvf8-qc78-5mxm: the full health payload fingerprints the host (version,
 // node version, pid, memory, provider config). An anonymous caller — the common
@@ -49,35 +67,82 @@ function serveHealthPayload(fullView: boolean, payload: unknown) {
 }
 
 function scheduleHealthPayloadRefresh(): void {
-  if (healthPayloadRefreshInFlight) return;
-  healthPayloadRefreshInFlight = true;
+  void startHealthPayloadRefresh().catch((error) => {
+    console.warn(
+      "[API] GET /api/monitoring/health background refresh failed:",
+      error instanceof Error ? error.message : error
+    );
+  });
+}
+
+function startHealthPayloadRefresh(): Promise<unknown> {
+  if (healthPayloadRefresh) return healthPayloadRefresh;
+
+  const generation = healthPayloadCacheGeneration;
+  const refresh = new Promise<unknown>((resolve, reject) => {
+    setImmediate(() => {
+      void rebuildHealthPayload(generation).then(resolve, reject);
+    });
+  }).finally(() => {
+    if (healthPayloadRefresh === refresh) healthPayloadRefresh = null;
+  });
+  healthPayloadRefresh = refresh;
+  return refresh;
+}
+
+// Deep verdict helpers: the verdict never alters `status` — it rides along as
+// an additive `deepHealth` key on the full view only, served from its own
+// 30s cache and refreshed off the request path (same SWR motif as above).
+function withDeepHealth(payload: unknown, wantDeep: boolean): unknown {
+  if (!wantDeep || !deepHealthVerdictCache) return payload;
+  return { ...(payload as Record<string, unknown>), deepHealth: deepHealthVerdictCache.verdict };
+}
+
+function refreshDeepHealthVerdict(): void {
+  if (deepHealthRefreshInFlight) return;
+  if (deepHealthVerdictCache && Date.now() <= deepHealthVerdictCache.expiresAt) return;
+  deepHealthRefreshInFlight = true;
   setImmediate(() => {
-    rebuildHealthPayload()
-      .catch((error) => {
-        console.warn(
-          "[API] GET /api/monitoring/health background refresh failed:",
-          error instanceof Error ? error.message : error
-        );
-      })
-      .finally(() => {
-        healthPayloadRefreshInFlight = false;
-      });
+    void (async () => {
+      try {
+        const { probeDeepHealth, DEEP_HEALTH_VERDICT_TTL_MS, DEEP_HEALTH_PROBE_TIMEOUT_MS } =
+          await import("@/lib/monitoring/observability");
+        const { getCachedSettings } = await import("@/lib/db/readCache");
+        const settings = (await getCachedSettings()) as Record<string, unknown>;
+        const deepHealthUrl =
+          typeof settings.deepHealthUrl === "string" ? settings.deepHealthUrl : "";
+        if (!deepHealthUrl) return;
+        const deepHealthToken =
+          typeof settings.deepHealthToken === "string" ? settings.deepHealthToken : undefined;
+        const verdict = await probeDeepHealth(deepHealthUrl, {
+          timeoutMs: DEEP_HEALTH_PROBE_TIMEOUT_MS,
+          token: deepHealthToken,
+        });
+        deepHealthVerdictCache = { verdict, expiresAt: Date.now() + DEEP_HEALTH_VERDICT_TTL_MS };
+      } catch {
+        deepHealthVerdictCache = null;
+      } finally {
+        deepHealthRefreshInFlight = false;
+      }
+    })();
   });
 }
 
 export async function GET(request: Request) {
   const fullView = (await requireManagementAuth(request, { alwaysRequireAuth: true })) === null;
+  const wantDeep = fullView && isDeepHealthOptedIn(request);
+  if (wantDeep) refreshDeepHealthVerdict();
   const cachedNow = Date.now();
   if (healthPayloadCache) {
     if (cachedNow > healthPayloadCache.expiresAt) {
       scheduleHealthPayloadRefresh();
     }
-    return serveHealthPayload(fullView, healthPayloadCache.payload);
+    return serveHealthPayload(fullView, withDeepHealth(healthPayloadCache.payload, wantDeep));
   }
 
   try {
-    const payload = await rebuildHealthPayload();
-    return serveHealthPayload(fullView, payload);
+    const payload = await startHealthPayloadRefresh();
+    return serveHealthPayload(fullView, withDeepHealth(payload, wantDeep));
   } catch (error) {
     console.error("[API] GET /api/monitoring/health error:", error);
     return NextResponse.json({
@@ -106,8 +171,7 @@ export async function GET(request: Request) {
   }
 }
 
-async function rebuildHealthPayload(): Promise<unknown> {
-  const generation = healthPayloadCacheGeneration;
+async function rebuildHealthPayload(generation: number): Promise<unknown> {
   const readHealthValue = <T>(label: string, reader: () => T, fallback: T): T => {
     try {
       return reader();
@@ -246,6 +310,12 @@ async function rebuildHealthPayload(): Promise<unknown> {
   // admission gates. getWalMaintenanceState never throws and never touches
   // the DB — a monitoring read stays cheap. Additive key, nothing moves.
   const walMaintenance = readHealthValue("wal maintenance", () => getWalMaintenanceState(), null);
+  // Stall counters from the boot recorder (static import above; readHealthValue
+  // traces a failure and falls back to {0,0}, so health stays 200).
+  const eventLoopStall = readHealthValue("event loop stall", () => readEventLoopStallStats(), {
+    count: 0,
+    maxMs: 0,
+  });
 
   const payload = buildHealthPayload({
     appVersion: APP_CONFIG.version,
@@ -272,6 +342,7 @@ async function rebuildHealthPayload(): Promise<unknown> {
     adaptiveAdmission,
     chatAdmission,
     walMaintenance,
+    eventLoopStall,
   });
 
   if (generation === healthPayloadCacheGeneration) {

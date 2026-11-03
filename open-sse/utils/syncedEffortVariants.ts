@@ -19,18 +19,22 @@
  * only when the base model's own `supportedThinkingEfforts` actually declares that tier —
  * never a blind string match.
  *
- * Skipped entirely for `codex`, `kimi`-owned, and GLM (`glm`, `glm-cn`, `glmt`) models:
- * they already own conflicting `-{effort}` aliases (`splitCodexReasoningSuffix`,
- * `getKimiCodeStaticThinkingPolicy`, or `GlmExecutor::parseGlmEffortTier`), so generating
- * another layer here would create invalid nested ids. Also skipped for any model whose id
- * already ends in a token that matches a canonical effort value, to avoid colliding with a
- * model that legitimately ends in an effort-like token (e.g. a model named "...-high").
+ * Skipped entirely for `kimi`-owned, and GLM (`glm`, `glm-cn`, `glmt`) models:
+ * they already own conflicting `-{effort}` aliases (`getKimiCodeStaticThinkingPolicy`, or `GlmExecutor::parseGlmEffortTier`), so generating
+ * another layer here would create invalid nested ids. Other providers skip model ids that
+ * already end in a canonical effort token (`-low`, `-high`, `-max`, …). That check does
+ * not include `-ultra`: a non-Codex id such as nemotron-ultra still exposes its variants.
+ * Codex `-ultra` aliases are already an effort tier and must not grow a second suffix.
+ * Exact discovered Codex ids ending in `-high` or `-max` still expose their own variants
+ * when no unsuffixed sibling stem is in the catalog (#13224). When that stem is present,
+ * the suffixed row is an alias and is left as it is.
  */
+import { getCodexWireEfforts } from "@/shared/reasoning/codexEfforts.ts";
 import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardization.ts";
 import { isDevinLiteralModelIdProvider } from "./devinLiteralModelIds.ts";
 
 /** Provider ids with dedicated `-{effort}` aliases — never synthesize another suffix layer. */
-export const SYNCED_EFFORT_SKIP_PROVIDERS = new Set(["codex", "glm", "glm-cn", "glmt"]);
+export const SYNCED_EFFORT_SKIP_PROVIDERS = new Set(["glm", "glm-cn", "glmt"]);
 /** Provider-id prefixes covering that mechanism's multiple connection variants (kimi-coding, kimi-coding-apikey). */
 const SYNCED_EFFORT_SKIP_PROVIDER_PREFIXES = ["kimi"];
 
@@ -58,18 +62,45 @@ function endsWithKnownEffortToken(id: string): boolean {
   return CANONICAL_EFFORT_VALUES.some((value) => id.endsWith(`-${value}`));
 }
 
+/** Longest first so `-xhigh` is not read as `-high`. */
+const CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST: readonly string[] = [
+  ...CANONICAL_EFFORT_VALUES,
+].sort((a, b) => b.length - a.length);
+
+function canonicalEffortSuffixStem(id: string): string | null {
+  for (const value of CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST) {
+    const suffix = `-${value}`;
+    if (id.endsWith(suffix) && id.length > suffix.length) return id.slice(0, -suffix.length);
+  }
+  return null;
+}
+
+/** True when this Codex id is an alias of a bare stem already present in the catalog. */
+function codexAliasHasSiblingStem(id: string, ids: ReadonlySet<unknown>): boolean {
+  const stem = canonicalEffortSuffixStem(id);
+  return stem !== null && ids.has(stem);
+}
+
 function extractEffortTiers(model: CatalogModelEntry): string[] {
-  const tiers = model.capabilities?.effort_tiers;
+  const tiers =
+    model.capabilities?.effort_tiers ??
+    (model.owned_by === "codex" ? model.supportedThinkingEfforts : undefined);
   if (!Array.isArray(tiers)) return [];
-  return tiers.filter((tier): tier is string => typeof tier === "string" && tier.length > 0);
+  const values = tiers.filter(
+    (tier): tier is string => typeof tier === "string" && tier.length > 0
+  );
+  return model.owned_by === "codex" ? getCodexWireEfforts(values) : values;
 }
 
 /**
  * Whether the catalog should advertise reasoning-effort variants for this entry.
  *
- * Rule: a synced model that declares `capabilities.effort_tiers`, is not owned by a
- * provider that already owns its own suffix mechanism, is not a virtual combo entry, and
- * whose id does not already end in a token that collides with a canonical effort value.
+ * Rule: a synced model that declares effort tiers, is not owned by a provider that
+ * already owns its own suffix mechanism, is not a virtual combo entry, and — except
+ * exact Codex ids — does not already end in a canonical effort token. Codex `-ultra`
+ * aliases never grow another suffix. Codex `-high`/`-max` ids stay eligible here;
+ * `appendSyncedEffortVariants` skips those only when the unsuffixed sibling stem is
+ * already in the same catalog (#13224).
  */
 export function shouldExposeSyncedEffortVariants(
   model: CatalogModelEntry
@@ -81,8 +112,24 @@ export function shouldExposeSyncedEffortVariants(
   if (typeof model.owned_by === "string" && isSkippedEffortProvider(model.owned_by)) {
     return false;
   }
-  if (endsWithKnownEffortToken(id)) return false;
+  // `-ultra` is not canonical. Only Codex treats it as an alias suffix, so a
+  // non-Codex id such as nemotron-ultra still exposes its variants.
+  if (model.owned_by === "codex") {
+    if (id.endsWith("-ultra")) return false;
+  } else if (endsWithKnownEffortToken(id)) {
+    return false;
+  }
   return extractEffortTiers(model).length > 0;
+}
+
+/** Codex variants advertise their own label and drop tiers so clients never append a 2nd suffix. */
+function codexVariantOverrides(model: CatalogModelEntry, tier: string): Partial<CatalogModelEntry> {
+  if (model.owned_by !== "codex") return {};
+  return {
+    name: `${typeof model.name === "string" ? model.name : model.id} (${tier})`,
+    supportedThinkingEfforts: undefined,
+    capabilities: { ...model.capabilities, effort_tiers: undefined },
+  };
 }
 
 /**
@@ -100,13 +147,23 @@ export function appendSyncedEffortVariants<T extends CatalogModelEntry>(models: 
 
   for (const model of models) {
     if (!shouldExposeSyncedEffortVariants(model)) continue;
+    // Discovered Codex `*-high`/`*-max` ids stay when no bare stem exists (#13224).
+    // A suffixed row next to that stem is an alias and must not grow another tier.
+    if (model.owned_by === "codex" && codexAliasHasSiblingStem(model.id, existingIds)) {
+      continue;
+    }
     const baseRoot = typeof model.root === "string" && model.root ? model.root : model.id;
 
     for (const tier of extractEffortTiers(model)) {
       const variantId = `${model.id}-${tier}`;
       if (existingIds.has(variantId)) continue;
       existingIds.add(variantId);
-      variants.push({ ...model, id: variantId, root: `${baseRoot}-${tier}` });
+      variants.push({
+        ...model,
+        id: variantId,
+        root: `${baseRoot}-${tier}`,
+        ...codexVariantOverrides(model, tier),
+      });
     }
   }
 

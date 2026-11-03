@@ -1,10 +1,11 @@
-import { getAllSyncedAvailableModels } from "./db/models";
+import { getAllSyncedAvailableModels, getSyncedAvailableModels } from "./db/models";
 import { getResolvedModelCapabilities } from "./modelCapabilities";
 import {
   getModelContextOverrideRecord,
   setModelContextOverride,
   removeModelContextOverride,
 } from "./db/modelContextOverrides";
+import { invalidateDbCache } from "./db/readCache";
 
 /**
  * Feature 5004 — self-correcting context-window reconciler.
@@ -28,6 +29,8 @@ export interface DiscoveredWindow {
 export interface ReconcileDeps {
   getCatalogWindow: (provider: string, modelId: string) => number | null;
   getExistingSource: (provider: string, modelId: string) => string | null;
+  /** Stored window of the existing override; lets the pass skip rewriting an unchanged pin. */
+  getExistingWindow?: (provider: string, modelId: string) => number | null;
   writeAuto: (provider: string, modelId: string, window: number) => void;
   removeOverride: (provider: string, modelId: string) => void;
 }
@@ -40,6 +43,61 @@ export interface ReconcileResult {
 }
 
 /**
+ * True when `existingSource` is an `auto:discovery` pin that already stores `window`, so the
+ * pass can skip rewriting it (the write would only churn `refreshedAt` and the read cache).
+ */
+function isAlreadyPinned(
+  existingSource: string | null,
+  deps: ReconcileDeps,
+  provider: string,
+  modelId: string,
+  window: number
+): boolean {
+  return (
+    existingSource === "auto:discovery" && deps.getExistingWindow?.(provider, modelId) === window
+  );
+}
+
+/** Remove an `auto:discovery` pin when discovery no longer reports a window; true if removed. */
+function dropStaleAutoPin(deps: ReconcileDeps, provider: string, modelId: string): boolean {
+  if (deps.getExistingSource(provider, modelId) !== "auto:discovery") return false;
+  deps.removeOverride(provider, modelId);
+  return true;
+}
+
+/** Reconcile one discovered window; mutates `result` and goes through the injected deps. */
+function reconcileOne(
+  { provider, modelId, window }: DiscoveredWindow,
+  deps: ReconcileDeps,
+  result: ReconcileResult
+): void {
+  if (!provider || !modelId) return;
+  if (typeof window !== "number" || !Number.isInteger(window) || window <= 0) {
+    // Discovery omitted a real window. Drop a stale auto:discovery pin
+    // (e.g. grok-cli's old 256k fallback) so registry/models.dev can win.
+    if (dropStaleAutoPin(deps, provider, modelId)) result.removed++;
+    return;
+  }
+
+  const existingSource = deps.getExistingSource(provider, modelId);
+  if (existingSource === "manual") {
+    result.skippedManual++;
+    return;
+  }
+
+  const catalog = deps.getCatalogWindow(provider, modelId);
+  if (window !== catalog) {
+    if (isAlreadyPinned(existingSource, deps, provider, modelId, window)) return;
+    deps.writeAuto(provider, modelId, window);
+    result.written++;
+  } else if (existingSource) {
+    // Discovered window now matches the catalog and a stale auto override exists → drop it.
+    deps.removeOverride(provider, modelId);
+    result.removed++;
+  }
+}
+
+/**
  * Pure reconcile: given the discovered windows and a set of injectable deps, decide
  * which auto overrides to write/remove. Deterministic and side-effect-free except
  * through the injected `writeAuto`/`removeOverride`.
@@ -49,25 +107,35 @@ export function reconcileContextWindows(
   deps: ReconcileDeps
 ): ReconcileResult {
   const result: ReconcileResult = { scanned: 0, written: 0, removed: 0, skippedManual: 0 };
-  for (const { provider, modelId, window } of discovered) {
+  for (const entry of discovered) {
     result.scanned++;
-    if (!provider || !modelId) continue;
-    if (typeof window !== "number" || !Number.isInteger(window) || window <= 0) continue;
+    reconcileOne(entry, deps, result);
+  }
+  return result;
+}
 
-    const existingSource = deps.getExistingSource(provider, modelId);
-    if (existingSource === "manual") {
-      result.skippedManual++;
-      continue;
-    }
+/** Max synchronous work per slice before the cooperative pass yields to the event loop (#18048). */
+const RECONCILE_SLICE_MS = 15;
 
-    const catalog = deps.getCatalogWindow(provider, modelId);
-    if (window !== catalog) {
-      deps.writeAuto(provider, modelId, window);
-      result.written++;
-    } else if (existingSource) {
-      // Discovered window now matches the catalog and a stale auto override exists → drop it.
-      deps.removeOverride(provider, modelId);
-      result.removed++;
+const yieldToEventLoop = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
+
+/**
+ * Cooperative twin of `reconcileContextWindows`: identical decisions, but it hands the
+ * event loop back every ~15 ms so a large catalog (100+ connections) cannot starve
+ * loopback requests and client traffic (#18048).
+ */
+export async function reconcileContextWindowsCooperative(
+  discovered: DiscoveredWindow[],
+  deps: ReconcileDeps
+): Promise<ReconcileResult> {
+  const result: ReconcileResult = { scanned: 0, written: 0, removed: 0, skippedManual: 0 };
+  let sliceStart = performance.now();
+  for (const entry of discovered) {
+    result.scanned++;
+    reconcileOne(entry, deps, result);
+    if (performance.now() - sliceStart >= RECONCILE_SLICE_MS) {
+      await yieldToEventLoop();
+      sliceStart = performance.now();
     }
   }
   return result;
@@ -93,26 +161,62 @@ function toDiscoveredWindows(
   return out;
 }
 
+export interface RunReconcileOptions {
+  /** Restrict the pass to these providers (post-sync path); omit for the full pass. */
+  providers?: string[];
+}
+
+async function loadDiscoveryByProvider(
+  providers?: string[]
+): Promise<Awaited<ReturnType<typeof getAllSyncedAvailableModels>>> {
+  if (!providers) return getAllSyncedAvailableModels();
+  const byProvider: Awaited<ReturnType<typeof getAllSyncedAvailableModels>> = {};
+  for (const provider of new Set(providers)) {
+    byProvider[provider] = await getSyncedAvailableModels(provider);
+    await yieldToEventLoop();
+  }
+  return byProvider;
+}
+
 /** Run the reconcile against the live DB (discovery → overrides). */
-export async function runContextWindowReconcile(): Promise<ReconcileResult> {
-  const byProvider = await getAllSyncedAvailableModels();
+export async function runContextWindowReconcile(
+  options: RunReconcileOptions = {}
+): Promise<ReconcileResult> {
+  const byProvider = await loadDiscoveryByProvider(options.providers);
   const discovered = toDiscoveredWindows(byProvider);
-  return reconcileContextWindows(discovered, {
-    // Compare against the override-free catalog view. A persisted override must
-    // never feed back into the comparison that (re)writes it, or the reconciler
-    // oscillates (write → equal → remove → differ → write ...).
-    getCatalogWindow: (provider, modelId) =>
-      getResolvedModelCapabilities({ provider, model: modelId }, { persistedOverrides: false })
-        .contextWindow,
-    getExistingSource: (provider, modelId) =>
-      getModelContextOverrideRecord(provider, modelId)?.source ?? null,
-    writeAuto: (provider, modelId, window) => {
-      setModelContextOverride(provider, modelId, window, "auto:discovery");
-    },
-    removeOverride: (provider, modelId) => {
-      removeModelContextOverride(provider, modelId);
-    },
-  });
+  // Each catalog-version bump drops catalog-version memos (the synced vision
+  // verdict map, which `getCatalogWindow` reads), so writes inside the pass do
+  // not invalidate: one bump at the end. The comparisons below read the
+  // override-free catalog and the override table directly, so they stay exact.
+  let changed = false;
+  try {
+    return await reconcileContextWindowsCooperative(discovered, {
+      // Compare against the override-free catalog view. A persisted override must
+      // never feed back into the comparison that (re)writes it, or the reconciler
+      // oscillates (write → equal → remove → differ → write ...).
+      getCatalogWindow: (provider, modelId) =>
+        getResolvedModelCapabilities({ provider, model: modelId }, { persistedOverrides: false })
+          .contextWindow,
+      getExistingSource: (provider, modelId) =>
+        getModelContextOverrideRecord(provider, modelId)?.source ?? null,
+      getExistingWindow: (provider, modelId) =>
+        getModelContextOverrideRecord(provider, modelId)?.realContext ?? null,
+      writeAuto: (provider, modelId, window) => {
+        if (
+          setModelContextOverride(provider, modelId, window, "auto:discovery", {
+            invalidate: false,
+          })
+        ) {
+          changed = true;
+        }
+      },
+      removeOverride: (provider, modelId) => {
+        if (removeModelContextOverride(provider, modelId, { invalidate: false })) changed = true;
+      },
+    });
+  } finally {
+    if (changed) invalidateDbCache("model-capabilities");
+  }
 }
 
 // --- Periodic job (mirrors modelsDevSync.startPeriodicSync) ---

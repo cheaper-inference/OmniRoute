@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import { newestChromeProfile } from "@omniroute/open-sse/utils/browserProfiles.ts";
+import {
+  applyApiKeyCodexServiceMode,
+  withApiKeyCodexServiceMode,
+} from "@/lib/providers/codexApiKeyServiceMode";
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { CodexExecutor } from "@omniroute/open-sse/executors/codex.ts";
@@ -11,7 +16,8 @@ import { acquireCodexWsLease, releaseCodexWsLease } from "@/sse/services/codexWs
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
 import { resolveCodexWsModelInfo } from "./modelResolution";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { buildHandshakeOriginRequest, isWebSocketOriginAllowed } from "@/server/origin/wsOrigin";
 import { formatMemoryContext } from "@/lib/memory/injection";
 import { retrieveMemories } from "@/lib/memory/retrieval";
 import {
@@ -21,7 +27,7 @@ import {
 } from "@/lib/memory/settings";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { logger } from "@omniroute/open-sse/utils/logger.ts";
-import { resolveProxy } from "@omniroute/open-sse/utils/networkProxy.ts";
+import { resolveProxyForConnection } from "@/lib/db/settings";
 import { withCodexFingerprintCredentials } from "@omniroute/open-sse/config/codexIdentity.ts";
 import { withReasoningRuleContext } from "@omniroute/open-sse/utils/reasoningRuleContext.ts";
 import { proxyConfigToUrl } from "@omniroute/open-sse/utils/proxyDispatcher.ts";
@@ -42,11 +48,13 @@ import { persistResponsesWsCallHistory } from "./history";
 import { applyResponsesWsCompression } from "./compression";
 import { getComboByName } from "@/lib/db/combos";
 import { getComboModelString } from "@/lib/combos/steps";
+import { isQuotaModelName } from "@/lib/quota/quotaModelNaming";
 import {
   buildManagedLeaseErrorResponse,
   isExclusiveLeaseManagedKey,
   LeaseContextError,
 } from "@/sse/services/leaseContext";
+import { applyResponsesWsUpstreamHeaders } from "@omniroute/open-sse/handlers/chatCore/upstreamExecuteHeaders.ts";
 
 const CODEX_RESPONSES_WS_URL = "wss://chatgpt.com/backend-api/codex/responses";
 const executor = new CodexExecutor();
@@ -105,6 +113,7 @@ const bridgePayloadSchema = z
     action: z.string().optional(),
     requestUrl: z.string().optional(),
     headers: z.record(z.string(), z.unknown()).optional(),
+    handshake: z.record(z.string(), z.unknown()).optional(),
     response: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
@@ -329,15 +338,33 @@ function normalizeUpstreamHeaders(headers: Record<string, string>): Record<strin
   return result;
 }
 
-async function authenticate(body: JsonRecord) {
+function getHandshakeOriginRequest(body: JsonRecord, authRequest: Request): Request {
+  return buildHandshakeOriginRequest(body.handshake, authRequest.headers.get("origin"));
+}
+
+async function authenticate(body: JsonRecord, { checkOrigin = false } = {}) {
   const authRequest = getAuthRequest(body);
-  const auth = await authorizeWebSocketHandshake(authRequest);
+  // REQUIRE_API_KEY applies to this transport exactly as it does to HTTP /v1/responses.
+  const auth = await authorizeWebSocketHandshake(authRequest, {
+    requireAuth: isRequireApiKeyEnabled(),
+  });
   if (!auth.authorized) {
     return jsonError(
       auth.hasCredential ? 403 : 401,
       auth.hasCredential ? "ws_auth_invalid" : "ws_auth_required",
       auth.hasCredential ? "Invalid WebSocket credential" : "WebSocket auth required"
     );
+  }
+
+  // Browsers skip CORS for WebSocket, so a cross-site page must be stopped here. A valid
+  // API key is exempt, matching the HTTP CORS relaxation for token-authenticated calls:
+  // the page cannot know the key. A session cookie is not exempt (browsers attach it).
+  if (
+    checkOrigin &&
+    auth.authType !== "api_key" &&
+    !isWebSocketOriginAllowed(getHandshakeOriginRequest(body, authRequest))
+  ) {
+    return jsonError(403, "ws_origin_forbidden", "WebSocket origin not allowed");
   }
 
   return NextResponse.json({
@@ -609,9 +636,24 @@ async function resolveCodexUpstreamContext(
   };
 }
 
-async function resolveCodexProxy(provider: string): Promise<string | undefined> {
+async function resolveCodexProxy(
+  connectionId: string,
+  apiKeyId?: string | null,
+  provider?: string
+): Promise<string | undefined> {
   try {
-    return proxyConfigToUrl(await resolveProxy(provider)) || undefined;
+    // #14531: resolve through the same full cascade the HTTP path uses
+    // (per-key → account → provider → combo → global, Proxy Registry first,
+    // legacy key_value store after). The previous networkProxy.resolveProxy()
+    // read only the legacy store, so a proxy assigned in the Proxy Registry —
+    // what the dashboard's provider/account/global "Set Proxy" modals write —
+    // never reached the upstream WS connect and the bridge went out direct.
+    const resolved = await resolveProxyForConnection(
+      connectionId,
+      apiKeyId ?? undefined,
+      provider ?? undefined
+    );
+    return proxyConfigToUrl(resolved?.proxy ?? null) || undefined;
   } catch (err) {
     log.warn(`[codex-responses-ws] proxy resolution failed: ${sanitizeErrorMessage(err)}`);
     return undefined;
@@ -619,10 +661,20 @@ async function resolveCodexProxy(provider: string): Promise<string | undefined> 
 }
 
 async function prepare(body: JsonRecord) {
+  // Resolve the fingerprint profile before anything below can acquire a WS
+  // lease: a fail-loud throw here must not strand the account semaphore.
+  const browser = newestChromeProfile();
   const context = await resolveCodexRequestContext(body);
   if ("error" in context) return context.error;
   const combo = await getComboByName(context.requestedModel).catch(() => null);
   if (combo) {
+    if (combo.strategy === "quota-share") {
+      return jsonError(
+        426,
+        "responses_websocket_http_fallback",
+        "Quota sharing requires the HTTP/SSE Responses transport for lease and quota coordination"
+      );
+    }
     const models = Array.isArray(combo.models) ? combo.models : [];
     if (models.some((model) => getComboModelString(model)?.startsWith("chatgpt-web-codex/"))) {
       return jsonError(
@@ -632,7 +684,13 @@ async function prepare(body: JsonRecord) {
       );
     }
   }
-
+  if (isQuotaModelName(context.requestedModel)) {
+    return jsonError(
+      426,
+      "responses_websocket_http_fallback",
+      "Quota sharing requires the HTTP/SSE Responses transport for lease and quota coordination"
+    );
+  }
   const upstream = await resolveCodexUpstreamContext(context);
   if ("error" in upstream) return upstream.error;
   const {
@@ -672,8 +730,17 @@ async function prepare(body: JsonRecord) {
       model,
       requestId: randomUUID(),
     });
+    responseBodyWithMemory = applyApiKeyCodexServiceMode(
+      provider,
+      responseBodyWithMemory,
+      metadata?.codexServiceMode
+    );
     credentialsWithFingerprint = withCodexFingerprintCredentials(
-      withReasoningRuleContext(refreshedCredentials, reasoningRuleDirective),
+      withApiKeyCodexServiceMode(
+        provider,
+        withReasoningRuleContext(refreshedCredentials, reasoningRuleDirective),
+        metadata?.codexServiceMode
+      ),
       context.clientHeaders,
       responseBodyWithMemory
     );
@@ -700,13 +767,26 @@ async function prepare(body: JsonRecord) {
   let headers: Record<string, string>;
   let proxy: string | undefined;
   try {
-    headers = normalizeUpstreamHeaders(executor.buildHeaders(credentialsWithFingerprint, true));
+    // The HTTP/SSE path merges per-model upstreamHeaders and connection custom headers after the
+    // executor's own headers; without the same merge here a per-model `Version` override that
+    // unlocks a model over HTTP never reaches the WS upgrade (ChatGPT answers model_not_found).
+    headers = normalizeUpstreamHeaders(
+      applyResponsesWsUpstreamHeaders(executor.buildHeaders(credentialsWithFingerprint, true), {
+        provider,
+        model,
+        providerSpecificData: refreshedCredentials.providerSpecificData,
+      })
+    );
 
-    // #5611: apply the configured Global/provider proxy to the upstream Codex
-    // Responses WebSocket too. The downstream client→OmniRoute hop works, but the
-    // upstream wreq-js.websocket() connect previously ignored the Proxy Registry,
-    // so a no-direct-egress container failed with a DNS lookup error.
-    proxy = await resolveCodexProxy(provider);
+    // #5611: apply the configured proxy to the upstream Codex Responses
+    // WebSocket too. #14531: resolve it through the full per-connection
+    // cascade (Proxy Registry + legacy store, per-key → account → provider →
+    // combo → global) the HTTP path uses, not just the legacy key_value map.
+    proxy = await resolveCodexProxy(
+      refreshedCredentials.connectionId,
+      metadata?.id ?? null,
+      provider
+    );
   } catch (error) {
     releaseCodexWsLease(leaseId);
     return jsonError(
@@ -719,11 +799,7 @@ async function prepare(body: JsonRecord) {
   return NextResponse.json({
     ok: true,
     upstreamUrl: CODEX_RESPONSES_WS_URL,
-    // #5591: chrome_149 does not exist in wreq-js 2.3.1 (max chrome_147) → the
-    // native layer yields a degenerate TLS fingerprint and ChatGPT rejects the
-    // upgrade ("Invalid JSON body"). chrome_142 is the profile that shipped in
-    // v3.8.39 and is confirmed working against this upstream.
-    browser: "chrome_142",
+    browser,
     os: "windows",
     connectionId: refreshedCredentials.connectionId,
     leaseId,
@@ -757,7 +833,7 @@ export async function POST(request: Request) {
 
   const action = typeof body.action === "string" ? body.action : "";
   if (action === "authenticate") {
-    return authenticate(body);
+    return authenticate(body, { checkOrigin: true });
   }
   if (action === "prepare") {
     return prepare(body);

@@ -1,6 +1,6 @@
 # Remote Mode (中文 (简体))
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -207,50 +207,44 @@ ssh -L 20128:127.0.0.1:20128 -L 1455:127.0.0.1:1455 <user>@192.168.0.15
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ 密钥仅显示一次——请立即复制
-omniroute tokens list                 # 已掩码：ID、名称、作用域、前缀、状态、过期时间
+#   ↳ 密钥只显示一次，请立即复制
+omniroute tokens list                 # 已脱敏：id、名称、范围、前缀、状态、过期时间
 omniroute tokens revoke <id|prefix>   # 立即撤销
-omniroute tokens scopes               # 说明三种作用域
+omniroute tokens scopes               # 说明三种范围
 ```
 
-`tokens` 命令需要**管理员**凭据。您也可以在仪表板的
-**设置 → 访问令牌**下管理令牌（创建、撤销、仅复制一次）。
+`tokens` 命令需要 **admin** 凭证。你也可以在仪表板的 **设置 → 访问令牌** 中管理令牌（创建、撤销、一次性复制）。
+
+令牌的权限永远不能超过其创建者所持有的权限。`admin` 令牌只能由操作员创建：即仪表板会话、服务器本机上的 CLI，或使用密码的 `omniroute connect`。机器凭证（`admin` 访问令牌，或具有 `manage`/`admin` 范围的 API 密钥）只能签发 `write` 和 `read` 令牌；若请求 `--scope admin`，则返回 `403`。禁用登录并不会开放签发权限：任何范围的访问令牌都是始终受认证保护的路由所接受的凭证，因此匿名调用在任何范围下都会得到 `401`。
 
 ---
 
 ## 从远程目录配置编码 CLI
 
-`omniroute configure` 会读取**活动服务器的**实时模型目录，并在
-**您的**机器上写入配置。
+`omniroute configure` 读取**当前活动服务器**的实时模型目录，并在**你的**机器上写入配置。
 
 ```bash
 omniroute configure codex
-#   提供者：glm、kmc、ollamacloud、opencode-go、……
+#   提供者：glm, kmc, ollamacloud, opencode-go, …
 #   提供者：glm
 #   模型 ID：glm/glm-5.2
 #   ✔ 已写入 ~/.codex/glm52.config.toml
-#   使用方式：codex --profile glm52
+#   使用方法：  codex --profile glm52
 
-# 非交互模式
+# 非交互式
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# 将常用模型保留在交互式选择器顶部
+# 让常用模型保持在交互式选择器的顶部
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-选择器只会在本地 `model-preferences.json` 文件中保存模型 ID（绝不会保存 URL 或凭据），
-并按上下文和 CLI 目标划分作用域。收藏项会显示在最近选择项之前；使用
-`--unfavorite` 可从该上下文/目标列表中移除所选模型。
+选择器只在本地的 `model-preferences.json` 文件中保存模型 ID（从不保存 URL 或凭证），并按上下文和 CLI 目标分别保存。收藏的模型会排在最近选择的模型之前；使用 `--unfavorite` 可将所选模型从该上下文/目标的列表中移除。
 
-写入的配置文件通过环境变量（`OMNIROUTE_API_KEY`）引用推理密钥——
-密钥绝不会写入磁盘。有关一次性的 Codex 基础设置
-（`[model_providers.omniroute]` 块），请参阅
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md)。
+写入的配置文件通过环境变量（`OMNIROUTE_API_KEY`）引用推理密钥，密钥本身从不写入磁盘。关于一次性的基础 Codex 设置（`[model_providers.omniroute]` 块），请参阅 [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md)。
 
 ### 针对远程启动 CLI（不写入配置）
 
-`omniroute run <target>` 同样会遵循活动上下文：远程基础 URL
-和上下文凭据仅会被注入启动的进程中。
+`omniroute run <target>` 同样遵循活动上下文：远程基础 URL 和上下文凭证只会注入到派生的进程中。
 
 ```bash
 omniroute connect 192.168.0.15
@@ -258,112 +252,98 @@ omniroute run claude   --model openai/gpt-5.4          # Claude Code → 远程
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# 准确预览将要启动的内容（仅显示环境变量的键名，绝不显示值）：
+# 预览将要派生的确切内容（仅显示环境变量名称，从不显示值）：
 omniroute run codex --dry-run --json
 ```
 
-目标：`claude`、`codex`、`aider`、`goose`、`opencode`、`qwen`、`gemini`
-（单一来源：`bin/cli/cli-manifest.mjs`）。Qwen 和 Gemini 会使用一个
-临时隔离的主目录运行，该目录会在退出时移除，因此启动过程绝不会修改——
-或泄露到——您的个人工具配置中。
+目标：`claude`、`codex`、`aider`、`goose`、`opencode`、`qwen`、`gemini`（唯一来源：`bin/cli/cli-manifest.mjs`）。Qwen 和 Gemini 在临时的隔离主目录中运行，该目录会在退出时删除，因此启动操作绝不会触及或泄漏到你个人的工具配置中。
 
 ### 各 CLI 的设置命令
 
-每个受支持的 CLI 都有一个支持远程的设置命令（均遵循活动
-上下文，也可使用 `--remote <url> --api-key <key>`）：
+每个受支持的 CLI 都有一个支持远程的设置命令（均遵循活动上下文，或使用 `--remote <url> --api-key <key>`）：
 
 | CLI         | 命令                       | 写入内容                                                                                                                                                   |
 | ----------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` 配置文件（每个模型一个）                                                                                                     |
 | Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json`（每个模型一个）                                                                                                  |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — 包含目录中所有模型的 `omniroute` OpenAI 兼容提供者（运行 `opencode -m omniroute/<model>`）                            |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json`（CLI 模式）+ 输出供粘贴的 VS Code 扩展设置（OpenAI 兼容，Base URL **不含** `/v1`）                              |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json`（CLI）+ VS Code `kilocode.*` 设置 — OpenAI 兼容，Base URL **包含** `/v1`                                                   |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml`（VS Code/JetBrains + `cn` CLI）— `provider: openai`，`apiBase` **包含** `/v1`，通过 `${{ secrets.OMNIROUTE_API_KEY }}` 获取密钥  |
-| Cursor      | `omniroute setup-cursor`   | 输出应用内操作步骤（Settings → Models → Override OpenAI Base URL **包含** `/v1` + 密钥 + 模型）。Cursor 配置存储在不透明的 SQLite 中 — 仅适用于聊天面板    |
-| Roo Code    | `omniroute setup-roo`      | 写入 Roo 导入 JSON（`~/.omniroute/roo-settings.json`）+ 设置 `roo-cline.autoImportSettingsPath` + 输出 UI 操作步骤（OpenAI 兼容，Base URL **包含** `/v1`） |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` 提供者，`base_url` **包含** `/v1`，通过 `$OMNIROUTE_API_KEY` 获取密钥                                       |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml`（`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **不含** `/v1` + `GOOSE_MODEL`）+ 环境变量配置方法                                  |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml`（`openai-api-base` **不含** `/v1` + `model: openai/<id>`）+ 环境变量配置方法（`aider --message --yes`）                                |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 中的 `modelProviders.openai` 条目 + `~/.qwen/.env` 中的 `OMNIROUTE_API_KEY`                                                     |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`：包含目录中所有模型的 `omniroute` openai 兼容提供者（运行 `opencode -m omniroute/<model>`）                             |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json`（CLI 模式），并打印需要粘贴到 VS Code 扩展设置中的内容（OpenAI 兼容，Base URL **不带** `/v1`）                  |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json`（CLI）以及 VS Code 的 `kilocode.*` 设置：OpenAI 兼容，Base URL **带** `/v1`                                                |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml`（VS Code/JetBrains 以及 `cn` CLI）：`provider: openai`，`apiBase` **带** `/v1`，密钥通过 `${{ secrets.OMNIROUTE_API_KEY }}` 引用 |
+| Cursor      | `omniroute setup-cursor`   | 打印应用内步骤（Settings → Models → Override OpenAI Base URL **带** `/v1` + 密钥 + 模型）。Cursor 的配置是不透明的 SQLite，仅适用于聊天面板                |
+| Roo Code    | `omniroute setup-roo`      | 写入 Roo 导入 JSON（`~/.omniroute/roo-settings.json`），设置 `roo-cline.autoImportSettingsPath`，并打印界面步骤（OpenAI 兼容，Base URL **带** `/v1`）      |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`：`openai-compat` 提供者，`base_url` **带** `/v1`，密钥通过 `$OMNIROUTE_API_KEY` 引用                                          |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`：`language_models.openai_compatible.omniroute`，`api_url` **带** `/v1`，密钥由 Zed 从 `$OMNIROUTE_API_KEY` 读取（从不写入）  |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml`（`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **不带** `/v1` + `GOOSE_MODEL`）+ 环境变量配置方案                                  |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml`（`openai-api-base` **不带** `/v1` + `model: openai/<id>`）+ 环境变量配置方案（`aider --message --yes`）                                |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` 条目，以及 `~/.qwen/.env` 中的 `OMNIROUTE_API_KEY`                                                      |
 
 ```bash
-# OpenCode（OpenAI 兼容提供者、所有目录模型、远程 VPS）
+# OpenCode（openai 兼容提供者，包含所有目录模型，远程 VPS）
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 omniroute setup-opencode --only glm,kimi        # 仅保留匹配的模型
-opencode -m omniroute/glm/glm-5.2 "..."          # 请先导出 OMNIROUTE_API_KEY
+opencode -m omniroute/glm/glm-5.2 "..."          # 先导出 OMNIROUTE_API_KEY
 ```
 
-> OpenCode 还提供功能更丰富的**插件**集成：`omniroute setup opencode`
-> （现已通过 `--remote` 支持远程模式）会安装 `@omniroute/opencode-plugin`。
-> `setup-opencode` 是轻量级的 OpenAI 兼容替代方案。API 密钥通过
-> `{env:OMNIROUTE_API_KEY}` 引用 — 绝不会写入磁盘。
+> OpenCode 还有功能更丰富的**插件**集成：`omniroute setup opencode`（现已通过 `--remote` 支持远程）会安装 `@omniroute/opencode-plugin`。
+> `setup-opencode` 是轻量级的 openai 兼容替代方案。API 密钥通过 `{env:OMNIROUTE_API_KEY}` 引用，从不写入磁盘。
 >
-> 在 OpenCode v2 上，请改用 `@omniroute/opencode-plugin-v2`：目录相同，
-> 但加载器约定不同。连接集成后，它会从 OpenCode 自身的凭据
-> 存储中读取密钥，因此远程网关完全不需要在 `opencode.json` 中配置密钥。
+> 在 OpenCode v2 上，请改用 `@omniroute/opencode-plugin-v2`：目录相同，但加载器契约不同。当集成已连接时，它会从 OpenCode 自身的凭证存储中读取密钥，因此远程网关根本无需在 `opencode.json` 中写入密钥。
 
 ---
 
 ## 管理上下文（在服务器之间切换）
 
-**上下文**是已保存的服务器配置（baseUrl + 凭据 + 作用域）。`omniroute connect`
-会创建一个上下文并将其设为活动上下文；此后的每个命令都会以该上下文为目标。使用
-`omniroute contexts` 管理并切换上下文：
+**上下文**是已保存的服务器（baseUrl + 凭据 + 范围）。`omniroute connect` 会创建一个上下文并使其处于活动状态；从那时起，每个命令都将以此上下文为目标。使用 `omniroute contexts` 管理和切换它们：
 
 ```bash
-omniroute contexts list            # 所有上下文；活动上下文以 ● 标记
-omniroute contexts current         # 活动服务器、认证状态和作用域
+omniroute contexts list            # 所有上下文；活动上下文标有 ●
+omniroute contexts current         # 活动服务器、认证状态、范围
 ```
 
 ```text
-  | 名称    | 基础 URL                  | 认证  | 作用域 | 描述
-● | vps     | http://100.67.86.91:20128 | token | admin | 远程 OmniRoute (…)
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
   | default | http://localhost:20128    | ✗     |       |
 ```
 
-**切换服务器** — 此后的每个命令都会使用活动上下文：
+**切换服务器** — 每个后续命令都将遵循活动上下文：
 
 ```bash
-omniroute contexts use vps         # → 现在所有命令都会访问远程 VPS
-omniroute tokens list              #   （针对该 VPS 运行）
+omniroute contexts use vps         # → 所有命令现在都将访问远程 VPS
+omniroute tokens list              #   （针对 VPS 运行）
 
-omniroute contexts use default     # → 返回 localhost
+omniroute contexts use default     # → 返回到 localhost
 omniroute tokens list              #   （针对本地服务器运行）
 ```
 
-**手动添加上下文**（而不是使用 `connect`），以及查看或重命名上下文：
+**手动添加上下文**（而不是 `connect`）、检查或重命名：
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
-  --access-token oma_live_xxxx --scope write --description "暂存服务器"
-omniroute contexts show staging    # 查看一个上下文的完整详细信息
+  --access-token oma_live_xxxx --scope write --description "staging box"
+omniroute contexts show staging    # 一个上下文的完整详细信息
 omniroute contexts rename staging stg
 ```
 
-**删除上下文** — 系统会提示确认；传入 `--yes` 可跳过确认
-（脚本/非交互式 shell 必须使用，否则将安全地拒绝操作）：
+**移除上下文** — 会提示确认；传递 `--yes` 以跳过确认（脚本/非交互式 shell 需要，否则会安全地拒绝）：
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> 无法删除 `default`（localhost）。删除活动上下文后，会回退到
-> `default`。提示：删除上下文只会移除**本地**保存的凭据 —
-> 要真正撤销访问权限，请在服务器上使用 `omniroute tokens revoke <id>` 撤销令牌。
+> `default` (localhost) 无法移除。移除活动上下文会回退到 `default`。提示：移除上下文只会删除**本地**保存的凭据 — 要真正终止访问，请使用 `omniroute tokens revoke <id>` 在服务器上撤销令牌。
 
-**导出/导入**上下文（例如，在计算机之间迁移上下文）。当操作系统
-钥匙串可用时，新上下文仅持久保存钥匙串引用；凭据不会被复制到导出内容中：
+**导出/导入**上下文（例如，在机器之间移动它们）。默认情况下，导出会省略凭据，包括通过文件回退存储的凭据。当需要可移植的包含凭据的备份时，请明确使用 `--include-secrets`：
 
 ```bash
-omniroute contexts export --out contexts.json     # 默认：stdout
-omniroute contexts import contexts.json            # 覆盖；使用 --merge 保留现有内容
-omniroute contexts migrate --yes                  # 将旧版明文令牌迁移到钥匙串
+omniroute contexts export --out contexts.json     # 已编辑；默认目的地：stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # 覆盖；使用 --merge 保留现有
+omniroute contexts migrate --yes                  # 将旧版明文令牌移动到密钥链
 ```
 
-在没有可用操作系统钥匙串的无头系统上，CLI 会回退到
-权限模式为 `0600` 的 `config.json`，并显示一次性警告。应将此回退方式生成的导出内容
-（以及迁移前的任何旧版配置）视为机密材料。
+`--include-secrets` 在导出前解析密钥链引用，如果任何引用的凭据无法读取，则会失败。`--no-secrets` 始终优先。导出文件以 `0600` 模式原子写入。请将明确包含秘密的导出视为秘密材料。在没有可用操作系统密钥链的无头系统上，CLI 会回退到 `0600` 模式的 `config.json` 并打印一次性警告；在此模式下，默认导出仍将是编辑过的。
 
 ---
 

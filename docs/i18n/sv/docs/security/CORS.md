@@ -1,6 +1,6 @@
 # CORS Configuration & Security (Svenska)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇪🇪 [et](../../../et/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -57,11 +57,11 @@ på grund av ett konkret implementeringsfaktum:
 
 Detta innebär följande för varje yta, även med `CORS_ALLOW_ALL=true`:
 
-| Yta                                       | Autentiseringsmekanism    | Effekt av CORS med jokertecken                                                                                                                                                                                                                                   |
-| ----------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Instrumentpanel / MANAGEMENT `/api/*`     | Cookiesession             | Ursprunget returneras, men **utan `Allow-Credentials`** **blockerar** webbläsaren den autentiserade läsningen. En skadlig webbplats med ett annat ursprung **kan inte läsa** dina autentiserade svar från instrumentpanelen, och sessionscookien exponeras inte. |
-| Klient-API `/v1/*`, `/v1beta/*`           | Bearer-/`x-api-key`-huvud | Redan tillåtande **avsiktligt** (`relaxForTokenAuth`): webbläsare bifogar aldrig `Authorization`/`x-api-key` automatiskt, så en angripares sida kan inte tillhandahålla din nyckel. `CORS_ALLOW_ALL` utökar inte detta.                                          |
-| Offentlig skrivskyddad (`/api/health`, …) | Ingen                     | Icke-känslig; jokertecken är ofarligt.                                                                                                                                                                                                                           |
+| Yta                                       | Autentiseringsmekanism    | Effekt av CORS med jokertecken                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Instrumentpanel / MANAGEMENT `/api/*`     | Cookiesession             | Ursprunget returneras, men **utan `Allow-Credentials`** **blockerar** webbläsaren den autentiserade läsningen. En skadlig webbplats med ett annat ursprung **kan inte läsa** dina autentiserade svar från instrumentpanelen, och sessionscookien exponeras inte.                                                                                             |
+| Klient-API `/v1/*`, `/v1beta/*`           | Bearer-/`x-api-key`-huvud | Redan tillåtande **avsiktligt** (`relaxForTokenAuth`): webbläsare bifogar aldrig `Authorization`/`x-api-key` automatiskt, så en angripares sida kan inte tillhandahålla din nyckel. Ursprunget returneras bara när den angivna nyckeln har validerats; anonyma svar (`REQUIRE_API_KEY=false`) behåller tillåtelselistan. `CORS_ALLOW_ALL` utökar inte detta. |
+| Offentlig skrivskyddad (`/api/health`, …) | Ingen                     | Icke-känslig; jokertecken är ofarligt.                                                                                                                                                                                                                                                                                                                       |
 
 Den **kvarvarande** exponeringen med `CORS_ALLOW_ALL=true` är alltså begränsad till: (a)
 oautentiserade läsningar mellan olika ursprung av data som redan är tillgängliga utan autentisering, och (b)
@@ -125,30 +125,73 @@ CORS-ursprung** utan omstart.
   automatiskt. CORS utgör inget meningsfullt hinder här — API-nyckeln är hindret
   — vilket är anledningen till att den ytan avsiktligt är tillåtande så att
   webbläsar- och Electron-klienter kan läsa svar som de redan har rätt till.
+  Den tillåtande ursprungsreturneringen följer den validerade nyckeln, inte enbart att
+  huvudet finns: när `REQUIRE_API_KEY=false` betjänar en begäran anonymt behåller dess
+  lyckade svar den tillåtelselista som nekar som standard. Autentiseringsavslag (401)
+  förblir läsbara så att klienter kan visa en återkallad eller felskriven nyckel (#5242):
+  pipelinens egen 401 behåller ursprungsreturneringen, och en rutt som själv avvisar
+  nyckeln efter att pipelinen har betjänat begäran som anonym (`/v1/models` och
+  `/v1beta/models` när hanteringsautentisering är konfigurerad, de ägarbegränsade
+  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` och rutterna för
+  auto-combo-kandidater) lägger till ursprungsreturneringen i den 401:an via
+  `credentialRejectionHeaders()`. Returneringen styrs av att begäran bär ett
+  autentiseringshuvud (`Authorization`, `x-api-key`, `x-goog-api-key` eller cookien
+  `auth_token`), inte av vilket av dem rutten kontrollerade, och kombineras aldrig med
+  `Access-Control-Allow-Credentials`; brödtexten är ett fast felkuvert. Hanteringsrutter
+  under `/api/v1/` som skyddas av `requireManagementAuth()` (`/api/v1/management/*`,
+  `/api/v1/registered-keys`) lägger inte till returneringen: med `REQUIRE_API_KEY=false`
+  går deras 401/403 inte att läsa från ett annat ursprung.
 - **Cookiesession (instrumentpanelen):** skyddas av standardinställningen som
   nekar vid fel **och** av avsaknaden av `Access-Control-Allow-Credentials` på
   den delade sökvägen. Undanta ursprung för hantering/instrumentpanelen från alla
   tillåtande konfigurationer; de måste fortsätta att neka vid fel utan undantag.
 
+## WebSocket-handskakningar (`/v1/responses`, `/v1/ws`)
+
+Webbläsare tillämpar inte CORS på WebSocket, så de WebSocket-transporter som returnerar
+inferensutdata kontrollerar själva handskakningens `Origin`
+(`src/server/origin/wsOrigin.ts`): Responses-WebSocketen (`/v1/responses`) och, när
+OmniRoute körs via `npm start` / `npm run dev`, bryggan `/v1/ws` och `/api/v1/ws`, som
+strömmar `/v1/chat/completions`, `/v1/messages` och `/v1/responses` som ramar. Bryggan
+frågar `/api/v1/ws?handshake=1` om utslaget och vägrar uppgradera om inte den rutten
+har kört kontrollen. En handskakning accepteras när:
+
+- den saknar `Origin`-huvud (Codex CLI, SDK:er och andra klienter som inte är webbläsare);
+- `Origin` godkänns av tillåtelselistan ovan (`CORS_ALLOWED_ORIGINS`, inställningen
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` är ett av OmniRoutes egna offentliga ursprung (den konfigurerade offentliga
+  bas-URL:en, en betrodd proxys vidarebefordrade ursprung eller en direkt
+  loopback-/LAN-värd angiven som IP-literal eller `localhost` — samma kandidater som
+  instrumentpanelens mutationskontroll använder); eller
+- den bär en giltig API-nyckel, precis som på HTTP-ytan `/v1/*`.
+
+Allt annat får `403 ws_origin_forbidden`. En sessionscookie för instrumentpanelen
+undantar inte ett främmande `Origin`, eftersom webbläsaren bifogar den till varje sidas
+socket. `localhost` på en annan port behandlas inte som samma ursprung; lägg till
+sådana utvecklingsursprung i `CORS_ALLOWED_ORIGINS`.
+
 ## Exempel: omvänd proxy framför OmniRoute
 
-CORS tillämpas av OmniRoute självt, så proxyn bör i allmänhet **inte** lägga till
-eller skriva om `Access-Control-*`-huvuden (dubbla huvuden får webbläsare att
-sluta fungera). Terminera TLS och vidarebefordra — låt OmniRoute besvara
-preflight-begäran:
+CORS tillämpas av OmniRoute självt, så proxyn bör i allmänhet **inte** lägga till eller
+skriva om `Access-Control-*`-rubriker (dubbla rubriker orsakar problem i webbläsare). Terminera TLS
+och vidarebefordra — låt OmniRoute besvara preflight-förfrågningar:
 
 ```nginx
 # nginx — vidarebefordra till OmniRoute; injicera INTE Access-Control-* här
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # Ange INTE X-Forwarded-For som 127.0.0.1 — det sätter loopback-ruttskyddet ur spel.
+    # Behåll vidarebefordringsrubrikerna: en proxy på samma värd ansluter från loopback, och det är
+    # de som talar om för OmniRoute att anroparen inte är den lokala operatören. En proxy som inte lägger till någon av dem
+    # får alla fjärranropare att se lokala ut. Ange heller aldrig X-Forwarded-For som 127.0.0.1.
 }
 ```
 
-Ange de tillåtna webbläsarursprungen i OmniRoute (`CORS_ALLOWED_ORIGINS` eller
-fliken Säkerhet), inte i proxyn.
+Ange de tillåtna webbläsarursprungen i OmniRoute (`CORS_ALLOWED_ORIGINS` eller fliken
+Säkerhet), inte i proxyn.
 
 ## Källfiler
 
@@ -161,6 +204,7 @@ fliken Säkerhet), inte i proxyn.
 | Varningsbanderoll på instrumentpanelen               | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Fält för tillåtna CORS-ursprung                      | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Routningsspecifik CORS för Cloud-Agent (undantaget)  | `src/lib/cloudAgent/api.ts`                                          |
+| Kontroll av `Origin` vid WebSocket-handskakning      | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Se även
 

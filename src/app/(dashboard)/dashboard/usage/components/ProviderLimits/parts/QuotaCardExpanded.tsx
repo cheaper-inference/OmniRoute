@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { buildGrokBillingCardRows } from "@/shared/utils/grokBilling";
 import { buildKimiBillingCardRows } from "@/shared/utils/kimiBilling";
 import {
@@ -27,6 +29,9 @@ import {
   sortQuotasByWindow,
 } from "../quotaParsing";
 import KiloPassMeter from "./KiloPassMeter";
+import QuotaCardSpeed from "./QuotaCardSpeed";
+import { hasCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
+import AntigravityQuotaGroups, { resolveAntigravityQuotaGroups } from "../AntigravityQuotaGroups";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: "$",
@@ -63,7 +68,7 @@ function ProviderBillingDetails({ billing }: { billing: ProviderBillingStatus })
             className="inline-flex w-fit items-center gap-1 font-medium text-primary hover:underline"
           >
             {row.label}
-            <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+            <Icon name="open_in_new" size={12} />
           </a>
         ) : (
           <div
@@ -136,11 +141,13 @@ export function shouldShowLoadingPlaceholder(
 
 interface Props {
   quotas: any[];
+  quotaGroups?: Array<Record<string, unknown>>;
   providerId?: string;
   loading: boolean;
   error: string | null;
   message?: string | null;
   billing?: ProviderBillingStatus | null;
+  paidCredits?: CodexPaidCredits;
   refreshedAt?: string;
   hasStaleData: boolean;
   onRefresh: () => void;
@@ -156,6 +163,8 @@ interface Props {
   hiddenQuotaRows?: any[];
   onHideQuota?: (quota: any) => void;
   onShowQuota?: (quota: any) => void;
+  /** Read-time decode-speed stats from the usage API (`speed` payload). */
+  speed?: unknown;
 }
 
 function QuotaDetailRow({
@@ -195,36 +204,32 @@ function QuotaDetailRow({
       <div className="flex min-h-[34px] items-center justify-between gap-2 py-1">
         <span className="flex min-w-0 flex-1 items-center gap-1.5 text-[12px] font-medium leading-none text-text-main">
           <span className="inline-flex size-6 shrink-0 items-center justify-center">
-            <span
-              className="material-symbols-outlined text-[15px] leading-none"
-              style={{ color: colors.text }}
-            >
-              restart_alt
+            <span style={{ color: colors.text }}>
+              <Icon name="restart_alt" size={15} />
             </span>
           </span>
           <span className="truncate leading-none">
             {translateUsageOrFallback(t, "resetCreditsLabel", "Reset credits")}
           </span>
         </span>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           disabled={!onOpenResetCredits || loadingResetCredits}
           onClick={(event) => {
             event.stopPropagation();
             onOpenResetCredits?.();
           }}
           aria-label={translateUsageOrFallback(t, "viewResetCredits", "View reset credits")}
-          className="inline-flex h-6 shrink-0 items-center gap-1 rounded-md px-1.5 text-[12px] font-bold leading-none tabular-nums hover:bg-black/[0.05] disabled:cursor-default dark:hover:bg-white/[0.05]"
+          className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-bold leading-none tabular-nums"
           style={{ color: colors.text }}
         >
           {loadingResetCredits && (
-            <span className="material-symbols-outlined animate-spin text-[12px]">
-              progress_activity
-            </span>
+            <Icon name="progress_activity" size={12} className="animate-spin" />
           )}
           {count.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-          <span className="material-symbols-outlined text-[13px]">chevron_right</span>
-        </button>
+          <Icon name="chevron_right" size={13} />
+        </Button>
       </div>
     );
   }
@@ -240,11 +245,8 @@ function QuotaDetailRow({
       <div className="flex min-h-[34px] items-center justify-between gap-2 py-1">
         <span className="flex min-w-0 flex-1 items-center gap-1.5 text-[12px] font-medium leading-none text-text-main">
           <span className="inline-flex size-6 shrink-0 items-center justify-center">
-            <span
-              className="material-symbols-outlined text-[15px] leading-none"
-              style={{ color: colors.text }}
-            >
-              paid
+            <span style={{ color: colors.text }}>
+              <Icon name="paid" size={15} />
             </span>
           </span>
           <span className="truncate leading-none">
@@ -282,20 +284,19 @@ function QuotaDetailRow({
           {q.unlimited ? "∞" : translateUsageOrFallback(t, "percentLeft", `${pct}% left`, { pct })}
         </span>
         {canHide && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={(e) => {
               e.stopPropagation();
               onHideQuota?.(q);
             }}
-            className="inline-flex size-5 shrink-0 items-center justify-center rounded text-text-muted transition-colors hover:bg-black/5 hover:text-text-main dark:hover:bg-white/5"
+            className="size-5 min-h-5 shrink-0 text-text-muted"
             title={translateUsageOrFallback(t, "hideQuotaRow", "Hide this quota row")}
             aria-label={translateUsageOrFallback(t, "hideQuotaRow", "Hide this quota row")}
           >
-            <span className="material-symbols-outlined text-[13px] leading-none">
-              visibility_off
-            </span>
-          </button>
+            <Icon name="visibility_off" size={13} className="leading-none" />
+          </Button>
         )}
       </div>
       {!q.unlimited && <QuotaMiniBar percent={pct} size="sm" />}
@@ -321,11 +322,13 @@ function QuotaDetailRow({
 
 export default function QuotaCardExpanded({
   quotas,
+  quotaGroups = [],
   providerId,
   loading,
   error,
   message,
   billing,
+  paidCredits,
   refreshedAt,
   hasStaleData,
   onRefresh,
@@ -340,12 +343,20 @@ export default function QuotaCardExpanded({
   hiddenQuotaRows = [],
   onHideQuota,
   onShowQuota,
+  speed,
 }: Props) {
   const t = useTranslations("usage");
   const tr = (key: string, fallback: string, values?: UsageTranslationValues) =>
     translateUsageOrFallback(t, key, fallback, values);
 
   const [expanded, setExpanded] = useState(false);
+  const resolvedAntigravityGroups = useMemo(
+    () =>
+      providerId === "antigravity" || providerId === "agy"
+        ? resolveAntigravityQuotaGroups(quotaGroups, quotas)
+        : [],
+    [providerId, quotaGroups, quotas]
+  );
   const sortedQuotas = useMemo(
     () => resolveQuotaDisplayOrder(providerId, quotas),
     [quotas, providerId]
@@ -373,16 +384,17 @@ export default function QuotaCardExpanded({
     <div className="border-t border-border bg-bg-subtle/30 px-3 py-2.5 flex flex-col gap-1.5">
       {shouldShowLoadingPlaceholder(loading, sortedQuotas.length, message) ? (
         <div className="text-[11px] text-text-muted flex items-center gap-1.5">
-          <span className="material-symbols-outlined animate-spin text-[13px]">
-            progress_activity
-          </span>
+          <Icon name="progress_activity" size={13} className="animate-spin" />
           {t("loadingQuotas")}
         </div>
       ) : error ? (
-        <div className="text-[11px] text-red-500 flex items-start gap-1.5">
-          <span className="material-symbols-outlined text-[13px]">error</span>
+        <div className="text-[11px] text-error flex items-start gap-1.5">
+          <Icon name="error" size={13} />
           <span>{error}</span>
         </div>
+      ) : (providerId === "antigravity" || providerId === "agy") &&
+        resolvedAntigravityGroups.length > 0 ? (
+        <AntigravityQuotaGroups groups={resolvedAntigravityGroups} />
       ) : quotas.length === 0 && message ? (
         <div className="text-[11px] text-text-muted italic" title={message}>
           {message}
@@ -407,123 +419,143 @@ export default function QuotaCardExpanded({
       {isProviderBillingProvider(providerId) && billing && (
         <ProviderBillingDetails billing={billing} />
       )}
+      {providerId === "codex" && paidCredits && (
+        <div className="flex justify-between gap-2 border-t border-border/40 pt-2 text-[11px] text-text-main">
+          <span>{t("codexPaidCreditsLabel")}</span>
+          <span className="font-semibold">
+            {paidCredits.overageLimitReached || !hasCodexPaidCredits(paidCredits)
+              ? t("codexPaidCreditsUnavailable")
+              : paidCredits.unlimited
+                ? t("codexPaidCreditsUnlimited")
+                : paidCredits.balance === null
+                  ? t("codexPaidCreditsAvailable")
+                  : paidCredits.balance.toLocaleString()}
+          </span>
+        </div>
+      )}
+
+      {!error && <QuotaCardSpeed speed={speed} />}
 
       {hiddenQuotaRows.length > 0 && (
         <div className="flex flex-wrap items-center gap-1 border-t border-border/40 pt-1.5 text-[10px] text-text-muted">
-          <span className="material-symbols-outlined text-[12px]">visibility_off</span>
+          <Icon name="visibility_off" size={12} />
           <span>{tr("hiddenQuotaRowsLabel", "Hidden:")}</span>
           {hiddenQuotaRows.map((q) => (
-            <button
+            <Button
               key={getQuotaVisibilityKey(q)}
-              type="button"
+              variant="outline"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onShowQuota?.(q);
               }}
-              className="rounded-md border border-border px-1.5 py-0.5 transition-colors hover:bg-black/5 hover:text-text-main dark:hover:bg-white/5"
+              className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] font-normal"
               title={translateUsageOrFallback(t, "showQuotaRow", "Show this quota row")}
             >
               {q.displayName || formatQuotaLabel(q.name)}
-            </button>
+            </Button>
           ))}
         </div>
       )}
 
       {!error && sortedQuotas.length > DEFAULT_VISIBLE_ROWS && (
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
+          aria-expanded={expanded}
           onClick={(e) => {
             e.stopPropagation();
             setExpanded((prev) => !prev);
           }}
-          className="inline-flex items-center justify-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] cursor-pointer"
+          className="h-7 min-h-7 gap-1 px-2 text-[11px]"
         >
-          <span className="material-symbols-outlined text-[12px]">
-            {expanded ? "expand_less" : "expand_more"}
-          </span>
+          <Icon name={expanded ? "expand_less" : "expand_more"} size={12} />
           {expanded
             ? tr("showLessQuotas", "Show less")
             : tr("showMoreQuotas", `Show ${hiddenCount} more`, { count: hiddenCount })}
-        </button>
+        </Button>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-border/40">
-        {refreshedLabel && (
-          <span
-            className={`text-[10px] tabular-nums shrink-0 ${
-              hasStaleData ? "text-amber-500" : "text-text-muted"
-            }`}
-            title={
-              hasStaleData
-                ? t("staleQuotaTooltip")
-                : `${tr("lastRefreshed", "Last refreshed")}: ${refreshedLabel}`
-            }
+      <div className="min-w-0 space-y-1.5 pt-1.5 border-t border-border/40">
+        <div className="flex min-w-0 items-center justify-between gap-2">
+          {refreshedLabel && (
+            <span
+              className={`text-[10px] tabular-nums ${
+                hasStaleData ? "text-warning" : "text-text-muted"
+              }`}
+              title={
+                hasStaleData
+                  ? t("staleQuotaTooltip")
+                  : `${tr("lastRefreshed", "Last refreshed")}: ${refreshedLabel}`
+              }
+            >
+              {tr("updatedShort", "Updated")} {refreshedLabel}
+            </span>
+          )}
+          <Button
+            variant="outline"
+            size="icon-sm"
+            disabled={loading}
+            title={tr("forceRefresh", "Refresh now")}
+            aria-label={tr("forceRefresh", "Refresh now")}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRefresh();
+            }}
+            className="ml-auto inline-flex size-7 shrink-0 min-h-7"
           >
-            {tr("updatedShort", "Updated")} {refreshedLabel}
-          </span>
-        )}
-        <div className="flex flex-wrap items-center justify-end gap-1.5 ml-auto">
+            <Icon name="refresh" size={12} className={loading ? "animate-spin" : undefined} />
+          </Button>
+        </div>
+        <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,5rem),1fr))] gap-1.5">
           {canRedeemResetCredit && (
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               disabled={loading || redeemingResetCredit || loadingResetCredits}
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenResetCredits?.();
               }}
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border border-primary/40 text-primary bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="h-auto min-h-0 min-w-0 gap-1 whitespace-normal break-words border-primary/40 px-1.5 py-1.5 text-[11px] text-primary"
             >
-              <span
-                className={`material-symbols-outlined text-[12px] ${
-                  redeemingResetCredit || loadingResetCredits ? "animate-spin" : ""
-                }`}
-              >
-                {redeemingResetCredit || loadingResetCredits ? "progress_activity" : "restart_alt"}
-              </span>
-              {tr("manageResetCredits", "View credits")}
-            </button>
+              <Icon
+                name={
+                  redeemingResetCredit || loadingResetCredits ? "progress_activity" : "restart_alt"
+                }
+                size={12}
+                className={redeemingResetCredit || loadingResetCredits ? "animate-spin" : undefined}
+              />
+              <span className="min-w-0">{tr("manageResetCredits", "View credits")}</span>
+            </Button>
           )}
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             disabled={!canEditCutoff}
             onClick={(e) => {
               e.stopPropagation();
               onOpenCutoff();
             }}
-            className={`inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
-              hasCutoffOverrides ? "border-primary/40 text-primary" : "border-border"
+            className={`h-auto min-h-0 min-w-0 gap-1 whitespace-normal break-words px-1.5 py-1.5 text-[11px] ${
+              hasCutoffOverrides ? "border-primary/40 text-primary" : ""
             }`}
           >
-            <span className="material-symbols-outlined text-[12px]">tune</span>
-            {tr("editCutoffs", "Edit cutoffs")}
-          </button>
-          <button
-            type="button"
+            <Icon name="tune" size={12} />
+            <span className="min-w-0">{tr("editCutoffs", "Edit cutoffs")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               onOpenCost();
             }}
-            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] cursor-pointer"
+            className="h-auto min-h-0 min-w-0 gap-1 whitespace-normal break-words px-1.5 py-1.5 text-[11px]"
           >
-            <span className="material-symbols-outlined text-[12px]">bar_chart</span>
-            {t("usdCost")}
-          </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={(e) => {
-              e.stopPropagation();
-              onRefresh();
-            }}
-            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            <span
-              className={`material-symbols-outlined text-[12px] ${loading ? "animate-spin" : ""}`}
-            >
-              refresh
-            </span>
-            {tr("forceRefresh", "Refresh now")}
-          </button>
+            <Icon name="bar_chart" size={12} />
+            <span className="min-w-0">{t("usdCost")}</span>
+          </Button>
         </div>
       </div>
     </div>

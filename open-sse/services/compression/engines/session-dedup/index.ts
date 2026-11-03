@@ -22,6 +22,8 @@
  *   - Never touch multipart content parts other than `type: "text"`.
  *   - Only dedup blocks ≥ minBlockChars (default 80 chars) AND ≥ MIN_BLOCK_LINES lines.
  *   - First occurrence is ALWAYS kept intact; only later identical occurrences are replaced.
+ *   - Never rewrite the current turn (messages after the last assistant message): the
+ *     model must see what it just read or was just sent. It is deduped on a later turn.
  *
  * Reconstruction:
  *   Replace every `[dedup:ref sha=XXXXXXXX]` marker with the original block text
@@ -31,6 +33,7 @@
 import crypto from "node:crypto";
 import { createCompressionStats } from "../../stats.ts";
 import { runFuzzyPass } from "./fuzzy.ts";
+import { callerSupportsCcrRetrieve } from "../ccr/protocolInstruction.ts";
 import type {
   CompressionEngine,
   CompressionEngineApplyOptions,
@@ -113,6 +116,41 @@ function findSuffixBlocks(
  * Deduplicates repeated lines within a single message (intra-message dedup).
  * Replaces repeated suffix blocks with markers.
  */
+function countLiteralOccurrences(text: string, needle: string): number {
+  if (!needle) return 0;
+  let count = 0;
+  let offset = 0;
+  while (true) {
+    const idx = text.indexOf(needle, offset);
+    if (idx === -1) return count;
+    count++;
+    offset = idx + needle.length;
+  }
+}
+
+function replaceLiteralOccurrencesAfterFirst(
+  text: string,
+  needle: string,
+  replacement: string
+): string {
+  if (!needle) return text;
+  const first = text.indexOf(needle);
+  if (first === -1) return text;
+
+  let result = text.slice(0, first + needle.length);
+  let offset = first + needle.length;
+
+  while (true) {
+    const idx = text.indexOf(needle, offset);
+    if (idx === -1) {
+      result += text.slice(offset);
+      return result;
+    }
+    result += text.slice(offset, idx) + replacement;
+    offset = idx + needle.length;
+  }
+}
+
 function dedupeWithinMessage(
   text: string,
   minBlockChars: number
@@ -138,18 +176,17 @@ function dedupeWithinMessage(
   let changed = false;
 
   for (const { block } of sortedBlocks) {
-    // Only dedup blocks that appear 2+ times in the text.
-    const occurrences = (result.match(new RegExp(block.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length;
+    // Only dedup blocks that appear 2+ times in the text. Use literal indexOf
+    // scanning instead of compiling the whole block into a RegExp: remembered
+    // JSON/tool blobs can be hundreds of KB and V8 rejects such regex sources
+    // with "Regular expression too large".
+    const occurrences = countLiteralOccurrences(result, block);
     if (occurrences < 2) continue;
 
     const sha = hashBlock(block);
     const marker = `[dedup:ref sha=${sha}]`;
     // Replace ALL occurrences except the first (keep the original once).
-    let count = 0;
-    result = result.replace(new RegExp(block.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), () => {
-      count++;
-      return count === 1 ? block : marker;
-    });
+    result = replaceLiteralOccurrencesAfterFirst(result, block, marker);
     changed = true;
   }
 
@@ -161,8 +198,9 @@ function dedupeWithinMessage(
  * Returns the replaced texts for duplicate messages, a reverse map, and a count.
  */
 function dedupMessageTexts(
-  msgTexts: Array<{ msgIdx: number; text: string }>,
-  minBlockChars: number
+  msgTexts: Array<{ msgIdx: number; messageIndex: number; text: string }>,
+  minBlockChars: number,
+  currentTurnStart: number
 ): {
   deduped: Map<number, string>;
   dedupCount: number;
@@ -172,7 +210,10 @@ function dedupMessageTexts(
 
   // Single-message case: apply intra-message dedup.
   if (msgTexts.length === 1) {
-    const { text, msgIdx } = msgTexts[0];
+    const { text, msgIdx, messageIndex } = msgTexts[0];
+    if (messageIndex >= currentTurnStart) {
+      return { deduped, dedupCount };
+    }
     const { deduped: dedupedText, changed } = dedupeWithinMessage(text, minBlockChars);
     if (changed) {
       deduped.set(msgIdx, dedupedText);
@@ -198,7 +239,10 @@ function dedupMessageTexts(
   }
 
   // Pass 2: for each message, find blocks that were FIRST seen in an earlier message.
-  for (const { msgIdx, text } of msgTexts) {
+  // The current turn is never rewritten: a re-read tool result replaced by a marker
+  // reads to the model as a lost read, and it reads the file again another way.
+  for (const { msgIdx, messageIndex, text } of msgTexts) {
+    if (messageIndex >= currentTurnStart) continue;
     const lines = text.split("\n");
     const blocks = findSuffixBlocks(lines, minBlockChars);
 
@@ -256,29 +300,122 @@ type MessageLike = {
 };
 
 /**
+ * Text-bearing slots in a message: string content, top-level text parts, and
+ * Anthropic `tool_result` content (a string or inner text blocks).
+ */
+function collectTextSlots(msg: MessageLike): string[] {
+  if (typeof msg.content === "string") return [msg.content];
+  if (!Array.isArray(msg.content)) return [];
+  const texts: string[] = [];
+  for (const part of msg.content) {
+    if (part["type"] === "text" && typeof part["text"] === "string") {
+      texts.push(part["text"]);
+      continue;
+    }
+    if (part["type"] !== "tool_result") continue;
+    const inner = part["content"];
+    if (typeof inner === "string") {
+      texts.push(inner);
+    } else if (Array.isArray(inner)) {
+      for (const block of inner) {
+        if (block["type"] === "text" && typeof block["text"] === "string") {
+          texts.push(block["text"]);
+        }
+      }
+    }
+  }
+  return texts;
+}
+
+/**
+ * Rebuild a message applying dedup replacements keyed by the slot order used by
+ * {@link collectTextSlots}.
+ */
+function applyTextSlots(
+  msg: MessageLike,
+  baseKey: number,
+  deduped: Map<number, string>
+): MessageLike {
+  if (typeof msg.content === "string") {
+    const replacement = deduped.get(baseKey + 1);
+    return replacement !== undefined ? { ...msg, content: replacement } : { ...msg };
+  }
+  if (!Array.isArray(msg.content)) return { ...msg };
+
+  let slot = 0;
+  let changed = false;
+  const newContent = msg.content.map((part) => {
+    if (part["type"] === "text" && typeof part["text"] === "string") {
+      slot++;
+      const replacement = deduped.get(baseKey + slot);
+      if (replacement !== undefined) {
+        changed = true;
+        return { ...part, text: replacement };
+      }
+      return part;
+    }
+    if (part["type"] !== "tool_result") return part;
+    const inner = part["content"];
+    if (typeof inner === "string") {
+      slot++;
+      const replacement = deduped.get(baseKey + slot);
+      if (replacement !== undefined) {
+        changed = true;
+        return { ...part, content: replacement };
+      }
+      return part;
+    }
+    if (!Array.isArray(inner)) return part;
+    let innerChanged = false;
+    const newInner = inner.map((block) => {
+      if (block["type"] !== "text" || typeof block["text"] !== "string") return block;
+      slot++;
+      const replacement = deduped.get(baseKey + slot);
+      if (replacement !== undefined) {
+        innerChanged = true;
+        return { ...block, text: replacement };
+      }
+      return block;
+    });
+    if (!innerChanged) return part;
+    changed = true;
+    return { ...part, content: newInner };
+  });
+  return changed ? { ...msg, content: newContent } : { ...msg };
+}
+
+/**
+ * Calculates the start index of the current turn (messages after the last assistant message).
+ * If no assistant message is present, returns 0 (the entire conversation is the current turn).
+ */
+function calculateCurrentTurnStart(messages: MessageLike[]): number {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]?.role === "assistant") {
+      return i + 1;
+    }
+  }
+  return 0;
+}
+
+/**
  * Process messages: collect text content, run two-pass dedup, apply results.
  */
 function processMessages(
   messages: MessageLike[],
-  minBlockChars: number
+  minBlockChars: number,
+  currentTurnStart: number
 ): { messages: MessageLike[]; dedupCount: number } {
-  // Collect (msgIdx, text) for non-system string-content messages.
-  // For multipart, index each text part separately.
-  const msgTexts: Array<{ msgIdx: number; text: string }> = [];
+  // Collect (msgIdx, text) for non-system messages, including Anthropic tool_result text.
+  // For multipart, index each text-bearing slot separately.
+  const msgTexts: Array<{ msgIdx: number; messageIndex: number; text: string }> = [];
 
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
     if (msg.role === "system") continue;
-    if (typeof msg.content === "string") {
-      msgTexts.push({ msgIdx: i, text: msg.content });
-    } else if (Array.isArray(msg.content)) {
-      for (let p = 0; p < msg.content.length; p++) {
-        const part = msg.content[p];
-        if (part["type"] === "text" && typeof part["text"] === "string") {
-          // Composite key: i * 100000 + p + 1 (safe for reasonable message counts)
-          msgTexts.push({ msgIdx: i * 100000 + p + 1, text: part["text"] as string });
-        }
-      }
+    const slots = collectTextSlots(msg);
+    for (let s = 0; s < slots.length; s++) {
+      // Composite key: i * 100000 + s + 1 (stride leaves room for 100k slots).
+      msgTexts.push({ msgIdx: i * 100000 + s + 1, messageIndex: i, text: slots[s] });
     }
   }
 
@@ -286,7 +423,7 @@ function processMessages(
     return { messages, dedupCount: 0 };
   }
 
-  const { deduped, dedupCount } = dedupMessageTexts(msgTexts, minBlockChars);
+  const { deduped, dedupCount } = dedupMessageTexts(msgTexts, minBlockChars, currentTurnStart);
 
   if (dedupCount === 0) {
     return { messages, dedupCount: 0 };
@@ -295,27 +432,7 @@ function processMessages(
   const result = messages.map((msg, i) => {
     if (msg.role === "system") return { ...msg };
 
-    if (typeof msg.content === "string") {
-      const replacement = deduped.get(i);
-      return replacement !== undefined ? { ...msg, content: replacement } : { ...msg };
-    }
-
-    if (Array.isArray(msg.content)) {
-      let changed = false;
-      const newContent = msg.content.map((part, p) => {
-        if (part["type"] !== "text" || typeof part["text"] !== "string") return part;
-        const key = i * 100000 + p + 1;
-        const replacement = deduped.get(key);
-        if (replacement !== undefined) {
-          changed = true;
-          return { ...part, text: replacement };
-        }
-        return part;
-      });
-      return changed ? { ...msg, content: newContent } : { ...msg };
-    }
-
-    return { ...msg };
+    return applyTextSlots(msg, i * 100000, deduped);
   });
 
   return { messages: result, dedupCount };
@@ -364,7 +481,8 @@ function validateSessionDedupConfig(config: Record<string, unknown>): EngineVali
     const f = config["fuzzy"];
     if (typeof f === "object" && f !== null) {
       const fe = (f as Record<string, unknown>)["enabled"];
-      if (fe !== undefined && typeof fe !== "boolean") errors.push("fuzzy.enabled must be a boolean");
+      if (fe !== undefined && typeof fe !== "boolean")
+        errors.push("fuzzy.enabled must be a boolean");
     } else if (typeof f !== "boolean") {
       errors.push("fuzzy must be an object { enabled } or a boolean");
     }
@@ -414,17 +532,22 @@ export const sessionDedupEngine: CompressionEngine = {
       return { body, compressed: false, stats: null };
     }
 
+    const currentTurnStart = calculateCurrentTurnStart(messages as MessageLike[]);
+
     const start = performance.now();
     const { messages: exactMessages, dedupCount } = processMessages(
       messages as MessageLike[],
-      minBlockChars
+      minBlockChars,
+      currentTurnStart
     );
 
     const { messages: finalMessages, fuzzyCount } = runFuzzyPass(
       exactMessages,
       stepConfig,
       minBlockChars,
-      options?.principalId
+      options?.principalId,
+      callerSupportsCcrRetrieve(body),
+      currentTurnStart
     );
 
     if (dedupCount + fuzzyCount === 0) {

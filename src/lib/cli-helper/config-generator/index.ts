@@ -2,14 +2,16 @@ import path from "node:path";
 import os from "node:os";
 
 import { getHermesConfigPath } from "./hermesHome.ts";
+import { getWhyCodesConfigPath } from "./whycodesHome.ts";
 import { generateClaudeConfig } from "./claude";
 import { generateClineConfig } from "./cline";
 import { generateCodexConfig, findLegacyCodexYaml } from "./codex";
 import { generateContinueConfig } from "./continue";
 import { generateHermesConfig } from "./hermes";
-import { generateHermesAgentConfig, type HermesAgentConfigPayload } from "./hermes-agent";
+import { generateHermesAgentConfig } from "./hermes-agent";
 import { generateKilocodeConfig } from "./kilocode";
 import { generateOpencodeConfig } from "./opencode";
+import { generateWhyCodesConfig } from "./whycodes";
 import { resolveOpencodeConfigPath } from "../../../shared/services/opencodeConfigPath";
 import { normalizeCliToolId } from "../../../shared/services/cliRuntime";
 
@@ -28,6 +30,8 @@ export interface GenerateResult {
   migration?: string;
 }
 
+export { redactGeneratedConfig } from "../configPreview";
+
 export function validateBaseUrl(url: string): boolean {
   try {
     const u = new URL(url);
@@ -35,11 +39,6 @@ export function validateBaseUrl(url: string): boolean {
   } catch {
     return false;
   }
-}
-
-function expandHome(p: string): string {
-  const home = os.homedir();
-  return p.replace(/^~\//, home + "/");
 }
 
 // Static paths that do not depend on runtime env vars can stay eagerly computed.
@@ -68,6 +67,9 @@ function getToolConfigPath(toolId: string): string {
   if (toolId === "opencode") {
     return resolveOpencodeConfigPath();
   }
+  if (toolId === "whycodes") {
+    return getWhyCodesConfigPath();
+  }
   return STATIC_TOOL_CONFIG_PATHS[toolId] ?? "";
 }
 
@@ -82,6 +84,17 @@ const GENERATORS: Record<string, ConfigGenerator> = {
   continue: generateContinueConfig,
   hermes: generateHermesConfig,
   "hermes-agent": generateHermesAgentConfig as any, // rich multi-role version
+  whycodes: generateWhyCodesConfig,
+};
+
+// Generators that need the resolved config path (to merge into an existing file).
+const PATH_AWARE_GENERATORS: Record<
+  string,
+  (options: GenerateOptions & { configPath: string }) => string | Promise<string>
+> = {
+  opencode: generateOpencodeConfig,
+  codex: generateCodexConfig,
+  whycodes: generateWhyCodesConfig,
 };
 
 export async function generateConfig(
@@ -107,12 +120,10 @@ export async function generateConfig(
       return { success: false, configPath: "", error: `Unknown tool: ${toolId}` };
     }
     const configPath = getToolConfigPath(canonicalToolId);
-    const content =
-      canonicalToolId === "opencode"
-        ? await generateOpencodeConfig({ ...options, configPath })
-        : canonicalToolId === "codex"
-          ? await generateCodexConfig({ ...options, configPath })
-          : await generate(options);
+    const pathAware = PATH_AWARE_GENERATORS[canonicalToolId];
+    const content = pathAware
+      ? await pathAware({ ...options, configPath })
+      : await generate(options);
 
     let migration: string | undefined;
     if (canonicalToolId === "codex") {
@@ -132,11 +143,13 @@ export async function generateConfig(
   }
 }
 
+export const CONFIG_GENERATOR_IDS = Object.freeze(Object.keys(GENERATORS));
+
 export async function generateAllConfigs(options: GenerateOptions): Promise<GenerateResult[]> {
   // Keep the batch view derived from the actual generator registry. Hermes
   // Agent has a richer payload and is intentionally exposed by its dedicated
   // endpoint, not by this simple `{baseUrl, apiKey, model}` batch API.
-  const toolIds = Object.keys(GENERATORS).filter((id) => id !== "hermes-agent");
+  const toolIds = CONFIG_GENERATOR_IDS.filter((id) => id !== "hermes-agent");
   const results = await Promise.allSettled(toolIds.map((id) => generateConfig(id, options)));
 
   return results.map((r) =>

@@ -1,6 +1,6 @@
 # CORS Configuration & Security (Eesti)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/CORS.md) · 🇪🇹 [am](../../../am/docs/security/CORS.md) · 🇸🇦 [ar](../../../ar/docs/security/CORS.md) · 🇦🇿 [az](../../../az/docs/security/CORS.md) · 🇧🇬 [bg](../../../bg/docs/security/CORS.md) · 🇧🇩 [bn](../../../bn/docs/security/CORS.md) · 🇧🇦 [bs](../../../bs/docs/security/CORS.md) · 🇨🇿 [cs](../../../cs/docs/security/CORS.md) · 🇩🇰 [da](../../../da/docs/security/CORS.md) · 🇩🇪 [de](../../../de/docs/security/CORS.md) · 🇬🇷 [el](../../../el/docs/security/CORS.md) · 🇪🇸 [es](../../../es/docs/security/CORS.md) · 🇮🇷 [fa](../../../fa/docs/security/CORS.md) · 🇫🇮 [fi](../../../fi/docs/security/CORS.md) · 🇫🇷 [fr](../../../fr/docs/security/CORS.md) · 🇮🇪 [ga](../../../ga/docs/security/CORS.md) · 🇮🇳 [gu](../../../gu/docs/security/CORS.md) · 🇳🇬 [ha](../../../ha/docs/security/CORS.md) · 🇮🇱 [he](../../../he/docs/security/CORS.md) · 🇮🇳 [hi](../../../hi/docs/security/CORS.md) · 🇭🇷 [hr](../../../hr/docs/security/CORS.md) · 🇭🇺 [hu](../../../hu/docs/security/CORS.md) · 🇦🇲 [hy](../../../hy/docs/security/CORS.md) · 🇮🇩 [id](../../../id/docs/security/CORS.md) · 🇳🇬 [ig](../../../ig/docs/security/CORS.md) · 🇮🇹 [it](../../../it/docs/security/CORS.md) · 🇯🇵 [ja](../../../ja/docs/security/CORS.md) · 🇬🇪 [ka](../../../ka/docs/security/CORS.md) · 🇰🇭 [km](../../../km/docs/security/CORS.md) · 🇮🇳 [kn](../../../kn/docs/security/CORS.md) · 🇰🇷 [ko](../../../ko/docs/security/CORS.md) · 🇱🇹 [lt](../../../lt/docs/security/CORS.md) · 🇱🇻 [lv](../../../lv/docs/security/CORS.md) · 🇮🇳 [ml](../../../ml/docs/security/CORS.md) · 🇮🇳 [mr](../../../mr/docs/security/CORS.md) · 🇲🇾 [ms](../../../ms/docs/security/CORS.md) · 🇲🇹 [mt](../../../mt/docs/security/CORS.md) · 🇲🇲 [my](../../../my/docs/security/CORS.md) · 🇳🇵 [ne](../../../ne/docs/security/CORS.md) · 🇳🇱 [nl](../../../nl/docs/security/CORS.md) · 🇳🇴 [no](../../../no/docs/security/CORS.md) · 🇮🇳 [or](../../../or/docs/security/CORS.md) · 🇮🇳 [pa](../../../pa/docs/security/CORS.md) · 🇵🇭 [phi](../../../phi/docs/security/CORS.md) · 🇵🇱 [pl](../../../pl/docs/security/CORS.md) · 🇵🇹 [pt](../../../pt/docs/security/CORS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/CORS.md) · 🇷🇴 [ro](../../../ro/docs/security/CORS.md) · 🇷🇺 [ru](../../../ru/docs/security/CORS.md) · 🇱🇰 [si](../../../si/docs/security/CORS.md) · 🇸🇰 [sk](../../../sk/docs/security/CORS.md) · 🇸🇮 [sl](../../../sl/docs/security/CORS.md) · 🇷🇸 [sr](../../../sr/docs/security/CORS.md) · 🇸🇪 [sv](../../../sv/docs/security/CORS.md) · 🇰🇪 [sw](../../../sw/docs/security/CORS.md) · 🇮🇳 [ta](../../../ta/docs/security/CORS.md) · 🇮🇳 [te](../../../te/docs/security/CORS.md) · 🇹🇭 [th](../../../th/docs/security/CORS.md) · 🇹🇷 [tr](../../../tr/docs/security/CORS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/CORS.md) · 🇵🇰 [ur](../../../ur/docs/security/CORS.md) · 🇺🇿 [uz](../../../uz/docs/security/CORS.md) · 🇻🇳 [vi](../../../vi/docs/security/CORS.md) · 🇳🇬 [yo](../../../yo/docs/security/CORS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/CORS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/CORS.md)
 
 ---
 
@@ -56,11 +56,11 @@ sest rakendusel on üks konkreetne omadus:
 
 See tähendab iga pinna kohta järgmist, isegi kui `CORS_ALLOW_ALL=true`:
 
-| Pind                                       | Autentimismehhanism        | Metamärgiga CORS-i mõju                                                                                                                                                                                                                        |
-| ------------------------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Juhtpaneel / HALDUS `/api/*`               | Küpsiseseanss              | Päritolu tagastatakse, kuid **ilma päiseta `Allow-Credentials`** brauser **blokeerib** autenditud vastuse lugemise. Pahatahtlik päritoluülene sait **ei saa lugeda** teie autenditud juhtpaneeli vastuseid ning seansiküpsist ei avalikustata. |
-| Kliendi API `/v1/*`, `/v1beta/*`           | Bearer- / `x-api-key` päis | Juba **olemuslikult** lubav (`relaxForTokenAuth`): brauserid ei lisa päiseid `Authorization`/`x-api-key` kunagi automaatselt, seega ei saa ründaja leht teie võtit edastada. `CORS_ALLOW_ALL` ei laienda seda.                                 |
-| Avalik kirjutuskaitstud (`/api/health`, …) | Puudub                     | Pole tundlik; metamärk on kahjutu.                                                                                                                                                                                                             |
+| Pind                                       | Autentimismehhanism        | Metamärgiga CORS-i mõju                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Juhtpaneel / HALDUS `/api/*`               | Küpsiseseanss              | Päritolu tagastatakse, kuid **ilma päiseta `Allow-Credentials`** brauser **blokeerib** autenditud vastuse lugemise. Pahatahtlik päritoluülene sait **ei saa lugeda** teie autenditud juhtpaneeli vastuseid ning seansiküpsist ei avalikustata.                                                                                                              |
+| Kliendi API `/v1/*`, `/v1beta/*`           | Bearer- / `x-api-key` päis | Juba **olemuslikult** lubav (`relaxForTokenAuth`): brauserid ei lisa päiseid `Authorization`/`x-api-key` kunagi automaatselt, seega ei saa ründaja leht teie võtit edastada. Peegeldamine kehtib ainult siis, kui esitatud võti on valideeritud; anonüümsed vastused (`REQUIRE_API_KEY=false`) säilitavad lubatud loendi. `CORS_ALLOW_ALL` ei laienda seda. |
+| Avalik kirjutuskaitstud (`/api/health`, …) | Puudub                     | Pole tundlik; metamärk on kahjutu.                                                                                                                                                                                                                                                                                                                          |
 
 Seega piirdub `CORS_ALLOW_ALL=true` **jääkkokkupuude** järgmisega: (a)
 juba autentimist mittevajavate andmete autentimata päritoluülesed **lugemised** ja (b)
@@ -122,29 +122,74 @@ taaskäivitamiseta.
   neid kunagi automaatselt. CORS ei ole siin sisuline tõke — tõkkeks on API-võti —
   mistõttu on see liides teadlikult liberaalne, et brauseri- ja
   Electroni kliendid saaksid lugeda vastuseid, millele neil on juba õigus.
+  Leevendatud peegeldamine järgib valideeritud võtit, mitte pelgalt päise olemasolu: kui
+  `REQUIRE_API_KEY=false` teenindab päringut anonüümselt, säilitab selle edukas vastus
+  fail-closed lubatud loendi. Autentimise tagasilükkamised (401) jäävad loetavaks, et
+  kliendid saaksid kuvada tühistatud või valesti sisestatud võtme (#5242): konveieri enda
+  401 säilitab peegeldamise ning marsruut, mis lükkab võtme ise tagasi pärast seda, kui
+  konveier teenindas päringut anonüümsena (`/v1/models` ja `/v1beta/models`
+  seadistatud haldusautentimisega, omanikupõhised `/v1/files`, `/v1/batches`,
+  `/v1/media`, `/v1/session-leases` ja auto-combo kandidaatmarsruudid), lisab
+  peegeldamise sellele 401-le funktsiooni `credentialRejectionHeaders()` kaudu.
+  Peegeldamine sõltub sellest, kas päring kannab mandaadipäist (`Authorization`,
+  `x-api-key`, `x-goog-api-key` või küpsis `auth_token`), mitte sellest, millist neist
+  marsruut kontrollis, ning seda ei seota kunagi päisega
+  `Access-Control-Allow-Credentials`; keha on fikseeritud veaümbrik. Haldusmarsruudid
+  `/api/v1/` all, mida kaitseb `requireManagementAuth()` (`/api/v1/management/*`,
+  `/api/v1/registered-keys`), peegeldamist ei lisa: `REQUIRE_API_KEY=false` korral ei
+  ole nende 401/403 päritoluüleselt loetav.
 - **Küpsiseseanss (juhtpaneel):** seda kaitseb vaikimisi ligipääsu keelav seadistus **ja**
   päise `Access-Control-Allow-Credentials` puudumine ühisel teel. Ärge lisage
   haldusliidese ega juhtpaneeli päritoluallikaid ühelegi liberaalsele seadistusele; nende puhul peab
   vaikimisi ligipääs olema alati rangelt keelatud.
 
+## WebSocketi kätlused (`/v1/responses`, `/v1/ws`)
+
+Brauserid ei rakenda WebSocketile CORS-i, seega kontrollivad järeldusväljundit
+tagastavad WebSocketi transpordid kätluse `Origin` väärtust ise
+(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) ja, kui
+OmniRoute töötab käsuga `npm start` / `npm run dev`, sild `/v1/ws` ja
+`/api/v1/ws`, mis voogedastab `/v1/chat/completions`, `/v1/messages` ja
+`/v1/responses` kaadritena. Sild küsib otsust aadressilt `/api/v1/ws?handshake=1` ja
+keeldub ühendust uuendamast, kui see marsruut kontrolli ei teinud. Kätlus võetakse
+vastu, kui:
+
+- sellel puudub `Origin` päis (Codex CLI, SDK-d ja muud mitte-brauseri kliendid);
+- `Origin` on lubatud ülaltoodud lubatud loendiga (`CORS_ALLOWED_ORIGINS`, seadistus
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` on üks OmniRoute'i enda avalikest päritoludest (seadistatud avalik baas-URL,
+  usaldusväärse puhverserveri edastatud päritolu või otsene loopback-/LAN-host, mis on
+  antud IP-literaalina või kujul `localhost` — samad kandidaadid, mida kasutab
+  juhtpaneeli muudatuste kontroll); või
+- see kannab kehtivat API-võtit, nagu HTTP `/v1/*` liideses.
+
+Kõik muu saab vastuseks `403 ws_origin_forbidden`. Juhtpaneeli seansiküpsis ei vabasta
+võõrast `Origin` väärtust, sest brauser lisab selle iga lehe soklile. `localhost`
+teisel pordil ei loeta samaks päritoluks; lisage sellised arenduspäritolud loendisse
+`CORS_ALLOWED_ORIGINS`.
+
 ## Näide: pöördproksi OmniRoute'i ees
 
-CORS-i jõustab OmniRoute ise, seega ei tohiks proksi üldjuhul päiseid
-`Access-Control-*` lisada ega ümber kirjutada (topeltpäised põhjustavad brauserites tõrkeid). Lõpetage TLS
-ja edastage päring — laske OmniRoute'il eelpäringule vastata:
+CORS-i jõustab OmniRoute ise, seega ei tohiks proksi üldjuhul `Access-Control-*`
+päiseid lisada ega ümber kirjutada (topeltpäised põhjustavad brauserites tõrkeid). Lõpeta TLS
+ja edasta päring edasi — lase OmniRoute'il eelpäringule vastata:
 
 ```nginx
-# nginx — edasta OmniRoute'i; ÄRA sisesta siin päiseid Access-Control-*
+# nginx — edasta OmniRoute'ile; ÄRA sisesta siia Access-Control-* päiseid
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # ÄRA määra X-Forwarded-For väärtuseks 127.0.0.1 — see nurjab loopback-marsruudi kaitse.
+    # Säilita edastuspäised: samas hostis asuv proksi loob ühenduse tagasisideaadressilt ja just
+    # need annavad OmniRoute'ile teada, et helistaja ei ole kohalik operaator. Proksi, mis ei lisa neist ühtegi,
+    # jätab mulje, et iga kaughelistaja on kohalik. Ära määra ka X-Forwarded-For väärtuseks 127.0.0.1.
 }
 ```
 
-Määrake brauseri lubatud päritoluallikad OmniRoute'is (`CORS_ALLOWED_ORIGINS` või
-vahekaardil Turvalisus), mitte proksis.
+Määra brauseri lubatud päritolud OmniRoute'is (`CORS_ALLOWED_ORIGINS` või
+vahekaardil Security), mitte proksis.
 
 ## Lähtefailid
 
@@ -157,6 +202,7 @@ vahekaardil Turvalisus), mitte proksis.
 | Juhtpaneeli hoiatusriba                           | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS-i lubatud päritoluallikate väli              | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agenti marsruudipõhine CORS (erand)         | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocketi kätluse `Origin` kontroll              | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Vaata ka
 

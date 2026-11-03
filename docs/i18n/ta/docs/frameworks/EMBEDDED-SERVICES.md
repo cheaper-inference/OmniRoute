@@ -1,16 +1,12 @@
 # Embedded Services (தமிழ்)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
-> **பதிப்பு:** v3.8.44
-> **கடைசியாகப் புதுப்பிக்கப்பட்டது:** 2026-07-03
-> **இலக்கு வாசகர்கள்:** உட்பொதிக்கப்பட்ட சேவைகளை (9Router, CLIProxyAPI, Mux, Bifrost) சேர்க்கும், பராமரிக்கும் அல்லது பிழைத்திருத்தும் பொறியாளர்கள்.
+> **பதிப்பு:** v3.8.44** கடைசியாக புதுப்பிக்கப்பட்டது:** 2026-10-28** பார்வையாளர்கள்:** உட்பொதிக்கப்பட்ட சேவைகளைச் சேர்ப்பது, பராமரித்தல் அல்லது பிழைத்திருத்தம் செய்யும் பொறியாளர்கள் (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-உட்பொதிக்கப்பட்ட சேவைகள் என்பவை, OmniRoute நிறுவி, மேற்பார்வையிட்டு,
-முதன்மைத் தர ரூட்டிங் இலக்குகளாக வெளிப்படுத்தும், உள்ளூரில் நிறுவப்பட்ட செயல்முறை சைட்கார் கருவிகள் ஆகும். வெளிப்புற வழங்குநர்களைப் போலல்லாமல் (அவை API விசைகள் வழியாக இணையத்தின் மூலம் அணுகப்படுகின்றன),
-உட்பொதிக்கப்பட்ட சேவைகள் OmniRoute உள்ள அதே கணினியில் இயங்கி, லூப்பேக் வழியாகத் தொடர்புகொள்கின்றன.
+உட்பொதிக்கப்பட்ட சேவைகள் உள்நாட்டில் நிறுவப்பட்ட செயல்முறை பக்கவாட்டு கருவிகள் ஆகும், அவை OmniRoute நிறுவுகிறது, மேற்பார்வை செய்கிறது மற்றும் முதல்-வகுப்பு ரூட்டிங் இலக்குகளாக வெளிப்படுத்துகிறது. வெளிப்புற வழங்குநர்களைப் போலல்லாமல் (அவை இணையத்தில் API விசைகள் மூலம் அடையப்படுகின்றன), உட்பொதிக்கப்பட்ட சேவைகள் OmniRoute போன்ற அதே கணினியில் இயங்குகின்றன மற்றும் லூப்பேக் மூலம் தொடர்பு கொள்கின்றன.
 
 ---
 
@@ -27,50 +23,53 @@
 
 ---
 
-## 1. மேலோட்டம்
+## 1. கண்ணோட்டம்
 
-### உட்பொதிக்கப்பட்ட சேவைகள் ஏன்?
+### ஏன் உட்பொதிக்கப்பட்ட சேவைகள்?
 
-ஐந்து சேவைகள் உட்பொதிக்கப்பட்டுள்ளன:
+எட்டு சேவைகள் உட்பொதிக்கப்பட்டுள்ளன:
 
-| சேவை            | npm தொகுப்பு                         | இயல்புநிலை போர்ட் | நோக்கம்                                                                                                                                                                                                                     |
-| --------------- | ------------------------------------ | :---------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                            |       20130       | OmniRoute துணை வழங்குநராகப் பயன்படுத்தக்கூடிய AI ரூட்டர். மாதிரிகள் `9router/{sub}/{model}` என வெளிப்படுத்தப்படுகின்றன                                                                                                      |
-| **CLIProxyAPI** | GitHub வெளியீட்டு பைனரி (`cliproxy`) |       8317        | Anthropic CLI அங்கீகாரச் செயலோட்டங்களுக்கான உள்ளூர் ப்ராக்ஸி அடாப்டர். OAuth டோக்கன்கள் காலாவதியாகும்போது மாற்று ரூட்டிங்கை வழங்குகிறது                                                                                     |
-| **Mux**         | `mux` (தலையில்லா `mux server`)       |       8322        | உள்ளூர் முகவர்-ஒருங்கிணைப்பு டீமன் (coder/mux). வாழ்க்கைச்சுழற்சி மட்டும் நிர்வகிக்கப்படுகிறது — ரூட்டிங் இலக்கு அல்ல (LLM ப்ராக்ஸியிங் இல்லை).                                                                             |
-| **Bifrost**     | `@maximhq/bifrost`                   |       8080        | Go AI-நுழைவாயில் ரிலே பின்தளம். இயங்கும்போது, ரிலே வழித்தடத்தால் (`/v1/relay/`) தானாகத் தேர்ந்தெடுக்கப்படுகிறது                                                                                                             |
-| **Dario**       | `@askalf/dario`                      |       3456        | Claude-சந்தா ப்ராக்ஸி — Claude-Code வடிவிலான போக்குவரத்துக்கு CLIProxyAPI-க்கான மாற்று/செயலிழப்பு மாற்று; உட்செலுத்தப்பட்ட விசை, அதன் `/admin/*` OAuth கட்டுப்பாட்டுத் தளத்தைக் கட்டுப்படுத்தும் `DARIO_ADMIN_TOKEN` ஆகிறது |
+| சேவை            | npm தொகுப்பு                       | இயல்புநிலை போர்ட் | நோக்கம்                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------- | ---------------------------------- | :---------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 திசைவி**    | `9router`                          |       20130       | AI ரூட்டரை OmniRoute துணை வழங்குநராகப் பயன்படுத்தலாம். `9router/{sub}/{model}` ஆக வெளிப்படும் மாதிரிகள்                                                                                                                                                                                                                                                                            |
+| **CLIProxyAPI** | GitHub வெளியீடு பைனரி (`cliproxy`) |       8317        | Anthropic CLI அங்கீகாரத்திற்கான உள்ளூர் ப்ராக்ஸி அடாப்டர். OAuth டோக்கன்கள் காலாவதியாகும் போது ஃபால்பேக் ரூட்டிங் வழங்குகிறது                                                                                                                                                                                                                                                      |
+| **மக்ஸ்**       | `mux` (தலை இல்லாத `mux server`)    |       8322        | உள்ளூர் முகவர்-ஆர்கெஸ்ட்ரேஷன் டெமான் (coder/mux). வாழ்க்கைச் சுழற்சி-நிர்வகிப்பது — மட்டுமே ரூட்டிங் இலக்கு அல்ல ( LLM ப்ராக்ஸிங் இல்லை).                                                                                                                                                                                                                                          |
+| **பிஃப்ரோஸ்ட்** | `@maximhq/bifrost`                 |       8080        | AI-கேட்வே ரிலே பின்தளத்தில் செல்க. இயங்கும் போது, ரிலே வழி (`/v1/relay/`) மூலம் தானாக தேர்ந்தெடுக்கப்பட்டது                                                                                                                                                                                                                                                                        |
+| **டாரியோ**      | `@askalf/dario`                    |       3456        | கிளாட்-சந்தா ப்ராக்ஸி — alternative/failover முதல் CLIProxyAPI வரை க்ளாட்-கோட் வடிவ போக்குவரத்திற்கு; உட்செலுத்தப்பட்ட விசை `DARIO_ADMIN_TOKEN` ஆனது அதன் `/admin/*` OAuth கட்டுப்பாட்டு விமானத்தை இணைக்கிறது                                                                                                                                                                      |
+| **திறந்த-வா**   | `@open-wa/wa-automate`             |       8323        | WhatsApp வெப் ஆட்டோமேஷன் (தலை இல்லாத குரோமியம் பப்பீட்டீர் வழியாக). வாழ்க்கைச் சுழற்சியால் நிர்வகிக்கப்படும் — மட்டுமே ரூட்டிங் இலக்கு அல்ல.                                                                                                                                                                                                                                       |
+| **LLMLingua**   | `@atjsh/llmlingua-2`               |       20135       | ப்ராம்ட்-கம்ப்ரஷன் சைட்கார் — உண்மையான LLMLingua-2 ONNX மாதிரி ( Microsoft இன் அல்காரிதத்தின்JS/TS போர்ட்). `open-sse/services/compression/engines/llmlingua/index.ts` HTTP க்கு மேல் `/compress` அனுப்புகிறது, சைட்கார் கீழே இருக்கும் போது, செயல்பாட்டில் உள்ள வேலைக்காரன்-த்ரெட் பின்தளத்திற்கு திரும்பும். வாழ்க்கைச் சுழற்சி-நிர்வகிக்கப்பட்ட — மட்டுமே ரூட்டிங் இலக்கு அல்ல. |
+| **பாட பெட்டி**  | GitHub வெளியீடு பைனரி (`singbox`)  |       20140       | TPROXY சைட்கார் பேக்கிங் `applyTproxy()` இன் வெளிப்படையான-ப்ராக்ஸி இடைமறிப்பு (`src/mitm/tproxy/setup.ts`). பின் செய்யப்பட்ட, செக்சம் சரிபார்க்கப்பட்ட வெளியீட்டை நிறுவி பதிவிறக்குகிறது. வாழ்க்கைச் சுழற்சி-நிர்வகித்தல் மட்டுமே — ஒரு ரூட்டிங் இலக்கு அல்ல ( LLM ப்ராக்ஸிங் இல்லை)                                                                                               |
 
-இந்த ஐந்தும் ஒரே மேற்பார்வை மாதிரியைப் பின்பற்றுகின்றன:
+எட்டும் ஒரே மேற்பார்வை மாதிரியைப் பின்பற்றுகின்றன:
 
-- OmniRoute அவற்றை `DATA_DIR/services/{name}/`-இன் கீழ் நிறுவுகிறது (OmniRoute-இன் சொந்த `package.json`-இலிருந்து தனிமைப்படுத்தப்பட்டு)
-- OmniRoute அவற்றைச் சேய் செயல்முறைகளாகத் தொடங்கி கண்காணிக்கிறது
-- OmniRoute சேய் செயல்முறையின் சூழலில் தற்காலிக API விசையை உட்செலுத்தி, செயல்நிறுத்தம் இல்லாமல் அதைச் சுழற்சி முறையில் மாற்றுகிறது (பொருந்தும் இடங்களில்)
-- அனைத்து மேலாண்மை வழித்தடங்களும் (`/api/services/*`) **LOCAL_ONLY** — லூப்பேக்கிலிருந்து மட்டுமே அணுகக்கூடியவை (கடுமையான விதி #17)
+- OmniRoute அவற்றை `DATA_DIR/services/{name}/` இன் கீழ் நிறுவுகிறது ( OmniRoute இன் சொந்த `package.json` இலிருந்து தனிமைப்படுத்தப்பட்டது)
+- OmniRoute குழந்தை செயல்முறைகளாக அவற்றை உருவாக்கி கண்காணிக்கிறது
+- OmniRoute ஒரு எபிமரல் API விசையை குழந்தையின் சுற்றுச்சூழலில் செலுத்துகிறது மற்றும் அதை வேலையில்லா நேரம் இல்லாமல் சுழற்றுகிறது (பொருந்தக்கூடிய இடத்தில்)
+- அனைத்து மேலாண்மை வழிகளும் (`/api/services/*`)**LOCAL_ONLY** — லூப்பேக்கிலிருந்து மட்டுமே அணுக முடியும் (கடின விதி #17)
 
-### முக்கிய முடிவுகள் (வடிவமைப்புத் திட்டத்திலிருந்து)
+### முக்கிய முடிவுகள் (வடிவமைப்பு திட்டத்திலிருந்து)
 
-| முடிவு                                      | மதிப்பு                                                                                         |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| 9Router சொந்த UI-க்கான முகப்புப்பலகை அணுகல் | `/dashboard/providers/services/9router/embed/*`-இல் ரிவர்ஸ் ப்ராக்ஸி                            |
-| நிறுவல் முறை                                | `execFile` வழியாக `npm install {package}` (ஷெல் இடைச்செருகல் இல்லை)                             |
-| பயன்பாட்டு முறை                             | ரூட்டிங் இயந்திரத்தில் `9router/{sub}/{model}` எனப் பதிவுசெய்யப்பட்ட வழங்குநர்                  |
-| API விசை மேலாண்மை                           | OmniRoute உருவாக்கி, நிலைத்த சேமிப்பில் குறியாக்கி (AES-256-GCM), சூழல் வழியாக உட்செலுத்துகிறது |
-| முகப்புப்பலகை இருப்பிடம்                    | `/dashboard/providers/services` (மூன்று தாவல்கள்)                                               |
-| தானியக்கத் தொடக்கம்                         | ஒவ்வொரு சேவைக்கும் தனியான மாற்றி, இயல்பாக OFF                                                   |
+| முடிவு                                      | மதிப்பு                                                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 9Router நேட்டிவ் UI க்கான டாஷ்போர்டு அணுகல் | `/dashboard/providers/services/9router/embed/*` இல் ரிவர்ஸ் ப்ராக்ஸி                                               |
+| நிறுவல் பொறிமுறை                            | `execFile` வழியாக `npm install {package}` (ஷெல் இடைச்செருகல் இல்லை)                                                |
+| நுகர்வு முறை                                | வழங்குநர் ரூட்டிங் இன்ஜினில் `9router/{sub}/{model}` என பதிவு செய்துள்ளார்                                         |
+| API முக்கிய மேலாண்மை                        | OmniRoute உருவாக்குகிறது, ஓய்வு நேரத்தில் குறியாக்கம் செய்கிறது (AES-256-GCM), மற்றும் env வழியாக உட்செலுத்துகிறது |
+| டாஷ்போர்டு இடம்                             | `/dashboard/providers/services` (மூன்று தாவல்கள்)                                                                  |
+| தானாக தொடங்குதல்                            | ஒரு சேவைக்கு மாற்று, இயல்புநிலை OFF                                                                                |
 
 ---
 
-## 2. கட்டமைப்பு — 4 அடுக்குகள்
+## 2. கட்டிடக்கலை — 4 அடுக்குகள்
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  அடுக்கு 1 — பயனர் இடைமுகம்                                       │
-│  /dashboard/providers/services  (தாவல்கள்: CLIProxyAPI | 9Router | Mux)│
-│  நேரடி பதிவுகள் (SSE), தொடங்கு/நிறுத்து/மறுதொடக்கம்/புதுப்பி, அமைப்புகள், நிறுவல்│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Shell + ?tab= அடிப்படையிலான தாவல் வழிச்செலுத்தல்│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -78,7 +77,7 @@
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  அடுக்கு 2 — API (LOCAL_ONLY — loopback மட்டும்)                   │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -87,72 +86,74 @@
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (தலைகீழ் HTTP + WebSocket பதிலி → 9Router upstream)            │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  நுழைவாயில்: LOCAL_ONLY_API_PREFIXES இல் "/api/services/" மற்றும்│
-│        "/dashboard/providers/services/*/embed/" உள்ளடங்கும்        │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ செயல்முறைக்குள் அழைப்புகள்
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  அடுக்கு 3 — ServiceSupervisor (src/lib/services/)                 │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   பொதுவான மேற்பார்வையாளர் (child_process.spawn)│
-│    ├── நிறுவல்:    execFile('npm', ['install', pkg, '--prefix'])   │
-│    ├── தொடக்கம்:   spawn(node, [entrypoint], {env, cwd})           │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
 │    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       9Router-க்கு 20130 (உள்ளமைக்கக்கூடியது)        │
-│    ├── பதிவுகள்:   stdio வளைய இடையகம் 5 MB → SSE நிகழ்வுகள்       │
-│    ├── ஆரோக்கியம்: HTTP GET /health ஒவ்வொரு 2–5 s-க்கும், சோம்பல் மீட்பு│
-│    └── வாழ்நிலைச் சுழற்சி: SIGTERM 15 s → SIGKILL                 │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       செயல்முறை தொடக்கத்தில் அனைத்து SERVICES[]-ஐயும் தொடக்குகிறது│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       காலமுறை GET /v1/models → service_models அட்டவணை│
-│  ringBuffer.ts      சுழல் பதிவு இடையகம் (ஒவ்வொரு சேவைக்கும் 5 MB) │
-│  healthCheck.ts     வாக்கெடுப்பு HTTP ஆரோக்கிய ஆய்வு               │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
-│                      (நிறுவி ஏற்பிகள்)                              │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI-இணக்கமான HTTP (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  அடுக்கு 4 — வழங்குநர் / வழிப்படுத்தல்                             │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    ஒவ்வொரு கோரிக்கைக்கும் port மற்றும் API key-ஐ மீண்டும் தேடுகிறது (தேக்கமில்லை).│
-│    பதிலி அனுப்பும் முன் model id-இலிருந்து "9router/" முன்னொட்டை நீக்குகிறது.│
-│    மேற்பார்வையாளர் "running" நிலையில் இல்லாவிட்டால் 503 service_not_running-ஐ வழங்குகிறது.│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    "9router"-க்கான பதிவு: isEmbeddedService: true                  │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    மாதிரிகள் "9router/{sub}/{model}" எனச் சேமிக்கப்படுகின்றன (முன்னொட்டுடன்).│
-│    modelSync.ts மூலம் ஒவ்வொரு 5 நிமிடங்களுக்கும் ஒத்திசைக்கப்படுகிறது.│
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux-க்கு வாழ்நிலைச் சுழற்சி மட்டும் நிர்வகிக்கப்படுகிறது (அடுக்குகள் 1-3) — அது ஒரு முகவர்-│
-│  ஒருங்கிணைப்பு daemon; LLM பதிலி அல்ல, எனவே அதற்கு அடுக்கு 4       │
-│  executor/provider பதிவு இல்லை, மேலும் அது ஒருபோதும் வழிப்படுத்தல் இலக்காகாது.│
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### முக்கிய மூலக் கோப்புகள்
+### முக்கிய மூல கோப்புகள்
 
-| கோப்பு                                      | பங்கு                                                             |
-| ------------------------------------------- | ----------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | மைய வகுப்பு: வாழ்நிலைச் சுழற்சி, பூட்டு, ஆரோக்கியம், வளைய இடையகம் |
-| `src/lib/services/bootstrap.ts`             | செயல்முறை-நிலைப் பதிவும் தானியக்கத் தொடக்கமும்                    |
-| `src/lib/services/registry.ts`              | சிங்கிள்டன் வரைபடம் `tool → supervisor`                           |
-| `src/lib/services/apiKey.ts`                | விசை உருவாக்கம், சேமிப்பில் AES-256-GCM குறியாக்கம்               |
-| `src/lib/services/modelSync.ts`             | காலமுறை மாதிரி ஒத்திசைவு (5 நிமி) + தேவைக்கேற்ப                   |
-| `src/lib/services/ringBuffer.ts`            | SSE சந்தாவுடன் கூடிய 5 MB வட்டப் பதிவேட்டு இடையகம்                |
-| `src/lib/services/healthCheck.ts`           | HTTP ஆரோக்கிய ஆய்வு (அமைவாக்கக்கூடிய இடைவெளி)                     |
-| `src/lib/services/installers/ninerouter.ts` | 9Router-க்கான npm நிறுவல்/புதுப்பித்தல்/நிறுவல் நீக்கம்           |
-| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI-க்கான npm நிறுவல்/புதுப்பித்தல்/நிறுவல் நீக்கம்       |
-| `src/lib/services/installers/mux.ts`        | Mux-க்கான npm நிறுவல்/புதுப்பித்தல்/நிறுவல் நீக்கம்               |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` உதவிச் செயல்பாடு                          |
-| `src/app/api/services/[name]/logs/route.ts` | பகிரப்பட்ட SSE பதிவுகள் முனைப்புள்ளி                              |
-| `open-sse/executors/ninerouter.ts`          | வழங்குநர் இயக்கி (அடுக்கு 4)                                      |
+| கோப்பு                                      | பங்கு                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | முக்கிய வகுப்பு: வாழ்க்கைச் சுழற்சி, பூட்டு, ஆரோக்கியம், மோதிர இடையகம் |
+| `src/lib/services/bootstrap.ts`             | செயல்முறை நிலை பதிவு மற்றும் தானாக தொடங்குதல்                          |
+| `src/lib/services/registry.ts`              | சிங்கிள்டன் வரைபடம் `tool → supervisor`                                |
+| `src/lib/services/apiKey.ts`                | முக்கிய உருவாக்கம், ஓய்வு நேரத்தில் AES-256-GCM குறியாக்கம்            |
+| `src/lib/services/modelSync.ts`             | குறிப்பிட்ட கால மாதிரி ஒத்திசைவு (5 நிமிடம்) தேவைக்கேற்ப +             |
+| `src/lib/services/ringBuffer.ts`            | SSE சந்தாவுடன் 5 MB வட்ட பதிவு இடையகம்                                 |
+| `src/lib/services/healthCheck.ts`           | HTTP சுகாதார ஆய்வு (கட்டமைக்கக்கூடிய இடைவெளி)                          |
+| `src/lib/services/installers/ninerouter.ts` | 9Router க்கான npm install/update/uninstall                             |
+| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI க்கு npm install/update/uninstall                          |
+| `src/lib/services/installers/mux.ts`        | Mux க்கான npm install/update/uninstall                                 |
+| `src/lib/services/installers/openwa.ts`     | open-wa க்கு npm install/update/uninstall                              |
+| `src/lib/services/installers/llmlingua.ts`  | LLMLingua க்கு npm install/update/uninstall                            |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` உதவியாளர்                                      |
+| `src/app/api/services/[name]/logs/route.ts` | பகிரப்பட்ட SSE பதிவுகளின் இறுதிப்புள்ளி                                |
+| `open-sse/executors/ninerouter.ts`          | வழங்குநர் செயல்படுத்துபவர் (அடுக்கு 4)                                 |
 
 ---
 
@@ -207,59 +208,54 @@
 
 ---
 
-## 4. API மேற்கோள்
+## 4. API குறிப்பு
 
-`/api/services/`-இன் கீழுள்ள அனைத்து வழிகளும் **LOCAL_ONLY** (loopback மட்டும், கடுமையான விதி #17).
-auth token இருந்தாலும் loopback அல்லாத கோரிக்கைகள் `403 LOCAL_ONLY` பதிலைப் பெறும்.
+`/api/services/` கீழ் அனைத்து வழிகளும் உள்ளன**LOCAL_ONLY** (லூப்பேக் மட்டும், கடினமான விதி #17). லூப்பேக் அல்லாத கோரிக்கைகள் அங்கீகார டோக்கனைப் பொருட்படுத்தாமல் `403 LOCAL_ONLY` பெறும்.
 
-### 4.1 9Router முடிவுப் புள்ளிகள் (11 வழிகள்)
+### 4.1 9திசை முனைப்புள்ளிகள் (11 வழிகள்)
 
 #### `POST /api/services/9router/install`
 
-npm-இலிருந்து 9Router-ஐ நிறுவுகிறது. அதற்கே உரிய `package.json` மற்றும் `node_modules/`
-ஆகியவற்றுடன் `DATA_DIR/services/9router/`-ஐ உருவாக்குகிறது. OmniRoute-இன் சொந்த சார்புகளுடன்
-முரண்படாது.
+npm இலிருந்து 9Router ஐ நிறுவவும். `DATA_DIR/services/9router/` அதன் சொந்த `package.json` மற்றும் `node_modules/` உடன் உருவாக்குகிறது. OmniRoute இன் சொந்த டெப்ஸுடன் முரண்படாது.
 
-**கோரிக்கை உடல்** (அனைத்தும் விருப்பத்திற்குரியவை):
+**கோரிக்கை உடல்** (அனைத்தும் விருப்பமானது):
 
 ```json
 { "version": "latest" }
 ```
 
-| புலம்     | வகை      | இயல்புநிலை | விளக்கம்                                             |
-| --------- | -------- | ---------- | ---------------------------------------------------- |
-| `version` | `string` | `"latest"` | நிறுவ வேண்டிய npm பதிப்புக் குறிச்சொல் அல்லது semver |
+| களம்      | வகை      | இயல்புநிலை | விளக்கம்                                   |
+| --------- | -------- | ---------- | ------------------------------------------ |
+| `version` | `string` | `"latest"` | npm பதிப்பு குறிச்சொல் அல்லது semver நிறுவ |
 
 **பதில்கள்:**
 
-| நிலை  | விளக்கம்                                                                             |
-| ----- | ------------------------------------------------------------------------------------ |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                               |
-| `400` | தவறான கோரிக்கை உடல் (Zod சரிபார்ப்புத் தோல்வி)                                       |
-| `409` | ஏற்கனவே நிறுவப்படுகிறது (பூட்டு பிடிக்கப்பட்டுள்ளது)                                 |
-| `500` | npm நிறுவல் தோல்வியடைந்தது — புரிந்துகொள்ளக்கூடிய பிழைக்கு `message`-ஐப் பார்க்கவும் |
+| நிலை  | விளக்கம்                                                  |
+| ----- | --------------------------------------------------------- |
+| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`    |
+| `400` | தவறான கோரிக்கை அமைப்பு (Zod சரிபார்ப்பு தோல்வி)           |
+| `409` | ஏற்கனவே நிறுவுகிறது (பூட்டு வைக்கப்பட்டுள்ளது)            |
+| `500` | npm நிறுவல் தோல்வி — நட்பு பிழைக்கு `message` பார்க்கவும் |
 
-**குறிப்புகள்:** `execFile('npm', [...])`-ஐப் பயன்படுத்துகிறது — shell இல்லை, interpolation இல்லை (கடுமையான விதி #13).
-EACCES பிழைகள் புரிந்துகொள்ளக்கூடிய செய்திகளாகக் காட்டப்படுகின்றன.
+**குறிப்புகள்:** `execFile('npm', [...])` — இல்லை ஷெல், இடைக்கணிப்பு இல்லை (வன் விதி #13). EACCES பிழைகள் நட்பு செய்திகளாக வெளிப்படுகின்றன.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-9Router-ஐத் தொடங்குகிறது. ஏற்கனவே பதிவுசெய்யப்படவில்லை எனில் supervisor ஒன்றைப் பதிவுசெய்து,
-பின்னர் `supervisor.start()`-ஐ அழைக்கிறது. ஏற்கனவே இயங்கிக்கொண்டிருந்தால் இது idempotent ஆகும்.
+9 ரூட்டரைத் தொடங்கவும். ஏற்கனவே பதிவு செய்யவில்லை என்றால் ஒரு மேற்பார்வையாளரைப் பதிவுசெய்து, பின்னர் `supervisor.start()` அழைக்கிறது. ஏற்கனவே இயங்கும் போது Ideempotent.
 
-**கோரிக்கை உடல்:** எதுவுமில்லை
+**கோரிக்கை உடல்:** எதுவும் இல்லை
 
 **பதில்கள்:**
 
-| நிலை  | விளக்கம்                                                                   |
-| ----- | -------------------------------------------------------------------------- |
-| `200` | `ServiceStatus` பொருள் (கீழேயுள்ள schema-ஐப் பார்க்கவும்)                  |
-| `409` | 9Router நிறுவப்படவில்லை (`status: "not_installed"`)                        |
-| `503` | தொடங்குவது தோல்வியடைந்தது (செயல்முறைப் பிழை — `lastError`-ஐப் பார்க்கவும்) |
+| நிலை  | விளக்கம்                                                   |
+| ----- | ---------------------------------------------------------- |
+| `200` | `ServiceStatus` பொருள் (கீழே உள்ள திட்டத்தைப் பார்க்கவும்) |
+| `409` | 9Router நிறுவப்படவில்லை (`status: "not_installed"`)        |
+| `503` | தொடங்குவதில் தோல்வி (செயல்முறை பிழை — பார்க்க `lastError`) |
 
-**ServiceStatus schema:**
+**ServiceStatus திட்டம்:**
 
 ```json
 {
@@ -277,37 +273,34 @@ EACCES பிழைகள் புரிந்துகொள்ளக்கூ
 
 #### `POST /api/services/9router/stop`
 
-9Router-ஐ முறையாக நிறுத்துகிறது. SIGTERM-ஐ அனுப்பி, 15 s காத்திருந்து, இன்னும் இயங்கினால்
-SIGKILL-ஐ அனுப்புகிறது. ஏற்கனவே நிறுத்தப்பட்டிருந்தால் இது idempotent ஆகும்.
+9 ரூட்டரை அழகாக நிறுத்துங்கள். SIGTERM அனுப்புகிறது, 15 வினாடிகள் காத்திருக்கிறது, பிறகு உயிருடன் இருந்தால் SIGKILL. ஏற்கனவே நிறுத்தப்பட்ட போது Ideempotent.
 
-**கோரிக்கை உடல்:** எதுவுமில்லை
+**கோரிக்கை உடல்:** எதுவும் இல்லை
 
 **பதில்கள்:**
 
-| நிலை  | விளக்கம்                                      |
-| ----- | --------------------------------------------- |
-| `200` | `ServiceStatus` (நிலை: "stopped")             |
-| `503` | நிறுத்துவது எதிர்பாராதவிதமாகத் தோல்வியடைந்தது |
+| நிலை  | விளக்கம்                                     |
+| ----- | -------------------------------------------- |
+| `200` | `ServiceStatus` (மாநிலம்: "நிறுத்தப்பட்டது") |
+| `503` | எதிர்பாராத விதமாக நிறுத்தம் தோல்வியடைந்தது   |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-செயல்பாட்டுப் பூட்டின் கீழ் `stop()`-ஐத் தொடர்ந்து `start()`-ஐச் செய்வதற்கு இணையானது.
+செயல்பாட்டு பூட்டின் கீழ் `stop()` க்கு சமமான பின்னர் `start()`.
 
-**கோரிக்கை உடல்:** எதுவுமில்லை
+**கோரிக்கை உடல்:** எதுவும் இல்லை
 
-**பதில்கள்:** `start`-ஐப் போன்றதே (இறுதி `ServiceStatus`-ஐத் திருப்பித் தரும்).
+**பதில்கள்:** `start` போலவே (இறுதி `ServiceStatus` ஐத் தருகிறது).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-9Router-ஐப் புதிய npm பதிப்புக்குப் புதுப்பிக்கிறது. சேவை இயங்கிக்கொண்டிருந்தால், முதலில் அது
-நிறுத்தப்பட்டு, npm install இயக்கப்பட்டு (புதிய பதிப்பை அதே இடத்தில் நிறுவி), பின்னர் சேவை
-மீண்டும் தொடங்கப்படும்.
+9Routerஐ புதிய npm பதிப்பிற்கு மேம்படுத்துகிறது. சேவை இயங்கினால், அது முதலில் நிறுத்தப்படும், npm நிறுவல் இயக்கப்படும் (புதிய பதிப்பை இடத்தில் நிறுவுதல்), பின்னர் சேவை மறுதொடக்கம் செய்யப்படும்.
 
-**கோரிக்கை உடல்** (அனைத்தும் விருப்பத்திற்குரியவை):
+**கோரிக்கை உடல்** (அனைத்தும் விருப்பமானது):
 
 ```json
 { "version": "latest" }
@@ -319,39 +312,39 @@ SIGKILL-ஐ அனுப்புகிறது. ஏற்கனவே நி�
 | ----- | --------------------------------------------------------------- |
 | `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
 | `400` | தவறான உடல்                                                      |
-| `500` | npm புதுப்பிப்பு தோல்வியடைந்தது                                 |
+| `500` | npm மேம்படுத்தல் தோல்வியடைந்தது                                 |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-9Router-க்காக ஒரு புதிய API விசையை உருவாக்கி, சேமிப்பகத்தில் இருக்கும்போது அதை மறையாக்கம் செய்து, சேவை இயங்கிக் கொண்டிருந்தால் அதன் சூழலிலிருந்து புதிய விசையைப் பெறும் வகையில் சேவையை மறுதொடக்கம் செய்கிறது. பழைய விசை உடனடியாகச் செல்லாததாக்கப்படுகிறது.
+9Router க்கு ஒரு புதிய API விசையை உருவாக்குகிறது, அதை ஓய்வில் குறியாக்குகிறது மற்றும் சேவையை (இயங்கினால்) மறுதொடக்கம் செய்கிறது, எனவே அது அதன் சூழலில் இருந்து புதிய விசையை எடுக்கும். பழைய விசை உடனடியாக செல்லாது.
 
-**கோரிக்கை உள்ளடக்கம்:** ஏதுமில்லை
+**கோரிக்கை உடல்:** எதுவும் இல்லை
 
 **பதில்கள்:**
 
 | நிலை  | விளக்கம்                                   |
 | ----- | ------------------------------------------ |
 | `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | விசைச் சுழற்சி தோல்வியடைந்தது              |
+| `500` | சுழற்சி தோல்வியடைந்தது                     |
 
-**பாதுகாப்பு:** புதிய விசை ஒருபோதும் பதிலில் திருப்பி அனுப்பப்படாது (நற்சான்றுத் தகவல் கசிவு இல்லை). அது `version_manager` அட்டவணையில் மறையாக்கப்பட்டு (AES-256-GCM) சேமிக்கப்படுகிறது.
+**பாதுகாப்பு:** புதிய விசை பதிலில் திரும்பப் பெறப்படவில்லை (நற்சான்றிதழ் கசிவு இல்லை). இது `version_manager` அட்டவணையில் மறைகுறியாக்கப்பட்ட (AES-256-GCM) சேமிக்கப்படுகிறது.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-பதிப்பின் மெட்டாடேட்டா மற்றும் API விசையின் முன்னோட்டம் உட்பட, நேரடி + DB நிலையை ஒருங்கிணைத்து வழங்குகிறது.
+பதிப்பு மெட்டாடேட்டா மற்றும் API விசை மாதிரிக்காட்சி உட்பட ஒருங்கிணைந்த நேரடி + DB நிலையை வழங்குகிறது.
 
 **பதில்கள்:**
 
-| நிலை  | விளக்கம்                     |
-| ----- | ---------------------------- |
-| `200` | கீழேயுள்ள திட்டவடிவைக் காண்க |
-| `500` | நிலையைப் படிக்க முடியவில்லை  |
+| நிலை  | விளக்கம்                          |
+| ----- | --------------------------------- |
+| `200` | கீழே உள்ள திட்டத்தைப் பார்க்கவும் |
+| `500` | நிலையைப் படிக்க முடியவில்லை       |
 
-**பதில் திட்டவடிவம்:**
+**பதில் திட்டம்:**
 
 ```json
 {
@@ -375,9 +368,9 @@ SIGKILL-ஐ அனுப்புகிறது. ஏற்கனவே நி�
 
 #### `POST /api/services/9router/auto-start`
 
-தானியங்குத் தொடக்கக் கொடியை மாற்றுகிறது. `enabled: true` என இருக்கும்போது, அடுத்த முறை OmniRoute துவங்குகையில் சேவை நிறுவப்பட்டிருந்தால் அது தானாகத் தொடங்கும்.
+தானாகத் தொடங்கும் கொடியை நிலைமாற்று. `enabled: true`, அடுத்த முறை OmniRoute பூட் செய்யும் போது சேவை தானாகவே தொடங்கும் (சேவை நிறுவப்பட்டிருந்தால்).
 
-**கோரிக்கை உள்ளடக்கம்:**
+**கோரிக்கை உடல்:**
 
 ```json
 { "enabled": true }
@@ -388,116 +381,168 @@ SIGKILL-ஐ அனுப்புகிறது. ஏற்கனவே நி�
 | நிலை  | விளக்கம்              |
 | ----- | --------------------- |
 | `200` | `{ autoStart: true }` |
-| `400` | தவறான உள்ளடக்கம்      |
+| `400` | தவறான உடல்            |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-9Router-இன் stdout/stderr வளைய இடையகத்திலிருந்து நேரடிப் பதிவுகளை வழங்கும் SSE தரவோடை.
+9Router இன் stdout/stderr ரிங் பஃபரிலிருந்து நேரடி பதிவுகளின்SSE ஸ்ட்ரீம்.
 
 **வினவல் அளவுருக்கள்:**
 
-| அளவுரு   | வகை       | இயல்புநிலை | விளக்கம்                                                                                 |
-| -------- | --------- | ---------- | ---------------------------------------------------------------------------------------- |
-| `tail`   | `integer` | 200        | முதலில் அனுப்ப வேண்டிய வரலாற்று வரிகளின் எண்ணிக்கை (அதிகபட்சம் 1000)                     |
-| `filter` | `string`  | ஏதுமில்லை  | எழுத்துப் பெட்டி வேறுபாடற்ற உட்சர வடிகட்டி (regex இல்லை — ReDoS-இலிருந்து பாதுகாப்பானது) |
+| பரம்     | வகை       | இயல்புநிலை    | விளக்கம்                                                                   |
+| -------- | --------- | ------------- | -------------------------------------------------------------------------- |
+| `tail`   | `integer` | 200           | முதலில் எத்தனை வரலாற்று வரிகளை அனுப்ப வேண்டும் (அதிகபட்சம் 1000)           |
+| `filter` | `string`  | எதுவும் இல்லை | கேஸ்-சென்சிட்டிவ் சப்ஸ்ட்ரிங் ஃபில்டர் (regex — ReDoS-பாதுகாப்பானது இல்லை) |
 
 **SSE நிகழ்வுகள்:**
 
-| நிகழ்வு     | தரவு        | விளக்கம்                              |
-| ----------- | ----------- | ------------------------------------- |
-| `snapshot`  | `LogLine[]` | தொடக்க வரலாற்று இறுதிப் பகுதி         |
-| `log`       | `LogLine`   | நேரடிப் பதிவுவரி                      |
-| `heartbeat` | `{}`        | ஒவ்வொரு 15 s-க்கும் இணைப்பைப் பேணுதல் |
+| நிகழ்வு     | தரவு        | விளக்கம்                                     |
+| ----------- | ----------- | -------------------------------------------- |
+| `snapshot`  | `LogLine[]` | ஆரம்ப வரலாற்று வால்                          |
+| `log`       | `LogLine`   | நேரடி பதிவு வரி                              |
+| `heartbeat` | `{}`        | ஒவ்வொரு 15 வினாடிகளுக்கும் உயிருடன் இருங்கள் |
 
-**LogLine திட்டவடிவம்:**
+**LogLine திட்டம்:**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **பதில்கள்:**
 
-| நிலை  | விளக்கம்                                                        |
-| ----- | --------------------------------------------------------------- |
-| `200` | `text/event-stream`                                             |
-| `400` | `filter` அளவுரு மிக நீளமாக உள்ளது (> 200 எழுத்துகள்)            |
-| `404` | சேவை கண்டறியப்படவில்லை (மேற்பார்வையாளரில் பதிவுசெய்யப்படவில்லை) |
+| நிலை  | விளக்கம்                                                   |
+| ----- | ---------------------------------------------------------- |
+| `200` | `text/event-stream`                                        |
+| `400` | `filter` அளவுரு மிக நீளமானது (> 200 எழுத்துகள்)            |
+| `404` | சேவை கிடைக்கவில்லை (மேற்பார்வையாளர் பதிவு செய்யப்படவில்லை) |
 
 ---
 
-### 4.2 CLIProxyAPI முனைப்புள்ளிகள் (10 வழித்தடங்கள்)
+### 4.2 CLIProxyAPI இறுதிப்புள்ளிகள் (10 வழிகள்)
 
-CLIProxyAPI-க்கு `rotate-key` தவிர்த்து 9Router-இன் அதே முனைப்புள்ளி வடிவம் உள்ளது; கூடுதலாக `accounts`, `provider-expose` மற்றும் `auto-restart-adopted` ஆகியவையும் உள்ளன. இப்போது அது உருவாக்கப்படும்போது செலுத்தப்படும் பிரத்யேக தரவுத் தள API விசையைப் பெறுகிறது (`bootstrap.ts`-இல் `needsApiKey: true`, மாதிரி ஒத்திசைவுக்குப் பயன்படுத்தப்படுகிறது); `status` குறைவான புலங்களைக் கொண்டுள்ளது.
+CLIProxyAPI 9Router கழித்தல் `rotate-key`, பிளஸ் `accounts`, `provider-expose` மற்றும் `auto-restart-adopted` போன்ற அதே இறுதிப்புள்ளி வடிவத்தைக் கொண்டுள்ளது. அது இப்போது ஸ்பானில் செலுத்தப்பட்ட ஒரு பிரத்யேக டேட்டா-பிளேன் API விசையைப் பெறுகிறது ( `bootstrap.ts` இல்`needsApiKey: true`, மாதிரி ஒத்திசைவுக்குப் பயன்படுத்தப்படுகிறது); `status` குறைவான புலங்களை உள்ளடக்கியது.
 
-| முறை   | பாதை                                | விளக்கம்                               |
-| ------ | ----------------------------------- | -------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | npm-இலிருந்து CLIProxyAPI-ஐ நிறுவுதல்  |
-| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI-ஐத் தொடங்குதல்             |
-| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI-ஐ நிறுத்துதல்              |
-| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI-ஐ மறுதொடக்கம் செய்தல்      |
-| `POST` | `/api/services/cliproxy/update`     | புதிய பதிப்புக்குப் புதுப்பித்தல்      |
-| `GET`  | `/api/services/cliproxy/status`     | நேரடி + DB நிலை (`apiKeyMasked` இல்லை) |
-| `POST` | `/api/services/cliproxy/auto-start` | தானியங்குத் தொடக்கத்தை மாற்றுதல்       |
+| முறை   | பாதை                                | விளக்கம்                                |
+| ------ | ----------------------------------- | --------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | npm இலிருந்து CLIProxyAPI நிறுவவும்     |
+| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI தொடங்கவும்                  |
+| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI நிறுத்து                    |
+| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI மீண்டும் தொடங்கவும்         |
+| `POST` | `/api/services/cliproxy/update`     | புதிய பதிப்பிற்கு புதுப்பிக்கவும்       |
+| `GET`  | `/api/services/cliproxy/status`     | நேரடி + DB நிலை ( `apiKeyMasked` இல்லை) |
+| `POST` | `/api/services/cliproxy/auto-start` | தானாகத் தொடங்குவதை நிலைமாற்று           |
 
-பகிரப்பட்ட `GET /api/services/{name}/logs` முனைப்புள்ளி (§4.1-ஐக் காண்க), `[name]` இயக்கநிலைத் துண்டைப் பயன்படுத்தி நான்கு சேவைகளுக்கும் செயல்படுகிறது.
+பகிரப்பட்ட `GET /api/services/{name}/logs` இறுதிப்புள்ளி (பார்க்க §4.1) `[name]` டைனமிக் பிரிவைப் பயன்படுத்தி நான்கு சேவைகளுக்கும் வேலை செய்கிறது.
 
 ---
 
-### 4.3 Mux முனைப்புள்ளிகள் (8 வழித்தடங்கள்)
+### 4.3 மக்ஸ் இறுதிப்புள்ளிகள் (8 வழிகள்)
 
-Mux-க்கு CLIProxyAPI-இன் அதே முனைப்புள்ளி வடிவம் உள்ளது — API பரப்பில் `rotate-key` வழித்தடம் இல்லை (`getOrCreateApiKey("mux")` வழியாக 9Router-ஐப் போலவே bearer token உருவாக்கப்பட்டு, `MUX_SERVER_AUTH_TOKEN` சூழல் மாறி வழியாகச் செலுத்தப்படுகிறது; ஆனால் இதற்கெனத் தனிப்பட்ட விசைச் சுழற்சி முனைப்புள்ளி இன்னும் இல்லை). Mux-க்கு வாழ்க்கைச்சுழற்சி மட்டுமே நிர்வகிக்கப்படுகிறது: 9Router போலல்லாமல், இதற்கு அடுக்கு 4 செயலாக்கி இல்லை, மேலும் இது ஒருபோதும் வழிப்படுத்தல் வழங்குநராகப் பதிவுசெய்யப்படுவதில்லை.
+Mux ஆனது API மேற்பரப்பில் உள்ள CLIProxyAPI — no `rotate-key` வழியின் அதே இறுதிப்புள்ளி வடிவத்தைக் கொண்டுள்ளது (பேரர் டோக்கன் 9Router's `getOrCreateApiKey("mux")` வழியாக உருவாக்கப்படுகிறது மற்றும் `MUX_SERVER_AUTH_TOKEN` env var வழியாக செலுத்தப்படுகிறது, ஆனால் இதுவரை பிரத்யேக சுழற்சி முடிவுப்புள்ளி இல்லை). Mux என்பது வாழ்க்கைச் சுழற்சியால் மட்டுமே நிர்வகிக்கப்படுகிறது: 9 ரூட்டரைப் போலல்லாமல், இதில் லேயர் 4 எக்ஸிகியூட்டர் இல்லை மற்றும் ரூட்டிங் வழங்குநராகப் பதிவு செய்யப்படவில்லை.
 
 | முறை   | பாதை                           | விளக்கம்                                    |
 | ------ | ------------------------------ | ------------------------------------------- |
-| `POST` | `/api/services/mux/install`    | npm-இலிருந்து Mux-ஐ நிறுவுதல் (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Mux-ஐத் தொடங்குதல் (`mux server`)           |
-| `POST` | `/api/services/mux/stop`       | Mux-ஐ நிறுத்துதல்                           |
-| `POST` | `/api/services/mux/restart`    | Mux-ஐ மறுதொடக்கம் செய்தல்                   |
-| `POST` | `/api/services/mux/update`     | புதிய npm பதிப்புக்குப் புதுப்பித்தல்       |
+| `POST` | `/api/services/mux/install`    | npm (`npm i mux`) இலிருந்து Mux ஐ நிறுவவும் |
+| `POST` | `/api/services/mux/start`      | Mux (`mux server`) தொடங்கு                  |
+| `POST` | `/api/services/mux/stop`       | முக்ஸ் நிறுத்து                             |
+| `POST` | `/api/services/mux/restart`    | Mux ஐ மீண்டும் துவக்கவும்                   |
+| `POST` | `/api/services/mux/update`     | புதிய npm பதிப்பிற்கு புதுப்பிக்கவும்       |
 | `GET`  | `/api/services/mux/status`     | நேரடி + DB நிலை                             |
-| `POST` | `/api/services/mux/auto-start` | தானியங்குத் தொடக்கத்தை மாற்றுதல்            |
+| `POST` | `/api/services/mux/auto-start` | தானாகத் தொடங்குவதை நிலைமாற்று               |
 
 ---
 
-### 4.4 Bifrost முனைப்புள்ளிகள் (8 வழித்தடங்கள்)
+### 4.4 பிஃப்ரோஸ்ட் முடிவுப் புள்ளிகள் (8 வழிகள்)
 
-Bifrost என்பது Go AI நுழைவாயில் இடைமாற்றுப் பின்தளமாகும் (`@maximhq/bifrost`). இது CLIProxyAPI-இன் அதே முனைப்புள்ளி வடிவத்தைப் பயன்படுத்துகிறது (`rotate-key` இல்லை — Bifrost தனது சொந்த வழங்குநர் விசைகளை அதன் `-app-dir`-இன் கீழுள்ள `config.json`-இல் நிர்வகிக்கிறது).
+Bifrost என்பது Go AI-கேட்வே ரிலே பின்தளத்தில் (`@maximhq/bifrost`) உள்ளது. இது CLIProxyAPI போன்ற அதே இறுதிப்புள்ளி வடிவத்தைப் பயன்படுத்துகிறது (இல்லை `rotate-key` — Bifrost அதன் சொந்த வழங்குநர் விசைகளை `config.json` இல் அதன் `-app-dir` இன் கீழ் நிர்வகிக்கிறது).
 
-| முறை   | பாதை                               | விளக்கம்                                                                     |
-| ------ | ---------------------------------- | ---------------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | npm இலிருந்து Bifrost-ஐ நிறுவுதல் (`@maximhq/bifrost`)                       |
-| `POST` | `/api/services/bifrost/start`      | port 8080-இல் Bifrost-ஐத் தொடங்குதல் (இயல்புநிலை)                            |
-| `POST` | `/api/services/bifrost/stop`       | Bifrost-ஐ நிறுத்துதல்                                                        |
-| `POST` | `/api/services/bifrost/restart`    | Bifrost-ஐ மறுதொடக்கம் செய்தல்                                                |
-| `POST` | `/api/services/bifrost/update`     | புதிய பதிப்பிற்குப் புதுப்பித்தல்                                            |
-| `GET`  | `/api/services/bifrost/status`     | நேரலை + DB நிலை                                                              |
-| `POST` | `/api/services/bifrost/auto-start` | தானியக்கத் தொடக்கத்தை நிலைமாற்றுதல்                                          |
-| `GET`  | `/api/services/bifrost/logs`       | SSE பதிவின் இறுதிப் பகுதி (பகிரப்பட்ட `[name]/logs` மாறும் வழித்தடம் வழியாக) |
+| முறை   | பாதை                               | விளக்கம்                                                      |
+| ------ | ---------------------------------- | ------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | npm (`@maximhq/bifrost`) இலிருந்து Bifrost ஐ நிறுவவும்        |
+| `POST` | `/api/services/bifrost/start`      | போர்ட் 8080 இல் Bifrost ஐத் தொடங்கவும் (இயல்புநிலை)           |
+| `POST` | `/api/services/bifrost/stop`       | Bifrost நிறுத்து                                              |
+| `POST` | `/api/services/bifrost/restart`    | Bifrost ஐ மீண்டும் தொடங்கவும்                                 |
+| `POST` | `/api/services/bifrost/update`     | புதிய பதிப்பிற்கு புதுப்பிக்கவும்                             |
+| `GET`  | `/api/services/bifrost/status`     | நேரடி + DB நிலை                                               |
+| `POST` | `/api/services/bifrost/auto-start` | தானாகத் தொடங்குவதை நிலைமாற்று                                 |
+| `GET`  | `/api/services/bifrost/logs`       | SSE பதிவு வால் (பகிரப்பட்ட `[name]/logs` டைனமிக் பாதை வழியாக) |
 
-**வழித்தட இணைப்பு:** `BIFROST_BASE_URL` அமைக்கப்படாமல், மேற்பார்வையிடப்படும் Bifrost
-நிகழ்வு இயங்கிக்கொண்டிருக்கும்போது, `getBifrostRoutingConfig()` (`routingBackend.ts`-இல்) தானாகவே
-`http://127.0.0.1:{port}`-ஐ ரிலே அடிப்படை URL ஆகப் பயன்படுத்துகிறது. வெளிப்படையாக அமைக்கப்பட்ட `BIFROST_BASE_URL` சூழல் மாறி
-எப்போதும் முன்னுரிமை பெறும்.
+**ரூட்டிங் வயரிங்:** `BIFROST_BASE_URL` அமைக்கப்படவில்லை மற்றும் கண்காணிக்கப்படும் Bifrost நிகழ்வு இயங்கும் போது, `getBifrostRoutingConfig()` ( `routingBackend.ts` இல்) தானாகவே `http://127.0.0.1:{port}` ரிலே பேஸ் URL ஆகப் பயன்படுத்துகிறது. வெளிப்படையான `BIFROST_BASE_URL` env எப்போதும் முன்னுரிமை பெறுகிறது.
 
 ---
 
-### 4.5 Dario முனைப்புள்ளிகள் (12 வழித்தடங்கள்)
+### 4.5 டாரியோ இறுதிப் புள்ளிகள் (12 வழிகள்)
 
-பிற சேவைகளில் உள்ள அதே வாழ்க்கைச் சுழற்சி வடிவம் (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`) மற்றும் `admin/`-இன் கீழ் டோக்கன் மூலம் கட்டுப்படுத்தப்படும் OAuth
-கட்டுப்பாட்டுத் தளம்: `admin/accounts`, `admin/import-from-omniroute`,
-`admin/login-start`, `admin/login-complete` (அனைத்தும் `DARIO_ADMIN_TOKEN`-க்குப் பின்னால் பாதுகாக்கப்படுகின்றன).
+மற்ற சேவைகளைப் போலவே அதே வாழ்க்கைச் சுழற்சி வடிவம் (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) மேலும் `admin/` கீழ் ஒரு டோக்கன்-கேட்டட் OAuth கட்டுப்பாட்டு விமானம்: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`( `DARIO_ADMIN_TOKEN` `admin/login-complete`
 
-### 4.6 தலைகீழ் ப்ராக்ஸி (9Router டாஷ்போர்டு உட்பொதிவு)
+### 4.6 ஓபன்-வா இறுதிப்புள்ளிகள் (7 வழிகள்)
 
-டாஷ்போர்டு, பின்வரும் உள் தலைகீழ் ப்ராக்ஸி வழியாக iframe-க்குள் 9Router வலை UI-ஐ
-உட்பொதிக்கிறது:
+open-wa (`@open-wa/wa-automate`) WhatsApp வலையை தானியக்கமாக்குவதற்கு தலையில்லாத குரோமியம் நிகழ்வை (பப்படீர் வழியாக) இயக்குகிறது. இது Mux போன்ற அதே இறுதிப்புள்ளி வடிவத்தைப் பயன்படுத்துகிறது (இன்னும் `rotate-key` வழி இல்லை). இது வாழ்க்கைச் சுழற்சியால் நிர்வகிக்கப்படும் — மட்டுமே ரூட்டிங் இலக்கு அல்ல, அடுக்கு 4 executor/provider நுழைவு இல்லை.
+
+| முறை   | பாதை                              | விளக்கம்                                                      |
+| ------ | --------------------------------- | ------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | npm (`@open-wa/wa-automate`) இலிருந்து open-wa ஐ நிறுவவும்    |
+| `POST` | `/api/services/openwa/start`      | போர்ட் 8323 இல் open-wa ஐத் தொடங்கவும் (இயல்புநிலை)           |
+| `POST` | `/api/services/openwa/stop`       | ஓபன்-வா நிறுத்து                                              |
+| `POST` | `/api/services/openwa/restart`    | ஓபன்-வாவை மீண்டும் தொடங்கவும்                                 |
+| `POST` | `/api/services/openwa/update`     | புதிய பதிப்பிற்கு புதுப்பிக்கவும்                             |
+| `GET`  | `/api/services/openwa/status`     | நேரடி + DB நிலை                                               |
+| `POST` | `/api/services/openwa/auto-start` | தானாகத் தொடங்குவதை நிலைமாற்று                                 |
+| `GET`  | `/api/services/openwa/logs`       | SSE பதிவு வால் (பகிரப்பட்ட `[name]/logs` டைனமிக் பாதை வழியாக) |
+
+**API விசை:** `WA_KEY` — open-wa's generic `WA_*` -prefixed env என உட்செலுத்தப்பட்டது, அதை `--key`/`-k` CLI விருப்பத்தில் வரைபடமாக்குகிறது (`dist/cli/setup.js::envArgs()`, நிறுவப்பட்ட 4.76.0 தொகுப்புக்கு எதிராக சரிபார்க்கப்பட்டது). `generateServiceApiKey()` ஆல் உருவாக்கப்படும் போது முன்னொட்டு `ow_`. open-wa ஒரு `key`/`api_key` HTTP தலைப்பிலிருந்து விசையை மீண்டும் படிக்கிறது ( `Authorization: Bearer` அல்ல); `/api-docs*` காசோலையில் இருந்து வெளிப்படையாக விலக்கு அளிக்கப்பட்டுள்ளது ( `dist/cli/server.js` இல்`setupAuthenticationLayer` ), எனவே சுகாதார ஆய்வுக்கு அங்கீகார தலைப்பு தேவையில்லை.
+
+**இணைத்தல்:** open-wa அதிகாரப்பூர்வமற்றது மற்றும் WhatsApp — உடன் இணைக்கப்படாதது, இணைக்கப்பட்ட எண் WhatsApp இன் சொந்த ஆட்டோமேஷன் கண்டறிதலில் இருந்து தடை ஆபத்தைக் கொண்டுள்ளது. முதல் தொடக்கத்தில், இணைத்தல் QR குறியீடு stdout க்கு அச்சிடப்பட்டு, ஏற்கனவே உள்ள பதிவுகள் panel/SSE ஸ்ட்ரீம் — மூலம் வெளிவருகிறது.
+
+---
+
+### 4.7 LLMLingua இறுதிப்புள்ளிகள் (8 வழிகள்)
+
+LLMLingua என்பது ப்ராம்ப்ட்-கம்ப்ரஷன் சைட்கார் ரேப்பிங் `@atjsh/llmlingua-2` (உண்மையான ONNX டோக்கன்-வகைப்படுத்தல் மாதிரி, முதல் `/compress` அழைப்பில் ஹக்கிங் ஃபேஸிலிருந்து பதிவிறக்கம் செய்யப்பட்டது). இது Bifrost போன்ற அதே இறுதிப்புள்ளி வடிவத்தைப் பயன்படுத்துகிறது ( API விசை — `needsApiKey: false` இல்லை, இது நற்சான்றிதழ்களைக் கையாளாது).
+
+| முறை   | பாதை                                           | விளக்கம்                                                                             |
+| ------ | ---------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `POST` | `/api/services/llmlingua/install`              | npm- `@atjsh/llmlingua-2` + பியர்களை நிறுவவும், சைட்கார் சர்வர் ஸ்கிரிப்டை எழுதவும்  |
+| `POST` | `/api/services/llmlingua/start`                | போர்ட் 20135 இல் சைட்காரைத் தொடங்கவும் (இயல்புநிலை)                                  |
+| `POST` | `/api/services/llmlingua/stop`                 | பக்கவாட்டு வண்டியை நிறுத்து                                                          |
+| `POST` | `/api/services/llmlingua/restart`              | சைட்காரை மறுதொடக்கம் செய்யுங்கள்                                                     |
+| `POST` | `/api/services/llmlingua/update`               | புதிய தொகுப்பு பதிப்பிற்கு புதுப்பிக்கவும்                                           |
+| `GET`  | `/api/services/llmlingua/status`               | நேரடி + DB நிலை                                                                      |
+| `POST` | `/api/services/llmlingua/auto-start`           | தானாகத் தொடங்குவதை நிலைமாற்று                                                        |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | ஏற்றுக்கொள்ளப்பட்ட (முன்பே இருக்கும்) நிகழ்வின் தானாக மறுதொடக்கம் செய்வதை நிலைமாற்று |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE பதிவு வால் (பகிரப்பட்ட `[name]/logs` டைனமிக் பாதை வழியாக)                        |
+
+**பக்கவாட்டு ஒப்பந்தம்:** சர்வர் ஸ்கிரிப்ட் `GET /health` (உடனடி — மாதிரியில் காத்திருக்காது) மற்றும் `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`) ஆகியவற்றை வெளிப்படுத்துகிறது. முதல் `/compress` அழைப்பில் மாடல் சோம்பேறித்தனமாக ஏற்றப்படும்.
+
+**சுருக்க வயரிங்:** `open-sse/services/compression/engines/llmlingua/index.ts` இன் `httpSidecarBackend` `LLMLINGUA_BASE_URL` (இயல்புநிலை `http://127.0.0.1:20135`) ஐ அழைக்கிறது மற்றும் சைட்காரின் பதிலை உள்ளீட்டை விட கண்டிப்பாக குறைவாக இருக்கும் போது மட்டுமே ஏற்கிறது; எந்த தோல்வியும் (இயங்கவில்லை, காலாவதியாகவில்லை, நோ-ஆப் பதில்) செயல்பாட்டில் உள்ள பணியாளர்-நூல் பின்தளத்தில் (`./worker.ts`) திரும்பும்.
+
+---
+
+### 4.8 சிங்-பாக்ஸ் இறுதிப் புள்ளிகள் (8 வழிகள்)
+
+sing-box Mux — no `rotate-key` ரூட், API கீ இன்ஜெக்ஷன் ( `bootstrap.ts` இல்`needsApiKey: false` ) போன்ற அதே இறுதிப்புள்ளி வடிவத்தைக் கொண்டுள்ளது. இது வாழ்க்கைச் சுழற்சியால் மட்டுமே நிர்வகிக்கப்படுகிறது: ஒருபோதும் routing/LLM வழங்குநர் அல்ல. பின் செய்யப்பட்ட பதிப்பிற்கான அதிகாரப்பூர்வ GitHub வெளியீட்டு பைனரி (`SagerNet/sing-box`) — `install()` பதிவிறக்குகிறது ( `src/lib/services/installers/singbox.ts` இல்`SINGBOX_PINNED_VERSION` ) மற்றும் அதன் SHA256 அதே கோப்பில் பேக் செய்யப்பட்ட செக்சம்க்கு எதிராக சரிபார்க்கிறது.
+
+| முறை   | பாதை                                         | விளக்கம்                                                                                    |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | + ஐப் பதிவிறக்கி பின் செய்யப்பட்ட sing-box வெளியீட்டைச் சரிபார்க்கவும்                      |
+| `POST` | `/api/services/singbox/start`                | பாடலைத் தொடங்கு (`sing-box run -c config.json`)                                             |
+| `POST` | `/api/services/singbox/stop`                 | பாடலை நிறுத்து                                                                              |
+| `POST` | `/api/services/singbox/restart`              | பாட பெட்டியை மறுதொடக்கம் செய்யுங்கள்                                                        |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall பின் செய்யப்பட்ட வெளியீடு                                               |
+| `GET`  | `/api/services/singbox/status`               | நேரடி + DB நிலை                                                                             |
+| `POST` | `/api/services/singbox/auto-start`           | தானாகத் தொடங்குவதை நிலைமாற்று                                                               |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | ஏற்றுக்கொள்ளப்பட்ட (முன்பே இருக்கும்) செயல்முறைக்கு தானாக மறுதொடக்கம் செய்வதை நிலைமாற்றவும் |
+| `GET`  | `/api/services/singbox/logs`                 | SSE பதிவு வால் (பகிரப்பட்ட `[name]/logs` டைனமிக் பாதை வழியாக)                               |
+
+**TPROXY வயரிங்:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` எழுதி `applyTproxy()` TPROXY ஃபயர்வால் விதிகளை நிறுவும் முன் மேற்பார்வையாளரைத் தொடங்குகிறது. மேற்பார்வையாளர் காணாமல் போயிருந்தால் அல்லது `running` அடையத் தவறினால், அது இப்போது பிழை மட்டத்தில் (தோல்வியை அமைதியாக விழுங்குவதற்குப் பதிலாக) பதிவுசெய்கிறது, எனவே TPROXY விதிகள் அவர்களுக்குப் பின்னால் வேலை செய்பவர் இல்லாமல் பயன்படுத்தப்பட்டதாக ஒரு ஆபரேட்டர் சொல்ல முடியும்.
+
+---
+
+### 4.9 ரிவர்ஸ் ப்ராக்ஸி (9 ரூட்டர் டாஷ்போர்டு உட்பொதிக்கப்பட்டது)
+
+டாஷ்போர்டு 9Router வலை UI ஒரு iframe இன் உள்ளே உள் தலைகீழ் ப்ராக்ஸி வழியாக உட்பொதிக்கிறது:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -505,18 +550,15 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 இந்த ப்ராக்ஸி:
 
-- கோரிக்கையை `http://127.0.0.1:{port}/{path}`-க்கு அனுப்புகிறது (loopback மட்டும்)
-- உள்வரும் `cookie` மற்றும் `authorization` தலைப்புகளை அகற்றுகிறது (OmniRoute அமர்வு கசியாது)
-- 9Router அங்கீகாரத்திற்காக `Authorization: Bearer {apiKey}`-ஐச் சேர்க்கிறது
-- பதிலிலிருந்து `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ஆகியவற்றை அகற்றுகிறது
-- `<base href>`-ஐச் சேர்க்கவும், முழுமையான பாதைகளை இயல்பாக்கவும் HTML பதில்களை மீண்டும் எழுதுகிறது (`/foo` → `/dashboard/.../embed/foo`)
+- கோரிக்கையை `http://127.0.0.1:{port}/{path}` க்கு அனுப்பவும் (லூப்பேக் மட்டும்)
+- உள்வரும் `cookie` மற்றும் `authorization` தலைப்புகளை நீக்குகிறது ( OmniRoute அமர்வின் கசிவு இல்லை)
+- 9Router அங்கீகாரத்திற்காக `Authorization: Bearer {apiKey}` செலுத்துகிறது
+- பதிலில் இருந்து `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
+- `<base href>` உட்செலுத்துவதற்கும் முழுமையான பாதைகளை இயல்பாக்குவதற்கும் HTML பதில்களை மீண்டும் எழுதுகிறது (`/foo` → `/dashboard/.../embed/foo`)
 
-உட்பொதிக்கப்பட்ட டாஷ்போர்டுக்கான WebSocket மேம்படுத்தல்கள், ஒரு
-பிரத்யேக port-இல் உள்ள துணை சேவையகத்தால் கையாளப்படுகின்றன (`src/lib/services/embedWsProxy.ts`-ஐப் பார்க்கவும்).
+உட்பொதிக்கப்பட்ட டாஷ்போர்டிற்கான WebSocket மேம்படுத்தல்கள் ஒரு பிரத்யேக போர்ட்டில் துணை சேவையகத்தால் கையாளப்படுகிறது ( `src/lib/services/embedWsProxy.ts` ஐப் பார்க்கவும்).
 
-**பாதுகாப்பு:** உட்பொதிவு ப்ராக்ஸி வழித்தடங்கள் `LOCAL_ONLY_API_PREFIXES`-இன் கீழ் வகைப்படுத்தப்பட்டுள்ளன,
-மேலும் அவற்றை loopback-இலிருந்து மட்டுமே அணுக முடியும். Cloudflare/Ngrok சுரங்கப்பாதை வழியாக JWT-ஐப் பெறும்
-தாக்குதலாளர், உட்பொதிக்கப்பட்ட சேவைகளுக்குள் ப்ராக்ஸி செய்ய முடியாது.
+**பாதுகாப்பு:** உட்பொதிக்கப்பட்ட ப்ராக்ஸி வழிகள் `LOCAL_ONLY_API_PREFIXES` இன் கீழ் வகைப்படுத்தப்பட்டுள்ளன மற்றும் லூப்பேக்கிலிருந்து மட்டுமே அடைய முடியும். ஒரு Cloudflare/Ngrok சுரங்கப்பாதை வழியாக JWT ஐப் பெறும் தாக்குபவர் உட்பொதிக்கப்பட்ட சேவைகளில் ப்ராக்ஸி செய்ய முடியாது.
 
 ---
 

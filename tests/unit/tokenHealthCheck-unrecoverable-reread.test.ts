@@ -7,7 +7,7 @@ const root = path.resolve(import.meta.dirname, "../..");
 const src = await readFile(path.join(root, "src/lib/tokenHealthCheck.ts"), "utf8");
 
 function unrecoverableSlice() {
-  const idx = src.indexOf("if (isUnrecoverableRefreshError(result))");
+  const idx = src.search(/if \((?:tokenRefresh\.)?isUnrecoverableRefreshError\(result\)\)/);
   assert.ok(idx >= 0, "unrecoverable refresh branch must exist");
   return src.slice(idx, idx + 3500);
 }
@@ -46,6 +46,16 @@ test("shouldNullRefreshTokenAfterUnrecoverable_Claude_IsFalse", async () => {
   stopTokenHealthCheck();
   assert.equal(shouldNullRefreshTokenAfterUnrecoverable("claude"), false);
   assert.equal(shouldNullRefreshTokenAfterUnrecoverable("Claude"), false);
+});
+
+test("shouldNullRefreshTokenAfterUnrecoverable_KimiCoding_IsFalse (#16984)", async () => {
+  const { shouldNullRefreshTokenAfterUnrecoverable, stopTokenHealthCheck } =
+    await import("../../src/lib/tokenHealthCheck.ts");
+  stopTokenHealthCheck();
+  assert.equal(shouldNullRefreshTokenAfterUnrecoverable("kimi-coding"), false);
+  assert.equal(shouldNullRefreshTokenAfterUnrecoverable("KIMI-CODING"), false);
+  // A genuinely consumed Codex refresh token still follows its existing policy.
+  assert.equal(shouldNullRefreshTokenAfterUnrecoverable("codex"), true);
 });
 
 test("shouldNullRefreshTokenAfterUnrecoverable_Codex_IsTrue", async () => {

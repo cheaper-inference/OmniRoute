@@ -1,14 +1,12 @@
 # Embedded Services (Oʻzbekcha)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
-> **Versiya:** v3.8.44
-> **Soʻnggi yangilanish:** 2026-07-03
-> **Auditoriya:** Oʻrnatilgan xizmatlarni (9Router, CLIProxyAPI, Mux, Bifrost) qoʻshadigan, ularga texnik xizmat koʻrsatadigan yoki ulardagi nosozliklarni tuzatadigan muhandislar.
+> **Versiya:** v3.8.44** Oxirgi yangilangan:** 28.10.2026** Tomoshabinlar:** Muhandislar oʻrnatilgan xizmatlarni qoʻshish, ularga xizmat koʻrsatish yoki disk raskadrovka qilish (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Oʻrnatilgan xizmatlar — OmniRoute oʻrnatadigan, nazorat qiladigan va toʻlaqonli marshrutlash maqsadlari sifatida taqdim etadigan, mahalliy oʻrnatilgan yordamchi jarayon vositalaridir. Tashqi provayderlardan farqli ravishda (ularga internet orqali API kalitlari yordamida ulaniladi), oʻrnatilgan xizmatlar OmniRoute bilan bir kompyuterda ishlaydi va loopback orqali aloqa qiladi.
+Oʻrnatilgan xizmatlar mahalliy oʻrnatilgan texnologik yordamchi vositalar boʻlib, OmniRoute oʻrnatadi, nazorat qiladi va birinchi darajali marshrutlash maqsadlari sifatida namoyon boʻladi. Tashqi provayderlardan (internet orqali API tugmalari orqali erishiladi) farqli o'laroq, o'rnatilgan xizmatlar OmniRoute bilan bir xil mashinada ishlaydi va orqaga qaytish orqali muloqot qiladi.
 
 ---
 
@@ -25,37 +23,40 @@ Oʻrnatilgan xizmatlar — OmniRoute oʻrnatadigan, nazorat qiladigan va toʻlaq
 
 ---
 
-## 1. Umumiy koʻrinish
+## 1. Umumiy ko‘rinish
 
-### Oʻrnatilgan xizmatlar nima uchun kerak?
+### Nima uchun o'rnatilgan xizmatlar?
 
-Beshta xizmat oʻrnatilgan:
+Sakkizta xizmat o'rnatilgan:
 
-| Xizmat          | npm paketi                               | Standart port | Maqsadi                                                                                                                                                                                                  |
-| --------------- | ---------------------------------------- | :-----------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                |     20130     | OmniRoute quyi provayder sifatida ishlatishi mumkin boʻlgan AI marshrutizatori. Modellar `9router/{sub}/{model}` koʻrinishida taqdim etiladi                                                             |
-| **CLIProxyAPI** | GitHub reliz binar fayli (`cliproxy`)    |     8317      | Anthropic CLI autentifikatsiya oqimlari uchun mahalliy proksi-adapter. OAuth tokenlarining amal qilish muddati tugaganda zaxira marshrutlashni taʼminlaydi                                               |
-| **Mux**         | `mux` (grafik interfeyssiz `mux server`) |     8322      | Mahalliy agentlarni muvofiqlashtirish demoni (coder/mux). Faqat hayotiy sikli boshqariladi — marshrutlash maqsadi emas (LLM proksilash mavjud emas).                                                     |
-| **Bifrost**     | `@maximhq/bifrost`                       |     8080      | Go asosidagi AI-shlyuz retranslyatsiya bekendi. Ishlayotganida retranslyatsiya marshruti (`/v1/relay/`) tomonidan avtomatik tanlanadi                                                                    |
-| **Dario**       | `@askalf/dario`                          |     3456      | Claude obunasining proksisi — Claude-Code shaklidagi trafik uchun CLIProxyAPI muqobili/zaxirasi; kiritilgan kalit uning `/admin/*` OAuth boshqaruv qatlamini himoyalovchi `DARIO_ADMIN_TOKEN`ga aylanadi |
+| Xizmat             | npm to'plami                      | Standart port | Maqsad                                                                                                                                                                                                                                                                                                                                 |
+| ------------------ | --------------------------------- | :-----------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 Router**       | `9router`                         |     20130     | OmniRoute sub-provayder sifatida foydalanishi mumkin bo'lgan AI router. Modellar `9router/{sub}/{model}` sifatida namoyon bo'ladi                                                                                                                                                                                                      |
+| **CLIProxyAPI**    | GitHub reliz ikkilik (`cliproxy`) |     8317      | Anthropic CLI auth oqimlari uchun mahalliy proksi adapter. OAuth tokenlarining amal qilish muddati tugashi bilan qayta marshrutlashni ta'minlaydi                                                                                                                                                                                      |
+| **Mux**            | `mux` (boshsiz `mux server`)      |     8322      | Mahalliy agent-orkestratsiya demoni (coder/mux). Yashash davri tomonidan boshqariladigan faqat — marshrutlash maqsadi emas ( LLM proksi-serveri yo'q).                                                                                                                                                                                 |
+| **Bifrost**        | `@maximhq/bifrost`                |     8080      | AI-shlyuz o'rni orqa tomoniga o'ting. Ishlayotganda, o'tish yo'nalishi bo'yicha avtomatik ravishda tanlanadi (`/v1/relay/`)                                                                                                                                                                                                            |
+| **Dario**          | `@askalf/dario`                   |     3456      | Klod-kod shaklidagi trafik uchun Claude-obuna proksi — alternative/failover dan CLIProxyAPI ; AOK qilingan kalit o'zining `/admin/*` OAuth boshqaruv tekisligini o'rnatuvchi `DARIO_ADMIN_TOKEN` bo'ladi                                                                                                                               |
+| **ochiq-va**       | `@open-wa/wa-automate`            |     8323      | WhatsApp Web avtomatlashtirish (Pappeteer orqali boshsiz Chromium). Marshrutlash maqsadi emas, faqat — hayot aylanishi bilan boshqariladi.                                                                                                                                                                                             |
+| **LLMLingua**      | `@atjsh/llmlingua-2`              |     20135     | Tezkor siqish yonbosh — real LLMLingua-2 ONNX modeli (JS/TS algoritmining Microsoft porti). `open-sse/services/compression/engines/llmlingua/index.ts` unga HTTP `/compress`, yonbosh ishdan bo'shatilganda jarayondagi ishchi-ipning orqa qismiga qaytadi. Hayotiy tsikl tomonidan boshqariladigan faqat — marshrutlash maqsadi emas. |
+| **qo'shiq qutisi** | GitHub reliz ikkilik (`singbox`)  |     20140     | TPROXY sidecar backing `applyTproxy()` ning transparent-proxy interception (`src/mitm/tproxy/setup.ts`). O'rnatuvchi mahkamlangan, nazorat summasi bilan tasdiqlangan versiyani yuklab oladi. Hayotiy tsikl tomonidan boshqariladigan faqat — marshrutlash maqsadi emas ( LLM proksi-serveri yo'q)                                     |
 
-Barcha beshta xizmat bir xil nazorat modeliga amal qiladi:
+Barcha sakkizta bir xil nazorat modeliga amal qiladi:
 
-- OmniRoute ularni `DATA_DIR/services/{name}/` ostiga oʻrnatadi (OmniRoute’ning oʻz `package.json` faylidan ajratilgan holda)
-- OmniRoute ularni quyi jarayonlar sifatida ishga tushiradi va kuzatadi
-- OmniRoute quyi jarayon muhitiga vaqtinchalik API kalitini kiritadi va uni ishlashni toʻxtatmasdan almashtiradi (tegishli hollarda)
-- Barcha boshqaruv marshrutlari (`/api/services/*`) **LOCAL_ONLY** hisoblanadi — ularga faqat loopback orqali kirish mumkin (qatʼiy qoida #17)
+- OmniRoute ularni `DATA_DIR/services/{name}/` ostida o'rnatadi ( OmniRoute o'z `package.json` dan ajratilgan)
+- OmniRoute ularni bola jarayonlari sifatida yaratadi va nazorat qiladi
+- OmniRoute vaqtinchalik API kalitini bolaning muhitiga kiritadi va uni uzilishlarsiz aylantiradi (agar mavjud bo'lsa)
+- Barcha boshqaruv yo'llari (`/api/services/*`) mavjud**LOCAL_ONLY** — faqat orqaga qaytish orqali kirish mumkin (qattiq qoida №17)
 
-### Asosiy qarorlar (loyiha rejasidan)
+### Asosiy qarorlar (dizayn rejasidan)
 
-| Qaror                                                       | Qiymat                                                                                     |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| 9Router mahalliy UI interfeysiga boshqaruv panelidan kirish | `/dashboard/providers/services/9router/embed/*` manzilidagi teskari proksi                 |
-| Oʻrnatish mexanizmi                                         | `execFile` orqali `npm install {package}` (shell interpolyatsiyasisiz)                     |
-| Foydalanish rejimi                                          | Marshrutlash mexanizmida `9router/{sub}/{model}` sifatida roʻyxatdan oʻtkazilgan provayder |
-| API kalitlarini boshqarish                                  | OmniRoute yaratadi, saqlash vaqtida shifrlaydi (AES-256-GCM) va muhit orqali kiritadi      |
-| Boshqaruv panelidagi joylashuvi                             | `/dashboard/providers/services` (uchta ichki sahifa)                                       |
-| Avtomatik ishga tushirish                                   | Har bir xizmat uchun alohida almashtirgich, standart holatda OʻCHIRILGAN                   |
+| Qaror                                           | Qiymat                                                                                           |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 9Router mahalliy UI-ga asboblar paneliga kirish | `/dashboard/providers/services/9router/embed/*` da teskari proksi                                |
+| O'rnatish mexanizmi                             | `npm install {package}` orqali `execFile` (qobiq interpolyatsiyasi yo'q)                         |
+| Iste'mol rejimi                                 | Provayder marshrutlash tizimida `9router/{sub}/{model}` sifatida roʻyxatdan oʻtgan               |
+| API kalit boshqaruvi                            | OmniRoute ishlab chiqaradi, dam olishda shifrlaydi (AES-256-GCM) va env orqali in'ektsiya qiladi |
+| Boshqaruv paneli joylashuvi                     | `/dashboard/providers/services` (uchta yorliq)                                                   |
+| Avtomatik ishga tushirish                       | Har bir xizmat uchun almashtirish, standart OFF                                                  |
 
 ---
 
@@ -63,12 +64,12 @@ Barcha beshta xizmat bir xil nazorat modeliga amal qiladi:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  1-qatlam — UI                                                     │
-│  /dashboard/providers/services  (varaqlar: CLIProxyAPI | 9Router | Mux)│
-│  Jonli loglar (SSE), Ishga tushirish/Toʻxtatish/Qayta ishga tushirish/Yangilash, Sozlamalar, Oʻrnatish│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Qobiq + ?tab= orqali varaqlarni yoʻnaltirish│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -76,7 +77,7 @@ Barcha beshta xizmat bir xil nazorat modeliga amal qiladi:
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  2-qatlam — API (LOCAL_ONLY — faqat loopback)                      │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -85,73 +86,74 @@ Barcha beshta xizmat bir xil nazorat modeliga amal qiladi:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (teskari HTTP + WebSocket proksi → 9Router yuqori oqimi)        │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Toʻsiq: LOCAL_ONLY_API_PREFIXES tarkibiga "/api/services/" va     │
-│          "/dashboard/providers/services/*/embed/" kiradi           │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ jarayon ichidagi chaqiruvlar
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  3-qatlam — ServiceSupervisor (src/lib/services/)                  │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Umumiy nazoratchi (child_process.spawn)    │
-│    ├── oʻrnatish:  execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── ishga tushirish: spawn(node, [entrypoint], {env, cwd})      │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
 │    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       9Router uchun 20130 (sozlanishi mumkin)         │
-│    ├── loglar:     stdio halqali buferi 5 MB → SSE hodisalari      │
-│    ├── holat:      har 2–5 soniyada HTTP GET /health, sust tiklash │
-│    └── hayot sikli: SIGTERM 15 s → SIGKILL                         │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Jarayon boshida barcha SERVICES[] ni ishga tayyorlaydi│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Davriy GET /v1/models → service_models jadvali │
-│  ringBuffer.ts      Halqali log buferi (har bir xizmat uchun 5 MB) │
-│  healthCheck.ts     Davriy HTTP holat tekshiruvi                   │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
-│                      (oʻrnatuvchi adapterlar)                      │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI bilan mos HTTP (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  4-qatlam — Provayder / Yoʻnaltirish                               │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Har bir soʻrovda port va API kalitini qayta izlaydi (keshlanmaydi).│
-│    Proksilashdan oldin model identifikatoridan "9router/" prefiksini olib tashlaydi.│
-│    Agar nazoratchi "running" holatida boʻlmasa, 503 service_not_running qaytaradi.│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    "9router" uchun yozuv: isEmbeddedService: true                  │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Modellar "9router/{sub}/{model}" shaklida saqlanadi (prefiksli).│
-│    modelSync.ts tomonidan har 5 daqiqada sinxronlanadi.            │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux FAQAT hayot sikli boʻyicha boshqariladi (1–3-qatlamlar) — u   │
-│  LLM proksi emas, balki agentlarni muvofiqlashtirish demoni, shu   │
-│  sababli unda 4-qatlam ijrochisi/provayder yozuvi yoʻq va u hech   │
-│  qachon yoʻnaltirish nishoni boʻlmaydi.                            │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Asosiy manba fayllari
 
-| Fayl                                        | Vazifasi                                                             |
-| ------------------------------------------- | -------------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Asosiy klass: hayotiy sikl, qulf, holat, halqali bufer               |
-| `src/lib/services/bootstrap.ts`             | Jarayon darajasida roʻyxatdan oʻtkazish va avtomatik ishga tushirish |
-| `src/lib/services/registry.ts`              | Yagona nusxali xarita `tool → supervisor`                            |
-| `src/lib/services/apiKey.ts`                | Kalit yaratish, saqlashda AES-256-GCM bilan shifrlash                |
-| `src/lib/services/modelSync.ts`             | Davriy model sinxronlash (5 daqiqa) + talab boʻyicha                 |
-| `src/lib/services/ringBuffer.ts`            | SSE obunasi bilan 5 MB hajmli halqali jurnal buferi                  |
-| `src/lib/services/healthCheck.ts`           | HTTP holat tekshiruvi (sozlanadigan interval)                        |
-| `src/lib/services/installers/ninerouter.ts` | 9Router uchun npm orqali oʻrnatish/yangilash/oʻchirish               |
-| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI uchun npm orqali oʻrnatish/yangilash/oʻchirish           |
-| `src/lib/services/installers/mux.ts`        | Mux uchun npm orqali oʻrnatish/yangilash/oʻchirish                   |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` yordamchi funksiyasi                         |
-| `src/app/api/services/[name]/logs/route.ts` | Umumiy SSE jurnallari endpointi                                      |
-| `open-sse/executors/ninerouter.ts`          | Provayder ijrochisi (4-qatlam)                                       |
+| Fayl                                        | Rol                                                             |
+| ------------------------------------------- | --------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Asosiy sinf: hayot aylanishi, qulf, sog'liq, halqa buferi       |
+| `src/lib/services/bootstrap.ts`             | Jarayon darajasida ro'yxatga olish va avtomatik ishga tushirish |
+| `src/lib/services/registry.ts`              | Singleton xaritasi `tool → supervisor`                          |
+| `src/lib/services/apiKey.ts`                | Kalit ishlab chiqarish, dam olishda AES-256-GCM shifrlash       |
+| `src/lib/services/modelSync.ts`             | Davriy model sinxronlash (5 daqiqa) + talab bo'yicha            |
+| `src/lib/services/ringBuffer.ts`            | SSE obunasi bilan 5 MB circular log buferi                      |
+| `src/lib/services/healthCheck.ts`           | HTTP salomatlik probi (sozlanishi mumkin bo'lgan interval)      |
+| `src/lib/services/installers/ninerouter.ts` | 9Router uchun npm install/update/uninstall                      |
+| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPI uchun npm install/update/uninstall                  |
+| `src/lib/services/installers/mux.ts`        | Mux uchun npm install/update/uninstall                          |
+| `src/lib/services/installers/openwa.ts`     | Open-wa uchun npm install/update/uninstall                      |
+| `src/lib/services/installers/llmlingua.ts`  | LLMLingua uchun npm install/update/uninstall                    |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` yordamchisi                             |
+| `src/app/api/services/[name]/logs/route.ts` | Umumiy SSE jurnallarining oxirgi nuqtasi                        |
+| `open-sse/executors/ninerouter.ts`          | Provayder ijrochisi (4-qavat)                                   |
 
 ---
 
@@ -207,60 +209,52 @@ vaqtda faollashganda poyga holatlarining oldini oladi.
 
 ---
 
-## 4. API ma’lumotnomasi
+## 4. API ma'lumotnomasi
 
-`/api/services/` ostidagi barcha yo‘nalishlar **LOCAL_ONLY** (faqat loopback,
-qat’iy qoida #17). Loopback bo‘lmagan so‘rovlar autentifikatsiya tokenidan qat’i
-nazar `403 LOCAL_ONLY` javobini oladi.
+`/api/services/` ostidagi barcha marshrutlar**LOCAL_ONLY** (faqat orqaga qaytish, qattiq qoida №17). Orqaga qaytarilmaydigan so'rovlar autentlik tokenidan qat'iy nazar `403 LOCAL_ONLY` oladi.
 
-### 4.1 9Router so‘nggi nuqtalari (11 ta yo‘nalish)
+### 4.1 9Marshrutizatorning oxirgi nuqtalari (11 marshrut)
 
 #### `POST /api/services/9router/install`
 
-9Router’ni npm’dan o‘rnatadi. O‘zining `package.json` va `node_modules/`
-fayllariga ega `DATA_DIR/services/9router/` katalogini yaratadi. OmniRoute’ning
-o‘z bog‘liqliklari bilan ziddiyatga kirishmaydi.
+npm dan 9Routerni o'rnating. O'z `package.json` va `node_modules/` bilan `DATA_DIR/services/9router/` yaratadi. OmniRoute ning o'z depslariga zid kelmaydi.
 
-**So‘rov tanasi** (barchasi ixtiyoriy):
+**So'rov organi** (barchasi ixtiyoriy):
 
 ```json
 { "version": "latest" }
 ```
 
-| Maydon    | Tur      | Standart   | Tavsif                                      |
-| --------- | -------- | ---------- | ------------------------------------------- |
-| `version` | `string` | `"latest"` | o‘rnatiladigan npm versiya tegi yoki semver |
+| Maydon    | Turi     | Standart   | Tavsif                                           |
+| --------- | -------- | ---------- | ------------------------------------------------ |
+| `version` | `string` | `"latest"` | o'rnatish uchun npm versiya yorlig'i yoki semver |
 
 **Javoblar:**
 
-| Holat | Tavsif                                                                       |
-| ----- | ---------------------------------------------------------------------------- |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                       |
-| `400` | So‘rov tanasi noto‘g‘ri (Zod validatsiyasi muvaffaqiyatsiz)                  |
-| `409` | O‘rnatish allaqachon bajarilmoqda (qulf band)                                |
-| `500` | npm o‘rnatilishi muvaffaqiyatsiz — tushunarli xato uchun `message`ni ko‘ring |
+| Status | Tavsif                                                                      |
+| ------ | --------------------------------------------------------------------------- |
+| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                      |
+| `400`  | So‘rovning asosiy qismi noto‘g‘ri (Zod tekshiruvi xatosi)                   |
+| `409`  | Allaqachon o'rnatilmoqda (qulflangan)                                       |
+| `500`  | npm o'rnatish muvaffaqiyatsiz tugadi — do'stona xato uchun `message` qarang |
 
-**Eslatmalar:** `execFile('npm', [...])` ishlatiladi — shell ham, interpolatsiya
-ham yo‘q (qat’iy qoida #13). EACCES xatolari tushunarli xabarlar sifatida
-ko‘rsatiladi.
+**Eslatmalar:** `execFile('npm', [...])` — qobiqsiz, interpolyatsiyasiz (qattiq qoida # 13) foydalanadi. EACCES xatolar do'stona xabarlar sifatida paydo bo'ladi.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-9Router’ni ishga tushiradi. Agar hali ro‘yxatdan o‘tkazilmagan bo‘lsa,
-nazoratchini ro‘yxatdan o‘tkazadi, so‘ng `supervisor.start()`ni chaqiradi.
-Allaqachon ishlayotgan bo‘lsa, idempotent hisoblanadi.
+9 Routerni ishga tushiring. Agar ro'yxatdan o'tmagan bo'lsa, supervayzerni ro'yxatdan o'tkazadi, keyin `supervisor.start()` qo'ng'iroq qiladi. Ishlayotgan paytda idempotent.
 
-**So‘rov tanasi:** yo‘q
+**So'rov organi:** yo'q
 
 **Javoblar:**
 
-| Holat | Tavsif                                                                  |
-| ----- | ----------------------------------------------------------------------- |
-| `200` | `ServiceStatus` obyekti (quyidagi sxemaga qarang)                       |
-| `409` | 9Router o‘rnatilmagan (`status: "not_installed"`)                       |
-| `503` | Ishga tushirish muvaffaqiyatsiz (jarayon xatosi — `lastError`ga qarang) |
+| Status | Tavsif                                                                    |
+| ------ | ------------------------------------------------------------------------- |
+| `200`  | `ServiceStatus` obyekti (quyidagi sxemaga qarang)                         |
+| `409`  | 9Router o'rnatilmagan (`status: "not_installed"`)                         |
+| `503`  | Boshlash muvaffaqiyatsiz tugadi ( — jarayon xatosi `lastError` ga qarang) |
 
 **ServiceStatus sxemasi:**
 
@@ -280,38 +274,34 @@ Allaqachon ishlayotgan bo‘lsa, idempotent hisoblanadi.
 
 #### `POST /api/services/9router/stop`
 
-9Router’ni xavfsiz tarzda to‘xtatadi. SIGTERM yuboradi, 15 s kutadi, agar hali ham
-ishlayotgan bo‘lsa, SIGKILL yuboradi. Allaqachon to‘xtatilgan bo‘lsa, idempotent
-hisoblanadi.
+9Routerni ehtiyotkorlik bilan to'xtating. SIGTERM yuboradi, 15 s kutadi, keyin tirik bo'lsa SIGKILL. Allaqachon to'xtatilganda idempotent.
 
-**So‘rov tanasi:** yo‘q
+**So'rov organi:** yo'q
 
 **Javoblar:**
 
-| Holat | Tavsif                                  |
-| ----- | --------------------------------------- |
-| `200` | `ServiceStatus` (holat: "stopped")      |
-| `503` | To‘xtatish kutilmaganda muvaffaqiyatsiz |
+| Status | Tavsif                                         |
+| ------ | ---------------------------------------------- |
+| `200`  | `ServiceStatus` (holat: "to'xtadi")            |
+| `503`  | To'xtatish kutilmaganda muvaffaqiyatsiz tugadi |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Amaliyot qulfi ostida `stop()`, undan keyin `start()` bajarilishiga teng.
+Ekvivalent `stop()` keyin operatsiya blokirovkasi ostida `start()`.
 
-**So‘rov tanasi:** yo‘q
+**So'rov organi:** yo'q
 
-**Javoblar:** `start` bilan bir xil (yakuniy `ServiceStatus`ni qaytaradi).
+**Javoblar:** `start` bilan bir xil (yakuniy `ServiceStatus` ni qaytaradi).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-9Router’ni yangiroq npm versiyasiga yangilaydi. Agar xizmat ishlayotgan bo‘lsa,
-avval u to‘xtatiladi, npm o‘rnatilishi bajariladi (yangiroq versiya mavjud
-joyning o‘ziga o‘rnatiladi), so‘ng xizmat qayta ishga tushiriladi.
+9Routerni yangi npm versiyasiga yangilaydi. Agar xizmat ishlayotgan bo'lsa, avval u to'xtatiladi, npm install ishga tushiriladi (yangiroq versiyani joyida o'rnatish) va keyin xizmat qayta ishga tushiriladi.
 
-**So‘rov tanasi** (barchasi ixtiyoriy):
+**So'rov organi** (barchasi ixtiyoriy):
 
 ```json
 { "version": "latest" }
@@ -319,41 +309,41 @@ joyning o‘ziga o‘rnatiladi), so‘ng xizmat qayta ishga tushiriladi.
 
 **Javoblar:**
 
-| Holat | Tavsif                                                          |
-| ----- | --------------------------------------------------------------- |
-| `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400` | Tana noto‘g‘ri                                                  |
-| `500` | npm yangilanishi muvaffaqiyatsiz                                |
+| Status | Tavsif                                                          |
+| ------ | --------------------------------------------------------------- |
+| `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
+| `400`  | Yaroqsiz tana                                                   |
+| `500`  | npm yangilanishi amalga oshmadi                                 |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-9Router uchun yangi API kalitini yaratadi, uni saqlash holatida shifrlaydi va xizmat yangi kalitni o‘z muhitidan olishi uchun uni (agar ishlayotgan bo‘lsa) qayta ishga tushiradi. Eski kalit darhol bekor qilinadi.
+9Router uchun yangi API kalitini yaratadi, uni dam olishda shifrlaydi va xizmatni qayta ishga tushiradi (agar ishlayotgan bo'lsa), u o'z muhitidan yangi kalitni oladi. Eski kalit darhol bekor qilinadi.
 
-**So‘rov tanasi:** yo‘q
+**So'rov organi:** yo'q
 
 **Javoblar:**
 
-| Holat | Tavsif                                     |
-| ----- | ------------------------------------------ |
-| `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | Kalitni almashtirish amalga oshmadi        |
+| Status | Tavsif                                     |
+| ------ | ------------------------------------------ |
+| `200`  | `{ keyRotated: true, restarted: boolean }` |
+| `500`  | Aylantirish amalga oshmadi                 |
 
-**Xavfsizlik:** Yangi kalit hech qachon javobda qaytarilmaydi (hisob ma’lumotlari sizib chiqmaydi). U `version_manager` jadvalida shifrlangan holda (AES-256-GCM) saqlanadi.
+**Xavfsizlik:** Javobda yangi kalit hech qachon qaytarilmaydi (hisob ma'lumotlari sizib chiqmaydi). U `version_manager` jadvalida shifrlangan holda (AES-256-GCM) saqlanadi.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Versiya metama’lumotlari va API kaliti ko‘rinishini o‘z ichiga olgan birlashtirilgan jonli + DB holatini qaytaradi.
+Birlashtirilgan jonli + DB holatini qaytaradi, shu jumladan versiya metamaʼlumotlari va API kalitini oldindan koʻrish.
 
 **Javoblar:**
 
-| Holat | Tavsif                        |
-| ----- | ----------------------------- |
-| `200` | Quyidagi sxemaga qarang       |
-| `500` | Holatni o‘qish amalga oshmadi |
+| Status | Tavsif                  |
+| ------ | ----------------------- |
+| `200`  | Quyidagi sxemaga qarang |
+| `500`  | Holatni o‘qib bo‘lmadi  |
 
 **Javob sxemasi:**
 
@@ -379,9 +369,9 @@ Versiya metama’lumotlari va API kaliti ko‘rinishini o‘z ichiga olgan birla
 
 #### `POST /api/services/9router/auto-start`
 
-Avtomatik ishga tushirish bayrog‘ini almashtiradi. `enabled: true` bo‘lsa, OmniRoute keyingi safar yuklanganda xizmat avtomatik ravishda ishga tushadi (agar xizmat o‘rnatilgan bo‘lsa).
+Avtomatik ishga tushirish belgisini o'zgartiring. Qachon `enabled: true`, xizmat keyingi safar OmniRoute yuklanganda avtomatik ravishda ishga tushadi (agar xizmat o'rnatilgan bo'lsa).
 
-**So‘rov tanasi:**
+**So'rov organi:**
 
 ```json
 { "enabled": true }
@@ -389,138 +379,187 @@ Avtomatik ishga tushirish bayrog‘ini almashtiradi. `enabled: true` bo‘lsa, O
 
 **Javoblar:**
 
-| Holat | Tavsif                  |
-| ----- | ----------------------- |
-| `200` | `{ autoStart: true }`   |
-| `400` | Noto‘g‘ri so‘rov tanasi |
+| Status | Tavsif                |
+| ------ | --------------------- |
+| `200`  | `{ autoStart: true }` |
+| `400`  | Yaroqsiz tana         |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-9Router’ning stdout/stderr halqali buferidan jonli jurnallar SSE oqimi.
+9Router stdout/stderr ring buferidan jonli jurnallarning SSE oqimi.
 
-**So‘rov parametrlari:**
+**So'rov parametrlari:**
 
-| Parametr | Tur       | Standart qiymat | Tavsif                                                                             |
-| -------- | --------- | --------------- | ---------------------------------------------------------------------------------- |
-| `tail`   | `integer` | 200             | Dastlab yuboriladigan tarixiy satrlar soni (maksimal 1000)                         |
-| `filter` | `string`  | yo‘q            | Registrga bog‘liq bo‘lmagan quyi satr filtri (regex emas — ReDoS’dan himoyalangan) |
+| Param    | Turi      | Standart | Tavsif                                                                         |
+| -------- | --------- | -------- | ------------------------------------------------------------------------------ |
+| `tail`   | `integer` | 200      | Qancha tarixiy qatorni birinchi yuborish kerak (maksimal 1000)                 |
+| `filter` | `string`  | yo'q     | Katta-kichik harflarni sezmaydigan pastki qator filtri (regex — ReDoS-xavfsiz) |
 
-**SSE hodisalari:**
+**SSE voqealari:**
 
-| Hodisa      | Ma’lumotlar | Tavsif                              |
-| ----------- | ----------- | ----------------------------------- |
-| `snapshot`  | `LogLine[]` | Dastlabki tarixiy yakuniy satrlar   |
-| `log`       | `LogLine`   | Jonli jurnal satri                  |
-| `heartbeat` | `{}`        | Har 15 s da ulanishni saqlab turish |
+| Tadbir      | Ma'lumotlar | Tavsif                       |
+| ----------- | ----------- | ---------------------------- |
+| `snapshot`  | `LogLine[]` | Dastlabki tarixiy dum        |
+| `log`       | `LogLine`   | Jonli jurnal liniyasi        |
+| `heartbeat` | `{}`        | Har 15 soniyada tirik turing |
 
 **LogLine sxemasi:**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **Javoblar:**
 
-| Holat | Tavsif                                              |
-| ----- | --------------------------------------------------- |
-| `200` | `text/event-stream`                                 |
-| `400` | `filter` parametri juda uzun (> 200 ta belgi)       |
-| `404` | Xizmat topilmadi (supervizorda ro‘yxatdan o‘tmagan) |
+| Status | Tavsif                                            |
+| ------ | ------------------------------------------------- |
+| `200`  | `text/event-stream`                               |
+| `400`  | `filter` parametri juda uzun (> 200 ta belgi)     |
+| `404`  | Xizmat topilmadi (nazoratchi ro'yxatdan o'tmagan) |
 
 ---
 
-### 4.2 CLIProxyAPI endpointlari (10 ta marshrut)
+### 4.2 CLIProxyAPI oxirgi nuqtalari (10 ta marshrut)
 
-CLIProxyAPI `rotate-key` bundan mustasno, 9Router bilan bir xil endpoint tuzilishiga ega, shuningdek, `accounts`, `provider-expose` va `auto-restart-adopted` endpointlarini o‘z ichiga oladi. Endi u ishga tushirilganda kiritiladigan alohida ma’lumotlar tekisligi API kalitini oladi (`bootstrap.ts` ichida `needsApiKey: true`, modelni sinxronlashtirish uchun ishlatiladi); `status` kamroq maydonlarni o‘z ichiga oladi.
+CLIProxyAPI 9Router minus `rotate-key`, plus `accounts`, `provider-expose` va `auto-restart-adopted` bilan bir xil yakuniy nuqta shakliga ega . Endi u spawn vaqtida AOK qilingan maxsus ma'lumotlar tekisligi API kalitini oladi (`needsApiKey: true` in `bootstrap.ts`, model sinxronlash uchun ishlatiladi); `status` kamroq maydonlarni o'z ichiga oladi.
 
-| Metod  | Yo‘l                                | Tavsif                                   |
+| Usul   | Yo'l                                | Tavsif                                   |
 | ------ | ----------------------------------- | ---------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | CLIProxyAPI’ni npm orqali o‘rnatish      |
-| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI’ni ishga tushirish           |
-| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI’ni to‘xtatish                |
-| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI’ni qayta ishga tushirish     |
-| `POST` | `/api/services/cliproxy/update`     | Yangiroq versiyaga yangilash             |
-| `GET`  | `/api/services/cliproxy/status`     | Jonli + DB holati (`apiKeyMasked` yo‘q)  |
-| `POST` | `/api/services/cliproxy/auto-start` | Avtomatik ishga tushirishni almashtirish |
+| `POST` | `/api/services/cliproxy/install`    | npm-dan CLIProxyAPI o'rnating            |
+| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI boshlang                     |
+| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI                              |
+| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI qayta ishga tushiring        |
+| `POST` | `/api/services/cliproxy/update`     | Yangi versiyaga yangilang                |
+| `GET`  | `/api/services/cliproxy/status`     | Jonli + DB holati ( `apiKeyMasked` yo'q) |
+| `POST` | `/api/services/cliproxy/auto-start` | Avtomatik ishga tushirishni yoqing       |
 
-Umumiy `GET /api/services/{name}/logs` endpointi (§4.1 ga qarang) `[name]` dinamik segmentidan foydalangan holda barcha to‘rtta xizmat uchun ishlaydi.
-
----
-
-### 4.3 Mux endpointlari (8 ta marshrut)
-
-Mux CLIProxyAPI bilan bir xil endpoint tuzilishiga ega — API yuzasida `rotate-key` marshruti yo‘q (bearer token 9Router’dagi kabi `getOrCreateApiKey("mux")` orqali yaratiladi va `MUX_SERVER_AUTH_TOKEN` muhit o‘zgaruvchisi orqali kiritiladi, ammo hozircha alohida kalit almashtirish endpointi mavjud emas). Mux faqat hayotiy sikl asosida boshqariladi: 9Router’dan farqli ravishda, unda Layer 4 ijrochisi yo‘q va u hech qachon marshrutlash provayderi sifatida ro‘yxatdan o‘tkazilmaydi.
-
-| Metod  | Yo‘l                           | Tavsif                                    |
-| ------ | ------------------------------ | ----------------------------------------- |
-| `POST` | `/api/services/mux/install`    | Mux’ni npm orqali o‘rnatish (`npm i mux`) |
-| `POST` | `/api/services/mux/start`      | Mux’ni ishga tushirish (`mux server`)     |
-| `POST` | `/api/services/mux/stop`       | Mux’ni to‘xtatish                         |
-| `POST` | `/api/services/mux/restart`    | Mux’ni qayta ishga tushirish              |
-| `POST` | `/api/services/mux/update`     | Yangiroq npm versiyasiga yangilash        |
-| `GET`  | `/api/services/mux/status`     | Jonli + DB holati                         |
-| `POST` | `/api/services/mux/auto-start` | Avtomatik ishga tushirishni almashtirish  |
+Umumiy `GET /api/services/{name}/logs` so'nggi nuqtasi (4.1-bandga qarang) `[name]` dinamik segmentidan foydalangan holda barcha to'rtta xizmat uchun ishlaydi.
 
 ---
 
-### 4.4 Bifrost endpointlari (8 ta marshrut)
+### 4.3 Mux oxirgi nuqtalari (8 marshrut)
 
-Bifrost — Go asosidagi AI-shlyuz retranslyatsiya bekendi (`@maximhq/bifrost`). U CLIProxyAPI bilan bir xil endpoint tuzilishidan foydalanadi (`rotate-key` yo‘q — Bifrost o‘z provayder kalitlarini `-app-dir` ostidagi `config.json` faylida o‘zi boshqaradi).
+Mux API yuzasida CLIProxyAPI — no `rotate-key` route bilan bir xil so‘nggi nuqta shakliga ega (tashuvchi token `getOrCreateApiKey("mux")` orqali 9Router’niki bilan bir xil tarzda yaratiladi va `MUX_SERVER_AUTH_TOKEN` env var orqali kiritiladi, lekin hozircha maxsus aylanish yakuniy nuqtasi yo‘q). Mux faqat hayot sikli orqali boshqariladi: 9Routerdan farqli o'laroq, u Layer 4 ijrochisiga ega emas va hech qachon marshrutlash provayderi sifatida ro'yxatdan o'tmagan.
 
-| Metod  | Yoʻl                               | Tavsif                                                                       |
-| ------ | ---------------------------------- | ---------------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Bifrost’ni npm (`@maximhq/bifrost`) orqali oʻrnatish                         |
-| `POST` | `/api/services/bifrost/start`      | Bifrost’ni 8080-portda ishga tushirish (standart)                            |
-| `POST` | `/api/services/bifrost/stop`       | Bifrost’ni toʻxtatish                                                        |
-| `POST` | `/api/services/bifrost/restart`    | Bifrost’ni qayta ishga tushirish                                             |
-| `POST` | `/api/services/bifrost/update`     | Yangiroq versiyaga yangilash                                                 |
-| `GET`  | `/api/services/bifrost/status`     | Joriy + maʼlumotlar bazasidagi holat                                         |
-| `POST` | `/api/services/bifrost/auto-start` | Avtomatik ishga tushirishni yoqish yoki oʻchirish                            |
-| `GET`  | `/api/services/bifrost/logs`       | SSE jurnalining oxirgi qismi (umumiy `[name]/logs` dinamik marshruti orqali) |
-
-**Marshrutlash ulanishi:** `BIFROST_BASE_URL` belgilanmagan va nazorat qilinadigan Bifrost
-nusxasi ishlab turganida, `getBifrostRoutingConfig()` (`routingBackend.ts` ichida) avtomatik ravishda
-`http://127.0.0.1:{port}` manzilidan retranslyatsiyaning asosiy URL manzili sifatida foydalanadi. Aniq belgilangan `BIFROST_BASE_URL` muhit
-oʻzgaruvchisi har doim ustuvor hisoblanadi.
+| Usul   | Yo'l                           | Tavsif                                 |
+| ------ | ------------------------------ | -------------------------------------- |
+| `POST` | `/api/services/mux/install`    | Mux-ni npm (`npm i mux`) dan o'rnating |
+| `POST` | `/api/services/mux/start`      | Mux (`mux server`) ni boshlash         |
+| `POST` | `/api/services/mux/stop`       | Muxni to'xtating                       |
+| `POST` | `/api/services/mux/restart`    | Mux-ni qayta ishga tushiring           |
+| `POST` | `/api/services/mux/update`     | Yangi npm versiyasiga yangilang        |
+| `GET`  | `/api/services/mux/status`     | Jonli + DB holati                      |
+| `POST` | `/api/services/mux/auto-start` | Avtomatik ishga tushirishni yoqing     |
 
 ---
 
-### 4.5 Dario soʻnggi nuqtalari (12 ta marshrut)
+### 4.4 Bifrost so'nggi nuqtalari (8 marshrut)
 
-Boshqa xizmatlardagi kabi bir xil hayot sikli tuzilmasi (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`), shuningdek `admin/` ostida token bilan
-himoyalangan OAuth boshqaruv qatlami mavjud: `admin/accounts`, `admin/import-from-omniroute`,
-`admin/login-start`, `admin/login-complete` (barchasi `DARIO_ADMIN_TOKEN` bilan himoyalangan).
+Bifrost - bu Go AI-shlyuz o'rni orqa tomoni (`@maximhq/bifrost`). U CLIProxyAPI bilan bir xil so'nggi nuqta shaklidan foydalanadi ( `rotate-key` — Bifrost o'zining `-app-dir` ostida `config.json` da o'z provayder kalitlarini boshqara olmaydi).
 
-### 4.6 Teskari proksi (9Router boshqaruv panelini joylashtirish)
+| Usul   | Yo'l                               | Tavsif                                                      |
+| ------ | ---------------------------------- | ----------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Bifrost-ni npm (`@maximhq/bifrost`) dan o'rnating           |
+| `POST` | `/api/services/bifrost/start`      | 8080 portida Bifrostni ishga tushiring (standart)           |
+| `POST` | `/api/services/bifrost/stop`       | Bifrostni to'xtating                                        |
+| `POST` | `/api/services/bifrost/restart`    | Bifrost-ni qayta ishga tushiring                            |
+| `POST` | `/api/services/bifrost/update`     | Yangi versiyaga yangilang                                   |
+| `GET`  | `/api/services/bifrost/status`     | Jonli + DB holati                                           |
+| `POST` | `/api/services/bifrost/auto-start` | Avtomatik ishga tushirishni yoqing                          |
+| `GET`  | `/api/services/bifrost/logs`       | SSE log tail (umumiy `[name]/logs` dinamik marshrut orqali) |
 
-Boshqaruv paneli 9Router veb-interfeysini ichki teskari proksi orqali iframe ichiga
-quyidagi manzilda joylashtiradi:
+**Marshrutlash simlari:** `BIFROST_BASE_URL` o‘rnatilmagan va nazorat ostidagi Bifrost misoli ishlayotgan bo‘lsa, `getBifrostRoutingConfig()` ( `routingBackend.ts` da) avtomatik ravishda `http://127.0.0.1:{port}` dan URL o‘rni sifatida foydalanadi. Aniq `BIFROST_BASE_URL` env har doim ustunlik qiladi.
+
+---
+
+### 4.5 Dario so'nggi nuqtalari (12 marshrut)
+
+Boshqa xizmatlar (`install`, `start`, `stop` `DARIO_ADMIN_TOKEN` `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) bilan bir xil hayot tsikli shakli va `admin/` ostida token bilan qoplangan OAuth boshqaruv tekisligi: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start` all , `admin/login-complete`.
+
+### 4.6 ochiq-wa so'nggi nuqtalar (7 marshrut)
+
+open-wa (`@open-wa/wa-automate`) WhatsApp Web-ni avtomatlashtirish uchun boshsiz Chromium nusxasini (Pappeteer orqali) boshqaradi. U Mux bilan bir xil so'nggi nuqta shaklidan foydalanadi (hali `rotate-key` marshruti yo'q). U hayot tsikli tomonidan boshqariladi, faqat — marshrutlash maqsadi emas, 4-qatlam executor/provider kirishi yo'q.
+
+| Usul   | Yo'l                              | Tavsif                                                      |
+| ------ | --------------------------------- | ----------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | Open-wa-ni npm (`@open-wa/wa-automate`) dan o'rnating       |
+| `POST` | `/api/services/openwa/start`      | 8323-portda open-wa-ni ishga tushiring (standart)           |
+| `POST` | `/api/services/openwa/stop`       | Ochiq-oydin to'xtating                                      |
+| `POST` | `/api/services/openwa/restart`    | Open-wa-ni qayta ishga tushiring                            |
+| `POST` | `/api/services/openwa/update`     | Yangi versiyaga yangilang                                   |
+| `GET`  | `/api/services/openwa/status`     | Jonli + DB holati                                           |
+| `POST` | `/api/services/openwa/auto-start` | Avtomatik ishga tushirishni yoqing                          |
+| `GET`  | `/api/services/openwa/logs`       | SSE log tail (umumiy `[name]/logs` dinamik marshrut orqali) |
+
+**API kaliti:** injected as `WA_KEY` — open-wa-ning umumiy `WA_*` -prefixed env override uni `--key`/`-k` CLI opsiyasiga joylashtiradi (`dist/cli/setup.js::envArgs()`, o‘rnatilgan 4.76.0 paketi bilan tasdiqlangan). `generateServiceApiKey()` tomonidan yaratilganda `ow_` prefiksi. open-wa kalitni `key`/`api_key` HTTP sarlavhasidan o'qiydi ( `Authorization: Bearer` emas); `/api-docs*` aniq tekshirishdan ozod qilingan ( `dist/cli/server.js` dagi `setupAuthenticationLayer` ), shuning uchun sog'liqni tekshirishga auth sarlavhasi kerak emas.
+
+**Ulanish:** open-wa norasmiy va WhatsApp — bilan aloqasi yo'q, ulangan raqam WhatsApp ning o'z avtomatizatsiyasini aniqlashdan foydalanishni taqiqlash xavfiga ega. Birinchi ishga tushirilganda, QR juftlash kodi stdout-ga chop etiladi va mavjud Logs panel/SSE oqimi — orqali chiqariladi, bu integratsiyada hozircha QR-tasvirning maxsus so'nggi nuqtasi yo'q.
+
+---
+
+### 4,7 LLMLingua oxirgi nuqtalari (8 marshrut)
+
+LLMLingua - bu tezkor siqish yonbosh `@atjsh/llmlingua-2` (birinchi `/compress` qo‘ng‘irog‘ida Hugging Face-dan yuklab olingan haqiqiy ONNX token-klassifikatsiyasi modeli). U Bifrost bilan bir xil so'nggi nuqta shaklidan foydalanadi ( API kaliti yo'q — `needsApiKey: false`, u hech qachon hisob ma'lumotlarini ishlatmaydi).
+
+| Usul   | Yo'l                                           | Tavsif                                                                            |
+| ------ | ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-o'rnatish `@atjsh/llmlingua-2` + peers, sidecar server skriptini yozing       |
+| `POST` | `/api/services/llmlingua/start`                | 20135 portida yonbosh mashinasini ishga tushiring (standart)                      |
+| `POST` | `/api/services/llmlingua/stop`                 | Vagonni to'xtating                                                                |
+| `POST` | `/api/services/llmlingua/restart`              | Yan vagonni qayta ishga tushiring                                                 |
+| `POST` | `/api/services/llmlingua/update`               | Paketning yangi versiyasiga yangilang                                             |
+| `GET`  | `/api/services/llmlingua/status`               | Jonli + DB holati                                                                 |
+| `POST` | `/api/services/llmlingua/auto-start`           | Avtomatik ishga tushirishni yoqing                                                |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Qabul qilingan (oldindan mavjud) misolni avtomatik qayta ishga tushirishni yoqish |
+| `GET`  | `/api/services/llmlingua/logs`                 | SSE log tail (umumiy `[name]/logs` dinamik marshrut orqali)                       |
+
+**Sidecar shartnomasi:** server skripti `GET /health` (instant — modelda kutmaydi) va `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`) ni ochib beradi. Model birinchi `/compress` chaqiruvida dangasa yuklaydi.
+
+**Siqish simlari:** `open-sse/services/compression/engines/llmlingua/index.ts` ning `httpSidecarBackend` `LLMLINGUA_BASE_URL` (standart `http://127.0.0.1:20135`) ni chaqiradi va faqat kirishdan qat'iy qisqaroq bo'lganda yonboshning javobini qabul qiladi; har qanday nosozlik (ishlamayapti, vaqt tugashi, no-op javobi) jarayondagi ishchi-ipning orqa qismiga (`./worker.ts`) qaytadi.
+
+---
+
+### 4.8 sing-box oxirgi nuqtalari (8 marshrut)
+
+sing-box has the same endpoint shape as Mux — no `rotate-key` route, no API key injection (`needsApiKey: false` in `bootstrap.ts`). It is lifecycle-managed only: never a routing/LLM provider. `install()` downloads the official GitHub release binary (`SagerNet/sing-box`) for the pinned version (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) and verifies its SHA256 against a checksum baked into the same file before ever writing it to disk — any other requested version is rejected.
+
+| Usul   | Yo'l                                         | Tavsif                                                                                  |
+| ------ | -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Qattiqlangan sing-box versiyasini +                                                     |
+| `POST` | `/api/services/singbox/start`                | Sing-box (`sing-box run -c config.json`) ni ishga tushirish                             |
+| `POST` | `/api/services/singbox/stop`                 | Sing-boxni to'xtating                                                                   |
+| `POST` | `/api/services/singbox/restart`              | Sing-box-ni qayta ishga tushiring                                                       |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall mahkamlangan nashr                                                  |
+| `GET`  | `/api/services/singbox/status`               | Jonli + DB holati                                                                       |
+| `POST` | `/api/services/singbox/auto-start`           | Avtomatik ishga tushirishni yoqing                                                      |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Qabul qilingan (oldindan mavjud) jarayon uchun avtomatik qayta ishga tushirishni yoqing |
+| `GET`  | `/api/services/singbox/logs`                 | SSE log tail (umumiy `[name]/logs` dinamik marshrut orqali)                             |
+
+**TPROXY simlari:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` yozadi va `applyTproxy()` TPROXY xavfsizlik devori qoidalarini o‘rnatishdan oldin nazoratchini ishga tushiradi. Agar nazoratchi yo'qolgan bo'lsa yoki `running` ga erisha olmasa, u endi xatolik darajasida jurnalga kiradi (noto'g'rilikni indamay yutib yuborish o'rniga), operator TPROXY qoidalari ularning orqasida ishlaydigan tinglovchisiz qo'llanilganligini aytishi mumkin.
+
+---
+
+### 4.9 Teskari proksi-server (9Router asboblar panelini o'rnatish)
+
+Boshqaruv paneli quyidagi manzilda ichki teskari proksi-server orqali 9Router web UI ni iframe ichiga joylashtiradi:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-Ushbu proksi:
+Bu proksi:
 
-- Soʻrovni `http://127.0.0.1:{port}/{path}` manziliga yoʻnaltiradi (faqat loopback)
-- Kiruvchi `cookie` va `authorization` sarlavhalarini olib tashlaydi (OmniRoute sessiyasi sizib chiqmaydi)
-- 9Router autentifikatsiyasi uchun `Authorization: Bearer {apiKey}` sarlavhasini kiritadi
-- Javobdan `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` sarlavhalarini olib tashlaydi
-- `<base href>` tegini kiritish va mutlaq yoʻllarni meʼyorlashtirish (`/foo` → `/dashboard/.../embed/foo`) uchun HTML javoblarini qayta yozadi
+- So'rovni `http://127.0.0.1:{port}/{path}` ga yo'naltiradi (faqat orqaga qaytish)
+- Kiruvchi `cookie` va `authorization` sarlavhalarini yo'q qiladi ( OmniRoute sessiyasi oqib chiqmaydi)
+- 9Router autentifikatsiyasi uchun `Authorization: Bearer {apiKey}` kiritadi
+- Javobdan `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` chiziqlari
+- `<base href>` kiritish va mutlaq yo'llarni normallashtirish uchun HTML javoblarini qayta yozadi (`/foo` → `/dashboard/.../embed/foo`)
 
-Joylashtirilgan boshqaruv paneli uchun WebSocket yangilanishlari maxsus portdagi yordamchi server
-tomonidan boshqariladi (`src/lib/services/embedWsProxy.ts` fayliga qarang).
+O'rnatilgan asboblar paneli uchun WebSocket yangilanishlari maxsus portdagi yordamchi server tomonidan amalga oshiriladi ( `src/lib/services/embedWsProxy.ts` ga qarang).
 
-**Xavfsizlik:** Joylashtirish proksi marshrutlari `LOCAL_ONLY_API_PREFIXES` tarkibida tasniflangan
-va ularga faqat loopback orqali kirish mumkin. Cloudflare/Ngrok tunneli orqali JWT’ni qoʻlga kiritgan
-hujumchi joylashtirilgan xizmatlarga proksi orqali kira olmaydi.
+**Xavfsizlik:** O'rnatish proksi-marshrutlari `LOCAL_ONLY_API_PREFIXES` bo'yicha tasniflanadi va ularga faqat orqaga qaytish orqali kirish mumkin. Cloudflare/Ngrok tunnel orqali JWT olgan tajovuzkor o'rnatilgan xizmatlarga proksi-server o'tkaza olmaydi.
 
 ---
 
