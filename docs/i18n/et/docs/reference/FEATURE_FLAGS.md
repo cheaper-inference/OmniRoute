@@ -44,7 +44,7 @@ Tõeväärtusega lipp loetakse **lubatuks**, kui selle tegelik väärtus on `"tr
 
 ## Lippude kataloog
 
-113 lippu kuues kategoorias. **Vaikeväärtus** on definitsioonis määratud vaikeväärtus — väärtus,
+114 lippu kuues kategoorias. **Vaikeväärtus** on definitsioonis määratud vaikeväärtus — väärtus,
 mida kasutatakse, kui puuduvad nii andmebaasi ülekirjutus kui ka keskkonnamuutuja.
 
 ### Turve (10)
@@ -112,7 +112,7 @@ mida kasutatakse, kui puuduvad nii andmebaasi ülekirjutus kui ka keskkonnamuutu
 
 Kui `UNPRICED_USAGE_BUDGET_POLICY` on selgesõnaliselt määratud (andmebaasi alistus enne keskkonda), on see ülimuslik väärtuse `USAGE_LIMIT_IGNORE_UNPRICED` suhtes. Kui selgesõnaline enum-väärtus puudub, valib ülesvoolu tõeväärtuseline erand `count_as_zero`; muidu on vaikeväärtus `fail_closed`. Vigased enum-väärtused ja loetamatu funktsioonilippude salvestus põhjustavad ettevaatusest keeldumise. Kumbki erand ei leevenda hinnastatud kulude ega ebaõnnestunud hinnaotsingu kontrolli. Jõustamine ja administraatori aruanne määravad sama tegeliku poliitika.
 
-### Käituskeskkond (54)
+### Käituskeskkond (55)
 
 | Võti                                           | Tüüp       | Vaikimisi | Taaskäivitus | Kirjeldus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------------------------------- | ---------- | --------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Kui `UNPRICED_USAGE_BUDGET_POLICY` on selgesõnaliselt määratud (andmebaasi al
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean    | `false`   |              | Luba aknapõhisel kvoodipoliitikal (konto valimisel kasutatavad seansi-/nädalalävendid) arvestada piiratud ammendumisootega (#17000): kui piiratud ooteaja tähtaeg on möödunud või vahemällu salvestatud vaatlus on ooteaja ülempiirist vanem, ei välista aken kontot enam kuni kvoodiandmete värske pärimiseni. Vaikimisi väljas: vahemällu salvestatud aken jätkab konto blokeerimist viimati teatatud protsendi alusel kuni oma lähtestamisajani.                                                                                                                                                                                                                                                                                                                   |
 | `IMAGE_GENERATION_LONG_JOBS`                   | tõeväärtus | `false`   |              | OpenAI-ga ühilduva pildiloome jaoks (#16260): kasuta ühenduse ajalõppu (`providerSpecificData.timeoutMs`), muul juhul keskset ülesvoolu päringu ajalõppu (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → vaikimisi 600 s), mitte fikseeritud 120 s pildiloome ajapiirangut; kui kutsuja tühistab päringu, vasta olekukoodiga 499; võimalda Playgroundil võtta pikad pildiloome tööd vastu SSE-voona koos ühendust aktiivsena hoidvate südamelöökidega. Vaikimisi väljas: rakendub fikseeritud ajapiirang ja kutsuja tühistamist ei edastata. Vastuse keha lugemist hõlmav tähtaeg on alati sisse lülitatud.                                                                                                                                                              |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean    | `false`   |              | Lõpetab Cursor Grok 4.7 jaoks arutluspingutuse `max` pakkumise ja edastamise (#17386): Cursori dokumentatsioon loetleb ainult low/medium/high/xhigh, mistõttu varualias `grok-4.7-max` kaob kataloogist ja pingutust `max` nõudev päring saadetakse ilma pingutusparameetrita. Vaikimisi välja lülitatud: `max` jääb pakutuks ja edastatuks, sest otsene AgentService/Run-proov aktsepteeris seda.                                                                                                                                                                                                                                                                                                                                                                    |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | tõeväärtus | `false`   |              | Tihendusvahemälu statistikas arvestage tihendatud päring automaatse prefiksi vahemällu salvestamise pakkujale (OpenAI, Codex, Azure või kohandatud ühendus, mis deklareerib kiire vahemälu koos markeri eemaldamisega) hinnangulise vahemälu tabamusena isegi ilma `cache_control` -markeriteta (#17114). Prognoos on vahemälu sobivuse signaal, mitte täheldatud tabamus, seega on nende pakkujate teatatud tabamusmäär 100% suunas. Vaikimisi välja lülitatud: ainult `cache_control` markereid vahemällu salvestavale pakkujale edastav taotlus loetakse hinnanguliseks tabamuseks, nii et automaatse prefiksiga pakkujad teatavad jätkuvalt 0-st.                                                                                                                 |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Tagastab kõik lipud koos nende kehtiva väärtuse, allika ja kokkuvõttega.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kõik 113 lippu
+    // ... kõik 114 lippu
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

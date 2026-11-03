@@ -44,7 +44,7 @@ Flaga logiczna jest uznawana za **włączoną**, gdy jej efektywna wartość to 
 
 ## Katalog flag
 
-113 flag w 6 kategoriach. **Wartość domyślna** jest wartością domyślną definicji — używaną,
+114 flag w 6 kategoriach. **Wartość domyślna** jest wartością domyślną definicji — używaną,
 gdy nie określono ani nadpisania w bazie danych, ani zmiennej środowiskowej.
 
 ### Bezpieczeństwo (10)
@@ -112,7 +112,7 @@ gdy nie określono ani nadpisania w bazie danych, ani zmiennej środowiskowej.
 
 Gdy `UNPRICED_USAGE_BUDGET_POLICY` jest jawnie skonfigurowane (nadpisanie w DB przed środowiskiem), ma pierwszeństwo przed `USAGE_LIMIT_IGNORE_UNPRICED`. Bez jawnej wartości enum wyjątek typu boolean z upstreama wybiera `count_as_zero`; w przeciwnym razie domyślne jest `fail_closed`. Niepoprawne wartości enum i nieczytelny magazyn flag funkcji powodują blokowanie. Żaden z wyjątków nie osłabia kontroli wydatków o znanej cenie ani nieudanego wyszukania ceny. Egzekwowanie i raport administratora ustalają tę samą efektywną politykę.
 
-### Środowisko uruchomieniowe (54)
+### Środowisko uruchomieniowe (55)
 
 | Klucz                                          | Typ     | Domyślnie | Restart | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | ------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Gdy `UNPRICED_USAGE_BUDGET_POLICY` jest jawnie skonfigurowane (nadpisanie w DB p
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`   |         | Zezwól, aby polityka limitów dla poszczególnych okien (progi sesyjne/tygodniowe używane podczas wyboru konta) uwzględniała ograniczone czasowo wstrzymanie po wyczerpaniu (#17000): po upływie ostatecznego terminu ograniczonego wstrzymania lub gdy obserwacja w pamięci podręcznej jest starsza niż limit wstrzymania, okno przestaje wykluczać konto do czasu ponownego pobrania informacji o limicie. Domyślnie wyłączone: okno zapisane w pamięci podręcznej nadal blokuje konto na podstawie ostatnio zgłoszonej wartości procentowej aż do własnego czasu resetowania.                                                                                                                                                                                                                                          |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`   |         | W przypadku generowania obrazów zgodnego z OpenAI (#16260): używaj limitu czasu połączenia (`providerSpecificData.timeoutMs`), a jeśli nie jest ustawiony — centralnego limitu czasu pobierania z usługi nadrzędnej (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → domyślnie 600 s) zamiast stałego, 120-sekundowego limitu dla obrazów; zwracaj kod 499, gdy wywołujący anuluje żądanie; umożliwiaj środowisku Playground odbieranie długotrwałych zadań generowania obrazów jako strumienia SSE z komunikatami heartbeat podtrzymującymi połączenie. Domyślnie wyłączone: obowiązuje stały limit, a anulowanie przez wywołującego nie jest propagowane. Limit czasu obejmujący odczyt treści odpowiedzi jest zawsze aktywny.                                                                                            |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`   |         | Przestaje oferować i przekazywać wysiłek rozumowania `max` dla Cursor Grok 4.7 (#17386): dokumentacja Cursor wymienia tylko low/medium/high/xhigh, więc zapasowy alias `grok-4.7-max` znika z katalogu, a żądanie wysiłku `max` jest wysyłane bez parametru wysiłku. Domyślnie wyłączone: `max` pozostaje oferowane i przekazywane, ponieważ próba AgentService/Run na żywo je zaakceptowała.                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`   |         | W statystykach pamięci podręcznej kompresji traktuj skompresowane żądanie do dostawcy z automatycznym buforowaniem prefiksu (OpenAI, Codex, Azure lub niestandardowe połączenie deklarujące buforowanie promptów z usuwaniem znaczników) jako szacowane trafienie pamięci podręcznej, nawet bez znaczników `cache_control` (#17114). Szacunek jest sygnałem kwalifikowalności do buforowania, a nie zaobserwowanym trafieniem, dlatego raportowany współczynnik trafień dla tych dostawców zmierza do 100%. Domyślnie wyłączone: tylko żądanie zawierające znaczniki `cache_control` skierowane do dostawcy obsługującego buforowanie jest liczone jako szacowane trafienie, więc dostawcy z automatycznym prefiksem nadal raportują 0.                                                                                 |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Zwraca wszystkie flagi wraz z ich obowiązującą wartością, źródłem i pods
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 113 flags
+    // ... all 114 flags
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

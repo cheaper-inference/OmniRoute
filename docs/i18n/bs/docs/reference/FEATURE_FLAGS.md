@@ -40,7 +40,7 @@ Boolean zastavica se smatra **omogućenom** kada je njena efektivna vrijednost `
 
 ## Katalog zastavica
 
-113 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
+114 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
 koja se koristi kada nisu prisutni ni nadjačavanje iz baze podataka ni varijabla okruženja.
 
 ### Sigurnost (10)
@@ -108,7 +108,7 @@ koja se koristi kada nisu prisutni ni nadjačavanje iz baze podataka ni varijabl
 
 Kad je `UNPRICED_USAGE_BUDGET_POLICY` izričito postavljen (nadjačavanje u DB-u prije okruženja), ima prednost pred `USAGE_LIMIT_IGNORE_UNPRICED`. Bez izričite enum vrijednosti booleovski izuzetak iz upstreama odabire `count_as_zero`; inače je podrazumijevano `fail_closed`. Nevaljane enum vrijednosti i nečitljiva pohrana zastavica značajki dovode do blokiranja. Nijedan izuzetak ne ublažava ograničenja potrošnje s poznatom cijenom ili neuspjelog dohvaćanja cijene. Provedba i administratorski izvještaj utvrđuju istu efektivnu politiku.
 
-### Izvršno okruženje (54)
+### Izvršno okruženje (55)
 
 | Ključ                                          | Tip     | Zadano  | Ponovno pokretanje | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------- | ------- | ------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -168,6 +168,7 @@ Kad je `UNPRICED_USAGE_BUDGET_POLICY` izričito postavljen (nadjačavanje u DB-u
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |                    | Dozvolite pravilima kvote po vremenskom prozoru (pragovi sesije/sedmice koje koristi odabir računa) da poštuju ograničeno parkiranje pri iscrpljenju (#17000): nakon što istekne krajnji rok ograničenog parkiranja ili kada je keširano zapažanje starije od ograničenja parkiranja, prozor prestaje izuzimati račun do novog dohvatanja kvote. Podrazumijevano je isključeno: keširani prozor nastavlja blokirati na osnovu posljednjeg prijavljenog postotka sve do vlastitog vremena poništavanja.                                                                                                                                                                                                                                                                                                                            |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |                    | Za generisanje slika kompatibilno s OpenAI-jem (#16260): koristi vremensko ograničenje veze (`providerSpecificData.timeoutMs`), a ako nije dostupno, centralno vremensko ograničenje za dohvaćanje iz nadređenog sistema (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → zadano 600 s) umjesto fiksnog ograničenja od 120 s za slike; odgovori statusom 499 kada pozivalac otkaže zahtjev; omogući Playgroundu da prima dugotrajne zadatke generisanja slika kao SSE tok s keepalive signalima. Zadano je isključeno: primjenjuje se fiksno ograničenje, a otkazivanje od strane pozivaoca se ne prosljeđuje. Krajnji rok koji obuhvata čitanje tijela odgovora uvijek je aktivan.                                                                                                                                                   |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                    | Prestaje nuditi i prosljeđivati napor zaključivanja `max` za Cursor Grok 4.7 (#17386): dokumentacija Cursora navodi samo low/medium/high/xhigh, pa rezervni alias `grok-4.7-max` nestaje iz kataloga, a zahtjev za napor `max` šalje se bez parametra napora. Podrazumijevano isključeno: `max` se i dalje nudi i prosljeđuje jer ga je živa provjera AgentService/Run prihvatila.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                    | U statistici keša kompresije, kompresovani zahtjev prema pružaocu s automatskim keširanjem prefiksa (OpenAI, Codex, Azure ili prilagođena veza koja deklarira keširanje upita uz uklanjanje oznaka) računaj kao procijenjeni pogodak keša čak i bez oznaka `cache_control` (#17114). Procjena je signal podobnosti za keširanje, a ne zabilježeni pogodak, pa prijavljena stopa pogodaka za te pružaoce teži ka 100%. Isključeno prema zadanim postavkama: samo zahtjev koji sadrži oznake `cache_control` prema pružaocu koji podržava keširanje računa se kao procijenjeni pogodak, pa pružaoci s automatskim prefiksom i dalje prijavljuju 0.                                                                                                                                                                                  |
 
 ### CLI (5)
 
@@ -253,10 +254,10 @@ Vraća svaku zastavicu s njenom efektivnom vrijednošću, izvorom i sažetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... svih 113 zastavica
+    // ... svih 114 zastavica
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

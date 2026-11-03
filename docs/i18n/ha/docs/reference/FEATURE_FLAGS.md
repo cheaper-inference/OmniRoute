@@ -44,7 +44,7 @@ Ana ɗaukar alamar boolean a matsayin **mai aiki** idan ƙimarta mai aiki ita ce
 
 ## Kundin Tutoci
 
-Tutoci 113 a rukunai 6. **Tsoho** shi ne tsohon ƙimar da aka ayyana — ƙimar da ake
+Tutoci 114 a rukunai 6. **Tsoho** shi ne tsohon ƙimar da aka ayyana — ƙimar da ake
 amfani da ita idan babu sauya ƙima ta DB ko canjin muhalli.
 
 ### Tsaro (10)
@@ -112,7 +112,7 @@ amfani da ita idan babu sauya ƙima ta DB ko canjin muhalli.
 
 Idan an saita `UNPRICED_USAGE_BUDGET_POLICY` a fili (sauyawar rumbun bayanai kafin muhalli), yana da fifiko a kan `USAGE_LIMIT_IGNORE_UNPRICED`. Idan babu ƙimar enum a fili, zaɓin boolean na keɓancewa na upstream yana zaɓar `count_as_zero`; in ba haka ba ƙimar asali ita ce `fail_closed`. Ƙimomin enum marasa inganci da ma'ajin feature flags da ba a iya karantawa suna haifar da toshewa don tsaro. Babu ɗayan zaɓin keɓancewar da ke sassauta ƙuntatawar kashe kuɗin da ke da farashi ko gazawar neman farashi. Aiwatar da ƙuntatawar da rahoton mai gudanarwa suna warware manufar da ake amfani da ita guda ɗaya.
 
-### Lokacin Gudanarwa (54)
+### Lokacin Gudanarwa (55)
 
 | Maɓalli                                        | Nau'i   | Na asali | Sake farawa | Bayani                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------------------------- | ------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -172,6 +172,7 @@ Idan an saita `UNPRICED_USAGE_BUDGET_POLICY` a fili (sauyawar rumbun bayanai kaf
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`  |             | Bada damar manufar ƙayyadadden kaso na kowace taga (iyakokin zaman/na mako-mako da zaɓin asusu ke amfani da su) ta mutunta ajiyar ƙarewa mai iyaka (#17000): da zarar wa’adin ajiyar da aka iyakance ya wuce, ko kuma bayanin da aka adana a cache ya girmi iyakar ajiyar, tagar za ta daina ware asusun har sai an sake ɗauko sabon bayanin ƙayyadadden kaso. A kashe yake ta tsohuwa: tagar da aka adana a cache tana ci gaba da toshewa bisa kaso na ƙarshe da ta bayar da rahoto har zuwa lokacin sake saitinta.                                                                                                                                                                                                                                                                             |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`  |             | Don samar da hoto mai dacewa da OpenAI (#16260): yi amfani da iyakar jiran haɗi (`providerSpecificData.timeoutMs`), ko kuma iyakar jiran ɗauko bayanai ta tsakiya daga upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → tsoho na sakan 600) maimakon ƙayyadadden kasafin lokacin hoto na sakan 120; mayar da amsar 499 idan mai kira ya soke; ba Playground damar karɓar ayyukan hoto masu ɗaukar lokaci a matsayin rafin SSE tare da saƙonnin keepalive na lokaci-lokaci. A kashe yake ta tsohuwa: ƙayyadadden kasafin lokacin ne yake aiki kuma ba a isar da sokewar mai kira ba. Wa’adin lokacin da ya ƙunshi karanta jikin amsa koyaushe yana kunne.                                                                                                                                    |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`  |             | Yana daina bayarwa da turawa na ƙarfin tunani `max` ga Cursor Grok 4.7 (#17386): takardun Cursor sun lissafa low/medium/high/xhigh kawai, don haka sunan madadin `grok-4.7-max` yana ɓacewa daga katalogi, kuma ana aika buƙatar ƙarfin `max` ba tare da parameter na ƙarfi ba. A kashe yake bisa asali: ana ci gaba da bayarwa da turawa na `max`, domin ainihin gwajin AgentService/Run ya karɓe shi.                                                                                                                                                                                                                                                                                                                                                                                          |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`  |             | A cikin ƙididdigar cache na matsawa, ƙidaya buƙatun da aka matsa zuwa mai ba da caching prefix ta atomatik (OpenAI, Codex, Azure, ko haɗin al'ada wanda ke bayyana saurin caching tare da cire alamar alama) azaman kiyasin cache da aka buga koda ba tare da alamun `cache_control` ba (#17114). Ƙididdigar siginar cancantar cache, ba bugun gani ba, don haka ƙimar bugun da aka ruwaito na waɗannan masu samarwa yana tafiya zuwa 100%. Kashe ta tsohuwa: kawai buƙatun ɗauke da alamomin `cache_control` zuwa mai bada caching ana ƙidaya azaman kiyasin bugawa, don haka masu samar da prefix ta atomatik suna ci gaba da bayar da rahoton 0.                                                                                                                                              |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Yana mayar da kowace tuta tare da ƙimar da ake amfani da ita, tushenta, da taƙ
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... dukkan tutoci 113
+    // ... dukkan tutoci 114
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

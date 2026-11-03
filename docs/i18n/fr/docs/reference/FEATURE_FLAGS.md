@@ -44,7 +44,7 @@ Un indicateur booléen est considéré comme **activé** lorsque sa valeur effec
 
 ## Catalogue des indicateurs
 
-113 indicateurs répartis en 6 catégories. **Par défaut** correspond à la valeur par défaut de la définition — la valeur
+114 indicateurs répartis en 6 catégories. **Par défaut** correspond à la valeur par défaut de la définition — la valeur
 utilisée lorsqu’aucune substitution en base de données ni aucune variable d’environnement n’est présente.
 
 ### Sécurité (10)
@@ -112,7 +112,7 @@ utilisée lorsqu’aucune substitution en base de données ni aucune variable d�
 
 Lorsque `UNPRICED_USAGE_BUDGET_POLICY` est explicitement configuré (la surcharge en base de données précède l'environnement), il prévaut sur `USAGE_LIMIT_IGNORE_UNPRICED`. Sans valeur enum explicite, la désactivation booléenne de l'amont sélectionne `count_as_zero` ; sinon, la valeur par défaut est `fail_closed`. Les valeurs enum invalides et un stockage illisible des options de fonctionnalité entraînent un blocage par sécurité. Aucune des options de désactivation n'assouplit les restrictions sur les dépenses tarifées ou sur un échec de recherche de tarif. L'application des restrictions et le rapport de l'administrateur déterminent la même politique effective.
 
-### Environnement d’exécution (54)
+### Environnement d’exécution (55)
 
 | Clé                                            | Type    | Valeur par défaut | Redémarrage | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ----------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Lorsque `UNPRICED_USAGE_BUDGET_POLICY` est explicitement configuré (la surcharg
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`           |             | Permet à la politique de quota par fenêtre (seuils de session/hebdomadaires utilisés pour la sélection des comptes) de respecter la mise en attente bornée après épuisement (#17000) : une fois l’échéance maximale de mise en attente dépassée, ou lorsque l’observation mise en cache est plus ancienne que la durée maximale de mise en attente, la fenêtre cesse d’exclure le compte jusqu’à une nouvelle récupération du quota. Désactivé par défaut : une fenêtre mise en cache continue de bloquer en fonction du dernier pourcentage signalé jusqu’à sa propre heure de réinitialisation.                                                                                                                                                                                                                                                                                                                               |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`           |             | Pour la génération d’images compatible avec OpenAI (#16260) : utiliser le délai d’expiration de la connexion (`providerSpecificData.timeoutMs`), ou à défaut le délai d’expiration central de récupération en amont (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → valeur par défaut de 600 s), au lieu du budget fixe de 120 s pour les images ; répondre avec le code 499 lorsque l’appelant annule ; permettre au Playground de recevoir les longues tâches de génération d’images sous forme de flux SSE avec des pulsations de maintien de connexion. Désactivé par défaut : le budget fixe s’applique et l’annulation par l’appelant n’est pas propagée. Le délai couvrant la lecture du corps de la réponse est toujours actif.                                                                                                                                                                                            |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`           |             | Cesse de proposer et de transmettre l'effort de raisonnement `max` pour Cursor Grok 4.7 (#17386) : la documentation Cursor ne répertorie que low/medium/high/xhigh ; l'alias de repli `grok-4.7-max` disparaît donc du catalogue et une requête avec effort `max` est envoyée sans paramètre d'effort. Désactivé par défaut : `max` reste proposé et transmis, car un test réel d'AgentService/Run l'a accepté.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | booléen | `false`           |             | Dans les statistiques du cache de compression, comptez une requête compressée adressée à un fournisseur de mise en cache de préfixes automatique (OpenAI, Codex, Azure ou une connexion personnalisée qui déclare la mise en cache rapide avec suppression des marqueurs) comme une estimation du cache atteint même sans marqueurs `cache_control` (#17114). L'estimation est un signal d'éligibilité au cache, et non un succès observé, de sorte que le taux de succès signalé pour ces fournisseurs tend vers 100 %. Désactivé par défaut : seule une requête transportant des marqueurs `cache_control` vers un fournisseur de mise en cache compte comme une estimation du succès, donc les fournisseurs de préfixes automatiques continuent de signaler 0.                                                                                                                                                               |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Renvoie chaque indicateur avec sa valeur effective, sa source et un résumé.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... les 113 indicateurs
+    // ... les 114 indicateurs
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -44,7 +44,7 @@ Logična zastavica se šteje za **omogočeno**, kadar je njena dejanska vrednost
 
 ## Katalog zastavic
 
-113 zastavic v 6 kategorijah. **Privzeta vrednost** je privzeta vrednost definicije — vrednost,
+114 zastavic v 6 kategorijah. **Privzeta vrednost** je privzeta vrednost definicije — vrednost,
 ki se uporabi, kadar ni prisotna niti preglasitev v zbirki podatkov niti okoljska spremenljivka.
 
 ### Varnost (10)
@@ -112,7 +112,7 @@ ki se uporabi, kadar ni prisotna niti preglasitev v zbirki podatkov niti okoljsk
 
 Če je `UNPRICED_USAGE_BUDGET_POLICY` izrecno nastavljen (prepis v DB pred okoljem), ima prednost pred `USAGE_LIMIT_IGNORE_UNPRICED`. Brez izrecne vrednosti enum logična izjema iz upstreama izbere `count_as_zero`; sicer je privzeto `fail_closed`. Neveljavne vrednosti enum in neberljiva shramba zastavic funkcij povzročijo blokiranje. Nobena izjema ne omili nadzora porabe z znano ceno ali neuspešnega iskanja cene. Uveljavljanje in skrbniško poročilo določita isto veljavno politiko.
 
-### Izvajalno okolje (54)
+### Izvajalno okolje (55)
 
 | Ključ                                          | Vrsta   | Privzeto | Ponovni zagon | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | -------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ ki se uporabi, kadar ni prisotna niti preglasitev v zbirki podatkov niti okoljsk
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`  |               | Omogoči, da pravilnik kvot za posamezno časovno okno (pragovi sej/tednov, uporabljeni pri izbiri računa) upošteva omejeno čakanje zaradi izčrpanosti (#17000): ko poteče omejeni rok čakanja ali je predpomnjeno opažanje starejše od omejitve čakanja, časovno okno preneha izključevati račun do naslednjega pridobivanja podatkov o kvoti. Privzeto izklopljeno: predpomnjeno časovno okno še naprej blokira na podlagi zadnjega sporočenega odstotka do lastnega časa ponastavitve.                                                                                                                                                                                                                                                                  |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`  |               | Za ustvarjanje slik, združljivo z OpenAI (#16260): uporabi časovno omejitev povezave (`providerSpecificData.timeoutMs`), sicer pa osrednjo časovno omejitev pridobivanja iz nadrejenega vira (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → privzeto 600 s) namesto fiksne 120-sekundne omejitve za slike; vrne odgovor 499, ko klicatelj prekliče zahtevo; omogoči, da Playground prejema dolgotrajna opravila ustvarjanja slik kot tok SSE s periodičnimi signali za ohranjanje povezave. Privzeto izklopljeno: uporablja se fiksna omejitev, preklic klicatelja pa se ne posreduje. Rok, ki zajema branje telesa odgovora, je vedno omogočen.                                                                                                           |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`  |               | Preneha ponujati in posredovati trud sklepanja `max` za Cursor Grok 4.7 (#17386): dokumentacija Cursor navaja samo low/medium/high/xhigh, zato rezervni vzdevek `grok-4.7-max` izgine iz kataloga, zahteva s trudom `max` pa se pošlje brez parametra truda. Privzeto izklopljeno: `max` se še naprej ponuja in posreduje, saj ga je preizkus AgentService/Run v živo sprejel.                                                                                                                                                                                                                                                                                                                                                                           |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | logično | `false`  |               | V statističnih podatkih o stiskanju predpomnilnika štejte stisnjeno zahtevo ponudniku samodejnega predpomnjenja predpone (OpenAI, Codex, Azure ali povezava po meri, ki deklarira hitro predpomnjenje z odstranjevanjem označevalcev) kot ocenjeni zadetek predpomnilnika tudi brez označevalcev `cache_control` (#17114). Ocena je signal primernosti predpomnilnika in ne opažen zadetek, zato se poročana stopnja zadetkov za te ponudnike giblje proti 100 %. Privzeto izklopljeno: samo zahteva, ki nosi oznake `cache_control` ponudniku predpomnjenja, šteje kot ocenjeni zadetek, zato ponudniki samodejnih predpon še naprej poročajo 0.                                                                                                        |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Vrne vse zastavice z njihovo dejansko vrednostjo, virom in povzetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... vseh 113 zastavic
+    // ... vseh 114 zastavic
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

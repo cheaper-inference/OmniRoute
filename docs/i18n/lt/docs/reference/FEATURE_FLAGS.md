@@ -39,7 +39,7 @@ Loginė vėliavėlė laikoma **įjungta**, kai jos efektyvioji reikšmė yra `"t
 
 ## Vėliavėlių katalogas
 
-113 vėliavėlių 6 kategorijose. **Numatytoji reikšmė** yra apibrėžime nurodyta numatytoji reikšmė, naudojama,
+114 vėliavėlių 6 kategorijose. **Numatytoji reikšmė** yra apibrėžime nurodyta numatytoji reikšmė, naudojama,
 kai nėra nei DB perrašymo, nei aplinkos kintamojo.
 
 ### Saugumas (10)
@@ -107,7 +107,7 @@ kai nėra nei DB perrašymo, nei aplinkos kintamojo.
 
 Kai `UNPRICED_USAGE_BUDGET_POLICY` aiškiai sukonfigūruota (duomenų bazės perrašymas prieš aplinką), ji turi pirmenybę prieš `USAGE_LIMIT_IGNORE_UNPRICED`. Be aiškios enum reikšmės upstream loginė išimtis pasirenka `count_as_zero`; kitu atveju numatytoji reikšmė yra `fail_closed`. Netinkamos enum reikšmės ir neperskaitoma funkcijų vėliavėlių saugykla saugumo sumetimais lemia atmetimą. Nė viena išimtis nesusilpnina įkainotų išlaidų ar nepavykusios kainos paieškos kontrolės. Kontrolė ir administratoriaus ataskaita nustato tą pačią galiojančią politiką.
 
-### Vykdymo aplinka (54)
+### Vykdymo aplinka (55)
 
 | Raktas                                         | Tipas   | Numatytoji reikšmė | Paleidimas iš naujo | Aprašymas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | ------- | ------------------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -167,6 +167,7 @@ Kai `UNPRICED_USAGE_BUDGET_POLICY` aiškiai sukonfigūruota (duomenų bazės per
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`            |                     | Leisti lango kvotos politikai (paskyrai parinkti naudojamiems sesijos / savaitės slenksčiams) paisyti apriboto išnaudojimo pristabdymo (#17000): pasibaigus apriboto pristabdymo terminui arba kai podėlyje esantis stebėjimas yra senesnis už pristabdymo ribą, langas nustoja atmesti paskyrą iki naujo kvotos gavimo. Pagal numatytuosius nustatymus išjungta: podėlyje saugomas langas ir toliau blokuoja pagal paskutinį nurodytą procentą iki savo nustatymo iš naujo laiko.                                                                                                                                                                                                                                                                                                                                                           |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`            |                     | „OpenAI“ suderinamam vaizdų generavimui (#16260): naudoti ryšio skirtąjį laiką (`providerSpecificData.timeoutMs`), o jei jis nenurodytas – centrinį išsiunčiamų užklausų skirtąjį laiką (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → numatytoji reikšmė 600 sek.), o ne fiksuotą 120 sek. vaizdų generavimo limitą; grąžinti 499, kai kvietėjas atšaukia užklausą; leisti „Playground“ gauti ilgai vykdomas vaizdų generavimo užduotis kaip SSE srautą su ryšį palaikančiais signalais. Pagal numatytuosius nustatymus išjungta: taikomas fiksuotas limitas, o kvietėjo atšaukimas neperduodamas. Atsakymo turinio nuskaitymui taikomas terminas visada įjungtas.                                                                                                                                                                            |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`            |                     | Nustoja siūlyti ir perduoti samprotavimo pastangas `max` modeliui Cursor Grok 4.7 (#17386): Cursor dokumentacijoje nurodoma tik low/medium/high/xhigh, todėl atsarginis alternatyvus pavadinimas `grok-4.7-max` išnyksta iš katalogo, o užklausa su pastangomis `max` siunčiama be pastangų parametro. Pagal numatymą išjungta: `max` vis dar siūloma ir perduodama, nes tiesioginė AgentService/Run patikra ją priėmė.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | loginis | `false`            |                     | Suglaudinimo talpyklos statistikoje skaičiuokite suglaudintą užklausą automatinio priešdėlio kaupimo talpykloje teikėjui (OpenAI, Codex, Azure arba tinkintam ryšiui, kuris deklaruoja greitą talpyklą su žymeklio pašalinimu) kaip apskaičiuotą talpyklos įvykį net be `cache_control` žymeklių (#17114). Įvertinimas yra talpyklos tinkamumo signalas, o ne pastebėtas įvykis, todėl tų paslaugų teikėjų pranešimų apie įvykius rodiklis siekia 100 %. Išjungta pagal numatytuosius nustatymus: tik užklausa su `cache_control` žymekliais talpyklos teikėjui skaičiuojama kaip įvertintas įvykis, todėl automatinio priešdėlio teikėjai praneša 0.                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -252,10 +253,10 @@ Grąžina visas žymas su jų galiojančia reikšme, šaltiniu ir suvestine.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... visos 113 žymų
+    // ... visos 114 žymų
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

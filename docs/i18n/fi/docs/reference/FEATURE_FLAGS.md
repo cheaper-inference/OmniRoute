@@ -44,7 +44,7 @@ Totuusarvoinen lippu katsotaan **käytössä olevaksi**, kun sen voimassa oleva 
 
 ## Valitsinluettelo
 
-113 valitsinta 6 kategoriassa. **Oletusarvo** on määrityksen oletusarvo — arvo, jota
+114 valitsinta 6 kategoriassa. **Oletusarvo** on määrityksen oletusarvo — arvo, jota
 käytetään, kun tietokantaohitusta tai ympäristömuuttujaa ei ole määritetty.
 
 ### Tietoturva (10)
@@ -112,7 +112,7 @@ käytetään, kun tietokantaohitusta tai ympäristömuuttujaa ei ole määritett
 
 Kun `UNPRICED_USAGE_BUDGET_POLICY` on eksplisiittisesti määritetty (tietokantaohitus ennen ympäristöä), se on etusijalla arvoon `USAGE_LIMIT_IGNORE_UNPRICED` nähden. Ilman eksplisiittistä enum-arvoa upstreamin totuusarvoinen poikkeusvalinta valitsee arvon `count_as_zero`; muussa tapauksessa oletus on `fail_closed`. Virheelliset enum-arvot ja lukukelvoton ominaisuuslippujen tallennus estävät käytön varmuuden vuoksi. Kumpikaan poikkeusvalinta ei lievennä hinnoitellun kulutuksen tai epäonnistuneen hinnanhaun valvontaa. Valvonta ja ylläpitäjän raportti ratkaisevat saman voimassa olevan käytännön.
 
-### Ajonaika (54)
+### Ajonaika (55)
 
 | Avain                                          | Tyyppi     | Oletusarvo | Uudelleenkäynnistys | Kuvaus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------------------------------- | ---------- | ---------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Kun `UNPRICED_USAGE_BUDGET_POLICY` on eksplisiittisesti määritetty (tietokanta
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean    | `false`    |                     | Salli ikkunakohtaisen kiintiökäytännön (tilin valinnassa käytettävät istunto-/viikkokohtaiset kynnysarvot) noudattaa rajattua ehtymistaukoa (#17000): kun rajoitetun tauon määräaika on umpeutunut tai välimuistissa oleva havainto on tauon enimmäiskestoa vanhempi, ikkuna lakkaa sulkemasta tiliä pois, kunnes kiintiötiedot noudetaan uudelleen. Oletusarvoisesti pois käytöstä: välimuistissa oleva ikkuna jatkaa estämistä viimeksi ilmoitetun prosenttiosuuden perusteella omaan nollautumisajankohtaansa asti.                                                                                                                                                                                                                                                                                                                            |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean    | `false`    |                     | OpenAI-yhteensopivaa kuvien generointia varten (#16260): käytä yhteyden aikakatkaisua (`providerSpecificData.timeoutMs`) tai muussa tapauksessa keskitettyä upstream-noudon aikakatkaisua (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → oletuksena 600 s) kiinteän 120 s:n kuvabudjetin sijaan; vastaa tilakoodilla 499, kun kutsuja peruuttaa pyynnön; anna Playgroundin vastaanottaa pitkäkestoiset kuvatyöt SSE-suoratoistona, jossa on yhteyttä ylläpitäviä heartbeat-viestejä. Oletusarvoisesti poissa käytöstä: kiinteää budjettia sovelletaan eikä kutsujan tekemää peruutusta välitetä eteenpäin. Vastauksen rungon lukemisen kattava määräaika on aina käytössä.                                                                                                                                                                          |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean    | `false`    |                     | Lopettaa päättelypanoksen `max` tarjoamisen ja välittämisen Cursor Grok 4.7:lle (#17386): Cursorin dokumentaatio luettelee vain arvot low/medium/high/xhigh, joten varavaihtoehdon alias `grok-4.7-max` poistuu luettelosta ja panosta `max` pyytävä pyyntö lähetetään ilman panosparametria. Oletusarvoisesti pois käytöstä: `max` tarjotaan ja välitetään edelleen, sillä suora AgentService/Run-koepyyntö hyväksyi sen.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean    | `false`    |                     | Laske pakkausvälimuistitilastoissa pakattu pyyntö automaattisen etuliitevälimuistin palveluntarjoajalle (OpenAI, Codex, Azure tai mukautettu yhteys, joka ilmoittaa välimuistin välimuistin ja merkin poistamisen) arvioiduksi välimuistiosumaksi myös ilman `cache_control` -merkkejä (#17114). Arvio on välimuistin kelpoisuussignaali, ei havaittu osuma, joten näiden palveluntarjoajien raportoitu osumaprosentti on kohti 100 %. Pois oletusarvoisesti: vain pyyntö, joka kuljettaa `cache_control` -merkkejä välimuistin tarjoajalle, lasketaan arvioiduksi osumaksi, joten automaattisten etuliitteiden tarjoajat raportoivat jatkuvasti 0:n.                                                                                                                                                                                             |
 
 ### CLI (5)
 
@@ -258,10 +259,10 @@ Palauttaa jokaisen lipun sekä sen voimassa olevan arvon, lähteen ja yhteenvedo
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kaikki 113 lippua
+    // ... kaikki 114 lippua
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

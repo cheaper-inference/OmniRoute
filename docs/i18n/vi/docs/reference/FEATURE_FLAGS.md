@@ -39,7 +39,7 @@ Một cờ boolean được coi là **đã bật** khi giá trị hiệu quả c
 
 ## Danh mục cờ
 
-113 cờ thuộc 6 danh mục. **Mặc định** là giá trị mặc định trong định nghĩa — giá trị
+114 cờ thuộc 6 danh mục. **Mặc định** là giá trị mặc định trong định nghĩa — giá trị
 được sử dụng khi không có giá trị ghi đè trong DB cũng như biến môi trường.
 
 ### Bảo mật (10)
@@ -107,7 +107,7 @@ Một cờ boolean được coi là **đã bật** khi giá trị hiệu quả c
 
 Khi `UNPRICED_USAGE_BUDGET_POLICY` được cấu hình rõ ràng (ghi đè DB trước môi trường), nó ưu tiên hơn `USAGE_LIMIT_IGNORE_UNPRICED`. Không có giá trị enum rõ ràng thì tùy chọn ngoại lệ boolean của thượng nguồn chọn `count_as_zero`; nếu không, mặc định là `fail_closed`. Giá trị enum không hợp lệ và kho cờ tính năng không đọc được đều dẫn đến từ chối để bảo đảm an toàn. Không ngoại lệ nào nới lỏng ràng buộc đối với chi tiêu có giá hay tra cứu giá thất bại. Việc thực thi và báo cáo quản trị viên xác định cùng một chính sách có hiệu lực.
 
-### Runtime (54)
+### Runtime (55)
 
 | Khóa                                           | Kiểu    | Mặc định | Khởi động lại | Mô tả                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------------------------------- | ------- | -------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -167,6 +167,7 @@ Khi `UNPRICED_USAGE_BUDGET_POLICY` được cấu hình rõ ràng (ghi đè DB t
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`  |               | Cho phép chính sách hạn ngạch theo từng cửa sổ (các ngưỡng theo phiên/tuần được sử dụng khi chọn tài khoản) tuân theo khoảng tạm dừng hữu hạn khi cạn kiệt (#17000): sau khi thời hạn tạm dừng có giới hạn đã qua, hoặc quan sát được lưu trong bộ nhớ đệm cũ hơn giới hạn tạm dừng, cửa sổ sẽ ngừng loại trừ tài khoản cho đến lần truy xuất hạn ngạch mới. Tắt theo mặc định: một cửa sổ được lưu trong bộ nhớ đệm tiếp tục chặn dựa trên tỷ lệ phần trăm được báo cáo gần nhất cho đến thời điểm đặt lại của chính cửa sổ đó.                                                                                                                                                                                                                       |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`  |               | Đối với việc tạo hình ảnh tương thích với OpenAI (#16260): sử dụng thời gian chờ kết nối (`providerSpecificData.timeoutMs`), nếu không thì sử dụng thời gian chờ tìm nạp ngược dòng trung tâm (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → mặc định 600 giây) thay vì giới hạn cố định 120 giây dành cho hình ảnh; trả về 499 khi bên gọi hủy; cho phép Playground nhận các tác vụ tạo hình ảnh kéo dài dưới dạng luồng SSE với các tín hiệu duy trì kết nối. Mặc định tắt: giới hạn cố định được áp dụng và thao tác hủy của bên gọi không được truyền tiếp. Thời hạn bao phủ việc đọc nội dung phản hồi luôn được bật.                                                                                                                               |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`  |               | Ngừng cung cấp và chuyển tiếp mức suy luận `max` cho Cursor Grok 4.7 (#17386): tài liệu Cursor chỉ liệt kê low/medium/high/xhigh, nên bí danh dự phòng `grok-4.7-max` biến mất khỏi danh mục và yêu cầu mức `max` được gửi không kèm tham số mức suy luận. Mặc định tắt: `max` vẫn được cung cấp và chuyển tiếp vì một lần thăm dò AgentService/Run thực tế đã chấp nhận nó.                                                                                                                                                                                                                                                                                                                                                                           |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`  |               | Trong số liệu thống kê về bộ nhớ đệm nén, hãy tính yêu cầu đã nén tới nhà cung cấp bộ nhớ đệm tiền tố tự động (OpenAI, Codex, Azure hoặc kết nối tùy chỉnh khai báo bộ nhớ đệm nhanh chóng có tính năng loại bỏ điểm đánh dấu) là một lần truy cập bộ nhớ đệm ước tính ngay cả khi không có điểm đánh dấu `cache_control` (#17114). Ước tính này là tín hiệu đủ điều kiện cho bộ đệm, không phải là lần truy cập được quan sát, vì vậy tỷ lệ lần truy cập được báo cáo cho các nhà cung cấp đó có xu hướng đạt tới 100%. Tắt theo mặc định: chỉ yêu cầu mang điểm đánh dấu `cache_control` đến nhà cung cấp bộ đệm được tính là lần truy cập ước tính, do đó, nhà cung cấp tiền tố tự động tiếp tục báo cáo 0.                                         |
 
 ### CLI (5)
 
@@ -252,10 +253,10 @@ Trả về mọi cờ cùng với giá trị hiệu lực, nguồn và thông ti
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... toàn bộ 113 cờ
+    // ... toàn bộ 114 cờ
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -44,7 +44,7 @@ Flag boolean dianggap **diaktifkan** ketika nilai efektifnya adalah `"true"`,
 
 ## Katalog Flag
 
-113 flag dalam 6 kategori. **Default** adalah nilai default definisi — nilai yang
+114 flag dalam 6 kategori. **Default** adalah nilai default definisi — nilai yang
 digunakan ketika tidak ada penggantian dari DB maupun variabel lingkungan.
 
 ### Keamanan (10)
@@ -112,7 +112,7 @@ digunakan ketika tidak ada penggantian dari DB maupun variabel lingkungan.
 
 Jika `UNPRICED_USAGE_BUDGET_POLICY` dikonfigurasi secara eksplisit (override DB sebelum environment), kebijakan tersebut lebih diutamakan daripada `USAGE_LIMIT_IGNORE_UNPRICED`. Tanpa nilai enum eksplisit, opt-out boolean upstream memilih `count_as_zero`; selain itu, defaultnya adalah `fail_closed`. Nilai enum tidak valid dan penyimpanan feature flag yang tidak dapat dibaca ditangani dengan gagal-tertutup. Tidak satu pun opt-out melonggarkan pembatasan pengeluaran yang memiliki data harga atau kegagalan pencarian harga. Penerapan batas dan laporan administrator menentukan kebijakan efektif yang sama.
 
-### Runtime (54)
+### Runtime (55)
 
 | Kunci                                          | Tipe    | Default | Mulai Ulang | Deskripsi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Jika `UNPRICED_USAGE_BUDGET_POLICY` dikonfigurasi secara eksplisit (override DB 
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |             | Izinkan kebijakan kuota per jendela (ambang batas sesi/mingguan yang digunakan oleh pemilihan akun) mematuhi penangguhan terbatas akibat kehabisan kuota (#17000): setelah tenggat penangguhan yang dibatasi berlalu, atau observasi dalam cache lebih lama daripada batas penangguhan, jendela berhenti mengecualikan akun hingga pengambilan kuota baru dilakukan. Nonaktif secara default: jendela dalam cache tetap memblokir berdasarkan persentase terakhir yang dilaporkan hingga waktu reset-nya sendiri.                                                                                                                                                                                                                                                         |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |             | Untuk pembuatan gambar yang kompatibel dengan OpenAI (#16260): gunakan batas waktu koneksi (`providerSpecificData.timeoutMs`), atau jika tidak tersedia, batas waktu pengambilan upstream pusat (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → default 600 dtk), sebagai pengganti anggaran tetap 120 dtk untuk gambar; kembalikan 499 saat pemanggil membatalkan; izinkan Playground menerima tugas pembuatan gambar berdurasi panjang sebagai aliran SSE dengan heartbeat keepalive. Dinonaktifkan secara default: anggaran tetap berlaku dan pembatalan oleh pemanggil tidak diteruskan. Tenggat waktu yang mencakup pembacaan isi respons selalu aktif.                                                                                                                 |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |             | Berhenti menawarkan dan meneruskan tingkat upaya penalaran `max` untuk Cursor Grok 4.7 (#17386): dokumentasi Cursor hanya mencantumkan low/medium/high/xhigh, sehingga alias fallback `grok-4.7-max` hilang dari katalog dan permintaan upaya `max` dikirim tanpa parameter upaya. Nonaktif secara default: `max` tetap ditawarkan dan diteruskan, karena probe AgentService/Run langsung menerimanya.                                                                                                                                                                                                                                                                                                                                                                    |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |             | Dalam statistik cache kompresi, hitung permintaan terkompresi ke penyedia cache awalan otomatis (OpenAI, Codex, Azure, atau koneksi kustom yang mendeklarasikan cache cepat dengan pengupasan penanda) sebagai perkiraan cache yang tercapai bahkan tanpa penanda `cache_control` (#17114). Perkiraan tersebut merupakan sinyal kelayakan cache, bukan hit yang teramati, sehingga tingkat hit yang dilaporkan untuk penyedia tersebut cenderung menuju 100%. Nonaktif secara default: hanya permintaan yang membawa penanda `cache_control` ke penyedia cache yang dihitung sebagai perkiraan hit, sehingga penyedia awalan otomatis terus melaporkan 0.                                                                                                                 |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Mengembalikan setiap flag beserta nilai efektif, sumber, dan ringkasannya.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... semua 113 flag
+    // ... semua 114 flag
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

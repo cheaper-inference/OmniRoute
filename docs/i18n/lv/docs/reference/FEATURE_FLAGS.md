@@ -44,7 +44,7 @@ Būla karogs tiek uzskatīts par **iespējotu**, ja tā efektīvā vērtība ir 
 
 ## Kārodziņu katalogs
 
-113 kārodziņi 6 kategorijās. **Noklusējums** ir definīcijā norādītā noklusējuma vērtība —
+114 kārodziņi 6 kategorijās. **Noklusējums** ir definīcijā norādītā noklusējuma vērtība —
 vērtība, kas tiek izmantota, ja nav ne DB pārrakstīšanas, ne vides mainīgā.
 
 ### Drošība (10)
@@ -112,7 +112,7 @@ vērtība, kas tiek izmantota, ja nav ne DB pārrakstīšanas, ne vides mainīg�
 
 Ja `UNPRICED_USAGE_BUDGET_POLICY` ir skaidri konfigurēta (datubāzes pārrakstījums pirms vides), tai ir priekšroka pār `USAGE_LIMIT_IGNORE_UNPRICED`. Bez skaidras enum vērtības upstream Būla izņēmums izvēlas `count_as_zero`; citādi noklusējums ir `fail_closed`. Nederīgas enum vērtības un nenolasāma funkciju karodziņu glabātuve drošības labad izraisa atteikumu. Neviens no izņēmumiem neatslābina izdevumu ar zināmu cenu vai neveiksmīgas cenas meklēšanas kontroli. Kontrole un administratora atskaite nosaka vienu un to pašu faktisko politiku.
 
-### Izpildlaika vide (54)
+### Izpildlaika vide (55)
 
 | Atslēga                                        | Tips    | Noklusējums | Restartēšana | Apraksts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------- | ------- | ----------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Ja `UNPRICED_USAGE_BUDGET_POLICY` ir skaidri konfigurēta (datubāzes pārrakst�
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`     |              | Atļaut katra loga kvotas politikai (sesijas/nedēļas sliekšņiem, ko izmanto kontu atlasei) ievērot ierobežoto izsmelšanas nogaidīšanu (#17000): tiklīdz ir pagājis ierobežotās nogaidīšanas termiņš vai kešotais novērojums ir vecāks par nogaidīšanas ierobežojumu, logs vairs neizslēdz kontu līdz jaunai kvotas izgūšanai. Pēc noklusējuma izslēgts: kešots logs turpina bloķēt kontu atbilstoši pēdējai ziņotajai procentuālajai vērtībai līdz sava atiestatīšanas laika iestāšanās brīdim.                                                                                                                                                                                                                                          |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`     |              | Ar OpenAI saderīgai attēlu ģenerēšanai (#16260): izmantot savienojuma taimautu (`providerSpecificData.timeoutMs`), bet, ja tas nav pieejams, — centrālo augšupstraumes ielādes taimautu (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → noklusējuma vērtība 600 s), nevis fiksēto 120 s attēlu apstrādes laika ierobežojumu; atbildēt ar 499, kad izsaucējs atceļ pieprasījumu; ļaut Playground saņemt ilgstošus attēlu ģenerēšanas uzdevumus kā SSE straumi ar periodiskiem savienojuma uzturēšanas signāliem. Pēc noklusējuma izslēgts: tiek piemērots fiksētais laika ierobežojums, un izsaucēja veiktā atcelšana netiek pārsūtīta. Termiņš, kas aptver atbildes pamatteksta nolasīšanu, ir spēkā vienmēr.                              |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`     |              | Pārtrauc piedāvāt un pārsūtīt spriešanas piepūli `max` modelim Cursor Grok 4.7 (#17386): Cursor dokumentācija uzskaita tikai low/medium/high/xhigh, tāpēc rezerves aizstājvārds `grok-4.7-max` pazūd no kataloga un pieprasījums ar piepūli `max` tiek nosūtīts bez piepūles parametra. Pēc noklusējuma izslēgts: `max` joprojām tiek piedāvāts un pārsūtīts, jo tiešs AgentService/Run pārbaudes pieprasījums to pieņēma.                                                                                                                                                                                                                                                                                                              |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | Būla    | `false`     |              | Saspiešanas kešatmiņas statistikā uzskaitiet saspiestu pieprasījumu automātiskās prefiksu kešatmiņas nodrošinātājam (OpenAI, Codex, Azure vai pielāgotam savienojumam, kas deklarē tūlītēju kešatmiņu ar marķiera noņemšanu) kā aptuveno kešatmiņas trāpījumu pat bez `cache_control` marķieriem (#17114). Aprēķins ir kešatmiņas piemērotības signāls, nevis novērots trāpījums, tāpēc šo pakalpojumu sniedzēju ziņotais trāpījumu līmenis ir 100%. Izslēgts pēc noklusējuma: tikai pieprasījums ar `cache_control` marķieriem kešatmiņas nodrošinātājam tiek uzskatīts par aptuveno trāpījumu, tāpēc automātisko prefiksu nodrošinātāji turpina ziņot par 0.                                                                          |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Atgriež katru karodziņu ar tā faktisko vērtību, avotu un kopsavilkumu.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... visi 113 karodziņi
+    // ... visi 114 karodziņi
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

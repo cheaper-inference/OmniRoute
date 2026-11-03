@@ -38,7 +38,7 @@ Flag boolean huwa kkunsidrat **attivat** meta l-valur effettiv tiegħu jkun `"tr
 
 ## Katalgu tal-Flags
 
-113-il flag f’6 kategoriji. **Il-valur predefinit** huwa l-valur predefinit fid-definizzjoni — il-valur
+114-il flag f’6 kategoriji. **Il-valur predefinit** huwa l-valur predefinit fid-definizzjoni — il-valur
 użat meta la jkun hemm override tad-DB u lanqas varjabbli tal-ambjent.
 
 ### Sigurtà (10)
@@ -106,7 +106,7 @@ użat meta la jkun hemm override tad-DB u lanqas varjabbli tal-ambjent.
 
 Meta `UNPRICED_USAGE_BUDGET_POLICY` tkun konfigurata espliċitament (override fid-database qabel l-ambjent), tieħu preċedenza fuq `USAGE_LIMIT_IGNORE_UNPRICED`. Mingħajr valur enum espliċitu, l-eżenzjoni Booleana upstream tagħżel `count_as_zero`; inkella l-valur predefinit huwa `fail_closed`. Valuri enum invalidi u ħażna tal-flags tal-karatteristiċi li ma tistax tinqara jikkawżaw rifjut għal raġunijiet ta' sigurtà. L-ebda waħda mill-eżenzjonijiet ma ttaffi l-kontroll tal-infiq bi prezz magħruf jew ta' tfittxija tal-prezz li falliet. L-infurzar u r-rapport tal-amministratur jiddeterminaw l-istess politika effettiva.
 
-### Ambjent waqt l-eżekuzzjoni (54)
+### Ambjent waqt l-eżekuzzjoni (55)
 
 | Ċavetta                                        | Tip     | Valur predefinit | Bidu mill-ġdid | Deskrizzjoni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------------------------------- | ------- | ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -166,6 +166,7 @@ Meta `UNPRICED_USAGE_BUDGET_POLICY` tkun konfigurata espliċitament (override fi
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`          |                | Ħalli l-politika tal-kwota għal kull tieqa (limiti tas-sessjoni/ta’ kull ġimgħa użati għall-għażla tal-kont) tirrispetta l-ipparkjar limitat minħabba eżawriment (#17000): ladarba tkun għaddiet l-iskadenza massima tal-ipparkjar, jew l-osservazzjoni fil-cache tkun eqdem mil-limitu tal-ipparkjar, it-tieqa tieqaf teskludi l-kont sakemm tinġieb kwota ġdida. Mitfi b’mod awtomatiku: tieqa fil-cache tibqa’ timblokka skont l-aħħar perċentwal irrappurtat tagħha sal-ħin tar-reset tagħha stess.                                                                                                                                                                                                                                                       |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`          |                | Għall-ġenerazzjoni tal-immaġnijiet kompatibbli ma’ OpenAI (#16260): uża l-iskadenza tal-konnessjoni (`providerSpecificData.timeoutMs`), inkella l-iskadenza ċentrali tal-irkupru upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → valur predefinit ta’ 600 s) minflok il-limitu fiss ta’ 120 s għall-immaġnijiet; irritorna 499 meta min jagħmel it-talba jikkanċella; ħalli l-Playground jirċievi kompiti twal tal-immaġnijiet bħala fluss SSE b’sinjali keepalive. Diżattivat b’mod predefinit: japplika l-limitu fiss u l-kanċellazzjoni minn min jagħmel it-talba ma tiġix propagata. L-iskadenza li tkopri l-qari tal-korp tar-risposta tkun dejjem attiva.                                                                                         |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`          |                | Jieqaf joffri u jgħaddi l-isforz tar-raġunament `max` għal Cursor Grok 4.7 (#17386): id-dokumentazzjoni ta' Cursor telenka biss low/medium/high/xhigh, għalhekk l-alias ta' riżerva `grok-4.7-max` jisparixxi mill-katalgu u talba għal sforz `max` tintbagħat mingħajr parametru tal-isforz. Mitfi b'mod predefinit: `max` jibqa' offrut u mgħoddi, għax prova diretta ta' AgentService/Run aċċettatu.                                                                                                                                                                                                                                                                                                                                                       |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`          |                | Fl-istatistiċi tal-cache tal-kompressjoni, għodd talba ikkompressata lil fornitur tal-caching awtomatiku tal-prefiss (OpenAI, Codex, Azure, jew konnessjoni tad-dwana li tiddikjara caching fil-pront bi tqaxxir tal-marker) bħala hit cache stmat anke mingħajr markaturi `cache_control` (#17114). L-istima hija sinjal ta' eliġibilità tal-cache, mhux hit osservata, għalhekk ir-rata ta' hit irrappurtata għal dawk il-fornituri tvarja lejn 100%. Off awtomatikament: talba biss li ġġorr markaturi `cache_control` lil fornitur tal-caching tgħodd bħala hit stmata, għalhekk il-fornituri tal-prefiss awtomatiku jibqgħu jirrappurtaw 0.                                                                                                              |
 
 ### CLI (5)
 
@@ -252,10 +253,10 @@ Jirritorna kull flag bil-valur effettiv tiegħu, is-sors, u taqsira.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... il-113-il flag kollha
+    // ... il-114-il flag kollha
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

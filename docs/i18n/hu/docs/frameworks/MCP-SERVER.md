@@ -114,7 +114,7 @@ Lásd az [MCP kliens konfigurációt](../guides/SETUP_GUIDE.md#mcp-client-config
 | `omniroute_simulate_route`         | `read:health`, `read:combos`         | Szárazon futó útválasztási szimuláció tartalék fával                                                                                 |
 | `omniroute_set_budget_guard`       | `write:budget`                       | Munkamenet költségkeret leépítési/blokkolási/riasztási művelettel                                                                    |
 | `omniroute_set_routing_strategy`   | `write:combos`                       | Kombinált stratégia frissítése futásidőben (prioritás/súlyozott/auto/stb.)                                                           |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | `agresszív` / `kiegyensúlyozott` / `konzervatív` ellenállóképességi előbeállítás alkalmazása                                         |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | `aggressive` / `balanced` / `conservative` ellenállóképességi előbeállítás alkalmazása                                               |
 | `omniroute_test_combo`             | `execute:completions`, `read:combos` | Élő teszt minden szolgáltató számára egy kombinációban, valós upstream hívás használatával                                           |
 | `omniroute_get_provider_metrics`   | `read:health`                        | Szolgáltatónkénti metrikák p50/p95/p99 késleltetéssel és megszakító állapotával                                                      |
 | `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | Kombináció ajánlása feladattípus szerint költségkeret/késleltetési korlátokkal                                                       |
@@ -300,7 +300,7 @@ Az eszközkatalógust lásd itt: [MCP-eszközhatókörök](#mcp-eszközhatókör
 Az API-kulcson lévő `manage`, az MCP-eszközön lévő `read:compression`, valamint az
 `oma_live_…` hozzáférési tokenen lévő `read` három különböző jogosultság. Azok a hívók, amelyek `read`
 hozzáférési tokent küldenek egy állapotmódosító felügyeleti útvonalnak, HTTP 403 választ kapnak:
-`A hozzáférési token 'read' hatóköre nem elegendő; 'write' szükséges.`
+`Access token scope 'read' is insufficient; 'write' required.`
 Ezt a rangsort a `scopeSatisfies` kezeli. Nem veszi figyelembe az MCP-táblázatot, és az MCP
 illesztője sem veszi figyelembe ezt a rangsort.
 
@@ -380,7 +380,7 @@ Az `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ezt a rango
 
 A `PATCH /api/keys/{id}` egy módosítási művelet, és nem szerepel ezeken az adminisztrátori listákon, ezért egy
 `read` token 403-as választ kap:
-`Az access token 'read' hatóköre nem elegendő; 'write' szükséges.`
+`Access token scope 'read' is insufficient; 'write' required.`
 Egy `write` vagy `admin` access token megfelel az útvonal követelményeinek. Egy dashboard JWT, a
 loopback CLI gépazonosító tokenje, valamint egy `manage` vagy `admin` jogosultságú API-kulcs
 más ágakon halad végig, és ez a rangsorolás nem korlátozza őket.

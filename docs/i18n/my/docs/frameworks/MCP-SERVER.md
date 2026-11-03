@@ -386,7 +386,7 @@ catalog ကို ကျော်သွားသည်။ ဖွင့်ထာ�
 
 `PATCH /api/keys/{id}` သည် ပြောင်းလဲမှုတစ်ခုဖြစ်ပြီး အဆိုပါ admin စာရင်းများတွင် မပါဝင်သောကြောင့်
 `read` token သည် 403 ကို ရရှိပါသည်။
-`Access token scope 'read' သည် မလုံလောက်ပါ၊ 'write' လိုအပ်ပါသည်။`
+`Access token scope 'read' is insufficient; 'write' required.`
 `write` သို့မဟုတ် `admin` access token သည် ထို route ၏ လိုအပ်ချက်ကို ဖြည့်ဆည်းပေးပါသည်။ dashboard JWT၊
 loopback CLI machine-id token နှင့် `manage` သို့မဟုတ် `admin` ပါရှိသော API key တို့သည်
 အခြား branch များကို အသုံးပြုကြပြီး ဤ rank ကြောင့် ကန့်သတ်ခြင်းမခံရပါ။

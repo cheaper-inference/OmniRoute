@@ -44,7 +44,7 @@ Booleovský príznak sa považuje za **povolený**, keď je jeho efektívna hodn
 
 ## Katalóg príznakov
 
-113 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená hodnota definície — hodnota
+114 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená hodnota definície — hodnota
 použitá v prípade, keď nie je prítomné prepísanie v DB ani premenná prostredia.
 
 ### Bezpečnosť (10)
@@ -112,7 +112,7 @@ použitá v prípade, keď nie je prítomné prepísanie v DB ani premenná pros
 
 Keď je `UNPRICED_USAGE_BUDGET_POLICY` explicitne nastavené (prepísanie v DB má prednosť pred prostredím), má prednosť pred `USAGE_LIMIT_IGNORE_UNPRICED`. Bez explicitnej hodnoty enum booleovská výnimka z upstreamu vyberie `count_as_zero`; inak je predvolené `fail_closed`. Neplatné hodnoty enum a nečitateľné úložisko príznakov funkcií vedú k blokovaniu. Ani jedna výnimka neuvoľňuje kontrolu výdavkov so známou cenou ani zlyhaného vyhľadania ceny. Vynucovanie a správa pre administrátora určujú tú istú účinnú politiku.
 
-### Runtime (54)
+### Runtime (55)
 
 | Kľúč                                           | Typ     | Predvolené | Reštartovanie | Popis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------------------------- | ------- | ---------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Keď je `UNPRICED_USAGE_BUDGET_POLICY` explicitne nastavené (prepísanie v DB m
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`    |               | Umožní pravidlám kvóty pre jednotlivé časové okná (prahy relácie/týždňa používané pri výbere účtu) rešpektovať ohraničené pozastavenie pri vyčerpaní (#17000): po uplynutí konečného termínu ohraničeného pozastavenia alebo ak je pozorovanie vo vyrovnávacej pamäti staršie než maximálna dĺžka pozastavenia, časové okno prestane vylučovať účet až do nového načítania kvóty. Predvolene vypnuté: okno vo vyrovnávacej pamäti naďalej blokuje podľa posledného nahláseného percenta až do vlastného času obnovenia.                                                                                                                                                                                                       |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`    |               | Pri generovaní obrázkov kompatibilnom s OpenAI (#16260): použiť časový limit pripojenia (`providerSpecificData.timeoutMs`), inak centrálny časový limit načítania z upstreamu (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → predvolených 600 s) namiesto pevného 120-sekundového limitu pre obrázky; pri zrušení volajúcim vrátiť stav 499; umožniť Playgroundu prijímať dlhotrvajúce úlohy generovania obrázkov ako SSE stream so signálmi keepalive. Predvolene vypnuté: použije sa pevný limit a zrušenie volajúcim sa neprenesie. Konečný termín zahŕňajúci čítanie tela odpovede je vždy aktívny.                                                                                                                         |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`    |               | Prestane ponúkať a odovzdávať úroveň úsilia uvažovania `max` pre Cursor Grok 4.7 (#17386): dokumentácia Cursor uvádza iba low/medium/high/xhigh, preto záložný alias `grok-4.7-max` zmizne z katalógu a požiadavka s úsilím `max` sa odošle bez parametra úsilia. Predvolene vypnuté: `max` sa naďalej ponúka a odovzdáva, pretože ho živý test AgentService/Run prijal.                                                                                                                                                                                                                                                                                                                                                      |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`    |               | V štatistikách kompresnej cache započítať komprimovanú požiadavku poskytovateľovi s automatickým ukladaním prefixov do cache (OpenAI, Codex, Azure alebo vlastné pripojenie, ktoré deklaruje ukladanie promptov do cache s odstraňovaním markerov) ako odhadovaný zásah do cache aj bez markerov `cache_control` (#17114). Odhad je signálom oprávnenosti na použitie cache, nie pozorovaným zásahom, takže nahlásená miera zásahov pre týchto poskytovateľov smeruje k 100 %. Predvolene vypnuté: za odhadovaný zásah sa počíta iba požiadavka obsahujúca markery `cache_control` odoslaná poskytovateľovi s podporou cache, takže poskytovatelia s automatickým ukladaním prefixov naďalej vykazujú 0.                      |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Vráti každý príznak spolu s jeho výslednou hodnotou, zdrojom a súhrnom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všetkých 113 príznakov
+    // ... všetkých 114 príznakov
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

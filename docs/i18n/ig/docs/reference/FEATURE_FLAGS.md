@@ -43,7 +43,7 @@ A na-ewere boolean flag dị ka nke **agbanyere** mgbe uru ya dị irè bụ `"t
 
 ## Katalọgụ Ọkọlọtọ
 
-Ọkọlọtọ 113 n’ime ngalaba 6. **Ndabara** bụ ndabara nke nkọwa — uru a
+Ọkọlọtọ 114 n’ime ngalaba 6. **Ndabara** bụ ndabara nke nkọwa — uru a
 na-eji mgbe enweghị ma mgbanwe DB ma ọ bụ mgbanwe gburugburu ebe obibi.
 
 ### Nchebe (10)
@@ -111,7 +111,7 @@ na-eji mgbe enweghị ma mgbanwe DB ma ọ bụ mgbanwe gburugburu ebe obibi.
 
 Mgbe etinyere `UNPRICED_USAGE_BUDGET_POLICY` kpọmkwem (mgbanwe ebe nchekwa data tupu environment), ọ na-ebute `USAGE_LIMIT_IGNORE_UNPRICED` ụzọ. Mgbe enweghị uru enum doro anya, nhọrọ boolean ịhapụ mgbochi nke upstream na-ahọrọ `count_as_zero`; ma ọ bụghị ya, ndabara bụ `fail_closed`. Uru enum na-adịghị irè na ebe nchekwa feature flags a na-apụghị ịgụ na-akpata mgbochi maka nchekwa. Ọ dịghị n'ime nhọrọ ịhapụ mgbochi na-eme ka mgbochi mmefu nwere ọnụ ahịa ma ọ bụ ọchụchọ ọnụ ahịa dara ada dị nro. Itinye mgbochi na akụkọ onye nchịkwa na-ekpebi otu iwu dị irè.
 
-### Oge ịrụ ọrụ (54)
+### Oge ịrụ ọrụ (55)
 
 | Igodo                                          | Ụdị     | Ndabara | Malitegharịa | Nkọwa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------- | ------- | ------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -171,6 +171,7 @@ Mgbe etinyere `UNPRICED_USAGE_BUDGET_POLICY` kpọmkwem (mgbanwe ebe nchekwa dat
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |              | Kwe ka iwu oke-kvota nke windo ọ bụla (oke nnọkọ/kwa-izu ndị nhọpụta akaụntụ na-eji) sọpụrụ nkwụsị nwa oge nwere oke mgbe kvota gwụsịrị (#17000): ozugbo oge njedebe nke nkwụsị nwere oke gafere, ma ọ bụ ihe nlele echekwara ochie karịa oke nkwụsị ahụ, windo ahụ ga-akwụsị iwepụ akaụntụ ahụ ruo mgbe e wetara kvota ọhụrụ. Agbanyụghị ya na ndabara: windo echekwara na-aga n'ihu igbochi dabere na pasent ikpeazụ ọ kọrọ ruo oge nrụgharị nke ya.                                                                                                                                                                                                                                                                                                               |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |              | Maka imepụta onyonyo dakọtara na OpenAI (#16260): jiri oge njikọ ga-agwụ (`providerSpecificData.timeoutMs`), ma ọ bụghị ya jiri oge etiti maka ngwụcha nchịkọta upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → ndabara sekọnd 600) kama oke oge onyonyo a kapịrị ọnụ nke sekọnd 120; zaghachi 499 mgbe onye kpọrọ oku kagburu; kwe ka Playground nata ọrụ onyonyo ndị na-ewe ogologo oge dị ka iyi SSE nwere akara obi keepalive. Ọ na-agbanyụ na ndabara: oke oge a kapịrị ọnụ ka na-emetụta, a naghịkwa ebufe nkagbu onye kpọrọ oku. Oge ngwụcha nke na-ekpuchi ịgụ ahụ nzaghachi na-adị mgbe niile.                                                                                                                                                        |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |              | Na-akwụsị ịnye na iziga ike echiche `max` maka Cursor Grok 4.7 (#17386): akwụkwọ Cursor depụtara naanị low/medium/high/xhigh, ya mere aha ndabere `grok-4.7-max` na-apụ na katalog, a na-ezigakwa arịrịọ ike `max` na-enweghị parameter ike. Ọ gbanyụrụ dịka ndabara: a ka na-enye ma na-eziga `max`, n'ihi na ule AgentService/Run mere n'ezie nabatara ya.                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |              | N'ime stats cache mkpakọ, gụọ arịrịọ agbakwunyere na onye na-eweta caching prefix akpaaka (OpenAI, Codex, Azure, ma ọ bụ njikọ omenala nke na-ekwupụta caching ngwa ngwa na ihe nrịbama akara) dị ka echere cache kụrụ ọbụna na-enweghị akara `cache_control` (#17114). Atụmatụ ahụ bụ akara ntozu nke cache, ọ bụghị ihe a hụrụ n'anya, yabụ ọnụego a kọrọ maka ndị na-enye ndị ahụ na-aga n'ihu na 100%. Gbanyụọ na ndabara: naanị arịrịọ na-ebu akara `cache_control` gaa na onye na-eweta caching na-agụta dị ka atụmatụ echere, yabụ ndị na-eweta prefix akpaka na-aga n'ihu na-akọ 0.                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -256,10 +257,10 @@ Na-eweghachi ọkọlọtọ ọ bụla tinyere ụkpụrụ ya dị ire, isi mm
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... ọkọlọtọ 113 niile
+    // ... ọkọlọtọ 114 niile
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

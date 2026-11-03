@@ -44,7 +44,7 @@ Et boolsk flagg anses som **aktivert** når dets effektive verdi er `"true"`,
 
 ## Flaggkatalog
 
-113 flagg fordelt på 6 kategorier. **Standardverdi** er standardverdien i definisjonen — verdien
+114 flagg fordelt på 6 kategorier. **Standardverdi** er standardverdien i definisjonen — verdien
 som brukes når verken en databaseoverstyring eller en miljøvariabel finnes.
 
 ### Sikkerhet (10)
@@ -112,7 +112,7 @@ som brukes når verken en databaseoverstyring eller en miljøvariabel finnes.
 
 Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplisitt konfigurert (databaseoverstyring før miljø), har den forrang fremfor `USAGE_LIMIT_IGNORE_UNPRICED`. Uten en eksplisitt enum-verdi velger det boolske unntaksvalget fra upstream `count_as_zero`; ellers er standarden `fail_closed`. Ugyldige enum-verdier og uleselig lagring for funksjonsflagg fører til blokkering av sikkerhetshensyn. Ingen av unntaksvalgene svekker håndhevingen for priset forbruk eller et mislykket prisoppslag. Håndhevingen og administratorrapporten kommer frem til samme effektive policy.
 
-### Kjøretid (54)
+### Kjøretid (55)
 
 | Nøkkel                                         | Type    | Standardverdi | Omstart | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ---------------------------------------------- | ------- | ------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplisitt konfigurert (databaseoverstyri
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`       |         | La kvotepolicyen per vindu (økt-/uketerskler brukt ved kontovalg) respektere den avgrensede parkeringen ved uttømming (#17000): Når fristen for den begrensede parkeringen er utløpt, eller den mellomlagrede observasjonen er eldre enn parkeringsgrensen, slutter vinduet å ekskludere kontoen frem til en ny kvotehenting. Av som standard: Et mellomlagret vindu fortsetter å blokkere basert på den sist rapporterte prosentandelen frem til vinduets eget tilbakestillingstidspunkt.                                                                                                                                                                                                                                                                                   |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`       |         | For OpenAI-kompatibel bildegenerering (#16260): bruk tidsavbruddet for tilkoblingen (`providerSpecificData.timeoutMs`), ellers det sentrale tidsavbruddet for oppstrømsinnhenting (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → standardverdi 600 s), i stedet for det faste bildebudsjettet på 120 s; svar med 499 når anroperen avbryter; la Playground motta langvarige bildejobber som en SSE-strøm med keepalive-hjerteslag. Deaktivert som standard: Det faste budsjettet gjelder, og avbrytelse fra anroperen videreformidles ikke. Tidsfristen som dekker lesing av responskroppen, er alltid aktiv.                                                                                                                                                                  |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`       |         | Slutter å tilby og videresende resonneringsinnsatsen `max` for Cursor Grok 4.7 (#17386): Cursors dokumentasjon oppgir bare low/medium/high/xhigh, så reservealiaset `grok-4.7-max` forsvinner fra katalogen, og en forespørsel om innsatsen `max` sendes uten innsatsparameter. Av som standard: `max` tilbys og videresendes fortsatt, ettersom en direkte AgentService/Run-probe godtok verdien.                                                                                                                                                                                                                                                                                                                                                                           |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolsk  | `false`       |         | I komprimeringsbufferstatistikken teller du en komprimert forespørsel til en leverandør av automatisk prefiksbufring (OpenAI, Codex, Azure eller en tilpasset tilkobling som erklærer hurtigbufring med markørstripping) som et estimert cachetreff selv uten `cache_control` -markører (#17114). Anslaget er et signal for cache-kvalifisering, ikke et observert treff, så den rapporterte trefffrekvensen for disse leverandørene går mot 100 %. Av som standard: bare en forespørsel som sender `cache_control` -markører til en hurtigbufferleverandør teller som et estimert treff, så leverandører av automatiske prefikser fortsetter å rapportere 0.                                                                                                                |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Returnerer hvert flagg med gjeldende verdi, kilde og et sammendrag.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 113 flagg
+    // ... alle 114 flagg
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

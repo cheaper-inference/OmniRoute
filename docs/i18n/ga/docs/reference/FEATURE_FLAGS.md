@@ -44,7 +44,7 @@ Meastar bratach bhooleach a bheith **cumasaithe** nuair is é `"true"`,
 
 ## Catalóg Bratach
 
-113 bratach i 6 chatagóir. Is é **Réamhshocrú** réamhshocrú an tsainmhínithe — an luach
+114 bratach i 6 chatagóir. Is é **Réamhshocrú** réamhshocrú an tsainmhínithe — an luach
 a úsáidtear nuair nach bhfuil sárú DB ná athróg timpeallachta i láthair.
 
 ### Slándáil (10)
@@ -112,7 +112,7 @@ a úsáidtear nuair nach bhfuil sárú DB ná athróg timpeallachta i láthair.
 
 Nuair atá `UNPRICED_USAGE_BUDGET_POLICY` cumraithe go sainráite (sárú sa bhunachar sonraí roimh an timpeallacht), bíonn tosaíocht aige ar `USAGE_LIMIT_IGNORE_UNPRICED`. Gan luach enum sainráite, roghnaíonn an eisceacht Boole suas-srutha `count_as_zero`; murach sin is é `fail_closed` an réamhshocrú. Diúltaítear ar mhaithe le sábháilteacht le luachanna enum neamhbhailí agus stóráil bratach gné nach féidir a léamh. Ní mhaolaíonn ceachtar eisceacht forfheidhmiú caiteachais a bhfuil praghas air ná cuardach praghais teipthe. Socraíonn an forfheidhmiú agus tuarascáil an riarthóra an polasaí éifeachtach céanna.
 
-### Am rite (54)
+### Am rite (55)
 
 | Eochair                                        | Cineál   | Réamhshocrú | Atosú   | Cur síos                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------------------------------- | -------- | ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Nuair atá `UNPRICED_USAGE_BUDGET_POLICY` cumraithe go sainráite (sárú sa bhu
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean  | `false`     |         | Lig don pholasaí cuóta in aghaidh na fuinneoige (tairseacha seisiúin/seachtainiúla a úsáidtear chun cuntais a roghnú) an pháirceáil theoranta ídithe a urramú (#17000): a luaithe a bheidh spriocdháta na páirceála uasteorannaithe caite, nó a bheidh an bhreathnóireacht thaiscthe níos sine ná uasteorainn na páirceála, scoireann an fhuinneog den chuntas a eisiamh go dtí go n-aisghabhtar cuóta úr. Díchumasaithe de réir réamhshocraithe: leanann fuinneog thaiscthe den chuntas a bhlocáil bunaithe ar an gcéatadán deireanach a tuairiscíodh go dtí a ham athshocraithe féin.                                                                                                                                                                                                                                                                                             |
 | `IMAGE_GENERATION_LONG_JOBS`                   | Booleach | `false`     |         | Maidir le giniúint íomhánna atá comhoiriúnach le OpenAI (#16260): úsáid teorainn ama an naisc (`providerSpecificData.timeoutMs`), nó, ina héagmais sin, teorainn ama lárnach na haisghabhála réamhtheachtaí (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → réamhshocrú 600 s) in ionad bhuiséad seasta 120 s na n-íomhánna; freagair le 499 nuair a chealaíonn an glaoiteoir; lig don Playground jabanna fada íomhánna a fháil mar shruth SSE le buillí croí coinneála beo. Díchumasaithe de réir réamhshocraithe: cuirtear an buiséad seasta i bhfeidhm agus ní chuirtear cealú an ghlaoiteora ar aghaidh. Bíonn an sprioc-am a chumhdaíonn léamh chorp an fhreagra cumasaithe i gcónaí.                                                                                                                                                                                             |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean  | `false`     |         | Stopann sé iarracht réasúnaíochta `max` a thairiscint agus a chur ar aghaidh do Cursor Grok 4.7 (#17386): ní liostaíonn doiciméadú Cursor ach low/medium/high/xhigh, mar sin imíonn an t-ailias cúltaca `grok-4.7-max` ón gcatalóg agus seoltar iarratas iarrachta `max` gan pharaiméadar iarrachta. Múchta de réir réamhshocraithe: tairgtear agus cuirtear `max` ar aghaidh fós, mar gur ghlac tástáil bheo AgentService/Run leis.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | Boole    | `false`     |         | Sna stats taisce comhbhrú, comhaireamh iarratas comhbhrúite chuig soláthraí uathoibríoch-réimír-caching (OpenAI, Codex, Azure , nó nasc saincheaptha a dhearbhaíonn taisceadh pras le stripping marcóra) mar thaisce measta buailte fiú gan marcóirí `cache_control` (#17114). Comhartha incháilitheachta taisce atá sa mheastachán, ní buaicphointe breathnaithe, agus mar sin treoraíonn an ráta buailte tuairiscithe do na soláthraithe sin i dtreo 100%. As de réir réamhshocraithe: ní áirítear ach iarratas a iompraíonn marcóirí `cache_control` chuig soláthraí taisce mar bhua measta, agus mar sin coinníonn soláthraithe réimír uathoibríocha ag tuairisciú 0.                                                                                                                                                                                                           |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Filleann sé gach bratach lena luach éifeachtach, lena foinse agus le hachoimre
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... na 113 bhratach ar fad
+    // ... na 114 bhratach ar fad
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

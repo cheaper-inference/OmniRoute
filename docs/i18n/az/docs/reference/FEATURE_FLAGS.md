@@ -44,7 +44,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 
 ## Bayraq Kataloqu
 
-6 kateqoriya üzrə 113 bayraq. **Defolt** tərifdəki standart dəyərdir — nə DB əvəzləməsi,
+6 kateqoriya üzrə 114 bayraq. **Defolt** tərifdəki standart dəyərdir — nə DB əvəzləməsi,
 nə də mühit dəyişəni mövcud olduqda istifadə edilən dəyərdir.
 
 ### Təhlükəsizlik (10)
@@ -112,7 +112,7 @@ nə də mühit dəyişəni mövcud olduqda istifadə edilən dəyərdir.
 
 `UNPRICED_USAGE_BUDGET_POLICY` açıq şəkildə konfiqurasiya edildikdə (DB-dəki əvəzləyici dəyər mühitdən əvvəl gəlir), `USAGE_LIMIT_IGNORE_UNPRICED` üzərində üstünlük təşkil edir. Açıq enum dəyəri yoxdursa, upstream boolean istisna seçimi `count_as_zero` seçir; əks halda standart `fail_closed` olur. Yanlış enum dəyərləri və oxunmayan funksiya bayrağı anbarı bloklama ilə nəticələnir. İstisna seçimlərinin heç biri qiyməti olan xərclərə və ya uğursuz qiymət axtarışına qoyulan tələbləri yumşaltmır. Tətbiq mexanizmi və administrator hesabatı eyni effektiv siyasəti müəyyən edir.
 
-### İcra mühiti (54)
+### İcra mühiti (55)
 
 | Açar                                           | Növ     | Standart | Yenidən başlatma | Təsvir                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | -------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ nə də mühit dəyişəni mövcud olduqda istifadə edilən dəyərdir.
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`  |                  | Hər pəncərə üzrə kvota siyasətinə (hesab seçimində istifadə olunan sessiya/həftəlik hədlər) məhdud tükənmə gözləməsini nəzərə almağa imkan verir (#17000): məhdudlaşdırılmış gözləmənin son müddəti keçdikdən və ya keşlənmiş müşahidə gözləmə həddindən köhnə olduqdan sonra, yeni kvota əldə edilənədək pəncərə hesabı istisna etməyi dayandırır. Defolt olaraq söndürülüb: keşlənmiş pəncərə öz sıfırlanma vaxtına qədər son bildirilmiş faiz əsasında hesabı bloklamağa davam edir.                                                                                                                                                                                                                                                                                                |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`  |                  | OpenAI ilə uyğun şəkil generasiyası (#16260) üçün: sabit 120 saniyəlik şəkil vaxt büdcəsi əvəzinə bağlantı vaxt limitindən (`providerSpecificData.timeoutMs`), o mövcud olmadıqda isə mərkəzi yuxarı axından əldəetmə vaxt limitindən (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → standart olaraq 600 saniyə) istifadə edin; çağıran tərəf ləğv etdikdə 499 cavabı verin; Playground-un uzunmüddətli şəkil tapşırıqlarını bağlantını aktiv saxlayan heartbeat siqnalları ilə SSE axını kimi qəbul etməsinə imkan verin. Standart olaraq söndürülüb: sabit vaxt büdcəsi tətbiq olunur və çağıran tərəfin ləğvetmə əməliyyatı ötürülmür. Cavab gövdəsinin oxunmasını əhatə edən son müddət həmişə aktivdir.                                                                             |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`  |                  | Cursor Grok 4.7 üçün `max` düşünmə səviyyəsini təklif etməyi və ötürməyi dayandırır (#17386): Cursor sənədlərində yalnız low/medium/high/xhigh göstərildiyindən, `grok-4.7-max` ehtiyat ləqəbi kataloqdan yox olur və `max` səviyyəsi tələb edən sorğu səviyyə parametri olmadan göndərilir. Standart olaraq söndürülüb: canlı AgentService/Run yoxlaması bunu qəbul etdiyinə görə `max` təklif və ötürülməyə davam edir.                                                                                                                                                                                                                                                                                                                                                              |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`  |                  | Sıxılma keş statistiklərində, avtomatik prefiks-keşləmə provayderinə (OpenAI, Codex, Azure və ya markerin çıxarılması ilə operativ keşləşdirməni elan edən fərdi əlaqə) sıxılmış sorğunu hətta `cache_control` markerləri (#17114) olmadan təxmini keş vurulması kimi hesablayın. Təxmin, müşahidə olunan hit deyil, keş-uyğunluq siqnalıdır, ona görə də həmin provayderlər üçün bildirilən hit dərəcəsi 100%-ə doğru meyl edir. Defolt olaraq deaktivdir: yalnız keşləmə provayderinə `cache_control` markerlərini daşıyan sorğu təxmini hit kimi sayılır, beləliklə, avtomatik prefiks təminatçıları 0-a hesabat verməyə davam edirlər.                                                                                                                                             |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Hər bir bayrağı onun qüvvədə olan dəyəri, mənbəyi və xülasəsi ilə 
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... 113 bayrağın hamısı
+    // ... 114 bayrağın hamısı
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

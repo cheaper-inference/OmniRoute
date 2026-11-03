@@ -44,7 +44,7 @@ Příznak typu boolean se považuje za **povolený**, pokud je jeho efektivní h
 
 ## Katalog příznaků
 
-113 příznaků v 6 kategoriích. **Výchozí hodnota** je výchozí hodnota definice — hodnota
+114 příznaků v 6 kategoriích. **Výchozí hodnota** je výchozí hodnota definice — hodnota
 použitá v případě, že není přítomno přepsání z databáze ani proměnná prostředí.
 
 ### Zabezpečení (10)
@@ -112,7 +112,7 @@ použitá v případě, že není přítomno přepsání z databáze ani proměn
 
 Je-li `UNPRICED_USAGE_BUDGET_POLICY` explicitně nakonfigurována (přepis v databázi před prostředím), má přednost před `USAGE_LIMIT_IGNORE_UNPRICED`. Bez explicitní hodnoty enum vybere upstreamová booleovská výjimka `count_as_zero`; jinak je výchozí hodnota `fail_closed`. Neplatné hodnoty enum a nečitelné úložiště příznaků funkcí vedou k zamítnutí z bezpečnostních důvodů. Ani jedna výjimka neoslabuje vynucování limitů oceněné útraty ani kontrolu neúspěšného vyhledání ceny. Vynucování a report správce určují stejnou účinnou politiku.
 
-### Běhové prostředí (54)
+### Běhové prostředí (55)
 
 | Klíč                                           | Typ     | Výchozí | Restart | Popis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ---------------------------------------------- | ------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Je-li `UNPRICED_USAGE_BUDGET_POLICY` explicitně nakonfigurována (přepis v dat
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |         | Umožní, aby zásady kvóty pro jednotlivá okna (prahové hodnoty relace/týdne používané při výběru účtu) respektovaly omezené pozastavení při vyčerpání (#17000): jakmile uplyne konečný termín omezeného pozastavení nebo je pozorování v mezipaměti starší než limit pozastavení, okno přestane účet vylučovat až do nového načtení kvóty. Ve výchozím nastavení vypnuto: okno uložené v mezipaměti nadále blokuje účet na základě posledního nahlášeného procenta až do vlastního času obnovení.                                                                                                                                                                                                                           |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |         | Pro generování obrázků kompatibilní s OpenAI (#16260): použít časový limit připojení (`providerSpecificData.timeoutMs`), jinak centrální časový limit načítání z upstreamu (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → výchozí hodnota 600 s) namísto pevného limitu 120 s pro obrázky; při zrušení volajícím vrátit 499; umožnit Playgroundu přijímat dlouhé úlohy generování obrázků jako stream SSE s udržovacími signály. Ve výchozím nastavení vypnuto: platí pevný limit a zrušení volajícím se nepřenáší. Časový limit zahrnující čtení těla odpovědi je vždy aktivní.                                                                                                                                             |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Přestane nabízet a předávat úsilí uvažování `max` pro Cursor Grok 4.7 (#17386): dokumentace Cursor uvádí pouze low/medium/high/xhigh, takže záložní alias `grok-4.7-max` zmizí z katalogu a požadavek s úsilím `max` se odešle bez parametru úsilí. Ve výchozím nastavení vypnuto: `max` se dál nabízí a předává, protože jej přímá sonda AgentService/Run přijala.                                                                                                                                                                                                                                                                                                                                                        |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | Ve statistikách mezipaměti komprese započítá komprimovaný požadavek poskytovateli s automatickým ukládáním prefixů do mezipaměti (OpenAI, Codex, Azure nebo vlastní připojení deklarující ukládání promptů do mezipaměti s odstraňováním markerů) jako odhadovaný zásah do mezipaměti i bez markerů `cache_control` (#17114). Odhad je signálem způsobilosti pro mezipaměť, nikoli pozorovaným zásahem, takže uváděná míra zásahů u těchto poskytovatelů směřuje ke 100 %. Ve výchozím nastavení vypnuto: jako odhadovaný zásah se započítá pouze požadavek s markery `cache_control` odeslaný poskytovateli s podporou mezipaměti, takže poskytovatelé s automatickým ukládáním prefixů nadále uvádějí 0.                 |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Vrátí všechny příznaky s jejich výslednou hodnotou, zdrojem a souhrnem.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všech 113 příznaků
+    // ... všech 114 příznaků
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

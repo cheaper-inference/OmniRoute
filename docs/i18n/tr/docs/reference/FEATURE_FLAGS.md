@@ -44,7 +44,7 @@ Bir boolean bayrağı, etkin değeri `"true"`, `"1"` veya `"yes"` olduğunda
 
 ## Bayrak Kataloğu
 
-6 kategoride 113 bayrak. **Varsayılan**, tanımda belirtilen varsayılan değerdir — bir DB geçersiz kılma değeri veya ortam değişkeni bulunmadığında
+6 kategoride 114 bayrak. **Varsayılan**, tanımda belirtilen varsayılan değerdir — bir DB geçersiz kılma değeri veya ortam değişkeni bulunmadığında
 kullanılan değerdir.
 
 ### Güvenlik (10)
@@ -112,7 +112,7 @@ kullanılan değerdir.
 
 `UNPRICED_USAGE_BUDGET_POLICY` açıkça yapılandırıldığında (veritabanı geçersiz kılması ortamdan önce), `USAGE_LIMIT_IGNORE_UNPRICED` üzerinde önceliğe sahiptir. Açık bir enum değeri yoksa upstream Boole istisnası `count_as_zero` seçer; aksi hâlde varsayılan `fail_closed` olur. Geçersiz enum değerleri ve okunamayan özellik bayrağı deposu güvenlik gereği reddetmeyle sonuçlanır. İstisna seçeneklerinin hiçbiri fiyatı bilinen harcamaların veya başarısız bir fiyat aramasının denetimini gevşetmez. Denetim ve yönetici raporu aynı etkin politikayı belirler.
 
-### Çalışma Zamanı (54)
+### Çalışma Zamanı (55)
 
 | Anahtar                                        | Tür     | Varsayılan | Yeniden Başlatma | Açıklama                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------- | ------- | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ kullanılan değerdir.
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`    |                  | Pencere başına kota politikasının (hesap seçiminde kullanılan oturumluk/haftalık eşikler) sınırlı tükenme bekletmesine uymasını sağlar (#17000): üst sınırı belirlenmiş bekletme son tarihi geçtiğinde veya önbelleğe alınan gözlem bekletme üst sınırından daha eski olduğunda, yeni bir kota alımına kadar pencere hesabı hariç tutmayı bırakır. Varsayılan olarak kapalıdır: önbelleğe alınmış bir pencere, kendi sıfırlanma zamanına kadar son bildirilen yüzdesine göre hesabı engellemeye devam eder.                                                                                                                                                                                                                                                                                     |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`    |                  | OpenAI uyumlu görüntü oluşturma (#16260) için: sabit 120 sn'lik görüntü bütçesi yerine bağlantı zaman aşımını (`providerSpecificData.timeoutMs`), bu yoksa merkezi yukarı akış getirme zaman aşımını (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → varsayılan 600 sn) kullanır; çağıran iptal ettiğinde 499 ile yanıt verir; Playground'un uzun süren görüntü işlerini keepalive sinyalleri içeren bir SSE akışı olarak almasını sağlar. Varsayılan olarak kapalıdır: sabit bütçe uygulanır ve çağıranın iptali aktarılmaz. Yanıt gövdesinin okunmasını kapsayan son tarih her zaman etkindir.                                                                                                                                                                                                   |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`    |                  | Cursor Grok 4.7 için `max` akıl yürütme çabasını sunmayı ve iletmeyi durdurur (#17386): Cursor belgeleri yalnızca low/medium/high/xhigh değerlerini listeler; bu nedenle `grok-4.7-max` yedek takma adı katalogdan kalkar ve `max` çabalı bir istek çaba parametresi olmadan gönderilir. Varsayılan olarak kapalıdır: canlı bir AgentService/Run yoklaması kabul ettiği için `max` sunulmaya ve iletilmeye devam eder.                                                                                                                                                                                                                                                                                                                                                                          |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`    |                  | Sıkıştırma önbelleği istatistiklerinde, otomatik önek önbelleğe alma özelliğine sahip bir sağlayıcıya (OpenAI, Codex, Azure veya işaretçi kaldırma özelliğiyle istem önbelleğe almayı bildiren özel bir bağlantı) gönderilen sıkıştırılmış isteği, `cache_control` işaretçileri olmasa bile tahmini bir önbellek isabeti olarak sayar (#17114). Tahmin bir önbellek uygunluğu sinyalidir, gözlemlenen bir isabet değildir; bu nedenle söz konusu sağlayıcılar için bildirilen isabet oranı %100'e yaklaşır. Varsayılan olarak kapalıdır: yalnızca önbelleğe alma sağlayıcısına `cache_control` işaretçileri taşıyan bir istek tahmini isabet olarak sayılır; bu nedenle otomatik önek sağlayıcıları 0 bildirmeye devam eder.                                                                    |
 
 ### CLI (5)
 
@@ -258,10 +259,10 @@ Her bayrağı geçerli değeri, kaynağı ve bir özetle birlikte döndürür.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... 113 bayrağın tümü
+    // ... 114 bayrağın tümü
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

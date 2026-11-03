@@ -44,7 +44,7 @@ Un indicador booleano se considera **habilitado** cuando su valor efectivo es `"
 
 ## Catálogo de indicadores
 
-113 indicadores en 6 categorías. El valor **Predeterminado** es el definido de forma predeterminada: el valor
+114 indicadores en 6 categorías. El valor **Predeterminado** es el definido de forma predeterminada: el valor
 utilizado cuando no existe una anulación en la BD ni una variable de entorno.
 
 ### Seguridad (10)
@@ -112,7 +112,7 @@ utilizado cuando no existe una anulación en la BD ni una variable de entorno.
 
 Cuando `UNPRICED_USAGE_BUDGET_POLICY` se configura explícitamente (la sobrescritura en la base de datos precede al entorno), tiene prioridad sobre `USAGE_LIMIT_IGNORE_UNPRICED`. Sin un valor enum explícito, la desactivación booleana del upstream selecciona `count_as_zero`; de lo contrario, el valor predeterminado es `fail_closed`. Los valores enum inválidos y un almacenamiento ilegible de opciones de funcionalidad provocan un bloqueo por seguridad. Ninguna de las opciones de desactivación relaja las restricciones del gasto con precio definido ni las de una consulta de precios fallida. La aplicación de restricciones y el informe del administrador resuelven la misma política efectiva.
 
-### Entorno de ejecución (54)
+### Entorno de ejecución (55)
 
 | Clave                                          | Tipo     | Predeterminado | Reinicio | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | -------- | -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -172,6 +172,7 @@ Cuando `UNPRICED_USAGE_BUDGET_POLICY` se configura explícitamente (la sobrescri
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean  | `false`        |          | Permite que la política de cuota por ventana (umbrales de sesión/semanales utilizados por la selección de cuentas) respete el aplazamiento acotado por agotamiento (#17000): una vez transcurrido el plazo máximo de aplazamiento, o cuando la observación almacenada en caché es más antigua que el límite del aplazamiento, la ventana deja de excluir la cuenta hasta que se obtenga de nuevo la cuota. Desactivado de forma predeterminada: una ventana almacenada en caché sigue bloqueando según el último porcentaje notificado hasta su propia hora de restablecimiento.                                                                                                                                                                                                                                                                                                                                               |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean  | `false`        |          | Para la generación de imágenes compatible con OpenAI (#16260): usar el tiempo de espera de conexión (`providerSpecificData.timeoutMs`) o, en su defecto, el tiempo de espera central de las solicitudes upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → valor predeterminado de 600 s), en lugar del límite fijo de 120 s para imágenes; responder con 499 cuando el solicitante cancele; permitir que Playground reciba trabajos prolongados de generación de imágenes como un flujo SSE con señales periódicas de mantenimiento de conexión. Desactivado de forma predeterminada: se aplica el límite fijo y la cancelación del solicitante no se propaga. El plazo que abarca la lectura del cuerpo de la respuesta siempre está activo.                                                                                                                                                                              |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean  | `false`        |          | Deja de ofrecer y reenviar el esfuerzo de razonamiento `max` para Cursor Grok 4.7 (#17386): la documentación de Cursor solo enumera low/medium/high/xhigh, por lo que el alias de respaldo `grok-4.7-max` desaparece del catálogo y una solicitud de esfuerzo `max` se envía sin parámetro de esfuerzo. Desactivado de forma predeterminada: `max` se sigue ofreciendo y reenviando, ya que un sondeo real de AgentService/Run lo aceptó.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | booleano | `false`        |          | En las estadísticas de caché de compresión, cuente una solicitud comprimida a un proveedor de almacenamiento en caché de prefijo automático (OpenAI, Codex, Azure o una conexión personalizada que declare el almacenamiento en caché rápido con eliminación de marcadores) como un acierto de caché estimado incluso sin marcadores `cache_control` (#17114). La estimación es una señal de elegibilidad de caché, no un acierto observado, por lo que la tasa de aciertos reportada por esos proveedores tiende hacia el 100%. Desactivado de forma predeterminada: solo una solicitud que lleva marcadores `cache_control` a un proveedor de almacenamiento en caché cuenta como un acierto estimado, por lo que los proveedores de prefijo automático siguen informando 0.                                                                                                                                                 |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Devuelve todos los indicadores con su valor efectivo, origen y un resumen.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... los 113 indicadores
+    // ... los 114 indicadores
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

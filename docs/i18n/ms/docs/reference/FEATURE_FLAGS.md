@@ -44,7 +44,7 @@ Bendera boolean dianggap **didayakan** apabila nilai berkuat kuasanya ialah `"tr
 
 ## Katalog Bendera
 
-113 bendera merentas 6 kategori. **Lalai** ialah nilai lalai takrifan — nilai yang
+114 bendera merentas 6 kategori. **Lalai** ialah nilai lalai takrifan — nilai yang
 digunakan apabila tiada penggantian DB mahupun pemboleh ubah persekitaran.
 
 ### Keselamatan (10)
@@ -112,7 +112,7 @@ digunakan apabila tiada penggantian DB mahupun pemboleh ubah persekitaran.
 
 Apabila `UNPRICED_USAGE_BUDGET_POLICY` dikonfigurasi secara eksplisit (pengatasan DB mendahului persekitaran), ia mengatasi `USAGE_LIMIT_IGNORE_UNPRICED`. Tanpa nilai enum eksplisit, opsyen pengecualian boolean upstream memilih `count_as_zero`; jika tidak, lalainya ialah `fail_closed`. Nilai enum tidak sah dan storan bendera ciri yang tidak dapat dibaca gagal secara tertutup. Kedua-dua opsyen pengecualian tidak melonggarkan had perbelanjaan yang mempunyai data harga atau sekatan bagi carian harga yang gagal. Penguatkuasaan dan laporan pentadbir menentukan dasar berkesan yang sama.
 
-### Masa Jalan (54)
+### Masa Jalan (55)
 
 | Kekunci                                        | Jenis   | Lalai   | Mulakan Semula | Penerangan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -172,6 +172,7 @@ Apabila `UNPRICED_USAGE_BUDGET_POLICY` dikonfigurasi secara eksplisit (pengatasa
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |                | Benarkan dasar kuota setiap tetingkap (ambang sesi/mingguan yang digunakan oleh pemilihan akaun) mematuhi penangguhan kehabisan terhad (#17000): sebaik sahaja tarikh akhir penangguhan berhad berlalu, atau pemerhatian yang dicache lebih lama daripada had penangguhan, tetingkap berhenti mengecualikan akaun sehingga pengambilan kuota baharu. Dimatikan secara lalai: tetingkap yang dicache terus menyekat berdasarkan peratusan terakhir yang dilaporkan sehingga waktu tetapannya semula.                                                                                                                                                                                                                                                                                                                            |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |                | Untuk penjanaan imej yang serasi dengan OpenAI (#16260): gunakan tamat masa sambungan (`providerSpecificData.timeoutMs`), atau jika tiada, tamat masa pengambilan huluan pusat (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → lalai 600 s) dan bukannya peruntukan imej tetap 120 s; berikan respons 499 apabila pemanggil membatalkan; benarkan Playground menerima tugas imej yang panjang sebagai strim SSE dengan denyutan kekal aktif. Dilumpuhkan secara lalai: peruntukan tetap digunakan dan pembatalan pemanggil tidak disebarkan. Tarikh akhir yang meliputi pembacaan badan respons sentiasa diaktifkan.                                                                                                                                                                                                              |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                | Berhenti menawarkan dan memajukan tahap usaha penaakulan `max` untuk Cursor Grok 4.7 (#17386): dokumentasi Cursor hanya menyenaraikan low/medium/high/xhigh, maka alias sandaran `grok-4.7-max` hilang daripada katalog dan permintaan usaha `max` dihantar tanpa parameter usaha. Dimatikan secara lalai: `max` masih ditawarkan dan dimajukan kerana semakan AgentService/Run secara langsung menerimanya.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                | Dalam statistik cache pemampatan, kira permintaan termampat kepada penyedia automatic-prefix-caching (OpenAI, Codex, Azure, atau sambungan tersuai yang mengisytiharkan cache gesaan dengan pelucutan penanda) sebagai cache hit anggaran walaupun tanpa penanda `cache_control` (#17114). Anggaran tersebut ialah isyarat kelayakan cache, bukan cache hit yang diperhatikan, jadi kadar hit yang dilaporkan untuk penyedia itu cenderung kepada 100%. Dilumpuhkan secara lalai: hanya permintaan yang membawa penanda `cache_control` kepada penyedia caching dikira sebagai cache hit anggaran, jadi penyedia automatic-prefix terus melaporkan 0.                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Mengembalikan setiap bendera bersama nilai berkuat kuasa, sumber dan ringkasanny
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kesemua 113 bendera
+    // ... kesemua 114 bendera
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

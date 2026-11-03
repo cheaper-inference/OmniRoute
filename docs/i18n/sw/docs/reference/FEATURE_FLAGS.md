@@ -44,7 +44,7 @@ Bendera ya boolean huchukuliwa kuwa **imewashwa** wakati thamani yake inayotumik
 
 ## Katalogi ya Bendera
 
-Bendera 113 katika kategoria 6. **Chaguo-msingi** ni chaguo-msingi la ufafanuzi — thamani
+Bendera 114 katika kategoria 6. **Chaguo-msingi** ni chaguo-msingi la ufafanuzi — thamani
 inayotumika wakati hakuna ubatilishaji wa DB wala kigeu cha mazingira.
 
 ### Usalama (10)
@@ -112,7 +112,7 @@ inayotumika wakati hakuna ubatilishaji wa DB wala kigeu cha mazingira.
 
 `UNPRICED_USAGE_BUDGET_POLICY` ikiwekwa wazi (ubatilishaji wa hifadhidata kabla ya mazingira), hutangulia `USAGE_LIMIT_IGNORE_UNPRICED`. Bila thamani ya enum iliyowekwa wazi, chaguo la msamaha la boolean la upstream huchagua `count_as_zero`; vinginevyo chaguo-msingi ni `fail_closed`. Thamani batili za enum na hifadhi isiyosomeka ya swichi za vipengele husababisha kuzuia kwa usalama. Hakuna chaguo la msamaha linalolegeza vizuizi vya matumizi ya fedha yenye bei au utafutaji wa bei ulioshindwa. Utekelezaji wa vizuizi na ripoti ya msimamizi hutambua sera ileile inayotumika.
 
-### Wakati wa utekelezaji (54)
+### Wakati wa utekelezaji (55)
 
 | Ufunguo                                        | Aina    | Chaguomsingi | Kuanzisha upya | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | ------- | ------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ inayotumika wakati hakuna ubatilishaji wa DB wala kigeu cha mazingira.
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`      |                | Ruhusu sera ya kiwango cha matumizi kwa kila dirisha (vizingiti vya kipindi/kila wiki vinavyotumiwa katika uteuzi wa akaunti) iheshimu kusimamishwa kwa muda kwa ukomo baada ya kiwango kuisha (#17000): mara tu tarehe ya mwisho ya kusimamishwa kwa muda yenye kikomo inapopita, au taarifa iliyohifadhiwa kwenye akiba ni ya zamani kuliko kikomo hicho, dirisha huacha kuiondoa akaunti hadi data mpya ya kiwango cha matumizi itakapoletwa. Imezimwa kwa chaguo-msingi: dirisha lililohifadhiwa kwenye akiba huendelea kuzuia kulingana na asilimia yake ya mwisho iliyoripotiwa hadi wakati wake wa kuwekwa upya.                                                                                                                                                                                                    |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`      |                | Kwa utengenezaji wa picha unaooana na OpenAI (#16260): tumia muda wa mwisho wa muunganisho (`providerSpecificData.timeoutMs`), vinginevyo muda wa mwisho wa kati wa kuleta data kutoka upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → chaguomsingi sekunde 600) badala ya kikomo kisichobadilika cha sekunde 120 cha picha; jibu kwa 499 mpigaji anapoghairi; ruhusu Playground kupokea kazi ndefu za picha kama mtiririko wa SSE wenye mipigo ya kudumisha muunganisho. Imezimwa kwa chaguomsingi: kikomo kisichobadilika kinatumika na kughairi kwa mpigaji hakusambazwi. Muda wa mwisho unaojumuisha usomaji wa sehemu kuu ya jibu huwashwa kila wakati.                                                                                                                                                         |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`      |                | Huacha kutoa na kupitisha juhudi ya kufikiri ya `max` kwa Cursor Grok 4.7 (#17386): nyaraka za Cursor zinaorodhesha low/medium/high/xhigh pekee, kwa hiyo jina mbadala la akiba `grok-4.7-max` huondoka katika katalogi na ombi la juhudi ya `max` hutumwa bila kigezo cha juhudi. Imezimwa kwa chaguo-msingi: `max` bado hutolewa na kupitishwa kwa sababu jaribio halisi la AgentService/Run liliikubali.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`      |                | Katika takwimu za akiba ya mbano, hesabu ombi lililobanwa kwa mtoa huduma wa kuweka akiba kiambishi kiotomatiki (OpenAI, Codex, Azure, au muunganisho maalum unaotangaza uwekaji wa papo hapo kwa uondoaji wa alama) kama makadirio ya akiba ambayo hayana alama za `cache_control` (#17114). Kadirio ni ishara ya ustahiki wa akiba, si mvuto uliogunduliwa, kwa hivyo kiwango kilichoripotiwa cha watoa huduma hao kinaelekea 100%. Imezimwa kwa chaguo-msingi: ombi lililobeba viambishi vya `cache_control` pekee kwa mtoaji huduma wa akiba ndilo linalohesabiwa kama makadirio ya kugonga, kwa hivyo watoa huduma za kiambishi otomatiki wanaendelea kuripoti 0.                                                                                                                                                     |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Hurejesha kila kiashiria pamoja na thamani yake inayotumika, chanzo, na muhtasar
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... viashiria vyote 113
+    // ... viashiria vyote 114
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
