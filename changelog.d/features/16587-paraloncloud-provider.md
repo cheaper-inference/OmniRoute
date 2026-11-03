@@ -1,0 +1,1 @@
+- **feat(providers):** add ParalonCloud (`paraloncloud`) as an OpenAI-compatible inference provider on a decentralized GPU network, with Bearer-key authentication, `/v1/responses`, and live model discovery from `/v1/models` ([#16587](https://github.com/diegosouzapw/OmniRoute/pull/16587)) — thanks @robertjitaru

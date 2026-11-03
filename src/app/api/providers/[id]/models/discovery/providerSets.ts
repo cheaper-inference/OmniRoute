@@ -72,6 +72,10 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // discovered live from https://api.openvecta.com/v1/models; the registry seed
   // (registry/openvecta) covers the most-used LLMs as the offline fallback.
   "openvecta",
+  // ParalonCloud (https://paraloncloud.com/) serves its own open-weight models on a
+  // decentralized GPU network; the catalog follows the GPUs online, so it is discovered
+  // live from https://paraloncloud.com/v1/models (Bearer key).
+  "paraloncloud",
   // Openference (https://openference.com/) — OAuth JWT or API key on the same
   // OpenAI-compatible gateway. Live catalog from api.openference.com/v1/models.
   "openference",
