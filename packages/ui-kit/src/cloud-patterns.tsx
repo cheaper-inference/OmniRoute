@@ -162,12 +162,12 @@ export function CloudInstancePanel(p: CloudInstancePanelProps) {
           {p.connectionError && <p className="ci-cloud-connection__error" role="alert">{p.connectionError}</p>}
           <Button className="ci-cloud-connection__button" variant={p.connected ? "outline" : "default"} onClick={p.connected ? p.onDisconnect : p.onConnect} disabled={!ready || !p.canManage || p.busy || connecting} loading={!!connectionBusy && !connecting}>{p.connected ? "Disconnect Cheaper Inference" : connecting ? "Connecting your account…" : p.connectionError ? "Retry connection" : "Connect Cheaper Inference"}{!p.connected && !connectionBusy && <ArrowRight size={15} aria-hidden="true" />}</Button>
           <small>{!ready ? "Available when your gateway is online. " : ""}Inference is billed separately from hosting.</small>
-          <div className="ci-cloud-byok"><KeyRound size={18} aria-hidden="true" /><div><h3>Your providers</h3><p>Add API keys, subscriptions, or OAuth accounts in OmniRoute.</p><Button variant="link" onClick={p.onOpen} disabled={!ready || !p.canManage}>Configure providers<ArrowRight size={14} aria-hidden="true" /></Button></div></div>
+          <div className="ci-cloud-byok"><KeyRound size={18} aria-hidden="true" /><div><h3>Your providers</h3><p>Add API keys, subscriptions, or OAuth accounts in OmniRoute.</p><Button variant="link" onClick={p.onOpen} disabled={!ready || !p.canManage || p.busy}>Configure providers<ArrowRight size={14} aria-hidden="true" /></Button></div></div>
         </section>
         <section className="ci-cloud-hosting" aria-label="Hosting billing">
           <div className="ci-cloud-hosting-bill"><span>Monthly hosting</span><strong>{money(p.monthlyCents)}<small>/ month</small></strong></div>
           <p>{p.cancelAtPeriodEnd ? `Hosting ends ${renewal || "at the end of your paid period"}.` : renewal ? `Next renewal ${renewal}.` : "Monthly subscription. Inference billed separately."}</p>
-          {p.canBill && p.onBilling ? <Button className="ci-cloud-hosting__button" variant="outline" onClick={p.onBilling} disabled={p.busy}><CreditCard size={15} aria-hidden="true" />Manage billing<ArrowRight size={14} aria-hidden="true" /></Button> : !p.canBill && <small>Your workspace’s billing owner manages this subscription.</small>}
+          {p.canBill && p.onBilling ? <Button className="ci-cloud-hosting__button" variant="outline" onClick={p.onBilling} disabled={p.busy} loading={p.pendingAction === "portal"}><CreditCard size={15} aria-hidden="true" />Manage billing<ArrowRight size={14} aria-hidden="true" /></Button> : !p.canBill && <small>Your workspace’s billing owner manages this subscription.</small>}
         </section>
       </aside>
     </div>
@@ -179,13 +179,15 @@ export interface CloudBillingDetailsProps {
   monthlyCents: number; transferGb: number; periodEnd?: string | null;
   cancelAtPeriodEnd?: boolean; awaitingPayment?: boolean; busy?: boolean; pendingAction?: string | null;
   onPortal: () => void; onCancel: () => void; onResume: () => void; onCheckout: () => void;
+  /** Native dashboard management uses an arrow rather than an external-link icon. */
+  portalExternal?: boolean;
 }
 export function CloudBillingDetails(p: CloudBillingDetailsProps) {
   const period = billingDate(p.periodEnd);
   return <div className="ci-cloud-billing">
     <div className="ci-cloud-billing__summary"><span>OmniRoute Cloud</span><strong>{money(p.monthlyCents)}<small>/ month</small></strong><p>{p.cancelAtPeriodEnd ? `Ends ${period || "at the end of your paid period"}.` : period ? `Renews ${period}.` : "Renews monthly after payment."}</p></div>
     <p className="ci-cloud-billing__included">Includes {(p.transferGb / 1000).toLocaleString("en-US")} TB transfer. Inference is billed separately to your provider or Cheaper Inference wallet.</p>
-    <Button className="ci-cloud-billing__portal" onClick={p.awaitingPayment ? p.onCheckout : p.onPortal} disabled={p.busy} loading={p.pendingAction === "portal"}><CreditCard size={15} aria-hidden="true" />{p.awaitingPayment ? "Complete payment" : "Payment methods and invoices"}<ExternalLink size={14} aria-hidden="true" /></Button>
+    <Button className="ci-cloud-billing__portal" onClick={p.awaitingPayment ? p.onCheckout : p.onPortal} disabled={p.busy} loading={p.pendingAction === "portal"}><CreditCard size={15} aria-hidden="true" />{p.awaitingPayment ? "Complete payment" : "Payment methods and invoices"}{p.portalExternal === true ? <ExternalLink size={14} aria-hidden="true" /> : <ArrowRight size={14} aria-hidden="true" />}</Button>
     {!p.awaitingPayment && <div className="ci-cloud-billing__subscription"><div><h3>{p.cancelAtPeriodEnd ? "Cancellation scheduled" : "Subscription"}</h3><p>{p.cancelAtPeriodEnd ? "Keep hosting to continue your subscription." : "If you cancel, your gateway stays online until the paid period ends."}</p></div><Button variant="outline" onClick={p.cancelAtPeriodEnd ? p.onResume : p.onCancel} disabled={p.busy} loading={p.pendingAction === "resume"}>{p.cancelAtPeriodEnd ? "Keep hosting" : "Cancel hosting"}</Button></div>}
   </div>;
 }
