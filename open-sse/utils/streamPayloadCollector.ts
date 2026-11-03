@@ -1,5 +1,5 @@
 import { cloneLogPayload } from "@/lib/logPayloads";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "./numeric.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { jsonLength } from "./jsonSize.ts";
 

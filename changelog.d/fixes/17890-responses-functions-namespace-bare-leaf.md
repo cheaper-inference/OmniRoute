@@ -1,1 +1,0 @@
-- fix(translator): keep bare leaf names for the Responses default `functions` namespace on Chat upstreams so Codex `exec`/`wait` are no longer renamed to `functions__exec` (#17890)

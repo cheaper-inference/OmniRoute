@@ -172,7 +172,11 @@ export function translateNonStreamingClientResponse(
     !input.videoTranscriptSensitive
   ) {
     try {
-      storeClaudeThinkingFromResponse(responseBody, { provider, model });
+      storeClaudeThinkingFromResponse(responseBody, {
+        provider,
+        model,
+        connectionId: input.connectionId,
+      });
     } catch {
       // Continuity capture is best-effort — never block the response
     }

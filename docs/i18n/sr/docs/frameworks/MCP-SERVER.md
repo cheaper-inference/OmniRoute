@@ -288,144 +288,121 @@ I SSE i HTTP transporti sa strimovanjem su blokirani dok se MCP server ne omogu�
 
 ---
 
-## Аутентификација и опсези
+## Аутентификација и опсег
 
-MCP позиви алата читају низове опсега од позиваоца. Та провера припада једном од три независна именска простора. Успех једне провере није успех осталих. Правила су [Три именска простора опсега](#three-scope-namespaces). Каталог алата је [MCP опсези алата](#mcp-tool-scopes).
+MCP алата зка читају низове опсега из позиваоца. Та провера је један од три независна простора имена. Пас једног дама није пас осталих. Правила су [три именска простора опсега](#three-scope-namespaces). Каталог алата је [MCP тоол сцопес](#mcp-tool-scopes).
 
 ### Три именска простора опсега
 
-`manage` на API кључу, `read:compression` на MCP алату и `read` на токену за приступ `oma_live_…` су три различита одобрења. Позиваоци који пошаљу токен за приступ `read` на мутацијску управљачку руту добијају HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Тај ранг је `scopeSatisfies`. Он не консултује MCP табелу, а ни MCP механизам за упаривање не консултује њега.
+`manage` на API кључу, `read:compression` на MCP алату и `read` на `oma_live_…` приступном токену су три различита одобрења. Позиваоци који пошаљу `read` приступни токен на променљиву руту управљања добијају HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Тај ранг је `scopeSatisfies`. Не консултује MCP табелу, а MCP матцхер је не консултује.
 
-| Namespace               | Credential                                                                | Checker                | A pass allows                                           |
-| :---------------------- | :------------------------------------------------------------------------ | :--------------------- | :------------------------------------------------------ |
-| Управљање API кључевима | `api_keys.scopes`                                                         | `hasManageScope`       | Управљачки REST за тај Bearer кључ                      |
-| Адитивни API кључеви    | исти низ, један тачан низ знакова                                         | помоћник наведен испод | Само та једна могућност                                 |
-| MCP опсези алата        | исти низ, иначе MCP `_meta` (само HTTP/SSE), иначе `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | Тај алат, када је примена укључена                      |
-| Токен за приступ        | `oma_live_…`                                                              | `scopeSatisfies`       | Управљачка рута чија метода и путања захтевају тај ранг |
+| Намеспаце               | Акредитив                                                                  | Цхецкер               | Пропусница дозвољава                               |
+| :---------------------- | :------------------------------------------------------------------------- | :-------------------- | :------------------------------------------------- |
+| Управљање АПИ кључевима | `api_keys.scopes`                                                          | `hasManageScope`      | Менаџмент REST за тај кључ носиоца                 |
+| Додатак за АПИ кључ     | исти низ, један тачан низ                                                  | доле наведен помоћник | Само та једна способност                           |
+| MCP опсег алата         | исти низ, иначе MCP `_meta` (само HTTP/SSE ), иначе `OMNIROUTE_MCP_SCOPES` | `scopeMatches`        | Тај алат, када је извршење укључено                |
+| Приступни токен         | `oma_live_…`                                                               | `scopeSatisfies`      | Рута управљања чији метод и пут захтевају тај ранг |
 
-Издавање сваког доказа за приступ описано је у
-[Управљачка аутентификација](../guides/MANAGEMENT-AUTH.md).
+Ковање сваког акредитива је покривено [аутентификацијом управљања](../guides/MANAGEMENT-AUTH.md).
 
-#### Опсези API кључева
+#### Опсези АПИ-кључева
 
-Један низ `api_keys.scopes` обухвата два посла. Користе различите функције.
+Један `api_keys.scopes` низ храни два посла. Користе различите функције.
 
-**Управљачки REST.** `manage` и `admin` су чланови `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` је оно што овлашћује управљачке руте за тај кључ. `admin` има управљачке могућности на тим рутама. Реч `admin` овде није ранг токена за приступ и не проширује се у MCP опсеге алата.
+**Манагемент REST.** `manage` и `admin` су чланови `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` је оно што овлашћује руте управљања за тај кључ. `admin` је способан за управљање на тим рутама. Реч `admin` овде није ранг токена приступа и не проширује се на опсег MCP алата.
 
-**Адитивни низови.** Сваки од њих је тачно испитивање припадности, и сваки остаје изван `MANAGEMENT_API_KEY_SCOPES`.
+**Адитивни низови.** Сваки од њих је тачан тест чланства и сваки остаје изван `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scope                          | A pass allows                                                                                                                                                             |
+| Обим                           | Пропусница дозвољава                                                                                                                                                      |
 | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | Само изузетак LOCAL_ONLY за `/api/mcp/` ван петље (loopback) (`hasMcpConnectOrManageScope`). Кључ са `manage` или `admin` и даље пролази кроз тај изузетак.               |
+| `mcp:connect`                  | Само изрезивање `/api/mcp/` LOCAL_ONLY без петље (`hasMcpConnectOrManageScope`). Кључ са `manage` или `admin` и даље пролази кроз то изрезивање.                          |
 | `self:usage`                   | `GET /api/v1/me/status` за овај кључ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` додаје овај опсег приликом креирања (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Квоте налога из извора унутар тог payload-а статуса (`src/lib/usage/apiKeySelfService.ts`). Рута статуса и даље захтева `self:usage`.                                     |
-| `policy:bypass-provider-quota` | Позиви инференције овог кључа заобилазе политику квота добављача (`hasProviderQuotaBypassScope` у `src/sse/handlers/chat.ts`).                                            |
+| `self:account-quota`           | Квоте упстреам налога унутар тог статусног терета (`src/lib/usage/apiKeySelfService.ts`). Статусна рута и даље захтева `self:usage`.                                      |
+| `policy:bypass-provider-quota` | Позиви закључивања овог кључа прескачу политику квоте добављача (`hasProviderQuotaBypassScope` у `src/sse/handlers/chat.ts`).                                             |
 
-#### Упаривање
+#### Матцхинг
 
-Каталог је табела испод [MCP опсези алата](#mcp-tool-scopes). Не третирајте `MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` као тај каталог: то је оригинални типизирани подскуп. Каснији алати декларишу још опсега поред њега (`read:notion`, `read:skills`, `read:local-corpus` и остатак табеле).
+Каталог је табела под [MCP алатима](#mcp-tool-scopes). Не третирајте `MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` као тај каталог: то је оригинални откуцани подскуп. Каснији алати декларишу даље опсеге поред њега (`read:notion`, `read:skills`, `read:local-corpus` и остатак табеле).
 
-`evaluateToolScopes` у `open-sse/mcp-server/scopeEnforcement.ts` дозвољава позив када сваки захтевани опсег одговара неком додељеном опсегу:
+`evaluateToolScopes` у `open-sse/mcp-server/scopeEnforcement.ts` дозвољава позив када сваки тражени опсег одговара неком одобреном опсегу:
 
-- `*` одговара сваком захтеваном опсегу.
-- Додељени опсег који се завршава са `*` одговара захтеваном опсегу који почиње префиксом пре звездице. `read:*` одговара `read:compression`.
-- Сваки други додељени опсег одговара само идентичном захтеваном низу знакова.
+- `*` одговара сваком траженом опсегу.
+- Одобрени опсег који се завршава на `*` одговара захтеваном опсегу који почиње префиксом пре звездице. `read:*` одговара `read:compression`.
+- Сваки други одобрени опсег одговара само идентичном траженом низу.
 
-Кључ чији су опсези `["manage"]` не пролази `scopeMatches` за `read:compression`.
-Исти позив не пролази ни за `admin`, `mcp:connect`, `read` и `write` када су то једини
-додељени низови знакова. Међу MCP опсезима алата не постоји хијерархија осим завршне `*`.
+Кључ чији су опсег `["manage"]` не успева `scopeMatches` за `read:compression`. Исти позив не успева за `admin`, `mcp:connect`, `read` и `write` када су то једини додељени стрингови. Не постоји хијерархија међу опсегима MCP алата изван задњег `*`.
 
-Примена је искључена осим ако је `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (подразумевано
-`false`). Док је искључена, `evaluateToolScopes` дозвољава позив и занемарује каталог.
-Док је укључена, HTTP користи `api_keys.scopes` Bearer кључа као
-`authInfo` (види [Повезивање HTTP опсега по кључу](#per-key-http-scope-binding-7895)).
-Када се не разреше опсези кључа, скуп додељених опсега се пребацује на MCP `_meta` (поштује се само
-за HTTP/SSE позиваоце, унутар HTTP контекста аутентификације; `_meta` stdio позиваоца се занемарује
-јер га контролише клијент и не носи идентитет позиваоца), а затим
-`OMNIROUTE_MCP_SCOPES`.
+Примена је искључена осим ако `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (подразумевано `false`). Док је искључен, `evaluateToolScopes` дозвољава позив и прескаче каталог. Док је укључен, HTTP користи `api_keys.scopes` кључа носиоца као `authInfo` (погледајте [Повезивање опсега HTTP по кључу](#per-key-http-scope-binding-7895) ). Када се ниједан опсег кључева не разреши, додељени скуп пада на MCP `_meta` (поштова се само за HTTP/SSE позиваоце, унутар HTTP аутх контекста; `_meta` стдио позиваоца се занемарује јер га клијент контролише и не носи идентитет по позиваоцу), затим `OMNIROUTE_MCP_SCOPES`.
 
-#### Опсези токена за приступ
+#### Опсези токена приступа
 
-Токени `oma_live_…` (`src/lib/accessTokens/scopes.ts`) носе `read`, `write`
-или `admin`. `scopeSatisfies` је ранг: `admin` обухвата `write` и `read`, а
-`write` обухвата `read`. Непознати опсези не обухватају ништа.
+`oma_live_…` токени (`src/lib/accessTokens/scopes.ts`) носе `read`, `write` или `admin`. `scopeSatisfies` је ранг: `admin` покрива `write` и `read`, а `write` покрива `read`. Непознати домети не покривају ништа.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) упоређује тај
-ранг са `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) упоређује тај ранг са `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` i `OPTIONS` zahtevaju `read`.
-- Svaka druga metoda zahteva `write`.
-- Putanje u `ADMIN_SCOPE_PREFIXES` zahtevaju `admin` za svaku metodu. `/api/mcp`
-  je na toj listi, pa `write` access token i dalje ne može da poziva MCP HTTP
-  površinu.
-- Putanje u `ADMIN_MUTATION_PREFIXES` zahtevaju `admin` samo za mutacije.
-- Putanje u `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) zahtevaju `admin` samo za mutacije, i samo na
-  tačno toj putanji — ostale pod-rute `/api/settings/*` zadržavaju `write`.
+- `GET`, `HEAD` и `OPTIONS` захтевају `read`.
+- Сваки други метод захтева `write`.
+- Путања у `ADMIN_SCOPE_PREFIXES` захтевају `admin` за сваки метод. `/api/mcp` је на тој листи, тако да `write` приступни токен и даље не може позвати MCP HTTP површину.
+- Путања у `ADMIN_MUTATION_PREFIXES` захтевају `admin` само за мутације.
+- Путања у `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) захтевају `admin` само за мутације, а само на тој тачној путањи — друге `/api/settings/*` подруте задржавају `write`.
 
-`PATCH /api/keys/{id}` je mutacija i nije na tim admin listama, pa `read` token
-dobija 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Access token sa `write` ili `admin` zadovoljava tu rutu. Dashboard JWT, loopback
-CLI machine-id token i API ključ sa `manage` ili `admin` ulaze u druge grane i
-nisu ograničeni ovim rangom.
+`PATCH /api/keys/{id}` је мутација и није на тим листама администратора, тако да `read` токен прима 403 `Access token scope 'read' is insufficient; 'write' required.` `write` или `admin` приступни токен задовољава ту руту. Контролна табла JWT, лоопбацк CLI машински ИД токен и API кључ са `manage` или `admin` заузимају друге гране и нису сужени овим рангом.
 
-Access token koji prođe `scopeSatisfies` za `/api/mcp` prošao je samo upravljačku
-kapiju. Pozivi alata i dalje pokreću `scopeMatches` nad opsezima API ključa.
-Rang access tokena nije ulazni parametar za `scopeMatches`.
+Приступни токен који пролази `scopeSatisfies` за `/api/mcp` је очистио само капију управљања. Позиви алата и даље покрећу `scopeMatches` против опсега АПИ кључева. Ранг токена приступа није улаз за `scopeMatches`.
 
-### MCP opsezi alata
+### MCP опсег алата
 
-Provera opsega je centralizovana u `open-sse/mcp-server/scopeEnforcement.ts`.
-Svaki alat zahteva specifične opsege:
+Спровођење делокруга је централизовано у `open-sse/mcp-server/scopeEnforcement.ts`. Сваки алат захтева одређене опсеге:
 
-| Обим                  | Алати                                                                                                                                                                              |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                  |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                          |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                             |
-| `read:quota`          | `check_quota`                                                                                                                                                                      |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                             |
-| `read:models`         | `list_models_catalog`                                                                                                                                                              |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                      |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                              |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                 |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                        |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                     |
-| `read:cache`          | `cache_stats`                                                                                                                                                                      |
-| `write:cache`         | `cache_flush`                                                                                                                                                                      |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                         |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                  |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                              |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                   |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                             |
-| `read:memory`         | `memory_search`                                                                                                                                                                    |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                       |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                 |
-| `write:skills`        | `skills_enable`                                                                                                                                                                    |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                   |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                   |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                            |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                          |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                   |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                     |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                 |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                    |
-| `read:obsidian`       | 13 alata za čitanje — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 alata za upis — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                   |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
+| Обим                  | Алати                                                                                                                                                                             |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                 |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                         |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                            |
+| `read:quota`          | `check_quota`                                                                                                                                                                     |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                            |
+| `read:models`         | `list_models_catalog`                                                                                                                                                             |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                     |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                             |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                                |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                       |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                    |
+| `read:cache`          | `cache_stats`                                                                                                                                                                     |
+| `write:cache`         | `cache_flush`                                                                                                                                                                     |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                        |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                 |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                             |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                  |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                            |
+| `read:memory`         | `memory_search`                                                                                                                                                                   |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                      |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                |
+| `write:skills`        | `skills_enable`                                                                                                                                                                   |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                  |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                  |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                           |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                         |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                  |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                    |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                   |
+| `read:obsidian`       | 13 алата за читање — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 алата за писање — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                 |
 
-Podržani su wildcard opsezi: `read:*` daje pristup svim opsezima za čitanje, `*` daje puni pristup.
+Подржани су џокерски опсеги: `read:*` даје све опсеге за читање, `*` даје пуни приступ.
 
-### `mcp:connect` — uska mogućnost rutiranja (#7895)
+### `mcp:connect` — могућност уске руте (#7895)
 
-Pristupu HTTP/SSE MCP transportu (`/api/mcp/*`) sa adrese koja nije loopback potreban je LOCAL_ONLY izuzetak za `/api/mcp/` (vidi `docs/security/ROUTE_GUARD_TIERS.md`). Ranije je taj izuzetak prihvatao samo API ključ sa punim `manage`/`admin` opsegom — preširoko za pozivaoca kojem je potreban samo MCP. `src/shared/constants/managementScopes.ts` sada izvozi `MCP_CONNECT_SCOPE = "mcp:connect"`: dodatni, usko ograničen opseg (isti presedan kao `SELF_USAGE_SCOPE`) koji ovlašćuje SAMO bypass za `/api/mcp/` u `src/server/authz/policies/management.ts` — ne daje pristup nijednoj drugoj upravljačkoj ruti i namerno je van `MANAGEMENT_API_KEY_SCOPES`. Ključ sa `manage`/`admin` i dalje prolazi kroz izuzetak bez izmena; `mcp:connect` je alternativa sa manjim privilegijama za udaljene pozivaoce koji koriste isključivo MCP, a proverava se preko `hasMcpConnectOrManageScope()`.
+Достизање HTTP/SSE MCP транспорта (`/api/mcp/*`) из без петље захтева изрезивање `/api/mcp/` LOCAL_ONLY (погледајте `docs/security/ROUTE_GUARD_TIERS.md`). Историјски гледано, то издвајање је прихватало само пун `manage`/`admin` -scope кључ API — за позиваоца који само треба да говори MCP. `src/shared/constants/managementScopes.ts` сада извози `MCP_CONNECT_SCOPE = "mcp:connect"`: адитивни, уски опсег (исти преседан као `SELF_USAGE_SCOPE`) који овлашћује ONLY `/api/mcp/` заобилазницу у `src/server/authz/policies/management.ts` — не даје никакав други приступ рути управљања и намерно се чува OUT од `MANAGEMENT_API_KEY_SCOPES`. Кључ који држи `manage`/`admin` и даље пролази кроз изрезивање непромењен; `mcp:connect` је алтернатива са нижим привилегијама за удаљене позиваоце само за МЦП, проверава се преко `hasMcpConnectOrManageScope()`.
 
-### Per-key vezivanje opsega za HTTP (#7895)
+### Везање опсега HTTP по кључу (#7895)
 
-Preko HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` sada određuje stvarne `api_keys.scopes` pozivaoca preko `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) i prosleđuje ih MCP SDK-ovom `transport.handleRequest(req, { authInfo })`, tako da `extra.authInfo.scopes` koji stiže do svakog poziva alata odražava opsege samog Bearer ključa. `scopeEnforcement.ts`-ov `resolveCallerScopeContext()` je već davao prioritet `authInfo` u odnosu na `_meta` i rezervni izvor `OMNIROUTE_MCP_SCOPES` iz okruženja — ovim se samo popunjava taj prvi, najviši prioritetni izvor, koji preko HTTP-a ranije nije bio popunjen. Kada se ne odredi nijedan API ključ (nema zaglavlja, nevalidan ključ), `authInfo` ostaje `undefined` i određivanje pada na postojeći lanac `meta`/env bez izmena. stdio nema identitet pozivaoca (vidi `mcpCallerIdentity.ts`) i nije pogođen vezivanjem po ključu — preskače korak `_meta` (`_meta` se uvažava samo unutar HTTP auth konteksta, #15159) i određuje se samo iz ključa okruženja `OMNIROUTE_MCP_SCOPES`.
+Преко HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` сада решава стварни `api_keys.scopes` позиваоца преко `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) и прослеђује га MCP SDK `transport.handleRequest(req, { authInfo })`, тако да `extra.authInfo.scopes` достигне сваки позив алата одражава сопствене опсеге кључа носиоца. `scopeEnforcement.ts`-ов `resolveCallerScopeContext()` је већ дао приоритет `authInfo` над `_meta` и `OMNIROUTE_MCP_SCOPES` енв резервним — ово само попуњава тај први извор највишег приоритета, који раније није био напајан преко HTTP. Када се ниједан API кључ не реши (без заглавља, неважећи кључ), `authInfo` остаје `undefined` и резолуција пада на постојећи `meta`/енв ланац непромењена. стдио нема идентитет по позиваоцу (погледајте `mcpCallerIdentity.ts`) и на њега не утиче везивање по кључу — он прескаче `_meta` корак (`_meta` се поштује само унутар HTTP аутх контекста, #15159) и решава се само од `OMNIROUTE_MCP_SCOPES` енв кључа.
 
-**Primena opsega se namerno uključuje za HTTP/SSE pozivaoce sa usko ograničenim opsegom, bez obzira na `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Podrazumevana vrednost `false` za `OMNIROUTE_MCP_ENFORCE_SCOPES` bezbedna je samo za lokalni/stdio tok sa jednim operatorom, gde nema identiteta pozivaoca prema kome bi se opseg mogao primeniti. `open-sse/mcp-server/server.ts::withScopeEnforcement()` neuslovno uključuje primenu opsega po alatu (`shouldForceScopeEnforcement()` u `scopeEnforcement.ts`) kad god `resolveCallerScopeContext()` odredi `source === "authInfo"` (tj. stvarno HTTP Authorization zaglavlje po ključu, samo HTTP/SSE) I taj ključ nema puni `manage`/`admin` opseg. Time se zatvara praznina u kojoj ključ sa ISKLJUČIVO uskim `mcp:connect` opsegom za bypass — iznad dokumentovan kao ovlašćenje ni za šta osim LOCAL_ONLY izuzetka za `/api/mcp/` — bi inače mogao da pozove svaki MCP alat čim operator uključi udaljeni/van-loopback MCP pristup, samo zato što `OMNIROUTE_MCP_ENFORCE_SCOPES` dolazi sa podrazumevanom vrednošću `false`. Ključ sa punim `manage`/`admin` preko HTTP-a, kao i svaki stdio/lokalni pozivaoc, zadržavaju postojeće ponašanje kontrolisano uslovom `OMNIROUTE_MCP_ENFORCE_SCOPES`.
+**Спровођење је принудно за HTTP/SSE позиваоце уског опсега без обзира на `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` подразумевано подешавање на `false` је безбедно само за local/stdio ток са једним оператором, где не постоји идентитет по позиваоцу који би могао да се примени. `open-sse/mcp-server/server.ts::withScopeEnforcement()` безусловно укључује примену опсега по алату (`shouldForceScopeEnforcement()` у `scopeEnforcement.ts`) кад год `resolveCallerScopeContext()` разреши `source === "authInfo"` (тј. право заглавље HTTP ауторизације по кључу, HTTP/SSE-only) AND тај кључ не садржи пун `manage`/`admin` опсег. Ово затвара празнину у којој би кључ који држи ONLY уски `mcp:connect` заобилазни обим — документован горе као неовлашћујући ништа осим `/api/mcp/` LOCAL_ONLY изрезивања — могао иначе да позове сваки MCP алат када оператер омогући приступ remote/non-loopback MCP, једноставно зато што `OMNIROUTE_MCP_ENFORCE_SCOPES` подразумевано испоручује `false`. Потпуни `manage`/`admin` кључ преко HTTP и сваки stdio/local позивалац задржавају постојеће понашање `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated непромењеним.
+
+---
 
 ## Променљиве окружења
 

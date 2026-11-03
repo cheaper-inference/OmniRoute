@@ -13,13 +13,13 @@
 
 ## Me Yake
 
-OmniRoute yayi rijistar masu samarwa 377, gami da shigarwar kasida 155 da aka yiwa alama**free/no-auth** (no-auth, free-tier OAuth, ko free-tier API key - duba [Jagoran Tiers Kyauta](../getting-started/FREE-TIERS-GUIDE.md) da cikakken [jagorar Tiers Kyauta](../reference/FREE_TIERS.md) ). Kama: masu samar da kyauta sun bambanta sosai a cikin ingancin ƙirar. Mai ba da izini wanda ke ba da samfurin iyaka yana da amfani sosai fiye da wanda ke ba da ƙaramin ƙirar gado.
+OmniRoute yayi rijistar masu samarwa 380, gami da shigarwar kasida 155 da aka yiwa alama**free/no-auth** (no-auth, free-tier OAuth, ko free-tier API maɓalli — duba [Jagoran Tiers Kyauta](../getting-started/FREE-TIERS-GUIDE.md) da cikakken [jagorar Tiers Kyauta](../reference/FREE_TIERS.md) ). Kama: masu samar da kyauta sun bambanta sosai a cikin ingancin ƙirar. Mai ba da izini wanda ke ba da samfurin iyaka yana da amfani sosai fiye da wanda ke ba da ƙaramin ƙirar gado.
 
-**Matsayin Masu Ba da Kyauta** amsa"** wane mai bada kyauta ya ba ni mafi kyawun samfurin?** " ta hanyar shiga kowane kasida ta masu bada kyauta tare da** Maki masu inganci da jama'a suka samo asali** daga** Jagoran jagororin Arena AI** ( ELO zaɓin ɗan adam, ra'ayin guda ɗaya a bayan fagen LMArena chatbot). Masu bayarwa sai an jera su da ƙarfinsu** mafi kyawun samfurin kyauta** .
+**Matsayin Masu Ba da Kyauta** amsa"** wane mai bada kyauta ya ba ni mafi kyawun samfurin?** " ta hanyar shiga kowane kasida ta masu bada kyauta tare da** Maki masu inganci da jama'a suka samo asali** daga** Jagoran jagororin Arena AI** ( ELO fifikon ɗan adam, ra'ayin guda ɗaya bayan fage na LMArena chatbot). Masu bayarwa sai an jera su da ƙarfinsu** mafi kyawun samfurin kyauta** .
 
 An ƙididdige darajar daga tushe guda uku na gaske:
 
-1. Jerin masu ba da kyauta - `NOAUTH_PROVIDERS`, da `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` shigarwar `hasFree` (`src/shared/constants/providers.ts`).
+1. Mai ba da kyauta ya lissafa — `NOAUTH_PROVIDERS`, da `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` shigarwar `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalojin samfurin kowane mai bayarwa daga wurin rajistar mai bada (`open-sse/config/providerRegistry.ts`).
 3. Makin da ya dace da ɗawainiya da aka samu ELO da aka adana a cikin tebur `model_intelligence` DB ta injin daidaitawa na Arena ELO (`src/lib/arenaEloSync.ts`).
 
