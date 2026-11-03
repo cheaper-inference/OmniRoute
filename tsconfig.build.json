@@ -15,6 +15,13 @@
   // next-env.d.ts is deliberately absent: Next generates it, it is gitignored, and
   // including a path that may not exist made the program differ between a fresh
   // checkout and one that had run `next build`.
+  //
+  // The vendored kit's root barrel and `reporting-charts.tsx` are excluded. Upstream wrote that
+  // component for recharts 2 (kit 0.0.81 declares recharts 2.15.4) and it fails against our
+  // recharts 3 (TS2322 on the tooltip payload). packages/ui-kit is a byte-for-byte copy, so the
+  // fix belongs upstream. Nothing imports either file, so neither is bundled:
+  // tests/unit/build-typecheck-vendored-kit-scope.test.ts fails the moment something does, and
+  // then this exclude has to go.
   "extends": "./tsconfig.json",
   "include": [
     "electron/**/*.d.ts",
@@ -41,6 +48,8 @@
     ".next-playwright",
     ".claude",
     ".scratch",
-    ".source"
+    ".source",
+    "packages/ui-kit/src/index.ts",
+    "packages/ui-kit/src/reporting-charts.tsx"
   ]
 }

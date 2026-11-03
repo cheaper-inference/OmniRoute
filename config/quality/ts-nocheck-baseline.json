@@ -22,7 +22,7 @@
     "src/lib/usage/migrations.ts"
   ],
   "_program": {
-    "files": 6072,
+    "files": 6122,
     "include": [
       "electron/**/*.d.ts",
       "src/**/*.ts",
@@ -48,15 +48,13 @@
       ".next-playwright",
       ".claude",
       ".scratch",
-      ".source"
+      ".source",
+      "packages/ui-kit/src/index.ts",
+      "packages/ui-kit/src/reporting-charts.tsx"
     ],
     "compilerOptions": {
       "target": "ES2022",
-      "lib": [
-        "dom",
-        "dom.iterable",
-        "esnext"
-      ],
+      "lib": ["dom", "dom.iterable", "esnext"],
       "allowJs": true,
       "checkJs": false,
       "skipLibCheck": true,
@@ -72,24 +70,12 @@
       "incremental": true,
       "forceConsistentCasingInFileNames": true,
       "paths": {
-        "@/*": [
-          "./src/*"
-        ],
-        "@omniroute/open-sse": [
-          "./open-sse"
-        ],
-        "@omniroute/open-sse/*": [
-          "./open-sse/*"
-        ],
-        "@omniroute/browser-pool": [
-          "./packages/browser-pool/src"
-        ],
-        "@omniroute/ui-kit": [
-          "./packages/ui-kit/src"
-        ],
-        "@omniroute/ui-kit/*": [
-          "./packages/ui-kit/src/*"
-        ]
+        "@/*": ["./src/*"],
+        "@omniroute/open-sse": ["./open-sse"],
+        "@omniroute/open-sse/*": ["./open-sse/*"],
+        "@omniroute/browser-pool": ["./packages/browser-pool/src"],
+        "@omniroute/ui-kit": ["./packages/ui-kit/src"],
+        "@omniroute/ui-kit/*": ["./packages/ui-kit/src/*"]
       },
       "plugins": [
         {
