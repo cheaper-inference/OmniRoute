@@ -1,5 +1,10 @@
 # ── Common base with runtime deps ──────────────────────────────────────────
-FROM node:26-trixie-slim AS base
+# Pinned to a patch release (Dependabot bumps it) instead of the floating `26-trixie-slim`
+# tag: the floating tag let v3.8.52 ship with node 26.12.0, whose bundled root store still
+# trusts the compromised eMudhra intermediates (https://emudhra.we-have-a-problem.com/).
+# 26.12.1 is the first 26.x that rejects them; tests/unit/build/docker-ca-baseline.test.mjs
+# keeps it from going below that.
+FROM node:26.12.1-trixie-slim AS base
 WORKDIR /app
 
 # Mirrors for builders whose network cannot reach the default sources
@@ -230,7 +235,15 @@ ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_BUILD_MEMORY_MB}"
 ARG OMNIROUTE_BUILD_WORKERS=2
 ENV CIRCLE_NODE_TOTAL=${OMNIROUTE_BUILD_WORKERS}
 
+# Webpack production builds skip the persistent cache unless this is 1 (see
+# next.config.mjs). Declared as ARG+ENV so `--build-arg
+# OMNIROUTE_WEBPACK_BUILD_CACHE=1` reaches `npm run build`.
+ARG OMNIROUTE_WEBPACK_BUILD_CACHE=""
+ENV OMNIROUTE_WEBPACK_BUILD_CACHE=$OMNIROUTE_WEBPACK_BUILD_CACHE
+
 COPY . ./
+# The cache mount keeps .build/next/cache across builds on the same BuildKit host.
+# It holds only the SWC cache unless OMNIROUTE_WEBPACK_BUILD_CACHE=1.
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-next-cache,target=/app/.build/next/cache \
   mkdir -p /app/data \
   && npm run build \
@@ -360,11 +373,15 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 
 USER node
 
-FROM runner-base AS runner-cli
+FROM runner-base AS runner-cli-core
 
-# Drop back to root briefly so we can install system + global npm packages,
-# then return to the `node` non-root user before the CMD inherited from
-# runner-base runs.
+# Shared CLI runtime: retains every supported AI CLI while keeping Docker client
+# packages out of the common layer. Deployments without a Docker socket (including
+# the homelab image) can stop at runner-cli-no-docker and avoid installing tools
+# that cannot reach a daemon. The published runner-cli target below keeps its
+# historical Docker client + Compose behavior. Drop back to root briefly so we can
+# install system + global npm packages, then return to the `node` non-root user
+# before the CMD inherited from runner-base runs.
 USER root
 
 # The CLI image can use the internal ChatGPT Web (Codex) Chromium sidecar over
@@ -376,7 +393,7 @@ COPY --from=builder /app/node_modules/playwright ./node_modules/playwright
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-lists,target=/var/lib/apt/lists,sharing=locked \
   apt-get update \
-  && apt-get install -y --no-install-recommends git ca-certificates docker.io docker-compose \
+  && apt-get install -y --no-install-recommends git ca-certificates \
   && rm -rf /var/lib/apt/lists/* \
   && git config --system url."https://github.com/".insteadOf "ssh://git@github.com/"
 
@@ -408,3 +425,24 @@ RUN --network=none codex --version \
   && droid --version \
   && openclaw --version \
   && qodercli --version
+
+# Docker-client-free CLI flavor for hosts that do not mount /var/run/docker.sock
+# and do not set DOCKER_HOST. It still includes Codex, Claude Code, Droid,
+# OpenClaw, Qoder CLI, Playwright, and git; only the unusable Docker/Compose
+# clients differ.
+FROM runner-cli-core AS runner-cli-no-docker
+
+# Backward-compatible generic CLI flavor. Existing builds targeting runner-cli
+# retain Docker and Compose clients for operators that connect to a daemon. It
+# stays the LAST stage so a build without --target still produces it.
+FROM runner-cli-core AS runner-cli
+
+USER root
+
+RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-lists,target=/var/lib/apt/lists,sharing=locked \
+  apt-get update \
+  && apt-get install -y --no-install-recommends docker.io docker-compose \
+  && rm -rf /var/lib/apt/lists/*
+
+USER node

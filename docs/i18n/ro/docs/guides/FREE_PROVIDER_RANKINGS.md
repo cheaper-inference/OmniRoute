@@ -13,13 +13,13 @@
 
 ## Ce este
 
-OmniRoute înregistrează 377 de furnizori, inclusiv 155 de intrări de catalog marcate**free/no-auth** (no-auth, free-tier OAuth sau free-tier API key — consultați [Ghidul Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) și [directorul complet Free Tiers](../reference/FREE_TIERS.md) ). Captura: furnizorii gratuiti variază foarte mult în calitatea modelului. Un furnizor fără autorizare care deservește un model de frontieră este mult mai util decât unul care deservește un model vechi vechi.
+OmniRoute înregistrează 380 de furnizori, inclusiv 155 de intrări de catalog marcate**free/no-auth** (no-auth, free-tier OAuth sau free-tier API key — consultați [Ghidul Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) și [directorul complet Free Tiers](../reference/FREE_TIERS.md) ). Captura: furnizorii gratuiti variază foarte mult în calitatea modelului. Un furnizor fără autorizare care deservește un model de frontieră este mult mai util decât unul care deservește un model vechi vechi.
 
-**Clasamentul gratuit al furnizorilor** raspunsuri"** care furnizor gratuit îmi oferă cel mai bun model?** " prin aderarea la catalogul fiecărui furnizor gratuit cu** scoruri de calitate aglomerate** din** Clasament Arena AI** (human-preference ELO, aceeași idee din spatele arenei chatbot LMArena). Furnizorii sunt apoi clasificați în funcție de puterea lor** cel mai bun model gratuit** .
+**Clasamentul gratuit al furnizorilor** raspunsuri"** care furnizor gratuit îmi oferă cel mai bun model?** " prin aderarea la catalogul fiecărui furnizor gratuit cu** scoruri de calitate aglomerate** din** Clasament Arena AI** (human-preference ELO, aceeași idee din spatele arenei LMArena chatbot). Furnizorii sunt apoi clasificați în funcție de puterea lor** cel mai bun model gratuit** .
 
 Clasamentul este calculat din trei surse reale:
 
-1. Listele de furnizori gratuiti — `NOAUTH_PROVIDERS`, plus intrările `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marcate `hasFree` (`src/shared/constants/providers.ts`).
+1. Furnizorul gratuit listează — `NOAUTH_PROVIDERS`, plus intrările `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marcate `hasFree` (`src/shared/constants/providers.ts`).
 2. Catalogul modelului fiecărui furnizor din registrul furnizorilor (`open-sse/config/providerRegistry.ts`).
 3. Scorurile de potrivire a sarcinilor derivate din ELO stocate în tabelul `model_intelligence` DB de către motorul de sincronizare Arena ELO (`src/lib/arenaEloSync.ts`).
 

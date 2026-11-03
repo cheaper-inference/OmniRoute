@@ -1,0 +1,101 @@
+{
+  "_comment": "Files that opt out of type checking entirely with @ts-nocheck. tsc never reports an error inside them, so they are invisible to the diagnostic baseline and would otherwise be a place where debt can hide forever. This list is frozen: adding a file here (or adding @ts-nocheck to a new file) fails the gate. Removing an entry by fixing the file is always allowed and should be paired with `--update` to ratchet the list down.",
+  "_measured_2026_10_30": "With all of these disabled at once the whole-app program reports 326 diagnostics instead of 272, so 54 errors are currently hidden behind them. The bulk sits in tokenHealthCheck.ts (23), bedrock.ts (21) and tokenRefresh.ts (6) - token and credential paths.",
+  "files": [
+    "open-sse/services/provider.ts",
+    "open-sse/services/tokenRefresh.ts",
+    "open-sse/services/tokenRefresh/circuitBreaker.ts",
+    "open-sse/services/tokenRefresh/providers/claudeOAuth.ts",
+    "open-sse/services/tokenRefresh/providers/cline.ts",
+    "open-sse/services/tokenRefresh/providers/codex.ts",
+    "open-sse/services/tokenRefresh/providers/copilot.ts",
+    "open-sse/services/tokenRefresh/providers/github.ts",
+    "open-sse/services/tokenRefresh/providers/google.ts",
+    "open-sse/services/tokenRefresh/providers/kiro.ts",
+    "open-sse/services/tokenRefresh/providers/openference.ts",
+    "open-sse/services/tokenRefresh/providers/qoder.ts",
+    "open-sse/services/tokenRefresh/providers/workbuddy.ts",
+    "open-sse/services/tokenRefresh/rotationMap.ts",
+    "open-sse/services/tokenRefresh/shared.ts",
+    "open-sse/services/wildcardRouter.ts",
+    "open-sse/utils/proxyFetch.ts",
+    "src/lib/usage/migrations.ts"
+  ],
+  "_program": {
+    "files": 6072,
+    "include": [
+      "electron/**/*.d.ts",
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "open-sse/**/*.ts",
+      "open-sse/**/*.tsx",
+      "packages/**/*.ts",
+      "packages/**/*.tsx",
+      "bin/**/*.ts",
+      "bin/**/*.tsx",
+      "scripts/**/*.ts",
+      "*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "tests",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/__tests__/**",
+      ".build",
+      ".next",
+      ".next-playwright",
+      ".claude",
+      ".scratch",
+      ".source"
+    ],
+    "compilerOptions": {
+      "target": "ES2022",
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "esnext"
+      ],
+      "allowJs": true,
+      "checkJs": false,
+      "skipLibCheck": true,
+      "strict": false,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "module": "esnext",
+      "moduleResolution": "bundler",
+      "allowImportingTsExtensions": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "jsx": "react-jsx",
+      "incremental": true,
+      "forceConsistentCasingInFileNames": true,
+      "paths": {
+        "@/*": [
+          "./src/*"
+        ],
+        "@omniroute/open-sse": [
+          "./open-sse"
+        ],
+        "@omniroute/open-sse/*": [
+          "./open-sse/*"
+        ],
+        "@omniroute/browser-pool": [
+          "./packages/browser-pool/src"
+        ],
+        "@omniroute/ui-kit": [
+          "./packages/ui-kit/src"
+        ],
+        "@omniroute/ui-kit/*": [
+          "./packages/ui-kit/src/*"
+        ]
+      },
+      "plugins": [
+        {
+          "name": "next"
+        }
+      ]
+    }
+  }
+}

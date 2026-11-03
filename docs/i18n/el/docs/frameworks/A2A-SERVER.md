@@ -163,7 +163,7 @@ OmniRoute εκθέτει 6 δεξιότητες A2A ενσωματωμένες �
 | Έκθεση Υγείας          | `health-report`      | Διακόπτης κυκλώματος αδρανών, ψύξη, κατάσταση κλειδώματος ανά πάροχο                                                                                               | υγεία, ανθεκτικότητα             | "Εμφάνιση κατάστασης υγείας όλων των παρόχων"                 |
 | Δυνατότητες λίστας     | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο Agent Skills με 45 καταχωρήσεις (23 API + 21 CLI + 1 config) ως πίνακα σήμανσης με ακατέργαστο SKILL.md URLs για ένεση περιβάλλοντος | κατάλογος, ανακάλυψη, δεξιότητες | "Κατάλογος όλων των δυνατοτήτων OmniRoute "                   |
 
-> Η Κάρτα Αντιπροσώπου θα πρέπει να διατηρείται ευθυγραμμισμένη με τον ζωντανό κατάλογο παρόχων 377. Οι μετρήσεις παρόχων και τα μεταδεδομένα free/no-auth προέρχονται από το μητρώο χρόνου εκτέλεσης.
+> Η Κάρτα Αντιπροσώπου θα πρέπει να διατηρείται ευθυγραμμισμένη με τον κατάλογο των ζωντανών 380 παρόχων. Οι μετρήσεις παρόχων και τα μεταδεδομένα free/no-auth προέρχονται από το μητρώο χρόνου εκτέλεσης.
 
 ### Λεπτομέρεια δεξιοτήτων `list-capabilities`
 
@@ -197,17 +197,17 @@ OmniRoute εκθέτει 6 δεξιότητες A2A ενσωματωμένες �
 
 ---
 
-## Προσθήκη Νέας Δεξιότητας
+## Προσθήκη νέας δεξιότητας
 
-1. **Δημιουργία αρχείου δεξιότητας:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Δημιουργία αρχείου δεξιοτήτων:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Εξάγετε μια ασύγχρονη συνάρτηση `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ακολουθήστε τη μορφή υπαρχουσών δεξιοτήτων όπως το `smartRouting.ts`.
+   Εξαγωγή ασύγχρονης συνάρτησης `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ακολουθήστε το σχήμα των υπαρχουσών δεξιοτήτων όπως `smartRouting.ts`.
 
-2. **Καταχώρηση handler:** στο `src/lib/a2a/taskExecution.ts`, προσθέστε μια εγγραφή στο `A2A_SKILL_HANDLERS`:
+2. **Διαχειριστής εγγραφής:** στο `src/lib/a2a/taskExecution.ts`, προσθέστε μια καταχώρηση στο `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...υπάρχουσες δεξιότητες
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ OmniRoute εκθέτει 6 δεξιότητες A2A ενσωματωμένες �
    };
    ```
 
-3. **Έκθεση στο Agent Card:** στο `src/app/.well-known/agent.json/route.ts`, προσθέστε στον πίνακα `skills`:
+3. **Έκθεση στην κάρτα αντιπροσώπου:** σε `src/lib/a2a/agentCardMetadata.ts` (κοινόχρηστο από `/.well-known/agent.json` και `/.well-known/agent-card.json`), προσαρτήστε στον πίνακα `skills` :
 
    ```json
    {
      "id": "your-skill",
      "name": "Your Skill",
-     "description": "Σύντομη, εστιασμένη στην πρόθεση περιγραφή",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Παράδειγμα κλήσης σε φυσική γλώσσα"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Γράψτε δοκιμές:** `tests/unit/a2a-<your-skill>.test.ts`. Καλύψτε το ευτυχές μονοπάτι + το μονοπάτι σφάλματος.
+4. **Γράψτε τεστ:** `tests/unit/a2a-<your-skill>.test.ts`. Διαδρομή σφάλματος κάλυψης happy path +.
 
-5. **Τεκμηριώστε** τη νέα δεξιότητα στον πίνακα `Available Skills` αυτού του αρχείου.
+5. **Εγγραφο** η νέα ικανότητα στον πίνακα `Available Skills` αυτού του αρχείου.
 
 ---
 

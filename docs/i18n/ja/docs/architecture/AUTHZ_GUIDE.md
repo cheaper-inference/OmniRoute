@@ -133,31 +133,31 @@ JWT の検証に成功し、**かつ** `authenticated: true` が含まれてい�
 ## パイプライン
 
 ```
-受信リクエスト → src/proxy.ts
-  → src/server/authz/pipeline.ts の runAuthzPipeline()
-    1. 信頼済み内部ヘッダーを除去（x-omniroute-auth-*、x-omniroute-route-class）
-    2. リクエストIDを生成し、classifyRoute() でルートを分類
-    3. pathname == "/" の場合 → /dashboard にリダイレクト
-    4. ドレイン中（グレースフルシャットダウン）かつ /api/* の場合 → 503
-    5. GET以外の /api/* の場合 → checkBodySize() ガード
-    6. OPTIONS の場合 → CORSプリフライト 204
-    7. options.enforce == false の場合 → ルートクラスヘッダーを付けてそのまま通過
-    8. それ以外の場合: POLICIES[routeClass].evaluate(ctx)
-       - 許可  → x-omniroute-auth-{kind,id,label,scopes} を付与 → NextResponse.next()
-       - 拒否 → correlation_id 付きのJSONエラー（ダッシュボードページの場合 → 302 /login）
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-信頼済み内部ヘッダー（`src/server/authz/headers.ts` で定義）は、分類前に**受信リクエストから除去されます**。クライアントが `x-omniroute-auth-*` を事前に設定して主体になりすますことはできません。
+信頼できる内部ヘッダー ( `src/server/authz/headers.ts`で定義) は次のとおりです。**受信リクエストから削除される**分類の前に、 —クライアントは、サブジェクトになりすますために`x-omniroute-auth-*`事前に設定することはできません。
 
-### ポリシーの契約
+### 保険契約
 
-各ルートクラスには、`src/server/authz/policies/` 内にポリシーがあります。
+各ルート クラスには`src/server/authz/policies/`にポリシーがあります。
 
-- **`publicPolicy`**（`policies/public.ts`）— 常に `allow({ kind: "anonymous", id: "anonymous" })` を返します。
-- **`clientApiPolicy`**（`policies/clientApi.ts`）— Bearerを抽出し、`validateApiKey()` で検証します。有効な `REQUIRE_API_KEY` 機能フラグが無効な場合に限り、匿名アクセスへフォールスルーします。有効なフラグは `isRequireApiKeyEnabled()`（`DB feature flag override > process.env.REQUIRE_API_KEY > default`）によって解決されるため、ダッシュボードの機能フラグと環境変数が `/api/v1/*`、`/api/v1beta/*`、およびエイリアスを一貫して制御します。リゾルバーで障害が発生した場合は、フェイルクローズします。クライアントAPIルートでのダッシュボードセッションリクエストを許可します（ダッシュボードのモデルカタログで使用される `/api/v1/models` を含む）。
-- **`managementPolicy`**（`policies/management.ts`）— ダッシュボードセッション、内部モデル同期リクエスト（`/api/providers/[name]/(sync-models|models)` に対して照合）、または `isAuthRequired()` がfalseを返した場合は認証を完全にスキップします。Bearerトークンが存在するものの無効な場合は403（`AUTH_001`）を返し、それ以外の場合は401を返します。また、すべての認証分岐の前にルートガード階層（LOCAL_ONLY / ALWAYS_PROTECTED）も適用します。[ルートガード階層](../security/ROUTE_GUARD_TIERS.md)を参照してください。`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 内のLOCAL_ONLYパス（現時点では `/api/mcp/`）は、Bearerキーが `manage` スコープを持つ場合、非ループバックからアクセスできます。それ以外のすべてのLOCAL_ONLYパスは、スコープに関係なく厳密にループバック限定のままです。
+- **`publicPolicy`** (`policies/public.ts`) —常に`allow({ kind: "anonymous", id: "anonymous" })`を返します。
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer を抽出し、 `validateApiKey()`経由で検証します。有効な`REQUIRE_API_KEY`機能フラグが無効になっている場合にのみ、匿名に移行します。有効なフラグは`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) によって解決されるため、ダッシュボード機能フラグと環境変数によって`/api/v1/*`、 `/api/v1beta/*`、およびエイリアスが一貫して制御されます。リゾルバ障害がフェールクローズされる。クライアントAPIルート (ダッシュボード モデル カタログで使用される`/api/v1/models`を含む) でのダッシュボード セッション リクエストを許可します。 Entra ID SSOが有効な場合、構造的に Entra トークンであるベアラー (3 つの Base64url セグメント、 `RS*` alg、 `kid`) はSSOブランチによって処理されます。**前に**`validateApiKey()`とその判定は最終的な—であり、API キー パスや匿名ブランチへの劣化は決して通過しないため、アイデンティティ プロバイダーの停止がオープン アクセスになることはありません。静的APIキーは影響を受けません。 [「エントラID SSOを](../security/ENTRA_SSO.md)参照してください。
+- **`managementPolicy`** (`policies/management.ts`) — 、ダッシュボード セッション、内部モデル同期リクエスト ( `/api/providers/[name]/(sync-models|models)`と照合) を受け入れるか、 `isAuthRequired()` false を返した場合は完全にスキップします。 Bearer トークンが存在するが無効な場合は 403 (`AUTH_001`) を返し、それ以外の場合は 401 を返します。また、認証ブランチ—の前にルート ガード層 (LOCAL_ONLY / ALWAYS_PROTECTED) を適用します。 [「ルート ガード層」](../security/ROUTE_GUARD_TIERS.md)を参照してください。 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (現在: `/api/mcp/`) のLOCAL_ONLYパスは、Bearer キーが`manage`スコープを保持している場合、非ループバックからアクセスできます。他のすべてのLOCAL_ONLYパスは、スコープに関係なく厳密なループバックのままです。
 
-ポリシーが成功すると、`kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` を持つ `AuthSubject` が返されます。後続のハンドラーは認証ロジックを再実行する代わりに、`src/server/authz/assertAuth.ts` の `assertAuth(request, "CLIENT_API")` を介してこれを読み取れます。
+ポリシーが成功すると、 `AuthSubject`と`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`が返されます。ダウンストリーム ハンドラーは、認証ロジックを再実行する代わりに、 `src/server/authz/assertAuth.ts`の`assertAuth(request, "CLIENT_API")`を介してそれを読み取ることができます。
 
 ## 公開ルート一覧
 
@@ -294,23 +294,23 @@ APIキーには`scopes`配列が含まれています（`api_keys.scopes`にJSON
 
 ## デバッグ
 
-パイプラインは、レスポンスに常に以下のヘッダーを付与します。
+パイプラインは常に応答に次のスタンプを付けます。
 
 ```
-x-request-id:               <相関 ID。エラーボディにも同じ値が含まれる>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-認証済みリクエストの場合、アップストリーム（ハンドラー側）のリクエストヘッダーには以下も含まれます。
+認証されたリクエストの場合、上流 (ハンドラー側) リクエスト ヘッダーには次のものも含まれます。
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<末尾 4 文字> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     （任意）
-x-omniroute-auth-scopes:    カンマ区切りのリスト
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-ハンドラー内では `assertAuth(req, expectedClass)` を使用してください。ミドルウェアが迂回された場合、コード `AUTHZ_NOT_INITIALIZED` の `AuthzAssertionError` がスローされます（テストで設定のリグレッションを検出する際に役立ちます）。
+ハンドラー—内で`assertAuth(req, expectedClass)`使用します。ミドルウェアがバイパスされた場合、コード`AUTHZ_NOT_INITIALIZED`で`AuthzAssertionError`をスローします (テストで構成のリグレッションを検出するのに役立ちます)。
 
 ## 関連項目
 

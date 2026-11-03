@@ -3,8 +3,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { defaultComboForRequest, isBuiltinStackedPipeline, isStackedCompressionCombo } =
-  await import("../../open-sse/handlers/chatCore/compressionComboPredicates.ts");
+const {
+  defaultComboForRequest,
+  isBuiltinStackedPipeline,
+  isStackedCompressionCombo,
+  shouldRunResolvedPipeline,
+} = await import("../../open-sse/handlers/chatCore/compressionComboPredicates.ts");
 const { DEFAULT_COMPRESSION_CONFIG } = await import("../../open-sse/services/compression/types.ts");
 
 test("isBuiltinStackedPipeline true only for the rtk(standard)→caveman(full) shape", () => {
@@ -61,7 +65,7 @@ test("defaultComboForRequest keeps only the safe steps when the request does not
     });
     assert.deepEqual(
       combo?.pipeline,
-      [{ engine: "session-dedup" }, { engine: "lite" }],
+      [{ engine: "session-dedup" }, { engine: "lite", config: { compressToolResults: false } }],
       String(header)
     );
   }
@@ -116,7 +120,10 @@ test("defaultComboForRequest swaps a single lossy engine for the safe default pa
     header: null,
     combos: {},
   });
-  assert.deepEqual(combo?.pipeline, [{ engine: "session-dedup" }, { engine: "lite" }]);
+  assert.deepEqual(combo?.pipeline, [
+    { engine: "session-dedup" },
+    { engine: "lite", config: { compressToolResults: false } },
+  ]);
 });
 
 test("defaultComboForRequest keeps a single safe engine as-is", () => {
@@ -126,7 +133,7 @@ test("defaultComboForRequest keeps a single safe engine as-is", () => {
     header: null,
     combos: {},
   });
-  assert.deepEqual(combo?.pipeline, [{ engine: "lite" }]);
+  assert.deepEqual(combo?.pipeline, [{ engine: "lite", config: { compressToolResults: false } }]);
 });
 
 test("defaultComboForRequest yields when an engine:<id> header resolves a plan", () => {
@@ -165,5 +172,44 @@ test("isStackedCompressionCombo true when the combo has >= 1 pipeline layer", ()
       outputModeIntensity: "full",
     } as never),
     true
+  );
+});
+
+test("shouldRunResolvedPipeline: without a combo the resolved plan always runs", () => {
+  assert.equal(
+    shouldRunResolvedPipeline({
+      comboApplied: false,
+      comboIsDefault: false,
+      comboIdConfigured: false,
+      adaptiveStagesApplied: 0,
+    }),
+    true
+  );
+});
+
+test("shouldRunResolvedPipeline: the default combo yields only when the budget dial escalated", () => {
+  const base = { comboApplied: true, comboIsDefault: true, comboIdConfigured: true };
+  assert.equal(shouldRunResolvedPipeline({ ...base, adaptiveStagesApplied: 0 }), false);
+  assert.equal(shouldRunResolvedPipeline({ ...base, adaptiveStagesApplied: 2 }), true);
+});
+
+test("shouldRunResolvedPipeline: an assigned or named combo is never replaced", () => {
+  assert.equal(
+    shouldRunResolvedPipeline({
+      comboApplied: true,
+      comboIsDefault: false,
+      comboIdConfigured: true,
+      adaptiveStagesApplied: 3,
+    }),
+    false
+  );
+  assert.equal(
+    shouldRunResolvedPipeline({
+      comboApplied: false,
+      comboIsDefault: false,
+      comboIdConfigured: true,
+      adaptiveStagesApplied: 3,
+    }),
+    false
   );
 });
