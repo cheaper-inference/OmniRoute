@@ -107,39 +107,40 @@ omniroute setup-whycodes
 
 ---
 
-## 1. کاتالوگ کد CLI (27 ابزار)
+## 1. کاتالوگ کد CLI (28 ابزار)
 
 همه ابزارهایی که در `/dashboard/cli-code` ظاهر می شوند. آنهایی که `baseUrlSupport: none` دارند به جای URL پایه سفارشی از طریق MITM یا یک راهنمای دستی متصل می شوند:
 
 | شناسه       | نام                      | فروشنده             | baseUrlSupport | configType | acpSpawnable |
 | ----------- | ------------------------ | ------------------- | -------------- | ---------- | ------------ |
-| کلود        | کد Claude                | Anthropic           | کامل           | env        | درست است     |
-| کدکس        | OpenAI Codex CLI         | OpenAI              | کامل           | سفارشی     | درست است     |
+| کلود        | کد Claude                | Anthropic           | پر             | env        | درست است     |
+| کدکس        | OpenAI Codex CLI         | OpenAI              | پر             | سفارشی     | درست است     |
 | zcode       | ZCode (طرح کدگذاری GLM ) | Z.ai                | هیچ کدام       | سفارشی     | نادرست       |
-| cline       | Cline                    | OSS (کلود دیو سابق) | کامل           | سفارشی     | درست است     |
-| کیلو        | کد کیلویی                | کیلو ارگ            | کامل           | سفارشی     | نادرست       |
-| رو          | رو کد                    | رو (OSS)            | کامل           | راهنمای    | نادرست       |
-| ادامه       | ادامه دهید               | continue.dev        | کامل           | راهنمای    | نادرست       |
-| کمک کننده   | ایدر                     | OSS (P. Gauthier)   | کامل           | راهنمای    | درست است     |
-| جعل کردن    | ForgeCode                | ضدیت HQ             | کامل           | سفارشی     | درست است     |
-| jcode       | jcode                    | 1jehuang (OSS)      | کامل           | سفارشی     | نادرست       |
-| جستجوی عمیق | DeepSeek TUI             | شکارچی باون (OSS)   | کامل           | سفارشی     | نادرست       |
-| نهنگ کد     | CodeWhale                | همبون (OSS)         | کامل           | سفارشی     | نادرست       |
-| کد باز      | OpenCode                 | ناهنجاری (SST سابق) | کامل           | راهنمای    | درست است     |
-| خوانده      | دروید کارخانه ای         | کارخانه AI          | جزئی           | راهنمای    | نادرست       |
-| کمک خلبان   | GitHub Copilot CLI       | GitHub/MS           | کامل           | سفارشی     | نادرست       |
+| cline       | Cline                    | OSS (کلود دیو سابق) | پر             | سفارشی     | درست است     |
+| کیلو        | کد کیلویی                | کیلو ارگ            | پر             | سفارشی     | نادرست       |
+| رو          | رو کد                    | رو (OSS)            | پر             | راهنمای    | نادرست       |
+| ادامه       | ادامه دهید               | continue.dev        | پر             | راهنمای    | نادرست       |
+| کمک کننده   | ایدر                     | OSS (P. Gauthier)   | پر             | راهنمای    | درست است     |
+| جعل کردن    | ForgeCode                | ضدیت HQ             | پر             | سفارشی     | درست است     |
+| jcode       | jcode                    | 1jehuang (OSS)      | پر             | سفارشی     | نادرست       |
+| جستجوی عمیق | DeepSeek TUI             | شکارچی باون (OSS)   | پر             | سفارشی     | نادرست       |
+| نهنگ کد     | CodeWhale                | همبون (OSS)         | پر             | سفارشی     | نادرست       |
+| کد باز      | OpenCode                 | ناهنجاری (SST سابق) | پر             | راهنمای    | درست است     |
+| خوانده      | Factory Droid            | کارخانه AI          | جزئی           | راهنمای    | نادرست       |
+| خلبان       | GitHub Copilot CLI       | GitHub/MS           | پر             | سفارشی     | نادرست       |
 | نشانگر-کلی  | Cursor CLI               | Anysphere           | جزئی           | راهنمای    | درست است     |
-| بو کردن     | بو کنید                  | leonardcser (OSS)   | کامل           | سفارشی     | نادرست       |
-| پی          | Pi (عامل کدگذاری pi)     | M. Zechner (OSS)    | کامل           | سفارشی     | نادرست       |
-| grok-build  | ساخت Grok                | xAI                 | کامل           | سفارشی     | نادرست       |
-| خرد کردن    | خرد کردن                 | OSS (افسون)         | کامل           | سفارشی     | نادرست       |
-| qwen        | کد Qwen                  | Alibaba             | کامل           | راهنمای    | درست است     |
-| زد          | Zed                      | صنایع Zed           | کامل           | راهنمای    | نادرست       |
+| بو کردن     | بو کنید                  | leonardcser (OSS)   | پر             | سفارشی     | نادرست       |
+| پی          | Pi (عامل کدگذاری pi)     | M. Zechner (OSS)    | پر             | سفارشی     | نادرست       |
+| grok-build  | ساخت Grok                | xAI                 | پر             | سفارشی     | نادرست       |
+| خرد کردن    | خرد کردن                 | OSS (افسون)         | پر             | سفارشی     | نادرست       |
+| qwen        | کد Qwen                  | Alibaba             | پر             | راهنمای    | درست است     |
+| openclaude  | OpenClaude               | گیتلاوب (OSS)       | پر             | راهنمای    | نادرست       |
+| زد          | Zed                      | صنایع Zed           | پر             | راهنمای    | نادرست       |
 | مکان نما    | Cursor                   | Anysphere           | هیچ کدام       | راهنمای    | نادرست       |
 | ضد جاذبه    | Antigravity              | Google              | هیچ کدام       | mitm       | نادرست       |
 | هرمس        | هرمس                     | تحقیق نوس           | هیچ کدام       | راهنمای    | نادرست       |
 | کیرو        | Kiro AI                  | Amazon              | هیچ کدام       | mitm       | نادرست       |
-| سفارشی      | CLI سفارشی               | —                   | کامل           | سفارشی ساز | نادرست       |
+| سفارشی      | CLI سفارشی               | —                   | پر             | سفارشی ساز | نادرست       |
 
 ابزارهای دارای `baseUrlSupport: "partial"` نشان "⚠ Base URL parcial" را در کارت داشبورد نشان میدهند.
 ---
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## ۶. مدیریتکنندههای تنظیمات برای ابزارهای جدید
+## 6. Setting Handlers for New Tools
 
-ابزارهای جدید با `configType: "custom"` دارای مسیرهای اختصاصی API برای تنظیمات هستند:
+ابزارهای جدید با `configType: "custom"` دارای تنظیمات اختصاصی مسیرهای API هستند:
 
-| مسیر                                        | ابزار                                                             |
-| ------------------------------------------- | ----------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                           |
-| `POST /api/cli-tools/jcode-settings`        | jcode (فلگ --base-url)                                            |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL، قدیمی)                             |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL، همگامسازی اصلی + قدیمی `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                             |
-| `POST /api/cli-tools/pi-settings`           | عامل کدنویسی Pi                                                   |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml، `[model.omniroute]`)             |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + کلید اختصاصی `.env`)         |
+| مسیر                                        | ابزار                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                             |
+| `POST /api/cli-tools/jcode-settings`        | jcode (پرچم --base-url )                                            |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL، میراث)                               |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL، همگام سازی `~/.deepseek` میراث + اولیه) |
+| `POST /api/cli-tools/smelt-settings`        | بو کنید                                                             |
+| `POST /api/cli-tools/pi-settings`           | عامل کدگذاری Pi (`~/.pi/agent/models.json`, `providers.omniroute`)  |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)               |
+| `POST /api/cli-tools/qwen-settings`         | کد Qwen (کلید `.env` اختصاصی + `~/.qwen/settings.json` )            |
 
-همه مسیرها برای پاسخهای خطا از `sanitizeErrorMessage()` استفاده میکنند (قانون سختگیرانه شماره ۱۲).
+همه مسیرها `sanitizeErrorMessage()` برای پاسخ به خطا استفاده می کنند (قانون سخت شماره 12).
 
 ---
 
@@ -293,19 +294,19 @@ interface ToolBatchStatus {
 
 ## 9. شروع سریع
 
-### مرحلهٔ 1 — دریافت کلید API از OmniRoute
+### مرحله 1 — یک کلید OmniRoute API دریافت کنید
 
-1. `/dashboard/api-manager` را باز کنید ← **ایجاد کلید API**
-2. نامی برای آن تعیین کنید (برای مثال `cli-tools`) و همهٔ مجوزها را انتخاب کنید
-3. کلید را کپی کنید — برای تمام CLIهای زیر به آن نیاز خواهید داشت
+1. `/dashboard/api-manager` → را باز کن** کلید API را ایجاد کنید**
+2. نامی به آن بدهید (مثلا `cli-tools`) و همه مجوزها را انتخاب کنید
+3. کلید — را برای هر CLI زیر کپی کنید
 
-> کلید شما به این شکل است: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> کلید شما شبیه این است: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### مرحلهٔ 2 — نصب ابزارهای CLI
+### مرحله 2 — ابزار CLI را نصب کنید
 
-همهٔ ابزارهای مبتنی بر npm به Node.js 22.22.2+ یا 24.x نیاز دارند:
+همه ابزارهای مبتنی بر npm Node.js 22.22.2 + یا 24.x نیاز دارند:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (قابل اجرا از طریق `omniroute run gemini` ← سطح /v1beta)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # مبتنی بر Rust
+cargo install smelt  # Rust-based
 
-# عامل کدنویسی Pi
-# برای نصب، https://github.com/zechnerj/pi-coding-agent را ببینید
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# برای نصب، https://github.com/1jehuang/jcode را ببینید
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### مرحلهٔ 3 — پیکربندی از طریق داشبورد
+### مرحله 3 — را از طریق داشبورد پیکربندی کنید
 
-1. به `http://localhost:20128/dashboard/cli-code` بروید
+1. به `http://localhost:20128/dashboard/cli-code` برو
 2. ابزار خود را در شبکه پیدا کنید
-3. روی کارت کلیک کنید تا صفحهٔ جزئیات ابزار باز شود
-4. کلید API و URL پایهٔ خود را انتخاب کنید
-5. روی **اعمال پیکربندی** کلیک کنید یا قطعهکد پیکربندی دستی را کپی کنید
+3. روی کارت کلیک کنید تا صفحه جزئیات ابزار باز شود
+4. کلید API و URL پایه خود را انتخاب کنید
+5. کلیک کنید** Config را اعمال کنید** یا قطعه پیکربندی دستی را کپی کنید
 
 ---
 
-### مرحلهٔ 4 — تنظیم متغیرهای محیطی سراسری
+### مرحله 4 — متغیرهای محیطی جهانی را تنظیم کنید
 
 ```bash
-# نقطهٔ پایانی همگانی OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI مقدار GOOGLE_GEMINI_BASE_URL را در ریشه میخواند (SDK آن خودش /v1beta/... را اضافه میکند)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> برای یک **سرور راه دور**، `localhost:20128` را با IP یا دامنهٔ سرور جایگزین کنید،
-> برای مثال `http://<your-server-ip>:20128`.
+> برای یک** سرور راه دور** `localhost:20128` با سرور IP یا دامنه جایگزین کنید، به عنوان مثال `http://<your-server-ip>:20128`.
 
 ---
 
-### مرحلهٔ 4 — پیکربندی هر ابزار
+### مرحله 4 — پیکربندی هر ابزار
 
-#### Claude Code
+#### کد Claude
 
 ```bash
-# ایجاد ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,18 +388,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-برای Claude Code از ریشهٔ یکپارچهٔ درگاه Anthropic استفاده کنید. در اینجا `/v1` را اضافه نکنید.
+از ریشه دروازه یکپارچه Anthropic برای کد Claude استفاده کنید. `/v1` اینجا اضافه نکنید.
 
-**آزمایش:** `claude "say hello"`
+**تست:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Codex مدرن (v0.137+) فقط `~/.codex/config.toml` را میخواند — فایل قدیمی
-`config.yaml` متعلق به CLI قدیمی npm است و بدون نمایش هیچ پیامی نادیده گرفته میشود. کلید API
-در متغیر محیطی `OMNIROUTE_API_KEY` (`env_key`) باقی میماند و هرگز
-داخل فایل قرار نمیگیرد:
+Codex مدرن (v0.137 +) `~/.codex/config.toml` فقط — می خواند `config.yaml` قدیمی به میراث npm CLI تعلق دارد و بی سر و صدا نادیده گرفته می شود. کلید API در متغیر محیط `OMNIROUTE_API_KEY` (`env_key`) باقی میماند و هرگز داخل فایل نیست:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,9 +411,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-مرجع کامل (پروفایلها، `wire_api`، پنجرههای زمینه): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+مرجع کامل (پروفایل، `wire_api`، پنجره های زمینه): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**آزمایش:** `codex "what is 2+2?"`
+**تست:** `codex "what is 2+2?"`
 
 ---
 
@@ -445,17 +442,46 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**آزمایش:** `opencode`
+**تست:** `opencode`
 
-> برای ارسال گونههای دارای قابلیت تفکر، از
-> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> استفاده کنید.
+> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` برای ارسال انواع تفکر استفاده کنید.
 
 ---
 
-#### Cline (CLI یا VS Code)
+#### عامل کدنویسی Pi
 
-**حالت CLI:**
+بسته رسمی Pi Coding Agent را با `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` نصب کنید. Pi ارائه دهندگان سفارشی را از `~/.pi/agent/models.json` می خواند. `PI_CODING_AGENT_DIR` را برای جابجایی کل دایرکتوری عامل تنظیم کنید. داشبورد از این لغو پیروی می کند. Pi مدلهایی را از نقاط پایانی سفارشی کشف نمیکند، بنابراین OmniRoute مدل انتخابشده را در `models[]` با استفاده از `openai-completions` API Pi و نقطه پایانی `/v1` سازگار با OpenAI OmniRoute مینویسد.
+
+در**CLI Tools → Pi** ، یک نقطه پایانی، کلید API و مدل را انتخاب کنید، پیش نمایش ارائه دهنده را بررسی کنید، سپس اعمال کنید. پیش نمایش یک قطعه ارائه دهنده است: هنگام پیکربندی دستی Pi `providers.omniroute` در `models.json` موجود خود ادغام کنید تا سایر ارائه دهندگان و تنظیمات دست نخورده باقی بمانند.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+وقتی `/model` را باز میکنید، Pi `models.json` دوباره بارگیری میکند. مسیر پیکربندی شده را با شناسه ارائه دهنده و شناسه مدلی که انتخاب کرده اید آزمایش کنید:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+منابع: [مدلهای Pi و ارائهدهندگان سفارشی](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md) ، [متغیرهای محیطی Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md) ، [دستورالعملهای نصب Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (کد CLI یا VS )
+
+**حالت CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -467,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**حالت VS Code:**
-تنظیمات افزونهٔ Cline ← ارائهدهندهٔ API: `OpenAI Compatible` ← URL پایه: `http://localhost:20128/v1`
+**حالت کد VS :** تنظیمات افزونه Cline → API ارائه دهنده: `OpenAI Compatible` → پایه URL: `http://localhost:20128/v1`
 
-یا از داشبورد OmniRoute ← **ابزارهای CLI ← Cline ← اعمال پیکربندی** استفاده کنید.
+یا از داشبورد OmniRoute → استفاده کنید** ابزار CLI → Cline → اعمال پیکربندی** .
 
 ---
 
-#### KiloCode (CLI یا VS Code)
+#### KiloCode (کد CLI یا VS )
 
-**حالت CLI:**
+**حالت CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**تنظیمات VS Code:**
+**تنظیمات کد VS :**
 
 ```json
 {
@@ -491,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-یا از داشبورد OmniRoute ← **ابزارهای CLI ← KiloCode ← اعمال پیکربندی** استفاده کنید.
+یا از داشبورد OmniRoute → استفاده کنید** ابزار CLI → KiloCode → اعمال پیکربندی** .
 
 ---
 
-#### Continue (افزونهٔ VS Code)
+#### ادامه ( افزونه کد VS )
 
-فایل `~/.continue/config.yaml` را ویرایش کنید:
+ویرایش `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -509,20 +534,20 @@ models:
     default: true
 ```
 
-پس از ویرایش، VS Code را مجدداً راهاندازی کنید.
+پس از ویرایش کد VS را مجددا راه اندازی کنید.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-زمانی از این روش استفاده کنید که VS Code Insiders برای مدلهای دارای نقطهٔ پایانی سفارشی پیکربندی شده است و میخواهید OmniRoute بدون فیلد هدر سفارشی کار کند.
+وقتی VS Code Insiders برای مدلهای نقطه پایانی سفارشی پیکربندی شده است از این استفاده کنید و میخواهید OmniRoute بدون فیلد هدر سفارشی کار کند.
 
-**محل پیشنهادی:**
+**مکان پیشنهادی:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**مثال با استفاده از نام مستعار توکنیشدهٔ OmniRoute:**
+**مثال با استفاده از نام مستعار OmniRoute نشانه گذاری شده:**
 
 ```json
 [
@@ -544,29 +569,28 @@ models:
 ]
 ```
 
-**نکات:**
+**یادداشت ها:**
 
-- `sk-your-omniroute-key` را با یک کلید API ساختهشده در OmniRoute جایگزین کنید.
+- `sk-your-omniroute-key` با یک کلید API که در OmniRoute ایجاد شده است جایگزین کنید.
 - فیلد `url` باید به `/api/v1/vscode/{token}/chat/completions` اشاره کند.
 - فیلد `modelsUrl` باید به `/api/v1/vscode/{token}/models` اشاره کند.
-- هنگامی که کلاینت از هدرهای سفارشی پشتیبانی میکند، جریان معمول `/v1` بههمراه هدر Bearer را ترجیح دهید.
-- توکنهای تعبیهشده در URL یک راهکار سازگاری جایگزین هستند و ممکن است در گزارشهای ویرایشگر یا سابقهٔ پروکسی ظاهر شوند.
+- هنگامی که مشتری از هدرهای سفارشی پشتیبانی می کند، جریان هدر حامل `/v1` + معمولی را ترجیح دهید.
+- نشانههای تعبیهشده در URL یک نسخه بازگشتی سازگاری هستند و ممکن است در گزارشهای ویرایشگر یا سابقه پراکسی ظاهر شوند.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# به حساب AWS/Kiro خود وارد شوید:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI از احراز هویت خودش استفاده میکند — خود Kiro CLI به OmniRoute بهعنوان بکاند نیاز ندارد.
-# برای ابزارهای دیگر، از kiro-cli در کنار OmniRoute استفاده کنید.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-برای برنامهٔ دسکتاپ **Kiro IDE**، از نقطهٔ پایانی MITM ارائهشده توسط OmniRoute
-در مسیر `/dashboard/cli-tools → Kiro` استفاده کنید.
+برای**Kiro IDE** برنامه دسکتاپ، از نقطه پایانی MITM که توسط OmniRoute در زیر `/dashboard/cli-tools → Kiro` در معرض دید قرار گرفته است استفاده کنید.
 
 ---
 

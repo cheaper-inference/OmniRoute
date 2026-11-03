@@ -163,7 +163,7 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 | گزارش سلامت         | `health-report`      | قطع کننده مدار، خنک کننده، حالت قفل در هر ارائه دهنده                                                                                         | سلامتی، تاب آوری        | "نمایش وضعیت سلامت همه ارائه دهندگان"             |
 | لیست قابلیت ها      | `list-capabilities`  | کاتالوگ کامل 45 ورودی Agent Skills (23 API + 21 CLI + 1 config) را به عنوان جدول علامت گذاری با SKILL.md URLs خام برای تزریق متن برمی گرداند. | کاتالوگ، کشف، مهارت     | "لیست تمام قابلیت های OmniRoute "                 |
 
-> کارت نماینده باید با کاتالوگ 377 ارائهدهنده زنده همسو باشد. تعداد ارائهدهنده و ابرداده free/no-auth از رجیستری زمان اجرا منبع میشوند.
+> کارت نماینده باید با کاتالوگ 380 ارائه دهنده زنده همراستا باشد. تعداد ارائهدهنده و ابرداده free/no-auth از رجیستری زمان اجرا منبع میشوند.
 
 ### جزئیات مهارت `list-capabilities`
 
@@ -201,13 +201,13 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 
 1. **ایجاد فایل مهارت:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   یک تابع ناهمگام با امضای `(task: A2ATask) => Promise<{ artifacts, metadata }>` صادر کنید. از ساختار مهارتهای موجود مانند `smartRouting.ts` پیروی کنید.
+   یک تابع async `(task: A2ATask) => Promise<{ artifacts, metadata }>` را صادر کنید. شکل مهارت های موجود مانند `smartRouting.ts` را دنبال کنید.
 
-2. **ثبت کنترلکننده:** در `src/lib/a2a/taskExecution.ts`، یک ورودی به `A2A_SKILL_HANDLERS` اضافه کنید:
+2. **کنترل کننده ثبت نام:** در `src/lib/a2a/taskExecution.ts`، یک ورودی به `A2A_SKILL_HANDLERS` اضافه کنید:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...مهارتهای موجود
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
    };
    ```
 
-3. **ارائه در کارت عامل:** در `src/lib/a2a/agentCardMetadata.ts` (که بین `/.well-known/agent.json` و `/.well-known/agent-card.json` مشترک است)، مورد جدید را به آرایه `skills` اضافه کنید:
+3. **نمایش در کارت نماینده:** در `src/lib/a2a/agentCardMetadata.ts` (به اشتراک گذاشته شده توسط `/.well-known/agent.json` و `/.well-known/agent-card.json`)، به آرایه `skills` اضافه کنید:
 
    ```json
    {
@@ -227,9 +227,9 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
    }
    ```
 
-4. **نوشتن آزمونها:** `tests/unit/a2a-<your-skill>.test.ts`. مسیر موفقیت و مسیر خطا را پوشش دهید.
+4. **تست ها را بنویسید:** `tests/unit/a2a-<your-skill>.test.ts`. مسیر خطای + را پوشش دهید.
 
-5. **مستندسازی** مهارت جدید در جدول `Available Skills` این فایل.
+5. **سند** مهارت جدید در جدول `Available Skills` این فایل.
 
 ---
 

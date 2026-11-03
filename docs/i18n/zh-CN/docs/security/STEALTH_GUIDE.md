@@ -238,19 +238,18 @@ interface CliFingerprint {
 
 ---
 
-## User-Agent 覆盖项 — 环境变量（`.env.example` 第 12 节）
+## 用户代理覆盖—环境变量（`.env.example`第 12 节）
 
-| 变量                     | 默认值                                                          |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| 多变的              | 默认                                          |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-由 `open-sse/executors/base.ts::buildHeaders()` 通过动态查找读取。**当提供者发布新的 CLI 版本时，请更新这些值**——过期的 UA 字符串会因客户端版本过旧而开始被拒绝。
+由`open-sse/executors/base.ts::buildHeaders()`通过动态查找使用。**当提供者发布新的CLI版本时，请注意这些**—过时的UA字符串开始被视为过时的客户端而被拒绝。
 
 ## CLI 兼容模式开关（`.env.example` 第 13 节）
 

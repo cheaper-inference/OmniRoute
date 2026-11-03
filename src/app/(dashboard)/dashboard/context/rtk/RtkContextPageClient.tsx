@@ -466,7 +466,7 @@ export default function RtkContextPageClient() {
         <Alert
           variant="warning"
           icon={<Icon name="info" size={18} />}
-          className="[&>.ci-alert__dismiss]:hidden"
+          dismissible={false}
           description={t("masterSwitchOffAlert")}
         />
       )}
