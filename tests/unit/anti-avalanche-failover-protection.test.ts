@@ -445,6 +445,7 @@ test.after(async () => {
   else process.env[ENABLE_ENV] = previousEnabled;
   const core = await import("../../src/lib/db/core.ts");
   core.resetDbInstance();
+  await (await import("../../src/shared/utils/loggerResource.ts")).closeSharedLoggerResource();
   if (previousDataDir === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = previousDataDir;
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });

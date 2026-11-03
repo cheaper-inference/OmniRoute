@@ -4,6 +4,11 @@ import assert from "node:assert/strict";
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
 
 const harness = await createChatPipelineHarness("anti-avalanche-chat-wiring");
+// Egress discovery is outside the credential-failover assertions.
+const { _setEgressProbeForTests, clearEgressCache } = await import("../../src/lib/proxyEgress.ts");
+_setEgressProbeForTests(async () => ({ ip: "192.0.2.1", latencyMs: 0 }));
+clearEgressCache();
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
 const { clearAllModelLockouts } = await import("../../open-sse/services/accountFallback.ts");
 const {
   BaseExecutor,
@@ -68,7 +73,14 @@ test.afterEach(async () => {
 });
 
 test.after(async () => {
-  await harness.cleanup();
+  try {
+    await harness.callLogsDb.closeCallLogSaves(5000);
+    await closeSharedLoggerResource();
+    await harness.cleanup();
+  } finally {
+    _setEgressProbeForTests(null);
+    clearEgressCache();
+  }
 });
 
 test("an explicit TPM 429 stops at the first key and tags the response as suppressed", async () => {
