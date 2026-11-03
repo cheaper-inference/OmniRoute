@@ -479,6 +479,13 @@ rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
 (locked until midnight) or auth/not-found reasons.
 
+A combo can opt out with `config.comboCooldownWaitEnabled: false`. Only literal
+`false` disables these shared combo waits (post-dispatch cooldown and pre-dispatch
+circuit-open/model-lock waits) and their wait-budget timeout-floor extension.
+Missing or `true` preserves the global policy; `true` cannot enable globally
+disabled waiting. An explicit `targetTimeoutMs` still wins. This opt-out does not
+change the separate native-Codex turn-pin pre-dispatch wait.
+
 The same gate covers the pre-dispatch case (#16319): when every target of a
 combo is skipped before any attempt is made because its model sits in a short
 transient lockout, the zero-attempt path waits the lock out under the same

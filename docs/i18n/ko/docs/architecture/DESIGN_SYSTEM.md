@@ -59,7 +59,16 @@
 
 ## 5. 키트 업데이트
 
-`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다. 주간 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행하고 핀이 뒤에 있는 동안 하나의 추적 문제를 열어 둡니다. 업스트림 저장소는 비공개이므로 워크플로에는 `UI_KIT_READ_TOKEN` 비밀에 읽기 전용 토큰이 필요합니다. 업스트림을 읽을 수 없는 경우(토큰 없음, 작동이 중지된 토큰 또는 GitHub 연결할 수 없음) 실행은 녹색으로 유지되지만 경고를 기록하고 하나의 별도 문제를 열어 두며 나중에 실행하여 업스트림을 다시 읽을 수 있게 되면 자동으로 닫힙니다.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다.
+
+일일 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행합니다. 핀이 뒤에 있는 동안 `scripts/ci/ui-kit-sync-pr.sh` 롤링 분기 `chore/ui-kit-sync-latest` 에서 가장 높은 `release/vX.Y.Z` 분기에 대해 하나의 동기화 PR 열린 상태로 유지합니다. 병합되지 않습니다. 모든 키트 릴리스에는 여전히 로컬 VPS 에 대한 시각적 확인이 필요합니다. 최신 릴리스가 출시되면 브랜치가 다시 빌드되고 그렇지 않으면 그대로 유지됩니다. 수동으로 푸시된 커밋이 포함된 공개 PR 덮어쓰여지지 않으며, 관리자가 병합하지 않고 닫은 버전의 PR 최신 릴리스가 나올 때까지 닫힌 상태로 유지됩니다.
+
+PR 열 수 없는 경우(대상 릴리스가 고정되었거나, PR 수동으로 푸시된 커밋이 있거나, PR 가 닫혔거나, PR 토큰이 설정되지 않은 경우) 워크플로는 이유를 설명하는 하나의 추적 문제를 열린 상태로 유지합니다.
+
+워크플로에서는 두 가지 비밀을 사용합니다.
+
+- `secrets.UI_KIT_READ_TOKEN`: 개인 업스트림 저장소에 대한 읽기 전용 토큰입니다. 워크플로가 업스트림을 읽을 수 없는 경우(토큰 없음, 작동이 중지된 토큰 또는 GitHub 연결할 수 없음) 실행은 녹색으로 유지되지만 경고를 기록하고 별도의 문제 하나를 열린 상태로 유지합니다. 이 문제는 나중에 실행하여 업스트림을 다시 읽을 수 있게 되면 자체적으로 닫힙니다.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: 콘텐츠 및 풀 요청 쓰기 액세스 권한이 있는 이 저장소의 세분화된 토큰입니다. 기본 `GITHUB_TOKEN` 여기에서 PRs 생성할 수 없으며, 열린 PR CI 트리거하지 않습니다. 이 토큰이 없으면 워크플로는 분기만 푸시합니다.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` 해당 커밋(최신 `v*` 태그 `latest` = )에서 업스트림 `src/` `packages/ui-kit/src` 로 복사하고, 허용되는 단일 변환을 적용하고(상대 가져오기에서 `.js` 접미사를 삭제함), `packages/ui-kit/package.json` 및 `package-lock.json` 의 작업 공간 버전을 업스트림 버전으로 설정합니다. 그런 다음 `git diff packages/ui-kit` 검토하고, 두 테마 모두에서 공급자, 설정, 콤보, 사용법 및 끝점에 대한 시각적 전달을 수행하고, `npm run check:ui-kit-snapshot` 및 `npm run test:vitest:ui` 실행하고, 업스트림 변경 로그가 있는 PR 엽니다.
 
