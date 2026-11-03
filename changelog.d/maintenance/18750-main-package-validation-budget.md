@@ -1,1 +1,0 @@
-- **ci(release):** Main-branch full package validation now shares a 40-minute budget, so a slow pack and boot run fails on one clear deadline ([#18750](https://github.com/cheaper-inference/OmniRoute/pull/18750)) — thanks @HouMinXi
