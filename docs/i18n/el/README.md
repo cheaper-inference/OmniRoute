@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Η Δωρεάν Πύλη AI
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Μην σταματάς ποτέ να κωδικοποιείς. Κάθε εργαλείο AI → 380 πάροχοι — 150+ δωρεάν — μέσω ενός endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity σε ΔΩΡΕΑΝ Claude / GPT / Gemini με αυτόματη εναλλακτική διαδρομή. Η συμπίεση RTK + Caveman εξοικονομεί 15–95% tokens (~89% μ.ο.) — ποτέ μην φτάνεις τα όρια. 380 πάροχοι AI · 150+ δωρεάν επίπεδα · ~1.62B δωρεάν tokens/μήνα · 20 στρατηγικές δρομολόγησης · $0 για να ξεκινήσεις."/>
 
 </div>
@@ -1302,7 +1304,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 επίσης τη
   <tr><td nowrap><b>Περιβάλλον εκτέλεσης</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Γλώσσα</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> στα <code>src/</code> και <code>open-sse/</code> (μηδενικές εμφανίσεις του <code>any</code> στον πυρήνα από την έκδοση v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (παλαιού τύπου JSON) — 147 λειτουργικές μονάδες τομέα, 220 μεταναστεύσεις</td></tr>
+  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (παλαιού τύπου JSON) — 147 λειτουργικές μονάδες τομέα, 221 μεταναστεύσεις</td></tr>
   <tr><td nowrap><b>Μνήμη</b></td><td>Πλήρες κείμενο SQLite FTS5 + διανυσματικές ενσωματώσεις κβαντισμένες σε int8, τυποποιημένη εξασθένηση</td></tr>
   <tr><td nowrap><b>Σχήματα</b></td><td>Zod 4 — επικύρωση εισόδου/εξόδου εργαλείων MCP + συμβάσεις API</td></tr>
   <tr><td nowrap><b>Πρωτόκολλα</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1815,7 +1817,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ Επιστροφή στην κορυφή](#-omniroute)** · Φτιαγμένο με ❤️ για την κοινότητα AI ανοιχτού κώδικα.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Τα GitHub Discussions είναι ενεργοποιημένα για ερωτήσεις και απαντήσεις της κοινότητας -->

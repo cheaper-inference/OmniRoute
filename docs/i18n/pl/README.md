@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Darmowa Brama AI
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nigdy nie przestawaj kodować. Każde narzędzie AI → 380 dostawców — 150+ darmowych — przez jeden endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity do DARMOWEGO Claude / GPT / Gemini z automatycznym przełączaniem awaryjnym. Kompresja warstwowa RTK + Caveman oszczędza 15–95% tokenów (~89% średnio) — nigdy nie przekraczaj limitów. 380 dostawców AI · 150+ darmowych planów · ~1,62 mld darmowych tokenów/mies. · 20 strategii routingu · $0 na start."/>
 
 </div>
@@ -1298,7 +1300,7 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
   <tr><td nowrap><b>Środowisko uruchomieniowe</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Język</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> w katalogach <code>src/</code> i <code>open-sse/</code> (zero <code>any</code> w rdzeniu od wersji v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza danych</b></td><td>better-sqlite3 (SQLite, rejestrowanie WAL) + LowDB (JSON — starszy format) — 147 modułów domenowych, 220 migracji</td></tr>
+  <tr><td nowrap><b>Baza danych</b></td><td>better-sqlite3 (SQLite, rejestrowanie WAL) + LowDB (JSON — starszy format) — 147 modułów domenowych, 221 migracji</td></tr>
   <tr><td nowrap><b>Pamięć</b></td><td>Pełnotekstowe wyszukiwanie SQLite FTS5 + wektorowe embeddingi kwantyzowane do int8, typowane wygaszanie</td></tr>
   <tr><td nowrap><b>Schematy</b></td><td>Zod 4 — walidacja wejścia/wyjścia narzędzi MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoły</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1811,7 +1813,7 @@ Licencja MIT — szczegóły w pliku [LICENSE](LICENSE).
 
 **[⬆ Powrót na górę](#-omniroute)** · Stworzone z ❤️ dla społeczności open-source AI.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licencja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licencja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions włączone dla pytań i odpowiedzi społeczności -->
