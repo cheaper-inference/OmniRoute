@@ -13,25 +13,25 @@
 
 # 🚀 OmniRoute — 無料のAIゲートウェイ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止めない。すべてのAIツール → 380のプロバイダー — 150以上が無料 — へ単一のエンドポイントから接続。Claude Code、Codex、Cursor、Cline、Copilot、Antigravityを、無料のClaude / GPT / Geminiに自動フォールバック付きで接続。RTK + Cavemanの多層圧縮によりトークンを15〜95%（平均約89%）節約 — 上限に達する心配なし。380のAIプロバイダー · 150以上の無料枠 · 毎月約16.2億の無料トークン · 20のルーティング戦略 · $0から開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止めない。すべてのAIツール → 380プロバイダー — 150以上が無料 — 1つのエンドポイントで。Claude Code、Codex、Cursor、Cline、Copilot & Antigravity を無料の Claude / GPT / Gemini に自動フェイルオーバーで統合。RTK + Caveman の積層圧縮でトークンを15–95%節約（平均約89%）— 制限に達しない。380のAIプロバイダー · 150以上の無料枠 · 月間約16.2億無料トークン · 20のルーティング戦略 · $0から始められる。"/>
 
 </div>
 
 <div align="center">
 
-## 💰 サードパーティの無料枠を合計して月間約1.62Bトークン
+## 💰 サードパーティの無料枠合計で月間約16.2億トークン
 
 </div>
 
-> **ご自身のプロバイダーアカウントをご用意ください。** これは、個別に利用資格が必要なサードパーティの無料枠を合計した推定値であり、OmniRouteがトークンを付与するものではありません。利用可能なプロバイダーに登録し、必要に応じて認証情報を取得して接続してください。各プロバイダーが、それぞれの上限、可用性、利用条件を管理しています。
+> **ご自身のプロバイダーアカウントをご用意ください。** これはOmniRouteからのトークン付与ではなく、個別に利用可能なサードパーティ無料枠の推定合計です。必要に応じてサインアップし、認証情報を取得し、利用可能なプロバイダーを接続してください。各プロバイダーがその上限、可用性、利用規約を管理しています。
 >
-> 無料枠を手作業で積み上げるのは大変です。数十ものSDK、数十ものレート制限があり、実際にどれだけ利用できるのかも把握できません。OmniRouteは、**34個の定期更新プールキーにまたがる484件の無料枠エントリ**をカタログ化し、**月間予算が正の値として公開されている17個のプールと、Groqのモデルごとの上限5件**から、共有プールを重複排除してトークン総数を算出します。地域の本人確認後にのみ利用可能になるクォータ（現時点ではModelScope）は別枠として表示され、地域の本人確認後に利用可能な約6Mトークンとして、見出しの合計には一切含まれません。この結果はダッシュボード（`/dashboard/free-tiers`）で常に確認できます。
+> 無料枠を手作業で積み上げるのは大変です ― SDKが何十個も、レート制限も何十個も、実際にどれだけ使えるのか分かりません。OmniRouteは**34個の定期的なプールキーにまたがる485件の無料枠エントリ**をカタログ化し、**毎月の公開済み正の予算がある17プール＋モデルごとのGroq上限5つ**から重複を除外してトークン総量を算出します。地域認証後にのみ開放されるクォータ（現時点ではModelScope）は別枠で表示され、地域認証後に約600万トークンが追加されますが、総量には加算されません。結果はダッシュボード（`/dashboard/free-tiers`）で常時確認できます。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRouteの無料枠予算カード：通常は月間約1.62Bの無料トークン、登録クレジットを含む初月は最大約2.22B。1つのエンドポイントで利用できる、34個の文書化された定期更新プールキーと484件のカタログ化済み無料枠エントリから算出。共有プールを正確に重複排除した計算で、各共有プールは1回のみカウント。月間トークン予算が正の値として公開されている17個の定期更新プールと、Groqのモデルごとの上限5件を含む。利用条件のリスクカタログでは12のプロバイダーが回避対象としてマークされており、利用するかどうかはユーザーが判断可能。予算バーにはMistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（モデルごとの上限5件）および小規模なプールを含む。さらに、初月の登録クレジットと、トークン上限なしで恒久的に無料のプロバイダーを個別に表示し、見出しの数値が水増しされないようにしている。使用済み／残量は /dashboard/free-tiers/ でリアルタイムに確認可能。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute無料枠予算カード：毎月約16.2億トークンが安定して無料、初月はサインアップクレジットで最大約22.2億トークン。34の定期プールキーが485件の無料枠エントリをカバーし、1つのエンドポイントで利用可能。正直なプール重複排除計算 ― 共有プールは1回だけカウント、毎月の公開済み正のトークン予算がある17の定期プールとモデルごとのGroq上限5つを含む。12プロバイダーは利用規約リスクカタログで「回避推奨」とマークされているのでご自身で判断を。予算バーにはMistral 1B、Nara 2.1億、LLM7 1.5億、xKiro 1.5億、Groq 3,000万（モデルごと上限5つ）や小規模プール、初月サインアップクレジット、恒久無料・トークン上限なしプロバイダーも個別表示し、総量を水増ししません。/dashboard/free-tiersで残量・使用量をライブ表示。"/>
 
-> 稼働中の`/dashboard/free-tiers`ページの概要アニメーション。完全な算出方法（プールの重複排除、クレジット階層、プロバイダーの利用条件）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
+> ライブの`/dashboard/free-tiers`ページのアニメーション要約です。完全な算出方法（プール重複排除、クレジット枠、プロバイダー規約）は**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**をご覧ください。
 >
-> <sub>これらの数値は、稼働中のカタログと照合して2週間ごとに再監査され、**増減の両方が発生します**。プロバイダーが無料枠を終了すれば数値は減少し、新しい無料枠が追加されれば増加します。切り上げた最良ケースではなく、カタログが実際に算出した数値を公開しています。</sub>
+> <sub>これらの数値は2週間ごとにライブカタログと照合して再監査され、**増減します** ― プロバイダーが無料枠を終了すれば減少し、新規追加されれば増加します。カタログが実際に算出した値のみを公開し、切り上げた理想値は一切掲載しません。</sub>
 
 <br/>
 
@@ -39,49 +39,49 @@
 
 <h3>
 
-⭐ OMNIROUTEでコストを削減し、作業を効率化できたら、リポジトリにStarをお願いします。
+⭐ OMNIROUTEでコスト削減や業務効率化できた方は、ぜひリポジトリにスターをお願いします。
 
 </h3>
 
-[![Star数](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star履歴ランキング](https://api.star-history.com/badge?repo=diegosouzapw/Omniroute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 コミュニティに参加
+### 💬 コミュニティに参加しよう
 
-**👋 メンテナーをフォローして、新しいプロバイダー、リリース、ヒントをいち早く入手しましょう：**
+**👋 メンテナーをフォローして新プロバイダー・リリース・最新情報をいち早くゲット：**
 
-[![LinkedInでDiegoをフォロー](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![GitHubで@diegosouzapwをフォロー](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp グローバル](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp ブラジル](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![ウェブサイト](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**質問、プロバイダー情報、ロードマップ、サポート → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 グローバル](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 ブラジル](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [ポータル](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**質問・プロバイダー情報・ロードマップ・サポート → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 グローバル](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 ブラジル](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [ポータル](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈ゲートウェイは成長を続ける
+## 📈 ゲートウェイは成長し続けています
 
 <div align="center">
 
-|                                      |           v3.8.50            | **v3.8.51** |      `v3.8.53+`       |
-| ------------------------------------ | :--------------------------: | :---------: | :-------------------: |
-| 🌐プロバイダー                       |             352              |   **358**   |          380          |
-| 🧠独自のチャットモデルIDs            |             1320             |  **1374**   |         1475          |
-| 🖼️モダリティブリッジ                 | 🆕ビジョン+オーディオ+ビデオ |      ✓      |           ✓           |
-| 📡レーダー無料カタログ               |         🆕オプトイン         |      ✓      |           ✓           |
-| ⚖️クォータを意識したスケジューリング |       🆕クォータシェア       |      ✓      |           ✓           |
-| 📊クォータ テレメトリ                |           🆕ライブ           |      ✓      |           ✓           |
-| 🧰ヘッドレスモード                   |              —               |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS鉄道インフラ                   |              —               |      —      |  🆕リリース チャネル  |
-| 🔎モデル検出API                      |              —               |      —      | 🆕 `/v1/models/query` |
+|                                 |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------- | :-----------------------: | :---------: | :-------------------: |
+| 🌐 プロバイダー                 |            352            |   **358**   |          380          |
+| 🧠 ユニークチャットモデルID     |           1320            |  **1374**   |         1475          |
+| 🖼️ モダリティブリッジ           | 🆕 vision + audio + video |      ✓      |           ✓           |
+| 📡 レーダーフリーカタログ       |       🆕 オプトイン       |      ✓      |           ✓           |
+| ⚖️ クォータ対応スケジューリング |     🆕 クォータシェア     |      ✓      |           ✓           |
+| 📊 クォータテレメトリ           |         🆕 ライブ         |      ✓      |           ✓           |
+| 🧰 ヘッドレスモード             |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTSレールインフラ            |             —             |      —      | 🆕 リリースチャンネル |
+| 🔎 モデルディスカバリーAPI      |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→[ロードマップ](ROADMAP.md)— `v3.9.0 LTS`へのレールに乗る**
+**→ [ロードマップ](ROADMAP.md) — `v3.9.0 LTS` へのレールに乗って**
 
 </div>
 
@@ -89,16 +89,16 @@
 
 ## 🧩 利用可能
 
-[![npm バージョン](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM 月間ダウンロード数](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
+![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![ライセンス: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker プル数](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron ダウンロード数](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
+![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 はじめる</b></td>
+    <td align="right"><b>🚀 スタート</b></td>
     <td align="center"><a href="#-quick-start">🚀 クイックスタート</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 インストール</a></td>
     <td align="center"><a href="#first-run">🆓 プロバイダーに接続</a></td>
@@ -106,8 +106,8 @@
   <tr>
     <td align="right"><b>💡 学ぶ</b></td>
     <td align="center"><a href="#-the-promise">💥 約束</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 OmniRouteを選ぶ理由</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 OmniRouteの強み</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 なぜOmniRouteか</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 差別化ポイント</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ 機能</b></td>
@@ -118,18 +118,18 @@
   <tr>
     <td align="right"></td>
     <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ 圧縮</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ 実行環境</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ 動作環境</a></td>
     <td align="center"><a href="#-private--local-first">🔒 プライベート</a></td>
   </tr>
   <tr>
     <td align="right"><b>👀 見る</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 動作デモ</a></td>
-    <td align="center"><a href="#-whats-new">✨ 新着情報</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 対応CLI</a></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 実演</a></td>
+    <td align="center"><a href="#-whats-new">✨ 新機能</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 互換CLI</a></td>
   </tr>
   <tr>
     <td align="right"><b>💚 サポート</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 支援 / 寄付</a></td>
+    <td align="center"><a href="#-support-omniroute">💚 サポート / 寄付</a></td>
     <td align="center"><a href="#-community--help">💬 コミュニティ</a></td>
     <td align="center"><a href="#-sponsors">💖 スポンサー</a></td>
   </tr>
@@ -144,75 +144,75 @@
 </div>
 
 <div align="center">
-  <b>🌐 67言語に対応</b>
+  <b>🌐 67言語で利用可能</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="英語 (en)" title="英語 (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="ポルトガル語 — ブラジル (pt-BR)" title="ポルトガル語 — ブラジル (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="ポルトガル語 (pt)" title="ポルトガル語 (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="スペイン語 (es)" title="スペイン語 (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="フランス語 (fr)" title="フランス語 (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="イタリア語 (it)" title="イタリア語 (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="ドイツ語 (de)" title="ドイツ語 (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="オランダ語 (nl)" title="オランダ語 (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="ロシア語 (ru)" title="ロシア語 (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="ウクライナ語 (uk-UA)" title="ウクライナ語 (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="ポーランド語 (pl)" title="ポーランド語 (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="チェコ語 (cs)" title="チェコ語 (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="スロバキア語 (sk)" title="スロバキア語 (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="ルーマニア語 (ro)" title="ルーマニア語 (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="ハンガリー語 (hu)" title="ハンガリー語 (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="ブルガリア語 (bg)" title="ブルガリア語 (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="デンマーク語 (da)" title="デンマーク語 (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="フィンランド語 (fi)" title="フィンランド語 (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="ノルウェー語 (no)" title="ノルウェー語 (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="スウェーデン語 (sv)" title="スウェーデン語 (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中国語 — 簡体字 (zh-CN)" title="中国語 — 簡体字 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中国語 — 繁体字 (zh-TW)" title="中国語 — 繁体字 (zh-TW)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
   <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="韓国語 (ko)" title="韓国語 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="タイ語 (th)" title="タイ語 (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="ベトナム語 (vi)" title="ベトナム語 (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="インドネシア語 (id)" title="インドネシア語 (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="マレー語 (ms)" title="マレー語 (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="フィリピノ語 (phi)" title="フィリピノ語 (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ヒンディー語 (hi)" title="ヒンディー語 (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="グジャラート語 (gu)" title="グジャラート語 (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="マラーティー語 (mr)" title="マラーティー語 (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="タミル語 (ta)" title="タミル語 (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="テルグ語 (te)" title="テルグ語 (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="ベンガル語 (bn)" title="ベンガル語 (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="ウルドゥー語 (ur)" title="ウルドゥー語 (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="ペルシア語 (fa)" title="ペルシア語 (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="アラビア語 (ar)" title="アラビア語 (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="ヘブライ語 (he)" title="ヘブライ語 (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="トルコ語 (tr)" title="トルコ語 (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="アゼルバイジャン語 (az)" title="アゼルバイジャン語 (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="スワヒリ語 (sw)" title="スワヒリ語 (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="ギリシャ語 (el)" title="ギリシャ語 (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="クロアチア語 (hr)" title="クロアチア語 (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="セルビア語 (sr)" title="セルビア語 (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="リトアニア語 (lt)" title="リトアニア語 (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="エストニア語 (et)" title="エストニア語 (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="ラトビア語 (lv)" title="ラトビア語 (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="スロベニア語 (sl)" title="スロベニア語 (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="マルタ語 (mt)" title="マルタ語 (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="アイルランド語 (ga)" title="アイルランド語 (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="カンナダ語 (kn)" title="カンナダ語 (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="マラヤーラム語 (ml)" title="マラヤーラム語 (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="オディア語 (or)" title="オディア語 (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="パンジャブ語 (pa)" title="パンジャブ語 (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="ネパール語 (ne)" title="ネパール語 (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="シンハラ語 (si)" title="シンハラ語 (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="ミャンマー語 (my)" title="ミャンマー語 (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="クメール語 (km)" title="クメール語 (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ハウサ語 (ha)" title="ハウサ語 (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ヨルバ語 (yo)" title="ヨルバ語 (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="イボ語 (ig)" title="イボ語 (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="アムハラ語 (am)" title="アムハラ語 (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="ウズベク語 (uz)" title="ウズベク語 (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ジョージア語 (ka)" title="ジョージア語 (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="アルメニア語 (hy)" title="アルメニア語 (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="ボスニア語 (bs)" title="ボスニア語 (bs)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -226,44 +226,44 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="3つのステップ：OmniRouteをインストールして起動し、自分のアカウントまたはAPIキーで対象プロバイダーを接続してから、OmniRoute APIキーとモデルautoを使用してツールをlocalhost:20128/v1に接続します。ルーティングは、利用可能な対象接続とプロバイダーの制限によって決まります。"/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="3ステップ：OmniRouteをインストールして起動し、自分のアカウントまたはAPIキーで対象プロバイダーを接続し、ツールをlocalhost:20128/v1にOmniRoute APIキーとmodel autoで向けるだけ。ルーティングは利用可能な接続とプロバイダーの制限に依存します。"/>
 
 ```bash
-# プロバイダーを接続したら、Dashboard → EndpointsからOmniRouteキーをコピーします：
+# プロバイダー接続後、Dashboard → EndpointsからOmniRouteキーをコピーしてください:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto`には対象となるルートが必要です。新規インストール直後は、対象となるキーレスターゲットが存在しない場合があり、キーレスプロバイダーがサードパーティークライアントを拒否することもあります。Kiroを含む`tos: avoid`とマークされたプロバイダーは、デフォルトで自動ルーティングから除外されます。アカウントを接続しても、この設定は上書きされません。プロバイダーを選択する前に、[無料枠ガイド](docs/getting-started/FREE-TIERS-GUIDE.md)を参照してください。</sub>
+<sub>`auto`には利用可能なルートが必要です。新規インストール時は、利用可能なキーなしターゲットが存在しない場合があります。また、キーなしプロバイダーはサードパーティクライアントを拒否する場合があります。`tos: avoid`とマークされたプロバイダー（Kiroなど）は、デフォルトで自動ルーティングから除外されます。アカウントを接続してもこの設定は上書きされません。プロバイダー選択前に[Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md)をご確認ください。</sub>
 
-<sub>📦 **Python、Node.js、PHP、cURL**向けのコピー＆ペースト可能なクイックスタートスクリプト → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 **Python、Node.js、PHP、cURL**用のコピペクイックスタートスクリプト → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
 <div align="center">
 
-# 💥 お約束
+# 💥 約束
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="お約束 — 1つのエンドポイントと380のプロバイダー。別の正常なターゲットが利用可能な間は、自動フォールバックによってルーティングを継続します。6つの柱：380のプロバイダーにわたる耐障害性の高いフォールバック · 対象ワークロードで最大95%のトークン削減 · 150以上の無料枠と52の定期更新型／キーレスの永久無料プロバイダーにより$0から開始 · 1つの設定で37のCLI／エージェント統合 · /v1でOpenAI、Claude、Gemini、Responses APIとの互換性 · サーキットブレーカー、TLSステルス、MCPの110ツール、A2A、メモリ、ガードレール、評価、7,800以上の追跡対象テストファイルにわたる56,000以上の静的テスト宣言を含む本番環境向け制御。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="約束 — 1つのエンドポイントと380のプロバイダー。自動フェイルオーバーで他の健全なターゲットがあればルーティングを継続。6つの柱：380プロバイダー間の堅牢なフェイルオーバー · 対象ワークロードで最大95%のトークン節約 · 150以上の無料枠と53の継続/キーなし無料プロバイダーで$0から開始 · 1つの設定で39のCLI/エージェント統合 · /v1でOpenAI、Claude、Gemini、Responses API互換 · サーキットブレーカー、TLSステルス、MCP 110ツール、A2A、メモリ、ガードレール、評価、7,800以上のテストファイルで56,000以上の静的テスト宣言などの本番管理機能。"/>
 
 <br/>
 <br/>
 
 <div align="center">
 
-# 🤔 OmniRouteを選ぶ理由
+# 🤔 なぜOmniRoute？
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="OmniRouteを選ぶ理由 — 10個ものダッシュボード、使えないAPIキー、予想外の請求に振り回されるのはもう終わりです。日常的な10の問題と解決策：クォータを使い切れずに期限切れ → サブスクリプションを最大限に活用；コーディング中のレート制限 → 4段階の自動フォールバック（サブスクリプション → API → 低価格 → 無料）；ツール出力によるトークン浪費 → RTK + Caveman圧縮（15～95%）；高額なAPI → コスト最適化ルーティング；ツールごとに個別設定が必要 → 1つのエンドポイント、1つのダッシュボード；AIがブロックされる → 3段階プロキシ + TLSステルス；使えないキー → 3層の耐障害性（サーキットブレーカー、キーのクールダウン、モデルのロックアウト）；チームで1つのサブスクリプションを共有 → 公平な割当クォータを備えたキープール；プロンプトが他者のクラウドを通過 → AES-256-GCMで暗号化されたキーによるローカルファースト；支出の可視性がない → リアルタイム分析（使用量、クォータ、削減額、p95レイテンシ）。"/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="なぜOmniRoute — 10個のダッシュボード、無効なAPIキー、予期せぬ請求から解放。10のよくある悩みと解決策：未使用のクォータ失効→サブスクリプション最大化；コーディング中のレート制限→4層自動フェイルオーバー（サブスクリプション→API→格安→無料）；ツール出力でトークン消費→RTK＋Caveman圧縮（15–95%）；高額API→コスト最適化ルーティング；ツールごとに個別設定→1エンドポイント・1ダッシュボード；AIブロック→3段階プロキシ＋TLSステルス；無効キー→3層耐障害性（サーキットブレーカー、キー冷却、モデルロックアウト）；チームで1つのサブスクリプション共有→フェアシェアクォータ付きキー・プール；他人のクラウド経由プロンプト→ローカルファースト＋AES-256-GCM暗号化キー；利用状況不明→リアルタイム分析（使用量、クォータ、節約、p95レイテンシ）。"/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRouteのリクエストフロー：IDEまたはCLI（Claude Code、Cursor、Clineなど）が1つのローカルエンドポイント（http://localhost:20128/v1）を呼び出します。OmniRoute Smart Router（RTK + Caveman圧縮、20のルーティング戦略、サーキットブレーカー、TLSステルス、MCP、A2A、ガードレール）は、対象となる正常なターゲットが残っている間、4つのプロバイダー階層をまたいでフォールバックできます — Tier 1 サブスクリプション、Tier 2 APIキー、Tier 3 低価格、Tier 4 無料。"/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRouteリクエストフロー：IDEやCLI（Claude Code、Cursor、Clineなど）が1つのローカルエンドポイント（http://localhost:20128/v1）を呼び出し、OmniRouteスマートルーター（RTK＋Caveman圧縮、20のルーティング戦略、サーキットブレーカー、TLSステルス、MCP、A2A、ガードレール）が利用可能な健全ターゲットがある限り4つのプロバイダーティア間でフェイルオーバー可能 — ティア1 サブスクリプション、ティア2 APIキー、ティア3 格安、ティア4 無料。"/>
 
 </div>
 
@@ -504,13 +504,13 @@ curl http://localhost:20128/v1/chat/completions \
 
 <div align="center">
 
-## 🏆 OmniRoute が選ばれる理由
+## 🏆 OmniRoute の特長
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特長 — 13の機能について、9router、OpenRouter、CLIProxyAPI、LiteLLM と比較した特定時点の機能スナップショット。OmniRoute：380のプロバイダー、150以上の組み込み無料枠、20種類のルーティング戦略、12エンジンによるトークン圧縮、110のツールを備えた組み込みMCPサーバー、A2Aエージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLSフィンガープリントの秘匿化、Desktop/Termux/PWA、および67の国際化UIロケール。OmniRoute はMITライセンスで提供され、セルフホスティングが可能です。競合製品の機能と数値は変更される可能性があります。リンク先の評価方法をご覧ください。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute の特長 — 9router、OpenRouter、CLIProxyAPI、LiteLLM と 13 項目で比較した機能スナップショット。OmniRoute: 380 プロバイダー、150 以上の無料枠内蔵、20 種類のルーティング戦略、12 エンジンのトークン圧縮、110 ツール内蔵 MCP サーバー、A2A エージェントプロトコル、永続メモリ、ガードレール、クラウドエージェント、TLS フィンガープリントステルス、Desktop/Termux/PWA、67 言語の UI ローカライズ。OmniRoute は MIT ライセンスでセルフホスト可能。他社機能や数値は変更される場合があります。詳細はリンク先の方法論をご覧ください。"/>
 
-<sub>📊 評価方法の全文および9router、OpenRouter、CLIProxyAPI、LiteLLMとの機能別比較の詳細 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 9router、OpenRouter、CLIProxyAPI、LiteLLM との詳細な比較方法と各機能の詳細 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -578,92 +578,93 @@ Radarはオプトイン方式で、GETリクエストのみを使用します。
 
 </div>
 
-> **v3.8.20 → v3.8.53** の最近のハイライト。完全な履歴は [`CHANGELOG.md`](CHANGELOG.md) にあります。
+> **v3.8.20 → v3.8.53** の最近のハイライト。全履歴は [`CHANGELOG.md`](CHANGELOG.md) をご覧ください。
 
-- **⚖️ `quota-weighted` ルーティング** — 20 番目のコンボ戦略は、枯渇したアカウントをスキップし、残りのアカウントの中から残りクォータ ÷ 実行中負荷に比例して選択します。既存の会話は固定されたままです。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 ヘッドレスモード** — `omniroute serve --headless`(または `OMNIROUTE_HEADLESS=1`)は `/v1/*` プロキシエンジンのみを実行し、ダッシュボードおよびダッシュボード専用のサブシステムはオフになります。→ [Headless Mode](docs/guides/HEADLESS.md)
-- **🔎 モデルディスカバリ** — `/v1/models` は機能、コンテキスト、種類、テキストでフィルタリングでき、`POST /v1/models/query` は同じキーごとの可視性で短く決定論的な候補リストを返します。→ [API Reference](docs/reference/API_REFERENCE.md)
-- **🔑 キーごとのルーティング制御** — `forcedModel` で API キーを 1 つのモデルまたはコンボに固定し、キーのモデルとコンボをアトミックに追加・削除できます(`/api/keys/{id}/access`)。→ [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ より細かい PII 制御** — タイプごとの選択、最大 20 個の検証済みカスタムマスキングパターン、タイプごとの検出カウンター。マスキング自体はオプトインのままです。→ [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 言語** — ダッシュボード、ドキュメントミラー、CLI。`npm run i18n:add-locale` を使えば 1 つのコマンドで全箇所に言語を追加できます。→ [i18n Guide](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — インバウンドの A2A 委任をエージェントフリートへ、Agent Card 上の Conductor スキル、Faro のプッシュトゥトーク音声チャット付きダッシュボードパネル。→ [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 適応型アドミッション & 過負荷保護** — 重量級のチャットリクエストは 503 を返す代わりにキューに入り、接続ごとのアトミックな RPM ローリングリースを備えます。→ [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ 正規化された `/v1/models` の順序** — プロバイダーごとに 1 つの連続したプロバイダーグループブロック(コンボは先頭に固定)で、あらゆるカタログソースにわたって安定しています。→ [API Reference](docs/reference/API_REFERENCE.md)
-- **🗜️ 圧縮の強化** — デフォルトで有効なインフレガード、DE / FR / JA + 中国語(文言)向けの Caveman パック、Gradle & .NET 向けの RTK フィルター。→ [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 誠実な定額コスト** — サブスクリプション / コーディングプランのプロバイダーはコスト分析で **$0** と表示されます。予算、クォータ、ルーティングは引き続き見積もります。→ [API Reference](docs/reference/API_REFERENCE.md)
-- **⚖️ クォータ共有ルーティング** — 共有アカウントのクォータをプールされたキー間で公平に分割し、ワークコンサビング方式でアイドルスライスを貸し出します。→ [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 ワンコマンドの CLI/エージェントセットアップ** — 15 個の登録済み `setup-*` コマンド。`omniroute run` は 7 つの CLI(Claude Code、Codex、Aider、Goose、OpenCode、Qwen Code、Gemini CLI)を起動し、`omniroute configure` はインタラクティブなプロバイダー+モデルピッカーとコンテキストごとのお気に入りを備えた 11 個のターゲットをサポートします。→ [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ リモートモード** — スコープ付きトークン(`connect` / `contexts` / `tokens`)でリモートの OmniRoute を操作し、VPS インストール向けの `antigravity` OAuth ヘルパーも用意。→ [Remote Mode](docs/guides/REMOTE-MODE.md)
-- **🧭 より賢い自動ルーティング** — `auto/<category>:<tier>` コンボ、**Fusion**(モデルパネル + ジャッジ)、タスク認識ルーティング、リクエストごとのモデル / モード / USD 予算の上書き。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ プラグ可能な圧縮** — 12 個の組み合わせ可能なエンジン + Compression Studios:LLMLingua-2、2 段階 Ultra、omniglyph、ステップごとのフィデリティゲート、GCF v3.2、ドラッグ並べ替えエディター。→ [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ 透過的な MITM 復号(TPROXY)** — プロキシ環境変数を無視する CLI を捕捉し、SNI ごとの CA + トラストストアインストーラーを提供。→ [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 あらゆる場所でのコストテレメトリ** — すべてのエンドポイントに `X-OmniRoute-*` コスト/使用量ヘッダー、キャッシュ HIT の節約ヘッダー、キーごとの USD 支出クォータ。→ [API Reference](docs/reference/API_REFERENCE.md)
-- **🧠 制御可能なメモリ** — デフォルトはオフ、オプトインの int8 ベクトル量子化 + 型付き減衰、リクエストごとの `x-omniroute-no-memory`。→ [Memory](docs/frameworks/MEMORY.md)
-- **🛡️ セキュリティ** — すべての LLM ルートにプロンプトインジェクションガード(レッドチームスイート)、オプトインのクレデンシャルマスキングガードレール(双方向で漏洩した API キー/シークレットを伏字化)、無料の DuckDuckGo 最終手段ウェブ検索、ダッシュボード向けのオプションの OIDC ログインゲート(パスワードログインは常に利用可能)。→ [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ 新しいエンドポイント** — `/v1/ocr`(Mistral OCR)と `/v1/audio/translations`(Whisper スタイル)がメディア機能を締めくくります。→ [API Reference](docs/reference/API_REFERENCE.md)
-- **🎨 画像 / 動画 / 音声生成** — メディア向けの単一 API:xAI Grok Imagine & Novita AI 動画、ComfyUI、Magnific、Adobe Firefly、Segmind、ElevenLabs などの音声プロバイダー。→ [API Reference](docs/reference/API_REFERENCE.md)
-- **🌍 デプロイ & 運用** — リバースプロキシ `basePath`、ブラウザ言語の自動検出、キーごとのデバイス追跡、root 不要の MITM トラスト、zh-TW ローカライズ。→ [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 さらなるプロバイダー & エージェント** — クラウドエージェント(Codex Cloud、Cursor、Devin、Jules)、ブラウザ + OAuth ログイン付きの Grok Build(xAI)、Ollama の一級カード、Claude Opus 5 & Sonnet 5、Kimi 公式パートナーシップ(Code/Web/Moonshot)、Zed、Requesty、SenseNova、Yuanbao、Agnes AI… そして刷新された **380 プロバイダーカタログ**。→ [Providers](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 ルーティングの透明性** — すべてのレスポンスには、それを処理した戦略/プロバイダー/レイテンシを示す `X-OmniRoute-Decision` ヘッダーが付与され、新しい `cache-optimized` コンボ戦略 + Auto-Combo の `cacheAffinity` ファクターが、キャッシュされたプレフィックスを保持する接続へ繰り返しリクエストをルーティングします。また、読み取り専用の `/v1/auto-combo/{channel}/candidates` エンドポイントが `auto/*` チャネルのライブ候補プールを公開します。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ ローカルパフォーマンス＆インフラ** — ワンクリックのローカル Redis、Cloudflare Workers / Deno Deploy リレーデプロイヤー、監視付き組み込みサービスとしての Bifrost ＆ Mux。 → [組み込みサービス](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 その他の搭載機能** — プラグインフレームワーク＋マーケットプレイス、Omni/Agent/GitHub スキルフレームワーク、Obsidian vault 連携（22 個の MCP ツール）、OpenAI 互換の Batch ＆ Files API、セマンティックレスポンスキャッシュ、リーダーボード付きゲーミフィケーション、ACP エージェントディスカバリ（15 個の組み込みエージェント）、BigQuery へのスケジュール済みログエクスポート、`auto/chaos` 並列マルチモデルファンアウト、Telegram ボットブリッジ、アプリ内バージョンマネージャー、LMArena-ELO による無料プロバイダーランキング。 → [ドキュメント](docs/README.md)
+- **⚖️ `quota-weighted` ルーティング** — 20番目のコンボ戦略は、使い切ったアカウントをスキップし、残りのアカウントから残りのクォータ ÷ 処理中の負荷の比率に応じて抽選し、既存の会話をピン留めしたままにします。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 ヘッドレスモード** — `omniroute serve --headless`（または `OMNIROUTE_HEADLESS=1`）で `/v1/*` プロキシエンジンのみを実行し、ダッシュボードおよびダッシュボード専用サブシステムをオフにします。→ [ヘッドレスモード](docs/guides/HEADLESS.md)
+- **🔎 モデルディスカバリー** — `/v1/models` で機能、コンテキスト、種類、テキストでフィルタリングし、`POST /v1/models/query` で同じキーごとの可視性で短く決定論的なショートリストを返します。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
+- **🔑 キーごとのルーティング制御** — APIキーを1つのモデルまたはコンボに `forcedModel` でピン留めし、キーのモデルやコンボをアトミックに追加・削除できます（`/api/keys/{id}/access`）。→ [APIリファレンス](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ より細かなPII制御** — 種類ごとの選択、最大20個の検証済みカスタムマスキングパターン、種類ごとの検出カウンター。マスキング自体はオプトインのままです。→ [ガードレール](docs/security/GUARDRAILS.md)
+- **🌍 67言語対応** — ダッシュボード、ドキュメントミラー、CLIに対応し、`npm run i18n:add-locale` で1コマンドですべてに言語を追加できます。→ [i18nガイド](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — インバウンドA2Aデリゲーションをエージェント群に、Conductorスキルをエージェントカードに、Faroプッシュトゥトーク音声チャット付きダッシュボードパネルを追加。→ [A2Aサーバー](docs/frameworks/A2A-SERVER.md)
+- **🛂 適応型アドミッション＆過負荷保護** — 重量級チャットリクエストは503を返さずキューイングし、接続ごとにアトミックなRPMローリングリースを実現。→ [レジリエンスガイド](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ 標準化された `/v1/models` 並び順** — プロバイダーごとに連続したブロック（コンボは先頭にピン留め）、すべてのカタログソースで安定。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
+- **🗜️ 圧縮強化** — デフォルト有効のインフレーションガード、Cavemanパック（DE / FR / JA + 中国語（文言））、Gradle & .NET用RTKフィルター。→ [圧縮](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 正直な定額コスト** — サブスクリプション／コーディングプランプロバイダーはコスト分析で **$0** と表示、予算・クォータ・ルーティングは推定を継続。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
+- **⚖️ クォータシェアルーティング** — 共有アカウントのクォータをプールされたキー間で公平に分割、アイドルスライスは貸し出し。→ [レジリエンスガイド](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 ワンコマンドCLI/エージェントセットアップ** — 15個の `setup-*` コマンド登録済み；`omniroute run` で7つのCLI（Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI）を起動；`omniroute configure` は11ターゲットに対応し、対話型プロバイダー＋モデルピッカーとコンテキストごとのお気に入りをサポート。→ [CLI統合](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ リモートモード** — スコープ付きトークン（`connect` / `contexts` / `tokens`）＋VPSインストール用 `antigravity` OAuthヘルパーでリモートOmniRouteを操作。→ [リモートモード](docs/guides/REMOTE-MODE.md)
+- **🧭 より賢い自動ルーティング** — `auto/<category>:<tier>` コンボ、**Fusion**（モデルパネル＋ジャッジ）、タスク認識ルーティング、リクエストごとのモデル／モード／USD予算上書き。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ プラグイン式圧縮** — 12の合成可能エンジン＋Compression Studios：LLMLingua-2、2段階Ultra、omniglyph、ステップごとの忠実度ゲート、GCF v3.2、ドラッグ並べ替えエディタ。→ [圧縮](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ 透過的MITM復号（TPROXY）** — プロキシ環境変数を無視するCLIをキャプチャ、SNIごとのCA＋トラストストアインストーラー付き。→ [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 コストテレメトリの全域化** — すべてのエンドポイントで `X-OmniRoute-*` コスト／使用量ヘッダー、キャッシュHIT節約ヘッダー、キーごとのUSD消費クォータ。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
+- **🧠 コントロール可能なメモリ** — デフォルトオフ、オプトインのint8ベクトル量子化＋型付き減衰、リクエストごとの `x-omniroute-no-memory`。→ [メモリ](docs/frameworks/MEMORY.md)
+- **🛡️ セキュリティ** — すべてのLLMルートでプロンプトインジェクションガード（レッドチームスイート）、オプトインの認証情報マスキングガードレール（APIキー／シークレットの漏洩を両方向でマスク）、無料DuckDuckGo最終手段ウェブ検索、ダッシュボード用のオプションOIDCログインゲート（パスワードログインは常時利用可能）。→ [ガードレール](docs/security/GUARDRAILS.md)
+- **🖼️ 新エンドポイント** — `/v1/ocr`（Mistral OCR）と `/v1/audio/translations`（Whisperスタイル）でメディア機能を拡充。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
+- **🎨 画像／動画／音声生成** — 1つのAPIでメディア：xAI Grok Imagine & Novita AI動画、ComfyUI、Magnific、Adobe Firefly、Segmind、ElevenLabsなどの音声プロバイダー。→ [APIリファレンス](docs/reference/API_REFERENCE.md)
+- **🌍 デプロイ＆運用** — リバースプロキシ `basePath`、ブラウザ言語自動検出、キーごとのデバイストラッキング、ルートレスMITMトラスト、zh-TWローカライズ。→ [環境](docs/reference/ENVIRONMENT.md)
+- **🤝 さらに多くのプロバイダー＆エージェント** — クラウドエージェント（Codex Cloud, Cursor, Devin, Jules）、Grok Build（xAI）ブラウザ＋OAuthログイン、Ollama一級カード、Claude Opus 5 & Sonnet 5、Kimi公式パートナーシップ（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI… そして刷新された**380プロバイダーカタログ**。→ [プロバイダー](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 ルーティングの透明性** — すべてのレスポンスに `X-OmniRoute-Decision` ヘッダーで戦略／プロバイダー／レイテンシを明示、新しい `cache-optimized` コンボ戦略＋Auto-Comboの `cacheAffinity` ファクターでキャッシュ済みプレフィックスを保持する接続にリピートリクエストをルーティング、読み取り専用 `/v1/auto-combo/{channel}/candidates` エンドポイントで `auto/*` チャンネルのライブ候補プールを公開。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ ローカルパフォーマンス & インフラ** — ワンクリックでローカルRedis、Cloudflare Workers / Deno Deployリレーデプロイヤー、Bifrost & Muxを監督付き組み込みサービスとして提供。→ [組み込みサービス](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 さらに同梱** — プラグインフレームワーク＋マーケットプレイス、Omni/Agent/GitHubスキルフレームワーク、Obsidian Vault統合（22 MCPツール）、OpenAI互換のBatch & Files API、セマンティックレスポンスキャッシュ、リーダーボードによるゲーミフィケーション、ACPエージェントディスカバリー（15種類の組み込みエージェント）、BigQueryへのスケジュールログエクスポート、`auto/chaos` 並列マルチモデルファンアウト、Telegramボットブリッジ、アプリ内バージョンマネージャー、LMArena-ELOフリープロバイダーランキング。→ [ドキュメント](docs/README.md)
 
 <br/>
 
 <div align="center">
 
-## 🤖と互換性のあるCLIsおよびコーディング エージェント
+## 🤖 対応CLI & コーディングエージェント
 
-> 1 つの構成 — `http://localhost:20128/v1` — および**毎**AI IDEまたはCLIは無料および低コストのモデルで動作します。
+> 1つの設定 — `http://localhost:20128/v1` — で、**すべて**のAI IDEやCLIが無料・低コストのモデルで動作します。
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claudeコード</b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>キロコード</b></sub><br/><sub> </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>動物園コード</b></sub><br/><sub> </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>継続</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>エイダー</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>ファクトリー・ドロイド</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>ワカサギ</b></sub><br/><sub> </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> pi </b></sub><br/><sub> </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grokビルド</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>ヘルメスエージェント</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>グース</b></sub><br/><sub> </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>オープン インタプリタ</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ 、</b> 、Agent Deck、 Kiro 、コマンド コード、 Antigravity 、 Windsurf 、 AMP 、 <b>の OpenAI 互換ツール</b>でも動作します。
+<b>＋ 他にも対応</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>あらゆるOpenAI互換ツール</b>
 </div>
 
-<sub>📖すべての 38 ツールのツールごとのセットアップ (27 CLIコードの+ 11 CLIエージェント) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCodeプラグイン→ [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 すべての39ツール（CLI Code 28種 + CLI Agent 11種）のツールごとのセットアップ → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCodeプラグイン → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**1 つのコマンドでサポートされているOmniRouteからCLIを起動します**— 設定ファイルは書き込まれず、プロセスごとに認証情報が挿入され、 Qwen/Gemini使い捨ての隔離されたホームを取得します。
+**OmniRouteを使って、サポートされている任意のCLIを1コマンドで起動** — 設定ファイル不要、
+認証情報はプロセスごとに注入、Qwen/Geminiには使い捨ての分離されたホームを割り当て:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -674,25 +675,27 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Or pick provider+model interactively and write the tool's own config:
-omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# または、プロバイダーとモデルを対話的に選択し、ツール独自の設定を書き込む:
+omniroute configure codex          # 他にも: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-すべてのコマンドはアクティブなリモート コンテキスト (`omniroute connect <host>`) を尊重し、 `--dry-run`実行せずに正確なenv/argsプレビューし、 `--api-key-env NAME`シェル履歴に秘密を残します。 → [CLI統合](docs/guides/CLI-INTEGRATIONS.md)
+すべてのコマンドはアクティブなリモートコンテキスト（`omniroute connect <host>`）を尊重し、`--dry-run`で
+実行せずに正確な環境変数や引数をプレビュー、`--api-key-env NAME`で
+シェル履歴に秘密情報を残しません。→ [CLI統合](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 380のAIプロバイダー — うち153がカタログ上で無料
+## 🌐 380のAIプロバイダー — 153件がカタログで無料マーク
 
 </div>
 
-> 正規のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにわたり、**380のプロバイダーが登録**されており、そのうち**153には検出用メタデータとして `hasFree: true` が設定**されています。チャットモデルレジストリには、**239のプロバイダー / 3,059の一意なプロバイダー・モデルの組み合わせ / 1,475の生モデルID**が収録されています。これとは別の無料枠カタログには、**モデル別の471行**、**34の定期更新プール**、**52の定期更新型またはキー不要の永久無料プロバイダー**が収録されています。これらは設計上、異なる母数を使用しています。定義およびプールの重複を除外した計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)および[無料枠](docs/reference/FREE_TIERS.md)をご覧ください。
+> **380の登録プロバイダー**が、標準のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにわたり存在し、そのうち**153件が`hasFree: true`のディスカバリーメタデータ**を持っています。チャットモデルのレジストリは**239プロバイダー / 3,059のプロバイダー・モデルペア / 1,475の生モデルID**をカバーしています。別途、無料枠カタログには**471のモデルごとの行**、**34の定期プール**、**53の定期/キー不要の永久無料プロバイダー**があります。これらは設計上、異なる分母を持っています。定義やプール重複排除の計算方法は[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)および[無料枠](docs/reference/FREE_TIERS.md)に記載されています。
 
 <div align="center">
 
-### 🏢 すべての主要ラボへ — 1つのエンドポイントから
+### 🏢 主要なラボをすべて — ひとつのエンドポイントで
 
 <table>
   <tr>
@@ -721,7 +724,7 @@ omniroute configure codex          # also: claude opencode qwen aider goose gemi
   </tr>
 </table>
 
-<sub>…ほかにも350以上 — すべてのアイコンは、ダッシュボードのプロバイダーカタログからリアルタイムで取得されます。📖 [プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…さらに350以上 — すべてのアイコンはダッシュボードのプロバイダーカタログからライブで取得されます。📖 [プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -729,24 +732,24 @@ omniroute configure codex          # also: claude opencode qwen aider goose gemi
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4、Nemotron 3<br/>トークン上限なし</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>自動ルーター、Tencent Hy3<br/>永久無料</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B、Nemotron<br/>永久無料</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>無料枠</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>永久無料</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>永久無料</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>トークン上限なし</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>自動ルーティング, Tencent Hy3<br/>永年無料</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>永年無料</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>無料枠あり</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>永年無料</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>永年無料</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max、Kimi-K2<br/>無制限で無料</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT、Llama、Claude<br/>キー不要</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50以上のモデル<br/>1日あたり10Kニューロン</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM、MiniMax<br/>無料で約40 RPM</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7、GPT-OSS<br/>1回限りの$5クレジット、カード必須</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:freeモデル<br/>+$10 → RPM上限引き上げ</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>無制限・無料</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>キー不要</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50以上のモデル<br/>1日10Kニューロン</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>約40RPM無料</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>一度きり$5クレジット・カード必須</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:無料モデル<br/>+$10 → 高RPM</sub></td>
   </tr>
 </table>
 
-📖 機械可読形式の完全なカタログ → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 機械可読な全カタログ → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -1289,21 +1292,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 <table>
   <tr><th align="left">レイヤー</th><th align="left">技術</th></tr>
   <tr><td nowrap><b>ランタイム</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <code>src/</code> と <code>open-sse/</code> 全体で<b>100% TypeScript</b>（v2.0以降コアに<code>any</code>はゼロ）</td></tr>
+  <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b>（<code>src/</code> および <code>open-sse/</code> 全体、v2.0以降コアに <code>any</code> はゼロ）</td></tr>
   <tr><td nowrap><b>フレームワーク</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（JSONレガシー）— 147個のドメインモジュール、219個のマイグレーション</td></tr>
+  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（JSONレガシー）— 147ドメインモジュール、219マイグレーション</td></tr>
   <tr><td nowrap><b>メモリ</b></td><td>SQLite FTS5 全文検索 + int8量子化ベクトル埋め込み、型付き減衰</td></tr>
-  <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールのI/O検証 + APIコントラクト</td></tr>
+  <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールI/Oバリデーション + APIコントラクト</td></tr>
   <tr><td nowrap><b>プロトコル</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
   <tr><td nowrap><b>ストリーミング</b></td><td>Server-Sent Events（SSE）+ WebSocketブリッジ（<code>/v1/ws</code>）</td></tr>
-  <tr><td nowrap><b>圧縮</b></td><td>12エンジンのパイプライン — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
-  <tr><td nowrap><b>認証とセキュリティ</b></td><td>OAuth 2.0（PKCE）+ JWT + APIキー + MCPスコープ認証 · 保存時AES-256-GCM暗号化 · DOMPurify</td></tr>
+  <tr><td nowrap><b>圧縮</b></td><td>12エンジンパイプライン — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
+  <tr><td nowrap><b>認証・セキュリティ</b></td><td>OAuth 2.0（PKCE）+ JWT + APIキー + MCPスコープ認証 · AES-256-GCM（保存時）· DOMPurify</td></tr>
   <tr><td nowrap><b>ステルス</b></td><td>wreq-js — JA3 / JA4 TLSフィンガープリント偽装、3段階プロキシ</td></tr>
-  <tr><td nowrap><b>耐障害性</b></td><td>サーキットブレーカー、指数バックオフ、サンダリングハード対策、auto-comboの自己修復</td></tr>
-  <tr><td nowrap><b>ログ</b></td><td>pino — リクエストコンテキスト付きの構造化JSONログ</td></tr>
-  <tr><td nowrap><b>テスト</b></td><td>Node.jsテストランナー + Vitest — 7,800以上の追跡テストファイルにわたる<b>56,000以上の静的テスト宣言</b>（単体、統合、E2E、セキュリティ、エコシステム）</td></tr>
+  <tr><td nowrap><b>レジリエンス</b></td><td>サーキットブレーカー、指数バックオフ、アンチサンダリングハード、オートコンボ自己修復</td></tr>
+  <tr><td nowrap><b>ロギング</b></td><td>pino — リクエストコンテキスト付き構造化JSONログ</td></tr>
+  <tr><td nowrap><b>テスト</b></td><td>Node.jsテストランナー + Vitest — <b>56,000以上の静的テスト宣言</b>、7,800以上の追跡テストファイル（ユニット、統合、E2E、セキュリティ、エコシステム）</td></tr>
   <tr><td nowrap><b>プラットフォーム</b></td><td>デスクトップ（Electron）· Android（Termux）· PWA（任意のブラウザ）</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — リリース時にnpm自動公開 + Docker Hub</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — リリース時に自動npm公開 + Docker Hub</td></tr>
   <tr><td nowrap><b>リンク</b></td><td><a href="https://omniroute.online">ウェブサイト</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1319,83 +1322,83 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">ユーザーガイド</a></b></td><td>プロバイダー、コンボ、CLI連携、デプロイ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">セットアップガイド</a></b></td><td>すべてのインストール方法、CLIツール設定、プロトコル設定、タイムアウト調整</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLIツールガイド</a></b></td><td>Claude Code、Codex、Cursor、Cline、OpenClaw、Kilo、Copilotのツール別セットアップ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">リモートモード</a></b></td><td>スコープ付きアクセストークンを使用して、ノートPCのCLIからリモートのOmniRoute（VPS）を操作</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code設定</a></b></td><td><code>launch</code>とモデル別プロファイルを使用して、Claude CodeをOmniRoute（ローカル／リモート）に接続</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">ユーザーガイド</a></b></td><td>プロバイダー、コンボ、CLI統合、デプロイ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">セットアップガイド</a></b></td><td>完全なインストール方法、CLIツール設定、プロトコル設定、タイムアウト調整</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLIツールガイド</a></b></td><td>Claude Code、Codex、Cursor、Cline、OpenClaw、Kilo、Copilot 各ツールのセットアップ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">リモートモード</a></b></td><td>スコープ付きアクセストークンを使い、ノートPCのCLIからリモートOmniRoute（VPS）を操作</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code設定</a></b></td><td><code>launch</code>とモデルごとのプロファイルでClaude CodeをOmniRoute（ローカル/リモート）に接続</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">クイックスタート</a></b></td><td>3ステップ：インストール → 接続 → 設定</td></tr>
 </table>
 
-### 🔧 運用とデプロイ
+### 🔧 運用・デプロイ
 
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Dockerガイド</a></b></td><td>Dockerの実行、Composeプロファイル、Caddy HTTPS、トンネル、イメージタグ</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podmanガイド</a></b></td><td>Quadletとsystemdの連携、podman-compose、SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VMデプロイ</a></b></td><td>完全ガイド：VM + nginx + Cloudflareのセットアップ</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.ioへのデプロイ</a></b></td><td>永続ストレージを使用してFly.ioへデプロイ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termuxガイド</a></b></td><td>Termuxを介してAndroid上でOmniRouteを実行</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWAガイド</a></b></td><td>プログレッシブウェブアプリのインストール、キャッシュ、アーキテクチャ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">アンインストールガイド</a></b></td><td>すべてのインストール方法に対応した完全な削除</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">環境設定</a></b></td><td><code>.env</code>変数とリファレンスの完全な一覧</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Dockerガイド</a></b></td><td>Docker実行、Composeプロファイル、Caddy HTTPS、トンネル、イメージタグ</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Podmanガイド</a></b></td><td>Quadlet systemd統合、podman-compose、SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VMデプロイ</a></b></td><td>完全ガイド：VM + nginx + Cloudflare設定</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.ioデプロイ</a></b></td><td>永続ストレージ付きでFly.ioにデプロイ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termuxガイド</a></b></td><td>Termux経由でAndroid上でOmniRouteを実行</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWAガイド</a></b></td><td>プログレッシブWebアプリのインストール、キャッシュ、アーキテクチャ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">アンインストールガイド</a></b></td><td>全インストール方法のクリーンな削除</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">環境設定</a></b></td><td>完全な<code>.env</code>変数とリファレンス</td></tr>
 </table>
 
-### 🧠 機能とアーキテクチャ
+### 🧠 機能・アーキテクチャ
 
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">アーキテクチャ</a></b></td><td>システムアーキテクチャ、データフロー、内部構造</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">圧縮ガイド</a></b></td><td>7つのオプションを備えたパイプライン：オフ／軽量／標準／強力／超強力／RTK／スタック</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK圧縮</a></b></td><td>コマンド出力の圧縮、フィルター、信頼、検証、生出力の復元</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">圧縮エンジン</a></b></td><td>Caveman、RTK、スタック型パイプライン、ダッシュボード／API／MCPインターフェース</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">圧縮ルール形式</a></b></td><td>CavemanおよびRTKフィルター向けJSONルールパックのスキーマ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">圧縮言語パック</a></b></td><td>言語検出とCavemanルールパックの作成</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">耐障害性ガイド</a></b></td><td>サーキットブレーカー、クールダウン、キュー、サンダリングハード対策、TLSスプーフィング</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Comboエンジン</a></b></td><td>16要素のスコアリング、モードパック、自己修復</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">プロキシガイド</a></b></td><td>3段階プロキシシステム、1proxyマーケットプレイス、レジストリのCRUD操作</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">無料枠</a></b></td><td>統合ディレクトリ：文書化された34の定期プール／カタログ登録された484件の無料枠エントリ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">機能ギャラリー</a></b></td><td>スクリーンショットで紹介するダッシュボードのビジュアルツアー</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">アーキテクチャ</a></b></td><td>システム構成、データフロー、内部構造</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">圧縮ガイド</a></b></td><td>7種類のパイプライン：off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK圧縮</a></b></td><td>コマンド出力圧縮、フィルター、信頼、検証、生出力リカバリ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">圧縮エンジン</a></b></td><td>Caveman、RTK、スタック型パイプライン、ダッシュボード/API/MCPサーフェス</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">圧縮ルール形式</a></b></td><td>CavemanおよびRTKフィルター用のJSONルールパックスキーマ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">圧縮言語パック</a></b></td><td>言語検出とCavemanルールパック作成</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">レジリエンスガイド</a></b></td><td>サーキットブレーカー、クールダウン、キュー、アンチサンダリングハード、TLSスプーフィング</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">オートコンボエンジン</a></b></td><td>16要素のスコアリング、モードパック、自己修復</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">プロキシガイド</a></b></td><td>3段階プロキシシステム、1proxyマーケットプレイス、レジストリCRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">フリーティア</a></b></td><td>統合ディレクトリ：34の定期プール／485のカタログ化されたフリーティアエントリ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">機能ギャラリー</a></b></td><td>スクリーンショット付きのビジュアルダッシュボードツアー</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">コードベースドキュメント</a></b></td><td>初心者向けのコードベース解説</td></tr>
 </table>
 
-### 🤖 プロトコルとAPI
+### 🤖 プロトコル・API
 
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">APIリファレンス</a></b></td><td>すべてのエンドポイントと使用例</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI仕様</a></b></td><td>OpenAPI 3.0仕様</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCPサーバー</a></b></td><td>110個のMCPツール、IDE設定、Python／TS／Goクライアント</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCPサーバーガイド</a></b></td><td>MCPのインストール、トランスポート、ツールリファレンス</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">APIリファレンス</a></b></td><td>全エンドポイントとサンプル</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI仕様</a></b></td><td>OpenAPI 3.0仕様書</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCPサーバー</a></b></td><td>110のMCPツール、IDE設定、Python/TS/Goクライアント</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCPサーバーガイド</a></b></td><td>MCPインストール、トランスポート、ツールリファレンス</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2Aサーバー</a></b></td><td>JSON-RPC 2.0プロトコル、スキル、ストリーミング、タスク管理</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2Aサーバーガイド</a></b></td><td>A2Aエージェントカード、タスク、スキル、ストリーミング</td></tr>
 </table>
 
-### 📋 プロジェクトと品質
+### 📋 プロジェクト・品質
 
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">コントリビューション</a></b></td><td>開発環境のセットアップとガイドライン</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ブランチおよびリリースモデル</a></b></td><td>PR のターゲット先（<code>release/*</code>）と、<code>main</code> およびタグの意味</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">変更履歴</a></b></td><td>バージョンごとの完全なリリース履歴</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">セキュリティポリシー</a></b></td><td>脆弱性の報告とセキュリティ対策</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ガイド</a></b></td><td>67 言語対応、翻訳ワークフロー、RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">リリースチェックリスト</a></b></td><td>リリース前の検証手順</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">カバレッジ計画</a></b></td><td>追跡対象の 7,800 以上のテストファイルに含まれる 56,000 以上の静的テスト宣言に対するテストカバレッジ戦略</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Contributing</a></b></td><td>開発環境のセットアップとガイドライン</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Branching & Release Model</a></b></td><td>PRのターゲット先（<code>release/*</code>）、<code>main</code>やタグの意味</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Changelog</a></b></td><td>バージョンごとのリリース履歴全体</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Security Policy</a></b></td><td>脆弱性報告とセキュリティ対応方針</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n Guide</a></b></td><td>67言語対応、翻訳ワークフロー、RTL対応</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Release Checklist</a></b></td><td>リリース前の検証手順</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Coverage Plan</a></b></td><td>7,800以上のテストファイルで管理される56,000以上の静的テスト宣言に対するテストカバレッジ戦略</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ 貢献者上位
+# ⭐ トップコントリビューター
 
-> OmniRoute は、情熱的なオープンソースコミュニティによって形作られています。以下の方々は、プロジェクトの品質、安定性、普及に直接影響を与える卓越した貢献をしてきました。**ありがとうございます。**
+> OmniRouteは、情熱的なオープンソースコミュニティによって形作られています。これらの方々は、プロジェクトの品質、安定性、普及に直接影響を与える卓越した貢献をしてくださいました。**心より感謝いたします。**
 
-### マージ済みプルリクエスト数による外部貢献者ランキング
+### マージされたプルリクエスト数による外部コントリビューター
 
 <table>
-  <tr><th align="center">順位</th><th align="left">貢献者</th><th align="center">マージ済み PR 数</th><th align="right">変更行数（概算）</th></tr>
+  <tr><th align="center">順位</th><th align="left">コントリビューター</th><th align="center">マージPR数</th><th align="right">~変更行数</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
@@ -1418,9 +1421,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>集計は 2026-10-18 15:09:09 UTC に、最新の <code>release/v3.8.52</code> の先端コミット <code>656f01cb43</code> を使用して実施しました。ページネーションされた GitHub GraphQL による集計には、9,191 件のマージ済み PR が含まれています。その内訳は、リポジトリ所有者によるものが 3,834 件、Dependabot によるものが 229 件、その他のボット／アプリによるものが 6 件、そして<b>個別の貢献者 835 人による外部 PR が 5,122 件</b>です。「変更行数」は GitHub 上の追加行数と削除行数の合計であり、生成ファイル、ロックファイル、カタログ、翻訳、ドキュメントを含みます。これは変更量であり、本人が作成した LOC ではありません。49 件の PR では、GitHub 上の差分が 500,000 行を超えています（たとえば #13399 は、単一プロバイダーの追加でありながら 2,347 件の変更ファイルが記録されています）。このため、上記の合計の一部は大きく膨らんでいます。同数の場合は同順位としています。</sub>
+<sub>2026-10-18 15:09:09 UTC時点で取得したセンサス。ライブの<code>release/v3.8.52</code>先端<code>656f01cb43</code>で計測。ページネーションされたGitHub GraphQLセンサスには9,191件のマージ済みPRが含まれます：リポジトリオーナーによる3,834件、Dependabotによる229件、他のボット/アプリによる6件、そして<b>835人の異なるコントリビューターによる5,122件の外部PR</b>。 “変更行数”はGitHubの追加＋削除で、生成ファイル、ロックファイル、カタログ、翻訳、ドキュメントも含みます。これは執筆したLOCではなく、変更量（churn）です。49件のPRはGitHubの差分が50万行を超えています（例：#13399は単一プロバイダー追加で2,347ファイル変更）、これにより一部合計値が膨らんでいます。同順位は同列で表示されます。</sub>
 
-### GitHub に帰属するコミット
+### GitHubによるコミットの帰属
 
 <table>
   <tr>
@@ -1429,42 +1432,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHubに帰属するコミット367件</sub>
+      <sub>🥇 367 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHubに帰属するコミット269件</sub>
+      <sub>🥈 269 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHubに帰属するコミット229件</sub>
+      <sub>🥉 229 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット202件</sub>
+      <sub>🏅 202 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット174件</sub>
+      <sub>🏅 174 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット126件</sub>
+      <sub>🏅 126 GitHub帰属コミット</sub>
     </td>
   </tr>
   <tr>
@@ -1473,42 +1476,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット114件</sub>
+      <sub>🏅 114 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット108件</sub>
+      <sub>🏅 108 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット87件</sub>
+      <sub>🏅 87 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット70件</sub>
+      <sub>🏅 70 GitHub帰属コミット</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット68件</sub>
+      <sub>🏅 68 GitHub帰属コミット</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTCに再確認：<code>release/v3.8.52</code>デフォルトブランチについて、リポジトリのContributors APIが報告したGitHubに帰属するコミット。APIは849件のID（ユーザー429件、ボット2件、匿名418件）を返しました。この表では、メンテナー、ボット、匿名IDを除外し、同順位はそのまま保持しています。これは、上記のマージ済みPRランキングとも、下記のGitメタデータ集計とも異なります。</sub>
+<sub>2026-10-18 14:44:45 UTC時点で再確認：<code>release/v3.8.52</code>デフォルトブランチのリポジトリContributors APIによって報告されたGitHub帰属コミット数。APIは849のアイデンティティ（429ユーザー、2ボット、418匿名）を返しました；この表はメンテナー、ボット、匿名アイデンティティを除外し、同順位を保持しています。これは上記のマージ済みPRランキングや下記のGitメタデータ国勢調査とは異なります。</sub>
 
-> 🙏 これらのコントリビューターによる機能、バグ修正、インフラストラクチャの改善は、OmniRouteの信頼性と豊富な機能を支える**中核的な要素**です。すべてのプルリクエスト、すべてのテストケース、すべてのi18n翻訳ファイルが重要です。オープンソースは、このような人々によって築かれています。
+> 🙏 これらのコントリビューターによる機能追加、バグ修正、インフラ改善は、OmniRouteを信頼性が高く多機能なものにしている**中核的な要素**です。すべてのプルリクエスト、すべてのテストケース、すべてのi18n翻訳ファイルが重要です。オープンソースは、彼らのような人々によって築かれています。
 
 </div>
 

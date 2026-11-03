@@ -13,25 +13,25 @@
 
 # 🚀 OmniRoute — Gerbang AI Percuma
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan berhenti mengekod. Setiap alat AI → 380 penyedia — 150+ percuma — melalui satu titik akhir. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity kepada Claude / GPT / Gemini PERCUMA dengan sandaran automatik. Pemampatan bertindan RTK + Caveman menjimatkan 15–95% token (~89% secara purata) — tidak akan mencapai had. 380 penyedia AI · 150+ peringkat percuma · ~1.62B token percuma/bulan · 20 strategi penghalaan · $0 untuk bermula."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Teruskan pengekodan tanpa henti. Setiap alat AI → 380 penyedia — 150+ percuma — melalui satu titik akhir. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke dalam Claude / GPT / Gemini PERCUMA dengan auto-fallback. Pemampatan bertindan RTK + Caveman menjimatkan 15–95% token (~89% purata) — tidak pernah melebihi had. 380 penyedia AI · 150+ pelan percuma · ~1.62B token percuma/bulan · 20 strategi penghalaan · $0 untuk bermula."/>
 
 </div>
 
 <div align="center">
 
-## 💰 ~1.62B Token / Bulan Merentasi Peringkat Percuma Pihak Ketiga
+## 💰 ~1.62B Token / Bulan Merentasi Tahap Percuma Pihak Ketiga
 
 </div>
 
-> **Gunakan akaun penyedia anda sendiri.** Ini ialah anggaran agregat merentasi peringkat percuma pihak ketiga yang layak secara berasingan, bukannya pemberian token daripada OmniRoute. Daftar, dapatkan bukti kelayakan jika diperlukan dan sambungkan penyedia yang boleh anda gunakan; setiap penyedia mengawal had, ketersediaan dan terma mereka sendiri.
+> **Bawa akaun pembekal anda sendiri.** Ini adalah anggaran agregat merentasi tahap percuma pihak ketiga yang layak secara berasingan, bukan geran token daripada OmniRoute. Daftar, dapatkan kelayakan di mana diperlukan, dan sambungkan pembekal yang anda boleh gunakan; setiap pembekal mengawal had, ketersediaan, dan terma mereka.
 >
-> Menggabungkan peringkat percuma secara manual memang menyusahkan — berpuluh-puluh SDK, berpuluh-puluh had kadar dan tiada gambaran tentang jumlah sebenar yang anda miliki. OmniRoute mengkatalogkan **484 entri peringkat percuma merentasi 34 kunci kumpulan berulang** dan mengira angka token utama daripada **17 kumpulan dengan belanjawan bulanan positif yang diterbitkan serta lima had Groq bagi setiap model**, dinyahduplikasi mengikut kumpulan dikongsi. Kuota yang hanya tersedia selepas semakan identiti serantau (pada masa ini: ModelScope) dipaparkan secara berasingan, +~6M di sebalik pengesahan identiti serantau, dan tidak pernah dimasukkan ke dalam jumlah angka utama. Hasilnya kekal dipaparkan pada papan pemuka (`/dashboard/free-tiers`).
+> Menyusun tahap percuma secara manual sangat menyakitkan — berpuluh SDK, berpuluh had kadar, dan tiada idea berapa banyak yang anda sebenarnya ada. OmniRoute mengkatalogkan **485 entri tahap percuma merentasi 34 kunci kolam berulang** dan mengira jumlah token daripada **17 kolam dengan bajet bulanan positif yang diterbitkan ditambah lima had per-model Groq**, dideduplikasi mengikut kolam yang dikongsi. Kuota yang hanya dibuka selepas semakan identiti serantau (hari ini: ModelScope) dipaparkan berasingan, +~6M di belakang pengesahan identiti serantau, dan tidak pernah dijumlahkan dalam tajuk utama. Hasilnya kekal kelihatan pada papan pemuka (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kad belanjawan peringkat percuma OmniRoute: ~1.62B token percuma sebulan secara berterusan, sehingga ~2.22B pada bulan pertama dengan kredit pendaftaran, daripada 34 kunci kumpulan berulang yang didokumenkan, meliputi 484 entri peringkat percuma yang dikatalogkan di sebalik satu titik akhir. Pengiraan telus yang dinyahduplikasi mengikut kumpulan — setiap kumpulan dikongsi dikira sekali, termasuk 17 kumpulan berulang dengan belanjawan token bulanan positif yang diterbitkan serta lima had Groq bagi setiap model; 12 penyedia ditandai sebagai perlu dielakkan dalam katalog risiko terma supaya anda boleh membuat keputusan. Bar belanjawan merangkumi Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (lima had bagi setiap model) dan kumpulan yang lebih kecil, serta kredit pendaftaran bulan pertama dan penyedia percuma secara kekal tanpa had token yang dipaparkan secara berasingan supaya tidak menaikkan angka utama. Penggunaan/baki secara langsung pada /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kad bajet tahap percuma OmniRoute: ~1.62B token percuma sebulan secara tetap, sehingga ~2.22B pada bulan pertama dengan kredit pendaftaran, daripada 34 kunci kolam berulang yang didokumenkan meliputi 485 entri tahap percuma yang dikatalogkan di belakang satu titik akhir. Matematik deduplikasi kolam yang jujur — setiap kolam dikongsi dikira sekali, termasuk 17 kolam berulang dengan bajet token bulanan positif yang diterbitkan ditambah lima had per-model Groq; 12 pembekal ditanda elak dalam katalog risiko-terma supaya anda boleh buat keputusan. Bar bajet termasuk Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (lima had per-model) dan kolam lebih kecil, ditambah kredit pendaftaran bulan pertama dan pembekal tanpa had token percuma kekal dipaparkan berasingan supaya tidak pernah menaikkan tajuk utama. Status digunakan/baki secara langsung di /dashboard/free-tiers."/>
 
-> Ringkasan beranimasi bagi halaman langsung `/dashboard/free-tiers`. Metodologi penuh (penyahduplikasian kumpulan, peringkat kredit, terma penyedia): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Ringkasan animasi halaman langsung `/dashboard/free-tiers`. Metodologi penuh (deduplikasi kolam, tahap kredit, terma pembekal): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Angka ini diaudit semula setiap dua minggu berdasarkan katalog langsung dan **boleh berubah dalam kedua-dua arah** — apabila penyedia menamatkan peringkat percuma, angkanya menurun; apabila yang baharu ditambah, angkanya meningkat. Kami menerbitkan nilai yang benar-benar dikira oleh katalog, bukan senario terbaik yang dibundarkan ke atas.</sub>
+> <sub>Angka-angka ini diaudit semula setiap dua minggu terhadap katalog langsung dan **bergerak kedua-dua arah** — pembekal menamatkan tahap percuma dan nombor menurun; yang baru muncul dan ia meningkat. Kami menerbitkan apa yang benar-benar dikira oleh katalog, tidak pernah kes terbaik yang dibundarkan ke atas.</sub>
 
 <br/>
 
@@ -39,49 +39,49 @@
 
 <h3>
 
-⭐ Berikan bintang kepada repositori ini jika OMNIROUTE membantu anda menjimatkan wang dan memudahkan kerja anda.
+⭐ Bintangkan repo jika OMNIROUTE membantu anda menjimatkan wang dan memudahkan kerja anda.
 
 </h3>
 
-[![Bintang](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Kedudukan Sejarah Bintang](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Sertai komuniti
 
-**👋 Ikuti penyelenggara — dapatkan maklumat penyedia baharu, keluaran & petua terlebih dahulu:**
+**👋 Ikuti penyelenggara — dapatkan pembekal baru, keluaran & tip terkini dahulu:**
 
-[![Ikuti Diego di LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Ikuti @diegosouzapw di GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Laman Web](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Soalan, petua penyedia, pelan hala tuju & sokongan → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Soalan, tip pembekal, pelan hala tuju & sokongan → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 Gerbang Terus Berkembang
+## 📈 Gateway Terus Berkembang
 
 <div align="center">
 
-|                            |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------- | :-----------------------: | :---------: | :-------------------: |
-| Pembekal 🌐                |            352            |   **358**   |          380          |
-| 🧠 Model sembang unik IDs  |           1320            |  **1374**   |         1475          |
-| 🖼️ Modality Bridge         | 🆕 vision + audio + video |      ✓      |           ✓           |
-| katalog percuma 📡 Radar   |       🆕 ikut serta       |      ✓      |           ✓           |
-| ⚖️ Penjadualan sedar Kuota |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Kuota telemetri         |         🆕 hidup          |      ✓      |           ✓           |
-| 🧰 Mod tanpa kepala        |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rail infra          |             —             |      —      |  saluran keluaran 🆕  |
-| 🔎 Penemuan model API      |             —             |      —      | 🆕 `/v1/models/query` |
+|                            |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------- | :---------------------: | :---------: | :-------------------: |
+| 🌐 Penyedia                |           352           |   **358**   |          380          |
+| 🧠 ID model chat unik      |          1320           |  **1374**   |         1475          |
+| 🖼️ Modality Bridge         | 🆕 visi + audio + video |      ✓      |           ✓           |
+| 📡 Katalog percuma Radar   |        🆕 opt-in        |      ✓      |           ✓           |
+| ⚖️ Penjadualan sedar kuota |     🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetri kuota         |       🆕 langsung       |      ✓      |           ✓           |
+| 🧰 Mod tanpa kepala        |            —            |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastruktur rel LTS   |            —            |      —      |  🆕 saluran keluaran  |
+| 🔎 API penemuan model      |            —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — menaiki kereta api ke `v3.9.0 LTS`**
+**→ [Peta Jalan](ROADMAP.md) — menuju ke `v3.9.0 LTS`**
 
 </div>
 
@@ -89,42 +89,42 @@
 
 ## 🧩 Tersedia
 
-[![versi npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Bulanan](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
+![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![Lesen: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Tarikan Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Muat Turun Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
+![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
     <td align="right"><b>🚀 Mula</b></td>
     <td align="center"><a href="#-quick-start">🚀 Mula Pantas</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Pasang</a></td>
-    <td align="center"><a href="#first-run">🆓 Sambungkan penyedia</a></td>
+    <td align="center"><a href="#first-run">🆓 Sambung penyedia</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Pelajari</b></td>
+    <td align="right"><b>💡 Belajar</b></td>
     <td align="center"><a href="#-the-promise">💥 Janji</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Mengapa OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Keistimewaannya</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Kenapa OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Apa Yang Membezakan</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Ciri</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombo</a></td>
+    <td align="right"><b>⚙️ Ciri-ciri</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Kombinasi</a></td>
     <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Penyedia</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
     <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Pemampatan</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Tempat Ia Berjalan</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Lokasi Jalankan</a></td>
     <td align="center"><a href="#-private--local-first">🔒 Peribadi</a></td>
   </tr>
   <tr>
     <td align="right"><b>👀 Lihat</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Sedang Beraksi</a></td>
-    <td align="center"><a href="#-whats-new">✨ Perkara Baharu</a></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 Dalam Aksi</a></td>
+    <td align="center"><a href="#-whats-new">✨ Apa Yang Baru</a></td>
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI Serasi</a></td>
   </tr>
   <tr>
@@ -135,7 +135,7 @@
   </tr>
   <tr>
     <td align="right"><b>📦 Projek</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tindanan Teknologi</a></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Teknologi</a></td>
     <td align="center"><a href="#-documentation">📖 Dokumentasi</a></td>
     <td align="center"><a href="#-900-contributors">👥 Penyumbang</a></td>
   </tr>
@@ -146,73 +146,73 @@
 <div align="center">
   <b>🌐 Dalam 67 bahasa</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Bahasa Inggeris (en)" title="Bahasa Inggeris (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Bahasa Portugis — Brazil (pt-BR)" title="Bahasa Portugis — Brazil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Bahasa Portugis (pt)" title="Bahasa Portugis (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Bahasa Sepanyol (es)" title="Bahasa Sepanyol (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Bahasa Perancis (fr)" title="Bahasa Perancis (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Bahasa Itali (it)" title="Bahasa Itali (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Bahasa Jerman (de)" title="Bahasa Jerman (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Bahasa Belanda (nl)" title="Bahasa Belanda (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Bahasa Rusia (ru)" title="Bahasa Rusia (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Bahasa Ukraine (uk-UA)" title="Bahasa Ukraine (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Bahasa Poland (pl)" title="Bahasa Poland (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Bahasa Czech (cs)" title="Bahasa Czech (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Bahasa Slovak (sk)" title="Bahasa Slovak (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Bahasa Romania (ro)" title="Bahasa Romania (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Bahasa Hungary (hu)" title="Bahasa Hungary (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bahasa Bulgaria (bg)" title="Bahasa Bulgaria (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Bahasa Denmark (da)" title="Bahasa Denmark (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Bahasa Finland (fi)" title="Bahasa Finland (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Bahasa Norway (no)" title="Bahasa Norway (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Bahasa Sweden (sv)" title="Bahasa Sweden (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Bahasa Cina — Ringkas (zh-CN)" title="Bahasa Cina — Ringkas (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Bahasa Cina — Tradisional (zh-TW)" title="Bahasa Cina — Tradisional (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Bahasa Jepun (ja)" title="Bahasa Jepun (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Bahasa Korea (ko)" title="Bahasa Korea (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Bahasa Thai (th)" title="Bahasa Thai (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Bahasa Vietnam (vi)" title="Bahasa Vietnam (vi)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
   <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
   <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Bahasa Filipino (phi)" title="Bahasa Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Hindi (hi)" title="Bahasa Hindi (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Gujarati (gu)" title="Bahasa Gujarati (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Marathi (mr)" title="Bahasa Marathi (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Tamil (ta)" title="Bahasa Tamil (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Telugu (te)" title="Bahasa Telugu (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bahasa Benggali (bn)" title="Bahasa Benggali (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Bahasa Urdu (ur)" title="Bahasa Urdu (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Bahasa Parsi (fa)" title="Bahasa Parsi (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Bahasa Arab (ar)" title="Bahasa Arab (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Bahasa Ibrani (he)" title="Bahasa Ibrani (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Bahasa Turki (tr)" title="Bahasa Turki (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Bahasa Azerbaijan (az)" title="Bahasa Azerbaijan (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Bahasa Swahili (sw)" title="Bahasa Swahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Bahasa Yunani (el)" title="Bahasa Yunani (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Bahasa Croatia (hr)" title="Bahasa Croatia (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Bahasa Serbia (sr)" title="Bahasa Serbia (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Bahasa Lithuania (lt)" title="Bahasa Lithuania (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Bahasa Estonia (et)" title="Bahasa Estonia (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Bahasa Latvia (lv)" title="Bahasa Latvia (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Bahasa Slovenia (sl)" title="Bahasa Slovenia (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Bahasa Malta (mt)" title="Bahasa Malta (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Bahasa Ireland (ga)" title="Bahasa Ireland (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Kannada (kn)" title="Bahasa Kannada (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Malayalam (ml)" title="Bahasa Malayalam (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Odia (or)" title="Bahasa Odia (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Bahasa Punjabi (pa)" title="Bahasa Punjabi (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Bahasa Nepal (ne)" title="Bahasa Nepal (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Bahasa Sinhala (si)" title="Bahasa Sinhala (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Bahasa Myanmar (my)" title="Bahasa Myanmar (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Bahasa Khmer (km)" title="Bahasa Khmer (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Bahasa Hausa (ha)" title="Bahasa Hausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Bahasa Yoruba (yo)" title="Bahasa Yoruba (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Bahasa Igbo (ig)" title="Bahasa Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Bahasa Amharik (am)" title="Bahasa Amharik (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Bahasa Uzbek (uz)" title="Bahasa Uzbek (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Bahasa Georgia (ka)" title="Bahasa Georgia (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Bahasa Armenia (hy)" title="Bahasa Armenia (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bahasa Bosnia (bs)" title="Bahasa Bosnia (bs)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
 </div>
 
 <br/>
@@ -222,48 +222,48 @@
 
 <a id="first-run"></a>
 
-## 🆓 Pasang, sambungkan penyedia, kemudian halakan melalui satu titik akhir
+## 🆓 Pasang, sambung pembekal, kemudian lalukan melalui satu endpoint
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Tiga langkah: pasang dan mulakan OmniRoute, sambungkan penyedia yang layak menggunakan akaun atau kunci API anda sendiri, kemudian halakan alat anda ke localhost:20128/v1 menggunakan kunci API OmniRoute dan model auto. Penghalaan bergantung pada sambungan layak yang tersedia dan had penyedia."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Tiga langkah: pasang dan mulakan OmniRoute, sambungkan pembekal yang layak dengan akaun atau kunci API anda sendiri, kemudian arahkan alat anda ke localhost:20128/v1 menggunakan kunci API OmniRoute dan model auto. Penghalaan bergantung pada sambungan yang layak tersedia dan had pembekal."/>
 
 ```bash
-# Selepas menyambungkan penyedia, salin kunci OmniRoute anda daripada Dashboard → Endpoints:
+# Selepas menyambungkan pembekal, salin kunci OmniRoute anda dari Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` memerlukan laluan yang layak. Pemasangan baharu mungkin tidak mempunyai sasaran tanpa kunci yang layak, dan penyedia tanpa kunci mungkin menolak klien pihak ketiga. Penyedia yang ditandai `tos: avoid`, termasuk Kiro, dikecualikan daripada penghalaan automatik secara lalai; penyambungan akaun tidak mengatasi tetapan tersebut. Lihat [Panduan Peringkat Percuma](docs/getting-started/FREE-TIERS-GUIDE.md) sebelum memilih penyedia.</sub>
+<sub>`auto` memerlukan laluan yang layak. Pemasangan baru mungkin tiada sasaran tanpa kunci yang layak, dan pembekal tanpa kunci mungkin menolak klien pihak ketiga. Pembekal yang ditandakan `tos: avoid`, termasuk Kiro, dikecualikan daripada penghalaan automatik secara lalai; menyambungkan akaun tidak akan mengatasi tetapan itu. Lihat [Panduan Free Tiers](docs/getting-started/FREE-TIERS-GUIDE.md) sebelum memilih pembekal.</sub>
 
-<sub>📦 Skrip mula pantas yang boleh disalin dan ditampal untuk **Python, Node.js, PHP, dan cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Skrip mula pantas salin-tampal untuk **Python, Node.js, PHP, dan cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
 <div align="center">
 
-# 💥 Janji Kami
+# 💥 Janji
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji Kami — Satu titik akhir dan 380 penyedia. Sandaran automatik mengekalkan penghalaan selagi sasaran sihat yang lain tersedia. Enam tonggak: sandaran berdaya tahan merentasi 380 penyedia · penjimatan token sehingga 95% untuk beban kerja yang layak · $0 untuk bermula dengan lebih 150 peringkat percuma dan 52 penyedia percuma selama-lamanya yang berulang/tanpa kunci · 37 penyepaduan CLI/ejen melalui satu konfigurasi · keserasian OpenAI, Claude, Gemini dan Responses API pada /v1 · kawalan produksi termasuk pemutus litar, penyamaran TLS, 110 alat MCP, A2A, memori, pagar keselamatan, penilaian dan lebih 56,000 pengisytiharan ujian statik merentasi lebih 7,800 fail ujian yang dijejaki."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 380 pembekal. Fallback automatik memastikan penghalaan diteruskan selagi ada sasaran sihat yang lain. Enam tonggak: fallback berdaya tahan merentasi 380 pembekal · penjimatan token sehingga 95% untuk beban kerja yang layak · $0 untuk bermula dengan 150+ free tiers dan 53 pembekal percuma/kekal tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · keserasian API OpenAI, Claude, Gemini dan Responses di /v1 · kawalan produksi termasuk circuit breakers, TLS stealth, MCP 110 tools, A2A, memori, guardrails, evals dan 56,000+ deklarasi ujian statik merentasi 7,800+ fail ujian yang dijejak."/>
 
 <br/>
 <br/>
 
 <div align="center">
 
-# 🤔 Mengapa OmniRoute?
+# 🤔 Kenapa OmniRoute?
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Mengapa OmniRoute — berhenti mengurus 10 papan pemuka, kunci API yang tidak berfungsi dan bil yang mengejutkan. Sepuluh masalah harian berbanding penyelesaian: kuota tamat tanpa digunakan → maksimumkan langganan; had kadar ketika menulis kod → sandaran automatik 4 peringkat (Langganan → API → Murah → Percuma); output alat menghabiskan token → pemampatan RTK + Caveman (15–95%); API mahal → penghalaan yang dioptimumkan untuk kos; setiap alat memerlukan persediaannya sendiri → satu titik akhir, satu papan pemuka; AI disekat → proksi 3 tahap + penyamaran TLS; kunci tidak berfungsi → daya tahan 3 lapisan (pemutus litar, tempoh bertenang kunci, penguncian model); pasukan berkongsi satu langganan → kumpulan kunci dengan kuota perkongsian adil; gesaan melalui awan milik pihak lain → mengutamakan setempat dengan kunci disulitkan AES-256-GCM; tiada keterlihatan perbelanjaan → analitik langsung (penggunaan, kuota, penjimatan, kependaman p95)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Kenapa OmniRoute — hentikan pengurusan 10 papan pemuka, kunci API mati dan bil mengejut. Sepuluh masalah harian vs penyelesaian: kuota tamat tanpa digunakan → maksimumkan langganan; had kadar semasa menulis kod → fallback automatik 4 peringkat (Langganan → API → Murah → Percuma); output alat membazir token → RTK + pemampatan Caveman (15–95%); API mahal → penghalaan dioptimumkan kos; setiap alat dengan tetapan sendiri → satu endpoint, satu papan pemuka; AI disekat → proksi 3 peringkat + TLS stealth; kunci mati → ketahanan 3 lapisan (circuit breakers, penyejukan kunci, penguncian model); pasukan berkongsi satu langganan → kolam kunci dengan kuota adil; prompt melalui awan orang lain → keutamaan setempat dengan kunci disulitkan AES-256-GCM; tiada keterlihatan perbelanjaan → analitik langsung (penggunaan, kuota, penjimatan, latensi p95)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Aliran permintaan OmniRoute: IDE atau CLI anda (Claude Code, Cursor, Cline…) memanggil satu titik akhir setempat (http://localhost:20128/v1); Penghala Pintar OmniRoute (pemampatan RTK + Caveman, 20 strategi penghalaan, pemutus litar, penyamaran TLS, MCP, A2A, pagar keselamatan) boleh beralih kepada sandaran merentasi 4 peringkat penyedia selagi sasaran sihat yang layak masih tersedia — Peringkat 1 Langganan, Peringkat 2 Kunci API, Peringkat 3 Murah dan Peringkat 4 Percuma."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Aliran permintaan OmniRoute: IDE atau CLI anda (Claude Code, Cursor, Cline…) memanggil satu endpoint setempat (http://localhost:20128/v1); OmniRoute Smart Router (RTK + pemampatan Caveman, 20 strategi penghalaan, circuit breakers, TLS stealth, MCP, A2A, guardrails) boleh fallback merentasi 4 peringkat pembekal selagi ada sasaran sihat yang layak — Peringkat 1 Langganan, Peringkat 2 Kunci API, Peringkat 3 Murah dan Peringkat 4 Percuma."/>
 
 </div>
 
@@ -504,13 +504,13 @@ Kesemua **20** strategi — campur & padankan bagi setiap langkah kombo:
 
 <div align="center">
 
-## 🏆 Keistimewaan OmniRoute
+## 🏆 Apa yang Membezakan OmniRoute
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Keistimewaan OmniRoute — gambaran ciri bertarikh berbanding 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentas 13 keupayaan. OmniRoute: 380 penyedia, 150+ peringkat percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12 enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 penempatan UI i18n. OmniRoute berlesen MIT dan boleh dihoskan sendiri. Keupayaan serta bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri bertarikh vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 380 penyedia, lebih 150 pelan percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
 
-<sub>📊 Metodologi penuh &amp; butiran setiap ciri berbanding 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 Metodologi penuh &amp; perincian setiap ciri berbanding 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -578,92 +578,93 @@ Radar adalah secara ikut serta dan GET sahaja. Klien OmniRoute tidak memuat naik
 
 </div>
 
-> Sorotan terkini daripada **v3.8.20 → v3.8.53**. Sejarah penuh dalam [`CHANGELOG.md`](CHANGELOG.md).
+> Sorotan terkini dari **v3.8.20 → v3.8.53**. Sejarah penuh di [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ Penghalaan `quota-weighted`** — strategi kombo ke-20 melangkau akaun yang telah habis, kemudian memilih antara yang lain mengikut perkadaran baki kuota ÷ beban sedang berjalan, sambil mengekalkan perbualan sedia ada yang dipin. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Mod headless** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) menjalankan hanya enjin proksi `/v1/*`, dengan papan pemuka dan subsistem khusus papan pemuka dimatikan. → [Mod Headless](docs/guides/HEADLESS.md)
-- **🔎 Penemuan model** — `/v1/models` menapis mengikut keupayaan, konteks, jenis dan teks, dan `POST /v1/models/query` mengembalikan senarai pendek deterministik dengan keterlihatan per-kunci yang sama. → [Rujukan API](docs/reference/API_REFERENCE.md)
-- **🔑 Kawalan penghalaan per-kunci** — pin kunci API kepada satu model atau kombo dengan `forcedModel`, dan tambah atau buang model serta kombo sesuatu kunci secara atomik (`/api/keys/{id}/access`). → [Rujukan API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Kawalan PII yang lebih halus** — pemilihan mengikut jenis, sehingga 20 corak penyamaran tersuai yang disahkan dan pembilang pengesanan mengikut jenis; penyamaran itu sendiri kekal pilih masuk. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 bahasa** — papan pemuka, cermin dokumen dan CLI, dengan `npm run i18n:add-locale` menambah bahasa di semua tempat dalam satu arahan. → [Panduan i18n](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — delegasi A2A masuk ke armada ejen anda, kemahiran Conductor pada Kad Ejen, dan panel papan pemuka dengan sembang suara tekan-untuk-cakap Faro. → [Pelayan A2A](docs/frameworks/A2A-SERVER.md)
-- **🛂 Kemasukan adaptif & perlindungan beban lampau** — permintaan sembang berat dimasukkan ke dalam baris gilir dan bukannya menerima 503, dengan pajakan bergulir RPM atomik bagi setiap sambungan. → [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Susunan `/v1/models` kanonik** — satu blok bersebelahan yang dikelompokkan mengikut penyedia bagi setiap penyedia (kombo dipin dahulu), stabil merentas setiap sumber katalog. → [Rujukan API](docs/reference/API_REFERENCE.md)
-- **🗜️ Pengukuhan pemampatan** — pengawal inflasi yang dihidupkan secara lalai, pek Caveman untuk DE / FR / JA + Cina (wényán), penapis RTK untuk Gradle & .NET. → [Pemampatan](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Kos kadar rata yang jujur** — penyedia langganan / pelan pengekodan dipaparkan sebagai **$0** dalam analitik kos; belanjawan, kuota & penghalaan terus menganggar. → [Rujukan API](docs/reference/API_REFERENCE.md)
-- **⚖️ Penghalaan Quota-Share** — bahagikan kuota akaun kongsi secara adil merentas kunci terkumpul, bersifat memelihara kerja supaya hirisan terbiar dipinjamkan. → [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Persediaan CLI/ejen satu arahan** — 15 arahan `setup-*` berdaftar; `omniroute run` melancarkan 7 CLI (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` menyokong 11 sasaran dengan pemilih penyedia+model interaktif dan kegemaran mengikut konteks. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Mod jauh** — kendalikan OmniRoute jauh dengan token berskop (`connect` / `contexts` / `tokens`) + pembantu OAuth `antigravity` untuk pemasangan VPS. → [Mod Jauh](docs/guides/REMOTE-MODE.md)
-- **🧭 Penghalaan auto lebih pintar** — kombo `auto/<category>:<tier>`, **Fusion** (panel model + hakim), penghalaan sedar tugas, pengatasan model / mod / belanjawan USD mengikut permintaan. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Pemampatan boleh pasang** — 12 enjin boleh kompos + Compression Studios: LLMLingua-2, Ultra dua peringkat, omniglyph, get kesetiaan setiap langkah, GCF v3.2, editor susun semula seret. → [Pemampatan](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Nyahsulit MITM telus (TPROXY)** — tangkap CLI yang mengabaikan pemboleh ubah persekitaran proksi, dengan CA per-SNI + pemasang stor kepercayaan. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Telemetri kos di merata tempat** — pengepala kos/penggunaan `X-OmniRoute-*` pada setiap titik akhir, pengepala penjimatan cache-HIT, kuota perbelanjaan USD mengikut kunci. → [Rujukan API](docs/reference/API_REFERENCE.md)
-- **🧠 Memori yang anda kawal** — dimatikan secara lalai, pengkuantuman vektor int8 pilih masuk + pereputan bertaip, `x-omniroute-no-memory` mengikut permintaan. → [Memori](docs/frameworks/MEMORY.md)
-- **🛡️ Keselamatan** — pengawal suntikan arahan pada setiap laluan LLM (suite pasukan merah), pagar keselamatan penyamaran kelayakan pilih masuk (menyunting kunci API/rahsia yang bocor dalam kedua-dua arah), carian web DuckDuckGo percuma sebagai pilihan terakhir, dan pintu log masuk OIDC pilihan untuk papan pemuka (log masuk kata laluan sentiasa kekal tersedia). → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ Titik akhir baharu** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (gaya Whisper) melengkapkan permukaan media. → [Rujukan API](docs/reference/API_REFERENCE.md)
-- **🎨 Penjanaan imej / video / audio** — satu API untuk media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, dan penyedia pertuturan seperti ElevenLabs. → [Rujukan API](docs/reference/API_REFERENCE.md)
-- **🌍 Penggelaran & operasi** — `basePath` proksi songsang, pengesanan automatik bahasa pelayar, penjejakan peranti mengikut kunci, kepercayaan MITM tanpa root, penyetempatan zh-TW. → [Persekitaran](docs/reference/ENVIRONMENT.md)
-- **🤝 Lebih banyak penyedia & ejen** — ejen awan (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk pelayar + OAuth, kad kelas pertama Ollama, Claude Opus 5 & Sonnet 5, perkongsian rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan **katalog 380 penyedia** yang disegarkan. → [Penyedia](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Ketelusan penghalaan** — setiap respons membawa pengepala `X-OmniRoute-Decision` yang menamakan strategi/penyedia/latensi yang melayaninya, strategi kombo `cache-optimized` baharu + faktor `cacheAffinity` Auto-Combo menghalakan permintaan berulang kembali ke sambungan yang memegang awalan cache, dan titik akhir baca sahaja `/v1/auto-combo/{channel}/candidates` mendedahkan kumpulan calon langsung saluran `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Prestasi & infrastruktur tempatan** — Redis tempatan satu klik, penyebar relay Cloudflare Workers / Deno Deploy, Bifrost & Mux sebagai perkhidmatan terbenam yang diselia. → [Perkhidmatan Terbenam](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Turut disertakan** — kerangka pemalam + marketplace, kerangka kemahiran Omni/Agent/GitHub, integrasi vault Obsidian (22 alat MCP), API Batch & Files serasi OpenAI, cache respons semantik, gamifikasi dengan papan pendahulu, penemuan ejen ACP (15 ejen terbina dalam), eksport log berjadual ke BigQuery, `auto/chaos` fan-out berbilang model selari, jambatan bot Telegram, pengurus versi dalam aplikasi dan kedudukan penyedia percuma LMArena-ELO. → [Dokumentasi](docs/README.md)
+- **⚖️ Penghalaan `quota-weighted`** — strategi kombo ke-20 melangkau akaun yang telah habis kuota, kemudian memilih antara baki akaun mengikut nisbah kuota yang tinggal ÷ beban semasa, sambil mengekalkan perbualan sedia ada. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 Mod Headless** — `omniroute serve --headless` (atau `OMNIROUTE_HEADLESS=1`) hanya menjalankan enjin proksi `/v1/*`, dengan papan pemuka dan subsistem khusus papan pemuka dimatikan. → [Mod Headless](docs/guides/HEADLESS.md)
+- **🔎 Penemuan model** — `/v1/models` menapis mengikut keupayaan, konteks, jenis dan teks, dan `POST /v1/models/query` memulangkan senarai pendek deterministik dengan keterlihatan per-kunci yang sama. → [Rujukan API](docs/reference/API_REFERENCE.md)
+- **🔑 Kawalan penghalaan per-kunci** — pin satu kunci API kepada satu model atau kombo dengan `forcedModel`, dan tambah atau buang model dan kombo kunci secara atomik (`/api/keys/{id}/access`). → [Rujukan API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Kawalan PII lebih terperinci** — pemilihan mengikut jenis, sehingga 20 corak penyalutan khusus yang disahkan dan kaunter pengesanan mengikut jenis; penyalutan kekal pilihan. → [Guardrails](docs/security/GUARDRAILS.md)
+- **🌍 67 bahasa** — papan pemuka, cermin dokumentasi dan CLI, dengan `npm run i18n:add-locale` menambah bahasa di semua tempat dengan satu arahan. → [Panduan i18n](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — delegasi A2A masuk ke armada ejen anda, kemahiran Conductor pada Kad Ejen, dan panel papan pemuka dengan sembang suara Faro push-to-talk. → [A2A Server](docs/frameworks/A2A-SERVER.md)
+- **🛂 Kemasukan adaptif & perlindungan beban berlebihan** — permintaan sembang berat beratur daripada menerima 503, dengan pajakan RPM bergolek secara atomik bagi setiap sambungan. → [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Susunan `/v1/models` kanonik** — satu blok berterusan dikumpulkan mengikut penyedia bagi setiap penyedia (kombo dipin dahulu), stabil merentas setiap sumber katalog. → [Rujukan API](docs/reference/API_REFERENCE.md)
+- **🗜️ Pengukuhan pemampatan** — perlindungan inflasi diaktifkan secara lalai, Caveman packs untuk DE / FR / JA + Cina (wényán), penapis RTK untuk Gradle & .NET. → [Pemampatan](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Kos kadar rata yang jujur** — penyedia langganan / pelan pengekodan memaparkan **$0** dalam analitik kos; bajet, kuota & penghalaan terus menganggarkan. → [Rujukan API](docs/reference/API_REFERENCE.md)
+- **⚖️ Penghalaan Quota-Share** — bahagikan kuota akaun bersama secara adil merentas kunci terkumpul, kerja dipinjamkan jika bahagian tidak digunakan. → [Panduan Ketahanan](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 Persediaan CLI/ejen satu arahan** — 15 arahan `setup-*` didaftarkan; `omniroute run` melancarkan 7 CLI (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` menyokong 11 sasaran dengan pemilih penyedia+model interaktif dan kegemaran mengikut konteks. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Mod Jauh** — kendalikan OmniRoute jauh dengan token skop (`connect` / `contexts` / `tokens`) + pembantu OAuth `antigravity` untuk pemasangan VPS. → [Mod Jauh](docs/guides/REMOTE-MODE.md)
+- **🧭 Penghalaan automatik lebih bijak** — kombo `auto/<category>:<tier>`, **Fusion** (panel model + hakim), penghalaan peka tugas, penggantian model / mod / bajet USD mengikut permintaan. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Pemampatan boleh dipasang** — 12 enjin komposisi + Compression Studios: LLMLingua-2, Ultra dua peringkat, omniglyph, pintu kesetiaan per-langkah, GCF v3.2, editor seret-atur semula. → [Pemampatan](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Penyahsulitan MITM telus (TPROXY)** — tangkap CLI yang mengabaikan pembolehubah persekitaran proksi, dengan CA per-SNI + pemasang stor kepercayaan. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Telemetri kos di mana-mana** — header kos/penggunaan `X-OmniRoute-*` pada setiap endpoint, header penjimatan cache-HIT, kuota perbelanjaan USD per-kunci. → [Rujukan API](docs/reference/API_REFERENCE.md)
+- **🧠 Memori yang anda kawal** — dimatikan secara lalai, kuantisasi vektor int8 pilihan + pelunturan jenis, `x-omniroute-no-memory` mengikut permintaan. → [Memori](docs/frameworks/MEMORY.md)
+- **🛡️ Keselamatan** — perlindungan suntikan prompt pada setiap laluan LLM (suit red-team), guardrail penyalutan kelayakan pilihan (menyembunyikan kunci API/rahsia yang bocor di kedua-dua arah), carian web DuckDuckGo percuma sebagai pilihan terakhir, dan pintu masuk log masuk OIDC pilihan untuk papan pemuka (log masuk kata laluan sentiasa tersedia). → [Guardrails](docs/security/GUARDRAILS.md)
+- **🖼️ Endpoint baharu** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (gaya Whisper) melengkapkan permukaan media. → [Rujukan API](docs/reference/API_REFERENCE.md)
+- **🎨 Penjanaan imej / video / audio** — satu API untuk media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, dan penyedia suara seperti ElevenLabs. → [Rujukan API](docs/reference/API_REFERENCE.md)
+- **🌍 Penyebaran & operasi** — `basePath` proksi songsang, pengesanan bahasa pelayar automatik, penjejakan peranti per-kunci, MITM root-less trust, setempat zh-TW. → [Persekitaran](docs/reference/ENVIRONMENT.md)
+- **🤝 Lebih banyak penyedia & ejen** — ejen awan (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk pelayar + OAuth, kad Ollama kelas pertama, Claude Opus 5 & Sonnet 5, kerjasama rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan katalog **380 penyedia** yang diperbaharui. → [Penyedia](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Ketelusan penghalaan** — setiap respons membawa header `X-OmniRoute-Decision` yang menamakan strategi/penyedia/latensi yang melayannya, strategi kombo `cache-optimized` baharu + faktor Auto-Combo `cacheAffinity` menghala semula permintaan berulang ke sambungan yang memegang awalan cache, dan endpoint baca sahaja `/v1/auto-combo/{channel}/candidates` mendedahkan kolam calon langsung saluran `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ Prestasi & infrastruktur tempatan** — Redis tempatan satu klik, penyebar relay Cloudflare Workers / Deno Deploy, Bifrost & Mux sebagai perkhidmatan terbenam yang diawasi. → [Perkhidmatan Terbenam](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 Juga disertakan** — rangka kerja plugin + pasaran, rangka kerja kemahiran Omni/Agent/GitHub, integrasi peti simpan Obsidian (22 alat MCP), API Batch & Files serasi OpenAI, cache respons semantik, gamifikasi dengan papan pendahulu, penemuan ejen ACP (15 ejen terbina dalam), eksport log berjadual ke BigQuery, `auto/chaos` fan-out multi-model selari, jambatan bot Telegram, pengurus versi dalam aplikasi dan penarafan penyedia percuma LMArena-ELO. → [Dokumentasi](docs/README.md)
 
 <br/>
 
 <div align="center">
 
-## 🤖 Ejen CLIs & Pengekodan yang serasi
+## 🤖 CLI & Ejen Pengekodan Serasi
 
-> Satu konfigurasi — `http://localhost:20128/v1` — dan** setiap** AI IDE atau CLI dijalankan pada model percuma & kos rendah.
+> Satu konfigurasi — `http://localhost:20128/v1` — dan **setiap** IDE AI atau CLI berjalan pada model percuma & kos rendah.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Kod </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Kod Kilo </b></sub><br/><sub> </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Kod Zoo </b></sub><br/><sub> </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Teruskan </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Kilang Droid </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Bau </b></sub><br/><sub> </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Bina </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Hermes Ejen </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Angsa </b></sub><br/><sub> </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Jurubahasa Terbuka </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ juga berfungsi dengan </b> · Dek Ejen · Kiro · Kod Perintah · Antigravity · Windsurf · AMP · <b> sebarang alat yang serasi dengan OpenAI </b>
+<b>＋ juga berfungsi dengan</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>mana-mana alat serasi OpenAI</b>
 </div>
 
-<sub>📖 Persediaan setiap alat untuk semua 38 alatan (27 Ejen + 11 CLI Kod CLI ) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Persediaan setiap alat untuk semua 39 alat (28 CLI Code + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Lancarkan mana-mana CLI yang disokong melalui OmniRoute dalam satu arahan** — tiada fail konfigurasi ditulis, bukti kelayakan disuntik setiap proses, Qwen/Gemini mendapat rumah terpencil yang dibuang:
+**Lancarkan mana-mana CLI yang disokong melalui OmniRoute dengan satu arahan** — tiada fail konfigurasi ditulis,
+kelayakan disuntik setiap proses, Qwen/Gemini mendapat direktori rumah terasing sementara:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -674,25 +675,27 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Or pick provider+model interactively and write the tool's own config:
-omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Atau pilih penyedia+model secara interaktif dan tulis konfigurasi alat itu sendiri:
+omniroute configure codex          # juga: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Setiap arahan menghormati konteks jauh aktif (`omniroute connect <host>`), `--dry-run` pratonton env/args tepat tanpa melaksanakan dan `--api-key-env NAME` menyimpan rahsia daripada sejarah shell anda. → [CLI Integrasi](docs/guides/CLI-INTEGRATIONS.md)
+Setiap arahan menghormati konteks jauh aktif (`omniroute connect <host>`), `--dry-run`
+memaparkan pratonton persekitaran/argumen tepat tanpa melaksanakan, dan `--api-key-env NAME` memastikan rahsia tidak
+masuk dalam sejarah shell anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 380 Penyedia AI — 153 Ditandai Percuma dalam Katalog
+## 🌐 380 Penyedia AI — 153 Ditanda Percuma dalam Katalog
 
 </div>
 
-> **380 penyedia berdaftar** merentas koleksi kanonik sembang, media, carian, setempat, ejen awan dan sistem, termasuk **153 yang membawa metadata penemuan `hasFree: true`**. Daftar model sembang merangkumi **239 penyedia / 3,059 pasangan penyedia-model yang berbeza / 1,475 ID model mentah**; katalog bajet percuma yang berasingan mempunyai **471 baris bagi setiap model**, **34 kumpulan berulang** dan **52 penyedia percuma selamanya yang berulang/tanpa kunci**. Penyebut ini sememangnya berbeza mengikut reka bentuk; takrif dan pengiraan selepas penyahduplikasian kumpulan tersedia dalam [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
+> **380 penyedia berdaftar** merangkumi koleksi chat, media, carian, tempatan, ejen awan dan sistem, termasuk **153 yang membawa metadata penemuan `hasFree: true`**. Daftar model chat meliputi **239 penyedia / 3,059 pasangan penyedia-model yang berbeza / 1,475 ID model mentah**; katalog bajet percuma berasingan mempunyai **471 baris per-model**, **34 kolam berulang** dan **53 penyedia percuma selama-lamanya berulang/tanpa kunci**. Ini adalah penyebut yang berbeza secara reka bentuk; definisi dan pengiraan tanpa pendua kolam boleh didapati di [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tahap Percuma](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Setiap makmal utama — melalui satu titik akhir
+### 🏢 Setiap makmal utama — melalui satu endpoint
 
 <table>
   <tr>
@@ -721,32 +724,32 @@ Setiap arahan menghormati konteks jauh aktif (`omniroute connect <host>`), `--dr
   </tr>
 </table>
 
-<sub>…dan 350+ lagi — setiap ikon dimuatkan secara langsung daripada katalog penyedia papan pemuka. 📖 [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…dan 350+ lagi — setiap ikon dimuat secara langsung dari katalog penyedia di papan pemuka. 📖 [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 Percuma Selamanya — $0, tanpa kad
+### 🆓 Percuma Selamanya — $0, tiada kad
 
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Tiada had token</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Penghala automatik, Tencent Hy3<br/>Percuma selama-lamanya</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Percuma selama-lamanya</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Peringkat percuma</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Percuma selama-lamanya</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Percuma selama-lamanya</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Auto-router, Tencent Hy3<br/>Percuma selamanya</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Percuma selamanya</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Tier percuma</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Percuma selamanya</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Percuma selamanya</sub></td>
   </tr>
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>PERCUMA tanpa had</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Tidak memerlukan kunci</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Tiada kunci diperlukan</sub></td>
     <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ model<br/>10K neuron/hari</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM percuma</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Kredit $5 sekali sahaja; kad diperlukan</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>model :free<br/>+$10 → RPM lebih tinggi</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Kredit $5 sekali; kad diperlukan</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:model percuma<br/>+$10 → RPM lebih tinggi</sub></td>
   </tr>
 </table>
 
-📖 Katalog penuh yang boleh dibaca mesin → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 Katalog boleh dibaca mesin penuh → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -1278,28 +1281,28 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
 <br/>
 <div align="center">
 
-## 🛠️ Timbunan Teknologi
+## 🛠️ Stak Teknologi
 
 </div>
 
 <table>
   <tr><th align="left">Lapisan</th><th align="left">Teknologi</th></tr>
-  <tr><td nowrap><b>Masa Jalan</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentas <code>src/</code> dan <code>open-sse/</code> (sifar <code>any</code> dalam teras sejak v2.0)</td></tr>
-  <tr><td nowrap><b>Rangka Kerja</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Pangkalan Data</b></td><td>better-sqlite3 (SQLite, penjejakan jurnal WAL) + LowDB (JSON legasi) — 147 modul domain, 219 migrasi</td></tr>
-  <tr><td nowrap><b>Memori</b></td><td>SQLite FTS5 teks penuh + pembenaman vektor terkuantisasi int8, pereputan bertaip</td></tr>
+  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (tiada <code>any</code> dalam teras sejak v2.0)</td></tr>
+  <tr><td nowrap><b>Kerangka</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Pangkalan Data</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 modul domain, 219 migrasi</td></tr>
+  <tr><td nowrap><b>Memori</b></td><td>SQLite FTS5 carian teks penuh + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — pengesahan I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Penstriman</b></td><td>Server-Sent Events (SSE) + jambatan WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Pemampatan</b></td><td>Saluran paip 12-enjin — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Pengesahan &amp; keselamatan</b></td><td>OAuth 2.0 (PKCE) + JWT + Kunci API + pengesahan berskop MCP · AES-256-GCM semasa rehat · DOMPurify</td></tr>
-  <tr><td nowrap><b>Siluman</b></td><td>wreq-js — penyiruan cap jari TLS JA3 / JA4, proksi 3 peringkat</td></tr>
-  <tr><td nowrap><b>Ketahanan</b></td><td>Pemutus litar, backoff eksponen, anti-thundering-herd, auto-combo penyembuhan kendiri</td></tr>
-  <tr><td nowrap><b>Pengelogan</b></td><td>pino — log JSON berstruktur dengan konteks permintaan</td></tr>
-  <tr><td nowrap><b>Pengujian</b></td><td>Pelari ujian Node.js + Vitest — <b>56,000+ deklarasi ujian statik</b> merentas 7,800+ fail ujian yang dijejaki (unit, integrasi, E2E, keselamatan, ekosistem)</td></tr>
+  <tr><td nowrap><b>Pemampatan</b></td><td>Saluran 12-enjin — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Auth &amp; keselamatan</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM pada rehat · DOMPurify</td></tr>
+  <tr><td nowrap><b>Penyamaran</b></td><td>wreq-js — penyamaran cap jari TLS JA3 / JA4, proksi 3 peringkat</td></tr>
+  <tr><td nowrap><b>Daya Tahan</b></td><td>Pemutus litar, backoff eksponen, anti-thundering-herd, penyembuhan kendiri auto-combo</td></tr>
+  <tr><td nowrap><b>Pembalakan</b></td><td>pino — log JSON berstruktur dengan konteks permintaan</td></tr>
+  <tr><td nowrap><b>Ujian</b></td><td>Node.js test runner + Vitest — <b>56,000+ deklarasi ujian statik</b> di seluruh 7,800+ fail ujian yang dijejak (unit, integrasi, E2E, keselamatan, ekosistem)</td></tr>
   <tr><td nowrap><b>Platform</b></td><td>Desktop (Electron) · Android (Termux) · PWA (mana-mana pelayar)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — penerbitan npm automatik + Docker Hub semasa keluaran</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm publish + Docker Hub semasa pelepasan</td></tr>
   <tr><td nowrap><b>Pautan</b></td><td><a href="https://omniroute.online">Laman Web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1315,69 +1318,69 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
 
 <table>
   <tr><th align="left">Dokumen</th><th align="left">Penerangan</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Panduan Pengguna</a></b></td><td>Penyedia, gabungan, penyepaduan CLI, penggunaan</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Panduan Persediaan</a></b></td><td>Kaedah pemasangan lengkap, konfigurasi alat CLI, persediaan protokol, penalaan tamat masa</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Panduan Alat CLI</a></b></td><td>Persediaan khusus bagi setiap alat untuk Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Mod Jauh</a></b></td><td>Kawal OmniRoute jauh (VPS) daripada CLI komputer riba anda melalui token akses berskop</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Konfigurasi Claude Code</a></b></td><td>Halakan Claude Code ke OmniRoute (setempat/jauh) dengan <code>launch</code> + profil bagi setiap model</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Mula Pantas</a></b></td><td>Pemasangan 3 langkah → sambungkan → konfigurasikan</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Panduan Pengguna</a></b></td><td>Penyedia, kombo, integrasi CLI, penyebaran</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Panduan Persediaan</a></b></td><td>Kaedah pemasangan penuh, konfigurasi alat CLI, persediaan protokol, pelarasan masa tamat</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Panduan Alat CLI</a></b></td><td>Penyediaan setiap alat untuk Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Mod Jauh</a></b></td><td>Kawal OmniRoute jauh (VPS) dari CLI komputer riba anda melalui token akses skop</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Konfigurasi Claude Code</a></b></td><td>Arahkan Claude Code ke OmniRoute (tempatan/jauh) dengan <code>launch</code> + profil setiap model</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Permulaan Pantas</a></b></td><td>Pemasangan 3 langkah → sambung → konfigurasi</td></tr>
 </table>
 
-### 🔧 Operasi & Penggunaan
+### 🔧 Operasi & Penyebaran
 
 <table>
   <tr><th align="left">Dokumen</th><th align="left">Penerangan</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Panduan Docker</a></b></td><td>Docker run, profil Compose, Caddy HTTPS, terowong, tag imej</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Panduan Podman</a></b></td><td>Penyepaduan Quadlet systemd, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Penggunaan VM</a></b></td><td>Panduan lengkap: persediaan VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Penggunaan Fly.io</a></b></td><td>Gunakan pada Fly.io dengan storan berterusan</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Panduan Docker</a></b></td><td>Jalankan Docker, profil Compose, Caddy HTTPS, terowong, tag imej</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Panduan Podman</a></b></td><td>Integrasi Quadlet systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Penyebaran VM</a></b></td><td>Panduan lengkap: persediaan VM + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Penyebaran Fly.io</a></b></td><td>Sebar ke Fly.io dengan storan berterusan</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Panduan Termux</a></b></td><td>Jalankan OmniRoute pada Android melalui Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Panduan PWA</a></b></td><td>Pemasangan Aplikasi Web Progresif, cache, seni bina</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Panduan Nyahpasang</a></b></td><td>Penyingkiran bersih untuk semua kaedah pemasangan</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Konfigurasi Persekitaran</a></b></td><td>Pemboleh ubah dan rujukan <code>.env</code> yang lengkap</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Panduan PWA</a></b></td><td>Pemasangan Progressive Web App, caching, seni bina</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Panduan Nyahpasang</a></b></td><td>Pembuangan bersih untuk semua kaedah pemasangan</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Konfigurasi Persekitaran</a></b></td><td>Senarai lengkap pembolehubah <code>.env</code> dan rujukan</td></tr>
 </table>
 
 ### 🧠 Ciri & Seni Bina
 
 <table>
   <tr><th align="left">Dokumen</th><th align="left">Penerangan</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Seni Bina</a></b></td><td>Seni bina sistem, aliran data dan komponen dalaman</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Panduan Pemampatan</a></b></td><td>Talian paip 7 pilihan: dimatikan / ringan / standard / agresif / ultra / RTK / bertindan</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Seni Bina</a></b></td><td>Seni bina sistem, aliran data, dan dalaman</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Panduan Pemampatan</a></b></td><td>Saluran 7 pilihan: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Pemampatan RTK</a></b></td><td>Pemampatan output perintah, penapis, kepercayaan, pengesahan, pemulihan output mentah</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Enjin Pemampatan</a></b></td><td>Caveman, RTK, talian paip bertindan, antara muka papan pemuka/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Format Peraturan Pemampatan</a></b></td><td>Skema pek peraturan JSON untuk penapis Caveman dan RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pek Bahasa Pemampatan</a></b></td><td>Pengesanan bahasa dan penghasilan pek peraturan Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Panduan Daya Tahan</a></b></td><td>Pemutus litar, tempoh bertenang, baris gilir, pencegahan kawanan serentak, penyamaran TLS</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Enjin Auto-Combo</a></b></td><td>Penskoran 16 faktor, pek mod, pemulihan kendiri</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Panduan Proksi</a></b></td><td>Sistem proksi 3 peringkat, pasaran 1proxy, CRUD pendaftaran</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Peringkat Percuma</a></b></td><td>Direktori disatukan: 34 kumpulan berulang yang didokumentasikan / 484 entri peringkat percuma yang dikatalogkan</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeri Ciri</a></b></td><td>Jelajah visual papan pemuka dengan tangkapan skrin</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasi Asas Kod</a></b></td><td>Panduan langkah demi langkah asas kod yang mesra pemula</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Enjin Pemampatan</a></b></td><td>Caveman, RTK, saluran bertindan, permukaan dashboard/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Format Peraturan Pemampatan</a></b></td><td>Skema rule-pack JSON untuk penapis Caveman dan RTK</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pakej Bahasa Pemampatan</a></b></td><td>Pengesanan bahasa dan penulisan rule-pack Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Panduan Ketahanan</a></b></td><td>Pemutus litar, cooldown, barisan, anti-thundering herd, spoofing TLS</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Enjin Auto-Combo</a></b></td><td>Penilaian 16 faktor, pek mod, penyembuhan sendiri</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Panduan Proksi</a></b></td><td>Sistem proksi 3 peringkat, marketplace 1proxy, CRUD daftar</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tier Percuma</a></b></td><td>Direktori terkonsolidasi: 34 kolam berulang didokumen / 485 entri tier percuma dikatalogkan</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeri Ciri</a></b></td><td>Lawatan papan pemuka visual dengan tangkapan skrin</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasi Codebase</a></b></td><td>Penerangan codebase mesra pemula</td></tr>
 </table>
 
 ### 🤖 Protokol & API
 
 <table>
   <tr><th align="left">Dokumen</th><th align="left">Penerangan</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Rujukan API</a></b></td><td>Semua titik akhir berserta contoh</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Rujukan API</a></b></td><td>Semua endpoint dengan contoh</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">Spesifikasi OpenAPI</a></b></td><td>Spesifikasi OpenAPI 3.0</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Pelayan MCP</a></b></td><td>110 alat MCP, konfigurasi IDE, klien Python/TS/Go</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Panduan Pelayan MCP</a></b></td><td>Pemasangan MCP, pengangkutan dan rujukan alat</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Pelayan A2A</a></b></td><td>Protokol JSON-RPC 2.0, kemahiran, penstriman, pengurusan tugas</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Panduan Pelayan A2A</a></b></td><td>Kad ejen A2A, tugas, kemahiran dan penstriman</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Panduan Pelayan MCP</a></b></td><td>Pemasangan MCP, pengangkutan, dan rujukan alat</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Pelayan A2A</a></b></td><td>Protokol JSON-RPC 2.0, kemahiran, penstriman, pengurusan tugasan</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Panduan Pelayan A2A</a></b></td><td>Kad ejen A2A, tugasan, kemahiran, dan penstriman</td></tr>
 </table>
 
 ### 📋 Projek & Kualiti
 
 <table>
   <tr><th align="left">Dokumen</th><th align="left">Penerangan</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Menyumbang</a></b></td><td>Persediaan dan garis panduan pembangunan</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Model Percabangan & Keluaran</a></b></td><td>Sasaran PR (<code>release/*</code>), serta maksud <code>main</code> dan tag</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Log Perubahan</a></b></td><td>Sejarah keluaran penuh bagi setiap versi</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Dasar Keselamatan</a></b></td><td>Pelaporan kerentanan dan amalan keselamatan</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Menyumbang</a></b></td><td>Penyediaan pembangunan dan garis panduan</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Model Cawangan & Pelepasan</a></b></td><td>Ke mana PR disasarkan (<code>release/*</code>), maksud <code>main</code> dan tag</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Log Perubahan</a></b></td><td>Sejarah pelepasan penuh mengikut versi</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Dasar Keselamatan</a></b></td><td>Laporan kerentanan dan amalan keselamatan</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Panduan i18n</a></b></td><td>Sokongan 67 bahasa, aliran kerja terjemahan, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Senarai Semak Keluaran</a></b></td><td>Langkah pengesahan prakeluaran</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Pelan Liputan</a></b></td><td>Strategi liputan ujian untuk lebih 56,000 pengisytiharan ujian statik merentas lebih 7,800 fail ujian yang dijejaki</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Senarai Semak Pelepasan</a></b></td><td>Langkah pengesahan sebelum pelepasan</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Pelan Liputan</a></b></td><td>Strategi liputan ujian untuk 56,000+ deklarasi ujian statik merentasi 7,800+ fail ujian yang dijejak</td></tr>
 </table>
 
 <br/>
@@ -1386,9 +1389,9 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
 
 # ⭐ Penyumbang Teratas
 
-> OmniRoute dibentuk oleh komuniti sumber terbuka yang bersemangat. Individu-individu ini telah memberikan sumbangan luar biasa yang memberi kesan langsung terhadap kualiti, kestabilan dan jangkauan projek. **Terima kasih.**
+> OmniRoute dibentuk oleh komuniti sumber terbuka yang bersemangat. Individu-individu ini telah membuat sumbangan luar biasa yang memberi impak secara langsung kepada kualiti, kestabilan, dan jangkauan projek ini. **Terima kasih.**
 
-### Penyumbang luar mengikut permintaan tarik yang digabungkan
+### Penyumbang luar mengikut permintaan tarik yang telah digabungkan
 
 <table>
   <tr><th align="center">Kedudukan</th><th align="left">Penyumbang</th><th align="center">PR Digabungkan</th><th align="right">~Baris diubah</th></tr>
@@ -1414,9 +1417,9 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Banci dilakukan pada 2026-10-18 15:09:09 UTC menggunakan hujung langsung <code>release/v3.8.52</code> <code>656f01cb43</code>. Banci GitHub GraphQL berhalaman mengandungi 9,191 PR yang digabungkan: 3,834 oleh pemilik repositori, 229 oleh Dependabot, 6 oleh bot/aplikasi lain dan <b>5,122 PR luar daripada 835 penyumbang berbeza</b>. “Baris diubah” ialah penambahan + pemadaman GitHub dan merangkumi fail yang dijana, fail kunci, katalog, terjemahan dan dokumentasi; ia mengukur kekerapan perubahan, bukan LOC yang dikarang. Sebanyak 49 PR melaporkan perbezaan GitHub melebihi 500,000 baris (contohnya #13399, satu penambahan penyedia, menyenaraikan 2,347 fail yang diubah), yang meningkatkan beberapa jumlah di atas. Kedudukan yang seri dikumpulkan bersama.</sub>
+<sub>Bancian diambil pada 2026-10-18 15:09:09 UTC dengan tip langsung <code>release/v3.8.52</code> <code>656f01cb43</code>. Bancian GraphQL GitHub berhalaman mengandungi 9,191 PR yang telah digabungkan: 3,834 oleh pemilik repositori, 229 oleh Dependabot, 6 oleh bot/aplikasi lain, dan <b>5,122 PR luar daripada 835 penyumbang berbeza</b>. “Baris diubah” ialah jumlah tambah + buang GitHub dan termasuk fail terjana, lockfile, katalog, terjemahan dan dokumentasi; ia adalah churn, bukan LOC yang dikarang. 49 PR melaporkan perbezaan GitHub melebihi 500,000 baris (contohnya #13399, satu penambahan penyedia, menyenaraikan 2,347 fail diubah), yang menyebabkan beberapa jumlah di atas meningkat. Kedudukan seri disenaraikan bersama.</sub>
 
-### Komit yang dikaitkan oleh GitHub
+### Komit yang dikaitkan GitHub
 
 <table>
   <tr>
@@ -1425,42 +1428,42 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🥇 367 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🥈 269 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🥉 229 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 202 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 202 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 174 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 174 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 126 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 126 komit GitHub yang dikaitkan</sub>
     </td>
   </tr>
   <tr>
@@ -1469,42 +1472,42 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 114 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 108 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 108 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 87 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 87 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 70 komit GitHub yang dikaitkan</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 komit yang dikaitkan dengan GitHub</sub>
+      <sub>🏅 68 komit GitHub yang dikaitkan</sub>
     </td>
   </tr>
 </table>
 
-<sub>Disemak semula pada 2026-10-18 14:44:45 UTC: Komit yang dikaitkan dengan GitHub seperti yang dilaporkan oleh API Penyumbang repositori untuk cabang lalai <code>release/v3.8.52</code>. API tersebut mengembalikan 849 identiti (429 pengguna, 2 bot, 418 tanpa nama); jadual ini mengecualikan penyelenggara, bot dan identiti tanpa nama serta mengekalkan kedudukan seri. Jadual ini berbeza daripada kedua-dua kedudukan PR tergabung di atas dan bancian metadata Git di bawah.</sub>
+<sub>Disemak semula pada 2026-10-18 14:44:45 UTC: Komit GitHub yang dikaitkan dilaporkan oleh API Contributors repositori untuk cawangan lalai <code>release/v3.8.52</code>. API mengembalikan 849 identiti (429 pengguna, 2 bot, 418 tanpa nama); jadual ini tidak termasuk penyelenggara, bot dan identiti tanpa nama serta mengekalkan seri pertandingan. Ia berbeza daripada kedudukan PR-bergabung di atas dan bancian metadata Git di bawah.</sub>
 
-> 🙏 Ciri, pembetulan pepijat dan penambahbaikan infrastruktur daripada para penyumbang ini merupakan **bahagian teras** yang menjadikan OmniRoute andal dan kaya dengan ciri. Setiap permintaan tarik, setiap kes ujian dan setiap fail terjemahan i18n adalah penting. Sumber terbuka dibangunkan oleh insan seperti mereka.
+> 🙏 Ciri-ciri, pembaikan pepijat, dan penambahbaikan infrastruktur oleh penyumbang ini adalah **bahagian teras** yang menjadikan OmniRoute boleh dipercayai dan kaya dengan ciri. Setiap permintaan tarik, setiap kes ujian, dan setiap fail terjemahan i18n adalah penting. Sumber terbuka dibina oleh orang seperti mereka.
 
 </div>
 
