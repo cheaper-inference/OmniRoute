@@ -43,6 +43,9 @@ const HOUR_MS = 60 * 60 * 1000;
 // whether ITS connection was probed and make only ITS probes fail.
 const probeCalls = new Map<string, number>();
 const failingNodes = new Set<string>();
+// Install the probe stub after the production wrapper's one-time initialization,
+// so importing the real routes cannot replace it with a network transport.
+await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
 globalThis.fetch = (async (input: string | URL | Request) => {
   const url =
