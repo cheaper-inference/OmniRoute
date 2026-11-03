@@ -88,6 +88,19 @@ function buildSuccessResponse(
   return new Response(JSON.stringify(parsed), { status: 200, headers });
 }
 
+/**
+ * Strip this connection's own secrets (token, Cloudflare account id) from text
+ * that leaves the handler. Upstream errors and transport exceptions may echo
+ * them verbatim, and the shared sanitizer does not know unlabelled values.
+ */
+function redactConnectionSecrets(text: string, credentials: SystemOneCredentials | null): string {
+  const accountId = credentials?.providerSpecificData?.accountId;
+  const secrets = [credentials?.apiKey, credentials?.accessToken, accountId].filter(
+    (value): value is string => typeof value === "string" && value.length >= 8
+  );
+  return secrets.reduce((out, secret) => out.split(secret).join("[redacted]"), text);
+}
+
 interface DecisionRequest {
   url: string;
   body: Record<string, unknown>;
@@ -204,14 +217,15 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
     const ok = normalized.status >= 200 && normalized.status < 300;
     const usage = ok ? parsed?.usage : undefined;
     const answeredModel = resolveAnsweredModel(parsed, options);
-    const upstreamError = upstreamErrorMessage(parsed);
+    const rawError = upstreamErrorMessage(parsed);
+    const upstreamError = rawError && redactConnectionSecrets(rawError, options.credentials);
 
     logDecisionCall(options, {
       status: normalized.status,
       ok,
       model: answeredModel,
       usage,
-      error: upstreamError || text.slice(0, 500),
+      error: upstreamError || redactConnectionSecrets(text.slice(0, 500), options.credentials),
       startTime,
     });
 
@@ -229,7 +243,8 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
       startTime,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const raw = err instanceof Error ? err.message : String(err);
+    const message = redactConnectionSecrets(raw, options.credentials);
     return errorResponse(500, `System One request failed: ${message}`);
   }
 }

@@ -186,3 +186,36 @@ test("cloudflare: a 200 with success=false or a malformed result is a gateway er
     assert.equal(response.status, 502);
   }
 });
+
+test("cloudflare: upstream error text never echoes the account id or token", async () => {
+  const cases: Array<[number, string]> = [
+    [403, `Account ${ACCOUNT} is not authorized to run model`],
+    [401, "Invalid token cf-test-token supplied"],
+  ];
+  for (const [status, message] of cases) {
+    const { response } = await call(
+      "cloudflare-ai/jev",
+      jsonResponse(status, { success: false, errors: [{ message }] })
+    );
+    assert.equal(response.status, status);
+    const text = await response.text();
+    assert.equal(text.includes(ACCOUNT), false, text);
+    assert.equal(text.includes("cf-test-token"), false, text);
+  }
+});
+
+test("cloudflare: a transport failure naming the URL does not leak the account id", async () => {
+  const response = await handleSystemOneProxy({
+    path: "/v1/systemone",
+    target: resolveSystemOneTarget("cf/clef")!,
+    body: { model: "cf/clef", state: "s", questions: { q: { type: "noul" } } },
+    credentials: { apiKey: "cf-test-token", providerSpecificData: { accountId: ACCOUNT } },
+    fetchImpl: async (url) => {
+      throw new Error(`Request to ${String(url)} failed with token cf-test-token`);
+    },
+  });
+  assert.equal(response.status, 500);
+  const text = await response.text();
+  assert.equal(text.includes(ACCOUNT), false, text);
+  assert.equal(text.includes("cf-test-token"), false, text);
+});
