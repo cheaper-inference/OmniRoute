@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "यह इस टेम्पलेट से मेल खाने वाले वर्तमान जुड़े प्रदाताओं/मॉडल को संपादन योग्य कॉम्बो में स्नैपशॉट लेगा।",
     "duplicateAutoComboFailedPrefix": "ऑटोकॉम्बो डुप्लिकेट करने में विफल:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं"
+    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं",
+    "fallbackSummary": "{rate}% अनुरोध फ़ॉलबैक पर गए, हर एक में औसतन {skips} लक्ष्य छोड़े गए"
   },
   "costs": {
     "title": "लागत",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "उपधारा स्थिति",
     "noResponse": "कोई प्रतिक्रिया नहीं",
     "egressIp": "निकासी आईपी",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "हेडर बाद में",
     "firstChunkAfter": "पहला टुकड़ा बाद में",
     "servedBy": "द्वारा सेवा की गई",

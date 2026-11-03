@@ -4,16 +4,18 @@ import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 import subsetFont from "subset-font";
 import { README_DIAGRAMS } from "../../../scripts/docs/gen-readme-diagrams.mjs";
-import { SYMBOL_FALLBACKS } from "../../../scripts/docs/readme-fonts.mjs";
 
-// readme-fonts.mjs decides coverage from the @fontsource latin *unicode ranges*, not from the
-// font's cmap: a character inside the latin ranges that the face happens to lack would still
-// count as covered and render in a fallback family on GitHub. This test is the cmap oracle on
-// the committed files: for every drawn text node it resolves the embedded face the CSS cascade
-// picks (family + weight) and asks subset-font whether that face carries each character —
-// subsetting the embedded face to one character yields the same bytes as subsetting it to
-// nothing when the glyph is absent. Per file it asserts 0 missing glyphs, 0 unresolved text
-// nodes (no family, or a family/weight with no embedded face) and 0 embedded faces nobody uses.
+// Everything a README diagram shows is either a drawn outline or real text on the embedded mono
+// subset, so no system font is ever reached. readme-fonts.mjs decides what can be embedded from the
+// @fontsource latin *unicode ranges*, not from the font's cmap: a character inside the latin ranges
+// that the face happens to lack would still count as covered and render in a fallback family on
+// GitHub. This test is the cmap oracle on the committed files: for every text node that stays visible
+// it resolves the embedded face the CSS cascade picks (family + weight) and asks subset-font whether
+// that face carries each character — subsetting the embedded face to one character yields the same
+// bytes as subsetting it to nothing when the glyph is absent. Per file it asserts 0 missing glyphs,
+// 0 unresolved text nodes (no family, or a family/weight with no embedded face) and 0 embedded faces
+// nobody uses. Invisible text (class "ol": the strings the outlining step drew) shows nothing and is
+// skipped; a diagram with no visible text embeds no face at all.
 //
 // Cascade heuristic (explicit, on purpose — the diagrams only use these forms):
 //   - faces: `@font-face{font-family:"F";font-style:normal;font-weight:W;src:url(data:…)}`
@@ -25,13 +27,14 @@ import { SYMBOL_FALLBACKS } from "../../../scripts/docs/readme-fonts.mjs";
 //     classes the rule that appears LAST in the stylesheet wins (CSS source order at equal
 //     specificity); the walk then continues to the parent for whatever is still unset
 //     (inheritance); font-weight defaults to 400, `bold`/`normal` keywords map to 700/400;
-//   - only text inside <text>, <tspan> and <textPath> is drawn; whitespace and the characters
-//     in SYMBOL_FALLBACKS (drawn by the next family in the stack by design) are exempt.
+//   - only text inside <text>, <tspan> and <textPath> is drawn; whitespace is exempt.
 
 type Diagram = { name: string; out: string };
 type FontDecl = { family?: string; weight?: string; order: number };
 
-const EXEMPT = new Set<string>([" ", " ", "\n", "\t", ...SYMBOL_FALLBACKS]);
+const EXEMPT = new Set<string>([" ", "\u00A0", "\n", "\t"]);
+
+const isInvisible = (el: Element) => el.closest(".ol") !== null;
 
 const FACE_RULE =
   /@font-face\{font-family:"([^"]+)";font-style:normal;font-weight:(\d+);src:url\(data:font\/woff2;base64,([A-Za-z0-9+/=]+)\)/g;
@@ -112,7 +115,6 @@ for (const { name, out } of README_DIAGRAMS as Diagram[]) {
     const doc = new JSDOM(svg, { contentType: "image/svg+xml" }).window.document;
     const styleText = [...doc.querySelectorAll("style")].map((s) => s.textContent).join("\n");
     const { faces, classes } = parseStylesheet(styleText);
-    assert.ok(faces.size > 0, `${out}: no embedded @font-face found`);
 
     const used = new Map<string, Set<string>>(); // face key → characters drawn with it
     const example = new Map<string, string>(); // face key + char → first string it appears in
@@ -123,7 +125,7 @@ for (const { name, out } of README_DIAGRAMS as Diagram[]) {
       const parent = node.parentElement;
       if (!parent || !["text", "tspan", "textPath"].includes(parent.tagName)) continue;
       const txt = node.textContent ?? "";
-      if (!txt.trim()) continue;
+      if (!txt.trim() || isInvisible(parent)) continue;
       const { family, weight } = resolveFace(parent, classes);
       const key = `${family}|${weight}`;
       if (!family) {
@@ -164,5 +166,7 @@ for (const { name, out } of README_DIAGRAMS as Diagram[]) {
 
     const unused = [...faces.keys()].filter((k) => !used.has(k));
     assert.deepEqual(unused, [], `${out}: embedded faces no text node resolves to`);
+    assert.ok(faces.size <= 1, `${out}: the mono subset is the only face a diagram may embed`);
+    for (const key of faces.keys()) assert.equal(key, "CI Mono|500", `${out}: unexpected face`);
   });
 }
