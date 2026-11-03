@@ -83,3 +83,35 @@ test("PUT with overrideAllowedProviders on a combo with an EXISTING restriction 
   const stored = (await combosDb.getComboById(combo.id)) as { allowedProviders?: string[] };
   assert.deepEqual([...(stored.allowedProviders ?? [])].sort(), ["claude", "openai"]);
 });
+
+test("PUT persists capability routes and widens an existing provider restriction from their targets", async () => {
+  const combo = await combosDb.createCombo({
+    name: "restricted-capability-combo",
+    strategy: "priority",
+    allowedProviders: ["claude"],
+    models: [{ provider: "claude", model: "claude-sonnet-5" }],
+  });
+  assert.ok(combo?.id);
+
+  const response = await comboRoute.PUT(
+    put(combo.id, {
+      routes: {
+        search: {
+          strategy: "round-robin",
+          models: [{ providerId: "tavily-search", model: "web" }],
+        },
+      },
+      overrideAllowedProviders: true,
+    }),
+    { params: Promise.resolve({ id: combo.id }) }
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+
+  const stored = (await combosDb.getComboById(combo.id)) as {
+    allowedProviders?: string[];
+    routes?: { search?: { strategy?: string; models?: Array<{ providerId?: string }> } };
+  };
+  assert.deepEqual([...(stored.allowedProviders ?? [])].sort(), ["claude", "tavily-search"]);
+  assert.equal(stored.routes?.search?.strategy, "round-robin");
+  assert.equal(stored.routes?.search?.models?.[0]?.providerId, "tavily-search");
+});

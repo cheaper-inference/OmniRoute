@@ -1081,7 +1081,7 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     method: "POST",
     summary: "Run a unified search",
     description:
-      "Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search.",
+      "Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search. Alternatively, set `model` to a saved priority/fill-first combo name. Only search-capable targets are attempted, in configured order. `model` and `provider` are mutually exclusive.",
     tag: "Search",
     tags: ["Search"],
     requiresAuth: true,
@@ -1467,11 +1467,12 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/web/fetch",
     method: "POST",
     summary: "POST web › fetch",
-    description: "",
+    description:
+      "Fetch a URL with an explicit provider, native automatic selection, or a saved priority/fill-first combo in `model`. Mixed combos skip targets without a fetch executor. `model` and `provider` are mutually exclusive.",
     tag: "V1 Web",
     tags: ["V1 Web"],
-    requiresAuth: false,
-    hasRequestBody: false,
+    requiresAuth: true,
+    hasRequestBody: true,
   },
   {
     path: "/api/v1/ws",

@@ -34,6 +34,8 @@ import {
   runImageComboTargets,
   type ImageComboDispatchResult,
 } from "@omniroute/open-sse/services/imageCombo.ts";
+import { projectComboForEndpoint } from "@/lib/combos/endpointCapabilities";
+import { orderCapabilityTargets } from "@/lib/combos/capabilityTargetOrder";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
 import {
   runImageRequestWithAccounting,
@@ -337,6 +339,7 @@ interface ImageEditContext {
 /** A combo target that resolved to an edit-capable provider/node. */
 interface EditComboTarget {
   modelStr: string;
+  weight?: number;
   parsed: ReturnType<typeof parseImageModel>;
   providerConfig: ReturnType<typeof getImageProvider> | null;
   /** Credential/connection lookup key (built-in provider id, or custom node id). */
@@ -569,7 +572,8 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
   }
   const allCombos = await getCombos();
-  const targets = resolveComboTargets(combo as never, allCombos as never);
+  const projected = projectComboForEndpoint(combo as never, allCombos as never, "image-edits");
+  const targets = resolveComboTargets(projected.combo as never, projected.allCombos as never);
   if (!targets || targets.length === 0) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
   }
@@ -594,7 +598,13 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
     const capability = classifyImageEditTarget(resolved, parsed, providerConfig);
     if (!capability) continue;
-    editTargets.push({ modelStr: resolved, parsed, providerConfig, credKey: capability.credKey });
+    editTargets.push({
+      modelStr: resolved,
+      weight: t.weight,
+      parsed,
+      providerConfig,
+      credKey: capability.credKey,
+    });
   }
 
   if (editTargets.length === 0) {
@@ -604,7 +614,13 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     );
   }
 
-  const run = await runImageComboTargets(editTargets, {
+  const orderedTargets = orderCapabilityTargets({
+    comboName,
+    endpoint: "image-edits",
+    strategy: projected.combo.strategy,
+    targets: editTargets,
+  });
+  const run = await runImageComboTargets(orderedTargets, {
     resolveProvider: (target) => ({ provider: target.credKey, model: target.parsed.model }),
     resolveCredentials: (_provider, target) =>
       getProviderCredentialsWithQuotaPreflight(
@@ -621,7 +637,7 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
           target.parsed.provider || target.credKey,
           target.parsed.model,
           credentials,
-          "priority"
+          projected.combo.strategy || "priority"
         ),
         () => dispatchImageEditTarget(target, credentials, ctx)
       ),

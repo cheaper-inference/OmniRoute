@@ -17,6 +17,10 @@ import { comboErrorResponse } from "@/lib/api/comboErrorResponse";
 import { ComboInvariantError } from "@/lib/combos/invariants";
 import { buildComboNameCollisionWarning } from "@/lib/combos/modelNameCollision";
 import { stripDeadComboConfigKeys } from "@/lib/combos/deadConfigKeys";
+import {
+  comboWithCapabilityRouteSteps,
+  normalizeComboCapabilityRoutes,
+} from "@/lib/combos/capabilityRoutes";
 
 // Minimal shape for the fields we read off a combo row in this route.
 // `getComboById` returns a structurally `JsonRecord`-typed object, so we
@@ -138,6 +142,12 @@ export async function PUT(request, { params }) {
     if (normalizedUpdate.config && typeof normalizedUpdate.config === "object") {
       normalizedUpdate.config = stripDeadComboConfigKeys(normalizedUpdate.config);
     }
+    if (normalizedUpdate.routes && typeof normalizedUpdate.routes === "object") {
+      normalizedUpdate.routes = normalizeComboCapabilityRoutes(normalizedUpdate.routes, {
+        comboName: String(comboName),
+        allCombos: allCombos as never,
+      });
+    }
     // #15251: the runtime reads `universal_handoff` before the camelCase alias,
     // so a stale stored alias must not shadow a validated update (or null-clear).
     if (normalizedUpdate.universal_handoff !== undefined) {
@@ -167,10 +177,24 @@ export async function PUT(request, { params }) {
       // currently has no allowedProviders restriction, currentProviders is
       // empty and unioning it with the new step providers would synthesize a
       // brand-new allowlist out of nothing — the opposite of "no restriction".
-      if (body.models && body.allowedProviders === undefined && currentProviders.length > 0) {
-        const stepProviders = (
-          body.models as Array<{ providerId?: string; provider?: string; model?: string }>
-        )
+      const routeModels =
+        body.routes && typeof body.routes === "object" && !Array.isArray(body.routes)
+          ? Object.values(body.routes).flatMap((route) =>
+              route && typeof route === "object" && !Array.isArray(route)
+                ? ((route as { models?: unknown }).models ?? [])
+                : []
+            )
+          : [];
+      const providerSteps = [
+        ...(Array.isArray(body.models) ? body.models : []),
+        ...(Array.isArray(routeModels) ? routeModels : []),
+      ] as Array<{ providerId?: string; provider?: string; model?: string }>;
+      if (
+        providerSteps.length > 0 &&
+        body.allowedProviders === undefined &&
+        currentProviders.length > 0
+      ) {
+        const stepProviders = providerSteps
           .map((m) => {
             if (m.providerId) return m.providerId;
             if (m.provider) return m.provider;
@@ -227,9 +251,11 @@ export async function PUT(request, { params }) {
     }
 
     // Validate nested combo DAG (no circular references, max depth)
-    if (body.models) {
+    if (body.models || body.routes) {
       // Update the combo in the list temporarily for validation
-      const updatedCombos = allCombos.map((c) => (c.id === id ? { ...c, ...body } : c));
+      const updatedCombos = allCombos.map((c) =>
+        comboWithCapabilityRouteSteps(c.id === id ? { ...c, ...body } : c)
+      );
       if (comboName) {
         const configuredDepth = clampComboDepth(
           (nextComboState as { config?: { maxComboDepth?: unknown } }).config?.maxComboDepth
