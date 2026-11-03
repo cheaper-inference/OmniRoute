@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Spowoduje to przechwycenie aktualnie połączonych dostawców/modeli pasujących do tego szablonu w edytowalnej kombinacji.",
     "duplicateAutoComboFailedPrefix": "Nie udało się skopiować automatycznej kombinacji:",
     "duplicateAutoComboUnknownError": "Nieznany błąd",
-    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}"
+    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}",
+    "fallbackSummary": "{rate}% żądań użyło awaryjnego przełącznika, ~{skips} celów pominiętych przy każdym"
   },
   "costs": {
     "title": "Koszty",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "Anonimowe przełączanie włączone dla {provider}",
     "anonymousFallbackDisabled": "Anonimowe zapasowe wyłączone dla {provider} — wyczerpane połączenia pominą tego dostawcę",
     "anonymousFallbackUpdateFailed": "Nie udało się zaktualizować ustawienia domyślnego dla anonimowych użytkowników",
+    "retryDelayTitle": "Opóźnienie ponowienia",
+    "retryDelayDesc": "Jak długo połączenie odpoczywa po błędzie limitu żądań, gdy dostawca nie podaje, kiedy spróbować ponownie. Tryb automatyczny używa wbudowanego wycofania; czas resetu wysłany przez dostawcę zawsze ma pierwszeństwo.",
+    "retryDelayAuto": "Automatycznie",
+    "retryDelaySaved": "Zapisano opóźnienie ponowienia",
+    "retryDelayUpdateFailed": "Nie udało się zaktualizować opóźnienia ponowienia",
     "batchDeleteFailed": "Usunięcie wsadowe nie powiodło się",
     "batchDeleteNetworkError": "Błąd sieciowy podczas masowego usuwania",
     "batchUpdateFailed": "Aktualizacja wsadowa nie powiodła się",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Status źródła",
     "noResponse": "Brak odpowiedzi",
     "egressIp": "Adres IP wyjściowy",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Nagłówki po",
     "firstChunkAfter": "Pierwszy fragment po",
     "servedBy": "Obsługiwane przez",

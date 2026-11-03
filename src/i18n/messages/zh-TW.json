@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "這將把與此模板匹配的目前連線提供者/模型快照到可編輯的組合中。",
     "duplicateAutoComboFailedPrefix": "複製自動組合失敗：",
     "duplicateAutoComboUnknownError": "未知錯誤",
-    "duplicateAutoComboTitle": "從{name}建立靜態組合"
+    "duplicateAutoComboTitle": "從{name}建立靜態組合",
+    "fallbackSummary": "{rate}% 的請求已回退，每次約跳過 {skips} 個目標"
   },
   "costs": {
     "title": "成本",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "為 {provider} 啟用匿名後備",
     "anonymousFallbackDisabled": "已禁用 {provider} 的匿名後備 — 耗盡的連接將跳過此提供者",
     "anonymousFallbackUpdateFailed": "無法更新匿名回退設置",
+    "retryDelayTitle": "重試延遲",
+    "retryDelayDesc": "當提供者未告知何時重試時，連線在速率限制錯誤後休息的時間。自動模式使用內建退避；提供者傳送的重設時間一律優先。",
+    "retryDelayAuto": "自動",
+    "retryDelaySaved": "重試延遲已儲存",
+    "retryDelayUpdateFailed": "更新重試延遲失敗",
     "batchDeleteFailed": "批次刪除失敗",
     "batchDeleteNetworkError": "批次刪除期間發生網路錯誤",
     "batchUpdateFailed": "批次更新失敗",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "上游狀態",
     "noResponse": "無回應",
     "egressIp": "出口 IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "標頭之後",
     "firstChunkAfter": "第一個區塊之後",
     "servedBy": "由...提供",

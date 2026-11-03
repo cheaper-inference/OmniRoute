@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Wannan zai adana kwafin masu samarwa/samfura da aka haɗa a yanzu waɗanda suka dace da wannan samfuri na tsari a matsayin haɗin da za a iya gyarawa.",
     "duplicateAutoComboFailedPrefix": "An kasa yin kwafin haɗin atomatik:",
     "duplicateAutoComboUnknownError": "Kuskuren da ba a sani ba",
-    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}"
+    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}",
+    "fallbackSummary": "kasofofen {rate}% na tambaya suke ta wucin gari, kawai matsi {skips} a kowace"
   },
   "costs": {
     "title": "Kuɗaɗen kashewa",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "An kunna madadin da ba a bayyana suna ba don {provider}",
     "anonymousFallbackDisabled": "An kashe madadin da ba a bayyana suna ba don {provider} — za a tsallake wannan mai samarwa idan haɗin sun ƙare",
     "anonymousFallbackUpdateFailed": "An kasa sabunta saitin madadin da ba a bayyana suna ba",
+    "retryDelayTitle": "Jinkirin sake gwadawa",
+    "retryDelayDesc": "Tsawon lokacin da haɗi zai huta bayan kuskuren iyakar yawan buƙatu idan mai bayarwa bai faɗi lokacin sake gwadawa ba. Yanayin atomatik yana amfani da jinkirin da aka gina a ciki; lokacin sake saitawa da mai bayarwa ya aiko koyaushe yana da fifiko.",
+    "retryDelayAuto": "Atomatik",
+    "retryDelaySaved": "An adana jinkirin sake gwadawa",
+    "retryDelayUpdateFailed": "An kasa sabunta jinkirin sake gwadawa",
     "batchDeleteFailed": "Goge rukuni ya gaza",
     "batchDeleteNetworkError": "Kuskuren hanyar sadarwa yayin goge rukuni",
     "batchUpdateFailed": "Sabunta rukuni ya gaza",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Matsayin tushen",
     "noResponse": "Babu amsa",
     "egressIp": "IP na fita",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Kanun bayan",
     "firstChunkAfter": "Sashe na farko bayan",
     "servedBy": "An bayar da",

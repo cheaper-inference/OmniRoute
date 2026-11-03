@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Dit maakt een momentopname van de momenteel verbonden providers/modellen die overeenkomen met dit sjabloon in een bewerkbare combinatie.",
     "duplicateAutoComboFailedPrefix": "Automatische combinatie dupliceren mislukt:",
     "duplicateAutoComboUnknownError": "Onbekende fout",
-    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}"
+    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
+    "fallbackSummary": "{rate}% van de verzoeken viel terug, gemiddeld ~{skips} doelen per verzoek overslagen"
   },
   "costs": {
     "title": "Kosten",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "Anonieme fallback ingeschakeld voor {provider}",
     "anonymousFallbackDisabled": "Anonieme fallback uitgeschakeld voor {provider} — uitgeputte verbindingen zullen deze provider overslaan",
     "anonymousFallbackUpdateFailed": "Kon de anonieme fallback-instelling niet bijwerken",
+    "retryDelayTitle": "Vertraging voor nieuwe poging",
+    "retryDelayDesc": "Hoe lang een verbinding rust na een rate-limitfout wanneer de provider niet aangeeft wanneer opnieuw te proberen. Automatisch gebruikt de ingebouwde backoff; een door de provider gestuurde resettijd gaat altijd voor.",
+    "retryDelayAuto": "Automatisch",
+    "retryDelaySaved": "Vertraging voor nieuwe poging opgeslagen",
+    "retryDelayUpdateFailed": "Bijwerken van vertraging voor nieuwe poging mislukt",
     "batchDeleteFailed": "Batch verwijderen mislukt",
     "batchDeleteNetworkError": "Netwerkfout tijdens batchverwijdering",
     "batchUpdateFailed": "Batch-update mislukt",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Stroomopwaartse status",
     "noResponse": "Geen reactie",
     "egressIp": "Uittrede IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Headers na",
     "firstChunkAfter": "Eerste chunk na",
     "servedBy": "Gediend door",

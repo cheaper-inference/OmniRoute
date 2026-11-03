@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "આ ટેમપ્લેટ સાથે મેચ થતા વર્તમાન જોડાયેલા પ્રદાતાઓ/મોડેલને સંપાદનીય કોમ્બોમાં સ્નેપશોટ લેશે.",
     "duplicateAutoComboFailedPrefix": "ઓટોકોમ્બો ડુપ્લિકેટ કરવામાં નિષ્ફળ:",
     "duplicateAutoComboUnknownError": "અજ્ઞાત ભૂલ",
-    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો"
+    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો",
+    "fallbackSummary": "{rate}% વિનંતીઓ ફેલબેક પર ગઈ, દરેકમાં લગભગ {skips} લક્ષ્યો ચૂકાયા"
   },
   "costs": {
     "title": "ખર્ચ",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "{provider} માટે અજ્ઞાત ફોલબેક સક્રિય છે",
     "anonymousFallbackDisabled": "{provider} માટે અજ્ઞાત ફોલબેક નિષ્ક્રિય છે — થાકેલા કનેક્શન આ પ્રદાતા અવગણશે",
     "anonymousFallbackUpdateFailed": "અનામિક ફોલબેક સેટિંગને અપડેટ કરવામાં નિષ્ફળ થયું",
+    "retryDelayTitle": "ફરી પ્રયાસમાં વિલંબ",
+    "retryDelayDesc": "પ્રદાતા ફરી ક્યારે પ્રયાસ કરવો તે ન જણાવે ત્યારે રેટ-લિમિટ ભૂલ પછી કનેક્શન કેટલો સમય આરામ કરે છે. સ્વચાલિત મોડ બિલ્ટ-ઇન બેકઓફનો ઉપયોગ કરે છે; પ્રદાતાએ મોકલેલો રીસેટ સમય હંમેશા અગ્રતા ધરાવે છે.",
+    "retryDelayAuto": "સ્વચાલિત",
+    "retryDelaySaved": "ફરી પ્રયાસનો વિલંબ સાચવ્યો",
+    "retryDelayUpdateFailed": "ફરી પ્રયાસનો વિલંબ અપડેટ કરવામાં નિષ્ફળ",
     "batchDeleteFailed": "બેચ ડિલીટ નિષ્ફળ થયું",
     "batchDeleteNetworkError": "બેચ ડિલીટ દરમિયાન નેટવર્ક ભૂલ",
     "batchUpdateFailed": "બેચ અપડેટ નિષ્ફળ થયું",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "અપસ્ટ્રીમ સ્થિતિ",
     "noResponse": "કોઈ પ્રતિસાદ નથી",
     "egressIp": "ઇગ્રેસ આઈપી",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "હેડર્સ પછી",
     "firstChunkAfter": "પ્રથમ ચંક પછી",
     "servedBy": "દ્વારા સેવા આપવામાં આવી",

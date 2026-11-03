@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Esto capturará los proveedores/modelos conectados actualmente que coincidan con esta plantilla en una combinación editable.",
     "duplicateAutoComboFailedPrefix": "Error al duplicar la combinación automática:",
     "duplicateAutoComboUnknownError": "Error desconocido",
-    "duplicateAutoComboTitle": "Crear una combinación estática de {name}"
+    "duplicateAutoComboTitle": "Crear una combinación estática de {name}",
+    "fallbackSummary": "{rate}% de las solicitudes usaron el respaldo; cada una omitió en promedio ~{skips} objetivos"
   },
   "costs": {
     "title": "Costos",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "Fallback anónimo habilitado para {provider}",
     "anonymousFallbackDisabled": "El retroceso anónimo está deshabilitado para {provider} — las conexiones agotadas omitirán este proveedor",
     "anonymousFallbackUpdateFailed": "Error al actualizar la configuración de respaldo anónimo",
+    "retryDelayTitle": "Retraso de reintento",
+    "retryDelayDesc": "Cuánto tiempo descansa una conexión tras un error de límite de velocidad cuando el proveedor no indica cuándo reintentar. Automático usa el retroceso integrado; un tiempo de restablecimiento enviado por el proveedor siempre tiene prioridad.",
+    "retryDelayAuto": "Automático",
+    "retryDelaySaved": "Retraso de reintento guardado",
+    "retryDelayUpdateFailed": "No se pudo actualizar el retraso de reintento",
     "batchDeleteFailed": "La eliminación por lotes falló",
     "batchDeleteNetworkError": "Error de red durante la eliminación por lotes",
     "batchUpdateFailed": "La actualización por lotes falló",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Estado de río arriba",
     "noResponse": "Sin respuesta",
     "egressIp": "IP de salida",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Encabezados después",
     "firstChunkAfter": "Primer fragmento después",
     "servedBy": "Servido por",

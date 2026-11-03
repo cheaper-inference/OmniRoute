@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil tage et øjebliksbillede af de aktuelt tilsluttede udbydere/modeller, der matcher denne skabelon, i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering af auto-kombination mislykkedes:",
     "duplicateAutoComboUnknownError": "Ukendt fejl",
-    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}"
+    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
+    "fallbackSummary": "{rate} % af anmodningerne faldt tilbage, hver hoppede i gennemsnit over ~{skips} mål"
   },
   "costs": {
     "title": "Omkostninger",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "Anonym fallback aktiveret for {provider}",
     "anonymousFallbackDisabled": "Anonym fallback deaktiveret for {provider} — udtømte forbindelser vil springe denne udbyder over",
     "anonymousFallbackUpdateFailed": "Mislykkedes med at opdatere anonym fallback-indstilling",
+    "retryDelayTitle": "Forsinkelse før nyt forsøg",
+    "retryDelayDesc": "Hvor længe en forbindelse hviler efter en rate-limit-fejl, når udbyderen ikke angiver, hvornår der skal prøves igen. Automatisk bruger den indbyggede backoff; et nulstillingstidspunkt fra udbyderen har altid forrang.",
+    "retryDelayAuto": "Automatisk",
+    "retryDelaySaved": "Forsinkelse før nyt forsøg gemt",
+    "retryDelayUpdateFailed": "Kunne ikke opdatere forsinkelse før nyt forsøg",
     "batchDeleteFailed": "Batch sletning mislykkedes",
     "batchDeleteNetworkError": "Netværksfejl under batch-sletning",
     "batchUpdateFailed": "Batchopdatering mislykkedes",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "Opstrøm status",
     "noResponse": "Ingen respons",
     "egressIp": "Udgående IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Headers efter",
     "firstChunkAfter": "Første chunk efter",
     "servedBy": "Betjent af",

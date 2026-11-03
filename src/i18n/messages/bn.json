@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
+    "fallbackSummary": "আপেক্ষার {rate}% ফলব্যাক ব্যবহার করেছিল, প্রতিটিতে গড় করে ~{skips}টি লক্ষ্য বিমুখ"
   },
   "costs": {
     "title": "খরচ",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "{provider} এর জন্য অজ্ঞাত ফFallback সক্রিয় করা হয়েছে",
     "anonymousFallbackDisabled": "{provider} এর জন্য অজ্ঞাত ফ্যালব্যাক নিষ্ক্রিয় — শেষ হওয়া সংযোগগুলি এই প্রদানকারীকে বাদ দেবে",
     "anonymousFallbackUpdateFailed": "গোপন ফallback সেটিং আপডেট করতে ব্যর্থ হয়েছে",
+    "retryDelayTitle": "পুনরায় চেষ্টার বিলম্ব",
+    "retryDelayDesc": "প্রদানকারী কখন আবার চেষ্টা করতে হবে তা না জানালে রেট-লিমিট ত্রুটির পরে সংযোগটি কতক্ষণ বিশ্রামে থাকবে। স্বয়ংক্রিয় মোড অন্তর্নির্মিত ব্যাকঅফ ব্যবহার করে; প্রদানকারীর পাঠানো রিসেট সময় সর্বদা অগ্রাধিকার পায়।",
+    "retryDelayAuto": "স্বয়ংক্রিয়",
+    "retryDelaySaved": "পুনরায় চেষ্টার বিলম্ব সংরক্ষিত হয়েছে",
+    "retryDelayUpdateFailed": "পুনরায় চেষ্টার বিলম্ব আপডেট করতে ব্যর্থ",
     "batchDeleteFailed": "ব্যাচ মুছে ফেলা ব্যর্থ হয়েছে",
     "batchDeleteNetworkError": "ব্যাচ মুছে ফেলার সময় নেটওয়ার্ক ত্রুটি",
     "batchUpdateFailed": "ব্যাচ আপডেট ব্যর্থ হয়েছে",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "আপস্ট্রিম স্থিতি",
     "noResponse": "কোনো প্রতিক্রিয়া নেই",
     "egressIp": "এগ্রেস আইপি",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "হেডারস পরে",
     "firstChunkAfter": "প্রথম চাঙ্ক পরে",
     "servedBy": "দ্বারা পরিবেশন করা হয়েছে",

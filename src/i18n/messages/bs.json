@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "Ovo će napraviti snapshot povezanih providera/modela koji odgovaraju ovom šablonu u uredivi combo.",
     "duplicateAutoComboFailedPrefix": "Neuspjelo dupliranje auto-comba:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}",
+    "fallbackSummary": "{rate}% zahtjeva je koristilo alternativni put, svaki je prosječno preskočio ~{skips} meta"
   },
   "costs": {
     "title": "Troškovi",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "Anonimni fallback omogućen za {provider}",
     "anonymousFallbackDisabled": "Anonimni fallback onemogućen za {provider} — iscrpljene veze će preskočiti ovog provajdera",
     "anonymousFallbackUpdateFailed": "Neuspjelo ažuriranje postavke anonimnog fallback-a",
+    "retryDelayTitle": "Kašnjenje ponovnog pokušaja",
+    "retryDelayDesc": "Koliko dugo veza miruje nakon greške ograničenja brzine kada provajder ne navede kada ponovo pokušati. Automatski način koristi ugrađeno odgađanje; vrijeme resetovanja koje pošalje provajder uvijek ima prednost.",
+    "retryDelayAuto": "Automatski",
+    "retryDelaySaved": "Kašnjenje ponovnog pokušaja je sačuvano",
+    "retryDelayUpdateFailed": "Ažuriranje kašnjenja ponovnog pokušaja nije uspjelo",
     "batchDeleteFailed": "Masovno brisanje nije uspjelo",
     "batchDeleteNetworkError": "Mrežna greška tokom masovnog brisanja",
     "batchUpdateFailed": "Masovno ažuriranje nije uspjelo",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "Status upravljačkog",
     "noResponse": "Nema odgovora",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Zaglavlja nakon",
     "firstChunkAfter": "Prvi dio nakon",
     "servedBy": "Posluženo od",
