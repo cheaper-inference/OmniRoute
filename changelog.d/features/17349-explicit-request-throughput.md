@@ -1,0 +1,1 @@
+- Show separately labeled post-first-token and end-to-end token rates in request logs, with a keyboard-accessible explanation of buffered delivery. Both use the same reasoning-aware token count; existing TPS sorting and missing-TTFT fallback keep their generation-rate semantics. (#17349)

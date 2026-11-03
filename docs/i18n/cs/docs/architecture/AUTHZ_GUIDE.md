@@ -135,34 +135,34 @@ doplněno:
 
 Několik akcí `MANAGEMENT` je **pouze pro operátora**: klíč `manage` nestačí. Export uložených pověření (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), obnovení zálohy přes živá data (`POST /api/db-backups/import` včetně `dryRun=true`, `POST /api/db-backups` obnovení podle id, `POST /api/settings/import-json`) a ničení bodů obnovy (úklid přes `DELETE /api/db-backups` a také `PATCH /api/db-backups`, protože uložená retence řídí automatické promazávání po každé záloze) vyžadují relaci panelu, lokální subjekt CLI nebo vypnuté přihlášení. Vydání tokenu synchronizace (`POST /api/sync/tokens`) a vytvoření přístupového tokenu CLI s rozsahem `admin` (`POST /api/cli/tokens`) vyžadují relaci panelu nebo lokální subjekt CLI ve všech režimech přihlášení. Klíče API libovolného rozsahu a přístupové tokeny `oma_` nejsou operátorská pověření: pokud je vyžadováno operátorské pověření, dostanou `403`. Kontrola je v `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Změna nastavení přihlášení je rovněž vyhrazena operátorovi: `POST /api/settings/require-login` (nastavení správcovského hesla / přepnutí `requireLogin`) přijme pouze tato pověření, jakmile heslo existuje — okno prvního spuštění (zatím bez hesla) zůstává beze změny — a relace panelu musí pro nahrazení hesla poslat `currentPassword` (`403`, pokud chybí nebo je špatné, audituje se jako `settings.update_failed`). Lokální CLI a instance s vypnutým přihlášením si zachovávají obnovovací cestu a mohou nastavit heslo bez něj, protože obě jsou vázány na hostitele, který vlastní datový adresář.
 
-## Zpracovatelský řetězec
+## Potrubí
 
 ```
-Příchozí požadavek → src/proxy.ts
-  → runAuthzPipeline() v src/server/authz/pipeline.ts
-    1. Odstranění důvěryhodných interních hlaviček (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Vygenerování ID požadavku a klasifikace trasy pomocí classifyRoute()
-    3. Pokud pathname == "/" → přesměrování na /dashboard
-    4. Pokud probíhá ukončování (graceful shutdown) a jde o /api/* → 503
-    5. Pokud jde o jiný požadavek než GET na /api/* → kontrola checkBodySize()
-    6. Pokud jde o OPTIONS → odpověď CORS preflight 204
-    7. Pokud options.enforce == false → předání dál s hlavičkami třídy trasy
-    8. Jinak: POLICIES[routeClass].evaluate(ctx)
-       - allow  → nastavení x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → chyba JSON s correlation_id (stránky řídicího panelu → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Důvěryhodné interní hlavičky (definované v `src/server/authz/headers.ts`) jsou před klasifikací **odstraněny z příchozích požadavků** — klienti nemohou předem nastavit `x-omniroute-auth-*` a vydávat se tak za jiný subjekt.
+Důvěryhodné interní hlavičky (definované v `src/server/authz/headers.ts`) jsou** odstraněny z příchozích požadavků** před klasifikací klienti — nemohou předem vyplnit `x-omniroute-auth-*`, aby se vydávali za subjekt.
 
-### Kontrakty zásad
+### Pojistné smlouvy
 
-Každá třída tras má zásadu v `src/server/authz/policies/`:
+Každá třída trasy má zásady v `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — vždy vrací `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrahuje Bearer a ověřuje jej pomocí `validateApiKey()`. K anonymnímu přístupu přejde pouze tehdy, když je výsledný příznak funkce `REQUIRE_API_KEY` vypnutý. Výsledná hodnota příznaku se určuje prostřednictvím `isRequireApiKeyEnabled()` (`přepsání příznakem funkce v DB > process.env.REQUIRE_API_KEY > výchozí hodnota`), takže příznaky funkcí v řídicím panelu a proměnné prostředí řídí `/api/v1/*`, `/api/v1beta/*` a aliasy konzistentně; při selhání resolveru se přístup zamítne. Umožňuje požadavky s relací řídicího panelu na klientských trasách API (včetně `/api/v1/models`, kterou používá katalog modelů v řídicím panelu).
-- **`managementPolicy`** (`policies/management.ts`) — přijímá relaci řídicího panelu nebo interní požadavky na synchronizaci modelů (porovnávané s `/api/providers/[name]/(sync-models|models)`), případně ověřování zcela přeskočí, pokud `isAuthRequired()` vrátí false. Pokud je token Bearer přítomen, ale není platný, vrátí 403 (`AUTH_001`), jinak vrátí 401. Před jakoukoli větví ověřování také vynucuje úrovně ochrany tras (LOCAL_ONLY / ALWAYS_PROTECTED) — viz [Úrovně ochrany tras](../security/ROUTE_GUARD_TIERS.md). Cesty LOCAL_ONLY v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (aktuálně: `/api/mcp/`) mohou být přístupné z adres mimo loopback, pokud má klíč Bearer rozsah oprávnění `manage`; všechny ostatní cesty LOCAL_ONLY zůstávají omezené výhradně na loopback bez ohledu na rozsah oprávnění.
+- **`publicPolicy`** (`policies/public.ts`) — vždy vrátí `allow({ kind: "anonymous", id: "anonymous" })`.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrahuje nosič, ověřuje přes `validateApiKey()`. Propadne na anonymní pouze tehdy, když je deaktivován efektivní příznak funkce `REQUIRE_API_KEY`. Efektivní příznak je vyřešen pomocí `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), takže příznaky funkcí ovládacího panelu a proměnné prostředí řídí `/api/v1/*`, `/api/v1beta/*` a aliasy konzistentně; Selhání resolveru uzavřeno. Umožňuje požadavky na relaci řídicího panelu na klientských trasách API (včetně `/api/v1/models`, používaného v katalogu modelů řídicích panelů). Když je Entra ID SSO povolen, Nosič, který je strukturálně token Entra (tři segmenty base64url, `RS*` alg, `kid`), zpracovává větev SSO** před** `validateApiKey()` a jeho verdikt je konečný — nikdy neprojde cestou klíče API nebo větve degradace na anonymní, takže výpadek poskytovatele identity se nemůže stát otevřeným přístupem. Statické klávesy API nejsou ovlivněny. Viz [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — přijímá relaci řídicího panelu, požadavky na interní synchronizaci modelu (porovnané se `/api/providers/[name]/(sync-models|models)`) nebo zcela přeskakuje, pokud `isAuthRequired()` vrátí hodnotu false. Vrátí 403 (`AUTH_001`), když je token nositele přítomen, ale neplatný, jinak 401. Také vynucuje úrovně ochrany trasy (LOCAL_ONLY / ALWAYS_PROTECTED) před jakoukoli auth větví — viz [vrstvy Route Guard](../security/ROUTE_GUARD_TIERS.md). Cesty LOCAL_ONLY v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (dnes: `/api/mcp/`) mohou být přístupné z bez zpětné smyčky, když klíč Nosiče nese rozsah `manage` ; všechny ostatní cesty LOCAL_ONLY zůstávají striktně-loopback bez ohledu na rozsah.
 
-Úspěšná zásada vrací `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Následné handlery jej mohou načíst pomocí `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts`, aniž by znovu spouštěly logiku ověřování.
+Úspěšná politika vrátí `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Následné obslužné programy jej mohou číst prostřednictvím `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts` namísto opětovného spouštění auth logiky.
 
 ## Seznam veřejných tras
 
@@ -310,23 +310,23 @@ Koncové body `/api/v1/agents/tasks/*` a `/api/resilience/model-cooldowns` **nyn
 
 ## Ladění
 
-Pipeline vždy opatří odpovědi následujícími hlavičkami:
+Potrubí vždy označí odpovědi:
 
 ```
-x-request-id:               <korelační id, zopakované v těle chyby>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-U ověřených požadavků obsahují hlavičky požadavku upstreamu (na straně obslužné rutiny) také:
+Pro autentizované požadavky upstream (na straně obslužné rutiny) hlavičky požadavků také zahrnují:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<poslední 4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (volitelné)
-x-omniroute-auth-scopes:    seznam oddělený čárkami
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Uvnitř obslužných rutin používejte `assertAuth(req, expectedClass)` — pokud byl middleware obejit, vyvolá výjimku `AuthzAssertionError` s kódem `AUTHZ_NOT_INITIALIZED` (užitečné pro odhalování regresí konfigurace v testech).
+Použijte `assertAuth(req, expectedClass)` uvnitř obslužných rutin — to vyvolá `AuthzAssertionError` s kódem `AUTHZ_NOT_INITIALIZED` pokud byl middleware obejit (užitečné pro zachycení konfiguračních regresí v testech).
 
 ## Viz také
 
