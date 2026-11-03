@@ -1,4 +1,4 @@
-import { hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
+import { getEmptyTurnDiagnostics, hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
 import { createCompletionDrain } from "./streamCompletionDrain.ts";
 import type { StreamControllerOptions } from "./streamControllerTypes.ts";
 import { trackPendingRequest } from "@/lib/usageDb";
@@ -657,7 +657,11 @@ function resolveSilentCloseOutcome(input: {
 export function createDisconnectAwareStream(
   transformStream,
   streamController,
-  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
+  options: {
+    highWaterMark?: number;
+    permitsEmptyTurn?: () => boolean;
+    emptyTurnDiagnostics?: () => ReturnType<typeof getEmptyTurnDiagnostics>;
+  } = {}
 ) {
   const reader = transformStream.readable.getReader();
   const writer = transformStream.writable.getWriter();
@@ -753,6 +757,15 @@ export function createDisconnectAwareStream(
                 // downstream may have closed; stream already marked complete
               }
             } else if (silentClose) {
+              console.warn(
+                `[STREAM] detector=post-translation reason=${
+                  silentClose.reason === "Provider returned empty content"
+                    ? "empty-content"
+                    : "missing-terminal"
+                } native=${JSON.stringify(
+                  options.emptyTurnDiagnostics?.() ?? { nativeExecutionObserved: false }
+                )}`
+              );
               streamController.handleError(
                 Object.assign(new Error(silentClose.reason), { statusCode: 502 })
               );
@@ -907,6 +920,7 @@ export function pipeWithDisconnect(
       {
         highWaterMark: opts.highWaterMark,
         permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+        emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
       }
     );
   }
@@ -1181,6 +1195,7 @@ export function pipeWithDisconnect(
     {
       highWaterMark: opts.highWaterMark,
       permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+      emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
     }
   );
 }
