@@ -203,6 +203,7 @@ import {
   appendRequestLog,
   capturePendingRequestOwner,
 } from "@/lib/usageDb";
+import { getPendingById } from "@/lib/usage/usageHistory";
 import {
   finalizePendingScope,
   initialPendingBody,
@@ -762,6 +763,8 @@ async function handleChatCoreInner({
       correlationId,
       sessionTag: conversationId || null,
     }) || generateRequestId();
+  // Capture before any await: retries can reuse the public preview ID.
+  const pendingRequestGeneration = getPendingById().get(pendingRequestId)?.attemptGeneration;
   const pendingRequestOwner = pendingConnId
     ? capturePendingRequestOwner(pendingRequestId)
     : undefined;
@@ -931,6 +934,7 @@ async function handleChatCoreInner({
       detailedLoggingEnabled,
       reqLogger,
       pendingRequestId,
+      pendingRequestGeneration,
       clientRawRequest,
       requestedModel,
       credentials,
