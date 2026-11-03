@@ -4,65 +4,47 @@
 
 ---
 
-> Bersifat opt-in, dinonaktifkan secara default (`modelVisibilityAllowlist`/`modelVisibilityDenylist` yang
-> keduanya kosong membuat katalog `/v1/models` DAN setiap kumpulan kandidat `auto/*` identik secara
-> byte). Fitur ini merupakan fitur sejenis dengan `hidePaidModels`/`hideAutoCombos`
-> (`src/lib/db/settings.ts`) bagi operator yang menginginkan daftar model terkurasi karena alasan
-> yang tidak berkaitan dengan biaya.
+> Ikut serta, tidak aktif secara default (`modelVisibilityAllowlist`/`modelVisibilityDenylist` keduanya kosong meninggalkan katalog `/v1/models` AND setiap kumpulan kandidat `auto/*` identik dengan byte). Saudara dari `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) untuk operator yang menginginkan daftar model yang dikurasi karena alasan yang tidak ada hubungannya dengan biaya.
 
-## Alasan fitur ini tersedia
+## Mengapa hal ini ada
 
-`hidePaidModels` menjawab "apakah model ini gratis?" dan `hideAutoCombos` menjawab "apakah ID virtual
-`auto/*` perlu ditampilkan?" — keduanya tidak memungkinkan operator mengkurasi subset model secara
-bebas (misalnya menampilkan tepat model-model yang seharusnya dilihat oleh klien Claude Code /
-OpenCode tertentu, terlepas dari harganya). #11481 menambahkan kemampuan tersebut sebagai dua
-pengaturan array string independen yang bersifat opt-in.
+`hidePaidModels` menjawab "apakah model ini gratis?" dan `hideAutoCombos` menjawab "haruskah id virtual `auto/*` diiklankan?" — juga tidak mengizinkan operator menyusun subset model yang berubah-ubah (misalnya menampilkan model yang harus dilihat oleh klien Kode Claude / OpenCode tertentu, terlepas dari harga). #11481 menambahkan itu sebagai dua pengaturan array string opt-in yang independen.
 
 ## Pengaturan
 
-| Kunci                      | Tipe       | Default | Arti                                                                                    |
-| -------------------------- | ---------- | ------- | --------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`    | Entri yang cocok dengan kandidat akan menyembunyikannya dari katalog/kumpulan kandidat. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`    | Jika tidak kosong, HANYA entri yang cocok dengan kandidat yang tetap ditampilkan.       |
+| Kunci                      | Jenis      | Bawaan | Arti                                                                                |
+| -------------------------- | ---------- | ------ | ----------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`   | Entri yang cocok dengan kandidat menyembunyikannya dari kumpulan catalog/candidate. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`   | Jika tidak kosong, entri ONLY yang cocok dengan kandidat tetap terbuka.             |
 
-Keduanya menerima hingga 500 entri dengan panjang maksimum 200 karakter per entri (divalidasi
-oleh Zod di `src/shared/validation/settingsSchemas.ts`). Sebuah entri dapat berupa:
+Keduanya menerima hingga 500 entri masing-masing hingga 200 karakter (divalidasi Zod di `src/shared/validation/settingsSchemas.ts`). Entrinya adalah:
 
-- ID katalog persis — `"gpt-4o"` (ID model tanpa prefiks) atau `"openai/gpt-4o"` (dengan prefiks penyedia), atau
-- pola glob yang menggunakan `*`/`?` — misalnya `"openai/gpt-4*"` atau `"anthropic/*"` — dicocokkan
-  melalui pencocok bersama `globToRegex()` (`src/shared/utils/globPattern.ts`) yang sudah digunakan
-  oleh pemetaan kombo per model milik `ModelRoutingSection` dan `freeModels.ts::matchesOnlyPaidModels`.
+- id katalog yang tepat — `"gpt-4o"` (id model kosong) atau `"openai/gpt-4o"` (awalan penyedia), atau
+- pola glob menggunakan `*`/`?` — misalnya `"openai/gpt-4*"` atau `"anthropic/*"` — diselesaikan melalui `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) yang sama yang telah digunakan oleh pemetaan kombo per model `ModelRoutingSection` dan `freeModels.ts::matchesOnlyPaidModels`.
 
-Prioritas: denylist diperiksa terlebih dahulu (entri yang ditolak selalu disembunyikan, meskipun
-juga cocok dengan allowlist); jika allowlist tidak kosong, hanya entri yang cocok dengannya yang
-tetap ditampilkan.
+Prioritas: daftar yang ditolak diperiksa terlebih dahulu (entri yang ditolak selalu disembunyikan, meskipun entri tersebut juga cocok dengan daftar yang diizinkan); jika daftar yang diizinkan tidak kosong, hanya entri yang cocok yang akan bertahan.
 
-## Dua titik kontrol, bukan satu
+## Dua titik tersedak, bukan satu
 
-Pelajaran dari #6512 (filter katalog yang hanya menggunakan `hidePaidModels` masih memungkinkan
-`auto/*` merutekan ke model berbayar karena kumpulan kandidat kombo dibuat secara terpisah) berlaku
-sama persis di sini. Predikat pencocokan `isModelExposureAllowed()`
-(`src/shared/utils/modelExposureList.ts`) dipanggil dari KEDUANYA:
+Pelajaran dari #6512 (filter katalog `hidePaidModels` -only masih membiarkan `auto/*` merutekan ke model berbayar, karena kumpulan kandidat kombo dibuat secara independen) berlaku sama di sini. Predikat yang cocok `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) dipanggil dari BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — daftar `/v1/models` itu sendiri, pada 5 titik kontrol per
-  sumber yang sama yang sudah dibatasi oleh `shouldHidePaid()` (`PROVIDER_MODELS` statis, baris
-  penyedia tersinkronisasi, baris kustom, baris berbasis alias, baris fallback terkelola).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — dipanggil
-  dari `virtualFactory.ts::buildPreparedPool`, tepat setelah pemanggilan
-  `filterPaidOnlyCandidates()` yang setara, sehingga model yang ditolak juga tidak akan pernah
-  dapat dipilih ke dalam kumpulan kandidat `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — daftar `/v1/models` itu sendiri, pada 5 titik tersedak per sumber yang sama `shouldHidePaid()` sudah digerbang (statis `PROVIDER_MODELS`, baris penyedia yang disinkronkan, baris khusus, baris yang didukung alias, baris fallback terkelola).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — dipanggil dari `virtualFactory.ts::buildPreparedPool`, segera setelah panggilan `filterPaidOnlyCandidates()` yang setara, sehingga model yang ditolak juga tidak akan pernah bisa dipilih ke dalam kumpulan kandidat `auto/*`.
 
-## Yang TIDAK difilter
+## Apa yang difilter NOT
 
-Mengikuti perilaku `hideAutoCombos` yang sudah ada: ID model yang dikirim **secara eksplisit**
-(bukan melalui `auto/*`, dan bukan ditemukan melalui daftar katalog) tidak pernah diblokir saat
-dispatch — hanya penampilan/keanggotaan kumpulan kandidat yang difilter. Hal ini bersifat independen
-dari `hidePaidModels`; operator mungkin menginginkan set terkurasi karena alasan yang tidak
-berkaitan dengan biaya, sehingga kedua pengaturan digabungkan sebagai filter independen yang
-di-AND-kan, sama seperti komposisi beberapa flag yang sudah ada di `catalog.ts`.
+Mencerminkan perilaku `hideAutoCombos` yang ada: id model dikirim** secara eksplisit** (tidak melalui `auto/*`, dan tidak ditemukan melalui daftar katalog) tidak pernah diblokir saat pengiriman — hanya keanggotaan advertisement/candidate-pool yang difilter. Ini tidak bergantung pada `hidePaidModels`; seorang operator mungkin menginginkan kumpulan yang dikurasi karena alasan yang tidak ada hubungannya dengan biaya, sehingga kedua pengaturan dibuat sebagai filter AND-ed yang independen, sama seperti komposisi multi-bendera yang ada di `catalog.ts`.
 
-Ekspor pengaturan (`GET /api/settings/export-json`) menyertakan kedua array apa adanya, seperti
-field pengaturan lainnya — tidak seperti filter ekspor langkah kombo milik `hidePaidModels`, tidak
-ada risiko rehidrasi di sini: ID yang ditolak dan disematkan dalam langkah kombo yang diekspor
-merupakan pilihan perutean eksplisit milik operator sendiri, bukan sesuatu yang perlu dihapus oleh
-batas ekspor.
+Pengaturan ekspor (`GET /api/settings/export-json`) mencakup kedua array kata demi kata, seperti bidang pengaturan lainnya — tidak seperti filter ekspor langkah kombo `hidePaidModels`, tidak ada risiko hidrasi ulang di sini: id yang ditolak yang tertanam dalam langkah kombo yang diekspor adalah pilihan perutean eksplisit milik operator, bukan sesuatu yang perlu dihapus oleh batas ekspor.
+
+## Daftar kombo saja (`exposeCombosOnly`)
+
+Boolean terpisah, juga opt-in dan `false` secara default, untuk penerapan di mana kombo adalah permukaan model publik dan penyedia hanya sebagai backend. Jika `true`, daftar publik (`GET /v1/models`, `GET /v1`, dan rute penemuan `/v1` lainnya yang dibangun di atas `getUnifiedModelsResponse()`) hanya menyimpan baris dengan `owned_by: "combo"`: kombo pengguna ditambah kombo `auto/*` bawaan (kecuali `hideAutoCombos` menyembunyikannya). Ia menggunakan pengujian baris yang sama dengan `catalogScope: "combos"` per kunci, dan filter allow/deny/scope milik kunci masih berlaku di atas.
+
+Aktifkan** Pengaturan → Perutean → Model daftar API** , atau dengan `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Seperti daftar di atas, hanya mengubah iklan:
+
+- id `provider/model` eksplisit masih dikirimkan, dan `GET /v1/models/{id}` masih menyelesaikannya;
+- katalog dasbor (`GET /api/models/catalog`, yang digunakan oleh pemetik model) tidak menyempit;
+- itu tidak dicerminkan ke dalam kumpulan kandidat `auto/*`, jadi kombo `auto/*` mempertahankan kumpulan penuhnya.

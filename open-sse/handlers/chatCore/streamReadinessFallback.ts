@@ -14,6 +14,7 @@
  */
 import { ensureStreamReadiness, type StreamReadinessResult } from "../../utils/streamReadiness.ts";
 import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
+import { isPublicProviderSafetyCode } from "../../utils/providerSafety.ts";
 import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
 
 type LoggerLike = {
@@ -206,7 +207,9 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
   if (
     ctx.streamReadiness.ok === true ||
     ctx.clientAborted ||
-    ctx.streamReadiness.code === "empty_content"
+    ctx.streamReadiness.code === "empty_content" ||
+    // #17049: a provider safety stop is terminal; a stall retry would re-send it.
+    isPublicProviderSafetyCode(ctx.streamReadiness.code)
   ) {
     return {
       readiness: ctx.streamReadiness,

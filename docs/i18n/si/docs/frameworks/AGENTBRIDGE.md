@@ -16,11 +16,11 @@ AgentBridge යනු IDE AI නියෝජිතයන්ගෙන් පැ�
 
 ### AgentBridge යනු කුමක්ද?
 
-IDE නියෝජිතයෙකු (උදා, GitHub Copilot, Cursor, Claude කේතය) API ඇමතුමක් කරන විට, එය සෘජුවම උඩුගං AI සපයන්නා වෙත සම්බන්ධ වේ (OpenAI, Anthropic, ආදිය). AgentBridge TLS මට්ටමින් විනිවිදභාවයෙන් එම සම්බන්ධතාවයට බාධා කරයි - කිසිදු නියෝජිත වින්‍යාස වෙනසක් අවශ්‍ය නොවී - සහ OmniRoute හරහා ඉල්ලීම නැවත ලියයි.
+IDE නියෝජිතයෙකු (උදා, GitHub Copilot, Cursor, Claude කේතය) API ඇමතුමක් කරන විට, එය සෘජුවම උඩුගං AI සපයන්නා වෙත සම්බන්ධ වේ (OpenAI, Anthropic, ආදිය). AgentBridge කිසිදු නියෝජිත වින්‍යාසයක් අවශ්‍ය නොවී TLS මට්ටමේ — විනිවිද පෙනෙන සම්බන්ධතාවයක් — බාධා කරයි සහ OmniRoute හරහා ඉල්ලීම නැවත ලියයි.
 
 මෙයින් අදහස් කරන්නේ ඔබට කළ හැක්කේ:
 
-- **ඕනෑම නියෝජිතයෙකු ඕනෑම සැපයුම්කරුවෙකු වෙත ආපසු හරවන්න** : Copilot OpenAI සමඟ කතා කරනවාද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි 377 සපයන්නන්ගෙන් ඕනෑම කෙනෙකුට හරවා යවන්න.
+- **ඕනෑම නියෝජිතයෙකු ඕනෑම සැපයුම්කරුවෙකු වෙත ආපසු හරවන්න** : Copilot OpenAI සමඟ කතා කරනවාද? එය Anthropic Claude, Gemini, හෝ OmniRoute හි 380 සපයන්නන්ගෙන් ඕනෑම කෙනෙකුට හරවා යවන්න.
 - **ආකෘති සිතියම්කරණය යොදන්න** : `gemini-3-flash` → `claude-sonnet-4.7` හසුරුවන්න මට්ටමේ විනිවිද පෙනෙන ලෙස.
 - **සියලුම නියෝජිත ගමනාගමනය නිරීක්ෂණය කරන්න** : බාධා කරන ලද සෑම ඉල්ලීමක්ම [රථවාහන පරීක්ෂක](./TRAFFIC_INSPECTOR.md) වෙත ප්‍රකාශ කරනු ලැබේ.
 - **OmniRoute ඔරොත්තු දීමේ හැකියාව යොදන්න** : combo routing, circuit Breakers, Fallbacks, and cost tracking work for IDE agent traffic සඳහාද.
