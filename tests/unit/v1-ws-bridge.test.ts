@@ -57,7 +57,15 @@ test("v1 ws bridge streams correlated request chunks and survives protocol error
 
     if (url.pathname === "/api/v1/ws" && url.searchParams.get("handshake") === "1") {
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ ok: true, path: "/v1/ws", wsAuth: false, authenticated: false }));
+      res.end(
+        JSON.stringify({
+          ok: true,
+          originChecked: true,
+          path: "/v1/ws",
+          wsAuth: false,
+          authenticated: false,
+        })
+      );
       return;
     }
 

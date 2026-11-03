@@ -55,6 +55,8 @@ const CLAUDE_TOOL_CHOICE_REQUIRED = "an" + "y";
 export interface FilterToOpenAIFormatOptions {
   /** Keep `cache_control` on content blocks (providers that honor OpenAI-format breakpoints). */
   preserveCacheControl?: boolean;
+  /** Keep OpenAI's explicit prompt-caching `prompt_cache_breakpoint` on content parts (GPT-5.6+). */
+  preservePromptCacheBreakpoint?: boolean;
   /** Keep Moonshot's non-standard `video_url` content block. */
   preserveVideoUrl?: boolean;
   /** Keep `reasoning_content` on tool-call assistant turns (reasoning-replay providers). */
@@ -77,6 +79,10 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
   // Keep that extension opt-in so generic OpenAI-compatible providers still
   // receive only the standard allowlist below.
   const preserveVideoUrl = opts?.preserveVideoUrl === true;
+  // OpenAI explicit prompt caching marks prefix ends with `prompt_cache_breakpoint`
+  // on content parts. With `prompt_cache_options: { mode: "explicit" }` and no
+  // breakpoint the upstream caches nothing, so keep it for providers that accept it.
+  const preservePromptCacheBreakpoint = opts?.preservePromptCacheBreakpoint === true;
   // #4849 strips reasoning_content from tool-call assistant turns to stop O(n^2)
   // context growth — but reasoning-replay providers (DeepSeek V4, Kimi K2, etc.)
   // REQUIRE the client's reasoning_content to be passed back, so keep it for them
@@ -183,6 +189,9 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           const cleanBlock: Record<string, unknown> = { type: block.type };
           if (preserveCacheControl && cache_control !== undefined) {
             cleanBlock.cache_control = cache_control;
+          }
+          if (preservePromptCacheBreakpoint && block.prompt_cache_breakpoint !== undefined) {
+            cleanBlock.prompt_cache_breakpoint = block.prompt_cache_breakpoint;
           }
           for (const field of allowedFields) {
             if (block[field] !== undefined) cleanBlock[field] = block[field];

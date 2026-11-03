@@ -30,94 +30,87 @@ Client Request
 
 ---
 
-## Compression Mode များ
+## ဖိသိပ်မှု မုဒ်များ
 
-### Off
+### ပိတ်ထားသည်
 
-Compression မပြုလုပ်ပါ။ Message အားလုံးကို မပြောင်းလဲဘဲ ဖြတ်သန်းစေသည်။
+ဖိသိပ်မှု မပြုလုပ်ပါ။ မက်ဆေ့ချ်အားလုံးကို မူရင်းအတိုင်း ဖြတ်သန်းစေသည်။
 
-### Lite Mode (~15% ချွေတာမှု၊ <1ms latency)
+### Lite မုဒ် (~15% ချွေတာမှု၊ <1ms ကြာမြင့်ချိန်)
 
-အဘေးကင်းဆုံး mode ဖြစ်ပြီး semantic အဓိပ္ပာယ်ကို လုံးဝမပြောင်းလဲဘဲ formatting ကိုသာ ရှင်းလင်းသည်-
+အန္တရာယ်အကင်းဆုံး မုဒ် — ဖော်မတ်သန့်ရှင်းရေးကိုသာ ပြုလုပ်သည်။ ၎င်း၏ tool-result ဖြတ်တောက်မှုသည် အချက်အလက်ဆုံးရှုံးနိုင်သောကြောင့် ပုံမှန်လမ်းကြောင်း
+(`allow-lossy`, `engine:lite` သို့မဟုတ် အမည်ပေးထားသော combo ကို opt-in မပြုလုပ်ထားပါက) သည်
+`compressToolResults: false` ဖြင့် lite ကို အသုံးပြုသည်။ အစောပိုင်း tool ရလဒ်များကို provider ထံ မပြောင်းလဲဘဲ ပေးပို့သည်။
 
-| နည်းစနစ်                 | ဖော်ပြချက်                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------ |
-| `collapseWhitespace`     | ဆက်တိုက်ဖြစ်နေသော blank line များနှင့် စာကြောင်းအဆုံးရှိ space များကို ပေါင်းစည်းသည် |
-| `dedupSystemPrompt`      | ထပ်နေသော system message များကို ဖယ်ရှားသည်                                           |
-| `compressToolResults`    | ရှည်လျားလွန်းသော tool/function output များကို ချုံ့သည်                               |
-| `removeRedundantContent` | ထပ်တလဲလဲဖြစ်နေသော ညွှန်ကြားချက်များကို ဖယ်ရှားသည်                                    |
-| `replaceImageUrls`       | base64 image data URI များကို အတိုချုံ့သည်                                           |
+| နည်းလမ်း                 | ဖော်ပြချက်                                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `collapseWhitespace`     | ဆက်တိုက်ဖြစ်နေသော အလွတ်လိုင်းများနှင့် အဆုံးရှိ space များကို ပေါင်းစည်းသည်                                                    |
+| `dedupSystemPrompt`      | ထပ်နေသော system မက်ဆေ့ချ်များကို ဖယ်ရှားသည်                                                                                    |
+| `compressToolResults`    | အစောပိုင်း tool ရလဒ်များကို lite ကန့်သတ်ချက်အထိ ဖြတ်တောက်သည် (အချက်အလက်ဆုံးရှုံးနိုင်သည် — request opt-in ဖြင့်သာ အသုံးပြုသည်) |
+| `removeRedundantContent` | ထပ်ခါတလဲလဲဖြစ်နေသော ညွှန်ကြားချက်များကို ဖယ်ရှားသည်                                                                            |
+| `replaceImageUrls`       | base64 image data URI များကို တိုတောင်းစေသည်                                                                                   |
 
-**အသင့်တော်ဆုံးအခြေအနေ:** အမြဲဖွင့်ထားပြီး အသုံးပြုခြင်း၊ ဘေးကင်းရေးအလွန်အရေးကြီးသော workflow များ။
+**အသင့်တော်ဆုံး:** အမြဲဖွင့်ထားသည့် အသုံးပြုမှုနှင့် ဘေးကင်းလုံခြုံမှုအရေးကြီးသော workflow များ။
 
-### Standard Mode (~30% ချွေတာမှု)
+### Standard မုဒ် (~30% ချွေတာမှု)
 
-[Caveman](https://github.com/JuliusBrussee/caveman) ကို အခြေခံထားပြီး အဓိပ္ပာယ်ကို ထိန်းသိမ်းထားကာ အပိုစကားလုံးများနှင့် ရှည်လျားသော စကားအသုံးအနှုန်းများကို ဖယ်ရှားသည်-
+[Caveman](https://github.com/JuliusBrussee/caveman) မှ အယူအဆရယူထားပြီး — အဓိပ္ပာယ်ကို ထိန်းသိမ်းကာ မလိုအပ်သော စကားလုံးများနှင့် ရှည်လျားသော ပြောဆိုပုံများကို ဖယ်ရှားသည်။
 
-- အပိုစကားလုံးများ ("please", "I think", "basically", "actually") ကို ဖယ်ရှားသည်
+- အပိုစကားလုံးများကို ဖယ်ရှားသည် ("please", "I think", "basically", "actually")
 - ရှည်လျားသော စကားစုများကို ချုံ့သည် ("in order to" → "to", "as a result of" → "because")
-- ယဉ်ကျေးစွာ မသေမချာ ပြောဆိုထားမှုများကို ဖယ်ရှားသည် ("Would you mind...", "If you could possibly...")
-- Coding prompt များအတွက် ချိန်ညှိထားသော regex rule 30 ကျော် ပါဝင်သည်
+- ယဉ်ကျေးစွာ မသေချာသည့် ပြောဆိုပုံများကို ဖယ်ရှားသည် ("Would you mind...", "If you could possibly...")
+- coding prompt များအတွက် ချိန်ညှိထားသော regex စည်းမျဉ်း 30 ကျော် ပါဝင်သည်
 
-**အသင့်တော်ဆုံးအခြေအနေ:** နေ့စဉ် coding workflow များ၊ ကုန်ကျစရိတ်ကို အလေးထားသော အဖွဲ့များ။
+**အသင့်တော်ဆုံး:** နေ့စဉ် coding workflow များနှင့် ကုန်ကျစရိတ်ကို အလေးထားသော အဖွဲ့များ။
 
-### Aggressive Mode (~50% ချွေတာမှု)
+### Aggressive မုဒ် (~50% ချွေတာမှု)
 
-ကြာရှည်သော session များအတွက် စမတ်ကျသည့် history စီမံခန့်ခွဲမှု-
+ရှည်လျားသော session များအတွက် history ကို ထက်မြက်စွာ စီမံသည်။
 
-- **Message Aging** — အဟောင်းပိုင်း message များကို အဆင့်ဆင့် ပိုမိုချုံ့သွားသည်
-- **Tool Result Compression** — ရှည်လျားသော tool output များကို ဖြတ်တောက်ခြင်း သို့မဟုတ် ချန်လှပ်ခြင်း ပြုလုပ်သည် (ပထမ/နောက်ဆုံးစာကြောင်းများ၊
-  ကိုက်ညီသောစာကြောင်း filtering၊ JSON key ချုံ့ခြင်း)
-- **Structural Integrity Guards** — `tool_use` + `tool_result` အတွဲများ တစ်သမတ်တည်း ရှိနေစေရန် သေချာစေသည်
-- **Context Window Awareness** — model တစ်ခုချင်းစီ၏ token ကန့်သတ်ချက်များကို လိုက်နာသည်
+- **Message Aging** — ပိုဟောင်းသော မက်ဆေ့ချ်များကို တဖြည်းဖြည်း ပိုမိုချုံ့သည်
+- **Tool Result Compression** — ရှည်လျားသော tool output များကို ဖြတ်တောက်ခြင်း သို့မဟုတ် ဖျောက်ထားခြင်း ပြုလုပ်သည် (ပထမ/နောက်ဆုံးလိုင်းများ၊
+  match-line filtering၊ JSON key compaction)
+- **Structural Integrity Guards** — `tool_use` + `tool_result` အတွဲများ တစ်သမတ်တည်းရှိနေစေရန် သေချာစေသည်
+- **Context Window Awareness** — model တစ်ခုချင်းစီအလိုက် token ကန့်သတ်ချက်များကို လိုက်နာသည်
 
-**အသင့်တော်ဆုံးအခြေအနေ:** ကြာရှည်သော debugging session များ၊ ကြီးမားသော codebase များ။
+**အသင့်တော်ဆုံး:** ကြာရှည်သော debugging session များနှင့် ကြီးမားသော codebase များ။
 
-### Ultra Mode (~75% ချွေတာမှု)
+### Ultra မုဒ် (~75% ချွေတာမှု)
 
-Token အလွန်အမင်း ချွေတာရန်လိုအပ်သော အခြေအနေများအတွက် အမြင့်ဆုံး compression-
+token အလွန်အမင်း အရေးကြီးသော အခြေအနေများအတွက် အများဆုံး ဖိသိပ်မှုကို ပြုလုပ်သည်။
 
-- **Heuristic Pruning** — ရမှတ်အခြေခံသည့် prose token pruning
-- **Structure Preservation** — fenced code block များ၊ inline code၊ URL နှင့် identifier များကို
-  tombstone အဖြစ် အစားထိုးပြီး မူရင်းအတိုင်း ပြန်လည်ဆက်စပ်ပေးသောကြောင့် မည်သည့်အခါမျှ pruning မလုပ်ပါ
-- **ရွေးချယ်နိုင်သော SLM tier** — configure လုပ်ထားပါက local model အသေးစားတစ်ခုသည် prune ရလဒ်ကို ထပ်မံကောင်းမွန်အောင် ပြင်ဆင်နိုင်သည်
-- Aggressive mode နှင့် သီးခြားလွတ်လပ်သည်။ Message aging၊ tool-result compression
-  သို့မဟုတ် fallback summarizer ကို မလုပ်ဆောင်ပါ (SLM-tier ချို့ယွင်းမှုဖြစ်မှသာ fallback pass ကို
-  aggressive မှတစ်ဆင့် လမ်းကြောင်းပြောင်းနိုင်သည်)
+- **Heuristic Pruning** — ရမှတ်အခြေပြု token pruning ဖြင့် prose ကို လျှော့ချသည်
+- **Structure Preservation** — fenced code block များ၊ inline code၊ URL များနှင့် identifier များကို tombstone လုပ်ကာ မူရင်းအတိုင်း ပြန်လည်ချိတ်ဆက်သည်၊ မည်သည့်အခါမျှ pruning မပြုလုပ်ပါ
+- **Optional SLM tier** — ပြင်ဆင်သတ်မှတ်ထားပါက local model အသေးတစ်ခုသည် prune လုပ်မှုကို ထပ်မံပြုပြင်နိုင်သည်
+- Aggressive မုဒ်နှင့် သီးခြားဖြစ်သည်: message aging၊ tool-result compression သို့မဟုတ် fallback summarizer ကို မလုပ်ဆောင်ပါ (SLM-tier မအောင်မြင်မှုတစ်ခုတည်းကသာ fallback pass ကို aggressive မှတစ်ဆင့် လမ်းကြောင်းပြောင်းနိုင်သည်)
 
-**အသင့်တော်ဆုံးအခြေအနေ:** Context ကန့်သတ်ချက်များကို ထပ်ခါတလဲလဲ ရောက်ရှိနေသောအခါ။
+**အသင့်တော်ဆုံး:** context limit များနှင့် ထပ်ခါတလဲလဲ ရင်ဆိုင်နေရသည့်အခါ။
 
-### RTK Mode (upstream အပိုင်းအခြား 60-90%)
+### RTK မုဒ် (upstream range 60-90%)
 
-RTK mode ကို coding-agent session များတွင် ပေါ်လာသော ရှည်လျားလွန်းသည့် tool output များအတွက် အကောင်းဆုံးဖြစ်အောင် ပြုလုပ်ထားသည်-
+RTK မုဒ်သည် coding-agent session များတွင် တွေ့ရသော verbose tool output များအတွက် အထူးပြုထားသည်။
 
-- `git status`၊ `git diff`၊ `git log`၊ test runner များ၊
-  TypeScript/Vite/Webpack build များ၊ ESLint/Biome/Prettier၊ npm audit/install များ၊ Docker log များ၊ infra
-  output နှင့် ယေဘုယျ shell output ကဲ့သို့သော command/output အမျိုးအစားများကို ရှာဖွေသိရှိသည်
+- `git status`၊ `git diff`၊ `git log`၊ test runner များ၊ TypeScript/Vite/Webpack build များ၊ ESLint/Biome/Prettier၊ npm audit/install များ၊ Docker log များ၊ infra output နှင့် ယေဘုယျ shell output ကဲ့သို့သော command/output အမျိုးအစားများကို ရှာဖွေသတ်မှတ်သည်
 - `open-sse/services/compression/engines/rtk/filters/` မှ JSON filter pack များကို အသုံးပြုသည်
-- Project သို့မဟုတ် global `filters.toml` file များမှ RTK TOML schema v1 filter များကို import လုပ်ပြီး inline-test
-  validation နှင့် project file များအတွက် trust-gating ကို အသုံးပြုသည်
-- Inline verify sample များနှင့်အတူ built-in filter 55 ခု ပါဝင်သည်
-- ANSI control sequence များ၊ progress bar များ၊ ထပ်နေသောစာကြောင်းများနှင့် လက်တွေ့လုပ်ဆောင်ရန်မလိုသည့် noise များကို ဖယ်ရှားသည်
-- Failure များ၊ error များ၊ warning များ၊ ပြောင်းလဲထားသော file များ၊ အကျဉ်းချုပ်များနှင့် ရှည်လျားသော output ၏ အဆုံးပိုင်းကို ထိန်းသိမ်းထားသည်
-- Trust-gated project filter များ၊ global filter များနှင့် ရွေးချယ်နိုင်သော ဖုံးကွယ်ပြင်ဆင်ထားသည့် raw-output recovery ကို ပံ့ပိုးသည်
+- Project သို့မဟုတ် global `filters.toml` ဖိုင်များမှ RTK TOML schema v1 filter များကို ထည့်သွင်းပြီး inline-test validation နှင့် project ဖိုင်များအတွက် trust-gating ပြုလုပ်သည်
+- inline verify sample များပါဝင်သော built-in filter 56 ခုကို ပေးပို့ထားသည်
+- ANSI control sequence များ၊ progress bar များ၊ ထပ်နေသောလိုင်းများနှင့် လုပ်ဆောင်ချက်မရှိသော noise များကို ဖယ်ရှားသည်
+- failure များ၊ error များ၊ warning များ၊ ပြောင်းလဲထားသောဖိုင်များ၊ အနှစ်ချုပ်များနှင့် ရှည်လျားသော output ၏ အဆုံးပိုင်းကို ထိန်းသိမ်းသည်
+- trust-gated project filter များ၊ global filter များနှင့် ရွေးချယ်နိုင်သော redacted raw-output recovery ကို ပံ့ပိုးသည်
 
-**အသင့်တော်ဆုံးအခြေအနေ:** Shell၊ build၊ test၊ git၊ grep နှင့် file-output transcript များပါဝင်သော agent session များ။
+**အသင့်တော်ဆုံး:** shell၊ build၊ test၊ git၊ grep နှင့် file-output transcript များပါဝင်သည့် agent session များ။
 
-### Stacked Mode (သတ်မှတ်ချက်နှင့်ကိုက်ညီသော အပိုင်းအခြား 78-95%)
+### Stacked မုဒ် (eligible range 78-95%)
 
-Stacked mode သည် compression engine အများအပြားကို ကြိုတင်သတ်မှတ်ထားသော အစဉ်အတိုင်း လုပ်ဆောင်သည်။ Default pipeline မှာ-
+Stacked မုဒ်သည် ဖိသိပ်မှု engine များစွာကို သတ်မှတ်ထားသော အစဉ်အတိုင်း လုပ်ဆောင်သည်။ ပုံမှန် pipeline သည်-
 
 ```txt
 RTK -> Caveman
 ```
 
-ထိုအစီအစဉ်သည် terminal/tool output ကို ဦးစွာ ကျစ်လျစ်စေပြီးနောက် ကျန်ရှိသည့် သဘာဝဘာသာစကား prompt ကို Caveman semantic condensation ဖြင့် ချုံ့သည်။ Stacked pipeline များကို global အနေဖြင့် configure လုပ်နိုင်သလို routing combo များတွင် သတ်မှတ်ထားသော
-compression combo များမှတစ်ဆင့်လည်း configure လုပ်နိုင်သည်။
+ထိုအစဉ်သည် terminal/tool output ကို ဦးစွာ ကျစ်လျစ်စေပြီးနောက် ကျန်ရှိသော သဘာဝဘာသာစကား prompt တွင် Caveman semantic condensation ကို အသုံးပြုသည်။ Stacked pipeline များကို ကမ္ဘာလုံးဆိုင်ရာအနေဖြင့် သို့မဟုတ် routing combo များတွင် သတ်မှတ်ထားသော compression combo များမှတစ်ဆင့် ပြင်ဆင်သတ်မှတ်နိုင်သည်။
 
-**အသင့်တော်ဆုံးအခြေအနေ:** ကြီးမားသော tool log များနှင့် လူကပေးသော ညွှန်ကြားချက်များ သို့မဟုတ် assistant အကျဉ်းချုပ်များ ရောနှောပါဝင်သည့် context။
-
----
+**အသင့်တော်ဆုံး:** ကြီးမားသော tool log များနှင့် လူသားညွှန်ကြားချက်များ သို့မဟုတ် assistant အနှစ်ချုပ်များ ရောနှောပါဝင်သော context များ။
 
 ## Upstream ချွေတာမှု တွက်ချက်ပုံ
 
@@ -182,21 +175,21 @@ Stacked ဖြင့်:         token 10K-2.5K ပို့သည်     (အ�
 
 ---
 
-## ဖွဲ့စည်းသတ်မှတ်မှု
+## ဖွဲ့စည်းမှု
 
 ### ဒက်ရှ်ဘုတ်
 
-`Dashboard → Context & Cache` သို့ သွားပါ-
+`Dashboard → Context & Cache` သို့ သွားပါ:
 
-- **Caveman** — မုဒ်ရွေးချယ်မှု၊ ဘာသာစကားပက်ကေ့ချ်များ၊ အစမ်းကြည့်ရှုမှုနှင့် ကမ္ဘာလုံးဆိုင်ရာ မူလသတ်မှတ်ချက်များ
-- **RTK** — အမိန့်စစ်ထုတ်မှု အစမ်းကြည့်ရှုချက်၊ RTK ဘေးကင်းရေးဆက်တင်များနှင့် စစ်ထုတ်ကတ်တလောက်
-- **Compression Combos** — လမ်းကြောင်းသတ်မှတ်ရေး combo များထံ သတ်မှတ်ပေးထားသော အမည်တပ် engine pipeline များ
-- **Auto-Trigger Threshold** — token အရေအတွက်သည် သတ်မှတ်အဆင့်ကို ကျော်လွန်သောအခါ compression ကို အလိုအလျောက် စတင်အသုံးပြုခြင်း
+- **Caveman** — မုဒ်ရွေးချယ်မှု၊ ဘာသာစကားပက်ခ်များ၊ အစမ်းကြည့်ရှုမှုနှင့် ကမ္ဘာလုံးဆိုင်ရာ မူလသတ်မှတ်ချက်များ
+- **RTK** — command-filter အစမ်းကြည့်ရှုမှု၊ RTK လုံခြုံရေးသတ်မှတ်ချက်များနှင့် filter catalog
+- **Compression Combos** — routing combo များအတွက် သတ်မှတ်ပေးထားသော အမည်ပေးထားသည့် engine pipeline များ
+- **Auto-Trigger Threshold** — token အရေအတွက်က သတ်မှတ်ချက်ကို ကျော်လွန်သောအခါ compression ကို အလိုအလျောက် ဖွင့်ပေးခြင်း
 
-### Combo အလိုက် အစားထိုးသတ်မှတ်မှု
+### Combo တစ်ခုချင်းစီအလိုက် အစားထိုးသတ်မှတ်ခြင်း
 
-`Dashboard → Context & Cache → Compression Combos` တွင် compression combo တစ်ခုကို routing
-combo တစ်ခုထံ သတ်မှတ်ပေးပါ-
+`Dashboard → Context & Cache → Compression Combos` တွင် routing
+combo တစ်ခုအတွက် compression combo တစ်ခု သတ်မှတ်ပေးပါ:
 
 ```txt
 Combo: "free-tier-fallback"
@@ -207,64 +200,73 @@ Combo: "free-tier-fallback"
     2. if/qwen3.8-max-preview
 ```
 
-၎င်းက အခပေး subscription များတွင် lite မုဒ်ကို ဆက်လက်အသုံးပြုထားစဉ် အခမဲ့/coding provider များတွင်
-အဆင့်ဆင့်ဆက်ထားသော compression ကို အသုံးပြုနိုင်စေသည်။
+၎င်းက အခမဲ့/coding provider များတွင် stacked compression ကို အသုံးပြုနိုင်စေပြီး အခကြေးငွေပေးထားသော
+subscription များတွင် lite mode ကို ဆက်လက်ထားရှိနိုင်စေသည်။
 
 ဤ "Per-Combo Override" သတ်မှတ်မှုသည် **routing-combo compression
 mode** အစားထိုးသတ်မှတ်မှု (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — field ၏
-schema သည် `rtk`, `stacked` နှင့် `omniglyph` တို့ကိုလည်း လက်ခံသည်) နှင့် မတူသော ထိန်းချုပ်မှုတစ်ခုဖြစ်သည် —
-ထိုအစားထိုးသတ်မှတ်မှုသည် အမည်တပ် compression-combo pipeline တစ်ခုကို မရွေးချယ်ဘဲ
-`resolveCompressionPlan` က အသုံးပြုကြည့်ရှုသည့် `compressionMode` field ကိုသာ သတ်မှတ်သည်။
-၎င်းကို combo card (`Dashboard → Combos`) တွင်ဖြစ်စေ၊ #6760 မှစ၍
-`Dashboard → Context & Cache → Compression Combos` ရှိ "Assign to routing" စာရင်းအတွင်း routing combo
-တစ်ခုချင်းစီအတွက်ဖြစ်စေ၊ အထက်တွင် မှတ်တမ်းတင်ထားသော pipeline သတ်မှတ် checkbox ၏ ဘေးတွင် သတ်မှတ်နိုင်သည်။
-မျက်နှာပြင်နှစ်ခုစလုံးသည် တူညီသော `PUT /api/combos/{id}` endpoint မှတစ်ဆင့် အမြဲတမ်းသိမ်းဆည်းသည်။
+schema သည် `rtk`, `stacked` နှင့် `omniglyph` တို့ကိုလည်း လက်ခံသည်) နှင့် မတူညီသော control တစ်ခုဖြစ်သည် —
+ထိုအစားထိုးသတ်မှတ်မှုသည် အမည်ပေးထားသည့် compression-combo pipeline တစ်ခုကို ရွေးချယ်ပေးခြင်းမဟုတ်ဘဲ
+`resolveCompressionPlan` က အသုံးပြုသည့် `compressionMode` field ကိုသာ သတ်မှတ်ပေးသည်။ ၎င်းကို combo card
+(`Dashboard → Combos`) တွင် သတ်မှတ်နိုင်သကဲ့သို့၊ #6760 မှစ၍
+`Dashboard → Context & Cache → Compression Combos` ရှိ "Assign to routing" list တွင် routing combo
+တစ်ခုချင်းစီအလိုက်လည်း သတ်မှတ်နိုင်သည် — အထက်တွင် မှတ်တမ်းတင်ထားသော pipeline-assignment checkbox ၏
+ဘေးတွင် ဖြစ်သည်။ နေရာနှစ်ခုစလုံးမှ သတ်မှတ်ချက်များသည် တူညီသော
+`PUT /api/combos/{id}` endpoint မှတစ်ဆင့် သိမ်းဆည်းထားသည်။
 
-### တောင်းဆိုမှုတစ်ခုချင်းစီအလိုက် အစားထိုးသတ်မှတ်မှု
+### Request တစ်ခုချင်းစီအလိုက် အစားထိုးသတ်မှတ်ခြင်း
 
-တောင်းဆိုမှုတစ်ခုတည်းအတွက် compression plan ကို အစားထိုးသတ်မှတ်ရန်
-`x-omniroute-compression` request header ကို ပေးပို့ပါ။ ၎င်းတွင် အမြင့်ဆုံးဦးစားပေးအဆင့် ရှိသည် —
-routing-combo အစားထိုးသတ်မှတ်မှု၊ လက်ရှိအသုံးပြုနေသော profile၊ auto-trigger နှင့် panel Default တို့ထက်
-ဦးစားပေးသည်။ မသိသောတန်ဖိုးများကို လျစ်လျူရှုသည် (တောင်းဆိုမှုကို လုံးဝ ငြင်းပယ်မည်မဟုတ်ပါ)၊ ထို့အပြင်
-ကမ္ဘာလုံးဆိုင်ရာ master switch က အရာအားလုံးကို ဆက်လက်ထိန်းချုပ်ထားသည်- compression ကို
-ကမ္ဘာလုံးဆိုင်ရာအဆင့်တွင် ပိတ်ထားပါက header ဖြင့် ၎င်းကို ဖွင့်၍မရပါ။ တန်ဖိုးများမှာ-
+Request တစ်ခုတည်းအတွက် compression plan ကို အစားထိုးသတ်မှတ်ရန်
+`x-omniroute-compression` request header ကို ပေးပို့ပါ။ ၎င်းတွင် ဦးစားပေးအဆင့်အမြင့်ဆုံးရှိသည် —
+routing-combo override၊ လက်ရှိအသုံးပြုနေသော profile၊ auto-trigger နှင့် panel Default တို့ကို ကျော်လွန်သည်။
+မသိသော value များကို လျစ်လျူရှုသည် (request ကို ဘယ်သောအခါမျှ reject မလုပ်ပါ)၊ ထို့အပြင်
+ကမ္ဘာလုံးဆိုင်ရာ master switch က အရာအားလုံးကို ဆက်လက်ထိန်းချုပ်ထားသည်: compression ကို ကမ္ဘာလုံးဆိုင်ရာ
+ပိတ်ထားပါက header သည် ၎င်းကို ပြန်ဖွင့်၍မရပါ။ Value များမှာ:
 
-| တန်ဖိုး       | အကျိုးသက်ရောက်မှု                                                                                                                             |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `off`         | ဤတောင်းဆိုမှုအတွက် compression မပြုလုပ်ပါ။                                                                                                    |
-| `default`     | Panel မှ ဆင်းသက်လာသော Default profile (လက်ရှိ profile ကို လျစ်လျူရှုသည်)။ Lossy engine များကို ပိတ်ထားသည်။                                    |
-| `safe`        | Header မထည့်ထားခြင်းနှင့် တူညီသည်- dedup နှင့် whitespace folding ကိုသာ လုပ်ဆောင်သည်။                                                         |
-| `allow-lossy` | အနှစ်ချုပ်များ၊ ဆက်စပ်မှုစစ်ထုတ်ကိရိယာများနှင့် စတိုင်ပြန်လည်ရေးသားမှုများ အပါအဝင် ဤတောင်းဆိုမှု၏ operator plan ကို ဆက်လက်ထားရှိသည်။          |
-| `engine:<id>` | ဖွင့်ထားချိန်တွင် engine တစ်ခုတည်းကို အသုံးပြုသည်၊ ဥပမာ `engine:rtk`။ ၎င်းသည် ထို engine အတွက် တောင်းဆိုမှုတစ်ခုချင်းစီအလိုက် opt-in ဖြစ်သည်။ |
-| `<combo>`     | အမည်တပ် combo တစ်ခုကို ဦးစွာ အမည်ဖြင့် (စာလုံးအကြီးအသေးမခွဲဘဲ) ကိုက်ညီစေပြီး၊ ထို့နောက် id ဖြင့် ကိုက်ညီစေသည်။                                |
+| Value         | Effect                                                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `off`         | ဤ request အတွက် compression မလုပ်ပါ။                                                                                                 |
+| `default`     | panel မှ ဆင်းသက်လာသော Default profile (လက်ရှိအသုံးပြုနေသော profile ကို လျစ်လျူရှုသည်)။ ဆုံးရှုံးမှုရှိသော engine များကို ပိတ်ထားသည်။ |
+| `safe`        | header မပေးပို့ခြင်းနှင့် တူညီသည်။                                                                                                   |
+| `allow-lossy` | summaries၊ relevance filter များနှင့် style rewrite များအပါအဝင် ဤ request ၏ operator plan ကို ထိန်းသိမ်းထားသည်။                      |
+| `engine:<id>` | ဖွင့်ထားသောအခါ engine တစ်ခုတည်း၊ ဥပမာ `engine:rtk`။ ၎င်းသည် ထို engine အတွက် request တစ်ခုချင်းစီအလိုက် opt-in ဖြစ်သည်။              |
+| `<combo>`     | အမည်ဖြင့် အရင် (စာလုံးအကြီး/အသေး မခွဲခြားဘဲ)၊ ထို့နောက် id ဖြင့် ကိုက်ညီသော အမည်ပေးထားသည့် combo တစ်ခု။                              |
 
-`allow-lossy`၊ `engine:<id>` သို့မဟုတ် အမည်တပ် combo တစ်ခု မရှိပါက lossy engine များကို အသုံးမပြုပါ။
-compression ဖွင့်ထားသည့်အခါ တောင်းဆိုမှုတွင် session dedup နှင့် whitespace folding ကို ဆက်လက်ရရှိသည်။
+`allow-lossy`၊ `engine:<id>` သို့မဟုတ် အမည်ပေးထားသည့် combo မရှိပါက ဆုံးရှုံးမှုရှိသော engine များကို
+အသုံးမပြုပါ။ ဆုံးရှုံးမှုရှိသော Default၊ auto-trigger သို့မဟုတ် routing override တစ်ခုကို အဆင့်လျှော့ချ
+လိုက်သောအခါ OmniRoute သည် သတ်မှတ်ထားသော stacked pipeline ထဲမှ အသိအမှတ်ပြုထားသော
+ဆုံးရှုံးမှုမရှိသည့် အဆင့်များကို သတ်မှတ်ထားသည့် အစီအစဉ်အတိုင်း ဆက်လက်အသုံးပြုသည်။ သတ်မှတ်ထားသော
+ဆုံးရှုံးမှုမရှိသည့် အဆင့်တစ်ခုမျှ မကျန်တော့သည့်အခါမှသာ
+`session-dedup → lite` သို့ fallback ပြုလုပ်သည်။
 
-အသုံးချထားသော plan ကို `X-OmniRoute-Compression: <mode>; source=<source>` response
-header တွင် ပြန်လည်ဖော်ပြပေးပြီး၊ `<source>` သည် `request-header`၊ `routing-override`၊ `active-profile`၊
-`auto-trigger`၊ `default` သို့မဟုတ် `off` တို့အနက် တစ်ခုဖြစ်သည်။
+Settings panel ရှိ **Effective pipeline** အစမ်းကြည့်ရှုမှုက ပုံမှန် at-rest plan ကို ပြသသည်။
+auto-trigger ကို လုပ်ဆောင်နိုင်သောအခါ၊ ထိုအစမ်းကြည့်ရှုမှုက ၎င်း၏ conditional effective pipeline ကိုလည်း
+ပြသသောကြောင့် panel နှင့် header မပါသော runtime resolution တို့သည် တစ်ပြေးညီ ရှိနေသည်။
+
+အသုံးပြုထားသော plan ကို `X-OmniRoute-Compression: <mode>; source=<source>` response
+header ထဲသို့ ပြန်လည်ထည့်သွင်းပေးသည်၊ `<source>` သည် `request-header`၊ `routing-override`၊
+`active-profile`၊ `auto-trigger`၊ `default` သို့မဟုတ် `off` တစ်ခုဖြစ်သည်။
 
 ### API
 
 ```bash
-# Compression ဆက်တင်များကို ရယူရန်
+# compression သတ်မှတ်ချက်များကို ရယူရန်
 curl http://localhost:20128/api/settings/compression
 
-# Compression ဆက်တင်များကို အပ်ဒိတ်လုပ်ရန်
+# compression သတ်မှတ်ချက်များကို အပ်ဒိတ်လုပ်ရန်
 curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# သတ်မှတ်ထားသော RTK/stacked payload တစ်ခုကို အစမ်းကြည့်ရှုရန်
+# သတ်မှတ်ထားသော RTK/stacked payload ကို အစမ်းကြည့်ရန်
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# RTK filter pack များကို စာရင်းပြုစုရန်
+# RTK filter pack များကို စာရင်းပြရန်
 curl http://localhost:20128/api/context/rtk/filters
 
-# ရွေးချယ်ထည့်သွင်းနိုင်သော command metadata ဖြင့် RTK ကို တိုက်ရိုက်စမ်းသပ်ရန်
+# ရွေးချယ်နိုင်သော command metadata ဖြင့် RTK ကို တိုက်ရိုက်စမ်းသပ်ရန်
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'
