@@ -118,7 +118,16 @@
 
 ## 5. Nmu awọn kit
 
-`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade. Ṣiṣan iṣiṣẹ `UI Kit upstream watch` osẹ-ọsẹ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna ati pe o jẹ ki ọrọ ipasẹ kan ṣii lakoko ti pin wa lẹhin; repo ti o wa ni oke jẹ ikọkọ, nitorinaa iṣan-iṣẹ nilo aami-kika nikan ni aṣiri `UI_KIT_READ_TOKEN`. Nigbati ko ba le ka ni oke (ko si ami ami, ami ami kan ti o da iṣẹ duro, tabi GitHub unreachable) ṣiṣe naa duro alawọ ewe ṣugbọn o kọ ikilọ kan ati pe o jẹ ki ọrọ lọtọ kan ṣii, eyiti o tilekun funrararẹ ni kete ti ṣiṣe nigbamii le ka ṣiṣan soke lẹẹkansi.
+`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade.
+
+Ṣiṣan iṣẹ `UI Kit upstream watch` ojoojumọ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna. Lakoko ti pinni wa ni ẹhin, `scripts/ci/ui-kit-sync-pr.sh` ntọju PR amuṣiṣẹpọ kan ṣiṣi si ẹka `release/vX.Y.Z` ti o ga julọ, lori ẹka yiyi `chore/ui-kit-sync-latest`. Ko dapọ rara: gbogbo idasilẹ ohun elo tun nilo ayẹwo wiwo lori VPS agbegbe. Ẹka naa ni a tun kọ nigbati itusilẹ tuntun ba jade ti o fi silẹ nikan bibẹẹkọ. PR ti o ṣii pẹlu awọn iṣẹ titari nipasẹ ọwọ ko ni atunkọ, ati PR kan fun ẹya kan ti olutọju kan ti a ti pa ti ko dapọ duro ni pipade titi ti idasilẹ tuntun.
+
+Nigbati ko ba si PR ti o le ṣii (itusilẹ ibi-afẹde ti di didi, PR ti ṣe titari nipasẹ ọwọ, PR ti wa ni pipade, tabi ko si ami ami PR ti a ṣeto) ṣiṣiṣẹ ṣiṣẹ jẹ ki ọran ipasẹ kan ṣii ti o sọ idi.
+
+Ṣiṣẹ iṣẹ naa nlo awọn aṣiri meji:
+
+- `secrets.UI_KIT_READ_TOKEN`: àmi kika-nikan fun repo oke ikọkọ. Nigbati iṣan-iṣẹ ko le ka ni oke (ko si ami ami, ami ami kan ti o da iṣẹ duro, tabi GitHub unreachable) ṣiṣe naa duro alawọ ewe ṣugbọn o kọ ikilọ kan ati pe o jẹ ki ọrọ lọtọ kan ṣii, eyiti o tilekun funrararẹ ni kete ti ṣiṣe nigbamii le ka soke lẹẹkansi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: àmi-ọkà daradara kan lori ibi ipamọ yii pẹlu Awọn akoonu ati Awọn ibeere Fa kikọ wiwọle. `GITHUB_TOKEN` aiyipada ko le ṣẹda PRs nibi, ati pe PR ti o ṣii kii yoo ṣe okunfa CI. Laisi ami ami yii, ṣiṣan iṣẹ naa n tẹ ẹka nikan.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` daakọ `src/` ti o wa ni oke ni adehun yẹn (`latest` = tuntun `v*` tag) sinu `packages/ui-kit/src`, nlo iyipada ti a gba laaye nikan (o ju suffix `.js` silẹ lati agbewọle ojulumọ), o si ṣeto ẹya aaye iṣẹ ni `packages/ui-kit/package.json` ati `package-lock.json` si oke oke. Lẹhinna: atunwo `git diff packages/ui-kit`, ṣe iwe-iwoye wiwo lori awọn olupese, awọn eto, awọn akojọpọ, lilo ati aaye ipari ni awọn akori mejeeji, ṣiṣe `npm run check:ui-kit-snapshot` ati `npm run test:vitest:ui`, ati ṣii PR pẹlu iyipada iyipada oke.
 

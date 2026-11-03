@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — મફત AI ગેટવે
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — કોડિંગ ક્યારેય બંધ ન કરો. દરેક AI ટૂલ → ૩૮૦ પ્રોવાઇડર્સ — ૧૫૦+ મફત — એક જ એન્ડપોઇન્ટથી. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ને મફત Claude / GPT / Gemini માં ઓટો-ફોલબેક સાથે. RTK + Caveman સ્ટેક્ડ કંપ્રેશન ૧૫–૯૫% ટોકન્સ બચાવે છે (~૮૯% સરેરાશ) — ક્યારેય લિમિટ્સ પર ન પહોંચો. ૩૮૦ AI પ્રોવાઇડર્સ · ૧૫૦+ મફત ટિયર્સ · ~૧.૬૨B મફત ટોકન્સ/મહિનો · ૨૦ રૂટિંગ સ્ટ્રેટેજીઝ · $૦ થી શરૂ કરો."/>
 
 </div>
@@ -1292,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 પણ તેન�
   <tr><td nowrap><b>રનટાઇમ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ભાષા</b></td><td>TypeScript 6.0 — <code>src/</code> અને <code>open-sse/</code>માં <b>100% TypeScript</b> (v2.0થી કોરમાં શૂન્ય <code>any</code>)</td></tr>
   <tr><td nowrap><b>ફ્રેમવર્ક</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON લેગસી) — 147 ડોમેન મોડ્યુલ્સ, 220 માઇગ્રેશન</td></tr>
+  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON લેગસી) — 147 ડોમેન મોડ્યુલ્સ, 221 માઇગ્રેશન</td></tr>
   <tr><td nowrap><b>મેમરી</b></td><td>SQLite FTS5 ફુલ-ટેક્સ્ટ + int8-ક્વૉન્ટાઇઝ્ડ વેક્ટર એમ્બેડિંગ્સ, ટાઇપ્ડ ડિકે</td></tr>
   <tr><td nowrap><b>સ્કીમા</b></td><td>Zod 4 — MCP ટૂલ I/O માન્યતા + API કોન્ટ્રાક્ટ્સ</td></tr>
   <tr><td nowrap><b>પ્રોટોકોલ્સ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ MIT લાઇસન્સ - વિગતો માટે [LICENSE](LICENSE) જ�
 
 **[⬆ ટોચ પર પાછા જાઓ](#-omniroute)** · ઓપન-સોર્સ AI કમ્યુનિટી માટે ❤️ થી બનાવેલું.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT લાઇસન્સ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT લાઇસન્સ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- કમ્યુનિટી Q&A માટે GitHub Discussions સક્ષમ કરેલ છે -->
