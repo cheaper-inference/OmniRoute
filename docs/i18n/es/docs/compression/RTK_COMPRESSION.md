@@ -27,24 +27,24 @@ Apilado:          1 - (1 - 0.80) * (1 - 0.46) = 89.2% de ahorro
 Intervalo:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Qué comprime
+## Qué Comprime
 
-El catálogo integrado incluye actualmente 49 filtros distribuidos entre estas categorías:
+El catálogo integrado incluye actualmente 56 filtros en estas categorías:
 
-| Categoría | Ejemplos                                                          |
-| --------- | ----------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
-| `test`    | Vitest, Jest, Pytest, Playwright, pruebas de Go, pruebas de Cargo |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`   | `ls`, `find`, `grep`, registros genéricos del shell               |
-| `docker`  | `docker ps`, registros de Docker                                  |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
-| `generic` | Salida JSON, trazas de pila, alternativa genérica para la salida  |
+| Categoría | Ejemplos                                                        |
+| --------- | --------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`               |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, pruebas de Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx   |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler   |
+| `shell`   | `ls`, `find`, `grep`, registros genéricos de shell              |
+| `docker`  | `docker ps`, registros de Docker                                |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                         |
+| `generic` | salida JSON, trazas de pila, fallback genérico de salida        |
 
-El detector de `open-sse/services/compression/engines/rtk/commandDetector.ts` clasifica la salida
-antes de seleccionar el filtro. Los filtros también pueden coincidir mediante un patrón de comando o una expresión regular de salida cuando una clase
-de comando no es suficiente.
+El detector en `open-sse/services/compression/engines/rtk/commandDetector.ts` clasifica la salida
+antes de la selección del filtro. Los filtros también pueden coincidir por patrón de comando o
+expresión regular de salida cuando una clase de comando no es suficiente.
 
 ## Resolución de filtros
 
@@ -352,60 +352,59 @@ node --import tsx/esm --test \
 
 ## Niveles de intensidad (v3.8.16+)
 
-RTK admite **3 niveles de intensidad** que ofrecen distintos equilibrios entre la **agresividad de la compresión** y la **seguridad**. El nivel se establece mediante `config.intensity` en la configuración del motor.
+RTK admite **3 niveles de intensidad** que equilibran la **agresividad de la compresión** y la **seguridad**. El nivel se define mediante `config.intensity` en la configuración del motor.
 
 ### Los 3 niveles
 
 | Nivel                       | Umbral de truncamiento | Ahorro de tokens | Riesgo   | Ideal para                       |
 | --------------------------- | ---------------------- | ---------------- | -------- | -------------------------------- |
 | `minimal`                   | 24 líneas por sección  | ~20-40%          | Muy bajo | Producción con contexto crítico  |
-| `standard` (predeterminado) | 24 líneas por sección  | ~50-70%          | Bajo     | Sesiones diarias de programación |
+| `standard` (predeterminado) | 24 líneas por sección  | ~50-70%          | Bajo     | Sesiones de codificación diarias |
 | `aggressive`                | 16 líneas por sección  | ~70-90%          | Medio    | Sesiones largas, ahorro máximo   |
 
-### Dónde se produce el truncamiento
+### Dónde ocurre el truncamiento
 
 El umbral de truncamiento afecta a `lineFilter.ts`:
 
 ```ts
-// De open-sse/services/compression/engines/rtk/index.ts:329-330
+// Desde open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Se conservan tanto el **inicio** como el **final** de cada sección; el contenido intermedio se descarta cuando se activa el truncamiento.
+Tanto el **inicio** como el **final** de cada sección se conservan; el contenido intermedio se descarta cuando se activa el truncamiento.
 
-### Qué se conserva y qué se elimina
+### Qué se conserva y qué se recorta
 
-| Contenido                         | minimal       | standard      | aggressive    |
-| --------------------------------- | ------------- | ------------- | ------------- |
-| Errores / trazas de pila          | ✅ conservado | ✅ conservado | ✅ conservado |
-| Fallos de pruebas                 | ✅ conservado | ✅ conservado | ✅ conservado |
-| Errores de compilación            | ✅ conservado | ✅ conservado | ✅ conservado |
-| Pruebas superadas (detalladas)    | ✅ conservado | 🟡 contraído  | 🟡 contraído  |
-| Salida rutinaria (registros info) | 🟡 contraído  | 🟡 contraído  | ❌ descartado |
-| Barras de progreso                | 🟡 contraído  | ❌ descartado | ❌ descartado |
-| Banner / arte ASCII               | 🟡 contraído  | ❌ descartado | ❌ descartado |
+| Contenido                       | minimal       | standard      | aggressive    |
+| ------------------------------- | ------------- | ------------- | ------------- |
+| Errores / trazas de pila        | ✅ conservado | ✅ conservado | ✅ conservado |
+| Fallos de pruebas               | ✅ conservado | ✅ conservado | ✅ conservado |
+| Errores de compilación          | ✅ conservado | ✅ conservado | ✅ conservado |
+| Pruebas exitosas (detalladas)   | ✅ conservado | 🟡 colapsado  | 🟡 colapsado  |
+| Salida rutinaria (logs de info) | 🟡 colapsado  | 🟡 colapsado  | ❌ descartado |
+| Barras de progreso              | 🟡 colapsado  | ❌ descartado | ❌ descartado |
+| Banner / arte ASCII             | 🟡 colapsado  | ❌ descartado | ❌ descartado |
 
-### Elección de la intensidad adecuada
+### Cómo elegir la intensidad adecuada
 
 ```
-                  ¿Perder contexto sería catastrófico?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     SÍ          NO         NO SEGURO
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      ¿Qué importancia  Pruebe primero `standard`
-      │      tiene el          (funciona en el 80% de los
-      │      rendimiento?      casos)
-      │           │
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │     BAJA      ALTA
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -428,11 +427,11 @@ Se conservan tanto el **inicio** como el **final** de cada sección; el contenid
 }
 ```
 
-**Mediante programación**:
+**De forma programática**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) es un
-`CompressionEngine` y no tiene ningún método `updateConfig`. En su lugar, actualice la configuración
-de un motor mediante la función auxiliar del registro:
+`CompressionEngine` y no tiene un método `updateConfig`. Actualiza la configuración
+de un motor a través del auxiliar del registro:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,14 +441,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificación del efecto
 
-Utilice la **puerta de verificación** (véase más abajo) para confirmar que su filtro es seguro con la intensidad elegida:
+Usa la **Puerta de verificación** (ver más abajo) para confirmar que tu filtro es seguro con la intensidad elegida:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Los filtros fallaron con la intensidad aggressive");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

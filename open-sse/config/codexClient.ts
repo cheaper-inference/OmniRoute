@@ -5,6 +5,7 @@ import {
   DEFAULT_CODEX_CLIENT_VERSION,
   getCodexCliRsHeaders as buildCodexCliRsHeaders,
 } from "@/shared/constants/codexClient";
+import { getCliVersionOverride, type CliVersionSource } from "./cliVersions.ts";
 
 export {
   DEFAULT_CODEX_CLIENT_VERSION,
@@ -26,9 +27,12 @@ export type CodexClientVersionFetch = (
   init: SafeOutboundFetchOptions & { method: "GET"; headers: Record<string, string> }
 ) => Promise<Response>;
 
+type CodexClientVersionSource = "override" | "registry" | "pinned" | "fallback";
+
 let cachedCodexVersion: string | null = null;
 let codexVersionRefreshAt = 0;
 let codexVersionRefresh: Promise<string> | null = null;
+let codexVersionSource: CodexClientVersionSource = "fallback";
 const DEFAULT_CODEX_USER_AGENT_PLATFORM = "Windows 10.0.26200";
 const DEFAULT_CODEX_USER_AGENT_ARCH = "x64";
 const CODEX_VERSION_OVERRIDE_ENV = "CODEX_CLIENT_VERSION";
@@ -50,6 +54,40 @@ type FetchLike = typeof fetch;
 
 let versionCache: CodexVersionCache | null = null;
 let versionInFlight: Promise<string> | null = null;
+
+function describeError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+/**
+ * A silent fallback to the pinned version is indistinguishable from a healthy
+ * install: the live catalog just comes back short and #16714 has no trace to
+ * follow. Warn once per failed refresh so the operator can see why discovery
+ * stopped seeing new models.
+ */
+function reportCodexVersionFallback(reason: string): void {
+  codexVersionSource = "fallback";
+  console.warn(
+    `[codex] client version refresh failed (${reason}); discovery stays on ` +
+      `${getCodexClientVersion()} and may omit models the backend gates behind a newer client`
+  );
+}
+
+/**
+ * Which version the next upstream call will advertise. `fallback` means the
+ * last refresh failed and the catalog may be short (#16714); `registry` means
+ * the npm metadata was applied; `pinned` means the registry answered but is not
+ * newer than the built-in floor (healthy, nothing to fix); `override` means
+ * the dashboard override or CODEX_CLIENT_VERSION won (no refresh runs then).
+ * For the operator-facing layer name (settings/env/discovered/default) see
+ * getCodexAdvertisedVersionSource().
+ */
+export function getCodexClientVersionSource(): CodexClientVersionSource {
+  if (getCliVersionOverride("codex")) return "override";
+  if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "override";
+  return codexVersionSource;
+}
 
 function getSafeEnvValue(name: string, pattern: RegExp): string | null {
   const raw = process.env[name];
@@ -148,7 +186,9 @@ export function clearCodexClientVersionCache(): void {
 }
 
 export function getCodexClientVersion(): string {
-  const override = getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
+  const override =
+    getCliVersionOverride("codex") ||
+    getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
   if (override) return override;
   // Discovery may cache a registry version, but never below the release pin.
   if (
@@ -196,7 +236,9 @@ async function readCodexVersionMetadata(response: Response, signal: AbortSignal)
 
 /** Refresh only during model discovery. Inference reads the validated cache synchronously. */
 export function refreshCodexClientVersion(fetchImpl: CodexClientVersionFetch): Promise<string> {
-  const override = getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
+  const override =
+    getCliVersionOverride("codex") ||
+    getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
   if (override || Date.now() < codexVersionRefreshAt) {
     return Promise.resolve(getCodexClientVersion());
   }
@@ -230,14 +272,24 @@ export function refreshCodexClientVersion(fetchImpl: CodexClientVersionFetch): P
               .find((part) => part !== 0) ?? 0;
           if (difference >= 0) {
             cachedCodexVersion = parsed.data.version;
+            codexVersionSource = "registry";
+            refreshAfter = CODEX_VERSION_CACHE_TTL_MS;
+          } else {
+            // The pin is a floor, so a registry that lags behind it is healthy:
+            // nothing failed, there is nothing to warn about and no reason to
+            // retry sooner than a successful refresh would.
+            if (!cachedCodexVersion) codexVersionSource = "pinned";
             refreshAfter = CODEX_VERSION_CACHE_TTL_MS;
           }
+        } else {
+          reportCodexVersionFallback("registry metadata did not match the expected shape");
         }
       } else {
         await response.body?.cancel();
+        reportCodexVersionFallback(`registry responded with HTTP ${response.status}`);
       }
-    } catch {
-      // Registry unavailable or invalid: retain the last-known-good version or offline pin.
+    } catch (error) {
+      reportCodexVersionFallback(`registry request failed: ${describeError(error)}`);
     }
     codexVersionRefreshAt = Date.now() + refreshAfter;
     return getCodexClientVersion();
@@ -253,6 +305,25 @@ export function resetCodexClientVersionCacheForTests(): void {
   cachedCodexVersion = null;
   codexVersionRefreshAt = 0;
   codexVersionRefresh = null;
+  codexVersionSource = "fallback";
+}
+
+/**
+ * Which layer produced `getCodexClientVersion()` right now. Resolution is
+ * dashboard override -> `CODEX_CLIENT_VERSION` env -> a discovered registry /
+ * release version newer than the pin ("discovered") -> the captured default.
+ * Side-effect free: unlike getCodexClientVersion() it never starts a refresh.
+ * Note this is the NON-caller-aware chain; see resolveCodexAdvertisedVersion for
+ * the inference path, which additionally forwards the caller's own version.
+ */
+export function getCodexAdvertisedVersionSource(): CliVersionSource {
+  if (getCliVersionOverride("codex")) return "settings";
+  if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "env";
+  const discovered =
+    cachedCodexVersion && compareDottedTriple(cachedCodexVersion, DEFAULT_CODEX_CLIENT_VERSION) >= 0
+      ? cachedCodexVersion
+      : getCachedCodexClientVersion();
+  return discovered !== DEFAULT_CODEX_CLIENT_VERSION ? "discovered" : "default";
 }
 
 /**
@@ -302,6 +373,33 @@ export function getCodexClientVersionFromHeaders(
 
   const version = match[1];
   return SAFE_HEADER_TOKEN_PATTERN.test(version) ? version : null;
+}
+
+/**
+ * The version to advertise on the chatgpt.com/backend-api inference face.
+ *
+ * Precedence, highest first:
+ *   1. the dashboard override (`settings.cliVersionOverrides.codex`), which is an
+ *      explicit operator choice and therefore outranks the caller;
+ *   2. the version the CALLER reported (see getCodexClientVersionFromHeaders);
+ *   3. `CODEX_CLIENT_VERSION` env;
+ *   4. a discovered registry/release version newer than the pin;
+ *   5. the captured default.
+ *
+ * Layer 2 exists because the ChatGPT backend gates newer models on the client
+ * version, so forwarding what the caller actually runs keeps a stale pin from
+ * locking operators out of a model their own CLI supports. Step 1 was added
+ * later so an operator can force one advertised version regardless of what the
+ * caller sends.
+ */
+export function resolveCodexAdvertisedVersion(
+  clientHeaders?: Record<string, string> | null
+): string {
+  return (
+    getCliVersionOverride("codex") ||
+    getCodexClientVersionFromHeaders(clientHeaders) ||
+    getCodexClientVersion()
+  );
 }
 
 export function getCodexUserAgent(versionOverride?: string | null): string {

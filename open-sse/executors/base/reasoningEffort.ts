@@ -64,7 +64,9 @@ export const MAX_TIER_REASONING_MODEL_PATTERN =
 export const O1_O3_REASONING_MODELS_PATTERN = /(?:^|\/|\b)(?:o1-mini|o1|o3-mini|o3-pro|o3)(?:$|-)/i;
 export const O1_PREVIEW_PATTERN = /(?:^|\/|\b)o1-preview(?:$|-)/i;
 export const MUSE_SPARK_PATTERN = /(?:^|\/|\b)muse-spark/i;
+export const MUSE_SPARK_12_PATTERN = /(?:^|\/|\b)muse-spark-1\.2(?:$|-|\b)/i;
 export const MINIMAX_REASONING_PATTERN = /(?:^|\/|\b)minimax(?:-m3|-m2)/i;
+export const MINIMAX_M31_PATTERN = /(?:^|\/|\b)minimax-m3\.1(?:-|\b)/i;
 export const GROK_45_PATTERN = /(?:^|\/|\b)grok-4\.5/i;
 export const GROK_46_PATTERN = /(?:^|\/|\b)grok-4\.6/i;
 export const GLM_53_FAMILY_PATTERN = /(?:^|\/|\b)glm-5\.3(?:$|-)/i;
@@ -213,18 +215,22 @@ export function supportsMaxEffortForProvider(provider: string, model: string): b
   );
 }
 
-// ── Effort carrier helpers (#7044) ──────────────────────────────────────────
-// OmniRoute carries the requested effort on up to three shapes:
+// ── Effort carrier helpers (#7044) ────────────────────────────────────────────
+// OmniRoute carries the requested effort on up to four shapes:
 //   1. top-level `reasoning_effort`        — OpenAI / OmniRoute-internal
-//   2. `reasoning.effort`                  — OpenAI Responses shape
-//   3. `output_config.effort`              — Anthropic Messages native (Claude Code / Claude passthrough)
-// Carrier (3) was previously invisible to this sanitizer, so a native Claude request
+//   2. top-level `reasoningEffort`         — camel-case alias of (1), sent by
+//      some clients; folded into `reasoning_effort` (canonical wins on
+//      conflict) and stripped before dispatch to OpenAI-shape upstreams
+//   3. `reasoning.effort`                  — OpenAI Responses shape
+//   4. `output_config.effort`              — Anthropic Messages native (Claude Code / Claude passthrough)
+// Carrier (4) was previously invisible to this sanitizer, so a native Claude request
 // carrying `output_config.effort: "xhigh"` reached providers that don't accept xhigh
 // (e.g. claude-sonnet-4-6, supportsXHighEffort=false) unchanged → HTTP 400 (#7044).
 interface EffortCarriers {
   reasoning: Record<string, unknown> | null;
   outputConfig: Record<string, unknown> | null;
   hasTopLevelReasoningEffort: boolean;
+  hasCamelCaseReasoningEffort: boolean;
   hasReasoningEffort: boolean;
   hasOutputConfigEffort: boolean;
   effort: unknown;
@@ -240,31 +246,45 @@ function readEffortCarriers(b: Record<string, unknown>): EffortCarriers {
       ? (b.output_config as Record<string, unknown>)
       : null;
   const hasTopLevelReasoningEffort = Object.prototype.hasOwnProperty.call(b, "reasoning_effort");
+  // Own-property only. An own `undefined` counts as absent: the entry fold in
+  // `sanitizeReasoningEffortForProvider` gates its copy on a defined value
+  // (identity preserved), `camelEffort` below only promotes strings, and
+  // `writeEffortValue` only writes from a defined alias value.
+  const hasCamelCaseReasoningEffort = Object.prototype.hasOwnProperty.call(b, "reasoningEffort");
   const hasReasoningEffort = !!(
     reasoning && Object.prototype.hasOwnProperty.call(reasoning, "effort")
   );
   const hasOutputConfigEffort = !!(
     outputConfig && Object.prototype.hasOwnProperty.call(outputConfig, "effort")
   );
-  const effort = b.reasoning_effort ?? reasoning?.effort ?? outputConfig?.effort;
+  const camelEffort = typeof b.reasoningEffort === "string" ? b.reasoningEffort : undefined;
+  const effort = b.reasoning_effort ?? camelEffort ?? reasoning?.effort ?? outputConfig?.effort;
   return {
     reasoning,
     outputConfig,
     hasTopLevelReasoningEffort,
+    hasCamelCaseReasoningEffort,
     hasReasoningEffort,
     hasOutputConfigEffort,
     effort,
   };
 }
 
-/** Write a normalized effort value back to every carrier that was present. */
+/** Write a normalized effort value back to every carrier that was present.
+ * A present camel-case alias counts as a present top-level carrier: the body
+ * did carry a top-level effort, and the value lands on the canonical field.
+ * An own `undefined` alias counts as absent: nothing is promoted from it. */
 function writeEffortValue(
   b: Record<string, unknown>,
   value: string,
   c: EffortCarriers
 ): Record<string, unknown> {
   const next: Record<string, unknown> = { ...b };
-  if (c.hasTopLevelReasoningEffort) next.reasoning_effort = value;
+  if (
+    c.hasTopLevelReasoningEffort ||
+    (c.hasCamelCaseReasoningEffort && b.reasoningEffort !== undefined)
+  )
+    next.reasoning_effort = value;
   if (c.hasReasoningEffort && c.reasoning) next.reasoning = { ...c.reasoning, effort: value };
   if (c.hasOutputConfigEffort && c.outputConfig)
     next.output_config = { ...c.outputConfig, effort: value };
@@ -289,14 +309,17 @@ export function readBodyReasoningEffort(body: unknown): string | null {
  * that is already on its way upstream, so it must not reshape anything else.
  */
 export function writeBodyReasoningEffort(body: unknown, value: string): unknown {
-  if (!body || typeof body !== "object") return body;
+  if (!body || typeof body !== "object" || typeof value !== "string") return body;
   const record = body as Record<string, unknown>;
-  return writeEffortValue(record, value, readEffortCarriers(record));
+  const next = writeEffortValue(record, value, readEffortCarriers(record));
+  delete next.reasoningEffort;
+  return next;
 }
 
 /** Strip the effort field from every carrier that was present. */
 function stripEffortValue(b: Record<string, unknown>, c: EffortCarriers): Record<string, unknown> {
   const next: Record<string, unknown> = { ...b };
+  delete next.reasoningEffort;
   if (c.hasTopLevelReasoningEffort) delete next.reasoning_effort;
   if (c.hasReasoningEffort && c.reasoning) {
     const r: Record<string, unknown> = { ...c.reasoning };
@@ -319,17 +342,36 @@ export function sanitizeReasoningEffortForProvider(
   model: string | undefined,
   log?: ReasoningSanitizeLog | null
 ): unknown {
-  if (isNvidiaGlm52(provider, model)) {
-    return mapNvidiaGlm52ReasoningParams(body, provider, model, log);
-  }
-  if (isBasetenReasoningModel(provider, model)) {
-    return mapBasetenReasoningParams(body, provider, model, log);
-  }
-
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
   const b = body as Record<string, unknown>;
-  const c = readEffortCarriers(b);
-  if (c.effort === undefined) return body;
+  // Fold the camel-case alias into the canonical field before any early exit,
+  // so every passthrough path below also drops it. Without the alias there is
+  // no copy: working === body and every return below preserves identity.
+  let working = b;
+  if (
+    Object.prototype.hasOwnProperty.call(b, "reasoningEffort") &&
+    b.reasoningEffort !== undefined
+  ) {
+    const camel = b.reasoningEffort;
+    const next: Record<string, unknown> = { ...b };
+    delete next.reasoningEffort;
+    if (
+      typeof camel === "string" &&
+      !Object.prototype.hasOwnProperty.call(next, "reasoning_effort")
+    ) {
+      next.reasoning_effort = camel;
+    }
+    working = next;
+  }
+  if (isNvidiaGlm52(provider, model)) {
+    return mapNvidiaGlm52ReasoningParams(working, provider, model, log);
+  }
+  if (isBasetenReasoningModel(provider, model)) {
+    return mapBasetenReasoningParams(working, provider, model, log);
+  }
+
+  const c = readEffortCarriers(working);
+  if (c.effort === undefined) return working;
   const effortStr = typeof c.effort === "string" ? c.effort.toLowerCase() : "";
   const modelStr = model || "";
 
@@ -339,7 +381,7 @@ export function sanitizeReasoningEffortForProvider(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: removed unsupported reasoning_effort for o1-preview`
     );
-    return stripEffortValue(b, c);
+    return stripEffortValue(working, c);
   }
 
   const githubOptIn =
@@ -352,7 +394,7 @@ export function sanitizeReasoningEffortForProvider(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: removed unsupported reasoning_effort`
     );
-    return stripEffortValue(b, c);
+    return stripEffortValue(working, c);
   }
 
   // ── GLM-5.3 and GLM-5.3-FLASH specific rules ──────────────────────────────
@@ -372,7 +414,7 @@ export function sanitizeReasoningEffortForProvider(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: mapped reasoning_effort ${effortStr} → ${mappedGlm53} (GLM-5.3 contract)`
     );
-    let updated = writeEffortValue(b, mappedGlm53, c);
+    let updated = writeEffortValue(working, mappedGlm53, c);
     const thinkingObj = updated.thinking;
     if (
       thinkingObj &&
@@ -409,21 +451,40 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: mapped reasoning_effort ${effortStr} → ${mappedGlm52} (GLM-5.2 contract)`
       );
-      return writeEffortValue(b, mappedGlm52, c);
+      return writeEffortValue(working, mappedGlm52, c);
     }
-    return body;
+    return working;
   }
 
-  // ── Muse Spark models (muse-spark-1.2, etc.) ─────────────────────────────
-  // Accepts minimal|low|medium|high|xhigh. Rejects none (400) and max.
-  // max/ultra → xhigh; none → minimal.
-  if (MUSE_SPARK_PATTERN.test(modelStr)) {
+  // ── Muse Spark models (muse-spark-1.2 vs 1.3+ / future versions) ───────
+  // 1.2: Accepts minimal|low|medium|high|xhigh (no max).
+  //      max/ultra → xhigh; none → minimal.
+  // 1.3+ / future versions: Accepts minimal|low|medium|high|xhigh|max.
+  //      ultra → max; none → minimal.
+  if (MUSE_SPARK_12_PATTERN.test(modelStr)) {
     if (effortStr === "max" || effortStr === "ultra") {
       log?.info?.(
         "REASONING_SANITIZE",
-        `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → xhigh (Muse Spark ceiling)`
+        `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → xhigh (Muse Spark 1.2 ceiling)`
       );
-      return writeEffortValue(b, "xhigh", c);
+      return writeEffortValue(working, "xhigh", c);
+    }
+    if (effortStr === "none") {
+      log?.info?.(
+        "REASONING_SANITIZE",
+        `${provider}/${modelStr}: clamped reasoning_effort none → minimal (Muse Spark floor)`
+      );
+      return writeEffortValue(working, "minimal", c);
+    }
+    return working;
+  }
+  if (MUSE_SPARK_PATTERN.test(modelStr)) {
+    if (effortStr === "ultra") {
+      log?.info?.(
+        "REASONING_SANITIZE",
+        `${provider}/${modelStr}: clamped reasoning_effort ultra → max (Muse Spark ceiling)`
+      );
+      return writeEffortValue(b, "max", c);
     }
     if (effortStr === "none") {
       log?.info?.(
@@ -443,22 +504,35 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → high (o1/o3-mini ceiling)`
       );
-      return writeEffortValue(b, "high", c);
+      return writeEffortValue(working, "high", c);
     }
-    return body;
+    return working;
   }
 
   // ── MiniMax models ───────────────────────────────────────────────────────
   // Accepts none|minimal|low|medium|high. Clamp xhigh/max/ultra → high.
   if (MINIMAX_REASONING_PATTERN.test(modelStr)) {
+    // MiniMax M3.1 Flash accepts the full graduated vocabulary up to max
+    // (registry: low..max + supportsXHighEffort), so xhigh/max pass through.
+    // Only ultra, which it does not declare, is clamped to its max ceiling.
+    if (MINIMAX_M31_PATTERN.test(modelStr)) {
+      if (effortStr === "ultra") {
+        log?.info?.(
+          "REASONING_SANITIZE",
+          `${provider}/${modelStr}: clamped reasoning_effort ultra → max (MiniMax M3.1 ceiling)`
+        );
+        return writeEffortValue(b, "max", c);
+      }
+      return body;
+    }
     if (effortStr === "xhigh" || effortStr === "max" || effortStr === "ultra") {
       log?.info?.(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → high (MiniMax ceiling)`
       );
-      return writeEffortValue(b, "high", c);
+      return writeEffortValue(working, "high", c);
     }
-    return body;
+    return working;
   }
 
   // ── xAI Grok models ──────────────────────────────────────────────────────
@@ -470,9 +544,9 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → xhigh (Grok 4.6 ceiling)`
       );
-      return writeEffortValue(b, "xhigh", c);
+      return writeEffortValue(working, "xhigh", c);
     }
-    return body;
+    return working;
   }
   if (GROK_45_PATTERN.test(modelStr)) {
     if (effortStr === "xhigh" || effortStr === "max" || effortStr === "ultra") {
@@ -480,9 +554,9 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → high (Grok 4.5 ceiling)`
       );
-      return writeEffortValue(b, "high", c);
+      return writeEffortValue(working, "high", c);
     }
-    return body;
+    return working;
   }
 
   // ── Xiaomi MiMo V2.5 / V2.6 on OpenCode gateways ─────────────────────────
@@ -524,16 +598,16 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → high (MiMo ceiling)`
       );
-      return writeEffortValue(b, "high", c);
+      return writeEffortValue(working, "high", c);
     }
     if (effortStr === "minimal") {
       log?.info?.(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: clamped reasoning_effort minimal → low (MiMo floor)`
       );
-      return writeEffortValue(b, "low", c);
+      return writeEffortValue(working, "low", c);
     }
-    return body;
+    return working;
   }
 
   // `minimal` is a sub-`low` reasoning tier some catalogs advertise (e.g.
@@ -562,7 +636,7 @@ export function sanitizeReasoningEffortForProvider(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: mapped reasoning_effort ${effortStr} → low`
     );
-    return writeEffortValue(b, "low", c);
+    return writeEffortValue(working, "low", c);
   }
 
   if (
@@ -573,7 +647,7 @@ export function sanitizeReasoningEffortForProvider(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} to high (SenseNova DeepSeek V4 Flash ceiling)`
     );
-    return writeEffortValue(b, "high", c);
+    return writeEffortValue(working, "high", c);
   }
 
   // Providers and model families whose top reasoning tier is `max` natively
@@ -606,14 +680,14 @@ export function sanitizeReasoningEffortForProvider(
     isMaxTierTarget && effortStr === "xhigh" ? getLearnedReasoningEffort(provider, modelStr) : null;
   const learnedRejectsMax =
     maxTierLearnedSet !== null && maxTierLearnedSet.size > 0 && !maxTierLearnedSet.has("max");
-  if (learnedRejectsMax && maxTierLearnedSet.has("xhigh")) return body;
+  if (learnedRejectsMax && maxTierLearnedSet.has("xhigh")) return working;
 
   if (isMaxTierTarget && effortStr === "xhigh" && !learnedRejectsMax) {
     log?.info?.(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: normalized reasoning_effort xhigh → max`
     );
-    return writeEffortValue(b, "max", c);
+    return writeEffortValue(working, "max", c);
   }
 
   // Native DeepSeek (api.deepseek.com) — V4 Pro and Flash use the native
@@ -634,9 +708,9 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `deepseek/${modelStr}: normalized reasoning_effort ${effortStr} → ${mapped}`
       );
-      return writeEffortValue(b, mapped, c);
+      return writeEffortValue(working, mapped, c);
     }
-    return body;
+    return working;
   }
 
   // Generic learned clamp (downgrade-only: greatest accepted <= demand).
@@ -652,7 +726,7 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} → ${clamped} (learned)`
       );
-      return writeEffortValue(b, clamped, c);
+      return writeEffortValue(working, clamped, c);
     }
   }
 
@@ -681,7 +755,7 @@ export function sanitizeReasoningEffortForProvider(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: mapped reasoning_effort ${effortStr} → ${nearest.tier} (model accepts ${declaredEfforts!.join("/")})`
     );
-    return writeEffortValue(b, nearest.tier, c);
+    return writeEffortValue(working, nearest.tier, c);
   }
 
   const supportsXHigh = supportsXHighEffort(provider, modelStr);
@@ -690,20 +764,20 @@ export function sanitizeReasoningEffortForProvider(
   // ── xhigh handling ──────────────────────────────────────────────────────
   // xhigh is OmniRoute-internal. Map it to the best effort the model accepts.
   if (effortStr === "xhigh") {
-    if (supportsXHigh) return body; // model accepts xhigh natively
+    if (supportsXHigh) return working; // model accepts xhigh natively
     if (supportsMax) {
       log?.info?.(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: mapped reasoning_effort xhigh → max`
       );
-      return writeEffortValue(b, "max", c);
+      return writeEffortValue(working, "max", c);
     }
     // Model explicitly rejects xhigh — gracefully degrade to high (its highest standard tier)
     log?.info?.(
       "REASONING_SANITIZE",
       `${provider}/${modelStr}: downgraded reasoning_effort xhigh → high`
     );
-    return writeEffortValue(b, "high", c);
+    return writeEffortValue(working, "high", c);
   }
 
   // ── max handling ────────────────────────────────────────────────────────
@@ -714,7 +788,7 @@ export function sanitizeReasoningEffortForProvider(
   // upstream, and if it 400s the user gets a clear signal. This prevents
   // new models from being unusable for weeks until they're whitelisted (#8057).
   if (effortStr === "max") {
-    if (supportsMax) return body; // explicitly known to accept max
+    if (supportsMax) return working; // explicitly known to accept max
 
     // A model that explicitly advertises its accepted tiers is safe to normalize.
     // Keep the default pass-through for absent metadata: an unlisted model might
@@ -737,7 +811,7 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: downgraded reasoning_effort max → ${maxFallback} (explicit model capability)`
       );
-      return writeEffortValue(b, maxFallback, c);
+      return writeEffortValue(working, maxFallback, c);
     }
 
     if (!supportsXHigh) {
@@ -747,10 +821,10 @@ export function sanitizeReasoningEffortForProvider(
         "REASONING_SANITIZE",
         `${provider}/${modelStr}: downgraded reasoning_effort max → high (model rejects max/xhigh)`
       );
-      return writeEffortValue(b, "high", c);
+      return writeEffortValue(working, "high", c);
     }
-    return body;
+    return working;
   }
 
-  return body;
+  return working;
 }
