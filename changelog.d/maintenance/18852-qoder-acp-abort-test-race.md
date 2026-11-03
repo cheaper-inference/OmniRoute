@@ -1,0 +1,1 @@
+- **test(sse): make the qodercli ACP abort test independent of timing**: the fake agent now holds `session/new` until the test has aborted, so "a session that finishes setup after the client aborted" no longer depends on how fast the runner is. It failed the scheduled Release-Green run on a loaded host.
