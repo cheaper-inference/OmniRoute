@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { cookies } from "next/headers";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
@@ -10,10 +11,10 @@ import {
   isRequestSecure,
 } from "@/lib/auth/socialOAuth";
 import {
-  asRecord,
   consumeOAuthFlow,
   getJsonWithBearer,
-  postForJson,
+  parseOAuthCallbackQuery,
+  postForAccessToken,
   startDashboardSession,
   type SocialCookieStore,
   type StepResult,
@@ -25,13 +26,26 @@ export const githubCallbackInternals = {
 
 const GITHUB_API_HEADERS = { "User-Agent": "OmniRoute-OAuth" };
 
+const githubEmailsSchema = z.array(
+  z.object({
+    email: z.string().trim().toLowerCase().min(1),
+    primary: z.boolean().optional(),
+    verified: z.boolean().optional(),
+  })
+);
+
+const githubAccountSchema = z.object({
+  login: z.string().toLowerCase().optional(),
+  id: z.number().int().optional(),
+});
+
 async function exchangeCodeForAccessToken(
   config: ReturnType<typeof getGitHubOAuthConfig>,
   code: string,
   redirectUri: string,
   codeVerifier: string
 ): Promise<StepResult<string>> {
-  const token = await postForJson(
+  return postForAccessToken(
     "https://github.com/login/oauth/access_token",
     {
       headers: { Accept: "application/json", "Content-Type": "application/json" },
@@ -45,11 +59,6 @@ async function exchangeCodeForAccessToken(
     },
     { request: "token_exchange", response: "token_response" }
   );
-  if (token.ok === false) return token;
-  const accessToken = token.value.access_token;
-  return typeof accessToken === "string" && accessToken
-    ? { ok: true, value: accessToken }
-    : { ok: false, error: "token_response" };
 }
 
 /** The account's verified e-mail and whether it is the account's primary address. */
@@ -69,23 +78,21 @@ async function fetchVerifiedEmail(accessToken: string): Promise<GithubVerifiedEm
     accessToken,
     GITHUB_API_HEADERS
   );
-  const entries = Array.isArray(raw) ? raw.map(asRecord) : [];
+  const entries = githubEmailsSchema.safeParse(raw);
+  if (!entries.success) return null;
   const match =
-    entries.find((entry) => entry.primary === true && entry.verified === true) ??
-    entries.find((entry) => entry.verified === true);
-  if (typeof match?.email !== "string" || !match.email.trim()) return null;
-  return { email: match.email.trim().toLowerCase(), primary: match.primary === true };
+    entries.data.find((entry) => entry.primary && entry.verified) ??
+    entries.data.find((entry) => entry.verified);
+  return match ? { email: match.email, primary: match.primary === true } : null;
 }
 
 /** The account's login and stable numeric id (the id survives renames; the login does not). */
 async function fetchAccount(accessToken: string): Promise<{ login: string; id: number | null }> {
-  const profile = asRecord(
+  const account = githubAccountSchema.safeParse(
     await getJsonWithBearer("https://api.github.com/user", accessToken, GITHUB_API_HEADERS)
   );
-  return {
-    login: typeof profile.login === "string" ? profile.login.toLowerCase() : "",
-    id: typeof profile.id === "number" && Number.isSafeInteger(profile.id) ? profile.id : null,
-  };
+  if (!account.success) return { login: "", id: null };
+  return { login: account.data.login ?? "", id: account.data.id ?? null };
 }
 
 /**
@@ -110,16 +117,14 @@ function isGithubSignInAllowed(
  * Handles the GitHub OAuth authorization code exchange and sets the dashboard session cookie.
  */
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const returnedState = url.searchParams.get("state");
   const origin = getRequestOrigin(request);
   const fail = (error: string) => NextResponse.redirect(new URL(`/login?error=${error}`, origin));
 
-  if (!code || !returnedState) return fail("missing_code");
+  const query = parseOAuthCallbackQuery(new URL(request.url));
+  if (!query) return fail("missing_code");
 
   const cookieStore = await githubCallbackInternals.getCookieStore();
-  const codeVerifier = consumeOAuthFlow(cookieStore, "github", returnedState);
+  const codeVerifier = consumeOAuthFlow(cookieStore, "github", query.state);
   if (!codeVerifier) return fail("invalid_state");
 
   const settings = await getCachedSettings();
@@ -128,7 +133,7 @@ export async function GET(request: Request) {
 
   const accessToken = await exchangeCodeForAccessToken(
     config,
-    code,
+    query.code,
     `${origin}${config.redirectPath}`,
     codeVerifier
   );

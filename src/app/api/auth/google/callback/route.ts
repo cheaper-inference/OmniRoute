@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { cookies } from "next/headers";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
@@ -9,10 +10,10 @@ import {
   isRequestSecure,
 } from "@/lib/auth/socialOAuth";
 import {
-  asRecord,
   consumeOAuthFlow,
   getJsonWithBearer,
-  postForJson,
+  parseOAuthCallbackQuery,
+  postForAccessToken,
   startDashboardSession,
   type SocialCookieStore,
   type StepResult,
@@ -28,7 +29,7 @@ async function exchangeCodeForAccessToken(
   redirectUri: string,
   codeVerifier: string
 ): Promise<StepResult<string>> {
-  const token = await postForJson(
+  return postForAccessToken(
     "https://oauth2.googleapis.com/token",
     {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -43,12 +44,13 @@ async function exchangeCodeForAccessToken(
     },
     { request: "token_exchange", response: "token_response" }
   );
-  if (token.ok === false) return token;
-  const accessToken = token.value.access_token;
-  return typeof accessToken === "string" && accessToken
-    ? { ok: true, value: accessToken }
-    : { ok: false, error: "token_response" };
 }
+
+const googleUserInfoSchema = z.object({
+  email: z.string().trim().toLowerCase().min(1),
+  email_verified: z.literal(true),
+  hd: z.string().trim().toLowerCase().optional(),
+});
 
 /** A Google account's verified e-mail and its Workspace domain (`hd`), when it has one. */
 interface GoogleIdentity {
@@ -60,11 +62,9 @@ interface GoogleIdentity {
 async function fetchVerifiedIdentity(accessToken: string): Promise<StepResult<GoogleIdentity>> {
   const raw = await getJsonWithBearer("https://www.googleapis.com/oauth2/v3/userinfo", accessToken);
   if (raw === null) return { ok: false, error: "user_info_failed" };
-  const info = asRecord(raw);
-  const email = typeof info.email === "string" ? info.email.trim().toLowerCase() : "";
-  if (!email || info.email_verified !== true) return { ok: false, error: "email_not_verified" };
-  const hostedDomain = typeof info.hd === "string" && info.hd ? info.hd.trim().toLowerCase() : null;
-  return { ok: true, value: { email, hostedDomain } };
+  const info = googleUserInfoSchema.safeParse(raw);
+  if (!info.success) return { ok: false, error: "email_not_verified" };
+  return { ok: true, value: { email: info.data.email, hostedDomain: info.data.hd || null } };
 }
 
 /**
@@ -72,16 +72,14 @@ async function fetchVerifiedIdentity(accessToken: string): Promise<StepResult<Go
  * Handles the Google OAuth 2.0 authorization code exchange and sets the dashboard session cookie.
  */
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const returnedState = url.searchParams.get("state");
   const origin = getRequestOrigin(request);
   const fail = (error: string) => NextResponse.redirect(new URL(`/login?error=${error}`, origin));
 
-  if (!code || !returnedState) return fail("missing_code");
+  const query = parseOAuthCallbackQuery(new URL(request.url));
+  if (!query) return fail("missing_code");
 
   const cookieStore = await googleCallbackInternals.getCookieStore();
-  const codeVerifier = consumeOAuthFlow(cookieStore, "google", returnedState);
+  const codeVerifier = consumeOAuthFlow(cookieStore, "google", query.state);
   if (!codeVerifier) return fail("invalid_state");
 
   const settings = await getCachedSettings();
@@ -90,7 +88,7 @@ export async function GET(request: Request) {
 
   const accessToken = await exchangeCodeForAccessToken(
     config,
-    code,
+    query.code,
     `${origin}${config.redirectPath}`,
     codeVerifier
   );

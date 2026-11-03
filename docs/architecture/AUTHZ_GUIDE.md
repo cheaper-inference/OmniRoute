@@ -148,7 +148,8 @@ stays available.
   the state and the verifier live in short-lived `httpOnly` cookies and are
   consumed together by the callback, so a stolen authorization code cannot be
   redeemed from another browser. The redirect URI and the final redirect use
-  the `Host` header (never `X-Forwarded-Host`). Errors redirect to
+  the `Host` header (never `X-Forwarded-Host`). The callback query and every
+  provider response are validated with Zod and fail closed. Errors redirect to
   `/login?error=<code>` without provider text.
 - **Session.** On success the callback mints the session through
   `mintDashboardSessionToken` like every other login, so sign-out revokes it
@@ -160,7 +161,8 @@ stays available.
   `disablePasswordLogin` is in `SECURITY_IMPACTING_SETTINGS_KEYS`: `PATCH
 /api/settings` needs `currentPassword`, machine credentials get `403`, and
   `POST /api/settings/import-json` drops them. The client secrets are never
-  returned by `GET` / `PATCH /api/settings` (only `*SecretConfigured`).
+  returned by `GET` / `PATCH /api/settings` (only `*SecretConfigured`), and the
+  JSON export and the config sync bundle leave them out.
 - **Trust model.** `/api/auth/google/` and `/api/auth/github/` are public
   prefixes (they run before a session exists) and spawn no process. Behind a
   tunnel, the dashboard's security becomes that of the allowlisted Google or

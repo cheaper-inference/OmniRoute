@@ -35,6 +35,9 @@ const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const settingsRoute = await import("../../src/app/api/settings/route.ts");
 const importJsonRoute = await import("../../src/app/api/settings/import-json/route.ts");
+const exportJsonRoute = await import("../../src/app/api/settings/export-json/route.ts");
+const syncBundle = await import("../../src/lib/sync/bundle.ts");
+const { getAuditLog } = await import("../../src/lib/compliance/index.ts");
 const managementPassword = await import("../../src/lib/auth/managementPassword.ts");
 const securitySettings = await import("../../src/shared/constants/securityImpactingSettings.ts");
 const { updateSettingsSchema } = await import("../../src/shared/validation/settingsSchemas.ts");
@@ -241,4 +244,39 @@ test("re-sending the same allowlist or touching an unrelated key keeps every ses
   assert.equal(unrelated.status, 200, await unrelated.clone().text());
 
   assert.equal(await stored("sessionsValidAfter"), undefined);
+});
+
+test("the client secrets never leave the instance through the JSON export or the config sync", async () => {
+  await seedConfiguredInstance();
+  const secrets = [SEEDED_SOCIAL.googleClientSecret, SEEDED_SOCIAL.githubClientSecret] as string[];
+
+  const exported = await exportJsonRoute.GET(
+    await makeManagementSessionRequest("http://localhost:20128/api/settings/export-json")
+  );
+  assert.equal(exported.status, 200);
+  const exportText = await exported.text();
+
+  const { bundle } = await syncBundle.buildConfigSyncEnvelope();
+  const bundleText = JSON.stringify(bundle);
+
+  for (const secret of secrets) {
+    assert.ok(!exportText.includes(secret), `${secret} leaked through export-json`);
+    assert.ok(!bundleText.includes(secret), `${secret} leaked through the sync bundle`);
+  }
+  assert.ok(exportText.includes(SEEDED_SOCIAL.googleClientId as string), "only secrets are cut");
+  assert.ok(bundleText.includes(SEEDED_SOCIAL.googleClientId as string), "only secrets are cut");
+});
+
+test("rotating a client secret keeps the value out of the settings audit diff", async () => {
+  await seedConfiguredInstance();
+  const response = await sessionPatch({
+    googleClientSecret: "rotated-google-secret",
+    currentPassword: PASSWORD,
+  });
+  assert.equal(response.status, 200, await response.clone().text());
+
+  const rows = JSON.stringify(getAuditLog({ action: "settings.update", limit: 10 }));
+  assert.ok(rows.includes("googleClientSecret"), "the change itself stays auditable");
+  assert.ok(!rows.includes("rotated-google-secret"), "new secret in the audit log");
+  assert.ok(!rows.includes(SEEDED_SOCIAL.googleClientSecret as string), "old secret in the log");
 });

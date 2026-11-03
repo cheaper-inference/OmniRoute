@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { updateSettings } from "@/lib/db/settings";
 import {
   DASHBOARD_SESSION_COOKIE,
@@ -21,8 +22,23 @@ export interface SocialCookieStore {
 /** Outcome of a provider HTTP step: the parsed value, or a `/login?error=<code>` code. */
 export type StepResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
-export function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+/** Far above a real authorization code or our own UUID `state`; caps what reaches the provider. */
+const OAUTH_CALLBACK_PARAM_MAX_LENGTH = 4096;
+
+const oauthCallbackQuerySchema = z.object({
+  code: z.string().min(1).max(OAUTH_CALLBACK_PARAM_MAX_LENGTH),
+  state: z.string().min(1).max(OAUTH_CALLBACK_PARAM_MAX_LENGTH),
+});
+
+const oauthTokenResponseSchema = z.object({ access_token: z.string().min(1) });
+
+/** Validates the provider-controlled query of a callback; null when `code`/`state` are unusable. */
+export function parseOAuthCallbackQuery(url: URL): z.infer<typeof oauthCallbackQuerySchema> | null {
+  const parsed = oauthCallbackQuerySchema.safeParse({
+    code: url.searchParams.get("code"),
+    state: url.searchParams.get("state"),
+  });
+  return parsed.success ? parsed.data : null;
 }
 
 export type SocialProvider = "google" | "github";
@@ -88,14 +104,15 @@ export function consumeOAuthFlow(
 }
 
 /**
- * POSTs to a provider endpoint and parses a JSON body. Every failure mode collapses into a short
- * error code — provider response text is never reflected to the browser.
+ * Exchanges an authorization code at the provider's token endpoint and returns the access token.
+ * Every failure mode collapses into a short error code — provider response text is never
+ * reflected to the browser.
  */
-export async function postForJson(
+export async function postForAccessToken(
   url: string,
   init: { headers: Record<string, string>; body: string },
   errors: { request: string; response: string }
-): Promise<StepResult<Record<string, unknown>>> {
+): Promise<StepResult<string>> {
   let resp: Response;
   try {
     resp = await fetch(url, {
@@ -109,7 +126,10 @@ export async function postForJson(
   }
   if (!resp.ok) return { ok: false, error: errors.request };
   try {
-    return { ok: true, value: asRecord(await resp.json()) };
+    const token = oauthTokenResponseSchema.safeParse(await resp.json());
+    return token.success
+      ? { ok: true, value: token.data.access_token }
+      : { ok: false, error: errors.response };
   } catch {
     return { ok: false, error: errors.response };
   }

@@ -25,6 +25,8 @@ const githubLoginRoute = await import("../../src/app/api/auth/github/login/route
 const githubCallbackRoute = await import("../../src/app/api/auth/github/callback/route.ts");
 // @ts-ignore
 const logoutRoute = await import("../../src/app/api/auth/logout/route.ts");
+// @ts-ignore
+const { getAuditLog } = await import("../../src/lib/compliance/index.ts");
 
 interface CapturedCookie {
   value: string;
@@ -843,4 +845,196 @@ test("googleAuthEnabled / githubAuthEnabled false switch a configured provider o
   );
   assert.ok(res.headers.get("location")?.includes("error=not_configured"));
   assert.equal(capturedCookies["auth_token"], undefined);
+});
+
+// ─── Callback inputs, redirect targets, session cookie and audit rows ───
+
+test("Callbacks reject an oversized code or state before touching the cookies or a provider", async () => {
+  await seedGoogle(["allowed@company.com"]);
+  await updateSettings({
+    githubClientId: "gh-test-client-id",
+    githubClientSecret: "gh-test-client-secret",
+  });
+  const providers = [
+    ["google", googleCallbackRoute] as const,
+    ["github", githubCallbackRoute] as const,
+  ];
+  const oversized = [
+    ["state", "c", "s".repeat(4097)],
+    ["code", "c".repeat(4097), "s"],
+  ] as const;
+
+  for (const [provider, route] of providers) {
+    for (const [label, code, state] of oversized) {
+      capturedCookies = {};
+      // The cookie holds the same value: only the schema can refuse this request.
+      startFlow(provider, state);
+      const upstream = recordingFetch(() => new Response("{}", { status: 200 }));
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = upstream.fn;
+      try {
+        const res = await route.GET(
+          new Request(
+            `http://localhost/api/auth/${provider}/callback?code=${code}&state=${state}`,
+            {
+              headers: { host: "app.example.com" },
+            }
+          )
+        );
+        const where = `${provider} oversized ${label}`;
+        assert.equal(
+          res.headers.get("location"),
+          "http://app.example.com/login?error=missing_code",
+          where
+        );
+        assert.equal(upstream.calls.length, 0, where);
+        assert.equal(capturedCookies[`${provider}_oauth_state`]?.value, state, where);
+        assert.equal(capturedCookies["auth_token"], undefined, where);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }
+  }
+});
+
+test("Callbacks ignore redirect targets in the query: success and failure stay on fixed paths", async () => {
+  await seedGoogle(["allowed@company.com"]);
+  const hostile =
+    "next=https://evil.example/&redirect_uri=https://evil.example/cb&returnTo=//evil.example&error=x";
+  startFlow("google", "state-redirect");
+  const provider = googleProvider({ email: "allowed@company.com", email_verified: true });
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = provider.fn;
+  try {
+    const ok = await googleCallbackRoute.GET(
+      new Request(
+        `http://localhost/api/auth/google/callback?code=c&state=state-redirect&${hostile}`,
+        { headers: { host: "app.example.com" } }
+      )
+    );
+    assert.equal(ok.headers.get("location"), "http://app.example.com/dashboard");
+    const token = provider.calls.find((call) => call.url.includes("oauth2.googleapis.com/token"));
+    assert.equal(
+      new URLSearchParams(token?.body).get("redirect_uri"),
+      "http://app.example.com/api/auth/google/callback"
+    );
+
+    const rejected = await googleCallbackRoute.GET(
+      new Request(`http://localhost/api/auth/google/callback?code=c&state=wrong&${hostile}`, {
+        headers: { host: "app.example.com" },
+      })
+    );
+    assert.equal(
+      rejected.headers.get("location"),
+      "http://app.example.com/login?error=invalid_state"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Malformed provider payloads fail closed", async () => {
+  await seedGoogle(["allowed@company.com", "github:583231"]);
+  await updateSettings({
+    githubClientId: "gh-test-client-id",
+    githubClientSecret: "gh-test-client-secret",
+  });
+  const allowedEmail = { email: "allowed@company.com", primary: true, verified: true };
+
+  const badToken = recordingFetch(() =>
+    Response.json({ access_token: { nested: "not-a-string" } }, { status: 200 })
+  );
+  startFlow("google", "state-bad-token");
+  const tokenRes = await runGoogleCallback(badToken.fn, "state-bad-token");
+  assert.equal(
+    tokenRes.headers.get("location"),
+    "http://app.example.com/login?error=token_response"
+  );
+
+  startFlow("google", "state-string-verified");
+  const stringVerified = await runGoogleCallback(
+    googleProvider({ email: "allowed@company.com", email_verified: "true" }).fn,
+    "state-string-verified"
+  );
+  assert.ok(stringVerified.headers.get("location")?.includes("error=email_not_verified"));
+
+  const emailCases = [
+    ["a junk entry poisons the list", [allowedEmail, "junk"]],
+    ["verified must be a real boolean", [{ ...allowedEmail, verified: "true" }]],
+    ["the list must be a list", { ...allowedEmail }],
+  ] as const;
+  for (const [index, [label, emails]] of emailCases.entries()) {
+    const res = await runGithubCallback(
+      githubFetchMock({ profile: { login: "octocat", id: 583231 }, emails }),
+      `gh-state-malformed-${index}`
+    );
+    assert.ok(res.headers.get("location")?.includes("error=email_not_verified"), label);
+  }
+
+  const stringId = await runGithubCallback(
+    githubFetchMock({
+      profile: { login: "octocat", id: "583231" },
+      emails: [{ ...allowedEmail, email: "other@elsewhere.dev" }],
+    }),
+    "gh-state-string-id"
+  );
+  assert.ok(stringId.headers.get("location")?.includes("error=unauthorized_email"));
+  assert.equal(capturedCookies["auth_token"], undefined);
+});
+
+test("The social session cookie is httpOnly, Lax, site-wide, 30 days and Secure on HTTPS", async () => {
+  await seedGoogle(["allowed@company.com"]);
+  const cases = [
+    ["http", {}, false],
+    ["https proxy", { "x-forwarded-proto": "https" }, true],
+  ] as const;
+  for (const [label, headers, secure] of cases) {
+    capturedCookies = {};
+    startFlow("google", `state-cookie-${secure}`);
+    const provider = googleProvider({ email: "allowed@company.com", email_verified: true });
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = provider.fn;
+    try {
+      await googleCallbackRoute.GET(
+        new Request(
+          `http://localhost/api/auth/google/callback?code=c&state=state-cookie-${secure}`,
+          { headers: { host: "app.example.com", ...headers } }
+        )
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+    assert.deepEqual(
+      capturedCookies["auth_token"]?.options,
+      { httpOnly: true, secure, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30 },
+      label
+    );
+  }
+});
+
+test("Audit rows of a social login record the outcome and no code, token or client secret", async () => {
+  await seedGoogle(["allowed@company.com"]);
+  startFlow("google", "state-audit-ok", "verifier-audit-ok");
+  await runGoogleCallback(
+    googleProvider({ email: "allowed@company.com", email_verified: true }).fn,
+    "state-audit-ok"
+  );
+  startFlow("google", "state-audit-no", "verifier-audit-no");
+  await runGoogleCallback(
+    googleProvider({ email: "stranger@company.com", email_verified: true }).fn,
+    "state-audit-no"
+  );
+
+  const rows = JSON.stringify(getAuditLog({ limit: 50 }));
+  assert.ok(rows.includes("auth.login.google.success"), "success row missing");
+  assert.ok(rows.includes("auth.login.google.unauthorized"), "unauthorized row missing");
+  for (const secret of [
+    "g-test-client-secret",
+    "mock-google-token",
+    "state-audit-ok",
+    "verifier-audit-ok",
+    "verifier-audit-no",
+  ]) {
+    assert.ok(!rows.includes(secret), `${secret} must not reach the audit log`);
+  }
 });
