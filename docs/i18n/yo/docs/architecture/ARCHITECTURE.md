@@ -14,7 +14,7 @@ OmniRoute jẹ ẹnu-ọna afisona AI agbegbe ati dasibodu ti a ṣe lori Next.j
 
 Awọn agbara koko:
 
-- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 377, awọn modulu alaṣẹ 156)
+- Ṣii-ibaramu API dada fun CLI/tools (awọn olupese 380, awọn modulu alaṣẹ 156)
 - Request/response itumọ kọja awọn ọna kika olupese
 - Awoṣe konbo fallback (ọkọọkan awoṣe pupọ)
 - Awọn igbesẹ konbo ti a ṣeto (`provider + model + connection`) pẹlu pipaṣẹ akoko ṣiṣe nipasẹ `compositeTiers`
@@ -33,7 +33,7 @@ Awọn agbara koko:
 - Ronu tag parsing (`<think>...</think>`) fun ero awọn awoṣe
 - Idahun imototo fun ibamu OpenAI SDK ti o muna
 - Iṣe deede ipa (eto → olupilẹṣẹ, olumulo → eto) fun ibaramu olupese
-- Iyipada igbejade ti a ṣeto (json_schema → Gemini respondSchema)
+- Iyipada igbejade ti a ṣeto (json_schema → Gemini responseSchema)
 - Iduroṣinṣin agbegbe fun awọn olupese, awọn bọtini, awọn inagijẹ, awọn akojọpọ, awọn eto, idiyele (awọn modulu DB 122)
 - Usage/cost titele ati ìbéèrè gedu
 - Imuṣiṣẹpọ awọsanma iyan fun ìsiṣẹpọ multi-device/state
@@ -42,11 +42,11 @@ Awọn agbara koko:
 - Agbaye eto abẹrẹ kiakia
 - Ipasẹ igba ati itẹka
 - Idiwọn oṣuwọn imudara iwe-iroyin pẹlu awọn profaili kan pato ti olupese
-- Awoṣe fifọ Circuit fun resilience olupese
+- Apẹrẹ fifọ Circuit fun resilience olupese
 - Idaabobo agbo egboogi-ãra pẹlu titiipa mutex
 - Kaṣe yiyọkuro ibeere ti o da lori Ibuwọlu
 - Layer ase: awọn ofin iye owo, eto imupadabọ, eto imulo titiipa
-- Yiyi ọrọ ọrọ: awọn akopọ imudani igba fun lilọsiwaju yiyi akọọlẹ
+- Yiyi ọrọ-ọrọ: awọn akopọ imudani igba fun lilọsiwaju yiyi akọọlẹ
 - Itẹramọṣẹ ipinlẹ agbegbe (SQLite kikọ-nipasẹ kaṣe fun awọn ipadasẹhin, awọn inawo, awọn titiipa, awọn fifọ iyika)
 - Ẹrọ eto imulo fun igbelewọn ibeere aarin (lockout → budget → fallback)
 - Beere telemetry pẹlu akopọ lairi p50/p95/p99
@@ -66,7 +66,7 @@ Awọn agbara koko:
 - Awọn olupese OAuth apọjuwọn (awọn modulu kọọkan 22 labẹ `src/lib/oauth/providers/`)
 - Uninstall/full-uninstall awọn iwe afọwọkọ
 - OAuth ayika titunṣe igbese
-- afara WebSocket fun OpenAI-ibaramu WS ibara (`/v1/ws`)
+- afara WebSocket fun OpenAI-ibaramu WS onibara (`/v1/ws`)
 - Ìṣàkóso àmi ìsiṣẹpọ (issue/revoke, ETag-versioned konfigi edidi gbigba lati ayelujara)
 - GLM Thinking (`glmt`) tito olupese olupese kilasi akọkọ
 - Kika àmi arabara (olupese-ẹgbẹ `/messages/count_tokens` pẹlu ifẹhinti ifoju)

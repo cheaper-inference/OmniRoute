@@ -4,7 +4,7 @@
 
 ---
 
-> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Akcentas – Keak lime (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Kiekviena piktograma yra Lucide glifas.
+> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Akcentas – Keak lime (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Scenarijai Šveicarijoje trūksta kritimo po glifo (`src/app/globals.css`): „Inter“ kirilicai, graikų ir vietnamiečių kalbai ir, tik pagal `html[dir="rtl"]`, „Vazirmatn“ arabų rašmenims. Kiekviena piktograma yra Lucide glifas.
 
 ## 1. Kur kas saugoma
 
@@ -120,7 +120,7 @@
 
 ## 5. Komplekto atnaujinimas
 
-`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas. Savaitinė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą ir palieka vieną sekimo problemą atidarytą, kol kaištis yra už nugaros; prieš srovę esantis atpirkimas yra privatus, todėl darbo eigai reikia tik skaitymo prieigos rakto `UI_KIT_READ_TOKEN` paslaptyje ir be jo ji lieka inertiška.
+`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas. Savaitinė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą ir palieka vieną sekimo problemą atidarytą, kol kaištis yra už nugaros; prieš srovę esantis atpirkimas yra privatus, todėl darbo eigai reikia tik skaitymo prieigos rakto `UI_KIT_READ_TOKEN` paslaptyje. Kai jis negali nuskaityti prieš srovę (nėra prieigos rakto, nustojo veikti arba GitHub nepasiekiamas), paleidimas lieka žalias, bet įrašo įspėjimą ir palieka atvirą atskirą problemą, kuri užsidaro, kai vėlesnis paleidimas vėl gali nuskaityti prieš srovę.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` nukopijuoja prieš srovę esantį `src/` to įpareigojimo metu (`latest` = naujausia `v*` žyma) į `packages/ui-kit/src`, taiko vieną leistiną transformaciją (atmeta `.js` priesagą iš santykinių importų) ir nustato darbo srities versiją `packages/ui-kit/package.json` ir `package-lock.json` į ankstesnę. Tada: peržiūrėkite `git diff packages/ui-kit`, atlikite abiejų temų teikėjų, nustatymų, kombinacijų, naudojimo ir galutinio taško vaizdinį perdavimą, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR naudodami išankstinį pakeitimų žurnalą.
 

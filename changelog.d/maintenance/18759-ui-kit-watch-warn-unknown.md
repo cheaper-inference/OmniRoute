@@ -1,0 +1,1 @@
+- **ci(dashboard):** the weekly UI Kit upstream watch now warns and keeps one tracking issue open when it can't read upstream, and closes it once it can; the message says the token is missing only when it really is unset ([#18759](https://github.com/cheaper-inference/OmniRoute/pull/18759))

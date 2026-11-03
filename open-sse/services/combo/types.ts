@@ -169,7 +169,10 @@ export type HandleComboChatOptions = {
   requestHeaders?: Headers | Record<string, unknown> | null;
 };
 
-export type HandleRoundRobinOptions = HandleComboChatOptions;
+export type HandleRoundRobinOptions = HandleComboChatOptions & {
+  /** The attempt round-robin moved on from; the caller resolves it against the final answer. */
+  heldAttempt?: { heldTruncatedResponse?: Response | null };
+};
 
 export type HistoricalLatencyStatsEntry = {
   totalRequests?: number;

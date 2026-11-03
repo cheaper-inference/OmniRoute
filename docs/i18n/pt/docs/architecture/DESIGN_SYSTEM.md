@@ -4,7 +4,7 @@
 
 ---
 
-> **Estatuto:** o painel é construído no** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendido como o espaço de trabalho `packages/ui-kit` (`@omniroute/ui-kit`; o instantâneo a montante é fixado em `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). A luz é o tema canónico; a preferência por defeito é `system`. O sotaque é Keak lime (`--ci-color-accent`). Switzer é a única família para UI, display e texto de código (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` resolvem isso), auto-hospedado pelo próprio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Cada ícone é um glifo Lucide.
+> **Estatuto:** o painel é construído no** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendido como o espaço de trabalho `packages/ui-kit` (`@omniroute/ui-kit`; o instantâneo a montante é fixado em `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). A luz é o tema canónico; a preferência por defeito é `system`. O sotaque é Keak lime (`--ci-color-accent`). Switzer é a única família para UI, display e texto de código (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` resolvem isso), auto-hospedado pelo próprio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Guiões O Switzer carece de glifo por glifo (`src/app/globals.css`): Inter para cirílico, grego e vietnamita e, apenas sob `html[dir="rtl"]`, Vazirmatn para escrita árabe. Cada ícone é um glifo Lucide.
 
 ## 1. Onde as coisas vivem
 
@@ -116,7 +116,7 @@
 
 ## 5.º Atualizando o kit
 
-`npm run check:ui-kit-upstream` compara a versão fixada em `packages/ui-kit/UPSTREAM.md` com a tag `v*` mais recente do repositório upstream e imprime o comando de sincronização quando uma versão é lançada. O fluxo de trabalho semanal `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) executa a mesma verificação e mantém um problema de rastreio aberto enquanto o pin está atrasado; o repositório upstream é privado, pelo que o fluxo de trabalho necessita de um token de leitura apenas no segredo `UI_KIT_READ_TOKEN` e permanece inerte sem ele.
+`npm run check:ui-kit-upstream` compara a versão fixada em `packages/ui-kit/UPSTREAM.md` com a tag `v*` mais recente do repositório upstream e imprime o comando de sincronização quando uma versão é lançada. O fluxo de trabalho semanal `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) executa a mesma verificação e mantém um problema de rastreio aberto enquanto o pin está atrasado; o repositório upstream é privado, pelo que o fluxo de trabalho necessita de um token de leitura apenas no segredo `UI_KIT_READ_TOKEN`. Quando não é possível ler o upstream (sem token, um token que deixou de funcionar ou GitHub inacessível), a execução permanece verde, mas escreve um aviso e mantém aberto um problema separado, que se fecha quando uma execução posterior pode ler o upstream novamente.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copia o `src/` upstream nesse commit (`latest` = a tag `v*` mais recente) em `packages/ui-kit/src`, aplica a única transformação permitida (elimina o sufixo `.js` das importações relativas) e define a versão do espaço de trabalho em `packages/ui-kit/package.json` e `package-lock.json` para o upstream. De seguida: reveja `git diff packages/ui-kit`, faça uma passagem visual sobre os fornecedores, configurações, combos, utilização e endpoint em ambos os temas, execute `npm run check:ui-kit-snapshot` e `npm run test:vitest:ui` e abra o PR com o changelog upstream.
 

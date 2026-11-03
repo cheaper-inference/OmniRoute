@@ -241,19 +241,18 @@ interface CliFingerprint {
 
 ---
 
-## דריסות User-Agent — משתני סביבה (`.env.example`, סעיף 12)
+## User-Agent עוקף — env vars (`.env.example` סעיף 12)
 
-| משתנה                    | ברירת מחדל                                                      |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| מִשְׁתַנֶה          | בְּרִירַת מֶחדָל                              |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-נצרכים על ידי `open-sse/executors/base.ts::buildHeaders()` באמצעות חיפוש דינמי. **יש לעדכן אותם כאשר ספקים משחררים גרסאות CLI חדשות** — מחרוזות UA מיושנות מתחילות להידחות כלקוחות שאינם מעודכנים.
+נצרך על ידי `open-sse/executors/base.ts::buildHeaders()` באמצעות חיפוש דינמי.** תקפו אותם כאשר ספקים משחררים גרסאות CLI חדשות** מחרוזות UA מיושנות — מתחילות להידחות כלקוחות מיושנים.
 
 ## מתגים למצב תאימות CLI (`.env.example` סעיף 13)
 
