@@ -15,8 +15,25 @@ reviews:
   profile: chill
   high_level_summary: true
   poem: false
+  # Single maintainer identity and a lot of walkthrough already: keep the summary lean.
+  sequence_diagrams: false
+  suggested_reviewers: false
+  # Anti-slop for public repos: label low-quality PRs instead of spending a review on them.
+  slop_detection:
+    enabled: true
+    label: "slop"
   auto_review:
     enabled: true
+    # The open-source plan allows ~1-10 PR reviews per hour per developer (scaled by stars)
+    # and most PRs here come from one maintainer identity used by several sessions, each
+    # pushing many commits. Review each PR once; re-run on demand with
+    # `@coderabbitai review` (or `@coderabbitai full review`).
+    auto_incremental_review: false
+    # Bot PRs would burn the hourly allowance; Dependabot bumps are covered by CI and the
+    # security wave, Mergify queue candidates are drafts anyway.
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "mergify[bot]"
     # Drafts are skipped; the Mergify merge-queue candidates are drafts too.
     drafts: false
     base_branches:
@@ -105,9 +122,9 @@ chat:
 knowledge_base:
   code_guidelines:
     enabled: true
+    # **/AGENTS.md, **/CLAUDE.md, **/GEMINI.md and .github/copilot-instructions.md are read
+    # by default (each scoped to its own directory); these patterns only add the security
+    # references the hard rules point to.
     filePatterns:
-      - "AGENTS.md"
-      - "open-sse/services/AGENTS.md"
-      - "src/lib/db/AGENTS.md"
       - "docs/security/ERROR_SANITIZATION.md"
       - "docs/security/PUBLIC_CREDS.md"

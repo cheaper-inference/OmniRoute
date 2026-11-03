@@ -8,7 +8,7 @@
  * to roughly once per user per apiKeyHelper refresh.
  */
 
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import * as log from "@/sse/utils/logger";
 import { getSsoShadowSecret, provisionSsoIdentity } from "@/lib/db/ssoIdentities";
 import { getEntraConfig } from "./config";
@@ -48,9 +48,8 @@ export function resetSsoResolutionCache(): void {
 }
 
 function hashToken(token: string): string {
-  // Cache key, not a password hash — the input is a signed JWT. Hashing keeps
-  // raw bearer tokens from sitting in memory as Map keys.
-  return createHash("sha256").update(token).digest("hex"); // nosemgrep: insufficient-password-hash
+  // Hashing keeps raw bearer JWTs from sitting in memory as Map keys.
+  return opaqueTokenFingerprint(token);
 }
 
 function pruneCache(): void {
@@ -109,10 +108,18 @@ export async function evaluateSsoAuth(token: string): Promise<SsoAuthResult> {
   }
 
   const verified = await verifyEntraToken(token, config);
-  if (!verified.ok) return verified;
+  // `strict` is off in this tsconfig, so discriminating the union on `ok` does not
+  // narrow; the two failure shapes are identical, so state the read explicitly.
+  if (!verified.ok) {
+    const failure = verified as { status: number; code: string; message: string };
+    return { ok: false, status: failure.status, code: failure.code, message: failure.message };
+  }
 
   const groups = await resolveKeyGroups(verified.identity, config);
-  if (!groups.ok) return groups;
+  if (!groups.ok) {
+    const failure = groups as { status: number; code: string; message: string };
+    return { ok: false, status: failure.status, code: failure.code, message: failure.message };
+  }
 
   let secret: string | null;
   try {

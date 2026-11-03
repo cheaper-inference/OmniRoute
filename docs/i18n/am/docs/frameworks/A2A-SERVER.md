@@ -45,7 +45,7 @@ A2A በ**Endpoints → A2A** መቀያየሪያ የሚቆጣጠር ሲሆን በ
 
 ## JSON-RPC 2.0 ዘዴዎች
 
-### `message/send` - የተመሳሰለ አፈፃፀም
+### `message/send` — የተመሳሰለ አፈጻጸም
 
 ወደ ችሎታ መልእክት ይልካል እና የተሟላውን ምላሽ ይጠብቃል።
 
@@ -94,7 +94,7 @@ curl -X POST http://localhost:20128/a2a \
 }
 ```
 
-### `message/stream` - SSE ዥረት
+### `message/stream` — SSE ዥረት
 
 ልክ እንደ `message/send` ተመሳሳይ ነገር ግን በአገልጋይ የተላኩ ክስተቶችን ለእውነተኛ ጊዜ ዥረት ይመልሳል።
 
@@ -123,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` - የጥያቄ ተግባር ሁኔታ
+### `tasks/get` — የመጠይቅ ተግባር ሁኔታ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -132,7 +132,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` - አንድ ተግባር ሰርዝ
+### `tasks/cancel` — አንድ ተግባር ሰርዝ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -156,7 +156,7 @@ OmniRoute የሚያጋልጥ 6 A2A ችሎታዎች በ `src/lib/a2a/taskExecutio
 | የጤና ሪፖርት    | `health-report`      | የወረዳ የሚላተም ድምር, cooldown, መቆለፊያ ሁኔታ በአንድ አቅራቢ                                                               | ጤና, የመቋቋም ችሎታ    | "የሁሉም አቅራቢዎች የጤና ሁኔታን አሳይ"   |
 | የዝርዝር ችሎታዎች | `list-capabilities`  | ሙሉውን ባለ 45-የግቤት ወኪል ችሎታ ካታሎግ (23 API + 21 CLI + 1 ውቅር) እንደ ማርክ ማድረጊያ ሠንጠረዥ ከጥሬ SKILL.md URLs ለአውድ መርፌ ይመልሳል | ካታሎግ, ግኝት, ክህሎቶች | "ሁሉንም OmniRoute ችሎታዎች ይዘርዝሩ" |
 
-> የኤጀንት ካርዱ ከቀጥታ 377 አቅራቢዎች ካታሎግ ጋር ተስተካክሎ መቀመጥ አለበት። የአቅራቢ ቆጠራዎች እና free/no-auth ሜታዳታ የሚመነጩት ከአሂድ ጊዜ መዝገብ ነው።
+> የኤጀንት ካርዱ ከቀጥታ 380 አቅራቢዎች ካታሎግ ጋር ተስተካክሎ መቀመጥ አለበት። የአቅራቢ ቆጠራዎች እና free/no-auth ሜታዳታ የሚመነጩት ከአሂድ ጊዜ መዝገብ ነው።
 
 ### `list-capabilities` የክህሎት ዝርዝር
 
@@ -190,17 +190,17 @@ OmniRoute የሚያጋልጥ 6 A2A ችሎታዎች በ `src/lib/a2a/taskExecutio
 
 ---
 
-## አዲስ ክህሎት ማከል
+## አዲስ ችሎታ መጨመር
 
-1. **የክህሎት ፋይል ይፍጠሩ፦** `src/lib/a2a/skills/<your-skill>.ts`
+1. **የክህሎት ፋይል ይፍጠሩ፡** `src/lib/a2a/skills/<your-skill>.ts`
 
-   async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` ወደ ውጭ ይላኩ። እንደ `smartRouting.ts` ያሉ ነባር ክህሎቶችን ቅርጽ ይከተሉ።
+   ያልተመሳሰለ ተግባር `(task: A2ATask) => Promise<{ artifacts, metadata }>` ወደ ውጪ ላክ። እንደ `smartRouting.ts` ያሉ የነባር ክህሎቶችን ቅርፅ ይከተሉ።
 
-2. **መቆጣጠሪያውን ይመዝግቡ፦** በ`src/lib/a2a/taskExecution.ts` ውስጥ ወደ `A2A_SKILL_HANDLERS` ግቤት ያክሉ፦
+2. **መመዝገቢያ ተቆጣጣሪ፡-** `src/lib/a2a/taskExecution.ts` ውስጥ፣ ወደ `A2A_SKILL_HANDLERS` ግቤት ያክሉ፡-
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ነባር ክህሎቶች
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,21 +208,21 @@ OmniRoute የሚያጋልጥ 6 A2A ችሎታዎች በ `src/lib/a2a/taskExecutio
    };
    ```
 
-3. **በወኪል ካርድ ላይ ያጋልጡ፦** በ`src/app/.well-known/agent.json/route.ts` ውስጥ ወደ `skills` ድርድር ያክሉ፦
+3. **በወኪል ካርድ ውስጥ መጋለጥ;** በ `src/lib/a2a/agentCardMetadata.ts` (በ `/.well-known/agent.json` እና `/.well-known/agent-card.json` የተጋራ)፣ ከ `skills` አደራደር ጋር አባሪ፡-
 
    ```json
    {
      "id": "your-skill",
-     "name": "የእርስዎ ክህሎት",
-     "description": "አጭር፣ በዓላማ ላይ ያተኮረ መግለጫ",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["የተፈጥሮ ቋንቋ ጥሪ ምሳሌ"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **ሙከራዎችን ይጻፉ፦** `tests/unit/a2a-<your-skill>.test.ts`። የተሳካ መንገድን + የስህተት መንገድን ይሸፍኑ።
+4. **ፈተናዎችን ይፃፉ;** `tests/unit/a2a-<your-skill>.test.ts`. የደስታ መንገድን ይሸፍኑ + የስህተት መንገድ።
 
-5. አዲሱን ክህሎት በዚህ ፋይል `Available Skills` ሰንጠረዥ ውስጥ **ይመዝግቡ**።
+5. **ሰነድ** በዚህ ፋይል `Available Skills` ሰንጠረዥ ውስጥ ያለው አዲሱ ችሎታ።
 
 ---
 
