@@ -133,6 +133,31 @@ export const updateSettingsSchema = z.object({
   oidcRedirectPath: z.string().max(500).optional(),
   oidcAllowedSubjects: z.array(z.string().max(200)).optional(),
   oidcAdmissionClaim: oidcAdmissionClaimSchema.nullable().optional(),
+  // Entra ID SSO for /v1/*. Separate from the oidc* block above: that gates the
+  // dashboard with an id_token audienced to the client_id, this gates the API
+  // with an access token audienced to a custom scope. See docs/security/ENTRA_SSO.md.
+  entraSsoEnabled: z.boolean().optional(),
+  /** Authority origin. Defaults to the commercial cloud; sovereign clouds differ. */
+  entraAuthorityHost: z.string().max(300).optional(),
+  entraTenantId: z.string().max(100).optional(),
+  entraClientId: z.string().max(200).optional(),
+  entraApiAudience: z.string().max(300).optional(),
+  /** Entra security-group objectId → OmniRoute key_groups.id. */
+  entraGroupMappings: z
+    .array(
+      z.object({
+        groupId: z.string().min(1).max(100),
+        keyGroupId: z.string().min(1).max(100),
+      })
+    )
+    .max(500)
+    .optional(),
+  /** Key group for users matching no mapping. Empty/absent = deny. */
+  entraDefaultKeyGroupId: z.string().max(100).nullable().optional(),
+  /** Resolve users whose `groups` claim overflowed (>150 groups) via Graph. */
+  entraGraphFallbackEnabled: z.boolean().optional(),
+  /** Encrypted at rest. Only needed for the Graph fallback. */
+  entraGraphClientSecret: z.string().max(500).optional(),
   enableSocks5Proxy: z.boolean().optional(),
   instanceName: z.string().max(100).optional(),
   customLogoUrl: z.string().max(2000).optional(),
@@ -152,6 +177,7 @@ export const updateSettingsSchema = z.object({
   // answered 200 while dropping both before they reached the DB.
   hideAutoCombos: z.boolean().optional(),
   hideNoThinkVariants: z.boolean().optional(),
+  exposeCombosOnly: z.boolean().optional(),
   // STRICT_ZERO_COST (opt-in, default "off"): stricter than hidePaidModels — a
   // candidate must be keyless (no credential exists, so no request against it
   // can ever be billed) OR pass a live, fresh, hard-stop-guaranteed quota
@@ -328,6 +354,9 @@ export const updateSettingsSchema = z.object({
       z.object({
         fallbackStrategy: accountFallbackStrategySchema.optional(),
         stickyRoundRobinLimit: z.number().int().min(1).max(1000).optional(),
+        planWeights: z
+          .record(z.string().trim().min(1).max(40), z.number().finite().min(0.01).max(100))
+          .optional(),
       })
     )
     .optional(),
@@ -379,6 +408,12 @@ export const updateSettingsSchema = z.object({
   connectionAwareExpansion: z.boolean().optional(),
   // Global cap on per-target expansion; the per-combo value wins when set.
   connectionAwareExpansionMaxPerTarget: z.coerce.number().int().min(1).max(64).optional(),
+  /**
+   * Keep combo targets whose known output ceiling sits below the request's
+   * max_tokens instead of dropping them. The combo resolver already honours this
+   * key; without it in the schema the only way to set it was per combo.
+   */
+  outputLimitAdvisory: z.boolean().optional(),
   /** Keep eligible combo targets close to the provider-side prompt cache. */
   promptCacheAffinityEnabled: z.boolean().optional(),
   /**

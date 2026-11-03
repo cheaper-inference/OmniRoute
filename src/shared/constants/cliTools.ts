@@ -576,6 +576,49 @@ aider --openai-api-base "{{baseUrl}}" --model "{{model}}"`,
     ],
   },
 
+  // OpenClaude (Gitlawb/openclaude) — distinct from the "openclaw" entry above.
+  openclaude: {
+    id: "openclaude",
+    name: "OpenClaude",
+    image: "/providers/cli-generic.svg",
+    color: "#000000",
+    description: "OpenClaude coding agent CLI — OpenAI-compatible provider via OPENAI_BASE_URL",
+    docsUrl: "https://github.com/Gitlawb/openclaude",
+    configType: "guide",
+    category: "code",
+    vendor: "Gitlawb (OSS)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "openclaude",
+    notes: [
+      {
+        type: "warning",
+        text: 'OpenClaude needs --provider openai. Without it the env vars are ignored and it stops at "Not logged in".',
+      },
+    ],
+    guideSteps: [
+      { step: 1, title: "Install", desc: "npm install -g @gitlawb/openclaude" },
+      { step: 2, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 3, title: "API Key", type: "apiKeySelector" },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Run",
+        desc: "Export the variables below, then start OpenClaude with --provider openai",
+      },
+    ],
+    codeBlock: {
+      language: "bash",
+      code: `export OPENAI_BASE_URL="{{baseUrl}}"
+export OPENAI_API_KEY="{{apiKey}}"
+export OPENAI_MODEL="{{model}}"
+openclaude --provider openai
+# Windows PowerShell:
+# $env:OPENAI_BASE_URL="{{baseUrl}}"; $env:OPENAI_API_KEY="{{apiKey}}"; $env:OPENAI_MODEL="{{model}}"
+# openclaude --provider openai`,
+    },
+  },
+
   /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
   jcode: {
     id: "jcode",
@@ -692,6 +735,29 @@ aider --openai-api-base "{{baseUrl}}" --model "{{model}}"`,
     acpSpawnable: false,
     baseUrlSupport: "full",
     defaultCommand: "pi",
+    // Pi loads custom providers from <agent-dir>/models.json; agent-dir defaults
+    // to ~/.pi/agent and moves wholesale with PI_CODING_AGENT_DIR. See
+    // src/shared/services/piConfig.ts.
+    settingsFile: "~/.pi/agent/models.json",
+    // Hand-edit fallback shown by the guided card's manual-configuration block.
+    codeBlock: {
+      title: "~/.pi/agent/models.json",
+      language: "json",
+      code: [
+        "{",
+        '  "providers": {',
+        '    "omniroute": {',
+        '      "baseUrl": "http://127.0.0.1:20128/v1",',
+        '      "api": "openai-completions",',
+        '      "apiKey": "sk_omniroute",',
+        '      "models": [',
+        '        { "id": "auto/best-coding", "name": "OmniRoute best-coding" }',
+        "      ]",
+        "    }",
+        "  }",
+        "}",
+      ].join("\n"),
+    },
   },
 
   /** Added — ported from upstream decolua/9router#1233 (dashboard catalog entry for Crush). */
@@ -949,6 +1015,61 @@ OPENAI_API_KEY: "{{apiKey}}"`,
       {
         type: "warning",
         text: "Writing a 5dive auth profile is root-only, and each agent's own runtime model pin outranks the profile's model default — pass --agent <name> to pin the seats too.",
+      },
+    ],
+  },
+
+  /** ★ WhyCodes CLI agent (diegosouzapw/OmniRoute#14096) — 2026-09-18 */
+  whycodes: {
+    id: "whycodes",
+    name: "WhyCodes",
+    icon: "terminal",
+    color: "#2563EB",
+    description:
+      "WhyCodes — broad-purpose autonomous CLI agent (TUI, named agents, tools, memory); OpenAI-compatible base URL points at OmniRoute",
+    docsUrl: "https://github.com/whycorporation/whycodes",
+    configType: "custom",
+    category: "agent",
+    vendor: "Why Corporation",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "whycodes",
+    settingsFile: "$WHYCODES_HOME/config.toml",
+    guideSteps: [
+      {
+        step: 1,
+        title: "Install WhyCodes",
+        desc: "Install WhyCodes with Homebrew (brew tap whycorporation/whycodes https://github.com/whycorporation/whycodes && brew install whycorporation/whycodes/whycodes), a release binary, or cargo — see https://github.com/whycorporation/whycodes#installation",
+      },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Write the provider",
+        desc: "omniroute setup-whycodes --model <id>   (or: whycodes provider add omniroute --api-key <key> --base-url <origin>/v1)",
+      },
+    ],
+    codeBlock: {
+      language: "toml",
+      code: `[providers.omniroute]
+name = "omniroute"
+base_url = "{{baseUrl}}"
+api_key = "{{apiKey}}"
+
+[default_model]
+provider_id = "omniroute"
+model_id = "{{model}}"
+supports_tools = true`,
+    },
+    notes: [
+      {
+        type: "info",
+        text: "WhyCodes talks Chat Completions at /v1/chat/completions. Config lives at $WHYCODES_HOME/config.toml, or ~/.whycodes/config.toml (%USERPROFILE%\\.whycodes on Windows); `whycodes config path` prints it.",
+      },
+      {
+        type: "warning",
+        text: "whycodes acp is not implemented — this card is not ACP-spawnable.",
       },
     ],
   },

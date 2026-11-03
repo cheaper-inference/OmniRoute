@@ -112,6 +112,10 @@ load_translation_env() {
 load_translation_env
 
 REQUIRED_VARS="OMNIROUTE_TRANSLATION_API_URL OMNIROUTE_TRANSLATION_API_KEY OMNIROUTE_TRANSLATION_MODEL"
+# The Google engine (OMNIROUTE_TRANSLATION_ENGINE=google) needs none of the LLM variables.
+if [ "$(printf '%s' "${OMNIROUTE_TRANSLATION_ENGINE:-llm}" | tr '[:upper:]' '[:lower:]')" = "google" ]; then
+  REQUIRED_VARS=""
+fi
 OPTIONAL_VARS="OMNIROUTE_TRANSLATION_CONCURRENCY OMNIROUTE_TRANSLATION_TIMEOUT_MS"
 missing=""
 for v in $REQUIRED_VARS; do
