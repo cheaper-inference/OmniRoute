@@ -11,55 +11,75 @@ OmniRoute የአስተዳደር ድርጊቶችን፣ የማረጋገጫ ክስ�
 
 ትግበራው በ`src/lib/compliance/index.ts` (T-43 — "የተገዢነት ቁጥጥሮች") እና `src/lib/compliance/providerAudit.ts` ውስጥ ይገኛል። የኦዲት ጽሑፎች ፈጽሞ ስህተት አይጥሉም፦ የኦዲት ምዝገባ ዋናውን የጥያቄ ፍሰት እንዳያበላሽ፣ ማንኛውም ውድቀት ሲከሰት ጥሪው ያለ ማሳወቂያ ይታለፋል።
 
-## የሚመዘገቡ ነገሮች
+## የሚመዘገበው
 
 ### የአስተዳደር ኦዲት ክስተቶች (`audit_log`)
 
-እያንዳንዱ የ`logAuditEvent({ action, actor, target, details, ... })` ጥሪ አንድ ረድፍ ይፈጥራል። የድርጊት ሕብረቁምፊዎች የ`domain.verb` (ወይም `domain.verb.outcome`) ንድፍን ይከተላሉ። በምንጭ ዛፉ ውስጥ የተረጋገጡ የድርጊት ዓይነቶች የሚከተሉትን ያካትታሉ፦
+እያንዳንዱ `logAuditEvent({ action, actor, target, details, ... })` ጥሪ
+አንድ ረድፍ ያመነጫል። የእርምጃ ሕብረቁምፊዎች `domain.verb` (ወይም
+`domain.verb.outcome`) ንድፍን ይከተላሉ። በኮድ ውስጥ የተረጋገጡ የእርምጃ
+ዓይነቶች፦
 
-| ድርጊት                                 | ምንጭ                                     |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-እያንዳንዱ ግቤት `action`፣ `actor` (ነባሪው `"system"` ነው)፣ `target`፣ `details`/`metadata` (JSON)፣ `ip_address`፣ `resource_type`፣ `status`፣ `request_id` እና `timestamp` ይይዛል። ሚስጥራዊ ቁልፎች (`apiKey`፣ `accessToken`፣ `refreshToken`፣ `password`፣ ከ`*token`/`*secret`/`*apikey` ጋር የሚዛመዱ ማናቸውም ቁልፎች፣ ወዘተ) ረድፉ ከመጻፉ በፊት በተደጋጋሚ ወደ `"[redacted]"` ይሰወራሉ።
+እያንዳንዱ መዝገብ `action`፣ `actor` (ነባሪው `"system"` ነው)፣ `target`፣
+`details`/`metadata` (JSON)፣ `ip_address`፣ `resource_type`፣ `status`፣
+`request_id` እና `timestamp` ይይዛል። ሚስጥራዊ ቁልፎች
+(`apiKey`፣ `accessToken`፣ `refreshToken`፣ `password`፣ `*token`/`*secret`/`*apikey`
+ጋር የሚዛመዱ ማንኛውም ቁልፎች ወዘተ) ረድፉ ከመጻፉ በፊት በተደጋጋሚ
+ይደበቃሉ፤ የሚተኩትም `"[redacted]"` ነው።
 
-### MCP መሣሪያ ጥሪዎች (`mcp_tool_audit`)
+`api_key.auth.touch` ረድፎች የተሳካ የAPI ቁልፍ ሜታዳታ እና ወደ የጥያቄ
+መዝገብ የማይደርሱ የግኝት ንባቦችን (GET/HEAD) ይመዘግባሉ፦ የትኛው ቁልፍ፣
+መቼ እና መደበኛ የተደረገው ዱካ፤ እንዲሁም መዝገቦቹ ተጣምረው በ1,000 ረድፎች
+ይገደባሉ። `noLog` ያላቸው ቁልፎች እና የአካባቢ ቁልፉ ይዘለላሉ።
+የጠሪው የIP አድራሻ እና የተጠቃሚ-ወኪል የሚጨመሩት
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` የባህሪ ባንዲራ ሲነቃ ብቻ ነው
+(በነባሪ የተዘጋ ነው)።
 
-እያንዳንዱ የMCP መሣሪያ ጥሪ በ`open-sse/mcp-server/audit.ts` በኩል አንድ ረድፍ ይጽፋል። መርሃግብሩ (ከ`src/lib/db/migrations/002_mcp_a2a_tables.sql`)፦
+### የMCP መሣሪያ ጥሪዎች (`mcp_tool_audit`)
 
-| ዓምድ              | ማስታወሻዎች                       |
-| ---------------- | ----------------------------- |
-| `id`             | በራስ-ሰር የሚጨምር                  |
-| `tool_name`      | የMCP መሣሪያ መለያ                 |
-| `input_hash`     | የግቤቱ sha256 (የውሂብ ይዘቱ አይከማችም) |
-| `output_summary` | አጭር፣ የተቆረጠ ማጠቃለያ              |
-| `duration_ms`    | በእውነተኛ ጊዜ የሚለካ ቆይታ            |
-| `api_key_id`     | ጠሪው (አልባ ሊሆን ይችላል)            |
-| `success`        | `1` / `0`                     |
-| `error_code`     | ሲወድቅ የመጨረሻው የስህተት ኮድ          |
-| `created_at`     | ISO የጊዜ ማህተም                  |
+እያንዳንዱ የMCP መሣሪያ ጥሪ በ
+`open-sse/mcp-server/audit.ts` በኩል አንድ ረድፍ ይጽፋል። እቅዱ
+(ከ `src/lib/db/migrations/002_mcp_a2a_tables.sql`)፦
 
-### የጥያቄ / የአጠቃቀም ምዝግቦች
+| Column           | Notes                     |
+| ---------------- | ------------------------- |
+| `id`             | በራስ-ሰር የሚጨምር              |
+| `tool_name`      | የMCP መሣሪያ መለያ             |
+| `input_hash`     | የግብዓት sha256 (ይዘት አይቀመጥም) |
+| `output_summary` | አጭር፣ የተቆረጠ ማጠቃለያ          |
+| `duration_ms`    | ያለፈው ጊዜ                   |
+| `api_key_id`     | ጠሪው (ባዶ ሊሆን ይችላል)         |
+| `success`        | `1` / `0`                 |
+| `error_code`     | ሲከሽፍ የሚመጣ የመጨረሻ የስህተት ኮድ  |
+| `created_at`     | የISO የጊዜ ማህተም             |
 
-እነዚህ የአሠራር ቴሌሜትሪ መረጃዎች ናቸው (በጥብቅ አነጋገር የአስተዳደር ኦዲት አይደሉም)፣ ነገር ግን ተመሳሳዩን የማቆያ ሂደት ይጋራሉ፦
+### የጥያቄ / አጠቃቀም መዝገቦች
 
-- `usage_history` — ለእያንዳንዱ ጥያቄ የተጠቃለለ አጠቃቀም
-- `call_logs` — ለእያንዳንዱ ጥያቄ ሙሉ ምዝግብ (የረድፍ ከፍተኛ ገደብ ይኖረዋል፤ ከታች ይመልከቱ)
-- `proxy_logs` — የፕሮክሲ ትራፊክ ምዝግብ (የረድፍ ከፍተኛ ገደብ ይኖረዋል)
-- `request_detail_logs` — የቀድሞ ዝርዝር የጥያቄ ምዝግብ (ካለ አሁንም ይመነጠራል)
+እነዚህ የአሠራር ቴሌሜትሪ ናቸው (በጥብቅ ሲታይ የአስተዳደር ኦዲት
+አይደሉም)፣ ነገር ግን ተመሳሳዩን የማቆያ ሂደት ይጋራሉ፦
+
+- `usage_history` — በእያንዳንዱ ጥያቄ የሚደረግ የአጠቃቀም ማጠቃለያ
+- `call_logs` — ሙሉ በሙሉ በእያንዳንዱ ጥያቄ የሚመዘገብ መዝገብ (ለረድፍ ገደብ ተገዢ፣ ከዚህ በታች ይመልከቱ)
+- `proxy_logs` — የፕሮክሲ ትራፊክ መዝገብ (ለረድፍ ገደብ ተገዢ)
+- `request_detail_logs` — የቆየ ዝርዝር የጥያቄ መዝገብ (ካለ አሁንም ይጸዳል)
 
 ## የማከማቻ መዋቅር
 
