@@ -94,7 +94,11 @@ import {
   isNoAuthRawProviderPrefix,
   normalizeBlockedProviderSet,
 } from "@/shared/utils/noAuthProviders";
-import { getSourcedTokenLimit, getTokenLimit } from "@omniroute/open-sse/services/contextManager";
+import {
+  getSourcedTokenLimit,
+  getTokenLimit,
+  hasContextLengthEnvOverride,
+} from "@omniroute/open-sse/services/contextManager";
 import { extractApiKey } from "@/sse/services/auth";
 import type { ComboModelStep } from "@/lib/combos/steps";
 import {
@@ -704,11 +708,21 @@ async function buildUnifiedModelsResponseCore(
       const syncedInputModalities = parseJsonStringArray(synced?.modalities_input);
       const syncedOutputModalities = parseJsonStringArray(synced?.modalities_output);
 
-      const contextLength = getSourcedTokenLimit(
-        providerId,
-        modelId,
-        canonical.limits.contextWindow
-      );
+      // #18609: a connection's synced listing proves the member exists, not its window. With
+      // no registry/spec/synced-capability row and no persisted override, the provider
+      // `defaultContextLength` is a guess, so leave the limits unknown — the same outcome
+      // this member gets when no connection lists it (the gate above). An unknown member
+      // then drops out of the combo `min()` instead of clamping confirmed siblings to it.
+      const hasLimitEvidence =
+        source.providerRegistry ||
+        source.staticSpec ||
+        source.syncedCapability ||
+        isPositiveFiniteNumber(canonical.limits.contextWindow) ||
+        // The operator's CONTEXT_LENGTH_<PROVIDER> / _DEFAULT cap is a declared limit.
+        hasContextLengthEnvOverride(providerId);
+      const contextLength = hasLimitEvidence
+        ? getSourcedTokenLimit(providerId, modelId, canonical.limits.contextWindow)
+        : undefined;
       const maxInputTokens = isPositiveFiniteNumber(canonical.limits.maxInputTokens)
         ? canonical.limits.maxInputTokens
         : contextLength;
