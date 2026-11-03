@@ -337,7 +337,7 @@ export default function CompressionHub() {
         <Alert
           variant="warning"
           icon={<Icon name="info" size={16} />}
-          className="[&>.ci-alert__dismiss]:hidden"
+          dismissible={false}
           description={t("contextEditingNote")}
         />
       </div>

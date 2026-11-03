@@ -1,1 +1,0 @@
-- **fix(proxy):** Preserve HTTP/HTTPS subscription nodes using their default ports. ([#17241](https://github.com/diegosouzapw/OmniRoute/pull/17241)) — thanks @pacocartones
