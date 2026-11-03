@@ -85,6 +85,7 @@ import {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 } from "./combo/comboPredicates.ts";
@@ -93,6 +94,7 @@ export {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 };

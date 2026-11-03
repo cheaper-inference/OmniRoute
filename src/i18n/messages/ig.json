@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Nke a ga-echekwa ọnọdụ ndị na-eweta ọrụ/model ejikọrọ ugbu a dabara na ndebiri a n'ime ngwakọta a pụrụ idezi.",
     "duplicateAutoComboFailedPrefix": "Ime oyiri nke ngwakọta akpaka dara:",
     "duplicateAutoComboUnknownError": "Njehie amaghị ama",
-    "duplicateAutoComboTitle": "Mepụta ngwakọta anaghị agbanwe agbanwe site na {name}"
+    "duplicateAutoComboTitle": "Mepụta ngwakọta anaghị agbanwe agbanwe site na {name}",
+    "fallbackSummary": "{rate}% nke akaụnyụ jiri ọnụọgụgụ, otu ụzọ dịka ~{skips} ihe ebe a chọrọ"
   },
   "costs": {
     "title": "Ọnụ ahịa",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "N'elu ọnọdụ",
     "noResponse": "Enweghị nzaghachi",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Isi mgbe",
     "firstChunkAfter": "Akụkụ mbụ mgbe",
     "servedBy": "Nyeere site na",

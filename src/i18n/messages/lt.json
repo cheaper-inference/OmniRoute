@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Taip šiuo metu prijungtų, šį šabloną atitinkančių teikėjų ir modelių momentinė kopija bus įrašyta į redaguojamą kombo.",
     "duplicateAutoComboFailedPrefix": "Nepavyko dubliuoti automatinio kombo:",
     "duplicateAutoComboUnknownError": "Nežinoma klaida",
-    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}"
+    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
+    "fallbackSummary": "{rate}% užklausų naudojo atsarginį variantą, vidutiniškai praleido apie {skips} tikslų per užklausą"
   },
   "costs": {
     "title": "Išlaidos",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Aukštupio būsena",
     "noResponse": "Nėra atsakymo",
     "egressIp": "Išėjimo IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Antraštės po",
     "firstChunkAfter": "Pirmas gabalas po",
     "servedBy": "Teikia",

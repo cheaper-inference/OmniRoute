@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   KIT,
+  SWITZER_ROLES,
+  afterKicker,
+  roleWidth,
   themeCss,
   textRoleCss,
   svgOpen,
@@ -163,7 +166,7 @@ test("themeCss carries the status colors in both blocks under kebab-case variabl
   }
 });
 
-test("text roles use the kit stacks and end in a generic family", () => {
+test("Switzer roles declare no font family, code roles sit on the mono stack", () => {
   const css = textRoleCss();
   for (const cls of [
     ".kicker",
@@ -178,9 +181,41 @@ test("text roles use the kit stacks and end in a generic family", () => {
   ]) {
     assert.ok(css.includes(cls), cls);
   }
-  assert.match(css, /\.headline\{[^}]*"CI Serif"[^}]*serif/);
-  assert.match(css, /\.sub\{[^}]*"CI Sans"[^}]*Arial, Helvetica, sans-serif/);
-  assert.match(css, /\.num\{[^}]*"CI Mono"[^}]*monospace/);
+  for (const name of Object.keys(SWITZER_ROLES)) {
+    const block = css.match(new RegExp(`\\.${name}\\{([^}]*)\\}`))?.[1];
+    assert.ok(block, `.${name} missing`);
+    assert.doesNotMatch(block, /font-family/, `.${name} must not name a family: it is drawn`);
+  }
+  assert.doesNotMatch(css, /Switzer|CI Serif|CI Sans|Instrument Serif|Inter\b/);
+  for (const cls of ["mono", "mono-sm", "mono-xs", "term", "term-lg", "cmd"]) {
+    const block = css.match(new RegExp(`\\.${cls}\\{([^}]*)\\}`))?.[1];
+    assert.match(block ?? "", /"CI Mono"[^}]*monospace/, cls);
+  }
+});
+
+test("the kit's type tokens are the source of the Switzer roles", () => {
+  const em = (name: string) => Number(lightBlock.get(name)?.replace("em", ""));
+  assert.equal(SWITZER_ROLES.headline.tracking, em("--ci-letter-spacing-display"));
+  assert.equal(SWITZER_ROLES.h2.tracking, em("--ci-type-heading-tracking"));
+  assert.equal(SWITZER_ROLES.num.tracking, em("--ci-type-metric-tracking"));
+  assert.equal(SWITZER_ROLES.kicker.tracking, em("--ci-letter-spacing-caps"));
+  assert.equal(SWITZER_ROLES.small.tracking, em("--ci-type-caption-tracking"));
+  assert.match(tokens, /--ci-font-display: var\(--ci-font-ui\)/);
+  assert.equal(Number(lightBlock.get("--ci-font-weight-medium")), SWITZER_ROLES.headline.weight);
+  for (const { weight } of Object.values(SWITZER_ROLES)) {
+    assert.ok([400, 500, 600].includes(weight), `the kit has no weight ${weight}`);
+  }
+});
+
+test("roleWidth measures with the role's own weight, size and tracking", () => {
+  assert.ok(roleWidth("h3", "Provider") > roleWidth("h4", "Provider"));
+  assert.ok(roleWidth("h4", "Provider") > roleWidth("cell", "Provider"));
+  assert.ok(roleWidth("h4", "Provider", { size: 28 }) > roleWidth("h4", "Provider"));
+  assert.throws(() => roleWidth("mono" as never, "x"), /unknown Switzer role/);
+  assert.equal(
+    afterKicker(40, "WHY OMNIROUTE"),
+    Math.ceil(40 + roleWidth("kicker", "WHY OMNIROUTE") + 24)
+  );
 });
 
 test("ordering pin: textRoleCss() lines keep their positions — the original nine classes and the fill line first, then the type scale", () => {
@@ -210,6 +245,9 @@ test("ordering pin: textRoleCss() lines keep their positions — the original ni
     ".mono-xs{",
     ".term{",
     ".term-lg{",
+    ".label{",
+    ".label-sm{",
+    ".label-xs{",
     ".ok{",
   ];
   appended.forEach((h, i) =>
@@ -218,31 +256,36 @@ test("ordering pin: textRoleCss() lines keep their positions — the original ni
   assert.ok(lines.length > heads.length, "the diagram type scale is appended after them");
 });
 
-// class → [family token, weight, size, fill] (task 6.0 brief, "New text and fill classes")
+// class → [family token ("" = drawn as Switzer outlines), weight, size, fill]
 const TYPE_SCALE: Record<string, [string, number, number, string]> = {
-  ".h2": ['"CI Serif"', 400, 40, "var(--ink)"],
-  ".h3": ['"CI Sans"', 600, 18, "var(--ink)"],
-  ".h4": ['"CI Sans"', 600, 14, "var(--ink)"],
-  ".cell": ['"CI Sans"', 400, 13, "var(--body)"],
-  ".small": ['"CI Sans"', 400, 11, "var(--muted)"],
-  ".num-sm": ['"CI Mono"', 500, 20, "var(--ink)"],
+  ".h2": ["", 500, 40, "var(--ink)"],
+  ".h3": ["", 600, 18, "var(--ink)"],
+  ".h4": ["", 600, 14, "var(--ink)"],
+  ".cell": ["", 400, 13, "var(--body)"],
+  ".small": ["", 400, 11, "var(--muted)"],
+  ".num-sm": ["", 500, 20, "var(--ink)"],
+  ".label": ["", 500, 13, "var(--body)"],
+  ".label-sm": ["", 500, 11, "var(--body)"],
+  ".label-xs": ["", 500, 9, "var(--muted)"],
   ".mono-sm": ['"CI Mono"', 500, 11, "var(--body)"],
   ".mono-xs": ['"CI Mono"', 500, 9, "var(--muted)"],
   ".term": ['"CI Mono"', 500, 13, "var(--inverse-text)"],
   ".term-lg": ['"CI Mono"', 500, 16, "var(--inverse-text)"],
 };
 
-test("the diagram type scale classes exist with the brief's face, weight, size and fill", () => {
+test("the diagram type scale classes exist with the expected face, weight, size and fill", () => {
   const css = textRoleCss();
   for (const [cls, [family, weight, size, fill]] of Object.entries(TYPE_SCALE)) {
     const block = css.match(new RegExp(`${cls.replace(".", "\\.")}\\{([^}]*)\\}`))?.[1];
     assert.ok(block, `${cls} missing from textRoleCss()`);
-    assert.ok(block.includes(family), `${cls} uses ${family}`);
+    if (family) assert.ok(block.includes(family), `${cls} uses ${family}`);
+    else assert.ok(!block.includes("font-family"), `${cls} is drawn, it names no family`);
     assert.ok(block.includes(`font-weight:${weight}`), `${cls} weight ${weight}`);
     assert.ok(block.includes(`font-size:${size}px`), `${cls} size ${size}px`);
     assert.ok(block.includes(`fill:${fill}`), `${cls} fill ${fill}`);
   }
   assert.match(css, /\.mono-xs\{[^}]*letter-spacing:0\.08em/);
+  assert.match(css, /\.headline\{font-weight:500;font-size:72px;letter-spacing:-0\.05em/);
 });
 
 test("the status / surface fill and stroke helpers are present verbatim", () => {
@@ -268,15 +311,10 @@ test("the status / surface fill and stroke helpers are present verbatim", () => 
 test("every font-family ends in a generic family and no font-size is below 9px", () => {
   const css = textRoleCss();
   const families = [...css.matchAll(/font-family:\s*([^;}]+)/g)].map((m) => m[1].trim());
-  assert.ok(
-    families.length >= 18,
-    `expected the 9 original + 9 new stacks, got ${families.length}`
-  );
+  assert.equal(families.length, 6, "the six code roles are the only ones naming a family");
   for (const f of families) {
-    assert.match(f, /(^|, )(serif|sans-serif|monospace)$/, f);
-    if (!f.includes("CI Serif") && !f.includes("CI Mono")) {
-      assert.ok(f.includes("Arial, Helvetica"), `sans stack keeps Arial, Helvetica: ${f}`);
-    }
+    assert.match(f, /(^|, )monospace$/, f);
+    assert.ok(f.includes('"CI Mono"'), f);
   }
   const sizes = [...css.matchAll(/font-size:(\d+(?:\.\d+)?)px/g)].map((m) => Number(m[1]));
   assert.ok(sizes.length >= 18);
@@ -284,24 +322,19 @@ test("every font-family ends in a generic family and no font-size is below 9px",
 });
 
 test("svgOpen emits an accessible root with title, desc and the style block", () => {
-  const head = svgOpen({
-    viewBox: "0 0 1200 548",
-    title: "T",
-    desc: "D",
-    fontFaceCss: "@font-face{}",
-  });
+  const head = svgOpen({ viewBox: "0 0 1200 548", title: "T", desc: "D" });
   assert.match(
     head,
     /^<svg viewBox="0 0 1200 548" xmlns="http:\/\/www\.w3\.org\/2000\/svg" role="img" aria-labelledby="t d">/
   );
   assert.match(head, /<title id="t">T<\/title>\n\s*<desc id="d">D<\/desc>\n\s*<style>/);
-  assert.ok(head.includes("@font-face{}"));
+  assert.doesNotMatch(head, /@font-face/, "the outlining step adds the mono face, not svgOpen");
   assert.ok(gridDefs("g1").includes('<pattern id="g1"'));
   assert.equal(esc("a<b>&"), "a&lt;b&gt;&amp;");
 });
 
 test("svgOpen appends extraCss on its own line after the text roles, and nothing when omitted", () => {
-  const base = { viewBox: "0 0 10 10", title: "t", desc: "d", fontFaceCss: "" };
+  const base = { viewBox: "0 0 10 10", title: "t", desc: "d" };
   const withExtra = svgOpen({ ...base, extraCss: ".x{fill:red}" });
   assert.ok(withExtra.includes(`${textRoleCss()}\n.x{fill:red}\n  </style>`), withExtra);
   const plain = svgOpen(base);

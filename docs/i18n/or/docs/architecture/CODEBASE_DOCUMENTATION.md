@@ -458,7 +458,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -488,7 +488,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ଟପ୍-ଲେଭଲ୍ ଏକଜେକ୍ୟୁଟର ମଡ୍ୟୁଲ୍ (`*.ts` ମାଇନସ୍ `base.ts`, `index.ts` ଏବଂ — ଗଣନା `npm run check:docs-counts` ମାପଗୁଡିକ ପରୀକ୍ଷା କରେ) \| ପ୍ରତ୍ୟେକ ଏକଜେକ୍ୟୁଟର ଶ୍ରେଣୀ `BaseExecutor` (`base.ts`) କୁ ସିଧାସଳଖ କିମ୍ବା `DefaultExecutor` କିମ୍ବା ଅନ୍ୟ ଏକଜେକ୍ୟୁଟର ମାଧ୍ୟମରେ ବିସ୍ତାର କରେ \| ଅବଶିଷ୍ଟ ମଡ୍ୟୁଲଗୁଡ଼ିକ ହେଉଛି ପ୍ରତି-ପ୍ରଦାନକାରୀ ସହାୟକକାରୀ (ଟୁଲ୍ ସ୍କିମା, fetch/TTS ଆଡାପ୍ଟର, କ୍ୱିକ୍ ହ୍ୟାଣ୍ଡେଲର୍) \| କାର୍ଯ୍ୟନିର୍ବାହୀମାନେ ଅନ୍ତର୍ଭୁକ୍ତ:
+158 ଟପ୍-ଲେଭଲ୍ ଏକଜେକ୍ୟୁଟର ମଡ୍ୟୁଲ୍ (`*.ts` ମାଇନସ୍ `base.ts`, `index.ts` ଏବଂ — ଗଣନା `npm run check:docs-counts` ମାପଗୁଡିକ ପରୀକ୍ଷା କରେ) \| ପ୍ରତ୍ୟେକ ଏକଜେକ୍ୟୁଟର ଶ୍ରେଣୀ `BaseExecutor` (`base.ts`) କୁ ସିଧାସଳଖ କିମ୍ବା `DefaultExecutor` କିମ୍ବା ଅନ୍ୟ ଏକଜେକ୍ୟୁଟର ମାଧ୍ୟମରେ ବିସ୍ତାର କରେ \| ଅବଶିଷ୍ଟ ମଡ୍ୟୁଲଗୁଡ଼ିକ ହେଉଛି ପ୍ରତି-ପ୍ରଦାନକାରୀ ସହାୟକକାରୀ (ଟୁଲ୍ ସ୍କିମା, fetch/TTS ଆଡାପ୍ଟର, କ୍ୱିକ୍ ହ୍ୟାଣ୍ଡେଲର୍) \| କାର୍ଯ୍ୟନିର୍ବାହୀମାନେ ଅନ୍ତର୍ଭୁକ୍ତ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `index.ts` `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `muse-spark-web`, `devin-desktop`, Plus `claudeIdentity.ts`
 
