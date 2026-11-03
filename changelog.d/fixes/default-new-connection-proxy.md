@@ -1,1 +1,0 @@
-- **fix(proxy):** Add a persistent default proxy switch for new provider accounts in Settings → Proxy. Existing accounts keep their state, explicit creation choices take precedence, and installations without a saved preference retain the previous ON default. Selective transfers use destination policy.
