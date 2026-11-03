@@ -246,6 +246,27 @@ async function isModelUsableGivenLockouts(
   return false;
 }
 
+/**
+ * A fixed model is selectable unless its credential check is a confirmed `false`
+ * or every known connection for it is locked out (a model-scoped 400 or a 404 lock).
+ * A bare id without a provider prefix has no lockout scope, so only the credential
+ * check applies.
+ */
+async function isFixedModelSelectable(
+  fixedModel: string,
+  usable: boolean | null,
+  deps: VisionBridgeRouterDeps
+): Promise<boolean> {
+  if (usable === false) return false;
+  const separator = fixedModel.indexOf("/");
+  if (separator < 1) return true;
+  return isModelUsableGivenLockouts(
+    fixedModel.slice(0, separator),
+    fixedModel.slice(separator + 1),
+    deps
+  );
+}
+
 async function cachedModelRemainsAvailable(
   fullModelId: string,
   deps: VisionBridgeRouterDeps
@@ -456,14 +477,8 @@ export async function getBestVisionModel(
     const usable = await checkCreds(fullConfig.fixedModel);
     // Only skip credential validation when the check is indeterminate (null).
     // A confirmed `false` means fall through to auto-selection.
-    if (usable !== false) {
-      const separator = fullConfig.fixedModel.indexOf("/");
-      if (separator < 1) return fullConfig.fixedModel;
-      const providerAlias = fullConfig.fixedModel.slice(0, separator);
-      const modelId = fullConfig.fixedModel.slice(separator + 1);
-      if (await isModelUsableGivenLockouts(providerAlias, modelId, deps)) {
-        return fullConfig.fixedModel;
-      }
+    if (await isFixedModelSelectable(fullConfig.fixedModel, usable, deps)) {
+      return fullConfig.fixedModel;
     }
   }
 
