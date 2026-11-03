@@ -4,8 +4,14 @@ import {
   normalizeCodexImportRecord,
   flattenCodexImportPayload,
   preserveExistingCodexConnectionState,
+  decodeJwtExp,
+  type CodexImportPayload,
 } from "@/lib/oauth/services/codexImport";
-import { createProviderConnection, getProviderConnections } from "@/models";
+import {
+  createProviderConnection,
+  getProviderConnections,
+  updateProviderConnection,
+} from "@/models";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import {
@@ -23,6 +29,9 @@ const EXPIRED_SESSION_MESSAGE =
   "This Codex session has expired — run `codex login` again and re-import. " +
   "(Esta sessão do Codex expirou — rode `codex login` novamente e reimporte.)";
 
+type RefreshValidation = "valid" | "invalid" | "inconclusive";
+const MIN_USABLE_ACCESS_TOKEN_LIFETIME_SECONDS = 60;
+
 /**
  * Validate a normalized Codex import record's refresh_token against OpenAI's
  * OAuth token endpoint before it is persisted as a connection. Reuses
@@ -39,17 +48,17 @@ const EXPIRED_SESSION_MESSAGE =
 async function validateCodexRefreshToken(payload: {
   accessToken: string;
   refreshToken: string;
-}): Promise<string | null> {
+}): Promise<RefreshValidation> {
   let refreshResult: unknown;
   try {
     refreshResult = await refreshCodexToken(payload.refreshToken, undefined, null);
   } catch {
     // Network/transport failure: inconclusive, do not block the import.
-    return null;
+    return "inconclusive";
   }
 
   if (isUnrecoverableRefreshError(refreshResult)) {
-    return EXPIRED_SESSION_MESSAGE;
+    return "invalid";
   }
 
   if (
@@ -62,12 +71,75 @@ async function validateCodexRefreshToken(payload: {
     if (typeof refreshed.refreshToken === "string" && refreshed.refreshToken) {
       payload.refreshToken = refreshed.refreshToken;
     }
+    return "valid";
   }
 
   // `refreshResult === null` (transient error already logged inside
   // refreshCodexToken) is inconclusive — fall through and import the
   // originally-supplied tokens rather than blocking on a network hiccup.
-  return null;
+  return "inconclusive";
+}
+
+function hasUsableAccessToken(payload: CodexImportPayload): boolean {
+  const expiresAt = decodeJwtExp(payload.accessToken);
+  return (
+    expiresAt !== null && expiresAt > Date.now() / 1000 + MIN_USABLE_ACCESS_TOKEN_LIFETIME_SECONDS
+  );
+}
+
+type ExistingCodexConnection = {
+  id?: unknown;
+  email?: unknown;
+  refreshToken?: unknown;
+  priority?: unknown;
+  providerSpecificData?: unknown;
+};
+
+function codexAccountId(providerSpecificData: unknown): string | null {
+  if (!providerSpecificData || typeof providerSpecificData !== "object") return null;
+  const data = providerSpecificData as Record<string, unknown>;
+  const value = data.chatgptAccountId ?? data.workspaceId;
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+async function findExistingCodexConnection(
+  payload: CodexImportPayload
+): Promise<ExistingCodexConnection | null> {
+  const accountId = codexAccountId(payload.providerSpecificData);
+  if (!accountId) return null;
+  const connections = (await getProviderConnections({
+    provider: "codex",
+    authType: "oauth",
+  })) as ExistingCodexConnection[];
+  return (
+    connections.find(
+      (connection) => codexAccountId(connection.providerSpecificData) === accountId
+    ) ?? null
+  );
+}
+
+async function updateExistingCodexImportMetadata(
+  existing: ExistingCodexConnection,
+  payload: CodexImportPayload
+) {
+  const id = typeof existing.id === "string" ? existing.id : "";
+  if (!id) throw new Error("Existing Codex connection has no id");
+  const oldProviderSpecificData =
+    existing.providerSpecificData && typeof existing.providerSpecificData === "object"
+      ? (existing.providerSpecificData as Record<string, unknown>)
+      : {};
+  const newProviderSpecificData =
+    payload.providerSpecificData && typeof payload.providerSpecificData === "object"
+      ? payload.providerSpecificData
+      : {};
+  const update: Record<string, unknown> = {
+    email: payload.email,
+    providerSpecificData: { ...oldProviderSpecificData, ...newProviderSpecificData },
+  };
+  if (payload.priority !== undefined) update.priority = payload.priority;
+  const connection = await updateProviderConnection(id, update);
+  if (!connection) throw new Error("Existing Codex connection disappeared during import");
+  return connection;
 }
 
 /**
@@ -124,7 +196,7 @@ export async function POST(request: Request) {
   }
 
   const results: Array<
-    | { index: number; ok: true; connectionId: string; email: string }
+    | { index: number; ok: true; connectionId: string; email: string; unchanged?: true }
     | { index: number; ok: false; error: string }
   > = [];
   let imported = 0;
@@ -138,32 +210,49 @@ export async function POST(request: Request) {
       continue;
     }
 
-    const refreshError = await validateCodexRefreshToken(norm.payload);
-    if (refreshError) {
-      failed += 1;
-      results.push({ index: i, ok: false, error: refreshError });
-      continue;
-    }
-
     try {
-      // A record matching an existing connection (same email + workspaceId)
-      // flows into createProviderConnection's upsert, which replaces supplied
-      // columns wholesale — carry the matched row's providerSpecificData and
-      // priority through the payload so a re-import cannot clobber them
-      // (#11954 follow-up). Fetched per record: an earlier record in this
-      // batch may have just created the row a later duplicate must match.
-      const existing = await getProviderConnections({ provider: "codex", authType: "oauth" });
-      const payload = preserveExistingCodexConnectionState(
-        norm.payload,
-        existing as Array<Record<string, unknown>>
-      );
-      const conn = await createProviderConnection(payload as Record<string, unknown>);
+      const existing = await findExistingCodexConnection(norm.payload);
+      const sameRefreshToken =
+        existing !== null &&
+        typeof existing.refreshToken === "string" &&
+        existing.refreshToken === norm.payload.refreshToken;
+      const validation = sameRefreshToken ? "valid" : await validateCodexRefreshToken(norm.payload);
+
+      if (validation === "invalid" && !existing && !hasUsableAccessToken(norm.payload)) {
+        failed += 1;
+        results.push({ index: i, ok: false, error: EXPIRED_SESSION_MESSAGE });
+        continue;
+      }
+
+      // A server-side refresh rotates Codex refresh tokens. CodexSwitcher can
+      // therefore keep an older token after OmniRoute has already persisted the
+      // rotated one. Re-importing that stable account is a successful metadata
+      // sync, not a reason to overwrite the working server credentials.
+      const preserveExistingCredentials =
+        existing !== null &&
+        !sameRefreshToken &&
+        (validation === "invalid" || validation === "inconclusive");
+
+      let conn;
+      if (preserveExistingCredentials) {
+        conn = await updateExistingCodexImportMetadata(existing, norm.payload);
+      } else {
+        // Preserve operator-managed state (priority and providerSpecificData)
+        // when the normal upsert path matches an existing connection.
+        const allExisting = await getProviderConnections({ provider: "codex", authType: "oauth" });
+        const payload = preserveExistingCodexConnectionState(
+          norm.payload,
+          allExisting as Array<Record<string, unknown>>
+        );
+        conn = await createProviderConnection(payload as Record<string, unknown>);
+      }
       imported += 1;
       results.push({
         index: i,
         ok: true,
         connectionId: String(conn.id),
         email: String(conn.email ?? norm.payload.email),
+        ...(preserveExistingCredentials ? { unchanged: true as const } : {}),
       });
     } catch (error) {
       failed += 1;
