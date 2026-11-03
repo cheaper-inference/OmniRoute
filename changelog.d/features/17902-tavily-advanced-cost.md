@@ -1,0 +1,1 @@
+- **feat(search):** Tavily `search_depth: "advanced"` is recorded at 2 credits ($0.016) instead of 1 ([#17902](https://github.com/diegosouzapw/OmniRoute/pull/17902)) — thanks @yourspraveen

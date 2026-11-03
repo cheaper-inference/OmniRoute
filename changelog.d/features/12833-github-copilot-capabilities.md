@@ -1,0 +1,1 @@
+- **feat(oauth):** GitHub Copilot connections record the account's plan, model-selection mode and quota state, and the dashboard shows a policy disclosure before the device-code login; Free / Student accounts use the catalog's `auto` model ([#12833](https://github.com/diegosouzapw/OmniRoute/pull/12833)) — thanks @ScottyAmr

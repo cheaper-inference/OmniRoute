@@ -25,6 +25,17 @@ curl http://localhost:20128/api/monitoring/health \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
+### GET /api/monitoring/model-health
+
+Get per-model health states
+
+Management-only report that classifies every synced model on every provider connection as HEALTHY, DEGRADED, RATE_LIMITED, AUTH_FAILED, PROVIDER_DOWN, CONNECTION_BLOCKED, MODEL_LOCKED or UNKNOWN, from the connection state, the provider circuit breaker and the per-model lockout. Includes connection ids and names, so it requires a management principal.
+
+```bash
+curl http://localhost:20128/api/monitoring/model-health \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
 ### GET /api/monitoring/compression
 
 Get compression result-memo statistics

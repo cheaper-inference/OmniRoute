@@ -1,11 +1,12 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
-import { ArrowRight, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Circle, Sparkles, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Circle, Pencil, Sparkles, X } from "lucide-react";
 import { Button } from "./button";
 import { Card, CardContent } from "./card";
 import { RadioGroupItem, type RadioGroupItemProps } from "./radio-group";
 import { cn } from "./lib/utils";
+import { Checkbox, type CheckboxProps } from "./checkbox";
 
 export type ChoiceCardTone = "neutral" | "accent" | "info" | "success";
 export interface ChoiceCardProps extends Omit<RadioGroupItemProps, "card" | "label" | "title"> {
@@ -18,6 +19,36 @@ export function ChoiceCard({ title, icon, tone = "neutral", className, ...props 
   return <RadioGroupItem {...props} card className={cn("ci-choice-card", `ci-choice-card--${tone}`, className)} label={
     <span className="ci-choice-card__heading">{icon && <span className="ci-choice-card__icon" aria-hidden>{icon}</span>}<span>{title}</span></span>
   } />;
+}
+
+/** Decorative product illustrations. All selection remains on the native checkbox. */
+function ChoiceCardVisual({ visual }: { visual: "models" | "gpus" | "optimization" }) {
+  return <span className={`ci-choice-visual ci-choice-visual--${visual}`} aria-hidden="true">
+    {Array.from({ length: visual === "gpus" ? 9 : 5 }, (_, index) => <span className="ci-choice-visual__block" key={index} />)}
+  </span>;
+}
+
+export interface MultiChoiceCardProps extends Omit<CheckboxProps, "label" | "title"> {
+  title: ReactNode;
+  icon?: ReactNode;
+  /** Large product-selection tile with a decorative animated illustration. */
+  variant?: "default" | "feature";
+  visual?: "models" | "gpus" | "optimization";
+}
+/** A native checkbox card for independent, multi-select onboarding choices. */
+export function MultiChoiceCard({ title, icon, variant = "default", visual, className, ...props }: MultiChoiceCardProps) {
+  return <Checkbox {...props} card className={cn("ci-choice-card", "ci-multi-choice-card", variant === "feature" && "ci-multi-choice-card--feature", className)} label={<>{variant === "feature" && visual && <ChoiceCardVisual visual={visual} />}<span className="ci-choice-card__heading">{icon && <span className="ci-choice-card__icon" aria-hidden>{icon}</span>}<span>{title}</span></span></>} />;
+}
+
+export interface SetupLayoutProps { children: ReactNode; aside?: ReactNode; className?: string; /** Compact section headings for dense workspace and payment setup. */ headingVariant?: "default" | "compact"; /** Wider right column for embedded booking or configuration. */ asideSize?: "default" | "wide" | "booking"; }
+/** Shared content/benefits layout for workspace setup and wallet payment summaries. */
+export function SetupLayout({ children, aside, className, headingVariant = "default", asideSize = "default" }: SetupLayoutProps) {
+  return <div className={cn("ci-setup-layout", asideSize !== "default" && `ci-setup-layout--${asideSize}`, headingVariant === "compact" && "ci-setup-layout--compact", className)}><div className="ci-setup-layout__main">{children}</div>{aside && <aside className="ci-setup-layout__aside">{aside}</aside>}</div>;
+}
+
+export interface SetupBenefitsProps { title: string; description?: string; items: readonly { title: string; description: string; icon?: ReactNode }[]; }
+export function SetupBenefits({ title, description, items }: SetupBenefitsProps) {
+  return <div className="ci-setup-benefits"><h2>{title}</h2>{description && <p>{description}</p>}<ul>{items.map(item => <li key={item.title}>{item.icon && <span aria-hidden>{item.icon}</span>}<div><strong>{item.title}</strong><p>{item.description}</p></div></li>)}</ul></div>;
 }
 
 export interface SetupProgressCardProps {
@@ -72,4 +103,15 @@ export function SaveChangesBar({ dirty, onRevert, onSave, form, busy, saveLabel 
     <span role="status">Unsaved changes</span>
     <Button type={form ? "submit" : "button"} form={form} disabled={busy} onClick={onSave}>{busy ? "Saving…" : saveLabel}</Button>
   </div></footer>;
+}
+
+export interface SetupSelectionSummaryProps {
+  items: readonly { id: string; label: string; icon?: ReactNode }[];
+  onEdit?: () => void;
+  editLabel?: string;
+  disabled?: boolean;
+}
+/** Keeps selected interests in context; omit onEdit when the wizard owns Back. */
+export function SetupSelectionSummary({ items, onEdit, editLabel = "Edit interests", disabled }: SetupSelectionSummaryProps) {
+  return <div className="ci-setup-selection"><ul aria-label="Selected interests">{items.map(item => <li key={item.id}>{item.icon && <span aria-hidden>{item.icon}</span>}<span>{item.label}</span></li>)}</ul>{onEdit && <Button type="button" variant="ghost" size="sm" disabled={disabled} onClick={onEdit}><Pencil aria-hidden />{editLabel}</Button>}</div>;
 }
