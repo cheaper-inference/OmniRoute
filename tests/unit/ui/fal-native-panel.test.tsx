@@ -28,7 +28,7 @@ test("schema controls preserve explicit false and zero, and native output files 
           inputs: {
             prompt: { type: "string" },
             enable_thinking: { type: "boolean" },
-            seed: { type: "integer" },
+            seed: { type: "integer", enum: [0, 42] },
           },
           reasoning: { enable_thinking: { type: "boolean" } },
           required: ["prompt"],
@@ -111,4 +111,7 @@ test("an endpoint without a thinking field does not invent a thinking control", 
   expect(
     JSON.parse((screen.getByLabelText("falNative.input") as HTMLTextAreaElement).value)
   ).toEqual({ quality: "max" });
+  fireEvent.change(screen.getByLabelText("falNative.input"), { target: { value: "{" } });
+  fireEvent.change(screen.getByLabelText("quality"), { target: { value: "standard" } });
+  expect(screen.getByRole("alert").textContent).toBe("playground.invalidJson");
 });

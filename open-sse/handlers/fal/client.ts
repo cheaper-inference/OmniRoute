@@ -44,19 +44,33 @@ export class FalClient {
 
   /** POSTs are dispatched once. Only safe reads may retry, with bounded Retry-After. */
   async request(url: string, init: RequestInit = {}): Promise<Response> {
+    const target = new URL(url);
+    if (
+      !["https://api.fal.ai", "https://fal.run", "https://queue.fal.run"].includes(target.origin) ||
+      target.username ||
+      target.password
+    ) {
+      throw new FalError("Invalid fal request URL");
+    }
     const deadline = AbortSignal.timeout(getConfiguredTimeout());
     init = { ...init, signal: init.signal ? AbortSignal.any([init.signal, deadline]) : deadline };
     const isRead = !init.method || init.method === "GET";
     for (let attempt = 0; ; attempt++) {
-      const response = await this.fetcher(url, {
-        ...init,
-        redirect: "error",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Key ${this.token}`,
-          ...Object.fromEntries(new Headers(init.headers).entries()),
-        },
-      });
+      let response: Response;
+      try {
+        response = await this.fetcher(url, {
+          ...init,
+          redirect: "error",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Key ${this.token}`,
+            ...Object.fromEntries(new Headers(init.headers).entries()),
+          },
+        });
+      } catch {
+        if (init.signal?.aborted) throw init.signal.reason;
+        throw new FalError("Fal upstream transport failed", 502);
+      }
       if (isRead && attempt < 2 && [429, 503].includes(response.status)) {
         const retry = response.headers.get("retry-after");
         const seconds =
@@ -171,6 +185,10 @@ export class FalClient {
 export function normalizeFalOutput(payload: unknown) {
   const artifacts: FalRecord[] = [];
   function visit(value: unknown, path: string) {
+    if (typeof value === "string" && /^(https:\/\/|data:)/.test(value)) {
+      artifacts.push({ url: value, path });
+      return;
+    }
     if (Array.isArray(value)) {
       value.forEach((item, i) => visit(item, `${path}[${i}]`));
       return;

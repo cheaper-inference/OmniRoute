@@ -1086,10 +1086,14 @@ export async function enforceApiKeyPolicy(
   const canonicalPath = resolveCanonicalEndpointPath(new URL(request.url).pathname);
   if (
     options?.existingFalJob === true &&
-    ["GET", "DELETE"].includes(request.method) &&
-    /^\/v1\/fal\/jobs\/[a-zA-Z0-9-]+$/.test(canonicalPath)
+    ((["GET", "DELETE"].includes(request.method) &&
+      /^\/v1\/fal\/jobs\/[a-zA-Z0-9-]+$/.test(canonicalPath)) ||
+      (request.method === "POST" &&
+        canonicalPath === "/v1/fal/run" &&
+        request.headers.has("idempotency-key")))
   ) {
-    // Retrieval/cancellation remains available after this job consumes the key's budget.
+    // Existing receipts and results remain accessible after spend limits. The run route
+    // uses this only for receipt lookup, then reapplies full policy before any new dispatch.
     const rejection =
       validateKeyAccessSchedule(context) ??
       validateEndpointAccess(context) ??

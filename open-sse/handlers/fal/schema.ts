@@ -147,6 +147,21 @@ export function falCompatibilityInput(body: FalRecord, definition: FalDefinition
   for (const [key, value] of Object.entries(body)) {
     if (!envelope.has(key)) input[key] = value;
   }
+  for (const media of ["image", "video", "audio"]) {
+    const source = `${media}_urls`;
+    const references = `reference_${media}_urls`;
+    if (body[source] === undefined || Object.hasOwn(properties, source)) continue;
+    if (Object.hasOwn(properties, references)) {
+      input[references] = body[source];
+      delete input[source];
+    } else if (Object.hasOwn(properties, `${media}_url`)) {
+      if (!Array.isArray(body[source]) || body[source].length !== 1) {
+        throw new Error(`This fal endpoint supports exactly one ${media} reference`);
+      }
+      input[`${media}_url`] = body[source][0];
+      delete input[source];
+    }
+  }
   for (const [source, target] of [
     ["n", "num_images"],
     ["mask", "mask_url"],

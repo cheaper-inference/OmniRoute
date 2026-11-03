@@ -10,7 +10,7 @@ import {
   falRecord,
 } from "@omniroute/open-sse/handlers/fal/schema";
 import { reserveFalJob, saveFalJob, claimFalAccounting } from "@/lib/db/fal";
-import { falContext, resolveFalDefinition } from "@/lib/fal/runtime";
+import { falContext, resolveFalDefinition, recoverFalReceipt } from "@/lib/fal/runtime";
 import { falErrorResponse, falOptions, readFalRun } from "@/lib/fal/http";
 import { recordFalDispatch } from "@/lib/fal/accounting";
 import { getConfiguredTimeout } from "@/shared/utils/fetchTimeout";
@@ -27,6 +27,16 @@ export async function POST(request: Request) {
   try {
     const body = await readFalRun(request);
     const endpoint = canonicalFalEndpoint(body.endpoint_id);
+    if (body.transport === "queue" && request.headers.has("idempotency-key")) {
+      const recovered = await recoverFalReceipt(
+        request,
+        endpoint,
+        body.input,
+        request.headers.get("idempotency-key")!,
+        body.connection_id
+      );
+      if (recovered) return recovered;
+    }
     const context = await falContext(request, endpoint, body.connection_id);
     if (context.rejection) return context.rejection;
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(getConfiguredTimeout())]);
@@ -142,7 +152,12 @@ export async function POST(request: Request) {
       }
       return Response.json(normalizeFalOutput(await response.json()), { headers });
     } catch (error) {
-      job.status = job.requestId ? "SUBMITTED" : "SUBMISSION_UNKNOWN";
+      job.status =
+        error instanceof FalError && error.status < 500
+          ? "FAILED"
+          : job.requestId
+            ? "SUBMITTED"
+            : "SUBMISSION_UNKNOWN";
       saveFalJob(job);
       // A lost response can still be billable. Keep its receipt and fail closed on unknown cost.
       if (!(error instanceof FalError && error.status < 500) && claimFalAccounting(job.id)) {

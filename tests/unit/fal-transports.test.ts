@@ -79,6 +79,23 @@ test("safe reads retry within Retry-After bounds; a failed generation POST never
   );
 });
 
+test("file URL arrays remain downloadable and all credentialed requests stay on Fal hosts", async () => {
+  const { normalizeFalOutput } = await import("../../open-sse/handlers/fal/client.ts");
+  assert.equal(
+    normalizeFalOutput({
+      meshes: ["https://example.com/model.glb", "https://example.com/model.obj"],
+    }).artifacts.length,
+    2
+  );
+  let calls = 0;
+  const client = new FalClient("transport-test-key", async () => {
+    calls++;
+    return Response.json({});
+  });
+  await assert.rejects(client.request("https://evil.test/collect"), /Invalid fal request URL/);
+  assert.equal(calls, 0);
+});
+
 test("timeout/abort signals reach the transport and do not resubmit", async () => {
   const controller = new AbortController();
   let calls = 0;

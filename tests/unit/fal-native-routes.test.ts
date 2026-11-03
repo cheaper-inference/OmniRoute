@@ -153,6 +153,36 @@ test("native queue reserves once; retries and repeated result GETs never regener
   assert.equal(conflict.status, 400);
 });
 
+test("idempotency ignores object key ordering and preserves ordered references and nulls", () => {
+  const input = {
+    options: { enabled: false, count: 0 },
+    refs: ["second", "first"],
+    nullable: null,
+  };
+  const reserved = db.reserveFalJob(
+    "fingerprint-owner",
+    String(connection.id),
+    endpoint,
+    input,
+    "ordered-input"
+  );
+  const recovered = db.findFalReservation("fingerprint-owner", "ordered-input", endpoint, {
+    nullable: null,
+    refs: ["second", "first"],
+    options: { count: 0, enabled: false },
+  });
+  assert.equal(recovered?.id, reserved.job.id);
+  assert.throws(
+    () =>
+      db.findFalReservation("fingerprint-owner", "ordered-input", endpoint, {
+        ...input,
+        refs: ["first", "second"],
+      }),
+    /different fal input/
+  );
+  assert.equal(db.findFalReservation("another-owner", "ordered-input", endpoint, input), null);
+});
+
 test("job ownership, model restrictions and connection scopes survive retrieval and cancellation", async () => {
   const response = await run.POST(request("run", "POST", body));
   const receipt = await response.json();
@@ -176,17 +206,59 @@ test("job ownership, model restrictions and connection scopes survive retrieval 
 test("completed jobs remain retrievable when their unknown cost exhausts a limited budget", async () => {
   costs.setBudget(key.id, { dailyLimitUsd: 1, resetInterval: "daily" });
   try {
-    const submitted = await run.POST(request("run", "POST", body));
+    const submitted = await run.POST(
+      request("run", "POST", body, key.key, { "Idempotency-Key": "budget-recovery" })
+    );
     assert.equal(submitted.status, 202, await submitted.clone().text());
     const receipt = await submitted.json();
     assert.equal(costs.checkBudget(key.id).allowed, false);
+    const recovered = await run.POST(
+      request("run", "POST", body, key.key, { "Idempotency-Key": "budget-recovery" })
+    );
+    assert.equal(recovered.status, 202, await recovered.clone().text());
+    assert.equal((await recovered.json()).id, receipt.id);
     const result = await jobs.GET(request(`jobs/${receipt.id}?result=true`), {
       params: Promise.resolve({ id: receipt.id }),
     });
     assert.equal(result.status, 200, await result.clone().text());
-    const next = await run.POST(request("run", "POST", body));
+    const next = await run.POST(
+      request("run", "POST", body, key.key, { "Idempotency-Key": "new-after-budget" })
+    );
     assert.equal(next.status, 429);
   } finally {
+    costs.resetCostData();
+  }
+});
+
+test("uncertain submissions retain a recoverable receipt after the budget fails closed", async () => {
+  const fetcher = globalThis.fetch;
+  let submissions = 0;
+  globalThis.fetch = async (url, init) => {
+    if (String(url) === `https://queue.fal.run/${endpoint}` && init?.method === "POST") {
+      submissions++;
+      throw new TypeError("connection reset after dispatch");
+    }
+    return fetcher(url, init);
+  };
+  costs.setBudget(key.id, { dailyLimitUsd: 1, resetInterval: "daily" });
+  try {
+    const first = await run.POST(
+      request("run", "POST", body, key.key, { "Idempotency-Key": "uncertain-recovery" })
+    );
+    assert.equal(first.status, 502);
+    const id = first.headers.get("X-Request-ID");
+    assert.ok(id);
+    assert.equal(costs.checkBudget(key.id).allowed, false);
+    const recovered = await run.POST(
+      request("run", "POST", body, key.key, { "Idempotency-Key": "uncertain-recovery" })
+    );
+    assert.equal(recovered.status, 202);
+    const receipt = await recovered.json();
+    assert.equal(receipt.id, id);
+    assert.equal(receipt.status, "SUBMISSION_UNKNOWN");
+    assert.equal(submissions, 1);
+  } finally {
+    globalThis.fetch = fetcher;
     costs.resetCostData();
   }
 });

@@ -4,7 +4,8 @@ import {
   compileFalInput,
   falRecord,
 } from "@omniroute/open-sse/handlers/fal/schema";
-import { getFalDefinition, saveFalDefinition } from "@/lib/db/fal";
+import { getFalDefinition, saveFalDefinition, findFalReservation } from "@/lib/db/fal";
+import type { FalRecord } from "@omniroute/open-sse/handlers/fal/schema";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
@@ -97,4 +98,41 @@ export async function resolveFalDefinition(
   compileFalInput(definition);
   saveFalDefinition(connectionId, definition);
   return definition;
+}
+
+/** Recover an existing receipt only; callers still enforce full policy for new inference. */
+export async function recoverFalReceipt(
+  request: Request,
+  endpoint: string,
+  input: FalRecord,
+  idempotencyKey: string,
+  connectionId?: string
+): Promise<Response | null> {
+  if (!(await isAuthenticated(request))) return errorResponse(401, "Authentication required");
+  const scope = await enforceApiKeyPolicyWithScope(request, `fal-ai/${endpoint}`, {
+    existingFalJob: true,
+  });
+  if (scope.rejection) return scope.rejection;
+  const job = findFalReservation(
+    scope.policy.apiKeyInfo?.id ?? "dashboard",
+    idempotencyKey,
+    endpoint,
+    input
+  );
+  if (!job) return null;
+  if (connectionId && connectionId !== job.connectionId)
+    throw new FalError("Idempotency-Key is bound to another connection");
+  const context = await falContext(request, endpoint, job.connectionId, true);
+  if (context.rejection) return context.rejection;
+  return Response.json(
+    {
+      id: job.id,
+      status: job.status,
+      request_id: job.requestId ?? null,
+      status_url: `/v1/fal/jobs/${job.id}`,
+      response_url: `/v1/fal/jobs/${job.id}?result=true`,
+      cancel_url: job.cancelUrl ? `/v1/fal/jobs/${job.id}` : null,
+    },
+    { status: 202, headers: { "X-Request-ID": job.id, "Cache-Control": "no-store" } }
+  );
 }

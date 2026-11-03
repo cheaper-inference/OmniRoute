@@ -147,6 +147,25 @@ test("Wan thinking booleans, ordered multimodal references and native nested inp
     };
     assert.deepEqual(compileFalInput(definition)(input), input);
   }
+  assert.deepEqual(
+    falCompatibilityInput(
+      {
+        prompt: "walk",
+        enable_thinking: false,
+        image_urls: ["https://example.com/1", "https://example.com/2"],
+        video_urls: ["https://example.com/video"],
+        audio_urls: ["https://example.com/audio"],
+      },
+      definition
+    ),
+    {
+      prompt: "walk",
+      enable_thinking: false,
+      reference_image_urls: ["https://example.com/1", "https://example.com/2"],
+      reference_video_urls: ["https://example.com/video"],
+      reference_audio_urls: ["https://example.com/audio"],
+    }
+  );
   const custom: FalDefinition = {
     endpoint_id: "publisher/custom",
     openapi: {

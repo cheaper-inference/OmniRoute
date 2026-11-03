@@ -27,6 +27,7 @@ async function readResponse(response: Response) {
 export default function FalNativePanel({ connectionId }: { connectionId: string | null }) {
   const t = useTranslations("falNative");
   const common = useTranslations("common");
+  const jsonText = useTranslations("playground");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [models, setModels] = useState<Model[]>([]);
@@ -73,7 +74,16 @@ export default function FalNativePanel({ connectionId }: { connectionId: string 
     if (!available.includes(transport)) setTransport(available[0]);
   }
   function setParameter(name: string, value: unknown) {
-    setInput((current) => JSON.stringify({ ...JSON.parse(current), [name]: value }, null, 2));
+    try {
+      const parsed: unknown = JSON.parse(input);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        setError(jsonText("invalidJson"));
+        return;
+      }
+      setInput(JSON.stringify({ ...parsed, [name]: value }, null, 2));
+    } catch {
+      setError(jsonText("invalidJson"));
+    }
   }
   async function retrieve(cancel = false) {
     const value = await readResponse(
@@ -217,8 +227,17 @@ export default function FalNativePanel({ connectionId }: { connectionId: string 
                     {Array.isArray(field.enum) ? (
                       <select
                         className="rounded border bg-transparent p-2"
-                        value={String(values[name] ?? "")}
-                        onChange={(event) => setParameter(name, event.target.value)}
+                        value={values[name] === undefined ? "" : String(values[name])}
+                        onChange={(event) =>
+                          setParameter(
+                            name,
+                            event.target.value === ""
+                              ? undefined
+                              : (field.enum as unknown[]).find(
+                                  (value) => String(value) === event.target.value
+                                )
+                          )
+                        }
                       >
                         <option value="">—</option>
                         {field.enum.map((value) => (
