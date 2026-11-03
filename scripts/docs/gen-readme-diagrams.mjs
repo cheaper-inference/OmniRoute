@@ -1,7 +1,7 @@
 // Regenerates every generated README diagram in one go, in README order. Each SVG under
 // docs/diagrams/ is committed and byte-compared by tests/unit/docs/readme-<name>-svg.test.ts,
 // so a stale picture fails `test-unit`; after touching a generator, a shared module
-// (readme-fonts.mjs, readme-diagram-theme.mjs) or the data a generator reads (the free-tier
+// (readme-fonts.mjs, readme-outline.mjs, readme-diagram-theme.mjs) or the data a generator reads (the free-tier
 // catalog, provider display names), run this and commit the SVGs it rewrites.
 //
 //   npm run docs:readme-diagrams
