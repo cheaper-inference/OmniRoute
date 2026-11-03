@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -485,7 +485,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-โมดูลตัวดำเนินการระดับบนสุด 156 โมดูล (`*.ts` ลบ `base.ts`, `index.ts` และการทดสอบ - การนับ `npm run check:docs-counts` วัด) ทุกคลาสของตัวดำเนินการจะขยาย `BaseExecutor` (`base.ts`) โดยตรงหรือผ่าน `DefaultExecutor` หรือตัวเรียกทำงานอื่น โมดูลที่เหลือเป็นตัวช่วยต่อผู้ให้บริการ (สกีมาเครื่องมือ, อะแดปเตอร์ fetch/TTS, ตัวจัดการมุม) ผู้ดำเนินการได้แก่:
+โมดูลตัวดำเนินการระดับบนสุด 158 โมดูล (`*.ts` ลบ `base.ts`, `index.ts` และการทดสอบ - การนับ `npm run check:docs-counts` วัด) ทุกคลาสของตัวดำเนินการจะขยาย `BaseExecutor` (`base.ts`) โดยตรงหรือผ่าน `DefaultExecutor` หรือตัวเรียกทำงานอื่น โมดูลที่เหลือเป็นตัวช่วยต่อผู้ให้บริการ (สกีมาเครื่องมือ, อะแดปเตอร์ fetch/TTS, ตัวจัดการมุม) ผู้ดำเนินการได้แก่:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` บวก `claudeIdentity.ts` (ตัวช่วยระบุตัวตนที่ใช้ร่วมกัน) และ `index.ts` (รีจิสทรี)
 

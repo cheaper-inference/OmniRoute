@@ -4,7 +4,7 @@
 
 ---
 
-> **Stádas:** tá an deais tógtha ar an** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), díolta mar an spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá an pictiúr in aghaidh an tsrutha pinned i `packages/ui-kit/UPSTREAM.md` agus cosanta ag `npm run check:ui-kit-snapshot`). Is é solas an téama canónach; Is é `system` an rogha réamhshocraithe. Is é an accent ná Keak aoil (`--ci-color-accent`). Is é Switzer an teaghlach aonair le haghaidh UI, taispeáint agus cód téacs (`--ci-font-ui`; `--ci-font-display` agus `--ci-font-mono` réiteach dó ), féin-óstáil ag an trealamh féin (`packages/ui-kit/src/ci-fonts.css`, allmhairithe ag `ci-tokens.css`). Is glyph Lucide gach íocón.
+> **Stádas:** tá an deais tógtha ar an** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), díolta mar an spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá an pictiúr in aghaidh an tsrutha pinned i `packages/ui-kit/UPSTREAM.md` agus cosanta ag `npm run check:ui-kit-snapshot`). Is é solas an téama canónach; Is é `system` an rogha réamhshocraithe. Is é an accent ná Keak aoil (`--ci-color-accent`). Is é Switzer an teaghlach aonair le haghaidh UI, taispeáint agus cód téacs (`--ci-font-ui`; `--ci-font-display` agus `--ci-font-mono` réiteach dó ), féin-óstáil ag an trealamh féin (`packages/ui-kit/src/ci-fonts.css`, allmhairithe ag `ci-tokens.css`). Scripteanna Ní thiteann Switzer trí glyph trí glyph (`src/app/globals.css`): Idir le haghaidh Coireallach, Gréigis agus Vítneaimis agus, faoi `html[dir="rtl"]` amháin, Vazirmatn don script Araibis. Is glyph Lucide gach íocón.
 
 ## 1. Cá bhfuil rudaí suite
 

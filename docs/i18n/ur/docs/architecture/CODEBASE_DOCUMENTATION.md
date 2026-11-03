@@ -458,7 +458,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -488,7 +488,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ٹاپ لیول ایگزیکیوٹر ماڈیولز (`*.ts` مائنس `base.ts`، `index.ts` اور ٹیسٹ — the count `npm run check:docs-counts` اقدامات)۔ ہر ایگزیکیوٹر کلاس `BaseExecutor` (`base.ts`) کو براہ راست یا `DefaultExecutor` یا کسی اور ایگزیکیوٹر کے ذریعے بڑھاتا ہے۔ بقیہ ماڈیول فی فراہم کنندہ مددگار ہیں (ٹول اسکیماس، fetch/TTS اڈاپٹر، quirk ہینڈلرز)۔ ایگزیکیوٹرز میں شامل ہیں:
+158 ٹاپ لیول ایگزیکیوٹر ماڈیولز (`*.ts` مائنس `base.ts`، `index.ts` اور ٹیسٹ — the count `npm run check:docs-counts` اقدامات)۔ ہر ایگزیکیوٹر کلاس `BaseExecutor` (`base.ts`) کو براہ راست یا `DefaultExecutor` یا کسی اور ایگزیکیوٹر کے ذریعے بڑھاتا ہے۔ بقیہ ماڈیول فی فراہم کنندہ مددگار ہیں (ٹول اسکیماس، fetch/TTS اڈاپٹر، quirk ہینڈلرز)۔ ایگزیکیوٹرز میں شامل ہیں:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `vertex` `devin-desktop` plus `claudeIdentity.ts` (مشترکہ شناخت مددگار) اور `index.ts` `qoder` رجسٹری)۔
 
