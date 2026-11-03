@@ -15,10 +15,12 @@ import {
  * dedicated Images routes, so the inventory carries no evidence about them and must not
  * filter accounts for them — otherwise every Codex account is ineligible and
  * `/v1/images/generations` fails with "No credentials for image provider: codex".
+ * Hosted-tool image ids (`gpt-6.1-sol`, `gpt-5.6-*`) are chat models the inventory does
+ * list, so they keep the filter (#18687).
  */
 function isCodexImageModel(requestedModel: string): boolean {
   const rawModel = requestedModel.slice(requestedModel.lastIndexOf("/") + 1);
-  return isRegisteredImageModel("codex", rawModel);
+  return /^gpt-image-/i.test(rawModel) && isRegisteredImageModel("codex", rawModel);
 }
 
 /**

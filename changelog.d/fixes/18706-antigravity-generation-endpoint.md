@@ -1,0 +1,1 @@
+- **fix(antigravity):** Keep default Antigravity and agy generation requests on the daily consumer endpoint instead of falling back to the regular host ([#18706](https://github.com/cheaper-inference/OmniRoute/pull/18706)) — thanks @AiCaptain357
