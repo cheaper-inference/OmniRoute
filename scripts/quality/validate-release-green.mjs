@@ -48,7 +48,7 @@ import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
 import { unitDiagnosticReference } from "../ci/unit-diagnostics.mjs";
-import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
+import { eslintMeasurementCounts, readEslintMeasurement } from "./eslint-measurement.mjs";
 import {
   loadFullCiProfile,
   resolveFullCiComparison,
@@ -214,7 +214,8 @@ export function parseEslintJson(out) {
  * "could not parse eslint json" hides the actionable cause and sends maintainers debugging
  * the parser instead of the gate ceiling.
  */
-export function evaluateEslintRun({ code, out }, warningBaseline) {
+export function evaluateEslintRun(run, warningBaseline) {
+  const { code, out } = run;
   if (code !== 0) {
     return [
       {
@@ -229,7 +230,7 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
       },
     ];
   }
-  const parsed = parseEslintJson(out);
+  const parsed = Object.hasOwn(run, "measurement") ? run.measurement : parseEslintJson(out);
   let counts;
   try {
     counts = eslintMeasurementCounts(parsed);
@@ -1081,6 +1082,11 @@ async function main() {
     // pre-existing debt in config/quality/eslint-suppressions.json must not count as
     // errors here — only NET-NEW violations are release reds. The cold release runner can
     // exceed 30 minutes as the repository grows, and this pre-flight often runs under load.
+    // stdout/stderr chunks may interleave, and dependencies can print bracketed
+    // diagnostics. Keep the machine report in its own fresh file, not that stream.
+    const lintReportPath = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
+    mkdirSync(dirname(lintReportPath), { recursive: true });
+    writeFileSync(lintReportPath, "", { flag: "wx", mode: 0o600 });
     const lintRun = await run(
       "npx",
       [
@@ -1091,6 +1097,8 @@ async function main() {
         ".eslintcache",
         "--format",
         "json",
+        "--output-file",
+        lintReportPath,
         "--suppressions-location",
         "config/quality/eslint-suppressions.json",
         // An "unpruned" suppression means a previously-frozen violation was legitimately
@@ -1107,16 +1115,11 @@ async function main() {
     );
     const { out } = lintRun;
     saveGateLog("lint", out);
-    for (const result of evaluateEslintRun(lintRun, baselineValue("eslintWarnings"))) {
-      record(result);
-    }
+    let measurement = null;
     if ([0, 1].includes(lintRun.code) && ["PASS", "FAIL"].includes(lintRun.receipt.outcome)) {
       try {
-        const parsed = parseEslintJson(out);
-        eslintMeasurementCounts(parsed);
-        const path = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
-        writeFileSync(path, `${JSON.stringify(parsed)}\n`, { flag: "wx", mode: 0o600 });
-        freshLintReport = path;
+        measurement = readEslintMeasurement(lintReportPath);
+        freshLintReport = lintReportPath;
       } catch {
         record({
           id: "lint-measurement",
@@ -1126,6 +1129,12 @@ async function main() {
           detail: "no complete lint report retained for this execution",
         });
       }
+    }
+    for (const result of evaluateEslintRun(
+      { ...lintRun, measurement },
+      baselineValue("eslintWarnings")
+    )) {
+      record(result);
     }
   }
 
