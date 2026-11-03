@@ -627,6 +627,7 @@
       "tests/unit/authz/peer-stamp.test.ts",
       "tests/unit/circuit-breaker-kind-cooldown-escalation-14960.test.ts",
       "tests/unit/claude-scoped-quota-auth.test.ts",
+      "tests/unit/18664-model-lockout-not-quota-exhausted.test.ts",
       "tests/unit/combo-priority-all-circuit-open.test.ts",
       "tests/unit/combo/claude-scoped-quota-alias-round-robin.test.ts",
       "tests/unit/combo/combo-target-exhaustion.test.ts",

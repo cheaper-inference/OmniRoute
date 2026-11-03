@@ -1623,6 +1623,43 @@ export async function getProviderCredentials(
         ? new Date(earliestResetMs).toISOString()
         : new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
+      // #18664: an account filtered out only by a short retryable model lockout still
+      // has quota. When its lockout ends before the earliest quota reset, the request
+      // is blocked by that lockout, not by quota exhaustion: report it as a model
+      // cooldown with the lockout's retry time.
+      const earliestModelLockout = requestedModel
+        ? connections
+            .filter((connection) => connectionFilterStatus.get(connection.id) === "modelLocked")
+            .map((connection) => {
+              const lockout = getModelLockoutInfo(provider, connection.id, requestedModel);
+              return lockout &&
+                lockout.remainingMs > 0 &&
+                isRetryableModelLockoutReason(lockout.reason)
+                ? { connection, untilMs: Date.now() + lockout.remainingMs }
+                : null;
+            })
+            .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+            .sort((a, b) => a.untilMs - b.untilMs)[0]
+        : undefined;
+      if (earliestModelLockout && earliestModelLockout.untilMs < new Date(retryAfter).getTime()) {
+        const lockoutRetryAfter = new Date(earliestModelLockout.untilMs).toISOString();
+        log.warn(
+          "AUTH",
+          `${provider} | remaining accounts quota-exhausted; account ${earliestModelLockout.connection.id?.slice(0, 8)} cooling down for model ${requestedModel} (${formatRetryAfter(lockoutRetryAfter)})`
+        );
+        invalidateManagedLease(options, "MODEL_INELIGIBLE");
+        return {
+          allRateLimited: true,
+          retryAfter: lockoutRetryAfter,
+          retryAfterHuman: formatRetryAfter(lockoutRetryAfter),
+          lastError: earliestModelLockout.connection.lastError || null,
+          lastErrorCode: 429,
+          cooldownScope: "model",
+          cooldownModel: requestedModel,
+          connectionsCount: connections.length,
+        };
+      }
+
       invalidateManagedLease(options, "QUOTA_UNAVAILABLE");
       return {
         allRateLimited: true,
