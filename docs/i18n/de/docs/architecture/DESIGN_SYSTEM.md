@@ -119,7 +119,16 @@
 
 ## 5. Aktualisieren des Kits
 
-`npm run check:ui-kit-upstream` vergleicht die in `packages/ui-kit/UPSTREAM.md` gepinnte Version mit dem neuesten `v*` Tag des Upstream-Repos und gibt den Synchronisierungsbefehl aus, wenn eine Version veröffentlicht wird. Der wöchentliche `UI Kit upstream watch` Workflow (`.github/workflows/ui-kit-upstream-watch.yml`) führt die gleiche Prüfung durch und hält ein Tracking-Problem offen, während der Pin im Rückstand ist; Das Upstream-Repo ist privat, daher benötigt der Workflow ein schreibgeschütztes Token im `UI_KIT_READ_TOKEN` Geheimnis. Wenn der Upstream nicht gelesen werden kann (kein Token, ein Token, der nicht mehr funktioniert, oder GitHub nicht erreichbar), bleibt der Lauf grün, schreibt aber eine Warnung und hält ein separates Problem offen, das sich selbst schließt, sobald ein späterer Lauf wieder Upstream lesen kann.
+`npm run check:ui-kit-upstream` vergleicht die in `packages/ui-kit/UPSTREAM.md` gepinnte Version mit dem neuesten `v*` Tag des Upstream-Repos und gibt den Synchronisierungsbefehl aus, wenn eine Version veröffentlicht wird.
+
+Der tägliche `UI Kit upstream watch` Workflow (`.github/workflows/ui-kit-upstream-watch.yml`) führt dieselbe Prüfung durch. Während der Pin zurückliegt, hält `scripts/ci/ui-kit-sync-pr.sh` einen synchronisierten PR für den höchsten `release/vX.Y.Z` Zweig auf dem rollenden Zweig `chore/ui-kit-sync-latest` offen. Es wird nie zusammengeführt: Jede Kit-Veröffentlichung erfordert immer noch eine visuelle Überprüfung auf dem lokalen VPS. Der Zweig wird neu erstellt, wenn eine neuere Version verfügbar ist, andernfalls bleibt er in Ruhe. Ein geöffneter PR mit manuell übertragenen Commits wird nicht überschrieben, und ein PR für eine Version, die ein Betreuer nicht zusammengeführt hat, bleibt bis zu einer neueren Version geschlossen.
+
+Wenn kein PR geöffnet werden kann (die Zielversion ist eingefroren, für den PR wurden Commits manuell gepusht, der PR wurde geschlossen oder es ist kein PR Token festgelegt), bleibt im Workflow ein Tracking-Problem offen, das den Grund dafür angibt.
+
+Der Workflow verwendet zwei Geheimnisse:
+
+- `secrets.UI_KIT_READ_TOKEN`: ein schreibgeschütztes Token für das private Upstream-Repo. Wenn der Workflow den Upstream nicht lesen kann (kein Token, ein Token, der nicht mehr funktioniert, oder GitHub nicht erreichbar), bleibt der Lauf grün, schreibt aber eine Warnung und lässt ein separates Problem offen, das sich selbst schließt, sobald ein späterer Lauf wieder Upstream lesen kann.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: ein feinkörniges Token für dieses Repository mit Schreibzugriff auf Inhalte und Pull-Anfragen. Das Standard `GITHUB_TOKEN` kann hier kein PRs erstellen, und ein geöffnetes PR würde CI nicht auslösen. Ohne dieses Token verschiebt der Workflow nur die Verzweigung.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopiert das Upstream- `src/` bei diesem Commit (`latest` = das neueste `v*` Tag) in `packages/ui-kit/src`, wendet die einzelne zulässige Transformation an (es löscht das `.js` Suffix aus relativen Importen) und setzt die Workspace-Version in `packages/ui-kit/package.json` und `package-lock.json` auf die Upstream-Version. Dann: Überprüfen Sie `git diff packages/ui-kit`, machen Sie einen visuellen Überblick über Anbieter, Einstellungen, Kombinationen, Nutzung und Endpunkt in beiden Themes, führen Sie `npm run check:ui-kit-snapshot` und `npm run test:vitest:ui` aus und öffnen Sie PR mit dem Upstream-Änderungsprotokoll.
 
