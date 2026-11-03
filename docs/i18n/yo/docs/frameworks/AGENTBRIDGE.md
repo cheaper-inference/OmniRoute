@@ -16,11 +16,11 @@ AgentBridge jẹ́ proxy MITM (Man-in-the-Middle) ti OmniRoute, èyí tí ń dá
 
 ### Kini AgentBridge?
 
-Nigbati aṣoju IDE kan (fun apẹẹrẹ, GitHub Copilot, Cursor, koodu Claude ) ṣe ipe API, o sopọ taara si olupese AI oke (OpenAI, Anthropic, ati bẹbẹ lọ). AgentBridge ṣe idilọwọ asopọ yẹn ni gbangba ni ipele TLS - laisi nilo iyipada iṣeto ni aṣoju eyikeyi - o si tun kọ ibeere naa nipasẹ OmniRoute.
+Nigbati aṣoju IDE kan (fun apẹẹrẹ, GitHub Copilot, Cursor, koodu Claude ) ṣe ipe API, o sopọ taara si olupese AI oke (OpenAI, Anthropic, ati bẹbẹ lọ). AgentBridge ṣe idilọwọ asopọ yẹn ni gbangba ni ipele TLS — laisi nilo eyikeyi iṣeto iṣeto aṣoju ayipada — ati tun ṣe ibeere naa nipasẹ OmniRoute.
 
 Eyi tumọ si pe o le:
 
-- **Yipada eyikeyi aṣoju si olupese eyikeyi** : Copilot sọrọ si OpenAI? Ṣe àtúnjúwe sí Anthropic Claude, Gemini, tabi eyikeyi ninu awọn olupese 377 OmniRoute.
+- **Yipada eyikeyi aṣoju si olupese eyikeyi** : Copilot sọrọ si OpenAI? Ṣe àtúnjúwe sí Anthropic Claude, Gemini, tabi eyikeyi ninu awọn olupese 380 OmniRoute.
 - **Waye awọn aworan agbaye** : `gemini-3-flash` → `claude-sonnet-4.7` ni gbangba ni ipele oluṣakoso.
 - **Ṣe akiyesi gbogbo ijabọ aṣoju** : Gbogbo ibeere ti o gba wọle ni a gbejade si [Oluyewo Ijabọ](./TRAFFIC_INSPECTOR.md).
 - **Waye resilience OmniRoute** : ipa ọna konbo, awọn fifọ iyika, awọn ipadasẹhin, ati iṣẹ ipasẹ iye owo fun ijabọ aṣoju IDE paapaa.

@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** dasbor dibangun di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream disematkan di `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Terang adalah tema kanonik; preferensi defaultnya adalah `system`. Aksennya adalah kapur keak (`--ci-color-accent`). Switzer adalah keluarga tunggal untuk UI, tampilan dan teks kode (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` memutuskan untuk itu), dihosting sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimpor oleh `ci-tokens.css`). Setiap ikon adalah mesin terbang Lucide.
+> **Status:** dasbor dibangun di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream disematkan di `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Terang adalah tema kanonik; preferensi defaultnya adalah `system`. Aksennya adalah kapur keak (`--ci-color-accent`). Switzer adalah keluarga tunggal untuk UI, tampilan dan teks kode (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` memutuskan untuk itu), dihosting sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimpor oleh `ci-tokens.css`). Skrip Switzer tidak memiliki mesin terbang demi mesin terbang (`src/app/globals.css`): Inter untuk Sirilik, Yunani, dan Vietnam dan, hanya di bawah `html[dir="rtl"]`, Vazirmatn untuk aksara Arab. Setiap ikon adalah mesin terbang Lucide.
 
 ## 1. Di mana semuanya berada
 
@@ -118,11 +118,9 @@
 
 ## 5. Memperbarui kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` menyalin `src/` upstream pada commit tersebut ke
-`packages/ui-kit/src` dan menerapkan satu-satunya transformasi yang diizinkan (menghapus akhiran `.js` dari
-impor relatif). Kemudian: tinjau `git diff packages/ui-kit`, lakukan pemeriksaan visual pada halaman
-penyedia, pengaturan, kombo, penggunaan, dan endpoint di kedua tema, jalankan
-`npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, lalu buka PR dengan changelog upstream.
+`npm run check:ui-kit-upstream` membandingkan versi yang disematkan di `packages/ui-kit/UPSTREAM.md` dengan tag `v*` terbaru dari repo upstream dan mencetak perintah sinkronisasi ketika rilis keluar. Alur kerja `UI Kit upstream watch` mingguan (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan pemeriksaan yang sama dan membiarkan satu masalah pelacakan tetap terbuka saat pin berada di belakang; repo upstream bersifat pribadi, sehingga alur kerja memerlukan token baca-saja dalam rahasia `UI_KIT_READ_TOKEN`. Ketika tidak dapat membaca upstream (tidak ada token, token yang berhenti berfungsi, atau GitHub tidak dapat dijangkau) proses tetap hijau tetapi menulis peringatan dan membiarkan satu masalah terpisah tetap terbuka, yang akan menutup sendiri setelah proses selanjutnya dapat membaca upstream lagi.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` menyalin `src/` upstream pada commit tersebut (`latest` = tag `v*` terbaru) ke `packages/ui-kit/src`, menerapkan transformasi tunggal yang diizinkan (ini menghilangkan akhiran `.js` dari impor relatif), dan menyetel versi ruang kerja di `packages/ui-kit/package.json` dan `package-lock.json` ke versi upstream. Kemudian: tinjau `git diff packages/ui-kit`, lakukan penyampaian visual pada penyedia, pengaturan, kombo, penggunaan dan titik akhir di kedua tema, jalankan `npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, dan buka PR dengan log perubahan upstream.
 
 ## 6. diagram README
 

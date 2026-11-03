@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** deska rozdzielcza jest zbudowana na** Zestaw Keak CI UI** (`@keak/cheaper-inference-ui-kit`), sprzedawany jako obszar roboczy `packages/ui-kit` (`@omniroute/ui-kit`; migawka nadrzędna jest przypinana w `packages/ui-kit/UPSTREAM.md` i chroniona przez `npm run check:ui-kit-snapshot`). Światło jest tematem kanonicznym; domyślna preferencja to `system`. Akcentem jest limonka Keak (`--ci-color-accent`). Switzer to pojedyncza rodzina dla UI, wyświetlacza i tekstu kodu (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` na to odpowiadają), hostowana przez sam zestaw (`packages/ui-kit/src/ci-fonts.css`, importowany przez `ci-tokens.css`). Każda ikona jest glifem Lucide.
+> **Status:** deska rozdzielcza jest zbudowana na** Zestaw Keak CI UI** (`@keak/cheaper-inference-ui-kit`), sprzedawany jako obszar roboczy `packages/ui-kit` (`@omniroute/ui-kit`; migawka nadrzędna jest przypinana w `packages/ui-kit/UPSTREAM.md` i chroniona przez `npm run check:ui-kit-snapshot`). Światło jest tematem kanonicznym; domyślna preferencja to `system`. Akcentem jest limonka Keak (`--ci-color-accent`). Switzer to pojedyncza rodzina dla UI, wyświetlacza i tekstu kodu (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` na to odpowiadają), hostowana samodzielnie przez sam zestaw (`packages/ui-kit/src/ci-fonts.css`, importowany przez `ci-tokens.css`). Skrypty, których brakuje Switzerowi, przechodzą przez glif po glifie (`src/app/globals.css`): Inter dla cyrylicy, greckiego i wietnamskiego oraz, tylko pod `html[dir="rtl"]`, Vazirmatn dla pisma arabskiego. Każda ikona jest glifem Lucide.
 
 ## 1. Gdzie co się znajduje
 
@@ -116,13 +116,11 @@
    wywołującymi porównaj wyrenderowany markup przed i po zmianie — zmiany paddingu lub wrappera rozchodzą
    się na każdy ekran.
 
-## 5. Aktualizacja kita
+## 5. Aktualizacja zestawu
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopiuje upstreamowe `src/` z danego commita do
-`packages/ui-kit/src` i stosuje jedyną dozwoloną transformację (usuwa sufiks `.js` ze względnych
-importów). Następnie: przejrzyj `git diff packages/ui-kit`, wykonaj wizualny przegląd ekranów dostawców,
-ustawień, kombinacji, użycia i endpointu w obu motywach, uruchom `npm run check:ui-kit-snapshot` oraz
-`npm run test:vitest:ui` i otwórz PR z upstreamowym changelogiem.
+`npm run check:ui-kit-upstream` porównuje wersję przypiętą w `packages/ui-kit/UPSTREAM.md` z najnowszym znacznikiem `v*` z repozytorium źródłowego i wypisuje polecenie synchronizacji, gdy wydanie zostanie wydane. Cotygodniowy przepływ pracy `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) przeprowadza tę samą kontrolę i utrzymuje jeden problem ze śledzeniem otwarty, gdy kod PIN jest opóźniony; repozytorium nadrzędne jest prywatne, więc przepływ pracy wymaga tokena tylko do odczytu w tajemnicy `UI_KIT_READ_TOKEN`. Kiedy nie może odczytać upstream (brak tokena, token, który przestał działać lub GitHub nieosiągalny), przebieg pozostaje zielony, ale zapisuje ostrzeżenie i pozostawia otwarty osobny problem, który zamyka się, gdy późniejsze uruchomienie będzie mogło ponownie odczytać upstream.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopiuje nadrzędne `src/` w momencie zatwierdzenia (`latest` = najnowszy znacznik `v*` ) do `packages/ui-kit/src`, stosuje pojedynczą dozwoloną transformację (usuwa sufiks `.js` z względnego importu) i ustawia wersję obszaru roboczego w `packages/ui-kit/package.json` i `package-lock.json` na wersję nadrzędną. Następnie: przejrzyj `git diff packages/ui-kit`, wykonaj wizualny przegląd dostawców, ustawień, kombinacji, użycia i punktu końcowego w obu motywach, uruchom `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otwórz PR z wcześniejszym dziennikiem zmian.
 
 ## 6. diagramy README
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **حیثیت:** ڈیش بورڈ پر بنایا گیا ہے۔** Keak CI UI کٹ** (`@keak/cheaper-inference-ui-kit`)، ورک اسپیس `packages/ui-kit` کے طور پر فروخت کیا جاتا ہے (`@omniroute/ui-kit`؛ اپ اسٹریم اسنیپ شاٹ کو `packages/ui-kit/UPSTREAM.md` میں پن کیا جاتا ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ کیا جاتا ہے)۔ روشنی کیننیکل تھیم ہے۔ پہلے سے طے شدہ ترجیح `system` ہے۔ لہجہ Keak lime (`--ci-color-accent`) ہے۔ سوئٹزر UI، ڈسپلے اور کوڈ ٹیکسٹ کے لیے واحد خاندان ہے (`--ci-font-ui`؛ `--ci-font-display` اور `--ci-font-mono` اسے حل کرتا ہے)، خود کٹ کے ذریعے میزبانی کرتا ہے (`packages/ui-kit/src/ci-fonts.css`، درآمد شدہ بذریعہ `ci-tokens.css`)۔ ہر آئیکن ایک لوسائیڈ گلیف ہے۔
+> **حیثیت:** ڈیش بورڈ پر بنایا گیا ہے۔** Keak CI UI کٹ** (`@keak/cheaper-inference-ui-kit`)، ورک اسپیس `packages/ui-kit` کے طور پر فروخت کیا جاتا ہے (`@omniroute/ui-kit`؛ اپ اسٹریم اسنیپ شاٹ کو `packages/ui-kit/UPSTREAM.md` میں پن کیا جاتا ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ کیا جاتا ہے)۔ روشنی کیننیکل تھیم ہے۔ پہلے سے طے شدہ ترجیح `system` ہے۔ لہجہ Keak lime (`--ci-color-accent`) ہے۔ سوئٹزر UI، ڈسپلے اور کوڈ ٹیکسٹ کے لیے واحد خاندان ہے (`--ci-font-ui`؛ `--ci-font-display` اور `--ci-font-mono` اسے حل کرتا ہے)، خود کٹ کے ذریعے میزبانی کرتا ہے (`packages/ui-kit/src/ci-fonts.css`، درآمد شدہ بذریعہ `ci-tokens.css`)۔ اسکرپٹس سوئٹزر میں گلائف کے ذریعے گلف کے ذریعے گرنے کی کمی ہے (`src/app/globals.css`): سیریلک، یونانی اور ویتنامی کے لیے انٹر اور عربی رسم الخط کے لیے صرف `html[dir="rtl"]`، Vazirmatn کے تحت۔ ہر آئیکن ایک لوسائیڈ گلیف ہے۔
 
 ## 1. چیزیں کہاں موجود ہیں
 
@@ -51,9 +51,11 @@
 3. kit کی کمیوں کے workarounds اڈاپٹر میں رہتے ہیں (یا `globals.css` کے `@layer components` میں جب اصلاح اسٹائل کی ہو)، کبھی بھی `packages/ui-kit/src` میں نہیں۔
 4. `tests/unit/ui/adapters/<name>.test.tsx` شامل یا اپڈیٹ کریں۔ بہت سے callers والے اڈاپٹر کے لیے، تبدیلی سے پہلے اور بعد کے rendered markup کا موازنہ کریں — padding یا wrapper کی تبدیلیاں ہر سکرین تک پھیل جاتی ہیں۔
 
-## 5. kit کو اپڈیٹ کرنا
+## 5. کٹ کو اپ ڈیٹ کرنا
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` اس commit پر موجود upstream `src/` کو `packages/ui-kit/src` میں کاپی کرتا ہے اور واحد مجاز تبدیلی لاگو کرتا ہے (یہ relative imports سے `.js` لاحقہ ہٹا دیتا ہے)۔ پھر: `git diff packages/ui-kit` کا جائزہ لیں، دونوں تھیمز میں providers، settings، combos، usage اور endpoint کا بصری معائنہ کریں، `npm run check:ui-kit-snapshot` اور `npm run test:vitest:ui` چلائیں، اور upstream changelog کے ساتھ PR کھولیں۔
+`npm run check:ui-kit-upstream` اپ اسٹریم ریپو کے تازہ ترین `v*` ٹیگ کے ساتھ `packages/ui-kit/UPSTREAM.md` میں پن کیے ہوئے ورژن کا موازنہ کرتا ہے اور جب کوئی ریلیز ختم ہوتا ہے تو sync کمانڈ پرنٹ کرتا ہے۔ ہفتہ وار `UI Kit upstream watch` ورک فلو (`.github/workflows/ui-kit-upstream-watch.yml`) وہی چیک چلاتا ہے اور ایک ٹریکنگ ایشو کو کھلا رکھتا ہے جب کہ پن پیچھے ہوتا ہے۔ اپ اسٹریم ریپو نجی ہے، اس لیے ورک فلو کو `UI_KIT_READ_TOKEN` سیکریٹ میں صرف پڑھنے کے لیے ٹوکن کی ضرورت ہے۔ جب یہ اپ اسٹریم کو نہیں پڑھ سکتا ہے (کوئی ٹوکن نہیں، ایک ٹوکن جس نے کام کرنا بند کر دیا ہے، یا GitHub ناقابل رسائی) رن سبز رہتا ہے لیکن ایک انتباہ لکھتا ہے اور ایک الگ ایشو کو کھلا رکھتا ہے، جو بعد میں چلنے کے بعد اپ اسٹریم کو دوبارہ پڑھ سکتا ہے۔
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` upstream `src/` اس کمٹ پر کاپی کرتا ہے (`latest` = جدید ترین `v*` ٹیگ) `packages/ui-kit/src` میں، واحد اجازت شدہ تبدیلی کو لاگو کرتا ہے (یہ متعلقہ درآمدات سے `.js` لاحقہ گرتا ہے)، اور `packages/ui-kit/package.json` اور `package-lock.json` میں ورک اسپیس ورژن کو اپ اسٹریم والے پر سیٹ کرتا ہے۔ پھر: `git diff packages/ui-kit` کا جائزہ لیں، دونوں تھیمز میں فراہم کنندگان، ترتیبات، کومبوز، استعمال اور اختتامی نقطہ پر ایک بصری پاس کریں، `npm run check:ui-kit-snapshot` اور `npm run test:vitest:ui` چلائیں، اور PR اپ اسٹریم چینج لاگ کے ساتھ کھولیں۔
 
 ## 6. README خاکے
 

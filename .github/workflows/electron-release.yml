@@ -390,6 +390,12 @@ jobs:
             [ -f "$file" ] && cp "$file" ../../release-assets/
           done
 
+          # Publish exactly the content-addressed packs named by this build.
+          cd ../..
+          node scripts/release/collect-optional-packs.mjs \
+            .build/electron-standalone/optional-packs.index.json \
+            .build/optional-packs release-assets
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -491,6 +497,7 @@ jobs:
             release-assets/*.deb
             release-assets/*.blockmap
             release-assets/*.yml
+            release-assets/optional-pack-*.tar.gz
             release-assets/*.source.tar.gz
             release-assets/*.source.zip
         env:

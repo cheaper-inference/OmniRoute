@@ -160,10 +160,10 @@ OmniRoute expõe 6 habilidades A2A conectadas em `src/lib/a2a/taskExecution.ts::
 | Gerenciamento de cotas | `quota-management`   | Informa o estado da cota por provedor e ajuda os chamadores a decidir quando fazer throttle/switch                                                                                    | cota, provedores                  | “Verificar cota para antrópicos”                   |
 | Descoberta de provedor | `provider-discovery` | Lista provedores instalados com recursos, sinalizadores de nível gratuito, status OAuth                                                                                               | provedores, descoberta            | "Quais provedores estão disponíveis?"              |
 | Análise de custos      | `cost-analysis`      | Estima o custo de um request/conversation considerando o uso recente do catálogo +                                                                                                    | custo, uso                        | "Estimar o custo desta conversa"                   |
-| Relatório de saúde     | `health-report`      | Agrega disjuntor, resfriamento e estado de bloqueio por provedor                                                                                                                      | saúde, resiliência                | "Mostrar o estado de saúde de todos os provedores" |
+| Relatório de Saúde     | `health-report`      | Agrega disjuntor, resfriamento e estado de bloqueio por provedor                                                                                                                      | saúde, resiliência                | "Mostrar o estado de saúde de todos os provedores" |
 | Listar recursos        | `list-capabilities`  | Retorna o catálogo completo de habilidades do agente com 45 entradas (configuração 23 API + 21 CLI + 1) como uma tabela de descontos com SKILL.md URLs bruto para injeção de contexto | catálogo, descoberta, habilidades | "Listar todos os recursos OmniRoute "              |
 
-> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 377 provedores; contagens de provedores e metadados free/no-auth são provenientes do registro de tempo de execução.
+> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 380 provedores; contagens de provedores e metadados free/no-auth são provenientes do registro de tempo de execução.
 
 ### Detalhe da habilidade `list-capabilities`
 
@@ -197,17 +197,17 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canônico. Os endpoints RES
 
 ---
 
-## Adicionando uma nova skill
+## Adicionando uma nova habilidade
 
-1. **Crie o arquivo da skill:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Criar arquivo de habilidade:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporte uma função assíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga a estrutura das skills existentes, como `smartRouting.ts`.
+   Exporte uma função assíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga o formato das habilidades existentes, como `smartRouting.ts`.
 
-2. **Registre o handler:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
+2. **Manipulador de registro:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...skills existentes
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canônico. Os endpoints RES
    };
    ```
 
-3. **Exponha no Agent Card:** em `src/app/.well-known/agent.json/route.ts`, acrescente ao array `skills`:
+3. **Expor no Cartão de Agente:** em `src/lib/a2a/agentCardMetadata.ts` (compartilhado por `/.well-known/agent.json` e `/.well-known/agent-card.json`), anexe ao array `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canônico. Os endpoints RES
    }
    ```
 
-4. **Escreva testes:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra o caminho de sucesso e o caminho de erro.
+4. **Escreva testes:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra o caminho do erro + do caminho feliz.
 
-5. **Documente** a nova skill na tabela `Available Skills` deste arquivo.
+5. **Documento** a nova habilidade na tabela `Available Skills` deste arquivo.
 
 ---
 

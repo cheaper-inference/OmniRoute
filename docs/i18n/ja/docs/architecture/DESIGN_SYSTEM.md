@@ -4,7 +4,7 @@
 
 ---
 
-> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
+> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`それに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。スイスには、グリフごとのフォールスルーグリフ (`src/app/globals.css`) がありません。キリル文字、ギリシャ語、ベトナム語の Inter、および`html[dir="rtl"]`の下でのみ、アラビア文字の Vazirmatn です。すべてのアイコンは Lucide グリフです。
 
 ## 1. どこに何があるか
 
@@ -59,13 +59,11 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx` を追加または更新すること。呼び出し元の多いアダプターでは、
    変更前後でレンダリングされるマークアップを比較すること —— パディングやラッパーの変更はすべての画面に波及する。
 
-## 5. キットの更新
+## 5. キットのアップデート
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` は、そのコミット時点の上流の `src/` を
-`packages/ui-kit/src` にコピーし、許可されている唯一の変換(相対インポートから `.js` サフィックスを
-除去する)を適用する。その後:`git diff packages/ui-kit` を確認し、プロバイダー、設定、コンボ、
-usage、endpoint を両テーマで目視確認し、`npm run check:ui-kit-snapshot` と `npm run test:vitest:ui` を
-実行してから、上流の変更履歴を添えて PR を作成する。
+`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。毎週の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行し、ピンが遅れている間 1 つの追跡問題を未解決のままにします。アップストリーム リポジトリはプライベートであるため、ワークフローには`UI_KIT_READ_TOKEN`シークレットに読み取り専用トークンが必要です。アップストリームを読み取ることができない場合 (トークンがない、トークンが動作を停止した、またはGitHubに到達できない)、実行は緑色のままですが、警告が書き込まれ、別の問題が 1 つ開いたままになります。後の実行で再びアップストリームを読み取ることができると、問題は自動的に閉じられます。
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`そのコミット時に上流の`src/` (`latest` =最新の`v*`タグ) を`packages/ui-kit/src`にコピーし、単一の許可された変換を適用し (相対インポートから`.js`サフィックスを削除します)、 `packages/ui-kit/package.json`および`package-lock.json`のワークスペースのバージョンを上流のバージョンに設定します。次に、 `git diff packages/ui-kit`を確認し、両方のテーマでプロバイダー、設定、コンボ、使用法、およびエンドポイントのビジュアルパスを実行し、 `npm run check:ui-kit-snapshot`と`npm run test:vitest:ui`を実行して、アップストリームの変更ログでPR開きます。
 
 ## 6. README図
 

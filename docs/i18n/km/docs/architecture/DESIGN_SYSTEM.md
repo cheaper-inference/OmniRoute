@@ -4,7 +4,7 @@
 
 ---
 
-> **ស្ថានភាព៖** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងនៅលើ** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ដែលបានលក់ជាកន្លែងធ្វើការ `packages/ui-kit` (`@omniroute/ui-kit`; រូបថតខាងលើត្រូវបានខ្ទាស់ជា `packages/ui-kit/UPSTREAM.md` និងការពារដោយ `npm run check:ui-kit-snapshot`) ។ ពន្លឺគឺជាប្រធានបទ Canonical; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ការសង្កត់សំឡេងគឺ Keak lime (`--ci-color-accent`) ។ ស្វ៊ីសគឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
+> **ស្ថានភាព៖** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងនៅលើ** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ដែលបានលក់ជាកន្លែងធ្វើការ `packages/ui-kit` (`@omniroute/ui-kit`; រូបថតខាងលើត្រូវបានខ្ទាស់ជា `packages/ui-kit/UPSTREAM.md` និងការពារដោយ `npm run check:ui-kit-snapshot`) ។ ពន្លឺគឺជាប្រធានបទ Canonical; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ការសង្កត់សំឡេងគឺ Keak lime (`--ci-color-accent`) ។ ស្វ៊ីសគឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ ស្គ្រីប Switzer ខ្វះការធ្លាក់តាមរយៈ glyph ដោយ glyph (`src/app/globals.css`): Inter សម្រាប់ Cyrillic ក្រិក និងវៀតណាម ហើយមានតែក្រោម `html[dir="rtl"]`, Vazirmatn សម្រាប់អក្សរអារ៉ាប់។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
 
 ## 1. កន្លែងដែលអ្វីៗស្ថិតនៅ
 
@@ -104,13 +104,11 @@
 4. បន្ថែម ឬធ្វើបច្ចុប្បន្នភាព `tests/unit/ui/adapters/<name>.test.tsx`។ សម្រាប់ adapter ដែលមាន caller ច្រើន សូមប្រៀបធៀប
    markup ដែលបាន render នៅមុន និងក្រោយការផ្លាស់ប្តូរ — ការផ្លាស់ប្តូរ padding ឬ wrapper រាលដាលទៅគ្រប់ screen ទាំងអស់។
 
-## 5. ការធ្វើបច្ចុប្បន្នភាព kit
+## 5. ការធ្វើបច្ចុប្បន្នភាពឧបករណ៍
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ចម្លង `src/` ពី upstream នៅ commit នោះ ចូលទៅក្នុង
-`packages/ui-kit/src` ហើយអនុវត្តការបំប្លែងតែមួយដែលត្រូវបានអនុញ្ញាត (វាដក suffix `.js` ចេញពី
-relative import)។ បន្ទាប់មក៖ ពិនិត្យ `git diff packages/ui-kit` ធ្វើការត្រួតពិនិត្យមើលដោយផ្ទាល់លើ providers, settings, combos,
-usage និង endpoint ក្នុង theme ទាំងពីរ ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយ
-បើក PR ជាមួយនឹង changelog ពី upstream។
+`npm run check:ui-kit-upstream` ប្រៀបធៀបកំណែដែលបានខ្ទាស់ក្នុង `packages/ui-kit/UPSTREAM.md` ជាមួយនឹងស្លាក `v*` ថ្មីបំផុតនៃ repo ខាងលើ ហើយបោះពុម្ពពាក្យបញ្ជាធ្វើសមកាលកម្ម នៅពេលការចេញផ្សាយចេញ។ លំហូរការងារ `UI Kit upstream watch` ប្រចាំសប្តាហ៍ (`.github/workflows/ui-kit-upstream-watch.yml`) ដំណើរការការត្រួតពិនិត្យដូចគ្នា និងរក្សាបញ្ហាតាមដានមួយបើកចំហខណៈពេលដែលម្ជុលនៅពីក្រោយ។ repo ខាងលើមានលក្ខណៈឯកជន ដូច្នេះលំហូរការងារត្រូវការសញ្ញាសម្ងាត់ដែលអាចអានបានតែនៅក្នុងសម្ងាត់ `UI_KIT_READ_TOKEN` ។ នៅពេលដែលវាមិនអាចអានចរន្តទឹក (គ្មានសញ្ញាសម្ងាត់ សញ្ញាសម្ងាត់ដែលឈប់ដំណើរការ ឬ GitHub មិនអាចទៅដល់បាន) ការរត់នៅតែមានពណ៌បៃតង ប៉ុន្តែសរសេរការព្រមាន និងរក្សាបញ្ហាដាច់ដោយឡែកមួយបើក ដែលបិទដោយខ្លួនវានៅពេលការរត់នៅពេលក្រោយអាចអានចរន្តម្តងទៀត។
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ចម្លង `src/` ខាងលើនៅឯការប្តេជ្ញាចិត្តនោះ (`latest` = ស្លាក `v*` ថ្មីបំផុត) ទៅជា `packages/ui-kit/src` អនុវត្តការផ្លាស់ប្តូរដែលបានអនុញ្ញាតតែមួយ (វាទម្លាក់បច្ច័យ `.js` ពីការនាំចូលដែលទាក់ទង) និងកំណត់កំណែកន្លែងធ្វើការនៅក្នុង `packages/ui-kit/package.json` និង `package-lock.json` ទៅផ្នែកខាងលើ។ បន្ទាប់មក៖ ពិនិត្យមើល `git diff packages/ui-kit` ធ្វើវិចារណញាណលើអ្នកផ្តល់សេវា ការកំណត់ បន្សំ ការប្រើប្រាស់ និងចំណុចបញ្ចប់នៅក្នុងស្បែកទាំងពីរ ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយបើក PR ជាមួយនឹងការផ្លាស់ប្តូរកម្រិតខ្ពស់។
 
 ## 6. ដ្យាក្រាម README
 

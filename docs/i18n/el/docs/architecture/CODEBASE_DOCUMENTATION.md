@@ -444,7 +444,7 @@ server/
 
 ---
 
-## 4. `open-sse/` — Χώρος εργασίας του κινητήρα ροής
+## 4. `open-sse/` — Χώρος εργασίας κινητήρα ροής
 
 Ξεχωριστός χώρος εργασίας npm που δημοσιεύεται ως `@omniroute/open-sse`. Κατέχει την επεξεργασία αιτημάτων, τους εκτελεστές, τους μεταφραστές, τις υπηρεσίες, τον μετασχηματιστή και τον διακομιστή MCP.
 
@@ -478,19 +478,19 @@ open-sse/
 | `musicGeneration.ts`    | Μουσική γενιά                                                                                   |
 | `rerank.ts`             | Ανακατάταξη                                                                                     |
 | `moderations.ts`        | Μετριοπάθεια                                                                                    |
-| `search.ts`             | Αναζήτηση στο Web                                                                               |
+| `search.ts`             | Αναζήτηση στον Ιστό                                                                             |
 | `sseParser.ts`          | Αναλυτής συμβάντων SSE                                                                          |
 | `usageExtractor.ts`     | Τραβήξτε μετρήσεις διακριτικών από ροές ανάντη                                                  |
-| `responseSanitizer.ts`  | Θόρυβος ειδικής παροχής strip                                                                   |
+| `responseSanitizer.ts`  | Θόρυβος συγκεκριμένου παρόχου ταινίας                                                           |
 | `responseTranslator.ts` | Κολλήστε μεταξύ απόκρισης παρόχου και στρώματος μεταφραστή                                      |
 
 ### 4.2 `open-sse/executors/`
 
-156 ενότητες εκτελεστών ανώτατου επιπέδου (`*.ts` μείον `base.ts`, `index.ts` και δοκιμές — η μέτρηση `npm run check:docs-counts` μετράει). Κάθε κλάση εκτελεστή επεκτείνεται `BaseExecutor` (`base.ts`), απευθείας ή μέσω `DefaultExecutor` ή άλλου εκτελεστή. οι υπόλοιπες μονάδες είναι βοηθοί ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιορρυθμιών). Οι εκτελεστές περιλαμβάνουν:
+156 ενότητες εκτελεστών ανώτατου επιπέδου (`*.ts` μείον `base.ts`, `index.ts` και δοκιμές — η μέτρηση `npm run check:docs-counts` μέτρα). Κάθε κλάση εκτελεστή επεκτείνεται `BaseExecutor` (`base.ts`), απευθείας ή μέσω `DefaultExecutor` ή άλλου εκτελεστή. οι υπόλοιπες μονάδες είναι βοηθοί ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιορρυθμιών). Οι εκτελεστές περιλαμβάνουν:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder` `devin-desktop` `vertex` `claudeIdentity.ts` συν ταυτότητα ( `index.ts` )
 
-> Σημείωση: οι πάροχοι που δεν αναφέρονται εδώ εξυπηρετούνται από `default.ts` χρησιμοποιώντας τον γενικό εκτελεστή συμβατό με OpenAI. Ο πλήρης κατάλογος παρόχων (377 πάροχοι) ζει στο `src/shared/constants/providers.ts`.
+> Σημείωση: οι πάροχοι που δεν αναφέρονται εδώ εξυπηρετούνται από `default.ts` χρησιμοποιώντας τον γενικό εκτελεστή συμβατό με OpenAI. Ο πλήρης κατάλογος παρόχων (380 πάροχοι) ζει στο `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -508,7 +508,7 @@ open-sse/
 
 ### 4.5 `open-sse/services/`
 
-Κύρια σημεία (πλήρης λίστα κάτω από `open-sse/services/`):
+Σημαντικά σημεία (πλήρης λίστα κάτω από `open-sse/services/`):
 
 | Ανησυχία                | Αρχεία                                                                                                                                                                                                                                                   |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -519,7 +519,7 @@ open-sse/
 | Προσωρινή αποθήκευση    | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Ευφυΐα δρομολόγησης     | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Χειρισμός μοντέλου      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Συμπίεση                | `compression/` — καλωδίωση κινητήρα πλήρους συμπίεσης                                                                                                                                                                                                    |
+| Συμπίεση                | καλωδίωση κινητήρα πλήρους συμπίεσης `compression/` —                                                                                                                                                                                                    |
 | Token + session         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Επίπεδο / εκδήλωση      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / δίκτυο             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,16 +528,16 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 μοναδικά εργαλεία** ενσύρματα σε `server.ts` (45 κανονικές σε `schemas/tools.ts` μνήμη +, δεξιότητες, δεξιότητες GitHub, πισίνα, gamification, πρόσθετο, Notion, Obsidian, τοπικές μονάδες σώματος και συμπίεσης — η ένωση μετράται με `countUniqueMcpTools`).
+- **110 μοναδικά εργαλεία** ενσύρματα σε `server.ts` (45 κανονικές σε `schemas/tools.ts` μνήμη +, δεξιότητες, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus και μονάδες συμπίεσης — union μετρημένες με `countUniqueMcpTools`).
 - **3 μεταφορες** : stdio, HTTP Streamable, SSE.
-- **33 πεδία** επιβάλλεται κατά το χρόνο εκτέλεσης — η λίστα βάσης στο `src/shared/constants/mcpScopes.ts`, το πλήρες σύνολο είναι η ένωση των πεδίων που δηλώνονται από κάθε λειτουργική μονάδα.
+- **33 πεδία** — πλήρες `src/shared/constants/mcpScopes.ts` είναι η ένωση των πεδίων που δηλώνονται από κάθε λειτουργική μονάδα.
 - Πίνακας ελέγχου: `mcp_tool_audit` (συμπληρωμένο με `audit.ts`).
 - Αρχεία: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, συν δοκιμές κάτω από `__tests__/`.
 - Δείτε [MCP-SERVER.md](../frameworks/MCP-SERVER.md) για τον πλήρη κατάλογο εργαλείων.
 
 ### 4.7 `open-sse/config/`
 
-Μητρώα παρόχων (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), μητρώα μοντέλων ανά μορφή (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), βοηθοί ταυτότητας (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` βοηθοί ( `toolCloaking.ts`, `defaultThinkingSignature.ts`) και προσαρμογείς cloud (`credentialLoader.ts`,`azureAi.ts`, `bedrock.ts` `registryUtils.ts` `datarobot.ts`, zqz , `oci.ts`, `glmProvider.ts`, `maritalk.ts`, `runway.ts` `petals.ts` `sap.ts` `codexClient.ts` `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

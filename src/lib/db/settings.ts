@@ -24,6 +24,19 @@ import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
 
+/**
+ * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
+ * Read and write must stay in sync — a key that is encrypted on write but not
+ * decrypted on read hands ciphertext to the consumer, which fails as a silent
+ * auth error rather than a visible one. Both paths derive from this set.
+ */
+const ENCRYPTED_SETTING_KEYS: ReadonlySet<string> = new Set([
+  "oidcClientSecret",
+  "entraGraphClientSecret",
+  "googleClientSecret",
+  "githubClientSecret",
+]);
+
 type ProxyValue = JsonRecord | string | null;
 type ProxyResolutionResult = {
   proxy: ProxyValue;
@@ -131,20 +144,6 @@ export async function getSettingsRevision(): Promise<number> {
   return readSettingsRevision(getDbInstance());
 }
 
-// Settings stored encrypted at rest (AES-256-GCM): decrypted on read, encrypted on write.
-const SECRET_SETTING_KEYS = new Set([
-  "oidcClientSecret",
-  "googleClientSecret",
-  "githubClientSecret",
-]);
-
-function decryptSecretSettings(settings: Record<string, unknown>): void {
-  for (const key of SECRET_SETTING_KEYS) {
-    const value = settings[key];
-    if (typeof value === "string") settings[key] = decrypt(value) ?? "";
-  }
-}
-
 /**
  * #7274: read-fallback for the codexSessionAffinityTtlMs -> sessionAffinityTtlMs
  * rename. Migration 124 already backfills the new key from any pre-existing
@@ -175,6 +174,10 @@ export async function getSettings() {
     disableSessionStickiness: false,
     // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
     connectionAwareExpansion: false,
+    // Keep combo targets whose known output ceiling is below the request's
+    // max_tokens instead of treating output_tokens as a hard compatibility
+    // mismatch; the upstream then applies its own ceiling.
+    outputLimitAdvisory: false,
     promptCacheAffinityEnabled: true,
     geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
@@ -214,6 +217,17 @@ export async function getSettings() {
     githubRedirectPath: "/api/auth/github/callback",
     authAllowedEmails: [], // social login allowlist — empty admits nobody (deny-by-default)
     disablePasswordLogin: false,
+    // Entra ID SSO for /v1/* (see docs/security/ENTRA_SSO.md). Off by default:
+    // enabling it only ADDS a way to authenticate — static API keys keep working.
+    entraSsoEnabled: false,
+    entraAuthorityHost: "",
+    entraTenantId: "",
+    entraClientId: "",
+    entraApiAudience: "",
+    entraGroupMappings: [],
+    entraDefaultKeyGroupId: null, // null = users matching no mapping are denied
+    entraGraphFallbackEnabled: false,
+    entraGraphClientSecret: "",
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
@@ -297,6 +311,9 @@ export async function getSettings() {
     // #9418: Opt-in filter that hides no-think/* gateway variants from the /v1/models catalog.
     // Routing still works for hidden ids sent explicitly.
     hideNoThinkVariants: false,
+    // Opt-in: the public /v1/models listing advertises only combos (user combos +
+    // auto/*). Catalog-only — explicit provider/model ids still route.
+    exposeCombosOnly: false,
     // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
     // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
     // so a denied model can't sneak back in via combo routing — the same trap
@@ -314,6 +331,10 @@ export async function getSettings() {
     codexAutoPing: { connections: {} },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
+    // Operator-set CLI client-version overrides for the Claude Code / Codex
+    // identity presets (open-sse/config/cliVersions.ts). Empty record = no
+    // override: resolution falls back to the env var, then the captured pin.
+    cliVersionOverrides: {},
   };
   for (const row of rows) {
     const record = toRecord(row);
@@ -327,7 +348,11 @@ export async function getSettings() {
     }
   }
 
-  decryptSecretSettings(settings);
+  for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
+    if (typeof settings[encryptedKey] === "string") {
+      settings[encryptedKey] = decrypt(settings[encryptedKey] as string) ?? "";
+    }
+  }
   applySessionAffinityLegacyFallback(settings);
 
   // Auto-complete onboarding for pre-configured deployments (Docker/VM)
@@ -372,7 +397,7 @@ export async function updateSettings(
     }
     for (const [key, value] of Object.entries(updates)) {
       const toStore =
-        SECRET_SETTING_KEYS.has(key) && typeof value === "string" ? encrypt(value) : value;
+        ENCRYPTED_SETTING_KEYS.has(key) && typeof value === "string" ? encrypt(value) : value;
       insert.run(key, JSON.stringify(toStore));
     }
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));

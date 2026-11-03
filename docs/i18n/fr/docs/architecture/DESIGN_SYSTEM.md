@@ -4,7 +4,7 @@
 
 ---
 
-> **Statut:** le tableau de bord est construit sur le** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendu sous le nom d'espace de travail `packages/ui-kit` (`@omniroute/ui-kit`; l'instantané en amont est épinglé dans `packages/ui-kit/UPSTREAM.md` et gardé par `npm run check:ui-kit-snapshot`). La lumière est le thème canonique ; la préférence par défaut est `system`. L'accent est Keak lime (`--ci-color-accent`). Switzer est la famille unique pour UI, affichage et texte de code (`--ci-font-ui`; `--ci-font-display` et `--ci-font-mono` s'y résolvent), auto-hébergé par le kit lui-même (`packages/ui-kit/src/ci-fonts.css`, importé par `ci-tokens.css`). Chaque icône est un glyphe Lucide.
+> **Statut:** le tableau de bord est construit sur le** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendu sous le nom d'espace de travail `packages/ui-kit` (`@omniroute/ui-kit`; l'instantané en amont est épinglé dans `packages/ui-kit/UPSTREAM.md` et gardé par `npm run check:ui-kit-snapshot`). La lumière est le thème canonique ; la préférence par défaut est `system`. L'accent est Keak lime (`--ci-color-accent`). Switzer est la famille unique pour UI, affichage et texte de code (`--ci-font-ui`; `--ci-font-display` et `--ci-font-mono` s'y résolvent), auto-hébergé par le kit lui-même (`packages/ui-kit/src/ci-fonts.css`, importé par `ci-tokens.css`). Les écritures suisses manquent glyphe par glyphe (`src/app/globals.css`) : Inter pour le cyrillique, le grec et le vietnamien et, uniquement sous `html[dir="rtl"]`, Vazirmatn pour l'écriture arabe. Chaque icône est un glyphe Lucide.
 
 ## 1. Où les choses se trouvent
 
@@ -117,13 +117,11 @@
 4. Ajouter ou mettre à jour `tests/unit/ui/adapters/<name>.test.tsx`. Pour un adaptateur avec de nombreux appelants, comparer le
    balisage rendu avant et après la modification — les changements de padding ou de wrapper se propagent à chaque écran.
 
-## 5. Mettre à jour le kit
+## 5. Mise à jour du kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copie le `src/` amont à ce commit dans
-`packages/ui-kit/src` et applique l'unique transformation autorisée (elle supprime le suffixe `.js` des
-imports relatifs). Ensuite : examiner `git diff packages/ui-kit`, faire une passe visuelle sur les providers, settings, combos,
-usage et endpoint dans les deux thèmes, exécuter `npm run check:ui-kit-snapshot` et `npm run test:vitest:ui`, et
-ouvrir la PR avec le changelog amont.
+`npm run check:ui-kit-upstream` compare la version épinglée dans `packages/ui-kit/UPSTREAM.md` avec la balise `v*` la plus récente du dépôt en amont et imprime la commande de synchronisation lorsqu'une version est publiée. Le flux de travail hebdomadaire `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) exécute la même vérification et maintient un problème de suivi ouvert pendant que la broche est en retard ; le dépôt en amont est privé, le workflow a donc besoin d'un jeton en lecture seule dans le secret `UI_KIT_READ_TOKEN`. Lorsqu'il ne peut pas lire en amont (pas de jeton, un jeton qui a cessé de fonctionner ou GitHub inaccessible), l'exécution reste verte mais écrit un avertissement et garde un problème distinct ouvert, qui se ferme une fois qu'une exécution ultérieure peut à nouveau lire en amont.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copie le `src/` en amont au niveau de ce commit (`latest` = la balise `v*` la plus récente) dans `packages/ui-kit/src`, applique la seule transformation autorisée (il supprime le suffixe `.js` des importations relatives) et définit la version de l'espace de travail dans `packages/ui-kit/package.json` et `package-lock.json` sur celle en amont. Ensuite : examinez `git diff packages/ui-kit`, effectuez une transmission visuelle des fournisseurs, des paramètres, des combos, de l'utilisation et du point de terminaison dans les deux thèmes, exécutez `npm run check:ui-kit-snapshot` et `npm run test:vitest:ui` et ouvrez le PR avec le journal des modifications en amont.
 
 ## 6. diagrammes README
 

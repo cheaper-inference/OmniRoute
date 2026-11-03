@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** Das Armaturenbrett ist auf dem aufgebaut** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), angeboten als Workspace `packages/ui-kit` (`@omniroute/ui-kit`; der Upstream-Snapshot ist in `packages/ui-kit/UPSTREAM.md` gepinnt und wird von `npm run check:ui-kit-snapshot` geschützt). Licht ist das kanonische Thema; Die Standardeinstellung ist `system`. Der Akzent ist Keak-Limette (`--ci-color-accent`). Switzer ist die einzelne Familie für UI, Anzeige- und Codetext (`--ci-font-ui`; `--ci-font-display` und `--ci-font-mono` lösen sich darauf auf), die vom Kit selbst selbst gehostet wird (`packages/ui-kit/src/ci-fonts.css`, importiert von `ci-tokens.css`). Jedes Symbol ist eine Lucide-Glyphe.
+> **Status:** Das Armaturenbrett ist auf dem aufgebaut** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), angeboten als Workspace `packages/ui-kit` (`@omniroute/ui-kit`; der Upstream-Snapshot ist in `packages/ui-kit/UPSTREAM.md` gepinnt und wird von `npm run check:ui-kit-snapshot` geschützt). Licht ist das kanonische Thema; Die Standardeinstellung ist `system`. Der Akzent ist Keak-Limette (`--ci-color-accent`). Switzer ist die einzelne Familie für UI, Anzeige- und Codetext (`--ci-font-ui`; `--ci-font-display` und `--ci-font-mono` lösen sich darauf auf), die vom Kit selbst selbst gehostet wird (`packages/ui-kit/src/ci-fonts.css`, importiert von `ci-tokens.css`). In der Schweiz fehlen Schriftarten, die Glyphe für Glyphe (`src/app/globals.css`) durchgehen: Inter für Kyrillisch, Griechisch und Vietnamesisch und, nur unter `html[dir="rtl"]`, Vazirmatn für arabische Schrift. Jedes Symbol ist eine Lucide-Glyphe.
 
 ## 1. Wo sich alles befindet
 
@@ -117,13 +117,11 @@
    das gerenderte Markup vor und nach der Änderung vergleichen — Padding- oder Wrapper-Änderungen wirken sich auf
    jeden Screen aus.
 
-## 5. Das Kit aktualisieren
+## 5. Aktualisieren des Kits
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopiert das Upstream-`src/` an diesem Commit nach
-`packages/ui-kit/src` und wendet die einzige erlaubte Transformation an (das Entfernen der `.js`-Endung bei
-relativen Imports). Anschließend: `git diff packages/ui-kit` prüfen, eine visuelle Kontrolle von Providers,
-Settings, Combos, Usage und Endpoint in beiden Themes durchführen, `npm run check:ui-kit-snapshot` und
-`npm run test:vitest:ui` ausführen und den PR mit dem Upstream-Changelog öffnen.
+`npm run check:ui-kit-upstream` vergleicht die in `packages/ui-kit/UPSTREAM.md` gepinnte Version mit dem neuesten `v*` Tag des Upstream-Repos und gibt den Synchronisierungsbefehl aus, wenn eine Version veröffentlicht wird. Der wöchentliche `UI Kit upstream watch` Workflow (`.github/workflows/ui-kit-upstream-watch.yml`) führt die gleiche Prüfung durch und hält ein Tracking-Problem offen, während der Pin im Rückstand ist; Das Upstream-Repo ist privat, daher benötigt der Workflow ein schreibgeschütztes Token im `UI_KIT_READ_TOKEN` Geheimnis. Wenn der Upstream nicht gelesen werden kann (kein Token, ein Token, der nicht mehr funktioniert, oder GitHub nicht erreichbar), bleibt der Lauf grün, schreibt aber eine Warnung und hält ein separates Problem offen, das sich selbst schließt, sobald ein späterer Lauf wieder Upstream lesen kann.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopiert das Upstream- `src/` bei diesem Commit (`latest` = das neueste `v*` Tag) in `packages/ui-kit/src`, wendet die einzelne zulässige Transformation an (es löscht das `.js` Suffix aus relativen Importen) und setzt die Workspace-Version in `packages/ui-kit/package.json` und `package-lock.json` auf die Upstream-Version. Dann: Überprüfen Sie `git diff packages/ui-kit`, machen Sie einen visuellen Überblick über Anbieter, Einstellungen, Kombinationen, Nutzung und Endpunkt in beiden Themes, führen Sie `npm run check:ui-kit-snapshot` und `npm run test:vitest:ui` aus und öffnen Sie PR mit dem Upstream-Änderungsprotokoll.
 
 ## 6. README -Diagramme
 

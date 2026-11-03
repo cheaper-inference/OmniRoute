@@ -38,6 +38,11 @@ export const SOCIAL_LOGIN_SESSION_ENDING_SETTINGS_KEYS = [
  *   API with the operator's cookie, and whether repeated failed logins are throttled.
  *   Loosening either weakens the login defenses, so both need the same re-auth (the Security
  *   tab asks for the current password) and are dropped by the JSON import.
+ * - `entra*`: Entra ID SSO for `/v1/*` (docs/security/ENTRA_SSO.md) — which authority's
+ *   tokens are trusted (`entraAuthorityHost` / `entraTenantId` / `entraClientId` /
+ *   `entraApiAudience`), which key-group policy SSO users land in (`entraGroupMappings` /
+ *   `entraDefaultKeyGroupId`) and the Graph fallback and its secret. Every `entra*` key of
+ *   the settings schema belongs here (pinned by `tests/unit/entra-sso-auth.test.ts`).
  *
  * - `google*` / `github*` / `authAllowedEmails` / `disablePasswordLogin`: the Google/GitHub
  *   dashboard login (#15153) — the OAuth client trusted for the login, where the code is sent,
@@ -75,6 +80,15 @@ export const SECURITY_IMPACTING_SETTINGS_KEYS = [
   "googleRedirectPath",
   "githubRedirectPath",
   "disablePasswordLogin",
+  "entraSsoEnabled",
+  "entraAuthorityHost",
+  "entraTenantId",
+  "entraClientId",
+  "entraApiAudience",
+  "entraGroupMappings",
+  "entraDefaultKeyGroupId",
+  "entraGraphFallbackEnabled",
+  "entraGraphClientSecret",
 ] as const;
 
 /**
