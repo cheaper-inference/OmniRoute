@@ -52,6 +52,240 @@ const LEVEL_BG: Record<string, string> = {
 };
 
 const POLL_INTERVAL = 5000; // 5 seconds
+const PAGE_LIMIT = 2000;
+
+const stringifyValue = (value: unknown): string => {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
+const getText = (entry: LogEntry) => stringifyValue(entry.msg || entry.message || "");
+const getComponent = (entry: LogEntry) => stringifyValue(entry.component || entry.module || "");
+const getCorrelationId = (entry: LogEntry) => stringifyValue(entry.correlationId);
+
+function formatLogTime(ts: string, locale: string, range: string): string {
+  try {
+    const d = new Date(ts);
+    return d.toLocaleString(locale, {
+      ...(range !== "1h" ? ({ year: "numeric", month: "2-digit", day: "2-digit" } as const) : {}),
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      fractionalSecondDigits: 3,
+    });
+  } catch {
+    return ts;
+  }
+}
+
+/** Polling never replaces a paused snapshot or a history page the reader is browsing. */
+function shouldSkipFetch(
+  paused: boolean,
+  viewingHistory: boolean,
+  cursor: string | undefined,
+  refresh: boolean
+): boolean {
+  return paused || (!cursor && viewingHistory && !refresh);
+}
+
+const errorText = (err: unknown, fallback: string): string =>
+  err instanceof Error ? err.message : fallback;
+
+/** `/api/logs/console` query string for one page (newest page when `cursor` is absent). */
+function buildLogQuery(levelFilter: string, range: string, cursor?: string): string {
+  const params = new URLSearchParams();
+  if (levelFilter !== "all") params.set("level", levelFilter);
+  params.set("limit", "500");
+  params.set("range", range);
+  if (cursor) params.set("cursor", cursor);
+  return params.toString();
+}
+
+/** Bound browser memory independently of the retained files. Keep the older
+ * end while paging so every retained page stays reachable. */
+function mergeLogPage(previous: LogEntry[], data: LogEntry[], cursor?: string): LogEntry[] {
+  return cursor ? [...data, ...previous].slice(0, PAGE_LIMIT) : data;
+}
+
+function readPageMeta(res: Response): { nextCursor: string | null; scanLimited: boolean } {
+  return {
+    nextCursor: res.headers?.get("x-console-next-cursor") || null,
+    scanLimited: res.headers?.get("x-console-truncated") === "true",
+  };
+}
+
+type ViewerTranslator = ReturnType<typeof useTranslations>;
+
+function rangeLabel(
+  range: string,
+  tv: ViewerTranslator,
+  tc: ViewerTranslator,
+  tl: ViewerTranslator
+) {
+  if (range === "all") return tc("all");
+  if (range === "1h") return tv("lastHour");
+  return tl("lastNHours", { hours: range === "24h" ? "24h" : "168h" });
+}
+
+function ConsoleStatus({
+  paused,
+  viewingHistory,
+  scanLimited,
+  count,
+  range,
+  lastUpdated,
+  locale,
+}: {
+  paused: boolean;
+  viewingHistory: boolean;
+  scanLimited: boolean;
+  count: number;
+  range: string;
+  lastUpdated: Date | null;
+  locale: string;
+}) {
+  const tv = useTranslations("logs.consoleViewer");
+  const tc = useTranslations("common");
+  const tl = useTranslations("logs");
+  const frozen = paused || viewingHistory;
+  return (
+    <div className="ml-auto flex items-center gap-2 self-center text-xs text-text-muted">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "inline-block size-2 rounded-full",
+          frozen ? "bg-warning" : "animate-pulse bg-success"
+        )}
+      />
+      {frozen && <span>{tv("paused")}</span>}
+      {scanLimited && <span>{tv("scanLimited")}</span>}
+      <span>{tv("entryCount", { count })}</span>
+      <span className="text-text-muted/50">•</span>
+      <span>{rangeLabel(range, tv, tc, tl)}</span>
+      {lastUpdated && (
+        <>
+          <span className="text-text-muted/50">•</span>
+          <span>{tv("updatedAt", { time: lastUpdated.toLocaleTimeString(locale) })}</span>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LogRow({
+  entry,
+  idx,
+  copied,
+  locale,
+  range,
+  onCopy,
+}: {
+  entry: LogEntry;
+  idx: number;
+  copied: boolean;
+  locale: string;
+  range: string;
+  onCopy: (entry: LogEntry, idx: number) => void;
+}) {
+  const tv = useTranslations("logs.consoleViewer");
+  const tc = useTranslations("common");
+  const level = stringifyValue(entry.level || "info").toLowerCase();
+  const colorClass = LEVEL_COLORS[level] || LEVEL_COLORS.info;
+  const bgClass = LEVEL_BG[level] || "";
+  const comp = getComponent(entry);
+  const msg = getText(entry);
+  const correlationId = getCorrelationId(entry);
+
+  return (
+    <div
+      className={`group flex flex-wrap sm:flex-nowrap items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
+        level === "error" || level === "fatal" ? "bg-[#ff7b72]/5" : ""
+      }`}
+    >
+      {/* Timestamp */}
+      <span className="text-[#8b949e] whitespace-nowrap shrink-0 select-none">
+        {formatLogTime(entry.timestamp, locale, range)}
+      </span>
+
+      {/* Level badge */}
+      <span
+        className={`inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border shrink-0 ${colorClass} ${bgClass}`}
+      >
+        {level.padEnd(5)}
+      </span>
+
+      {/* Component */}
+      {comp && <span className="text-[#d2a8ff]/80 max-w-full break-all sm:shrink-0">[{comp}]</span>}
+
+      {/* Message */}
+      <span className="text-[#c9d1d9] flex-1 min-w-0 basis-full order-last sm:basis-auto sm:order-none break-all">
+        {msg}
+        {/* Extra meta */}
+        {correlationId && (
+          <span className="text-[#8b949e] ml-2">cid:{correlationId.slice(0, 8)}</span>
+        )}
+      </span>
+
+      {/* Copy button */}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => onCopy(entry, idx)}
+        title={tv("copyLogEntry")}
+        aria-label={tv("copyLogEntry")}
+        className="size-6 min-h-6 shrink-0 text-[#8b949e] opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
+      >
+        <Icon name={copied ? "check" : "content_copy"} size={14} />
+      </Button>
+      {copied && (
+        <span className="sr-only" role="status" aria-live="polite">
+          {tc("copied")}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function PauseButton({ paused, onToggle }: { paused: boolean; onToggle: () => void }) {
+  const tv = useTranslations("logs.consoleViewer");
+  return (
+    <Button
+      variant="outline"
+      onClick={onToggle}
+      aria-label={tv(paused ? "resumeLogs" : "pauseLogs")}
+      aria-pressed={paused}
+    >
+      <Icon name={paused ? "play_arrow" : "pause"} size={16} />
+      {tv(paused ? "resumeLogs" : "pauseLogs")}
+    </Button>
+  );
+}
+
+function AutoScrollButton({ autoScroll, onToggle }: { autoScroll: boolean; onToggle: () => void }) {
+  const tv = useTranslations("logs.consoleViewer");
+  return (
+    <Button
+      variant="outline"
+      aria-pressed={autoScroll}
+      onClick={onToggle}
+      title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
+      className={cn(autoScroll && "border-info/30 bg-info/15 text-info")}
+    >
+      <Icon name={autoScroll ? "vertical_align_bottom" : "lock"} size={16} />
+      {tv("autoScroll")}
+    </Button>
+  );
+}
 
 export default function ConsoleLogViewer() {
   const locale = useLocale();
@@ -91,7 +325,7 @@ export default function ConsoleLogViewer() {
 
   const fetchLogs = useCallback(
     async (cursor?: string, refresh = false) => {
-      if (pausedRef.current || (!cursor && historyRef.current && !refresh)) return;
+      if (shouldSkipFetch(pausedRef.current, historyRef.current, cursor, refresh)) return;
       if (cursor || refresh) {
         historyRef.current = Boolean(cursor);
         setViewingHistory(Boolean(cursor));
@@ -103,12 +337,7 @@ export default function ConsoleLogViewer() {
       fetchAbortRef.current = controller;
       const isCurrent = () => !pausedRef.current && version === requestVersionRef.current;
       try {
-        const params = new URLSearchParams();
-        if (levelFilter !== "all") params.set("level", levelFilter);
-        params.set("limit", "500");
-        params.set("range", range);
-        if (cursor) params.set("cursor", cursor);
-        const res = await fetch(`/api/logs/console?${params.toString()}`, {
+        const res = await fetch(`/api/logs/console?${buildLogQuery(levelFilter, range, cursor)}`, {
           signal: controller.signal,
           cache: "no-store",
         });
@@ -116,16 +345,14 @@ export default function ConsoleLogViewer() {
         const data: LogEntry[] = await res.json();
         if (!isCurrent()) return;
         if (!Array.isArray(data)) throw new Error(tv("fetchFailed"));
-        // Bound browser memory independently of the retained files. Keep the older
-        // end while paging so every retained page stays reachable.
-        setLogs((previous) => (cursor ? [...data, ...previous].slice(0, 2000) : data));
-        setNextCursor(res.headers?.get("x-console-next-cursor") || null);
-        setScanLimited(res.headers?.get("x-console-truncated") === "true");
+        const meta = readPageMeta(res);
+        setLogs((previous) => mergeLogPage(previous, data, cursor));
+        setNextCursor(meta.nextCursor);
+        setScanLimited(meta.scanLimited);
         setLastUpdated(new Date());
         setError(null);
       } catch (err: unknown) {
-        if (isCurrent() && !controller.signal.aborted)
-          setError(err instanceof Error ? err.message : tv("fetchFailed"));
+        if (isCurrent() && !controller.signal.aborted) setError(errorText(err, tv("fetchFailed")));
       } finally {
         if (isCurrent()) {
           fetchAbortRef.current = null;
@@ -198,40 +425,6 @@ export default function ConsoleLogViewer() {
     }, 2000);
   };
 
-  const formatTime = (ts: string) => {
-    try {
-      const d = new Date(ts);
-      return d.toLocaleString(locale, {
-        ...(range !== "1h" ? ({ year: "numeric", month: "2-digit", day: "2-digit" } as const) : {}),
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        fractionalSecondDigits: 3,
-      });
-    } catch {
-      return ts;
-    }
-  };
-
-  const stringifyValue = (value: unknown) => {
-    if (value === undefined || value === null) return "";
-    if (typeof value === "string") return value;
-    if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
-      return String(value);
-    }
-
-    try {
-      return JSON.stringify(value);
-    } catch {
-      return String(value);
-    }
-  };
-
-  const getText = (entry: LogEntry) => stringifyValue(entry.msg || entry.message || "");
-  const getComponent = (entry: LogEntry) => stringifyValue(entry.component || entry.module || "");
-  const getCorrelationId = (entry: LogEntry) => stringifyValue(entry.correlationId);
-
   // Apply text search filter
   const filteredLogs = searchText
     ? logs.filter((entry) => {
@@ -298,31 +491,17 @@ export default function ConsoleLogViewer() {
           className="min-w-[200px] flex-1"
         />
 
-        <Button
-          variant="outline"
-          onClick={togglePause}
-          aria-label={tv(paused ? "resumeLogs" : "pauseLogs")}
-          aria-pressed={paused}
-        >
-          <Icon name={paused ? "play_arrow" : "pause"} size={16} />
-          {tv(paused ? "resumeLogs" : "pauseLogs")}
-        </Button>
+        <PauseButton paused={paused} onToggle={togglePause} />
 
         {/* Auto-scroll toggle */}
-        <Button
-          variant="outline"
-          aria-pressed={autoScroll}
-          onClick={() => {
+        <AutoScrollButton
+          autoScroll={autoScroll}
+          onToggle={() => {
             // Switching auto-scroll back on is an explicit "take me to the newest line".
             if (!autoScroll) followTailRef.current = true;
             setAutoScroll(!autoScroll);
           }}
-          title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
-          className={cn(autoScroll && "border-info/30 bg-info/15 text-info")}
-        >
-          <Icon name={autoScroll ? "vertical_align_bottom" : "lock"} size={16} />
-          {tv("autoScroll")}
-        </Button>
+        />
 
         {/* Refresh */}
         <Button
@@ -337,32 +516,15 @@ export default function ConsoleLogViewer() {
         </Button>
 
         {/* Status */}
-        <div className="ml-auto flex items-center gap-2 self-center text-xs text-text-muted">
-          <span
-            aria-hidden="true"
-            className={cn(
-              "inline-block size-2 rounded-full",
-              paused || viewingHistory ? "bg-warning" : "animate-pulse bg-success"
-            )}
-          />
-          {(paused || viewingHistory) && <span>{tv("paused")}</span>}
-          {scanLimited && <span>{tv("scanLimited")}</span>}
-          <span>{tv("entryCount", { count: filteredLogs.length })}</span>
-          <span className="text-text-muted/50">•</span>
-          <span>
-            {range === "all"
-              ? tc("all")
-              : range === "1h"
-                ? tv("lastHour")
-                : tl("lastNHours", { hours: range === "24h" ? "24h" : "168h" })}
-          </span>
-          {lastUpdated && (
-            <>
-              <span className="text-text-muted/50">•</span>
-              <span>{tv("updatedAt", { time: lastUpdated.toLocaleTimeString(locale) })}</span>
-            </>
-          )}
-        </div>
+        <ConsoleStatus
+          paused={paused}
+          viewingHistory={viewingHistory}
+          scanLimited={scanLimited}
+          count={filteredLogs.length}
+          range={range}
+          lastUpdated={lastUpdated}
+          locale={locale}
+        />
       </div>
 
       {/* Error */}
@@ -412,68 +574,17 @@ export default function ConsoleLogViewer() {
               <p className="text-[10px] mt-1">{tv("emptyFileLoggingHint")}</p>
             </div>
           ) : (
-            filteredLogs.map((entry, idx) => {
-              const level = stringifyValue(entry.level || "info").toLowerCase();
-              const colorClass = LEVEL_COLORS[level] || LEVEL_COLORS.info;
-              const bgClass = LEVEL_BG[level] || "";
-              const comp = getComponent(entry);
-              const msg = getText(entry);
-              const correlationId = getCorrelationId(entry);
-
-              return (
-                <div
-                  key={idx}
-                  className={`group flex flex-wrap sm:flex-nowrap items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
-                    level === "error" || level === "fatal" ? "bg-[#ff7b72]/5" : ""
-                  }`}
-                >
-                  {/* Timestamp */}
-                  <span className="text-[#8b949e] whitespace-nowrap shrink-0 select-none">
-                    {formatTime(entry.timestamp)}
-                  </span>
-
-                  {/* Level badge */}
-                  <span
-                    className={`inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border shrink-0 ${colorClass} ${bgClass}`}
-                  >
-                    {level.padEnd(5)}
-                  </span>
-
-                  {/* Component */}
-                  {comp && (
-                    <span className="text-[#d2a8ff]/80 max-w-full break-all sm:shrink-0">
-                      [{comp}]
-                    </span>
-                  )}
-
-                  {/* Message */}
-                  <span className="text-[#c9d1d9] flex-1 min-w-0 basis-full order-last sm:basis-auto sm:order-none break-all">
-                    {msg}
-                    {/* Extra meta */}
-                    {correlationId && (
-                      <span className="text-[#8b949e] ml-2">cid:{correlationId.slice(0, 8)}</span>
-                    )}
-                  </span>
-
-                  {/* Copy button */}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleCopy(entry, idx)}
-                    title={tv("copyLogEntry")}
-                    aria-label={tv("copyLogEntry")}
-                    className="size-6 min-h-6 shrink-0 text-[#8b949e] opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
-                  >
-                    <Icon name={copiedIdx === idx ? "check" : "content_copy"} size={14} />
-                  </Button>
-                  {copiedIdx === idx && (
-                    <span className="sr-only" role="status" aria-live="polite">
-                      {tc("copied")}
-                    </span>
-                  )}
-                </div>
-              );
-            })
+            filteredLogs.map((entry, idx) => (
+              <LogRow
+                key={idx}
+                entry={entry}
+                idx={idx}
+                copied={copiedIdx === idx}
+                locale={locale}
+                range={range}
+                onCopy={handleCopy}
+              />
+            ))
           )}
 
           {loading && filteredLogs.length === 0 && (
