@@ -156,7 +156,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` də simli 6 A2A bac
 | Sağlamlıq Hesabatı     | `health-report`      | Bir provayder üçün dövrə açarı, soyuducu, kilidləmə vəziyyəti                                                                                              | sağlamlıq, dözümlülük         | "Bütün provayderlərin sağlamlıq vəziyyətini göstərin" |
 | Bacarıqların siyahısı  | `list-capabilities`  | Tam 45 girişli Agent Bacarıqları kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) kontekst inyeksiyası üçün xam SKILL.md URLs ilə qeyd cədvəli kimi qaytarır | kataloq, kəşf, bacarıqlar     | "Bütün OmniRoute imkanlarını sadalayın"               |
 
-> Agent Kartı canlı 377 provayder kataloqu ilə uyğunlaşdırılmalıdır; provayder sayları və free/no-auth metadata icra vaxtı reyestrindən əldə edilir.
+> Agent Kartı canlı 380 provayder kataloqu ilə uyğunlaşdırılmalıdır; provayder sayları və free/no-auth metadata icra vaxtı reyestrindən əldə edilir.
 
 ### `list-capabilities` Bacarıq Təfərrüatı
 
@@ -190,17 +190,17 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
 
 ---
 
-## Yeni Bacarıq Əlavə Etmək
+## Yeni Bacarıq əlavə etmək
 
-1. **Bacarıq faylını yaradın:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Bacarıq faylı yaradın:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` tipli asinxron funksiya ixrac edin. `smartRouting.ts` kimi mövcud bacarıqların strukturuna əməl edin.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` async funksiyasını ixrac edin. `smartRouting.ts` kimi mövcud bacarıqların formasına əməl edin.
 
-2. **Emalçını qeydiyyatdan keçirin:** `src/lib/a2a/taskExecution.ts` faylında `A2A_SKILL_HANDLERS` obyektinə bir element əlavə edin:
+2. **Qeydiyyat işləyicisi:** `src/lib/a2a/taskExecution.ts` da `A2A_SKILL_HANDLERS`-ə giriş əlavə edin:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mövcud bacarıqlar
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,21 +208,21 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
    };
    ```
 
-3. **Agent Kartında təqdim edin:** `src/lib/a2a/agentCardMetadata.ts` faylında (`/.well-known/agent.json` və `/.well-known/agent-card.json` tərəfindən paylaşılır) `skills` massivinə əlavə edin:
+3. **Agent Kartında ifşa:** `src/lib/a2a/agentCardMetadata.ts` da ( `/.well-known/agent.json` və `/.well-known/agent-card.json` tərəfindən paylaşılır), `skills` massivinə əlavə edin:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Sizin Bacarığınız",
-     "description": "Niyyətə yönəlmiş qısa təsvir",
-     "tags": ["marşrutlaşdırma", "kvota"],
-     "examples": ["Təbii dildə nümunə çağırış"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Testlər yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Uğurlu icra ssenarisini və xəta ssenarisini əhatə edin.
+4. **Testləri yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Xoşbəxt yolu + xəta yolunu əhatə edin.
 
-5. Yeni bacarığı bu fayldakı `Available Skills` cədvəlində **sənədləşdirin**.
+5. **Sənəd** bu faylın `Available Skills` cədvəlindəki yeni bacarıq.
 
 ---
 

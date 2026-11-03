@@ -9,7 +9,7 @@ import {
   normalizeCliVersionOverrides,
   setCliVersionOverrides,
   type CliVersionOverrides,
-} from "@/shared/constants/cliVersions";
+} from "@omniroute/open-sse/config/cliVersions.ts";
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 
 type JsonRecord = Record<string, unknown>;

@@ -1,0 +1,1 @@
+- **fix(providers):** Anthropic API-key connections now get the same automatic prompt-cache breakpoints as the Claude OAuth provider; OpenAI-format clients were billed full uncached input on every turn ([#18532](https://github.com/cheaper-inference/OmniRoute/pull/18532), closes [#18531](https://github.com/cheaper-inference/OmniRoute/issues/18531))
