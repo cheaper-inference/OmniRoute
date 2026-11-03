@@ -19,6 +19,7 @@ delete process.env.KIRO_TOOL_CALL_REPAIR_ENABLED;
 const { KiroExecutor } = await import("../../open-sse/executors/kiro.ts");
 const { kiroRequestDeclaresToolCallWrapperName, validateKiroToolUse } =
   await import("../../open-sse/executors/kiroToolCallValidation.ts");
+const { buildKiroPayload } = await import("../../open-sse/translator/request/openai-to-kiro.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const originalFetch = globalThis.fetch;
@@ -213,4 +214,74 @@ test("#18675 validateKiroToolUse skips wrapper checks only when the client decla
   const toolUse = { name: "tool_call", input: CLIENT_ARGS };
   assert.throws(() => validateKiroToolUse(toolUse), /missing nested MCP tool name/);
   assert.doesNotThrow(() => validateKiroToolUse(toolUse, { clientDeclaresWrapperName: true }));
+});
+
+// Review follow-up: with `tools` omitted, openai-to-kiro synthesizes a `tool_call` spec from
+// history. That entry is not a client declaration, so wrapper validation must still run.
+function historicalToolCallPayload() {
+  return buildKiroPayload(
+    "claude-sonnet-4.6",
+    {
+      messages: [
+        { role: "user", content: "search" },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call_0",
+              type: "function",
+              function: { name: "tool_call", arguments: '{"name":"web_search","arguments":{}}' },
+            },
+          ],
+        },
+        { role: "tool", tool_call_id: "call_0", content: "ok" },
+        { role: "user", content: "again" },
+      ],
+    },
+    true,
+    {}
+  ) as Record<string, unknown>;
+}
+
+test("#18675 a tool_call synthesized from history is not a client declaration", () => {
+  const payload = historicalToolCallPayload();
+  const conversationState = payload.conversationState as Record<string, unknown>;
+  const userInput = (conversationState.currentMessage as Record<string, unknown>)
+    .userInputMessage as Record<string, unknown>;
+  const tools = (userInput.userInputMessageContext as Record<string, unknown>).tools as Array<
+    Record<string, Record<string, unknown>>
+  >;
+  assert.ok(tools.some((tool) => tool.toolSpecification.name === "tool_call"));
+  assert.equal(kiroRequestDeclaresToolCallWrapperName(payload), false);
+
+  const declared = buildKiroPayload(
+    "claude-sonnet-4.6",
+    {
+      messages: [{ role: "user", content: "hi" }],
+      tools: [{ type: "function", function: { name: "tool_call", parameters: {} } }],
+    },
+    true,
+    {}
+  );
+  assert.equal(kiroRequestDeclaresToolCallWrapperName(declared), true);
+});
+
+test("#18675 execute() still validates the wrapper when tools are omitted but history has tool_call", async () => {
+  process.env.KIRO_TOOL_CALL_REPAIR_ENABLED = "false";
+  globalThis.fetch = async () => eventStreamResponse(CLIENT_TOOL_CALL_FRAMES());
+
+  const result = await new KiroExecutor().execute({
+    model: "claude-sonnet-4.6",
+    body: historicalToolCallPayload(),
+    stream: true,
+    credentials: {
+      apiKey: "kiro-18675-fixture-only",
+      providerSpecificData: { authMethod: "api_key", region: "us-east-1" },
+    },
+  } as Parameters<InstanceType<typeof KiroExecutor>["execute"]>[0]);
+  const text = await (result.response as Response).text();
+
+  assert.match(text, /invalid_kiro_tool_call/);
+  assert.match(text, /missing nested MCP tool name/);
 });

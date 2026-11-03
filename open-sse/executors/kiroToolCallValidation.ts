@@ -63,11 +63,15 @@ export function validateKiroToolCallWrapperInput(toolInput: unknown): void {
  * client's schema, not `{name, arguments}`, so it must pass through untouched.
  *
  * openai-to-kiro always places the tool list on the current message (and strips it
- * from history), so that is the only place checked.
+ * from history), so that is the only place checked. Pass the translated body as
+ * built by openai-to-kiro (before the executor's allowlist): names it synthesized
+ * from history in `_kiroSynthesizedToolNames` were never declared by the client.
  */
 export function kiroRequestDeclaresToolCallWrapperName(transformedBody: unknown): boolean {
   const asRecord = (value: unknown): JsonRecord | null =>
     value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+  const synthesized = asRecord(transformedBody)?._kiroSynthesizedToolNames;
+  if (synthesized instanceof Map && synthesized.has(KIRO_TOOL_CALL_WRAPPER)) return false;
   const userInput = asRecord(
     asRecord(asRecord(asRecord(transformedBody)?.conversationState)?.currentMessage)
       ?.userInputMessage

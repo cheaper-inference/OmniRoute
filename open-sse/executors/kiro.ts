@@ -488,10 +488,11 @@ export class KiroExecutor extends BaseExecutor {
         )?.userInputMessage as Record<string, unknown>
       )?.content as string) || "";
     const thinkingExpected = userContent.includes("<thinking_mode>enabled</thinking_mode>");
-    // A client tool named `tool_call` is not the Kiro MCP wrapper (#18675).
+    // A client tool named `tool_call` is not the Kiro MCP wrapper (#18675). Read the
+    // pre-allowlist body: it carries the names openai-to-kiro synthesized from history.
     const sseOpts = {
       thinkingExpected,
-      clientDeclaresWrapperName: kiroRequestDeclaresToolCallWrapperName(transformedBody),
+      clientDeclaresWrapperName: kiroRequestDeclaresToolCallWrapperName(body),
     };
     const transformedResponse =
       stream && isKiroToolCallRepairEnabled()
