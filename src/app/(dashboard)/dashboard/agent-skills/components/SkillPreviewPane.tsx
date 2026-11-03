@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
+import type { JSX } from "react";
 
 // Lazy-load react-markdown to reduce initial bundle size.
 const ReactMarkdown = dynamic(() => import("react-markdown"), {

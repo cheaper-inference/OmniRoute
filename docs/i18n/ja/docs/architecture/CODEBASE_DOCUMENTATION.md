@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 個のトップレベル エグゼキューター モジュール (`*.ts`から`base.ts`、 `index.ts` 、およびテスト—た数`npm run check:docs-counts`が測定する)。すべてのエグゼキューター クラスは、直接または`DefaultExecutor`または別のエグゼキューターを通じて`BaseExecutor` (`base.ts`) を拡張します。残りのモジュールは、プロバイダーごとのヘルパー (ツール スキーマ、 fetch/TTSアダプター、quirk ハンドラー) です。執行者には次のものが含まれます。
+158 個のトップレベル エグゼキューター モジュール (`*.ts`から`base.ts`、 `index.ts` 、およびテスト—た数`npm run check:docs-counts`が測定する)。すべてのエグゼキューター クラスは、直接または`DefaultExecutor`または別のエグゼキューターを通じて`BaseExecutor` (`base.ts`) を拡張します。残りのモジュールは、プロバイダーごとのヘルパー (ツール スキーマ、 fetch/TTSアダプター、quirk ハンドラー) です。執行者には次のものが含まれます。
 
 `antigravity`、 `azure-openai`、 `blackbox-web`、 `cliproxyapi`、 `chatgpt-web-codex`、 `cloudflare-ai`、 `codex`、 `commandCode`、 `cursor`、 `default`、 `devin-cli`、 `muse-spark-web`、 `nlpcloud`、 `opencode`、 `perplexity-web`、 `petals`、 `pollinations`、 `qoder`、 `vertex`、 `devin-desktop`、さらに`claudeIdentity.ts` (共有 ID ヘルパー) と`index.ts` (レジストリ)。
 

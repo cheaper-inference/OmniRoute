@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Isso irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
+    "fallbackSummary": "{rate}% das solicitações usaram fallback, ~{skips} alvos ignorados por cada uma"
   },
   "costs": {
     "title": "Custos",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Status ascendente",
     "noResponse": "Sem resposta",
     "egressIp": "IP de Egressão",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Cabeçalhos após",
     "firstChunkAfter": "Primeiro bloco após",
     "servedBy": "Atendido por",
