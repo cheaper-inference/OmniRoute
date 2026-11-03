@@ -4,7 +4,6 @@ import type { JSX } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Icon from "./Icon";
-import type { JSX } from "react";
 
 export interface SkillsConceptCardProps {
   variant: "agent" | "omni";
