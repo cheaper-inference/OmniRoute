@@ -61,7 +61,16 @@
 
 ## 5. Aġġornament tal-kit
 
-`npm run check:ui-kit-upstream` jqabbel il-verżjoni ippinjat `v*` mat-tikketta `packages/ui-kit/UPSTREAM.md` l-aktar ġdida tar-repo upstream u tipprintja l-kmand tas-sinkronizzazzjoni meta rilaxx ikun barra. Il-fluss tax-xogħol `UI Kit upstream watch` ta 'kull ġimgħa (`.github/workflows/ui-kit-upstream-watch.yml`) imexxi l-istess kontroll u jżomm kwistjoni ta' traċċar waħda miftuħa waqt li l-pin ikun lura; ir-repo upstream huwa privat, għalhekk il-fluss tax-xogħol jeħtieġ token li jinqara biss fis-sigriet `UI_KIT_READ_TOKEN`. Meta ma jkunx jista 'jaqra upstream (l-ebda token, token li waqaf jaħdem, jew GitHub unreachable) il-ġirja tibqa' ħadra iżda tikteb twissija u żżomm kwistjoni waħda separata miftuħa, li tagħlaq ruħha darba ġirja aktar tard tista 'taqra upstream mill-ġdid.
+`npm run check:ui-kit-upstream` jqabbel il-verżjoni ippinjat `v*` mat-tikketta `packages/ui-kit/UPSTREAM.md` l-aktar ġdida tar-repo upstream u tipprintja l-kmand tas-sinkronizzazzjoni meta rilaxx ikun barra.
+
+Il-fluss tax-xogħol `UI Kit upstream watch` ta' kuljum (`.github/workflows/ui-kit-upstream-watch.yml`) iwettaq l-istess kontroll. Waqt li l-pin ikun lura, `scripts/ci/ui-kit-sync-pr.sh` iżomm PR sync wieħed miftuħ kontra l-ogħla fergħa `release/vX.Y.Z`, fuq il-fergħa rolling `chore/ui-kit-sync-latest`. Qatt ma jingħaqad: kull ħruġ ta 'kit xorta jeħtieġ kontroll viżwali fuq il- VPS lokali. Il-fergħa tinbena mill-ġdid meta toħroġ rilaxx aktar ġdid u titħalla waħedha mod ieħor. PR miftuħ b'commits imbuttati bl-idejn ma jinkitebx fuqu, u PR għal verżjoni li manutenzjoni magħluqa mhux magħquda tibqa' magħluqa sa rilaxx aktar ġdid.
+
+Meta l-ebda PR ma jista 'jinfetaħ (ir-rilaxx fil-mira huwa ffriżat, iż- PR għandu jimpenja imbuttat bl-idejn, iż PR kien magħluq, jew l-ebda token PR ma huwa stabbilit) il-fluss tax-xogħol iżomm kwistjoni ta' traċċar waħda miftuħa li tgħid għaliex.
+
+Il-fluss tax-xogħol juża żewġ sigrieti:
+
+- `secrets.UI_KIT_READ_TOKEN`: token li jinqara biss għar-repo upstream privat. Meta l-fluss tax-xogħol ma jkunx jista 'jaqra 'l fuq (l-ebda token, token li waqaf jaħdem, jew GitHub li ma jintlaħaqx) il-ġirja tibqa' ħadra iżda tikteb twissija u żżomm kwistjoni waħda separata miftuħa, li tagħlaq ruħha darba ġirja aktar tard tista 'taqra 'l fuq mill-ġdid.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: token ta' qamħ fin fuq dan ir-repożitorju b'aċċess għall-kitba ta' Contents and Pull requests. `GITHUB_TOKEN` default ma jistax joħloq PRs hawn, u PR li fetaħ ma jikkawżax CI. Mingħajr dan it-token il-fluss tax-xogħol jimbotta biss il-fergħa.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` tikkopja `src/` upstream f'dak il-commit (`latest` = l-aktar tikketta `v*` ġdida) `packages/ui-kit/src`, tapplika t-trasformazzjoni permessa waħda (tneħħi s-suffiss `.js` minn importazzjonijiet relattivi), u tistabbilixxi l-verżjoni tal-ispazju tax-xogħol `packages/ui-kit/package.json` u `package-lock.json` għal dik upstream. Imbagħad: irrevedi `git diff packages/ui-kit`, agħmel pass viżwali fuq il-fornituri, is-settings, il-combos, l-użu u l-endpoint fiż-żewġ temi, mexxi `npm run check:ui-kit-snapshot` u `npm run test:vitest:ui`, u tiftaħ il- PR bil-changelog upstream.
 
