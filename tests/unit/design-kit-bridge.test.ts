@@ -27,10 +27,13 @@ test("globals.css loads the vendored kit CSS right after Tailwind, and the kit s
     order,
     "imports keep this order"
   );
-  // Since kit 0.0.66 every role (UI, display, code) is Switzer, declared by the kit itself:
-  // ci-ui.css → ci-tokens.css → ci-fonts.css → local woff2 files. The app no longer loads the
-  // old Inter / Instrument Serif / IBM Plex Mono faces.
-  assert.doesNotMatch(css, /@fontsource/);
+  // Since kit 0.0.66 the UI and display roles are Switzer, declared by the kit itself:
+  // ci-ui.css → ci-tokens.css → ci-fonts.css → local woff2 files. Instrument Serif and IBM Plex
+  // Mono are gone; Inter comes back ONLY as the per-script fallback after Switzer (Switzer has no
+  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face.
+  const fontsourceImports = [...css.matchAll(/@import "@fontsource\/([^/"]+)\//g)].map((m) => m[1]);
+  assert.deepEqual([...new Set(fontsourceImports)], ["inter"]);
+  assert.doesNotMatch(css, /--font-(sans|display):\s*"Inter"/);
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
   const tokens = read("packages/ui-kit/src/ci-tokens.css");
   assert.match(tokens, /^@import "\.\/ci-fonts\.css";/m);
@@ -91,7 +94,13 @@ test("the graph-paper grid, the coral/indigo palette and the macOS font stack ar
   assert.doesNotMatch(css, /"SF Pro Text"/);
   const theme = block("@theme inline {");
   assert.match(theme, /--font-sans:\s*var\(--ci-font-ui\);/);
-  assert.match(theme, /--font-mono:\s*var\(--ci-font-mono\);/);
+  // Code text is monospace again: kit 0.0.66 points --ci-font-mono at Switzer (proportional),
+  // so `font-mono` maps to the code stack (upstream 0.0.76 names it --ci-font-code).
+  assert.match(theme, /--font-mono:\s*var\(--ci-font-code\);/);
+  assert.match(css, /--ci-font-code:\s*ui-monospace[^;]*monospace;/);
+  // Switzer is Latin-only: Inter's subsets (unicode-range) cover Cyrillic / Greek / Vietnamese.
+  assert.match(css, /--ci-font-ui:\s*"Switzer",\s*"Inter",/);
+  assert.match(css, /@import "@fontsource\/inter\/400\.css";/);
   assert.match(theme, /--font-display:\s*var\(--ci-font-display\);/);
   for (const t of [
     "--color-success-bg",

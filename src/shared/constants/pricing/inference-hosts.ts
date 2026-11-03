@@ -380,30 +380,6 @@ export const DEFAULT_PRICING_INFERENCE = {
     "nvidia/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "moonshotai/kimi-k2.5": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "z-ai/glm4.7": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "deepseek-ai/deepseek-v3.2": {
-      input: 0,
-      output: 0,
-      cached: 0,
-      reasoning: 0,
-      cache_creation: 0,
-    },
-    "nvidia/llama-3.3-70b-instruct": {
-      input: 0,
-      output: 0,
-      cached: 0,
-      reasoning: 0,
-      cache_creation: 0,
-    },
-    "meta/llama-4-maverick-17b-128e-instruct": {
-      input: 0,
-      output: 0,
-      cached: 0,
-      reasoning: 0,
-      cache_creation: 0,
-    },
-    "deepseek/deepseek-r1": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     // #18464: NVIDIA hosted free endpoints. build.nvidia.com rate limits them and lists no
     // per-token price, so they are priced at zero. Without a row, usage is unpriced and
     // USD-limited API keys fail closed (#12341) after one request.
