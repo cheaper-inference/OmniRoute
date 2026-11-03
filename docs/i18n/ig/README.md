@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ụzọ Ọnụ Ụzọ AI N'efu
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ekwela ka ị kwụsị ide koodu. Ngwaọrụ AI niile → ndị na-eweta 380 — 150+ n'efu — site n'otu njedebe. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity na-etinye n'ime FREE Claude / GPT / Gemini na auto-fallback. RTK + Caveman stacked compression na-echekwa 15–95% tokens (~89% n'ogo) — agaghị emetụ oke. Ndị na-eweta AI 380 · 150+ ọkwa n'efu · ~1.62B tokens n'efu kwa ọnwa · 20 ụzọ mbufe · $0 ịmalite."/>
 
 </div>
@@ -1803,7 +1805,7 @@ Ikikere MIT - lee [LICENSE](LICENSE) maka nkọwa.
 
 **[⬆ Laghachi n'elu](#-omniroute)** · E wuru ya site n'❤️ maka obodo AI open-source.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Ikikere MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Ikikere MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Emeghe GitHub Discussions maka ajụjụ na azịza nke obodo -->

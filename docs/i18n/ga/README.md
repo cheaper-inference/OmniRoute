@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — An Geata AI Saor in Aisce
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ná stop códú choíche. Gach uirlis AI → 380 soláthraí — 150+ saor in aisce — trí aon phointe deiridh amháin. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity isteach i CLAUDE / GPT / Gemini SAOR IN AISCE le hath-thitim uathoibríoch. Comhbhrú RTK + Caveman cruachta sábhálann 15–95% de thóicéid (~89% ar an meán) — ná sroich teorainneacha choíche. 380 soláthraí AI · 150+ sraitheanna saor in aisce · ~1.62B tóicéid saor in aisce/mí · 20 straitéis ródaithe · $0 le tosú."/>
 
 </div>
@@ -1814,7 +1816,7 @@ Ceadúnas MIT - féach [LICENSE](LICENSE) le haghaidh sonraí.
 
 **[⬆ Ar ais go barr](#-omniroute)** · Tógtha le ❤️ do phobal an AI foinse oscailte.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions cumasaithe le haghaidh C&F an phobail -->

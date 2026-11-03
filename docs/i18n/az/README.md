@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Pulsuz AI Gateway
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmağa heç vaxt ara vermə. Hər bir AI aləti → 380 provayder — 150+ pulsuz — bir endpoint vasitəsilə. Claude Code, Codex, Cursor, Cline, Copilot və Antigravity-ni PULSUZ Claude / GPT / Gemini-ə avtomatik keçid ilə birləşdir. RTK + Caveman yığılmış sıxılma 15–95% tokenə qənaət edir (~89% orta) — limitlərə heç vaxt çatma. 380 AI provayderi · 150+ pulsuz səviyyə · ~1.62B pulsuz token/ay · 20 yönləndirmə strategiyası · Başlamaq üçün $0."/>
 
 </div>
@@ -1805,7 +1807,7 @@ MIT Lisenziyası - ətraflı məlumat üçün [LICENSE](LICENSE) faylına baxın
 
 **[⬆ Yuxarı qayıt](#-omniroute)** · Açıq mənbəli AI icması üçün ❤️ ilə hazırlanıb.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisenziyası · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisenziyası · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- İcma sual-cavabı üçün GitHub Discussions aktivləşdirilib -->

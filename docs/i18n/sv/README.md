@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Den fria AI-gatewayen
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Sluta aldrig koda. Alla AI-verktyg → 380 leverantörer — 150+ gratis — via en enda endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity till GRATIS Claude / GPT / Gemini med automatisk fallback. RTK + Caveman staplad komprimering sparar 15–95% tokens (~89% i snitt) — nå aldrig gränser. 380 AI-leverantörer · 150+ gratisnivåer · ~1,62 miljarder gratis tokens/mån · 20 routningsstrategier · 0 kr att börja."/>
 
 </div>
@@ -1814,7 +1816,7 @@ MIT-licens – se [LICENSE](LICENSE) för detaljer.
 
 **[⬆ Tillbaka till toppen](#-omniroute)** · Byggt med ❤️ för AI-gemenskapen med öppen källkod.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-licens · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-licens · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions aktiverat för frågor och svar i communityn -->

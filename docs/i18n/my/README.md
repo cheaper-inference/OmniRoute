@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — အခမဲ့ AI Gateway
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Coding ကို မရပ်တန့်ပါနဲ့။ AI ကိရိယာတိုင်း → ၃၈၀ ခုသော ပံ့ပိုးသူများ — ၁၅၀+ ခု အခမဲ့ — တစ်ခုတည်းသော endpoint မှတစ်ဆင့်။ Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ကို အခမဲ့ Claude / GPT / Gemini သို့ auto-fallback ဖြင့်။ RTK + Caveman စုစည်းထားသော compression ဖြင့် token များကို ၁၅–၉၅% (ပျမ်းမျှ ~၈၉%) ထိ ချွေတာနိုင်သည် — အကန့်အသတ် မကျော်သွားပါစေ။ ၃၈၀ ခုသော AI ပံ့ပိုးသူများ · ၁၅၀+ အခမဲ့အဆင့်များ · ~၁.၆၂ ဘီလီယံ အခမဲ့ token များ/လ · ၂၀ ခုသော routing မဟာဗျူဟာများ · စတင်ရန် $0။"/>
 
 </div>
@@ -1808,7 +1810,7 @@ MIT လိုင်စင် - အသေးစိတ်အတွက် [LICENSE]
 
 **[⬆ အပေါ်ဆုံးသို့ ပြန်သွားရန်](#-omniroute)** · open-source AI အသိုင်းအဝိုင်းအတွက် ❤️ ဖြင့် တည်ဆောက်ထားပါသည်။
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- အသိုင်းအဝိုင်း Q&A အတွက် GitHub Discussions ကို ဖွင့်ထားပါသည် -->

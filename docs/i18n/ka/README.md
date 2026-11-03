@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — უფასო AI გეითვეი
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — არასდროს შეწყვიტო კოდირება. ყველა AI ინსტრუმენტი → 380 პროვაიდერი — 150+ უფასო — ერთ ენდპოინტში. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity უფასო Claude / GPT / Gemini-ში ავტომატური გადართვით. RTK + Caveman-ის სტეკირებული კომპრესია ზოგავს 15–95% ტოკენს (~89% საშუალოდ) — არასდროს გადააჭარბებ ლიმიტებს. 380 AI პროვაიდერი · 150+ უფასო ტარი · ~1.62 მლრდ უფასო ტოკენი/თვე · 20 როუტინგის სტრატეგია · $0 დასაწყებად."/>
 
 </div>
@@ -1805,7 +1807,7 @@ MIT ლიცენზია — დეტალებისთვის იხ�
 
 **[⬆ ზემოთ დაბრუნება](#-omniroute)** · შექმნილია ❤️-ით ღია კოდის AI საზოგადოებისთვის.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ლიცენზია · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ლიცენზია · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ჩართულია საზოგადოების კითხვებისა და პასუხებისთვის -->

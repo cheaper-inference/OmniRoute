@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Η Δωρεάν Πύλη AI
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Μην σταματάς ποτέ να κωδικοποιείς. Κάθε εργαλείο AI → 380 πάροχοι — 150+ δωρεάν — μέσω ενός endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity σε ΔΩΡΕΑΝ Claude / GPT / Gemini με αυτόματη εναλλακτική διαδρομή. Η συμπίεση RTK + Caveman εξοικονομεί 15–95% tokens (~89% μ.ο.) — ποτέ μην φτάνεις τα όρια. 380 πάροχοι AI · 150+ δωρεάν επίπεδα · ~1.62B δωρεάν tokens/μήνα · 20 στρατηγικές δρομολόγησης · $0 για να ξεκινήσεις."/>
 
 </div>
@@ -1815,7 +1817,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ Επιστροφή στην κορυφή](#-omniroute)** · Φτιαγμένο με ❤️ για την κοινότητα AI ανοιχτού κώδικα.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Τα GitHub Discussions είναι ενεργοποιημένα για ερωτήσεις και απαντήσεις της κοινότητας -->
