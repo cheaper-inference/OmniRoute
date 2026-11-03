@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil tage et øjebliksbillede af de aktuelt tilsluttede udbydere/modeller, der matcher denne skabelon, i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering af auto-kombination mislykkedes:",
     "duplicateAutoComboUnknownError": "Ukendt fejl",
-    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}"
+    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
+    "fallbackSummary": "{rate} % af anmodningerne faldt tilbage, hver hoppede i gennemsnit over ~{skips} mål"
   },
   "costs": {
     "title": "Omkostninger",
@@ -15462,6 +15463,7 @@
     "upstreamStatus": "Opstrøm status",
     "noResponse": "Ingen respons",
     "egressIp": "Udgående IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Headers efter",
     "firstChunkAfter": "Første chunk efter",
     "servedBy": "Betjent af",

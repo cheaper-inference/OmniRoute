@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "S tem boste trenutno povezane ponudnike/modele, ki se ujemajo s to predlogo, zajeli v kombinacijo, ki jo je mogoče urejati.",
     "duplicateAutoComboFailedPrefix": "Podvajanje samodejne kombinacije ni uspelo:",
     "duplicateAutoComboUnknownError": "Neznana napaka",
-    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}"
+    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}",
+    "fallbackSummary": "{rate}% zahtev je uporabilo nadomestno rešitev, vsaka je preskočila približno {skips} ciljev"
   },
   "costs": {
     "title": "Stroški",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Status nihala",
     "noResponse": "Brez odgovora",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Glave po",
     "firstChunkAfter": "Prvi del po",
     "servedBy": "Servira",
