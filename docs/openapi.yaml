@@ -43,6 +43,8 @@ tags:
     description: Content moderation
   - name: Rerank
     description: Document reranking
+  - name: Decisions
+    description: System One typed decisions (Jev)
   - name: Search
     description: Unified web, news, and X search
   - name: Models
@@ -1731,7 +1733,7 @@ paths:
             `POST /api/v1/chat/completions`), including `X-OmniRoute-Request-Id`
             and `X-OmniRoute-Version`.
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/messages/count_tokens:
     post:
@@ -1748,6 +1750,8 @@ paths:
       responses:
         "200":
           description: Token count
+        "401":
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/responses:
     post:
@@ -2329,9 +2333,64 @@ paths:
     get:
       tags: [Models]
       summary: List models (management)
+      parameters:
+        - name: all
+          in: query
+          description: "`true` lists every model, not only those with an active provider connection."
+          schema:
+            type: string
+        - name: withLimits
+          in: query
+          description: >-
+            Opt-in. `1`/`true` adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and
+            `capsSource` (per-limit provenance) to each model row. Omitted or `0`/`false`
+            keeps the default payload unchanged.
+          schema:
+            type: string
+            enum: ["1", "true", "0", "false"]
       responses:
         "200":
           description: Internal model list with aliases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  models:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        provider:
+                          type: string
+                        model:
+                          type: string
+                        name:
+                          type: string
+                        fullModel:
+                          type: string
+                        alias:
+                          type: string
+                        available:
+                          type: boolean
+                        supportsVision:
+                          type: boolean
+                        contextWindow:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        maxInputTokens:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        maxOutputTokens:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        capsSource:
+                          $ref: "#/components/schemas/ModelLimitSources"
+        "400":
+          description: Invalid `withLimits` value
 
   /api/models/alias:
     post:
@@ -2633,6 +2692,33 @@ paths:
       responses:
         "200":
           description: Provider model list
+    post:
+      tags: [Provider Nodes]
+      summary: Add a custom model
+      description: >-
+        Requires management authentication. On a compatible provider node the
+        stored modelId is the bare upstream id: a leading copy of the node's
+        prefix is stripped (and canonical providers' slashed ids pass through
+        untouched). The response echoes the stored id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, modelId]
+              properties:
+                provider:
+                  type: string
+                modelId:
+                  type: string
+                modelName:
+                  type: string
+      responses:
+        "200":
+          description: Model added (echoes the stored id)
+        "400":
+          description: Invalid request body
     put:
       tags: [Provider Nodes]
       summary: Update model metadata or per-model overrides
@@ -2680,6 +2766,8 @@ paths:
         exact JSON model field. Specialized executors and other providers are unsupported;
         session pools, extra-key rotation, HTTP redirects and credential refresh are refused.
         Active runtime plugins also fail closed; plugin policies are not silently skipped.
+        On a compatible provider node the inserted modelId is stored as the
+        bare upstream id (a leading copy of the node's prefix is stripped).
       security:
         - BearerAuth: []
       requestBody:
@@ -15327,6 +15415,50 @@ paths:
       responses:
         "200":
           description: OK
+  /api/v1/systemone:
+    post:
+      tags: [Decisions]
+      summary: System One typed decisions
+      description: >-
+        One `state` plus typed `questions` (`noul` / `choice` / `score`); the
+        backend is selected by the model id — `typesafe/jev-*` or a bare
+        `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/
+        <model>` routes to OpenRouter's alpha decisions endpoint. Answers,
+        probabilities and usage (tokens, cost) pass through untouched.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [state, questions]
+              properties:
+                model:
+                  type: string
+                state:
+                  description: Decision context — a string or an object map.
+                questions:
+                  type: object
+      responses:
+        "200":
+          description: >-
+            Upstream passthrough: `{ model, answers, usage }` with calibrated
+            probabilities. Carries the `X-OmniRoute-*` cost-telemetry headers.
+        "400":
+          description: Unknown decisions model or invalid body.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
+    get:
+      tags: [Decisions]
+      summary: List decisions-capable models
+      description: Decisions entries from the unified model catalog.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Model list (same shape as GET /api/v1/models).
   /api/v1/video-bridge/drilldown:
     delete:
       tags:
@@ -15923,6 +16055,34 @@ components:
               error:
                 type: string
                 example: Unauthorized
+    AnthropicUnauthorized:
+      description: >-
+        Missing or invalid API key on the Anthropic Messages endpoints, returned in
+        Anthropic's error envelope so Anthropic clients (Claude Code, Anthropic SDKs)
+        show the message. The correlation id is on the `x-request-id` header.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [type, error]
+            properties:
+              type:
+                type: string
+                enum: [error]
+              error:
+                type: object
+                required: [type, message]
+                properties:
+                  type:
+                    type: string
+                    enum: [authentication_error]
+                  message:
+                    type: string
+          example:
+            type: error
+            error:
+              type: authentication_error
+              message: Invalid API key
     ManagementAuthenticationRequired:
       description: Authentication required for management routes
       content:
@@ -17494,6 +17654,16 @@ components:
           example: model
         owned_by:
           type: string
+        name:
+          type: string
+          description: >-
+            Human-readable display name. Built-in models use the registry name and
+            synced models the provider's published name; a model with neither gets
+            a name derived from its id (for example `claude-opus-5-5` becomes
+            `Claude Opus 5.5`). A name shared by several providers is prefixed with
+            the provider (`gh/GPT-5.5`). Omitted when the `MODEL_CATALOG_INCLUDE_NAMES`
+            feature flag is off.
+          example: GLM 5.3 Flash
         pricing:
           $ref: "#/components/schemas/ModelPricing"
 
@@ -17630,6 +17800,23 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    ModelLimitSources:
+      type: object
+      description: >-
+        Which rule supplied each resolved token limit (`GET /api/models?withLimits=1`).
+        Values: `override:context`, `override:max_input`, `override:max_output`,
+        `static-authoritative:<provider>/<model>`, `synced:<provider>/<model>` (models.dev),
+        `registry:<provider>/<model>`, `spec:<model>`, optionally prefixed with `effort-base:`
+        when borrowed from an effort variant's base model, or `none`.
+      properties:
+        contextWindow:
+          type: string
+        maxInputTokens:
+          type: string
+        maxOutputTokens:
+          type: string
+      required: [contextWindow, maxInputTokens, maxOutputTokens]
 
     ProviderConnection:
       type: object

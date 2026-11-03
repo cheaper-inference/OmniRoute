@@ -318,7 +318,7 @@ export async function getSettings() {
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
     // Operator-set CLI client-version overrides for the Claude Code / Codex
-    // identity presets (src/shared/constants/cliVersions.ts). Empty record = no
+    // identity presets (open-sse/config/cliVersions.ts). Empty record = no
     // override: resolution falls back to the env var, then the captured pin.
     cliVersionOverrides: {},
   };
