@@ -1,3 +1,4 @@
+import { getSpecialtyModelsResponse } from "../../_shared/specialtyCatalog";
 import { getProviderAlias } from "@/shared/constants/providers";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getApiKeyMetadata, isModelAllowedForKey } from "@/lib/db/apiKeys";
@@ -103,8 +104,17 @@ export async function GET(request: Request) {
     metadata
   );
 
+  const legacy = await getSpecialtyModelsResponse(request, "/v1/systemone/models", (model) => {
+    const id = typeof model.id === "string" ? model.id : "";
+    return (
+      (id.startsWith("typesafe/") || id.startsWith("openrouter/")) && model.type === "decisions"
+    );
+  });
+  if (!legacy.ok) return legacy;
+  const legacyPayload = record(await legacy.json());
+  const legacyModels = Array.isArray(legacyPayload.data) ? legacyPayload.data : [];
   return Response.json(
-    { object: "list", data: [...models.values()] },
+    { object: "list", data: [...legacyModels, ...models.values()] },
     {
       headers: {
         "Cache-Control": "no-store",

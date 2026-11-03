@@ -251,12 +251,17 @@ Ollama Cloud uses the existing account connection and its native capability proo
 then calls `https://ollama.com/v1/systemone`; it does not require a local Ollama
 server. A name containing `clef` is not capability evidence. Cloudflare Workers AI
 uses the existing token/account ID, discovers documented Clef/Clef Flash entries,
-calls the per-model Workers endpoint and unwraps its response envelope. Other
-System One providers, including TypeSafe Jev and OpenRouter, retain their existing
-routes and catalog behavior. Protocol payloads are never translated to chat.
+calls the per-model Workers endpoint and unwraps its response envelope. Existing
+TypeSafe Jev and OpenRouter routes are preserved; their scoped catalog entries
+are included in the common decision-model catalog. Protocol payloads are never translated to chat.
 
 Sources: [Ollama decisions](https://docs.ollama.com/capabilities/decision),
 [Cloudflare Clef](https://developers.cloudflare.com/workers-ai/models/clef/),
 [Cloudflare discovery](https://developers.cloudflare.com/api/resources/ai/subresources/models/methods/list/).
 These source changes require a new deployment. Tests using mocked providers do
 not establish live inference or the billing terms of an individual account.
+
+The connection Test/Test All health probe currently skips native decision models
+with an explicit 422/skipped result and names the matching endpoint. It never
+sends a chat request or marks a configuration-only check as successful inference.
+Use that endpoint with an authorized, scoped client key for a real decision test.

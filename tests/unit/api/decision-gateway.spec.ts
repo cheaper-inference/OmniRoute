@@ -570,3 +570,18 @@ describe("Cloudflare System One transport", () => {
     expect(s.observations[0].cost).toBeNull();
   });
 });
+
+it("normal Cloudflare import classifies native decision models before exposing them", async () => {
+  const { parseCloudflareModelsSearch } =
+    await import("../../../src/app/api/providers/[id]/models/discovery/cloudflareModels");
+  expect(
+    parseCloudflareModelsSearch({
+      result: [{ name: "@cf/cloudflare/clef", task: { name: "Text Generation" } }],
+    })[0]
+  ).toMatchObject({
+    id: "@cf/cloudflare/clef",
+    supportedEndpoints: ["systemone"],
+    modelType: "decisions",
+    apiFormat: "systemone",
+  });
+});

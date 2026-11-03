@@ -39,7 +39,9 @@ vi.mock("@/shared/constants/providers", async (original) => ({
 vi.mock("@/middleware/promptInjectionGuard", () => ({
   withInjectionGuard: (handler: unknown) => handler,
 }));
-vi.mock("@/app/api/v1/_shared/specialtyCatalog", () => ({ getSpecialtyModelsResponse: vi.fn() }));
+vi.mock("@/app/api/v1/_shared/specialtyCatalog", () => ({
+  getSpecialtyModelsResponse: vi.fn(async () => Response.json({ data: [] })),
+}));
 vi.mock("@omniroute/open-sse/handlers/systemOne.ts", () => ({
   handleSystemOneProxy: vi.fn(async () => Response.json({ legacy: true })),
 }));
@@ -53,6 +55,7 @@ vi.mock("@/shared/network/outboundUrlGuardPolicy", () => ({
 }));
 vi.mock("@/lib/db/settings", () => ({ resolveProxyForConnection: vi.fn(async () => null) }));
 
+import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { POST } from "@/app/api/v1/systemone/route";
 import { handleSystemOneProxy } from "@omniroute/open-sse/handlers/systemOne.ts";
 import { GET } from "@/app/api/v1/systemone/models/route";
@@ -275,4 +278,29 @@ describe("universal native decision catalog", () => {
     expect(data[0].supported_endpoints).toEqual(["systemone"]);
     expect(deps.allowed).toHaveBeenCalledWith("client-test", "ollamacloud/clef:27b");
   });
+});
+
+it("unions the scoped legacy TypeSafe and OpenRouter catalog with native results", async () => {
+  deps.valid.mockResolvedValue(true);
+  deps.policy.mockResolvedValue({ rejection: null });
+  deps.scope.mockResolvedValue({ allowedConnections: ["c1"], rejection: null });
+  deps.metadata.mockResolvedValue({});
+  deps.connections.mockResolvedValue([]);
+  vi.mocked(getSpecialtyModelsResponse).mockResolvedValueOnce(
+    Response.json({
+      data: [
+        { id: "typesafe/jev-latest", type: "decisions" },
+        { id: "openrouter/typesafe/jev-1.13", type: "decisions" },
+      ],
+    })
+  );
+  const response = await GET(
+    new Request("http://gateway/v1/systemone/models", {
+      headers: { authorization: "Bearer client-test" },
+    })
+  );
+  expect((await response.json()).data.map((row: { id: string }) => row.id)).toEqual([
+    "typesafe/jev-latest",
+    "openrouter/typesafe/jev-1.13",
+  ]);
 });
