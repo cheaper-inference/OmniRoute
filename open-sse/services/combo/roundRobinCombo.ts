@@ -116,7 +116,11 @@ import {
   resolvePersistedConnectionCooldownSkipReason,
 } from "./comboPredicates.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
-import { handlePreContentStreamRetry } from "./executeTargetClassify.ts";
+import {
+  handlePreContentStreamRetry,
+  isProviderSafetyStreamFailure,
+  qualityValidationFailure,
+} from "./executeTargetClassify.ts";
 import {
   handleEmptyContentRetry,
   isEmptyContentResponse,
@@ -891,6 +895,17 @@ export async function handleRoundRobinCombo({
                 );
               }
               rrEvents.failed(`Quality: ${quality.reason}`, Date.now() - startTime);
+              // #17049: an in-stream provider safety stop is terminal for the whole combo.
+              if (isProviderSafetyStreamFailure(quality)) {
+                recordComboRequest(combo.name, modelStr, {
+                  success: false,
+                  latencyMs: Date.now() - startTime,
+                  fallbackCount,
+                  strategy: "round-robin",
+                  target: toRecordedTarget(target),
+                });
+                return qualityValidationFailure(quality).response;
+              }
               if (emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent) {
                 const emptyContentRetry = retryEmptyContent({
                   response: new Response(null, {
