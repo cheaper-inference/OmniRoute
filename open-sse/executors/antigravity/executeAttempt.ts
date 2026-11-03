@@ -1,4 +1,5 @@
 import {
+  retainHttpResponse,
   selectHttpResponse,
   type HttpAttemptMetadata,
   type HttpAttemptSelection,
@@ -733,6 +734,7 @@ export async function peekFirstAntigravitySseEvent(
     throw new AntigravityFirstEventTimeoutError(timeoutMs, url);
   }
 
+  retainHttpResponse(response, readiness.response);
   return readiness.response;
 }
 async function buildNonStreamingExecuteOnceResult(

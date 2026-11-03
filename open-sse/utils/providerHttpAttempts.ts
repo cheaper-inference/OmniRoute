@@ -132,6 +132,16 @@ export function selectHttpResponse(response: object): HttpAttemptSelection | nul
   return ref ? (owners.get(ref)?.selection(response) ?? null) : null;
 }
 
+/**
+ * A re-wrapped body (for example a stream-readiness probe that hands back a new Response) is still
+ * the same upstream HTTP send: keep its association so the logical row selects that send.
+ */
+export function retainHttpResponse(from: object, to: object): void {
+  if (from === to) return;
+  const ref = responses.get(from);
+  if (ref && !responses.has(to)) responses.set(to, ref);
+}
+
 /** Observe only an explicit inference boundary. The exact Response/exception passes through. */
 export async function observeProviderHttpSend(
   metadata: HttpAttemptMetadata,

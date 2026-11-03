@@ -658,18 +658,26 @@ test("actual Antigravity pass-through retains npm-undici response identity", asy
     assert.equal(sent.response instanceof Response, false);
     const controller = new AbortController();
     if (aborted) controller.abort();
-    const result = normalizeExecutorResult(
-      await buildFinalAntigravityResult(
-        false,
-        sent.response,
-        "https://provider.example/content",
-        {},
-        {},
-        "account-wire",
-        controller.signal,
-        () => {}
-      )
+    const finalResult = buildFinalAntigravityResult(
+      false,
+      sent.response,
+      "https://provider.example/content",
+      {},
+      {},
+      "account-wire",
+      controller.signal,
+      () => {}
     );
+    // A client that already left aborts the first-event peek (#13125): the final builder rejects
+    // instead of returning a 499, and the caller persists that 499 with no selected send.
+    const result = aborted
+      ? await assert
+          .rejects(finalResult, { name: "AbortError" })
+          .then(() => ({
+            upstreamHttpSelection: null,
+            response: new Response("", { status: 499 }),
+          }))
+      : normalizeExecutorResult(await finalResult);
     const rows = await finish(f, result.upstreamHttpSelection, result.response.status);
     assert.equal(sends, statuses.length);
     assert.equal(rows.length, statuses.length + Number(aborted));
