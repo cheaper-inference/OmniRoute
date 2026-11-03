@@ -142,6 +142,11 @@
 - [`POST /api/v1/vscode/raw/{token}/v1/chat/completions`](#post-apiv1vscoderawtokenv1chatcompletions)
 - [`GET /api/v1/vscode/raw/{token}/v1/models`](#get-apiv1vscoderawtokenv1models)
 - [`POST /api/v1/web/fetch`](#post-apiv1webfetch)
+- [`GET /api/v1/fal/models`](#get-apiv1falmodels)
+- [`POST /api/v1/fal/run`](#post-apiv1falrun)
+- [`GET /api/v1/fal/jobs/{id}`](#get-apiv1faljobsid)
+- [`POST /api/v1/fal/jobs/{id}`](#post-apiv1faljobsid)
+- [`DELETE /api/v1/fal/jobs/{id}`](#delete-apiv1faljobsid)
 
 ### POST /api/v1/session-leases
 
@@ -1629,4 +1634,53 @@ curl -X POST http://localhost:20128/api/v1/web/fetch \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/v1/fal/models
+
+Discover Fal endpoints or load one endpoint's validated schema
+
+```bash
+curl http://localhost:20128/api/v1/fal/models \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/fal/run
+
+Execute validated native Fal model inputs
+
+```bash
+curl -X POST http://localhost:20128/api/v1/fal/run \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/v1/fal/jobs/{id}
+
+Poll a saved Fal job or retrieve its result without resubmission
+
+```bash
+curl http://localhost:20128/api/v1/fal/jobs/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/fal/jobs/{id}
+
+Send one authorized invocation to an active Fal realtime or HTTP WebSocket
+
+```bash
+curl -X POST http://localhost:20128/api/v1/fal/jobs/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### DELETE /api/v1/fal/jobs/{id}
+
+Cancel a saved Fal job or close its realtime session
+
+```bash
+curl -X DELETE http://localhost:20128/api/v1/fal/jobs/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```

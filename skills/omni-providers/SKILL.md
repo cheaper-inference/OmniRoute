@@ -91,6 +91,9 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/providers/zed/discover`](references/endpoints.md#post-apiproviderszeddiscover)
 - [`POST /api/providers/zed/import`](references/endpoints.md#post-apiproviderszedimport)
 - [`POST /api/providers/zed/manual-import`](references/endpoints.md#post-apiproviderszedmanual-import)
+- [`GET /api/providers/{id}/fal`](references/endpoints.md#get-apiprovidersidfal)
+- [`PUT /api/providers/{id}/fal`](references/endpoints.md#put-apiprovidersidfal)
+- [`DELETE /api/providers/{id}/fal`](references/endpoints.md#delete-apiprovidersidfal)
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.
