@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import ProviderIcon from "@/shared/components/ProviderIcon";
-import { Badge, Button } from "@/shared/components";
+import { Badge, Button, Icon } from "@/shared/components";
 import CatalogTestBadge from "./CatalogTestBadge";
 import {
   ActionsHeading,
@@ -297,8 +297,10 @@ function ModelVisibilityCell({
   const hidden = model.hidden === true;
   return (
     <TableCell className="h-auto px-4 py-3 align-top">
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-sm"
         role="switch"
         aria-checked={!hidden}
         aria-label={
@@ -308,15 +310,14 @@ function ModelVisibilityCell({
         disabled={busy || !model.visibility}
         onClick={() => onToggle(model)}
         data-testid={`toggle-visibility-${model.id}`}
-        className="inline-flex size-8 items-center justify-center rounded-md text-text-muted hover:bg-black/5 hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-40 dark:hover:bg-white/5"
+        className="text-text-muted hover:text-text-main"
       >
-        <span
-          className={`material-symbols-outlined text-lg ${hidden ? "" : "text-primary"}`}
-          aria-hidden="true"
-        >
-          {hidden ? "visibility_off" : "visibility"}
-        </span>
-      </button>
+        <Icon
+          name={hidden ? "visibility_off" : "visibility"}
+          size={18}
+          className={hidden ? undefined : "text-primary"}
+        />
+      </Button>
     </TableCell>
   );
 }
@@ -329,6 +330,7 @@ function ModelCatalogTableRow({
   activeTestingKeys,
   providerHealthMap,
   onToggleSelect,
+  renderKeyAccess,
   onTestModel,
   bulkRunning,
   onToggleVisibility,
@@ -341,6 +343,7 @@ function ModelCatalogTableRow({
   activeTestingKeys: ReadonlySet<string>;
   providerHealthMap: Record<string, ProviderHealth>;
   onToggleSelect?: (id: string) => void;
+  renderKeyAccess?: (model: CatalogModelRow) => import("react").ReactNode;
   onTestModel?: (providerId: string, modelId: string) => void;
   bulkRunning: boolean;
   onToggleVisibility?: (model: CatalogModelRow) => void;
@@ -391,7 +394,8 @@ function ModelCatalogTableRow({
         <CatalogTestBadge result={result} loading={isTesting} />
       </TableCell>
       {onTestModel && (
-        <TableCell className="h-auto px-4 py-3 text-right align-top">
+        <TableCell className="h-auto whitespace-nowrap px-4 py-3 text-right align-top">
+          {renderKeyAccess?.(model)}
           <Button
             variant="secondary"
             size="sm"
@@ -426,6 +430,7 @@ interface ModelCatalogTableProps {
   onToggleSelectAll?: () => void;
   testResults?: Record<string, CatalogTestResult>;
   activeTestingKeys?: ReadonlySet<string>;
+  renderKeyAccess?: (model: CatalogModelRow) => import("react").ReactNode;
   onTestModel?: (providerId: string, modelId: string) => void;
   providerHealthMap?: Record<string, "healthy" | "degraded" | "down">;
   /** A bulk run owns the runner; per-row tests wait until it ends. */
@@ -453,6 +458,7 @@ export default function ModelCatalogTable({
   onToggleSelectAll,
   testResults = {},
   activeTestingKeys = new Set<string>(),
+  renderKeyAccess,
   onTestModel,
   providerHealthMap = {},
   bulkRunning = false,
@@ -498,6 +504,7 @@ export default function ModelCatalogTable({
                 activeTestingKeys={activeTestingKeys}
                 providerHealthMap={providerHealthMap}
                 onToggleSelect={onToggleSelect}
+                renderKeyAccess={renderKeyAccess}
                 onTestModel={onTestModel}
                 bulkRunning={bulkRunning}
                 onToggleVisibility={onToggleVisibility}

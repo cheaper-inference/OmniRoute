@@ -291,85 +291,71 @@ Tá iompar SSE agus HTTP in-stream cosnaithe go dtí go ndéantar an freastalaí
 
 ## Fíordheimhniú & Scóip
 
-Léann glaonna uirlisí MCP teaghráin scóipe ón nglaoiteoir. Tá an tseiceáil sin ar cheann de thrí ainmspás neamhspleácha. Ní hionann pas ó sheiceálaí amháin agus pas ó na cinn eile. Tá na rialacha in [Trí ainmspás scóipe](#three-scope-namespaces).
-Tá catalóg na n-uirlisí in [Scóip uirlisí MCP](#mcp-tool-scopes).
+Léann glaonna uirlis MCP teaghráin scóip ón nglaoiteoir. Tá an tseiceáil sin ar cheann de thrí ainmspás neamhspleácha. Ní pas ó sheiceálaí amháin pas ón gceann eile. [Trí ainmspás raon feidhme](#three-scope-namespaces) atá sna rialacha . Is éard atá sa chatalóg uirlisí ná [scopes uirlisí MCP](#mcp-tool-scopes).
 
-### Trí ainmspás scóipe
+### Trí ainmspás scóip
 
-Is trí dheontas éagsúla iad `manage` ar eochair API, `read:compression` ar uirlis MCP, agus `read` ar chomhartha rochtana `oma_live_…`. Faigheann glaoiteoirí a sheolann comhartha rochtana `read` chuig bealach bainistíochta a dhéanann athrú HTTP 403:
-`Access token scope 'read' is insufficient; 'write' required.`
-Is é `scopeSatisfies` an rang sin. Ní théann sé i gcomhairle leis an tábla MCP, agus ní théann meaitseálaí MCP i gcomhairle leis.
+Is trí dheontas éagsúla iad `manage` ar eochair API, `read:compression` ar uirlis MCP, agus `read` ar chomhartha rochtana `oma_live_…`. Faigheann glaoiteoirí a sheolann comhartha rochtana `read` chuig bealach bainistíochta sóchán HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Is é an céim sin `scopeSatisfies`. Ní théann sé i gcomhairle leis an tábla MCP, agus ní théann an matcher MCP i gcomhairle leis.
 
-| Ainmspás                  | Dintiúr                                                      | Seiceálaí                      | An méid a cheadaíonn pas                                              |
-| :------------------------ | :----------------------------------------------------------- | :----------------------------- | :-------------------------------------------------------------------- |
-| Bainistíocht eochrach API | `api_keys.scopes`                                            | `hasManageScope`               | REST bainistíochta don eochair Bearer sin                             |
-| Breisiúchán eochrach API  | an t-eagar céanna, teaghrán beacht amháin                    | an cúntóir atá ainmnithe thíos | An cumas amháin sin                                                   |
-| Scóip uirlisí MCP         | an t-eagar céanna, nó MCP `_meta`, nó `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | An uirlis sin, a luaithe a bhíonn forfheidhmiú ar siúl                |
-| Comhartha rochtana        | `oma_live_…`                                                 | `scopeSatisfies`               | An bealach bainistíochta a éilíonn a mhodh agus a chonair an rang sin |
+| Ainmspás                 | Dintiúir                                                                      | seiceálaí                      | Ceadaíonn pas                                                       |
+| :----------------------- | :---------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------------------ |
+| Bainistíocht eochair API | `api_keys.scopes`                                                             | `hasManageScope`               | Bainistíocht REST don eochair Iompróir sin                          |
+| breiseán eochair API     | eagar céanna, teaghrán cruinn amháin                                          | an cúntóir atá ainmnithe thíos | Níl ach an cumas amháin sin                                         |
+| scóip uirlisí MCP        | eagar céanna, eile MCP `_meta` (HTTP/SSE amháin), eile `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | An uirlis sin, a luaithe a bheidh forfheidhmiú curtha i gcrích      |
+| Comhartha rochtana       | `oma_live_…`                                                                  | `scopeSatisfies`               | An bealach bainistíochta a éilíonn a modh agus a cosán an chéim sin |
 
-Clúdaítear eisiúint gach dintiúir in
-[Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md).
+Tá mionú gach dintiúr clúdaithe sa [Fhíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md).
 
-#### Scóip eochrach API
+#### Scóipeanna eochair-API
 
-Freastalaíonn eagar amháin `api_keys.scopes` ar dhá chúram. Úsáideann siad feidhmeanna éagsúla.
+Cothaíonn eagar `api_keys.scopes` amháin dhá phost. Úsáideann siad feidhmeanna éagsúla.
 
-**REST bainistíochta.** Is iad `manage` agus `admin` baill
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-Is é `hasManageScope` a údaraíonn bealaí bainistíochta don eochair sin. Tá cumas bainistíochta ag `admin` ar na bealaí sin. Ní hionann an focal `admin` anseo agus rang an chomhartha rochtana, agus ní leathnaíonn sé ina scóip uirlisí MCP.
+**REST.** Is iad `manage` agus `admin` baill `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). Is é `hasManageScope` a údaraíonn bealaí bainistíochta don eochair sin. tá `admin` in ann bainistíocht a dhéanamh ar na bealaí sin. Ní hé an focal `admin` anseo an chéim chomhartha rochtana agus ní leathnaíonn sé isteach i scóip uirlisí MCP.
 
-**Teaghráin bhreise.** Is tástáil bhallraíochta bheacht gach ceann acu, agus fanann gach ceann acu lasmuigh de `MANAGEMENT_API_KEY_SCOPES`.
+**Teaghráin breiseán.** Is tástáil bhallraíochta chruinn gach ceann acu, agus fanann gach ceann acu lasmuigh `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scóip                          | An méid a cheadaíonn pas                                                                                                                                                             |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | An t-eisceacht LOCAL_ONLY neamh-loopback `/api/mcp/` amháin (`hasMcpConnectOrManageScope`). Gabhann eochair le `manage` nó `admin` tríd an eisceacht sin fós.                        |
-| `self:usage`                   | `GET /api/v1/me/status` don eochair seo (`src/app/api/v1/me/status/route.ts`). Cuireann `POST /api/keys` an scóip seo leis tráth cruthaithe (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Cuótaí cuntais réamhtheachtacha laistigh den phálasta stádais sin (`src/lib/usage/apiKeySelfService.ts`). Éilíonn an bealach stádais `self:usage` fós.                               |
-| `policy:bypass-provider-quota` | Scipeálann glaonna tátail na heochrach seo polasaí chuóta an tsoláthraí (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                               |
+| Raon feidhme                   | Ceadaíonn pas                                                                                                                                                            |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | An neamh-lúb `/api/mcp/` LOCAL_ONLY carve-out amháin (`hasMcpConnectOrManageScope`). Gabhann eochair le `manage` nó `admin` go fóill.                                    |
+| `self:usage`                   | `GET /api/v1/me/status` don eochair seo (`src/app/api/v1/me/status/route.ts`). Cuireann `POST /api/keys` an scóip seo le create (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Cuótaí cuntais in aghaidh srutha taobh istigh den pálasta stádais sin (`src/lib/usage/apiKeySelfService.ts`). Tá `self:usage` fós ag teastáil don bhealach stádais .     |
+| `policy:bypass-provider-quota` | Scipeáil glaonna tátal na heochrach seo an polasaí cuóta soláthraí (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                        |
 
 #### Meaitseáil
 
-Is í an chatalóg an tábla faoi [Scóip uirlisí MCP](#mcp-tool-scopes). Ná caith le `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` mar an gcatalóg sin:
-is é an fo-thacar clóscríofa bunaidh é. Fógraíonn uirlisí níos déanaí scóip bhreise taobh leis (`read:notion`, `read:skills`, `read:local-corpus`, agus an chuid eile den tábla).
+Is é an catalóg an tábla faoi [scopes uirlis MCP](#mcp-tool-scopes). Ná caith `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` mar an chatalóg sin: is é an fothacar clóscríofa bunaidh é. Dearbhaíonn uirlisí níos déanaí scóip bhreise in aice leis (`read:notion`, `read:skills`, `read:local-corpus`, agus an chuid eile den tábla).
 
-Ceadaíonn `evaluateToolScopes` in `open-sse/mcp-server/scopeEnforcement.ts` glao nuair a mheaitseálann gach scóip riachtanach scóip dheonaithe éigin:
+Ceadaíonn `evaluateToolScopes` in `open-sse/mcp-server/scopeEnforcement.ts` glao nuair a mheaitseálann gach scóip riachtanach le raon feidhme a deonaíodh:
 
-- Meaitseálann `*` gach scóip riachtanach.
-- Meaitseálann scóip dheonaithe a chríochnaíonn le `*` scóip riachtanach a thosaíonn leis an réimír roimh an réiltín. Meaitseálann `read:*` `read:compression`.
-- Ní mheaitseálann gach scóip dheonaithe eile ach an teaghrán riachtanach comhionann.
+- meaitseálann `*` gach scóip riachtanach.
+- Meaitseálann scóip dheonaithe a chríochnaíonn le `*` raon feidhme riachtanach a thosaíonn leis an réimír roimh an réalta. meaitseálann `read:*` `read:compression`.
+- Ní mheaitseálann gach scóip eile a dheonaítear ach an teaghrán comhionann a theastaíonn.
 
-Teipeann ar eochair arb iad `["manage"]` a scóip `scopeMatches` a shásamh do `read:compression`.
-Teipeann an glao céanna i gcás `admin`, `mcp:connect`, `read`, agus `write` nuair is iad sin na teaghráin dheonaithe amháin. Níl aon ordlathas i measc scóip uirlisí MCP seachas an `*` deiridh.
+Teipeann `scopeMatches` le haghaidh `read:compression` ar eochair a bhfuil a scóip `["manage"]`. Teipeann ar an nglao céanna le haghaidh `admin`, `mcp:connect`, `read`, agus `write` nuair is iad sin na teaghráin amháin a deonaíodh. Níl aon ordlathas i measc scopes uirlisí MCP níos faide ná an `*` trailing.
 
-Bíonn an forfheidhmiú múchta mura bhfuil `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (réamhshocrú
-`false`). Fad is atá sé múchta, ceadaíonn `evaluateToolScopes` an glao agus scipeálann sé an chatalóg. Fad is atá sé ar siúl, úsáideann HTTP `api_keys.scopes` na heochrach Bearer mar `authInfo` (féach [Ceangal scóipe HTTP de réir eochrach](#per-key-http-scope-binding-7895)).
-Nuair nach réitítear aon scóip eochrach, téann an tacar deonaithe ar aghaidh chuig MCP `_meta`, agus ansin chuig `OMNIROUTE_MCP_SCOPES`.
+Tá forfheidhmiú múchta mura `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (réamhshocraithe `false`). Cé go bhfuil sé múchta, ceadaíonn `evaluateToolScopes` an glaoch agus scipeann sé an chatalóg. Cé go bhfuil sé ar siúl, úsáideann HTTP `api_keys.scopes` an eochair Iompróra mar `authInfo` (féach [Per-key ceangailteach raon feidhme HTTP](#per-key-http-scope-binding-7895) ). Nuair nach réitíonn eochairscóip, titfidh an tacar deonaithe go MCP `_meta` (onóir amháin do ghlaoiteoirí HTTP/SSE, taobh istigh de chomhthéacs HTTP auth; ní thugtar aird `_meta` an ghlaoiteora stdio toisc go rialaíonn an cliant é agus nach n-iompraíonn sé aon aitheantas in aghaidh an ghlaoiteora), ansin `OMNIROUTE_MCP_SCOPES`.
 
-#### Scóip chomharthaí rochtana
+#### Scóip chomhartha rochtana
 
-Iompraíonn comharthaí `oma_live_…` (`src/lib/accessTokens/scopes.ts`) `read`, `write`, nó `admin`. Is rang é `scopeSatisfies`: clúdaíonn `admin` `write` agus `read`, agus clúdaíonn `write` `read`. Ní chlúdaíonn scóip anaithnide aon rud.
+iompraíonn comharthaí `oma_live_…` (`src/lib/accessTokens/scopes.ts`) `read`, `write`, nó `admin`. Is céim é `scopeSatisfies` : clúdaíonn `admin` `write` agus `read`, agus clúdaíonn `write` `read`. Ní chlúdaíonn scóip anaithnid rud ar bith.
 
-Déanann `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) an rang sin a chur i gcomparáid le `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+Déanann `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) an chéim sin i gcomparáid le `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- Éilíonn `GET`, `HEAD`, agus `OPTIONS` `read`.
+- Teastaíonn `GET`, `HEAD`, agus `OPTIONS` `read`.
 - Éilíonn gach modh eile `write`.
-- Éilíonn conairí in `ADMIN_SCOPE_PREFIXES` `admin` do gach modh. Tá `/api/mcp` ar an liosta sin, mar sin ní féidir le comhartha rochtana `write` dromchla HTTP MCP a ghlaoch fós.
-- Ní éilíonn conairí in `ADMIN_MUTATION_PREFIXES` `admin` ach amháin le haghaidh athruithe.
-- Ní éilíonn conairí in `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) `admin` ach amháin le haghaidh athruithe, agus ar an gconair bheacht sin amháin — coimeádann fo-bhealaí eile `/api/settings/*` `write`.
+- Teastaíonn `admin` le haghaidh cosáin i `ADMIN_SCOPE_PREFIXES` le haghaidh gach modha. Tá `/api/mcp` ar an liosta sin, mar sin ní féidir glaoch ar chomhartha rochtana `write` fós ar an dromchla MCP HTTP.
+- Ní theastaíonn `admin` ach amháin le haghaidh sócháin amháin le haghaidh cosáin i `ADMIN_MUTATION_PREFIXES`.
+- Ní éilíonn cosáin i `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) `admin` ach amháin le haghaidh sócháin, agus ar an gcosán cruinn sin amháin coinníonn — fo-bhealaí eile `/api/settings/*` `write`.
 
-`PATCH /api/keys/{id}` is sóchán é agus níl sé ar na liostaí riaracháin sin, mar sin faigheann comhartha `read` 403
-`Níl raon feidhme an chomhartha rochtana 'read' leordhóthanach; tá 'write' riachtanach.`
-Comhlíonann comhartha rochtana `write` nó `admin` riachtanais an bhealaigh sin. Téann JWT an deais, comhartha machine-id CLI an loopback, agus eochair API le `manage` nó `admin` trí bhrainsí eile agus ní chuireann an rang seo srian orthu.
+Is sóchán é `PATCH /api/keys/{id}` agus níl sé ar na liostaí riaracháin sin, mar sin faigheann comhartha `read` 403 `Access token scope 'read' is insufficient; 'write' required.` Sásaíonn comhartha rochtana `write` nó `admin` an bealach sin. Glacann painéal JWT, an comhartha meaisín-id loopback CLI, agus eochair API le `manage` nó `admin` brainsí eile agus ní cúngaítear iad ag an gcéim seo.
 
-Ní bhíonn ach an geata bainistíochta sáraithe ag comhartha rochtana a éiríonn leis in `scopeSatisfies` le haghaidh `/api/mcp`. Ritheann glaonna uirlise `scopeMatches` fós i gcoinne raonta feidhme eochracha API. Ní ionchur é rang an chomhartha rochtana do `scopeMatches`.
+Níl ach an geata bainistíochta glanta ag comhartha rochtana a théann thar `scopeSatisfies` do `/api/mcp`. Ritheann glaonna uirlisí `scopeMatches` fós i gcoinne scóip eochair-API. Ní ionchur chuig `scopeMatches` é an t-ainm comhartha rochtana.
 
-### Raonta feidhme uirlisí MCP
+### scóip uirlisí MCP
 
-Tá forfheidhmiú raonta feidhme láraithe in `open-sse/mcp-server/scopeEnforcement.ts`.
-Teastaíonn raonta feidhme sonracha ó gach uirlis:
+Tá raon feidhme forfheidhmithe láraithe in `open-sse/mcp-server/scopeEnforcement.ts`. Tá scóip shonracha ag teastáil ó gach uirlis:
 
-| Raon                  | Uirlisí                                                                                                                                                                        |
+| Raon feidhme          | Uirlisí                                                                                                                                                                        |
 | :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                              |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                      |
@@ -402,20 +388,20 @@ Teastaíonn raonta feidhme sonracha ó gach uirlis:
 | `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                             |
 | `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                |
 | `read:obsidian`       | 13 uirlis léite — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 n-uirlis scríofa — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …            |
+| `write:obsidian`      | 9 uirlisí scríobh — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …             |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                              |
 
-Tacaítear le scóipeanna saoróige: deonaíonn `read:*` gach scóip léite, agus deonaíonn `*` rochtain iomlán.
+Tacaítear le scópanna saoróg: tugann `read:*` cead do gach scóip léite, tugann `*` rochtain iomlán.
 
-### `mcp:connect` — cumas cúng bealaigh (#7895)
+### cumas caolbhealaigh `mcp:connect` — (#7895)
 
-Chun iompar HTTP/SSE MCP (`/api/mcp/*`) a bhaint amach ó sheoladh nach seoladh lúbais é, teastaíonn eisceacht LOCAL_ONLY `/api/mcp/` (féach `docs/security/ROUTE_GUARD_TIERS.md`). Go stairiúil, níor ghlac an eisceacht sin ach le heochair API ag a raibh scóip iomlán `manage`/`admin` — rochtain a bhí róleathan do ghlaoiteoir nach gá dó ach cumarsáid a dhéanamh le MCP. Easpórtálann `src/shared/constants/managementScopes.ts` anois `MCP_CONNECT_SCOPE = "mcp:connect"`: scóip bhreise chúnga (de réir an fhasaigh chéanna le `SELF_USAGE_SCOPE`) nach n-údaraíonn ACH seachaint `/api/mcp/` in `src/server/authz/policies/management.ts` — ní dheonaíonn sí rochtain ar aon bhealach bainistíochta eile agus coinnítear í d'aon ghnó LASMUIGH de `MANAGEMENT_API_KEY_SCOPES`. Gabhann eochair ag a bhfuil `manage`/`admin` tríd an eisceacht fós gan athrú; is rogha eile ar phribhléid níos ísle é `mcp:connect` do ghlaoiteoirí cianda MCP-amháin, agus déantar é a sheiceáil trí `hasMcpConnectOrManageScope()`.
+Chun an t-iompar HTTP/SSE MCP (`/api/mcp/*`) a bhaint amach ó neamh-lúb tá gá le `/api/mcp/` LOCAL_ONLY carve-out (féach `docs/security/ROUTE_GUARD_TIERS.md`). Go stairiúil níor ghlac an carve-out ach eochair iomlán `manage`/`admin` -scope API — ró-leathan do ghlaoiteoir nach gá dó ach labhairt MCP. Onnmhairíonn `src/shared/constants/managementScopes.ts` anois `MCP_CONNECT_SCOPE = "mcp:connect"`: breiseán, raon feidhme cúng (fasach céanna le `SELF_USAGE_SCOPE`) a údaraíonn ONLY an seachbhóthar `/api/mcp/` i `src/server/authz/policies/management.ts` — ní thugann sé aon rochtain eile ar bhealaí bainistíochta agus a choinnítear d'aon ghnó OUT of `MANAGEMENT_API_KEY_SCOPES`. Gabhann eochair-shealbhú `manage`/`admin` an carve-amach gan athrú; Is rogha eile le pribhléid níos ísle é `mcp:connect` do ghlaoiteoirí cianda MCP amháin, arna sheiceáil trí `hasMcpConnectOrManageScope()`.
 
-### Ceangal scóipe HTTP de réir eochrach (#7895)
+### Ceangal scóip HTTP per-eochair (#7895)
 
-Thar HTTP/SSE, réitíonn `open-sse/mcp-server/httpTransport.ts` fíorluach `api_keys.scopes` an ghlaoiteora anois trí `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) agus cuireann sé ar aghaidh é chuig `transport.handleRequest(req, { authInfo })` de chuid SDK MCP, ionas go léiríonn `extra.authInfo.scopes` a shroicheann gach glao uirlise scóipeanna na heochrach Bearer féin. Thug `resolveCallerScopeContext()` in `scopeEnforcement.ts` tús áite cheana féin do `authInfo` thar `_meta` agus cúltaca na timpeallachta `OMNIROUTE_MCP_SCOPES` — ní dhéanann sé seo ach an chéad fhoinse sin, an fhoinse is airde tosaíochta, a líonadh; ní raibh sonraí á soláthar di roimhe seo thar HTTP. Nuair nach réitítear aon eochair API (gan ceanntásc nó le heochair neamhbhailí), fanann `authInfo` mar `undefined` agus téann an réiteach ar aghaidh chuig an slabhra `meta`/timpeallachta atá ann cheana gan athrú. Níl aon aitheantas de réir glaoiteora ag stdio (féach `mcpCallerIdentity.ts`) agus ní dhéantar difear dó — fanann sé ar an slabhra cúltaca `_meta`/timpeallachta.
+Thar HTTP/SSE, réitíonn `open-sse/mcp-server/httpTransport.ts` fíor- `api_keys.scopes` an ghlaoiteora trí `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) anois agus cuireann sé ar aghaidh chuig `transport.handleRequest(req, { authInfo })` an MCP SDK, agus mar sin léiríonn `extra.authInfo.scopes` gach glao uirlise scóip an Iompróra féin. Thug `scopeEnforcement.ts`'s `resolveCallerScopeContext()` tosaíocht do `authInfo` cheana féin thar an `_meta` agus `OMNIROUTE_MCP_SCOPES` env fallback — ní léiríonn sé seo ach an chéad fhoinse is airde tosaíochta, nach raibh á chothú roimhe seo thar HTTP. Nuair nach réitíonn aon eochair API (gan ceanntásc, eochair neamhbhailí), fanann `authInfo` `undefined` agus titeann an taifeach tríd go dtí an slabhra `meta`/env atá ann cheana féin gan athrú. Níl aon chéannacht in aghaidh an ghlaoiteora ag stdio (féach `mcpCallerIdentity.ts`) agus ní chuireann an ceangal in aghaidh na heochrach — isteach air ní scipeann sé an chéim `_meta` (ní thugtar onóir `_meta` ach laistigh de chomhthéacs HTTP auth, #15159) agus réitíonn sé ón eochair env `OMNIROUTE_MCP_SCOPES` amháin.
 
-**Cuirtear forfheidhmiú i bhfeidhm go héigeantach do ghlaoiteoirí HTTP/SSE a bhfuil scóip chúng acu, beag beann ar `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Níl sé sábháilte `OMNIROUTE_MCP_ENFORCE_SCOPES` a bheith réamhshocraithe mar `false` ach amháin don sreabhadh áitiúil/stdio d'oibreoir aonair, áit nach bhfuil aon aitheantas de réir glaoiteora ann lena scópáil. Cuireann `open-sse/mcp-server/server.ts::withScopeEnforcement()` forfheidhmiú scóipe de réir uirlise ar siúl go neamhchoinníollach (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) aon uair a réitigh `resolveCallerScopeContext()` `source === "authInfo"` (is é sin, fíorcheanntásc HTTP Authorization de réir eochrach, HTTP/SSE-amháin) AGUS nach bhfuil scóip iomlán `manage`/`admin` ag an eochair sin. Dúnann sé seo an bhearna ina bhféadfadh eochair nach raibh aici ACH an scóip chúng sheachanta `mcp:connect` — a bhfuil cur síos uirthi thuas mar scóip nach n-údaraíonn aon rud seachas eisceacht LOCAL_ONLY `/api/mcp/` — gach uirlis MCP a agairt murach sin a luaithe a chumasódh oibreoir rochtain MCP chianda/neamhlúbais, díreach toisc go soláthraítear `OMNIROUTE_MCP_ENFORCE_SCOPES` mar `false` de réir réamhshocraithe. Coinníonn eochair iomlán `manage`/`admin` thar HTTP, agus gach glaoiteoir stdio/áitiúil, an t-iompar reatha atá rialaithe ag `OMNIROUTE_MCP_ENFORCE_SCOPES` gan athrú.
+**Cuirtear iallach ar ghlaoiteoirí scóip chaol HTTP/SSE beag beann ar `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Níl mainneachtain `OMNIROUTE_MCP_ENFORCE_SCOPES` go `false` ach sábháilte do shreabhadh oibritheora aonair local/stdio, nuair nach bhfuil aon chéannacht in aghaidh an ghlaoiteora le scóip ina aghaidh. Déanann `open-sse/mcp-server/server.ts::withScopeEnforcement()` forfheidhmiú scóip in aghaidh na huirlise a iompú go neamhchoinníollach (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) aon uair a réitíonn `resolveCallerScopeContext()` `source === "authInfo"` (.i. fíorcheannteideal údaraithe HTTP per-eochair, HTTP/SSE-only) AND níl scóip iomlán `manage`/`admin` ag an eochair sin. Dúnann sé seo an bhearna ina bhféadfadh eochair-shealbhú ONLY an scóip sheachbhóthar caol `mcp:connect` — doiciméadaithe thuas mar ní a údarú ach an `/api/mcp/` LOCAL_ONLY carve-out — a d’fhéadfadh gach uirlis MCP a agairt ar shlí eile nuair a chumasaigh oibreoir rochtain remote/non-loopback MCP, go simplí mar gheall ar longa `OMNIROUTE_MCP_ENFORCE_SCOPES` `false` de réir réamhshocraithe. Eochair `manage`/`admin` iomlán os cionn HTTP, agus gach glaoiteoir stdio/local, coinnigh an t-iompar `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated reatha gan athrú.
 
 ---
 
