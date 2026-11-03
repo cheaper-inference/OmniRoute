@@ -73,7 +73,7 @@ describe("compression derived-pipeline integration (Task 12)", () => {
     ]);
     assert.deepEqual(selectCompressionPlan(config, null, 5000).stackedPipeline, [
       { engine: "session-dedup" },
-      { engine: "lite" },
+      { engine: "lite", config: { compressToolResults: false } },
     ]);
   });
 
