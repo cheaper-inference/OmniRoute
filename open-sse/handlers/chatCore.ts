@@ -44,11 +44,7 @@ import { runStreamingTail } from "./chatCore/streamingTail.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import { isReasoningContinuationIncompatible } from "./chatCore/reasoningInputGate.ts";
 
-import {
-  getHeaderValueCaseInsensitive,
-  isNoMemoryRequested,
-  resolveCompressionHeader,
-} from "./chatCore/headers.ts";
+import { getHeaderValueCaseInsensitive, resolveCompressionHeader } from "./chatCore/headers.ts";
 
 import {
   isCodexOriginatedHeaders,
@@ -91,7 +87,10 @@ export {
   buildStreamingResponseHeaders,
   stripStaleForwardingHeaders,
 };
-import { resolveMemoryOwnerId, runMemoryExtractionGate } from "./chatCore/memoryExtraction.ts";
+import {
+  resolveRequestMemoryOwnerId,
+  runMemoryExtractionGate,
+} from "./chatCore/memoryExtraction.ts";
 import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
 import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
@@ -174,6 +173,7 @@ import { buildCacheUsageLogMeta } from "./chatCore/cacheUsageMeta.ts";
 
 import { resolveExecutionCredentials as resolveExecutionCredentialsFor } from "./chatCore/executionCredentials.ts";
 import { createExecutorResolver } from "./chatCore/executorProxy.ts";
+import { resolveChatExecutor } from "./chatCore/searchProviderRejection.ts";
 import { normalizeClaudeUpstreamMessages as normalizeClaudeUpstreamMessagesFor } from "./chatCore/claudeUpstreamMessages.ts";
 import {
   persistAttemptLogs as persistAttemptLogsFor,
@@ -1162,12 +1162,15 @@ async function handleChatCoreInner({
   }
 
   body = sanitizeChatRequestBody(body, sourceFormat, targetFormat);
-  // Per-request opt-out: clients that manage their own context send
-  // `x-omniroute-no-memory: true` to skip memory+skills injection (a null owner
-  // disables both branches in injectMemoryAndSkills). See PRD-2026-06-19-no-memory-header.
-  const memoryOwnerId = isNoMemoryRequested(clientRawRequest?.headers ?? null)
-    ? null
-    : resolveMemoryOwnerId(apiKeyInfo as Record<string, unknown> | null);
+  // Clients that manage their own context send `x-omniroute-no-memory: true`, and Claude
+  // Code's classifier turns are excluded (a null owner disables both branches in
+  // injectMemoryAndSkills plus extraction). See PRD-2026-06-19-no-memory-header.
+  const memoryOwnerId = resolveRequestMemoryOwnerId({
+    apiKeyInfo: apiKeyInfo as Record<string, unknown> | null,
+    headers: clientRawRequest?.headers ?? null,
+    sourceFormat,
+    body: body as Record<string, unknown>,
+  });
   const injectionResult = await injectMemoryAndSkills({
     body,
     memoryOwnerId,
@@ -1754,6 +1757,7 @@ async function handleChatCoreInner({
               mode,
               stats: result.stats,
               connectionCacheOverride,
+              isFeatureFlagEnabled,
               log,
             });
             log?.info?.(
@@ -2414,14 +2418,8 @@ async function handleChatCoreInner({
     log,
   });
 
-  // Resolve executor with optional upstream proxy (CLIProxyAPI) routing.
-  // mode="native" (default): returns the native executor unchanged.
-  // mode="cliproxyapi": returns the CLIProxyAPI executor instead.
-  // mode="fallback": returns a wrapper that tries native first, falls back to CLIProxyAPI on 5xx/network errors.
-
-  // #6339: pass the resolved connection's providerSpecificData so a per-connection
-  // cliproxyapiMode="claude-native" override can deep-route this single connection
-  // through CLIProxyAPI regardless of the provider-level upstream_proxy_config mode.
+  // Resolve executor with optional upstream proxy routing. The native / cliproxyapi / dario /
+  // fallback modes and the #6339 per-connection override live in chatCore/executorProxy.ts.
   const resolveExecutorWithProxy = createExecutorResolver(log, credentials, validationExecutorFence);
 
   // === Quota Share enforcement PRE-hook (B/F7) + G2 combo soft penalty ===
@@ -2455,8 +2453,12 @@ async function handleChatCoreInner({
       return createErrorResult(400, msg, null, fit.terminalReason, "invalid_request_error");
     }
   }
-  // Get executor for this provider (with optional upstream proxy routing)
-  const executor = await resolveExecutorWithProxy(provider);
+  // Get the executor; a search-only provider gets the typed 400 on every chat route (#17858)
+  const { executor, rejected } = await resolveChatExecutor(resolveExecutorWithProxy, provider, log);
+  if (rejected) {
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    return rejected;
+  }
   const getExecutionCredentials = () => {
     const executionCredentials = withApiKeyCodexServiceMode(
       provider,

@@ -16,11 +16,11 @@ AgentBridge, IDE AI ajanlarından gelen HTTPS trafiğini yakalayan ve OmniRoute'
 
 ### AgentBridge nedir?
 
-Bir IDE aracısı (örneğin, GitHub Copilot, Cursor, Claude Code) bir API çağrısı yaptığında, doğrudan yukarı akışlı AI sağlayıcısına (OpenAI, Anthropic, vb.) bağlanır. AgentBridge herhangi bir aracı yapılandırma değişikliği gerektirmeden bu bağlantıyı TLS düzeyinde şeffaf bir şekilde keser ve isteği OmniRoute aracılığıyla yeniden yazar.
+Bir IDE aracısı (örneğin, GitHub Copilot, Cursor, Claude Code) bir API çağrısı yaptığında, doğrudan yukarı akışlı AI sağlayıcısına (OpenAI, Anthropic, vb.) bağlanır. AgentBridge herhangi bir aracı yapılandırma değişikliği — gerektirmeden TLS düzeyinde — şeffaf bir şekilde bu bağlantıyı keser ve isteği OmniRoute aracılığıyla yeniden yazar.
 
 Bu, şunları yapabileceğiniz anlamına gelir:
 
-- **Herhangi bir aracıyı herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 377 sağlayıcılarından herhangi birine yönlendirin.
+- **Herhangi bir aracıyı herhangi bir sağlayıcıya yeniden yönlendirin** : Copilot OpenAI ile mi konuşuyor? Bunu Anthropic Claude, Gemini veya OmniRoute 380 sağlayıcılarından herhangi birine yönlendirin.
 - **Model eşlemelerini uygulama** : `gemini-3-flash` → `claude-sonnet-4.7` işleyici düzeyinde şeffaf bir şekilde.
 - **Tüm temsilci trafiğini gözlemleyin** : ele geçirilen her istek [Trafik Müfettişine](./TRAFFIC_INSPECTOR.md) yayınlanır.
 - **OmniRoute esnekliğini uygulayın** : birleşik yönlendirme, devre kesiciler, geri dönüşler ve maliyet takibi IDE aracı trafiği için de çalışır.

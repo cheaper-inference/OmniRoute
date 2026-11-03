@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** instrumentbrættet er bygget på** Keak CI UI sæt** (`@keak/cheaper-inference-ui-kit`), sælges som arbejdsområdet `packages/ui-kit` (`@omniroute/ui-kit`; upstream-øjebliksbilledet er fastgjort i `packages/ui-kit/UPSTREAM.md` og beskyttet af `npm run check:ui-kit-snapshot`). Lys er det kanoniske tema; standardpræferencen er `system`. Accenten er Keak lime (`--ci-color-accent`). Switzer er den enkelte familie for UI, display og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løses til det), selv-hostet af selve sættet (`packages/ui-kit/src/ci-fonts.css`, importeret af `ci-tokens.css`). Hvert ikon er en Lucide-glyph.
+> **Status:** instrumentbrættet er bygget på** Keak CI UI sæt** (`@keak/cheaper-inference-ui-kit`), sælges som arbejdsområdet `packages/ui-kit` (`@omniroute/ui-kit`; opstrøms-øjebliksbilledet er fastgjort i `packages/ui-kit/UPSTREAM.md` og beskyttet af `npm run check:ui-kit-snapshot`). Lys er det kanoniske tema; standardpræferencen er `system`. Accenten er Keak lime (`--ci-color-accent`). Switzer er den enkelte familie for UI, display og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løses til det), selv-hostet af selve sættet (`packages/ui-kit/src/ci-fonts.css`, importeret af `ci-tokens.css`). Scripts Switzer mangler fald gennem glyf for glyf (`src/app/globals.css`): Inter for kyrillisk, græsk og vietnamesisk og, kun under `html[dir="rtl"]`, Vazirmatn for arabisk skrift. Hvert ikon er en Lucide-glyph.
 
 ## 1. Hvor tingene ligger
 
@@ -119,7 +119,7 @@
 
 ## 5. Opdatering af sættet
 
-`npm run check:ui-kit-upstream` sammenligner den version, der er fastgjort i `packages/ui-kit/UPSTREAM.md` med det nyeste `v*` tag i upstream-repoen og udskriver synkroniseringskommandoen, når en udgivelse er ude. Den ugentlige `UI Kit upstream watch` -arbejdsgang (`.github/workflows/ui-kit-upstream-watch.yml`) kører det samme tjek og holder ét sporingsproblem åbent, mens stiften er bagved; upstream-repoen er privat, så arbejdsgangen har brug for et skrivebeskyttet token i `UI_KIT_READ_TOKEN` hemmeligheden og forbliver inaktiv uden det.
+`npm run check:ui-kit-upstream` sammenligner den version, der er fastgjort i `packages/ui-kit/UPSTREAM.md` med det nyeste `v*` tag i upstream-repoen og udskriver synkroniseringskommandoen, når en udgivelse er ude. Den ugentlige `UI Kit upstream watch` -arbejdsgang (`.github/workflows/ui-kit-upstream-watch.yml`) kører det samme tjek og holder ét sporingsproblem åbent, mens stiften er bagved; upstream-repoen er privat, så arbejdsgangen har brug for et skrivebeskyttet token i `UI_KIT_READ_TOKEN` hemmeligheden. Når den ikke kan læse opstrøms (ingen token, et token, der holdt op med at fungere, eller GitHub ikke kan nås), forbliver kørslen grøn, men skriver en advarsel og holder et separat problem åbent, som lukker sig selv, når en senere kørsel kan læse opstrøms igen.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopierer upstream `src/` ved den commit (`latest` = det nyeste `v*` tag) ind i `packages/ui-kit/src`, anvender den enkelte tilladte transformation (den dropper `.js` suffikset fra relativ import) og indstiller workspace versionen i `packages/ui-kit/package.json` og `package-lock.json` til upstream. Derefter: gennemgå `git diff packages/ui-kit`, lav en visuel pass på udbydere, indstillinger, kombinationer, brug og slutpunkt i begge temaer, kør `npm run check:ui-kit-snapshot` og `npm run test:vitest:ui`, og åbn PR med upstream changelog.
 
