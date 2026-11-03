@@ -65,6 +65,34 @@ function queueHotReloadCheck(source: string) {
     });
 }
 
+function armPoll(pollIntervalMs: number) {
+  pollTimer = setInterval(() => {
+    queueHotReloadCheck("hot-reload:poll");
+  }, pollIntervalMs);
+  if (typeof pollTimer === "object" && "unref" in pollTimer) {
+    (pollTimer as { unref?: () => void }).unref?.();
+  }
+}
+
+function watchSqliteFile(pollEnabled: boolean) {
+  if (!SQLITE_FILE) return;
+  try {
+    sqliteWatcher = fs.watch(path.dirname(SQLITE_FILE), (_eventType, filename) => {
+      const normalizedFilename = typeof filename === "string" ? filename : filename?.toString();
+      if (isRelevantSqliteChange(normalizedFilename || null)) {
+        queueHotReloadCheck("hot-reload:fs-watch");
+      }
+    });
+  } catch (error) {
+    console.warn(
+      pollEnabled
+        ? "[HOT_RELOAD] SQLite file watch unavailable, polling only:"
+        : "[HOT_RELOAD] SQLite file watch unavailable and polling is off, settings apply at restart:",
+      error instanceof Error ? error.message : error
+    );
+  }
+}
+
 export function startRuntimeConfigHotReload(options: { pollIntervalMs?: number } = {}) {
   if (hotReloadStarted) return;
   hotReloadStarted = true;
@@ -75,32 +103,8 @@ export function startRuntimeConfigHotReload(options: { pollIntervalMs?: number }
     MIN_POLL_INTERVAL_MS
   );
 
-  if (pollEnabled) {
-    pollTimer = setInterval(() => {
-      queueHotReloadCheck("hot-reload:poll");
-    }, pollIntervalMs);
-    if (typeof pollTimer === "object" && "unref" in pollTimer) {
-      (pollTimer as { unref?: () => void }).unref?.();
-    }
-  }
-
-  if (SQLITE_FILE) {
-    try {
-      sqliteWatcher = fs.watch(path.dirname(SQLITE_FILE), (_eventType, filename) => {
-        const normalizedFilename = typeof filename === "string" ? filename : filename?.toString();
-        if (isRelevantSqliteChange(normalizedFilename || null)) {
-          queueHotReloadCheck("hot-reload:fs-watch");
-        }
-      });
-    } catch (error) {
-      console.warn(
-        pollEnabled
-          ? "[HOT_RELOAD] SQLite file watch unavailable, polling only:"
-          : "[HOT_RELOAD] SQLite file watch unavailable and polling is off, settings apply at restart:",
-        error instanceof Error ? error.message : error
-      );
-    }
-  }
+  if (pollEnabled) armPoll(pollIntervalMs);
+  watchSqliteFile(pollEnabled);
 
   console.log(
     `[HOT_RELOAD] Runtime config hot-reload started (poll=${pollEnabled ? `${pollIntervalMs}ms` : "off"}, fsWatch=${
