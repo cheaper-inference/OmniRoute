@@ -50,13 +50,17 @@ import {
   usableProviderAliasSet,
 } from "./shared/index.js";
 import {
+  compileModelListFilter,
+  matchesModelFilter,
+  type ModelListFilter,
+} from "./model-filter.js";
+import {
   FRESH_PER_OWNER,
   FRESH_WINDOW_DAYS,
   SHOWCASE_PER_OWNER,
   baseIdOf,
   freshWindowDaysToMs,
   isFlatTierId,
-  matchesSuffix,
   passesWhatServes,
   readEntryStatus,
   selectFreshKeptIds,
@@ -79,8 +83,7 @@ export {
   selectShowcaseIds,
   staysDropped,
 } from "./catalog-freshness.js";
-export type { ModelListFilter } from "./catalog-freshness.js";
-import type { ModelListFilter } from "./catalog-freshness.js";
+export type { ModelListFilter } from "./model-filter.js";
 
 export type ModelsFetcher = OmniRouteModelsFetcher;
 export type CombosFetcher = OmniRouteCombosFetcher;
@@ -112,6 +115,8 @@ export interface ResolvedOptions extends FreeOptions {
   hiddenModels?: string[];
   providersAllow?: string[];
   usableOnly: boolean;
+  /** Hide every combo when false (default true keeps combos). */
+  combos?: boolean;
   /**
    * Combo source. Absent or `"api"` keeps the member-verified `/api/combos`
    * pass; `"models"` opts into the `/v1/models` combo rows when no
@@ -448,31 +453,16 @@ export interface PublishCounts {
   combos: number;
 }
 
-export function compileModelListFilter(list?: string[]): ModelListFilter | undefined {
-  if (!list || list.length === 0) return undefined;
-  const exact = new Set<string>();
-  const suffixes = new Set<string>();
-  for (const id of list) {
-    if (id.includes("/")) {
-      exact.add(id);
-    } else {
-      suffixes.add(id);
-    }
-  }
-  if (exact.size === 0 && suffixes.size === 0) return undefined;
-  return { exact, suffixes };
-}
-
 export function passesModelAllowlist(
   id: string,
   visible?: ModelListFilter,
   hidden?: ModelListFilter
 ): boolean {
   if (hidden) {
-    if (hidden.exact.has(id) || matchesSuffix(id, hidden.suffixes)) return false;
+    if (matchesModelFilter(id, hidden)) return false;
   }
   if (visible) {
-    if (!visible.exact.has(id) && !matchesSuffix(id, visible.suffixes)) return false;
+    if (!matchesModelFilter(id, visible)) return false;
   }
   return true;
 }
@@ -487,7 +477,7 @@ export function passesComboAllowlist(combo: OmniRouteRawCombo, visible?: ModelLi
     const modelId = typeof step?.model === "string" ? step.model : "";
     if (modelId.length === 0) continue;
     sawResolvableMember = true;
-    if (visible.exact.has(modelId) || matchesSuffix(modelId, visible.suffixes)) return true;
+    if (matchesModelFilter(modelId, visible)) return true;
   }
   if (!sawResolvableMember) return true;
   return false;
@@ -936,7 +926,8 @@ export async function collectCatalog(
   // Opt-in `combosSource: "models"`: the user combo rows of /v1/models are
   // the published combos, so they skip the default-view narrowing exactly
   // like the /api/combos pass never narrows a combo.
-  const modelsComboSource = usesModelsComboSource(opts);
+  const combosEnabled = opts.combos !== false;
+  const modelsComboSource = combosEnabled && usesModelsComboSource(opts);
   if (opts.combosSource === "models" && !modelsComboSource) {
     log.debug(
       "[omniroute-v2] combosSource=models needs no member-level filter; a preset, usableOnly, providersAllow or a visible/hidden list is on, so combos keep the /api/combos source."
@@ -945,6 +936,7 @@ export async function collectCatalog(
   let modelsComboCount = 0;
   for (const entry of rawModels) {
     if (!entry.id) continue;
+    if (combosEnabled === false && entry.owned_by === "combo") continue;
     if (canonicalDedup.has(entry.id)) continue;
     if (usable && !isUsableRawModelId(entry.id, usable)) continue;
     if (!passesModelAllowlist(entry.id, visibleFilter, hiddenFilter)) continue;
@@ -1050,30 +1042,33 @@ export async function collectCatalog(
   }
 
   const cacheKey = `${opts.baseURL}::${opts.providerId}`;
-  const comboResult = modelsComboSource
-    ? { published: modelsComboCount, providerDropped: 0 }
-    : await publishCombos({
-        opts,
-        log,
-        providerId: X,
-        enrichment,
-        rawModelById,
-        collected,
-        publishedKeys,
-        publishedModelIds,
-        visibleFilter,
-        hiddenFilter,
-        usable,
-        canonicalToAlias,
-        providerFilter,
-        providerResolve,
-        providerAllUnknown,
-        combosFetcher,
-        combosTimeout,
-        warnedCombos,
-        cacheKey,
-        isFreeInferred,
-      });
+  const comboResult =
+    combosEnabled === false
+      ? { published: 0, providerDropped: 0 }
+      : modelsComboSource
+        ? { published: modelsComboCount, providerDropped: 0 }
+        : await publishCombos({
+            opts,
+            log,
+            providerId: X,
+            enrichment,
+            rawModelById,
+            collected,
+            publishedKeys,
+            publishedModelIds,
+            visibleFilter,
+            hiddenFilter,
+            usable,
+            canonicalToAlias,
+            providerFilter,
+            providerResolve,
+            providerAllUnknown,
+            combosFetcher,
+            combosTimeout,
+            warnedCombos,
+            cacheKey,
+            isFreeInferred,
+          });
   // One summary line per successful refresh: the stage counters plus the
   // free-tier lines the served catalog never reached. Audible at the
   // default `warn` level so a service install (stdout lost) still reads

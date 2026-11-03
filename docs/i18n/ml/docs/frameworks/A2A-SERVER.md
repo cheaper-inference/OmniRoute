@@ -156,7 +156,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` യിൽ വയർ
 | ആരോഗ്യ റിപ്പോർട്ട്   | `health-report`      | ഓരോ ദാതാവിനും സർക്യൂട്ട് ബ്രേക്കർ, കൂൾഡൗൺ, ലോക്കൗട്ട് അവസ്ഥ എന്നിവയുടെ സംഗ്രഹം                                                                  | ആരോഗ്യം, പ്രതിരോധശേഷി         | "എല്ലാ ദാതാക്കളുടെയും ആരോഗ്യ നില കാണിക്കുക"  |
 | ലിസ്റ്റ് കഴിവുകൾ     | `list-capabilities`  | സന്ദർഭ കുത്തിവയ്പ്പിനായി റോ SKILL.md URLs ഉള്ള ഒരു മാർക്ക്ഡൗൺ ടേബിളായി 45-എൻട്രി ഏജൻ്റ് സ്കിൽസ് കാറ്റലോഗ് (23 API + 21 CLI + 1 config) നൽകുന്നു | കാറ്റലോഗ്, കണ്ടെത്തൽ, കഴിവുകൾ | "എല്ലാ OmniRoute കഴിവുകളും ലിസ്റ്റുചെയ്യുക"  |
 
-> ഏജൻ്റ് കാർഡ് തത്സമയ 377-ദാതാക്കളുടെ കാറ്റലോഗുമായി വിന്യസിച്ചിരിക്കണം; ദാതാവിൻ്റെ എണ്ണവും free/no-auth മെറ്റാഡാറ്റയും റൺടൈം രജിസ്ട്രിയിൽ നിന്നാണ്.
+> ഏജൻ്റ് കാർഡ് തത്സമയ 380-ദാതാക്കളുടെ കാറ്റലോഗുമായി വിന്യസിച്ചിരിക്കണം; ദാതാവിൻ്റെ എണ്ണവും free/no-auth മെറ്റാഡാറ്റയും റൺടൈം രജിസ്ട്രിയിൽ നിന്നാണ്.
 
 ### `list-capabilities` നൈപുണ്യ വിശദാംശങ്ങൾ
 
@@ -190,17 +190,17 @@ JSON-RPC എൻഡ്പോയിന്റായ `/a2a` ആണ് ഔദ്യ�
 
 ---
 
-## ഒരു പുതിയ സ്കിൽ ചേർക്കൽ
+## ഒരു പുതിയ കഴിവ് ചേർക്കുന്നു
 
-1. **സ്കിൽ ഫയൽ സൃഷ്ടിക്കുക:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **നൈപുണ്യ ഫയൽ സൃഷ്ടിക്കുക:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` എന്ന async ഫങ്ഷൻ എക്സ്പോർട്ട് ചെയ്യുക. `smartRouting.ts` പോലുള്ള നിലവിലുള്ള സ്കില്ലുകളുടെ ഘടന പിന്തുടരുക.
+   ഒരു async ഫംഗ്ഷൻ `(task: A2ATask) => Promise<{ artifacts, metadata }>` കയറ്റുമതി ചെയ്യുക. `smartRouting.ts` പോലുള്ള നിലവിലുള്ള കഴിവുകളുടെ ആകൃതി പിന്തുടരുക.
 
-2. **ഹാൻഡ്ലർ രജിസ്റ്റർ ചെയ്യുക:** `src/lib/a2a/taskExecution.ts`-ലെ `A2A_SKILL_HANDLERS`-ലേക്ക് ഒരു എൻട്രി ചേർക്കുക:
+2. **രജിസ്ട്രേഷൻ ഹാൻഡ്ലർ:** `src/lib/a2a/taskExecution.ts` യിൽ, `A2A_SKILL_HANDLERS` ലേക്ക് ഒരു എൻട്രി ചേർക്കുക:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...നിലവിലുള്ള സ്കില്ലുകൾ
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,7 +208,7 @@ JSON-RPC എൻഡ്പോയിന്റായ `/a2a` ആണ് ഔദ്യ�
    };
    ```
 
-3. **ഏജന്റ് കാർഡിൽ പ്രദർശിപ്പിക്കുക:** `src/app/.well-known/agent.json/route.ts`-ലെ `skills` അറേയിലേക്ക് ചേർക്കുക:
+3. **ഏജൻ്റ് കാർഡിൽ വെളിപ്പെടുത്തുക:** `src/lib/a2a/agentCardMetadata.ts` യിൽ ( `/.well-known/agent.json`, `/.well-known/agent-card.json` എന്നിവ പങ്കിട്ടത്), `skills` അറേയിലേക്ക് കൂട്ടിച്ചേർക്കുക:
 
    ```json
    {
@@ -220,9 +220,9 @@ JSON-RPC എൻഡ്പോയിന്റായ `/a2a` ആണ് ഔദ്യ�
    }
    ```
 
-4. **ടെസ്റ്റുകൾ എഴുതുക:** `tests/unit/a2a-<your-skill>.test.ts`. വിജയപാതയും പിശക് പാതയും ഉൾപ്പെടുത്തുക.
+4. **ടെസ്റ്റുകൾ എഴുതുക:** `tests/unit/a2a-<your-skill>.test.ts`. കവർ ഹാപ്പി പാത്ത് + പിശക് പാത.
 
-5. ഈ ഫയലിലെ `Available Skills` പട്ടികയിൽ പുതിയ സ്കിൽ **രേഖപ്പെടുത്തുക**.
+5. **പ്രമാണം** ഈ ഫയലിൻ്റെ `Available Skills` പട്ടികയിലെ പുതിയ വൈദഗ്ദ്ധ്യം.
 
 ---
 

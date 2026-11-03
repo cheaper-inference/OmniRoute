@@ -163,7 +163,7 @@ OmniRoute mendedahkan 6 kemahiran A2A berwayar dalam `src/lib/a2a/taskExecution.
 | Laporan Kesihatan    | `health-report`      | Agregat pemutus litar, cooldown, keadaan kunci keluar bagi setiap pembekal                                                                                                   | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua pembekal" |
 | Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog Kemahiran Ejen 45 penyertaan penuh (23 API + 21 CLI + 1 konfigurasi) sebagai jadual penurunan harga dengan SKILL.md URLs mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute "     |
 
-> Kad Ejen hendaklah sentiasa sejajar dengan katalog 377-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
+> Kad Ejen hendaklah sentiasa sejajar dengan katalog 380 pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
 
 ### `list-capabilities` Butiran Kemahiran
 
@@ -197,17 +197,17 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
 
 ---
 
-## Menambahkan Kemahiran Baharu
+## Menambah Kemahiran Baru
 
-1. **Cipta fail kemahiran:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Buat fail kemahiran:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksport fungsi tak segerak `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur kemahiran sedia ada seperti `smartRouting.ts`.
+   Eksport fungsi async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikut bentuk kemahiran sedia ada seperti `smartRouting.ts`.
 
-2. **Daftarkan pengendali:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri kepada `A2A_SKILL_HANDLERS`:
+2. **Pengendali daftar:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri pada `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...kemahiran sedia ada
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
    };
    ```
 
-3. **Dedahkan dalam Kad Ejen:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan kepada tatasusunan `skills`:
+3. **Dedahkan dalam Kad Ejen:** dalam `src/lib/a2a/agentCardMetadata.ts` (dikongsi oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan pada tatasusunan `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
    }
    ```
 
-4. **Tulis ujian:** `tests/unit/a2a-<your-skill>.test.ts`. Liputi laluan berjaya + laluan ralat.
+4. **Tulis ujian:** `tests/unit/a2a-<your-skill>.test.ts`. Tutup laluan gembira + laluan ralat.
 
-5. **Dokumentasikan** kemahiran baharu dalam jadual `Available Skills` fail ini.
+5. **Dokumen** kemahiran baharu dalam jadual `Available Skills` fail ini.
 
 ---
 

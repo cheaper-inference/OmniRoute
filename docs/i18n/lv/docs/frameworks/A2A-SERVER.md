@@ -156,7 +156,7 @@ OmniRoute atklāj 6 A2A prasmes, kas pievienotas `src/lib/a2a/taskExecution.ts::
 | Pārskats par veselību           | `health-report`      | Agregāti ķēdes pārtraucējs, dzesēšana, bloķēšanas stāvoklis katram pakalpojumu sniedzējam                                                                               | veselība, izturība                  | "Rādīt visu pakalpojumu sniedzēju veselības stāvokli" |
 | Saraksta iespējas               | `list-capabilities`  | Atgriež pilnu 45 ierakstu aģentu prasmju katalogu (23 API + 21 CLI + 1 konfigurācija) kā cenu samazināšanas tabulu ar neapstrādātu SKILL.md URLs konteksta ievadīšanai. | katalogs, atklājums, prasmes        | "Uzskaitiet visas OmniRoute iespējas"                 |
 
-> Aģenta kartei jābūt saskaņotai ar tiešsaistes 377 pakalpojumu sniedzēju katalogu; nodrošinātāju skaits un free/no-auth metadati tiek iegūti no izpildlaika reģistra.
+> Aģenta kartei jābūt saskaņotai ar tiešsaistes 380 pakalpojumu sniedzēju katalogu; nodrošinātāju skaits un free/no-auth metadati tiek iegūti no izpildlaika reģistra.
 
 ### `list-capabilities` Skill Detail
 
@@ -190,17 +190,17 @@ JSON-RPC galapunkts `/a2a` ir oficiālais A2A ieejas punkts. Tālāk minētie RE
 
 ---
 
-## Jauna prasmes pievienošana
+## Jaunas prasmes pievienošana
 
-1. **Izveidojiet prasmēs failu:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Izveidojiet prasmju failu:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportējiet asinhronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ievērojiet esošo prasmēs struktūru, piemēram, `smartRouting.ts`.
+   Eksportējiet asinhrono funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Sekojiet esošo prasmju formai, piemēram, `smartRouting.ts`.
 
-2. **Reģistrējiet izpildītāju:** failā `src/lib/a2a/taskExecution.ts` pievienojiet ierakstu objektā `A2A_SKILL_HANDLERS`:
+2. **Reģistru apstrādātājs:** `src/lib/a2a/taskExecution.ts`, pievienojiet ierakstu `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...esošās prasmēs
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,21 +208,21 @@ JSON-RPC galapunkts `/a2a` ir oficiālais A2A ieejas punkts. Tālāk minētie RE
    };
    ```
 
-3. **Izpaužiet Aģenta kartē:** failā `src/app/.well-known/agent.json/route.ts` pievienojiet masīva `skills` beigās jaunu elementu:
+3. **Atklāt aģenta kartē:** `src/lib/a2a/agentCardMetadata.ts` (kopīgos ar `/.well-known/agent.json` un `/.well-known/agent-card.json`), pievienojiet `skills` masīvam:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Jūsu prasme",
-     "description": "Īss, uz nodomu vērsts apraksts",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Parauga dabiskvalodas izsaukums"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Rakstiet testus:** `tests/unit/a2a-<your-skill>.test.ts`. Aptveriet gan veiksmīgo, gan kļūdoscenāriju.
+4. **Rakstiet testus:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Nodokumentējiet** jauno prasmi šī dokumenta tabulā `Pieejamās prasmēs`.
+5. **Dokuments** jaunā prasme šī faila `Available Skills` tabulā.
 
 ---
 

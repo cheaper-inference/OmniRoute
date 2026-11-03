@@ -4,59 +4,47 @@
 
 ---
 
-> Yíyan-láti-múṣiṣẹ́ ni, ó sì jẹ́ pípa ní àìyẹsẹ̀ (`modelVisibilityAllowlist`/`modelVisibilityDenylist` tí àwọn méjèèjì bá ṣófo yóò fi
-> àkójọ `/v1/models` ÀTI gbogbo àkójọpọ̀ olùdíje `auto/*` sílẹ̀ ní ìbámu pátápátá ní ìpele báìtì). Ó jẹ́ alábàákẹ́gbẹ́
-> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) fún àwọn olùṣàkóso tí wọ́n fẹ́ àkójọ
-> módẹ́lì tí a ti fara balẹ̀ yàn fún àwọn ìdí tí kò ní ohunkóhun ṣe pẹ̀lú iye owó.
+> Jade-ni, pipa nipa aiyipada (`modelVisibilityAllowlist`/`modelVisibilityDenylist` mejeeji sofo fi `/v1/models` katalogi AND gbogbo `auto/*` oludije pool baiti-aami). Arakunrin kan ti `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) fun awọn oniṣẹ ti o fẹ atokọ awoṣe ti a ti sọtọ fun awọn idi ti ko ni nkankan lati ṣe pẹlu idiyele.
 
-## Ìdí tí èyí fi wà
+## Kini idi ti eyi wa
 
-`hidePaidModels` dáhùn "ṣé módẹ́lì yìí jẹ́ ọ̀fẹ́?" àti `hideAutoCombos` dáhùn "ṣé ó yẹ kí a polówó àwọn
-id àfojúrí `auto/*` rárá?" — kò sí èyíkéyìí tó jẹ́ kí olùṣàkóso fara balẹ̀ yan èyíkéyìí ìpín kékeré nínú
-àwọn módẹ́lì (fún àpẹẹrẹ, fífi àwọn módẹ́lì pàtó tí ó yẹ kí oníbàárà Claude Code / OpenCode kan rí hàn,
-láìka ìṣírò iye owó sí). #11481 fi èyí kún un gẹ́gẹ́ bí ètò àkójọpọ̀-okùn méjì tí kò gbára lé ara wọn, tí a sì lè yàn láti mú ṣiṣẹ́.
+`hidePaidModels` idahun "Ṣe awoṣe yi free?" ati awọn idahun `hideAutoCombos` "Ṣe o yẹ ki a polowo awọn ids foju `auto/*` rara?" — bẹni ko jẹ ki oniṣẹ kan ṣatunto ipin ti awọn awoṣe lainidii (fun apẹẹrẹ fifihan deede awọn awoṣe ti a fun ni koodu Claude / alabara OpenCode yẹ ki o rii, ni ominira ti idiyele). # #11481 ṣe afikun pe bi ominira meji, ijade ni awọn eto opo-okun.
 
-## Àwọn ètò
+## Eto
 
-| Kókó                       | Irú        | Àìyẹsẹ̀ | Ìtumọ̀                                                                            |
-| -------------------------- | ---------- | ------ | -------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`   | Àwọn àkọsílẹ̀ tó bá olùdíje kan mu yóò fi í pamọ́ kúrò nínú àkójọ/àkójọpọ̀ olùdíje. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`   | Nígbà tí kò bá ṣófo, àwọn àkọsílẹ̀ tó bá olùdíje kan mu NÌKAN ni yóò ṣì hàn.      |
+| Bọtini                     | Iru        | Aiyipada | Itumo                                                                      |
+| -------------------------- | ---------- | -------- | -------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`     | Awọn titẹ sii ti o baamu oludije tọju rẹ lati adagun catalog/candidate.    |
+| `modelVisibilityAllowlist` | `string[]` | `[]`     | Nigba ti ko ba ṣofo, awọn titẹ sii ONLY ti o baamu oludije duro ni ifihan. |
 
-Àwọn méjèèjì gba tó àkọsílẹ̀ 500, tí ọ̀kọ̀ọ̀kan lè ní tó ohun kikọ 200 (a fọwọ́sí rẹ̀ pẹ̀lú Zod nínú
-`src/shared/validation/settingsSchemas.ts`). Àkọsílẹ̀ kan jẹ́ ọ̀kan nínú àwọn wọ̀nyí:
+Mejeeji gba to awọn titẹ sii 500 ti o to awọn ohun kikọ 200 kọọkan (Zo-fọwọsi ni `src/shared/validation/settingsSchemas.ts`). Iwọle jẹ boya:
 
-- id àkójọ tó bá mu pátápátá — `"gpt-4o"` (id módẹ́lì lásán) tàbí `"openai/gpt-4o"` (pẹ̀lú ìṣáájú olùpèsè), tàbí
-- àpẹẹrẹ glob tó ń lo `*`/`?` — fún àpẹẹrẹ `"openai/gpt-4*"` tàbí `"anthropic/*"` — tí a túmọ̀ nípasẹ̀
-  olùbámu `globToRegex()` kan náà tí gbogbo wọn ń lò (`src/shared/utils/globPattern.ts`), èyí tí
-  àwọn ìbámu combo fún módẹ́lì kọ̀ọ̀kan ti `ModelRoutingSection` àti `freeModels.ts::matchesOnlyPaidModels` ti ń lò tẹ́lẹ̀.
+- id — `"gpt-4o"` (idi awoṣe agan) tabi `"openai/gpt-4o"` (isọtẹlẹ olupese), tabi
+- apẹrẹ glob nipa lilo `*`/`?` — fun `"openai/gpt-4*"` tabi `"anthropic/*"` — ti o yanju nipasẹ `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) ti o pin kanna ti a ti lo tẹlẹ nipasẹ `ModelRoutingSection`'s fun-awoṣe konbo maapu ati `freeModels.ts::matchesOnlyPaidModels`.
 
-Ètò àṣẹ: a máa kọ́kọ́ ṣàyẹ̀wò àkójọ ìdènà (àkọsílẹ̀ tí a ti kọ̀ yóò máa farapamọ́ nígbà gbogbo, kódà bí ó bá
-tún bá àkójọ ìyọ̀ǹda mu); nígbà tí àkójọ ìyọ̀ǹda kò bá ṣófo, àwọn àkọsílẹ̀ tó bá a mu nìkan ni yóò yè.
+Iṣaaju: a ti ṣayẹwo iwe-ikọsilẹ ni akọkọ (titẹsi ti a sẹ jẹ nigbagbogbo farasin, paapaa ti o ba tun baamu atokọ laaye); nigbati awọn allowlist jẹ ti kii ṣofo, nikan awọn titẹ sii ti o ibaamu ye.
 
-## Àwọn ibi ìdènà méjì, kì í ṣe ọ̀kan
+## Meji chokepoints, ko ọkan
 
-Ẹ̀kọ́ láti #6512 (àsẹ̀ àkójọ `hidePaidModels` nìkan ṣì jẹ́ kí `auto/*` darí sí
-módẹ́lì olówó, nítorí pé a kọ àkójọpọ̀ olùdíje combo lọ́tọ̀) kan síbí lọ́nà kan náà.
-A ń pe àsọtẹ́lẹ̀ ìbámu `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) láti inú àwọn méjèèjì:
+Ẹkọ lati # #6512 (àlẹmọ katalogi `hidePaidModels` -only ṣi jẹ ki ọna `auto/*` si awoṣe isanwo, nitori adagun oludije konbo ti a kọ ni ominira) kan ni aami nibi. `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ti o baamu ni a pe lati BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — àkójọ `/v1/models` fúnra rẹ̀, ní àwọn ibi ìdènà 5 fún orísun kọ̀ọ̀kan
-  kan náà tí `shouldHidePaid()` ti ń ṣàkóso tẹ́lẹ̀ (`PROVIDER_MODELS` àìyípadà, àwọn ìlà olùpèsè tí a múṣiṣẹ́pọ̀,
-  àwọn ìlà àdáni, àwọn ìlà tí alias ṣe àtìlẹ́yìn fún, àwọn ìlà àṣàyàn-àfẹ́yinti tí a ń ṣàkóso).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — tí a ń pè
-  láti `virtualFactory.ts::buildPreparedPool`, lẹ́sẹ̀kẹsẹ̀ lẹ́yìn ìpè
-  `filterPaidOnlyCandidates()` tó bá a dọ́gba, kí módẹ́lì tí a kọ̀ má bàa lè jẹ́ yíyan sínú àkójọpọ̀
-  olùdíje `auto/*` rárá.
+- `src/app/api/v1/models/catalog.ts` — awọn `/v1/models` kikojọ funrararẹ, ni kanna 5 fun-orisun chokepoints `shouldHidePaid()` tẹlẹ ibode (aimi `PROVIDER_MODELS`, amuṣiṣẹpọ olupese awọn ori ila, aṣa awọn ori ila, inagijẹ-lona awọn ori ila, isakoso-fallback awọn ori ila).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — ti a npe ni lati `virtualFactory.ts::buildPreparedPool`, lẹsẹkẹsẹ lẹhin ipe `filterPaidOnlyCandidates()` deede, nitorinaa awoṣe ti a kọ ko le yan sinu adagun oludije `auto/*` boya.
 
-## Ohun tí a KÒ ṣe àlẹ́
+## Kini NOT filtered
 
-Ó ṣe àfihàn ìhùwàsí `hideAutoCombos` tó wà tẹ́lẹ̀: id módẹ́lì tí a fi ránṣẹ́ **ní tààràtà** (kì í ṣe nípasẹ̀ `auto/*`,
-tí a kò sì ṣàwárí rẹ̀ nípasẹ̀ àkójọ) kì í jẹ́ dídènà nígbà ìfiranṣẹ́ — ìpolówó/jíjẹ́ ọmọ ẹgbẹ́ àkójọpọ̀-olùdíje
-nìkan ni a ń ṣe àlẹ́. Èyí kò gbára lé `hidePaidModels`; olùṣàkóso lè fẹ́ àkójọpọ̀ tí a fara balẹ̀ yàn fún
-àwọn ìdí tí kò ní ohunkóhun ṣe pẹ̀lú iye owó, nítorí náà àwọn ètò méjèèjì ń ṣiṣẹ́ pọ̀ gẹ́gẹ́ bí àwọn àsẹ̀ AND tí kò gbára
-lé ara wọn, bí àkójọpọ̀ àsìá-púpọ̀ tó wà tẹ́lẹ̀ nínú `catalog.ts`.
+Awọn digi `hideAutoCombos`'s tẹlẹ iwa: a awoṣe id rán** kedere** (kii ṣe nipasẹ `auto/*`, ati pe ko ṣe awari nipasẹ atokọ katalogi) ko ni dina mọ ni fifiranṣẹ — nikan ọmọ ẹgbẹ advertisement/candidate-pool ti wa ni filtered. Eyi jẹ ominira ti `hidePaidModels`; oniṣẹ ẹrọ le fẹ eto ti a ti sọ di mimọ fun awọn idi ti ko ni nkankan lati ṣe pẹlu idiyele, nitorinaa awọn eto mejeeji ṣajọ bi awọn asẹ ATI-ed ominira, kanna gẹgẹbi akopọ asia olona ti o wa tẹlẹ ni `catalog.ts`.
 
-Ìkójáde àwọn ètò (`GET /api/settings/export-json`) ní àwọn àkójọpọ̀ méjèèjì nínú gan-an bí wọ́n ṣe rí, gẹ́gẹ́ bí
-ààyè ètò mìíràn èyíkéyìí — yàtọ̀ sí àsẹ̀ ìkójáde ìgbésẹ̀ combo ti `hidePaidModels`, kò sí ewu ìmúpadà
-sí ipò tẹ́lẹ̀ níbí: id tí a kọ̀ tí a fi sínú ìgbésẹ̀ combo tí a kójáde jẹ́ yíyan ìtọ́sọ́nà ní tààràtà ti olùṣàkóso
-fúnra rẹ̀, kì í ṣe ohun tí ààlà ìkójáde ní láti yọ kúrò.
+Awọn eto okeere (`GET /api/settings/export-json`) pẹlu awọn eto mejeeji verbatim, bii eyikeyi aaye eto eto miiran — ko dabi àlẹmọ okeere konbo-igbesẹ `hidePaidModels`, ko si eewu tun-hydration nibi: id ti a sẹ ti a fi sinu igbesẹ konbo ti okeere jẹ yiyan afisona ti o han gbangba ti oniṣẹ, kii ṣe ohunkan ti aala okeere nilo lati yọ kuro.
+
+## Atokọ combos-nikan (`exposeCombosOnly`)
+
+Boolean ọtọtọ, tun yọkuro ati `false` nipasẹ aiyipada, fun awọn imuṣiṣẹ nibiti awọn akojọpọ jẹ dada awoṣe ti gbogbo eniyan ati pe awọn olupese jẹ awọn ẹhin ẹhin nikan. Nigbati o jẹ `true`, atokọ ti gbogbo eniyan (`GET /v1/models`, `GET /v1`, ati awọn ọna wiwa `/v1` miiran ti a ṣe lori `getUnifiedModelsResponse()`) tọju awọn ori ila nikan pẹlu `owned_by: "combo"`: awọn akojọpọ olumulo pẹlu awọn akojọpọ `auto/*` ti a ṣe sinu (ayafi ti `hideAutoCombos` fi wọn pamọ). O nlo idanwo ila kanna bi bọtini- fun `catalogScope: "combos"`, ati awọn asẹ allow/deny/scope bọtini tirẹ tun wa lori oke.
+
+Yi lọ sinu** Eto → afisona → Models API kikojọ** , tabi pẹlu `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Bii awọn atokọ loke, ipolowo nikan ni o yipada:
+
+- id `provider/model` ti o fojuhan si tun n ranṣẹ, `GET /v1/models/{id}` si tun yanju rẹ;
+- katalogi dasibodu (`GET /api/models/catalog`, ti a lo nipasẹ awọn oluya awoṣe) ko dín;
+- o ti wa ni ko mirrored sinu `auto/*` oludije adagun, ki `auto/*` combos pa wọn ni kikun pool.

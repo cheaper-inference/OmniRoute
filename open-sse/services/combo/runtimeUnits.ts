@@ -10,7 +10,11 @@ import { buildContextBudgetResponse, readBudgetFailure } from "./budgetExhaustio
 import type { ComboDiagnostics } from "../../utils/error.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { resolveDelayMs, requestScopedReplayKey } from "./comboPredicates.ts";
-import { qualityValidationFailure } from "./executeTargetClassify.ts";
+import {
+  isProviderSafetyStreamFailure,
+  qualityValidationFailure,
+} from "./executeTargetClassify.ts";
+import { isSafetyRejection } from "./safetyStopLatch.ts";
 import { isRuntimeUnitAtConcurrencyCap } from "./runtimeUnitCapacity.ts";
 import { isQuotaExhaustionResponse, withQuotaExhaustionClassification } from "./quotaExhaustion.ts";
 import {
@@ -319,6 +323,18 @@ export async function executeRuntimeUnitCombo(args: {
         effectiveComboStrategy: effectiveStrategy,
         fallbackAttempts: fallbackCount,
       });
+      // #17049: a nested child combo already ended on a provider safety stop (HTTP-level or
+      // classified in-stream); the parent must not replace it with a sibling unit.
+      if (unit.kind === "combo-ref" && (await isSafetyRejection(response))) {
+        recordComboRequest(args.combo.name, null, {
+          success: false,
+          latencyMs: Date.now() - startTime,
+          fallbackCount,
+          strategy: effectiveStrategy,
+          target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+        });
+        return { response, unit };
+      }
       lastResponse = response;
       if (response.ok) {
         if (unit.kind === "combo-ref") {
@@ -358,6 +374,17 @@ export async function executeRuntimeUnitCombo(args: {
           return { response, unit };
         }
         releaseRejectedQualityResponse(unitClone, response);
+        // #17049: an in-stream provider safety stop ends the nested combo immediately.
+        if (isProviderSafetyStreamFailure(quality)) {
+          recordComboRequest(args.combo.name, unit.modelStr, {
+            success: false,
+            latencyMs: Date.now() - startTime,
+            fallbackCount,
+            strategy: effectiveStrategy,
+            target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+          });
+          return { response: qualityValidationFailure(quality).response, unit };
+        }
         qualityRetryable = quality.upstreamFailure?.retryable ?? false;
         if (quality.upstreamFailure?.requestScoped)
           rejectedModelKeys.add(requestScopedReplayKey(unit.modelStr));
