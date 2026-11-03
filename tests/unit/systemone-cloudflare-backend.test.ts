@@ -233,3 +233,44 @@ test("cloudflare: secrets cut off by the 500-character error cap are still redac
     assert.equal(text.includes(secret.slice(0, -1)), false, secret);
   }
 });
+
+test("cloudflare: an escaped secret in an error message is not decoded back into the response", async () => {
+  // "\u0063" is "c": the shared sanitizer decodes the escape, so redaction must run after it.
+  const escaped = "\\u0063" + "f-test-token";
+  const { response } = await call(
+    "cloudflare-ai/jev",
+    jsonResponse(403, { success: false, errors: [{ message: `Denied ${escaped}` }] })
+  );
+  assert.equal(response.status, 403);
+  const text = await response.text();
+  assert.equal(text.includes("cf-test-token"), false, text);
+});
+
+test("cloudflare: success results keep only model, answers and usage, without secrets", async () => {
+  for (const secret of [ACCOUNT, "cf-test-token"]) {
+    const { response } = await call(
+      "cloudflare-ai/jev",
+      jsonResponse(200, {
+        success: true,
+        result: {
+          state: "Completed",
+          result: {
+            model: `jev-${secret}`,
+            answers: ANSWERS,
+            usage: { input_tokens: 5, output_tokens: 1, debug: secret },
+            diagnostic: { account: ACCOUNT, credential: "cf-test-token" },
+          },
+        },
+      })
+    );
+    assert.equal(response.status, 200);
+    const text = await response.text();
+    assert.equal(text.includes(secret), false, text);
+    assert.equal((response.headers.get("x-omniroute-model") ?? "").includes(secret), false);
+    assert.deepEqual(JSON.parse(text), {
+      model: "typesafe/jev",
+      answers: ANSWERS,
+      usage: { input_tokens: 5, output_tokens: 1 },
+    });
+  }
+});

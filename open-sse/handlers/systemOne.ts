@@ -15,7 +15,7 @@
  */
 
 import { CORS_HEADERS } from "../utils/cors.ts";
-import { errorResponse } from "../utils/error.ts";
+import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { saveCallLog } from "@/lib/usageDb";
@@ -101,6 +101,47 @@ function redactConnectionSecrets(text: string, credentials: SystemOneCredentials
   return secrets.reduce((out, secret) => out.split(secret).join("[redacted]"), text);
 }
 
+/**
+ * Outward error text: run the shared sanitizer first (it decodes security
+ * escapes such as `\u004f`), then remove this connection's own secrets, so a
+ * later sanitizer pass cannot turn an escaped secret back into plain text.
+ */
+function safeErrorText(text: string, options: SystemOneProxyOptions): string {
+  // TypeSafe/OpenRouter keep #17994's behaviour; the Cloudflare URL carries the account id.
+  if (options.target.backend !== "cloudflare") return text;
+  return redactConnectionSecrets(sanitizeErrorMessage(text), options.credentials);
+}
+
+const SAFE_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/;
+
+/**
+ * Cloudflare results are rebuilt from the documented fields only
+ * (`model`, `answers`, numeric `usage` token counts and cost), dropping anything else the
+ * envelope carries. The answered model falls back to the registry model when
+ * it is not a plain id or contains a connection secret.
+ */
+function projectCloudflareResult(
+  native: Record<string, unknown>,
+  target: SystemOneTarget,
+  credentials: SystemOneCredentials | null
+): SystemOneUpstreamResponse {
+  const model =
+    typeof native.model === "string" &&
+    SAFE_MODEL_ID.test(native.model) &&
+    redactConnectionSecrets(native.model, credentials) === native.model
+      ? native.model
+      : target.upstreamModel;
+  const rawUsage = (native.usage ?? {}) as Record<string, unknown>;
+  const usage: NonNullable<SystemOneUpstreamResponse["usage"]> = {};
+  for (const field of ["input_tokens", "output_tokens", "cost"] as const) {
+    if (typeof rawUsage[field] === "number") usage[field] = rawUsage[field];
+  }
+  const answers = JSON.parse(
+    redactConnectionSecrets(JSON.stringify(native.answers ?? {}), credentials)
+  ) as unknown;
+  return { model, answers, usage };
+}
+
 interface DecisionRequest {
   url: string;
   body: Record<string, unknown>;
@@ -147,13 +188,14 @@ function postDecision(
 function normalizeBackendBody(
   target: SystemOneTarget,
   status: number,
-  parsed: SystemOneUpstreamResponse | null
+  parsed: SystemOneUpstreamResponse | null,
+  credentials: SystemOneCredentials | null
 ): { status: number; parsed: SystemOneUpstreamResponse | null } {
   if (target.backend !== "cloudflare") return { status, parsed };
   const message = cloudflareErrorMessage(parsed);
   if (status < 200 || status >= 300) return { status, parsed: message ? { message } : parsed };
   const native = unwrapCloudflareDecision(parsed);
-  if (native) return { status, parsed: native as SystemOneUpstreamResponse };
+  if (native) return { status, parsed: projectCloudflareResult(native, target, credentials) };
   return { status: 502, parsed: { message: message || "Cloudflare returned no decision result" } };
 }
 
@@ -214,21 +256,30 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
     const raw = await res.text();
     // Redact before parseUpstreamBody truncates a non-JSON error body: a secret
     // cut off at the cap would no longer match exactly.
-    const text = res.ok ? raw : redactConnectionSecrets(raw, options.credentials);
-    const normalized = normalizeBackendBody(options.target, res.status, parseUpstreamBody(text));
+    const text = res.ok ? raw : safeErrorText(raw, options);
+    const normalized = normalizeBackendBody(
+      options.target,
+      res.status,
+      parseUpstreamBody(text),
+      options.credentials
+    );
     const { parsed } = normalized;
     const ok = normalized.status >= 200 && normalized.status < 300;
     const usage = ok ? parsed?.usage : undefined;
-    const answeredModel = resolveAnsweredModel(parsed, options);
+    // A failed Cloudflare call never reports an upstream-supplied model name.
+    const answeredModel =
+      ok || options.target.backend !== "cloudflare"
+        ? resolveAnsweredModel(parsed, options)
+        : options.requestedModel || options.target.provider;
     const rawError = upstreamErrorMessage(parsed);
-    const upstreamError = rawError && redactConnectionSecrets(rawError, options.credentials);
+    const upstreamError = rawError && safeErrorText(rawError, options);
 
     logDecisionCall(options, {
       status: normalized.status,
       ok,
       model: answeredModel,
       usage,
-      error: upstreamError || redactConnectionSecrets(text, options.credentials).slice(0, 500),
+      error: upstreamError || safeErrorText(text, options).slice(0, 500),
       startTime,
     });
 
@@ -247,7 +298,7 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
     });
   } catch (err) {
     const raw = err instanceof Error ? err.message : String(err);
-    const message = redactConnectionSecrets(raw, options.credentials);
+    const message = safeErrorText(raw, options);
     return errorResponse(500, `System One request failed: ${message}`);
   }
 }
