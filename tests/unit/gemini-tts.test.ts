@@ -22,23 +22,31 @@ test("Google Gemini TTS models parse publicly and remap to Gemini credentials", 
   assert.deepEqual(
     AUDIO_SPEECH_PROVIDERS.google.models.map(({ id }) => id),
     [
-      "gemini-3.8-flash-tts",
-      "gemini-3.8-flash-lite-tts",
       "gemini-3.1-flash-tts-preview",
       "gemini-2.5-flash-preview-tts",
       "gemini-2.5-pro-preview-tts",
+      "gemini-3.8-flash-tts",
+      "gemini-3.8-flash-lite-tts",
     ]
   );
   assert.deepEqual(
     AUDIO_SPEECH_PROVIDERS.vertex.models.map(({ id }) => id),
     [
-      "gemini-3.8-flash-tts",
-      "gemini-3.8-flash-lite-tts",
       "gemini-3.1-flash-tts-preview",
       "gemini-2.5-flash-preview-tts",
       "gemini-2.5-pro-preview-tts",
+      "gemini-3.8-flash-tts",
+      "gemini-3.8-flash-lite-tts",
     ]
   );
+});
+
+test("Gemini 3.8 TTS ships opt-in: the google/vertex default model is unchanged from the release", () => {
+  // Owner decision (2026-11-03): the 3.8 ids are unverified until a live run, so they are appended
+  // after the existing catalog. The first entry (the default and the dashboard example pick) stays
+  // gemini-3.1-flash-tts-preview, exactly as on release/v3.8.53.
+  assert.equal(AUDIO_SPEECH_PROVIDERS.google.models[0].id, "gemini-3.1-flash-tts-preview");
+  assert.equal(AUDIO_SPEECH_PROVIDERS.vertex.models[0].id, "gemini-3.1-flash-tts-preview");
 });
 
 test("geminiGenerateSpeech sends the exact AI Studio generateContent contract and wraps PCM", async () => {
