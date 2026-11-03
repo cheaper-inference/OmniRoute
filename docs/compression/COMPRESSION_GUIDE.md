@@ -235,7 +235,7 @@ turn it on. Values:
 | ------------- | ------------------------------------------------------------------------------------------------ |
 | `off`         | No compression for this request.                                                                 |
 | `default`     | The panel-derived Default profile (ignores the active profile). Lossy engines are left off.      |
-| `safe`        | Force the historical safe fallback: dedup and whitespace folding only.                           |
+| `safe`        | Same as omitting the header.                                                                     |
 | `allow-lossy` | Keep this request's operator plan, including summaries, relevance filters, and style rewrites.   |
 | `engine:<id>` | A single engine when enabled, e.g. `engine:rtk`. This is the per-request opt-in for that engine. |
 | `<combo>`     | A named combo, matched by name (case-insensitive) first, then by id.                             |
