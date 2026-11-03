@@ -7,6 +7,7 @@ import {
   createProxyDispatcher,
   getDefaultDispatcher,
   getDedicatedCodexImageDispatcher,
+  getDedicatedCodexImageProxyDispatcher,
   getProxyRetryDispatcher,
   getRetryDispatcher,
   isLocalEgressHostname,
@@ -956,10 +957,10 @@ async function patchedFetchUnrecorded(
             await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
             continue;
           }
-          if (hasNonReplayableBody) {
+          if (hasNonReplayableBody || dedicatedCodexImageRequest) {
             const detail = describeFallbackFailure(
               describeFetchCause(dispatcherError),
-              "skipped: non-replayable request body"
+              dedicatedCodexImageRequest ? "skipped: paid image POST may have been submitted" : "skipped: non-replayable request body"
             );
             console.warn(
               `[ProxyFetch] skipping native fetch fallback for non-replayable body: ${detail}`
@@ -1194,11 +1195,24 @@ async function patchedFetchUnrecorded(
   let lastProxyError: unknown = null;
   for (let attempt = 0; attempt < maxProxyAttempts; attempt++) {
     try {
-      const response = await _undiciProxy(input, {
-        ...options,
-        dispatcher:
-          attempt === 0 ? createProxyDispatcher(proxyUrl) : getProxyRetryDispatcher(proxyUrl),
-      });
+      const response = dedicatedCodexImageRequest
+        ? await directFetchWithBoundedResponseStart(
+            input,
+            {
+              ...options,
+              dispatcher: getDedicatedCodexImageProxyDispatcher(
+                proxyUrl,
+                codexImageResponseStartTimeoutMs()
+              ),
+            },
+            _undiciProxy,
+            codexImageResponseStartTimeoutMs()
+          )
+        : await _undiciProxy(input, {
+            ...options,
+            dispatcher:
+              attempt === 0 ? createProxyDispatcher(proxyUrl) : getProxyRetryDispatcher(proxyUrl),
+          });
       recordProxiedSuccess(proxyUrl, targetUrl); // completed response, any status
       return response;
     } catch (error) {

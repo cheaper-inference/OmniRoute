@@ -292,6 +292,8 @@ export function getDedicatedCodexImageDispatcher(responseStartTimeoutMs: number)
       keepAliveTimeout: 1,
       keepAliveMaxTimeout: 1,
       pipelining: 0,
+      // HTTP/2 multiplexes POSTs even with pipelining disabled.
+      allowH2: false,
     });
     dedicatedCodexImageDispatchers.set(timeoutMs, dispatcher);
   }
@@ -670,6 +672,38 @@ export function getProxyRetryDispatcher(proxyUrl: string): Dispatcher {
     return winner;
   }
   setDispatcherCacheEntry(retryKey, dispatcher);
+  return dispatcher;
+}
+
+/** Isolated proxy transport for long-running, non-replayable Codex image operations. */
+export function getDedicatedCodexImageProxyDispatcher(
+  proxyUrl: string,
+  responseStartTimeoutMs: number
+): Dispatcher {
+  const normalizedUrl = normalizeProxyUrl(proxyUrl, "proxy dispatcher");
+  const timeoutMs = Math.max(60_000, responseStartTimeoutMs + 60_000);
+  const key = "codex-image:" + timeoutMs + ":" + normalizedUrl;
+  const dispatcherCache = getDispatcherCache();
+  const cached = dispatcherCache.get(key);
+  if (cached) return cached;
+  const defaults = getProxyDispatcherOptions();
+  const dispatcher = buildProxyDispatcher(normalizedUrl, {
+    ...defaults,
+    headersTimeout: Math.max(defaults.headersTimeout, timeoutMs),
+    bodyTimeout: Math.max(defaults.bodyTimeout, timeoutMs),
+    keepAliveTimeout: 1,
+    keepAliveMaxTimeout: 1,
+    pipelining: 0,
+    allowH2: false,
+    requestTls: { ...defaults.requestTls, allowH2: false },
+    proxyTls: { ...defaults.proxyTls, allowH2: false },
+  });
+  const winner = dispatcherCache.get(key);
+  if (winner) {
+    void dispatcher.close().catch(() => {});
+    return winner;
+  }
+  setDispatcherCacheEntry(key, dispatcher);
   return dispatcher;
 }
 
