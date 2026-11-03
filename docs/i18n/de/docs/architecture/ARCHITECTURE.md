@@ -14,7 +14,7 @@ OmniRoute ist ein lokales AI Routing-Gateway und Dashboard, das auf Next.js basi
 
 Kernkompetenzen:
 
-- OpenAI-kompatible API Oberfläche für CLI/tools (377 Anbieter, 156 Executor-Module)
+- OpenAI-kompatible API Oberfläche für CLI/tools (380 Anbieter, 156 Executor-Module)
 - Request/response -Übersetzung über Anbieterformate hinweg
 - Modell-Combo-Fallback (Multi-Modell-Sequenz)
 - Strukturierte Kombinationsschritte (`provider + model + connection`) mit Laufzeitreihenfolge nach `compositeTiers`
@@ -33,7 +33,7 @@ Kernkompetenzen:
 - Denken Sie an Tag-Parsing (`<think>...</think>`) für Argumentationsmodelle
 - Antwortbereinigung für strikte OpenAI SDK Kompatibilität
 - Rollennormalisierung (Entwickler → System, System → Benutzer) für anbieterübergreifende Kompatibilität
-- Strukturierte Ausgabekonvertierung (json_schema → Gemini ResponseSchema)
+- Strukturierte Ausgabekonvertierung (json_schema → Gemini responseSchema)
 - Lokale Persistenz für Anbieter, Schlüssel, Aliase, Kombinationen, Einstellungen, Preise (122 DB Module)
 - Usage/cost -Verfolgung und Anforderungsprotokollierung
 - Optionale Cloud-Synchronisierung für multi-device/state -Synchronisierung
@@ -47,7 +47,7 @@ Kernkompetenzen:
 - Signaturbasierter Anforderungsdeduplizierungs-Cache
 - Domänenschicht: Kostenregeln, Fallback-Richtlinie, Sperrrichtlinie
 - Kontext-Relay: Zusammenfassungen der Sitzungsübergaben für die Kontinuität der Kontorotation
-- Persistenz des Domänenstatus (SQLite -Write-Through-Cache für Fallbacks, Budgets, Sperrungen, Leistungsschalter)
+- Persistenz des Domänenstatus (SQLite -Durchschreibcache für Fallbacks, Budgets, Sperrungen, Leistungsschalter)
 - Richtlinien-Engine für zentralisierte Anfrageauswertung (Lockout → Budget → Fallback)
 - Fordern Sie Telemetrie mit p50/p95/p99 -Latenzaggregation an
 - Combo-Ziel-Telemetrie und historischer Combo-Zielzustand über `combo_execution_key` / `combo_step_id`

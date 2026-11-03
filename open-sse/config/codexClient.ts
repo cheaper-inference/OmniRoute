@@ -5,7 +5,7 @@ import {
   DEFAULT_CODEX_CLIENT_VERSION,
   getCodexCliRsHeaders as buildCodexCliRsHeaders,
 } from "@/shared/constants/codexClient";
-import { getCliVersionOverride, type CliVersionSource } from "@/shared/constants/cliVersions";
+import { getCliVersionOverride, type CliVersionSource } from "./cliVersions.ts";
 
 export {
   DEFAULT_CODEX_CLIENT_VERSION,
