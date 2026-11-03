@@ -1,31 +1,73 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { DEFAULT_LOCALE, LOCALE_ALIASES, LOCALE_COOKIE, LOCALES } from "@/i18n/config";
-import { resolveRequestedLocale } from "@/i18n/resolveRequestedLocale";
-import { loadTranslatedDoc } from "@/lib/docsI18nRender";
-import { resolveDocHref } from "@/lib/docsLinkResolver";
-import { createLogger } from "@/shared/utils/logger";
+import { DEFAULT_LOCALE, LOCALE_COOKIE } from "@/i18n/config";
+import fs from "node:fs";
+import path from "node:path";
+import { resolveSafeI18nSectionDir } from "@/lib/docsI18nPath";
+import { resolveDocHref, normalizeDocsMarkdownLinks } from "@/lib/docsLinkResolver";
 import { getTranslations } from "next-intl/server";
-
-const log = createLogger("docs/page");
 
 // ── Locale detection ────────────────────────────────────────────────────────
 
 async function getDocsLocale(): Promise<string> {
   try {
     const cookieStore = await cookies();
-    // Same resolution as src/i18n/request.ts, so the article matches <html lang>.
-    return resolveRequestedLocale(
-      cookieStore.get(LOCALE_COOKIE)?.value ?? "",
-      LOCALES,
-      LOCALE_ALIASES,
-      DEFAULT_LOCALE
-    );
-  } catch (err) {
-    log.warn({ err }, "Could not read the locale cookie; serving the default locale");
+    return (cookieStore as any).get(LOCALE_COOKIE)?.value || DEFAULT_LOCALE;
+  } catch {
     return DEFAULT_LOCALE;
   }
+}
+
+// ── i18n fallback ───────────────────────────────────────────────────────────
+// When locale ≠ "en", try to load the translated .md from
+// `docs/i18n/<locale>/docs/<section>/<FILE>.md` — the exact path layout that
+// `scripts/i18n/run-translation.mjs` produces. Returns rendered HTML or null.
+
+async function tryI18nFallback(slug: string[], locale: string): Promise<string | null> {
+  if (!locale || locale === "en") return null;
+
+  // 🛡️ Path traversal prevention — `locale` is a user-controllable cookie, so
+  // validate segments + confine the resolved dir to docs/i18n before any fs read.
+  // Centralized in resolveSafeI18nSectionDir (pure, unit-tested).
+  const docsRoot = path.resolve(process.cwd(), "docs");
+  const sectionDir = resolveSafeI18nSectionDir(docsRoot, locale, slug);
+  if (!sectionDir) return null;
+
+  if (!fs.existsSync(sectionDir)) return null;
+
+  // Fumadocs lowercases slugs — match case-insensitively against i18n dir
+  const target = slug[slug.length - 1];
+  let files: string[];
+  try {
+    files = fs.readdirSync(sectionDir);
+  } catch {
+    return null;
+  }
+
+  const match = files.find((f) => f.toLowerCase().replace(/\.md$/, "") === target.toLowerCase());
+  if (!match) return null;
+
+  const filePath = path.join(sectionDir, match);
+  const raw = fs.readFileSync(filePath, "utf8");
+
+  // Strip the i18n header (heading + language bar + ---) before rendering.
+  // Translated files have: # Title (Native)\n\n🌐 Languages: ...\n\n---\n\nbody
+  const bodyMatch = raw.match(/^---\s*$/m);
+  const body =
+    bodyMatch && bodyMatch.index != null
+      ? raw.slice(bodyMatch.index + bodyMatch[0].length).trim()
+      : raw;
+
+  // 🛡️ Sentinel: XSS protection via server-side sanitization of rendered markdown
+  const [{ marked }, { sanitizeDocsHtml }] = await Promise.all([
+    import("marked"),
+    import("@/lib/docsSanitizer"),
+  ]);
+  const docRelPath = `${slug.join("/")}.md`;
+  const normalizedBody = normalizeDocsMarkdownLinks(body, docRelPath);
+  const html = marked.parse(normalizedBody) as string;
+  return sanitizeDocsHtml(html);
 }
 
 // ── Page component ──────────────────────────────────────────────────────────
@@ -41,15 +83,14 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   if (!page) notFound();
 
   const locale = await getDocsLocale();
-  const translated = await loadTranslatedDoc(params.slug, locale, page.data.toc);
+  const i18nHtml = await tryI18nFallback(params.slug, locale);
 
-  if (translated) {
+  if (i18nHtml) {
     // Render translated markdown (non-English locale with available translation)
     return (
-      <DocsPage toc={translated.toc} full={page.data.full}>
+      <DocsPage toc={page.data.toc} full={page.data.full}>
         <DocsBody>
-          {!translated.hasOwnTitle && <h1>{page.data.title}</h1>}
-          <div className="prose-content" dangerouslySetInnerHTML={{ __html: translated.html }} />
+          <div className="prose-content" dangerouslySetInnerHTML={{ __html: i18nHtml }} />
         </DocsBody>
       </DocsPage>
     );
