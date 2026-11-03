@@ -189,11 +189,14 @@ generator's output (job `test-unit`).
   code — from the `@fontsource` packages (the dashboard itself uses the kit's Switzer since kit 0.0.66).
   Light values sit on `:root`, dark values behind `prefers-color-scheme: dark`, inside the file, so each
   image follows the viewer's scheme on GitHub.
-- **Fonts.** `scripts/docs/readme-fonts.mjs` subsets those woff2 files to the glyphs each diagram draws and
-  embeds them as `@font-face` `data:` URIs — keeping the kit fonts inside the SVG.
-  The local README image probe checks that rendering makes no external font requests. The subsets are latin-only;
-  the symbol glyphs that fall back to the system stack are allowed one by one in `SYMBOL_FALLBACKS`, and any
-  other uncovered glyph throws.
+- **Fonts.** GitHub Markdown carries no CSS and the camo proxy blocks every external fetch, so kit type has
+  to travel inside the file. `scripts/docs/readme-outline.mjs`, the last step of every generator, shapes the
+  Switzer roles with HarfBuzz and draws them as vector outlines (`<defs>` paths and `<use>`), with the arrows
+  and geometric symbols Switzer lacks drawn on its own metrics. Outlines, never an embedded font: Switzer's
+  licence (`packages/ui-kit/src/fonts/FFL.txt`) forbids subsetting and format conversion without written
+  consent and allows vector drawings, so do not reintroduce a Switzer `@font-face` or `data:` URI. The one
+  font left in a file is the OFL IBM Plex Mono subset for what stays real code text
+  (`scripts/docs/readme-fonts.mjs`), built from those characters; any glyph it cannot embed throws.
 - **Regenerate.** `npm run docs:readme-diagrams` rewrites all twelve in README order and prints one line per
   file with its size. A single generator also runs on its own (`node scripts/docs/gen-readme-<name>.mjs`;
   `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
@@ -206,7 +209,8 @@ generator's output (job `test-unit`).
   image (the SVG studio validator's rule).
 - **Shared copy, counts from the gate.** Each generator
   carries its diagram's copy in a `*_COPY` constant (or builds it from the live catalog) that is both the
-  drawn text and the font-subset input. Canonical figures stay in `<text>` nodes, read by `check:docs-counts`
+  drawn text and the input of the outlining step. Canonical figures stay in `<text>` nodes
+  (invisible once outlined, `fill-opacity:0`), read by `check:docs-counts`
   (`scripts/check/check-docs-counts-sync.mjs`); the staleness tests of the diagrams that gate reads also run
   its validators on the generated file, so a figure that drifts from the code fails the test — fix the
   source the gate reads, never the number in the generator.

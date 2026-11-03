@@ -24,13 +24,19 @@ for (const [name, render] of [
 }
 
 test("a free-catalog regime change updates accessible and visible promise counts", async () => {
-  const counts = { ...CURRENT_DOC_COUNTS, freeForever: CURRENT_DOC_COUNTS.freeForever + 1 };
-  const svg = await renderReadmePromisePillars({ counts });
-  assert.ok(
-    svg.includes(`${counts.freeForever} recurring or keyless free-forever`),
-    "accessible count remained stale"
-  );
-  assert.ok(svg.includes(`free tier, ${counts.freeForever} free`), "visible count remained stale");
+  // One neighboring total can coincide with a stale constant; verify a second total too.
+  for (const added of [1, 7]) {
+    const counts = { ...CURRENT_DOC_COUNTS, freeForever: CURRENT_DOC_COUNTS.freeForever + added };
+    const svg = await renderReadmePromisePillars({ counts });
+    assert.ok(
+      svg.includes(`${counts.freeForever} recurring or keyless free-forever`),
+      "accessible count remained stale"
+    );
+    assert.ok(
+      svg.includes(`free tier, ${counts.freeForever} free`),
+      "visible count remained stale"
+    );
+  }
 });
 
 test("a CLI record addition cannot be reverted by regenerating the promise card", async () => {
