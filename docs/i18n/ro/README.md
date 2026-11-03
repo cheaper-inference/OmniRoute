@@ -72,7 +72,7 @@
 |                                  |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Furnizori                     |            352            |   **358**   |          380          |
-| 🧠 Model unic de chat IDs        |           1320            |  **1374**   |         1475          |
+| 🧠 Model unic de chat IDs        |           1320            |  **1374**   |         1491          |
 | Podul modalității 🖼️             | 🆕 vision + audio + video |      ✓      |           ✓           |
 | Catalog gratuit 📡 Radar         |         🆕 opt-in         |      ✓      |           ✓           |
 | ⚖️ Programare în funcție de cote |     🆕 Cotă-Partajare     |      ✓      |           ✓           |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 Proiect</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tehnologii utilizate</a></td>
     <td align="center"><a href="#-documentation">📖 Documentație</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Colaboratori</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Colaboratori</a></td>
   </tr>
 </table>
 
@@ -1308,7 +1308,7 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
   <tr><td nowrap><b>Stealth</b></td><td>wreq-js — impersonare a amprentei TLS JA3 / JA4, proxy pe 3 niveluri</td></tr>
   <tr><td nowrap><b>Reziliență</b></td><td>Circuit breaker, backoff exponențial, anti-thundering-herd, auto-vindecare auto-combo</td></tr>
   <tr><td nowrap><b>Logare</b></td><td>pino — jurnale JSON structurate cu contextul cererii</td></tr>
-  <tr><td nowrap><b>Testare</b></td><td>Node.js test runner + Vitest — <b>peste 56.000 de declarații de test statice</b> în peste 7.800 de fișiere de test urmărite (unitare, de integrare, E2E, de securitate, de ecosistem)</td></tr>
+  <tr><td nowrap><b>Testare</b></td><td>Node.js test runner + Vitest — <b>peste 60.000 de declarații de test statice</b> în peste 8.400 de fișiere de test urmărite (unitare, de integrare, E2E, de securitate, de ecosistem)</td></tr>
   <tr><td nowrap><b>Platforme</b></td><td>Desktop (Electron) · Android (Termux) · PWA (orice browser)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicare automată npm + Docker Hub la lansare</td></tr>
   <tr><td nowrap><b>Linkuri</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1388,7 +1388,7 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
   <tr><td nowrap><b><a href="SECURITY.md">Politica de securitate</a></b></td><td>Raportarea vulnerabilităților și practicile de securitate</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Ghid i18n</a></b></td><td>Suport pentru 67 de limbi, fluxul de lucru pentru traduceri, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Listă de verificare pentru lansare</a></b></td><td>Etapele de validare premergătoare lansării</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plan de acoperire</a></b></td><td>Strategia de acoperire cu teste pentru peste 56,000 de declarații de teste statice în peste 7,800 de fișiere de testare urmărite</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plan de acoperire</a></b></td><td>Strategia de acoperire cu teste pentru peste 60,000 de declarații de teste statice în peste 8,400 de fișiere de testare urmărite</td></tr>
 </table>
 
 <br/>
@@ -1625,13 +1625,13 @@ Mulțumiri din inimă celor care finanțează OmniRoute din propriul buzunar —
 
 <div align="center">
 
-## 👥 Peste 900 de contributori
+## 👥 Peste 1,000 de contributori
 
 </div>
 
-[![Contributori](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributori](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Auditat la 2026-10-18, la cel mai recent commit <code>ad160ab2d1</code> al ramurii <code>release/v3.8.52</code> (6.826 de commituri): <b>993 de identități Git umane normalizate</b> — 707 apar ca autori ai commiturilor (inclusiv responsabilul de întreținere), iar 286 apar doar în liniile explicite <code>Co-authored-by</code>. Recensământul aplică <code>.mailmap</code>, compară adresele de e-mail fără a ține cont de litere mari și mici, asociază adresele GitHub noreply numerice cu cele simple doar atunci când codifică același identificator, exclude 26 de identități de boți/agenți/servicii/substituenți și nu combină adresele de e-mail obișnuite doar pentru că numele lor afișate coincid. Auditul din 2026-08-24 a raportat 639; reaplicarea acestei metode pe baza auditului respectiv, <code>ac02c5b42f</code>, produce 619, astfel încât creșterea provine de la contributori noi, nu de la o metodă mai permisivă.</sub>
+<sub>Auditat la 2026-11-02, la cel mai recent commit <code>1c7135e0fb</code> al ramurii <code>release/v3.8.53</code> (7.972 de commituri): <b>1,074 de identități Git umane normalizate</b> — 759 apar ca autori ai commiturilor (inclusiv responsabilul de întreținere), iar 315 apar doar în liniile explicite <code>Co-authored-by</code>. Recensământul aplică <code>.mailmap</code>, compară adresele de e-mail fără a ține cont de litere mari și mici, asociază adresele GitHub noreply numerice cu cele simple doar atunci când codifică același identificator, exclude 29 de identități de boți/agenți/servicii/substituenți și nu combină adresele de e-mail obișnuite doar pentru că numele lor afișate coincid. Auditul din 2026-08-24 a raportat 639; reaplicarea acestei metode pe baza auditului respectiv, <code>ac02c5b42f</code>, produce 619, astfel încât creșterea provine de la contributori noi, nu de la o metodă mai permisivă.</sub>
 
 ### Cum să contribuiți
 
@@ -1691,25 +1691,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute se sprijină pe umerii unor giganți. A început ca un fork al proiectului **[9router](https://github.com/decolua/9router)** și ca un port TypeScript al proiectului Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — iar de atunci, fiecare subsistem de mai jos a fost inspirat de un proiect open-source care a deschis drumul. Fiecare dintre ele a contribuit la conturarea unei componente concrete din OmniRoute. Acesta este modul nostru de a le mulțumi tuturor. 🙏
 
-> ⭐ numărul de stele a fost verificat prin API-ul REST GitHub la 18 octombrie 2026 — acordați-le o stea acestor proiecte. Valorile reprezintă un instantaneu exact, datat, și se vor modifica în mod firesc.
+> ⭐ numărul de stele a fost verificat prin API-ul REST GitHub la 2026-11-03 — acordați-le o stea acestor proiecte. Valorile reprezintă un instantaneu exact, datat, și se vor modifica în mod firesc.
 
 ### 🧬 Filiație și gateway
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Proiectul original pe care este construit acest fork — extins aici cu API-uri multimodale și o rescriere completă în TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Implementarea Go care a inspirat acest port JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>Gateway-ul AI al cărui set public de date privind prețurile alimentează sincronizarea noastră pentru urmărirea costurilor și al cărui model de normalizare a furnizorilor ne-a influențat rutarea.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>Sursă MIT adaptată în puntea inclusă ChatGPT Web → Codex Responses, inclusiv adaptoare pentru sesiunea browserului, încadrarea răspunsurilor, utilizare și căutare web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Modele portate pentru recuperarea fluxurilor, aliasuri fără raționament, căutare web de rezervă, limite cu fereastră glisantă, mascarea datelor din jurnale și fluxuri de lansare securizate.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Modele Cursor Composer pentru alegerea instrumentelor, constrângerile de ieșire și confirmarea instrumentelor, adaptate în executorul Cursor nativ.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Modele pentru autentificări noi și rotația tokenurilor de reîmprospătare, portate în reautentificarea Codex OAuth.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Valorile implicite de transformare compatibile cu Claude Code și comportamentul antetelor de facturare, generalizate în puntea OmniRoute controlată prin configurație.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Proiectul original pe care este construit acest fork — extins aici cu API-uri multimodale și o rescriere completă în TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Implementarea Go care a inspirat acest port JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>Gateway-ul AI al cărui set public de date privind prețurile alimentează sincronizarea noastră pentru urmărirea costurilor și al cărui model de normalizare a furnizorilor ne-a influențat rutarea.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Sursă MIT adaptată în puntea inclusă ChatGPT Web → Codex Responses, inclusiv adaptoare pentru sesiunea browserului, încadrarea răspunsurilor, utilizare și căutare web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Modele portate pentru recuperarea fluxurilor, aliasuri fără raționament, căutare web de rezervă, limite cu fereastră glisantă, mascarea datelor din jurnale și fluxuri de lansare securizate.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Modele Cursor Composer pentru alegerea instrumentelor, constrângerile de ieșire și confirmarea instrumentelor, adaptate în executorul Cursor nativ.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Modele pentru autentificări noi și rotația tokenurilor de reîmprospătare, portate în reautentificarea Codex OAuth.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Valorile implicite de transformare compatibile cu Claude Code și comportamentul antetelor de facturare, generalizate în puntea OmniRoute controlată prin configurație.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Mapările sale pentru modelele Grok, generatorul Statsig cu TypeError simulat, valorile implicite pentru cereri și dispozitive, precum și procesorul de răspunsuri NDJSON au fost adaptate în mod substanțial în executorul Grok Web al OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>Principala sursă tranzitivă de cod din spatele grok2api-merged; implementările sale pentru modele, antete, sarcini utile, Statsig și procesoare sunt păstrate în filiația Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Sursa MIT subiacentă pentru sarcinile utile Grok și valorile implicite ale dispozitivelor, generatorul Statsig și procesorul <code>result.response</code>, preluate prin TQZHR și grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>Principala sursă tranzitivă de cod din spatele grok2api-merged; implementările sale pentru modele, antete, sarcini utile, Statsig și procesoare sunt păstrate în filiația Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Sursa MIT subiacentă pentru sarcinile utile Grok și valorile implicite ale dispozitivelor, generatorul Statsig și procesorul <code>result.response</code>, preluate prin TQZHR și grok2api-merged.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>O sursă tranzitivă menționată de grok2api-merged pentru stratul său de pool-uri proxy; OmniRoute păstrează mențiunea acestei filiații, dar nu pretinde că a portat un pool de proxy-uri în executorul său Grok Web cu domeniu limitat.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Proxy-ul său Grok autentificat prin cookie-uri și modelul de streaming <code>result.response.token</code> au influențat transportul Grok Web al OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Proxy-ul său Grok autentificat prin cookie-uri și modelul de streaming <code>result.response.token</code> au influențat transportul Grok Web al OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Implementarea originală Grok Web a consultat arhitectura sa upstream HTTP/browser; calea sa HTTP directă derivă din GrokProxy, astfel că nu se revendică niciun port independent de cod.</td></tr>
 </table>
 
@@ -1717,81 +1717,81 @@ OmniRoute se sprijină pe umerii unor giganți. A început ca un fork al proiect
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Proiectul viral „de ce folosi multe cuvinte când puține cuvinte rezolvă” — filosofia sa de vorbire rudimentară stă la baza modului nostru standard de compresie și a peste 30 de reguli de eliminare a umpluturilor și condensare.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Compresie de înaltă performanță a ieșirii comenzilor — a inspirat motorul nostru RTK, DSL-ul de filtrare JSON, recuperarea ieșirii brute și fluxul suprapus RTK → Caveman.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Compresie reversibilă a contextului (SmartCrusher) — a inspirat motorul nostru <code>headroom</code> și modelul de marcaj pentru recuperare <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Cercetare privind compresia prompturilor (LLMLingua / LLMLingua-2) — a inspirat motorul nostru asincron <code>llmlingua</code>, sigur pentru cod și cu funcționare neîntreruptă în caz de eroare.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>Portarea JS/ONNX (MobileBERT / XLM-RoBERTa), utilizată ca backend bazat pe fire de execuție worker pentru motorul nostru LLMLingua.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Proiectul viral „de ce folosi multe cuvinte când puține cuvinte rezolvă” — filosofia sa de vorbire rudimentară stă la baza modului nostru standard de compresie și a peste 30 de reguli de eliminare a umpluturilor și condensare.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Compresie de înaltă performanță a ieșirii comenzilor — a inspirat motorul nostru RTK, DSL-ul de filtrare JSON, recuperarea ieșirii brute și fluxul suprapus RTK → Caveman.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Compresie reversibilă a contextului (SmartCrusher) — a inspirat motorul nostru <code>headroom</code> și modelul de marcaj pentru recuperare <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Cercetare privind compresia prompturilor (LLMLingua / LLMLingua-2) — a inspirat motorul nostru asincron <code>llmlingua</code>, sigur pentru cod și cu funcționare neîntreruptă în caz de eroare.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>Portarea JS/ONNX (MobileBERT / XLM-RoBERTa), utilizată ca backend bazat pe fire de execuție worker pentru motorul nostru LLMLingua.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Compresie de tokenuri pentru portugheza braziliană — stă la baza pachetului nostru lingvistic pt-BR: reducerea pleonasmelor și eliminarea umpluturilor, ajustate pentru gramatica portughezei braziliene.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Competența virală de programare YAGNI a „dezvoltatorului senior leneș” — a inspirat stilul nostru de ieșire <b>less-code</b>: orientarea către cea mai mică modificare funcțională, care reduce codul _generat_ (echivalentul pentru axa ieșirii al prozei concise din Caveman).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Stilul său de răspuns orientat mai întâi spre acțiune și adaptat persoanelor cu ADHD a fost transpus în stilul de ieșire concis al OmniRoute, disponibil în cinci limbi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Competența virală de programare YAGNI a „dezvoltatorului senior leneș” — a inspirat stilul nostru de ieșire <b>less-code</b>: orientarea către cea mai mică modificare funcțională, care reduce codul _generat_ (echivalentul pentru axa ieșirii al prozei concise din Caveman).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Stilul său de răspuns orientat mai întâi spre acțiune și adaptat persoanelor cu ADHD a fost transpus în stilul de ieșire concis al OmniRoute, disponibil în cinci limbi.</td></tr>
 </table>
 
 ### 🧩 Formate compacte, cercetarea tokenurilor și instrumente care țin cont de cod
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Notație de obiecte orientată pe tokenuri — modelul său columnar, cu antet urmat de rânduri, a modelat etapa noastră de compactare tabelară.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Formatul său compact pentru grafuri și concepția bazată pe profil generic au influențat compactarea tabelară din OmniRoute și formatul codecului Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Notație de obiecte orientată pe tokenuri — modelul său columnar, cu antet urmat de rânduri, a modelat etapa noastră de compactare tabelară.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Formatul său compact pentru grafuri și concepția bazată pe profil generic au influențat compactarea tabelară din OmniRoute și formatul codecului Headroom.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Implementarea MIT în TypeScript, integrată direct și extinsă drept codec cu profil generic pentru Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Cache Brotli/SQLite + diferență de context pentru fiecare sesiune — a inspirat motorul nostru <code>session-dedup</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Compactarea ieșirii Bash + profiluri MCP — a inspirat disciplina noastră de renunțare la compresie și reducerea manifestelor instrumentelor MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Compresie a ieșirii în funcție de conținut și de tipul fișierului, cu renunțare în caz de eșec — a validat distribuirea noastră în funcție de tip și omiterea compresiei când câștigul este sub pragul minim.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>„Găsește tokenurile-fantomă” — modelul său de externalizare + identificator recuperabil a influențat abordarea noastră privind externalizarea CCR.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Un model bazat pe graful sesiunii + deduplicarea liniilor între interacțiuni, care a influențat proiectarea mecanismului nostru session-dedup.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Cache Brotli/SQLite + diferență de context pentru fiecare sesiune — a inspirat motorul nostru <code>session-dedup</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Compactarea ieșirii Bash + profiluri MCP — a inspirat disciplina noastră de renunțare la compresie și reducerea manifestelor instrumentelor MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Compresie a ieșirii în funcție de conținut și de tipul fișierului, cu renunțare în caz de eșec — a validat distribuirea noastră în funcție de tip și omiterea compresiei când câștigul este sub pragul minim.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>„Găsește tokenurile-fantomă” — modelul său de externalizare + identificator recuperabil a influențat abordarea noastră privind externalizarea CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Un model bazat pe graful sesiunii + deduplicarea liniilor între interacțiuni, care a influențat proiectarea mecanismului nostru session-dedup.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON columnar în Rust + recuperare adresată după conținut + deduplicare între mesaje — a validat proiectarea motoarelor noastre <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> și invariantul stabil pentru cache „forma comprimată este independentă de poziție”.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Compresia schemelor și descrierilor instrumentelor MCP — a influențat reducerea cardinalității manifestelor instrumentelor MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Clasificarea hărților de depozite în stil Aider — a influențat explorarea noastră privind hărțile depozitelor / clasificarea rezultatelor regăsite.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Compresia schemelor și descrierilor instrumentelor MCP — a influențat reducerea cardinalității manifestelor instrumentelor MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Clasificarea hărților de depozite în stil Aider — a influențat explorarea noastră privind hărțile depozitelor / clasificarea rezultatelor regăsite.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Reducerea declarativă a ieșirii shell prin MCP — a validat compactarea noastră declarativă a ieșirii Bash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Set de instrumente pentru TypeScript Compiler API — a inspirat eliminarea comentariilor bazată pe parser, care păstrează literalii de tip șir, șablon și expresie regulată.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Set de instrumente pentru TypeScript Compiler API — a inspirat eliminarea comentariilor bazată pe parser, care păstrează literalii de tip șir, șablon și expresie regulată.</td></tr>
 </table>
 
 ### 🧠 Memorie și RAG
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Strat universal de memorie — modelul său de proxy ca limită de scriere/citire a influențat arhitectura noastră de memorie.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Agenți cu stare și memorie pe niveluri — au inspirat modelul nostru pe niveluri pentru Controlul și recuperarea contextului (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>Taxonomia ProblemMap a 16 moduri recurente de eșec RAG/LLM — vocabularul comun din ghidul nostru de depanare.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Strat universal de memorie — modelul său de proxy ca limită de scriere/citire a influențat arhitectura noastră de memorie.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Agenți cu stare și memorie pe niveluri — au inspirat modelul nostru pe niveluri pentru Controlul și recuperarea contextului (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>Taxonomia ProblemMap a 16 moduri recurente de eșec RAG/LLM — vocabularul comun din ghidul nostru de depanare.</td></tr>
 </table>
 
 ### 🛰️ Inspectarea traficului, MITM și proxy transparent
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Interceptarea/analiza MITM a traficului dintre asistentul de programare ↔ LLM a stat la baza cerințelor inițiale pentru Inspectorul de trafic. Patru module derivate anterior — îmbinarea SSE, normalizarea conversațiilor, mascarea secretelor și igienizarea anteturilor — au fost înlocuite cu implementări independente de tip clean-room, bazate pe standarde publice de protocol. Cele două suprafețe de trecere directă către gazdă (<code>passthrough.ts</code> și <code>_internal/bypass.cjs</code>) rămân implementări interne OmniRoute, clasificate independent; acestea nu au fost rescrise ca parte a înlocuirii respective.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Rutarea transparentă prin proxy pentru fiecare proces — a inspirat oprirea noastră MITM sigură în caz de blocare, expirările de inactivitate pentru socketuri, atribuirea proceselor prin <code>/proc</code> și capturarea TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Interceptarea/analiza MITM a traficului dintre asistentul de programare ↔ LLM a stat la baza cerințelor inițiale pentru Inspectorul de trafic. Patru module derivate anterior — îmbinarea SSE, normalizarea conversațiilor, mascarea secretelor și igienizarea anteturilor — au fost înlocuite cu implementări independente de tip clean-room, bazate pe standarde publice de protocol. Cele două suprafețe de trecere directă către gazdă (<code>passthrough.ts</code> și <code>_internal/bypass.cjs</code>) rămân implementări interne OmniRoute, clasificate independent; acestea nu au fost rescrise ca parte a înlocuirii respective.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Rutarea transparentă prin proxy pentru fiecare proces — a inspirat oprirea noastră MITM sigură în caz de blocare, expirările de inactivitate pentru socketuri, atribuirea proceselor prin <code>/proc</code> și capturarea TPROXY.</td></tr>
 </table>
 
 ### 📚 Date despre modele, observabilitate și interfață
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Bază de date deschisă cu specificațiile, prețurile și capabilitățile modelelor IA — sincronizată nativ în catalogul nostru de modele.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Biblioteca de grafuri bazată pe noduri care asigură funcționarea în timp real a Compression Studio și Combo/Routing Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>Vizualizarea în timp real a grafului fluxului de lucru din LangGraph Studio a inspirat vizualizarea în timp real a cascadei din studiourile noastre.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Modelul său de observabilitate urmă → interval → generare a influențat diagrama cascadă din Compression Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Observabilitate pentru rețeaua de servicii Istio — a inspirat indicatoarele noastre pentru disjunctoare și reprezentările vizuale ale muchiilor cu erori din Routing/Combo Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Sigle ale mărcilor IA/LLM care redau pictogramele furnizorilor în întregul nostru panou de control.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Furnizează steagurile SVG sub licență MIT utilizate de selectorul de limbă din README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Bază de date deschisă cu specificațiile, prețurile și capabilitățile modelelor IA — sincronizată nativ în catalogul nostru de modele.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Biblioteca de grafuri bazată pe noduri care asigură funcționarea în timp real a Compression Studio și Combo/Routing Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>Vizualizarea în timp real a grafului fluxului de lucru din LangGraph Studio a inspirat vizualizarea în timp real a cascadei din studiourile noastre.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Modelul său de observabilitate urmă → interval → generare a influențat diagrama cascadă din Compression Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Observabilitate pentru rețeaua de servicii Istio — a inspirat indicatoarele noastre pentru disjunctoare și reprezentările vizuale ale muchiilor cu erori din Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Sigle ale mărcilor IA/LLM care redau pictogramele furnizorilor în întregul nostru panou de control.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Furnizează steagurile SVG sub licență MIT utilizate de selectorul de limbă din README.</td></tr>
 </table>
 
 ### 🛡️ Securitate
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>O listă atent selecționată de biblioteci securizate în mod implicit, care ne ghidează alegerile de securitate (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>O listă atent selecționată de biblioteci securizate în mod implicit, care ne ghidează alegerile de securitate (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Instrumente complementare
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>A inspirat deduplicarea cererilor, soluția de rezervă de urgență fără costuri, strategiile Auto-Combo extensibile și clasificarea multilingvă a intențiilor.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Remaparea modelelor în funcție de cont, validarea căii executabilului și comportamentul etichetelor de plan au stat la baza mediului de execuție Antigravity din OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Formatul său compact pentru numărătoarea inversă până la resetarea cotei a inspirat afișarea corespunzătoare a limitei furnizorului în OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Integrările sale ACP au inspirat detectarea automată de către OmniRoute a agenților CLI instalați.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>A identificat suprafața cotei Grok Build; apoi OmniRoute a verificat și a corectat independent formatul efectiv al datelor transmise.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>A inspirat deduplicarea cererilor, soluția de rezervă de urgență fără costuri, strategiile Auto-Combo extensibile și clasificarea multilingvă a intențiilor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Remaparea modelelor în funcție de cont, validarea căii executabilului și comportamentul etichetelor de plan au stat la baza mediului de execuție Antigravity din OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Formatul său compact pentru numărătoarea inversă până la resetarea cotei a inspirat afișarea corespunzătoare a limitei furnizorului în OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Integrările sale ACP au inspirat detectarea automată de către OmniRoute a agenților CLI instalați.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>A identificat suprafața cotei Grok Build; apoi OmniRoute a verificat și a corectat independent formatul efectiv al datelor transmise.</td></tr>
 </table>
 
 ## 📄 Licență

@@ -72,7 +72,7 @@
 |                                   |          v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
 | --------------------------------- | :-----------------------: | :---------: | :--------------------: |
 | 🌐 pakalpojumu sniedzēji          |            352            |   **358**   |          380           |
-| 🧠 Unikāls tērzēšanas modelis IDs |           1320            |  **1374**   |          1475          |
+| 🧠 Unikāls tērzēšanas modelis IDs |           1320            |  **1374**   |          1491          |
 | 🖼️ Modalitātes tilts              | 🆕 vision + audio + video |      ✓      |           ✓            |
 | 📡 Radar bezmaksas katalogs       |      🆕 pieteikšanās      |      ✓      |           ✓            |
 | ⚖️ Kvotu zinoša plānošana         |      🆕 kvotas daļa       |      ✓      |           ✓            |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 Projekts</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tehnoloģiju steks</a></td>
     <td align="center"><a href="#-documentation">📖 Dokumentācija</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Līdzstrādnieki</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Līdzstrādnieki</a></td>
   </tr>
 </table>
 
@@ -1300,7 +1300,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   <tr><td nowrap><b>Neredzamība</b></td><td>wreq-js — JA3 / JA4 TLS pirkstu nospiedumu imitēšana, 3 līmeņu starpniekserveris</td></tr>
   <tr><td nowrap><b>Noturība</b></td><td>Ķēdes pārtraucējs (circuit breaker), eksponenciāla atkāpšanās, aizsardzība pret vienlaicīgu pieprasījumu lavīnu, automātiskā kombināciju pašatjaunošanās</td></tr>
   <tr><td nowrap><b>Žurnalēšana</b></td><td>pino — strukturēti JSON žurnāli ar pieprasījuma kontekstu</td></tr>
-  <tr><td nowrap><b>Testēšana</b></td><td>Node.js testu izpildītājs + Vitest — <b>56 000+ statiskas testu deklarācijas</b> vairāk nekā 7 800 izsekotos testu failos (vienību, integrācijas, E2E, drošības, ekosistēmas)</td></tr>
+  <tr><td nowrap><b>Testēšana</b></td><td>Node.js testu izpildītājs + Vitest — <b>60 000+ statiskas testu deklarācijas</b> vairāk nekā 8 400 izsekotos testu failos (vienību, integrācijas, E2E, drošības, ekosistēmas)</td></tr>
   <tr><td nowrap><b>Platformas</b></td><td>Darbvirsma (Electron) · Android (Termux) · PWA (jebkurā pārlūkā)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automātiska publicēšana npm + Docker Hub izlaišanas brīdī</td></tr>
   <tr><td nowrap><b>Saites</b></td><td><a href="https://omniroute.online">Tīmekļa vietne</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1380,7 +1380,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   <tr><td nowrap><b><a href="SECURITY.md">Drošības politika</a></b></td><td>Ievainojamību ziņošana un drošības prakse</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ceļvedis</a></b></td><td>67 valodu atbalsts, tulkošanas darbplūsma, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Laidiena kontrolsaraksts</a></b></td><td>Pirmslaidiena validācijas darbības</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Pārklājuma plāns</a></b></td><td>Testu pārklājuma stratēģija vairāk nekā 56,000 statisku testu deklarācijām vairāk nekā 7,800 izsekotos testu failos</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Pārklājuma plāns</a></b></td><td>Testu pārklājuma stratēģija vairāk nekā 60,000 statisku testu deklarācijām vairāk nekā 8,400 izsekotos testu failos</td></tr>
 </table>
 
 <br/>
@@ -1617,13 +1617,13 @@ Sirsnīgs paldies cilvēkiem, kuri finansē OmniRoute no saviem līdzekļiem —
 
 <div align="center">
 
-## 👥 900+ līdzautoru
+## 👥 1,000+ līdzautoru
 
 </div>
 
-[![Līdzautori](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Līdzautori](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Audits veikts 2026-10-18 aktuālās <code>release/v3.8.52</code> zara galotnes <code>ad160ab2d1</code> stāvoklī (6 826 komiti): <b>993 normalizētas cilvēku Git identitātes</b> — 707 ir norādītas kā komitu autori (tostarp uzturētājs), bet 286 parādās tikai tieši norādītās <code>Co-authored-by</code> piekabēs. Uzskaitē tiek izmantots <code>.mailmap</code>, e-pasta adreses tiek salīdzinātas, neņemot vērā reģistru, skaitliskās un parastās GitHub noreply adreses tiek apvienotas tikai tad, ja tās kodē vienu un to pašu lietotājvārdu, tiek izslēgtas 26 robotu/aģentu/pakalpojumu/vietturu identitātes, un parastās e-pasta adreses netiek apvienotas tikai tāpēc, ka sakrīt to parādāmie vārdi. 2026-08-24 auditā tika publicēts skaits 639; atkārtoti izmantojot šo metodi minētā audita bāzei <code>ac02c5b42f</code>, tiek iegūts skaits 619, tāpēc pieaugumu rada jauni līdzautori, nevis mazāk stingra metode.</sub>
+<sub>Audits veikts 2026-11-02 aktuālās <code>release/v3.8.53</code> zara galotnes <code>1c7135e0fb</code> stāvoklī (7 972 komiti): <b>1,074 normalizētas cilvēku Git identitātes</b> — 759 ir norādītas kā komitu autori (tostarp uzturētājs), bet 315 parādās tikai tieši norādītās <code>Co-authored-by</code> piekabēs. Uzskaitē tiek izmantots <code>.mailmap</code>, e-pasta adreses tiek salīdzinātas, neņemot vērā reģistru, skaitliskās un parastās GitHub noreply adreses tiek apvienotas tikai tad, ja tās kodē vienu un to pašu lietotājvārdu, tiek izslēgtas 29 robotu/aģentu/pakalpojumu/vietturu identitātes, un parastās e-pasta adreses netiek apvienotas tikai tāpēc, ka sakrīt to parādāmie vārdi. 2026-08-24 auditā tika publicēts skaits 639; atkārtoti izmantojot šo metodi minētā audita bāzei <code>ac02c5b42f</code>, tiek iegūts skaits 619, tāpēc pieaugumu rada jauni līdzautori, nevis mazāk stingra metode.</sub>
 
 ### Kā sniegt ieguldījumu
 
@@ -1683,25 +1683,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute balstās uz milžu pleciem. Tas aizsākās kā **[9router](https://github.com/decolua/9router)** atzarojums un Go projekta **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** TypeScript ports — un kopš tā laika katru tālāk minēto apakšsistēmu ir iedvesmojis kāds atvērtā pirmkoda projekts, kas to paveica pirmais. Katrs no tiem ir veidojis kādu konkrētu OmniRoute daļu. Šī ir mūsu pateicība tiem visiem. 🙏
 
-> ⭐ zvaigžņu skaits pārbaudīts, izmantojot GitHub REST API, 2026. gada 18. oktobrī — piešķiriet šiem projektiem zvaigzni. Norādītais skaits ir precīzs momentuzņēmums konkrētajā datumā un laika gaitā, protams, mainīsies.
+> ⭐ zvaigžņu skaits pārbaudīts, izmantojot GitHub REST API, 2026-11-03. oktobrī — piešķiriet šiem projektiem zvaigzni. Norādītais skaits ir precīzs momentuzņēmums konkrētajā datumā un laika gaitā, protams, mainīsies.
 
 ### 🧬 Izcelsme un vārteja
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Sākotnējais projekts, uz kura pamata ir veidots šis atzarojums — šeit tas papildināts ar multimodālām API un pilnībā pārrakstīts TypeScript valodā.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Go implementācija, kas iedvesmoja šo JavaScript / TypeScript portu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>MI vārteja, kuras publiskā cenu datu kopa nodrošina mūsu izmaksu uzskaites sinhronizāciju un kuras nodrošinātāju normalizācijas modelis palīdzēja veidot mūsu maršrutēšanu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>MIT pirmkods, kas pielāgots iekļautajam ChatGPT Web → Codex Responses tiltam, tostarp pārlūka sesijas, atbilžu kadrēšanas, lietojuma un tīmekļa meklēšanas adapteriem.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Modeļi, kas pārnesti uz straumes atkopšanu, aizstājvārdiem bez spriešanas, rezerves tīmekļa meklēšanu, slīdošā loga ierobežojumiem, žurnālu rediģēšanu un pastiprinātām palaišanas plūsmām.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Cursor Composer rīku izvēles, izvades ierobežojumu un rīku apstiprināšanas modeļi, kas pielāgoti vietējam Cursor izpildītājam.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Jaunas pieteikšanās un atsvaidzināšanas pilnvaru rotācijas modeļi, kas pārnesti uz Codex OAuth atkārtoto autentifikāciju.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Ar Claude Code saderīgās transformāciju noklusējuma vērtības un norēķinu galveņu darbība, kas vispārināta OmniRoute konfigurācijas vadītajā tiltā.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Sākotnējais projekts, uz kura pamata ir veidots šis atzarojums — šeit tas papildināts ar multimodālām API un pilnībā pārrakstīts TypeScript valodā.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Go implementācija, kas iedvesmoja šo JavaScript / TypeScript portu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>MI vārteja, kuras publiskā cenu datu kopa nodrošina mūsu izmaksu uzskaites sinhronizāciju un kuras nodrošinātāju normalizācijas modelis palīdzēja veidot mūsu maršrutēšanu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>MIT pirmkods, kas pielāgots iekļautajam ChatGPT Web → Codex Responses tiltam, tostarp pārlūka sesijas, atbilžu kadrēšanas, lietojuma un tīmekļa meklēšanas adapteriem.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Modeļi, kas pārnesti uz straumes atkopšanu, aizstājvārdiem bez spriešanas, rezerves tīmekļa meklēšanu, slīdošā loga ierobežojumiem, žurnālu rediģēšanu un pastiprinātām palaišanas plūsmām.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Cursor Composer rīku izvēles, izvades ierobežojumu un rīku apstiprināšanas modeļi, kas pielāgoti vietējam Cursor izpildītājam.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Jaunas pieteikšanās un atsvaidzināšanas pilnvaru rotācijas modeļi, kas pārnesti uz Codex OAuth atkārtoto autentifikāciju.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Ar Claude Code saderīgās transformāciju noklusējuma vērtības un norēķinu galveņu darbība, kas vispārināta OmniRoute konfigurācijas vadītajā tiltā.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Tā Grok modeļu kartējumi, viltus TypeError Statsig ģenerators, pieprasījumu un ierīču noklusējuma vērtības, kā arī NDJSON atbilžu procesors tika būtiski pielāgoti OmniRoute Grok Web izpildītājam.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>Galvenais netiešais pirmkoda avots, kas ir grok2api-merged pamatā; tā modeļu, galveņu, lietderīgās slodzes, Statsig un procesora implementācijas ir saglabātas Grok Web izcelsmes ķēdē.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Pamatā esošais MIT pirmkods Grok lietderīgās slodzes un ierīču noklusējuma vērtībām, Statsig ģeneratoram un <code>result.response</code> procesoram, kas pārmantots caur TQZHR un grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>Galvenais netiešais pirmkoda avots, kas ir grok2api-merged pamatā; tā modeļu, galveņu, lietderīgās slodzes, Statsig un procesora implementācijas ir saglabātas Grok Web izcelsmes ķēdē.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Pamatā esošais MIT pirmkods Grok lietderīgās slodzes un ierīču noklusējuma vērtībām, Statsig ģeneratoram un <code>result.response</code> procesoram, kas pārmantots caur TQZHR un grok2api-merged.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Netiešs avots, ko grok2api-merged norādījis sava starpniekserveru pūla slāņa izcelsmei; OmniRoute saglabā šo izcelsmes norādi, taču neapgalvo, ka tā ierobežotajā Grok Web izpildītājā būtu pārnests starpniekserveru pūls.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Tā ar sīkdatnēm autentificētais Grok starpniekserveris un <code>result.response.token</code> straumēšanas modelis palīdzēja veidot OmniRoute Grok Web transportu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Tā ar sīkdatnēm autentificētais Grok starpniekserveris un <code>result.response.token</code> straumēšanas modelis palīdzēja veidot OmniRoute Grok Web transportu.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Sākotnējā Grok Web implementācija izmantoja tā HTTP/pārlūka augšupstraumes dizainu; tās tiešais HTTP ceļš ir atvasināts no GrokProxy, tāpēc netiek apgalvots, ka būtu veikts neatkarīgs koda ports.</td></tr>
 </table>
 
@@ -1709,81 +1709,81 @@ OmniRoute balstās uz milžu pleciem. Tas aizsākās kā **[9router](https://git
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Vīrusu popularitāti ieguvušais projekts „kāpēc lietot daudz žetonu, ja pietiek ar dažiem” — tā alu cilvēka runas filozofija ir mūsu standarta saspiešanas režīma un vairāk nekā 30 liekvārdības novēršanas un kondensēšanas kārtulu pamatā.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Augstas veiktspējas komandu izvades saspiešana — iedvesmoja mūsu RTK dzini, JSON filtru DSL, neapstrādātās izvades atkopšanu un secīgo RTK → Caveman konveijeru.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Atgriezeniska konteksta saspiešana (SmartCrusher) — iedvesmoja mūsu <code>headroom</code> dzini un <code>ccr</code> izgūšanas marķiera modeli.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Uzvedņu saspiešanas pētījumi (LLMLingua / LLMLingua-2) — iedvesmoja mūsu asinhrono, kodam drošo, kļūmes gadījumā sākotnējo saturu saglabājošo <code>llmlingua</code> dzini.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>JS/ONNX ports (MobileBERT / XLM-RoBERTa), kas tiek izmantots kā mūsu LLMLingua dziņa darbinātājpavediena aizmugursistēma.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Vīrusu popularitāti ieguvušais projekts „kāpēc lietot daudz žetonu, ja pietiek ar dažiem” — tā alu cilvēka runas filozofija ir mūsu standarta saspiešanas režīma un vairāk nekā 30 liekvārdības novēršanas un kondensēšanas kārtulu pamatā.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Augstas veiktspējas komandu izvades saspiešana — iedvesmoja mūsu RTK dzini, JSON filtru DSL, neapstrādātās izvades atkopšanu un secīgo RTK → Caveman konveijeru.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Atgriezeniska konteksta saspiešana (SmartCrusher) — iedvesmoja mūsu <code>headroom</code> dzini un <code>ccr</code> izgūšanas marķiera modeli.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Uzvedņu saspiešanas pētījumi (LLMLingua / LLMLingua-2) — iedvesmoja mūsu asinhrono, kodam drošo, kļūmes gadījumā sākotnējo saturu saglabājošo <code>llmlingua</code> dzini.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>JS/ONNX ports (MobileBERT / XLM-RoBERTa), kas tiek izmantots kā mūsu LLMLingua dziņa darbinātājpavediena aizmugursistēma.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>pt-BR žetonu saspiešana — nodrošina mūsu pt-BR valodas pakotni: pleonasmu samazināšanu un liekvārdu noņemšanu, kas pielāgota Brazīlijas portugāļu valodas gramatikai.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Vīrusu popularitāti ieguvusī „slinkā vecākā izstrādātāja” YAGNI kodēšanas prasme — iedvesmoja mūsu <b>less-code</b> izvades stilu: virzību uz mazākajām funkcionējošajām izmaiņām, kas samazina _ģenerētā_ koda apjomu (izvades ass līdzinieks Caveman lakoniskajai prozai).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Tā uz darbībām orientētais un cilvēkiem ar UDHS draudzīgais atbilžu stils tika pielāgots OmniRoute kodolīgajam izvades stilam piecās valodās.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Vīrusu popularitāti ieguvusī „slinkā vecākā izstrādātāja” YAGNI kodēšanas prasme — iedvesmoja mūsu <b>less-code</b> izvades stilu: virzību uz mazākajām funkcionējošajām izmaiņām, kas samazina _ģenerētā_ koda apjomu (izvades ass līdzinieks Caveman lakoniskajai prozai).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Tā uz darbībām orientētais un cilvēkiem ar UDHS draudzīgais atbilžu stils tika pielāgots OmniRoute kodolīgajam izvades stilam piecās valodās.</td></tr>
 </table>
 
 ### 🧩 Kompakti formāti, žetonu izpēte un kodu izprotoši rīki
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Uz žetoniem orientēta objektu notācija — tās kolonnveida galvenes un rindu modelis noteica mūsu tabulārās kompaktēšanas posma aprises.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Tā kompaktais grafa formāts un vispārīgā profila dizains ietekmēja OmniRoute tabulāro kompaktēšanu un Headroom kodeka formātu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Uz žetoniem orientēta objektu notācija — tās kolonnveida galvenes un rindu modelis noteica mūsu tabulārās kompaktēšanas posma aprises.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Tā kompaktais grafa formāts un vispārīgā profila dizains ietekmēja OmniRoute tabulāro kompaktēšanu un Headroom kodeka formātu.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>MIT licencētā TypeScript implementācija, kas tieši iekļauta un paplašināta kā Headroom vispārīgā profila kodeks.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Brotli/SQLite kešatmiņa un katras sesijas konteksta izmaiņas — iedvesmoja mūsu <code>session-dedup</code> dzini.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Bash izvades kompaktēšana un MCP profili — iedvesmoja mūsu disciplinēto atteikšanos no saspiešanas un MCP rīku manifesta samazināšanu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Saturu izprotoša izvades saspiešana katram faila tipam ar kļūmes apzinātu atteikšanos — apstiprināja mūsu tipam atbilstošo maršrutēšanu un saspiešanas izlaišanu, ja ieguvums ir pārāk mazs.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>„Atrodi spoku žetonus” — tā ārējas glabāšanas un atkopjama tura modelis ietekmēja mūsu pieeju CCR ārējai glabāšanai.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Sesijas grafa un starpziņojumu rindu dublikātu novēršanas paraugs, kas ietekmēja mūsu sesijas dublikātu novēršanas dizainu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite kešatmiņa un katras sesijas konteksta izmaiņas — iedvesmoja mūsu <code>session-dedup</code> dzini.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash izvades kompaktēšana un MCP profili — iedvesmoja mūsu disciplinēto atteikšanos no saspiešanas un MCP rīku manifesta samazināšanu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Saturu izprotoša izvades saspiešana katram faila tipam ar kļūmes apzinātu atteikšanos — apstiprināja mūsu tipam atbilstošo maršrutēšanu un saspiešanas izlaišanu, ja ieguvums ir pārāk mazs.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>„Atrodi spoku žetonus” — tā ārējas glabāšanas un atkopjama tura modelis ietekmēja mūsu pieeju CCR ārējai glabāšanai.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Sesijas grafa un starpziņojumu rindu dublikātu novēršanas paraugs, kas ietekmēja mūsu sesijas dublikātu novēršanas dizainu.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust kolonnveida JSON, pēc satura adresēta izgūšana un starpziņojumu dublikātu novēršana — apstiprināja mūsu <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> dziņu dizainu un kešatmiņas stabilitātes invariantu „saspiestā forma nav atkarīga no pozīcijas”.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>MCP rīku shēmu un aprakstu saspiešana — ietekmēja mūsu MCP rīku manifesta kardinalitātes samazināšanu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Aider stila repozitorija kartes ranžēšana — ietekmēja mūsu repozitorija kartes un izgūšanas ranžēšanas izpēti.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP rīku shēmu un aprakstu saspiešana — ietekmēja mūsu MCP rīku manifesta kardinalitātes samazināšanu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider stila repozitorija kartes ranžēšana — ietekmēja mūsu repozitorija kartes un izgūšanas ranžēšanas izpēti.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Deklaratīva čaulas izvades samazināšana, izmantojot MCP — apstiprināja mūsu deklaratīvo bash izvades kompaktēšanu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>TypeScript Compiler API rīkkopa — iedvesmoja mūsu parsētājā balstīto komentāru noņemšanu, kas saglabā virkņu, veidņu un regulāro izteiksmju literāļus.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API rīkkopa — iedvesmoja mūsu parsētājā balstīto komentāru noņemšanu, kas saglabā virkņu, veidņu un regulāro izteiksmju literāļus.</td></tr>
 </table>
 
 ### 🧠 Atmiņa un RAG
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Universāls atmiņas slānis — tā starpniekservera kā rakstīšanas/lasīšanas robežas modelis veidoja mūsu atmiņas arhitektūru.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Stāvokli saglabājoši aģenti ar līmeņotu atmiņu — iedvesmoja mūsu līmeņoto konteksta kontroles un atkopšanas (CCR) modeli.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>ProblemMap taksonomija ar 16 atkārtotiem RAG/LLM kļūmju režīmiem — kopīgā terminoloģija mūsu problēmu novēršanas rokasgrāmatā.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Universāls atmiņas slānis — tā starpniekservera kā rakstīšanas/lasīšanas robežas modelis veidoja mūsu atmiņas arhitektūru.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Stāvokli saglabājoši aģenti ar līmeņotu atmiņu — iedvesmoja mūsu līmeņoto konteksta kontroles un atkopšanas (CCR) modeli.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>ProblemMap taksonomija ar 16 atkārtotiem RAG/LLM kļūmju režīmiem — kopīgā terminoloģija mūsu problēmu novēršanas rokasgrāmatā.</td></tr>
 </table>
 
 ### 🛰️ Datplūsmas pārbaude, MITM un caurspīdīgs starpniekserveris
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Kodēšanas asistenta ↔ LLM datplūsmas MITM pārtveršana/analīze palīdzēja noteikt sākotnējās datplūsmas inspektora prasības. Četri iepriekš atvasināti moduļi — SSE apvienošana, sarunu normalizēšana, noslēpumu maskēšana un galveņu sanitizēšana — ir aizstāti ar neatkarīgām tīrtelpas implementācijām, kuru pamatā ir publiski protokolu standarti. Abas resursdatora tiešās caurlaides saskarnes (<code>passthrough.ts</code> un <code>_internal/bypass.cjs</code>) joprojām ir neatkarīgi klasificētas OmniRoute iekšējās implementācijas; šīs aizstāšanas ietvaros tās netika pārrakstītas.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Caurspīdīga starpniekservera maršrutēšana katram procesam — iedvesmoja mūsu pret avārijām drošo MITM darbības pārtraukšanu, ligzdu dīkstāves noildzes, procesu attiecināšanu, izmantojot <code>/proc</code>, un TPROXY tvēršanu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Kodēšanas asistenta ↔ LLM datplūsmas MITM pārtveršana/analīze palīdzēja noteikt sākotnējās datplūsmas inspektora prasības. Četri iepriekš atvasināti moduļi — SSE apvienošana, sarunu normalizēšana, noslēpumu maskēšana un galveņu sanitizēšana — ir aizstāti ar neatkarīgām tīrtelpas implementācijām, kuru pamatā ir publiski protokolu standarti. Abas resursdatora tiešās caurlaides saskarnes (<code>passthrough.ts</code> un <code>_internal/bypass.cjs</code>) joprojām ir neatkarīgi klasificētas OmniRoute iekšējās implementācijas; šīs aizstāšanas ietvaros tās netika pārrakstītas.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Caurspīdīga starpniekservera maršrutēšana katram procesam — iedvesmoja mūsu pret avārijām drošo MITM darbības pārtraukšanu, ligzdu dīkstāves noildzes, procesu attiecināšanu, izmantojot <code>/proc</code>, un TPROXY tvēršanu.</td></tr>
 </table>
 
 ### 📚 Modeļu dati, novērojamība un lietotāja saskarne
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Atvērta MI modeļu specifikāciju, cenu un iespēju datubāze — iebūvēti sinhronizēta ar mūsu modeļu katalogu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Uz mezgliem balstīta grafu bibliotēka, kas nodrošina mūsu reāllaika saspiešanas studijas un kombināciju/maršrutēšanas studijas darbību.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>LangGraph Studio darbplūsmas grafika vizualizācija reāllaikā iedvesmoja mūsu studiju reāllaika kaskādes skatu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Tā novērojamības modelis „izsekojums → laidums → ģenerēšana” veidoja mūsu saspiešanas studijas ūdenskrituma skatu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Istio pakalpojumu režģa novērojamība — iedvesmoja mūsu ķēdes pārtraucēju emblēmas un kļūdu savienojumu vizuālos elementus maršrutēšanas/kombināciju studijā.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>MI/LLM zīmolu logotipi, kas attēlo pakalpojumu sniedzēju ikonas visā mūsu informācijas panelī.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Nodrošina ar MIT licenci licencētos SVG karogus, ko izmanto README valodas atlasītājs.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Atvērta MI modeļu specifikāciju, cenu un iespēju datubāze — iebūvēti sinhronizēta ar mūsu modeļu katalogu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Uz mezgliem balstīta grafu bibliotēka, kas nodrošina mūsu reāllaika saspiešanas studijas un kombināciju/maršrutēšanas studijas darbību.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studio darbplūsmas grafika vizualizācija reāllaikā iedvesmoja mūsu studiju reāllaika kaskādes skatu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Tā novērojamības modelis „izsekojums → laidums → ģenerēšana” veidoja mūsu saspiešanas studijas ūdenskrituma skatu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio pakalpojumu režģa novērojamība — iedvesmoja mūsu ķēdes pārtraucēju emblēmas un kļūdu savienojumu vizuālos elementus maršrutēšanas/kombināciju studijā.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>MI/LLM zīmolu logotipi, kas attēlo pakalpojumu sniedzēju ikonas visā mūsu informācijas panelī.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Nodrošina ar MIT licenci licencētos SVG karogus, ko izmanto README valodas atlasītājs.</td></tr>
 </table>
 
 ### 🛡️ Drošība
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Atlasīts pēc noklusējuma drošu bibliotēku saraksts, kas nosaka mūsu drošības risinājumu izvēli (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Atlasīts pēc noklusējuma drošu bibliotēku saraksts, kas nosaka mūsu drošības risinājumu izvēli (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Papildinošie rīki
 
 <table>
   <tr><th align="left">Projekts</th><th align="center">⭐</th><th align="left">Kā tas iedvesmoja OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Iedvesmoja pieprasījumu deduplicēšanu, ārkārtas bezmaksas atkāpšanās risinājumu, iespraužamas Auto-Combo stratēģijas un daudzvalodu nolūka klasifikāciju.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Tā kontu ņemošā modeļu pārkartēšana, izpildāmā faila ceļa validācija un plānu etiķešu darbība palīdzēja veidot OmniRoute Antigravity izpildlaika vidi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Tā kompaktais kvotas atiestatīšanas atpakaļskaitīšanas formāts iedvesmoja atbilstošo pakalpojumu sniedzēja ierobežojumu attēlojumu OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Tā ACP integrācijas iedvesmoja OmniRoute instalēto CLI aģentu automātisko noteikšanu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Identificēja Grok Build kvotas saskarni; pēc tam OmniRoute neatkarīgi pārbaudīja un izlaboja faktisko datu pārraides formātu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Iedvesmoja pieprasījumu deduplicēšanu, ārkārtas bezmaksas atkāpšanās risinājumu, iespraužamas Auto-Combo stratēģijas un daudzvalodu nolūka klasifikāciju.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Tā kontu ņemošā modeļu pārkartēšana, izpildāmā faila ceļa validācija un plānu etiķešu darbība palīdzēja veidot OmniRoute Antigravity izpildlaika vidi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Tā kompaktais kvotas atiestatīšanas atpakaļskaitīšanas formāts iedvesmoja atbilstošo pakalpojumu sniedzēja ierobežojumu attēlojumu OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Tā ACP integrācijas iedvesmoja OmniRoute instalēto CLI aģentu automātisko noteikšanu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Identificēja Grok Build kvotas saskarni; pēc tam OmniRoute neatkarīgi pārbaudīja un izlaboja faktisko datu pārraides formātu.</td></tr>
 </table>
 
 ## 📄 Licence

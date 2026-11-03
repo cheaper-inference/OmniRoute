@@ -14,7 +14,7 @@ OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය 
 
 මූලික හැකියාවන්:
 
-- CLI/tools සඳහා OpenAI-අනුකූල API මතුපිට (380 සපයන්නන්, 156 විධායක මොඩියුල)
+- CLI/tools සඳහා OpenAI-අනුකූල API මතුපිට (380 සපයන්නන්, 158 විධායක මොඩියුල)
 - සපයන්නන්ගේ ආකෘති හරහාRequest/response පරිවර්තනය
 - Model Combo Falback (බහු මාදිලි අනුපිළිවෙල)
 - `compositeTiers` මඟින් ධාවන කාල අනුපිළිවෙල සමඟ ව්‍යුහගත සංයුක්ත පියවර (`provider + model + connection`).

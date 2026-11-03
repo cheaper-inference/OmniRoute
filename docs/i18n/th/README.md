@@ -72,7 +72,7 @@
 |                                 |        เวอร์ชัน 3.8.50         | **เวอร์ชัน 3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :----------------------------: | :-----------------: | :-------------------: |
 | ผู้ให้บริการ 🌐                 |              352               |       **358**       |          380          |
-| 🧠 รูปแบบการแชทที่ไม่ซ้ำใคร IDs |              1320              |      **1374**       |         1475          |
+| 🧠 รูปแบบการแชทที่ไม่ซ้ำใคร IDs |              1320              |      **1374**       |         1491          |
 | สะพาน Modality 🖼️               | 🆕 วิสัยทัศน์ + เสียง + วิดีโอ |          ✓          |           ✓           |
 | แคตตาล็อก 📡 Radar ฟรี          |           เลือกใช้🆕           |          ✓          |           ✓           |
 | ⚖️ การกำหนดเวลาที่รับรู้โควต้า  |       🆕 โควต้า-แบ่งปัน        |          ✓          |           ✓           |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 โปรเจกต์</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ เทคโนโลยีที่ใช้</a></td>
     <td align="center"><a href="#-documentation">📖 เอกสารประกอบ</a></td>
-    <td align="center"><a href="#-900-contributors">👥 ผู้มีส่วนร่วม</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 ผู้มีส่วนร่วม</a></td>
   </tr>
 </table>
 
@@ -1297,7 +1297,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 จะข้า�
   <tr><td nowrap><b>การพรางตัว</b></td><td>wreq-js — การปลอมแปลงลายนิ้วมือ TLS แบบ JA3 / JA4, พร็อกซี 3 ระดับ</td></tr>
   <tr><td nowrap><b>ความทนทาน</b></td><td>Circuit breaker, exponential backoff, anti-thundering-herd, การฟื้นฟูตัวเองของ auto-combo</td></tr>
   <tr><td nowrap><b>การบันทึก日志</b></td><td>pino — บันทึกแบบ JSON ที่มีโครงสร้างพร้อมบริบทของคำขอ</td></tr>
-  <tr><td nowrap><b>การทดสอบ</b></td><td>Node.js test runner + Vitest — <b>การประกาศการทดสอบแบบคงที่กว่า 56,000 รายการ</b> ในไฟล์ทดสอบที่ติดตามกว่า 7,800 ไฟล์ (unit, integration, E2E, security, ecosystem)</td></tr>
+  <tr><td nowrap><b>การทดสอบ</b></td><td>Node.js test runner + Vitest — <b>การประกาศการทดสอบแบบคงที่กว่า 60,000 รายการ</b> ในไฟล์ทดสอบที่ติดตามกว่า 8,400 ไฟล์ (unit, integration, E2E, security, ecosystem)</td></tr>
   <tr><td nowrap><b>แพลตฟอร์ม</b></td><td>เดสก์ท็อป (Electron) · Android (Termux) · PWA (เบราว์เซอร์ใดก็ได้)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — เผยแพร่ npm อัตโนมัติ + Docker Hub เมื่อออกเวอร์ชัน</td></tr>
   <tr><td nowrap><b>ลิงก์</b></td><td><a href="https://omniroute.online">เว็บไซต์</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1377,7 +1377,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 จะข้า�
   <tr><td nowrap><b><a href="SECURITY.md">นโยบายความปลอดภัย</a></b></td><td>การรายงานช่องโหว่และแนวปฏิบัติด้านความปลอดภัย</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">คู่มือ i18n</a></b></td><td>การรองรับ 67 ภาษา เวิร์กโฟลว์การแปล และ RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">รายการตรวจสอบการเผยแพร่</a></b></td><td>ขั้นตอนการตรวจสอบความถูกต้องก่อนเผยแพร่</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">แผนความครอบคลุม</a></b></td><td>กลยุทธ์ความครอบคลุมของการทดสอบสำหรับการประกาศการทดสอบแบบสแตติกกว่า 56,000 รายการ ในไฟล์ทดสอบที่ติดตามกว่า 7,800 ไฟล์</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">แผนความครอบคลุม</a></b></td><td>กลยุทธ์ความครอบคลุมของการทดสอบสำหรับการประกาศการทดสอบแบบสแตติกกว่า 60,000 รายการ ในไฟล์ทดสอบที่ติดตามกว่า 8,400 ไฟล์</td></tr>
 </table>
 
 <br/>
@@ -1614,13 +1614,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 จะข้า�
 
 <div align="center">
 
-## 👥 ผู้มีส่วนร่วมกว่า 900 คน
+## 👥 ผู้มีส่วนร่วมกว่า 1,000 คน
 
 </div>
 
-[![ผู้มีส่วนร่วม](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![ผู้มีส่วนร่วม](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>ตรวจสอบเมื่อ 2026-10-18 ที่ปลายสาขา <code>release/v3.8.52</code> ซึ่งใช้งานอยู่ ณ commit <code>ad160ab2d1</code> (6,826 commits): <b>ข้อมูลระบุตัวตน Git ของบุคคลที่ปรับให้เป็นมาตรฐานแล้ว 993 รายการ</b> — 707 รายการปรากฏเป็นผู้เขียน commit (รวมถึงผู้ดูแลโครงการ) และ 286 รายการปรากฏเฉพาะในส่วนท้าย <code>Co-authored-by</code> ที่ระบุไว้อย่างชัดเจน การสำรวจนี้ใช้ <code>.mailmap</code> เปรียบเทียบที่อยู่อีเมลโดยไม่คำนึงถึงตัวพิมพ์เล็กและตัวพิมพ์ใหญ่ เชื่อมโยงที่อยู่ GitHub noreply แบบตัวเลขและแบบข้อความธรรมดาเฉพาะเมื่อทั้งคู่เข้ารหัสชื่อผู้ใช้เดียวกัน ไม่รวมข้อมูลระบุตัวตนของบอต/เอเจนต์/บริการ/ตัวแทนชั่วคราว 26 รายการ และไม่รวมที่อยู่อีเมลทั่วไปเข้าด้วยกันเพียงเพราะชื่อที่แสดงตรงกัน การตรวจสอบเมื่อ 2026-08-24 เผยแพร่ตัวเลข 639 รายการ แต่เมื่อนำวิธีนี้ไปรันซ้ำกับฐาน <code>ac02c5b42f</code> ของการตรวจสอบครั้งดังกล่าว จะได้ 619 รายการ ดังนั้นจำนวนที่เพิ่มขึ้นจึงมาจากผู้มีส่วนร่วมรายใหม่ ไม่ใช่จากการใช้วิธีที่ผ่อนปรนกว่าเดิม</sub>
+<sub>ตรวจสอบเมื่อ 2026-11-02 ที่ปลายสาขา <code>release/v3.8.53</code> ซึ่งใช้งานอยู่ ณ commit <code>1c7135e0fb</code> (7,972 commits): <b>ข้อมูลระบุตัวตน Git ของบุคคลที่ปรับให้เป็นมาตรฐานแล้ว 1,074 รายการ</b> — 759 รายการปรากฏเป็นผู้เขียน commit (รวมถึงผู้ดูแลโครงการ) และ 315 รายการปรากฏเฉพาะในส่วนท้าย <code>Co-authored-by</code> ที่ระบุไว้อย่างชัดเจน การสำรวจนี้ใช้ <code>.mailmap</code> เปรียบเทียบที่อยู่อีเมลโดยไม่คำนึงถึงตัวพิมพ์เล็กและตัวพิมพ์ใหญ่ เชื่อมโยงที่อยู่ GitHub noreply แบบตัวเลขและแบบข้อความธรรมดาเฉพาะเมื่อทั้งคู่เข้ารหัสชื่อผู้ใช้เดียวกัน ไม่รวมข้อมูลระบุตัวตนของบอต/เอเจนต์/บริการ/ตัวแทนชั่วคราว 29 รายการ และไม่รวมที่อยู่อีเมลทั่วไปเข้าด้วยกันเพียงเพราะชื่อที่แสดงตรงกัน การตรวจสอบเมื่อ 2026-08-24 เผยแพร่ตัวเลข 639 รายการ แต่เมื่อนำวิธีนี้ไปรันซ้ำกับฐาน <code>ac02c5b42f</code> ของการตรวจสอบครั้งดังกล่าว จะได้ 619 รายการ ดังนั้นจำนวนที่เพิ่มขึ้นจึงมาจากผู้มีส่วนร่วมรายใหม่ ไม่ใช่จากการใช้วิธีที่ผ่อนปรนกว่าเดิม</sub>
 
 ### วิธีมีส่วนร่วม
 
@@ -1680,25 +1680,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute ยืนอยู่บนไหล่ของยักษ์ใหญ่ โดยเริ่มต้นจากการ fork **[9router](https://github.com/decolua/9router)** และการพอร์ตโปรเจกต์ภาษา Go อย่าง **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** มายัง TypeScript — และจากจุดนั้น ระบบย่อยทุกส่วนด้านล่างล้วนได้รับแรงบันดาลใจจากโปรเจกต์โอเพนซอร์สที่บุกเบิกมาก่อน แต่ละโปรเจกต์มีส่วนหล่อหลอมองค์ประกอบที่เป็นรูปธรรมของ OmniRoute นี่คือคำขอบคุณจากเราถึงทุกโปรเจกต์เหล่านั้น 🙏
 
-> ⭐ จำนวนดาวได้รับการตรวจสอบจาก REST API ของ GitHub เมื่อวันที่ 18 ตุลาคม 2026 — อย่าลืมไปกดดาวให้โปรเจกต์เหล่านี้ ตัวเลขดังกล่าวเป็นภาพรวม ณ วันที่ระบุอย่างแม่นยำและย่อมเปลี่ยนแปลงไปตามธรรมชาติ
+> ⭐ จำนวนดาวได้รับการตรวจสอบจาก REST API ของ GitHub เมื่อวันที่ 2026-11-03 — อย่าลืมไปกดดาวให้โปรเจกต์เหล่านี้ ตัวเลขดังกล่าวเป็นภาพรวม ณ วันที่ระบุอย่างแม่นยำและย่อมเปลี่ยนแปลงไปตามธรรมชาติ
 
 ### 🧬 ที่มาและเกตเวย์
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">สร้างแรงบันดาลใจให้ OmniRoute อย่างไร</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>โปรเจกต์ต้นฉบับที่ fork นี้สร้างขึ้นต่อยอดจากมัน — โดยขยายให้รองรับ API แบบหลายโมดัลและเขียนใหม่ทั้งหมดด้วย TypeScript</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>อิมพลีเมนเทชันภาษา Go ที่สร้างแรงบันดาลใจให้กับการพอร์ตมายัง JavaScript / TypeScript นี้</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>เกตเวย์ AI ซึ่งชุดข้อมูลราคาสาธารณะถูกใช้เป็นข้อมูลให้กับการซิงค์การติดตามต้นทุนของเรา และโมเดลการปรับผู้ให้บริการให้เป็นมาตรฐานของโปรเจกต์นี้ยังเป็นแนวทางให้กับระบบกำหนดเส้นทางของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>ซอร์สภายใต้สัญญาอนุญาต MIT ที่นำมาปรับใช้ในบริดจ์ ChatGPT Web → Codex Responses ที่รวมมากับโปรเจกต์ รวมถึงอะแดปเตอร์สำหรับเซสชันเบราว์เซอร์ การจัดเฟรมการตอบกลับ การใช้งาน และการค้นหาเว็บ</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>รูปแบบต่าง ๆ ที่พอร์ตมาใช้กับการกู้คืนสตรีม นามแฝงแบบไม่ใช้การคิด การค้นหาเว็บสำรอง ขีดจำกัดแบบหน้าต่างเลื่อน การปกปิดข้อมูลในบันทึก และโฟลว์ตัวเรียกใช้งานที่เสริมความปลอดภัย</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>รูปแบบการเลือกเครื่องมือ ข้อจำกัดเอาต์พุต และการยืนยันการใช้เครื่องมือของ Cursor Composer ซึ่งนำมาปรับใช้ในตัวดำเนินการ Cursor แบบเนทีฟ</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>รูปแบบการเข้าสู่ระบบใหม่และการหมุนเวียน refresh token ที่พอร์ตมาใช้ในการยืนยันตัวตน OAuth ของ Codex ใหม่</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>ค่าเริ่มต้นของการแปลงที่เข้ากันได้กับ Claude Code และพฤติกรรมของส่วนหัวการเรียกเก็บเงิน ซึ่งนำมาทำให้ใช้ได้ทั่วไปในบริดจ์ที่ขับเคลื่อนด้วยการกำหนดค่าของ OmniRoute</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>โปรเจกต์ต้นฉบับที่ fork นี้สร้างขึ้นต่อยอดจากมัน — โดยขยายให้รองรับ API แบบหลายโมดัลและเขียนใหม่ทั้งหมดด้วย TypeScript</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>อิมพลีเมนเทชันภาษา Go ที่สร้างแรงบันดาลใจให้กับการพอร์ตมายัง JavaScript / TypeScript นี้</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>เกตเวย์ AI ซึ่งชุดข้อมูลราคาสาธารณะถูกใช้เป็นข้อมูลให้กับการซิงค์การติดตามต้นทุนของเรา และโมเดลการปรับผู้ให้บริการให้เป็นมาตรฐานของโปรเจกต์นี้ยังเป็นแนวทางให้กับระบบกำหนดเส้นทางของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>ซอร์สภายใต้สัญญาอนุญาต MIT ที่นำมาปรับใช้ในบริดจ์ ChatGPT Web → Codex Responses ที่รวมมากับโปรเจกต์ รวมถึงอะแดปเตอร์สำหรับเซสชันเบราว์เซอร์ การจัดเฟรมการตอบกลับ การใช้งาน และการค้นหาเว็บ</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>รูปแบบต่าง ๆ ที่พอร์ตมาใช้กับการกู้คืนสตรีม นามแฝงแบบไม่ใช้การคิด การค้นหาเว็บสำรอง ขีดจำกัดแบบหน้าต่างเลื่อน การปกปิดข้อมูลในบันทึก และโฟลว์ตัวเรียกใช้งานที่เสริมความปลอดภัย</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>รูปแบบการเลือกเครื่องมือ ข้อจำกัดเอาต์พุต และการยืนยันการใช้เครื่องมือของ Cursor Composer ซึ่งนำมาปรับใช้ในตัวดำเนินการ Cursor แบบเนทีฟ</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>รูปแบบการเข้าสู่ระบบใหม่และการหมุนเวียน refresh token ที่พอร์ตมาใช้ในการยืนยันตัวตน OAuth ของ Codex ใหม่</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>ค่าเริ่มต้นของการแปลงที่เข้ากันได้กับ Claude Code และพฤติกรรมของส่วนหัวการเรียกเก็บเงิน ซึ่งนำมาทำให้ใช้ได้ทั่วไปในบริดจ์ที่ขับเคลื่อนด้วยการกำหนดค่าของ OmniRoute</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>การแมปโมเดล Grok, ตัวสร้าง Statsig ที่จำลอง TypeError, ค่าเริ่มต้นของคำขอและอุปกรณ์ รวมถึงตัวประมวลผลการตอบกลับ NDJSON ถูกนำมาปรับใช้อย่างมีนัยสำคัญในตัวดำเนินการ Grok Web ของ OmniRoute</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>แหล่งโค้ดทางอ้อมหลักเบื้องหลัง grok2api-merged โดยอิมพลีเมนเทชันด้านโมเดล ส่วนหัว เพย์โหลด Statsig และตัวประมวลผลของโปรเจกต์นี้ยังคงถูกรักษาไว้ในสายที่มาของ Grok Web</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>ซอร์สพื้นฐานภายใต้สัญญาอนุญาต MIT สำหรับเพย์โหลดและค่าเริ่มต้นของอุปกรณ์ Grok, ตัวสร้าง Statsig และตัวประมวลผล <code>result.response</code> ซึ่งส่งต่อมาผ่าน TQZHR และ grok2api-merged</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>แหล่งโค้ดทางอ้อมหลักเบื้องหลัง grok2api-merged โดยอิมพลีเมนเทชันด้านโมเดล ส่วนหัว เพย์โหลด Statsig และตัวประมวลผลของโปรเจกต์นี้ยังคงถูกรักษาไว้ในสายที่มาของ Grok Web</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>ซอร์สพื้นฐานภายใต้สัญญาอนุญาต MIT สำหรับเพย์โหลดและค่าเริ่มต้นของอุปกรณ์ Grok, ตัวสร้าง Statsig และตัวประมวลผล <code>result.response</code> ซึ่งส่งต่อมาผ่าน TQZHR และ grok2api-merged</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>แหล่งที่มาทางอ้อมซึ่ง grok2api-merged ให้เครดิตสำหรับเลเยอร์พร็อกซีพูล OmniRoute ยังคงเก็บประกาศสายที่มาดังกล่าวไว้ แต่ไม่ได้อ้างว่าได้พอร์ตพร็อกซีพูลมาไว้ในตัวดำเนินการ Grok Web ที่มีขอบเขตจำกัด</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>พร็อกซี Grok ที่ยืนยันตัวตนด้วยคุกกี้และรูปแบบการสตรีม <code>result.response.token</code> ของโปรเจกต์นี้เป็นแนวทางให้กับการรับส่งข้อมูล Grok Web ของ OmniRoute</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>พร็อกซี Grok ที่ยืนยันตัวตนด้วยคุกกี้และรูปแบบการสตรีม <code>result.response.token</code> ของโปรเจกต์นี้เป็นแนวทางให้กับการรับส่งข้อมูล Grok Web ของ OmniRoute</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>อิมพลีเมนเทชัน Grok Web ดั้งเดิมได้อ้างอิงการออกแบบต้นทางผ่าน HTTP/เบราว์เซอร์ของโปรเจกต์นี้ โดยเส้นทาง HTTP โดยตรงของโปรเจกต์ดังกล่าวมีที่มาจาก GrokProxy ดังนั้นจึงไม่ได้อ้างว่ามีการพอร์ตโค้ดแยกต่างหาก</td></tr>
 </table>
 
@@ -1706,81 +1706,81 @@ OmniRoute ยืนอยู่บนไหล่ของยักษ์ให�
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">แรงบันดาลใจที่มอบให้ OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>โปรเจกต์ไวรัล "ทำไมใช้โทเค็นเยอะ ในเมื่อโทเค็นน้อยก็เอาอยู่" — ปรัชญาการพูดแบบมนุษย์ถ้ำของโปรเจกต์นี้เป็นรากฐานให้โหมดบีบอัดมาตรฐานของเรา รวมถึงกฎตัดคำฟุ่มเฟือย/ย่อความกว่า 30 ข้อ</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>การบีบอัดเอาต์พุตคำสั่งประสิทธิภาพสูง — เป็นแรงบันดาลใจให้เอนจิน RTK, DSL สำหรับกรอง JSON, การกู้คืนเอาต์พุตดิบ และไปป์ไลน์แบบซ้อน RTK → Caveman ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>การบีบอัดบริบทแบบย้อนคืนได้ (SmartCrusher) — เป็นแรงบันดาลใจให้เอนจิน <code>headroom</code> และรูปแบบเครื่องหมายเรียกคืน <code>ccr</code> ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>งานวิจัยด้านการบีบอัดพรอมป์ (LLMLingua / LLMLingua-2) — เป็นแรงบันดาลใจให้เอนจิน <code>llmlingua</code> แบบอะซิงโครนัส ปลอดภัยต่อโค้ด และปล่อยผ่านเมื่อเกิดข้อผิดพลาดของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>พอร์ต JS/ONNX (MobileBERT / XLM-RoBERTa) ที่ใช้เป็นแบ็กเอนด์เธรดเวิร์กเกอร์สำหรับเอนจิน LLMLingua ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>โปรเจกต์ไวรัล "ทำไมใช้โทเค็นเยอะ ในเมื่อโทเค็นน้อยก็เอาอยู่" — ปรัชญาการพูดแบบมนุษย์ถ้ำของโปรเจกต์นี้เป็นรากฐานให้โหมดบีบอัดมาตรฐานของเรา รวมถึงกฎตัดคำฟุ่มเฟือย/ย่อความกว่า 30 ข้อ</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>การบีบอัดเอาต์พุตคำสั่งประสิทธิภาพสูง — เป็นแรงบันดาลใจให้เอนจิน RTK, DSL สำหรับกรอง JSON, การกู้คืนเอาต์พุตดิบ และไปป์ไลน์แบบซ้อน RTK → Caveman ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>การบีบอัดบริบทแบบย้อนคืนได้ (SmartCrusher) — เป็นแรงบันดาลใจให้เอนจิน <code>headroom</code> และรูปแบบเครื่องหมายเรียกคืน <code>ccr</code> ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>งานวิจัยด้านการบีบอัดพรอมป์ (LLMLingua / LLMLingua-2) — เป็นแรงบันดาลใจให้เอนจิน <code>llmlingua</code> แบบอะซิงโครนัส ปลอดภัยต่อโค้ด และปล่อยผ่านเมื่อเกิดข้อผิดพลาดของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>พอร์ต JS/ONNX (MobileBERT / XLM-RoBERTa) ที่ใช้เป็นแบ็กเอนด์เธรดเวิร์กเกอร์สำหรับเอนจิน LLMLingua ของเรา</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>การบีบอัดโทเค็นภาษาโปรตุเกสบราซิล — เป็นรากฐานให้แพ็กภาษา pt-BR ของเรา ได้แก่ การลดคำซ้ำความหมายและการตัดคำฟุ่มเฟือยที่ปรับแต่งตามไวยากรณ์โปรตุเกสบราซิล</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>ทักษะเขียนโค้ดแบบ YAGNI ของ "นักพัฒนาอาวุโสจอมขี้เกียจ" ที่โด่งดังเป็นไวรัล — เป็นแรงบันดาลใจให้รูปแบบเอาต์พุต <b>less-code</b> ของเรา ซึ่งชี้นำให้สร้างการเปลี่ยนแปลงที่เล็กที่สุดแต่ใช้งานได้ เพื่อลดโค้ดที่ _สร้างขึ้น_ (เป็นแกนด้านเอาต์พุตที่คู่ขนานกับร้อยแก้วกระชับของ Caveman)</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>รูปแบบการตอบที่เน้นการลงมือทำก่อนและเป็นมิตรต่อผู้มี ADHD ถูกนำมาปรับใช้เป็นรูปแบบเอาต์พุตแบบกระชับของ OmniRoute ในห้าภาษา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>ทักษะเขียนโค้ดแบบ YAGNI ของ "นักพัฒนาอาวุโสจอมขี้เกียจ" ที่โด่งดังเป็นไวรัล — เป็นแรงบันดาลใจให้รูปแบบเอาต์พุต <b>less-code</b> ของเรา ซึ่งชี้นำให้สร้างการเปลี่ยนแปลงที่เล็กที่สุดแต่ใช้งานได้ เพื่อลดโค้ดที่ _สร้างขึ้น_ (เป็นแกนด้านเอาต์พุตที่คู่ขนานกับร้อยแก้วกระชับของ Caveman)</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>รูปแบบการตอบที่เน้นการลงมือทำก่อนและเป็นมิตรต่อผู้มี ADHD ถูกนำมาปรับใช้เป็นรูปแบบเอาต์พุตแบบกระชับของ OmniRoute ในห้าภาษา</td></tr>
 </table>
 
 ### 🧩 รูปแบบกะทัดรัด งานวิจัยโทเค็น และเครื่องมือที่เข้าใจโค้ด
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">แรงบันดาลใจที่มอบให้ OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>สัญกรณ์อ็อบเจกต์ที่เน้นโทเค็น — โมเดลแบบคอลัมน์ที่ประกอบด้วยส่วนหัวและแถวของโปรเจกต์นี้มีอิทธิพลต่อขั้นตอนการย่อตารางของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>รูปแบบกราฟกะทัดรัดและการออกแบบโปรไฟล์ทั่วไปของโปรเจกต์นี้เป็นแนวทางให้การย่อตารางและรูปแบบโคเดก Headroom ของ OmniRoute</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>สัญกรณ์อ็อบเจกต์ที่เน้นโทเค็น — โมเดลแบบคอลัมน์ที่ประกอบด้วยส่วนหัวและแถวของโปรเจกต์นี้มีอิทธิพลต่อขั้นตอนการย่อตารางของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>รูปแบบกราฟกะทัดรัดและการออกแบบโปรไฟล์ทั่วไปของโปรเจกต์นี้เป็นแนวทางให้การย่อตารางและรูปแบบโคเดก Headroom ของ OmniRoute</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>อิมพลีเมนเทชัน TypeScript ภายใต้สัญญาอนุญาต MIT ที่นำเข้ามาในซอร์สโดยตรงและต่อยอดเป็นโคเดกโปรไฟล์ทั่วไปของ Headroom</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>แคช Brotli/SQLite + ส่วนต่างบริบทต่อเซสชัน — เป็นแรงบันดาลใจให้เอนจิน <code>session-dedup</code> ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>การย่อเอาต์พุต Bash + โปรไฟล์ MCP — เป็นแรงบันดาลใจให้หลักปฏิบัติในการยุติการบีบอัดของเราและการลดรายการเครื่องมือ MCP</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>การบีบอัดเอาต์พุตที่รับรู้เนื้อหาแยกตามประเภทไฟล์ พร้อมการยุติเมื่อพบความล้มเหลว — ช่วยยืนยันแนวทางการกระจายงานตามประเภทและการข้ามเมื่อได้ประโยชน์ต่ำกว่าเกณฑ์ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"ค้นหาโทเค็นผี" — รูปแบบการถ่ายโอนข้อมูล + แฮนเดิลที่กู้คืนได้ของโปรเจกต์นี้เป็นแนวทางให้แนวคิดการถ่ายโอนข้อมูลออกของ CCR</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>พิมพ์เขียวกราฟเซสชัน + การขจัดบรรทัดซ้ำข้ามเทิร์น ซึ่งเป็นแนวทางให้การออกแบบ session-dedup ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>แคช Brotli/SQLite + ส่วนต่างบริบทต่อเซสชัน — เป็นแรงบันดาลใจให้เอนจิน <code>session-dedup</code> ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>การย่อเอาต์พุต Bash + โปรไฟล์ MCP — เป็นแรงบันดาลใจให้หลักปฏิบัติในการยุติการบีบอัดของเราและการลดรายการเครื่องมือ MCP</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>การบีบอัดเอาต์พุตที่รับรู้เนื้อหาแยกตามประเภทไฟล์ พร้อมการยุติเมื่อพบความล้มเหลว — ช่วยยืนยันแนวทางการกระจายงานตามประเภทและการข้ามเมื่อได้ประโยชน์ต่ำกว่าเกณฑ์ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"ค้นหาโทเค็นผี" — รูปแบบการถ่ายโอนข้อมูล + แฮนเดิลที่กู้คืนได้ของโปรเจกต์นี้เป็นแนวทางให้แนวคิดการถ่ายโอนข้อมูลออกของ CCR</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>พิมพ์เขียวกราฟเซสชัน + การขจัดบรรทัดซ้ำข้ามเทิร์น ซึ่งเป็นแนวทางให้การออกแบบ session-dedup ของเรา</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON แบบคอลัมน์ใน Rust + การเรียกคืนโดยอ้างอิงเนื้อหา + การขจัดข้อมูลซ้ำข้ามข้อความ — ช่วยยืนยันการออกแบบเอนจิน <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> ของเรา และค่าคงตัวที่เป็นมิตรต่อแคชว่า "รูปแบบที่บีบอัดแล้วไม่ขึ้นกับตำแหน่ง"</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>การบีบอัดสคีมา/คำอธิบายเครื่องมือ MCP — เป็นแนวทางให้การลดจำนวนรายการเครื่องมือ MCP ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>การจัดอันดับแผนที่รีโพแบบ Aider — เป็นแนวทางให้การสำรวจแผนที่รีโพ / การจัดอันดับการค้นคืนของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>การบีบอัดสคีมา/คำอธิบายเครื่องมือ MCP — เป็นแนวทางให้การลดจำนวนรายการเครื่องมือ MCP ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>การจัดอันดับแผนที่รีโพแบบ Aider — เป็นแนวทางให้การสำรวจแผนที่รีโพ / การจัดอันดับการค้นคืนของเรา</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>การลดเอาต์พุตเชลล์ผ่าน MCP แบบประกาศ — ช่วยยืนยันแนวทางการย่อเอาต์พุต bash แบบประกาศของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>ชุดเครื่องมือ TypeScript Compiler API — เป็นแรงบันดาลใจให้การลบความคิดเห็นด้วยพาร์เซอร์ของเรา ซึ่งยังคงรักษาลิเทอรัลสตริง เทมเพลต และนิพจน์ทั่วไปไว้</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>ชุดเครื่องมือ TypeScript Compiler API — เป็นแรงบันดาลใจให้การลบความคิดเห็นด้วยพาร์เซอร์ของเรา ซึ่งยังคงรักษาลิเทอรัลสตริง เทมเพลต และนิพจน์ทั่วไปไว้</td></tr>
 </table>
 
 ### 🧠 หน่วยความจำและ RAG
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">แรงบันดาลใจที่มอบให้ OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>เลเยอร์หน่วยความจำแบบสากล — โมเดลพร็อกซีที่ทำหน้าที่เป็นขอบเขตการเขียน/อ่านของโปรเจกต์นี้เป็นต้นแบบให้กับสถาปัตยกรรมหน่วยความจำของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>เอเจนต์แบบมีสถานะพร้อมหน่วยความจำหลายระดับ — เป็นแรงบันดาลใจให้กับโมเดล Context Control & Recovery (CCR) แบบหลายระดับของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>อนุกรมวิธาน ProblemMap ซึ่งครอบคลุมรูปแบบความล้มเหลวที่เกิดซ้ำ 16 รูปแบบของ RAG/LLM — เป็นคำศัพท์ร่วมที่ใช้ในคู่มือการแก้ไขปัญหาของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>เลเยอร์หน่วยความจำแบบสากล — โมเดลพร็อกซีที่ทำหน้าที่เป็นขอบเขตการเขียน/อ่านของโปรเจกต์นี้เป็นต้นแบบให้กับสถาปัตยกรรมหน่วยความจำของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>เอเจนต์แบบมีสถานะพร้อมหน่วยความจำหลายระดับ — เป็นแรงบันดาลใจให้กับโมเดล Context Control & Recovery (CCR) แบบหลายระดับของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>อนุกรมวิธาน ProblemMap ซึ่งครอบคลุมรูปแบบความล้มเหลวที่เกิดซ้ำ 16 รูปแบบของ RAG/LLM — เป็นคำศัพท์ร่วมที่ใช้ในคู่มือการแก้ไขปัญหาของเรา</td></tr>
 </table>
 
 ### 🛰️ การตรวจสอบทราฟฟิก, MITM และพร็อกซีแบบโปร่งใส
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">แรงบันดาลใจที่มอบให้ OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>การดักจับ/วิเคราะห์แบบ MITM สำหรับทราฟฟิกระหว่างผู้ช่วยเขียนโค้ด ↔ LLM ช่วยกำหนดข้อกำหนดเบื้องต้นของ Traffic Inspector โมดูลสี่รายการที่เคยต่อยอดมา ได้แก่ การรวม SSE, การทำให้บทสนทนาเป็นมาตรฐาน, การปกปิดข้อมูลลับ และการปรับส่วนหัวให้ปลอดภัย ได้ถูกแทนที่ด้วยการนำไปใช้งานแบบคลีนรูมที่เป็นอิสระโดยอิงตามมาตรฐานโปรโตคอลสาธารณะ ส่วนพื้นผิวการส่งผ่านโฮสต์สองรายการ (<code>passthrough.ts</code> และ <code>_internal/bypass.cjs</code>) ยังคงเป็นการนำไปใช้งานภายใน OmniRoute ที่จัดประเภทแยกต่างหาก และไม่ได้ถูกเขียนใหม่ในการแทนที่ดังกล่าว</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>การกำหนดเส้นทางพร็อกซีแบบโปร่งใสแยกตามโปรเซส — เป็นแรงบันดาลใจให้กับการปิดระบบ MITM ที่ปลอดภัยเมื่อเกิดข้อขัดข้อง, ระยะหมดเวลาขณะซ็อกเก็ตไม่มีการใช้งาน, การระบุโปรเซสผ่าน <code>/proc</code> และการดักจับด้วย TPROXY ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>การดักจับ/วิเคราะห์แบบ MITM สำหรับทราฟฟิกระหว่างผู้ช่วยเขียนโค้ด ↔ LLM ช่วยกำหนดข้อกำหนดเบื้องต้นของ Traffic Inspector โมดูลสี่รายการที่เคยต่อยอดมา ได้แก่ การรวม SSE, การทำให้บทสนทนาเป็นมาตรฐาน, การปกปิดข้อมูลลับ และการปรับส่วนหัวให้ปลอดภัย ได้ถูกแทนที่ด้วยการนำไปใช้งานแบบคลีนรูมที่เป็นอิสระโดยอิงตามมาตรฐานโปรโตคอลสาธารณะ ส่วนพื้นผิวการส่งผ่านโฮสต์สองรายการ (<code>passthrough.ts</code> และ <code>_internal/bypass.cjs</code>) ยังคงเป็นการนำไปใช้งานภายใน OmniRoute ที่จัดประเภทแยกต่างหาก และไม่ได้ถูกเขียนใหม่ในการแทนที่ดังกล่าว</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>การกำหนดเส้นทางพร็อกซีแบบโปร่งใสแยกตามโปรเซส — เป็นแรงบันดาลใจให้กับการปิดระบบ MITM ที่ปลอดภัยเมื่อเกิดข้อขัดข้อง, ระยะหมดเวลาขณะซ็อกเก็ตไม่มีการใช้งาน, การระบุโปรเซสผ่าน <code>/proc</code> และการดักจับด้วย TPROXY ของเรา</td></tr>
 </table>
 
 ### 📚 ข้อมูลโมเดล การสังเกตการณ์ และ UI
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">แรงบันดาลใจที่มอบให้ OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>ฐานข้อมูลแบบเปิดสำหรับข้อมูลจำเพาะ ราคา และความสามารถของโมเดล AI — ซิงค์เข้าสู่แค็ตตาล็อกโมเดลของเราโดยตรง</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>ไลบรารีกราฟแบบโหนดที่ขับเคลื่อน Compression Studio และ Combo/Routing Studio แบบเรียลไทม์ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>การแสดงภาพกราฟเวิร์กโฟลว์แบบสดของ LangGraph Studio เป็นแรงบันดาลใจให้กับมุมมองคาสเคดแบบเรียลไทม์ใน Studios ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>โมเดลการสังเกตการณ์แบบ trace → span → generation ของโปรเจกต์นี้เป็นต้นแบบให้กับมุมมองวอเตอร์ฟอลล์ใน Compression Studio ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>การสังเกตการณ์เซอร์วิสเมช Istio — เป็นแรงบันดาลใจให้กับป้ายสถานะเซอร์กิตเบรกเกอร์และการแสดงเส้นเชื่อมข้อผิดพลาดใน Routing/Combo Studio ของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>โลโก้แบรนด์ AI/LLM ที่ใช้แสดงไอคอนผู้ให้บริการทั่วทั้งแดชบอร์ดของเรา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>จัดเตรียมธง SVG ภายใต้สัญญาอนุญาต MIT ที่ใช้โดยตัวเลือกภาษาใน README</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>ฐานข้อมูลแบบเปิดสำหรับข้อมูลจำเพาะ ราคา และความสามารถของโมเดล AI — ซิงค์เข้าสู่แค็ตตาล็อกโมเดลของเราโดยตรง</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>ไลบรารีกราฟแบบโหนดที่ขับเคลื่อน Compression Studio และ Combo/Routing Studio แบบเรียลไทม์ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>การแสดงภาพกราฟเวิร์กโฟลว์แบบสดของ LangGraph Studio เป็นแรงบันดาลใจให้กับมุมมองคาสเคดแบบเรียลไทม์ใน Studios ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>โมเดลการสังเกตการณ์แบบ trace → span → generation ของโปรเจกต์นี้เป็นต้นแบบให้กับมุมมองวอเตอร์ฟอลล์ใน Compression Studio ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>การสังเกตการณ์เซอร์วิสเมช Istio — เป็นแรงบันดาลใจให้กับป้ายสถานะเซอร์กิตเบรกเกอร์และการแสดงเส้นเชื่อมข้อผิดพลาดใน Routing/Combo Studio ของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>โลโก้แบรนด์ AI/LLM ที่ใช้แสดงไอคอนผู้ให้บริการทั่วทั้งแดชบอร์ดของเรา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>จัดเตรียมธง SVG ภายใต้สัญญาอนุญาต MIT ที่ใช้โดยตัวเลือกภาษาใน README</td></tr>
 </table>
 
 ### 🛡️ ความปลอดภัย
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">แรงบันดาลใจที่มอบให้ OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>รายการไลบรารีที่คัดสรรมาแล้วและมีค่าเริ่มต้นที่ปลอดภัย ซึ่งใช้เป็นแนวทางในการตัดสินใจด้านความปลอดภัยของเรา (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink)</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>รายการไลบรารีที่คัดสรรมาแล้วและมีค่าเริ่มต้นที่ปลอดภัย ซึ่งใช้เป็นแนวทางในการตัดสินใจด้านความปลอดภัยของเรา (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink)</td></tr>
 </table>
 
 ### 🧭 เครื่องมือเสริม
 
 <table>
   <tr><th align="left">โปรเจกต์</th><th align="center">⭐</th><th align="left">แรงบันดาลใจที่มอบให้ OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>เป็นแรงบันดาลใจให้กับการขจัดคำขอซ้ำ, ระบบสำรองฉุกเฉินที่ไม่มีค่าใช้จ่าย, กลยุทธ์ Auto-Combo แบบเสียบเปลี่ยนได้ และการจำแนกเจตนาแบบหลายภาษา</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>การรีแมปโมเดลโดยคำนึงถึงบัญชี, การตรวจสอบพาธของไฟล์ปฏิบัติการ และลักษณะการทำงานของป้ายแผนจากโปรเจกต์นี้ เป็นข้อมูลประกอบในการพัฒนารันไทม์ Antigravity ของ OmniRoute</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>รูปแบบการนับถอยหลังแบบกะทัดรัดจนถึงเวลารีเซ็ตโควตาของโปรเจกต์นี้ เป็นแรงบันดาลใจให้กับการแสดงขีดจำกัดของผู้ให้บริการใน OmniRoute</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>การผสานรวม ACP ของโปรเจกต์นี้เป็นแรงบันดาลใจให้กับการตรวจหาเอเจนต์ CLI ที่ติดตั้งไว้โดยอัตโนมัติของ OmniRoute</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>ระบุส่วนแสดงโควตาของ Grok Build จากนั้น OmniRoute จึงตรวจสอบและแก้ไขรูปแบบข้อมูลจริงบนสายสัญญาณอย่างเป็นอิสระ</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>เป็นแรงบันดาลใจให้กับการขจัดคำขอซ้ำ, ระบบสำรองฉุกเฉินที่ไม่มีค่าใช้จ่าย, กลยุทธ์ Auto-Combo แบบเสียบเปลี่ยนได้ และการจำแนกเจตนาแบบหลายภาษา</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>การรีแมปโมเดลโดยคำนึงถึงบัญชี, การตรวจสอบพาธของไฟล์ปฏิบัติการ และลักษณะการทำงานของป้ายแผนจากโปรเจกต์นี้ เป็นข้อมูลประกอบในการพัฒนารันไทม์ Antigravity ของ OmniRoute</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>รูปแบบการนับถอยหลังแบบกะทัดรัดจนถึงเวลารีเซ็ตโควตาของโปรเจกต์นี้ เป็นแรงบันดาลใจให้กับการแสดงขีดจำกัดของผู้ให้บริการใน OmniRoute</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>การผสานรวม ACP ของโปรเจกต์นี้เป็นแรงบันดาลใจให้กับการตรวจหาเอเจนต์ CLI ที่ติดตั้งไว้โดยอัตโนมัติของ OmniRoute</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>ระบุส่วนแสดงโควตาของ Grok Build จากนั้น OmniRoute จึงตรวจสอบและแก้ไขรูปแบบข้อมูลจริงบนสายสัญญาณอย่างเป็นอิสระ</td></tr>
 </table>
 
 ## 📄

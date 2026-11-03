@@ -72,7 +72,7 @@
 |                                           |         v3.8.50          | **v3.8.51** |       `v3.8.53+`        |
 | ----------------------------------------- | :----------------------: | :---------: | :---------------------: |
 | Provedores 🌐                             |           352            |   **358**   |           380           |
-| 🧠 Modelo de bate-papo exclusivo IDs      |           1320           |  **1374**   |          1475           |
+| 🧠 Modelo de bate-papo exclusivo IDs      |           1320           |  **1374**   |          1491           |
 | Ponte da modalidade 🖼️                    | 🆕 visão + áudio + vídeo |      ✓      |            ✓            |
 | Catálogo gratuito do radar 📡             |       aceitação 🆕       |      ✓      |            ✓            |
 | Agendamento com reconhecimento de cota ⚖️ | 🆕 Cota-Compartilhamento |      ✓      |            ✓            |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 Projeto</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Stack tecnológica</a></td>
     <td align="center"><a href="#-documentation">📖 Documentação</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Colaboradores</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Colaboradores</a></td>
   </tr>
 </table>
 
@@ -1300,7 +1300,7 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Furtividade</b></td><td>wreq-js — impersonação de fingerprint TLS JA3 / JA4, proxy de 3 níveis</td></tr>
   <tr><td nowrap><b>Resiliência</b></td><td>Circuit breaker, backoff exponencial, anti-thundering-herd, auto-combo com autocura</td></tr>
   <tr><td nowrap><b>Registro de logs</b></td><td>pino — logs JSON estruturados com contexto de requisição</td></tr>
-  <tr><td nowrap><b>Testes</b></td><td>Node.js test runner + Vitest — <b>56.000+ declarações estáticas de teste</b> em 7.800+ arquivos de teste rastreados (unidade, integração, E2E, segurança, ecossistema)</td></tr>
+  <tr><td nowrap><b>Testes</b></td><td>Node.js test runner + Vitest — <b>60.000+ declarações estáticas de teste</b> em 8.400+ arquivos de teste rastreados (unidade, integração, E2E, segurança, ecossistema)</td></tr>
   <tr><td nowrap><b>Plataformas</b></td><td>Desktop (Electron) · Android (Termux) · PWA (qualquer navegador)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicação automática no npm + Docker Hub no lançamento</td></tr>
   <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Site</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1380,7 +1380,7 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b><a href="SECURITY.md">Política de segurança</a></b></td><td>Relato de vulnerabilidades e práticas de segurança</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Guia de i18n</a></b></td><td>Suporte a 67 idiomas, fluxo de trabalho de tradução, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Checklist de lançamento</a></b></td><td>Etapas de validação antes do lançamento</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plano de cobertura</a></b></td><td>Estratégia de cobertura de testes para mais de 56.000 declarações de testes estáticos em mais de 7.800 arquivos de teste rastreados</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plano de cobertura</a></b></td><td>Estratégia de cobertura de testes para mais de 60.000 declarações de testes estáticos em mais de 8.400 arquivos de teste rastreados</td></tr>
 </table>
 
 <br/>
@@ -1617,13 +1617,13 @@ Um agradecimento de coração às pessoas que financiam o OmniRoute do próprio 
 
 <div align="center">
 
-## 👥 Mais de 900 colaboradores
+## 👥 Mais de 1,000 colaboradores
 
 </div>
 
-[![Colaboradores](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Colaboradores](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Auditado em 2026-10-18 na ponta ativa de <code>release/v3.8.52</code>, commit <code>ad160ab2d1</code> (6.826 commits): <b>993 identidades humanas normalizadas do Git</b> — 707 aparecem como autores de commits (incluindo o mantenedor) e 286 apenas em trailers explícitos de <code>Co-authored-by</code>. O levantamento aplica o <code>.mailmap</code>, compara endereços de e-mail sem diferenciar maiúsculas de minúsculas, une endereços noreply numéricos e simples do GitHub somente quando codificam o mesmo identificador, exclui 26 identidades de bots/agentes/serviços/placeholders e não mescla endereços de e-mail comuns apenas porque seus nomes de exibição coincidem. A auditoria de 2026-08-24 publicou 639; uma nova execução deste método sobre a base <code>ac02c5b42f</code> daquela auditoria resulta em 619, portanto o aumento vem de novos colaboradores, não de um método menos rigoroso.</sub>
+<sub>Auditado em 2026-11-02 na ponta ativa de <code>release/v3.8.53</code>, commit <code>1c7135e0fb</code> (7.972 commits): <b>1,074 identidades humanas normalizadas do Git</b> — 759 aparecem como autores de commits (incluindo o mantenedor) e 315 apenas em trailers explícitos de <code>Co-authored-by</code>. O levantamento aplica o <code>.mailmap</code>, compara endereços de e-mail sem diferenciar maiúsculas de minúsculas, une endereços noreply numéricos e simples do GitHub somente quando codificam o mesmo identificador, exclui 29 identidades de bots/agentes/serviços/placeholders e não mescla endereços de e-mail comuns apenas porque seus nomes de exibição coincidem. A auditoria de 2026-08-24 publicou 639; uma nova execução deste método sobre a base <code>ac02c5b42f</code> daquela auditoria resulta em 619, portanto o aumento vem de novos colaboradores, não de um método menos rigoroso.</sub>
 
 ### Como contribuir
 
@@ -1683,25 +1683,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 O OmniRoute se apoia sobre os ombros de gigantes. Ele começou como um fork do **[9router](https://github.com/decolua/9router)** e como uma versão em TypeScript do projeto em Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — e, a partir daí, cada subsistema abaixo foi inspirado por um projeto de código aberto que chegou lá primeiro. Cada um deles moldou uma parte concreta do OmniRoute. Este é o nosso agradecimento a todos eles. 🙏
 
-> ⭐ contagens de estrelas verificadas por meio da API REST do GitHub em 18 de outubro de 2026 — dê uma estrela a esses projetos. As contagens são um retrato exato daquela data e naturalmente mudarão.
+> ⭐ contagens de estrelas verificadas por meio da API REST do GitHub em 2026-11-03 — dê uma estrela a esses projetos. As contagens são um retrato exato daquela data e naturalmente mudarão.
 
 ### 🧬 Linhagem e gateway
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>O projeto original no qual este fork se baseia — ampliado aqui com APIs multimodais e uma reescrita completa em TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>A implementação em Go que inspirou esta versão em JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>O gateway de IA cujo conjunto público de dados de preços alimenta nossa sincronização de monitoramento de custos e cujo modelo de normalização de provedores orientou nosso roteamento.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>Código-fonte MIT adaptado para a ponte incorporada ChatGPT Web → Codex Responses, incluindo adaptadores de sessão do navegador, estruturação de respostas, uso e pesquisa na web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Padrões portados para recuperação de streams, aliases sem raciocínio, pesquisa na web alternativa, limites de janela deslizante, ocultação de dados em logs e fluxos reforçados de inicialização.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Padrões de escolha de ferramentas, restrição de saída e confirmação de ferramentas do Cursor Composer adaptados ao executor nativo do Cursor.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Padrões de novo login e rotação de tokens de atualização portados para a reautenticação OAuth do Codex.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Valores padrão de transformação compatíveis com o Claude Code e comportamento de cabeçalhos de cobrança generalizados na ponte orientada por configuração do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>O projeto original no qual este fork se baseia — ampliado aqui com APIs multimodais e uma reescrita completa em TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>A implementação em Go que inspirou esta versão em JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>O gateway de IA cujo conjunto público de dados de preços alimenta nossa sincronização de monitoramento de custos e cujo modelo de normalização de provedores orientou nosso roteamento.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Código-fonte MIT adaptado para a ponte incorporada ChatGPT Web → Codex Responses, incluindo adaptadores de sessão do navegador, estruturação de respostas, uso e pesquisa na web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Padrões portados para recuperação de streams, aliases sem raciocínio, pesquisa na web alternativa, limites de janela deslizante, ocultação de dados em logs e fluxos reforçados de inicialização.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Padrões de escolha de ferramentas, restrição de saída e confirmação de ferramentas do Cursor Composer adaptados ao executor nativo do Cursor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Padrões de novo login e rotação de tokens de atualização portados para a reautenticação OAuth do Codex.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Valores padrão de transformação compatíveis com o Claude Code e comportamento de cabeçalhos de cobrança generalizados na ponte orientada por configuração do OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Seus mapeamentos de modelos Grok, gerador Statsig com TypeError simulado, padrões de requisição e dispositivo e processador de respostas NDJSON foram substancialmente adaptados ao executor Grok Web do OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>A principal fonte transitiva de código por trás do grok2api-merged; suas implementações de modelos, cabeçalhos, payloads, Statsig e processadores são preservadas na linhagem do Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>O código-fonte MIT subjacente para os padrões de payload e dispositivo do Grok, o gerador Statsig e o processador <code>result.response</code>, incorporados por meio do TQZHR e do grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>A principal fonte transitiva de código por trás do grok2api-merged; suas implementações de modelos, cabeçalhos, payloads, Statsig e processadores são preservadas na linhagem do Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>O código-fonte MIT subjacente para os padrões de payload e dispositivo do Grok, o gerador Statsig e o processador <code>result.response</code>, incorporados por meio do TQZHR e do grok2api-merged.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Uma fonte transitiva creditada pelo grok2api-merged por sua camada de pool de proxies; o OmniRoute preserva esse aviso de linhagem, mas não reivindica uma adaptação do pool de proxies em seu executor Grok Web de escopo limitado.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Seu proxy do Grok autenticado por cookies e o padrão de streaming <code>result.response.token</code> orientaram o transporte Grok Web do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Seu proxy do Grok autenticado por cookies e o padrão de streaming <code>result.response.token</code> orientaram o transporte Grok Web do OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>A implementação original do Grok Web consultou seu design de upstream via HTTP/navegador; seu caminho HTTP direto deriva do GrokProxy, portanto não se reivindica nenhuma adaptação independente de código.</td></tr>
 </table>
 
@@ -1709,81 +1709,81 @@ O OmniRoute se apoia sobre os ombros de gigantes. Ele começou como um fork do *
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>O projeto viral "por que usar muitos token quando poucos token resolvem" — sua filosofia de fala de homem das cavernas é a base do nosso modo de compressão padrão e de mais de 30 regras de remoção de termos supérfluos e condensação.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Compressão de saída de comandos de alto desempenho — inspirou nosso mecanismo RTK, a DSL de filtros JSON, a recuperação da saída bruta e o pipeline empilhado RTK → Caveman.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Compressão reversível de contexto (SmartCrusher) — inspirou nosso mecanismo <code>headroom</code> e o padrão de marcadores de recuperação <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Pesquisa sobre compressão de prompts (LLMLingua / LLMLingua-2) — inspirou nosso mecanismo <code>llmlingua</code> assíncrono, seguro para código e com continuidade em caso de falha.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>O port para JS/ONNX (MobileBERT / XLM-RoBERTa) usado como backend em thread de trabalho para nosso mecanismo LLMLingua.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>O projeto viral "por que usar muitos token quando poucos token resolvem" — sua filosofia de fala de homem das cavernas é a base do nosso modo de compressão padrão e de mais de 30 regras de remoção de termos supérfluos e condensação.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Compressão de saída de comandos de alto desempenho — inspirou nosso mecanismo RTK, a DSL de filtros JSON, a recuperação da saída bruta e o pipeline empilhado RTK → Caveman.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Compressão reversível de contexto (SmartCrusher) — inspirou nosso mecanismo <code>headroom</code> e o padrão de marcadores de recuperação <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Pesquisa sobre compressão de prompts (LLMLingua / LLMLingua-2) — inspirou nosso mecanismo <code>llmlingua</code> assíncrono, seguro para código e com continuidade em caso de falha.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>O port para JS/ONNX (MobileBERT / XLM-RoBERTa) usado como backend em thread de trabalho para nosso mecanismo LLMLingua.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Compressão de tokens em PT-BR — é a base do nosso pacote de idioma pt-BR: redução de pleonasmos e remoção de termos supérfluos ajustadas à gramática do português brasileiro.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>A habilidade viral de programação YAGNI do "desenvolvedor sênior preguiçoso" — inspirou nosso Estilo de Saída <b>less-code</b>: orientação para a menor alteração funcional, que reduz o código _gerado_ (a contraparte no eixo da saída à prosa concisa do Caveman).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Seu estilo de resposta orientado à ação e adequado a pessoas com TDAH foi adaptado para o estilo de saída conciso do OmniRoute em cinco idiomas.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>A habilidade viral de programação YAGNI do "desenvolvedor sênior preguiçoso" — inspirou nosso Estilo de Saída <b>less-code</b>: orientação para a menor alteração funcional, que reduz o código _gerado_ (a contraparte no eixo da saída à prosa concisa do Caveman).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Seu estilo de resposta orientado à ação e adequado a pessoas com TDAH foi adaptado para o estilo de saída conciso do OmniRoute em cinco idiomas.</td></tr>
 </table>
 
 ### 🧩 Formatos compactos, pesquisa sobre tokens e ferramentas que reconhecem código
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Notação de Objetos Orientada a Tokens — seu modelo colunar de cabeçalho e linhas moldou nossa etapa de compactação tabular.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Seu formato compacto de grafos e design de perfil genérico serviram de base para a compactação tabular e o formato do codec Headroom do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Notação de Objetos Orientada a Tokens — seu modelo colunar de cabeçalho e linhas moldou nossa etapa de compactação tabular.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Seu formato compacto de grafos e design de perfil genérico serviram de base para a compactação tabular e o formato do codec Headroom do OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>A implementação em TypeScript sob licença MIT, incorporada diretamente e estendida como o codec de perfil genérico do Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Cache Brotli/SQLite + delta de contexto por sessão — inspirou nosso mecanismo <code>session-dedup</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Compactação de saída do Bash + perfis MCP — inspirou nossa disciplina de interrupção da compressão e a redução de manifestos de ferramentas MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Compressão de saída sensível ao conteúdo e por tipo de arquivo, com interrupção em caso de falha — validou nosso despacho por tipo e a omissão quando o ganho é inferior ao mínimo.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"Encontre os tokens fantasmas" — seu padrão de descarregamento + identificador recuperável orientou nossa abordagem de descarregamento CCR.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Um modelo de grafo de sessão + desduplicação de linhas entre turnos que serviu de base para nosso design de desduplicação de sessão.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Cache Brotli/SQLite + delta de contexto por sessão — inspirou nosso mecanismo <code>session-dedup</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Compactação de saída do Bash + perfis MCP — inspirou nossa disciplina de interrupção da compressão e a redução de manifestos de ferramentas MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Compressão de saída sensível ao conteúdo e por tipo de arquivo, com interrupção em caso de falha — validou nosso despacho por tipo e a omissão quando o ganho é inferior ao mínimo.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"Encontre os tokens fantasmas" — seu padrão de descarregamento + identificador recuperável orientou nossa abordagem de descarregamento CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Um modelo de grafo de sessão + desduplicação de linhas entre turnos que serviu de base para nosso design de desduplicação de sessão.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON colunar em Rust + recuperação endereçada por conteúdo + desduplicação entre mensagens — validou o design de nossos mecanismos <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> e a invariante estável para cache de que "a forma comprimida independe da posição".</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Compressão de esquemas/descrições de ferramentas MCP — serviu de base para nossa redução da cardinalidade de manifestos de ferramentas MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Classificação de mapas de repositório no estilo Aider — serviu de base para nossa exploração de mapas de repositório / classificação de recuperação.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Compressão de esquemas/descrições de ferramentas MCP — serviu de base para nossa redução da cardinalidade de manifestos de ferramentas MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Classificação de mapas de repositório no estilo Aider — serviu de base para nossa exploração de mapas de repositório / classificação de recuperação.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Redução declarativa da saída do shell sobre MCP — validou nossa compactação declarativa da saída do Bash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Kit de ferramentas da API do compilador TypeScript — inspirou nossa remoção de comentários baseada em parser, que preserva literais de string, template e expressões regulares.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Kit de ferramentas da API do compilador TypeScript — inspirou nossa remoção de comentários baseada em parser, que preserva literais de string, template e expressões regulares.</td></tr>
 </table>
 
 ### 🧠 Memória e RAG
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Camada universal de memória — seu modelo de proxy como limite de escrita/leitura moldou nossa arquitetura de memória.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Agentes com estado e memória em camadas — inspiraram nosso modelo em camadas de Controle e Recuperação de Contexto (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>A taxonomia ProblemMap de 16 modos recorrentes de falha em RAG/LLM — o vocabulário compartilhado em nosso guia de solução de problemas.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Camada universal de memória — seu modelo de proxy como limite de escrita/leitura moldou nossa arquitetura de memória.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Agentes com estado e memória em camadas — inspiraram nosso modelo em camadas de Controle e Recuperação de Contexto (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>A taxonomia ProblemMap de 16 modos recorrentes de falha em RAG/LLM — o vocabulário compartilhado em nosso guia de solução de problemas.</td></tr>
 </table>
 
 ### 🛰️ Inspeção de tráfego, MITM e proxy transparente
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>A interceptação/análise MITM do tráfego entre assistentes de programação ↔ LLM embasou os requisitos iniciais do Inspetor de Tráfego. Quatro módulos derivados anteriormente — mesclagem de SSE, normalização de conversas, mascaramento de segredos e sanitização de cabeçalhos — foram substituídos por implementações independentes de sala limpa, baseadas em padrões públicos de protocolo. As duas superfícies de passagem direta ao host (<code>passthrough.ts</code> e <code>_internal/bypass.cjs</code>) continuam sendo implementações internas do OmniRoute classificadas de forma independente; elas não foram reescritas como parte dessa substituição.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Roteamento transparente de proxy por processo — inspirou nosso encerramento MITM seguro em caso de falhas, tempos limite de inatividade de sockets, atribuição de processos via <code>/proc</code> e captura TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>A interceptação/análise MITM do tráfego entre assistentes de programação ↔ LLM embasou os requisitos iniciais do Inspetor de Tráfego. Quatro módulos derivados anteriormente — mesclagem de SSE, normalização de conversas, mascaramento de segredos e sanitização de cabeçalhos — foram substituídos por implementações independentes de sala limpa, baseadas em padrões públicos de protocolo. As duas superfícies de passagem direta ao host (<code>passthrough.ts</code> e <code>_internal/bypass.cjs</code>) continuam sendo implementações internas do OmniRoute classificadas de forma independente; elas não foram reescritas como parte dessa substituição.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Roteamento transparente de proxy por processo — inspirou nosso encerramento MITM seguro em caso de falhas, tempos limite de inatividade de sockets, atribuição de processos via <code>/proc</code> e captura TPROXY.</td></tr>
 </table>
 
 ### 📚 Dados de modelos, observabilidade e interface
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Banco de dados aberto com especificações, preços e recursos de modelos de IA — sincronizado nativamente com nosso catálogo de modelos.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>A biblioteca de grafos baseada em nós que sustenta nosso Compression Studio e Combo/Routing Studio em tempo real.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>A visualização ao vivo de grafos de fluxo de trabalho do LangGraph Studio inspirou a visualização de cascata em tempo real dos nossos Studios.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Seu modelo de observabilidade de rastreamento → intervalo → geração moldou a visualização em cascata do nosso Compression Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Observabilidade da malha de serviços Istio — inspirou nossos indicadores de disjuntores e elementos visuais de arestas com erro no Routing/Combo Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Logotipos de marcas de IA/LLM usados para renderizar os ícones dos provedores em todo o nosso painel.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Fornece as bandeiras SVG licenciadas sob a MIT usadas pelo seletor de idiomas do README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Banco de dados aberto com especificações, preços e recursos de modelos de IA — sincronizado nativamente com nosso catálogo de modelos.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>A biblioteca de grafos baseada em nós que sustenta nosso Compression Studio e Combo/Routing Studio em tempo real.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>A visualização ao vivo de grafos de fluxo de trabalho do LangGraph Studio inspirou a visualização de cascata em tempo real dos nossos Studios.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Seu modelo de observabilidade de rastreamento → intervalo → geração moldou a visualização em cascata do nosso Compression Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Observabilidade da malha de serviços Istio — inspirou nossos indicadores de disjuntores e elementos visuais de arestas com erro no Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Logotipos de marcas de IA/LLM usados para renderizar os ícones dos provedores em todo o nosso painel.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Fornece as bandeiras SVG licenciadas sob a MIT usadas pelo seletor de idiomas do README.</td></tr>
 </table>
 
 ### 🛡️ Segurança
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Uma lista selecionada de bibliotecas seguras por padrão que orienta nossas escolhas de segurança (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Uma lista selecionada de bibliotecas seguras por padrão que orienta nossas escolhas de segurança (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Ferramentas complementares
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Inspirou a deduplicação de solicitações, o fallback emergencial de custo zero, as estratégias plugáveis de Auto-Combo e a classificação multilíngue de intenções.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Seu remapeamento de modelos baseado em contas, a validação de caminhos de executáveis e o comportamento dos rótulos de planos embasaram o runtime Antigravity do OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Seu formato compacto de contagem regressiva para redefinição de cotas inspirou a exibição correspondente dos limites dos provedores no OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Suas integrações ACP inspiraram a detecção automática, pelo OmniRoute, dos agentes de CLI instalados.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Identificou a superfície de cotas do Grok Build; em seguida, o OmniRoute verificou e corrigiu de forma independente o formato real dos dados transmitidos.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Inspirou a deduplicação de solicitações, o fallback emergencial de custo zero, as estratégias plugáveis de Auto-Combo e a classificação multilíngue de intenções.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Seu remapeamento de modelos baseado em contas, a validação de caminhos de executáveis e o comportamento dos rótulos de planos embasaram o runtime Antigravity do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Seu formato compacto de contagem regressiva para redefinição de cotas inspirou a exibição correspondente dos limites dos provedores no OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Suas integrações ACP inspiraram a detecção automática, pelo OmniRoute, dos agentes de CLI instalados.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Identificou a superfície de cotas do Grok Build; em seguida, o OmniRoute verificou e corrigiu de forma independente o formato real dos dados transmitidos.</td></tr>
 </table>
 
 ## 📄 Licença

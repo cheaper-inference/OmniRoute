@@ -72,7 +72,7 @@
 |                     |     v3.8.50      | **v3.8.51** |      `v3.8.53+`       |
 | ------------------- | :--------------: | :---------: | :-------------------: |
 | 🌐提供者            |       352        |   **358**   |          380          |
-| 🧠独特的聊天模式IDs |       1320       |  **1374**   |         1475          |
+| 🧠独特的聊天模式IDs |       1320       |  **1374**   |         1491          |
 | 🖼️模态桥            | 🆕视觉+音频+视频 |      ✓      |           ✓           |
 | 📡雷达免费目录      |    🆕选择加入    |      ✓      |           ✓           |
 | ⚖️配额感知调度      |    🆕配额分享    |      ✓      |           ✓           |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 项目</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ 技术栈</a></td>
     <td align="center"><a href="#-documentation">📖 文档</a></td>
-    <td align="center"><a href="#-900-contributors">👥 贡献者</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 贡献者</a></td>
   </tr>
 </table>
 
@@ -1297,7 +1297,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
   <tr><td nowrap><b>隐身</b></td><td>wreq-js — JA3 / JA4 TLS 指纹模拟，三级代理</td></tr>
   <tr><td nowrap><b>容错</b></td><td>熔断器、指数退避、防惊群（anti-thundering-herd）、auto-combo 自愈</td></tr>
   <tr><td nowrap><b>日志</b></td><td>pino — 带请求上下文的结构化 JSON 日志</td></tr>
-  <tr><td nowrap><b>测试</b></td><td>Node.js test runner + Vitest — 7,800+ 个受跟踪测试文件中共 <b>56,000+ 条静态测试声明</b>（单元、集成、E2E、安全、生态）</td></tr>
+  <tr><td nowrap><b>测试</b></td><td>Node.js test runner + Vitest — 8,400+ 个受跟踪测试文件中共 <b>60,000+ 条静态测试声明</b>（单元、集成、E2E、安全、生态）</td></tr>
   <tr><td nowrap><b>平台</b></td><td>桌面端（Electron）· Android（Termux）· PWA（任意浏览器）</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 发布时自动执行 npm 发布 + Docker Hub 推送</td></tr>
   <tr><td nowrap><b>链接</b></td><td><a href="https://omniroute.online">网站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1377,7 +1377,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
   <tr><td nowrap><b><a href="SECURITY.md">安全策略</a></b></td><td>漏洞报告与安全实践</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n 指南</a></b></td><td>67 种语言支持、翻译工作流程、RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">发布检查清单</a></b></td><td>发布前验证步骤</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">覆盖率计划</a></b></td><td>针对 7,800 多个受跟踪测试文件中 56,000 多项静态测试声明的测试覆盖率策略</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">覆盖率计划</a></b></td><td>针对 8,400 多个受跟踪测试文件中 60,000 多项静态测试声明的测试覆盖率策略</td></tr>
 </table>
 
 <br/>
@@ -1614,13 +1614,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 
 <div align="center">
 
-## 👥 900+ 位贡献者
+## 👥 1,000+ 位贡献者
 
 </div>
 
-[![贡献者](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![贡献者](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>审计于 2026-10-18，基于当时最新的 <code>release/v3.8.52</code> 分支顶端提交 <code>ad160ab2d1</code>（6,826 次提交）：<b>共计 993 个经标准化处理的真实个人 Git 身份</b>——其中 707 个以提交作者身份出现（包括维护者），另有 286 个仅出现在明确的 <code>Co-authored-by</code> 尾注中。此次统计应用了 <code>.mailmap</code>，以不区分大小写的方式比较电子邮件地址，仅当数字格式和普通格式的 GitHub noreply 地址编码了相同用户名时才进行合并；排除了 26 个机器人/代理/服务/占位身份，并且不会仅因显示名称相同而合并普通电子邮件地址。2026-08-24 的审计公布了 639 人；在该次审计所基于的提交 <code>ac02c5b42f</code> 上重新运行此方法得到 619 人，因此人数增长来自新贡献者，而非更宽松的统计方法。</sub>
+<sub>审计于 2026-11-02，基于当时最新的 <code>release/v3.8.53</code> 分支顶端提交 <code>1c7135e0fb</code>（7,972 次提交）：<b>共计 1,074 个经标准化处理的真实个人 Git 身份</b>——其中 759 个以提交作者身份出现（包括维护者），另有 315 个仅出现在明确的 <code>Co-authored-by</code> 尾注中。此次统计应用了 <code>.mailmap</code>，以不区分大小写的方式比较电子邮件地址，仅当数字格式和普通格式的 GitHub noreply 地址编码了相同用户名时才进行合并；排除了 29 个机器人/代理/服务/占位身份，并且不会仅因显示名称相同而合并普通电子邮件地址。2026-08-24 的审计公布了 639 人；在该次审计所基于的提交 <code>ac02c5b42f</code> 上重新运行此方法得到 619 人，因此人数增长来自新贡献者，而非更宽松的统计方法。</sub>
 
 ### 如何贡献
 
@@ -1680,25 +1680,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute 站在巨人的肩膀上。它最初是 **[9router](https://github.com/decolua/9router)** 的一个分支，也是 Go 项目 **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** 的 TypeScript 移植版本——在此基础上，下面的每个子系统都受到某个率先实现相关功能的开源项目启发。每个项目都塑造了 OmniRoute 的某个具体部分。谨以此向它们一一致谢。🙏
 
-> ⭐ 星标数已于 2026 年 10 月 18 日通过 GitHub REST API 核实——请为这些项目点亮星标。这里的数量是特定日期的精确快照，自然会随时间变化。
+> ⭐ 星标数已于 2026-11-03通过 GitHub REST API 核实——请为这些项目点亮星标。这里的数量是特定日期的精确快照，自然会随时间变化。
 
 ### 🧬 项目传承与网关
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>本分支所基于的原始项目——在此基础上扩展了多模态 API，并使用 TypeScript 进行了完整重写。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>启发了此 JavaScript / TypeScript 移植版本的 Go 实现。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>这个 AI 网关的公开定价数据集为我们的成本跟踪同步功能提供数据，其提供者标准化模型也为我们的路由设计提供了参考。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>其 MIT 源代码经过改编后被内置于 ChatGPT Web → Codex Responses 桥接器中，包括浏览器会话、响应分帧、用量统计和网络搜索适配器。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>其模式被移植到流恢复、无思考别名、后备网络搜索、滑动窗口限制、日志脱敏和强化的启动器流程中。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>将 Cursor Composer 的工具选择、输出约束和工具提交模式改编到原生 Cursor 执行器中。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>将全新登录和刷新令牌轮换模式移植到 Codex OAuth 重新认证中。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>将 Claude Code 兼容的转换默认值和计费请求头行为泛化到 OmniRoute 的配置驱动型桥接器中。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>本分支所基于的原始项目——在此基础上扩展了多模态 API，并使用 TypeScript 进行了完整重写。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>启发了此 JavaScript / TypeScript 移植版本的 Go 实现。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>这个 AI 网关的公开定价数据集为我们的成本跟踪同步功能提供数据，其提供者标准化模型也为我们的路由设计提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>其 MIT 源代码经过改编后被内置于 ChatGPT Web → Codex Responses 桥接器中，包括浏览器会话、响应分帧、用量统计和网络搜索适配器。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>其模式被移植到流恢复、无思考别名、后备网络搜索、滑动窗口限制、日志脱敏和强化的启动器流程中。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>将 Cursor Composer 的工具选择、输出约束和工具提交模式改编到原生 Cursor 执行器中。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>将全新登录和刷新令牌轮换模式移植到 Codex OAuth 重新认证中。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>将 Claude Code 兼容的转换默认值和计费请求头行为泛化到 OmniRoute 的配置驱动型桥接器中。</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>其 Grok 模型映射、伪 TypeError Statsig 生成器、请求和设备默认值以及 NDJSON 响应处理器均被实质性地改编到 OmniRoute 的 Grok Web 执行器中。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>grok2api-merged 背后的主要传递性代码来源；其模型、请求头、负载、Statsig 和处理器实现均保留在 Grok Web 的项目传承中。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>这是 Grok 负载和设备默认值、Statsig 生成器，以及经由 TQZHR 和 grok2api-merged 传承下来的 <code>result.response</code> 处理器的底层 MIT 源代码。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>grok2api-merged 背后的主要传递性代码来源；其模型、请求头、负载、Statsig 和处理器实现均保留在 Grok Web 的项目传承中。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>这是 Grok 负载和设备默认值、Statsig 生成器，以及经由 TQZHR 和 grok2api-merged 传承下来的 <code>result.response</code> 处理器的底层 MIT 源代码。</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>grok2api-merged 为其代理池层注明的一个传递性来源；OmniRoute 保留了该传承声明，但并不声称在其范围受限的 Grok Web 执行器中移植了代理池。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>其基于 Cookie 认证的 Grok 代理和 <code>result.response.token</code> 流式传输模式为 OmniRoute 的 Grok Web 传输层提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>其基于 Cookie 认证的 Grok 代理和 <code>result.response.token</code> 流式传输模式为 OmniRoute 的 Grok Web 传输层提供了参考。</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>最初的 Grok Web 实现参考了其 HTTP/浏览器上游设计；由于其直接 HTTP 路径源自 GrokProxy，因此不主张存在独立的代码移植。</td></tr>
 </table>
 
@@ -1706,81 +1706,81 @@ OmniRoute 站在巨人的肩膀上。它最初是 **[9router](https://github.com
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>爆火的“能用少量 token 搞定，为什么还要用很多 token”项目——其穴居人式表达理念为我们的标准压缩模式以及 30 多条赘词删除/内容精简规则提供了基础。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>高性能命令输出压缩——启发了我们的 RTK 引擎、JSON 过滤器 DSL、原始输出恢复机制，以及串联式 RTK → Caveman 流水线。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>可逆上下文压缩（SmartCrusher）——启发了我们的 <code>headroom</code> 引擎和 <code>ccr</code> 检索标记模式。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>提示词压缩研究（LLMLingua / LLMLingua-2）——启发了我们的异步、代码安全、故障时放行的 <code>llmlingua</code> 引擎。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>JS/ONNX 移植版（MobileBERT / XLM-RoBERTa），用作我们 LLMLingua 引擎的工作线程后端。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>爆火的“能用少量 token 搞定，为什么还要用很多 token”项目——其穴居人式表达理念为我们的标准压缩模式以及 30 多条赘词删除/内容精简规则提供了基础。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>高性能命令输出压缩——启发了我们的 RTK 引擎、JSON 过滤器 DSL、原始输出恢复机制，以及串联式 RTK → Caveman 流水线。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>可逆上下文压缩（SmartCrusher）——启发了我们的 <code>headroom</code> 引擎和 <code>ccr</code> 检索标记模式。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>提示词压缩研究（LLMLingua / LLMLingua-2）——启发了我们的异步、代码安全、故障时放行的 <code>llmlingua</code> 引擎。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>JS/ONNX 移植版（MobileBERT / XLM-RoBERTa），用作我们 LLMLingua 引擎的工作线程后端。</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>巴西葡萄牙语 token 压缩——为我们的 pt-BR 语言包提供支持：针对巴西葡萄牙语语法调优的赘述精简和填充词删除。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>爆火的“懒惰高级开发者”YAGNI 编码技能——启发了我们的 <b>less-code</b> 输出风格：引导生成最小可用改动，减少_生成的_代码（与 Caveman 的简洁表达相对应的输出维度策略）。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>其行动优先、对 ADHD 友好的响应风格被改造为 OmniRoute 支持五种语言的简洁输出风格。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>爆火的“懒惰高级开发者”YAGNI 编码技能——启发了我们的 <b>less-code</b> 输出风格：引导生成最小可用改动，减少_生成的_代码（与 Caveman 的简洁表达相对应的输出维度策略）。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>其行动优先、对 ADHD 友好的响应风格被改造为 OmniRoute 支持五种语言的简洁输出风格。</td></tr>
 </table>
 
 ### 🧩 紧凑格式、token 研究与代码感知工具
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>面向 token 的对象表示法——其列式、“表头加数据行”模型塑造了我们的表格压缩阶段。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>其紧凑图格式和通用配置设计为 OmniRoute 的表格压缩及 Headroom 编解码格式提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>面向 token 的对象表示法——其列式、“表头加数据行”模型塑造了我们的表格压缩阶段。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>其紧凑图格式和通用配置设计为 OmniRoute 的表格压缩及 Headroom 编解码格式提供了参考。</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>该 MIT TypeScript 实现被直接内置并扩展为 Headroom 通用配置编解码器。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Brotli/SQLite 缓存 + 按会话计算上下文增量——启发了我们的 <code>session-dedup</code> 引擎。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Bash 输出压缩 + MCP 配置——启发了我们的压缩退出原则和 MCP 工具清单精简机制。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>内容感知、按文件类型进行输出压缩，并具备故障感知退出机制——验证了我们的按类型分派和低于最小收益时跳过的策略。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>“找出幽灵 token”——其卸载 + 可恢复句柄模式为我们的 CCR 卸载思路提供了参考。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>会话图 + 跨轮次行去重蓝图，为我们的 session-dedup 设计提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite 缓存 + 按会话计算上下文增量——启发了我们的 <code>session-dedup</code> 引擎。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash 输出压缩 + MCP 配置——启发了我们的压缩退出原则和 MCP 工具清单精简机制。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>内容感知、按文件类型进行输出压缩，并具备故障感知退出机制——验证了我们的按类型分派和低于最小收益时跳过的策略。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>“找出幽灵 token”——其卸载 + 可恢复句柄模式为我们的 CCR 卸载思路提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>会话图 + 跨轮次行去重蓝图，为我们的 session-dedup 设计提供了参考。</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust 列式 JSON + 内容寻址检索 + 跨消息去重——验证了我们的 <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> 引擎设计，以及“压缩形式与位置无关”这一缓存稳定性不变量。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>MCP 工具架构/描述压缩——为我们的 MCP 工具清单基数缩减提供了参考。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Aider 风格的仓库映射排序——为我们的仓库映射/检索排序探索提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP 工具架构/描述压缩——为我们的 MCP 工具清单基数缩减提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider 风格的仓库映射排序——为我们的仓库映射/检索排序探索提供了参考。</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>基于 MCP 的声明式 shell 输出精简——验证了我们的声明式 bash 输出压缩方案。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>TypeScript Compiler API 工具包——启发了我们基于解析器的注释删除机制，同时保留字符串、模板和正则表达式字面量。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API 工具包——启发了我们基于解析器的注释删除机制，同时保留字符串、模板和正则表达式字面量。</td></tr>
 </table>
 
 ### 🧠 记忆与 RAG
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>通用记忆层——其以代理作为写入/读取边界的模型塑造了我们的记忆架构。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>采用分层记忆的有状态智能体——启发了我们的上下文控制与恢复（CCR）分层模型。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>ProblemMap 对 16 种常见 RAG/LLM 故障模式的分类体系——构成了我们故障排除指南中的共享术语。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>通用记忆层——其以代理作为写入/读取边界的模型塑造了我们的记忆架构。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>采用分层记忆的有状态智能体——启发了我们的上下文控制与恢复（CCR）分层模型。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>ProblemMap 对 16 种常见 RAG/LLM 故障模式的分类体系——构成了我们故障排除指南中的共享术语。</td></tr>
 </table>
 
 ### 🛰️ 流量检查、MITM 与透明代理
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>对编码助手 ↔ LLM 流量的 MITM 拦截/分析为早期的流量检查器需求提供了参考。此前派生的四个模块——SSE 合并、对话规范化、敏感信息遮蔽和请求头清理——均已由基于公开协议标准、独立洁净室实现的版本取代。两个主机直通接口（<code>passthrough.ts</code> 和 <code>_internal/bypass.cjs</code>）仍为独立归类的 OmniRoute 内部实现；它们不属于此次替换重写的范围。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>透明的按进程代理路由——启发了我们可防崩溃的 MITM 清理机制、套接字空闲超时、<code>/proc</code> 进程归属识别和 TPROXY 捕获。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>对编码助手 ↔ LLM 流量的 MITM 拦截/分析为早期的流量检查器需求提供了参考。此前派生的四个模块——SSE 合并、对话规范化、敏感信息遮蔽和请求头清理——均已由基于公开协议标准、独立洁净室实现的版本取代。两个主机直通接口（<code>passthrough.ts</code> 和 <code>_internal/bypass.cjs</code>）仍为独立归类的 OmniRoute 内部实现；它们不属于此次替换重写的范围。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>透明的按进程代理路由——启发了我们可防崩溃的 MITM 清理机制、套接字空闲超时、<code>/proc</code> 进程归属识别和 TPROXY 捕获。</td></tr>
 </table>
 
 ### 📚 模型数据、可观测性与 UI
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>开放的 AI 模型规格、定价与能力数据库——以原生方式同步至我们的模型目录。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>为我们的实时压缩工作室和组合/路由工作室提供支持的节点式图形库。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>LangGraph Studio 的实时工作流图可视化启发了我们各工作室的实时级联视图。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>其追踪 → 跨度 → 生成的可观测性模型塑造了我们压缩工作室中的瀑布图。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Istio 服务网格可观测性——启发了路由/组合工作室中的熔断器徽章和错误边可视化效果。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>用于在我们的仪表板中呈现各提供者图标的 AI/LLM 品牌徽标。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>提供 README 语言选择器所使用的 MIT 许可证 SVG 旗帜图标。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>开放的 AI 模型规格、定价与能力数据库——以原生方式同步至我们的模型目录。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>为我们的实时压缩工作室和组合/路由工作室提供支持的节点式图形库。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studio 的实时工作流图可视化启发了我们各工作室的实时级联视图。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>其追踪 → 跨度 → 生成的可观测性模型塑造了我们压缩工作室中的瀑布图。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio 服务网格可观测性——启发了路由/组合工作室中的熔断器徽章和错误边可视化效果。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>用于在我们的仪表板中呈现各提供者图标的 AI/LLM 品牌徽标。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>提供 README 语言选择器所使用的 MIT 许可证 SVG 旗帜图标。</td></tr>
 </table>
 
 ### 🛡️ 安全
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>一份精心整理的默认安全库列表，为我们的安全方案选择提供指导（Helmet.js、DOMPurify、ssrf-req-filter、safe-regex、Google Tink）。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>一份精心整理的默认安全库列表，为我们的安全方案选择提供指导（Helmet.js、DOMPurify、ssrf-req-filter、safe-regex、Google Tink）。</td></tr>
 </table>
 
 ### 🧭 互补工具
 
 <table>
   <tr><th align="left">项目</th><th align="center">⭐</th><th align="left">它如何启发 OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>启发了请求去重、紧急零成本回退、可插拔 Auto-Combo 策略和多语言意图分类。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>其账户感知的模型重映射、可执行文件路径验证和套餐标签行为为 OmniRoute 的 Antigravity 运行时提供了参考。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>其紧凑的配额重置倒计时格式启发了 OmniRoute 中相应的提供者限额显示。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>其 ACP 集成启发了 OmniRoute 对已安装 CLI 智能体的自动检测。</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>发现了 Grok Build 配额接口；随后 OmniRoute 独立验证并修正了实际使用的线级格式。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>启发了请求去重、紧急零成本回退、可插拔 Auto-Combo 策略和多语言意图分类。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>其账户感知的模型重映射、可执行文件路径验证和套餐标签行为为 OmniRoute 的 Antigravity 运行时提供了参考。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>其紧凑的配额重置倒计时格式启发了 OmniRoute 中相应的提供者限额显示。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>其 ACP 集成启发了 OmniRoute 对已安装 CLI 智能体的自动检测。</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>发现了 Grok Build 配额接口；随后 OmniRoute 独立验证并修正了实际使用的线级格式。</td></tr>
 </table>
 
 ## 📄 许可证

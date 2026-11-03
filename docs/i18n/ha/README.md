@@ -72,7 +72,7 @@
 |                          |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------ | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Masu bayarwa          |            352            |   **358**   |          380          |
-| 🧠 Unique chat model IDs |           1320            |  **1374**   |         1475          |
+| 🧠 Unique chat model IDs |           1320            |  **1374**   |         1491          |
 | 🖼️ Modality Bridge       | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radar free catalog    |         🆕 ficewa         |      ✓      |           ✓           |
 | ⚖️ Quota-aware jadawalin |      🆕 Quota-Share       |      ✓      |           ✓           |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 Aiki</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tarin Fasahohi</a></td>
     <td align="center"><a href="#-documentation">📖 Takardu</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Masu Ba da Gudummawa</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Masu Ba da Gudummawa</a></td>
   </tr>
 </table>
 
@@ -1300,7 +1300,7 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
   <tr><td nowrap><b>ɓoyewa</b></td><td>wreq-js — kwaikwayon fingerprint na TLS JA3 / JA4, proxy mai matakai 3</td></tr>
   <tr><td nowrap><b>Juriyawar</b></td><td>Circuit breaker, exponential backoff, kariya daga thundering-herd, warkewar kai ta auto-combo</td></tr>
   <tr><td nowrap><b>Rubutun Ayyuka</b></td><td>pino — logs na JSON masu tsari tare da mahallin buƙata</td></tr>
-  <tr><td nowrap><b>Gwaji</b></td><td>Node.js test runner + Vitest — <b>sanarwar gwaje-gwaje 56,000+</b> a cikin fayilolin gwaji 7,800+ da ake bibiya (unit, integration, E2E, tsaro, ecosystem)</td></tr>
+  <tr><td nowrap><b>Gwaji</b></td><td>Node.js test runner + Vitest — <b>sanarwar gwaje-gwaje 60,000+</b> a cikin fayilolin gwaji 8,400+ da ake bibiya (unit, integration, E2E, tsaro, ecosystem)</td></tr>
   <tr><td nowrap><b>Dandamali</b></td><td>Desktop (Electron) · Android (Termux) · PWA (kowane burauza)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — buga kai tsaye zuwa npm + Docker Hub a lokacin release</td></tr>
   <tr><td nowrap><b>Hanyoyin Haɗi</b></td><td><a href="https://omniroute.online">Shafin Yanar</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1380,7 +1380,7 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
   <tr><td nowrap><b><a href="SECURITY.md">Manufar Tsaro</a></b></td><td>Rahoton rauni da hanyoyin tsaro</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Jagorar i18n</a></b></td><td>Tallafin harsuna 67, tsarin aikin fassara, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Jerin Binciken Fitarwa</a></b></td><td>Matakan tantancewa kafin fitarwa</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Tsarin Ɗaukar Gwaji</a></b></td><td>Dabarun ɗaukar gwaji don ayyana gwaje-gwaje na tsaye sama da 56,000 a cikin fayilolin gwaji sama da 7,800 da ake sa ido a kansu</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Tsarin Ɗaukar Gwaji</a></b></td><td>Dabarun ɗaukar gwaji don ayyana gwaje-gwaje na tsaye sama da 60,000 a cikin fayilolin gwaji sama da 8,400 da ake sa ido a kansu</td></tr>
 </table>
 
 <br/>
@@ -1617,13 +1617,13 @@ Godiya ta musamman daga zuciya ga mutanen da ke ɗaukar nauyin OmniRoute daga al
 
 <div align="center">
 
-## 👥 Masu Ba da Gudummawa 900+
+## 👥 Masu Ba da Gudummawa 1,000+
 
 </div>
 
-[![Masu Ba da Gudummawa](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Masu Ba da Gudummawa](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>An gudanar da bincike a ranar 2026-10-18 a kan ƙarshen <code>release/v3.8.52</code> na kai-tsaye, wato <code>ad160ab2d1</code> (commits 6,826): <b>asalin mutane 993 na Git da aka daidaita</b> — 707 sun bayyana a matsayin marubutan commit (ciki har da mai kula da aikin), yayin da 286 suka bayyana ne kawai a cikin alamomin <code>Co-authored-by</code> da aka bayyana kai tsaye. Ƙidayar tana amfani da <code>.mailmap</code>, tana kwatanta adiresoshin imel ba tare da la’akari da bambancin manyan da ƙananan haruffa ba, tana haɗa adiresoshin GitHub noreply masu lambobi da na rubutu kawai idan suna wakiltar suna iri ɗaya, tana ware asalin bots/agents/services/placeholders guda 26, kuma ba ta haɗa adiresoshin imel na yau da kullum kawai saboda sunayen da suke nunawa sun yi daidai ba. Binciken ranar 2026-08-24 ya wallafa 639; sake gudanar da wannan hanyar a kan tushen binciken nan na <code>ac02c5b42f</code> ya ba da 619, don haka ƙaruwar ta samo asali ne daga sababbin masu ba da gudummawa, ba daga sassauta hanyar ba.</sub>
+<sub>An gudanar da bincike a ranar 2026-11-02 a kan ƙarshen <code>release/v3.8.53</code> na kai-tsaye, wato <code>1c7135e0fb</code> (commits 7,972): <b>asalin mutane 1,074 na Git da aka daidaita</b> — 759 sun bayyana a matsayin marubutan commit (ciki har da mai kula da aikin), yayin da 315 suka bayyana ne kawai a cikin alamomin <code>Co-authored-by</code> da aka bayyana kai tsaye. Ƙidayar tana amfani da <code>.mailmap</code>, tana kwatanta adiresoshin imel ba tare da la’akari da bambancin manyan da ƙananan haruffa ba, tana haɗa adiresoshin GitHub noreply masu lambobi da na rubutu kawai idan suna wakiltar suna iri ɗaya, tana ware asalin bots/agents/services/placeholders guda 29, kuma ba ta haɗa adiresoshin imel na yau da kullum kawai saboda sunayen da suke nunawa sun yi daidai ba. Binciken ranar 2026-08-24 ya wallafa 639; sake gudanar da wannan hanyar a kan tushen binciken nan na <code>ac02c5b42f</code> ya ba da 619, don haka ƙaruwar ta samo asali ne daga sababbin masu ba da gudummawa, ba daga sassauta hanyar ba.</sub>
 
 ### Yadda Ake Ba da Gudummawa
 
@@ -1683,25 +1683,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute ya ginu ne a kan ayyukan manyan da suka gabata. Ya fara ne a matsayin reshen **[9router](https://github.com/decolua/9router)** da kuma sauya aikin Go na **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** zuwa TypeScript — daga nan kuma, kowane ƙaramin tsarin da ke ƙasa ya samo wahayi daga wani aikin buɗaɗɗen tushe da ya riga ya cim ma hakan. Kowannensu ya taimaka wajen tsara wani takamaiman ɓangare na OmniRoute. Wannan ita ce godiyarmu gare su baki ɗaya. 🙏
 
-> ⭐ an tabbatar da yawan taurari daga REST API na GitHub a ranar 18 ga Oktoba, 2026 — ku je ku ba waɗannan ayyukan tauraro. Adadin ainihin hoton bayanai ne na wannan ranar kuma zai sauya a zahiri.
+> ⭐ an tabbatar da yawan taurari daga REST API na GitHub a ranar 2026-11-03 — ku je ku ba waɗannan ayyukan tauraro. Adadin ainihin hoton bayanai ne na wannan ranar kuma zai sauya a zahiri.
 
 ### 🧬 Asali & ƙofa
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Ainihin aikin da aka gina wannan reshe a kansa — wanda aka faɗaɗa a nan da API masu halaye da yawa tare da cikakken sake rubutawa a TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Aiwatarwar Go da ta zaburar da wannan sauyawa zuwa JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>Ƙofar AI wadda bayanan farashinta na jama'a ke ciyar da daidaitawar bin diddigin kuɗinmu, kuma tsarin daidaita masu samarwarta ya taimaka wajen tsara hanyar isar da buƙatunmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>An daidaita tushen MIT zuwa gadar ChatGPT Web → Codex Responses da aka haɗa cikin aikin, ciki har da adaftocin zaman burauza, tsara amsa, amfani da binciken yanar gizo.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>An ɗauko tsarukansa zuwa dawo da yawo, laƙaban rashin-tunani, binciken yanar gizo na madadin, iyakokin taga mai motsi, ɓoye bayanai a rajista da ingantattun hanyoyin ƙaddamarwa.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>An daidaita tsarin zaɓin kayan aiki, ƙuntata fitarwa da tabbatar da kayan aiki na Cursor Composer zuwa mai aiwatar da Cursor na asali.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>An ɗauko tsarin sabon shiga da juyawar refresh-token zuwa sake tabbatar da OAuth na Codex.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>An faɗaɗa tsoffin saitunan sauyawa masu dacewa da Claude Code da halayen kanun lissafin kuɗi zuwa gadar OmniRoute da saituna ke sarrafawa.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Ainihin aikin da aka gina wannan reshe a kansa — wanda aka faɗaɗa a nan da API masu halaye da yawa tare da cikakken sake rubutawa a TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Aiwatarwar Go da ta zaburar da wannan sauyawa zuwa JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>Ƙofar AI wadda bayanan farashinta na jama'a ke ciyar da daidaitawar bin diddigin kuɗinmu, kuma tsarin daidaita masu samarwarta ya taimaka wajen tsara hanyar isar da buƙatunmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>An daidaita tushen MIT zuwa gadar ChatGPT Web → Codex Responses da aka haɗa cikin aikin, ciki har da adaftocin zaman burauza, tsara amsa, amfani da binciken yanar gizo.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>An ɗauko tsarukansa zuwa dawo da yawo, laƙaban rashin-tunani, binciken yanar gizo na madadin, iyakokin taga mai motsi, ɓoye bayanai a rajista da ingantattun hanyoyin ƙaddamarwa.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>An daidaita tsarin zaɓin kayan aiki, ƙuntata fitarwa da tabbatar da kayan aiki na Cursor Composer zuwa mai aiwatar da Cursor na asali.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>An ɗauko tsarin sabon shiga da juyawar refresh-token zuwa sake tabbatar da OAuth na Codex.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>An faɗaɗa tsoffin saitunan sauyawa masu dacewa da Claude Code da halayen kanun lissafin kuɗi zuwa gadar OmniRoute da saituna ke sarrafawa.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>An daidaita taswirar samfurin Grok ɗinsa, janareton Statsig na fake-TypeError, tsoffin saitunan buƙata da na'ura, da mai sarrafa amsar NDJSON zuwa mai aiwatar da Grok Web na OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>Babban tushen lambar da aka gada a bayan grok2api-merged; an adana aiwatarwar samfurinsa, kanunsa, payload, Statsig da masu sarrafawa a cikin asalin Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Asalin tushen MIT na payload na Grok da tsoffin saitunan na'ura, janareton Statsig, da mai sarrafa <code>result.response</code> da aka gada ta TQZHR da grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>Babban tushen lambar da aka gada a bayan grok2api-merged; an adana aiwatarwar samfurinsa, kanunsa, payload, Statsig da masu sarrafawa a cikin asalin Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Asalin tushen MIT na payload na Grok da tsoffin saitunan na'ura, janareton Statsig, da mai sarrafa <code>result.response</code> da aka gada ta TQZHR da grok2api-merged.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Wani tushen da aka gada wanda grok2api-merged ya ambata saboda shimfiɗar proxy-pool ɗinsa; OmniRoute yana riƙe wannan sanarwar asali amma baya ikirarin ɗauko proxy-pool a cikin iyakantaccen mai aiwatar da Grok Web nasa.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Proxy na Grok da cookie ke tabbatar da sahihancinsa da tsarin yawo na <code>result.response.token</code sun taimaka wajen tsara jigilar Grok Web ta OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Proxy na Grok da cookie ke tabbatar da sahihancinsa da tsarin yawo na <code>result.response.token</code sun taimaka wajen tsara jigilar Grok Web ta OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Aiwatarwar Grok Web ta asali ta yi amfani da ƙirar HTTP/burauza ta uwar garken sama; hanyarta ta HTTP kai tsaye ta samo asali daga GrokProxy, don haka ba a ikirarin ɗauko lamba mai zaman kanta ba.</td></tr>
 </table>
 
@@ -1709,81 +1709,81 @@ OmniRoute ya ginu ne a kan ayyukan manyan da suka gabata. Ya fara ne a matsayin 
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Shahararren aikin "me ya sa a yi amfani da token da yawa alhali kaɗan za su yi aikin" — falsafar maganar mutumin kogo tasa ce ke ƙarfafa yanayin matsawar mu na yau da kullum da dokokin cire kalmomin cikewa/tattara bayanai sama da 30.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Matsawar fitarwar umarni mai inganci sosai — ta zaburar da injin RTK ɗinmu, JSON filter DSL, dawo da ɗanyen fitarwa da jerin aikin RTK → Caveman.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Matsawar mahalli da za a iya warwarewa (SmartCrusher) — ta zaburar da injin <code>headroom</code> ɗinmu da tsarin alamar dawo da bayanai na <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Binciken matsawar umarni (LLMLingua / LLMLingua-2) — ya zaburar da injin <code>llmlingua</code> ɗinmu mai aiki ba tare da jira ba, mai kiyaye lamba, kuma mai ci gaba da aiki idan ya gaza.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>Juyin JS/ONNX (MobileBERT / XLM-RoBERTa) da ake amfani da shi a matsayin tushen worker-thread na injin LLMLingua ɗinmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Shahararren aikin "me ya sa a yi amfani da token da yawa alhali kaɗan za su yi aikin" — falsafar maganar mutumin kogo tasa ce ke ƙarfafa yanayin matsawar mu na yau da kullum da dokokin cire kalmomin cikewa/tattara bayanai sama da 30.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Matsawar fitarwar umarni mai inganci sosai — ta zaburar da injin RTK ɗinmu, JSON filter DSL, dawo da ɗanyen fitarwa da jerin aikin RTK → Caveman.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Matsawar mahalli da za a iya warwarewa (SmartCrusher) — ta zaburar da injin <code>headroom</code> ɗinmu da tsarin alamar dawo da bayanai na <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Binciken matsawar umarni (LLMLingua / LLMLingua-2) — ya zaburar da injin <code>llmlingua</code> ɗinmu mai aiki ba tare da jira ba, mai kiyaye lamba, kuma mai ci gaba da aiki idan ya gaza.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>Juyin JS/ONNX (MobileBERT / XLM-RoBERTa) da ake amfani da shi a matsayin tushen worker-thread na injin LLMLingua ɗinmu.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Matsawar token ta PT-BR — ita ce ke ƙarfafa fakitin harshen pt-BR ɗinmu: rage maimaita ma’ana da cire kalmomin cikewa da aka daidaita don nahawun Fotigal na Brazil.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Shahararriyar ƙwarewar mai rubuta lambar YAGNI ta "babban mai haɓakawa malalaci" — ta zaburar da Salon Fitarwa na <b>less-code</b>: jagorantar mafi ƙarancin canjin da zai yi aiki wanda ke rage lambar da aka _samar_ (takwaran ɓangaren fitarwa na taƙaitacciyar maganar Caveman).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>An daidaita salon amsarsa mai fara da aiki kuma mai dacewa da masu ADHD zuwa taƙaitaccen salon fitarwa na OmniRoute a cikin harsuna biyar.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Shahararriyar ƙwarewar mai rubuta lambar YAGNI ta "babban mai haɓakawa malalaci" — ta zaburar da Salon Fitarwa na <b>less-code</b>: jagorantar mafi ƙarancin canjin da zai yi aiki wanda ke rage lambar da aka _samar_ (takwaran ɓangaren fitarwa na taƙaitacciyar maganar Caveman).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>An daidaita salon amsarsa mai fara da aiki kuma mai dacewa da masu ADHD zuwa taƙaitaccen salon fitarwa na OmniRoute a cikin harsuna biyar.</td></tr>
 </table>
 
 ### 🧩 Tsare-tsare masu taƙaituwa, binciken token da kayan aiki masu fahimtar lamba
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Tsarin Rubutun Abu Mai Dogaro da Token — tsarin ginshiƙai da take-haɗe-da-layuka nasa ne ya tsara matakin taƙaita jadawalinmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Tsarin jadawalinsa mai taƙaituwa da ƙirar bayanin martaba na gama-gari sun taimaka wajen tsara taƙaita jadawalin OmniRoute da tsarin codec na Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Tsarin Rubutun Abu Mai Dogaro da Token — tsarin ginshiƙai da take-haɗe-da-layuka nasa ne ya tsara matakin taƙaita jadawalinmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Tsarin jadawalinsa mai taƙaituwa da ƙirar bayanin martaba na gama-gari sun taimaka wajen tsara taƙaita jadawalin OmniRoute da tsarin codec na Headroom.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Aiwatarwar MIT TypeScript da aka shigar kai tsaye tare da faɗaɗa ta a matsayin codec na bayanin martaba na gama-gari na Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Ma’ajiyar wucin gadi ta Brotli/SQLite + bambancin mahalli na kowane zama — ya zaburar da injin <code>session-dedup</code> ɗinmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Taƙaita fitarwar Bash + bayanan martaba na MCP — ya zaburar da ƙa’idar janyewa daga matsawa da rage bayanan kayan aikin MCP ɗinmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Matsawar fitarwa mai fahimtar abun ciki bisa kowane nau’in fayil tare da janyewa idan aka samu gazawa — ya tabbatar da rarrabawar mu bisa kowane nau’i da tsallake matsawa idan ribar ta yi ƙasa da mafi ƙaranci.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"Nemo token na fatalwa" — tsarin tura bayanai waje + makama da za a iya amfani da shi wajen dawo da su ya taimaka wajen tsara tunaninmu game da tura bayanai waje ta CCR.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Tsarin jadawalin zama + cire maimaitattun layuka tsakanin juyayyun tattaunawa wanda ya taimaka wajen tsara <code>session-dedup</code> ɗinmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Ma’ajiyar wucin gadi ta Brotli/SQLite + bambancin mahalli na kowane zama — ya zaburar da injin <code>session-dedup</code> ɗinmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Taƙaita fitarwar Bash + bayanan martaba na MCP — ya zaburar da ƙa’idar janyewa daga matsawa da rage bayanan kayan aikin MCP ɗinmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Matsawar fitarwa mai fahimtar abun ciki bisa kowane nau’in fayil tare da janyewa idan aka samu gazawa — ya tabbatar da rarrabawar mu bisa kowane nau’i da tsallake matsawa idan ribar ta yi ƙasa da mafi ƙaranci.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"Nemo token na fatalwa" — tsarin tura bayanai waje + makama da za a iya amfani da shi wajen dawo da su ya taimaka wajen tsara tunaninmu game da tura bayanai waje ta CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Tsarin jadawalin zama + cire maimaitattun layuka tsakanin juyayyun tattaunawa wanda ya taimaka wajen tsara <code>session-dedup</code> ɗinmu.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON na ginshiƙan Rust + dawo da bayanai bisa adireshin abun ciki + cire maimaituwa tsakanin saƙonni — ya tabbatar da ƙirar injinan <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> ɗinmu da ƙa’idar ma’ajiyar wucin gadi mai ɗorewa cewa "siffar da aka matsa ba ta dogara da matsayi".</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Matsawar tsarin kayan aikin/bayani na MCP — ta taimaka wajen tsara rage yawan bayanan kayan aikin MCP ɗinmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Jera taswirar ma’ajiyar lamba irin ta Aider bisa muhimmanci — ya taimaka wajen bincikenmu kan taswirar ma’ajiya / jera dawo da bayanai bisa muhimmanci.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Matsawar tsarin kayan aikin/bayani na MCP — ta taimaka wajen tsara rage yawan bayanan kayan aikin MCP ɗinmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Jera taswirar ma’ajiyar lamba irin ta Aider bisa muhimmanci — ya taimaka wajen bincikenmu kan taswirar ma’ajiya / jera dawo da bayanai bisa muhimmanci.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Rage fitarwar shell ta hanyar sanar da ƙa’idoji a kan MCP — ya tabbatar da taƙaita fitarwar bash ɗinmu ta hanyar sanar da ƙa’idoji.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Kayan aikin TypeScript Compiler API — ya zaburar da cire sharhi bisa parser ɗinmu wanda ke kiyaye string, template da regex literals.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Kayan aikin TypeScript Compiler API — ya zaburar da cire sharhi bisa parser ɗinmu wanda ke kiyaye string, template da regex literals.</td></tr>
 </table>
 
 ### 🧠 Ƙwaƙwalwa & RAG
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Matakin ƙwaƙwalwa na bai-ɗaya — tsarinsa na proxy a matsayin iyakar rubutawa/karantawa ne ya tsara tsarin gine-ginen ƙwaƙwalwarmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Wakilai masu riƙe da yanayi tare da ƙwaƙwalwa mai matakai — sun zaburar da tsarinmu mai matakai na Sarrafa Mahallin Bayani da Farfaɗowa (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>Rabe-raben ProblemMap na hanyoyin gazawar RAG/LLM guda 16 masu maimaituwa — ƙamus ɗin gama-gari a jagoranmu na warware matsaloli.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Matakin ƙwaƙwalwa na bai-ɗaya — tsarinsa na proxy a matsayin iyakar rubutawa/karantawa ne ya tsara tsarin gine-ginen ƙwaƙwalwarmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Wakilai masu riƙe da yanayi tare da ƙwaƙwalwa mai matakai — sun zaburar da tsarinmu mai matakai na Sarrafa Mahallin Bayani da Farfaɗowa (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>Rabe-raben ProblemMap na hanyoyin gazawar RAG/LLM guda 16 masu maimaituwa — ƙamus ɗin gama-gari a jagoranmu na warware matsaloli.</td></tr>
 </table>
 
 ### 🛰️ Binciken zirga-zirga, MITM da proxy mai gaskiya
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Tsarewa/binciken MITM na zirga-zirgar mataimakin shirye-shirye ↔ LLM ya taimaka wajen tsara buƙatun farko na Traffic Inspector. An maye gurbin kayayyaki huɗu da aka samo a baya — haɗa SSE, daidaita tattaunawa, ɓoye sirri da tsabtace headers — da aiwatarwa masu zaman kansu da aka gina daga tushe bisa ƙa'idodin yarjejeniya na jama'a. Fuskokin host-passthrough guda biyu (<code>passthrough.ts</code> da <code>_internal/bypass.cjs</code>) sun ci gaba da kasancewa aiwatarwa na cikin OmniRoute waɗanda aka rarraba su daban; ba a sake rubuta su a matsayin wani ɓangare na wannan sauyawar ba.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Jagorantar proxy ga kowane process a bayyane — ya zaburar da kashe MITM cikin aminci idan aka samu rushewa, wa'adin rashin aiki na socket, danganta process ta <code>/proc</code> da kama zirga-zirga ta TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Tsarewa/binciken MITM na zirga-zirgar mataimakin shirye-shirye ↔ LLM ya taimaka wajen tsara buƙatun farko na Traffic Inspector. An maye gurbin kayayyaki huɗu da aka samo a baya — haɗa SSE, daidaita tattaunawa, ɓoye sirri da tsabtace headers — da aiwatarwa masu zaman kansu da aka gina daga tushe bisa ƙa'idodin yarjejeniya na jama'a. Fuskokin host-passthrough guda biyu (<code>passthrough.ts</code> da <code>_internal/bypass.cjs</code>) sun ci gaba da kasancewa aiwatarwa na cikin OmniRoute waɗanda aka rarraba su daban; ba a sake rubuta su a matsayin wani ɓangare na wannan sauyawar ba.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Jagorantar proxy ga kowane process a bayyane — ya zaburar da kashe MITM cikin aminci idan aka samu rushewa, wa'adin rashin aiki na socket, danganta process ta <code>/proc</code> da kama zirga-zirga ta TPROXY.</td></tr>
 </table>
 
 ### 📚 Bayanan samfuri, sa ido da UI
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Buɗaɗɗen rumbun bayanai na ƙayyadaddun samfuran AI, farashi da ƙwarewa — ana daidaita shi kai tsaye cikin kundin samfuranmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Laburaren jadawali mai tushen nodes wanda ke tafiyar da Compression Studio da Combo/Routing Studio namu a ainihin lokaci.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>Nuna jadawalin tafiyar aiki kai tsaye na LangGraph Studio ya zaburar da kallon cascade na ainihin lokaci a Studios namu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Tsarin sa ido nasa na trace → span → generation ne ya tsara waterfall na Compression Studio namu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Sa ido kan service-mesh na Istio — ya zaburar da alamomin circuit-breaker da hotunan gefunan kurakurai a Routing/Combo Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Tambarin samfuran AI/LLM waɗanda ke nuna gumakan masu samarwa a faifan sarrafawarmu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Yana samar da tutocin SVG masu lasisin MIT da mai zaɓen harshe na README ke amfani da su.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Buɗaɗɗen rumbun bayanai na ƙayyadaddun samfuran AI, farashi da ƙwarewa — ana daidaita shi kai tsaye cikin kundin samfuranmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Laburaren jadawali mai tushen nodes wanda ke tafiyar da Compression Studio da Combo/Routing Studio namu a ainihin lokaci.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>Nuna jadawalin tafiyar aiki kai tsaye na LangGraph Studio ya zaburar da kallon cascade na ainihin lokaci a Studios namu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Tsarin sa ido nasa na trace → span → generation ne ya tsara waterfall na Compression Studio namu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Sa ido kan service-mesh na Istio — ya zaburar da alamomin circuit-breaker da hotunan gefunan kurakurai a Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Tambarin samfuran AI/LLM waɗanda ke nuna gumakan masu samarwa a faifan sarrafawarmu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Yana samar da tutocin SVG masu lasisin MIT da mai zaɓen harshe na README ke amfani da su.</td></tr>
 </table>
 
 ### 🛡️ Tsaro
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Jerin zaɓaɓɓun laburare masu tsaro ta asali wanda ke jagorantar zaɓuɓɓukan tsaronmu (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Jerin zaɓaɓɓun laburare masu tsaro ta asali wanda ke jagorantar zaɓuɓɓukan tsaronmu (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Kayan aiki masu taimakon juna
 
 <table>
   <tr><th align="left">Aiki</th><th align="center">⭐</th><th align="left">Yadda ya zaburar da OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Ya zaburar da kawar da maimaitattun buƙatu, madadin gaggawa mara kuɗi, dabarun Auto-Combo masu iya haɗawa da rarraba niyya ta harsuna da dama.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Sake danganta samfuri bisa asusu, tabbatar da executable-path da halayen plan-label nasa sun taimaka wajen tsara runtime na Antigravity na OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Tsarin ƙirga-lokaci zuwa sake saitin ƙayyadadden amfani mai taƙaitaccen salo ya zaburar da nunin iyakar mai samarwa da ya dace a OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Haɗe-haɗen ACP nasa sun zaburar da gano wakilan CLI da aka shigar ta atomatik a OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Ya gano fuskar ƙayyadadden amfani ta Grok Build; daga nan OmniRoute ya tabbatar tare da gyara tsarin bayanan da ake watsawa kai tsaye da kansa.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Ya zaburar da kawar da maimaitattun buƙatu, madadin gaggawa mara kuɗi, dabarun Auto-Combo masu iya haɗawa da rarraba niyya ta harsuna da dama.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Sake danganta samfuri bisa asusu, tabbatar da executable-path da halayen plan-label nasa sun taimaka wajen tsara runtime na Antigravity na OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Tsarin ƙirga-lokaci zuwa sake saitin ƙayyadadden amfani mai taƙaitaccen salo ya zaburar da nunin iyakar mai samarwa da ya dace a OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Haɗe-haɗen ACP nasa sun zaburar da gano wakilan CLI da aka shigar ta atomatik a OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Ya gano fuskar ƙayyadadden amfani ta Grok Build; daga nan OmniRoute ya tabbatar tare da gyara tsarin bayanan da ake watsawa kai tsaye da kansa.</td></tr>
 </table>
 
 ## 📄 Lasisi
