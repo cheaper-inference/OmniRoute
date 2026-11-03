@@ -281,17 +281,17 @@ mkpochi na-arụ ọrụ dị n'oge gachara.
 
 ---
 
-## 4. Njikwa Ọtụtụ Arịrị Otu Oge nke Quota-Share (v3.8.36)
+## 4. Njikwa nkwekọrịta nke oke oke (v3.8.36)
 
-Akaụntụ ndebanye aha (GLM, MiniMax, wdg.) na-anabatakarị naanị ~1–3 arịrị otu oge; ịgafere nke ahụ na-akpata 429 na oge cooldown. Nke a na-adị oke njọ n'okpuru combo **quota-share** (`qtSd/…`), ebe ọtụtụ igodo API na-ekekọrịta otu akaụntụ upstream. Ọkwa atọ na-egbochi ka arịrị jupụta akaụntụ ekerịta.
+Akaụntụ ndenye aha (GLM, MiniMax, wdg) na-anabatakarị naanị ~ 1-3 arịrịọ otu oge; gafere nke na-akpalite 429s na cooldowns. Nke a bụ nnukwu n'okpuru** oke-oke** (`qtSd/…`) combos, ebe ọtụtụ igodo API na-ekekọrịta otu akaụntụ elu. N'ígwé atọ na-eme ka idei mmiri ghara ikpuchi akaụntụ nkekọrịta.
 
-### Oke arịrị otu oge maka njikọ ọ bụla (`max_concurrent`)
+### Okpu nkwekọrịta n'otu-njikọ (`max_concurrent`)
 
-Njikọ onye na-enye ọ bụla nwere ike ịkwupụta oke `max_concurrent` (`provider_connections.max_concurrent`, edobere na modal njikọ / API / DB). Hapụ ya oghere maka enweghị oke. Nke a bụ otu bọtịnụ ahụ na-achịkwa ọkwa ịdobe n'usoro dị n'okpuru — debe ya na ọnụọgụ arịrị otu oge n'ezie nke akaụntụ ahụ (dịka GLM ~1, MiniMax ~2).
+Njikọ ọ bụla na-enye ndị na-enye ọrụ nwere ike ikwupụta `max_concurrent` uko ụlọ (`provider_connections.max_concurrent`, setịpụrụ na njikọ modal / API / DB). Hapụ ya tọgbọrọ chakoo. Nke a bụ otu igodo na-ebugharị oyi akwa serialization dị n'okpuru — tọọ ya na ezigbo concurrency nke akaụntụ ahụ (dịka GLM ~ 1, MiniMax ~ 2).
 
-### Oke arịrị otu oge maka nlereanya ọ bụla (`modelConcurrency`)
+### Okpu concurrency nke ọ bụla (`modelConcurrency`)
 
-Njikọ nwere ike ịkwupụtakwa oke arịrị otu oge ziri ezi maka nlereanya ọ bụla n'ime map `rateLimitOverrides` ya:
+Njikọ nwekwara ike kwupụta kpọmkwem uko ụlọ concurrency nke ọ bụla n'ime maapụ `rateLimitOverrides` ya:
 
 ```json
 {
@@ -302,30 +302,32 @@ Njikọ nwere ike ịkwupụtakwa oke arịrị otu oge ziri ezi maka nlereanya 
 }
 ```
 
-Debe ya na modal njikọ (**Ndọpụta oke ọnụego → Oke arịrị otu oge maka nlereanya ọ bụla**, otu `model=cap` n'ahịrị ọ bụla) ma ọ bụ site na `PATCH /api/providers/[id]` na otu ụdị JSON ahụ. Ọdịmma ndị igodo:
+Tọọ ya na usoro njikọ (** Oke ọnụego gabigara okpu concurrency nke → kwa-ụdị** , otu `model=cap` kwa ahịrị) ma ọ bụ site na `PATCH /api/providers/[id]` nwere otu ụdị JSON. Nkọwapụta isi:
 
-- **Nke njikọ dum vs nke nlereanya pụrụ iche:** `maxConcurrent` ka na-anọgide dị ka oke ekerịta nke njikọ dum. Mgbe ha abụọ na-adị irè, a na-enweta ụzọ abụọ ahụ otu oge n'otu ụzọ mejupụtara (`global → provider → account → model`); omume dị irè bụ oke kacha sie ike nke na-adị irè.
-- **Nnabata igodo-nlereanya ziri ezi:** igodo ahụ bụ eriri nlereanya e nyefere onye na-arụ ọrụ mgbe routing dochachara — n'ọtụtụ oge ọ bụ id nlereanya upstream dị larịị (`glm-5`), ọ bụghị aha ọzọ `provider/model` n'akụkụ onye ahịa (`zai/glm-5` adabaghị na `glm-5`). Ọnụ ọgụgụ ndị ahụ bụ oke arịrị otu oge nke ọnụọgụ ezi karịa efu.
-- **Nhazi ahịrị n'ebe ahụ, enweghị nchọpụta:** arịrị karịrị oke na-eche n'ahịrị n'ebe ahụ na ọdịmma ahịrị/timeout dị adị (njehie nnabata edepụtara `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute anaghị achọpụta ma ọ bụ nyochaa iwu upstream — ọ na-amanye oke ndị onye ọrụ haziri ziri ezi. Ụzọ nlereanya jupụtara anaghị agbanyụ onye na-enye ma ọ bụ mepụta mkpọchị nlereanya na-adịgide adịgide; omume upstream 429/cooldown/fallback ka na-anọgide dị ka nchekwa njehie ikpeazụ.
-- **Oke nke njikọ ọ bụla, usoro ọ bụla:** oke ndị ahụ bụ nke njikọ nchekwa data ọ bụla ma e jide ha n'echeta, ya mere njikọ abụọ na-eji otu igodo API upstream ahụ ọzọ anaghị arụkọ ọrụ ọnụ.
-- **Enweghị nhazi pụtara enweghị mgbanwe:** ịhapụ map ahụ (ma ọ bụ ịhapụ oghere dashboard n'efu) anaghị etinye ụzọ nlereanya ọ bụla. Nhazi nlereanya na-ekwupụtaghị oke ọ bụla zuru ụwa ọnụ nke onye na-enye:
+- **Njikọ-obosara vs ụdị-kpọmkwem:** `maxConcurrent` na-anọgide na-ekekọrịta njikọ-obosara uko ụlọ. Mgbe ha abụọ na-etinye, a na-enweta ọnụ ụzọ abụọ atomically n'otu ọnụ ụzọ ámá mejupụtara (`global → provider → account → model`); omume dị irè bụ oke ọdabara.
+- **Kpọmkwem egwuregwu igodo nlereanya:** Isi ihe bụ eriri ihe atụ ahụ gafere n'aka onye mmebe mgbe emechara mkpebi — na-abụkarị id upstream model id (`glm-5`), ọ bụghị n'akụkụ `provider/model` nke onye ahịa (`zai/glm-5` adabaghị `glm-5`). Uru bụ uko ụlọ na-arịọ arịrịọ n'otu oge.
+- **Ahịrị n'ahịrị mpaghara, enweghị nchọpụta:** Arịrịọ ngafe kwụ n'ahịrị na mpaghara yana usoro mmụta queue/timeout dị ugbu a (ụdị mperi nnabata `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ). OmniRoute anaghị achọpụta ma ọ bụ chepụta amụma elu — ọ na-amanye kpọmkwem uko ụlọ onye ọrụ haziri. Ọnụ ụzọ ihe atụ juru eju adịghị eme ka onye na-eweta ya kwụsị ma ọ dịghị emepụta mkpọchi ihe nlereanya na-adịgide adịgide; omume 429/cooldown/fallback dị elu ka bụ njehie azụ azụ.
+- **Njikọ n'otu oge, oke usoro:** okpu bụ maka njikọ nchekwa data ma jide ya na ebe nchekwa, yabụ njikọ abụọ na-eji otu igodo API elu anaghị ejikọta ibe ha.
+- **Enweghị nhazi pụtara agbanweghị:** ịhapụ map ahụ (ma ọ bụ ịhapụ oghere dashboard ahụ efu) anaghị agbakwunye ọ nweghị ọnụ ụzọ ihe atụ. Nhazi ọmụmaatụ na-ekwupụtaghị oke ndị na-eweta ihe ọ bụla:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Ịdobe arịrị Quota-share n'usoro
+### Arịrịọ nkekọrịta oke nsonazụ
 
-Mgbe nkesa quota-share lekwasịrị njikọ na-akpọsa `max_concurrent` dị mma, a na-edobe arịrị otu oge gaa na **akaụntụ** ahụ n'usoro site na semaphore nke njikọ ọ bụla (igodo `qsconn:<connectionId>`): arịrị karịrị oke **na-eche n'ahịrị** kama ịjupụta akaụntụ ahụ. Ọ bụ **fail-open** — ahịrị jupụtara ma ọ bụ timeout na-aga n'ihu na-enweghị ohere kama ịjụ arịrị nwere ike ịkesa ọ bụla. Gbanwee ya na **Ntọala → Nkwusi ike → Ọtụtụ arịrị otu oge nke njikọ ọ bụla nke Quota-share** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ndabara bụ ọn). Na-enweghị oke `max_concurrent`, omume ahụ adịghị agbanwe.
+Mgbe nzipu oke-oke lekwasịrị anya njikọ na-ekwupụta `max_concurrent` dị mma, a na-arịọ arịrịọ ahụ n'otu oge.** akaụntụ** A na-edobe usoro site na semaphore njikọ ọ bụla (key `qsconn:<connectionId>`): arịrịọ ngafe** chere na kwụ n'ahịrị** kama ikpuchi akaụntụ ahụ. Ọ bụ** ada-emeghe** — kwụ n'ahịrị ma ọ bụ nkwụsị oge na-aga na-enweghị oghere karịa ịjụ arịrịọ enwere ike izipu. Banye** Ntọala → Resilience → Quota-share kwa njikọ njikọ** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ndabara na). Na-enweghị okpu `max_concurrent` omume adịghị agbanwe agbanwe.
 
-> Ụzọ routing quota-share (`selectQuotaShareTarget`, DRR + P2C) n'onwe ya bụ fail-open ma ọ na-_belata mkpa_ naanị njikọ ruru oke — na pool nwere naanị otu njikọ, ọ nweghị ike ịnye oke siri ike, ya mere semaphore a ka bụ nke na-egbochi ide arịrị ahụ n'ezie.
+> Ọnụ ụzọ ụzọ nke oke oke (`selectQuotaShareTarget`, DRR + P2C) bụ n'onwe ya na-emeghe ma ọ bụ naanị _deprioritizes_ njikọ njikọ — nwere otu ọdọ mmiri ọ nweghị ike ịgbachi nkịtị, yabụ semaphore a bụ ihe nwere iju mmiri ahụ n'ezie.
 
-### Ịnwale ọzọ na-amata cooldown nke combo
+### Ngwakọta cooldown-marakwa ọzọ nwaa
 
-Maka atụmatụ combo ọ bụla (mgbe e gbasara ya), arịrị ga-akpụ 429 maka cooldown nwa oge na-agafe agafe na-eche ka ọ gafee ma kesaa ọzọ kama ịweghachite 429 ahụ — nke a na-ekpuchi windo TPM/RPM klaasị Gemini (~60s retry-after) na combo ọtụtụ nlereanya, dịka ebumnuche abụọ nke combo nlereanya 2 na-akụ oke ọnụego nke nlereanya ọ bụla. Oke ya bụ `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) na **Ntọala → Nkwusi ike**. Ọ naghị eche na `quota_exhausted` (ekpochiri ruo etiti abalị) ma ọ bụ ihe mere bụ auth/not-found.
+Maka atụmatụ ngwakọta ọ bụla (mgbe enyere ya aka), arịrịọ nke ga-eme ka 429 dị jụụ maka SHORT na-adịru nwa oge na-echere ya ma zigaghachi ya kama ịlaghachi 429 — nke a na-ekpuchi Gemini-class TPM/RPM windows (~ 60s retry-after) na multi-model combos, eg ma ihe mgbaru ọsọ nke ọnụ ọgụgụ 2-model. Ejiri `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) n'ime** Ntọala → Resilience** . Ọ dịghị mgbe ọ na-eche na `quota_exhausted` (akpọchiri ruo etiti abalị) ma ọ bụ auth/not-found ihe kpatara ya.
 
-Ụzọ ahụ ka ahụ na-ekpuchi ọnọdụ tupu ekesa (#16319): mgbe a na-agafe ebumnuche ọ bụla nke combo tupu e me nnwale ọ bụla n'ihi na nlereanya ya nọ n'ọnọdụ mkpọchị nwa oge na-agafe agafe, ụzọ na-enweghị nnwale ahụ na-eche ka mkpọchị ahụ gafee n'okpuru otu oke ahụ ma kesaa ọzọ, kama ịza `503 ALL_TARGETS_SKIPPED` na-enweghị ntụzịaka. Mgbe achọtaghị ịchere (oke, nnwale ma ọ bụ ego enyere ezuola, ma ọ bụ a gbanyụrụ atụmatụ ahụ), nzaghachi ikpeazụ na-arịgo na `429 rate_limit_error` na-ebu `retry_after` / `reset_at` site na oge njedebe mkpọchị na-agafe agafe kacha nta; mkpọchị quota, auth na not-found na-edebe 503 na-enweghị ntụzịaka.
+Ngwakọta nwere ike ịpụ na `config.comboCooldownWaitEnabled: false`. Naanị `false` nkịtị na-eme ka echere combo ndị a na-ekekọrịta (ntụziaka nzipu ozi na tupu izipu circuit-open/model-lock na-echere) yana ndọtị oge nkwụsị nke mmefu ego ha. Na-efu ma ọ bụ `true` na-echekwa amụma zuru ụwa ọnụ; `true` enweghị ike ime ka ndị nwere nkwarụ zuru ụwa ọnụ ichere. `targetTimeoutMs` doro anya ka na-emeri. Nbupu a anaghị agbanwe iche iche-Codex turn-pin tupu izipu echere.
+
+Otu ọnụ ụzọ ámá ahụ na-ekpuchi ikpe tupu izipu (#16319): mgbe a na-amapụ ihe ọ bụla e lekwasịrị anya nke combo tupu emee mgbalị ọ bụla n'ihi na ihe nlereanya ya na-anọdụ ala n'ime obere nkwụsị oge na-agafe agafe, ụzọ efu efu na-echere mkpọchi n'okpuru otu ụlọ elu ma na-ezigaghachi, kama ịza `503 ALL_TARGETS_SKIPPED` na-enweghị atụ. Mgbe anabataghị echere (elu ụlọ, mbọ ma ọ bụ mmefu ego agwụla, ma ọ bụ njirimara ahụ kwụsịrị), nzaghachi ọnụ na-ebuli `429 rate_limit_error` na-ebu `retry_after` / `reset_at` site na njedebe mkpọchi oge mbụ; oke, auth na mkpọchi a na-ahụbeghị na-edobe ihe ngosi-503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

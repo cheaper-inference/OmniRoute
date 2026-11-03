@@ -283,25 +283,17 @@ tallennetaan pysyvästi; aktiivinen lukituksen _tila_ on ohimenevä.
 
 ---
 
-## 4. Quota-share -samanaikaisuuden hallinta (v3.8.36)
+## 4. Kiintiön jaon samanaikaisuuden hallinta (v3.8.36)
 
-Tilauspohjaiset tilit (GLM, MiniMax jne.) hyväksyvät usein vain noin 1–3 samanaikaista
-pyyntöä; rajan ylittäminen laukaisee 429-virheitä ja jäähdytysaikoja. Ongelma korostuu
-**quota-share**-yhdistelmissä (`qtSd/…`), joissa useat API-avaimet jakavat yhden
-upstream-tilin. Kolme kerrosta estää jaetun tilin tulvimisen.
+Tilaustilit (GLM, MiniMax jne.) hyväksyvät usein vain ~ 1–3 samanaikaista pyyntöä; sen ylittäminen laukaisee 429s ja jäähtymisen. Tämä on akuutti alla** kiintiöosuus** (`qtSd/…`) -yhdistelmät, joissa useat API näppäimet jakavat yhden ylävirran tilin. Kolme kerrosta estävät jaetun tilin tulvimisen.
 
-### Yhteyskohtainen samanaikaisuusraja (`max_concurrent`)
+### Yhteyskohtainen samanaikaisuuden yläraja (`max_concurrent`)
 
-Jokainen provider-yhteys voi määrittää `max_concurrent`-ylärajan
-(`provider_connections.max_concurrent`, asetetaan yhteysikkunassa / API:n kautta /
-tietokannassa). Jätä tyhjäksi, jos rajaa ei haluta. Tämä on ainoa säädin, joka ohjaa
-alla kuvattua sarjallistuskerrosta — aseta se tilin todellista samanaikaisuutta
-vastaavaksi (esim. GLM ~1, MiniMax ~2).
+Jokainen palveluntarjoajayhteys voi ilmoittaa `max_concurrent` -katon (`provider_connections.max_concurrent`, asetettu yhteyden modaalissa / API / DB). Jätä se tyhjäksi ilman rajoituksia. Tämä on yksi nuppi, joka ohjaa sarjoituskerrosta — alapuolella ja asettaa sen tilin todelliseen samanaikaisuuteen (esim. GLM ~ 1, MiniMax ~ 2).
 
-### Mallikohtaiset samanaikaisuusrajat (`modelConcurrency`)
+### Mallikohtaiset samanaikaisuuden ylärajat (`modelConcurrency`)
 
-Yhteys voi lisäksi määrittää tarkat mallikohtaiset samanaikaisuusylärajat
-`rateLimitOverrides`-kartan sisällä:
+Yhteys voi lisäksi ilmoittaa tarkat mallikohtaiset samanaikaisuuskatot `rateLimitOverrides` kartassa:
 
 ```json
 {
@@ -312,78 +304,32 @@ Yhteys voi lisäksi määrittää tarkat mallikohtaiset samanaikaisuusylärajat
 }
 ```
 
-Aseta se yhteysikkunassa (**Rate limit overrides → Per-model
-concurrency caps**, yksi `model=cap` per rivi) tai kutsulla
-`PATCH /api/providers/[id]` samalla JSON-muodolla. Keskeinen semantiikka:
+Aseta se yhteysmodaaliin (** Hintaraja ohittaa → -mallikohtaiset samanaikaisuuskatot** , yksi `model=cap` riviä kohden) tai `PATCH /api/providers/[id]` kautta samalla JSON muodolla. Keskeiset semantiikka:
 
-- **Koko yhteys vs. mallikohtainen:** `maxConcurrent` pysyy jaettuna koko yhteyden
-  ylärajana. Kun molemmat ovat voimassa, molemmat portit hankitaan
-  atomisesti samassa yhdistelmäportissa
-  (`global → provider → account → model`); vaikuttava käyttäytyminen määräytyy
-  tiukemman sovellettavan rajan mukaan.
-- **Tarkka malliavainvastaavuus:** avain on mallimerkkijono, joka välitetään
-  executorille reititysratkaisun jälkeen — yleensä pelkkä upstream-mallin tunnus
-  (`glm-5`), ei asiakaspuolen `provider/model`-alias (`zai/glm-5` ei
-  vastaa `glm-5`). Arvot ovat positiivisia kokonaislukuja, jotka toimivat
-  samanaikaisten pyyntöjen ylärajoina.
-- **Paikallinen jonotus, ei selvittelyä:** ylimääräiset pyynnöt jonottavat
-  paikallisesti olemassa olevilla jono-/aikakatkaisusemantiikoilla (typitetyt
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` -pääsyvirheet). OmniRoute ei selvitä
-  tai päättele upstream-käytäntöä — se valvoo täsmälleen operaattorin
-  määrittelemiä ylärajoja. Kyllästynyt malliportti ei koskaan poista provideria
-  käytöstä eikä luo pysyvää mallilukitusta; upstreamin 429-/jäähdytys-/fallback-
-  käyttäytyminen toimii edelleen virheiden varmistuksena.
-- **Yhteys- ja prosessikohtainen laajuus:** rajat ovat tietokantayhteyskohtaisia
-  ja säilytetään muistissa, joten kaksi samaa upstream-API-avainta käyttävää
-  yhteyttä eivät koordinoi keskenään.
-- **Määrittämätön tarkoittaa muuttumatonta:** kartan pois jättäminen (tai
-  hallintapaneelin kentän jättäminen tyhjäksi) ei lisää malliporttia.
-  Esimerkkikonfiguraatio ilman väitettä mistään yleisestä provider-rajasta:
+- **Yhteydenlaajuinen vs mallikohtainen:** `maxConcurrent` pysyy jaetun yhteyden laajuisena kattona. Kun molemmat ovat voimassa, molemmat portit hankitaan atomisesti samassa komposiittiportissa (`global → provider → account → model`); tehokas käyttäytyminen on tiukempi sovellettava raja.
+- **Tarkka malli-avain vastaavuus:** avain on mallimerkkijono, joka välitetään suorittimelle reititysresoluution — jälkeen, yleensä paljas ylävirran mallitunnus (`glm-5`), ei asiakaspuolen `provider/model` alias (`zai/glm-5` ei vastaa `glm-5`). Arvot ovat positiivisten kokonaislukujen samanaikaisten pyyntöjen enimmäismääriä.
+- **Paikallinen jonotus, ei löytöä:** ylimääräiset pyynnöt jonottavat paikallisesti olemassa olevan queue/timeout semantiikan kanssa (kirjoitettu `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` -pääsyvirheet). OmniRoute ei löydä tai päättele ylävirran käytäntöä — se valvoo operaattorin määrittämiä tarkat enimmäismäärät. Kyllästynyt malliportti ei koskaan poista palveluntarjoajaa käytöstä eikä luo pysyvää mallin lukitusta; ylävirran 429/cooldown/fallback käyttäytyminen on edelleen virheen esto.
+- **Yhteyskohtainen, prosessikohtainen laajuus:** caps ovat tietokantayhteyskohtaisia ja säilytetään muistissa, joten kaksi samaa ylävirran API avainta uudelleen käyttävää yhteyttä eivät koordinoi toisiaan.
+- **Määrittämätön tarkoittaa muuttumatonta:** kartan jättäminen pois (tai kojelautakentän tyhjäksi jättäminen) ei lisää malliporttia. Esimerkki kokoonpanosta ilman yleispalvelun tarjoajan rajoitusta:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Quota-share -pyyntöjen sarjallistaminen
+### Kiintiönjakopyynnön sarjoittaminen
 
-Kun quota-share -lähetys kohdistuu yhteyteen, jossa on määritetty positiivinen
-`max_concurrent`, kyseiseen **tiliin** kohdistuvat samanaikaiset pyynnöt
-sarjallistetaan yhteyskohtaisen semaforin kautta (avain `qsconn:<connectionId>`):
-ylimääräiset pyynnöt **odottavat jonossa** sen sijaan, että ne tulvisivat tiliä.
-Ratkaisu on **fail-open** — täysi jono tai aikakatkaisu jatkaa ilman paikkaa sen
-sijaan, että lähetettävissä oleva pyyntö koskaan hylättäisiin. Ominaisuuden voi
-kytkeä kohdassa **Settings → Resilience → Quota-share per-connection
-concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`,
-oletuksena päällä). Ilman `max_concurrent`-rajaa toiminta on ennallaan.
+Kun kiintiöosuuslähetys kohdistuu yhteyteen, joka ilmoittaa positiivisen `max_concurrent`, samanaikaiset pyynnöt** tili** sarjoitetaan yhteyskohtaisen semaforin kautta (avain `qsconn:<connectionId>`): ylimääräiset pyynnöt** odota jonossa** tilin tulvimisen sijaan. Se on** epäonnistunut** — kyllästynyt jono tai aikakatkaisu etenee ilman aikaväliä sen sijaan, että koskaan hylättäisiin lähetettävä pyyntö. Vaihda sisään** Asetukset → Resilience → Kiintiön osuus yhteyskohtaisesti samanaikaisuus** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, oletuksena päällä). Ilman `max_concurrent` korkkia käyttäytyminen ei muutu.
 
-> Quota-share -reititysportti (`selectQuotaShareTarget`, DRR + P2C) on itsessään
-> fail-open ja vain _alentaa_ kapasiteetin ylärajaan saavuttaneen yhteyden
-> _prioriteettia_ — yhden yhteyden poolissa se ei voi asettaa ehdotonta rajaa,
-> joten tämä semafori on se, joka todella pitää tulvan hallinnassa.
+> Kiintiön jaon reititysportti (`selectQuotaShareTarget`, DRR + P2C) on itsessään vikasietoinen ja vain _depriorisoi_ at-cap-yhteyden — jossa on yksiyhteyspooli, jota se ei voi tiukasti rajoittaa, joten tämä semafori on se, joka todella sisältää tulvan.
 
-### Yhdistelmien jäähdytykseen mukautuva uudelleenyritys
+### Yhdistelmäjäähdytystietoinen uudelleenyritys
 
-Jokaisessa yhdistelmästrategiassa (kun ominaisuus on käytössä) pyyntö, joka
-muuten tuottaisi 429-virheen LYHYEN ohimenevän jäähdytysajan vuoksi, odottaa sen
-päättymistä ja lähetetään uudelleen sen sijaan, että 429 palautettaisiin — tämä
-kattaa Gemini-luokan TPM/RPM-ikkunat (~60 s retry-after) usean mallin
-yhdistelmissä, esimerkiksi kun kahden mallin yhdistelmän molemmat kohteet osuvat
-mallikohtaiseen nopeusrajoitukseen. Rajoituksia ohjaa `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) kohdassa **Settings →
-Resilience**. Se ei koskaan odota `quota_exhausted`-tilan vuoksi (lukittuna
-keskiyöhön asti) tai auth-/not-found-syistä.
+Jokaisen yhdistelmästrategian kohdalla (kun käytössä) pyyntö, joka kiteyttää 429:n SHORT ohimenevään jäähtymiseen, odottaa sen ja lähettää uudelleen sen sijaan, että se palauttaisi 429 — Tämä kattaa Gemini-luokan TPM/RPM ikkunat (~ 60s uudelleenyritysten jälkeen) usean mallin yhdistelmässä, esim. molemmissa rajoissa model-model-mallit. `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) rajoittama** Asetukset → Resilience** . Se ei koskaan odota `quota_exhausted` (lukittu keskiyöhön asti) tai auth/not-found syistä.
 
-Sama portti kattaa myös lähetystä edeltävän tapauksen (#16319): kun kaikki
-yhdistelmän kohteet ohitetaan ennen yhtään yritystä, koska niiden mallit ovat
-lyhyessä ohimenevässä lukituksessa, nollayrityspolku odottaa lukon päättymistä
-samojen ylärajojen puitteissa ja lähettää uudelleen sen sijaan, että vastaisi
-vihjeettömällä `503 ALL_TARGETS_SKIPPED` -virheellä. Kun odotusta ei sallita
-(yläraja, yritys- tai budjettivaraus lopussa tai ominaisuus pois päältä),
-lopullinen vastaus muuttuu muotoon `429 rate_limit_error`, joka sisältää
-`retry_after`- / `reset_at`-arvot aikaisimmasta ohimenevän lukon
-päättymisajankohdasta; quota-, auth- ja not-found-lukot säilyttävät vihjeettömän
-503-vastauksen.
+Yhdistelmä voi kieltäytyä käytöstä `config.comboCooldownWaitEnabled: false` kanssa. Vain kirjaimellinen `false` poistaa käytöstä nämä jaetut yhdistelmä-odotukset (lähetyksen jälkeiset jäähdytys- ja lähetystä edeltävät circuit-open/model-lock odotukset) ja niiden odotusbudjetin aikakatkaisukerroslaajennus. Puuttuva tai `true` säilyttää globaalin politiikan; `true` ei voi ottaa käyttöön maailmanlaajuisesti käytöstä poistettua odotusta. Selkeä `targetTimeoutMs` voittaa silti. Tämä kieltäytyminen ei muuta erillistä alkuperäisen Codexin kääntönasta ennen lähettämistä.
+
+Sama portti peittää lähettämistä edeltävän tapauksen (#16319): kun yhdistelmän jokainen kohde ohitetaan ennen kuin yritetään tehdä, koska sen malli on lyhyessä ohimenevässä lukituksessa, nollayrityspolku odottaa lukitusta samojen kattojen alla ja lähettää uudelleen sen sijaan, että vastaisi vihjeettömään `503 ALL_TARGETS_SKIPPED`. Kun odotus ei ole sallittua (katto, yritys tai budjetti on käytetty loppuun tai ominaisuus pois päältä), päätteen vastaus päivittyy `429 rate_limit_error`, joka kuljettaa `retry_after` / `reset_at` aikaisimmasta ohimenevän lukon päättymisestä; kiintiö-, todennus- ja ei-found-lukot pitävät vihjettömän 503:n.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

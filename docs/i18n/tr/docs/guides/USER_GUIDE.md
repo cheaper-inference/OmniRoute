@@ -609,43 +609,43 @@ Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bak�
 ## 📊 Mevcut Modeller
 
 <details>
-<summary><b>Tüm mevcut modelleri görüntüle</b></summary>
+<summary><b>Mevcut tüm modelleri görüntüle</b></summary>
 
-> Aşağıdaki liste, v3.8.0 için `open-sse/config/providerRegistry.ts` dosyasından derlenmiştir. Bulut katalogları (Gemini, OpenRouter vb.) dinamik olarak senkronize edilir — canlı kataloğun tamamı için **Panel → Sağlayıcılar → [sağlayıcı] → Mevcut Modeller** yolunu açın veya `GET /api/models/catalog` çağrısını yapın.
+> Aşağıdaki liste v3.8.0 için `open-sse/config/providerRegistry.ts` derlenmiştir. Bulut katalogları (Gemini, OpenRouter, vb.), tam canlı kataloğun açık olması için — dinamik olarak senkronize edilir** Kontrol Paneli → Sağlayıcıları → [sağlayıcı] → Mevcut Modeller** veya `GET /api/models/catalog` arayın.
 >
-> Bir sağlayıcının yerleşik listesi sapmışsa, canlı yukarı akış kataloğunu çekmek için o sayfadaki **/models'den İçe Aktar** seçeneğini kullanın (veya **Otomatik Senkronizasyon**'u etkinleştirin). Bu, v3.8.50 sürümünde LLM7.io (`gemini-3.1-flash-lite`) ve UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) için doğrulanmıştır; Pollinations anonim erişimi aynı test turunda yukarı akış tarafında sınırlı kaldı.
+> Bir sağlayıcının yerleşik listesi kaymışsa şunu kullanın:** /models'ten içe aktar** o sayfada (veya etkinleştirin)** Otomatik Senkronizasyon** ) canlı yukarı akış kataloğunu çekmek için. Bu, LLM7.io (`gemini-3.1-flash-lite`) ve UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) için v3.8.50'de doğrulandı; Tozlaşmanın anonim erişimi aynı test geçişi sırasında yukarı akışla sınırlı kaldı.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Kodu (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort kademeleri: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ çaba katmanları: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ÜCRETSİZ OAuth: **Panel → Sağlayıcılar → Kiro → Mevcut Modeller** altında gösterilen canlı kataloğu kullanın. Kullanılabilirlik hesaba ve plana bağlıdır.
+**Kiro (`kr/`)** — FREE OAuth: aşağıda gösterilen canlı kataloğu kullanın** Kontrol Paneli → Sağlayıcıları → Kiro → Mevcut Modeller** . Kullanılabilirlik hesaba ve plana bağlıdır.
 
-**Qoder (`if/`)** — ÜCRETSİZ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — FREE OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — Aylık $9 sabit ücret veya kullanım başına: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo düz veya kullanım başına: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API anahtarı: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Ultra hızlı: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Yerel Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok yerel: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — AB'de barındırılan: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — AB tarafından barındırılan: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Arama destekli: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Şaşkınlık (`pplx/`)** — Aramayla zenginleştirilmiş: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Açık kaynak: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ücretsiz), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Hızlı çıkarım: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer ölçekli: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Gofret ölçeği: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG odaklı: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
@@ -653,13 +653,13 @@ Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bak�
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Bulut (`ollama-cloud/`)** : `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google'dan API anahtarı başına canlı olarak senkronize edilir — statik liste yoktur. **Panel → Sağlayıcılar** bölümünden bir anahtar bağlayın, ardından güncel kataloğu içe aktarmak için **Mevcut Modeller** seçeneğini kullanın (örn. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Bulut `gemini/`)** : Statik liste olmadan Google — API anahtarı başına canlı olarak senkronize edildi. Bir anahtar bağlayın** Kontrol Paneli → Sağlayıcıları** sonra kullan** Mevcut Modeller** geçerli kataloğu içe aktarmak için (örneğin `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Diğer uyumlu sağlayıcılar** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` aracılığıyla), `azure-ai`, `openrouter` (doğrudan aktarım kataloğu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Her biri kendi model listesini `providerRegistry.ts` içinde tutar ve sağlayıcı bir `/models` uç noktası sunduğunda otomatik olarak senkronize edilebilir.
+**Diğer uyumlu sağlayıcılar** (seçili): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` ( `aws-bedrock` aracılığıyla), `azure-ai`, `openrouter` (geçiş kataloğu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Her biri `providerRegistry.ts` kendi model listesini tutar ve sağlayıcı bir `/models` uç noktasını kullanıma sunduğunda otomatik olarak senkronize edilebilir.
 
-**Model kimlikleri hakkında not:** OmniRoute, sağlayıcıya özgü kimlikler kullanır (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bazı kimlikler noktalı sürümler içerir çünkü yukarı akış API'si bunları bu biçimde bekler. Bir model yukarıda listelenmemişse, kullanılabilirliği doğrulamak için `omniroute models --search <term>` komutunu çalıştırın veya `GET /api/models/catalog` çağrısını yapın.
+**IDs modeli hakkında not:** OmniRoute sağlayıcıya özgü IDs (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) kullanır. Bazı IDs noktalı versiyonlar içerir çünkü yukarı akışlı API onları bu şekilde bekler. Bir model yukarıda listelenmiyorsa kullanılabilirliği onaylamak için `omniroute models --search <term>` çalıştırın veya `GET /api/models/catalog` basın.
 
 </details>
 

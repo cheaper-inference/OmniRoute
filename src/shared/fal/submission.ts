@@ -41,10 +41,10 @@ export async function falFingerprint(draft: FalDraft): Promise<string> {
   return Array.from(new Uint8Array(bytes), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-const storageKey = "fal-submission-receipts-v2";
+const receiptStorageSlot = "fal-submission-receipts-v2";
 export function falReceiptSnapshot(): string {
   try {
-    return sessionStorage.getItem(storageKey) ?? "[]";
+    return sessionStorage.getItem(receiptStorageSlot) ?? "[]";
   } catch {
     return "[]";
   }
@@ -83,7 +83,7 @@ export function persistFalReceipt(receipt: FalSubmission): FalReceipt[] {
     ...readFalReceipts().filter((r) => r.key !== key),
   ].slice(0, 20);
   try {
-    sessionStorage.setItem(storageKey, JSON.stringify(records));
+    sessionStorage.setItem(receiptStorageSlot, JSON.stringify(records));
     window.dispatchEvent(new Event("fal-receipts"));
   } catch {
     // The in-memory snapshot still allows recovery when browser storage is unavailable.

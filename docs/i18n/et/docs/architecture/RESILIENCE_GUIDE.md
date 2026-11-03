@@ -283,17 +283,17 @@ lukustuse _olek_ on efemeerne.
 
 ---
 
-## 4. Kvoodijagamise samaaegsuse kontroll (v3.8.36)
+## 4. Kvoodi jagamise samaaegsuse juhtimine (v3.8.36)
 
-Tellimuskontod (GLM, MiniMax jne) aktsepteerivad sageli vaid ~1–3 samaaegset päringut; selle ületamine käivitab 429-vead ja jahtumisperioodid. See on eriti terav **kvoodijagamise** (`qtSd/…`) kombinatsioonide puhul, kus mitu API-võtit jagavad ühte ülesvoolu kontot. Kolm kihti hoiavad jagatud konto üleujutamise eest.
+Tellimuskontod (GLM, MiniMax jne) võtavad sageli vastu ainult ~ 1–3 samaaegset taotlust; selle ületamine käivitab 429 sekundit ja jahtumist. See on äge all** kvoodiosa** (`qtSd/…`) kombod, kus mitu API klahvi jagavad ühte ülesvoolu kontot. Kolm kihti hoiavad jagatud konto üle ujutamise eest.
 
-### Ühendusepõhine samaaegsuse piirang (`max_concurrent`)
+### Ühendusepõhine samaaegsuse ülempiir (`max_concurrent`)
 
-Iga pakkuja ühendus saab deklareerida `max_concurrent` ülempiiri (`provider_connections.max_concurrent`, määratud ühenduse modaalis / API-s / andmebaasis). Jätke see tühjaks, kui piirangut pole. See on ainus nupp, mis juhib allolevat serialiseerimiskihit – seadke see konto tegelikule samaaegsusele (nt GLM ~1, MiniMax ~2).
+Iga teenusepakkuja ühendus saab deklareerida `max_concurrent` ülemmäära (`provider_connections.max_concurrent`, määratud ühenduses modal / API / DB). Jätke see piiranguteta tühjaks. See on ainuke nupp, mis juhib — all olevat serialiseerimiskihti, mis seab selle konto tegelikule samaaegsusele (nt GLM ~ 1, MiniMax ~ 2).
 
-### Mudelipõhised samaaegsuse piirangud (`modelConcurrency`)
+### Mudelipõhised samaaegsuse piirid (`modelConcurrency`)
 
-Ühendus saab lisaks deklareerida täpsed mudelipõhised samaaegsuse ülempiirid oma `rateLimitOverrides` kaardis:
+Ühendus võib lisaks deklareerida täpsed mudelipõhised samaaegsuse ülemmäärad oma `rateLimitOverrides` kaardil:
 
 ```json
 {
@@ -304,30 +304,32 @@ Iga pakkuja ühendus saab deklareerida `max_concurrent` ülempiiri (`provider_co
 }
 ```
 
-Määrake see ühenduse modaalis (**Rate limit overrides → Per-model concurrency caps**, üks `model=cap` rea kohta) või `PATCH /api/providers/[id]` kaudu sama JSON-kujuga. Võtme semantika:
+Seadke see ühenduse modaali (** Rate limiit alistab → mudelipõhised samaaegsuse ülemmäärad** , üks `model=cap` rea kohta) või `PATCH /api/providers/[id]` kaudu sama JSON -kujuga. Peamised semantika:
 
-- **Ühenduseülene vs mudelispetsiifiline:** `maxConcurrent` jääb jagatud ühenduseüleseks ülempiiriks. Kui mõlemad kehtivad, omandatakse mõlemad väravad aatomiliselt samas liitväravas (`global → provider → account → model`); tegelik käitumine on rangem kohaldatav piirang.
-- **Täpne mudelivõtme vaste:** võti on mudeli string, mis edastatakse täitjale pärast marsruutimise lahendamist – tavaliselt paljas ülesvoolu mudeli ID (`glm-5`), mitte kliendipoolne `provider/model` alias (`zai/glm-5` ei vasta `glm-5`). Väärtused on positiivsed täisarvulised samaaegsete päringute ülempiirid.
-- **Kohalik järjekord, puudub avastamine:** liigsed päringud järjekorda kohapeal olemasoleva järjekorra/ajalõpu semantikaga (tüübitud `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` vastuvõtuvead). OmniRoute ei avasta ega järelda ülesvoolu poliitikat – see jõustab täpsed piirangud, mille operaator on konfigureerinud. Küllastunud mudelivärav ei lülita kunagi pakkujat välja ega loo püsivat mudeli lukustust; ülesvoolu 429/jahtumis-/tagavaramehhanismi käitumine jääb veapiiriks.
-- **Ühendusepõhine, protsessipõhine ulatus:** piirangud on andmebaasi ühendusepõhised ja hoitakse mälus, nii et kaks ühendust, mis kasutavad sama ülesvoolu API-võtit, ei koordineeri omavahel.
-- **Konfigureerimata tähendab muutumatut:** kaardi väljajätmine (või armatuurlaua välja tühjaks jätmine) ei lisa mudeliväravat. Näide konfiguratsioonist ilma universaalset pakkuja piirangut kehtestamata:
+- **Kogu ühendust hõlmav vs mudelipõhine:** `maxConcurrent` jääb ühisühendust hõlmavaks laeks. Mõlema rakendumisel omandatakse mõlemad väravad aatomiliselt samas liitväravas (`global → provider → account → model`); tõhus käitumine on rangem kohaldatav piir.
+- **Täpne mudeli ja võtme vaste:** võti on mudelistring, mis edastatakse täitjale pärast marsruutimislahutust — tavaliselt tühi ülesvoolu mudeli ID (`glm-5`), mitte kliendipoolne `provider/model` alias (`zai/glm-5` ei ühti `glm-5`). Väärtused on positiivsete täisarvude samaaegse taotluse ülemmäärad.
+- **Kohalik järjekord, avastamata:** üleliigsed päringud lokaalselt olemasoleva queue/timeout semantikaga (tipitud `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` vastuvõtuvead). OmniRoute ei tuvasta ega järelda ülesvoolupoliitikat — see jõustab operaatori seadistatud täpsed ülemmäärad. Küllastunud mudelivärav ei keela kunagi teenusepakkujat ega loo kunagi püsivat mudeli lukustamist; ülesvoolu 429/cooldown/fallback käitumine jääb vea tagamise vahendiks.
+- **Ühenduse kohta, protsessi ulatus:** piirangud on andmebaasiühenduse kohta ja neid hoitakse mälus, nii et kaks sama ülesvoolu API -võtit uuesti kasutavad ühendust ei koordineeri end üksteisega.
+- **Konfigureerimata tähendab muutmata:** kaardi väljajätmine (või armatuurlaua välja tühjaks jätmine) ei lisa mudeliväravat. Konfiguratsiooni näide ilma universaalse pakkuja piiranguta:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Kvoodijagamise päringute serialiseerimine
+### Kvoodi jagamise taotluse serialiseerimine
 
-Kui kvoodijagamise dispetšer suunab päringu ühendusele, mis deklareerib positiivse `max_concurrent`, serialiseeritakse samaaegsed päringud sellele **kontole** ühendusepõhise semafori kaudu (võti `qsconn:<connectionId>`): liigsed päringud **ootavad järjekorras** konto üleujutamise asemel. See on **fail-open** – küllastunud järjekord või ajalõpp jätkub ilma pesata, selle asemel et kunagi dispetšeeritavat päringut tagasi lükata. Lülitage sisse **Settings → Resilience → Quota-share per-connection concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, vaikimisi sisse lülitatud). Ilma `max_concurrent` piiranguta jääb käitumine muutumatuks.
+Kui kvoodijagamise saatmine sihib ühendust, mis deklareerib positiivse `max_concurrent`, esitatakse sellele samaaegsed taotlused** konto** jadatakse ühendusepõhise semafoori kaudu (klahv `qsconn:<connectionId>`): liigsed päringud** järjekorras ootama** konto üle ujutamise asemel. On küll** tõrgeteta avatud** — küllastunud järjekord või ajalõpp kulgeb edasi ilma pesa, mitte ei lükka kunagi tagasi saadetavat taotlust. Lülitage sisse** Seaded → Vastupidavus → Kvoodi jagamine ühenduse kohta samaaegsus** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, vaikimisi sees). Ilma `max_concurrent` korgita on käitumine muutumatu.
 
-> Kvoodijagamise marsruutimisvärav (`selectQuotaShareTarget`, DRR + P2C) on iseenesest fail-open ja ainult _deprioriseerib_ piirini jõudnud ühenduse – ühe ühenduse puhul ei saa see kõvasti piirata, seega see semafor on see, mis tegelikult üleujutust ohjeldab.
+> Kvoodijagamise marsruutimise värav (`selectQuotaShareTarget`, DRR + P2C) on ise tõrkeavatud ja _defitseerib_ ainult ühe ühendusega ühenduse — prioriteedid, nii et see semafor on see, mis tegelikult üleujutust sisaldab.
 
-### Kombineeritud jahtumisperioodi teadlik korduskatse
+### Kombineeritud jahtumist arvestav uuesti proovimine
 
-Iga kombineeritud strateegia puhul (kui see on lubatud) ootab päring, mis kristalliseeriks 429-vea LÜHIKESE mööduva jahtumisperioodi jaoks, selle ära ja saadab uuesti, selle asemel et tagastada 429 – see hõlmab Gemini-klassi TPM/RPM aknaid (~60s retry-after) mitme mudeli kombinatsioonide puhul, nt mõlemad 2-mudeli kombinatsiooni sihtmärgid jõuavad mudelipõhise piirini. Piiratud `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) seadetes **Settings → Resilience**. See ei oota kunagi `quota_exhausted` (lukustatud südaööni) ega autentimis-/mitteleidmise põhjuste puhul.
+Iga kombineeritud strateegia puhul (kui see on lubatud) ootab taotlus, mis kristalliseerib 429 SHORT ajutise jahtumise jaoks, ja saadetakse uuesti, selle asemel, et tagastada 429 — see hõlmab Gemini-klassi TPM/RPM aknaid (~ 60s uuesti proovimine-pärast) mitme mudeli kombinatsioonidel, nt kamm-model-model mõlema piirangu tabamissagedus. Piiratud `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`)** Seaded → Vastupidavus** . See ei oota kunagi `quota_exhausted` (lukus keskööni) või auth/not-found põhjustel.
 
-Sama värav katab eeldispetšerimise juhtumi (#16319): kui iga kombinatsiooni sihtmärk jäetakse vahele enne mis tahes katse tegemist, kuna selle mudel on lühiajalises mööduvas lukustuses, ootab nullkatse tee luku ära samade piirangute all ja dispetšeerib uuesti, selle asemel et vastata vihjeta `503 ALL_TARGETS_SKIPPED`. Kui ootamine pole lubatud (piirang, katse või eelarve on ammendatud või funktsioon on välja lülitatud), uuendatakse lõplik vastus `429 rate_limit_error`-ks, mis sisaldab `retry_after` / `reset_at` varaseimast mööduvast luku aegumisest; kvoodi-, autentimis- ja mitteleidmise lukud säilitavad vihjeta 503.
+Kombo saab `config.comboCooldownWaitEnabled: false` abil loobuda. Ainult sõnasõnaline `false` keelab need jagatud kombineeritud ooteootused (saatmisjärgne jahtumine ja väljasaatmiseelne circuit-open/model-lock ootamine) ja nende oote-eelarve ajalõpu-põrandalaienduse. Puuduv või `true` säilitab globaalse poliitika; `true` ei saa lubada globaalselt keelatud ootamist. Selgesõnaline `targetTimeoutMs` võidab ikkagi. See loobumine ei muuda eraldi natiivse Codexi nööpnõela saatmiseelset ootamist.
+
+Sama värav katab ärasaatmiseelse juhtumi (#16319): kui kombinatsiooni iga sihtmärk jäetakse vahele enne mis tahes katse tegemist, kuna selle mudel on lühikeses mööduvas lukustuses, ootab nullkatseta tee samade lagede all ja saadetakse uuesti, selle asemel et vastata vihjevabale `503 ALL_TARGETS_SKIPPED`-le. Kui ootamine pole lubatud (lagi, katse või eelarve on ammendatud või funktsioon on välja lülitatud), uuendatakse terminali vastust `429 rate_limit_error`, mis kannab `retry_after` / `reset_at` alates varaseimast mööduva lukustuse aegumist; kvoot, autentimine ja leidmata lukud hoiavad vihjeteta 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

@@ -283,25 +283,17 @@ lockout-_tilstand_ er flygtig.
 
 ---
 
-## 4. Samtidighedsstyring for quota-share (v3.8.36)
+## 4. Samtidig kontrol med kvoteandele (v3.8.36)
 
-Abonnementskonti (GLM, MiniMax osv.) accepterer ofte kun ~1–3 samtidige
-forespørgsler; overskrides det, udløses 429'ere og cooldowns. Dette er særligt
-kritisk ved **quota-share**-kombinationer (`qtSd/…`), hvor flere API-nøgler
-deler én upstream-konto. Tre lag forhindrer, at en delt konto bliver oversvømmet.
+Abonnementskonti (GLM, MiniMax, osv.) accepterer ofte kun ~ 1-3 samtidige anmodninger; overskridelse udløser 429s og nedkøling. Dette er akut under** kvote-andel** (`qtSd/…`) combos, hvor flere API nøgler deler én upstream-konto. Tre lag forhindrer en delt konto i at blive oversvømmet.
 
-### Loft over samtidighed pr. forbindelse (`max_concurrent`)
+### Per-forbindelse samtidighedsloft (`max_concurrent`)
 
-Hver udbyderforbindelse kan deklarere et `max_concurrent`-loft
-(`provider_connections.max_concurrent`, indstilles i forbindelsesmodalen /
-API'et / databasen). Lad feltet stå tomt for ingen grænse. Dette er den ene
-knap, der driver serialiseringslaget nedenfor — indstil det til kontoens
-reelle samtidighed (f.eks. GLM ~1, MiniMax ~2).
+Hver udbyderforbindelse kan erklære et `max_concurrent` loft (`provider_connections.max_concurrent`, indstillet i forbindelsesmodal / API / DB). Lad det stå tomt uden begrænsning. Dette er den enkelte knap, der driver serialiseringslaget under — sæt det til kontoens reelle samtidighed (f.eks. GLM ~ 1, MiniMax ~ 2).
 
-### Samtidighedslofter pr. model (`modelConcurrency`)
+### Samtidighedsgrænser pr. model (`modelConcurrency`)
 
-En forbindelse kan desuden deklarere præcise samtidighedslofter pr. model
-inde i sit `rateLimitOverrides`-map:
+En forbindelse kan desuden erklære nøjagtige per-model samtidighedslofter inde i sit `rateLimitOverrides` kort:
 
 ```json
 {
@@ -312,76 +304,32 @@ inde i sit `rateLimitOverrides`-map:
 }
 ```
 
-Indstil det i forbindelsesmodalen (**Rate limit-tilsidesættelser →
-Samtidighedslofter pr. model**, én `model=cap` pr. linje) eller via
-`PATCH /api/providers/[id]` med samme JSON-struktur. Vigtig semantik:
+Indstil den i forbindelsesmodal (** Rate limit tilsidesætter → Per-model concurrency caps** , en `model=cap` pr. linje) eller via `PATCH /api/providers/[id]` med samme JSON form. Nøgle semantik:
 
-- **Forbindelsesdækkende vs. modelspecifik:** `maxConcurrent` forbliver det
-  delte, forbindelsesdækkende loft. Når begge gælder, erhverves begge porte
-  atomisk i samme sammensatte port
-  (`global → provider → account → model`); den effektive adfærd er den
-  strengeste gældende grænse.
-- **Eksakt match på modelnøgle:** nøglen er den modelstreng, der sendes til
-  eksekvereren efter routingopløsning — normalt det rene upstream-model-id
-  (`glm-5`), ikke et klientside-`provider/model`-alias (`zai/glm-5` matcher
-  ikke `glm-5`). Værdier er lofter over samtidige forespørgsler som positive
-  heltal.
-- **Lokal kø, ingen discovery:** overskydende forespørgsler stilles lokalt i
-  kø med den eksisterende kø-/timeout-semantik (typede `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL`-adgangsfejl). OmniRoute opdager eller udleder ikke
-  upstream-politik — den håndhæver præcis de lofter, operatøren har
-  konfigureret. En mættet modelport deaktiverer aldrig udbyderen og skaber
-  aldrig en permanent modellockout; upstream-429/cooldown/fallback-adfærd
-  forbliver sikkerhedsnettet for fejl.
-- **Omfang pr. forbindelse, pr. proces:** lofter gælder pr. databaseforbindelse
-  og opbevares i hukommelsen, så to forbindelser, der genbruger samme
-  upstream-API-nøgle, ikke koordinerer med hinanden.
-- **Ukonfigureret betyder uændret:** udelades mappet (eller efterlades
-  dashboard-feltet tomt), tilføjes ingen modelport. Eksempelkonfiguration
-  uden at hævde nogen universel udbydergrænse:
+- **Forbindelsesdækkende vs modelspecifik:** `maxConcurrent` forbliver det delte loft over hele forbindelsen. Når begge gælder, erhverves begge porte atomisk i den samme sammensatte port (`global → provider → account → model`); den effektive adfærd er den strengere gældende grænse.
+- **Præcis model-nøgle match:** nøglen er modelstrengen, der sendes til eksekveren efter routingopløsning — normalt det blotte opstrøms model-id (`glm-5`), ikke et `provider/model` alias på klientsiden (`zai/glm-5` matcher ikke `glm-5`). Værdier er positive-heltals samtidige anmodningslofter.
+- **Lokal kø, ingen opdagelse:** overskydende anmodninger står i kø lokalt med den eksisterende queue/timeout semantik (indtastede `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` -adgangsfejl). OmniRoute opdager eller udleder ikke upstream-politik — den håndhæver de nøjagtige lofter, som operatøren har konfigureret. En mættet modelport deaktiverer aldrig udbyderen og skaber aldrig en permanent modellockout; opstrøms 429/cooldown/fallback adfærd forbliver fejlens bagstopper.
+- **Per-forbindelse, pr-proces omfang:** caps er pr. databaseforbindelse og holdes i hukommelsen, så to forbindelser, der genbruger den samme upstream API nøgle, koordinerer ikke med hinanden.
+- **Ukonfigureret betyder uændret:** udeladelse af kortet (eller lade dashboardfeltet stå tomt) tilføjer ingen modelport. Eksempel på konfiguration uden at hævde nogen universel udbydergrænse:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serialisering af quota-share-forespørgsler
+### Serialisering af anmodning om kvotedeling
 
-Når en quota-share-dispatch retter sig mod en forbindelse, der deklarerer en
-positiv `max_concurrent`, serialiseres samtidige forespørgsler til den
-pågældende **konto** gennem en semafor pr. forbindelse (nøgle
-`qsconn:<connectionId>`): overskydende forespørgsler **venter i køen** i stedet
-for at oversvømme kontoen. Den er **fail-open** — en mættet kø eller en timeout
-fortsætter uden en plads frem for nogensinde at afvise en forespørgsel, der kan
-dispatches. Slå til/fra under **Indstillinger → Robusthed → Quota-share-
-samtidighed pr. forbindelse** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`,
-slået til som standard). Uden et `max_concurrent`-loft er adfærden uændret.
+Når en kvotedelingsudsendelse er målrettet mod en forbindelse, der erklærer en positiv `max_concurrent`, samtidige anmodninger til den** konto** serialiseres gennem en per-forbindelse semafor (nøgle `qsconn:<connectionId>`): overskydende anmodninger** vente i køen** i stedet for at oversvømme kontoen. Det er det** fejl-åbn** — en mættet kø eller timeout fortsætter uden et slot i stedet for nogensinde at afvise en afsendelsesanmodning. Slå ind** Indstillinger → Resilience → Quota-share per-forbindelse samtidighed** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standard slået til). Uden en `max_concurrent` cap er adfærden uændret.
 
-> Quota-share-routingporten (`selectQuotaShareTarget`, DRR + P2C) er i sig selv
-> fail-open og _nedprioriterer_ kun en forbindelse, der har nået loftet — med en
-> pool med kun én forbindelse kan den ikke begrænse hårdt, så det er denne
-> semafor, der rent faktisk inddæmmer oversvømmelsen.
+> Quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) er i sig selv fejlåben og _deprioriterer_ kun en at-cap-forbindelse — med en single-connection pool, den kan ikke hårdt begrænse, så denne semafor er det, der faktisk indeholder oversvømmelsen.
 
-### Cooldown-bevidste genforsøg for kombinationer
+### Genforsøg med combo-afkølingsbevidst
 
-For enhver kombinationsstrategi (når den er aktiveret) afventer en forespørgsel,
-der ellers ville udkrystallisere sig til en 429 under en KORT forbigående
-cooldown, denne og dispatcher igen i stedet for at returnere 429'en — dette
-dækker Gemini-klassens TPM/RPM-vinduer (~60 s retry-after) på kombinationer med
-flere modeller, f.eks. når begge mål i en kombination med 2 modeller rammer en
-rate limit pr. model. Begrænset af `comboCooldownWait` (`enabled`, `maxWaitMs`,
-`maxAttempts`, `budgetMs`) under **Indstillinger → Robusthed**. Den venter
-aldrig på `quota_exhausted` (låst indtil midnat) eller auth-/not-found-årsager.
+For hver kombinationsstrategi (når den er aktiveret), venter en anmodning, der ville krystallisere en 429 for en SHORT -transient cooldown, den ud og afsendes igen i stedet for at returnere de 429 — Dette dækker Gemini-klassen TPM/RPM vinduer (~ 60s genforsøg efter) på kombinationer med flere modeller, f.eks. rammer begge mål for en model. Afgrænset af `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) i** Indstillinger → Resilience** . Den venter aldrig på `quota_exhausted` (låst indtil midnat) eller auth/not-found årsager.
 
-Samme port dækker tilfældet før dispatch (#16319): når alle mål i en
-kombination springes over, før der gøres noget forsøg, fordi deres model
-befinder sig i en kort forbigående lockout, afventer nul-forsøgs-vejen låsen
-under samme lofter og dispatcher igen i stedet for at svare med en
-`503 ALL_TARGETS_SKIPPED` uden hint. Når ventning ikke er tilladt (loft, forsøg
-eller budget opbrugt, eller funktionen slået fra), opgraderes det endelige svar
-til `429 rate_limit_error` med `retry_after` / `reset_at` fra det tidligste
-udløb af en forbigående lås; kvote-, auth- og not-found-låse beholder 503'en
-uden hint.
+En combo kan fravælge med `config.comboCooldownWaitEnabled: false`. Kun bogstavelig `false` deaktiverer disse delte kombinationsventer (afkøling efter afsendelse og ventetider før afsendelse af circuit-open/model-lock ) og deres vente-budget timeout-gulvudvidelse. Mangler eller `true` bevarer den globale politik; `true` kan ikke aktivere globalt deaktiveret ventetid. En eksplicit `targetTimeoutMs` vinder stadig. Dette fravalg ændrer ikke den separate native-Codex turn-pin før afsendelse.
+
+Den samme gate dækker sagen før afsendelse (#16319): når hvert mål i en kombination springes over, før der gøres forsøg, fordi dens model sidder i en kort forbigående lockout, venter nul-forsøgsvejen låsningen ude under de samme lofter og sender igen, i stedet for at besvare en `503 ALL_TARGETS_SKIPPED` uden hints. Når ingen ventetid er tilladt (loft, forsøg eller budget opbrugt, eller funktionen er slået fra), opgraderes terminalsvaret til `429 rate_limit_error`, der bærer `retry_after` / `reset_at` fra det tidligste forbigående låseudløb; kvote-, godkendelses- og ikke-fundne låse holder den antydningsfrie 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

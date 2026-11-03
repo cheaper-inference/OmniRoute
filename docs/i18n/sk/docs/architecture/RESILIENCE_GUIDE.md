@@ -284,26 +284,17 @@ _stav_ blokovaní je efemérny.
 
 ---
 
-## 4. Riadenie súbežnosti quota-share (v3.8.36)
+## 4. Kontrola súbežného zdieľania kvót (v3.8.36)
 
-Účty predplatného (GLM, MiniMax atď.) často akceptujú len ~1–3 súbežné
-požiadavky; ich prekročenie spúšťa chyby 429 a cooldowny. Tento problém je
-obzvlášť naliehavý pri kombináciách **quota-share** (`qtSd/…`), kde viacero
-API kľúčov zdieľa jeden upstream účet. Tri vrstvy zabraňujú zaplaveniu
-zdieľaného účtu.
+Účty predplatiteľov (GLM, MiniMax atď.) často akceptujú iba ~ 1–3 súbežné požiadavky; prekročenie spúšťa 429s a cooldowny. Toto je akútne pod** kvóty** (`qtSd/…`) kombá, kde niekoľko kľúčov API zdieľa jeden upstream účet. Tri vrstvy chránia zdieľaný účet pred zaplavením.
 
-### Limit súbežnosti na pripojenie (`max_concurrent`)
+### Obmedzenie súbežnosti na pripojenie (`max_concurrent`)
 
-Každé pripojenie poskytovateľa môže deklarovať strop `max_concurrent`
-(`provider_connections.max_concurrent`, nastavuje sa v modálnom okne
-pripojenia / API / DB). Nechajte ho prázdny pre režim bez limitu. Toto je
-jediný ovládač, ktorý riadi serializačnú vrstvu popísanú nižšie — nastavte
-ho na skutočnú súbežnosť účtu (napr. GLM ~1, MiniMax ~2).
+Každé pripojenie poskytovateľa môže deklarovať strop `max_concurrent` (`provider_connections.max_concurrent`, nastavený v pripojení modal / API / DB). Nechajte ho prázdne bez obmedzenia. Toto je jediný gombík, ktorý riadi vrstvu serializácie pod — nastavte ju na skutočnú súbežnosť účtu (napr. GLM ~ 1, MiniMax ~ 2).
 
-### Limity súbežnosti podľa modelu (`modelConcurrency`)
+### Obmedzenia súbežnosti podľa modelu (`modelConcurrency`)
 
-Pripojenie môže navyše deklarovať presné stropy súbežnosti pre jednotlivé
-modely vo svojej mape `rateLimitOverrides`:
+Spojenie môže dodatočne deklarovať presné stropy súbežnosti podľa modelu vo svojej mape `rateLimitOverrides` :
 
 ```json
 {
@@ -314,77 +305,32 @@ modely vo svojej mape `rateLimitOverrides`:
 }
 ```
 
-Nastavuje sa v modálnom okne pripojenia (**Prepísania rate limitov → Limity
-súbežnosti podľa modelu**, jeden `model=cap` na riadok) alebo cez
-`PATCH /api/providers/[id]` s rovnakým tvarom JSON. Sémantika kľúčov:
+Nastavte ho v režime pripojenia (** Limit sadzby prepíše → Obmedzenia súbežnosti podľa modelu** , jeden `model=cap` na riadok) alebo cez `PATCH /api/providers/[id]` s rovnakým tvarom JSON. Kľúčová sémantika:
 
-- **Celopripojový vs. modelovo-špecifický:** `maxConcurrent` zostáva
-  zdieľaným stropom na úrovni celého pripojenia. Keď platia oba, obe brány
-  sa získavajú atomicky v rámci tej istej kompozitnej brány
-  (`global → provider → account → model`); výsledné správanie určuje
-  prísnejší platný limit.
-- **Presná zhoda kľúča modelu:** kľúčom je reťazec modelu odovzdaný
-  vykonávateľovi po rozlíšení smerovania — zvyčajne holé upstream ID modelu
-  (`glm-5`), nie alias `provider/model` na strane klienta (`zai/glm-5`
-  nezodpovedá `glm-5`). Hodnoty sú stropy počtu súbežných požiadaviek vo
-  forme kladných celých čísel.
-- **Lokálne radenie, bez zisťovania:** nadbytočné požiadavky čakajú lokálne
-  v rade s existujúcou sémantikou radu/timeoutu (typované chyby prijatia
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute nezisťuje ani
-  neodvodzuje politiku upstreamu — vynucuje presne tie stropy, ktoré
-  operátor nakonfiguroval. Nasýtená brána modelu nikdy nevypne poskytovateľa
-  a nikdy nevytvorí trvalé blokovanie modelu; správanie upstream
-  429/cooldown/fallback zostáva poistkou pri chybách.
-- **Rozsah na pripojenie a na proces:** limity platia na databázové
-  pripojenie a držia sa v pamäti, takže dve pripojenia zdieľajúce rovnaký
-  upstream API kľúč sa navzájom nekoordinujú.
-- **Nenakonfigurované znamená nezmenené:** vynechanie mapy (alebo ponechanie
-  poľa na dashboarde prázdne) nepridá žiadnu bránu modelu. Príklad
-  konfigurácie bez deklarovania akéhokoľvek univerzálneho limitu
-  poskytovateľa:
+- **Pre celé pripojenie vs pre konkrétny model:** `maxConcurrent` zostáva spoločný strop pre celé pripojenie. Keď sa použijú obe, obe brány sa získajú atómovo v rovnakom zloženom hradle (`global → provider → account → model`); efektívne správanie je prísnejšia uplatniteľná hranica.
+- **Presná zhoda modelu a kľúča:** kľúčom je modelový reťazec odovzdaný exekútorovi po vyriešení smerovania — normálne holé id modelu upstream (`glm-5`), nie alias `provider/model` na strane klienta (`zai/glm-5` sa nezhoduje `glm-5`). Hodnoty sú limity kladných celých súbežných požiadaviek.
+- **Miestne radenie, žiadne zistenie:** nadmerné požiadavky sa zaraďujú do frontu lokálne s existujúcou sémantikou queue/timeout (chyby prijatia typu `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ). OmniRoute nezisťuje ani neodvodzuje upstream politiku — presadzuje presné stropy nakonfigurované operátorom. Nasýtená brána modelu nikdy nevyradí poskytovateľa a nikdy nevytvorí trvalé uzamknutie modelu; správanie 429/cooldown/fallback proti prúdu zostáva blokovaním chyby.
+- **Na pripojenie, rozsah na proces:** caps sú na databázové pripojenie a sú uložené v pamäti, takže dve pripojenia používajúce rovnaký upstream kľúč API sa navzájom nekoordinujú.
+- **Nekonfigurované znamená nezmenené:** vynechanie mapy (alebo ponechanie poľa na palubnej doske prázdne) nepridá žiadnu modelovú bránu. Príklad konfigurácie bez uplatnenia akéhokoľvek limitu univerzálneho poskytovateľa:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serializácia požiadaviek quota-share
+### Serializácia žiadostí o zdieľanie kvót
 
-Keď odoslanie quota-share cieli na pripojenie, ktoré deklaruje kladné
-`max_concurrent`, súbežné požiadavky na daný **účet** sa serializujú cez
-semafór na pripojenie (kľúč `qsconn:<connectionId>`): nadbytočné požiadavky
-**čakajú v rade** namiesto zaplavovania účtu. Funguje v režime **fail-open**
-— nasýtený rad alebo timeout pokračuje bez slotu namiesto toho, aby niekedy
-zamietol požiadavku, ktorú možno odoslať. Prepínač nájdete v **Nastavenia →
-Odolnosť → Súbežnosť quota-share na pripojenie**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, predvolene
-zapnuté). Bez limitu `max_concurrent` sa správanie nemení.
+Keď odoslanie zdieľania kvót zacieli na pripojenie, ktoré deklaruje kladné `max_concurrent`, súbežné požiadavky na toto pripojenie** účtu** sú serializované prostredníctvom semaforu pre jednotlivé pripojenia (kľúč `qsconn:<connectionId>`): nadmerné požiadavky** čakať v rade** namiesto zaplavenia účtu. je to tak** zlyhanie otvorené** — nasýtený front alebo časový limit pokračuje bez slotu, namiesto toho, aby sa odmietla odoslaná požiadavka. Zapnúť** Nastavenia → Odolnosť → Súbežnosť zdieľania kvót na pripojenie** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, predvolene zapnuté). Bez obmedzenia `max_concurrent` je správanie nezmenené.
 
-> Smerovacia brána quota-share (`selectQuotaShareTarget`, DRR + P2C) je sama
-> osebe fail-open a pripojenie na limite len _degraduje v prioritách_ — s
-> poolom s jediným pripojením nemôže vynútiť tvrdý limit, takže práve tento
-> semafór skutočne zadržiava záplavu.
+> Smerovacia brána na zdieľanie kvót (`selectQuotaShareTarget`, DRR + P2C) je sama o sebe otvorená zlyhaním a iba _deprioritizuje_ pripojenie typu at-cap — s fondom s jedným pripojením, ktorý nemôže pevne obmedziť, takže tento semafor je to, čo v skutočnosti obsahuje záplavu.
 
-### Opakovanie pokusu combo s ohľadom na cooldown
+### Kombinovaný pokus o chladenie
 
-Pri každej stratégii combo (ak je povolená) požiadavka, ktorá by sa zmenila
-na chybu 429 kvôli KRÁTKEMU prechodnému cooldownu, počká na jeho uplynutie a
-znova sa odošle namiesto vrátenia chyby 429 — pokrýva to okná TPM/RPM triedy
-Gemini (~60 s retry-after) pri viacmodelových kombináciách, napr. keď oba
-ciele 2-modelového combo narazia na rate limit daného modelu. Ohraničené
-pomocou `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) v **Nastavenia → Odolnosť**. Nikdy nečaká na `quota_exhausted`
-(uzamknuté do polnoci) ani na dôvody auth/not-found.
+Pri každej kombinovanej stratégii (keď je povolená) požiadavka, ktorá by vykryštalizovala 429 pre prechodné vychladnutie SHORT, čaká a znova odošle namiesto vrátenia 429 — čo sa vzťahuje na okná TPM/RPM triedy Gemini (~ 60s opakovanie po) na kombá s viacerými modelmi, napr. oba ciele dosiahnutia limitu komba 2 na model. ohraničené `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) v** Nastavenia → Odolnosť** . Nikdy nečaká na dôvody `quota_exhausted` (uzamknuté do polnoci) alebo auth/not-found.
 
-Rovnaká brána pokrýva aj prípad pred odoslaním (#16319): keď sa všetky ciele
-combo preskočia skôr, než sa vykoná akýkoľvek pokus, pretože ich model je v
-krátkom prechodnom blokovaní, cesta s nulovými pokusmi počká na uplynutie
-blokovania v rámci rovnakých stropov a znova odošle, namiesto odpovede
-`503 ALL_TARGETS_SKIPPED` bez indície. Keď čakanie nie je povolené
-(vyčerpaný strop, pokus alebo rozpočet, prípadne je funkcia vypnutá),
-terminálna odpoveď sa povýši na `429 rate_limit_error` nesúcu `retry_after`
-/ `reset_at` z najskoršej expirácie prechodného blokovania; blokovania typu
-kvóta, auth a not-found si ponechávajú 503 bez indície.
+Kombinácia sa môže odhlásiť pomocou `config.comboCooldownWaitEnabled: false`. Iba doslovné `false` zakáže tieto zdieľané kombinované čakania (chladenie po odoslaní a čakanie circuit-open/model-lock pred odoslaním) a ich predĺženie časového limitu čakania a rozpočtu. Chýbajúce alebo `true` zachováva globálnu politiku; `true` nemôže povoliť globálne zakázané čakanie. Explicitné `targetTimeoutMs` stále vyhráva. Toto odhlásenie nemení samostatné čakanie pred odoslaním otočného kolíka natívneho kódexu.
+
+Rovnaká brána pokrýva prípad pred odoslaním (#16319): keď je každý cieľ komba preskočený pred vykonaním akéhokoľvek pokusu, pretože jeho model je v krátkom prechodnom zablokovaní, cesta nulového pokusu čaká na uzamknutie pod rovnakými stropmi a znova sa odošle namiesto odpovede na `503 ALL_TARGETS_SKIPPED` bez náznaku. Keď nie je povolené žiadne čakanie (strop, pokus alebo rozpočet vyčerpaný, alebo funkcia vypnutá), odpoveď terminálu sa upgraduje na `429 rate_limit_error` nesúci `retry_after` / `reset_at` od najskoršieho vypršania prechodného zámku; kvóta, auth a not-nájdené zámky udržujú bez náznaku 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

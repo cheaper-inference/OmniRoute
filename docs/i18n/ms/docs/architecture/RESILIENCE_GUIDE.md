@@ -283,26 +283,17 @@ _keadaan_ sekatan aktif bersifat efemeral.
 
 ---
 
-## 4. Kawalan Keserentakan Quota-Share (v3.8.36)
+## 4. Kawalan Persamaan Perkongsian Kuota (v3.8.36)
 
-Akaun langganan (GLM, MiniMax, dll.) selalunya hanya menerima ~1–3 permintaan
-serentak; melebihi had itu akan mencetuskan 429 dan tempoh cooldown. Keadaan ini
-amat ketara dalam kombo **quota-share** (`qtSd/…`), di mana beberapa kunci API
-berkongsi satu akaun huluan. Tiga lapisan menghalang akaun kongsi daripada
-dibanjiri.
+Akaun langganan (GLM, MiniMax, dsb.) selalunya menerima hanya ~ 1–3 permintaan serentak; melebihi itu mencetuskan 429s dan cooldown. Ini adalah akut di bawah** perkongsian kuota** (`qtSd/…`) kombo, di mana beberapa kunci API berkongsi satu akaun huluan. Tiga lapisan mengekalkan akaun kongsi daripada dibanjiri.
 
-### Had keserentakan setiap sambungan (`max_concurrent`)
+### Had konkurensi setiap sambungan (`max_concurrent`)
 
-Setiap sambungan penyedia boleh mengisytiharkan siling `max_concurrent`
-(`provider_connections.max_concurrent`, ditetapkan dalam modal sambungan / API /
-pangkalan data). Biarkan kosong untuk tiada had. Ini ialah satu-satunya tombol
-yang menggerakkan lapisan penyirian di bawah — tetapkannya kepada keserentakan
-sebenar akaun (cth. GLM ~1, MiniMax ~2).
+Setiap sambungan pembekal boleh mengisytiharkan siling `max_concurrent` (`provider_connections.max_concurrent`, ditetapkan dalam mod sambungan / API / DB). Biarkan kosong tanpa had. Ini ialah tombol tunggal yang memacu lapisan bersiri di bawah — tetapkannya kepada konkurensi sebenar akaun (cth GLM ~ 1, MiniMax ~ 2).
 
-### Had keserentakan setiap model (`modelConcurrency`)
+### Had konkurensi setiap model (`modelConcurrency`)
 
-Sesebuah sambungan juga boleh mengisytiharkan siling keserentakan tepat setiap
-model di dalam peta `rateLimitOverrides` miliknya:
+Sambungan juga boleh mengisytiharkan siling konkurensi setiap model yang tepat di dalam peta `rateLimitOverrides` :
 
 ```json
 {
@@ -313,78 +304,32 @@ model di dalam peta `rateLimitOverrides` miliknya:
 }
 ```
 
-Tetapkannya dalam modal sambungan (**Pintasan had kadar → Had keserentakan
-setiap model**, satu `model=cap` setiap baris) atau melalui
-`PATCH /api/providers/[id]` dengan bentuk JSON yang sama. Semantik utama:
+Tetapkannya dalam modal sambungan (** Had kadar mengatasi → Had konkurensi setiap model** , satu `model=cap` setiap baris) atau melalui `PATCH /api/providers/[id]` dengan bentuk JSON yang sama. Semantik utama:
 
-- **Seluruh sambungan lwn khusus model:** `maxConcurrent` kekal sebagai siling
-  kongsi seluruh sambungan. Apabila kedua-duanya terpakai, kedua-dua pintu
-  diperoleh secara atomik dalam pintu komposit yang sama
-  (`global → provider → account → model`); tingkah laku efektifnya ialah had
-  yang lebih ketat di kalangan yang terpakai.
-- **Padanan tepat kunci model:** kuncinya ialah rentetan model yang diserahkan
-  kepada pelaksana selepas penyelesaian penghalaan — biasanya ID model huluan
-  asal (`glm-5`), bukan alias `provider/model` di sisi klien (`zai/glm-5` tidak
-  sepadan dengan `glm-5`). Nilainya ialah siling permintaan serentak berbentuk
-  integer positif.
-- **Giliran setempat, tiada penemuan:** permintaan berlebihan beratur secara
-  setempat dengan semantik baris gilir/tamat masa sedia ada (ralat kemasukan
-  bertaip `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute tidak
-  mengesan atau menyimpulkan dasar huluan — ia menguatkuasakan siling tepat
-  yang dikonfigurasikan oleh pengendali. Pintu model yang tepu tidak pernah
-  melumpuhkan penyedia mahupun mewujudkan sekatan model yang kekal; tingkah
-  laku 429/cooldown/fallback huluan kekal sebagai benteng terakhir untuk ralat.
-- **Skop setiap sambungan, setiap proses:** had adalah mengikut sambungan
-  pangkalan data dan dipegang dalam ingatan, jadi dua sambungan yang
-  menggunakan semula kunci API huluan yang sama tidak berkoordinasi antara satu
-  sama lain.
-- **Tidak dikonfigurasi bermakna tidak berubah:** mengabaikan peta (atau
-  membiarkan medan papan pemuka kosong) tidak menambah sebarang pintu model.
-  Contoh konfigurasi tanpa menetapkan sebarang had penyedia universal:
+- **Seluruh sambungan vs khusus model:** `maxConcurrent` kekal sebagai siling seluruh sambungan dikongsi. Apabila kedua-duanya digunakan, kedua-dua get diperolehi secara atom dalam get komposit yang sama (`global → provider → account → model`); tingkah laku yang berkesan ialah had yang lebih ketat.
+- **Padanan model-kunci yang tepat:** kuncinya ialah rentetan model yang dihantar kepada pelaksana selepas penghalaan resolusi — biasanya id model huluan kosong (`glm-5`), bukan alias `provider/model` sebelah klien (`zai/glm-5` tidak sepadan dengan `glm-5`). Nilai ialah siling permintaan serentak integer positif.
+- **Beratur tempatan, tiada penemuan:** lebihan permintaan beratur secara setempat dengan semantik queue/timeout sedia ada (taip `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ralat kemasukan). OmniRoute tidak menemui atau membuat kesimpulan dasar huluan — ia menguatkuasakan siling tepat yang dikonfigurasikan oleh operator. Gerbang model tepu tidak sekali-kali melumpuhkan pembekal dan tidak pernah mencipta kunci keluar model kekal; Tingkah laku 429/cooldown/fallback hulu kekal sebagai hentian belakang ralat.
+- **Skop per sambungan, setiap proses:** topi adalah setiap sambungan pangkalan data dan disimpan dalam memori, jadi dua sambungan yang menggunakan semula kunci API huluan yang sama tidak menyelaras antara satu sama lain.
+- **Tidak dikonfigurasikan bermaksud tidak berubah:** meninggalkan peta (atau membiarkan medan papan pemuka kosong) tidak menambah gerbang model. Contoh konfigurasi tanpa menegaskan sebarang had pembekal sejagat:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Penyirian permintaan quota-share
+### Siri permintaan perkongsian kuota
 
-Apabila penghantaran quota-share menyasarkan sambungan yang mengisytiharkan
-`max_concurrent` positif, permintaan serentak ke **akaun** itu disirikan melalui
-semafor setiap sambungan (kunci `qsconn:<connectionId>`): permintaan berlebihan
-**menunggu dalam baris gilir** dan bukannya membanjiri akaun. Ia bersifat
-**fail-open** — baris gilir yang tepu atau tamat masa akan diteruskan tanpa
-slot, dan tidak sekali-kali menolak permintaan yang boleh dihantar. Togol dalam
-**Tetapan → Resiliensi → Keserentakan setiap sambungan quota-share**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, lalai aktif). Tanpa
-had `max_concurrent`, tingkah laku kekal tidak berubah.
+Apabila penghantaran perkongsian kuota menyasarkan sambungan yang mengisytiharkan `max_concurrent` positif , permintaan serentak untuk itu** akaun** disirikan melalui semafor per sambungan (kunci `qsconn:<connectionId>`): permintaan berlebihan** tunggu dalam barisan** bukannya membanjiri akaun. Ia adalah** gagal-terbuka** — baris gilir tepu atau tamat masa diteruskan tanpa slot dan bukannya menolak permintaan yang boleh dihantar. Togol masuk** Tetapan → Ketahanan → Perkongsian kuota setiap sambungan serentak** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, lalai hidup). Tanpa topi `max_concurrent` tingkah laku tidak berubah.
 
-> Pintu penghalaan quota-share (`selectQuotaShareTarget`, DRR + P2C) itu
-> sendiri bersifat fail-open dan hanya _menyahutamakan_ sambungan yang telah
-> mencapai had — dengan kumpulan sambungan tunggal ia tidak dapat mengehadkan
-> secara mutlak, jadi semafor inilah yang sebenarnya membendung banjir itu.
+> Gerbang penghalaan perkongsian kuota (`selectQuotaShareTarget`, DRR + P2C) itu sendiri gagal-terbuka dan hanya _mendeprioritaskan_ — sambungan pada had dengan kolam sambungan tunggal yang tidak boleh dihadkan, jadi semafor inilah yang sebenarnya mengandungi banjir.
 
-### Cubaan semula peka cooldown kombo
+### Combo cooldown-aware cuba semula
 
-Untuk setiap strategi kombo (apabila didayakan), permintaan yang sepatutnya
-menghasilkan 429 untuk cooldown sementara yang SINGKAT akan menunggu sehingga
-tamat dan menghantar semula, dan bukannya memulangkan 429 — ini merangkumi
-tetingkap TPM/RPM kelas Gemini (~60s retry-after) pada kombo berbilang model,
-cth. apabila kedua-dua sasaran kombo 2 model terkena had kadar setiap model.
-Dibatasi oleh `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) dalam **Tetapan → Resiliensi**. Ia tidak pernah menunggu untuk
-`quota_exhausted` (dikunci sehingga tengah malam) atau sebab pengesahan/tidak
-dijumpai.
+Untuk setiap strategi kombo (apabila didayakan), permintaan yang akan mengkristalkan 429 untuk cooldown sementara SHORT menunggunya dan menghantar semula dan bukannya mengembalikan 429 — ini meliputi tingkap TPM/RPM kelas Gemini (~ 60s cuba semula selepas) pada kombo berbilang model, cth kedua-dua sasaran pada kadar kombo 2 model yang menghadkan. Dibatasi oleh `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) dalam** Tetapan → Ketahanan** . Ia tidak pernah menunggu pada `quota_exhausted` (dikunci sehingga tengah malam) atau sebab auth/not-found.
 
-Pintu yang sama merangkumi kes pra-penghantaran (#16319): apabila setiap
-sasaran kombo dilangkau sebelum sebarang percubaan dibuat kerana modelnya
-berada dalam sekatan sementara singkat, laluan sifar percubaan akan menunggu
-sekatan itu tamat di bawah siling yang sama dan menghantar semula, dan bukannya
-menjawab `503 ALL_TARGETS_SKIPPED` tanpa petunjuk. Apabila tiada penantian
-dibenarkan (siling, percubaan atau bajet telah habis, atau ciri dimatikan),
-respons terminal dinaik taraf kepada `429 rate_limit_error` yang membawa
-`retry_after` / `reset_at` daripada waktu tamat sekatan sementara paling awal;
-sekatan kuota, pengesahan dan tidak dijumpai mengekalkan 503 tanpa petunjuk.
+Kombo boleh memilih keluar dengan `config.comboCooldownWaitEnabled: false`. Hanya `false` literal yang melumpuhkan tunggu kombo kongsi ini (bertenang selepas penghantaran dan menunggu circuit-open/model-lock prapenghantaran) dan lanjutan tingkat masa tunggu belanjawan mereka. Hilang atau `true` mengekalkan dasar global; `true` tidak boleh mendayakan menunggu dilumpuhkan secara global. `targetTimeoutMs` eksplisit masih menang. Tarik diri ini tidak mengubah penantian pra-penghantaran pin giliran asli-Codex yang berasingan.
+
+Gerbang yang sama meliputi bekas pra-penghantaran (#16319): apabila setiap sasaran kombo dilangkau sebelum sebarang percubaan dibuat kerana modelnya berada dalam kunci keluar sementara yang singkat, laluan percubaan sifar menunggu kunci keluar di bawah siling yang sama dan menghantar semula, bukannya menjawab `503 ALL_TARGETS_SKIPPED` tanpa petunjuk. Apabila tiada tunggu dibenarkan (siling, percubaan atau belanjawan habis, atau ciri dimatikan), tindak balas terminal dinaik taraf kepada `429 rate_limit_error` membawa `retry_after` / `reset_at` daripada kunci sementara yang paling awal tamat; kuota, kesahihan dan kunci yang tidak ditemui mengekalkan petunjuk-kurang 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

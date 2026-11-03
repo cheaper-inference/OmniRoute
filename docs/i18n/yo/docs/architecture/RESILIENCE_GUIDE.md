@@ -281,26 +281,17 @@ tó ń ṣiṣẹ́ jẹ́ ti ìgbà díẹ̀.
 
 ---
 
-## 4. Ìṣàkóso Ìṣiṣẹ́pọ̀ Quota-Share (v3.8.36)
+## 4. Pipin-pipin Iṣakoso Iyipada owo (v3.8.36)
 
-Àwọn àkọọ́lẹ̀ ìforúkọsílẹ̀ (GLM, MiniMax, abbl.) sábà máa ń gba nǹkan bí ìbéèrè
-~1–3 péré ní àkókò kan náà; fífi ju bẹ́ẹ̀ lọ ń fa 429 àti àwọn àkókò ìdádúró.
-Èyí le gan-an lábẹ́ àwọn àkójọpọ̀ **quota-share** (`qtSd/…`), níbi tí ọ̀pọ̀
-kọ́kọ́rọ́ API ti ń pín àkọọ́lẹ̀ iṣẹ́ òkè kan náà. Ìpele mẹ́ta ló ń dáàbò bo
-àkọọ́lẹ̀ tí a jọ ń lò kí ìbéèrè má bàa kún inú rẹ̀ kọjá ààlà.
+Awọn akọọlẹ ṣiṣe alabapin (GLM, MiniMax, ati bẹbẹ lọ) nigbagbogbo gba awọn ibeere igbakana ~ 1–3; ju ti o okunfa 429s ati cooldowns. Eleyi jẹ ńlá labẹ** ipin-pin** (`qtSd/…`) combos, nibiti ọpọlọpọ awọn bọtini API pin akọọlẹ oke kan. Awọn ipele mẹta tọju akọọlẹ ti o pin lati jẹ iṣan omi.
 
-### Ààlà ìṣiṣẹ́pọ̀ fún asopọ̀ kọ̀ọ̀kan (`max_concurrent`)
+### Ila asopọ fun-asopọmọra (`max_concurrent`)
 
-Asopọ̀ olùpèsè kọ̀ọ̀kan lè sọ ààlà `max_concurrent` kan
-(`provider_connections.max_concurrent`, tí a ṣètò nínú fèrèsé asopọ̀ / API / DB).
-Fi í sílẹ̀ ní òfo tí o kò bá fẹ́ ààlà. Èyí ni ìṣàkóso kan ṣoṣo tó ń darí ìpele
-títẹ̀lé-lẹ́sẹẹsẹ ní ìsàlẹ̀ — ṣètò rẹ̀ sí iye ìṣiṣẹ́pọ̀ gidi ti àkọọ́lẹ̀ náà
-(fún àpẹẹrẹ, GLM ~1, MiniMax ~2).
+Asopọmọra olupese kọọkan le sọ orule `max_concurrent` (`provider_connections.max_concurrent`, ti a ṣeto sinu modal asopọ / API / DB). Fi silẹ ni ofo fun ko si iye to. Eyi ni koko ẹyọkan ti o wakọ ipele serialization ti o wa ni isalẹ — ṣeto si ibaramu gidi ti akọọlẹ naa (fun apẹẹrẹ GLM ~ 1, MiniMax ~ 2).
 
-### Àwọn ààlà ìṣiṣẹ́pọ̀ fún awoṣe kọ̀ọ̀kan (`modelConcurrency`)
+### Fun-awoṣe awọn fila concurrency (`modelConcurrency`)
 
-Asopọ̀ kan tún lè sọ àwọn ààlà ìṣiṣẹ́pọ̀ pàtó fún awoṣe kọ̀ọ̀kan
-nínú máàpù `rateLimitOverrides` rẹ̀:
+Asopọ le ni afikun sọ asọye gangan fun-awoṣe awọn orule concurrency inu maapu `rateLimitOverrides` rẹ:
 
 ```json
 {
@@ -311,80 +302,32 @@ nínú máàpù `rateLimitOverrides` rẹ̀:
 }
 ```
 
-Ṣètò rẹ̀ nínú fèrèsé asopọ̀ (**Àwọn àtúnṣe ààlà oṣùwọ̀n → Àwọn ààlà
-ìṣiṣẹ́pọ̀ fún awoṣe kọ̀ọ̀kan**, `model=cap` kan lórí ìlà kọ̀ọ̀kan) tàbí nípasẹ̀
-`PATCH /api/providers/[id]` pẹ̀lú ìrísí JSON kan náà. Ìtumọ̀ àwọn kọ́kọ́rọ́:
+Ṣeto rẹ ni ọna asopọ asopọ (** Idiwọn oṣuwọn dojuiwọn → Per-awoṣe concurrency awọn fila** , ọkan `model=cap` fun laini) tabi nipasẹ `PATCH /api/providers/[id]` pẹlu apẹrẹ JSON kanna. Awọn itumọ bọtini:
 
-- **Gbogbo asopọ̀ ní ìfiwéra pẹ̀lú awoṣe pàtó:** `maxConcurrent` ṣì jẹ́ ààlà
-  tí gbogbo asopọ̀ ń pín. Nígbà tí àwọn méjèèjì bá wúlò, a máa gba àwọn ẹnu-ọ̀nà
-  méjèèjì lẹ́ẹ̀kan náà nínú ẹnu-ọ̀nà àpapọ̀ kan
-  (`global → provider → account → model`); ààlà tó le jù lára àwọn tó wúlò
-  ni yóò ní ipa.
-- **Ìbámu pípé ti kọ́kọ́rọ́ awoṣe:** kọ́kọ́rọ́ náà ni ọ̀rọ̀ awoṣe tí a fi ránṣẹ́
-  sí olùṣiṣẹ́ lẹ́yìn tí a bá ti pinnu ipa-ọ̀nà — nígbà gbogbo, ó jẹ́ id awoṣe
-  òkè lásán (`glm-5`), kì í ṣe orúkọ àpèjúwe `provider/model` láti ọ̀dọ̀
-  oníbàárà (`zai/glm-5` kò bá `glm-5` mu). Àwọn iye gbọdọ̀ jẹ́ odidi rere
-  tó ń ṣàlàyé ààlà iye ìbéèrè tó lè ṣiṣẹ́ ní àkókò kan náà.
-- **Ìtòlẹ́sẹẹsẹ agbègbè, kò sí ìṣàwárí:** àwọn ìbéèrè tó kọjá ààlà máa dúró
-  nínú ìtòlẹ́sẹẹsẹ agbègbè pẹ̀lú ìlànà ìtòlẹ́sẹẹsẹ/àkókò-ìparí tó ti wà
-  (àwọn àṣìṣe ìgbàwọlé onírúurú `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL`). OmniRoute kì í ṣàwárí tàbí fojú díwọ̀n ìlànà
-  iṣẹ́ òkè — ó ń fi àwọn ààlà pàtó tí olùdarí ṣètò múlẹ̀. Ẹnu-ọ̀nà awoṣe
-  tó ti kún kì í pa olùpèsè, bẹ́ẹ̀ ni kì í dá ìdènà awoṣe títí láé sílẹ̀;
-  ìhùwàsí 429/àkókò ìdádúró/ìyípadà sí omiì ti iṣẹ́ òkè ṣì jẹ́ ààbò ìkẹyìn
-  fún àṣìṣe.
-- **Ìpín fún asopọ̀ kọ̀ọ̀kan, fún ìlànà-iṣẹ́ kọ̀ọ̀kan:** àwọn ààlà jẹ́ ti
-  asopọ̀ ibi ìpamọ́ dátà kọ̀ọ̀kan, a sì ń pa wọ́n mọ́ sínú ìrántí; nítorí náà,
-  asopọ̀ méjì tó tún ń lo kọ́kọ́rọ́ API iṣẹ́ òkè kan náà kì í ṣọ̀kan pẹ̀lú
-  ara wọn.
-- **Àìṣètò túmọ̀ sí pé kò sí ìyípadà:** fífi máàpù náà sílẹ̀ (tàbí fífi
-  ààyè inú pánẹ́ẹ̀lì sílẹ̀ ní òfo) kò fi ẹnu-ọ̀nà awoṣe kankan kún un.
-  Àpẹẹrẹ ìṣètò láì sọ pé ààlà olùpèsè àgbáyé kankan wà:
+- **Asopọ-jakejado vs awoṣe-pato:** `maxConcurrent` maa wa ni ile asopọ ti o pin jakejado. Nigbati awọn mejeeji ba waye, awọn ẹnu-ọna mejeeji ni a gba ni atomiki ni ẹnu-ọna apapo kanna (`global → provider → account → model`); awọn munadoko ihuwasi ni awọn stricter wulo iye to.
+- **Baramu-bọtini awoṣe gangan:** bọtini naa ni okun awoṣe ti o ti kọja si olupilẹṣẹ lẹhin ipinnu idari — ni deede iṣii awoṣe ti o wa ni oke (`glm-5`), kii ṣe alias onibara- `provider/model` (`zai/glm-5` ko baramu `glm-5`). Awọn iye jẹ odidi-odidi-rere nigbakanna-ibeere orule.
+- **Ti isinyi agbegbe, ko si awari:** awọn ibeere ti o pọju ti isinyi ni agbegbe pẹlu awọn itumọ queue/timeout ti o wa tẹlẹ (ti tẹ `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` awọn aṣiṣe gbigba). OmniRoute ko ṣe awari tabi ṣe alaye eto imulo oke — o fi ipa mu awọn orule gangan ti oniṣẹ tunto. Ẹnu-ọna awoṣe ti o ni kikun ko mu olupese ṣiṣẹ ati pe ko ṣẹda titiipa awoṣe titilai; ihuwasi 429/cooldown/fallback ti o wa ni oke si wa aṣiṣe ẹhin.
+- **Isopọmọ-kọọkan, aaye-ilana-ilana:** awọn fila wa fun asopọ data data ati ti o waye ni iranti, nitorinaa awọn asopọ meji ti n lo bọtini API oke kanna ko ni ipoidojuko pẹlu ara wọn.
+- **Aitunto tumo si ko yipada:** yiyọ maapu naa (tabi fifi aaye dasibodu silẹ ni ofifo) ko ṣe afikun ẹnu-ọna awoṣe. Iṣeto apẹẹrẹ lai ṣe afihan eyikeyi opin olupese agbaye:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Títẹ̀lé-lẹ́sẹẹsẹ àwọn ìbéèrè quota-share
+### Pipin-pin ibeere serialization
 
-Nígbà tí ìfiranṣẹ́ quota-share bá dojú kọ asopọ̀ kan tó sọ `max_concurrent`
-rere, a máa tẹ àwọn ìbéèrè tó ń lọ sí **àkọọ́lẹ̀** náà ní àkókò kan náà
-lẹ́sẹẹsẹ nípasẹ̀ semaphore fún asopọ̀ kọ̀ọ̀kan (kọ́kọ́rọ́
-`qsconn:<connectionId>`): àwọn ìbéèrè tó kọjá ààlà **máa dúró nínú
-ìtòlẹ́sẹẹsẹ** dípò kí wọ́n kún inú àkọọ́lẹ̀ náà. Ó jẹ́ **ṣí-sílẹ̀ nígbà
-ìkùnà** — ìtòlẹ́sẹẹsẹ tó ti kún tàbí àkókò tó parí máa tẹ̀síwájú láì gba
-àyè kan dípò kí ó kọ ìbéèrè tó ṣeé firánṣẹ́ sílẹ̀ láéláé. Tan-an tàbí pa á
-nínú **Àwọn ìṣètò → Ìfaradà → Ìṣiṣẹ́pọ̀ fún asopọ̀ quota-share kọ̀ọ̀kan**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ó máa ń wà ní títàn
-ní ìbẹ̀rẹ̀). Láìsí ààlà `max_concurrent`, ìhùwàsí náà kò ní yí padà.
+Nigbati ifiranse ipin ipin kan fojusi asopọ kan ti o sọ `max_concurrent` rere kan, awọn ibeere nigbakanna si iyẹn** iroyin** ti wa ni serialized nipasẹ kan fun-asopọ semaphore (bọtini `qsconn:<connectionId>`): excess ibeere** duro ninu awọn ti isinyi** dipo ti ikunomi iroyin. O jẹ** kuna-ìmọ** — isinyi ti o kun tabi awọn ere akoko ipari laisi iho kuku ju kiko ibeere ti o le firanṣẹ nigbagbogbo. Yipada sinu** Eto → Resilience → Quota-pin fun concurrency asopo ohun** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, aiyipada lori). Laisi fila `max_concurrent` ihuwasi ko yipada.
 
-> Ẹnu-ọ̀nà ìdarí ipa-ọ̀nà quota-share (`selectQuotaShareTarget`, DRR + P2C)
-> fúnra rẹ̀ jẹ́ èyí tó ṣí-sílẹ̀ nígbà ìkùnà, ó sì kàn ń _dín ààyè àṣàyàn_
-> asopọ̀ tó ti dé ààlà kù — pẹ̀lú àkójọpọ̀ asopọ̀ kan ṣoṣo, kò lè fi ààlà
-> líle múlẹ̀, nítorí náà semaphore yìí gan-an ló ń ṣàkóso ìṣàn ìbéèrè tó pọ̀.
+> Ẹnu-ọna afisona ipin ipin (`selectQuotaShareTarget`, DRR + P2C) funrararẹ kuna-ṣii ati pe nikan _deprioritizes_ asopọ ni-fila — pẹlu adagun-asopọ kan ko le ni opin-lile, nitorinaa semaphore yii jẹ ohun ti o ni ikun omi gangan ninu.
 
-### Àtúngbìyànjú tó mọ àkókò ìdádúró àkójọpọ̀
+### Konbo cooldown-mọ tun gbiyanju
 
-Fún gbogbo ọgbọ́n àkójọpọ̀ (nígbà tí ó bá ṣiṣẹ́), ìbéèrè kan tó máa mú 429
-kẹyìn wá nítorí àkókò ìdádúró alágbàákò KÚKÚRÚ máa dúró de òpin rẹ̀, yóò sì
-tún fi ìbéèrè náà ránṣẹ́ dípò pípadà 429 — èyí bo àwọn àkókò TPM/RPM irú ti
-Gemini (~60s retry-after) lórí àwọn àkójọpọ̀ awoṣe-púpọ̀, fún àpẹẹrẹ, nígbà
-tí àwọn ibi-afẹ́ méjèèjì nínú àkójọpọ̀ awoṣe méjì bá dé ààlà oṣùwọ̀n fún
-awoṣe kọ̀ọ̀kan. `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) nínú **Àwọn ìṣètò → Ìfaradà** ló fi ààlà sí i. Kò dúró láéláé
-lórí `quota_exhausted` (tí a ti tì pa títí di ọ̀gànjọ́ òru) tàbí àwọn ìdí
-ìfàṣẹsí/àìrí.
+Fun gbogbo ilana konbo (nigbati o ba ṣiṣẹ), ibeere ti yoo ṣe 429 fun itutu agbaiye akoko SHORT duro de ki o tun fi ranṣẹ dipo ki o pada 429 — eyi ni wiwa Gemini-kilasi TPM/RPM windows (~ 60s tun gbiyanju-lẹhin) lori awọn akojọpọ awoṣe pupọ, fun apẹẹrẹ awọn ibi-afẹde mejeeji ti oṣuwọn 2-model kan. Dide nipasẹ `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) ninu** Eto → Resilience** . Ko duro lori `quota_exhausted` (tiipa titi di ọganjọ oru) tabi awọn idi auth/not-found.
 
-Ẹnu-ọ̀nà kan náà tún bo ipò ṣáájú ìfiranṣẹ́ (#16319): nígbà tí a bá foju kọ
-gbogbo ibi-afẹ́ àkójọpọ̀ kan kí ìgbìyànjú kankan tó bẹ̀rẹ̀ nítorí pé awoṣe
-wọn wà lábẹ́ ìdènà alágbàákò kúkúrú, ipa-ọ̀nà aláìní-ìgbìyànjú náà máa dúró
-de òpin ìdènà lábẹ́ àwọn ààlà kan náà, yóò sì tún fi ìbéèrè náà ránṣẹ́, dípò
-dídi èsì `503 ALL_TARGETS_SKIPPED` tí kò ní ìtọ́kasí. Nígbà tí a kò bá gba
-ìdúró láàyè (ààlà ti dé, iye ìgbìyànjú tàbí ìnáwó ti parí, tàbí àǹfààní náà
-wà ní pípà), èsì ìkẹyìn máa yí sí `429 rate_limit_error` tó ní `retry_after` /
-`reset_at` láti àkókò ìparí ìdènà alágbàákò tó kọ́kọ́ dé; àwọn ìdènà kótà,
-ìfàṣẹsí àti àìrí máa pa 503 tí kò ní ìtọ́kasí mọ́.
+Konbo le jade pẹlu `config.comboCooldownWaitEnabled: false`. `false` gangan nikan ni o pa awọn idaduro konbo pinpin wọnyi (itutu-itupalẹ lẹhin-ifiranṣẹ ati awọn iduro-fifiranṣẹ circuit-open/model-lock nduro) ati idaduro-isuna-iduro-isunwo-akoko-pakà wọn. Sonu tabi `true` ṣe itọju eto imulo agbaye; `true` ko le mu idaduro alaabo agbaye ṣiṣẹ. `targetTimeoutMs` ti o fojuhan ṣi bori. Ijade-jade yii ko yi iṣipaya ara-ẹni-Codex turn-pin diduro-ifiranṣẹ tẹlẹ.
+
+Ẹnu-ọna kanna ni wiwa ọran-ifilọlẹ-ṣaaju (#16319): nigbati gbogbo ibi-afẹde ti konbo ti fo ṣaaju ki o to ṣe eyikeyi igbiyanju nitori pe awoṣe rẹ joko ni titiipa igba diẹ kukuru, ọna igbiyanju odo n duro de titiipa labẹ awọn orule kanna ati tun-firanṣẹ, dipo ti o dahun `503 ALL_TARGETS_SKIPPED` ti ko ni ofiri. Nigbati ko ba gba idaduro laaye (aja, igbiyanju tabi isuna ti o rẹ, tabi ẹya naa kuro), awọn iṣagbega esi ebute si `429 rate_limit_error` ti o n gbe `retry_after` / `reset_at` lati akoko titiipa igba diẹ akọkọ; ipin, auth ati awọn titiipa ti a ko rii jẹ ki itọkasi-kere 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

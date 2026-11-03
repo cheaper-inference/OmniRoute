@@ -612,57 +612,57 @@ A környezeti változók teljes referenciáját lásd a [README](../README.md) f
 ## 📊 Elérhető modellek
 
 <details>
-<summary><b>Az összes elérhető modell megtekintése</b></summary>
+<summary><b>Tekintse meg az összes elérhető modellt</b></summary>
 
-> Az alábbi lista az `open-sse/config/providerRegistry.ts` fájlból készült, a v3.8.0 verzióhoz. A felhőkatalógusok (Gemini, OpenRouter stb.) dinamikusan szinkronizálódnak — a teljes, élő katalógusért nyisd meg a **Vezérlőpult → Szolgáltatók → [szolgáltató] → Elérhető modellek** menüpontot, vagy hívd a `GET /api/models/catalog` végpontot.
+> Az alábbi lista `open-sse/config/providerRegistry.ts` 3.8.0-s verziójához készült. A felhőkatalógusok (Gemini, OpenRouter stb.) dinamikusan szinkronizálva — a teljes élő katalógus megnyitásához** Dashboard → Szolgáltatók → [szolgáltató] → Elérhető modellek** vagy hívja `GET /api/models/catalog`.
 >
-> Ha egy szolgáltató beépített listája elavult, használd az adott oldalon az **Importálás a /models-ből** lehetőséget (vagy kapcsold be az **Automatikus szinkronizálást**) az élő upstream katalógus lekéréséhez. Ezt a v3.8.50-ben ellenőriztük az LLM7.io (`gemini-3.1-flash-lite`) és az UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) esetében; a Pollinations névtelen hozzáférése ugyanabban a tesztmenetben továbbra is upstream-oldalon korlátozott maradt.
+> Ha egy szolgáltató beépített listája elcsúszott, használja** Importálás a /models-ből** azon az oldalon (vagy engedélyezze** Automatikus szinkronizálás** ) az élő upstream katalógus letöltéséhez. Ezt a v3.8.50-ben ellenőriztük LLM7.io (`gemini-3.1-flash-lite`) és UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) esetén; A beporzások anonim hozzáférése az áramlás irányába korlátozva maradt ugyanazon teszt során.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude kód (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort-fokozatok: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ erőfeszítési szintek: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — INGYENES OAuth: használd a **Vezérlőpult → Szolgáltatók → Kiro → Elérhető modellek** alatt megjelenő élő katalógust. Az elérhetőség a fióktól és a csomagtól függ.
+**Kiro (`kr/`)** — FREE OAuth: használja az alábbi élő katalógust** Irányítópult → Szolgáltatók → Kiro → Elérhető modellek** . A rendelkezésre állás a számlától és a csomagtól függ.
 
-**Qoder (`if/`)** — INGYENES OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — FREE OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/hó fix díj vagy használat alapján: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo lapos vagy használatonkénti: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API-kulcs: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API kulcs: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultragyors: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultra-gyors: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok-natív: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok natív: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-ban üzemeltetett: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-központú: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Kereséssel bővített: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**zavarodottság (`pplx/`)** — Keresés bővített: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Nyílt forráskódú: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ingyenes), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Nyílt forráskód: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ingyenes), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Gyors inferencia: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Gyors következtetés: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-szintű: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Ostya-skála: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-központú: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Vállalati: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)** : `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: API-kulcsoként élőben szinkronizálva a Google-tól — nincs statikus lista. Adj hozzá egy kulcsot a **Vezérlőpult → Szolgáltatók** menüpontban, majd az **Elérhető modellek** segítségével importáld az aktuális katalógust (pl. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)** : Élőben szinkronizálva API kulcsonként Google — ből, nincs statikus lista. Csatlakoztasson egy kulcsot** Irányítópult → szolgáltatók** majd használd** Elérhető modellek** az aktuális katalógus importálásához (pl. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Egyéb kompatibilis szolgáltatók** (válogatás): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (átadott katalógus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mindegyik a saját modelllistáját a `providerRegistry.ts` fájlban tartja karban, és automatikusan szinkronizálható, ha a szolgáltató `/models` végpontot biztosít.
+**Egyéb kompatibilis szolgáltatók** (kiválasztva): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (átutalási katalógus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai` `cloudflare-ai` `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mindegyik saját modelllistát tart fenn `providerRegistry.ts` ban, és automatikusan szinkronizálható, ha a szolgáltató közzéteszi a `/models` végpontot.
 
-**Megjegyzés a modellazonosítókról:** Az OmniRoute szolgáltató-natív azonosítókat használ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Egyes azonosítók pontozott verziószámokat tartalmaznak, mert az upstream API ezt a formátumot várja. Ha egy modell nem szerepel a fenti listában, futtasd az `omniroute models --search <term>` parancsot, vagy kérdezd le a `GET /api/models/catalog` végpontot az elérhetőség megerősítéséhez.
+**Megjegyzés IDs modellhez:** OmniRoute szolgáltató-natív IDs t használja (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Néhány IDs pontozott változatot tartalmaz, mert az upstream API így várja el őket. Ha egy modell nem szerepel a fenti listában, futtassa `omniroute models --search <term>`, vagy nyomja meg `GET /api/models/catalog` az elérhetőség megerősítéséhez.
 
 </details>
 

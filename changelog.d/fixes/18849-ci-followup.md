@@ -1,0 +1,3 @@
+- Preserve Fal image-edit options and ordered references alongside the updated Sol reference/mask parser when synchronizing the release branch. (@KiaroSama)
+- Complete Burmese and Yoruba Fal controls, refresh changed documentation mirrors, and keep the receipt-storage label out of credential-pattern false positives without changing its persisted value. (@KiaroSama)
+- Give the keyboard chart tooltip its required series identity and scope the Codex CLI-version browser assertion to its explanatory hint. (@KiaroSama)

@@ -288,21 +288,17 @@ saqlanadi; faol blokirovka _holati_ vaqtinchalikdir.
 
 ---
 
-## 4. Quota-share parallellik nazorati (v3.8.36)
+## 4. Kvota-ulashishning parallelligini nazorat qilish (v3.8.36)
 
-Obuna hisoblari (GLM, MiniMax va boshq.) ko'pincha atigi ~1–3 ta parallel so'rovni qabul qiladi; bundan oshib ketish 429 xatolarini va cooldown (sovutish) davrlarini keltirib chiqaradi. Bu **quota-share** (`qtSd/…`) kombinatsiyalarida keskin namoyon bo'ladi, bunda bir nechta API kalit bitta upstream hisobini bo'lishadi. Uch qatlam umumiy hisobning to'lib ketishidan (flood) himoya qiladi.
+Obuna hisoblari (GLM, MiniMax va boshqalar) ko'pincha faqat ~ 1–3 bir vaqtda so'rovlarni qabul qiladi; buning oshib ketishi 429 soniya va sovutish vaqtini ishga tushiradi. Bu o'tkir ostida** kvota-ulush** (`qtSd/…`) kombinatsiyalar, bu erda bir nechta API kalitlari bitta yuqori oqim hisobini baham ko'radi. Uchta qatlam umumiy hisobni suv bosishidan saqlaydi.
 
-### Har bir ulanish uchun parallellik chegarasi (`max_concurrent`)
+### Har bir ulanish uchun moslik chegarasi (`max_concurrent`)
 
-Har bir provayder ulanishi `max_concurrent` chegarasini e'lon qilishi mumkin
-(`provider_connections.max_concurrent`, ulanish modali / API / DB orqali o'rnatiladi).
-Cheklov bo'lmasligi uchun uni bo'sh qoldiring. Bu — quyidagi seriyalash qatlamini
-boshqaradigan yagona parametr: uni hisobning haqiqiy parallellik darajasiga o'rnating
-(masalan, GLM ~1, MiniMax ~2).
+Har bir provayder ulanishi `max_concurrent` shiftini e'lon qilishi mumkin (`provider_connections.max_concurrent`, ulanish modal / API / DB da o'rnatiladi). Hech qanday cheklovsiz uni bo'sh qoldiring. Bu — ostidagi ketma-ketlashtirish qatlamini boshqaradigan yagona tugma bo'lib, uni hisobning haqiqiy parallelligiga o'rnatadi (masalan, GLM ~ 1, MiniMax ~ 2).
 
-### Har bir model uchun parallellik chegaralari (`modelConcurrency`)
+### Har bir model uchun mos keladigan chegaralar (`modelConcurrency`)
 
-Ulanish qo'shimcha ravishda o'zining `rateLimitOverrides` xaritasi ichida har bir model uchun aniq parallellik chegaralarini e'lon qilishi mumkin:
+Ulanish qo'shimcha ravishda o'zining `rateLimitOverrides` xaritasi ichida har bir model uchun aniq moslik shiftini e'lon qilishi mumkin:
 
 ```json
 {
@@ -313,79 +309,32 @@ Ulanish qo'shimcha ravishda o'zining `rateLimitOverrides` xaritasi ichida har bi
 }
 ```
 
-Buni ulanish modalida (**Rate limit overrides → Har bir model uchun parallellik
-chegaralari**, har qatorda bitta `model=cap`) yoki xuddi shunday JSON ko'rinishi bilan
-`PATCH /api/providers/[id]` orqali o'rnating. Asosiy semantika:
+Uni ulanish rejimiga o'rnating (** Tarif chegarasi har bir model uchun → chegaralarini bekor qiladi** , har bir satr uchun bitta `model=cap` ) yoki bir xil JSON shakliga ega `PATCH /api/providers/[id]` orqali. Asosiy semantika:
 
-- **Butun ulanish bo'yicha va modelga xos:** `maxConcurrent` umumiy, butun
-  ulanish bo'yicha chegara bo'lib qoladi. Ikkalasi ham qo'llanilganda, ikkala
-  darvoza bir xil kompozit darvozada atomik tarzda olinadi
-  (`global → provider → account → model`); amaliy natija — qo'llaniladigan
-  eng qat'iy cheklovga teng.
-- **Model kalitining aniq mosligi:** kalit — marshrutlash aniqlangandan keyin
-  ijrochiga uzatiladigan model satri, ya'ni odatda sof upstream model
-  identifikatori (`glm-5`), mijoz tomonidagi `provider/model` taxallusi emas
-  (`zai/glm-5` `glm-5` ga mos kelmaydi). Qiymatlar — musbat butun sonli parallel
-  so'rovlar chegaralari.
-- **Mahalliy navbat, avtomatik aniqlash yo'q:** ortiqcha so'rovlar mavjud
-  navbat/timeout semantikasi bilan mahalliy navbatga qo'yiladi (tipli
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` kirish xatolari). OmniRoute
-  upstream siyosatini aniqlamaydi yoki taxmin qilmaydi — u operator sozlagan
-  aniq chegaralarni qo'llaydi. To'yangan model darvozasi provayderni hech qachon
-  o'chirmaydi va doimiy model blokirovkasini yaratmaydi; upstream
-  429/cooldown/fallback xatti-harakati xatolarning oxirgi himoyasi bo'lib qoladi.
-- **Har bir ulanish va har bir jarayon doirasida:** chegaralar har bir ma'lumotlar
-  bazasi ulanishi uchun belgilanadi va xotirada saqlanadi, shuning uchun bir xil
-  upstream API kalitini qayta ishlatadigan ikki ulanish bir-biri bilan
-  muvofiqlashmaydi.
-- **Sozlanmagan — o'zgarmagan degani:** xaritani kiritmaslik (yoki boshqaruv
-  paneli maydonini bo'sh qoldirish) hech qanday model darvozasini qo'shmaydi.
-  Har qanday universal provayder chegarasini ta'kidlamagan holda misol
-  konfiguratsiya:
+- **Ulanish bo'yicha va modelga xos:** `maxConcurrent` umumiy ulanish bo'yicha shift bo'lib qoladi. Ikkalasi ham qo'llanilganda, ikkala eshik ham bir xil kompozit eshikda (`global → provider → account → model`) atomik ravishda olinadi; samarali xatti-harakatlar qat'iyroq qo'llaniladigan chegaradir.
+- **Aniq model kaliti mosligi:** kalit — marshrutlashdan so'ng ijrochiga o'tkaziladigan model qatori odatda yalang'och yuqori oqim model identifikatori (`glm-5`), mijoz tomoni `provider/model` taxallus emas (`zai/glm-5` `glm-5` mos kelmaydi). Qiymatlar musbat-butun sonli bir vaqtning o'zida so'rovlar uchun shiftlardir.
+- **Mahalliy navbat, topilmadi:** ortiqcha so'rovlar mavjud queue/timeout semantikasi (yozilgan `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` kirish xatolari) bilan mahalliy navbatda. OmniRoute yuqori oqim siyosatini aniqlamaydi yoki xulosa qilmaydi — u operator sozlagan aniq shiftlarni amalga oshiradi. To'yingan model darvozasi hech qachon provayderni o'chirib qo'ymaydi va hech qachon doimiy model blokirovkasini yaratmaydi; upstream 429/cooldown/fallback xatti xato backstop bo'lib qoladi.
+- **Har bir ulanish, har bir jarayon doirasi:** bosh harflar har bir ma'lumotlar bazasi ulanishi va xotirada saqlanadi, shuning uchun bir xil yuqori oqim API kalitini qayta ishlatadigan ikkita ulanish bir-biri bilan muvofiqlashtirilmaydi.
+- **Konfiguratsiya o'zgarmagan degan ma'noni anglatadi:** xaritani o'tkazib yuborish (yoki asboblar paneli maydonini bo'sh qoldirish) hech qanday model darvozasini qo'shmaydi. Har qanday universal provayder chegarasini tasdiqlamasdan konfiguratsiyaga misol:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Quota-share so'rovlarini seriyalash
+### Kvota almashish soʻrovini ketma-ketlashtirish
 
-Quota-share yuborish (dispatch) musbat `max_concurrent` e'lon qilgan ulanishga
-qaratilganda, ushbu **hisobga** qilingan parallel so'rovlar har bir ulanish uchun
-semafor orqali seriyalanadi (kalit `qsconn:<connectionId>`): ortiqcha so'rovlar
-hisobni to'ldirib yuborish o'rniga **navbatda kutadi**. Bu **fail-open** — to'yangan
-navbat yoki timeout yuborilishi mumkin bo'lgan so'rovni hech qachon rad etish
-o'rniga, slotsiz davom etadi. **Sozlamalar → Chidamlilik → Quota-share har-ulanish
-parallelligi** bo'limida almashtiriladi
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, sukut bo'yicha yoqilgan).
-`max_concurrent` chegarasisiz xatti-harakat o'zgarmaydi.
+Kvota taqsimoti musbat `max_concurrent` e'lon qiladigan ulanishni maqsad qilganda, unga bir vaqtda so'rovlar yuboriladi.** hisob** har bir ulanish semafori (kalit `qsconn:<connectionId>`) orqali ketma-ketlashtiriladi: ortiqcha so'rovlar** navbatda kuting** hisobni to'ldirish o'rniga. Bu** muvaffaqiyatsiz ochiq** — to'yingan navbat yoki vaqt tugashi jo'natilishi mumkin bo'lgan so'rovni rad etishdan ko'ra, tirqishsiz davom etadi. Kirish** Parametrlar → Moslashuvchanlik → Kvota-ulanish uchun bir vaqtning o‘zida** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, sukut bo'yicha yoqilgan). `max_concurrent` qopqog'isiz xatti-harakatlar o'zgarmaydi.
 
-> Quota-share marshrutlash darvozasi (`selectQuotaShareTarget`, DRR + P2C) o'zi ham
-> fail-open bo'lib, chegaraga yetgan ulanishni faqat _ustuvorlikdan tushiradi_ —
-> bitta ulanishli hovuz (pool) bilan u qattiq cheklay olmaydi, shuning uchun
-> to'lqinni aslida ushbu semafor tiib turadi.
+> Kvota-ulush marshrutlash eshigi (`selectQuotaShareTarget`, DRR + P2C) o'zi ishlamay qoladi va faqat bitta ulanishli hovuzga ega bo'lgan — ulanishini _deprioritizes_, u qattiq cheklay olmaydi, shuning uchun bu semafor aslida toshqinni o'z ichiga oladi.
 
-### Kombinatsiya uchun cooldown'ni hisobga oluvchi qayta urinish
+### Kombo sovishini biladigan qayta urinib ko'ring
 
-Har bir kombinatsiya strategiyasi uchun (yoqilgan bo'lsa), QISQA vaqtinchalik
-cooldown sababli 429 ni keltirib chiqaradigan so'rov 429 ni qaytarish o'rniga
-uni kutib turadi va qayta yuboradi — bu ko'p modelli kombinatsiyalarda
-Gemini sinfidagi TPM/RPM oynalarini (~60s retry-after) qamrab oladi, masalan,
-2 modelli kombinatsiyaning ikkala nishoni ham model bo'yicha rate limit'ga duch
-kelganda. **Sozlamalar → Chidamlilik** dagi `comboCooldownWait` (`enabled`,
-`maxWaitMs`, `maxAttempts`, `budgetMs`) bilan chegaralanadi. U `quota_exhausted`
-(yarim tungacha qulflangan) yoki auth/not-found sabablari bo'yicha hech qachon
-kutmaydi.
+Har bir kombinatsiyalangan strategiya uchun (yoqilganda) SHORT vaqtinchalik sovutish uchun 429 ni kristallashtiradigan so'rov uni kutadi va 429 — ni qaytarish o'rniga qayta jo'natadi, bu Gemini-sinf TPM/RPM oynalarini (~ 60s qayta urinib ko'ring) qamrab oladi, masalan, ko'p modelli kombo va 2-tarmoqli kombinatsiyalarda. tarif chegarasi. `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) bilan chegaralangan.** → Moslashuvchanlik sozlamalari** . U hech qachon `quota_exhausted` (yarim tungacha qulflangan) yoki auth/not-found sabablarini kutmaydi.
 
-Xuddi shu darvoza yuborishdan oldingi holatni ham qamrab oladi (#16319): kombinatsiyaning
-har bir nishoni uning modeli qisqa vaqtinchalik blokirovkada bo'lgani uchun birorta
-urinish amalga oshirilishidan oldin o'tkazib yuborilsa, nol-urinishli yo'l xuddi
-shu chegaralar ostida qulfning ochilishini kutadi va qayta yuboradi — ishorasiz
-`503 ALL_TARGETS_SKIPPED` javobini berish o'rniga. Kutishga ruxsat bo'lmaganda
-(chegara, urinish yoki byudjet tugagan, yoki funksiya o'chirilgan), yakuniy javob
-eng erta vaqtinchalik qulfning tugash muddatidan olingan `retry_after` /
-`reset_at` qiymatlarini olib yuruvchi `429 rate_limit_error` ga ko'tariladi; kvota,
-auth va not-found qulflari ishorasiz 503 ni saqlab qoladi.
+Kombo `config.comboCooldownWaitEnabled: false` bilan voz kechishi mumkin. Faqat literal `false` ushbu umumiy kombinatsiyalangan kutishlarni (jo'natishdan keyingi sovutish va jo'natishdan oldingi circuit-open/model-lock kutishlari) va ularning kutish-byudjet taymout-qavatini kengaytirishni o'chirib qo'yadi. Yo'qolgan yoki `true` global siyosatni saqlaydi; `true` global miqyosda o'chirilgan kutishni faollashtira olmaydi. Aniq `targetTimeoutMs` hali ham g'alaba qozonadi. Bu rad etish alohida mahalliy Codex burilishni oldindan jo'natishni kutishni o'zgartirmaydi.
+
+Xuddi shu darvoza jo'natishdan oldingi holatni (#16319) qamrab oladi: har qanday urinish amalga oshirilgunga qadar kombinatning har bir nishoni o'tkazib yuborilsa, uning modeli qisqa vaqtinchalik blokirovkada o'tirsa, nolga urinish yo'li bir xil shiftlar ostida qulfni kutadi va maslahatsiz `503 ALL_TARGETS_SKIPPED` javob berish o'rniga qayta jo'natadi. Kutishga ruxsat berilmaganda (shift, urinish yoki byudjet tugagan yoki xususiyat o'chirilgan), terminal javobi eng erta vaqtinchalik blokirovka muddati tugaganidan boshlab `retry_after` / `reset_at` ko'taruvchi `429 rate_limit_error` ga yangilanadi; kvota, auth va topilmagan qulflar maslahatsiz 503 ni saqlaydi.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

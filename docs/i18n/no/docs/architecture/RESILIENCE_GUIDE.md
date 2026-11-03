@@ -289,25 +289,17 @@ _tilstanden_ for utestenging er flyktig.
 
 ---
 
-## 4. Kvote-delt samtidighetskontroll (v3.8.36)
+## 4. Samtidighetskontroll for kvoteandel (v3.8.36)
 
-Abonnementskontoer (GLM, MiniMax osv.) godtar ofte bare ~1–3 samtidige
-forespørsler; overskrides dette utløses 429-feil og nedkjølingsperioder. Dette er
-spesielt alvorlig under **quota-share**-kombinasjoner (`qtSd/…`), der flere
-API-nøkler deler én oppstrømskonto. Tre lag hindrer at en delt konto blir oversvømt.
+Abonnementskontoer (GLM, MiniMax, etc.) aksepterer ofte bare ~ 1–3 samtidige forespørsler; overskridelse utløser 429s og nedkjøling. Dette er akutt under** kvote-andel** (`qtSd/…`)-kombinasjoner, der flere API nøkler deler én oppstrømskonto. Tre lag forhindrer at en delt konto blir oversvømmet.
 
 ### Samtidighetstak per tilkobling (`max_concurrent`)
 
-Hver leverandørtilkobling kan deklarere et `max_concurrent`-tak
-(`provider_connections.max_concurrent`, satt i tilkoblingsmodalen / API-et /
-databasen). La det stå tomt for ingen grense. Dette er den ene bryteren som styrer
-serialiseringslaget nedenfor — sett det til kontoens reelle samtidighet
-(f.eks. GLM ~1, MiniMax ~2).
+Hver leverandørtilkobling kan deklarere et `max_concurrent` -tak (`provider_connections.max_concurrent`, satt i tilkoblingsmodal / API / DB). La det stå tomt uten grenser. Dette er den enkle knotten som driver serialiseringslaget under — sett det til kontoens reelle samtidighet (f.eks. GLM ~ 1, MiniMax ~ 2).
 
 ### Samtidighetstak per modell (`modelConcurrency`)
 
-En tilkobling kan i tillegg deklarere eksakte samtidighetstak per modell
-inne i `rateLimitOverrides`-kartet sitt:
+En tilkobling kan i tillegg deklarere nøyaktige samtidighetstak per modell i `rateLimitOverrides` kartet:
 
 ```json
 {
@@ -318,76 +310,32 @@ inne i `rateLimitOverrides`-kartet sitt:
 }
 ```
 
-Sett det i tilkoblingsmodalen (**Rate limit overrides → Per-model
-concurrency caps**, én `model=cap` per linje) eller via
-`PATCH /api/providers/[id]` med samme JSON-form. Nøkkelsemantikk:
+Sett den i tilkoblingsmodalen (** Rate limit overstyrer → Per-modell samtidighetstak** , en `model=cap` per linje) eller via `PATCH /api/providers/[id]` med samme JSON form. Nøkkelsemantikk:
 
-- **Hele tilkoblingen vs. modellspesifikt:** `maxConcurrent` forblir det delte
-  taket for hele tilkoblingen. Når begge gjelder, tilegnes begge portene
-  atomisk i samme sammensatte port
-  (`global → provider → account → model`); den effektive oppførselen er det
-  strengeste gjeldende taket.
-- **Eksakt modellnøkkel-match:** nøkkelen er modellstrengen som sendes til
-  eksekvereren etter rutingoppløsning — vanligvis den rene oppstrøms
-  modell-ID-en (`glm-5`), ikke et klientside-alias av typen `provider/model`
-  (`zai/glm-5` matcher ikke `glm-5`). Verdiene er positive heltallstall for
-  samtidige forespørsler.
-- **Lokal køing, ingen oppdagelse:** overskytende forespørsler legges i lokal
-  kø med eksisterende kø-/tidsavbruddssemantikk (typede
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`-adgangsfeil). OmniRoute
-  oppdager eller utleder ikke oppstrømspolicy — den håndhever nøyaktig de
-  takene operatøren har konfigurert. En mettet modellport deaktiverer aldri
-  leverandøren og skaper aldri en permanent modelllåsing; oppstrøms
-  429-/nedkjølings-/fallback-oppførsel forblir feil-sikkerhetsnettet.
-- **Omfang per tilkobling, per prosess:** takene gjelder per
-  databasetilkobling og holdes i minnet, så to tilkoblinger som gjenbruker
-  samme oppstrøms API-nøkkel koordinerer ikke med hverandre.
-- **Ukonfigurert betyr uendret:** utelates kartet (eller dashbordfeltet står
-  tomt) legges ingen modellport til. Eksempelkonfigurasjon uten å hevde noen
-  universell leverandørgrense:
+- **Tilkoblingsomfattende kontra modellspesifikk:** `maxConcurrent` forblir det delte taket for hele tilkoblingen. Når begge gjelder, innhentes begge portene atomært i den samme sammensatte porten (`global → provider → account → model`); den effektive oppførselen er den strengere gjeldende grensen.
+- **Nøyaktig modell-nøkkelmatch:** nøkkelen er modellstrengen som sendes til eksekveren etter rutingsoppløsning — normalt den bare oppstrøms modell-ID (`glm-5`), ikke et `provider/model` alias på klientsiden (`zai/glm-5` samsvarer ikke med `glm-5`). Verdier er positive-heltalls samtidige forespørsel-tak.
+- **Lokal kø, ingen oppdagelse:** overskytende forespørsler står i kø lokalt med den eksisterende queue/timeout semantikken (skrivet `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` -innrømmelsesfeil). OmniRoute oppdager eller slutter ikke oppstrøms policy — den håndhever de nøyaktige taket operatøren konfigurerte. En mettet modellport deaktiverer aldri leverandøren og skaper aldri en permanent modellsperre; oppstrøms 429/cooldown/fallback atferd forblir tilbakestopperen for feilen.
+- **Per tilkobling, per prosess omfang:** caps er per databasetilkobling og holdes i minnet, så to tilkoblinger som gjenbruker den samme oppstrøms API nøkkelen koordinerer ikke med hverandre.
+- **Ukonfigurert betyr uendret:** utelate kartet (eller la dashbordfeltet stå tomt) legger ikke til noen modellport. Eksempel på konfigurasjon uten å hevde noen universell leverandørgrense:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serialisering av quota-share-forespørsler
+### Serialisering av kvotedelingsforespørsel
 
-Når en quota-share-forsendelse retter seg mot en tilkobling som deklarerer en
-positiv `max_concurrent`, serialiseres samtidige forespørsler til den
-**kontoen** gjennom en semafor per tilkobling (nøkkel `qsconn:<connectionId>`):
-overskytende forespørsler **venter i køen** i stedet for å oversvømme kontoen. Den er
-**fail-open** — en mettet kø eller et tidsavbrudd fortsetter uten en plass i
-stedet for noensinne å avvise en forespørsel som kan sendes. Slås av/på under
-**Settings → Resilience → Quota-share per-connection
-concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, på som
-standard). Uten et `max_concurrent`-tak er oppførselen uendret.
+Når en kvotedeling retter seg mot en tilkobling som erklærer en positiv `max_concurrent`, samtidige forespørsler til den** konto** serialiseres gjennom en semafor per tilkobling (nøkkel `qsconn:<connectionId>`): overflødige forespørsler** vente i køen** i stedet for å oversvømme kontoen. Det er det** fail-open** — en mettet kø eller tidsavbrudd fortsetter uten et spor i stedet for noen gang å avvise en forespørsel som kan sendes. Slå inn** Innstillinger → Resilience → Kvota-andel per tilkobling samtidighet** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standard på). Uten en `max_concurrent` cap er oppførselen uendret.
 
-> Quota-share-rutingsporten (`selectQuotaShareTarget`, DRR + P2C) er selv
-> fail-open og bare _nedprioriterer_ en tilkobling ved taket — med en
-> tilkoblingspool med én tilkobling kan den ikke sette et hardt tak, så denne
-> semaforen er det som faktisk demmer opp flommen.
+> Rutingporten for kvotedeling (`selectQuotaShareTarget`, DRR + P2C) er i seg selv feilåpen og _deprioriterer_ bare en at-cap-forbindelse — med en enkelt-tilkoblingspool den kan ikke hardt begrense, så denne semaforen er det som faktisk inneholder flommen.
 
-### Nedkjølingsbevisst combo-retry
+### Prøv på nytt med kombinasjonsavkjøling
 
-For hver combo-strategi (når aktivert) vil en forespørsel som ville krystallisere
-en 429 for en KORT forbigående nedkjøling vente den ut og sende på nytt i stedet
-for å returnere 429-en — dette dekker Gemini-klasse TPM/RPM-vinduer (~60s
-retry-after) på flermodell-comboer, f.eks. når begge målene i en combo med to
-modeller treffer et hastighetstak per modell. Begrenset av `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) under
-**Settings → Resilience**. Den venter aldri på `quota_exhausted` (låst til
-midnatt) eller autentiserings-/ikke-funnet-årsaker.
+For hver kombinasjonsstrategi (når den er aktivert), venter en forespørsel som vil krystallisere en 429 for en SHORT forbigående nedkjøling og sendes ut på nytt i stedet for å returnere 429 — Dette dekker Gemini-klasse TPM/RPM vinduer (~ 60s gjenforsøk etter) på kombinasjoner av flere modeller, f.eks. Avgrenset av `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) i** Innstillinger → Resilience** . Den venter aldri på `quota_exhausted` (låst til midnatt) eller auth/not-found grunner.
 
-Samme port dekker tilfellet før forsendelse (#16319): når hvert mål i en combo
-hoppes over før noe forsøk er gjort fordi modellen sitter i en kort forbigående
-låsing, venter null-forsøks-veien låsingen ut under de samme takene og sender
-på nytt, i stedet for å svare med en hint-løs
-`503 ALL_TARGETS_SKIPPED`. Når ingen venting er tillatt (tak, forsøk eller
-budsjett oppbrukt, eller funksjonen av), oppgraderes det endelige svaret til
-`429 rate_limit_error` med `retry_after` / `reset_at` fra den tidligste
-forbigående låseutløpet; kvote-, autentiserings- og ikke-funnet-låsinger
-beholder den hint-løse 503-en.
+En kombinasjon kan velges bort med `config.comboCooldownWaitEnabled: false`. Bare bokstavelig `false` deaktiverer disse delte kombinasjonsventene (nedkjøling etter utsendelse og circuit-open/model-lock -venter før utsendelse) og deres forlengelse av vente-budsjett-timeout-gulvet. Mangler eller `true` bevarer den globale politikken; `true` kan ikke aktivere globalt deaktivert venting. En eksplisitt `targetTimeoutMs` vinner fortsatt. Denne frameldingen endrer ikke den separate native-Codex turn-pin pre-dispatch ventetiden.
+
+Den samme porten dekker pre-dispatch-saken (#16319): når hvert mål i en kombinasjon blir hoppet over før ethvert forsøk gjøres fordi modellen sitter i en kort forbigående lockout, venter null-forsøksbanen på låsen under de samme tak og sender ut på nytt, i stedet for å svare på en `503 ALL_TARGETS_SKIPPED` uten hint. Når ingen venting er tillatt (tak, forsøk eller budsjett oppbrukt, eller funksjonen av), oppgraderes terminalresponsen til `429 rate_limit_error` som bærer `retry_after` / `reset_at` fra den tidligste forbigående låsen utløper; kvote-, autentiserings- og ikke-funnet-låser holder den hintløse 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

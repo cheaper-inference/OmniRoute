@@ -119,7 +119,7 @@ export function StackedBarChart({
           </BarChart>
         </ResponsiveContainer>
         {focused && keyboardTooltip && <div id={tooltipId} role="tooltip" className="ci-stacked-chart__keyboard-tooltip" style={{ left: keyboardTooltip.x, top: keyboardTooltip.y }}>
-          <DefaultTooltipContent label={focused.tooltipLabel ?? focused.label} payload={series.map((item, index) => ({ name: item.label, value: focused.values[item.key] ?? unavailableLabel, color: seriesColor(item, index) }))} formatter={(value, name) => [typeof value === "number" ? valueFormatter(value) : value, name]} contentStyle={tooltipStyle} />
+          <DefaultTooltipContent label={focused.tooltipLabel ?? focused.label} payload={series.map((item, index) => ({ graphicalItemId: item.key, name: item.label, value: focused.values[item.key] ?? unavailableLabel, color: seriesColor(item, index) }))} formatter={(value, name) => [typeof value === "number" ? valueFormatter(value) : value, name]} contentStyle={tooltipStyle} />
         </div>}
       </div>
       {showLegend && <figcaption className="ci-stacked-chart__legend">{series.map((item, index) => <span key={item.key}><i aria-hidden style={{ background: seriesColor(item, index) }} /><span className="ci-stacked-chart__series">{item.icon && <span aria-hidden>{item.icon}</span>}{item.label}</span></span>)}</figcaption>}

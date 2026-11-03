@@ -300,21 +300,17 @@ aktywny _stan_ blokad jest efemeryczny.
 
 ---
 
-## 4. Kontrola współbieżności quota-share (v3.8.36)
+## 4. Kontrola współbieżności przydziału (wersja 3.8.36)
 
-Konta subskrypcyjne (GLM, MiniMax itp.) często akceptują tylko ~1–3 współbieżne żądania; przekroczenie tego limitu wywołuje błędy 429 i cooldowny. Problem jest szczególnie dotkliwy przy kombinacjach **quota-share** (`qtSd/…`), gdzie kilka kluczy API współdzieli jedno konto upstream. Trzy warstwy chronią współdzielone konto przed zalaniem.
+Konta subskrypcyjne (GLM, MiniMax itp.) często akceptują tylko ~ 1–3 jednoczesnych żądań; przekroczenie tego wyzwala 429 sekund i czasy odnowienia. To jest ostre pod** udział kwotowy** (`qtSd/…`) kombinacje, w których kilka kluczy API współdzieli jedno konto nadrzędne. Trzy warstwy chronią współdzielone konto przed zalaniem.
 
-### Limit współbieżności per połączenie (`max_concurrent`)
+### Limit współbieżności na połączenie (`max_concurrent`)
 
-Każde połączenie dostawcy może zadeklarować górny limit `max_concurrent`
-(`provider_connections.max_concurrent`, ustawiany w modalu połączenia / API / DB).
-Pozostaw puste, aby nie stosować limitu. To jedyny parametr sterujący opisaną niżej
-warstwą serializacji — ustaw go na rzeczywistą współbieżność konta (np. GLM ~1, MiniMax ~2).
+Każde połączenie dostawcy może zadeklarować pułap `max_concurrent` (`provider_connections.max_concurrent`, ustawiony w połączeniu modal / API / DB). Pozostaw puste bez ograniczeń. Jest to pojedyncze pokrętło sterujące warstwą serializacji poniżej. — ustawia ją na rzeczywistą współbieżność konta (np. GLM ~ 1, MiniMax ~ 2).
 
-### Limity współbieżności per model (`modelConcurrency`)
+### Limity współbieżności na model (`modelConcurrency`)
 
-Połączenie może dodatkowo zadeklarować dokładne limity współbieżności dla
-poszczególnych modeli w swojej mapie `rateLimitOverrides`:
+Połączenie może dodatkowo zadeklarować dokładne pułapy współbieżności dla każdego modelu w swojej mapie `rateLimitOverrides` :
 
 ```json
 {
@@ -325,73 +321,32 @@ poszczególnych modeli w swojej mapie `rateLimitOverrides`:
 }
 ```
 
-Ustaw je w modalu połączenia (**Nadpisania limitów szybkości → Limity współbieżności
-dla poszczególnych modeli**, po jednym `model=cap` na linię) lub przez
-`PATCH /api/providers/[id]` z tym samym kształtem JSON. Kluczowe zasady:
+Ustaw go w trybie połączenia (** Limit szybkości zastępuje → Limity współbieżności dla poszczególnych modeli** , jedno `model=cap` na linię) lub przez `PATCH /api/providers/[id]` o tym samym kształcie JSON. Kluczowa semantyka:
 
-- **Całe połączenie vs konkretny model:** `maxConcurrent` pozostaje wspólnym
-  limitem obowiązującym dla całego połączenia. Gdy oba mają zastosowanie, obie bramki
-  są przejmowane atomowo w ramach tej samej bramki złożonej
-  (`global → provider → account → model`); zachowanie efektywne odpowiada
-  bardziej restrykcyjnemu z obowiązujących limitów.
-- **Dokładne dopasowanie klucza modelu:** kluczem jest ciąg modelu przekazywany
-  do wykonawcy po rozstrzygnięciu routingu — zwykle sam identyfikator modelu
-  upstream (`glm-5`), a nie alias `provider/model` po stronie klienta
-  (`zai/glm-5` nie pasuje do `glm-5`). Wartości to limity współbieżnych żądań
-  wyrażone dodatnimi liczbami całkowitymi.
-- **Lokalne kolejkowanie, bez wykrywania:** nadmiarowe żądania są kolejkowane
-  lokalnie zgodnie z istniejącą semantyką kolejki/timeoutu (typizowane błędy
-  dopuszczenia `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute nie
-  wykrywa ani nie wywnioskowuje polityki upstream — wymusza dokładnie te limity,
-  które skonfigurował operator. Wysycona bramka modelu nigdy nie wyłącza dostawcy
-  i nigdy nie tworzy trwałej blokady modelu; zachowanie upstream
-  429/cooldown/fallback pozostaje ostatnią linią obrony przed błędami.
-- **Zakres per połączenie, per proces:** limity obowiązują dla każdego połączenia
-  w bazie danych i są trzymane w pamięci, więc dwa połączenia korzystające z tego
-  samego klucza API upstream nie koordynują się między sobą.
-- **Brak konfiguracji oznacza brak zmian:** pominięcie mapy (lub pozostawienie
-  pustego pola w panelu) nie dodaje żadnej bramki modelu. Przykładowa konfiguracja
-  bez narzucania uniwersalnego limitu dostawcy:
+- **Dla całego połączenia a dla konkretnego modelu:** `maxConcurrent` pozostaje wspólnym pułapem obejmującym całe połączenie. Gdy oba mają zastosowanie, obie bramki są pozyskiwane atomowo w tej samej bramce złożonej (`global → provider → account → model`); efektywne zachowanie to bardziej rygorystyczny obowiązujący limit.
+- **Dokładne dopasowanie klucza modelu:** kluczem jest ciąg modelu przekazywany do modułu wykonującego po rozpoznaniu routingu. — zwykle jest to sam identyfikator modelu nadrzędnego (`glm-5`), a nie alias `provider/model` po stronie klienta (`zai/glm-5` nie pasuje `glm-5`). Wartości są dodatnimi liczbami całkowitymi, pułapami równoczesnych żądań.
+- **Lokalne kolejkowanie, brak wykrywania:** nadmiar żądań kolejkuje lokalnie z istniejącą semantyką queue/timeout (wpisane błędy przyjęcia `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ). OmniRoute nie wykrywa ani nie wnioskuje zasad nadrzędnych. — wymusza dokładnie takie pułapy, jakie skonfigurował operator. Nasycona bramka modelu nigdy nie wyłącza dostawcy i nigdy nie powoduje trwałej blokady modelu; Zachowanie 429/cooldown/fallback w górę strumienia pozostaje zabezpieczeniem przed błędem.
+- **Na połączenie, zakres na proces:** caps są przypisane do połączenia z bazą danych i są przechowywane w pamięci, więc dwa połączenia ponownie wykorzystujące ten sam klucz nadrzędny API nie koordynują się ze sobą.
+- **Nieskonfigurowane oznacza niezmienione:** pominięcie mapy (lub pozostawienie pustego pola panelu kontrolnego) nie dodaje bramy modelu. Przykładowa konfiguracja bez podawania uniwersalnego limitu dostawcy:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serializacja żądań quota-share
+### Serializacja żądania udziału przydziału
 
-Gdy dyspozycja quota-share kieruje żądanie do połączenia deklarującego dodatni
-`max_concurrent`, współbieżne żądania do tego **konta** są serializowane przez
-semafor per połączenie (klucz `qsconn:<connectionId>`): nadmiarowe żądania **czekają
-w kolejce**, zamiast zalewać konto. Mechanizm jest **fail-open** — wysycona kolejka
-lub timeout powoduje kontynuację bez slotu, zamiast kiedykolwiek odrzucać żądanie
-możliwe do wysłania. Przełącznik w **Ustawienia → Odporność → Współbieżność
-quota-share per połączenie** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`,
-domyślnie włączone). Bez limitu `max_concurrent` zachowanie pozostaje niezmienione.
+Gdy wysyłka przydziału jest skierowana do połączenia, które deklaruje dodatnią `max_concurrent`, jednoczesne żądania do tego** konto** są serializowane przez semafor połączenia (klucz `qsconn:<connectionId>`): nadmiar żądań** czekać w kolejce** zamiast zalewać konto. To jest** otwieranie awaryjne** — zapełniona kolejka lub przekroczenie limitu czasu przebiega bez szczeliny, zamiast odrzucać możliwe do wysłania żądanie. Włącz** Ustawienia → Odporność → Współbieżność udziału przydziału na połączenie** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, domyślnie włączone). Bez czapki `max_concurrent` zachowanie pozostaje niezmienione.
 
-> Bramka routingu quota-share (`selectQuotaShareTarget`, DRR + P2C) sama w sobie
-> działa w trybie fail-open i jedynie _obniża priorytet_ połączenia, które osiągnęło
-> limit — przy puli z jednym połączeniem nie może narzucić twardego limitu, więc to
-> właśnie ten semafor faktycznie powstrzymuje zalanie.
+> Bramka routingu z udziałem przydziału (`selectQuotaShareTarget`, DRR + P2C) sama jest otwarta w przypadku awarii i tylko _depriorytetyzuje_ połączenie at-cap — z pulą pojedynczych połączeń, której nie można ograniczyć na stałe, więc ten semafor jest tym, co faktycznie zawiera powódź.
 
-### Ponawianie combo z uwzględnieniem cooldownu
+### Ponowna próba kombinacji uwzględniająca czas odnowienia
 
-Dla każdej strategii combo (gdy jest włączona) żądanie, które przybrałoby postać
-błędu 429 dla KRÓTKIEGO przejściowego cooldownu, oczekuje jego upływ i jest wysyłane
-ponownie, zamiast zwracać 429 — obejmuje to okna TPM/RPM klasy Gemini (~60 s
-retry-after) w kombinacjach wielomodelowych, np. gdy oba cele combo 2-modelowego
-natrafiają na limit per model. Ograniczone parametrem `comboCooldownWait` (`enabled`,
-`maxWaitMs`, `maxAttempts`, `budgetMs`) w **Ustawienia → Odporność**. Nigdy nie czeka
-przy `quota_exhausted` (zablokowane do północy) ani z powodów auth/not-found.
+Dla każdej strategii combo (jeśli jest włączona), żądanie, które skrystalizowałoby 429 dla przejściowego czasu odnowienia SHORT, czeka i ponownie wysyła zamiast zwracać 429 — Dotyczy to okien TPM/RPM klasy Gemini (~ 60s retry-after) w kombinacjach wielu modeli, np. oba cele kombinacji 2-modelowej osiągają limit szybkości dla każdego modelu. Ograniczone przez `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) w** Ustawienia → Odporność** . Nigdy nie czeka na powody `quota_exhausted` (zablokowane do północy) lub auth/not-found.
 
-Ta sama bramka obejmuje przypadek przed wysłaniem (#16319): gdy każdy cel combo
-zostaje pominięty przed jakąkolwiek próbą, ponieważ jego model znajduje się w krótkiej
-przejściowej blokadzie, ścieżka bez żadnej próby oczekuje upływ blokady w ramach tych
-samych limitów i wysyła ponownie, zamiast odpowiadać błędem `503 ALL_TARGETS_SKIPPED`
-bez wskazówki. Gdy oczekiwanie nie jest dozwolone (wyczerpany limit, próby lub budżet
-albo funkcja wyłączona), odpowiedź końcowa jest podnoszona do `429 rate_limit_error`
-i przenosi `retry_after` / `reset_at` z najwcześniejszego wygaśnięcia przejściowej
-blokady; blokady quota, auth i not-found zachowują odpowiedź 503 bez wskazówki.
+Kombinacja może zrezygnować z `config.comboCooldownWaitEnabled: false`. Tylko dosłowne `false` wyłącza te współdzielone oczekiwania combo (czas odnowienia po wysłaniu i oczekiwanie circuit-open/model-lock przed wysyłką) oraz ich wydłużenie limitu czasu oczekiwania i minimalnego budżetu. Brak lub `true` zachowuje politykę globalną; `true` nie może włączyć globalnie wyłączonego oczekiwania. Wyraźny `targetTimeoutMs` nadal wygrywa. Ta rezygnacja nie zmienia oddzielnego oczekiwania przed wysyłką, zgodnego z natywnym Kodeksem.
+
+Ta sama bramka obejmuje przypadek przed wysyłką (#16319): kiedy każdy cel kombinacji jest pomijany przed podjęciem jakiejkolwiek próby, ponieważ jego model znajduje się w krótkiej, przejściowej blokadzie, ścieżka zerowej próby czeka na blokadę pod tymi samymi sufitami i ponownie wysyła, zamiast odpowiadać na bez podpowiedzi `503 ALL_TARGETS_SKIPPED`. Gdy nie jest dozwolone oczekiwanie (wyczerpany limit, próba lub budżet albo funkcja wyłączona), odpowiedź terminala jest aktualizowana do `429 rate_limit_error` przenoszącego `retry_after` / `reset_at` od najwcześniejszego wygaśnięcia blokady przejściowej; Blokady kwot, uwierzytelnień i nieznalezionych utrzymują kod 503 bez podpowiedzi.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

@@ -268,17 +268,17 @@ DB — suna ɓacewa a sake farawa. Ana ajiye _saitunan_; _yanayin_ kullewa mai a
 
 ---
 
-## 4. Sarrafa Yawan Buƙatun Lokaci Guda na Quota-Share (v3.8.36)
+## 4. Ƙididdigar Rarraba Sarrafa Sabis (v3.8.36)
 
-Asusun biyan kuɗi (GLM, MiniMax, da sauransu) galibi suna karɓar buƙatu ~1–3 kacal a lokaci guda; ƙetare hakan yana haifar da 429s da cooldowns. Wannan matsala tana da tsanani musamman ƙarƙashin hadewar **quota-share** (`qtSd/…`), inda maɓallan API da yawa ke raba asusu guda na sama. Matakan uku suna kare asusun da aka raba daga ambaliya.
+Asusun biyan kuɗi (GLM, MiniMax, da sauransu) yawanci suna karɓar buƙatun ~ 1-3 kawai; wuce abin da ke haifar da 429s da cooldowns. Wannan shi ne m karkashin** rabo-share** (`qtSd/…`) combos, inda maɓallan API da yawa ke raba asusun sama ɗaya. Yadudduka uku suna kiyaye asusun da aka raba daga ambaliya.
 
-### Iyakar yawan aiki lokaci guda na kowace haɗi (`max_concurrent`)
+### Haɗin haɗin kai tsaye (`max_concurrent`)
 
-Kowace haɗin mai samarwa na iya ayyana iyakar `max_concurrent` (`provider_connections.max_concurrent`, ana saita ta a cikin modal ɗin haɗi / API / DB). Bar ta babu komai idan ba a son iyaka. Wannan shi ne kaɗai mabuɗin da ke tūkara matakin tsarawa da ke ƙasa — saita shi zuwa ainihin yawan aikin lokaci guda na asusun (misali GLM ~1, MiniMax ~2).
+Kowane haɗin mai ba da sabis na iya ayyana rufin `max_concurrent` (`provider_connections.max_concurrent`, saita cikin yanayin haɗin / API / DB). Bar shi fanko ba iyaka. Wannan ita ce ƙulli ɗaya wanda ke tafiyar da serialization Layer a ƙasa — saita shi zuwa ainihin daidaitaccen asusun (misali GLM ~ 1, MiniMax ~ 2).
 
-### Iyakokin yawan aiki lokaci guda na kowace samfuri (`modelConcurrency`)
+### Ƙwararren ƙira (`modelConcurrency`)
 
-Haɗi na iya ƙara ayyana ainihin iyakokin yawan aiki lokaci guda na kowace samfuri a cikin taswirar `rateLimitOverrides` ɗinta:
+Haɗin yana kuma iya bayyana ainihin madaidaicin rufin kowane samfuri a cikin taswirar `rateLimitOverrides` :
 
 ```json
 {
@@ -289,30 +289,32 @@ Haɗi na iya ƙara ayyana ainihin iyakokin yawan aiki lokaci guda na kowace samf
 }
 ```
 
-Saita shi a cikin modal ɗin haɗi (**Ƙetare iyakar sauri → Iyakokin yawan aiki lokaci guda na kowace samfuri**, `model=cap` ɗaya a kowace layi) ko ta `PATCH /api/providers/[id]` da wannan tsarin JSON ɗin. Ma'anomin maɓallai:
+Saita shi a cikin tsarin haɗin kai (** Ƙididdigar ƙididdigewa ta wuce → Per-model madaidaicin iyakoki** , `model=cap` ɗaya a kowane layi) ko ta hanyar `PATCH /api/providers/[id]` mai siffar JSON iri ɗaya. Mahimman bayanai:
 
-- **Na haɗi gaba ɗaya vs na takamaiman samfuri:** `maxConcurrent` yana ci gaba da kasancewa iyakar haɗi gaba ɗaya da aka raba. Idan dukkansu biyu sun shafi aiki, ana samun ƙofofin biyu tare a ɗan lokaci a cikin wannan ƙofar hadaka (`global → provider → account → model`); halin da ke aiki shi ne iyakar da ta fi tsaurara a cikin waɗanda suka dace.
-- **Daidaituwar maɓallin samfuri daidai:** maɓallin shi ne rubutun samfurin da aka miƙa wa mai aiwatarwa bayan warware jagora — yawanci ainihin ID ɗin samfurin sama marar ƙari (`glm-5`), ba laƙabin `provider/model` na gefen abokin ciniki ba (`zai/glm-5` bai dace da `glm-5` ba). Ƙimomin su ne iyakokin buƙatun lokaci guda na cikakkiyar lamba mai kyau.
-- **Jerin gida, babu bincike:** buƙatun da suka wuce suna yin jerin gwano a gida da ma'anar jeri/timeout da yake akwai (kurakuran shiga na `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute ba ya gano ko fahimtar manufar sama da kansa — yana tilasta ainihin iyakokin da mai aiki ya saita. Ƙofar samfuri da ta cika ba ta kashe mai samarwa kuma ba ta ƙirƙirar kulle samfuri na dindindin; halin 429/cooldown/fallback na sama ya kasance matsayin ƙarshe na kuskure.
-- **Fannin kowace haɗi, kowace tsari (process):** iyakokin su ne na kowace haɗin bayanai (database) kuma ana riƙe su a cikin ƙwaƙwalwa, don haka haɗi biyu da ke sake amfani da maɓallin API ɗaya na sama ba sa haɗin kai da juna.
-- **Rashin saita yana nufin babu canji:** barin taswirar (ko barin filin dashboard babu komai) ba ya ƙara ƙofar samfuri. Misalin saiti ba tare da ayyana wata iyaka ta duniya ta mai samarwa ba:
+- **Haɗin kai-fadi vs takamaiman samfuri:** `maxConcurrent` ya kasance rufin da aka raba haɗin haɗin gwiwa. Lokacin da aka yi amfani da duka biyun, ana samun duka kofofin biyu ta atomatik a cikin kofa guda ɗaya (`global → provider → account → model`); ingantacciyar ɗabi'a ita ce mafi tsananin iyaka.
+- **Daidaitaccen maɓalli na ƙirar ƙira:** maɓalli shine ƙirar ƙirar da aka aika zuwa ga mai aiwatarwa bayan ƙaddamar da ƙudurin — kullum dandali samfurin id na sama (`glm-5`), ba sunan `provider/model` na abokin ciniki ba (`zai/glm-5` bai dace da `glm-5` ba). Ma'auni sune rufin buƙatun ƙididdiga masu inganci.
+- **Layin gida, babu ganowa:** wuce haddi na buƙatun layi a cikin gida tare da ilimin tarukan queue/timeout na yanzu (kurakurai shigar `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ). OmniRoute baya ganowa ko fahimtar manufofin sama da — yana aiwatar da ainihin silin da mai aiki ya daidaita. Cikakken Ƙofar ƙira ba zai taɓa kashe mai badawa ba kuma baya haifar da kulle samfurin dindindin; Halin 429/cooldown/fallback na sama ya kasance kuskuren baya.
+- **Haɗin kai-tsaye, iyakar-tsari:** iyakoki suna ta kowace hanyar haɗin bayanai kuma ana riƙe su a cikin ƙwaƙwalwar ajiya, don haka haɗi biyu masu sake amfani da maɓallin API ɗaya na sama ba sa daidaitawa da juna.
+- **Ba a daidaita shi yana nufin mara canzawa:** ƙetare taswirar (ko barin filin dashboard babu komai) baya ƙara kofa samfurin. Tsarin misali ba tare da tabbatar da kowane iyaka na mai bada sabis na duniya ba:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Tsara buƙatun quota-share
+### Serialization buƙatun rabon ƙima
 
-Idan aikewar quota-share ta nufa haɗi da ke ayyana `max_concurrent` mai kyau, ana tsara buƙatun lokaci guda zuwa wannan **asusun** ta semaphore na kowace haɗi (maɓalli `qsconn:<connectionId>`): buƙatun da suka wuce **suna jira a jerin gwano** maimakon ambaliyar asusun. Yana **fail-open** — jerin da ya cika ko timeout yana ci gaba ba tare da wuri ba maimakon taƙaita buƙata da za a iya aikawa. Canza shi a **Saituna → Juriya → Yawan aiki lokaci guda na kowace haɗi na quota-share** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, asali kunne). Ba tare da iyakar `max_concurrent` ba halin ba ya canzawa.
+Lokacin da aika rabon rabon rabon ya yi niyya ga haɗin gwiwa wanda ke bayyana tabbataccen `max_concurrent`, buƙatun lokaci guda zuwa wancan.** asusu** ana jera su ta hanyar semaphore mai haɗin kai (key `qsconn:<connectionId>`): buƙatun wuce gona da iri** jira a cikin jerin gwano** maimakon ambaliya asusu. Yana da** kasa-bude** — cikakken jerin gwano ko ƙarewar lokaci yana ci gaba ba tare da ramuwa ba maimakon taɓa ƙin yarda da buƙatun da za a iya aikawa. Shiga ciki** Saituna → Resilience → Quota-share kowane haɗin haɗin kai** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, tsoho a kunne). Ba tare da hular `max_concurrent` ba yanayin ba ya canzawa.
 
-> Ƙofar jagorar quota-share (`selectQuotaShareTarget`, DRR + P2C) ita kanta fail-open ce kuma tana _rage mahimmanci_ kawai ga haɗi da ta cika — da tafkin haɗi ɗaya ba za ta iya takaita da ƙarfi ba, don haka wannan semaphore shi ne ainihin abin da ke ɗauke da ambaliyar.
+> Ƙofar hanyar da za a raba rabo (`selectQuotaShareTarget`, DRR + P2C) ita kanta ta gaza buɗewa kuma kawai _deprioritizes_ haɗin haɗin gwiwa — tare da tafkin haɗin kai guda ɗaya ba zai iya iyakancewa ba, don haka wannan semaphore shine ainihin abin da ya ƙunshi ambaliya.
 
-### Sake gwadawa mai fahimtar cooldown na combo
+### Combo cooldown-sanke sake gwadawa
 
-Ga kowace dabarar combo (idan an kunna), buƙata da za ta kafa 429 saboda GAJEREN cooldown na wucin gadi tana jira shi ya wuce kuma ta sake aikawa maimakon mayar da 429 — wannan ya rufe tagogin TPM/RPM na irin Gemini (~60s retry-after) a kan combos na samfuri da yawa, misali dukkanin manufofi biyu na combo na samfuri 2 suna buga iyakar sauri na kowace samfuri. Yana da iyaka da `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) a **Saituna → Juriya**. Ba ya jira a kan `quota_exhausted` (an kulle har tsakar dare) ko dalilan auth/not-found.
+Ga kowane dabarun haɗin gwiwa (lokacin da aka kunna), buƙatun da zai ƙirƙira 429 don sanyin sanyi na SHORT yana jira shi kuma ya sake aikawa maimakon dawo da 429 — wannan ya rufe Gemini-class TPM/RPM windows (~ 60s sake gwadawa-bayan) akan haɗaɗɗun samfura da yawa, misali duka biyun iyakacin adadin 2-mo. An yi iyaka da `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) a ciki** Saituna → Resilience** . Ba ya jira a kan `quota_exhausted` (a kulle har zuwa tsakar dare) ko dalilai na auth/not-found.
 
-Wannan ƙofar ma tana rufe yanayin kafin aikawa (#16319): idan an tsallake kowace manufa ta combo kafin a yi wani gwaji saboda samfurinta yana cikin kulle na wucin gadi na gajere, hanyar marar gwaji tana jira kulle ya wuce ƙarƙashin wannan iyakoki kuma tana sake aikawa, maimakon amsa `503 ALL_TARGETS_SKIPPED` marar-bayanin kula. Idan ba a yarda da jira ba (iyaka, gwaji ko kasafin kuɗi ya ƙare, ko fasalin ya kashe), amsar ƙarshe tana haɓakawa zuwa `429 rate_limit_error` tana ɗauke da `retry_after` / `reset_at` daga mafi farkon ƙarewar kulle na wucin gadi; kulle na quota, auth da not-found suna riƙe da 503 marar-bayanin kula.
+Combo na iya ficewa da `config.comboCooldownWaitEnabled: false`. `false` na zahiri ne kawai ya hana waɗannan jiragerun haɗin gwiwa (bayan aika sanyi da aika circuit-open/model-lock kafin a aika) da tsawaita lokacin-kudin kasafin kuɗin su. Bace ko `true` yana kiyaye manufofin duniya; `true` ba zai iya kunna jiran naƙasasshen duniya ba. Har yanzu `targetTimeoutMs` bayyananne yana nasara. Wannan ficewar ba zai canza keɓantaccen ɗan-bakin-bakin-bakin juya-filin jiran aika jira.
+
+Ƙofar guda ɗaya tana rufe harafin da aka riga aka aika (#16319): lokacin da aka tsallake kowane maƙasudi na haɗakarwa kafin a yi kowane ƙoƙari saboda samfurinsa yana zaune a cikin ɗan gajeren kulle-kulle, hanyar yunƙurin sifiri yana jiran kullewa a ƙarƙashin rufin guda ɗaya kuma a sake aikawa, maimakon amsa `503 ALL_TARGETS_SKIPPED` mara alama. Lokacin da ba a ba da izinin jira ba (rufi, ƙoƙari ko ƙarancin kasafin kuɗi, ko fasalin a kashe), haɓaka martanin tasha zuwa `429 rate_limit_error` ɗauke da `retry_after` / `reset_at` daga farkon ƙarshen kullewa na wucin gadi; ƙididdiga, auth da makullin da ba a samo su ba suna kiyaye alamar-kasa 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
