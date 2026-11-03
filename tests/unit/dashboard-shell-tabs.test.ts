@@ -80,14 +80,22 @@ test("settings root redirects to section pages instead of rendering a tab shell"
   assert.ok(pageSource.includes("redirect(resolveSettingsRoute(tab))"));
 });
 
-test("provider limit status chips use English fallback labels", () => {
+test("provider limit status chips use localized current availability labels", () => {
   const source = readSource(
     "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/index.tsx"
   );
 
-  assert.ok(source.includes('critical: tr("statCritical", "Critical")'));
-  assert.ok(source.includes('alert: tr("statAlert", "Alert")'));
-  assert.ok(source.includes('ok: tr("statHealthy", "Healthy")'));
+  const stats = readSource(
+    "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthStats.tsx"
+  );
+  const display = readSource(
+    "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/availabilityDisplay.ts"
+  );
+  assert.ok(source.includes("<HealthStats"));
+  assert.ok(stats.includes("all(DISPLAY_LABELS[kind])"));
+  for (const key of ["healthAvailable", "healthCd5", "healthCdw", "healthAction"])
+    assert.ok(display.includes(`usage.${key}`));
+  assert.ok(display.includes('paused: "common.paused"'));
   assert.doesNotMatch(source, /Crítico|Alerta|Saudável/);
 });
 

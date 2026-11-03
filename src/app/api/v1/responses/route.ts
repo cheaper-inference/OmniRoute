@@ -25,6 +25,7 @@ import {
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
+import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
 import {
   buildKeepaliveResponseId,
   buildResponsesInProgressFrame,
@@ -104,6 +105,15 @@ export async function withCodexPreferredModel(
  * POST /v1/responses - OpenAI Responses API format
  * Handled by the unified chat handler (openai-responses format auto-detected).
  */
+// #17825: per-request complete frame (stable id, request-time created_at, request model).
+function buildRequestKeepaliveFrame(body: { model?: unknown } | null | undefined) {
+  const model = body?.model;
+  return buildResponsesInProgressFrame({
+    id: buildKeepaliveResponseId(),
+    model: typeof model === "string" ? model : undefined,
+  });
+}
+
 async function postHandler(request: any) {
   // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
   // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
@@ -229,11 +239,7 @@ async function postHandler(request: any) {
         admission.lease,
         { signal: streamSignal }
       );
-      // #17825: per-request complete frame (stable id, request-time created_at, request model).
-      const keepaliveFrame = buildResponsesInProgressFrame({
-        id: buildKeepaliveResponseId(),
-        model: typeof resolvedBody?.model === "string" ? resolvedBody.model : undefined,
-      });
+      const keepaliveFrame = buildRequestKeepaliveFrame(resolvedBody);
       return await withEarlyStreamKeepalive(handlerResponse, {
         signal: streamSignal,
         thresholdMs,
@@ -249,7 +255,14 @@ async function postHandler(request: any) {
       });
     }
 
-    return finishAdmission(await handleChat(resolved, null, resolvedBody, correlationId));
+    const handlerResponse = await handleChat(resolved, null, resolvedBody, correlationId);
+    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
+      request: resolved,
+      body: resolvedBody,
+      response: handlerResponse,
+      endpoint: "responses",
+    });
+    return finishAdmission(recoveryResponse);
   } catch (error) {
     admission.lease?.release();
     throw error;
