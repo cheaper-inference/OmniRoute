@@ -1,0 +1,1 @@
+- Stabilize the Codex usage throttle and credential-health regression fixtures with controlled timing and explicit background-probe readiness. Keep Codex fingerprint coverage aligned with optional native Responses fields and select the exact model in the provider-page browser test.
