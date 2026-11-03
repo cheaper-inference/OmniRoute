@@ -14,7 +14,7 @@ OmniRoute je lokálna smerovacia brána AI a riadiaci panel postavený na Next.j
 
 Základné schopnosti:
 
-- Povrch API kompatibilný s OpenAI pre CLI/tools (380 poskytovateľov, 156 spúšťacích modulov)
+- Povrch API kompatibilný s OpenAI pre CLI/tools (380 poskytovateľov, 158 spúšťacích modulov)
 - preklad Request/response naprieč formátmi poskytovateľov
 - Záložná kombinácia modelov (sekvencia viacerých modelov)
 - Štruktúrované kombinované kroky (`provider + model + connection`) s riadením runtime podľa `compositeTiers`

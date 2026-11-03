@@ -4,7 +4,7 @@
 
 ---
 
-> **स्थिती:** डॅशबोर्ड वर तयार केला आहे** Keak CI UI किट** (`@keak/cheaper-inference-ui-kit`), वर्कस्पेस `packages/ui-kit` (`@omniroute/ui-kit`; अपस्ट्रीम स्नॅपशॉट `packages/ui-kit/UPSTREAM.md` मध्ये पिन केलेला आहे आणि `npm run check:ui-kit-snapshot` द्वारे संरक्षित आहे) म्हणून विकले जाते. प्रकाश ही प्रामाणिक थीम आहे; डीफॉल्ट प्राधान्य `system` आहे. उच्चार Keak चुना (`--ci-color-accent`) आहे. स्वित्झर हे UI, डिस्प्ले आणि कोड मजकूर (`--ci-font-ui`; `--ci-font-display` आणि `--ci-font-mono` रिझोल्यूशन) साठी एकल कुटुंब आहे, किटद्वारे स्वतः होस्ट केलेले (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारे आयात केलेले). प्रत्येक चिन्ह एक ल्युसाइड ग्लिफ आहे.
+> **स्थिती:** डॅशबोर्ड वर तयार केला आहे** Keak CI UI किट** (`@keak/cheaper-inference-ui-kit`), वर्कस्पेस `packages/ui-kit` (`@omniroute/ui-kit`; अपस्ट्रीम स्नॅपशॉट `packages/ui-kit/UPSTREAM.md` मध्ये पिन केलेला आहे आणि `npm run check:ui-kit-snapshot` द्वारे संरक्षित आहे) म्हणून विकले जाते. प्रकाश ही प्रामाणिक थीम आहे; डीफॉल्ट प्राधान्य `system` आहे. उच्चार Keak चुना (`--ci-color-accent`) आहे. स्वित्झर हे UI, डिस्प्ले आणि कोड मजकूर (`--ci-font-ui`; `--ci-font-display` आणि `--ci-font-mono` रिझोल्यूशन) साठी एकल कुटुंब आहे, किटद्वारे स्वतः होस्ट केलेले (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारे आयात केलेले). स्क्रिप्टस् स्वित्झरमध्ये ग्लायफ द्वारे ग्लिफ (`src/app/globals.css`) मध्ये फॉल होत नाही : सिरिलिक, ग्रीक आणि व्हिएतनामीसाठी इंटर आणि अरबी लिपीसाठी फक्त `html[dir="rtl"]`, Vazirmatn अंतर्गत. प्रत्येक चिन्ह ल्युसाइड ग्लिफ आहे.
 
 ## 1. गोष्टी कुठे आहेत
 

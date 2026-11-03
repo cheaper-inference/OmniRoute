@@ -4,7 +4,7 @@
 
 ---
 
-> **სტატუსი:** დაფა აგებულია** Keak CI UI ნაკრები** (`@keak/cheaper-inference-ui-kit`), გაყიდული, როგორც სამუშაო ადგილი `packages/ui-kit` (`@omniroute/ui-kit`; ზემოთ სნეპშოტი მიმაგრებულია `packages/ui-kit/UPSTREAM.md` ში და დაცულია `npm run check:ui-kit-snapshot` ით). სინათლე კანონიკური თემაა; ნაგულისხმევი უპირატესობა არის `system`. აქცენტი არის Keak lime (`--ci-color-accent`). Switzer არის UI, ჩვენების და კოდის ტექსტის ერთი ოჯახი (`--ci-font-ui`; `--ci-font-display` და `--ci-font-mono` გადაწყვეტს მას), დამოუკიდებლად მასპინძლობს თავად ნაკრების მიერ (`packages/ui-kit/src/ci-fonts.css`, იმპორტირებული `ci-tokens.css` მიერ). ყველა ხატი არის ლუციდის გლიფი.
+> **სტატუსი:** დაფა აგებულია** Keak CI UI ნაკრები** (`@keak/cheaper-inference-ui-kit`), გაყიდული, როგორც სამუშაო ადგილი `packages/ui-kit` (`@omniroute/ui-kit`; ზემოთ სნეპშოტი მიმაგრებულია `packages/ui-kit/UPSTREAM.md` ში და დაცულია `npm run check:ui-kit-snapshot` ით). სინათლე კანონიკური თემაა; ნაგულისხმევი უპირატესობა არის `system`. აქცენტი არის Keak lime (`--ci-color-accent`). Switzer არის UI, დისპლეის და კოდის ტექსტის ერთი ოჯახი (`--ci-font-ui`; `--ci-font-display` და `--ci-font-mono` გადაწყვეტს მას), რომელიც დამოუკიდებლად იმართება თავად ნაკრების მიერ (`packages/ui-kit/src/ci-fonts.css`, იმპორტირებული `ci-tokens.css` მიერ). სკრიპტები Switzer-ს აკლია გლიფი გლიფის მიხედვით (`src/app/globals.css`): ინტერ კირილური, ბერძნული და ვიეტნამური დამწერლობისთვის და მხოლოდ `html[dir="rtl"]`, Vazirmatn არაბული დამწერლობისთვის. ყველა ხატი არის ლუციდის გლიფი.
 
 ## 1. სად რა მდებარეობს
 
