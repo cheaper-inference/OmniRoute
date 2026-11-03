@@ -4,7 +4,7 @@
 
 ---
 
-> **Statut:** le tableau de bord est construit sur le** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendu sous le nom d'espace de travail `packages/ui-kit` (`@omniroute/ui-kit`; l'instantané en amont est épinglé dans `packages/ui-kit/UPSTREAM.md` et gardé par `npm run check:ui-kit-snapshot`). La lumière est le thème canonique ; la préférence par défaut est `system`. L'accent est Keak lime (`--ci-color-accent`). Switzer est la famille unique pour UI, affichage et texte de code (`--ci-font-ui`; `--ci-font-display` et `--ci-font-mono` s'y résolvent), auto-hébergé par le kit lui-même (`packages/ui-kit/src/ci-fonts.css`, importé par `ci-tokens.css`). Chaque icône est un glyphe Lucide.
+> **Statut:** le tableau de bord est construit sur le** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendu sous le nom d'espace de travail `packages/ui-kit` (`@omniroute/ui-kit`; l'instantané en amont est épinglé dans `packages/ui-kit/UPSTREAM.md` et gardé par `npm run check:ui-kit-snapshot`). La lumière est le thème canonique ; la préférence par défaut est `system`. L'accent est Keak lime (`--ci-color-accent`). Switzer est la famille unique pour UI, affichage et texte de code (`--ci-font-ui`; `--ci-font-display` et `--ci-font-mono` s'y résolvent), auto-hébergé par le kit lui-même (`packages/ui-kit/src/ci-fonts.css`, importé par `ci-tokens.css`). Les écritures suisses manquent glyphe par glyphe (`src/app/globals.css`) : Inter pour le cyrillique, le grec et le vietnamien et, uniquement sous `html[dir="rtl"]`, Vazirmatn pour l'écriture arabe. Chaque icône est un glyphe Lucide.
 
 ## 1. Où les choses se trouvent
 
