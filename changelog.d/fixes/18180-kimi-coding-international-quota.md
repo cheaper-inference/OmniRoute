@@ -1,1 +1,0 @@
-- **fix(quota):** recognize international Kimi Coding usage endpoints (`api.kimi.ai/coding/v1`) under Moonshot connections (#18180).

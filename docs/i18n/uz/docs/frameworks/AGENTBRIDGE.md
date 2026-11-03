@@ -16,11 +16,11 @@ AgentBridge — OmniRoute’ning MITM (Man-in-the-Middle) proksisi bo‘lib, IDE
 
 ### AgentBridge nima?
 
-IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga oshirganda, u to‘g‘ridan-to‘g‘ri yuqoridagi AI provayderiga (OpenAI, Anthropic va boshqalar) ulanadi. AgentBridge ushbu ulanishni TLS darajasida shaffof tarzda ushlab turadi - hech qanday agent konfiguratsiyasini o'zgartirishni talab qilmasdan - va so'rovni OmniRoute orqali qayta yozadi.
+IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga oshirganda, u to‘g‘ridan-to‘g‘ri yuqoridagi AI provayderiga (OpenAI, Anthropic va boshqalar) ulanadi. AgentBridge hech qanday agent konfiguratsiyasini o'zgartirish — talab qilmasdan TLS darajasida — bu ulanishni shaffof tarzda ushlab turadi va so'rovni OmniRoute orqali qayta yozadi.
 
 Bu shuni anglatadiki, siz:
 
-- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 377 provayderlaridan biriga yo‘naltiring.
+- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 380 ta provayderlaridan biriga yoʻnaltiring.
 - **Model xaritalarini qo'llang** : ishlov beruvchi darajasida `gemini-3-flash` → `claude-sonnet-4.7` shaffof.
 - **Barcha agent trafigini kuzating** : har bir ushlangan so'rov [Yo'l harakati inspektoriga](./TRAFFIC_INSPECTOR.md) e'lon qilinadi.
 - **OmniRoute chidamliligini qo'llang** : kombinatsiyalangan marshrutlash, o'chirgichlar, zaxiralar va IDE agent trafiki uchun xarajatlarni kuzatish ham ishlaydi.

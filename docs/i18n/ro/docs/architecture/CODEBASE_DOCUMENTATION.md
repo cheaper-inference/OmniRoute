@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 de module de executare de nivel superior (`*.ts` minus `base.ts`, `index.ts` și teste - măsoară numărul `npm run check:docs-counts` ). Fiecare clasă de executant extinde `BaseExecutor` (`base.ts`), direct sau prin `DefaultExecutor` sau alt executant; modulele rămase sunt ajutoare pentru fiecare furnizor (scheme de instrumente, adaptoare fetch/TTS, gestionare de ciudatenii). Executorii includ:
+158 de module de executare de nivel superior (`*.ts` minus `base.ts`, `index.ts` și teste - măsoară numărul `npm run check:docs-counts` ). Fiecare clasă de executant extinde `BaseExecutor` (`base.ts`), direct sau prin `DefaultExecutor` sau alt executant; modulele rămase sunt ajutoare pentru fiecare furnizor (scheme de instrumente, adaptoare fetch/TTS, gestionare de ciudatenii). Executorii includ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` plus `claudeIdentity.ts` (asistent de identitate partajată) și `index.ts` (registru).
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **وضعیت:** داشبورد بر روی ساخته شده است** کیک CI UI کیت** (`@keak/cheaper-inference-ui-kit`)، بهعنوان فضای کاری `packages/ui-kit` عرضه میشود (`@omniroute/ui-kit`؛ عکس فوری بالادست به `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود). نور موضوع متعارف است. اولویت پیش فرض `system` است. لهجه آن Keak lime (`--ci-color-accent`) است. Switzer یک خانواده واحد برای UI، نمایش و متن کد (`--ci-font-ui`؛ `--ci-font-display` و `--ci-font-mono` به آن است)، که توسط خود کیت میزبانی میشود (`packages/ui-kit/src/ci-fonts.css`، وارد شده توسط `ci-tokens.css`). هر نماد یک گلیف Lucide است.
+> **وضعیت:** داشبورد بر روی ساخته شده است** کیک CI UI کیت** (`@keak/cheaper-inference-ui-kit`)، بهعنوان فضای کاری `packages/ui-kit` عرضه میشود (`@omniroute/ui-kit`؛ عکس فوری بالادست به `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود). نور موضوع متعارف است. اولویت پیش فرض `system` است. لهجه آن Keak lime (`--ci-color-accent`) است. Switzer خانواده تکی برای UI، نمایش و متن کد (`--ci-font-ui`؛ `--ci-font-display` و `--ci-font-mono` به آن حل میشوند)، توسط خود کیت میزبانی میشود (`packages/ui-kit/src/ci-fonts.css`، وارد شده توسط `ci-tokens.css`). اسکریپتهای Switzer فاقد اسلوب به حروف (`src/app/globals.css`): Inter برای خط سیریلیک، یونانی و ویتنامی و فقط زیر `html[dir="rtl"]`، وزیرمتن برای خط عربی. هر نماد یک گلیف Lucide است.
 
 ## 1. محل قرارگیری اجزا
 
@@ -59,7 +59,7 @@
 
 ## 5. به روز رسانی کیت
 
-`npm run check:ui-kit-upstream` نسخه پینشده در `packages/ui-kit/UPSTREAM.md` را با جدیدترین تگ `v*` مخزن بالادستی مقایسه میکند و دستور همگامسازی را هنگامی که نسخه منتشر میشود چاپ میکند. گردش کار هفتگی `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) همان بررسی را انجام میدهد و یک موضوع ردیابی را در حالی که پین پشت است باز نگه میدارد. مخزن بالادستی خصوصی است، بنابراین گردش کار به یک توکن فقط خواندنی در رمز `UI_KIT_READ_TOKEN` نیاز دارد و بدون آن بی اثر می ماند.
+`npm run check:ui-kit-upstream` نسخه پینشده در `packages/ui-kit/UPSTREAM.md` را با جدیدترین تگ `v*` مخزن بالادستی مقایسه میکند و دستور همگامسازی را هنگامی که نسخه منتشر میشود چاپ میکند. گردش کار هفتگی `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) همان بررسی را انجام میدهد و یک موضوع ردیابی را در حالی که پین پشت است باز نگه میدارد. مخزن بالادست خصوصی است، بنابراین گردش کار به یک توکن فقط خواندنی در رمز `UI_KIT_READ_TOKEN` نیاز دارد. زمانی که نمیتواند بالادستی را بخواند (توکنی وجود ندارد، نشانهای که کار نمیکند، یا GitHub غیرقابل دسترسی است)، اجرا سبز میماند اما یک اخطار مینویسد و یک شماره جداگانه را باز نگه میدارد، که یک بار دیگر بسته میشود و میتواند دوباره upstream را بخواند.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` بالادست `src/` در آن commit (`latest` = جدیدترین تگ `v*` ) را در `packages/ui-kit/src` کپی میکند، تبدیل واحد مجاز را اعمال میکند (پسوند `.js` را از واردات نسبی حذف میکند)، و نسخه فضای کاری را در `packages/ui-kit/package.json` و `package-lock.json` به بالادستی تنظیم میکند. سپس: `git diff packages/ui-kit` را مرور کنید، ارائهدهندهها، تنظیمات، ترکیبهای ترکیبی، استفاده و نقطه پایانی را در هر دو موضوع بررسی کنید، `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui` را اجرا کنید و PR را با تغییرات بالادستی باز کنید.
 
