@@ -239,19 +239,18 @@ Všetky koncové body MITM vyžadujú autentifikáciu pre správu (`requireCliTo
 
 ---
 
-## Prepísanie reťazcov User-Agent — premenné prostredia (`.env.example`, sekcia 12)
+## User-Agent prepíše — env vars (`.env.example` sekcia 12)
 
-| Premenná                 | Predvolená hodnota                                              |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Variabilné          | Predvolené                                    |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Používa ich `open-sse/executors/base.ts::buildHeaders()` prostredníctvom dynamického vyhľadávania. **Aktualizujte ich, keď poskytovatelia vydajú nové verzie CLI** — zastarané reťazce UA začnú byť odmietané ako neaktuálni klienti.
+Spotrebované `open-sse/executors/base.ts::buildHeaders()` prostredníctvom dynamického vyhľadávania.** Zvýšte ich, keď poskytovatelia vydajú nové verzie CLI** — zastaralé reťazce UA začínajú byť odmietané ako zastaraní klienti.
 
 ## Prepínače režimu kompatibility CLI (`.env.example`, časť 13)
 

@@ -13,13 +13,13 @@
 
 ## ምንድን ነው?
 
-OmniRoute ምልክት የተደረገባቸውን 155 ካታሎግ ግቤቶችን ጨምሮ 377 አቅራቢዎችን ይመዘግባል**free/no-auth** (ምንም-auth፣ ነፃ-ደረጃ OAuth፣ ወይም ነፃ-ደረጃ API ቁልፍ - [የነፃ ደረጃዎች መመሪያን](../getting-started/FREE-TIERS-GUIDE.md) እና ሙሉ [የነፃ ደረጃዎች ማውጫን](../reference/FREE_TIERS.md) ይመልከቱ)። የሚይዘው፡ ነፃ አቅራቢዎች በአምሳያው ጥራት ይለያያሉ። የድንበር ሞዴልን የሚያገለግል የነፃ አገልግሎት አቅራቢ አነስተኛ ቅርስ ሞዴልን ከሚያቀርበው የበለጠ ጠቃሚ ነው።
+OmniRoute ምልክት የተደረገባቸውን 155 ካታሎግ ግቤቶችን ጨምሮ 380 አቅራቢዎችን ይመዘግባል**free/no-auth** (ምንም-auth፣ ነፃ-ደረጃ OAuth፣ ወይም ነፃ-ደረጃ API ቁልፍ — [የነፃ ደረጃዎች መመሪያን](../getting-started/FREE-TIERS-GUIDE.md) እና ሙሉ [የነፃ ደረጃዎች ማውጫን](../reference/FREE_TIERS.md) ይመልከቱ)። የሚይዘው፡ ነፃ አቅራቢዎች በአምሳያው ጥራት ይለያያሉ። የድንበር ሞዴልን የሚያገለግል የነፃ አገልግሎት አቅራቢ አነስተኛ ቅርስ ሞዴልን ከሚያቀርበው የበለጠ ጠቃሚ ነው።
 
-**የነፃ አቅራቢ ደረጃዎች** መልሶች "** የትኛው ነፃ አቅራቢ በጣም ጥሩውን ሞዴል ይሰጠኛል?** የእያንዳንዱን የነጻ አቅራቢ ካታሎግ በመቀላቀል** በሕዝብ የተገኙ የጥራት ውጤቶች** ከ** Arena AI መሪ ሰሌዳ** (የሰው ምርጫ ELO፣ ከLMArena chatbot arena ጀርባ ያለው ተመሳሳይ ሀሳብ)። ከዚያም አቅራቢዎች በጥንካሬያቸው ይመደባሉ** ምርጥ ነፃ ሞዴል** .
+**የነፃ አቅራቢ ደረጃዎች** መልሶች "** የትኛው ነፃ አቅራቢ በጣም ጥሩውን ሞዴል ይሰጠኛል?** የእያንዳንዱን የነጻ አቅራቢ ካታሎግ በመቀላቀል** በሕዝብ የተገኙ የጥራት ውጤቶች** ከ** Arena AI መሪ ሰሌዳ** (የሰው ምርጫ ELO፣ LMArena ቻትቦት መድረክ ጀርባ ያለው ተመሳሳይ ሀሳብ)። ከዚያም አቅራቢዎች በጥንካሬያቸው ይመደባሉ** ምርጥ ነፃ ሞዴል** .
 
 ደረጃው የሚሰላው ከሶስት እውነተኛ ምንጮች ነው።
 
-1. የነጻ አቅራቢው ይዘረዝራል — `NOAUTH_PROVIDERS`፣ እና `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` የሚጠቁሙ `hasFree` (`src/shared/constants/providers.ts`)።
+1. ነፃ አቅራቢው — `NOAUTH_PROVIDERS`፣ እና `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ጥቆማዎችን የያዘ `hasFree` (`src/shared/constants/providers.ts`) ይዘረዝራል።
 2. የእያንዳንዱ አቅራቢ ሞዴል ካታሎግ ከአቅራቢው መዝገብ ቤት (`open-sse/config/providerRegistry.ts`)።
 3. በ `model_intelligence` DB ሠንጠረዥ በ Arena ELO ማመሳሰል ሞተር (`src/lib/arenaEloSync.ts`) የተከማቹ ከኤልኦ የተገኙ የተግባር ብቃት ውጤቶች።
 

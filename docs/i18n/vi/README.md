@@ -72,7 +72,7 @@
 |                                     |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------- | :----------------------------: | :---------: | :-------------------: |
 | nhà cung cấp 🌐                     |              352               |   **358**   |          380          |
-| 🧠 Mô hình trò chuyện độc đáo IDs   |              1320              |  **1374**   |         1475          |
+| 🧠 Mô hình trò chuyện độc đáo IDs   |              1320              |  **1374**   |         1491          |
 | Cầu phương thức 🖼️                  | 🆕 tầm nhìn + âm thanh + video |      ✓      |           ✓           |
 | Danh mục miễn phí 📡 Radar          |        chọn tham gia 🆕        |      ✓      |           ✓           |
 | lập kế hoạch nhận biết hạn ngạch ⚖️ |      chia sẻ hạn ngạch 🆕      |      ✓      |           ✓           |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 Dự án</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Ngăn xếp công nghệ</a></td>
     <td align="center"><a href="#-documentation">📖 Tài liệu</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Người đóng góp</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Người đóng góp</a></td>
   </tr>
 </table>
 
@@ -1287,7 +1287,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Môi trường chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trên toàn bộ <code>src/</code> và <code>open-sse/</code> (không còn <code>any</code> trong phần lõi kể từ v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 module nghiệp vụ, 219 bản migration</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 module nghiệp vụ, 220 bản migration</td></tr>
   <tr><td nowrap><b>Bộ nhớ</b></td><td>SQLite FTS5 toàn văn + vector embedding lượng tử hóa int8, suy giảm có kiểu (typed decay)</td></tr>
   <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — kiểm tra dữ liệu vào/ra của công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1297,7 +1297,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Tàng hình</b></td><td>wreq-js — giả lập dấu vân tay TLS JA3 / JA4, proxy 3 cấp</td></tr>
   <tr><td nowrap><b>Khả năng phục hồi</b></td><td>Circuit breaker, exponential backoff, chống hiệu ứng bầy đàn (anti-thundering-herd), auto-combo tự phục hồi</td></tr>
   <tr><td nowrap><b>Ghi log</b></td><td>pino — log JSON có cấu trúc kèm ngữ cảnh request</td></tr>
-  <tr><td nowrap><b>Kiểm thử</b></td><td>Node.js test runner + Vitest — <b>hơn 56.000 khai báo kiểm thử tĩnh</b> trải khắp hơn 7.800 tệp kiểm thử được theo dõi (unit, integration, E2E, bảo mật, hệ sinh thái)</td></tr>
+  <tr><td nowrap><b>Kiểm thử</b></td><td>Node.js test runner + Vitest — <b>hơn 60.000 khai báo kiểm thử tĩnh</b> trải khắp hơn 8.400 tệp kiểm thử được theo dõi (unit, integration, E2E, bảo mật, hệ sinh thái)</td></tr>
   <tr><td nowrap><b>Nền tảng</b></td><td>Máy tính để bàn (Electron) · Android (Termux) · PWA (mọi trình duyệt)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — tự động publish lên npm + Docker Hub khi phát hành</td></tr>
   <tr><td nowrap><b>Liên kết</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1377,7 +1377,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b><a href="SECURITY.md">Chính sách bảo mật</a></b></td><td>Báo cáo lỗ hổng và các biện pháp bảo mật</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Hướng dẫn i18n</a></b></td><td>Hỗ trợ 67 ngôn ngữ, quy trình dịch thuật, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Danh sách kiểm tra phát hành</a></b></td><td>Các bước xác thực trước khi phát hành</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Kế hoạch độ bao phủ</a></b></td><td>Chiến lược độ bao phủ kiểm thử cho hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Kế hoạch độ bao phủ</a></b></td><td>Chiến lược độ bao phủ kiểm thử cho hơn 60.000 khai báo kiểm thử tĩnh trên hơn 8.400 tệp kiểm thử được theo dõi</td></tr>
 </table>
 
 <br/>
@@ -1392,29 +1392,29 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
 
 <table>
   <tr><th align="center">Hạng</th><th align="left">Người đóng góp</th><th align="center">PR đã hợp nhất</th><th align="right">~Dòng thay đổi</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Thống kê được thực hiện vào 2026-10-18 15:09:09 UTC với đầu nhánh trực tiếp <code>release/v3.8.52</code> tại <code>656f01cb43</code>. Thống kê GitHub GraphQL được phân trang chứa 9.191 PR đã hợp nhất: 3.834 bởi chủ sở hữu kho lưu trữ, 229 bởi Dependabot, 6 bởi các bot/ứng dụng khác và <b>5.122 PR bên ngoài từ 835 người đóng góp riêng biệt</b>. “Dòng thay đổi” là tổng số dòng thêm và xóa trên GitHub, bao gồm các tệp được tạo tự động, lockfile, danh mục, bản dịch và tài liệu; đây là mức độ biến động, không phải số dòng mã do tác giả viết. Có 49 PR có diff trên GitHub vượt quá 500.000 dòng (ví dụ: #13399, một lần bổ sung nhà cung cấp duy nhất, liệt kê 2.347 tệp đã thay đổi), làm tăng đáng kể một số tổng số ở trên. Các trường hợp bằng nhau được xếp cùng hạng.</sub>
+<sub>Thống kê được thực hiện vào 2026-11-03 03:01:19 UTC với đầu nhánh trực tiếp <code>release/v3.8.53</code> tại <code>05bc048d6c</code>. Thống kê GitHub GraphQL được phân trang chứa 9.947 PR đã hợp nhất: 4.130 bởi chủ sở hữu kho lưu trữ, 240 bởi Dependabot, 6 bởi các bot/ứng dụng khác và <b>5.571 PR bên ngoài từ 883 người đóng góp riêng biệt</b>. “Dòng thay đổi” là tổng số dòng thêm và xóa trên GitHub, bao gồm các tệp được tạo tự động, lockfile, danh mục, bản dịch và tài liệu; đây là mức độ biến động, không phải số dòng mã do tác giả viết. Có 53 PR có diff trên GitHub vượt quá 500.000 dòng (ví dụ: #13399, một lần bổ sung nhà cung cấp duy nhất, liệt kê 2.347 tệp đã thay đổi), làm tăng đáng kể một số tổng số ở trên. Các trường hợp bằng nhau được xếp cùng hạng.</sub>
 
 ### Các commit được GitHub ghi nhận
 
@@ -1425,14 +1425,14 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 commit được ghi nhận trên GitHub</sub>
+      <sub>🥇 418 commit được ghi nhận trên GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 commit được ghi nhận trên GitHub</sub>
+      <sub>🥈 294 commit được ghi nhận trên GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1442,6 +1442,13 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
       <sub>🥉 229 commit được ghi nhận trên GitHub</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 commit được ghi nhận trên GitHub</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1449,12 +1456,14 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
       <sub>🏅 202 commit được ghi nhận trên GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 commit được ghi nhận trên GitHub</sub>
+      <sub>🏅 134 commit được ghi nhận trên GitHub</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1462,14 +1471,12 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
       </a><br/>
       <sub>🏅 126 commit được ghi nhận trên GitHub</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 commit được ghi nhận trên GitHub</sub>
+      <sub>🏅 115 commit được ghi nhận trên GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1479,18 +1486,18 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
       <sub>🏅 108 commit được ghi nhận trên GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 commit được ghi nhận trên GitHub</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 commit được ghi nhận trên GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 commit được ghi nhận trên GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1502,7 +1509,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   </tr>
 </table>
 
-<sub>Được kiểm tra lại vào 2026-10-18 14:44:45 UTC: số commit được GitHub ghi nhận do API Contributors của kho lưu trữ báo cáo cho nhánh mặc định <code>release/v3.8.52</code>. API trả về 849 danh tính (429 người dùng, 2 bot, 418 danh tính ẩn danh); bảng này loại trừ người bảo trì, bot và các danh tính ẩn danh, đồng thời giữ nguyên các trường hợp đồng hạng. Bảng này khác với cả bảng xếp hạng PR đã hợp nhất ở trên và thống kê siêu dữ liệu Git ở dưới.</sub>
+<sub>Được kiểm tra lại vào 2026-11-03 02:09:16 UTC: số commit được GitHub ghi nhận do API Contributors của kho lưu trữ báo cáo cho nhánh mặc định <code>release/v3.8.53</code>. API trả về 903 danh tính (429 người dùng, 2 bot, 472 danh tính ẩn danh); bảng này loại trừ người bảo trì, bot và các danh tính ẩn danh, đồng thời giữ nguyên các trường hợp đồng hạng. Bảng này khác với cả bảng xếp hạng PR đã hợp nhất ở trên và thống kê siêu dữ liệu Git ở dưới.</sub>
 
 > 🙏 Các tính năng, bản sửa lỗi và cải tiến cơ sở hạ tầng của những người đóng góp này là một **phần cốt lõi** giúp OmniRoute trở nên đáng tin cậy và giàu tính năng. Mọi pull request, mọi trường hợp kiểm thử và mọi tệp bản dịch i18n đều quan trọng. Mã nguồn mở được xây dựng bởi những người như họ.
 
@@ -1614,13 +1621,13 @@ Xin chân thành cảm ơn những người đã tự bỏ tiền túi tài tr�
 
 <div align="center">
 
-## 👥 Hơn 900 người đóng góp
+## 👥 Hơn 1,000 người đóng góp
 
 </div>
 
-[![Những người đóng góp](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Những người đóng góp](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Được kiểm tra vào ngày 2026-10-18 tại đầu mút trực tiếp <code>release/v3.8.52</code> <code>ad160ab2d1</code> (6.826 commit): <b>993 danh tính Git của người dùng đã được chuẩn hóa</b> — 707 xuất hiện với tư cách tác giả commit (bao gồm cả người bảo trì) và 286 chỉ xuất hiện trong các dòng chú thích <code>Co-authored-by</code> rõ ràng. Quá trình thống kê áp dụng <code>.mailmap</code>, so sánh địa chỉ email không phân biệt chữ hoa chữ thường, chỉ liên kết địa chỉ noreply dạng số và dạng văn bản thuần túy của GitHub khi chúng mã hóa cùng một tên định danh, loại trừ 26 danh tính bot/tác nhân/dịch vụ/giữ chỗ và không hợp nhất các địa chỉ email thông thường chỉ vì tên hiển thị của chúng trùng khớp. Báo cáo kiểm tra ngày 2026-08-24 đã công bố con số 639; khi chạy lại phương pháp này trên cơ sở <code>ac02c5b42f</code> của đợt kiểm tra đó, kết quả là 619, vì vậy mức tăng đến từ những người đóng góp mới chứ không phải do phương pháp ít nghiêm ngặt hơn.</sub>
+<sub>Được kiểm tra vào ngày 2026-11-02 tại đầu mút trực tiếp <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7.972 commit): <b>1,074 danh tính Git của người dùng đã được chuẩn hóa</b> — 759 xuất hiện với tư cách tác giả commit (bao gồm cả người bảo trì) và 315 chỉ xuất hiện trong các dòng chú thích <code>Co-authored-by</code> rõ ràng. Quá trình thống kê áp dụng <code>.mailmap</code>, so sánh địa chỉ email không phân biệt chữ hoa chữ thường, chỉ liên kết địa chỉ noreply dạng số và dạng văn bản thuần túy của GitHub khi chúng mã hóa cùng một tên định danh, loại trừ 29 danh tính bot/tác nhân/dịch vụ/giữ chỗ và không hợp nhất các địa chỉ email thông thường chỉ vì tên hiển thị của chúng trùng khớp. Báo cáo kiểm tra ngày 2026-08-24 đã công bố con số 639; khi chạy lại phương pháp này trên cơ sở <code>ac02c5b42f</code> của đợt kiểm tra đó, kết quả là 619, vì vậy mức tăng đến từ những người đóng góp mới chứ không phải do phương pháp ít nghiêm ngặt hơn.</sub>
 
 ### Cách đóng góp
 
@@ -1680,25 +1687,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute được xây dựng trên nền tảng của những dự án tiên phong. Dự án khởi đầu dưới dạng một bản fork của **[9router](https://github.com/decolua/9router)** và một bản chuyển đổi sang TypeScript của dự án Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — và kể từ đó, mỗi hệ thống con bên dưới đều được truyền cảm hứng từ một dự án mã nguồn mở đi trước. Mỗi dự án đều góp phần định hình một thành phần cụ thể của OmniRoute. Đây là lời cảm ơn của chúng tôi dành cho tất cả các dự án ấy. 🙏
 
-> ⭐ số lượt sao được xác minh qua REST API của GitHub vào ngày 18 tháng 10 năm 2026 — hãy tặng các dự án này một ngôi sao. Các con số là ảnh chụp nhanh chính xác tại thời điểm nêu trên và đương nhiên sẽ thay đổi theo thời gian.
+> ⭐ số lượt sao được xác minh qua REST API của GitHub vào ngày 2026-11-03 — hãy tặng các dự án này một ngôi sao. Các con số là ảnh chụp nhanh chính xác tại thời điểm nêu trên và đương nhiên sẽ thay đổi theo thời gian.
 
 ### 🧬 Nguồn gốc & gateway
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Cách dự án truyền cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Dự án gốc làm nền tảng cho bản fork này — được mở rộng tại đây với các API đa phương thức và được viết lại hoàn toàn bằng TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Phần triển khai bằng Go đã truyền cảm hứng cho bản chuyển đổi sang JavaScript / TypeScript này.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>Gateway AI có tập dữ liệu giá công khai được dùng để đồng bộ tính năng theo dõi chi phí của chúng tôi, đồng thời mô hình chuẩn hóa nhà cung cấp của dự án đã định hướng cơ chế định tuyến của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>Nguồn mã MIT được điều chỉnh để tích hợp vào cầu nối ChatGPT Web → Codex Responses đi kèm, bao gồm các bộ điều hợp phiên trình duyệt, đóng khung phản hồi, mức sử dụng và tìm kiếm web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Các mẫu thiết kế được chuyển sang tính năng khôi phục luồng, bí danh không suy luận, tìm kiếm web dự phòng, giới hạn cửa sổ trượt, biên tập nhật ký và các luồng khởi chạy được tăng cường bảo mật.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Các mẫu lựa chọn công cụ, ràng buộc đầu ra và cam kết công cụ của Cursor Composer được điều chỉnh để tích hợp vào trình thực thi Cursor gốc.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Các mẫu đăng nhập mới và luân chuyển refresh-token được chuyển sang cơ chế xác thực lại Codex OAuth.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Các giá trị mặc định về chuyển đổi tương thích với Claude Code và hành vi của tiêu đề thanh toán được khái quát hóa vào cầu nối dựa trên cấu hình của OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Dự án gốc làm nền tảng cho bản fork này — được mở rộng tại đây với các API đa phương thức và được viết lại hoàn toàn bằng TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Phần triển khai bằng Go đã truyền cảm hứng cho bản chuyển đổi sang JavaScript / TypeScript này.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>Gateway AI có tập dữ liệu giá công khai được dùng để đồng bộ tính năng theo dõi chi phí của chúng tôi, đồng thời mô hình chuẩn hóa nhà cung cấp của dự án đã định hướng cơ chế định tuyến của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Nguồn mã MIT được điều chỉnh để tích hợp vào cầu nối ChatGPT Web → Codex Responses đi kèm, bao gồm các bộ điều hợp phiên trình duyệt, đóng khung phản hồi, mức sử dụng và tìm kiếm web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Các mẫu thiết kế được chuyển sang tính năng khôi phục luồng, bí danh không suy luận, tìm kiếm web dự phòng, giới hạn cửa sổ trượt, biên tập nhật ký và các luồng khởi chạy được tăng cường bảo mật.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Các mẫu lựa chọn công cụ, ràng buộc đầu ra và cam kết công cụ của Cursor Composer được điều chỉnh để tích hợp vào trình thực thi Cursor gốc.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Các mẫu đăng nhập mới và luân chuyển refresh-token được chuyển sang cơ chế xác thực lại Codex OAuth.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Các giá trị mặc định về chuyển đổi tương thích với Claude Code và hành vi của tiêu đề thanh toán được khái quát hóa vào cầu nối dựa trên cấu hình của OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Các ánh xạ mô hình Grok, trình tạo Statsig với TypeError giả, các giá trị mặc định cho yêu cầu và thiết bị, cùng trình xử lý phản hồi NDJSON của dự án đã được điều chỉnh đáng kể để tích hợp vào trình thực thi Grok Web của OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>Nguồn mã bắc cầu chính đứng sau grok2api-merged; các phần triển khai mô hình, tiêu đề, payload, Statsig và bộ xử lý của dự án được bảo tồn trong nguồn gốc của Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Nguồn MIT nền tảng cho payload Grok và các giá trị mặc định của thiết bị, trình tạo Statsig và bộ xử lý <code>result.response</code> được kế thừa thông qua TQZHR và grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>Nguồn mã bắc cầu chính đứng sau grok2api-merged; các phần triển khai mô hình, tiêu đề, payload, Statsig và bộ xử lý của dự án được bảo tồn trong nguồn gốc của Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Nguồn MIT nền tảng cho payload Grok và các giá trị mặc định của thiết bị, trình tạo Statsig và bộ xử lý <code>result.response</code> được kế thừa thông qua TQZHR và grok2api-merged.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Một nguồn bắc cầu được grok2api-merged ghi công cho lớp nhóm proxy; OmniRoute duy trì thông báo về nguồn gốc đó nhưng không tuyên bố đã chuyển đổi nhóm proxy vào trình thực thi Grok Web có phạm vi giới hạn của mình.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Proxy Grok được xác thực bằng cookie và mẫu truyền phát trực tuyến <code>result.response.token</code> của dự án đã định hướng lớp truyền tải Grok Web của OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Proxy Grok được xác thực bằng cookie và mẫu truyền phát trực tuyến <code>result.response.token</code> của dự án đã định hướng lớp truyền tải Grok Web của OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Phần triển khai Grok Web ban đầu đã tham khảo thiết kế upstream HTTP/trình duyệt của dự án; đường dẫn HTTP trực tiếp của nó bắt nguồn từ GrokProxy, vì vậy không tuyên bố có bất kỳ bản chuyển đổi mã độc lập nào.</td></tr>
 </table>
 
@@ -1706,81 +1713,81 @@ OmniRoute được xây dựng trên nền tảng của những dự án tiên p
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Cách dự án truyền cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Dự án lan truyền mạnh với câu "tại sao dùng nhiều token khi ít token cũng làm được" — triết lý nói kiểu người tiền sử của dự án là nền tảng cho chế độ nén tiêu chuẩn và hơn 30 quy tắc loại bỏ từ thừa/rút gọn của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Nén đầu ra lệnh hiệu năng cao — truyền cảm hứng cho công cụ RTK, DSL bộ lọc JSON, khả năng khôi phục đầu ra thô và quy trình xếp chồng RTK → Caveman của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Nén ngữ cảnh có thể đảo ngược (SmartCrusher) — truyền cảm hứng cho công cụ <code>headroom</code> và mẫu dấu truy xuất <code>ccr</code> của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Nghiên cứu nén lời nhắc (LLMLingua / LLMLingua-2) — truyền cảm hứng cho công cụ <code>llmlingua</code> bất đồng bộ, an toàn với mã và cho phép tiếp tục khi gặp lỗi của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>Bản chuyển đổi JS/ONNX (MobileBERT / XLM-RoBERTa) được dùng làm backend luồng worker cho công cụ LLMLingua của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Dự án lan truyền mạnh với câu "tại sao dùng nhiều token khi ít token cũng làm được" — triết lý nói kiểu người tiền sử của dự án là nền tảng cho chế độ nén tiêu chuẩn và hơn 30 quy tắc loại bỏ từ thừa/rút gọn của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Nén đầu ra lệnh hiệu năng cao — truyền cảm hứng cho công cụ RTK, DSL bộ lọc JSON, khả năng khôi phục đầu ra thô và quy trình xếp chồng RTK → Caveman của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Nén ngữ cảnh có thể đảo ngược (SmartCrusher) — truyền cảm hứng cho công cụ <code>headroom</code> và mẫu dấu truy xuất <code>ccr</code> của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Nghiên cứu nén lời nhắc (LLMLingua / LLMLingua-2) — truyền cảm hứng cho công cụ <code>llmlingua</code> bất đồng bộ, an toàn với mã và cho phép tiếp tục khi gặp lỗi của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>Bản chuyển đổi JS/ONNX (MobileBERT / XLM-RoBERTa) được dùng làm backend luồng worker cho công cụ LLMLingua của chúng tôi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Nén token PT-BR — là nền tảng cho gói ngôn ngữ pt-BR của chúng tôi: giảm trùng ý và loại bỏ từ thừa được tinh chỉnh cho ngữ pháp tiếng Bồ Đào Nha Brazil.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Kỹ năng lập trình YAGNI "lập trình viên cấp cao lười biếng" từng lan truyền mạnh — truyền cảm hứng cho Kiểu đầu ra <b>less-code</b> của chúng tôi: định hướng thay đổi nhỏ nhất nhưng vẫn hoạt động, giúp giảm lượng mã _được tạo ra_ (đối trọng trên trục đầu ra với văn phong súc tích của Caveman).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Phong cách phản hồi ưu tiên hành động, thân thiện với người mắc ADHD của dự án đã được điều chỉnh thành kiểu đầu ra súc tích của OmniRoute trên năm ngôn ngữ.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Kỹ năng lập trình YAGNI "lập trình viên cấp cao lười biếng" từng lan truyền mạnh — truyền cảm hứng cho Kiểu đầu ra <b>less-code</b> của chúng tôi: định hướng thay đổi nhỏ nhất nhưng vẫn hoạt động, giúp giảm lượng mã _được tạo ra_ (đối trọng trên trục đầu ra với văn phong súc tích của Caveman).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Phong cách phản hồi ưu tiên hành động, thân thiện với người mắc ADHD của dự án đã được điều chỉnh thành kiểu đầu ra súc tích của OmniRoute trên năm ngôn ngữ.</td></tr>
 </table>
 
 ### 🧩 Định dạng nhỏ gọn, nghiên cứu token & công cụ nhận biết mã
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Cách dự án truyền cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Ký pháp đối tượng hướng token — mô hình dạng cột với tiêu đề và các hàng của dự án đã định hình giai đoạn thu gọn dữ liệu dạng bảng của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Định dạng đồ thị nhỏ gọn và thiết kế hồ sơ chung của dự án đã cung cấp cơ sở cho tính năng thu gọn dạng bảng và định dạng codec Headroom của OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Ký pháp đối tượng hướng token — mô hình dạng cột với tiêu đề và các hàng của dự án đã định hình giai đoạn thu gọn dữ liệu dạng bảng của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Định dạng đồ thị nhỏ gọn và thiết kế hồ sơ chung của dự án đã cung cấp cơ sở cho tính năng thu gọn dạng bảng và định dạng codec Headroom của OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Bản triển khai TypeScript theo giấy phép MIT được tích hợp trực tiếp và mở rộng thành codec hồ sơ chung Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Bộ nhớ đệm Brotli/SQLite + chênh lệch ngữ cảnh theo từng phiên — truyền cảm hứng cho công cụ <code>session-dedup</code> của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Thu gọn đầu ra Bash + các hồ sơ MCP — truyền cảm hứng cho nguyên tắc dừng nén đúng lúc và việc rút gọn bản kê khai công cụ MCP của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Nén đầu ra theo từng loại tệp, có nhận biết nội dung và có cơ chế dừng khi gặp lỗi — xác nhận tính đúng đắn của cơ chế điều phối theo loại và bỏ qua khi mức giảm không đạt ngưỡng tối thiểu của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"Tìm các token ma" — mẫu giảm tải + định danh có thể khôi phục của dự án đã cung cấp cơ sở cho cách tiếp cận giảm tải CCR của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Một bản thiết kế đồ thị phiên + loại bỏ dòng trùng lặp giữa các lượt, cung cấp cơ sở cho thiết kế session-dedup của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Bộ nhớ đệm Brotli/SQLite + chênh lệch ngữ cảnh theo từng phiên — truyền cảm hứng cho công cụ <code>session-dedup</code> của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Thu gọn đầu ra Bash + các hồ sơ MCP — truyền cảm hứng cho nguyên tắc dừng nén đúng lúc và việc rút gọn bản kê khai công cụ MCP của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Nén đầu ra theo từng loại tệp, có nhận biết nội dung và có cơ chế dừng khi gặp lỗi — xác nhận tính đúng đắn của cơ chế điều phối theo loại và bỏ qua khi mức giảm không đạt ngưỡng tối thiểu của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"Tìm các token ma" — mẫu giảm tải + định danh có thể khôi phục của dự án đã cung cấp cơ sở cho cách tiếp cận giảm tải CCR của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Một bản thiết kế đồ thị phiên + loại bỏ dòng trùng lặp giữa các lượt, cung cấp cơ sở cho thiết kế session-dedup của chúng tôi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON dạng cột bằng Rust + truy xuất theo địa chỉ nội dung + loại bỏ trùng lặp giữa các thông điệp — xác nhận thiết kế công cụ <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> và bất biến thân thiện với bộ nhớ đệm rằng "dạng nén không phụ thuộc vào vị trí" của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Nén lược đồ/mô tả công cụ MCP — cung cấp cơ sở cho việc giảm số lượng mục trong bản kê khai công cụ MCP của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Xếp hạng bản đồ kho mã theo phong cách Aider — cung cấp cơ sở cho hoạt động thử nghiệm bản đồ kho mã / xếp hạng truy xuất của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Nén lược đồ/mô tả công cụ MCP — cung cấp cơ sở cho việc giảm số lượng mục trong bản kê khai công cụ MCP của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Xếp hạng bản đồ kho mã theo phong cách Aider — cung cấp cơ sở cho hoạt động thử nghiệm bản đồ kho mã / xếp hạng truy xuất của chúng tôi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Giảm đầu ra shell theo cách khai báo trên MCP — xác nhận phương pháp thu gọn đầu ra bash theo cách khai báo của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Bộ công cụ TypeScript Compiler API — truyền cảm hứng cho cơ chế loại bỏ chú thích dựa trên trình phân tích cú pháp của chúng tôi, đồng thời bảo toàn các literal chuỗi, template và biểu thức chính quy.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Bộ công cụ TypeScript Compiler API — truyền cảm hứng cho cơ chế loại bỏ chú thích dựa trên trình phân tích cú pháp của chúng tôi, đồng thời bảo toàn các literal chuỗi, template và biểu thức chính quy.</td></tr>
 </table>
 
 ### 🧠 Bộ nhớ & RAG
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Nguồn cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Lớp bộ nhớ phổ quát — mô hình proxy đóng vai trò ranh giới ghi/đọc của dự án này đã định hình kiến trúc bộ nhớ của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Các tác nhân có trạng thái với bộ nhớ phân tầng — truyền cảm hứng cho mô hình Context Control & Recovery (CCR) phân tầng của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>Hệ thống phân loại ProblemMap gồm 16 chế độ lỗi RAG/LLM thường gặp — bộ thuật ngữ chung trong hướng dẫn khắc phục sự cố của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Lớp bộ nhớ phổ quát — mô hình proxy đóng vai trò ranh giới ghi/đọc của dự án này đã định hình kiến trúc bộ nhớ của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Các tác nhân có trạng thái với bộ nhớ phân tầng — truyền cảm hứng cho mô hình Context Control & Recovery (CCR) phân tầng của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>Hệ thống phân loại ProblemMap gồm 16 chế độ lỗi RAG/LLM thường gặp — bộ thuật ngữ chung trong hướng dẫn khắc phục sự cố của chúng tôi.</td></tr>
 </table>
 
 ### 🛰️ Kiểm tra lưu lượng, MITM & proxy trong suốt
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Nguồn cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Việc chặn/phân tích MITM đối với lưu lượng giữa trợ lý lập trình ↔ LLM đã định hình các yêu cầu ban đầu của Traffic Inspector. Bốn mô-đun được kế thừa trước đây — hợp nhất SSE, chuẩn hóa hội thoại, che giấu thông tin bí mật và làm sạch header — đã được thay thế bằng các bản triển khai clean-room độc lập dựa trên các tiêu chuẩn giao thức công khai. Hai bề mặt chuyển tiếp nguyên trạng đến máy chủ (<code>passthrough.ts</code> và <code>_internal/bypass.cjs</code>) vẫn là các bản triển khai nội bộ của OmniRoute được phân loại độc lập; chúng không được viết lại trong quá trình thay thế đó.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Định tuyến proxy trong suốt theo từng tiến trình — truyền cảm hứng cho cơ chế tháo dỡ MITM an toàn khi gặp sự cố, thời gian chờ khi socket không hoạt động, quy kết tiến trình qua <code>/proc</code> và thu giữ lưu lượng bằng TPROXY của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Việc chặn/phân tích MITM đối với lưu lượng giữa trợ lý lập trình ↔ LLM đã định hình các yêu cầu ban đầu của Traffic Inspector. Bốn mô-đun được kế thừa trước đây — hợp nhất SSE, chuẩn hóa hội thoại, che giấu thông tin bí mật và làm sạch header — đã được thay thế bằng các bản triển khai clean-room độc lập dựa trên các tiêu chuẩn giao thức công khai. Hai bề mặt chuyển tiếp nguyên trạng đến máy chủ (<code>passthrough.ts</code> và <code>_internal/bypass.cjs</code>) vẫn là các bản triển khai nội bộ của OmniRoute được phân loại độc lập; chúng không được viết lại trong quá trình thay thế đó.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Định tuyến proxy trong suốt theo từng tiến trình — truyền cảm hứng cho cơ chế tháo dỡ MITM an toàn khi gặp sự cố, thời gian chờ khi socket không hoạt động, quy kết tiến trình qua <code>/proc</code> và thu giữ lưu lượng bằng TPROXY của chúng tôi.</td></tr>
 </table>
 
 ### 📚 Dữ liệu mô hình, khả năng quan sát & giao diện người dùng
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Nguồn cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Cơ sở dữ liệu mở về thông số kỹ thuật, giá cả và khả năng của các mô hình AI — được đồng bộ nguyên bản vào danh mục mô hình của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Thư viện đồ thị dựa trên nút, vận hành Compression Studio và Combo/Routing Studio theo thời gian thực của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>Khả năng trực quan hóa đồ thị luồng công việc trực tiếp của LangGraph Studio đã truyền cảm hứng cho chế độ xem chuỗi chuyển tiếp theo thời gian thực trong các Studio của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Mô hình quan sát dấu vết → khoảng đo → lượt sinh của dự án này đã định hình biểu đồ thác nước trong Compression Studio của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Khả năng quan sát lưới dịch vụ Istio — truyền cảm hứng cho các huy hiệu ngắt mạch và phần trực quan hóa cạnh lỗi trong Routing/Combo Studio của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Các logo thương hiệu AI/LLM dùng để hiển thị biểu tượng nhà cung cấp trên toàn bộ bảng điều khiển của chúng tôi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Cung cấp các cờ SVG được cấp phép theo MIT, dùng trong bộ chọn ngôn ngữ của README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Cơ sở dữ liệu mở về thông số kỹ thuật, giá cả và khả năng của các mô hình AI — được đồng bộ nguyên bản vào danh mục mô hình của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Thư viện đồ thị dựa trên nút, vận hành Compression Studio và Combo/Routing Studio theo thời gian thực của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>Khả năng trực quan hóa đồ thị luồng công việc trực tiếp của LangGraph Studio đã truyền cảm hứng cho chế độ xem chuỗi chuyển tiếp theo thời gian thực trong các Studio của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Mô hình quan sát dấu vết → khoảng đo → lượt sinh của dự án này đã định hình biểu đồ thác nước trong Compression Studio của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Khả năng quan sát lưới dịch vụ Istio — truyền cảm hứng cho các huy hiệu ngắt mạch và phần trực quan hóa cạnh lỗi trong Routing/Combo Studio của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Các logo thương hiệu AI/LLM dùng để hiển thị biểu tượng nhà cung cấp trên toàn bộ bảng điều khiển của chúng tôi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Cung cấp các cờ SVG được cấp phép theo MIT, dùng trong bộ chọn ngôn ngữ của README.</td></tr>
 </table>
 
 ### 🛡️ Bảo mật
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Nguồn cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Danh sách tuyển chọn các thư viện an toàn theo mặc định, định hướng cho những lựa chọn bảo mật của chúng tôi (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Danh sách tuyển chọn các thư viện an toàn theo mặc định, định hướng cho những lựa chọn bảo mật của chúng tôi (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Công cụ bổ trợ
 
 <table>
   <tr><th align="left">Dự án</th><th align="center">⭐</th><th align="left">Nguồn cảm hứng cho OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Truyền cảm hứng cho việc loại bỏ yêu cầu trùng lặp, phương án dự phòng khẩn cấp không tốn chi phí, các chiến lược Auto-Combo có thể cắm ghép và khả năng phân loại ý định đa ngôn ngữ.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Khả năng ánh xạ lại mô hình theo tài khoản, xác thực đường dẫn tệp thực thi và cách xử lý nhãn gói của dự án này đã định hình runtime Antigravity của OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Định dạng đếm ngược nhỏ gọn đến thời điểm đặt lại hạn ngạch của dự án này đã truyền cảm hứng cho phần hiển thị giới hạn nhà cung cấp tương ứng trong OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Các tích hợp ACP của dự án này đã truyền cảm hứng cho khả năng tự động phát hiện các tác nhân CLI đã cài đặt của OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Đã xác định bề mặt hạn ngạch Grok Build; sau đó OmniRoute đã xác minh và hiệu chỉnh độc lập định dạng dữ liệu truyền trực tiếp.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Truyền cảm hứng cho việc loại bỏ yêu cầu trùng lặp, phương án dự phòng khẩn cấp không tốn chi phí, các chiến lược Auto-Combo có thể cắm ghép và khả năng phân loại ý định đa ngôn ngữ.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Khả năng ánh xạ lại mô hình theo tài khoản, xác thực đường dẫn tệp thực thi và cách xử lý nhãn gói của dự án này đã định hình runtime Antigravity của OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Định dạng đếm ngược nhỏ gọn đến thời điểm đặt lại hạn ngạch của dự án này đã truyền cảm hứng cho phần hiển thị giới hạn nhà cung cấp tương ứng trong OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Các tích hợp ACP của dự án này đã truyền cảm hứng cho khả năng tự động phát hiện các tác nhân CLI đã cài đặt của OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Đã xác định bề mặt hạn ngạch Grok Build; sau đó OmniRoute đã xác minh và hiệu chỉnh độc lập định dạng dữ liệu truyền trực tiếp.</td></tr>
 </table>
 
 ## 📄 Giấy phép

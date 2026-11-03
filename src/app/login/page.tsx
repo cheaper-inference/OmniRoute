@@ -32,7 +32,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    requestAnimationFrame(() => setMounted(true));
+    const raf = requestAnimationFrame(() => setMounted(true));
     async function checkAuth() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -61,7 +61,7 @@ export default function LoginPage() {
           setOidcEnabled(false);
           setOidcDisablePasswordLogin(false);
         }
-      } catch {
+      } catch (err) {
         clearTimeout(timeoutId);
         setHasPassword(true);
         setSetupComplete(true);
@@ -96,7 +96,7 @@ export default function LoginPage() {
         }
         setError(data.error || t("invalidPassword"));
       }
-    } catch {
+    } catch (err) {
       setError(t("errorOccurredRetry"));
     } finally {
       setLoading(false);
@@ -106,6 +106,7 @@ export default function LoginPage() {
   const nodeWarningBanner =
     !nodeCompatible && nodeVersion ? (
       <div className="w-full max-w-lg mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
+        {/* The Node warning is a permanent banner: nothing on this page can resolve it. */}
         <Alert
           variant="critical"
           dismissible={false}

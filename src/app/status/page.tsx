@@ -117,6 +117,7 @@ export default function StatusPage() {
         )}
 
         {!loading && error && (
+          // Stays until a refresh gets an answer from the health endpoint.
           <Alert
             variant="critical"
             dismissible={false}
