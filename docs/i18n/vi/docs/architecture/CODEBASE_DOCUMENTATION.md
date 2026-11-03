@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 mô-đun thực thi cấp cao nhất (`*.ts` trừ `base.ts`, `index.ts` và các bài kiểm tra — số đo `npm run check:docs-counts` ). Mọi lớp người thực thi đều mở rộng `BaseExecutor` (`base.ts`), trực tiếp hoặc thông qua `DefaultExecutor` hoặc người thực thi khác; các mô-đun còn lại là trình trợ giúp cho mỗi nhà cung cấp (lược đồ công cụ, bộ điều hợp fetch/TTS, trình xử lý quirk). Người thực hiện bao gồm:
+158 mô-đun thực thi cấp cao nhất (`*.ts` trừ `base.ts`, `index.ts` và các bài kiểm tra — số đo `npm run check:docs-counts` ). Mọi lớp người thực thi đều mở rộng `BaseExecutor` (`base.ts`), trực tiếp hoặc thông qua `DefaultExecutor` hoặc người thực thi khác; các mô-đun còn lại là trình trợ giúp cho mỗi nhà cung cấp (lược đồ công cụ, bộ điều hợp fetch/TTS, trình xử lý quirk). Người thực hiện bao gồm:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi` `chatgpt-web-codex` `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, zqn , `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, cộng với `claudeIdentity.ts` (người trợ `devin-desktop` nhận dạng chung) và `index.ts` (đăng ký).
 

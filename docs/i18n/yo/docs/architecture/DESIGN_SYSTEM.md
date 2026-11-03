@@ -4,7 +4,7 @@
 
 ---
 
-> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Asẹnti naa ni Keak orombo wewe (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Gbogbo aami jẹ glyph Lucide kan.
+> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Asẹnti naa ni Keak orombo wewe (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Awọn iwe afọwọkọ Switzer ko ṣubu nipasẹ glyph nipasẹ glyph (`src/app/globals.css`): Inter fun Cyrillic, Greek ati Vietnamese ati, labẹ `html[dir="rtl"]` nikan, Vazirmatn fun iwe afọwọkọ Larubawa. Gbogbo aami jẹ glyph Lucide kan.
 
 ## 1. Ibi tí àwọn ohun wà
 
@@ -118,7 +118,7 @@
 
 ## 5. Nmu awọn kit
 
-`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade. Ṣiṣan iṣiṣẹ `UI Kit upstream watch` osẹ-ọsẹ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna ati pe o jẹ ki ọrọ ipasẹ kan ṣii lakoko ti pin wa lẹhin; repo ti o wa ni oke jẹ ikọkọ, nitorinaa ṣiṣiṣẹsẹhin nilo ami kika-nikan ni aṣiri `UI_KIT_READ_TOKEN` ati duro inert laisi rẹ.
+`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade. Ṣiṣan iṣiṣẹ `UI Kit upstream watch` osẹ-ọsẹ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna ati pe o jẹ ki ọrọ ipasẹ kan ṣii lakoko ti pin wa lẹhin; repo ti o wa ni oke jẹ ikọkọ, nitorinaa iṣan-iṣẹ nilo aami-kika nikan ni aṣiri `UI_KIT_READ_TOKEN`. Nigbati ko ba le ka ni oke (ko si ami ami, ami ami kan ti o da iṣẹ duro, tabi GitHub unreachable) ṣiṣe naa duro alawọ ewe ṣugbọn o kọ ikilọ kan ati pe o jẹ ki ọrọ lọtọ kan ṣii, eyiti o tilekun funrararẹ ni kete ti ṣiṣe nigbamii le ka ṣiṣan soke lẹẹkansi.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` daakọ `src/` ti o wa ni oke ni adehun yẹn (`latest` = tuntun `v*` tag) sinu `packages/ui-kit/src`, nlo iyipada ti a gba laaye nikan (o ju suffix `.js` silẹ lati agbewọle ojulumọ), o si ṣeto ẹya aaye iṣẹ ni `packages/ui-kit/package.json` ati `package-lock.json` si oke oke. Lẹhinna: atunwo `git diff packages/ui-kit`, ṣe iwe-iwoye wiwo lori awọn olupese, awọn eto, awọn akojọpọ, lilo ati aaye ipari ni awọn akori mejeeji, ṣiṣe `npm run check:ui-kit-snapshot` ati `npm run test:vitest:ui`, ati ṣii PR pẹlu iyipada iyipada oke.
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **סטָטוּס:** לוח המחוונים בנוי על** ערכת Keak CI UI** (`@keak/cheaper-inference-ui-kit`), מסופק כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב במעלה הזרם מוצמדת ב- `packages/ui-kit/UPSTREAM.md` ומוגנת על ידי `npm run check:ui-kit-snapshot`). האור הוא הנושא הקנוני; העדפת ברירת המחדל היא `system`. המבטא הוא קיאק ליים (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
+> **סטָטוּס:** לוח המחוונים בנוי על** ערכת Keak CI UI** (`@keak/cheaper-inference-ui-kit`), מסופק כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב במעלה הזרם מוצמדת ב- `packages/ui-kit/UPSTREAM.md` ומוגנת על ידי `npm run check:ui-kit-snapshot`). האור הוא הנושא הקנוני; העדפת ברירת המחדל היא `system`. המבטא הוא קיאק ליים (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). סקריפטים שחסרים לשוויץ נופלים דרך גליף אחר גליף (`src/app/globals.css`): אינטר עבור קירילי, יווני ווייטנאמי, ורק תחת `html[dir="rtl"]`, Vazirmatn עבור כתב ערבי. כל אייקון הוא גליף Lucide.
 
 ## 1. איפה דברים נמצאים
 
@@ -45,7 +45,7 @@
 
 ## 5. עדכון הערכה
 
-`npm run check:ui-kit-upstream` משווה את הגרסה המוצמדת ב- `packages/ui-kit/UPSTREAM.md` עם תג `v*` החדש ביותר של הריפו במעלה הזרם ומדפיס את פקודת הסינכרון כשיוצא מהדורה. זרימת העבודה השבועית `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) מפעילה את אותה בדיקה ושומרת בעיית מעקב אחת פתוחה בזמן שהסיכה מאחור; הריפו במעלה הזרם הוא פרטי, כך שזרימת העבודה צריכה אסימון לקריאה בלבד בסוד `UI_KIT_READ_TOKEN` ונשאר אדיש בלעדיו.
+`npm run check:ui-kit-upstream` משווה את הגרסה המוצמדת ב- `packages/ui-kit/UPSTREAM.md` עם תג `v*` החדש ביותר של הריפו במעלה הזרם ומדפיס את פקודת הסינכרון כשיוצא מהדורה. זרימת העבודה השבועית `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) מפעילה את אותה בדיקה ושומרת בעיית מעקב אחת פתוחה בזמן שהסיכה מאחור; הריפו במעלה הזרם הוא פרטי, כך שזרימת העבודה צריכה אסימון לקריאה בלבד בסוד `UI_KIT_READ_TOKEN`. כאשר הוא לא יכול לקרוא במעלה הזרם (ללא אסימון, אסימון שהפסיק לעבוד או GitHub בלתי ניתן להשגה) הריצה נשארת ירוקה אך כותבת אזהרה ומשאירה בעיה אחת נפרדת פתוחה, שסוגרת את עצמה ברגע שהריצה מאוחרת יותר יכולה לקרוא שוב במעלה הזרם.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` מעתיק את ה- `src/` במעלה הזרם באותו commit (`latest` = התג `v*` החדש ביותר) ל- `packages/ui-kit/src`, מחיל את הטרנספורמציה הבודדת המותרת (הוא מוריד את סיומת `.js` מייבוא יחסי), ומגדיר את גרסת סביבת העבודה ב- `packages/ui-kit/package.json` ו- `package-lock.json` ל-upstream. לאחר מכן: בדוק את `git diff packages/ui-kit`, בצע העברת מידע חזותית על ספקים, הגדרות, שילובים, שימוש ונקודת קצה בשני הנושאים, הפעל `npm run check:ui-kit-snapshot` ו- `npm run test:vitest:ui` ופתח את PR עם יומן השינויים במעלה הזרם.
 

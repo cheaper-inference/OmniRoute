@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # Claude Code a glm/glm-5.2 használatával az
 
 ---
 
-## Hogyan kapcsolódik a Claude Code egy átjáróhoz
+## Hogyan csatlakozik Claude Code egy átjáróhoz
 
-A Claude Code az **Anthropic Messages API**-val kommunikál, és környezeti változókkal
-irányítható egy egyéni végpontra (nincs `--base-url` kapcsolója):
+Claude Code beszél a**Anthropic Üzenetek API** és egy egyéni végpontra mutat környezeti változókkal (nincs `--base-url` jelzője):
 
-| Változó                                      | Cél                                                                                                                    |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Az átjáró gyökér-URL-je (a Claude Code hozzáfűzi a `/v1/messages` útvonalat). **Ne legyen `/v1` utótag.**              |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` fejlécként küldi el — használja az OmniRoute hozzáférési tokenjét/API-kulcsát                |
-| `ANTHROPIC_API_KEY`                          | Alternatíva: `x-api-key` fejlécként küldi el. Ha mindkettő be van állítva, az `ANTHROPIC_AUTH_TOKEN` élvez elsőbbséget |
-| `ANTHROPIC_MODEL`                            | Egy adott modell kényszerítése (felülírja a `/model` választó alapértelmezését)                                        |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → a natív `/model` választó felsorolja a `/v1/models` végpont `claude*`/`anthropic*` modelljeit                    |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | A válaszonkénti kimeneti tokenek számának korlátozása (pl. `65536`)                                                    |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokenküszöb az automatikus tömörítéshez                                                                                |
+| Változó                                      | Cél                                                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Átjáró gyökér URL (Claude kód hozzáfűzi `/v1/messages`).** Nincs `/v1` utótag.**                  |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — néven elküldve használja a OmniRoute hozzáférési tokent / API kulcsot |
+| `ANTHROPIC_API_KEY`                          | Alternatív megoldás: `x-api-key` néven küldve. Ha mindkettő beáll, `ANTHROPIC_AUTH_TOKEN` nyer    |
+| `ANTHROPIC_MODEL`                            | Egy adott modell kényszerítése (felülbírálja a `/model` picker alapértelmezett értékét)           |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → a natív `/model` választó listázza `claude*`/`anthropic*` modelleket `/v1/models` ből       |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Válaszonkénti kimeneti tokenek korlátozása (pl. `65536`)                                          |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Token küszöbértéke az automatikus tömörítéshez                                                    |
 
-> A környezeti változók beolvasása **egyszer, az indításkor** történik — módosításuk után indítsa újra a Claude Code-ot.
+> Env vars beolvasott** egyszer indításkor** — indítsa újra Claude kódot, miután megváltoztatta őket.
 
-Az `omniroute launch` mindezeket beállítja: feloldja az alap-URL-t és a tokent
-az aktív kontextusból (így az `omniroute connect <vps>`, majd az `omniroute launch`
-egyszerűen működik), ellenőrzi a kiszolgáló állapotát, majd elindítja a `claude` folyamatot.
+Rögzített karakterlánc helyett forgó hitelesítő adatok esetén állítsa be `apiKeyHelper` `~/.claude/settings.json` -ben olyan parancsra, amely az aktuális hitelesítő adatot az stdout-ba nyomtatja. Claude Code alapértelmezés szerint öt percig gyorsítótárazza a kimenetét (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ezt felülbírálja), és elküldi az értéket `Authorization: Bearer` és `x-api-key` értékben is. A szkriptnek ki kell nyomtatnia a hitelesítő adatokat, és semmi más — egy szalaghirdetést mellé, ami megbuktatja a segédprogramot a 2.1.227 + verzióban.
+
+Az Entra ID SSO így működik: `scripts/cli/omniroute-sso.mjs token` egy rövid életű Entra hozzáférési jogkivonatot nyomtat, amelyet OmniRoute ellenőriz a API kulcs helyett. Lásd: [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` mindezeket beállítja: feloldja az alap URL + tokent az aktív környezetből (tehát `omniroute connect <vps>` majd `omniroute launch` csak működik), ellenőrzi a szerver állapotát, és végrehajtja `claude`.
 
 ---
 

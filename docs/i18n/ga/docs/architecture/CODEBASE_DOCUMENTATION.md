@@ -458,7 +458,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -488,7 +488,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modúl seiceadóir barrleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus tástálacha — na bearta comhaireamh `npm run check:docs-counts` ). Síneann gach aicme seiceadóir `BaseExecutor` (`base.ts`), go díreach nó trí `DefaultExecutor` nó seiceadóir eile; is cúntóirí in aghaidh an tsoláthraí iad na modúil atá fágtha (scéimeanna uirlisí, oiriúntóirí fetch/TTS, láimhseálaithe cuairc). I measc na seiceadóirí tá:
+158 modúl seiceadóir barrleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus tástálacha — na bearta comhaireamh `npm run check:docs-counts` ). Síneann gach aicme seiceadóir `BaseExecutor` (`base.ts`), go díreach nó trí `DefaultExecutor` nó seiceadóir eile; is cúntóirí in aghaidh an tsoláthraí iad na modúil atá fágtha (scéimeanna uirlisí, oiriúntóirí fetch/TTS, láimhseálaithe cuairc). I measc na seiceadóirí tá:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, zqn , zqo , zqp , zqq , zqr , `opencode`, `perplexity-web`, `petals`, zqs , `pollinations`, zqs , zqy , `qoder`, `vertex`, `devin-desktop`, zqy , zqs , zqy , `claudeIdentity.ts`, `index.ts` (comhroinnt) agus cúnta (roinnt)
 
