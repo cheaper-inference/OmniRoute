@@ -16,6 +16,14 @@ export function readNewConnectionProxyDefault(db) {
       )
       .get();
     if (row === undefined) return DEFAULT_NEW_CONNECTION_PROXY_ENABLED;
+    if (
+      row === null ||
+      typeof row !== "object" ||
+      !("value" in row) ||
+      typeof row.value !== "string"
+    ) {
+      throw new Error("Invalid policy row");
+    }
     const value = JSON.parse(row.value);
     if (typeof value !== "boolean") throw new Error("Invalid policy type");
     return value;

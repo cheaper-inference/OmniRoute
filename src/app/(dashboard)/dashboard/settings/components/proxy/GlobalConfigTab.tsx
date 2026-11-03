@@ -22,6 +22,32 @@ type ProxyPreferences = {
   settingsRevision: number;
 };
 
+function ProxyPreferenceAction({
+  preferences,
+  setting,
+  label,
+  loading,
+  saving,
+  onChange,
+}: {
+  preferences: ProxyPreferences | null;
+  setting: "perKeyProxyEnabled" | "defaultNewConnectionProxyEnabled";
+  label: string;
+  loading: boolean;
+  saving: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  if (!preferences) return loading ? <Spinner size="sm" /> : null;
+  return (
+    <Toggle
+      ariaLabel={label}
+      checked={preferences[setting]}
+      disabled={loading || saving}
+      onChange={onChange}
+    />
+  );
+}
+
 function parsePreferences(data: Record<string, unknown>): ProxyPreferences {
   const creationDefault =
     data.defaultNewConnectionProxyEnabled === undefined
@@ -212,16 +238,14 @@ export default function GlobalConfigTab() {
         title={t("defaultNewConnectionProxyEnabled")}
         subtitle={t("defaultNewConnectionProxyEnabledDesc")}
         action={
-          preferences ? (
-            <Toggle
-              ariaLabel={t("defaultNewConnectionProxyEnabled")}
-              checked={preferences.defaultNewConnectionProxyEnabled}
-              disabled={preferencesLoading || preferencesSaving}
-              onChange={(next) => void savePreference("defaultNewConnectionProxyEnabled", next)}
-            />
-          ) : preferencesLoading ? (
-            <Spinner size="sm" />
-          ) : undefined
+          <ProxyPreferenceAction
+            preferences={preferences}
+            setting="defaultNewConnectionProxyEnabled"
+            label={t("defaultNewConnectionProxyEnabled")}
+            loading={preferencesLoading}
+            saving={preferencesSaving}
+            onChange={(next) => void savePreference("defaultNewConnectionProxyEnabled", next)}
+          />
         }
       >
         {preferencesError && (
@@ -249,16 +273,14 @@ export default function GlobalConfigTab() {
         subtitle={t("perKeyProxyEnabledDesc")}
         className="[&>[data-slot=card-header]]:mb-0"
         action={
-          preferences ? (
-            <Toggle
-              ariaLabel={t("perKeyProxyEnabled")}
-              checked={preferences.perKeyProxyEnabled}
-              disabled={preferencesLoading || preferencesSaving}
-              onChange={(next) => void savePreference("perKeyProxyEnabled", next)}
-            />
-          ) : preferencesLoading ? (
-            <Spinner size="sm" />
-          ) : undefined
+          <ProxyPreferenceAction
+            preferences={preferences}
+            setting="perKeyProxyEnabled"
+            label={t("perKeyProxyEnabled")}
+            loading={preferencesLoading}
+            saving={preferencesSaving}
+            onChange={(next) => void savePreference("perKeyProxyEnabled", next)}
+          />
         }
       />
 
