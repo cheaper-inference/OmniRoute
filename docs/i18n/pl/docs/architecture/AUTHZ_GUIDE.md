@@ -146,7 +146,7 @@ uzupełniane:
 
 Kilka działań `MANAGEMENT` jest **dostępnych wyłącznie dla operatora**: sam klucz `manage` nie wystarcza. Eksport zapisanych poświadczeń (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), przywracanie kopii zapasowej nad żywymi danymi (`POST /api/db-backups/import`, łącznie z `dryRun=true`, `POST /api/db-backups` przywracanie po id, `POST /api/settings/import-json`) oraz niszczenie punktów przywracania (czyszczenie przez `DELETE /api/db-backups` oraz `PATCH /api/db-backups`, ponieważ zapisywana retencja steruje automatycznym przycinaniem po każdym backupie) wymagają sesji panelu, lokalnego podmiotu CLI albo wyłączonego logowania. Wystawienie tokenu synchronizacji (`POST /api/sync/tokens`) i wybicie tokenu dostępu CLI z zakresem `admin` (`POST /api/cli/tokens`) wymagają sesji panelu lub lokalnego podmiotu CLI we wszystkich trybach logowania. Klucze API dowolnego zakresu oraz tokeny dostępu `oma_` nie są poświadczeniami operatora: gdy takie poświadczenie jest wymagane, dostają `403`. Sprawdzenie znajduje się w `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Zmiana ustawień logowania również jest zastrzeżona dla operatora: `POST /api/settings/require-login` (ustawienie hasła zarządzania / przełączenie `requireLogin`) akceptuje wyłącznie te poświadczenia, gdy hasło już istnieje — okno pierwszego uruchomienia (jeszcze bez hasła) pozostaje bez zmian — a sesja panelu musi wysłać `currentPassword`, aby zastąpić hasło (`403`, gdy brakuje go lub jest błędne, audytowane jako `settings.update_failed`). Lokalne CLI oraz instancja z wyłączonym logowaniem zachowują ścieżkę odzyskiwania i mogą ustawić hasło bez tego, ponieważ oba są powiązane z hostem, który posiada katalog danych.
 
-## Potok
+## Rurociąg
 
 ```
 Incoming request → src/proxy.ts
@@ -163,17 +163,17 @@ Incoming request → src/proxy.ts
        - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Zaufane nagłówki wewnętrzne (zdefiniowane w `src/server/authz/headers.ts`) są **usuwane z przychodzących żądań** przed klasyfikacją — klienci nie mogą wcześniej ustawić `x-omniroute-auth-*`, aby podszyć się pod subject.
+Zaufane nagłówki wewnętrzne (zdefiniowane w `src/server/authz/headers.ts`) to** pozbawione przychodzących żądań** przed klasyfikacją klienci — nie mogą wstępnie wypełnić `x-omniroute-auth-*`, aby podszywać się pod podmiot.
 
-### Kontrakty polityk
+### Umowy polisowe
 
 Każda klasa trasy ma politykę w `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — zawsze zwraca `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — wyciąga Bearer, waliduje przez `validateApiKey()`. Przechodzi do anonymous tylko gdy efektywna flaga `REQUIRE_API_KEY` jest wyłączona. Efektywna flaga jest rozwiązywana przez `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), więc Dashboard Feature Flags i zmienne środowiskowe spójnie rządzą `/api/v1/*`, `/api/v1beta/*` oraz aliasami; awarie resolvera kończą się fail-closed. Dopuszcza żądania z sesją dashboardu na trasach client API (w tym `/api/v1/models`, używane przez katalog modeli w dashboardzie).
-- **`managementPolicy`** (`policies/management.ts`) — akceptuje sesję dashboardu, wewnętrzne żądania model-sync (dopasowane do `/api/providers/[name]/(sync-models|models)`) albo całkowicie pomija auth, jeśli `isAuthRequired()` zwraca false. Zwraca 403 (`AUTH_001`), gdy token Bearer jest obecny, ale nieprawidłowy, w przeciwnym razie 401. Egzekwuje też poziomy route-guard (LOCAL_ONLY / ALWAYS_PROTECTED) przed jakąkolwiek gałęzią auth — zob. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). Ścieżki LOCAL_ONLY w `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (dziś: `/api/mcp/`) mogą być dostępne spoza loopback, gdy klucz Bearer ma scope `manage`; wszystkie pozostałe ścieżki LOCAL_ONLY pozostają ściśle loopback niezależnie od scope.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — wyodrębnia nośnik, sprawdza poprawność poprzez `validateApiKey()`. Przechodzi do anonimowego tylko wtedy, gdy efektywna flaga funkcji `REQUIRE_API_KEY` jest wyłączona. Efektywna flaga jest rozpoznawana poprzez `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), więc flagi funkcji pulpitu nawigacyjnego i zmienne środowiskowe spójnie regulują `/api/v1/*`, `/api/v1beta/*` i aliasy; awarie programu rozpoznawania nazw nie są zamknięte. Zezwala na żądania sesji pulpitu nawigacyjnego na trasach API klienta (w tym `/api/v1/models`, używanego przez katalog modeli pulpitu nawigacyjnego). Kiedy Entra ID SSO jest włączona, nośnik będący strukturalnie tokenem Entra (trzy segmenty base64url, `RS*` alg, `kid`) jest obsługiwany przez gałąź SSO** zanim** `validateApiKey()` i jego werdykt jest ostateczny. — nigdy nie przechodzi do ścieżki klucza API ani gałęzi degradującej do anonimowej, więc awaria dostawcy tożsamości nie może stać się otwartym dostępem. Nie ma to wpływu na statyczne klucze API. Zobacz [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — akceptuje sesję dashboardu, żądania synchronizacji modelu wewnętrznego (dopasowane do `/api/providers/[name]/(sync-models|models)`) lub całkowicie pomija, jeśli `isAuthRequired()` zwróci wartość false. Zwraca 403 (`AUTH_001`), gdy token okaziciela jest obecny, ale jest nieprawidłowy, w przeciwnym razie 401. Wymusza także poziomy strażników tras (LOCAL_ONLY / ALWAYS_PROTECTED) przed jakąkolwiek gałęzią autoryzacji — patrz [Poziomy strażników tras](../security/ROUTE_GUARD_TIERS.md). do ścieżek LOCAL_ONLY w `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (dziś: `/api/mcp/`) można uzyskać dostęp bez sprzężenia zwrotnego, gdy klucz nośnika przenosi zakres `manage` ; wszystkie inne ścieżki LOCAL_ONLY pozostają w trybie ścisłej pętli zwrotnej, niezależnie od zakresu.
 
-Udana polityka zwraca `AuthSubject` z `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Handlery downstream mogą to odczytać przez `assertAuth(request, "CLIENT_API")` w `src/server/authz/assertAuth.ts` zamiast ponownie uruchamiać logikę auth.
+Pomyślna polityka zwraca `AuthSubject` z `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Dalsze procedury obsługi mogą to odczytać poprzez `assertAuth(request, "CLIENT_API")` w `src/server/authz/assertAuth.ts` zamiast ponownie uruchamiać logikę uwierzytelniania.
 
 ## Lista tras publicznych
 
@@ -286,23 +286,23 @@ Endpointy `/api/v1/agents/tasks/*` oraz `/api/resilience/model-cooldowns` **wyma
 
 ## Debugowanie
 
-Potok zawsze stempluje odpowiedzi:
+Potok zawsze stempluje odpowiedzi za pomocą:
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Dla uwierzytelnionych żądań nagłówki żądania upstream (po stronie handlera) zawierają także:
+W przypadku żądań uwierzytelnionych nagłówki żądań nadrzędnych (po stronie modułu obsługi) obejmują również:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Używaj `assertAuth(req, expectedClass)` wewnątrz handlerów — rzuca `AuthzAssertionError` z kodem `AUTHZ_NOT_INITIALIZED`, jeśli middleware zostało ominięte (przydatne do łapania regresji konfiguracji w testach).
+Użyj `assertAuth(req, expectedClass)` wewnątrz procedur obsługi — wyrzuca ona `AuthzAssertionError` z kodem `AUTHZ_NOT_INITIALIZED` jeśli oprogramowanie pośredniczące zostało pominięte (pomocne przy wychwytywaniu regresji konfiguracji w testach).
 
 ## Zobacz również
 

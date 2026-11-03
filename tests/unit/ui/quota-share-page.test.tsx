@@ -3,6 +3,7 @@ import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
 
 // The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
 // with ResizeObserver, which jsdom does not implement.
@@ -155,6 +156,18 @@ describe("QuotaSharePageClient", { timeout: 15000 }, () => {
     container?.remove();
     container = null;
     root = null;
+  });
+
+  it("always shows the beta banner, with no dismiss control", async () => {
+    await renderComponent();
+    await waitFor(() => document.body.innerHTML.includes("betaTitle"));
+
+    const banner = Array.from(document.querySelectorAll('[data-slot="alert"]')).find((alert) =>
+      alert.textContent?.includes("betaTitle")
+    );
+    expect(banner).toBeTruthy();
+    expect(banner!.textContent).toContain("betaReportLink");
+    expect(banner!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
   });
 
   it("renders 2 PoolCard components when usePools returns 2 pools", async () => {
