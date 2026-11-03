@@ -149,6 +149,7 @@ jobs:
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
       - run: npm run check:test-tla-order
+      - run: npm run check:trivy-ignore-policy
       - run: npm run audit:deps
       - name: Restore ESLint file cache
         if: github.event_name == 'pull_request'

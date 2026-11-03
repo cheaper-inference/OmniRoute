@@ -255,6 +255,7 @@
     "quality:boundary": "node scripts/quality/measure-boundary.mjs",
     "quality:gate": "npm run quality:collect && npm run quality:ratchet -- --allow-missing",
     "check:gate-manifest": "node scripts/quality/gate-manifest.mjs",
+    "check:trivy-ignore-policy": "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml",
     "check:quality-skill-contract": "node scripts/quality/check-skill-contract.mjs",
     "quality:scan": "node scripts/quality/run-all-gates.mjs",
     "quality:scan:fast": "node scripts/quality/run-all-gates.mjs --fast",

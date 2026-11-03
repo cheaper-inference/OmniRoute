@@ -26,6 +26,13 @@
   ],
   "gates": [
     {
+      "id": "check:trivy-ignore-policy",
+      "job": "lint",
+      "args": ["run", "check:trivy-ignore-policy"],
+      "kind": "hard",
+      "command": "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml"
+    },
+    {
       "id": "check:test-tla-order",
       "job": "lint",
       "args": ["run", "check:test-tla-order"],

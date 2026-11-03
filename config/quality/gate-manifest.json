@@ -204,6 +204,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:trivy-ignore-policy",
+      "command": "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:install-upgrade",
       "command": "node scripts/check/check-install-upgrade.mjs",
       "disposition": "separately-invoked"
@@ -784,6 +789,7 @@
       "description": "All gates of the static filesystem scan; excludes product tests, build and live GitHub checks.",
       "aliases": [
         "check:gate-manifest",
+        "check:trivy-ignore-policy",
         "check:tracked-artifacts",
         "check:any-budget:t11",
         "check:migration-numbering",
@@ -813,6 +819,7 @@
       "description": "Static filesystem scan excluding duplication and cycles; not full acceptance.",
       "aliases": [
         "check:gate-manifest",
+        "check:trivy-ignore-policy",
         "check:tracked-artifacts",
         "check:any-budget:t11",
         "check:migration-numbering",
