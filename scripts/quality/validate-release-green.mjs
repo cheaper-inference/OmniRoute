@@ -1127,7 +1127,10 @@ async function main() {
         // stationary tip: next build compiles silently for ~12 min, keeps printing, and the old
         // 20 min ceiling killed it on every scheduled run. 40 min still turns a genuine hang
         // into a visible failure (same reasoning as the integration ceiling above).
-        timeout: 40 * 60 * 1000,
+        // Measured 2026-11-02: build:cli took 2237 s and 2372 s on two sweeps of the same day and
+        // check:pack-artifact about 150 s, so the 40 min ceiling left seconds of headroom and
+        // killed the second run. 60 min restores the margin; a genuine hang still fails.
+        timeout: 60 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.
