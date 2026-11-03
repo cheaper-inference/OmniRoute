@@ -212,6 +212,7 @@ export const comboRuntimeConfigSchema = z
     outputLimitAdvisory: z.boolean().optional(),
     reasoningTransportFallback: z.enum(["skip", "drop"]).optional(),
     compressionMode: compressionModeSchema.optional(),
+    comboCooldownWaitEnabled: z.boolean().optional(),
     failoverBeforeRetry: z.boolean().optional(),
     maxSetRetries: z.coerce.number().int().min(0).max(10).optional(),
     setRetryDelayMs: z.coerce.number().int().min(0).max(60000).optional(),
