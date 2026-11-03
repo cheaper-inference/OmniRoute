@@ -82,7 +82,7 @@
 
 ## 5. kit 업데이트
 
-`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다. 주간 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행하고 핀이 뒤에 있는 동안 하나의 추적 문제를 열어 둡니다. 업스트림 저장소는 비공개이므로 워크플로는 `UI_KIT_READ_TOKEN` 비밀에 읽기 전용 토큰이 필요하며 토큰 없이는 비활성 상태를 유지합니다.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다. 주간 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행하고 핀이 뒤에 있는 동안 하나의 추적 문제를 열어 둡니다. 업스트림 저장소는 비공개이므로 워크플로는 `UI_KIT_READ_TOKEN` 시크릿에 읽기 전용 토큰이 필요합니다. 업스트림 검사기가 데이터를 읽을 수 없으면(토큰이 없거나, 더 이상 작동하지 않거나, GitHub에 연결할 수 없는 경우) `unknown`을 보고하고 종료 코드 `0`으로 끝납니다. 워크플로는 경고를 기록하고 별도의 추적 이슈 한 개를 열린 상태로 유지하려고 시도합니다. 접근이 복구된 뒤의 성공한 실행에서 해당 이슈를 닫습니다. GitHub 이슈 API가 실패하면 작업도 실패합니다.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` 해당 커밋(`latest` = 최신 `v*` 태그)에서 업스트림 `src/` `packages/ui-kit/src` 로 복사하고, 허용되는 단일 변환을 적용하고(상대 가져오기에서 `.js` 접미사를 삭제함), `packages/ui-kit/package.json` 및 `package-lock.json` 의 작업 공간 버전을 업스트림 버전으로 설정합니다. 그런 다음 `git diff packages/ui-kit` 검토하고, 두 테마 모두에서 공급자, 설정, 콤보, 사용법 및 끝점에 대한 화면을 확인하고, `npm run check:ui-kit-snapshot` 및 `npm run test:vitest:ui` 실행하고, 업스트림 변경 로그가 있는 PR 엽니다.
 

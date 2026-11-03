@@ -99,7 +99,7 @@
 
 ## 5. キットの更新
 
-`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。毎週の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行し、ピンが遅れている間 1 つの追跡問題を未解決のままにします。アップストリーム リポジトリはプライベートであるため、ワークフローは`UI_KIT_READ_TOKEN`シークレットに読み取り専用トークンを必要とし、それがないと不活性なままになります。
+`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。毎週の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行し、ピンが遅れている間 1 つの追跡問題を未解決のままにします。アップストリーム リポジトリはプライベートであるため、ワークフローは`UI_KIT_READ_TOKEN`シークレットに読み取り専用トークンが必要です。アップストリームの検査がデータを読み取れない場合（トークンがない、機能しなくなった、または GitHub に接続できない場合）、`unknown` を報告し、終了コード `0` で終了します。ワークフローは警告を出力し、独立した追跡用 issue を一件開いた状態に保とうとします。アクセスが復旧した後の正常な実行で、その issue を閉じます。GitHub の issue API が失敗すると、ジョブは失敗します。
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`そのコミット時に上流の`src/` (`latest` =最新の`v*`タグ) を`packages/ui-kit/src`にコピーし、単一の許可された変換を適用し (相対インポートから`.js`サフィックスを削除します)、 `packages/ui-kit/package.json`および`package-lock.json`のワークスペースのバージョンを上流のバージョンに設定します。次に、 `git diff packages/ui-kit`を確認し、両方のテーマでプロバイダー、設定、コンボ、使用法、およびエンドポイントのビジュアルパスを実行し、 `npm run check:ui-kit-snapshot`と`npm run test:vitest:ui`を実行して、アップストリームの変更ログでPR開きます。
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
 import { once } from "node:events";
-import {
+import fs, {
   chmodSync,
   existsSync,
   readFileSync,
@@ -13,6 +13,7 @@ import {
   symlinkSync,
   writeFileSync,
 } from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
@@ -119,7 +120,7 @@ function hasExecutableThreads(pid) {
       .split(/\s+/);
     return fields[0] !== "Z" || fields[17] !== "1";
   } catch (error) {
-    if (error.code === "ENOENT") return false;
+    if (error.code === "ENOENT" || error.code === "ESRCH") return false;
     throw error;
   }
 }
@@ -142,6 +143,36 @@ async function waitUntil(predicate, message, timeoutMs = 5_000) {
   }
   assert.fail(message);
 }
+
+test("an exited native proc descriptor means no executable threads", async () => {
+  const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], {
+    stdio: "ignore",
+  });
+  const originalRead = fs.readFileSync;
+  let descriptor;
+  try {
+    await once(child, "spawn");
+    const path = `/proc/${child.pid}/stat`;
+    descriptor = fs.openSync(path, "r");
+    const exited = once(child, "exit");
+    child.kill("SIGTERM");
+    await exited;
+    assert.throws(() => originalRead(descriptor, "utf8"), { code: "ESRCH" });
+    fs.readFileSync = (value, ...args) =>
+      String(value) === path ? originalRead(descriptor, ...args) : originalRead(value, ...args);
+    syncBuiltinESMExports();
+    assert.equal(hasExecutableThreads(child.pid), false);
+  } finally {
+    fs.readFileSync = originalRead;
+    syncBuiltinESMExports();
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = once(child, "exit");
+      child.kill("SIGTERM");
+      await exited;
+    }
+  }
+});
 
 test("reserves, reports, and releases capacity through the CLI", () => {
   const commonDir = sandbox();

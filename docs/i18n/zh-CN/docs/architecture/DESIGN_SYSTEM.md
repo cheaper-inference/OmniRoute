@@ -77,7 +77,7 @@
 
 ## 5. 更新 kit
 
-`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。每周`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查，并在 pin 落后时保持一个跟踪问题处于打开状态；上游存储库是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的只读令牌，并且在没有它的情况下保持惰性。
+`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。每周`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查，并在 pin 落后时保持一个跟踪问题处于打开状态；上游存储库是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的只读令牌。如果上游检查器无法读取数据（没有令牌、令牌已失效或无法访问 GitHub），它会报告 `unknown` 并以退出码 `0` 结束。工作流会写入警告，并尝试保持一个独立的跟踪 issue 处于打开状态；访问恢复后的成功运行会关闭它。GitHub issue API 失败会导致作业失败。
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`将该提交处的上游`src/` （`latest` =最新的`v*`标记）复制到`packages/ui-kit/src`中，应用单个允许的转换（它从相对导入中删除`.js`后缀），并将`packages/ui-kit/package.json`和`package-lock.json`中的工作区版本设置为上游版本。然后：查看`git diff packages/ui-kit`，对两个主题中的提供者、设置、组合、用量和端点进行界面检查，运行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，并使用上游变更日志打开PR 。
 

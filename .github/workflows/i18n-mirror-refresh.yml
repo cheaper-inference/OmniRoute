@@ -15,8 +15,10 @@ name: i18n mirror refresh
 #   4. `npm run check:docs-all` + the drift check must both pass; then the mirrors are committed
 #      to the fixed branch `chore/i18n-mirror-refresh` (rebuilt from an exact target tip)
 #      and one draft PR is opened, or an owned PR is updated under a head lease;
-#   5. any translation or check failure opens NO PR and fails the job with a step summary that
-#      records the failure or drift counts (translation failures also list files/locales).
+#   5. exit 3 retains successful translations and proposes a draft with exact failed units listed;
+#      all five drift classes are checked, with exceptions only for unchanged failed units;
+#   6. before and after hooks, failed mirror bytes and locale records must equal the selected base.
+#      Other translation/check failures open NO PR and remain failures.
 #
 # PRs opened with the default GITHUB_TOKEN do not trigger other workflows (no CI on the refresh
 # PR). Set the `I18N_REFRESH_TOKEN` secret (fine-grained PAT or App token with contents +
@@ -192,13 +194,19 @@ jobs:
           export OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK=1
           echo "engine=$ENGINE" >> "$GITHUB_OUTPUT"
           echo "Engine: \`$ENGINE\`" >> "$GITHUB_STEP_SUMMARY"
+          git diff --exit-code -- docs/i18n .i18n-state.json
+          git diff --cached --exit-code -- docs/i18n .i18n-state.json
           set +e
-          node scripts/i18n/run-translation.mjs --files="$FILES" 2>&1 | tee "$RUNNER_TEMP/translate.log"
+          node scripts/i18n/run-translation.mjs --files="$FILES" \
+            --failures-json="$RUNNER_TEMP/translate-failures.json" 2>&1 | tee "$RUNNER_TEMP/translate.log"
           TRANSLATE_PIPE=("${PIPESTATUS[@]}")
           set -e
           RC=${TRANSLATE_PIPE[0]}
-          if [ "$RC" -eq 0 ] && [ "${TRANSLATE_PIPE[1]}" -ne 0 ]; then RC=1; fi
-          if [ "$RC" -ne 0 ]; then
+          if [ "${TRANSLATE_PIPE[1]}" -ne 0 ]; then RC=1; fi
+          if [ "$RC" -eq 3 ]; then
+            echo "partial=true" >> "$GITHUB_OUTPUT"
+            echo "### Partial translation: failed units require unchanged-preimage validation before any draft is proposed" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$RC" -ne 0 ]; then
             {
               echo "### Translation failed (exit $RC) — no PR opened"
               echo
@@ -211,6 +219,9 @@ jobs:
           fi
 
       - name: Check the refreshed mirrors
+        env:
+          BASE_SHA: ${{ steps.target.outputs.base_sha }}
+          PARTIAL: ${{ steps.translate.outputs.partial }}
         if: steps.drift.outputs.files != ''
         run: |
           set -uo pipefail
@@ -220,7 +231,68 @@ jobs:
           DOCS_PIPE=("${PIPESTATUS[@]}")
           node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-after.json"
           CHECKER_RC=$?
-          node scripts/i18n/mirror-refresh-report.mjs check "$RUNNER_TEMP/drift-after.json" > "$RUNNER_TEMP/refresh-check.txt" 2>&1
+          if [ "${PARTIAL:-}" = "true" ]; then
+            DRIFT_JSON="$RUNNER_TEMP/drift-after.json" \
+            FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module > "$RUNNER_TEMP/refresh-check.txt" 2>&1 <<'I18N_PARTIAL_CHECK'
+              import { readFileSync, lstatSync } from "node:fs";
+              import { execFileSync } from "node:child_process";
+              import { createHash } from "node:crypto";
+              import {
+                readTranslationSummary,
+                blockingDrift,
+                assertFailedUnitsUnchanged,
+                translationExitCode,
+                EXIT_PARTIAL,
+              } from "./scripts/i18n/run-translation.mjs";
+
+              try {
+                const read = (filename) => JSON.parse(readFileSync(filename, "utf8"));
+                const base = process.env.BASE_SHA;
+                if (!/^[a-f0-9]{40}$/.test(base || "")) throw new Error("invalid-base");
+                const run = readTranslationSummary(read(process.env.FAILURES_JSON));
+                if (translationExitCode(run) !== EXIT_PARTIAL) throw new Error("not-partial");
+                const git = (args) => execFileSync("git", args, {
+                  stdio: ["ignore", "pipe", "pipe"],
+                  // The current state is already over 4 MB; the default 1 MB would reject every partial run.
+                  maxBuffer: 64 * 1024 * 1024,
+                  timeout: 30000,
+                });
+                const hash = (value) => createHash("sha256").update(value).digest("hex");
+                if (!lstatSync(".i18n-state.json").isFile()) throw new Error("invalid-state-file");
+                const before = JSON.parse(git(["show", `${base}:.i18n-state.json`]).toString("utf8"));
+                const after = read(".i18n-state.json");
+                const targets = run.failures.map(({ rel, locale }) => {
+                  const filename = `docs/i18n/${locale}/${rel}`;
+                  const entry = git(["ls-tree", "-z", base, "--", filename]).toString("utf8");
+                  if (entry && !/^100644 blob [a-f0-9]{40}\t/.test(entry)) {
+                    throw new Error("invalid-base-target");
+                  }
+                  if (entry && entry.slice(entry.indexOf("\t") + 1) !== filename + "\u0000") {
+                    throw new Error("unexpected-base-target");
+                  }
+                  const beforeHash = entry ? hash(git(["show", `${base}:${filename}`])) : null;
+                  let afterHash = null;
+                  try {
+                    if (!lstatSync(filename).isFile()) throw new Error("invalid-target-file");
+                    afterHash = hash(readFileSync(filename));
+                  } catch (error) {
+                    if (error.code !== "ENOENT") throw error;
+                  }
+                  return { rel, locale, beforeHash, afterHash };
+                });
+                assertFailedUnitsUnchanged(run.failures, before, after, targets);
+                const left = blockingDrift(read(process.env.DRIFT_JSON), run.failures, run.translatedUnits);
+                console.log(`[i18n-refresh] partial: ${run.translated} translated, ${run.failed} unchanged failed units`);
+                for (const unit of left) console.log(`${unit.kind}: ${unit.rel}${unit.locale ? ` [${unit.locale}]` : ""}`);
+                process.exitCode = left.length ? 1 : 0;
+              } catch {
+                console.error("[i18n-refresh] INCOMPLETE: invalid report, summary or failed-unit preimages");
+                process.exitCode = 2;
+              }
+          I18N_PARTIAL_CHECK
+          else
+            node scripts/i18n/mirror-refresh-report.mjs check "$RUNNER_TEMP/drift-after.json" > "$RUNNER_TEMP/refresh-check.txt" 2>&1
+          fi
           REPORT_RC=$?
           set -e
           FAILED=0
@@ -245,6 +317,7 @@ jobs:
           BASE_SHA: ${{ steps.target.outputs.base_sha }}
           REFRESH_SHA: ${{ steps.target.outputs.refresh_sha }}
           ENGINE: ${{ steps.translate.outputs.engine }}
+          PARTIAL: ${{ steps.translate.outputs.partial }}
           FILES: ${{ steps.drift.outputs.files }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
@@ -274,11 +347,26 @@ jobs:
             process.stdout.write(String(protectedPaths.length > 0));
           ')
           COUNT=$(git diff --cached --name-only -- docs/i18n | wc -l | tr -d ' ')
+          FAILED_UNITS=""
+          NOTE=""
+          if [ "${PARTIAL:-}" = "true" ]; then
+            FAILED_UNITS=$(FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module <<'I18N_FAILURE_SUMMARY'
+              import { readFileSync } from "node:fs";
+              import { readTranslationSummary, translationExitCode, EXIT_PARTIAL } from "./scripts/i18n/run-translation.mjs";
+              try {
+                const run = readTranslationSummary(JSON.parse(readFileSync(process.env.FAILURES_JSON, "utf8")));
+                if (translationExitCode(run) !== EXIT_PARTIAL) throw new Error("not-partial");
+                for (const unit of run.failures) console.log("- `" + unit.rel + "` [" + unit.locale + "]: translation failed; mirror and locale record unchanged");
+              } catch { console.error("[i18n-refresh] invalid partial summary"); process.exit(2); }
+          I18N_FAILURE_SUMMARY
+            )
+            NOTE=" $(printf '%s\n' "$FAILED_UNITS" | wc -l | tr -d ' ') unit(s) failed and remain unchanged."
+          fi
           # CI bot commit: retain normal hooks and no Co-Authored-By trailer.
           git -c user.name="github-actions[bot]" \
             -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit --quiet -m "$PR_TITLE" \
-            -m "Engine: ${ENGINE}. Sources: ${FILES//,/, }. ${COUNT} mirror file(s)." \
+            -m "Engine: ${ENGINE}. Sources: ${FILES//,/, }. ${COUNT} mirror file(s).${NOTE}" \
             -m "Run: ${RUN_URL}. Base: ${BASE_SHA}."
           CANDIDATE_SHA=$(git rev-parse HEAD)
           [ "$(git rev-parse HEAD^)" = "$BASE_SHA" ] || { echo "::error::unexpected refresh ancestry"; exit 1; }
@@ -286,7 +374,68 @@ jobs:
           git diff --exit-code
           git diff --cached --exit-code
           node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-committed.json"
-          node scripts/i18n/mirror-refresh-report.mjs check "$RUNNER_TEMP/drift-committed.json"
+          if [ "${PARTIAL:-}" = "true" ]; then
+            DRIFT_JSON="$RUNNER_TEMP/drift-committed.json" \
+            FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module <<'I18N_COMMITTED_CHECK'
+              import { readFileSync, lstatSync } from "node:fs";
+              import { execFileSync } from "node:child_process";
+              import { createHash } from "node:crypto";
+              import {
+                readTranslationSummary,
+                blockingDrift,
+                assertFailedUnitsUnchanged,
+                translationExitCode,
+                EXIT_PARTIAL,
+              } from "./scripts/i18n/run-translation.mjs";
+
+              try {
+                const read = (filename) => JSON.parse(readFileSync(filename, "utf8"));
+                const base = process.env.BASE_SHA;
+                if (!/^[a-f0-9]{40}$/.test(base || "")) throw new Error("invalid-base");
+                const run = readTranslationSummary(read(process.env.FAILURES_JSON));
+                if (translationExitCode(run) !== EXIT_PARTIAL) throw new Error("not-partial");
+                const git = (args) => execFileSync("git", args, {
+                  stdio: ["ignore", "pipe", "pipe"],
+                  // The current state is already over 4 MB; the default 1 MB would reject every partial run.
+                  maxBuffer: 64 * 1024 * 1024,
+                  timeout: 30000,
+                });
+                const hash = (value) => createHash("sha256").update(value).digest("hex");
+                if (!lstatSync(".i18n-state.json").isFile()) throw new Error("invalid-state-file");
+                const before = JSON.parse(git(["show", `${base}:.i18n-state.json`]).toString("utf8"));
+                const after = read(".i18n-state.json");
+                const targets = run.failures.map(({ rel, locale }) => {
+                  const filename = `docs/i18n/${locale}/${rel}`;
+                  const entry = git(["ls-tree", "-z", base, "--", filename]).toString("utf8");
+                  if (entry && !/^100644 blob [a-f0-9]{40}\t/.test(entry)) {
+                    throw new Error("invalid-base-target");
+                  }
+                  if (entry && entry.slice(entry.indexOf("\t") + 1) !== filename + "\u0000") {
+                    throw new Error("unexpected-base-target");
+                  }
+                  const beforeHash = entry ? hash(git(["show", `${base}:${filename}`])) : null;
+                  let afterHash = null;
+                  try {
+                    if (!lstatSync(filename).isFile()) throw new Error("invalid-target-file");
+                    afterHash = hash(readFileSync(filename));
+                  } catch (error) {
+                    if (error.code !== "ENOENT") throw error;
+                  }
+                  return { rel, locale, beforeHash, afterHash };
+                });
+                assertFailedUnitsUnchanged(run.failures, before, after, targets);
+                const left = blockingDrift(read(process.env.DRIFT_JSON), run.failures, run.translatedUnits);
+                console.log(`[i18n-refresh] partial: ${run.translated} translated, ${run.failed} unchanged failed units`);
+                for (const unit of left) console.log(`${unit.kind}: ${unit.rel}${unit.locale ? ` [${unit.locale}]` : ""}`);
+                process.exitCode = left.length ? 1 : 0;
+              } catch {
+                console.error("[i18n-refresh] INCOMPLETE: invalid report, summary or failed-unit preimages");
+                process.exitCode = 2;
+              }
+          I18N_COMMITTED_CHECK
+          else
+            node scripts/i18n/mirror-refresh-report.mjs check "$RUNNER_TEMP/drift-committed.json"
+          fi
 
 
           VER="${BASE#release/}"
@@ -334,7 +483,15 @@ jobs:
             echo "- Sources: \`${FILES//,/\`, \`}\`; ${COUNT} mirror file(s) changed"
             echo "- protected_surface: ${PROTECTED}"
             echo
-            echo "The docs check and all five drift buckets passed locally on this refresh. Translation meaning still requires review; hashes and structural checks do not certify it."
+            if [ -n "$FAILED_UNITS" ]; then
+              echo "Partial repair: the docs check passed; all five drift classes were evaluated. Only the following failed units were excused after their mirror bytes and locale records matched the selected base, including after hooks. Remaining drift is not zero."
+              echo
+              printf '%s\n' "$FAILED_UNITS"
+              echo
+              echo "Those units remain stale or drifted and are retried by a later run. Translation meaning still requires review; hashes and structural checks do not certify it."
+            else
+              echo "The docs check and all five drift buckets passed locally on this refresh. Translation meaning still requires review; hashes and structural checks do not certify it."
+            fi
             echo "This draft does not establish base/candidate acceptance. Required checks must pass for the current candidate. Any protected instruction mirror needs specific owner approval before merge."
             echo "The fixed branch is replaced only with a lease against the observed head; a moved base or freeze stops publication. A later run supersedes this candidate and its review."
             echo "PRs opened with \`GITHUB_TOKEN\` do not trigger CI. Configure \`I18N_REFRESH_TOKEN\` for CI, or obtain applicable exact-candidate runs before admission."

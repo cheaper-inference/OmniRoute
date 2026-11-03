@@ -27,6 +27,14 @@
  *                                  source_hash — mechanical mirror rewrites stop
  *                                  showing up as `target changed` while genuine
  *                                  source drift is still reported)
+ *   npm run i18n:run -- --failures-json=<path>
+ *                                 (also write the run summary and the failed
+ *                                  (source, locale) units as JSON)
+ *
+ * Exit codes of a translation run: 0 every work unit translated; 3 (EXIT_PARTIAL) at
+ * least one unit translated and at least one failed: the successful mirrors and their
+ * state records are written, a failed unit keeps its mirror and its state record exactly
+ * as they were; 1 nothing could be translated, or any other error.
  *
  * Backend (configured via env, never committed):
  *   OMNIROUTE_TRANSLATION_API_URL     e.g. https://cloud.omniroute.dev/v1
@@ -56,6 +64,8 @@ import path from "node:path";
 import crypto from "node:crypto";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { isDeepStrictEqual } from "node:util";
+import { REFRESH_BUCKETS, readRefreshReport } from "./mirror-refresh-report.mjs";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import {
@@ -207,6 +217,7 @@ function parseArgs(argv) {
     adopt: false,
     targetsOnly: false,
     concurrency: null,
+    failuresJson: null,
   };
   for (const arg of argv.slice(2)) {
     if (arg === "--force") opts.force = true;
@@ -232,6 +243,7 @@ function parseArgs(argv) {
         .map((s) => s.trim())
         .filter(Boolean);
     else if (arg.startsWith("--concurrency=")) opts.concurrency = Number(arg.slice(14));
+    else if (arg.startsWith("--failures-json=")) opts.failuresJson = arg.slice(16);
     else if (arg === "--help" || arg === "-h") {
       console.log(
         [
@@ -244,6 +256,9 @@ function parseArgs(argv) {
           "  --adopt              Rebuild .i18n-state.json from the files on disk (no API calls)",
           "  --targets-only       With --adopt: re-hash only the mirrors, keeping every source_hash",
           "  --concurrency=<n>    Parallel API requests (default: env CONCURRENCY or 4)",
+          "  --failures-json=<p>  Write the run summary and the failed units to <p> as JSON",
+          "",
+          "Exit: 0 all translated, 3 partial (failed units left untouched), 1 none translated or error",
         ].join("\n")
       );
       process.exit(0);
@@ -1267,6 +1282,126 @@ function createLimiter(max) {
 
 // ----- Main ----------------------------------------------------------------
 
+// A run where some units translated and some failed. The workflow commits the good mirrors
+// and lists the failed units; a failed unit is never written and never gets a state record.
+export const EXIT_PARTIAL = 3;
+
+export function translationExitCode({ translated, failed }) {
+  if (!failed) return 0;
+  return translated > 0 ? EXIT_PARTIAL : 1;
+}
+
+const refreshObject = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+const refreshUnitKey = ({ rel, locale }) => `${rel}\u0000${locale}`;
+
+function refreshUnitSet(units) {
+  if (!Array.isArray(units)) throw new Error("invalid-translation-units");
+  const keys = new Set();
+  for (const unit of units) {
+    if (
+      !refreshObject(unit) ||
+      typeof unit.rel !== "string" ||
+      !/^(?:[A-Za-z0-9_.-]+\/)*[A-Za-z0-9_.-]+$/.test(unit.rel) ||
+      unit.rel.startsWith("-") ||
+      unit.rel.split("/").some((part) => part === "." || part === "..") ||
+      typeof unit.locale !== "string" ||
+      !/^[a-z]{2,3}(?:-[A-Za-z]{2,4})?$/.test(unit.locale)
+    ) {
+      throw new Error("invalid-translation-unit");
+    }
+    const key = refreshUnitKey(unit);
+    if (keys.has(key)) throw new Error("duplicate-translation-unit");
+    keys.add(key);
+  }
+  return keys;
+}
+
+/** Validate the exact summary emitted by this runner before granting partial-run exceptions. */
+export function readTranslationSummary(summary) {
+  const fields = ["considered", "translated", "skipped", "failed", "failures", "translatedUnits"];
+  if (
+    !refreshObject(summary) ||
+    Object.keys(summary).length !== fields.length ||
+    Object.keys(summary).some((key) => !fields.includes(key)) ||
+    fields.slice(0, 4).some((key) => !Number.isSafeInteger(summary[key]) || summary[key] < 0)
+  ) {
+    throw new Error("invalid-translation-summary");
+  }
+  const failed = refreshUnitSet(summary.failures);
+  const translated = refreshUnitSet(summary.translatedUnits);
+  if (
+    failed.size !== summary.failed ||
+    translated.size !== summary.translated ||
+    summary.considered !== summary.failed + summary.translated + summary.skipped ||
+    [...failed].some((key) => translated.has(key)) ||
+    summary.failures.some((unit) => typeof unit.error !== "string")
+  ) {
+    throw new Error("contradictory-translation-summary");
+  }
+  return summary;
+}
+
+/** All five classes remain checked. Only precisely named failed units may be excused. */
+export function blockingDrift(report, failures, translated = []) {
+  try {
+    readRefreshReport(report);
+    const failedUnits = refreshUnitSet(failures);
+    const translatedUnits = refreshUnitSet(translated);
+    if ([...failedUnits].some((key) => translatedUnits.has(key))) {
+      throw new Error("overlapping-translation-units");
+    }
+    const translatedRels = new Set(translated.map((unit) => unit.rel));
+    const failedRels = new Set(
+      failures.map((unit) => unit.rel).filter((rel) => !translatedRels.has(rel))
+    );
+    return REFRESH_BUCKETS.flatMap((kind) =>
+      report[kind]
+        .filter((unit) =>
+          kind === "driftedSources"
+            ? !failedRels.has(unit.rel)
+            : !failedUnits.has(refreshUnitKey(unit))
+        )
+        .map((unit) => ({ ...unit, kind }))
+    );
+  } catch {
+    return [{ kind: "report", rel: "invalid-checker-report-or-translation-units" }];
+  }
+}
+
+/**
+ * A failed unit is eligible only if its complete locale record and actual mirror bytes
+ * still match the immutable pre-run base. Rechecking after hooks catches new drift even
+ * on an already-excused unit. The workflow obtains hashes through read-only Git/fs calls.
+ */
+export function assertFailedUnitsUnchanged(failures, beforeState, afterState, targets) {
+  const failed = refreshUnitSet(failures);
+  const observed = refreshUnitSet(targets);
+  const isHash = (value) =>
+    value === null || (typeof value === "string" && /^[a-f0-9]{64}$/.test(value));
+  if (
+    !refreshObject(beforeState?.sources) ||
+    !refreshObject(afterState?.sources) ||
+    observed.size !== failed.size ||
+    [...observed].some((key) => !failed.has(key))
+  ) {
+    throw new Error("invalid-failed-unit-preimages");
+  }
+  for (const unit of targets) {
+    if (
+      !isHash(unit.beforeHash) ||
+      !isHash(unit.afterHash) ||
+      unit.beforeHash !== unit.afterHash ||
+      !isDeepStrictEqual(
+        beforeState.sources[unit.rel]?.locales?.[unit.locale],
+        afterState.sources[unit.rel]?.locales?.[unit.locale]
+      )
+    ) {
+      throw new Error("failed-unit-changed");
+    }
+  }
+}
+
 /**
  * Merge one run's (source, locale) records into a freshly re-read state. Source-level
  * `source_hash` follows the record; untouched entries stay as the other runners left them.
@@ -1413,9 +1548,10 @@ async function main() {
   const touched = [];
   for (const rel of sources) {
     const { hash: sourceHash } = sourceHashes.get(rel);
-    const entry =
-      state.sources[rel] || (state.sources[rel] = { source_hash: sourceHash, locales: {} });
-    entry.source_hash = sourceHash;
+    // The source-level hash moves only with a translated unit (mergeStateUpdates); setting it
+    // here would also reach the save-time fallback below and mark a source whose every locale
+    // failed as translated.
+    const entry = state.sources[rel] || (state.sources[rel] = { source_hash: null, locales: {} });
 
     for (const locale of targetLocales) {
       stats.considered++;
@@ -1541,14 +1677,31 @@ async function main() {
     `summary: translated=${stats.translated}, skipped=${stats.skipped}, failed=${stats.failed}, total considered=${stats.considered}, elapsed=${elapsedSec}s`
   );
 
+  if (opts.failuresJson) {
+    const translatedUnits = touched.map(({ rel, locale }) => ({ rel, locale }));
+    const summary = { ...stats, failures, translatedUnits };
+    await fs.writeFile(
+      path.resolve(opts.failuresJson),
+      `${JSON.stringify(summary, null, 2)}\n`,
+      "utf8"
+    );
+  }
+
   if (failures.length) {
     logWarn(`${failures.length} failures:`);
     for (const f of failures) console.warn(`  - ${f.rel} [${f.locale}]: ${f.error}`);
-    process.exit(1);
+    const code = translationExitCode(stats);
+    if (code === EXIT_PARTIAL) {
+      logWarn(
+        `partial run: ${stats.translated} translated and recorded, ${failures.length} left as they were`
+      );
+    }
+    process.exit(code);
   }
 }
 
-const isDirectRun = import.meta.url === pathToFileURL(process.argv[1]).href;
+// argv[1] is unset under `node -e` (the refresh workflow imports blockingDrift that way).
+const isDirectRun = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isDirectRun) {
   main().catch((err) => {
     logError(err?.stack || err?.message || String(err));

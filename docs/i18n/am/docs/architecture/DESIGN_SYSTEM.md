@@ -90,7 +90,7 @@
 
 ## 5. ኪቱን ማዘመን
 
-`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል። ሳምንታዊው `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ያካሂዳል እና ፒኑ ከኋላ እያለ አንድ የመከታተያ ጉዳይ ክፍት ያደርገዋል። ወደ ላይ ያለው ሪፖ ግላዊ ነው፣ ስለዚህ የስራ ፍሰቱ በ `UI_KIT_READ_TOKEN` ሚስጥር ውስጥ ተነባቢ-ብቻ ማስመሰያ ያስፈልገዋል እና ያለሱ የስራ ፍሰቱ አይንቀሳቀስም።
+`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል። ሳምንታዊው `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ያካሂዳል እና ፒኑ ከኋላ እያለ አንድ የመከታተያ ጉዳይ ክፍት ያደርገዋል። ወደ ላይ ያለው ሪፖ ግላዊ ነው፣ ስለዚህ የስራ ፍሰቱ በ `UI_KIT_READ_TOKEN` ሚስጥር ውስጥ ተነባቢ-ብቻ ማስመሰያ ያስፈልገዋል። የupstream ፍተሻው ማንበብ ካልቻለ (ማስመሰያ ከሌለ፣ ማስመሰያው መስራት ካቆመ ወይም GitHub ተደራሽ ካልሆነ) `unknown` ብሎ ያሳውቃል እና በመውጫ ኮድ `0` ይጠናቀቃል። የስራ ፍሰቱ ማስጠንቀቂያ ይጽፋል እና አንድ የተለየ የመከታተያ ጉዳይ ክፍት ለማቆየት ይሞክራል፤ በኋላ ያለ የተሳካ ሂደት ተደራሽነት ሲመለስ ጉዳዩን ይዘጋዋል። የGitHub ጉዳዮች API ስህተት ስራውን ያስወድቃል።
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` የላይኛውን `src/` በዛ ቁርጠኝነት ይገለብጣል (`latest` = አዲሱ `v*` መለያ) ወደ `packages/ui-kit/src`, ነጠላ የተፈቀደውን ለውጥ ይተገበራል (ከአንፃራዊ ማስመጣት የ `.js` ቅጥያ ይጥላል) እና የስራ ቦታ ሥሪቱን በ `packages/ui-kit/package.json` እና `package-lock.json` ወደ ላይኛው ያዘጋጃል። በመቀጠል `git diff packages/ui-kit` ይገምግሙ፣ በአቅራቢዎች፣ መቼቶች፣ ጥንብሮች፣ አጠቃቀም እና የመጨረሻ ነጥብ በሁለቱም ጭብጦች ላይ የእይታ ምርመራ ያድርጉ፣ `npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui` ን ያሂዱ እና PR ከላይ ባለው የለውጥ ሎግ ይክፈቱ።
 
