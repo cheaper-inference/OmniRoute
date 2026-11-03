@@ -2,7 +2,8 @@ import { timingSafeEqual } from "node:crypto";
 
 import { getLegacyCliTokenSync, getMachineTokenSync } from "../../lib/machineToken";
 import type { PolicyContext } from "./context";
-import { CLI_TOKEN_HEADER, PEER_IP_HEADER, VIA_PROXY_HEADER } from "./headers";
+import { getTrustProxyMode } from "../origin/trustProxyMode";
+import { CLI_TOKEN_HEADER, CLIENT_IP_HEADER, PEER_IP_HEADER, VIA_PROXY_HEADER } from "./headers";
 import { resolveStampedPeer, resolveStampedViaProxy } from "./peerStamp";
 import { isLoopbackHost, isPrivateLanHost } from "./routeGuard";
 
@@ -56,13 +57,39 @@ export function isLoopbackRequest(ctx: PolicyContext): boolean {
 
 // Owner-authorized (2026-05-30): allow LOCAL_ONLY *paths* from a trusted private
 // LAN, based on the real socket peer IP (not spoofable). Does NOT relax the
-// CLI-token gate, which stays strictly loopback. Also falls back to "not LAN"
-// when a reverse-proxy hop is detected (the apparent LAN IP would be the proxy,
-// not the end-user — see isViaProxyRequest above).
+// CLI-token gate, which stays strictly loopback. When a reverse-proxy hop is
+// detected the apparent LAN IP is the proxy, not the end-user (see
+// isViaProxyRequest above), so the request is "not LAN" unless the operator
+// trusts private proxies and the chain names a private client (see below).
 export function isPrivateLanRequest(ctx: PolicyContext): boolean {
-  if (isViaProxyRequest(ctx)) return false;
   const peerAddress = requestPeerAddress(ctx);
-  return peerAddress ? isPrivateLanHost(peerAddress) : false;
+  if (!peerAddress) return false;
+  if (!isViaProxyRequest(ctx)) return isPrivateLanHost(peerAddress);
+  return isPrivateLanClientOfPrivateProxy(ctx, peerAddress);
+}
+
+/**
+ * A request relayed by a reverse proxy is a private-LAN request only when the operator
+ * opted in with `OMNIROUTE_TRUST_PROXY=private` and the whole chain vouches for it:
+ *   - the immediate peer is itself on loopback or a private network (a Cloudflare edge or
+ *     an OMNIROUTE_TRUSTED_PROXIES public proxy attributes client IPs, never locality);
+ *   - the request did not enter through a Cloudflare tunnel (`cf-connecting-ip`), which
+ *     always carries an internet client whatever the inner hops say;
+ *   - the client the stamp resolved (peer-stamp.mjs `resolveClientIp`, right-most
+ *     untrusted hop) is a private-network address and not loopback: a chain of loopback
+ *     hops, or a proxy that overwrites X-Forwarded-For with `$remote_addr`, names no client.
+ * Loopback is never derived this way: the CLI-token gate stays socket-only.
+ */
+function isPrivateLanClientOfPrivateProxy(ctx: PolicyContext, peerAddress: string): boolean {
+  if (getTrustProxyMode() !== "private") return false;
+  if (!isLoopbackHost(peerAddress) && !isPrivateLanHost(peerAddress)) return false;
+  if (ctx.request.headers?.get?.("cf-connecting-ip")) return false;
+  const client = resolveStampedPeer(
+    ctx.request.headers?.get?.(CLIENT_IP_HEADER) ?? null,
+    process.env.OMNIROUTE_PEER_STAMP_TOKEN
+  );
+  if (!client || isLoopbackHost(client)) return false;
+  return isPrivateLanHost(client);
 }
 
 /** Strictly-loopback machine-token check (constant-time). */
