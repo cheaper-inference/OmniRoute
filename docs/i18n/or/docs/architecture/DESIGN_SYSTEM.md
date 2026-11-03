@@ -4,7 +4,7 @@
 
 ---
 
-> **ସ୍ଥିତି:** ଡ୍ୟାସବୋର୍ଡ ଉପରେ ନିର୍ମିତ \|** Keak CI UI କିଟ୍ \|** (`@keak/cheaper-inference-ui-kit`), କାର୍ଯ୍ୟକ୍ଷେତ୍ର `packages/ui-kit` (`@omniroute/ui-kit`; ଅପଷ୍ଟ୍ରିମ୍ ସ୍ନାପସଟ୍ `packages/ui-kit/UPSTREAM.md` ରେ ପିନ୍ ହୋଇ `npm run check:ui-kit-snapshot` ଦ୍ୱାରା ଜଗାଯାଇଥାଏ) ଭାବରେ ବିକ୍ରେତା \| ଆଲୋକ ହେଉଛି କାନୋନିକାଲ୍ ଥିମ୍; ଡିଫଲ୍ଟ ପସନ୍ଦ ହେଉଛି `system`\| ଉଚ୍ଚାରଣ ହେଉଛି କିକ୍ ଚୂନ (`--ci-color-accent`) \| UI, ପ୍ରଦର୍ଶନ ଏବଂ କୋଡ୍ ପାଠ୍ୟ (`--ci-font-ui`; `--ci-font-display` ଏବଂ `--ci-font-mono` ଏହାର ସମାଧାନ) ପାଇଁ ସ୍ itzer ିଜର ହେଉଛି ଏକକ ପରିବାର, କିଟ୍ ନିଜେ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ଦ୍ୱାରା ଆମଦାନୀ) \| ପ୍ରତ୍ୟେକ ଆଇକନ୍ ହେଉଛି ଏକ ଲୁସିଡ୍ ଗ୍ଲାଇଫ୍ \|
+> **ସ୍ଥିତି:** ଡ୍ୟାସବୋର୍ଡ ଉପରେ ନିର୍ମିତ \|** Keak CI UI କିଟ୍ \|** (`@keak/cheaper-inference-ui-kit`), ୱାର୍କସ୍ପେସ୍ `packages/ui-kit` (`@omniroute/ui-kit`; ଅପଷ୍ଟ୍ରିମ୍ ସ୍ନାପସଟ୍ `packages/ui-kit/UPSTREAM.md` ରେ ପିନ୍ ହୋଇ `npm run check:ui-kit-snapshot` ଦ୍ୱାରା ଜଗାଯାଇଥାଏ) ଭାବରେ ବିକ୍ରେତା \| ଆଲୋକ ହେଉଛି କାନୋନିକାଲ୍ ଥିମ୍; ଡିଫଲ୍ଟ ପସନ୍ଦ ହେଉଛି `system`\| ଉଚ୍ଚାରଣ ହେଉଛି କିକ୍ ଚୂନ (`--ci-color-accent`) \| UI, ପ୍ରଦର୍ଶନ ଏବଂ କୋଡ୍ ପାଠ୍ୟ (`--ci-font-ui`; `--ci-font-display` ଏବଂ `--ci-font-mono` ଏହାର ସମାଧାନ) ପାଇଁ ସ୍ୱିଜର ହେଉଛି ଏକକ ପରିବାର, କିଟ୍ ନିଜେ ସ୍ୱ-ହୋଷ୍ଟ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ଦ୍ୱାରା ଆମଦାନୀ) \| ସ୍କ୍ରିପ୍ଟର ସ୍ itzer ିଜର ଅଭାବ ଗ୍ଲାଇଫ୍ (`src/app/globals.css`) ଦ୍ୱାରା ଗ୍ଲାଇଫ୍ ମାଧ୍ୟମରେ ପଡେ: ସିରିଲିକ୍, ଗ୍ରୀକ୍ ଏବଂ ଭିଏତନାମ ପାଇଁ ଇଣ୍ଟର ଏବଂ କେବଳ `html[dir="rtl"]` ଅଧୀନରେ, ଆରବୀୟ ସ୍କ୍ରିପ୍ଟ ପାଇଁ ଭାଜିରମାଟନ୍ \| ପ୍ରତ୍ୟେକ ଆଇକନ୍ ହେଉଛି ଏକ ଲୁସିଡ୍ ଗ୍ଲାଇଫ୍ \|
 
 ## 1. ଜିନିଷଗୁଡ଼ିକ କେଉଁଠାରେ ରହିଛି
 

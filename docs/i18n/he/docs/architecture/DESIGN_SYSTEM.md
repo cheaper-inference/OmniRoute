@@ -4,7 +4,7 @@
 
 ---
 
-> **סטָטוּס:** לוח המחוונים בנוי על** ערכת Keak CI UI** (`@keak/cheaper-inference-ui-kit`), מסופק כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב במעלה הזרם מוצמדת ב- `packages/ui-kit/UPSTREAM.md` ומוגנת על ידי `npm run check:ui-kit-snapshot`). האור הוא הנושא הקנוני; העדפת ברירת המחדל היא `system`. המבטא הוא קיאק ליים (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
+> **סטָטוּס:** לוח המחוונים בנוי על** ערכת Keak CI UI** (`@keak/cheaper-inference-ui-kit`), מסופק כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב במעלה הזרם מוצמדת ב- `packages/ui-kit/UPSTREAM.md` ומוגנת על ידי `npm run check:ui-kit-snapshot`). האור הוא הנושא הקנוני; העדפת ברירת המחדל היא `system`. המבטא הוא קיאק ליים (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). סקריפטים שחסרים לשוויץ נופלים דרך גליף אחר גליף (`src/app/globals.css`): אינטר עבור קירילי, יווני ווייטנאמי, ורק תחת `html[dir="rtl"]`, Vazirmatn עבור כתב ערבי. כל אייקון הוא גליף Lucide.
 
 ## 1. איפה דברים נמצאים
 
