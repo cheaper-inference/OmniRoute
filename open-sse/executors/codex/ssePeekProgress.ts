@@ -9,6 +9,38 @@ function isOutputProgressEvent(event: Record<string, unknown>): boolean {
   );
 }
 
+/** Split one SSE frame into its `event:` label and its (possibly multi-line) data field. */
+function readSseFrame(frame: string): { eventType: string; data: string[] } {
+  let eventType = "";
+  const data: string[] = [];
+  for (const line of frame.split("\n")) {
+    if (line.startsWith("event:")) eventType = line.slice(6).trim();
+    else if (line.startsWith("data:")) {
+      const value = line.slice(5);
+      data.push(value.startsWith(" ") ? value.slice(1) : value);
+    }
+  }
+  return { eventType, data };
+}
+
+/** Decode one frame into an event object, or null when it cannot declare anything. */
+function decodeSseFrame(frame: string): Record<string, unknown> | null {
+  const { eventType, data } = readSseFrame(frame);
+  if (!data.length || data.join("\n") === "[DONE]") return null;
+  try {
+    const parsed: unknown = JSON.parse(data.join("\n"));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const payload = parsed as Record<string, unknown>;
+    return {
+      ...payload,
+      type: typeof payload.type === "string" ? payload.type : eventType,
+    };
+  } catch {
+    // An incomplete/malformed data field cannot declare progress or failure.
+    return null;
+  }
+}
+
 /** Decode only dispatchable SSE events. A data field may span several lines,
  * and a named-only event uses its SSE label when JSON has no type. The peeker
  * retains at most its bounded prefix; downstream bytes are never rewritten.
@@ -21,28 +53,8 @@ export function completeCodexSseEvents(
   if (!streamEnded) frames.pop();
   const events: Record<string, unknown>[] = [];
   for (const frame of frames) {
-    let eventType = "";
-    const data: string[] = [];
-    for (const line of frame.split("\n")) {
-      if (line.startsWith("event:")) eventType = line.slice(6).trim();
-      else if (line.startsWith("data:")) {
-        const value = line.slice(5);
-        data.push(value.startsWith(" ") ? value.slice(1) : value);
-      }
-    }
-    if (!data.length || data.join("\n") === "[DONE]") continue;
-    try {
-      const parsed: unknown = JSON.parse(data.join("\n"));
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        const payload = parsed as Record<string, unknown>;
-        events.push({
-          ...payload,
-          type: typeof payload.type === "string" ? payload.type : eventType,
-        });
-      }
-    } catch {
-      // An incomplete/malformed data field cannot declare progress or failure.
-    }
+    const event = decodeSseFrame(frame);
+    if (event) events.push(event);
   }
   return events;
 }

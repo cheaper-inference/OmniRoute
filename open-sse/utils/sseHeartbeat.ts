@@ -117,6 +117,36 @@ export function sseCommentsEnabled(): boolean {
   return normalized === "on" || normalized === "true" || normalized === "1" || normalized === "yes";
 }
 
+/**
+ * Tracks SSE framing over raw bytes so a timer never splices a heartbeat mid-event.
+ * Scans ASCII separators, not payload characters. A chunk can end inside JSON, a CRLF
+ * pair or a UTF-8 code point; no timer may splice bytes there.
+ */
+function createSseFramingTracker() {
+  let atEventBoundary = true;
+  let lineHasBytes = false;
+  let pendingCR = false;
+  return {
+    note(chunk: Uint8Array): void {
+      for (const byte of chunk) {
+        if (pendingCR) {
+          pendingCR = false;
+          if (byte === 10) continue;
+        }
+        if (byte === 10 || byte === 13) {
+          atEventBoundary = !lineHasBytes;
+          lineHasBytes = false;
+          pendingCR = byte === 13;
+        } else {
+          lineHasBytes = true;
+          atEventBoundary = false;
+        }
+      }
+    },
+    atBoundary: (): boolean => atEventBoundary,
+  };
+}
+
 export function createSseHeartbeatTransform({
   intervalMs = DEFAULT_SSE_HEARTBEAT_INTERVAL_MS,
   signal,
@@ -140,27 +170,7 @@ export function createSseHeartbeatTransform({
   const transportOnly = isResponsesShape && isResponsesTransportKeepaliveEnabled();
   const responsesTracker =
     isResponsesShape && !transportOnly ? createResponsesInProgressTracker() : null;
-  let atEventBoundary = true;
-  let lineHasBytes = false;
-  let pendingCR = false;
-  const noteFraming = (chunk: Uint8Array) => {
-    // Scan ASCII separators, not payload characters. A chunk can end inside
-    // JSON, a CRLF pair or a UTF-8 code point; no timer may splice bytes there.
-    for (const byte of chunk) {
-      if (pendingCR) {
-        pendingCR = false;
-        if (byte === 10) continue;
-      }
-      if (byte === 10 || byte === 13) {
-        atEventBoundary = !lineHasBytes;
-        lineHasBytes = false;
-        pendingCR = byte === 13;
-      } else {
-        lineHasBytes = true;
-        atEventBoundary = false;
-      }
-    }
-  };
+  const framing = createSseFramingTracker();
 
   const stop = () => {
     if (!intervalId) return;
@@ -176,7 +186,7 @@ export function createSseHeartbeatTransform({
           return;
         }
 
-        if (!atEventBoundary) return;
+        if (!framing.atBoundary()) return;
         try {
           controller.enqueue(
             transportOnly
@@ -204,7 +214,7 @@ export function createSseHeartbeatTransform({
     },
 
     transform(chunk, controller) {
-      noteFraming(chunk);
+      framing.note(chunk);
       responsesTracker?.observe(chunk);
       controller.enqueue(chunk);
     },

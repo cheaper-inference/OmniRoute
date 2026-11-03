@@ -931,6 +931,41 @@ function extractResponsesOutputText(output: JsonRecord[]): string {
   return parts.join("");
 }
 
+/** Responses `incomplete_details.reason` for a Chat Completions finish_reason, or null. */
+function incompleteReasonForFinish(finishReason: unknown): string | null {
+  if (finishReason === "length") return "max_output_tokens";
+  return finishReason === "content_filter" ? "content_filter" : null;
+}
+
+/** Chat Completions tool_calls (or the legacy function_call) as Responses function_call items. */
+function buildFunctionCallOutputs(message: JsonRecord, choice: JsonRecord): JsonRecord[] {
+  const toolCalls = Array.isArray(message.tool_calls)
+    ? message.tool_calls
+    : message.function_call
+      ? [
+          {
+            id: toString(choice.id) || "call_0",
+            type: "function",
+            function: message.function_call,
+          },
+        ]
+      : [];
+  const items: JsonRecord[] = [];
+  for (let index = 0; index < toolCalls.length; index += 1) {
+    const toolCall = toRecord(toolCalls[index]) || {};
+    const fn = toRecord(toolCall.function) || {};
+    const callId = toString(toolCall.id) || `call_${index}`;
+    items.push({
+      id: `fc_${callId}`,
+      type: "function_call",
+      call_id: callId,
+      name: toString(fn.name) || "",
+      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
+    });
+  }
+  return items;
+}
+
 function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecord {
   const responseId = normalizeResponsesId(openaiResponse.id);
   const createdAt = toNumber(openaiResponse.created) ?? Math.floor(Date.now() / 1000);
@@ -939,12 +974,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     ? (toRecord(openaiResponse.choices[0]) ?? {})
     : {};
   const message = toRecord(choice.message) || {};
-  const incompleteReason =
-    choice.finish_reason === "length"
-      ? "max_output_tokens"
-      : choice.finish_reason === "content_filter"
-        ? "content_filter"
-        : null;
+  const incompleteReason = incompleteReasonForFinish(choice.finish_reason);
   const output: JsonRecord[] = [];
 
   const reasoningContent =
@@ -973,30 +1003,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     });
   }
 
-  const toolCalls = Array.isArray(message.tool_calls)
-    ? message.tool_calls
-    : message.function_call
-      ? [
-          {
-            id: toString(choice.id) || "call_0",
-            type: "function",
-            function: message.function_call,
-          },
-        ]
-      : [];
-
-  for (let index = 0; index < toolCalls.length; index += 1) {
-    const toolCall = toRecord(toolCalls[index]) || {};
-    const fn = toRecord(toolCall.function) || {};
-    const callId = toString(toolCall.id) || `call_${index}`;
-    output.push({
-      id: `fc_${callId}`,
-      type: "function_call",
-      call_id: callId,
-      name: toString(fn.name) || "",
-      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
-    });
-  }
+  output.push(...buildFunctionCallOutputs(message, choice));
 
   const sanitized: JsonRecord = {
     id: responseId,
