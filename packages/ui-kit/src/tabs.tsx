@@ -6,6 +6,7 @@ import { Check } from "lucide-react";
 import { cn } from "./lib/utils";
 
 export type TabsOrientation = "horizontal" | "vertical";
+export type TabsSize = "default" | "sm";
 export type TabsVariant = "pill" | "capsule" | "underline" | "card";
 
 interface TabsContextValue {
@@ -30,6 +31,8 @@ export interface TabsProps extends Omit<ComponentProps<"div">, "onChange" | "def
   onValueChange?: (value: string) => void;
   orientation?: TabsOrientation;
   variant?: TabsVariant;
+  /** Compact controls keep the same keyboard and selection behavior. */
+  size?: TabsSize;
 }
 
 export function Tabs({
@@ -39,6 +42,7 @@ export function Tabs({
   onValueChange,
   orientation = "horizontal",
   variant = "pill",
+  size = "default",
   children,
   ...props
 }: TabsProps) {
@@ -61,7 +65,8 @@ export function Tabs({
         data-slot="tabs"
         data-orientation={orientation}
         data-variant={variant}
-        className={cn("ci-tabs", `ci-tabs--${orientation}`, `ci-tabs--${variant}`, className)}
+        data-size={size}
+        className={cn("ci-tabs", `ci-tabs--${orientation}`, `ci-tabs--${variant}`, `ci-tabs--size-${size}`, className)}
         {...props}
       >
         {children}

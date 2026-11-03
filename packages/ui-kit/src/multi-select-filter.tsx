@@ -3,7 +3,7 @@
 import { ChevronDown, Search, X } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { Button } from "./button";
+import { Button, type ButtonSize } from "./button";
 import { Checkbox } from "./checkbox";
 import { Input } from "./input";
 import { cn } from "./lib/utils";
@@ -34,6 +34,8 @@ export interface MultiSelectFilterProps {
   align?: "start" | "center" | "end";
   className?: string;
   popoverClassName?: string;
+  /** Opt into the host toolbar's control height; compact table filters stay small by default. */
+  triggerSize?: ButtonSize;
 }
 
 export function multiSelectFilterValues(
@@ -113,6 +115,7 @@ export function MultiSelectFilter({
   align = "start",
   className,
   popoverClassName,
+  triggerSize = "sm",
 }: MultiSelectFilterProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -140,7 +143,7 @@ export function MultiSelectFilter({
         <Button
           type="button"
           variant="outline"
-          size="sm"
+          size={triggerSize}
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={menuId}
