@@ -139,34 +139,35 @@ A `src/server/authz/types.ts` három osztályt határoz meg. Minden olyan útvon
 
 Néhány `MANAGEMENT` művelet **kizárólag operátor** által végezhető: a `manage` kulcs ehhez nem elég. A hitelesítő adatok exportálása (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), visszaállítás az élő adatok fölé (`POST /api/db-backups/import`, beleértve a `dryRun=true` változatot, `POST /api/db-backups` azonosító szerinti visszaállítás, `POST /api/settings/import-json`), a visszaállítási pontok megsemmisítése (`DELETE /api/db-backups` takarítás, és `PATCH /api/db-backups`, mert az általa mentett megőrzési idő vezérli minden mentés utáni automatikus törlést) irányítópult-munkamenetet, a helyi CLI alanyt vagy a letiltott bejelentkezést követeli meg. Szinkronizációs token kiállítása (`POST /api/sync/tokens`) és `admin` CLI hozzáférési token létrehozása (`POST /api/cli/tokens`) minden bejelentkezési módban irányítópult-munkamenetet vagy a helyi CLI alanyt igényel. Bármely hatókörű API-kulcs és `oma_` hozzáférési token nem operátori hitelesítő adat: ha ilyet kell megadni, `403`-at kapnak. Az ellenőrzés a `src/lib/api/operatorCredential.ts` fájlban van (`resolveOperatorCredential()` / `requireOperatorCredential()`). A bejelentkezési beállítások módosítása is kizárólag operátori feladat: a `POST /api/settings/require-login` (kezelési jelszó beállítása / `requireLogin` átkapcsolása) jelszó megléte után csak ezekkel a hitelesítő adatokkal fogadja el a kérést. Az első indításkori bootstrap ablak (még nincs jelszó) változatlan marad, a jelszó cseréjéhez pedig az irányítópult-munkamenetnek el kell küldenie a `currentPassword` mezőt (hiány vagy hibás érték esetén `403`, `settings.update_failed` eseményként naplózva). A helyi CLI és a bejelentkezés nélküli példány megőrzi a helyreállítási utat, és jelszót jelszó nélkül is állíthat be, mert mindkettő ahhoz a géphez van kötve, amelyen az adatkönyvtár található.
 
-## Feldolgozási folyamat
+## Folyamat
 
 ```
-Bejövő kérés → src/proxy.ts
-  → runAuthzPipeline() a src/server/authz/pipeline.ts fájlban
+Beérkező kérés → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
     1. Megbízható belső fejlécek eltávolítása (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Kérésazonosító létrehozása, az útvonal besorolása a classifyRoute() segítségével
-    3. Ha pathname == "/" → átirányítás ide: /dashboard
-    4. Ha leállítási állapotban van (szabályos leállítás), és /api/* → 503
-    5. Ha nem GET /api/* → checkBodySize() ellenőrzés
-    6. Ha OPTIONS → CORS előzetes kérés, 204
-    7. Ha options.enforce == false → változatlan továbbítás útvonalosztály-fejlécekkel
+    2. Kérésazonosító generálása, útvonal osztályozása a classifyRoute() segítségével
+    3. Ha pathname == "/" → átirányítás /dashboard
+    4. Ha leállítási folyamat zajlik (graceful shutdown) és /api/* → 503
+    5. Ha nem-GET /api/* → checkBodySize() védelem ellenőrzése
+    6. Ha OPTIONS → CORS előzetes ellenőrzés 204
+    7. Ha options.enforce == false → átengedés route-class fejlécekkel
     8. Egyébként: POLICIES[routeClass].evaluate(ctx)
-       - engedélyezés  → x-omniroute-auth-{kind,id,label,scopes} beállítása → NextResponse.next()
-       - elutasítás → JSON-hiba correlation_id értékkel (vezérlőpultoldalak → 302 /login)
+       - allow  → x-omniroute-auth-{kind,id,label,scopes} beállítása → NextResponse.next()
+       - reject → JSON-hiba correlation_id értékkel (dashboard-oldalak → 302 /login)
 ```
 
-A megbízható belső fejléceket (amelyeket a `src/server/authz/headers.ts` definiál) a rendszer a besorolás előtt **eltávolítja a bejövő kérésekből** — az ügyfelek nem adhatják meg előre az `x-omniroute-auth-*` fejléceket egy alany megszemélyesítéséhez.
+A megbízható belső fejléceket (a `src/server/authz/headers.ts` fájlban definiálva) a rendszer **eltávolítja a beérkező kérésekből** az osztályozás előtt — az ügyfelek nem tölthetik előre az `x-omniroute-auth-*` fejléceket egy tárgy megszemélyesítéséhez.
 
-### Szabályzati szerződések
+### Szerződések házirendekhez
 
-Minden útvonalosztályhoz tartozik egy szabályzat a `src/server/authz/policies/` könyvtárban:
+Minden útvonalosztályhoz tartozik egy házirend a `src/server/authz/policies/` könyvtárban:
 
-- **`publicPolicy`** (`policies/public.ts`) — mindig az `allow({ kind: "anonymous", id: "anonymous" })` értéket adja vissza.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — kinyeri a Bearer-token értékét, és a `validateApiKey()` segítségével ellenőrzi. Csak akkor engedélyez névtelen hozzáférést, ha az effektív `REQUIRE_API_KEY` funkciójelző le van tiltva. Az effektív jelzőt az `isRequireApiKeyEnabled()` oldja fel (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), így a vezérlőpult funkciójelzői és a környezeti változók egységesen szabályozzák az `/api/v1/*`, `/api/v1beta/*` útvonalakat és aliasaikat; a feloldási hibák zárt módon meghiúsítják a hozzáférést. Engedélyezi a vezérlőpult-munkamenettel rendelkező kéréseket az ügyfél-API útvonalain (beleértve a vezérlőpult modellkatalógusa által használt `/api/v1/models` útvonalat).
-- **`managementPolicy`** (`policies/management.ts`) — elfogad vezérlőpult-munkamenetet és belső modell-szinkronizálási kéréseket (amelyeket az `/api/providers/[name]/(sync-models|models)` mintával egyeztet), vagy teljesen kihagyja az ellenőrzést, ha az `isAuthRequired()` false értéket ad vissza. 403-as (`AUTH_001`) választ ad, ha van Bearer-token, de az érvénytelen; egyébként 401-es választ ad. Emellett minden hitelesítési ág előtt érvényesíti az útvonalvédelmi szinteket (LOCAL_ONLY / ALWAYS_PROTECTED) — lásd: [Útvonalvédelmi szintek](../security/ROUTE_GUARD_TIERS.md). A `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` listában szereplő LOCAL_ONLY útvonalak (jelenleg: `/api/mcp/`) nem loopback címről is elérhetők, ha a Bearer-kulcs rendelkezik `manage` hatókörrel; minden más LOCAL_ONLY útvonal a hatókörtől függetlenül szigorúan csak loopback címről érhető el.
+- **`publicPolicy`** (`policies/public.ts`) — mindig `allow({ kind: "anonymous", id: "anonymous" })` értéket ad vissza.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — kinyeri a Bearer tokent, majd a `validateApiKey()` segítségével érvényesíti. Csak akkor tér vissza anonim módba, ha a tényleges `REQUIRE_API_KEY` funkciójelző le van tiltva. A tényleges jelző feloldása az `isRequireApiKeyEnabled()` segítségével történik (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), így a Dashboard funkciójelzői és a környezeti változók egységesen szabályozzák az `/api/v1/*`, `/api/v1beta/*` és az aliasok működését; a feloldási hibák alapértelmezés szerint megtagadják a hozzáférést. Engedélyezi a dashboard-munkamenetet használó kéréseket az ügyfél-API útvonalain, beleértve az `/api/v1/models` útvonalat is, amelyet a dashboard modellkatalógusa használ.
+  Ha az Entra ID SSO engedélyezve van, akkor a szerkezetileg Entra-tokennek minősülő Bearer tokent (három base64url szegmens, `RS*` alg, `kid`) az SSO-ág kezeli a `validateApiKey()` előtt, és annak eredménye végleges — a token soha nem kerül vissza az API-kulcsos ágba vagy a névtelen módba való visszalépéshez, így egy identitásszolgáltatói kiesés nem eredményezhet nyílt hozzáférést. A statikus API-kulcsokat ez nem érinti. Lásd: [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — elfogadja a dashboard-munkamenetet, a belső modell-szinkronizálási kéréseket (amelyek illeszkednek a `/api/providers/[name]/(sync-models|models)` útvonalra), vagy teljesen kihagyja az ellenőrzést, ha az `isAuthRequired()` értéke false. 403-as (`AUTH_001`) választ ad, ha Bearer-token van jelen, de érvénytelen; egyébként 401-et ad vissza. Emellett az autentikációs ágak előtt érvényesíti az útvonalvédelmi szinteket is (LOCAL_ONLY / ALWAYS_PROTECTED) — lásd: [Útvonalvédelmi szintek](../security/ROUTE_GUARD_TIERS.md). A `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` listában szereplő LOCAL_ONLY útvonalak (jelenleg: `/api/mcp/`) nem loopback címről is elérhetők, ha a Bearer-kulcs tartalmazza a `manage` hatókört; minden más LOCAL_ONLY útvonal a hatókörtől függetlenül továbbra is szigorúan loopbackre korlátozott.
 
-A sikeres szabályzat egy `AuthSubject` értéket ad vissza, ahol `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Az alsóbb szintű kezelők ezt az `assertAuth(request, "CLIENT_API")` segítségével olvashatják ki a `src/server/authz/assertAuth.ts` fájlban, a hitelesítési logika ismételt végrehajtása helyett.
+A sikeres házirend `AuthSubject` értéket ad vissza, amelynek `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Az alsóbb szintű kezelők az `src/server/authz/assertAuth.ts` fájlban található `assertAuth(request, "CLIENT_API")` segítségével olvashatják ki, így nincs szükségük az autentikációs logika újbóli futtatására.
 
 ## Nyilvános útvonalak listája
 
@@ -317,25 +318,25 @@ Az `/api/mcp/*` (a távoli MCP-kiszolgáló) alapértelmezés szerint továbbra 
 - Nyilvános engedélyezési lista: `tests/unit/public-api-routes.test.ts`.
 - Célzott futtatás: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Hibakeresés
+## Hibaelhárítás
 
-A feldolgozási folyamat a válaszokat mindig a következő fejlécekkel látja el:
+A folyamat mindig ellátja a válaszokat a következőkkel:
 
 ```
-x-request-id:               <korrelációs azonosító, a hibatörzsekben is visszaküldve>
+x-request-id:               <korrelációs azonosító, amely visszaköszön a hibatörzsekben>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Hitelesített kérések esetén a felsőbb rétegbeli (kezelőoldali) kérésfejlécek a következőket is tartalmazzák:
+A hitelesített kérések esetében a felfelé irányuló (kezelőoldali) kérésfejlécek szintén tartalmazzák a következőket:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<utolsó 4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (opcionális)
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (nem kötelező)
 x-omniroute-auth-scopes:    vesszővel elválasztott lista
 ```
 
-A kezelőkön belül használja az `assertAuth(req, expectedClass)` függvényt — ez `AUTHZ_NOT_INITIALIZED` kódú `AuthzAssertionError` hibát vált ki, ha a köztes szoftvert megkerülték (hasznos a konfigurációs regressziók tesztekben történő észleléséhez).
+Használd az `assertAuth(req, expectedClass)` függvényt a kezelőkben — ez `AuthzAssertionError` hibát dob `AUTHZ_NOT_INITIALIZED` kóddal, ha a middleware megkerülésre került (ez hasznos a konfigurációs regressziók tesztelés közbeni felismeréséhez).
 
 ## Lásd még
 

@@ -14,6 +14,7 @@ import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
  * failure is returned so the freshest diagnostic surfaces).
  */
 import { ensureStreamReadiness, type StreamReadinessResult } from "../../utils/streamReadiness.ts";
+import { isPublicProviderSafetyCode } from "../../utils/providerSafety.ts";
 import { isStreamReadinessStallRetryEnabled } from "@/shared/utils/featureFlags.ts";
 import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
 
@@ -244,7 +245,9 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
   if (
     ctx.streamReadiness.ok === true ||
     ctx.clientAborted ||
-    ctx.streamReadiness.code === "empty_content"
+    ctx.streamReadiness.code === "empty_content" ||
+    // #17049: a provider safety stop is terminal; a stall retry would re-send it.
+    isPublicProviderSafetyCode(ctx.streamReadiness.code)
   ) {
     return {
       readiness: ctx.streamReadiness,
