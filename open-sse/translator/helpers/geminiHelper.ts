@@ -541,6 +541,13 @@ function forEachSubschema(record: JsonRecord, visitor: (sub: unknown) => void): 
   }
 }
 
+// Helper: an object `items` schema with no `type` that is not a union/enum Gemini can type itself.
+function isTypelessItemsSchema(items: unknown): boolean {
+  if (!items || typeof items !== "object" || Array.isArray(items)) return false;
+  const record = items as JsonRecord;
+  return !record.type && record.anyOf === undefined && record.enum === undefined;
+}
+
 function resolveLocalReference(root: unknown, ref: unknown): unknown | null {
   if (typeof ref !== "string" || !ref.startsWith("#/")) return null;
 
@@ -1129,6 +1136,10 @@ export function cleanJSONSchemaForAntigravity(
     const record = obj as JsonRecord;
     if (record.type === "array" && !record.items) {
       record.items = { type: "string" };
+    } else if (record.type === "array" && isTypelessItemsSchema(record.items)) {
+      // `items: {}` (or one emptied by Phase 4 keyword stripping) is still typeless —
+      // Gemini rejects it. Phase 7 already typed object/array-shaped nodes.
+      (record.items as JsonRecord).type = "string";
     }
 
     forEachSubschema(record, ensureArrayItems);

@@ -109,7 +109,10 @@ describe("header precedence in resolveBasePlan (Phase 3)", () => {
     // active profile, then drops lossy engines (rtk) for dedup + whitespace.
     const plan = planWithHeader(config, "default");
     assert.equal(plan.mode, "stacked");
-    assert.deepEqual(plan.stackedPipeline, [{ engine: "session-dedup" }, { engine: "lite" }]);
+    assert.deepEqual(plan.stackedPipeline, [
+      { engine: "session-dedup" },
+      { engine: "lite", config: { compressToolResults: false } },
+    ]);
     assert.equal(planWithHeader(config, "engine:rtk").mode, "rtk");
   });
 

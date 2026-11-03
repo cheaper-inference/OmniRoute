@@ -10,6 +10,8 @@ export type AlertPersistence = "temporary" | "persistent";
 
 export interface AlertProps extends Omit<ComponentProps<"div">, "title"> {
   variant?: AlertVariant;
+  /** Compact banner with inline messages and actions that wrap on small screens. */
+  layout?: "stacked" | "inline";
   icon?: ReactNode;
   title?: ReactNode;
   description?: ReactNode;
@@ -18,11 +20,14 @@ export interface AlertProps extends Omit<ComponentProps<"div">, "title"> {
   duration?: number;
   dismissLabel?: string;
   onDismiss?: () => void;
+  /** Keep actionable form errors visible until the caller clears them. */
+  dismissible?: boolean;
 }
 
 export function Alert({
   className,
   variant = "default",
+  layout = "stacked",
   icon,
   title,
   description,
@@ -31,6 +36,7 @@ export function Alert({
   duration = 8000,
   dismissLabel = "Dismiss alert",
   onDismiss,
+  dismissible = true,
   children,
   ...props
 }: AlertProps) {
@@ -61,6 +67,7 @@ export function Alert({
       role={variant === "critical" ? "alert" : "status"}
       data-slot="alert"
       data-variant={variant}
+      data-layout={layout}
       data-persistence={persistence}
       className={cn("ci-alert", `ci-alert--${variant}`, className)}
       {...props}
@@ -69,8 +76,13 @@ export function Alert({
         <>
           {icon != null && <span className="ci-alert__icon">{icon}</span>}
           <div className="ci-alert__body">
-            {title != null && <AlertTitle>{title}</AlertTitle>}
-            {description != null && <AlertDescription>{description}</AlertDescription>}
+            {layout === "inline" ? <div className="ci-alert__message">
+              {title != null && <AlertTitle>{title}</AlertTitle>}
+              {description != null && <AlertDescription>{description}</AlertDescription>}
+            </div> : <>
+              {title != null && <AlertTitle>{title}</AlertTitle>}
+              {description != null && <AlertDescription>{description}</AlertDescription>}
+            </>}
             {actions != null && <AlertActions>{actions}</AlertActions>}
           </div>
         </>
@@ -80,7 +92,7 @@ export function Alert({
           {actions != null && <AlertActions>{actions}</AlertActions>}
         </div>
       )}
-      {persistence === "persistent" && (
+      {persistence === "persistent" && dismissible && (
         <button
           type="button"
           className="ci-alert__dismiss"

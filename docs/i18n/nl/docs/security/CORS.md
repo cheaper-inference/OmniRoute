@@ -57,11 +57,11 @@ vanwege één concreet implementatiedetail:
 
 Dit betekent per oppervlak, zelfs met `CORS_ALLOW_ALL=true`:
 
-| Oppervlak                                | Authenticatiemechanisme      | Effect van wildcard-CORS                                                                                                                                                                                                                                        |
-| ---------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`          | Cookiesessie                 | De origin wordt teruggestuurd, maar **zonder `Allow-Credentials`** **blokkeert** de browser het lezen met credentials. Een schadelijke cross-origin-site **kan uw geauthenticeerde dashboardantwoorden niet lezen** en de sessiecookie wordt niet blootgesteld. |
-| Client-API `/v1/*`, `/v1beta/*`          | Bearer- / `x-api-key`-header | Reeds permissief **door ontwerp** (`relaxForTokenAuth`): browsers voegen `Authorization`/`x-api-key` nooit automatisch toe, dus de pagina van een aanvaller kan uw sleutel niet meesturen. `CORS_ALLOW_ALL` verruimt dit niet.                                  |
-| Openbaar alleen-lezen (`/api/health`, …) | Geen                         | Niet-gevoelig; een wildcard is onschadelijk.                                                                                                                                                                                                                    |
+| Oppervlak                                | Authenticatiemechanisme      | Effect van wildcard-CORS                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dashboard / MANAGEMENT `/api/*`          | Cookiesessie                 | De origin wordt teruggestuurd, maar **zonder `Allow-Credentials`** **blokkeert** de browser het lezen met credentials. Een schadelijke cross-origin-site **kan uw geauthenticeerde dashboardantwoorden niet lezen** en de sessiecookie wordt niet blootgesteld.                                                                                                          |
+| Client-API `/v1/*`, `/v1beta/*`          | Bearer- / `x-api-key`-header | Reeds permissief **door ontwerp** (`relaxForTokenAuth`): browsers voegen `Authorization`/`x-api-key` nooit automatisch toe, dus de pagina van een aanvaller kan uw sleutel niet meesturen. De echo geldt alleen wanneer de meegestuurde sleutel is gevalideerd; anonieme antwoorden (`REQUIRE_API_KEY=false`) behouden de allowlist. `CORS_ALLOW_ALL` verruimt dit niet. |
+| Openbaar alleen-lezen (`/api/health`, …) | Geen                         | Niet-gevoelig; een wildcard is onschadelijk.                                                                                                                                                                                                                                                                                                                             |
 
 De **resterende** blootstelling van `CORS_ALLOW_ALL=true` is dus beperkt tot: (a)
 niet-geauthenticeerde cross-origin-**leesacties** van gegevens die al zonder authenticatie toegankelijk zijn, en (b)
@@ -125,11 +125,52 @@ via **Dashboard → Beveiliging → Toegestane CORS-origins**.
   API-sleutel is de barrière. Daarom is dit oppervlak bewust permissief, zodat
   browser- en Electron-clients antwoorden kunnen lezen waartoe ze al gerechtigd
   zijn.
+  De versoepelde echo volgt de gevalideerde sleutel, niet de loutere aanwezigheid van de
+  header: wanneer `REQUIRE_API_KEY=false` een verzoek anoniem afhandelt, behoudt het
+  succesvolle antwoord de fail-closed allowlist. Authenticatieweigeringen (401) blijven
+  leesbaar, zodat clients een ingetrokken of verkeerd getypte sleutel kunnen melden (#5242):
+  de eigen 401 van de pipeline behoudt de echo, en een route die de sleutel zelf weigert
+  nadat de pipeline het verzoek als anoniem heeft afgehandeld (`/v1/models` en
+  `/v1beta/models` met geconfigureerde beheerauthenticatie, de eigenaargebonden
+  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` en
+  auto-combo-kandidaatroutes) voegt de echo aan die 401 toe via
+  `credentialRejectionHeaders()`. De echo hangt af van de vraag of het verzoek een
+  credential-header meestuurt (`Authorization`, `x-api-key`, `x-goog-api-key` of de
+  `auth_token`-cookie), niet van welke daarvan de route controleerde, en wordt nooit
+  gecombineerd met `Access-Control-Allow-Credentials`; de body is een vaste foutenvelop.
+  Beheerroutes onder `/api/v1/` die worden beschermd door `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) voegen de echo niet toe: met
+  `REQUIRE_API_KEY=false` is hun 401/403 niet cross-origin leesbaar.
 - **Cookiesessie (het dashboard):** wordt beschermd door de standaardinstelling
   die bij fouten gesloten blijft **en** door het ontbreken van
   `Access-Control-Allow-Credentials` op het gedeelde pad. Neem origins voor beheer
   en dashboards niet op in een permissieve configuratie; deze moeten strikt
   gesloten blijven.
+
+## WebSocket-handshakes (`/v1/responses`, `/v1/ws`)
+
+Browsers passen CORS niet toe op WebSocket. Daarom controleren de WebSocket-transporten
+die inferentie-uitvoer retourneren de `Origin` van de handshake zelf
+(`src/server/origin/wsOrigin.ts`): de Responses-WebSocket (`/v1/responses`) en, wanneer
+OmniRoute via `npm start` / `npm run dev` draait, de bridge op `/v1/ws` en
+`/api/v1/ws`, die `/v1/chat/completions`, `/v1/messages` en `/v1/responses` als
+frames streamt. De bridge vraagt `/api/v1/ws?handshake=1` om het oordeel en weigert de
+upgrade tenzij die route de controle heeft uitgevoerd. Een handshake wordt geaccepteerd
+wanneer:
+
+- deze geen `Origin`-header heeft (Codex CLI, SDK's en andere clients die geen browser zijn);
+- de `Origin` wordt toegelaten door de bovenstaande allowlist (`CORS_ALLOWED_ORIGINS`, de
+  instelling `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- de `Origin` een van de eigen openbare origins van OmniRoute is (de geconfigureerde
+  openbare basis-URL, de doorgestuurde origin van een vertrouwde proxy, of een directe
+  loopback-/LAN-host opgegeven als IP-literal of `localhost` — dezelfde kandidaten die de
+  mutatiecontrole van het dashboard gebruikt); of
+- deze een geldige API-sleutel meestuurt, net als op het HTTP-oppervlak `/v1/*`.
+
+Al het andere krijgt `403 ws_origin_forbidden`. Een sessiecookie van het dashboard
+stelt een vreemde `Origin` niet vrij, omdat de browser die cookie aan de socket van
+elke pagina toevoegt. `localhost` op een andere poort wordt niet als dezelfde origin
+behandeld; voeg zulke ontwikkelorigins toe aan `CORS_ALLOWED_ORIGINS`.
 
 ## Voorbeeld: reverse proxy vóór OmniRoute
 
@@ -165,6 +206,7 @@ tabblad Beveiliging), niet in de proxy.
 | Waarschuwingsbanner op het dashboard              | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Veld voor toegestane CORS-origins                 | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS per route voor Cloud-Agent (de uitzondering) | `src/lib/cloudAgent/api.ts`                                          |
+| `Origin`-controle bij de WebSocket-handshake      | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Zie ook
 
