@@ -227,6 +227,62 @@ test("search-only key still reaches /v1/search through the canonical path", asyn
   assert.equal(result.rejection, null);
 });
 
+test("policy checks endpoint authorization before Team budget state", async () => {
+  const policy = await loadPolicy("observed-validator-order");
+  const key = await createKeyWithEndpoints([]);
+  const calls: string[] = [];
+
+  const result = await policy.enforceApiKeyPolicy(
+    makeRequest("http://localhost/v1/chat/completions", key.key),
+    "gpt-4",
+    { validationObserver: (stage) => calls.push(stage) }
+  );
+
+  assert.equal(result.rejection, null);
+  assert.deepEqual(calls, [
+    "validateEndpointAccess",
+    "validateTeamUsage",
+    "validateQuotaAccess",
+    "validateModelAccess",
+  ]);
+});
+
+test("endpoint rejection short-circuits before Team budget lookup", async () => {
+  const policy = await loadPolicy("endpoint-before-team-usage");
+  const key = await createKeyWithEndpoints(["search"]);
+  const calls: string[] = [];
+
+  const result = await policy.enforceApiKeyPolicy(
+    makeRequest("http://localhost/v1/chat/completions", key.key),
+    "gpt-4",
+    { validationObserver: (stage) => calls.push(stage) }
+  );
+
+  assert.equal(result.rejection?.status, 403);
+  assert.deepEqual(calls, ["validateEndpointAccess"]);
+});
+
+test("Team budget backend failure is fail-closed with a sanitized 503", async (t) => {
+  const policy = await loadPolicy("team-budget-store-failure");
+  const key = await createKeyWithEndpoints([]);
+  const db = coreDb.getDbInstance();
+  const prepare = db.prepare.bind(db);
+  t.mock.method(db, "prepare", (sql: string) => {
+    if (sql.includes("FROM api_key_billing_team_history binding")) {
+      throw new Error("simulated team budget store failure");
+    }
+    return prepare(sql);
+  });
+
+  const result = await policy.enforceApiKeyPolicy(
+    makeRequest("http://localhost/v1/chat/completions", key.key),
+    "gpt-4"
+  );
+
+  assert.equal(result.rejection?.status, 503);
+  assert.equal(await readErrorMessage(result.rejection!), "Team usage limit unavailable");
+});
+
 test("chat+embeddings key allows /v1/embeddings", async () => {
   const policy = await loadPolicy("chat-emb-allowed");
   const key = await createKeyWithEndpoints(["chat", "embeddings"]);

@@ -825,47 +825,40 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API جستوجو
+## جستجوی API
 
-انتزاع ارائهدهنده وب/جستوجو (Tavily، Brave، Exa، Serper و غیره).
+انتزاع ارائه دهنده Web/search (Tavily، Brave، Exa، Serper و غیره).
 
-| متد  | مسیر                   | توضیحات                                                                                                          |
-| ---- | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | فهرستکردن ارائهدهندگان جستوجوی پیکربندیشده و قابلیتهای آنها                                                      |
-| POST | `/v1/search`           | اجرای یک پرسوجوی جستوجو — بدنه توسط `v1SearchSchema` اعتبارسنجی میشود و از کشکردن/ادغام درخواستها پشتیبانی میکند |
-| GET  | `/v1/search/analytics` | آمار برخورد/تأخیر/کش بهتفکیک ارائهدهنده                                                                          |
+| روش  | مسیر                   | توضیحات                                                                                                      |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET  | `/v1/search`           | قابلیت های + ارائه دهندگان جستجوی پیکربندی شده را فهرست کنید                                                 |
+| POST | `/v1/search`           | یک عبارت جستجوی — را اجرا کنید که توسط `v1SearchSchema` تأیید شده است، از caching/coalescing پشتیبانی می کند |
+| GET  | `/v1/search/analytics` | آمار hit/latency/cache هر ارائه دهنده                                                                        |
 
-**احراز هویت:** کلید API از نوع Bearer (`extractApiKey` + `isValidApiKey`). سیاست جستوجو از طریق `enforceApiKeyPolicy` اعمال میشود.
+**احراز هویت:** کلید حامل API (`extractApiKey` + `isValidApiKey`). سیاست جستجو از طریق `enforceApiKeyPolicy` اجرا شد.
 
-### گزینههای `provider_options` برای Exa و Tavily
+### اگزا و طویلی `provider_options`
 
-Exa و Tavily فیلدهای مختص ارائهدهنده را از یک مجموعه نامگذاریشده میخوانند:
-`provider_options.exa` (یا `provider_options["exa-search"]`) و `provider_options.tavily`
-(یا `provider_options["tavily-search"]`). فقط کلیدهای زیر ارسال میشوند. هرکدام در
-`open-sse/handlers/search/providerOptionsPassthrough.ts` با طرحواره Zod مختص خود
-بررسی میشوند و کلیدی با نوع نادرست حذف میشود. همه کلیدهای دیگر، از جمله احراز هویت، URL پایه،
-`stream` و `outputSchema` نادیده گرفته میشوند. کلیدهای مسطحی که سایر ارائهدهندگان استفاده میکنند (`cx`، `depth`، ...) مانند
-قبل کار میکنند.
+Exa و Tavily فیلدهای خاص ارائه دهنده را از یک کیسه namespaced می خوانند: `provider_options.exa` (یا `provider_options["exa-search"]`) و `provider_options.tavily` (یا `provider_options["tavily-search"]`). فقط کلیدهای زیر فوروارد می شوند. هر کدام با طرح Zod خود در `open-sse/handlers/search/providerOptionsPassthrough.ts` بررسی می شود و یک کلید با نوع اشتباه حذف می شود. هر کلید دیگری از جمله auth، base URL، `stream` و `outputSchema` نادیده گرفته میشود. کلیدهای مسطح استفاده شده توسط سایر ارائه دهندگان (`cx`، `depth`، ...) مانند قبل کار می کنند.
 
-| ارائهدهنده | فیلدهای سطح بالا                                                                                                                                                                                                                                                                                                                                                          | تودرتو                                                                                                                                                                |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`، `category`، `userLocation`، `moderation`، `additionalQueries`، `objective`، `systemPrompt`، `compliance` (مقادیر اولیه مسطح)، `startPublishedDate`، `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` با مقدار پیشفرض `{ text: true, highlights: true }` ادغام میشود |
-| Tavily     | `search_depth`، `chunks_per_source`، `time_range`، `start_date`، `end_date`، `include_published_date`، `filter_by_published_date`، `include_answer`، `include_raw_content`، `include_images`، `include_image_descriptions`، `include_favicon`، `include_domains_mode`، `language`، `filter_by_language`، `auto_parameters`، `exact_match`، `include_usage`، `safe_search` | —                                                                                                                                                                     |
+| ارائه دهنده | زمینه های سطح بالا                                                                                                                                                                                                                                                                                                                                                        | تو در تو                                                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| امتحان      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ابتدایی مسطح) , `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` روی `{ text: true, highlights: true }` پیشفرض ادغام شد |
+| تاویلی      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                    |
 
-فیلدهای عمومی همیشه اولویت دارند: `query`، `max_results`، `filters` (دامنهها)، `country` و
-موضوع مشتقشده از `search_type`. در Exa، `search_type: "news"` مقدار `category: "news"` را حفظ میکند.
-Tavily همچنین `search_type: "finance"` (`topic: "finance"`) را میپذیرد.
+فیلدهای عمومی همیشه برنده هستند: `query`، `max_results`، `filters` (دامنه ها)، `country` و موضوع مشتق شده از `search_type`. در Exa، `search_type: "news"` `category: "news"` را نگه میدارد. طویلی نیز `search_type: "finance"` (`topic: "finance"`) را می پذیرد.
 
-اکنون `time_range` عمومی به هر دو ارائهدهنده میرسد: Exa مقدار `startPublishedDate` (مُهر زمانی ISO)
-و Tavily مقدار `start_date` (`YYYY-MM-DD`) را دریافت میکند. تاریخ صریح در `provider_options`
-مقدار نگاشتشده را بازنویسی میکند.
+هزینه جستجوی Firecrawl برای هر بلوک شروع شده از 10 نتیجه بازگشتی، 0.002 دلار (2 اعتبار) هر بلوک و حداقل یک بلوک در هر تماس ( [صورتحساب Firecrawl](https://docs.firecrawl.dev/billing) ) ثبت می شود: 11 نتیجه 0.004 دلار هزینه دارد.
 
-نتایج Exa مقادیر `id`، `highlight_scores`، `summary`، `subpages`، `entities` و `extras` را در
-`provider_raw` نگه میدارند. نتایج Tavily مقادیر `images` و `favicon` را نگه میدارند.
+`time_range` عمومی اکنون به هر دو ارائهدهنده میرسد: Exa `startPublishedDate` (مهر زمانی ISO ) و Tavily `start_date` (`YYYY-MM-DD`) دریافت میکند. تاریخ صریح در `provider_options` تاریخ نگاشت شده را لغو می کند.
 
-محاسبه هزینه همچنان از رجیستری مسطح `costPerQuery` استفاده میکند. Tavily برای
-`search_depth: "advanced"` بهازای هر فراخوانی اعتبار بیشتری دریافت میکند و این تفاوت در
-`usage.search_cost_usd` منعکس نمیشود.
+نتایج Exa `id`, `highlight_scores`, `summary`, `subpages`, `entities` و `extras` را در `provider_raw` نگه می دارند . طویلی نتایج حفظ `images` و `favicon`.
+
+هزینه جستجوی پیوند 0.005 دلار برای `depth` `fast` و `standard` و 0.05 دلار برای `deep` ( [قیمت گذاری پیوندها](https://docs.linkup.so/pages/documentation/development/pricing) ) ثبت می شود، چه `depth` از `provider_options` باشد یا از تنظیمات اتصال.
+
+Exa `type: "lite"` (Exa 3.0) مجموعه کوچکتری از فیلدها را می پذیرد و در صورت تنظیم هر فیلد دیگری، کل درخواست را رد می کند. برای lite، `additionalQueries`، `systemPrompt` و هر کلید `contents` به جز `text` و `highlights` قبل از تماس حذف میشوند. `subpages`، `subpageTarget`، `highlights.numSentences` و `highlights.highlightsPerUrl` منسوخ شده دیگر ارسال نمیشوند.
+
+حسابداری بهای تمام شده `costPerQuery` ثبت ثابت است، به جز Exa، که از قیمت گذاری خود Exa پیروی می کند: 0.007 دلار در هر تماس برای `auto` (و `fast` میراث) یا 0.004 دلار برای `lite` (و `instant` میراث)، که 10 نتیجه را پوشش می دهد. 0.001 دلار برای هر نتیجه بعدی؛ و 0.001 دلار به ازای هر نتیجه برگشتی زمانی که `contents.summary` تنظیم شود. Tavily با 1 اعتبار (0.008 دلار) برای `search_depth` `basic`، `fast` و `ultra-fast`، و 2 اعتبار (0.016 دلار) برای `advanced` ( [اعتبارات Tavily API](https://docs.tavily.com/documentation/api-credits) ) ثبت شده است. تماس با `auto_parameters: true` که Tavily آن را به پیشرفته ارتقا میدهد همچنان با 1 اعتبار ثبت میشود.
 
 ---
 
