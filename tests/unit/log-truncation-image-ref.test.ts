@@ -9,9 +9,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 
-const { collapseOversizedDataUrlForLog, cloneBoundedChatLogPayload } = await import(
-  "../../open-sse/handlers/chatCore/logTruncation.ts"
-);
+const { collapseOversizedDataUrlForLog, cloneBoundedChatLogPayload } =
+  await import("../../open-sse/handlers/chatCore/logTruncation.ts");
 
 const base64 = "A".repeat(500_000); // far past any configured text limit
 const oversizedImage = `data:image/png;base64,${base64}`;
@@ -21,10 +20,7 @@ test("1. an oversized image data URL collapses into an _omniroute_image_ref reco
   assert.equal(collapsed._omniroute_image_ref, true);
   assert.equal(collapsed.mime, "image/png");
   assert.equal(collapsed.base64Bytes, base64.length);
-  assert.equal(
-    collapsed.sha256,
-    createHash("sha256").update(base64).digest("hex").slice(0, 16)
-  );
+  assert.equal(collapsed.sha256, createHash("sha256").update(base64).digest("hex").slice(0, 16));
   assert.equal(collapsed.head, oversizedImage.slice(0, 64));
 });
 
@@ -34,9 +30,9 @@ test("2. the fingerprint is stable across rows (same image → same sha)", () =>
     sha256: string;
   };
   assert.equal(a.sha256, b.sha256);
-  const other = collapseOversizedDataUrlForLog(
-    `data:image/png;base64,${"B".repeat(500_000)}`
-  ) as { sha256: string };
+  const other = collapseOversizedDataUrlForLog(`data:image/png;base64,${"B".repeat(500_000)}`) as {
+    sha256: string;
+  };
   assert.notEqual(a.sha256, other.sha256);
 });
 
