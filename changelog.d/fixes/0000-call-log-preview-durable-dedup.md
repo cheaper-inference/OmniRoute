@@ -1,0 +1,1 @@
+- Deduplicate completed previews against their exact saved rows in the filtered result; keep genuine retries separate and cached details accessible through the saved ID while the linked preview remains available.

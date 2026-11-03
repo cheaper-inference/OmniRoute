@@ -1,0 +1,1 @@
+- **fix(compression):** Headerless lossy defaults and auto-triggers now retain configured lossless engines while lossy steps remain opt-in ([#18279](https://github.com/cheaper-inference/OmniRoute/pull/18279)) — thanks @jackyfan01
