@@ -161,6 +161,40 @@ describe("MfaSection", () => {
     expect(container.textContent).not.toContain("mfaDisableDesc");
   });
 
+  it("with the recovery switch on, disables with the password alone (no code sent)", async () => {
+    const calls = mockFetch({
+      "/api/auth/mfa/status": {
+        ok: true,
+        body: { enabled: true, backupCodesRemaining: 0, recoverySwitchSet: true },
+      },
+      "/api/auth/mfa/disable": { ok: true, body: {} },
+    });
+    const container = await render();
+
+    await click(button(container, "disable"));
+    expect(button(container, "disable").disabled).toBe(true);
+    await type(container.querySelector('input[type="password"]') as HTMLInputElement, "pw");
+    expect(button(container, "disable").disabled).toBe(false);
+    await click(button(container, "disable"));
+
+    expect(calls.find((c) => c.url === "/api/auth/mfa/disable")?.body).toEqual({ password: "pw" });
+    expect(container.textContent).not.toContain("mfaDisableDesc");
+  });
+
+  it("without the recovery switch, the code stays mandatory to disable", async () => {
+    mockFetch({
+      "/api/auth/mfa/status": {
+        ok: true,
+        body: { enabled: true, backupCodesRemaining: 3, recoverySwitchSet: false },
+      },
+    });
+    const container = await render();
+
+    await click(button(container, "disable"));
+    await type(container.querySelector('input[type="password"]') as HTMLInputElement, "pw");
+    expect(button(container, "disable").disabled).toBe(true);
+  });
+
   it("shows the server's error message and stays on the step", async () => {
     mockFetch({
       "/api/auth/mfa/status": {

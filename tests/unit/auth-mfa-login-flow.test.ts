@@ -413,6 +413,104 @@ test("a corrupted factor row fails closed instead of 500-ing every sign-in", asy
   assert.equal(cookieJar.jar.has("auth_token"), true);
 });
 
+function corruptFactorRow() {
+  core
+    .getDbInstance()
+    .prepare(
+      "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('dashboardMfa', 'state', ?)"
+    )
+    .run("{not json");
+}
+
+function managementPost(url: string, body: unknown, peerIp = "127.0.0.1") {
+  return makeManagementSessionRequest(`http://localhost${url}`, {
+    method: "POST",
+    headers: peerHeaders(peerIp),
+    body: body as Record<string, unknown>,
+  });
+}
+
+test("recovery switch: the host operator removes a corrupted factor without a code, then re-enrolls", async () => {
+  const compliance = await import("../../src/lib/compliance/index.ts");
+  corruptFactorRow();
+  process.env.OMNIROUTE_DISABLE_MFA = "true";
+
+  // While the unreadable factor exists, enrollment is refused…
+  const blocked = await setupRoute.POST(
+    await managementPost("/api/auth/mfa/setup", { password: PASSWORD })
+  );
+  assert.equal(blocked.status, 409);
+
+  // …and no live code can match it; the switch lets the owner drop it with the password only.
+  const disable = await disableRoute.POST(
+    await managementPost("/api/auth/mfa/disable", { password: PASSWORD })
+  );
+  assert.equal(disable.status, 200);
+  assert.deepEqual(await disable.json(), { success: true });
+  assert.equal(mfaDb.getDashboardMfaState().enabled, false);
+
+  const audit = compliance.getAuditLog({ action: "auth.mfa.disabled" });
+  assert.ok(
+    audit.some(
+      (entry) =>
+        entry.action === "auth.mfa.disabled" && JSON.stringify(entry).includes("recovery_switch")
+    ),
+    "the code-less removal is audited as a recovery-switch disable"
+  );
+
+  const setup = await setupRoute.POST(
+    await managementPost("/api/auth/mfa/setup", { password: PASSWORD })
+  );
+  assert.equal(setup.status, 200);
+  assert.match((await setup.json()).secret, /^[A-Z2-7]{32}$/);
+});
+
+test("recovery switch: the code-less removal still needs the current password", async () => {
+  corruptFactorRow();
+  process.env.OMNIROUTE_DISABLE_MFA = "true";
+  const response = await disableRoute.POST(
+    await managementPost("/api/auth/mfa/disable", { password: "wrong-password" })
+  );
+  assert.equal(response.status, 401);
+  assert.equal(mfaDb.getDashboardMfaState().enabled, true);
+});
+
+test("without the recovery switch, disabling still requires a code", async () => {
+  enrollFixture();
+  const missing = await disableRoute.POST(
+    await managementPost("/api/auth/mfa/disable", { password: PASSWORD })
+  );
+  assert.equal(missing.status, 400);
+  assert.equal(mfaDb.getDashboardMfaState().enabled, true);
+
+  corruptFactorRow();
+  const corrupted = await disableRoute.POST(
+    await managementPost("/api/auth/mfa/disable", { password: PASSWORD })
+  );
+  assert.equal(corrupted.status, 400);
+  assert.equal(mfaDb.getDashboardMfaState().enabled, true);
+});
+
+test("the recovery switch does not waive the code for a remote peer", async () => {
+  enrollFixture();
+  process.env.OMNIROUTE_DISABLE_MFA = "true";
+  const response = await disableRoute.POST(
+    await managementPost("/api/auth/mfa/disable", { password: PASSWORD }, "203.0.113.40")
+  );
+  assert.equal(response.status, 400);
+  assert.equal(mfaDb.getDashboardMfaState().enabled, true);
+});
+
+test("the recovery switch does not open disable to an unauthenticated request", async () => {
+  corruptFactorRow();
+  process.env.OMNIROUTE_DISABLE_MFA = "true";
+  const response = await disableRoute.POST(
+    post("/api/auth/mfa/disable", { password: PASSWORD }, "127.0.0.1") as never
+  );
+  assert.equal(response.status, 401);
+  assert.equal(mfaDb.getDashboardMfaState().enabled, true);
+});
+
 test("GET /api/settings never exposes the factor and PATCH cannot set it", async () => {
   const secret = enrollFixture();
   const get = await settingsRoute.GET(

@@ -126,8 +126,9 @@ function useMfaFlow(t: Translate, loadStatus: () => void) {
     });
   };
 
+  // A blank code is omitted: the server accepts that only under the host recovery switch.
   const disable = () =>
-    submit("/api/auth/mfa/disable", { password, code }, () => {
+    submit("/api/auth/mfa/disable", code.trim() ? { password, code } : { password }, () => {
       reset();
       loadStatus();
     });
@@ -307,7 +308,17 @@ function VerifyPanel({
   );
 }
 
-function DisablePanel({ flow, t }: { flow: MfaFlow; t: Translate }) {
+function DisablePanel({
+  flow,
+  t,
+  status,
+}: {
+  flow: MfaFlow;
+  t: Translate;
+  status: MfaStatus | null;
+}) {
+  // `OMNIROUTE_DISABLE_MFA` is set: the host operator may drop a factor that no code matches.
+  const codeOptional = status?.recoverySwitchSet === true;
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-text-muted">{t("mfaDisableDesc")}</p>
@@ -326,7 +337,7 @@ function DisablePanel({ flow, t }: { flow: MfaFlow; t: Translate }) {
           variant="danger"
           onClick={flow.disable}
           loading={flow.busy}
-          disabled={!flow.password || !flow.code}
+          disabled={!flow.password || (!codeOptional && !flow.code.trim())}
         >
           {t("disable")}
         </Button>
@@ -373,7 +384,7 @@ export default function MfaSection() {
         {flow.mode === "verify" && flow.enrollment && (
           <VerifyPanel flow={flow} t={t} enrollment={flow.enrollment} />
         )}
-        {flow.mode === "disable" && <DisablePanel flow={flow} t={t} />}
+        {flow.mode === "disable" && <DisablePanel flow={flow} t={t} status={status} />}
         {flow.error && <p className="text-sm text-error">{flow.error}</p>}
       </div>
     </Card>

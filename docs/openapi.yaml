@@ -7319,20 +7319,28 @@ paths:
     post:
       tags: [System]
       summary: Turn two-factor authentication off
-      description: Requires the current password and a live TOTP or recovery code.
+      description: |
+        Requires the current password and a live TOTP or recovery code. While
+        `OMNIROUTE_DISABLE_MFA=true` is set, a request from the host itself (loopback
+        peer and loopback `Host`) may omit `code` to remove a factor that can no longer
+        be verified; the session and password are still required.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [password, code]
+              required: [password]
               properties:
                 password: { type: string, minLength: 1 }
-                code: { type: string }
+                code:
+                  type: string
+                  description: Required unless the host recovery switch applies.
       responses:
         "200":
           description: Disabled; secret and recovery codes removed
+        "400":
+          description: Invalid body, or `code` missing outside the host recovery switch
         "401":
           description: Invalid password or code
         "409":
