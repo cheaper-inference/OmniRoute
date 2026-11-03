@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { listModelIntelligence } from "@/lib/db/modelIntelligence";
+import { listModelIntelligence, type ModelIntelligenceEntry } from "@/lib/db/modelIntelligence";
 import {
   mergeProviderModels,
   findMatchingIntelligence,
@@ -30,6 +30,47 @@ export interface ProviderModelIntelligence {
   confidence: string | null;
   category: string;
   isFree: boolean;
+}
+
+type IntelligenceMatch = Pick<
+  ModelIntelligenceEntry,
+  "score" | "eloRaw" | "confidence" | "category"
+>;
+
+/** Resolution chain, strongest first (same order as the task-fitness layers). */
+const SOURCE_PRECEDENCE = ["user_override", "arena_elo", "models_dev_tier"];
+
+function sourceRank(source: string): number {
+  const rank = SOURCE_PRECEDENCE.indexOf(source);
+  return rank === -1 ? SOURCE_PRECEDENCE.length : rank;
+}
+
+/**
+ * Lookup map of normalized model name -> rows of that model's strongest source.
+ *
+ * `findMatchingIntelligence` picks the highest score it is given, so weaker
+ * sources must be dropped here: a derived `models_dev_tier` row would otherwise
+ * outrank the measured Arena score, or an operator override, of the same model.
+ * Precedence is per model, not per category, because tier rows cover every
+ * category and would still win wherever Arena has no row.
+ */
+function buildIntelligenceMap(entries: ModelIntelligenceEntry[]): Map<string, IntelligenceMatch[]> {
+  const intelMap = new Map<string, IntelligenceMatch[]>();
+  const rankByModel = new Map<string, number>();
+
+  for (const { model, source, score, eloRaw, confidence, category } of entries) {
+    const key = model.toLowerCase();
+    const rank = sourceRank(source);
+    const currentRank = rankByModel.get(key);
+    if (currentRank !== undefined && rank > currentRank) continue;
+    if (currentRank !== rank) {
+      intelMap.set(key, []);
+      rankByModel.set(key, rank);
+    }
+    intelMap.get(key)?.push({ score, eloRaw, confidence, category });
+  }
+
+  return intelMap;
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -56,35 +97,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       Array.isArray(customModels) ? customModels : []
     );
 
-    // Load all intelligence entries (all sources — user_override > arena_elo > models_dev_tier)
-    const intelligenceEntries = listModelIntelligence();
-
-    // Build a lookup map: normalized model name → entries (same shape as rankings page)
-    const intelMap = new Map<
-      string,
-      Array<{ score: number; eloRaw: number | null; confidence: string | null; category: string }>
-    >();
-    for (const ie of intelligenceEntries) {
-      const key = ie.model.toLowerCase();
-      const existing = intelMap.get(key);
-      if (existing) {
-        existing.push({
-          score: ie.score,
-          eloRaw: ie.eloRaw,
-          confidence: ie.confidence,
-          category: ie.category,
-        });
-      } else {
-        intelMap.set(key, [
-          {
-            score: ie.score,
-            eloRaw: ie.eloRaw,
-            confidence: ie.confidence,
-            category: ie.category,
-          },
-        ]);
-      }
-    }
+    // Load all intelligence entries, keeping each model's best source
+    const intelMap = buildIntelligenceMap(listModelIntelligence());
 
     // Score each model
     const result: ProviderModelIntelligence[] = models.map((model) => {

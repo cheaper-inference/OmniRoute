@@ -11813,7 +11813,7 @@ paths:
       tags:
         - Intelligence
       summary: "GET provider intelligence"
-      description: Per-model intelligence scores for a provider's catalog (static registry plus custom models), sorted by score descending. Models without a matching intelligence row are returned with `score` 0. Management-authenticated.
+      description: Per-model intelligence scores for a provider's catalog (static registry plus custom models), sorted by score descending. Each model reports its strongest source (`user_override`, then `arena_elo`, then `models_dev_tier`). Models without a matching intelligence row are returned with `score` 0. Management-authenticated.
       parameters:
         - in: query
           name: provider

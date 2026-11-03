@@ -130,6 +130,42 @@ test("GET returns sorted model intelligence for a provider", async () => {
   assert.equal(typeof top.isFree, "boolean");
 });
 
+test("GET resolves each model through the source chain, not the highest score across sources", async () => {
+  const upsert = (model: string, source: string, score: number, eloRaw: number | null = null) =>
+    modelIntelligenceDb.upsertModelIntelligence({
+      model,
+      source,
+      category: "coding",
+      score,
+      eloRaw,
+      confidence: "high",
+    });
+
+  // A persisted tier row outscores the measured Arena value it must yield to.
+  upsert("kimi-k2.6", "arena_elo", 0.71, 1380);
+  upsert("kimi-k2.6", "models_dev_tier", 0.95);
+  // An operator override is authoritative even when it is the lowest of the three.
+  upsert("kimi-k2.7-code", "arena_elo", 0.92, 1520);
+  upsert("kimi-k2.7-code", "models_dev_tier", 0.95);
+  upsert("kimi-k2.7-code", "user_override", 0.3);
+  // With no better source the tier row is still what the panel should show.
+  upsert("kimi-k3", "models_dev_tier", 0.85);
+
+  const res = await listRoute.GET(
+    asNextRequest(
+      await makeManagementSessionRequest("http://localhost/api/provider-intelligence?provider=kimi")
+    )
+  );
+  assert.equal(res.status, 200);
+  const body = (await res.json()) as { modelId: string; score: number; eloRaw: number | null }[];
+  const byId = new Map(body.map((entry) => [entry.modelId, entry]));
+
+  assert.equal(byId.get("kimi-k2.6")?.score, 0.71);
+  assert.equal(byId.get("kimi-k2.6")?.eloRaw, 1380);
+  assert.equal(byId.get("kimi-k2.7-code")?.score, 0.3);
+  assert.equal(byId.get("kimi-k3")?.score, 0.85);
+});
+
 test("GET returns an empty array when a provider has no models", async () => {
   const res = await listRoute.GET(
     asNextRequest(
