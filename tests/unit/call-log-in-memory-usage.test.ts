@@ -27,6 +27,7 @@ for (const finalizeFirst of [false, true]) {
   test(`usage survives closed persistence (finalize first: ${finalizeFirst})`, async () => {
     const id = history.trackPendingRequest("model", "provider", "connection", true);
     assert.ok(id);
+    const capturedGeneration = history.getPendingById().get(id)?.attemptGeneration;
     const finish = () =>
       history.finalizePendingRequestById(id, {
         status: 200,
@@ -37,6 +38,7 @@ for (const finalizeFirst of [false, true]) {
     await saveCallLog({
       id: `attempt-${id}`,
       pendingRequestId: id,
+      pendingRequestGeneration: capturedGeneration,
       tokens: {
         prompt_tokens: 43979,
         completion_tokens: 243,
@@ -52,6 +54,7 @@ for (const finalizeFirst of [false, true]) {
       completedDetails: history.getCompletedDetails().values(),
     });
     const row = rows.find((entry) => entry.id === id);
+    assert.equal(history.getCompletedDetails().get(id)?.persistedLogId, undefined);
     assert.equal(row.tokens.in, 43979);
     assert.equal(row.tokens.out, 243);
     assert.equal(row.tokens.cacheRead, 43000);
