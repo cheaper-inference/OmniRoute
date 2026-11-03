@@ -148,31 +148,31 @@ Quelques actions de `MANAGEMENT` sont **réservées à l'opérateur** : une clé
 ## Pipeline
 
 ```
-Requête entrante → src/proxy.ts
-  → runAuthzPipeline() dans src/server/authz/pipeline.ts
-    1. Supprimer les en-têtes internes approuvés (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Générer l’identifiant de requête, classifier la route via classifyRoute()
-    3. Si pathname == "/" → rediriger vers /dashboard
-    4. Si un arrêt progressif est en cours et que la route est /api/* → 503
-    5. Si la méthode n’est pas GET et que la route est /api/* → appliquer la protection checkBodySize()
-    6. Si OPTIONS → pré-vérification CORS 204
-    7. Si options.enforce == false → transmettre avec les en-têtes de classe de route
-    8. Sinon : POLICIES[routeClass].evaluate(ctx)
-       - autoriser → ajouter x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - rejeter   → erreur JSON avec correlation_id (pages du tableau de bord → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Les en-têtes internes approuvés (définis dans `src/server/authz/headers.ts`) sont **supprimés des requêtes entrantes** avant la classification — les clients ne peuvent pas préremplir `x-omniroute-auth-*` pour usurper l’identité d’un sujet.
+Les en-têtes internes de confiance (définis dans `src/server/authz/headers.ts`) sont** supprimé des demandes entrantes** avant la classification, les clients — ne peuvent pas pré-remplir `x-omniroute-auth-*` pour usurper l'identité d'un sujet.
 
-### Contrats des politiques
+### Contrats de politique
 
-Chaque classe de route possède une politique dans `src/server/authz/policies/` :
+Chaque classe de route a une politique dans `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — renvoie toujours `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrait le jeton Bearer et le valide via `validateApiKey()`. N’autorise l’accès anonyme que lorsque l’indicateur de fonctionnalité effectif `REQUIRE_API_KEY` est désactivé. L’indicateur effectif est résolu par `isRequireApiKeyEnabled()` (`remplacement par l’indicateur de fonctionnalité de la base de données > process.env.REQUIRE_API_KEY > valeur par défaut`), afin que les indicateurs de fonctionnalité du tableau de bord et les variables d’environnement régissent de manière cohérente `/api/v1/*`, `/api/v1beta/*` et leurs alias ; les échecs du résolveur entraînent un refus par défaut. Autorise les requêtes disposant d’une session du tableau de bord sur les routes de l’API cliente (y compris `/api/v1/models`, utilisée par le catalogue de modèles du tableau de bord).
-- **`managementPolicy`** (`policies/management.ts`) — accepte une session du tableau de bord, les requêtes internes de synchronisation des modèles (correspondant à `/api/providers/[name]/(sync-models|models)`), ou ignore entièrement l’authentification si `isAuthRequired()` renvoie false. Renvoie 403 (`AUTH_001`) lorsqu’un jeton Bearer est présent mais invalide, et 401 dans les autres cas. Applique également les niveaux de protection des routes (LOCAL_ONLY / ALWAYS_PROTECTED) avant toute branche d’authentification — consultez [Niveaux de protection des routes](../security/ROUTE_GUARD_TIERS.md). Les chemins LOCAL_ONLY figurant dans `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (actuellement : `/api/mcp/`) peuvent être accessibles depuis une adresse hors boucle locale lorsque la clé Bearer possède la portée `manage` ; tous les autres chemins LOCAL_ONLY restent strictement limités à la boucle locale, quelle que soit la portée.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrait Bearer, valide via `validateApiKey()`. Passe à l'anonymat uniquement lorsque l'indicateur de fonctionnalité `REQUIRE_API_KEY` efficace est désactivé. L'indicateur effectif est résolu via `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), de sorte que les indicateurs de fonctionnalités du tableau de bord et les variables d'environnement régissent `/api/v1/*`, `/api/v1beta/*` et les alias de manière cohérente ; les échecs du résolveur échouent. Autorise les requêtes de session de tableau de bord sur les routes API du client (y compris `/api/v1/models`, utilisé par le catalogue de modèles de tableau de bord). Lorsque Entra ID SSO est activé, un porteur qui est structurellement un jeton Entra (trois segments base64url, `RS*` alg, `kid`) est géré par la branche SSO** avant** `validateApiKey()` et son verdict est définitif — il ne passe jamais par le chemin de la clé API ou la branche de dégradation vers anonyme, donc une panne du fournisseur d'identité ne peut pas devenir un accès ouvert. Les clés API statiques ne sont pas affectées. Voir [Entrée ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — accepte la session de tableau de bord, les demandes de synchronisation de modèle internes (correspondantes à `/api/providers/[name]/(sync-models|models)`) ou les ignore complètement si `isAuthRequired()` renvoie false. Renvoie 403 (`AUTH_001`) lorsqu'un jeton Bearer est présent mais invalide, 401 sinon. Applique également les niveaux de garde de route (LOCAL_ONLY / ALWAYS_PROTECTED) avant toute branche d'authentification — voir [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). les chemins LOCAL_ONLY dans `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (aujourd'hui : `/api/mcp/`) sont accessibles depuis le non-bouclage lorsque la clé Bearer porte la portée `manage` ; tous les autres chemins LOCAL_ONLY restent en bouclage strict, quelle que soit la portée.
 
-Une politique réussie renvoie `AuthSubject` avec `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Les gestionnaires en aval peuvent le lire via `assertAuth(request, "CLIENT_API")` dans `src/server/authz/assertAuth.ts` au lieu de réexécuter la logique d’authentification.
+Une politique réussie renvoie `AuthSubject` avec `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Les gestionnaires en aval peuvent le lire via `assertAuth(request, "CLIENT_API")` dans `src/server/authz/assertAuth.ts` au lieu de réexécuter la logique d'authentification.
 
 ## Liste des routes publiques
 
@@ -318,23 +318,23 @@ Les points de terminaison `/api/v1/agents/tasks/*` et `/api/resilience/model-coo
 
 ## Débogage
 
-Le pipeline ajoute toujours les en-têtes suivants aux réponses :
+Le pipeline marque toujours les réponses avec :
 
 ```
-x-request-id:               <identifiant de corrélation, repris dans les corps d’erreur>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Pour les requêtes authentifiées, les en-têtes de requête en amont (côté gestionnaire) incluent également :
+Pour les requêtes authentifiées, les en-têtes de requête en amont (côté gestionnaire) incluent également :
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4 derniers caractères> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (facultatif)
-x-omniroute-auth-scopes:    liste séparée par des virgules
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Utilisez `assertAuth(req, expectedClass)` dans les gestionnaires — cette fonction lève une `AuthzAssertionError` avec le code `AUTHZ_NOT_INITIALIZED` si le middleware a été contourné (utile pour détecter les régressions de configuration dans les tests).
+Utilisez `assertAuth(req, expectedClass)` dans les gestionnaires — il lance `AuthzAssertionError` avec le code `AUTHZ_NOT_INITIALIZED` si le middleware a été contourné (utile pour détecter les régressions de configuration dans les tests).
 
 ## Voir aussi
 

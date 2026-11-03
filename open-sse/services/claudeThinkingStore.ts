@@ -16,13 +16,12 @@
  * Invariants:
  * - Memory only, TTL + size bounded. Thinking text and signatures never reach the
  *   DB or any log line (thinkingSignatureDiagnostics invariants).
- * - Bound to provider + model: a signature replayed to a different model or
- *   provider is a hard 400 (#6953), so a binding mismatch restores nothing.
+ * - Bound to provider + model + connection: a signature replayed to a different
+ *   model, provider, or OAuth org/connection is a hard 400 (#6953, #17324), so a
+ *   binding mismatch restores nothing.
  * - All-or-nothing: a turn is stored only when every thinking-ish block is
  *   replayable (non-empty signature / data); a partial set would reorder the turn.
  */
-
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
 
 export type ClaudeSignedThinkingBlock =
   | { type: "thinking"; thinking: string; signature: string }
@@ -31,6 +30,9 @@ export type ClaudeSignedThinkingBlock =
 type Entry = {
   provider: string;
   model: string;
+  /** Serving connection id; thinking signatures are org-scoped, so a block
+   *  produced by one OAuth org must never be replayed on another (#17324). */
+  connectionId: string;
   blocks: ClaudeSignedThinkingBlock[];
   size: number;
   expiresAt: number;
@@ -129,6 +131,7 @@ export function storeClaudeThinkingBlocks(args: {
   blocks: unknown;
   provider: unknown;
   model: unknown;
+  connectionId?: unknown;
 }): boolean {
   const toolUseIds = collectToolUseIds(args.toolUseIds);
   const model = normalizeClaudeThinkingModel(args.model);
@@ -143,11 +146,18 @@ export function storeClaudeThinkingBlocks(args: {
 
   const now = Date.now();
   const provider = normalizeProvider(args.provider);
+  // #17324: thinking signatures are scoped to the producing OAuth org (connection),
+  // so the serving connection id is part of the binding. An entry captured without
+  // connection info has unknown provenance — storing it invites cross-org replay on
+  // the next request that is equally unbound (""==="" would match). Refuse.
+  const connectionId = typeof args.connectionId === "string" ? args.connectionId : "";
+  if (connectionId.length === 0) return false;
   for (const toolUseId of toolUseIds) {
     deleteKey(toolUseId);
     entries.set(toolUseId, {
       provider,
       model,
+      connectionId,
       blocks: cloneBlocks(normalizedBlocks),
       size,
       expiresAt: now + CLAUDE_THINKING_MEMORY_TTL_MS,
@@ -165,7 +175,7 @@ export function storeClaudeThinkingBlocks(args: {
  */
 export function storeClaudeThinkingFromResponse(
   responseBody: unknown,
-  binding: { provider: unknown; model: unknown }
+  binding: { provider: unknown; model: unknown; connectionId?: unknown }
 ): boolean {
   if (!responseBody || typeof responseBody !== "object" || Array.isArray(responseBody)) {
     return false;
@@ -184,17 +194,19 @@ export function storeClaudeThinkingFromResponse(
     blocks,
     provider: binding.provider,
     model: typeof root.model === "string" && root.model ? root.model : binding.model,
+    connectionId: binding.connectionId,
   });
 }
 
 /**
  * Return fresh copies of the signed blocks stored for the first tool_use id that
- * hits with the same provider + model binding, or null.
+ * hits with the same provider + model + connection binding, or null.
  */
 export function restoreClaudeThinkingBlocks(args: {
   toolUseIds: unknown;
   provider: unknown;
   model: unknown;
+  connectionId?: unknown;
 }): ClaudeSignedThinkingBlock[] | null {
   const toolUseIds = collectToolUseIds(args.toolUseIds);
   const model = normalizeClaudeThinkingModel(args.model);
@@ -202,10 +214,17 @@ export function restoreClaudeThinkingBlocks(args: {
 
   pruneExpired(Date.now());
   const provider = normalizeProvider(args.provider);
+  // #17324: thinking signatures are org-scoped. Replaying a block stored by one
+  // OAuth connection on a different connection of the same provider+model combo
+  // makes Anthropic reject the whole request with 400 "latest assistant message
+  // cannot be modified". An absent binding info restores nothing (miss = omit,
+  // which adaptive thinking accepts).
+  const connectionId = typeof args.connectionId === "string" ? args.connectionId : "";
   for (const toolUseId of toolUseIds) {
     const entry = entries.get(toolUseId);
     if (!entry) continue;
     if (entry.provider !== provider || entry.model !== model) return null;
+    if (entry.connectionId !== connectionId) return null;
     const blocks = cloneBlocks(entry.blocks);
     for (const block of blocks) restoredBlocks.add(block);
     return blocks;
@@ -242,9 +261,10 @@ function forgetEntriesHolding(blocks: unknown[]) {
 /**
  * Signature-recovery fallback: Anthropic rejected a thinking signature. The
  * active tool-use cycle is otherwise preserved verbatim by the recovery, so any
- * block this store restored there is swapped for the pre-restore #5312
- * `redacted_thinking` placeholder and forgotten, so later turns do not replay it
- * again. Returns null when the content holds no server-restored block.
+ * block this store restored there is dropped (forgotten) so later turns do not
+ * replay it again; the remaining turn keeps its valid shape without a fabricated
+ * placeholder (#17324/#17344). Returns null when the content holds no
+ * server-restored block.
  */
 export function downgradeRestoredClaudeThinking(content: unknown): unknown[] | null {
   if (!Array.isArray(content) || entries.size === 0) return null;
@@ -252,17 +272,14 @@ export function downgradeRestoredClaudeThinking(content: unknown): unknown[] | n
   if (restored.length === 0) return null;
 
   forgetEntriesHolding(restored);
+  // Removed thinking blocks leave the tool_use turn without a precursor — a valid
+  // Anthropic request shape under adaptive thinking (#17324/#17344: no fabricated
+  // placeholder is re-injected; it never matches what Anthropic signed for those
+  // tool_use ids and re-triggers the "latest assistant message cannot be modified" 400
+  // while their cache is warm).
   const kept = content.filter((block) => !restored.includes(block));
-  const hasThinking = kept.some((block) => {
-    const type = (block as Record<string, unknown> | null)?.type;
-    return type === "thinking" || type === "redacted_thinking";
-  });
-  const hasToolUse = kept.some(
-    (block) => (block as Record<string, unknown> | null)?.type === "tool_use"
-  );
-  if (!hasThinking && hasToolUse) {
-    kept.unshift({ type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE });
-  }
+  // Inject nothing (the DEFAULT blob is a foreign encrypted thought);
+  // the recovery caller disables manual thinking when the final tool turn is left bare.
   return kept;
 }
 

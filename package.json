@@ -1,7 +1,7 @@
 {
   "name": "omniroute",
   "version": "3.8.53",
-  "description": "Unified AI router with 377 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
+  "description": "Unified AI router with 380 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
     "omniroute": "bin/omniroute.mjs",
@@ -278,6 +278,7 @@
     "test:combo:live": "cross-env RUN_COMBO_LIVE=1 DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 \"tests/integration/combo-live/*.live.test.ts\"",
     "test:combo:live:vps": "node scripts/test/combo-live-vps.mjs",
     "test:combo:live:vps:failover": "node scripts/test/combo-live-vps.mjs --failover",
+    "test:opencode:smoke": "node scripts/test/opencode-chatgpt-web-smoke.mjs",
     "test:services:int": "cross-env RUN_SERVICES_INT=1 DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 \"tests/integration/services/*.test.ts\"",
     "test:boundary:live": "cross-env RUN_BOUNDARY_LIVE=1 DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 \"tests/boundary/*.live.test.ts\"",
     "test:heap": "node --expose-gc --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/integration/heap-growth.test.ts",
@@ -335,6 +336,7 @@
     "@fontsource/ibm-plex-mono": "5.3.0",
     "@fontsource/instrument-serif": "5.3.0",
     "@fontsource/inter": "5.3.0",
+    "@fontsource/vazirmatn": "5.3.0",
     "@lobehub/icons": "^5.16.0",
     "@modelcontextprotocol/sdk": "^1.31.0",
     "@monaco-editor/react": "^4.7.0",
@@ -530,15 +532,13 @@
     "keytar": true,
     "protobufjs": true,
     "unrs-resolver": true,
-    "@playwright/browser-chromium@1.61.1": true,
-    "bun@1.4.2": true,
-    "libxmljs2@0.37.0": true,
-    "opencode-ai@1.18.30": true,
-    "better-sqlite3@13.0.3": true,
-    "@huggingface/transformers@4.2.0": true,
-    "keytar@7.9.0": true,
-    "sharp@0.35.4": true,
-    "onnxruntime-node@1.24.3": true
+    "@playwright/browser-chromium": true,
+    "bun": true,
+    "libxmljs2": true,
+    "opencode-ai": true,
+    "@huggingface/transformers": true,
+    "sharp": true,
+    "onnxruntime-node": false
   },
   "overrides": {
     "browserslist": "^4.28.8",
@@ -557,7 +557,7 @@
     "protobufjs": "^7.6.5",
     "@babel/core": "^7.29.6",
     "hono": "^4.13.13",
-    "@hono/node-server": "^2.0.5",
+    "@hono/node-server": "^2.1.3",
     "fast-uri": "^3.1.9",
     "body-parser": "^2.4.0",
     "@yarnpkg/parsers": {
