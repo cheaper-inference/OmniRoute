@@ -163,7 +163,7 @@ OmniRoute ta fallasa ƙwarewar A2A guda 6 da aka haɗa cikin `src/lib/a2a/taskEx
 | Rahoton Lafiya   | `health-report`      | Haɗa mai watsewar kewayawa, sanyi, yanayin kulle kowane mai bayarwa                                                                                       | lafiya, juriya          | "Nuna halin kiwon lafiya na duk masu bayarwa"                |
 | Ƙarfin Lissafi   | `list-capabilities`  | Yana dawo da cikakken katalogin Ƙwararrun Agent 45 (23 API + 21 CLI + 1 config) azaman tebur mai alamar tare da danyen SKILL.md URLs don allurar mahallin | catalog, ganowa, basira | "Jera duk damar OmniRoute "                                  |
 
-> Katin Wakilin ya kamata a kiyaye shi daidai da kundin mai ba da 377 mai rai; Ƙididdigar masu badawa da free/no-auth metadata an samo su daga wurin yin rajistar lokacin aiki.
+> Katin Agent ya kamata a kiyaye shi daidai da kundin mai ba da 380 mai rai; Ƙididdigar masu badawa da free/no-auth metadata an samo su daga wurin yin rajistar lokacin aiki.
 
 ### `list-capabilities` Skill Detail
 
@@ -199,15 +199,15 @@ Matsayar JSON-RPC ta `/a2a` ita ce babbar mashigar A2A. Matsayoyin REST da ke ƙ
 
 ## Ƙara Sabuwar Ƙwarewa
 
-1. **Ƙirƙiri fayil ɗin ƙwarewa:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ƙirƙiri fayil ɗin fasaha:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Fitar da aikin async mai sigar `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Bi tsarin ƙwarewar da ake da su kamar `smartRouting.ts`.
+   Fitar da aikin async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Bi siffar basirar data kasance kamar `smartRouting.ts`.
 
-2. **Yi rajistar mai sarrafawa:** a cikin `src/lib/a2a/taskExecution.ts`, ƙara shigarwa zuwa `A2A_SKILL_HANDLERS`:
+2. **Mai kula da rajista:** a cikin `src/lib/a2a/taskExecution.ts`, ƙara shigarwa zuwa `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ƙwarewar da ake da su
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ Matsayar JSON-RPC ta `/a2a` ita ce babbar mashigar A2A. Matsayoyin REST da ke ƙ
    };
    ```
 
-3. **Bayyana a cikin Katin Wakili:** a cikin `src/lib/a2a/agentCardMetadata.ts` (wanda `/.well-known/agent.json` da `/.well-known/agent-card.json` suke amfani da shi tare), ƙara zuwa jerin `skills`:
+3. **Bayyana a Katin Agent:** a cikin `src/lib/a2a/agentCardMetadata.ts` (wanda `/.well-known/agent.json` da `/.well-known/agent-card.json` suka raba), haɗa zuwa tsararrun `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Ƙwarewarku",
-     "description": "Taƙaitaccen bayani mai mayar da hankali kan manufa",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Misalin kiran umarni ta harshen ɗan Adam"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Rubuta gwaje-gwaje:** `tests/unit/a2a-<your-skill>.test.ts`. Gwada yanayin nasara + yanayin kuskure.
+4. **Rubuta gwaje-gwaje:** `tests/unit/a2a-<your-skill>.test.ts`. Rufe hanyar farin ciki hanyar kuskure +.
 
-5. **Rubuta bayanin** sabuwar ƙwarewar a cikin jadawalin `Available Skills` na wannan fayil.
+5. **Takardu** sabuwar fasaha a cikin teburin `Available Skills` na fayil ɗin.
 
 ---
 
@@ -266,7 +266,7 @@ an gabatar → ana aiki → an kammala
 
 ---
 
-## Misalan Haɗawa
+## Misalan Haɗin Kai
 
 ### Python (buƙatun)
 

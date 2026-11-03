@@ -82,6 +82,7 @@ import {
   isTruncatedComboAttempt,
   recordTruncatedStreamAttempt,
 } from "./truncatedStreamFailover.ts";
+import { isAgenticStallComboAttempt, recordAgenticStallAttempt } from "./agenticStallFailover.ts";
 import {
   isQuotaExhaustionFailure,
   recordQuotaExhaustionClassification,
@@ -504,6 +505,29 @@ export async function executeTargetAttempt(
           continue;
         }
         return protectedPriorityTarget ? qualityValidationFailure(quality) : null;
+      }
+
+      // #13954 (opt-in): a quality-valid 200 that narrates instead of calling the next tool.
+      if (
+        await isAgenticStallComboAttempt({
+          body: deps.body,
+          result,
+          modelStr,
+          hasNextTarget: i + 1 < state.orderedTargets.length,
+          protectedPriorityTarget,
+          log: deps.log,
+        })
+      ) {
+        recordAgenticStallAttempt({
+          result,
+          modelStr,
+          provider,
+          targetIndex: i,
+          target,
+          state,
+          deps,
+        });
+        return null;
       }
 
       if (Boolean(deps.clientManagedResponsesContext) && effectiveConnectionId) {
