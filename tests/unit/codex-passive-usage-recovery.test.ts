@@ -96,7 +96,7 @@ for (const stored of [
       cloudPathCalls = 0;
       globalThis.fetch = async (input, init) => {
         const url = String(input);
-        if (url.includes("auth.openai.com")) {
+        if (new URL(url).hostname === "auth.openai.com") {
           tokenCalls++;
           throw new Error("passive replica must not exchange tokens");
         }

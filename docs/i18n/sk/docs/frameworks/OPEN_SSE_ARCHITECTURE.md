@@ -486,13 +486,13 @@ Ten spracováva:
 
 `open-sse/config/` obsahuje konfiguračnú vrstvu:
 
-| Súbor                         | Účel                                                 |
-| ----------------------------- | ---------------------------------------------------- |
-| `providerRegistry.ts`         | Register modelu chatu cez katalóg poskytovateľov 377 |
-| `providerModels.ts`           | Aliasy modelov, mapovanie formátov                   |
-| `constants.ts`                | Časové limity, limity, stavové kódy                  |
-| `defaultThinkingSignature.ts` | Predvolený podpis myslenia Claude                    |
-| `modelStrip.ts` (v službách)  | Odizolovanie polí podľa poskytovateľa                |
+| Súbor                         | Účel                                                  |
+| ----------------------------- | ----------------------------------------------------- |
+| `providerRegistry.ts`         | Register modelov chatu cez katalóg 380 poskytovateľov |
+| `providerModels.ts`           | Aliasy modelov, mapovanie formátov                    |
+| `constants.ts`                | Časové limity, limity, stavové kódy                   |
+| `defaultThinkingSignature.ts` | Predvolený podpis myslenia Claude                     |
+| `modelStrip.ts` (v službách)  | Odizolovanie polí podľa poskytovateľa                 |
 
 ### Schéma registra poskytovateľa
 

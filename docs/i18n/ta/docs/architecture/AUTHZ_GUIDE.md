@@ -146,34 +146,34 @@ server, `/api/settings/require-login`, `/api/auth/status`) அந்த helper �
 
 சில `MANAGEMENT` செயல்கள் **operator-only** ஆகும்: `manage` key மட்டும் போதாது. சேமிக்கப்பட்ட credentials-ஐ ஏற்றுமதி செய்தல் (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), live data-வின் மேல் backup-ஐ மீட்டமைத்தல் (`dryRun=true` உட்பட `POST /api/db-backups/import`, id மூலம் `POST /api/db-backups` restore, `POST /api/settings/import-json`), restore points-ஐ அழித்தல் (`DELETE /api/db-backups` cleanup, மற்றும் `PATCH /api/db-backups` ஏனெனில் அது சேமிக்கும் retention ஒவ்வொரு backup-க்குப் பின்னும் தானியங்கு நீக்கத்தை இயக்குகிறது) ஆகியவற்றுக்கு dashboard session, உள்ளூர் CLI subject, அல்லது login முடக்கப்பட்டிருப்பது தேவை. Sync token-ஐ வழங்குதல் (`POST /api/sync/tokens`) மற்றும் `admin` CLI access token-ஐ உருவாக்குதல் (`POST /api/cli/tokens`) ஒவ்வொரு login mode-இலும் dashboard session அல்லது உள்ளூர் CLI subject தேவை. எந்த scope-இன் API keys-உம், `oma_` access tokens-உம் operator credentials அல்ல: தேவைப்படும்போதெல்லாம் அவை `403` பெறும். இச்சரிபார்ப்பு `src/lib/api/operatorCredential.ts`-இல் உள்ளது (`resolveOperatorCredential()` / `requireOperatorCredential()`). Login settings-ஐ மாற்றுவதும் operator-only: ஒரு கடவுச்சொல் ஏற்கனவே இருந்தால் `POST /api/settings/require-login` (நிர்வாகக் கடவுச்சொல்லை அமைத்தல் / `requireLogin`-ஐ மாற்றுதல்) அந்த credentials-ஐ மட்டுமே ஏற்கும் — கடவுச்சொல் இல்லாத முதல்-முறை bootstrap சாளரம் மாறாது — மேலும் கடவுச்சொல்லை மாற்ற dashboard session `currentPassword` அனுப்ப வேண்டும் (அது இல்லாவிட்டால் அல்லது தவறாக இருந்தால் `403`, `settings.update_failed` என தணிக்கை செய்யப்படும்). உள்ளூர் CLI-உம், login முடக்கப்பட்ட instance-உம் மீட்புப் பாதையைத் தக்கவைக்கின்றன; அவை data directory-ஐ வைத்திருக்கும் host-உடன் பிணைக்கப்பட்டிருப்பதால், அது இல்லாமலேயே கடவுச்சொல்லை அமைக்கலாம்.
 
-## செயலாக்கத் தொடர்
+## குழாய்
 
 ```
-உள்வரும் கோரிக்கை → src/proxy.ts
-  → src/server/authz/pipeline.ts-இல் உள்ள runAuthzPipeline()
-    1. நம்பகமான உள் தலைப்புகளை அகற்று (x-omniroute-auth-*, x-omniroute-route-class)
-    2. கோரிக்கை ID-ஐ உருவாக்கி, classifyRoute() வழியாக வழித்தடத்தை வகைப்படுத்து
-    3. pathname == "/" எனில் → /dashboard-க்குத் திருப்பிவிடு
-    4. வடிகட்டிச் செயல்நிறுத்தம் (முறையான பணிநிறுத்தம்) நடைபெற்று, /api/* எனில் → 503
-    5. GET அல்லாத /api/* எனில் → checkBodySize() பாதுகாப்பைச் சரிபார்
-    6. OPTIONS எனில் → CORS முன்சோதனை 204
-    7. options.enforce == false எனில் → route-class தலைப்புகளுடன் அப்படியே அனுப்பு
-    8. இல்லையெனில்: POLICIES[routeClass].evaluate(ctx)
-       - அனுமதி → x-omniroute-auth-{kind,id,label,scopes}-ஐப் பதித்து → NextResponse.next()
-       - நிராகரிப்பு → correlation_id உடன் JSON பிழை (கட்டுப்பாட்டுப் பலகைப் பக்கங்கள் → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-நம்பகமான உள் தலைப்புகள் (`src/server/authz/headers.ts`-இல் வரையறுக்கப்பட்டவை) வகைப்படுத்தலுக்கு முன் **உள்வரும் கோரிக்கைகளிலிருந்து அகற்றப்படுகின்றன** — ஒரு பொருளைப் போல ஆள்மாறாட்டம் செய்ய வாடிக்கையாளர்கள் `x-omniroute-auth-*` தலைப்புகளை முன்கூட்டியே நிரப்ப முடியாது.
+நம்பகமான உள் தலைப்புகள் ( `src/server/authz/headers.ts` இல் வரையறுக்கப்பட்டுள்ளன)** உள்வரும் கோரிக்கைகளிலிருந்து அகற்றப்பட்டது** — வகைப்பாட்டிற்கு முன் கிளையண்டுகள் ஒரு விஷயத்தைப் போல ஆள்மாறாட்டம் செய்ய `x-omniroute-auth-*` முன் நிரப்ப முடியாது.
 
 ### கொள்கை ஒப்பந்தங்கள்
 
-ஒவ்வொரு வழித்தட வகுப்புக்கும் `src/server/authz/policies/`-இல் ஒரு கொள்கை உள்ளது:
+ஒவ்வொரு வழி வகுப்பிற்கும் `src/server/authz/policies/` இல் கொள்கை உள்ளது:
 
-- **`publicPolicy`** (`policies/public.ts`) — எப்போதும் `allow({ kind: "anonymous", id: "anonymous" })` என்பதைத் திருப்பித் தரும்.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer-ஐப் பிரித்தெடுத்து, `validateApiKey()` வழியாகச் சரிபார்க்கிறது. நடைமுறையிலுள்ள `REQUIRE_API_KEY` அம்சக் கொடி முடக்கப்பட்டிருக்கும்போது மட்டுமே பெயரிலாப் பயன்பாட்டிற்கு வழிவிடுகிறது. நடைமுறையிலுள்ள கொடி `isRequireApiKeyEnabled()` (`DB அம்சக் கொடி மேலெழுதல் > process.env.REQUIRE_API_KEY > இயல்புநிலை`) வழியாகத் தீர்மானிக்கப்படுவதால், கட்டுப்பாட்டுப் பலகையின் அம்சக் கொடிகளும் சூழல் மாறிகளும் `/api/v1/*`, `/api/v1beta/*` மற்றும் மாற்றுப் பெயர்களை ஒரே மாதிரியாகக் கட்டுப்படுத்துகின்றன; தீர்மானிப்பான் தோல்விகள் அணுகலை மறுக்கும். கிளையன்ட் API வழித்தடங்களில் கட்டுப்பாட்டுப் பலகை அமர்வுக் கோரிக்கைகளை அனுமதிக்கிறது (கட்டுப்பாட்டுப் பலகையின் மாதிரிப் பட்டியல் பயன்படுத்தும் `/api/v1/models` உட்பட).
-- **`managementPolicy`** (`policies/management.ts`) — கட்டுப்பாட்டுப் பலகை அமர்வு, உள் மாதிரி-ஒத்திசைவுக் கோரிக்கைகள் (`/api/providers/[name]/(sync-models|models)` உடன் பொருத்தப்படுபவை) ஆகியவற்றை ஏற்கிறது அல்லது `isAuthRequired()` false என்பதைத் திருப்பினால் முழுமையாகத் தவிர்க்கிறது. Bearer டோக்கன் இருந்தும் செல்லுபடியாகாதபோது 403 (`AUTH_001`) என்பதையும், இல்லையெனில் 401 என்பதையும் திருப்பித் தருகிறது. எந்த அங்கீகாரக் கிளைக்கும் முன்பாக வழித்தடப் பாதுகாப்பு அடுக்குகளையும் (LOCAL_ONLY / ALWAYS_PROTECTED) செயல்படுத்துகிறது — [வழித்தடப் பாதுகாப்பு அடுக்குகள்](../security/ROUTE_GUARD_TIERS.md) என்பதைப் பார்க்கவும். `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-இல் உள்ள LOCAL_ONLY பாதைகளை (தற்போது: `/api/mcp/`) Bearer விசை `manage` வரம்பைக் கொண்டிருக்கும்போது loopback அல்லாத இடங்களிலிருந்து அணுகலாம்; மற்ற அனைத்து LOCAL_ONLY பாதைகளும் வரம்பைப் பொருட்படுத்தாமல் கண்டிப்பாக loopback-க்கு மட்டுமே கட்டுப்படுத்தப்பட்டிருக்கும்.
+- **`publicPolicy`** (`policies/public.ts`) — எப்போதும் `allow({ kind: "anonymous", id: "anonymous" })` வழங்கும்.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — பிரித்தெடுத்தல் தாங்கி, `validateApiKey()` வழியாக சரிபார்க்கிறது. பயனுள்ள `REQUIRE_API_KEY` அம்சக் கொடி முடக்கப்பட்டிருக்கும் போது மட்டுமே அநாமதேயமாக மாறும். பயனுள்ள கொடியானது `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) மூலம் தீர்க்கப்படுகிறது, எனவே டாஷ்போர்டு அம்சம் கொடிகள் மற்றும் சூழல் மாறிகள் `/api/v1/*`, `/api/v1beta/*` மற்றும் மாற்றுப்பெயர்களை தொடர்ந்து நிர்வகிக்கின்றன; தீர்க்கும் தோல்விகள் தோல்வி அடைகின்றன. கிளையன்ட் API வழிகளில் டேஷ்போர்டு-அமர்வு கோரிக்கைகளை அனுமதிக்கிறது ( `/api/v1/models`, டாஷ்போர்டு மாதிரி அட்டவணையால் பயன்படுத்தப்படுகிறது). Entra ID SSO இயக்கப்பட்டால், கட்டமைப்பு ரீதியாக என்ட்ரா டோக்கனாக இருக்கும் ஒரு தாங்கி (மூன்று base64url பிரிவுகள், `RS*` alg, `kid`) SSO கிளையால் கையாளப்படுகிறது.** முன்** `validateApiKey()` மற்றும் அதன் தீர்ப்பு இறுதி — ஆகும், இது ஒருபோதும் API-கீ பாதை அல்லது சிதைவிலிருந்து அநாமதேய கிளைக்கு வராது, எனவே அடையாள-வழங்குபவர் செயலிழப்பு திறந்த அணுகலாக மாற முடியாது. நிலையான API விசைகள் பாதிக்கப்படாது. [Entra ID SSO](../security/ENTRA_SSO.md) ஐப் பார்க்கவும்.
+- **`managementPolicy`** (`policies/management.ts`) — டாஷ்போர்டு அமர்வு, உள் மாதிரி-ஒத்திசைவு கோரிக்கைகளை ( `/api/providers/[name]/(sync-models|models)` க்கு எதிராகப் பொருந்துகிறது) ஏற்றுக்கொள்கிறது அல்லது `isAuthRequired()` தவறு எனத் திரும்பினால் முழுவதுமாகத் தவிர்க்கிறது. ஒரு தாங்கி டோக்கன் இருக்கும் போது 403 (`AUTH_001`) ஐ வழங்குகிறது ஆனால் செல்லாது, இல்லையெனில் 401. மேலும் வழி — காவலர் [அடுக்குகளை](../security/ROUTE_GUARD_TIERS.md) (LOCAL_ONLY / ALWAYS_PROTECTED) செயல்படுத்துகிறது. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` இல் உள்ள LOCAL_ONLY பாதைகள் (இன்று: `/api/mcp/`) பியரர் விசை `manage` ஸ்கோப்பைக் கொண்டிருக்கும் போது லூப்பேக் அல்லாதவற்றிலிருந்து அணுகலாம்; மற்ற அனைத்து LOCAL_ONLY பாதைகளும் ஸ்கோப்பைப் பொருட்படுத்தாமல் கண்டிப்பான-லூப்பேக்காக இருக்கும்.
 
-வெற்றிகரமான கொள்கை `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` கொண்ட `AuthSubject`-ஐத் திருப்பித் தருகிறது. கீழ்நிலை கையாளிகள் அங்கீகாரத் தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக, `src/server/authz/assertAuth.ts`-இல் உள்ள `assertAuth(request, "CLIENT_API")` வழியாக அதைப் படிக்கலாம்.
+வெற்றிகரமான கொள்கையானது `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` உடன் வழங்கும். கீழ்நிலை கையாளுபவர்கள் அங்கீகார தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக `src/server/authz/assertAuth.ts` இல் `assertAuth(request, "CLIENT_API")` வழியாகப் படிக்கலாம்.
 
 ## பொது Routes பட்டியல்
 
@@ -310,23 +310,23 @@ Client API key enforcement, நேரடியாக `process.env.REQUIRE_API_KE
 
 ## பிழைத்திருத்தம்
 
-பைப்லைன் எப்போதும் பதில்களில் பின்வருவனவற்றைப் பதிக்கிறது:
+பைப்லைன் எப்போதும் பதில்களை முத்திரையிடுகிறது:
 
 ```
-x-request-id:               <தொடர்பு ஐடி, பிழை உள்ளடக்கங்களிலும் பிரதிபலிக்கப்படும்>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-அங்கீகரிக்கப்பட்ட கோரிக்கைகளுக்கு, அப்ஸ்ட்ரீம் (ஹேண்ட்லர்-பக்க) கோரிக்கை தலைப்புகளில் பின்வருவனவும் அடங்கும்:
+அங்கீகரிக்கப்பட்ட கோரிக்கைகளுக்கு அப்ஸ்ட்ரீம் (ஹேண்ட்லர்-பக்கம்) கோரிக்கை தலைப்புகளும் அடங்கும்:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<கடைசி-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (விருப்பத்தேர்வு)
-x-omniroute-auth-scopes:    காற்புள்ளியால் பிரிக்கப்பட்ட பட்டியல்
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-ஹேண்ட்லர்களுக்குள் `assertAuth(req, expectedClass)`-ஐப் பயன்படுத்தவும் — மிடில்வேர் தவிர்க்கப்பட்டிருந்தால், இது `AUTHZ_NOT_INITIALIZED` குறியீட்டுடன் `AuthzAssertionError`-ஐ எறியும் (சோதனைகளில் உள்ளமைவு பின்னடைவுகளைக் கண்டறிய உதவும்).
+— ஹேண்ட்லர்களுக்குள் `assertAuth(req, expectedClass)` பயன்படுத்தவும், மிடில்வேர் புறக்கணிக்கப்பட்டிருந்தால், `AUTHZ_NOT_INITIALIZED` குறியீட்டுடன் `AuthzAssertionError` வீசுகிறது (சோதனைகளில் உள்ளமைவு பின்னடைவுகளைப் பிடிக்க உதவுகிறது).
 
 ## மேலும் காண்க
 

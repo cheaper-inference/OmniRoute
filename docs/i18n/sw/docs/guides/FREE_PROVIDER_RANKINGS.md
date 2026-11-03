@@ -13,13 +13,13 @@
 
 ## Ni Nini
 
-OmniRoute inasajili watoa huduma 377, ikijumuisha maingizo 155 ya katalogi yaliyowekwa alama**free/no-auth** ( no-auth, free-tier OAuth, au free-tier API key — tazama [Mwongozo wa Viwango Huru](../getting-started/FREE-TIERS-GUIDE.md) na [saraka kamili ya Viwango vya Bure](../reference/FREE_TIERS.md) ). Kukamata: watoa huduma bila malipo hutofautiana sana katika ubora wa mfano. Mtoa huduma ambaye hakuna mwandishi anayetoa kielelezo cha mipaka ni muhimu zaidi kuliko anayetoa mfano mdogo wa urithi.
+OmniRoute inasajili watoa huduma 380, ikijumuisha maingizo 155 ya orodha yaliyowekwa alama**free/no-auth** (no-auth, free-tier OAuth, au free-tier API key — tazama [Mwongozo wa Viwango Huru](../getting-started/FREE-TIERS-GUIDE.md) na [saraka kamili ya Viwango Huru](../reference/FREE_TIERS.md) ). Kukamata: watoa huduma bila malipo hutofautiana sana katika ubora wa mfano. Mtoa huduma ambaye hakuna mwandishi anayetoa kielelezo cha mipaka ni muhimu zaidi kuliko anayetoa mfano mdogo wa urithi.
 
-**Nafasi za Watoa Huduma Bila Malipo** majibu"** ni mtoaji gani wa bure anayenipa mfano bora?** " kwa kujiunga na kila katalogi ya mtoa huduma bila malipo na** alama za ubora zinazotokana na umati** kutoka kwa** AI wa wanaoongoza wa uwanja** (upendeleo wa kibinadamu ELO, wazo lile lile nyuma ya medani ya gumzo ya LMArena). Watoa huduma huwekwa kulingana na nguvu zao** mfano bora wa bure** .
+**Nafasi za Watoa Huduma Bila Malipo** majibu"** ni mtoaji gani wa bure anayenipa mfano bora?** " kwa kujiunga na kila katalogi ya mtoa huduma bila malipo na** alama za ubora zinazotokana na umati** kutoka kwa** AI wa wanaoongoza wa uwanja** (upendeleo wa kibinadamu ELO, wazo lile lile nyuma ya uwanja wa gumzo LMArena ). Watoa huduma huwekwa kulingana na nguvu zao** mfano bora wa bure** .
 
 Kiwango kinahesabiwa kutoka kwa vyanzo vitatu halisi:
 
-1. Orodha za watoa huduma bila malipo — `NOAUTH_PROVIDERS`, pamoja na `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` maingizo yaliyoalamishwa `hasFree` (`src/shared/constants/providers.ts`).
+1. Mtoa huduma bila malipo huorodhesha — `NOAUTH_PROVIDERS`, pamoja na `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` maingizo yaliyoalamishwa `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalogi ya modeli ya kila mtoaji kutoka kwa sajili ya mtoa huduma (`open-sse/config/providerRegistry.ts`).
 3. Alama zinazotokana na ELO zinazolingana na kazi zilizohifadhiwa katika jedwali la `model_intelligence` DB na injini ya kusawazisha ya Arena ELO (`src/lib/arenaEloSync.ts`).
 

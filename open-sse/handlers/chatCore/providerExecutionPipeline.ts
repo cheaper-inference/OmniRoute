@@ -12,7 +12,10 @@ import { createErrorResult } from "../../utils/error.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
 import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 import { recoverAnthropicThinkingSignature } from "./thinkingSignatureRecovery.ts";
-import { isAnthropicThinkingSignatureError } from "./passthroughHelpers.ts";
+import {
+  isAnthropicThinkingSignatureError,
+  isAnthropicThinkingModifiedError,
+} from "./passthroughHelpers.ts";
 import {
   isModelUnavailableError,
   getNextEligibleFamilyFallback,
@@ -549,12 +552,21 @@ export async function runProviderExecutionPipeline(
         // keep statusText
       }
       // Snapshot the first failed wire body before recovery sends a second request.
-      // The caller receives it only for the explicit signature-validation 400.
-      const signatureFailure = isAnthropicThinkingSignatureError({
-        provider: target.provider,
-        status,
-        message: signatureMessage,
-      });
+      // The caller receives it only for the two thinking-block validation 400s
+      // recoverAnthropicThinkingSignature understands (signature rejection, #17324
+      // "cannot be modified").
+      const signatureFailure =
+        isAnthropicThinkingSignatureError({
+          provider: target.provider,
+          model: wire.currentModel,
+          status,
+          message: signatureMessage,
+        }) ||
+        isAnthropicThinkingModifiedError({
+          provider: target.provider,
+          status,
+          message: signatureMessage,
+        });
       const capturedOutboundBody = signatureFailure
         ? input.getLastOutboundBody?.(attempt)
         : undefined;
@@ -566,6 +578,7 @@ export async function runProviderExecutionPipeline(
       try {
         signatureRecovery = await recoverAnthropicThinkingSignature({
           provider: target.provider,
+          model: wire.currentModel,
           statusCode: status,
           message: signatureMessage,
           body: wire.body,
