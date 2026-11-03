@@ -4,7 +4,7 @@
 
 ---
 
-> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。每个图标都是 Lucide 字形。
+> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。瑞士文字缺乏逐个字形的下降（`src/app/globals.css`）：Inter 用于西里尔文、希腊语和越南语，仅在`html[dir="rtl"]`下，Vazirmatn 用于阿拉伯文。每个图标都是 Lucide 字形。
 
 ## 1. 内容所在位置
 
@@ -54,7 +54,7 @@
 
 ## 5. 更新套件
 
-`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。每周`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查，并在 pin 落后时保持一个跟踪问题处于打开状态；上游存储库是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的只读令牌，并且在没有它的情况下保持惰性。
+`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。每周`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查，并在 pin 落后时保持一个跟踪问题处于打开状态；上游存储库是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的只读令牌。当它无法读取上游（没有令牌、停止工作的令牌或GitHub无法访问）时，运行保持绿色，但会写入一条警告并保持一个单独的问题打开，一旦稍后的运行可以再次读取上游，该问题就会自行关闭。
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`将该提交处的上游`src/` （`latest` =最新的`v*`标记）复制到`packages/ui-kit/src`中，应用单个允许的转换（它从相对导入中删除`.js`后缀），并将`packages/ui-kit/package.json`和`package-lock.json`中的工作区版本设置为上游版本。然后：查看`git diff packages/ui-kit`，对两个主题中的提供程序、设置、组合、用法和端点进行可视化传递，运行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，并使用上游变更日志打开PR 。
 

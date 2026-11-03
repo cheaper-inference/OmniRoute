@@ -4,7 +4,7 @@
 
 ---
 
-> **Statuss:** informācijas panelis ir veidots uz** Keak CI UI komplekts** (`@keak/cheaper-inference-ui-kit`), tiek piegādāts kā darbvieta `packages/ui-kit` (`@omniroute/ui-kit`; augšējais momentuzņēmums ir piesprausts `packages/ui-kit/UPSTREAM.md` un to aizsargā `npm run check:ui-kit-snapshot`). Gaisma ir kanoniskā tēma; noklusējuma preference ir `system`. Akcents ir Keak laima (`--ci-color-accent`). Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Katra ikona ir Lucide glifs.
+> **Statuss:** informācijas panelis ir veidots uz** Keak CI UI komplekts** (`@keak/cheaper-inference-ui-kit`), tiek piegādāts kā darbvieta `packages/ui-kit` (`@omniroute/ui-kit`; augšējais momentuzņēmums ir piesprausts `packages/ui-kit/UPSTREAM.md` un to aizsargā `npm run check:ui-kit-snapshot`). Gaisma ir kanoniskā tēma; noklusējuma preference ir `system`. Akcents ir Keak laima (`--ci-color-accent`). Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Skripti Switzer trūkst izšķirtspējas pēc glifa (`src/app/globals.css`): Inter kirilicai, grieķu un vjetnamiešu valodai un, tikai zem `html[dir="rtl"]`, Vazirmatn arābu rakstībai. Katra ikona ir Lucide glifs.
 
 ## 1. Kur kas atrodas
 
@@ -111,7 +111,7 @@ gen:icon-map` izdrukā lietotos nosaukumus, kuru kartē nav (`tests/unit/icon-ma
 
 ## 5. Komplekta atjaunināšana
 
-`npm run check:ui-kit-upstream` salīdzina `packages/ui-kit/UPSTREAM.md` piesprausto versiju ar jaunāko iepriekšējā repo `v*` tagu un izdrukā sinhronizācijas komandu, kad laidiens ir izdots. Iknedēļas `UI Kit upstream watch` darbplūsma (`.github/workflows/ui-kit-upstream-watch.yml`) veic to pašu pārbaudi un atstāj vienu izsekošanas problēmu atvērtu, kamēr tapa ir aiz muguras; augšupējais repo ir privāts, tāpēc darbplūsmai ir nepieciešams tikai lasāms pilnvaras `UI_KIT_READ_TOKEN` noslēpumā, un tā paliek inerta bez tā.
+`npm run check:ui-kit-upstream` salīdzina `packages/ui-kit/UPSTREAM.md` piesprausto versiju ar jaunāko iepriekšējā repo `v*` tagu un izdrukā sinhronizācijas komandu, kad laidiens ir izdots. Iknedēļas `UI Kit upstream watch` darbplūsma (`.github/workflows/ui-kit-upstream-watch.yml`) veic to pašu pārbaudi un atstāj vienu izsekošanas problēmu atvērtu, kamēr tapa ir aiz muguras; augšupējais repo ir privāts, tāpēc darbplūsmai ir nepieciešams tikai lasāms pilnvaras `UI_KIT_READ_TOKEN` noslēpumā. Ja tas nevar nolasīt augšup pa straumi (nav pilnvaras, marķieris, kas pārtrauca darboties, vai GitHub nav sasniedzams), izpilde paliek zaļa, bet raksta brīdinājumu un atstāj atvērtu vienu atsevišķu problēmu, kas pati aizveras, tiklīdz vēlāk palaišana atkal var lasīt augšup pa straumi.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopē augšupvērsto `src/` šajā apstiprinājumā (`latest` = jaunākais `v*` tags) `packages/ui-kit/src`, lieto vienu atļauto transformāciju (atmet `.js` sufiksu no relatīvā importa) un iestata darbvietas versiju `packages/ui-kit/package.json` un `package-lock.json` uz augšupējo versiju. Pēc tam: pārskatiet `git diff packages/ui-kit`, vizuāli pārskatiet pakalpojumu sniedzējus, iestatījumus, kombinācijas, lietojumu un beigu punktu abās tēmās, palaidiet `npm run check:ui-kit-snapshot` un `npm run test:vitest:ui` un atveriet PR, izmantojot augšējo izmaiņu žurnālu.
 

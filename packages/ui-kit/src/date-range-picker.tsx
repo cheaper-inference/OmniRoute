@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import {
   DayButton as DayPickerDayButton,
   DayPicker,
@@ -11,16 +11,29 @@ import {
   type DayButtonProps,
   type MonthProps,
 } from "react-day-picker";
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { Badge } from "./badge";
 import { Button, type ButtonSize } from "./button";
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "./popover";
 import { cn } from "./lib/utils";
+import {
+  calendarDayBoundary,
+  dateInTimeZone,
+  defaultDateRangeRelativePresets,
+  nextCalendarDay,
+  normalizeTimestampRange,
+  parseDateRangeInstant,
+  resolveDateRangePreset,
+  type DateRangeRelativePreset,
+} from "./date-range-time";
 
 export interface DateRangeValue { from: string; to: string; }
 export type DateRangePickerVariant = "default" | "capsule";
 export type DateRangePreset = "today" | "yesterday" | "week" | "7days" | "28days" | "month" | "lastMonth" | "year";
 
 export interface DateRangePickerProps extends Omit<ComponentProps<"button">, "value" | "defaultValue" | "onChange"> {
+  /** Date mode uses inclusive YYYY-MM-DD values; timestamp mode uses [from, to) ISO instants. */
+  mode?: "date" | "timestamp";
   value?: DateRangeValue;
   defaultValue?: DateRangeValue;
   onValueChange?: (value: DateRangeValue) => void;
@@ -40,7 +53,23 @@ export interface DateRangePickerProps extends Omit<ComponentProps<"button">, "va
    */
   referenceDate?: string;
   /** Identifies the preset represented by the committed value when ranges overlap. */
-  valuePreset?: DateRangePreset;
+  valuePreset?: DateRangePreset | (string & {});
+  /** Relative presets for timestamp mode. Supply an empty array for calendar-only selection. */
+  presets?: readonly DateRangeRelativePreset[];
+  /** Authoritative ISO instant used by timestamp presets. Defaults to the time the popover opens. */
+  referenceTime?: string;
+  /** IANA timezone for timestamp labels and civil calendar-day boundaries. Defaults to UTC. */
+  timeZone?: string;
+  /** Committed preset identity; undefined after a calendar selection or Clear. */
+  onPresetChange?: (preset: string | undefined) => void;
+  /** Timestamp-mode helper content can explain application-specific bounds using the pending range. */
+  helper?: ReactNode | ((state: { draft: DateRangeValue; preset: string | undefined }) => ReactNode);
+  /** Timestamp-mode helper placement. Actions places it beside Apply in the footer. */
+  helperPlacement?: "summary" | "actions";
+  /** Hide the visible timestamp instruction/range summary without removing calendar live announcements. Defaults to true. */
+  showSummary?: boolean;
+  /** Timestamp-mode application validation. Returning false disables Apply while leaving the full pending range available to helper content. */
+  canApply?: (state: { draft: DateRangeValue; preset: string | undefined }) => boolean;
   /** Visual treatment for the trigger; capsule is a compact 36px opt-in control. */
   variant?: DateRangePickerVariant;
   /** Overrides the trigger height without changing the calendar popover. */
@@ -184,7 +213,20 @@ const calendarClassNames = {
   range_end: "ci-range-calendar__day--range-end",
 } as const;
 
-export function DateRangePicker({
+export function DateRangePicker(props: DateRangePickerProps) {
+  return props.mode === "timestamp" ? <TimestampDateRangePicker {...props} /> : <CalendarDateRangePicker {...props} />;
+}
+
+function CalendarDateRangePicker({
+  mode: _mode,
+  presets: _presets,
+  referenceTime: _referenceTime,
+  timeZone: _timeZone,
+  onPresetChange,
+  helper: _helper,
+  helperPlacement: _helperPlacement,
+  showSummary: _showSummary,
+  canApply: _canApply,
   className,
   value: controlled,
   defaultValue = { from: "", to: "" },
@@ -213,7 +255,7 @@ export function DateRangePicker({
   const value = normalizeRange(controlled ?? uncontrolled, min, max);
   const committedPreset = valuePreset ?? matchingPreset(value, weekStartsOn, min, max, referenceDateValue);
   const [draft, setDraft] = useState(value);
-  const [activePreset, setActivePreset] = useState<DateRangePreset | undefined>(committedPreset);
+  const [activePreset, setActivePreset] = useState<string | undefined>(committedPreset);
   const [month, setMonth] = useState(() => monthForValue(value, referenceDateValue));
   const isCompact = useSyncExternalStore(subscribeToCompactChange, getCompactSnapshot, () => false);
 
@@ -309,8 +351,158 @@ export function DateRangePicker({
           />
         </div>
         <div className="ci-date-range-popover__actions">
-          <PopoverClose asChild><button type="button" onClick={() => { setActivePreset(undefined); setDraft({ from: "", to: "" }); update({ from: "", to: "" }); }}>Clear</button></PopoverClose>
-          <PopoverClose asChild><Button size="sm" onClick={() => update(draft)} disabled={!draft.from || !draft.to}>Apply range</Button></PopoverClose>
+          <PopoverClose asChild><button type="button" onClick={() => { setActivePreset(undefined); setDraft({ from: "", to: "" }); update({ from: "", to: "" }); onPresetChange?.(undefined); }}>Clear</button></PopoverClose>
+          <PopoverClose asChild><Button size="sm" onClick={() => { update(draft); onPresetChange?.(activePreset); }} disabled={!draft.from || !draft.to}>Apply range</Button></PopoverClose>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function TimestampDateRangePicker({
+  mode: _mode,
+  className,
+  value: controlled,
+  defaultValue = { from: "", to: "" },
+  onValueChange,
+  open: controlledOpen,
+  defaultOpen = false,
+  onOpenChange,
+  min,
+  max,
+  placeholder = "Select date range",
+  locale,
+  weekStartsOn = 0,
+  numberOfMonths = 1,
+  referenceDate: _referenceDate,
+  referenceTime,
+  timeZone = "UTC",
+  valuePreset,
+  presets = defaultDateRangeRelativePresets,
+  onPresetChange,
+  helper,
+  helperPlacement = "summary",
+  showSummary = true,
+  canApply,
+  variant = "default",
+  triggerSize: triggerSizeProp,
+  ...props
+}: DateRangePickerProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const [openedAt, setOpenedAt] = useState(() => new Date().toISOString());
+  const clock = referenceTime ?? openedAt;
+  const reference = parseDateRangeInstant(clock, "referenceTime");
+  const today = dateInTimeZone(reference, timeZone);
+  const [uncontrolled, setUncontrolled] = useState(() => normalizeTimestampRange(defaultValue, min, max));
+  const value = normalizeTimestampRange(controlled ?? uncontrolled, min, max);
+  const candidates = presets.map((preset) => ({ preset, value: normalizeTimestampRange(resolveDateRangePreset(preset, { referenceTime: clock, timeZone }), min, max) }));
+  if (new Set(presets.map(({ id }) => id)).size !== presets.length) throw new RangeError("DateRangePicker preset ids must be unique.");
+  const matchedPreset = candidates.find((candidate) => candidate.value.from === value.from && candidate.value.to === value.to)?.preset.id;
+  const committedPreset = valuePreset ?? matchedPreset;
+  const [draft, setDraft] = useState(value);
+  const [activePreset, setActivePreset] = useState<string | undefined>(committedPreset);
+  const calendarDate = (instant: string) => dateInTimeZone(parseDateRangeInstant(instant), timeZone);
+  const monthForTimestamp = (range: DateRangeValue) => startOfMonth(parseIso(range.from ? calendarDate(range.from) : today));
+  const [month, setMonth] = useState(() => monthForTimestamp(value));
+  const isCompact = useSyncExternalStore(subscribeToCompactChange, getCompactSnapshot, () => false);
+  const visibleMonths = numberOfMonths === 2 || (numberOfMonths === "responsive" && !isCompact) ? 2 : 1;
+  const formatInstant = new Intl.DateTimeFormat(locale, { timeZone, dateStyle: "medium", timeStyle: "short" });
+  // The calendar represents civil dates, so its Date objects are formatted in browser-local time.
+  const fullDate = new Intl.DateTimeFormat(locale, { dateStyle: "full" });
+  const monthYear = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" });
+  const weekdayShort = new Intl.DateTimeFormat(locale, { weekday: "short" });
+  const weekdayLong = new Intl.DateTimeFormat(locale, { weekday: "long" });
+  const dayNumber = new Intl.DateTimeFormat(locale, { day: "numeric" });
+  const labelPreset = candidates.find(({ preset, value: candidate }) => preset.id === committedPreset && candidate.from === value.from && candidate.to === value.to)?.preset;
+  const label = value.from && value.to && value.from < value.to
+    ? labelPreset?.label ?? `${formatInstant.format(new Date(value.from))} – ${formatInstant.format(new Date(value.to))}`
+    : placeholder;
+  const minDate = min ? calendarDate(min) : undefined;
+  const maxDate = max ? dateInTimeZone(parseDateRangeInstant(max) - 1, timeZone) : undefined;
+  const disabledDates = [...(minDate ? [{ before: parseIso(minDate) }] : []), ...(maxDate ? [{ after: parseIso(maxDate) }] : [])];
+  const selected = draft.from ? { from: parseIso(calendarDate(draft.from)), to: draft.to && draft.to > draft.from ? parseIso(dateInTimeZone(parseDateRangeInstant(draft.to) - 1, timeZone)) : undefined } : undefined;
+  const complete = Boolean(draft.from && draft.to && draft.from < draft.to);
+  const allowed = complete && (canApply?.({ draft, preset: activePreset }) ?? true);
+  const helperContent = typeof helper === "function" ? helper({ draft, preset: activePreset }) : helper;
+  const hasHelper = helperContent != null && helperContent !== false && helperContent !== true && helperContent !== "";
+  const status = complete
+    ? `${formatInstant.format(new Date(draft.from))} – ${formatInstant.format(new Date(draft.to))} (${timeZone}).`
+    : draft.from ? "Choose an end date." : "Choose a start date.";
+
+  useEffect(() => {
+    setDraft(value);
+    setActivePreset(committedPreset);
+    setMonth(monthForTimestamp(value));
+  }, [value.from, value.to, committedPreset, timeZone]);
+
+  const update = (next: DateRangeValue, preset?: string) => {
+    const normalized = normalizeTimestampRange(next, min, max);
+    if (controlled === undefined) setUncontrolled(normalized);
+    onValueChange?.(normalized);
+    onPresetChange?.(preset);
+  };
+  const handleOpen = (nextOpen: boolean) => {
+    if (nextOpen) {
+      if (!referenceTime) setOpenedAt(new Date().toISOString());
+      setDraft(value);
+      setActivePreset(committedPreset);
+      setMonth(monthForTimestamp(value));
+    }
+    if (controlledOpen === undefined) setUncontrolledOpen(nextOpen);
+    onOpenChange?.(nextOpen);
+  };
+  const selectCalendarDay = (date: string) => {
+    setActivePreset(undefined);
+    if (!draft.from || draft.to) {
+      setDraft(normalizeTimestampRange({ from: calendarDayBoundary(date, timeZone), to: "" }, min, max));
+      return;
+    }
+    const first = calendarDate(draft.from);
+    const from = date < first ? date : first;
+    const to = date < first ? first : date;
+    setDraft(normalizeTimestampRange({ from: calendarDayBoundary(from, timeZone), to: calendarDayBoundary(nextCalendarDay(to), timeZone) }, min, max));
+  };
+
+  return (
+    <Popover open={open} onOpenChange={handleOpen}>
+      <PopoverTrigger asChild><Button variant="outline" size={triggerSizeProp ?? (variant === "capsule" ? "sm" : "default")} data-trigger-variant={variant} className={cn("ci-date-range-trigger", className)} {...props}><CalendarDays aria-hidden="true" /><span>{label}</span></Button></PopoverTrigger>
+      <PopoverContent className="ci-date-range-popover ci-date-range-popover--timestamp" align="end" aria-label="Choose date range" data-calendar-months={visibleMonths} data-presets={presets.length > 0 || undefined}>
+        {presets.length > 0 && <div className="ci-date-range-presets" aria-label="Relative ranges">
+          {candidates.map(({ preset, value: next }) => <button type="button" key={preset.id} aria-pressed={activePreset === preset.id} data-active={activePreset === preset.id || undefined} disabled={!next.from || !next.to || next.from >= next.to} onClick={() => { setActivePreset(preset.id); setDraft(next); setMonth(monthForTimestamp(next)); }}>{preset.shortLabel && <Badge variant="outline" aria-hidden="true" className="ci-date-range-preset__duration">{preset.shortLabel}</Badge>}<span>{preset.label}</span>{activePreset === preset.id && <Check size={16} aria-hidden />}</button>)}
+        </div>}
+        <div className="ci-range-calendars" data-months={numberOfMonths}>
+          <DayPicker
+            aria-label="Date range calendar"
+            classNames={calendarClassNames}
+            components={{ Chevron: CalendarChevron, DayButton: CalendarDayButton, Month: CalendarMonth }}
+            disabled={disabledDates}
+            endMonth={maxDate ? startOfMonth(parseIso(maxDate)) : undefined}
+            fixedWeeks
+            footer={status}
+            formatters={{ formatCaption: (date) => monthYear.format(date), formatDay: (date) => dayNumber.format(date), formatWeekdayName: (date) => weekdayShort.format(date) }}
+            labels={{
+              labelDayButton: (date, modifiers) => `${fullDate.format(date)}${modifiers.today ? ", today" : ""}${modifiers.range_start ? ", range start" : ""}${modifiers.range_middle ? ", in selected range" : ""}${modifiers.range_end ? ", range end" : ""}`,
+              labelGrid: (date) => monthYear.format(date), labelNav: () => "Calendar navigation", labelNext: () => "Next month", labelPrevious: () => "Previous month", labelWeekday: (date) => weekdayLong.format(date),
+            }}
+            lang={new Intl.DateTimeFormat(locale).resolvedOptions().locale}
+            mode="range"
+            month={month}
+            numberOfMonths={visibleMonths}
+            onMonthChange={setMonth}
+            onSelect={(_next, triggerDate) => selectCalendarDay(toIso(triggerDate))}
+            selected={selected}
+            showOutsideDays
+            startMonth={minDate ? startOfMonth(parseIso(minDate)) : undefined}
+            today={parseIso(today)}
+            weekStartsOn={weekStartsOn}
+          />
+          {(showSummary || (hasHelper && helperPlacement === "summary")) && <div className="ci-date-range-popover__summary">{showSummary && <><p>{draft.from && !draft.to ? "Choose an end date." : "Select a preset or choose a custom range."}</p>{complete && <p>{status}</p>}</>}{hasHelper && helperPlacement === "summary" && <div className="ci-date-range-popover__helper">{helperContent}</div>}</div>}
+        </div>
+        <div className="ci-date-range-popover__actions" data-has-helper={hasHelper && helperPlacement === "actions" || undefined}>
+          <PopoverClose asChild><button type="button" onClick={() => { setDraft({ from: "", to: "" }); setActivePreset(undefined); update({ from: "", to: "" }); }}>Clear</button></PopoverClose>
+          {hasHelper && helperPlacement === "actions" && <div className="ci-date-range-popover__helper">{helperContent}</div>}
+          <PopoverClose asChild><Button size="sm" disabled={!allowed} onClick={() => { if (allowed) update(draft, activePreset); }}>Apply range</Button></PopoverClose>
         </div>
       </PopoverContent>
     </Popover>

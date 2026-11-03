@@ -2,6 +2,8 @@ export { SidebarBranch, type SidebarBranchItem, type SidebarBranchProps } from "
 export { SignalDiagram, DiagramFrame, type SignalNode, type SignalEdge, type SignalDiagramProps, type DiagramFrameProps } from "./signal-diagram";
 export { OverviewCard, type OverviewCardProps, type OverviewMetric, type OverviewTone } from "./overview-card";
 export { MetricChartFrame, MetricFunnel, MetricDonut, StatusMatrix, type MetricChartFrameProps, type MetricFunnelDatum, type MetricFunnelProps, type MetricDonutDatum, type MetricDonutProps, type StatusMatrixItem, type StatusMatrixProps } from "./metric-charts";
+export { StackedBarChart, Sparkline, type ChartSeries, type StackedBarDatum, type StackedBarChartProps, type SparklineProps } from "./reporting-charts";
+export { MetricCard, MetricTrend, type MetricCardProps, type MetricTrendProps } from "./metric-card";
 export { WorkflowGuide, type WorkflowGuideItem, type WorkflowGuideProps } from "./workflow-guide";
 export {
   ciTokenReferences,
@@ -18,7 +20,7 @@ export { Input, type InputProps, type InputSize } from "./input";
 export { Label } from "./label";
 export { Separator, type SeparatorLabelAlign, type SeparatorOrientation, type SeparatorProps } from "./separator";
 export { Skeleton, type SkeletonAnimation, type SkeletonProps, type SkeletonVariant } from "./skeleton";
-export { Switch, type SwitchProps, type SwitchSide } from "./switch";
+export { Switch, type SwitchProps, type SwitchSide, type SwitchSize } from "./switch";
 export { Textarea, type TextareaProps } from "./textarea";
 export {
   Checkbox,
@@ -67,7 +69,7 @@ export {
   TabsList,
   TabsTrigger,
   type TabsContentProps,
-  type TabsOrientation,
+  type TabsOrientation, type TabsSize,
   type TabsProps,
   type TabsTriggerProps,
   type TabsVariant,
@@ -295,6 +297,7 @@ export {
 } from "./multi-select-filter";
 export { Slider, type SliderProps, type SliderPreset } from "./slider";
 export { DateRangePicker, type DateRangePickerProps, type DateRangePickerVariant, type DateRangePreset, type DateRangeValue } from "./date-range-picker";
+export { defaultDateRangeRelativePresets, resolveDateRangePreset, calendarDayBoundary, type DateRangeRelativePreset, type DateRangePresetContext } from "./date-range-time";
 export {
   LanguageSegmentedControl,
   type LanguageSegmentedControlProps,
@@ -376,3 +379,10 @@ export { CloudRoutingExplorer, type CloudRoutingExplorerProps } from "./cloud-ro
 export { CloudAuthHandoff, type CloudAuthHandoffProps } from "./cloud-auth-handoff";
 
 export { CloudFieldHelp, CloudHostingConsent, type CloudHostingConsentValue } from "./cloud-patterns";
+
+export { DockedLayout, DockedRail, DockedRailHeader, DockedRailBody, DockedRailFooter, DockedRailClose, type DockedLayoutProps, type DockedRailProps } from "./docked-rail";
+export { ScopeChip, type ScopeChipProps } from "./scope-chip";
+
+export { ChatHeader, ChatWelcome, ChatPromptList, ChatComposer, ChatThread, ChatMessage, ChatActivity, ChatMessageActions, ChatHistory, type ChatHeaderProps, type ChatWelcomeProps, type ChatPrompt, type ChatPromptListProps, type ChatAttachment, type ChatComposerProps, type ChatThreadProps, type ChatMessageProps, type ChatActivityState, type ChatActivityProps, type ChatMessageActionsProps, type ChatHistoryItem, type ChatHistoryGroup, type ChatHistoryProps } from "./chat";
+
+export { UsageInfoTooltip, UsageDrilldownHeader, UsageRequestIdentity, UsageCostBreakdown, UsageTokenUsage, UsageDetailSection, UsageTimingDelivery, UsageModelsUsed, UsageDrilldownBody, UsageDrilldownActions, UsageRequestFailure, UsageDrilldownLoading, type UsageDetailValue, type UsageInfoTooltipProps, type UsageDrilldownHeaderProps, type UsageRequestIdentityProps, type UsageReceiptRow, type UsageCostBreakdownProps, type UsageTokenUsageProps, type UsageDetailRow, type UsageDetailSectionProps, type UsageTimingDeliveryProps, type UsageModelRow, type UsageModelsUsedProps, type UsageDrilldownLoadingProps } from "./usage-drilldown";
