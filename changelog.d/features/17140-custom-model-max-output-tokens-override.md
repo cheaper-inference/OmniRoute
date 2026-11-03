@@ -1,0 +1,1 @@
+- **feat(dashboard):** the Custom Models editor can set a per-model Max Output Tokens override (blank clears it), wired to the existing `maxOutputTokenOverride` field of `PUT /api/provider-models` so `/v1/models` reports it for strict OpenAI-compatible clients ([#17140](https://github.com/diegosouzapw/OmniRoute/pull/17140)) — thanks @SaebAmini

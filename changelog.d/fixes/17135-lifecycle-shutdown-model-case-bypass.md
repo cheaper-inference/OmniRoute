@@ -1,0 +1,1 @@
+- **fix(sse):** Uppercase or mixed-case spellings of a shut-down model id are now rejected with the 410 that cites the canonical record id, instead of being routed. ([#17135](https://github.com/diegosouzapw/OmniRoute/pull/17135)) — thanks @maxmad64bis

@@ -178,29 +178,29 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # Duk gwaje-gwaje (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Fayil ɗin gwaji guda ɗaya (ginannen mai gudanar da gwajin Node.js — yawancin gwaje-gwaje suna amfani da wannan)
+# Fayil ɗin gwaji guda ɗaya (mai gudanar da gwaji na asali na Node.js — yawancin gwaje-gwaje suna amfani da wannan)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Gwaje-gwajen unit kawai da canjin da ka yi ya shafa (mai zaɓen TIA iri ɗaya da shingen CI, #8084)
+# Gwaje-gwajen unit kawai da canjin ku ya shafa (mai zaɓin TIA iri ɗaya da shingen CI, #8084)
 npm run test:scoped            # canje-canje a commit na ƙarshe (ko working tree)
-npm run test:scoped:staged     # canje-canjen staged kawai — ya dace sosai da gudanarwar pre-commit
-npm run test:scoped:full       # fara da sake gina taswirar import-graph (bayan ƙara/matsar da fayiloli)
-# Exit 1 + "run the full suite" na nufin wani fayil na hub (tsconfig, package.json, …) ko source
-# marar taswira ya canza — mai zaɓen yana gaza cikin aminci, ba ya taɓa tsallakewa a ɓoye.
+npm run test:scoped:staged     # staged changes kawai — ya dace sosai da gudanarwar pre-commit
+npm run test:scoped:full       # fara sake gina taswirar import-graph (bayan ƙara/matsar da fayiloli)
+# Exit 1 + "gudanar da cikakken suite" na nufin wani hub file (tsconfig, package.json, …) ko wani
+# source da ba a yi masa mapping ba ya canza — mai zaɓin yana gazawa cikin aminci, ba ya taɓa tsallakewa a ɓoye.
 
-# Vitest (uwar garken MCP, autoCombo, cache)
+# Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
 # Gwaje-gwajen E2E (yana buƙatar Playwright)
 npm run test:e2e
 
-# E2E na abokan cinikin protocol (MCP transports, A2A)
+# E2E na protocol clients (MCP transports, A2A)
 npm run test:protocols:e2e
 
 # Gwaje-gwajen dacewar ecosystem
 npm run test:ecosystem
 
-# Shingen coverage: 60% statements/lines/functions/branches
+# Shingen coverage: 60% na statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
@@ -208,51 +208,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gwajin smoke na combo mai amfani da ainihin upstream kuma mai shinge (yana buƙatar damar VPS + kuɗin ainihin masu samarwa)
-# Yana tuntuɓar masu samarwa na GASKIYA — yana kashe kuɗi kaɗan. BA YA TAƁA gudana a CI. Yana tsallakewa cikin tsabta ba tare da shingen ba.
-# Yana buƙatar: damar ssh root@192.168.0.15 (yana samo snapshot na DB mai karantawa-kawai daga VPS).
+# Gwajin combo smoke na ainihin upstream mai shinge (yana buƙatar damar shiga VPS + kuɗin ainihin provider)
+# Yana tuntuɓar ainihin providers — yana cin kuɗi kaɗan. BA YA TAƁA gudana a CI. Yana tsallakewa yadda ya dace idan babu shingen.
+# Ana buƙata: damar ssh root@192.168.0.15 (yana samo snapshot na DB mai read-only daga VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Gwajin smoke kai tsaye na VPS na Phase-3 — tsantsar rubutun Node ESM, suna tuntuɓar uwar garken .15 kai tsaye.
-# Yana buƙatar: damar ssh root@192.168.0.15 (ana ƙirƙira/rusa combos ta hanyar SSH sqlite).
-# Yana tuntuɓar masu samarwa na GASKIYA (ƙaramin kuɗi). Yana ƙirƙira/share combos na __live_test__* kawai. BA YA TAƁA gudana a CI.
-# REQUIRE_API_KEY=false a .15 saboda haka ba a buƙatar API key, amma yana mutunta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY idan an saita su.
-npm run test:combo:live:vps              # Yanayin HTTP guda 7 (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # yana ƙara yanayin failover na ainihi tsakanin masu samarwa (gaba ɗaya 8)
+# Gwajin live smoke na VPS na Phase-3 — tsantsar scripts na Node ESM, suna tuntuɓar live .15 server kai tsaye.
+# Yana buƙatar: damar ssh root@192.168.0.15 (ana ƙirƙira/rushe combos ta hanyar SSH sqlite).
+# Yana tuntuɓar ainihin providers (ƙaramin kuɗi). Yana ƙirƙira/goge combos na __live_test__* kawai. BA YA TAƁA gudana a CI.
+# REQUIRE_API_KEY=false a .15 don haka ba a buƙatar API key, amma yana bin COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY idan an saita su.
+npm run test:combo:live:vps              # yanayin HTTP guda 7 (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # yana ƙara ainihin yanayin failover tsakanin providers (jimilla 8)
 ```
 
 Bayanan coverage:
 
-- `npm run test:coverage` yana auna coverage na source don babban rukunin gwaje-gwajen unit, yana ware `tests/**`, kuma yana haɗa `open-sse/**`
-- Dole Pull Request su riƙe shingen coverage na **60%+** na statements/lines/functions/branches
-- Idan PR ya canza lambar production a `src/`, `open-sse/`, `electron/`, ko `bin/`, dole ne ya ƙara ko sabunta gwaje-gwaje masu sarrafa kansu a cikin PR ɗin
-- `npm run coverage:report` yana buga cikakken rahoto fayil-bayan-fayil daga gudanarwar coverage ta baya-bayan nan
-- `npm run test:coverage:legacy` yana adana tsohon ma'auni don kwatanta bayanan tarihi
-- Duba `docs/ops/COVERAGE_PLAN.md` don taswirar inganta coverage mataki-mataki
+- `npm run test:coverage` yana auna coverage na source don babban unit test suite, yana cire `tests/**`, kuma yana haɗa `open-sse/**`
+- Dole ne pull requests su kiyaye shingen coverage na **60%+** na statements/lines/functions/branches
+- Idan PR ya canza production code a cikin `src/`, `open-sse/`, `electron/`, ko `bin/`, dole ne ya ƙara ko ya sabunta automated tests a cikin PR ɗin
+- `npm run coverage:report` yana fitar da cikakken rahoto fayil-bayan-fayil daga gudanarwar coverage ta baya-bayan nan
+- `npm run test:coverage:legacy` yana adana tsohon ma'auni don kwatanta tarihi
+- Duba `docs/ops/COVERAGE_PLAN.md` don phased coverage improvement roadmap
 
-### Abubuwan da ake Buƙata na Pull Request
+### Abubuwan da Ake Buƙata na Pull Request
 
 Kafin buɗe PR, yi amfani da
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) don gudanar da zagayen da aka mayar da hankali kan
-abin da ka canza. Cikakken rukunin unit (sassan CI guda 4), Vitest, shingen coverage na **60%+**, da
-gina production alhakin CI ne — gudanar da su a na'urarka ba ya ƙara wata alama da gwaje-gwajen PR
-ba za su riga sun ba ka ba, kuma a kan ƙananan na'urori hakan na iya cika ƙarfin host (#8084):
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) don gudanar da focused loop na
+abin da kuka canza. Cikakken unit suite (4 CI shards), Vitest, shingen coverage na **60%+**, da
+production build alhakin CI ne — gudanar da su a gida ba ya ƙara wani bayani da gwaje-gwajen PR
+ba za su riga sun ba ku ba, kuma a kan ƙananan na'urori yana iya cika ƙarfin host (#8084):
 
-- Gudanar da fayilolin gwajin da suka shafi canjin da ka yi: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Gudanar da test files da suka shafi canjinku: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Gudanar da `npm run lint`
-- Haɗa ko sabunta gwaje-gwaje masu sarrafa kansu a cikin PR ɗin duk lokacin da aka canza lambar production
-- Haɗa fayilolin gwajin da aka canza ko aka ƙara a bayanin PR lokacin da aka canza lambar production
-- Duba sakamakon SonarQube a PR lokacin da aka saita sirrin aikin a CI
+- Ƙara ko sabunta automated tests a cikin PR ɗin duk lokacin da production code ya canza
+- A cikin fayilolin `node:test`, sanya kowane top-level `await` (kamar `await import(...)`) kafin `test()` / `describe()` na farko: a ƙarƙashin `--test-force-exit`, gwaje-gwajen da aka yi wa rajista bayansa na iya ƙin gudana a ɓoye (#18045; ana tilasta wannan ta `npm run check:test-tla-order`)
+- Haɗa test files da aka canza ko aka ƙara a cikin bayanin PR idan production code ya canza
+- Duba sakamakon SonarQube a kan PR lokacin da aka saita project secrets a CI
 
-Matsayin gwaji na yanzu: **fayilolin gwajin unit guda 122** waɗanda suka shafi:
+Matsayin gwaji na yanzu: **122 unit test files** waɗanda suka shafi:
 
-- Masu fassarar provider da sauya format
-- Iyakance ƙima, circuit breaker, da resilience
-- Semantic cache, idempotency, da bin diddigin ci gaba
-- Ayyukan database da schema (modules na DB guda 21)
-- Tsarukan OAuth da authentication
+- Provider translators da format conversion
+- Rate limiting, circuit breaker, da resilience
+- Semantic cache, idempotency, da progress tracking
+- Database operations da schema (21 DB modules)
+- OAuth flows da authentication
 - Tabbatar da API endpoint (Zod v4)
-- Kayan aikin uwar garken MCP da tilasta scope
+- MCP server tools da tilasta scope
 - Tsarukan Memory da Skills
 
 ---

@@ -11,17 +11,18 @@ asistenta (arhitektura, konvencije, testiranje, kvalitativni uvjeti, git tijek r
 PII saznanja). Pročitajte ga u cijelosti; nemojte ovdje ponovo dodavati pravila projekta. Sve u nastavku odnosi se ISKLJUČIVO
 na Claude Code — operativna poboljšanja pravila već definiranih u `AGENTS.md`.
 
-## Izolacija radnog stabla — specifičnosti Claude Code-a
+## Izolacija worktreea — specifičnosti za Claude Code
 
-Potpuni obavezni protokol radnog stabla (potvrda osnovne grane, kanonska putanja `.claude/worktrees/`,
-`cp -al` node_modules, pravila uklanjanja) nalazi se u `AGENTS.md` → Git tijek rada → "Izolacija radnog stabla".
-Točke specifične za Claude Code:
+Cjeloviti obvezni protokol za worktree (potvrda osnovne grane, kanonska putanja
+`.claude/worktrees/`, `cp -al` node_modules, pravila za uklanjanje) nalazi se u
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (sažeto u `AGENTS.md` →
+Git tijek rada → "Izolacija worktreea"). Točke specifične za Claude Code:
 
-- Potvrdite osnovnu granu s operatorom putem `AskUserQuestion` (Tvrdo pravilo #19) osim ako
-  su vam je već priopćili.
-- Dajte prednost nativnom alatu `EnterWorktree` — on već stvara radna stabla u
-  `.claude/worktrees/` (kanonska putanja). Stvorite radno stablo dokumentiranom naredbom `git
-worktree add`, zatim pozovite `EnterWorktree` s njegovom `path` putanjom.
+- Potvrdite osnovnu granu s operatorom putem `AskUserQuestion` (Strogo pravilo br. 19), osim
+  ako vam već nije rekao.
+- Dajte prednost izvornom alatu `EnterWorktree` — on već stvara worktreeove unutar
+  `.claude/worktrees/` (kanonska putanja). Stvorite worktree dokumentiranom naredbom `git
+worktree add`, a zatim pozovite `EnterWorktree` s njegovim argumentom `path`.
 
 ## Sigurnost između sesija — specifičnosti Claude Code-a
 

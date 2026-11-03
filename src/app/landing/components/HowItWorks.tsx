@@ -1,5 +1,6 @@
 "use client";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
 
 export default function HowItWorks() {
   const t = useTranslations("landing");
@@ -19,9 +20,7 @@ export default function HowItWorks() {
           {/* Step 1: CLI & SDKs */}
           <div className="flex flex-col gap-6 relative group">
             <div className="w-24 h-24 rounded-2xl bg-[#0B0E14] border border-[#2D333B] flex items-center justify-center shadow-xl group-hover:border-gray-500 transition-colors z-10 mx-auto md:mx-0">
-              <span className="material-symbols-outlined text-4xl text-gray-300" aria-hidden="true">
-                terminal
-              </span>
+              <Icon name="terminal" size={36} className="text-gray-300" />
             </div>
             <div>
               <h3 className="text-xl font-bold mb-2 break-words">{t("howItWorksStep1Title")}</h3>
@@ -32,12 +31,7 @@ export default function HowItWorks() {
           {/* Step 2: OmniRoute Hub */}
           <div className="flex flex-col gap-6 relative group md:items-center md:text-center">
             <div className="w-24 h-24 rounded-2xl bg-[#0B0E14] border-2 border-[#E54D5E] flex items-center justify-center shadow-[0_0_30px_rgba(229,77,94,0.2)] z-10 mx-auto">
-              <span
-                className="material-symbols-outlined text-4xl text-[#E54D5E] animate-pulse"
-                aria-hidden="true"
-              >
-                hub
-              </span>
+              <Icon name="hub" size={36} className="text-[#E54D5E] animate-pulse" />
             </div>
             <div>
               <h3 className="text-xl font-bold mb-2 text-[#E54D5E] break-words">

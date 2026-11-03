@@ -17,6 +17,8 @@
     "cliTools.guides.windsurf.steps.3.desc",
     "cliTools.guides.windsurf.steps.4.desc",
     "cliTools.model",
+    "cliTools.piInstallCommand",
+    "cliTools.piManualConfigSample",
     "cliTools.platforms",
     "cliTools.startMitm",
     "cliTools.stopMitm",

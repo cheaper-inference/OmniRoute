@@ -18,6 +18,9 @@ vi.mock("next-intl", () => ({
 
 import ProxyConfigModal from "@/shared/components/ProxyConfigModal";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
+
 const cleanupCallbacks: Array<() => void> = [];
 
 function makeContainer(): HTMLElement {
@@ -108,7 +111,7 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
     const container = makeContainer();
     await renderModal(container);
 
-    const select = container.querySelector("select");
+    const select = document.body.querySelector("select");
     expect(select).not.toBeNull();
     const optionLabels = Array.from(select!.querySelectorAll("option"))
       .map((opt) => opt.textContent || "")
@@ -129,8 +132,8 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
 
     // The Saved tab is active exactly when the saved-proxy <select> is rendered
     // (mode === "saved" gates that block in ProxyConfigModal.tsx).
-    expect(container.querySelector("select")).not.toBeNull();
-    expect(container.querySelector('input[placeholder="hostPlaceholder"]')).toBeNull();
+    expect(document.body.querySelector("select")).not.toBeNull();
+    expect(document.body.querySelector('input[placeholder="hostPlaceholder"]')).toBeNull();
   });
 
   it("still defaults to the Custom tab when the saved-proxy pool is empty and no assignment is set", async () => {
@@ -142,8 +145,8 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
     const container = makeContainer();
     await renderModal(container);
 
-    expect(container.querySelector("select")).toBeNull();
-    expect(container.querySelector('input[placeholder="hostPlaceholder"]')).not.toBeNull();
+    expect(document.body.querySelector("select")).toBeNull();
+    expect(document.body.querySelector('input[placeholder="hostPlaceholder"]')).not.toBeNull();
   });
 
   it("still resolves to the Custom tab when an existing custom-proxy assignment is present", async () => {
@@ -164,7 +167,7 @@ describe("ProxyConfigModal saved-proxy sort + default tab (#7643)", () => {
     const container = makeContainer();
     await renderModal(container);
 
-    expect(container.querySelector("select")).toBeNull();
-    expect(container.querySelector('input[placeholder="hostPlaceholder"]')).not.toBeNull();
+    expect(document.body.querySelector("select")).toBeNull();
+    expect(document.body.querySelector('input[placeholder="hostPlaceholder"]')).not.toBeNull();
   });
 });

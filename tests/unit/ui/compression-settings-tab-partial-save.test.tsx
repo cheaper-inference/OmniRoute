@@ -4,6 +4,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import CompressionSettingsTab from "@/app/(dashboard)/dashboard/settings/components/CompressionSettingsTab";
 import CavemanContextPageClient from "@/app/(dashboard)/dashboard/context/caveman/CavemanContextPageClient";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
 
 // next-intl echoes the key, so labels are the translation keys.
 vi.mock("next-intl", () => ({
@@ -144,8 +145,9 @@ async function settle() {
 }
 
 function inputFor(labelKey: string): HTMLInputElement {
-  const input = screen.getByText(labelKey).closest("label")?.querySelector("input");
-  if (!input) throw new Error(`no input next to ${labelKey}`);
+  // Kit Field: the <label for> names the input (no longer a <label> wrapping it).
+  const input = screen.getByLabelText(labelKey);
+  if (!(input instanceof HTMLInputElement)) throw new Error(`no input labelled ${labelKey}`);
   return input;
 }
 
@@ -187,6 +189,21 @@ describe("CompressionSettingsTab saves only what changed", () => {
   });
 
   // Rendering the whole caveman page takes over 5 seconds on a cold run.
+  it(
+    "keeps the master-switch warning on the caveman page, with no dismiss control",
+    { timeout: 30_000 },
+    async () => {
+      const server = startServer();
+      server.write({ enabled: false });
+      render(<CavemanContextPageClient />);
+      await settle();
+
+      const warning = screen.getByText("masterDisabledWarning").closest('[data-slot="alert"]');
+      expect(warning).toBeTruthy();
+      expect(warning!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
+    }
+  );
+
   it(
     "shows one Auto-Clarity control on the caveman page and keeps it off when the embedded tab saves",
     { timeout: 30_000 },

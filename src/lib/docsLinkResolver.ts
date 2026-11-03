@@ -1,6 +1,8 @@
 import path from "node:path";
 
-export const GITHUB_REPO_BLOB_URL = "https://github.com/diegosouzapw/OmniRoute/blob/main";
+export const GITHUB_REPO_BLOB_URL = "https://github.com/cheaper-inference/OmniRoute/blob/main";
+export const GITHUB_REPO_RAW_URL =
+  "https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main";
 
 /**
  * Resolves a doc link (e.g. `../routing/AUTO-COMBO.md#14-factors`, `./RESILIENCE_GUIDE.md`,
@@ -67,7 +69,21 @@ export function resolveDocHref(href: string, currentDocRelPath: string = ""): st
 }
 
 /**
- * Normalizes all relative markdown links in a raw markdown string for HTML/i18n rendering.
+ * Resolves an image source in markdown rendered outside the MDX pipeline. MDX bundles images into
+ * /_next/static, but a relative `src` in raw HTML would resolve against the /docs route and 404,
+ * and a GitHub blob URL is an HTML page, so repository images load from the raw host.
+ */
+export function resolveDocImageSrc(src: string, currentDocRelPath: string = ""): string {
+  const resolved = resolveDocHref(src, currentDocRelPath);
+  if (resolved.startsWith(`${GITHUB_REPO_BLOB_URL}/`)) {
+    return `${GITHUB_REPO_RAW_URL}/${resolved.slice(GITHUB_REPO_BLOB_URL.length + 1)}`;
+  }
+  return resolved.startsWith("/docs/") ? `${GITHUB_REPO_RAW_URL}${resolved}` : resolved;
+}
+
+/**
+ * Normalizes all relative markdown links and images in a raw markdown string for HTML/i18n
+ * rendering.
  */
 export function normalizeDocsMarkdownLinks(
   markdown: string,
@@ -102,6 +118,20 @@ export function normalizeDocsMarkdownLinks(
       const newHref = resolveDocHref(href, currentDocRelPath);
       return `<a${before}${newHref}${after}>`;
     }
+  );
+
+  // 4. Images: ![alt](src "title"?)
+  out = out.replace(
+    /!\[([^\]]*)\]\(([^)\s]+)(\s+["'][^"']*["'])?\)/g,
+    (_match, alt, src, title) =>
+      `![${alt}](${resolveDocImageSrc(src, currentDocRelPath)}${title || ""})`
+  );
+
+  // 5. HTML images: <img ... src="..." ...>
+  out = out.replace(
+    /<img\b([^>]*\bsrc=["'])([^"']+)(["'][^>]*)>/gi,
+    (_match, before, src, after) =>
+      `<img${before}${resolveDocImageSrc(src, currentDocRelPath)}${after}>`
   );
 
   return out;

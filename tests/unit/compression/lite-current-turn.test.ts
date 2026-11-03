@@ -84,4 +84,34 @@ describe("lite tool-result truncation and the current turn", () => {
     const messages = result.body.messages as Msg[];
     assert.equal(messages[4].content, FILE);
   });
+
+  it("keeps the newest Responses tool output whole when the turn has no assistant message", () => {
+    const result = applyCompression(
+      {
+        model: "gpt-5",
+        input: [
+          { role: "developer", content: "rules" },
+          { role: "user", content: "read it" },
+          { type: "function_call", call_id: "c1", name: "read", arguments: "{}" },
+          { type: "function_call_output", call_id: "c1", output: FILE },
+        ],
+      },
+      "stacked",
+      {
+        config: {
+          enabled: true,
+          defaultMode: "off",
+          autoTriggerTokens: 0,
+          cacheMinutes: 5,
+          preserveSystemPrompt: true,
+          comboOverrides: {},
+          engines: {},
+          activeComboId: null,
+          stackedPipeline: [{ engine: "lite", config: { maxToolLength: 100 } }],
+        },
+      }
+    );
+    const input = result.body.input as Array<Record<string, unknown>>;
+    assert.equal(input[3].output, FILE);
+  });
 });

@@ -4,21 +4,21 @@
 
 ---
 
-Masu samar da Web Cookie suna ba OmniRoute damar amfani da sabis na AI ta hanyar zaman burauzarka na yanzu maimakon maɓallin API. Suna da amfani idan kana da damar amfani da wani sabis ta shafinsa kuma kana son OmniRoute ya yi amfani da wannan zaman da aka riga aka tantance.
+Masu samar da Web Cookie suna ba OmniRoute damar amfani da sabis na AI ta hanyar zaman burauzarka da ke gudana maimakon mabuɗin API. Suna da amfani idan kana da damar shiga wani sabis ta shafinsa kuma kana son OmniRoute ya yi amfani da wannan zaman da aka riga aka tabbatar da shi.
 
-Ba kamar masu samarwa masu amfani da maɓallin API ba, masu samar da Web Cookie suna tantancewa ta amfani da bayanan shaidar da burauzarka ke aikawa zuwa shafin yanar gizon.
+Ba kamar masu samarwa masu amfani da mabuɗin API ba, masu samar da Web Cookie suna tabbatar da shiga ta amfani da bayanan shaidar da burauzarka ke aikawa zuwa shafin yanar gizon.
 
 ---
 
 # Kafin Ka Fara
 
-> **Muhimmi:** Koyaushe ka kwafi bayanan shaida daga **buƙatar hanyar sadarwa mai gudana**, **ba** daga ma'ajiyar cookies ta burauzarka ba.
+> **Muhimmi:** Koyaushe ka kwafi bayanan shaidar daga **buƙatar hanyar sadarwa mai gudana**, **ba** daga ma'ajiyar cookies ta burauzarka ba.
 
-Yawancin matsalolin tantancewa suna faruwa ne sakamakon kwafi cookies daga wurin da bai dace ba.
+Matsalolin tabbatar da shiga da yawa suna faruwa ne saboda kwafin cookies daga wurin da bai dace ba.
 
-## KADA KA kwafi daga Ma'ajiyar Cookies
+## KADA KA kwafa daga Ma'ajiyar Cookies
 
-Yawancin burauzozi suna nuna cookies da aka adana ta hanyar:
+Yawancin burauzogi suna nuna cookies da aka adana ta hanyar:
 
 ```
 DevTools
@@ -26,28 +26,28 @@ DevTools
 → Cookies
 ```
 
-Ko da yake waɗannan cookies suna iya bayyana daidai, suna iya zama:
+Ko da yake waɗannan cookies suna kama da daidai, suna iya kasancewa:
 
 - tsofaffi
-- ba cikakku ba
-- ba su ƙunshi cookies da ake aikawa kawai a cikin buƙatun da aka tantance ba
+- marasa cikawa
+- ba su ƙunshi cookies da ake aikawa kawai a buƙatun da aka tabbatar da shiga ba
 
-Amfani da waɗannan ƙimomin na iya haifar da gazawar tantancewa ko da suna bayyana ingantattu.
+Amfani da waɗannan ƙimomin na iya haifar da gazawar tabbatar da shiga ko da suna bayyana a matsayin ingantattu.
 
-## Kwafi daga Buƙata Mai Gudana
+## Kwafa daga Buƙata Mai Gudana
 
 Maimakon haka, yi amfani da cookies daga buƙatar da ta yi nasara:
 
 ```
 DevTools
 → Network
-→ Sabunta shafin
-→ Buɗe buƙatar taɗi ko tattaunawa
+→ Sake loda shafin
+→ Buɗe buƙatar hira ko tattaunawa
 → Request Headers
 → Cookie
 ```
 
-Kan buƙatar `Cookie` yana ɗauke da ainihin bayanan tantancewa da burauzarka ta yi amfani da su cikin nasara.
+Kan buƙatar `Cookie` yana ƙunshe da ainihin bayanan tabbatar da shiga da burauzarka ta yi amfani da su cikin nasara.
 
 Ga yawancin masu samar da Web Cookie, wannan shi ne ƙimar da ya kamata a liƙa cikin OmniRoute.
 
@@ -55,17 +55,17 @@ Ga yawancin masu samar da Web Cookie, wannan shi ne ƙimar da ya kamata a liƙa 
 
 # Saitin Gabaɗaya
 
-Tsarin saiti iri ɗaya ne ga yawancin masu samar da Web Cookie.
+Tsarin saitin iri ɗaya ne ga yawancin masu samar da Web Cookie.
 
 1. Shiga shafin yanar gizon mai samarwar.
 2. Buɗe Developer Tools na burauzar.
 3. Buɗe shafin **Network**.
-4. Sabunta shafin.
-5. Buɗe buƙatar taɗi ko tattaunawa da aka tantance.
-6. Kwafi bayanan shaidar tantancewa da ake buƙata.
+4. Sake loda shafin.
+5. Buɗe buƙatar hira ko tattaunawa da aka tabbatar da shiga.
+6. Kwafi bayanan shaidar tabbatar da shiga da ake buƙata.
 7. Buɗe OmniRoute.
 8. Je zuwa **Providers → Add Provider**.
-9. Zaɓi mai samar da Web Cookie naka.
+9. Zaɓi mai samar da Web Cookie ɗinka.
 10. Liƙa bayanan shaidar.
 11. Danna **Test Connection**.
 12. Ajiye mai samarwar.
@@ -74,9 +74,9 @@ Ainihin bayanan shaidar da ake buƙata sun dogara da mai samarwar.
 
 ---
 
-# Tsare-tsaren Bayanan Shaidar Masu Samarwa
+# Tsarukan Bayanan Shaidar Masu Samarwa
 
-Shafukan yanar gizo daban-daban suna adana bayanan tantancewa ta hanyoyi daban-daban. Wasu suna buƙatar cookies kawai, yayin da wasu kuma na iya buƙatar ƙarin headers ko tokens.
+Shafukan yanar gizo daban-daban suna adana bayanan tabbatar da shiga ta hanyoyi daban-daban. Wasu suna buƙatar cookies kawai, yayin da wasu za su iya buƙatar ƙarin kawuna ko tokens.
 
 | Mai Samarwa                     | Tsarin Bayanan Shaida         | Jagorar Mai Samarwa              |
 | ------------------------------- | ----------------------------- | -------------------------------- |
@@ -88,154 +88,171 @@ Shafukan yanar gizo daban-daban suna adana bayanan tantancewa ta hanyoyi daban-d
 | Grok Web                        | _(tabbatar)_                  |                                  |
 | ...                             | ...                           | ...                              |
 
-> Sabunta wannan tebur yayin da ake ƙara sabbin masu samar da Web Cookie ko kuma masu samarwa na yanzu suka canza buƙatun tantancewarsu.
+> Sabunta wannan tebur yayin da aka ƙara sabbin masu samar da Web Cookie ko kuma masu samarwa da ake da su suka canza buƙatun tabbatar da shigarsu.
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) dandali ne na tattaunawa kyauta ga masu amfani wanda ba ya buƙatar yin rajista — ana ƙirƙirar zaman ba tare da bayyana suna ba a ziyarar farko, kuma yana ci gaba ta hanyar cookies guda uku: `uid`, `si_usr_id`, da `si_ses_id`. OmniRoute yana wakiltar endpoint ɗin `/api/dispatch` ɗaya ta hanyar id na model guda (`notrack-c`, alias `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) dandali ne na hira kyauta ga masu amfani wanda ba ya buƙatar rajista — ana ƙirƙirar zaman ba tare da bayyana mai amfani ba a ziyarar farko, kuma yana ci gaba ta hanyar kukis guda uku: `uid`, `si_usr_id`, da `si_ses_id`. OmniRoute yana wakiltar wannan endpoint ɗin `/api/dispatch` ta hanyar id guda na samfuri (`notrack-c`, laƙabi `ntw`).
 
 ### Matakan haɗawa
 
-1. Buɗe [notrack.ai](https://notrack.ai) a browser ɗinka kuma ka bari a saita cookie na zaman da ba a bayyana suna ba.
-2. Buɗe **DevTools → Network**, sake loda shafin, sannan ka danna kowace buƙatar `/api`.
-3. A cikin **Request Headers**, kwafi cikakkiyar ƙimar header na `Cookie`.
+1. Buɗe [notrack.ai](https://notrack.ai) a burauzarka sannan ka bari a saita kukin zaman da ba a bayyana mai amfani ba.
+2. Buɗe **DevTools → Network**, sabunta shafin, sannan ka danna kowace buƙatar `/api`.
+3. A cikin **Request Headers**, kwafi cikakkiyar ƙimar header ɗin `Cookie`.
 4. A cikin OmniRoute, je zuwa **Providers → Add Provider → NoTrack Web (Free)**.
-5. Liƙa string ɗin cookie a cikin filin `apiKey`, sannan ka danna **Save**.
+5. Liƙa jimlar kukin a cikin filin `apiKey` sannan ka yi **Save**.
 
-OmniRoute yana fitar da `uid`, `si_usr_id`, da `si_ses_id` daga string ɗin da aka liƙa, sannan ya sake gina tsaftataccen header na `Cookie` mai ɗauke da waɗannan nau'i-nau'in maɓalli da ƙima kawai — tare da `nt_session` (token na `ntk_…` da ake saitawa ga asusun da aka shiga) idan yana nan. Idan ɗaya daga cikin ukun ya ɓace, ana tura ɗanyen string ɗin da aka liƙa ba tare da canji ba domin masu gudanarwa su iya gwada wasu tsare-tsare.
+OmniRoute yana ciro `uid`, `si_usr_id`, da `si_ses_id` daga jimlar da aka liƙa, sannan ya sake gina tsaftataccen header na `Cookie` wanda ke ɗauke da waɗannan nau'i-nau'in kawai — tare da `nt_session` (token ɗin `ntk_…` da ake saitawa ga asusun da aka shiga) idan yana nan. Idan ɗaya daga cikin ukun ya ɓace, za a tura ainihin jimlar da aka liƙa ba tare da canji ba domin masu gudanarwa su iya gwada wasu tsare-tsare na daban.
 
-### Id na model
+### Id na samfura
 
-| Id na model | Sunan nuni | Bayanan kula                                               |
-| ----------- | ---------- | ---------------------------------------------------------- |
-| `notrack-c` | NoTrack C  | Na asali — model na dispatch na upstream `C`.              |
-| `C`         | NoTrack C  | Alias na `notrack-c` (ɗanyen lambar dispatch ta upstream). |
-| `notrack`   | NoTrack C  | Alias na `notrack-c`.                                      |
-| `ntw`       | NoTrack C  | Gajeren alias na `notrack-c`.                              |
+| Id na samfuri | Sunan nunawa | Bayani                                          |
+| ------------- | ------------ | ----------------------------------------------- |
+| `notrack-c`   | NoTrack C    | Na asali — samfurin rarrabawa na sama `C`.      |
+| `C`           | NoTrack C    | Laƙabin `notrack-c` (lambar rarrabawa ta sama). |
+| `notrack`     | NoTrack C    | Laƙabin `notrack-c`.                            |
+| `ntw`         | NoTrack C    | Gajeren laƙabin `notrack-c`.                    |
 
-Dukkan id na model guda huɗu suna nuni zuwa model na dispatch na upstream guda ɗaya (`C`).
+Dukkan id ɗin samfura huɗun suna nuni zuwa samfurin rarrabawa na sama guda ɗaya (`C`).
 
 ### Zaɓuɓɓukan buƙata
 
-Executor yana karɓar waɗannan filaye na zaɓi a jikin buƙatar:
+Mai aiwatarwa yana karɓar waɗannan filaye na zaɓi a jikin buƙatar:
 
-| Filin jiki            | Na asali | Manufa                                                                                        |
-| --------------------- | -------- | --------------------------------------------------------------------------------------------- |
-| `notrack_mode`        | `usual`  | Yanayin dispatch (string mai sassauci; upstream yana karɓar `usual`, …)                       |
-| `notrack_max_turns`   | `6`      | Yawan zagayen ciki da upstream zai iya yi kafin ya ba da amsa.                                |
-| `notrack_chat_id`     | `null`   | Ci gaba da wata tattaunawar upstream da ke akwai (a bar shi idan ana son sabuwar tattaunawa). |
-| `notrack_attachments` | `[]`     | Jerin bayanan haɗe-haɗe na upstream da ake wucewa kai tsaye.                                  |
-| `notrack_regenerate`  | `false`  | Saita `true` don neman a sake samar da amsa ga zagayen da ya gabata.                          |
+| Filin jiki            | Na asali | Manufa                                                                       |
+| --------------------- | -------- | ---------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual`  | Yanayin rarrabawa (jimla mai sassauci; sabis na sama yana karɓar `usual`, …) |
+| `notrack_max_turns`   | `6`      | Yawan zagayen ciki da sabis na sama zai iya yi kafin ya ba da amsa.          |
+| `notrack_chat_id`     | `null`   | Ci gaba da hirar sama da ake da ita (a bar shi don fara sabuwar hira).       |
+| `notrack_attachments` | `[]`     | Jerin bayanan haɗe-haɗe na sama da za a tura kai tsaye.                      |
+| `notrack_regenerate`  | `false`  | Saita `true` domin neman a sake samar da amsar zagayen da ya gabata.         |
 
-### Abubuwan da yake iya yi
+### Ƙwarewa
 
-- Kammala tattaunawa ta **streaming da non-streaming**.
-- **Kiran kayan aiki** — saita `tools: [...]` a kan buƙatar; executor yana sauya su zuwa tsarin yarjejeniyar ambulan kiran kayan aiki, sannan ya mayar da martanin model zuwa `tool_calls` na OpenAI.
-- **`response_format`** — ana goyon bayan `json_object` da `json_schema`. Executor yana fitar da object na JSON na farko daga martanin model, sannan ya mayar da shi string kafin ya dawo da shi.
-- **Alamar yin tunani** — executor yana fitar da delta na `reasoning` lokacin da upstream ya aika event na `thinking`.
+- Kammala hira ta **streaming da non-streaming**.
+- **Kiran kayan aiki** — saita `tools: [...]` a kan buƙatar; mai aiwatarwa yana jera su cikin kwangilar ambulan kiran kayan aiki sannan ya mayar da martanin samfurin zuwa OpenAI `tool_calls`.
+- **`response_format`** — ana goyon bayan `json_object` da `json_schema`. Mai aiwatarwa yana ciro JSON object na farko daga amsar samfurin, ya mai da shi jimla, sannan ya dawo da shi.
+- **Alamar tunani** — mai aiwatarwa yana fitar da delta na `reasoning` lokacin da sabis na sama ya aika da event na `thinking`.
 
 ### Iyakoki
 
-- Upstream yana tilasta ƙayyadadden yawan amfani ba tare da bayyana suna ba — idan an kai iyakar, executor yana nuna 429 tare da saƙo mai sauƙin fahimta.
-- Dukkan id na model suna komawa zuwa model na dispatch na upstream guda ɗaya; babu sauyawa na musamman ga kowane model.
-- Executor ba ya kiran endpoint na `/api/chats` na upstream, saboda haka ba a sarrafa tarihin tattaunawa / zaman kai tsaye. Yi amfani da `notrack_chat_id` don ci gaba da wata tattaunawar upstream da ke akwai.
+- Sabis na sama yana tilasta ƙa'idojin iyakar amfani ba tare da bayyana mai amfani ba — idan an kai iyakar, mai aiwatarwa yana nuna 429 tare da saƙo mai sauƙin fahimta.
+- Dukkan id ɗin samfura suna nuni zuwa samfurin rarrabawa na sama guda ɗaya; babu sauyawa na kowane samfuri daban.
+- Mai aiwatarwa ba ya kiran endpoint ɗin `/api/chats` na sabis na sama, don haka ba a sarrafa tarihin hira / zaman kai tsaye. Yi amfani da `notrack_chat_id` domin ci gaba da hirar sama da ake da ita.
 
 ---
 
-# Abin da Masu Ba da Sabis na Web Cookie Za Su Iya Yi da Wanda Ba Za Su Iya Yi Ba
+# Abin da Masu Bayar da Web Cookie Za Su Iya Yi da Wanda Ba Za Su Iya Yi Ba
 
-Masu ba da sabis na Web Cookie suna sake amfani da interface na tattaunawar wani shafin yanar gizo. **Ba sa** samar da irin damar da official APIs suke bayarwa.
+Masu bayar da Web Cookie suna sake amfani da mahadar hira ta wani gidan yanar gizo. **Ba sa** samar da ƙwarewa iri ɗaya da API na hukuma.
 
 ## Abubuwan da Ake Tallafawa
 
-- Tabbatar da shaidarka ta amfani da zaman burauzarka na yanzu
-- Samun damar amfani da samfuran da ake da su ta asusunka
-- Yaɗa amsoshin taɗi kai tsaye
-- Ba a buƙatar maɓallin API
+- Tabbatar da ainihi ta amfani da zaman burauzarka na yanzu
+- Samun dama ga samfuran da ake da su ta asusunka
+- Yaɗa amsoshin hira kai tsaye
+- Ba a buƙatar mabuɗin API
 
-## Abubuwan da Ba a Tallafawa
+## Abubuwan da Ba Ake Tallafawa ba
 
 - Kiran ayyuka
 - Kiran kayan aiki
-- Gyaran fayil ta atomatik
-- Tsarukan aikin IDE na wakili
-- Fasalolin da ake samu ta API kawai
+- Gyara fayiloli ta atomatik
+- Tsarukan aiki na IDE masu wakilcin kai
+- Abubuwan da ake samu ta API kawai
 
-Wannan ɗabi'a ce da ake tsammani kuma **ba** matsala ba ce.
+Wannan hali ne da ake tsammani kuma **ba** matsala ba ce.
 
-Idan kana buƙatar gudanar da kayan aiki, gyaran fayil ta atomatik, ko wasu tsarukan aikin wakili, yi amfani da **mai samar da maɓallin API** maimakon mai samar da Web Cookie.
+Idan kana buƙatar aiwatar da kayan aiki, gyara fayiloli ta atomatik, ko wasu tsarukan aiki na wakili, yi amfani da **mai samarwa na mabuɗin API** maimakon mai samarwa na Web Cookie.
 
 ---
 
-# Gargaɗi Kan Tabbatarwa
+# Gargadin Tabbatarwa
 
-Nasarar **Test Connection** ko tabbatar da kuki tana tabbatarwa ne kawai cewa bayanan shaidar da aka bayar suna da tsarin da ake tsammani.
+Nasarar **Test Connection** ko tabbatar da kuki tana tabbatarwa kawai cewa bayanan shaidar da aka bayar suna kama da tsarin da ake tsammani.
 
-Har sai an warware Issue #7857, nasarar tabbatarwa **ba ta ba da tabbacin** cewa mai samarwar zai yi nasarar tabbatar da shaidarka ba.
+Har sai an warware Issue #7857, nasarar tabbatarwa **ba ta ba da tabbacin** cewa mai samarwar zai yi nasarar tabbatar da ainihi ba.
 
-Idan har yanzu tabbatar da shaida bai yi nasara ba, tabbatar cewa ka kwafi bayanan shaidar daga buƙatar hanyar sadarwa mai aiki, maimakon daga ma'ajiyar kuki ta burauza.
+Idan tabbatar da ainihi har yanzu ya gaza, tabbatar cewa ka kwafi bayanan shaidar daga buƙatar hanyar sadarwa mai aiki maimakon ma'ajiyar kuki ta burauza.
 
 ---
 
 # Warware Matsaloli
 
-## Tabbatar da Shaida Ya Gagara
+## Tabbatar da Ainihi Ya Gazu
 
 Tabbatar cewa an kwafi bayanan shaidar daga:
 
 ```
-Hanyar Sadarwa
-→ Kanun Buƙata
-→ Kuki
+Network
+→ Request Headers
+→ Cookie
 ```
 
 kuma **ba** daga:
 
 ```
-Manhaja
-→ Kukis
+Application
+→ Cookies
 ```
 
 ---
 
-## Kuki Yana Aiki a Burauza Amma Ba Ya Aiki a OmniRoute
+## Kuki Yana Aiki a Burauza amma Ba Ya Aiki a OmniRoute
 
-Wasu masu samarwa suna haɗa kukis waɗanda ake aikawa ne kawai yayin buƙatun da aka tabbatar da shaida.
+Wasu masu samarwa suna haɗa kukis waɗanda ake aikawa kawai yayin buƙatun da aka tabbatar da ainihi.
 
-Sake kwafin bayanan shaidar daga sabuwar buƙatar hanyar sadarwa bayan ka yi nasarar buɗe tattaunawa.
+Sake kwafi bayanan shaidar daga sabuwar buƙatar hanyar sadarwa bayan ka yi nasarar buɗe tattaunawa.
 
 ---
 
 ## Zaman Ya Ƙare
 
-Masu samar da Web Cookie suna amfani da zaman burauzarka na yanzu.
+Masu samarwa na Web Cookie suna amfani da zaman burauzarka na yanzu.
 
-Idan zaman burauzarka ya ƙare ko ka fita daga asusunka, dole ne ka kwafi sabon saitin bayanan shaida. Don sarrafa sabunta kuki ta atomatik ga masu samar da yanar gizo da ake tallafawa, duba kayan aikin haɗin gwiwa na [Ƙarin Daidaita Zaman Burauza](../guides/SESSION-SYNC-EXTENSION.md).
+Idan zaman burauzarka ya ƙare ko ka fita daga asusunka, dole ne ka kwafi sabon saitin bayanan shaidar. Don sarrafa sabunta kuki ta atomatik ga masu samarwar yanar gizo da ake tallafawa, duba kayan aikin haɗin gwiwa na [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
-## Test Connection Ya Yi Nasara Amma Buƙatu Sun Gagara
+## Test Connection Ya Yi Nasara amma Buƙatu Sun Gazu
 
-Har sai an warware Issue #7857, nasarar tabbatarwa ba ta ba da tabbacin cewa buƙatar tabbatar da shaida za ta yi nasara ba.
+Har sai an warware Issue #7857, cin nasarar tabbatarwa ba ya ba da tabbacin cewa buƙatar tabbatar da ainihi za ta yi nasara ba.
 
-Sake kwafin bayanan shaidarka daga sabuwar buƙata da aka tabbatar da shaida kafin ka ci gaba da warware matsalar.
+Sake kwafi bayanan shaidarka daga sabuwar buƙatar da aka tabbatar da ainihi kafin ka ci gaba da warware matsalar.
+
+---
+
+## ChatGPT Web Ya Gazu Tare da "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Bayanan shaidar suna daidai — wannan kuskuren ya fito ne daga gadar, ba daga zaman ba. chatgpt.com yana sanya
+ID na modulolinsa a kowane turawa, kuma gadar a baya tana ɗaure ID na mataimakin Sentinel da take ƙirƙira, don haka
+sake gina chatgpt.com da ya sake sanya wa mataimakin suna ya lalata kowace mu'amala duk da cewa kukin yana nan ingantacce. Sake ba da
+izini ga haɗin ba zai iya gyara wannan ba.
+
+Sigar ginin da ke warware modul ɗin ta hanyar yanayin aikin shafin kansa ba ta ɗaure wani ID kuma wannan matsalar ba ta shafe ta. Idan ka ga
+kuskuren, sabunta OmniRoute sannan ka sake gudanar da gwajin haɗin.
 
 ---
 
 # Misalin Mai Samarwa
 
-Don cikakken bayani mataki-mataki na takamaiman mai samarwa, duba:
+Don cikakken jagora na musamman ga mai samarwa, duba:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Jagorar Claude Web tana nuna cikakken tsarin saita mai samar da Web Cookie kuma tana zama aiwatarwar da ake amfani da ita a matsayin abin dubawa.
+Jagorar Claude Web tana nuna cikakken tsarin saita mai samarwa na Web Cookie kuma tana aiki a matsayin samfurin aiwatarwa da ake komawa gare shi.
 
 ---
 
 # Ingantattun Hanyoyin Aiki
 
-- Kwafi bayanan shaida daga sabuwar buƙata da aka tabbatar da shaida.
+- Kwafi bayanan shaidar daga sabuwar buƙatar da aka tabbatar da ainihi.
 - Guji sake amfani da tsofaffin kukis.
-- Bar zaman burauzarka yana aiki yayin amfani da masu samar da Web Cookie.
-- Ɗauki kukis da aka kwafa a matsayin bayanan shaida masu muhimmanci.
-- Yi amfani da masu samar da maɓallin API lokacin da kake buƙatar kiran ayyuka ko tsarukan aikin wakili.
+- Ci gaba da barin zaman burauzarka yana aiki yayin amfani da masu samarwa na Web Cookie.
+- Ɗauki kukis da aka kwafa a matsayin bayanan shaidar sirri.
+- Yi amfani da masu samarwa na mabuɗin API lokacin da kake buƙatar kiran ayyuka ko tsarukan aikin wakili.

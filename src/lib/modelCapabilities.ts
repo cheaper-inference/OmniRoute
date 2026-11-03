@@ -24,15 +24,26 @@ import {
   getReasoningEffortsOverride,
 } from "@/lib/db/modelCapabilityOverrides";
 import { getModelCompatVisionOverride } from "@/lib/db/models/compat";
-import { getProviderNodePrefixSync } from "@/lib/db/providers/nodePrefix";
+import {
+  getProviderNodeIdByPrefixSync,
+  getProviderNodePrefixSync,
+} from "@/lib/db/providers/nodePrefix";
 import { getCustomModelVisionOverride, getSyncedAvailableModelVision } from "@/lib/db/models";
 import type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 import { resolveAudioCapability, resolveVideoCapability } from "@/lib/modelCapabilityModalities";
+import {
+  describeLimitSources,
+  pickContextWindow,
+  pickMaxInputTokens,
+  pickMaxOutputTokens,
+  type ModelLimitSources,
+} from "@/lib/modelCapabilityLimits";
 import { getNoAuthHydrationProviderIds } from "@/sse/services/noAuthProviderSiblings";
 
 export type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 export { createModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 export { resolveAudioCapability } from "@/lib/modelCapabilityModalities";
+export type { ModelLimitSources } from "@/lib/modelCapabilityLimits";
 import { isVisionModelId } from "@/shared/constants/visionModels";
 import { getUnsupportedParams } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
@@ -127,6 +138,8 @@ type SyncedCapabilities = ReturnType<typeof getSyncedCapability>;
  */
 export interface ResolveModelCapabilitiesOptions {
   persistedOverrides?: boolean;
+  /** Diagnostic collector: when passed, filled with each limit's provenance. */
+  limitSources?: Partial<ModelLimitSources>;
 }
 
 export interface ResolvedModelCapabilities {
@@ -187,7 +200,11 @@ function getRegistryModel(providerIdOrAlias: string | null, modelId: string | nu
   if (!Array.isArray(models)) return null;
   const normalizedModelId =
     providerAlias === "cnl" ? modelId.replace(/-(?:xhigh|high|medium|low)$/i, "") : modelId;
-  return models.find((model) => model?.id === normalizedModelId) || null;
+  return (
+    models.find(
+      (model) => model?.id === normalizedModelId || model?.aliases?.includes(normalizedModelId)
+    ) || null
+  );
 }
 
 /**
@@ -785,15 +802,22 @@ function getCompatVisionOverride(
   snapshot?: ModelCapabilityResolutionSnapshot | null
 ): boolean | null {
   if (!resolved.provider || !resolved.model) return null;
-  const providerCandidates = Array.from(
-    new Set(
-      [
-        ...getNoAuthHydrationProviderIds(resolved.provider),
-        resolved.rawProvider,
-        resolved.rawProvider ? resolveProviderAlias(resolved.rawProvider) : null,
-      ].filter((value): value is string => Boolean(value))
-    )
-  );
+  const directCandidates = [
+    ...getNoAuthHydrationProviderIds(resolved.provider),
+    resolved.rawProvider,
+    resolved.rawProvider ? resolveProviderAlias(resolved.rawProvider) : null,
+  ].filter((value): value is string => Boolean(value));
+  // A custom node is addressable both by its internal id (combo steps store it,
+  // #2778) and by its user-defined prefix (the catalog id and prefix-addressed
+  // requests use it, see catalog.ts's `alias = prefix || ...`). The override is
+  // keyed by whichever form PUT /api/provider-models was given — normally the
+  // node id — so map every candidate prefix back to its node id. Mapped ids go
+  // LAST: a direct key match always wins, so this can only ADD a resolution that
+  // the direct candidates missed.
+  const mappedNodeIds = directCandidates
+    .map((candidate) => getProviderNodeIdByPrefixSync(candidate))
+    .filter((value): value is string => Boolean(value));
+  const providerCandidates = Array.from(new Set([...directCandidates, ...mappedNodeIds]));
   const modelCandidates = Array.from(
     new Set([resolved.model, resolved.rawModel].filter((value): value is string => Boolean(value)))
   );
@@ -872,9 +896,11 @@ export function getResolvedModelCapabilities(
   // silently reorders it behind models with confirmed capabilities. Resolve
   // the variant's capabilities from its base model when every direct source
   // misses.
+  let effortBaseModelId: string | null = null;
   if (!spec && !registryModel && !synced && resolved.provider && resolved.model) {
     const baseModelId = stripKnownEffortSuffix(resolved.model);
     if (baseModelId && baseModelId !== resolved.model) {
+      effortBaseModelId = baseModelId;
       spec = getStaticSpec(baseModelId, resolved.rawModel);
       registryModel = getRegistryModel(resolved.provider, baseModelId);
       synced = getSyncedCapabilityForResolved(
@@ -939,13 +965,9 @@ export function getResolvedModelCapabilities(
   const persistedContextWindow = usePersistedOverrides
     ? getContextOverride(resolved, snapshot)
     : null;
-  const contextWindow =
-    persistedContextWindow ??
-    authoritativeContextWindow ??
-    synced?.limit_context ??
-    (typeof registryModel?.contextLength === "number" ? registryModel.contextLength : null) ??
-    spec?.contextWindow ??
-    null;
+  const limitRows = { synced, registryModel, spec, authoritativeContextWindow };
+  const contextLimit = pickContextWindow(limitRows, persistedContextWindow);
+  const contextWindow = contextLimit.value;
 
   const maxInputOverride = !usePersistedOverrides
     ? null
@@ -957,6 +979,18 @@ export function getResolvedModelCapabilities(
     : usePersistedOverrides
       ? getOutputTokenCapabilityOverride(resolved)
       : null;
+
+  const inputLimit = pickMaxInputTokens(limitRows, maxInputOverride, contextLimit);
+  const outputLimit = pickMaxOutputTokens(limitRows, maxTokenOverride);
+  if (options?.limitSources) {
+    Object.assign(
+      options.limitSources,
+      describeLimitSources(
+        { contextWindow: contextLimit, maxInputTokens: inputLimit, maxOutputTokens: outputLimit },
+        { ...resolved, effortBaseModelId }
+      )
+    );
+  }
 
   // Vision consults leaf static metadata for path-shaped ids; other capability
   // fields keep using the non-leaf `spec` from getStaticSpec() above.
@@ -1001,6 +1035,16 @@ export function getResolvedModelCapabilities(
     compatVisionOverride,
     syncedAvailableModelVision
   );
+  // #17289: WorkBuddy's DeepSeek Flash endpoint was observed to accept image_url
+  // (unlike other gateways serving the same upstream id). Provider-scoped, not a
+  // global DeepSeek name heuristic, and only applied while the verdict is still
+  // unknown: an explicit operator override, synced denial or registry value wins.
+  const effectiveSupportsVision =
+    supportsVision === null &&
+    resolved.provider === "workbuddy" &&
+    /^(?:global:|cn:)?deepseek-v4\.1-flash$/i.test(resolved.model ?? "")
+      ? true
+      : supportsVision;
   const supportsAudio = resolveAudioCapability(spec, registryModel, modalitiesInput);
   const supportsVideo = resolveVideoCapability(spec, registryModel, modalitiesInput);
 
@@ -1024,7 +1068,7 @@ export function getResolvedModelCapabilities(
       resolveSyncedEffortTierFallback(synced?.reasoning_efforts),
     reasoningEffortsOverride: reasoningEffortsOverride !== null,
     supportsTools,
-    supportsVision,
+    supportsVision: effectiveSupportsVision,
     supportsAudio,
     supportsVideo,
     supportsMaxTokens: heuristicMaxTokens(lookupKey),
@@ -1032,28 +1076,10 @@ export function getResolvedModelCapabilities(
     structuredOutput: synced?.structured_output ?? null,
     temperature: synced?.temperature ?? null,
     contextWindow,
-    maxInputTokens: (() => {
-      // Input cap is input-only. An explicit `max_input_tokens` override wins;
-      // otherwise fall back to the existing per-source input limits, then to the
-      // total window. The effective cap can never exceed the total window
-      // (input + output), so clamp it — but never double-count a requested
-      // output against this input cap.
-      const candidate =
-        maxInputOverride ??
-        (typeof registryModel?.maxInputTokens === "number" ? registryModel.maxInputTokens : null) ??
-        authoritativeContextWindow ??
-        synced?.limit_input ??
-        contextWindow;
-      return candidate !== null && contextWindow !== null
-        ? Math.min(candidate, contextWindow)
-        : candidate;
-    })(),
-    maxOutputTokens:
-      maxTokenOverride ??
-      synced?.limit_output ??
-      (typeof registryModel?.maxOutputTokens === "number" ? registryModel.maxOutputTokens : null) ??
-      spec?.maxOutputTokens ??
-      null,
+    // Input-only cap, clamped to the total window — never double-counts a requested
+    // output against it (see pickMaxInputTokens).
+    maxInputTokens: inputLimit.value,
+    maxOutputTokens: outputLimit.value,
     defaultThinkingBudget: spec?.defaultThinkingBudget ?? 0,
     thinkingBudgetCap: spec?.thinkingBudgetCap ?? null,
     thinkingOverhead: spec?.thinkingOverhead ?? null,
@@ -1070,6 +1096,19 @@ export function getResolvedModelCapabilities(
       synced?.interleaved_field ??
       (typeof registryModel?.interleavedField === "string" ? registryModel.interleavedField : null),
   };
+}
+
+/**
+ * Same resolution as `getResolvedModelCapabilities`, plus which source supplied each
+ * token limit (diagnostics only — the resolved capabilities are identical).
+ */
+export function getResolvedModelCapabilitiesWithLimitSources(
+  input: CapabilityInput,
+  snapshot?: ModelCapabilityResolutionSnapshot | null
+): { capabilities: ResolvedModelCapabilities; limitSources: ModelLimitSources } {
+  const limitSources: Partial<ModelLimitSources> = {};
+  const capabilities = getResolvedModelCapabilities(input, { limitSources }, snapshot);
+  return { capabilities, limitSources: limitSources as ModelLimitSources };
 }
 
 /**

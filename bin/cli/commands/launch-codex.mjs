@@ -1,7 +1,7 @@
 import { spawn, execFileSync } from "node:child_process";
 import { t } from "../i18n.mjs";
 import { resolveActiveContext } from "../contexts.mjs";
-import { quoteShellArgs } from "../utils/winShellArgs.mjs";
+import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 
 /**
@@ -225,11 +225,15 @@ export async function runLaunchCodexCommand(opts = {}, codexArgs = []) {
   const { command: codexLaunch, shell: shellValue } = await resolveCodexSpawn(process.platform);
 
   return await new Promise((resolve) => {
-    const child = spawn(codexLaunch, quoteCodexArgs(extraArgs, process.platform), {
-      env,
-      stdio: "inherit",
-      shell: shellValue,
-    });
+    const child = spawn(
+      codexLaunch,
+      quoteShellArgsForSpawn(extraArgs, process.platform, shellValue),
+      {
+        env,
+        stdio: "inherit",
+        shell: shellValue,
+      }
+    );
     let settled = false;
     let requestedSignalCode;
     let escalationTimer;

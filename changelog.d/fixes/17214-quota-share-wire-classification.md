@@ -1,0 +1,1 @@
+- Preserve the per-key quota-share error code through JSON responses so combos do not lock a shared connection's model when one API key reaches its allocation. Keep the quota reason and available retry hint in the client response ([#17214](https://github.com/diegosouzapw/OmniRoute/pull/17214)) — thanks @rafacpti23. Fixes #17132.

@@ -1,0 +1,1 @@
+- **fix(cursor):** Preserve structured model-entitlement refusal titles and guidance across Connect and JSON error paths, and keep explicit weekly-usage model restrictions scoped to the selected connection/model instead of treating them as account-wide failures ([#17182](https://github.com/diegosouzapw/OmniRoute/pull/17182)) — thanks @xiaoyaner0201

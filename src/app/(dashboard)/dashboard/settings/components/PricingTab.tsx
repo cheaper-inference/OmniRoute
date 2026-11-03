@@ -1,14 +1,23 @@
 "use client";
 
-import { FilterSelect, HeroStat, SyncMini } from "./PricingTabHelpers";
-
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, Button } from "@/shared/components";
+import { useTranslations } from "next-intl";
+import { EmptyState } from "@omniroute/ui-kit/empty-state";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { Badge, Card, Button, Input } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import InfoTooltip from "@/shared/components/InfoTooltip";
-import { useTranslations } from "next-intl";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
+import { FilterSelect, HeroStat, SyncMini } from "./PricingTabHelpers";
 
 type CoverageFilter = "all" | "lt50" | "gte50lt100" | "full";
 type AuthFilter = "all" | "oauth" | "apikey" | "unknown";
@@ -58,11 +67,11 @@ interface PricingCatalogProvider {
 function getSourceTone(source: PricingSource): string {
   switch (source) {
     case "user":
-      return "bg-amber-500/15 text-amber-400 border border-amber-500/25";
+      return "bg-warning/15 text-warning border border-warning/25";
     case "modelsDev":
-      return "bg-sky-500/15 text-sky-400 border border-sky-500/25";
+      return "bg-info/15 text-info border border-info/25";
     case "litellm":
-      return "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25";
+      return "bg-success/15 text-success border border-success/25";
     default:
       return "bg-bg-subtle text-text-muted border border-border/40";
   }
@@ -502,7 +511,7 @@ export default function PricingTab() {
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <span className="material-symbols-outlined text-[22px] text-primary">payments</span>
+              <Icon name="payments" size={22} className="text-primary" />
               {t("modelPricing")}
             </h2>
             <InfoTooltip
@@ -520,11 +529,11 @@ export default function PricingTab() {
             <div className="grid grid-cols-4 gap-3 mb-3">
               <HeroStat label={t("providers")} value={stats.providers} />
               <HeroStat label={t("registry")} value={stats.totalModels} />
-              <HeroStat label={t("priced")} value={stats.pricedCount} accent="text-emerald-400" />
+              <HeroStat label={t("priced")} value={stats.pricedCount} accent="text-success" />
               <HeroStat
                 label={t("pricingSourceUser")}
                 value={stats.overriddenCount}
-                accent="text-amber-400"
+                accent="text-warning"
               />
             </div>
             <div>
@@ -534,14 +543,10 @@ export default function PricingTab() {
                 </span>
                 <span className="tabular-nums font-semibold">{coveragePct}%</span>
               </div>
-              <div className="h-2 rounded-sm bg-black/[0.08] dark:bg-white/[0.06] overflow-hidden">
+              <div className="h-2 rounded-sm bg-border/60 overflow-hidden" aria-hidden="true">
                 <div
                   className={`h-full transition-[width] duration-300 ${
-                    coveragePct >= 90
-                      ? "bg-emerald-500"
-                      : coveragePct >= 60
-                        ? "bg-amber-500"
-                        : "bg-red-500"
+                    coveragePct >= 90 ? "bg-success" : coveragePct >= 60 ? "bg-warning" : "bg-error"
                   }`}
                   style={{ width: `${Math.min(coveragePct, 100)}%` }}
                 />
@@ -559,7 +564,7 @@ export default function PricingTab() {
                 <div className="flex items-center gap-1.5 mt-1">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
-                      syncStatus?.enabled ? "bg-emerald-500 animate-pulse" : "bg-text-muted"
+                      syncStatus?.enabled ? "bg-success animate-pulse" : "bg-text-muted"
                     }`}
                   />
                   <span className="text-xs text-text-main font-medium">
@@ -610,10 +615,10 @@ export default function PricingTab() {
         <div
           className={`px-3 py-2 rounded-lg border text-sm ${
             statusMessage.tone === "success"
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              ? "bg-success/10 border-success/20 text-success"
               : statusMessage.tone === "error"
-                ? "bg-red-500/10 border-red-500/20 text-red-400"
-                : "bg-sky-500/10 border-sky-500/20 text-sky-400"
+                ? "bg-error/10 border-error/20 text-error"
+                : "bg-info/10 border-info/20 text-info"
           }`}
         >
           {statusMessage.message}
@@ -623,18 +628,15 @@ export default function PricingTab() {
       {/* Search + Filters */}
       <div className="flex flex-col gap-2">
         <div className="flex gap-2 items-center flex-wrap">
-          <div className="relative flex-1 min-w-[260px]">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-lg">
-              search
-            </span>
-            <input
-              type="text"
-              placeholder={t("searchProvidersModels")}
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full pl-10 pr-3 py-2 bg-bg-base border border-border rounded-lg focus:outline-none focus:border-primary text-sm"
-            />
-          </div>
+          <Input
+            type="search"
+            icon="search"
+            aria-label={t("searchProvidersModels")}
+            placeholder={t("searchProvidersModels")}
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="flex-1 min-w-[260px]"
+          />
 
           <FilterSelect
             label={t("pricingCoverage")}
@@ -678,25 +680,24 @@ export default function PricingTab() {
 
         {/* Quick shortcuts */}
         <div className="flex items-center gap-2 flex-wrap text-[11px]">
-          <button
-            type="button"
+          <Button
+            variant={coverageFilter === "lt50" ? "warning" : "outline"}
+            size="sm"
+            icon="warning"
+            aria-pressed={coverageFilter === "lt50"}
             onClick={() => setCoverageFilter(coverageFilter === "lt50" ? "all" : "lt50")}
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs transition-colors cursor-pointer ${
-              coverageFilter === "lt50"
-                ? "bg-amber-500/15 border-amber-500/30 text-amber-400"
-                : "bg-bg-subtle border-border text-text-muted hover:text-text-main"
-            }`}
           >
-            <span className="material-symbols-outlined text-[14px]">warning</span>
             {t("pricingCoverageGaps")} ({coverageGapCount})
-          </button>
+          </Button>
           {(searchQuery ||
             coverageFilter !== "all" ||
             authFilter !== "all" ||
             sortKey !== "modelsDesc" ||
             selectedProvider) && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="close"
               onClick={() => {
                 setSearchQuery("");
                 setCoverageFilter("all");
@@ -704,11 +705,9 @@ export default function PricingTab() {
                 setSortKey("modelsDesc");
                 setSelectedProvider(null);
               }}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border bg-bg-subtle text-xs text-text-muted hover:text-text-main cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[14px]">close</span>
               {t("pricingClearFilters")}
-            </button>
+            </Button>
           )}
           <span className="text-text-muted ml-auto">
             {t("pricingShowingProviders", {
@@ -743,21 +742,26 @@ export default function PricingTab() {
         ))}
 
         {displayProviders.length === 0 && (
-          <div className="text-center py-12 text-text-muted">{t("noProvidersMatch")}</div>
+          <EmptyState
+            compact
+            icon={<Icon name="search_off" size={24} />}
+            title={t("noProvidersMatch")}
+          />
         )}
 
         {visibleCount < totalFiltered && (
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            icon="expand_more"
             onClick={() => setVisibleCount((c) => c + VISIBLE_INCREMENT)}
-            className="mt-2 mx-auto px-4 py-2 rounded-md border border-border bg-bg-subtle hover:bg-black/[0.04] dark:hover:bg-white/[0.04] text-sm text-text-main cursor-pointer flex items-center gap-1.5"
+            className="mt-2 mx-auto"
           >
-            <span className="material-symbols-outlined text-[16px]">expand_more</span>
             {t("pricingShowMoreProviders", {
               count: Math.min(VISIBLE_INCREMENT, totalFiltered - visibleCount),
               remaining: totalFiltered - visibleCount,
             })}
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -809,21 +813,21 @@ function ProviderSection({
   return (
     <div
       className={`border rounded-lg overflow-hidden transition-colors ${
-        isEdited ? "border-yellow-500/40 bg-yellow-500/5" : "border-border"
+        isEdited ? "border-warning/40 bg-warning/5" : "border-border"
       }`}
     >
-      <button
+      <Button
+        variant="ghost"
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-bg-hover/50 transition-colors text-left"
+        aria-expanded={isExpanded}
+        className="h-auto w-full justify-between gap-3 rounded-none px-4 py-3 text-left font-normal"
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span
-            className={`material-symbols-outlined text-lg text-text-muted transition-transform shrink-0 ${
-              isExpanded ? "rotate-90" : ""
-            }`}
-          >
-            chevron_right
-          </span>
+          <Icon
+            name="chevron_right"
+            size={18}
+            className={`text-text-muted transition-transform ${isExpanded ? "rotate-90" : ""}`}
+          />
           <div className="w-7 h-7 rounded-md flex items-center justify-center overflow-hidden shrink-0 bg-bg-subtle">
             <ProviderIcon providerId={provider.id} size={28} type="color" />
           </div>
@@ -835,17 +839,19 @@ function ProviderSection({
               ({provider.alias.toUpperCase()})
             </span>
           </div>
-          <span
-            className={`px-1.5 py-0.5 text-[9px] rounded uppercase font-semibold shrink-0 ${
+          <Badge
+            size="sm"
+            variant={
               provider.authType === "oauth"
-                ? "bg-sky-500/15 text-sky-400 border border-sky-500/25"
+                ? "info"
                 : provider.authType === "apikey"
-                  ? "bg-violet-500/15 text-violet-400 border border-violet-500/25"
-                  : "bg-bg-subtle text-text-muted border border-border/40"
-            }`}
+                  ? "primary"
+                  : "default"
+            }
+            className="shrink-0 uppercase"
           >
             {authBadge}
-          </span>
+          </Badge>
           <span className="px-1.5 py-0.5 bg-bg-subtle text-text-muted text-[9px] rounded uppercase font-semibold shrink-0">
             {provider.format}
           </span>
@@ -853,14 +859,14 @@ function ProviderSection({
         <div className="flex items-center gap-3 shrink-0">
           {sourceCounts.user > 0 && (
             <span
-              className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-400"
+              className="inline-flex items-center gap-1 text-[10px] font-semibold text-warning"
               title={`${sourceCounts.user} ${getSourceLabel("user")}`}
             >
               💎 {sourceCounts.user}
             </span>
           )}
           {isEdited && (
-            <span className="text-yellow-500 text-[11px] font-semibold">{t("unsaved")}</span>
+            <span className="text-warning text-[11px] font-semibold">{t("unsaved")}</span>
           )}
           <span className="text-text-muted text-[11px] tabular-nums hidden sm:inline">
             {pricedCount}/{provider.modelCount}
@@ -868,14 +874,16 @@ function ProviderSection({
           {(() => {
             const pct =
               provider.modelCount > 0 ? Math.round((pricedCount / provider.modelCount) * 100) : 0;
-            const barColor =
-              pct >= 100 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-red-500";
+            const barColor = pct >= 100 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-error";
             const textColor =
-              pct >= 100 ? "text-emerald-400" : pct >= 50 ? "text-amber-400" : "text-red-400";
+              pct >= 100 ? "text-success" : pct >= 50 ? "text-warning" : "text-error";
             const icon = pct >= 100 ? "✓" : pct >= 50 ? "◐" : "⚠";
             return (
               <>
-                <div className="w-20 h-1.5 bg-bg-subtle rounded-full overflow-hidden">
+                <div
+                  className="w-20 h-1.5 bg-border/60 rounded-full overflow-hidden"
+                  aria-hidden="true"
+                >
                   <div
                     className={`h-full ${barColor} rounded-full transition-all`}
                     style={{ width: `${pct}%` }}
@@ -891,7 +899,7 @@ function ProviderSection({
             );
           })()}
         </div>
-      </button>
+      </Button>
 
       {isExpanded && (
         <div className="border-t border-border">
@@ -900,54 +908,54 @@ function ProviderSection({
               {provider.modelCount} {t("models")} • {pricedCount} {t("withPricing")}
             </span>
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={(event) => {
                   event.stopPropagation();
                   onReset();
                 }}
-                className="px-2.5 py-1 text-[11px] text-red-400 hover:bg-red-500/10 rounded border border-red-500/20 transition-colors"
               >
                 {t("resetDefaults")}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={(event) => {
                   event.stopPropagation();
                   onSave();
                 }}
                 disabled={saving || !isEdited}
-                className="px-2.5 py-1 text-[11px] bg-primary text-white rounded hover:bg-primary/90 transition-colors disabled:opacity-40"
               >
                 {saving ? t("saving") : t("saveProvider")}
-              </button>
+              </Button>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-[11px] text-text-muted uppercase bg-bg-subtle/30">
-                <tr>
-                  <th className="px-4 py-2 text-left font-semibold">{t("model")}</th>
-                  {PRICING_FIELDS.map((field) => (
-                    <th key={field} className="px-2 py-2 text-right font-semibold w-24">
-                      {t(FIELD_LABEL_KEYS[field])}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {provider.models.map((model) => (
-                  <ModelRow
-                    key={model.id}
-                    model={model}
-                    pricing={pricingData[model.id]}
-                    source={sourceMap[model.id] || "default"}
-                    getSourceLabel={getSourceLabel}
-                    onPricingChange={(field, value) => onPricingChange(model.id, field, value)}
-                  />
+          <Table scrollbarLabel={t("modelPricing")} className="text-sm">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("model")}</TableHead>
+                {PRICING_FIELDS.map((field) => (
+                  <TableHead key={field} className="w-24 text-right">
+                    {t(FIELD_LABEL_KEYS[field])}
+                  </TableHead>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {provider.models.map((model) => (
+                <ModelRow
+                  key={model.id}
+                  model={model}
+                  pricing={pricingData[model.id]}
+                  source={sourceMap[model.id] || "default"}
+                  getSourceLabel={getSourceLabel}
+                  onPricingChange={(field, value) => onPricingChange(model.id, field, value)}
+                />
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>
@@ -971,17 +979,17 @@ function ModelRow({
   const hasPricing = Boolean(pricing && Object.values(pricing).some((value) => Number(value) > 0));
 
   return (
-    <tr className="hover:bg-bg-hover/30 group">
-      <td className="px-4 py-1.5">
+    <TableRow className="group">
+      <TableCell className="py-1.5">
         <div className="flex items-center gap-2">
           <span
             className={`w-1.5 h-1.5 rounded-full ${hasPricing ? "bg-success" : "bg-text-muted/30"}`}
           />
           <span className="font-medium text-xs">{model.name}</span>
           {model.custom && (
-            <span className="px-1 py-0.5 text-[8px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/20 rounded uppercase">
+            <Badge size="sm" variant="info" className="uppercase">
               {t("custom")}
-            </span>
+            </Badge>
           )}
           <span className={`px-1.5 py-0.5 rounded text-[9px] ${getSourceTone(source)}`}>
             {getSourceLabel(source)}
@@ -990,19 +998,20 @@ function ModelRow({
             {model.id}
           </span>
         </div>
-      </td>
+      </TableCell>
       {PRICING_FIELDS.map((field) => (
-        <td key={field} className="px-2 py-1.5">
-          <input
+        <TableCell key={field} className="px-2 py-1.5">
+          <Input
             type="number"
             step="0.01"
             min="0"
+            aria-label={`${model.name} ${t(FIELD_LABEL_KEYS[field])}`}
             value={pricing?.[field] || 0}
             onChange={(event) => onPricingChange(field, event.target.value)}
-            className="w-full px-2 py-1 text-right text-xs bg-transparent border border-transparent hover:border-border focus:border-primary focus:bg-bg-base rounded transition-colors outline-none tabular-nums"
+            inputClassName="text-right text-xs tabular-nums"
           />
-        </td>
+        </TableCell>
       ))}
-    </tr>
+    </TableRow>
   );
 }

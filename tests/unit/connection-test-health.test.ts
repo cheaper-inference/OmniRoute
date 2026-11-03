@@ -155,3 +155,71 @@ test(
     assert.equal(update.rateLimitedUntil, input.connection.rateLimitedUntil);
   }
 );
+
+const PASSIVE_ENV = "OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS";
+const adoptedTokens = {
+  accessToken: "synthetic-adopted-access",
+  refreshToken: "synthetic-adopted-refresh",
+  expiresIn: 3600,
+};
+const TOKEN_FIELDS = ["accessToken", "refreshToken", "expiresAt"] as const;
+
+async function persistWithRefresh(provider: string): Promise<Record<string, unknown>> {
+  let update: Record<string, unknown> = {};
+  await persistConnectionTestHealth({
+    ...options(),
+    provider,
+    result: { valid: true, refreshed: true, newTokens: adoptedTokens },
+    persist: async (_id, fields) => {
+      update = fields;
+    },
+  });
+  return update;
+}
+
+test(
+  "a passive Codex connection test never persists tokens carried by its result",
+  { timeout: 2000 },
+  async () => {
+    const previous = process.env[PASSIVE_ENV];
+    process.env[PASSIVE_ENV] = "codex";
+    try {
+      for (const provider of ["codex", "cx"]) {
+        const update = await persistWithRefresh(provider);
+        for (const field of TOKEN_FIELDS) {
+          assert.equal(
+            Object.hasOwn(update, field),
+            false,
+            `${provider}: passive standby must not write ${field} from a connection test`
+          );
+        }
+        assert.equal(update.testStatus, "error", "health fields are still persisted");
+      }
+    } finally {
+      if (previous === undefined) delete process.env[PASSIVE_ENV];
+      else process.env[PASSIVE_ENV] = previous;
+    }
+  }
+);
+
+test(
+  "a non-passive connection test still persists refreshed tokens",
+  { timeout: 2000 },
+  async () => {
+    const previous = process.env[PASSIVE_ENV];
+    delete process.env[PASSIVE_ENV];
+    try {
+      const update = await persistWithRefresh("codex");
+      assert.equal(update.accessToken, adoptedTokens.accessToken);
+      assert.equal(update.refreshToken, adoptedTokens.refreshToken);
+      assert.ok(Date.parse(String(update.expiresAt)) > Date.now());
+      // Passive mode scoped to codex must not affect other providers.
+      process.env[PASSIVE_ENV] = "codex";
+      const other = await persistWithRefresh("claude");
+      assert.equal(other.accessToken, adoptedTokens.accessToken);
+    } finally {
+      if (previous === undefined) delete process.env[PASSIVE_ENV];
+      else process.env[PASSIVE_ENV] = previous;
+    }
+  }
+);

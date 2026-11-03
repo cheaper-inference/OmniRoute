@@ -15,8 +15,13 @@
  * the opt-in config key `connectionAwareExpansion` (combo config or settings
  * fallback, default false). When off, targets pass through byte-identical.
  *
+ * The per-target expansion cap resolves the same way: the raw combo config
+ * layer first, then the global settings layer, then the default cap. Callers
+ * must pass the raw combo config -- the resolved combo config always carries
+ * the default cap and would hide the global layer.
  */
 
+import type { PreDispatchExclusion } from "./pinRecovery.ts";
 import type { ResolvedComboTarget, ComboLogger } from "./types.ts";
 import { expandTargetsByQuotaAwareConnections } from "./quotaStrategies.ts";
 
@@ -58,13 +63,19 @@ export interface ExpandTargetsForAllStrategiesArgs {
   strategy: string;
   targets: ResolvedComboTarget[];
   comboName: string;
-  /** Resolved combo config (cascade output) or raw combo config. */
+  /**
+   * Raw combo config layer. Never the resolved combo config: the resolved
+   * config always carries the default cap, which would hide the global
+   * settings layer.
+   */
   config: Record<string, unknown> | null | undefined;
   /** Global settings layer; consulted when the combo config layer is unset. */
   settings?: Record<string, unknown> | null | undefined;
   log: ComboLogger;
   /** API-key allowedConnections scope, intersected with the expansion. */
   apiKeyAllowedConnectionIds?: string[] | null;
+  /** Request-scoped exclusions used only when expansion empties the pool. */
+  exclusions?: PreDispatchExclusion[];
   /**
    * Test-only injection point replacing the underlying expander, used to
    * exercise the fail-open path deterministically (T10). Production callers
@@ -75,16 +86,16 @@ export interface ExpandTargetsForAllStrategiesArgs {
     comboName: string,
     log: ComboLogger,
     apiKeyAllowedConnectionIds: string[] | null
-  ) => Promise<{ expandedTargets: ResolvedComboTarget[] }>;
+  ) => Promise<{ expandedTargets: ResolvedComboTarget[]; exclusions?: PreDispatchExclusion[] }>;
 }
 
 /**
  * Should the connection-aware expansion stage run for this request?
  *
- * true iff the strategy is a group-B strategy AND the resolved config (combo
- * config layer, falling back to the settings layer) enables
- * `connectionAwareExpansion`. Both layers default to false; flipping the
- * switch must never change a combo that did not ask for it.
+ * true iff the strategy is a group-B strategy AND the raw combo config layer
+ * (falling back to the settings layer) enables `connectionAwareExpansion`.
+ * Both layers default to false; flipping the switch must never change a
+ * combo that did not ask for it.
  */
 export function shouldApplyConnectionAwareExpansion(
   strategy: string,
@@ -97,12 +108,33 @@ export function shouldApplyConnectionAwareExpansion(
   return settings?.connectionAwareExpansion === true;
 }
 
-function clampMaxPerTarget(value: unknown): number {
+/**
+ * Read a per-target expansion cap from one layer.
+ *
+ * Returns null when the layer sets no usable cap (missing key, null, a
+ * non-numeric value, or a value below 1), so the caller can fall through to
+ * the next layer -- same reading as the `connectionAwareExpansion` switch
+ * above, which only lets an explicit true/false win over the global layer.
+ */
+function readMaxPerTarget(value: unknown): number | null {
   const numeric = Number(value);
-  if (!Number.isFinite(numeric) || numeric < 1) {
-    return DEFAULT_CONNECTION_AWARE_EXPANSION_MAX_PER_TARGET;
-  }
+  if (!Number.isFinite(numeric) || numeric < 1) return null;
   return Math.min(Math.floor(numeric), 64);
+}
+
+/**
+ * Resolve the per-target expansion cap: the combo layer wins when it sets a
+ * usable cap, otherwise the global settings layer, otherwise the default.
+ */
+function resolveMaxPerTarget(
+  config: Record<string, unknown> | null | undefined,
+  settings: Record<string, unknown> | null | undefined
+): number {
+  return (
+    readMaxPerTarget(config?.connectionAwareExpansionMaxPerTarget) ??
+    readMaxPerTarget(settings?.connectionAwareExpansionMaxPerTarget) ??
+    DEFAULT_CONNECTION_AWARE_EXPANSION_MAX_PER_TARGET
+  );
 }
 
 /**
@@ -118,14 +150,14 @@ export async function expandTargetsForAllStrategies(
   if (targets.length === 0) return targets;
   if (!shouldApplyConnectionAwareExpansion(strategy, config, settings)) return targets;
 
-  const maxPerTarget = clampMaxPerTarget(config?.connectionAwareExpansionMaxPerTarget);
+  const maxPerTarget = resolveMaxPerTarget(config, settings);
 
   try {
     const expander =
       args.__testExpander ??
       ((t: ResolvedComboTarget[], name: string, l: ComboLogger, allowed: string[] | null) =>
         expandTargetsByQuotaAwareConnections(t, name, l, allowed));
-    const { expandedTargets } = await expander(
+    const { expandedTargets, exclusions } = await expander(
       targets,
       comboName,
       log,
@@ -144,6 +176,7 @@ export async function expandTargetsForAllStrategies(
       counts.set(key, seen + 1);
       capped.push(target);
     }
+    args.exclusions?.push(...(exclusions ?? []));
     return capped;
   } catch (error) {
     // Fail-open (spec section 3.1): expansion is a best-effort pre-filter, never a

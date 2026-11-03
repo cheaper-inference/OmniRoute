@@ -1,0 +1,1 @@
+- **fix(sse):** keep an explicit client thinking type instead of overwriting it with the connection default ([#18114](https://github.com/cheaper-inference/OmniRoute/pull/18114)) — thanks @maxmad64bis

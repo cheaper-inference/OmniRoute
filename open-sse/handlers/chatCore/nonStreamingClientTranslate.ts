@@ -75,7 +75,10 @@ export function translateNonStreamingClientResponse(
 
   // ── Extract tool schemas for schema-aware translation ──────────────────────
   const finalBody = requestBody as Record<string, unknown> | null;
-  const responseToolSchemas = extractToolSchemaMap(finalBody || responseBody);
+  const responseToolSchemas =
+    (clientResponseFormat === FORMATS.CLAUDE
+      ? extractToolSchemaMap(input.clientRequestBody)
+      : null) ?? extractToolSchemaMap(finalBody || responseBody);
 
   // ── Claude signed-thinking continuity ─────────────────────────────────────
   // A non-Claude client never holds the signed thinking blocks of this tool turn;
@@ -87,7 +90,11 @@ export function translateNonStreamingClientResponse(
     !input.videoTranscriptSensitive
   ) {
     try {
-      storeClaudeThinkingFromResponse(responseBody, { provider, model });
+      storeClaudeThinkingFromResponse(responseBody, {
+        provider,
+        model,
+        connectionId: input.connectionId,
+      });
     } catch {
       // Continuity capture is best-effort — never block the response
     }
@@ -101,7 +108,9 @@ export function translateNonStreamingClientResponse(
         clientResponseFormat,
         responseToolNameMap,
         responseToolSchemas,
-        requestedThinking
+        requestedThinking,
+        (input.clientRequestBody as Record<string, unknown> | null | undefined)?.tools ?? null,
+        { signatureNamespace: input.signatureNamespace ?? null }
       )
     : responseBody;
   const responseForMemoryExtraction = translatedResponse;
@@ -121,7 +130,10 @@ export function translateNonStreamingClientResponse(
             responsePayloadFormat,
             FORMATS.OPENAI,
             responseToolNameMap,
-            responseToolSchemas
+            responseToolSchemas,
+            undefined,
+            undefined,
+            { signatureNamespace: input.signatureNamespace ?? null }
           )
         : responseBody;
     const firstChoice = cacheResponse?.choices?.[0];

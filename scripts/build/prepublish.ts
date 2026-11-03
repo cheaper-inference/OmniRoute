@@ -30,6 +30,7 @@ import { assembleStandalone } from "./assembleStandalone.mjs";
 import { buildMitmUtilities } from "./buildMitm.mjs";
 import { isNativeExecutable, resolveLocalBinEntry } from "./buildToolRunner.mjs";
 import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
+import { getPrepublishDistDirRefusal } from "./prepublishPathSafety.ts";
 import {
   APP_STAGING_ALLOWED_EXACT_PATHS,
   APP_STAGING_ALLOWED_PATH_PREFIXES,
@@ -93,7 +94,13 @@ function runBuildTool(
   });
 }
 
-const DIST_DIR = join(ROOT, "dist");
+const DIST_DIR = process.env.OMNIROUTE_DIST_DIR || join(ROOT, "dist");
+// Step 1 wipes DIST_DIR recursively: also refuse parents that would erase the checkout.
+const distDirRefusal = getPrepublishDistDirRefusal(DIST_DIR, ROOT);
+if (distDirRefusal) {
+  console.error(`  ❌ Refusing ${DIST_DIR} as the publish dist directory: ${distDirRefusal}.`);
+  process.exit(1);
+}
 const METHOD_GUARD_REQUIRE = 'require("./http-method-guard.cjs").installHttpMethodGuard();\n';
 
 function walkFiles(dir: string, rootDir: string = dir, files: string[] = []): string[] {
@@ -246,11 +253,11 @@ if (existsSync(mcpSrcFile)) {
         "--platform=node",
         "--packages=external",
         "--format=esm",
-        "--outfile=dist/open-sse/mcp-server/server.js",
+        `--outfile=${mcpDestFile}`,
       ],
       { cwd: ROOT, stdio: "inherit" }
     );
-    console.log("  ✅ MCP Server bundled to dist/open-sse/mcp-server/server.js");
+    console.log(`  ✅ MCP Server bundled to ${mcpDestFile}`);
   } catch (err: any) {
     console.warn("  ⚠️  MCP Server bundle error:", err.message);
   }
@@ -286,7 +293,7 @@ if (existsSync(chatGptWebCodexMcpSrcFile)) {
       "--platform=node",
       "--packages=external",
       "--format=esm",
-      "--outfile=dist/open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.js",
+      `--outfile=${chatGptWebCodexMcpDestFile}`,
     ],
     { cwd: ROOT, stdio: "inherit" }
   );
@@ -325,7 +332,7 @@ runBuildTool(
     "--platform=node",
     "--packages=external",
     "--format=esm",
-    "--outfile=dist/src/lib/usage/callLogArtifactWorker.js",
+    `--outfile=${callLogWorkerDest}`,
   ],
   { cwd: ROOT, stdio: "inherit" }
 );
@@ -351,7 +358,7 @@ runBuildTool(
     "--platform=node",
     "--packages=external",
     "--format=esm",
-    "--outfile=dist/src/lib/logExport/exportChild.js",
+    `--outfile=${logExportChildDest}`,
   ],
   { cwd: ROOT, stdio: "inherit" }
 );
@@ -379,6 +386,7 @@ const llmWorkerDestDir = join(
   "engines",
   "llmlingua"
 );
+const llmWorkerDest = join(llmWorkerDestDir, "onnxWorker.js");
 if (existsSync(llmWorkerSrc)) {
   console.log("  🔨 Bundling LLMLingua ONNX worker (TypeScript → JavaScript)...");
   mkdirSync(llmWorkerDestDir, { recursive: true });
@@ -392,13 +400,11 @@ if (existsSync(llmWorkerSrc)) {
         "--platform=node",
         "--packages=external",
         "--format=esm",
-        "--outfile=dist/open-sse/services/compression/engines/llmlingua/onnxWorker.js",
+        `--outfile=${llmWorkerDest}`,
       ],
       { cwd: ROOT, stdio: "inherit" }
     );
-    console.log(
-      "  ✅ LLMLingua worker bundled to dist/open-sse/services/compression/engines/llmlingua/onnxWorker.js"
-    );
+    console.log(`  ✅ LLMLingua worker bundled to ${llmWorkerDest}`);
   } catch (err: any) {
     console.warn("  ⚠️  LLMLingua worker bundle error:", err.message);
   }
@@ -433,7 +439,7 @@ runBuildTool(
     "--platform=node",
     "--packages=external",
     "--format=esm",
-    "--outfile=dist/open-sse/services/compression/compressionWorker.js",
+    `--outfile=${compressionWorkerDest}`,
   ],
   { cwd: ROOT, stdio: "inherit" }
 );
@@ -738,8 +744,8 @@ const distPkg = join(DIST_DIR, "package.json");
 if (existsSync(distPkg)) {
   JSON.parse(readFileSync(distPkg, "utf8"));
   console.log(`\n  ✅ Build complete!`);
-  console.log(`     Dist directory: dist/`);
-  console.log(`     Server entry:  dist/server.js`);
+  console.log(`     Dist directory: ${DIST_DIR}`);
+  console.log(`     Server entry:  ${join(DIST_DIR, "server.js")}`);
 } else {
   console.log(`\n  ✅ Build complete! (dist/ ready for publish)`);
 }

@@ -23,6 +23,17 @@ function getPromptTokenDetails(tokens: unknown): JsonRecord {
 export function getPromptCacheReadTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
   const promptDetails = getPromptTokenDetails(tokenRecord);
+  // Compatibility aliases may contain zero while a later field reports a cache hit.
+  const firstPositive = [
+    tokenRecord.cacheRead,
+    tokenRecord.cache_read_input_tokens,
+    tokenRecord.cached_tokens,
+    promptDetails.cached_tokens,
+  ]
+    .map(toFiniteNumber)
+    .find((value) => value > 0);
+  if (firstPositive !== undefined) return firstPositive;
+
   return toFiniteNumber(
     tokenRecord.cacheRead ??
       tokenRecord.cache_read_input_tokens ??

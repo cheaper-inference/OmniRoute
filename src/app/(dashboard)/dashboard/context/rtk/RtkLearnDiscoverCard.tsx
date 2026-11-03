@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Input from "@/shared/components/Input";
 
 interface NoiseCandidate {
   pattern: string;
@@ -78,15 +82,11 @@ export default function RtkLearnDiscoverCard() {
   }
 
   return (
-    <section
-      className="rounded-lg border border-border bg-surface p-4"
-      data-testid="rtk-learn-discover"
-    >
-      <h2 className="text-sm font-semibold text-text-main">{t("learnDiscoverTitle")}</h2>
-      <p className="mt-1 text-xs text-text-muted">{t("learnDiscoverDesc")}</p>
+    <Card padding="sm" data-testid="rtk-learn-discover">
+      <SectionHeader title={t("learnDiscoverTitle")} description={t("learnDiscoverDesc")} />
 
       {error && (
-        <p className="mt-3 text-xs text-red-600 dark:text-red-400" data-testid="rtk-ld-error">
+        <p className="mt-3 text-xs text-error" role="alert" data-testid="rtk-ld-error">
           {error}
         </p>
       )}
@@ -95,15 +95,16 @@ export default function RtkLearnDiscoverCard() {
         {/* ── Discover ─────────────────────────────────────────────── */}
         <div>
           <h3 className="text-xs font-medium text-text-main">{t("discoverHeading")}</h3>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={runDiscover}
             disabled={discovering}
             data-testid="rtk-discover-button"
-            className="mt-2 rounded border border-border px-2.5 py-1 text-xs font-medium text-text-main hover:bg-surface-hover disabled:opacity-50"
+            className="mt-2"
           >
             {discovering ? t("discoverScanning") : t("discoverButton")}
-          </button>
+          </Button>
 
           {candidates !== null && (
             <div className="mt-3" data-testid="rtk-discover-results">
@@ -135,23 +136,25 @@ export default function RtkLearnDiscoverCard() {
         <div>
           <h3 className="text-xs font-medium text-text-main">{t("learnHeading")}</h3>
           <div className="mt-2 flex gap-2">
-            <input
+            <Input
               type="text"
               value={command}
               onChange={(event) => setCommand(event.target.value)}
               placeholder={t("learnCommandPlaceholder")}
+              aria-label={t("learnHeading")}
               data-testid="rtk-learn-command"
-              className="min-w-0 flex-1 rounded border border-border bg-surface px-2 py-1 text-xs text-text-main"
+              className="min-w-0 flex-1"
             />
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={runLearn}
               disabled={learning || !command.trim()}
               data-testid="rtk-learn-button"
-              className="shrink-0 rounded border border-border px-2.5 py-1 text-xs font-medium text-text-main hover:bg-surface-hover disabled:opacity-50"
+              className="shrink-0"
             >
               {t("learnButton")}
-            </button>
+            </Button>
           </div>
 
           {suggested === null ? (
@@ -161,13 +164,13 @@ export default function RtkLearnDiscoverCard() {
               <p className="text-[11px] text-text-muted">
                 {t("learnSamplesUsed", { count: learnCount })}
               </p>
-              <pre className="mt-2 max-h-48 overflow-auto rounded bg-surface-hover p-2 text-[10px] text-text-main">
+              <pre className="mt-2 max-h-48 overflow-auto rounded bg-bg-subtle p-2 text-[10px] text-text-main">
                 {JSON.stringify(suggested, null, 2)}
               </pre>
             </div>
           )}
         </div>
       </div>
-    </section>
+    </Card>
   );
 }

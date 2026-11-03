@@ -98,6 +98,25 @@ test("#18296 fresh account-wide headroom scopes an explicit Claude quota 429 to 
   assert.equal(decide({ status: 503 }).scope, "connection");
 });
 
+test("#18296 model-credit entitlement text keeps its own decision when headroom is proven", () => {
+  const connectionId = "claude-18296-entitlement";
+  const now = Date.now();
+  seedUsage(connectionId, productionUsage(now));
+  const decision = quotaCache.getCachedClaudeQuotaScopeDecision({
+    connectionId,
+    provider: "claude",
+    status: 429,
+    errorText: "[429]: Usage credits are required for this model.",
+    model: FABLE,
+    nowMs: now,
+  });
+
+  // The entitlement decision (evidence "blocking", fixed cooldown) wins over "headroom".
+  assert.equal(decision.scope, "model");
+  assert.equal(decision.evidence, "blocking");
+  assert.notEqual(decision.cooldownMs, null);
+});
+
 test("#18296 headroom scoping requires proof for every account-wide window", () => {
   const now = Date.now();
   const cases: Array<[string, ReturnType<typeof productionUsage>]> = [

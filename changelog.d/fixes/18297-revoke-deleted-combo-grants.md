@@ -1,0 +1,1 @@
+- **fix(db):** deleting a combo now revokes its name from every API key's allowed combos, so a combo recreated under the same name is no longer granted to keys that had the old one ([#18297](https://github.com/cheaper-inference/OmniRoute/pull/18297)) — thanks @Jordannst
