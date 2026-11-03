@@ -489,26 +489,22 @@ export class KiroExecutor extends BaseExecutor {
       )?.content as string) || "";
     const thinkingExpected = userContent.includes("<thinking_mode>enabled</thinking_mode>");
     // A client tool named `tool_call` is not the Kiro MCP wrapper (#18675).
-    const clientDeclaresWrapperName = kiroRequestDeclaresToolCallWrapperName(transformedBody);
+    const sseOpts = {
+      thinkingExpected,
+      clientDeclaresWrapperName: kiroRequestDeclaresToolCallWrapperName(transformedBody),
+    };
     const transformedResponse =
       stream && isKiroToolCallRepairEnabled()
         ? createKiroToolCallRepairStream({
             upstream: response,
             transform: (raw, opts) =>
-              this.transformEventStreamToSSE(raw, model, {
-                thinkingExpected,
-                clientDeclaresWrapperName,
-                ...opts,
-              }),
+              this.transformEventStreamToSSE(raw, model, { ...sseOpts, ...opts }),
             retry: async (payload, retrySignal) => (await send(payload, retrySignal)).res,
             transformedBody,
             signal,
             log,
           })
-        : this.transformEventStreamToSSE(response, model, {
-            thinkingExpected,
-            clientDeclaresWrapperName,
-          });
+        : this.transformEventStreamToSSE(response, model, sseOpts);
 
     return { response: transformedResponse, url, headers, transformedBody };
   }
