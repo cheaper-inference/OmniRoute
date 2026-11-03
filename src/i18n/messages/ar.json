@@ -10676,6 +10676,7 @@
       "refreshFailures": "تم الكشف عن فشل في تحديث الرمز",
       "unknown": "حالة الصحة غير معروفة"
     },
+    "tokenHealthRefreshResult": "{refreshed} تم التحديث، {failed} فشل، {skipped} تم التخطي",
     "systemMonitor": {
       "metricsAriaLabel": "مقاييس النظام",
       "memory": "ذاكرة",

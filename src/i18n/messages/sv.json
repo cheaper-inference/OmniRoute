@@ -10599,6 +10599,7 @@
       "refreshFailures": "Tokenuppdateringsfel upptäckta",
       "unknown": "Hälsostatus okänd"
     },
+    "tokenHealthRefreshResult": "{refreshed} uppdaterade, {failed} misslyckades, {skipped} hoppades över",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmetrik",
       "memory": "Minne",

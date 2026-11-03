@@ -10599,6 +10599,7 @@
       "refreshFailures": "Otkriveni su neuspjesi osvježavanja tokena",
       "unknown": "Stanje nije poznato"
     },
+    "tokenHealthRefreshResult": "{refreshed} osvježeno, {failed} neuspjelo, {skipped} preskočeno",
     "systemMonitor": {
       "metricsAriaLabel": "Metrike sustava",
       "memory": "Memorija",

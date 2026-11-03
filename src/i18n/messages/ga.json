@@ -10599,6 +10599,7 @@
       "refreshFailures": "Braitheadh teipeanna athnuachana ceadchomharthaí",
       "unknown": "Stádas sláinte anaithnid"
     },
+    "tokenHealthRefreshResult": "{refreshed} athnuadaithe, {failed} theip, {skipped} fágtha amuigh",
     "systemMonitor": {
       "metricsAriaLabel": "Méadrachtaí an chórais",
       "memory": "Cuimhne",

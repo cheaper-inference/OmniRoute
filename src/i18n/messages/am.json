@@ -10676,6 +10676,7 @@
       "refreshFailures": "የቶከን እድሳት አለመሳካቶች ተገኝተዋል",
       "unknown": "የጤንነት ሁኔታው አይታወቅም"
     },
+    "tokenHealthRefreshResult": "{refreshed} ታድሷል፣ {failed} አልተሳካም፣ {skipped} ተዘለለ",
     "systemMonitor": {
       "metricsAriaLabel": "የስርዓት መለኪያዎች",
       "memory": "ማህደረ ትውስታ",

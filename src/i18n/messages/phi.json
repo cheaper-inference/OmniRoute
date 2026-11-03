@@ -10599,6 +10599,7 @@
       "refreshFailures": "Nakita ang mga pagkabigo sa pag-refresh ng token",
       "unknown": "Hindi alam ang katayuan ng kalusugan"
     },
+    "tokenHealthRefreshResult": "{refreshed} na-refresh, {failed} nabigo, {skipped} nilaktawan",
     "systemMonitor": {
       "metricsAriaLabel": "Mga Sukat ng Sistema",
       "memory": "Memorya",

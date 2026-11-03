@@ -10599,6 +10599,7 @@
       "refreshFailures": "Tokenlarni yangilashda xatoliklar aniqlandi",
       "unknown": "Holat noma’lum"
     },
+    "tokenHealthRefreshResult": "{refreshed} yangilandi, {failed} muvaffaqiyatsiz boʻldi, {skipped} tashlab qoldi",
     "systemMonitor": {
       "metricsAriaLabel": "Tizim ko‘rsatkichlari",
       "memory": "Xotira",

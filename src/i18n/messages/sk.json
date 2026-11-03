@@ -10599,6 +10599,7 @@
       "refreshFailures": "Zistené zlyhania obnovenia tokenu",
       "unknown": "Zdravotný stav neznámy"
     },
+    "tokenHealthRefreshResult": "{refreshed} obnovené, {failed} zlyhalo, {skipped} preskočené",
     "systemMonitor": {
       "metricsAriaLabel": "Systémové metriky",
       "memory": "Pamäť",

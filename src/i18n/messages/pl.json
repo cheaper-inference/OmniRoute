@@ -10599,6 +10599,7 @@
       "refreshFailures": "Wykryto błędy odświeżania tokenów",
       "unknown": "Stan zdrowia nieznany"
     },
+    "tokenHealthRefreshResult": "{refreshed} odświeżone, {failed} nieudane, {skipped} pominięte",
     "systemMonitor": {
       "metricsAriaLabel": "Metryki systemowe",
       "memory": "Pamięć",

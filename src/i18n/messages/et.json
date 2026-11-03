@@ -10599,6 +10599,7 @@
       "refreshFailures": "Tuvastati tokenite värskendamise tõrkeid",
       "unknown": "Seisund pole teada"
     },
+    "tokenHealthRefreshResult": "{refreshed} uuendatud, {failed} nurjunud, {skipped} vahele jäetud",
     "systemMonitor": {
       "metricsAriaLabel": "Süsteemimõõdikud",
       "memory": "Mälu",

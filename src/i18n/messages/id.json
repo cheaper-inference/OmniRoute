@@ -10599,6 +10599,7 @@
       "refreshFailures": "Kegagalan penyegaran token terdeteksi",
       "unknown": "Status kesehatan tidak diketahui"
     },
+    "tokenHealthRefreshResult": "{refreshed} disegarkan, {failed} gagal, {skipped} dilewati",
     "systemMonitor": {
       "metricsAriaLabel": "Metrik sistem",
       "memory": "Memori",

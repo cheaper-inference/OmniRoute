@@ -10676,6 +10676,7 @@
       "refreshFailures": "Token refresh failures detected",
       "unknown": "Health status unknown"
     },
+    "tokenHealthRefreshResult": "{refreshed} refreshed, {failed} failed, {skipped} skipped",
     "systemMonitor": {
       "metricsAriaLabel": "System metrics",
       "memory": "Memory",
