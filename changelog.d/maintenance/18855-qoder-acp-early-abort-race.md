@@ -1,0 +1,1 @@
+- **test(sse):** the qodercli ACP early-abort test holds the fake agent's `session/new` reply until the client has aborted, so it no longer fails with `null !== 'Aborted'` when a fast runner finishes the whole turn first (#18855).
