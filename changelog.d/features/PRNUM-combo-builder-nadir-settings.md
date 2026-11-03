@@ -1,0 +1,1 @@
+- **feat(dashboard):** the combo builder shows a Nadir settings section (API key, timeout, self-hosted base URL) when the router strategy is `nadir`, so a dashboard-built combo no longer needs hand-edited JSON or env vars to set `config.nadir` ([#PRNUM](https://github.com/cheaper-inference/OmniRoute/pull/PRNUM)) — thanks @doramirdor

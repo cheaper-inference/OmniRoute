@@ -106,6 +106,11 @@ export default function BuilderIntelligentStep({
 }) {
   const normalizedConfig = normalizeIntelligentRoutingConfig(config);
   const isSlaAwareStrategy = ["sla-aware", "sla"].includes(normalizedConfig.routerStrategy);
+  const isNadirStrategy = normalizedConfig.routerStrategy === "nadir";
+  const nadirConfig: Record<string, unknown> =
+    config.nadir && typeof config.nadir === "object" && !Array.isArray(config.nadir)
+      ? (config.nadir as Record<string, unknown>)
+      : {};
   const providerOptions = useMemo(
     () => toProviderOptions(activeProviders, normalizedConfig.candidatePool),
     [activeProviders, normalizedConfig.candidatePool]
@@ -113,6 +118,17 @@ export default function BuilderIntelligentStep({
 
   const updateConfig = (patch: Record<string, unknown>) => {
     onChange(applyIntelligentRoutingConfigPatch(config, patch));
+  };
+
+  // Writes `config.nadir` (validated by comboRuntimeConfigSchema). Cleared fields are
+  // dropped, and an empty block is removed so the env fallbacks still apply.
+  const updateNadirConfig = (patch: Record<string, unknown>) => {
+    const next = Object.fromEntries(
+      Object.entries({ ...nadirConfig, ...patch }).filter(
+        ([, value]) => value !== undefined && value !== ""
+      )
+    );
+    updateConfig({ nadir: Object.keys(next).length > 0 ? next : undefined });
   };
 
   const toggleCandidateProvider = (providerId: string) => {
@@ -316,6 +332,65 @@ export default function BuilderIntelligentStep({
               "Prefer strict SLA-compliant candidates before soft scoring."
             )}
           />
+        </Card.Section>
+      )}
+
+      {isNadirStrategy && (
+        <Card.Section>
+          <div>
+            <p className="text-xs font-semibold text-text-main">
+              {getI18nOrFallback(t, "nadirRoutingTitle", "Nadir decision API")}
+            </p>
+            <p className="text-xs text-text-muted mt-1">
+              {getI18nOrFallback(
+                t,
+                "nadirRoutingHint",
+                "All fields are optional. Without an API key, calls use Nadir's anonymous tier, which is rate-limited per IP; with a key, each decision is logged to your Nadir dashboard. Empty fields fall back to OMNIROUTE_NADIR_API_KEY / OMNIROUTE_NADIR_BASE_URL. Any failure or timeout routes with Rules."
+              )}{" "}
+              <a
+                href="https://getnadir.com/docs/gateway-omniroute/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                {getI18nOrFallback(t, "nadirRoutingDocsLink", "Setup guide")}
+              </a>
+            </p>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Input
+              label={getI18nOrFallback(t, "nadirApiKeyLabel", "API key")}
+              type="password"
+              autoComplete="off"
+              value={typeof nadirConfig.apiKey === "string" ? nadirConfig.apiKey : ""}
+              placeholder="ndr_..."
+              onChange={(event) => updateNadirConfig({ apiKey: event.target.value.trim() })}
+            />
+
+            <Input
+              label={getI18nOrFallback(t, "nadirTimeoutLabel", "Timeout (ms)")}
+              type="number"
+              min="100"
+              max="30000"
+              step="100"
+              value={typeof nadirConfig.timeoutMs === "number" ? nadirConfig.timeoutMs : ""}
+              placeholder="2000"
+              onChange={(event) =>
+                updateNadirConfig({
+                  timeoutMs: event.target.value ? Number(event.target.value) : undefined,
+                })
+              }
+            />
+
+            <Input
+              label={getI18nOrFallback(t, "nadirBaseUrlLabel", "Base URL (self-hosted)")}
+              type="url"
+              value={typeof nadirConfig.baseUrl === "string" ? nadirConfig.baseUrl : ""}
+              placeholder="https://api.getnadir.com"
+              onChange={(event) => updateNadirConfig({ baseUrl: event.target.value.trim() })}
+            />
+          </div>
         </Card.Section>
       )}
 
