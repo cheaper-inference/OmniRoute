@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "跳過暫時冷卻，使此連線在可恢復錯誤後仍保持資格（已停用/已過期等終止狀態仍適用）。",
     "disableCoolingLabel": "對此連線停用冷卻",
+    "requireUserLastMessageDescription": "對於拒絕輔助預填充的上游：在發送之前刪除尾隨輔助輪（無工具使用）。該模型可能會重新生成其先前的答案。",
+    "requireUserLastMessageLabel": "要求對話以用戶訊息結束",
     "bulkPasteAdded": "{count, plural, one {已新增 1 個 key} other {已新增 # 個 key}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {已跳過 1 個重複項} other {已跳過 # 個重複項}}",
     "bulkPasteHint": "每行貼上一個 API 金鑰。空行會被忽略，重複金鑰會被跳過。",

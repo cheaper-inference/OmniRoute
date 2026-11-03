@@ -6323,6 +6323,8 @@
     "allowCodexPaidCreditsDescription": "允许此账户在订阅配额达到上限后使用付费额度。要求 OpenAI 报告有可用额度；可能产生费用。Spark 限额和上游冷却仍然适用。即使配额预检关闭也会检查额度可用性，除非本地配额过滤完全关闭（配额预检和限额策略都关闭）。",
     "disableCoolingDescription": "跳过瞬态冷却，以便此连接在发生可恢复错误后仍符合条件（被禁/过期等终态仍适用）。",
     "disableCoolingLabel": "禁用此连接的冷却",
+    "requireUserLastMessageDescription": "对于拒绝辅助预填充的上游：在发送之前删除尾随辅助轮（无工具使用）。该模型可能会重新生成其先前的答案。",
+    "requireUserLastMessageLabel": "要求对话以用户消息结束",
     "bulkPasteAdded": "{count, plural, one {已添加 1 个 key} other {已添加 # 个 key}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {已跳过 1 个重复项} other {已跳过 # 个重复项}}",
     "bulkPasteHint": "每行粘贴一个 API 密钥。空行会被忽略，重复密钥会被跳过。",

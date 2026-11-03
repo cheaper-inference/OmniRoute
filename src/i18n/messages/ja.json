@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "一時的なクールダウンをスキップし、回復可能なエラーの後でもこの接続を対象として維持します (banned/expired などの終端状態は引き続き適用されます)。",
     "disableCoolingLabel": "この接続のクールダウンを無効化",
+    "requireUserLastMessageDescription": "アシスタントの事前入力を拒否するアップストリームの場合: 送信前に後続のアシスタント ターンを削除します (tool_use なし)。モデルは以前の答えを再生成する場合があります。",
+    "requireUserLastMessageLabel": "会話はユーザーメッセージで終了する必要があります",
     "bulkPasteAdded": "{count, plural, one {1件のキーを追加しました} other {#件のキーを追加しました}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {重複した1件をスキップしました} other {重複した#件をスキップしました}}",
     "bulkPasteHint": "1行につき1つのAPIキーを貼り付けてください。空行は無視され、重複するキーはスキップされます。",

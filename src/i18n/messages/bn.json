@@ -6323,6 +6323,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "অস্থায়ী কুলডাউন এড়িয়ে যান যাতে পুনরুদ্ধারযোগ্য ত্রুটির পরেও এই সংযোগটি যোগ্য থাকে (নিষিদ্ধ/মেয়াদোত্তীর্ণের মতো টার্মিনাল অবস্থাগুলি এখনও প্রযোজ্য)।",
     "disableCoolingLabel": "এই সংযোগের জন্য কুলডাউন নিষ্ক্রিয় করুন",
+    "requireUserLastMessageDescription": "আপস্ট্রিমগুলির জন্য যেগুলি সহকারী প্রিফিল প্রত্যাখ্যান করে: পাঠানোর আগে ড্রপ ট্রেলিং সহকারী বাঁক (কোনও টুল_ব্যবহার নয়)। মডেলটি তার পূর্ববর্তী উত্তর পুনরায় তৈরি করতে পারে।",
+    "requireUserLastMessageLabel": "একটি ব্যবহারকারী বার্তা দিয়ে কথোপকথন শেষ করতে হবে",
     "bulkPasteAdded": "{count, plural, one {১টি কী যোগ করা হয়েছে} other {#টি কী যোগ করা হয়েছে}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {১টি সদৃশ বাদ দেওয়া হয়েছে} other {#টি সদৃশ বাদ দেওয়া হয়েছে}}",
     "bulkPasteHint": "প্রতি লাইনে একটি করে API কী পেস্ট করুন। ফাঁকা লাইন উপেক্ষা করা হবে এবং সদৃশ কীগুলো বাদ দেওয়া হবে।",

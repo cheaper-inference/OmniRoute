@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "क्षणिक कूलडाउन छोड्नुहोस्, ताकि पुनःप्राप्त गर्न सकिने त्रुटिहरूपछि पनि यो जडान योग्य रहोस् (प्रतिबन्धित/म्याद सकिएको जस्ता अन्तिम अवस्थाहरू अझै लागू हुन्छन्)।",
     "disableCoolingLabel": "यस जडानका लागि कूलडाउन असक्षम गर्नुहोस्",
+    "requireUserLastMessageDescription": "सहायक प्रिफिल अस्वीकार गर्ने अपस्ट्रिमहरूका लागि: पठाउनु अघि पछाडि सहायक टर्न ड्रप गर्नुहोस् (उपकरण_उपयोग छैन)। मोडेलले आफ्नो अघिल्लो जवाफ पुन: उत्पन्न गर्न सक्छ।",
+    "requireUserLastMessageLabel": "प्रयोगकर्ता सन्देशको साथ समाप्त गर्न कुराकानी आवश्यक छ",
     "bulkPasteAdded": "{count, plural, one {1 कुञ्जी थपियो} other {# कुञ्जीहरू थपिए}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 दोहोरिएको कुञ्जी छोडियो} other {# दोहोरिएका कुञ्जीहरू छोडिए}}",
     "bulkPasteHint": "प्रत्येक लाइनमा एउटा API कुञ्जी टाँस्नुहोस्। खाली लाइनहरू बेवास्ता गरिन्छन् र दोहोरिएका कुञ्जीहरू छोडिन्छन्।",

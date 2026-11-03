@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "نادیده گرفتن دوره خنک‌سازی گذرا تا این اتصال حتی پس از خطاهای قابل بازیابی واجد شرایط باقی بماند (حالت‌های نهایی مانند مسدود شده/منقضی شده همچنان اعمال می‌شوند).",
     "disableCoolingLabel": "غیرفعال کردن دوره خنک‌سازی برای این اتصال",
+    "requireUserLastMessageDescription": "برای بالادستهایی که پیشپر کردن دستیار را رد میکنند: قبل از ارسال، چرخشهای دستیار انتهایی (بدون استفاده از ابزار) را رها کنید. مدل ممکن است پاسخ قبلی خود را بازسازی کند.",
+    "requireUserLastMessageLabel": "نیاز به مکالمه برای پایان دادن به یک پیام کاربر",
     "bulkPasteAdded": "{count, plural, one {۱ کلید اضافه شد} other {# کلید اضافه شد}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {۱ مورد تکراری نادیده گرفته شد} other {# مورد تکراری نادیده گرفته شد}}",
     "bulkPasteHint": "در هر خط یک کلید API جایگذاری کنید. خطوط خالی نادیده گرفته میشوند و کلیدهای تکراری رد میشوند.",

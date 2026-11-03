@@ -6323,6 +6323,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ਅਸਥਾਈ ਕੂਲਡਾਊਨ ਨੂੰ ਛੱਡੋ ਤਾਂ ਜੋ ਸੁਧਾਰੀ ਜਾ ਸਕਣ ਵਾਲੀਆਂ ਗਲਤੀਆਂ ਤੋਂ ਬਾਅਦ ਵੀ ਇਹ ਕਨੈਕਸ਼ਨ ਯੋਗ ਰਹੇ (ਪਾਬੰਦੀਸ਼ੁਦਾ/ਮਿਆਦ ਪੁੱਗਣ ਵਰਗੀਆਂ ਅੰਤਿਮ ਸਥਿਤੀਆਂ ਫਿਰ ਵੀ ਲਾਗੂ ਹੁੰਦੀਆਂ ਹਨ)।",
     "disableCoolingLabel": "ਇਸ ਕਨੈਕਸ਼ਨ ਲਈ ਕੂਲਡਾਊਨ ਅਯੋਗ ਕਰੋ",
+    "requireUserLastMessageDescription": "ਸਹਾਇਕ ਪ੍ਰੀਫਿਲ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਨ ਵਾਲੇ ਅੱਪਸਟਰੀਮ ਲਈ: ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ ਡ੍ਰੌਪ ਟ੍ਰੇਲਿੰਗ ਅਸਿਸਟੈਂਟ ਮੋੜ (ਕੋਈ ਟੂਲ_ਵਰਤੋਂ ਨਹੀਂ)। ਮਾਡਲ ਆਪਣੇ ਪਿਛਲੇ ਜਵਾਬ ਨੂੰ ਮੁੜ ਤਿਆਰ ਕਰ ਸਕਦਾ ਹੈ।",
+    "requireUserLastMessageLabel": "ਇੱਕ ਉਪਭੋਗਤਾ ਸੁਨੇਹੇ ਨਾਲ ਸਮਾਪਤ ਕਰਨ ਲਈ ਗੱਲਬਾਤ ਦੀ ਲੋੜ ਹੈ",
     "bulkPasteAdded": "{count, plural, one {1 ਕੁੰਜੀ ਜੋੜੀ ਗਈ} other {# ਕੁੰਜੀਆਂ ਜੋੜੀਆਂ ਗਈਆਂ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ਡੁਪਲੀਕੇਟ ਛੱਡਿਆ ਗਿਆ} other {# ਡੁਪਲੀਕੇਟ ਛੱਡੇ ਗਏ}}",
     "bulkPasteHint": "ਹਰ ਲਾਈਨ ਵਿੱਚ ਇੱਕ API ਕੁੰਜੀ ਪੇਸਟ ਕਰੋ। ਖਾਲੀ ਲਾਈਨਾਂ ਨੂੰ ਅਣਡਿੱਠਾ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਡੁਪਲੀਕੇਟ ਕੁੰਜੀਆਂ ਛੱਡ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",

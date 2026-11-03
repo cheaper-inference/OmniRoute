@@ -6323,6 +6323,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Přeskočit přechodný cooldown, aby toto připojení zůstalo způsobilé i po obnovitelných chybách (konečné stavy jako zablokováno/vypršelo stále platí).",
     "disableCoolingLabel": "Zakázat cooldown pro toto připojení",
+    "requireUserLastMessageDescription": "Pro upstreamy, které odmítají předvyplnění asistentem: před odesláním pusťte koncové otáčky asistenta (bez použití nástroje). Model může obnovit svou předchozí odpověď.",
+    "requireUserLastMessageLabel": "Vyžadovat ukončení konverzace uživatelskou zprávou",
     "bulkPasteAdded": "{count, plural, one {Přidán 1 klíč} few {Přidány # klíče} other {Přidáno # klíčů}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Přeskočen 1 duplikát} few {Přeskočeny # duplikáty} other {Přeskočeno # duplikátů}}",
     "bulkPasteHint": "Vložte jeden API klíč na každý řádek. Prázdné řádky budou ignorovány a duplicitní klíče přeskočeny.",

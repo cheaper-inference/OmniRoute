@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ଅସ୍ଥାୟୀ କୁଲଡାଉନ୍କୁ ଏଡ଼ାଇ ଯାଆନ୍ତୁ, ଯାହାଦ୍ୱାରା ପୁନରୁଦ୍ଧାରଯୋଗ୍ୟ ତ୍ରୁଟି ପରେ ମଧ୍ୟ ଏହି ସଂଯୋଗ ଯୋଗ୍ୟ ରହିବ (ନିଷିଦ୍ଧ/ମିଆଦ ସମାପ୍ତ ପରି ଅନ୍ତିମ ଅବସ୍ଥାଗୁଡ଼ିକ ତଥାପି ଲାଗୁ ହେବ)।",
     "disableCoolingLabel": "ଏହି ସଂଯୋଗ ପାଇଁ କୁଲଡାଉନ୍ ଅକ୍ଷମ କରନ୍ତୁ",
+    "requireUserLastMessageDescription": "ଅପଷ୍ଟ୍ରିମ୍ ପାଇଁ ଯାହା ସହାୟକ ପ୍ରିଫିଲ୍ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ: ପଠାଇବା ପୂର୍ବରୁ ଟ୍ରେଲିଂ ଆସିଷ୍ଟାଣ୍ଟ ଟର୍ନ୍ (କ tool ଣସି ଟୁଲ୍_ ବ୍ୟବହାର) ଡ୍ରପ୍ କରନ୍ତୁ \\| ମଡେଲ୍ ଏହାର ପୂର୍ବ ଉତ୍ତରକୁ ପୁନ ener ନିର୍ମାଣ କରିପାରେ \\|",
+    "requireUserLastMessageLabel": "ଏକ ଉପଭୋକ୍ତା ବାର୍ତ୍ତା ସହିତ ସମାପ୍ତ ହେବାକୁ ବାର୍ତ୍ତାଳାପ ଆବଶ୍ୟକ \\|",
     "bulkPasteAdded": "{count, plural, one {1ଟି କୀ ଯୋଡ଼ାଗଲା} other {#ଟି କୀ ଯୋଡ଼ାଗଲା}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1ଟି ନକଲ କୀ ଏଡ଼ାଇ ଦିଆଗଲା} other {#ଟି ନକଲ କୀ ଏଡ଼ାଇ ଦିଆଗଲା}}",
     "bulkPasteHint": "ପ୍ରତ୍ୟେକ ଧାଡ଼ିରେ ଗୋଟିଏ API କୀ ପେଷ୍ଟ କରନ୍ତୁ। ଖାଲି ଧାଡ଼ିଗୁଡ଼ିକୁ ଅଣଦେଖା କରାଯାଏ ଏବଂ ନକଲ କୀଗୁଡ଼ିକୁ ଏଡ଼ାଇ ଦିଆଯାଏ।",

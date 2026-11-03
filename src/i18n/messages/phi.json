@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Payagan ang account na ito na gumamit ng mga bayad na kredito kapag umabot na sa itinakdang cutoff ang quota ng subscription nito. Kailangan ng mga magagamit na kredito ayon sa ulat ng OpenAI; maaaring may singil. Nalalapat pa rin ang mga limitasyon ng Spark at ang mga cooldown ng upstream. Sinusuri ang pagkakaroon ng mga kredito kahit hindi pinagana ang paunang pagsusuri ng quota, maliban kung ganap na naka-off ang lokal na pag-filter ng quota (parehong hindi pinagana ang paunang pagsusuri ng quota at ang patakaran sa limitasyon).",
     "disableCoolingDescription": "Laktawan ang transient cooldown para manatiling kwalipikado ang koneksyong ito kahit pagkatapos ng mga error na maaaring ma-recover (nalalapat pa rin ang mga terminal state tulad ng banned/expired).",
     "disableCoolingLabel": "I-disable ang cooldown para sa koneksyong ito",
+    "requireUserLastMessageDescription": "Para sa mga upstream na tinatanggihan ang prefill ng assistant: i-drop ang mga sumusunod na assistant turn (walang tool_use) bago ipadala. Maaaring i-regenerate ng modelo ang dati nitong sagot.",
+    "requireUserLastMessageLabel": "Atasan ang pag-uusap upang tapusin sa isang mensahe ng user",
     "bulkPasteAdded": "{count, plural, one {1 key ang naidagdag} other {# key ang naidagdag}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicate ang nilaktawan} other {# duplicate ang nilaktawan}}",
     "bulkPasteHint": "Mag-paste ng isang API key sa bawat linya. Binabalewala ang mga walang lamang linya at nilalaktawan ang mga duplicate na key.",

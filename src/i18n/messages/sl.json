@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskočite prehodno obdobje ohlajanja, da ta povezava ostane na voljo tudi po odpravljivih napakah (končna stanja, kot sta prepovedana ali potekla povezava, še vedno veljajo).",
     "disableCoolingLabel": "Onemogoči ohlajanje za to povezavo",
+    "requireUserLastMessageDescription": "Za navzgor, ki zavrnejo vnaprejšnje izpolnjevanje pomočnika: pred pošiljanjem spustite zaostanek pomočnika (brez tool_use). Model lahko regenerira svoj prejšnji odgovor.",
+    "requireUserLastMessageLabel": "Zahtevaj, da se pogovor konča z uporabniškim sporočilom",
     "bulkPasteAdded": "{count, plural, one {Dodan 1 ključ} two {Dodana # ključa} few {Dodani # ključi} other {Dodanih # ključev}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Preskočen 1 podvojen ključ} two {Preskočena # podvojena ključa} few {Preskočeni # podvojeni ključi} other {Preskočenih # podvojenih ključev}}",
     "bulkPasteHint": "Prilepite en ključ API na vrstico. Prazne vrstice bodo prezrte, podvojeni ključi pa preskočeni.",

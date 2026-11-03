@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Scipeáil an tréimhse fhuaraithe neamhbhuan ionas go bhfanann an ceangal seo incháilithe fiú tar éis earráidí in-aisghabhála (tá feidhm fós ag stáit chríochacha amhail toirmiscthe/éagtha).",
     "disableCoolingLabel": "Díchumasaigh an tréimhse fhuaraithe don cheangal seo",
+    "requireUserLastMessageDescription": "Maidir le sruthanna in aghaidh srutha a dhiúltaíonn réamhlíonadh an chúntóra: buail amach casadh an chúntóra rianaigh (gan tool_use) roimh é a sheoladh. Féadfaidh an tsamhail an freagra a bhí air roimhe seo a athghiniúint.",
+    "requireUserLastMessageLabel": "Éilíonn an comhrá chun deireadh a chur le teachtaireacht úsáideora",
     "bulkPasteAdded": "{count, plural, one {1 eochair curtha leis} other {# eochracha curtha leis}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dúblach scipeáilte} other {# dúblacha scipeáilte}}",
     "bulkPasteHint": "Greamaigh eochair API amháin in aghaidh an líne. Déantar neamhaird ar línte folmha agus scipeáiltear eochracha dúblacha.",

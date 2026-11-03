@@ -6246,6 +6246,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "தற்காலிக கூல்டவுனைத் தவிர்க்கவும், இதனால் மீட்டெடுக்கக்கூடிய பிழைகளுக்குப் பிறகும் இந்த இணைப்பு தகுதியுடையதாக இருக்கும் (தடைசெய்யப்பட்ட/காலாவதியான போன்ற இறுதி நிலைகள் இன்னும் பொருந்தும்).",
     "disableCoolingLabel": "இந்த இணைப்பிற்கான கூல்டவுனை முடக்கவும்",
+    "requireUserLastMessageDescription": "அசிஸ்டண்ட் முன் நிரப்புதலை நிராகரிக்கும் அப்ஸ்ட்ரீம்களுக்கு: அனுப்பும் முன் டிரெயிலிங் அசிஸ்டண்ட் டர்ன்களை (டூல்_யூஸ் இல்லை) கைவிடவும். மாதிரி அதன் முந்தைய பதிலை மீண்டும் உருவாக்கலாம்.",
+    "requireUserLastMessageLabel": "ஒரு பயனர் செய்தியுடன் உரையாடலை முடிக்க வேண்டும்",
     "bulkPasteAdded": "{count, plural, one {1 விசை சேர்க்கப்பட்டது} other {# விசைகள் சேர்க்கப்பட்டன}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 நகல் தவிர்க்கப்பட்டது} other {# நகல்கள் தவிர்க்கப்பட்டன}}",
     "bulkPasteHint": "ஒவ்வொரு வரியிலும் ஓர் API விசையை ஒட்டவும். காலியான வரிகள் புறக்கணிக்கப்படும்; நகல் விசைகள் தவிர்க்கப்படும்.",

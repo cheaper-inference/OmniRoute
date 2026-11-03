@@ -6323,6 +6323,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "រំលងរយៈពេលរង់ចាំបណ្តោះអាសន្ន ដើម្បីឱ្យការតភ្ជាប់នេះនៅតែអាចប្រើបាន សូម្បីតែបន្ទាប់ពីមានកំហុសដែលអាចស្ដារឡើងវិញបានក៏ដោយ (ស្ថានភាពបញ្ចប់ដូចជា ត្រូវបានហាមឃាត់/ផុតកំណត់ នៅតែអនុវត្ត)។",
     "disableCoolingLabel": "បិទរយៈពេលរង់ចាំសម្រាប់ការតភ្ជាប់នេះ",
+    "requireUserLastMessageDescription": "សម្រាប់ការបញ្ជូនបន្តដែលបដិសេធការបញ្ចូលជំនួយជាមុន៖ ទម្លាក់ការបង្វិលជំនួយការដែលនៅពីក្រោយ (គ្មាន tool_use) មុនពេលផ្ញើ។ គំរូអាចបង្កើតចម្លើយពីមុនរបស់វាឡើងវិញ។",
+    "requireUserLastMessageLabel": "ទាមទារការសន្ទនាដើម្បីបញ្ចប់ដោយសារអ្នកប្រើប្រាស់",
     "bulkPasteAdded": "{count, plural, one {បានបន្ថែមសោ 1} other {បានបន្ថែមសោ #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {បានរំលងសោស្ទួន 1} other {បានរំលងសោស្ទួន #}}",
     "bulkPasteHint": "បិទភ្ជាប់ API key មួយក្នុងមួយបន្ទាត់។ បន្ទាត់ទទេនឹងមិនត្រូវបានអើពើ ហើយសោស្ទួននឹងត្រូវបានរំលង។",

@@ -6323,6 +6323,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "تخطي فترة التهدئة المؤقتة حتى يظل هذا الاتصال مؤهلاً حتى بعد الأخطاء القابلة للاسترداد (لا تزال الحالات النهائية مثل banned/expired سارية).",
     "disableCoolingLabel": "تعطيل فترة التهدئة لهذا الاتصال",
+    "requireUserLastMessageDescription": "بالنسبة إلى المنبع الذي يرفض التعبئة المسبقة للمساعد: قم بإسقاط دورات المساعد اللاحقة (بدون استخدام أداة) قبل الإرسال. قد يقوم النموذج بإعادة إنشاء إجابته السابقة.",
+    "requireUserLastMessageLabel": "اطلب أن تنتهي المحادثة برسالة مستخدم",
     "bulkPasteAdded": "المفاتيح المضافة: {count, plural, one {أُضيف مفتاح واحد} other {أُضيف # من المفاتيح}}",
     "bulkPasteDuplicatesIgnored": "التكرارات المتجاهلة: {count, plural, one {تُخطي تكرار واحد} other {تُخطي # من التكرارات}}",
     "bulkPasteHint": "ألصق مفتاح API واحدًا في كل سطر. تُتجاهل الأسطر الفارغة والمفاتيح المكررة.",
