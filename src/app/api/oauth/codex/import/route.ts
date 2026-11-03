@@ -91,7 +91,8 @@ type ExistingCodexConnection = {
   id?: unknown;
   email?: unknown;
   refreshToken?: unknown;
-  priority?: unknown;
+  expiresAt?: unknown;
+  tokenExpiresAt?: unknown;
   providerSpecificData?: unknown;
 };
 
@@ -100,6 +101,37 @@ function codexAccountId(providerSpecificData: unknown): string | null {
   const data = providerSpecificData as Record<string, unknown>;
   const value = data.chatgptAccountId ?? data.workspaceId;
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+// A temporary refresh-validation failure is not proof that an imported token
+// is stale. Only prefer the new credentials when the stored token has expired
+// and the imported record has a later, currently usable expiry.
+function hasNewerCredentialsForExpiredConnection(
+  existing: ExistingCodexConnection,
+  payload: CodexImportPayload
+): boolean {
+  const expirations = [existing.expiresAt, existing.tokenExpiresAt]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => Date.parse(value))
+    .filter(Number.isFinite);
+  const importedExpiry = Date.parse(payload.expiresAt);
+  return (
+    expirations.length > 0 &&
+    Math.max(...expirations) <= Date.now() &&
+    Number.isFinite(importedExpiry) &&
+    importedExpiry > Date.now()
+  );
+}
+
+function preserveStoredCodexCredentials(
+  existing: ExistingCodexConnection | null,
+  payload: CodexImportPayload,
+  sameRefreshToken: boolean,
+  validation: RefreshValidation
+): boolean {
+  if (!existing || sameRefreshToken || validation === "valid") return false;
+  if (validation === "invalid") return true;
+  return !hasNewerCredentialsForExpiredConnection(existing, payload);
 }
 
 async function findExistingCodexConnection(
@@ -136,7 +168,7 @@ async function updateExistingCodexImportMetadata(
     email: payload.email,
     providerSpecificData: { ...oldProviderSpecificData, ...newProviderSpecificData },
   };
-  if (payload.priority !== undefined) update.priority = payload.priority;
+  // Priority is operator-managed; metadata-only imports must not reorder it.
   const connection = await updateProviderConnection(id, update);
   if (!connection) throw new Error("Existing Codex connection disappeared during import");
   return connection;
@@ -228,10 +260,12 @@ export async function POST(request: Request) {
       // therefore keep an older token after OmniRoute has already persisted the
       // rotated one. Re-importing that stable account is a successful metadata
       // sync, not a reason to overwrite the working server credentials.
-      const preserveExistingCredentials =
-        existing !== null &&
-        !sameRefreshToken &&
-        (validation === "invalid" || validation === "inconclusive");
+      const preserveExistingCredentials = preserveStoredCodexCredentials(
+        existing,
+        norm.payload,
+        sameRefreshToken,
+        validation
+      );
 
       let conn;
       if (preserveExistingCredentials) {
