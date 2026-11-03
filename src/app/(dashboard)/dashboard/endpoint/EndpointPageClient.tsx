@@ -1,5 +1,6 @@
 "use client";
 
+import { resolveDecisionProtocol } from "@/shared/constants/decisionProtocol";
 import Icon from "@/shared/components/Icon";
 import { Alert } from "@omniroute/ui-kit/alert";
 
@@ -107,6 +108,7 @@ type EndpointModelSummary = {
   type?: string;
   subtype?: string;
   supported_endpoints?: string[];
+  api_format?: string;
   custom?: boolean;
   root?: string;
 };
@@ -354,13 +356,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const endpointData = useMemo(() => {
     const chat = allModels.filter((m) => !m.type && !m.parent);
     const decisions = allModels.filter(
-      (m) => !m.parent && m.supported_endpoints?.includes("decisions")
+      (m) => !m.parent && resolveDecisionProtocol(m) === "decisions"
     );
     const systemone = allModels.filter(
-      (m) =>
-        !m.parent &&
-        (m.supported_endpoints?.includes("systemone") ||
-          (m.type === "decisions" && !m.supported_endpoints?.includes("decisions")))
+      (m) => !m.parent && resolveDecisionProtocol(m) === "systemone"
     );
     const embeddings = allModels.filter((m) => m.type === "embedding" && !m.parent);
     const images = allModels.filter((m) => m.type === "image" && !m.parent);

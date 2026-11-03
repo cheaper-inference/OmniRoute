@@ -1,3 +1,4 @@
+import { resolveDecisionProtocol } from "@/shared/constants/decisionProtocol";
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
 
 /** The chat health probe must never be sent to a native decision-only model. */
@@ -13,8 +14,6 @@ export async function nativeDecisionTestEndpoint(
     (await getActiveSyncedCatalog(provider)).models.find(
       (entry) => entry.id === bare || entry.id === model
     );
-  const endpoints = Array.isArray(row?.supportedEndpoints) ? row.supportedEndpoints : [];
-  if (endpoints.includes("systemone") || nodeType === "systemone") return "/v1/systemone";
-  if (endpoints.includes("decisions") || nodeType === "decisions") return "/v1/decisions";
-  return null;
+  const format = resolveDecisionProtocol({ ...row, id: model }, nodeType);
+  return format ? `/v1/${format}` : null;
 }

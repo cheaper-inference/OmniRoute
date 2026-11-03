@@ -27,3 +27,22 @@ describe("native decision probe policy", () => {
     ).toBeNull();
   });
 });
+
+it("preserves legacy Jev decisions tags as System One while explicit native format wins", async () => {
+  expect(
+    await nativeDecisionTestEndpoint(
+      "typesafe",
+      "typesafe/jev-latest",
+      { supportedEndpoints: ["decisions"] },
+      undefined
+    )
+  ).toBe("/v1/systemone");
+  expect(
+    await nativeDecisionTestEndpoint(
+      "custom",
+      "custom/native",
+      { supportedEndpoints: ["decisions"], apiFormat: "decisions" },
+      undefined
+    )
+  ).toBe("/v1/decisions");
+});
