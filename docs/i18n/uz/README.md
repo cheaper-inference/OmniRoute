@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Boshqaruv paneli" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute boshqaruv paneli" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Bepul AI Shlyuzi
+# 🚀 OmniRoute — Bepul AI shlyuzi
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**[Diego Souza](https://github.com/diegosouzapw) tomonidan yaratilgan**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yozishni to‘xtatmang. Har bir AI vositasi → 380 ta provayder — 150+ bepul — bitta endpoint orqali. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity-ni BEPUL Claude / GPT / Gemini-ga avtomatik zaxira bilan ulang. RTK + Caveman asosidagi siqish 15–95% tokenlarni tejaydi (~89% o‘rtacha) — limitlarga yetmang. 380 ta AI provayder · 150+ bepul tarif · ~1.62 mlrd bepul token/oy · 20 ta marshrutlash strategiyasi · Boshlash uchun $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Dasturlashni hech qachon to‘xtatmang. Har bir AI vositasi → bitta endpoint orqali 380 ta provayder — 150+ tasi bepul. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity → avtomatik zaxira yo‘naltirish bilan BEPUL Claude / GPT / Gemini’ga. RTK + Caveman’ning birgalikdagi siqishi tokenlarni 15–95% tejaydi (o‘rtacha ~89%) — limitlarga hech qachon yetib bormang. 380 ta AI provayderi · 150+ ta bepul tarif · oyiga ~1,62 mlrd bepul token · 20 ta yo‘naltirish strategiyasi · boshlash uchun $0."/>
 
 </div>
 
@@ -762,17 +762,17 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 </div>
 
-> Xuddi shu dastur, sizning mashinangiz, sizning qoidalaringiz. Global npm o'rnatishdan** telefoningiz** Termux orqali.
+> Xuddi shu dastur, sizning mashinangiz, sizning qoidalaringiz. Global npm o'rnatishdan **telefoningiz** Termux orqali.
 
 <table>
-  <tr><th align="left"> Platformasi </th><th align="left"><th align="left"></tr> o‘rnatish </th></th>
+  <tr><th align="left">Platforma</th><th align="left">O'rnatish</th><th align="left">Tavsif</th></tr>
   <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code> npm o‘rnatish -g omniroute </code></td><td align="left"> Bitta buyruq, har qanday OS</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Xuddi shu registr tarball, tezroq o‘rnatish </td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron</tr></b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> Mahalliy + tizim tepsisi — <b>Windows / macOS / Linux</b></td>
+  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Mahalliy + tizim tepsisi — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b> Menyu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew o‘rnatish --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp; serverni avtomatik yangilashini nazorat qiladi — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> mahalliy <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM serverlari, Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Telefoningizda <b> ishlaydi </b>, 24/7, root </tr></td>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Telefoningizda <b> ishlaydi </b>, 24/7, root</td></tr>
   <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Bosh ekranga qo‘shish"</td><td align="left"> To‘liq ekran, oflayn, brauzerdan o‘rnatilishi mumkin </td></tr>
   <tr><td align="left" nowrap>🧩 <b>OpenCode plagin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Native OpenCode integratsiyasi </td></tr>
   <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat </b></td><td align="left" nowrap> o‘rnatish <b>OmniCopilot</b> kengaytmasi </td><td align="left"> Mahalliy Copilot har bir OmniRoute modeli Chat tanlagich — barqaror &amp; Insiderlar </td></tr>
@@ -789,17 +789,17 @@ shell tarixidan tashqarida saqlaydi. → [CLI Integratsiyalari](docs/guides/CLI-
 
 </div>
 
-> Yangi yon panel yo'q, yangi chat UI yo'q — har bir OmniRoute xizmat modeli to'g'ridan-to'g'ri ekranda ko'rinadi** Siz allaqachon foydalanayotgan Copilot Chat modeli tanlagichi** . VS Code 1.122 dan beri provayder modellari GitHub tizimiga kirish yoki Copilot obunasisiz ishlaydi — agent rejimi, asboblarni chaqirish va ko‘rish, bepul.
+> Yangi yon panel yo'q, yangi chat UI yo'q — har bir OmniRoute xizmat modeli to'g'ridan-to'g'ri ekranda ko'rinadi **Siz allaqachon foydalanayotgan Copilot Chat modeli tanlagichi** . VS Code 1.122 dan beri provayder modellari GitHub tizimiga kirish yoki Copilot obunasisiz ishlaydi — agent rejimi, asboblarni chaqirish va ko‘rish, bepul.
 
-ni o'rnating** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kengaytmasini o'rnating, uni OmniRoute serveringizga yo'naltiring (birlamchi `localhost:20128` ga), keyin Copilot Chat → model tanlash → oching.** Modellarni boshqarish…** →**OmniRoute** .
+**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kengaytmasini o'rnating, uni OmniRoute serveringizga yo'naltiring (birlamchi `localhost:20128` ga), keyin Copilot Chat → model tanlash → oching. **Modellarni boshqarish…** → **OmniRoute** .
 
 <table>
-  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"></th></tr> bilan ishlaydi
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> o‘rnating →</a ></td >< td align ="chapga">VS Code — barqaror &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b>VSX registrini oching </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> o‘rnating →</a ></td >< td align ="chapga">Cursor, Windsurf, VSCodium, Theia </td> code-server </tr>Antigravity, Kiro
+  <tr><th align="left">Do'kon</th><th align="left">Havola</th><th align="left">Mos keladi</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">O'rnatish →</a></td><td align="left">VS Code — barqaror &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>VSX Open Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">O'rnatish →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Antigravity, Kiro</td></tr>
 </table>
 
-Muharrir ichidan: ni oching** Kengaytmalar** ko'rish, qidirish** "OmniRoute"** , bosing** O'rnatish** — ikkala do'konda ham xuddi shunday ishlaydi. Manba, muammolar va nashriyot kitobi [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) da jonli.
+Muharrir ichidan: **Kengaytmalar** ko'rishni oching, "OmniRoute" ni qidiring, **O'rnatish** tugmasini bosing — ikkala do'konda ham xuddi shunday ishlaydi. Manba, muammolar va nashriyot kitobi [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) da jonli.
 
 <sub>📖 [VS Code Copilot Chat qo‘llanmasi](docs/guides/VSCODE-COPILOT.md) — sozlash, tanlovchi nimani ko‘rsatadi, paneldagi panel, muammolarni bartaraf etish </sub>
 
@@ -811,9 +811,9 @@ Muharrir ichidan: ni oching** Kengaytmalar** ko'rish, qidirish** "OmniRoute"** ,
 
 </div>
 
-> `omniroute serve` doimo yoqilgan bo'lsa, eng baxtlidir.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** uni macOS uchun sozlash va unutish menyusi ilovasiga aylantiradi: u serverni ishga tushiradi, uni qayta yuklashda saqlab turadi, uni yangilaydi va jonli token byudjetingizni bir marta bosish masofasiga joylashtiradi —** hech qanday terminal oynasi ochiq qolmagan, bolaga qarash uchun `npm install -g omniroute` yo'q.**
+> `omniroute serve` doimo yoqilgan bo'lsa, eng baxtlidir. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)** uni macOS uchun sozlash va unutish menyusi ilovasiga aylantiradi: u serverni ishga tushiradi, uni qayta yuklashda saqlab turadi, uni yangilaydi va jonli token byudjetingizni bir marta bosish masofasiga joylashtiradi — **hech qanday terminal oynasi ochiq qolmagan, bolaga qarash uchun `npm install -g omniroute` yo'q.**
 
-[Tauri v2](https://v2.tauri.app/) (yaxlitlash xatosi oʻlchamidagi Rust yadrosi) bilan yaratilgan u oʻzining imzolangan 24-tugun ish vaqtini joʻnatadi va ilovaga tegishli OmniRoute oʻrnatishni boshqaradi, shuning uchun u hech qachon global `node`/`bun` bilan kurashmaydi. Bu** mavjud `~/.omniroute/` konfiguratsiyasi va ma'lumotlar bazasini baham ko'radi** — demak, siz allaqachon shlyapa bilan OmniRoute. 🎩
+[Tauri v2](https://v2.tauri.app/) (yaxlitlash xatosi oʻlchamidagi Rust yadrosi) bilan yaratilgan u oʻzining imzolangan 24-tugun ish vaqtini joʻnatadi va ilovaga tegishli OmniRoute oʻrnatishni boshqaradi, shuning uchun u hech qachon global `node`/`bun` bilan kurashmaydi. Bu **mavjud `~/.omniroute/` konfiguratsiyasi va ma'lumotlar bazasini baham ko'radi** — demak, siz allaqachon shlyapa bilan OmniRoute. 🎩
 
 <table>
   <tr><th align="left"> nima qiladi </th><th align="left"> Qanday qilib </th></tr>
@@ -1056,7 +1056,7 @@ curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 
 Ulangan modellaringiz ro'yxatda ko'rinishi kerak. 🎉 Bo'ldi — kodlashni boshlang, OmniRoute esa siz uchun avtomatik marshrutlaydi va zaxira variantga o'tadi.
 
-Agar mijoziingiz maxsus sarlavhalar yubora olmasa, OmniRoute tokenlashtirilgan moslik aliaslarini ham taqdim etadi:
+Agar mijozingiz maxsus sarlavhalar yubora olmasa, OmniRoute tokenlashtirilgan moslik aliaslarini ham taqdim etadi:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1286,7 +1286,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
 <br/>
 <div align="center">
 
-## 🛠️ Texnologiyalar toʻplami
+## 🛠️ Texnologik stek
 
 </div>
 
@@ -1295,18 +1295,18 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   <tr><td nowrap><b>Ishlash muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dasturlash tili</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri yadroda nolta <code>any</code>)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON merosi) — 147 ta domen moduli, 221 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON legacy) — 147 ta domen moduli, 221 ta migratsiya</td></tr>
   <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektorli embeddinglar, tiplashtirilgan so‘nish</td></tr>
-  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari kiritish/chiqarishini tekshirish + API shartnomalari</td></tr>
+  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari kiritish/chiqarishini tekshirish + API kontraktlari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Oqimli uzatish</b></td><td>Server tomonidan yuboriladigan hodisalar (SSE) + WebSocket ko‘prigi (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Siqish</b></td><td>12 ta dvigateldan iborat pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikatsiya va xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API kalitlari + MCP doirasidagi autentifikatsiya · Saqlanayotgan ma’lumotlar uchun AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>Siqish</b></td><td>12 dvigatelli pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentifikatsiya va xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API kalitlari + MCP doirasidagi autentifikatsiya · Saqlangan ma’lumotlar uchun AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>Yashirinlik</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint taqlidi, 3 darajali proksi</td></tr>
-  <tr><td nowrap><b>Barqarorlik</b></td><td>Avtomatik uzgich, eksponensial kechikish, bir vaqtdagi ko‘plab so‘rovlarning oldini olish, avtomatik kombinatsiyali o‘zini tiklash</td></tr>
-  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan tuzilgan JSON jurnallari</td></tr>
-  <tr><td nowrap><b>Sinovdan o‘tkazish</b></td><td>Node.js test runner + Vitest — 8 400 dan ortiq kuzatiladigan test fayllari bo‘ylab <b>60 000 dan ortiq statik test deklaratsiyasi</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
-  <tr><td nowrap><b>Platformalar</b></td><td>Ish stoli (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
+  <tr><td nowrap><b>Barqarorlik</b></td><td>O‘chirgich, eksponensial kechikish, bir vaqtdagi ortiqcha yuklanishga qarshi himoya, avtomatik kombinatsiyali o‘z-o‘zini tiklash</td></tr>
+  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan tizimli JSON jurnallari</td></tr>
+  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 8 400 dan ortiq kuzatiladigan test fayllari bo‘ylab <b>60 000 dan ortiq statik test deklaratsiyasi</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
+  <tr><td nowrap><b>Platformalar</b></td><td>Desktop (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — reliz paytida avtomatik npm nashri + Docker Hub</td></tr>
   <tr><td nowrap><b>Havolalar</b></td><td><a href="https://omniroute.online">Veb-sayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
@@ -1800,15 +1800,15 @@ OmniRoute buyuk loyihalar yelkasida qurilgan. U **[9router](https://github.com/d
 
 ## 📄 Litsenziya
 
-MIT Litsenziyasi — batafsil ma'lumot uchun [LICENSE](LICENSE) ga qarang.
+MIT litsenziyasi — batafsil ma’lumot uchun [LICENSE](LICENSE) ga qarang.
 
 ---
 
 <div align="center">
 
-**[⬆ Yuqoriga qaytish](#-omniroute)** · Ochiq kodli AI hamjamiyati uchun ❤️ bilan yaratilgan.
+**[⬆ Yuqoriga qaytish](#-omniroute)** · Ochiq kodli AI hamjamiyati uchun ❤️ bilan yaratildi.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> tomonidan yaratilgan · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Hamjamiyat savol-javoblari uchun GitHub Discussions yoqilgan -->

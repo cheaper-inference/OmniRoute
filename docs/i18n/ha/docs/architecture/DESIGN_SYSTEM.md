@@ -116,7 +116,16 @@
 
 ## 5. Ana sabunta kayan aiki
 
-`npm run check:ui-kit-upstream` yana kwatanta sigar da aka liƙa a cikin `packages/ui-kit/UPSTREAM.md` tare da sabuwar alamar `v*` na repo na sama kuma yana buga umarnin daidaitawa lokacin da sakin ya fito. Gudun aikin `UI Kit upstream watch` na mako-mako (`.github/workflows/ui-kit-upstream-watch.yml`) yana gudanar da rajistan guda ɗaya kuma yana buɗe batun bin diddigin guda ɗaya yayin da fil ɗin yana baya; repo na sama na sirri ne, don haka tafiyar aiki yana buƙatar alamar karantawa kawai a cikin sirrin `UI_KIT_READ_TOKEN`. Lokacin da ba zai iya karanta sama ba (ba alama, alamar da ta daina aiki, ko GitHub ba za a iya kaiwa ba) gudu yana tsayawa kore amma ya rubuta gargaɗi kuma yana buɗe fitowar guda ɗaya a buɗe, wanda ke rufe kanta sau ɗaya daga baya gudu zai iya sake karantawa sama.
+`npm run check:ui-kit-upstream` yana kwatanta sigar da aka liƙa a cikin `packages/ui-kit/UPSTREAM.md` tare da sabuwar alamar `v*` na repo na sama kuma yana buga umarnin daidaitawa lokacin da sakin ya fito.
+
+Gudun aikin `UI Kit upstream watch` na yau da kullun (`.github/workflows/ui-kit-upstream-watch.yml`) yana gudanar da bincike iri ɗaya. Yayin da fil ɗin yana baya, `scripts/ci/ui-kit-sync-pr.sh` yana buɗe PR guda ɗaya a buɗe tare da mafi girman reshe `release/vX.Y.Z`, akan reshe na birgima `chore/ui-kit-sync-latest`. Ba zai taɓa haɗuwa ba: kowane sakin kit har yanzu yana buƙatar dubawa na gani akan VPS na gida. Ana sake gina reshen lokacin da sabon sakin ya fito kuma a bar shi shi kaɗai. Buɗaɗɗen PR tare da ayyukan turawa da hannu ba a sake rubutawa ba, kuma PR na sigar da mai kula ya rufe ba a haɗa shi ba yana zama a rufe har sai an sake sabon saki.
+
+Lokacin da ba za a iya buɗe PR ba (sakin da aka yi niyya ya daskare, PR ya aikata da hannu, an rufe PR, ko kuma ba a saita alamar PR ) aikin yana buɗe batun bin diddigi guda ɗaya wanda ke faɗi dalilin.
+
+Tsarin aiki yana amfani da sirri guda biyu:
+
+- `secrets.UI_KIT_READ_TOKEN`: alamar karantawa kawai ga mai zaman kansa na sama. Lokacin da aikin ba zai iya karanta sama ba (ba alama, alamar da ta daina aiki, ko GitHub ba za a iya kaiwa ba) gudu yana tsayawa kore amma yana rubuta gargaɗi kuma yana buɗe fitowar guda ɗaya a buɗe, wanda ke rufe kanta sau ɗaya daga baya gudu zai iya sake karantawa sama.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: alama ce mai kyau akan wannan ma'ajiyar tare da Abun ciki da Buƙatun jawo rubuta damar shiga. Tsohuwar `GITHUB_TOKEN` ba zai iya ƙirƙirar PRs a nan ba, kuma PR da ta buɗe ba zai jawo CI. Ba tare da wannan alamar aikin ba kawai yana tura reshe.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` tana kwafin `src/` na sama a waccan ƙaddamarwa (`latest` = sabuwar `v*` tag) zuwa `packages/ui-kit/src`, tana aiwatar da sauyi ɗaya da aka yarda (yana sauke ƙarar `.js` daga shigo da dangi), kuma ya saita sigar filin aiki a cikin `packages/ui-kit/package.json` da `package-lock.json` zuwa na sama. Sa'an nan: sake duba `git diff packages/ui-kit`, yi izinin gani akan masu samarwa, saituna, combos, amfani da ƙarshen duka a cikin jigogi biyu, gudanar da `npm run check:ui-kit-snapshot` da `npm run test:vitest:ui`, kuma buɗe PR tare da canjin canji na sama.
 
