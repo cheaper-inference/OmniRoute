@@ -11,55 +11,77 @@ OmniRoute သည် စီမံခန့်ခွဲရေးဆိုင်ရ
 
 အကောင်အထည်ဖော်မှုသည် `src/lib/compliance/index.ts` (T-43 — "လိုက်နာမှု ထိန်းချုပ်ရေးများ") နှင့် `src/lib/compliance/providerAudit.ts` တွင် ရှိသည်။ စာရင်းစစ် ရေးသားမှုများသည် မည်သည့်အခါမျှ ခြွင်းချက်မပစ်ပါ။ မည်သည့် ချို့ယွင်းမှုဖြစ်စေ ခေါ်ဆိုမှုကို တိတ်တဆိတ် လျစ်လျူရှုသဖြင့် စာရင်းစစ်မှတ်တမ်းတင်ခြင်းက ပင်မတောင်းဆိုမှု စီးဆင်းပုံကို မထိခိုက်စေနိုင်ပါ။
 
-## မှတ်တမ်းတင်သည့်အရာများ
+## မှတ်တမ်းတင်ထားသည့်အရာများ
 
-### စီမံခန့်ခွဲရေးဆိုင်ရာ စာရင်းစစ်ဖြစ်ရပ်များ (`audit_log`)
+### စီမံခန့်ခွဲရေး စစ်ဆေးမှတ်တမ်းဖြစ်ရပ်များ (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` ကို ခေါ်ဆိုမှုတိုင်းက အတန်းတစ်တန်း ဖန်တီးသည်။ လုပ်ဆောင်ချက် စာသားများသည် `domain.verb` (သို့မဟုတ် `domain.verb.outcome`) ပုံစံကို လိုက်နာသည်။ လက်ရှိ source tree အတွင်း အတည်ပြုထားသည့် လုပ်ဆောင်ချက် အမျိုးအစားများတွင် အောက်ပါတို့ ပါဝင်သည်-
+`logAuditEvent({ action, actor, target, details, ... })` ကို ခေါ်ဆိုမှုတိုင်းသည်
+အတန်းတစ်ကြောင်းကို ထုတ်ပေးသည်။ လုပ်ဆောင်ချက်စာသားများသည်
+`domain.verb` (သို့မဟုတ် `domain.verb.outcome`) ပုံစံကို လိုက်နာသည်။
+ကုဒ်အတွင်း အတည်ပြုထားသော လုပ်ဆောင်ချက်အမျိုးအစားများမှာ-
 
-| လုပ်ဆောင်ချက်                        | ရင်းမြစ်                                |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| လုပ်ဆောင်ချက်                        | ရင်းမြစ်                                 |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-မှတ်တမ်းတစ်ခုစီတွင် `action`၊ `actor` (မူလတန်ဖိုးမှာ `"system"`)၊ `target`၊ `details`/`metadata` (JSON)၊ `ip_address`၊ `resource_type`၊ `status`၊ `request_id` နှင့် `timestamp` တို့ကို ဖမ်းယူသိမ်းဆည်းသည်။ အရေးကြီးသော key များ (`apiKey`၊ `accessToken`၊ `refreshToken`၊ `password`၊ `*token`/`*secret`/`*apikey` နှင့် ကိုက်ညီသည့် မည်သည့်အရာမဆို စသည်တို့) ကို အတန်းမရေးသားမီ `"[redacted]"` အဖြစ် အဆင့်ဆင့် ပြန်လည်ရှာဖွေ၍ ဖုံးကွယ်ထားသည်။
+အကြောင်းအရာတစ်ခုစီတွင် `action`၊ `actor` (မသတ်မှတ်ထားပါက `"system"` ဖြစ်သည်)၊
+`target`၊ `details`/`metadata` (JSON)၊ `ip_address`၊ `resource_type`၊ `status`၊
+`request_id` နှင့် `timestamp` တို့ကို သိမ်းဆည်းထားသည်။ အရေးကြီးသော key များ
+(`apiKey`၊ `accessToken`၊ `refreshToken`၊ `password`၊ `*token`/`*secret`/`*apikey`
+နှင့် ကိုက်ညီသည့်အရာများ စသည်) ကို အတန်းမရေးသားမီ ထပ်ဆင့်၍ `"[redacted]"` ဖြင့်
+ဖုံးကွယ်ထားသည်။
 
-### MCP ကိရိယာ ခေါ်ဆိုမှုများ (`mcp_tool_audit`)
+`api_key.auth.touch` အတန်းများသည် request log သို့ မရောက်ရှိသည့် အောင်မြင်သော
+API key metadata နှင့် ရှာဖွေဖတ်ရှုမှုများ (GET/HEAD) ကို မှတ်တမ်းတင်သည်။ မည်သည့်
+key ဖြစ်သည်၊ မည်သည့်အချိန်တွင် ဖြစ်သည်နှင့် ပုံမှန်ပြုလုပ်ထားသော လမ်းကြောင်းတို့ကို
+မှတ်တမ်းတင်ပြီး အတန်း ၁,၀၀၀ အထိသာ ပေါင်းစည်းကာ ကန့်သတ်ထားသည်။ `noLog` ပါသည့် key များနှင့်
+ပတ်ဝန်းကျင် key ကို ကျော်လွှားထားသည်။ ခေါ်ဆိုသူ၏ IP လိပ်စာနှင့် user-agent ကို
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` feature flag ဖွင့်ထားသည့်အခါမှသာ
+ထည့်သွင်းသည် (မူလအတိုင်း ပိတ်ထားသည်)။
 
-MCP ကိရိယာ ခေါ်ယူအသုံးပြုမှုတိုင်းသည် `open-sse/mcp-server/audit.ts` မှတစ်ဆင့် အတန်းတစ်တန်း ရေးသားသည်။ Schema (`src/lib/db/migrations/002_mcp_a2a_tables.sql` မှ)-
+### MCP tool ခေါ်ဆိုမှုများ (`mcp_tool_audit`)
 
-| ကော်လံ           | မှတ်ချက်များ                                   |
-| ---------------- | ---------------------------------------------- |
-| `id`             | အလိုအလျောက် တိုးမြှင့်မှု                      |
-| `tool_name`      | MCP ကိရိယာ အမှတ်အသား                           |
-| `input_hash`     | input ၏ sha256 (payload ကို မသိမ်းဆည်းပါ)      |
-| `output_summary` | တိုတောင်း၍ ဖြတ်တောက်ထားသော အကျဉ်းချုပ်         |
-| `duration_ms`    | အမှန်တကယ် ကြာချိန်                             |
-| `api_key_id`     | ခေါ်ဆိုသူ (null ဖြစ်နိုင်သည်)                  |
-| `success`        | `1` / `0`                                      |
-| `error_code`     | ချို့ယွင်းမှုဖြစ်ချိန်ရှိ နောက်ဆုံး error code |
-| `created_at`     | ISO timestamp                                  |
+MCP tool ကို ခေါ်ဆိုမှုတိုင်းသည်
+`open-sse/mcp-server/audit.ts` မှတစ်ဆင့် အတန်းတစ်ကြောင်းကို ရေးသားသည်။
+Schema ကို
+`src/lib/db/migrations/002_mcp_a2a_tables.sql` မှ ရယူထားသည်-
 
-### တောင်းဆိုမှု / အသုံးပြုမှု မှတ်တမ်းများ
+| ကော်လံ           | မှတ်ချက်                                  |
+| ---------------- | ----------------------------------------- |
+| `id`             | အလိုအလျောက် တိုးပွားခြင်း                 |
+| `tool_name`      | MCP tool identifier                       |
+| `input_hash`     | input ၏ sha256 (payload ကို မသိမ်းဆည်းပါ) |
+| `output_summary` | တိုတောင်းပြီး ဖြတ်တောက်ထားသော အကျဉ်းချုပ် |
+| `duration_ms`    | စုစုပေါင်း ကြာချိန်                       |
+| `api_key_id`     | ခေါ်ဆိုသူ (nullable)                      |
+| `success`        | `1` / `0`                                 |
+| `error_code`     | မအောင်မြင်သည့်အခါ အဆုံးသတ် error code     |
+| `created_at`     | ISO timestamp                             |
 
-၎င်းတို့သည် လုပ်ငန်းလည်ပတ်မှုဆိုင်ရာ telemetry များဖြစ်ပြီး (တိတိကျကျဆိုရလျှင် စီမံခန့်ခွဲရေး စာရင်းစစ်မဟုတ်ပါ) တူညီသော ထိန်းသိမ်းမှု pipeline ကို အသုံးပြုသည်-
+### Request / အသုံးပြုမှု မှတ်တမ်းများ
 
-- `usage_history` — တောင်းဆိုမှုတစ်ခုချင်းအလိုက် အသုံးပြုမှု စုစည်းချက်
-- `call_logs` — တောင်းဆိုမှုတစ်ခုချင်းအလိုက် မှတ်တမ်းအပြည့်အစုံ (အတန်းအရေအတွက် ကန့်သတ်ချက်ရှိသည်၊ အောက်တွင်ကြည့်ပါ)
-- `proxy_logs` — proxy traffic မှတ်တမ်း (အတန်းအရေအတွက် ကန့်သတ်ချက်ရှိသည်)
-- `request_detail_logs` — ယခင်စနစ်မှ အသေးစိတ် တောင်းဆိုမှုမှတ်တမ်း (ရှိနေသေးပါက ဆက်လက်ရှင်းလင်းဖယ်ရှားသည်)
+ဤအရာများသည် စီမံခန့်ခွဲရေး စစ်ဆေးမှတ်တမ်းများကို တင်းကျပ်စွာ မဟုတ်သော်လည်း
+တူညီသော ထိန်းသိမ်းကာလ pipeline ကို မျှဝေသုံးစွဲသည့် လုပ်ငန်းဆိုင်ရာ telemetry
+များဖြစ်သည်-
+
+- `usage_history` — request တစ်ခုချင်းစီအလိုက် အသုံးပြုမှု စုစည်းမှတ်တမ်း
+- `call_logs` — request တစ်ခုချင်းစီအတွက် အပြည့်အစုံ မှတ်တမ်း (အောက်တွင် ဖော်ပြထားသည့် row-cap နှင့် သက်ဆိုင်သည်)
+- `proxy_logs` — proxy traffic မှတ်တမ်း (row-cap နှင့် သက်ဆိုင်သည်)
+- `request_detail_logs` — ယခင်အသေးစိတ် request မှတ်တမ်း (ရှိနေပါက pruned လုပ်ဆောင်ဆဲဖြစ်သည်)
 
 ## သိမ်းဆည်းမှု Schema
 
