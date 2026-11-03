@@ -30,9 +30,10 @@ test("globals.css loads the vendored kit CSS right after Tailwind, and the kit s
   // Since kit 0.0.66 the UI and display roles are Switzer, declared by the kit itself:
   // ci-ui.css → ci-tokens.css → ci-fonts.css → local woff2 files. Instrument Serif and IBM Plex
   // Mono are gone; Inter comes back ONLY as the per-script fallback after Switzer (Switzer has no
-  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face.
+  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face. Vazirmatn is the Arabic-script
+  // fallback, named only under html[dir="rtl"] (tests/unit/rtl-font-stack.test.ts).
   const fontsourceImports = [...css.matchAll(/@import "@fontsource\/([^/"]+)\//g)].map((m) => m[1]);
-  assert.deepEqual([...new Set(fontsourceImports)], ["inter"]);
+  assert.deepEqual([...new Set(fontsourceImports)], ["inter", "vazirmatn"]);
   assert.doesNotMatch(css, /--font-(sans|display):\s*"Inter"/);
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
   const tokens = read("packages/ui-kit/src/ci-tokens.css");
