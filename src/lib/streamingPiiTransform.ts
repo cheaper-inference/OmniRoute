@@ -1,6 +1,12 @@
 import { resolveStreamIndices } from "./streamIndices";
 import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextTransform";
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
+import {
+  bufferField,
+  flushOpenAiTextBuffers,
+  type BufferedField,
+  type TextBuffers,
+} from "./sseTextBuffers";
 
 const RECORD_STATS = { recordStats: true } as const;
 
@@ -9,15 +15,16 @@ export interface PiiTransformOptions {
 }
 
 export function createPiiSseTransform(options?: PiiTransformOptions): TransformStream {
-  const choiceBuffers = new Map<string, Record<FieldCategory, string>>();
+  const choiceBuffers = new Map<string, TextBuffers>();
 
-  const getBuffers = (index: string | number): Record<FieldCategory, string> => {
+  const getBuffers = (index: string | number): TextBuffers => {
     const key = String(index);
     let buf = choiceBuffers.get(key);
     if (!buf) {
       buf = {
         content: "",
         reasoning: "",
+        reasoning_content: "",
         toolArgs: "",
         partialJson: "",
       };
@@ -37,11 +44,13 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
 
   const processor = (
     text: string,
-    field: FieldCategory,
+    category: FieldCategory,
     isStopSignal = false,
     index: string | number = "0_0",
-    isSnapshot = false
+    isSnapshot = false,
+    fieldName?: string
   ): string => {
+    const field = bufferField(category, fieldName);
     if (field === "toolArgs" || field === "partialJson") {
       return text;
     }
@@ -87,7 +96,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     // Force final redaction on all buffers
     for (const [index, buffers] of choiceBuffers.entries()) {
       for (const key of Object.keys(buffers)) {
-        const field = key as FieldCategory;
+        const field = key as BufferedField;
         if (buffers[field]) {
           buffers[field] = sanitizePII(buffers[field], false, RECORD_STATS).text;
         }
@@ -97,7 +106,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     let hasRemaining = false;
     for (const buffers of choiceBuffers.values()) {
       for (const key of Object.keys(buffers)) {
-        if (buffers[key as FieldCategory].length > 0) {
+        if (buffers[key as BufferedField].length > 0) {
           hasRemaining = true;
         }
       }
@@ -165,71 +174,10 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
 
     // 2. OpenAI Chat Completions
     if (lastJson.choices && Array.isArray(lastJson.choices)) {
-      const finalJson = JSON.parse(JSON.stringify(lastJson));
-      const presentIndexes = new Set(
-        finalJson.choices.map((c: any) => c.index).filter((idx: any) => typeof idx === "number")
+      return flushOpenAiTextBuffers(
+        { get: getBuffers, takeAll: () => Array.from(choiceBuffers) },
+        lastJson
       );
-      for (const [compositeKey, choiceBuf] of choiceBuffers.entries()) {
-        const choiceIdx = parseInt(compositeKey.split("_")[0] || "0", 10);
-        if (
-          !presentIndexes.has(choiceIdx) &&
-          (choiceBuf.content || choiceBuf.reasoning || choiceBuf.toolArgs)
-        ) {
-          finalJson.choices.push({ index: choiceIdx, delta: {} });
-          presentIndexes.add(choiceIdx);
-        }
-      }
-
-      for (const choice of finalJson.choices) {
-        const choiceIdx = typeof choice.index === "number" ? choice.index : 0;
-
-        // Find if we have tool buffers for this choice
-        const toolEntries = Array.from(choiceBuffers.entries()).filter(
-          ([key]) => key.startsWith(`${choiceIdx}_`) && key !== `${choiceIdx}_0`
-        );
-
-        const choiceBuf = getBuffers(`${choiceIdx}_0`);
-        if (!choice.delta) choice.delta = {};
-        const delta = choice.delta;
-
-        if (choiceBuf.content) {
-          delta.content = choiceBuf.content;
-          choiceBuf.content = "";
-        } else {
-          delete delta.content;
-        }
-        if (choiceBuf.reasoning) {
-          delta.reasoning_content = choiceBuf.reasoning;
-          choiceBuf.reasoning = "";
-        } else {
-          delete delta.reasoning_content;
-        }
-        if (choiceBuf.toolArgs || toolEntries.length > 0) {
-          if (!choice.delta.tool_calls) choice.delta.tool_calls = [];
-
-          if (choiceBuf.toolArgs) {
-            choice.delta.tool_calls.push({
-              index: 0,
-              function: { arguments: choiceBuf.toolArgs },
-            });
-            choiceBuf.toolArgs = "";
-          }
-
-          for (const [key, buf] of toolEntries) {
-            if (buf.toolArgs) {
-              const toolIdx = parseInt(key.split("_")[1] || "0", 10);
-              choice.delta.tool_calls.push({
-                index: toolIdx,
-                function: { arguments: buf.toolArgs },
-              });
-              buf.toolArgs = "";
-            }
-          }
-        } else {
-          delete choice.delta.tool_calls;
-        }
-      }
-      return finalJson;
     }
 
     // 3. Responses API
@@ -333,6 +281,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     for (const buffers of choiceBuffers.values()) {
       buffers.content = "";
       buffers.reasoning = "";
+      buffers.reasoning_content = "";
       buffers.toolArgs = "";
       buffers.partialJson = "";
     }
