@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -475,7 +475,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 个顶级执行器模块（`*.ts`减去`base.ts`、 `index.ts`并测试—计数`npm run check:docs-counts`测量值）。每个执行器类直接或通过`DefaultExecutor`或另一个执行器扩展`BaseExecutor` (`base.ts`)；其余模块是每个提供者的帮助程序（工具模式、 fetch/TTS适配器、怪异处理程序）。执行者包括：
+158 个顶级执行器模块（`*.ts`减去`base.ts`、 `index.ts`并测试—计数`npm run check:docs-counts`测量值）。每个执行器类直接或通过`DefaultExecutor`或另一个执行器扩展`BaseExecutor` (`base.ts`)；其余模块是每个提供者的帮助程序（工具模式、 fetch/TTS适配器、怪异处理程序）。执行者包括：
 
 `antigravity`、 `azure-openai`、 `blackbox-web`、 `cliproxyapi`、 `chatgpt-web-codex`、 `cloudflare-ai`、 `codex`、 `commandCode`、 `cursor`、 `default`、 `devin-cli`、 `muse-spark-web`、 `nlpcloud`、 `opencode`、 `perplexity-web`、 `petals`、 `pollinations`、 `qoder`、 `vertex`、 `devin-desktop`，加上`claudeIdentity.ts` （共享身份助手）和`index.ts` （注册表）。
 
