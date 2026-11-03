@@ -1,1 +1,0 @@
-- Keep the original Anthropic thinking error when recovery would create an empty assistant message or resend an identical placeholder, and restrict the recovery matcher to the latest assistant message (#17324).
