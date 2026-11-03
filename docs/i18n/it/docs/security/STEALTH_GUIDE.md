@@ -242,19 +242,18 @@ Tutti gli endpoint MITM richiedono l'autenticazione di gestione (`requireCliTool
 
 ---
 
-## Override dello User-Agent — variabili d'ambiente (sezione 12 di `.env.example`)
+## L'agente utente esegue l'override — env vars (sezione `.env.example` 12)
 
-| Variabile                | Valore predefinito                                              |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Variabile           | Predefinito                                   |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Utilizzate da `open-sse/executors/base.ts::buildHeaders()` tramite ricerca dinamica. **Aggiornatele quando i provider rilasciano nuove versioni della CLI**: le stringhe UA obsolete iniziano a essere rifiutate perché associate a client non aggiornati.
+Consumato da `open-sse/executors/base.ts::buildHeaders()` tramite ricerca dinamica.** Aumentateli quando i provider rilasciano nuove versioni CLI** Le stringhe — UA obsolete iniziano a essere rifiutate come client obsoleti.
 
 ## Opzioni della modalità di compatibilità CLI (sezione 13 di `.env.example`)
 

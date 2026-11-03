@@ -4,7 +4,7 @@
 
 ---
 
-> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
+> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`それに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。スイスには、グリフごとのフォールスルーグリフ (`src/app/globals.css`) がありません。キリル文字、ギリシャ語、ベトナム語の Inter、および`html[dir="rtl"]`の下でのみ、アラビア文字の Vazirmatn です。すべてのアイコンは Lucide グリフです。
 
 ## 1. どこに何があるか
 
@@ -61,7 +61,16 @@
 
 ## 5. キットのアップデート
 
-`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。毎週の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行し、ピンが遅れている間 1 つの追跡問題を未解決のままにします。アップストリーム リポジトリはプライベートであるため、ワークフローは`UI_KIT_READ_TOKEN`シークレットに読み取り専用トークンを必要とし、それがないと不活性なままになります。
+`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。
+
+毎日の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行します。ピンが後ろにある間、 `scripts/ci/ui-kit-sync-pr.sh`ローリング ブランチ`chore/ui-kit-sync-latest`上の最上位の`release/vX.Y.Z`ブランチに対して 1 つの同期PRを開いたままにします。マージは決して行われません。すべてのキット リリースでは、引き続きローカルVPSでの視覚的なチェックが必要です。新しいリリースがリリースされるとブランチは再構築され、それ以外の場合はそのまま残されます。手動でコミットがプッシュされたオープンなPR上書きされず、メンテナがマージされずに閉じたバージョンのPR 、新しいリリースまで閉じられたままになります。
+
+PRを開くことができない場合 (ターゲット リリースがフリーズしている、 PR手動でプッシュされたコミットがある、 PRが閉じられている、またはPRトークンが設定されていない)、ワークフローはその理由を示す 1 つの追跡問題を未解決のままにします。
+
+ワークフローでは 2 つのシークレットを使用します。
+
+- `secrets.UI_KIT_READ_TOKEN`: プライベート アップストリーム リポジトリの読み取り専用トークン。ワークフローがアップストリームを読み取ることができない場合 (トークンがない、トークンが機能を停止している、またはGitHubに到達できない)、実行は緑色のままですが、警告が書き込まれ、別の 1 つの問題が開いたままになります。後の実行で再びアップストリームを読み取ることができると、問題は自動的に閉じられます。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: コンテンツおよびプルリクエストの書き込みアクセスを持つ、このリポジトリ上のきめ細かいトークン。デフォルトの`GITHUB_TOKEN`ここでPRsを作成できず、開かれたPR CIをトリガーしません。このトークンがないと、ワークフローはブランチをプッシュするだけです。
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`そのコミット時に上流の`src/` (`latest` =最新の`v*`タグ) を`packages/ui-kit/src`にコピーし、単一の許可された変換を適用し (相対インポートから`.js`サフィックスを削除します)、 `packages/ui-kit/package.json`および`package-lock.json`のワークスペースのバージョンを上流のバージョンに設定します。次に、 `git diff packages/ui-kit`を確認し、両方のテーマでプロバイダー、設定、コンボ、使用法、およびエンドポイントのビジュアルパスを実行し、 `npm run check:ui-kit-snapshot`と`npm run test:vitest:ui`を実行して、アップストリームの変更ログでPR開きます。
 
@@ -69,12 +78,12 @@
 
 ルート`README.md`が埋め込む 12 個のダイアグラム (`docs/diagrams/*.svg`) は、静的イメージに適用されるキットであり、手作業で描画されるのではなく生成されます。 `scripts/docs/gen-readme-*.mjs`に 13 個のジェネレーター ファイル (12 個のダイアグラムと`gen-readme-diagrams.mjs`ドライバー) および`tests/unit/docs/readme-*-svg.test.ts`にある 12 個の失効性テスト (ダイアグラムごとに 1 つ) があり、それぞれコミットされたファイルとジェネレーターの出力 (ジョブ`test-unit`) をバイト比較します。
 
-- **トークン。** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts`によってそのファイルに対して固定) からパレットをコピーし、キットの以前の面のテキストの役割 (表示用の Instrument Serif、 UIテキスト用の Inter、図とコード用のIBM Plex Mono) を`@fontsource`パッケージから定義します (ダッシュボード自体はキット 0.0.66 以降、キットの Switzer を使用します)。ファイル内の明るい値は`:root`に、暗い値は`prefers-color-scheme: dark`後ろにあるため、各画像はGitHub上のビューアのスキームに従います。
-- **フォント。** `scripts/docs/readme-fonts.mjs`これらの woff2 ファイルを各図が描画するグリフにサブセット化し、 `@font-face` `data:` URIsとして埋め込みます。zqf Markdown GitHubはCSSが含まれておらず、迷彩プロキシがすべての外部フェッチをブロックするため、キット タイポグラフィがREADMEイメージに到達する唯一の方法です。サブセットはラテン語のみです。システム スタックにフォールバックするシンボル グリフは`SYMBOL_FALLBACKS`で 1 つずつ許可され、その他のカバーされていないグリフはスローされます。
+- **トークン。** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts`によってそのファイルに対して固定) からパレットをコピーし、キットのタイプ スケールでテキストの役割を定義します。キットの重み (400/500/600、表示は 500) でのスイスと、コードの役割 (`.cmd`、 `.term`、 `.term-lg`、 `.mono`、 `.mono-sm`、 `.mono-xs`) ( IBM ) を除くすべての追跡です。 Plex Mono は、コマンド、 URLs、識別子、および端末画面のみに使用されます。ファイル内の明るい値は`:root`に、暗い値は`prefers-color-scheme: dark`後ろにあるため、各画像はGitHub上のビューアのスキームに従います。
+- **フォント。** GitHub Markdown にはCSSが含まれておらず、camo プロキシはすべての外部フェッチをブロックするため、キット タイプはファイル内で移動する必要があります。すべてのジェネレーターの最後のステップである`scripts/docs/readme-outline.mjs`、 HarfBuzzでスイスの役割を整形し、スイスにはない矢印や幾何学記号を独自のメトリックに基づいて描画したベクトル アウトライン (`<defs>`パスと`<use>`) として描画します。アウトライン。埋め込みフォントは使用しない: スイスのライセンス (`packages/ui-kit/src/fonts/FFL.txt`) では、書面による同意のないサブセット化と形式変換が禁止されており、ベクター描画が許可されているため、スイスの`@font-face`または`data:` URIを再導入しないでください。ファイルに残る 1 つのフォントは、これらの文字から構築された実際のコード テキスト (`scripts/docs/readme-fonts.mjs`) のままのOFL IBM Plex Mono サブセットです。埋め込むことができないグリフはスローされます。
 - **再生します。** `npm run docs:readme-diagrams` 12 個すべてをREADME順序で書き換え、ファイルごとに 1 行とそのサイズを出力します。単一のジェネレーターも単独で実行されます (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`は`node --import tsx/esm`が必要です。その数値は`open-sse/config/freeModelCatalog.ts`のライブ カタログ ローダーから取得されるためです。カタログ変更のCI結果は`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`にあります)。ジェネレーターとSVG一緒にコミットします。
 - **証拠。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub提供する方法 ( `<img>`タグ、迷彩の`Content-Security-Policy`、 `image/svg+xml`) でファイルをレンダリングし、明るいフレームと暗いフレームをキャプチャし、ページが作成した外部フォント リクエストを報告します (0 である必要があります)。
 - **予算。**ファイルあたり 200 KB未満 (各ファイルの古さテストで確認されます)。 500 KBは、 READMEイメージのハード キャップです ( SVG Studio バリデーターのルール)。
-- **コピーは変更せず、ゲートからカウントします。**ブランド変更により、単語ではなくタイプとパレットが変更されました。各ジェネレーターは、描画テキストとフォント サブセット入力の両方である`*_COPY`定数で図のコピーを保持します (またはライブ カタログから構築します)。正準数値は`<text>`ノードに残り、 `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) によって読み取られます。ゲートが読み取る図の古さテストでは、生成されたファイルに対してバリデーターも実行されるため、コードから逸脱した図はテストに失敗します。ジェネレーター内の数値ではなく、ゲートが読み取るソースを修正してください。
+- **コピーは変更せず、ゲートからカウントします。**ブランド変更により、単語ではなくタイプとパレットが変更されました。各ジェネレーターは、描画テキストとアウトライン ステップの入力の両方である`*_COPY`定数で図のコピーを保持します (またはライブ カタログから構築します)。正準図は`<text>`ノード (アウトライン化されると非表示、 `fill-opacity:0`) に留まり、 `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) によって読み取られます。ゲートが読み取る図の古さテストは、生成されたファイルに対してバリデーターも実行するため、コードからドリフトする図はテストで不合格になります—ジェネレーター内の数値ではなく、ゲートが読み取るソースを修正します。
 
 ## 7. リファレンス索引
 

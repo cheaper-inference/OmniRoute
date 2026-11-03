@@ -13,6 +13,7 @@ import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
 import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
+import { isAnthropicMessagesRequest } from "./anthropicErrorEnvelope";
 import { checkBudget } from "@/domain/costRules";
 import { checkKeyQuota } from "@/domain/keyQuota";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
@@ -224,17 +225,6 @@ export function isComboNameAllowedForKey(
   if (!comboName) return false;
   // In the catalog the requested model IS the combo id, so both arguments match.
   return allowedCombos.some((rule) => matchesComboAccessRule(comboName, comboName, rule));
-}
-
-function isAnthropicMessagesRequest(request: Request): boolean {
-  if (request.headers.has("anthropic-version")) return true;
-
-  try {
-    const url = new URL(request.url);
-    return url.pathname.endsWith("/v1/messages");
-  } catch {
-    return false;
-  }
 }
 
 function policyErrorResponse(
