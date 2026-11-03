@@ -8,6 +8,11 @@ const LEGACY_FAL_ENDPOINTS: Record<string, string> = {
   "flux/dev": "fal-ai/flux/dev",
   "flux/schnell": "fal-ai/flux/schnell",
   "ideogram/v3": "fal-ai/ideogram/v3",
+  "bria/text-to-image/3.2": "fal-ai/bria/text-to-image/3.2",
+  "bytedance/seedream/v4.5/text-to-image": "fal-ai/bytedance/seedream/v4.5/text-to-image",
+  "bytedance/dreamina/v3.1/text-to-image": "fal-ai/bytedance/dreamina/v3.1/text-to-image",
+  "recraft/v4/pro/text-to-image": "fal-ai/recraft/v4/pro/text-to-image",
+  "recraft/v4/text-to-image": "fal-ai/recraft/v4/text-to-image",
   "stable-diffusion-v35-medium": "fal-ai/stable-diffusion-v35-medium",
   "veo3.1/lite": "fal-ai/veo3.1/lite",
   "ace-step": "fal-ai/ace-step",
@@ -39,7 +44,7 @@ export function falEditEndpoint(value: string): string {
 }
 
 // These transports are documented by fal's realtime guide, not inferred from category names.
-const DOCUMENTED_REALTIME = new Set(["fal-ai/fast-lcm-diffusion", "fal-ai/fast-turbo-diffusion"]);
+const DOCUMENTED_REALTIME = new Set(["fal-ai/fast-lcm-diffusion"]);
 
 export function falRealtimePath(definition: {
   endpoint_id: string;

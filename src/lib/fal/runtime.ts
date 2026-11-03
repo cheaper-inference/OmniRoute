@@ -33,6 +33,23 @@ export async function falContext(
     existingJob ? { existingFalJob: true } : undefined
   );
   if (scope.rejection) return { rejection: scope.rejection };
+  const selection = await selectCredentials(scope, endpoint, pinnedConnectionId, existingJob);
+  if (selection.rejection) return { rejection: selection.rejection };
+  const credentials = selection.credentials;
+  if (!credentials) return { rejection: errorResponse(401, "No credentials for fal-ai") };
+  const unusable = unusableCredentialsResponse("fal-ai", credentials);
+  if (unusable) return { rejection: unusable };
+  const selected = falRecord(credentials);
+  const connectionId = String(selected.connectionId ?? "");
+  if (!connectionId) throw new FalError("Fal requires a persisted provider connection", 503);
+  return buildContext(scope, selected, connectionId);
+}
+async function selectCredentials(
+  scope: Awaited<ReturnType<typeof enforceApiKeyPolicyWithScope>>,
+  endpoint: string | null,
+  pinnedConnectionId: string | undefined,
+  existingJob: boolean
+) {
   if (
     pinnedConnectionId &&
     scope.allowedConnections &&
@@ -53,12 +70,13 @@ export async function falContext(
           pinnedConnectionId ? [pinnedConnectionId] : scope.allowedConnections,
           endpoint ? `fal-ai/${endpoint}` : null
         );
-  if (!credentials) return { rejection: errorResponse(401, "No credentials for fal-ai") };
-  const unusable = unusableCredentialsResponse("fal-ai", credentials);
-  if (unusable) return { rejection: unusable };
-  const selected = falRecord(credentials);
-  const connectionId = String(selected.connectionId ?? "");
-  if (!connectionId) throw new FalError("Fal requires a persisted provider connection", 503);
+  return { credentials, rejection: null };
+}
+async function buildContext(
+  scope: Awaited<ReturnType<typeof enforceApiKeyPolicyWithScope>>,
+  selected: FalRecord,
+  connectionId: string
+) {
   const proxy = await resolveProxyForConnection(
     connectionId,
     scope.policy.apiKeyInfo?.id,
@@ -75,10 +93,10 @@ export async function falContext(
     apiKeyInfo: scope.policy.apiKeyInfo,
     realtime: {
       token: String(selected.apiKey || selected.accessToken || ""),
-      proxyUrl: () => {
+      proxyUrl: (origin = "https://fal.run") => {
         if (isRelayType(String(falRecord(proxy.proxy).type ?? "")))
           throw new FalError("The selected relay does not support fal realtime", 409);
-        return proxyConfigToUrl(proxy.proxy) ?? resolveEnvProxyUrl("https://fal.run");
+        return proxyConfigToUrl(proxy.proxy) ?? resolveEnvProxyUrl(origin);
       },
     },
   };

@@ -15900,6 +15900,14 @@
     "job": "__MISSING__:Saved job ID",
     "register": "__MISSING__:Register endpoint or schema override",
     "schema": "__MISSING__:OpenAPI 3 schema",
-    "download": "__MISSING__:Download artifact"
+    "download": "__MISSING__:Download artifact",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

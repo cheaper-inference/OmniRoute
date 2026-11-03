@@ -15900,6 +15900,14 @@
     "job": "Saved job ID",
     "register": "Register endpoint or schema override",
     "schema": "OpenAPI 3 schema",
-    "download": "Download artifact"
+    "download": "Download artifact",
+    "newGeneration": "New generation",
+    "submissionUnknown": "SUBMISSION_UNKNOWN: the upstream job may still be running. Recover the original receipt before starting another generation.",
+    "recover": "Recover original submission",
+    "recoveryRecord": "Saved submission",
+    "recoveryMismatch": "Recovery requires the original connection and an exactly matching draft after reload. No new request was sent.",
+    "recoveryHelp": "Recovery reuses the original payload and key. After reload, restore the exact endpoint, connection, transport and input. New generation starts a separate billable request. Up to 20 receipts are kept in this tab.",
+    "streamIncomplete": "The stream ended without a complete final event. Upstream completion is unknown.",
+    "streamError": "The upstream stream reported an error. Received files remain available."
   }
 }

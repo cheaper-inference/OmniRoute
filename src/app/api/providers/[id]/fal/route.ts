@@ -61,6 +61,7 @@ export async function PUT(request: Request, route: Context) {
     definition.endpoint_id = canonicalFalEndpoint(definition.endpoint_id);
     const capabilities = falCapabilities(definition);
     compileFalInput(definition);
+    if (definition.openapi["x-fal-realtime"]) compileFalInput(definition, "realtime");
     saveFalDefinition(id, definition, true);
     return Response.json({
       endpoint_id: definition.endpoint_id,

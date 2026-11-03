@@ -1,9 +1,10 @@
 import Ajv, { type AnySchema, type ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 import { canonicalFalEndpoint, falRealtimePath } from "../../config/falEndpoint.ts";
+import realtimeSchema from "./realtimeSchema.json" with { type: "json" };
 
 export type FalRecord = Record<string, unknown>;
-export type FalTransport = "direct" | "queue" | "stream";
+export type FalTransport = "direct" | "queue" | "stream" | "realtime" | "http-websocket";
 export type FalDefinition = {
   endpoint_id: string;
   metadata?: FalRecord;
@@ -51,6 +52,24 @@ function falInputProperties(
 
 export function falInputSchema(definition: FalDefinition, transport: FalTransport = "direct") {
   canonicalFalEndpoint(definition.endpoint_id);
+  if (transport === "realtime") {
+    const override = falRecord(definition.openapi["x-fal-realtime"]);
+    // Legacy path-only overrides remain stored, but need an explicit input_schema upgrade.
+    const schema = falRecord(override.input_schema);
+    if (Object.keys(schema).length) {
+      return { path: falRealtimePath(definition)!, schema };
+    }
+    if (definition.endpoint_id === "fal-ai/fast-lcm-diffusion" && !Object.keys(override).length) {
+      return {
+        path: falRealtimePath(definition)!,
+        schema: {
+          ...realtimeSchema.schema,
+          components: realtimeSchema.components,
+        } as FalRecord,
+      };
+    }
+    throw new Error("No verified realtime input schema; register x-fal-realtime.input_schema");
+  }
   if (!String(definition.openapi.openapi ?? "").startsWith("3.")) {
     throw new Error("The endpoint has no usable OpenAPI schema; register an override");
   }
@@ -80,6 +99,16 @@ export function falCapabilities(definition: FalDefinition) {
   const { schema } = falInputSchema(definition);
   const paths = Object.keys(falRecord(definition.openapi.paths));
   const properties = falInputProperties(definition.openapi, schema);
+  let realtime: ReturnType<typeof falInputSchema> | null = null;
+  if (falRealtimePath(definition)) {
+    try {
+      const candidate = falInputSchema(definition, "realtime");
+      compileFalInput(definition, "realtime");
+      realtime = candidate;
+    } catch {
+      // A protocol path alone is not proof of a usable input contract.
+    }
+  }
   return {
     category: definition.metadata?.category ?? null,
     kind: definition.metadata?.kind ?? "inference",
@@ -89,10 +118,38 @@ export function falCapabilities(definition: FalDefinition) {
       stream:
         paths.some((path) => path.endsWith("/stream")) ||
         typeof definition.metadata?.stream_url === "string",
-      realtime: falRealtimePath(definition) !== null,
+      realtime: realtime !== null,
+      "http-websocket": true,
     },
     inputs: properties,
     required: schema.required ?? [],
+    transport_inputs: {
+      ...(realtime
+        ? {
+            realtime: {
+              inputs: falInputProperties(
+                {
+                  ...definition.openapi,
+                  components: realtime.schema.components ?? definition.openapi.components,
+                },
+                realtime.schema
+              ),
+              required: realtime.schema.required ?? [],
+            },
+          }
+        : {}),
+      ...(paths.some((path) => path.endsWith("/stream"))
+        ? {
+            stream: {
+              inputs: falInputProperties(
+                definition.openapi,
+                falInputSchema(definition, "stream").schema
+              ),
+              required: falInputSchema(definition, "stream").schema.required ?? [],
+            },
+          }
+        : {}),
+    },
     reasoning: Object.fromEntries(
       Object.entries(properties).filter(([name]) =>
         /^(enable_thinking|reasoning|reasoning_mode|reasoning_budget|reasoning_effort|thinking_budget)$/.test(
@@ -111,7 +168,7 @@ export function compileFalInput(definition: FalDefinition, transport: FalTranspo
   addFormats(ajv);
   const validate: ValidateFunction = ajv.compile({
     ...schema,
-    components: definition.openapi.components,
+    components: schema.components ?? definition.openapi.components,
   } as AnySchema);
   return (input: FalRecord) => {
     // OpenAPI objects often leave additionalProperties implicit. Unsupported controls
@@ -147,21 +204,7 @@ export function falCompatibilityInput(body: FalRecord, definition: FalDefinition
   for (const [key, value] of Object.entries(body)) {
     if (!envelope.has(key)) input[key] = value;
   }
-  for (const media of ["image", "video", "audio"]) {
-    const source = `${media}_urls`;
-    const references = `reference_${media}_urls`;
-    if (body[source] === undefined || Object.hasOwn(properties, source)) continue;
-    if (Object.hasOwn(properties, references)) {
-      input[references] = body[source];
-      delete input[source];
-    } else if (Object.hasOwn(properties, `${media}_url`)) {
-      if (!Array.isArray(body[source]) || body[source].length !== 1) {
-        throw new Error(`This fal endpoint supports exactly one ${media} reference`);
-      }
-      input[`${media}_url`] = body[source][0];
-      delete input[source];
-    }
-  }
+  mapMediaReferences(body, properties, input);
   for (const [source, target] of [
     ["n", "num_images"],
     ["mask", "mask_url"],
@@ -178,4 +221,22 @@ export function falCompatibilityInput(body: FalRecord, definition: FalDefinition
     input.image_size = match ? { width: Number(match[1]), height: Number(match[2]) } : body.size;
   }
   return compileFalInput(definition)({ ...input, ...falRecord(body.fal_input) });
+}
+
+function mapMediaReferences(body: FalRecord, properties: FalRecord, input: FalRecord) {
+  for (const media of ["image", "video", "audio"]) {
+    const source = `${media}_urls`;
+    const references = `reference_${media}_urls`;
+    if (body[source] === undefined || Object.hasOwn(properties, source)) continue;
+    if (Object.hasOwn(properties, references)) {
+      input[references] = body[source];
+      delete input[source];
+    } else if (Object.hasOwn(properties, `${media}_url`)) {
+      if (!Array.isArray(body[source]) || body[source].length !== 1) {
+        throw new Error(`This fal endpoint supports exactly one ${media} reference`);
+      }
+      input[`${media}_url`] = body[source][0];
+      delete input[source];
+    }
+  }
 }

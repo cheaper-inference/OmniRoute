@@ -16064,7 +16064,12 @@ paths:
                     description: Canonical owner/app/subpath without gateway provider prefix,
                   }
                 connection_id: { type: string }
-                transport: { type: string, enum: [queue, direct, stream, realtime], default: queue }
+                transport:
+                  {
+                    type: string,
+                    enum: [queue, direct, stream, realtime, http-websocket],
+                    default: queue,
+                  }
                 input: { type: object, additionalProperties: true }
       responses:
         "200": { description: Native output and artifacts, or native SSE/realtime events }
@@ -16088,14 +16093,26 @@ paths:
         - BearerAuth: []
       parameters:
         - { in: query, name: result, schema: { type: boolean } }
+        - {
+            in: query,
+            name: artifact,
+            schema: { type: string },
+            description: Authenticated binary file ID; same worker,
+            expires after 10 minutes,
+          }
       responses:
-        "200": { description: Job status or completed native output and artifacts }
+        "200":
+          {
+            description: Job status,
+            native output and artifacts,
+            or an authenticated binary download with upstream content type,
+          }
         "202": { description: Submission outcome is still unknown }
         "403": { description: Connection is outside the caller's scope }
         "404": { description: Job not found or not owned by caller }
     post:
       tags: [Providers]
-      summary: Send one more validated input to an active Fal realtime WebSocket
+      summary: Send one authorized invocation to an active Fal realtime or HTTP WebSocket
       security:
         - BearerAuth: []
       requestBody:
@@ -16110,7 +16127,8 @@ paths:
                 input: { type: object, additionalProperties: true }
       responses:
         "200": { description: Input sent; results arrive on the original native SSE connection }
-        "410": { description: Realtime session expired or belongs to another worker }
+        "409": { description: Previous HTTP WebSocket invocation has not ended }
+        "410": { description: WebSocket session expired or belongs to another worker }
         "429": { description: Rate, quota or budget limit }
     delete:
       tags: [Providers]

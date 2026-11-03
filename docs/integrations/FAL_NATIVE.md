@@ -12,6 +12,11 @@ cancellation, and artifact downloads. Select the connection before loading its s
 OmniRoute's provider ID is `fal-ai`. The native `endpoint_id` is a separate value such as
 `openai/gpt-image-2.5/sunburst/edit`. Qualified publisher IDs are preserved. Historical
 short IDs have explicit mappings in `open-sse/config/falEndpoint.ts`.
+Seedream, Dreamina and Recraft historical selections map explicitly to their `fal-ai/`
+endpoints. Native `google/...`, `xai/...` and `openai/...` publishers remain unchanged.
+The retained Bria 3.2 alias keeps its historical destination; both its old and prefixed
+OpenAPI URLs returned 404 on 2026-11-03. This is upstream availability evidence, not a
+reason to remove the registry entry or route it to a different publisher.
 
 ## Discover and validate
 
@@ -105,6 +110,20 @@ not return an upstream request ID, the gateway cannot determine whether the job 
 the Fal account's request history before issuing a new idempotency key. Cancellation is
 unavailable when upstream did not provide a cancellation URL.
 
+The dashboard reserves an immutable submission snapshot before dispatch and reads
+`X-Request-ID` on every response status before parsing its body. **Recover original
+submission** reuses the original queue input and key, including after an error or abort.
+**New generation** explicitly allocates another key and can incur another charge. Editing
+the draft never changes the retained recovery snapshot. A synchronous lock prevents
+concurrent clicks from creating separate submissions.
+
+This tab keeps up to 20 recovery receipts in session storage: endpoint, connection,
+transport, key, local job ID, status and a SHA-256 input fingerprint. Credentials and input
+payloads are not persisted. After reload, restore the exact draft before recovery; reordered
+object keys are equivalent, while array order, null, false and zero remain significant.
+Switch back to the original connection to recover its receipt. "SUBMISSION_UNKNOWN" stays
+visibly uncertain. A receipt without an upstream ID cannot recover a missing upstream result.
+
 Only GET requests retry on 429/503, at most twice. Retry-After delays up to five seconds are
 honored; longer delays are returned to the client instead of retrying early. Inference POSTs
 and WebSocket messages are not retried. Client abort/deadline signals stop HTTP waits and
@@ -118,24 +137,64 @@ that metadata when catalog discovery omits it. Streaming preserves native partia
 and separate reasoning fields. Queue logs/status are never presented as generated tokens.
 
 `transport: "realtime"` opens a server-side WebSocket and returns native results as SSE.
-The documented fast-LCM/fast-turbo transport declarations live in
-`open-sse/config/falEndpoint.ts`; a usable input schema is also required. For another
-documented realtime endpoint, an administrator can register an OpenAPI override containing
-`"x-fal-realtime": {"path": "/realtime"}`. This declaration uses the registered input schema;
-register the realtime input schema when it differs from the regular HTTP input schema.
+The built-in fast-LCM contract uses the official `/realtime` OpenAPI components, with the
+optional string/URI `image_url` from Fal's official realtime guide. That guide and the
+published components differ: the latter omit `image_url`. The two sources, retrieval date,
+required prompt and published field limits are recorded in `realtimeSchema.json`; the
+unmodified upstream document is a test fixture. HTTP validation remains separate and strict.
+Fast-turbo currently has no discoverable usable schema (404 on 2026-11-03), so it is not
+advertised solely because the guide mentions its transport.
+
+For another verified realtime endpoint, register an OpenAPI override containing
+`"x-fal-realtime": {"path": "/realtime", "input_schema": {"type":"object", ...}}`.
+The same transport-specific compiled validator checks the initial and every later message.
+Cached HTTP definitions do not supply realtime validators. Overrides remain scoped to their
+connection and pinned during refresh. Existing path-only overrides remain stored, but do
+not advertise realtime; upgrade them with a valid `input_schema`. Registration rejects an
+invalid upgrade. Ordinary direct/queue/HTTP-WebSocket inputs continue using the HTTP schema.
 
 The response's `X-Request-ID` is the realtime job ID. Send additional inputs with
 `POST /v1/fal/jobs/{id}` and `{ "input": { ... } }`. Each message passes the gateway's
 authorization, quota, budget, and schema checks before it is sent on the existing socket.
 DELETE or disconnect closes the socket. API keys never leave the server. Native MessagePack
-output is decoded, and binary values are preserved as `binary_base64` instead of re-encoded
-media. No completion semantics are invented for a persistent connection.
+output is decoded; native binary values remain available as `binary_base64`, and binary
+image content additionally gets an authenticated download. No completion semantics are
+invented for a persistent connection.
 
 Realtime sockets are process-local and expire at the configured upstream request deadline.
 Repeated messages must reach the same worker; a restart or another worker returns 410
 instead of silently opening a new billable session. HTTP(S) CONNECT proxies are supported;
 edge relays and other proxy transports explicitly reject realtime. The dashboard can start
 and stop a realtime stream; repeated-message clients use the native POST API.
+
+### HTTP over WebSockets
+
+`transport: "http-websocket"` implements Fal's separate JSON/HTTP wire protocol at
+`wss://ws.fal.run/{endpoint_id}`. It works with the ordinary HTTP input schema. The server
+sends the input object directly, receives `start` with request ID/status/headers, then raw
+body chunks and `end` with matching request ID/status/timing. MessagePack is not involved.
+The gateway emits `http-start`, native SSE events where applicable, and a `final` or `error`
+event containing HTTP metadata and parsed JSON/text output. Cumulative output replaces the
+previous snapshot. Non-JSON error text and upstream status/content type remain available.
+
+Binary responses are delivered through authenticated
+`GET /v1/fal/jobs/{id}?artifact={file_id}` downloads with their content type and filename;
+the event contains an artifact URL. This avoids converting binary HTTP response bodies into
+text. Files expire after 10 minutes, reside on the same worker, have a 32 MiB response limit
+and a shared 128 MiB cache limit (oldest files may be evicted sooner). Fetch promptly.
+
+After `end`, clients can submit another invocation with `POST /v1/fal/jobs/{id}`. Every
+invocation repeats authorization, quota, budget and schema checks and records one attributed
+dispatch. A pending invocation returns 409 rather than accepting a duplicate. Each invocation
+has a deadline; the socket also has the request lifetime limit. Disconnects never reconnect
+or replay input. Cancellation, worker affinity and proxy limitations match realtime.
+
+The dashboard incrementally decodes UTF-8/SSE across chunk boundaries, preserves native
+event names, extracts and deduplicates downloads, and retains the latest 40 native events.
+Partial, final and reasoning values remain separate. Truncated frames or upstream errors
+remain visible without deleting files already received. Stopping the reader releases it
+and closes a socket; it does not claim that a queued generation was cancelled. The JSON
+editor accepts only a non-null object; invalid text remains editable and blocks execution.
 
 ## Outputs, reasoning, and accounting
 
@@ -160,19 +219,20 @@ This implementation does not report invented dollar costs for catalog-only model
 
 ## Capability and verification matrix
 
-| Capability                                                  | Execution / delivery                                                                         | Verification                                                            |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Four GPT Image 2.5 Sunburst/Flare generation/edit endpoints | Compatibility images and native inputs; ordered references, masks, dimensions, `quality=max` | Official schemas; mocked adapter regressions                            |
-| Wan 3.0 reference-to-video                                  | Native queue/direct; image/video/audio references and thinking booleans                      | Official schema; mocked validation                                      |
-| Music / TTS / transcription / audio transformation          | Separate native schemas; ACE-Step, Kokoro, Whisper, Demucs and isolation fixtures            | Official schemas; mocked validation                                     |
-| 3D and multiple assets                                      | Native queue/direct; mesh, textures and preview downloads                                    | Hunyuan3D schema; mocked route/result lifecycle                         |
-| Text / vision / mixed analysis                              | Schema-driven native input and unmodified structured output                                  | Any-LLM reasoning fixture; other discovered schemas validated on demand |
-| Workflows / training / future categories                    | Native schema-driven model APIs, preserving catalog kind                                     | Adapter path available; account-specific endpoints not live-tested      |
-| Direct execution                                            | One Fal HTTP POST                                                                            | Mock-tested                                                             |
-| Queue submit / status / result / cancel                     | Persisted receipt; trusted upstream tracking URLs; no regeneration on GET                    | Mock-tested, including scope, cancellation and budget recovery          |
-| Generation/token SSE                                        | Native SSE; explicit schema/metadata transport declaration                                   | Mock-tested framing and ordering; no paid live test                     |
-| Realtime WebSocket                                          | Validated MessagePack inputs; native SSE output; per-message gateway checks                  | Official transport guide; mocked socket protocol and abort cleanup      |
-| Other/undocumented transports                               | Explicitly unavailable until supported schema/transport information exists                   | Unsupported, not inferred from category names                           |
+| Capability                                                  | Execution / delivery                                                                         | Verification                                                                         |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Four GPT Image 2.5 Sunburst/Flare generation/edit endpoints | Compatibility images and native inputs; ordered references, masks, dimensions, `quality=max` | Official schemas; mocked adapter regressions                                         |
+| Wan 3.0 reference-to-video                                  | Native queue/direct; image/video/audio references and thinking booleans                      | Official schema; mocked validation                                                   |
+| Music / TTS / transcription / audio transformation          | Separate native schemas; ACE-Step, Kokoro, Whisper, Demucs and isolation fixtures            | Official schemas; mocked validation                                                  |
+| 3D and multiple assets                                      | Native queue/direct; mesh, textures and preview downloads                                    | Hunyuan3D schema; mocked route/result lifecycle                                      |
+| Text / vision / mixed analysis                              | Schema-driven native input and unmodified structured output                                  | Any-LLM reasoning fixture; other discovered schemas validated on demand              |
+| Workflows / training / future categories                    | Native schema-driven model APIs, preserving catalog kind                                     | Adapter path available; account-specific endpoints not live-tested                   |
+| Direct execution                                            | One Fal HTTP POST                                                                            | Mock-tested                                                                          |
+| Queue submit / status / result / cancel                     | Persisted receipt; trusted upstream tracking URLs; no regeneration on GET                    | Mock-tested, including scope, cancellation and budget recovery                       |
+| Generation/token SSE                                        | Native SSE; explicit schema/metadata transport declaration                                   | Mock-tested framing and ordering; no paid live test                                  |
+| Realtime WebSocket                                          | Validated MessagePack inputs; native SSE output; per-message gateway checks                  | Official transport guide; mocked socket protocol and abort cleanup                   |
+| HTTP over WebSockets                                        | Ordinary HTTP schema; start/body/end; native text/SSE and authenticated binary downloads     | Official wire documentation; mock peer and real-route authorization/accounting tests |
+| Other/undocumented transports                               | Explicitly unavailable until supported schema/transport information exists                   | Unsupported, not inferred from category names                                        |
 
 Fixtures in `tests/fixtures/fal/` were fetched from Fal's official model API on 2026-11-03.
 They are discovery/schema evidence. All inference tests use mocked upstream responses;
@@ -183,4 +243,5 @@ from schema validation and mocked protocol coverage.
 Sources: [model search and OpenAPI](https://fal.ai/docs/platform-apis/v1/models),
 [queue](https://fal.ai/docs/documentation/model-apis/inference/queue),
 [streaming](https://fal.ai/docs/documentation/model-apis/inference/streaming),
-[realtime](https://fal.ai/docs/documentation/model-apis/inference/real-time).
+[realtime](https://fal.ai/docs/documentation/model-apis/inference/real-time),
+[HTTP over WebSockets](https://fal.ai/docs/documentation/model-apis/inference/websockets).

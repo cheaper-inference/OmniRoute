@@ -4,6 +4,10 @@ import { readFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { canonicalFalEndpoint, falEditEndpoint } from "../../open-sse/config/falEndpoint.ts";
+import { IMAGE_PROVIDERS } from "../../open-sse/config/imageRegistryData.ts";
+import { parseImageModel } from "../../open-sse/config/imageRegistry.ts";
+import { VIDEO_PROVIDERS, parseVideoModel } from "../../open-sse/config/videoRegistry.ts";
+import { MUSIC_PROVIDERS, parseMusicModel } from "../../open-sse/config/musicRegistry.ts";
 import {
   compileFalInput,
   falCapabilities,
@@ -22,9 +26,128 @@ const { handleFalAIImageEdit } =
   await import("../../open-sse/handlers/imageGeneration/providers/fal.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
+const { handleFalVideoGeneration, handleFalMusicGeneration } =
+  await import("../../open-sse/handlers/mediaGeneration/fal.ts");
 test.after(async () => {
   await waitForCallLogSaves(10_000);
   resetDbInstance();
+});
+
+test("every retained registry selection resolves, discovers the native schema and dispatches the exact endpoint", async () => {
+  const aliases: Record<string, string> = {
+    "flux-2-max": "fal-ai/flux-2-max",
+    "flux-2-pro": "fal-ai/flux-2-pro",
+    "flux-2-flex": "fal-ai/flux-2-flex",
+    "bria/text-to-image/3.2": "fal-ai/bria/text-to-image/3.2",
+    "bytedance/seedream/v4.5/text-to-image": "fal-ai/bytedance/seedream/v4.5/text-to-image",
+    "bytedance/dreamina/v3.1/text-to-image": "fal-ai/bytedance/dreamina/v3.1/text-to-image",
+    "ideogram/v3": "fal-ai/ideogram/v3",
+    "stable-diffusion-v35-medium": "fal-ai/stable-diffusion-v35-medium",
+    "recraft/v4/pro/text-to-image": "fal-ai/recraft/v4/pro/text-to-image",
+    "recraft/v4/text-to-image": "fal-ai/recraft/v4/text-to-image",
+    "veo3.1/lite": "fal-ai/veo3.1/lite",
+    "ace-step": "fal-ai/ace-step",
+  };
+  const original = globalThis.fetch;
+  try {
+    for (const [kind, registry, parse] of [
+      ["image", IMAGE_PROVIDERS, parseImageModel],
+      ["video", VIDEO_PROVIDERS, parseVideoModel],
+      ["music", MUSIC_PROVIDERS, parseMusicModel],
+    ] as const) {
+      for (const entry of registry["fal-ai"].models) {
+        const expected = aliases[entry.id] ?? entry.id;
+        assert.equal(canonicalFalEndpoint(expected), expected);
+        // Native IDs go directly to FalClient; provider-qualified selections go through provider resolution.
+        const client = new FalClient("test-key", async (url) => {
+          assert.equal(url, `https://fal.run/${expected}`);
+          return Response.json({});
+        });
+        await client.execute(expected, { prompt: "test" }, "direct");
+        const selections = [
+          `fal-ai/${entry.id}`,
+          ...(expected.startsWith("fal-ai/") ? [expected] : []),
+        ];
+        for (const selection of selections) {
+          const selected = parse(selection);
+          assert.equal(selected.provider, "fal-ai", selection);
+          assert.equal(canonicalFalEndpoint(selected.model!), expected, selection);
+          let discoveries = 0;
+          let generations = 0;
+          globalThis.fetch = async (url, init) => {
+            if (String(url).startsWith("https://api.fal.ai/")) {
+              discoveries++;
+              assert.equal(new URL(String(url)).searchParams.get("endpoint_id"), expected);
+              return Response.json({
+                models: [
+                  {
+                    endpoint_id: expected,
+                    openapi: {
+                      openapi: "3.0.0",
+                      paths: {
+                        [`/${expected}`]: {
+                          post: {
+                            requestBody: {
+                              content: {
+                                "application/json": {
+                                  schema: {
+                                    type: "object",
+                                    properties: { prompt: { type: "string" } },
+                                    required: ["prompt"],
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+                has_more: false,
+              });
+            }
+            generations++;
+            assert.equal(
+              String(url),
+              `https://${kind === "image" ? "fal.run" : "queue.fal.run"}/${expected}`
+            );
+            assert.equal(init?.method, "POST");
+            assert.deepEqual(JSON.parse(String(init?.body)), { prompt: "test" });
+            return Response.json({
+              images: [{ url: "data:image/png;base64,AQID" }],
+              video: { url: "https://example.com/video.mp4" },
+              audio: { url: "https://example.com/audio.wav" },
+            });
+          };
+          const body = { prompt: "test", fal_input: {} };
+          const args = {
+            model: selected.model!,
+            provider: "fal-ai",
+            providerConfig: { baseUrl: "https://queue.fal.run" },
+            body,
+            credentials: { apiKey: "test-key" },
+            log: null,
+          };
+          const result =
+            kind === "image"
+              ? await handleImageGeneration({
+                  body: { ...body, model: selection },
+                  credentials: args.credentials,
+                  log: null,
+                })
+              : kind === "video"
+                ? await handleFalVideoGeneration(args)
+                : await handleFalMusicGeneration(args);
+          assert.equal(result.success, true, `${selection}: ${JSON.stringify(result)}`);
+          assert.equal(discoveries, 1, selection);
+          assert.equal(generations, 1, selection);
+        }
+      }
+    }
+  } finally {
+    globalThis.fetch = original;
+  }
 });
 
 function fixture(id: string): FalDefinition {
@@ -43,6 +166,16 @@ const imageIds = [
 ];
 
 test("qualified endpoint IDs and nested publishers remain opaque, with explicit legacy aliases", () => {
+  for (const legacy of [
+    "bytedance/seedream/v4.5/text-to-image",
+    "bytedance/dreamina/v3.1/text-to-image",
+    "bria/text-to-image/3.2",
+    "recraft/v4/pro/text-to-image",
+    "recraft/v4/text-to-image",
+  ]) {
+    assert.equal(canonicalFalEndpoint(legacy), `fal-ai/${legacy}`);
+    assert.equal(canonicalFalEndpoint(canonicalFalEndpoint(legacy)), `fal-ai/${legacy}`);
+  }
   for (const id of [...imageIds, "new-publisher/app/variant/edit"])
     assert.equal(canonicalFalEndpoint(id), id);
   assert.equal(canonicalFalEndpoint("veo3.1/lite"), "fal-ai/veo3.1/lite");

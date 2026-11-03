@@ -13,6 +13,15 @@ export class FalError extends Error {
 }
 
 export type FalFetch = (url: string, init?: RequestInit) => Promise<Response>;
+function validateFalTarget(value: string) {
+  const target = new URL(value);
+  if (
+    !["https://api.fal.ai", "https://fal.run", "https://queue.fal.run"].includes(target.origin) ||
+    target.username ||
+    target.password
+  )
+    throw new FalError("Invalid fal request URL");
+}
 
 export function falTrackingUrl(value: unknown, requestId: string): string {
   if (typeof value !== "string") throw new FalError("Missing fal job tracking URL", 502);
@@ -34,6 +43,41 @@ export function falTrackingUrl(value: unknown, requestId: string): string {
   return url.toString();
 }
 
+async function retryFalRead(response: Response, signal?: AbortSignal | null) {
+  const retry = response.headers.get("retry-after");
+  const seconds =
+    retry && /^\d+$/.test(retry)
+      ? Number(retry)
+      : retry && Number.isFinite(Date.parse(retry))
+        ? Math.max(0, (Date.parse(retry) - Date.now()) / 1000)
+        : 1;
+  if (seconds > 5) {
+    await response.body?.cancel();
+    throw new FalError(
+      `Fal upstream request failed (${response.status})`,
+      response.status,
+      retry ?? undefined
+    );
+  }
+  await response.body?.cancel();
+  await new Promise<void>((resolve, reject) => {
+    const activeSignal = signal;
+    const abort = () => {
+      clearTimeout(timer);
+      reject(activeSignal?.reason);
+    };
+    const timer = setTimeout(
+      () => {
+        activeSignal?.removeEventListener("abort", abort);
+        resolve();
+      },
+      Math.min(5000, seconds * 1000)
+    );
+    if (activeSignal?.aborted) abort();
+    else activeSignal?.addEventListener("abort", abort, { once: true });
+  });
+}
+
 export class FalClient {
   constructor(
     private token: string,
@@ -44,14 +88,7 @@ export class FalClient {
 
   /** POSTs are dispatched once. Only safe reads may retry, with bounded Retry-After. */
   async request(url: string, init: RequestInit = {}): Promise<Response> {
-    const target = new URL(url);
-    if (
-      !["https://api.fal.ai", "https://fal.run", "https://queue.fal.run"].includes(target.origin) ||
-      target.username ||
-      target.password
-    ) {
-      throw new FalError("Invalid fal request URL");
-    }
+    validateFalTarget(url);
     const deadline = AbortSignal.timeout(getConfiguredTimeout());
     init = { ...init, signal: init.signal ? AbortSignal.any([init.signal, deadline]) : deadline };
     const isRead = !init.method || init.method === "GET";
@@ -72,38 +109,7 @@ export class FalClient {
         throw new FalError("Fal upstream transport failed", 502);
       }
       if (isRead && attempt < 2 && [429, 503].includes(response.status)) {
-        const retry = response.headers.get("retry-after");
-        const seconds =
-          retry && /^\d+$/.test(retry)
-            ? Number(retry)
-            : retry && Number.isFinite(Date.parse(retry))
-              ? Math.max(0, (Date.parse(retry) - Date.now()) / 1000)
-              : 1;
-        if (seconds > 5) {
-          await response.body?.cancel();
-          throw new FalError(
-            `Fal upstream request failed (${response.status})`,
-            response.status,
-            retry ?? undefined
-          );
-        }
-        await response.body?.cancel();
-        await new Promise<void>((resolve, reject) => {
-          const signal = init.signal;
-          const abort = () => {
-            clearTimeout(timer);
-            reject(signal?.reason);
-          };
-          const timer = setTimeout(
-            () => {
-              signal?.removeEventListener("abort", abort);
-              resolve();
-            },
-            Math.min(5000, seconds * 1000)
-          );
-          if (signal?.aborted) abort();
-          else signal?.addEventListener("abort", abort, { once: true });
-        });
+        await retryFalRead(response, init.signal);
         continue;
       }
       if (!response.ok) {
@@ -181,28 +187,4 @@ export class FalClient {
   }
 }
 
-/** Keep every file and its metadata; native output remains available verbatim. */
-export function normalizeFalOutput(payload: unknown) {
-  const artifacts: FalRecord[] = [];
-  function visit(value: unknown, path: string) {
-    if (typeof value === "string" && /^(https:\/\/|data:)/.test(value)) {
-      artifacts.push({ url: value, path });
-      return;
-    }
-    if (Array.isArray(value)) {
-      value.forEach((item, i) => visit(item, `${path}[${i}]`));
-      return;
-    }
-    const record = falRecord(value);
-    if (typeof record.url === "string" && /^(https:\/\/|data:)/.test(record.url)) {
-      artifacts.push({ ...record, path });
-    }
-    for (const [key, item] of Object.entries(record)) {
-      if (typeof item === "string" && key.endsWith("_url") && /^(https:\/\/|data:)/.test(item)) {
-        artifacts.push({ url: item, path: `${path}.${key}` });
-      } else if (key !== "url") visit(item, `${path}.${key}`);
-    }
-  }
-  visit(payload, "$");
-  return { artifacts, output: payload };
-}
+export { normalizeFalOutput } from "./output.ts";

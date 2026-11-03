@@ -11,6 +11,8 @@ import {
   type FalDefinition,
 } from "../../open-sse/handlers/fal/schema.ts";
 import { connectFalRealtime, falRealtimePath } from "../../open-sse/handlers/fal/realtime.ts";
+import { connectFalHttpWebsocket } from "../../open-sse/handlers/fal/httpWebsocket.ts";
+import { readFalEvents, type FalEvent } from "../../open-sse/handlers/fal/events.ts";
 
 function fixture(id: string): FalDefinition {
   return JSON.parse(
@@ -157,9 +159,24 @@ test("documented realtime WebSockets use MessagePack, retain outputs and close o
       return socket as unknown as WebSocket;
     },
   });
-  const input = compileFalInput(definition)({ prompt: "a cube", seed: 0 });
+  const image = `data:image/png;base64,${readFileSync(new URL("../fixtures/fal/realtime-1px.png", import.meta.url)).toString("base64")}`;
+  const input = compileFalInput(
+    definition,
+    "realtime"
+  )({ prompt: "a cube", sync_mode: true, image_url: image, seed: 0 });
+  assert.throws(() => compileFalInput(definition)(input), /Unsupported/);
+  assert.throws(
+    () => compileFalInput(definition, "realtime")({ ...input, num_images: 9 }),
+    /Invalid/
+  );
+  assert.throws(
+    () => compileFalInput(definition, "realtime")({ ...input, image_url: false }),
+    /Invalid/
+  );
   connection.send(input);
   assert.deepEqual(decode(socket.messages[0]), input);
+  connection.send(compileFalInput(definition, "realtime")({ ...input, prompt: "later image" }));
+  assert.equal(decode(socket.messages[1]).prompt, "later image");
   const reader = connection.output.getReader();
   const output = {
     images: [{ url: "https://example.com/image.png", content_type: "image/png" }],
@@ -173,6 +190,224 @@ test("documented realtime WebSockets use MessagePack, retain outputs and close o
   assert.equal(closed, 1);
   assert.equal((await reader.read()).done, true);
   assert.throws(() => connection.send(input), /ended/);
+});
+
+class MockHttpSocket extends EventEmitter {
+  readyState = WebSocket.OPEN;
+  bufferedAmount = 0;
+  messages: string[] = [];
+  ended = false;
+  send(data: string, callback?: (error?: Error) => void) {
+    this.messages.push(data);
+    callback?.();
+  }
+  pause() {}
+  resume() {}
+  terminate() {
+    this.ended = true;
+  }
+  text(value: unknown) {
+    this.emit(
+      "message",
+      Buffer.from(typeof value === "string" ? value : JSON.stringify(value)),
+      false
+    );
+  }
+}
+
+test("HTTP WebSockets preserve start/body/end, JSON, binary downloads and repeated invocations", async () => {
+  const peer = new MockHttpSocket();
+  const events: FalEvent[] = [];
+  let closes = 0;
+  let file: Uint8Array | undefined;
+  const connection = await connectFalHttpWebsocket({
+    endpoint: "openai/gpt-image-2.5/flare/text-to-image",
+    token: "test-key",
+    signal: new AbortController().signal,
+    timeoutMs: 1000,
+    onClose() {
+      closes++;
+    },
+    artifact(bytes, type, name) {
+      file = bytes;
+      assert.equal(type, "image/png");
+      assert.equal(name, "test.png");
+      return "/api/v1/fal/jobs/job?artifact=file";
+    },
+    socketFactory(url, options) {
+      assert.equal(url, "wss://ws.fal.run/openai/gpt-image-2.5/flare/text-to-image");
+      assert.equal((options.headers as Record<string, string>).Authorization, "Key test-key");
+      assert.equal(options.followRedirects, false);
+      queueMicrotask(() => peer.emit("open"));
+      return peer as unknown as WebSocket;
+    },
+  });
+  const reading = readFalEvents(connection.output, (event) => events.push(event));
+  connection.send({ prompt: "one" });
+  assert.deepEqual(JSON.parse(peer.messages[0]), { prompt: "one" });
+  assert.throws(() => connection.send({ prompt: "duplicate while pending" }), /not ended/);
+  peer.text({
+    type: "start",
+    request_id: "one",
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+  peer.text('{"answer":');
+  peer.text('"one"}');
+  peer.text({ type: "end", request_id: "one", status: 200, time_to_first_byte_seconds: 0.1 });
+  connection.send({ prompt: "two" });
+  peer.text({
+    type: "start",
+    request_id: "two",
+    status: 200,
+    headers: {
+      "content-type": "image/png",
+      "content-disposition": 'attachment; filename="test.png"',
+    },
+  });
+  peer.emit("message", Buffer.from([0, 1, 255]), true);
+  peer.text({ type: "end", request_id: "two", status: 200 });
+  connection.send({ prompt: "error" });
+  peer.text({
+    type: "start",
+    request_id: "three",
+    status: 422,
+    headers: { "Content-Type": "text/plain" },
+  });
+  peer.text("native validation message");
+  peer.text({ type: "end", request_id: "three", status: 422 });
+  connection.close();
+  await reading;
+  assert.equal(closes, 1);
+  assert.deepEqual(file, Buffer.from([0, 1, 255]));
+  assert.deepEqual((events[1].data as Record<string, unknown>).output, { answer: "one" });
+  const binary = events.find(
+    (e) =>
+      e.event === "final" &&
+      Array.isArray((e.data as Record<string, unknown>).artifacts) &&
+      ((e.data as Record<string, unknown>).artifacts as unknown[]).length
+  )!;
+  assert.equal(
+    ((binary.data as Record<string, unknown>).artifacts as Record<string, unknown>[])[0].url,
+    "/api/v1/fal/jobs/job?artifact=file"
+  );
+  const error = events.find((e) => e.event === "error")!.data as Record<string, unknown>;
+  assert.equal(error.output, "native validation message");
+  assert.equal((error.http as Record<string, unknown>).status, 422);
+  assert.equal(peer.messages.length, 3);
+});
+
+test("HTTP WebSocket connection loss and invalid order remain uncertain and never replay", async () => {
+  for (const invalidOrder of [true, false]) {
+    const peer = new MockHttpSocket();
+    let uncertain = false;
+    const connection = await connectFalHttpWebsocket({
+      endpoint: "publisher/app",
+      token: "test",
+      signal: new AbortController().signal,
+      timeoutMs: 1000,
+      onClose(value) {
+        uncertain = value;
+      },
+      artifact() {
+        throw new Error("unexpected file");
+      },
+      socketFactory() {
+        queueMicrotask(() => peer.emit("open"));
+        return peer as unknown as WebSocket;
+      },
+    });
+    const events: FalEvent[] = [];
+    const reading = readFalEvents(connection.output, (event) => events.push(event));
+    connection.send({ prompt: "bill once" });
+    if (invalidOrder) peer.text("body before start");
+    else peer.emit("close");
+    await reading;
+    assert.equal(uncertain, true);
+    assert.equal(peer.messages.length, 1);
+    assert.equal(events.at(-1)?.event, "error");
+    assert.throws(() => connection.send({}), /expired/);
+  }
+});
+
+test("HTTP WebSockets parse native SSE and close pending invocations on deadline or cancellation", async () => {
+  for (const mode of ["sse", "deadline", "abort"]) {
+    const peer = new MockHttpSocket();
+    const abort = new AbortController();
+    const events: FalEvent[] = [];
+    let uncertain = false;
+    const connection = await connectFalHttpWebsocket({
+      endpoint: "fal-ai/any-llm/stream",
+      token: "test",
+      signal: abort.signal,
+      timeoutMs: mode === "deadline" ? 10 : 1000,
+      onClose(value) {
+        uncertain = value;
+      },
+      artifact() {
+        throw new Error("Unexpected binary");
+      },
+      socketFactory() {
+        queueMicrotask(() => peer.emit("open"));
+        return peer as unknown as WebSocket;
+      },
+    });
+    const reading = readFalEvents(connection.output, (event) => events.push(event));
+    connection.send({ prompt: "test", reasoning: false });
+    if (mode === "sse") {
+      peer.text({
+        type: "start",
+        request_id: "sse",
+        status: 200,
+        headers: { "Content-Type": "text/event-stream; charset=utf-8" },
+      });
+      const text =
+        'event: token\r\ndata: {"partial":true,"output":"é"}\r\n\r\nevent: final\ndata: {"partial":false,"output":"é cube"}\n\n';
+      for (const byte of new TextEncoder().encode(text))
+        peer.emit("message", Buffer.from([byte]), true);
+      peer.text({ type: "end", request_id: "sse", status: 200 });
+      connection.close();
+    } else if (mode === "abort") abort.abort();
+    await reading;
+    assert.equal(peer.ended, true);
+    assert.equal(uncertain, mode !== "sse");
+    assert.equal(peer.messages.length, 1);
+    if (mode === "sse")
+      assert.deepEqual(events.find((e) => e.event === "token")?.data, {
+        partial: true,
+        output: "é",
+      });
+    else assert.equal(events.at(-1)?.event, "error");
+  }
+});
+
+test("realtime path-only overrides require an input schema and remain connection-local definitions", () => {
+  const definition = fixture("fal-ai/fast-lcm-diffusion");
+  const oldOverride = {
+    ...definition,
+    openapi: { ...definition.openapi, "x-fal-realtime": { path: "/realtime" } },
+  };
+  assert.equal(falCapabilities(oldOverride).transports.realtime, false);
+  const upgraded = {
+    ...definition,
+    openapi: {
+      ...definition.openapi,
+      "x-fal-realtime": {
+        path: "/realtime",
+        input_schema: {
+          type: "object",
+          properties: { account_field: { type: "boolean" } },
+          required: ["account_field"],
+        },
+      },
+    },
+  };
+  assert.equal(falCapabilities(upgraded).transports.realtime, true);
+  compileFalInput(upgraded, "realtime")({ account_field: false });
+  assert.throws(
+    () => compileFalInput(definition, "realtime")({ account_field: false }),
+    /Unsupported/
+  );
 });
 
 test("schema errors, unsupported thinking and invalid manual schemas fail before transport", () => {

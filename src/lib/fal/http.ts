@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { FalError } from "@omniroute/open-sse/handlers/fal/client";
-import { falRecord } from "@omniroute/open-sse/handlers/fal/schema";
 import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { readRequestBodyWithLimit, getBodySizeLimit } from "@/shared/middleware/bodySizeGuard";
 
@@ -9,7 +8,7 @@ export const falRunSchema = z
     endpoint_id: z.string().min(3).max(300),
     connection_id: z.string().min(1).max(100).optional(),
     input: z.record(z.string(), z.unknown()),
-    transport: z.enum(["direct", "queue", "stream", "realtime"]).default("queue"),
+    transport: z.enum(["direct", "queue", "stream", "realtime", "http-websocket"]).default("queue"),
   })
   .strict();
 
@@ -19,7 +18,9 @@ export async function readFalRun(request: Request) {
   if (!contentType.includes("multipart/form-data"))
     return falRunSchema.parse(JSON.parse(Buffer.from(raw).toString()));
   const form = await new Response(raw, { headers: { "content-type": contentType } }).formData();
-  const input = falRecord(JSON.parse(String(form.get("input") ?? "{}")));
+  const input = z
+    .record(z.string(), z.unknown())
+    .parse(JSON.parse(String(form.get("input") ?? "{}")));
   const files = new Map<string, string[]>();
   for (const [field, value] of form.entries()) {
     if (typeof value === "string") continue;
