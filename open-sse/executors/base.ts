@@ -134,6 +134,11 @@ import { assertValidationCredentials, validationFetch } from "./base/validationD
 import type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 export type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyMaxTokensRecovery } from "./base/maxTokensRecovery.ts";
+import {
+  clampTopLevelMaxTokens,
+  getLearnedMaxTokensCap,
+} from "../services/learnedMaxTokensCaps.ts";
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
@@ -863,6 +868,7 @@ export class BaseExecutor {
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
+    let maxTokensCeilingRecovered = false; // max_tokens ceiling 400 clamp-and-retry below.
     let advisorResultsReplaced = false;
     const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
 
@@ -924,6 +930,15 @@ export class BaseExecutor {
         model,
         log
       );
+      // Learned max_tokens ceiling (recorded from an earlier 400 advertising
+      // one): pre-clamp with zero extra round-trips. No-op when nothing was
+      // learned for this provider/model.
+      {
+        const learnedMaxTokensCap = getLearnedMaxTokensCap(this.provider, model);
+        if (learnedMaxTokensCap !== null) {
+          clampTopLevelMaxTokens(transformedBody, learnedMaxTokensCap);
+        }
+      }
       if (this.provider === "groq") {
         transformedBody = stripGroqUnsupportedFields(
           transformedBody as Record<string, unknown>,
@@ -1633,6 +1648,34 @@ export class BaseExecutor {
             log,
           });
           if (recovery.attempted) reasoningEffortClamped = true;
+          response = recovery.response;
+          transformedBody = recovery.body;
+        }
+
+        // max_tokens ceiling 400 clamp-and-retry — the third learned-cap
+        // recovery: parse the upstream-advertised ceiling ("expected a value
+        // <= N"), clamp (squeezing a Claude-style thinking budget to keep
+        // budget_tokens < max_tokens), record it process-wide for the
+        // proactive pre-clamp above, and retry the same URL once.
+        if (
+          (response.status === HTTP_STATUS.BAD_REQUEST ||
+            response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) &&
+          !maxTokensCeilingRecovered &&
+          transformedBody &&
+          typeof transformedBody === "object"
+        ) {
+          const recovery = await applyMaxTokensRecovery({
+            response,
+            url,
+            provider: this.provider,
+            model,
+            body: transformedBody,
+            fetchOptions,
+            fetchFn: fetchWithStartTimeout,
+            serializeBody: serializeRetryBody,
+            log,
+          });
+          if (recovery.attempted) maxTokensCeilingRecovered = true;
           response = recovery.response;
           transformedBody = recovery.body;
         }

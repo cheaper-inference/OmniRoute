@@ -107,39 +107,40 @@ jednoho rozhraní bez ostatních způsobí selhání sady testů namísto vzniku
 
 ---
 
-## 1. Katalog kódů CLI (27 nástrojů)
+## 1. Katalog kódů CLI (28 nástrojů)
 
 Všechny nástroje, které se objevují v `/dashboard/cli-code`. Ti s `baseUrlSupport: none` jsou propojeni přes MITM nebo manuální průvodce namísto vlastní základny URL:
 
-| id            | jméno                      | prodejce            | baseUrlSupport | configType         | acpSpawnable |
-| ------------- | -------------------------- | ------------------- | -------------- | ------------------ | ------------ |
-| claude        | Claude kód                 | Anthropic           | plný           | env                | věrný        |
-| kodex         | OpenAI Codex CLI           | OpenAI              | plný           | zvyk               | věrný        |
-| zcode         | ZCode (kódovací plán GLM ) | Z.ai                | žádný          | zvyk               | falešný      |
-| klinovat      | Cline                      | OSS (ex-Claude Dev) | plný           | zvyk               | věrný        |
-| kilo          | Kilový kód                 | Kilo-Org            | plný           | zvyk               | falešný      |
-| roo           | Roo Code                   | Roo (OSS)           | plný           | průvodce           | falešný      |
-| pokračovat    | Pokračovat                 | pokračovat.dev      | plný           | průvodce           | falešný      |
-| pomocník      | Aider                      | OSS (P. Gauthier)   | plný           | průvodce           | věrný        |
-| kovárna       | ForgeCode                  | Antinomie HQ        | plný           | zvyk               | věrný        |
-| jcode         | jcode                      | 1jehuang (OSS)      | plný           | zvyk               | falešný      |
-| deepseek-tui  | DeepSeek TUI               | Hunter Bown (OSS)   | plný           | zvyk               | falešný      |
-| cowhale       | CodeWhale                  | Hmbown (OSS)        | plný           | zvyk               | falešný      |
-| opencode      | OpenCode                   | Anomálie (ex-SST)   | plný           | průvodce           | věrný        |
-| droid         | Tovární Droid              | Továrna AI          | částečný       | průvodce           | falešný      |
-| druhý pilot   | GitHub Copilot CLI         | GitHub/MS           | plný           | zvyk               | falešný      |
-| kurzor-cli    | Cursor CLI                 | Jakákoli koule      | částečný       | průvodce           | věrný        |
-| koruška       | Koruška                    | leonardcser (OSS)   | plný           | zvyk               | falešný      |
-| pí            | Pi (pi-coding-agent)       | M. Zechner (OSS)    | plný           | zvyk               | falešný      |
-| grok-stavět   | Grok sestavit              | xAI                 | plný           | zvyk               | falešný      |
-| rozdrtit      | Rozdrtit                   | OSS (kouzlo)        | plný           | zvyk               | falešný      |
-| qwen          | Qwen kód                   | Alibaba             | plný           | průvodce           | věrný        |
-| zed           | Zed                        | Zed Industries      | plný           | průvodce           | falešný      |
-| kurzor        | Cursor                     | Jakákoli koule      | žádný          | průvodce           | falešný      |
-| antigravitace | Antigravity                | Google              | žádný          | mitm               | falešný      |
-| hermes        | Hermes                     | Nous Research       | žádný          | průvodce           | falešný      |
-| kiro          | Kiro AI                    | Amazon              | žádný          | mitm               | falešný      |
-| zvyk          | Vlastní CLI                | —                   | plný           | zakázkový stavitel | falešný      |
+| id            | jméno                     | prodejce            | baseUrlSupport | configType         | acpSpawnable |
+| ------------- | ------------------------- | ------------------- | -------------- | ------------------ | ------------ |
+| claude        | Claude kód                | Anthropic           | plný           | env                | věrný        |
+| kodex         | OpenAI Codex CLI          | OpenAI              | plný           | zvyk               | věrný        |
+| zcode         | ZCode (GLM kódovací plán) | Z.ai                | žádný          | zvyk               | falešný      |
+| klinovat      | Cline                     | OSS (ex-Claude Dev) | plný           | zvyk               | věrný        |
+| kilo          | Kilový kód                | Kilo-Org            | plný           | zvyk               | falešný      |
+| roo           | Roo Code                  | Roo (OSS)           | plný           | průvodce           | falešný      |
+| pokračovat    | Pokračovat                | pokračovat.dev      | plný           | průvodce           | falešný      |
+| pomocník      | Aider                     | OSS (P. Gauthier)   | plný           | průvodce           | věrný        |
+| kovárna       | ForgeCode                 | Antinomie HQ        | plný           | zvyk               | věrný        |
+| jcode         | jcode                     | 1jehuang (OSS)      | plný           | zvyk               | falešný      |
+| deepseek-tui  | DeepSeek TUI              | Hunter Bown (OSS)   | plný           | zvyk               | falešný      |
+| cowhale       | CodeWhale                 | Hmbown (OSS)        | plný           | zvyk               | falešný      |
+| opencode      | OpenCode                  | Anomálie (ex-SST)   | plný           | průvodce           | věrný        |
+| droid         | Tovární Droid             | Továrna AI          | částečný       | průvodce           | falešný      |
+| druhý pilot   | GitHub Copilot CLI        | GitHub/MS           | plný           | zvyk               | falešný      |
+| kurzor-cli    | Cursor CLI                | Jakákoli koule      | částečný       | průvodce           | věrný        |
+| koruška       | Koruška                   | leonardcser (OSS)   | plný           | zvyk               | falešný      |
+| pí            | Pi (pi-coding-agent)      | M. Zechner (OSS)    | plný           | zvyk               | falešný      |
+| grok-stavět   | Grok sestavení            | xAI                 | plný           | zvyk               | falešný      |
+| rozdrtit      | Rozdrtit                  | OSS (kouzlo)        | plný           | zvyk               | falešný      |
+| qwen          | Qwen kód                  | Alibaba             | plný           | průvodce           | věrný        |
+| openclaude    | OpenClaude                | Gitlawb (OSS)       | plný           | průvodce           | falešný      |
+| zed           | Zed                       | Zed Industries      | plný           | průvodce           | falešný      |
+| kurzor        | Cursor                    | Jakákoli koule      | žádný          | průvodce           | falešný      |
+| antigravitace | Antigravity               | Google              | žádný          | mitm               | falešný      |
+| hermes        | Hermes                    | Nous Research       | žádný          | průvodce           | falešný      |
+| kiro          | Kiro AI                   | Amazon              | žádný          | mitm               | falešný      |
+| zvyk          | Vlastní CLI               | —                   | plný           | zakázkový stavitel | falešný      |
 
 Nástroje se `baseUrlSupport: "partial"` zobrazují na kartě palubní desky odznak „⚠ Base URL parcial“.
 ---
@@ -221,20 +222,20 @@ interface ToolBatchStatus {
 
 ## 6. Obslužné rutiny nastavení pro nové nástroje
 
-Nové nástroje s `configType: "custom"` mají vyhrazené trasy API pro nastavení:
+Nové nástroje se `configType: "custom"` mají vyhrazená nastavení tras API :
 
-| Trasa                                       | Nástroj                                                                           |
-| ------------------------------------------- | --------------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                           |
-| `POST /api/cli-tools/jcode-settings`        | jcode (příznak --base-url)                                                        |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, zastaralé)                                         |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primární + synchronizace se zastaralým `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                             |
-| `POST /api/cli-tools/pi-settings`           | Programovací agent Pi                                                             |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                             |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + vyhrazený klíč `.env`)                       |
+| Trasa                                       | Nástroj                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                              |
+| `POST /api/cli-tools/jcode-settings`        | jcode (příznak --base-url )                                          |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, starší verze)                         |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primární synchronizace + `~/.deepseek` ) |
+| `POST /api/cli-tools/smelt-settings`        | Koruška                                                              |
+| `POST /api/cli-tools/pi-settings`           | Kódovací agent pí (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | sestavení Grok (~/.grok/config.toml, `[model.omniroute]`)            |
+| `POST /api/cli-tools/qwen-settings`         | Qwen kód (`~/.qwen/settings.json` + vyhrazený klíč `.env` )          |
 
-Všechny trasy používají pro chybové odpovědi `sanitizeErrorMessage()` (Pevné pravidlo č. 12).
+Všechny cesty používají `sanitizeErrorMessage()` pro chybové reakce (tvrdé pravidlo #12).
 
 ---
 
@@ -293,11 +294,11 @@ K dispozici jsou kompletní překlady do PT-BR a EN. U 39 dalších lokalizací 
 
 ## 9. Rychlý start
 
-### Krok 1 — Získejte API klíč OmniRoute
+### Krok 1 — Získejte klíč OmniRoute API
 
-1. Otevřete `/dashboard/api-manager` → **Vytvořit API klíč**
-2. Zadejte mu název (např. `cli-tools`) a vyberte všechna oprávnění
-3. Zkopírujte klíč — budete ho potřebovat pro každý z níže uvedených nástrojů CLI
+1. Otevřete `/dashboard/api-manager` →** Vytvořte klíč API**
+2. Pojmenujte jej (např. `cli-tools`) a vyberte všechna oprávnění
+3. Zkopírujte klíč — který budete potřebovat pro každý CLI níže
 
 > Váš klíč vypadá takto: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
@@ -305,7 +306,7 @@ K dispozici jsou kompletní překlady do PT-BR a EN. U 39 dalších lokalizací 
 
 ### Krok 2 — Nainstalujte nástroje CLI
 
-Všechny nástroje založené na npm vyžadují Node.js 22.22.2+ nebo 24.x:
+Všechny nástroje založené na npm vyžadují Node.js 22.22.2 + nebo 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (lze spustit pomocí `omniroute run gemini` → rozhraní /v1beta)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Založeno na Rustu
+cargo install smelt  # Rust-based
 
-# Programovací agent Pi
-# Pokyny k instalaci najdete na https://github.com/zechnerj/pi-coding-agent
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# Pokyny k instalaci najdete na https://github.com/1jehuang/jcode
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Krok 3 — Nakonfigurujte prostřednictvím řídicího panelu
+### Krok 3 — Konfigurace přes Dashboard
 
-1. Přejděte na `http://localhost:20128/dashboard/cli-code`
+1. Přejít na `http://localhost:20128/dashboard/cli-code`
 2. Najděte svůj nástroj v mřížce
 3. Kliknutím na kartu otevřete stránku s podrobnostmi o nástroji
-4. Vyberte svůj API klíč a základní URL
-5. Klikněte na **Použít konfiguraci** nebo zkopírujte úryvek pro ruční konfiguraci
+4. Vyberte klíč API a základnu URL
+5. Klikněte** Použít Config** nebo zkopírujte fragment ruční konfigurace
 
 ---
 
 ### Krok 4 — Nastavte globální proměnné prostředí
 
 ```bash
-# Univerzální koncový bod OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI načítá GOOGLE_GEMINI_BASE_URL z KOŘENOVÉ adresy (jeho SDK samo přidá /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Pro **vzdálený server** nahraďte `localhost:20128` IP adresou nebo doménou serveru,
-> např. `http://<your-server-ip>:20128`.
+> Pro a** vzdálený server** nahraďte `localhost:20128` serverem IP nebo doménou, např. `http://<your-server-ip>:20128`.
 
 ---
 
-### Krok 4 — Nakonfigurujte jednotlivé nástroje
+### Krok 4 — Nakonfigurujte každý nástroj
 
-#### Claude Code
+#### Claude kód
 
 ```bash
-# Vytvořte ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Pro Claude Code použijte kořen sjednocené brány Anthropic. Nepřidávejte zde `/v1`.
+Pro kód Claude použijte jednotný kořen brány Anthropic. Zde nepřipojujte `/v1`.
 
 **Test:** `claude "say hello"`
 
@@ -396,10 +396,7 @@ Pro Claude Code použijte kořen sjednocené brány Anthropic. Nepřidávejte zd
 
 #### OpenAI Codex
 
-Moderní Codex (v0.137+) načítá pouze `~/.codex/config.toml` — starý soubor
-`config.yaml` patří ke starší verzi npm CLI a je bez upozornění ignorován. API
-klíč zůstává v proměnné prostředí `OMNIROUTE_API_KEY` (`env_key`), nikdy
-uvnitř souboru:
+Moderní Codex (v0.137 +) čte pouze `~/.codex/config.toml` — staré `config.yaml` patří ke staršímu npm CLI a je tiše ignorováno. Klíč API zůstává v proměnné prostředí `OMNIROUTE_API_KEY` (`env_key`), nikdy uvnitř souboru:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,7 +411,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Úplná dokumentace (profily, `wire_api`, kontextová okna): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Úplná reference (profily, `wire_api`, kontextová okna): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Test:** `codex "what is 2+2?"`
 
@@ -447,14 +444,44 @@ EOF
 
 **Test:** `opencode`
 
-> Pomocí příkazu `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> odešlete varianty s přemýšlením.
+> Použijte `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` k odeslání variant myšlení.
 
 ---
 
-#### Cline (CLI nebo VS Code)
+#### Pi kódovací agent
 
-**Režim CLI:**
+Nainstalujte oficiální balíček Pi Coding Agent pomocí `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi čte vlastní poskytovatele ze `~/.pi/agent/models.json`; nastavte `PI_CODING_AGENT_DIR`, abyste přesunuli celý adresář agenta. Přístrojová deska toto přepsání následuje. Pi neobjevuje modely z vlastních koncových bodů, takže OmniRoute zapíše vybraný model do `models[]` pomocí Pi's `openai-completions` API a OmniRoute koncového bodu `/v1` kompatibilního s OpenAI.
+
+V**CLI Nástroje → Pi** , vyberte koncový bod, klíč API a model, prohlédněte si náhled poskytovatele a poté použijte. Náhled je fragment poskytovatele: slučte `providers.omniroute` do svého stávajícího `models.json` při ruční konfiguraci Pi, takže ostatní poskytovatelé a nastavení zůstanou nedotčeni.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi znovu načte `models.json` když otevřete `/model`. Otestujte nakonfigurovanou trasu s ID poskytovatele a ID modelu, které jste vybrali:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Reference: [Modely Pi a vlastní poskytovatelé](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Proměnné prostředí Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pokyny k instalaci Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (kód CLI nebo VS )
+
+**režim CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -466,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Režim VS Code:**
-Nastavení rozšíření Cline → Poskytovatel API: `OpenAI Compatible` → Základní URL: `http://localhost:20128/v1`
+**Režim kódu VS :** Cline nastavení rozšíření → API Poskytovatel: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-Nebo použijte řídicí panel OmniRoute → **Nástroje CLI → Cline → Použít konfiguraci**.
+Nebo použijte OmniRoute dashboard →**CLI Nástroje → Cline → Použít konfiguraci** .
 
 ---
 
-#### KiloCode (CLI nebo VS Code)
+#### KiloCode (kód CLI nebo VS )
 
-**Režim CLI:**
+**režim CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Nastavení VS Code:**
+**Nastavení kódu VS :**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Nebo použijte řídicí panel OmniRoute → **Nástroje CLI → KiloCode → Použít konfiguraci**.
+Nebo použijte OmniRoute dashboard →**CLI Nástroje → KiloCode → Použít konfiguraci** .
 
 ---
 
-#### Continue (rozšíření VS Code)
+#### Pokračovat ( rozšíření kódu VS )
 
-Upravte `~/.continue/config.yaml`:
+Upravit `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-Po úpravě restartujte VS Code.
+Po úpravě restartujte kód VS.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Tuto možnost použijte, pokud je VS Code Insiders nakonfigurován pro modely s vlastními koncovými body a chcete, aby OmniRoute fungoval bez vlastního pole záhlaví.
+Použijte to, když je VS Code Insiders nakonfigurován pro vlastní modely koncových bodů a chcete, aby OmniRoute fungoval bez vlastního pole záhlaví.
 
 **Doporučené umístění:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Příklad použití tokenizovaného aliasu OmniRoute:**
+**Příklad pomocí tokenizovaného aliasu OmniRoute :**
 
 ```json
 [
@@ -545,27 +571,26 @@ Tuto možnost použijte, pokud je VS Code Insiders nakonfigurován pro modely s 
 
 **Poznámky:**
 
-- Nahraďte `sk-your-omniroute-key` API klíčem vytvořeným v OmniRoute.
-- Pole `url` by mělo odkazovat na `/api/v1/vscode/{token}/chat/completions`.
-- Pole `modelsUrl` by mělo odkazovat na `/api/v1/vscode/{token}/models`.
-- Pokud klient podporuje vlastní hlavičky, upřednostněte standardní postup s `/v1` a hlavičkou Bearer.
-- Tokeny vložené do URL představují záložní řešení pro kompatibilitu a mohou se objevit v protokolech editoru nebo historii proxy.
+- Nahraďte `sk-your-omniroute-key` klíčem API vytvořeným v OmniRoute.
+- Pole `url` by mělo ukazovat na `/api/v1/vscode/{token}/chat/completions`.
+- Pole `modelsUrl` by mělo ukazovat na `/api/v1/vscode/{token}/models`.
+- Pokud klient podporuje vlastní hlavičky, upřednostňujte normální tok nosných hlaviček `/v1` +.
+- Tokeny vložené do adresy URL představují záložní zdroj kompatibility a mohou se objevit v protokolech editoru nebo historii serveru proxy.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Přihlaste se ke svému účtu AWS/Kiro:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI používá vlastní ověřování — OmniRoute není potřeba jako backend pro samotné Kiro CLI.
-# Používejte kiro-cli společně s OmniRoute pro další nástroje.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Pro desktopovou aplikaci **Kiro IDE** použijte endpoint MITM zpřístupněný službou OmniRoute
-v části `/dashboard/cli-tools → Kiro`.
+Pro**Kiro IDE** desktopové aplikace, použijte koncový bod MITM vystavený pomocí OmniRoute pod `/dashboard/cli-tools → Kiro`.
 
 ---
 
