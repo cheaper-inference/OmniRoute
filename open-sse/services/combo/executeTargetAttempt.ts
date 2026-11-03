@@ -79,6 +79,7 @@ import {
   releaseRejectedQualityResponse,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import { getEmptyTurnDiagnostics } from "../../utils/emptyTurnPolicy.ts";
 import {
   isTruncatedComboAttempt,
   recordTruncatedStreamAttempt,
@@ -402,7 +403,8 @@ export async function executeTargetAttempt(
         releaseRejectedQualityResponse(qualityClone, result);
         deps.log.warn(
           "COMBO",
-          `Model ${modelStr} returned 200 but failed quality check: ${quality.reason}`
+          `Model ${modelStr} returned 200 but failed quality check: ${quality.reason}; ` +
+            `detector=combo-quality native=${JSON.stringify(getEmptyTurnDiagnostics(result))}`
         );
         // #6692: a quality-rejected 200 never marks the connection row
         // unhealthy, so the sticky pin's lazy headroom recheck would never
