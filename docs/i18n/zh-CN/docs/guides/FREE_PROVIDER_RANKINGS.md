@@ -10,13 +10,13 @@
 
 ## 它是什么
 
-OmniRoute注册了 377 个提供者，其中 155 个目录条目已标记为**free/no-auth** （无身份验证、免费层OAuth或免费层API密钥 — 请参阅[免费套餐指南](../getting-started/FREE-TIERS-GUIDE.md)和完整的[免费套餐目录](../reference/FREE_TIERS.md)）。问题是：免费提供者的模型质量差异很大。为前沿模型提供服务的无身份验证提供者比为小型遗留模型提供服务的提供者有用得多。
+OmniRoute注册了 380 个提供者，其中 155 个目录条目已标记**free/no-auth** （无身份验证、免费层OAuth或免费层API密钥—请参阅[免费套餐指南](../getting-started/FREE-TIERS-GUIDE.md)和完整的[免费套餐目录](../reference/FREE_TIERS.md)）。问题是：免费提供者的模型质量差异很大。为前沿模型提供服务的无身份验证提供者比为小型遗留模型提供服务的提供者有用得多。
 
-**免费提供者排名**答案”**哪个免费提供者为我提供了最好的模型？** “通过加入每个免费提供者的目录**众包质量得分**从**竞技场AI排行榜**（人类偏好ELO，LMArena 聊天机器人竞技场背后的想法相同）。然后根据提供者的实力对提供者进行排名**最佳免费模型**。
+**免费提供者排名**答案”**哪个免费提供者为我提供了最好的模型？** “通过加入每个免费提供者的目录**众包质量分数**从**竞技场AI排行榜**（人类偏好ELO， LMArena聊天机器人领域背后的想法相同）。然后根据提供者的实力对提供者进行排名**最佳免费模型**。
 
 该排名是根据三个真实来源计算的：
 
-1. 免费提供者列表 — `NOAUTH_PROVIDERS`，以及标记为`hasFree` (`src/shared/constants/providers.ts`) 的`OAUTH_PROVIDERS` / `APIKEY_PROVIDERS`条目。
+1. 免费提供者列出了— `NOAUTH_PROVIDERS`，以及标记为`hasFree` (`src/shared/constants/providers.ts`) 的`OAUTH_PROVIDERS` / `APIKEY_PROVIDERS`条目。
 2. 来自提供者注册表 (`open-sse/config/providerRegistry.ts`) 的每个提供者的模型目录。
 3. ELO 派生的任务适合度分数由 Arena ELO同步引擎 (`src/lib/arenaEloSync.ts`) 存储在`model_intelligence` DB表中。
 

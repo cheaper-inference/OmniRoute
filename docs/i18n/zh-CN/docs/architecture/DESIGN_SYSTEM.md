@@ -52,9 +52,11 @@
 3. 针对 kit 缺陷的变通方案放在适配器中（如果修复的是样式，则放在 `globals.css` 的 `@layer components` 中），绝不放在 `packages/ui-kit/src` 中。
 4. 添加或更新 `tests/unit/ui/adapters/<name>.test.tsx`。对于调用方众多的适配器，要比较变更前后渲染出的标记——内边距或包裹元素的变化会扩散到每个界面。
 
-## 5. 更新 kit
+## 5. 更新套件
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` 将上游该提交处的 `src/` 复制到 `packages/ui-kit/src`，并应用唯一允许的转换（去掉相对导入的 `.js` 后缀）。然后：检查 `git diff packages/ui-kit`，在两种主题下对 providers、settings、combos、usage 和 endpoint 页面做一次视觉走查，运行 `npm run check:ui-kit-snapshot` 和 `npm run test:vitest:ui`，并附上上游变更日志提交 PR。
+`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。每周`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查，并在 pin 落后时保持一个跟踪问题处于打开状态；上游存储库是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的只读令牌。当它无法读取上游（没有令牌、停止工作的令牌或GitHub无法访问）时，运行保持绿色，但会写入一条警告并保持一个单独的问题打开，一旦稍后的运行可以再次读取上游，该问题就会自行关闭。
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`将该提交处的上游`src/` （`latest` =最新的`v*`标记）复制到`packages/ui-kit/src`中，应用单个允许的转换（它从相对导入中删除`.js`后缀），并将`packages/ui-kit/package.json`和`package-lock.json`中的工作区版本设置为上游版本。然后：查看`git diff packages/ui-kit`，对两个主题中的提供程序、设置、组合、用法和端点进行可视化传递，运行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，并使用上游变更日志打开PR 。
 
 ## README图
 

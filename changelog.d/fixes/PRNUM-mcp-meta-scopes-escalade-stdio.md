@@ -1,0 +1,1 @@
+- **fix(mcp):** Client-provided _meta scopes are now ignored for local (stdio) MCP callers when scope enforcement is on, so the OMNIROUTE_MCP_SCOPES env key stays the only local grant ([#PRNUM](https://github.com/diegosouzapw/OmniRoute/pull/PRNUM)) — thanks @maxmad64bis

@@ -20,7 +20,10 @@ export function isComboModelVisible(
     isHidden = createHiddenModelLookup(hiddenModelsByProvider);
     lookups.set(hiddenModelsByProvider, isHidden);
   }
-  return !isHidden(providerId || parsed.provider || parsed.providerAlias, rawModel);
+  const effectiveProvider =
+    providerId ||
+    (parsed.providerAlias === "agy" ? "agy" : parsed.provider || parsed.providerAlias);
+  return !isHidden(effectiveProvider, rawModel);
 }
 
 /** Share one hidden-model snapshot across all candidates of a recovery decision. */

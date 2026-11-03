@@ -160,10 +160,10 @@ OmniRoute expõe 6 competências A2A ligadas em `src/lib/a2a/taskExecution.ts::A
 | Gestão de cotas          | `quota-management`   | Informa o estado da quota por fornecedor e ajuda os chamadores a decidir quando fazer throttle/switch                                                                                     | quota, fornecedores                | “Verificar cota para antrópicos”                    |
 | Descoberta de fornecedor | `provider-discovery` | Lista fornecedores instalados com recursos, sinalizadores de nível gratuito, estado OAuth                                                                                                 | fornecedores, descoberta           | "Quais os fornecedores disponíveis?"                |
 | Análise de custos        | `cost-analysis`      | Estima o custo de um request/conversation considerando a utilização recente do catálogo +                                                                                                 | custo, utilização                  | "Estimar o custo desta conversa"                    |
-| Relatório de saúde       | `health-report`      | Agrega disjuntor, arrefecimento e estado de bloqueio por fornecedor                                                                                                                       | saúde, resiliência                 | "Mostrar o estado de saúde de todos os prestadores" |
+| Relatório de Saúde       | `health-report`      | Agrega disjuntor, arrefecimento e estado de bloqueio por fornecedor                                                                                                                       | saúde, resiliência                 | "Mostrar o estado de saúde de todos os prestadores" |
 | Listar recursos          | `list-capabilities`  | Retorna o catálogo completo de competências do agente com 45 entradas (configuração 23 API + 21 CLI + 1) como uma tabela de descontos com SKILL.md URLs em bruto para injeção de contexto | catálogo, descoberta, competências | "Listar todos os recursos OmniRoute "               |
 
-> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 377 prestadores; as contagens de fornecedores e os metadados free/no-auth são provenientes do registo de tempo de execução.
+> O Cartão de Agente deve ser mantido alinhado com o catálogo ativo de 380 prestadores; as contagens de fornecedores e os metadados free/no-auth são provenientes do registo de tempo de execução.
 
 ### Detalhe da habilidade `list-capabilities`
 
@@ -197,17 +197,17 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canónico. Os endpoints RES
 
 ---
 
-## Adicionar uma nova competência
+## Adicionando uma nova habilidade
 
-1. **Criar o ficheiro da competência:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Criar ficheiro de habilidade:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporte uma função assíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga a estrutura das competências existentes, como `smartRouting.ts`.
+   Exporte uma função assíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga o formato das habilidades existentes, como `smartRouting.ts`.
 
-2. **Registar o manipulador:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
+2. **Manipulador de registo:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...competências existentes
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canónico. Os endpoints RES
    };
    ```
 
-3. **Expor no Cartão do Agente:** em `src/app/.well-known/agent.json/route.ts`, acrescente ao array `skills`:
+3. **Expor no Cartão de Agente:** em `src/lib/a2a/agentCardMetadata.ts` (partilhado por `/.well-known/agent.json` e `/.well-known/agent-card.json`), anexar ao array `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canónico. Os endpoints RES
    }
    ```
 
-4. **Escrever testes:** `tests/unit/a2a-<your-skill>.test.ts`. Abranja o percurso de sucesso e o percurso de erro.
+4. **Escrever testes:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra o caminho do erro + do caminho feliz.
 
-5. **Documentar** a nova competência na tabela `Competências disponíveis` deste ficheiro.
+5. **Documento** a nova habilidade na tabela `Available Skills` deste ficheiro.
 
 ---
 
