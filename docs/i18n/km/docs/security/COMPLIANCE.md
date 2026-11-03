@@ -11,55 +11,58 @@ OmniRoute កត់ត្រាសកម្មភាពរដ្ឋបាល ព
 
 ការអនុវត្តមាននៅក្នុង `src/lib/compliance/index.ts` (T-43 — "ការគ្រប់គ្រងអនុលោមភាព") និង `src/lib/compliance/providerAudit.ts`។ ការសរសេរទិន្នន័យសវនកម្មមិនបង្កើតកំហុសដែលត្រូវបោះចេញទេ៖ នៅពេលមានបរាជ័យណាមួយ ការហៅនោះត្រូវបានរំលងដោយស្ងាត់ស្ងៀម ដើម្បីកុំឱ្យការកត់ត្រាសវនកម្មបង្អាក់លំហូរសំណើចម្បង។
 
-## អ្វីដែលត្រូវបានកត់ត្រា
+## អ្វីខ្លះត្រូវបានកត់ត្រា
 
 ### ព្រឹត្តិការណ៍សវនកម្មរដ្ឋបាល (`audit_log`)
 
-រាល់ការហៅទៅកាន់ `logAuditEvent({ action, actor, target, details, ... })` បង្កើតបានមួយជួរ។ ខ្សែអក្សរសកម្មភាពអនុវត្តតាមលំនាំ `domain.verb` (ឬ `domain.verb.outcome`)។ ប្រភេទសកម្មភាពដែលបានបញ្ជាក់ថាមាននៅក្នុងមែកធាងប្រភពរួមមាន៖
+រាល់ការហៅ `logAuditEvent({ action, actor, target, details, ... })` បង្កើតជួរដេកមួយ។ ខ្សែអក្សរសកម្មភាពអនុវត្តតាមលំនាំ `domain.verb` (ឬ `domain.verb.outcome`)។ ប្រភេទសកម្មភាពដែលបានបញ្ជាក់នៅក្នុងមែកធាងកូដរួមមាន៖
 
-| សកម្មភាព                             | ប្រភព                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| សកម្មភាព                             | ប្រភព                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ធាតុនីមួយៗកត់ត្រា `action`, `actor` (តម្លៃលំនាំដើមគឺ `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` និង `timestamp`។ កូនសោរសើប (`apiKey`, `accessToken`, `refreshToken`, `password`, និងអ្វីៗដែលត្រូវគ្នានឹង `*token`/`*secret`/`*apikey` ជាដើម) ត្រូវបានលាក់ជាបន្តបន្ទាប់នៅគ្រប់កម្រិតទៅជា `"[redacted]"` មុនពេលជួរទិន្នន័យត្រូវបានសរសេរ។
+ធាតុនីមួយៗរក្សាទុក `action`, `actor` (លំនាំដើមជា `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` និង `timestamp`។ គន្លឹះដែលមានព័ត៌មានរសើប (`apiKey`, `accessToken`, `refreshToken`, `password`, អ្វីៗដែលត្រូវនឹង `*token`/`*secret`/`*apikey` ជាដើម) ត្រូវបានលាក់តម្លៃឡើងវិញជាលំដាប់ជាមួយ `"[redacted]"` មុនពេលជួរដេកត្រូវបានសរសេរ។
+
+ជួរដេក `api_key.auth.touch` កត់ត្រាទិន្នន័យមេតារបស់ API key ដែលបានជោគជ័យ និងការអានសម្រាប់ស្វែងរក (GET/HEAD) ដែលមិនដែលឈានដល់កំណត់ហេតុសំណើ៖ តើជាគន្លឹះមួយណា ពេលណា និងផ្លូវដែលបានធ្វើឱ្យមានទម្រង់ស្តង់ដារ ដោយបញ្ចូលរួមគ្នា និងកំណត់អតិបរមាត្រឹម 1,000 ជួរដេក។ គន្លឹះដែលមាន `noLog` និងគន្លឹះបរិស្ថានត្រូវបានរំលង។ អាសយដ្ឋាន IP និង user-agent របស់អ្នកហៅត្រូវបានបន្ថែមតែពេល feature flag `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` បើកប៉ុណ្ណោះ (លំនាំដើមគឺបិទ)។
 
 ### ការហៅឧបករណ៍ MCP (`mcp_tool_audit`)
 
-រាល់ការហៅប្រើឧបករណ៍ MCP នីមួយៗសរសេរមួយជួរតាមរយៈ `open-sse/mcp-server/audit.ts`។ គ្រោងការណ៍ (មកពី `src/lib/db/migrations/002_mcp_a2a_tables.sql`)៖
+រាល់ការហៅឧបករណ៍ MCP សរសេរជួរដេកមួយតាមរយៈ `open-sse/mcp-server/audit.ts`។ គ្រោងទិន្នន័យ (ពី `src/lib/db/migrations/002_mcp_a2a_tables.sql`)៖
 
-| ជួរឈរ            | កំណត់សម្គាល់                                 |
-| ---------------- | -------------------------------------------- |
-| `id`             | កើនឡើងដោយស្វ័យប្រវត្តិ                       |
-| `tool_name`      | ឧបករណ៍កំណត់អត្តសញ្ញាណ MCP                    |
-| `input_hash`     | sha256 នៃធាតុបញ្ចូល (មិនរក្សាទុក payload ទេ) |
-| `output_summary` | សេចក្តីសង្ខេបខ្លីដែលត្រូវបានកាត់ឱ្យខ្លី      |
-| `duration_ms`    | រយៈពេលជាក់ស្តែង                              |
-| `api_key_id`     | អ្នកហៅ (អាចជា null)                          |
-| `success`        | `1` / `0`                                    |
-| `error_code`     | កូដកំហុសចុងក្រោយនៅពេលបរាជ័យ                  |
-| `created_at`     | ISO timestamp                                |
+| ជួរឈរ            | កំណត់សម្គាល់                              |
+| ---------------- | ----------------------------------------- |
+| `id`             | បង្កើនលេខដោយស្វ័យប្រវត្តិ                 |
+| `tool_name`      | ឧបករណ៍កំណត់អត្តសញ្ញាណ MCP                 |
+| `input_hash`     | sha256 នៃធាតុបញ្ចូល (មិនរក្សាទុក payload) |
+| `output_summary` | សេចក្តីសង្ខេបខ្លី ដែលត្រូវបានកាត់ឱ្យខ្លី  |
+| `duration_ms`    | រយៈពេលប្រតិបត្តិការជាក់ស្តែង              |
+| `api_key_id`     | អ្នកហៅ (អាចជា null)                       |
+| `success`        | `1` / `0`                                 |
+| `error_code`     | កូដកំហុសចុងក្រោយនៅពេលបរាជ័យ               |
+| `created_at`     | ត្រាពេលវេលា ISO                           |
 
 ### កំណត់ហេតុសំណើ / ការប្រើប្រាស់
 
-ទាំងនេះជាទិន្នន័យតាមដានប្រតិបត្តិការ (មិនមែនជាសវនកម្មរដ្ឋបាលតឹងរ៉ឹងទេ) ប៉ុន្តែប្រើបំពង់ដំណើរការរក្សាទុកដូចគ្នា៖
+ទាំងនេះជាទិន្នន័យតេឡេមេទ្រីប្រតិបត្តិការ (មិនមែនជាសវនកម្មរដ្ឋបាលយ៉ាងតឹងរឹងទេ) ប៉ុន្តែប្រើបំពង់រក្សាទុកដូចគ្នា៖
 
-- `usage_history` — ការបូកសរុបការប្រើប្រាស់តាមសំណើនីមួយៗ
-- `call_logs` — កំណត់ហេតុពេញលេញតាមសំណើនីមួយៗ (ស្ថិតក្រោមដែនកំណត់ចំនួនជួរ សូមមើលខាងក្រោម)
-- `proxy_logs` — កំណត់ហេតុចរាចរណ៍ proxy (ស្ថិតក្រោមដែនកំណត់ចំនួនជួរ)
-- `request_detail_logs` — កំណត់ហេតុលម្អិតរបស់សំណើជំនាន់ចាស់ (នៅតែត្រូវបានសម្អាត ប្រសិនបើមាន)
+- `usage_history` — សេចក្តីសង្ខេបការប្រើប្រាស់តាមសំណើនីមួយៗ
+- `call_logs` — កំណត់ហេតុពេញលេញតាមសំណើនីមួយៗ (ស្ថិតក្រោមការកំណត់ចំនួនជួរដេក សូមមើលខាងក្រោម)
+- `proxy_logs` — កំណត់ហេតុចរាចរណ៍ proxy (ស្ថិតក្រោមការកំណត់ចំនួនជួរដេក)
+- `request_detail_logs` — កំណត់ហេតុលម្អិតសំណើចាស់ (នៅតែត្រូវបានសម្អាត ប្រសិនបើមាន)
 
 ## គ្រោងការណ៍ផ្ទុកទិន្នន័យ
 

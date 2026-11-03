@@ -130,7 +130,16 @@ components` részében, ha a javítás stílusjellegű), soha ne a `packages/ui-
 
 ## 5. A készlet frissítése
 
-`npm run check:ui-kit-upstream` összehasonlítja a `packages/ui-kit/UPSTREAM.md` ben rögzített verziót az upstream repo legújabb `v*` címkéjével, és kiírja a szinkronizálási parancsot, amikor egy kiadás megjelent. A heti `UI Kit upstream watch` munkafolyamat (`.github/workflows/ui-kit-upstream-watch.yml`) ugyanazt az ellenőrzést futtatja, és nyitva tart egy nyomkövetési problémát, amíg a tű mögött van; az upstream repo privát, így a munkafolyamathoz csak olvasható tokenre van szükség a `UI_KIT_READ_TOKEN` secret-ben. Ha nem tud olvasni felfelé (nincs token, egy token, amely leállt, vagy GitHub nem érhető el), a futás zölden marad, de figyelmeztetést ír, és nyitva tart egy külön problémát, amely bezárul, amint egy későbbi futás ismét képes olvasni az áramlás irányába.
+`npm run check:ui-kit-upstream` összehasonlítja a `packages/ui-kit/UPSTREAM.md` ben rögzített verziót az upstream repo legújabb `v*` címkéjével, és kiírja a szinkronizálási parancsot, amikor egy kiadás megjelent.
+
+A napi `UI Kit upstream watch` munkafolyamat (`.github/workflows/ui-kit-upstream-watch.yml`) ugyanazt az ellenőrzést futtatja. Amíg a tű mögött van, `scripts/ci/ui-kit-sync-pr.sh` egy szinkronizáló PR nyitva tart a legmagasabb `release/vX.Y.Z` ágon, a `chore/ui-kit-sync-latest` gördülő ágon. Soha nem olvad össze: minden készletkiadást továbbra is vizuálisan ellenőrizni kell a helyi VPS n. Az ág újjáépül, amikor egy újabb kiadás megjelenik, és különben magára hagyják. Egy nyitott PR amely kézzel tolja a véglegesítéseket, nem íródik felül, és egy olyan verzióhoz tartozó PR, amelyet a karbantartó bezárt, összevonva zárva marad, egészen egy újabb kiadásig.
+
+Ha nem lehet megnyitni PR (a célkiadás le van fagyva, a PR kézzel tolták a véglegesítéseket, a PR zárva volt, vagy nincs beállítva PR token), a munkafolyamat nyitva tart egy nyomkövetési problémát, amely megmondja, hogy miért.
+
+A munkafolyamat két titkot használ:
+
+- `secrets.UI_KIT_READ_TOKEN`: csak olvasható token a privát upstream repóhoz. Ha a munkafolyamat nem tudja olvasni az upstreamet (nincs token, egy token, amely leállt, vagy GitHub nem érhető el), a futtatás zölden marad, de figyelmeztetést ír, és nyitva tart egy külön problémát, amely bezárul, ha egy későbbi futás ismét képes olvasni az áramlás irányába.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: egy finom szemcsés token ezen a tárhelyen, tartalom- és lehívási kéréssel. Az alapértelmezett `GITHUB_TOKEN` itt nem tud PRs létrehozni, és az általa megnyitott PR nem váltja ki CI. E token nélkül a munkafolyamat csak az ágat tolja.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` átmásolja az upstream `src/` az adott véglegesítésnél (`latest` = a legújabb `v*` címke) `packages/ui-kit/src` be, alkalmazza az egyetlen engedélyezett átalakítást (elhagyja a `.js` utótagot a relatív importálásból), és beállítja a `packages/ui-kit/package.json` és `package-lock.json` munkaterület verzióját az upstream verzióra. Ezután tekintse át `git diff packages/ui-kit`, végezzen vizuális átadást a szolgáltatókról, a beállításokról, a kombinációkról, a használatról és a végpontról mindkét témában, futtassa `npm run check:ui-kit-snapshot` és `npm run test:vitest:ui`, és nyissa meg a PR az upstream változásnaplóval.
 
