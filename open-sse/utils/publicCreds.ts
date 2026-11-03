@@ -199,6 +199,9 @@ const EMBEDDED_DEFAULTS = {
   ],
   // Muse Code CLI — Meta public OAuth client id (device grant, no secret).
   muse_id: [94, 93, 93, 88, 68, 93, 64, 77, 80, 31, 71, 65, 90, 85, 93, 85],
+  // InfCode (Token Infinity) — public OAuth client id (PKCE browser flow, no
+  // secret). Verified from the official Tokfinity.infcode VSIX extension.
+  infcode_id: [6, 3, 8, 10, 29, 11, 16],
 } as const;
 
 export type EmbeddedDefaultKey = keyof typeof EMBEDDED_DEFAULTS;

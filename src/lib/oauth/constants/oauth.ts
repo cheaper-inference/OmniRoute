@@ -203,6 +203,24 @@ export const OPENFERENCE_CONFIG = {
   callbackHost: "127.0.0.1",
 };
 
+// InfCode (Token Infinity) OAuth — Authorization Code Flow with PKCE.
+// Endpoints verified live 2026-11-02 against the Tokfinity.infcode v2.8.0
+// VS Code extension. The client id is a public PKCE client (no secret).
+// Env-overridable so private instances (infone-*.tokensinfinity.com) work.
+const INF_CODE_BASE = process.env.INF_CODE_OAUTH_BASE_URL || "https://www.tokensinfinity.com";
+
+export const INF_CODE_CONFIG = {
+  clientId: resolvePublicCred("infcode_id", "INF_CODE_OAUTH_CLIENT_ID"),
+  authorizeUrl: process.env.INF_CODE_OAUTH_AUTHORIZE_URL || `${INF_CODE_BASE}/infcode/login`,
+  tokenUrl: process.env.INF_CODE_OAUTH_TOKEN_URL || `${INF_CODE_BASE}/acode/v1/login_by_authcode`,
+  userinfoUrl: `${INF_CODE_BASE}/acode/v1/userinfo`,
+  scope: "profile",
+  codeChallengeMethod: "S256",
+  loopbackPort: 56124,
+  callbackPath: "/callback",
+  callbackHost: "127.0.0.1",
+};
+
 // Muse Code (Meta) OAuth — RFC 8628 device grant + subscription key mint.
 // Public CLI client id (Muse Code CLI); PKCE is not used on this grant.
 export const MUSE_CODE_CONFIG = {

@@ -165,6 +165,16 @@ export const OAUTH_ENDPOINTS = {
     auth: "https://openference.com/app/oauth/authorize",
     clientId: resolvePublicCred("openference_id"),
   },
+  infcode: {
+    // InfCode (Token Infinity) — endpoints verified live 2026-11-02 from the
+    // Tokfinity.infcode v2.8.0 extension. Env-overridable for private instances.
+    token:
+      process.env.INF_CODE_OAUTH_TOKEN_URL ||
+      "https://www.tokensinfinity.com/acode/v1/refresh_token",
+    auth:
+      process.env.INF_CODE_OAUTH_AUTHORIZE_URL || "https://www.tokensinfinity.com/infcode/login",
+    clientId: process.env.INF_CODE_OAUTH_CLIENT_ID || resolvePublicCred("infcode_id"),
+  },
 };
 
 // Cache TTLs (seconds)

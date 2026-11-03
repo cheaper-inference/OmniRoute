@@ -53,7 +53,13 @@ if (!globalThis.__pkceCallbackStates) {
 }
 
 /** Providers that use the PKCE browser callback flow (like Codex). */
-const PKCE_CALLBACK_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli", "openference"]);
+const PKCE_CALLBACK_PROVIDERS = new Set([
+  "codex",
+  "xai-oauth",
+  "grok-cli",
+  "openference",
+  "inf-code",
+]);
 
 /**
  * Providers whose device flow runs in the user's browser (auth.openai.com blocks
