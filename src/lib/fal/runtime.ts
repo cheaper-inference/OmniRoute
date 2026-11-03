@@ -75,7 +75,7 @@ export async function falContext(
     realtime: {
       token: String(selected.apiKey || selected.accessToken || ""),
       proxyUrl: () => {
-        if (isRelayType(falRecord(proxy.proxy).type))
+        if (isRelayType(String(falRecord(proxy.proxy).type ?? "")))
           throw new FalError("The selected relay does not support fal realtime", 409);
         return proxyConfigToUrl(proxy.proxy) ?? resolveEnvProxyUrl("https://fal.run");
       },
