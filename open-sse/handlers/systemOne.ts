@@ -211,7 +211,10 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
 
   try {
     const res = await postDecision(options, request, token);
-    const text = await res.text();
+    const raw = await res.text();
+    // Redact before parseUpstreamBody truncates a non-JSON error body: a secret
+    // cut off at the cap would no longer match exactly.
+    const text = res.ok ? raw : redactConnectionSecrets(raw, options.credentials);
     const normalized = normalizeBackendBody(options.target, res.status, parseUpstreamBody(text));
     const { parsed } = normalized;
     const ok = normalized.status >= 200 && normalized.status < 300;
@@ -225,7 +228,7 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
       ok,
       model: answeredModel,
       usage,
-      error: upstreamError || redactConnectionSecrets(text.slice(0, 500), options.credentials),
+      error: upstreamError || redactConnectionSecrets(text, options.credentials).slice(0, 500),
       startTime,
     });
 

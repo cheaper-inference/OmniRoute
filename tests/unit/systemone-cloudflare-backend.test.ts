@@ -219,3 +219,17 @@ test("cloudflare: a transport failure naming the URL does not leak the account i
   assert.equal(text.includes(ACCOUNT), false, text);
   assert.equal(text.includes("cf-test-token"), false, text);
 });
+
+test("cloudflare: secrets cut off by the 500-character error cap are still redacted", async () => {
+  for (const secret of [ACCOUNT, "cf-test-token"]) {
+    // A non-JSON body whose secret straddles the truncation point.
+    const raw = "Denied ".padEnd(500 - secret.length + 1, ".") + secret + " rejected";
+    const { response } = await call(
+      "cf/clef",
+      new Response(raw, { status: 403, headers: { "content-type": "text/plain" } })
+    );
+    assert.equal(response.status, 403);
+    const text = await response.text();
+    assert.equal(text.includes(secret.slice(0, -1)), false, secret);
+  }
+});
