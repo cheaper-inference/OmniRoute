@@ -100,7 +100,7 @@ test.describe("Advertised CLI client version card", () => {
     await gotoDashboardRoute(page, "/dashboard/providers/codex");
 
     await expect(page.getByText("Advertised CLI client version")).toBeVisible({ timeout: 20000 });
-    await expect(page.getByText(/gpt-6-astra/)).toBeVisible();
+    await expect(page.getByText("cx/gpt-6-astra", { exact: true })).toBeVisible();
     await expect(page.getByText(/Inference caveat/)).toBeVisible();
   });
 

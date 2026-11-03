@@ -11,11 +11,11 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Gerbang AI Gratis
+# 🚀 OmniRoute — Gateway AI Gratis
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Dibuat oleh [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti ngoding. Setiap alat AI → 380 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke dalam Claude / GPT / Gemini GRATIS dengan auto-fallback. Kompresi bertumpuk RTK + Caveman menghemat 15–95% token (~89% rata-rata) — tidak pernah kena batas. 380 penyedia AI · 150+ paket gratis · ~1,62M token gratis/bln · 20 strategi routing · $0 untuk mulai."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti membuat kode. Setiap alat AI → 380 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke Claude / GPT / Gemini GRATIS dengan fallback otomatis. Kompresi bertingkat RTK + Caveman menghemat 15–95% token (rata-rata ~89%) — jangan pernah mencapai batas. 380 penyedia AI · 150+ tingkat gratis · ~1,62 miliar token gratis/bulan · 20 strategi perutean · Mulai dari $0."/>
 
 </div>
 
@@ -1293,19 +1293,19 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
 <table>
   <tr><th align="left">Lapisan</th><th align="left">Teknologi</th></tr>
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (tidak ada <code>any</code> di inti sejak v2.0)</td></tr>
+  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (<code>any</code> tidak digunakan di inti sejak v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Basis Data</b></td><td>better-sqlite3 (SQLite, pencatatan WAL) + LowDB (JSON lama) — 147 modul domain, 222 migrasi</td></tr>
+  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, pencatatan WAL) + LowDB (JSON legacy) — 147 modul domain, 222 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>Pencarian teks penuh SQLite FTS5 + embedding vektor terkuantisasi int8, peluruhan bertipe</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — validasi I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Streaming</b></td><td>Server-Sent Events (SSE) + jembatan WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Kompresi</b></td><td>Pipeline 12 mesin — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentikasi &amp; keamanan</b></td><td>OAuth 2.0 (PKCE) + JWT + Kunci API + autentikasi berscope MCP · AES-256-GCM saat tersimpan · DOMPurify</td></tr>
-  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — impersonasi sidik jari TLS JA3 / JA4, proksi 3 tingkat</td></tr>
+  <tr><td nowrap><b>Autentikasi &amp; keamanan</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + autentikasi MCP berskop · AES-256-GCM saat tersimpan · DOMPurify</td></tr>
+  <tr><td nowrap><b>Penyamaran</b></td><td>wreq-js — penyamaran sidik jari TLS JA3 / JA4, proxy 3 tingkat</td></tr>
   <tr><td nowrap><b>Ketahanan</b></td><td>Pemutus sirkuit, backoff eksponensial, pencegahan thundering herd, pemulihan mandiri auto-combo</td></tr>
   <tr><td nowrap><b>Pencatatan</b></td><td>pino — log JSON terstruktur dengan konteks permintaan</td></tr>
-  <tr><td nowrap><b>Pengujian</b></td><td>Pelari pengujian Node.js + Vitest — <b>60.000+ deklarasi pengujian statis</b> di lebih dari 8.400 berkas pengujian yang dilacak (unit, integrasi, E2E, keamanan, ekosistem)</td></tr>
+  <tr><td nowrap><b>Pengujian</b></td><td>Pelari pengujian Node.js + Vitest — <b>60.000+ deklarasi pengujian statis</b> di lebih dari 8.400 file pengujian yang dilacak (unit, integrasi, E2E, keamanan, ekosistem)</td></tr>
   <tr><td nowrap><b>Platform</b></td><td>Desktop (Electron) · Android (Termux) · PWA (browser apa pun)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publikasi npm otomatis + Docker Hub saat rilis</td></tr>
   <tr><td nowrap><b>Tautan</b></td><td><a href="https://omniroute.online">Situs web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1800,15 +1800,15 @@ OmniRoute berdiri di atas bahu para raksasa. Proyek ini dimulai sebagai fork dar
 
 ## 📄 Lisensi
 
-Lisensi MIT - lihat [LICENSE](LICENSE) untuk detailnya.
+Lisensi MIT - lihat [LICENSE](LICENSE) untuk mengetahui detailnya.
 
 ---
 
 <div align="center">
 
-**[⬆ Kembali ke atas](#-omniroute)** · Dibuat dengan ❤️ untuk komunitas AI open-source.
+**[⬆ Kembali ke atas](#-omniroute)** · Dibuat dengan ❤️ untuk komunitas AI sumber terbuka.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Dibuat oleh <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions diaktifkan untuk tanya jawab komunitas -->
+<!-- GitHub Discussions diaktifkan untuk Tanya Jawab komunitas -->
