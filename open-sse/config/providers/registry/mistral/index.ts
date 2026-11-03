@@ -42,12 +42,6 @@ export const mistralProvider: RegistryEntry = {
       supportsReasoning: true,
     },
     {
-      id: "devstral-latest",
-      name: "Devstral 2",
-      contextLength: 262144,
-      toolCalling: true,
-    },
-    {
       id: "codestral-latest",
       name: "Codestral",
       contextLength: 131072,

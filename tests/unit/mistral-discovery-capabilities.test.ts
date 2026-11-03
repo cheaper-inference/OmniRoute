@@ -171,15 +171,16 @@ test("static mistral rows carry the ids and windows of Mistral's model cards", (
     "mistral-large-4": 1048576,
     "mistral-medium-3-5": 262144,
     "mistral-small-latest": 262144,
-    "devstral-latest": 262144,
     "codestral-latest": 131072,
     "ministral-14b-latest": 262144,
     "ministral-8b-latest": 262144,
     "ministral-3b-latest": 262144,
     "voxtral-small-latest": 32768,
   });
-  // Retired by Mistral on 2026-05-31; the id would only answer an upstream error.
+  // Retired by Mistral: pixtral-large on 2026-05-31, devstral-latest on 2026-07-31
+  // (#18755 / #18792); the ids would only answer an upstream error.
   assert.equal(rows.has("pixtral-large-latest"), false);
+  assert.equal(rows.has("devstral-latest"), false);
 });
 
 test("a capability flag Mistral does not publish adds no tool support", () => {
