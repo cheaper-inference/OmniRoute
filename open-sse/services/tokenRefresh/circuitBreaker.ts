@@ -8,6 +8,7 @@
 // failures → 30min pause). Unrecoverable refresh errors (invalid_grant,
 // refresh_token_reused, …) short-circuit retries so the HealthCheck can
 // deactivate the account instead of looping every 60s.
+import { isPassiveCodex } from "./passiveCodex.ts";
 import type { RefreshLogger } from "./shared.ts";
 import { isUnrecoverableRefreshError, NO_REFRESH_NEEDED } from "./shared.ts";
 
@@ -223,6 +224,7 @@ export async function refreshWithRetry(
   provider = "unknown",
   options?: TokenRefreshBreakerOptions
 ) {
+  if (isPassiveCodex(provider)) return refreshFn();
   const effective = resolveBreakerOptions(options);
   const key = breakerKey(provider, options?.connectionId, effective.scope);
   // Circuit breaker check

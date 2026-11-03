@@ -56,11 +56,11 @@ OmniRoute, ஒரே மையப்படுத்தப்பட்ட அன�
 
 `CORS_ALLOW_ALL=true` இருந்தாலும்கூட, ஒவ்வொரு surface-க்கும் இதன் பொருள்:
 
-| Surface                           | அங்கீகார முறை               | Wildcard CORS-இன் விளைவு                                                                                                                                                                                                                                                        |
-| --------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`   | Cookie session              | Origin அப்படியே திருப்பி அனுப்பப்படும்; ஆனால் **`Allow-Credentials` இல்லாததால்**, credentialed read-ஐ உலாவி **தடுக்கிறது**. தீங்கிழைக்கும் குறுக்கு-origin தளம், அங்கீகரிக்கப்பட்ட உங்கள் dashboard responses-ஐப் **படிக்க முடியாது**; session cookie-யும் வெளிப்படுத்தப்படாது. |
-| Client API `/v1/*`, `/v1beta/*`   | Bearer / `x-api-key` header | ஏற்கனவே **வடிவமைப்பின்படியே** அனுமதிப்பானது (`relaxForTokenAuth`): உலாவிகள் `Authorization`/`x-api-key`-ஐத் தானாக இணைப்பதில்லை; எனவே தாக்குபவரின் பக்கத்தால் உங்கள் key-ஐ வழங்க முடியாது. `CORS_ALLOW_ALL` இதன் அணுகலை விரிவுபடுத்தாது.                                         |
-| பொது read-only (`/api/health`, …) | எதுவுமில்லை                 | உணர்திறன் மிக்கதல்ல; wildcard பாதிப்பற்றது.                                                                                                                                                                                                                                     |
+| Surface                           | அங்கீகார முறை               | Wildcard CORS-இன் விளைவு                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`   | Cookie session              | Origin அப்படியே திருப்பி அனுப்பப்படும்; ஆனால் **`Allow-Credentials` இல்லாததால்**, credentialed read-ஐ உலாவி **தடுக்கிறது**. தீங்கிழைக்கும் குறுக்கு-origin தளம், அங்கீகரிக்கப்பட்ட உங்கள் dashboard responses-ஐப் **படிக்க முடியாது**; session cookie-யும் வெளிப்படுத்தப்படாது.                                                                                                        |
+| Client API `/v1/*`, `/v1beta/*`   | Bearer / `x-api-key` header | ஏற்கனவே **வடிவமைப்பின்படியே** அனுமதிப்பானது (`relaxForTokenAuth`): உலாவிகள் `Authorization`/`x-api-key`-ஐத் தானாக இணைப்பதில்லை; எனவே தாக்குபவரின் பக்கத்தால் உங்கள் key-ஐ வழங்க முடியாது. வழங்கப்பட்ட key சரிபார்க்கப்பட்டிருந்தால் மட்டுமே echo பொருந்தும்; anonymous responses (`REQUIRE_API_KEY=false`) allowlist-ஐயே தக்கவைக்கின்றன. `CORS_ALLOW_ALL` இதன் அணுகலை விரிவுபடுத்தாது. |
+| பொது read-only (`/api/health`, …) | எதுவுமில்லை                 | உணர்திறன் மிக்கதல்ல; wildcard பாதிப்பற்றது.                                                                                                                                                                                                                                                                                                                                            |
 
 எனவே, `CORS_ALLOW_ALL=true`-இன் **எஞ்சியுள்ள** exposure பின்வருவனவற்றுக்கு மட்டுமே வரையறுக்கப்படுகிறது: (a)
 ஏற்கனவே அங்கீகாரம் தேவையில்லாத தரவின் credential இல்லாத குறுக்கு-origin **வாசிப்புகள்**, மற்றும் (b)
@@ -121,10 +121,52 @@ restart செய்யாமல், runtime-இல் **Dashboard → Security 
   தானாக இணைப்பதில்லை. இங்கு CORS ஒரு பொருத்தமான தடையல்ல — API key-தான்
   தடை — அதனால்தான் browser மற்றும் Electron clients தங்களுக்கு ஏற்கெனவே அனுமதி உள்ள
   responses-ஐப் படிக்கக்கூடிய வகையில் அந்த surface வேண்டுமென்றே permissive ஆக உள்ளது.
+  தளர்த்தப்பட்ட echo, header இருப்பதை மட்டும் அல்லாமல் சரிபார்க்கப்பட்ட key-ஐப்
+  பின்பற்றுகிறது: `REQUIRE_API_KEY=false` ஒரு request-ஐ anonymous ஆகச் சேவை செய்யும்போது,
+  அதன் வெற்றிகரமான response fail-closed allowlist-ஐயே தக்கவைக்கிறது. Auth rejections (401)
+  படிக்கக்கூடியவையாகவே இருக்கின்றன; இதனால் clients ரத்துசெய்யப்பட்ட அல்லது தவறாகத்
+  தட்டச்சு செய்யப்பட்ட key-ஐக் காட்ட முடியும் (#5242): pipeline-இன் சொந்த 401 echo-வைத்
+  தக்கவைக்கிறது; pipeline அதை anonymous ஆகச் சேவை செய்த பிறகு key-ஐத் தானே நிராகரிக்கும்
+  route (management auth கட்டமைக்கப்பட்டிருக்கும்போது `/v1/models` மற்றும்
+  `/v1beta/models`, owner-scoped `/v1/files`, `/v1/batches`, `/v1/media`,
+  `/v1/session-leases` மற்றும் auto-combo candidate routes) அந்த 401-இல்
+  `credentialRejectionHeaders()` வழியாக echo-வைச் சேர்க்கிறது. Request ஒரு credential
+  header-ஐ (`Authorization`, `x-api-key`, `x-goog-api-key` அல்லது `auth_token` cookie)
+  கொண்டுள்ளதா என்பதன் அடிப்படையில் echo அமைகிறது, route அவற்றில் எதைச் சரிபார்த்தது
+  என்பதன் அடிப்படையில் அல்ல; மேலும் அது ஒருபோதும் `Access-Control-Allow-Credentials`
+  உடன் இணைக்கப்படுவதில்லை; body ஒரு நிலையான error envelope ஆகும். `/api/v1/`-இன் கீழ்
+  `requireManagementAuth()` மூலம் பாதுகாக்கப்படும் management routes
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) echo-வைச் சேர்ப்பதில்லை:
+  `REQUIRE_API_KEY=false` இருக்கும்போது அவற்றின் 401/403-ஐ cross-origin ஆகப் படிக்க முடியாது.
 - **Cookie session (dashboard):** fail-closed இயல்புநிலையாலும் **மற்றும்**
   பகிரப்பட்ட path-இல் `Access-Control-Allow-Credentials` இல்லாததாலும் பாதுகாக்கப்படுகிறது. எந்தவொரு
   permissive config-இலும் management/dashboard origins-ஐச் சேர்க்க வேண்டாம்; அவை கண்டிப்பாக
   fail-closed ஆகவே இருக்க வேண்டும்.
+
+## WebSocket handshake-கள் (`/v1/responses`, `/v1/ws`)
+
+உலாவிகள் WebSocket-க்கு CORS-ஐப் பயன்படுத்துவதில்லை; எனவே inference output-ஐத்
+திருப்பி அனுப்பும் WebSocket transports, handshake-இன் `Origin`-ஐத் தாமே சரிபார்க்கின்றன
+(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) மற்றும்,
+OmniRoute `npm start` / `npm run dev` மூலம் இயங்கும்போது, `/v1/ws` மற்றும்
+`/api/v1/ws` bridge; இது `/v1/chat/completions`, `/v1/messages` மற்றும்
+`/v1/responses` ஆகியவற்றை frames ஆக stream செய்கிறது. Bridge தீர்ப்புக்காக
+`/api/v1/ws?handshake=1`-இடம் கேட்கிறது; அந்த route சரிபார்ப்பை இயக்கியிருந்தால் தவிர
+upgrade செய்ய மறுக்கிறது. ஒரு handshake பின்வரும் நிலைகளில் ஏற்கப்படுகிறது:
+
+- அதில் `Origin` header இல்லை (Codex CLI, SDKs மற்றும் பிற browser அல்லாத clients);
+- மேலே உள்ள allowlist அந்த `Origin`-ஐ அனுமதிக்கிறது (`CORS_ALLOWED_ORIGINS`,
+  `corsOrigins` அமைப்பு, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- அந்த `Origin`, OmniRoute-இன் சொந்த public origins-இல் ஒன்று (கட்டமைக்கப்பட்ட public
+  base URL, நம்பகமான proxy-இன் forwarded origin, அல்லது IP literal அல்லது `localhost`
+  ஆகக் கொடுக்கப்பட்ட நேரடி loopback/LAN host — dashboard mutation சரிபார்ப்பு
+  பயன்படுத்தும் அதே candidates); அல்லது
+- HTTP `/v1/*` surface-இல் உள்ளதைப் போலவே, அது செல்லுபடியான API key-ஐக் கொண்டுள்ளது.
+
+மற்ற அனைத்திற்கும் `403 ws_origin_forbidden` கிடைக்கும். Dashboard session cookie ஒரு
+வெளி `Origin`-க்கு விலக்கு அளிக்காது, ஏனெனில் உலாவி அதை எந்தப் பக்கத்தின் socket-உடனும்
+இணைக்கிறது. வேறு port-இல் உள்ள `localhost` same-origin ஆகக் கருதப்படுவதில்லை; அத்தகைய
+dev origins-ஐ `CORS_ALLOWED_ORIGINS`-இல் சேர்க்கவும்.
 
 ## எடுத்துக்காட்டு: OmniRoute-க்கு முன்னால் reverse proxy
 
@@ -160,6 +202,7 @@ location / {
 | Dashboard எச்சரிக்கை banner                          | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins புலம்                           | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | ஒவ்வொரு route-க்குமான Cloud-Agent CORS (விதிவிலக்கு) | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket handshake `Origin` சரிபார்ப்பு             | `src/server/origin/wsOrigin.ts`                                      |
 
 ## மேலும் காண்க
 

@@ -76,9 +76,12 @@ describe("feature-flags-settings count update", () => {
     // default off) to 82; USAGE_LIMIT_IGNORE_UNPRICED (#14799, default off) to 83;
     // REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
-    // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87;
-    // OPENCODE_FREE_TIER_EGRESS_PROBE (default off) takes the catalog from 111 to 112.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 112);
+    // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 115);
+    // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
+    // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
+    // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
+    // OPENCODE_FREE_TIER_EGRESS_PROBE (default off) takes the catalog to 115.
     // OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED (#16571, default off) to 87.
     // COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED (#16256, default off) to 87.
     // OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED (#16797, default off) to 87;
@@ -93,6 +96,7 @@ describe("feature-flags-settings count update", () => {
     // STREAM_LATE_OUTPUT_PROBE_ENABLED (#16927 late-output stream probe, default off) to 88.
     // LMARENA_SYNTHESIZED_CX_ENABLED (#16895, default off) to 88.
     // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
+    // UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 112.
   });
 });
 
