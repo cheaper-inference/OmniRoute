@@ -1,5 +1,5 @@
 import { performance } from "node:perf_hooks";
-import type { SqliteAdapter } from "./types";
+import type { PreparedStatement, SqliteAdapter } from "./types";
 
 const WARN_EVERY_MS = 10_000;
 type Operation =
@@ -66,12 +66,12 @@ export function instrumentSqliteAdapter(
     get raw() {
       return db.raw;
     },
-    prepare(sql) {
-      const stmt = measure("prepare", () => db.prepare(sql));
+    prepare<Row = unknown>(sql: string): PreparedStatement<Row> {
+      const stmt = measure("prepare", () => db.prepare<Row>(sql)) as PreparedStatement<Row>;
       return {
         run: (...params) => measure("run", () => stmt.run(...params)),
-        get: (...params) => measure("get", () => stmt.get(...params)),
-        all: (...params) => measure("all", () => stmt.all(...params)),
+        get: (...params) => measure("get", () => stmt.get(...params)) as Row | undefined,
+        all: (...params) => measure("all", () => stmt.all(...params)) as Row[],
       };
     },
     exec(sql) {

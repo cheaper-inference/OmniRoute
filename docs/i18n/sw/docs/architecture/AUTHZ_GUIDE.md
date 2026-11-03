@@ -131,34 +131,34 @@ huongezewa uwezo:
 
 Vitendo kadhaa vya `MANAGEMENT` ni **vya operator pekee**: ufunguo wa `manage` hautoshi. Kusafirisha credentials zilizohifadhiwa (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), kurejesha backup juu ya data hai (`POST /api/db-backups/import` ikiwemo `dryRun=true`, `POST /api/db-backups` restore kwa id, `POST /api/settings/import-json`), na kuharibu pointi za kurejesha (`DELETE /api/db-backups` cleanup, na `PATCH /api/db-backups` kwa sababu retention inayohifadhi ndiyo inayoendesha pruning ya kiotomatiki baada ya kila backup) vinahitaji kipindi cha dashboard, somo la CLI la ndani, au kuingia kukiwa kumezimwa. Kutoa sync token (`POST /api/sync/tokens`) na kutengeneza `admin` CLI access token (`POST /api/cli/tokens`) vinahitaji kipindi cha dashboard au somo la CLI la ndani katika kila hali ya kuingia. Funguo za API za wigo wowote na access tokens za `oma_` si credentials za operator: hupata `403` wakati wowote inapohitajika. Ukaguzi huu uko katika `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Kubadilisha mipangilio ya kuingia pia ni kwa operator pekee: `POST /api/settings/require-login` (kuweka nenosiri la usimamizi / kugeuza `requireLogin`) inakubali credentials hizo pekee mara nenosiri linapokuwepo. Dirisha la bootstrap la uendeshaji wa kwanza (bila nenosiri bado) halibadiliki, na kipindi cha dashboard lazima kituma `currentPassword` ili kubadilisha nenosiri (`403` pale kisipokuwepo au ni kibaya, na kinakaguliwa kama `settings.update_failed`). CLI ya ndani na instance yenye kuingia kumezimwa zinabaki na njia ya urejeshaji na zinaweza kuweka nenosiri bila hilo, kwa sababu zote mbili zimefungamana na host inayomiliki data directory.
 
-## Msururu wa Uchakataji
+## Bomba
 
 ```
-Ombi linaloingia → src/proxy.ts
-  → runAuthzPipeline() katika src/server/authz/pipeline.ts
-    1. Ondoa vichwa vya ndani vinavyoaminika (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Tengeneza kitambulisho cha ombi, ainisha njia kupitia classifyRoute()
-    3. Ikiwa pathname == "/" → elekeza upya kwenda /dashboard
-    4. Ikiwa mfumo unaacha kufanya kazi taratibu (kuzima kwa utaratibu) na /api/* → 503
-    5. Ikiwa ni ombi lisilo la GET kwa /api/* → tumia kinga ya checkBodySize()
-    6. Ikiwa ni OPTIONS → ukaguzi wa awali wa CORS 204
-    7. Ikiwa options.enforce == false → pitisha moja kwa moja ukiwa na vichwa vya aina ya njia
-    8. Vinginevyo: POLICIES[routeClass].evaluate(ctx)
-       - ruhusu  → weka x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - kataa → hitilafu ya JSON yenye correlation_id (kurasa za dashibodi → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Vichwa vya ndani vinavyoaminika (vilivyofafanuliwa katika `src/server/authz/headers.ts`) **huondolewa kwenye maombi yanayoingia** kabla ya uainishaji — wateja hawawezi kujaza mapema `x-omniroute-auth-*` ili kujifanya mhusika mwingine.
+Vijajuu vya ndani vinavyoaminika (vilivyofafanuliwa katika `src/server/authz/headers.ts`) ni** kuondolewa kutoka kwa maombi yanayoingia** kabla ya uainishaji wateja wa — hawawezi kujaza `x-omniroute-auth-*` mapema ili kuiga somo.
 
 ### Mikataba ya sera
 
-Kila aina ya njia ina sera katika `src/server/authz/policies/`:
+Kila darasa la njia lina sera katika `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — daima hurejesha `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — huchukua Bearer na kuithibitisha kupitia `validateApiKey()`. Huruhusu ufikiaji bila utambulisho pale tu ambapo alama amilifu ya kipengele `REQUIRE_API_KEY` imezimwa. Alama amilifu hubainishwa kupitia `isRequireApiKeyEnabled()` (`ubatilishaji wa alama ya kipengele kwenye DB > process.env.REQUIRE_API_KEY > chaguo-msingi`) ili Alama za Vipengele za Dashibodi na vigeu vya mazingira vidhibiti `/api/v1/*`, `/api/v1beta/*`, na majina mbadala kwa uthabiti; hitilafu za kibainishi husababisha ombi kukataliwa. Huruhusu maombi ya kikao cha dashibodi kwenye njia za API ya mteja (ikiwemo `/api/v1/models`, inayotumiwa na katalogi ya modeli ya dashibodi).
-- **`managementPolicy`** (`policies/management.ts`) — hukubali kikao cha dashibodi, maombi ya ndani ya ulandanishaji wa modeli (yanayolinganishwa na `/api/providers/[name]/(sync-models|models)`), au huruka kabisa ikiwa `isAuthRequired()` inarejesha false. Hurejesha 403 (`AUTH_001`) wakati tokeni ya Bearer ipo lakini si halali, na 401 katika hali nyingine. Pia hutekeleza viwango vya ulinzi wa njia (LOCAL_ONLY / ALWAYS_PROTECTED) kabla ya tawi lolote la uthibitishaji — tazama [Viwango vya Ulinzi wa Njia](../security/ROUTE_GUARD_TIERS.md). Njia za LOCAL_ONLY katika `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (kwa sasa: `/api/mcp/`) zinaweza kufikiwa kutoka anwani zisizo za loopback wakati ufunguo wa Bearer una upeo wa `manage`; njia nyingine zote za LOCAL_ONLY zinasalia kuwa za loopback pekee bila kujali upeo.
+- **`publicPolicy`** (`policies/public.ts`) — daima inarudi `allow({ kind: "anonymous", id: "anonymous" })`.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — inadondosha Mbebaji, inathibitisha kupitia `validateApiKey()`. Huanguka hadi kutokujulikana wakati tu alama ya kipengele `REQUIRE_API_KEY` bora imezimwa. Bendera inayotumika hutatuliwa kupitia `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) kwa hivyo Bendera za Kipengele cha Dashibodi na vigeu vya mazingira vinatawala `/api/v1/*`, `/api/v1beta/*`, na lakabu mfululizo; kushindwa kwa kisuluhishi kushindwa kufungwa. Huruhusu maombi ya kikao cha dashibodi kwenye njia za API za mteja (pamoja na `/api/v1/models`, inayotumiwa na katalogi ya muundo wa dashibodi). Wakati Entra ID SSO imewashwa, Mbeba ambayo kimuundo ni ishara ya Entra (sehemu tatu za base64url, `RS*` alg, `kid`) hushughulikiwa na tawi la SSO** kabla** `validateApiKey()` na uamuzi wake ni — ya mwisho kamwe haianguki kwenye njia ya ufunguo wa API au tawi la kushusha hadhi hadi lisilojulikana, kwa hivyo hitilafu ya mtoaji kitambulisho haiwezi kuwa ufikiaji wazi. Vifunguo tuli vya API hazijaathiriwa. Tazama [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — inakubali kipindi cha dashibodi, maombi ya kusawazisha ya ndani ya kielelezo (yanayolingana na `/api/providers/[name]/(sync-models|models)`), au huruka kabisa ikiwa `isAuthRequired()` itarejesha sivyo. Hurejesha 403 (`AUTH_001`) wakati ishara ya Bearer iko lakini ni batili, 401 vinginevyo. Pia hutekeleza viwango vya walinzi wa njia (LOCAL_ONLY / ALWAYS_PROTECTED) kabla ya tawi lolote la mwandishi — kuona [Viwango vya Walinzi wa Njia](../security/ROUTE_GUARD_TIERS.md). njia za LOCAL_ONLY katika `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (leo: `/api/mcp/`) zinaweza kufikiwa kutoka kwa njia zisizo za nyuma wakati kitufe cha Bearer kinapobeba upeo wa `manage` ; njia zingine zote LOCAL_ONLY hubaki nyuma-kitanzi madhubuti bila kujali wigo.
 
-Sera iliyofaulu hurejesha `AuthSubject` yenye `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Vishughulikiaji vya chini ya msururu vinaweza kuisoma kupitia `assertAuth(request, "CLIENT_API")` katika `src/server/authz/assertAuth.ts` badala ya kutekeleza upya mantiki ya uthibitishaji.
+Sera iliyofanikiwa inarudisha `AuthSubject` kwa `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Washughulikiaji wa mkondo wa chini wanaweza kuisoma kupitia `assertAuth(request, "CLIENT_API")` katika `src/server/authz/assertAuth.ts` badala ya kuendesha tena mantiki ya uandishi.
 
 ## Orodha ya Njia za Umma
 
@@ -308,23 +308,23 @@ Vituo vya mwisho vya `/api/v1/agents/tasks/*` na `/api/resilience/model-cooldown
 
 ## Utatuzi
 
-Bomba la uchakataji huweka mihuri ifuatayo kwenye majibu kila wakati:
+Bomba daima huweka muhuri wa majibu na:
 
 ```
-x-request-id:               <kitambulisho cha uhusianishaji, hurudiwa katika miili ya hitilafu>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Kwa maombi yaliyothibitishwa, vichwa vya ombi la upande wa seva lengwa (upstream) pia hujumuisha:
+Kwa maombi yaliyothibitishwa vichwa vya ombi vya juu (upande wa kushughulikia) pia ni pamoja na:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (si lazima)
-x-omniroute-auth-scopes:    orodha iliyotenganishwa kwa koma
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Tumia `assertAuth(req, expectedClass)` ndani ya vishughulikiaji — hutupa `AuthzAssertionError` yenye msimbo `AUTHZ_NOT_INITIALIZED` ikiwa middleware ilipitishwa bila kutekelezwa (husaidia kugundua hitilafu za mipangilio zinapojirudia katika majaribio).
+Tumia `assertAuth(req, expectedClass)` ndani ya vishikizi — inatupa `AuthzAssertionError` na msimbo `AUTHZ_NOT_INITIALIZED` ikiwa programu ya kati ilipitwa (inasaidia kupata rejista za usanidi katika majaribio).
 
 ## Tazama Pia
 
