@@ -11,6 +11,10 @@ import assert from "node:assert/strict";
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
 import { setCodexUsageFetchForTests } from "../../open-sse/services/usage/codex.ts";
 import {
+  connectionProxyTestOverride,
+  fetchWithConnectionProxy,
+} from "../../open-sse/services/connectionProxyFetch.ts";
+import {
   MinIntervalThrottle,
   resetQuotaFetchThrottle,
   setQuotaFetchThrottleForTests,
@@ -22,6 +26,28 @@ import {
 } from "../../src/lib/services/quotaAutoPing.ts";
 
 const INTERVAL_MS = 250;
+const originalProxyResolver = connectionProxyTestOverride.resolveProxyForConnection;
+
+// Measure pacing after the same lazy-import warmup used by the #6911 quota fixtures.
+// Proxy lookup is synthetic: database startup must not compress the observed fetch gaps.
+test.before(
+  async () => {
+    connectionProxyTestOverride.resolveProxyForConnection = async () => null;
+    const originalFetch = globalThis.fetch;
+    try {
+      await fetchWithConnectionProxy("warmup-15172", "https://warmup.invalid/", undefined, {
+        fetchFn: async () => new Response("{}", { status: 200 }),
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  },
+  { timeout: 20000 }
+);
+
+test.after(() => {
+  connectionProxyTestOverride.resolveProxyForConnection = originalProxyResolver;
+});
 
 class FakeClock implements ThrottleClock {
   t = 1_000;
