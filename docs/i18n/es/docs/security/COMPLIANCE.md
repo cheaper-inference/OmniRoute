@@ -15,51 +15,71 @@ La implementación se encuentra en `src/lib/compliance/index.ts` (T-43 — «Con
 
 ### Eventos de auditoría administrativa (`audit_log`)
 
-Cada llamada a `logAuditEvent({ action, actor, target, details, ... })` genera una fila. Las cadenas de acciones siguen el patrón `domain.verb` (o `domain.verb.outcome`). Los tipos de acciones confirmados en el código fuente incluyen:
+Cada llamada a `logAuditEvent({ action, actor, target, details, ... })` produce
+una fila. Las cadenas de acción siguen un patrón
+`domain.verb` (o `domain.verb.outcome`). Los tipos de acción confirmados en el
+árbol de código incluyen:
 
-| Acción                               | Fuente                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Acción                               | Origen                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Cada entrada captura `action`, `actor` (de forma predeterminada, `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` y `timestamp`. Las claves confidenciales (`apiKey`, `accessToken`, `refreshToken`, `password`, cualquier elemento que coincida con `*token`/`*secret`/`*apikey`, etc.) se censuran recursivamente como `"[redacted]"` antes de escribir la fila.
+Cada entrada captura `action`, `actor` (por defecto, `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` y `timestamp`. Las claves sensibles (`apiKey`, `accessToken`,
+`refreshToken`, `password`, cualquier elemento que coincida con
+`*token`/`*secret`/`*apikey`, etc.) se redactan recursivamente como
+`"[redacted]"` antes de escribir la fila.
+
+Las filas `api_key.auth.touch` registran lecturas correctas de metadatos de
+claves API y de descubrimiento (GET/HEAD) que nunca llegan al registro de
+solicitudes: qué clave, cuándo y la ruta normalizada, agrupadas y limitadas a
+1.000 filas. Las claves con `noLog` y la clave del entorno se omiten. La
+dirección IP y el agente de usuario del cliente se añaden únicamente cuando la
+bandera de funcionalidad `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` está activada
+(desactivada de forma predeterminada).
 
 ### Llamadas a herramientas MCP (`mcp_tool_audit`)
 
-Cada invocación de una herramienta MCP escribe una fila mediante `open-sse/mcp-server/audit.ts`. Esquema (de `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Cada invocación de una herramienta MCP escribe una fila mediante
+`open-sse/mcp-server/audit.ts`. Esquema (de
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | Columna          | Notas                                               |
 | ---------------- | --------------------------------------------------- |
-| `id`             | incremento automático                               |
+| `id`             | autoincremento                                      |
 | `tool_name`      | identificador de la herramienta MCP                 |
 | `input_hash`     | sha256 de la entrada (no se almacena la carga útil) |
 | `output_summary` | resumen breve y truncado                            |
-| `duration_ms`    | tiempo transcurrido                                 |
-| `api_key_id`     | llamante (puede ser nulo)                           |
+| `duration_ms`    | tiempo de reloj                                     |
+| `api_key_id`     | autor de la llamada (puede ser nulo)                |
 | `success`        | `1` / `0`                                           |
-| `error_code`     | código de error final en caso de fallo              |
+| `error_code`     | código de error terminal en caso de fallo           |
 | `created_at`     | marca de tiempo ISO                                 |
 
-### Registros de solicitudes/uso
+### Registros de solicitudes / uso
 
-Estos constituyen telemetría operativa (no son estrictamente auditorías administrativas), pero comparten el mismo proceso de retención:
+Estos son datos operativos de telemetría (no son estrictamente auditoría
+administrativa), pero comparten la misma canalización de retención:
 
-- `usage_history` — resumen de uso por solicitud
-- `call_logs` — registro completo por solicitud (sujeto al límite de filas; véase más abajo)
+- `usage_history` — resumen acumulado del uso por solicitud
+- `call_logs` — registro completo por solicitud (sujeto al límite de filas, véase más abajo)
 - `proxy_logs` — registro del tráfico del proxy (sujeto al límite de filas)
-- `request_detail_logs` — registro detallado heredado de solicitudes (también se depura si está presente)
+- `request_detail_logs` — registro detallado de solicitudes heredado (se sigue depurando si está presente)
 
 ## Esquema de almacenamiento
 
