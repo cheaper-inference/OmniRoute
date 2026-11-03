@@ -385,6 +385,34 @@ test("the TOTP secret is encrypted at rest when a storage key is configured", as
   }
 });
 
+test("a corrupted factor row fails closed instead of 500-ing every sign-in", async () => {
+  core
+    .getDbInstance()
+    .prepare(
+      "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('dashboardMfa', 'state', ?)"
+    )
+    .run("{not json");
+
+  // Treated as enrolled with no usable secret: the password alone never yields a session…
+  const state = mfaDb.getDashboardMfaState();
+  assert.equal(state.enabled, true);
+  assert.equal(state.secret, "");
+  const remote = await loginRoute.POST(
+    post("/api/auth/login", { password: PASSWORD }, "203.0.113.30") as never
+  );
+  assert.equal(remote.status, 200);
+  assert.deepEqual(await remote.json(), { success: false, mfaRequired: true });
+  assert.equal(cookieJar.jar.has("auth_token"), false);
+
+  // …and the host-only recovery switch still lets the operator back in to re-enroll.
+  process.env.OMNIROUTE_DISABLE_MFA = "true";
+  const local = await loginRoute.POST(
+    post("/api/auth/login", { password: PASSWORD }, "127.0.0.1") as never
+  );
+  assert.deepEqual(await local.json(), { success: true });
+  assert.equal(cookieJar.jar.has("auth_token"), true);
+});
+
 test("GET /api/settings never exposes the factor and PATCH cannot set it", async () => {
   const secret = enrollFixture();
   const get = await settingsRoute.GET(

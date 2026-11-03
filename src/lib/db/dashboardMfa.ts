@@ -42,12 +42,22 @@ const DISABLED_STATE: DashboardMfaState = Object.freeze({
   enabledAt: null,
 }) as DashboardMfaState;
 
+/** An unreadable row: still enrolled, but with no secret and no recovery code that can match. */
+const CORRUPTED_STATE: StoredState = Object.freeze({ enabled: true, secret: "" });
+
 function readStoredState(): StoredState | null {
   const row = getDbInstance()
     .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
     .get(NAMESPACE, STATE_KEY) as { value?: string } | undefined;
   if (!row || typeof row.value !== "string") return null;
-  const parsed = JSON.parse(row.value) as unknown;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(row.value);
+  } catch {
+    // Fail closed, like an undecryptable secret: a row exists, so the factor was enrolled.
+    // Throwing here would 500 every sign-in, the host recovery switch included.
+    return CORRUPTED_STATE;
+  }
   return parsed && typeof parsed === "object" ? (parsed as StoredState) : null;
 }
 
