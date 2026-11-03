@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — 免費 AI 閘道
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下編碼。每個 AI 工具 → 380 個提供者 — 其中 150+ 個免費 — 透過單一端點。Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 整合至免費的 Claude / GPT / Gemini，並具備自動備援。RTK + Caveman 堆疊式壓縮可節省 15–95% 的權杖（平均約 89%）— 絕不觸及限制。380 個 AI 提供者 · 150+ 個免費方案 · 每月約 1.62B 個免費權杖 · 20 種路由策略 · $0 即可開始。"/>
 
 </div>
@@ -1805,7 +1807,7 @@ MIT 授權條款 - 詳情請參閱 [LICENSE](LICENSE)。
 
 **[⬆ 回到頂部](#-omniroute)** · 以 ❤️ 為開源 AI 社群打造。
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT 授權條款 · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT 授權條款 · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions enabled for community Q&A -->

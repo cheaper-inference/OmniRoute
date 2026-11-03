@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — שער ה-AI החינמי
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — אף פעם אל תפסיק לקודד. כל כלי AI → 380 ספקים — 150+ חינמיים — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ל- Claude / GPT / Gemini חינמיים עם מעבר אוטומטי במקרה של כשל. דחיסה משולבת RTK + Caveman חוסכת 15–95% טוקנים (~89% בממוצע) — לעולם לא תגיעו למגבלות. 380 ספקי AI · 150+ מסלולים חינמיים · ~1.62B טוקנים חינמיים בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
 
 </div>
@@ -1802,7 +1804,7 @@ OmniRoute עומד על כתפי ענקים. הוא התחיל כ-fork של **[9
 
 **[⬆ חזרה למעלה](#-omniroute)** · נבנה עם ❤️ עבור קהילת ה-AI בקוד פתוח.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions מופעל לשאלות ותשובות של הקהילה -->

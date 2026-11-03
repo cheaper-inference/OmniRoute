@@ -88,7 +88,7 @@
     "auto-fallback"
   ],
   "license": "MIT",
-  "author": "diegosouzapw",
+  "author": "Diego Souza (https://github.com/diegosouzapw)",
   "repository": {
     "type": "git",
     "url": "https://github.com/cheaper-inference/OmniRoute"

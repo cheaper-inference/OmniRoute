@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Bepul AI Shlyuzi
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yozishni to‘xtatmang. Har bir AI vositasi → 380 ta provayder — 150+ bepul — bitta endpoint orqali. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity-ni BEPUL Claude / GPT / Gemini-ga avtomatik zaxira bilan ulang. RTK + Caveman asosidagi siqish 15–95% tokenlarni tejaydi (~89% o‘rtacha) — limitlarga yetmang. 380 ta AI provayder · 150+ bepul tarif · ~1.62 mlrd bepul token/oy · 20 ta marshrutlash strategiyasi · Boshlash uchun $0."/>
 
 </div>
@@ -1806,7 +1808,7 @@ MIT Litsenziyasi — batafsil ma'lumot uchun [LICENSE](LICENSE) ga qarang.
 
 **[⬆ Yuqoriga qaytish](#-omniroute)** · Ochiq kodli AI hamjamiyati uchun ❤️ bilan yaratilgan.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Hamjamiyat savol-javoblari uchun GitHub Discussions yoqilgan -->

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ang Libreng AI Gateway
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Huwag tumigil sa pag-code. Bawat AI tool → 380 provider — 150+ libre — sa iisang endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity papunta sa LIBRENG Claude / GPT / Gemini na may auto-fallback. RTK + Caveman stacked compression nakakatipid ng 15–95% tokens (~89% avg) — hindi ka mauubusan ng limit. 380 AI provider · 150+ libreng tier · ~1.62B libreng tokens/buwan · 20 routing strategies · ₱0 panimula."/>
 
 </div>
@@ -1803,7 +1805,7 @@ MIT License - tingnan ang [LICENSE](LICENSE) para sa mga detalye.
 
 **[⬆ Bumalik sa itaas](#-omniroute)** · Ginawa nang may ❤️ para sa komunidad ng open-source AI.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Naka-enable ang GitHub Discussions para sa Q&A ng komunidad -->

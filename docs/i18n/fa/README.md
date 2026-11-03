@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — دروازه رایگان هوش مصنوعی
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — هیچوقت کدنویسی را متوقف نکنید. هر ابزار هوش مصنوعی → ۳۸۰ ارائهدهنده — ۱۵۰+ رایگان — از طریق یک نقطه پایانی. Claude Code، Codex، Cursor، Cline، Copilot و Antigravity را به Claude / GPT / Gemini رایگان با بازگشت خودکار متصل کنید. فشردهسازی پشتهای RTK + Caveman تا ۱۵–۹۵٪ توکنها را ذخیره میکند (~۸۹٪ میانگین) — هرگز به محدودیتها نخورید. ۳۸۰ ارائهدهنده هوش مصنوعی · ۱۵۰+ پلن رایگان · ~۱.۶۲ میلیارد توکن رایگان در ماه · ۲۰ استراتژی مسیریابی · شروع از ۰ دلار."/>
 
 </div>
@@ -1803,7 +1805,7 @@ OmniRoute بر شانههای غولها ایستاده است. این پروژ�
 
 **[⬆ بازگشت به بالا](#-omniroute)** · ساختهشده با ❤️ برای جامعهٔ متنباز هوش مصنوعی.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · مجوز MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · مجوز MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions برای پرسش و پاسخ جامعه فعال شده است -->

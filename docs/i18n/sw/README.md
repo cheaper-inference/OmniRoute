@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Lango la AI Bure
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usikome kamwe kuandika msimbo. Kila zana ya AI → watoa huduma 380 — 150+ bure — kupitia kituo kimoja. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity hadi CLAUDE / GPT / GEMINI BURE kwa kubadilisha kiotomatiki. RTK + Caveman compression iliyounganishwa huokoa tokeni 15–95% (~89% wastani) — usiwahi kufikia kikomo. Watoa huduma 380 wa AI · 150+ viwango vya bure · ~1.62B tokeni bure/mwezi · Mikakati 20 ya uelekezaji · $0 kuanza."/>
 
 </div>
@@ -1739,7 +1741,7 @@ Leseni ya MIT - tazama [LICENSE](LICENSE) kwa maelezo.
 
 **[⬆ Rudi juu](#-omniroute)** · Imeundwa kwa ❤️ kwa ajili ya jumuiya ya AI ya chanzo huria.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Majadiliano ya GitHub yamewashwa kwa ajili ya maswali na majibu ya jumuiya -->
