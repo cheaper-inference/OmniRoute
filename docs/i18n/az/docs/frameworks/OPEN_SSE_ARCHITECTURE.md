@@ -226,7 +226,7 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-**21 marşrutlaşdırma strategiyasını** dəstəkləyir (bax: `src/shared/constants/routingStrategies.ts`):
+**20 marşrutlaşdırma strategiyasını** dəstəkləyir (bax: `src/shared/constants/routingStrategies.ts`):
 
 | Strategiya          | Davranış                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------ |
@@ -241,7 +241,6 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 | `cost-optimized`    | Əvvəlcə ən ucuz sağlam hədəf                                                         |
 | `reset-aware`       | Provayder sıfırlanma pəncərələrindən xəbərdardır                                     |
 | `reset-window`      | Sıfırlanma pəncərəsinə əsaslanan marşrutlaşdırma                                     |
-| `expiry-first`      | Əks halda istifadəsiz yanacaq kvotası olan hesabı xərcləyir                          |
 | `headroom`          | Əvvəlcə ən çox qalan kvota ehtiyatı                                                  |
 | `quota-weighted`    | Tükənmiş hesabları ötürür, sonra qalan kvota ÷ aktiv yüklə seçim edir                |
 | `strict-random`     | Həqiqətən bərabər paylanmış (keyfiyyət çəkisi olmadan)                               |
