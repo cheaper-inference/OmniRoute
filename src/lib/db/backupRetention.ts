@@ -145,11 +145,14 @@ export function resolveDbBackupRetention(
 }
 
 /**
- * A backup "family" is the primary `.sqlite` file plus its SQLite sidecars
- * (`-wal` / `-shm` / `-journal`). Retention operates on families so a sidecar is never
- * orphaned from — or outlives — the snapshot it belongs to.
+ * A backup family is a `.sqlite` primary plus its SQLite sidecars, or a
+ * `.sqlite.zst` archive plus `.preservation-YYYYMMDD.json` receipts. Archives
+ * participate in count/age retention without being mistaken for orphaned sidecars.
+ * Unknown formats are not retention authority; detached receipts are preserved.
  */
 export function getBackupFamilyBase(filename: string) {
+  const receipt = filename.match(/^(.+\.sqlite\.zst)\.preservation-\d{8}\.json$/);
+  if (receipt) return receipt[1];
   if (filename.endsWith("-wal") || filename.endsWith("-shm")) return filename.slice(0, -4);
   if (filename.endsWith("-journal")) return filename.slice(0, -8);
   return filename;
@@ -184,6 +187,15 @@ function collectPortableFamily(backupDir: string, name: string): BackupFamily | 
   }
 }
 
+function getRegularFileStat(filePath: string): fs.Stats | null {
+  try {
+    const stat = fs.lstatSync(filePath);
+    return stat.isFile() ? stat : null;
+  } catch {
+    return null;
+  }
+}
+
 export function collectBackupFamilies(backupDir: string): BackupFamily[] {
   if (!fs.existsSync(backupDir)) return [];
 
@@ -196,15 +208,15 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
       if (family) families.set(name, family);
       continue;
     }
-    const base = getBackupFamilyBase(name);
-    const filePath = path.join(backupDir, name);
-
-    let stat;
-    try {
-      stat = fs.statSync(filePath);
-    } catch {
+    // A db_ prefix alone does not authorize deleting an operator-owned file.
+    if (
+      !/^db_.+\.sqlite(?:-(?:wal|shm|journal)|\.zst(?:\.preservation-\d{8}\.json)?)?$/.test(name)
+    ) {
       continue;
     }
+    const base = getBackupFamilyBase(name);
+    const stat = getRegularFileStat(path.join(backupDir, name));
+    if (!stat) continue;
 
     const family = families.get(base) || {
       base,
@@ -216,7 +228,7 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
 
     family.files.push(name);
     family.latestMtimeMs = Math.max(family.latestMtimeMs, stat.mtimeMs);
-    if (name === base && name.endsWith(".sqlite")) {
+    if (name === base) {
       family.hasPrimary = true;
       family.primaryMtimeMs = stat.mtimeMs;
     }
@@ -224,7 +236,11 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
     families.set(base, family);
   }
 
-  return [...families.values()];
+  // Only SQLite sidecars have orphan semantics. A receipt without its archive
+  // may be the last preservation evidence, not a disposable sidecar.
+  return [...families.values()].filter(
+    (family) => family.hasPrimary || family.base.endsWith(".sqlite")
+  );
 }
 
 export type PruneResult = {
