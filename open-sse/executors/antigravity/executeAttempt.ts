@@ -15,6 +15,7 @@ import { awaitReactiveModelSync } from "@/lib/providerModels/reactiveModelSync.t
 import {
   HTTP_STATUS,
   FETCH_TIMEOUT_MS,
+  STREAM_READINESS_TIMEOUT_MS,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
 } from "../../config/constants.ts";
 import { injectCreditsField, handleCreditsFailure } from "../../services/antigravityCredits.ts";
