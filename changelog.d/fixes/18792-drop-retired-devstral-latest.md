@@ -1,0 +1,1 @@
+- **fix(providers):** The Mistral model list no longer offers the retired `devstral-latest` (Devstral 2, retired by Mistral on 2026-07-31), and the user guide no longer lists it ([#18792](https://github.com/cheaper-inference/OmniRoute/pull/18792), closes #18755) — thanks @costajohnt
