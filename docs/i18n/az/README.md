@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute İdarə Paneli" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute İdarəetmə paneli" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — Pulsuz AI Gateway
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**[Diego Souza](https://github.com/diegosouzapw) tərəfindən yaradılıb**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmağa heç vaxt ara vermə. Hər bir AI aləti → 380 provayder — 150+ pulsuz — bir endpoint vasitəsilə. Claude Code, Codex, Cursor, Cline, Copilot və Antigravity-ni PULSUZ Claude / GPT / Gemini-ə avtomatik keçid ilə birləşdir. RTK + Caveman yığılmış sıxılma 15–95% tokenə qənaət edir (~89% orta) — limitlərə heç vaxt çatma. 380 AI provayderi · 150+ pulsuz səviyyə · ~1.62B pulsuz token/ay · 20 yönləndirmə strategiyası · Başlamaq üçün $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmağı heç vaxt dayandırmayın. Hər AI aləti → 380 provayder — 150+ pulsuz — vahid endpoint vasitəsilə. Claude Code, Codex, Cursor, Cline, Copilot və Antigravity → PULSUZ Claude / GPT / Gemini, avtomatik ehtiyat keçidi ilə. RTK + Caveman birləşdirilmiş sıxılma mexanizmi 15–95% tokenə qənaət edir (orta hesabla ~89%) — heç vaxt limitlərə çatmayın. 380 AI provayderi · 150+ pulsuz tarif · ayda ~1,62 milyard pulsuz token · 20 marşrutlaşdırma strategiyası · Başlamaq üçün $0."/>
 
 </div>
 
@@ -1285,29 +1285,29 @@ bir portda təqdim olunur, buna görə hazırda ayrıca yalnız CLI üçün pake
 <br/>
 <div align="center">
 
-## 🛠️ Texnoloji stek
+## 🛠️ Texnologiya yığını
 
 </div>
 
 <table>
-  <tr><th align="left">Təbəqə</th><th align="left">Texnologiya</th></tr>
+  <tr><th align="left">Səviyyə</th><th align="left">Texnologiya</th></tr>
   <tr><td nowrap><b>İşləmə mühiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Dil</b></td><td>TypeScript 6.0 — <code>src/</code> və <code>open-sse/</code> üzrə <b>100% TypeScript</b> (v2.0-dan etibarən nüvədə sıfır <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Dil</b></td><td>TypeScript 6.0 — <code>src/</code> və <code>open-sse/</code> üzrə <b>100% TypeScript</b> (<code>any</code> olmadan, v2.0-dan etibarən nüvədə sıfır)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırması) + LowDB (JSON legacy) — 147 domen modulu, 221 miqrasiya</td></tr>
-  <tr><td nowrap><b>Yaddaş</b></td><td>SQLite FTS5 tam mətn axtarışı + int8-kəmiyyətləşdirilmiş vektor embedding-ləri, tipləşdirilmiş zəifləmə</td></tr>
-  <tr><td nowrap><b>Sxemlər</b></td><td>Zod 4 — MCP alətləri üçün I/O yoxlaması + API müqavilələri</td></tr>
+  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırması) + LowDB (JSON köhnə sistemi) — 147 domen modulu, 221 miqrasiya</td></tr>
+  <tr><td nowrap><b>Yaddaş</b></td><td>SQLite FTS5 tam mətn axtarışı + int8-kəmiyyətləşdirilmiş vektor embedding-ləri, tipləndirilmiş zəifləmə</td></tr>
+  <tr><td nowrap><b>Sxemlər</b></td><td>Zod 4 — MCP alətləri üçün giriş/çıxış yoxlaması + API müqavilələri</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Axınlaşdırma</b></td><td>Server tərəfindən göndərilən hadisələr (SSE) + WebSocket körpüsü (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Sıxışdırma</b></td><td>12 mühərrikli konveyer — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikasiya və təhlükəsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API açarları + MCP əhatə dairəli autentifikasiya · AES-256-GCM saxlanılan verilənlər üçün · DOMPurify</td></tr>
+  <tr><td nowrap><b>Autentifikasiya və təhlükəsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API açarları + MCP əhatə dairəli autentifikasiya · Saxlanılan məlumatlar üçün AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>Gizlilik</b></td><td>wreq-js — JA3 / JA4 TLS barmaq izi təqlidi, 3 səviyyəli proksi</td></tr>
-  <tr><td nowrap><b>Davamlılıq</b></td><td>Dövrə kəsici, eksponensial geriləmə, izdihamın qarşısının alınması, avtomatik kombinə edilmiş özünütəmir</td></tr>
+  <tr><td nowrap><b>Davamlılıq</b></td><td>Qısaqapanma qoruyucusu, eksponensial geriçəkilmə, izdiham effektinə qarşı qoruma, avtomatik kombinə edilmiş özünübərpa</td></tr>
   <tr><td nowrap><b>Jurnallaşdırma</b></td><td>pino — sorğu konteksti ilə strukturlaşdırılmış JSON jurnalları</td></tr>
-  <tr><td nowrap><b>Testləşdirmə</b></td><td>Node.js test icraçısı + Vitest — 8,400-dən çox izlənilən test faylı üzrə <b>60,000-dən çox statik test elanı</b> (unit, inteqrasiya, E2E, təhlükəsizlik, ekosistem)</td></tr>
+  <tr><td nowrap><b>Testləşdirmə</b></td><td>Node.js test icraçısı + Vitest — 8 400-dən çox izlənən test faylı üzrə <b>60 000-dən çox statik test elanı</b> (vahid, inteqrasiya, E2E, təhlükəsizlik, ekosistem)</td></tr>
   <tr><td nowrap><b>Platformalar</b></td><td>Masaüstü (Electron) · Android (Termux) · PWA (istənilən brauzer)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — buraxılış zamanı avtomatik npm yayımlaması + Docker Hub</td></tr>
-  <tr><td nowrap><b>Keçidlər</b></td><td><a href="https://omniroute.online">Veb-sayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — buraxılış zamanı avtomatik npm nəşri + Docker Hub</td></tr>
+  <tr><td nowrap><b>Keçidlər</b></td><td><a href="https://omniroute.online">Vebsayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1799,7 +1799,7 @@ OmniRoute nəhənglərin çiyinləri üzərində dayanır. O, **[9router](https:
 
 ## 📄 Lisenziya
 
-MIT Lisenziyası - ətraflı məlumat üçün [LICENSE](LICENSE) faylına baxın.
+MIT License — ətraflı məlumat üçün [LICENSE](LICENSE) faylına baxın.
 
 ---
 
@@ -1807,7 +1807,7 @@ MIT Lisenziyası - ətraflı məlumat üçün [LICENSE](LICENSE) faylına baxın
 
 **[⬆ Yuxarı qayıt](#-omniroute)** · Açıq mənbəli AI icması üçün ❤️ ilə hazırlanıb.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisenziyası · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> tərəfindən yaradılıb · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- İcma sual-cavabı üçün GitHub Discussions aktivləşdirilib -->
+<!-- İcma üçün GitHub Discussions aktivdir -->
