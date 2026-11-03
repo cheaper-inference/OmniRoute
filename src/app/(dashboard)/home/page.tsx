@@ -8,6 +8,7 @@ import VscodeCopilotBanner from "../dashboard/VscodeCopilotBanner";
 import NewsBanner from "../dashboard/NewsBanner";
 import FirstRunReadinessCard from "../dashboard/FirstRunReadinessCard";
 import HomeSystemMetricsCards from "./HomeSystemMetricsCards";
+import UnpricedUsageBanner from "../dashboard/UnpricedUsageBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export default async function HomePage() {
     <>
       {isBootstrapped && <BootstrapBanner />}
       <FirstRunReadinessCard setupComplete={Boolean(settings.setupComplete)} />
+      <UnpricedUsageBanner />
       <KimiSponsorBanner />
       <CheaperInferenceSponsorBanner />
       <VscodeCopilotBanner />

@@ -41,6 +41,8 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
     "src/lib/machineToken.ts",
     "open-sse/services/browserPool.ts",
     "open-sse/utils/tlsClient.ts",
+    // Owns the wreq-js createRequire loader that tlsClient.ts imports.
+    "open-sse/utils/browserProfiles.ts",
   ] as const;
   const entries: Record<string, string> = {};
 
@@ -84,6 +86,9 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
         // machineToken.ts imports `./dataPaths` since #13909 (random per-install
         // CLI token salt reads the data dir). Same isolated-compile reason.
         "./dataPaths",
+        // tlsClient.ts imports the loader as `./browserProfiles.ts`; the file is
+        // compiled as its own entry above, so keep the import external here.
+        "./browserProfiles.ts",
       ],
       externalsPresets: { node: true },
       mode: "development",

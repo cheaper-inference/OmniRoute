@@ -152,6 +152,7 @@ jobs:
     needs: prepare
     if: >-
       github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' &&
+      vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.DOCKER_AMD64_RUNNER != 'hosted' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -177,7 +178,7 @@ jobs:
           echo "online omni-build runners: ${ONLINE}"
           if [ "${ONLINE}" -eq 0 ]; then
             echo "::error::No ONLINE runner carries the omni-build label. The amd64 build would queue forever (silent publish stall, #14560)."
-            echo "Check the self-hosted runner pool, or set USE_VPS_RUNNER=false to fall back to hosted (note: hosted ~7GB dies ResourceExhausted on this build, #11976)."
+            echo "Check the self-hosted runner pool, or set DOCKER_AMD64_RUNNER=hosted (or blacksmith) to build amd64 off the .113 slot."
             exit 1
           fi
 
@@ -192,21 +193,29 @@ jobs:
       (needs.runner-preflight.result == 'success' || needs.runner-preflight.result == 'skipped') &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     # amd64: the .113 omni-build pool (31 GB / 32 cores, ONE listener since
-    # #12048). Hosted ubuntu-24.04 is ~7 GB and dies ResourceExhausted (#11976).
-    # Falls back to hosted when USE_VPS_RUNNER is off. arm64: no ARM box — stay
+    # #12048). Hosted ubuntu-24.04 is 16 GB; the ~7 GB runners of #11976 died
+    # ResourceExhausted. Falls back to hosted when USE_VPS_RUNNER is off. arm64: no ARM box — stay
     # on GitHub's ubuntu-24.04-arm.
     # Webpack on BOTH arches: Turbopack on omniroute-113-6 hit
     # TurbopackInternalError "there must be a path to a root" after 26 min
     # (run 33253576569). The same tree's arm64 webpack build on hosted ARM
     # succeeded (run 33264823398). Dockerfile already documents webpack as the
     # Docker escape hatch (OMNIROUTE_USE_TURBOPACK=0).
-    runs-on: ${{ matrix.arch == 'amd64' && (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
+    # DOCKER_AMD64_RUNNER (repository variable) moves the amd64 leg off the .113 slot, which takes
+    # 90-165 min per publish while the same build on a 16 GB / 4 vCPU hosted runner takes 20-45:
+    #   blacksmith → blacksmith-4vcpu-ubuntu-2404 (16 GB; needs the Blacksmith app on the org; the
+    #                free tier is 3,000 2-vCPU minutes a month and a 4 vCPU minute counts as two)
+    #   hosted     → ubuntu-24.04 (16 GB)
+    #   unset      → unchanged: omni-build when the .113 opt-in is on, hosted otherwise
+    # The Dockerfile build is sized for 16 GB (OMNIROUTE_BUILD_WORKERS, #7518).
+    runs-on: ${{ matrix.arch == 'amd64' && (vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-4vcpu-ubuntu-2404' || vars.DOCKER_AMD64_RUNNER != 'hosted' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
     # Share the 1-slot omni-build ceiling (#12048) with ci.yml `Build` /
     # npm-publish. Same group as main's Build so a :next publish waits beside
     # the artefact instead of sitting next to it. arm64 is hosted — its own
-    # group, cancelled by the workflow-level concurrency.
+    # group, cancelled by the workflow-level concurrency. An amd64 leg moved by
+    # DOCKER_AMD64_RUNNER does not hold the slot, so it gets a per-ref group.
     concurrency:
-      group: ${{ matrix.arch == 'amd64' && 'heavy-build-main' || format('docker-publish-arm-{0}', github.ref) }}
+      group: ${{ matrix.arch == 'amd64' && (vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.DOCKER_AMD64_RUNNER != 'hosted' && 'heavy-build-main' || format('docker-publish-amd64-{0}', github.ref)) || format('docker-publish-arm-{0}', github.ref) }}
       cancel-in-progress: ${{ matrix.arch != 'amd64' }}
     # Backstop for a hung BUILD step only — it cannot and must not bound the
     # queue wait (that is runner-preflight's job): the clock starts when a

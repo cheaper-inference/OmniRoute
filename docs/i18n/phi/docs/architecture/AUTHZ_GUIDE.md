@@ -133,31 +133,31 @@ Ilang aksyon ng `MANAGEMENT` ay **operator-only**: hindi sapat ang `manage` key.
 ## Pipeline
 
 ```
-Papasok na request → src/proxy.ts
-  → runAuthzPipeline() sa src/server/authz/pipeline.ts
-    1. Alisin ang mga pinagkakatiwalaang internal header (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Bumuo ng request id, iklasipika ang route sa pamamagitan ng classifyRoute()
-    3. Kung pathname == "/" → i-redirect sa /dashboard
-    4. Kung nagda-drain (graceful shutdown) at /api/* → 503
-    5. Kung hindi GET ang /api/* → checkBodySize() guard
-    6. Kung OPTIONS → CORS preflight 204
-    7. Kung options.enforce == false → direktang ipasa na may mga route-class header
-    8. Kung hindi: POLICIES[routeClass].evaluate(ctx)
-       - payagan  → itatak ang x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - tanggihan → JSON error na may correlation_id (mga dashboard page → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Ang mga pinagkakatiwalaang internal header (na tinukoy sa `src/server/authz/headers.ts`) ay **inaalis mula sa mga papasok na request** bago ang klasipikasyon — hindi maaaring paunang lagyan ng mga client ang `x-omniroute-auth-*` upang magpanggap bilang isang subject.
+Ang mga pinagkakatiwalaang panloob na header (tinukoy sa `src/server/authz/headers.ts`) ay** inalis sa mga papasok na kahilingan** bago ang pag-uuri — client ay hindi maaaring pre-populate `x-omniroute-auth-*` upang gayahin ang isang paksa.
 
-### Mga kontrata ng policy
+### Mga kontrata sa patakaran
 
-Ang bawat klase ng route ay may policy sa `src/server/authz/policies/`:
+Ang bawat klase ng ruta ay may patakaran sa `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — palaging nagbabalik ng `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — kinukuha ang Bearer at bine-validate ito sa pamamagitan ng `validateApiKey()`. Nagpapatuloy lamang sa anonymous kapag naka-disable ang epektibong `REQUIRE_API_KEY` feature flag. Nireresolba ang epektibong flag sa pamamagitan ng `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) upang pare-parehong pamahalaan ng mga Dashboard Feature Flag at environment variable ang `/api/v1/*`, `/api/v1beta/*`, at mga alias; kapag nabigo ang resolver, isinasara ang access. Pinapayagan ang mga dashboard-session request sa mga client API route (kabilang ang `/api/v1/models`, na ginagamit ng dashboard model catalog).
-- **`managementPolicy`** (`policies/management.ts`) — tumatanggap ng dashboard session, mga internal model-sync request (itinutugma sa `/api/providers/[name]/(sync-models|models)`), o ganap na nilalaktawan kung nagbabalik ng false ang `isAuthRequired()`. Nagbabalik ng 403 (`AUTH_001`) kapag may Bearer token ngunit hindi ito valid, at 401 naman kung wala. Ipinapatupad din nito ang mga tier ng route guard (LOCAL_ONLY / ALWAYS_PROTECTED) bago ang anumang auth branch — tingnan ang [Mga Tier ng Route Guard](../security/ROUTE_GUARD_TIERS.md). Maaaring i-access mula sa non-loopback ang mga LOCAL_ONLY path sa `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (sa kasalukuyan: `/api/mcp/`) kapag taglay ng Bearer key ang `manage` scope; nananatiling mahigpit na loopback-only ang lahat ng iba pang LOCAL_ONLY path anuman ang scope.
+- **`publicPolicy`** (`policies/public.ts`) palaging nagbabalik ng `allow({ kind: "anonymous", id: "anonymous" })` —.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — extracts Bearer, nagpapatunay sa pamamagitan ng `validateApiKey()`. Nahulog sa anonymous lamang kapag ang epektibong `REQUIRE_API_KEY` feature flag ay hindi pinagana. Ang epektibong flag ay nareresolba sa pamamagitan ng `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) kaya ang Dashboard Feature Flags at environment variable ay patuloy na namamahala `/api/v1/*`, `/api/v1beta/*`, at mga alias; Ang mga pagkabigo sa solver ay nabigo na sarado. Pinapayagan ang mga kahilingan sa dashboard-session sa mga ruta API ng kliyente (kabilang ang `/api/v1/models`, na ginagamit ng catalog ng modelo ng dashboard). Kapag ang Entra ID SSO ay pinagana, ang isang Bearer na structurally ay isang Entra token (tatlong base64url segment, `RS*` alg, `kid`) ay pinangangasiwaan ng SSO branch** dati** `validateApiKey()` at ang hatol nito ay pangwakas na — hindi ito nahuhulog sa API-key path o sa degrade-to-anonymous na sangay, kaya hindi maaaring maging bukas na access ang pagkawala ng identity-provider. Ang mga static API key ay hindi naaapektuhan. Tingnan [ang Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) tumatanggap ang — ng sesyon ng dashboard, mga kahilingan sa panloob na pag-sync ng modelo (itinugma laban sa `/api/providers/[name]/(sync-models|models)`), o ganap na lumalaktaw kung nagbabalik ng false `isAuthRequired()`. Ibinabalik ang 403 (`AUTH_001`) kapag may Bearer token ngunit invalid, 401 kung hindi. Ipinapatupad din ang mga tier ng route-guard (LOCAL_ONLY / ALWAYS_PROTECTED) bago ang anumang auth branch — tingnan [ang Mga Tier ng Route Guard](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY path sa `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ngayon: `/api/mcp/`) ay maaaring ma-access mula sa non-loopback kapag ang Bearer key ay nagdadala ng `manage` scope; lahat ng iba pang mga LOCAL_ONLY path ay nananatiling mahigpit-loopback anuman ang saklaw.
 
-Ang matagumpay na policy ay nagbabalik ng `AuthSubject` na may `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Mababasa ito ng mga downstream handler sa pamamagitan ng `assertAuth(request, "CLIENT_API")` sa `src/server/authz/assertAuth.ts` sa halip na muling patakbuhin ang auth logic.
+Ang isang matagumpay na patakaran ay nagbabalik `AuthSubject` na may `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Mababasa ito ng mga humahawak sa downstream sa pamamagitan ng `assertAuth(request, "CLIENT_API")` sa `src/server/authz/assertAuth.ts` sa halip na muling patakbuhin ang logic ng auth.
 
 ## Listahan ng mga Pampublikong Route
 
@@ -292,23 +292,23 @@ Ang `/api/mcp/*` (ang remote MCP server) ay LOCAL_ONLY pa rin bilang default ngu
 
 ## Pag-debug
 
-Palaging nilalagyan ng pipeline ang mga tugon ng:
+Palaging tinatatak ng pipeline ang mga tugon ng:
 
 ```
-x-request-id:               <correlation id, inuulit sa mga katawan ng error>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Para sa mga napatotohanang kahilingan, kasama rin sa mga upstream (panig ng handler) na header ng kahilingan ang:
+Para sa mga napatunayang kahilingan, kasama rin sa upstream (handler-side) na mga header ng kahilingan ang:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (opsyonal)
-x-omniroute-auth-scopes:    listahang pinaghihiwalay ng kuwit
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Gamitin ang `assertAuth(req, expectedClass)` sa loob ng mga handler — naglalabas ito ng `AuthzAssertionError` na may code na `AUTHZ_NOT_INITIALIZED` kung nalampasan ang middleware (kapaki-pakinabang para matukoy ang mga pag-urong sa configuration sa mga test).
+Gumamit `assertAuth(req, expectedClass)` inside handlers — it throws `AuthzAssertionError` with code `AUTHZ_NOT_INITIALIZED` if the middleware was bypassed (helpful for catching configuration regressions in tests).
 
 ## Tingnan Din
 

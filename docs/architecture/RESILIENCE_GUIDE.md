@@ -12,6 +12,19 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 
 > Source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Env-vs-dashboard precedence for resilience toggles.** The opt-in
+> resilience toggles seeded from the environment — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`,
+> `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`,
+> `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` —
+> only supply the _default_ (`DEFAULT_RESILIENCE_SETTINGS`,
+> `src/lib/resilience/settings.ts`). A boolean persisted in `resilienceSettings`
+> (Dashboard → **Settings → Resilience** / `PATCH /api/resilience`, stored in
+> `key_value`) wins over the env value: normalization (`toBoolean`,
+> `src/lib/resilience/settings/normalize.ts`) keeps the stored boolean whenever
+> one exists. Setting such an env var to `true` on a deployment where the
+> dashboard already saved `false` therefore changes nothing — flip the toggle
+> in **Settings → Resilience** (or clear the stored field) instead.
+
 ## 1. Provider Circuit Breaker
 
 **Scope:** entire provider (e.g., `glm`, `openai`, `anthropic`).
@@ -95,6 +108,15 @@ Regression guard: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-key base: 3s
 - API-key 429: prefers upstream `Retry-After`/reset headers/parseable reset text
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Per-provider retry delay.** The provider detail page has a **Retry delay** select (Auto,
+15s up to 1h). It saves `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600, through `PATCH /api/resilience`). When a rate-limit error carries no upstream retry
+hint, that value replaces the scaled backoff for the provider and resets `backoffLevel` to 0
+(`open-sse/services/rotationConfig.ts::overrideFor`). Precedence for a rate-limited error, highest
+first: upstream retry hint, then per-connection `providerSpecificData.rotationOverrides.rateLimitResetSeconds`,
+then the per-provider retry delay, then env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, then the
+scaled backoff. Auto removes the field. It only affects the rate-limit reason, never terminal states.
 
 **Anti-thundering-herd guard:** prevents concurrent failures from over-extending cooldown or double-incrementing `backoffLevel`.
 
@@ -457,6 +479,13 @@ rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
 (locked until midnight) or auth/not-found reasons.
 
+A combo can opt out with `config.comboCooldownWaitEnabled: false`. Only literal
+`false` disables these shared combo waits (post-dispatch cooldown and pre-dispatch
+circuit-open/model-lock waits) and their wait-budget timeout-floor extension.
+Missing or `true` preserves the global policy; `true` cannot enable globally
+disabled waiting. An explicit `targetTimeoutMs` still wins. This opt-out does not
+change the separate native-Codex turn-pin pre-dispatch wait.
+
 The same gate covers the pre-dispatch case (#16319): when every target of a
 combo is skipped before any attempt is made because its model sits in a short
 transient lockout, the zero-attempt path waits the lock out under the same
@@ -610,7 +639,10 @@ The watchdog requires a warm-up period followed by a complete rolling window bef
 it can abort. It counts text deltas from Chat Completions and Responses API output
 events (a conservative UTF-8 byte proxy), ignores usage-only and empty events, and
 suspends judgement while tool-call or reasoning events are in flight. It is disabled
-by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; the
+by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`
+(that env value only seeds the default — a saved
+`resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean wins;
+see the env-vs-dashboard precedence note at the top of this guide); the
 window, warm-up, minimum rate, and minimum measurable output are bounded by the
 normal resilience-settings normalization layer.
 
