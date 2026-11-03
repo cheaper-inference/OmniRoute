@@ -88,3 +88,41 @@ export async function probeEchoTargets<T>(
   }
   throw lastError;
 }
+
+export interface EchoTargetAnswer<T> {
+  url: string;
+  result: T;
+}
+
+/**
+ * Query every echo target at once, each one with the WHOLE deadline, so both
+ * address families are measured inside the budget the caller already enforced
+ * instead of halving it per attempt. The answers come back in the order of the
+ * targets, so the caller can tell which target answered; a target that failed
+ * is simply missing from the list. When every target fails, the LAST error is
+ * rethrown, exactly like the sequential probe.
+ *
+ * The sequential probe above is untouched: a caller that wants the first target
+ * that answers (and only one request for a healthy proxy) keeps using it.
+ */
+export async function probeEchoTargetsInParallel<T>(
+  run: (url: string, timeoutMs: number) => Promise<T>,
+  totalMs: number,
+  env?: Record<string, string | undefined>
+): Promise<EchoTargetAnswer<T>[]> {
+  const urls = resolveEgressEchoUrls(env);
+  const settled = await Promise.allSettled(urls.map((url) => run(url, totalMs)));
+  const answers: EchoTargetAnswer<T>[] = [];
+  let lastError: unknown = new Error("no echo target attempted");
+
+  for (let i = 0; i < settled.length; i++) {
+    const outcome = settled[i];
+    if (outcome.status === "fulfilled") {
+      answers.push({ url: urls[i], result: outcome.value });
+    } else {
+      lastError = outcome.reason;
+    }
+  }
+  if (answers.length === 0) throw lastError;
+  return answers;
+}
