@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ਉੱਚ-ਪੱਧਰੀ ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਮਾਇਨਸ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟ — ਦੀ ਗਿਣਤੀ `npm run check:docs-counts` ਮਾਪਾਂ)। ਹਰੇਕ ਐਗਜ਼ੀਕਿਊਟਰ ਕਲਾਸ `BaseExecutor` (`base.ts`), ਸਿੱਧੇ ਜਾਂ `DefaultExecutor` ਜਾਂ ਕਿਸੇ ਹੋਰ ਐਗਜ਼ੀਕਿਊਟਰ ਰਾਹੀਂ ਵਧਾਉਂਦਾ ਹੈ; ਬਾਕੀ ਬਚੇ ਮੋਡੀਊਲ ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ ਹਨ (ਟੂਲ ਸਕੀਮਾ, fetch/TTS ਅਡਾਪਟਰ, ਕੁਇਰਕ ਹੈਂਡਲਰ)। ਐਗਜ਼ੀਕਿਊਟਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
+158 ਉੱਚ-ਪੱਧਰੀ ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਮਾਇਨਸ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟ — ਦੀ ਗਿਣਤੀ `npm run check:docs-counts` ਮਾਪਾਂ)। ਹਰੇਕ ਐਗਜ਼ੀਕਿਊਟਰ ਕਲਾਸ `BaseExecutor` (`base.ts`), ਸਿੱਧੇ ਜਾਂ `DefaultExecutor` ਜਾਂ ਕਿਸੇ ਹੋਰ ਐਗਜ਼ੀਕਿਊਟਰ ਰਾਹੀਂ ਵਧਾਉਂਦਾ ਹੈ; ਬਾਕੀ ਬਚੇ ਮੋਡੀਊਲ ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ ਹਨ (ਟੂਲ ਸਕੀਮਾ, fetch/TTS ਅਡਾਪਟਰ, ਕੁਇਰਕ ਹੈਂਡਲਰ)। ਐਗਜ਼ੀਕਿਊਟਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, ਪਲੱਸ `claudeIdentity.ts` (ਸਾਂਝੀ ਪਛਾਣ ਸਹਾਇਕ) ਅਤੇ `index.ts` (ਰਜਿਸਟਰੀ) `devin-desktop`
 

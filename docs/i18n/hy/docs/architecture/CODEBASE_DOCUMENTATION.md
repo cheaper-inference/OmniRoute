@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 վերին մակարդակի կատարող մոդուլ (`*.ts` մինուս `base.ts`, `index.ts` և թեստեր — `npm run check:docs-counts` ի հաշվարկը): Յուրաքանչյուր կատարողի դաս ընդլայնում է `BaseExecutor` (`base.ts`) ուղղակիորեն կամ `DefaultExecutor` կամ մեկ այլ կատարողի միջոցով; մնացած մոդուլները յուրաքանչյուր մատակարարի օգնականներ են (գործիքների սխեմաներ, fetch/TTS ադապտերներ, տարօրինակ մշակիչներ): Կատարողները ներառում են.
+158 վերին մակարդակի կատարող մոդուլ (`*.ts` մինուս `base.ts`, `index.ts` և թեստեր — `npm run check:docs-counts` ի հաշվարկը): Յուրաքանչյուր կատարողի դաս ընդլայնում է `BaseExecutor` (`base.ts`) ուղղակիորեն կամ `DefaultExecutor` կամ մեկ այլ կատարողի միջոցով; մնացած մոդուլները յուրաքանչյուր մատակարարի օգնականներ են (գործիքների սխեմաներ, fetch/TTS ադապտերներ, տարօրինակ մշակիչներ): Կատարողները ներառում են.
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` plus (զքրըր `claudeIdentity.ts` օգնական) `index.ts`
 

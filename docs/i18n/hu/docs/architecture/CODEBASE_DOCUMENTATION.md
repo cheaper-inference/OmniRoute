@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 legfelső szintű végrehajtó modul (`*.ts` mínusz `base.ts`, `index.ts` és tesztek — a count `npm run check:docs-counts` intézkedések). Minden végrehajtó osztály kiterjeszti `BaseExecutor` (`base.ts`), közvetlenül vagy `DefaultExecutor` vagy egy másik végrehajtón keresztül; a többi modul szolgáltatónkénti segítők (eszközsémák, fetch/TTS adapterek, quirk-kezelők). A végrehajtók közé tartozik:
+158 legfelső szintű végrehajtó modul (`*.ts` mínusz `base.ts`, `index.ts` és tesztek — a count `npm run check:docs-counts` intézkedések). Minden végrehajtó osztály kiterjeszti `BaseExecutor` (`base.ts`), közvetlenül vagy `DefaultExecutor` vagy egy másik végrehajtón keresztül; a többi modul szolgáltatónkénti segítők (eszközsémák, fetch/TTS adapterek, quirk-kezelők). A végrehajtók közé tartozik:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `petals` `pollinations` `qoder` `devin-desktop` `claudeIdentity.ts` ) `index.ts`
 

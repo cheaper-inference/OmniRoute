@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modul pelaksana peringkat atas (`*.ts` tolak `base.ts`, `index.ts` dan ujian — kiraan `npm run check:docs-counts` ukuran). Setiap kelas pelaksana memanjangkan `BaseExecutor` (`base.ts`), secara langsung atau melalui `DefaultExecutor` atau pelaksana lain; modul yang selebihnya ialah pembantu setiap penyedia (skema alat, penyesuai fetch/TTS, pengendali kebiasaan). Pelaksana termasuk:
+158 modul pelaksana peringkat atas (`*.ts` tolak `base.ts`, `index.ts` dan ujian — kiraan `npm run check:docs-counts` ukuran). Setiap kelas pelaksana memanjangkan `BaseExecutor` (`base.ts`), secara langsung atau melalui `DefaultExecutor` atau pelaksana lain; modul yang selebihnya ialah pembantu setiap penyedia (skema alat, penyesuai fetch/TTS, pengendali kebiasaan). Pelaksana termasuk:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`(bantuan), `claudeIdentity.ts` (bantuan) ( `index.ts` )
 

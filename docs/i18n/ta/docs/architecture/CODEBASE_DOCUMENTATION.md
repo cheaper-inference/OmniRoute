@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 உயர்மட்ட எக்ஸிகியூட்டர் தொகுதிகள் (`*.ts` கழித்தல் `base.ts`, `index.ts` மற்றும் சோதனைகள் — எண்ணிக்கை `npm run check:docs-counts` அளவீடுகள்). ஒவ்வொரு எக்ஸிகியூட்டர் கிளாஸும் `BaseExecutor` (`base.ts`) ஐ நேரடியாகவோ அல்லது `DefaultExecutor` மூலமாகவோ அல்லது மற்றொரு செயல்படுத்துபவர் மூலமாகவோ நீட்டிக்கிறது; மீதமுள்ள தொகுதிகள் ஒவ்வொரு வழங்குநருக்கும் உதவியாளர்கள் (கருவி திட்டங்கள், fetch/TTS அடாப்டர்கள், க்விர்க் ஹேண்ட்லர்கள்). நிறைவேற்றுபவர்கள் அடங்குவர்:
+158 உயர்மட்ட எக்ஸிகியூட்டர் தொகுதிகள் (`*.ts` கழித்தல் `base.ts`, `index.ts` மற்றும் சோதனைகள் — எண்ணிக்கை `npm run check:docs-counts` அளவீடுகள்). ஒவ்வொரு எக்ஸிகியூட்டர் கிளாஸும் `BaseExecutor` (`base.ts`) ஐ நேரடியாகவோ அல்லது `DefaultExecutor` மூலமாகவோ அல்லது மற்றொரு செயல்படுத்துபவர் மூலமாகவோ நீட்டிக்கிறது; மீதமுள்ள தொகுதிகள் ஒவ்வொரு வழங்குநருக்கும் உதவியாளர்கள் (கருவி திட்டங்கள், fetch/TTS அடாப்டர்கள், க்விர்க் ஹேண்ட்லர்கள்). நிறைவேற்றுபவர்கள் அடங்குவர்:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `opencode` `nlpcloud` `perplexity-web` `petals` `pollinations` `qoder` `devin-desktop` `claudeIdentity.ts` பதிவு) `index.ts`
 

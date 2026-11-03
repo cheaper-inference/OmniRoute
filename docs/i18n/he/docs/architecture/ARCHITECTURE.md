@@ -14,7 +14,7 @@ OmniRoute הוא שער ניתוב ולוח מחוונים מקומי AI הבנ�
 
 יכולות ליבה:
 
-- משטח API תואם OpenAI עבור CLI/tools (380 ספקים, 156 מודולי executor)
+- משטח API תואם OpenAI עבור CLI/tools (380 ספקים, 158 מודולי executor)
 - תרגום Request/response בין פורמטים של ספקים
 - מודל חזרה משולבת (רצף מרובה דגמים)
 - שלבים משולבים מובנים (`provider + model + connection`) עם סידור זמן ריצה לפי `compositeTiers`

@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modules d'exécution de niveau supérieur (`*.ts` moins `base.ts`, `index.ts` et tests — le nombre de mesures `npm run check:docs-counts` ). Chaque classe d'exécuteur étend `BaseExecutor` (`base.ts`), directement ou via `DefaultExecutor` ou un autre exécuteur ; les modules restants sont des assistants par fournisseur (schémas d'outils, adaptateurs fetch/TTS, gestionnaires de bizarreries). Les exécuteurs testamentaires comprennent :
+158 modules d'exécution de niveau supérieur (`*.ts` moins `base.ts`, `index.ts` et tests — le nombre de mesures `npm run check:docs-counts` ). Chaque classe d'exécuteur étend `BaseExecutor` (`base.ts`), directement ou via `DefaultExecutor` ou un autre exécuteur ; les modules restants sont des assistants par fournisseur (schémas d'outils, adaptateurs fetch/TTS, gestionnaires de bizarreries). Les exécuteurs testamentaires comprennent :
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (assistant d'identité partagée) et `index.ts` (registre).
 

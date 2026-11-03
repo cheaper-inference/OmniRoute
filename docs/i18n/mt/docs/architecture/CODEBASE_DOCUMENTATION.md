@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modulu eżekutur tal-ogħla livell (`*.ts` nieqes `base.ts`, `index.ts` u testijiet — l-għadd `npm run check:docs-counts` miżuri). Kull klassi ta 'eżekutur testendi `BaseExecutor` (`base.ts`), direttament jew permezz `DefaultExecutor` jew eżekutur ieħor; il-moduli li jifdal huma helpers għal kull fornitur (skemi ta 'għodda, adapters fetch/TTS, quirk handlers). L-eżekuturi jinkludu:
+158 modulu eżekutur tal-ogħla livell (`*.ts` nieqes `base.ts`, `index.ts` u testijiet — l-għadd `npm run check:docs-counts` miżuri). Kull klassi ta 'eżekutur testendi `BaseExecutor` (`base.ts`), direttament jew permezz `DefaultExecutor` jew eżekutur ieħor; il-moduli li jifdal huma helpers għal kull fornitur (skemi ta 'għodda, adapters fetch/TTS, quirk handlers). L-eżekuturi jinkludu:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` flimkien ma `claudeIdentity.ts` (helper ta’ identità kondiviża) u `index.ts` (reġistru).
 

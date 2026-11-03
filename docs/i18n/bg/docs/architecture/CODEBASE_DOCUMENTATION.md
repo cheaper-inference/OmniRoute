@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 изпълнителни модула от най-високо ниво (`*.ts` минус `base.ts`, `index.ts` и тестове — броят измерва `npm run check:docs-counts` ). Всеки изпълнителен клас разширява `BaseExecutor` (`base.ts`), директно или чрез `DefaultExecutor` или друг изпълнител; останалите модули са помощници за всеки доставчик (схеми на инструменти, fetch/TTS адаптери, манипулатори на quirk). Изпълнителите включват:
+158 изпълнителни модула от най-високо ниво (`*.ts` минус `base.ts`, `index.ts` и тестове — броят измерва `npm run check:docs-counts` ). Всеки изпълнителен клас разширява `BaseExecutor` (`base.ts`), директно или чрез `DefaultExecutor` или друг изпълнител; останалите модули са помощници за всеки доставчик (схеми на инструменти, fetch/TTS адаптери, манипулатори на quirk). Изпълнителите включват:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, плюс `claudeIdentity.ts` (помощник за споделена самоличност) и `index.ts` (регистър).
 

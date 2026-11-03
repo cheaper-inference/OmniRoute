@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 शीर्ष-स्तरीय निष्पादक मॉड्यूल (`*.ts` माइनस `base.ts`, `index.ts` और परीक्षण — गिनती `npm run check:docs-counts` उपाय)। प्रत्येक निष्पादक वर्ग सीधे या `DefaultExecutor` या किसी अन्य निष्पादक के माध्यम से `BaseExecutor` (`base.ts`) का विस्तार करता है; शेष मॉड्यूल प्रति-प्रदाता सहायक (टूल स्कीमा, fetch/TTS एडाप्टर, क्विर्क हैंडलर) हैं। निष्पादकों में शामिल हैं:
+158 शीर्ष-स्तरीय निष्पादक मॉड्यूल (`*.ts` माइनस `base.ts`, `index.ts` और परीक्षण — गिनती `npm run check:docs-counts` उपाय)। प्रत्येक निष्पादक वर्ग सीधे या `DefaultExecutor` या किसी अन्य निष्पादक के माध्यम से `BaseExecutor` (`base.ts`) का विस्तार करता है; शेष मॉड्यूल प्रति-प्रदाता सहायक (टूल स्कीमा, fetch/TTS एडाप्टर, क्विर्क हैंडलर) हैं। निष्पादकों में शामिल हैं:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, प्लस `claudeIdentity.ts` (साझा पहचान सहायक) और `index.ts` (रजिस्ट्री)।
 

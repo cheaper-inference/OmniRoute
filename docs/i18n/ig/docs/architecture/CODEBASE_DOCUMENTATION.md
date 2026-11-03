@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modul mmezu nke elu-elu (`*.ts` mwepu `base.ts`, `index.ts` na nwale — ọnụ ọgụgụ `npm run check:docs-counts` jikoro). Klas onye mmebe ọ bụla na-agbatị `BaseExecutor` (`base.ts`), ozugbo ma ọ bụ site na `DefaultExecutor` ma ọ bụ onye mmebe ọzọ; modul fọdụrụnụ bụ ndị na-enyere onye ọ bụla aka (nhazi ngwaọrụ, ihe nkwụnye fetch/TTS, quirk handlers). Ndị mmebe gụnyere:
+158 modul mmezu nke elu-elu (`*.ts` mwepu `base.ts`, `index.ts` na nwale — ọnụ ọgụgụ `npm run check:docs-counts` jikoro). Klas onye mmebe ọ bụla na-agbatị `BaseExecutor` (`base.ts`), ozugbo ma ọ bụ site na `DefaultExecutor` ma ọ bụ onye mmebe ọzọ; modul fọdụrụnụ bụ ndị na-enyere onye ọ bụla aka (nhazi ngwaọrụ, ihe nkwụnye fetch/TTS, quirk handlers). Ndị mmebe gụnyere:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 

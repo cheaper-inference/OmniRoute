@@ -1,1 +1,0 @@
-- **test(cli):** `cli-tray.test.ts` also points `APPDATA` at its temp dir, so on Windows it no longer sees the developer's real Startup folder ([#18645](https://github.com/diegosouzapw/OmniRoute/pull/18645)) — thanks @AndresDiagoM

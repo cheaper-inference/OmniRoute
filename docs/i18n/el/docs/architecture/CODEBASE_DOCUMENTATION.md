@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ενότητες εκτελεστών ανώτατου επιπέδου (`*.ts` μείον `base.ts`, `index.ts` και δοκιμές — η μέτρηση `npm run check:docs-counts` μέτρα). Κάθε κλάση εκτελεστή επεκτείνεται `BaseExecutor` (`base.ts`), απευθείας ή μέσω `DefaultExecutor` ή άλλου εκτελεστή. οι υπόλοιπες μονάδες είναι βοηθοί ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιορρυθμιών). Οι εκτελεστές περιλαμβάνουν:
+158 ενότητες εκτελεστών ανώτατου επιπέδου (`*.ts` μείον `base.ts`, `index.ts` και δοκιμές — η μέτρηση `npm run check:docs-counts` μέτρα). Κάθε κλάση εκτελεστή επεκτείνεται `BaseExecutor` (`base.ts`), απευθείας ή μέσω `DefaultExecutor` ή άλλου εκτελεστή. οι υπόλοιπες μονάδες είναι βοηθοί ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιορρυθμιών). Οι εκτελεστές περιλαμβάνουν:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder` `devin-desktop` `vertex` `claudeIdentity.ts` συν ταυτότητα ( `index.ts` )
 

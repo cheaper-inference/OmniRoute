@@ -14,7 +14,7 @@ OmniRoute huwa gateway u dashboard lokali AI routing mibnija fuq Next.js. Jippro
 
 Kapaċitajiet ewlenin:
 
-- Wiċċ API kompatibbli mal-OpenAI għal CLI/tools (380 fornitur, 156 modulu eżekutur)
+- Wiċċ API kompatibbli mal-OpenAI għal CLI/tools (380 fornitur, 158 modulu eżekutur)
 - Request/response traduzzjoni madwar formati tal-fornitur
 - Fallback combo tal-mudell (sekwenza multi-mudell)
 - Passi combo strutturati (`provider + model + connection`) b'ordni ta' runtime minn `compositeTiers`

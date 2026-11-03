@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156개의 최상위 실행기 모듈(`*.ts` 빼기 `base.ts`, `index.ts` 및 테스트 — `npm run check:docs-counts` 측정 개수)입니다. 모든 실행기 클래스는 직접적으로 또는 `DefaultExecutor` 나 다른 실행기를 통해 `BaseExecutor` (`base.ts`)를 확장합니다. 나머지 모듈은 공급자별 도우미(도구 스키마, fetch/TTS 어댑터, 쿼크 처리기)입니다. 실행자에는 다음이 포함됩니다.
+158개의 최상위 실행기 모듈(`*.ts` 빼기 `base.ts`, `index.ts` 및 테스트 — `npm run check:docs-counts` 측정 개수)입니다. 모든 실행기 클래스는 직접적으로 또는 `DefaultExecutor` 나 다른 실행기를 통해 `BaseExecutor` (`base.ts`)를 확장합니다. 나머지 모듈은 공급자별 도우미(도구 스키마, fetch/TTS 어댑터, 쿼크 처리기)입니다. 실행자에는 다음이 포함됩니다.
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` ( 공유 신원 도우미 ) 및 `index.ts` (레지스트리).
 

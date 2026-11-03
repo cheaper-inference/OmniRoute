@@ -14,7 +14,7 @@ OmniRoute ialah pintu masuk dan papan pemuka penghalaan AI tempatan yang dibina 
 
 Keupayaan teras:
 
-- Permukaan API yang serasi OpenAI untuk CLI/tools (380 pembekal, 156 modul pelaksana)
+- Permukaan API yang serasi OpenAI untuk CLI/tools (380 pembekal, 158 modul pelaksana)
 - terjemahan Request/response merentas format pembekal
 - Model kombo mundur (jujukan berbilang model)
 - Langkah kombo berstruktur (`provider + model + connection`) dengan pesanan masa jalan oleh `compositeTiers`

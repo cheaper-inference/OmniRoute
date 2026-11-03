@@ -454,7 +454,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -484,7 +484,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ඉහළ මට්ටමේ විධායක මොඩියුල 156 (`*.ts` minus `base.ts`, `index.ts` සහ පරීක්ෂණ — ගණන් කිරීමේ `npm run check:docs-counts` මිනුම්). සෑම විධායක පන්තියක්ම `BaseExecutor` (`base.ts`) සෘජුව හෝ `DefaultExecutor` හරහා හෝ වෙනත් ක්‍රියාත්මක කරන්නෙකු හරහා දිගු කරයි; ඉතිරි මොඩියුලයන් එක්-සැපයුම්කරුට සහායකයින් වේ (මෙවලම් ක්‍රම, fetch/TTS ඇඩප්ටර, quirk හසුරුවන්න). විධායකයින්ට ඇතුළත් වන්නේ:
+ඉහළ මට්ටමේ විධායක මොඩියුල 158 (`*.ts` minus `base.ts`, `index.ts` සහ පරීක්ෂණ — ගණන් කිරීමේ `npm run check:docs-counts` මිනුම්). සෑම විධායක පන්තියක්ම `BaseExecutor` (`base.ts`) සෘජුව හෝ `DefaultExecutor` හරහා හෝ වෙනත් ක්‍රියාත්මක කරන්නෙකු හරහා දිගු කරයි; ඉතිරි මොඩියුලයන් එක්-සැපයුම්කරුට සහායකයින් වේ (මෙවලම් ක්‍රම, fetch/TTS ඇඩප්ටර, quirk හසුරුවන්න). විධායකයින්ට ඇතුළත් වන්නේ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `pollinations` `qoder` `devin-desktop` `petals` `claudeIdentity.ts` රෙජිස්ට්‍රිය) `index.ts`
 

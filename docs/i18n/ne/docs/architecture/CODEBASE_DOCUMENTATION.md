@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 शीर्ष-स्तर निर्वाहक मोड्युलहरू (`*.ts` माइनस `base.ts`, `index.ts` र परीक्षणहरू — गणना `npm run check:docs-counts` उपायहरू)। प्रत्येक निर्वाहक वर्गले `BaseExecutor` (`base.ts`), प्रत्यक्ष वा `DefaultExecutor` वा अर्को एक्जिक्युटर मार्फत विस्तार गर्दछ; बाँकी मोड्युलहरू प्रति-प्रदायक सहयोगीहरू हुन् (उपकरण योजनाहरू, fetch/TTS एडेप्टरहरू, quirk ह्यान्डलरहरू)। कार्यकारीहरू समावेश छन्:
+158 शीर्ष-स्तर निर्वाहक मोड्युलहरू (`*.ts` माइनस `base.ts`, `index.ts` र परीक्षणहरू — गणना `npm run check:docs-counts` उपायहरू)। प्रत्येक निर्वाहक वर्गले `BaseExecutor` (`base.ts`), प्रत्यक्ष वा `DefaultExecutor` वा अर्को एक्जिक्युटर मार्फत विस्तार गर्दछ; बाँकी मोड्युलहरू प्रति-प्रदायक सहयोगीहरू हुन् (उपकरण योजनाहरू, fetch/TTS एडेप्टरहरू, quirk ह्यान्डलरहरू)। कार्यकारीहरू समावेश छन्:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, plus `claudeIdentity.ts` (साझा पहिचान सहायक) र `index.ts` (रजिस्ट्री) `devin-desktop`
 

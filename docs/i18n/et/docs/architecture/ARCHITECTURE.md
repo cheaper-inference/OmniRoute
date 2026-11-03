@@ -16,7 +16,7 @@ OmniRoute on kohalik AI marsruutimise lüüs ja armatuurlaud, mis on ehitatud Ne
 
 Põhilised võimalused:
 
-- OpenAI-ga ühilduv API pind CLI/tools jaoks (380 pakkujat, 156 täitjamoodulit)
+- OpenAI-ga ühilduv API pind CLI/tools jaoks (380 pakkujat, 158 täitjamoodulit)
 - Request/response tõlge teenusepakkuja vormingute vahel
 - Mudeli kombineeritud varu (mitme mudeli jada)
 - Struktureeritud kombineeritud sammud (`provider + model + connection`) koos käitusaja järjestamisega `compositeTiers` järgi

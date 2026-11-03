@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 spouštěcích modulů nejvyšší úrovně (`*.ts` minus `base.ts`, `index.ts` a testy — počet měření `npm run check:docs-counts` ). Každá třída exekutorů rozšiřuje `BaseExecutor` (`base.ts`), přímo nebo prostřednictvím `DefaultExecutor` nebo jiného exekutoru; zbývající moduly jsou pomocníci pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, ovladače quirk). Mezi exekutory patří:
+158 spouštěcích modulů nejvyšší úrovně (`*.ts` minus `base.ts`, `index.ts` a testy — počet měření `npm run check:docs-counts` ). Každá třída exekutorů rozšiřuje `BaseExecutor` (`base.ts`), přímo nebo prostřednictvím `DefaultExecutor` nebo jiného exekutoru; zbývající moduly jsou pomocníci pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, ovladače quirk). Mezi exekutory patří:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, identita plus `claudeIdentity.ts` `index.ts` (registr).
 
