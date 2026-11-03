@@ -118,7 +118,16 @@
 
 ## 5. Aktualizacja zestawu
 
-`npm run check:ui-kit-upstream` porównuje wersję przypiętą w `packages/ui-kit/UPSTREAM.md` z najnowszym znacznikiem `v*` z repozytorium źródłowego i wypisuje polecenie synchronizacji, gdy wydanie zostanie wydane. Cotygodniowy przepływ pracy `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) przeprowadza tę samą kontrolę i utrzymuje jeden problem ze śledzeniem otwarty, gdy kod PIN jest opóźniony; repozytorium nadrzędne jest prywatne, więc przepływ pracy wymaga tokena tylko do odczytu w tajemnicy `UI_KIT_READ_TOKEN`. Kiedy nie może odczytać upstream (brak tokena, token, który przestał działać lub GitHub nieosiągalny), przebieg pozostaje zielony, ale zapisuje ostrzeżenie i pozostawia otwarty osobny problem, który zamyka się, gdy późniejsze uruchomienie będzie mogło ponownie odczytać upstream.
+`npm run check:ui-kit-upstream` porównuje wersję przypiętą w `packages/ui-kit/UPSTREAM.md` z najnowszym znacznikiem `v*` z repozytorium źródłowego i wypisuje polecenie synchronizacji, gdy wydanie zostanie wydane.
+
+Codzienny przepływ pracy `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) przeprowadza tę samą kontrolę. Gdy pin jest z tyłu, `scripts/ci/ui-kit-sync-pr.sh` utrzymuje jedną synchronizację PR otwartą względem najwyższej gałęzi `release/vX.Y.Z`, na gałęzi kroczącej `chore/ui-kit-sync-latest`. Nigdy się to nie łączy: każde wydanie zestawu nadal wymaga wizualnej kontroli lokalnego VPS. Gałąź jest odbudowywana po wydaniu nowszej wersji i w przeciwnym razie pozostawiana w spokoju. Otwarty PR z ręcznie wypychanymi zatwierdzeniami nie jest nadpisywany, a PR dla wersji, którą opiekun zamknął w stanie niescalonym, pozostaje zamknięty aż do nowszej wersji.
+
+Kiedy nie można otworzyć żadnego PR (wersja docelowa jest zablokowana, PR ma ręcznie wypchnięte zatwierdzenia, PR został zamknięty lub nie ustawiono żadnego tokena PR ), przepływ pracy pozostawia otwarty jeden problem ze śledzeniem, który mówi dlaczego.
+
+Przepływ pracy wykorzystuje dwa sekrety:
+
+- `secrets.UI_KIT_READ_TOKEN`: token tylko do odczytu dla prywatnego repozytorium nadrzędnego. Gdy przepływ pracy nie może odczytać upstream (brak tokena, token, który przestał działać lub GitHub nieosiągalny), uruchomienie pozostaje zielone, ale zapisuje ostrzeżenie i pozostawia otwarty osobny problem, który zamyka się, gdy późniejsze uruchomienie będzie mogło ponownie odczytać upstream.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: drobnoziarnisty token w tym repozytorium z dostępem do zapisu zawartości i żądaniami ściągnięcia. Domyślny `GITHUB_TOKEN` nie może tutaj utworzyć PRs, a otwarty PR nie uruchomiłby CI. Bez tego tokena przepływ pracy jedynie wypycha gałąź.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopiuje nadrzędne `src/` w momencie zatwierdzenia (`latest` = najnowszy znacznik `v*` ) do `packages/ui-kit/src`, stosuje pojedynczą dozwoloną transformację (usuwa sufiks `.js` z względnego importu) i ustawia wersję obszaru roboczego w `packages/ui-kit/package.json` i `package-lock.json` na wersję nadrzędną. Następnie: przejrzyj `git diff packages/ui-kit`, wykonaj wizualny przegląd dostawców, ustawień, kombinacji, użycia i punktu końcowego w obu motywach, uruchom `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otwórz PR z wcześniejszym dziennikiem zmian.
 

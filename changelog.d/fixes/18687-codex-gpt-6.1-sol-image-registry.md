@@ -1,0 +1,1 @@
+- **fix(providers):** Codex `gpt-6.1-sol` is registered as a Codex hosted-tool image model (`codex/gpt-6.1-sol-image` in the image catalog), so image combos keep `cx/gpt-6.1-sol` as a target instead of dropping it, and `/v1/images/edits` accepts it instead of returning 400 ([#18687](https://github.com/cheaper-inference/OmniRoute/issues/18687))
