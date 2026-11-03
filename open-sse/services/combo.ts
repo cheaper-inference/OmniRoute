@@ -84,6 +84,7 @@ import {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 } from "./combo/comboPredicates.ts";
@@ -92,6 +93,7 @@ export {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 };
@@ -152,7 +154,10 @@ import {
 } from "./combo/autoConnectionScope.ts";
 import { resolveComboTargetPipeline } from "./combo/targetResolution.ts";
 import { dispatchWithCooldownRetry } from "./combo/comboAttemptLoop.ts";
-import { resolveHeldTruncatedResponse } from "./combo/truncatedStreamFailover.ts";
+import {
+  resolveHeldTruncatedResponse,
+  type HeldTruncatedState,
+} from "./combo/truncatedStreamFailover.ts";
 import { evaluateExecuteTargetGates } from "./combo/executeTargetGates.ts";
 import { executeTargetAttempt } from "./combo/executeTargetAttempt.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./combo/attemptLoopTypes.ts";
@@ -972,7 +977,8 @@ async function handleComboChatInner({
   // target pipeline below so it cannot rotate between tool rounds.
   if (getStrategyTraits(strategy).usesRoundRobinLoop && !activeNativeTurnPin) {
     const { handleRoundRobinCombo } = await import("./combo/roundRobinCombo.ts");
-    return handleRoundRobinCombo({
+    const heldAttempt: HeldTruncatedState = {};
+    const roundRobinResponse = await handleRoundRobinCombo({
       body,
       combo,
       handleSingleModel: handleSingleModelWithTimeout,
@@ -991,7 +997,9 @@ async function handleComboChatInner({
       requestHeaders,
       relayOptions,
       perTargetAdmission,
+      heldAttempt,
     });
+    return resolveHeldTruncatedResponse(heldAttempt, roundRobinResponse);
   }
 
   // Native Codex turns must stay on their pinned target, but a pre-content

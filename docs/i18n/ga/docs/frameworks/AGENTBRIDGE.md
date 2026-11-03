@@ -16,11 +16,11 @@ Is é AgentBridge seachfhreastalaí MITM (Man-in-the-Middle) OmniRoute a idirche
 
 ### Cad é AgentBridge?
 
-Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) glaoch API, nascann sé go díreach leis an soláthraí AI in aghaidh an tsrutha (OpenAI, Anthropic, etc.). idircheapann AgentBridge an nasc sin go trédhearcach ag an leibhéal TLS - gan aon athrú ar chumraíocht an ghníomhaire a éileamh - agus athscríobhann sé an t-iarratas trí OmniRoute.
+Nuair a dhéanann gníomhaire IDE (m.sh., GitHub Copilot, Cursor, Claude Code) glaoch API, nascann sé go díreach leis an soláthraí AI in aghaidh an tsrutha (OpenAI, Anthropic, etc.). idircheapann AgentBridge an nasc sin go trédhearcach ag an leibhéal TLS — gan a cheangal ar aon athrú cumraíochta gníomhaire — agus athscríobhann sé an t-iarratas trí OmniRoute.
 
 Ciallaíonn sé seo gur féidir leat:
 
-- **Déan gníomhaire ar bith a atreorú chuig aon soláthraí** : Copilot ag caint le OpenAI? Déan é a atreorú chuig Anthropic Claude, Gemini, nó chuig aon cheann de na 377 soláthraí OmniRoute.
+- **Déan gníomhaire ar bith a atreorú chuig aon soláthraí** : Copilot ag caint le OpenAI? Déan é a atreorú chuig Anthropic Claude, Gemini, nó chuig aon cheann de na 380 soláthraí OmniRoute.
 - **Cuir mapálacha samhlacha i bhfeidhm** : `gemini-3-flash` → `claude-sonnet-4.7` trédhearcach ag leibhéal an láimhseála.
 - **Breathnaigh ar gach trácht gníomhaire** : foilsítear gach iarratas idircheapadh don [Chigire Tráchta](./TRAFFIC_INSPECTOR.md).
 - **Cuir athléimneacht OmniRoute i bhfeidhm** : ródú teaglama, scoradáin chiorcaid, fallbacks, agus obair rianaithe costais do thrácht gníomhaire IDE freisin.
