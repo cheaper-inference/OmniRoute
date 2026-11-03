@@ -156,7 +156,7 @@ OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដ�
 | របាយការណ៍សុខភាព       | `health-report`      | សរុបការបំបែកសៀគ្វី ការចុះត្រជាក់ ស្ថានភាពចាក់សោរក្នុងមួយអ្នកផ្តល់សេវា                                                               | សុខភាព ភាពធន់           | "បង្ហាញស្ថានភាពសុខភាពរបស់អ្នកផ្តល់សេវាទាំងអស់" |
 | បញ្ជីសមត្ថភាព         | `list-capabilities`  | ត្រឡប់កាតាឡុកជំនាញភ្នាក់ងារ 45 ធាតុពេញលេញ (23 API + 21 CLI + 1 config) ជាតារាង markdown ជាមួយ SKILL.md URLs ឆៅសម្រាប់ការបញ្ចូលបរិបទ | កាតាឡុក ការរកឃើញ ជំនាញ  | "រាយបញ្ជីសមត្ថភាព OmniRoute ទាំងអស់"           |
 
-> កាតភ្នាក់ងារគួរតែត្រូវបានរក្សាទុកឱ្យស្របជាមួយនឹងកាតាឡុកអ្នកផ្តល់សេវា 377 ផ្ទាល់។ ចំនួនអ្នកផ្តល់សេវា និងទិន្នន័យមេតា free/no-auth ត្រូវបានប្រភពចេញពីបញ្ជីឈ្មោះពេលដំណើរការ។
+> កាតភ្នាក់ងារគួរតែត្រូវបានរក្សាទុកឱ្យស្របតាមកាតាឡុកអ្នកផ្តល់សេវា 380 ផ្ទាល់។ ចំនួនអ្នកផ្តល់សេវា និងទិន្នន័យមេតា free/no-auth ត្រូវបានប្រភពចេញពីបញ្ជីឈ្មោះពេលដំណើរការ។
 
 ### `list-capabilities` លម្អិតជំនាញ
 
@@ -190,17 +190,17 @@ OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដ�
 
 ---
 
-## ការបន្ថែមជំនាញថ្មី
+## ការបន្ថែមជំនាញថ្មី។
 
 1. **បង្កើតឯកសារជំនាញ៖** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Export អនុគមន៍ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`។ អនុវត្តតាមទម្រង់របស់ជំនាញដែលមានស្រាប់ដូចជា `smartRouting.ts`។
+   នាំចេញមុខងារ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`។ ធ្វើតាមរូបរាងជំនាញដែលមានស្រាប់ដូចជា `smartRouting.ts`។
 
-2. **ចុះឈ្មោះ handler៖** នៅក្នុង `src/lib/a2a/taskExecution.ts` បន្ថែមធាតុមួយទៅ `A2A_SKILL_HANDLERS`៖
+2. **ចុះឈ្មោះអ្នកដោះស្រាយ៖** នៅក្នុង `src/lib/a2a/taskExecution.ts` បន្ថែមធាតុទៅ `A2A_SKILL_HANDLERS`៖
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ជំនាញដែលមានស្រាប់
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,7 +208,7 @@ OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដ�
    };
    ```
 
-3. **បង្ហាញក្នុងកាតភ្នាក់ងារ៖** នៅក្នុង `src/app/.well-known/agent.json/route.ts` បន្ថែមទៅខាងចុងនៃ array `skills`៖
+3. **បង្ហាញក្នុងកាតភ្នាក់ងារ៖** ក្នុង `src/lib/a2a/agentCardMetadata.ts` (ចែករំលែកដោយ `/.well-known/agent.json` និង `/.well-known/agent-card.json`) បន្ថែមទៅអារេ `skills` ៖
 
    ```json
    {
@@ -220,9 +220,9 @@ OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដ�
    }
    ```
 
-4. **សរសេរការធ្វើតេស្ត៖** `tests/unit/a2a-<your-skill>.test.ts`។ គ្របដណ្តប់ទាំងករណីជោគជ័យ + ករណីមានកំហុស។
+4. **សរសេរការធ្វើតេស្ត៖** `tests/unit/a2a-<your-skill>.test.ts` គ្របដណ្តប់ផ្លូវរីករាយ + ផ្លូវកំហុស។
 
-5. **ចងក្រងឯកសារ** សម្រាប់ជំនាញថ្មីនៅក្នុងតារាង `Available Skills` របស់ឯកសារនេះ។
+5. **ឯកសារ** ជំនាញថ្មីនៅក្នុងតារាង `Available Skills` របស់ឯកសារនេះ។
 
 ---
 

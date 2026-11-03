@@ -8,7 +8,7 @@ import { buildOpenAiCompatibleRegistryEntry } from "../../shared.ts";
  *
  * `GET /v1/models` (Bearer key) is the live catalog and the source of truth at
  * runtime via NAMED_OPENAI_STYLE_PROVIDERS. The seed below is the offline fallback;
- * context lengths are the per-model maxima the catalog reports (2026-10-14).
+ * context lengths are the per-model maxima the catalog reports (2026-11-03).
  */
 export const paraloncloudProvider: RegistryEntry = buildOpenAiCompatibleRegistryEntry({
   id: "paraloncloud",
@@ -18,7 +18,7 @@ export const paraloncloudProvider: RegistryEntry = buildOpenAiCompatibleRegistry
   modelsUrl: "https://paraloncloud.com/v1/models",
   models: [
     { id: "qwen3.8-27b", name: "Qwen 3.8 27B", contextLength: 131072 },
-    { id: "qwen3-3b", name: "Qwen3 3B", contextLength: 16384 },
+    { id: "qwen3-3b", name: "Qwen3 4B", contextLength: 32768 },
   ],
   passthroughModels: true,
 });

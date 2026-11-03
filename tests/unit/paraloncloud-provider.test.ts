@@ -34,7 +34,7 @@ test("paraloncloud seeds its two chat models as the offline fallback", () => {
     paraloncloudProvider.models.map((m) => [m.id, m.contextLength]),
     [
       ["qwen3.8-27b", 131072],
-      ["qwen3-3b", 16384],
+      ["qwen3-3b", 32768],
     ]
   );
 });
