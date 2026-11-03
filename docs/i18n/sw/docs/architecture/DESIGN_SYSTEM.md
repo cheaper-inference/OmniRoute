@@ -10,6 +10,8 @@
 > halisi; mapendeleo chaguomsingi ni `system`. Rangi ya msisitizo ni Keak lime (`--ci-color-accent`). Switzer ni familia kuu ya fonti kwa UI na maandishi ya onyesho (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoagizwa na `ci-tokens.css`). Kila ikoni ni glyph ya Lucide.
 >
 > Inter ni fonti mbadala kwa glifu zinazokosekana katika Switzer; `--font-mono` inaelekeza kwenye orodha ya fonti za mfumo zenye upana sawa `--ci-font-code`.
+>
+> Glyph inapokosekana katika `Switzer`, `src/app/globals.css` huchagua fonti mbadala kwa kila glyph kando: `Inter` kwa Kisirili, Kigiriki na Kivietinamu, na `Vazirmatn` kwa maandishi ya Kiarabu chini ya `html[dir="rtl"]` pekee.
 
 `src/app/globals.css`:
 

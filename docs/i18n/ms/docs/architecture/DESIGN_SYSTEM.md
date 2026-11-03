@@ -10,6 +10,8 @@
 > kanonik; keutamaan lalai ialah `system`. Aksennya ialah Keak lime (`--ci-color-accent`). Switzer ialah keluarga fon utama untuk UI dan teks paparan (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Setiap ikon ialah glif Lucide.
 >
 > Inter ialah fon sandaran untuk glif yang tiada dalam Switzer; `--font-mono` merujuk kepada susunan fon monospace sistem `--ci-font-code`.
+>
+> Apabila sesuatu glif tiada dalam `Switzer`, `src/app/globals.css` memilih fon gantian bagi setiap glif secara berasingan: `Inter` untuk tulisan Cyrillic, Yunani dan Vietnam, serta `Vazirmatn` untuk tulisan Arab hanya di bawah `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

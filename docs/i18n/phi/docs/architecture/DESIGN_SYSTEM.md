@@ -10,6 +10,8 @@
 > na tema; ang default na kagustuhan ay `system`. Ang accent ay Keak lime (`--ci-color-accent`). Ang Switzer ay ang pangunahing pamilya ng font para sa UI at display text (`--ci-font-ui`; `--ci-font-display` at `--ci-font-mono` resolve to it), self-hosted ng kit mismo (`packages/ui-kit/src/ci-fonts.css`, na-import ng `ci-tokens.css`). Ang bawat icon ay isang Lucide glyph.
 >
 > Ang Inter ay reserbang font para sa mga glyph na wala sa Switzer; tumutukoy ang `--font-mono` sa monospace font stack ng system na `--ci-font-code`.
+>
+> Kapag walang katumbas na glyph sa `Switzer`, pumipili ang `src/app/globals.css` ng pamalit na font para sa bawat glyph: `Inter` para sa Cyrillic, Greek at Vietnamese, at `Vazirmatn` para sa sulat na Arabic sa ilalim lamang ng `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

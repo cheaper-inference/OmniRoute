@@ -10,6 +10,8 @@
 > היא בהירה (Light); ברירת המחדל של ההעדפה היא `system`. צבע ההדגשה הוא Keak lime (`--ci-color-accent`). Switzer היא משפחת הגופנים הראשית עבור UI וטקסט תצוגה (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
 >
 > Inter הוא גופן חלופי לגליפים שחסרים ב-Switzer; `--font-mono` מפנה לרשימת גופני המערכת ברוחב אחיד `--ci-font-code`.
+>
+> כאשר חסר גליף ב־`Switzer`, הקובץ `src/app/globals.css` בוחר גופן חלופי לכל גליף בנפרד: `Inter` לקירילית, ליוונית ולווייטנאמית, ו־`Vazirmatn` לכתב ערבי רק תחת `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

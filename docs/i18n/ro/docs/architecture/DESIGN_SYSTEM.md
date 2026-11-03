@@ -10,6 +10,8 @@
 > canonică; preferința implicită este `system`. Culoarea de accent este Keak lime (`--ci-color-accent`). Switzer este familia principală pentru UI și textul afișat (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Fiecare pictogramă este un glif Lucide.
 >
 > Inter este un font de rezervă pentru glifele care lipsesc din Switzer; `--font-mono` indică stiva de fonturi monospațiate a sistemului `--ci-font-code`.
+>
+> Când un glif lipsește din `Switzer`, `src/app/globals.css` alege un font de rezervă pentru fiecare glif în parte: `Inter` pentru chirilică, greacă și vietnameză, iar `Vazirmatn` pentru scrierea arabă numai sub `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

@@ -10,6 +10,8 @@
 > mövzudur; standart seçim `system`-dir. Vurğu rəngi Keak lime-dır (`--ci-color-accent`). Switzer UI və displey mətni (`--ci-font-ui`; `--ci-font-display` və `--ci-font-mono` həll etmək üçün ) üçün əsas şrift ailəsidir , dəstin özü tərəfindən (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tərəfindən idxal olunur ). Hər ikona Lucide qlifidir.
 >
 > Inter, Switzer-də olmayan qliflər üçün ehtiyat şriftdir; `--font-mono` sistemin bərabər enli şrift yığını olan `--ci-font-code`-a yönəlir.
+>
+> `Switzer`-də qlif olmadıqda `src/app/globals.css` hər qlif üçün ehtiyat şrift seçir: kiril, yunan və Vyetnam yazısı üçün `Inter`, ərəb yazısı üçün isə yalnız `html[dir="rtl"]` altında `Vazirmatn`.
 
 `src/app/globals.css`:
 

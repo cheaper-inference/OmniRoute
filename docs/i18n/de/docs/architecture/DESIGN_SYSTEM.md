@@ -10,6 +10,8 @@
 > maßgebliche Theme; die Standardeinstellung ist `system`. Die Akzentfarbe ist Keak-Lime (`--ci-color-accent`). Switzer ist die primäre Schriftfamilie für UI- und Anzeigetext (`--ci-font-ui`; `--ci-font-display` und `--ci-font-mono` lösen sich darauf auf), die vom Kit selbst selbst gehostet wird (`packages/ui-kit/src/ci-fonts.css`, importiert von `ci-tokens.css`). Jedes Symbol ist eine Lucide-Glyphe.
 >
 > Inter dient als Ersatzschrift für in Switzer fehlende Glyphen; `--font-mono` verweist auf den System-Monospace-Stack `--ci-font-code`.
+>
+> Wenn `Switzer` eine Glyphe fehlt, wählt `src/app/globals.css` für jede Glyphe einzeln eine Ersatzschrift: `Inter` für Kyrillisch, Griechisch und Vietnamesisch sowie `Vazirmatn` für arabische Schrift, letzteres ausschließlich unter `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

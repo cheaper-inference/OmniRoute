@@ -10,6 +10,8 @@
 > canónico; la preferencia predeterminada es `system`. El acento es Keak lime (`--ci-color-accent`). Switzer es la familia principal para UI y texto de visualización (`--ci-font-ui`; `--ci-font-display` y `--ci-font-mono` lo resuelven), autohospedado por el propio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Cada ícono es un glifo Lucide.
 >
 > Inter es una fuente de respaldo para los glifos que faltan en Switzer; `--font-mono` apunta a la pila de fuentes monoespaciadas del sistema `--ci-font-code`.
+>
+> Cuando a `Switzer` le falta un glifo, `src/app/globals.css` selecciona una fuente alternativa para cada glifo: `Inter` para cirílico, griego y vietnamita, y `Vazirmatn` para la escritura árabe únicamente bajo `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

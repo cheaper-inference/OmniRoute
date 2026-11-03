@@ -10,6 +10,8 @@
 > tema; privzeta nastavitev je `system`. Poudarkovna barva je Keak limeta (`--ci-color-accent`). Switzer je primarna družina pisav za UI in zaslonsko besedilo (`--ci-font-ui`; `--ci-font-display` in `--ci-font-mono` ga razrešita), ki ga samostojno gosti sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvozil `ci-tokens.css`). Vsaka ikona je glif Lucide.
 >
 > Inter je nadomestna pisava za glife, ki manjkajo v Switzerju; `--font-mono` kaže na sistemski nabor pisav enake širine `--ci-font-code`.
+>
+> Ko v pisavi `Switzer` manjka glif, `src/app/globals.css` izbere nadomestno pisavo za vsak glif posebej: `Inter` za cirilico, grščino in vietnamščino ter `Vazirmatn` za arabsko pisavo samo pod `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

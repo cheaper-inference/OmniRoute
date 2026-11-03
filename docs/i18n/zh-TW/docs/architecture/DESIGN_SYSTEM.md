@@ -7,6 +7,8 @@
 > **狀態：** 儀表板建構於 **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）之上，以 vendor 方式納入為工作區中的 `packages/ui-kit`（`@omniroute/ui-kit`；上游快照固定於 `packages/ui-kit/UPSTREAM.md`，並由 `npm run check:ui-kit-snapshot` 把關）。亮色（Light）為標準主題；預設偏好為 `system`。強調色為 Keak 萊姆綠（`--ci-color-accent`)。 Switzer 是UI 和顯示文字（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析為它）的主要字型家族，由套件本身自託管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`導入）。每個圖示都是 Lucide 字形。
 >
 > Inter 為 Switzer 缺少的字形提供備援；`--font-mono` 指向系統等寬字型堆疊 `--ci-font-code`。
+>
+> 當 `Switzer` 缺少某個字形時，`src/app/globals.css` 會逐字形選擇備用字型：西里爾文、希臘文和越南文使用 `Inter`；阿拉伯文使用 `Vazirmatn`，且僅在 `html[dir="rtl"]` 下生效。
 
 `src/app/globals.css`:
 

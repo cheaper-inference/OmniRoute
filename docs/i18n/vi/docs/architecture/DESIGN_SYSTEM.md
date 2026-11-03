@@ -10,6 +10,8 @@
 > tùy chọn mặc định là `system`. Màu nhấn là Keak lime (`--ci-color-accent`). Switzer là họ phông chữ chính cho UI và văn bản hiển thị (`--ci-font-ui`; `--ci-font-display` và `--ci-font-mono` giải quyết nó), được chính bộ công cụ tự lưu trữ (`packages/ui-kit/src/ci-fonts.css`, được nhập bởi `ci-tokens.css`). Mỗi biểu tượng là một hình tượng Lucide.
 >
 > Inter là phông chữ dự phòng cho các glyph không có trong Switzer; `--font-mono` trỏ đến ngăn xếp phông chữ đơn cách của hệ thống `--ci-font-code`.
+>
+> Khi `Switzer` thiếu một glyph, `src/app/globals.css` chọn phông chữ thay thế riêng cho từng glyph: `Inter` cho chữ Cyrillic, tiếng Hy Lạp và tiếng Việt, còn `Vazirmatn` cho chữ Ả Rập chỉ trong `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

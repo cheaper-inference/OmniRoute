@@ -11,6 +11,8 @@
 > （`--ci-color-accent`）です。 Switzer は、 UI および表示テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の主要なフォントファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
 >
 > Inter は Switzer にないグリフのフォールバックです。`--font-mono` はシステムの等幅フォントスタック `--ci-font-code` を参照します。
+>
+> `Switzer` にないグリフについては、`src/app/globals.css` がグリフごとに代替フォントを選びます。キリル文字・ギリシャ語・ベトナム語には `Inter` を使い、アラビア文字には `html[dir="rtl"]` の下でのみ `Vazirmatn` を使います。
 
 `src/app/globals.css`:
 

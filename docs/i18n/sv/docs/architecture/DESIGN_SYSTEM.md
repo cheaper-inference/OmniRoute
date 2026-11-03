@@ -10,6 +10,8 @@
 > temat; standardinställningen är `system`. Accentfärgen är Keak-lime (`--ci-color-accent`). Switzer är den primära teckensnittsfamiljen för UI och visningstext (`--ci-font-ui`; `--ci-font-display` och `--ci-font-mono` löser sig till det), som värd för själva kitet (`packages/ui-kit/src/ci-fonts.css`, importerat av `ci-tokens.css`). Varje ikon är en Lucide-glyph.
 >
 > Inter är ett reservteckensnitt för glyfer som saknas i Switzer; `--font-mono` hänvisar till systemets teckensnittsstack med fast bredd `--ci-font-code`.
+>
+> När en glyf saknas i `Switzer` väljer `src/app/globals.css` ett reservtypsnitt för varje enskild glyf: `Inter` för kyrilliska, grekiska och vietnamesiska samt `Vazirmatn` för arabisk skrift, det senare endast under `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

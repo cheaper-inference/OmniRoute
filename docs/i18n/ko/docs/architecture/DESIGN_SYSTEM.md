@@ -10,6 +10,8 @@
 > 테마이며, 기본 설정은 `system`입니다. 강조색은 Keak lime (`--ci-color-accent`)입니다. Switzer는 UI 및 디스플레이 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 기본 글꼴 계열이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 모든 아이콘은 Lucide 문자 모양입니다.
 >
 > Inter는 Switzer에 없는 글리프를 위한 대체 글꼴입니다. `--font-mono`는 시스템 고정폭 글꼴 스택인 `--ci-font-code`를 참조합니다.
+>
+> `Switzer`에 없는 글리프는 `src/app/globals.css`에서 글리프별로 대체 글꼴을 선택합니다. 키릴 문자·그리스어·베트남어에는 `Inter`를 사용하고, 아랍 문자에는 `html[dir="rtl"]` 아래에서만 `Vazirmatn`을 사용합니다.
 
 `src/app/globals.css`:
 

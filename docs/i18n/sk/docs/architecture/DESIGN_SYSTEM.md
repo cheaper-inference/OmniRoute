@@ -10,6 +10,8 @@
 > téma; predvolená preferencia je `system`. Akcentom je Keak lime (`--ci-color-accent`). Switzer je primárna rodina písiem pre UI a zobrazovaný text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` sa naň rozlíšia), ktorý je hostený samotnou súpravou (`packages/ui-kit/src/ci-fonts.css`, importované `ci-tokens.css`). Každá ikona je symbolom Lucide.
 >
 > Inter je náhradné písmo pre glyfy, ktoré chýbajú v Switzeri; `--font-mono` odkazuje na systémový zoznam písiem s pevnou šírkou `--ci-font-code`.
+>
+> Ak v písme `Switzer` chýba glyf, `src/app/globals.css` vyberá náhradné písmo pre každý glyf osobitne: `Inter` pre cyriliku, gréčtinu a vietnamčinu a `Vazirmatn` pre arabské písmo iba pod `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

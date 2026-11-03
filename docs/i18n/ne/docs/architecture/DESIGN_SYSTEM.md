@@ -10,6 +10,8 @@
 > नै canonical theme हो; default प्राथमिकता भनेको `system` हो। Accent रङ Keak lime (`--ci-color-accent`) हो। स्विट्जर UI र डिस्प्ले टेक्स्ट (`--ci-font-ui`; `--ci-font-display` र `--ci-font-mono` रिजोल्युसन) को लागि मुख्य फन्ट परिवार हो, किट आफैंद्वारा स्व-होस्ट गरिएको (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयात गरिएको)। प्रत्येक प्रतिमा लुसाइड ग्लाइफ हो।
 >
 > Switzer मा नभएका ग्लिफहरूका लागि Inter वैकल्पिक फन्ट हो; `--font-mono` ले प्रणालीको मोनोस्पेस फन्ट स्ट्याक `--ci-font-code` लाई जनाउँछ।
+>
+> `Switzer` मा कुनै ग्लिफ नभएमा `src/app/globals.css` ले प्रत्येक ग्लिफका लागि छुट्टाछुट्टै वैकल्पिक फन्ट छान्छ: सिरिलिक, ग्रीक र भियतनामीका लागि `Inter`, र अरबी लिपिका लागि `html[dir="rtl"]` अन्तर्गत मात्र `Vazirmatn`।
 
 `src/app/globals.css`:
 

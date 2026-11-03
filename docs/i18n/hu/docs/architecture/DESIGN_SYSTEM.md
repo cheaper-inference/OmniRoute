@@ -7,6 +7,8 @@
 > **Állapot:** az irányítópult a **Keak CI UI Kit**-re (`@keak/cheaper-inference-ui-kit`) épül, amely a `packages/ui-kit` workspace-csomagként van beágyazva (`@omniroute/ui-kit`; az upstream pillanatkép a `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` védi). A világos téma a kanonikus téma; az alapértelmezett beállítás a `system`. A kiemelőszín a Keak lime (`--ci-color-accent`). A Switzer az elsődleges betűcsalád a UI-hoz és a megjelenített szöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ezt oldja meg), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Minden ikon egy Lucide jelkép.
 >
 > Az Inter a Switzerből hiányzó karakterjelek tartalék betűtípusa; a `--font-mono` a rendszer rögzített szélességű betűtípusainak `--ci-font-code` listájára mutat.
+>
+> Ha egy karakterjel hiányzik a `Switzer` betűkészletből, a `src/app/globals.css` karakterjelenként választ helyettesítő betűkészletet: cirill, görög és vietnámi íráshoz az `Inter`, arab íráshoz pedig kizárólag a `html[dir="rtl"]` alatt a `Vazirmatn` használatos.
 
 `src/app/globals.css`:
 

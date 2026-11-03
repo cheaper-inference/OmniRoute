@@ -10,6 +10,8 @@
 > มาตรฐาน ค่า preference เริ่มต้นคือ `system` สี accent คือ Keak lime (`--ci-color-accent`) Switzer เป็นตระกูลแบบอักษรหลักสำหรับ UI และข้อความแสดงผล (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) ทุกไอคอนเป็นสัญลักษณ์ลูซิด
 >
 > Inter เป็นแบบอักษรสำรองสำหรับรูปอักษรที่ไม่มีใน Switzer; `--font-mono` อ้างอิงชุดแบบอักษรความกว้างคงที่ของระบบ `--ci-font-code`
+>
+> เมื่อ `Switzer` ไม่มีกลิฟที่ต้องการ `src/app/globals.css` จะเลือกแบบอักษรสำรองเป็นรายกลิฟ โดยใช้ `Inter` สำหรับอักษรซีริลลิก กรีก และเวียดนาม และใช้ `Vazirmatn` สำหรับอักษรอาหรับเฉพาะภายใต้ `html[dir="rtl"]` เท่านั้น
 
 `src/app/globals.css`:
 

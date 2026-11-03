@@ -10,6 +10,8 @@
 > jest jasny; domyślna preferencja to `system`. Kolorem akcentu jest Keak lime (`--ci-color-accent`). Switzer to główna rodzina krojów pisma dla UI i tekstu wyświetlanego (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` na to odpowiadają), hostowana przez sam zestaw (`packages/ui-kit/src/ci-fonts.css`, importowany przez `ci-tokens.css`). Każda ikona jest glifem Lucide.
 >
 > Inter jest krojem zastępczym dla glifów brakujących w Switzer; `--font-mono` wskazuje na systemowy stos krojów o stałej szerokości `--ci-font-code`.
+>
+> Gdy w kroju `Switzer` brakuje glifu, `src/app/globals.css` wybiera krój zastępczy osobno dla każdego glifu: `Inter` dla cyrylicy, greki i języka wietnamskiego oraz `Vazirmatn` dla pisma arabskiego wyłącznie pod `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

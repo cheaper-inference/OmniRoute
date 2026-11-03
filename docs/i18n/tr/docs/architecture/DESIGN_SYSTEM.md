@@ -11,6 +11,8 @@
 > (`--ci-color-accent`). Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI ve görüntüleme metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için birincil yazı tipi ailesidir. Her simge bir Lucide glifidir.
 >
 > Inter, Switzer'de bulunmayan glifler için yedek yazı tipidir; `--font-mono`, sistemin eş aralıklı yazı tipi yığını `--ci-font-code`'a başvurur.
+>
+> `Switzer` bir glifi içermediğinde `src/app/globals.css` her glif için ayrı bir yedek yazı tipi seçer: Kiril, Yunanca ve Vietnamca için `Inter`, Arap yazısı için ise yalnızca `html[dir="rtl"]` altında `Vazirmatn`.
 
 `src/app/globals.css`:
 

@@ -11,6 +11,8 @@
 > Akcentem je Keak lime (`--ci-color-accent`). Switzer je primární rodina písem pro UI a zobrazovaný text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` se na něj rozlišují), kterou vlastní sada (`packages/ui-kit/src/ci-fonts.css`, importováno `ci-tokens.css`). Každá ikona je lucidní glyf.
 >
 > Inter je náhradní písmo pro glyfy chybějící ve Switzeru; `--font-mono` odkazuje na systémový seznam neproporcionálních písem `--ci-font-code`.
+>
+> Pokud v písmu `Switzer` chybí glyf, `src/app/globals.css` vybírá náhradní písmo pro každý glyf zvlášť: `Inter` pro cyrilici, řečtinu a vietnamštinu a `Vazirmatn` pro arabské písmo pouze pod `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

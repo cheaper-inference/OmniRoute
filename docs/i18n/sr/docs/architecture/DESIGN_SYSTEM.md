@@ -10,6 +10,8 @@
 > tema; podrazumevano podešavanje je `system`. Akcenat je Keak lime (`--ci-color-accent`). Свитзер је примарна породица фонтова за UI и приказ текста (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` га решавају), који сам хостује сам комплет (`packages/ui-kit/src/ci-fonts.css`, увезен од `ci-tokens.css`). Свака икона је Луциде глиф.
 >
 > Inter је резервни фонт за глифове који недостају у Switzer-у; `--font-mono` упућује на системски низ фонтова једнаке ширине `--ci-font-code`.
+>
+> Када у фонту `Switzer` недостаје глиф, `src/app/globals.css` бира заменски фонт за сваки глиф посебно: `Inter` за ћирилицу, грчки и вијетнамски, а `Vazirmatn` за арапско писмо само под `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

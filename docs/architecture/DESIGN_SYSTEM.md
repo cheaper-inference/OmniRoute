@@ -14,6 +14,8 @@ lastUpdated: 2026-10-27
 > imported by `ci-tokens.css`). Every icon is a Lucide glyph.
 >
 > Inter is a fallback for glyphs missing from Switzer; `--font-mono` maps to the system monospace stack `--ci-font-code`.
+>
+> `src/app/globals.css` selects fallback fonts per glyph when `Switzer` lacks a glyph: `Inter` for Cyrillic, Greek and Vietnamese, and `Vazirmatn` for Arabic script only under `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

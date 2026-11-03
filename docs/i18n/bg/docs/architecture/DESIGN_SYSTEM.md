@@ -10,6 +10,8 @@
 > предпочитанието по подразбиране е `system`. Акцентът е Keak lime (`--ci-color-accent`). Switzer е основната фамилия за UI и текст на дисплея (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешават това), самостоятелно хостван от самия комплект (`packages/ui-kit/src/ci-fonts.css`, импортиран от `ci-tokens.css`). Всяка икона е Lucide глиф.
 >
 > Inter е резервен шрифт за глифове, липсващи в Switzer; `--font-mono` сочи към системния набор от моноширинни шрифтове `--ci-font-code`.
+>
+> Когато в `Switzer` липсва глиф, `src/app/globals.css` избира резервен шрифт за всеки глиф поотделно: `Inter` за кирилица, гръцки и виетнамски и `Vazirmatn` за арабска писменост само под `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

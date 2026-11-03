@@ -10,6 +10,8 @@
 > tema; zadana postavka je `system`. Akcentna boja je Keak lime (`--ci-color-accent`). Switzer je primarna porodica fontova za UI i prikaz teksta (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju ga), koji sam hostuje sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvezen od `ci-tokens.css`). Svaka ikona je Lucide glif.
 >
 > Inter je rezervni font za glifove koji nedostaju u Switzeru; `--font-mono` upućuje na sistemski niz monospace fontova `--ci-font-code`.
+>
+> Kada u fontu `Switzer` nedostaje glif, `src/app/globals.css` bira zamjenski font za svaki glif zasebno: `Inter` za ćirilicu, grčki i vijetnamski, a `Vazirmatn` za arapsko pismo samo pod `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

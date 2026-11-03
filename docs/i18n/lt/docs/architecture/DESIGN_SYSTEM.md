@@ -7,6 +7,8 @@
 > **Būsena:** informacinė suvestinė sukurta naudojant **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), perkeltą į projektą kaip darbo srities paketą `packages/ui-kit` (`@omniroute/ui-kit`; pirminis (upstream) momentinis vaizdas prisegtas `packages/ui-kit/UPSTREAM.md` ir saugomas `npm run check:ui-kit-snapshot`). Šviesi tema yra kanoninė; numatytoji nuostata yra `system`. Akcentinė spalva yra Keak laimo (`--ci-color-accent`). Switzer yra pagrindinė šriftų šeima, skirta UI ir rodomam tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Kiekviena piktograma yra Lucide glifas.
 >
 > Inter yra atsarginis šriftas glifams, kurių nėra Switzer; `--font-mono` nurodo sistemos vienodo pločio šriftų sąrašą `--ci-font-code`.
+>
+> Kai šrifte `Switzer` trūksta glifo, `src/app/globals.css` kiekvienam glifui atskirai parenka pakaitinį šriftą: `Inter` kirilicai, graikų ir vietnamiečių rašmenims, o `Vazirmatn` arabų rašmenims tik po `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

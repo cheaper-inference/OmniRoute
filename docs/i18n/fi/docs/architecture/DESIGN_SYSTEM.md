@@ -10,6 +10,8 @@
 > teema; oletusvalinta on `system`. Korostusvärinä on Keak-lime (`--ci-color-accent`). Switzer on UI- ja näyttötekstin ensisijainen kirjasinperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Jokainen kuvake on Luciden merkki.
 >
 > Inter on varakirjasin Switzeristä puuttuville merkeille; `--font-mono` viittaa järjestelmän tasalevyiseen kirjasinpinoon `--ci-font-code`.
+>
+> Kun `Switzer`-fontista puuttuu glyyfi, `src/app/globals.css` valitsee varafontin kullekin glyyfille erikseen: `Inter` kyrillisille, kreikkalaisille ja vietnamilaisille merkeille sekä `Vazirmatn` arabialaiselle kirjoitukselle vain `html[dir="rtl"]`-elementin alla.
 
 `src/app/globals.css`:
 

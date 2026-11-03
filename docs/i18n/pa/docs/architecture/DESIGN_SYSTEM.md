@@ -9,6 +9,8 @@
 > ਥੀਮ ਹੈ; ਡਿਫੌਲਟ ਤਰਜੀਹ `system` ਹੈ। ਐਕਸੈਂਟ Keak lime (`--ci-color-accent`) ਹੈ। ਸਵਿਟਜ਼ਰ UI ਅਤੇ ਡਿਸਪਲੇਅ ਟੈਕਸਟ (`--ci-font-ui`; `--ci-font-display` ਅਤੇ `--ci-font-mono` ਇਸ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ), ਕਿੱਟ ਦੁਆਰਾ ਸਵੈ-ਮੇਜ਼ਬਾਨੀ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ਦੁਆਰਾ ਆਯਾਤ ਕੀਤਾ ਗਿਆ) ਲਈ ਮੁੱਖ ਫੌਂਟ ਪਰਿਵਾਰ ਹੈ। ਹਰ ਆਈਕਨ ਇੱਕ ਲੂਸਾਈਡ ਗਲਾਈਫ ਹੈ।
 >
 > Switzer ਵਿੱਚ ਨਾ ਮੌਜੂਦ ਗਲਿਫਾਂ ਲਈ Inter ਇੱਕ ਵਿਕਲਪਕ ਫੌਂਟ ਹੈ; `--font-mono` ਸਿਸਟਮ ਦੇ ਮੋਨੋਸਪੇਸ ਫੌਂਟ ਸਟੈਕ `--ci-font-code` ਵੱਲ ਸੰਕੇਤ ਕਰਦਾ ਹੈ।
+>
+> ਜਦੋਂ `Switzer` ਵਿੱਚ ਕੋਈ ਗਲਿਫ਼ ਨਹੀਂ ਹੁੰਦਾ, ਤਾਂ `src/app/globals.css` ਹਰ ਗਲਿਫ਼ ਲਈ ਵੱਖਰੇ ਤੌਰ ’ਤੇ ਬਦਲਵਾਂ ਫੌਂਟ ਚੁਣਦਾ ਹੈ: ਸਿਰਿਲਿਕ, ਯੂਨਾਨੀ ਅਤੇ ਵੀਅਤਨਾਮੀ ਲਈ `Inter`, ਅਤੇ ਅਰਬੀ ਲਿਪੀ ਲਈ ਸਿਰਫ਼ `html[dir="rtl"]` ਦੇ ਅਧੀਨ `Vazirmatn`।
 
 `src/app/globals.css`:
 

@@ -10,6 +10,8 @@
 > kanonis; preferensi default-nya adalah `system`. Aksennya adalah Keak lime (`--ci-color-accent`). Switzer adalah keluarga font utama untuk UI dan teks tampilan (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` memutuskan untuk itu), dihosting sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimpor oleh `ci-tokens.css`). Setiap ikon adalah mesin terbang Lucide.
 >
 > Inter menjadi font cadangan untuk glif yang tidak ada di Switzer; `--font-mono` mengarah ke tumpukan font monospace sistem `--ci-font-code`.
+>
+> Saat sebuah glif tidak tersedia di `Switzer`, `src/app/globals.css` memilih font pengganti untuk setiap glif: `Inter` untuk aksara Kiril, Yunani, dan Vietnam, serta `Vazirmatn` untuk aksara Arab hanya di bawah `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

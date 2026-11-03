@@ -8,6 +8,8 @@
 > `packages/ui-kit/UPSTREAM.md` un to uzrauga `npm run check:ui-kit-snapshot`). Kanoniskā tēma ir gaišā (Light); noklusējuma iestatījums ir `system`. Akcenta krāsa ir Keak laima zaļā (`--ci-color-accent`). Switzer ir galvenā fontu saime UI un attēlojamajam tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Katra ikona ir Lucide glifs.
 >
 > Inter ir rezerves fonts glifiem, kuru nav Switzer; `--font-mono` norāda uz sistēmas vienāda platuma fontu sarakstu `--ci-font-code`.
+>
+> Ja fontā `Switzer` trūkst glifa, `src/app/globals.css` katram glifam atsevišķi izvēlas aizstājējfontu: `Inter` kirilicai, grieķu un vjetnamiešu rakstībai, bet `Vazirmatn` arābu rakstībai tikai zem `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

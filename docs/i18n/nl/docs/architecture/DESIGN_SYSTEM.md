@@ -10,6 +10,8 @@
 > thema; de standaardvoorkeur is `system`. Het accent is Keak-limoen (`--ci-color-accent`). Switzer is de primaire lettertypefamilie voor UI- en displaytekst (`--ci-font-ui`; `--ci-font-display` en `--ci-font-mono` lossen dit op), zelf gehost door de kit zelf (`packages/ui-kit/src/ci-fonts.css`, geïmporteerd door `ci-tokens.css`). Elk pictogram is een Lucide-glyph.
 >
 > Inter is een reservelettertype voor glyphs die in Switzer ontbreken; `--font-mono` verwijst naar de monospace-lettertypestack van het systeem, `--ci-font-code`.
+>
+> Wanneer een glyph in `Switzer` ontbreekt, kiest `src/app/globals.css` voor elke glyph afzonderlijk een vervangend lettertype: `Inter` voor Cyrillisch, Grieks en Vietnamees, en `Vazirmatn` voor Arabisch schrift uitsluitend onder `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

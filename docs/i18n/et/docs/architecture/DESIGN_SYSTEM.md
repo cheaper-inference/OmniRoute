@@ -10,6 +10,8 @@
 > teema; vaikeeelistus on `system`. Aktsentvärv on Keaki laim (`--ci-color-accent`). Switzer on UI ja kuvateksti (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` lahendavad selle) peamine fondiperekond, mida ise hostib komplekt ise (`packages/ui-kit/src/ci-fonts.css`, impordib `ci-tokens.css`). Iga ikoon on Lucide'i glüüf.
 >
 > Inter on varufont Switzeris puuduvate glüüfide jaoks; `--font-mono` viitab süsteemi fikseeritud laiusega fontide loendile `--ci-font-code`.
+>
+> Kui fondis `Switzer` puudub mõni glüüf, valib `src/app/globals.css` asendusfondi iga glüüfi jaoks eraldi: kirillitsa, kreeka ja vietnami jaoks `Inter` ning araabia kirja jaoks `Vazirmatn` ainult `html[dir="rtl"]` all.
 
 `src/app/globals.css`:
 

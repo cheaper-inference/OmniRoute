@@ -10,6 +10,8 @@
 > mavzu hisoblanadi; standart tanlov — `system`. Aktsent rangi — Keak lime (`--ci-color-accent`). Switzer UI va displey matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun asosiy shrift oilasi bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Har bir belgi Lucid glifidir.
 >
 > Inter — Switzer'da yo‘q gliflar uchun zaxira shrift; `--font-mono` tizimning bir xil kenglikdagi shriftlar to‘plami `--ci-font-code`ga murojaat qiladi.
+>
+> `Switzer`da glif bo‘lmasa, `src/app/globals.css` har bir glif uchun alohida zaxira shrift tanlaydi: kirill, yunon va vetnam yozuvi uchun `Inter`, arab yozuvi uchun esa faqat `html[dir="rtl"]` ostida `Vazirmatn`.
 
 `src/app/globals.css`:
 

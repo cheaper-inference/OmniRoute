@@ -10,6 +10,8 @@
 > il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Switzer hija l-familja primarja ta’ fonts għal UI u test tal-wiri (`--ci-font-ui`; `--ci-font-display` u `--ci-font-mono` jirrisolvu għaliha), ospitat waħdu mill-kit innifsu (`packages/ui-kit/src/ci-fonts.css`, importat minn `ci-tokens.css`). Kull ikona hija glifa Lucide.
 >
 > Inter huwa font ta’ riżerva għall-glifi nieqsa minn Switzer; `--font-mono` jirreferi għal-lista ta’ fonts monospace tas-sistema `--ci-font-code`.
+>
+> Meta jkun nieqes glif minn `Switzer`, `src/app/globals.css` jagħżel font ta’ sostituzzjoni għal kull glif separatament: `Inter` għaċ-Ċirilliku, il-Grieg u l-Vjetnamiż, u `Vazirmatn` għall-kitba Għarbija biss taħt `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 

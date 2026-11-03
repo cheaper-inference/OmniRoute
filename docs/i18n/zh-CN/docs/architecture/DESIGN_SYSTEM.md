@@ -10,6 +10,8 @@
 > 主题；默认偏好为 `system`。强调色为 Keak 青柠色（`--ci-color-accent`)。 Switzer 是UI 和显示文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的主要字体家族，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。每个图标都是 Lucide 字形。
 >
 > Inter 为 Switzer 缺少的字形提供回退；`--font-mono` 指向系统等宽字体栈 `--ci-font-code`。
+>
+> 当 `Switzer` 缺少某个字形时，`src/app/globals.css` 会逐字形选择备用字体：西里尔文、希腊文和越南文使用 `Inter`；阿拉伯文使用 `Vazirmatn`，且仅在 `html[dir="rtl"]` 下生效。
 
 `src/app/globals.css`:
 
