@@ -4,7 +4,7 @@
 
 ---
 
-> **Stare:** tabloul de bord este construit pe** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vândut ca spațiu de lucru `packages/ui-kit` (`@omniroute/ui-kit`; instantaneul din amonte este fixat în `packages/ui-kit/UPSTREAM.md` și protejat de `npm run check:ui-kit-snapshot`). Lumina este tema canonică; preferința implicită este `system`. Accentul este Keak lime (`--ci-color-accent`). Switzer este familia unică pentru UI, afișare și text de cod (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Fiecare pictogramă este un glif Lucide.
+> **Stare:** tabloul de bord este construit pe** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vândut ca spațiu de lucru `packages/ui-kit` (`@omniroute/ui-kit`; instantaneul din amonte este fixat în `packages/ui-kit/UPSTREAM.md` și protejat de `npm run check:ui-kit-snapshot`). Lumina este tema canonică; preferința implicită este `system`. Accentul este Keak lime (`--ci-color-accent`). Switzer este singura familie pentru UI, afișare și text de cod (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Scripturi Switzer lipsesc prin glif cu glif (`src/app/globals.css`): Inter pentru chirilic, greacă și vietnameză și, numai sub `html[dir="rtl"]`, Vazirmatn pentru scriere arabă. Fiecare pictogramă este un glif Lucide.
 
 ## 1. Unde se află lucrurile
 

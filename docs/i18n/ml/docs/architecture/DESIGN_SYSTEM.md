@@ -4,7 +4,7 @@
 
 ---
 
-> **നില:** ഡാഷ്ബോർഡ് നിർമ്മിച്ചിരിക്കുന്നത്** Keak CI UI കിറ്റ്** (`@keak/cheaper-inference-ui-kit`), വർക്ക്സ്പെയ്സ് `packages/ui-kit` (`@omniroute/ui-kit`; അപ്സ്ട്രീം സ്നാപ്പ്ഷോട്ട് `packages/ui-kit/UPSTREAM.md` ൽ പിൻ ചെയ്ത് `npm run check:ui-kit-snapshot` സംരക്ഷിച്ചിരിക്കുന്നു) ആയി വെണ്ടർ ചെയ്യുന്നു. വെളിച്ചമാണ് കാനോനിക്കൽ തീം; സ്ഥിരസ്ഥിതി മുൻഗണന `system` ആണ്. Keak lime (`--ci-color-accent`) ആണ് ഉച്ചാരണം. UI, ഡിസ്പ്ലേ, കോഡ് ടെക്സ്റ്റ് (`--ci-font-ui`; `--ci-font-display`, `--ci-font-mono` എന്നിവ പരിഹരിക്കുക), കിറ്റ് തന്നെ സ്വയം ഹോസ്റ്റ് ചെയ്ത (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ഇറക്കുമതി ചെയ്തത്) ഏക കുടുംബമാണ് സ്വിറ്റ്സർ. ഓരോ ഐക്കണും ഒരു ലൂസിഡ് ഗ്ലിഫാണ്.
+> **നില:** ഡാഷ്ബോർഡ് നിർമ്മിച്ചിരിക്കുന്നത്** Keak CI UI കിറ്റ്** (`@keak/cheaper-inference-ui-kit`), വർക്ക്സ്പെയ്സ് `packages/ui-kit` (`@omniroute/ui-kit`; അപ്സ്ട്രീം സ്നാപ്പ്ഷോട്ട് `packages/ui-kit/UPSTREAM.md` ൽ പിൻ ചെയ്ത് `npm run check:ui-kit-snapshot` സംരക്ഷിച്ചിരിക്കുന്നു). വെളിച്ചമാണ് കാനോനിക്കൽ തീം; സ്ഥിരസ്ഥിതി മുൻഗണന `system` ആണ്. Keak lime (`--ci-color-accent`) ആണ് ഉച്ചാരണം. UI, ഡിസ്പ്ലേ, കോഡ് ടെക്സ്റ്റ് (`--ci-font-ui`; `--ci-font-display`, `--ci-font-mono` എന്നിവ പരിഹരിക്കുക), കിറ്റ് തന്നെ സ്വയം ഹോസ്റ്റ് ചെയ്ത (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ഇറക്കുമതി ചെയ്തത്) ഏക കുടുംബമാണ് സ്വിറ്റ്സർ. സ്ക്രിപ്റ്റുകൾ സ്വിറ്റ്സറിന് ഗ്ലിഫ് വഴി ഗ്ലിഫിൻ്റെ കുറവില്ല (`src/app/globals.css`): സിറിലിക്, ഗ്രീക്ക്, വിയറ്റ്നാമീസ് എന്നിവയ്ക്ക് ഇൻ്റർ, കൂടാതെ `html[dir="rtl"]` കീഴിൽ മാത്രം, അറബിക് ലിപിക്ക് വസീർമാറ്റ്. ഓരോ ഐക്കണും ഒരു ലൂസിഡ് ഗ്ലിഫാണ്.
 
 ## 1. കാര്യങ്ങൾ എവിടെയാണ്
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Κατάσταση:** το ταμπλό είναι χτισμένο πάνω στο** Κιτ Keak CI UI** (`@keak/cheaper-inference-ui-kit`), πωλείται ως ο χώρος εργασίας `packages/ui-kit` (`@omniroute/ui-kit`; το στιγμιότυπο ανάντη είναι καρφιτσωμένο σε `packages/ui-kit/UPSTREAM.md` και προστατεύεται από `npm run check:ui-kit-snapshot`). Το φως είναι το κανονικό θέμα. η προεπιλεγμένη προτίμηση είναι `system`. Η προφορά είναι Keak lime (`--ci-color-accent`). Το Switzer είναι η ενιαία οικογένεια για UI, οθόνη και κείμενο κώδικα (`--ci-font-ui`; `--ci-font-display` και `--ci-font-mono` επιλύουν σε αυτό), που φιλοξενείται από το ίδιο το κιτ (`packages/ui-kit/src/ci-fonts.css`, εισαγωγή από `ci-tokens.css`). Κάθε εικονίδιο είναι ένα γλυφό Lucide.
+> **Κατάσταση:** το ταμπλό είναι χτισμένο πάνω στο** Κιτ Keak CI UI** (`@keak/cheaper-inference-ui-kit`), πωλείται ως ο χώρος εργασίας `packages/ui-kit` (`@omniroute/ui-kit`; το στιγμιότυπο ανάντη είναι καρφιτσωμένο σε `packages/ui-kit/UPSTREAM.md` και προστατεύεται από `npm run check:ui-kit-snapshot`). Το φως είναι το κανονικό θέμα. η προεπιλεγμένη προτίμηση είναι `system`. Η προφορά είναι Keak lime (`--ci-color-accent`). Το Switzer είναι η ενιαία οικογένεια για UI, οθόνη και κείμενο κώδικα (`--ci-font-ui`; `--ci-font-display` και `--ci-font-mono` επιλύουν σε αυτό), που φιλοξενείται από το ίδιο το κιτ (`packages/ui-kit/src/ci-fonts.css`, εισαγωγή από `ci-tokens.css`). Σενάρια Η Switzer στερείται πτώσης με γλύφο (`src/app/globals.css`): Inter για κυριλλική, ελληνική και βιετναμέζικη γραφή και, μόνο κάτω από `html[dir="rtl"]`, Vazirmatn για αραβική γραφή. Κάθε εικονίδιο είναι ένα γλυφό Lucide.
 
 ## 1. Πού βρίσκονται τα πράγματα
 
