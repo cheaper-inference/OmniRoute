@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Dadurch werden die aktuell verbundenen Anbieter/Modelle, die dieser Vorlage entsprechen, in einer bearbeitbaren Kombination gespeichert.",
     "duplicateAutoComboFailedPrefix": "Automatische Kombination konnte nicht dupliziert werden:",
     "duplicateAutoComboUnknownError": "Unbekannter Fehler",
-    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}"
+    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}",
+    "fallbackSummary": "{rate} % der Anfragen haben den Fallback genutzt, jede übersprang im Durchschnitt ~{skips} Ziele"
   },
   "costs": {
     "title": "Kosten",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Upstream-Status",
     "noResponse": "Keine Antwort",
     "egressIp": "Egress-IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Header nach",
     "firstChunkAfter": "Erster Chunk danach",
     "servedBy": "Bedient durch",
