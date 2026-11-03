@@ -24,7 +24,7 @@ sh() { printf 'SH:%s\\n' "$*"; }
 test("hook never stashes and never downloads a missing lint-staged", () => {
   const result = runHook();
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /NPX:--no-install lint-staged --no-stash/);
+  assert.match(result.stdout, /NPX:--no-install lint-staged --no-stash --max-arg-length 4000/);
   assert.match(result.stdout, /NODE:scripts\/check\/check-tracked-artifacts.mjs/);
 });
 

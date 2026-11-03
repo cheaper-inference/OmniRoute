@@ -25,10 +25,10 @@ process.env.OMNIROUTE_PLUGINS_DIR = path.join(fixtureDir, "plugins");
 process.env.OMNIROUTE_MIGRATIONS_DIR = fixtureDir;
 
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/224_proxy_payload_traffic.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/225_proxy_payload_traffic.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixtureDir, "224_proxy_payload_traffic.sql"), sql, "utf8");
+fs.writeFileSync(path.join(fixtureDir, "225_proxy_payload_traffic.sql"), sql, "utf8");
 fs.writeFileSync(
   path.join(fixtureDir, "206_codex_wakeup_tasks.sql"),
   "CREATE TABLE incoming_206 (id INTEGER PRIMARY KEY);",
@@ -72,6 +72,14 @@ fs.writeFileSync(
 fs.writeFileSync(
   path.join(fixtureDir, "223_call_logs_queue_wait_ms.sql"),
   "CREATE TABLE incoming_223 (id INTEGER PRIMARY KEY);",
+  "utf8"
+);
+fs.writeFileSync(
+  path.join(fixtureDir, "224_proxy_logs_egress_ip_families.sql"),
+  fs.readFileSync(
+    new URL("../../src/lib/db/migrations/224_proxy_logs_egress_ip_families.sql", import.meta.url),
+    "utf8"
+  ),
   "utf8"
 );
 // All state paths are isolated before loading the real migration orchestrator.
@@ -138,7 +146,13 @@ test(
             "INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES (?, ?, ?)"
           ).run(version, "proxy_payload_traffic", "fixture-applied");
         }
-        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 9 : 10);
+        db.exec(
+          "CREATE TABLE proxy_logs (id TEXT PRIMARY KEY); INSERT INTO proxy_logs VALUES ('retained');"
+        );
+        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 10 : 11);
+        assert.deepEqual(db.prepare("SELECT * FROM proxy_logs").all(), [
+          { id: "retained", egress_ip_v4: null, egress_ip_v6: null },
+        ]);
         assert.deepEqual(
           db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
           [
@@ -151,7 +165,8 @@ test(
             { version: "217", name: "quota_recovery_tickets" },
             { version: "218", name: "proxy_subscription_mirror_urls" },
             { version: "223", name: "call_logs_queue_wait_ms" },
-            { version: "224", name: "proxy_payload_traffic" },
+            { version: "224", name: "proxy_logs_egress_ip_families" },
+            { version: "225", name: "proxy_payload_traffic" },
           ],
           `canonical ledger after ${versions.join(",") || "fresh"} startup`
         );
@@ -176,7 +191,7 @@ test(
           assert.equal(
             (
               db
-                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '224'")
+                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '225'")
                 .get() as {
                 applied_at: string;
               }
@@ -211,7 +226,13 @@ test("traffic migration preserves the previously published higher slot", { timeo
     INSERT INTO _omniroute_migrations VALUES ('225', 'proxy_payload_traffic', 'fixture-applied');
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');`);
+    db.exec(
+      "CREATE TABLE proxy_logs (id TEXT PRIMARY KEY); INSERT INTO proxy_logs VALUES ('retained');"
+    );
     runMigrations(db, { isNewDb: true });
+    assert.deepEqual(db.prepare("SELECT * FROM proxy_logs").all(), [
+      { id: "retained", egress_ip_v4: null, egress_ip_v6: null },
+    ]);
     assert.equal(
       (db.prepare("SELECT attempts FROM proxy_payload_traffic").get() as { attempts: number })
         .attempts,
@@ -250,11 +271,11 @@ test(
       version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     INSERT INTO _omniroute_migrations (version, name) VALUES
-      ('224', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
+      ('225', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');`);
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
-      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 224 is occupied/);
+      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 225 is occupied/);
       assert.deepEqual(
         db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
         before
