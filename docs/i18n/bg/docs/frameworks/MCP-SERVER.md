@@ -301,117 +301,71 @@ OmniRoute чрез същия модел за свързване, който с�
 
 ## Удостоверяване и обхвати
 
-MCP извикванията четат низовете на обхватите от извикващия. Тази проверка е една от три независими именни пространства. Успех от една проверка не означава успех от останалите.
-Правилата са описани в [Три именни пространства на обхватите](#three-scope-namespaces).
-Каталогът на инструментите е в [Обхвати на MCP инструменти](#mcp-tool-scopes).
+MCP инструментът извиква низове за четене на обхват от повикващия. Тази проверка е едно от трите независими пространства от имена. Пас от един пул не е пас от останалите. Правилата са [три пространства от имена на обхват](#three-scope-namespaces). Каталогът с инструменти е [MCP tool scopes](#mcp-tool-scopes).
 
-### Три именни пространства на обхватите
+### Три пространства от имена на обхват
 
-`manage` върху API ключ, `read:compression` върху MCP инструмент и `read` върху
-токен за достъп `oma_live_…` са три различни разрешения. Извикващи, които изпращат токен за
-достъп `read` към маршрут за управление, който променя състоянието, получават HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Този ранг се определя от `scopeSatisfies`. Той не консултира MCP таблицата, а MCP
-съпоставянето не консултира него.
+`manage` на API ключ, `read:compression` на MCP инструмент и `read` на `oma_live_…` токен за достъп са три различни разрешения. Обаждащите се, които изпращат `read` токен за достъп до мутиращ маршрут за управление, получават HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Този ранг е `scopeSatisfies`. Той не прави справка с таблицата MCP и инструментът за съвпадение MCP не се консултира с нея.
 
-| Именно пространство        | Удостоверение                                                                 | Проверяващ механизъм           | Успехът позволява                                             |
-| :------------------------- | :---------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------------ |
-| Управление чрез API ключ   | `api_keys.scopes`                                                             | `hasManageScope`               | REST за управление за съответния Bearer ключ                  |
-| Адитивно за API ключ       | същият масив, един точен низ                                                  | помощникът, наименован по-долу | Само тази единична възможност                                 |
-| Обхвати на MCP инструменти | същият масив, иначе MCP `_meta` (само HTTP/SSE), иначе `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Съответния инструмент, след като налагането е включено        |
-| Токен за достъп            | `oma_live_…`                                                                  | `scopeSatisfies`               | Маршрутът за управление, чиито метод и път изискват този ранг |
+| Пространство от имена     | Удостоверение                                                                 | Дама                        | Пропуск позволява                                             |
+| :------------------------ | :---------------------------------------------------------------------------- | :-------------------------- | :------------------------------------------------------------ |
+| Управление на API ключове | `api_keys.scopes`                                                             | `hasManageScope`            | Управление REST за този ключ на носителя                      |
+| API-ключова добавка       | същия масив, един точен низ                                                   | помощникът, посочен по-долу | Само тази единствена способност                               |
+| обхват на инструмента MCP | същия масив, иначе MCP `_meta` (само HTTP/SSE ), иначе `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Този инструмент, след като прилагането е включено             |
+| Токен за достъп           | `oma_live_…`                                                                  | `scopeSatisfies`            | Маршрутът на управление, чийто метод и път изискват този ранг |
 
-Създаването на всяко удостоверение е описано в
-[Management Authentication](../guides/MANAGEMENT-AUTH.md).
+Сеченето на всяко пълномощно е обхванато в [Удостоверяване на управлението](../guides/MANAGEMENT-AUTH.md).
 
-#### Обхвати на API ключ
+#### Обхват на API-ключ
 
-Един масив `api_keys.scopes` захранва две задачи. Те използват различни функции.
+Един `api_keys.scopes` масив захранва две задачи. Те използват различни функции.
 
-**REST за управление.** `manage` и `admin` са членовете на
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` е това, което оторизира маршрутите за управление за съответния ключ. `admin` е
-с допустим за управление по тези маршрути. Думата `admin` тук не е
-рангът на токена за достъп и не се разширява до обхвати на MCP инструменти.
+**Управление REST.** `manage` и `admin` са членовете на `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` е това, което разрешава маршрути за управление за този ключ. `admin` е способен да управлява тези маршрути. Думата `admin` тук не е рангът на токена за достъп и не се разширява в обхвата на инструмента MCP.
 
-**Адитивни низове.** Всеки от тях е точен тест за членство и всеки от тях остава
-извън `MANAGEMENT_API_KEY_SCOPES`.
+**Добавъчни низове.** Всеки от тях е точен тест за членство и всеки остава извън `MANAGEMENT_API_KEY_SCOPES`.
 
-| Обхват                         | Успехът позволява                                                                                                                                                      |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Само изключението LOCAL_ONLY за `/api/mcp/` извън loopback (`hasMcpConnectOrManageScope`). Ключ с `manage` или `admin` все пак преминава това изключение.              |
-| `self:usage`                   | `GET /api/v1/me/status` за този ключ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` добавя този обхват при създаване (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Квотите на акаунта от страната на доставчика в този статус payload (`src/lib/usage/apiKeySelfService.ts`). Маршрутът за статус все така изисква `self:usage`.          |
-| `policy:bypass-provider-quota` | Извикванията за извод на този ключ пропускат политиката на квотата на доставчика (`hasProviderQuotaBypassScope` в `src/sse/handlers/chat.ts`).                         |
+| Обхват                         | Пропуск позволява                                                                                                                                                        |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Не-loopback `/api/mcp/` LOCAL_ONLY само отделяне (`hasMcpConnectOrManageScope`). Ключ с `manage` или `admin` все още преминава това изрязване.                           |
+| `self:usage`                   | `GET /api/v1/me/status` за този ключ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` добавя този обхват при създаване (`normalizeSelfServiceScopesForCreate`).   |
+| `self:account-quota`           | Квотите на акаунта нагоре по веригата в този полезен товар на състоянието (`src/lib/usage/apiKeySelfService.ts`). Маршрутът на състоянието все още изисква `self:usage`. |
+| `policy:bypass-provider-quota` | Извикванията за извод на този ключ пропускат политиката за квоти на доставчика (`hasProviderQuotaBypassScope` в `src/sse/handlers/chat.ts`).                             |
 
-#### Съпоставяне
+#### Съвпадение
 
-Каталогът е таблицата под [Обхвати на MCP инструменти](#mcp-tool-scopes). Не
-третирай `MCP_SCOPE_LIST` в `src/shared/constants/mcpScopes.ts` като този каталог:
-това е първоначалното типизирано подмножество. По-късните инструменти обявяват
-допълнителни обхвати до него (`read:notion`, `read:skills`, `read:local-corpus` и
-останалата част от таблицата).
+Каталогът е таблицата под [обхватите на инструмента MCP](#mcp-tool-scopes). Не третирайте `MCP_SCOPE_LIST` в `src/shared/constants/mcpScopes.ts` като този каталог: това е оригиналното въведено подмножество. По-късните инструменти декларират допълнителни обхвати до него (`read:notion`, `read:skills`, `read:local-corpus` и останалата част от таблицата).
 
-`evaluateToolScopes` в `open-sse/mcp-server/scopeEnforcement.ts` позволява извикване,
-когато всеки необходим обхват съвпада с някой предоставен обхват:
+`evaluateToolScopes` в `open-sse/mcp-server/scopeEnforcement.ts` позволява извикване, когато всеки необходим обхват съответства на даден предоставен обхват:
 
-- `*` съвпада с всеки необходим обхват.
-- Предоставен обхват, който завършва с `*`, съвпада с необходим обхват, който
-  започва с префикса преди звездичката. `read:*` съвпада с `read:compression`.
-- Всеки друг предоставен обхват съвпада само с идентичния необходим низ.
+- `*` съответства на всеки необходим обхват.
+- Предоставен обхват, който завършва на `*` съответства на задължителен обхват, който започва с префикса преди звездата. `read:*` съответства `read:compression`.
+- Всеки друг предоставен обхват съответства само на идентичния задължителен низ.
 
-Ключ, чиито обхвати са `["manage"]`, не преминава `scopeMatches` за `read:compression`.
-Същото извикване е неуспешно за `admin`, `mcp:connect`, `read` и `write`, когато те са
-единствените предоставени низове. Между обхватите на MCP инструменти няма йерархия
-освен за_trailing `*`.
+Ключ, чийто обхват е `["manage"]` се проваля `scopeMatches` за `read:compression`. Същото извикване е неуспешно за `admin`, `mcp:connect`, `read` и `write` когато това са единствените предоставени низове. Няма йерархия между обхватите на инструмента MCP извън края на `*`.
 
-Налагането е изключено, освен ако `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (по подразбиране
-`false`). Докато е изключено, `evaluateToolScopes` позволява извикването и пропуска
-каталога. Докато е включено, HTTP използва `api_keys.scopes` на Bearer ключа като
-`authInfo` (вж. [Per-key HTTP scope binding](#per-key-http-scope-binding-7895)).
-Когато не се разрешат обхвати на ключ, предоставеният набор преминава към MCP `_meta`
-(почетен само за HTTP/SSE извикващи, в HTTP контекст за удостоверяване; `_meta` на
-stdio извикващ се игнорира, защото клиентът го контролира и той не носи идентичност на
-конкретния извикващ), а след това към `OMNIROUTE_MCP_SCOPES`.
+Налагането е изключено, освен ако `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (по подразбиране `false`). Докато е изключен, `evaluateToolScopes` позволява повикването и пропуска каталога. Докато е включен, HTTP използва `api_keys.scopes` на ключа на носителя като `authInfo` (вижте [Обвързване на обхвата на HTTP за ключ](#per-key-http-scope-binding-7895) ). Когато няма разрешени обхвати на ключове, предоставеният набор попада в MCP `_meta` (отчита се само за HTTP/SSE повикващите, в рамките на HTTP auth контекст; `_meta` на stdio повикващия се игнорира, защото клиентът го контролира и не носи самоличност на повикващия), след това `OMNIROUTE_MCP_SCOPES`.
 
-#### Обхвати на токените за достъп
+#### Обхват на маркер за достъп
 
-Токените `oma_live_…` (`src/lib/accessTokens/scopes.ts`) носят `read`, `write`
-или `admin`. `scopeSatisfies` е ранг: `admin` покрива `write` и `read`, а
-`write` покрива `read`. Непознатите обхвати не покриват нищо.
+`oma_live_…` токените (`src/lib/accessTokens/scopes.ts`) носят `read`, `write` или `admin`. `scopeSatisfies` е ранг: `admin` покрива `write` и `read`, а `write` покрива `read`. Неизвестните обхвати не покриват нищо.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) сравнява този
-ранг с `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) сравнява този ранг с `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` и `OPTIONS` изискват `read`.
 - Всеки друг метод изисква `write`.
-- Пътищата в `ADMIN_SCOPE_PREFIXES` изискват `admin` за всеки метод. `/api/mcp`
-  е в този списък, затова `write` токен за достъп все още не може да извика
-  HTTP интерфейса на MCP.
+- Пътищата в `ADMIN_SCOPE_PREFIXES` изискват `admin` за всеки метод. `/api/mcp` е в този списък, така че `write` маркер за достъп все още не може да извика MCP HTTP повърхността.
 - Пътищата в `ADMIN_MUTATION_PREFIXES` изискват `admin` само за мутации.
-- Пътищата в `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) изискват `admin` само за мутации и само на
-  точно този път — останалите под-пътища `/api/settings/*` запазват `write`.
+- Пътищата в `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) изискват `admin` само за мутации и само по този точен път — други `/api/settings/*` подмаршрути запазват `write`.
 
-`PATCH /api/keys/{id}` е мутация и не е в тези admin списъци, затова `read`
-токен получава 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Токен за достъп с `write` или `admin` обслужва този маршрут. Dashboard JWT-ът,
-loopback CLI machine-id токенът и API ключ с `manage` или `admin` минават по
-други разклонения и не се стесняват от този ранг.
+`PATCH /api/keys/{id}` е мутация и не е в тези администраторски списъци, така че `read` токен получава 403 `Access token scope 'read' is insufficient; 'write' required.` `write` или `admin` токен за достъп удовлетворява този маршрут. Таблото JWT, loopback CLI machine-id токен и API ключ с `manage` или `admin` вземат други разклонения и не се стесняват от този ранг.
 
-Токен за достъп, който премине през `scopeSatisfies` за `/api/mcp`, е
-преминал само проверката за управленчески достъп. Извикванията на инструментите
-все пак изпълняват `scopeMatches` спрямо обхватите на API ключа. Рангът на
-токена за достъп не е вход за `scopeMatches`.
+Токен за достъп, който предава `scopeSatisfies` за `/api/mcp` е изчистил само вратата за управление. Извикванията на инструмента все още изпълняват `scopeMatches` срещу обхвати на API ключ. Рангът на токена за достъп не е вход за `scopeMatches`.
 
-### Обхвати на MCP инструментите
+### обхват на инструмента MCP
 
-Прилагането на обхватите е централизирано в
-`open-sse/mcp-server/scopeEnforcement.ts`. Всеки инструмент изисква
-специфични обхвати:
+Налагането на обхват е централизирано в `open-sse/mcp-server/scopeEnforcement.ts`. Всеки инструмент изисква специфични обхвати:
 
-| Scope                 | Tools                                                                                                                                                                                   |
+| Обхват                | Инструменти                                                                                                                                                                             |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                       |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                               |
@@ -444,57 +398,22 @@ loopback CLI machine-id токенът и API ключ с `manage` или `admin
 | `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                      |
 | `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                         |
 | `read:obsidian`       | 13 инструмента за четене — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 инструмента за запис — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
+| `write:obsidian`      | 9 инструменти за писане — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                       |
 
-Поддържат се wildcard обхвати: `read:*` дава всички обхвати за четене, `*` дава пълен достъп.
+Поддържат се обхвати със заместващи знаци: `read:*` предоставя всички обхвати за четене, `*` предоставя пълен достъп.
 
-### `mcp:connect` — тясна възможност за маршрут (#7895)
+### `mcp:connect` — възможност за тесен маршрут (#7895)
 
-Достъпът до HTTP/SSE MCP транспорта (`/api/mcp/*`) от извън loopback изисква
-изключението LOCAL_ONLY за `/api/mcp/` (вж. `docs/security/ROUTE_GUARD_TIERS.md`). Исторически
-това изключение приемаше само API ключ с пълен обхват `manage`/`admin` — твърде широко за
-извиквател, който трябва само да комуникира по MCP. `src/shared/constants/managementScopes.ts` вече
-експортира `MCP_CONNECT_SCOPE = "mcp:connect"`: аддитивен, тясен обхват (същият прецедент като
-`SELF_USAGE_SCOPE`), който разрешава САМО заобикалянето на `/api/mcp/` в
-`src/server/authz/policies/management.ts` — не дава никакъв друг достъп до маршрутите за
-управление и съзнателно е изключен от `MANAGEMENT_API_KEY_SCOPES`. Ключ с обхват
-`manage`/`admin` все така преминава през изключението без промяна; `mcp:connect` е алтернатива с
-по-ниски привилегии за отдалечени извикватели, които използват само MCP, и се проверява чрез
-`hasMcpConnectOrManageScope()`.
+Достигането до транспорта HTTP/SSE MCP (`/api/mcp/*`) от non-loopback изисква отделянето на `/api/mcp/` LOCAL_ONLY (вижте `docs/security/ROUTE_GUARD_TIERS.md`). Исторически това изрязване приема само пълен `manage`/`admin` -scope API ключ — твърде широк за обаждащ се, който трябва да говори само MCP. `src/shared/constants/managementScopes.ts` сега експортира `MCP_CONNECT_SCOPE = "mcp:connect"`: допълнителен, тесен обхват (същия прецедент като `SELF_USAGE_SCOPE`), който разрешава ONLY байпаса на `/api/mcp/` в `src/server/authz/policies/management.ts` — не предоставя друг достъп до маршрут за управление и съзнателно се запазва OUT на `MANAGEMENT_API_KEY_SCOPES`. Ключ, който държи `manage`/`admin` все още преминава през изрязването непроменен; `mcp:connect` е алтернатива с по-ниски привилегии за отдалечени обаждащи се само с MCP, проверени чрез `hasMcpConnectOrManageScope()`.
 
-### Свързване на обхвати по ключ при HTTP (#7895)
+### Обвързване на HTTP обхват на ключ (#7895)
 
-При HTTP/SSE `open-sse/mcp-server/httpTransport.ts` вече определя истинските
-`api_keys.scopes` на извиквателя чрез `resolveMcpCallerAuthInfo()`
-(`open-sse/mcp-server/httpAuthContext.ts`) и ги предава към MCP SDK чрез
-`transport.handleRequest(req, { authInfo })`, така че `extra.authInfo.scopes`, достигащи
-всяко извикване на инструмент, отразява собствените обхвати на Bearer ключа.
-`resolveCallerScopeContext()` в `scopeEnforcement.ts` вече даваше приоритет на `authInfo`
-пред `_meta` и пред резервния вариант с променливата на средата `OMNIROUTE_MCP_SCOPES` —
-това изменение само попълва този първи, най-високоприоритетен източник, който при HTTP
-дотогава не е бил попълван. Когато не се определи API ключ (няма заглавен ключ, невалиден ключ),
-`authInfo` остава `undefined` и определянето преминава непроменено към съществуващата верига
-`meta`/среда. stdio няма идентичност на извиквателя (вж. `mcpCallerIdentity.ts`) и не се
-засяга от свързването по ключ — той пропуска стъпката с `_meta` (`_meta` се използва само вътре в
-HTTP контекст за удостоверяване, #15159) и определя обхватите само от променливата на средата
-`OMNIROUTE_MCP_SCOPES`.
+Над HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` вече разрешава реалния `api_keys.scopes` на повикващия чрез `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) и го предава на `transport.handleRequest(req, { authInfo })` на MCP SDK, така че `extra.authInfo.scopes` достигайки всяко извикване на инструмент, отразява собствените обхвати на ключа на носещия. `resolveCallerScopeContext()` на `scopeEnforcement.ts` вече даде приоритет `authInfo` пред `_meta` и `OMNIROUTE_MCP_SCOPES` env резервен — това попълва само този първи източник с най-висок приоритет, който преди това не е бил захранван през HTTP. Когато ключът API не се разреши (няма заглавка, невалиден ключ), `authInfo` остава `undefined` и разрешаването преминава към съществуващата верига `meta`/env непроменена. stdio няма идентичност на обаждащия се (вижте `mcpCallerIdentity.ts`) и не се влияе от обвързването на ключ — той пропуска стъпката `_meta` (`_meta` се зачита само в контекста на удостоверяване на HTTP, #15159) и разрешава само от ключа `OMNIROUTE_MCP_SCOPES` env.
 
-**Принудителното прилагане на обхватите е включено за HTTP/SSE извикватели с тясни обхвати
-независимо от `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Стойността по подразбиране `false` на
-`OMNIROUTE_MCP_ENFORCE_SCOPES` е безопасна само за локалния/stdio поток с един оператор, където
-няма идентичност на извиквател, спрямо който да се прилагат обхватите.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` включва прилагането на обхватите по
-инструмент безусловно (`shouldForceScopeEnforcement()` в `scopeEnforcement.ts`), когато
-`resolveCallerScopeContext()` е определил `source === "authInfo"` (т.е. реален HTTP
-Authorization заглавен ключ, само за HTTP/SSE) И този ключ не притежава пълния обхват
-`manage`/`admin`. Това затваря празнината, при която ключ, притежаващ САМО тясния обхват
-`mcp:connect` — документиран по-горе като разрешаващ нищо друго освен изключението LOCAL_ONLY за
-`/api/mcp/` — иначе би могъл да извика всеки MCP инструмент, след като операторът е разрешил
-отдалечен/не-loopback MCP достъп, просто защото `OMNIROUTE_MCP_ENFORCE_SCOPES` излиза с
-`false` по подразбиране. Пълен ключ с `manage`/`admin` при HTTP, както и всеки stdio/локalен
-извиквател, запазват без промяна съществуващото поведение, управлявано от
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.
+**Изпълнението е принудително включено за HTTP/SSE повикващи с тесен обхват, независимо от `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` по подразбиране на `false` е безопасен само за local/stdio потока с един оператор, където няма идентичност на обаждащия се срещу обхват. `open-sse/mcp-server/server.ts::withScopeEnforcement()` включва прилагането на обхвата на инструмента безусловно (`shouldForceScopeEnforcement()` в `scopeEnforcement.ts`) всеки път, когато `resolveCallerScopeContext()` разреши `source === "authInfo"` (т.е. реален за ключ HTTP Authorization header, HTTP/SSE-only) AND този ключ не съдържа пълния обхват `manage`/`admin`. Това затваря празнината, при която ключ, който държи ONLY тесния обхват на `mcp:connect` заобикаляне — документиран по-горе като разрешаващ нищо друго освен `/api/mcp/` LOCAL_ONLY отделянето — може иначе да извика всеки MCP инструмент, след като оператор разреши remote/non-loopback MCP достъп, просто защото `OMNIROUTE_MCP_ENFORCE_SCOPES` изпраща `false` по подразбиране. Пълен ключ `manage`/`admin` над HTTP и всеки извикващ stdio/local запазва съществуващото поведение `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated непроменено.
+
+---
 
 ## Променливи на средата
 

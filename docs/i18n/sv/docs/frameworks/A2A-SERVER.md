@@ -163,7 +163,7 @@ OmniRoute avslöjar 6 A2A färdigheter kopplade i `src/lib/a2a/taskExecution.ts:
 | Hälsorapport       | `health-report`      | Aggregerat strömbrytare, nedkylning, låsningstillstånd per leverantör                                                                                | hälsa, motståndskraft          | "Visa hälsostatus för alla leverantörer"         |
 | Lista funktioner   | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 config) som en nedräkningstabell med rå SKILL.md URLs för kontextinjektion | katalog, upptäckt, färdigheter | "Lista alla OmniRoute -funktioner"               |
 
-> Agentkortet ska hållas i linje med 377-leverantörskatalogen. leverantörsantal och free/no-auth metadata hämtas från runtime-registret.
+> Agentkortet ska hållas i linje med 380-leverantörskatalogen. leverantörsantal och free/no-auth metadata hämtas från runtime-registret.
 
 ### `list-capabilities` Skicklighetsdetalj
 
@@ -199,15 +199,15 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
 
 ## Lägga till en ny färdighet
 
-1. **Skapa en färdighetsfil:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skapa färdighetsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportera en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ strukturen för befintliga färdigheter, såsom `smartRouting.ts`.
+   Exportera en asynkronfunktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ formen av befintliga färdigheter som `smartRouting.ts`.
 
-2. **Registrera hanteraren:** lägg till en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
+2. **Registerhanterare:** i `src/lib/a2a/taskExecution.ts`, lägg till en post i `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...befintliga färdigheter
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
    };
    ```
 
-3. **Exponera i agentkortet:** lägg till följande i arrayen `skills` i `src/lib/a2a/agentCardMetadata.ts` (som delas av `/.well-known/agent.json` och `/.well-known/agent-card.json`):
+3. **Exponera i agentkort:** i `src/lib/a2a/agentCardMetadata.ts` (delas av `/.well-known/agent.json` och `/.well-known/agent-card.json`), lägg till `skills` matrisen:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
    }
    ```
 
-4. **Skriv tester:** `tests/unit/a2a-<your-skill>.test.ts`. Täck både lyckat flöde och felflöde.
+4. **Skriv tester:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + felsökväg.
 
-5. **Dokumentera** den nya färdigheten i tabellen `Available Skills` i den här filen.
+5. **Dokumentera** den nya färdigheten i filens `Available Skills` tabell.
 
 ---
 
