@@ -297,165 +297,119 @@ Guardrails निष्पादन-पूर्व/पश्चात फ़ि
 
 ---
 
-## प्रमाणीकरण और स्कोप
+## प्रमाणीकरण और दायरा
 
-MCP टूल कॉल कॉलर से स्कोप स्ट्रिंग पढ़ते हैं। यह जाँच तीन स्वतंत्र नेमस्पेस में से एक है।
-एक चेकर से पास होना बाकी चेकरों से पास होने का प्रमाण नहीं है।
-नियम [तीन स्कोप नेमस्पेस](#three-scope-namespaces) में हैं।
-टूल कैटलॉग [MCP टूल स्कोप](#mcp-tool-scopes) में है।
+MCP टूल कॉल कॉलर से स्कोप स्ट्रिंग पढ़ता है। वह चेक तीन स्वतंत्र नामस्थानों में से एक है। एक चेकर का पास दूसरे चेकर का पास नहीं है। नियम [तीन स्कोप नेमस्पेस](#three-scope-namespaces) हैं। टूल कैटलॉग [MCP टूल स्कोप](#mcp-tool-scopes) है।
 
 ### तीन स्कोप नेमस्पेस
 
-किसी API कुंजी पर `manage`, किसी MCP टूल पर `read:compression`, और किसी
-`oma_live_…` एक्सेस टोकन पर `read` — ये तीन अलग-अलग अनुमतियाँ हैं। जो कॉलर किसी
-बदलने वाले मैनेजमेंट रूट पर `read` एक्सेस टोकन भेजते हैं, उन्हें HTTP 403
-मिलता है `Access token scope 'read' is insufficient; 'write' required.`
-वह रैंक `scopeSatisfies` है। यह MCP टेबल से परामर्श नहीं करता, और MCP मैचर भी
-उससे परामर्श नहीं करता।
+API कुंजी पर `manage`, MCP टूल पर `read:compression`, और `oma_live_…` एक्सेस टोकन पर `read` तीन अलग-अलग अनुदान हैं। कॉल करने वाले जो परिवर्तनशील प्रबंधन मार्ग पर `read` एक्सेस टोकन भेजते हैं, उन्हें HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` मिलता है, वह रैंक `scopeSatisfies` है। यह MCP तालिका से परामर्श नहीं करता है, और MCP मिलानकर्ता इससे परामर्श नहीं करता है।
 
-| नेमस्पेस          | क्रेडेंशियल                                                                | चेकर              | पास होने पर क्या अनुमत                                         |
-| :---------------- | :------------------------------------------------------------------------- | :---------------- | :------------------------------------------------------------- |
-| API-कुंजी प्रबंधन | `api_keys.scopes`                                                          | `hasManageScope`  | उस Bearer कुंजी के लिए मैनेजमेंट REST                          |
-| API-कुंजी एडिटिव  | वही ऐरे, एक सटीक स्ट्रिंग                                                  | नीचे नामित हेल्पर | केवल वही एक क्षमता                                             |
-| MCP टूल स्कोप     | वही ऐरे, अन्यथा MCP `_meta` (केवल HTTP/SSE), अन्यथा `OMNIROUTE_MCP_SCOPES` | `scopeMatches`    | वह टूल, जब enforcement चालू हो                                 |
-| एक्सेस टोकन       | `oma_live_…`                                                               | `scopeSatisfies`  | वह मैनेजमेंट रूट जिसके method और path के लिए वह रैंक आवश्यक है |
+| नाम स्थान           | क्रेडेंशियल                                                                  | परीक्षक          | एक पास अनुमति देता है                                              |
+| :------------------ | :--------------------------------------------------------------------------- | :--------------- | :----------------------------------------------------------------- |
+| एपीआई-कुंजी प्रबंधन | `api_keys.scopes`                                                            | `hasManageScope` | उस बियरर कुंजी के लिए प्रबंधन REST                                 |
+| एपीआई-कुंजी योजक    | एक ही सरणी, एक सटीक स्ट्रिंग                                                 | नीचे नामित सहायक | बस वही एक क्षमता है                                                |
+| MCP टूल स्कोप       | वही सरणी, अन्यथा MCP `_meta` (केवल HTTP/SSE ), अन्यथा `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | वह उपकरण, एक बार प्रवर्तन चालू हो जाने पर                          |
+| एक्सेस टोकन         | `oma_live_…`                                                                 | `scopeSatisfies` | जिस प्रबंधन मार्ग की विधि और पथ के लिए उस रैंक की आवश्यकता होती है |
 
-प्रत्येक क्रेडेंशियल बनाने की प्रक्रिया
-[मैनेजमेंट प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) में शामिल है।
+प्रत्येक क्रेडेंशियल को ढालना [प्रबंधन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) में शामिल है।
 
-#### API-कुंजी स्कोप
+#### एपीआई-कुंजी स्कोप
 
-एक `api_keys.scopes` ऐरे दो कामों को पोषित करता है। वे अलग-अलग फ़ंक्शन
-इस्तेमाल करते हैं।
+एक `api_keys.scopes` सरणी दो नौकरियों को फ़ीड करती है। वे विभिन्न कार्यों का उपयोग करते हैं।
 
-**मैनेजमेंट REST.** `manage` और `admin`, `MANAGEMENT_API_KEY_SCOPES`
-(`src/shared/constants/managementScopes.ts`) के सदस्य हैं।
-`hasManageScope` ही उस कुंजी के लिए मैनेजमेंट रूटों को प्राधिकृत करता है। उन रूटों
-पर `admin` मैनेजमेंट-सक्षम है। यहाँ `admin` शब्द एक्सेस-टोकन रैंक नहीं है और यह
-MCP टूल स्कोप में विस्तारित भी नहीं होता।
+**प्रबंधन REST.** `manage` और `admin` `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) के सदस्य हैं। `hasManageScope` वह है जो उस कुंजी के लिए प्रबंधन मार्गों को अधिकृत करता है। `admin` उन मार्गों पर प्रबंधन-सक्षम है। यहां `admin` शब्द एक्सेस-टोकन रैंक नहीं है और यह MCP टूल स्कोप में विस्तारित नहीं होता है।
 
-**एडिटिव स्ट्रिंग्स.** प्रत्येक एक सटीक सदस्यता परीक्षण है, और प्रत्येक एक
-`MANAGEMENT_API_KEY_SCOPES` के बाहर ही रहता है।
+**योगात्मक तार.** प्रत्येक एक सटीक सदस्यता परीक्षण है, और प्रत्येक `MANAGEMENT_API_KEY_SCOPES` से बाहर रहता है।
 
-| स्कोप                          | पास होने पर क्या अनुमत                                                                                                                                                |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | केवल non-loopback `/api/mcp/` LOCAL_ONLY carve-out (`hasMcpConnectOrManageScope`)। `manage` या `admin` वाली कुंजी भी उस carve-out से होकर गुज़रती है।                 |
-| `self:usage`                   | इस कुंजी के लिए `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)। `POST /api/keys` बनाते समय यह स्कोप जोड़ता है (`normalizeSelfServiceScopesForCreate`)। |
-| `self:account-quota`           | उस status payload के अंदर अपस्ट्रीम खाता कोटा (`src/lib/usage/apiKeySelfService.ts`)। status रूट को फिर भी `self:usage` चाहिए।                                        |
-| `policy:bypass-provider-quota` | इस कुंजी के inference कॉल provider-quota नीति को छोड़ देते हैं (`src/sse/handlers/chat.ts` में `hasProviderQuotaBypassScope`)।                                        |
+| दायरा                          | एक पास अनुमति देता है                                                                                                                                                    |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | गैर-लूपबैक `/api/mcp/` LOCAL_ONLY केवल नक्काशीदार (`hasMcpConnectOrManageScope`)। `manage` या `admin` वाली कुंजी अभी भी उस नक्काशी से गुजरती है।                         |
+| `self:usage`                   | इस कुंजी के लिए `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)। `POST /api/keys` इस स्कोप को क्रिएट (`normalizeSelfServiceScopesForCreate`) पर जोड़ता है। |
+| `self:account-quota`           | उस स्थिति पेलोड (`src/lib/usage/apiKeySelfService.ts`) के अंदर अपस्ट्रीम खाता कोटा। स्टेटस रूट के लिए अभी भी `self:usage` आवश्यकता है।                                   |
+| `policy:bypass-provider-quota` | इस कुंजी की अनुमान कॉल प्रदाता-कोटा नीति (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`) को छोड़ देती है।                                                  |
 
-#### मिलान
+#### मेल मिलाना
 
-कैटलॉग [MCP टूल स्कोप](#mcp-tool-scopes) के अंतर्गत दी गई तालिका है।
-`src/shared/constants/mcpScopes.ts` में मौजूद `MCP_SCOPE_LIST` को उस कैटलॉग मत
-समझें: वह मूल टाइप किया गया उप-समूह है। बाद के टूल उसके साथ-साथ और स्कोप भी
-घोषित करते हैं (`read:notion`, `read:skills`, `read:local-corpus`, और तालिका का शेष
-भाग)।
+कैटलॉग [MCP टूल स्कोप](#mcp-tool-scopes) के अंतर्गत तालिका है। `src/shared/constants/mcpScopes.ts` में `MCP_SCOPE_LIST` उस कैटलॉग के रूप में न मानें: यह मूल टाइप किया गया उपसमुच्चय है। बाद के उपकरण इसके अतिरिक्त अन्य क्षेत्रों की घोषणा करते हैं (`read:notion`, `read:skills`, `read:local-corpus`, और शेष तालिका)।
 
-`open-sse/mcp-server/scopeEnforcement.ts` में `evaluateToolScopes` कॉल को तब
-अनुमति देता है जब हर आवश्यक स्कोप किसी granted स्कोप से मेल खाता हो:
+`open-sse/mcp-server/scopeEnforcement.ts` में`evaluateToolScopes` कॉल की अनुमति देता है जब प्रत्येक आवश्यक दायरा कुछ दिए गए दायरे से मेल खाता है:
 
-- `*` हर आवश्यक स्कोप से मेल खाता है।
-- `*` पर समाप्त होने वाला कोई granted स्कोप उस आवश्यक स्कोप से मेल खाता है जो
-  स्टार से पहले के prefix से शुरू होता है। `read:*`, `read:compression` से मेल
-  खाता है।
-- हर अन्य granted स्कोप केवल उसी समरूप आवश्यक स्ट्रिंग से मेल खाता है।
+- `*` हर आवश्यक दायरे से मेल खाता है।
+- एक स्वीकृत दायरा जो `*` में समाप्त होता है, एक आवश्यक दायरे से मेल खाता है जो स्टार से पहले उपसर्ग से शुरू होता है। `read:*` `read:compression` मेल खाता है।
+- प्रत्येक अन्य स्वीकृत दायरा केवल समान आवश्यक स्ट्रिंग से मेल खाता है।
 
-जिस कुंजी के स्कोप `["manage"]` हों, वह `read:compression` के लिए `scopeMatches`
-में विफल होती है। वही कॉल `admin`, `mcp:connect`, `read`, और `write` के लिए भी
-विफल होता है, जब वे ही मात्र granted स्ट्रिंग हों। अंतिम `*` के अतिरिक्त MCP टूल
-स्कोपों के बीच कोई पदानुक्रम नहीं है।
+एक कुंजी जिसका दायरा `["manage"]` है, `read:compression` के लिए `scopeMatches` विफल हो जाता है। वही कॉल `admin`, `mcp:connect`, `read`, और `write` के लिए विफल हो जाती है जब वे एकमात्र स्वीकृत स्ट्रिंग होते हैं। अनुवर्ती `*` से परे MCP टूल स्कोप के बीच कोई पदानुक्रम नहीं है।
 
-जब तक `OMNIROUTE_MCP_ENFORCE_SCOPES=true` न हो, enforcement बंद रहता है
-(डिफ़ॉल्ट `false`)। जब वह बंद है, `evaluateToolScopes` कॉल को अनुमति देता है और
-कैटलॉग को छोड़ देता है। जब वह चालू हो, HTTP Bearer कुंजी के `api_keys.scopes` को
-`authInfo` के रूप में उपयोग करता है (देखें [प्रति-कुंजी HTTP स्कोप बाइंडिंग](#per-key-http-scope-binding-7895))।
-जब कोई कुंजी स्कोप resolve न हो, तो granted सेट MCP `_meta` की ओर गिरता है (इसे
-केवल HTTP/SSE कॉलरों के लिए HTTP auth संदर्भ के भीतर मान्यता मिलती है; stdio कॉलर
-का `_meta` अनदेखा किया जाता है क्योंकि उसे क्लाइंट नियंत्रित करता है और उसमें
-प्रति-कॉलर पहचान नहीं होती), फिर `OMNIROUTE_MCP_SCOPES`।
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (डिफ़ॉल्ट `false`) तक प्रवर्तन बंद है। जबकि यह बंद है, `evaluateToolScopes` कॉल की अनुमति देता है और कैटलॉग को छोड़ देता है। जब यह चालू होता है, HTTP बियरर कुंजी के `api_keys.scopes` `authInfo` के रूप में उपयोग करता है ( [प्रति-कुंजी HTTP स्कोप बाइंडिंग](#per-key-http-scope-binding-7895) देखें)। जब कोई कुंजी स्कोप हल नहीं होता है, तो दिया गया सेट MCP `_meta` (केवल HTTP/SSE कॉलर्स के लिए सम्मानित किया जाता है, HTTP प्रामाणिक संदर्भ के अंदर; एक stdio कॉलर के `_meta` नजरअंदाज कर दिया जाता है क्योंकि क्लाइंट इसे नियंत्रित करता है और इसमें प्रति-कॉलर की कोई पहचान नहीं होती है), फिर `OMNIROUTE_MCP_SCOPES`।
 
 #### एक्सेस-टोकन स्कोप
 
-`oma_live_…` टोकन (`src/lib/accessTokens/scopes.ts`) में `read`, `write`, या
-`admin` होता है। `scopeSatisfies` एक रैंक है: `admin`, `write` और `read` दोनों को
-कवर करता है, और `write`, `read` को कवर करता है। अज्ञात स्कोप किसी भी चीज़ को कवर
-नहीं करते।
+`oma_live_…` टोकन (`src/lib/accessTokens/scopes.ts`) में `read`, `write`, या `admin` होता है। `scopeSatisfies` एक रैंक है: `admin` `write` और `read` को कवर करता है, और `write` `read` को कवर करता है। अज्ञात दायरे कुछ भी कवर नहीं करते.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) उस रैंक की तुलना
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`) से करता है:
-"
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) उस रैंक की तुलना `inferRequiredScope` (`src/server/authz/accessScopes.ts`) से करता है:
 
-- `GET`, `HEAD` और `OPTIONS` को `read` की आवश्यकता होती है।
-- हर अन्य विधि को `write` की आवश्यकता होती है।
-- `ADMIN_SCOPE_PREFIXES` में शामिल पथों को हर विधि के लिए `admin` की आवश्यकता होती है। `/api/mcp`
-  उस सूची में शामिल है, इसलिए `write` एक्सेस टोकन भी अभी भी MCP HTTP
-  सरफ़ेस को कॉल नहीं कर सकता।
-- `ADMIN_MUTATION_PREFIXES` में शामिल पथों को केवल उत्परिवर्तनों के लिए `admin` की आवश्यकता होती है।
-- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) में शामिल पथों को केवल उत्परिवर्तनों के लिए `admin` की आवश्यकता होती है, और केवल उस
-  सटीक पथ पर — अन्य `/api/settings/*` सब-रूट में `write` बना रहता है।
+- `GET`, `HEAD`, और `OPTIONS` `read` आवश्यकता होती है।
+- प्रत्येक अन्य विधि के लिए `write` आवश्यकता होती है।
+- `ADMIN_SCOPE_PREFIXES` में पथों को प्रत्येक विधि के लिए `admin` आवश्यकता होती है। `/api/mcp` उस सूची में है, इसलिए `write` एक्सेस टोकन अभी भी MCP HTTP सतह को कॉल नहीं कर सकता है।
+- `ADMIN_MUTATION_PREFIXES` में पथों को केवल उत्परिवर्तन के लिए `admin` आवश्यकता होती है।
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) में पथों को केवल उत्परिवर्तन के लिए `admin` आवश्यकता होती है, और केवल उस सटीक पथ पर — अन्य `/api/settings/*` उप-मार्ग `write` रखते हैं।
 
-`PATCH /api/keys/{id}` एक उत्परिवर्तन है और वह उन एडमिन सूचियों पर नहीं है, इसलिए `read`
-टोकन को 403
-`Access token scope 'read' is insufficient; 'write' required.`
-मिलता है।
-`write` या `admin` एक्सेस टोकन उस रूट को संतुष्ट करता है। डैशबोर्ड JWT, लूपबैक CLI मशीन-आईड टोकन, तथा `manage` या `admin` वाली API कुंजी अन्य शाखाएँ लेती हैं और इस रैंक से सीमित नहीं होतीं।
+`PATCH /api/keys/{id}` एक उत्परिवर्तन है और उन व्यवस्थापक सूचियों पर नहीं है, इसलिए एक `read` टोकन 403 `Access token scope 'read' is insufficient; 'write' required.` प्राप्त करता है एक `write` या `admin` एक्सेस टोकन उस मार्ग को संतुष्ट करता है। एक डैशबोर्ड JWT, लूपबैक CLI मशीन-आईडी टोकन, और `manage` या `admin` के साथ एक API कुंजी अन्य शाखाएं लेते हैं और इस रैंक से संकुचित नहीं होते हैं।
 
-`/api/mcp` के लिए `scopeSatisfies` पास करने वाला एक्सेस टोकन केवल प्रबंधन गेट से गुज़र चुका है। टूल कॉल अब भी API-कुंजी स्कोप के विरुद्ध `scopeMatches` चलाते हैं। एक्सेस-टोकन रैंक `scopeMatches` का इनपुट नहीं है।
+एक एक्सेस टोकन जो `/api/mcp` के लिए `scopeSatisfies` पास करता है उसने केवल प्रबंधन गेट को साफ़ कर दिया है। टूल कॉल अभी भी एपीआई-कुंजी स्कोप के विरुद्ध `scopeMatches` चलाते हैं। एक्सेस-टोकन रैंक `scopeMatches` का इनपुट नहीं है।
 
 ### MCP टूल स्कोप
 
-स्कोप प्रवर्तन `open-sse/mcp-server/scopeEnforcement.ts` में केंद्रित है।
-हर टूल के लिए विशिष्ट स्कोप आवश्यक होते हैं:
+स्कोप प्रवर्तन `open-sse/mcp-server/scopeEnforcement.ts` में केंद्रीकृत है। प्रत्येक उपकरण को विशिष्ट दायरे की आवश्यकता होती है:
 
-| क्षेत्र               | उपकरण                                                                                                                                                                        |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                            |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                    |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                       |
-| `read:quota`          | `check_quota`                                                                                                                                                                |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                       |
-| `read:models`         | `list_models_catalog`                                                                                                                                                        |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                        |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                           |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                  |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                               |
-| `read:cache`          | `cache_stats`                                                                                                                                                                |
-| `write:cache`         | `cache_flush`                                                                                                                                                                |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                   |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                            |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                        |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                             |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                       |
-| `read:memory`         | `memory_search`                                                                                                                                                              |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                 |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                           |
-| `write:skills`        | `skills_enable`                                                                                                                                                              |
-| `execute:skills`      | `skills_execute`                                                                                                                                                             |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                             |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                      |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                    |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                             |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                               |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                           |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                              |
-| `read:obsidian`       | 13 read tools — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 write tools — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
+| दायरा                 | औजार                                                                                                                                                                            |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                               |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                       |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                          |
+| `read:quota`          | `check_quota`                                                                                                                                                                   |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                          |
+| `read:models`         | `list_models_catalog`                                                                                                                                                           |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                   |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                           |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                              |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                     |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                  |
+| `read:cache`          | `cache_stats`                                                                                                                                                                   |
+| `write:cache`         | `cache_flush`                                                                                                                                                                   |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                      |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                               |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                           |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                          |
+| `read:memory`         | `memory_search`                                                                                                                                                                 |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                    |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                              |
+| `write:skills`        | `skills_enable`                                                                                                                                                                 |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                         |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                       |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                  |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                              |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                 |
+| `read:obsidian`       | 13 उपकरण पढ़ें — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, ... |
+| `write:obsidian`      | 9 उपकरण लिखें — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, ...                |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
 
-वाइल्डकार्ड स्कोप समर्थित हैं: `read:*` सभी read-स्कोप प्रदान करता है, `*` पूर्ण पहुँच प्रदान करता है।
+वाइल्डकार्ड स्कोप समर्थित हैं: `read:*` सभी रीड-स्कोप्स प्रदान करता है, `*` पूर्ण एक्सेस प्रदान करता है।
 
-### `mcp:connect` — संकीर्ण रूट क्षमता (#7895)
+### `mcp:connect` — संकीर्ण मार्ग क्षमता (#7895)
 
-HTTP/SSE MCP ट्रांज़पोर्ट (`/api/mcp/*`) तक गैर-लूपबैक से पहुँचने के लिए `/api/mcp/` LOCAL_ONLY carve-out आवश्यक है (देखें `docs/security/ROUTE_GUARD_TIERS.md`)। ऐतिहासिक रूप से यह carve-out केवल पूर्ण `manage`/`admin`-स्कोप वाली API key स्वीकार करता था — यह उस कॉलर के लिए बहुत व्यापक था जिसे केवल MCP से बात करने की आवश्यकता है। `src/shared/constants/managementScopes.ts` अब `MCP_CONNECT_SCOPE = "mcp:connect"` एक्सपोर्ट करता है: यह एक योजक (additive), संकीर्ण स्कोप है (उसी सिद्धांत पर आधारित जैसे `SELF_USAGE_SCOPE`) जो केवल `src/server/authz/policies/management.ts` में `/api/mcp/` bypass को प्राधिकृत करता है — यह किसी अन्य मैनेजमेंट-रूट पहुँच प्रदान नहीं करता और जानबूझकर `MANAGEMENT_API_KEY_SCOPES` से बाहर रखा गया है। `manage`/`admin` वाली key अभी भी अपरिवर्तित carve-out से गुजरती है; `mcp:connect` दूरस्थ MCP-केवल कॉलरों के लिए कम विशेषाधिकार वाला विकल्प है, जिसकी जाँच `hasMcpConnectOrManageScope()` से होती है।
+गैर-लूपबैक से HTTP/SSE MCP ट्रांसपोर्ट (`/api/mcp/*`) तक पहुंचने के लिए `/api/mcp/` LOCAL_ONLY कार्व-आउट ( `docs/security/ROUTE_GUARD_TIERS.md` देखें) की आवश्यकता होती है। ऐतिहासिक रूप से वह नक्काशी केवल एक पूर्ण `manage`/`admin` -scope API कुंजी — स्वीकार करती है जो एक कॉलर के लिए बहुत व्यापक है जिसे केवल MCP बात करने की आवश्यकता है। `src/shared/constants/managementScopes.ts` अब `MCP_CONNECT_SCOPE = "mcp:connect"` निर्यात करता है: एक योजक, संकीर्ण दायरा ( `SELF_USAGE_SCOPE` के समान उदाहरण) जो `/api/mcp/` `src/server/authz/policies/management.ts` ONLY अधिकृत करता है — यह कोई अन्य प्रबंधन-मार्ग पहुंच नहीं देता है और जानबूझकर `MANAGEMENT_API_KEY_SCOPES` का OUT रखा जाता है। `manage`/`admin` को धारण करने वाली कुंजी अभी भी नक्काशी-आउट को अपरिवर्तित करती है; `mcp:connect` केवल दूरस्थ एमसीपी कॉल करने वालों के लिए एक निम्न-विशेषाधिकार वाला विकल्प है, जिसे `hasMcpConnectOrManageScope()` के माध्यम से जांचा जाता है।
 
-### प्रति-key HTTP स्कोप बाइंडिंग (#7895)
+### प्रति-कुंजी HTTP स्कोप बाइंडिंग (#7895)
 
-HTTP/SSE पर, `open-sse/mcp-server/httpTransport.ts` अब `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) के माध्यम से कॉलर का वास्तविक `api_keys.scopes` हल करता है और उसे MCP SDK के `transport.handleRequest(req, { authInfo })` को पास करता है, ताकि प्रत्येक टूल कॉल तक पहुँचने वाला `extra.authInfo.scopes` Bearer key के अपने स्कोप्स को दर्शाए। `scopeEnforcement.ts` का `resolveCallerScopeContext()` पहले से ही `_meta` और `OMNIROUTE_MCP_SCOPES` env फ़ॉलबैक की तुलना में `authInfo` को प्राथमिकता देता था — यह केवल उस पहले, सर्वोच्च-प्राथमिकता स्रोत को भरता है, जो HTTP पर पहले अप्रस्तुत था। जब कोई API key हल नहीं होती (कोई header नहीं, अमान्य key), तब `authInfo` `undefined` रहता है और हल करने की प्रक्रिया अपरिवर्तित `meta`/env शृंखला तक नीचे जाती है। stdio में प्रति-कॉलर पहचान नहीं होती (देखें `mcpCallerIdentity.ts`) और प्रति-key बाइंडिंग से अप्रभावित रहता है — यह `_meta` चरण को छोड़ देता है (`_meta` केवल HTTP ऑथ संदर्भ के भीतर मान्य है, #15159) और केवल `OMNIROUTE_MCP_SCOPES` env key से हल करता है।
+HTTP/SSE पर, `open-sse/mcp-server/httpTransport.ts` अब `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) के माध्यम से कॉलर के वास्तविक `api_keys.scopes` हल करता है और इसे MCP SDK के `transport.handleRequest(req, { authInfo })` में भेजता है, इसलिए प्रत्येक टूल कॉल तक पहुंचने वाला `extra.authInfo.scopes` बियरर कुंजी के अपने दायरे को दर्शाता है। `scopeEnforcement.ts` के `resolveCallerScopeContext()` ने पहले से ही `_meta` और `OMNIROUTE_MCP_SCOPES` env फ़ॉलबैक — पर `authInfo` प्राथमिकता दी है, यह केवल उस पहले, उच्चतम-प्राथमिकता वाले स्रोत को पॉप्युलेट करता है, जो पहले HTTP पर अनफेड था। जब कोई API कुंजी हल नहीं होती (कोई हेडर नहीं, अमान्य कुंजी), `authInfo` `undefined` रहता है और रिज़ॉल्यूशन मौजूदा `meta`/env श्रृंखला में अपरिवर्तित रहता है। stdio की कोई प्रति-कॉलर पहचान नहीं है (देखें `mcpCallerIdentity.ts`) और यह प्रति-कुंजी बाइंडिंग — से अप्रभावित है, यह `_meta` चरण को छोड़ देता है (`_meta` केवल HTTP प्रामाणिक संदर्भ के अंदर सम्मानित किया जाता है, #15159) और केवल `OMNIROUTE_MCP_SCOPES` env कुंजी से हल होता है।
 
-**संकीर्ण-स्कोप वाले HTTP/SSE कॉलरों के लिए प्रवर्तन `OMNIROUTE_MCP_ENFORCE_SCOPES` की परवाह किए बिना अनिवार्य रूप से चालू रहता है।** `OMNIROUTE_MCP_ENFORCE_SCOPES` का डिफ़ॉल्ट `false` होना केवल स्थानीय/stdio एकल-ऑपरेटर प्रवाह के लिए सुरक्षित है, जहाँ स्कोप करने के लिए कोई प्रति-कॉलर पहचान नहीं होती। `open-sse/mcp-server/server.ts::withScopeEnforcement()` प्रति-टूल स्कोप प्रवर्तन को अनिवार्य रूप से चालू कर देता है (`scopeEnforcement.ts` में `shouldForceScopeEnforcement()`) जब भी `resolveCallerScopeContext()` ने `source === "authInfo"` हल किया (अर्थात वास्तविक प्रति-key HTTP Authorization header, केवल HTTP/SSE) और वह key पूर्ण `manage`/`admin` स्कोप नहीं रखती। इससे वह अंतर बंद हो जाता है जहाँ केवल संकीर्ण `mcp:connect` bypass स्कोप वाली key — जैसा ऊपर दस्तावेज़ीकृत किया गया है कि यह `/api/mcp/` LOCAL_ONLY carve-out के अलावा कुछ भी प्राधिकृत नहीं करती — अन्यथा ऑपरेटर दूरस्थ/गैर-लूपबैक MCP पहुँच सक्षम करने के बाद हर MCP टूल आमंत्रित कर सकती थी, केवल इसलिए कि `OMNIROUTE_MCP_ENFORCE_SCOPES` डिफ़ॉल्ट रूप से `false` आता है। HTTP पर पूर्ण `manage`/`admin` वाली key, और हर stdio/स्थानीय कॉलर, मौजूदा `OMNIROUTE_MCP_ENFORCE_SCOPES`-आधारित व्यवहार को अपरिवर्तित रखते हैं।
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` की परवाह किए बिना संकीर्ण दायरे वाले HTTP/SSE कॉल करने वालों के लिए प्रवर्तन को मजबूर किया जाता है।** `OMNIROUTE_MCP_ENFORCE_SCOPES` को `false` पर डिफॉल्ट करना केवल local/stdio सिंगल-ऑपरेटर प्रवाह के लिए सुरक्षित है, जहां प्रति-कॉलर की कोई पहचान नहीं है। जब भी `resolveCallerScopeContext()` `source === "authInfo"` (यानी एक वास्तविक प्रति-कुंजी HTTP प्राधिकरण हेडर, HTTP/SSE-only) को हल करता है तो `open-sse/mcp-server/server.ts::withScopeEnforcement()` प्रति-टूल स्कोप प्रवर्तन को बिना शर्त ( `scopeEnforcement.ts` में`shouldForceScopeEnforcement()` ) चालू कर देता है, AND उस कुंजी में पूर्ण `manage`/`admin` स्कोप नहीं होता है। यह उस अंतर को बंद कर देता है जहां एक कुंजी ONLY को पकड़े हुए संकीर्ण `mcp:connect` बाईपास स्कोप — `/api/mcp/` LOCAL_ONLY कार्व-आउट — के अलावा कुछ भी अधिकृत करने के रूप में ऊपर प्रलेखित नहीं करती है, अन्यथा ऑपरेटर द्वारा remote/non-loopback MCP एक्सेस सक्षम करने के बाद प्रत्येक MCP टूल को आमंत्रित किया जा सकता है, केवल इसलिए क्योंकि `OMNIROUTE_MCP_ENFORCE_SCOPES` डिफ़ॉल्ट रूप से `false` को शिप करता है। HTTP पर एक पूर्ण `manage`/`admin` कुंजी, और प्रत्येक stdio/local कॉलर, मौजूदा `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated व्यवहार को अपरिवर्तित रखता है।
 
 ---
 

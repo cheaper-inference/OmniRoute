@@ -772,6 +772,10 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
         model: "codex/gpt-5.5-low",
         stream: false,
         conversation_id: "conv_codex_fingerprint",
+        // Native Responses passthrough preserves optional fields rather than
+        // injecting them. Supply both to exercise their canonical wire order.
+        instructions: "Reply with the requested fingerprint confirmation.",
+        include: ["reasoning.encrypted_content"],
         input: [
           {
             type: "message",
@@ -825,6 +829,8 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
   );
   assert.equal(call.body.model, "gpt-5.5");
   assert.equal(call.body.store, false);
+  assert.equal(call.body.instructions, "Reply with the requested fingerprint confirmation.");
+  assert.deepEqual(call.body.include, ["reasoning.encrypted_content"]);
   assert.equal(
     call.body.client_metadata["x-codex-installation-id"],
     "11111111-1111-4111-a111-111111111111"
