@@ -14,61 +14,73 @@ vezérlők”) és a `src/lib/compliance/providerAudit.ts` fájlokban találhat�
 
 ## Mi kerül naplózásra
 
-### Adminisztratív auditesemények (`audit_log`)
+### Adminisztratív audit események (`audit_log`)
 
-A `logAuditEvent({ action, actor, target, details, ... })` minden egyes hívása
-egy sort hoz létre. A műveleti karakterláncok a `domain.verb` (vagy `domain.verb.outcome`)
-mintát követik. A forráskódban megerősített művelettípusok többek között:
+A `logAuditEvent({ action, actor, target, details, ... })` minden hívása
+egy sort eredményez. A műveletkarakterláncok a `domain.verb` (vagy
+`domain.verb.outcome`) mintát követik. A forráskódban megerősített művelettípusok:
 
-| Művelet                              | Forrás                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Művelet                              | Forrás                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Minden bejegyzés rögzíti az `action`, `actor` (alapértelmezés szerint `"system"`), `target`,
-`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` és `timestamp` mezőket. Az érzékeny kulcsok (`apiKey`, `accessToken`,
-`refreshToken`, `password`, valamint minden, a `*token`/`*secret`/`*apikey`
-mintára illeszkedő kulcs stb.) rekurzívan `"[redacted]"` értékre cserélődnek a sor beírása előtt.
+Minden bejegyzés tartalmazza az `action`, `actor` (alapértelmezett értéke
+`"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`,
+`status`, `request_id` és `timestamp` mezőket. Az érzékeny kulcsokat (`apiKey`,
+`accessToken`, `refreshToken`, `password`, a `*token`/`*secret`/`*apikey` mintára
+illeszkedő kulcsokat stb.) a rendszer rekurzívan `"[redacted]"` értékre maszkolja,
+mielőtt a sor írásra kerül.
+
+Az `api_key.auth.touch` sorok a sikeres API-kulcs-metaadat- és
+felderítési olvasásokat (GET/HEAD) rögzítik, amelyek soha nem jutnak el a
+kérésnaplóig: melyik kulcsról, mikor és mely normalizált útvonalról volt szó;
+ezek összevonva, legfeljebb 1 000 sorban kerülnek tárolásra. A `noLog` értékkel
+rendelkező kulcsok és a környezeti kulcs kimaradnak. A hívó IP-címe és
+felhasználói ügynöke csak akkor kerül hozzáadásra, ha az
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` funkciójelző be van kapcsolva
+(alapértelmezés szerint ki van kapcsolva).
 
 ### MCP-eszközhívások (`mcp_tool_audit`)
 
 Minden MCP-eszközmeghívás egy sort ír az
-`open-sse/mcp-server/audit.ts` fájlon keresztül. A séma (a
+`open-sse/mcp-server/audit.ts` fájlon keresztül. Séma (a
 `src/lib/db/migrations/002_mcp_a2a_tables.sql` alapján):
 
-| Oszlop           | Megjegyzés                                        |
-| ---------------- | ------------------------------------------------- |
-| `id`             | automatikusan növekvő érték                       |
-| `tool_name`      | MCP-eszközazonosító                               |
-| `input_hash`     | a bemenet sha256 kivonata (a hasznos adat nélkül) |
-| `output_summary` | rövid, csonkolt összefoglaló                      |
-| `duration_ms`    | eltelt idő                                        |
-| `api_key_id`     | hívó (lehet null)                                 |
-| `success`        | `1` / `0`                                         |
-| `error_code`     | sikertelenség esetén a végső hibakód              |
-| `created_at`     | ISO-időbélyeg                                     |
+| Oszlop           | Megjegyzések                                           |
+| ---------------- | ------------------------------------------------------ |
+| `id`             | automatikusan növekvő                                  |
+| `tool_name`      | MCP-eszközazonosító                                    |
+| `input_hash`     | a bemenet sha256-értéke (a hasznos adatot nem tárolja) |
+| `output_summary` | rövid, csonkolt összefoglaló                           |
+| `duration_ms`    | eltelt idő                                             |
+| `api_key_id`     | hívó (null értékű lehet)                               |
+| `success`        | `1` / `0`                                              |
+| `error_code`     | sikertelenség esetén a végleges hibakód                |
+| `created_at`     | ISO-időbélyeg                                          |
 
 ### Kérés- és használati naplók
 
-Ezek működési telemetriai adatok (nem szigorúan véve adminisztratív auditadatok), de ugyanazt a megőrzési folyamatot használják:
+Ezek működési telemetriai adatok (nem szigorúan adminisztratív auditadatok),
+de ugyanazt a megőrzési folyamatot használják:
 
-- `usage_history` — kérésenként összesített használati adatok
-- `call_logs` — teljes, kérésenkénti napló (sorszámkorlátozással; lásd alább)
-- `proxy_logs` — proxyforgalmi napló (sorszámkorlátozással)
-- `request_detail_logs` — örökölt részletes kérésnapló (ha létezik, továbbra is ritkításra kerül)
+- `usage_history` — kérésenkénti használati összesítés
+- `call_logs` — teljes kérésenkénti napló (sorkorlátozás alá esik, lásd alább)
+- `proxy_logs` — proxiforgalmi napló (sorkorlátozás alá esik)
+- `request_detail_logs` — örökölt részletes kérésnapló (ha jelen van, továbbra is törlésre kerül)
 
 ## Tárolási séma
 
