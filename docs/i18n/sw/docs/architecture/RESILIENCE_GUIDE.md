@@ -286,21 +286,17 @@ zinazotumika ni ya muda tu (ephemeral).
 
 ---
 
-## 4. Udhibiti wa Usambamba wa Quota-Share (v3.8.36)
+## 4. Udhibiti wa Kiasi wa Kushiriki Fedha (v3.8.36)
 
-Akaunti za usajili (GLM, MiniMax, n.k.) mara nyingi hukubali miombi ~1–3 sambamba tu; kuzidi hapo husababisha 429 na cooldown. Hili ni suala kali zaidi chini ya combo za **quota-share** (`qtSd/…`), ambapo funguo kadhaa za API hushiriki akaunti moja ya upstream. Tabaka tatu huzuia akaunti inayoshirikiwa isifurikwe.
+Akaunti za usajili (GLM, MiniMax, n.k.) mara nyingi hukubali maombi ~ 1–3 pekee; kuzidi hiyo husababisha 429s na baridi. Hii ni papo hapo chini** sehemu ya upendeleo** (`qtSd/…`) mchanganyiko, ambapo vitufe kadhaa API hushiriki akaunti moja ya juu. Tabaka tatu huzuia akaunti iliyoshirikiwa isijaribiwe.
 
-### Kikomo cha usambamba cha kila muunganisho (`max_concurrent`)
+### Kofia ya sarafu ya kila muunganisho (`max_concurrent`)
 
-Kila muunganisho wa mtoa huduma unaweza kutangaza kikomo cha juu cha `max_concurrent`
-(`provider_connections.max_concurrent`, kinachowekwa kwenye modali ya muunganisho / API / DB).
-Kiache wazi kwa hakuna kikomo. Hiki ndicho kitufe pekee kinachoendesha tabaka la ufuatanyaji
-lililo hapa chini — kikiweke kwenye usambamba halisi wa akaunti (k.m. GLM ~1, MiniMax ~2).
+Kila muunganisho wa mtoa huduma unaweza kutangaza dari `max_concurrent` (`provider_connections.max_concurrent`, iliyowekwa katika modal ya uunganisho / API / DB). Iache tupu bila kikomo. Hiki ndicho kifundo kimoja kinachoendesha safu ya ufuataji chini ya — kuiweka kwa upatanifu halisi wa akaunti (km GLM ~ 1, MiniMax ~ 2).
 
-### Vikomo vya usambamba vya kila modeli (`modelConcurrency`)
+### Kofia za upatanisho za kila mfano (`modelConcurrency`)
 
-Muunganisho unaweza pia kutangaza vikomo halisi vya juu vya usambamba vya kila modeli
-ndani ya ramani yake ya `rateLimitOverrides`:
+Muunganisho unaweza pia kutangaza dari halisi za upatanisho wa kila mfano ndani ya ramani yake `rateLimitOverrides` :
 
 ```json
 {
@@ -311,73 +307,32 @@ ndani ya ramani yake ya `rateLimitOverrides`:
 }
 ```
 
-Viweke kwenye modali ya muunganisho (**Mapuuza ya vikomo vya kiwango → Vikomo vya
-usambamba vya kila modeli**, `model=cap` moja kwa kila mstari) au kupitia
-`PATCH /api/providers/[id]` kwa umbo lile lile la JSON. Semantiki muhimu:
+Iweke katika moduli ya unganisho (** Kiwango cha juu cha bei kinabatilisha → vikomo vya kubadilishana vya sarafu kwa kila mtindo** , `model=cap` moja kwa kila mstari) au kupitia `PATCH /api/providers/[id]` yenye umbo sawa JSON. Semantiki muhimu:
 
-- **Kikomo cha muunganisho mzima dhidi ya kile cha modeli mahususi:** `maxConcurrent` hubaki
-  kikomo cha juu cha pamoja cha muunganisho mzima. Zote zikitumika, milango yote miwili
-  hupatikana kwa atomiki ndani ya lango moja la mchanganyiko
-  (`global → provider → account → model`); tabia inayotumika ni
-  kikomo kali zaidi kinachohusika.
-- **Ulinganifu halisi wa ufunguo wa modeli:** ufunguo ni mfuatano wa modeli unaopitishwa
-  kwa kitekelezaji baada ya utatuzi wa uelekezaji — kwa kawaida kitambulisho safi cha modeli
-  ya upstream (`glm-5`), si jina bandia la `provider/model` la upande wa mteja
-  (`zai/glm-5` hailingani na `glm-5`). Thamani ni vikomo vya juu vya miombi sambamba
-  vya namba nzima chanya.
-- **Foleni ya ndani, hakuna ugunduzi:** miombi ya ziada huingia kwenye foleni ya ndani kwa
-  semantiki zilizopo za foleni/timeout (makosa ya udahili yaliyoainishwa `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL`). OmniRoute haugundui wala kuhitimisha sera ya upstream —
-  hutekeleza vikomo halisi ambavyo mwendeshaji alisanidi. Lango la modeli lililojaa
-  kamwe halimzuii mtoa huduma wala haliumbi kufuli ya kudumu ya modeli; tabia ya
-  429/cooldown/fallback ya upstream hubaki kama kinga ya mwisho ya makosa.
-- **Wigo wa kila muunganisho, kila mchakato:** vikomo ni vya kila muunganisho wa
-  hifadhidata na huhifadhiwa kwenye kumbukumbu, hivyo miunganisho miwili inayotumia tena
-  ufunguo ule ule wa API wa upstream hairatibu wao kwa wao.
-- **Kutokusanidiwa kunamaanisha hakuna mabadiliko:** kuacha ramani (au kuacha
-  uga wa dashibodi wazi) hakuongezi lango lolote la modeli. Mfano wa usanidi bila
-  kudai kikomo chochote cha jumla cha mtoa huduma:
+- **Muunganisho mpana dhidi ya muundo mahususi:** `maxConcurrent` inabaki kuwa dari iliyoshirikiwa ya unganisho-pana. Wakati zote zinatumika, milango yote miwili hupatikana kwa atomi katika lango moja la mchanganyiko (`global → provider → account → model`); tabia ya ufanisi ni kikomo kinachotumika zaidi.
+- **Ulinganisho kamili wa ufunguo wa mfano:** ufunguo ni mfuatano wa mfuatano uliopitishwa kwa mtekelezaji baada ya azimio la kuelekeza — kwa kawaida kitambulisho cha mfano wa juu wa mto (`glm-5`), si lak `provider/model` la upande wa mteja (`zai/glm-5` hailingani na `glm-5`). Thamani ni dari chanya-jumla-ya ombi kwa wakati mmoja.
+- **Kupanga foleni ndani, hakuna ugunduzi:** maombi ya ziada kwenye foleni ya ndani na semantiki za queue/timeout zilizopo (hitilafu za uandikishaji zilizoandikwa `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` ). OmniRoute haigundui au kukisia sera ya juu ya mkondo — inatekeleza viwango kamili ambavyo opereta aliweka. Lango la modeli iliyojaa kamwe halizima mtoa huduma na kamwe haliundi mtindo wa kufuli wa kudumu; tabia 429/cooldown/fallback ya juu inabaki kuwa kizuizi cha makosa.
+- **Kwa muunganisho, wigo wa kila mchakato:** kofia ni kwa kila muunganisho wa hifadhidata na huhifadhiwa kwenye kumbukumbu, kwa hivyo miunganisho miwili inayotumia tena ufunguo sawa API wa juu haushirikiani.
+- **Haijasanidiwa inamaanisha kuwa haijabadilishwa:** kuacha ramani (au kuacha uga wa dashibodi wazi) hakuongezi lango la mfano. Usanidi wa mfano bila kusisitiza kikomo chochote cha mtoaji:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Ufuatanyaji wa miombi ya quota-share
+### Urekebishaji wa ombi la kushiriki kiasi
 
-Upelekaji wa quota-share unapolenga muunganisho unaotangaza `max_concurrent`
-chanya, miombi sambamba kwa **akaunti** hiyo hufuatanywa kupitia semaphore ya
-kila muunganisho (ufunguo `qsconn:<connectionId>`): miombi ya ziada **husubiri kwenye
-foleni** badala ya kumwagilia akaunti. Ni **fail-open** — foleni iliyojaa au timeout
-huendelea bila nafasi badala ya kamwe kukataa ombi linaloweza kupelekwa. Washa/zima kwenye
-**Mipangilio → Ustahimilivu → Usambamba wa kila muunganisho wa quota-share**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, chaguomsingi imewashwa).
-Bila kikomo cha `max_concurrent` tabia haibadiliki.
+Wakati utumaji wa sehemu ya kiasi unalenga muunganisho unaotangaza `max_concurrent` chanya, maombi yanayofanana kwa hiyo.** akaunti** husasishwa kupitia semaphore ya kila muunganisho (ufunguo `qsconn:<connectionId>`): maombi ya ziada** subiri kwenye foleni** badala ya kujaza akaunti. Ni** kushindwa-wazi** — foleni iliyojaa au muda wa kuisha huendelea bila nafasi badala ya kukataa ombi linaloweza kutumwa. Washa** Mipangilio → Ustahimilivu → Kiwango cha kushiriki kwa kila muunganisho wa sarafu** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, chaguomsingi imewashwa). Bila kofia ya `max_concurrent` tabia haibadilika.
 
-> Lango la uelekezaji la quota-share (`selectQuotaShareTarget`, DRR + P2C) lenyewe ni
-> fail-open na _hupunguza kipaumbele_ tu cha muunganisho uliofikia kikomo — kwa
-> dimbwi la muunganisho mmoja haliwezi kuweka kikomo cha lazima, hivyo semaphore hii
-> ndicho kinachozuia mafuriko kweli kweli.
+> Lango la uelekezaji wa sehemu ya upendeleo (`selectQuotaShareTarget`, DRR + P2C) lenyewe haliko wazi na _inapunguza upendeleo tu — yenye kikomo cha muunganisho mmoja haiwezi kuweka kikomo, kwa hivyo semaphore hii ndiyo hasa inayo mafuriko.
 
-### Ujaribio upya wa combo unaozingatia cooldown
+### Combo cooldown-aware jaribu tena
 
-Kwa kila mkakati wa combo (ukiwa umewashwa), ombi ambalo lingethibitisha 429
-kwa cooldown FUPI ya mpito husubiri iishe na kupeleka upya badala ya
-kurudisha 429 — hii inashughulikia madirisha ya TPM/RPM ya darasa la Gemini (~60s retry-after)
-kwenye combo za modeli nyingi, k.m. malengo yote mawili ya combo ya modeli 2 kugonga kikomo
-cha kiwango cha kila modeli. Inapakwa na `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) kwenye **Mipangilio → Ustahimilivu**. Kamwe haisubiri kwa `quota_exhausted`
-(imefungwa hadi usiku wa manane) wala sababu za uthibitishaji/haijapatikana.
+For every combo strategy (when enabled), a request that would crystallize a 429 for a SHORT transient cooldown waits it out and re-dispatches instead of returning the 429 — this covers Gemini-class TPM/RPM windows (~60s retry-after) on multi-model combos, e.g. both targets of a 2-model combo hitting a per-model rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted` (locked until midnight) or auth/not-found reasons.
 
-Lango lile lile linashughulikia hali ya kabla ya upelekaji (#16319): wakati kila lengo la
-combo linarukwa kabla ya jaribio lolote kufanywa kwa sababu modeli yake iko ndani ya kufuli
-fupi ya mpito, njia ya majaribio-sifuri husubiri kufuli iishe chini ya vikomo
-vile vile na kupeleka upya, badala ya kujibu
-`503 ALL_TARGETS_SKIPPED` isiyo na kidokezo. Wakati kusubiri hakuruhusiwi (kikomo,
-jaribio au bajeti imekwisha, au kipengele kimezimwa), jibu la mwisho hupandishwa hadi
-`429 rate_limit_error` likibeba `retry_after` / `reset_at` kutoka muda wa mapema zaidi
-wa kuisha kwa kufuli ya mpito; kufuli za quota, uthibitishaji na haijapatikana huhifadhi
-503 isiyo na kidokezo.
+Mchanganyiko unaweza kuchagua kutoka kwa `config.comboCooldownWaitEnabled: false`. `false` halisi pekee ndiyo huzima kusubiri kwa michanganyiko hii iliyoshirikiwa (kupunguza kasi ya baada ya kutuma na kusubiri circuit-open/model-lock kabla ya kutuma) na kiendelezi cha sakafu ya muda wa kuisha kwa bajeti. Inakosekana au `true` inahifadhi sera ya kimataifa; `true` haiwezi kuwezesha kusubiri kwa walemavu duniani kote. `targetTimeoutMs` ya wazi bado inashinda. Kujiondoa huku hakubadilishi ungoja wa awali wa kutuma wa asili-Codex.
+
+Lango lile lile hufunika kipochi cha kabla ya kutuma (#16319): wakati kila lengo la mseto linarukwa kabla ya jaribio lolote kufanywa kwa sababu kielelezo chake kinakaa katika kizuizi kifupi cha muda mfupi, njia ya kujaribu sifuri inangoja kufuli chini ya dari zile zile na kutuma tena, badala ya kujibu `503 ALL_TARGETS_SKIPPED` isiyo na dokezo. Wakati hakuna kusubiri kunaruhusiwa (dari, jaribio au bajeti imeisha, au kipengele kimezimwa), jibu la mwisho linasasishwa hadi `429 rate_limit_error` inayobeba `retry_after` / `reset_at` kutoka kwa kuisha kwa kufuli ya muda mfupi mapema zaidi; nafasi, auth na kufuli ambazo hazipatikani huweka dokezo-chini ya 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

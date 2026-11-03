@@ -603,60 +603,60 @@ Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../
 
 ---
 
-## 📊 Samhail atá ar Fáil
+## 📊 Múnlaí Ar Fáil
 
 <details>
-<summary><b>Féach ar na samhail go léir atá ar fáil</b></summary>
+<summary><b>Féach ar na samhlacha go léir atá ar fáil</b></summary>
 
-> Coimeádtar an liosta thíos as `open-sse/config/providerRegistry.ts` do v3.8.0. Sioncrónaítear catalóga scamall (Gemini, OpenRouter, srl.) go dinimiciúil — don chatalóg beo iomlán, oscail **Deais → Soláthraithe → [soláthraí] → Samhail atá ar Fáil** nó cuir glao ar `GET /api/models/catalog`.
+> Tá an liosta thíos coimeádta ó `open-sse/config/providerRegistry.ts` do v3.8.0. Déantar catalóga néal (Gemini, OpenRouter, etc.) a shioncronú go dinimiciúil — chun an chatalóg iomlán beo a oscailt** Soláthraithe Painéal → → [soláthraí] → Múnlaí ar Fáil** nó cuir glaoch ar `GET /api/models/catalog`.
 >
-> Má tá liosta ionsuite soláthraí tar éis dul as sync, úsáid **Iompórtáil ó /models** ar an leathanach sin (nó cumasaigh **Uath-Shioncrónú**) chun an catalóg beo uastaighreach a tharraingt anuas. Fíoraíodh é seo i v3.8.50 do LLM7.io (`gemini-3.1-flash-lite`) agus do UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); d'fhan rochtain anaithnid Pollinations teoranta ón uastaigre le linn na rith tástála chéanna.
+> Má tá athrú tagtha ar liosta ionsuite soláthraí, bain úsáid as** Iompórtáil ó / samhlacha** ar an leathanach sin (nó cumasaigh** Uath-Sync** ) an chatalóg beo in aghaidh an tsrutha a tharraingt. Fíoraíodh é seo i v3.8.50 do LLM7.io (`gemini-3.1-flash-lite`) agus UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Bhí rochtain gan ainm ar phailniú teoranta in aghaidh an tsrutha le linn an pas tástála céanna.
 
-**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Cód Claude (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ leibhéil iarrachta: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` ( sraitheanna iarracht + : `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth SAOR IN AISCE: úsáid an catalóg beo a thaispeántar faoi **Deais → Soláthraithe → Kiro → Samhail atá ar Fáil**. Braitheann an infhaighteacht ar an gcuntas agus ar an bplean.
+**Kiro (`kr/`)** — FREE OAuth: bain úsáid as an gcatalóg bheo a thaispeántar thíos** Soláthraithe Painéal → → Kiro → Múnlaí ar Fáil** . Braitheann infhaighteacht ar an gcuntas agus ar an bplean.
 
-**Qoder (`if/`)** — OAuth SAOR IN AISCE: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — FREE OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mí comhráta nó de réir úsáide: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo árasán nó in aghaidh na húsáide: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — Eochair API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** eochair — API : `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Fíorthapa: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultra-tapa: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok dúchais: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Óstáilte san AE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — arna óstáil ag an AE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Feabhsaithe le cuardach: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Cuardach méadaithe: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Foinse oscailte: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (saor in aisce), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** foinse oscailte — : `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (saor in aisce), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Tátal tapa: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Scála wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-scála: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Dírithe ar RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-dírithe: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Fiontar: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** Fiontar — : `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama (`ollama-cloud/`)** : `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sioncrónaítear go beo de réir eochair API ó Google — gan aon liosta statach. Ceangail eochair i **Deais → Soláthraithe** agus ansin úsáid **Samhail atá ar Fáil** chun an catalóg reatha a iompórtáil (m.sh. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Scamall `gemini/`)** : sioncronaithe beo in aghaidh API eochair ó Google — gan aon liosta statach. Ceangail eochair isteach** Painéal na Soláthraithe →** úsáid ansin** Múnlaí ar Fáil** chun an chatalóg reatha a allmhairiú (m.sh. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Soláthraithe comhoiriúnacha eile** (roghnaithe): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (trí `aws-bedrock`), `azure-ai`, `openrouter` (catalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Coinníonn gach ceann a liosta samhail féin i `providerRegistry.ts` agus is féidir é a uath-shioncrónú nuair a nochtann an soláthraí críochphointe `/models`.
+**Soláthraithe comhoiriúnacha eile** (roghnaithe): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (catalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai` `reka` `nous-research`, `volcengine`, `ai21` `gigachat` Coinníonn gach ceann acu a liosta samhlacha féin i `providerRegistry.ts` agus is féidir iad a uathshioncronú nuair a nochtar an soláthraí críochphointe `/models`.
 
-**Nóta faoi IDanna samhail:** Úsáideann OmniRoute IDanna atá dúchais don tsoláthraí (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Áirítear leaganacha poncaithe i roinnt IDanna mar sin an chaoi a nglacann an API uastaighreach leo. Mura bhfuil samhail liostaithe thuas, rith `omniroute models --search <term>` nó cuir glao ar `GET /api/models/catalog` chun an infhaighteacht a dhearbhú.
+**Nóta ar mhúnla IDs:** Úsáideann OmniRoute IDs ó dhúchas soláthraí (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Cuimsíonn roinnt IDs leaganacha poncaithe mar is é sin an chaoi a bhfuil an API in aghaidh an tsrutha ag súil leo. Mura bhfuil samhail liostaithe thuas, rith `omniroute models --search <term>` nó buail `GET /api/models/catalog` chun infhaighteacht a dhearbhú.
 
 </details>
 
