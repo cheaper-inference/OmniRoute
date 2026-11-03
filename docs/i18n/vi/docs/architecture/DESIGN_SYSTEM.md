@@ -116,7 +116,16 @@
 
 ## 5. Cập nhật bộ sản phẩm
 
-`npm run check:ui-kit-upstream` so sánh phiên bản được ghim trong `packages/ui-kit/UPSTREAM.md` với thẻ `v*` mới nhất của repo ngược dòng và in lệnh đồng bộ hóa khi hết bản phát hành. Quy trình làm việc `UI Kit upstream watch` hàng tuần (`.github/workflows/ui-kit-upstream-watch.yml`) chạy cùng một quy trình kiểm tra và giữ một vấn đề theo dõi ở trạng thái mở trong khi mã pin ở phía sau; kho lưu trữ ngược dòng là riêng tư, vì vậy quy trình làm việc cần có mã thông báo chỉ đọc trong bí mật `UI_KIT_READ_TOKEN`. Khi nó không thể đọc ngược dòng (không có mã thông báo, mã thông báo đã ngừng hoạt động hoặc GitHub không thể truy cập được), lượt chạy vẫn có màu xanh nhưng viết cảnh báo và giữ một vấn đề riêng biệt mở, vấn đề này sẽ tự đóng lại sau khi lần chạy sau có thể đọc lại ngược dòng.
+`npm run check:ui-kit-upstream` so sánh phiên bản được ghim trong `packages/ui-kit/UPSTREAM.md` với thẻ `v*` mới nhất của repo ngược dòng và in lệnh đồng bộ hóa khi hết bản phát hành.
+
+Quy trình làm việc `UI Kit upstream watch` hàng ngày (`.github/workflows/ui-kit-upstream-watch.yml`) chạy cùng một bước kiểm tra. Trong khi chốt ở phía sau, `scripts/ci/ui-kit-sync-pr.sh` giữ một PR đồng bộ mở đối với nhánh `release/vX.Y.Z` cao nhất, trên nhánh cuộn `chore/ui-kit-sync-latest`. Nó không bao giờ hợp nhất: mọi bản phát hành bộ công cụ vẫn cần kiểm tra trực quan trên VPS cục bộ. Chi nhánh được xây dựng lại khi có bản phát hành mới hơn và bị bỏ lại một mình. Một PR mở với các cam kết được đẩy bằng tay sẽ không bị ghi đè và PR cho phiên bản mà người bảo trì đã đóng chưa hợp nhất sẽ vẫn đóng cho đến khi có bản phát hành mới hơn.
+
+Khi không thể mở PR (bản phát hành mục tiêu bị đóng băng, PR đã được đẩy bằng tay, PR đã bị đóng hoặc không có mã thông báo PR được đặt), quy trình làm việc sẽ tiếp tục mở một vấn đề theo dõi cho biết lý do.
+
+Quy trình làm việc sử dụng hai bí mật:
+
+- `secrets.UI_KIT_READ_TOKEN`: mã thông báo chỉ đọc cho kho lưu trữ ngược dòng riêng tư. Khi quy trình làm việc không thể đọc ngược dòng (không có mã thông báo, mã thông báo đã ngừng hoạt động hoặc không thể truy cập GitHub ), quá trình chạy vẫn có màu xanh nhưng ghi cảnh báo và giữ một vấn đề riêng biệt mở, vấn đề này sẽ tự đóng lại sau khi lần chạy sau có thể đọc lại ngược dòng.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: một mã thông báo chi tiết trên kho lưu trữ này với quyền truy cập ghi Nội dung và Yêu cầu kéo. `GITHUB_TOKEN` mặc định không thể tạo PRs ở đây và PR nó mở sẽ không kích hoạt CI. Nếu không có mã thông báo này, quy trình làm việc chỉ đẩy nhánh.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` sao chép `src/` ngược dòng tại cam kết đó (`latest` = thẻ `v*` mới nhất) vào `packages/ui-kit/src`, áp dụng phép biến đổi duy nhất được phép (nó loại bỏ hậu tố `.js` khỏi các lần nhập tương đối) và đặt phiên bản không gian làm việc trong `packages/ui-kit/package.json` và `package-lock.json` thành phiên bản ngược dòng. Sau đó: xem lại `git diff packages/ui-kit`, thực hiện chuyển đổi trực quan về nhà cung cấp, cài đặt, kết hợp, cách sử dụng và điểm cuối trong cả hai chủ đề, chạy `npm run check:ui-kit-snapshot` và `npm run test:vitest:ui` và mở PR bằng nhật ký thay đổi ngược dòng.
 
