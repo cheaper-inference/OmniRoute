@@ -30100,22 +30100,22 @@
           "updated_at": "2026-11-02T18:18:59.594Z"
         },
         "or": {
-          "source_hash": "9840b35dd94b817b4fef6675d3b6369174ffbdd12ce1daff2f899544e5da9461",
-          "target_hash": "4e39cc35a8ebaf755dd79a21edc95ca4154ec3e77b446674adb651ab0cdb988f",
+          "source_hash": "293bdfd2f5278cee7bda26efa9eff420ffb93e00d062c0437493689d69e8d3bd",
+          "target_hash": "83304c9c22d0278336abed411c68ad48da4b20db88b227fe6834f40869273736",
           "section_hashes": [
-            "b8eb0b8bf666",
+            "9576d500388b",
             "99e9925aa7fa",
-            "17047afeacab",
-            "24005a24ea13",
+            "a28ae3061f6a",
+            "1d3c13d973a4",
             "b3186dce71c2",
-            "976e36285595",
+            "a99e31188b9e",
             "bef9b42ca9b3",
             "34440383caf8",
             "6d6742b4d721",
             "ffa17c5ac309",
             "b68bf7eedc90"
           ],
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "updated_at": "2026-11-03T06:11:52.583Z"
         },
         "ru": {
           "source_hash": "293bdfd2f5278cee7bda26efa9eff420ffb93e00d062c0437493689d69e8d3bd",
