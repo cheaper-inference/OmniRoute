@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Kofar AI Kyauta
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kada ka daina yin lamba. Kowanne kayan aikin AI → masu samarwa 380 — sama da 150 kyauta — ta hanyar hanya guda. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity zuwa CLAUDE / GPT / GEMINI KYAUTA tare da sauyawa ta atomatik idan daya ya kasa. RTK + Caveman stacked compression yana rage yawan tokens da ake amfani da su da kashi 15–95% (~89% matsakaici) — ba za ka taba kai iyaka ba. Masu samar da AI 380 · sama da 150 matakan kyauta · ~1.62B tokens kyauta a kowane wata · dabarun routing 20 · $0 don farawa."/>
 
 </div>
@@ -1292,7 +1294,7 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
   <tr><td nowrap><b>Yanayin gudu</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Harshen shirye-shirye</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> a cikin <code>src/</code> da <code>open-sse/</code> (<code>any</code> sifili a cikin core tun daga v2.0)</td></tr>
   <tr><td nowrap><b>Tsarin aiki</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’adanar bayanai</b></td><td>better-sqlite3 (SQLite, rubutun WAL) + LowDB (JSON na gado) — modules na yanki 147, ƙaurar bayanai 220</td></tr>
+  <tr><td nowrap><b>Ma’adanar bayanai</b></td><td>better-sqlite3 (SQLite, rubutun WAL) + LowDB (JSON na gado) — modules na yanki 147, ƙaurar bayanai 221</td></tr>
   <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>Cikakken binciken rubutu na SQLite FTS5 + embeddings na vector da aka ƙididdige su da int8, lalacewa mai nau’i</td></tr>
   <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — ingantawar shigarwa/fitarwa na kayan aikin MCP + kwangilolin API</td></tr>
   <tr><td nowrap><b>Ka’idoji</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ Lasisin MIT - duba [LICENSE](LICENSE) don ƙarin bayani.
 
 **[⬆ Koma sama](#-omniroute)** · An gina shi da ❤️ don al'ummar AI ta buɗaɗɗen tushe.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Lasisin MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lasisin MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- An kunna GitHub Discussions don tambayoyi da amsoshin al'umma -->

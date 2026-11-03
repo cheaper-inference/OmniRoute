@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — بوابة الذكاء الاصطناعي المجانية
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — لا تتوقف عن البرمجة أبدًا. كل أداة ذكاء اصطناعي → 380 مزود — أكثر من 150 مجانية — عبر نقطة نهاية واحدة. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity إلى Claude / GPT / Gemini المجانية مع التحويل التلقائي عند الفشل. ضغط مكدس RTK + Caveman يوفر من 15–95% من الرموز (~89% متوسط) — لن تصل إلى الحدود أبدًا. 380 مزود ذكاء اصطناعي · أكثر من 150 طبقة مجانية · ~1.62 مليار رمز مجاني شهريًا · 20 استراتيجية توجيه · $0 للبدء."/>
 
 </div>
@@ -1290,7 +1292,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
   <tr><td nowrap><b>بيئة التشغيل</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>اللغة</b></td><td>TypeScript 6.0 — <b>TypeScript بنسبة 100%</b> ضمن <code>src/</code> و<code>open-sse/</code> (من دون <code>any</code> في النواة منذ v2.0)</td></tr>
   <tr><td nowrap><b>إطار العمل</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، تسجيل WAL) + LowDB (JSON قديم) — 147 وحدة نطاق، و220 عملية ترحيل</td></tr>
+  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، تسجيل WAL) + LowDB (JSON قديم) — 147 وحدة نطاق، و221 عملية ترحيل</td></tr>
   <tr><td nowrap><b>الذاكرة</b></td><td>بحث SQLite FTS5 في النصوص الكاملة + تضمينات متجهية مكمّمة إلى int8، مع اضمحلال معتمد على النوع</td></tr>
   <tr><td nowrap><b>المخططات</b></td><td>Zod 4 — التحقق من إدخال/إخراج أدوات MCP + عقود API</td></tr>
   <tr><td nowrap><b>البروتوكولات</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1803,7 +1805,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ العودة إلى الأعلى](#-omniroute)** · صُنع بـ ❤️ لمجتمع الذكاء الاصطناعي مفتوح المصدر.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · رخصة MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · رخصة MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- تم تفعيل نقاشات GitHub لأسئلة وأجوبة المجتمع -->

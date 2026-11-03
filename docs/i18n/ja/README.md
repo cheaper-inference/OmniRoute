@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — 無料のAIゲートウェイ
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止めない。すべてのAIツール → 380プロバイダー — 150以上が無料 — 1つのエンドポイントで。Claude Code、Codex、Cursor、Cline、Copilot & Antigravity を無料の Claude / GPT / Gemini に自動フェイルオーバーで統合。RTK + Caveman の積層圧縮でトークンを15–95%節約（平均約89%）— 制限に達しない。380のAIプロバイダー · 150以上の無料枠 · 月間約16.2億無料トークン · 20のルーティング戦略 · $0から始められる。"/>
 
 </div>
@@ -1294,7 +1296,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
   <tr><td nowrap><b>ランタイム</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <code>src/</code> と <code>open-sse/</code> 全体で<b>100% TypeScript</b>（v2.0以降、コアに <code>any</code> はゼロ）</td></tr>
   <tr><td nowrap><b>フレームワーク</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（JSONレガシー） — 147のドメインモジュール、220のマイグレーション</td></tr>
+  <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（JSONレガシー） — 147のドメインモジュール、221のマイグレーション</td></tr>
   <tr><td nowrap><b>メモリ</b></td><td>SQLite FTS5全文検索 + int8量子化ベクトル埋め込み、型付き減衰</td></tr>
   <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールI/Oバリデーション + APIコントラクト</td></tr>
   <tr><td nowrap><b>プロトコル</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
@@ -1807,7 +1809,7 @@ MITライセンス - 詳細は[LICENSE](LICENSE)をご覧ください。
 
 **[⬆ トップに戻る](#-omniroute)** · オープンソースAIコミュニティのために❤️を込めて構築。
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MITライセンス · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MITライセンス · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- コミュニティQ&A用にGitHub Discussionsを有効化 -->

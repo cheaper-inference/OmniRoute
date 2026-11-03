@@ -118,7 +118,16 @@
 
 ## 5. Mengemas kini kit
 
-`npm run check:ui-kit-upstream` membandingkan versi yang disematkan dalam `packages/ui-kit/UPSTREAM.md` dengan teg `v*` terbaharu repo huluan dan mencetak arahan penyegerakan apabila keluaran keluar. Aliran kerja `UI Kit upstream watch` mingguan (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan semakan yang sama dan memastikan satu isu penjejakan terbuka semasa pin berada di belakang; repo huluan adalah peribadi, jadi aliran kerja memerlukan token baca sahaja dalam rahsia `UI_KIT_READ_TOKEN`. Apabila ia tidak dapat membaca huluan (tiada token, token yang berhenti berfungsi, atau GitHub tidak dapat dicapai) larian kekal hijau tetapi menulis amaran dan memastikan satu isu berasingan terbuka, yang menutup sendiri apabila larian kemudian boleh membaca huluan semula.
+`npm run check:ui-kit-upstream` membandingkan versi yang disematkan dalam `packages/ui-kit/UPSTREAM.md` dengan teg `v*` terbaharu repo huluan dan mencetak arahan penyegerakan apabila keluaran keluar.
+
+Aliran kerja `UI Kit upstream watch` harian (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan semakan yang sama. Semasa pin berada di belakang, `scripts/ci/ui-kit-sync-pr.sh` mengekalkan satu PR penyegerakan terbuka terhadap cawangan `release/vX.Y.Z` tertinggi, pada cawangan bergolek `chore/ui-kit-sync-latest`. Ia tidak pernah bergabung: setiap keluaran kit masih memerlukan pemeriksaan visual pada VPS setempat. Cawangan itu dibina semula apabila keluaran yang lebih baru dikeluarkan dan dibiarkan begitu sahaja. PR terbuka dengan komit ditolak dengan tangan tidak ditulis ganti dan PR untuk versi yang ditutup oleh penyelenggara tidak digabungkan kekal ditutup sehingga keluaran yang lebih baharu.
+
+Apabila tiada PR boleh dibuka (pelepasan sasaran dibekukan, PR telah komit ditolak dengan tangan, PR telah ditutup, atau tiada token PR ditetapkan) aliran kerja memastikan satu isu penjejakan terbuka yang menyatakan sebabnya.
+
+Aliran kerja menggunakan dua rahsia:
+
+- `secrets.UI_KIT_READ_TOKEN`: token baca sahaja untuk repo huluan peribadi. Apabila aliran kerja tidak dapat membaca huluan (tiada token, token yang berhenti berfungsi, atau GitHub tidak dapat dicapai) larian kekal hijau tetapi menulis amaran dan memastikan satu isu berasingan terbuka, yang menutup sendiri apabila larian kemudian boleh membaca huluan semula.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: token berbutir halus pada repositori ini dengan kandungan dan akses tulis permintaan Tarik. `GITHUB_TOKEN` lalai tidak boleh mencipta PRs di sini dan PR yang dibuka tidak akan mencetuskan CI. Tanpa token ini aliran kerja hanya menolak cawangan.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` menyalin `src/` huluan pada komit itu (`latest` = teg `v*` terbaharu) ke dalam `packages/ui-kit/src`, menggunakan transformasi tunggal yang dibenarkan (ia menjatuhkan akhiran `.js` daripada import relatif), dan menetapkan versi ruang kerja dalam `packages/ui-kit/package.json` dan `package-lock.json` kepada versi huluan. Kemudian: semak `git diff packages/ui-kit`, lakukan hantaran visual pada pembekal, tetapan, kombo, penggunaan dan titik akhir dalam kedua-dua tema, jalankan `npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, dan buka PR dengan log perubahan huluan.
 

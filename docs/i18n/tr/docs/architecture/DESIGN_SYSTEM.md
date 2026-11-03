@@ -120,7 +120,16 @@
 
 ## 5. Kitin güncellenmesi
 
-`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` sabitlenen sürümü yukarı akış deposunun en yeni `v*` etiketiyle karşılaştırır ve bir sürüm çıktığında senkronizasyon komutunu yazdırır. Haftalık `UI Kit upstream watch` iş akışı (`.github/workflows/ui-kit-upstream-watch.yml`) aynı kontrolü çalıştırır ve pin gerideyken bir izleme sorununu açık tutar; yukarı akış deposu özeldir, bu nedenle iş akışının `UI_KIT_READ_TOKEN` sırrında salt okunur bir jetona ihtiyacı vardır. Yukarı akış okunamadığında (belirteç yok, çalışmayı durduran bir belirteç veya GitHub ulaşılamıyor), çalıştırma yeşil kalır ancak bir uyarı yazar ve ayrı bir sorunu açık tutar; bu, daha sonraki bir çalıştırma tekrar yukarı akış okuyabildiğinde kendini kapatır.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` sabitlenen sürümü yukarı akış deposunun en yeni `v*` etiketiyle karşılaştırır ve bir sürüm çıktığında senkronizasyon komutunu yazdırır.
+
+Günlük `UI Kit upstream watch` iş akışı (`.github/workflows/ui-kit-upstream-watch.yml`) aynı kontrolü çalıştırır. Pim gerideyken `scripts/ci/ui-kit-sync-pr.sh`, dönen daldaki `chore/ui-kit-sync-latest` üzerindeki en yüksek `release/vX.Y.Z` dalına karşı bir senkronizasyon PR açık tutar. Hiçbir zaman birleşmez: her kit sürümünde yerel VPS üzerinde görsel bir kontrol yapılması gerekir. Daha yeni bir sürüm çıktığında şube yeniden inşa edilir ve aksi takdirde yalnız bırakılır. Elle gönderilen taahhütlere sahip açık bir PR üzerine yazılmaz ve bakımcının birleşmeden kapattığı bir sürüm için PR daha yeni bir sürüme kadar kapalı kalır.
+
+Hiçbir PR açılamadığında (hedef sürüm donmuşsa, PR elle gönderilen taahhütlere sahipse, PR kapatılmışsa veya hiçbir PR belirteci ayarlanmamışsa) iş akışı, nedenini belirten bir izleme sorununu açık tutar.
+
+İş akışı iki sır kullanır:
+
+- `secrets.UI_KIT_READ_TOKEN`: özel yukarı akış deposu için salt okunur bir belirteç. İş akışı yukarı akışı okuyamadığında (belirteç yok, çalışmayı durduran bir belirteç veya GitHub ulaşılamıyor), çalıştırma yeşil kalır ancak bir uyarı yazar ve ayrı bir sorunu açık tutar; bu, daha sonraki bir çalıştırma tekrar yukarı akışı okuyabildiğinde kendini kapatır.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: bu depoda İçerik ve Çekme istekleri yazma erişimine sahip ayrıntılı bir belirteç. Varsayılan `GITHUB_TOKEN` burada PRs oluşturamaz ve açtığı bir PR CI tetiklemez. Bu belirteç olmadan iş akışı yalnızca dalı iter.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` söz konusu taahhütteki yukarı akış `src/` (`latest` = en yeni `v*` etiketi) `packages/ui-kit/src` kopyalar, izin verilen tek dönüşümü uygular (göreli içe aktarmalardan `.js` sonekini çıkarır) ve `packages/ui-kit/package.json` ve `package-lock.json` çalışma alanı sürümünü yukarı akış sürümüne ayarlar. Ardından: `git diff packages/ui-kit` gözden geçirin, her iki temadaki sağlayıcılar, ayarlar, kombinasyonlar, kullanım ve uç noktalar hakkında görsel bir geçiş yapın, `npm run check:ui-kit-snapshot` ve `npm run test:vitest:ui` çalıştırın ve PR yukarı akış değişiklik günlüğüyle açın.
 

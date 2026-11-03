@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ilmainen AI-yhdyskäytävä
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Jokainen AI-työkalu → 380 tarjoajaa — 150+ ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ILMAISEKSI Claude / GPT / Geminiin automaattisella varareitityksellä. RTK + Caveman -pinoitettu pakkaus säästää 15–95 % tokeneista (~89 % keskimäärin) — älä koskaan ylitä rajoja. 380 AI-tarjoajaa · 150+ ilmaista tasoa · ~1,62 mrd ilmaista tokenia/kk · 20 reititysstrategiaa · $0 aloitukseen."/>
 
 </div>
@@ -1299,7 +1301,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b>Suoritusaikaympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ytimessä ei ole yhtään <code>any</code>-tyyppiä versiosta v2.0 lähtien)</td></tr>
   <tr><td nowrap><b>Kehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-legacy) — 147 toimialamoduulia, 220 migraatiota</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-legacy) — 147 toimialamoduulia, 221 migraatiota</td></tr>
   <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoinnit vektoriesityksille, tyypitetty vaimeneminen</td></tr>
   <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1812,7 +1814,7 @@ MIT-lisenssi – katso lisätiedot tiedostosta [LICENSE](LICENSE).
 
 **[⬆ Takaisin alkuun](#-omniroute)** · Rakennettu ❤️ avoimen lähdekoodin AI-yhteisölle.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions käytössä yhteisön kysymyksiin ja vastauksiin -->

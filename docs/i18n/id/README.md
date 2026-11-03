@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Gerbang AI Gratis
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti ngoding. Setiap alat AI → 380 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke dalam Claude / GPT / Gemini GRATIS dengan auto-fallback. Kompresi bertumpuk RTK + Caveman menghemat 15–95% token (~89% rata-rata) — tidak pernah kena batas. 380 penyedia AI · 150+ paket gratis · ~1,62M token gratis/bln · 20 strategi routing · $0 untuk mulai."/>
 
 </div>
@@ -1293,7 +1295,7 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (tidak ada <code>any</code> di inti sejak v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Basis Data</b></td><td>better-sqlite3 (SQLite, pencatatan WAL) + LowDB (JSON lama) — 147 modul domain, 220 migrasi</td></tr>
+  <tr><td nowrap><b>Basis Data</b></td><td>better-sqlite3 (SQLite, pencatatan WAL) + LowDB (JSON lama) — 147 modul domain, 221 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>Pencarian teks penuh SQLite FTS5 + embedding vektor terkuantisasi int8, peluruhan bertipe</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — validasi I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1806,7 +1808,7 @@ Lisensi MIT - lihat [LICENSE](LICENSE) untuk detailnya.
 
 **[⬆ Kembali ke atas](#-omniroute)** · Dibuat dengan ❤️ untuk komunitas AI open-source.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions diaktifkan untuk tanya jawab komunitas -->
