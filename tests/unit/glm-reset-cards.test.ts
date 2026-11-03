@@ -117,6 +117,41 @@ test("parseGlmResetCards prefers an explicit resetType and skips entries without
   assert.equal(parsed.cards[0].resetType, "WEEK");
 });
 
+test("reset cards preserve the provider grant type without inventing one", async () => {
+  for (const grantType of ["GLOBAL", "FUTURE_GRANT", undefined, null, 42, {}]) {
+    const parsed = wire.parseGlmResetCards(
+      listEnvelopeWith({
+        fiveHourResets: [{ recordId: 301, available: true, grantType }],
+        weekResets: [{ recordId: 302, available: true, grantType }],
+      })
+    );
+    assert.equal(parsed.availableCount, 2);
+    for (const card of parsed.cards) {
+      const expectedGrant = typeof grantType === "string" ? { grantType } : {};
+      assert.deepEqual(card, {
+        id: card.resetType === "WEEK" ? "302" : "301",
+        resetType: card.resetType,
+        ...expectedGrant,
+      });
+      let sent = false;
+      globalThis.fetch = async (_url, init = {}) => {
+        sent = true;
+        assert.equal(init.method, "POST");
+        assert.deepEqual(JSON.parse(String(init.body)), {
+          targetType: "PERSONAL",
+          resetType: card.resetType,
+          recordId: Number(card.id),
+          requestId: "synthetic-grant-test",
+          ...expectedGrant,
+        });
+        return json({ code: 200, success: true });
+      };
+      await wire.redeemGlmResetCard("synthetic-key", undefined, card, "synthetic-grant-test");
+      assert.equal(sent, true);
+    }
+  }
+});
+
 test("z.ai envelopes fail closed despite an HTTP 200 status line", () => {
   // Observed live: no auth header → code 1001, bad Bearer token → code 401.
   const missingAuth = { code: 1001, msg: "Authentication parameter not received in Header" };
@@ -209,7 +244,7 @@ test("consumeGlmResetCard redeems the listed card with z.ai's wire body, then re
 
     if (href.includes("/customer-package-reset/list")) {
       assert.equal((init.headers as Record<string, string>).Authorization, "Bearer glm-test-key");
-      return json(listEnvelopeWith({ weekResets: [{ recordId: 124128 }] }));
+      return json(listEnvelopeWith({ weekResets: [{ recordId: 124128, grantType: "GLOBAL" }] }));
     }
 
     if (href.includes("/customer-package-reset/use")) {
@@ -218,6 +253,7 @@ test("consumeGlmResetCard redeems the listed card with z.ai's wire body, then re
         resetType: "WEEK",
         recordId: 124128,
         requestId: "redeem-1",
+        grantType: "GLOBAL",
       });
       return json({ code: 200, msg: "Operation successful", data: 124128, success: true });
     }
@@ -564,7 +600,7 @@ test("consumeGlmResetCard retries an ambiguous use with the same card and reques
     const href = String(url);
     if (href.includes("/customer-package-reset/list")) {
       lists += 1;
-      return json(listEnvelopeWith({ weekResets: [{ recordId: 124131 }] }));
+      return json(listEnvelopeWith({ weekResets: [{ recordId: 124131, grantType: "GLOBAL" }] }));
     }
     if (href.includes("/customer-package-reset/use")) {
       bodies.push(JSON.parse(String(init.body)));
@@ -589,6 +625,13 @@ test("consumeGlmResetCard retries an ambiguous use with the same card and reques
   assert.equal(result.outcome, "reset");
   assert.equal(lists, 1, "retry must not relist a card that may already be consumed");
   assert.equal(bodies.length, 2);
+  assert.deepEqual(bodies[0], {
+    targetType: "PERSONAL",
+    resetType: "WEEK",
+    recordId: 124131,
+    requestId: "redeem-ambiguous",
+    grantType: "GLOBAL",
+  });
   assert.deepEqual(bodies[1], bodies[0]);
 });
 
