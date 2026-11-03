@@ -198,6 +198,8 @@ export interface NonStreamingClientTranslateInput {
    * reports through `onReasoningReplayHistory` instead.
    */
   historyMessages?: unknown[] | null;
+  /** Connection+family scoped Gemini thought-signature namespace (#17912). */
+  signatureNamespace?: string | null;
   responseToolNameMap: Map<string, string> | null;
   customToolNames?: ReadonlySet<string>;
   requestToolIdentityMap: Map<string, { namespace?: string; name: string }> | null;
@@ -206,6 +208,8 @@ export interface NonStreamingClientTranslateInput {
   videoTranscriptSensitive?: boolean;
   clientHeaders: Headers | Record<string, unknown> | null;
   isClaudeCodeCompatible: boolean;
+  /** Serving connection id — the Claude thinking store binds entries on it (#17324). */
+  connectionId?: string | null;
   /**
    * The client's explicit thinking intent for THIS request (same value the
    * streaming path threads into the SSE translator). Without it the

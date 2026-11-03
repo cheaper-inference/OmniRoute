@@ -22,6 +22,23 @@ const mk = (id: string, extra: Record<string, unknown> = {}) => ({
 
 // ── constants / labels ───────────────────────────────────────────────────────
 
+test("variant construction preserves custom roots, empty names, and source entries", () => {
+  const source = mk("cc/claude-fable-5", {
+    root: "custom-root",
+    name: "",
+    metadata: { keep: true },
+  });
+  const result = appendClaudeEffortVariants([source], { cc: "claude" });
+  const high = result.find((entry) => entry.id === "claude/claude-fable-5-high");
+  assert.ok(high);
+  assert.equal(high.root, "custom-root-high");
+  assert.equal(high.name, "");
+  assert.equal(high.metadata, source.metadata);
+  assert.equal(result[0], source);
+  assert.equal(source.root, "custom-root");
+  assert.equal(source.id, "cc/claude-fable-5");
+});
+
 test("advertises Low/Medium/High as the base effort levels", () => {
   assert.deepEqual([...CLAUDE_EFFORT_VARIANT_LEVELS], ["low", "medium", "high"]);
   assert.equal(CLAUDE_XHIGH_EFFORT_LEVEL, "xhigh");

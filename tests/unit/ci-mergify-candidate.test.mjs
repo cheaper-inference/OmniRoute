@@ -123,8 +123,10 @@ test("an official queue draft enables every applicable required CI lane", () => 
       assert.ok([job.needs].flat().includes("changes"), `${id} must receive classifier outputs`);
     }
   }
-  assert.deepEqual(workflow.jobs["package-artifact"].needs, "build");
-  assert.deepEqual(workflow.jobs["electron-package-smoke"].needs, "build");
+  // Full-matrix lane (2026-10-27): the build-dependent heavy jobs also read the classifier
+  // so an ordinary PR skips them and the queue candidate runs them.
+  assert.deepEqual(workflow.jobs["package-artifact"].needs, ["build", "changes"]);
+  assert.deepEqual(workflow.jobs["electron-package-smoke"].needs, ["build", "changes"]);
   assert.deepEqual(workflow.jobs["test-coverage"].needs, "test-unit");
 });
 
@@ -149,9 +151,19 @@ test("ordinary drafts, forged prefixes, forks and missing app authority stay ski
   }
 });
 
-test("ready PRs still run and queue identity never overrides path classification", () => {
+const fullLane = new Set(
+  Object.entries(policy.profiles.ci.jobs)
+    .filter(([, rule]) => rule.when.startsWith("full-"))
+    .map(([id]) => id)
+);
+
+test("ready PRs run the fast lane, skip the full matrix, and classification still rules", () => {
   for (const id of required)
-    assert.equal(condition(workflow.jobs[id].if ?? "true", jobValues(ready)), true, id);
+    assert.equal(
+      scheduled(id, jobValues(ready)),
+      !fullLane.has(id),
+      `${id} ${fullLane.has(id) ? "is full-matrix only" : "must run on a ready PR"}`
+    );
   const docsOnly = jobValues({
     ...queue,
     "needs.changes.outputs.code": "false",

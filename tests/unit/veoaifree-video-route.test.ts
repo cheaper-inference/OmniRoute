@@ -9,6 +9,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "veo-route-test-secret";
 
 const core = await import("../../src/lib/db/core.ts");
+await core.ensureDbInitialized();
 const videoRoute = await import("../../src/app/api/v1/videos/generations/route.ts");
 
 const originalFetch = globalThis.fetch;

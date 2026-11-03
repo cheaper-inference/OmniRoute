@@ -14,15 +14,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => router,
 }));
 
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async () => ({
+  // KEA-7886: form adapters (Button/Input/Checkbox/Select/FilterPills) as DOM-faithful stubs
+  ...(await import("../../helpers/sharedComponentStubs")).formStubs,
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Button: ({
-    children,
-    onClick,
-  }: {
-    children: React.ReactNode;
-    onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  }) => <button onClick={onClick}>{children}</button>,
 }));
 
 vi.mock("@/shared/components/ProviderIcon", () => ({
@@ -44,7 +39,10 @@ describe("CompatibleNodeCard provider deletion (#12298)", () => {
     ).IS_REACT_ACT_ENVIRONMENT = true;
     router.push.mockClear();
     router.refresh.mockClear();
-    vi.stubGlobal("confirm", vi.fn(() => true));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true)
+    );
 
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -104,7 +102,10 @@ describe("CompatibleNodeCard provider deletion (#12298)", () => {
   });
 
   it("does not navigate or refresh when the user cancels the confirm dialog", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => false));
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => false)
+    );
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true } as Response));
 
     await clickDelete();

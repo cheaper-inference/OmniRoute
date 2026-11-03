@@ -31,6 +31,8 @@ import {
 } from "@/lib/spend/batchWriter";
 import { recordLedgerFromCost } from "@/lib/usage/costLedgerRecorder";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { recordUnpricedKeyQuotaUsage } from "@/domain/keyQuota";
+import { isFlatRateProvider } from "@/lib/usage/flatRateProviders";
 
 export type BudgetResetInterval = "daily" | "weekly" | "monthly";
 
@@ -531,6 +533,23 @@ export function recordChatCallCost(
 }
 
 /**
+ * Charge a priced non-chat call (image, speech, video/music, rerank) to the key's
+ * dollar budget and cost ledger. These routes already price each successful call
+ * for the X-OmniRoute cost header; only the metered share draws the budget down,
+ * as on the chat path. Never throws.
+ */
+export function recordModalCallCost(
+  apiKeyId: string | null | undefined,
+  call: { provider: string; model?: string | null; costUsd: number }
+): void {
+  if (!apiKeyId) return;
+  // Same rule as meteredBudgetCost(): flat-rate plans are not paid from the budget.
+  if (isFlatRateProvider(call.provider)) return;
+  if (!Number.isFinite(call.costUsd) || call.costUsd <= 0) return;
+  recordCost(apiKeyId, call.costUsd, { provider: call.provider, model: call.model, success: true });
+}
+
+/**
  * Record that a completed call used a metered model whose cost could not be
  * priced (no pricing row and no provider-reported cost). That $0 is not free
  * usage, so the key's budget fails closed for the rest of the current period —
@@ -541,6 +560,8 @@ export function recordUnpricedBudgetUsage(
   apiKeyId: string,
   details: Pick<RecordCostDetails, "provider" | "model"> = {}
 ): void {
+  // The monthly USD key quota sums the same priced ledger, so it fails closed too.
+  recordUnpricedKeyQuotaUsage(apiKeyId, details);
   const budget = getBudget(apiKeyId);
   if (!budget || getActiveBudgetLimit(budget) <= 0) return;
   const window = getBudgetWindow(budget.resetInterval, budget.resetTime);

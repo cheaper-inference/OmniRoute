@@ -13,6 +13,7 @@
  * failure is returned so the freshest diagnostic surfaces).
  */
 import { ensureStreamReadiness, type StreamReadinessResult } from "../../utils/streamReadiness.ts";
+import { isPublicProviderSafetyCode } from "../../utils/providerSafety.ts";
 import { isStreamReadinessStallRetryEnabled } from "@/shared/utils/featureFlags.ts";
 import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
 
@@ -151,7 +152,7 @@ export async function runReadinessFallback(
     body: unknown
   ): ReadinessFallbackOutcome => ({ ...readiness, providerResponse: response, finalBody: body });
 
-  if (args.failedReadiness.ok === true)
+  if (args.failedReadiness.ok === true || args.failedReadiness.upstreamFailure)
     return fail(args.failedReadiness, args.failedBody, args.finalBody);
 
   await args.failedBody.body?.cancel().catch(() => {});
@@ -206,7 +207,9 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
   if (
     ctx.streamReadiness.ok === true ||
     ctx.clientAborted ||
-    ctx.streamReadiness.code === "empty_content"
+    ctx.streamReadiness.code === "empty_content" ||
+    // #17049: a provider safety stop is terminal; a stall retry would re-send it.
+    isPublicProviderSafetyCode(ctx.streamReadiness.code)
   ) {
     return {
       readiness: ctx.streamReadiness,

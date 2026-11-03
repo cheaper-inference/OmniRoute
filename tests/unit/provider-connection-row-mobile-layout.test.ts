@@ -21,9 +21,10 @@ test("provider connection actions fill the row width and wrap on mobile", () => 
     /className="contents"/,
     "icon-only actions must join the same flex line so they are spread with the other actions"
   );
+  // KEA-7886: icon-only actions are kit icon buttons pinned to the same 28px square.
   assert.match(
     source,
-    /className="inline-flex size-7 items-center justify-center/,
+    /size="icon-sm"[\s\S]{0,160}?className="size-7 min-h-7 rounded/,
     "icon-only actions must use the same square touch target"
   );
   assert.match(
@@ -91,16 +92,8 @@ test("connection filters use the shared FilterPills that fill the line on phones
 test("connection rows use the compact shared ReorderControl and hide separators on phones", () => {
   assert.match(source, /<ReorderControl/);
   assert.doesNotMatch(source, /<span className="text-text-muted\/30 select-none">\|<\/span>/);
-  assert.match(
-    read("src/shared/components/ReorderControl.tsx"),
-    /flex size-5 items-center justify-center/
-  );
-});
-
-test("icon size utilities win over the Material Symbols base size", () => {
-  const globals = read("src/app/globals.css");
-  assert.match(globals, /@import "material-symbols\/outlined\.css" layer\(base\);/);
-  assert.match(globals, /@layer base \{\s*:where\(\.material-symbols-outlined\) \{/);
+  // KEA-7886: compact 20px kit ghost icon buttons (the kit min-height is reset).
+  assert.match(read("src/shared/components/ReorderControl.tsx"), /size-5 min-h-5/);
 });
 
 test("provider lists use the shared one-column-on-phones card grid", () => {
@@ -130,9 +123,31 @@ test("custom model add and edit forms share the two-column phone grid", () => {
 });
 
 test("toggle thumb is vertically centred in its track", () => {
+  // KEA-7886: Toggle renders the kit Switch, whose thumb is absolutely positioned in the track,
+  // so "centred" is geometry: top === (track height - 2 × 1px border - thumb height) / 2, for
+  // the kit default and for the `.ci-switch--compact` extension in globals.css.
   const toggle = read("src/shared/components/Toggle.tsx");
-  assert.match(toggle, /"relative inline-flex shrink-0 cursor-pointer items-center rounded-full"/);
+  assert.match(toggle, /from "@omniroute\/ui-kit\/switch"/);
   assert.doesNotMatch(toggle, /"mt-0\.5"/);
+  const rem = (css: string, selector: string, prop: string) => {
+    const at = css.indexOf(`${selector} {`);
+    assert.ok(at > -1, `${selector} rule exists`);
+    const rule = css.slice(at, css.indexOf("}", at));
+    const m = rule.match(new RegExp(`(?:^|[\\s;{])${prop}:\\s*([\\d.]+)rem`));
+    assert.ok(m, `${selector} sets ${prop} in rem`);
+    return Number(m![1]) * 16;
+  };
+  const centred = (css: string, track: string, thumb: string) =>
+    assert.equal(
+      rem(css, thumb, "top"),
+      (rem(css, track, "height") - 2 - rem(css, thumb, "height")) / 2
+    );
+  centred(read("packages/ui-kit/src/ci-ui.css"), "  .ci-switch__track", "  .ci-switch__thumb");
+  centred(
+    read("src/app/globals.css"),
+    ".ci-switch--compact .ci-switch__track",
+    ".ci-switch--compact .ci-switch__thumb"
+  );
 });
 
 test("provider models use the symmetric AutoGrid", () => {

@@ -6,18 +6,23 @@
  * are cached after assembly; cache hits always return JSON.
  * Two-tier: in-memory LRU (fast) + SQLite (persistent across restarts).
  *
- * Cache key = SHA-256(model + normalized messages + temperature + top_p
- *             + output contract, when present — see outputContractOf, #12307)
+ * Cache key = SHA-256(version + model + normalized messages + temperature + top_p
+ *             + canonical response controls — see outputContractOf)
  * Bypass: X-OmniRoute-No-Cache: true
  *
  * @module lib/semanticCache
  */
 
 import crypto from "crypto";
+import { canonicalJson } from "./skills/stableJson";
 import { LRUCache } from "./cacheLayer";
 import { getDbInstance } from "./db/core";
 import { toNumber } from "@/shared/utils/numeric";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
+import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
+
+// Like reasoning-cache cleanup, start from the consumer module, independent of boot path.
+startSemanticCachePruneJob();
 
 type JsonRecord = Record<string, unknown>;
 
@@ -148,23 +153,22 @@ export function clearMemoryCache(): void {
  * These are stored under their raw request-body key only — no camelCase mirror exists,
  * because every caller passes `outputContractOf(body)` through untouched.
  */
-export interface SignatureConstraints {
+export const SEMANTIC_CACHE_KEY_SCHEMA = 2;
+
+/**
+ * Canonical (sorted-key) JSON serializer shared by both exact-cache hashes. Re-exported here so the
+ * open-sse cache manager reuses its existing `@/lib/semanticCache` import instead of adding a new
+ * open-sse -> src boundary edge.
+ */
+export { canonicalJson };
+
+export interface SignatureConstraints extends Partial<Record<GenerationParamKey, unknown>> {
   toolChoice?: unknown;
   tools?: unknown;
   responseFormat?: unknown;
   tool_choice?: unknown;
   response_format?: unknown;
   text_format?: unknown;
-  reasoning?: unknown;
-  reasoning_effort?: unknown;
-  max_tokens?: unknown;
-  max_completion_tokens?: unknown;
-  top_k?: unknown;
-  seed?: unknown;
-  stop?: unknown;
-  presence_penalty?: unknown;
-  frequency_penalty?: unknown;
-  logit_bias?: unknown;
 }
 
 /**
@@ -183,7 +187,32 @@ const GENERATION_PARAM_KEYS = [
   "presence_penalty",
   "frequency_penalty",
   "logit_bias",
+  "max_output_tokens",
+  "effort",
+  "thinking",
+  "parallel_tool_calls",
+  "functions",
+  "function_call",
+  "n",
+  "logprobs",
+  "top_logprobs",
+  "text",
+  "verbosity",
+  "output_config",
+  "generationConfig",
+  "generation_config",
+  "stop_sequences",
+  "instructions",
+  "system",
+  "prediction",
+  "modalities",
+  "audio",
+  "web_search_options",
+  "search_parameters",
+  "service_tier",
 ] as const;
+
+type GenerationParamKey = (typeof GENERATION_PARAM_KEYS)[number];
 
 /**
  * The parts of a request that decide what a *valid response* looks like.
@@ -193,8 +222,8 @@ const GENERATION_PARAM_KEYS = [
  * tool-calling request must not be served the body of one without tools.
  * Generation params (reasoning effort, max_tokens, …) count the same way (#15149).
  *
- * Returns null when the request carries none of these, so plain-chat
- * signatures — and every cache entry already written for them — are unchanged.
+ * Returns null when no response controls are present. Absent/null controls retain
+ * existing default semantics; explicit falsy values remain part of the identity.
  */
 export function outputContractOf(body: unknown): SignatureConstraints | null {
   const record = asRecord(body);
@@ -219,35 +248,9 @@ export function outputContractOf(body: unknown): SignatureConstraints | null {
   return Object.keys(contract).length > 0 ? contract : null;
 }
 
-/** Normalize a single tool definition, keeping only the fields that define its policy. */
-function normalizeTool(tool: unknown): unknown {
-  const record = asRecord(tool);
-  const fn = asRecord(record.function);
-  if (Object.keys(fn).length === 0 && Object.keys(record).length === 0) return tool;
-  return {
-    type: typeof record.type === "string" ? record.type : "function",
-    function: {
-      name: fn.name,
-      description: fn.description,
-      parameters: fn.parameters,
-    },
-  };
-}
-
-/**
- * Normalize `tools` for consistent hashing (mirrors `normalizeConversation` for messages):
- * strips volatile/irrelevant fields while keeping name/description/parameters, which are
- * what actually define the tool policy a cached response was generated under.
- */
-function normalizeTools(tools: unknown): unknown {
-  if (!Array.isArray(tools) || tools.length === 0) return undefined;
-  return tools.map(normalizeTool);
-}
-
 /**
  * Pick the #15149 generation params off a constraints object, skipping null/undefined
- * so they drop out of `JSON.stringify` and a request without them hashes byte-identically
- * to the legacy payload.
+ * so they retain the existing absent/default semantics.
  */
 function pickGenerationParams(constraints?: SignatureConstraints | null): Record<string, unknown> {
   if (!constraints) return {};
@@ -279,17 +282,25 @@ export function generateSignature(
   apiKeyId?: string,
   constraints?: SignatureConstraints | null
 ) {
-  const payload = JSON.stringify({
-    model,
-    messages: normalizeConversation(conversation),
-    temperature,
-    top_p: topP,
-    tool_choice: constraints?.toolChoice ?? constraints?.tool_choice,
-    tools: normalizeTools(constraints?.tools),
-    response_format: constraints?.responseFormat ?? constraints?.response_format,
-    text_format: constraints?.text_format,
-    ...pickGenerationParams(constraints),
-  });
+  // JSON round-trip retains JSON.stringify omission/default semantics before sorting
+  // nested object keys. Versioning prevents reads of older incomplete signatures.
+  const payload = canonicalJson(
+    JSON.parse(
+      JSON.stringify({
+        schema: SEMANTIC_CACHE_KEY_SCHEMA,
+        model,
+        messages: normalizeConversation(conversation),
+        temperature,
+        top_p: topP,
+        tool_choice: constraints?.toolChoice ?? constraints?.tool_choice,
+        // Preserve native tool fields and strict schemas; dropping them changes policy.
+        tools: constraints?.tools,
+        response_format: constraints?.responseFormat ?? constraints?.response_format,
+        text_format: constraints?.text_format,
+        ...pickGenerationParams(constraints),
+      })
+    )
+  );
   const digest = crypto.createHash("sha256").update(payload).digest("hex");
   // Per-key cache isolation (#3740) namespaces the signature with the apiKeyId as a
   // PLAINTEXT prefix instead of folding it into the digest. The apiKeyId is an internal
@@ -392,9 +403,9 @@ export function recordSemanticCacheHit(signature: string, tokensSaved = 0): void
   try {
     const db = getDbInstance();
     if (signature) {
-      db.prepare(
-        "UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ? OR prompt_hash = ?"
-      ).run(signature, signature.slice(0, 16));
+      db.prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?").run(
+        signature
+      );
     }
     incrementMetric("hits");
     if (tokensSaved > 0) {

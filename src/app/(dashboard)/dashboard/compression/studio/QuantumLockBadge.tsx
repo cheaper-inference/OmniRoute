@@ -12,7 +12,7 @@ export function QuantumLockBadge({ stats }: QuantumLockBadgeProps) {
     .map(([cat, n]) => `${cat} ×${n}`)
     .join(", ");
   return (
-    <span data-testid="quantum-badge" className="text-xs font-mono text-emerald-600">
+    <span data-testid="quantum-badge" className="text-xs font-mono text-success">
       🔒 {stats.fragments} volatile fragment(s) stabilized{detail ? ` (${detail})` : ""}
     </span>
   );

@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { Button, Input, Modal } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 interface DenoRelayModalProps {
   isOpen: boolean;
@@ -55,100 +57,74 @@ export default function DenoRelayModal({ isOpen, onClose, onDeployed }: DenoRela
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="deno-relay-title"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      closeOnOverlay={false}
+      title={
+        <span className="flex items-center gap-2">
+          <Icon name="terminal" />
+          {t("denoRelayModalTitle")}
+        </span>
+      }
+      footer={
+        <>
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={deploying}>
+            {t("cancel")}
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleDeploy} loading={deploying}>
+            {deploying ? t("denoRelayDeploying") : t("denoRelayDeploy")}
+          </Button>
+        </>
+      }
     >
-      <div className="bg-surface rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 id="deno-relay-title" className="text-lg font-bold flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary" aria-hidden="true">
-              terminal
-            </span>
-            {t("denoRelayModalTitle")}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t("close")}
-            className="text-text-muted hover:text-text"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              close
-            </span>
-          </button>
-        </div>
-
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded p-3 text-xs text-yellow-300">
+      <div className="space-y-4">
+        <div className="rounded border border-warning/30 bg-warning-bg p-3 text-xs text-text-main space-y-1">
           {t("denoRelayWarning")}
         </div>
 
         <div className="space-y-3">
-          <div>
-            <label className="text-sm font-medium mb-1 block" htmlFor="deno-token">
-              {t("denoRelayTokenLabel")}
-            </label>
-            <input
-              id="deno-token"
-              type="password"
-              value={denoToken}
-              onChange={(e) => setDenoToken(e.target.value)}
-              className="w-full text-sm bg-surface-alt border border-border rounded px-3 py-2 focus:outline-none focus:border-primary"
-              placeholder="ddo_..."
-              autoComplete="off"
-            />
-            <p className="text-xs text-text-muted mt-1">{t("denoRelayTokenHint")}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1 block" htmlFor="deno-org-domain">
-              {t("denoRelayOrgDomainLabel")}
-            </label>
-            <input
-              id="deno-org-domain"
-              type="text"
-              value={orgDomain}
-              onChange={(e) => setOrgDomain(e.target.value)}
-              className="w-full text-sm bg-surface-alt border border-border rounded px-3 py-2 focus:outline-none focus:border-primary"
-              placeholder="your-org.deno.net"
-            />
-            <p className="text-xs text-text-muted mt-1">{t("denoRelayOrgDomainHint")}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1 block" htmlFor="deno-project-name">
-              {t("denoRelayProjectNameLabel")}
-            </label>
-            <input
-              id="deno-project-name"
-              type="text"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              className="w-full text-sm bg-surface-alt border border-border rounded px-3 py-2 focus:outline-none focus:border-primary"
-              placeholder="omniroute-deno-relay"
-            />
-          </div>
+          <Input
+            id="deno-token"
+            type="password"
+            label={t("denoRelayTokenLabel")}
+            value={denoToken}
+            onChange={(e) => setDenoToken(e.target.value)}
+            placeholder="ddo_..."
+            hint={t("denoRelayTokenHint")}
+            autoComplete="off"
+          />
+          <Input
+            id="deno-org-domain"
+            type="text"
+            label={t("denoRelayOrgDomainLabel")}
+            value={orgDomain}
+            onChange={(e) => setOrgDomain(e.target.value)}
+            placeholder="your-org.deno.net"
+            hint={t("denoRelayOrgDomainHint")}
+          />
+          <Input
+            id="deno-project-name"
+            type="text"
+            label={t("denoRelayProjectNameLabel")}
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+            placeholder="omniroute-deno-relay"
+          />
         </div>
 
         {error && (
-          <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded p-2">
+          <div
+            role="alert"
+            className="text-sm text-error bg-error-bg border border-error/20 rounded p-2"
+          >
             {error}
           </div>
         )}
 
         <p className="text-xs text-text-muted">{t("denoRelayFreeTierNote")}</p>
-
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" size="sm" onClick={onClose} disabled={deploying}>
-            {t("cancel")}
-          </Button>
-          <Button variant="primary" size="sm" onClick={handleDeploy} disabled={deploying}>
-            {deploying ? t("denoRelayDeploying") : t("denoRelayDeploy")}
-          </Button>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 }

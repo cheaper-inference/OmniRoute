@@ -171,29 +171,29 @@ Opsezi (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Pokretanje Testova
+## Pokretanje testova
 
 ```bash
-# Svi testovi (unit + vitest + ecosystem + e2e)
+# Svi testovi (jedinični + vitest + ekosustav + e2e)
 npm run test:all
 
-# Jedna datoteka s testovima (Node.js nativni pokretač testova — većina testova koristi ovo)
+# Jedna testna datoteka (izvorni pokretač testova za Node.js — većina testova koristi njega)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Samo unit testovi na koje utječe vaša izmjena (isti TIA selektor kao CI prolaznik, #8084)
-npm run test:scoped            # izmjene u zadnjem commitu (ili radnom stablu)
-npm run test:scoped:staged     # samo staged izmjene — dobro se kombinira s pre-commit pokretanjem
-npm run test:scoped:full       # prvo ponovo izgradi mapu import-grafa (nakon dodavanja/premještanja datoteka)
-# Izlaz 1 + "pokrenite cijelu kolekciju" znači da se promijenila hub datoteka (tsconfig, package.json, …) ili
-# nemapiran izvor — selektor sigurno ne uspijeva, nikad tiho ne preskače.
+# Samo jedinični testovi na koje utječe vaša promjena (isti TIA selektor kao na CI kontrolnoj točki, #8084)
+npm run test:scoped            # promjene u posljednjem commitu (ili radnom stablu)
+npm run test:scoped:staged     # samo pripremljene promjene — dobro se uklapa s pokretanjem prije commita
+npm run test:scoped:full       # prvo ponovno izgradite mapu grafa uvoza (nakon dodavanja/premještanja datoteka)
+# Izlaz 1 + "pokrenite cijeli skup" znači da se promijenila središnja datoteka (tsconfig, package.json, …) ili
+# nemapirani izvor — selektor radi sigurno i nikada ništa prešutno ne preskače.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP poslužitelj, autoCombo, predmemorija)
 npm run test:vitest
 
 # E2E testovi (zahtijeva Playwright)
 npm run test:e2e
 
-# E2E testovi protokolarnih klijenata (MCP transporti, A2A)
+# E2E klijenata protokola (MCP prijenosi, A2A)
 npm run test:protocols:e2e
 
 # Testovi kompatibilnosti ekosustava
@@ -207,51 +207,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Zaštićeni real-upstream combo smoke (zahtijeva VPS pristup + stvarne kredite pružatelja)
-# Pogađa STVARNE pružatelje — malo košta. NIKAD se ne pokreće u CI-u. Preskače čisto bez prolaznika.
-# Potrebno: ssh root@192.168.0.15 pristup (učitava snimku baze podataka samo za čitanje s VPS-a).
+# Kontrolirani osnovni test stvarnih vanjskih sustava za combo (zahtijeva pristup VPS-u + stvarne kredite pružatelja)
+# Pristupa STVARNIM pružateljima — stvara mali trošak. NIKADA se ne pokreće u CI-ju. Uredno se preskače bez kontrolne zastavice.
+# Potrebno: pristup ssh root@192.168.0.15 (učitava snimku baze podataka samo za čitanje s VPS-a).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — jednostavne Node ESM skripte, pogađaju živi .15 poslužitelj direktno.
-# Potrebno: ssh root@192.168.0.15 pristup (comboi se stvaraju/brišu putem SSH sqlite).
-# Pogađa STVARNE pružatelje (mali trošak). Stvara/briše samo __live_test__* comboe. NIKAD se ne pokreće u CI-u.
-# REQUIRE_API_KEY=false na .15 pa nije potreban API ključ, ali poštuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ako su postavljeni.
-npm run test:combo:live:vps              # 7 HTTP scenarija (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # dodaje stvarni cross-provider failover scenarij (ukupno 8)
+# Aktivni VPS osnovni test 3. faze — obične Node ESM skripte izravno pristupaju aktivnom .15 poslužitelju.
+# Zahtijeva: pristup ssh root@192.168.0.15 (combo konfiguracije stvaraju se/uklanjaju putem SSH sqlitea).
+# Pristupa STVARNIM pružateljima (mali trošak). Stvara/briše samo combo konfiguracije __live_test__*. NIKADA se ne pokreće u CI-ju.
+# Na .15 je REQUIRE_API_KEY=false pa API ključ nije potreban, ali poštuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ako su postavljeni.
+npm run test:combo:live:vps              # 7 HTTP scenarija (prioritet/kružno raspoređivanje/ponderirano/trošak/fuzija/automatski + stanje)
+npm run test:combo:live:vps:failover     # dodaje stvarni scenarij prebacivanja između pružatelja (ukupno 8)
 ```
 
 Napomene o pokrivenosti:
 
-- `npm run test:coverage` mjeri pokrivenost izvornog koda za glavni skup unit testova, isključuje `tests/**` i uključuje `open-sse/**`
-- Pull requestovi moraju održavati prag pokrivenosti na **60%+** naredbi/redaka/funkcija/grana
-- Ako PR mijenja produkcijski kod u `src/`, `open-sse/`, `electron/` ili `bin/`, mora dodati ili ažurirati automatizirane testove u istom PR-u
-- `npm run coverage:report` ispisuje detaljno izvješće po datotekama iz zadnjeg pokretanja pokrivenosti
-- `npm run test:coverage:legacy` čuva stariju metriku za povijesnu usporedbu
-- Pogledajte `docs/ops/COVERAGE_PLAN.md` za plan poboljšanja pokrivenosti u fazama
+- `npm run test:coverage` mjeri pokrivenost izvornog koda za glavni skup jediničnih testova, izuzima `tests/**` i uključuje `open-sse/**`
+- Zahtjevi za spajanje moraju održavati prag pokrivenosti od **60%+** za naredbe/retke/funkcije/grane
+- Ako PR mijenja produkcijski kod u `src/`, `open-sse/`, `electron/` ili `bin/`, u istom PR-u mora dodati ili ažurirati automatizirane testove
+- `npm run coverage:report` ispisuje detaljno izvješće za svaku datoteku iz posljednjeg pokretanja pokrivenosti
+- `npm run test:coverage:legacy` zadržava stariju metriku radi povijesne usporedbe
+- Pogledajte `docs/ops/COVERAGE_PLAN.md` za fazni plan poboljšanja pokrivenosti
 
-### Zahtjevi za Pull Request
+### Zahtjevi za zahtjev za spajanje
 
-Prije otvaranja PR-a, koristite
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) za pokretanje fokusiranog ciklusa za
-ono što ste promijenili. Puni skup unit testova (4 CI sharda), Vitest, prag pokrivenosti **60%+** i
-produkcijski build su odgovornost CI-a — lokalno pokretanje ne dodaje nikakav signal koji provjere PR-a već neće dati, a na manjim strojevima može zasititi host (#8084):
+Prije otvaranja PR-a upotrijebite
+[Zlatni put za doprinošenje](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kako biste pokrenuli usredotočeni ciklus za
+ono što ste promijenili. Za cijeli skup jediničnih testova (4 CI segmenta), Vitest, prag pokrivenosti od **60%+** i
+produkcijsku izgradnju odgovoran je CI — njihovo lokalno pokretanje ne pruža dodatne informacije koje vam
+provjere PR-a već neće dati, a na slabijim računalima može preopteretiti sustav (#8084):
 
-- Pokrenite testne datoteke koje pokrivaju vašu izmjenu: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Pokrenite testne datoteke koje pokrivaju vašu promjenu: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Pokrenite `npm run lint`
-- Uključite ili ažurirajte automatizirane testove u istom PR-u kad god se mijenja produkcijski kod
-- Uključite izmijenjene ili dodane testne datoteke u opis PR-a kada se promijenio produkcijski kod
-- Provjerite SonarQube rezultat na PR-u kada su tajne projekta konfigurirane u CI-u
+- Dodajte ili ažurirajte automatizirane testove u istom PR-u kad god se promijeni produkcijski kod
+- U datotekama `node:test` postavite svaki `await` najviše razine (kao što je `await import(...)`) prije prvog `test()` / `describe()`: uz `--test-force-exit`, testovi registrirani nakon njega mogu se prešutno uopće ne pokrenuti (#18045; provodi se naredbom `npm run check:test-tla-order`)
+- Kada se promijeni produkcijski kod, u opis PR-a uključite promijenjene ili dodane testne datoteke
+- Provjerite rezultat SonarQubea na PR-u kada su tajne projekta konfigurirane u CI-ju
 
-Trenutni status testova: **122 unit testne datoteke** koje pokrivaju:
+Trenutačno stanje testova: **122 datoteke jediničnih testova** koje pokrivaju:
 
-- Prevoditelje pružatelja i konverziju formata
-- Ograničavanje brzine, circuit breaker i otpornost
-- Semantički cache, idempotentnost, praćenje napretka
-- Operacije s bazom podataka i shemu (21 DB modul)
+- Prevoditelje pružatelja i pretvorbu formata
+- Ograničavanje brzine, prekidač strujnog kruga i otpornost
+- Semantičku predmemoriju, idempotentnost i praćenje napretka
+- Operacije baze podataka i shemu (21 modul baze podataka)
 - OAuth tokove i autentifikaciju
-- Validaciju API krajnjih točaka (Zod v4)
-- Alate MCP poslužitelja i provođenje opsega
-- Sustave Memorije i Vještina
+- Validaciju krajnjih točaka API-ja (Zod v4)
+- Alate MCP poslužitelja i provedbu opsega
+- Sustave memorije i vještina
 
 ---
 

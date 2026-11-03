@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import Icon from "@/shared/components/Icon";
 
 interface Props {
   expiresAt: number | null; // unix seconds
@@ -29,7 +30,7 @@ export default function ExpirationBadge({ expiresAt, variant = "default" }: Prop
   const remaining = expiresAt - now;
   if (remaining <= 0) {
     return (
-      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium border bg-gray-500/15 text-gray-400 border-gray-500/25">
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium border bg-surface-2/15 text-text-muted border-border/25">
         {t("expirationBadgeExpired")}
       </span>
     );
@@ -38,13 +39,13 @@ export default function ExpirationBadge({ expiresAt, variant = "default" }: Prop
   // Plan specifies "<24h normal" — in practice batches always expire ≤24h (OpenAI window),
   // so "else" maps to that case. If a provider (e.g. Gemini 48h) yields remaining >24h,
   // we still render normal — graceful, no separate tier needed.
-  let tone = "bg-emerald-500/15 text-emerald-400 border-emerald-500/25";
+  let tone = "bg-success/15 text-success border-success/25";
   let label = t("expirationBadgeNormal");
   if (remaining < 3600) {
-    tone = "bg-red-500/15 text-red-400 border-red-500/25";
+    tone = "bg-error/15 text-error border-error/25";
     label = t("expirationBadgeCritical");
   } else if (remaining < 6 * 3600) {
-    tone = "bg-yellow-500/15 text-yellow-400 border-yellow-500/25";
+    tone = "bg-warning/15 text-warning border-warning/25";
     label = t("expirationBadgeWarning");
   }
   const display = formatRemaining(remaining);
@@ -65,7 +66,7 @@ export default function ExpirationBadge({ expiresAt, variant = "default" }: Prop
     <span
       className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium border ${tone}`}
     >
-      <span className="material-symbols-outlined text-[12px]">schedule</span>
+      <Icon name="schedule" size={12} />
       <span className="sr-only">{label}: </span>
       {display}
     </span>

@@ -11,16 +11,18 @@
 PII-সংক্রান্ত শিক্ষা)। এটি সম্পূর্ণ পড়ুন; এখানে প্রকল্পের নিয়ম পুনরায় যোগ করবেন না। নিচের সবকিছু শুধু
 Claude Code-এর ক্ষেত্রে প্রযোজ্য — `AGENTS.md`-এ ইতিমধ্যে সংজ্ঞায়িত নিয়মগুলোর কার্যকরী পরিমার্জন।
 
-## Worktree বিচ্ছিন্নতা — Claude Code-এর নির্দিষ্ট বিষয়
+## Worktree আইসোলেশন — Claude Code-নির্দিষ্ট বিষয়সমূহ
 
-সম্পূর্ণ বাধ্যতামূলক worktree প্রোটোকল (বেস-ব্রাঞ্চ নিশ্চিতকরণ, `.claude/worktrees/` ক্যানোনিক্যাল
-পাথ, `cp -al` node_modules, অপসারণের নিয়ম) `AGENTS.md` → Git Workflow → "Worktree
-isolation"-এ রয়েছে। Claude Code-এর নির্দিষ্ট বিষয়গুলো:
+সম্পূর্ণ বাধ্যতামূলক worktree প্রোটোকল (base-branch নিশ্চিতকরণ, `.claude/worktrees/` ক্যানোনিক্যাল
+পাথ, `cp -al` node_modules, teardown নিয়মাবলি) রয়েছে
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-এ (`AGENTS.md` →
+Git Workflow → "Worktree isolation"-এ সংক্ষিপ্ত করা হয়েছে)। Claude Code-নির্দিষ্ট পয়েন্টসমূহ:
 
-- অপারেটর আগে থেকে না জানিয়ে থাকলে `AskUserQuestion`-এর মাধ্যমে বেস ব্রাঞ্চ নিশ্চিত করুন (কঠোর নিয়ম #19)।
+- অপারেটরের কাছ থেকে `AskUserQuestion` এর মাধ্যমে বেস ব্রাঞ্চটি নিশ্চিত করুন (কঠোর নিয়ম #19), যদি না
+  তারা ইতিমধ্যে আপনাকে জানিয়ে থাকে।
 - নেটিভ `EnterWorktree` টুলটিকে অগ্রাধিকার দিন — এটি ইতিমধ্যেই
-  `.claude/worktrees/`-এর (ক্যানোনিক্যাল পাথ) অধীনে worktree তৈরি করে। নথিভুক্ত `git
-worktree add` কমান্ড দিয়ে worktree তৈরি করুন, এরপর এর `path` দিয়ে `EnterWorktree` কল করুন।
+  `.claude/worktrees/`-এর অধীনে worktree তৈরি করে (ক্যানোনিক্যাল পাথ)। ডকুমেন্টে বর্ণিত `git
+worktree add` কমান্ড দিয়ে worktree তৈরি করুন, তারপর এর `path` সহ `EnterWorktree` কল করুন।
 
 ## ক্রস-সেশন নিরাপত্তা — Claude Code-এর নির্দিষ্ট বিষয়
 

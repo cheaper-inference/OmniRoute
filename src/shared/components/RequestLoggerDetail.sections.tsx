@@ -13,6 +13,9 @@ import {
 } from "@/shared/hooks/useTimestampTitles";
 import { JsonTreeExpandControls } from "@/shared/components/JsonTreeExpandControls";
 import { useJsonTreeExpandLevel } from "@/store/jsonTreeExpandStore";
+import { cn } from "@/shared/utils/cn";
+import Button from "./Button";
+import Icon from "./Icon";
 import {
   isPipelineSizeLimitMarker,
   isSizeLimitOmissionMarker,
@@ -111,43 +114,44 @@ export function PayloadSection({
             {title}
           </h3>
           {collapsible && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setOpen((v) => !v)}
-              className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
+              className="size-6 min-h-6 text-text-muted"
+              aria-expanded={open}
               aria-label={open ? t("collapse", { title }) : t("expand", { title })}
             >
-              <span className="material-symbols-outlined text-[16px]">
-                {open ? "expand_less" : "expand_more"}
-              </span>
-            </button>
+              <Icon name={open ? "expand_less" : "expand_more"} size={16} />
+            </Button>
           )}
         </div>
         <div className="flex items-center gap-2">
           {!notice && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleCopy}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
+              className="h-7 min-h-7 px-2 text-xs text-text-muted"
               aria-label={t("copyTitle", { title })}
             >
-              <span className="material-symbols-outlined text-[14px]">
-                {copied ? "check" : "content_copy"}
-              </span>
+              <Icon name={copied ? "check" : "content_copy"} size={14} />
               {copied ? t("copied") : t("copy")}
-            </button>
+            </Button>
           )}
           {parsedJson !== null && <JsonTreeExpandControls sectionId={resolvedSectionId} />}
         </div>
       </div>
       {open && notice && (
-        <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
-          <span className="material-symbols-outlined text-[16px] shrink-0">warning</span>
+        <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-4 text-xs text-warning">
+          <Icon name="warning" size={16} />
           <span>{t("payloadSizeLimitOmitted")}</span>
         </div>
       )}
       {open && !notice && parsedJson !== null && (
         <div
           ref={treeContainerRef}
-          className="rounded-xl bg-black/5 dark:bg-black/30 border border-border max-h-150 overflow-auto p-4 text-xs font-mono"
+          className="max-h-150 overflow-auto rounded-xl border border-border bg-surface-2 p-4 font-mono text-xs"
         >
           <JsonView
             src={parsedJson}
@@ -159,7 +163,7 @@ export function PayloadSection({
         </div>
       )}
       {open && !notice && parsedJson === null && (
-        <pre className="p-4 rounded-xl bg-black/5 dark:bg-black/30 border border-border overflow-x-auto text-xs font-mono text-text-main max-h-150 overflow-y-auto leading-relaxed whitespace-pre-wrap break-words">
+        <pre className="max-h-150 overflow-x-auto overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-surface-2 p-4 font-mono text-xs leading-relaxed text-text-main">
           {json}
         </pre>
       )}
@@ -196,6 +200,7 @@ function asInterceptedResponseBody(responseBody: unknown): InterceptedRequest {
 }
 
 export function ConversationContextSection({ log, detail }) {
+  const t = useTranslations("requestLogger.detail");
   const [open, setOpen] = useState(true);
   const [liveDetail, setLiveDetail] = useState(detail);
   const [liveRefresh, setLiveRefresh] = useState(() => {
@@ -301,17 +306,22 @@ export function ConversationContextSection({ log, detail }) {
       <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-3">
           <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-bold">
-            Conversation Context
+            {t("conversationContext")}
           </h3>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setOpen((v) => !v)}
-            className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-            aria-label={open ? "Collapse Conversation Context" : "Expand Conversation Context"}
+            className="size-6 min-h-6 text-text-muted"
+            aria-expanded={open}
+            aria-label={
+              open
+                ? t("collapse", { title: t("conversationContext") })
+                : t("expand", { title: t("conversationContext") })
+            }
           >
-            <span className="material-symbols-outlined text-[16px]">
-              {open ? "expand_less" : "expand_more"}
-            </span>
-          </button>
+            <Icon name={open ? "expand_less" : "expand_more"} size={16} />
+          </Button>
           {liveDetail?.parentLogId && (
             // Full navigation, not client-side routing: the logs page only reads
             // ?id from a fresh mount (useState(() => searchParams.get("id")) in
@@ -320,10 +330,10 @@ export function ConversationContextSection({ log, detail }) {
             <a
               href={`/dashboard/logs?id=${encodeURIComponent(liveDetail.parentLogId)}`}
               className="flex items-center gap-1 text-[11px] text-text-muted hover:text-primary transition-colors"
-              title={`Continues from ${liveDetail.parentLogId}`}
+              title={t("continuesFrom", { id: liveDetail.parentLogId })}
             >
-              <span className="material-symbols-outlined text-[14px]">reply</span>
-              continues from parent
+              <Icon name="reply" size={14} />
+              {t("continuesFromParent")}
             </a>
           )}
           {liveDetail?.sessionTag && (
@@ -335,42 +345,47 @@ export function ConversationContextSection({ log, detail }) {
             <a
               href={`/dashboard/conversations?tree=${encodeURIComponent(liveDetail.sessionTag)}`}
               className="flex items-center gap-1 text-[11px] text-text-muted hover:text-primary transition-colors"
-              title={`Open conversation ${liveDetail.sessionTag}`}
+              title={t("openConversation", { id: liveDetail.sessionTag })}
             >
-              <span className="material-symbols-outlined text-[14px]">forum</span>
-              view conversation
+              <Icon name="forum" size={14} />
+              {t("viewConversation")}
             </a>
           )}
         </div>
         {open && (
           <div className="flex items-center gap-1">
             {liveDetail?.active && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={toggleLiveRefresh}
-                title={liveRefresh ? "Live refresh: on" : "Live refresh: off"}
-                className={`p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors ${liveRefresh ? "text-primary" : ""}`}
+                title={liveRefresh ? t("liveRefreshOn") : t("liveRefreshOff")}
+                // Static name + aria-pressed carries the on/off state ("Live refresh, pressed");
+                // the stateful wording stays in the tooltip.
+                aria-label={t("liveRefresh")}
+                className={cn("size-7 min-h-7", liveRefresh ? "text-primary" : "text-text-muted")}
                 aria-pressed={liveRefresh}
               >
-                <span className="material-symbols-outlined text-[18px]">
-                  {liveRefresh ? "sync" : "sync_disabled"}
-                </span>
-              </button>
+                <Icon name={liveRefresh ? "sync" : "sync_disabled"} size={18} />
+              </Button>
             )}
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={scrollToBottom}
-              title="Go to bottom"
-              className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-              aria-label="Go to bottom"
+              title={t("goToBottom")}
+              className="size-7 min-h-7 text-text-muted"
+              aria-label={t("goToBottom")}
             >
-              <span className="material-symbols-outlined text-[18px]">vertical_align_bottom</span>
-            </button>
+              <Icon name="vertical_align_bottom" size={18} />
+            </Button>
           </div>
         )}
       </div>
       {open && (
         <div
           ref={turnsBoxRef}
-          className="rounded-xl bg-black/5 dark:bg-black/30 border border-border max-h-150 overflow-y-auto p-3 space-y-2"
+          className="max-h-150 space-y-2 overflow-y-auto rounded-xl border border-border bg-surface-2 p-3"
         >
           {allTurns.map((turn, i) => (
             <ChatBubble key={i} turn={turn} />
