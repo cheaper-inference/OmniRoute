@@ -27,7 +27,7 @@
       "omp": [".omp/agent/models.yml"],
       "openclaw": [".openclaw/openclaw.json"],
       "opencode": [".config/opencode/opencode.json", ".config/opencode/opencode.jsonc"],
-      "pi": [".pi/config.json"],
+      "pi": [".pi/agent/models.json"],
       "prime-agent": [".prime-agent/config.json"],
       "qoder": [".qoder/settings.json"],
       "qwen": [".qwen/settings.json"],
@@ -512,6 +512,18 @@
       "surfaces": {
         "catalog": true,
         "detect": true,
+        "run": false,
+        "configure": false,
+        "generate": false
+      }
+    },
+    "openclaude": {
+      "displayName": "OpenClaude",
+      "aliases": [],
+      "binaries": ["openclaude"],
+      "surfaces": {
+        "catalog": true,
+        "detect": false,
         "run": false,
         "configure": false,
         "generate": false

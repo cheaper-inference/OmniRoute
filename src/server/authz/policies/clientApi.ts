@@ -3,6 +3,8 @@ import { recordApiKeyAuthTouch } from "@/lib/compliance/index";
 import { classifyIpScope, getClientIpFromRequest } from "@/lib/ipUtils";
 import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver.ts";
+import { isEntraSsoEnabled } from "../entra/config";
+import { evaluateSsoAuth, looksLikeEntraJwt } from "../entra/evaluate";
 import type { AuthOutcome, PolicyContext, RoutePolicy } from "../context";
 import { allow, reject } from "../context";
 import { isViaProxyRequest, requestPeerAddress } from "../peerContext";
@@ -126,6 +128,26 @@ export const clientApiPolicy: RoutePolicy = {
       }
 
       return reject(401, "AUTH_002", "Authentication required");
+    }
+
+    // Runs before validateApiKey, but only while SSO is actually configured —
+    // otherwise a client's own unrelated JWT would stop degrading to anonymous
+    // under REQUIRE_API_KEY=false. Once SSO does claim a bearer, its outcome is
+    // FINAL: falling through would let that same branch turn an Entra outage
+    // into open access. The highest-precedence credential is the one SSO
+    // inspects (Claude Code's apiKeyHelper sends the JWT as both Bearer and
+    // x-api-key, so it is always first).
+    const primary = credentials[0];
+    if (looksLikeEntraJwt(primary) && (await isEntraSsoEnabled())) {
+      const verdict = await evaluateSsoAuth(primary);
+      if (!verdict.ok) {
+        return reject(verdict.status, verdict.code, verdict.message);
+      }
+      return allow({
+        kind: "sso_user",
+        id: verdict.oid,
+        label: verdict.upn || undefined,
+      });
     }
 
     const { validateApiKey } = await import("../../../lib/db/apiKeys");

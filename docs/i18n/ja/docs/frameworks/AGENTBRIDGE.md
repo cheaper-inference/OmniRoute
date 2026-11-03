@@ -16,11 +16,11 @@ AgentBridge は、IDE AI エージェントからの HTTPS トラフィックを
 
 ### AgentBridgeとは何ですか？
 
-IDEエージェント ( GitHub Copilot、 Cursor、 Claudeコードなど) がAPI呼び出しを行うと、上流のAIプロバイダー (OpenAI、 Anthropicなど) に直接接続します。 AgentBridge 、エージェント構成の変更を必要とせずに、その接続をTLSレベルで透過的にインターセプトし、 OmniRouteを通じてリクエストを書き換えます。
+IDEエージェント ( GitHub Copilot、 Cursor、 Claudeコードなど) がAPI呼び出しを行うと、上流のAIプロバイダー (OpenAI、 Anthropicなど) に直接接続します。 AgentBridge 、エージェント構成の変更—を必要とせずに、 TLSレベル—でその接続を透過的にインターセプトし、 OmniRouteを介してリクエストを書き換えます。
 
 つまり、次のことが可能になります。
 
-- **エージェントを任意のプロバイダーに再ルーティングする**: Copilot OpenAIと話していますか?それをAnthropic Claude、 Gemini、またはOmniRouteの 377 プロバイダーのいずれかにリダイレクトします。
+- **エージェントを任意のプロバイダーに再ルーティングする**: Copilot OpenAIと話していますか? Anthropic Claude、 Gemini、またはOmniRouteの 380 プロバイダーのいずれかにリダイレクトします。
 - **モデルマッピングを適用する**: `gemini-3-flash` → `claude-sonnet-4.7`ハンドラーレベルで透過的に。
 - **すべてのエージェントのトラフィックを監視する**: 傍受されたすべてのリクエストは[Traffic Inspector](./TRAFFIC_INSPECTOR.md)に公開されます。
 - **OmniRouteレジリエンスを適用する**: コンボ ルーティング、サーキット ブレーカー、フォールバック、コスト トラッキングは、 IDEエージェント トラフィックに対しても機能します。

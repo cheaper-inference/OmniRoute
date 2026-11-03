@@ -157,12 +157,12 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` এ তারযু
 | :------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
 | স্মার্ট রাউটিং      | `smart-routing`      | OmniRoute এর কম্বো ইঞ্জিন + স্কোরিং ব্যবহার করে সর্বোত্তম provider/combo এর মাধ্যমে একটি প্রম্পট রুট করে                                                         | রাউটিং, প্রদানকারী         | "সেরা মডেলের মাধ্যমে এই প্রম্পটটি রুট করুন"  |
 | কোটা ব্যবস্থাপনা    | `quota-management`   | প্রতি-প্রোভাইডার কোটা স্টেট রিপোর্ট করে, কলকারীদের কখন throttle/switch করতে হবে তা সিদ্ধান্ত নিতে সাহায্য করে                                                    | কোটা, প্রদানকারী           | "নৃবিজ্ঞানের জন্য কোটা পরীক্ষা করুন"         |
-| প্রদানকারী আবিষ্কার | `provider-discovery` | সক্ষমতা, ফ্রি-টায়ার পতাকা, OAuth স্ট্যাটাস সহ ইনস্টল করা প্রদানকারীদের তালিকা করুন                                                                              | প্রদানকারী, আবিষ্কার       | "কি প্রদানকারী পাওয়া যায়?"                 |
+| প্রদানকারী আবিষ্কার | `provider-discovery` | সক্ষমতা, মুক্ত-স্তরের পতাকা, OAuth স্ট্যাটাস সহ ইনস্টল করা প্রদানকারীদের তালিকা করুন                                                                             | প্রদানকারী, আবিষ্কার       | "কি প্রদানকারী পাওয়া যায়?"                 |
 | খরচ বিশ্লেষণ        | `cost-analysis`      | ক্যাটালগ + সাম্প্রতিক ব্যবহার অনুযায়ী একটি request/conversation এর মূল্য অনুমান করে                                                                             | খরচ, ব্যবহার               | "এই কথোপকথনের জন্য আনুমানিক খরচ"             |
 | স্বাস্থ্য রিপোর্ট   | `health-report`      | সার্কিট ব্রেকার, কুলডাউন, প্রদানকারী প্রতি লকআউট অবস্থা                                                                                                          | স্বাস্থ্য, স্থিতিস্থাপকতা  | "সমস্ত প্রদানকারীর স্বাস্থ্যের অবস্থা দেখান" |
 | তালিকা ক্ষমতা       | `list-capabilities`  | প্রসঙ্গ ইনজেকশনের জন্য কাঁচা SKILL.md URLs সহ একটি মার্কডাউন টেবিল হিসাবে সম্পূর্ণ 45-এন্ট্রি এজেন্ট দক্ষতা ক্যাটালগ (23 API + 21 CLI + 1 কনফিগারেশন) প্রদান করে | ক্যাটালগ, আবিষ্কার, দক্ষতা | "সমস্ত OmniRoute ক্ষমতা তালিকাভুক্ত করুন"    |
 
-> এজেন্ট কার্ডটি লাইভ 377-প্রদানকারীর ক্যাটালগের সাথে সারিবদ্ধ রাখা উচিত; প্রদানকারীর সংখ্যা এবং free/no-auth মেটাডেটা রানটাইম রেজিস্ট্রি থেকে নেওয়া হয়।
+> এজেন্ট কার্ডটি লাইভ 380-প্রদানকারীর ক্যাটালগের সাথে সারিবদ্ধ রাখা উচিত; প্রদানকারীর সংখ্যা এবং free/no-auth মেটাডেটা রানটাইম রেজিস্ট্রি থেকে নেওয়া হয়।
 
 ### `list-capabilities` দক্ষতা বিস্তারিত
 
@@ -196,17 +196,17 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
 
 ---
 
-## নতুন Skill যোগ করা
+## একটি নতুন দক্ষতা যোগ করা হচ্ছে
 
-1. **Skill ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **দক্ষতা ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   একটি async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` export করুন। `smartRouting.ts`-এর মতো বিদ্যমান skills-এর কাঠামো অনুসরণ করুন।
+   একটি async ফাংশন `(task: A2ATask) => Promise<{ artifacts, metadata }>` রপ্তানি করুন। বিদ্যমান দক্ষতা যেমন `smartRouting.ts` এর আকার অনুসরণ করুন।
 
-2. **Handler নিবন্ধন করুন:** `src/lib/a2a/taskExecution.ts`-এ `A2A_SKILL_HANDLERS`-এ একটি entry যোগ করুন:
+2. **রেজিস্টার হ্যান্ডলার:** `src/lib/a2a/taskExecution.ts` তে, `A2A_SKILL_HANDLERS` এ একটি এন্ট্রি যোগ করুন:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...বিদ্যমান skills
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -214,21 +214,21 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
    };
    ```
 
-3. **Agent Card-এ প্রকাশ করুন:** `src/lib/a2a/agentCardMetadata.ts`-এ (`/.well-known/agent.json` এবং `/.well-known/agent-card.json` উভয়ের জন্য ব্যবহৃত), `skills` array-তে যোগ করুন:
+3. **এজেন্ট কার্ডে প্রকাশ করুন:** `src/lib/a2a/agentCardMetadata.ts` ( `/.well-known/agent.json` এবং `/.well-known/agent-card.json` দ্বারা ভাগ করা), `skills` অ্যারেতে যুক্ত করুন:
 
    ```json
    {
      "id": "your-skill",
-     "name": "আপনার Skill",
-     "description": "সংক্ষিপ্ত, অভিপ্রায়-কেন্দ্রিক বিবরণ",
-     "tags": ["রাউটিং", "কোটা"],
-     "examples": ["স্বাভাবিক ভাষায় নমুনা invocation"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Tests লিখুন:** `tests/unit/a2a-<your-skill>.test.ts`। সফল path এবং error path উভয়ই অন্তর্ভুক্ত করুন।
+4. **পরীক্ষা লিখুন:** `tests/unit/a2a-<your-skill>.test.ts` কভার হ্যাপি পাথ + এরর পাথ।
 
-5. **নথিভুক্ত করুন:** এই ফাইলের `Available Skills` table-এ নতুন skill-টি যোগ করুন।
+5. **দলিল** এই ফাইলের `Available Skills` টেবিলে নতুন দক্ষতা।
 
 ---
 

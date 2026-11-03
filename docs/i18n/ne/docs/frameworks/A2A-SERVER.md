@@ -156,7 +156,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` मा तार �
 | स्वास्थ्य रिपोर्ट | `health-report`      | कुल सर्किट ब्रेकर, कूलडाउन, प्रति प्रदायक लकआउट स्थिति                                                                                                               | स्वास्थ्य, लचकता  | "सबै प्रदायकहरूको स्वास्थ्य स्थिति देखाउनुहोस्" |
 | सूची क्षमताहरू    | `list-capabilities`  | कन्टेक्स्ट इन्जेक्सनको लागि कच्चा SKILL.md URLs सहितको मार्कडाउन तालिकाको रूपमा पूर्ण ४५-प्रविष्टि एजेन्ट स्किल्स क्याटलग (२३ API + 21 CLI + 1 कन्फिगरेसन) फर्काउँछ। | सूची, खोज, कौशल   | "सबै OmniRoute क्षमताहरू सूचीबद्ध गर्नुहोस्"    |
 
-> एजेन्ट कार्डलाई प्रत्यक्ष 377-प्रदायक सूचीसँग पङ्क्तिबद्ध राख्नुपर्छ; प्रदायक गणना र free/no-auth मेटाडेटा रनटाइम रजिस्ट्रीबाट प्राप्त गरिन्छ।
+> एजेन्ट कार्डलाई प्रत्यक्ष 380-प्रदायक सूचीसँग पङ्क्तिबद्ध राख्नुपर्छ; प्रदायक गणना र free/no-auth मेटाडेटा रनटाइम रजिस्ट्रीबाट प्राप्त गरिन्छ।
 
 ### `list-capabilities` कौशल विवरण
 
@@ -190,17 +190,17 @@ JSON-RPC endpoint `/a2a` नै आधिकारिक A2A प्रवेश 
 
 ---
 
-## नयाँ Skill थप्ने
+## नयाँ कौशल थप्दै
 
-1. **Skill फाइल सिर्जना गर्नुहोस्:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **कौशल फाइल सिर्जना गर्नुहोस्:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` async function निर्यात गर्नुहोस्। `smartRouting.ts` जस्ता विद्यमान skills को संरचना अनुसरण गर्नुहोस्।
+   async प्रकार्य `(task: A2ATask) => Promise<{ artifacts, metadata }>` निर्यात गर्नुहोस्। `smartRouting.ts` जस्ता अवस्थित कौशलहरूको आकार पछ्याउनुहोस्।
 
-2. **Handler दर्ता गर्नुहोस्:** `src/lib/a2a/taskExecution.ts` मा, `A2A_SKILL_HANDLERS` मा एउटा entry थप्नुहोस्:
+2. **दर्ता ह्यान्डलर:** `src/lib/a2a/taskExecution.ts` मा, `A2A_SKILL_HANDLERS` मा प्रविष्टि थप्नुहोस्:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...विद्यमान skills
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,21 +208,21 @@ JSON-RPC endpoint `/a2a` नै आधिकारिक A2A प्रवेश 
    };
    ```
 
-3. **Agent Card मा उपलब्ध गराउनुहोस्:** `src/lib/a2a/agentCardMetadata.ts` मा (`/.well-known/agent.json` र `/.well-known/agent-card.json` दुवैले साझा रूपमा प्रयोग गर्ने), `skills` array मा थप्नुहोस्:
+3. **एजेन्ट कार्डमा खुलासा गर्नुहोस्:** `src/lib/a2a/agentCardMetadata.ts` मा ( `/.well-known/agent.json` र `/.well-known/agent-card.json` द्वारा साझा गरिएको), `skills` array मा जोड्नुहोस्:
 
    ```json
    {
      "id": "your-skill",
-     "name": "तपाईंको Skill",
-     "description": "आशयमा केन्द्रित छोटो विवरण",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["प्राकृतिक भाषामा गरिएको नमुना आह्वान"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Tests लेख्नुहोस्:** `tests/unit/a2a-<your-skill>.test.ts`। सफल अवस्था + त्रुटि अवस्था समेट्नुहोस्।
+4. **परीक्षणहरू लेख्नुहोस्:** `tests/unit/a2a-<your-skill>.test.ts` खुशी मार्ग + त्रुटि मार्ग कभर गर्नुहोस्।
 
-5. यो फाइलको `Available Skills` table मा नयाँ skill लाई **दस्तावेजीकरण गर्नुहोस्**।
+5. **कागजात** यस फाइलको `Available Skills` तालिकामा नयाँ कौशल।
 
 ---
 

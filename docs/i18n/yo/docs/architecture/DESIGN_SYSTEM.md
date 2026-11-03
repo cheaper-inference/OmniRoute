@@ -118,7 +118,7 @@
 
 ## 5. Nmu awọn kit
 
-`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade. Ṣiṣan iṣiṣẹ `UI Kit upstream watch` osẹ-ọsẹ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna ati pe o jẹ ki ọrọ ipasẹ kan ṣii lakoko ti pin wa lẹhin; repo ti o wa ni oke jẹ ikọkọ, nitorinaa ṣiṣiṣẹsẹhin nilo ami kika-nikan ni aṣiri `UI_KIT_READ_TOKEN` ati duro inert laisi rẹ.
+`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade. Ṣiṣan iṣiṣẹ `UI Kit upstream watch` osẹ-ọsẹ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna ati pe o jẹ ki ọrọ ipasẹ kan ṣii lakoko ti pin wa lẹhin; repo ti o wa ni oke jẹ ikọkọ, nitorinaa iṣan-iṣẹ nilo aami-kika nikan ni aṣiri `UI_KIT_READ_TOKEN`. Nigbati ko ba le ka ni oke (ko si ami ami, ami ami kan ti o da iṣẹ duro, tabi GitHub unreachable) ṣiṣe naa duro alawọ ewe ṣugbọn o kọ ikilọ kan ati pe o jẹ ki ọrọ lọtọ kan ṣii, eyiti o tilekun funrararẹ ni kete ti ṣiṣe nigbamii le ka ṣiṣan soke lẹẹkansi.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` daakọ `src/` ti o wa ni oke ni adehun yẹn (`latest` = tuntun `v*` tag) sinu `packages/ui-kit/src`, nlo iyipada ti a gba laaye nikan (o ju suffix `.js` silẹ lati agbewọle ojulumọ), o si ṣeto ẹya aaye iṣẹ ni `packages/ui-kit/package.json` ati `package-lock.json` si oke oke. Lẹhinna: atunwo `git diff packages/ui-kit`, ṣe iwe-iwoye wiwo lori awọn olupese, awọn eto, awọn akojọpọ, lilo ati aaye ipari ni awọn akori mejeeji, ṣiṣe `npm run check:ui-kit-snapshot` ati `npm run test:vitest:ui`, ati ṣii PR pẹlu iyipada iyipada oke.
 
