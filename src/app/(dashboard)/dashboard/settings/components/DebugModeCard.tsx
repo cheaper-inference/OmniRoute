@@ -50,20 +50,20 @@ export default function DebugModeCard() {
   };
 
   return (
-    <Card>
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10 text-primary">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              bug_report
-            </span>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold">{t("debugToggle")}</h3>
-          </div>
-        </div>
-        <Toggle checked={debugMode} onChange={updateDebugMode} disabled={loading} />
-      </div>
-    </Card>
+    // Header-only card: the toggle sits in the header action slot, so the header's
+    // bottom margin (there is no body below it) is dropped.
+    <Card
+      icon="bug_report"
+      title={t("debugToggle")}
+      className="[&>[data-slot=card-header]]:mb-0"
+      action={
+        <Toggle
+          ariaLabel={t("debugToggle")}
+          checked={debugMode}
+          onChange={updateDebugMode}
+          disabled={loading}
+        />
+      }
+    />
   );
 }

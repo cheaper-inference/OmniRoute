@@ -1,6 +1,7 @@
 import { isVisionModelId } from "@/shared/constants/visionModels";
 import type { CompressionResult, CompressionMode } from "./types.ts";
 import { createCompressionStats } from "./stats.ts";
+import { isResponsesToolOutputMessage } from "./bodyAdapter.ts";
 
 interface Message {
   role: string;
@@ -145,10 +146,54 @@ function backOffToWordBoundary(content: string, cutIndex: number): number {
   return cutIndex;
 }
 
-/** Truncate a tool result string to the Lite cap on a word boundary. */
+const TRUNCATION_MARKER = "\n...[truncated]";
+// Room for the middle marker, whatever its line count.
+const ELISION_RESERVE = 32;
+const TAIL_SHARE = 0.3;
+// Content with this many lines or fewer keeps the head-only cut.
+const MIN_LINES_FOR_TAIL = 10;
+
+/** True when `text` has more than `lineCount` lines, without splitting the whole payload. */
+function hasMoreLinesThan(text: string, lineCount: number): boolean {
+  let index = -1;
+  for (let found = 0; found < lineCount; found++) {
+    index = text.indexOf("\n", index + 1);
+    if (index === -1) return false;
+  }
+  return true;
+}
+
+/**
+ * Start of the tail kept after the elision marker: the first line that begins inside the last
+ * `tailBudget` chars, so the tail never exceeds its budget. -1 when no complete line fits.
+ */
+function findTailStart(text: string, tailBudget: number): number {
+  const newline = text.indexOf("\n", text.length - tailBudget);
+  if (newline === -1 || newline + 1 >= text.length) return -1;
+  return newline + 1;
+}
+
+/**
+ * Truncate a tool result string to the Lite cap. Multi-line content keeps its tail as well as its
+ * head: a head-only cut deletes the lines an agent is about to edit (anchors, grep hits at the
+ * bottom), so the model rebuilds them from memory and the edit it makes is rejected as stale.
+ * The head is cut on a word boundary, the tail starts on a line boundary inside its budget, and
+ * content whose last line alone exceeds that budget falls back to the head-only cut.
+ * Single-line content still gets the #8169 word-boundary cut.
+ */
 function truncateToolText(text: string, maxLength: number): string {
+  const budgetLength = maxLength - TRUNCATION_MARKER.length - ELISION_RESERVE;
+  if (budgetLength > 0 && hasMoreLinesThan(text, MIN_LINES_FOR_TAIL)) {
+    const headCut = backOffToWordBoundary(text, Math.ceil(budgetLength * (1 - TAIL_SHARE)));
+    const tailStart = findTailStart(text, budgetLength - headCut);
+    if (tailStart > headCut) {
+      const elided = text.slice(headCut, tailStart).split("\n").length;
+      const tail = text.slice(tailStart);
+      return `${text.slice(0, headCut)}\n... [${elided} lines elided] ...\n${tail}${TRUNCATION_MARKER}`;
+    }
+  }
   const cutIndex = backOffToWordBoundary(text, maxLength);
-  return text.slice(0, cutIndex) + "\n...[truncated]";
+  return text.slice(0, cutIndex) + TRUNCATION_MARKER;
 }
 
 /**
@@ -199,7 +244,19 @@ export function compressToolResults(
   // what the model asked for this turn. Cutting them makes it re-read the same
   // file forever, since every re-read is cut again.
   const lastAssistant = body.messages.findLastIndex((msg) => msg.role === "assistant");
-  const currentTurnStart = lastAssistant === -1 ? body.messages.length : lastAssistant + 1;
+  // An OpenAI Responses API tool turn carries no assistant message — the call and its
+  // output arrive as top-level items — so the trailing Responses outputs are this turn's.
+  let trailingToolStart = body.messages.length;
+  while (
+    trailingToolStart > 0 &&
+    isResponsesToolOutputMessage(body.messages[trailingToolStart - 1])
+  ) {
+    trailingToolStart -= 1;
+  }
+  const currentTurnStart = Math.min(
+    lastAssistant === -1 ? body.messages.length : lastAssistant + 1,
+    trailingToolStart
+  );
   let applied = false;
   const messages = body.messages.map((msg, index) => {
     if (index >= currentTurnStart) return msg;

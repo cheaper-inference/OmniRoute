@@ -1,4 +1,4 @@
-import { hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
+import { getEmptyTurnDiagnostics, hasTrustedEmptyTurn } from "./emptyTurnPolicy.ts";
 import { createCompletionDrain } from "./streamCompletionDrain.ts";
 import type { StreamControllerOptions } from "./streamControllerTypes.ts";
 import { trackPendingRequest } from "@/lib/usageDb";
@@ -116,12 +116,8 @@ function encodeSseEvent(
 
 // Get HH:MM:SS timestamp
 function getTimeString() {
-  return new Date().toLocaleTimeString("en-US", {
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
 }
 
 function isPendingRequestClearedError(error: unknown): boolean {
@@ -312,6 +308,8 @@ export function createStreamController({
     startTime,
 
     isConnected: () => !disconnected,
+
+    clearPendingRequest,
 
     // Call when client disconnects
     handleDisconnect: (reason = "client_closed") => {
@@ -659,7 +657,11 @@ function resolveSilentCloseOutcome(input: {
 export function createDisconnectAwareStream(
   transformStream,
   streamController,
-  options: { highWaterMark?: number; permitsEmptyTurn?: () => boolean } = {}
+  options: {
+    highWaterMark?: number;
+    permitsEmptyTurn?: () => boolean;
+    emptyTurnDiagnostics?: () => ReturnType<typeof getEmptyTurnDiagnostics>;
+  } = {}
 ) {
   const reader = transformStream.readable.getReader();
   const writer = transformStream.writable.getWriter();
@@ -755,6 +757,15 @@ export function createDisconnectAwareStream(
                 // downstream may have closed; stream already marked complete
               }
             } else if (silentClose) {
+              console.warn(
+                `[STREAM] detector=post-translation reason=${
+                  silentClose.reason === "Provider returned empty content"
+                    ? "empty-content"
+                    : "missing-terminal"
+                } native=${JSON.stringify(
+                  options.emptyTurnDiagnostics?.() ?? { nativeExecutionObserved: false }
+                )}`
+              );
               streamController.handleError(
                 Object.assign(new Error(silentClose.reason), { statusCode: 502 })
               );
@@ -909,6 +920,7 @@ export function pipeWithDisconnect(
       {
         highWaterMark: opts.highWaterMark,
         permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+        emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
       }
     );
   }
@@ -981,8 +993,10 @@ export function pipeWithDisconnect(
   // with a clear error the client's own retry/fallback logic can react to
   // immediately. Armed at stream start, never re-armed by lifecycle-only
   // bytes (unlike armStall above), restarted by reasoning-progress frames
-  // (a model thinking for minutes before its first token is not stalled),
-  // and cleared permanently the first time real content is observed -- reuses the exact classifier
+  // (a model thinking for minutes before its first token is not stalled)
+  // and by Responses remote-compaction progress frames (#17826 — compaction
+  // is upstream work with no visible output), and cleared permanently the
+  // first time real content is observed -- reuses the exact classifier
   // (createStreamContentWatcher) createDisconnectAwareStream already trusts
   // for its own end-of-stream #8649 empty-content check.
   let contentStallTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1132,9 +1146,10 @@ export function pipeWithDisconnect(
   // transform so reasoning models that buffer many raw bytes into a single
   // emitted event do not look stalled to either watchdog. Reasoning frames
   // with no visible output (Claude thinking/signature deltas, Responses
-  // reasoning items) restart the content-stall budget instead of clearing it:
-  // the model is still working, but a turn that stops reasoning and only
-  // sends heartbeats afterwards must still be caught.
+  // reasoning items) and Responses remote-compaction progress frames
+  // (#17826) restart the content-stall budget instead of clearing it:
+  // the model is still working, but a turn that stops reasoning or
+  // compacting and only sends heartbeats afterwards must still be caught.
   const upstreamTap = new TransformStream<Uint8Array, Uint8Array>({
     start(controller) {
       upstreamTapController = controller;
@@ -1151,10 +1166,14 @@ export function pipeWithDisconnect(
         stallBytes += chunk.byteLength;
         noteStallText(decoded);
         const reasoningBefore = upstreamContentWatcher.reasoningProgress();
+        const compactionBefore = upstreamContentWatcher.compactionProgress();
         upstreamContentWatcher.note(decoded);
         if (upstreamContentWatcher.sawContent()) {
           clearContentStall();
-        } else if (upstreamContentWatcher.reasoningProgress() > reasoningBefore) {
+        } else if (
+          upstreamContentWatcher.reasoningProgress() > reasoningBefore ||
+          upstreamContentWatcher.compactionProgress() > compactionBefore
+        ) {
           clearContentStall();
           armContentStall();
         }
@@ -1176,6 +1195,7 @@ export function pipeWithDisconnect(
     {
       highWaterMark: opts.highWaterMark,
       permitsEmptyTurn: () => hasTrustedEmptyTurn(providerResponse),
+      emptyTurnDiagnostics: () => getEmptyTurnDiagnostics(providerResponse),
     }
   );
 }

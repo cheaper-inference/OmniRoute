@@ -1,6 +1,7 @@
 import {
   BACKOFF_STEPS_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
+  LOCAL_CONFIGURATION_ERROR_CODES,
   PROVIDER_PROFILES,
   RateLimitReason,
   HTTP_STATUS,
@@ -16,6 +17,7 @@ import {
   isNimFunctionDegraded,
 } from "../config/errorConfig.ts";
 import {
+  getCodebuddyRequestIllegalMatch,
   getOpencodeModelUnavailableMatch,
   getProviderErrorRuleMatch,
   resolveRuleMatchBody,
@@ -318,12 +320,31 @@ export const CONTEXT_OVERFLOW_PATTERNS = [
   /\bprompt is too long\b/i,
   /\bcontext window/i,
   /\bmaximum context/i,
+  // Safe: every consumer routes through isContextOverflowText(), which excludes TPM/RPM wording first.
   /\bmax.*token/i,
   /\btoken limit/i,
   /\brequest too large\b/i,
-  /\btokens per minute\b/i,
-  /\btpm\b/i,
 ];
+
+/** Rate-limit TPM/RPM wording must never be treated as context overflow. */
+export function isTokenRateLimitWording(errorText: string | null | undefined): boolean {
+  const text = String(errorText || "");
+  if (!text) return false;
+  return (
+    /maximum input tokens?\s+per\s+(?:minute|second|hour|day)\b/i.test(text) ||
+    /\btokens?\s+per\s+(?:minute|second|hour|day)\b/i.test(text) ||
+    /\btpm\b/i.test(text) ||
+    /\brpm\b/i.test(text)
+  );
+}
+
+/** Shared context-overflow text match with TPM/RPM exclusion. */
+export function isContextOverflowText(errorText: string | null | undefined): boolean {
+  const text = String(errorText || "");
+  if (!text) return false;
+  if (isTokenRateLimitWording(text)) return false;
+  return CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text));
+}
 
 // Structured error codes that reliably indicate model access denied
 // (more reliable than regex on human-readable messages).
@@ -1735,6 +1756,17 @@ export function checkFallbackError(
       skipProviderBreaker: true,
     };
   }
+  // #18019: a missing/unsafe local executor config repeats until the operator fixes it;
+  // a cooldown would only delay the combo's next target (fallback wait on a 503).
+  const localConfigCode = structuredError?.code;
+  if (localConfigCode && LOCAL_CONFIGURATION_ERROR_CODES.has(localConfigCode)) {
+    return {
+      shouldFallback: false,
+      cooldownMs: 0,
+      reason: localConfigCode,
+      skipProviderBreaker: true,
+    };
+  }
   // A policy refusal belongs to this input, even when relayed with a 403/5xx.
   // Preserve the refusal; rotating accounts or cooling them down cannot repair it.
   if (isContentPolicyRefusal(structuredError)) {
@@ -1883,7 +1915,7 @@ export function checkFallbackError(
       };
     }
 
-    const ro = rot.overrideFor(reason, rotation?.account);
+    const ro = rot.overrideFor(reason, rotation?.account, provider);
     if (ro) return ro;
     const scaled = getScaledBaseCooldown(reason, backoffLevel);
     return {
@@ -2291,6 +2323,9 @@ export function checkFallbackError(
   if (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
     const modelUnavailable = getOpencodeModelUnavailableMatch(provider, status, headers, errorStr);
     if (modelUnavailable) return ruleScopedResult(modelUnavailable);
+    // CodeBuddy Intl wraps its connection-wide WAF block in a 400 "request illegal".
+    const codebuddyBlocked = getCodebuddyRequestIllegalMatch(provider, status, headers, errorStr);
+    if (codebuddyBlocked) return ruleScopedResult(codebuddyBlocked);
     // Check structured error codes first (more reliable, no false positives)
     // OpenAI:  error.code === "model_not_found"
     // Anthropic: error.type === "not_found_error" / "permission_error"
@@ -2315,7 +2350,7 @@ export function checkFallbackError(
         // access denial when the message text confirms it is about the model.
         (MODEL_ACCESS_AMBIGUOUS_TYPES.has(structuredType) && matchesModelAccessPattern));
 
-    const isOverflow = CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(errorStr));
+    const isOverflow = isContextOverflowText(errorStr);
     const isMalformed = MALFORMED_REQUEST_PATTERNS.some((p) => p.test(errorStr));
     const isParamValidation = PARAM_VALIDATION_PATTERNS.some((p) => p.test(errorStr));
     const isModelAccessDenied = isModelAccessDeniedStructured || matchesModelAccessPattern;

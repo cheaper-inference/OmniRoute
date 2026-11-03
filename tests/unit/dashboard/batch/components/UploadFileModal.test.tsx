@@ -11,9 +11,8 @@ vi.mock("next-intl", () => ({
 
 // ── Import component after mocks ─────────────────────────────────────────────
 
-const { default: UploadFileModal } = await import(
-  "../../../../../src/app/(dashboard)/dashboard/batch/components/UploadFileModal"
-);
+const { default: UploadFileModal } =
+  await import("../../../../../src/app/(dashboard)/dashboard/batch/components/UploadFileModal");
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -31,7 +30,10 @@ function renderModal(
     root.render(<UploadFileModal onClose={onClose} onUploaded={onUploaded} />);
   });
   containers.push({ root, el });
-  return { el, onClose, onUploaded };
+  // The modal is the kit Dialog (Modal adapter), portaled to <body>: queries go to the dialog.
+  const dialog = document.body.querySelector<HTMLDivElement>('[role="dialog"]');
+  if (!dialog) throw new Error("UploadFileModal dialog not rendered");
+  return { el: dialog, onClose, onUploaded };
 }
 
 function makeFile(name: string, sizeBytes: number, type = "application/x-jsonlines"): File {

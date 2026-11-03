@@ -476,7 +476,7 @@ export function updateDatabaseSettings(
 
   for (const section of DATABASE_SETTINGS_SECTIONS) {
     if (updates[section] !== undefined) {
-      const sectionUpdate = { ...updates[section] };
+      const sectionUpdate: Record<string, unknown> = { ...updates[section] };
       if (section === "cache") {
         for (const key of Object.keys(sectionUpdate)) {
           if (isCacheSecret(key) && sectionUpdate[key] === CACHE_SECRET_MASK)

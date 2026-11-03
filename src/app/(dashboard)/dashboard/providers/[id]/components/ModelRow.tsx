@@ -1,4 +1,6 @@
 "use client";
+
+import Icon from "@/shared/components/Icon";
 /**
  * ModelRow — Issue #3501 Phase 1e
  *
@@ -16,6 +18,9 @@ import {
   normalizeModelCatalogSource,
 } from "@/shared/utils/modelCatalogSearch";
 import { providerText } from "../providerPageHelpers";
+import { Input as KitInput } from "@omniroute/ui-kit/input";
+import { Button, Checkbox, FilterPills } from "@/shared/components";
+import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
 
@@ -46,13 +51,13 @@ export type ModelCompatSavePatch = {
 function getModelSourceBadgeClass(source?: string): string {
   switch (normalizeModelCatalogSource(source)) {
     case "imported":
-      return "border-sky-500/30 bg-sky-500/10 text-sky-300";
+      return "border-info/30 bg-info/10 text-info";
     case "custom":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+      return "border-success/30 bg-success/10 text-success";
     case "fallback":
-      return "border-amber-500/30 bg-amber-500/10 text-amber-300";
+      return "border-warning/30 bg-warning/10 text-warning";
     case "alias":
-      return "border-violet-500/30 bg-violet-500/10 text-violet-300";
+      return "border-chart-3/30 bg-chart-3/10 text-chart-3";
     case "system":
     default:
       return "border-border bg-sidebar/70 text-text-muted";
@@ -124,128 +129,109 @@ export function ModelVisibilityToolbar({
 }: ModelVisibilityToolbarProps) {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2">
-      <div className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-[220px]">
-        <span className="material-symbols-outlined pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[15px] text-text-muted">
-          search
-        </span>
-        <input
+      <div className="w-full min-w-0 flex-1 sm:w-auto sm:min-w-[220px]">
+        <KitInput
           type="text"
+          size="sm"
           value={filterValue}
           onChange={(e) => onFilterChange(e.target.value)}
           placeholder={providerText(t, "filterModels", "Filter models…")}
-          className="w-full rounded-lg border border-border bg-sidebar/50 py-1.5 pl-7 pr-3 text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+          aria-label={providerText(t, "filterModels", "Filter models…")}
+          leadingIcon={<Icon name="search" size={15} />}
+          className="text-xs"
         />
       </div>
       {visibilityFilter !== undefined && onVisibilityFilterChange && (
-        <div className="flex w-full items-center gap-1 rounded-lg border border-border bg-sidebar/50 p-0.5 sm:w-auto [&>button]:grow sm:[&>button]:grow-0">
-          {(["all", "visible", "hidden"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => onVisibilityFilterChange(f)}
-              className={`rounded px-2 py-1 text-xs ${
-                visibilityFilter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "text-text-muted hover:text-text-main"
-              }`}
-            >
-              {f === "all"
-                ? providerText(t, "showAllModels", "All")
-                : f === "visible"
-                  ? providerText(t, "showVisibleOnly", "Visible")
-                  : providerText(t, "showHiddenOnly", "Hidden")}
-            </button>
-          ))}
-        </div>
+        <FilterPills
+          options={[
+            { value: "all", label: providerText(t, "showAllModels", "All") },
+            { value: "visible", label: providerText(t, "showVisibleOnly", "Visible") },
+            { value: "hidden", label: providerText(t, "showHiddenOnly", "Hidden") },
+          ]}
+          value={visibilityFilter}
+          onChange={(v) => onVisibilityFilterChange(v as "all" | "visible" | "hidden")}
+        />
       )}
       {freeFilter !== undefined && onFreeFilterChange && (
-        <div className="flex w-full items-center gap-1 rounded-lg border border-border bg-sidebar/50 p-0.5 sm:w-auto [&>button]:grow sm:[&>button]:grow-0">
-          {(["all", "free", "paid"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => onFreeFilterChange(f)}
-              className={`rounded px-2 py-1 text-xs ${
-                freeFilter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "text-text-muted hover:text-text-main"
-              }`}
-            >
-              {f === "all"
-                ? providerText(t, "freeFilterAll", "All")
-                : f === "free"
-                  ? providerText(t, "freeFilterFreeOnly", "Free only")
-                  : providerText(t, "freeFilterPaidOnly", "Paid only")}
-            </button>
-          ))}
-        </div>
+        <FilterPills
+          options={[
+            { value: "all", label: providerText(t, "freeFilterAll", "All") },
+            { value: "free", label: providerText(t, "freeFilterFreeOnly", "Free only") },
+            { value: "paid", label: providerText(t, "freeFilterPaidOnly", "Paid only") },
+          ]}
+          value={freeFilter}
+          onChange={(v) => onFreeFilterChange(v as "all" | "free" | "paid")}
+        />
       )}
       {onSortFreeFirstChange && (
-        <button
+        <Button
+          size="sm"
+          variant={sortFreeFirst ? "secondary" : "outline"}
+          icon="sort"
           onClick={() => onSortFreeFirstChange(!sortFreeFirst)}
           aria-pressed={!!sortFreeFirst}
-          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[12px] ${
-            sortFreeFirst
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-border bg-transparent text-text-main"
-          }`}
           title={providerText(t, "sortFreeFirst", "Free first")}
         >
-          <span className="material-symbols-outlined text-[16px]">sort</span>
           <span>{providerText(t, "sortFreeFirst", "Free first")}</span>
-        </button>
+        </Button>
       )}
       {onAutoHideFailedChange && (
-        <label
-          className="flex items-center gap-1.5 text-xs text-text-muted"
+        <span
+          className="inline-flex"
           title={providerText(
             t,
             "autoHideFailedHint",
             "When enabled, Test all hides non-transient failures from public catalogs such as /v1/models. Single-model tests never auto-hide."
           )}
         >
-          <input
-            type="checkbox"
+          <Checkbox
             checked={autoHideFailed ?? false}
             onChange={(e) => onAutoHideFailedChange(e.target.checked)}
-            className="rounded border-border bg-sidebar"
+            label={
+              <span className="text-xs text-text-muted">
+                {providerText(t, "hideFailedAuto", "Auto-hide failed")}
+              </span>
+            }
           />
-          {providerText(t, "hideFailedAuto", "Auto-hide failed")}
-        </label>
+        </span>
       )}
       {onTestAll && (
-        <button
+        <Button
+          size="sm"
+          variant="outline"
+          icon="science"
+          loading={!!testingAll}
           onClick={onTestAll}
           disabled={testingAll}
-          className="flex items-center gap-1.5 rounded-lg border border-border bg-transparent px-2.5 py-1 text-[12px] text-text-main disabled:cursor-not-allowed disabled:opacity-50"
           title={providerText(t, "testAllModels", "Test all")}
         >
-          <span className="material-symbols-outlined text-[16px]">
-            {testingAll ? "progress_activity" : "science"}
-          </span>
           <span>
             {testingAll && testProgress
               ? providerText(t, "testingAllModels", "Testing {done}/{total}", testProgress)
               : providerText(t, "testAllModels", "Test all")}
           </span>
-        </button>
+        </Button>
       )}
-      <button
+      <Button
+        size="sm"
+        variant="outline"
+        icon="visibility"
         onClick={onSelectAll}
         disabled={selectAllDisabled}
-        className="flex items-center gap-1.5 rounded-lg border border-border bg-transparent px-2.5 py-1 text-[12px] text-text-main disabled:cursor-not-allowed disabled:opacity-50"
         title={providerText(t, "showAllModels", "Show all")}
       >
-        <span className="material-symbols-outlined text-[16px]">visibility</span>
         <span>{providerText(t, "showAllModels", "Show all")}</span>
-      </button>
-      <button
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        icon="visibility_off"
         onClick={onDeselectAll}
         disabled={deselectAllDisabled}
-        className="flex items-center gap-1.5 rounded-lg border border-border bg-transparent px-2.5 py-1 text-[12px] text-text-main disabled:cursor-not-allowed disabled:opacity-50"
         title={providerText(t, "hideAllModels", "Hide all")}
       >
-        <span className="material-symbols-outlined text-[16px]">visibility_off</span>
         <span>{providerText(t, "hideAllModels", "Hide all")}</span>
-      </button>
+      </Button>
       <span className="whitespace-nowrap text-xs text-text-muted">
         {providerText(t, "modelsActiveCount", "{active}/{total} active", {
           active: activeCount,
@@ -265,6 +251,8 @@ export interface ModelRowProps {
   fullModel: string;
   provider: string;
   alias?: string;
+  /** Combo names that reference this model, for the "used in combo" badge. */
+  combos?: string[];
   copied?: string;
   onCopy: (text: string, key: string) => void;
   onSetAlias?: (alias: string) => void;
@@ -289,6 +277,7 @@ export default function ModelRow({
   fullModel,
   provider,
   alias,
+  combos,
   copied,
   onCopy,
   onSetAlias,
@@ -353,40 +342,42 @@ export default function ModelRow({
     >
       {/* Line 1: icon + full model name (wraps, never cut); copy pinned to the top-right corner. */}
       <div className="flex min-w-0 items-start gap-2 pr-7">
-        <span
-          className="material-symbols-outlined mt-0.5 shrink-0 text-base"
-          style={{ color: isHidden ? "var(--color-text-muted)" : undefined }}
-        >
-          smart_toy
-        </span>
+        <Icon
+          name="smart_toy"
+          size={16}
+          className={isHidden ? "mt-0.5 text-text-muted" : "mt-0.5"}
+        />
         <code className="min-w-0 break-all pt-px font-mono text-xs leading-5 text-text-main">
           {fullModel}
         </code>
       </div>
-      <button
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        icon={copied === `model-${model.id}` ? "check" : "content_copy"}
         onClick={() => onCopy(fullModel, `model-${model.id}`)}
-        className="absolute right-2 top-2 rounded p-0.5 text-text-muted hover:bg-sidebar hover:text-primary"
+        className="absolute right-2 top-2 rounded p-0.5 size-6 min-h-6 text-text-muted"
         title={t("copyModel")}
-      >
-        <span className="material-symbols-outlined text-sm">
-          {copied === `model-${model.id}` ? "check" : "content_copy"}
-        </span>
-      </button>
+        aria-label={t("copyModel")}
+      />
       {/* Line 2 (never wraps): source, alias (truncates) and the actions, in the name's column. */}
       <div className="flex min-w-0 items-center gap-2 pl-6">
         <ModelSourceBadge source={model.source} />
+        {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
         {onSetAlias && (
           <span className="flex min-w-0 flex-1 items-center text-[10px] gap-1">
             {editing ? (
-              <input
+              <KitInput
                 ref={inputRef}
                 type="text"
+                size="sm"
                 value={aliasValue}
                 onChange={(e) => setAliasValue(e.target.value)}
                 onBlur={handleAliasSubmit}
                 onKeyDown={handleKeyDown}
                 placeholder={providerText(t, "aliasInputPlaceholder", "alias name")}
-                className="bg-surface border border-primary/50 rounded px-1 py-0.5 text-[9px] text-text-main outline-none w-24"
+                aria-label={providerText(t, "aliasInputPlaceholder", "alias name")}
+                className="h-5 min-h-0 w-24 px-1 text-[9px]"
               />
             ) : (
               <span
@@ -407,28 +398,42 @@ export default function ModelRow({
         )}
         <div className="ml-auto flex shrink-0 items-center gap-1">
           {onToggleHidden && testStatus === "error" && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="block"
+              loading={!!togglingHidden}
               onClick={() => onToggleHidden(model.id, true)}
               disabled={togglingHidden}
-              className={`flex items-center gap-1 rounded p-0.5 text-[11px] text-red-500 hover:bg-sidebar transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${togglingHidden ? "animate-pulse" : ""}`}
+              className="h-6 min-h-0 gap-1 rounded px-1 text-[11px] text-error"
               title={providerText(
                 t,
                 "blacklistModelTooltip",
                 "Blacklist this model — hide it from the catalog"
               )}
             >
-              <span className="material-symbols-outlined text-sm">
-                {togglingHidden ? "progress_activity" : "block"}
-              </span>
               <span>{providerText(t, "blacklistModel", "Blacklist")}</span>
-            </button>
+            </Button>
           )}
           {onTestModel && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => onTestModel(model.id, fullModel)}
               disabled={testingModel}
-              className={`rounded p-0.5 hover:bg-sidebar transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${testStatus === "ok" ? "text-green-500" : testStatus === "quota" ? "text-amber-500" : testStatus === "error" ? "text-red-500" : "text-text-muted hover:text-primary"}`}
+              className={`size-6 min-h-6 rounded ${testStatus === "ok" ? "text-success" : testStatus === "quota" ? "text-warning" : testStatus === "error" ? "text-error" : "text-text-muted"}`}
               title={
+                testingModel
+                  ? t("testingModel")
+                  : testStatus === "ok"
+                    ? "OK"
+                    : testStatus === "quota"
+                      ? t("modelTestQuotaTooltip")
+                      : testStatus === "error"
+                        ? providerText(t, "errorShort", "Error")
+                        : t("testModel")
+              }
+              aria-label={
                 testingModel
                   ? t("testingModel")
                   : testStatus === "ok"
@@ -441,35 +446,37 @@ export default function ModelRow({
               }
             >
               {testingModel ? (
-                <span className="material-symbols-outlined text-sm animate-spin">
-                  progress_activity
-                </span>
+                <Icon name="progress_activity" size={14} className="animate-spin" />
               ) : testStatus === "ok" ? (
-                <span className="material-symbols-outlined text-sm">check_circle</span>
+                <Icon name="check_circle" size={14} />
               ) : testStatus === "quota" ? (
-                <span className="material-symbols-outlined text-sm">warning</span>
+                <Icon name="warning" size={14} />
               ) : testStatus === "error" ? (
-                <span className="material-symbols-outlined text-sm">error</span>
+                <Icon name="error" size={14} />
               ) : (
-                <span className="material-symbols-outlined text-sm">play_circle</span>
+                <Icon name="play_circle" size={14} />
               )}
-            </button>
+            </Button>
           )}
           {onToggleHidden && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              icon={isHidden ? "visibility_off" : "visibility"}
               onClick={() => onToggleHidden(model.id, !isHidden)}
               disabled={togglingHidden}
-              className="rounded p-0.5 text-text-muted hover:bg-sidebar hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+              className="size-6 min-h-6 rounded text-text-muted"
               title={
                 isHidden
                   ? providerText(t, "showModel", "Show model")
                   : providerText(t, "hideModel", "Hide model")
               }
-            >
-              <span className="material-symbols-outlined text-sm">
-                {isHidden ? "visibility_off" : "visibility"}
-              </span>
-            </button>
+              aria-label={
+                isHidden
+                  ? providerText(t, "showModel", "Show model")
+                  : providerText(t, "hideModel", "Hide model")
+              }
+            ></Button>
           )}
           <ModelCompatPopover
             t={t}

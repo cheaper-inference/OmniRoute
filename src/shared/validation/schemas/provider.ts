@@ -3,7 +3,7 @@ import {
   MODEL_SUPPORTED_ENDPOINT_VALUES,
   normalizeModelSupportedEndpoints,
 } from "@/shared/constants/modelSupportedEndpoints";
-import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
+import { providerAllowsOptionalApiKey, resolveProviderId } from "@/shared/constants/providers";
 import { validateProviderSpecificData } from "@/shared/validation/providerSpecificData";
 import {
   isReservedProviderPrefix,
@@ -105,7 +105,7 @@ export const createProviderSchema = z
   })
   .superRefine((data, ctx) => {
     const apiKey = typeof data.apiKey === "string" ? data.apiKey.trim() : "";
-    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(data.provider);
+    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(resolveProviderId(data.provider));
     if (data.allowNoCredential === true && !catalogAllowsOptionalKey) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

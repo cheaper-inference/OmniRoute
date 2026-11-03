@@ -207,10 +207,13 @@ async function postHandler(request, context) {
       withApiKeyContext(() =>
         handleVideoGeneration({
           body,
-          credentials: attemptCredentials,
+          credentials: attemp...als,
           log,
+          // #16372 — auth-gated job results are stored under this caller's owner and served
+          // from the caller-facing origin (configured public URL / trusted proxy / Host).
           mediaSink,
           ...(isCustomModel && { resolvedProvider: provider }),
+          signal: request.signal,
         })
       ),
   });
@@ -230,6 +233,7 @@ async function postHandler(request, context) {
     model: body.model,
     startTime,
     duration: body.duration,
+    apiKeyId: policy.apiKeyInfo?.id,
   });
 }
 

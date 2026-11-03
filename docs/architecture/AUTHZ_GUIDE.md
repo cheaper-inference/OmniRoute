@@ -66,18 +66,31 @@ supplemented:
 - `GET /api/auth/oidc/callback` validates `state`, exchanges the authorization
   code, and verifies the ID token's signature via the issuer's JWKS
   (`jose`'s `createRemoteJWKSet`, cached per JWKS URI) with `issuer`/`audience`
-  checks. The `oidcAllowedSubjects` allowlist is required: it matches the
-  token's `sub` claim or its `email` claim — the email claim is only honored
-  when `email_verified === true`, so an unverified email at the IdP can never
-  pass the gate — and with no entries the callback refuses every login
-  (`not_configured`).
+  checks. Dashboard admission requires a nonempty `oidcAllowedSubjects` list,
+  an `oidcAdmissionClaim` policy, or both. The subject list matches `sub` or
+  `email` only when `email_verified === true`. The optional claim policy takes
+  a dot-separated ID-token claim path (for example, `realm_access.roles`) and
+  an array of accepted values; the resolved claim must be an array of strings
+  containing at least one accepted value. If both policies are configured,
+  both must pass. Missing/malformed claims fail closed, and without either
+  policy the callback refuses login (`not_configured`). Existing subject-only
+  configurations continue unchanged.
+- Keycloak normally maps realm roles into access tokens, not necessarily ID
+  tokens. To require the realm role `admin`, configure a protocol mapper for
+  this client that includes `realm_access.roles` in its **ID token**, then set
+  `oidcAdmissionClaim` to `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Check the actual ID-token claim for this client before enabling role-only
+  admission; the application does not read access-token roles. IdP-side token
+  refusal can supplement but does not replace this application-side check.
 - On success it mints the **exact same** 30-day `auth_token` JWT the password
   login issues (`src/app/api/auth/login/route.ts`), so the rest of the
   dashboard session pipeline (auto-refresh, cookie flags) is unchanged —
-  OIDC only replaces how the cookie gets minted, not what it grants.
+  OIDC only replaces how the cookie gets minted, not what it grants. Changes
+  to IdP roles/groups do not invalidate existing OmniRoute sessions; logout,
+  password rotation, or session expiry still govern their lifetime.
 - Every `oidc*` setting (`oidcEnabled`, `oidcDisablePasswordLogin`,
   `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcRedirectPath`, `oidcScopes`) is in `SECURITY_IMPACTING_SETTINGS_KEYS`
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) is in `SECURITY_IMPACTING_SETTINGS_KEYS`
   (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
   answers `400 PASSWORD_REQUIRED` unless the body carries the management
   password as `currentPassword` (`401 PASSWORD_MISMATCH` when it is wrong).
@@ -163,9 +176,10 @@ Each route class has a policy in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — always returns `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extracts Bearer, validates via `validateApiKey()`. Falls through to anonymous only when the effective `REQUIRE_API_KEY` feature flag is disabled. The effective flag is resolved through `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) so Dashboard Feature Flags and environment variables govern `/api/v1/*`, `/api/v1beta/*`, and aliases consistently; resolver failures fail closed. Allows dashboard-session requests on client API routes (including `/api/v1/models`, used by the dashboard model catalog).
+  When Entra ID SSO is enabled, a Bearer that is structurally an Entra token (three base64url segments, `RS*` alg, `kid`) is handled by the SSO branch **before** `validateApiKey()` and its verdict is final — it never falls through to the API-key path or the degrade-to-anonymous branch, so an identity-provider outage cannot become open access. Static API keys are unaffected. See [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — accepts dashboard session, internal model-sync requests (matched against `/api/providers/[name]/(sync-models|models)`), or skips entirely if `isAuthRequired()` returns false. Returns 403 (`AUTH_001`) when a Bearer token is present but invalid, 401 otherwise. Also enforces the route-guard tiers (LOCAL_ONLY / ALWAYS_PROTECTED) before any auth branch — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY paths in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (today: `/api/mcp/`) may be accessed from non-loopback when the Bearer key carries the `manage` scope; all other LOCAL_ONLY paths remain strict-loopback regardless of scope.
 
-A successful policy returns `AuthSubject` with `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Downstream handlers can read it via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` instead of re-running auth logic.
+A successful policy returns `AuthSubject` with `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Downstream handlers can read it via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` instead of re-running auth logic.
 
 ## Public Routes List
 
@@ -332,8 +346,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 For authenticated requests the upstream (handler-side) request headers also include:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

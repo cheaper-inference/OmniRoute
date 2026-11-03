@@ -1,9 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import ProviderConnectionPermissionList, {
   type ProviderConnection,
 } from "@/app/(dashboard)/dashboard/api-manager/components/ProviderConnectionPermissionList";
+import PreferredConnectionsSection from "@/app/(dashboard)/dashboard/api-manager/components/PreferredConnectionsSection";
 import type { ApiKeyAccessFormState } from "../useApiKeyAccessForm";
 import TabErrorList from "./TabErrorList";
 
@@ -12,6 +14,9 @@ interface ConnectionsTabProps {
   allConnections: ProviderConnection[];
   setAllowAllConnections: (allow: boolean) => void;
   setSelectedConnections: (connections: string[]) => void;
+  togglePreferredConnection: (connectionId: string) => void;
+  movePreferredConnection: (connectionId: string, direction: -1 | 1) => void;
+  clearPreferredConnections: () => void;
   errors?: string[];
 }
 
@@ -20,6 +25,9 @@ export default function ConnectionsTab({
   allConnections,
   setAllowAllConnections,
   setSelectedConnections,
+  togglePreferredConnection,
+  movePreferredConnection,
+  clearPreferredConnections,
   errors,
 }: ConnectionsTabProps) {
   const t = useTranslations("apiManager");
@@ -41,31 +49,27 @@ export default function ConnectionsTab({
             </p>
           </div>
           <div className="flex gap-1 p-0.5 bg-surface rounded-md shrink-0">
-            <button
-              type="button"
+            <Button
+              size="sm"
+              variant={formState.allowAllConnections ? "primary" : "ghost"}
+              aria-pressed={formState.allowAllConnections}
               onClick={() => {
                 setAllowAllConnections(true);
                 setSelectedConnections([]);
               }}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                formState.allowAllConnections
-                  ? "bg-primary text-white"
-                  : "text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
-              }`}
+              className="gap-1.5 text-xs"
             >
               {t("allConnections")}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              size="sm"
+              variant={!formState.allowAllConnections ? "primary" : "ghost"}
+              aria-pressed={!formState.allowAllConnections}
               onClick={() => setAllowAllConnections(false)}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                !formState.allowAllConnections
-                  ? "bg-primary text-white"
-                  : "text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
-              }`}
+              className="gap-1.5 text-xs"
             >
               {t("onlySelectedConnections")}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -79,6 +83,16 @@ export default function ConnectionsTab({
           </div>
         )}
       </div>
+
+      <PreferredConnectionsSection
+        connections={allConnections}
+        allowAllConnections={formState.allowAllConnections}
+        selectedConnections={formState.selectedConnections}
+        preferredConnections={formState.selectedPreferredConnections}
+        onTogglePreferred={togglePreferredConnection}
+        onMovePreferred={movePreferredConnection}
+        onClearPreferred={clearPreferredConnections}
+      />
     </div>
   );
 }

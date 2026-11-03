@@ -6,8 +6,8 @@ import { applyCodexReasoningSelection } from "../../open-sse/executors/codex/rea
 import { setThinkingBudgetConfig, ThinkingMode } from "../../open-sse/services/thinkingBudget.ts";
 import { normalizeReasoningRequest } from "../../src/shared/reasoning/effortStandardization.ts";
 
-// The Codex Responses API accepts only `effort` and `summary` inside
-// `reasoning`. Client ecosystems send OpenRouter-style keys (`enabled`,
+// Preserve explicit `effort`, `summary`, and `context` at the Codex wire seam;
+// backend support remains model/mode-specific. OpenRouter-style keys (`enabled`,
 // `max_tokens`, `exclude`, ...) that the upstream rejects with HTTP 400
 // "Unknown parameter: 'reasoning.<key>'", taking down every combo target
 // with the same deterministic client error. The executor must whitelist the
@@ -26,6 +26,37 @@ function reasoningOf(result: Record<string, unknown>): Record<string, unknown> |
   if (r && typeof r === "object" && !Array.isArray(r)) return r as Record<string, unknown>;
   return null;
 }
+
+test("native Lite-shaped Responses retains explicit context and opaque reasoning history", () => {
+  const result = transform(
+    {
+      model: "gpt-6.1-sol",
+      store: false,
+      client_metadata: { ws_request_header_x_openai_internal_codex_responses_lite: "true" },
+      reasoning: { effort: "xhigh", context: "all_turns", enabled: true, max_tokens: 2048 },
+      input: [
+        { type: "reasoning", encrypted_content: "opaque-test-ciphertext", summary: [] },
+        { role: "user", content: [{ type: "input_text", text: "Continue the prior task." }] },
+      ],
+    },
+    "gpt-6.1-sol"
+  );
+  assert.deepEqual(reasoningOf(result), {
+    effort: "xhigh",
+    context: "all_turns",
+    summary: "auto",
+  });
+  assert.ok((result.include as string[]).includes("reasoning.encrypted_content"));
+  const history = result.input as Record<string, unknown>[];
+  assert.ok(history.some((item) => item.encrypted_content === "opaque-test-ciphertext"));
+});
+
+test("executor preserves explicit context when enabled:false normalizes to effort none", () => {
+  const result = transform({
+    reasoning: { enabled: false, context: "current_turn", max_tokens: 2048, exclude: true },
+  });
+  assert.deepEqual(reasoningOf(result), { effort: "none", context: "current_turn" });
+});
 
 test("reasoning.enabled is stripped; explicit effort survives", () => {
   const r = reasoningOf(transform({ reasoning: { enabled: true, effort: "high" } }));
