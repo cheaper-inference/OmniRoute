@@ -1222,6 +1222,14 @@ jobs:
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
     steps:
+      # Same disk exhaustion as the unit shards: merging the 8 raw shard JSONs filled the
+      # hosted runner disk on 2026-11-03 (job 125909618697, "No space left on device").
+      - name: Free hosted runner disk
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
