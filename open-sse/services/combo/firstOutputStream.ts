@@ -194,7 +194,7 @@ export class SseOutputScanner {
         this.replayEventType = type.length <= 64 ? type : "";
       } else if (trimmed.startsWith("data:")) {
         const result = inspectTransportReplayPayload(trimmed.slice(5).trim(), this.replayEventType);
-        if (result.veto) this.observeReplay();
+        if (result.veto) this.observeReplay?.();
         if (result.consumed) this.replayEventType = "";
       } else if (!trimmed) {
         this.replayEventType = "";
