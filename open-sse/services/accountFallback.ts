@@ -946,7 +946,7 @@ export function hasPerModelQuota(
   if (getCanonicalLockProvider(canonicalId) === "codex") return true;
   if (canonicalId === "gemini" || canonicalId === "github") return true;
   if (canonicalId === "antigravity" || canonicalId === "agy") return true;
-  // #3213: Qoder multiplexes every model behind one connection and answers a queued
+  // #18572: Qoder multiplexes every model behind one connection and answers a queued
   // request with `503 upstream_busy` naming the model that was queued. Treating that as a
   // connection cooldown parks every sibling model of the account, so it belongs on the
   // per-model allowlist instead.

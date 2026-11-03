@@ -1,4 +1,4 @@
-// Qoder's queue throttle (#3213) is a MODEL-scoped, temporary condition: a
+// Qoder's queue throttle (#18572) is a MODEL-scoped, temporary condition: a
 // `503 upstream_busy` whose body names the model that was queued. Parking the
 // whole connection on it makes every sibling model of that Qoder account look
 // dead, even though only the queued model was throttled.
@@ -53,7 +53,7 @@ const QUEUED_BODY_NORMALIZED = JSON.stringify({
   },
 });
 
-test("#3213: qoder is a per-model-quota provider", () => {
+test("#18572: qoder is a per-model-quota provider", () => {
   assert.equal(
     hasPerModelQuota(PROVIDER, MODEL),
     true,
@@ -61,7 +61,7 @@ test("#3213: qoder is a per-model-quota provider", () => {
   );
 });
 
-test("#3213: a 503 naming the requested model is model-scoped, not connection-wide", () => {
+test("#18572: a 503 naming the requested model is model-scoped, not connection-wide", () => {
   assert.equal(
     isQoderUpstreamBusy(QUEUED_BODY),
     true,
@@ -82,7 +82,7 @@ test("#3213: a 503 naming the requested model is model-scoped, not connection-wi
   );
 });
 
-test("#3213: locking the queued model leaves the connection and its siblings usable", () => {
+test("#18572: locking the queued model leaves the connection and its siblings usable", () => {
   clearAllModelLockouts();
 
   const locked = lockModelIfPerModelQuota(PROVIDER, CONNECTION, MODEL, "model_capacity", 30_000);
@@ -102,7 +102,7 @@ test("#3213: locking the queued model leaves the connection and its siblings usa
   clearAllModelLockouts();
 });
 
-test("#3213: an unrelated provider is unaffected by the allowlist entry", () => {
+test("#18572: an unrelated provider is unaffected by the allowlist entry", () => {
   assert.equal(
     hasPerModelQuota("openai", MODEL),
     false,
