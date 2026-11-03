@@ -12,7 +12,10 @@
  * uses that version when it is newer than the pin. The dashboard override
  * (`cliVersions.ts`) wins over everything, then the env override. The lookup is fire-and-forget; a cold or failed fetch stays on the pin.
  */
-import { getCliVersionOverride, type CliVersionSource } from "./cliVersions.ts";
+import {
+  getCliVersionOverride,
+  type CliVersionSource,
+} from "@omniroute/open-sse/config/cliVersions.ts";
 
 export const CLAUDE_CODE_CLIENT_VERSION = "2.1.280";
 export const CLAUDE_CODE_CLIENT_BUILD_REVISION = "1e2";
