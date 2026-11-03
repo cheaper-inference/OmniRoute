@@ -1,1 +1,0 @@
-- **feat(resilience):** per-provider rate-limit retry delay — a "Retry delay" select on the provider page sets a fixed connection cooldown used when a rate-limit error carries no upstream retry hint ([#16741](https://github.com/diegosouzapw/OmniRoute/pull/16741)) — thanks @MuhammadUsamaMX
