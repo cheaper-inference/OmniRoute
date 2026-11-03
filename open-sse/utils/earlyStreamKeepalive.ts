@@ -32,7 +32,12 @@
  */
 
 import { recordEarlyKeepaliveBytes } from "./earlyKeepaliveByteBuffer.ts";
-import { SYNTHETIC_RESPONSES_SEQUENCE_NUMBER } from "./responsesSequence.ts";
+import { classifyProviderSafetyError } from "./providerSafety.ts";
+import {
+  SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+  buildSyntheticResponsesFailedEvent,
+  buildSyntheticResponsesFailureId,
+} from "./responsesSequence.ts";
 import { withUpstreamErrorDetail } from "./upstreamErrorDetail.ts";
 import { mergeAbortSignals } from "../executors/base/mergeAbortSignals.ts";
 
@@ -175,6 +180,31 @@ function buildResponsesErrorDataLine(
     parsed && typeof parsed.diagnostics === "object" && parsed.diagnostics !== null
       ? { diagnostics: parsed.diagnostics }
       : {};
+  // PROVIDER_SAFETY_STOPS_TERMINAL (#17049): a provider safety stop is terminal, and Codex
+  // reads its fatal policy code only from `response.failed`; a bare `error` frame is a
+  // disconnect to it, so it reconnects and replays the stopped conversation.
+  const safety = classifyProviderSafetyError({
+    status: meta.status,
+    code: errorObj?.code,
+    type: errorObj?.type,
+    message: errorObj?.message,
+  });
+  if (safety) {
+    return JSON.stringify(
+      buildSyntheticResponsesFailedEvent({
+        id: buildSyntheticResponsesFailureId(),
+        object: "response",
+        status: "failed",
+        error: {
+          type: "invalid_request_error",
+          code: safety.code,
+          message,
+          param,
+          status_code: safety.status,
+        },
+      })
+    );
+  }
   return JSON.stringify({
     type: "error",
     code,
