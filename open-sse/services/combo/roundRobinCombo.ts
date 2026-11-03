@@ -88,6 +88,7 @@ import {
   toRetryAfterDisplayValue,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import { getEmptyTurnDiagnostics } from "../../utils/emptyTurnPolicy.ts";
 import {
   AGENTIC_STALL_COMBO_REASON,
   agenticStallOutcome,
@@ -107,6 +108,7 @@ import {
   comboModelNotFoundResponse,
   isStreamReadinessFailureErrorBody,
   isLocalKeyPolicyBreachErrorBody,
+  isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
   isProviderCircuitOpenResult,
   toRecordedTarget,
@@ -115,7 +117,11 @@ import {
   resolvePersistedConnectionCooldownSkipReason,
 } from "./comboPredicates.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
-import { handlePreContentStreamRetry } from "./executeTargetClassify.ts";
+import {
+  handlePreContentStreamRetry,
+  isProviderSafetyStreamFailure,
+  qualityValidationFailure,
+} from "./executeTargetClassify.ts";
 import {
   handleEmptyContentRetry,
   isEmptyContentResponse,
@@ -879,7 +885,8 @@ export async function handleRoundRobinCombo({
               releaseRejectedQualityResponse(rrClone, result);
               log.warn(
                 "COMBO-RR",
-                `${modelStr} returned 200 but failed quality check: ${quality.reason}`
+                `${modelStr} returned 200 but failed quality check: ${quality.reason}; ` +
+                  `detector=combo-quality native=${JSON.stringify(getEmptyTurnDiagnostics(result))}`
               );
               // #6692: same rationale as handleComboChat's quality-fail branch —
               // a quality-rejected 200 never marks the connection row unhealthy,
@@ -899,6 +906,17 @@ export async function handleRoundRobinCombo({
                 Date.now() - startTime,
                 selectedConnectionIdOf(result)
               );
+              // #17049: an in-stream provider safety stop is terminal for the whole combo.
+              if (isProviderSafetyStreamFailure(quality)) {
+                recordComboRequest(combo.name, modelStr, {
+                  success: false,
+                  latencyMs: Date.now() - startTime,
+                  fallbackCount,
+                  strategy: "round-robin",
+                  target: toRecordedTarget(target),
+                });
+                return qualityValidationFailure(quality).response;
+              }
               if (emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent) {
                 const emptyContentRetry = retryEmptyContent({
                   response: new Response(null, {
@@ -1275,7 +1293,7 @@ export async function handleRoundRobinCombo({
           const isTransient =
             !isStreamReadinessFailure &&
             !isTokenLimitBreach &&
-            !scopedFailure &&
+            (!scopedFailure || isAccountSemaphoreCapacityFailure(structuredError)) &&
             [408, 429, 500, 502, 503, 504].includes(result.status);
           // Explicit failover preference applies only while a sibling target remains.
           const hasNextRrTarget = offset + 1 < modelCount;

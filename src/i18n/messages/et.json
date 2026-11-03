@@ -4123,7 +4123,8 @@
     "duplicateAutoComboSnapshotMsg": "See salvestab hetkel ühendatud ja sellele mallile vastavad teenusepakkujad/mudelid redigeeritavasse kombinatsiooni.",
     "duplicateAutoComboFailedPrefix": "Automaatse kombinatsiooni dubleerimine ebaõnnestus:",
     "duplicateAutoComboUnknownError": "Tundmatu viga",
-    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon"
+    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
+    "fallbackSummary": "{rate}% palvastest kasutas tagasilükkumist, keskmiselt hüljati igaühes ~{skips} sihtpunkti"
   },
   "costs": {
     "title": "Kulud",
@@ -15387,6 +15388,7 @@
     "upstreamStatus": "Ülesvoolu olek",
     "noResponse": "Ei vastata",
     "egressIp": "Väljaminev IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Päised pärast",
     "firstChunkAfter": "Esimene tükk pärast",
     "servedBy": "Teenindab",
