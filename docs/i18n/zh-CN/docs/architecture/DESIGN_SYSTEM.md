@@ -4,7 +4,7 @@
 
 ---
 
-> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。每个图标都是 Lucide 字形。
+> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。瑞士文字缺乏逐个字形的下降（`src/app/globals.css`）：Inter 用于西里尔文、希腊语和越南语，仅在`html[dir="rtl"]`下，Vazirmatn 用于阿拉伯文。每个图标都是 Lucide 字形。
 
 ## 1. 内容所在位置
 
@@ -52,20 +52,31 @@
 3. 针对 kit 缺陷的变通方案放在适配器中（如果修复的是样式，则放在 `globals.css` 的 `@layer components` 中），绝不放在 `packages/ui-kit/src` 中。
 4. 添加或更新 `tests/unit/ui/adapters/<name>.test.tsx`。对于调用方众多的适配器，要比较变更前后渲染出的标记——内边距或包裹元素的变化会扩散到每个界面。
 
-## 5. 更新 kit
+## 5. 更新套件
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` 将上游该提交处的 `src/` 复制到 `packages/ui-kit/src`，并应用唯一允许的转换（去掉相对导入的 `.js` 后缀）。然后：检查 `git diff packages/ui-kit`，在两种主题下对 providers、settings、combos、usage 和 endpoint 页面做一次视觉走查，运行 `npm run check:ui-kit-snapshot` 和 `npm run test:vitest:ui`，并附上上游变更日志提交 PR。
+`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。
+
+每日`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查。当 pin 位于后面时， `scripts/ci/ui-kit-sync-pr.sh`会在滚动分支`chore/ui-kit-sync-latest`上针对最高`release/vX.Y.Z`分支保持一个同步PR打开。它永远不会合并：每个套件版本仍然需要对本地VPS进行目视检查。当新版本发布时，分支会被重建，否则就不会发生。手动提交的开放PR不会被覆盖，并且维护者关闭未合并的版本的PR将保持关闭状态，直到新版本发布。
+
+当无法打开PR时（目标版本被冻结、 PR已手动提交、 PR已关闭或未设置PR令牌），工作流会保持一个跟踪问题处于打开状态，并说明原因。
+
+该工作流程使用两个秘密：
+
+- `secrets.UI_KIT_READ_TOKEN`：私有上游存储库的只读令牌。当工作流无法读取上游（没有令牌、令牌停止工作或GitHub无法访问）时，运行将保持绿色，但会写入一条警告并保持一个单独的问题处于打开状态，一旦稍后的运行可以再次读取上游，该问题就会自行关闭。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`：此存储库上的细粒度令牌，具有内容和拉取请求写入权限。默认的`GITHUB_TOKEN`不能在这里创建PRs ，并且它打开的PR不会触发CI。如果没有此令牌，工作流只会推送分支。
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`将该提交处的上游`src/` （`latest` =最新的`v*`标记）复制到`packages/ui-kit/src`中，应用单个允许的转换（它从相对导入中删除`.js`后缀），并将`packages/ui-kit/package.json`和`package-lock.json`中的工作区版本设置为上游版本。然后：查看`git diff packages/ui-kit`，对两个主题中的提供程序、设置、组合、用法和端点进行可视化传递，运行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，并使用上游变更日志打开PR 。
 
 ## README图
 
 根`README.md`嵌入的 12 个图表 (`docs/diagrams/*.svg`) 是应用于静态图像的套件，它们是生成的，而不是手工绘制的： `scripts/docs/gen-readme-*.mjs`上的 13 个生成器文件（12 个图表加上`gen-readme-diagrams.mjs`驱动程序）和`tests/unit/docs/readme-*-svg.test.ts`上的 12 个过时测试，每个图表一个，每个字节将提交的文件与其生成器的输出（作业`test-unit`）进行比较。
 
-- **代币。** `scripts/docs/readme-diagram-theme.mjs`从`packages/ui-kit/src/ci-tokens.css`复制调色板（通过`tests/unit/docs/readme-diagram-theme.test.ts`固定在该文件上），并在`@fontsource`包中定义套件早期界面上的文本角色 - 用于显示的 Instrument Serif、用于UI文本的 Inter、用于图形和代码的IBM Plex Mono（仪表板本身从套件 0.0.66 开始使用套件的 Switzer）。文件内的亮值位于`:root`上，暗值位于`prefers-color-scheme: dark`后面，因此每个图像都遵循查看者在GitHub上的方案。
-- **字体。** `scripts/docs/readme-fonts.mjs`将这些 woff2 文件子集到每个图绘制的字形，并将它们嵌入为`@font-face` `data:` URIs - 这是套件排版到达README图像的唯一方法，因为GitHub Markdown 不携带CSS并且迷彩代理会阻止每个外部获取。这些子集仅包含拉丁语； `SYMBOL_FALLBACKS`中允许回退到系统堆栈的符号字形，以及任何其他未覆盖的字形抛出。
+- **代币。** `scripts/docs/readme-diagram-theme.mjs`从`packages/ui-kit/src/ci-tokens.css`复制调色板（由`tests/unit/docs/readme-diagram-theme.test.ts`固定在该文件上），并在套件的字体比例上定义文本角色：Switzer 在套件的权重（400/500/600，显示为 500）并跟踪所有内容，但代码角色（`.cmd`、 `.term`、 `.term-lg`、 `.mono`、 `.mono-sm`、 `.mono-xs`）除外，它们是IBM Plex Mono 并且仅用于命令URLs，标识符和终端屏幕。文件内的亮值位于`:root`上，暗值位于`prefers-color-scheme: dark`后面，因此每个图像都遵循查看者在GitHub上的方案。
+- **字体。** GitHub Markdown 不携带CSS ，并且迷彩代理会阻止每个外部获取，因此套件类型必须在文件内传输。 `scripts/docs/readme-outline.mjs`是每个生成器的最后一步，它使用HarfBuzz塑造 Switzer 角色，并将它们绘制为矢量轮廓（`<defs>`路径和`<use>`），并使用 Switzer 缺乏的根据其自己的度量绘制的箭头和几何符号。轮廓，绝不是嵌入字体：Switzer 的许可证 (`packages/ui-kit/src/fonts/FFL.txt`) 禁止在未经书面同意的情况下进行子集化和格式转换，并允许矢量图形，因此不要重新引入 Switzer `@font-face`或`data:` URI。文件中留下的一种字体是OFL IBM Plex Mono 子集，用于保留真实代码文本 (`scripts/docs/readme-fonts.mjs`)，由这些字符构建；任何不能嵌入的字形都会抛出异常。
 - **再生。** `npm run docs:readme-diagrams`按README顺序重写所有 12 个文件，并为每个文件打印一行及其大小。单个生成器也可以独立运行（`node scripts/docs/gen-readme-<name>.mjs`； `free-tier-budget`需要`node --import tsx/esm`因为它的数据来自`open-sse/config/freeModelCatalog.ts`中的实时目录加载器；目录更改的CI结果位于`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`中）。将生成器和SVG一起提交。
 - **证明。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`以GitHub服务的方式渲染文件（ `<img>`标签、camo 的`Content-Security-Policy`、 `image/svg+xml`），捕获浅色和深色框架并报告页面发出的外部字体请求（必须为 0）。
 - **预算。**每个文件低于 200 个KB （每个过时测试都断言这一点）； 500 KB是任何README镜像的硬上限（ SVG studio 验证器的规则）。
-- **复制不变，从门开始计数。**品牌重塑改变了类型和调色板，而不是单词：每个生成器在`*_COPY`常量中携带其图表的副本（或从实时目录构建它），该常量既是绘制的文本又是字体子集输入。规范数字保留在`<text>`节点中，由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 读取；门读取的图表的陈旧性测试也在生成的文件上运行其验证器，因此与代码漂移的数字无法通过测试 - 修复门读取的源，而不是生成器中的数字。
+- **复制不变，从门开始计数。**品牌重塑改变了类型和调色板，而不是单词：每个生成器在`*_COPY`常量中携带其图表的副本（或从实时目录构建它），该常量既是绘制的文本也是大纲步骤的输入。规范图形保留在`<text>`节点中（轮廓一旦勾勒就不可见， `fill-opacity:0`），由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 读取；门读取的图表的陈旧性测试也在生成的文件上运行其验证器，因此与代码漂移的数字无法通过测试—修复门读取的源，而不是生成器中的数字。
 
 ## 7. 参考索引
 

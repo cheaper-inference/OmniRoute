@@ -72,7 +72,10 @@ test("multicast is refused across the whole /4, not just 224/8", () => {
   for (const url of ["http://224.0.0.1", "http://231.7.7.7", "http://239.255.255.250"]) {
     assert.equal(isValid(url), false, `${url} must be refused`);
   }
-  assert.equal(isValid("http://240.0.0.1"), true, "just outside the /4 is unchanged");
+  assert.equal(isValid("http://223.255.255.255"), true, "just below the /4 is unchanged");
+  // 240.0.0.0/4 above it is reserved and refused by the shared host classifier, so the
+  // neighbour on that side is no longer an accepted proxy either.
+  assert.equal(isValid("http://240.0.0.1"), false, "reserved 240.0.0.0/4 is refused");
 });
 
 test("loopback stays allowed — CLIProxyAPI runs on localhost:8317", () => {

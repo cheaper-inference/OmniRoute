@@ -107,7 +107,7 @@ test("integration: openai-chunk heartbeat is valid JSON parseable by SDKs", asyn
       const jsonStr = chunk.slice(6, chunk.indexOf("\n\n"));
       const parsed = JSON.parse(jsonStr); // must not throw
       assert.equal(parsed.object, "chat.completion.chunk");
-      assert.equal(parsed.choices[0].finish_reason, null);
+      assert.deepEqual(parsed.choices, []);
       sawValidChunk = true;
       break;
     }

@@ -4,7 +4,7 @@
 
 ---
 
-> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Akcentas – Keak lime (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Kiekviena piktograma yra Lucide glifas.
+> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Akcentas – Keak lime (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Scenarijai Šveicarijoje trūksta kritimo po glifo (`src/app/globals.css`): „Inter“ kirilicai, graikų ir vietnamiečių kalbai ir, tik pagal `html[dir="rtl"]`, „Vazirmatn“ arabų rašmenims. Kiekviena piktograma yra Lucide glifas.
 
 ## 1. Kur kas saugoma
 
@@ -118,25 +118,31 @@
    palyginkite atvaizduotą žymėjimą prieš ir po pakeitimo — padding arba wrapper pakeitimai išsilieja į
    kiekvieną ekraną.
 
-## 5. Rinkinio atnaujinimas
+## 5. Komplekto atnaujinimas
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` nukopijuoja pirminės saugyklos `src/` katalogą ties tuo commit į
-`packages/ui-kit/src` ir pritaiko vienintelę leistiną transformaciją (iš santykinių importų pašalina `.js`
-galūnę). Tada: peržiūrėkite `git diff packages/ui-kit`, vizualiai patikrinkite teikėjų (providers),
-nustatymų (settings), derinių (combos), naudojimo (usage) ir galinio taško (endpoint) puslapius abiejose
-temose, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR, pridėdami
-pirminės saugyklos (upstream) pakeitimų žurnalą.
+`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas.
+
+Kasdieninė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą. Kol kaištis yra už nugaros, `scripts/ci/ui-kit-sync-pr.sh` išlaiko vieną sinchronizavimo PR atvirktį prieš aukščiausią `release/vX.Y.Z` šaką, slenkančią atšaką `chore/ui-kit-sync-latest`. Jis niekada nesusilieja: kiekvieną rinkinio leidimą vis tiek reikia vizualiai patikrinti vietinį VPS. Filialas atkuriamas, kai išleidžiamas naujesnis leidimas, o kitu atveju paliekama ramybėje. Atviras PR su įpareigojimais, stumiamais ranka, neperrašomas, o PR versijai, kurią prižiūrėtojas uždarė nesujungęs, lieka uždarytas iki naujesnės leidimo.
+
+Kai negalima atidaryti jokio PR (tikslinis leidimas užšaldytas, PR įvykdymai nustumiami ranka, PR buvo uždarytas arba nenustatytas PR prieigos raktas), darbo eiga lieka atvira viena sekimo problema, kurioje nurodoma, kodėl.
+
+Darbo eiga naudoja dvi paslaptis:
+
+- `secrets.UI_KIT_READ_TOKEN`: tik skaitomas prieigos raktas, skirtas privačiam atpirkimui prieš srautą. Kai darbo eigos nepavyksta nuskaityti prieš srovę (nėra prieigos rakto, nustojo veikti arba GitHub nepasiekiamas), vykdymas lieka žalias, bet įrašomas įspėjimas ir lieka atvira viena atskira problema, kuri užsidaro, kai vėlesnis paleidimas gali vėl nuskaityti prieš srovę.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: smulkus tokenas šioje saugykloje su turinio ir ištraukimo užklausomis rašyti. Numatytasis `GITHUB_TOKEN` negali sukurti PRs čia, o atidarytas PR nesuaktyvins CI. Be šio prieigos rakto darbo eiga tik stumia šaką.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` nukopijuoja prieš srovę esantį `src/` to įpareigojimo metu (`latest` = naujausia `v*` žyma) į `packages/ui-kit/src`, taiko vieną leistiną transformaciją (atmeta `.js` priesagą iš santykinių importų) ir nustato darbo srities versiją `packages/ui-kit/package.json` ir `package-lock.json` į ankstesnę. Tada: peržiūrėkite `git diff packages/ui-kit`, atlikite abiejų temų teikėjų, nustatymų, kombinacijų, naudojimo ir galutinio taško vaizdinį perdavimą, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR naudodami išankstinį pakeitimų žurnalą.
 
 ## 6. README diagramos
 
 Dvylika pagrindinių `README.md` įterptų diagramų (`docs/diagrams/*.svg`) yra rinkinys, pritaikytas statiniam vaizdui, ir jos generuojamos, o ne braižomos ranka: 13 generatoriaus failų `scripts/docs/gen-readme-*.mjs` (dvylika diagramų plius `gen-readme-diagrams.mjs` tvarkyklė) ir 12 pasenimo testų `tests/unit/docs/readme-*-svg.test.ts`, po vieną diagramoje, kiekvienas baitass failas su savo išvesties qzpar generatoriumi ( `test-unit`).
 
-- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` nukopijuoja paletę iš `packages/ui-kit/src/ci-tokens.css` (prie to failo prisegė `tests/unit/docs/readme-diagram-theme.test.ts`) ir apibrėžia teksto vaidmenis ankstesniuose rinkinio paviršiuose – Instrument Serif rodymui, Inter – UI tekstui, IBM Plex Mono – figūroms ir kodui – iš `@fontsource` paketų (pati prietaisų skydelis naudoja rinkinio Swit6 Swit6). Šviesos reikšmės yra ant `:root`, tamsios reikšmės už `prefers-color-scheme: dark`, failo viduje, todėl kiekvienas vaizdas atitinka žiūrinčiojo schemą GitHub.
-- **Šriftai.** `scripts/docs/readme-fonts.mjs` suskirsto tuos woff2 failus į kiekvienos diagramos nupieštus glifus ir įterpia juos kaip `@font-face` `data:` URIs – vienintelis būdas rinkinio tipografija pasiekia README vaizdą, nes GitHub Markdown neperkelia CSS, o camo tarpinis serveris blokuoja kiekvieną išorinį gavimą. Poaibiai yra tik lotynų kalba; Simbolių glifai, kurie patenka atgal į sistemos krūvą, leidžiami po vieną `SYMBOL_FALLBACKS` ir bet kokie kiti neuždengti glifų metimai.
+- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` nukopijuoja paletę iš `packages/ui-kit/src/ci-tokens.css` (prisegta prie to failo `tests/unit/docs/readme-diagram-theme.test.ts`) ir apibrėžia teksto vaidmenis rinkinio tipo skalėje: Switzer pagal rinkinio svorį (400/500/600, ekranas 500) ir seka viską, išskyrus kodo vaidmenis (`.cmd`, `.term`, `.term-lg` `.mono` `.mono-sm`), kurie yra IBM Plex Mono ir skirti tik komandoms, URLs, identifikatoriams `.mono-xs` terminalų ekranams. Šviesos reikšmės yra ant `:root`, tamsios vertės už `prefers-color-scheme: dark`, failo viduje, todėl kiekvienas vaizdas atitinka žiūrinčiojo schemą GitHub.
+- **Šriftai.** GitHub Markdown neturi CSS, o camo tarpinis serveris blokuoja kiekvieną išorinį gavimą, todėl rinkinio tipas turi patekti į failą. `scripts/docs/readme-outline.mjs`, paskutinis kiekvieno generatoriaus veiksmas, formuoja Šveicarijos vaidmenis su HarfBuzz ir nubrėžia juos kaip vektorinius kontūrus (`<defs>` paths ir `<use>`), o rodyklėmis ir geometriniais simboliais, kurių Šveicarui trūksta pagal savo metriką. Kontūrai, niekada nenaudojamas įterptasis šriftas: Šveicarijos licencija (`packages/ui-kit/src/fonts/FFL.txt`) draudžia keisti poaibį ir formatą be raštiško sutikimo ir leidžia naudoti vektorinius brėžinius, todėl iš naujo neįveskite Šveicarijos `@font-face` arba `data:` URI. Vienas faile paliktas šriftas yra OFL IBM Plex Mono poaibis, skirtas tikrajam kodo tekstui (`scripts/docs/readme-fonts.mjs`), sudarytas iš tų simbolių; bet koks glifas negali įterpti metimų.
 - **Regeneruoti.** `npm run docs:readme-diagrams` perrašo visus dvylika README tvarka ir atspausdina vieną eilutę kiekviename faile su jo dydžiu. Vienas generatorius taip pat veikia savarankiškai (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` reikia `node --import tsx/esm` nes jo skaičiai gaunami iš tiesioginio katalogo įkėlimo programos `open-sse/config/freeModelCatalog.ts`; katalogo pakeitimo CI pasekmė yra `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Sujunkite generatorių ir SVG kartu.
 - **Įrodymas.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` pateikia failą taip, kaip GitHub jį aptarnauja ( `<img>` žyma, camo's `Content-Security-Policy`, `image/svg+xml`), užfiksuoja šviesų ir tamsų rėmelį ir praneša apie išorinio šrifto užklausas, kad būtų sukurtas puslapis (turi būti 0).
 - **Biudžetas.** Mažiau nei 200 KB už failą (tai patvirtina kiekvienas pasenimo testas); 500 KB yra bet kurio README vaizdo kietoji riba ( SVG studio patvirtinimo taisyklė).
-- **Kopijuoti nepakeista, skaičiuojama nuo vartų.** Pakeistas prekės ženklo tipas ir paletė, o ne žodžiai: kiekvienas generatorius neša savo diagramos kopiją `*_COPY` konstantoje (arba sukuria ją iš tiesioginio katalogo), kuri yra ir nupieštas tekstas, ir šrifto pogrupio įvestis. Kanoninės figūros lieka `<text>` mazguose, skaitomos `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); Diagramų, kurias skaito vartai, pasenimo testai taip pat paleidžia patvirtinimo priemones sugeneruotame faile, todėl nuo kodo nutolusi figūra testo nepavyksta – pataisykite šaltinį, kurį skaito vartai, o ne skaičių generatoriuje.
+- **Kopijuoti nepakeista, skaičiuojama nuo vartų.** Keičiamas prekės ženklo tipas ir paletė, o ne žodžiai: kiekvienas generatorius neša savo diagramos kopiją `*_COPY` konstantoje (arba sukuria ją iš tiesioginio katalogo), kuri yra ir nupieštas tekstas, ir kontūro žingsnio įvestis. Kanoninės figūros lieka `<text>` mazguose (nematomos, kai nubrėžiamos, `fill-opacity:0`), skaitomos `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); Diagramų, kurias nuskaito vartai, pasenimo testai taip pat paleidžia patvirtinimo priemones sugeneruotame faile, todėl nuo kodo nutolusi figūra nepavyksta. — pataisykite šaltinį, kurį skaito vartai, o ne skaičių generatoriuje.
 
 ## 7. Nuorodų indeksas
 

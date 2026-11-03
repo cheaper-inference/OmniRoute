@@ -131,34 +131,34 @@ suppleres kun:
 
 Nogle `MANAGEMENT`-handlinger er **kun for operatøren**: en nøgle med scopet `manage` er ikke nok. Eksport af gemte loginoplysninger (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), gendannelse af en backup over de aktuelle data (`POST /api/db-backups/import` inklusive `dryRun=true`, `POST /api/db-backups` gendannelse via id, `POST /api/settings/import-json`) og sletning af gendannelsespunkter (`DELETE /api/db-backups` oprydning, og `PATCH /api/db-backups`, fordi den gemte retention styrer den automatiske oprydning efter hver backup) kræver en dashboardsession, den lokale CLI-identitet eller at login er deaktiveret. Udstedelse af et synkroniseringstoken (`POST /api/sync/tokens`) og oprettelse af et `admin`-CLI-adgangstoken (`POST /api/cli/tokens`) kræver en dashboardsession eller den lokale CLI-identitet i alle login-tilstande. API-nøgler med vilket som helst scope og `oma_`-adgangstokens er ikke operatørlegitimationsoplysninger: de får `403`, når en sådan kræves. Kontrollen ligger i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Ændring af loginindstillingerne er også kun for operatøren: `POST /api/settings/require-login` (sæt administrationsadgangskoden / skift `requireLogin`) accepterer kun disse legitimationsoplysninger, når der først findes en adgangskode. Bootstrap-vinduet ved første opsætning (ingen adgangskode endnu) er uændret, og en dashboardsession skal sende `currentPassword` for at erstatte adgangskoden (`403`, når den mangler eller er forkert, logget som `settings.update_failed`). Den lokale CLI og en instans med login deaktiveret beholder genopretningsstien og må sætte en adgangskode uden den, fordi begge er bundet til den vært, der ejer datamappen.
 
-## Pipeline
+## Rørledning
 
 ```
-Indgående anmodning → src/proxy.ts
-  → runAuthzPipeline() i src/server/authz/pipeline.ts
-    1. Fjern interne headers, der er tillid til (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Generér anmodnings-id, klassificér ruten via classifyRoute()
-    3. Hvis pathname == "/" → omdirigér til /dashboard
-    4. Hvis systemet er under nedlukning (kontrolleret nedlukning), og ruten er /api/* → 503
-    5. Hvis ikke-GET /api/* → kontrollér checkBodySize()-beskyttelsen
-    6. Hvis OPTIONS → CORS-preflight 204
-    7. Hvis options.enforce == false → videresend med ruteklasse-headers
-    8. Ellers: POLICIES[routeClass].evaluate(ctx)
-       - tillad  → angiv x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - afvis → JSON-fejl med correlation_id (dashboard-sider → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Interne headers, der er tillid til (defineret i `src/server/authz/headers.ts`), **fjernes fra indgående anmodninger** før klassificering — klienter kan ikke udfylde `x-omniroute-auth-*` på forhånd for at udgive sig for at være et subjekt.
+Pålidelige interne overskrifter (defineret i `src/server/authz/headers.ts`) er** fjernet fra indgående anmodninger** før klassificering kan — klienter ikke på forhånd udfylde `x-omniroute-auth-*` for at efterligne et emne.
 
-### Politikkontrakter
+### Forsikringskontrakter
 
 Hver ruteklasse har en politik i `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnerer altid `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — udtrækker Bearer og validerer via `validateApiKey()`. Falder kun tilbage til anonym adgang, når det effektive `REQUIRE_API_KEY`-funktionsflag er deaktiveret. Det effektive flag bestemmes via `isRequireApiKeyEnabled()` (`DB-funktionsflagtilsidesættelse > process.env.REQUIRE_API_KEY > standardværdi`), så Dashboard-funktionsflag og miljøvariabler styrer `/api/v1/*`, `/api/v1beta/*` og aliasser ensartet; fejl i resolveren medfører afvisning. Tillader anmodninger med dashboard-session på klient-API-ruter (herunder `/api/v1/models`, som bruges af dashboardets modelkatalog).
-- **`managementPolicy`** (`policies/management.ts`) — accepterer dashboard-sessioner og interne modelsynkroniseringsanmodninger (matchet mod `/api/providers/[name]/(sync-models|models)`) eller springer godkendelsen helt over, hvis `isAuthRequired()` returnerer false. Returnerer 403 (`AUTH_001`), når et Bearer-token er til stede, men ugyldigt, og ellers 401. Håndhæver også rutebeskyttelsesniveauerne (LOCAL_ONLY / ALWAYS_PROTECTED) før enhver godkendelsesgren — se [Rutebeskyttelsesniveauer](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY-stier i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (i øjeblikket: `/api/mcp/`) kan tilgås fra en adresse, der ikke er loopback, når Bearer-nøglen har `manage`-scope; alle andre LOCAL_ONLY-stier forbliver strengt begrænset til loopback uanset scope.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — udtrækker bærer, validerer via `validateApiKey()`. Falder kun igennem til anonym, når det effektive `REQUIRE_API_KEY` funktionsflag er deaktiveret. Det effektive flag løses gennem `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), så Dashboard-funktionsflag og miljøvariabler styrer `/api/v1/*`, `/api/v1beta/*` og aliaser konsekvent; resolver fejl fejl lukket. Tillader anmodninger om dashboard-session på klient- API ruter (inklusive `/api/v1/models`, brugt af dashboard-modelkataloget). Når Entra ID SSO er aktiveret, håndteres en bærer, der strukturelt er en Entra-token (tre base64url-segmenter, `RS*` alg, `kid`) af SSO -grenen** før** `validateApiKey()` og dens dom er endelig — Statiske API nøgler er upåvirkede. Se [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — accepterer dashboardsession, interne modelsynkroniseringsanmodninger (matchet mod `/api/providers/[name]/(sync-models|models)`) eller springer helt over, hvis `isAuthRequired()` returnerer falsk. Returnerer 403 (`AUTH_001`), når et bærer-token er til stede, men ugyldigt, ellers 401. Håndhæver også rutebeskyttelsesniveauerne (LOCAL_ONLY / ALWAYS_PROTECTED) før enhver godkendelsesgren — se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY stier i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (i dag: `/api/mcp/`) kan tilgås fra non-loopback, når bærer-nøglen bærer `manage` omfanget; alle andre LOCAL_ONLY stier forbliver strict-loopback uanset omfang.
 
-En vellykket politik returnerer `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Efterfølgende handlere kan læse det via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` i stedet for at køre godkendelseslogikken igen.
+En vellykket politik returnerer `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Downstream-handlere kan læse det via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` i stedet for at køre godkendelseslogik igen.
 
 ## Liste over offentlige ruter
 
@@ -306,25 +306,25 @@ Slutpunkterne `/api/v1/agents/tasks/*` og `/api/resilience/model-cooldowns` **kr
 - Offentlig tilladelsesliste: `tests/unit/public-api-routes.test.ts`.
 - Kør fokuseret: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Fejlfinding
+## Fejlretning
 
-Pipelinen stempler altid svar med:
+Rørledningen stempler altid svar med:
 
 ```
-x-request-id:               <korrelations-id, gentaget i fejltekster>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-For autentificerede anmodninger indeholder anmodningsheaderne hos upstream-systemet (på handlersiden) også:
+For godkendte anmodninger inkluderer opstrøms (handler-side) anmodningsheadere også:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<sidste-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (valgfri)
-x-omniroute-auth-scopes:    kommasepareret liste
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Brug `assertAuth(req, expectedClass)` i handlers — den udløser `AuthzAssertionError` med koden `AUTHZ_NOT_INITIALIZED`, hvis middlewaren blev omgået (nyttigt til at opdage konfigurationsregressioner i tests).
+Brug `assertAuth(req, expectedClass)` inde i handlere — det kaster `AuthzAssertionError` med kode `AUTHZ_NOT_INITIALIZED`, hvis middlewaren blev omgået (nyttigt til at fange konfigurationsregression i test).
 
 ## Se også
 
