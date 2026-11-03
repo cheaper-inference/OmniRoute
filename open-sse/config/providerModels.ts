@@ -332,6 +332,10 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // seed (e.g. grok-4.7 before a sync) otherwise falls back to the provider's "openai"
   // format and ships a chat-completions body, which Grok Build rejects with 400.
   if (alias === "gc") return "openai-responses";
+  // Muse Code speaks only the Responses wire (the registry base URL is /responses).
+  // Passthrough ids that post-date the catalog (muse-wonder-1.0 before a sync) would
+  // otherwise fall back to chat-completions and get 400 "unknown parameter `messages`".
+  if (alias === "mc" || alias === "muse-code") return "openai-responses";
   // Vertex uses three protocol families: Gemini generateContent, Anthropic Messages rawPredict,
   // and OpenAI-shaped Mistral/Open-MaaS requests. Resource names retain enough publisher data to
   // route future dynamically-synced models without adding another pinned prefix here.

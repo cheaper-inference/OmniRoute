@@ -72,6 +72,10 @@ import { xiaomiAlternateUrl, xiaomiMimoChatUrl } from "./default/xiaomiTokenPlan
 import { usesCcWireImage } from "../services/ccWireImageBuiltins.ts";
 import { applyRegistryBodyRepairs } from "../utils/strictChatHistory.ts";
 import { withWorkbuddyHeaders, sanitizeWorkbuddyBody } from "../utils/workbuddyGateway.ts";
+import {
+  attachMuseCodeToolNameMap,
+  sanitizeMuseCodeToolNames,
+} from "./default/museCodeToolNames.ts";
 
 const NVIDIA_TOOL_CALL_ID_PATTERN = /^[A-Za-z0-9]{9}$/;
 const ZAI_GLM_53_OPENAI_MODEL_PATTERN = /^glm-5\.3(?:-flash)?$/i;
@@ -1059,6 +1063,16 @@ export class DefaultExecutor extends BaseExecutor {
 
     if (this.provider === "workbuddy") {
       withDefaults = sanitizeWorkbuddyBody(withDefaults);
+    }
+
+    // Meta's Muse Code subscription gate 403s a request that declares a
+    // function tool under an exact coding-agent name (read_file, bash, ...)
+    // regardless of the client's identity. Rename those declarations to
+    // OmniRoute-prefixed wire aliases and publish the ledger on _toolNameMap
+    // so the response path restores the client's declared names.
+    if (this.provider === "muse-code") {
+      const aliases = sanitizeMuseCodeToolNames(withDefaults);
+      if (aliases) attachMuseCodeToolNameMap(withDefaults, aliases);
     }
 
     return applyRegistryBodyRepairs(this.provider, withDefaults);
