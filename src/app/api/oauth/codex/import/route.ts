@@ -157,7 +157,7 @@ async function updateExistingCodexImportMetadata(
  */
 
 const bodySchema = z.object({
-  accounts: z.union([z.record(z.unknown()), z.array(z.unknown())], {
+  accounts: z.union([z.record(z.string(), z.unknown()), z.array(z.unknown())], {
     errorMap: () => ({ message: "accounts must be an object or an array of objects" }),
   }),
 });
