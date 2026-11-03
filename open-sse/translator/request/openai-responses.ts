@@ -121,6 +121,32 @@ function positiveIntEnv(raw: string | undefined, fallback: number): number {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+/** The `output` payload a Responses input item carries for a tool result, if it is one. */
+function toolResultOutputOf(item: JsonRecord): unknown {
+  const itemType = toString(item.type);
+  if (itemType === "function_call_output" || itemType === "custom_tool_call_output") {
+    return item.output;
+  }
+  const isToolRoleMessage = toString(item.role) === "tool" && (itemType === "message" || !itemType);
+  return isToolRoleMessage ? item.content : undefined;
+}
+
+/** Every `input_image` part (with its URL byte length) across all tool outputs, oldest first. */
+function collectToolOutputImages(inputItems: unknown[]): { part: unknown; bytes: number }[] {
+  const images: { part: unknown; bytes: number }[] = [];
+  for (const itemValue of inputItems) {
+    const output = toolResultOutputOf(toRecord(itemValue));
+    if (!Array.isArray(output)) continue;
+    for (const part of output) {
+      const rec = toRecord(part);
+      if (rec.type !== "input_image") continue;
+      const url = toString(rec.image_url);
+      if (url) images.push({ part, bytes: url.length });
+    }
+  }
+  return images;
+}
+
 /**
  * #18684: every turn re-sends all historical tool-output images, so a long session
  * grows the Chat request without bound until the upstream rejects the body. Keep the
@@ -132,24 +158,7 @@ function selectDroppedToolOutputImages(inputItems: unknown[]): Set<unknown> {
     process.env.OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_BYTES,
     20 * 1024 * 1024
   );
-  const images: { part: unknown; bytes: number }[] = [];
-  for (const itemValue of inputItems) {
-    const item = toRecord(itemValue);
-    const itemType = toString(item.type);
-    const output =
-      itemType === "function_call_output" || itemType === "custom_tool_call_output"
-        ? item.output
-        : toString(item.role) === "tool" && (itemType === "message" || !itemType)
-          ? item.content
-          : undefined;
-    if (!Array.isArray(output)) continue;
-    for (const part of output) {
-      const rec = toRecord(part);
-      if (rec.type !== "input_image") continue;
-      const url = toString(rec.image_url);
-      if (url) images.push({ part, bytes: url.length });
-    }
-  }
+  const images = collectToolOutputImages(inputItems);
 
   const dropped = new Set<unknown>();
   let kept = 0;
