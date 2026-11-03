@@ -15385,6 +15385,7 @@
     "upstreamStatus": "Estado de río arriba",
     "noResponse": "Sin respuesta",
     "egressIp": "IP de salida",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Encabezados después",
     "firstChunkAfter": "Primer fragmento después",
     "servedBy": "Servido por",
