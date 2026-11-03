@@ -24,7 +24,7 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { clearEgressHits, egressHits, withEgressGuard } from "../_setup/egressGuard.ts";
+import { clearEgressHits, egressHits, installEgressGuard } from "../_setup/egressGuard.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-frozen-body-"));
 const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
@@ -44,6 +44,10 @@ type Bucket = "openai" | "openai-responses" | "claude" | "gemini";
 
 const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const CASE_TIMEOUT_MS = 5000;
+/** How long a case that timed out gets, after its abort, to settle before the survey ends. */
+const LINGER_GRACE_MS = 10_000;
+/** execute() calls that timed out and have not settled yet (labels). */
+const lingering = new Set<string>();
 const SUITE_TIMEOUT_MS = 60_000;
 const BUCKETS: Bucket[] = ["openai", "openai-responses", "claude", "gemini"];
 
@@ -390,19 +394,25 @@ async function runCase(c: Case): Promise<Outcome> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let error: unknown = null;
   let response: unknown = null;
+  let timedOut = false;
+  // Wrapped so a synchronous throw becomes a rejection the race below catches.
+  const run: Promise<unknown> = Promise.resolve().then(() =>
+    c.executor.execute({
+      model: c.model,
+      body,
+      stream: false,
+      credentials: credentialsFor(c.executor.provider),
+      signal: controller.signal,
+      log: { debug: record, info: record, warn: record, error: record },
+      clientHeaders: {},
+    } as Parameters<Executor["execute"]>[0])
+  );
   try {
     const outcome = await Promise.race([
-      c.executor.execute({
-        model: c.model,
-        body,
-        stream: false,
-        credentials: credentialsFor(c.executor.provider),
-        signal: controller.signal,
-        log: { debug: record, info: record, warn: record, error: record },
-        clientHeaders: {},
-      } as Parameters<Executor["execute"]>[0]),
+      run,
       new Promise<never>((_resolve, reject) => {
         timer = setTimeout(() => {
+          timedOut = true;
           controller.abort();
           reject(new Error(`no result within ${CASE_TIMEOUT_MS}ms`));
         }, CASE_TIMEOUT_MS);
@@ -416,6 +426,11 @@ async function runCase(c: Case): Promise<Outcome> {
     clearTimeout(timer);
     // Not the real fetch: an executor that timed out may still be running and must not reach it.
     globalThis.fetch = (async () => okResponse()) as typeof fetch;
+  }
+  if (timedOut) {
+    lingering.add(c.label);
+    const settled = () => void lingering.delete(c.label);
+    run.then(settled, settled);
   }
 
   const responseText = requestCalls === 0 ? await localErrorText(response) : "";
@@ -455,23 +470,36 @@ function writerLines(outcomes: Outcome[]): string[] {
     .map((o) => `WRITES into the caller's body: ${o.label}/${o.bucket}: ${o.writer}`);
 }
 
-type Survey = { cases: Case[]; refused: number; outcomes: Outcome[] };
+type Survey = { cases: Case[]; refused: number; outcomes: Outcome[]; stillRunning: string[] };
+
+/** Wait up to `ms` for every timed-out execute() to settle; returns the labels still running. */
+async function waitForLingering(ms: number): Promise<string[]> {
+  const deadline = Date.now() + ms;
+  while (lingering.size > 0 && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return [...lingering];
+}
 
 /**
  * Every case under the egress guard. Executors are constructed under it too: some lazy loaders
- * reach for wreq-js. The real fetch stays out of reach from the first case until the end.
+ * reach for wreq-js. The real fetch stays out of reach from the first case until the end, and
+ * neither the guard nor the real fetch comes back while an execute() that ignored its abort is
+ * still running: that run would otherwise be free to dial out after the survey.
  */
 async function runSurvey(): Promise<Survey> {
   const realFetch = globalThis.fetch;
+  const restoreGuard = installEgressGuard();
   try {
-    return await withEgressGuard(async () => {
-      const plan = await planCases();
-      const outcomes: Outcome[] = [];
-      for (const c of plan.cases) outcomes.push(await runCase(c));
-      return { ...plan, outcomes };
-    });
+    const plan = await planCases();
+    const outcomes: Outcome[] = [];
+    for (const c of plan.cases) outcomes.push(await runCase(c));
+    return { ...plan, outcomes, stillRunning: await waitForLingering(LINGER_GRACE_MS) };
   } finally {
-    globalThis.fetch = realFetch;
+    if ((await waitForLingering(0)).length === 0) {
+      restoreGuard();
+      globalThis.fetch = realFetch;
+    }
   }
 }
 
@@ -485,7 +513,13 @@ test(
       webSocket: globalThis.WebSocket,
     };
 
-    const { cases, refused, outcomes } = await runSurvey();
+    const { cases, refused, outcomes, stillRunning } = await runSurvey();
+    if (stillRunning.length > 0) {
+      // The guard stays installed (and fetch stubbed) for the rest of this test process on purpose.
+      t.diagnostic(
+        `still running ${LINGER_GRACE_MS}ms after their abort, egress left blocked: ${stillRunning.join(", ")}`
+      );
+    }
 
     const reached = reachedPerFormat(outcomes);
     const total = outcomes.filter((o) => o.reached).length;
@@ -498,9 +532,11 @@ test(
 
     // The only things that fail: the harness stopped working. Writers and unreached executors
     // above are warnings by design.
-    assert.equal(childProcess.spawn, before.spawn, "the egress guard was left installed");
-    assert.equal(net.connect, before.connect, "the egress guard was left installed");
-    assert.equal(globalThis.WebSocket, before.webSocket, "the egress guard was left installed");
+    if (stillRunning.length === 0) {
+      assert.equal(childProcess.spawn, before.spawn, "the egress guard was left installed");
+      assert.equal(net.connect, before.connect, "the egress guard was left installed");
+      assert.equal(globalThis.WebSocket, before.webSocket, "the egress guard was left installed");
+    }
     for (const bucket of BUCKETS) {
       assert.ok(
         reached[bucket] >= 1,
