@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Tasuta AI värav
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ära lõpeta kunagi kodeerimist. Iga AI tööriist → 380 pakkujat — 150+ tasuta — läbi ühe lõpp-punkti. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity TASUTA Claude / GPT / Gemini kaudu automaatse varutöötlusega. RTK + Caveman virnastatud tihendus säästab 15–95% märke (~89% keskmiselt) — ära kunagi ületa piire. 380 AI pakkujat · 150+ tasuta taset · ~1,62B tasuta märki/kuu · 20 marsruutimisstrateegiat · $0 alustamiseks."/>
 
 </div>
@@ -1818,7 +1820,7 @@ MIT litsents - üksikasju leiad failist [LICENSE](LICENSE).
 
 **[⬆ Tagasi üles](#-omniroute)** · Tehtud ❤️-ga avatud lähtekoodiga AI-kogukonna jaoks.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions on lubatud kogukonna küsimuste ja vastuste jaoks -->

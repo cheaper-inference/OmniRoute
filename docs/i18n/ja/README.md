@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — 無料のAIゲートウェイ
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — コーディングを止めない。すべてのAIツール → 380プロバイダー — 150以上が無料 — 1つのエンドポイントで。Claude Code、Codex、Cursor、Cline、Copilot & Antigravity を無料の Claude / GPT / Gemini に自動フェイルオーバーで統合。RTK + Caveman の積層圧縮でトークンを15–95%節約（平均約89%）— 制限に達しない。380のAIプロバイダー · 150以上の無料枠 · 月間約16.2億無料トークン · 20のルーティング戦略 · $0から始められる。"/>
 
 </div>
@@ -1807,7 +1809,7 @@ MITライセンス - 詳細は[LICENSE](LICENSE)をご覧ください。
 
 **[⬆ トップに戻る](#-omniroute)** · オープンソースAIコミュニティのために❤️を込めて構築。
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MITライセンス · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MITライセンス · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- コミュニティQ&A用にGitHub Discussionsを有効化 -->

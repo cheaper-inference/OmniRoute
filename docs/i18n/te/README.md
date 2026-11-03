@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — ఉచిత AI గేట్వే
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — కోడింగ్ ఆపకండి. ప్రతి AI టూల్ → 380 ప్రొవైడర్లు — 150+ ఉచితం — ఒకే ఎండ్పాయింట్ ద్వారా. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ను ఉచిత Claude / GPT / Gemini లోకి ఆటో-ఫాల్బ్యాక్తో. RTK + Caveman స్టాక్డ్ కాంప్రెషన్ 15–95% టోకెన్లను (సగటు ~89%) సేవ్ చేస్తుంది — ఎప్పుడూ లిమిట్స్ను తాకవద్దు. 380 AI ప్రొవైడర్లు · 150+ ఉచిత టియర్స్ · ~1.62B ఉచిత టోకెన్లు/నెల · 20 రూటింగ్ స్ట్రాటజీలు · ప్రారంభానికి $0."/>
 
 </div>
@@ -1806,7 +1808,7 @@ MIT లైసెన్స్ - వివరాల కోసం [LICENSE](LICENSE
 
 **[⬆ పైకి తిరిగి వెళ్ళండి](#-omniroute)** · ఓపెన్-సోర్స్ AI కమ్యూనిటీ కోసం ❤️తో నిర్మించబడింది.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- కమ్యూనిటీ Q&A కోసం GitHub Discussions ప్రారంభించబడ్డాయి -->

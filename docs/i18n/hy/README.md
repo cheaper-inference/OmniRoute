@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Անվճար AI Դարպաս
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Երբեք մի դադարեք կոդ գրել։ Ամեն AI գործիք → 380 մատակարար — 150+ անվճար — մեկ վերջնակետով։ Claude Code, Codex, Cursor, Cline, Copilot & Antigravity դեպի ԱՆՎՃԱՐ Claude / GPT / Gemini ավտոմատ փոխարինմամբ։ RTK + Caveman կուտակային սեղմումը խնայում է 15–95% թոքեն (~89% միջին) — երբեք մի հասեք սահմաններին։ 380 AI մատակարար · 150+ անվճար մակարդակ · ~1.62B անվճար թոքեն/ամիս · 20 երթուղավորման ռազմավարություն · $0 մեկնարկի համար."/>
 
 </div>
@@ -1806,7 +1808,7 @@ MIT License - մանրամասների համար տե՛ս [LICENSE](LICENSE)։
 
 **[⬆ Վերև վերադառնալ](#-omniroute)** · Ստեղծված է ❤️-ով բաց կոդով AI համայնքի համար։
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions-ը միացված է համայնքի հարց ու պատասխանի համար -->

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — 무료 AI 게이트웨이
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 코딩을 멈추지 마세요. 모든 AI 도구 → 380개 제공업체 — 150개 이상 무료 — 하나의 엔드포인트로. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity를 무료 Claude / GPT / Gemini로 자동 폴백. RTK + Caveman 스택 압축으로 토큰 15–95% 절감(~89% 평균) — 한도에 도달하지 마세요. 380개 AI 제공업체 · 150개 이상 무료 티어 · 월 약 16억 2천만 무료 토큰 · 20가지 라우팅 전략 · 시작 비용 $0."/>
 
 </div>
@@ -1803,7 +1805,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE)를 참조하세요.
 
 **[⬆ 맨 위로 돌아가기](#-omniroute)** · 오픈소스 AI 커뮤니티를 위해 ❤️를 담아 제작했습니다.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT 라이선스 · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT 라이선스 · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- 커뮤니티 Q&A를 위해 GitHub Discussions가 활성화되어 있습니다 -->

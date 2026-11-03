@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "یہ اس ٹیمپلیٹ سے ملنے والے موجودہ منسلک فراہم کنندگان/ماڈلز کو ایڈیٹ ایبل کمبو میں اسنیپ شاট لے گا۔",
     "duplicateAutoComboFailedPrefix": "آٹو کمبو ڈپلیکیٹ کرنے میں ناکام:",
     "duplicateAutoComboUnknownError": "نامعلوم خرابی",
-    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں"
+    "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں",
+    "fallbackSummary": "{rate}% درخواستیں بیک فیل ہوئیں، ہر ایک میں تقریباً {skips} ٹارگٹس چھوڑے گئے"
   },
   "costs": {
     "title": "اخراجات",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "اوپر کی طرف کی حیثیت",
     "noResponse": "کوئی جواب نہیں",
     "egressIp": "ایگریس آئی پی",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "ہیڈرز کے بعد",
     "firstChunkAfter": "پہلا حصہ کے بعد",
     "servedBy": "کی طرف سے فراہم کردہ",

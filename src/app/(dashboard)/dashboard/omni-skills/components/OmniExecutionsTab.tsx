@@ -11,6 +11,7 @@ import {
 } from "@omniroute/ui-kit/table";
 import Button from "@/shared/components/Button";
 import { Card } from "@/shared/components";
+import type { JSX } from "react";
 
 interface Execution {
   id: string;

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — இலவச AI கேட்வே
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ஒருபோதும் குறியீடு எழுதுவதை நிறுத்த வேண்டாம். ஒவ்வொரு AI கருவியும் → 380 வழங்குநர்கள் — 150+ இலவசம் — ஒரே முடிவில். Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ஐ இலவச Claude / GPT / Gemini-க்கு தானாக மாற்றும். RTK + Caveman அடுக்கப்பட்ட சுருக்கம் 15–95% டோக்கன்களை (சராசரி ~89%) சேமிக்கிறது — வரம்புகளை எட்டவே முடியாது. 380 AI வழங்குநர்கள் · 150+ இலவச அடுக்குகள் · ~1.62B இலவச டோக்கன்கள்/மாதம் · 20 வழிமாற்று உத்திகள் · $0 ஆரம்பிக்க."/>
 
 </div>
@@ -1813,7 +1815,7 @@ MIT உரிமம் - விவரங்களுக்கு [LICENSE](LICEN
 
 **[⬆ மேலே திரும்பு](#-omniroute)** · திறந்த மூல AI சமூகத்திற்காக ❤️ உடன் உருவாக்கப்பட்டது.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT உரிமம் · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT உரிமம் · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- சமூக கேள்வி-பதில்களுக்காக GitHub Discussions இயக்கப்பட்டுள்ளது -->
