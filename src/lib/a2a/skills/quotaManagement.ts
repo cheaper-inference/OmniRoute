@@ -68,7 +68,9 @@ export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManage
               const remainingLabel =
                 remaining === Number.POSITIVE_INFINITY ? "unlimited" : remaining.toLocaleString();
               const percentLabel =
-                p.quotaTotal === null ? "n/a" : `${Math.round(p.percentRemaining)}%`;
+                p.quotaTotal === null || p.percentRemaining === null
+                  ? "n/a"
+                  : `${Math.round(p.percentRemaining)}%`;
               return `${i + 1}. **${p.provider}** — ${remainingLabel} remaining (${percentLabel})`;
             })
             .join("\n")}`,
@@ -100,7 +102,7 @@ export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManage
   // Default: general quota summary
   const totalUsed = providers.reduce((sum, p) => sum + (p.quotaUsed || 0), 0);
   const totalAvailable = providers.reduce((sum, p) => sum + (p.quotaTotal || 0), 0);
-  const warnings = providers.filter((p) => p.percentRemaining <= 10);
+  const warnings = providers.filter((p) => p.percentRemaining !== null && p.percentRemaining <= 10);
 
   return {
     artifacts: [
