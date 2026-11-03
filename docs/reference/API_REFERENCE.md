@@ -891,7 +891,8 @@ The generic `time_range` now reaches both providers: Exa gets `startPublishedDat
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
 
-Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
+Exa results keep `id`, `highlights` (every highlight, not only the first one used as the
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
 Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for
@@ -1293,6 +1294,12 @@ values in `modelOutputOverrides`, including models without a custom-model row. T
 uses the runtime `max_output_tokens` capability and survives a model re-sync. The OpenAI-compatible
 provider page offers the same edit/clear controls and marks models with explicit vision support.
 
+On a compatible provider node, the write paths (`POST`, `PUT`, `PATCH`, `DELETE` and
+`/api/provider-models/validate-and-add`) store the model id as the bare upstream id: an id
+pasted from a prefixed listing has any leading stack of the node's own prefix collapsed, and
+responses echo the stored id. Canonical providers' slashed ids (e.g. `nvidia/nemotron-…`) are
+stored verbatim. `/v1/models` never emits a stacked `<prefix>/<prefix>/<model>` id.
+
 Custom Chat Completions nodes adapt explicit reasoning opt-outs to the upstream backend. A
 successful connection test automatically selects chat-template controls for each exact model ID
 whose `/models` entry proves a recognized `owned_by` value: `vllm`, `sglang`, or `llamacpp`.
@@ -1337,11 +1344,35 @@ verdicts; the second stage can still produce its requested visible reasoning as 
 
 | Endpoint              | Method   | Description                   |
 | --------------------- | -------- | ----------------------------- |
+| `/api/models`         | GET/PUT  | Model list / alias update     |
 | `/api/models/alias`   | GET/POST | Model aliases                 |
 | `/api/models/catalog` | GET      | All models by provider + type |
 | `/api/combos*`        | Various  | Combo management              |
 | `/api/keys*`          | Various  | API key management            |
 | `/api/pricing`        | GET      | Model pricing                 |
+
+#### Model limit provenance
+
+`GET /api/models?withLimits=1` (also `true`; `0`/`false` or omitting it keeps the default
+payload unchanged) adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and a `capsSource`
+object to every model row. `capsSource` names the rule that supplied each limit, so a
+surprising limit (for example 128k on a 1M model) can be traced to its origin. The resolved
+values are the same ones routing uses; the flag only adds fields and never changes a value.
+Any other `withLimits` value is rejected with `400`.
+
+| `capsSource` value                           | Origin                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `override:context`                           | Persisted context-window override (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Persisted `max_input_tokens` / `max_output_tokens` capability override |
+| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
+| `synced:<provider>/<model>`                  | models.dev synced capability row                                       |
+| `registry:<provider>/<model>`                | Provider registry entry                                                |
+| `spec:<model>`                               | Static model spec                                                      |
+| `effort-base:` prefix                        | Row borrowed from the base model of an effort-suffixed variant         |
+| `none`                                       | No source declares the limit (value is `null`)                         |
+
+Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`
+and the precedence chains in `src/lib/modelCapabilityLimits.ts`.
 
 ### Usage & Analytics
 

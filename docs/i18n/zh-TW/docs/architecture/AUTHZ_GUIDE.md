@@ -124,34 +124,34 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 部分 `MANAGEMENT` 操作是**僅限操作員**的：只有 `manage` 金鑰是不夠的。匯出已儲存的憑證（`GET /api/settings/export-json`、`GET /api/db-backups/export`、`GET /api/db-backups/exportAll`）、將備份還原到現有資料之上（`POST /api/db-backups/import`，包括 `dryRun=true`；依 id 進行的 `POST /api/db-backups` 還原；`POST /api/settings/import-json`）、銷毀還原點（`DELETE /api/db-backups` 的清理，以及 `PATCH /api/db-backups`，因為它持久化的保留策略會驅動每次備份後的自動修剪）時，需要儀表板工作階段、本機 CLI 主體，或已停用登入。核發同步權杖（`POST /api/sync/tokens`）以及核發 `admin` CLI 存取權杖（`POST /api/cli/tokens`）在所有登入模式下都需要儀表板工作階段或本機 CLI 主體。任何範圍的 API 金鑰與 `oma_` 存取權杖都不是操作員憑證：在需要操作員憑證的地方，它們會收到 `403`。檢查邏輯位於 `src/lib/api/operatorCredential.ts`（`resolveOperatorCredential()` / `requireOperatorCredential()`）。變更登入設定同樣僅限操作員：一旦存在密碼，`POST /api/settings/require-login`（設定管理密碼 / 切換 `requireLogin`）只接受這些憑證。首次執行的引導視窗（尚無密碼）維持不變；儀表板工作階段必須傳送 `currentPassword` 才能取代密碼（缺少或錯誤時回傳 `403`，並記錄為 `settings.update_failed`）。本機 CLI 以及已停用登入的執行個體保留復原路徑，可以在不提供密碼的情況下設定密碼，因為兩者都綁定到擁有資料目錄的主機。
 
-## 管線
+## 管道
 
 ```
-傳入請求 → src/proxy.ts
-  → src/server/authz/pipeline.ts 中的 runAuthzPipeline()
-    1. 移除受信任的內部標頭（x-omniroute-auth-*、x-omniroute-route-class）
-    2. 產生請求 ID，透過 classifyRoute() 分類路由
-    3. 若 pathname == "/" → 重新導向至 /dashboard
-    4. 若正在排空（優雅關閉）且為 /api/* → 503
-    5. 若為非 GET 的 /api/* → 執行 checkBodySize() 防護檢查
-    6. 若為 OPTIONS → CORS 預檢回應 204
-    7. 若 options.enforce == false → 附帶路由類別標頭直接放行
-    8. 否則：POLICIES[routeClass].evaluate(ctx)
-       - allow  → 加入 x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → 回傳包含 correlation_id 的 JSON 錯誤（儀表板頁面 → 302 /login）
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-受信任的內部標頭（定義於 `src/server/authz/headers.ts`）會在分類前**從傳入請求中移除**——用戶端無法預先填入 `x-omniroute-auth-*` 來冒充主體。
+可信內部標頭（在`src/server/authz/headers.ts`中定義）是**從傳入請求中剝離**分類之前—客戶端無法預先填入`x-omniroute-auth-*`來模擬主題。
 
-### 原則契約
+### 保單合約
 
-每個路由類別在 `src/server/authz/policies/` 中都有一項原則：
+每個路由類別在`src/server/authz/policies/`中都有一個策略：
 
-- **`publicPolicy`**（`policies/public.ts`）——一律回傳 `allow({ kind: "anonymous", id: "anonymous" })`。
-- **`clientApiPolicy`**（`policies/clientApi.ts`）——擷取 Bearer，並透過 `validateApiKey()` 驗證。只有在有效的 `REQUIRE_API_KEY` 功能旗標停用時，才會回退至匿名存取。有效旗標透過 `isRequireApiKeyEnabled()`（`DB 功能旗標覆寫 > process.env.REQUIRE_API_KEY > 預設值`）解析，因此儀表板功能旗標和環境變數會一致地管理 `/api/v1/*`、`/api/v1beta/*` 及其別名；解析器失敗時會採取拒絕存取的安全預設。允許具有儀表板工作階段的請求存取用戶端 API 路由（包括儀表板模型目錄所使用的 `/api/v1/models`）。
-- **`managementPolicy`**（`policies/management.ts`）——接受儀表板工作階段、內部模型同步請求（比對 `/api/providers/[name]/(sync-models|models)`），或在 `isAuthRequired()` 回傳 false 時完全略過驗證。當存在 Bearer 權杖但無效時回傳 403（`AUTH_001`），否則回傳 401。此原則也會在任何驗證分支之前強制執行路由防護層級（LOCAL_ONLY / ALWAYS_PROTECTED）——請參閱[路由防護層級](../security/ROUTE_GUARD_TIERS.md)。`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 中的 LOCAL_ONLY 路徑（目前為 `/api/mcp/`），可在 Bearer 金鑰具有 `manage` 範圍時從非迴路位址存取；無論範圍為何，所有其他 LOCAL_ONLY 路徑仍嚴格限制為僅能從迴路位址存取。
+- **`publicPolicy`** (`policies/public.ts`) —總是回傳`allow({ kind: "anonymous", id: "anonymous" })`。
+- **`clientApiPolicy`** (`policies/clientApi.ts`) —提取 Bearer，透過`validateApiKey()`進行驗證。只有當有效`REQUIRE_API_KEY`功能標誌被停用時才會轉為匿名。有效標誌透過`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) 解析，因此儀表板功能標誌和環境變數一致地管理`/api/v1/*`、 `/api/v1beta/*`和別名；解析器故障無法關閉。允許客戶端API路由（包括儀表板模型目錄使用的`/api/v1/models`）上的儀表板會話請求。當啟用 Entra ID SSO時，結構上是 Entra 令牌的 Bearer（三個 base64url 段、 `RS*` alg、 `kid`）由SSO分支處理**前**`validateApiKey()`及其判決是最終的—它永遠不會落入 API 金鑰路徑或降級為匿名分支，因此身分提供者中斷不能成為開放存取。靜態API密鑰不受影響。參見[Entra ID SSO](../security/ENTRA_SSO.md) 。
+- **`managementPolicy`** (`policies/management.ts`) —接受儀表板會話、內部模型同步請求（與`/api/providers/[name]/(sync-models|models)`匹配），或者如果`isAuthRequired()`返回 false，則完全跳過。當不記名令牌存在但無效時傳回 403 (`AUTH_001`)，否則傳回 401。在任何 auth 分支—也查看[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)之前強制執行路由保護層 (LOCAL_ONLY / ALWAYS_PROTECTED)。當 Bearer key 攜帶`manage`範圍時，可以從非環回訪問`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`中的LOCAL_ONLY路徑（今天： `/api/mcp/`）；無論範圍如何，所有其他LOCAL_ONLY路徑都保持嚴格環回。
 
-成功的原則會回傳 `AuthSubject`，其 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`。下游處理常式可透過 `src/server/authz/assertAuth.ts` 中的 `assertAuth(request, "CLIENT_API")` 讀取該主體，而無須重新執行驗證邏輯。
+成功的策略會回到`AuthSubject`和`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`。下游處理程序可以透過`src/server/authz/assertAuth.ts`中的`assertAuth(request, "CLIENT_API")`讀取它，而不是重新運行身份驗證邏輯。
 
 ## 公開路由清單
 
@@ -297,23 +297,23 @@ API 金鑰帶有一個 `scopes` 陣列（以 JSON 格式儲存在 `api_keys.scop
 
 ## 偵錯
 
-管線一律會在回應中加上：
+管道始終使用以下標記標記回應：
 
 ```
-x-request-id:               <關聯 ID，也會回傳於錯誤回應本文中>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-對於已驗證的請求，上游（處理常式端）的請求標頭還會包含：
+對於經過身份驗證的請求，上游（處理程序端）請求標頭還包括：
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<末 4 碼> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     （選用）
-x-omniroute-auth-scopes:    以逗號分隔的清單
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-請在處理常式內使用 `assertAuth(req, expectedClass)`——若中介軟體遭到繞過，它會擲出代碼為 `AUTHZ_NOT_INITIALIZED` 的 `AuthzAssertionError`（有助於在測試中發現設定退步問題）。
+在處理程序—中使用`assertAuth(req, expectedClass)`如果中間件被繞過，它會拋出帶有代碼`AUTHZ_NOT_INITIALIZED`的`AuthzAssertionError` （有助於在測試中捕獲配置回歸）。
 
 ## 參閱
 
