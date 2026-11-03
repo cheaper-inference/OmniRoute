@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# zahteva} two {# zahtevi} few {# zahteve} other {# zahtev}}, {keys, plural, one {# omejen ključ} two {# omejena ključa} few {# omejeni ključi} other {# omejenih ključev}}",
     "unpricedUsageMore": "…in še {count}",
     "unpricedUsageConfigure": "Konfiguriraj cene",
-    "unpricedUsageDismiss": "Zapri"
+    "unpricedUsageDismiss": "Zapri",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",

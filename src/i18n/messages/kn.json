@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ವಿನಂತಿ} other {# ವಿನಂತಿಗಳು}}, {keys, plural, one {# ಮಿತಿ ಇರುವ API ಕೀ} other {# ಮಿತಿ ಇರುವ API ಕೀಗಳು}}",
     "unpricedUsageMore": "…ಮತ್ತು {count} ಇನ್ನಷ್ಟು",
     "unpricedUsageConfigure": "ಬೆಲೆ ಸಂರಚಿಸಿ",
-    "unpricedUsageDismiss": "ರದ್ದು ಮಾಡಿ"
+    "unpricedUsageDismiss": "ರದ್ದು ಮಾಡಿ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ವಿಶ್ಲೇಷಣೆ",

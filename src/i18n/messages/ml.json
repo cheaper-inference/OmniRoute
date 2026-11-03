@@ -2009,7 +2009,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# അഭ്യർ‍ത്ഥന} other {# അഭ്യർത്ഥനകൾ}}, {keys, plural, one {# പരിമിത കീ} other {# പരിമിത കീകൾ}}",
     "unpricedUsageMore": "…കൂടാതെ {count} കൂടുതൽ",
     "unpricedUsageConfigure": "വില ക്രമീകരിക്കുക",
-    "unpricedUsageDismiss": "ഒഴിവാക്കുക"
+    "unpricedUsageDismiss": "ഒഴിവാക്കുക",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "വിശകലനം",

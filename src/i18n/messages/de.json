@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# Anfrage} other {# Anfragen}}, {keys, plural, one {# begrenzter Schlüssel} other {# begrenzte Schlüssel}}",
     "unpricedUsageMore": "…und {count} weitere",
     "unpricedUsageConfigure": "Preise konfigurieren",
-    "unpricedUsageDismiss": "Schließen"
+    "unpricedUsageDismiss": "Schließen",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analytik",

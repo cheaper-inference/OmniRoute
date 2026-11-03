@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# વિનંતી} other {# વિનંતીઓ}}, {keys, plural, one {# મર્યાદિત કી} other {# મર્યાદિત કીઓ}}",
     "unpricedUsageMore": "…અને {count} વધુ",
     "unpricedUsageConfigure": "કિંમત સેટ કરો",
-    "unpricedUsageDismiss": "બંદ કરો"
+    "unpricedUsageDismiss": "બંદ કરો",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "વિશ્લેષણ",

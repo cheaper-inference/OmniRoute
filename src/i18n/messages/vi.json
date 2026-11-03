@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# yêu cầu} other {# yêu cầu}}, {keys, plural, one {# khóa có giới hạn} other {# khóa có giới hạn}}",
     "unpricedUsageMore": "…và {count} mục khác",
     "unpricedUsageConfigure": "Cấu hình giá",
-    "unpricedUsageDismiss": "Bỏ qua"
+    "unpricedUsageDismiss": "Bỏ qua",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Phân tích",

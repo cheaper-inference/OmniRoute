@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# verzoek} other {# verzoeken}}, {keys, plural, one {# beperkte API-sleutel} other {# beperkte API-sleutels}}",
     "unpricedUsageMore": "…en nog {count} meer",
     "unpricedUsageConfigure": "Prijzen configureren",
-    "unpricedUsageDismiss": "Sluiten"
+    "unpricedUsageDismiss": "Sluiten",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analyses",

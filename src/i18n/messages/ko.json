@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {#건 요청} other {#건 요청}}, {keys, plural, one {#개의 제한된 키} other {#개의 제한된 키}}",
     "unpricedUsageMore": "…그리고 {count}개 더",
     "unpricedUsageConfigure": "가격 구성",
-    "unpricedUsageDismiss": "닫기"
+    "unpricedUsageDismiss": "닫기",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "분석",

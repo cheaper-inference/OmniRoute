@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# अनुरोध} other {# अनुरोध}}, {keys, plural, one {# सीमित कुंजी} other {# सीमित कुंजियाँ}}",
     "unpricedUsageMore": "…और {count} और",
     "unpricedUsageConfigure": "मूल्य निर्धारण कॉन्फ़िगर करें",
-    "unpricedUsageDismiss": "खारिज करें"
+    "unpricedUsageDismiss": "खारिज करें",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "विश्लेषिकी",

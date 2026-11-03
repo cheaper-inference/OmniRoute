@@ -2009,7 +2009,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ጥያቄ} other {# ጥያቄዎች}}, {keys, plural, one {# የጥቅም ገደብ ያለ ቁልፍ} other {# የጥቅም ገደብ ያሉ ቁልፎች}}",
     "unpricedUsageMore": "…እና {count} ተጨማሪ",
     "unpricedUsageConfigure": "ዋጋን ያቀናብሩ",
-    "unpricedUsageDismiss": "ዝጋ"
+    "unpricedUsageDismiss": "ዝጋ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ትንታኔ",

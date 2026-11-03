@@ -2009,7 +2009,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# request} other {# requests}}, {keys, plural, one {# limited key} other {# limited keys}}",
     "unpricedUsageMore": "…and {count} more",
     "unpricedUsageConfigure": "Configure pricing",
-    "unpricedUsageDismiss": "Dismiss"
+    "unpricedUsageDismiss": "Dismiss",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analytics",

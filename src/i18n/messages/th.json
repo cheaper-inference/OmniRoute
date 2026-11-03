@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# คำขอ} other {# คำขอ}}, {keys, plural, one {# คีย์ที่มีขีดจำกัด} other {# คีย์ที่มีขีดจำกัด}}",
     "unpricedUsageMore": "…และอีก {count} รายการ",
     "unpricedUsageConfigure": "ตั้งค่าราคา",
-    "unpricedUsageDismiss": "ปิด"
+    "unpricedUsageDismiss": "ปิด",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "การวิเคราะห์",

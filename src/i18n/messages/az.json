@@ -2009,7 +2009,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# sorğu} other {# sorğular}}, {keys, plural, one {# limitli açar} other {# limitli açarlar}}",
     "unpricedUsageMore": "…və daha {count}",
     "unpricedUsageConfigure": "Qiymətləri təyin et",
-    "unpricedUsageDismiss": "Bağla"
+    "unpricedUsageDismiss": "Bağla",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",

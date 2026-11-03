@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, other {# 次請求}}，{keys, plural, other {# 個受限金鑰}}",
     "unpricedUsageMore": "…另有 {count} 個",
     "unpricedUsageConfigure": "設定定價",
-    "unpricedUsageDismiss": "關閉"
+    "unpricedUsageDismiss": "關閉",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "分析",

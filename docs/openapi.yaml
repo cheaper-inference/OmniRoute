@@ -14330,6 +14330,71 @@ paths:
       responses:
         "200":
           description: OK
+  /api/system/metrics:
+    get:
+      tags:
+        - System
+      summary: Host and OmniRoute process CPU and memory
+      description: >-
+        Management-tier (dashboard session or management API key) snapshot behind the home-page
+        system metrics cards. CPU percentages are deltas since the previous call that was at least
+        400 ms earlier, so the first call after process start (and any call inside the 400 ms
+        window) returns the last computed value, which is `0` before the first delta. Host values
+        come from `os.cpus()` / `os.totalmem()` / `os.freemem()` and describe the host, not a
+        container limit; the process CPU percentage is normalised by the host core count. Sent
+        with `Cache-Control: no-store, no-cache, must-revalidate`.
+      responses:
+        "200":
+          description: Host and process metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [host, process]
+                properties:
+                  host:
+                    type: object
+                    required: [cpuPercent, memory, cpuCount, platform]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: Host CPU busy share since the previous sample, 0-100.
+                      memory:
+                        type: object
+                        required: [totalBytes, usedBytes, freeBytes, usedPercent]
+                        properties:
+                          totalBytes: { type: integer }
+                          usedBytes: { type: integer }
+                          freeBytes: { type: integer }
+                          usedPercent: { type: number, minimum: 0, maximum: 100 }
+                      cpuCount: { type: integer, minimum: 0 }
+                      platform:
+                        type: string
+                        description: Node.js `process.platform`.
+                  process:
+                    type: object
+                    required: [cpuPercent, memory, uptimeSeconds, pid]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: OmniRoute process CPU share of the whole host, 0-100.
+                      memory:
+                        type: object
+                        required: [rssBytes, heapUsedBytes, heapTotalBytes]
+                        properties:
+                          rssBytes: { type: integer }
+                          heapUsedBytes: { type: integer }
+                          heapTotalBytes: { type: integer }
+                      uptimeSeconds: { type: integer }
+                      pid: { type: integer }
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/system/version:
     get:
       tags:

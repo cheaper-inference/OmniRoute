@@ -2009,7 +2009,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# მოთხოვნა} other {# მოთხოვნები}}, {keys, plural, one {# შეზღუდული კლავი} other {# შეზღუდული კლავები}}",
     "unpricedUsageMore": "…და კიდევ {count}",
     "unpricedUsageConfigure": "ფასის კონფიგურაცია",
-    "unpricedUsageDismiss": "დახურვა"
+    "unpricedUsageDismiss": "დახურვა",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ანალიტიკა",

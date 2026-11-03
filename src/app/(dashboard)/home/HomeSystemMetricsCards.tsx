@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 
 export interface SystemMetrics {
@@ -46,6 +47,7 @@ function getUsageBarColor(percent: number): string {
 const POLL_INTERVAL_MS = 3500;
 
 export default function HomeSystemMetricsCards() {
+  const t = useTranslations("home");
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
 
   const fetchMetrics = useCallback(async (signal?: AbortSignal) => {
@@ -92,7 +94,7 @@ export default function HomeSystemMetricsCards() {
   }, [fetchMetrics]);
 
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label="Métricas do Sistema">
+    <section className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label={t("systemMetricsTitle")}>
       {/* Card CPU */}
       <div className="relative overflow-hidden rounded-xl border border-border/80 bg-bg-subtle/50 p-3.5 transition-colors hover:bg-bg-subtle/70">
         <div className="flex items-center justify-between gap-2">
@@ -102,16 +104,21 @@ export default function HomeSystemMetricsCards() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-text-main">CPU</span>
+                <span className="text-xs font-semibold text-text-main">
+                  {t("systemMetricsCpu")}
+                </span>
                 <span
                   className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"
-                  title="Monitoramento ativo"
+                  title={t("systemMetricsActive")}
                 />
               </div>
               <span className="text-[11px] text-text-muted truncate block">
                 {metrics
-                  ? `${metrics.host.cpuCount} vCPUs • ${metrics.host.platform}`
-                  : "Carregando..."}
+                  ? t("systemMetricsCpuCount", {
+                      count: metrics.host.cpuCount,
+                      platform: metrics.host.platform,
+                    })
+                  : t("systemMetricsLoading")}
               </span>
             </div>
           </div>
@@ -121,7 +128,7 @@ export default function HomeSystemMetricsCards() {
               {metrics ? `${metrics.host.cpuPercent.toFixed(1)}%` : "--"}
             </span>
             <span className="block text-[10px] text-text-muted uppercase tracking-wider">
-              VPS / Host
+              {t("systemMetricsHost")}
             </span>
           </div>
         </div>
@@ -129,6 +136,7 @@ export default function HomeSystemMetricsCards() {
         {/* Progress bar */}
         <div className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-muted/30">
           <div
+            data-testid="usage-bar"
             className={`h-full rounded-full transition-all duration-500 ${getUsageBarColor(
               metrics?.host.cpuPercent ?? 0
             )}`}
@@ -140,7 +148,7 @@ export default function HomeSystemMetricsCards() {
 
         {/* Breakdown for OmniRoute process */}
         <div className="flex items-center justify-between text-[11px] text-text-muted pt-1 border-t border-border/30">
-          <span>OmniRoute (Processo)</span>
+          <span>{t("systemMetricsProcessCpu")}</span>
           <span className="font-medium text-text-main tabular-nums">
             {metrics ? `${metrics.process.cpuPercent.toFixed(1)}%` : "--"}
           </span>
@@ -156,10 +164,12 @@ export default function HomeSystemMetricsCards() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-text-main">Memória</span>
+                <span className="text-xs font-semibold text-text-main">
+                  {t("systemMetricsMemory")}
+                </span>
                 <span
                   className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"
-                  title="Monitoramento ativo"
+                  title={t("systemMetricsActive")}
                 />
               </div>
               <span className="text-[11px] text-text-muted truncate block">
@@ -167,7 +177,7 @@ export default function HomeSystemMetricsCards() {
                   ? `${formatBytes(metrics.host.memory.usedBytes)} / ${formatBytes(
                       metrics.host.memory.totalBytes
                     )}`
-                  : "Carregando..."}
+                  : t("systemMetricsLoading")}
               </span>
             </div>
           </div>
@@ -177,7 +187,7 @@ export default function HomeSystemMetricsCards() {
               {metrics ? `${metrics.host.memory.usedPercent.toFixed(1)}%` : "--"}
             </span>
             <span className="block text-[10px] text-text-muted uppercase tracking-wider">
-              VPS / Host
+              {t("systemMetricsHost")}
             </span>
           </div>
         </div>
@@ -185,6 +195,7 @@ export default function HomeSystemMetricsCards() {
         {/* Progress bar */}
         <div className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-muted/30">
           <div
+            data-testid="usage-bar"
             className={`h-full rounded-full transition-all duration-500 ${getUsageBarColor(
               metrics?.host.memory.usedPercent ?? 0
             )}`}
@@ -196,7 +207,7 @@ export default function HomeSystemMetricsCards() {
 
         {/* Breakdown for OmniRoute process */}
         <div className="flex items-center justify-between text-[11px] text-text-muted pt-1 border-t border-border/30">
-          <span>OmniRoute (RSS / Heap)</span>
+          <span>{t("systemMetricsProcessMemory")}</span>
           <span className="font-medium text-text-main tabular-nums">
             {metrics
               ? `${formatBytes(metrics.process.memory.rssBytes)} (${formatBytes(

@@ -1932,7 +1932,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# கோரிக்கை} other {# கோரிக்கைகள்}}, {keys, plural, one {# வரையறுக்கப்பட்ட விசை} other {# வரையறுக்கப்பட்ட விசைகள்}}",
     "unpricedUsageMore": "…மற்றும் {count} மேலும்",
     "unpricedUsageConfigure": "விலை அமைக்கவும்",
-    "unpricedUsageDismiss": "மறுக்கவும்"
+    "unpricedUsageDismiss": "மறுக்கவும்",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "பகுப்பாய்வு",
