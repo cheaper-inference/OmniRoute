@@ -62,12 +62,12 @@
 
 根`README.md`嵌入的 12 个图表 (`docs/diagrams/*.svg`) 是应用于静态图像的套件，它们是生成的，而不是手工绘制的： `scripts/docs/gen-readme-*.mjs`上的 13 个生成器文件（12 个图表加上`gen-readme-diagrams.mjs`驱动程序）和`tests/unit/docs/readme-*-svg.test.ts`上的 12 个过时测试，每个图表一个，每个字节将提交的文件与其生成器的输出（作业`test-unit`）进行比较。
 
-- **代币。** `scripts/docs/readme-diagram-theme.mjs`从`packages/ui-kit/src/ci-tokens.css`复制调色板（通过`tests/unit/docs/readme-diagram-theme.test.ts`固定在该文件上），并在`@fontsource`包中定义套件早期界面上的文本角色 - 用于显示的 Instrument Serif、用于UI文本的 Inter、用于图形和代码的IBM Plex Mono（仪表板本身从套件 0.0.66 开始使用套件的 Switzer）。文件内的亮值位于`:root`上，暗值位于`prefers-color-scheme: dark`后面，因此每个图像都遵循查看者在GitHub上的方案。
-- **字体。** `scripts/docs/readme-fonts.mjs`将这些 woff2 文件子集到每个图绘制的字形，并将它们嵌入为`@font-face` `data:` URIs - 这是套件排版到达README图像的唯一方法，因为GitHub Markdown 不携带CSS并且迷彩代理会阻止每个外部获取。这些子集仅包含拉丁语； `SYMBOL_FALLBACKS`中允许回退到系统堆栈的符号字形，以及任何其他未覆盖的字形抛出。
+- **代币。** `scripts/docs/readme-diagram-theme.mjs`从`packages/ui-kit/src/ci-tokens.css`复制调色板（由`tests/unit/docs/readme-diagram-theme.test.ts`固定在该文件上），并在套件的字体比例上定义文本角色：Switzer 在套件的权重（400/500/600，显示为 500）并跟踪所有内容，但代码角色（`.cmd`、 `.term`、 `.term-lg`、 `.mono`、 `.mono-sm`、 `.mono-xs`）除外，它们是IBM Plex Mono 并且仅用于命令URLs，标识符和终端屏幕。文件内的亮值位于`:root`上，暗值位于`prefers-color-scheme: dark`后面，因此每个图像都遵循查看者在GitHub上的方案。
+- **字体。** GitHub Markdown 不携带CSS ，并且迷彩代理会阻止每个外部获取，因此套件类型必须在文件内传输。 `scripts/docs/readme-outline.mjs`是每个生成器的最后一步，它使用HarfBuzz塑造 Switzer 角色，并将它们绘制为矢量轮廓（`<defs>`路径和`<use>`），并使用 Switzer 缺乏的根据其自己的度量绘制的箭头和几何符号。轮廓，绝不是嵌入字体：Switzer 的许可证 (`packages/ui-kit/src/fonts/FFL.txt`) 禁止在未经书面同意的情况下进行子集化和格式转换，并允许矢量图形，因此不要重新引入 Switzer `@font-face`或`data:` URI。文件中留下的一种字体是OFL IBM Plex Mono 子集，用于保留真实代码文本 (`scripts/docs/readme-fonts.mjs`)，由这些字符构建；任何不能嵌入的字形都会抛出异常。
 - **再生。** `npm run docs:readme-diagrams`按README顺序重写所有 12 个文件，并为每个文件打印一行及其大小。单个生成器也可以独立运行（`node scripts/docs/gen-readme-<name>.mjs`； `free-tier-budget`需要`node --import tsx/esm`因为它的数据来自`open-sse/config/freeModelCatalog.ts`中的实时目录加载器；目录更改的CI结果位于`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`中）。将生成器和SVG一起提交。
 - **证明。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`以GitHub服务的方式渲染文件（ `<img>`标签、camo 的`Content-Security-Policy`、 `image/svg+xml`），捕获浅色和深色框架并报告页面发出的外部字体请求（必须为 0）。
 - **预算。**每个文件低于 200 个KB （每个过时测试都断言这一点）； 500 KB是任何README镜像的硬上限（ SVG studio 验证器的规则）。
-- **复制不变，从门开始计数。**品牌重塑改变了类型和调色板，而不是单词：每个生成器在`*_COPY`常量中携带其图表的副本（或从实时目录构建它），该常量既是绘制的文本又是字体子集输入。规范数字保留在`<text>`节点中，由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 读取；门读取的图表的陈旧性测试也在生成的文件上运行其验证器，因此与代码漂移的数字无法通过测试 - 修复门读取的源，而不是生成器中的数字。
+- **复制不变，从门开始计数。**品牌重塑改变了类型和调色板，而不是单词：每个生成器在`*_COPY`常量中携带其图表的副本（或从实时目录构建它），该常量既是绘制的文本也是大纲步骤的输入。规范图形保留在`<text>`节点中（轮廓一旦勾勒就不可见， `fill-opacity:0`），由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 读取；门读取的图表的陈旧性测试也在生成的文件上运行其验证器，因此与代码漂移的数字无法通过测试—修复门读取的源，而不是生成器中的数字。
 
 ## 7. 参考索引
 
