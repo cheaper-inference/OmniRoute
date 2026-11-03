@@ -699,6 +699,7 @@
       "tests/unit/sse-cut-tool-call-arguments.test.ts",
       "tests/unit/antigravity-argon-404.test.ts",
       "tests/unit/combo/combo-resilience-no-provider-state.test.ts",
+      "tests/unit/combo/hedge-cancel-streaming-leg.test.ts",
       "tests/unit/singbox-routes-local-only.test.ts"
     ],
     "nodeArgs": [
