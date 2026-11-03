@@ -14,7 +14,7 @@ OmniRoute kofa ce ta AI da kuma dashboard da aka gina akan Next.js. Yana ba da m
 
 Babban damar iyawa:
 
-- BudeAI mai dacewa da API surface don CLI/tools (Masu samar da 377, 156 masu zartarwa)
+- BudeAI mai dacewa da API surface don CLI/tools (Masu samar da 380, 156 masu aiwatarwa)
 - fassarar Request/response a cikin tsarin mai bayarwa
 - Model combo fallback (jerin samfuri da yawa)
 - Matakan haɗe-haɗe (`provider + model + connection`) tare da oda lokacin aiki ta `compositeTiers`
@@ -33,7 +33,7 @@ Babban damar iyawa:
 - Ka yi tunanin karkatar da alamar (`<think>...</think>`) don ƙirar tunani
 - Tsaftatar amsawa don tsananin dacewa OpenAI SDK
 - Daidaita rawar aiki (tsarin → mai haɓakawa, mai amfani da tsarin →) don daidaitawar mai bayarwa
-- Canjin fitarwa da aka tsara (json_schema → Gemini martaniSchema)
+- Canjin fitarwa da aka tsara (json_schema → Gemini responseSchema)
 - Dagewar gida don masu samarwa, maɓallai, laƙabi, haɗe-haɗe, saituna, farashi (Modules 122 DB )
 - bin diddigin Usage/cost da neman shiga
 - Aiki tare na zaɓi na girgije don daidaita multi-device/state

@@ -67,6 +67,7 @@ import {
   isContextOverflowFailure,
   requestScopedReplayKey,
 } from "./comboPredicates.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { buildBudgetExhaustedResponse } from "./budgetExhaustion.ts";
 import { advanceNativeCodexTurnGeneration, pinNativeCodexTurn } from "./nativeCodexTurnPin.ts";
@@ -82,6 +83,7 @@ import {
   isTruncatedComboAttempt,
   recordTruncatedStreamAttempt,
 } from "./truncatedStreamFailover.ts";
+import { isAgenticStallComboAttempt, recordAgenticStallAttempt } from "./agenticStallFailover.ts";
 import {
   isQuotaExhaustionFailure,
   recordQuotaExhaustionClassification,
@@ -504,6 +506,29 @@ export async function executeTargetAttempt(
           continue;
         }
         return protectedPriorityTarget ? qualityValidationFailure(quality) : null;
+      }
+
+      // #13954 (opt-in): a quality-valid 200 that narrates instead of calling the next tool.
+      if (
+        await isAgenticStallComboAttempt({
+          body: deps.body,
+          result,
+          modelStr,
+          hasNextTarget: i + 1 < state.orderedTargets.length,
+          protectedPriorityTarget,
+          log: deps.log,
+        })
+      ) {
+        recordAgenticStallAttempt({
+          result,
+          modelStr,
+          provider,
+          targetIndex: i,
+          target,
+          state,
+          deps,
+        });
+        return null;
       }
 
       if (Boolean(deps.clientManagedResponsesContext) && effectiveConnectionId) {
@@ -1039,7 +1064,13 @@ export async function executeTargetAttempt(
         error: errorText,
         isProxyUnreachable: structuredError?.code === "proxy_unreachable",
         providerCircuitOpen: isProviderCircuitOpenResult(result, errorText),
-      })
+      }) &&
+      // A graceful shutdown tears provider clients down under in-flight requests:
+      // the resulting 5xx is evidence about OUR shutdown, not about provider
+      // health. Opening the whole-provider circuit on it makes every later
+      // request skip a healthy provider. A genuine upstream 5xx outside a
+      // shutdown still trips the breaker exactly as before.
+      !isDraining()
     ) {
       const isQueueTimeout =
         errorText.includes("RATE_LIMIT_QUEUE_TIMEOUT") ||
@@ -1265,7 +1296,10 @@ export async function executeTargetAttempt(
       provider !== "unknown" &&
       !scopedFailure &&
       !isModelScopedClaudeQuota &&
-      !((result.status === 500 || result.status === 429) && hasPerModelQuota(provider, rawModel))
+      !((result.status === 500 || result.status === 429) && hasPerModelQuota(provider, rawModel)) &&
+      // Same rationale as the provider breaker above: a failure raised by our
+      // own shutdown must not cool the provider down for every later request.
+      !isDraining()
     ) {
       recordProviderCooldown(
         provider,

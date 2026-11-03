@@ -133,6 +133,31 @@ export const updateSettingsSchema = z.object({
   oidcRedirectPath: z.string().max(500).optional(),
   oidcAllowedSubjects: z.array(z.string().max(200)).optional(),
   oidcAdmissionClaim: oidcAdmissionClaimSchema.nullable().optional(),
+  // Entra ID SSO for /v1/*. Separate from the oidc* block above: that gates the
+  // dashboard with an id_token audienced to the client_id, this gates the API
+  // with an access token audienced to a custom scope. See docs/security/ENTRA_SSO.md.
+  entraSsoEnabled: z.boolean().optional(),
+  /** Authority origin. Defaults to the commercial cloud; sovereign clouds differ. */
+  entraAuthorityHost: z.string().max(300).optional(),
+  entraTenantId: z.string().max(100).optional(),
+  entraClientId: z.string().max(200).optional(),
+  entraApiAudience: z.string().max(300).optional(),
+  /** Entra security-group objectId → OmniRoute key_groups.id. */
+  entraGroupMappings: z
+    .array(
+      z.object({
+        groupId: z.string().min(1).max(100),
+        keyGroupId: z.string().min(1).max(100),
+      })
+    )
+    .max(500)
+    .optional(),
+  /** Key group for users matching no mapping. Empty/absent = deny. */
+  entraDefaultKeyGroupId: z.string().max(100).nullable().optional(),
+  /** Resolve users whose `groups` claim overflowed (>150 groups) via Graph. */
+  entraGraphFallbackEnabled: z.boolean().optional(),
+  /** Encrypted at rest. Only needed for the Graph fallback. */
+  entraGraphClientSecret: z.string().max(500).optional(),
   enableSocks5Proxy: z.boolean().optional(),
   instanceName: z.string().max(100).optional(),
   customLogoUrl: z.string().max(2000).optional(),
@@ -152,6 +177,7 @@ export const updateSettingsSchema = z.object({
   // answered 200 while dropping both before they reached the DB.
   hideAutoCombos: z.boolean().optional(),
   hideNoThinkVariants: z.boolean().optional(),
+  exposeCombosOnly: z.boolean().optional(),
   // STRICT_ZERO_COST (opt-in, default "off"): stricter than hidePaidModels — a
   // candidate must be keyless (no credential exists, so no request against it
   // can ever be billed) OR pass a live, fresh, hard-stop-guaranteed quota
