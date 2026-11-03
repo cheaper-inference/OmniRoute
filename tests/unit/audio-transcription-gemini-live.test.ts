@@ -96,6 +96,22 @@ test("audioRegistry registers gemini provider with gemini-3.5-transcribe-live mo
   );
 });
 
+test("auto STT selection does not pre-empt existing providers when a Gemini key is usable", async () => {
+  const { selectAudioBridgeModel } = await import("../../src/lib/guardrails/audioBridgeHelpers.ts");
+  // A key that can reach both Gemini and Groq must keep the pre-existing
+  // auto-selection (groq), not silently move every bridge to Gemini Live.
+  const selected = await selectAudioBridgeModel(
+    "auto",
+    async (model) => model.startsWith("gemini/") || model.startsWith("groq/")
+  );
+  assert.ok(selected?.startsWith("groq/"), `auto STT picked ${selected}`);
+  // Gemini Live is still reachable on auto when it is the only usable STT credential.
+  assert.equal(
+    await selectAudioBridgeModel("auto", async (model) => model.startsWith("gemini/")),
+    "gemini/gemini-3.5-transcribe-live"
+  );
+});
+
 test("parseTranscriptionModel resolves gemini/gemini-3.5-transcribe-live and bare model", () => {
   assert.deepEqual(parseTranscriptionModel("gemini/gemini-3.5-transcribe-live"), {
     provider: "gemini",

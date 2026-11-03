@@ -891,6 +891,43 @@ async function handleSpeechmaticsTranscription(providerConfig, file, modelId, to
   return pollSpeechmaticsJob(`${baseUrl}/${jobId}`, authHeaders);
 }
 
+function optionalFormString(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Gemini Live (BidiGenerateContent WebSocket) file-mode transcription.
+ * Rejects oversized uploads before buffering them a second time.
+ */
+async function handleGeminiLiveTranscription(
+  providerConfig: AudioProvider,
+  file: Blob,
+  modelId: string | null,
+  credentials: TranscriptionCredentials | null | undefined,
+  formData: FormData
+): Promise<Response> {
+  if (file.size > GEMINI_LIVE_MAX_INPUT_BYTES) {
+    return errorResponse(413, "Audio file is too large for Gemini Live transcription");
+  }
+  try {
+    const text = await geminiLiveTranscribe(credentials ?? {}, {
+      model: modelId as string,
+      audioBuffer: Buffer.from(await file.arrayBuffer()),
+      prompt: optionalFormString(formData, "prompt"),
+      language: optionalFormString(formData, "language"),
+      baseUrl: providerConfig.baseUrl,
+    });
+    return Response.json({ text }, { headers: { ...CORS_HEADERS } });
+  } catch (err) {
+    const error = err as { message?: string; status?: number };
+    return errorResponse(
+      typeof error?.status === "number" ? error.status : 500,
+      `Gemini Live transcription failed: ${error?.message || "unknown error"}`
+    );
+  }
+}
+
 function resolveTranscriptionToken(
   providerConfig: AudioProvider,
   credentials?: TranscriptionCredentials | null
@@ -969,29 +1006,7 @@ export async function handleAudioTranscription({
 
   // Route to provider-specific handler
   if (providerConfig.format === "gemini-live") {
-    try {
-      if (file.size > GEMINI_LIVE_MAX_INPUT_BYTES) {
-        // Reject before buffering the upload a second time.
-        return errorResponse(413, "Audio file is too large for Gemini Live transcription");
-      }
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const languageValue = formData.get("language");
-      const promptValue = formData.get("prompt");
-      const text = await geminiLiveTranscribe(credentials ?? {}, {
-        model: modelId as string,
-        audioBuffer: buffer,
-        prompt: typeof promptValue === "string" ? promptValue : undefined,
-        language: typeof languageValue === "string" ? languageValue : undefined,
-        baseUrl: providerConfig.baseUrl,
-      });
-      return Response.json({ text }, { headers: { ...CORS_HEADERS } });
-    } catch (err) {
-      const error = err as { message?: string; status?: number };
-      return errorResponse(
-        typeof error?.status === "number" ? error.status : 500,
-        `Gemini Live transcription failed: ${error?.message || "unknown error"}`
-      );
-    }
+    return handleGeminiLiveTranscription(providerConfig, file, modelId, credentials, formData);
   }
 
   if (providerConfig.format === "grok-stt") {

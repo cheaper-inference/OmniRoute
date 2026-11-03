@@ -46,15 +46,6 @@ export interface AudioProvider {
 }
 
 export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
-  gemini: {
-    id: "gemini",
-    baseUrl:
-      "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
-    authType: "apikey",
-    authHeader: "x-goog-api-key",
-    format: "gemini-live",
-    models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
-  },
   "grok-cli": {
     id: "grok-cli",
     baseUrl: "https://api.x.ai/v1/stt",
@@ -305,6 +296,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "bearer",
     format: "syntx-audio",
     models: toSyntxTranscriptionModels(),
+  },
+  // Kept last on purpose: the audio/video bridges auto-pick the FIRST catalog
+  // model with usable credentials (selectAudioBridgeModel), so a Gemini key must
+  // not pre-empt the established STT providers' auto-selection order.
+  gemini: {
+    id: "gemini",
+    baseUrl:
+      "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-live",
+    models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
   },
 };
 
