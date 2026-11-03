@@ -33,7 +33,6 @@ import {
   hashLeaseOwnerId,
   type ExclusiveConnectionLease,
 } from "@/lib/db/exclusiveConnectionLeases";
-import { getSettings } from "@/lib/db/settings";
 import {
   describePeakHourWindow,
   evaluatePeakHourProtection,
@@ -84,6 +83,7 @@ import {
 } from "@omniroute/open-sse/services/antigravityFamilyCooldown.ts";
 import { markQuotaPreflightAccountUnavailable } from "./quotaPreflightUnavailable.ts";
 import { buildNoAuthModelCooldown, pauseCooldownIfPaused } from "./noAuthModelCooldown.ts";
+import { isRequestShapeError } from "./requestShape.ts";
 import { getCreditsMode } from "@omniroute/open-sse/services/antigravityCredits.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import {
@@ -106,6 +106,7 @@ import {
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
 import { isSharedWalletCredits402 } from "@omniroute/open-sse/services/accountFallback/sharedWalletCredits.ts";
+import { resolveAvalancheCooldownMs } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { isModelScopedAccessDenial } from "@omniroute/open-sse/services/accountFallback/modelScopedAccessDenial.ts";
 import { isModelUnsupported401 } from "@omniroute/open-sse/services/accountFallback/perModelFailureScope.ts";
 import { postOutputFailureReachesLockout } from "@omniroute/open-sse/services/accountFallback/postOutputFailureStreak.ts";
@@ -132,7 +133,7 @@ import {
   classifyProviderError,
   PROVIDER_ERROR_TYPES,
 } from "@omniroute/open-sse/services/errorClassifier.ts";
-import { resolveTerminalConnectionStatus } from "./authTerminalStatus.ts";
+import { resolveTerminalConnectionStatus, isPassiveCodex } from "./authTerminalStatus.ts";
 import {
   ALIBABA_FREE_DRAINED_LOCK_MS,
   getAlibabaBillingMode,
@@ -142,6 +143,7 @@ import {
   mergeAlibabaFreeDrainedModels,
   rehydrateAlibabaFreeDrainedModelLocks,
 } from "@omniroute/open-sse/services/alibabaFreeTier.ts";
+import { isTransientCodexCapacity429 } from "@omniroute/open-sse/services/codexAccount/capacity429.ts";
 import {
   getCodexModelScope,
   getCodexQuotaWindowFilterForModel,
@@ -164,6 +166,7 @@ import {
   loadAdvertisedModelsForConnections,
 } from "./connectionModelInventory";
 import { isCatalogFreeModel } from "@/shared/utils/freeModels";
+import { getSessionAffinityStore } from "@/lib/db/sessionAccountAffinity";
 import {
   applySessionAffinityPin,
   formatSessionKeyForLog,
@@ -950,7 +953,7 @@ export async function getProviderCredentials(
 
     // Fetched early so the session-affinity-pin override (#5903) can consult
     // the TTL before forcedConnectionId narrows the connection pool.
-    const settings = await getSettings();
+    const settings = await getCachedSettings();
     const sessionAffinityTtlMs = resolveSessionAffinityTtlMs(provider, options, settings);
 
     // Fix #922: Check for aliases (nvidia/nvidia_nim) to ensure credentials are found
@@ -1014,11 +1017,16 @@ export async function getProviderCredentials(
       model: string | null
     ): boolean => provider === "codex" && isCodexChildUnavailable(connection, model);
 
-    // #5903: an active session-affinity pin outranks a per-request reset-aware
-    // forcedConnectionId (see sessionAffinityPin leaf for the full rationale).
+    // Only Redis needs a snapshot for synchronous consumers; SQLite reads in place.
+    const affinityStore = getSessionAffinityStore();
+    const affinityRecord =
+      affinityStore.driver === "redis" && options.sessionKey && sessionAffinityTtlMs > 0
+        ? await affinityStore.get(options.sessionKey, provider, sessionAffinityTtlMs)
+        : undefined;
     if (!options.lease) {
       forcedConnectionId =
         applySessionAffinityPin({
+          affinityRecord,
           forcedConnectionId,
           options,
           sessionAffinityTtlMs,
@@ -1033,15 +1041,7 @@ export async function getProviderCredentials(
         }) ?? forcedConnectionId;
     }
 
-    // A forced connection (combo step `connectionId` / `x-omniroute-connection`) is an
-    // operator instruction, not a suggestion. resolveForcedConnectionForCredentialPool()
-    // legitimately returns null for several *intentional* pin-release cases (forced ID
-    // already in excludedConnectionIds after a failed attempt, cooldown, quota exhaustion,
-    // quota-policy block) — those must keep degrading to normal sibling fallback, unchanged.
-    // The bug is narrower: the forced connection was requested, was NOT intentionally
-    // excluded, and simply is not present in the current active/allowed pool at all (e.g.
-    // an operator deactivated it). Detect exactly that case *before* calling the resolver,
-    // so it never gets folded in with the intentional-release cases above.
+    // Forced ids absent from the pool fail; excluded/cooling/quota-blocked ids allow fallback.
     if (isForcedConnectionMissingFromPool(forcedConnectionId, excludedConnectionIds, connections)) {
       // Route through the existing "target has no eligible credentials" recoverable path
       // (the connections.length === 0 branch just below) instead of falling through to the
@@ -1668,11 +1668,14 @@ export async function getProviderCredentials(
 
     const providerStrategyOverrides = (settings.providerStrategies || {}) as Record<
       string,
-      { fallbackStrategy?: string; stickyRoundRobinLimit?: number }
+      {
+        fallbackStrategy?: string;
+        stickyRoundRobinLimit?: number;
+        planWeights?: Record<string, number>;
+      }
     >;
     const providerOverride = providerStrategyOverrides[resolvedId] || {};
     const strategy = providerOverride.fallbackStrategy || settings.fallbackStrategy || "fill-first";
-
     let commitSelectionSideEffects: (() => Promise<void> | void) | undefined;
     let connection = leasePolicy.activeLease
       ? orderedConnections.find(
@@ -1688,13 +1691,16 @@ export async function getProviderCredentials(
         log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);
       }
     }
+    // Redis lease planning can use a pin evicted after prefetch (accepted synchronous window).
+    // After claim, rejected CAS keeps the claimed account; it never overwrites the shared winner.
     const affinityPlan =
       options.lease && !connection
         ? planSessionAffinityConnection(
             provider,
             options.sessionKey,
             orderedConnections,
-            sessionAffinityTtlMs
+            sessionAffinityTtlMs,
+            affinityRecord
           )
         : null;
     const affinityConnection = connection
@@ -1851,7 +1857,11 @@ export async function getProviderCredentials(
       connection = sorted[0];
       // expiry-first (#14533) ranks by the quota closest to being lost; see its leaf module.
       if (strategy === "expiry-first")
-        connection = pickExpiryFirstConnection(orderedConnections, settings);
+        connection = pickExpiryFirstConnection(orderedConnections, settings, {
+          provider: resolvedId,
+          requestedModel,
+          planWeights: providerOverride.planWeights,
+        });
       // Record the use (#10945). This strategy sorts on the very field it was
       // not writing, so on a pool where every lastUsedAt is null the tie-break
       // fell through to `priority` and returned the SAME connection on every
@@ -2323,6 +2333,16 @@ function isStreamContentStall(errorText: string): boolean {
   return /stream content stall/i.test(String(errorText || ""));
 }
 
+/** The reset an upstream announced for this failure, as opposed to a locally computed backoff. */
+function resolveUpstreamResetMs(fallback: {
+  usedUpstreamRetryHint?: boolean;
+  cooldownMs?: number;
+  quotaResetHintMs?: number | null;
+}): number | null {
+  if (fallback.usedUpstreamRetryHint === true) return fallback.cooldownMs ?? null;
+  return fallback.quotaResetHintMs ?? null;
+}
+
 export async function markAccountUnavailable(
   connectionId: string,
   status: number,
@@ -2337,6 +2357,9 @@ export async function markAccountUnavailable(
     headers?: Headers | Record<string, string> | null;
     correlationId?: string | null;
     streamOutputEmitted?: boolean;
+    isAvalancheRisk?: boolean;
+    avalancheCooldownMs?: number;
+    suppressFallback?: boolean;
     structuredError?: { code?: string | null; type?: string | null } | null;
   } = {}
 ) {
@@ -2366,6 +2389,18 @@ export async function markAccountUnavailable(
 
     const resourceBypass = getResource404Bypass(status, errorText, connectionId, log);
     if (resourceBypass) return resourceBypass;
+
+    // The upstream rejected the SHAPE of this request (schema / unsupported argument),
+    // not the account. Cooling the connection down would fail every other client routed
+    // to it (often the provider's only account) with this stale error. Let the caller
+    // fall back, but keep the connection available.
+    if (isRequestShapeError(status, errorText, provider)) {
+      log.info(
+        "AUTH",
+        `${connectionId.slice(0, 8)} request-shape ${status} — no cooldown: ${String(errorText).slice(0, 120)}`
+      );
+      return { shouldFallback: true, cooldownMs: 0 };
+    }
 
     // Read current connection to get backoffLevel
     const connectionsRaw = await getProviderConnections({ provider });
@@ -2780,6 +2815,12 @@ export async function markAccountUnavailable(
         status === 429
           ? ANTIGRAVITY_FAMILY_INFERRED_BASE_COOLDOWN_MS
           : null;
+      const upstreamCooldownMs = isModelScopedClaudeQuota
+        ? claudeQuotaScope.cooldownMs
+        : resolveUpstreamResetMs(fallbackResult);
+      const exactCooldownMs = options.isAvalancheRisk
+        ? resolveAvalancheCooldownMs(options.avalancheCooldownMs, upstreamCooldownMs)
+        : upstreamCooldownMs;
       const lockout = recordModelLockoutFailure(
         provider,
         connectionId,
@@ -2796,18 +2837,16 @@ export async function markAccountUnavailable(
         effectiveProviderProfile,
         {
           ...modelLockoutOptions,
-          exactCooldownMs: isModelScopedClaudeQuota
-            ? claudeQuotaScope.cooldownMs
-            : fallbackResult.usedUpstreamRetryHint === true
-              ? fallbackResult.cooldownMs
-              : (fallbackResult.quotaResetHintMs ?? null),
+          exactCooldownMs,
           maxCooldownMs: mlSettings.maxCooldownMs,
           scope: usesExactAntigravityLock ? "exact" : undefined,
           // Only a transport header, google.rpc.RetryInfo, or cached Claude reset can bypass
-          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped.
+          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped, and
+          // so does the avalanche burst cooldown when it outlasts the upstream reset.
           exactCooldownIsUpstreamReset:
-            retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
-            isModelScopedClaudeQuota,
+            exactCooldownMs === upstreamCooldownMs &&
+            (retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
+              isModelScopedClaudeQuota),
         }
       );
       // Update last error for observability (without changing terminal status)
@@ -2828,7 +2867,10 @@ export async function markAccountUnavailable(
         cooldownMs: lockout.cooldownMs,
         reason,
       });
-      return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
+      return {
+        shouldFallback: options.suppressFallback ? false : true,
+        cooldownMs: lockout.cooldownMs,
+      };
     }
     const result = fallbackResult;
     if (isSharedWalletCredits402(provider, status, errorText)) {
@@ -2838,6 +2880,16 @@ export async function markAccountUnavailable(
     }
     const { shouldFallback, cooldownMs: rawCooldownMs, newBackoffLevel, reason } = result;
     if (!shouldFallback) return { shouldFallback: false, cooldownMs: 0 };
+    if (options.suppressFallback) {
+      const suppressedCooldownMs =
+        resolveAvalancheCooldownMs(options.avalancheCooldownMs, resolveUpstreamResetMs(result)) ??
+        rawCooldownMs;
+      // This path skips the connection cooldown below, so the lock is what keeps the key out.
+      if (provider && suppressedCooldownMs > 0 && !disableCooling) {
+        lockModel(provider, connectionId, model, reason || "unknown", suppressedCooldownMs);
+      }
+      return { shouldFallback: false, cooldownMs: suppressedCooldownMs };
+    }
     const providerErrorType = classifyProviderError(status, errorText, provider);
 
     if (
@@ -2922,8 +2974,8 @@ export async function markAccountUnavailable(
     const tokenExpiryMs = Date.parse(String(conn?.tokenExpiresAt || conn?.expiresAt || ""));
     if (
       terminalStatus === "expired" &&
-      Number.isFinite(tokenExpiryMs) &&
-      tokenExpiryMs > Date.now() + 60_000
+      (isPassiveCodex(provider) ||
+        (Number.isFinite(tokenExpiryMs) && tokenExpiryMs > Date.now() + 60_000))
     ) {
       terminalStatus = null;
     }
@@ -3063,6 +3115,29 @@ export async function markAccountUnavailable(
     const errorMsg =
       sanitizeErrorMessage(describeUpstreamFailure(errorText)) || "Provider request failed";
 
+    // #18221: an explicit upstream Codex capacity 429 is not an exhausted
+    // account-wide quota window. Do not persist a virtual-child scope cooldown
+    // or lock sibling models; honor the operator's transient cooling opt-out.
+    if (
+      provider === "codex" &&
+      typeof model === "string" &&
+      model.trim().length > 0 &&
+      conn &&
+      isTransientCodexCapacity429(status, errorText, options.headers)
+    ) {
+      const modelCooldownMs = disableCooling ? 0 : Math.min(Math.max(cooldownMs, 5_000), 60_000);
+      if (modelCooldownMs > 0) {
+        lockExactModel(provider, connectionId, model, "model_capacity", modelCooldownMs);
+      }
+      await updateProviderConnection(connectionId, {
+        lastErrorType: "server_error",
+        lastError: "Codex model temporarily at capacity",
+        lastErrorAt: new Date().toISOString(),
+        errorCode: status,
+      });
+      return { shouldFallback: true, cooldownMs: modelCooldownMs };
+    }
+
     // T09: Codex per-scope lockout (do not block the whole account globally).
     if (
       provider === "codex" &&
@@ -3108,7 +3183,8 @@ export async function markAccountUnavailable(
     };
     const persistUnavailableState = options.persistUnavailableState !== false;
 
-    if (!persistUnavailableState) {
+    if (!persistUnavailableState && !terminalStatus) {
+      // Terminal account failures must persist even when a combo owns transient cooldowns.
       // Combo-managed transient failure (e.g. 429): keep the connection clean in
       // the DB, but record an in-memory model lockout so credential selection
       // skips this exact provider+connection+model while it cools down — other
