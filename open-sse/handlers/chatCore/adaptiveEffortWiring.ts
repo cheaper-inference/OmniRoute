@@ -12,7 +12,7 @@ import {
   isAdaptiveEffort,
   type ChatMessageLike,
 } from "../../services/adaptiveEffort.ts";
-import { isKimiK31Model } from "../../executors/base/reasoningEffort.ts";
+import { isKimiK31Model } from "../../utils/kimiK31.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
 

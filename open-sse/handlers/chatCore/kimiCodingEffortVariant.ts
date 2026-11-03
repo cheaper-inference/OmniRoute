@@ -18,15 +18,12 @@
  */
 
 import { splitKimiCodingEffortVariant } from "../../utils/kimiCodingEffortVariant.ts";
+import { isKimiK31Model } from "../../utils/kimiK31.ts";
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
-}
-
-function isK31Model(modelId: string): boolean {
-  return /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(modelId);
 }
 
 function hasExplicitEffortValue(body: Record<string, unknown>, modelId: string): boolean {
@@ -38,7 +35,7 @@ function hasExplicitEffortValue(body: Record<string, unknown>, modelId: string):
     thinking?.effort,
   ];
   if (efforts.some((value) => value !== undefined && value !== null && value !== "")) return true;
-  return isK31Model(modelId) && efforts.some((value) => value !== undefined);
+  return isKimiK31Model(modelId) && efforts.some((value) => value !== undefined);
 }
 
 function hasExplicitEffort(body: Record<string, unknown>, modelId: string): boolean {
@@ -52,7 +49,7 @@ export function applyKimiCodingEffortVariant(opts: {
   body: unknown;
 }): { effectiveModel: string; log: string | null } {
   const body = asRecord(opts.body);
-  if (body && isK31Model(opts.effectiveModel)) {
+  if (body && isKimiK31Model(opts.effectiveModel)) {
     if (body.enable_thinking === false && !hasExplicitEffortValue(body, opts.effectiveModel)) {
       body.thinking = { ...(asRecord(body.thinking) || {}), type: "disabled" };
     }

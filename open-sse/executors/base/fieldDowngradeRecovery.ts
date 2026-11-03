@@ -11,7 +11,7 @@ import {
   isAutoLearnGloballyEnabled,
 } from "@/lib/db/paramFilters";
 import { HTTP_STATUS } from "../../config/constants.ts";
-import { isK31RejectionFinal } from "./reasoningEffort.ts";
+import { isK31RejectionFinal } from "../../utils/kimiK31.ts";
 import {
   findOffendingField,
   detectRejectedMessageFields,

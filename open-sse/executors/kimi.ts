@@ -6,6 +6,7 @@ import {
 } from "../config/providers/registry/kimi/coding/runtime.ts";
 import { flattenOpenAIToolRootAnyOf } from "../services/toolSchemaSanitizer.ts";
 import { FORMATS } from "../translator/formats.ts";
+import { isKimiK31Model, mapK31EffortAlias } from "../utils/kimiK31.ts";
 import { DefaultExecutor } from "./default.ts";
 import type { ProviderCredentials } from "./base.ts";
 import { ensureToolMessageNames } from "./kimiToolNames.ts";
@@ -92,7 +93,7 @@ function resolveK31RequestedEffort(
 function resolveRequestedEffort(body: JsonRecord, modelId: string): unknown {
   const reasoning = asRecord(body.reasoning);
   const thinking = asRecord(body.thinking);
-  if (isK31Model(modelId)) return resolveK31RequestedEffort(body, reasoning, thinking);
+  if (isKimiK31Model(modelId)) return resolveK31RequestedEffort(body, reasoning, thinking);
 
   const direct = normalizeEffort(body.reasoning_effort);
   if (direct) return direct;
@@ -105,26 +106,11 @@ function resolveRequestedEffort(body: JsonRecord, modelId: string): unknown {
   return null;
 }
 
-const K31_EFFORT_ALIASES: Record<string, string> = {
-  ultra: "max",
-  xhigh: "max",
-  high: "high",
-  medium: "high",
-  low: "low",
-  minimum: "low",
-  light: "low",
-  max: "max",
-};
-
-function isK31Model(modelId: string): boolean {
-  return /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(modelId);
-}
-
 function constrainEffort(effort: unknown, policy: KimiThinkingPolicy, modelId: string): unknown {
   if (typeof effort !== "string") return effort;
-  if (isK31Model(modelId)) {
+  if (isKimiK31Model(modelId)) {
     if (effort === "off") return effort;
-    return K31_EFFORT_ALIASES[effort] ?? effort;
+    return mapK31EffortAlias(effort);
   }
   if (effort === "off" || effort === "on") return effort;
   const supported = policy.supportedThinkingEfforts;
@@ -140,7 +126,7 @@ function applyThinkingPolicyDefaults(
   policy: KimiThinkingPolicy,
   modelId: string
 ): unknown {
-  if (isK31Model(modelId)) {
+  if (isKimiK31Model(modelId)) {
     if (requestedEffort === "off") return "off";
     return requestedEffort === undefined ? policy.defaultThinkingEffort || "max" : requestedEffort;
   }
@@ -166,7 +152,7 @@ function buildOpenAIThinking(
   }
   return {
     type: "enabled",
-    ...(constrained !== "on" || isK31Model(modelId) ? { effort: constrained } : {}),
+    ...(constrained !== "on" || isKimiK31Model(modelId) ? { effort: constrained } : {}),
     keep: previousKeep ?? "all",
   };
 }
@@ -354,7 +340,7 @@ function resolveAnthropicEffort(
   modelId: string
 ): unknown {
   const reasoning = asRecord(body.reasoning);
-  if (isK31Model(modelId)) {
+  if (isKimiK31Model(modelId)) {
     return applyThinkingPolicyDefaults(
       resolveK31AnthropicEffort(body, reasoning, existingThinking, outputConfig),
       policy,
@@ -394,7 +380,7 @@ function applyAnthropicEffort(
   }
 
   body.thinking = { type: "enabled" };
-  if (constrained === "on" && !isK31Model(modelId)) {
+  if (constrained === "on" && !isKimiK31Model(modelId)) {
     delete body.output_config;
   } else {
     body.output_config = { ...(outputConfig || {}), effort: constrained };
@@ -517,7 +503,7 @@ export class KimiExecutor extends DefaultExecutor {
       resolveKimiProtocol(credentials, withNames) === "claude"
         ? normalizeAnthropicRequest(withNames, policy, model)
         : normalizeOpenAIRequest(withNames, stream, policy, model);
-    if (isK31Model(model)) delete normalized.enable_thinking;
+    if (isKimiK31Model(model)) delete normalized.enable_thinking;
     return stream ? { ...normalized, stream: true } : normalized;
   }
 }

@@ -1,4 +1,5 @@
 import { flattenOpenAIToolRootAnyOf } from "../services/toolSchemaSanitizer.ts";
+import { isKimiK31Model, mapK31EffortAlias } from "../utils/kimiK31.ts";
 import { DefaultExecutor } from "./default.ts";
 import type { ProviderCredentials } from "./base.ts";
 
@@ -96,17 +97,6 @@ function normalizeK2Thinking(body: JsonRecord, preservedThinkingOnly: boolean): 
   }
 }
 
-const K31_EFFORT_ALIASES: Record<string, string> = {
-  ultra: "max",
-  xhigh: "max",
-  high: "high",
-  medium: "high",
-  low: "low",
-  minimum: "low",
-  light: "low",
-  max: "max",
-};
-
 function normalizeK31ReasoningEffort(body: JsonRecord): void {
   const existingReasoning = asRecord(body.reasoning);
   const existingThinking = asRecord(body.thinking);
@@ -135,7 +125,7 @@ function normalizeK31ReasoningEffort(body: JsonRecord): void {
     body.reasoning_effort = requested;
     return;
   }
-  body.reasoning_effort = K31_EFFORT_ALIASES[requested.toLowerCase()] ?? requested;
+  body.reasoning_effort = mapK31EffortAlias(requested);
 }
 
 export function normalizeMoonshotRequest(model: string, body: unknown): unknown {
@@ -148,7 +138,7 @@ export function normalizeMoonshotRequest(model: string, body: unknown): unknown 
   const next: JsonRecord = { ...record };
   if (Array.isArray(next.tools)) next.tools = flattenOpenAIToolRootAnyOf(next.tools);
   const isK3 = /^kimi-k3(?:$|[.-])/.test(normalizedModel);
-  const isK31 = /^kimi-k3\.1(?:$|-)/.test(normalizedModel);
+  const isK31 = isK3 && isKimiK31Model(normalizedModel);
   const isK27 = /^kimi-k2\.7-code(?:$|-)/.test(normalizedModel);
   const isK26 = /^kimi-k2\.6(?:$|-)/.test(normalizedModel);
   const outputCeiling = isK3 ? 1048576 : 262144;

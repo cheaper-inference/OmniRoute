@@ -12,6 +12,7 @@
 
 import { getProviderModels } from "../config/providerModels.ts";
 import { KIMI_CODING_WIRE_MODEL_ALIASES } from "../config/providers/registry/kimi/coding/runtime.ts";
+import { isKimiK31Model } from "./kimiK31.ts";
 
 const KIMI_CODING_PROVIDERS = new Set(["kimi-coding", "kimi-coding-apikey"]);
 const KIMI_CODING_PREFIXES = new Set(["kimi-coding", "kimi-coding-apikey", "kmc", "kmca"]);
@@ -41,7 +42,7 @@ export function splitKimiCodingEffortVariant(
   if (registryIds.has(bareId)) return null;
 
   const bareLower = bareId.toLowerCase();
-  if (/^kimi-k3\.1-pro(?:-highspeed)?$/.test(bareLower)) {
+  if (isKimiK31Model(bareLower)) {
     const wireModel = KIMI_CODING_WIRE_MODEL_ALIASES[bareLower];
     if (wireModel && registryIds.has(wireModel)) return { wireModel, effort: null };
   }

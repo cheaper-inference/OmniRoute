@@ -16,9 +16,8 @@ import {
   recordLearnedProbeReasoningEffort,
   recordLearnedReasoningEffort,
 } from "../../services/learnedReasoningEffortCaps.ts";
+import { hasUnsupportedK31Effort, isKimiK31Model } from "../../utils/kimiK31.ts";
 import {
-  hasUnsupportedK31Effort,
-  isKimiK31Model,
   readBodyReasoningEffort,
   sanitizeReasoningEffortForProvider,
   writeBodyReasoningEffort,
