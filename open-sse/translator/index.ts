@@ -46,6 +46,7 @@ import {
 } from "../services/reasoningCache.ts";
 import {
   normalizeResponsesReasoningEffort,
+  REASONING_SUMMARY_OPT_OUT_MARKER,
   RESPONSES_STORE_MARKER,
 } from "./request/openai-responses/helpers.ts";
 import { applyReasoningInputPolicy } from "../services/reasoningInputPolicy.ts";
@@ -621,6 +622,10 @@ export function translateRequest(
                           options.signatureNamespace,
                           model
                         ),
+                        // Raw connection id (chatCore threads the serving connection as
+                        // signatureNamespace): openai-to-claude binds the Claude signed-
+                        // thinking restore on it (#17324 — signatures are org-scoped).
+                        _connectionId: options.signatureNamespace,
                       }
                     : {}),
                   ...(hasPreCompression ? { _preCompressionBody: options.preCompressionBody } : {}),
@@ -906,6 +911,12 @@ export function translateRequest(
   // `store` value would have already read the marker before this point.
   if (RESPONSES_STORE_MARKER in result) {
     delete result[RESPONSES_STORE_MARKER];
+  }
+
+  // #18124: only the Codex executor understands the reasoning-summary opt-out
+  // marker; any other provider would forward it verbatim to its upstream.
+  if (REASONING_SUMMARY_OPT_OUT_MARKER in result && provider !== "codex") {
+    delete result[REASONING_SUMMARY_OPT_OUT_MARKER];
   }
 
   // #7293 follow-up: the pre-translation hoist above normalizes the *source*
