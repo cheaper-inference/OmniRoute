@@ -1215,7 +1215,8 @@ async function handleComboChatInner({
 
   const comboCooldownWaitEnabled = isComboCooldownWaitEligible(
     strategy,
-    resilienceSettings.comboCooldownWait
+    resilienceSettings.comboCooldownWait,
+    config
   );
   const comboCooldownAttempt = { current: pinnedLockWaitMs > 0 ? 1 : 0 };
   const comboCooldownBudgetLeftMs = {
