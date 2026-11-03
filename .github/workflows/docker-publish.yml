@@ -444,8 +444,14 @@ jobs:
     needs:
       - prepare
       - build
+    # Explicit results, like `build`: an implicit success() also looks at `build`'s own
+    # dependency runner-preflight, which is SKIPPED whenever amd64 is off the omni-build slot
+    # (DOCKER_AMD64_RUNNER, USE_VPS_RUNNER off), and that silently skipped this job after both
+    # images built (run 41703618029, 2026-11-03).
     if: >-
-      github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' &&
+      !cancelled() && github.event_name != 'schedule' &&
+      needs.prepare.result == 'success' && needs.build.result == 'success' &&
+      needs.prepare.outputs.skip != 'true' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     # Same switch as `prepare` (see there).
     runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
