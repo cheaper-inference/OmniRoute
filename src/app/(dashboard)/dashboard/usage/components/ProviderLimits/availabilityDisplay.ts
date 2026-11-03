@@ -145,6 +145,17 @@ function selectWaterPercentages(
   );
   return { percentages, bypassed };
 }
+function lowestPercent(values: number[]): number | null {
+  let lowest = Number.POSITIVE_INFINITY;
+  for (const value of values) {
+    if (Number.isFinite(value) && value < lowest) lowest = value;
+  }
+  return Number.isFinite(lowest) ? lowest : null;
+}
+/** Lowest percentage the given cells report, or null when none reports a finite one. */
+export function reportedPercent(cells: HealthAccount["cells"]): number | null {
+  return lowestPercent(cells.map((cell) => cell.percent));
+}
 function resolveDisplayState(
   account: HealthAccount,
   decision: ReturnType<typeof displayDecision>["decision"],
@@ -214,7 +225,18 @@ function project(account: HealthAccount, now: number, poolId?: string): DisplayA
     now
   );
   const { percentages, bypassed } = selectWaterPercentages(cells, decision, poolId);
-  const remainingPct = percentages.length ? Math.min(...percentages) : bypassed ? 100 : null;
+  // A bypass (paid credits, extra usage, filtering opt-out) lets the account
+  // serve; it does not refill the plan window. Report what the windows actually
+  // carry. `bypassed` requires at least one ignored cell, and every cell carries
+  // a finite percentage, so this never needs a "full" fallback.
+  const remainingPct = percentages.length
+    ? lowestPercent(percentages)
+    : bypassed
+      ? // The account meter follows account-level windows; a model-scoped
+        // window (Sonnet, Spark, code review) says nothing about the pool the
+        // account is spending from.
+        reportedPercent(cells.filter((cell) => cell.scope !== "scoped"))
+      : null;
   const fill = displayFill(state.kind, remainingPct, state.waitMs, state.waitDuration);
   return {
     ...account,
