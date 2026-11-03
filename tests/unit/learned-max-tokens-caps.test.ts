@@ -19,7 +19,9 @@ test("1. parse: inclusive bound, exclusive bound, non-matches, escaped JSON form
     131072
   );
   assert.equal(
-    caps.parseMaxTokensCeiling("The parameter `max_tokens` is not valid: integer, expected a value < 8192"),
+    caps.parseMaxTokensCeiling(
+      "The parameter `max_tokens` is not valid: integer, expected a value < 8192"
+    ),
     8191
   );
   // JSON-serialized error body escapes "<" as \u003c and "=" as \u003d — the
@@ -30,7 +32,10 @@ test("1. parse: inclusive bound, exclusive bound, non-matches, escaped JSON form
     ),
     131072
   );
-  assert.equal(caps.parseMaxTokensCeiling("thinking_budget must be in the range [-1, 32000]"), null);
+  assert.equal(
+    caps.parseMaxTokensCeiling("thinking_budget must be in the range [-1, 32000]"),
+    null
+  );
   assert.equal(caps.parseMaxTokensCeiling(""), null);
   assert.equal(caps.parseMaxTokensCeiling(42), null);
 });
@@ -137,4 +142,51 @@ test("6. applyMaxTokensRecovery: ceiling advertised but body within it → learn
   assert.equal(result.attempted, true);
   assert.equal(result.retried, false);
   assert.equal(caps.getLearnedMaxTokensCap("prov", "model-z"), 131072);
+});
+
+test("7. parse: implausibly small ceilings are ignored (cannot poison the learned cap)", () => {
+  assert.equal(
+    caps.parseMaxTokensCeiling("The parameter `max_tokens` is invalid: expected a value <= 1"),
+    null
+  );
+  assert.equal(
+    caps.parseMaxTokensCeiling("The parameter `max_tokens` is invalid: expected a value < 100"),
+    null
+  );
+  assert.equal(
+    caps.parseMaxTokensCeiling("The parameter `max_tokens` is invalid: expected a value <= 256"),
+    256
+  );
+});
+
+test("8. parse: another parameter's ceiling on the same line is not attributed to max_tokens", () => {
+  assert.equal(
+    caps.parseMaxTokensCeiling(
+      "The parameter `max_tokens` ok; thinking.budget_tokens: expected a value <= 2048"
+    ),
+    null
+  );
+  assert.equal(
+    caps.parseMaxTokensCeiling(
+      "thinking.budget_tokens: expected a value <= 2048; The parameter `max_tokens` is invalid: expected a value <= 131072"
+    ),
+    131072
+  );
+});
+
+test("9. clampTopLevelMaxTokens drops thinking when the squeezed budget would be below 1024", () => {
+  const body: Record<string, unknown> = {
+    max_tokens: 8192,
+    thinking: { type: "enabled", budget_tokens: 4000 },
+  };
+  assert.equal(caps.clampTopLevelMaxTokens(body, 1500), true);
+  assert.equal(body.max_tokens, 1500);
+  assert.equal("thinking" in body, false, "no budget_tokens: 0 / <1024 is ever sent");
+
+  const roomy: { max_tokens: number; thinking: { budget_tokens: number } } = {
+    max_tokens: 8192,
+    thinking: { budget_tokens: 7000 },
+  };
+  assert.equal(caps.clampTopLevelMaxTokens(roomy, 4096), true);
+  assert.equal(roomy.thinking.budget_tokens, 4096 - 1024);
 });

@@ -40,13 +40,25 @@ export function recordLearnedMaxTokensCap(
 }
 
 /**
+ * Smallest ceiling we are willing to learn. A bogus or hostile upstream message
+ * ("expected a value <= 1") must not permanently clamp every request for a
+ * provider/model to a useless size, and learned caps have no TTL.
+ */
+export const MIN_PLAUSIBLE_MAX_TOKENS_CEILING = 256;
+
+function plausibleCeiling(value: number): number | null {
+  return Number.isFinite(value) && value >= MIN_PLAUSIBLE_MAX_TOKENS_CEILING ? value : null;
+}
+
+/**
  * Extract the upstream-advertised max_tokens ceiling from a 400 body.
  * Observed shapes:
  *   "The parameter `max_tokens` ... integer above maximum value, expected a
  *    value <= 131072, but got 178586 instead."            → 131072
  *   "The parameter `max_tokens` ... not valid: integer, expected a value
  *    < 8192"                                              → 8191 (exclusive bound)
- * Only matches max_tokens errors (never thinking_budget / other params).
+ * Only matches max_tokens errors (never thinking_budget / other params), and
+ * ignores ceilings below MIN_PLAUSIBLE_MAX_TOKENS_CEILING.
  * Returns null for anything else.
  *
  * Some providers JSON-serialize the error body, escaping "<" as `\u003c` and
@@ -59,16 +71,15 @@ export function parseMaxTokensCeiling(errText: unknown): number | null {
     .replace(/\\u003[cC]/g, "<")
     .replace(/\\u003[dD]/g, "=")
     .replace(/\\u0026/g, "&");
-  const inclusive = /max_tokens[^\n]*?expected a value\s*<=\s*(\d+)/i.exec(normalized);
-  if (inclusive) {
-    const max = Number(inclusive[1]);
-    return Number.isFinite(max) && max > 0 ? max : null;
-  }
-  const exclusive = /max_tokens[^\n]*?expected a value\s*<\s*(\d+)/i.exec(normalized);
-  if (exclusive) {
-    const max = Number(exclusive[1]);
-    if (Number.isFinite(max) && max > 1) return max - 1;
-    return null;
+  // Evaluate clause by clause (split on ";", newlines and sentence ends — but
+  // not on "...") so another parameter's ceiling on the same line is never
+  // attributed to max_tokens.
+  for (const clause of normalized.split(/[;\n]|(?<!\.)\.\s/)) {
+    if (!/max_tokens/i.test(clause) || /budget_tokens|thinking/i.test(clause)) continue;
+    const inclusive = /max_tokens[^\n]*?expected a value\s*<=\s*(\d+)/i.exec(clause);
+    if (inclusive) return plausibleCeiling(Number(inclusive[1]));
+    const exclusive = /max_tokens[^\n]*?expected a value\s*<\s*(\d+)/i.exec(clause);
+    if (exclusive) return plausibleCeiling(Number(exclusive[1]) - 1);
   }
   return null;
 }
@@ -100,12 +111,17 @@ export function clampTopLevelMaxTokens(body: unknown, cap: number): boolean {
   // Keep this much room under the cap for the visible answer instead of
   // letting reasoning eat it all when the learned cap squeezes the budget.
   const thinkingHeadroomTokens = 1024;
+  const minThinkingBudgetTokens = 1024;
   const budget = Number(rec.thinking?.budget_tokens);
   if (Number.isFinite(budget) && budget > cap - thinkingHeadroomTokens) {
-    rec.thinking = {
-      ...rec.thinking,
-      budget_tokens: Math.max(cap - thinkingHeadroomTokens, 0),
-    };
+    const squeezed = cap - thinkingHeadroomTokens;
+    if (squeezed < minThinkingBudgetTokens) {
+      // Anthropic rejects budget_tokens < 1024; with this little room under
+      // the cap, drop thinking instead of sending an invalid budget.
+      delete rec.thinking;
+    } else {
+      rec.thinking = { ...rec.thinking, budget_tokens: squeezed };
+    }
   }
   return true;
 }
