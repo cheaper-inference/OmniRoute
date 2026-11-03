@@ -72,7 +72,7 @@
 |                                     |          v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
 | ----------------------------------- | :-----------------------: | :---------: | :--------------------: |
 | 🌐 provayderlari                    |            352            |   **358**   |          380           |
-| 🧠 Noyob chat modeli IDs            |           1320            |  **1374**   |          1475          |
+| 🧠 Noyob chat modeli IDs            |           1320            |  **1374**   |          1491          |
 | 🖼️ Modallik ko'prigi                | 🆕 vision + audio + video |      ✓      |           ✓            |
 | 📡 radar bepul katalogi             |       🆕 -ga kirish       |      ✓      |           ✓            |
 | ⚖️ Kvotadan xabardor rejalashtirish |     🆕 Kvota-Ulashish     |      ✓      |           ✓            |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 Loyiha</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Texnologiyalar toʻplami</a></td>
     <td align="center"><a href="#-documentation">📖 Hujjatlar</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Hissa qoʻshuvchilar</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Hissa qoʻshuvchilar</a></td>
   </tr>
 </table>
 
@@ -1290,7 +1290,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   <tr><td nowrap><b>Ish muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> boʻylab <b>100% TypeScript</b> (v2.0 dan buyon yadroda <code>any</code> yoʻq)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Maʼlumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnalizatsiyasi) + LowDB (JSON legacy) — 147 ta domen moduli, 219 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Maʼlumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnalizatsiyasi) + LowDB (JSON legacy) — 147 ta domen moduli, 220 ta migratsiya</td></tr>
   <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 toʻliq matnli qidiruv + int8-kvantlangan vektor embeddinglar, tiplashtirilgan decay</td></tr>
   <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP asboblarining I/O validatsiyasi + API kontraktlari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1300,7 +1300,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   <tr><td nowrap><b>Yashirinlik (stealth)</b></td><td>wreq-js — JA3 / JA4 TLS barmoq izini taqlid qilish, 3 darajali proksi</td></tr>
   <tr><td nowrap><b>Barqarorlik</b></td><td>Circuit breaker, eksponensial backoff, anti-thundering-herd, avtomatik komboning oʻzini oʻzi tiklash</td></tr>
   <tr><td nowrap><b>Jurnal yozish</b></td><td>pino — soʻrov kontekstiga ega tuzilgan JSON jurnallar</td></tr>
-  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 7,800+ kuzatiladigan test fayli boʻylab <b>56,000+ statik test deklaratsiyasi</b> (unit, integratsiya, E2E, xavfsizlik, ekotizim)</td></tr>
+  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 8,400+ kuzatiladigan test fayli boʻylab <b>60,000+ statik test deklaratsiyasi</b> (unit, integratsiya, E2E, xavfsizlik, ekotizim)</td></tr>
   <tr><td nowrap><b>Platformalar</b></td><td>Desktop (Electron) · Android (Termux) · PWA (har qanday brauzer)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — reliz chiqqanda avtomatik npm publish + Docker Hub</td></tr>
   <tr><td nowrap><b>Havolalar</b></td><td><a href="https://omniroute.online">Veb-sayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1380,7 +1380,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   <tr><td nowrap><b><a href="SECURITY.md">Xavfsizlik siyosati</a></b></td><td>Zaifliklar haqida xabar berish va xavfsizlik amaliyotlari</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n qoʻllanmasi</a></b></td><td>67 ta tilni qoʻllab-quvvatlash, tarjima jarayoni, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Reliz nazorat roʻyxati</a></b></td><td>Relizdan oldingi tekshirish bosqichlari</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Qamrov rejasi</a></b></td><td>Kuzatiladigan 7 800 dan ortiq test faylidagi 56 000 dan ortiq statik test deklaratsiyasi uchun test qamrovi strategiyasi</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Qamrov rejasi</a></b></td><td>Kuzatiladigan 8 400 dan ortiq test faylidagi 60 000 dan ortiq statik test deklaratsiyasi uchun test qamrovi strategiyasi</td></tr>
 </table>
 
 <br/>
@@ -1395,29 +1395,29 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
 
 <table>
   <tr><th align="center">Oʻrin</th><th align="left">Hissa qoʻshuvchi</th><th align="center">Birlashtirilgan PRlar</th><th align="right">~Oʻzgartirilgan satrlar</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Hisob 2026-10-18 15:09:09 UTC da amaldagi <code>release/v3.8.52</code> tarmogʻining <code>656f01cb43</code> uchki holati asosida olindi. Sahifalarga boʻlingan GitHub GraphQL hisobi 9 191 ta birlashtirilgan PRni oʻz ichiga oladi: 3 834 tasi repozitoriy egasi tomonidan, 229 tasi Dependabot tomonidan, 6 tasi boshqa botlar/ilovalar tomonidan va <b>835 nafar alohida hissa qoʻshuvchidan 5 122 ta tashqi PR</b>. “Oʻzgartirilgan satrlar” — GitHubʼdagi qoʻshilgan va oʻchirilgan satrlar yigʻindisi boʻlib, yaratilgan fayllar, lockfilelar, kataloglar, tarjimalar va hujjatlarni ham oʻz ichiga oladi; bu muallif yozgan kod satrlari emas, balki oʻzgarishlar hajmidir. 49 ta PRda GitHub diffi 500 000 satrdan ortiq ekani koʻrsatilgan (masalan, bitta provayder qoʻshilgan #13399 da 2 347 ta oʻzgartirilgan fayl qayd etilgan), bu esa yuqoridagi ayrim jami qiymatlarni oshirib koʻrsatadi. Teng natijalar bir xil oʻrinda berilgan.</sub>
+<sub>Hisob 2026-11-03 03:01:19 UTC da amaldagi <code>release/v3.8.53</code> tarmogʻining <code>05bc048d6c</code> uchki holati asosida olindi. Sahifalarga boʻlingan GitHub GraphQL hisobi 9 947 ta birlashtirilgan PRni oʻz ichiga oladi: 4 130 tasi repozitoriy egasi tomonidan, 240 tasi Dependabot tomonidan, 6 tasi boshqa botlar/ilovalar tomonidan va <b>883 nafar alohida hissa qoʻshuvchidan 5 571 ta tashqi PR</b>. “Oʻzgartirilgan satrlar” — GitHubʼdagi qoʻshilgan va oʻchirilgan satrlar yigʻindisi boʻlib, yaratilgan fayllar, lockfilelar, kataloglar, tarjimalar va hujjatlarni ham oʻz ichiga oladi; bu muallif yozgan kod satrlari emas, balki oʻzgarishlar hajmidir. 53 ta PRda GitHub diffi 500 000 satrdan ortiq ekani koʻrsatilgan (masalan, bitta provayder qoʻshilgan #13399 da 2 347 ta oʻzgartirilgan fayl qayd etilgan), bu esa yuqoridagi ayrim jami qiymatlarni oshirib koʻrsatadi. Teng natijalar bir xil oʻrinda berilgan.</sub>
 
 ### GitHub tomonidan tegishli deb koʻrsatilgan commitlar
 
@@ -1428,14 +1428,14 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub tomonidan qayd etilgan 367 ta commit</sub>
+      <sub>🥇 GitHub tomonidan qayd etilgan 418 ta commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub tomonidan qayd etilgan 269 ta commit</sub>
+      <sub>🥈 GitHub tomonidan qayd etilgan 294 ta commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1445,6 +1445,13 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
       <sub>🥉 GitHub tomonidan qayd etilgan 229 ta commit</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub tomonidan qayd etilgan 222 ta commit</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1452,12 +1459,14 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
       <sub>🏅 GitHub tomonidan qayd etilgan 202 ta commit</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub tomonidan qayd etilgan 174 ta commit</sub>
+      <sub>🏅 GitHub tomonidan qayd etilgan 134 ta commit</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1465,14 +1474,12 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
       </a><br/>
       <sub>🏅 GitHub tomonidan qayd etilgan 126 ta commit</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub tomonidan qayd etilgan 114 ta commit</sub>
+      <sub>🏅 GitHub tomonidan qayd etilgan 115 ta commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1482,18 +1489,18 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
       <sub>🏅 GitHub tomonidan qayd etilgan 108 ta commit</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub tomonidan qayd etilgan 87 ta commit</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub tomonidan qayd etilgan 70 ta commit</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub tomonidan qayd etilgan 68 ta commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1505,7 +1512,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC da qayta tekshirildi: standart <code>release/v3.8.52</code> tarmogʻi uchun repozitoriyning Contributors API interfeysi tomonidan maʼlum qilingan, GitHub tomonidan qayd etilgan commitlar. API 849 ta identifikatorni qaytardi (429 foydalanuvchi, 2 bot, 418 anonim); bu jadvalga loyiha kuzatuvchisi, botlar va anonim identifikatorlar kiritilmagan hamda teng natijalar saqlab qolingan. Bu yuqoridagi birlashtirilgan PRlar reytingidan ham, quyidagi Git metamaʼlumotlari roʻyxatidan ham alohida.</sub>
+<sub>2026-11-03 02:09:16 UTC da qayta tekshirildi: standart <code>release/v3.8.53</code> tarmogʻi uchun repozitoriyning Contributors API interfeysi tomonidan maʼlum qilingan, GitHub tomonidan qayd etilgan commitlar. API 903 ta identifikatorni qaytardi (429 foydalanuvchi, 2 bot, 472 anonim); bu jadvalga loyiha kuzatuvchisi, botlar va anonim identifikatorlar kiritilmagan hamda teng natijalar saqlab qolingan. Bu yuqoridagi birlashtirilgan PRlar reytingidan ham, quyidagi Git metamaʼlumotlari roʻyxatidan ham alohida.</sub>
 
 > 🙏 Bu hissa qoʻshuvchilarning funksiyalari, xatolarni tuzatishlari va infratuzilma yaxshilanishlari OmniRoute’ni ishonchli va funksiyalarga boy qiladigan jihatlarning **asosiy qismi** hisoblanadi. Har bir pull request, har bir test holati va har bir i18n tarjima fayli muhim. Ochiq kodli dasturiy taʼminot ular kabi insonlar tomonidan yaratiladi.
 
@@ -1617,13 +1624,13 @@ OmniRoute loyihasini o‘z mablag‘lari hisobidan moliyalashtirayotgan insonlar
 
 <div align="center">
 
-## 👥 900+ hissa qoʻshuvchilar
+## 👥 1,000+ hissa qoʻshuvchilar
 
 </div>
 
-[![Hissa qoʻshuvchilar](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Hissa qoʻshuvchilar](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>2026-10-18 sanasida amaldagi <code>release/v3.8.52</code> tarmogʻining eng soʻnggi <code>ad160ab2d1</code> holati (6 826 ta kommit) asosida audit qilindi: <b>993 ta normallashtirilgan insoniy Git identifikatori</b> — ulardan 707 tasi kommit muallifi sifatida (jumladan, loyiha kuzatuvchisi) va 286 tasi faqat aniq <code>Co-authored-by</code> treylerlarida uchraydi. Hisoblashda <code>.mailmap</code> qoʻllanadi, e-pochta manzillari registrga bogʻliq boʻlmagan holda solishtiriladi, raqamli va oddiy GitHub noreply manzillari faqat bir xil foydalanuvchi nomini kodlagandagina birlashtiriladi, 26 ta bot/agent/xizmat/toʻldiruvchi identifikatori chiqarib tashlanadi va oddiy e-pochta manzillari faqat koʻrsatiladigan nomlari mos kelgani uchun birlashtirilmaydi. 2026-08-24 sanasidagi auditda 639 ta natija eʼlon qilingan; ushbu usul oʻsha auditning <code>ac02c5b42f</code> bazasida qayta qoʻllanganda 619 ta natija beradi, demak, oʻsish yumshoqroq usuldan emas, yangi hissa qoʻshuvchilardan kelib chiqqan.</sub>
+<sub>2026-11-02 sanasida amaldagi <code>release/v3.8.53</code> tarmogʻining eng soʻnggi <code>1c7135e0fb</code> holati (7 972 ta kommit) asosida audit qilindi: <b>1,074 ta normallashtirilgan insoniy Git identifikatori</b> — ulardan 759 tasi kommit muallifi sifatida (jumladan, loyiha kuzatuvchisi) va 315 tasi faqat aniq <code>Co-authored-by</code> treylerlarida uchraydi. Hisoblashda <code>.mailmap</code> qoʻllanadi, e-pochta manzillari registrga bogʻliq boʻlmagan holda solishtiriladi, raqamli va oddiy GitHub noreply manzillari faqat bir xil foydalanuvchi nomini kodlagandagina birlashtiriladi, 29 ta bot/agent/xizmat/toʻldiruvchi identifikatori chiqarib tashlanadi va oddiy e-pochta manzillari faqat koʻrsatiladigan nomlari mos kelgani uchun birlashtirilmaydi. 2026-08-24 sanasidagi auditda 639 ta natija eʼlon qilingan; ushbu usul oʻsha auditning <code>ac02c5b42f</code> bazasida qayta qoʻllanganda 619 ta natija beradi, demak, oʻsish yumshoqroq usuldan emas, yangi hissa qoʻshuvchilardan kelib chiqqan.</sub>
 
 ### Qanday hissa qoʻshish mumkin
 
@@ -1683,25 +1690,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute gigantlar yelkasida qad rostlagan. U **[9router](https://github.com/decolua/9router)** forki va Go loyihasi **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** ning TypeScript porti sifatida boshlangan — shundan soʻng quyidagi har bir quyi tizim bu yoʻlni avval bosib oʻtgan ochiq manbali loyihadan ilhomlangan. Ularning har biri OmniRoute’ning muayyan bir qismini shakllantirdi. Bu — ularning barchasiga bildirgan tashakkurimiz. 🙏
 
-> ⭐ yulduzlar soni 2026-yil 18-oktyabrda GitHub REST API orqali tekshirilgan — bu loyihalarga yulduz qoʻyib qoʻying. Koʻrsatkichlar muayyan sanadagi aniq holatni aks ettiradi va tabiiy ravishda oʻzgaradi.
+> ⭐ yulduzlar soni 2026-11-03-oktyabrda GitHub REST API orqali tekshirilgan — bu loyihalarga yulduz qoʻyib qoʻying. Koʻrsatkichlar muayyan sanadagi aniq holatni aks ettiradi va tabiiy ravishda oʻzgaradi.
 
 ### 🧬 Kelib chiqish & shlyuz
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRoute’ga qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Ushbu fork asoslangan asl loyiha — bu yerda multimodal API’lar bilan kengaytirilib, TypeScript’da toʻliq qayta yozilgan.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Ushbu JavaScript / TypeScript portiga ilhom bergan Go implementatsiyasi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>Ommaviy narxlar maʼlumotlar toʻplami xarajatlarni kuzatish sinxronizatsiyamizni taʼminlaydigan va provayderlarni normallashtirish modeli marshrutlashimizga asos boʻlgan AI shlyuzi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>ChatGPT Web → Codex Responses ichki koʻprigiga moslashtirilgan MIT manba kodi, jumladan brauzer sessiyasi, javoblarni freymlash, foydalanish va veb-qidiruv adapterlari.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Oqimni tiklash, fikrlashsiz taxalluslar, zaxira veb-qidiruv, sirgʻaluvchi oyna cheklovlari, jurnallardagi maxfiy maʼlumotlarni yashirish va mustahkamlangan ishga tushirish jarayonlariga koʻchirilgan andozalar.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Mahalliy Cursor ijrochisiga moslashtirilgan Cursor Composer vosita tanlash, chiqishni cheklash va vositani tasdiqlash andozalari.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Codex OAuth qayta autentifikatsiyasiga koʻchirilgan yangidan kirish va yangilash tokenini almashtirish andozalari.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Claude Code bilan mos transformatsiya standartlari va billing sarlavhasi xatti-harakati OmniRoute’ning konfiguratsiya orqali boshqariladigan koʻprigida umumlashtirilgan.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Ushbu fork asoslangan asl loyiha — bu yerda multimodal API’lar bilan kengaytirilib, TypeScript’da toʻliq qayta yozilgan.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Ushbu JavaScript / TypeScript portiga ilhom bergan Go implementatsiyasi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>Ommaviy narxlar maʼlumotlar toʻplami xarajatlarni kuzatish sinxronizatsiyamizni taʼminlaydigan va provayderlarni normallashtirish modeli marshrutlashimizga asos boʻlgan AI shlyuzi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>ChatGPT Web → Codex Responses ichki koʻprigiga moslashtirilgan MIT manba kodi, jumladan brauzer sessiyasi, javoblarni freymlash, foydalanish va veb-qidiruv adapterlari.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Oqimni tiklash, fikrlashsiz taxalluslar, zaxira veb-qidiruv, sirgʻaluvchi oyna cheklovlari, jurnallardagi maxfiy maʼlumotlarni yashirish va mustahkamlangan ishga tushirish jarayonlariga koʻchirilgan andozalar.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Mahalliy Cursor ijrochisiga moslashtirilgan Cursor Composer vosita tanlash, chiqishni cheklash va vositani tasdiqlash andozalari.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Codex OAuth qayta autentifikatsiyasiga koʻchirilgan yangidan kirish va yangilash tokenini almashtirish andozalari.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Claude Code bilan mos transformatsiya standartlari va billing sarlavhasi xatti-harakati OmniRoute’ning konfiguratsiya orqali boshqariladigan koʻprigida umumlashtirilgan.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Uning Grok model xaritalashlari, soxta TypeError Statsig generatori, soʻrov va qurilma standartlari hamda NDJSON javob protsessori OmniRoute’ning Grok Web ijrochisiga sezilarli darajada moslashtirilgan.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>grok2api-merged ortidagi asosiy bilvosita kod manbasi; uning model, sarlavha, foydali yuk, Statsig va protsessor implementatsiyalari Grok Web kelib chiqish zanjirida saqlangan.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Grok foydali yuki va qurilma standartlari, Statsig generatori hamda TQZHR va grok2api-merged orqali oʻtgan <code>result.response</code> protsessori uchun asos boʻlgan MIT manba kodi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>grok2api-merged ortidagi asosiy bilvosita kod manbasi; uning model, sarlavha, foydali yuk, Statsig va protsessor implementatsiyalari Grok Web kelib chiqish zanjirida saqlangan.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Grok foydali yuki va qurilma standartlari, Statsig generatori hamda TQZHR va grok2api-merged orqali oʻtgan <code>result.response</code> protsessori uchun asos boʻlgan MIT manba kodi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Proksi-pul qatlami uchun grok2api-merged tomonidan eʼtirof etilgan bilvosita manba; OmniRoute ushbu kelib chiqish qaydini saqlaydi, ammo oʻzining chegaralangan Grok Web ijrochisida proksi-pul porti mavjudligini daʼvo qilmaydi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Uning cookie orqali autentifikatsiya qilinadigan Grok proksisi va <code>result.response.token</code> oqim uzatish andozasi OmniRoute’ning Grok Web transportiga asos boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Uning cookie orqali autentifikatsiya qilinadigan Grok proksisi va <code>result.response.token</code> oqim uzatish andozasi OmniRoute’ning Grok Web transportiga asos boʻldi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Grok Web’ning dastlabki implementatsiyasi uning HTTP/brauzer yuqori oqim dizaynidan foydalangan; uning toʻgʻridan-toʻgʻri HTTP yoʻli GrokProxy’dan kelib chiqqani sababli mustaqil kod porti borligi daʼvo qilinmaydi.</td></tr>
 </table>
 
@@ -1709,81 +1716,81 @@ OmniRoute gigantlar yelkasida qad rostlagan. U **[9router](https://github.com/de
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRoute uchun qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Virusdek tarqalgan “nega ko‘p token ishlatish, oz token ishni bajaradi” loyihasi — uning g‘or odami nutqi falsafasi standart siqish rejimimiz va 30 dan ortiq ortiqcha so‘zlarni olib tashlash/ixchamlashtirish qoidalarimiz asosini tashkil etadi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Buyruq chiqishini yuqori unumdorlik bilan siqish — RTK dvigatelimiz, JSON filtrlash DSL’i, xom chiqishni tiklash va ketma-ket RTK → Caveman konveyerimiz uchun ilhom berdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Qaytariladigan kontekst siqilishi (SmartCrusher) — <code>headroom</code> dvigatelimiz va <code>ccr</code> olish-marker andozamiz uchun ilhom berdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Promptlarni siqish bo‘yicha tadqiqot (LLMLingua / LLMLingua-2) — asinxron, kod uchun xavfsiz va xatoda ochiq qoluvchi <code>llmlingua</code> dvigatelimiz uchun ilhom berdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>LLMLingua dvigatelimiz uchun worker-thread backendi sifatida ishlatiladigan JS/ONNX porti (MobileBERT / XLM-RoBERTa).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Virusdek tarqalgan “nega ko‘p token ishlatish, oz token ishni bajaradi” loyihasi — uning g‘or odami nutqi falsafasi standart siqish rejimimiz va 30 dan ortiq ortiqcha so‘zlarni olib tashlash/ixchamlashtirish qoidalarimiz asosini tashkil etadi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Buyruq chiqishini yuqori unumdorlik bilan siqish — RTK dvigatelimiz, JSON filtrlash DSL’i, xom chiqishni tiklash va ketma-ket RTK → Caveman konveyerimiz uchun ilhom berdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Qaytariladigan kontekst siqilishi (SmartCrusher) — <code>headroom</code> dvigatelimiz va <code>ccr</code> olish-marker andozamiz uchun ilhom berdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Promptlarni siqish bo‘yicha tadqiqot (LLMLingua / LLMLingua-2) — asinxron, kod uchun xavfsiz va xatoda ochiq qoluvchi <code>llmlingua</code> dvigatelimiz uchun ilhom berdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>LLMLingua dvigatelimiz uchun worker-thread backendi sifatida ishlatiladigan JS/ONNX porti (MobileBERT / XLM-RoBERTa).</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>PT-BR tokenlarini siqish — pt-BR til paketimizni quvvatlaydi: Braziliya portugal tili grammatikasiga moslashtirilgan pleonazmlarni qisqartirish va ortiqcha so‘zlarni olib tashlash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Virusdek tarqalgan “dangasa katta dasturchi” YAGNI-kodlash ko‘nikmasi — <b>less-code</b> Chiqish uslubimiz uchun ilhom berdi: _yaratiladigan_ kodni qisqartiruvchi, ishlaydigan eng kichik o‘zgarishga yo‘naltirish (Caveman’ning lo‘nda nasriga chiqish o‘qi bo‘yicha qardosh).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Uning avvalo harakatga yo‘naltirilgan, ADHD uchun qulay javob uslubi OmniRoute’ning besh tildagi ixcham chiqish uslubiga moslashtirildi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Virusdek tarqalgan “dangasa katta dasturchi” YAGNI-kodlash ko‘nikmasi — <b>less-code</b> Chiqish uslubimiz uchun ilhom berdi: _yaratiladigan_ kodni qisqartiruvchi, ishlaydigan eng kichik o‘zgarishga yo‘naltirish (Caveman’ning lo‘nda nasriga chiqish o‘qi bo‘yicha qardosh).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Uning avvalo harakatga yo‘naltirilgan, ADHD uchun qulay javob uslubi OmniRoute’ning besh tildagi ixcham chiqish uslubiga moslashtirildi.</td></tr>
 </table>
 
 ### 🧩 Ixcham formatlar, token tadqiqotlari va kodni hisobga oluvchi vositalar
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRoute uchun qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Tokenlarga yo‘naltirilgan obyekt notatsiyasi — uning ustunli, sarlavha-va-qatorlar modeli jadval asosidagi ixchamlashtirish bosqichimizni shakllantirdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Uning ixcham grafik formati va umumiy profil dizayni OmniRoute’ning jadval asosidagi ixchamlashtirishi hamda Headroom kodek formatiga ta’sir ko‘rsatdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Tokenlarga yo‘naltirilgan obyekt notatsiyasi — uning ustunli, sarlavha-va-qatorlar modeli jadval asosidagi ixchamlashtirish bosqichimizni shakllantirdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Uning ixcham grafik formati va umumiy profil dizayni OmniRoute’ning jadval asosidagi ixchamlashtirishi hamda Headroom kodek formatiga ta’sir ko‘rsatdi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Headroom umumiy profil kodeki sifatida bevosita loyihaga qo‘shilgan va kengaytirilgan MIT TypeScript implementatsiyasi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Brotli/SQLite keshi + har bir sessiya uchun kontekst farqi — <code>session-dedup</code> dvigatelimiz uchun ilhom berdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Bash chiqishini ixchamlashtirish + MCP profillari — siqishdan voz kechish intizomimiz va MCP vosita manifestini qisqartirishimiz uchun ilhom berdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Kontentni hisobga oluvchi, har bir fayl turi uchun chiqishni siqish hamda xatolarni hisobga olib siqishdan voz kechish — tur bo‘yicha taqsimlashimiz va minimal yutuq bo‘lmasa o‘tkazib yuborishimiz to‘g‘riligini tasdiqladi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>“Ko‘rinmas tokenlarni toping” — uning tashqariga ko‘chirish + tiklanadigan identifikator andozasi CCR orqali tashqariga ko‘chirish yondashuvimizga ta’sir ko‘rsatdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Sessiya grafigi + navbatlararo qator deduplikatsiyasi andozasi session-dedup dizaynimizga ta’sir ko‘rsatdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite keshi + har bir sessiya uchun kontekst farqi — <code>session-dedup</code> dvigatelimiz uchun ilhom berdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash chiqishini ixchamlashtirish + MCP profillari — siqishdan voz kechish intizomimiz va MCP vosita manifestini qisqartirishimiz uchun ilhom berdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Kontentni hisobga oluvchi, har bir fayl turi uchun chiqishni siqish hamda xatolarni hisobga olib siqishdan voz kechish — tur bo‘yicha taqsimlashimiz va minimal yutuq bo‘lmasa o‘tkazib yuborishimiz to‘g‘riligini tasdiqladi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>“Ko‘rinmas tokenlarni toping” — uning tashqariga ko‘chirish + tiklanadigan identifikator andozasi CCR orqali tashqariga ko‘chirish yondashuvimizga ta’sir ko‘rsatdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Sessiya grafigi + navbatlararo qator deduplikatsiyasi andozasi session-dedup dizaynimizga ta’sir ko‘rsatdi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust ustunli-JSON + kontent bo‘yicha manzillangan olish + xabarlararo deduplikatsiya — <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> dvigatellarimiz dizayni va kesh uchun barqaror “siqilgan shakl joylashuvga bog‘liq emas” invariantini tasdiqladi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>MCP vosita sxemasi/tavsifini siqish — MCP vosita manifesti kardinalligini kamaytirishimizga ta’sir ko‘rsatdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Aider uslubidagi repozitoriy xaritasini reytinglash — repozitoriy xaritasi / olishni reytinglash bo‘yicha izlanishimizga ta’sir ko‘rsatdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP vosita sxemasi/tavsifini siqish — MCP vosita manifesti kardinalligini kamaytirishimizga ta’sir ko‘rsatdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider uslubidagi repozitoriy xaritasini reytinglash — repozitoriy xaritasi / olishni reytinglash bo‘yicha izlanishimizga ta’sir ko‘rsatdi.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>MCP orqali deklarativ shell chiqishini qisqartirish — deklarativ bash chiqishini ixchamlashtirishimiz to‘g‘riligini tasdiqladi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>TypeScript Compiler API vositalar to‘plami — satr, shablon va regex literallarini saqlab qoluvchi parser asosidagi izohlarni olib tashlashimiz uchun ilhom berdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API vositalar to‘plami — satr, shablon va regex literallarini saqlab qoluvchi parser asosidagi izohlarni olib tashlashimiz uchun ilhom berdi.</td></tr>
 </table>
 
 ### 🧠 Xotira va RAG
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRouteʼga qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Universal xotira qatlami — uning proksi orqali yozish/oʻqish chegarasi modeli xotira arxitekturamizni shakllantirdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Darajali xotiraga ega holatli agentlar — Context Control & Recovery (CCR) darajali modelimiz uchun ilhom manbai boʻldi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>Takrorlanuvchi 16 ta RAG/LLM nosozlik rejimining ProblemMap taksonomiyasi — nosozliklarni bartaraf etish boʻyicha qoʻllanmamizdagi umumiy atamalar majmuasi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Universal xotira qatlami — uning proksi orqali yozish/oʻqish chegarasi modeli xotira arxitekturamizni shakllantirdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Darajali xotiraga ega holatli agentlar — Context Control & Recovery (CCR) darajali modelimiz uchun ilhom manbai boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>Takrorlanuvchi 16 ta RAG/LLM nosozlik rejimining ProblemMap taksonomiyasi — nosozliklarni bartaraf etish boʻyicha qoʻllanmamizdagi umumiy atamalar majmuasi.</td></tr>
 </table>
 
 ### 🛰️ Trafikni tekshirish, MITM va shaffof proksi
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRouteʼga qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Kodlash yordamchisi ↔ LLM trafigining MITM orqali ushlanishi/tahlili Traffic Inspectorʼning dastlabki talablarini shakllantirishga yordam berdi. Avval undan kelib chiqqan toʻrtta modul — SSE birlashtirish, suhbatlarni meʼyorlashtirish, maxfiy maʼlumotlarni niqoblash va sarlavhalarni tozalash — ommaviy protokol standartlariga asoslangan mustaqil clean-room implementatsiyalari bilan almashtirildi. Xostni toʻgʻridan-toʻgʻri oʻtkazuvchi ikkita yuza (<code>passthrough.ts</code> va <code>_internal/bypass.cjs</code>) alohida tasniflangan OmniRoute ichki implementatsiyalari sifatida qolmoqda; ular ushbu almashtirish doirasida qayta yozilmagan.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Har bir jarayon uchun shaffof proksi marshrutlash — nosozlikka chidamli MITM oʻchirilishi, soketning bekor turish taym-autlari, <code>/proc</code> orqali jarayonni aniqlash va TPROXY trafik tutish mexanizmlarimiz uchun ilhom manbai boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Kodlash yordamchisi ↔ LLM trafigining MITM orqali ushlanishi/tahlili Traffic Inspectorʼning dastlabki talablarini shakllantirishga yordam berdi. Avval undan kelib chiqqan toʻrtta modul — SSE birlashtirish, suhbatlarni meʼyorlashtirish, maxfiy maʼlumotlarni niqoblash va sarlavhalarni tozalash — ommaviy protokol standartlariga asoslangan mustaqil clean-room implementatsiyalari bilan almashtirildi. Xostni toʻgʻridan-toʻgʻri oʻtkazuvchi ikkita yuza (<code>passthrough.ts</code> va <code>_internal/bypass.cjs</code>) alohida tasniflangan OmniRoute ichki implementatsiyalari sifatida qolmoqda; ular ushbu almashtirish doirasida qayta yozilmagan.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Har bir jarayon uchun shaffof proksi marshrutlash — nosozlikka chidamli MITM oʻchirilishi, soketning bekor turish taym-autlari, <code>/proc</code> orqali jarayonni aniqlash va TPROXY trafik tutish mexanizmlarimiz uchun ilhom manbai boʻldi.</td></tr>
 </table>
 
 ### 📚 Model maʼlumotlari, kuzatuvchanlik va UI
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRouteʼga qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>AI modellari xususiyatlari, narxlari va imkoniyatlarining ochiq maʼlumotlar bazasi — model katalogimizga bevosita sinxronlanadi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Real vaqt rejimidagi Compression Studio va Combo/Routing Studioʼmizni ishlatuvchi tugunlarga asoslangan grafik kutubxonasi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>LangGraph Studioʼning ish jarayoni grafigini jonli vizuallashtirishi Studioʼlarimizdagi real vaqt kaskad koʻrinishi uchun ilhom manbai boʻldi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Uning kuzatuv → oraliq → generatsiya kuzatuvchanlik modeli Compression Studioʼmizdagi waterfall koʻrinishini shakllantirdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Istio xizmatlar toʻri kuzatuvchanligi — Routing/Combo Studioʼdagi circuit-breaker nishonlari va xato qirralari vizuallari uchun ilhom manbai boʻldi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Boshqaruv panelimiz boʻylab provayder ikonalarini aks ettiradigan AI/LLM brend logotiplari.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>README til tanlagichida ishlatiladigan MIT litsenziyali SVG bayroqlarini taqdim etadi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>AI modellari xususiyatlari, narxlari va imkoniyatlarining ochiq maʼlumotlar bazasi — model katalogimizga bevosita sinxronlanadi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Real vaqt rejimidagi Compression Studio va Combo/Routing Studioʼmizni ishlatuvchi tugunlarga asoslangan grafik kutubxonasi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studioʼning ish jarayoni grafigini jonli vizuallashtirishi Studioʼlarimizdagi real vaqt kaskad koʻrinishi uchun ilhom manbai boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Uning kuzatuv → oraliq → generatsiya kuzatuvchanlik modeli Compression Studioʼmizdagi waterfall koʻrinishini shakllantirdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio xizmatlar toʻri kuzatuvchanligi — Routing/Combo Studioʼdagi circuit-breaker nishonlari va xato qirralari vizuallari uchun ilhom manbai boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Boshqaruv panelimiz boʻylab provayder ikonalarini aks ettiradigan AI/LLM brend logotiplari.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>README til tanlagichida ishlatiladigan MIT litsenziyali SVG bayroqlarini taqdim etadi.</td></tr>
 </table>
 
 ### 🛡️ Xavfsizlik
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRouteʼga qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Xavfsizlik boʻyicha tanlovlarimizga yoʻl koʻrsatuvchi, standart holatda xavfsiz kutubxonalarning saralangan roʻyxati (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Xavfsizlik boʻyicha tanlovlarimizga yoʻl koʻrsatuvchi, standart holatda xavfsiz kutubxonalarning saralangan roʻyxati (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Qoʻshimcha vositalar
 
 <table>
   <tr><th align="left">Loyiha</th><th align="center">⭐</th><th align="left">U OmniRouteʼga qanday ilhom berdi</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Soʻrovlarni takroriy nusxalardan tozalash, favqulodda nol xarajatli zaxira variant, ulanadigan Auto-Combo strategiyalari va koʻp tilli niyat tasnifi uchun ilhom manbai boʻldi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Uning akkauntni hisobga oluvchi modelni qayta xaritalash, bajariladigan fayl yoʻlini tekshirish va tarif yorligʻi xatti-harakati OmniRouteʼning Antigravity bajarilish muhitini shakllantirishga yordam berdi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Uning kvotani tiklashgacha qolgan vaqtni ixcham koʻrsatish formati OmniRouteʼdagi provayder limitining tegishli koʻrinishi uchun ilhom manbai boʻldi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Uning ACP integratsiyalari OmniRouteʼda oʻrnatilgan CLI agentlarini avtomatik aniqlash uchun ilhom manbai boʻldi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Grok Build kvota interfeysini aniqladi; soʻng OmniRoute real uzatish formatini mustaqil ravishda tekshirib, tuzatdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Soʻrovlarni takroriy nusxalardan tozalash, favqulodda nol xarajatli zaxira variant, ulanadigan Auto-Combo strategiyalari va koʻp tilli niyat tasnifi uchun ilhom manbai boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Uning akkauntni hisobga oluvchi modelni qayta xaritalash, bajariladigan fayl yoʻlini tekshirish va tarif yorligʻi xatti-harakati OmniRouteʼning Antigravity bajarilish muhitini shakllantirishga yordam berdi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Uning kvotani tiklashgacha qolgan vaqtni ixcham koʻrsatish formati OmniRouteʼdagi provayder limitining tegishli koʻrinishi uchun ilhom manbai boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Uning ACP integratsiyalari OmniRouteʼda oʻrnatilgan CLI agentlarini avtomatik aniqlash uchun ilhom manbai boʻldi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Grok Build kvota interfeysini aniqladi; soʻng OmniRoute real uzatish formatini mustaqil ravishda tekshirib, tuzatdi.</td></tr>
 </table>
 
 ## 📄 Litsenziya
