@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Αυτό θα αποτυπώσει τους παρόχους/τα μοντέλα που είναι συνδεδεμένα αυτή τη στιγμή και ταιριάζουν σε αυτό το πρότυπο, δημιουργώντας έναν επεξεργάσιμο συνδυασμό.",
     "duplicateAutoComboFailedPrefix": "Αποτυχία αντιγραφής αυτόματου συνδυασμού:",
     "duplicateAutoComboUnknownError": "Άγνωστο σφάλμα",
-    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}"
+    "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}",
+    "fallbackSummary": "{rate}% των αιτημάτων έπιασαν εναλλακτική, κάθε ένα παραλείπει σε μέσο όρο ~{skips} στόχους"
   },
   "costs": {
     "title": "Κόστη",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Κατάσταση ανάντη",
     "noResponse": "Καμία απάντηση",
     "egressIp": "Διεύθυνση IP εξόδου",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Κεφαλίδες μετά",
     "firstChunkAfter": "Πρώτο τμήμα μετά",
     "servedBy": "Παρέχεται από",
