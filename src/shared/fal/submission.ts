@@ -1,4 +1,4 @@
-export type FalInput = Record<string, unknown>;
+type FalInput = Record<string, unknown>;
 export type FalDraft = {
   endpoint_id: string;
   connection_id: string;
