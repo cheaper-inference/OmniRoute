@@ -4,13 +4,7 @@
 
 ---
 
-> **स्थिती:** डॅशबोर्ड **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) वर बांधलेला आहे, जो
-> वर्कस्पेस `packages/ui-kit` म्हणून वेंडर केलेला आहे (`@omniroute/ui-kit`; अपस्ट्रीम स्नॅपशॉट
-> `packages/ui-kit/UPSTREAM.md` मध्ये पिन केलेला आहे आणि `npm run check:ui-kit-snapshot` द्वारे संरक्षित आहे). Light ही कॅनॉनिकल
-> थीम आहे; डीफॉल्ट प्राधान्य `system` आहे. ॲक्सेंट Keak lime (`--ci-color-accent`) आहे. Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) हे UI फॉन्ट फॅमिली आहे, Instrument Serif फक्त मोठ्या विरळ
-> डिस्प्ले मजकुरासाठी (`.ci-dashboard-display`), कोडसाठी IBM Plex Mono — सर्व `src/app/globals.css` च्या सुरुवातीला
-> असलेल्या `@fontsource/*` इम्पोर्ट्सद्वारे सेल्फ-होस्टेड. प्रत्येक आयकॉन Lucide ग्लिफ आहे.
+> **स्थिती:** डॅशबोर्ड वर तयार केला आहे** Keak CI UI किट** (`@keak/cheaper-inference-ui-kit`), वर्कस्पेस `packages/ui-kit` (`@omniroute/ui-kit`; अपस्ट्रीम स्नॅपशॉट `packages/ui-kit/UPSTREAM.md` मध्ये पिन केलेला आहे आणि `npm run check:ui-kit-snapshot` द्वारे संरक्षित आहे) म्हणून विकले जाते. प्रकाश ही प्रामाणिक थीम आहे; डीफॉल्ट प्राधान्य `system` आहे. उच्चार Keak चुना (`--ci-color-accent`) आहे. स्वित्झर हे UI, डिस्प्ले आणि कोड मजकूर (`--ci-font-ui`; `--ci-font-display` आणि `--ci-font-mono` रिझोल्यूशन) साठी एकल कुटुंब आहे, किटद्वारे स्वतः होस्ट केलेले (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारे आयात केलेले). स्क्रिप्टस् स्वित्झरमध्ये ग्लायफ द्वारे ग्लिफ (`src/app/globals.css`) मध्ये फॉल होत नाही : सिरिलिक, ग्रीक आणि व्हिएतनामीसाठी इंटर आणि अरबी लिपीसाठी फक्त `html[dir="rtl"]`, Vazirmatn अंतर्गत. प्रत्येक चिन्ह ल्युसाइड ग्लिफ आहे.
 
 ## 1. गोष्टी कुठे आहेत
 
@@ -22,35 +16,15 @@
 - **आयकन्स.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) नाव (स्क्रीन वापरत असलेला Material Symbols शब्दसंग्रह) `ICON_MAP` (`src/shared/constants/iconMap.ts`) मार्फत Lucide ग्लिफला रिझॉल्व्ह करते. Material Symbols फॉन्ट आणि पॅकेज आता गेले आहेत: नकाशात नसलेले नाव तटस्थ प्लेसहोल्डर ग्लिफ (`data-icon-missing="true"`) रेंडर करते आणि प्रोडक्शनच्या बाहेर कन्सोल चेतावणी लॉग करते. `npm run gen:icon-map` वापरात असलेली पण नकाशात नसलेली नावे छापते (`tests/unit/icon-map-coverage.test.ts` Lucide आयकन नसलेल्या कोणत्याही नावावर अयशस्वी होते; `tests/unit/icon-map-object-values.test.ts` लुकअप ऑब्जेक्ट्समध्ये साठवलेली नावे कव्हर करते); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` लिटरल `<span className="material-symbols-outlined">` स्पॅन्सना `<Icon>` मध्ये पुन्हा लिहिते.
 - **ब्रँड.** `src/shared/components/OmniRouteLogo.tsx` किटला रॅप करते: डीफॉल्ट एक्स्पोर्ट `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` रेंडर करते (इनलाइन SVG, `basePath`-सेफ) आणि `OmniRouteLockup` `ProductLockup product="omniroute"` रेंडर करते (प्रवेशयोग्य नाव "Keak OmniRoute") किंवा, व्हाइट-लेबल ऑपरेटर्ससाठी, त्यांचे स्वतःचे `name`/`logoSrc`. प्रोडक्ट-स्विचर गंतव्ये `src/shared/constants/keakProducts.ts` मध्ये आहेत (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). स्वतंत्र स्क्रीन — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` आणि `src/shared/components/ErrorPageScaffold.tsx` — लॉकअप दाखवतात; `tests/unit/brand-pages-static.test.ts` त्याचे रक्षण करते.
 
-## २. नियम
+## 2. नियम
 
-1. टोकन्स, कधीही लिटरल्स नाहीत. जाणीवपूर्वक ठेवलेले अपवाद: नेहमी-गडद कन्सोल टर्मिनल आणि
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), किट स्टेटस पॅलेटचा resolved-hex मिरर, जो लिटरल hex हवा असलेल्या कॉलर्ससाठी आहे. कॅटेगॉरिकल पॅलेट्स आता अपवाद राहिलेले नाहीत:
-   ते किटच्या पाच चार्ट टोकन्सवर (`--color-chart-1..5`)
-   `src/shared/utils/categoricalPalette.ts` मधून आणि राउटिंग स्ट्रॅटेजींसाठी
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` मधून चालतात; ReactFlow एजेस आणि ऑर्केस्ट्रेशन
-   कॅनव्हास थीम-अवेयर `--orch-status-*` व्हेरिएबल्स वाचतात (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` हाताने कधीही पॅच करू नका: `scripts/dev/sync-ui-kit.sh <commit>` ने सिंक करा;
-   pre-commit गेट `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) पिन केलेल्या अपस्ट्रीम कमिटपासून वेगळ्या
-   कोणत्याही बाइटवर अयशस्वी होते (जेव्हा अपस्ट्रीम क्लोन,
-   `UI_KIT_CLONE` किंवा `_references/cheaper-inference-ui-kit`, अनुपस्थित असेल तेव्हा ती चेतावणीसह स्किप करते). जेव्हा किटमध्ये काहीतरी नसेल,
-   तेव्हा अॅडॅप्टरमध्ये किंवा स्क्रीनमध्ये त्याची पर्यायी व्यवस्था करा आणि अपस्ट्रीमकडे त्याची मागणी करा.
-3. किट टेक्स्ट डिफॉल्ट्स इंग्रजी आहेत (`label = "Loading"`, `loadingLabel = "Loading table"`…) — किट कॉम्पोनंट टेक्स्ट रेंडर करतो तेव्हा नेहमी
-   `useTranslations(...)` मधून अनुवादित स्ट्रिंग्स पास करा.
-4. Tailwind युटिलिटीज किट कॉम्पोनंट क्लासेसपेक्षा जिंकतात (किट
-   `@layer theme, base, components, utilities` घोषित करते आणि त्याचे नियम `components` मध्ये राहतात) — स्पेसिंग आणि लेआउटसाठी युटिलिटीज वापरा,
-   किट कॉम्पोनंट्स पुन्हा रंगवण्यासाठी नाही.
-5. हेडिंग्ज: पेज आणि सेक्शन टायटल्ससाठी `.ci-heading` (Inter, ट्रॅकिंग नाही); `.ci-dashboard-display`
-   (Instrument Serif) फक्त मोठ्या, विरळ डिस्प्ले टेक्स्टसाठी, जसे की एरर-पेज स्टेटस कोड.
-6. `tests/unit/dashboard-kit-sweep.test.ts` किट अॅडॉप्शनचे रक्षण करते: `src/app` किंवा `src/shared/components` खाली Material ligature स्पॅन नाही;
-   डॅशबोर्ड ट्रीमध्ये (`src/app/(dashboard)` आणि
-   `src/shared/components`) कच्चे `<select>`, `<textarea>` किंवा `<table>` नाहीत आणि सूचीबद्ध अपवादांच्या बाहेर हाताने बनवलेले
-   `role="dialog"` नाही (`Select` अॅडॅप्टरची नेटिव्ह शाखा,
-   `RequestLoggerDetail`); तिथले प्रत्येक कच्चा `<button>` किंवा `<input>` ला `kit-exception:` असलेली (कारणासह)
-   कमेंट आवश्यक आहे, जी त्याच्या जास्तीत जास्त ३ ओळी वर संपते; पॅलेट ह्यूज आणि `dark:` व्हेरिएंट्स
-   फक्त टेस्ट सूचीबद्ध करत असलेल्या फाइल्समध्ये.
-7. PR पूर्वी दोन्ही थीम्स आणि 390 px व्ह्यूपोर्ट तपासा (स्क्रीनशॉट्स); `tests/e2e/a11y.spec.ts`
-   axe चालवते.
+1. टोकन, कधीही शाब्दिक. अपवाद हेतूपुरस्सर ठेवले जातात: नेहमी-गडद कन्सोल टर्मिनल आणि `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ज्या कॉलरला अक्षरशः हेक्सची आवश्यकता असते त्यांच्यासाठी किट स्टेटस पॅलेटचा निराकरण केलेला-हेक्स मिरर. स्पष्ट पॅलेट यापुढे अपवाद नाहीत: ते किटच्या पाच चार्ट टोकनवर (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` द्वारे आणि राउटिंग धोरणांसाठी, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow कडा आणि ऑर्केस्ट्रेशन कॅनव्हास थीम-अवेअर `--orch-status-*` व्हेरिएबल्स (`src/shared/components/flow/edgeStyles.ts`) वाचतात.
+2. `packages/ui-kit/src` हाताने कधीही पॅच करू नका: `scripts/dev/sync-ui-kit.sh <commit>` सह समक्रमित करा; प्री-कमिट गेट `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) पिन केलेल्या अपस्ट्रीम कमिटपेक्षा वेगळ्या असलेल्या कोणत्याही बाइटवर अयशस्वी होते (जेव्हा अपस्ट्रीम क्लोन, `UI_KIT_CLONE` किंवा `_references/cheaper-inference-ui-kit`, अनुपस्थित असतो तेव्हा ते चेतावणीसह वगळते). जेव्हा किटमध्ये काही उणीव असते, तेव्हा ॲडॉप्टर किंवा स्क्रीनमध्ये त्याच्याभोवती काम करा आणि ते अपस्ट्रीमला विचारा.
+3. किट मजकूर डीफॉल्ट इंग्रजी आहेत (`label = "Loading"`, `loadingLabel = "Loading table"`…) — जेव्हा जेव्हा एखादा किट घटक मजकूर प्रस्तुत करतो तेव्हा `useTranslations(...)` मधून भाषांतरित स्ट्रिंग पास करा.
+4. टेलविंड युटिलिटिज किट घटक वर्गांवर विजय मिळवतात (किट `@layer theme, base, components, utilities` घोषित करते आणि त्याचे नियम `components` मध्ये राहतात) — किट घटकांना पुन्हा रंग देण्यासाठी नव्हे तर अंतर आणि लेआउटसाठी उपयुक्तता वापरा.
+5. मथळे: पृष्ठ आणि विभाग शीर्षकांसाठी `.ci-heading` ; `.ci-dashboard-display` फक्त मोठ्या, विरळ डिस्प्ले मजकुरासाठी जसे की त्रुटी-पृष्ठ स्थिती कोड. दोघेही स्वित्झर वापरतात.
+6. `tests/unit/dashboard-kit-sweep.test.ts` किट दत्तक घेण्याचे रक्षण करते: `src/app` किंवा `src/shared/components` अंतर्गत कोणतेही मटेरियल लिगेचर स्पॅन नाही; डॅशबोर्ड ट्रीमध्ये (`src/app/(dashboard)` आणि `src/shared/components`) रॉ `<select>`, `<textarea>` किंवा `<table>` नाही आणि सूचीबद्ध अपवादांच्या बाहेर हाताने रोल केलेला `role="dialog"` नाही ( `Select` अडॅप्टरची मूळ शाखा, `RequestLoggerDetail`); प्रत्येक रॉ `<button>` किंवा `<input>` वर जास्तीत जास्त 3 ओळी संपणारी `kit-exception:` (कारणासह) असलेली टिप्पणी आवश्यक आहे; पॅलेट रंगछटा आणि `dark:` रूपे फक्त चाचणी सूची फाइल्समध्ये.
+7. PR (स्क्रीनशॉट) आधी थीम आणि 390 px व्ह्यूपोर्ट दोन्ही सत्यापित करा; `tests/e2e/a11y.spec.ts` कुऱ्हाडी चालवतो.
 
 ## ३. स्क्रीन जोडणे
 
@@ -84,49 +58,35 @@
 
 ## 5. किट अपडेट करणे
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` त्या कमिटवरील अपस्ट्रीम `src/` `packages/ui-kit/src` मध्ये
-कॉपी करते आणि परवानगी असलेले एकमेव रूपांतर लागू करते (ते रिलेटिव्ह इम्पोर्ट्समधून `.js` प्रत्यय काढून
-टाकते). नंतर: `git diff packages/ui-kit` चे पुनरावलोकन करा, दोन्ही थीममध्ये providers, settings, combos,
-usage आणि endpoint वर व्हिज्युअल तपासणी करा, `npm run check:ui-kit-snapshot` आणि `npm run test:vitest:ui`
-चालवा आणि अपस्ट्रीम चेंजलॉगसह PR उघडा.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` मध्ये पिन केलेल्या आवृत्तीची अपस्ट्रीम रेपोच्या नवीनतम `v*` टॅगशी तुलना करते आणि जेव्हा प्रकाशन संपते तेव्हा सिंक कमांड प्रिंट करते.
+
+दैनिक `UI Kit upstream watch` वर्कफ्लो (`.github/workflows/ui-kit-upstream-watch.yml`) समान तपासणी चालवते. पिन मागे असताना, `scripts/ci/ui-kit-sync-pr.sh` एक सिंक PR सर्वोच्च `release/vX.Y.Z` शाखेच्या विरुद्ध, रोलिंग ब्रांच `chore/ui-kit-sync-latest` वर उघडे ठेवते. हे कधीही विलीन होत नाही: प्रत्येक किट रिलीजला अजूनही स्थानिक VPS वर व्हिज्युअल तपासणी आवश्यक आहे. शाखा पुन्हा तयार केली जाते जेव्हा नवीन प्रकाशन बाहेर येते आणि अन्यथा एकटे सोडले जाते. हाताने पुश केलेल्या कमिटसह उघडलेले PR ओव्हरराइट केले जात नाही आणि एका आवृत्तीसाठी एक PR जो मेंटेनरने बंद केलेला अनमर्ज्ड नवीन रिलीज होईपर्यंत बंद राहतो.
+
+जेव्हा कोणतेही PR उघडले जाऊ शकत नाही (लक्ष्य प्रकाशन गोठलेले आहे, PR ने हाताने ढकलले आहे, PR बंद केले आहे, किंवा कोणतेही PR टोकन सेट केलेले नाही) वर्कफ्लो एक ट्रॅकिंग समस्या उघडे ठेवते जे कारण सांगते.
+
+वर्कफ्लो दोन रहस्ये वापरते:
+
+- `secrets.UI_KIT_READ_TOKEN`: खाजगी अपस्ट्रीम रेपोसाठी केवळ वाचनीय टोकन. जेव्हा वर्कफ्लो अपस्ट्रीम वाचू शकत नाही (कोणतेही टोकन नाही, एक टोकन ज्याने काम करणे थांबवले आहे किंवा GitHub पोहोचण्यायोग्य नाही) रन हिरवा राहतो परंतु एक चेतावणी लिहितो आणि एक वेगळा मुद्दा खुला ठेवतो, जो नंतरच्या रनने पुन्हा अपस्ट्रीम वाचू शकतो तेव्हा तो स्वतःच बंद होतो.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: या रेपॉजिटरीवर सामग्री आणि पुल विनंत्या लिहिण्याच्या प्रवेशासह एक सूक्ष्म टोकन. डीफॉल्ट `GITHUB_TOKEN` येथे PRs तयार करू शकत नाही, आणि PR उघडल्यास CI ट्रिगर होणार नाही. या टोकनशिवाय वर्कफ्लो केवळ शाखेला धक्का देतो.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` त्या कमिटवर अपस्ट्रीम `src/` कॉपी करते (`latest` = नवीनतम `v*` टॅग) `packages/ui-kit/src` मध्ये, सिंगल अनुमत ट्रान्सफॉर्मेशन लागू करते (हे सापेक्ष आयातींमधून `.js` प्रत्यय टाकते), आणि वर्कस्पेस आवृत्ती `packages/ui-kit/package.json` आणि `package-lock.json` मध्ये अपस्ट्रीमवर सेट करते. नंतर: `git diff packages/ui-kit` पुनरावलोकन करा, दोन्ही थीममध्ये प्रदाते, सेटिंग्ज, कॉम्बोज, वापर आणि एंडपॉइंटवर व्हिज्युअल पास करा, `npm run check:ui-kit-snapshot` आणि `npm run test:vitest:ui` चालवा आणि अपस्ट्रीम चेंजलॉगसह PR उघडा.
 
 ## 6. README आकृत्या
 
-रूट `README.md` एम्बेड करत असलेल्या बारा आकृत्या (`docs/diagrams/*.svg`) म्हणजे स्थिर प्रतिमेवर लागू
-केलेले किट, आणि त्या हाताने काढलेल्या नसून जनरेट केलेल्या आहेत: `scripts/docs/gen-readme-*.mjs` येथे
-13 जनरेटर फाइल्स (बारा आकृत्या अधिक `gen-readme-diagrams.mjs` ड्रायव्हर) आणि
-`tests/unit/docs/readme-*-svg.test.ts` येथे 12 स्टेलनेस चाचण्या, प्रत्येक आकृतीसाठी एक, प्रत्येक कमिट
-केलेल्या फाइलची तिच्या जनरेटरच्या आउटपुटशी बाइट-तुलना करते (जॉब `test-unit`).
+रूट `README.md` मध्ये एम्बेड केलेल्या बारा आकृत्या (`docs/diagrams/*.svg`) या स्थिर
+प्रतिमेला लागू केलेले किट आहेत आणि त्या हाताने काढलेल्या नसून निर्माण केलेल्या आहेत: `scripts/docs/gen-readme-*.mjs`
+मधील 13 जनरेटर फाइल्स (बारा आकृत्या आणि `gen-readme-diagrams.mjs` ड्रायव्हर) आणि
+`tests/unit/docs/readme-*-svg.test.ts` मधील 12 कालबाह्यता चाचण्या, प्रत्येक आकृतीसाठी एक, कमिट केलेल्या फाइलची तिच्या
+जनरेटरच्या आउटपुटशी बाइट-तुलना करतात (`test-unit` जॉब).
 
-- **टोकन.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` मधून पॅलेट कॉपी
-  करते (`tests/unit/docs/readme-diagram-theme.test.ts` द्वारे त्या फाइलशी पिन केलेले) आणि किट फेसेसवरील
-  मजकूर भूमिका परिभाषित करते — डिस्प्लेसाठी Instrument Serif, UI मजकुरासाठी Inter, आकडे आणि कोडसाठी
-  IBM Plex Mono, डॅशबोर्डसाठी `src/app/globals.css` लोड करत असलेली तीच `@fontsource` पॅकेजेस. लाइट
-  व्हॅल्यू `:root` वर राहतात, डार्क व्हॅल्यू `prefers-color-scheme: dark` मागे, फाइलच्या आत, त्यामुळे
-  प्रत्येक प्रतिमा GitHub वर व्ह्यूअरच्या स्कीमचे अनुसरण करते.
-- **फॉन्ट्स.** `scripts/docs/readme-fonts.mjs` त्या woff2 फाइल्सचे प्रत्येक आकृती वापरत असलेल्या
-  ग्लिफ्समध्ये सबसेट करते आणि ते `@font-face` `data:` URI म्हणून एम्बेड करते — किट टायपोग्राफी README
-  प्रतिमेपर्यंत पोहोचण्याचा हा एकमेव मार्ग आहे, कारण GitHub Markdown मध्ये CSS नसते आणि camo प्रॉक्सी
-  प्रत्येक बाह्य फेच ब्लॉक करते. सबसेट केवल लॅटिन असतात; सिस्टम स्टॅकवर फॉलबॅक होणाऱ्या सिंबल ग्लिफ्सना
-  `SYMBOL_FALLBACKS` मध्ये एकेकाने परवानगी दिली जाते, आणि इतर कोणताही असंरक्षित ग्लिफ थ्रो करतो.
-- **पुनर्जनरेट.** `npm run docs:readme-diagrams` README क्रमाने सर्व बारा पुन्हा लिहिते आणि प्रत्येक
-  फाइलसाठी तिच्या आकारासह एक ओळ प्रिंट करते. एकल जनरेटर स्वतःही चालतो
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ला `node --import tsx/esm` आवश्यक आहे
-  कारण त्याचे आकडे `open-sse/config/freeModelCatalog.ts` मधील लाइव्ह कॅटलॉग लोडरमधून येतात; कॅटलॉग
-  बदलाचा CI परिणाम `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` मध्ये आहे). जनरेटर आणि
-  SVG एकत्र कमिट करा.
-- **पुरावा.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub ज्या प्रकारे फाइल सर्व्ह
-  करते त्याच प्रकारे ती रेंडर करते (एक `<img>` टॅग, camo चे `Content-Security-Policy`, `image/svg+xml`),
-  लाइट आणि डार्क फ्रेम कॅप्चर करते आणि पेजने केलेल्या बाह्य फॉन्ट विनंत्यांचा अहवाल देते (0 असणे
-  आवश्यक आहे).
-- **बजेट.** प्रति फाइल 200 KB पेक्षा कमी (प्रत्येक स्टेलनेस चाचणी याची खात्री करते); कोणत्याही README
-  प्रतिमेसाठी 500 KB ही कडक मर्यादा आहे (SVG स्टुडिओ व्हॅलिडेटरचा नियम).
-- **कॉपी अपरिवर्तित, आकडे गेटमधून.** रीब्रँडने टाइप आणि पॅलेट बदलली, शब्द नाही: प्रत्येक जनरेटर
-  त्याच्या आकृतीची कॉपी `*_COPY` स्थिरांकात ठेवते (किंवा लाइव्ह कॅटलॉगमधून तयार करते) जी काढलेला मजकूर
-  आणि फॉन्ट-सबसेट इनपुट दोन्ही असते. कॅनॉनिकल आकडे `<text>` नोड्समध्ये राहतात, `check:docs-counts`
-  द्वारे वाचले जातात (`scripts/check/check-docs-counts-sync.mjs`); गेट वाचत असलेल्या आकृत्यांच्या
-  स्टेलनेस चाचण्या जनरेट केलेल्या फाइलवर त्याचे व्हॅलिडेटर्सही चालवतात, त्यामुळे कोडपासून विचलित
-  होणारा आकडा चाचणी अयशस्वी करतो — गेट वाचत असलेला स्रोत दुरुस्त करा, जनरेटरमधील आकडा कधीही नाही.
+- **टोकन्स.** `scripts/docs/readme-diagram-theme.mjs` हे पॅलेट `packages/ui-kit/src/ci-tokens.css` मधून कॉपी करते
+  (`tests/unit/docs/readme-diagram-theme.test.ts` द्वारे त्या फाइलशी पिन केलेले) आणि किटच्या टाइप स्केलवर मजकूर भूमिका परिभाषित करते: प्रत्येक गोष्टीसाठी Switzer चे किटमधील वेट्स (400/500/600, display साठी 500) आणि ट्रॅकिंग; मात्र कोड भूमिका (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) IBM Plex Mono वापरतात आणि त्या केवळ कमांड्स, URL, आयडेंटिफायर आणि टर्मिनल स्क्रीनसाठी आहेत.
+  फाइलमध्ये हलकी मूल्ये `:root` वर आणि गडद मूल्ये `prefers-color-scheme: dark` च्या मागे ठेवलेली आहेत, त्यामुळे GitHub वर प्रत्येक प्रतिमा दर्शकाच्या स्कीमनुसार दिसते.
+- **फॉन्ट्स.** GitHub Markdown मध्ये CSS नसते आणि camo proxy प्रत्येक बाह्य fetch रोखतो, त्यामुळे किटचा टाइप फाइलमध्येच समाविष्ट करावा लागतो. प्रत्येक जनरेटरची शेवटची पायरी असलेली `scripts/docs/readme-outline.mjs`, HarfBuzz वापरून Switzer भूमिका आकारते आणि त्यांना व्हेक्टर outlines (`<defs>` paths आणि `<use>`) म्हणून रेखाटते; Switzer मध्ये नसलेले बाण आणि भौमितिक चिन्हे त्याच्या स्वतःच्या मेट्रिक्सवर रेखाटली जातात. एम्बेड केलेला फॉन्ट कधीही वापरू नका, फक्त outlines: Switzer चा परवाना (`packages/ui-kit/src/fonts/FFL.txt`) लेखी संमतीशिवाय subsetting आणि format conversion प्रतिबंधित करतो आणि व्हेक्टर रेखाटनांना अनुमती देतो, त्यामुळे Switzer `@font-face` किंवा `data:` URI पुन्हा आणू नका. फाइलमध्ये उरलेला एकमेव फॉन्ट म्हणजे प्रत्यक्ष कोड मजकूरासाठी असलेला OFL IBM Plex Mono subset (`scripts/docs/readme-fonts.mjs`), जो त्या अक्षरांपासून तयार केला जातो; एम्बेड करता न येणारा कोणताही glyph त्रुटी निर्माण करतो.
+- **पुन्हा निर्माण करा.** `npm run docs:readme-diagrams` README क्रमाने सर्व बारा आकृत्या पुन्हा लिहिते आणि प्रत्येक फाइलच्या आकारासह एक ओळ मुद्रित करते. एकच जनरेटर स्वतंत्रपणेही चालवता येतो (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` साठी `node --import tsx/esm` आवश्यक आहे, कारण त्यातील आकडेवारी `open-sse/config/freeModelCatalog.ts` मधील live catalog loader मधून येते; catalog बदलाचा CI परिणाम `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` मध्ये आहे). जनरेटर आणि SVG एकत्र कमिट करा.
+- **पडताळणी.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ही फाइल GitHub ज्या पद्धतीने सर्व्ह करतो त्या पद्धतीने (`<img>` टॅग, camo चे `Content-Security-Policy`, `image/svg+xml`) रेंडर करते, हलकी आणि गडद फ्रेम कॅप्चर करते आणि पेजने केलेल्या बाह्य फॉन्ट विनंत्या नोंदवते (त्या 0 असणे आवश्यक आहे).
+- **बजेट.** प्रत्येक फाइल 200 KB पेक्षा कमी असावी (प्रत्येक कालबाह्यता चाचणी हे तपासते); कोणत्याही README प्रतिमेसाठी 500 KB ही कठोर कमाल मर्यादा आहे (SVG studio validator चा नियम).
+- **जसेच्या तसे कॉपी करा, मोजण्या gate मधून घ्या.** rebrand मुळे शब्द नव्हे तर टाइप आणि पॅलेट बदलले: प्रत्येक जनरेटरमध्ये त्याच्या आकृतीची कॉपी `*_COPY` constant मध्ये असते (किंवा live catalog मधून तयार केली जाते), जी रेखाटलेल्या मजकुरासाठी आणि outlining step च्या इनपुटसाठी दोन्ही वापरली जाते. Canonical आकृत्या `<text>` nodes मध्येच राहतात (outlined झाल्यावर अदृश्य, `fill-opacity:0`), आणि `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) त्यांना वाचते; gate reads नियंत्रित करणाऱ्या आकृत्यांच्या कालबाह्यता चाचण्या निर्माण केलेल्या फाइलवर त्याचे validators देखील चालवतात, त्यामुळे code पासून विसंगत झालेली आकृती चाचणीत अपयशी ठरते — gate ज्या source मधून वाचते तो source दुरुस्त करा, जनरेटरमधील संख्या कधीही बदलू नका.
 
 ## 7. संदर्भ निर्देशांक
 

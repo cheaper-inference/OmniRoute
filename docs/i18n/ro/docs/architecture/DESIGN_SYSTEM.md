@@ -4,13 +4,7 @@
 
 ---
 
-> **Status:** tabloul de bord este construit pe baza **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), preluat local (vendored)
-> ca workspace-ul `packages/ui-kit` (`@omniroute/ui-kit`; snapshot-ul upstream este fixat în
-> `packages/ui-kit/UPSTREAM.md` și verificat prin `npm run check:ui-kit-snapshot`). Light este tema
-> canonică; preferința implicită este `system`. Culoarea de accent este Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) este familia de fonturi a interfeței, Instrument Serif doar pentru
-> text de afișare mare și rar (`.ci-dashboard-display`), IBM Plex Mono pentru cod — toate auto-găzduite prin
-> importurile `@fontsource/*` din partea de sus a fișierului `src/app/globals.css`. Fiecare pictogramă este un glif Lucide.
+> **Stare:** tabloul de bord este construit pe** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vândut ca spațiu de lucru `packages/ui-kit` (`@omniroute/ui-kit`; instantaneul din amonte este fixat în `packages/ui-kit/UPSTREAM.md` și protejat de `npm run check:ui-kit-snapshot`). Lumina este tema canonică; preferința implicită este `system`. Accentul este Keak lime (`--ci-color-accent`). Switzer este singura familie pentru UI, afișare și text de cod (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Scripturi Switzer lipsesc prin glif cu glif (`src/app/globals.css`): Inter pentru chirilic, greacă și vietnameză și, numai sub `html[dir="rtl"]`, Vazirmatn pentru scriere arabă. Fiecare pictogramă este un glif Lucide.
 
 ## 1. Unde se află lucrurile
 
@@ -83,34 +77,13 @@
 
 ## 2. Reguli
 
-1. Tokenuri, niciodată literali. Excepțiile sunt păstrate intenționat: terminalul consolei, mereu întunecat, și
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), oglinda cu hex rezolvat a paletei de status din kit
-   pentru apelanții care au nevoie de un hex literal. Paletele categorice nu mai sunt o excepție: se sprijină pe
-   cele cinci tokenuri de grafice ale kitului (`--color-chart-1..5`) prin
-   `src/shared/utils/categoricalPalette.ts` și, pentru strategiile de rutare,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; muchiile ReactFlow și panza de orchestrare citesc
-   variabilele `--orch-status-*` sensibile la temă (`src/shared/components/flow/edgeStyles.ts`).
-2. Nu modificați manual `packages/ui-kit/src`: sincronizați cu `scripts/dev/sync-ui-kit.sh <commit>`; poarta
-   pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) eșuează la orice octet care diferă de
-   commit-ul upstream fixat (trece peste verificare cu un avertisment când clone-ul upstream,
-   `UI_KIT_CLONE` sau `_references/cheaper-inference-ui-kit`, lipsește). Când kitului îi lipsește ceva,
-   ocoliți problema în adaptor sau în ecran și cereți upstream soluția.
-3. Textele implicite ale kitului sunt în engleză (`label = "Loading"`, `loadingLabel = "Loading table"`…) — transmiteți
-   șiruri traduse din `useTranslations(...)` ori de câte ori o componentă kit redă text.
-4. Utilitarele Tailwind au prioritate față de clasele componentelor kit (kitul declară
-   `@layer theme, base, components, utilities` și regulile sale se află în `components`) — folosiți utilitarele pentru
-   spațiere și layout, nu pentru a recolora componentele kitului.
-5. Titluri: `.ci-heading` (Inter, fără tracking) pentru titlurile de pagină și de secțiune; `.ci-dashboard-display`
-   (Instrument Serif) doar pentru text de afișare mare și rar, cum ar fi codul de status al paginii de eroare.
-6. `tests/unit/dashboard-kit-sweep.test.ts` păzește adoptarea kitului: niciun span cu ligaturi Material sub
-   `src/app` sau `src/shared/components`; în arborele dashboardului (`src/app/(dashboard)` și
-   `src/shared/components`) niciun `<select>`, `<textarea>` sau `<table>` brut și niciun
-   `role="dialog"` scris manual în afara excepțiilor listate (ramura nativă a adaptorului `Select`,
-   `RequestLoggerDetail`); fiecare `<button>` sau `<input>` brut de acolo are nevoie de un comentariu care conține
-   `kit-exception:` (cu motivul) și se termină la cel mult 3 linii deasupra lui; nuanțele paletei și variantele
-   `dark:` doar în fișierele pe care testul le listează.
-7. Verificați ambele teme și viewport-ul de 390 px înainte de un PR (capturi de ecran); `tests/e2e/a11y.spec.ts`
-   rulează axe.
+1. Jetoane, niciodată literale. Excepții păstrate intenționat: terminalul de consolă mereu întunecat și `STATUS_HEX` (`src/shared/constants/statusColors.ts`), oglinda hexadecimală rezolvată a paletei de stare a kit-ului pentru apelanții care au nevoie de un hex literal. Paletele categorice nu mai fac excepție: ele călătoresc pe cele cinci jetoane grafice ale kit-ului (`--color-chart-1..5`) prin `src/shared/utils/categoricalPalette.ts` și, pentru strategiile de rutare, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; marginile ReactFlow și pânza de orchestrare citesc variabilele `--orch-status-*` care țin cont de temă (`src/shared/components/flow/edgeStyles.ts`).
+2. Nu corectați niciodată `packages/ui-kit/src` manual: sincronizați cu `scripts/dev/sync-ui-kit.sh <commit>`; poarta pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) eșuează pe orice octet care diferă de commit-ul în amonte fixat (sare cu un avertisment când clona din amonte, `UI_KIT_CLONE` sau `_references/cheaper-inference-ui-kit`, este absentă). Când kit-ului îi lipsește ceva, rezolvați-l în adaptor sau ecran și cereți-l în amonte.
+3. Valorile implicite ale textului kit-ului sunt în engleză (`label = "Loading"`, `loadingLabel = "Loading table"`...) - transmiteți șiruri traduse din `useTranslations(...)` ori de câte ori o componentă a kit-ului redă text.
+4. Utilitarele Tailwind câștigă clasele de componente ale kit-ului (kitul declară `@layer theme, base, components, utilities` și regulile sale trăiesc în `components`) — utilizați utilitare pentru spațiere și aspect, nu pentru a recolora componentele kit-ului.
+5. Titluri: `.ci-heading` pentru titlurile paginilor și secțiunilor; `.ci-dashboard-display` numai pentru textul de afișare mare și rar, cum ar fi codul de stare a paginii de eroare. Ambele folosesc Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` protejează adoptarea kit-ului: nu Material ligatură span sub `src/app` sau `src/shared/components`; în arborele tabloului de bord (`src/app/(dashboard)` și `src/shared/components`) nu `<select>` brut , `<textarea>` sau `<table>` și nici un `role="dialog"` rulat manual în afara excepțiilor enumerate (ramura nativă a adaptorului `Select`, `RequestLoggerDetail`); fiecare `<button>` sau `<input>` brut de acolo are nevoie de un comentariu care să conțină `kit-exception:` (cu motivul) care se termină cu cel mult 3 rânduri deasupra acestuia; nuanțe de paletă și variante `dark:` numai în fișierele listele de testare.
+7. Verificați ambele teme și fereastra de vizualizare de 390 px înainte de un PR (capturi de ecran); `tests/e2e/a11y.spec.ts` aleargă axe.
 
 ## 3. Adăugarea unui ecran
 
@@ -142,49 +115,31 @@
 4. Adaugă sau actualizează `tests/unit/ui/adapters/<name>.test.tsx`. Pentru un adaptor cu mulți apelanți, compară
    marcajul randat înainte și după modificare — schimbările de padding sau de wrapper se propagă pe fiecare ecran.
 
-## 5. Actualizarea kit-ului
+## 5. Actualizarea trusei
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copiază `src/` din upstream la acel commit în
-`packages/ui-kit/src` și aplică singura transformare permisă (elimină sufixul `.js` din
-importurile relative). Apoi: revizuiește `git diff packages/ui-kit`, fă o trecere vizuală peste furnizori, setări, combinații,
-utilizare și endpoint-uri în ambele teme, rulează `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui` și
-deschide PR-ul cu changelog-ul din upstream.
+`npm run check:ui-kit-upstream` compară versiunea fixată în `packages/ui-kit/UPSTREAM.md` cu cea mai nouă etichetă `v*` a depozitului din amonte și tipărește comanda de sincronizare atunci când este disponibilă o versiune.
 
-## 6. Diagramele din README
+Fluxul de lucru zilnic `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) rulează aceeași verificare. În timp ce pinul este în urmă, `scripts/ci/ui-kit-sync-pr.sh` menține un PR sincronizat deschis față de cea mai înaltă ramură `release/vX.Y.Z`, pe ramura rulantă `chore/ui-kit-sync-latest`. Nu se îmbină niciodată: fiecare lansare de kit are nevoie de o verificare vizuală a VPS local. Ramura este reconstruită când apare o versiune mai nouă și este lăsată în pace în caz contrar. Un PR deschis cu commit-uri împinse manual nu este suprascris, iar un PR pentru o versiune pe care un întreținător a închis-o nefusionată rămâne închis până la o versiune mai nouă.
 
-Cele douăsprezece diagrame pe care le încorporează `README.md` din rădăcină (`docs/diagrams/*.svg`) reprezintă kit-ul aplicat pe o imagine
-statică și sunt generate, nu desenate manual: 13 fișiere generatoare în `scripts/docs/gen-readme-*.mjs`
-(douăsprezece diagrame plus driverul `gen-readme-diagrams.mjs`) și 12 teste de învechire în
-`tests/unit/docs/readme-*-svg.test.ts`, câte unul pentru fiecare diagramă, fiecare comparând octet cu octet fișierul comis cu
-rezultatul generatorului său (jobul `test-unit`).
+Când nu poate fi deschis niciun PR (ediția țintă este înghețată, PR are commit-uri împinse manual, PR a fost închis sau nu este setat niciun simbol PR ), fluxul de lucru păstrează deschisă o problemă de urmărire care spune de ce.
 
-- **Token-uri.** `scripts/docs/readme-diagram-theme.mjs` copiază paleta din `packages/ui-kit/src/ci-tokens.css`
-  (fixată de acel fișier prin `tests/unit/docs/readme-diagram-theme.test.ts`) și definește rolurile textului pe
-  fețele kit-ului — Instrument Serif pentru display, Inter pentru textul UI, IBM Plex Mono pentru cifre și cod,
-  aceleași pachete `@fontsource` pe care `src/app/globals.css` le încarcă pentru dashboard. Valorile luminoase stau
-  pe `:root`, valorile întunecate în spatele `prefers-color-scheme: dark`, în interiorul fișierului, astfel încât fiecare
-  imagine urmează schema vizitatorului pe GitHub.
-- **Fonturi.** `scripts/docs/readme-fonts.mjs` face subset acelor fișiere woff2 la glifele pe care le desenează fiecare diagramă și
-  le încorporează ca URI-uri `data:` în `@font-face` — singura cale prin care tipografia kit-ului ajunge într-o imagine README, deoarece
-  GitHub Markdown nu conține CSS, iar proxy-ul camo blochează orice preluare externă. Subseturile sunt doar latine;
-  glifele-simbol care revin la stiva de sistem sunt permise una câte una în `SYMBOL_FALLBACKS`, iar orice
-  altă glifă neacoperită aruncă o eroare.
-- **Regenerare.** `npm run docs:readme-diagrams` rescrie toate cele douăsprezece în ordinea din README și afișează câte o linie pentru
-  fiecare fișier, cu dimensiunea lui. Un singur generator poate rula și de unul singur (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` are nevoie de `node --import tsx/esm` deoarece cifrele lui provin din încărcătorul live de catalog din
-  `open-sse/config/freeModelCatalog.ts`; consecința în CI a unei modificări de catalog se află în
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Comite generatorul și SVG-ul împreună.
-- **Dovadă.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` randează un fișier așa cum îl servește
-  GitHub (un tag `<img>`, `Content-Security-Policy`-ul lui camo, `image/svg+xml`), capturează un cadru luminos și unul
-  întunecat și raportează cererile externe de fonturi pe care pagina le-a făcut (trebuie să fie 0).
-- **Buget.** Sub 200 KB pe fișier (fiecare test de învechire verifică acest lucru); 500 KB este limita strictă pentru orice
-  imagine README (regula validatorului SVG studio).
-- **Text neschimbat, cifrele de la gate.** Rebrandingul a schimbat tipografia și paleta, nu cuvintele: fiecare generator
-  poartă textul diagramei sale într-o constantă `*_COPY` (sau îl construiește din catalogul live), care este atât
-  textul desenat, cât și intrarea pentru subsetul de fonturi. Cifrele canonice rămân în nodurile `<text>`, citite de `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); testele de învechire ale diagramelor pe care gate-ul le citește rulează de asemenea
-  validatorii acestuia pe fișierul generat, astfel încât o cifră care se îndepărtează de cod pică testul — repară
-  sursa pe care gate-ul o citește, niciodată numărul din generator.
+Fluxul de lucru folosește două secrete:
+
+- `secrets.UI_KIT_READ_TOKEN`: un token numai pentru citire pentru depozitul privat din amonte. Când fluxul de lucru nu poate citi în amonte (nici un token, un token care a încetat să funcționeze sau GitHub inaccesibil), rularea rămâne verde, dar scrie un avertisment și menține deschisă o problemă separată, care se închide singură odată ce o rulare ulterioară poate citi din nou în amonte.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: un token cu granulație fină pe acest depozit cu acces la scriere la conținut și la solicitări Pull. `GITHUB_TOKEN` implicit nu poate crea PRs aici, iar un PR pe care l-a deschis nu ar declanșa CI. Fără acest simbol, fluxul de lucru împinge doar ramura.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copiază `src/` din amonte la acel commit (`latest` = cea mai nouă etichetă `v*` ) în `packages/ui-kit/src`, aplică transformarea unică permisă (elimină sufixul `.js` din importurile relative) și setează versiunea spațiului de lucru în `packages/ui-kit/package.json` și `package-lock.json` la cea din amonte. Apoi: revizuiți `git diff packages/ui-kit`, faceți o trecere vizuală asupra furnizorilor, setărilor, combo-urilor, utilizării și punctului final în ambele teme, rulați `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui` și deschideți PR cu jurnalul de modificări din amonte.
+
+## 6. diagrame README
+
+Cele douăsprezece diagrame pe care le încorporează rădăcina `README.md` (`docs/diagrams/*.svg`) sunt kitul aplicat unei imagini statice și sunt generate, nu desenate manual: 13 fișiere generatoare la `scripts/docs/gen-readme-*.mjs` (douăsprezece diagrame plus driverul `gen-readme-diagrams.mjs` ) și 12 teste de staleness la `tests/unit/docs/readme-*-svg.test.ts`, câte unul pe diagramă, fiecare octet comparând fișierul generat `test-unit` cu ieșirea lui jobqf.
+
+- **Jetoane.** `scripts/docs/readme-diagram-theme.mjs` copie paleta din `packages/ui-kit/src/ci-tokens.css` (fixat pe acel fișier de `tests/unit/docs/readme-diagram-theme.test.ts`) și definește rolurile de text pe scara de tip a trusei: Switzer la greutățile kitului (400/500/600, afișare la 500) și urmărire pentru tot, cu excepția rolurilor de cod (`.cmd`, `.term`, `.term-lg`, , `.mono`, , `.mono-sm`, , `.mono-xs`), IBM Plex Mono și sunt doar pentru comenzi, URLs, identificatori și ecrane terminale. Valorile luminoase stau pe `:root`, valorile întunecate în spatele `prefers-color-scheme: dark`, în interiorul fișierului, astfel încât fiecare imagine urmează schema privitorului pe GitHub.
+- **Fonturi.** GitHub Markdown nu poartă CSS, iar proxy-ul camo blochează fiecare preluare externă, așa că tipul de kit trebuie să călătorească în interiorul fișierului. `scripts/docs/readme-outline.mjs`, ultimul pas al fiecărui generator, modelează rolurile Switzer cu HarfBuzz și le desenează ca contururi vectoriale (`<defs>` paths și `<use>`), cu săgețile și simbolurile geometrice ale lui Switzer desenate pe propriile metrice. Contururi, niciodată un font încorporat: licența Switzer (`packages/ui-kit/src/fonts/FFL.txt`) interzice subsetarea și conversia formatului fără acordul scris și permite desene vectoriale, așa că nu reintroduceți un Switzer `@font-face` sau `data:` URI. Singurul font rămas într-un fișier este subsetul OFL IBM Plex Mono pentru ceea ce rămâne text de cod real (`scripts/docs/readme-fonts.mjs`), construit din acele caractere; orice glifă pe care nu o poate încorpora aruncă.
+- **Regenera.** `npm run docs:readme-diagrams` rescrie toate cele doisprezece în ordine README și tipărește o linie pe fișier cu dimensiunea acestuia. De asemenea, un singur generator funcționează singur (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` are nevoie `node --import tsx/esm` deoarece cifrele sale provin din încărcătorul de catalog live în `open-sse/config/freeModelCatalog.ts`; consecința CI a unei modificări de catalog este în `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Angajați generatorul și SVG împreună.
+- **Dovada.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` redă un fișier așa cum îl servește GitHub (o etichetă `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), captează un cadru deschis și unul întunecat și raportează solicitările de font extern făcute de pagină (trebuie să fie 0).
+- **Buget.** Sub 200 KB pe dosar (fiecare test de învechire îl afirmă); 500 KB este limita pentru orice imagine README (regula validatorului SVG studio).
+- **Copie neschimbată, numără de la poartă.** Rebrand-ul a schimbat tipul și paleta, nu cuvinte: fiecare generator își poartă copia diagramei într-o constantă `*_COPY` (sau o construiește din catalogul live) care este atât textul desenat, cât și intrarea pasului de conturare. Figurile canonice rămân în noduri `<text>` (invizibile odată conturate, `fill-opacity:0`), citite de `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testele de staleness ale diagramelor pe care le citește poarta rulează și validatorii săi pe fișierul generat, așa că o cifră care se deplasează de la cod eșuează testul — fixează sursa pe care o citește poarta, niciodată numărul din generator.
 
 ## 7. Index de referință
 

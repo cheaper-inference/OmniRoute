@@ -4,13 +4,7 @@
 
 ---
 
-> **Holat:** boshqaruv paneli **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) asosida qurilgan bo‘lib,
-> u `packages/ui-kit` workspace’i sifatida kiritilgan (`@omniroute/ui-kit`; yuqori oqim (upstream) snapshot’i
-> `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan va `npm run check:ui-kit-snapshot` bilan himoyalangan). Yorug‘ (Light) mavzu kanonik
-> mavzu hisoblanadi; standart tanlov — `system`. Aktsent rangi — Keak lime (`--ci-color-accent`). Inter
-> (harflar oralig‘i 0, `--ci-letter-spacing-ui`) UI shrift oilasi, Instrument Serif faqat katta, siyrak
-> displey matnlari uchun (`.ci-dashboard-display`), IBM Plex Mono esa kod uchun ishlatiladi — barchasi
-> `src/app/globals.css` fayli boshidagi `@fontsource/*` importlari orqali o‘z serverida joylashtirilgan. Har bir piktogramma Lucide glifidir.
+> **Holati:** asboblar paneli ustiga qurilgan** Keak CI UI to'plami** (`@keak/cheaper-inference-ui-kit`), ish maydoni `packages/ui-kit` (`@omniroute/ui-kit`; yuqori oqim snapshoti `packages/ui-kit/UPSTREAM.md` ga mahkamlanadi va `npm run check:ui-kit-snapshot` tomonidan himoyalanadi) sifatida sotiladi. Nur - kanonik mavzu; standart afzallik `system`. Urg'u - Keak ohak (`--ci-color-accent`). Switzer UI, displey va kod matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun yagona oila bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Shveytsariya skriptlarida glif bo'yicha glif (`src/app/globals.css`) yo'q: kirill, yunon va vetnam uchun Inter va arab yozuvi uchun faqat `html[dir="rtl"]` ostida Vazirmatn. Har bir belgi Lucid glifidir.
 
 ## 1. Narsalar qayerda joylashgani
 
@@ -83,34 +77,13 @@
 
 ## 2. Qoidalar
 
-1. Tokenlar, hech qachon literallar emas. Ataylab saqlab qolingan istisnolar: har doim qorong'i konsol terminali va
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex kerak bo'lgan chaqiruvchilar uchun kit status
-   palitrasining resolved-hex aks ettiruvchisi. Kategorik palitralar endi istisno emas:
-   ular kitning besh chart tokenidan (`--color-chart-1..5`)
-   `src/shared/utils/categoricalPalette.ts` orqali, routing strategiyalari uchun esa
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` orqali foydalanadi; ReactFlow edgelari va orkestratsiya
-   kanvasi mavzuga mos `--orch-status-*` o'zgaruvchilarini o'qiydi (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` ni hech qachon qo'lda patch qilmang: `scripts/dev/sync-ui-kit.sh <commit>` bilan sinxronlang;
-   pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) pinned upstream commitdan farq qiladigan
-   har qanday baytda muvaffaqiyatsiz bo'ladi (upstream klon,
-   `UI_KIT_CLONE` yoki `_references/cheaper-inference-ui-kit`, mavjud bo'lmaganda ogohlantirish bilan o'tkazib yuboradi). Kitda biror narsa yetishmaganda,
-   uni adapterda yoki ekranda chetlab o'ting va upstreamdan so'rang.
-3. Kit matn standartlari ingliz tilida (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti matn chizgan har bir holatda
-   `useTranslations(...)` dan tarjima qilingan satrlarni uzating.
-4. Tailwind utilitlari kit komponent klasslaridan ustun keladi (kit
-   `@layer theme, base, components, utilities` ni e'lon qiladi va uning qoidalari `components` da yashaydi) — utilitlardan
-   oraliq va layout uchun foydalaning, kit komponentlarini qayta ranglash uchun emas.
-5. Sarlavhalar: sahifa va bo'lim sarlavhalari uchun `.ci-heading` (Inter, trackingsiz); `.ci-dashboard-display`
-   (Instrument Serif) faqat xato sahifasining status kodi kabi katta, siyrak display matn uchun.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kit qabul qilinishini himoya qiladi:
-   `src/app` yoki `src/shared/components` ostida Material ligature span bo'lmasligi kerak; dashboard daraxtida (`src/app/(dashboard)` va
-   `src/shared/components`) xom `<select>`, `<textarea>` yoki `<table>` va sanab o'tilgan istisnolardan tashqarida qo'lda yasalgan
-   `role="dialog"` bo'lmasligi kerak (`Select` adapterining native branchi,
-   `RequestLoggerDetail`); u yerda har bir xom `<button>` yoki `<input>` undan ko'pi bilan 3 qator yuqorida tugaydigan,
-   `kit-exception:` (sababi bilan) ni o'z ichiga olgan izohni talab qiladi; palitra huelari va `dark:` variantlari
-   faqat test sanab o'tgan fayllarda.
-7. PR dan oldin ikkala mavzuni va 390 px viewportni tekshiring (screenshotlar); `tests/e2e/a11y.spec.ts`
-   axe ni ishga tushiradi.
+1. Tokenlar, hech qachon harflar. Maqsadli istisnolar: har doim qorong'i konsol terminali va `STATUS_HEX` (`src/shared/constants/statusColors.ts`), so'zma-so'z olti burchakli qo'ng'iroq qiluvchilar uchun to'plam holati palitrasining hal qilingan olti burchakli oynasi. Kategoriyali palitralar bundan mustasno emas: ular to'plamning beshta diagramma tokenida (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` orqali va marshrutlash strategiyalari uchun `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow qirralari va orkestratsiya tuvali mavzudan xabardor `--orch-status-*` o'zgaruvchilarni (`src/shared/components/flow/edgeStyles.ts`) o'qiydi.
+2. Hech qachon `packages/ui-kit/src` qo'lda tuzatmang: `scripts/dev/sync-ui-kit.sh <commit>` bilan sinxronlash; `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) oldidan kirish eshigi mahkamlangan yuqori oqimdan farq qiluvchi har qanday baytda ishlamay qoladi (yuqori oqim klonlari, `UI_KIT_CLONE` yoki `_references/cheaper-inference-ui-kit` yo‘q bo‘lganda, u ogohlantirish bilan o‘tkazib yuboriladi). To'plamda biror narsa etishmayotgan bo'lsa, uni adapter yoki ekranda aylantiring va uni yuqoridan so'rang.
+3. To'plam matnining standart sozlamalari inglizcha (`label = "Loading"`, `loadingLabel = "Loading table"`…) - to'plam komponenti matnni ko'rsatganda, tarjima qilingan satrlarni `useTranslations(...)` dan o'tkazing.
+4. Tailwind yordam dasturlari to'plam komponentlari sinflari ustidan g'alaba qozonadi (to'plam `@layer theme, base, components, utilities` e'lon qiladi va uning qoidalari `components` yashaydi) - yordamchi dasturlardan to'plam komponentlarini qayta bo'yash uchun emas, oraliq va tartib uchun foydalaning.
+5. Sarlavhalar: sahifa va bo'lim sarlavhalari uchun `.ci-heading` ; `.ci-dashboard-display` faqat xato sahifasi holati kodi kabi katta, siyrak ekran matni uchun. Ikkalasi ham Shveytsariyadan foydalanadi.
+6. `tests/unit/dashboard-kit-sweep.test.ts` to'plamni qabul qilishni qo'riqlaydi: `src/app` yoki `src/shared/components` ostida moddiy ligature oralig'i yo'q; asboblar paneli daraxtida (`src/app/(dashboard)` va `src/shared/components`) hech qanday xom `<select>`, `<textarea>` yoki `<table>` va sanab o‘tilgan istisnolardan tashqari qo‘lda o‘ralgan `role="dialog"` yo‘q ( `Select` adapterning mahalliy filiali, `RequestLoggerDetail`); har bir raw `<button>` yoki `<input>` `kit-exception:` (sababini ko'rsatgan holda) o'z ichiga olgan izoh, uning tepasida ko'pi bilan 3 qatordan iborat bo'lishi kerak; palitra ranglari va `dark:` variantlari faqat test ro'yxatidagi fayllarda.
+7. PR (skrinshotlar) oldidan ikkala mavzuni va 390 px ko'rish oynasini tekshiring; `tests/e2e/a11y.spec.ts` bolta ishlaydi.
 
 ## 3. Ekran qo'shish
 
@@ -143,51 +116,31 @@
    o'zgarishdan oldin va keyingi render qilingan razmetkani solishtiring — padding yoki wrapper o'zgarishlari har
    bir ekranga tarqaladi.
 
-## 5. Kit'ni yangilash
+## 5. To'plamni yangilash
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` o'sha commit'dagi upstream `src/` ni `packages/ui-kit/src` ga
-nusxalaydi va ruxsat etilgan yagona transformatsiyani qo'llaydi (u nisbiy importlardan `.js` sufiksini olib
-tashlaydi). Keyin: `git diff packages/ui-kit` ni ko'rib chiqing, providers, settings, combos, usage va endpoint
-sahifalarini har ikkala mavzuda vizual ko'zdan kechiring, `npm run check:ui-kit-snapshot` va
-`npm run test:vitest:ui` ni ishga tushiring hamda upstream changelog bilan PR oching.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ga biriktirilgan versiyani yuqoridagi reponing eng yangi `v*` yorlig'i bilan taqqoslaydi va reliz tugashi bilan sinxronlash buyrug'ini chop etadi.
 
-## 6. README diagrammalari
+Kundalik `UI Kit upstream watch` ish jarayoni (`.github/workflows/ui-kit-upstream-watch.yml`) bir xil tekshiruvni amalga oshiradi. PIN orqada turganda, `scripts/ci/ui-kit-sync-pr.sh` bitta sinxronlash PR eng yuqori `release/vX.Y.Z` shoxiga, `chore/ui-kit-sync-latest` aylanma novdasiga qarshi ochiq holda ushlab turadi. U hech qachon birlashtirilmaydi: har bir to'plam hali ham mahalliy VPS ni vizual tekshirishga muhtoj. Yangi versiya chiqqanda filial qayta quriladi va aks holda yolg'iz qoladi. Qo'lda bosilgan majburiyatlari bo'lgan ochiq PR ustiga yozilmaydi va saqlovchi yopilgan birlashtirilmagan versiya uchun PR yangiroq versiyaga qadar yopiq qoladi.
 
-Ildiz `README.md` ga joylashtirilgan o'n ikkita diagramma (`docs/diagrams/*.svg`) — bu statik tasvirga qo'llangan
-kit, va ular qo'lda chizilmagan, balki generatsiya qilingan: `scripts/docs/gen-readme-*.mjs` da 13 ta generator
-fayl (o'n ikkita diagramma va `gen-readme-diagrams.mjs` drayveri) hamda `tests/unit/docs/readme-*-svg.test.ts` da
-12 ta eskirganlik testi — har bir diagramma uchun bittadan, har biri commit qilingan faylni o'z generatorining
-chiqishi bilan baytma-bayt solishtiradi (job `test-unit`).
+Hech qanday PR ochilmaganda (maqsadli versiya muzlatilgan, PR qo‘l bilan bosilgan, PR yopilgan yoki PR tokeni o‘rnatilmagan) ish jarayoni nima uchun ekanligini ko‘rsatadigan bitta kuzatuv muammosini ochiq qoldiradi.
 
-- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs` palitrani `packages/ui-kit/src/ci-tokens.css` dan nusxalaydi
-  (u `tests/unit/docs/readme-diagram-theme.test.ts` tomonidan o'sha faylga bog'langan) va kit shriftlarida matn
-  rollarini belgilaydi — sarlavhalar uchun Instrument Serif, UI matni uchun Inter, raqamlar va kod uchun IBM Plex
-  Mono, ya'ni `src/app/globals.css` dashboard uchun yuklaydigan xuddi shu `@fontsource` paketlari. Yorug' qiymatlar
-  `:root` da, qorong'u qiymatlar esa fayl ichida `prefers-color-scheme: dark` ortida joylashgan, shuning uchun har
-  bir tasvir GitHub'da tomoshabinning sxemasiga bo'ysunadi.
-- **Shriftlar.** `scripts/docs/readme-fonts.mjs` bu woff2 fayllarini har bir diagramma chizadigan gliflargacha
-  subset qiladi va ularni `@font-face` `data:` URI'lari sifatida joylashtiradi — bu kit tipografiyasining README
-  tasviriga yetib borishining yagona yo'li, chunki GitHub Markdown CSS ko'tarmaydi va camo proksi har qanday tashqi
-  yuklashni bloklaydi. Subset'lar faqat lotincha; tizim stekiga fallback qiladigan belgi gliflari
-  `SYMBOL_FALLBACKS` da birma-bir ruxsat etiladi va boshqa har qanday qoplanmagan glif xato tashlaydi.
-- **Qayta generatsiya.** `npm run docs:readme-diagrams` o'n ikkitasining barchasini README tartibida qayta yozadi
-  va har bir fayl uchun uning hajmi bilan bitta qatordan chop etadi. Bitta generator alohida ham ishlaydi
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ga `node --import tsx/esm` kerak, chunki uning
-  raqamlari `open-sse/config/freeModelCatalog.ts` dagi jonli katalog yuklovchisidan keladi; katalog o'zgarishining
-  CI oqibati `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` da). Generator va SVG'ni birga commit
-  qiling.
-- **Isbot.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` faylni GitHub taqdim etgan ko'rinishda render
-  qiladi (`<img>` tegi, camo'ning `Content-Security-Policy`'si, `image/svg+xml`), yorug' va qorong'u kadrni oladi
-  hamda sahifa qilgan tashqi shrift so'rovlarini hisobot qiladi (0 bo'lishi shart).
-- **Byudjet.** Har bir fayl 200 KB dan kam bo'lishi kerak (har bir eskirganlik testi buni tekshiradi); 500 KB har
-  qanday README tasviri uchun qat'iy yuqori chegara (SVG studio validatorining qoidasi).
-- **Matn o'zgarmagan, sonlar esa gate'dan.** Rebrending shrift va palitrani o'zgartirdi, so'zlarni emas: har bir
-  generator o'z diagrammasining matnini `*_COPY` konstantasida saqlaydi (yoki uni jonli katalogdan quradi) — bu ham
-  chizilgan matn, ham shrift-subset kirishi hisoblanadi. Kanonik raqamlar `<text>` tugunlarida qoladi, ularni
-  `check:docs-counts` o'qiydi (`scripts/check/check-docs-counts-sync.mjs`); gate o'qiydigan diagrammalarning
-  eskirganlik testlari ham uning validatorlarini generatsiya qilingan faylda ishga tushiradi, shuning uchun koddan
-  chetlashgan raqam testni muvaffaqiyatsiz qiladi — gate o'qiydigan manbani tuzating, hech qachon generatordagi
-  raqamni emas.
+Ish jarayoni ikkita sirdan foydalanadi:
+
+- `secrets.UI_KIT_READ_TOKEN`: yuqori oqim repo uchun faqat o‘qish uchun mo‘ljallangan token. Ish oqimi yuqori oqimda oʻqiy olmasa (token yoʻq, ishlamay qolgan token yoki GitHub kirish imkoni boʻlmasa) ishga tushirish yashil boʻlib qoladi, lekin ogohlantirish yozadi va bitta alohida masala ochiq qoladi, bu esa keyingi ishga tushirish yuqori oqimni qayta oʻqishi mumkin boʻlgandan keyin oʻzini yopib qoʻyadi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: ushbu omborda Contents and Pull so'rovlarini yozish uchun ruxsatga ega nozik token. Standart `GITHUB_TOKEN` bu yerda PRs yarata olmaydi va u ochilgan PR CI ishga tushirmaydi. Ushbu belgisiz ish jarayoni faqat filialni itaradi.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` yuqoridagi `src/` o‘sha majburiyatda (`latest` = eng yangi `v*` tegi) `packages/ui-kit/src` ga ko‘chiradi, yagona ruxsat etilgan transformatsiyani qo‘llaydi (nisbiy importdan `.js` qo‘shimchasini olib tashlaydi) va ish maydonining `packages/ui-kit/package.json` va `package-lock.json` versiyasini yuqori oqimga o‘rnatadi. Keyin: `git diff packages/ui-kit` ni ko'rib chiqing, ikkala mavzuda provayderlar, sozlamalar, kombinatsiyalar, foydalanish va oxirgi nuqtani vizual tarzda o'tkazing, `npm run check:ui-kit-snapshot` va `npm run test:vitest:ui` ni ishga tushiring va yuqoridagi o'zgarishlar jurnali bilan PR oching.
+
+## 6. README diagrammalar
+
+Ildiz `README.md` o'rnatgan o'n ikki diagramma (`docs/diagrams/*.svg`) statik tasvirga qo'llaniladigan to'plam bo'lib, ular qo'lda chizilmagan holda yaratiladi: `scripts/docs/gen-readme-*.mjs` da 13 ta generator fayli (o'n ikkita diagramma va `gen-readme-diagrams.mjs` drayveri) va `tests/unit/docs/readme-*-svg.test.ts` da 12 ta eskirish testi, har bir diagrammada bittadan, har bir bayt-kommitatsiya qilingan faylga ega bo'lgan generator. `test-unit`).
+
+- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs` palitrani `packages/ui-kit/src/ci-tokens.css` dan nusxa ko'chiradi ( `tests/unit/docs/readme-diagram-theme.test.ts` tomonidan ushbu faylga mahkamlangan) va to'plamning turdagi shkalasidagi matn rollarini belgilaydi: Switzer to'plam og'irliklarida (400/500/600, displeyda 500) va kod rollaridan tashqari (`.cmd`, `.term`, `.term-lg`, `.mono`), hamma narsani kuzatish IBM `.mono-xs` Mono va faqat buyruqlar, URLs `.mono-sm` identifikatorlar va terminal ekranlari uchun. Yorug'lik qiymatlari `:root` ustida, qorong'i qiymatlar `prefers-color-scheme: dark` orqasida, fayl ichida joylashadi, shuning uchun har bir tasvir GitHub tomoshabin sxemasiga amal qiladi.
+- **Shriftlar.** GitHub Markdown hech qanday CSS ga ega emas va camo proksi-server har bir tashqi yukni bloklaydi, shuning uchun kit turi fayl ichida harakatlanishi kerak. `scripts/docs/readme-outline.mjs`, har bir generatorning so'nggi bosqichi, Shveytsar rollarini HarfBuzz bilan shakllantiradi va ularni vektor konturlari (`<defs>` yo'llari va `<use>`) sifatida chizadi, Shveytsarning o'z ko'rsatkichlari bo'yicha chizilgan strelkalar va geometrik belgilar bilan. Konturlar, hech qachon oʻrnatilgan shrift: Shveytsariya litsenziyasi (`packages/ui-kit/src/fonts/FFL.txt`) yozma roziligisiz subsetlash va formatni oʻzgartirishni taqiqlaydi va vektor chizmalariga ruxsat beradi, shuning uchun Switzer `@font-face` yoki `data:` URI ni qayta kiritmang. Faylda qolgan bitta shrift OFL IBM Plex Mono kichik to'plami bo'lib, u haqiqiy kod matni (`scripts/docs/readme-fonts.mjs`) bo'lib qoladi, bu belgilardan tuzilgan; u joylashtira olmaydigan har qanday glif tashlaydi.
+- **Qayta tiklash.** `npm run docs:readme-diagrams` barcha o'n ikkitasini README tartibida qayta yozadi va o'z o'lchami bilan har bir fayl uchun bitta qatorni chop etadi. Yagona generator ham o'z-o'zidan ishlaydi (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` kerak, chunki uning raqamlari `open-sse/config/freeModelCatalog.ts` dagi jonli katalog yuklagichidan keladi; katalog o'zgarishining CI natijasi `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` da). Generator va SVG birgalikda bajaring.
+- **Isbot.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` faylni GitHub qanday xizmat qilsa ( `<img>` yorlig‘i, camo ning `Content-Security-Policy`, `image/svg+xml`), yorug‘ va qorong‘i freymni suratga oladi va tashqi shrift so‘rovlari haqida xabar beradi (0 bo‘lishi kerak).
+- **Byudjet.** Har bir fayl uchun 200 KB dan kam (har bir eskirish testi buni tasdiqlaydi); 500 KB har qanday README tasviri uchun qattiq chegaradir ( SVG studio validator qoidasi).
+- **O'zgarishsiz nusxa ko'chiring, darvozadan sanaydi.** Rebrend so'zlarni emas, balki turini va palitrasini o'zgartirdi: har bir generator o'z diagramma nusxasini `*_COPY` konstantasida olib yuradi (yoki uni jonli katalogdan tuzadi), bu ham chizilgan matn, ham kontur bosqichining kiritilishi hisoblanadi. Kanonik raqamlar `<text>` tugunlarida qoladi (belgilanganidan keyin ko'rinmas, `fill-opacity:0`), `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) tomonidan o'qiladi; gate o'qiydigan diagrammalarning eskirish testlari ham yaratilgan faylda o'zining validatorlarini ishga tushiradi, shuning uchun koddan o'zgargan raqam sinovdan o'tolmaydi — darvoza o'qigan manbani tuzatadi, generatordagi raqamni hech qachon.
 
 ## 7. Ma'lumotnoma indeksi
 

@@ -2,6 +2,8 @@ export { SidebarBranch, type SidebarBranchItem, type SidebarBranchProps } from "
 export { SignalDiagram, DiagramFrame, type SignalNode, type SignalEdge, type SignalDiagramProps, type DiagramFrameProps } from "./signal-diagram";
 export { OverviewCard, type OverviewCardProps, type OverviewMetric, type OverviewTone } from "./overview-card";
 export { MetricChartFrame, MetricFunnel, MetricDonut, StatusMatrix, type MetricChartFrameProps, type MetricFunnelDatum, type MetricFunnelProps, type MetricDonutDatum, type MetricDonutProps, type StatusMatrixItem, type StatusMatrixProps } from "./metric-charts";
+export { StackedBarChart, Sparkline, type ChartSeries, type StackedBarDatum, type StackedBarChartProps, type SparklineProps } from "./reporting-charts";
+export { MetricCard, MetricTrend, type MetricCardProps, type MetricTrendProps } from "./metric-card";
 export { WorkflowGuide, type WorkflowGuideItem, type WorkflowGuideProps } from "./workflow-guide";
 export {
   ciTokenReferences,
@@ -18,7 +20,7 @@ export { Input, type InputProps, type InputSize } from "./input";
 export { Label } from "./label";
 export { Separator, type SeparatorLabelAlign, type SeparatorOrientation, type SeparatorProps } from "./separator";
 export { Skeleton, type SkeletonAnimation, type SkeletonProps, type SkeletonVariant } from "./skeleton";
-export { Switch, type SwitchProps, type SwitchSide } from "./switch";
+export { Switch, type SwitchProps, type SwitchSide, type SwitchSize } from "./switch";
 export { Textarea, type TextareaProps } from "./textarea";
 export {
   Checkbox,
@@ -67,7 +69,7 @@ export {
   TabsList,
   TabsTrigger,
   type TabsContentProps,
-  type TabsOrientation,
+  type TabsOrientation, type TabsSize,
   type TabsProps,
   type TabsTriggerProps,
   type TabsVariant,
@@ -213,6 +215,7 @@ export {
   type AccordionItemData,
   type AccordionItemProps,
   type AccordionProps,
+  type AccordionTriggerProps,
   type AccordionType,
   type AccordionVariant,
 } from "./accordion";
@@ -294,6 +297,7 @@ export {
 } from "./multi-select-filter";
 export { Slider, type SliderProps, type SliderPreset } from "./slider";
 export { DateRangePicker, type DateRangePickerProps, type DateRangePickerVariant, type DateRangePreset, type DateRangeValue } from "./date-range-picker";
+export { defaultDateRangeRelativePresets, resolveDateRangePreset, calendarDayBoundary, type DateRangeRelativePreset, type DateRangePresetContext } from "./date-range-time";
 export {
   LanguageSegmentedControl,
   type LanguageSegmentedControlProps,
@@ -323,6 +327,7 @@ export {
   type RequestResultMetricsProps,
   type RequestWorkbenchProps,
   type RequestWorkbenchState,
+  type RequestWorkbenchVariant,
   type WalletStatus,
   type WalletStatusNoticeProps,
 } from "./request-workbench";
@@ -344,10 +349,12 @@ export {
 export { SearchableSelect } from "./searchable-select";
 export type { SearchableSelectProps, SearchableSelectOption } from "./searchable-select";
 export { Wizard, type WizardProps } from "./wizard";
-export { ChoiceCard, SetupProgressCard, SaveChangesBar, type ChoiceCardProps, type ChoiceCardTone, type SetupProgressCardProps, type SaveChangesBarProps } from "./onboarding-patterns";
+export { ChoiceCard, MultiChoiceCard, SetupLayout, SetupBenefits, SetupProgressCard, SaveChangesBar, type MultiChoiceCardProps, type SetupLayoutProps, type SetupBenefitsProps, type ChoiceCardProps, type ChoiceCardTone, type SetupProgressCardProps, type SaveChangesBarProps } from "./onboarding-patterns";
 export { AnnouncementCarousel, type AnnouncementCarouselProps, type AnnouncementItem, type AnnouncementMediaState } from "./announcement-carousel";
 
 export { BrandLoader, type BrandLoaderProps, type BrandLoaderVariant } from "./brand-loader";
+export { LoadingScreen, type LoadingScreenProps, type LoadingMessage } from "./loading-screen";
+export { SubmitButton, type SubmitButtonProps } from "./submit-button";
 
 export { TableLoadingRegion, TableLoadingState, type TableLoadingRegionProps, type TableLoadingStateProps } from "./table-loading";
 export { KeakMark, KeakLogo, ProductIcon, ProductLockup, ProductSwitcher, EditorialSection, EditorialCard,
@@ -356,3 +363,26 @@ export { KeakMark, KeakLogo, ProductIcon, ProductLockup, ProductSwitcher, Editor
   type ProductSwitcherItem, type ProductSwitcherProps, type EditorialSectionProps, type EditorialCardProps,
 } from "./keak-brand";
 export { InvoiceDocument, type InvoiceDocumentProps, type InvoiceDocumentParty } from "./invoice-document";
+
+export { IntegrationSetup, type IntegrationSetupProps, type IntegrationSetupStep } from "./integration-setup";
+
+export { IntegrationResources, type IntegrationResource, type IntegrationResourcesProps } from "./integration-resources";
+export { TokenSavingsList, ClientQuickStart, OverviewPanels, type TokenSavingsItem, type QuickStartIntegration, type OverviewPanelsProps } from "./overview-patterns";
+export { RecoveryState, type RecoveryStateProps } from "./recovery-state";
+export { SuccessTransition, type SuccessTransitionProps } from "./success-transition";
+export { SecretValue, type SecretValueProps } from "./secret-value";
+
+export { SetupSelectionSummary, type SetupSelectionSummaryProps } from "./onboarding-patterns";
+
+export { cheapestCloudPlan, CloudConfigurator, CloudInstancePanel, CloudBillingDetails, CloudTopology, type CloudConfiguratorProps, type CloudInstancePanelProps, type CloudBillingDetailsProps, type CloudConfiguration, type CloudMachineOption, type CloudRegionOption } from "./cloud-patterns";
+export { CloudRoutingExplorer, type CloudRoutingExplorerProps } from "./cloud-routing-explorer";
+export { CloudAuthHandoff, type CloudAuthHandoffProps } from "./cloud-auth-handoff";
+
+export { CloudFieldHelp, CloudHostingConsent, type CloudHostingConsentValue } from "./cloud-patterns";
+
+export { DockedLayout, DockedRail, DockedRailHeader, DockedRailBody, DockedRailFooter, DockedRailClose, type DockedLayoutProps, type DockedRailProps } from "./docked-rail";
+export { ScopeChip, type ScopeChipProps } from "./scope-chip";
+
+export { ChatHeader, ChatWelcome, ChatPromptList, ChatComposer, ChatThread, ChatMessage, ChatActivity, ChatMessageActions, ChatHistory, type ChatHeaderProps, type ChatWelcomeProps, type ChatPrompt, type ChatPromptListProps, type ChatAttachment, type ChatComposerProps, type ChatThreadProps, type ChatMessageProps, type ChatActivityState, type ChatActivityProps, type ChatMessageActionsProps, type ChatHistoryItem, type ChatHistoryGroup, type ChatHistoryProps } from "./chat";
+
+export { UsageInfoTooltip, UsageDrilldownHeader, UsageRequestIdentity, UsageCostBreakdown, UsageTokenUsage, UsageDetailSection, UsageTimingDelivery, UsageModelsUsed, UsageDrilldownBody, UsageDrilldownActions, UsageRequestFailure, UsageDrilldownLoading, type UsageDetailValue, type UsageInfoTooltipProps, type UsageDrilldownHeaderProps, type UsageRequestIdentityProps, type UsageReceiptRow, type UsageCostBreakdownProps, type UsageTokenUsageProps, type UsageDetailRow, type UsageDetailSectionProps, type UsageTimingDeliveryProps, type UsageModelRow, type UsageModelsUsedProps, type UsageDrilldownLoadingProps } from "./usage-drilldown";

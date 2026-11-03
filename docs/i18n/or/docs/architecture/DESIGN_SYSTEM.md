@@ -4,13 +4,7 @@
 
 ---
 
-> **ସ୍ଥିତି:** ଡ୍ୟାସବୋର୍ଡ଼ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ଉପରେ ନିର୍ମିତ, ଯାହାକୁ
-> ୱର୍କସ୍ପେସ୍ `packages/ui-kit` (`@omniroute/ui-kit`) ଭାବେ ଭେଣ୍ଡର୍ କରାଯାଇଛି; ଅପଷ୍ଟ୍ରିମ୍ ସ୍ନାପସଟ୍
-> `packages/ui-kit/UPSTREAM.md` ରେ ପିନ୍ କରାଯାଇଛି ଏବଂ `npm run check:ui-kit-snapshot` ଦ୍ୱାରା ସୁରକ୍ଷିତ। Light ହେଉଛି ମାନକ
-> ଥିମ୍; ଡିଫଲ୍ଟ ପସନ୍ଦ `system` ଅଟେ। ଆକସେଣ୍ଟ ହେଉଛି Keak lime (`--ci-color-accent`)। Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) ହେଉଛି UI ଫଣ୍ଟ ପରିବାର, Instrument Serif କେବଳ ବଡ଼ ବିରଳ
-> ଡିସପ୍ଲେ ଟେକ୍ସ୍ଟ (`.ci-dashboard-display`) ପାଇଁ, IBM Plex Mono କୋଡ୍ ପାଇଁ — ସମସ୍ତ
-> `src/app/globals.css` ର ଶୀର୍ଷରେ ଥିବା `@fontsource/*` ଇମ୍ପୋର୍ଟ ମାଧ୍ୟମରେ ସେଲ୍ଫ-ହୋଷ୍ଟେଡ୍। ପ୍ରତ୍ୟେକ ଆଇକନ୍ ଏକ Lucide ଗ୍ଲିଫ୍ ଅଟେ।
+> **ସ୍ଥିତି:** ଡ୍ୟାସବୋର୍ଡ ଉପରେ ନିର୍ମିତ \|** Keak CI UI କିଟ୍ \|** (`@keak/cheaper-inference-ui-kit`), ୱାର୍କସ୍ପେସ୍ `packages/ui-kit` (`@omniroute/ui-kit`; ଅପଷ୍ଟ୍ରିମ୍ ସ୍ନାପସଟ୍ `packages/ui-kit/UPSTREAM.md` ରେ ପିନ୍ ହୋଇ `npm run check:ui-kit-snapshot` ଦ୍ୱାରା ଜଗାଯାଇଥାଏ) ଭାବରେ ବିକ୍ରେତା \| ଆଲୋକ ହେଉଛି କାନୋନିକାଲ୍ ଥିମ୍; ଡିଫଲ୍ଟ ପସନ୍ଦ ହେଉଛି `system`\| ଉଚ୍ଚାରଣ ହେଉଛି କିକ୍ ଚୂନ (`--ci-color-accent`) \| UI, ପ୍ରଦର୍ଶନ ଏବଂ କୋଡ୍ ପାଠ୍ୟ (`--ci-font-ui`; `--ci-font-display` ଏବଂ `--ci-font-mono` ଏହାର ସମାଧାନ) ପାଇଁ ସ୍ୱିଜର ହେଉଛି ଏକକ ପରିବାର, କିଟ୍ ନିଜେ ସ୍ୱ-ହୋଷ୍ଟ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ଦ୍ୱାରା ଆମଦାନୀ) \| ସ୍କ୍ରିପ୍ଟର ସ୍ itzer ିଜର ଅଭାବ ଗ୍ଲାଇଫ୍ (`src/app/globals.css`) ଦ୍ୱାରା ଗ୍ଲାଇଫ୍ ମାଧ୍ୟମରେ ପଡେ: ସିରିଲିକ୍, ଗ୍ରୀକ୍ ଏବଂ ଭିଏତନାମ ପାଇଁ ଇଣ୍ଟର ଏବଂ କେବଳ `html[dir="rtl"]` ଅଧୀନରେ, ଆରବୀୟ ସ୍କ୍ରିପ୍ଟ ପାଇଁ ଭାଜିରମାଟନ୍ \| ପ୍ରତ୍ୟେକ ଆଇକନ୍ ହେଉଛି ଏକ ଲୁସିଡ୍ ଗ୍ଲାଇଫ୍ \|
 
 ## 1. ଜିନିଷଗୁଡ଼ିକ କେଉଁଠାରେ ରହିଛି
 
@@ -22,36 +16,15 @@
 - **ଆଇକନ୍ଗୁଡ଼ିକ।** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ନାମକୁ (ସ୍କ୍ରିନ୍ଗୁଡ଼ିକ ବ୍ୟବହାର କରୁଥିବା Material Symbols ଶବ୍ଦକୋଷ) `ICON_MAP` (`src/shared/constants/iconMap.ts`) ମାଧ୍ୟମରେ ଏକ Lucide ଗ୍ଲିଫ୍ କୁ ରିଜଲ୍ଭ କରେ। Material Symbols ଫଣ୍ଟ ଏବଂ ପ୍ୟାକେଜ୍ ବର୍ତ୍ତମାନ ନାହିଁ: ମ୍ୟାପରେ ନ ଥିବା ନାମ ଏକ ନିରପେକ୍ଷ ପ୍ଲେସହୋଲ୍ଡର୍ ଗ୍ଲିଫ୍ ରେଣ୍ଡର୍ କରେ (`data-icon-missing="true"`) ଏବଂ ପ୍ରୋଡକ୍ସନ୍ ବାହାରେ କନସୋଲ୍ ଚେତାବନୀ ଲଗ୍ କରେ। `npm run gen:icon-map` ବ୍ୟବହୃତ ହେଉଥିବା ଏବଂ ମ୍ୟାପରେ ନ ଥିବା ନାମଗୁଡ଼ିକୁ ପ୍ରିଣ୍ଟ କରେ (`tests/unit/icon-map-coverage.test.ts` Lucide ଆଇକନ୍ ବିନା ଯେକୌଣସି ନାମରେ ବିଫଳ ହୁଏ; `tests/unit/icon-map-object-values.test.ts` ଲୁକଅପ୍ ଅବଜେକ୍ଟଗୁଡ଼ିକରେ ସଂରକ୍ଷିତ ନାମଗୁଡ଼ିକୁ କଭର୍ କରେ); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ଆକ୍ଷରିକ `<span className="material-symbols-outlined">` ସ୍ପାନ୍ଗୁଡ଼ିକୁ `<Icon>` କୁ ପୁନଃଲେଖିଥାଏ।
 - **ବ୍ରାଣ୍ଡ।** `src/shared/components/OmniRouteLogo.tsx` କିଟ୍କୁ ରାପ୍ କରେ: ଡିଫଲ୍ଟ ଏକ୍ସପୋର୍ଟ `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` ରେଣ୍ଡର୍ କରେ (ଇନଲାଇନ୍ SVG, `basePath`-ସୁରକ୍ଷିତ) ଏବଂ `OmniRouteLockup` `ProductLockup product="omniroute"` ରେଣ୍ଡର୍ କରେ (ଆକ୍ସେସିବଲ୍ ନାମ "Keak OmniRoute") କିମ୍ବା, ହ୍ୱାଇଟ୍-ଲେବଲ୍ ଅପରେଟରମାନଙ୍କ ପାଇଁ, ସେମାନଙ୍କ ନିଜସ୍ୱ `name`/`logoSrc`। ପ୍ରୋଡକ୍ଟ-ସ୍ୱିଚର୍ ଗନ୍ତବ୍ୟଗୁଡ଼ିକ `src/shared/constants/keakProducts.ts` ରେ ରହିଛି (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)। ଷ୍ଟାଣ୍ଡଅଲୋନ୍ ସ୍କ୍ରିନ୍ଗୁଡ଼ିକ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ଏବଂ `src/shared/components/ErrorPageScaffold.tsx` — ଲକଅପ୍ ଦେଖାନ୍ତି; `tests/unit/brand-pages-static.test.ts` ଏହାକୁ ସୁରକ୍ଷା ଦିଏ।
 
-## 2. ନିୟମଗୁଡ଼ିକ
+## 2। ନିୟମ
 
-1. ଟୋକନ୍ଗୁଡ଼ିକ, କେବେବି ଲିଟେରାଲ୍ ନୁହେଁ। ଇଚ୍ଛାକୃତ ଭାବେ ରଖାଯାଇଥିବା ବ୍ୟତିକ୍ରମଗୁଡ଼ିକ: ସର୍ବଦା-ଗାଢ଼ କନସୋଲ୍ ଟର୍ମିନାଲ୍ ଏବଂ
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ଯାହା ଲିଟେରାଲ୍ hex ଆବଶ୍ୟକ କରୁଥିବା କଲର୍ମାନଙ୍କ ପାଇଁ କିଟ୍ ଷ୍ଟାଟସ୍
-   ପ୍ୟାଲେଟ୍ର resolved-hex ଦର୍ପଣ। ବର୍ଗୀକୃତ ପ୍ୟାଲେଟ୍ଗୁଡ଼ିକ ଆଉ ବ୍ୟତିକ୍ରମ ନୁହଁନ୍ତି:
-   ସେଗୁଡ଼ିକ କିଟ୍ର ପାଞ୍ଚଟି ଚାର୍ଟ ଟୋକନ୍ (`--color-chart-1..5`) ଉପରେ
-   `src/shared/utils/categoricalPalette.ts` ମାଧ୍ୟମରେ ଏବଂ ରାଉଟିଂ ଷ୍ଟ୍ରାଟେଜି ପାଇଁ
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ମାଧ୍ୟମରେ ଚାଲନ୍ତି; ReactFlow ଏଜ୍ଗୁଡ଼ିକ ଏବଂ ଅର୍କେଷ୍ଟ୍ରେସନ୍
-   କ୍ୟାନଭାସ୍ ଥିମ୍-ସଚେତନ `--orch-status-*` ଭେରିଏବଲ୍ଗୁଡ଼ିକୁ ପଢ଼ନ୍ତି (`src/shared/components/flow/edgeStyles.ts`)।
-2. `packages/ui-kit/src`କୁ କେବେବି ହାତରେ ପ୍ୟାଚ୍ କରନ୍ତୁ ନାହିଁ: `scripts/dev/sync-ui-kit.sh <commit>` ସହିତ ସିଙ୍କ୍ କରନ୍ତୁ;
-   pre-commit ଗେଟ୍ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ପିନ୍ କରାଯାଇଥିବା ଅପଷ୍ଟ୍ରିମ୍ କମିଟ୍ଠାରୁ ଭିନ୍ନ ଥିବା ଯେକୌଣସି
-   ବାଇଟ୍ରେ ବିଫଳ ହୁଏ (ଯେତେବେଳେ ଅପଷ୍ଟ୍ରିମ୍ କ୍ଲୋନ୍, `UI_KIT_CLONE` କିମ୍ବା `_references/cheaper-inference-ui-kit`, ଅନୁପସ୍ଥିତ ଥାଏ,
-   ସେତେବେଳେ ଏହା ଚେତାବନୀ ସହିତ ଏଡ଼ାଇ ଯାଏ)। କିଟ୍ରେ ଯେତେବେଳେ କିଛି ଅଭାବ ଥାଏ,
-   ଆଡାପ୍ଟର କିମ୍ବା ସ୍କ୍ରିନ୍ରେ ଏହାକୁ ପରିକ୍ରମ କରନ୍ତୁ ଏବଂ ଅପଷ୍ଟ୍ରିମ୍କୁ ତାହା ଲାଗି ଅନୁରୋଧ କରନ୍ତୁ।
-3. କିଟ୍ ଟେକ୍ସଟ୍ ଡିଫଲ୍ଟଗୁଡ଼ିକ ଇଂରାଜୀ ଅଟେ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ଯେତେବେଳେ କୌଣସି କିଟ୍ କମ୍ପୋନେଣ୍ଟ୍ ଟେକ୍ସଟ୍ ରେଣ୍ଡର୍ କରେ,
-   ସେତେବେଳେ `useTranslations(...)`ରୁ ଅନୁବାଦିତ ଷ୍ଟ୍ରିଂଗୁଡ଼ିକ ପାସ୍ କରନ୍ତୁ।
-4. Tailwind ୟୁଟିଲିଟିଗୁଡ଼ିକ କିଟ୍ କମ୍ପୋନେଣ୍ଟ୍ କ୍ଲାସ୍ଗୁଡ଼ିକ ଉପରେ ପ୍ରାଧାନ୍ୟ ପାଏ (କିଟ୍
-   `@layer theme, base, components, utilities` ଘୋଷଣା କରେ ଏବଂ ଏହାର ନିୟମଗୁଡ଼ିକ `components`ରେ ରହେ) — ବ୍ୟବଧାନ ଏବଂ ଲେଆଉଟ୍ ପାଇଁ
-   ୟୁଟିଲିଟିଗୁଡ଼ିକ ବ୍ୟବହାର କରନ୍ତୁ, କିଟ୍ କମ୍ପୋନେଣ୍ଟ୍ଗୁଡ଼ିକୁ ପୁନଃ-ରଙ୍ଗ କରିବା ପାଇଁ ନୁହେଁ।
-5. ଶୀର୍ଷକଗୁଡ଼ିକ: ପୃଷ୍ଠା ଏବଂ ବିଭାଗ ଶୀର୍ଷକ ପାଇଁ `.ci-heading` (Inter, କୌଣସି ଟ୍ରାକିଂ ନାହିଁ); କେବଳ ବଡ଼, ବିରଳ ଡିସପ୍ଲେ ଟେକ୍ସଟ୍
-   ଯେପରିକି ତ୍ରୁଟି-ପୃଷ୍ଠା ଷ୍ଟାଟସ୍ କୋଡ୍ ପାଇଁ `.ci-dashboard-display` (Instrument Serif)।
-6. `tests/unit/dashboard-kit-sweep.test.ts` କିଟ୍ ଅଙ୍ଗୀକାରକୁ ରକ୍ଷା କରେ: `src/app` କିମ୍ବା
-   `src/shared/components` ଅଧୀନରେ କୌଣସି Material ligature span ନାହିଁ; ଡାଶବୋର୍ଡ ଟ୍ରୀ (`src/app/(dashboard)` ଏବଂ
-   `src/shared/components`)ରେ କୌଣସି କଞ୍ଚା `<select>`, `<textarea>` କିମ୍ବା `<table>` ନାହିଁ ଏବଂ ତାଲିକାଭୁକ୍ତ ବ୍ୟତିକ୍ରମଗୁଡ଼ିକ
-   (`Select` ଆଡାପ୍ଟରର ନେଟିଭ୍ ଶାଖା, `RequestLoggerDetail`) ବାହାରେ କୌଣସି ହାତ-ନିର୍ମିତ
-   `role="dialog"` ନାହିଁ; ସେଠାରେ ପ୍ରତ୍ୟେକ କଞ୍ଚା `<button>` କିମ୍ବା `<input>` ନିଜର ସର୍ବାଧିକ 3 ଧାଡ଼ି ଉପରେ ଶେଷ ହେଉଥିବା,
-   `kit-exception:` (କାରଣ ସହିତ) ଥିବା ଏକ ମନ୍ତବ୍ୟ ଆବଶ୍ୟକ କରେ; ପ୍ୟାଲେଟ୍ ରଙ୍ଗଗୁଡ଼ିକ ଏବଂ `dark:` ଭ୍ୟାରିଆଣ୍ଟଗୁଡ଼ିକ
-   କେବଳ ପରୀକ୍ଷା ଦ୍ୱାରା ତାଲିକାଭୁକ୍ତ ଫାଇଲ୍ଗୁଡ଼ିକରେ।
-7. PR ପୂର୍ବରୁ ଉଭୟ ଥିମ୍ ଏବଂ 390 px ଭ୍ୟୁପୋର୍ଟ ଯାଞ୍ଚ କରନ୍ତୁ (ସ୍କ୍ରିନସଟ୍ଗୁଡ଼ିକ); `tests/e2e/a11y.spec.ts`
-   axe ଚଲାଏ।
+1. ଟୋକେନ୍, କଦାପି ଆକ୍ଷରିକ ନୁହେଁ \| ଉଦ୍ଦେଶ୍ୟରେ ରଖାଯାଇଥିବା ବ୍ୟତିକ୍ରମଗୁଡିକ: ସର୍ବଦା-ଗା dark କନସୋଲ୍ ଟର୍ମିନାଲ୍ ଏବଂ `STATUS_HEX` (`src/shared/constants/statusColors.ts`), କିଟ୍ ଷ୍ଟାଟସ୍ ପ୍ୟାଲେଟ୍ ର ସମାଧାନ-ହେକ୍ସ ଦର୍ପଣ ଯାହା ଏକ ଆକ୍ଷରିକ ହେକ୍ସ ଆବଶ୍ୟକ କରେ \| ଶ୍ରେଣୀଗତ ପ୍ୟାଲେଟ୍ ଗୁଡିକ ଆଉ କ exception ଣସି ବ୍ୟତିକ୍ରମ ନୁହେଁ: ସେମାନେ କିଟ୍ ର ପାଞ୍ଚଟି ଚାର୍ଟ ଟୋକେନ୍ (`--color-chart-1..5`) ଉପରେ `src/shared/utils/categoricalPalette.ts` ମାଧ୍ୟମରେ ଏବଂ ରାଉଟିଙ୍ଗ୍ ରଣନୀତି ପାଇଁ, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ଧାର ଏବଂ ଅର୍କେଷ୍ଟ୍ରେସନ୍ କାନଭାସ୍ ଥିମ୍-ସଚେତନ `--orch-status-*` ଭେରିଏବଲ୍ (`src/shared/components/flow/edgeStyles.ts`) ପ read ନ୍ତି \|
+2. `packages/ui-kit/src` କେବେବି ହାତରେ ପ୍ୟାଚ୍ କରନ୍ତୁ ନାହିଁ: `scripts/dev/sync-ui-kit.sh <commit>` ସହିତ ସିଙ୍କ କରନ୍ତୁ; ପ୍ରି-କମାଇଟ୍ ଗେଟ୍ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ଯେକ any ଣସି ବାଇଟ୍ ଉପରେ ବିଫଳ ହୁଏ ଯାହା ପିନ୍ ହୋଇଥିବା ଅପଷ୍ଟ୍ରିମ୍ ପ୍ରତିଶ୍ରୁତିଠାରୁ ଭିନ୍ନ ଅଟେ (ଅପଷ୍ଟ୍ରିମ୍ କ୍ଲୋନ୍, `UI_KIT_CLONE` କିମ୍ବା `_references/cheaper-inference-ui-kit` ଅନୁପସ୍ଥିତ ଥିବାବେଳେ ଏହା ଏକ ଚେତାବନୀ ସହିତ ଛାଡିଥାଏ) \| ଯେତେବେଳେ କିଟରେ କିଛି ଅଭାବ ଥାଏ, ଆଡାପ୍ଟର କିମ୍ବା ସ୍କ୍ରିନରେ ଏହାର ଚାରିପାଖରେ କାମ କର ଏବଂ ଏହା ପାଇଁ ଅପଷ୍ଟ୍ରିମକୁ ପଚାର \|
+3. କିଟ୍ ପାଠ୍ୟ ଡିଫଲ୍ଟଗୁଡ଼ିକ ହେଉଛି ଇଂରାଜୀ (`label = "Loading"`, `loadingLabel = "Loading table"`…) - ଯେତେବେଳେ କିଟ୍ ଉପାଦାନ ପାଠ୍ୟ ପ୍ରଦାନ କରେ `useTranslations(...)` ରୁ ଅନୁବାଦିତ ଷ୍ଟ୍ରିଙ୍ଗଗୁଡ଼ିକୁ ପାସ୍ କର \|
+4. ଟେଲୱିଣ୍ଡ ଉପଯୋଗୀତା କିଟ୍ ଉପାଦାନ ଶ୍ରେଣୀଗୁଡ଼ିକ ଉପରେ ଜିତେ (କିଟ୍ `@layer theme, base, components, utilities` ଘୋଷଣା କରେ ଏବଂ ଏହାର ନିୟମ `components` ରେ ବାସ କରେ) - କିଟ୍ ଉପାଦାନଗୁଡ଼ିକୁ ପୁନ color ରଙ୍ଗ କରିବା ପାଇଁ ନୁହେଁ, ବ୍ୟବଧାନ ଏବଂ ଲେଆଉଟ୍ ପାଇଁ ଉପଯୋଗିତା ବ୍ୟବହାର କର \|
+5. ଶିରୋନାମା: ପୃଷ୍ଠା ଏବଂ ବିଭାଗ ଶିରୋନାମା ପାଇଁ `.ci-heading` ; `.ci-dashboard-display` କେବଳ ବଡ଼, ସ୍ୱଳ୍ପ ପ୍ରଦର୍ଶନ ପାଠ୍ୟ ପାଇଁ ଯେପରିକି ତ୍ରୁଟି-ପୃଷ୍ଠା ସ୍ଥିତି କୋଡ୍ \| ଉଭୟ ସ୍ୱିଜର ବ୍ୟବହାର କରନ୍ତି \|
+6. `tests/unit/dashboard-kit-sweep.test.ts` କିଟ୍ ଗ୍ରହଣକୁ ଜଗିଥାଏ: `src/app` କିମ୍ବା `src/shared/components` ଅଧୀନରେ କ Material ଣସି ସାମଗ୍ରୀ ଲିଗାଚର୍ ସ୍ପାନ୍ ନାହିଁ \| ଡ୍ୟାସବୋର୍ଡ ଗଛରେ (`src/app/(dashboard)` ଏବଂ `src/shared/components`) କ raw ଣସି କଞ୍ଚା `<select>`, `<textarea>` କିମ୍ବା `<table>` ଏବଂ ତାଲିକାଭୁକ୍ତ ବ୍ୟତିକ୍ରମ ବାହାରେ କ hand ଣସି ହାତରେ ଗଡ଼ାଯାଇଥିବା `role="dialog"` ନାହିଁ ( `Select` ଆଡାପ୍ଟରର ମୂଳ ଶାଖା, `RequestLoggerDetail`); ପ୍ରତ୍ୟେକ କଞ୍ଚା `<button>` କିମ୍ବା `<input>` ସେଠାରେ `kit-exception:` ଧାରଣ କରିଥିବା ଏକ ମନ୍ତବ୍ୟ ଆବଶ୍ୟକ କରେ (କାରଣ ସହିତ) ଏହା ଉପରେ 3 ଟି ଧାଡିରେ ଶେଷ ହୁଏ; ପ୍ୟାଲେଟ୍ ହ୍ୟୁସ୍ ଏବଂ `dark:` ପ୍ରକାରଗୁଡ଼ିକ କେବଳ ପରୀକ୍ଷା ତାଲିକାରେ ଥିବା ଫାଇଲଗୁଡ଼ିକରେ \|
+7. PR (ସ୍କ୍ରିନ୍ ସଟ୍) ପୂର୍ବରୁ ଉଭୟ ଥିମ୍ ଏବଂ 390 px ଭ୍ୟୁପୋର୍ଟ ଯାଞ୍ଚ କରନ୍ତୁ \| `tests/e2e/a11y.spec.ts` runs ଼ୀ ଚଲାଇଥାଏ \|
 
 ## 3. ଏକ ସ୍କ୍ରିନ୍ ଯୋଡ଼ିବା
 
@@ -80,20 +53,50 @@
 3. କିଟ୍ର ଅଭାବଗୁଡ଼ିକ ପାଇଁ workaround ଆଡାପ୍ଟରରେ ରହିବ (କିମ୍ବା ଯେତେବେଳେ ସମାଧାନଟି ଷ୍ଟାଇଲ୍, `globals.css` `@layer components` ଭିତରେ), କେବେ `packages/ui-kit/src` ରେ ନୁହେଁ ।
 4. `tests/unit/ui/adapters/<name>.test.tsx` ଯୋଡ଼ନ୍ତୁ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ । ଅନେକ caller ଥିବା ଆଡାପ୍ଟର ପାଇଁ, ପରିବର୍ତ୍ତନ ପୂର୍ବରୁ ଏବଂ ପରେ ରେଣ୍ଡର୍ ହୋଇଥିବା ମାର୍କଅପ୍ ତୁଳନା କରନ୍ତୁ — padding କିମ୍ବା wrapper ପରିବର୍ତ୍ତନ ପ୍ରତ୍ୟେକ ସ୍କ୍ରିନ୍କୁ ବ୍ୟାପିଯାଏ ।
 
-## 5. କିଟ୍ ଅଦ୍ୟତନ କରିବା
+## 5 କିଟ୍ ଅପଡେଟ୍ କରିବା \|
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ସେହି commit ରେ ଥିବା upstream `src/` କୁ `packages/ui-kit/src` ଭିତରକୁ କପି କରେ ଏବଂ ଏକମାତ୍ର ଅନୁମୋଦିତ ରୂପାନ୍ତର ପ୍ରୟୋଗ କରେ (ଏହା relative import ଗୁଡ଼ିକରୁ `.js` ପ୍ରତ୍ୟୟ କାଢ଼ିଦିଏ) । ତାପରେ: `git diff packages/ui-kit` ସମୀକ୍ଷା କରନ୍ତୁ, ଉଭୟ ଥିମ୍ରେ providers, settings, combos, usage ଏବଂ endpoint ଉପରେ ଭିଜୁଆଲ୍ ଯାଞ୍ଚ କରନ୍ତୁ, `npm run check:ui-kit-snapshot` ଏବଂ `npm run test:vitest:ui` ଚଲାନ୍ତୁ, ଏବଂ upstream changelog ସହିତ PR ଖୋଲନ୍ତୁ ।
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ରେ ପିନ୍ ହୋଇଥିବା ସଂସ୍କରଣକୁ ଅପଷ୍ଟ୍ରିମ୍ ରେପୋ ର ନୂତନ `v*` ଟ୍ୟାଗ୍ ସହିତ ତୁଳନା କରେ ଏବଂ ଏକ ରିଲିଜ୍ ବାହାରେ ସିଙ୍କ କମାଣ୍ଡ ପ୍ରିଣ୍ଟ୍ କରେ \|
 
-## 6. README ଡାଏଗ୍ରାମ୍ଗୁଡ଼ିକ
+ଦ daily `UI Kit upstream watch` ୱାର୍କଫ୍ଲୋ (`.github/workflows/ui-kit-upstream-watch.yml`) ସମାନ ଯାଞ୍ଚ କରେ \| ପିନ୍ ପଛରେ ଥିବାବେଳେ, `scripts/ci/ui-kit-sync-pr.sh` ରୋଲ୍ ଶାଖା `chore/ui-kit-sync-latest` ଉପରେ ସର୍ବୋଚ୍ଚ `release/vX.Y.Z` ଶାଖା ବିରୁଦ୍ଧରେ ଗୋଟିଏ ସିଙ୍କ PR ଖୋଲା ରଖେ \| ଏହା କଦାପି ମିଶ୍ରିତ ହୁଏ ନାହିଁ: ପ୍ରତ୍ୟେକ କିଟ୍ ରିଲିଜ୍ ତଥାପି ସ୍ଥାନୀୟ VPS ଉପରେ ଏକ ଭିଜୁଆଲ୍ ଯାଞ୍ଚ ଆବଶ୍ୟକ କରେ \| ଯେତେବେଳେ ଏକ ନୂତନ ରିଲିଜ୍ ବାହାରେ ଏବଂ ଅନ୍ୟଥା ଏକାକୀ ଛାଡି ଦିଆଯାଏ, ଶାଖା ପୁନ ilt ନିର୍ମାଣ ହୁଏ \| ହାତରେ ଠେଲି ହୋଇଥିବା କାର୍ଯ୍ୟ ସହିତ ଏକ ଖୋଲା PR ଓଭର୍ ରାଇଟ୍ ହୋଇନାହିଁ, ଏବଂ ଏକ ସଂସ୍କରଣ ପାଇଁ ଏକ PR ଯାହାକି ଏକ ରକ୍ଷକ ବନ୍ଦ ହୋଇନଥିବା ଏକ ନୂତନ ପ୍ରକାଶନ ପର୍ଯ୍ୟନ୍ତ ବନ୍ଦ ରହିଥାଏ \|
 
-ମୂଳ `README.md` ଏମ୍ବେଡ୍ କରିଥିବା ବାରଟି ଡାଏଗ୍ରାମ୍ (`docs/diagrams/*.svg`) ହେଉଛି ଏକ ସ୍ଥିର ଚିତ୍ର ଉପରେ ପ୍ରୟୋଗ କରାଯାଇଥିବା କିଟ୍, ଏବଂ ସେଗୁଡ଼ିକ ହାତରେ ଅଙ୍କା ଯାଇ ନାହିଁ, ଜେନେରେଟ୍ କରାଯାଇଥାଏ: `scripts/docs/gen-readme-*.mjs` ରେ 13ଟି ଜେନେରେଟର ଫାଇଲ୍ (ବାରଟି ଡାଏଗ୍ରାମ୍ ସହିତ `gen-readme-diagrams.mjs` ଡ୍ରାଇଭର୍) ଏବଂ `tests/unit/docs/readme-*-svg.test.ts` ରେ 12ଟି staleness ଟେଷ୍ଟ, ପ୍ରତି ଡାଏଗ୍ରାମ୍ ପାଇଁ ଗୋଟିଏ ଲେଖାଏଁ, ପ୍ରତ୍ୟେକ କମିଟ୍ ହୋଇଥିବା ଫାଇଲ୍କୁ ତା'ର ଜେନେରେଟର୍ର ଆଉଟପୁଟ୍ ସହିତ byte-by-byte ତୁଳନା କରେ (job `test-unit`) ।
+ଯେତେବେଳେ କ z ଣସି PR ଖୋଲାଯାଇପାରିବ ନାହିଁ (ଟାର୍ଗେଟ୍ ରିଲିଜ୍ ଫ୍ରିଜ୍ ହୋଇଛି, PR ହାତରେ ଠେଲି ହୋଇସାରିଛି, PR ବନ୍ଦ ହୋଇଯାଇଥିଲା, କିମ୍ବା କ z ଣସି PR ଟୋକେନ୍ ସେଟ୍ ହୋଇନାହିଁ) ୱାର୍କଫ୍ଲୋ ଗୋଟିଏ ଟ୍ରାକିଂ ସମସ୍ୟାକୁ ଖୋଲା ରଖେ ଯାହା କାହିଁକି କହିଥାଏ \|
 
-- **ଟୋକନ୍।** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ରୁ ପ୍ୟାଲେଟ୍ କପି କରେ (ସେହି ଫାଇଲ୍ ବିରୁଦ୍ଧରେ `tests/unit/docs/readme-diagram-theme.test.ts` ଦ୍ୱାରା pinned) ଏବଂ କିଟ୍ ଟାଇପ୍ଫେସ୍ଗୁଡ଼ିକ ପାଇଁ ଟେକ୍ସଟ ଭୂମିକା ନିର୍ଦ୍ଧାରଣ କରେ — ଡିସପ୍ଲେ ପାଇଁ Instrument Serif, UI ଟେକ୍ସଟ ପାଇଁ Inter, ସଂଖ୍ୟା ଏବଂ କୋଡ୍ ପାଇଁ IBM Plex Mono, ସେହି ସମାନ `@fontsource` ପ୍ୟାକେଜ୍ଗୁଡ଼ିକ ଯାହା `src/app/globals.css` ଡ୍ୟାସବୋର୍ଡ ପାଇଁ ଲୋଡ୍ କରେ । light ମୂଲ୍ୟଗୁଡ଼ିକ `:root` ଉପରେ ରହେ, dark ମୂଲ୍ୟଗୁଡ଼ିକ ଫାଇଲ୍ ଭିତରେ `prefers-color-scheme: dark` ପଛରେ ରହେ, ଯାହାଦ୍ୱାରା ପ୍ରତ୍ୟେକ ଚିତ୍ର GitHub ରେ ଦର୍ଶକଙ୍କ scheme ଅନୁସରଣ କରେ ।
-- **ଫଣ୍ଟ।** `scripts/docs/readme-fonts.mjs` ସେହି woff2 ଫାଇଲ୍ଗୁଡ଼ିକୁ ପ୍ରତ୍ୟେକ ଡାଏଗ୍ରାମ୍ ଅଙ୍କନ କରୁଥିବା glyph ଗୁଡ଼ିକ ପର୍ଯ୍ୟନ୍ତ subset କରେ ଏବଂ ସେଗୁଡ଼ିକୁ `@font-face` `data:` URI ଭାବରେ ଏମ୍ବେଡ୍ କରେ — କିଟ୍ typography ଏକ README ଚିତ୍ରରେ ପହଞ୍ଚିବାର ଏକମାତ୍ର ଉପାୟ, କାରଣ GitHub Markdown କୌଣସି CSS ବହନ କରେ ନାହିଁ ଏବଂ camo proxy ପ୍ରତ୍ୟେକ ବାହ୍ୟ fetch କୁ ବ୍ଲକ୍ କରେ । subset ଗୁଡ଼ିକ କେବଳ latin; system stack କୁ fallback କରୁଥିବା ପ୍ରତୀକ glyph ଗୁଡ଼ିକୁ `SYMBOL_FALLBACKS` ରେ ଗୋଟିଏ ଗୋଟିଏ କରି ଅନୁମତି ଦିଆଯାଏ, ଏବଂ ଅନ୍ୟ ଯେକୌଣସି uncovered glyph throw କରେ ।
-- **ପୁଣି ଜେନେରେଟ୍।** `npm run docs:readme-diagrams` README କ୍ରମରେ ସମସ୍ତ ବାରଟିକୁ ପୁନର୍ଲେଖନ କରେ ଏବଂ ପ୍ରତି ଫାଇଲ୍ ପାଇଁ ତା'ର ଆକାର ସହିତ ଗୋଟିଏ ଧାଡ଼ି ପ୍ରିଣ୍ଟ କରେ । ଗୋଟିଏ ଜେନେରେଟର ମଧ୍ୟ ଏକାକୀ ଚାଲେ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` କୁ `node --import tsx/esm` ଦରକାର କାରଣ ଏହାର ସଂଖ୍ୟାଗୁଡ଼ିକ `open-sse/config/freeModelCatalog.ts` ରେ ଥିବା live catalog loader ରୁ ଆସେ; catalog ପରିବର୍ତ୍ତନର CI ପରିଣାମ `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ରେ ଅଛି) । ଜେନେରେଟର ଏବଂ SVG କୁ ଏକାଠି କମିଟ୍ କରନ୍ତୁ ।
-- **ପ୍ରମାଣ।** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ଏକ ଫାଇଲ୍କୁ GitHub ଯେପରି ପରିବେଷଣ କରେ ଠିକ୍ ସେହିପରି ରେଣ୍ଡର୍ କରେ (ଗୋଟିଏ `<img>` ଟ୍ୟାଗ୍, camo ର `Content-Security-Policy`, `image/svg+xml`), ଗୋଟିଏ light ଏବଂ ଗୋଟିଏ dark ଫ୍ରେମ୍ କ୍ୟାପଚର୍ କରେ ଏବଂ ପୃଷ୍ଠା କରିଥିବା ବାହ୍ୟ ଫଣ୍ଟ ଅନୁରୋଧଗୁଡ଼ିକ ରିପୋର୍ଟ କରେ (0 ହେବା ଆବଶ୍ୟକ) ।
-- **ବଜେଟ୍।** ପ୍ରତି ଫାଇଲ୍ 200 KB ରୁ କମ୍ (ପ୍ରତ୍ୟେକ staleness ଟେଷ୍ଟ ଏହା ଯାଞ୍ଚ କରେ); 500 KB ହେଉଛି ଯେକୌଣସି README ଚିତ୍ର ପାଇଁ କଠୋର ସର୍ବାଧିକ ସୀମା (SVG studio validator ର ନିୟମ) ।
-- **କପି ଅପରିବର୍ତ୍ତିତ, ଗଣନା ଗେଟ୍ରୁ।** ରିବ୍ରାଣ୍ଡ୍ ଟାଇପୋଗ୍ରାଫି ଏବଂ ପ୍ୟାଲେଟ୍ ବଦଳାଇଥିଲା, ଶବ୍ଦ ନୁହେଁ: ପ୍ରତ୍ୟେକ ଜେନେରେଟର ନିଜ ଡାଏଗ୍ରାମ୍ର କପି ଏକ `*_COPY` ଧ୍ରୁବକରେ ବହନ କରେ (କିମ୍ବା live catalog ରୁ ତିଆରି କରେ) ଯାହା ଅଙ୍କିତ ଟେକ୍ସଟ ଏବଂ ଫଣ୍ଟ-subset ଇନପୁଟ୍ ଉଭୟ ଅଟେ । ପ୍ରାମାଣିକ ସଂଖ୍ୟାଗୁଡ଼ିକ `<text>` ନୋଡ୍ଗୁଡ଼ିକରେ ରହେ, ଯାହାକୁ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ପଢ଼େ; ଯେଉଁ ଡାଏଗ୍ରାମ୍ଗୁଡ଼ିକୁ ଗେଟ୍ ପଢ଼େ ସେଗୁଡ଼ିକର staleness ଟେଷ୍ଟ ଜେନେରେଟ୍ ହୋଇଥିବା ଫାଇଲ୍ ଉପରେ ଏହାର validator ଗୁଡ଼ିକୁ ମଧ୍ୟ ଚଲାଏ, ତେଣୁ କୋଡ୍ଠାରୁ ବିଚ୍ୟୁତ ହୋଇଥିବା ସଂଖ୍ୟା ଟେଷ୍ଟରେ ବିଫଳ ହୁଏ — ଗେଟ୍ ପଢ଼ୁଥିବା ଉତ୍ସକୁ ଠିକ୍ କରନ୍ତୁ, ଜେନେରେଟରରେ ଥିବା ସଂଖ୍ୟାକୁ କେବେ ନୁହେଁ ।
+କାର୍ଯ୍ୟ ପ୍ରବାହ ଦୁଇଟି ରହସ୍ୟ ବ୍ୟବହାର କରେ:
+
+- `secrets.UI_KIT_READ_TOKEN`: ବ୍ୟକ୍ତିଗତ ଅପଷ୍ଟ୍ରିମ୍ ରେପୋ ପାଇଁ କେବଳ ପଠନୀୟ ଟୋକନ୍ \| ଯେତେବେଳେ ୱାର୍କଫ୍ଲୋ ଅପଷ୍ଟ୍ରିମକୁ ପ read ି ପାରିବ ନାହିଁ (କ to ଣସି ଟୋକେନ୍, ଏକ ଟୋକେନ୍ ଯାହା କାମ ବନ୍ଦ କରିଦେଲା, କିମ୍ବା GitHub ଅପହଞ୍ଚ) ରନ୍ ସବୁଜ ରହେ କିନ୍ତୁ ଏକ ଚେତାବନୀ ଲେଖେ ଏବଂ ଗୋଟିଏ ପୃଥକ ପ୍ରସଙ୍ଗ ଖୋଲା ରଖେ, ଯାହା ପରବର୍ତ୍ତୀ ରନ୍ ପୁନର୍ବାର ଅପଷ୍ଟ୍ରିମ୍ ପ read ିପାରେ \|
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: ବିଷୟବସ୍ତୁ ଏବଂ ପଲ୍ ଅନୁରୋଧ ଲେଖିବା ସହିତ ଏହି ସଂଗ୍ରହାଳୟରେ ଏକ ସୂକ୍ଷ୍ମ ଟୋକେନ୍ \| ଡିଫଲ୍ଟ `GITHUB_TOKEN` ଏଠାରେ PRs ସୃଷ୍ଟି କରିପାରିବ ନାହିଁ, ଏବଂ ଏହା ଖୋଲିଥିବା PR CI ଟ୍ରିଗର କରିବ ନାହିଁ \| ଏହି ଟୋକନ୍ ବିନା କାର୍ଯ୍ୟ ପ୍ରବାହ କେବଳ ଶାଖାକୁ ଠେଲିଦିଏ \|
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ସେହି ପ୍ରତିଶ୍ରୁତିରେ ଅପଷ୍ଟ୍ରିମ୍ `src/` କପି କରେ (`latest` = ନୂତନ `v*` ଟ୍ୟାଗ୍) `packages/ui-kit/src` ରେ, ଏକକ ଅନୁମତିପ୍ରାପ୍ତ ରୂପାନ୍ତରଣକୁ ପ୍ରୟୋଗ କରେ (ଏହା ଆପେକ୍ଷିକ ଆମଦାନୀରୁ `.js` ସଫିକ୍ସକୁ ଡ୍ରପ୍ କରେ), ଏବଂ କାର୍ଯ୍ୟକ୍ଷେତ୍ର ସଂସ୍କରଣକୁ `packages/ui-kit/package.json` ଏବଂ `package-lock.json` ରେ ଅପଷ୍ଟ୍ରିମ୍ ରେ ସେଟ୍ କରେ \| ତାପରେ: `git diff packages/ui-kit` ସମୀକ୍ଷା କରନ୍ତୁ, ପ୍ରଦାନକାରୀ, ସେଟିଂସମୂହ, କମ୍ବୋ, ବ୍ୟବହାର ଏବଂ ଶେଷ ପଏଣ୍ଟରେ ଉଭୟ ଭିଜୁଆଲ୍ ପାସ୍ କରନ୍ତୁ, `npm run check:ui-kit-snapshot` ଏବଂ `npm run test:vitest:ui` ଚଲାନ୍ତୁ, ଏବଂ ଅପଷ୍ଟ୍ରିମ୍ ଚେଞ୍ଜେଲଗ୍ ସହିତ PR ଖୋଲନ୍ତୁ \|
+
+## 6. README ଚିତ୍ରଗୁଡ଼ିକ
+
+ମୂଳ `README.md` ଯେଉଁ ବାରଟି ଚିତ୍ର (`docs/diagrams/*.svg`) ଏମ୍ବେଡ୍ କରେ, ସେଗୁଡ଼ିକ ଏକ ସ୍ଥିର
+ଛବିରେ ପ୍ରୟୋଗ କରାଯାଇଥିବା କିଟ୍, ଏବଂ ସେଗୁଡ଼ିକ ହାତରେ ଅଙ୍କା ନୁହେଁ, ଉତ୍ପାଦିତ: `scripts/docs/gen-readme-*.mjs` ରେ ଥିବା 13ଟି ଜେନେରେଟର
+ଫାଇଲ୍ (ବାରଟି ଚିତ୍ର ସହ `gen-readme-diagrams.mjs` ଡ୍ରାଇଭର୍) ଏବଂ
+`tests/unit/docs/readme-*-svg.test.ts` ରେ ଥିବା 12ଟି ପୁରୁଣାତ୍ୱ ପରୀକ୍ଷା, ପ୍ରତ୍ୟେକ ଚିତ୍ର ପାଇଁ ଗୋଟିଏ, ପ୍ରତିବଦ୍ଧ ଫାଇଲ୍କୁ ତାହାର
+ଜେନେରେଟର୍ର ଆଉଟପୁଟ୍ ସହ ପ୍ରତ୍ୟେକ ବାଇଟ୍ ତୁଳନା କରେ (`test-unit` ଜବ୍)।
+
+- **ଟୋକେନ୍ଗୁଡ଼ିକ।** `scripts/docs/readme-diagram-theme.mjs`, `packages/ui-kit/src/ci-tokens.css` ରୁ ପ୍ୟାଲେଟ୍କୁ କପି କରେ
+  (`tests/unit/docs/readme-diagram-theme.test.ts` ଦ୍ୱାରା ସେହି ଫାଇଲ୍ ସହ ପିନ୍ କରାଯାଇଛି) ଏବଂ କିଟ୍ର ଟାଇପ୍ ସ୍କେଲ୍ରେ ଟେକ୍ସଟ୍ ଭୂମିକାଗୁଡ଼ିକୁ
+  ନିର୍ଦ୍ଧାରଣ କରେ: କିଟ୍ର ଓଜନଗୁଡ଼ିକରେ (400/500/600, display ପାଇଁ 500) Switzer ଏବଂ ସବୁକିଛି ପାଇଁ ଟ୍ରାକିଂ, କେବଳ କୋଡ୍ ଭୂମିକାଗୁଡ଼ିକ
+  (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) ବ୍ୟତୀତ, ଯେଉଁଗୁଡ଼ିକ IBM Plex Mono ଏବଂ କେବଳ କମାଣ୍ଡ୍, URL, ଆଇଡେଣ୍ଟିଫାୟର୍ ଓ ଟର୍ମିନାଲ୍ ସ୍କ୍ରିନ୍ ପାଇଁ।
+  ଫାଇଲ୍ରେ `:root` ଉପରେ ହାଲୁକା ମୂଲ୍ୟଗୁଡ଼ିକ ଏବଂ `prefers-color-scheme: dark` ପଛରେ ଗାଢ଼ ମୂଲ୍ୟଗୁଡ଼ିକ ରହେ, ତେଣୁ GitHub ରେ ପ୍ରତ୍ୟେକ
+  ଛବି ଦର୍ଶକଙ୍କ ସ୍କିମ୍କୁ ଅନୁସରଣ କରେ।
+- **ଫଣ୍ଟ୍ଗୁଡ଼ିକ।** GitHub Markdown ରେ କୌଣସି CSS ନାହିଁ ଏବଂ camo ପ୍ରକ୍ସି ପ୍ରତ୍ୟେକ ବାହ୍ୟ fetch କୁ ଅବରୋଧ କରେ, ତେଣୁ କିଟ୍ର ଟାଇପ୍ ଫାଇଲ୍ ଭିତରେ
+  ରହିବାକୁ ପଡ଼େ। ପ୍ରତ୍ୟେକ ଜେନେରେଟର୍ର ଶେଷ ପଦକ୍ଷେପ `scripts/docs/readme-outline.mjs`, HarfBuzz ଦ୍ୱାରା Switzer ଭୂମିକାଗୁଡ଼ିକୁ ଆକାର ଦେଇ
+  ସେଗୁଡ଼ିକୁ ଭେକ୍ଟର୍ ଆଉଟଲାଇନ୍ (`<defs>` paths ଏବଂ `<use>`) ଭାବରେ ଅଙ୍କେ, ଏବଂ Switzer ରେ ନଥିବା ତୀର ଓ ଜ୍ୟାମିତିକ ପ୍ରତୀକଗୁଡ଼ିକୁ
+  ନିଜସ୍ୱ ମେଟ୍ରିକ୍ରେ ଅଙ୍କେ। ଆଉଟଲାଇନ୍, ଏମ୍ବେଡ୍ କରାଯାଇଥିବା ଫଣ୍ଟ୍ ନୁହେଁ: Switzer ର ଲାଇସେନ୍ସ
+  (`packages/ui-kit/src/fonts/FFL.txt`) ଲିଖିତ ଅନୁମତି ବିନା ସବ୍ସେଟିଂ ଏବଂ ଫର୍ମାଟ୍ ପରିବର୍ତ୍ତନକୁ ନିଷିଦ୍ଧ କରେ ଏବଂ ଭେକ୍ଟର୍ ଚିତ୍ରାଙ୍କନକୁ ଅନୁମତି ଦିଏ, ତେଣୁ
+  Switzer `@font-face` କିମ୍ବା `data:` URI ପୁନଃପ୍ରବେଶ କରାନ୍ତୁ ନାହିଁ। ଫାଇଲ୍ରେ ରହିଥିବା ଏକମାତ୍ର ଫଣ୍ଟ୍ ହେଉଛି ବାସ୍ତବ କୋଡ୍ ଟେକ୍ସଟ୍ ପାଇଁ
+  OFL IBM Plex Mono ସବ୍ସେଟ୍ (`scripts/docs/readme-fonts.mjs`), ଯାହା ସେହି ଅକ୍ଷରଗୁଡ଼ିକରୁ ନିର୍ମିତ; ଏହା ଏମ୍ବେଡ୍ କରିପାରୁନଥିବା କୌଣସି glyph ଥିଲେ ତ୍ରୁଟି ଦିଏ।
+- **ପୁନଃଉତ୍ପାଦନ।** `npm run docs:readme-diagrams` README କ୍ରମରେ ସମସ୍ତ ବାରଟିକୁ ପୁନଃଲେଖନ କରେ ଏବଂ ପ୍ରତ୍ୟେକ
+  ଫାଇଲ୍ର ଆକାର ସହ ଗୋଟିଏ ଲାଇନ୍ ପ୍ରିଣ୍ଟ କରେ। ଗୋଟିଏ ଜେନେରେଟର୍କୁ ମଧ୍ୟ ସ୍ୱତନ୍ତ୍ର ଭାବେ ଚଲାଯାଇପାରେ (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` ପାଇଁ `node --import tsx/esm` ଆବଶ୍ୟକ, କାରଣ ଏହାର ଆକୃତିଗୁଡ଼ିକ `open-sse/config/freeModelCatalog.ts` ର ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ଲୋଡର୍ରୁ ଆସେ; କ୍ୟାଟାଲଗ୍ ପରିବର୍ତ୍ତନର CI ପରିଣାମ
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ରେ ରହିଛି)। ଜେନେରେଟର୍ ଏବଂ SVG କୁ ଏକାସାଙ୍ଗେ କମିଟ୍ କରନ୍ତୁ।
+- **ପ୍ରମାଣ।** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub ଯେପରି ଏହାକୁ ପରିବେଷଣ କରେ ସେହିପରି ଗୋଟିଏ ଫାଇଲ୍ ରେଣ୍ଡର୍ କରେ (ଗୋଟିଏ `<img>` ଟ୍ୟାଗ୍, camo ର `Content-Security-Policy`, `image/svg+xml`), ହାଲୁକା ଏବଂ ଗାଢ଼ ଫ୍ରେମ୍ କ୍ୟାପଚର୍ କରେ ଏବଂ ପେଜ୍ କରିଥିବା ବାହ୍ୟ ଫଣ୍ଟ୍ ଅନୁରୋଧଗୁଡ଼ିକ ରିପୋର୍ଟ କରେ (ନିଶ୍ଚିତ ଭାବେ 0)।
+- **ବଜେଟ୍।** ପ୍ରତ୍ୟେକ ଫାଇଲ୍ ପାଇଁ 200 KB ରୁ କମ୍ (ପ୍ରତ୍ୟେକ ପୁରୁଣାତ୍ୱ ପରୀକ୍ଷା ଏହାକୁ ନିଶ୍ଚିତ କରେ); ଯେକୌଣସି README ଛବି ପାଇଁ 500 KB ହେଉଛି କଠୋର ସୀମା (SVG studio validator ର ନିୟମ)।
+- **ଅପରିବର୍ତ୍ତିତ କପି, ଗେଟ୍ରୁ ଗଣନା।** ରିବ୍ରାଣ୍ଡ୍ ଟାଇପ୍ ଏବଂ ପ୍ୟାଲେଟ୍କୁ ବଦଳାଇଛି, ଶବ୍ଦଗୁଡ଼ିକୁ ନୁହେଁ: ପ୍ରତ୍ୟେକ ଜେନେରେଟର୍ ନିଜ ଚିତ୍ରର କପିକୁ ଗୋଟିଏ `*_COPY` କନ୍ଷ୍ଟାଣ୍ଟ୍ରେ ରଖେ (କିମ୍ବା ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ରୁ ଏହାକୁ ଗଢ଼େ), ଯାହା ଅଙ୍କାଯାଇଥିବା ଟେକ୍ସଟ୍ ଏବଂ ଆଉଟଲାଇନିଂ ପଦକ୍ଷେପର ଇନପୁଟ୍ ଉଭୟ ଅଟେ। କାନୋନିକାଲ୍ ଆକୃତିଗୁଡ଼ିକ `<text>` ନୋଡ୍ରେ ରହେ (ଆଉଟଲାଇନ୍ ହେବା ପରେ ଅଦୃଶ୍ୟ, `fill-opacity:0`), ଯାହାକୁ `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) ପଢ଼େ; ଗେଟ୍ ପଢ଼ୁଥିବା ଚିତ୍ରଗୁଡ଼ିକର ପୁରୁଣାତ୍ୱ ପରୀକ୍ଷାଗୁଡ଼ିକ ଉତ୍ପାଦିତ ଫାଇଲ୍ରେ ଏହାର validator ଗୁଡ଼ିକୁ ମଧ୍ୟ ଚଲାଏ, ତେଣୁ କୋଡ୍ରୁ ବିଚ୍ୟୁତ ହେଉଥିବା ଆକୃତି ପରୀକ୍ଷାରେ ବିଫଳ ହୁଏ — ଜେନେରେଟର୍ରେ ଥିବା ସଂଖ୍ୟାକୁ କେବେବି ଠିକ୍ କରନ୍ତୁ ନାହିଁ, ଗେଟ୍ ଯେଉଁ ଉତ୍ସ ପଢ଼େ ତାହାକୁ ଠିକ୍ କରନ୍ତୁ।
 
 ## 7. ସନ୍ଦର୍ଭ ସୂଚୀ
 

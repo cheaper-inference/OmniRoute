@@ -4,14 +4,7 @@
 
 ---
 
-> **Stav:** dashboard je postaven na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), který je
-> do repozitáře začleněn (vendored) jako workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream
-> snapshot je připnut v `packages/ui-kit/UPSTREAM.md` a střežen příkazem
-> `npm run check:ui-kit-snapshot`). Kanonickým motivem je světlý; výchozí preference je `system`.
-> Akcentem je Keak lime (`--ci-color-accent`). Inter (letter-spacing 0, `--ci-letter-spacing-ui`) je
-> rodina písem pro UI, Instrument Serif pouze pro velké, řídce používané zobrazovací texty
-> (`.ci-dashboard-display`), IBM Plex Mono pro kód — vše je self-hostováno prostřednictvím importů
-> `@fontsource/*` v horní části souboru `src/app/globals.css`. Každá ikona je glyf Lucide.
+> **Postavení:** palubní deska je postavena na** Sada Keak CI UI** (`@keak/cheaper-inference-ui-kit`), dodávaný jako pracovní prostor `packages/ui-kit` (`@omniroute/ui-kit`; upstream snímek je připnut v `packages/ui-kit/UPSTREAM.md` a chráněn `npm run check:ui-kit-snapshot`). Světlo je kanonické téma; výchozí preference je `system`. Akcentem je keak limetka (`--ci-color-accent`). Switzer je jediná rodina pro UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` se na něj rozlišují), kterou vlastní sada samotná (`packages/ui-kit/src/ci-fonts.css`, importováno `ci-tokens.css`). Skripty Switzer postrádá procházení glyfem po glyfu (`src/app/globals.css`): Inter pro cyrilici, řečtinu a vietnamštinu a pouze pod `html[dir="rtl"]` Vazirmatn pro arabské písmo. Každá ikona je lucidní glyf.
 
 ## 1. Kde co je
 
@@ -82,34 +75,13 @@
 
 ## 2. Pravidla
 
-1. Tokeny, nikdy literály. Výjimky jsou ponechány záměrně: vždy tmavý terminál konzole a
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), zrcadlo stavové palety kitu s vyhodnocenými
-   hex hodnotami pro volající, kteří potřebují doslovný hex. Kategorické palety už výjimkou nejsou:
-   staví na pěti grafových tokenech kitu (`--color-chart-1..5`) prostřednictvím
-   `src/shared/utils/categoricalPalette.ts` a pro směrovací strategie
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; hrany ReactFlow a orchestrální plátno
-   čtou proměnné `--orch-status-*` závislé na motivu (`src/shared/components/flow/edgeStyles.ts`).
-2. Nikdy neupravujte `packages/ui-kit/src` ručně: synchronizujte pomocí `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit brána `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) selže při jakémkoli bytu,
-   který se liší od připnutého upstream commitu (přeskočí se s varováním, když upstream klon,
-   `UI_KIT_CLONE` nebo `_references/cheaper-inference-ui-kit`, chybí). Když kitu něco chybí,
-   obešlete to v adaptéru nebo obrazovce a požádejte o to upstream.
-3. Výchozí texty kitu jsou anglické (`label = "Loading"`, `loadingLabel = "Loading table"`…) — předávejte
-   přeložené řetězce z `useTranslations(...)` vždy, když komponenta kitu vykresluje text.
-4. Tailwind utility mají přednost před třídami komponent kitu (kit deklaruje
-   `@layer theme, base, components, utilities` a jeho pravidla žijí v `components`) — používejte utility
-   pro mezery a rozložení, ne k přebarvování komponent kitu.
-5. Nadpisy: `.ci-heading` (Inter, bez trackingu) pro titulky stránek a sekcí; `.ci-dashboard-display`
-   (Instrument Serif) pouze pro velký, řídký zobrazovací text, jako je stavový kód chybové stránky.
-6. `tests/unit/dashboard-kit-sweep.test.ts` hlídá adopci kitu: žádný Material ligature span pod
-   `src/app` nebo `src/shared/components`; ve stromu dashboardu (`src/app/(dashboard)` a
-   `src/shared/components`) žádné holé `<select>`, `<textarea>` nebo `<table>` a žádný ručně vyrobený
-   `role="dialog"` mimo uvedené výjimky (nativní větev adaptéru `Select`,
-   `RequestLoggerDetail`); každý holý `<button>` nebo `<input>` tam potřebuje komentář obsahující
-   `kit-exception:` (s důvodem) končící nejvýše 3 řádky nad ním; odstíny palety a varianty `dark:`
-   pouze v souborech, které test uvádí.
-7. Před PR ověřte oba motivy a viewport 390 px (screenshoty); `tests/e2e/a11y.spec.ts` spouští
-   axe.
+1. Tokeny, nikdy doslovy. Výjimky ponechané záměrně: vždy tmavý konzolový terminál a `STATUS_HEX` (`src/shared/constants/statusColors.ts`), vyřešené hex zrcadlo palety stavu sady pro volající, kteří potřebují doslovný hex. Kategorické palety již nejsou výjimkou: jezdí na pěti žetonech grafu (`--color-chart-1..5`) v sadě až po `src/shared/utils/categoricalPalette.ts` a pro směrovací strategie `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; Okraje ReactFlow a orchestrační plátno čtou proměnné `--orch-status-*` (`src/shared/components/flow/edgeStyles.ts`) s ohledem na téma.
+2. Nikdy neopravujte `packages/ui-kit/src` ručně: synchronizujte se `scripts/dev/sync-ui-kit.sh <commit>`; brána pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) selže na jakémkoli bajtu, který se liší od připnutého upstream commitu (přeskočí s varováním, když upstream klon, `UI_KIT_CLONE` nebo `_references/cheaper-inference-ui-kit`, chybí). Když v sadě něco chybí, vyřešte to v adaptéru nebo na obrazovce a požádejte o to proti proudu.
+3. Výchozí text sady je angličtina (`label = "Loading"`, `loadingLabel = "Loading table"`…) — předávat přeložené řetězce ze `useTranslations(...)` vždy, když komponenta sady vykresluje text.
+4. Obslužné programy Tailwind vítězí nad třídami komponent sady (sada deklaruje `@layer theme, base, components, utilities` a její pravidla fungují v `components`) — použijte nástroje pro rozmístění a rozvržení, nikoli pro přebarvování komponent sady.
+5. Nadpisy: `.ci-heading` pro názvy stránek a oddílů; `.ci-dashboard-display` pouze pro velký, řídce zobrazený text, jako je stavový kód chybové stránky. Oba používají Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` chrání přijetí sady: ne Rozpětí ligatury pod `src/app` nebo `src/shared/components`; ve stromu řídicího panelu (`src/app/(dashboard)` a `src/shared/components`) žádné surové `<select>`, `<textarea>` nebo `<table>` a žádné ručně rolované `role="dialog"` mimo uvedené výjimky (nativní větev adaptéru `Select`, `RequestLoggerDetail`); každý nezpracovaný `<button>` nebo `<input>` potřebuje komentář obsahující `kit-exception:` (s důvodem) končící maximálně 3 řádky nad ním; odstíny palet a varianty `dark:` pouze v souborech, které test uvádí.
+7. Před PR (snímky obrazovky) ověřte obě témata a výřez 390 px; `tests/e2e/a11y.spec.ts` běží sekera.
 
 ## 3. Přidání obrazovky
 
@@ -142,50 +114,57 @@
 4. Přidejte nebo aktualizujte `tests/unit/ui/adapters/<name>.test.tsx`. U adaptéru s mnoha volajícími porovnejte
    vykreslené HTML před změnou a po ní — změny paddingu nebo wrapperů se rozlejí do každé obrazovky.
 
-## 5. Aktualizace kitu
+## 5. Aktualizace sady
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` zkopíruje upstreamový adresář `src/` z daného commitu do
-`packages/ui-kit/src` a aplikuje jedinou povolenou transformaci (odstraní příponu `.js` z relativních
-importů). Poté: zkontrolujte `git diff packages/ui-kit`, vizuálně projděte poskytovatele, nastavení, kombinace,
-využití a endpoint v obou motivech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a
-otevřete PR s upstreamovým changelogem.
+`npm run check:ui-kit-upstream` porovná verzi připojenou v `packages/ui-kit/UPSTREAM.md` s nejnovější značkou `v*` upstream repo a vytiskne příkaz synchronizace, když je vydání k dispozici.
+
+Denní pracovní postup `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) spouští stejnou kontrolu. Zatímco je kolík za, `scripts/ci/ui-kit-sync-pr.sh` ponechává jeden synchronizační PR otevřený proti nejvyšší větvi `release/vX.Y.Z`, na pohyblivé větvi `chore/ui-kit-sync-latest`. Nikdy se neslučuje: každá verze sady stále potřebuje vizuální kontrolu místního VPS. Větev je přestavěna, když je k dispozici novější verze a jinak je ponechána sama. Otevřené PR s ručně zatlačenými commity se nepřepíše a PR pro verzi, kterou správce uzavřel nesloučenou, zůstane zavřená až do novějšího vydání.
+
+Když nelze otevřít žádné PR (cílové vydání je zamrzlé, PR ručně zatlačilo odevzdání, PR bylo uzavřeno nebo není nastaven žádný token PR ), pracovní postup ponechává jeden problém sledování otevřený, který říká proč.
+
+Pracovní postup používá dvě tajemství:
+
+- `secrets.UI_KIT_READ_TOKEN`: token pouze pro čtení pro soukromé upstream repo. Když pracovní postup nemůže číst upstream (žádný token, token, který přestal fungovat nebo GitHub nedostupné), běh zůstane zelený, ale zapíše varování a ponechá otevřený jeden samostatný problém, který se sám zavře, jakmile bude možné pozdější běh znovu číst proti proudu.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: jemně zrnitý token v tomto úložišti s požadavky Contents and Pull pro zápis. Výchozí `GITHUB_TOKEN` zde nemůže vytvořit PRs a PR které otevřel, by nespustilo CI. Bez tohoto tokenu pracovní postup pouze tlačí větev.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` zkopíruje upstream `src/` při tomto odevzdání (`latest` = nejnovější tag `v*` ) do `packages/ui-kit/src`, použije jedinou povolenou transformaci (vypustí příponu `.js` z relativních importů) a nastaví verzi pracovního prostoru v `packages/ui-kit/package.json` a `package-lock.json` na upstream. Poté: zkontrolujte `git diff packages/ui-kit`, proveďte vizuální předání poskytovatelů, nastavení, komba, použití a koncového bodu v obou tématech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a otevřete PR pomocí upstream changelogu.
 
 ## 6. Diagramy v README
 
-Dvanáct diagramů, které kořenový soubor `README.md` vkládá (`docs/diagrams/*.svg`), představuje kit aplikovaný
-na statický obrázek, a jsou generované, ne kreslené ručně: 13 souborů generátorů v
-`scripts/docs/gen-readme-*.mjs` (dvanáct diagramů plus řídicí skript `gen-readme-diagrams.mjs`) a 12 testů
-aktuálnosti v `tests/unit/docs/readme-*-svg.test.ts`, jeden na každý diagram, z nichž každý porovnává
-commitnutý soubor s výstupem svého generátoru bajt po bajtu (job `test-unit`).
+Dvanáct diagramů, které kořenový soubor `README.md` vkládá (`docs/diagrams/*.svg`), tvoří sadu aplikovanou na statický
+obrázek a generují se, nekreslí ručně: 13 generátorových souborů v `scripts/docs/gen-readme-*.mjs`
+(dvanáct diagramů plus ovladač `gen-readme-diagrams.mjs`) a 12 testů zastaralosti v
+`tests/unit/docs/readme-*-svg.test.ts`, jeden pro každý diagram, přičemž každý porovnává bajt po bajtu potvrzený soubor s
+výstupem jeho generátoru (úloha `test-unit`).
 
 - **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopíruje paletu z `packages/ui-kit/src/ci-tokens.css`
-  (jejíž soulad s tímto souborem hlídá test `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje textové
-  role na písmech kitu — Instrument Serif pro display, Inter pro text UI, IBM Plex Mono pro čísla a kód, tedy
-  stejné balíčky `@fontsource`, jaké `src/app/globals.css` načítá pro dashboard. Světlé hodnoty jsou na
-  `:root`, tmavé hodnoty za `prefers-color-scheme: dark`, přímo v souboru, takže každý obrázek na GitHubu
-  následuje schéma diváka.
-- **Písma.** `scripts/docs/readme-fonts.mjs` vytváří z těchto souborů woff2 subsety obsahující pouze glyfy,
-  které daný diagram kreslí, a vkládá je jako `@font-face` `data:` URI — jediný způsob, jak se typografie kitu
-  dostane do obrázku v README, protože GitHub Markdown nepřenáší žádné CSS a proxy camo blokuje každé externí
-  načtení. Subsets jsou pouze latinkové; symbolové glyfy, které se vykreslí náhradním systémovým stackem, jsou
-  povoleny jednotlivě v `SYMBOL_FALLBACKS`, a jakýkoli jiný nepokrytý glyf vyhodí výjimku.
-- **Přegenerování.** `npm run docs:readme-diagrams` přepíše všech dvanáct v pořadí z README a pro každý soubor
-  vypíše jeden řádek s jeho velikostí. Jeden generátor lze spustit i samostatně
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` potřebuje `node --import tsx/esm`, protože
-  jeho čísla pocházejí z živého loaderu katalogu v `open-sse/config/freeModelCatalog.ts`; důsledek změny
-  katalogu pro CI popisuje `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generátor a SVG
-  commitujte společně.
-- **Ověření.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` vykreslí soubor tak, jak ho GitHub
-  servíruje (tag `<img>`, `Content-Security-Policy` proxy camo, `image/svg+xml`), zachytí světlý i tmavý
-  snímek a nahlásí externí požadavky na písma, které stránka provedla (musí být 0).
-- **Rozpočet.** Pod 200 KB na soubor (každý test aktuálnosti to assertuje); 500 KB je pevný limit pro jakýkoli
-  obrázek v README (pravidlo validátoru SVG studia).
-- **Texty beze změny, čísla z gate.** Rebrand změnil písmo a paletu, ne slova: každý generátor nese text svého
-  diagramu v konstantě `*_COPY` (nebo ho sestavuje z živého katalogu), která je zároveň kresleným textem i
-  vstupem pro subset písma. Kanonická čísla zůstávají v uzlech `<text>`, které čte `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); testy aktuálnosti diagramů, které gate čte, navíc spouštějí
-  jeho validátory nad vygenerovaným souborem, takže číslo, které se rozejde s kódem, způsobí selhání testu —
-  opravte zdroj, který gate čte, nikdy číslo v generátoru.
+  (připnutou k tomuto souboru pomocí `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje textové role na typografické škále sady:
+  Switzer s váhami sady (400/500/600, display s váhou 500) a prokladem pro
+  vše, s výjimkou rolí kódu (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), které
+  používají IBM Plex Mono a jsou určeny pouze pro příkazy, URL, identifikátory a terminálové obrazovky.
+  Světlé hodnoty jsou v `:root`, tmavé hodnoty za
+  `prefers-color-scheme: dark`, uvnitř souboru, takže každý
+  obrázek sleduje schéma prohlížeče na GitHubu.
+- **Písma.** Markdown na GitHubu nepřenáší žádné CSS a proxy camo blokuje každé externí načtení, takže typografie sady
+  musí cestovat uvnitř souboru. `scripts/docs/readme-outline.mjs`, poslední krok každého generátoru, tvaruje
+  role Switzeru pomocí HarfBuzz a vykresluje je jako vektorové obrysy (`<defs>` cesty a `<use>`),
+  přičemž šipky a geometrické symboly, které Switzer postrádá, kreslí pomocí vlastních metrik. Obrysy, nikdy vložené písmo:
+  licence Switzeru (`packages/ui-kit/src/fonts/FFL.txt`) zakazuje podmnožinování a převod formátu bez písemného
+  souhlasu a povoluje vektorové kresby, proto znovu nezavádějte `@font-face` Switzeru ani URI `data:`. Jediné
+  písmo ponechané v souboru je podmnožina IBM Plex Mono s licencí OFL pro to, co zůstává skutečným textem kódu
+  (`scripts/docs/readme-fonts.mjs`), sestavená z těchto znaků; každý glyf, který nelze vložit, vyvolá chybu.
+- **Regenerace.** `npm run docs:readme-diagrams` přepíše všech dvanáct diagramů v pořadí v README a pro každý
+  soubor vypíše jeden řádek s jeho velikostí. Jeden generátor lze spustit také samostatně (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` vyžaduje `node --import tsx/esm`, protože jeho údaje pocházejí z živého načítače katalogu v
+  `open-sse/config/freeModelCatalog.ts`; důsledek změny katalogu pro CI je v
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generátor a SVG vždy potvrďte společně.
+- **Ověření.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` vykreslí soubor způsobem, jakým ho poskytuje GitHub
+  (značka `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), zachytí světlý a tmavý snímek
+  a oznámí požadavky stránky na externí písma (musí jich být 0).
+- **Limit.** Méně než 200 KB na soubor (každý test zastaralosti to ověřuje); 500 KB je pevný limit pro jakýkoli obrázek v README
+  (pravidlo validátoru SVG studia).
+- **Kopírujte beze změn, počty berte z kontroly.** Rebranding změnil typografii a paletu, nikoli slova: každý generátor obsahuje text svého diagramu v konstantě `*_COPY` (nebo ho sestavuje z živého katalogu), která je zároveň vykresleným textem a vstupem kroku tvorby obrysů. Kanonické údaje zůstávají v uzlech `<text>` (po vytvoření obrysů jsou neviditelné, `fill-opacity:0`), čte je `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`); testy zastaralosti diagramů, které kontrolu čtení zajišťují, také spouštějí jeho validátory nad vygenerovaným souborem, takže údaj, který se odchýlí od kódu, způsobí selhání testu — opravte zdroj, ze kterého kontrola čte, nikdy číslo v generátoru.
 
 ## 7. Referenční index
 

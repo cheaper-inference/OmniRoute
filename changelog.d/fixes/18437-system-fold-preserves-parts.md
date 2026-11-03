@@ -1,0 +1,1 @@
+- **fix(translator):** the system-role fold (GLM 4.x/5.0 family) no longer flattens the first user message to text — images and other structured parts survive with the system instructions prepended as a leading text part ([#18437](https://github.com/cheaper-inference/OmniRoute/pull/18437)) — thanks @jjxyxsjr

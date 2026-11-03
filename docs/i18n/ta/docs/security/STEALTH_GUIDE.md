@@ -237,19 +237,18 @@ interface CliFingerprint {
 
 அனைத்து MITM இறுதிப்புள்ளிகளுக்கும் நிர்வாக அங்கீகாரம் (`requireCliToolsAuth`) தேவை. sudo கடவுச்சொல் தொகுதிப் பரப்பில் தற்காலிகமாகச் சேமிக்கப்படுகிறது (`globalThis`-இல் ஒருபோதும் இல்லை), மேலும் `stopMitm()` அழைக்கப்படும்போது அழிக்கப்படுகிறது.
 
-## User-Agent மேலெழுதல்கள் — env மாறிகள் (`.env.example` பிரிவு 12)
+## பயனர் முகவர் — env vars (`.env.example` பிரிவு 12)
 
-| மாறி                     | இயல்புநிலை                                                      |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| மாறி                | இயல்புநிலை                                    |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-டைனமிக் தேடல் வழியாக `open-sse/executors/base.ts::buildHeaders()` இதைப் பயன்படுத்துகிறது. **வழங்குநர்கள் புதிய CLI பதிப்புகளை வெளியிடும்போது இவற்றின் பதிப்பு எண்களை உயர்த்தவும்** — காலாவதியான UA சரங்கள், பழைய கிளையன்ட்களாகக் கருதப்பட்டு நிராகரிக்கப்படத் தொடங்கும்.
+டைனமிக் லுக்அப் மூலம் `open-sse/executors/base.ts::buildHeaders()` ஆல் உட்கொள்ளப்படுகிறது.** வழங்குநர்கள் புதிய CLI பதிப்புகளை வெளியிடும் போது இவற்றை பம்ப் செய்யவும்** — பழமையான UA சரங்கள் காலாவதியான வாடிக்கையாளர்களாக நிராகரிக்கத் தொடங்குகின்றன.
 
 ## CLI இணக்கத்தன்மைப் பயன்முறை மாற்றிகள் (`.env.example` பிரிவு 13)
 

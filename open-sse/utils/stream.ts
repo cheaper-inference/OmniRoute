@@ -1,6 +1,7 @@
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
+import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
 import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
 import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
@@ -135,6 +136,7 @@ export { formatSSE };
 export { backfillResponsesCompletedOutput, stripResponsesLifecycleEcho };
 
 type JsonRecord = Record<string, unknown>;
+type StreamPendingRequestIdentity = PendingRequestIdentity | false;
 
 export const PENDING_REQUEST_CLEARED_MARKER = "__omniroutePendingRequestCleared";
 
@@ -233,7 +235,7 @@ type StreamOptions = {
    * codex-compatible `namespace` + `name` fields.
    */
   requestToolIdentityMap?: Map<string, { namespace: string; name: string }> | null;
-  pendingRequestId?: string | null;
+  pendingRequestId?: StreamPendingRequestIdentity | null;
 };
 
 type TranslateState = ReturnType<typeof initState> & {
@@ -1164,9 +1166,22 @@ export function createSSEStream(options: StreamOptions = {}) {
     }
   };
 
+  // Transport adapters leave pending cleanup and ownership markers to their outer request.
+  const markStreamPendingRequestCleared = (error: Error) =>
+    pendingRequestId === false ? error : markPendingRequestCleared(error);
   const clearSeen = { done: false };
   const clearPendingRequestFromStream = () => {
-    clearPendingRequestOnce(clearSeen, { model, provider, connectionId, pendingRequestId });
+    if (clearSeen.done || pendingRequestId === false) return;
+    if (typeof pendingRequestId === "string" && !connectionId) {
+      clearSeen.done = true;
+      return;
+    }
+    clearPendingRequestOnce(clearSeen, {
+      model,
+      provider,
+      connectionId,
+      pendingRequestId,
+    });
   };
 
   const emitClaudeEmptyStreamErrorAndAbort = (
@@ -1210,7 +1225,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     // and the 502 surfaces with no retry (call logs 96ef4a / 062cf6).
     const emptyStreamError = new Error(msg) as Error & { code?: string };
     emptyStreamError.code = "empty_response";
-    controller.error(markPendingRequestCleared(emptyStreamError));
+    controller.error(markStreamPendingRequestCleared(emptyStreamError));
   };
 
   const emitTranslatedClientItem = (
@@ -1393,9 +1408,26 @@ export function createSSEStream(options: StreamOptions = {}) {
     buildClientPayload: (body) => clientPayloadCollector.build(body, { includeEvents: false }),
     clearIdleTimer,
     clearPendingRequest: clearPendingRequestFromStream,
-    markPendingRequestCleared,
+    markPendingRequestCleared: markStreamPendingRequestCleared,
     model,
   });
+
+  // Keep queued chunks only once client-visible content was forwarded. A
+  // pre-content failure must still reject the stream, while a post-content
+  // failure leaves its queued terminal for slow readers instead of truncating.
+  const shouldPreserveQueuedChunks = (): boolean =>
+    totalContentLength > 0 || passthroughHasToolCalls || forwardedValuableChunk;
+
+  // Set once flush() starts. A preserved failure inside flush() ends the stream
+  // by returning; inside transform() the stream would keep running (later chunks,
+  // then flush()'s success path with finish_reason/[DONE] and a 200 onComplete),
+  // so a transform-time failure must also terminate(): the readable side closes
+  // after the queued terminal and the writable side errors, cancelling upstream.
+  let flushing = false;
+  const failureBoundaryOptions = (): { preserveQueuedChunks: boolean; terminate: boolean } => {
+    const preserveQueuedChunks = shouldPreserveQueuedChunks();
+    return { preserveQueuedChunks, terminate: preserveQueuedChunks && !flushing };
+  };
 
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
@@ -1412,6 +1444,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     doneSent = true;
     abortStreamFailure(controller, failure.internalFailure, failure.publicMessage, {
       notifyComplete: true,
+      ...failureBoundaryOptions(),
     });
     return true;
   };
@@ -1454,7 +1487,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               }).catch(() => {});
               const timeoutError = new Error(timeoutMsg);
               timeoutError.name = "StreamIdleTimeoutError";
-              controller.error(markPendingRequestCleared(timeoutError));
+              controller.error(markStreamPendingRequestCleared(timeoutError));
             }
           }, 10_000);
         }
@@ -2248,7 +2281,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   if (isFinishChunk) {
                     if (passthroughSawFinishReason) continue;
                     if (nativeFailure && !totalContentLength && !passthroughHasToolCalls)
-                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message);
+                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message, {
+                        ...failureBoundaryOptions(),
+                      });
                     passthroughSawFinishReason = true;
                   }
 
@@ -2336,7 +2371,8 @@ export function createSSEStream(options: StreamOptions = {}) {
               abortStreamFailure(
                 controller,
                 failurePayload,
-                publicFailureMessage || "Upstream failure"
+                publicFailureMessage || "Upstream failure",
+                failureBoundaryOptions()
               );
               return;
             }
@@ -2588,6 +2624,7 @@ export function createSSEStream(options: StreamOptions = {}) {
       },
 
       async flush(controller) {
+        flushing = true;
         // Clean up idle watchdog timer
         if (idleTimer) {
           clearIdleTimer();
@@ -2677,7 +2714,9 @@ export function createSSEStream(options: StreamOptions = {}) {
               restoreOpenAIToolNames: (parsed: JsonRecord) =>
                 restoreOpenAIToolNames(parsed, toolNameMap),
               abortFailure: (failure: StreamFailurePayload, publicMessage: string) =>
-                abortStreamFailure(controller, failure, publicMessage),
+                abortStreamFailure(controller, failure, publicMessage, {
+                  ...failureBoundaryOptions(),
+                }),
             };
 
             for (const line of normalizedTailLines) {
@@ -2760,7 +2799,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                 abortStreamFailure(
                   controller,
                   bufferedProjectedFailure.internalFailure,
-                  bufferedProjectedFailure.publicMessage
+                  bufferedProjectedFailure.publicMessage,
+                  failureBoundaryOptions()
                 );
                 return;
               }
@@ -3138,14 +3178,18 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
               }
             } catch {
-              // Swallow flush errors — the controller.error below is the
-              // terminal signal for the client.
+              // Swallow flush errors — the failure abort below is the terminal
+              // signal for the client (controller.error before any content, or
+              // the queued error event once content was forwarded).
             }
 
             const errorBody = buildErrorBody(err.status, err.message);
             const publicErrorMessage = errorBody.error.message;
             err.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
-            abortStreamFailure(controller, err, publicErrorMessage, { notifyComplete: true });
+            abortStreamFailure(controller, err, publicErrorMessage, {
+              notifyComplete: true,
+              ...failureBoundaryOptions(),
+            });
             return;
           }
 
@@ -3166,7 +3210,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               clearPendingRequestFromStream,
             })
           ) {
-            controller.error(markPendingRequestCleared(buildEmptyChoicesStreamError()));
+            controller.error(markStreamPendingRequestCleared(buildEmptyChoicesStreamError()));
             return;
           }
 
@@ -3407,7 +3451,8 @@ export function createSSETransformStreamWithLogger(
   customToolNames: ReadonlySet<string> = new Set(),
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
   clientTools: unknown = null,
-  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES
+  streamBufferBytes: number = DEFAULT_STREAM_BUFFER_BYTES,
+  pendingRequestId: StreamPendingRequestIdentity | null = null
 ) {
   return createSSEStream({
     mode: STREAM_MODE.TRANSLATE,
@@ -3429,6 +3474,7 @@ export function createSSETransformStreamWithLogger(
     requestToolIdentityMap,
     streamBufferBytes,
     clientTools,
+    pendingRequestId,
   });
 }
 
@@ -3444,7 +3490,8 @@ export function createPassthroughStreamWithLogger(
   onFailure: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null = null,
   clientResponseFormat: string | null = null,
   requestToolIdentityMap: Map<string, { namespace: string; name: string }> | null = null,
-  clientTools: unknown = null
+  clientTools: unknown = null,
+  pendingRequestId: StreamPendingRequestIdentity | null = null
 ) {
   return createSSEStream({
     mode: STREAM_MODE.PASSTHROUGH,
@@ -3460,6 +3507,7 @@ export function createPassthroughStreamWithLogger(
     clientResponseFormat,
     requestToolIdentityMap,
     clientTools,
+    pendingRequestId,
   });
 }
 

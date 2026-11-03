@@ -4,14 +4,7 @@
 
 ---
 
-> **Ipò:** a kọ́ dasibodu naa lórí **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), tí a ṣe vendor
-> gẹ́gẹ́ bí workspace `packages/ui-kit` (`@omniroute/ui-kit`; a fi snapshot upstream dúró nínú
-> `packages/ui-kit/UPSTREAM.md`, àti pé `npm run check:ui-kit-snapshot` ló ń dáàbò bo rẹ̀). Ìmọ́lẹ̀ ni
-> àkójọ àkọ́kọ́ (canonical theme); ìfẹ́ràn àtòpìnwáà ni `system`. Àwọ̀ accent ni Keak lime
-> (`--ci-color-accent`). Inter (letter-spacing 0, `--ci-letter-spacing-ui`) ni ẹbí font fún UI, Instrument
-> Serif nìkan fún ọ̀rọ̀ àfihàn ńlá díẹ̀ (`.ci-dashboard-display`), IBM Plex Mono fún kóòdù — gbogbo
-> wọn ni a ṣe self-hosted nípasẹ̀ àwọn ìkópọ̀ `@fontsource/*` ní òkè `src/app/globals.css`. Gbogbo àmì
-> jẹ́ Lucide glyph.
+> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Asẹnti naa ni Keak orombo wewe (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Awọn iwe afọwọkọ Switzer ko ṣubu nipasẹ glyph nipasẹ glyph (`src/app/globals.css`): Inter fun Cyrillic, Greek ati Vietnamese ati, labẹ `html[dir="rtl"]` nikan, Vazirmatn fun iwe afọwọkọ Larubawa. Gbogbo aami jẹ glyph Lucide kan.
 
 ## 1. Ibi tí àwọn ohun wà
 
@@ -86,36 +79,15 @@
   `src/shared/components/ErrorPageScaffold.tsx` — ń fi lockup náà hàn;
   `tests/unit/brand-pages-static.test.ts` ń ṣọ́ọ́ ò.
 
-## 2. Àwọn Òfin
+## 2. Awọn ofin
 
-1. Àwọn token, kíì ṣe àwọn iye tààrà. Àwọn ìyàtọ̀ tí a fi sílẹ̀ lópọ̀nàká: console terminal tí ó dúdú nígbà gbogbo àti
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ẹ̀jìrè hex-tí-a-ti-yanjú ti palette ipò ti kit fún
-   àwọn olùpe tí ó nílò hex tààrà. Àwọn palette ẹ̀yà (categorical) kò ṣì jẹ́ ìyàtọ̀ mọ́:
-   wọ́n ń gòke lórí àwọn token chart márùn-ún ti kit (`--color-chart-1..5`) nípasẹ̀
-   `src/shared/utils/categoricalPalette.ts` àti, fún àwọn ìlànà ìtọ́sọ́nà (routing),
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; àwọn etí ReactFlow àti canvas orchestration
-   ń ka àwọn variable `--orch-status-*` tí ó mọ̀ọ́mọ̀-téèmù (`src/shared/components/flow/edgeStyles.ts`).
-2. Má ṣe àtúnṣe `packages/ui-kit/src` pẹ̀lú ọwọ́: ṣe ìbáṣepọ̀ pẹ̀lú `scripts/dev/sync-ui-kit.sh <commit>`;
-   ẹnu-ọ̀nà pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) máa kùnà lórí báìtì kankan tí ó
-   yàtọ̀ sí commit upstream tí a fi tẹ̀ lé (ó máa fo lò pẹ̀lú ìkìlọ̀ nígbà tí ẹ̀dà clone upstream,
-   `UI_KIT_CLONE` tàbí `_references/cheaper-inference-ui-kit`, kò sí). Nígbà tí ohun kan bá kùnà nínú kit,
-   ṣe ìyípadà rẹ̀ nínú adapter tàbí síkíríìnì náà, kí o sì béèrè fún un láti ọ̀dọ̀ upstream.
-3. Àwọn ìbẹ̀rẹ̀ ọrọ̀ kit jẹ́ Gẹ̀ẹ́sì (`label = "Loading"`, `loadingLabel = "Loading table"`…) — rán àwọn
-   ìtẹ̀lé-ọrọ̀ tí a ti túmọ̀ láti `useTranslations(...)` nígbàkúgbà tí ẹ̀yà kit bá ń ṣàfihàn ọrọ̀.
-4. Àwọn ohun èlò Tailwind láàyè lórí àwọn kiláàsì ẹ̀yà kit (kit kéde
-   `@layer theme, base, components, utilities` kí àwọn òfin rẹ̀ sì gbé nínú `components`) — lo àwọn ohun èlò fún
-   ààyò àti àtòjọ-ohun, kì í ṣe láti tún àwọ àwọn ẹ̀yà kit ṣe.
-5. Àwọn àkópọ̀: `.ci-heading` (Inter, láìsí tracking) fún àkópọ̀ ojú-ìwé àti àbá; `.ci-dashboard-display`
-   (Instrument Serif) nìkan fún ọrọ̀ àfihàn ńlá tí ó dídí, bí i kóòdù ipò ti ojú-ìwé àṣìṣe.
-6. `tests/unit/dashboard-kit-sweep.test.ts` ń dáàbò bo gbígba kit lò: kò sí span ligature Material lábẹ́
-   `src/app` tàbí `src/shared/components`; nínú igi dashboard (`src/app/(dashboard)` àti
-   `src/shared/components`) kò sí `<select>`, `<textarea>` tàbí `<table>` lásán, kò sí
-   `role="dialog"` tí a ṣe pẹ̀lú ọwọ́ láìjẹ́ ọ̀kan lára àwọn ìyàtọ̀ tí a kọ sílẹ̀ (ẹ̀ka abínibí ti adapter `Select`,
-   `RequestLoggerDetail`); gbogbo `<button>` tàbí `<input>` lásán níbẹ̀ nílò ọ̀rọ̀-àláyè tí ó ní
-   `kit-exception:` (pẹ̀lú ìdí rẹ̀) tí ó parí ó kéré jù ìlà mẹ́ta lókè rẹ̀; àwọn àwo palette àti àwọn ìyàtọ̀
-   `dark:` nìkan nínú àwọn fáìlì tí ìdánwò náà kọ sílẹ̀.
-7. Jẹ́rìí sí àwọn téèmù méjèèjì àti viewport 390 px ṣáájú PR (àwọn àwòrán síkíríìnì); `tests/e2e/a11y.spec.ts` ń ṣe
-   axe lọ.
+1. Awọn ami-ami, kii ṣe gangan. Awọn imukuro wa ni idi: ebute console dudu nigbagbogbo ati `STATUS_HEX` (`src/shared/constants/statusColors.ts`), digi ti o yanju-hex ti paleti ipo kit fun awọn olupe ti o nilo hex gangan. Awọn paleti isori kii ṣe iyatọ diẹ sii: wọn gun lori awọn ami chart marun ti kit (`--color-chart-1..5`) nipasẹ `src/shared/utils/categoricalPalette.ts` ati, fun awọn ilana ipa-ọna, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; awọn egbegbe ReactFlow ati kanfasi orchestration ka akori-mọ `--orch-status-*` oniyipada (`src/shared/components/flow/edgeStyles.ts`).
+2. Maṣe patch `packages/ui-kit/src` pẹlu ọwọ: muṣiṣẹpọ pẹlu `scripts/dev/sync-ui-kit.sh <commit>`; ẹnu-ọna ti a ti sọ tẹlẹ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) kuna lori eyikeyi baiti ti o yato si ipinnu oke ti a pin (o fo pẹlu ikilọ nigbati ẹda oniye ti oke, `UI_KIT_CLONE` tabi `_references/cheaper-inference-ui-kit`, ko si). Nigbati ohun elo ko ba ni nkan, ṣiṣẹ ni ayika rẹ ni ohun ti nmu badọgba tabi iboju ki o beere fun u ni oke.
+3. Awọn aiyipada ọrọ kit jẹ Gẹẹsi (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kọja awọn gbolohun ọrọ ti a tumọ lati `useTranslations(...)` nigbakugba ti paati ohun elo ba ṣe ọrọ.
+4. Awọn ohun elo Tailwind bori lori awọn kilasi paati ohun elo (ohun elo naa n kede `@layer theme, base, components, utilities` ati awọn ofin rẹ n gbe ni `components`) - lo awọn ohun elo fun aye ati iṣeto, kii ṣe lati tun awọn ohun elo ohun elo awọ pada.
+5. Awọn akọle: `.ci-heading` fun oju-iwe ati awọn akọle apakan; `.ci-dashboard-display` nikan fun titobi nla, ọrọ ifihan fọnka gẹgẹbi koodu ipo oju-iwe aṣiṣe. Mejeeji lo Swiss.
+6. `tests/unit/dashboard-kit-sweep.test.ts` ṣe aabo fun igbasilẹ ohun elo: ko si akoko ligature ohun elo labẹ `src/app` tabi `src/shared/components`; ninu igi dasibodu (`src/app/(dashboard)` ati `src/shared/components`) ko si `<select>` aise, `<textarea>` tabi `<table>` ati pe ko si `role="dialog"` ti a fi ọwọ yiyi ni ita awọn imukuro ti a ṣe akojọ (ẹka abinibi `Select` ti nmu badọgba, `RequestLoggerDetail`); gbogbo `<button>` aise tabi `<input>` nibẹ nilo asọye ti o ni `kit-exception:` (pẹlu idi) ti o pari ni pupọ julọ awọn ila 3 loke rẹ; paleti hues ati `dark:` aba nikan ni awọn faili awọn akojọ igbeyewo.
+7. Ṣe idaniloju awọn akori mejeeji ati iwoye 390 px ṣaaju PR kan (awọn sikirinisoti); `tests/e2e/a11y.spec.ts` nṣiṣẹ ake.
 
 ## 3. Ẹ̀kun Síkíríìnì Kan
 
@@ -144,34 +116,31 @@
 3. Àwọn ìyanáà fún àwọn àlàfo kit gbọdọ̀ wà nínú adapter náà (tàbí nínú `globals.css` `@layer components` tí àtúnṣe náà bá jẹ́ style), kì í ṣe nínú `packages/ui-kit/src` rárá.
 4. Ṣàfikún tàbí ṣe àtúnṣe `tests/unit/ui/adapters/<name>.test.tsx`. Fún adapter tí ó ní ọ̀pọ̀ olùpè, ṣe àfiwè markup tí a ṣe jáde ṣáájú àti lẹ́yìn àyípadà náà — àyípadà padding tàbí wrapper máa ń tàn ká sí gbogbo ojú-ìbòjú.
 
-## 5. Ṣíṣe àtúnṣe kit náà
+## 5. Nmu awọn kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` máa ń da `src/` upstream ní commit yẹn sínú
-`packages/ui-kit/src` kí ó sì lo ìyípadà kan ṣoṣo tí a gba àṣẹ fún (ó máa ń yọ àmì-ìparí `.js` kúrò lẹ́nu àwọn relative import). Lẹ́yìn náà: ṣe àtúnyẹ̀wò `git diff packages/ui-kit`, ṣe àyẹ̀wò fífòjúrí lórí àwọn olùpèsè, ètò, àpọ̀pọ̀, lílò àti endpoint nínú àwọn theme méjèèjì, ṣe àṣẹ `npm run check:ui-kit-snapshot` àti `npm run test:vitest:ui`, kí o sì ṣí PR náà pẹ̀lú changelog upstream.
+`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade.
 
-## 6. Àwọn diagram README
+Ṣiṣan iṣẹ `UI Kit upstream watch` ojoojumọ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna. Lakoko ti pinni wa ni ẹhin, `scripts/ci/ui-kit-sync-pr.sh` ntọju PR amuṣiṣẹpọ kan ṣiṣi si ẹka `release/vX.Y.Z` ti o ga julọ, lori ẹka yiyi `chore/ui-kit-sync-latest`. Ko dapọ rara: gbogbo idasilẹ ohun elo tun nilo ayẹwo wiwo lori VPS agbegbe. Ẹka naa ni a tun kọ nigbati itusilẹ tuntun ba jade ti o fi silẹ nikan bibẹẹkọ. PR ti o ṣii pẹlu awọn iṣẹ titari nipasẹ ọwọ ko ni atunkọ, ati PR kan fun ẹya kan ti olutọju kan ti a ti pa ti ko dapọ duro ni pipade titi ti idasilẹ tuntun.
 
-Àwọn diagram méjìlá tí `README.md` gbòngbo fi sínú (`docs/diagrams/*.svg`) jẹ́ kit tí a lo lé àwòrán dúró kan, wọ́n sì jẹ́ èyí tí ẹ̀rọ ń ṣe, kì í ṣe ọwọ́ ni wọ́n fi yà wọ́n: àwọn fáìlì generator 13 ní `scripts/docs/gen-readme-*.mjs`
-(àwọn diagram méjìlá àti driver `gen-readme-diagrams.mjs`) àti àwọn ìdánwò staleness 12 ní
-`tests/unit/docs/readme-*-svg.test.ts`, ọ̀kan fún diagram kọ̀ọ̀kan, tí ọ̀kọ̀ọ̀kan máa ń ṣe àfiwè fáìlì tí a commit pẹ̀lú èsì generator rẹ̀ nípa byte (iṣẹ́ `test-unit`).
+Nigbati ko ba si PR ti o le ṣii (itusilẹ ibi-afẹde ti di didi, PR ti ṣe titari nipasẹ ọwọ, PR ti wa ni pipade, tabi ko si ami ami PR ti a ṣeto) ṣiṣiṣẹ ṣiṣẹ jẹ ki ọran ipasẹ kan ṣii ti o sọ idi.
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` máa ń da palette láti inú `packages/ui-kit/src/ci-tokens.css`
-  (tí `tests/unit/docs/readme-diagram-theme.test.ts` fi sọ́ mọ́ fáìlì yẹn) kí ó sì ṣàlàyé àwọn ipa ọ̀rọ̀ lórí àwọn ojú-ìtẹ̀wé kit — Instrument Serif fún àfihàn ńlá, Inter fún ọ̀rọ̀ UI, IBM Plex Mono fún àwọn nọ́ńbà àti kóòdù, àwọn package `@fontsource` kannáà gan-an tí `src/app/globals.css` ń gbé wọlé fún dashboard. Àwọn iye ìmọ́lẹ̀ wà lórí `:root`, àwọn iye òkùnkùn sì wà lẹ́yìn `prefers-color-scheme: dark`, nínú fáìlì náà gan-an, nítorí náà àwòrán kọ̀ọ̀kan máa ń tẹ̀lé scheme ẹni tó ń wò ó lórí
-  GitHub.
-- **Àwọn fọ́ǹtì.** `scripts/docs/readme-fonts.mjs` máa ń ya àwọn fáìlì woff2 yẹn sí àwọn subset tí ó ní àwọn glyph tí diagram kọ̀ọ̀kan yà nìkan kí ó sì fi wọ́n sínú gẹ́gẹ́ bí `@font-face` `data:` URIs — ọ̀nà kan ṣoṣo tí ìtẹ̀wé kit fi lè dé àwòrán README, níwọ̀n ìgbà tí GitHub Markdown kò gbé CSS rárá tí camo proxy sì dín gbogbo ìgbéwọlé òde kọ̀. Àwọn subset náà jẹ́ latin nìkan;
-  àwọn glyph àmì-ìdájǹà tí wọ́n máa ń padà sọ́wọ́ system stack ni a gba àṣẹ fún ọ̀kan lẹ́yìn ọ̀kan nínú `SYMBOL_FALLBACKS`, glyph mìíràn kankan tí a kò bò ó sì máa ń dá aṣìṣe (throw).
-- **Ṣíṣe lẹ́ẹ̀kejì.** `npm run docs:readme-diagrams` máa ń kọ gbogbo méjìlá wọn lẹ́ẹ̀kejì ní àtòlẹ́sẹ̀sẹ̀ README kí ó sì tẹ ìlà kan jáde fún fáìlì kọ̀ọ̀kan pẹ̀lú ìwọ̀n rẹ̀. Generator kan ṣoṣo tún lè ṣiṣẹ́ ní fúnra rẹ̀ (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` nílò `node --import tsx/esm` nítorí pé àwọn nọ́ńbà rẹ̀ máa ń wá láti ọ̀dọ̀ olùgbé catalog àyéyé nínú
-  `open-sse/config/freeModelCatalog.ts`; èsi tí CI máa ń ní fún àyípadà catalog wà nínú
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Ṣe commit generator àti SVG náà papọ̀.
-- **Ìdájẹ́rìlẹ̀.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` máa ń ṣe fáìlì kan bí GitHub ṣe máa ń pèsè rẹ̀
-  (àmì `<img>` kan, `Content-Security-Policy` ti camo, `image/svg+xml`), ó máa ń ya frame ìmọ́lẹ̀ kan àti frame òkùnkùn kan
-  kí ó sì jábò àwọn ìbéèrè fọ́ǹtì òde tí ojú-ìwé náà ṣe (ó gbọdọ̀ jẹ́ 0).
-- **Ààlà ìwọ̀n.** Ó gbọdọ̀ kéré ju 200 KB fún fáìlì kọ̀ọ̀kan (ìdánwò staleness kọ̀ọ̀kan máa ń ṣe ìfìdájúlẹ̀ rẹ̀); 500 KB ni òkè líle fún àwòrán README
-  kankan (òfin olùdájúrìlẹ̀ studio SVG).
-- **Ọ̀rọ̀ kò yí padà, àwọn ìka máa ń wá láti gate.** Rebrand náà yí ìtẹ̀wé àti palette padà, kì í ṣe ọ̀rọ̀: generator kọ̀ọ̀kan
-  máa ń gbé ọ̀rọ̀ diagram rẹ̀ nínú constant `*_COPY` kan (tàbí kí ó kọ́ ọ́ láti inú catalog àyéyé) èyí tó jẹ́ ọ̀rọ̀ tí wọ́n yà àti ohun-ìwọlé font-subset níjọ̀kan. Àwọn nọ́ńbà àṣáájú máa ń wà nínú àwọn node `<text>`, tí `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`) ń ka; àwọn ìdánwò staleness ti àwọn diagram tí gate náà ń ka tún máa ń ṣe àwọn validator rẹ̀ lórí fáìlì tí wọ́n ṣe, nítorí náà nọ́ńbà tí ó bá yà sọ́tọ̀ kúrò nínú kóòdù máa ń dá ìdánwò náà lulẹ̀ — ṣe àtúnṣe orísun tí gate náà ń ka, kì í ṣe nọ́ńbà tí ó wà nínú generator náà rárá.
+Ṣiṣẹ iṣẹ naa nlo awọn aṣiri meji:
+
+- `secrets.UI_KIT_READ_TOKEN`: àmi kika-nikan fun repo oke ikọkọ. Nigbati iṣan-iṣẹ ko le ka ni oke (ko si ami ami, ami ami kan ti o da iṣẹ duro, tabi GitHub unreachable) ṣiṣe naa duro alawọ ewe ṣugbọn o kọ ikilọ kan ati pe o jẹ ki ọrọ lọtọ kan ṣii, eyiti o tilekun funrararẹ ni kete ti ṣiṣe nigbamii le ka soke lẹẹkansi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: àmi-ọkà daradara kan lori ibi ipamọ yii pẹlu Awọn akoonu ati Awọn ibeere Fa kikọ wiwọle. `GITHUB_TOKEN` aiyipada ko le ṣẹda PRs nibi, ati pe PR ti o ṣii kii yoo ṣe okunfa CI. Laisi ami ami yii, ṣiṣan iṣẹ naa n tẹ ẹka nikan.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` daakọ `src/` ti o wa ni oke ni adehun yẹn (`latest` = tuntun `v*` tag) sinu `packages/ui-kit/src`, nlo iyipada ti a gba laaye nikan (o ju suffix `.js` silẹ lati agbewọle ojulumọ), o si ṣeto ẹya aaye iṣẹ ni `packages/ui-kit/package.json` ati `package-lock.json` si oke oke. Lẹhinna: atunwo `git diff packages/ui-kit`, ṣe iwe-iwoye wiwo lori awọn olupese, awọn eto, awọn akojọpọ, lilo ati aaye ipari ni awọn akori mejeeji, ṣiṣe `npm run check:ui-kit-snapshot` ati `npm run test:vitest:ui`, ati ṣii PR pẹlu iyipada iyipada oke.
+
+## 6. README awọn aworan atọka
+
+Awọn aworan atọka mejila ti root `README.md` embeds (`docs/diagrams/*.svg`) jẹ ohun elo ti a lo si aworan aimi, ati pe wọn jẹ ipilẹṣẹ, kii ṣe pẹlu ọwọ: awọn faili monomono 13 ni `scripts/docs/gen-readme-*.mjs` (awọn aworan mejila pẹlu awakọ `gen-readme-diagrams.mjs` ) ati awọn idanwo iduroṣinṣin 12 ni `tests/unit/docs/readme-*-svg.test.ts`, ọkan fun aworan atọka, kọọkan baiti-ifarawe pẹlu olupilẹṣẹ faili `test-unit`.
+
+- **Awọn ami-ami.** `scripts/docs/readme-diagram-theme.mjs` daakọ paleti lati `packages/ui-kit/src/ci-tokens.css` (ti a fi si faili yẹn nipasẹ `tests/unit/docs/readme-diagram-theme.test.ts`) ati asọye awọn ipa ọrọ lori iwọn iru ohun elo: Switzer ni awọn iwọn kit (400/500/600, ifihan ni 500) ati ipasẹ fun ohun gbogbo, ayafi awọn ipa koodu (`.cmd`, `.term`, `.term-lg`, `.mono` `.mono-sm`, `.mono-xs`), eyiti o jẹ fun IBM ati Pjk nikan. awọn aṣẹ, URLs, awọn idamọ ati awọn iboju ebute. Awọn iye ina joko lori `:root`, awọn iye dudu lẹhin `prefers-color-scheme: dark`, inu faili naa, nitorinaa aworan kọọkan tẹle ero oluwo lori GitHub.
+- **Awọn nkọwe.** GitHub Markdown ko gbe CSS ko si ati pe camo proxy dina gbogbo bulọọki ita, nitorinaa iru ohun elo ni lati rin irin-ajo sinu faili naa. `scripts/docs/readme-outline.mjs`, igbesẹ ti o kẹhin ti gbogbo olupilẹṣẹ, ṣe apẹrẹ awọn ipa Switzer pẹlu HarfBuzz ati fa wọn gẹgẹbi awọn ilana vector ( awọn ọna `<defs>` ati `<use>`), pẹlu awọn itọka ati awọn aami jiometirika Switzer ko ni iyaworan lori awọn metiriki tirẹ. Awọn ilana, kii ṣe fonti ti a fi sinu: Iwe-aṣẹ Switzer (`packages/ui-kit/src/fonts/FFL.txt`) ṣe idiwọ isọdọtun ati iyipada ọna kika laisi aṣẹ kikọ ati gba awọn iyaworan fekito laaye, nitorinaa ma ṣe tun Switzer `@font-face` tabi `data:` URI bẹrẹ. Fọọmu kan ti o ku ninu faili ni OFL IBM Plex Mono subset fun ohun ti o duro ọrọ koodu gidi (`scripts/docs/readme-fonts.mjs`), ti a ṣe lati awọn ohun kikọ wọnyẹn; eyikeyi glyph ko le fi sabe jiju.
+- **Tuntun-pada.** `npm run docs:readme-diagrams` tun kọ gbogbo awọn mejila ni aṣẹ README ati tẹ laini kan fun faili pẹlu iwọn rẹ. Olupilẹṣẹ ẹyọkan tun nṣiṣẹ lori tirẹ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` nilo `node --import tsx/esm` nitori awọn eeka rẹ wa lati agberu katalogi laaye ni `open-sse/config/freeModelCatalog.ts`; abajade CI ti iyipada katalogi kan wa ni `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Fi monomono ati SVG naa papọ.
+- **Ẹri.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ṣe agbekalẹ faili kan ni ọna ti GitHub ṣe nṣe iranṣẹ rẹ ( tag `<img>` kan, camo's `Content-Security-Policy`, `image/svg+xml`), gba ina ati fireemu dudu kan ati ijabọ awọn ibeere fonti ita ti oju-iwe ti o ṣe (gbọdọ jẹ 0).
+- **Isuna.** Labẹ 200 KB fun faili kan (idanwo staleness kọọkan jẹri rẹ); 500 KB jẹ fila lile fun aworan README eyikeyi (ofin SVG isise afọwọsi).
+- **Daakọ ko yipada, awọn iṣiro lati ẹnu-bode.** Atunkọ yi pada iru ati paleti, kii ṣe awọn ọrọ: olupilẹṣẹ kọọkan n gbe ẹda aworan rẹ ni igbagbogbo `*_COPY` (tabi kọ ọ lati inu katalogi laaye) ti o jẹ mejeeji ọrọ ti o ya ati titẹ sii ti igbesẹ itọka. Awọn isiro Canonical duro ni awọn apa `<text>` (airi ti a ṣe alaye lẹkan, `fill-opacity:0`), kika nipasẹ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); awọn idanwo iduroṣinṣin ti awọn aworan atọka ti ẹnu-ọna kika tun ṣiṣe awọn olufọwọsi rẹ lori faili ti ipilẹṣẹ, nitorinaa eeya kan ti o yọ kuro lati koodu naa kuna idanwo — ṣe atunṣe orisun ti ẹnu-ọna kika, kii ṣe nọmba ninu monomono.
 
 ## 7. Atọ́ka ìtọ́kasi
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Status:** dashboard dibangun di atas **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), di-vendorkan
-> sebagai workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream dikunci di
-> `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Light adalah tema
-> kanonis; preferensi default-nya adalah `system`. Aksennya adalah Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) adalah famili font UI, Instrument Serif hanya untuk teks
-> display besar yang minim (`.ci-dashboard-display`), IBM Plex Mono untuk kode — semuanya di-host sendiri
-> melalui impor `@fontsource/*` di bagian atas `src/app/globals.css`. Setiap ikon adalah glyph Lucide.
+> **Status:** dasbor dibangun di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream disematkan di `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Terang adalah tema kanonik; preferensi defaultnya adalah `system`. Aksennya adalah kapur keak (`--ci-color-accent`). Switzer adalah keluarga tunggal untuk UI, tampilan dan teks kode (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` memutuskan untuk itu), dihosting sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimpor oleh `ci-tokens.css`). Skrip Switzer tidak memiliki mesin terbang demi mesin terbang (`src/app/globals.css`): Inter untuk Sirilik, Yunani, dan Vietnam dan, hanya di bawah `html[dir="rtl"]`, Vazirmatn untuk aksara Arab. Setiap ikon adalah mesin terbang Lucide.
 
 ## 1. Di mana semuanya berada
 
@@ -81,36 +75,13 @@
 
 ## 2. Aturan
 
-1. Token, jangan pernah literal. Pengecualian sengaja dipertahankan: terminal konsol yang selalu gelap
-   dan `STATUS_HEX` (`src/shared/constants/statusColors.ts`), cerminan hex yang sudah di-resolve dari
-   palet status kit untuk pemanggil yang membutuhkan hex literal. Palet kategorikal tidak lagi menjadi
-   pengecualian: palet tersebut berjalan di atas lima token chart kit (`--color-chart-1..5`) melalui
-   `src/shared/utils/categoricalPalette.ts` dan, untuk strategi routing,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; edge ReactFlow dan kanvas orkestrasi
-   membaca variabel `--orch-status-*` yang peka tema (`src/shared/components/flow/edgeStyles.ts`).
-2. Jangan pernah menambal `packages/ui-kit/src` secara manual: sinkronkan dengan
-   `scripts/dev/sync-ui-kit.sh <commit>`; gerbang pre-commit `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) gagal pada byte apa pun yang berbeda dari commit upstream yang di-pin
-   (pemeriksaan ini dilewati dengan peringatan ketika clone upstream, `UI_KIT_CLONE` atau
-   `_references/cheaper-inference-ui-kit`, tidak ada). Ketika kit kekurangan sesuatu, akali di adapter
-   atau di layar dan ajukan permintaan ke upstream.
-3. Default teks kit adalah Bahasa Inggris (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   berikan string terjemahan dari `useTranslations(...)` setiap kali komponen kit merender teks.
-4. Utilitas Tailwind mengalahkan kelas komponen kit (kit mendeklarasikan
-   `@layer theme, base, components, utilities` dan aturannya berada di `components`) — gunakan utilitas
-   untuk spasi dan tata letak, bukan untuk mewarnai ulang komponen kit.
-5. Heading: `.ci-heading` (Inter, tanpa tracking) untuk judul halaman dan bagian;
-   `.ci-dashboard-display` (Instrument Serif) hanya untuk teks display yang besar dan jarang seperti
-   kode status halaman error.
-6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga adopsi kit: tidak boleh ada span ligatur Material
-   di bawah `src/app` atau `src/shared/components`; di pohon dashboard (`src/app/(dashboard)` dan
-   `src/shared/components`) tidak boleh ada `<select>`, `<textarea>` atau `<table>` mentah maupun
-   `role="dialog"` buatan manual di luar pengecualian yang tercantum (cabang native adapter `Select`,
-   `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah di sana memerlukan komentar yang
-   berisi `kit-exception:` (beserta alasannya) yang berakhir paling banyak 3 baris di atasnya; hue
-   palet dan varian `dark:` hanya di file yang dicantumkan tes tersebut.
-7. Verifikasi kedua tema dan viewport 390 px sebelum PR (screenshot); `tests/e2e/a11y.spec.ts`
-   menjalankan axe.
+1. Token, tidak pernah literal. Pengecualian sengaja dibuat: terminal konsol yang selalu gelap dan `STATUS_HEX` (`src/shared/constants/statusColors.ts`), cermin hex terselesaikan dari palet status kit untuk pemanggil yang memerlukan hex literal. Palet kategoris tidak terkecuali lagi: mereka menggunakan lima token grafik kit (`--color-chart-1..5`) melalui `src/shared/utils/categoricalPalette.ts` dan, untuk strategi perutean, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edge dan kanvas orkestrasi membaca variabel `--orch-status-*` yang sadar tema (`src/shared/components/flow/edgeStyles.ts`).
+2. Jangan pernah menambal `packages/ui-kit/src` dengan tangan: sinkronkan dengan `scripts/dev/sync-ui-kit.sh <commit>`; gerbang pra-komit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) gagal pada byte apa pun yang berbeda dari komit upstream yang disematkan (dilompati dengan peringatan ketika klon upstream, `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tidak ada). Jika kit kekurangan sesuatu, selesaikan hal tersebut di adaptor atau layar dan mintalah di bagian hulu.
+3. Default teks kit adalah bahasa Inggris (`label = "Loading"`, `loadingLabel = "Loading table"`…) — meneruskan string yang diterjemahkan dari `useTranslations(...)` setiap kali komponen kit merender teks.
+4. Utilitas tailwind memenangkan kelas komponen kit (kit menyatakan `@layer theme, base, components, utilities` dan aturannya ada di `components`) — gunakan utilitas untuk spasi dan tata letak, bukan untuk mewarnai ulang komponen kit.
+5. Judul: `.ci-heading` untuk judul halaman dan bagian; `.ci-dashboard-display` hanya untuk teks tampilan yang besar dan jarang seperti kode status halaman kesalahan. Keduanya menggunakan Swisser.
+6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga adopsi kit: tidak ada rentang pengikat Material di bawah `src/app` atau `src/shared/components`; di pohon dasbor (`src/app/(dashboard)` dan `src/shared/components`) tidak ada `<select>`, `<textarea>` atau `<table>` mentah dan tidak ada `role="dialog"` linting tangan di luar pengecualian yang terdaftar (cabang asli adaptor `Select`, `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah perlu komentar yang berisi `kit-exception:` (beserta alasannya) berakhiran paling banyak 3 baris di atasnya; warna palet dan varian `dark:` hanya di file daftar pengujian.
+7. Verifikasi tema dan area pandang 390 px sebelum PR (tangkapan layar); `tests/e2e/a11y.spec.ts` menjalankan kapak.
 
 ## 3. Menambahkan layar
 
@@ -147,49 +118,29 @@
 
 ## 5. Memperbarui kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` menyalin `src/` upstream pada commit tersebut ke
-`packages/ui-kit/src` dan menerapkan satu-satunya transformasi yang diizinkan (menghapus akhiran `.js` dari
-impor relatif). Kemudian: tinjau `git diff packages/ui-kit`, lakukan pemeriksaan visual pada halaman
-penyedia, pengaturan, kombo, penggunaan, dan endpoint di kedua tema, jalankan
-`npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, lalu buka PR dengan changelog upstream.
+`npm run check:ui-kit-upstream` membandingkan versi yang disematkan di `packages/ui-kit/UPSTREAM.md` dengan tag `v*` terbaru dari repo upstream dan mencetak perintah sinkronisasi ketika rilis keluar.
 
-## 6. Diagram README
+Alur kerja `UI Kit upstream watch` harian (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan pemeriksaan yang sama. Saat pin berada di belakang, `scripts/ci/ui-kit-sync-pr.sh` menjaga satu sinkronisasi PR tetap terbuka terhadap cabang `release/vX.Y.Z` tertinggi, pada cabang bergulir `chore/ui-kit-sync-latest`. Itu tidak pernah menyatu: setiap rilis kit masih memerlukan pemeriksaan visual pada VPS lokal. Cabang dibangun kembali ketika rilis yang lebih baru keluar dan dibiarkan begitu saja. PR terbuka dengan komit yang didorong dengan tangan tidak akan ditimpa, dan PR untuk versi yang ditutup oleh pengelola, tidak digabungkan, tetap ditutup hingga rilis yang lebih baru.
 
-Dua belas diagram yang disematkan `README.md` di root (`docs/diagrams/*.svg`) adalah kit yang diterapkan
-pada gambar statis, dan diagram itu dihasilkan, bukan digambar dengan tangan: 13 file generator di
-`scripts/docs/gen-readme-*.mjs` (dua belas diagram ditambah driver `gen-readme-diagrams.mjs`) dan 12 uji
-staleness di `tests/unit/docs/readme-*-svg.test.ts`, satu per diagram, masing-masing membandingkan file
-yang di-commit byte demi byte dengan output generatornya (job `test-unit`).
+Ketika tidak ada PR yang dapat dibuka (rilis target dibekukan, PR telah melakukan commit dengan tangan, PR ditutup, atau tidak ada token PR yang disetel) alur kerja membiarkan satu masalah pelacakan tetap terbuka dan menjelaskan alasannya.
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet dari `packages/ui-kit/src/ci-tokens.css`
-  (ditambatkan pada file tersebut oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mendefinisikan
-  peran teks pada typeface kit — Instrument Serif untuk display, Inter untuk teks UI, IBM Plex Mono untuk
-  angka dan kode, paket `@fontsource` yang sama dengan yang dimuat `src/app/globals.css` untuk dashboard.
-  Nilai terang berada di `:root`, nilai gelap di balik `prefers-color-scheme: dark`, di dalam file, sehingga
-  setiap gambar mengikuti skema warna penampil di GitHub.
-- **Font.** `scripts/docs/readme-fonts.mjs` membuat subset file woff2 tersebut menjadi hanya glif yang
-  digambar setiap diagram dan menyematkannya sebagai URI `data:` `@font-face` — satu-satunya cara tipografi
-  kit menjangkau gambar README, karena GitHub Markdown tidak membawa CSS dan proxy camo memblokir setiap
-  fetch eksternal. Subset tersebut hanya latin; glif simbol yang fallback ke stack sistem diizinkan satu per
-  satu di `SYMBOL_FALLBACKS`, dan glif lain yang tidak tercakup akan melempar error.
-- **Regenerasi.** `npm run docs:readme-diagrams` menulis ulang kedua belasnya dalam urutan README dan
-  mencetak satu baris per file beserta ukurannya. Satu generator juga dapat dijalankan sendiri
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` memerlukan `node --import tsx/esm` karena
-  angkanya berasal dari loader katalog live di `open-sse/config/freeModelCatalog.ts`; konsekuensi CI dari
-  perubahan katalog ada di `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit generator dan
-  SVG secara bersamaan.
-- **Bukti.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` merender file sebagaimana GitHub
-  menyajikannya (tag `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), menangkap satu frame terang
-  dan satu frame gelap, lalu melaporkan permintaan font eksternal yang dilakukan halaman (harus 0).
-- **Anggaran.** Di bawah 200 KB per file (setiap uji staleness memastikannya); 500 KB adalah batas mutlak
-  untuk gambar README mana pun (aturan validator studio SVG).
-- **Teks tidak berubah, angka dari gate.** Rebrand mengubah tipografi dan palet, bukan kata-kata: setiap
-  generator membawa teks diagramnya dalam konstanta `*_COPY` (atau membangunnya dari katalog live) yang
-  sekaligus menjadi teks yang digambar dan input subset font. Angka kanonik tetap berada di node `<text>`,
-  dibaca oleh `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); uji staleness diagram yang
-  dibaca gate tersebut juga menjalankan validatornya pada file yang dihasilkan, sehingga angka yang
-  menyimpang dari kode akan menggagalkan pengujian — perbaiki sumber yang dibaca gate, jangan pernah angka
-  di dalam generator.
+Alur kerjanya menggunakan dua rahasia:
+
+- `secrets.UI_KIT_READ_TOKEN`: token read-only untuk repo upstream pribadi. Ketika alur kerja tidak dapat membaca upstream (tidak ada token, token yang berhenti bekerja, atau GitHub tidak dapat dijangkau), proses tetap hijau namun menulis peringatan dan membiarkan satu masalah terpisah tetap terbuka, yang akan menutup sendiri setelah proses berikutnya dapat membaca upstream lagi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: token terperinci pada repositori ini dengan Konten dan permintaan Tarik akses tulis. `GITHUB_TOKEN` default tidak dapat membuat PRs di sini, dan PR yang dibuka tidak akan memicu CI. Tanpa token ini, alur kerja hanya mendorong cabang.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` menyalin `src/` upstream pada commit tersebut (`latest` = tag `v*` terbaru) ke `packages/ui-kit/src`, menerapkan transformasi tunggal yang diizinkan (ini menghilangkan akhiran `.js` dari impor relatif), dan menyetel versi ruang kerja di `packages/ui-kit/package.json` dan `package-lock.json` ke versi upstream. Kemudian: tinjau `git diff packages/ui-kit`, lakukan penyampaian visual pada penyedia, pengaturan, kombo, penggunaan dan titik akhir di kedua tema, jalankan `npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, dan buka PR dengan log perubahan upstream.
+
+## 6. diagram README
+
+Dua belas diagram yang disematkan oleh root `README.md` (`docs/diagrams/*.svg`) adalah kit yang diterapkan pada gambar statis, dan diagram tersebut dihasilkan, bukan digambar dengan tangan: 13 file generator di `scripts/docs/gen-readme-*.mjs` (dua belas diagram ditambah driver `gen-readme-diagrams.mjs` ) dan 12 tes staleness di `tests/unit/docs/readme-*-svg.test.ts`, satu per diagram, setiap byte membandingkan file yang dikomit dengan output generatornya (pekerjaan `test-unit`).
+
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet dari `packages/ui-kit/src/ci-tokens.css` (disematkan pada file itu oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mendefinisikan peran teks pada skala tipe kit: Switzer pada bobot kit (400/500/600, tampilan pada 500) dan melacak semuanya, kecuali peran kode (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), yang merupakan IBM Plex Mono dan hanya untuk perintah, URLs, pengidentifikasi dan layar terminal. Nilai terang berada di `:root`, nilai gelap di belakang `prefers-color-scheme: dark`, di dalam file, sehingga setiap gambar mengikuti skema pemirsa di GitHub.
+- **font.** GitHub Markdown tidak membawa CSS dan proxy camo memblokir setiap pengambilan eksternal, jadi jenis kit harus berpindah ke dalam file. `scripts/docs/readme-outline.mjs`, langkah terakhir dari setiap generator, membentuk peran Switzer dengan HarfBuzz dan menggambarnya sebagai garis vektor ( jalur `<defs>` dan `<use>`), dengan panah dan simbol geometris yang tidak digambar Switzer pada metriknya sendiri. Garis besarnya, tidak pernah merupakan font yang disematkan: Lisensi Switzer (`packages/ui-kit/src/fonts/FFL.txt`) melarang subsetting dan konversi format tanpa izin tertulis dan mengizinkan gambar vektor, jadi jangan memperkenalkan kembali Switzer `@font-face` atau `data:` URI. Satu-satunya font yang tersisa dalam file adalah subset OFL IBM Plex Mono untuk teks kode asli (`scripts/docs/readme-fonts.mjs`), yang dibuat dari karakter tersebut; mesin terbang apa pun yang tidak dapat ditempelkan.
+- **Diperbarui.** `npm run docs:readme-diagrams` menulis ulang kedua belas dalam urutan README dan mencetak satu baris per file dengan ukurannya. Generator tunggal juga berjalan sendiri (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` membutuhkan `node --import tsx/esm` karena angkanya berasal dari pemuat katalog langsung di `open-sse/config/freeModelCatalog.ts`; CI konsekuensi dari perubahan katalog ada di `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Komit generator dan SVG bersama-sama.
+- **Bukti.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` merender file dengan cara GitHub menyajikannya (tag `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), menangkap bingkai terang dan gelap dan melaporkan permintaan font eksternal yang dibuat halaman (harus 0).
+- **Anggaran.** Di bawah 200 KB per file (setiap tes staleness menyatakannya); 500 KB adalah batasan maksimum untuk gambar README apa pun (aturan validator studio SVG ).
+- **Salinan tidak berubah, dihitung dari gerbang.** Perubahan merek tersebut mengubah jenis dan palet, bukan kata-kata: setiap generator membawa salinan diagramnya dalam konstanta `*_COPY` (atau membuatnya dari katalog langsung) yang merupakan teks yang digambar dan masukan dari langkah pembuatan kerangka. Gambar kanonik tetap berada di node `<text>` (tidak terlihat setelah digariskan, `fill-opacity:0`), dibaca oleh `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); tes staleness dari diagram yang dibaca gerbang juga menjalankan validatornya pada file yang dihasilkan, sehingga gambar yang menyimpang dari kode gagal dalam tes — memperbaiki sumber yang dibaca gerbang, tidak pernah nomor di generator.
 
 ## 7. Indeks referensi
 

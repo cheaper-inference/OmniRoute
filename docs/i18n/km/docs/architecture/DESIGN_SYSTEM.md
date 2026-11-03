@@ -4,13 +4,7 @@
 
 ---
 
-> **ស្ថានភាព:** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងលើ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)
-> ដែលត្រូវបាន vendored ជា workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot នៃ upstream ត្រូវបាន pin
-> នៅក្នុង `packages/ui-kit/UPSTREAM.md` ហើយត្រូវបានការពារដោយ `npm run check:ui-kit-snapshot`)។ Light គឺជា
-> theme ផ្លូវការ; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ពណ៌ accent គឺ Keak lime (`--ci-color-accent`)។ Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) គឺជាគ្រួសារពុម្ពអក្សរ UI, Instrument Serif សម្រាប់តែអត្ថបទ
-> display ទំហំធំ ដែលមានធាតុរៀងឆ្ងាយៗ (`.ci-dashboard-display`), IBM Plex Mono សម្រាប់កូដ — ទាំងអស់ត្រូវបាន
-> self-hosted តាមរយៈ `@fontsource/*` imports នៅផ្នែកខាងលើនៃ `src/app/globals.css`។ រាល់រូបតំណាងទាំងអស់គឺជា Lucide glyph។
+> **ស្ថានភាព៖** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងនៅលើ** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ដែលបានលក់ជាកន្លែងធ្វើការ `packages/ui-kit` (`@omniroute/ui-kit`; រូបថតខាងលើត្រូវបានខ្ទាស់ជា `packages/ui-kit/UPSTREAM.md` និងការពារដោយ `npm run check:ui-kit-snapshot`) ។ ពន្លឺគឺជាប្រធានបទ Canonical; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ការសង្កត់សំឡេងគឺ Keak lime (`--ci-color-accent`) ។ ស្វ៊ីសគឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ ស្គ្រីប Switzer ខ្វះការធ្លាក់តាមរយៈ glyph ដោយ glyph (`src/app/globals.css`): Inter សម្រាប់ Cyrillic ក្រិក និងវៀតណាម ហើយមានតែក្រោម `html[dir="rtl"]`, Vazirmatn សម្រាប់អក្សរអារ៉ាប់។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
 
 ## 1. កន្លែងដែលអ្វីៗស្ថិតនៅ
 
@@ -82,13 +76,13 @@
 
 ## 2. ច្បាប់
 
-1. ប្រើ token ជានិច្ច កុំប្រើតម្លៃ literal។ ករណីលើកលែងត្រូវបានរក្សាទុកដោយចេតនា៖ console terminal ដែលងងឹតជានិច្ច និង `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ដែលជាការឆ្លុះបញ្ចាំង resolved-hex នៃ status palette របស់ kit សម្រាប់ caller ដែលត្រូវការ hex literal។ ចំពោះ categorical palettes វិញ លែងជាករណីលើកលែងទៀតទេ៖ ពួកវាដំណើរការលើ chart tokens ទាំងប្រាំរបស់ kit (`--color-chart-1..5`) តាមរយៈ `src/shared/utils/categoricalPalette.ts` ហើយសម្រាប់ routing strategies គឺ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges និង orchestration canvas អាន variables `--orch-status-*` ដែលផ្លាស់ប្តូរតាម theme (`src/shared/components/flow/edgeStyles.ts`)។
-2. កុំកែ `packages/ui-kit/src` ដោយដៃដាច់ខាត៖ ធ្វើសមកាលកម្មជាមួយ `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) នឹងបរាជ័យលើ byte ណាមួយដែលខុសពី pinned upstream commit (វារំលងជាមួយការព្រមាន នៅពេលដែល upstream clone គឺ `UI_KIT_CLONE` ឬ `_references/cheaper-inference-ui-kit` មិនមាន)។ នៅពេលដែល kit ខ្វះអ្វីមួយ សូមធ្វើ workaround នៅក្នុង adapter ឬ screen ហើយស្នើសុំទៅ upstream។
-3. អត្ថបទលំនាំដើមរបស់ kit គឺជាភាសាអង់គ្លេស (`label = "Loading"`, `loadingLabel = "Loading table"`…) — សូមបញ្ជូន strings ដែលបានបកប្រែពី `useTranslations(...)` រាល់ពេលដែល kit component បង្ហាញអត្ថបទ។
-4. Tailwind utilities ឈ្នះលើ kit component classes (kit ប្រកាស `@layer theme, base, components, utilities` ហើយ rules របស់វាស្ថិតនៅក្នុង `components`) — ប្រើ utilities សម្រាប់ spacing និង layout មិនមែនដើម្បីកែពណ៌ kit components ទេ។
-5. ចំណងជើង៖ `.ci-heading` (Inter, គ្មាន tracking) សម្រាប់ចំណងជើងទំព័រ និងចំណងជើងផ្នែក; `.ci-dashboard-display` (Instrument Serif) សម្រាប់តែ display text ធំៗ ដែលមានចំនួនតិចតួច ដូចជា status code នៃទំព័រ error។
-6. `tests/unit/dashboard-kit-sweep.test.ts` ការពារការអនុវត្ត kit៖ មិនអនុញ្ញាត Material ligature span នៅក្រោម `src/app` ឬ `src/shared/components`; នៅក្នុង dashboard tree (`src/app/(dashboard)` និង `src/shared/components`) មិនអនុញ្ញាត `<select>`, `<textarea>` ឬ `<table>` ដែលជា raw និង `role="dialog"` ដែលសរសេរដោយដៃ ក្រៅពីករណីលើកលែងដែលបានរាយ (native branch របស់ `Select` adapter, `RequestLoggerDetail`); រាល់ `<button>` ឬ `<input>` ដែលជា raw នៅទីនោះត្រូវការ comment ដែលមាន `kit-exception:` (ជាមួយហេតុផល) ដែលបញ្ចប់យ៉ាងច្រើន 3 បន្ទាត់ខាងលើវា; palette hues និង `dark:` variants អនុញ្ញាតតែនៅក្នុងឯកសារដែល test បានរាយប៉ុណ្ណោះ។
-7. ផ្ទៀងផ្ទាត់ theme ទាំងពីរ និង viewport 390 px មុនពេលបង្កើត PR (screenshots); `tests/e2e/a11y.spec.ts` ដំណើរការ axe។
+1. ថូខឹន មិនដែលព្យញ្ជនៈទេ។ ករណីលើកលែងត្រូវបានរក្សាទុកក្នុងគោលបំណង៖ ស្ថានីយកុងសូលតែងតែងងឹត និង `STATUS_HEX` (`src/shared/constants/statusColors.ts`) កញ្ចក់ដែលដោះស្រាយ - hex នៃក្ដារលាយស្ថានភាពឧបករណ៍សម្រាប់អ្នកហៅទូរសព្ទដែលត្រូវការគោលដប់ប្រាំមួយ។ ក្ដារលាយប្រភេទគឺមិនមានករណីលើកលែងទៀតទេ៖ ពួកគេជិះលើនិមិត្តសញ្ញាគំនូសតាងចំនួនប្រាំរបស់ឧបករណ៍ (`--color-chart-1..5`) តាមរយៈ `src/shared/utils/categoricalPalette.ts` និងសម្រាប់យុទ្ធសាស្ត្រកំណត់ទិសដៅ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges និង orchestration canvas អាន theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`) ។
+2. កុំធ្វើ patch `packages/ui-kit/src` ដោយដៃ៖ ធ្វើសមកាលកម្មជាមួយ `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) បរាជ័យនៅលើ byte ណាមួយដែលខុសពីការភ្ជាប់ upstream commit (វារំលងជាមួយនឹងការព្រមាននៅពេលដែល clone upstream `UI_KIT_CLONE` ឬ `_references/cheaper-inference-ui-kit` គឺអវត្តមាន)។ នៅពេលដែលឧបករណ៍ខ្វះអ្វីមួយ សូមធ្វើការជុំវិញវានៅក្នុងអាដាប់ទ័រ ឬអេក្រង់ ហើយសុំវាឡើងលើ។
+3. លំនាំដើមអត្ថបទរបស់កញ្ចប់គឺជាភាសាអង់គ្លេស (`label = "Loading"`, `loadingLabel = "Loading table"`… ) — ឆ្លងកាត់ខ្សែអក្សរដែលបានបកប្រែពី `useTranslations(...)` នៅពេលណាដែលសមាសធាតុឧបករណ៍បង្ហាញអត្ថបទ។
+4. ឧបករណ៍ប្រើប្រាស់ Tailwind ឈ្នះលើថ្នាក់សមាសភាគឧបករណ៍ (ឧបករណ៍ប្រកាស `@layer theme, base, components, utilities` និងច្បាប់របស់វារស់នៅក្នុង `components`) — ប្រើឧបករណ៍ប្រើប្រាស់សម្រាប់គម្លាត និងប្លង់ មិនមែនដើម្បីដាក់ពណ៌ឡើងវិញនូវសមាសធាតុនៃកញ្ចប់។
+5. ចំណងជើង៖ `.ci-heading` សម្រាប់ចំណងជើងទំព័រ និងផ្នែក; `.ci-dashboard-display` សម្រាប់តែអត្ថបទដែលបង្ហាញទំហំធំដូចជាលេខកូដស្ថានភាពទំព័រកំហុស។ ទាំងពីរប្រើស្វីស។
+6. `tests/unit/dashboard-kit-sweep.test.ts` ការពារការអនុម័តឧបករណ៍: មិនមានវិសាលភាពនៃសម្ភារៈនៅក្រោម `src/app` ឬ `src/shared/components`; នៅក្នុងផ្ទាំងគ្រប់គ្រងមែកធាង (`src/app/(dashboard)` និង `src/shared/components`) គ្មាន `<select>` ឆៅ `<textarea>` ឬ `<table>` និងគ្មាន `role="dialog"` រមៀលដោយដៃនៅខាងក្រៅករណីលើកលែងដែលបានរាយបញ្ជី (សាខាដើមរបស់អាដាប់ទ័រ `Select` `RequestLoggerDetail`); រាល់ `<button>` ឬ `<input>` ឆៅត្រូវការមតិដែលមាន `kit-exception:` (ដោយមានហេតុផល) ដែលបញ្ចប់នៅក្នុងបន្ទាត់ច្រើនបំផុត 3 នៅខាងលើវា; ពណ៌ក្ដារលាយពណ៌ និងបំរែបំរួល `dark:` តែនៅក្នុងឯកសារបញ្ជីសាកល្បងប៉ុណ្ណោះ។
+7. ផ្ទៀងផ្ទាត់ស្បែកទាំងពីរ និងច្រកទិដ្ឋភាព 390 px មុនពេល PR (រូបថតអេក្រង់); `tests/e2e/a11y.spec.ts` រត់ពូថៅ។
 
 ## 3. ការបន្ថែម screen
 
@@ -110,49 +104,31 @@
 4. បន្ថែម ឬធ្វើបច្ចុប្បន្នភាព `tests/unit/ui/adapters/<name>.test.tsx`។ សម្រាប់ adapter ដែលមាន caller ច្រើន សូមប្រៀបធៀប
    markup ដែលបាន render នៅមុន និងក្រោយការផ្លាស់ប្តូរ — ការផ្លាស់ប្តូរ padding ឬ wrapper រាលដាលទៅគ្រប់ screen ទាំងអស់។
 
-## 5. ការធ្វើបច្ចុប្បន្នភាព kit
+## 5. ការធ្វើបច្ចុប្បន្នភាពឧបករណ៍
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ចម្លង `src/` ពី upstream នៅ commit នោះ ចូលទៅក្នុង
-`packages/ui-kit/src` ហើយអនុវត្តការបំប្លែងតែមួយដែលត្រូវបានអនុញ្ញាត (វាដក suffix `.js` ចេញពី
-relative import)។ បន្ទាប់មក៖ ពិនិត្យ `git diff packages/ui-kit` ធ្វើការត្រួតពិនិត្យមើលដោយផ្ទាល់លើ providers, settings, combos,
-usage និង endpoint ក្នុង theme ទាំងពីរ ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយ
-បើក PR ជាមួយនឹង changelog ពី upstream។
+`npm run check:ui-kit-upstream` ប្រៀបធៀបកំណែដែលបានខ្ទាស់ក្នុង `packages/ui-kit/UPSTREAM.md` ជាមួយនឹងស្លាក `v*` ថ្មីបំផុតនៃ repo ខាងលើ ហើយបោះពុម្ពពាក្យបញ្ជាធ្វើសមកាលកម្ម នៅពេលការចេញផ្សាយចេញ។
+
+លំហូរការងារ `UI Kit upstream watch` ប្រចាំថ្ងៃ (`.github/workflows/ui-kit-upstream-watch.yml`) ដំណើរការការត្រួតពិនិត្យដូចគ្នា។ ខណៈពេលដែលម្ជុលស្ថិតនៅខាងក្រោយ `scripts/ci/ui-kit-sync-pr.sh` រក្សាសមកាលកម្មមួយ PR បើកទល់នឹងសាខា `release/vX.Y.Z` ខ្ពស់បំផុតនៅលើសាខាវិល `chore/ui-kit-sync-latest`។ វាមិនដែលបញ្ចូលគ្នាទេ៖ រាល់ការចេញផ្សាយកញ្ចប់នៅតែត្រូវការការត្រួតពិនិត្យមើលឃើញនៅលើ VPS មូលដ្ឋាន។ សាខានេះត្រូវបានសាងសង់ឡើងវិញនៅពេលដែលការចេញផ្សាយថ្មីជាងនេះចេញហើយទុកចោលតែម្នាក់ឯងបើមិនដូច្នេះទេ។ PR បើកចំហជាមួយនឹងការប្តេជ្ញាចិត្តដែលរុញដោយដៃមិនត្រូវបានសរសេរជាន់លើទេ ហើយ PR សម្រាប់កំណែដែលអ្នកថែទាំបានបិទដោយមិនបានបញ្ចូលនឹងបិទរហូតដល់ការចេញផ្សាយថ្មីជាងនេះ។
+
+នៅពេលដែលគ្មាន PR អាចត្រូវបានបើក (ការចេញផ្សាយគោលដៅត្រូវបានជាប់គាំង PR បានប្រព្រឹត្តដោយរុញដោយដៃ PR ត្រូវបានបិទ ឬមិនមានសញ្ញាសម្ងាត់ PR ត្រូវបានកំណត់) លំហូរការងាររក្សាបញ្ហាតាមដានមួយបើកចំហដែលនិយាយថាហេតុអ្វី។
+
+ដំណើរការការងារប្រើអាថ៌កំបាំងពីរ៖
+
+- `secrets.UI_KIT_READ_TOKEN`: សញ្ញាសម្ងាត់សម្រាប់អានបានតែសម្រាប់ repo ឯកជន។ នៅពេលដែលលំហូរការងារមិនអាចអានចរន្តខាងលើ (គ្មានសញ្ញាសម្ងាត់ សញ្ញាសម្ងាត់ដែលឈប់ដំណើរការ ឬ GitHub មិនអាចទៅដល់បាន) ការរត់នៅតែមានពណ៌បៃតង ប៉ុន្តែសរសេរការព្រមាន និងរក្សាបញ្ហាដាច់ដោយឡែកមួយបើក ដែលបិទដោយខ្លួនវានៅពេលដំណើរការក្រោយអាចអានចរន្តម្តងទៀត។
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: សញ្ញាសម្ងាត់ដែលមានលក្ខណៈល្អិតល្អន់នៅលើឃ្លាំងនេះជាមួយនឹងសំណើសុំចូលប្រើខ្លឹមសារ និងទាញ។ `GITHUB_TOKEN` លំនាំដើមមិនអាចបង្កើត PRs នៅទីនេះទេ ហើយ PR វាបើកនឹងមិនបង្ក CI ទេ។ បើគ្មាននិមិត្តសញ្ញានេះទេ លំហូរការងារគ្រាន់តែរុញសាខាប៉ុណ្ណោះ។
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ចម្លង `src/` ខាងលើនៅឯការប្តេជ្ញាចិត្តនោះ (`latest` = ស្លាក `v*` ថ្មីបំផុត) ទៅជា `packages/ui-kit/src` អនុវត្តការផ្លាស់ប្តូរដែលបានអនុញ្ញាតតែមួយ (វាទម្លាក់បច្ច័យ `.js` ពីការនាំចូលដែលទាក់ទង) និងកំណត់កំណែកន្លែងធ្វើការនៅក្នុង `packages/ui-kit/package.json` និង `package-lock.json` ទៅផ្នែកខាងលើ។ បន្ទាប់មក៖ ពិនិត្យមើល `git diff packages/ui-kit` ធ្វើវិចារណញាណលើអ្នកផ្តល់សេវា ការកំណត់ បន្សំ ការប្រើប្រាស់ និងចំណុចបញ្ចប់នៅក្នុងស្បែកទាំងពីរ ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយបើក PR ជាមួយនឹងការផ្លាស់ប្តូរកម្រិតខ្ពស់។
 
 ## 6. ដ្យាក្រាម README
 
-ដ្យាក្រាមទាំងដប់ពីរដែល `README.md` នៅ root បង្កប់ (`docs/diagrams/*.svg`) គឺជា kit ដែលបានអនុវត្តលើរូបភាព
-ស្ថិត ហើយពួកវាត្រូវបានបង្កើតឡើងដោយស្វ័យប្រវត្តិ មិនមែនគូរដោយដៃទេ៖ ឯកសារ generator ចំនួន 13 នៅ `scripts/docs/gen-readme-*.mjs`
-(ដ្យាក្រាមដប់ពីរ បូករួមនឹង driver `gen-readme-diagrams.mjs`) និងតេស្ត staleness ចំនួន 12 នៅ
-`tests/unit/docs/readme-*-svg.test.ts` មួយសម្រាប់ដ្យាក្រាមមួយ ដែលនីមួយៗប្រៀបធៀបតាម byte រវាងឯកសារដែលបាន commit ជាមួយ
-លទ្ធផលរបស់ generator របស់វា (job `test-unit`)។
+ដ្យាក្រាមទាំងដប់ពីរដែលឫស `README.md` បង្កប់ (`docs/diagrams/*.svg`) គឺជាឧបករណ៍ដែលបានអនុវត្តចំពោះរូបភាពឋិតិវន្ត ហើយពួកវាត្រូវបានបង្កើត មិនមែនគូរដោយដៃទេ៖ ឯកសារម៉ាស៊ីនភ្លើងចំនួន 13 នៅ `scripts/docs/gen-readme-*.mjs` (ដ្យាក្រាមដប់ពីរបូកនឹងកម្មវិធីបញ្ជា `gen-readme-diagrams.mjs` ) និងការធ្វើតេស្តភាពជាប់គាំងចំនួន 12 នៅ `tests/unit/docs/readme-*-svg.test.ts` មួយក្នុងមួយដ្យាក្រាមដែលចេញឯកសារនីមួយៗ (byte-comment) `test-unit`) ។
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` ចម្លង palette ពី `packages/ui-kit/src/ci-tokens.css`
-  (ត្រូវបាន pin ទល់នឹងឯកសារនោះដោយ `tests/unit/docs/readme-diagram-theme.test.ts`) ហើយកំណត់តួនាទីអត្ថបទលើ
-  គ្រឿងអក្សររបស់ kit — Instrument Serif សម្រាប់ display, Inter សម្រាប់អត្ថបទ UI, IBM Plex Mono សម្រាប់តួលេខ និងកូដ
-  ដែលជា package `@fontsource` ដដែលដែល `src/app/globals.css` ផ្ទុកសម្រាប់ dashboard។ តម្លៃ light ស្ថិតលើ `:root` ចំណែក
-  តម្លៃ dark ស្ថិតពីក្រោយ `prefers-color-scheme: dark` នៅខាងក្នុងឯកសារ ដូច្នេះរូបភាពនីមួយៗធ្វើតាម scheme របស់អ្នកមើលនៅលើ
-  GitHub។
-- **ពុម្ពអក្សរ.** `scripts/docs/readme-fonts.mjs` កាត់ឯកសារ woff2 ទាំងនោះជា subset ត្រឹមតែ glyph ដែលដ្យាក្រាមនីមួយៗគូរ ហើយ
-  បង្កប់វាជា `@font-face` `data:` URIs — ជាផ្លូវតែមួយគត់ដែល typography របស់ kit ទៅដល់រូបភាព README ដោយសារ
-  GitHub Markdown មិនមាន CSS និង camo proxy ប្លុករាល់ការ fetch ពីខាងក្រៅទាំងអស់។ subset ទាំងនោះគឺ latin
-  ប៉ុណ្ណោះ; glyph និមិត្តសញ្ញាដែល fallback ទៅកាន់ stack របស់ប្រព័ន្ធ ត្រូវបានអនុញ្ញាតម្តងមួយៗក្នុង `SYMBOL_FALLBACKS` ហើយ glyph
-  ផ្សេងទៀតដែលមិនត្រូវបានគ្របដណ្តប់ នឹង throw។
-- **បង្កើតឡើងវិញ.** `npm run docs:readme-diagrams` សរសេរឡើងវិញទាំងដប់ពីរតាមលំដាប់ក្នុង README ហើយបោះពុម្ពមួយបន្ទាត់
-  សម្រាប់ឯកសារមួយជាមួយទំហំរបស់វា។ generator តែមួយក៏អាចដំណើរការដោយខ្លួនឯងដែរ (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` ត្រូវការ `node --import tsx/esm` ពីព្រោះតួលេខរបស់វាមកពី live catalog loader នៅក្នុង
-  `open-sse/config/freeModelCatalog.ts`; ផលវិបាក CI នៃការផ្លាស់ប្តូរ catalog មាននៅក្នុង
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`)។ សូម commit generator និង SVG ឱ្យជាមួយគ្នា។
-- **ភស្តុតាង.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` render ឯកសារតាមរបៀបដែល GitHub បម្រើ
-  វា (tag `<img>` មួយ, `Content-Security-Policy` របស់ camo, `image/svg+xml`) ចាប់យក frame ពណ៌ភ្លឺមួយ និងងងឹតមួយ
-  ហើយរាយការណ៍សំណើ font ពីខាងក្រៅដែលទំព័របានធ្វើ (ត្រូវតែស្មើ 0)។
-- **ទំហំកំណត់.** ក្រោម 200 KB ក្នុងមួយឯកសារ (តេស្ត staleness នីមួយៗ assert ចំណុចនេះ); 500 KB គឺជាដែនកំណត់ខ្ពស់បំផុតសម្រាប់រូបភាព README
-  ណាមួយ (ច្បាប់របស់ SVG studio validator)។
-- **អត្ថបទនៅដដែល តួលេខមកពី gate.** ការ rebrand បានផ្លាស់ប្តូរគ្រឿងអក្សរ និង palette មិនមែនពាក្យទេ៖ generator នីមួយៗ
-  ផ្ទុកអត្ថបទ (copy) របស់ដ្យាក្រាមខ្លួនក្នុង constant `*_COPY` (ឬសាងសង់វាពី live catalog) ដែលជាទាំងអត្ថបទដែលត្រូវគូរ
-  និងជា input សម្រាប់ font-subset។ តួលេខ canonical នៅតែស្ថិតក្នុង node `<text>` ដែលត្រូវបានអានដោយ `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); តេស្ត staleness នៃដ្យាក្រាមដែល gate អាន ក៏ដំណើរការ
-  validator របស់វាលើឯកសារដែលបានបង្កើតផងដែរ ដូច្នេះតួលេខដែលផ្លាស់ចាកពីកូដ ធ្វើឱ្យតេស្តបរាជ័យ — សូមជួសជុល
-  ប្រភពដែល gate អាន កុំជួសជុលលេខក្នុង generator ជាដាច់ខាត។
+- **ថូខឹន។** `scripts/docs/readme-diagram-theme.mjs` ចម្លងក្ដារលាយពី `packages/ui-kit/src/ci-tokens.css` (ខ្ទាស់ប្រឆាំងនឹងឯកសារនោះដោយ `tests/unit/docs/readme-diagram-theme.test.ts`) ហើយកំណត់តួនាទីអត្ថបទនៅលើមាត្រដ្ឋានប្រភេទរបស់ឧបករណ៍ `.mono-xs` ស្វ៊ីសតាមទម្ងន់របស់ឧបករណ៍ (400/500/600 បង្ហាញនៅ 500) និងការតាមដានសម្រាប់អ្វីៗគ្រប់យ៉ាង លើកលែងតែតួនាទីកូដ (`.cmd`, `.term`, `.term-lg`, `.mono-sm`) ដែលជា IBM ហើយគឺសម្រាប់តែពាក្យបញ្ជា URLs ការកំណត់អត្តសញ្ញាណ និងអេក្រង់ស្ថានីយប៉ុណ្ណោះ `.mono` តម្លៃពន្លឺស្ថិតនៅលើ `:root` តម្លៃងងឹតនៅពីក្រោយ `prefers-color-scheme: dark` នៅខាងក្នុងឯកសារ ដូច្នេះរូបភាពនីមួយៗធ្វើតាមគ្រោងការណ៍របស់អ្នកមើលនៅលើ GitHub។
+- **ពុម្ពអក្សរ។** GitHub Markdown មិនផ្ទុក CSS ហើយប្រូកស៊ី camo រារាំងរាល់ការទាញយកខាងក្រៅ ដូច្នេះប្រភេទកញ្ចប់ត្រូវធ្វើដំណើរទៅខាងក្នុងឯកសារ។ `scripts/docs/readme-outline.mjs` ដែលជាជំហានចុងក្រោយនៃម៉ាស៊ីនភ្លើងនីមួយៗ កំណត់រូបរាងតួនាទីរបស់ស្វីសដោយប្រើ HarfBuzz ហើយគូរវាជាបន្ទាត់វ៉ិចទ័រ (`<defs>` paths និង `<use>`) ជាមួយនឹងព្រួញ និងនិមិត្តសញ្ញាធរណីមាត្រ ស្វ៊ីសខ្វះការគូសលើរង្វាស់របស់វាផ្ទាល់។ គ្រោង មិនដែលបង្កប់ពុម្ពអក្សរទេ៖ អាជ្ញាប័ណ្ណរបស់ស្វីស (`packages/ui-kit/src/fonts/FFL.txt`) ហាមឃាត់ការកំណត់រង និងការបំប្លែងទម្រង់ដោយគ្មានការយល់ព្រមជាលាយលក្ខណ៍អក្សរ និងអនុញ្ញាតឱ្យគូរវ៉ិចទ័រ ដូច្នេះកុំណែនាំស្វីស `@font-face` ឬ `data:` URI ឡើងវិញ។ ពុម្ពអក្សរមួយដែលបានបន្សល់ទុកក្នុងឯកសារគឺជាសំណុំរង OFL IBM Plex Mono សម្រាប់អ្វីដែលរក្សាអត្ថបទកូដពិតប្រាកដ (`scripts/docs/readme-fonts.mjs`) ដែលបង្កើតឡើងពីតួអក្សរទាំងនោះ។ glyph ណាមួយដែលវាមិនអាចបង្កប់ការបោះ។
+- **បង្កើតឡើងវិញ។** `npm run docs:readme-diagrams` សរសេរឡើងវិញទាំងដប់ពីរនៅក្នុងលំដាប់ README ហើយបោះពុម្ពមួយបន្ទាត់ក្នុងមួយឯកសារជាមួយនឹងទំហំរបស់វា។ ម៉ាស៊ីនភ្លើងតែមួយក៏ដំណើរការដោយខ្លួនឯង (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ត្រូវការ `node --import tsx/esm` ពីព្រោះតួលេខរបស់វាបានមកពីកម្មវិធីផ្ទុកកាតាឡុកផ្ទាល់នៅក្នុង `open-sse/config/freeModelCatalog.ts` ផលវិបាក CI នៃការផ្លាស់ប្តូរកាតាឡុកគឺនៅក្នុង `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`) ។ ភ្ជាប់ម៉ាស៊ីនភ្លើង និង SVG ជាមួយគ្នា។
+- **ភស្តុតាង។** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` បង្ហាញឯកសារតាមរបៀបដែល GitHub បម្រើវា (ស្លាក `<img>`, `Content-Security-Policy` របស់ Camo , `image/svg+xml`) ចាប់យកពន្លឺ និងស៊ុមងងឹត ហើយរាយការណ៍ពុម្ពអក្សរខាងក្រៅស្នើសុំទំព័រដែលបានធ្វើ (ត្រូវតែជា 0)។
+- **ថវិកា។** នៅក្រោម 200 KB ក្នុងមួយឯកសារ (ការធ្វើតេស្តភាពជាប់គាំងនីមួយៗអះអាងវា); 500 KB គឺជាអក្សររឹងសម្រាប់រូបភាព README ណាមួយ (ច្បាប់អ្នកមានសុពលភាពស្ទូឌីយោ SVG )។
+- **ចម្លងមិនផ្លាស់ប្តូរ រាប់ពីច្រកទ្វារ។** ម៉ាកដែលបានផ្លាស់ប្តូរប្រភេទ និងក្ដារលាយ មិនមែនជាពាក្យទេ៖ ម៉ាស៊ីនភ្លើងនីមួយៗផ្ទុកច្បាប់ចម្លងនៃដ្យាក្រាមរបស់វានៅក្នុង `*_COPY` ថេរ (ឬបង្កើតវាពីកាតាឡុកផ្ទាល់) ដែលជាទាំងអត្ថបទដែលបានគូរ និងការបញ្ចូលនៃជំហានគូសវាស។ តួលេខ Canonical ស្ថិតនៅក្នុងថ្នាំង `<text>` (មើលមិនឃើញនៅពេលដែលបានគូសបញ្ជាក់ `fill-opacity:0`) អានដោយ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); ការធ្វើតេស្តភាពជាប់គាំងនៃដ្យាក្រាមដែល gate អានក៏ដំណើរការនូវ validators របស់វានៅលើឯកសារដែលបានបង្កើត ដូច្នេះតួរលេខដែលរសាត់ចេញពី code បរាជ័យ ការធ្វើតេស្ត — ជួសជុលប្រភពដែល gate អាន មិនដែលលេខនៅក្នុង generator ទេ។
 
 ## 7. លិបិក្រមឯកសារយោង
 

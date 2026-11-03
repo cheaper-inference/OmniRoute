@@ -4,7 +4,7 @@
 
 ---
 
-> **وضعیت:** داشبورد بر پایهٔ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ساخته شده و بهصورت vendored در ورکاسپیس `packages/ui-kit` (`@omniroute/ui-kit`) قرار دارد؛ اسنپشات upstream در `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود. تم روشن، تم مرجع است؛ ترجیح پیشفرض `system` است. رنگ تأکیدی، لیمویی Keak (`--ci-color-accent`) است. Inter (با letter-spacing صفر، `--ci-letter-spacing-ui`) خانوادهٔ فونت رابط کاربری است، Instrument Serif فقط برای متنهای نمایشی بزرگ و خلوت (`.ci-dashboard-display`)، و IBM Plex Mono برای کد — همگی از طریق ایمپورتهای `@fontsource/*` در ابتدای `src/app/globals.css` بهصورت self-hosted ارائه میشوند. هر آیکون یک گلیف Lucide است.
+> **وضعیت:** داشبورد بر روی ساخته شده است** کیک CI UI کیت** (`@keak/cheaper-inference-ui-kit`)، بهعنوان فضای کاری `packages/ui-kit` عرضه میشود (`@omniroute/ui-kit`؛ عکس فوری بالادست به `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود). نور موضوع متعارف است. اولویت پیش فرض `system` است. لهجه آن Keak lime (`--ci-color-accent`) است. Switzer خانواده تکی برای UI، نمایش و متن کد (`--ci-font-ui`؛ `--ci-font-display` و `--ci-font-mono` به آن حل میشوند)، توسط خود کیت میزبانی میشود (`packages/ui-kit/src/ci-fonts.css`، وارد شده توسط `ci-tokens.css`). اسکریپتهای Switzer فاقد اسلوب به حروف (`src/app/globals.css`): Inter برای خط سیریلیک، یونانی و ویتنامی و فقط زیر `html[dir="rtl"]`، وزیرمتن برای خط عربی. هر نماد یک گلیف Lucide است.
 
 ## 1. محل قرارگیری اجزا
 
@@ -16,36 +16,15 @@
 - **آیکونها.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) نام را (واژگان Material Symbols که صفحهها استفاده میکنند) از طریق `ICON_MAP` (`src/shared/constants/iconMap.ts`) به یک گلیف Lucide نگاشت میکند. فونت و پکیج Material Symbols دیگر وجود ندارند: نامی که در نقشه نیست یک گلیف placeholder خنثی رندر میکند (`data-icon-missing="true"`) و خارج از پروداکشن یک هشدار در کنسول لاگ میکند. `npm run gen:icon-map` نامهای در حال استفادهای که در نقشه غایباند را چاپ میکند (`tests/unit/icon-map-coverage.test.ts` روی هر نام بدون آیکون Lucide شکست میخورد؛ `tests/unit/icon-map-object-values.test.ts` نامهای ذخیرهشده در آبجکتهای lookup را پوشش میدهد)؛ `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` اسپنهای تحتاللفظی `<span className="material-symbols-outlined">` را به `<Icon>` بازنویسی میکند.
 - **برند.** `src/shared/components/OmniRouteLogo.tsx` کیت را رپ میکند: اکسپورت پیشفرض `OmniRouteLogo` کامپوننت `ProductIcon product="omniroute" variant="glyph"` را رندر میکند (SVG اینلاین، سازگار با `basePath`) و `OmniRouteLockup` کامپوننت `ProductLockup product="omniroute"` را رندر میکند (با نام دسترسپذیر «Keak OmniRoute») یا، برای اپراتورهای white-label، `name`/`logoSrc` خودشان را. مقصدهای product-switcher در `src/shared/constants/keakProducts.ts` قرار دارند (`KEAK_PRODUCT_LINKS`، `KEAK_ACTIVE_PRODUCT`). صفحههای مستقل — `src/app/login/page.tsx`، `src/app/status/page.tsx`، `src/app/maintenance/page.tsx`، `src/app/offline/page.tsx`، `src/app/not-found.tsx` و `src/shared/components/ErrorPageScaffold.tsx` — لاکآپ را نشان میدهند؛ `tests/unit/brand-pages-static.test.ts` از آن محافظت میکند.
 
-## 2. قواعد
+## 2. قوانین
 
-1. توکنها، هرگز لیترال نه. استثناهایی که عمداً نگه داشته شدهاند: ترمینال کنسولِ همیشهتیره و
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، بازتابِ هگزِ نهاییِ پالت وضعیت کیت برای
-   فراخوانندههایی که به یک هگز لیترال نیاز دارند. پالتهای دستهبندیشده دیگر استثنا نیستند:
-   آنها روی پنج توکن نمودار کیت (`--color-chart-1..5`) از طریق
-   `src/shared/utils/categoricalPalette.ts` و، برای استراتژیهای مسیریابی،
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` سوار میشوند؛ یالهای ReactFlow و بوم
-   ارکستراسیون متغیرهای آگاهازتمِ `--orch-status-*` را میخوانند (`src/shared/components/flow/edgeStyles.ts`).
-2. هرگز `packages/ui-kit/src` را دستی وصله نکنید: با `scripts/dev/sync-ui-kit.sh <commit>` همگامسازی کنید؛
-   دروازهٔ pre-commit یعنی `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) روی هر بایتی که
-   از کامیت سنجاقشدهٔ بالادست متفاوت باشد شکست میخورد (وقتی کلون بالادست، یعنی
-   `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit`، غایب باشد با یک هشدار رد میشود). وقتی کیت
-   چیزی را ندارد، در آداپتور یا صفحه برایش راهحل موقت بسازید و از بالادست بخواهید.
-3. پیشفرضهای متنی کیت انگلیسی است (`label = "Loading"`, `loadingLabel = "Loading table"`…) — هر وقت
-   یک کامپوننت کیت متنی رندر میکند، رشتههای ترجمهشده را از `useTranslations(...)` به آن بدهید.
-4. یوتیلیتیهای Tailwind بر کلاسهای کامپوننت کیت غلبه میکنند (کیت
-   `@layer theme, base, components, utilities` را اعلام میکند و قوانینش در لایهٔ `components` قرار دارند) — از
-   یوتیلیتیها برای فاصلهگذاری و چیدمان استفاده کنید، نه برای رنگآمیزی مجدد کامپوننتهای کیت.
-5. سرفصلها: `.ci-heading` (فونت Inter، بدون tracking) برای عناوین صفحه و بخش؛ `.ci-dashboard-display`
-   (Instrument Serif) فقط برای متن نمایشی بزرگ و کمتراکم مانند کد وضعیت صفحهٔ خطا.
-6. `tests/unit/dashboard-kit-sweep.test.ts` از پذیرش کیت نگهبانی میکند: هیچ اسپن لیگچر Material
-   زیر `src/app` یا `src/shared/components` مجاز نیست؛ در درخت داشبورد (`src/app/(dashboard)` و
-   `src/shared/components`) هیچ `<select>`، `<textarea>` یا `<table>` خام و هیچ
-   `role="dialog"` دستساز خارج از استثناهای فهرستشده (شاخهٔ نیتیوِ آداپتور `Select`،
-   `RequestLoggerDetail`) مجاز نیست؛ هر `<button>` یا `<input>` خام در آنجا به یک کامنت حاوی
-   `kit-exception:` (همراه با دلیل) نیاز دارد که حداکثر ۳ خط بالاتر از آن تمام شود؛ رنگمایههای پالت و
-   واریانتهای `dark:` فقط در فایلهایی مجازند که تست فهرست میکند.
-7. قبل از PR هر دو تم و ویوپورت ۳۹۰ پیکسلی را بررسی کنید (با اسکرینشات)؛ `tests/e2e/a11y.spec.ts` ابزار
-   axe را اجرا میکند.
+1. نشانه ها، هرگز تحت اللفظی. استثناهایی که عمداً حفظ میشوند: پایانه کنسول همیشه تاریک و `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، آینه هگزا حلشده پالت وضعیت کیت برای تماسگیرندگانی که نیاز به هگز واقعی دارند. پالتهای طبقهبندی دیگر از این قاعده مستثنی نیستند: آنها بر روی پنج نشانه نمودار کیت (`--color-chart-1..5`) از طریق `src/shared/utils/categoricalPalette.ts` و برای استراتژیهای مسیریابی، `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` سوار میشوند. لبههای ReactFlow و بوم ارکستراسیون متغیرهای `--orch-status-*` آگاه از موضوع را میخوانند (`src/shared/components/flow/edgeStyles.ts`).
+2. هرگز `packages/ui-kit/src` با دست وصله نکنید: با `scripts/dev/sync-ui-kit.sh <commit>` همگام سازی کنید. گیت pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) در هر بایتی که با commit بالادستی پین شده متفاوت است، از کار می افتد (زمانی که کلون بالادست، `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit` وجود نداشته باشد، با اخطار رد می شود). هنگامی که کیت چیزی کم دارد، آن را در آداپتور یا صفحه نمایش کار کنید و از بالادست آن را بخواهید.
+3. پیشفرضهای متن کیت انگلیسی هستند (`label = "Loading"`، `loadingLabel = "Loading table"`…) - هر زمان که یک جزء کیت متنی را ارائه کرد، رشتههای ترجمهشده را از `useTranslations(...)` ارسال کنید.
+4. ابزارهای Tailwind بر کلاسهای مؤلفه کیت پیروز میشوند (کیت `@layer theme, base, components, utilities` اعلام میکند و قوانین آن در `components` زنده هستند) - از ابزارهای کاربردی برای فاصلهگذاری و چیدمان استفاده کنید، نه برای رنگآمیزی مجدد اجزای کیت.
+5. سرفصل ها: `.ci-heading` برای عناوین صفحه و بخش. `.ci-dashboard-display` فقط برای متن نمایشی بزرگ و پراکنده مانند کد وضعیت صفحه خطا. هر دو از Switzer استفاده می کنند.
+6. `tests/unit/dashboard-kit-sweep.test.ts` از پذیرش کیت محافظت می کند: هیچ دهانه بند مواد زیر `src/app` یا `src/shared/components` وجود ندارد. در درخت داشبورد (`src/app/(dashboard)` و `src/shared/components`) بدون `<select>` خام، `<textarea>` یا `<table>` و بدون `role="dialog"` دستی در خارج از استثناهای ذکر شده (شاخه بومی آداپتور `Select` ، `RequestLoggerDetail`) وجود ندارد. هر `<button>` یا `<input>` خام در آنجا نیاز به یک نظر حاوی `kit-exception:` (با دلیل) دارد که حداکثر 3 خط بالای آن ختم شود. رنگهای پالت و انواع `dark:` فقط در فایلهایی که لیستهای آزمایشی هستند.
+7. هر دو طرح زمینه و نمای 390 پیکسل را قبل از PR تأیید کنید (تصاویر). `tests/e2e/a11y.spec.ts` تبر را اجرا می کند.
 
 ## 3. افزودن یک صفحه
 
@@ -78,50 +57,64 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx` را اضافه یا بهروزرسانی کنید. برای آداپتوری با فراخوانهای زیاد،
    مارکآپ رندرشده را قبل و بعد از تغییر مقایسه کنید — تغییر در padding یا wrapper به همهٔ صفحهها سرایت میکند.
 
-## 5. بهروزرسانی kit
+## 5. به روز رسانی کیت
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` دایرکتوری `src/` بالادستی را در آن commit به
-`packages/ui-kit/src` کپی میکند و تنها تبدیل مجاز را اعمال میکند (پسوند `.js` را از importهای نسبی
-حذف میکند). سپس: `git diff packages/ui-kit` را بررسی کنید، یک بازبینی بصری روی providers، settings، combos،
-usage و endpoint در هر دو تم انجام دهید، `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui` را اجرا
-کنید و PR را همراه با changelog بالادستی باز کنید.
+`npm run check:ui-kit-upstream` نسخه پینشده در `packages/ui-kit/UPSTREAM.md` را با جدیدترین تگ `v*` مخزن بالادستی مقایسه میکند و دستور همگامسازی را هنگامی که نسخه منتشر میشود چاپ میکند.
 
-## 6. دیاگرامهای README
+گردش کار روزانه `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) همین بررسی را انجام می دهد. در حالی که پین پشت است، `scripts/ci/ui-kit-sync-pr.sh` یک PR همگام را در برابر بالاترین شاخه `release/vX.Y.Z` ، روی شاخه نورد `chore/ui-kit-sync-latest` باز نگه میدارد. هرگز ادغام نمیشود: هر کیت منتشر شده همچنان به بررسی بصری VPS محلی نیاز دارد. این شعبه زمانی که نسخه جدیدتر منتشر می شود بازسازی می شود و در غیر این صورت تنها می ماند. یک PR باز با commitهایی که با دست فشار داده میشوند بازنویسی نمیشود، و یک PR برای نسخهای که یک نگهدارنده بدون ادغام بسته است تا نسخه جدیدتر بسته میماند.
 
-دوازده دیاگرامی که `README.md` ریشه جاسازی میکند (`docs/diagrams/*.svg`) نتیجهٔ اعمال kit روی یک تصویر
-ایستا هستند و تولیدشدهاند، نه با دست رسمشده: ۱۳ فایل generator در `scripts/docs/gen-readme-*.mjs`
-(دوازده دیاگرام بهعلاوهٔ درایور `gen-readme-diagrams.mjs`) و ۱۲ تست staleness در
-`tests/unit/docs/readme-*-svg.test.ts`، یکی برای هر دیاگرام، که هرکدام فایل commitشده را بایتبهبایت با
-خروجی generatorش مقایسه میکنند (job `test-unit`).
+هنگامی که هیچ PR نمی تواند باز شود (انتشار هدف منجمد است، PR commit ها را با دست فشار داده است، PR بسته شده است، یا نشانه PR تنظیم نشده است) گردش کار یک موضوع ردیابی را باز نگه می دارد که دلیل آن را می گوید.
 
-- **توکنها.** `scripts/docs/readme-diagram-theme.mjs` پالت را از `packages/ui-kit/src/ci-tokens.css`
-  کپی میکند (که توسط `tests/unit/docs/readme-diagram-theme.test.ts` در برابر آن فایل تثبیت شده است) و نقشهای
-  متنی را روی فونتهای kit تعریف میکند — Instrument Serif برای متن نمایشی، Inter برای متن رابط کاربری،
-  IBM Plex Mono برای ارقام و کد، همان بستههای `@fontsource` که `src/app/globals.css` برای داشبورد بارگذاری
-  میکند. مقادیر روشن روی `:root` و مقادیر تیره پشت `prefers-color-scheme: dark`، درون همان فایل، قرار
-  میگیرند تا هر تصویر در GitHub از طرح رنگی بیننده پیروی کند.
-- **فونتها.** `scripts/docs/readme-fonts.mjs` از آن فایلهای woff2 زیرمجموعهای متشکل از glyphهایی که هر
-  دیاگرام رسم میکند میسازد و آنها را بهصورت `@font-face` با `data:` URI جاسازی میکند — تنها راهی که
-  تایپوگرافی kit به یک تصویر README میرسد، چون GitHub Markdown هیچ CSSای حمل نمیکند و پروکسی camo هر
-  واکشی خارجی را مسدود میکند. زیرمجموعهها فقط لاتین هستند؛ glyphهای نمادی که به پشتهٔ سیستمی fallback
-  میکنند یکییکی در `SYMBOL_FALLBACKS` مجاز اعلام میشوند و هر glyph پوششدادهنشدهٔ دیگر خطا پرتاب میکند.
-- **بازتولید.** `npm run docs:readme-diagrams` هر دوازده مورد را به ترتیب README بازنویسی میکند و برای هر
-  فایل یک خط همراه با اندازهاش چاپ میکند. هر generator بهتنهایی هم قابل اجراست
-  (`node scripts/docs/gen-readme-<name>.mjs`؛ `free-tier-budget` به `node --import tsx/esm` نیاز دارد چون
-  ارقامش از loader کاتالوگ زنده در `open-sse/config/freeModelCatalog.ts` میآید؛ پیامد CI ناشی از تغییر
-  کاتالوگ در `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` آمده است). generator و SVG را با هم
-  commit کنید.
-- **اثبات.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` فایل را همانطور که GitHub سرو میکند
-  رندر میکند (یک تگ `<img>`، `Content-Security-Policy` مخصوص camo، `image/svg+xml`)، یک فریم روشن و یک فریم
-  تیره ثبت میکند و درخواستهای فونت خارجی صفحه را گزارش میدهد (باید 0 باشد).
-- **بودجه.** زیر 200 KB برای هر فایل (هر تست staleness آن را assert میکند)؛ 500 KB سقف سخت برای هر تصویر
-  README است (قاعدهٔ validator استودیوی SVG).
-- **متن دستنخورده، اعداد از gate.** تغییر برند، تایپوگرافی و پالت را عوض کرد نه واژهها را: هر generator متن
-  دیاگرامش را در یک ثابت `*_COPY` نگه میدارد (یا آن را از کاتالوگ زنده میسازد) که هم متن رسمشده است و هم
-  ورودی زیرمجموعهٔ فونت. ارقام مرجع در گرههای `<text>` میمانند و توسط `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`) خوانده میشوند؛ تستهای staleness دیاگرامهایی که آن gate
-  میخواند، validatorهایش را نیز روی فایل تولیدشده اجرا میکنند، پس عددی که از کد منحرف شود تست را شکست
-  میدهد — منبعی را که gate میخواند اصلاح کنید، هرگز عددِ داخل generator را نه.
+گردش کار از دو راز استفاده می کند:
+
+- `secrets.UI_KIT_READ_TOKEN`: یک توکن فقط خواندنی برای مخزن خصوصی بالادستی. هنگامی که گردش کار نمی تواند بالادستی را بخواند (هیچ توکن، نشانه ای که کار نمی کند یا GitHub غیرقابل دسترسی است) اجرا سبز می ماند اما یک اخطار می نویسد و یک موضوع جداگانه را باز نگه می دارد، که یک بار در اجرای بعدی بسته می شود و می تواند دوباره upstream خوانده شود.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: یک توکن ریز در این مخزن با دسترسی نوشتن مطالب و درخواستهای کشش. `GITHUB_TOKEN` پیشفرض نمیتواند PRs در اینجا ایجاد کند، و PR که باز میشود، CI راهاندازی نمیکند. بدون این نشانه، گردش کار فقط شاخه را هل می دهد.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` بالادست `src/` در آن commit (`latest` = جدیدترین تگ `v*` ) را در `packages/ui-kit/src` کپی میکند، تبدیل واحد مجاز را اعمال میکند (پسوند `.js` را از واردات نسبی حذف میکند)، و نسخه فضای کاری را در `packages/ui-kit/package.json` و `package-lock.json` به بالادستی تنظیم میکند. سپس: `git diff packages/ui-kit` را مرور کنید، ارائهدهندهها، تنظیمات، ترکیبهای ترکیبی، استفاده و نقطه پایانی را در هر دو موضوع بررسی کنید، `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui` را اجرا کنید و PR را با تغییرات بالادستی باز کنید.
+
+## ۶. نمودارهای README
+
+دوازده نموداری که `README.md` ریشه جاسازی میکند (`docs/diagrams/*.svg`)، کیتی هستند که روی یک
+تصویر ایستا اعمال شدهاند و بهصورت خودکار تولید میشوند، نه اینکه دستی رسم شده باشند: ۱۳ فایل تولیدکننده در
+`scripts/docs/gen-readme-*.mjs` (دوازده نمودار بهعلاوهٔ راهانداز `gen-readme-diagrams.mjs`) و ۱۲ آزمون بررسی کهنگی در
+`tests/unit/docs/readme-*-svg.test.ts`، یکی برای هر نمودار، که هرکدام فایل ثبتشده را با خروجی
+تولیدکنندهٔ آن بهصورت بایتی مقایسه میکنند (کار `test-unit`).
+
+- **توکنها.** `scripts/docs/readme-diagram-theme.mjs` پالت را از `packages/ui-kit/src/ci-tokens.css` کپی میکند
+  (و توسط `tests/unit/docs/readme-diagram-theme.test.ts` به همان فایل مقید است) و نقشهای متنی را بر اساس مقیاس
+  تایپوگرافی کیت تعریف میکند: Switzer با وزنهای کیت (400/500/600، و نمایش با وزن 500) و فاصلهگذاری برای
+  همهچیز، بهجز نقشهای کد (`.cmd`، `.term`، `.term-lg`، `.mono`، `.mono-sm`، `.mono-xs`) که IBM Plex Mono
+  هستند و فقط برای فرمانها، URLها، شناسهها و صفحههای ترمینال استفاده میشوند.
+  مقادیر روشن روی `:root` و مقادیر تیره پشت `prefers-color-scheme: dark` و درون فایل قرار دارند؛ بنابراین هر
+  تصویر از طرح رنگی بیننده در GitHub پیروی میکند.
+- **فونتها.** Markdown گیتهاب هیچ CSSای منتقل نمیکند و پروکسی camo همهٔ واکشیهای خارجی را مسدود میکند،
+  بنابراین تایپوگرافی کیت باید داخل فایل قرار بگیرد. `scripts/docs/readme-outline.mjs`، که آخرین مرحلهٔ هر
+  تولیدکننده است، نقشهای Switzer را با HarfBuzz شکل میدهد و آنها را بهصورت مسیرهای برداری (`<defs>` و
+  `<use>`) رسم میکند؛ پیکانها و نمادهای هندسیای را که Switzer ندارد نیز با سنجههای مخصوص خود رسم میکند.
+  از outlineها استفاده کنید، نه فونت جاسازیشده: مجوز Switzer (`packages/ui-kit/src/fonts/FFL.txt`) زیرمجموعهسازی
+  و تبدیل قالب را بدون رضایت کتبی ممنوع میکند و استفاده از رسمهای برداری را مجاز میداند؛ بنابراین یک
+  `@font-face` یا URI از نوع `data:` برای Switzer دوباره معرفی نکنید. تنها فونت باقیمانده در فایل، زیرمجموعهٔ
+  IBM Plex Mono تحت مجوز OFL است که برای متن کد واقعی باقیمانده استفاده میشود
+  (`scripts/docs/readme-fonts.mjs`) و از همان نویسهها ساخته میشود؛ اگر نتواند هر گلیف را جاسازی کند، خطا
+  ایجاد میکند.
+- **تولید دوباره.** `npm run docs:readme-diagrams` هر دوازده نمودار را بهترتیب README بازنویسی میکند و یک
+  خط برای هر فایل، همراه با اندازهٔ آن، چاپ میکند. هر تولیدکننده بهتنهایی نیز اجرا میشود
+  (`node scripts/docs/gen-readme-<name>.mjs`؛ `free-tier-budget` به `node --import tsx/esm` نیاز دارد، زیرا
+  شکلهای آن از بارگذار کاتالوگ زنده در `open-sse/config/freeModelCatalog.ts` میآیند؛ پیامد CI تغییر کاتالوگ
+  در `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` آمده است). تولیدکننده و SVG را با هم commit کنید.
+- **راستیآزمایی.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` یک فایل را همانطور که GitHub
+  ارائه میکند رندر میکند (یک تگ `<img>`، سیاست `Content-Security-Policy` مربوط به camo و نوع
+  `image/svg+xml`)، یک فریم روشن و یک فریم تیره میگیرد و درخواستهای فونت خارجیای را که صفحه انجام داده
+  گزارش میکند (باید ۰ باشد).
+- **بودجه.** اندازهٔ هر فایل باید کمتر از ۲۰۰ کیلوبایت باشد (هر آزمون بررسی کهنگی این مورد را assert میکند)؛
+  ۵۰۰ کیلوبایت سقف سخت هر تصویر README است (قانون اعتبارسنج SVG studio).
+- **متن را بدون تغییر کپی کنید، شمارشها از gate میآیند.** بازبرندسازی نوع و پالت را تغییر داد، نه واژهها را:
+  هر تولیدکننده متن مربوط به نمودار خود را در یک ثابت `*_COPY` نگه میدارد (یا آن را از کاتالوگ زنده میسازد)
+  که هم متن رسمشده و هم ورودی مرحلهٔ outline است. شکلهای canonical در گرههای `<text>` باقی میمانند
+  (پس از outline شدن نامرئی هستند، با `fill-opacity:0`) و `check:docs-counts` آنها را میخواند
+  (`scripts/check/check-docs-counts-sync.mjs`)؛ آزمونهای بررسی کهنگی نمودارهایی که gate خوانش آنها را کنترل
+  میکند، اعتبارسنجهای آن را نیز روی فایل تولیدشده اجرا میکنند، بنابراین شکلی که از کد منحرف شود باعث شکست
+  آزمون میشود — منبعی را که gate میخواند اصلاح کنید، نه عدد موجود در تولیدکننده را.
 
 ## 7. فهرست مراجع
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Būsena:** informacinė suvestinė sukurta naudojant **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), perkeltą į projektą kaip darbo srities paketą `packages/ui-kit` (`@omniroute/ui-kit`; pirminis (upstream) momentinis vaizdas prisegtas `packages/ui-kit/UPSTREAM.md` ir saugomas `npm run check:ui-kit-snapshot`). Šviesi tema yra kanoninė; numatytoji nuostata yra `system`. Akcentinė spalva yra Keak laimo (`--ci-color-accent`). Inter (raidžių tarpai 0, `--ci-letter-spacing-ui`) yra sąsajos šriftas, Instrument Serif naudojamas tik dideliam retam antraštiniam tekstui (`.ci-dashboard-display`), IBM Plex Mono — kodui; visi šriftai talpinami pačių projekto per `@fontsource/*` importus `src/app/globals.css` viršuje. Kiekviena piktograma yra Lucide glifas.
+> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Akcentas – Keak lime (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Scenarijai Šveicarijoje trūksta kritimo po glifo (`src/app/globals.css`): „Inter“ kirilicai, graikų ir vietnamiečių kalbai ir, tik pagal `html[dir="rtl"]`, „Vazirmatn“ arabų rašmenims. Kiekviena piktograma yra Lucide glifas.
 
 ## 1. Kur kas saugoma
 
@@ -77,36 +77,13 @@
 
 ## 2. Taisyklės
 
-1. Žetonai, niekada literalios reikšmės. Išimtys paliktos sąmoningai: visada tamsus konsolės terminalas ir
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — rinkinio būsenų paletės atspindys su išspręstomis
-   hex reikšmėmis, skirtas kviestuvams, kuriems reikia tikslios hex reikšmės. Kategorinės paletės nebėra
-   išimtis: jos naudoja penkis rinkinio diagramų žetonus (`--color-chart-1..5`) per
-   `src/shared/utils/categoricalPalette.ts`, o maršrutų parinkimo strategijoms —
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow briaunos ir orkestravimo drobė
-   skaito prie temos prisitaikančius `--orch-status-*` kintamuosius (`src/shared/components/flow/edgeStyles.ts`).
-2. Niekada netaisykite `packages/ui-kit/src` rankiniu būdu: sinchronizuokite su
-   `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit kontrolė `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) nepavyksta, jei kuris nors baitas skiriasi nuo prisegto pirminio (upstream)
-   commit'o (ji praleidžiama su įspėjimu, kai nėra pirminio klono — `UI_KIT_CLONE` arba
-   `_references/cheaper-inference-ui-kit`). Kai rinkinyje kažko trūksta, apeikite tai adapteryje arba
-   ekrane ir kreipkitės dėl to į pirminį projektą.
-3. Rinkinio teksto numatytosios reikšmės yra angliškos (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   perduokite išverstas eilutes iš `useTranslations(...)`, kai tik rinkinio komponentas atvaizduoja tekstą.
-4. Tailwind pagalbinės klasės nugali rinkinio komponentų klases (rinkinys deklaruoja
-   `@layer theme, base, components, utilities`, o jo taisyklės yra `components` sluoksnyje) — pagalbines
-   klases naudokite tarpams ir išdėstymui, o ne rinkinio komponentų spalvų keitimui.
-5. Antraštės: `.ci-heading` (Inter, be raidžių tarpumo) — puslapių ir skyrių pavadinimams;
-   `.ci-dashboard-display` (Instrument Serif) — tik stambiam, retam demonstraciniam tekstui, pvz., klaidos
-   puslapio būsenos kodui.
-6. `tests/unit/dashboard-kit-sweep.test.ts` prižiūri rinkinio diegimą: jokio Material ligatūrų span po
-   `src/app` ar `src/shared/components`; prietaisų skydelio medyje (`src/app/(dashboard)` ir
-   `src/shared/components`) jokių grynųjų `<select>`, `<textarea>` ar `<table>` ir jokių rankiniu būdu
-   darytų `role="dialog"` už išvardytų išimčių ribų (natūvioji `Select` adapterio šaka,
-   `RequestLoggerDetail`); kiekvienam grynajam `<button>` ar `<input>` ten reikalingas komentaras su
-   `kit-exception:` (su priežastimi), kuris baigiasi ne daugiau kaip 3 eilutėmis virš jo; paletės
-   atspalviai ir `dark:` variantai — tik testo išvardytuose failuose.
-7. Prieš PR patikrinkite abi temas ir 390 px peržiūros sritį (ekrano nuotraukos); `tests/e2e/a11y.spec.ts`
-   paleidžia axe.
+1. Žetonai, niekada pažodiniai. Išimtys laikomos specialiai: visada tamsus pulto terminalas ir `STATUS_HEX` (`src/shared/constants/statusColors.ts`), išspręstas šešioliktainis rinkinio būsenos paletės veidrodis skambinantiems, kuriems reikia pažodinės šešioliktainės. Kategorinės paletės nebėra išimtis: jos važiuoja ant rinkinio penkių diagramos žetonų (`--color-chart-1..5`) per `src/shared/utils/categoricalPalette.ts` ir, maršruto parinkimo strategijoms, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow briaunos ir orkestravimo drobė nuskaito temą atitinkančius `--orch-status-*` kintamuosius (`src/shared/components/flow/edgeStyles.ts`).
+2. Niekada netaisykite `packages/ui-kit/src` ranka: sinchronizuokite su `scripts/dev/sync-ui-kit.sh <commit>`; išankstinio patvirtinimo vartai `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sugenda bet kuriame baite, kuris skiriasi nuo prisegto išankstinio patvirtinimo (jis praleidžiamas su įspėjimu, kai nėra klono prieš srovę, `UI_KIT_CLONE` arba `_references/cheaper-inference-ui-kit`). Kai rinkinyje kažko trūksta, apeikite jį adapteryje arba ekrane ir paprašykite prieš srovę.
+3. Numatytieji rinkinio teksto nustatymai yra anglų kalba (`label = "Loading"`, `loadingLabel = "Loading table"`…) – perduoda išverstas eilutes iš `useTranslations(...)` kai rinkinio komponentas pateikia tekstą.
+4. Tailwind komunalinės paslaugos laimi rinkinio komponentų klases (rinkinys deklaruoja `@layer theme, base, components, utilities`, o jo taisyklės galioja `components`) – naudokite komunalines paslaugas tarpams ir išdėstymui, o ne rinkinio komponentų spalvinimui.
+5. Antraštės: `.ci-heading` puslapių ir skyrių pavadinimams; `.ci-dashboard-display` tik dideliam, retai rodomam tekstui, pvz., klaidos puslapio būsenos kodui. Abu naudoja Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` saugo rinkinį: nėra medžiagos ligatūros tarpo pagal `src/app` arba `src/shared/components`; prietaisų skydelio medyje (`src/app/(dashboard)` ir `src/shared/components`) nėra neapdorotų `<select>`, `<textarea>` arba `<table>` ir rankiniu būdu susuktų `role="dialog"` išskyrus išvardytas išimtis (gimtoji `Select` adapterio šaka, `RequestLoggerDetail`); kiekvienam neapdorotam `<button>` arba `<input>` reikia komentaro, kuriame yra `kit-exception:` (su priežastimi), kuris baigiasi daugiausia 3 eilutėmis virš jo; paletės atspalviai ir `dark:` variantai tik testavimo sąrašuose.
+7. Prieš PR patikrinkite abi temas ir 390 px peržiūros sritį (ekrano kopijas); `tests/e2e/a11y.spec.ts` paleidžia kirvį.
 
 ## 3. Ekrano pridėjimas
 
@@ -141,52 +118,31 @@
    palyginkite atvaizduotą žymėjimą prieš ir po pakeitimo — padding arba wrapper pakeitimai išsilieja į
    kiekvieną ekraną.
 
-## 5. Rinkinio atnaujinimas
+## 5. Komplekto atnaujinimas
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` nukopijuoja pirminės saugyklos `src/` katalogą ties tuo commit į
-`packages/ui-kit/src` ir pritaiko vienintelę leistiną transformaciją (iš santykinių importų pašalina `.js`
-galūnę). Tada: peržiūrėkite `git diff packages/ui-kit`, vizualiai patikrinkite teikėjų (providers),
-nustatymų (settings), derinių (combos), naudojimo (usage) ir galinio taško (endpoint) puslapius abiejose
-temose, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR, pridėdami
-pirminės saugyklos (upstream) pakeitimų žurnalą.
+`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas.
+
+Kasdieninė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą. Kol kaištis yra už nugaros, `scripts/ci/ui-kit-sync-pr.sh` išlaiko vieną sinchronizavimo PR atvirktį prieš aukščiausią `release/vX.Y.Z` šaką, slenkančią atšaką `chore/ui-kit-sync-latest`. Jis niekada nesusilieja: kiekvieną rinkinio leidimą vis tiek reikia vizualiai patikrinti vietinį VPS. Filialas atkuriamas, kai išleidžiamas naujesnis leidimas, o kitu atveju paliekama ramybėje. Atviras PR su įpareigojimais, stumiamais ranka, neperrašomas, o PR versijai, kurią prižiūrėtojas uždarė nesujungęs, lieka uždarytas iki naujesnės leidimo.
+
+Kai negalima atidaryti jokio PR (tikslinis leidimas užšaldytas, PR įvykdymai nustumiami ranka, PR buvo uždarytas arba nenustatytas PR prieigos raktas), darbo eiga lieka atvira viena sekimo problema, kurioje nurodoma, kodėl.
+
+Darbo eiga naudoja dvi paslaptis:
+
+- `secrets.UI_KIT_READ_TOKEN`: tik skaitomas prieigos raktas, skirtas privačiam atpirkimui prieš srautą. Kai darbo eigos nepavyksta nuskaityti prieš srovę (nėra prieigos rakto, nustojo veikti arba GitHub nepasiekiamas), vykdymas lieka žalias, bet įrašomas įspėjimas ir lieka atvira viena atskira problema, kuri užsidaro, kai vėlesnis paleidimas gali vėl nuskaityti prieš srovę.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: smulkus tokenas šioje saugykloje su turinio ir ištraukimo užklausomis rašyti. Numatytasis `GITHUB_TOKEN` negali sukurti PRs čia, o atidarytas PR nesuaktyvins CI. Be šio prieigos rakto darbo eiga tik stumia šaką.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` nukopijuoja prieš srovę esantį `src/` to įpareigojimo metu (`latest` = naujausia `v*` žyma) į `packages/ui-kit/src`, taiko vieną leistiną transformaciją (atmeta `.js` priesagą iš santykinių importų) ir nustato darbo srities versiją `packages/ui-kit/package.json` ir `package-lock.json` į ankstesnę. Tada: peržiūrėkite `git diff packages/ui-kit`, atlikite abiejų temų teikėjų, nustatymų, kombinacijų, naudojimo ir galutinio taško vaizdinį perdavimą, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR naudodami išankstinį pakeitimų žurnalą.
 
 ## 6. README diagramos
 
-Dvylika diagramų, kurias įterpia šakninis `README.md` (`docs/diagrams/*.svg`), yra rinkinys, pritaikytas
-statiniam vaizdui, ir jos yra generuojamos, o ne piešiamos ranka: 13 generatorių failų
-`scripts/docs/gen-readme-*.mjs` (dvylika diagramų plius `gen-readme-diagrams.mjs` koordinatorius) ir 12
-aktualumo testų `tests/unit/docs/readme-*-svg.test.ts`, po vieną kiekvienai diagramai; kiekvienas testas
-baitas į baitą palygina įrašytą failą su savo generatoriaus išvestimi (užduotis `test-unit`).
+Dvylika pagrindinių `README.md` įterptų diagramų (`docs/diagrams/*.svg`) yra rinkinys, pritaikytas statiniam vaizdui, ir jos generuojamos, o ne braižomos ranka: 13 generatoriaus failų `scripts/docs/gen-readme-*.mjs` (dvylika diagramų plius `gen-readme-diagrams.mjs` tvarkyklė) ir 12 pasenimo testų `tests/unit/docs/readme-*-svg.test.ts`, po vieną diagramoje, kiekvienas baitass failas su savo išvesties qzpar generatoriumi ( `test-unit`).
 
-- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` nukopijuoja paletę iš `packages/ui-kit/src/ci-tokens.css`
-  (pririšta prie to failo testu `tests/unit/docs/readme-diagram-theme.test.ts`) ir apibrėžia rinkinio šriftų
-  teksto roles — Instrument Serif tituliniam tekstui, Inter sąsajos tekstui, IBM Plex Mono skaičiams ir
-  kodui, — tuos pačius `@fontsource` paketus, kuriuos `src/app/globals.css` įkelia valdymo pultui. Šviesios
-  reikšmės nurodytos ties `:root`, tamsios — po `prefers-color-scheme: dark`, faile viduje, todėl kiekvienas
-  vaizdas GitHub prisitaiko prie žiūrovo temos.
-- **Šriftai.** `scripts/docs/readme-fonts.mjs` apkerpa tuos woff2 failus iki glifų, kuriuos kiekviena diagrama
-  piešia, ir įterpia juos kaip `@font-face` `data:` URI — vienintelis būdas, kuriuo rinkinio tipografija
-  pasiekia README vaizdą, nes GitHub Markdown neperneša CSS, o camo tarpinis serveris blokuoja visas išorines
-  užklausas. Aibės apima tik lotyniškus simbolius; simbolių glifai, kurie kaip atsargai naudoja sisteminę
-  šriftų rietuvę, `SYMBOL_FALLBACKS` leidžiami po vieną, o bet kuris kitas nepadengtas glifas išmeta klaidą.
-- **Pergeneravimas.** `npm run docs:readme-diagrams` perrašo visas dvylika diagramų README tvarka ir kiekvienam
-  failui išveda po vieną eilutę su jo dydžiu. Vieną generatorių taip pat galima paleisti atskirai
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` reikia `node --import tsx/esm`, nes jo
-  skaičiai gaunami iš veikiančio katalogo įkroviklio `open-sse/config/freeModelCatalog.ts`; katalogo pakeitimo
-  pasekmė CI aprašyta `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generatorių ir SVG
-  įrašykite kartu, viename commit.
-- **Įrodymas.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` atvaizduoja failą taip, kaip jį
-  pateikia GitHub (`<img>` žyma, camo `Content-Security-Policy`, `image/svg+xml`), užfiksuoja šviesų ir tamsų
-  kadrą ir praneša, kokias išorinių šriftų užklausas pateikė puslapis (turi būti 0).
-- **Biudžetas.** Mažiau nei 200 KB vienam failui (tai tikrina kiekvienas aktualumo testas); 500 KB yra
-  griežtoji viršutinė riba bet kuriam README vaizdui (SVG studio validatoriaus taisyklė).
-- **Tekstas nepakeistas, skaičiai — iš kontrolės vartų.** Rebrendavimas pakeitė tipografiją ir paletę, o ne
-  žodžius: kiekvienas generatorius savo diagramos tekstą laiko `*_COPY` konstantoje (arba sugeneruoja jį iš
-  veikiančio katalogo); šis tekstas kartu yra ir piešiamas tekstas, ir šriftų aibių apkerpymo įvestis.
-  Kanoniniai skaičiai lieka `<text>` mazguose, juos nuskaito `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); tų diagramų, kurias skaito vartai, aktualumo testai taip pat
-  paleidžia vartų validatorius sugeneruotam failui, todėl skaičius, nutolęs nuo kodo, sugadina testą —
-  taisykite šaltinį, kurį skaito vartai, o niekada ne skaičių generatoriuje.
+- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` nukopijuoja paletę iš `packages/ui-kit/src/ci-tokens.css` (prisegta prie to failo `tests/unit/docs/readme-diagram-theme.test.ts`) ir apibrėžia teksto vaidmenis rinkinio tipo skalėje: Switzer pagal rinkinio svorį (400/500/600, ekranas 500) ir seka viską, išskyrus kodo vaidmenis (`.cmd`, `.term`, `.term-lg` `.mono` `.mono-sm`), kurie yra IBM Plex Mono ir skirti tik komandoms, URLs, identifikatoriams `.mono-xs` terminalų ekranams. Šviesos reikšmės yra ant `:root`, tamsios vertės už `prefers-color-scheme: dark`, failo viduje, todėl kiekvienas vaizdas atitinka žiūrinčiojo schemą GitHub.
+- **Šriftai.** GitHub Markdown neturi CSS, o camo tarpinis serveris blokuoja kiekvieną išorinį gavimą, todėl rinkinio tipas turi patekti į failą. `scripts/docs/readme-outline.mjs`, paskutinis kiekvieno generatoriaus veiksmas, formuoja Šveicarijos vaidmenis su HarfBuzz ir nubrėžia juos kaip vektorinius kontūrus (`<defs>` paths ir `<use>`), o rodyklėmis ir geometriniais simboliais, kurių Šveicarui trūksta pagal savo metriką. Kontūrai, niekada nenaudojamas įterptasis šriftas: Šveicarijos licencija (`packages/ui-kit/src/fonts/FFL.txt`) draudžia keisti poaibį ir formatą be raštiško sutikimo ir leidžia naudoti vektorinius brėžinius, todėl iš naujo neįveskite Šveicarijos `@font-face` arba `data:` URI. Vienas faile paliktas šriftas yra OFL IBM Plex Mono poaibis, skirtas tikrajam kodo tekstui (`scripts/docs/readme-fonts.mjs`), sudarytas iš tų simbolių; bet koks glifas negali įterpti metimų.
+- **Regeneruoti.** `npm run docs:readme-diagrams` perrašo visus dvylika README tvarka ir atspausdina vieną eilutę kiekviename faile su jo dydžiu. Vienas generatorius taip pat veikia savarankiškai (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` reikia `node --import tsx/esm` nes jo skaičiai gaunami iš tiesioginio katalogo įkėlimo programos `open-sse/config/freeModelCatalog.ts`; katalogo pakeitimo CI pasekmė yra `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Sujunkite generatorių ir SVG kartu.
+- **Įrodymas.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` pateikia failą taip, kaip GitHub jį aptarnauja ( `<img>` žyma, camo's `Content-Security-Policy`, `image/svg+xml`), užfiksuoja šviesų ir tamsų rėmelį ir praneša apie išorinio šrifto užklausas, kad būtų sukurtas puslapis (turi būti 0).
+- **Biudžetas.** Mažiau nei 200 KB už failą (tai patvirtina kiekvienas pasenimo testas); 500 KB yra bet kurio README vaizdo kietoji riba ( SVG studio patvirtinimo taisyklė).
+- **Kopijuoti nepakeista, skaičiuojama nuo vartų.** Keičiamas prekės ženklo tipas ir paletė, o ne žodžiai: kiekvienas generatorius neša savo diagramos kopiją `*_COPY` konstantoje (arba sukuria ją iš tiesioginio katalogo), kuri yra ir nupieštas tekstas, ir kontūro žingsnio įvestis. Kanoninės figūros lieka `<text>` mazguose (nematomos, kai nubrėžiamos, `fill-opacity:0`), skaitomos `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); Diagramų, kurias nuskaito vartai, pasenimo testai taip pat paleidžia patvirtinimo priemones sugeneruotame faile, todėl nuo kodo nutolusi figūra nepavyksta. — pataisykite šaltinį, kurį skaito vartai, o ne skaičių generatoriuje.
 
 ## 7. Nuorodų indeksas
 
