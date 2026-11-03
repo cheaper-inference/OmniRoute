@@ -318,6 +318,24 @@ function derivedPreviewText(
   return t("compressionDerivedMode", { mode: derived.mode });
 }
 
+function buildPreviewConfig(config: CompressionConfig): RuntimeCompressionConfig {
+  return {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    enabled: config.enabled,
+    defaultMode: config.defaultMode ?? DEFAULT_COMPRESSION_CONFIG.defaultMode,
+    autoTriggerMode: config.autoTriggerMode,
+    autoTriggerTokens: config.autoTriggerTokens,
+    preserveSystemPrompt: config.preserveSystemPrompt,
+    preserveSystemPromptMode: config.preserveSystemPromptMode,
+    comboOverrides: config.comboOverrides ?? {},
+    stackedPipeline: config.stackedPipeline,
+    engines: config.engines,
+    enginesExplicit: config.enginesExplicit,
+    activeComboId: config.activeComboId,
+    contextBudget: config.contextBudget,
+  };
+}
+
 export default function CompressionPanel() {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
@@ -561,21 +579,7 @@ export default function CompressionPanel() {
     }
   };
 
-  const previewConfig: RuntimeCompressionConfig = {
-    ...DEFAULT_COMPRESSION_CONFIG,
-    enabled: config.enabled,
-    defaultMode: config.defaultMode ?? DEFAULT_COMPRESSION_CONFIG.defaultMode,
-    autoTriggerMode: config.autoTriggerMode,
-    autoTriggerTokens: config.autoTriggerTokens,
-    preserveSystemPrompt: config.preserveSystemPrompt,
-    preserveSystemPromptMode: config.preserveSystemPromptMode,
-    comboOverrides: config.comboOverrides ?? {},
-    stackedPipeline: config.stackedPipeline,
-    engines: config.engines,
-    enginesExplicit: config.enginesExplicit,
-    activeComboId: config.activeComboId,
-    contextBudget: config.contextBudget,
-  };
+  const previewConfig = buildPreviewConfig(config);
   const derived = deriveEffectivePreviewPlan(previewConfig, namedCombos);
   const autoTriggerDerived = deriveEffectiveAutoTriggerPreviewPlan(previewConfig, namedCombos);
   const derivedText = derivedPreviewText(derived, t);
