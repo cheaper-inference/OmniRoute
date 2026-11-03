@@ -161,3 +161,19 @@ test("the omni-build preflight is skipped once amd64 leaves the slot", () => {
     assert.equal(evaluate(condition, { ...base, "vars.DOCKER_AMD64_RUNNER": runner }), false);
   }
 });
+
+test("prepare and merge follow the build to Blacksmith, and stay hosted otherwise", () => {
+  // 2026-11-03: `prepare` waited 3 h for a hosted ubuntu-latest slot behind ~300 queued PR runs
+  // while the amd64 build itself was already routed to Blacksmith.
+  const cases: Array<[string, string]> = [
+    ["blacksmith", "blacksmith-2vcpu-ubuntu-2404"],
+    ["hosted", "ubuntu-latest"],
+    ["", "ubuntu-latest"],
+  ];
+  for (const job of ["prepare", "merge"]) {
+    for (const [runner, expected] of cases) {
+      const vars = { ...VPS_ON, "vars.DOCKER_AMD64_RUNNER": runner };
+      assert.equal(evaluate(workflow.jobs[job]["runs-on"], vars), expected, `${job} / ${runner}`);
+    }
+  }
+});

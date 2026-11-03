@@ -61,7 +61,10 @@ jobs:
     if: >-
       github.event_name != 'schedule' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
-    runs-on: ubuntu-latest
+    # With DOCKER_AMD64_RUNNER=blacksmith the small jobs around the build run on Blacksmith as
+    # well: on 2026-11-03 this job waited 3 h for a hosted ubuntu-latest slot behind ~300 queued
+    # PR runs. About 2.5 min here plus 4.5 min in `merge` per publish, on 2 vCPU.
+    runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     outputs:
       version: ${{ steps.version.outputs.version }}
       promote_latest: ${{ steps.version.outputs.promote_latest }}
@@ -437,7 +440,8 @@ jobs:
     if: >-
       github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
-    runs-on: ubuntu-latest
+    # Same switch as `prepare` (see there).
+    runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: write
