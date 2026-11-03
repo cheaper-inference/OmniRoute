@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 извршних модула највишег нивоа (`*.ts` минус `base.ts`, `index.ts` и тестови — мерење броја `npm run check:docs-counts` ). Свака класа извршиоца проширује `BaseExecutor` (`base.ts`), директно или преко `DefaultExecutor` или другог извршиоца; преостали модули су помоћници по добављачима (шеме алата, fetch/TTS адаптери, куирк хандлери). Извршиоци укључују:
+156 извршних модула највишег нивоа (`*.ts` минус `base.ts`, `index.ts` и тестови — цоунт `npm run check:docs-counts` мере). Свака класа извршиоца проширује `BaseExecutor` (`base.ts`), директно или преко `DefaultExecutor` или другог извршиоца; преостали модули су помоћници по добављачима (шеме алата, fetch/TTS адаптери, куирк хандлери). Извршиоци укључују:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, плус `devin-desktop`, `claudeIdentity.ts` помоћ (регистратор) `index.ts`
 
-> Напомена: провајдере који нису наведени овде опслужује `default.ts` користећи генерички ОпенАИ-компатибилни извршитељ. Потпуни каталог провајдера (377 провајдера) живи у `src/shared/constants/providers.ts`.
+> Напомена: провајдере који нису наведени овде опслужује `default.ts` користећи генерички ОпенАИ-компатибилни извршитељ. Потпуни каталог провајдера (380 провајдера) живи у `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -528,9 +528,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 јединствених алата** спојено у `server.ts` (45 канонских у `schemas/tools.ts` + меморији, вештинама, ГитХуб вештинама, базену, игрификацији, додатку, Notion, Obsidian, модулима локалног корпуса и компресије — унија броји `countUniqueMcpTools`).
+- **110 јединствених алата** ожичен у `server.ts` (45 канонских у `schemas/tools.ts` + меморији, вештинама, ГитХуб вештинама, базену, игрификацији, додатку, Notion, Obsidian, модулима локалног корпуса и компресије — унион броји `countUniqueMcpTools`).
 - **3 транспорта** : стдио, HTTP Стреамабле, SSE.
-- **33 домета** примењено у време извођења — основна листа у `src/shared/constants/mcpScopes.ts`, пун скуп је унија опсега које је декларисао сваки модул алата.
+- **33 домета** примењена у време извођења — базна листа у `src/shared/constants/mcpScopes.ts`, пун скуп је унија опсега декларираних од стране сваког модула алата.
 - Табела ревизије: `mcp_tool_audit` (попуњена `audit.ts`).
 - Фајлови: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, плус тестови под `__tests__/`.
 - Погледајте [MCP-SERVER.md](../frameworks/MCP-SERVER.md) за цео каталог алата.

@@ -134,34 +134,34 @@ Dashboard admin login သည် မူလ password login နှင့်အတ�
 
 `MANAGEMENT` လုပ်ဆောင်ချက် အချို့သည် **operator-only** ဖြစ်သည်: `manage` key သာလျှင် မလုံလောက်ပါ။ သိမ်းထားသော credential များကို ထုတ်ယူခြင်း (`GET /api/settings/export-json`၊ `GET /api/db-backups/export`၊ `GET /api/db-backups/exportAll`)၊ လက်ရှိ data အပေါ် backup ကို ပြန်ထည့်ခြင်း (`dryRun=true` အပါအဝင် `POST /api/db-backups/import`၊ id ဖြင့် `POST /api/db-backups` restore၊ `POST /api/settings/import-json`)၊ restore point များကို ဖျက်ခြင်း (`DELETE /api/db-backups` cleanup နှင့် `PATCH /api/db-backups` ကြောင့်ဆိုသော ၎င်းက ထိန်းသိမ်းထားသော retention သည် backup တိုင်းပြီးနောက် အလိုအလျောက် pruning ကို မောင်းနှင်သည်) တို့အတွက် dashboard session၊ local CLI subject သို့မဟုတ် login ပိတ်ထားခြင်း လိုအပ်သည်။ Sync token ထုတ်ခြင်း (`POST /api/sync/tokens`) နှင့် `admin` CLI access token ထုတ်ခြင်း (`POST /api/cli/tokens`) တို့သည် login မုဒ်အားလုံးတွင် dashboard session သို့မဟုတ် local CLI subject လိုအပ်သည်။ မည်သည့် scope ရှိ API key မဆို နှင့် `oma_` access token များသည် operator credential မဟုတ်ပါ: လိုအပ်သည့်အခါတိုင်း `403` ရရှိသည်။ စစ်ဆေးမှုသည် `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) တွင် ရှိသည်။ Login setting များ ပြောင်းခြင်းလည်း operator-only ဖြစ်သည်: `POST /api/settings/require-login` (management password သတ်မှတ်ခြင်း / `requireLogin` ပြောင်းခြင်း) သည် password ရှိပြီးနောက် ထို credential များကိုသာ လက်ခံသည် — ပထမဆုံး run ချိန် bootstrap window (password မရှိသေးချိန်) မပြောင်းလဲပါ — နှင့် dashboard session က password အစားထိုးရန် `currentPassword` ပို့ရမည် (မပါခြင်း သို့မဟုတ် မှားခြင်းဖြစ်ပါက `403`၊ `settings.update_failed` အဖြစ် audit လုပ်သည်)။ Local CLI နှင့် login ပိတ်ထားသော instance တို့သည် recovery လမ်းကြောင်းကို ထိန်းသိမ်းထားပြီး ထို့ကြောင့် `currentPassword` မပါဘဲ password သတ်မှတ်နိုင်သည်၊ အကြောင်းမှာ နှစ်ခုလုံးသည် data directory ပိုင်ဆိုင်သော host ဖြင့် ချိတ်ဆက်ထားသောကြောင့် ဖြစ်သည်။
 
-## လုပ်ငန်းစဉ်
+## ပိုက်လိုင်း
 
 ```
-ဝင်လာသော request → src/proxy.ts
-  → src/server/authz/pipeline.ts ရှိ runAuthzPipeline()
-    1. ယုံကြည်ရသော internal header များကို ဖယ်ရှားပါ (x-omniroute-auth-*, x-omniroute-route-class)
-    2. request id ကို ထုတ်လုပ်ပြီး classifyRoute() မှတစ်ဆင့် route ကို အမျိုးအစားခွဲပါ
-    3. pathname == "/" ဖြစ်ပါက → /dashboard သို့ redirect လုပ်ပါ
-    4. draining (graceful shutdown) ဖြစ်နေပြီး /api/* ဖြစ်ပါက → 503
-    5. GET မဟုတ်သော /api/* ဖြစ်ပါက → checkBodySize() guard ဖြင့် စစ်ဆေးပါ
-    6. OPTIONS ဖြစ်ပါက → CORS preflight 204
-    7. options.enforce == false ဖြစ်ပါက → route-class header များနှင့်အတူ တိုက်ရိုက်ဆက်လက်ပေးပို့ပါ
-    8. သို့မဟုတ်ပါက: POLICIES[routeClass].evaluate(ctx)
-       - allow  → x-omniroute-auth-{kind,id,label,scopes} ကို သတ်မှတ် → NextResponse.next()
-       - reject → correlation_id ပါဝင်သည့် JSON error (dashboard စာမျက်နှာများ → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-ယုံကြည်ရသော internal header များ (`src/server/authz/headers.ts` တွင် သတ်မှတ်ထားသည်) ကို အမျိုးအစားမခွဲခြားမီ **ဝင်လာသော request များမှ ဖယ်ရှားသည်** — client များသည် subject တစ်ခုအဖြစ် အယောင်ဆောင်ရန် `x-omniroute-auth-*` ကို ကြိုတင်ဖြည့်သွင်း၍ မရပါ။
+ယုံကြည်ရသော အတွင်းပိုင်း ခေါင်းစီးများ ( `src/server/authz/headers.ts` တွင် သတ်မှတ်ထားသည်) များဖြစ်သည်။** ဝင်လာသော တောင်းဆိုမှုများမှ ဖယ်ထုတ်ထားသည်။** — အမျိုးအစားခွဲခြင်းမပြုမီ ဖောက်သည်များသည် အကြောင်းအရာတစ်ခုကို အယောင်ဆောင်ရန်အတွက် `x-omniroute-auth-*` ကြိုတင်ဖြည့်သွင်း၍မရပါ။
 
-### Policy စာချုပ်များ
+### မူဝါဒစာချုပ်များ
 
-Route အတန်းအစားတစ်ခုစီတွင် `src/server/authz/policies/` အောက်၌ policy တစ်ခုစီရှိသည်-
+လမ်းကြောင်း အတန်းတိုင်းတွင် `src/server/authz/policies/` တွင် မူဝါဒတစ်ခု ရှိသည်-
 
-- **`publicPolicy`** (`policies/public.ts`) — `allow({ kind: "anonymous", id: "anonymous" })` ကို အမြဲပြန်ပေးသည်။
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer ကို ထုတ်ယူပြီး `validateApiKey()` မှတစ်ဆင့် အတည်ပြုသည်။ သက်ရောက်နေသော `REQUIRE_API_KEY` feature flag ကို ပိတ်ထားသည့်အခါမှသာ anonymous အဖြစ် ဆက်လက်လုပ်ဆောင်သည်။ သက်ရောက်နေသော flag ကို `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) မှတစ်ဆင့် သတ်မှတ်သောကြောင့် Dashboard Feature Flags နှင့် environment variable များသည် `/api/v1/*`၊ `/api/v1beta/*` နှင့် alias များကို တစ်သမတ်တည်း ထိန်းချုပ်သည်။ resolver ချို့ယွင်းမှုများ ဖြစ်ပေါ်ပါက ပိတ်ဆို့ငြင်းပယ်သည်။ Client API route များတွင် dashboard-session request များကို ခွင့်ပြုသည် (`/api/v1/models` အပါအဝင်ဖြစ်ပြီး dashboard model catalog က အသုံးပြုသည်)။
-- **`managementPolicy`** (`policies/management.ts`) — dashboard session၊ internal model-sync request များ (`/api/providers/[name]/(sync-models|models)` နှင့် ကိုက်ညီစစ်ဆေးသည်) ကို လက်ခံသည်၊ သို့မဟုတ် `isAuthRequired()` က false ပြန်ပေးပါက လုံးဝကျော်သွားသည်။ Bearer token ပါရှိသော်လည်း မမှန်ကန်ပါက 403 (`AUTH_001`) ကို ပြန်ပေးပြီး၊ မဟုတ်ပါက 401 ကို ပြန်ပေးသည်။ မည်သည့် auth လမ်းခွဲမတိုင်မီတွင်မဆို route-guard အဆင့်များ (LOCAL_ONLY / ALWAYS_PROTECTED) ကိုလည်း မဖြစ်မနေ သက်ရောက်စေသည် — [Route Guard အဆင့်များ](../security/ROUTE_GUARD_TIERS.md) ကို ကြည့်ပါ။ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ရှိ LOCAL_ONLY path များ (လက်ရှိတွင် `/api/mcp/`) ကို Bearer key ၌ `manage` scope ပါရှိပါက non-loopback မှ ဝင်ရောက်အသုံးပြုနိုင်သည်။ အခြား LOCAL_ONLY path အားလုံးသည် scope မည်သို့ပင်ဖြစ်စေ strict-loopback အဖြစ် ဆက်လက်ကန့်သတ်ထားသည်။
+- **`publicPolicy`** (`policies/public.ts`) — အမြဲတမ်း `allow({ kind: "anonymous", id: "anonymous" })` ပြန်ပေးသည်။
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer ကို ထုတ်ယူပြီး `validateApiKey()` မှတဆင့် အတည်ပြုသည်။ ထိရောက်သော `REQUIRE_API_KEY` အင်္ဂါရပ်အလံကို ပိတ်ထားမှသာ အမည်မသိအဖြစ်သို့ ရောက်သွားနိုင်သည်။ ထိရောက်သောအလံကို `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) မှတဆင့်ဖြေရှင်းပြီးဖြစ်သောကြောင့် Dashboard အင်္ဂါရပ်အလံများနှင့် ပတ်ဝန်းကျင်ပြောင်းလဲမှုများသည် `/api/v1/*`၊ `/api/v1beta/*` နှင့် aliases များကို တသမတ်တည်းအုပ်ချုပ်သည်။ ဖြေရှင်းသူ ချို့ယွင်းချက် ပျက်ကွက် ပိတ်ထားသည်။ ကလိုင်းယင့် API လမ်းကြောင်းများပေါ်တွင် ဒက်ရှ်ဘုတ်-ဆက်ရှင်တောင်းဆိုမှုများကို ခွင့်ပြုသည် ( `/api/v1/models` အပါအဝင်၊ ဒက်ရှ်ဘုတ်မော်ဒယ်ကတ်တလောက်က အသုံးပြုသည်)။ Entra ID SSO ဖွင့်သောအခါ၊ ဖွဲ့စည်းတည်ဆောက်ပုံအရ Entra တိုကင် (base64url segments သုံးခု၊ `RS*` alg၊ `kid`) ကို SSO ဌာနခွဲမှ ကိုင်တွယ်သည်** မီ** `validateApiKey()` နှင့် ၎င်း၏ စီရင်ချက်သည် နောက်ဆုံး — ဖြစ်ပြီး ၎င်းသည် API-ကီးလမ်းကြောင်း သို့မဟုတ် အမည်မသိဌာနခွဲသို့ ကျဆင်းသွားခြင်းသို့ ဘယ်သောအခါမှ မကျရောက်ပါ၊ ထို့ကြောင့် အထောက်အထားဝန်ဆောင်မှုပေးသူ ပြတ်တောက်မှုသည် ဖွင့်သုံးခွင့်ဖြစ်လာမည်မဟုတ်ပါ။ Static API ကီးများသည် သက်ရောက်မှုမရှိပါ။ [Entra ID SSO](../security/ENTRA_SSO.md) ကြည့်ပါ။
+- **`managementPolicy`** (`policies/management.ts`) — ဒက်ရှ်ဘုတ်ဆက်ရှင်၊ အတွင်းပိုင်း မော်ဒယ်-စင့်ခ်လုပ်ခြင်း တောင်းဆိုချက်များကို လက်ခံသည် ( `/api/providers/[name]/(sync-models|models)` နှင့် ကိုက်ညီသည်) သို့မဟုတ် `isAuthRequired()` မှားယွင်းပါက ပြန်ပို့ပါက လုံးဝကျော်သွားပါသည်။ Bearer တိုကင်တစ်ခုရှိနေသော်လည်း မမှန်ပါက 403 (`AUTH_001`) ကို ပြန်ပေးသည်။ စစ်မှန်သောဌာနခွဲ — [Route Guard Tiers ကို](../security/ROUTE_GUARD_TIERS.md) မတွေ့မီ လမ်းကြောင်းစောင့်အဆင့် (LOCAL_ONLY / ALWAYS_PROTECTED) ကိုလည်း တွန်းအားပေးပါသည်။ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ရှိ LOCAL_ONLY လမ်းကြောင်းများ (ယနေ့- `/api/mcp/`) ကို Bearer သော့သည် `manage` နယ်ပယ်ကို သယ်ဆောင်လာသောအခါတွင် လှည့်ပတ်မဟုတ်သောမှ ဝင်ရောက်ကြည့်ရှုနိုင်သည်။ အခြား LOCAL_ONLY လမ်းကြောင်းများအားလုံးသည် နယ်ပယ်မခွဲခြားဘဲ တင်းကျပ်သော-လှည့်ပတ်နေပါသည်။
 
-အောင်မြင်သော policy တစ်ခုသည် `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ပါဝင်သည့် `AuthSubject` ကို ပြန်ပေးသည်။ Downstream handler များသည် auth logic ကို ထပ်မံလုပ်ဆောင်မည့်အစား `src/server/authz/assertAuth.ts` ရှိ `assertAuth(request, "CLIENT_API")` မှတစ်ဆင့် ၎င်းကို ဖတ်ရှုနိုင်သည်။
+အောင်မြင်သောမူဝါဒသည် `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ဖြင့် ပြန်ပေးသည်။ အောက်ခြေမှ ကိုင်တွယ်သူများသည် auth logic ကို ပြန်လည်လုပ်ဆောင်မည့်အစား `assertAuth(request, "CLIENT_API")` ရှိ `src/server/authz/assertAuth.ts` မှတစ်ဆင့် ဖတ်နိုင်သည်။
 
 ## အများသုံး Route များစာရင်း
 
@@ -304,25 +304,25 @@ Client API key enforcement သည် `src/shared/utils/featureFlags.ts` ရှ�
 - Public allowlist- `tests/unit/public-api-routes.test.ts`။
 - သီးသန့် စမ်းသပ်ရန်- `node --import tsx/esm --test tests/unit/authz/classify.test.ts`။
 
-## အမှားရှာဖွေခြင်း
+## အမှားရှာပြင်ခြင်း။
 
-Pipeline သည် တုံ့ပြန်ချက်များတွင် အောက်ပါတို့ကို အမြဲတမ်း ထည့်သွင်းပေးသည်-
+ပိုက်လိုင်းသည် တုံ့ပြန်မှုများကို အမြဲတမ်း တံဆိပ်တုံးထုသည်-
 
 ```
-x-request-id:               <ဆက်စပ်မှု ID၊ အမှားတုံ့ပြန်ချက်များတွင် ပြန်လည်ဖော်ပြသည်>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-စစ်မှန်ကြောင်းအတည်ပြုထားသော တောင်းဆိုမှုများအတွက် upstream (handler ဘက်ရှိ) တောင်းဆိုမှု header များတွင် အောက်ပါတို့လည်း ပါဝင်သည်-
+စစ်မှန်ကြောင်းသက်သေပြထားသော တောင်းဆိုမှုများအတွက် အထက်စီးကြောင်း (ကိုင်တွယ်သူဘက်ခြမ်း) တောင်းဆိုချက် ခေါင်းစီးများလည်း ပါဝင်သည်-
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<နောက်ဆုံး-4 လုံး> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ချန်လှပ်ထားနိုင်သည်)
-x-omniroute-auth-scopes:    ကော်မာဖြင့် ခွဲထားသော စာရင်း
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Handler များအတွင်း `assertAuth(req, expectedClass)` ကို အသုံးပြုပါ — middleware ကို ကျော်သွားခဲ့ပါက ၎င်းသည် `AUTHZ_NOT_INITIALIZED` ကုဒ်ပါဝင်သော `AuthzAssertionError` ကို throw လုပ်သည် (စမ်းသပ်မှုများတွင် configuration နောက်ပြန်ဆုတ်မှုများကို ဖမ်းမိရန် အသုံးဝင်သည်)။
+အလယ်တန်းဆော့ဖ်ဝဲကို ကျော်ဖြတ်သွားပါက ကိုင်တွယ်ကိရိယာများအတွင်း `assertAuth(req, expectedClass)` — `AuthzAssertionError` ကို ကုဒ် `AUTHZ_NOT_INITIALIZED` ဖြင့် ပစ်လွှတ်သည် (စမ်းသပ်မှုများတွင် ဖွဲ့စည်းမှုပုံစံဆုတ်ယုတ်မှုများကို ဖမ်းယူရာတွင် အထောက်အကူဖြစ်စေသည်)။
 
 ## ထပ်မံကြည့်ရှုရန်
 

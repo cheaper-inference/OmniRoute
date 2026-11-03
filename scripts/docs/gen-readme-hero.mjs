@@ -15,14 +15,14 @@ import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 export const HERO_COPY = {
   kicker: ["OMNIROUTE — THE FREE AI GATEWAY"],
   headline: ["Never stop coding."],
-  sub: ["Every AI tool → 377 providers — 150+ free —", "through one endpoint."],
+  sub: ["Every AI tool → 380 providers — 150+ free —", "through one endpoint."],
   tools: [
     "Claude Code · Codex · Cursor · Cline · Copilot · Antigravity  →  FREE Claude / GPT / Gemini · auto-fallback",
   ],
   cmd: ["$ npm i -g omniroute"],
   foot: ["RTK + CAVEMAN · STACKED COMPRESSION · ONE ENDPOINT · /v1"],
   stats: [
-    "377",
+    "380",
     "AI PROVIDERS",
     "150+",
     "FREE TIERS",
@@ -66,8 +66,8 @@ export async function renderReadmeHero() {
     svgOpen({
       viewBox: "0 0 1200 548",
       title:
-        "OmniRoute — Never stop coding. Every AI tool to 377 providers, 150+ free, through one endpoint.",
-      desc: "Hero card in the Cheaper Inference UI Kit style: Instrument Serif headline, Inter body, IBM Plex Mono figures. Claims: 377 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 20 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
+        "OmniRoute — Never stop coding. Every AI tool to 380 providers, 150+ free, through one endpoint.",
+      desc: "Hero card in the Cheaper Inference UI Kit style: Instrument Serif headline, Inter body, IBM Plex Mono figures. Claims: 380 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 20 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
       fontFaceCss: css,
     }) +
     gridDefs("heroGrid") +

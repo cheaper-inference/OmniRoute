@@ -111,6 +111,23 @@ test("authoritative membership and manual metadata precedence are provider-indep
   }
 });
 
+test("CodeBuddy CN's synced roster hides static models removed upstream", () => {
+  const models = mergeProviderModelListing({
+    providerId: "codebuddy-cn",
+    registryModels: [
+      { id: "minimax-m3", name: "MiniMax-M3" },
+      { id: "minimax-m3-pay", name: "MiniMax-M3" },
+    ],
+    syncedModels: [{ id: "minimax-m3-pay", name: "MiniMax-M3" }],
+    customModels: [{ id: "minimax-m3", source: "imported" }],
+  });
+
+  assert.deepEqual(
+    models.map((model) => model.id),
+    ["minimax-m3-pay"]
+  );
+});
+
 test("curated-only catalogs cannot be emptied or extended by a live-catalog flag", () => {
   for (const providerId of ["kimi-web", "zai-web", "chatgpt-web"]) {
     const models = mergeProviderModelListing({
