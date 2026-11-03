@@ -29,6 +29,7 @@ import { grokCli } from "./grok-cli";
 import { xaiOauth } from "./xai-oauth";
 import { openference } from "./openference";
 import { codebuddyCn } from "./codebuddy-cn";
+import { freebuff } from "./freebuff";
 import { codebuddyIntl } from "./codebuddy-intl";
 import { workbuddy } from "./workbuddy";
 import { zed } from "./zed";
@@ -64,6 +65,7 @@ export const PROVIDERS = {
   "xai-oauth": xaiOauth,
   openference,
   "codebuddy-cn": codebuddyCn,
+  freebuff,
   "codebuddy-intl": codebuddyIntl,
   // WorkBuddy is a separate Tencent product from CodeBuddy CN (own host, own
   // account system, own catalog). It shares the plugin-auth protocol shape, so

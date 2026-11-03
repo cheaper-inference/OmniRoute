@@ -1,4 +1,6 @@
 import { sanitizePII } from "@/lib/piiSanitizer";
+import { isClaudeCodeClassifierRequest } from "./claudeClassifierCompat.ts";
+import { isNoMemoryRequested } from "./headers.ts";
 import { capMemoryExtractionText, MEMORY_EXTRACTION_TEXT_LIMIT } from "./logTruncation.ts";
 
 export function extractMemoryTextFromResponse(
@@ -129,6 +131,25 @@ export function resolveMemoryOwnerId(apiKeyInfo: Record<string, unknown> | null)
     return rawId;
   }
   return null;
+}
+
+/**
+ * Memory owner for this request, or null when it must not touch Memory at all. A null
+ * owner disables injection and extraction. Covers the `x-omniroute-no-memory` opt-out and
+ * Claude Code's internal security-classifier turns: those are not user conversation, so
+ * their output format must not become a stored fact replayed into every later request.
+ */
+export function resolveRequestMemoryOwnerId(input: {
+  apiKeyInfo: Record<string, unknown> | null;
+  headers: Record<string, unknown> | Headers | null | undefined;
+  sourceFormat: string;
+  body: Record<string, unknown> | null | undefined;
+}): string | null {
+  const { apiKeyInfo, headers, sourceFormat, body } = input;
+  if (isNoMemoryRequested(headers) || isClaudeCodeClassifierRequest(sourceFormat, body)) {
+    return null;
+  }
+  return resolveMemoryOwnerId(apiKeyInfo);
 }
 
 /**

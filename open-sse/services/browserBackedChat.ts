@@ -448,8 +448,8 @@ export async function browserBackedChat(
 /**
  * httpBackedChat — Lightweight HTTP-backed alternative to browserBackedChat.
  *
- * Same interface, zero browser overhead. Uses tlsClient (Chrome 124 TLS
- * fingerprint) to make direct HTTP POST requests to the provider's chat
+ * Same interface, zero browser overhead. Uses tlsClient (newest chrome
+ * profile from the installed wreq-js catalog) to make direct HTTP POST requests to the provider's chat
  * endpoint with browser-emulated headers.
  *
  * ~0.5-2s per request vs 10-25s for Playwright. The trade-off: the HTTP

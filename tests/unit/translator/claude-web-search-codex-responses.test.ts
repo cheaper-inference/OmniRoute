@@ -36,6 +36,9 @@ function claudeWebSearchBody(extraTools: unknown[] = []) {
 
 // ── 1. Request: bypass predicate ──────────────────────────────────────────
 
+const { extractResponsesWebSearchEvidence } =
+  await import("../../../open-sse/translator/response/openai-responses/pureHelpers.ts");
+
 test("bypass predicate: true for codex + CLAUDE -> OPENAI_RESPONSES with the sole server tool", () => {
   assert.equal(
     supportsNativeWebSearchFallbackBypass({
@@ -208,9 +211,6 @@ test("interceptSearchOverride=true forces the fallback even for the sole-tool co
 });
 
 // ── Response: the pure per-chunk extractor ────────────────────────────────
-
-const { extractResponsesWebSearchEvidence } =
-  await import("../../../open-sse/translator/response/openai-responses/pureHelpers.ts");
 
 test("extractor: output_item.added web_search_call yields the call with no items yet", () => {
   const evidence = extractResponsesWebSearchEvidence({
