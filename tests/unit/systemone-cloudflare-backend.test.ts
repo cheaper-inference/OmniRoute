@@ -306,3 +306,24 @@ test("cloudflare: partial and encoded secrets are redacted in errors, exceptions
   assert.equal(capped.response.status, 502);
   assert.equal((await capped.response.text()).includes(ACCOUNT.slice(0, 12)), false);
 });
+
+test("cloudflare: quoted error messages survive intact and short tokens are still redacted", async () => {
+  const message = 'Invalid value for "questions": expected an object';
+  const { response } = await call(
+    "cloudflare-ai/jev",
+    jsonResponse(400, { success: false, errors: [{ code: 7003, message }] })
+  );
+  assert.equal(response.status, 400);
+  assert.equal(((await response.json()) as { error: { message: string } }).error.message, message);
+
+  const short = await handleSystemOneProxy({
+    path: "/v1/systemone",
+    target: resolveSystemOneTarget("cf/clef")!,
+    body: { model: "cf/clef", state: "s", questions: { q: { type: "noul" } } },
+    credentials: { apiKey: "qZ7vX2a", providerSpecificData: { accountId: ACCOUNT } },
+    fetchImpl: async () =>
+      jsonResponse(401, { success: false, errors: [{ message: "Rejected qZ7vX2a" }] }),
+  });
+  assert.equal(short.status, 401);
+  assert.equal((await short.text()).includes("qZ7vX2a"), false);
+});

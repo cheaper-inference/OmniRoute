@@ -101,9 +101,12 @@ const SECRET_FRAGMENT_LEN = 8;
  */
 function redactConnectionSecrets(text: string, credentials: SystemOneCredentials | null): string {
   const accountId = credentials?.providerSpecificData?.accountId;
-  const secrets = [credentials?.apiKey, credentials?.accessToken, accountId].filter(
-    (value): value is string => typeof value === "string" && value.length >= SECRET_FRAGMENT_LEN
+  const configured = [credentials?.apiKey, credentials?.accessToken, accountId].filter(
+    (value): value is string => typeof value === "string" && value.length > 0
   );
+  // A complete configured value is always removed, whatever its length.
+  text = configured.reduce((out, secret) => out.split(secret).join("[redacted]"), text);
+  const secrets = configured.filter((value) => value.length >= SECRET_FRAGMENT_LEN);
   if (secrets.length === 0 || text.length < SECRET_FRAGMENT_LEN) return text;
   const fragments = new Set<string>();
   for (const secret of secrets) {
@@ -294,8 +297,13 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
     const res = await postDecision(options, request, token);
     const raw = await res.text();
     // Redact before parseUpstreamBody truncates a non-JSON error body: a secret
-    // cut off at the cap would no longer match exactly.
-    const text = res.ok ? raw : safeErrorText(raw, options);
+    // cut off at the cap would no longer match exactly. Only the connection's
+    // own secrets here; the shared sanitizer runs on the extracted message, so
+    // the JSON envelope stays parseable.
+    const text =
+      res.ok || options.target.backend !== "cloudflare"
+        ? raw
+        : redactConnectionSecrets(raw, options.credentials);
     const normalized = normalizeBackendBody(
       options.target,
       res.status,
