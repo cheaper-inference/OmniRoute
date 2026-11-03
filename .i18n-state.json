@@ -1,35 +1,12 @@
 {
   "sources": {
     "AGENTS.md": {
-      "source_hash": "d53a0e4afde92f0ae0963d6810bfc80cdb3b7dd28fabc5d30a7785742f7f8e69",
+      "source_hash": "54b8b6faa23b2566a80f48c992cb55c9fedc513896382da16fa5f2f8f0c0292d",
       "locales": {
         "bs": {
-          "source_hash": "d53a0e4afde92f0ae0963d6810bfc80cdb3b7dd28fabc5d30a7785742f7f8e69",
-          "target_hash": "cf701751dee2e1edf41b4f939ac310df3fbf9e47f6105c5bdcfae6720cdeadb7",
-          "section_hashes": [
-            "fe5597d25ab9",
-            "51077e57dcfb",
-            "9c410d3e3cfb",
-            "3e48c6879f08",
-            "0b9c251e9fea",
-            "e83f2fa5d97a",
-            "63eb9f8494a9",
-            "e176a4cab67e",
-            "50974cb9b793",
-            "fa8d46969e63",
-            "e2846a2c88af",
-            "25fd324dc753",
-            "685657476062",
-            "6c80b3f13040",
-            "877c6a8f6871",
-            "8cbf77339ce9",
-            "66d8aabf7235",
-            "114c30ca5a5e",
-            "67de3b59b95e",
-            "f6624f38d27c",
-            "92c9bfddd378"
-          ],
-          "updated_at": "2026-10-26T00:28:09.519Z"
+          "source_hash": "54b8b6faa23b2566a80f48c992cb55c9fedc513896382da16fa5f2f8f0c0292d",
+          "target_hash": "202baa659025ad2a738d3add73b3217171173c70dadce51504a45247411ab459",
+          "updated_at": "2026-11-03T16:00:13.000Z"
         }
       }
     },
