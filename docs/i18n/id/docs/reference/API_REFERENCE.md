@@ -1253,6 +1253,11 @@ nilai-nilai ini dalam `modelOutputOverrides`, termasuk model tanpa baris model k
 menggunakan kapabilitas runtime `max_output_tokens` dan tetap bertahan setelah sinkronisasi ulang model. Halaman
 penyedia yang kompatibel dengan OpenAI menawarkan kontrol edit/hapus yang sama dan menandai model dengan dukungan visi eksplisit.
 
+Pada node provider yang kompatibel, jalur penulisan (`POST`, `PUT`, `PATCH`, `DELETE` dan
+`/api/provider-models/validate-and-add`) menyimpan id model sebagai id upstream tanpa awalan: id
+yang ditempel dari daftar berawalan akan menghapus tumpukan awalan milik node tersebut, dan
+respons mengembalikan id yang disimpan. Id provider kanonis yang mengandung garis miring (misalnya `nvidia/nemotron-…`) disimpan apa adanya. `/v1/models` tidak pernah menghasilkan id bertumpuk `<prefix>/<prefix>/<model>`.
+
 Node Chat Completions Kustom menyesuaikan penolakan eksplisit terhadap penalaran untuk backend upstream. Pengujian
 koneksi yang berhasil secara otomatis memilih kontrol templat chat untuk setiap ID model persis
 yang entri `/models`-nya membuktikan nilai `owned_by` yang dikenali: `vllm`, `sglang`, atau `llamacpp`.

@@ -1253,6 +1253,12 @@ värden i `modelOutputOverrides`, inklusive modeller utan en rad för en anpassa
 använder körningskapaciteten `max_output_tokens` och kvarstår efter en omsynkronisering av modellen. Sidan för den OpenAI-kompatibla
 leverantören erbjuder samma kontroller för redigering/rensning och markerar modeller med uttryckligt stöd för bildbehandling.
 
+På en kompatibel providernod lagrar skrivvägarna (`POST`, `PUT`, `PATCH`, `DELETE` och
+`/api/provider-models/validate-and-add`) modell-ID:t som det nakna upstream-ID:t: ett ID
+som klistrats in från en prefixförsedd lista får varje inledande kedja av nodens eget prefix hopslagen, och
+svaren återger det lagrade ID:t. Kanoniska providers snedstrecksseparerade ID:n (t.ex. `nvidia/nemotron-…`) lagras
+oförändrade. `/v1/models` skickar aldrig ut ett staplat `<prefix>/<prefix>/<model>`-ID.
+
 Anpassade Chat Completions-noder anpassar uttryckliga bortval av resonemang till uppströmsservern. Ett
 lyckat anslutningstest väljer automatiskt chattmallskontroller för varje exakt modell-ID
 vars `/models`-post styrker ett identifierat `owned_by`-värde: `vllm`, `sglang` eller `llamacpp`.

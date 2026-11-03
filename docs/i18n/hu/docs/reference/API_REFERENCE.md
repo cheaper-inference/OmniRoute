@@ -1229,6 +1229,11 @@ felülbírálás a futásidejű `max_output_tokens` képességet használja, és
 újraszinkronizálását is túléli. Az OpenAI-kompatibilis szolgáltatói oldal ugyanazokat a
 szerkesztés/törlés vezérlőket kínálja, és megjelöli az explicit látástámogatással rendelkező modelleket.
 
+Kompatibilis szolgáltatói csomóponton az írási útvonalak (`POST`, `PUT`, `PATCH`, `DELETE` és
+`/api/provider-models/validate-and-add`) a modellazonosítót a felsőbb szintű szolgáltató csupasz azonosítójaként tárolják: ha egy
+előtaggal ellátott listából beillesztett azonosítóról van szó, a csomópont saját előtagjának összes egymásba ágyazott előfordulása
+összevonásra kerül, a válaszok pedig a tárolt azonosítót adják vissza. A kanonikus szolgáltatók perjeleket tartalmazó azonosítói (például `nvidia/nemotron-…`) változatlanul kerülnek tárolásra. A `/v1/models` soha nem ad vissza egymásba ágyazott `<prefix>/<prefix>/<model>` azonosítót.
+
 Az egyéni Chat Completions-csomópontok az explicit reasoning-elutasításokat a felsőbb
 háttérrendszerhez igazítják. A sikeres kapcsolatteszt automatikusan kiválasztja a
 chat-sablon vezérlőket minden olyan pontos modellazonosítóhoz, amelynek `/models`-bejegyzése

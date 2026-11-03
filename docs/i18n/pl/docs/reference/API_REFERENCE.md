@@ -1253,6 +1253,12 @@ wartości w polu `modelOutputOverrides`, w tym również dla modeli bez rekordu 
 wykorzystuje funkcję środowiska uruchomieniowego `max_output_tokens` i jest zachowywane po ponownej synchronizacji modelu. Strona
 dostawcy zgodnego z OpenAI udostępnia te same elementy sterujące do edycji/usuwania i oznacza modele z jawną obsługą obrazu.
 
+W przypadku zgodnego węzła dostawcy ścieżki zapisu (`POST`, `PUT`, `PATCH`, `DELETE` oraz
+`/api/provider-models/validate-and-add`) przechowują identyfikator modelu jako identyfikator nadrzędny bez prefiksu: identyfikator
+wklejony z listy z prefiksem ma każdą początkową sekwencję prefiksów własnych węzła zredukowaną do jednego, a
+odpowiedzi zwracają zapisany identyfikator. Identyfikatory dostawców kanonicznych zawierające ukośniki (np. `nvidia/nemotron-…`) są
+przechowywane bez zmian. `/v1/models` nigdy nie emituje identyfikatora w postaci złożonego `<prefix>/<prefix>/<model>`.
+
 Niestandardowe węzły Chat Completions dostosowują jawne wyłączenie rozumowania do nadrzędnego backendu.
 Pomyślny test połączenia automatycznie wybiera elementy sterujące szablonem czatu dla każdego dokładnego identyfikatora modelu,
 którego wpis `/models` potwierdza rozpoznawaną wartość `owned_by`: `vllm`, `sglang` lub `llamacpp`.

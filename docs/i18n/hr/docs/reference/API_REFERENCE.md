@@ -1254,6 +1254,11 @@ vrijednosti u `modelOutputOverrides`, uključujući modele bez retka prilagođen
 koristi mogućnost `max_output_tokens` tijekom izvođenja i zadržava se nakon ponovne sinkronizacije modela. Stranica pružatelja
 usluga kompatibilnog s OpenAI-jem nudi iste kontrole za uređivanje/uklanjanje i označava modele s izričitom podrškom za slike.
 
+Na kompatibilnom čvoru pružatelja, putanje za zapisivanje (`POST`, `PUT`, `PATCH`, `DELETE` i
+`/api/provider-models/validate-and-add`) pohranjuju ID modela kao osnovni ID uzvodnog sustava: ID
+zalijepljen iz popisa s prefiksom ima svaki početni niz prefiksa tog čvora sažet, a
+odgovori vraćaju pohranjeni ID. ID-jevi kanonskih pružatelja s kosim crtama (npr. `nvidia/nemotron-…`) pohranjuju se bez izmjena. `/v1/models` nikad ne emitira ID u obliku naslaganog `<prefix>/<prefix>/<model>`.
+
 Prilagođeni čvorovi Chat Completions prilagođavaju izričite zahtjeve za isključivanje zaključivanja nadređenom sustavu. Uspješan
 test veze automatski odabire kontrole predloška razgovora za svaki točan ID modela
 čiji unos `/models` potvrđuje prepoznatu vrijednost `owned_by`: `vllm`, `sglang` ili `llamacpp`.

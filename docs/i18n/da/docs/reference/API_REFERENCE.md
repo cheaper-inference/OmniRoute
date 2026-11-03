@@ -101,7 +101,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Hvor findes id'et?** Åbn udbydersiden i kontrolpanelet
-  (**Kontrolpanel → Udbydere → <udbyder>**), og klik på id-feltet `xxxxxxxx…` på en forbindelsesrække
+  (**Kontrolpanel → Udbydere → <provider>**), og klik på id-feltet `xxxxxxxx…` på en forbindelsesrække
   — så kopieres det fulde forbindelses-id.
 - **Hvilke anmodninger respekterer det?** Anmodninger med én model (`provider/model`) på
   `/v1/chat/completions`, `/v1/messages` og `/v1/responses`. Kombinationer ignorerer headeren: Fastlås
@@ -1255,6 +1255,12 @@ fjerner den for at gendanne standardindstillingen. `GET /api/provider-models?pro
 værdier i `modelOutputOverrides`, herunder modeller uden en række for en tilpasset model. Tilsidesættelsen
 bruger runtime-egenskaben `max_output_tokens` og bevares efter en ny modelsynkronisering. Siden for den OpenAI-kompatible
 udbyder tilbyder de samme funktioner til redigering/nulstilling og markerer modeller med eksplicit understøttelse af vision.
+
+På et kompatibelt udbyderknudepunkt gemmer skrivehandlingerne (`POST`, `PUT`, `PATCH`, `DELETE` og
+`/api/provider-models/validate-and-add`) model-id'et som det rå upstream-id: Et id, der
+er indsat fra en præfikseret liste, får sammenfoldet alle indledende lag af knudepunktets eget præfiks, og
+svar returnerer det gemte id. Kanoniske udbyderes id'er med skråstreg (f.eks. `nvidia/nemotron-…`) gemmes
+ordret. `/v1/models` udsender aldrig et stablet `<prefix>/<prefix>/<model>`-id.
 
 Tilpassede Chat Completions-noder tilpasser eksplicit fravalg af ræsonnering til upstream-backenden. En
 vellykket forbindelsestest vælger automatisk chat-skabelonfunktioner for hvert nøjagtigt model-id,

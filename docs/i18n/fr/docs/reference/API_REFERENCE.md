@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Où trouver l’identifiant.** Ouvrez la page du fournisseur dans le tableau de bord
-  (**Tableau de bord → Fournisseurs → <fournisseur>**) et cliquez sur la pastille d’identifiant `xxxxxxxx…` dans une ligne
+  (**Tableau de bord → Fournisseurs → <provider>**) et cliquez sur la pastille d’identifiant `xxxxxxxx…` dans une ligne
   de connexion : l’identifiant complet de la connexion est alors copié.
 - **Quelles requêtes le prennent en compte.** Les requêtes à modèle unique (`provider/model`) sur
   `/v1/chat/completions`, `/v1/messages` et `/v1/responses`. Les combinaisons ignorent cet en-tête : épinglez
@@ -1228,6 +1228,12 @@ l’efface pour restaurer la valeur par défaut. `GET /api/provider-models?provi
 valeurs dans `modelOutputOverrides`, y compris pour les modèles sans ligne de modèle personnalisé. La substitution
 utilise la capacité d’exécution `max_output_tokens` et persiste après une nouvelle synchronisation du modèle. La page du
 fournisseur compatible avec OpenAI propose les mêmes commandes de modification/effacement et signale les modèles prenant explicitement en charge la vision.
+
+Sur un nœud de fournisseur compatible, les chemins d’écriture (`POST`, `PUT`, `PATCH`, `DELETE` et
+`/api/provider-models/validate-and-add`) enregistrent l’identifiant du modèle sous la forme de l’identifiant amont nu : un identifiant
+collé depuis une liste préfixée voit toute séquence initiale du propre préfixe du nœud réduite, et les
+réponses renvoient l’identifiant enregistré. Les identifiants avec barres obliques des fournisseurs canoniques (par ex. `nvidia/nemotron-…`) sont
+enregistrés tels quels. `/v1/models` n’émet jamais un identifiant empilé `<prefix>/<prefix>/<model>`.
 
 Les nœuds Chat Completions personnalisés adaptent les désactivations explicites du raisonnement au backend en amont. Un
 test de connexion réussi sélectionne automatiquement les contrôles du modèle de chat pour chaque ID de modèle exact

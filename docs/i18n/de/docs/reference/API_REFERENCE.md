@@ -1245,6 +1245,12 @@ Werte in `modelOutputOverrides` zurück, einschließlich Modellen ohne Zeile fü
 verwendet die Laufzeitfunktion `max_output_tokens` und bleibt nach einer erneuten Modellsynchronisierung erhalten. Die Seite für OpenAI-kompatible
 Anbieter bietet dieselben Steuerelemente zum Bearbeiten/Entfernen und kennzeichnet Modelle mit expliziter Vision-Unterstützung.
 
+Bei einem kompatiblen Provider-Knoten speichern die Schreibpfade (`POST`, `PUT`, `PATCH`, `DELETE` und
+`/api/provider-models/validate-and-add`) die Modell-ID als reine Upstream-ID: Bei einer aus einer
+präfixierten Auflistung eingefügten ID wird jede führende Folge des eigenen Präfixes des Knotens
+reduziert, und Antworten geben die gespeicherte ID zurück. IDs mit Schrägstrichen kanonischer Provider (z. B. `nvidia/nemotron-…`) werden
+unverändert gespeichert. `/v1/models` gibt niemals eine gestapelte ID im Format `<prefix>/<prefix>/<model>` aus.
+
 Benutzerdefinierte Chat-Completions-Knoten passen explizite Deaktivierungen des Reasonings an das Upstream-Backend an. Ein
 erfolgreicher Verbindungstest wählt automatisch Chat-Template-Steuerelemente für jede exakte Modell-ID aus,
 deren `/models`-Eintrag einen anerkannten `owned_by`-Wert nachweist: `vllm`, `sglang` oder `llamacpp`.

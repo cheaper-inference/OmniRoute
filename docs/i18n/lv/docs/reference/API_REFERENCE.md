@@ -1254,6 +1254,12 @@ vērtības laukā `modelOutputOverrides`, tostarp modeļiem bez pielāgota mode�
 izmanto izpildlaika `max_output_tokens` iespēju un saglabājas pēc atkārtotas modeļa sinhronizācijas. Ar OpenAI saderīga
 pakalpojumu sniedzēja lapa piedāvā tādas pašas rediģēšanas/notīrīšanas vadīklas un atzīmē modeļus ar tieši norādītu attēlu atbalstu.
 
+Saderīgā nodrošinātāja mezglā rakstīšanas ceļi (`POST`, `PUT`, `PATCH`, `DELETE` un
+`/api/provider-models/validate-and-add`) saglabā modeļa ID kā vienkāršu augšupējā nodrošinātāja ID: ID,
+kas ielīmēts no saraksta ar prefiksu, tiek saglabāts pēc visu mezgla paša prefiksa sākuma slāņu apvienošanas, un
+atbildēs tiek atgriezts saglabātais ID. Kanonisko nodrošinātāju ID ar slīpsvītrām (piemēram, `nvidia/nemotron-…`) tiek
+saglabāti nemainīti. `/v1/models` nekad neizvada sakrautu `<prefix>/<prefix>/<model>` ID.
+
 Pielāgotie Chat Completions mezgli pielāgo tiešu atteikšanos no spriešanas augšupstraumes aizmugursistēmai.
 Veiksmīga savienojuma pārbaude automātiski atlasa tērzēšanas veidnes vadīklas katram precīzam modeļa ID,
 kura `/models` ieraksts apliecina atpazītu `owned_by` vērtību: `vllm`, `sglang` vai `llamacpp`.

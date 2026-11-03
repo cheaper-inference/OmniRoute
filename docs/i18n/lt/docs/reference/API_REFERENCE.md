@@ -1253,6 +1253,11 @@ reikšmes lauke `modelOutputOverrides`, įskaitant modelius be pasirinktinio mod
 naudoja vykdymo aplinkos `max_output_tokens` galimybę ir išlieka pakartotinai sinchronizavus modelį. Su OpenAI suderinamo
 teikėjo puslapyje siūlomi tokie patys redagavimo / išvalymo valdikliai ir žymimi modeliai, kuriuose aiškiai nurodytas vaizdų palaikymas.
 
+Suderinamame teikėjo mazge įrašymo keliai (`POST`, `PUT`, `PATCH`, `DELETE` ir
+`/api/provider-models/validate-and-add`) saugo modelio ID kaip bazinį aukštesniojo lygmens teikėjo ID: jei ID
+įklijuotas iš sąrašo su priešdėliu, pašalinama bet kokia pradžioje esanti mazgo nuosavo priešdėlio seka, o
+atsakymai grąžina išsaugotą ID. Kanoninių teikėjų ID su pasviraisiais brūkšniais (pvz., `nvidia/nemotron-…`) saugomi pažodžiui. `/v1/models` niekada nepateikia sudėtinio `<prefix>/<prefix>/<model>` ID.
+
 Pasirinktiniai „Chat Completions“ mazgai pritaiko aiškiai nurodytą samprotavimo atsisakymą išorinei sistemai. Sėkmingas
 ryšio bandymas automatiškai parenka pokalbio šablono valdiklius kiekvienam tiksliam modelio ID,
 kurio `/models` įrašas patvirtina atpažintą `owned_by` reikšmę: `vllm`, `sglang` arba `llamacpp`.

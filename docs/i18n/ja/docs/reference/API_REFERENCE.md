@@ -1207,6 +1207,8 @@ https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-cre
 ランタイムの `max_output_tokens` 機能を使用し、モデルを再同期しても維持されます。OpenAI 互換
 プロバイダーページには同じ編集および解除コントロールがあり、明示的にビジョンをサポートするモデルにはマークが付きます。
 
+互換性のあるプロバイダーノードでは、書き込みパス（`POST`、`PUT`、`PATCH`、`DELETE` および `/api/provider-models/validate-and-add`）によって、モデル ID がプレーンな上流 ID として保存されます。プレフィックス付きの一覧から貼り付けられた ID は、ノード自身のプレフィックスが先頭に連続している場合、それらがまとめて 1 つに整理され、レスポンスでは保存された ID が返されます。正規プロバイダーのスラッシュ付き ID（例：`nvidia/nemotron-…`）はそのまま保存されます。`/v1/models` が、`<prefix>/<prefix>/<model>` のようにプレフィックスが重複した ID を出力することはありません。
+
 カスタム Chat Completions ノードは、明示的な推論のオプトアウトをアップストリームバックエンドに適合させます。
 接続テストが成功すると、`/models` のエントリで認識済みの `owned_by` 値（`vllm`、`sglang`、または `llamacpp`）
 が確認された各モデル ID に対して、チャットテンプレートコントロールが自動的に選択されます。

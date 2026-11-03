@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Kje najdete id.** Odprite stran ponudnika na nadzorni plošči
-  (**Nadzorna plošča → Ponudniki → <ponudnik>**) in kliknite oznako id `xxxxxxxx…` v vrstici
+  (**Nadzorna plošča → Ponudniki → <provider>**) in kliknite oznako id `xxxxxxxx…` v vrstici
   povezave — s tem kopirate celotni id povezave.
 - **Katere zahteve ga upoštevajo.** Zahteve za en model (`provider/model`) na
   `/v1/chat/completions`, `/v1/messages` in `/v1/responses`. Kombinacije prezrejo glavo: račun
@@ -1252,6 +1252,13 @@ pa jo odstrani in obnovi privzeto vrednost. `GET /api/provider-models?provider=<
 vrednosti v `modelOutputOverrides`, vključno z modeli brez vrstice modela po meri. Preglasitev
 uporablja izvajalno zmogljivost `max_output_tokens` in se ohrani po ponovni sinhronizaciji modela. Stran
 ponudnika, združljivega z OpenAI, ponuja enake kontrolnike za urejanje/odstranjevanje in označuje modele z izrecno podporo za vid.
+
+Pri združljivem vozlišču ponudnika zapisovalne poti (`POST`, `PUT`, `PATCH`, `DELETE` in
+`/api/provider-models/validate-and-add`) shranijo ID modela kot goli ID nadrejenega ponudnika: pri ID-ju,
+prilepljenem iz seznama s predpono, se vsak začetni niz predponi lastne predpone vozlišča strne,
+odgovori pa vrnejo shranjeni ID. ID-ji kanoničnih ponudnikov z lomljajem (npr. `nvidia/nemotron-…`) se
+shranijo dobesedno. `/v1/models` nikoli ne izpiše ID-ja z večkratno predpono
+`<prefix>/<prefix>/<model>`.
 
 Vozlišča Chat Completions po meri prilagodijo izrecne izklope sklepanja zalednemu sistemu. Uspešen
 preskus povezave samodejno izbere kontrolnike predloge klepeta za vsak natančen ID modela,

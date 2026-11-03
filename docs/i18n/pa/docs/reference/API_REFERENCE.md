@@ -1249,6 +1249,12 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 ਰਨਟਾਈਮ `max_output_tokens` ਸਮਰੱਥਾ ਵਰਤਦਾ ਹੈ ਅਤੇ ਮਾਡਲ ਦੇ ਮੁੜ-ਸਿੰਕ ਹੋਣ ਤੋਂ ਬਾਅਦ ਵੀ ਬਣਿਆ ਰਹਿੰਦਾ ਹੈ। OpenAI-ਅਨੁਕੂਲ
 ਪ੍ਰਦਾਤਾ ਪੰਨਾ ਉਹੀ ਸੰਪਾਦਨ/ਹਟਾਉਣ ਨਿਯੰਤਰਣ ਦਿੰਦਾ ਹੈ ਅਤੇ ਸਪਸ਼ਟ ਵਿਜ਼ਨ ਸਹਾਇਤਾ ਵਾਲੇ ਮਾਡਲਾਂ ਨੂੰ ਚਿੰਨ੍ਹਿਤ ਕਰਦਾ ਹੈ।
 
+ਕਿਸੇ ਅਨੁਕੂਲ ਪ੍ਰੋਵਾਈਡਰ ਨੋਡ ਉੱਤੇ, ਲਿਖਣ ਵਾਲੇ paths (`POST`, `PUT`, `PATCH`, `DELETE` ਅਤੇ
+`/api/provider-models/validate-and-add`) ਮਾਡਲ id ਨੂੰ ਬਿਨਾਂ ਕਿਸੇ prefix ਵਾਲੇ upstream id ਵਜੋਂ ਸਟੋਰ ਕਰਦੇ ਹਨ: ਕਿਸੇ prefixed listing ਤੋਂ
+ਪੇਸਟ ਕੀਤੀ id ਵਿੱਚ ਨੋਡ ਦੇ ਆਪਣੇ prefix ਦੀ ਸ਼ੁਰੂਆਤੀ ਲੜੀ ਨੂੰ ਇਕੱਠਾ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਅਤੇ
+responses ਸਟੋਰ ਕੀਤੀ id ਨੂੰ ਹੀ ਵਾਪਸ ਭੇਜਦੇ ਹਨ। Canonical providers ਦੀਆਂ slashed ids (ਉਦਾਹਰਨ ਵਜੋਂ `nvidia/nemotron-…`) ਨੂੰ
+ਜਿਉਂ ਦਾ ਤਿਉਂ ਸਟੋਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। `/v1/models` ਕਦੇ ਵੀ stacked `<prefix>/<prefix>/<model>` id ਜਾਰੀ ਨਹੀਂ ਕਰਦਾ।
+
 ਕਸਟਮ Chat Completions ਨੋਡ ਸਪਸ਼ਟ ਤਰਕ-ਅਸਵੀਕਾਰਾਂ ਨੂੰ ਅੱਪਸਟ੍ਰੀਮ ਬੈਕਐਂਡ ਅਨੁਸਾਰ ਢਾਲਦੇ ਹਨ। ਇੱਕ
 ਸਫਲ ਕਨੈਕਸ਼ਨ ਜਾਂਚ ਹਰ ਉਸ ਸਟੀਕ ਮਾਡਲ ID ਲਈ ਆਪਣੇ-ਆਪ ਚੈਟ-ਟੈਂਪਲੇਟ ਨਿਯੰਤਰਣ ਚੁਣਦੀ ਹੈ
 ਜਿਸਦੀ `/models` ਐਂਟਰੀ ਕਿਸੇ ਮਾਨਤਾ-ਪ੍ਰਾਪਤ `owned_by` ਮੁੱਲ ਦੀ ਪੁਸ਼ਟੀ ਕਰਦੀ ਹੈ: `vllm`, `sglang`, ਜਾਂ `llamacpp`।

@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Mahali pa kupata kitambulisho.** Fungua ukurasa wa mtoa huduma katika dashibodi
-  (**Dashibodi → Watoa huduma → <mtoa huduma>**) na ubofye chipu ya kitambulisho cha `xxxxxxxx…` kwenye safu ya muunganisho
+  (**Dashibodi → Watoa huduma → <provider>**) na ubofye chipu ya kitambulisho cha `xxxxxxxx…` kwenye safu ya muunganisho
   — inakili kitambulisho kamili cha muunganisho.
 - **Maombi yanayoiheshimu.** Maombi ya modeli moja (`provider/model`) kwenye
   `/v1/chat/completions`, `/v1/messages` na `/v1/responses`. Michanganyiko hupuuza kichwa hiki: bandika
@@ -1248,6 +1248,11 @@ hukiondoa ili kurejesha chaguo-msingi. `GET /api/provider-models?provider=<provi
 katika `modelOutputOverrides`, ikiwa ni pamoja na modeli zisizo na safu ya modeli maalum. Ubatilishaji
 hutumia uwezo wa wakati wa utekelezaji wa `max_output_tokens` na hudumu baada ya modeli kusawazishwa upya. Ukurasa wa mtoa huduma
 unaooana na OpenAI hutoa vidhibiti sawa vya kuhariri/kuondoa na huweka alama kwenye modeli zinazotumia uwezo wa kuona moja kwa moja.
+
+Kwenye nodi ya mtoa huduma inayoendana, njia za kuandika (`POST`, `PUT`, `PATCH`, `DELETE` na
+`/api/provider-models/validate-and-add`) huhifadhi kitambulisho cha modeli kama kitambulisho ghafi cha upstream: kitambulisho
+kilichobandikwa kutoka kwenye orodha yenye kiambishi huondolewa mfululizo wa viambishi vya mwanzo vya nodi hiyo,
+na majibu hurudisha kitambulisho kilichohifadhiwa. Vitambulisho vyenye slash vya watoa huduma kanoniki (kwa mfano `nvidia/nemotron-…`) huhifadhiwa bila kubadilishwa. `/v1/models` haitoi kamwe kitambulisho kilichopangwa mara mbili cha `<prefix>/<prefix>/<model>`.
 
 Nodi maalum za Chat Completions hurekebisha maombi ya wazi ya kutohoji kwa ajili ya mfumo wa juu. Jaribio
 la muunganisho lililofaulu huchagua kiotomatiki vidhibiti vya kiolezo cha gumzo kwa kila kitambulisho sahihi cha modeli

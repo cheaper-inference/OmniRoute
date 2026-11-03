@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Identifikatorni qayerdan topish mumkin.** Boshqaruv panelida provayder sahifasini oching
-  (**Boshqaruv paneli → Provayderlar → <provayder>**) va ulanish qatoridagi `xxxxxxxx…` identifikator belgisini
+  (**Boshqaruv paneli → Provayderlar → <provider>**) va ulanish qatoridagi `xxxxxxxx…` identifikator belgisini
   bosing — bu ulanishning toʻliq identifikatorini nusxalaydi.
 - **Qaysi soʻrovlar uni hisobga oladi.** `/v1/chat/completions`, `/v1/messages` va
   `/v1/responses` dagi bitta modelli soʻrovlar (`provider/model`). Kombinatsiyalar sarlavhani eʼtiborsiz qoldiradi:
@@ -1169,6 +1169,11 @@ jumladan, maxsus model qatoriga ega boʻlmagan modellar uchun ham qaytaradi. Bek
 vaqtidagi `max_output_tokens` imkoniyatidan foydalanadi va model qayta sinxronlangandan keyin ham saqlanib
 qoladi. OpenAI bilan mos provayder sahifasi xuddi shu tahrirlash/tozalash boshqaruvlarini taqdim etadi va
 tasvirlarni aniq qoʻllab-quvvatlaydigan modellarni belgilaydi.
+
+Mos provayder tugunida yozish yo‘llari (`POST`, `PUT`, `PATCH`, `DELETE` va
+`/api/provider-models/validate-and-add`) model identifikatorini yuqori oqimdagi yalang‘och identifikator sifatida saqlaydi: prefiksli ro‘yxatdan
+qo‘yilgan identifikator tugunning o‘z prefiksining boshidagi takroriy ketma-ketlikni qisqartiradi va javoblarda saqlangan identifikator qaytariladi. Kanonik provayderlarning qiya chiziqli identifikatorlari (masalan, `nvidia/nemotron-…`)
+o‘zgartirilmasdan saqlanadi. `/v1/models` hech qachon ichma-ich joylashgan `<prefix>/<prefix>/<model>` identifikatorini chiqarmaydi.
 
 Maxsus Chat Completions tugunlari mulohaza yuritishni aniq rad etish sozlamalarini yuqori oqimdagi
 backend tizimiga moslashtiradi. Muvaffaqiyatli ulanish sinovi `/models` yozuvi tan olingan `owned_by`

@@ -1256,6 +1256,11 @@ arvot kohteessa `modelOutputOverrides`, mukaan lukien mallit, joilla ei ole muka
 käyttää ajonaikaista `max_output_tokens`-ominaisuutta ja säilyy mallin uudelleensynkronoinnin jälkeen. OpenAI-yhteensopivan
 palveluntarjoajan sivu tarjoaa samat muokkaus- ja tyhjennysohjaimet ja merkitsee mallit, joissa on nimenomainen kuvatuki.
 
+Yhteensopivassa palveluntarjoajan solmussa kirjoituspolut (`POST`, `PUT`, `PATCH`, `DELETE` ja
+`/api/provider-models/validate-and-add`) tallentavat mallin tunnisteen pelkkänä upstream-tunnisteena: jos tunniste
+on liitetty etuliitteellä varustetusta luettelosta, kaikki solmun oman etuliitteen alussa olevat peräkkäiset esiintymät yhdistetään yhdeksi, ja
+vastaukset palauttavat tallennetun tunnisteen. Kanonisten palveluntarjoajien vinoviivalliset tunnisteet (esim. `nvidia/nemotron-…`) tallennetaan sellaisinaan. `/v1/models` ei koskaan palauta pinottua `<prefix>/<prefix>/<model>`-tunnistetta.
+
 Mukautetut Chat Completions -solmut mukauttavat nimenomaiset päättelyn käytöstä poistamiset taustajärjestelmää varten.
 Onnistunut yhteystesti valitsee automaattisesti keskustelumallipohjan ohjausasetukset jokaiselle täsmälliselle mallitunnukselle,
 jonka `/models`-merkintä todistaa tunnistetun `owned_by`-arvon: `vllm`, `sglang` tai `llamacpp`.

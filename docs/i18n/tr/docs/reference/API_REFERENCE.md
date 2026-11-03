@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Kimlik nerede bulunur?** Kontrol panelinde sağlayıcı sayfasını açın
-  (**Kontrol Paneli → Sağlayıcılar → <sağlayıcı>**) ve bir bağlantı satırındaki `xxxxxxxx…`
+  (**Kontrol Paneli → Sağlayıcılar → <provider>**) ve bir bağlantı satırındaki `xxxxxxxx…`
   kimlik etiketine tıklayın — tam bağlantı kimliği panoya kopyalanır.
 - **Hangi istekler bunu dikkate alır?** `/v1/chat/completions`, `/v1/messages` ve
   `/v1/responses` üzerindeki tek modelli istekler (`provider/model`). Kombolar üstbilgiyi
@@ -1182,6 +1182,13 @@ ayarlar ve `null`, varsayılanı geri yüklemek için bu sınırı temizler.
 üzere bu değerleri `modelOutputOverrides` içinde döndürür. Geçersiz kılma, çalışma zamanındaki
 `max_output_tokens` yeteneğini kullanır ve model yeniden senkronize edildiğinde korunur. OpenAI uyumlu
 sağlayıcı sayfası aynı düzenleme/temizleme denetimlerini sunar ve açık görsel desteğine sahip modelleri işaretler.
+
+Uyumlu bir sağlayıcı düğümünde yazma yolları (`POST`, `PUT`, `PATCH`, `DELETE` ve
+`/api/provider-models/validate-and-add`), model kimliğini ön ek içermeyen üst akış kimliği olarak
+saklar: ön ekli bir listeden yapıştırılan kimliğin başındaki, düğümün kendi ön eklerinden oluşan
+yığının tamamı tekilleştirilir ve yanıtlar saklanan kimliği yansıtır. Kanonik sağlayıcıların bölü işareti
+içeren kimlikleri (ör. `nvidia/nemotron-…`) olduğu gibi saklanır. `/v1/models` hiçbir zaman üst üste
+eklenmiş `<prefix>/<prefix>/<model>` kimliği üretmez.
 
 Özel Chat Completions düğümleri, açık akıl yürütme devre dışı bırakma seçeneklerini yukarı akış
 arka ucuna uyarlar. Başarılı bir bağlantı testi, `/models` girdisi tanınan bir `owned_by` değerini

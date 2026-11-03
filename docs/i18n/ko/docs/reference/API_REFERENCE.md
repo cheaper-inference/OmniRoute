@@ -1189,6 +1189,11 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 런타임 `max_output_tokens` 기능을 사용하며 모델을 다시 동기화한 후에도 유지됩니다. OpenAI 호환
 공급자 페이지에서는 동일한 편집/해제 컨트롤을 제공하며 명시적으로 비전을 지원하는 모델을 표시합니다.
 
+호환 가능한 공급자 노드에서 쓰기 경로(`POST`, `PUT`, `PATCH`, `DELETE` 및
+`/api/provider-models/validate-and-add`)는 모델 ID를 기본 업스트림 ID로 저장합니다. 접두사가 붙은 목록에서 붙여넣은 ID의 경우 노드 자체 접두사의 앞쪽 연속 부분이 하나로 축약되며,
+응답에는 저장된 ID가 그대로 반환됩니다. 정식 공급자의 슬래시가 포함된 ID(예: `nvidia/nemotron-…`)는
+있는 그대로 저장됩니다. `/v1/models`는 중복된 `<prefix>/<prefix>/<model>` ID를 출력하지 않습니다.
+
 사용자 지정 Chat Completions 노드는 명시적인 추론 비활성화 요청을 업스트림 백엔드에 맞게 조정합니다.
 연결 테스트에 성공하면 `/models` 항목에서 인식되는 `owned_by` 값(`vllm`, `sglang` 또는 `llamacpp`)이
 확인된 각 정확한 모델 ID에 대해 채팅 템플릿 컨트롤을 자동으로 선택합니다. 투명한 OpenAI 호환

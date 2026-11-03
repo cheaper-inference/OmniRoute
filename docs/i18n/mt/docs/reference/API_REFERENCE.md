@@ -1233,6 +1233,12 @@ il-valuri f’`modelOutputOverrides`, inklużi mudelli mingħajr ringiela ta’ 
 tuża l-kapaċità `max_output_tokens` waqt it-tħaddim u tibqa’ teżisti wara sinkronizzazzjoni mill-ġdid tal-mudell. Il-paġna
 tal-fornitur kompatibbli ma’ OpenAI toffri l-istess kontrolli ta’ editjar/tneħħija u timmarka mudelli b’appoġġ espliċitu għall-viżjoni.
 
+F’nodu ta’ fornitur kompatibbli, il-mogħdijiet tal-kitba (`POST`, `PUT`, `PATCH`, `DELETE` u
+`/api/provider-models/validate-and-add`) jaħżnu l-id tal-mudell bħala l-id bażiku tal-upstream: id
+imwaħħal minn lista b’prefix jitnaqqas billi jiġi kkolassat kull prefix inizjali konsekuttiv tan-node stess, u
+t-tweġibiet jirritornaw l-id maħżun. L-ids b’slashes tal-fornituri kanoniċi (eż. `nvidia/nemotron-…`) jinħażnu
+verbati. `/v1/models` qatt ma joħroġ id f’forma ta’ `<prefix>/<prefix>/<model>`.
+
 In-nodi personalizzati ta’ Chat Completions jadattaw l-għażliet espliċiti li jiddiżattivaw ir-raġunament għall-backend upstream. Test
 tal-konnessjoni li jirnexxi jagħżel awtomatikament il-kontrolli tal-mudell taċ-chat għal kull ID eżatt tal-mudell
 li l-entrata tiegħu f’`/models` turi valur rikonoxxut ta’ `owned_by`: `vllm`, `sglang`, jew `llamacpp`.

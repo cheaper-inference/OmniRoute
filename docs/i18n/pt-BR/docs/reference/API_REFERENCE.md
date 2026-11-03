@@ -1255,6 +1255,12 @@ valores em `modelOutputOverrides`, incluindo modelos sem uma linha de modelo per
 usa o recurso de tempo de execução `max_output_tokens` e persiste após uma nova sincronização do modelo. A página do
 provedor compatível com OpenAI oferece os mesmos controles de edição/remoção e marca modelos com suporte explícito a visão.
 
+Em um nó de provedor compatível, os caminhos de gravação (`POST`, `PUT`, `PATCH`, `DELETE` e
+`/api/provider-models/validate-and-add`) armazenam o id do modelo como o id upstream sem prefixo: um id
+colado de uma listagem com prefixo tem qualquer sequência inicial de prefixos do próprio nó compactada, e
+as respostas repetem o id armazenado. Os ids com barras dos provedores canônicos (por exemplo, `nvidia/nemotron-…`) são
+armazenados literalmente. `/v1/models` nunca emite um id empilhado no formato `<prefix>/<prefix>/<model>`.
+
 Nós personalizados de Chat Completions adaptam desativações explícitas de raciocínio ao backend upstream. Um
 teste de conexão bem-sucedido seleciona automaticamente os controles de modelo de chat para cada ID exato de modelo
 cuja entrada em `/models` comprove um valor reconhecido de `owned_by`: `vllm`, `sglang` ou `llamacpp`.

@@ -1231,6 +1231,12 @@ iye wọ̀nyí padà nínú `modelOutputOverrides`, pẹ̀lú àwọn àwòṣe 
 ń lo agbára `max_output_tokens` ní àkókò ìṣiṣẹ́, ó sì máa ń wà lẹ́yìn ìmúṣiṣẹ́pọ̀ àwòṣe tuntun. Ojú-ìwé olùpèsè
 tó bá OpenAI mu ń pèsè àwọn ìṣàkóso àtúnṣe/yíyọ-kúrò kan náà, ó sì ń samisi àwọn àwòṣe tó ní àtìlẹ́yìn ìríran kedere.
 
+Lórí nódù olùpèsè tó bá ohun náà mu, àwọn ọ̀nà ìkọ̀wé (`POST`, `PUT`, `PATCH`, `DELETE` àti
+`/api/provider-models/validate-and-add`) máa ń fi id model pamọ́ gẹ́gẹ́ bí id upstream aláìlórúkọ: id
+tí a lẹ̀ mọ́ láti inú àkójọ tó ní prefix máa ń yọ gbogbo ọ̀wọ̀ prefix ti nódù náà sílẹ̀, àwọn
+ìdáhùn sì máa ń fi id tí a pamọ́ padà. Àwọn id tí a gé pẹ̀lú slash ti àwọn olùpèsè canonical (fún àpẹẹrẹ `nvidia/nemotron-…`) máa ń
+wà gẹ́gẹ́ bí a ṣe fi wọ́n sílẹ̀. `/v1/models` kì í ṣe jáde id tí ó ní àkójọpọ̀ `<prefix>/<prefix>/<model>`.
+
 Àwọn node Chat Completions àdáni ń mú àwọn ìkọ̀sílẹ̀ ìrònú kedere bá backend òkè mu. Ìdánwò
 àsopọ̀ tó ṣàṣeyọrí máa ń yan àwọn ìṣàkóso àdàkọ ìbánisọ̀rọ̀ láìfọwọ́sí fún ID àwòṣe gangan kọ̀ọ̀kan
 tí àkọọlẹ̀ `/models` rẹ̀ fi hàn pé ó ní iye `owned_by` tí a mọ̀: `vllm`, `sglang`, tàbí `llamacpp`.

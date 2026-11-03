@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Tempat untuk mendapatkan ID.** Buka halaman penyedia dalam papan pemuka
-  (**Papan Pemuka → Penyedia → <penyedia>**) dan klik cip ID `xxxxxxxx…` pada baris sambungan
+  (**Papan Pemuka → Penyedia → <provider>**) dan klik cip ID `xxxxxxxx…` pada baris sambungan
   — tindakan ini menyalin ID sambungan penuh.
 - **Permintaan yang mematuhinya.** Permintaan model tunggal (`provider/model`) pada
   `/v1/chat/completions`, `/v1/messages` dan `/v1/responses`. Gabungan mengabaikan pengepala tersebut: sematkan
@@ -1252,6 +1252,11 @@ mengosongkannya untuk memulihkan nilai lalai. `GET /api/provider-models?provider
 nilai ini dalam `modelOutputOverrides`, termasuk model tanpa baris model tersuai. Penggantian tetapan
 menggunakan keupayaan masa jalan `max_output_tokens` dan dikekalkan selepas model disegerakkan semula. Halaman
 penyedia yang serasi dengan OpenAI menawarkan kawalan edit/kosongkan yang sama dan menandai model dengan sokongan visi secara eksplisit.
+
+Pada nod pembekal yang serasi, laluan penulisan (`POST`, `PUT`, `PATCH`, `DELETE` dan
+`/api/provider-models/validate-and-add`) menyimpan id model sebagai id upstream mentah: id
+yang ditampal daripada senarai berawalan akan mengalami semua awalan nod itu sendiri yang berlebihan diruntuhkan, dan
+respons mengembalikan id yang disimpan. Id berpalang pembekal kanonik (contohnya `nvidia/nemotron-…`) disimpan secara verbatim. `/v1/models` tidak pernah menghasilkan id bertindan `<prefix>/<prefix>/<model>`.
 
 Nod Pelengkapan Sembang Tersuai menyesuaikan pilihan untuk tidak menggunakan penaakulan secara eksplisit dengan bahagian belakang huluan. Ujian
 sambungan yang berjaya akan memilih kawalan templat sembang secara automatik bagi setiap ID model tepat

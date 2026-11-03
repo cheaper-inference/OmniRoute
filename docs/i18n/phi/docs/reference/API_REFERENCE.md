@@ -1253,6 +1253,11 @@ value na ito sa `modelOutputOverrides`, kabilang ang mga modelong walang row ng 
 ang runtime na kakayahang `max_output_tokens` at nananatili ito pagkatapos muling i-sync ang modelo. Nagbibigay ang page
 ng OpenAI-compatible na provider ng parehong mga kontrol sa pag-edit/pag-clear at minamarkahan ang mga modelong may tahasang suporta sa vision.
 
+Sa isang compatible na provider node, iniimbak ng mga write path (`POST`, `PUT`, `PATCH`, `DELETE` at
+`/api/provider-models/validate-and-add`) ang model id bilang bare upstream id: ang isang id
+na na-paste mula sa isang prefixed listing ay pinagsasama-sama ang anumang magkakasunod na prefix ng node mismo, at ibinabalik ng mga response ang nakaimbak na id. Ang mga slash na id ng canonical provider (hal. `nvidia/nemotron-…`) ay
+iniimbak nang eksakto. Hindi kailanman naglalabas ang `/v1/models` ng stacked na `<prefix>/<prefix>/<model>` id.
+
 Inaangkop ng mga custom na Chat Completions node ang tahasang pag-opt out sa reasoning para sa upstream backend. Awtomatikong
 pinipili ng matagumpay na pagsubok sa koneksyon ang mga kontrol ng chat template para sa bawat eksaktong model ID
 na ang entry sa `/models` ay nagpapatunay ng kinikilalang value ng `owned_by`: `vllm`, `sglang`, o `llamacpp`.

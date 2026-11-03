@@ -1254,6 +1254,12 @@ n'ime `modelOutputOverrides`, gụnyere ụdịdị na-enweghị ahịrị ụd�
 na-eji ikike `max_output_tokens` nke oge ọrụ ma na-adịgide mgbe emekọrịtara ụdịdị ọzọ. Peeji onye na-eweta ọrụ
 dakọtara na OpenAI na-enye otu njikwa ndezi/nhichapụ ahụ ma na-akara ụdịdị nwere nkwado ọhụụ doro anya.
 
+N’ọnụ onye na-eweta dakọtara, ụzọ ide ihe (`POST`, `PUT`, `PATCH`, `DELETE` na
+`/api/provider-models/validate-and-add`) na-echekwa id ụdị ahụ dịka id dị ọcha sitere n’aka upstream: id
+e tinyere site na ndepụta nwere prefix na-eme ka nchịkọta prefix mbụ ọ bụla nke ọnụ ahụ belata, nzaghachi
+na-egosikwa id ahụ echekwara. A na-echekwa id ndị ọrụ canonical nwere slash (dịka `nvidia/nemotron-…`)
+n’enweghị mgbanwe. `/v1/models` anaghị ewepụta id ụdị `<prefix>/<prefix>/<model>` nwere prefix a chịkọtara.
+
 Ọnụ Custom Chat Completions na-emegharị nhọrọ ịjụ ntụgharị uche doro anya ka ọ dabara na backend dị n'elu. Nnwale
 njikọ gara nke ọma na-ahọrọ njikwa ndebiri nkata na-akpaghị aka maka ID ụdịdị kpọmkwem ọ bụla
 nke ntinye `/models` ya gosipụtara ụkpụrụ `owned_by` a maara: `vllm`, `sglang`, ma ọ bụ `llamacpp`.

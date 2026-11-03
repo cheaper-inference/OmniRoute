@@ -1169,6 +1169,11 @@ https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-cre
 使用运行时 `max_output_tokens` 能力，并在模型重新同步后仍然保留。OpenAI 兼容
 提供者页面提供相同的编辑/清除控件，并会标记明确支持视觉能力的模型。
 
+在兼容的提供者节点上，写入路径（`POST`、`PUT`、`PATCH`、`DELETE` 和
+`/api/provider-models/validate-and-add`）会将模型 ID 存储为上游的原始 ID：从带前缀的列表中
+粘贴的 ID 会移除节点自身前缀的所有连续重复项，并且响应会返回存储的 ID。规范提供者的带斜杠 ID（例如 `nvidia/nemotron-…`）会
+按原样存储。`/v1/models` 永远不会发出堆叠的 `<prefix>/<prefix>/<model>` ID。
+
 自定义 Chat Completions 节点会调整显式禁用推理的设置，以适配上游后端。连接
 测试成功后，会为 `/models` 条目中能够证实具有以下已识别 `owned_by` 值的每个精确模型 ID
 自动选择聊天模板控件：`vllm`、`sglang` 或 `llamacpp`。

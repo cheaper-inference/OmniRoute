@@ -1230,6 +1230,12 @@ các giá trị này trong `modelOutputOverrides`, bao gồm cả các mô hình
 sử dụng khả năng `max_output_tokens` khi chạy và vẫn được duy trì sau khi mô hình được đồng bộ lại. Trang nhà cung cấp
 tương thích với OpenAI cung cấp cùng các điều khiển chỉnh sửa/xóa và đánh dấu các mô hình hỗ trợ thị giác một cách rõ ràng.
 
+Trên một node nhà cung cấp tương thích, các đường dẫn ghi (`POST`, `PUT`, `PATCH`, `DELETE` và
+`/api/provider-models/validate-and-add`) lưu id model dưới dạng id upstream thuần: một id
+được dán từ danh sách có tiền tố sẽ bị loại bỏ toàn bộ chuỗi tiền tố ở đầu của chính node đó, và
+các phản hồi sẽ trả về id đã lưu. Các id có dấu gạch chéo của nhà cung cấp chuẩn (ví dụ: `nvidia/nemotron-…`) được
+lưu nguyên văn. `/v1/models` không bao giờ phát ra id dạng `<prefix>/<prefix>/<model>` bị lặp tiền tố.
+
 Các nút Chat Completions tùy chỉnh điều chỉnh yêu cầu từ chối suy luận rõ ràng cho phù hợp với backend thượng nguồn. Một
 lần kiểm tra kết nối thành công sẽ tự động chọn các điều khiển mẫu trò chuyện cho từng ID mô hình chính xác
 mà mục `/models` chứng minh có giá trị `owned_by` được nhận dạng: `vllm`, `sglang` hoặc `llamacpp`.

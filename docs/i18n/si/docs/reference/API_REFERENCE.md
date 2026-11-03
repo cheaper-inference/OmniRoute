@@ -1248,6 +1248,13 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 `max_output_tokens` හැකියාව භාවිත කරන අතර ආකෘතිය නැවත සමමුහුර්ත කිරීමෙන් පසුවත් පවතී. OpenAI-අනුකූල
 සැපයුම්කරු පිටුව එම සංස්කරණ/ඉවත් කිරීමේ පාලකම ලබා දෙන අතර පැහැදිලි දෘශ්ය සහාය සහිත ආකෘති සලකුණු කරයි.
 
+අනුකූල සැපයුම්කරු නෝඩයක, ලිවීමේ මාර්ග (`POST`, `PUT`, `PATCH`, `DELETE` සහ
+`/api/provider-models/validate-and-add`) මාදිලි id එක ප්රාථමික upstream id ලෙස ගබඩා කරයි: node එකේම
+prefix එකක් එක් කර ඇති ලැයිස්තුවකින් අලවන ලද id එකක තිබෙන එම prefix එකේ ඉදිරිපස ඇති සියලුම අනුක්රමික
+පෙළගැස්ම එක් prefix එකකට සංකුචිත කරනු ලබන අතර, ප්රතිචාර ගබඩා කළ id එක නැවත ලබා දෙයි. Canonical providers හි slash සහිත
+id (උදා: `nvidia/nemotron-…`) එලෙසම ගබඩා කරයි. `/v1/models` කිසි විටෙකත් ගොඩගැසූ
+`<prefix>/<prefix>/<model>` id එකක් නිකුත් නොකරයි.
+
 අභිරුචි Chat Completions නෝඩ් පැහැදිලි reasoning අක්රීය කිරීම් ඉහළ ප්රවාහයේ පසුබිම් පද්ධතියට අනුගත කරයි.
 සාර්ථක සම්බන්ධතා පරීක්ෂණයක්, හඳුනාගත් `owned_by` අගයක් සනාථ කරන `/models` ප්රවේශයක් ඇති සෑම නිශ්චිත ආකෘති ID
 එකක් සඳහාම chat-template පාලක ස්වයංක්රීයව තෝරයි: `vllm`, `sglang`, හෝ `llamacpp`.

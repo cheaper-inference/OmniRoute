@@ -1253,6 +1253,13 @@ waarden in `modelOutputOverrides`, inclusief modellen zonder een rij voor een aa
 gebruikt de runtimemogelijkheid `max_output_tokens` en blijft behouden na het opnieuw synchroniseren van een model. De pagina voor
 OpenAI-compatibele providers biedt dezelfde besturingselementen voor bewerken/wissen en markeert modellen met expliciete ondersteuning voor beeldverwerking.
 
+Op een compatibele providernode slaan de schrijfpaden (`POST`, `PUT`, `PATCH`, `DELETE` en
+`/api/provider-models/validate-and-add`) de model-id op als de kale upstream-id: een id
+die uit een lijst met voorvoegsel is geplakt, heeft alle vooraanstaande herhalingen van het eigen voorvoegsel
+van de node samengevoegd, en antwoorden geven de opgeslagen id terug. Id's met schuine strepen van canonieke
+providers (bijv. `nvidia/nemotron-…`) worden ongewijzigd opgeslagen. `/v1/models` geeft nooit een gestapelde id
+`<prefix>/<prefix>/<model>` uit.
+
 Aangepaste Chat Completions-knooppunten passen expliciete afmeldingen voor redenering aan de upstreambackend aan. Een
 geslaagde verbindingstest selecteert automatisch besturingselementen voor chatsjablonen voor elke exacte model-ID
 waarvan de vermelding in `/models` een herkende waarde voor `owned_by` aantoont: `vllm`, `sglang` of `llamacpp`.

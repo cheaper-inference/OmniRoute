@@ -1235,6 +1235,12 @@ luachanna seo in `modelOutputOverrides`, lena n-áirítear samhlacha nach bhfuil
 an cumas `max_output_tokens` ag am rite agus maireann sé tar éis athshioncronú samhla. Cuireann leathanach an tsoláthraí
 atá comhoiriúnach le OpenAI na rialtáin chéanna eagarthóireachta/glanta ar fáil agus marcálann sé samhlacha a bhfuil tacaíocht fhollasach amhairc acu.
 
+Ar nód soláthraí comhoiriúnach, stórálann na cosáin scríofa (`POST`, `PUT`, `PATCH`, `DELETE` agus
+`/api/provider-models/validate-and-add`) aitheantas na samhla mar aitheantas upstream lom: má
+ghreamaítear aitheantas ó liostú réamhlíonta, laghdaítear aon chruach tosaigh de réimír an nóid féin go dtí ceann amháin,
+agus macallaíonn na freagraí an t-aitheantas stóráilte. Stóráiltear aitheantais le slaiseanna na soláthraithe canónaí (e.g. `nvidia/nemotron-…`)
+go dílis. Ní astaíonn `/v1/models` aitheantas cruachta `<prefix>/<prefix>/<model>` riamh.
+
 Cuireann nóid shaincheaptha Chat Completions díroghnuithe sainráite réasúnaíochta in oiriúint don inneall cúldeiridh réamhtheachtach. Roghnaíonn
 tástáil rathúil naisc rialtáin teimpléid comhrá go huathoibríoch do gach ID beacht samhla
 a gcruthaíonn a iontráil `/models` luach aitheanta `owned_by`: `vllm`, `sglang`, nó `llamacpp`.

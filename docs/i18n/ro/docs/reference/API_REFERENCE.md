@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Unde găsiți ID-ul.** Deschideți pagina furnizorului în panoul de control
-  (**Panou de control → Furnizori → <furnizor>**) și faceți clic pe cipul de ID `xxxxxxxx…` dintr-un rând
+  (**Panou de control → Furnizori → <provider>**) și faceți clic pe cipul de ID `xxxxxxxx…` dintr-un rând
   de conexiune — acesta copiază ID-ul complet al conexiunii.
 - **Ce solicitări îl respectă.** Solicitările cu un singur model (`provider/model`) către
   `/v1/chat/completions`, `/v1/messages` și `/v1/responses`. Combinațiile ignoră antetul: fixați
@@ -1253,6 +1253,12 @@ o elimină pentru a restabili valoarea implicită. `GET /api/provider-models?pro
 valori în `modelOutputOverrides`, inclusiv pentru modelele fără un rând de model personalizat. Suprascrierea
 utilizează capabilitatea `max_output_tokens` din timpul rulării și persistă după resincronizarea unui model. Pagina furnizorului
 compatibil cu OpenAI oferă aceleași controale de editare/eliminare și marchează modelele care acceptă explicit procesarea imaginilor.
+
+Pe un nod de furnizor compatibil, căile de scriere (`POST`, `PUT`, `PATCH`, `DELETE` și
+`/api/provider-models/validate-and-add`) stochează identificatorul modelului ca identificator upstream necalificat: un identificator
+lipit dintr-o listare cu prefix are orice serie de prefixuri inițiale ale nodului propriu redusă, iar
+răspunsurile reflectă identificatorul stocat. Identificatorii cu bare oblice ai furnizorilor canonici (de exemplu, `nvidia/nemotron-…`) sunt
+stocați fără modificări. `/v1/models` nu emite niciodată un identificator suprapus de forma `<prefix>/<prefix>/<model>`.
 
 Nodurile personalizate Chat Completions adaptează dezactivările explicite ale raționamentului la backendul din amonte. Un
 test de conexiune reușit selectează automat controalele șablonului de chat pentru fiecare ID exact de model

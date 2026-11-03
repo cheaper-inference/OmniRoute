@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Dónde encontrar el identificador.** Abre la página del proveedor en el panel
-  (**Panel → Proveedores → <proveedor>**) y haz clic en la etiqueta de identificador `xxxxxxxx…` de una
+  (**Panel → Proveedores → <provider>**) y haz clic en la etiqueta de identificador `xxxxxxxx…` de una
   fila de conexión; esto copia el identificador completo de la conexión.
 - **Qué solicitudes lo respetan.** Las solicitudes de un solo modelo (`provider/model`) en
   `/v1/chat/completions`, `/v1/messages` y `/v1/responses`. Las combinaciones ignoran el encabezado:
@@ -1229,6 +1229,12 @@ lo elimina para restaurar el valor predeterminado. `GET /api/provider-models?pro
 valores en `modelOutputOverrides`, incluidos los modelos sin una fila de modelo personalizado. La anulación
 utiliza la capacidad `max_output_tokens` en tiempo de ejecución y se conserva tras volver a sincronizar un modelo. La página del
 proveedor compatible con OpenAI ofrece los mismos controles de edición/eliminación y marca los modelos con compatibilidad explícita con visión.
+
+En un nodo de proveedor compatible, las rutas de escritura (`POST`, `PUT`, `PATCH`, `DELETE` y
+`/api/provider-models/validate-and-add`) almacenan el identificador del modelo como el identificador ascendente sin prefijo: un identificador
+pegado desde una lista con prefijo ve su cadena inicial de prefijos propios del nodo reducida a uno, y
+las respuestas devuelven el identificador almacenado. Los identificadores con barras de los proveedores canónicos (por ejemplo, `nvidia/nemotron-…`) se
+almacenan literalmente. `/v1/models` nunca emite un identificador apilado `<prefix>/<prefix>/<model>`.
 
 Los nodos personalizados de Chat Completions adaptan las exclusiones explícitas de razonamiento al backend ascendente. Una
 prueba de conexión correcta selecciona automáticamente los controles de plantilla de chat para cada ID de modelo exacto

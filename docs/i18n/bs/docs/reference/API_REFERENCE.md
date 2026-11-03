@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Gdje pronaći ID.** Otvorite stranicu pružaoca usluge na kontrolnoj ploči
-  (**Kontrolna ploča → Pružaoci usluga → <pružalac usluge>**) i kliknite na oznaku ID-a `xxxxxxxx…` u redu veze
+  (**Kontrolna ploča → Pružaoci usluga → <provider>**) i kliknite na oznaku ID-a `xxxxxxxx…` u redu veze
   — time se kopira puni ID veze.
 - **Koji zahtjevi ga uvažavaju.** Zahtjevi s jednim modelom (`provider/model`) na
   `/v1/chat/completions`, `/v1/messages` i `/v1/responses`. Kombinacije zanemaruju zaglavlje: umjesto toga
@@ -1252,6 +1252,12 @@ ga uklanja radi vraćanja zadane vrijednosti. `GET /api/provider-models?provider
 vrijednosti u `modelOutputOverrides`, uključujući modele bez reda prilagođenog modela. Zamjena
 koristi mogućnost `max_output_tokens` u vrijeme izvršavanja i zadržava se nakon ponovne sinhronizacije modela. Stranica pružaoca
 usluga kompatibilnog s OpenAI-jem nudi iste kontrole za uređivanje/uklanjanje i označava modele s izričitom podrškom za vid.
+
+Na kompatibilnom čvoru provajdera, putanje za upis (`POST`, `PUT`, `PATCH`, `DELETE` i
+`/api/provider-models/validate-and-add`) čuvaju ID modela kao osnovni ID uzvodnog sistema: ID
+zalijepljen iz prefiksovanog izlistavanja ima uklonjen svaki početni niz prefiksa samog čvora, a
+odgovori vraćaju sačuvani ID. ID-jevi kanonskih provajdera s kosim crticama (npr. `nvidia/nemotron-…`) čuvaju se
+doslovno. `/v1/models` nikada ne emituje složeni ID oblika `<prefix>/<prefix>/<model>`.
 
 Prilagođeni čvorovi Chat Completions prilagođavaju izričito isključivanje zaključivanja nadređenom pozadinskom sistemu. Uspješan
 test veze automatski odabire kontrole predloška razgovora za svaki tačan ID modela

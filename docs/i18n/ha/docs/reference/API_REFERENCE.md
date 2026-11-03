@@ -1252,6 +1252,12 @@ ke share ta don dawo da tsohuwar ƙima. `GET /api/provider-models?provider=<prov
 yana amfani da ƙarfin `max_output_tokens` na lokacin aiki kuma yana ci gaba da kasancewa bayan sake daidaita samfuri. Shafin mai samarwa mai
 jituwa da OpenAI yana ba da irin waɗannan sarrafawar gyara/sharewa kuma yana yi wa samfuran da ke da bayyanannen goyon bayan hangen nesa alama.
 
+A kan node na mai bayarwa mai jituwa, hanyoyin rubutawa (`POST`, `PUT`, `PATCH`, `DELETE` da
+`/api/provider-models/validate-and-add`) suna adana id ɗin samfurin a matsayin id ɗin upstream marar kari: id
+da aka liƙa daga jerin da ke da kari yana cire duk jerin kari na node ɗin da ke kan gaba, kuma
+amsoshi suna mayar da id ɗin da aka adana. Ana adana id ɗin masu bayarwa na canonical masu slash (misali `nvidia/nemotron-…`)
+kai tsaye ba tare da canji ba. `/v1/models` ba ya taɓa fitar da id mai tarin `<prefix>/<prefix>/<model>`.
+
 Mahaɗan Chat Completions na al'ada suna daidaita bayyanannen ƙin amfani da tunani zuwa backend na sama. Gwajin
 haɗi mai nasara yana zaɓar sarrafawar samfurin hira ta atomatik ga kowane ainihin ID na samfuri
 wanda shigarwar `/models` ɗinsa ta tabbatar da sananniyar ƙimar `owned_by`: `vllm`, `sglang`, ko `llamacpp`.

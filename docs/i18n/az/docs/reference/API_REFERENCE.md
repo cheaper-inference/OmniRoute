@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **İdentifikatoru haradan tapmaq olar.** İdarəetmə panelində provayder səhifəsini açın
-  (**İdarəetmə paneli → Provayderlər → <provayder>**) və bağlantı sətrindəki `xxxxxxxx…`
+  (**İdarəetmə paneli → Provayderlər → <provider>**) və bağlantı sətrindəki `xxxxxxxx…`
   identifikator nişanına klikləyin — tam bağlantı identifikatoru kopyalanacaq.
 - **Hansı sorğular bunu nəzərə alır.** `/v1/chat/completions`, `/v1/messages` və
   `/v1/responses` ünvanlarında tək modelli sorğular (`provider/model`). Kombinasiyalar başlığı
@@ -1175,6 +1175,9 @@ isə standart dəyəri bərpa etmək üçün onu silir. `GET /api/provider-model
 dəyərləri, fərdi model sətri olmayan modellər də daxil olmaqla, `modelOutputOverrides` daxilində qaytarır. Əvəzləmə
 icra vaxtı `max_output_tokens` imkanından istifadə edir və modelin yenidən sinxronlaşdırılmasından sonra da saxlanılır. OpenAI ilə uyğun
 provayder səhifəsi eyni redaktə/silmə idarəetmələrini təqdim edir və açıq şəkildə görüntü dəstəyi olan modelləri işarələyir.
+
+Uyğun provayder qovşağında yazma yolları (`POST`, `PUT`, `PATCH`, `DELETE` və
+`/api/provider-models/validate-and-add`) model identifikatorunu upstream-in yalın identifikatoru kimi saxlayır: prefiksli siyahıdan yapışdırılmış identifikatorun əvvəlində qovşağın öz prefiksindən ibarət ardıcıl hissə varsa, həmin hissə bir prefiksə endirilir və cavablar saxlanılmış identifikatoru qaytarır. Kanonik provayderlərin slash ilə ayrılmış identifikatorları (məsələn, `nvidia/nemotron-…`) olduğu kimi saxlanılır. `/v1/models` heç vaxt ardıcıl `<prefix>/<prefix>/<model>` identifikatoru qaytarmır.
 
 Fərdi Chat Completions qovşaqları açıq düşünmədən imtina seçimlərini yuxarı axın backend-inə uyğunlaşdırır.
 Uğurlu bağlantı sınağı `/models` qeydində tanınan `owned_by` dəyəri olduğu təsdiqlənən hər bir dəqiq model ID-si üçün

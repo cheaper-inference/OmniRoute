@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Kust ID leida.** Avage juhtpaneelil teenusepakkuja leht
-  (**Juhtpaneel → Teenusepakkujad → <teenusepakkuja>**) ja klõpsake ühenduse real ID-märgendil
+  (**Juhtpaneel → Teenusepakkujad → <provider>**) ja klõpsake ühenduse real ID-märgendil
   `xxxxxxxx…` — see kopeerib ühenduse täieliku ID.
 - **Millised päringud seda arvestavad.** Ühe mudeliga päringud (`provider/model`) lõpp-punktides
   `/v1/chat/completions`, `/v1/messages` ja `/v1/responses`. Kombinatsioonid eiravad päist:
@@ -1251,6 +1251,12 @@ eemaldab selle ja taastab vaikeväärtuse. `GET /api/provider-models?provider=<p
 väärtused väljal `modelOutputOverrides`, sealhulgas mudelite puhul, millel puudub kohandatud mudeli rida. Alistus
 kasutab käitusaegset `max_output_tokens` võimekust ja säilib mudeli uuesti sünkroonimisel. OpenAI-ga ühilduva
 pakkuja leht pakub samu muutmise/eemaldamise juhtelemente ning märgistab selgesõnalise nägemistoega mudelid.
+
+Ühilduvas teenusepakkuja sõlmes salvestavad kirjutamisteed (`POST`, `PUT`, `PATCH`, `DELETE` ja
+`/api/provider-models/validate-and-add`) mudeli ID palja ülesvoolu ID-na: prefiksiga loendist kleebitud ID puhul
+koondatakse kõik sõlme enda prefiksi alguses olevad kordused ja vastused sisaldavad salvestatud ID-d.
+Kanooniliste teenusepakkujate kaldkriipsuga ID-d (nt `nvidia/nemotron-…`) salvestatakse muutmata kujul.
+`/v1/models` ei väljasta kunagi virnastatud `<prefix>/<prefix>/<model>` ID-d.
 
 Kohandatud Chat Completionsi sõlmed kohandavad selgesõnalised arutlusest loobumised ülesvoolu taustsüsteemi jaoks. Edukas
 ühenduse test valib automaatselt vestlusmalli juhtelemendid iga täpse mudeli ID jaoks,

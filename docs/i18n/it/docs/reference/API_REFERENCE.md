@@ -1255,6 +1255,12 @@ valori in `modelOutputOverrides`, inclusi i modelli privi di una riga relativa a
 utilizza la funzionalità di runtime `max_output_tokens` e persiste dopo una nuova sincronizzazione del modello. La pagina
 del provider compatibile con OpenAI offre gli stessi controlli di modifica/rimozione e contrassegna i modelli con supporto esplicito per la visione.
 
+Su un nodo provider compatibile, i percorsi di scrittura (`POST`, `PUT`, `PATCH`, `DELETE` e
+`/api/provider-models/validate-and-add`) memorizzano l'ID del modello come ID upstream senza prefisso: un ID
+incollato da un elenco con prefisso vede ogni sequenza iniziale del prefisso del nodo stesso ridotta a una sola, e
+le risposte restituiscono l'ID memorizzato. Gli ID con slash dei provider canonici (ad es. `nvidia/nemotron-…`) vengono
+memorizzati verbatim. `/v1/models` non restituisce mai un ID impilato `<prefix>/<prefix>/<model>`.
+
 I nodi Chat Completions personalizzati adattano le esclusioni esplicite del ragionamento al backend upstream. Un
 test di connessione riuscito seleziona automaticamente i controlli del template di chat per ogni ID modello esatto
 la cui voce `/models` dimostra un valore `owned_by` riconosciuto: `vllm`, `sglang` o `llamacpp`.

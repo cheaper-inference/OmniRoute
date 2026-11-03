@@ -1221,6 +1221,8 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+<a id="cliproxyapi-management-compatibility"></a>
+
 ## CLIProxyAPI Management Compatibility
 
 OmniRoute answers the three [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)

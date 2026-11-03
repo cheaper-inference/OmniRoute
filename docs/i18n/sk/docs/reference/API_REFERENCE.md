@@ -1258,6 +1258,12 @@ hodnoty v `modelOutputOverrides` vrátane modelov bez riadka vlastného modelu. 
 používa runtime schopnosť `max_output_tokens` a zachová sa aj po opätovnej synchronizácii modelu. Stránka
 poskytovateľa kompatibilného s OpenAI ponúka rovnaké ovládacie prvky na úpravu/zrušenie a označuje modely s explicitnou podporou obrazu.
 
+Na kompatibilnom uzle poskytovateľa zapisovacie cesty (`POST`, `PUT`, `PATCH`, `DELETE` a
+`/api/provider-models/validate-and-add`) ukladajú ID modelu ako čisté ID upstreamu: pri vložení
+ID z výpisu s prefixom sa zbalí každý úvodný reťazec prefixov vlastných pre daný uzol
+a odpovede vracajú uložené ID. ID s lomkou kanonických poskytovateľov (napr. `nvidia/nemotron-…`) sa
+ukladajú doslovne. `/v1/models` nikdy nevygeneruje ID v tvare `<prefix>/<prefix>/<model>`.
+
 Vlastné uzly Chat Completions prispôsobujú explicitné vypnutie uvažovania nadradenému backendu. Úspešný
 test pripojenia automaticky vyberie ovládacie prvky šablóny chatu pre každé presné ID modelu,
 ktorého položka `/models` preukazuje rozpoznanú hodnotu `owned_by`: `vllm`, `sglang` alebo `llamacpp`.

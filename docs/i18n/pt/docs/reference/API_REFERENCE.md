@@ -102,7 +102,7 @@ curl http://localhost:20128/v1/chat/completions \
 ```
 
 - **Onde encontrar o ID.** Abra a página do fornecedor no painel
-  (**Painel → Fornecedores → <fornecedor>**) e clique na etiqueta de ID `xxxxxxxx…` numa linha de ligação
+  (**Painel → Fornecedores → <provider>**) e clique na etiqueta de ID `xxxxxxxx…` numa linha de ligação
   — isto copia o ID completo da ligação.
 - **Que pedidos o respeitam.** Pedidos de modelo único (`provider/model`) em
   `/v1/chat/completions`, `/v1/messages` e `/v1/responses`. As combinações ignoram o cabeçalho: fixe
@@ -1256,6 +1256,13 @@ valores em `modelOutputOverrides`, incluindo modelos sem uma linha de modelo per
 utiliza a capacidade de execução `max_output_tokens` e mantém-se após uma nova sincronização do modelo. A página
 do fornecedor compatível com OpenAI disponibiliza os mesmos controlos de edição/limpeza e assinala os modelos
 com suporte explícito para visão.
+
+Num nó de fornecedor compatível, os caminhos de escrita (`POST`, `PUT`, `PATCH`, `DELETE` e
+`/api/provider-models/validate-and-add`) armazenam o ID do modelo como o ID upstream simples: um ID
+colado a partir de uma lista com prefixo tem qualquer sequência inicial do próprio prefixo do nó
+recolhida, e as respostas devolvem o ID armazenado. Os IDs com barras dos fornecedores canónicos (por
+exemplo, `nvidia/nemotron-…`) são armazenados literalmente. `/v1/models` nunca emite um ID
+`<prefix>/<prefix>/<model>` com prefixos repetidos.
 
 Os nós personalizados de Chat Completions adaptam as exclusões explícitas de raciocínio ao backend a montante. Um
 teste de ligação bem-sucedido seleciona automaticamente os controlos de modelo de chat para cada ID de modelo exato

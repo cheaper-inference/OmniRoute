@@ -1254,6 +1254,10 @@ curl примери:
 користи могућност `max_output_tokens` током извршавања и остаје сачувана након поновне синхронизације модела. Страница
 провајдера компатибилног са OpenAI-јем нуди исте контроле за измену/уклањање и означава моделе са изричитом подршком за вид.
 
+Na kompatibilnom čvoru provajdera, putanje za upis (`POST`, `PUT`, `PATCH`, `DELETE` i
+`/api/provider-models/validate-and-add`) čuvaju ID modela kao neprefiksovani ID izvornog provajdera: ID
+nalepљen iz prefiksovanog spiska ima sve uzastopne početne prefikse samog čvora sažete, a odgovori vraćaju sačuvani ID. ID-jevi kanonskih provajdera sa kosim crtama (npr. `nvidia/nemotron-…`) čuvaju se nepromenjeni. `/v1/models` nikada ne emituje naslagani ID oblika `<prefix>/<prefix>/<model>`.
+
 Прилагођени Chat Completions чворови прилагођавају изричито искључивање резоновања надређеном позадинском систему.
 Успешан тест везе аутоматски бира контроле шаблона ћаскања за сваки тачан ID модела
 чији унос у `/models` доказује препознату вредност `owned_by`: `vllm`, `sglang` или `llamacpp`.
