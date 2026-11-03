@@ -33,6 +33,8 @@ import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImp
 const ENCRYPTED_SETTING_KEYS: ReadonlySet<string> = new Set([
   "oidcClientSecret",
   "entraGraphClientSecret",
+  "googleClientSecret",
+  "githubClientSecret",
 ]);
 
 type ProxyValue = JsonRecord | string | null;
@@ -203,6 +205,18 @@ export async function getSettings() {
     oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
     oidcAdmissionClaim: null, // optional ID-token role/group admission policy
+    // Social login kill-switches: a provider runs only with credentials and a non-empty
+    // allowlist; `false` turns it off even then.
+    googleAuthEnabled: true,
+    googleClientId: "",
+    googleClientSecret: "",
+    googleRedirectPath: "/api/auth/google/callback",
+    githubAuthEnabled: true,
+    githubClientId: "",
+    githubClientSecret: "",
+    githubRedirectPath: "/api/auth/github/callback",
+    authAllowedEmails: [], // social login allowlist — empty admits nobody (deny-by-default)
+    disablePasswordLogin: false,
     // Entra ID SSO for /v1/* (see docs/security/ENTRA_SSO.md). Off by default:
     // enabling it only ADDS a way to authenticate — static API keys keep working.
     entraSsoEnabled: false,
@@ -382,7 +396,8 @@ export async function updateSettings(
       throw new SettingsRevisionConflictError(currentRevision);
     }
     for (const [key, value] of Object.entries(updates)) {
-      const toStore = ENCRYPTED_SETTING_KEYS.has(key) ? encrypt(value as string) : value;
+      const toStore =
+        ENCRYPTED_SETTING_KEYS.has(key) && typeof value === "string" ? encrypt(value) : value;
       insert.run(key, JSON.stringify(toStore));
     }
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));
