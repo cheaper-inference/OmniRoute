@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -485,7 +485,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 yüksək səviyyəli icraçı modulları (`*.ts` minus `base.ts`, `index.ts` və testlər — `npm run check:docs-counts` ölçmələri). Hər bir icraçı sinfi birbaşa və ya `DefaultExecutor` və ya başqa icraçı vasitəsilə `BaseExecutor` (`base.ts`) genişləndirir; qalan modullar provayderə görə köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, quirk işləyiciləri). İcraçılara daxildir:
+158 yüksək səviyyəli icraçı modulları (`*.ts` minus `base.ts`, `index.ts` və testlər — `npm run check:docs-counts` ölçmələri). Hər bir icraçı sinfi birbaşa və ya `DefaultExecutor` və ya başqa icraçı vasitəsilə `BaseExecutor` (`base.ts`) genişləndirir; qalan modullar provayderə görə köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, quirk işləyiciləri). İcraçılara daxildir:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, plus `claudeIdentity.ts` `muse-spark-web` paylaşılan şəxsiyyət `devin-desktop`) və `index.ts` (reyestr).
 
