@@ -905,7 +905,8 @@ async function handleGeminiLiveTranscription(
   file: Blob,
   modelId: string | null,
   credentials: TranscriptionCredentials | null | undefined,
-  formData: FormData
+  formData: FormData,
+  signal?: AbortSignal | null
 ): Promise<Response> {
   if (file.size > GEMINI_LIVE_MAX_INPUT_BYTES) {
     return errorResponse(413, "Audio file is too large for Gemini Live transcription");
@@ -917,6 +918,7 @@ async function handleGeminiLiveTranscription(
       prompt: optionalFormString(formData, "prompt"),
       language: optionalFormString(formData, "language"),
       baseUrl: providerConfig.baseUrl,
+      signal: signal ?? undefined,
     });
     return Response.json({ text }, { headers: { ...CORS_HEADERS } });
   } catch (err) {
@@ -950,6 +952,7 @@ export async function handleAudioTranscription({
   resolvedProvider = null,
   resolvedModel = null,
   remoteMediaFetcher = null,
+  signal = null,
 }: {
   formData: FormData;
   credentials?: TranscriptionCredentials | null;
@@ -957,6 +960,8 @@ export async function handleAudioTranscription({
   resolvedModel?: string | null;
   /** SSRF-hardened downloader for `url` input, injected by the API route. */
   remoteMediaFetcher?: RemoteMediaFetcher | null;
+  /** Client request abort signal; kills spawned helpers (Gemini Live ffmpeg) on disconnect. */
+  signal?: AbortSignal | null;
 }): Promise<Response> {
   const model = formData.get("model");
   if (typeof model !== "string" || !model) {
@@ -1006,7 +1011,14 @@ export async function handleAudioTranscription({
 
   // Route to provider-specific handler
   if (providerConfig.format === "gemini-live") {
-    return handleGeminiLiveTranscription(providerConfig, file, modelId, credentials, formData);
+    return handleGeminiLiveTranscription(
+      providerConfig,
+      file,
+      modelId,
+      credentials,
+      formData,
+      signal
+    );
   }
 
   if (providerConfig.format === "grok-stt") {

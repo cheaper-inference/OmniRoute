@@ -550,6 +550,72 @@ test("convertToPcm16k survives an EPIPE on ffmpeg stdin and reports the ffmpeg f
   });
 });
 
+test("convertToPcm16k launches ffmpeg with a constant argv that carries no request data", async () => {
+  const seen: string[][] = [];
+  for (const audio of [NON_WAV_AUDIO, Buffer.from("-i /etc/passwd http://evil.example/x")]) {
+    const child = createFakeFfmpeg();
+    const pending = convertToPcm16k(audio, {
+      spawnFn: ((_command: string, args: string[]) => {
+        seen.push([...args]);
+        return child;
+      }) as never,
+    });
+    child.stdout.end();
+    setImmediate(() => child.emit("close", 0, null));
+    await pending;
+  }
+  assert.equal(seen.length, 2);
+  assert.deepEqual(seen[0], seen[1], "argv must not vary with the uploaded bytes");
+  assert.equal(seen[0][seen[0].indexOf("-i") + 1], "pipe:0", "input is stdin, never a path");
+  assert.equal(seen[0].at(-1), "pipe:1", "output is stdout, never a path");
+});
+
+test("convertToPcm16k does not spawn ffmpeg when the request is already aborted", async () => {
+  let spawned = false;
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(
+    convertToPcm16k(NON_WAV_AUDIO, {
+      signal: controller.signal,
+      spawnFn: (() => {
+        spawned = true;
+        return createFakeFfmpeg();
+      }) as never,
+    }),
+    (err: { status?: number }) => err.status === 499
+  );
+  assert.equal(spawned, false);
+});
+
+test("convertToPcm16k kills ffmpeg when the client aborts mid-conversion", async () => {
+  const child = createFakeFfmpeg();
+  const controller = new AbortController();
+  const pending = convertToPcm16k(NON_WAV_AUDIO, {
+    signal: controller.signal,
+    spawnFn: (() => child) as never,
+  });
+  child.stdout.write(Buffer.alloc(320));
+  controller.abort();
+  await assert.rejects(pending, (err: { status?: number }) => err.status === 499);
+  assert.equal(child.killed, true);
+  assert.equal(child.killSignal, "SIGKILL");
+});
+
+test("handleAudioTranscription forwards the request abort signal to the gemini-live ffmpeg step", async () => {
+  const formData = new FormData();
+  formData.append("model", "gemini/gemini-3.5-transcribe-live");
+  formData.append("file", new File([NON_WAV_AUDIO], "clip.mp3", { type: "audio/mpeg" }));
+  const controller = new AbortController();
+  controller.abort();
+
+  const res = await handleAudioTranscription({
+    formData,
+    credentials: { apiKey: "test-key" },
+    signal: controller.signal,
+  });
+  assert.equal(res.status, 499);
+});
+
 test("handleAudioTranscription answers 413 for an oversized gemini-live upload without converting it", async () => {
   const oversized = new File([Buffer.alloc(GEMINI_LIVE_MAX_INPUT_BYTES + 1)], "huge.mp3", {
     type: "audio/mpeg",

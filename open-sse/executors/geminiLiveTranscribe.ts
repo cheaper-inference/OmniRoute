@@ -24,6 +24,8 @@ export interface GeminiLiveTranscribeOptions {
   prompt?: string;
   language?: string;
   baseUrl?: string;
+  /** Client request abort signal: kills the ffmpeg child when the caller goes away. */
+  signal?: AbortSignal;
 }
 
 export class GeminiLiveError extends Error {
@@ -94,6 +96,8 @@ export interface ConvertToPcm16kOptions {
   timeoutMs?: number;
   maxInputBytes?: number;
   maxPcmBytes?: number;
+  /** Client request abort signal: ffmpeg is never started after it fires and is killed on it. */
+  signal?: AbortSignal;
   /** Test seam: replaces child_process.spawn. */
   spawnFn?: (command: string, args: string[]) => ChildProcessWithoutNullStreams;
 }
@@ -142,13 +146,22 @@ function ffmpegExitError(code: number | null, stderrChunks: Buffer[]): GeminiLiv
   );
 }
 
+function clientAbortedError(): GeminiLiveError {
+  return new GeminiLiveError("Client closed the request before audio conversion finished", 499);
+}
+
 function runFfmpegPcm16k(
   audioBuffer: Buffer,
   spawnFn: NonNullable<ConvertToPcm16kOptions["spawnFn"]>,
   timeoutMs: number,
-  maxPcmBytes: number
+  maxPcmBytes: number,
+  signal?: AbortSignal
 ): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(clientAbortedError());
+      return;
+    }
     const ffmpeg = spawnFn("ffmpeg", FFMPEG_PCM16K_ARGS);
     const stdoutChunks: Buffer[] = [];
     const stderrChunks: Buffer[] = [];
@@ -161,6 +174,7 @@ function runFfmpegPcm16k(
       if (settled) return;
       settled = true;
       clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
       if (error) {
         try {
           ffmpeg.kill("SIGKILL");
@@ -176,6 +190,8 @@ function runFfmpegPcm16k(
       () => settle(new GeminiLiveError("FFmpeg audio conversion timed out", 504)),
       timeoutMs
     );
+    const onAbort = () => settle(clientAbortedError());
+    signal?.addEventListener("abort", onAbort, { once: true });
 
     ffmpeg.stdout.on("data", (chunk: Buffer) => {
       stdoutBytes += chunk.length;
@@ -216,7 +232,9 @@ function runFfmpegPcm16k(
  * The input is an untrusted upload, so ffmpeg runs with the same guard rails as
  * src/lib/guardrails/videoBridgeAudioExtraction.ts: array arguments (Hard Rule #13), no stdin
  * interaction, a pipe-only protocol whitelist, a decoded-duration cap, a wall-clock timeout
- * that kills the child, and byte caps on both the upload and the decoded PCM.
+ * that kills the child, a kill on client abort, and byte caps on both the upload and the
+ * decoded PCM. The argv is a module constant (input on stdin, output on stdout): no request
+ * value ever reaches it.
  */
 export async function convertToPcm16k(
   audioBuffer: Buffer,
@@ -247,7 +265,8 @@ export async function convertToPcm16k(
     audioBuffer,
     options.spawnFn ?? (spawn as NonNullable<ConvertToPcm16kOptions["spawnFn"]>),
     options.timeoutMs ?? GEMINI_LIVE_FFMPEG_TIMEOUT_MS,
-    maxPcmBytes
+    maxPcmBytes,
+    options.signal
   );
 }
 
@@ -572,7 +591,7 @@ export async function geminiLiveTranscribe(
   credentials: GeminiLiveCredentials,
   options: GeminiLiveTranscribeOptions
 ): Promise<string> {
-  const pcmBuffer = await convertToPcm16k(options.audioBuffer);
+  const pcmBuffer = await convertToPcm16k(options.audioBuffer, { signal: options.signal });
 
   const { url, headers } = resolveLiveWsUrlAndHeaders(credentials, options.baseUrl);
 
