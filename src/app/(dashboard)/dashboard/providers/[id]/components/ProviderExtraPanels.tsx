@@ -10,6 +10,7 @@ import ProviderParamFilterSection from "./ProviderParamFilterSection";
 import ProviderInterceptionSection from "./ProviderInterceptionSection";
 import ProviderCcAliasSection from "./ProviderCcAliasSection";
 import OpencodeServerSettingsCard from "../../components/OpencodeServerSettingsCard";
+import ProviderCliVersionSection from "./ProviderCliVersionSection";
 
 export default function ProviderExtraPanels({ providerId }: { providerId: string }) {
   return (
@@ -28,6 +29,9 @@ export default function ProviderExtraPanels({ providerId }: { providerId: string
 
       {/* Claude Code discovery-alias gate — provider/model on/off/inherit */}
       <ProviderCcAliasSection providerId={providerId} />
+
+      {/* Advertised CLI client version — renders only for the claude/codex presets */}
+      <ProviderCliVersionSection providerId={providerId} />
     </>
   );
 }

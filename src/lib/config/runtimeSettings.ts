@@ -7,6 +7,11 @@ import {
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
+import {
+  normalizeCliVersionOverrides,
+  setCliVersionOverrides,
+  type CliVersionOverrides,
+} from "@omniroute/open-sse/config/cliVersions.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -26,7 +31,8 @@ export type RuntimeReloadSection =
   | "systemPrompt"
   | "authzBypass"
   | "bannedSignals"
-  | "opencodeServer";
+  | "opencodeServer"
+  | "cliVersionOverrides";
 
 export interface RuntimeReloadChange {
   section: RuntimeReloadSection;
@@ -57,6 +63,7 @@ interface RuntimeSettingsSnapshot {
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
   opencodeServerUrl: string;
+  cliVersionOverrides: CliVersionOverrides;
 }
 
 // Default bypass policy: kill-switch on, `/api/mcp/` bypassable. Mirrors the
@@ -86,6 +93,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   customBannedSignals: [],
   providerErrorRules: null,
   opencodeServerUrl: "",
+  cliVersionOverrides: {},
 };
 
 let lastAppliedSnapshot: RuntimeSettingsSnapshot | null = null;
@@ -317,6 +325,7 @@ export function buildRuntimeSettingsSnapshot(
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
     opencodeServerUrl:
       typeof settings.opencode_server_url === "string" ? settings.opencode_server_url.trim() : "",
+    cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
   };
 }
 
@@ -643,6 +652,23 @@ export async function applyRuntimeSettings(
   if (force || hasChanged(currentSnapshot.opencodeServerUrl, previousSnapshot.opencodeServerUrl)) {
     setOpencodeServerSettings({ url: currentSnapshot.opencodeServerUrl });
     markChanged("opencodeServer");
+  }
+
+  // CLI client-version overrides: swap the shared leaf store the [CC] /
+  // Codex identity presets read on every request. Cheap and idempotent, so it is
+  // safe on every settings write (dashboard edit, import-json, config restore).
+  //
+  // An ABSENT field is not the same as an empty one here. Both production
+  // callers pass getSettings() output, where the key is always present (default
+  // `{}`), but a caller holding a PARTIAL settings object must never be able to
+  // silently drop a value that goes onto the wire as a client fingerprint —
+  // unlike the visible toggles above, this one failing is invisible.
+  if (
+    settings.cliVersionOverrides !== undefined &&
+    (force || hasChanged(currentSnapshot.cliVersionOverrides, previousSnapshot.cliVersionOverrides))
+  ) {
+    setCliVersionOverrides(currentSnapshot.cliVersionOverrides);
+    markChanged("cliVersionOverrides");
   }
 
   lastAppliedSnapshot = currentSnapshot;

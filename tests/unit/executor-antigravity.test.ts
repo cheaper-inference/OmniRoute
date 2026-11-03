@@ -93,6 +93,25 @@ test("AntigravityExecutor.buildHeaders includes native headers without OmniRoute
   assert.equal(headers["X-OmniRoute-Source"], undefined);
 });
 
+test("AntigravityExecutor.buildHeaders omits Accept and x-goog-user-project on the CLI profile", () => {
+  // Live capture of the native Go CLI: streaming is requested by `?alt=sse` alone, and a
+  // consumer account carries no quota-project header. Emitting either is a fingerprint leak.
+  const executor = new AntigravityExecutor();
+  seedAntigravityCliVersionCache("1.4.4");
+  const headers = executor.buildHeaders(
+    { accessToken: "ag-token", providerSpecificData: { clientProfile: "cli" } },
+    true
+  );
+
+  assert.equal(headers.Authorization, "Bearer ag-token");
+  assert.equal(headers.Accept, undefined);
+  assert.equal(headers["x-goog-user-project"], undefined);
+  assert.match(headers["User-Agent"], /^antigravity\/cli\/1\.4\.4 \(aidev_client; os_type=/);
+  // The IDE profile keeps sending Accept.
+  const ideHeaders = executor.buildHeaders({ accessToken: "ag-token" }, true);
+  assert.equal(ideHeaders.Accept, "text/event-stream");
+});
+
 test("Antigravity header scrub removes OmniRoute internal headers", () => {
   const headers = scrubProxyAndFingerprintHeaders({
     Authorization: "Bearer ag-token",
@@ -146,7 +165,7 @@ test("AntigravityExecutor.transformRequest normalizes model, project and content
     "requestType",
   ]);
   assert.equal(result.userAgent, "antigravity");
-  assert.match(result.requestId, /^agent\/\d+\/[0-9a-f]{8}$/);
+  assert.match(result.requestId, /^agent\/[0-9a-f-]{36}\/\d+\/[0-9a-f-]{36}\/2$/);
   assert.equal(result.enabledCreditTypes, undefined);
   assert.ok(result.request.sessionId);
   const request = result.request as { generationConfig?: { topK?: number; topP?: number } };

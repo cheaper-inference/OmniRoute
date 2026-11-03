@@ -401,6 +401,14 @@ export default function ConnectionRow({
                 {t(statusPresentation.errorBadge.labelKey)}
               </Badge>
             )}
+            {connection.prefixShadowed && connection.isActive !== false && (
+              <span
+                className="text-xs text-warning truncate max-w-[300px]"
+                title={connection.prefixShadowed.message}
+              >
+                {connection.prefixShadowed.code}: {connection.prefixShadowed.message}
+              </span>
+            )}
             {shouldShowConnectionLastError(connection) && (
               <span
                 className={`text-xs truncate max-w-[300px] ${statusPresentation.errorTextClass}`}
@@ -557,12 +565,12 @@ export default function ConnectionRow({
                   }
                   className="w-auto"
                   selectClassName="text-xs font-medium"
-                  title="Upstream proxy routing for Claude Code traffic"
+                  title={t("claudeCodeRoutingTitle")}
                 >
-                  <option value="native">Native</option>
+                  <option value="native">{t("routingNative")}</option>
                   <option value="cliproxyapi">CLIProxyAPI</option>
                   <option value="dario">Dario</option>
-                  <option value="fallback">Fallback</option>
+                  <option value="fallback">{t("routingFallback")}</option>
                 </Select>
                 {effectiveUpstreamProxyMode === "fallback" && (
                   <Select
@@ -576,7 +584,7 @@ export default function ConnectionRow({
                     }
                     className="w-auto"
                     selectClassName="text-xs font-medium"
-                    title="Fallback retry backend"
+                    title={t("fallbackRetryBackendTitle")}
                   >
                     <option value="cliproxyapi">→ CLIProxyAPI</option>
                     <option value="dario">→ Dario</option>
