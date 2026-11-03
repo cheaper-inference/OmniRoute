@@ -140,34 +140,34 @@ dilengkapkan:
 
 Beberapa tindakan `MANAGEMENT` adalah **khusus operator**: kunci `manage` tidak mencukupi. Mengeksport kelayakan tersimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), memulihkan sandaran ke atas data langsung (`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan mengikut id, `POST /api/settings/import-json`), dan memusnahkan titik pemulihan (`DELETE /api/db-backups` pembersihan, dan `PATCH /api/db-backups` kerana pengekalannya memacu pemangkasan automatik selepas setiap sandaran) memerlukan sesi papan pemuka, subjek CLI tempatan, atau log masuk yang dilumpuhkan. Mengeluarkan token penyegerakan (`POST /api/sync/tokens`) dan mencetak token akses CLI `admin` (`POST /api/cli/tokens`) memerlukan sesi papan pemuka atau subjek CLI tempatan dalam setiap mod log masuk. Kunci API bagi mana-mana skop dan token akses `oma_` bukan kelayakan operator: ia menerima `403` setiap kali salah satu diperlukan. Semakannya terdapat dalam `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Menukar tetapan log masuk juga khusus operator: `POST /api/settings/require-login` (menetapkan kata laluan pengurusan / menukar `requireLogin`) hanya menerima kelayakan tersebut selepas kata laluan wujud — tetingkap bootstrap permulaan (belum ada kata laluan) kekal tidak berubah — dan sesi papan pemuka mesti menghantar `currentPassword` untuk menggantikan kata laluan (`403` jika tiada atau salah, diaudit sebagai `settings.update_failed`). CLI tempatan dan contoh yang log masuknya dilumpuhkan mengekalkan laluan pemulihan dan boleh menetapkan kata laluan tanpanya, kerana kedua-duanya terikat pada hos yang memiliki direktori data.
 
-## Saluran Pemprosesan
+## Saluran paip
 
 ```
-Permintaan masuk → src/proxy.ts
-  → runAuthzPipeline() dalam src/server/authz/pipeline.ts
-    1. Buang pengepala dalaman yang dipercayai (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Jana ID permintaan, kelaskan laluan melalui classifyRoute()
-    3. Jika pathname == "/" → ubah hala ke /dashboard
-    4. Jika sedang dikosongkan (penutupan secara terkawal) dan /api/* → 503
-    5. Jika bukan GET /api/* → pengadang checkBodySize()
-    6. Jika OPTIONS → prapenerbangan CORS 204
-    7. Jika options.enforce == false → teruskan dengan pengepala kelas laluan
-    8. Jika tidak: POLICIES[routeClass].evaluate(ctx)
-       - benarkan → cap x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - tolak    → ralat JSON dengan correlation_id (halaman papan pemuka → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Pengepala dalaman yang dipercayai (ditakrifkan dalam `src/server/authz/headers.ts`) **dibuang daripada permintaan masuk** sebelum pengelasan — klien tidak boleh mengisi awal `x-omniroute-auth-*` untuk menyamar sebagai subjek.
+Pengepala dalaman yang dipercayai (ditakrifkan dalam `src/server/authz/headers.ts`) ialah** dilucutkan daripada permintaan masuk** sebelum pengelasan — pelanggan tidak boleh pra-populasi `x-omniroute-auth-*` untuk menyamar sebagai subjek.
 
-### Kontrak dasar
+### Kontrak polisi
 
 Setiap kelas laluan mempunyai dasar dalam `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — sentiasa mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Bearer dan mengesahkannya melalui `validateApiKey()`. Hanya beralih kepada akses tanpa nama apabila bendera ciri `REQUIRE_API_KEY` yang berkuat kuasa dinyahdayakan. Bendera yang berkuat kuasa ditentukan melalui `isRequireApiKeyEnabled()` (`penggantian bendera ciri DB > process.env.REQUIRE_API_KEY > lalai`) supaya Bendera Ciri Papan Pemuka dan pemboleh ubah persekitaran mengawal `/api/v1/*`, `/api/v1beta/*`, serta alias secara konsisten; kegagalan penentu akan ditutup secara selamat. Membenarkan permintaan sesi papan pemuka pada laluan API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model papan pemuka).
-- **`managementPolicy`** (`policies/management.ts`) — menerima sesi papan pemuka, permintaan penyegerakan model dalaman (dipadankan dengan `/api/providers/[name]/(sync-models|models)`), atau dilangkau sepenuhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) apabila token Bearer disertakan tetapi tidak sah, dan 401 jika tidak. Ia juga menguatkuasakan peringkat pengadang laluan (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum mana-mana cabang pengesahan — lihat [Peringkat Pengadang Laluan](../security/ROUTE_GUARD_TIERS.md). Laluan LOCAL_ONLY dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (pada masa ini: `/api/mcp/`) boleh dicapai dari bukan gelung balik apabila kunci Bearer mempunyai skop `manage`; semua laluan LOCAL_ONLY yang lain kekal terhad kepada gelung balik tanpa mengira skop.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ekstrak Pembawa, mengesahkan melalui `validateApiKey()`. Terjadi tanpa nama hanya apabila bendera ciri `REQUIRE_API_KEY` yang berkesan dilumpuhkan. Bendera berkesan diselesaikan melalui `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) jadi Bendera Ciri Papan Pemuka dan pembolehubah persekitaran mengawal `/api/v1/*`, `/api/v1beta/*` dan alias secara konsisten; kegagalan penyelesai gagal ditutup. Membenarkan permintaan sesi papan pemuka pada laluan API pelanggan (termasuk `/api/v1/models`, digunakan oleh katalog model papan pemuka). Apabila Entra ID SSO didayakan, Pembawa yang secara struktur ialah token Entra (tiga segmen base64url, `RS*` alg, `kid`) dikendalikan oleh cawangan SSO** sebelum ini** `validateApiKey()` dan keputusannya adalah — muktamad ia tidak pernah jatuh ke laluan kunci API atau cawangan merendahkan kepada tanpa nama, jadi gangguan pembekal identiti tidak boleh menjadi akses terbuka. Kekunci API statik tidak terjejas. Lihat [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — menerima sesi papan pemuka, permintaan penyegerakan model dalaman (dipadanan dengan `/api/providers/[name]/(sync-models|models)`), atau melangkau sepenuhnya jika `isAuthRequired()` mengembalikan palsu. Mengembalikan 403 (`AUTH_001`) apabila token Pembawa hadir tetapi tidak sah, 401 sebaliknya. Juga menguatkuasakan peringkat pengawal laluan (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum mana-mana cawangan pengesahan — lihat [Peringkat Pengawal Laluan](../security/ROUTE_GUARD_TIERS.md). laluan LOCAL_ONLY dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) boleh diakses daripada bukan gelung apabila kunci Pembawa membawa skop `manage` ; semua laluan LOCAL_ONLY lain kekal strict-loopback tanpa mengira skop.
 
-Dasar yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Pengendali hiliran boleh membacanya melalui `assertAuth(request, "CLIENT_API")` dalam `src/server/authz/assertAuth.ts` dan bukannya menjalankan semula logik pengesahan.
+Polisi yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Pengendali hiliran boleh membacanya melalui `assertAuth(request, "CLIENT_API")` dalam `src/server/authz/assertAuth.ts` dan bukannya menjalankan semula logik auth.
 
 ## Senarai Laluan Awam
 
@@ -318,20 +318,20 @@ Titik akhir `/api/v1/agents/tasks/*` dan `/api/resilience/model-cooldowns` **kin
 Saluran paip sentiasa mengecap respons dengan:
 
 ```
-x-request-id:               <id korelasi, digemakan dalam badan ralat>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Untuk permintaan yang disahkan, pengepala permintaan huluan (pada bahagian pengendali) turut merangkumi:
+Untuk permintaan yang disahkan, pengepala permintaan huluan (sebelah pengendali) juga termasuk:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4-aksara-terakhir> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (pilihan)
-x-omniroute-auth-scopes:    senarai dipisahkan koma
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Gunakan `assertAuth(req, expectedClass)` dalam pengendali — ia melontarkan `AuthzAssertionError` dengan kod `AUTHZ_NOT_INITIALIZED` jika perisian tengah telah dipintas (berguna untuk mengesan regresi konfigurasi dalam ujian).
+Gunakan `assertAuth(req, expectedClass)` dalam pengendali — ia membuang `AuthzAssertionError` dengan kod `AUTHZ_NOT_INITIALIZED` jika perisian tengah dipintas (bermanfaat untuk menangkap regresi konfigurasi dalam ujian).
 
 ## Lihat Juga
 

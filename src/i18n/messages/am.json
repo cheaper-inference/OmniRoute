@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "ይህ ከዚህ አብነት ጋር የሚዛመዱትን በአሁኑ ጊዜ የተገናኙ አቅራቢዎች/ሞዴሎች ቅጽበታዊ ቅጂ ወደሚስተካከል ጥምረት ይቀይራል።",
     "duplicateAutoComboFailedPrefix": "ራስ-ሰር ጥምረቱን ማባዛት አልተሳካም፦",
     "duplicateAutoComboUnknownError": "ያልታወቀ ስህተት",
-    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር"
+    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
+    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን"
   },
   "costs": {
     "title": "ወጪዎች",
@@ -15462,6 +15463,7 @@
     "upstreamStatus": "ከላይ የሚገኝ ሁኔታ",
     "noResponse": "አንድ እንደማይመልስ",
     "egressIp": "ወጣት አይፒ",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "አርከቶች በኋላ",
     "firstChunkAfter": "የመጀመሪያ ቁርጽ በኋ�",
     "servedBy": "የተሰጠ በ",

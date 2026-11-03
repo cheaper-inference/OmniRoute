@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Hii itachukua picha ya watoa huduma/watolei sambazwa sasa yanayolingana na kioo hiki katika combo inayoedit.",
     "duplicateAutoComboFailedPrefix": "Imeshindwa kuiga combo ya otomatiki:",
     "duplicateAutoComboUnknownError": "Hitilafai isiyojulikana",
-    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}"
+    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}",
+    "fallbackSummary": "{rate}% ya maombi yalitembea, ~{skips} lengo zilizopitishwa kila moja"
   },
   "costs": {
     "title": "Gharama",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Hali ya mwelekeo",
     "noResponse": "Hakuna jibu",
     "egressIp": "IP ya Kutoka",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Vichwa baada",
     "firstChunkAfter": "Kipande cha kwanza baada",
     "servedBy": "Inatolewa na",

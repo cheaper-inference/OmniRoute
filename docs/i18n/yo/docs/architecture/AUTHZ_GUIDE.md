@@ -136,34 +136,34 @@ lẹ́gbẹ̀ẹ́ ìwọlé ọ̀rọ̀ aṣínà àìyípadà — a kì í y�
 
 Àwọn ìgbésẹ̀ `MANAGEMENT` kan jẹ́ **ti operator nìkan**: kọ́kọ́rọ́ `manage` kò tó. Kíkó àwọn credential tí a tọ́jú jáde (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), dída afẹ́yìntì padà sórí data ààyè (`POST /api/db-backups/import` pẹ̀lú `dryRun=true`, `POST /api/db-backups` restore nípa id, `POST /api/settings/import-json`), àti pípa àwọn ibi ìpadàbọ̀ rẹ́ (`DELETE /api/db-backups` cleanup, àti `PATCH /api/db-backups` nítorí pé retention tí ó ń tọ́jú ni ó ń wa pruning aládàáṣe lẹ́yìn gbogbo backup) nílò ìgbà dashboard, olùmọ̀ CLI ti agbègbè, tàbí wíwọlé tí a ti pa. Fífúnni ní sync token (`POST /api/sync/tokens`) àti ṣíṣe `admin` CLI access token (`POST /api/cli/tokens`) nílò ìgbà dashboard tàbí olùmọ̀ CLI ti agbègbè ní gbogbo ipò wíwọlé. Àwọn kọ́kọ́rọ́ API ti ìwọ̀n èyíkéyìí àti àwọn `oma_` access token kì í ṣe àwọn credential operator: wọ́n máa gba `403` nígbàkígbà tí a bá nílò ọ̀kan. Àyẹ̀wò yìí wà nínú `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Yíyí àwọn ètò wíwọlé padà pẹ̀lú jẹ́ ti operator nìkan: `POST /api/settings/require-login` (ṣètò ọ̀rọ̀ aṣínà ìṣàkóso / yí `requireLogin` padà) ń gba àwọn credential wọ̀nyí nìkan nígbà tí ọ̀rọ̀ aṣínà bá ti wà. Fèrèsé bootstrap ìbẹ̀rẹ̀ (kò sí ọ̀rọ̀ aṣínà síbẹ̀) kò yí padà, ìgbà dashboard sì gbọ́dọ̀ fi `currentPassword` ránṣẹ́ láti rọ́pò ọ̀rọ̀ aṣínà (`403` tí ó bá kù tàbí tí kò tọ̀nà, a sì ń ṣe àkọsílẹ̀ rẹ̀ gẹ́gẹ́ bí `settings.update_failed`). CLI ti agbègbè àti instance tí wíwọlé rẹ̀ jẹ́ alaabọ̀ ń pa ọ̀nà ìmúpadàbọ̀sípò mọ́, wọ́n sì lè ṣètò ọ̀rọ̀ aṣínà láìsí i, nítorí méjèèjì ni a so mọ́ host tí ó ni data directory.
 
-## Ìṣàn Iṣẹ́
+## Pipeline
 
 ```
-Ìbéèrè tó ń wọlé → src/proxy.ts
-  → runAuthzPipeline() nínú src/server/authz/pipeline.ts
-    1. Yọ àwọn header inú tí a fọkàn tán kúrò (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Ṣẹ̀dá id ìbéèrè, pín ìtọ́sọ́nà sí kíláàsì nípasẹ̀ classifyRoute()
-    3. Tí pathname == "/" → darí padà sí /dashboard
-    4. Tí ètò bá ń dáwọ́ dúró (graceful shutdown) tí ó sì jẹ́ /api/* → 503
-    5. Tí ó bá jẹ́ /api/* tí kì í ṣe GET → lo ìṣọ́ checkBodySize()
-    6. Tí ó bá jẹ́ OPTIONS → ìmúrasílẹ̀ CORS 204
-    7. Tí options.enforce == false → jẹ́ kí ó kọjá pẹ̀lú àwọn header kíláàsì-ìtọ́sọ́nà
-    8. Bí bẹ́ẹ̀ kọ́: POLICIES[routeClass].evaluate(ctx)
-       - allow  → fi àmì x-omniroute-auth-{kind,id,label,scopes} sí i → NextResponse.next()
-       - reject → àṣìṣe JSON pẹ̀lú correlation_id (àwọn ojúewé pátákó ìṣàkóso → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Àwọn header inú tí a fọkàn tán (tí a ṣàlàyé nínú `src/server/authz/headers.ts`) ni a **yọ kúrò nínú àwọn ìbéèrè tó ń wọlé** ṣáájú pípín wọn sí kíláàsì — àwọn client kò lè kọ́kọ́ fi `x-omniroute-auth-*` sínú ìbéèrè láti ṣe bí ẹni pé wọ́n jẹ́ subject kan.
+Awọn akọle inu ti o gbẹkẹle (ti a ṣalaye ni `src/server/authz/headers.ts`) jẹ** yọ kuro lati awọn ibeere ti nwọle** ṣaaju ki ikasi — awọn alabara ko le ṣaju-gbejade `x-omniroute-auth-*` lati farawe koko-ọrọ kan.
 
-### Àwọn àdéhùn policy
+### Awọn adehun imulo
 
-Kíláàsì ìtọ́sọ́nà kọ̀ọ̀kan ní policy kan nínú `src/server/authz/policies/`:
+Kilasi ipa ọna kọọkan ni eto imulo ni `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — máa ń dá `allow({ kind: "anonymous", id: "anonymous" })` padà ní gbogbo ìgbà.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — ń yọ Bearer jáde, ó sì ń fìdí rẹ̀ múlẹ̀ nípasẹ̀ `validateApiKey()`. Ó máa ń tẹ̀síwájú gẹ́gẹ́ bí anonymous kìkì nígbà tí àsíá ẹ̀yà `REQUIRE_API_KEY` tó n ṣiṣẹ́ kò bá ṣiṣẹ́. A máa ń pinnu àsíá tó n ṣiṣẹ́ nípasẹ̀ `isRequireApiKeyEnabled()` (`àtúnṣe àsíá ẹ̀yà DB > process.env.REQUIRE_API_KEY > iye àìyípadà`) kí Àwọn Àsíá Ẹ̀yà Pátákó Ìṣàkóso àti àwọn environment variable lè ṣàkóso `/api/v1/*`, `/api/v1beta/*`, àti àwọn orúkọ mìíràn ní ọ̀nà kan náà; ìkùnà resolver máa ń kọ̀ láìláàyè. Ó gba àwọn ìbéèrè ìjókòó pátákó ìṣàkóso láàyè lórí àwọn ìtọ́sọ́nà API client (pẹ̀lú `/api/v1/models`, tí àkójọ model pátákó ìṣàkóso ń lò).
-- **`managementPolicy`** (`policies/management.ts`) — gba ìjókòó pátákó ìṣàkóso, àwọn ìbéèrè ìmúdójúìwọ̀n model inú (tí a bá mú dọ́gba pẹ̀lú `/api/providers/[name]/(sync-models|models)`), tàbí ó foju kọ ọ́ pátápátá tí `isAuthRequired()` bá dá false padà. Ó dá 403 (`AUTH_001`) padà nígbà tí token Bearer bá wà ṣùgbọ́n tí kò fẹsẹ̀ múlẹ̀, àti 401 ní gbogbo ọ̀nà mìíràn. Ó tún ń fipá mú àwọn ìpele ìṣọ́-ìtọ́sọ́nà (LOCAL_ONLY / ALWAYS_PROTECTED) ṣáájú ẹ̀ka ìfàṣẹsí èyíkéyìí — wo [Àwọn Ìpele Ìṣọ́ Ìtọ́sọ́nà](../security/ROUTE_GUARD_TIERS.md). Àwọn path LOCAL_ONLY nínú `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (lọ́wọ́lọ́wọ́: `/api/mcp/`) lè jẹ́ kí a wọlé sí wọn láti ibi tí kì í ṣe loopback nígbà tí kọ́kọ́rọ́ Bearer bá ní scope `manage`; gbogbo àwọn path LOCAL_ONLY mìíràn ṣì nílò strict-loopback láìka scope sí.
+- **`publicPolicy`** (`policies/public.ts`) — nigbagbogbo da `allow({ kind: "anonymous", id: "anonymous" })` pada.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ayokuro Bearer, sooto nipasẹ `validateApiKey()`. Ṣubu nipasẹ ailorukọ nikan nigbati asia ẹya `REQUIRE_API_KEY` ti o munadoko jẹ alaabo. Asia ti o munadoko jẹ ipinnu nipasẹ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) nitorinaa Awọn asia Ẹya Dasibodu ati awọn oniyipada ayika ṣe akoso `/api/v1/*`, `/api/v1beta/*`, ati awọn inagijẹ nigbagbogbo; awọn ikuna ipinnu kuna ni pipade. Faye gba awọn ibeere dasibodu-igba lori awọn ipa ọna API alabara (pẹlu `/api/v1/models`, ti a lo nipasẹ katalogi awoṣe dasibodu). Nigbati o ba mu Entra ID SSO ṣiṣẹ, Oluduro ti o jẹ apẹrẹ ti o jẹ ami Entra (awọn ipele base64url mẹta, `RS*` alg, `kid`) ni a ṣakoso nipasẹ ẹka SSO** ṣaaju ki o to** `validateApiKey()` ati idajo rẹ jẹ — ti o kẹhin kii yoo ṣubu si ọna bọtini API tabi ẹka ti o bajẹ-si-ailorukọ, nitorinaa ijade olupese idanimọ ko le di iwọle si ṣiṣi. Awọn bọtini API aimi ko ni ipa. Wo [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — gba igba dasibodu, awọn ibeere amuṣiṣẹpọ inu inu (ti o baamu si `/api/providers/[name]/(sync-models|models)`), tabi fo patapata ti `isAuthRequired()` ba pada eke. Pada 403 (`AUTH_001`) nigbati aami Oluduro kan wa ṣugbọn ko wulo, 401 bibẹẹkọ. Paapaa fi agbara mu awọn ipele oluso ipa-ọna (LOCAL_ONLY / ALWAYS_PROTECTED) ṣaaju eyikeyi ẹka auth — wo [Awọn ipele Ẹṣọ Ipa-ọna](../security/ROUTE_GUARD_TIERS.md). awọn ọna LOCAL_ONLY ni `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (loni: `/api/mcp/`) le wọle lati ti kii ṣe loopback nigbati bọtini Bearer gbe aaye `manage` ; gbogbo awọn ọna LOCAL_ONLY miiran wa ti o muna-loopback laibikita iwọn.
 
-Policy tó ṣàṣeyọrí máa ń dá `AuthSubject` padà pẹ̀lú `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Àwọn handler tó wà lẹ́yìn lè kà á nípasẹ̀ `assertAuth(request, "CLIENT_API")` nínú `src/server/authz/assertAuth.ts` dípò ṣíṣe logic ìfàṣẹsí náà lẹ́ẹ̀kan sí i.
+Ilana aṣeyọri da `AuthSubject` pada pẹlu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Awọn olutọju isalẹ le ka nipasẹ `assertAuth(request, "CLIENT_API")` ni `src/server/authz/assertAuth.ts` dipo ṣiṣiṣẹ auth kannaa.
 
 ## Àtòjọ Àwọn Route Gbangba
 
@@ -304,25 +304,25 @@ bá ti yanjú àwọn àyè láti ìwífún ìfọwọ́sí MCP, metadata ìbé�
 - Àkójọ àṣẹ gbogbogbò: `tests/unit/public-api-routes.test.ts`.
 - Ṣíṣe ìdánwò àfojúsùn: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Ṣíṣe àtúnṣe àṣìṣe
+## N ṣatunṣe aṣiṣe
 
-Pipeline náà máa ń fi àwọn àkọlé wọ̀nyí sí gbogbo ìdáhùn:
+Opo gigun ti epo nigbagbogbo n ṣe awọn idahun pẹlu:
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Fún àwọn ìbéèrè tí a ti jẹ́rìí ìdánimọ̀ wọn, àwọn àkọlé ìbéèrè upstream (ní ẹ̀gbẹ́ handler) tún ní:
+Fun awọn ibeere ti o ni idaniloju awọn akọle ibeere ti oke (ẹgbẹ-aṣakoso) tun pẹlu:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (àṣàyàn)
-x-omniroute-auth-scopes:    àkójọ tí àmì kọ́mà yà sọ́tọ̀
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Lo `assertAuth(req, expectedClass)` nínú àwọn handler — ó máa ń ju `AuthzAssertionError` pẹ̀lú kóòdù `AUTHZ_NOT_INITIALIZED` bí a bá ti kọjá middleware náà (èyí wúlò fún ṣíṣe àmúlò àwọn ìdàgbàsókè sẹ́yìn nínú ìṣètò nígbà ìdánwò).
+Lo `assertAuth(req, expectedClass)` inu awọn olutọju — o jabọ `AuthzAssertionError` pẹlu koodu `AUTHZ_NOT_INITIALIZED` ti agbedemeji ti o ba kọja (ṣe iranlọwọ fun mimu awọn atunto iṣeto ni awọn idanwo).
 
 ## Wo Pẹ̀lú
 

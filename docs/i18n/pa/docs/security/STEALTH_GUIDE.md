@@ -248,19 +248,18 @@ interface CliFingerprint {
 
 ---
 
-## User-Agent ਓਵਰਰਾਈਡ — env vars (`.env.example` ਭਾਗ 12)
+## ਉਪਭੋਗਤਾ-ਏਜੰਟ — env vars ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ (`.env.example` ਸੈਕਸ਼ਨ 12)
 
-| ਵੇਰੀਏਬਲ                  | ਡਿਫਾਲਟ                                                          |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| ਵੇਰੀਏਬਲ             | ਡਿਫਾਲਟ                                        |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-ਡਾਇਨਾਮਿਕ ਲੁੱਕਅੱਪ ਰਾਹੀਂ `open-sse/executors/base.ts::buildHeaders()` ਵੱਲੋਂ ਵਰਤੇ ਜਾਂਦੇ ਹਨ। **ਜਦੋਂ ਪ੍ਰਦਾਤਾ ਨਵੇਂ CLI ਸੰਸਕਰਣ ਜਾਰੀ ਕਰਨ, ਤਾਂ ਇਨ੍ਹਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰੋ** — ਪੁਰਾਣੀਆਂ UA ਸਟ੍ਰਿੰਗਾਂ ਨੂੰ ਮਿਆਦ ਪੁੱਗੇ ਕਲਾਇੰਟ ਵਜੋਂ ਅਸਵੀਕਾਰ ਕੀਤਾ ਜਾਣ ਲੱਗਦਾ ਹੈ।
+`open-sse/executors/base.ts::buildHeaders()` ਦੁਆਰਾ ਡਾਇਨਾਮਿਕ ਲੁੱਕਅੱਪ ਦੁਆਰਾ ਖਪਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।** ਜਦੋਂ ਪ੍ਰਦਾਤਾ ਨਵੇਂ CLI ਸੰਸਕਰਣ ਜਾਰੀ ਕਰਦੇ ਹਨ ਤਾਂ ਇਹਨਾਂ ਨੂੰ ਬੰਪ ਕਰੋ** — ਪੁਰਾਣੀ UA ਸਤਰ ਪੁਰਾਣੇ ਕਲਾਇੰਟਾਂ ਵਜੋਂ ਰੱਦ ਹੋਣੀਆਂ ਸ਼ੁਰੂ ਹੋ ਜਾਂਦੀਆਂ ਹਨ।
 
 ## CLI ਅਨੁਕੂਲਤਾ ਮੋਡ ਟੌਗਲ (`.env.example` ਭਾਗ 13)
 
