@@ -121,7 +121,16 @@
 
 ## 5. Posodabljanje kompleta
 
-`npm run check:ui-kit-upstream` primerja različico, pripeto v `packages/ui-kit/UPSTREAM.md` z najnovejšo oznako `v*` zgornjega repoja in natisne ukaz za sinhronizacijo, ko je izdaja izdana. Tedenski potek dela `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) izvaja isto preverjanje in ohranja eno težavo s sledenjem odprto, medtem ko je žebljiček zadaj; zgornji repo je zaseben, zato potek dela potrebuje žeton samo za branje v skrivnosti `UI_KIT_READ_TOKEN`. Ko ne more brati navzgor (ni žetona, žeton, ki je prenehal delovati ali GitHub nedosegljiv), zagon ostane zelen, vendar zapiše opozorilo in pusti odprto eno ločeno težavo, ki se zapre, ko lahko kasnejši zagon znova bere navzgor.
+`npm run check:ui-kit-upstream` primerja različico, pripeto v `packages/ui-kit/UPSTREAM.md` z najnovejšo oznako `v*` zgornjega repoja in natisne ukaz za sinhronizacijo, ko je izdaja izdana.
+
+Dnevni potek dela `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) izvaja isto preverjanje. Medtem ko je zatič zadaj, `scripts/ci/ui-kit-sync-pr.sh` ohranja eno sinhronizacijo PR odprto proti najvišji veji `release/vX.Y.Z`, na valoviti veji `chore/ui-kit-sync-latest`. Nikoli se ne združi: vsaka izdaja kompleta še vedno potrebuje vizualni pregled na lokalnem VPS. Podružnica je ponovno zgrajena, ko je novejša izdaja zunaj, sicer pa ostane pri miru. Odprt PR z ročno potisnjenimi potrditvami ni prepisan, PR za različico, ki jo je vzdrževalec zaprl nespojeno, ostane zaprt do novejše izdaje.
+
+Ko ni mogoče odpreti nobenega PR (ciljna izdaja je zamrznjena, PR ima ročno potisnjene potrditve, PR je bil zaprt ali ni nastavljen noben žeton PR ), potek dela pusti odprto eno težavo sledenja, ki pove, zakaj.
+
+Potek dela uporablja dve skrivnosti:
+
+- `secrets.UI_KIT_READ_TOKEN`: žeton samo za branje za zasebni repo navzgor. Ko potek dela ne more brati navzgor (ni žetona, žeton, ki je prenehal delovati ali GitHub nedosegljiv), ostane zagon zelen, vendar napiše opozorilo in pusti odprto eno ločeno težavo, ki se zapre, ko lahko kasnejši zagon znova bere navzgor.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: natančen žeton v tem repozitoriju z dostopom za pisanje vsebin in zahtev po vleku. Privzeti `GITHUB_TOKEN` tukaj ne more ustvariti PRs in PR ki ga je odprl, ne bi sprožil CI. Brez tega žetona potek dela samo potisne vejo.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` prekopira `src/` navzgor pri tej objavi (`latest` = najnovejša oznaka `v*` ) v `packages/ui-kit/src`, uporabi eno samo dovoljeno transformacijo (spusti pripono `.js` iz relativnih uvozov) in nastavi različico delovnega prostora v `packages/ui-kit/package.json` in `package-lock.json` na navzgor. Nato: preglejte `git diff packages/ui-kit`, vizualno preglejte ponudnike, nastavitve, kombinacije, uporabo in končno točko v obeh temah, zaženite `npm run check:ui-kit-snapshot` in `npm run test:vitest:ui` ter odprite PR z dnevnikom sprememb navzgor.
 
