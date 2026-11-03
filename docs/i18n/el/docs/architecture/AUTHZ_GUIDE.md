@@ -134,34 +134,34 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 Ορισμένες ενέργειες της `MANAGEMENT` είναι **μόνο για τον διαχειριστή**: ένα κλειδί `manage` δεν αρκεί. Η εξαγωγή αποθηκευμένων διαπιστευτηρίων (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), η επαναφορά αντιγράφου πάνω στα ζωντανά δεδομένα (`POST /api/db-backups/import`, συμπεριλαμβανομένου του `dryRun=true`, `POST /api/db-backups` επαναφορά με βάση το id, `POST /api/settings/import-json`), η καταστροφή σημείων επαναφοράς (`DELETE /api/db-backups` για καθαρισμό και `PATCH /api/db-backups`, επειδή η διατήρηση που αποθηκεύει οδηγεί την αυτόματη διαγραφή μετά από κάθε αντίγραφο) απαιτούν συνεδρία πίνακα ελέγχου, το τοπικό υποκείμενο CLI ή απενεργοποιημένη σύνδεση. Η έκδοση ενός token συγχρονισμού (`POST /api/sync/tokens`) και η δημιουργία token πρόσβασης CLI με `admin` (`POST /api/cli/tokens`) απαιτούν συνεδρία πίνακα ελέγχου ή το τοπικό υποκείμενο CLI σε κάθε λειτουργία σύνδεσης. Τα κλειδιά API όλων των scopes και τα tokens πρόσβασης `oma_` δεν είναι διαπιστευτήρια διαχειριστή: λαμβάνουν `403` όποτε απαιτείται ένα τέτοιο. Ο έλεγχος βρίσκεται στο `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Η αλλαγή των ρυθμίσεων σύνδεσης είναι επίσης μόνο για τον διαχειριστή: το `POST /api/settings/require-login` (ορισμός του κωδικού διαχείρισης / εναλλαγή του `requireLogin`) δέχεται μόνο αυτά τα διαπιστευτήρια αφού υπάρξει κωδικός — το παράθυρο της αρχικής ρύθμισης (όταν δεν υπάρχει ακόμη κωδικός) παραμένει ως έχει — και μια συνεδρία πίνακα ελέγχου πρέπει να στείλει `currentPassword` για να αντικαταστήσει τον κωδικό (`403` όταν λείπει ή είναι λάθος, με καταγραφή ως `settings.update_failed`). Το τοπικό CLI και μια εγκατάσταση με απενεργοποιημένη σύνδεση διατηρούν τη διαδρομή ανάκτησης και μπορούν να ορίσουν κωδικό χωρίς αυτόν, αφού και τα δύο είναι δεσμευμένα στον υπολογιστή που κατέχει τον κατάλογο δεδομένων.
 
-## Ροή επεξεργασίας
+## Γραμμή σωλήνων
 
 ```
-Εισερχόμενο αίτημα → src/proxy.ts
-  → runAuthzPipeline() στο src/server/authz/pipeline.ts
-    1. Αφαίρεση αξιόπιστων εσωτερικών κεφαλίδων (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Δημιουργία αναγνωριστικού αιτήματος, ταξινόμηση διαδρομής μέσω classifyRoute()
-    3. Αν pathname == "/" → ανακατεύθυνση στο /dashboard
-    4. Αν βρίσκεται σε διαδικασία τερματισμού (ομαλός τερματισμός) και /api/* → 503
-    5. Αν δεν είναι GET και είναι /api/* → έλεγχος προστασίας checkBodySize()
-    6. Αν είναι OPTIONS → προκαταρκτικό αίτημα CORS 204
-    7. Αν options.enforce == false → διέλευση με κεφαλίδες κλάσης διαδρομής
-    8. Διαφορετικά: POLICIES[routeClass].evaluate(ctx)
-       - αποδοχή  → προσθήκη x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - απόρριψη → σφάλμα JSON με correlation_id (σελίδες πίνακα ελέγχου → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Οι αξιόπιστες εσωτερικές κεφαλίδες (που ορίζονται στο `src/server/authz/headers.ts`) **αφαιρούνται από τα εισερχόμενα αιτήματα** πριν από την ταξινόμηση — οι πελάτες δεν μπορούν να προσυμπληρώσουν το `x-omniroute-auth-*` για να πλαστοπροσωπήσουν ένα υποκείμενο.
+Οι αξιόπιστες εσωτερικές κεφαλίδες (που ορίζονται στο `src/server/authz/headers.ts`) είναι** απογυμνωθεί από εισερχόμενα αιτήματα** πριν από την ταξινόμηση, οι πελάτες — δεν μπορούν να συμπληρώσουν εκ των προτέρων `x-omniroute-auth-*` για να μιμηθούν ένα θέμα.
 
-### Συμβάσεις πολιτικών
+### Συμβάσεις πολιτικής
 
-Κάθε κλάση διαδρομής έχει μια πολιτική στο `src/server/authz/policies/`:
+Κάθε κατηγορία διαδρομής έχει μια πολιτική στο `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — επιστρέφει πάντα `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — εξάγει το Bearer και το επικυρώνει μέσω `validateApiKey()`. Μεταπίπτει σε ανώνυμη πρόσβαση μόνο όταν η ισχύουσα σημαία λειτουργίας `REQUIRE_API_KEY` είναι απενεργοποιημένη. Η ισχύουσα σημαία επιλύεται μέσω `isRequireApiKeyEnabled()` (`παράκαμψη σημαίας λειτουργίας DB > process.env.REQUIRE_API_KEY > προεπιλογή`), ώστε οι Σημαίες Λειτουργιών του Πίνακα Ελέγχου και οι μεταβλητές περιβάλλοντος να διέπουν με συνέπεια τα `/api/v1/*`, `/api/v1beta/*` και τα ψευδώνυμα· οι αποτυχίες του επιλυτή οδηγούν σε ασφαλή απόρριψη. Επιτρέπει αιτήματα με συνεδρία πίνακα ελέγχου στις διαδρομές API πελάτη (συμπεριλαμβανομένης της `/api/v1/models`, η οποία χρησιμοποιείται από τον κατάλογο μοντέλων του πίνακα ελέγχου).
-- **`managementPolicy`** (`policies/management.ts`) — αποδέχεται συνεδρία πίνακα ελέγχου, εσωτερικά αιτήματα συγχρονισμού μοντέλων (αντιστοιχισμένα με το `/api/providers/[name]/(sync-models|models)`) ή παρακάμπτεται πλήρως αν το `isAuthRequired()` επιστρέψει false. Επιστρέφει 403 (`AUTH_001`) όταν υπάρχει διακριτικό Bearer αλλά είναι μη έγκυρο, διαφορετικά 401. Επιβάλλει επίσης τις βαθμίδες προστασίας διαδρομών (LOCAL_ONLY / ALWAYS_PROTECTED) πριν από οποιονδήποτε κλάδο ελέγχου ταυτότητας — ανατρέξτε στο [Βαθμίδες Προστασίας Διαδρομών](../security/ROUTE_GUARD_TIERS.md). Οι διαδρομές LOCAL_ONLY στο `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (σήμερα: `/api/mcp/`) μπορούν να προσπελαστούν εκτός loopback όταν το κλειδί Bearer διαθέτει την εμβέλεια `manage`· όλες οι άλλες διαδρομές LOCAL_ONLY παραμένουν αυστηρά προσβάσιμες μόνο μέσω loopback, ανεξαρτήτως εμβέλειας.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — αποσπάσματα Bearer, επικυρώνει μέσω `validateApiKey()`. Πέφτει σε ανώνυμη μόνο όταν η ενεργή σημαία χαρακτηριστικών `REQUIRE_API_KEY` είναι απενεργοποιημένη. Η αποτελεσματική επισήμανση επιλύεται μέσω `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), επομένως οι σημαίες χαρακτηριστικών του πίνακα ελέγχου και οι μεταβλητές περιβάλλοντος διέπουν με συνέπεια `/api/v1/*`, `/api/v1beta/*` και ψευδώνυμα. οι αποτυχίες του επιλύτη αποτυγχάνουν να κλείσουν. Επιτρέπει αιτήματα συνεδρίας πίνακα εργαλείων σε διαδρομές πελάτη API (συμπεριλαμβανομένου του `/api/v1/models`, που χρησιμοποιείται από τον κατάλογο μοντέλων του πίνακα εργαλείων). Όταν το Entra ID SSO είναι ενεργοποιημένο, ένας φορέας που είναι δομικά ένα διακριτικό Entra (τρία τμήματα base64url, `RS*` alg, `kid`) αντιμετωπίζεται από τον κλάδο SSO** προτού** `validateApiKey()` και η ετυμηγορία του είναι οριστική — δεν περνά ποτέ στη διαδρομή κλειδιού API ή στον κλάδο υποβάθμισης σε ανώνυμο, επομένως μια διακοπή παροχής ταυτότητας δεν μπορεί να γίνει ανοιχτή πρόσβαση. Τα στατικά κλειδιά API δεν επηρεάζονται. Δείτε [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — αποδέχεται περίοδο λειτουργίας πίνακα εργαλείων, εσωτερικά αιτήματα συγχρονισμού μοντέλου (αντιστοιχίζονται σε `/api/providers/[name]/(sync-models|models)`) ή παρακάμπτει εντελώς εάν `isAuthRequired()` επιστρέψει false. Επιστρέφει 403 (`AUTH_001`) όταν υπάρχει ένα διακριτικό φορέα αλλά δεν είναι έγκυρο, 401 διαφορετικά. Επίσης, επιβάλλει τις βαθμίδες προστασίας διαδρομής (LOCAL_ONLY / ALWAYS_PROTECTED) πριν από οποιοδήποτε κλάδο εξουσιοδότησης — ανατρέξτε στο [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). Τα μονοπάτια LOCAL_ONLY στο `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (σήμερα: `/api/mcp/`) μπορούν να προσπελαστούν από non-loopback όταν το κλειδί Bearer φέρει το εύρος `manage`. όλα τα άλλα μονοπάτια LOCAL_ONLY παραμένουν αυστηρά-loopback ανεξάρτητα από το εύρος.
 
-Μια επιτυχημένη πολιτική επιστρέφει `AuthSubject` με `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Οι μεταγενέστεροι χειριστές μπορούν να το διαβάσουν μέσω `assertAuth(request, "CLIENT_API")` στο `src/server/authz/assertAuth.ts`, αντί να εκτελέσουν ξανά τη λογική ελέγχου ταυτότητας.
+Μια επιτυχημένη πολιτική επιστρέφει `AuthSubject` με `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Οι μεταγενέστεροι χειριστές μπορούν να το διαβάσουν μέσω `assertAuth(request, "CLIENT_API")` σε `src/server/authz/assertAuth.ts` αντί να εκτελούν ξανά τη λογική εξουσιοδότησης.
 
 ## Λίστα δημόσιων διαδρομών
 
@@ -310,23 +310,23 @@ export async function POST(request: Request) {
 
 ## Εντοπισμός σφαλμάτων
 
-Η διοχέτευση επισημαίνει πάντα τις αποκρίσεις με:
+Ο αγωγός σφραγίζει πάντα τις απαντήσεις με:
 
 ```
-x-request-id:               <αναγνωριστικό συσχέτισης, επαναλαμβάνεται στα σώματα σφαλμάτων>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Για πιστοποιημένα αιτήματα, οι κεφαλίδες αιτήματος προς το ανάντη σύστημα (στην πλευρά του χειριστή) περιλαμβάνουν επίσης:
+Για επικυρωμένα αιτήματα, οι κεφαλίδες αιτημάτων ανάντη (από την πλευρά του χειριστή) περιλαμβάνουν επίσης:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<τελευταία-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (προαιρετικό)
-x-omniroute-auth-scopes:    λίστα διαχωρισμένη με κόμματα
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Χρησιμοποιήστε το `assertAuth(req, expectedClass)` μέσα στους χειριστές — προκαλεί `AuthzAssertionError` με κωδικό `AUTHZ_NOT_INITIALIZED` εάν το ενδιάμεσο λογισμικό παρακάμφθηκε (χρήσιμο για τον εντοπισμό παλινδρομήσεων διαμόρφωσης στις δοκιμές).
+Χρησιμοποιήστε `assertAuth(req, expectedClass)` μέσα στους χειριστές — ρίχνει `AuthzAssertionError` με κωδικό `AUTHZ_NOT_INITIALIZED` εάν παρακαμφθεί το ενδιάμεσο λογισμικό (χρήσιμο για την καταγραφή παλινδρομήσεων διαμόρφωσης σε δοκιμές).
 
 ## Δείτε επίσης
 

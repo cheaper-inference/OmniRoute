@@ -613,7 +613,10 @@ async function requestBatch(htmlList, target, { fetchImpl, apiKey, timeoutMs, ba
         err?.name === "AbortError" ||
         err?.status === 429 ||
         (err?.status ?? 0) >= 500 ||
-        /fetch failed|ECONN|ENOTFOUND|network/i.test(String(err?.cause ?? err?.message));
+        // undici reports a dropped connection as TypeError("fetch failed") whose `cause` is
+        // e.g. `SocketError: other side closed` (UND_ERR_SOCKET), so the cause alone does not
+        // say "network"; test the message as well or a reset fails the locale on try 1.
+        /fetch failed|ECONN|ENOTFOUND|network/i.test(`${err?.message} ${err?.cause ?? ""}`);
       if (!retryable || attempt === MAX_TRIES) break;
       const wait = Math.min(MAX_BACKOFF_MS, backoffMs * 2 ** (attempt - 1));
       await sleep(wait + Math.floor(Math.random() * Math.min(wait, 1000) * 0.25));

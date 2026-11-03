@@ -142,31 +142,31 @@ Is **gníomhartha oibreora-amháin** cuid de ghníomhartha `MANAGEMENT`: ní leo
 ## Píblíne
 
 ```
-Iarratas isteach → src/proxy.ts
+Incoming request → src/proxy.ts
   → runAuthzPipeline() in src/server/authz/pipeline.ts
-    1. Bain ceanntásca inmheánacha iontaofa (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Gin aitheantas iarratais, aicmigh an bealach trí classifyRoute()
-    3. Má tá pathname == "/" → atreoraigh chuig /dashboard
-    4. Má tá an córas ag folmhú (múchadh grástúil) agus /api/* → 503
-    5. Más iarratas neamh-GET é ar /api/* → seiceáil an chosaint checkBodySize()
-    6. Más OPTIONS é → réamheitilt CORS 204
-    7. Má tá options.enforce == false → lig tríd le ceanntásca aicme bealaigh
-    8. Seachas sin: POLICIES[routeClass].evaluate(ctx)
-       - ceadaigh  → stampáil x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - diúltaigh → earráid JSON le correlation_id (leathanaigh deais → 302 /login)
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Déantar ceanntásca inmheánacha iontaofa (a shainmhínítear in `src/server/authz/headers.ts`) a **bhaint ó iarratais isteach** roimh an aicmiú — ní féidir le cliaint `x-omniroute-auth-*` a réamhlíonadh chun aithris a dhéanamh ar shuibiacht.
+Is iad ceanntásca inmheánacha iontaofa (arna sainmhíniú in `src/server/authz/headers.ts`).** bainte ó iarratais ag teacht isteach** roimh rangú ní féidir le cliaint — `x-omniroute-auth-*` a réamhdhaonra chun aithris a dhéanamh ar ábhar.
 
-### Conarthaí polasaí
+### Conarthaí beartais
 
-Tá polasaí ag gach aicme bealaigh in `src/server/authz/policies/`:
+Tá polasaí ag gach rang bealaigh i `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — tugann sé `allow({ kind: "anonymous", id: "anonymous" })` ar ais i gcónaí.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — baineann sé Bearer amach agus bailíochtaíonn sé é trí `validateApiKey()`. Ní théann sé ar aghaidh chuig rochtain anaithnid ach amháin nuair atá an bhratach ghné éifeachtach `REQUIRE_API_KEY` díchumasaithe. Réitítear an bhratach éifeachtach trí `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ionas go rialaíonn Bratacha Gné na Deaise agus athróga timpeallachta `/api/v1/*`, `/api/v1beta/*`, agus na hailiasanna ar bhealach comhsheasmhach; má theipeann ar an réiteoir, diúltaítear don rochtain. Ceadaíonn sé iarratais ó sheisiún deais ar bhealaí API cliaint (lena n-áirítear `/api/v1/models`, a úsáideann catalóg samhlacha na deaise).
-- **`managementPolicy`** (`policies/management.ts`) — glacann sé le seisiún deais, iarratais inmheánacha sioncronaithe samhlacha (a mheaitseáiltear le `/api/providers/[name]/(sync-models|models)`), nó scipeálann sé go hiomlán má thugann `isAuthRequired()` false ar ais. Tugann sé 403 (`AUTH_001`) ar ais nuair atá comhartha Bearer i láthair ach neamhbhailí, agus 401 i ngach cás eile. Cuireann sé cisil chosanta na mbealaí (LOCAL_ONLY / ALWAYS_PROTECTED) i bhfeidhm freisin roimh aon bhrainse fíordheimhnithe — féach [Cisil Chosanta na mBealaí](../security/ROUTE_GUARD_TIERS.md). Is féidir rochtain a fháil ar chosáin LOCAL_ONLY in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (faoi láthair: `/api/mcp/`) ó sheoladh nach seoladh lúb-ais é nuair atá an scóip `manage` ag an eochair Bearer; fanann gach cosán LOCAL_ONLY eile teoranta go docht do sheoltaí lúb-ais, beag beann ar an scóip.
+- **`publicPolicy`** (`policies/public.ts`) Filleann — `allow({ kind: "anonymous", id: "anonymous" })` i gcónaí .
+- **`clientApiPolicy`** (`policies/clientApi.ts`) sleachta — Iompróir, bailíochtaíonn sé trí `validateApiKey()`. Ní thagann sé gan ainm ach amháin nuair atá an bhratach gné `REQUIRE_API_KEY` éifeachtach díchumasaithe. Réitítear an bhratach éifeachtach trí `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) agus mar sin rialaíonn Bratacha Gné an Deais agus athróga timpeallachta `/api/v1/*`, `/api/v1beta/*`, agus ailiasanna go comhsheasmhach; teipeanna réititheora dúnta. Ceadaíonn sé iarratais ar sheisiún deais ar bhealaí API cliant (lena n-áirítear `/api/v1/models`, a úsáideann catalóg mhúnla an deais). Nuair atá Entra ID SSO cumasaithe, láimhseálann an brainse SSO Iompróir atá ina chomhartha Entra go struchtúrach (trí dheighleog base64url, `RS*` alg, `kid`)** roimhe** `validateApiKey()` agus is é an fíorasc deiridh — ní thiteann sé riamh go dtí an cosán API-eochair nó an brainse díghrádaithe go anaithnid, mar sin ní féidir briseadh soláthraí aitheantais a bheith ina rochtain oscailte. Níl aon tionchar ar eochracha statach API. Féach [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) glacann — le seisiún deais, iarratais ar shioncronú múnla inmheánach (mar a mheaitseáiltear le `/api/providers/[name]/(sync-models|models)`), nó scipeann sé go hiomlán má fhilleann `isAuthRequired()` bréagach. Filleann sé 403 (`AUTH_001`) nuair a bhíonn comhartha Iompróra i láthair ach neamhbhailí, 401 murach é. Chomh maith leis sin cuireann sé i bhfeidhm na sraitheanna garda bealaigh (LOCAL_ONLY / ALWAYS_PROTECTED) roimh aon bhrainse údaráis — féach [Sraitheanna Garda Bealaigh](../security/ROUTE_GUARD_TIERS.md). Is féidir cosáin LOCAL_ONLY i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (lá atá inniu ann: `/api/mcp/`) a rochtain ó neamh-lúb nuair a iompraíonn an eochair Iompróir an raon feidhme `manage` ; fanann gach cosán LOCAL_ONLY eile docht-lúb beag beann ar raon feidhme.
 
-Tugann polasaí rathúil `AuthSubject` ar ais le `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Is féidir le láimhseálaithe iartheachtacha é a léamh trí `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` seachas an loighic fíordheimhnithe a rith arís.
+Tugann polasaí rathúil `AuthSubject` le `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Is féidir le láimhseálaithe iartheachtacha é a léamh trí `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` in ionad loighic an údair a athrith.
 
 ## Liosta Bealaí Poiblí
 
@@ -314,25 +314,25 @@ Tá `/api/mcp/*` (an cianfhreastalaí MCP) fós LOCAL_ONLY de réir réamhshocra
 - Liosta ceada poiblí: `tests/unit/public-api-routes.test.ts`.
 - Rith dírithe: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Dífhabhtú
+## Dífhabhtaithe
 
-Marcálann an phíblíne freagraí i gcónaí leis na ceanntásca seo:
+Stampálann an píblíne freagraí i gcónaí le:
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-I gcás iarrataí fíordheimhnithe, áirítear na ceanntásca iarratais réamhtheachtacha (ar thaobh an láimhseálaí) seo freisin:
+I gcás iarratais fhíordheimhnithe, áirítear na ceannteidil iarratais in aghaidh an tsrutha (taobh láimhseálaí):
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Úsáid `assertAuth(req, expectedClass)` laistigh de láimhseálaithe — caitheann sé `AuthzAssertionError` leis an gcód `AUTHZ_NOT_INITIALIZED` má seachnaíodh an meánearra (rud atá úsáideach chun cúlchéimnithe cumraíochta a bhrath i dtástálacha).
+Bain úsáid as `assertAuth(req, expectedClass)` láimhseálaithe taobh istigh — caitheann sé `AuthzAssertionError` le cód `AUTHZ_NOT_INITIALIZED` má seachnaítear an lárearraí (cabhrach chun aischéimnithe cumraíochta a ghabháil i dtrialacha).
 
 ## Féach Freisin
 

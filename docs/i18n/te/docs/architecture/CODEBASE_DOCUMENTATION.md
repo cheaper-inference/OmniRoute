@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ఉన్నత-స్థాయి ఎగ్జిక్యూటర్ మాడ్యూల్స్ (`*.ts` మైనస్ `base.ts`, `index.ts` మరియు పరీక్షలు - కౌంట్ `npm run check:docs-counts` కొలతలు). ప్రతి ఎగ్జిక్యూటర్ క్లాస్ `BaseExecutor` (`base.ts`), నేరుగా లేదా `DefaultExecutor` లేదా మరొక కార్యనిర్వాహకుడు ద్వారా విస్తరించింది; మిగిలిన మాడ్యూల్స్ ప్రతి ప్రొవైడర్ సహాయకులు (టూల్ స్కీమాలు, fetch/TTS ఎడాప్టర్లు, క్విర్క్ హ్యాండ్లర్లు). కార్యనిర్వాహకులలో ఇవి ఉన్నాయి:
+156 ఉన్నత-స్థాయి ఎగ్జిక్యూటర్ మాడ్యూల్స్ (`*.ts` మైనస్ `base.ts`, `index.ts` మరియు పరీక్షలు — కౌంట్ `npm run check:docs-counts` కొలతలు). ప్రతి కార్యనిర్వాహక తరగతి నేరుగా లేదా `DefaultExecutor` లేదా మరొక కార్యనిర్వాహకుడు ద్వారా `BaseExecutor` (`base.ts`)ను విస్తరిస్తుంది; మిగిలిన మాడ్యూల్స్ ప్రతి ప్రొవైడర్ సహాయకులు (టూల్ స్కీమాలు, fetch/TTS ఎడాప్టర్లు, క్విర్క్ హ్యాండ్లర్లు). కార్యనిర్వాహకులలో ఇవి ఉన్నాయి:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `nlpcloud` `opencode` `perplexity-web` `petals` `pollinations` `devin-desktop` `claudeIdentity.ts` `qoder` రిజిస్ట్రీ) `index.ts`
 
-> గమనిక: ఇక్కడ జాబితా చేయని ప్రొవైడర్లు జెనరిక్ OpenAI-అనుకూల కార్యనిర్వాహకుడిని ఉపయోగించి `default.ts` ద్వారా సేవలు అందిస్తారు. పూర్తి ప్రొవైడర్ కేటలాగ్ (377 ప్రొవైడర్లు) `src/shared/constants/providers.ts` లో నివసిస్తుంది.
+> గమనిక: ఇక్కడ జాబితా చేయని ప్రొవైడర్లు జెనరిక్ OpenAI-అనుకూల కార్యనిర్వాహకుడిని ఉపయోగించి `default.ts` ద్వారా సేవలు అందిస్తారు. పూర్తి ప్రొవైడర్ కేటలాగ్ (380 ప్రొవైడర్లు) `src/shared/constants/providers.ts` లో నివసిస్తుంది.
 
 ### 4.3 `open-sse/translator/`
 
@@ -510,7 +510,7 @@ open-sse/
 
 ముఖ్యాంశాలు ( `open-sse/services/` క్రింద పూర్తి జాబితా):
 
-| ఆందోళన               | ఫైల్లు                                                                                                                                                                                                                                                   |
+| ఆందోళన               | ఫైళ్లు                                                                                                                                                                                                                                                   |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | కాంబో రూటింగ్        | `combo.ts` (20 వ్యూహాలు), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
 | ఆటో కాంబో ఇంజిన్     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
@@ -528,16 +528,16 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ప్రత్యేక సాధనాలు** `server.ts` లో వైర్డు ( `schemas/tools.ts` + మెమరీ, నైపుణ్యాలు, GitHub-నైపుణ్యాలు, పూల్, గేమిఫికేషన్, ప్లగిన్, Notion, Obsidian, లోకల్-కార్పస్ మరియు కంప్రెషన్ మాడ్యూల్స్లో 45 కానానికల్ — యూనియన్ `countUniqueMcpTools` ద్వారా లెక్కించబడుతుంది).
+- **110 ప్రత్యేక సాధనాలు** `server.ts` లో వైర్డు ( `schemas/tools.ts` + మెమరీ, నైపుణ్యాలు, GitHub-నైపుణ్యాలు, పూల్, గేమిఫికేషన్, ప్లగ్ఇన్, Notion, Obsidian, లోకల్-కార్పస్ మరియు కంప్రెషన్ మాడ్యూల్స్ — యూనియన్లో `countUniqueMcpTools` ద్వారా గణించబడిన 45 కానానికల్).
 - **3 రవాణా** : stdio, HTTP స్ట్రీమబుల్, SSE.
-- **33 పరిధులు** రన్టైమ్లో అమలు చేయబడుతుంది — `src/shared/constants/mcpScopes.ts` లో బేస్ లిస్ట్, పూర్తి సెట్ అనేది ప్రతి టూల్ మాడ్యూల్ ద్వారా ప్రకటించబడిన స్కోప్ల యూనియన్.
+- **33 పరిధులు** `src/shared/constants/mcpScopes.ts` లో రన్టైమ్ — బేస్ లిస్ట్లో అమలు చేయబడుతుంది, పూర్తి సెట్ అనేది ప్రతి టూల్ మాడ్యూల్ ద్వారా ప్రకటించబడిన స్కోప్ల యూనియన్.
 - ఆడిట్ టేబుల్: `mcp_tool_audit` (జనాభాతో `audit.ts`).
 - ఫైల్లు: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, ప్లస్ పరీక్షలు `__tests__/`.
 - పూర్తి టూల్ కేటలాగ్ కోసం [MCP-SERVER.md](../frameworks/MCP-SERVER.md) చూడండి.
 
 ### 4.7 `open-sse/config/`
 
-ప్రొవైడర్ రిజిస్ట్రీలు (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), పర్-ఫార్మాట్ మోడల్ రిజిస్ట్రీలు (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), గుర్తింపు సహాయకులు (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts` `defaultThinkingSignature.ts` `cliFingerprints.ts`, `toolCloaking.ts` సహాయకులు (`credentialLoader.ts`, `codexClient.ts`) మరియు క్లౌడ్ అడాప్టర్లు (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `oci.ts`, `glmProvider.ts`, `maritalk.ts`, `petals.ts`, `runway.ts`, `sap.ts` `errorConfig.ts` `watsonx.ts` `ollamaModels.ts`, `constants.ts` `registryUtils.ts`.
+ప్రొవైడర్ రిజిస్ట్రీలు (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), పర్-ఫార్మాట్ మోడల్ రిజిస్ట్రీలు (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), గుర్తింపు సహాయకులు (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts` `defaultThinkingSignature.ts` `cliFingerprints.ts`, `toolCloaking.ts` హెల్పర్లు (`credentialLoader.ts`, `codexClient.ts`) మరియు క్లౌడ్ అడాప్టర్లు (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `oci.ts`, `glmProvider.ts`, `maritalk.ts`, `petals.ts`, `runway.ts` `watsonx.ts` `sap.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
 
 ### 4.8 `open-sse/utils/`
 

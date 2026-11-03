@@ -147,34 +147,34 @@ completată:
 
 Câteva acțiuni `MANAGEMENT` sunt **doar pentru operator**: o cheie `manage` nu este suficientă. Exportul credențialelor stocate (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurarea unei copii de rezervă peste datele live (`POST /api/db-backups/import`, inclusiv `dryRun=true`, `POST /api/db-backups` restaurare după id, `POST /api/settings/import-json`) și distrugerea punctelor de restaurare (curățarea prin `DELETE /api/db-backups` și de asemenea `PATCH /api/db-backups`, deoarece retenția pe care o persistă determină curățarea automată după fiecare copie de rezervă) necesită o sesiune de panou, subiectul CLI local sau autentificarea dezactivată. Emiterea unui token de sincronizare (`POST /api/sync/tokens`) și crearea unui token de acces CLI cu domeniul `admin` (`POST /api/cli/tokens`) necesită o sesiune de panou sau subiectul CLI local în orice mod de autentificare. Cheile API de orice domeniu și tokenurile de acces `oma_` nu sunt credențiale de operator: primesc `403` ori de câte ori se cere una. Verificarea se află în `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Modificarea setărilor de autentificare este și ea rezervată operatorului: `POST /api/settings/require-login` (setarea parolei de administrare / comutarea `requireLogin`) acceptă doar aceste credențiale odată ce există o parolă — fereastra de bootstrap de la prima rulare (fără parolă) rămâne neschimbată — iar o sesiune de panou trebuie să trimită `currentPassword` pentru a înlocui parola (`403` dacă lipsește sau este greșită, auditat ca `settings.update_failed`). CLI-ul local și o instanță cu autentificarea dezactivată păstrează calea de recuperare și pot seta o parolă fără ea, deoarece ambele sunt legate de gazda care deține directorul de date.
 
-## Flux de procesare
+## Conductă
 
 ```
-Cerere primită → src/proxy.ts
-  → runAuthzPipeline() în src/server/authz/pipeline.ts
-    1. Elimină anteturile interne de încredere (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Generează ID-ul cererii, clasifică ruta prin classifyRoute()
-    3. Dacă pathname == "/" → redirecționează către /dashboard
-    4. Dacă serviciul este în curs de oprire (oprire controlată) și ruta este /api/* → 503
-    5. Dacă metoda nu este GET și ruta este /api/* → verificarea de protecție checkBodySize()
-    6. Dacă metoda este OPTIONS → răspuns preliminar CORS 204
-    7. Dacă options.enforce == false → transmite mai departe cu anteturile clasei rutei
-    8. În caz contrar: POLICIES[routeClass].evaluate(ctx)
-       - allow  → aplică x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → eroare JSON cu correlation_id (pagini ale panoului de control → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Anteturile interne de încredere (definite în `src/server/authz/headers.ts`) sunt **eliminate din cererile primite** înainte de clasificare — clienții nu pot precompleta `x-omniroute-auth-*` pentru a uzurpa identitatea unui subiect.
+Anteturile interne de încredere (definite în `src/server/authz/headers.ts`) sunt** eliminate de la cererile primite** înainte de clasificare, clienții — nu pot prepopula `x-omniroute-auth-*` pentru a uzurpa identitatea unui subiect.
 
-### Contractele politicilor
+### Contracte de poliță
 
 Fiecare clasă de rută are o politică în `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnează întotdeauna `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrage Bearer și îl validează prin `validateApiKey()`. Permite continuarea ca anonim numai când indicatorul de funcționalitate efectiv `REQUIRE_API_KEY` este dezactivat. Valoarea efectivă a indicatorului este determinată prin `isRequireApiKeyEnabled()` (`suprascriere prin indicatorul de funcționalitate din DB > process.env.REQUIRE_API_KEY > valoare implicită`), astfel încât indicatorii de funcționalitate din panoul de control și variabilele de mediu să controleze în mod consecvent `/api/v1/*`, `/api/v1beta/*` și aliasurile; erorile mecanismului de determinare duc la refuzarea accesului. Permite cereri cu sesiune a panoului de control pe rutele API pentru clienți (inclusiv `/api/v1/models`, utilizată de catalogul de modele al panoului de control).
-- **`managementPolicy`** (`policies/management.ts`) — acceptă sesiunea panoului de control, cererile interne de sincronizare a modelelor (potrivite cu `/api/providers/[name]/(sync-models|models)`) sau omite complet verificarea dacă `isAuthRequired()` returnează false. Returnează 403 (`AUTH_001`) când este prezent un token Bearer nevalid și 401 în caz contrar. De asemenea, aplică nivelurile de protecție a rutelor (LOCAL_ONLY / ALWAYS_PROTECTED) înaintea oricărei ramuri de autentificare — consultați [Nivelurile de protecție a rutelor](../security/ROUTE_GUARD_TIERS.md). Căile LOCAL_ONLY din `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (în prezent: `/api/mcp/`) pot fi accesate din afara interfeței loopback când cheia Bearer include domeniul `manage`; toate celelalte căi LOCAL_ONLY rămân limitate strict la interfața loopback, indiferent de domeniu.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrage Bearer, validează prin `validateApiKey()`. Devine anonim numai atunci când indicatorul caracteristicii efective `REQUIRE_API_KEY` este dezactivat. Indicatorul efectiv este rezolvat prin `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), astfel încât Indicatorii de caracteristică a tabloului de bord și variabilele de mediu guvernează în mod consecvent `/api/v1/*`, `/api/v1beta/*` și aliasurile; eșecurile rezolutorului eșuate închise. Permite solicitări de sesiuni de tablou de bord pe rutele client API (inclusiv `/api/v1/models`, utilizat de catalogul modelelor de tablou de bord). Când Entra ID SSO este activat, un purtător care este structural un token Entra (trei segmente base64url, `RS*` alg, `kid`) este gestionat de ramura SSO** înainte** `validateApiKey()` și verdictul său este final — nu ajunge niciodată la calea cheii API sau la ramura de degradare la anonimă, astfel încât o întrerupere a furnizorului de identitate nu poate deveni acces deschis. Cheile statice API nu sunt afectate. Vezi [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — acceptă sesiunile de tablou de bord, cererile interne de sincronizare a modelului (potrivite cu `/api/providers/[name]/(sync-models|models)`) sau omite complet dacă `isAuthRequired()` returnează false. Returnează 403 (`AUTH_001`) când este prezent un simbol Bearer, dar nu este valid, 401 în caz contrar. De asemenea, impune nivelurile de gardă rută (LOCAL_ONLY / ALWAYS_PROTECTED) înainte de orice ramură de autentificare — vezi [Nivelurile de gardă rută](../security/ROUTE_GUARD_TIERS.md). Căile LOCAL_ONLY în `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (azi: `/api/mcp/`) pot fi accesate din non-loopback atunci când cheia Bearer poartă domeniul `manage` ; toate celelalte căi LOCAL_ONLY rămân strict-loopback, indiferent de domeniul de aplicare.
 
-O politică reușită returnează `AuthSubject` cu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Gestionarii din aval îl pot citi prin `assertAuth(request, "CLIENT_API")` în `src/server/authz/assertAuth.ts`, în loc să execute din nou logica de autentificare.
+O politică de succes returnează `AuthSubject` cu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Managerii din aval îl pot citi prin `assertAuth(request, "CLIENT_API")` în `src/server/authz/assertAuth.ts` în loc să ruleze din nou logica de autentificare.
 
 ## Lista rutelor publice
 
@@ -325,23 +325,23 @@ Endpointurile `/api/v1/agents/tasks/*` și `/api/resilience/model-cooldowns` **n
 
 ## Depanare
 
-Pipeline-ul marchează întotdeauna răspunsurile cu:
+Conducta ștampilă întotdeauna răspunsurile cu:
 
 ```
-x-request-id:               <ID de corelare, reprodus în corpurile erorilor>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Pentru solicitările autentificate, antetele solicitării upstream (din partea handlerului) includ și:
+Pentru cererile autentificate, anteturile cererii din amonte (partea de gestionare) includ, de asemenea:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<ultimele-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (opțional)
-x-omniroute-auth-scopes:    listă separată prin virgule
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Utilizați `assertAuth(req, expectedClass)` în interiorul handlerelor — aceasta generează `AuthzAssertionError` cu codul `AUTHZ_NOT_INITIALIZED` dacă middleware-ul a fost ocolit (util pentru detectarea regresiilor de configurare în teste).
+Utilizați `assertAuth(req, expectedClass)` în interiorul handler-urilor — acesta aruncă `AuthzAssertionError` cu codul `AUTHZ_NOT_INITIALIZED` dacă middleware-ul a fost ocolit (util pentru a prinde regresiile de configurare în teste).
 
 ## Vezi și
 
