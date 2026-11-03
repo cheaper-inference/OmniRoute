@@ -1,4 +1,5 @@
 import type { OmniRouteRawModelEntry } from "./shared/index.js";
+import { matchesModelFilter, type ModelListFilter } from "./model-filter.js";
 
 /**
  * Freshness window in days. The millisecond value below derives from it,
@@ -163,8 +164,7 @@ export function passesWhatServes(
   windowMs: number = FRESHNESS_WINDOW_MS
 ): boolean {
   if (visibleFilter !== undefined) {
-    if (visibleFilter.exact.has(entry.id)) return true;
-    if (matchesSuffix(entry.id, visibleFilter.suffixes)) return true;
+    if (matchesModelFilter(entry.id, visibleFilter)) return true;
   }
   // The raw gateway row may carry a lifecycle hint the typed entry does
   // not declare (it already flows through the fetcher untouched).
@@ -198,8 +198,7 @@ export function selectFreshKeptIds(
     if (readEntryStatus(entry) === "deprecated") continue;
     if (isFlatTierId(entry.id)) continue;
     if (visibleFilter !== undefined) {
-      if (visibleFilter.exact.has(entry.id)) continue;
-      if (matchesSuffix(entry.id, visibleFilter.suffixes)) continue;
+      if (matchesModelFilter(entry.id, visibleFilter)) continue;
     }
     if (!isFreshModel(entry, nowMs, windowMs)) continue;
     const owner = ownerKeyOf(entry);
@@ -231,16 +230,4 @@ export function staysDropped(
   if (isFlatTierId(entry.id)) return true;
   if (isFreshModel(entry, nowMs, windowMs) && !freshKept.has(entry.id)) return true;
   return false;
-}
-
-export interface ModelListFilter {
-  exact: Set<string>;
-  suffixes: Set<string>;
-}
-
-export function matchesSuffix(id: string, suffixes: Set<string>): boolean {
-  if (suffixes.size === 0) return false;
-  const slash = id.indexOf("/");
-  const suffix = slash > 0 ? id.slice(slash + 1) : id;
-  return suffixes.has(suffix);
 }

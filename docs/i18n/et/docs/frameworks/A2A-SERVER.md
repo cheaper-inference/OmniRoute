@@ -163,7 +163,7 @@ OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.t
 | Tervisearuanne        | `health-report`      | Agregeerib kaitselülitit, jahtumist, lukustuse olekut pakkuja kohta                                                                                                                  | tervis, vastupidavus       | "Kuva kõigi teenuseosutajate tervislik seisund" |
 | Loetlege võimalused   | `list-capabilities`  | Tagastab täieliku 45 kirjest koosneva agendioskuste kataloogi (23 API + 21 CLI + 1 konfiguratsioon) allahindluste tabelina koos töötlemata SKILL.md URLs iga konteksti sisestamiseks | kataloog, avastus, oskused | "Loetlege kõik OmniRoute võimalused"            |
 
-> Agendikaarti tuleks hoida vastavuses reaalajas 377-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
+> Agendikaarti tuleks hoida vastavuses reaalajas 380-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
 
 ### `list-capabilities` oskuste üksikasjad
 
@@ -199,37 +199,37 @@ JSON-RPC-i lõpp-punkt `/a2a` on kanoniline A2A sisenemispunkt. Allpool toodud R
 
 ## Uue oskuse lisamine
 
-1. **Loo oskuse fail:** `src/lib/a2a/skills/<teie-oskus>.ts`
+1. **Loo oskuste fail:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ekspordi asünkroonne funktsioon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Järgi olemasolevate oskuste struktuuri, nagu `smartRouting.ts`.
+   Eksportige asünkroonimisfunktsioon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Järgige olemasolevate oskuste, näiteks `smartRouting.ts` kuju.
 
-2. **Registreeri käitleja:** `src/lib/a2a/taskExecution.ts` failis lisa kanne `A2A_SKILL_HANDLERS` objekti:
+2. **Registrihaldur:** `src/lib/a2a/taskExecution.ts` s lisage `A2A_SKILL_HANDLERS`-sse kirje:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...olemasolevad oskused
-     "teie-oskus": async (task) => {
+     // ...existing skills
+     "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
      },
    };
    ```
 
-3. **Näita Agent Card-is:** `src/app/.well-known/agent.json/route.ts` failis lisa `skills` massiivi lõppu:
+3. **Esitage agendikaardil:** `src/lib/a2a/agentCardMetadata.ts` (jagavad `/.well-known/agent.json` ja `/.well-known/agent-card.json`) lisage `skills` massiivi:
 
    ```json
    {
-     "id": "teie-oskus",
-     "name": "Teie Oskus",
-     "description": "Lühike, kavatsusele keskendunud kirjeldus",
-     "tags": ["marsruutimine", "kvooot"],
-     "examples": "Näidisloomuliku keele kutsed"]
+     "id": "your-skill",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Kirjuta testid:** `tests/unit/a2a-<teie-oskus>.test.ts`. Katke edukas + vigane tee.
+4. **Kirjutage teste:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Dokumenteeri** uus oskus selle faili `Saadaolevad oskused` tabelis.
+5. **Dokument** uus oskus selle faili `Available Skills` tabelis.
 
 ---
 

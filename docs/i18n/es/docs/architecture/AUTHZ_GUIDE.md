@@ -140,34 +140,34 @@ se complementa:
 
 Algunas acciones de `MANAGEMENT` son **solo para operadores**: una clave `manage` no basta. Exportar credenciales almacenadas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurar una copia de seguridad sobre los datos activos (`POST /api/db-backups/import`, incluido `dryRun=true`, `POST /api/db-backups` restaurando por id, `POST /api/settings/import-json`), y eliminar puntos de restauración (la limpieza con `DELETE /api/db-backups` y `PATCH /api/db-backups`, porque la retención que guarda controla la poda automática tras cada copia de seguridad) requieren una sesión del panel, la identidad de la CLI local o el inicio de sesión desactivado. Emitir un token de sincronización (`POST /api/sync/tokens`) y acuñar un token de acceso de CLI con ámbito `admin` (`POST /api/cli/tokens`) requieren, en todos los modos de inicio de sesión, una sesión del panel o la identidad de la CLI local. Las claves de API de cualquier ámbito y los tokens de acceso `oma_` no son credenciales de operador: si se requiere una, reciben `403`. La comprobación está en `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Cambiar los ajustes de inicio de sesión también es exclusivo del operador: `POST /api/settings/require-login` (establecer la contraseña de gestión / activar o desactivar `requireLogin`) solo acepta esas credenciales una vez existe una contraseña. La ventana de arranque de la primera ejecución (sin contraseña todavía) no cambia. Una sesión del panel debe enviar `currentPassword` para reemplazar la contraseña (`403` si falta o es incorrecta, auditado como `settings.update_failed`). La CLI local y una instancia con el inicio de sesión desactivado conservan la vía de recuperación y pueden establecer una contraseña sin ese paso, ya que ambas están vinculadas al host que es propietario del directorio de datos.
 
-## Canalización
+## Tubería
 
 ```
-Solicitud entrante → src/proxy.ts
-  → runAuthzPipeline() en src/server/authz/pipeline.ts
-    1. Eliminar encabezados internos de confianza (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Generar el id de la solicitud y clasificar la ruta mediante classifyRoute()
-    3. Si pathname == "/" → redirigir a /dashboard
-    4. Si está en proceso de cierre (cierre ordenado) y la ruta es /api/* → 503
-    5. Si no es GET y la ruta es /api/* → aplicar la protección checkBodySize()
-    6. Si es OPTIONS → respuesta de verificación previa CORS 204
-    7. Si options.enforce == false → continuar sin cambios con los encabezados de clase de ruta
-    8. En caso contrario: POLICIES[routeClass].evaluate(ctx)
-       - permitir  → establecer x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - rechazar → error JSON con correlation_id (páginas del panel → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Los encabezados internos de confianza (definidos en `src/server/authz/headers.ts`) se **eliminan de las solicitudes entrantes** antes de la clasificación; los clientes no pueden rellenar previamente `x-omniroute-auth-*` para suplantar a un sujeto.
+Los encabezados internos confiables (definidos en `src/server/authz/headers.ts`) son** eliminado de las solicitudes entrantes** antes de la clasificación, los clientes — no pueden completar previamente `x-omniroute-auth-*` para hacerse pasar por un sujeto.
 
-### Contratos de políticas
+### Contratos de póliza
 
 Cada clase de ruta tiene una política en `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — siempre devuelve `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrae Bearer y lo valida mediante `validateApiKey()`. Solo recurre al acceso anónimo cuando la marca de funcionalidad efectiva `REQUIRE_API_KEY` está deshabilitada. La marca efectiva se resuelve mediante `isRequireApiKeyEnabled()` (`anulación de la marca de funcionalidad de la base de datos > process.env.REQUIRE_API_KEY > valor predeterminado`), de modo que las marcas de funcionalidad del panel y las variables de entorno rijan de forma coherente `/api/v1/*`, `/api/v1beta/*` y los alias; los fallos del resolutor deniegan el acceso. Permite solicitudes con sesión del panel en las rutas de la API de cliente (incluida `/api/v1/models`, utilizada por el catálogo de modelos del panel).
-- **`managementPolicy`** (`policies/management.ts`) — acepta sesiones del panel y solicitudes internas de sincronización de modelos (comparadas con `/api/providers/[name]/(sync-models|models)`), o se omite por completo si `isAuthRequired()` devuelve false. Devuelve 403 (`AUTH_001`) cuando hay un token Bearer presente pero no es válido y 401 en caso contrario. También aplica los niveles de protección de rutas (LOCAL_ONLY / ALWAYS_PROTECTED) antes de cualquier rama de autenticación; consulte [Niveles de protección de rutas](../security/ROUTE_GUARD_TIERS.md). Se puede acceder a las rutas LOCAL_ONLY incluidas en `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (actualmente: `/api/mcp/`) desde direcciones que no sean de loopback cuando la clave Bearer contiene el ámbito `manage`; todas las demás rutas LOCAL_ONLY siguen limitadas estrictamente a loopback, independientemente del ámbito.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — extrae el portador y lo valida mediante `validateApiKey()`. Pasa a ser anónimo solo cuando el indicador de función `REQUIRE_API_KEY` efectivo está deshabilitado. El indicador efectivo se resuelve mediante `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), de modo que los indicadores de funciones del panel y las variables de entorno gobiernan `/api/v1/*`, `/api/v1beta/*` y los alias de manera consistente; Las fallas del solucionador fallan cerradas. Permite solicitudes de sesiones de panel en rutas API del cliente (incluido `/api/v1/models`, utilizado por el catálogo de modelos de panel). Cuando Entra ID SSO está habilitado, un portador que es estructuralmente un token de Entra (tres segmentos base64url, `RS*` alg, `kid`) es manejado por la rama SSO** antes** `validateApiKey()` y su veredicto es final — nunca pasa por la ruta de la clave API o la rama degradada a anónima, por lo que una interrupción del proveedor de identidad no puede convertirse en acceso abierto. Las claves estáticas API no se ven afectadas. Ver [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — acepta sesiones de panel, solicitudes internas de sincronización de modelos (comparadas con `/api/providers/[name]/(sync-models|models)`) o las omite por completo si `isAuthRequired()` devuelve false. Devuelve 403 (`AUTH_001`) cuando un token de portador está presente pero no es válido; en caso contrario, 401. También aplica los niveles de protección de ruta (LOCAL_ONLY / ALWAYS_PROTECTED) antes de cualquier rama de autenticación — Consulte [Niveles de protección de ruta](../security/ROUTE_GUARD_TIERS.md). Se puede acceder a las rutas LOCAL_ONLY en `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hoy: `/api/mcp/`) desde un sistema sin bucle invertido cuando la clave portadora lleva el alcance `manage` ; todas las demás rutas LOCAL_ONLY siguen siendo de bucle invertido estricto independientemente del alcance.
 
-Una política correcta devuelve `AuthSubject` con `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Los controladores posteriores pueden leerlo mediante `assertAuth(request, "CLIENT_API")` en `src/server/authz/assertAuth.ts`, en lugar de volver a ejecutar la lógica de autenticación.
+Una política exitosa devuelve `AuthSubject` con `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Los controladores posteriores pueden leerlo a través de `assertAuth(request, "CLIENT_API")` en `src/server/authz/assertAuth.ts` en lugar de volver a ejecutar la lógica de autenticación.
 
 ## Lista de rutas públicas
 
@@ -315,23 +315,23 @@ Los endpoints `/api/v1/agents/tasks/*` y `/api/resilience/model-cooldowns` **aho
 
 ## Depuración
 
-El pipeline siempre añade los siguientes encabezados a las respuestas:
+El canal siempre marca las respuestas con:
 
 ```
-x-request-id:               <id de correlación, repetido en los cuerpos de error>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Para las solicitudes autenticadas, los encabezados de solicitud del upstream (del lado del controlador) también incluyen:
+Para solicitudes autenticadas, los encabezados de solicitud ascendentes (del lado del controlador) también incluyen:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<últimos-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (opcional)
-x-omniroute-auth-scopes:    lista separada por comas
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Usa `assertAuth(req, expectedClass)` dentro de los controladores; lanza `AuthzAssertionError` con el código `AUTHZ_NOT_INITIALIZED` si se omitió el middleware (útil para detectar regresiones de configuración en las pruebas).
+Utilice `assertAuth(req, expectedClass)` dentro de los controladores — arroja `AuthzAssertionError` con el código `AUTHZ_NOT_INITIALIZED` si se omitió el middleware (útil para detectar regresiones de configuración en las pruebas).
 
 ## Véase también
 
