@@ -4,13 +4,13 @@ Double-clickable `.bat` files for Windows users who cloned the repo instead of
 installing the npm package. All of them resolve the repo root from their own location, so they
 work from any checkout path.
 
-| File                           | What it does                                                                                                           |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `start-omniroute-prod.bat`     | `npm run start:fast`: `next start` on a build made with `npm run build:fast`. Background services stay on              |
-| `start-omniroute-light.bat`    | `npm run dev` with `OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true` (see the trade-off below)                              |
-| `start-omniroute-headless.bat` | `npm run dev` with `OMNIROUTE_HEADLESS=1` and `OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true`: `/v1/*` only, no dashboard |
-| `start-omniroute.bat`          | `npm run dev`: dev server + dashboard on `http://localhost:20128`                                                      |
-| `launch-claude.bat`            | `node bin\omniroute.mjs launch`: opens Claude Code pointed at the local OmniRoute                                      |
+| File                           | What it does                                                                                                                                         |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `start-omniroute-prod.bat`     | `npm run start:fast`: production-mode Next server (not the standalone bundle) on a build made with `npm run build:fast`. Background services stay on |
+| `start-omniroute-light.bat`    | `npm run dev` with `OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true` (see the trade-off below)                                                            |
+| `start-omniroute-headless.bat` | `npm run dev` with `OMNIROUTE_HEADLESS=1` and `OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true`: `/v1/*` only, no dashboard                               |
+| `start-omniroute.bat`          | `npm run dev`: dev server + dashboard on `http://localhost:20128`                                                                                    |
+| `launch-claude.bat`            | `node bin\omniroute.mjs launch`: opens Claude Code pointed at the local OmniRoute                                                                    |
 
 Usage:
 
