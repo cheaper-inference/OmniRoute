@@ -14,7 +14,7 @@ OmniRoute ni lango la ndani AI la uelekezaji na dashibodi iliyojengwa juu ya Nex
 
 Uwezo wa msingi:
 
-- Uso wa API unaoendana na OpenAI kwa CLI/tools (watoa huduma 377, moduli 156 za watekelezaji)
+- Uso wa API unaoendana na OpenAI kwa CLI/tools (watoa huduma 380, moduli 156 za watekelezaji)
 - Request/response tafsiri katika miundo ya mtoaji
 - Mfano mbadala wa mseto (mfuatano wa miundo mingi)
 - Hatua za mchanganyiko zilizoundwa (`provider + model + connection`) na kuagiza wakati wa kukimbia na `compositeTiers`
@@ -33,7 +33,7 @@ Uwezo wa msingi:
 - Fikiria uchanganuzi wa lebo (`<think>...</think>`) kwa mifano ya hoja
 - Usafishaji wa majibu kwa utangamano madhubuti wa OpenAI SDK
 - Urekebishaji wa jukumu (mfumo wa → wa msanidi, mtumiaji wa → wa mfumo) kwa utangamano wa mtoaji mtambuka
-- Ubadilishaji wa pato lililoundwa (json_schema → Gemini majibuSchema)
+- Ubadilishaji wa matokeo yaliyopangwa (json_schema → Gemini responseSchema)
 - Uvumilivu wa ndani kwa watoa huduma, funguo, lakabu, mchanganyiko, mipangilio, bei (moduli 122 DB )
 - Usage/cost kufuatilia na kuomba ukataji miti
 - Usawazishaji wa hiari wa wingu kwa ulandanishi multi-device/state
@@ -47,7 +47,7 @@ Uwezo wa msingi:
 - Akiba ya upunguzaji wa ombi kulingana na saini
 - Safu ya kikoa: sheria za gharama, sera mbadala, sera ya kufunga nje
 - Upeanaji wa Muktadha: muhtasari wa kukabidhiwa kwa kipindi kwa mwendelezo wa mzunguko wa akaunti
-- Udumifu wa hali ya kikoa (SQLite kuandika kupitia akiba ya makosa, bajeti, kufunga nje, vivunja saketi)
+- Udumifu wa hali ya kikoa (SQLite kuandika kupitia akiba ya makosa, bajeti, kufunga nje, vivunja mzunguko)
 - Injini ya sera ya tathmini ya ombi la kati (kuzuia → bajeti → kurudi nyuma)
 - Omba telemetry kwa p50/p95/p99 latency aggregation
 - Telemetry lengwa la mchanganyiko na afya inayolengwa ya kihistoria kupitia `combo_execution_key` / `combo_step_id`

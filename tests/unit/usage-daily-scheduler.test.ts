@@ -286,7 +286,7 @@ test("coordination migration initializes its counter above legacy dirty revision
   );
   const sql = fs.readFileSync(
     new URL(
-      "../../src/lib/db/migrations/227_usage_daily_publication_coordination.sql",
+      "../../src/lib/db/migrations/228_usage_daily_publication_coordination.sql",
       import.meta.url
     ),
     "utf8"
@@ -321,7 +321,7 @@ test("coordination migration initializes its counter above legacy dirty revision
     (
       core
         .getDbInstance()
-        .prepare("SELECT COUNT(*) n FROM _omniroute_migrations WHERE version=227")
+        .prepare("SELECT COUNT(*) n FROM _omniroute_migrations WHERE version=228")
         .get() as { n: number }
     ).n,
     1

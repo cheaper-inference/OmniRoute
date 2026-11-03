@@ -730,7 +730,7 @@ test("migration conservatively protects old summaries and reset removes that pro
   db.exec("ALTER TABLE usage_daily_summary DROP COLUMN raw_rebuild_safe");
   insertPublishedDay({ day, requests: 7, input: 70, output: 10 });
   const sql = fs.readFileSync(
-    new URL("../../src/lib/db/migrations/226_usage_summary_rebuild_safety.sql", import.meta.url),
+    new URL("../../src/lib/db/migrations/227_usage_summary_rebuild_safety.sql", import.meta.url),
     "utf8"
   );
   assert.throws(() =>
@@ -756,14 +756,14 @@ test("migration conservatively protects old summaries and reset removes that pro
   assert.equal(summaryRequests(day), 1);
 });
 
-test("reopening the database does not reapply migration 226", async () => {
+test("reopening the database does not reapply migration 227", async () => {
   const day = "2026-01-01";
   await recordUsageRow(day);
   await retire(day);
   core.resetDbInstance();
   const db = core.getDbInstance();
   const applied = db
-    .prepare("SELECT COUNT(*) AS n FROM _omniroute_migrations WHERE version = 226")
+    .prepare("SELECT COUNT(*) AS n FROM _omniroute_migrations WHERE version = 227")
     .get() as { n: number };
   assert.equal(applied.n, 1);
   assert.equal(
