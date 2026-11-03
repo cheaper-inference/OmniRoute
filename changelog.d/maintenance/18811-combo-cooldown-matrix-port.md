@@ -1,0 +1,1 @@
+- **test(combo):** Port @skygunner's 28-case cooldown-expansion regression matrix from #17945 onto the #17880 landing, as promised in the #17945 review ([#18811](https://github.com/cheaper-inference/OmniRoute/pull/18811)) — thanks @skygunner
