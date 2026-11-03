@@ -5,7 +5,7 @@
       "locales": {
         "bs": {
           "source_hash": "d53a0e4afde92f0ae0963d6810bfc80cdb3b7dd28fabc5d30a7785742f7f8e69",
-          "target_hash": "cf701751dee2e1edf41b4f939ac310df3fbf9e47f6105c5bdcfae6720cdeadb7",
+          "target_hash": "d392f23d8681134de5c83d0ff54c623b548928d4663b2fc3c0c7a53391efe058",
           "section_hashes": [
             "fe5597d25ab9",
             "51077e57dcfb",
@@ -29,7 +29,7 @@
             "f6624f38d27c",
             "92c9bfddd378"
           ],
-          "updated_at": "2026-10-26T00:28:09.519Z"
+          "updated_at": "2026-11-03T11:54:09.525Z"
         }
       }
     },
