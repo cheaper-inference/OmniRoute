@@ -113,6 +113,7 @@ import { applyPeerTraceHeader } from "@/shared/resilience/peerRouting";
 import { applyClineProtocolHeaders } from "@/shared/utils/clineAuth";
 import { isProbeContext } from "@/shared/utils/probeOrigin";
 import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
+import { dispatchWithGzipBody } from "./base/gzipRequestBody.ts";
 // Header helpers extracted to a pure leaf; re-exported for external importers
 // (executors + tests) that import them from "./base.ts".
 export {
@@ -1015,7 +1016,10 @@ export class BaseExecutor {
               this.provider,
               model,
               requestCredentials,
-              (url, init) => dispatchGuarded(this.provider, url, init, requestCredentials)
+              (url, init) =>
+                dispatchWithGzipBody(this.provider, url, init, (gzipUrl, gzipInit) =>
+                  dispatchGuarded(this.provider, gzipUrl, gzipInit, requestCredentials)
+                )
             )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
