@@ -171,19 +171,19 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
   {
     fromVersion: "215",
     fromName: "codex_connection_fences",
-    toVersion: "223",
+    toVersion: "224",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "217",
     fromName: "codex_connection_fences",
-    toVersion: "223",
+    toVersion: "224",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "218",
     fromName: "codex_connection_fences",
-    toVersion: "223",
+    toVersion: "224",
     toName: "codex_connection_fences",
   },
   // PR #10409 circulated through these draft slots before the current release
