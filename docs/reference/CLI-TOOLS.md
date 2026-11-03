@@ -148,7 +148,7 @@ one surface without the others fails the suite instead of drifting silently.
 
 ---
 
-## 1. CLI Code's Catalog (27 tools)
+## 1. CLI Code's Catalog (28 tools)
 
 All tools that appear in `/dashboard/cli-code`. Those with `baseUrlSupport: none` are wired through MITM or a manual guide instead of a custom base URL:
 
@@ -175,6 +175,7 @@ All tools that appear in `/dashboard/cli-code`. Those with `baseUrlSupport: none
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -264,16 +265,16 @@ interface ToolBatchStatus {
 
 New tools with `configType: "custom"` have dedicated settings API routes:
 
-| Route                                       | Tool                                                             |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                           |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi coding agent                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedicated `.env` key)       |
+| Route                                       | Tool                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                            |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                            |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync)   |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                              |
+| `POST /api/cli-tools/pi-settings`           | Pi coding agent (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)              |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedicated `.env` key)         |
 
 All routes use `sanitizeErrorMessage()` for error responses (Hard Rule #12).
 
@@ -377,7 +378,7 @@ pip install aider-chat
 cargo install smelt  # Rust-based
 
 # Pi coding agent
-# see https://github.com/zechnerj/pi-coding-agent for install
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # see https://github.com/1jehuang/jcode for install
@@ -490,6 +491,48 @@ EOF
 
 > Use `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > to send thinking variants.
+
+---
+
+#### Pi Coding Agent
+
+Install the official Pi Coding Agent package with `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi reads custom providers from
+`~/.pi/agent/models.json`; set `PI_CODING_AGENT_DIR` to move the whole agent directory.
+The dashboard follows that override. Pi does not discover models from custom endpoints,
+so OmniRoute writes the selected model in `models[]` using Pi's `openai-completions` API
+and the OmniRoute OpenAI-compatible `/v1` endpoint.
+
+In **CLI Tools → Pi**, choose an endpoint, API key, and model, review the provider preview,
+then apply. The preview is a provider fragment: merge `providers.omniroute` into your
+existing `models.json` when configuring Pi manually so other providers and settings remain
+intact.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi reloads `models.json` when you open `/model`. Test the configured route with the
+provider id and model id you selected:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+References: [Pi models and custom providers](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md),
+[Pi environment variables](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md),
+[Pi install instructions](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

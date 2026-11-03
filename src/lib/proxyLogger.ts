@@ -45,6 +45,10 @@ interface ProxyLogEntry {
    * historical clientIp is the INBOUND IP (x-forwarded-for); egressIp answers
    * "by which IP is this account leaving" — critical for rotating providers. */
   egressIp: string | null;
+  /** Address observed for the IPv4 family (null = that family was not observed). */
+  egressIpv4: string | null;
+  /** Address observed for the IPv6 family (null = that family was not observed). */
+  egressIpv6: string | null;
   latencyMs: number;
   error: string | null;
   connectionId: string | null;
@@ -120,6 +124,8 @@ function loadFromDb() {
         targetUrl: row.target_url || null,
         clientIp: row.public_ip || null,
         egressIp: row.egress_ip || null,
+        egressIpv4: row.egress_ip_v4 || null,
+        egressIpv6: row.egress_ip_v6 || null,
         latencyMs: row.latency_ms || 0,
         error: row.error || null,
         connectionId: row.connection_id || null,
@@ -218,6 +224,9 @@ export function logProxyEvent(entry: ProxyLogInput) {
     targetUrl: entry.targetUrl || null,
     clientIp: entry.clientIp ?? entry.publicIp ?? null,
     egressIp: entry.egressIp ?? null,
+    // Never synthesized: a family that was not observed stays null.
+    egressIpv4: entry.egressIpv4 ?? null,
+    egressIpv6: entry.egressIpv6 ?? null,
     latencyMs: entry.latencyMs || 0,
     error: safeError,
     connectionId: entry.connectionId || null,
@@ -304,13 +313,13 @@ function logProxyBatchFailure(err: unknown): void {
 function writeProxyBatch(batch: ProxyLogEntry[], db: ReturnType<typeof getDbInstance>): void {
   const insertStmt = db.prepare(
     `INSERT INTO proxy_logs (id, timestamp, status, proxy_type, proxy_host, proxy_port, proxy_name,
-      level, level_id, provider, target_url, public_ip, egress_ip, latency_ms, error,
-      connection_id, combo_id, account, rotation_account, correlation_id, tls_fingerprint, upstream_status,
-      attempt_number, attempt_issue, headers_ms, first_chunk_ms)
+      level, level_id, provider, target_url, public_ip, egress_ip, egress_ip_v4, egress_ip_v6,
+      latency_ms, error, connection_id, combo_id, account, rotation_account, correlation_id, tls_fingerprint,
+      upstream_status, attempt_number, attempt_issue, headers_ms, first_chunk_ms)
     VALUES (@id, @timestamp, @status, @proxyType, @proxyHost, @proxyPort, @proxyName,
-      @level, @levelId, @provider, @targetUrl, @clientIp, @egressIp, @latencyMs, @error,
-      @connectionId, @comboId, @account, @rotationAccount, @correlationId, @tlsFingerprint, @upstreamStatus,
-      @attemptNumber, @attemptIssue, @headersMs, @firstChunkMs)`
+      @level, @levelId, @provider, @targetUrl, @clientIp, @egressIp, @egressIpv4, @egressIpv6,
+      @latencyMs, @error, @connectionId, @comboId, @account, @rotationAccount, @correlationId, @tlsFingerprint,
+      @upstreamStatus, @attemptNumber, @attemptIssue, @headersMs, @firstChunkMs)`
   );
 
   const transaction = db.transaction((entries: ProxyLogEntry[]) => {
@@ -329,6 +338,8 @@ function writeProxyBatch(batch: ProxyLogEntry[], db: ReturnType<typeof getDbInst
         targetUrl: item.targetUrl,
         clientIp: item.clientIp,
         egressIp: item.egressIp,
+        egressIpv4: item.egressIpv4,
+        egressIpv6: item.egressIpv6,
         latencyMs: item.latencyMs,
         error: item.error,
         connectionId: item.connectionId,

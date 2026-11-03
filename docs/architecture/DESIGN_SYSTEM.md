@@ -11,7 +11,9 @@ lastUpdated: 2026-10-27
 > theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Switzer is
 > the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
 > `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
-> imported by `ci-tokens.css`). Every icon is a Lucide glyph.
+> imported by `ci-tokens.css`). Scripts Switzer lacks fall through glyph by glyph (`src/app/globals.css`):
+> Inter for Cyrillic, Greek and Vietnamese and, only under `html[dir="rtl"]`, Vazirmatn for Arabic script.
+> Every icon is a Lucide glyph.
 
 ## 1. Where things live
 
@@ -143,11 +145,35 @@ lastUpdated: 2026-10-27
 
 ## 5. Updating the kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copies the upstream `src/` at that commit into
-`packages/ui-kit/src` and applies the single allowed transformation (it drops the `.js` suffix from
-relative imports). Then: review `git diff packages/ui-kit`, do a visual pass on providers, settings, combos,
-usage and endpoint in both themes, run `npm run check:ui-kit-snapshot` and `npm run test:vitest:ui`, and
-open the PR with the upstream changelog.
+`npm run check:ui-kit-upstream` compares the version pinned in `packages/ui-kit/UPSTREAM.md` with the
+newest `v*` tag of the upstream repo and prints the sync command when a release is out.
+
+The daily `UI Kit upstream watch` workflow (`.github/workflows/ui-kit-upstream-watch.yml`) runs the same
+check. While the pin is behind, `scripts/ci/ui-kit-sync-pr.sh` keeps one sync PR open against the highest
+`release/vX.Y.Z` branch, on the rolling branch `chore/ui-kit-sync-latest`. It never merges: every kit
+release still needs a visual check on the local VPS. The branch is rebuilt when a newer release is out and
+left alone otherwise. An open PR with commits pushed by hand isn't overwritten, and a PR for a version
+that a maintainer closed unmerged stays closed until a newer release.
+
+When no PR can be opened (the target release is frozen, the PR has commits pushed by hand, the PR was
+closed, or no PR token is set) the workflow keeps one tracking issue open that says why.
+
+The workflow uses two secrets:
+
+- `secrets.UI_KIT_READ_TOKEN`: a read-only token for the private upstream repo. When the workflow can't
+  read upstream (no token, a token that stopped working, or GitHub unreachable) the run stays green but
+  writes a warning and keeps one separate issue open, which closes itself once a later run can read
+  upstream again.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: a fine-grained token on this repository with Contents and Pull requests
+  write access. The default `GITHUB_TOKEN` can't create PRs here, and a PR it opened wouldn't trigger CI.
+  Without this token the workflow only pushes the branch.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copies the upstream `src/` at that commit (`latest`
+= the newest `v*` tag) into `packages/ui-kit/src`, applies the single allowed transformation (it drops
+the `.js` suffix from relative imports), and sets the workspace version in `packages/ui-kit/package.json`
+and `package-lock.json` to the upstream one. Then: review `git diff packages/ui-kit`, do a visual pass on
+providers, settings, combos, usage and endpoint in both themes, run `npm run check:ui-kit-snapshot` and
+`npm run test:vitest:ui`, and open the PR with the upstream changelog.
 
 ## 6. README diagrams
 
@@ -159,15 +185,19 @@ generator's output (job `test-unit`).
 
 - **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copies the palette from `packages/ui-kit/src/ci-tokens.css`
   (pinned against that file by `tests/unit/docs/readme-diagram-theme.test.ts`) and defines the text roles on
-  the kit's earlier faces — Instrument Serif for display, Inter for UI text, IBM Plex Mono for figures and
-  code — from the `@fontsource` packages (the dashboard itself uses the kit's Switzer since kit 0.0.66).
+  the kit's type scale: Switzer at the kit's weights (400/500/600, display at 500) and tracking for
+  everything, except the code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), which
+  are IBM Plex Mono and are only for commands, URLs, identifiers and terminal screens.
   Light values sit on `:root`, dark values behind `prefers-color-scheme: dark`, inside the file, so each
   image follows the viewer's scheme on GitHub.
-- **Fonts.** `scripts/docs/readme-fonts.mjs` subsets those woff2 files to the glyphs each diagram draws and
-  embeds them as `@font-face` `data:` URIs — the only way kit typography reaches a README image, since
-  GitHub Markdown carries no CSS and the camo proxy blocks every external fetch. The subsets are latin-only;
-  the symbol glyphs that fall back to the system stack are allowed one by one in `SYMBOL_FALLBACKS`, and any
-  other uncovered glyph throws.
+- **Fonts.** GitHub Markdown carries no CSS and the camo proxy blocks every external fetch, so kit type has
+  to travel inside the file. `scripts/docs/readme-outline.mjs`, the last step of every generator, shapes the
+  Switzer roles with HarfBuzz and draws them as vector outlines (`<defs>` paths and `<use>`), with the arrows
+  and geometric symbols Switzer lacks drawn on its own metrics. Outlines, never an embedded font: Switzer's
+  licence (`packages/ui-kit/src/fonts/FFL.txt`) forbids subsetting and format conversion without written
+  consent and allows vector drawings, so do not reintroduce a Switzer `@font-face` or `data:` URI. The one
+  font left in a file is the OFL IBM Plex Mono subset for what stays real code text
+  (`scripts/docs/readme-fonts.mjs`), built from those characters; any glyph it cannot embed throws.
 - **Regenerate.** `npm run docs:readme-diagrams` rewrites all twelve in README order and prints one line per
   file with its size. A single generator also runs on its own (`node scripts/docs/gen-readme-<name>.mjs`;
   `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
@@ -180,7 +210,8 @@ generator's output (job `test-unit`).
   image (the SVG studio validator's rule).
 - **Copy unchanged, counts from the gate.** The rebrand changed type and palette, not words: each generator
   carries its diagram's copy in a `*_COPY` constant (or builds it from the live catalog) that is both the
-  drawn text and the font-subset input. Canonical figures stay in `<text>` nodes, read by `check:docs-counts`
+  drawn text and the input of the outlining step. Canonical figures stay in `<text>` nodes (invisible once
+  outlined, `fill-opacity:0`), read by `check:docs-counts`
   (`scripts/check/check-docs-counts-sync.mjs`); the staleness tests of the diagrams that gate reads also run
   its validators on the generated file, so a figure that drifts from the code fails the test — fix the
   source the gate reads, never the number in the generator.
