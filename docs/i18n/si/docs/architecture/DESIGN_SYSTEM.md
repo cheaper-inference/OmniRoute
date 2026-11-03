@@ -4,7 +4,7 @@
 
 ---
 
-> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත්තේ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) මත වන අතර, එය workspace එකක් ලෙස `packages/ui-kit` ලෙස vendor කර ඇත (`@omniroute/ui-kit`; upstream snapshot එක `packages/ui-kit/UPSTREAM.md` හි pin කර ඇති අතර `npm run check:ui-kit-snapshot` මඟින් ආරක්ෂා කර ඇත). Light යනු නිල (canonical) theme එකයි; පෙරනිමි preference එක `system` වේ. Accent වර්ණය Keak lime (`--ci-color-accent`) වේ. Inter (letter-spacing 0, `--ci-letter-spacing-ui`) යනු UI font පවුල වන අතර, Instrument Serif භාවිතා වන්නේ විශාල විරල display පෙළ සඳහා පමණි (`.ci-dashboard-display`), කේත සඳහා IBM Plex Mono වේ — සියල්ලම `src/app/globals.css` හි ඉහළින් ඇති `@fontsource/*` imports හරහා self-host කර ඇත. සෑම icon එකක්ම Lucide glyph එකකි.
+> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත** Keak CI UI කට්ටලය** (`@keak/cheaper-inference-ui-kit`), වැඩබිම `packages/ui-kit` (`@omniroute/ui-kit`; උඩු ගංවතුර ස්නැප්ෂොට් එක `packages/ui-kit/UPSTREAM.md` හි අමුණා ඇති අතර `npm run check:ui-kit-snapshot` මගින් ආරක්ෂා කර ඇත). ආලෝකය කැනොනිකල් තේමාවයි; පෙරනිමි මනාපය `system` වේ. උච්චාරණය Keak දෙහි (`--ci-color-accent`) වේ. Switzer යනු UI, සංදර්ශකය සහ කේත පෙළ (`--ci-font-ui`; `--ci-font-display` සහ `--ci-font-mono` එයට නිරාකරණය කිරීම), කට්ටලය විසින්ම ස්වයං-සත්කාරක (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` විසින් ආනයනය කරන ලද) සඳහා තනි පවුලකි. ස්ක්‍රිප්ට් ස්විට්සර් හි ග්ලයිෆ් මගින් ග්ලයිෆ් (`src/app/globals.css`) පහත වැටීමක් නොමැත: සිරිලික්, ග්‍රීක සහ වියට්නාම සඳහා අන්තර් සහ, `html[dir="rtl"]` යටතේ පමණක්, අරාබි අක්ෂර සඳහා වසීර්මාට්. සෑම නිරූපකයක්ම Lucide glyph වේ.
 
 ## 1. දේවල් තිබෙන තැන
 
@@ -75,40 +75,15 @@
   `src/shared/components/ErrorPageScaffold.tsx` — lockup එක පෙන්වයි; `tests/unit/brand-pages-static.test.ts`
   එය ආරක්ෂා කරයි.
 
-## 2. නීති
+## 2. රීති
 
-1. ටෝකන පමණි — literal අගයන් කිසි විටෙක නොවේ. හිතාමතා තබා ඇති හැරුණුම්: සැමවිට අඳුරුව පවතින
-   console terminal එක සහ `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex
-   අගයක් අවශ්ය callers සඳහා kit status වර්ණපලිටයේ resolved-hex කැඩපතයි. Categorical වර්ණපලිට
-   තවදුරටත් හැරුණුමක් නොවේ: ඒවා kit හි chart ටෝකන පහ (`--color-chart-1..5`) මත
-   `src/shared/utils/categoricalPalette.ts` හරහාත්, routing strategies සඳහා
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` හරහාත් පදනම් වේ; ReactFlow edges සහ
-   orchestration canvas එක theme-සංවේදී `--orch-status-*` විචල්යයන් කියවයි
-   (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` කිසි විටෙක අතින් patch නොකරන්න: `scripts/dev/sync-ui-kit.sh <commit>`
-   සමඟ සමමුහුර්ත කරන්න; pre-commit gate එක වන `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`), pin කර ඇති upstream commit එකෙන් වෙනස් වන ඕනෑම byte එකකදී අසාර්ථක වේ
-   (upstream clone එක, `UI_KIT_CLONE` හෝ `_references/cheaper-inference-ui-kit`, නොමැති විට
-   අවවාදයක් සමඟ මඟ හරියි). Kit එකට යමක් නොමැති විට, adapter එකේ හෝ තිරයේ ඒ වටා workaround එකක්
-   කර, upstream වෙතින් එය ඉල්ලා සිටින්න.
-3. Kit text පෙරනිමි ඉංග්රීසි වේ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit
-   component එකක් text render කරන සෑම විටම `useTranslations(...)` වෙතින් පරිවර්තනය කළ strings ලබා
-   දෙන්න.
-4. Tailwind utilities, kit component classes වලට වඩා ජය ගනී (kit එක
-   `@layer theme, base, components, utilities` ප්රකාශ කරන අතර එහි rules `components` තුළ ඇත) —
-   spacing සහ layout සඳහා utilities භාවිත කරන්න; kit components නැවත වර්ණ ගැන්වීමට නොවේ.
-5. ශීර්ෂ: පිටු සහ කොටස් මාතෘකා සඳහා `.ci-heading` (Inter, tracking නොමැත); error-page status code
-   එක වැනි විශාල, විරල display text සඳහා පමණක් `.ci-dashboard-display` (Instrument Serif).
-6. `tests/unit/dashboard-kit-sweep.test.ts` kit යොදාගැනීම ආරක්ෂා කරයි: `src/app` හෝ
-   `src/shared/components` යටතේ Material ligature span නොමැත; dashboard tree එකේ
-   (`src/app/(dashboard)` සහ `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>`
-   නොමැති අතර, ලැයිස්තුගත හැරුණුම් (`Select` adapter එකේ native branch එක,
-   `RequestLoggerDetail`) වලින් පිටත අතින් සාදන ලද `role="dialog"` ද නොමැත; එහි ඇති සෑම raw
-   `<button>` හෝ `<input>` එකකටම, (හේතුව සමඟ) `kit-exception:` අඩංගු වන, ඊට ඉහළින් වැඩිම වශයෙන්
-   lines 3 ක තුළ අවසන් වන comment එකක් අවශ්ය වේ; palette hues සහ `dark:` variants test එක
-   ලැයිස්තුගත කරන files වල පමණි.
-7. PR එකකට පෙර themes දෙකම සහ 390 px viewport එක සත්යාපනය කරන්න (screenshots);
-   `tests/e2e/a11y.spec.ts` axe ධාවනය කරයි.
+1. ටෝකන, කිසි විටෙකත් වචනාර්ථයෙන් නොවේ. ව්‍යතිරේක අරමුණු මත තබා ඇත: සැමවිටම අඳුරු කොන්සෝල පර්යන්තය සහ `STATUS_HEX` (`src/shared/constants/statusColors.ts`), වචනාර්ථයෙන් හෙක්ස් අවශ්‍ය ඇමතුම්කරුවන් සඳහා කට්ටල තත්ත්‍වයේ නිරාකරණය වූ හෙක්ස් දර්පණය. වර්ගීකරණ තල තවත් ව්‍යතිරේකයක් නොවේ: ඒවා කට්ටලයේ ප්‍රස්ථාර පහක (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` හරහා ගමන් කරන අතර, මාර්ගගත කිරීමේ උපාය මාර්ග සඳහා, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow දාර සහ වාද්‍ය වෘන්ද කැන්වසය තේමා-දැනුවත් `--orch-status-*` විචල්‍ය (`src/shared/components/flow/edgeStyles.ts`) කියවයි.
+2. කිසිවිටෙක අතින් `packages/ui-kit/src` පැච් නොකරන්න: `scripts/dev/sync-ui-kit.sh <commit>` සමඟ සමමුහුර්ත කරන්න ; පූර්ව-විධිමත් ද්වාරය `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) අමුණන ලද උඩු ගංඟා කැපවීමෙන් වෙනස් වන ඕනෑම බයිටයක් මත අසමත් වේ (එය upstream clone, `UI_KIT_CLONE` හෝ `_references/cheaper-inference-ui-kit`, නොමැති විට අනතුරු ඇඟවීමක් සමඟ මඟ හැරේ). කට්ටලයට යමක් නොමැති විට, එය ඇඩැප්ටරයේ හෝ තිරයේ වැඩ කර එය උඩුගත කරන්න.
+3. කට්ටල පෙළ පෙරනිමි ඉංග්‍රීසි වේ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — කට්ටල සංරචකයක් පෙළ විදැහුම් කරන සෑම විටම `useTranslations(...)` වෙතින් පරිවර්තනය කළ තන්තු ලබා දෙන්න.
+4. Tailwind උපයෝගිතා කට්ටල සංරචක පන්ති ජය ගනී (කට්ටලය `@layer theme, base, components, utilities` ප්‍රකාශ කරන අතර එහි නීති `components` හි ප්‍රකාශ කරයි) — කට්ටල සංරචක නැවත වර්ණ ගැන්වීමට නොව පරතරය සහ පිරිසැලසුම සඳහා උපයෝගිතා භාවිතා කරන්න.
+5. ශීර්ෂයන්: පිටු සහ කොටස් මාතෘකා සඳහා `.ci-heading` ; `.ci-dashboard-display` දෝෂ පිටු තත්ව කේතය වැනි විශාල, විරල සංදර්ශක පෙළ සඳහා පමණි. දෙදෙනාම ස්විට්සර් භාවිතා කරයි.
+6. `tests/unit/dashboard-kit-sweep.test.ts` කට්ටලය දරුකමට හදා ගැනීම ආරක්ෂා කරයි: `src/app` හෝ `src/shared/components` යටතේ ද්‍රව්‍ය බන්ධන පරාසයක් නොමැත; උපකරණ පුවරුවේ ගසෙහි (`src/app/(dashboard)` සහ `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>` සහ ලැයිස්තුගත ව්‍යතිරේකවලින් පිටත අතින් රෝල් කරන ලද `role="dialog"` නොමැත ( `Select` ඇඩැප්ටරයේ ස්වදේශික ශාඛාව, `RequestLoggerDetail`); සෑම raw `<button>` හෝ `<input>` එකකටම `kit-exception:` අඩංගු විවරණයක් අවශ්‍ය වේ (හේතුව සමඟ) ඊට ඉහලින් පේළි 3කින් අවසන් වේ; palette hues සහ `dark:` ප්‍රභේද පරීක්ෂණ ලැයිස්තුගත කරන ගොනු වල පමණි.
+7. PR (තිරපිටපත්) ට පෙර තේමාවන් සහ 390 px දර්ශන තොටුපළ දෙකම තහවුරු කරන්න; `tests/e2e/a11y.spec.ts` දුවන්නේ axe.
 
 ## 3. තිරයක් එකතු කිරීම
 
@@ -140,51 +115,37 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx` එක් කරන්න හෝ යාවත්කාලීන කරන්න. callers ගණනාවක් ඇති ඇඩැප්ටරයක් සඳහා,
    වෙනසට පෙර සහ පසු render වූ markup සංසන්දනය කරන්න — padding හෝ wrapper වෙනස්කම් සෑම තිරයකටම පැතිරෙයි.
 
-## 5. kit එක යාවත්කාලීන කිරීම
+## 5. කට්ටලය යාවත්කාලීන කිරීම
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` එම commit එකේ ඇති upstream `src/` `packages/ui-kit/src` වෙත
-පිටපත් කර අවසර ලත් එකම පරිවර්තනය යොදයි (එය relative imports වලින් `.js` පසුටැල්ල ඉවත් කරයි). ඉන්පසු:
-`git diff packages/ui-kit` සමාලෝචනය කරන්න, තේමා දෙකෙහිම providers, settings, combos, usage සහ endpoint මත
-දෘශ්ය පරීක්ෂාවක් කරන්න, `npm run check:ui-kit-snapshot` සහ `npm run test:vitest:ui` ධාවනය කරන්න, සහ
-upstream changelog එක සමඟ PR එක විවෘත කරන්න.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` හි අමුණා ඇති අනුවාදය upstream repo හි නවතම `v*` ටැගය සමඟ සංසන්දනය කර නිකුතුවක් අවසන් වූ විට සමමුහුර්ත විධානය මුද්‍රණය කරයි.
 
-## 6. README රූප සටහන්
+දෛනික `UI Kit upstream watch` කාර්ය ප්‍රවාහය (`.github/workflows/ui-kit-upstream-watch.yml`) එකම චෙක්පතම ක්‍රියාත්මක කරයි. පින් එක පිටුපස ඇති අතර, `scripts/ci/ui-kit-sync-pr.sh` ඉහළම `release/vX.Y.Z` ශාඛාවට එරෙහිව එක් සමමුහුර්ත PR විවෘතව තබයි, පෙරළෙන ශාඛාවේ `chore/ui-kit-sync-latest`. එය කිසි විටෙකත් ඒකාබද්ධ නොවේ: සෑම කට්ටල නිකුතුවකටම තවමත් දේශීය VPS හි දෘශ්‍ය පරීක්ෂාවක් අවශ්‍ය වේ. ශාඛාව නව නිකුතුවක් නිකුත් වූ විට නැවත ගොඩනඟා ඇති අතර එසේ නොමැති නම් තනිව පවතී. අතින් තල්ලු කරන ලද කැපවීම් සහිත විවෘත PR එකක් උඩින් ලියනු නොලැබෙන අතර, නඩත්තු කරන්නෙකු විසින් ඒකාබද්ධ නොකළ අනුවාදයක් සඳහා වන PR නව නිකුතුවක් දක්වා වසා ඇත.
 
-මූල `README.md` කාවැද්දන රූප සටහන් දොළොස (`docs/diagrams/*.svg`) යනු ස්ථිතික පින්තූරයකට යොදන ලද kit එක වන
-අතර, ඒවා අතින් ඇඳූ ඒවා නොව උත්පාදනය කළ ඒවායි: `scripts/docs/gen-readme-*.mjs` හි generator ගොනු 13ක්
-(රූප සටහන් දොළොස සහ `gen-readme-diagrams.mjs` driver එක) සහ `tests/unit/docs/readme-*-svg.test.ts` හි
-staleness පරීක්ෂණ 12ක්, එක් එක් රූප සටහනට එකක් බැගින්, එක එකක් commit කළ ගොනුව එහි generator එකේ ප්රතිදානය
-සමඟ බයිට්-අනුව සංසන්දනය කරයි (job `test-unit`).
+PR විවෘත කළ නොහැකි වූ විට (ඉලක්ක නිකුතුව ශීත කළ විට, PR අතින් තල්ලු කර ඇත, PR වසා දමා ඇත, හෝ PR ටෝකනයක් සකසා නැත) කාර්ය ප්‍රවාහය එක් ලුහුබැඳීමේ ගැටලුවක් විවෘතව තබයි.
 
-- **ටෝකන.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` වෙතින් වර්ණ පුවරුව
-  පිටපත් කරයි (`tests/unit/docs/readme-diagram-theme.test.ts` මඟින් එම ගොනුවට pin කර ඇත) සහ kit
-  අක්ෂර මුහුණුවර මත පාඨ භූමිකා අර්ථ දක්වයි — display සඳහා Instrument Serif, UI පාඨ සඳහා Inter, සංඛ්යා සහ
-  කේත සඳහා IBM Plex Mono, `src/app/globals.css` dashboard එක සඳහා load කරන එම `@fontsource` පැකේජම. සැහැල්ලු
-  අගයන් `:root` මතත්, අඳුරු අගයන් `prefers-color-scheme: dark` පිටුපසත් ගොනුව තුළම පිහිටා ඇති නිසා, සෑම
-  පින්තූරයක්ම GitHub මත නරඹන්නාගේ color scheme එක අනුගමනය කරයි.
-- **ෆොන්ට.** `scripts/docs/readme-fonts.mjs` එම woff2 ගොනු එක් එක් රූප සටහන අඳින glyphs දක්වා subset කර,
-  ඒවා `@font-face` `data:` URIs ලෙස කාවද්දයි — GitHub Markdown CSS රැගෙන නොයන නිසත් camo proxy එක සෑම
-  බාහිර fetch එකක්ම අවහිර කරන නිසත්, kit typography එක README පින්තූරයකට ළඟා වෙන එකම ක්රමය එයයි. subsets
-  ලතින්-පමණි; system stack එකට fallback වන සංකේත glyphs `SYMBOL_FALLBACKS` හි එකින් එක අවසර දී ඇති අතර,
-  වෙනත් ආවරණය නොවූ ඕනෑම glyph එකක් throw කරයි.
-- **නැවත උත්පාදනය.** `npm run docs:readme-diagrams` දොළොසම README අනුපිළිවෙළින් නැවත ලියන අතර ගොනුවකට
-  පේළියක් බැගින් එහි ප්රමාණය සමඟ මුද්රණය කරයි. තනි generator එකක් තනිවමත් ධාවනය කළ හැක
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ට `node --import tsx/esm` අවශ්ය වන්නේ එහි
-  සංඛ්යා `open-sse/config/freeModelCatalog.ts` හි live catalog loader එකෙන් එන නිසායි; catalog වෙනසක CI
-  ප්රතිවිපාකය `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` හි ඇත). generator එක සහ SVG එක
-  එකට commit කරන්න.
-- **සාධනය.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub ගොනුවක් සේවය කරන ආකාරයටම
-  ගොනුවක් render කරයි (`<img>` tag එකක්, camo හි `Content-Security-Policy`, `image/svg+xml`), සැහැල්ලු frame
-  එකක් සහ අඳුරු frame එකක් ග්රහණය කරගෙන, පිටුව කළ බාහිර font ඉල්ලීම් වාර්තා කරයි (0 විය යුතුය).
-- **අයවැය.** ගොනුවකට 200 KB ට අඩුවෙන් (සෑම staleness පරීක්ෂණයක්ම එය assert කරයි); 500 KB යනු ඕනෑම README
-  පින්තූරයක් සඳහා දැඩි සීමාවයි (SVG studio validator හි නීතිය).
-- **Copy එක වෙනස් නොකර, ගණන් gate එකෙන්.** නැවත සන්නාමගත කිරීම වෙනස් කළේ අක්ෂර විලාසය සහ වර්ණ පුවරුවයි,
-  වචන නොවේ: එක් එක් generator එක තම රූප සටහනේ copy එක `*_COPY` නියතයකින් (හෝ එය live catalog එකෙන්
-  සාදා) ගෙන යයි — එය ඇඳ ඇති පාඨයත් font-subset ආදානයත් යන දෙකම වේ. Canonical සංඛ්යා `<text>` nodes තුළ
-  රැඳී සිටින අතර, `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) මඟින් කියවයි; එම gate එක
-  කියවන රූප සටහන්වල staleness පරීක්ෂණද උත්පාදනය කළ ගොනුව මත එහි validators ධාවනය කරයි — එබැවින් කේතයෙන්
-  ඉවත යන සංඛ්යාවක් පරීක්ෂණය අසමත් කරයි. gate එක කියවන මූලාශ්රය නිවැරදි කරන්න, generator එකේ ඇති සංඛ්යාව
-  කිසි විටෙක නොවේ.
+කාර්ය ප්රවාහය රහස් දෙකක් භාවිතා කරයි:
+
+- `secrets.UI_KIT_READ_TOKEN`: පුද්ගලික upstream repo සඳහා කියවීමට පමණක් ටෝකනයකි. කාර්ය ප්‍රවාහයට උඩුගං බලා කියවීමට නොහැකි වූ විට (ටෝකනයක් නැත, ක්‍රියා කිරීම නැවැත්වූ ටෝකනයක් හෝ GitHub වෙත ළඟා විය නොහැක) ධාවනය හරිතව පවතින නමුත් අනතුරු ඇඟවීමක් ලියන අතර එක් වෙනම ගැටලුවක් විවෘතව තබයි, එය පසුව ධාවනය වූ විට නැවත උඩුගං බලා කියවිය හැක.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: මෙම ගබඩාවේ අන්තර්ගත සහ ඇදීමේ ඉල්ලීම් ලිවීමේ ප්‍රවේශය සහිත සියුම් ටෝකනයක්. පෙරනිමි `GITHUB_TOKEN` මෙහි PRs සෑදිය නොහැකි අතර, එය විවෘත කළ PR CI අවුලුවන්නේ නැත. මෙම ටෝකනය නොමැතිව වැඩ ප්රවාහය පමණක් ශාඛාව තල්ලු කරයි.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` එම කැපවීමේදී upstream `src/` (`latest` = නවතම `v*` ටැගය) `packages/ui-kit/src` වෙත පිටපත් කරයි, තනි අවසර ලත් පරිවර්තනය යොදයි (එය සාපේක්ෂ ආයාතවලින් `.js` උපසර්ගය පහත දමයි), සහ `packages/ui-kit/package.json` සහ `package-lock.json` හි වැඩ අවකාශය අනුවාදය උඩුගං බලා සකසයි. ඉන්පසු: `git diff packages/ui-kit` සමාලෝචනය කරන්න, තේමා දෙකෙහිම සපයන්නන්, සැකසීම්, සංයෝජන, භාවිතය සහ අන්ත ලක්ෂ්‍යය පිළිබඳ දෘශ්‍ය ප්‍රවේශයක් කරන්න, `npm run check:ui-kit-snapshot` සහ `npm run test:vitest:ui` ධාවනය කරන්න, සහ upstream changelog සමඟ PR විවෘත කරන්න.
+
+## 6. README diagrams
+
+මූලයේ `README.md` තුළ embed කර ඇති diagrams දොළහ (`docs/diagrams/*.svg`) යනු static
+image එකකට යෙදූ kit එක වන අතර, ඒවා අතින් අඳින ලද ඒවා නොව ජනනය කරන ලද ඒවාය: `scripts/docs/gen-readme-*.mjs`
+හි generator ගොනු 13ක් (diagrams දොළහ සහ `gen-readme-diagrams.mjs` driver එක) සහ
+`tests/unit/docs/readme-*-svg.test.ts` හි staleness tests 12ක්, diagram එකකට එක බැගින්, එක් එක් committed ගොනුව එහි
+generator එකේ output සමඟ byte-level ලෙස සංසන්දනය කරයි (`test-unit` job එක).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` මඟින් palette එක `packages/ui-kit/src/ci-tokens.css`
+  වෙතින් පිටපත් කරයි (`tests/unit/docs/readme-diagram-theme.test.ts` මඟින් එම ගොනුවට pin කර ඇත) සහ kit එකේ type scale මත text roles නිර්වචනය කරයි: සියල්ල සඳහා tracking සමඟ kit එකේ weights (400/500/600, display සඳහා 500) හි Switzer භාවිත කරයි, නමුත් commands, URLs, identifiers සහ terminal screens සඳහා පමණක් වන code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) IBM Plex Mono වේ.
+  Light අගයන් `:root` මතද, dark අගයන් ගොනුව තුළ `prefers-color-scheme: dark` පිටුපසද තබා ඇත, එබැවින් GitHub හි viewer ගේ scheme එක අනුව සෑම image එකක්ම දිස් වේ.
+- **Fonts.** GitHub Markdown සමඟ CSS නොඑන අතර camo proxy එක සෑම external fetch එකක්ම අවහිර කරයි, එබැවින් kit type එක ගොනුව තුළම ගෙන යා යුතුය. සෑම generator එකකම අවසාන පියවර වන `scripts/docs/readme-outline.mjs`, HarfBuzz භාවිතයෙන් Switzer roles හැඩගස්වා ඒවා vector outlines (`<defs>` paths සහ `<use>`) ලෙස අඳියි; Switzer හි නොමැති arrows සහ geometric symbols ද එහිම metrics මත අඳිනු ලැබේ. Embedded font එකක් නොව outlines භාවිත කරන්න: Switzer හි licence එක (`packages/ui-kit/src/fonts/FFL.txt`) ලිඛිත අනුමැතියකින් තොරව subsetting සහ format conversion තහනම් කරන අතර vector drawings සඳහා අවසර දෙයි, එබැවින් Switzer `@font-face` එකක් හෝ `data:` URI එකක් නැවත හඳුන්වා නොදෙන්න. ගොනුවක ඉතිරි වන එකම font එක වන්නේ සැබෑ code text ලෙස පවතින දේ සඳහා වන OFL IBM Plex Mono subset එකයි (`scripts/docs/readme-fonts.mjs`); එය එම characters මත පදනම්ව build කරයි, embed කළ නොහැකි glyph එකක් තිබේ නම් error එකක් නිකුත් කරයි.
+- **Regenerate.** `npm run docs:readme-diagrams` මඟින් README order එකේ diagrams දොළහම නැවත ලියන අතර, එක් එක් ගොනුවේ size එක සමඟ එක් පේළියක් මුද්රණය කරයි. තනි generator එකක්ද තනිව ධාවනය කළ හැක (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` සඳහා `node --import tsx/esm` අවශ්ය වන්නේ එහි figures `open-sse/config/freeModelCatalog.ts` හි live catalog loader එකෙන් ලැබෙන බැවිනි; catalog වෙනසක CI ප්රතිවිපාකය `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` හි ඇත). Generator එක සහ SVG එක එකට commit කරන්න.
+- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` මඟින් GitHub එය serve කරන ආකාරයට (an `<img>` tag, camo හි `Content-Security-Policy`, `image/svg+xml`) ගොනුව render කර, light සහ dark frame එක බැගින් capture කර, page එක සිදු කළ external font requests වාර්තා කරයි (එය 0 විය යුතුය).
+- **Budget.** එක් ගොනුවකට 200 KB ට අඩු විය යුතුය (සෑම staleness test එකක්ම මෙය assert කරයි); ඕනෑම README image එකකට 500 KB යනු hard cap එකයි (SVG studio validator හි නියමය).
+- **Copy unchanged, counts from the gate.** Rebrand එක මඟින් type සහ palette වෙනස් කළ නමුත් වචන වෙනස් නොකළේය: සෑම generator එකක්ම එහි diagram එකේ copy එක `*_COPY` constant එකක දරයි (හෝ live catalog එකෙන් එය ගොඩනඟයි), එය drawn text එකද outlining step එකේ input එකද වේ. Canonical figures `<text>` nodes තුළ පවතී (outlined කළ පසු නොපෙනෙන ලෙස `fill-opacity:0`), ඒවා `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) මඟින් කියවනු ලැබේ; gate reads කරන diagrams වල staleness tests ජනනය කළ ගොනුව මත එහි validators ද ධාවනය කරයි, එබැවින් figure එකක් code එකෙන් වෙනස් වුවහොත් test එක අසමත් වේ — generator එකේ ඇති number එක කිසිවිටෙක නිවැරදි නොකර, gate එක කියවන source එක නිවැරදි කරන්න.
 
 ## 7. යොමු දර්ශකය
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Status:** instrumentpanelen är byggd på **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendord
-> som workspacet `packages/ui-kit` (`@omniroute/ui-kit`; uppströmsögonblicksbilden är låst i
-> `packages/ui-kit/UPSTREAM.md` och skyddas av `npm run check:ui-kit-snapshot`). Ljust är det kanoniska
-> temat; standardinställningen är `system`. Accentfärgen är Keak-lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) är gränssnittets typsnittsfamilj, Instrument Serif endast för stor, gles
-> displaytext (`.ci-dashboard-display`), IBM Plex Mono för kod — alla självhostade via
-> `@fontsource/*`-importerna högst upp i `src/app/globals.css`. Varje ikon är en Lucide-glyf.
+> **Status:** instrumentbrädan är byggd på** Keak CI UI kit** (`@keak/cheaper-inference-ui-kit`), säljs som arbetsytan `packages/ui-kit` (`@omniroute/ui-kit`; ögonblicksbilden uppströms är fäst i `packages/ui-kit/UPSTREAM.md` och skyddas av `npm run check:ui-kit-snapshot`). Ljus är det kanoniska temat; standardinställningen är `system`. Accenten är Keak lime (`--ci-color-accent`). Switzer är den enda familjen för UI, display och kodtext (`--ci-font-ui`; `--ci-font-display` och `--ci-font-mono` löser sig till det), värd för själva kitet (`packages/ui-kit/src/ci-fonts.css`, importerat av `ci-tokens.css`). Manus Switzer saknar fall genom glyf för glyf (`src/app/globals.css`): Inter för kyrilliska, grekiska och vietnamesiska och, endast under `html[dir="rtl"]`, Vazirmatn för arabiska skrift. Varje ikon är en Lucide-glyph.
 
 ## 1. Var saker finns
 
@@ -82,35 +76,13 @@
 
 ## 2. Regler
 
-1. Tokens, aldrig literaler. Undantagen är avsiktliga: den alltid mörka konsolterminalen och
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), spegeln av kitets statuspalett med upplösta
-   hex-värden för anropare som behöver en hex-literal. De kategoriska paletterna är inte längre något
-   undantag: de vilar på kitets fem diagramtokens (`--color-chart-1..5`) via
-   `src/shared/utils/categoricalPalette.ts` och, för routingstrategier,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-kanter och orkestreringsytan
-   läser de temaanpassade variablerna `--orch-status-*` (`src/shared/components/flow/edgeStyles.ts`).
-2. Patcha aldrig `packages/ui-kit/src` för hand: synka med `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit-spärren `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) misslyckas vid varje byte
-   som skiljer sig från den fastnålade uppströmscommitten (den hoppar över med en varning när
-   uppströmsklonen, `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, saknas). När kitet
-   saknar något, lös det i adaptern eller skärmen och be uppströms om det.
-3. Kitets standardtexter är på engelska (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   skicka översatta strängar från `useTranslations(...)` närhelst en kitkomponent renderar text.
-4. Tailwind-utilities vinner över kitets komponentklasser (kitet deklarerar
-   `@layer theme, base, components, utilities` och dess regler ligger i `components`) — använd
-   utilities för avstånd och layout, inte för att omfärga kitkomponenter.
-5. Rubriker: `.ci-heading` (Inter, utan tracking) för sid- och sektionstitlar;
-   `.ci-dashboard-display` (Instrument Serif) endast för stor, gles visningstext som felsidans
-   statuskod.
-6. `tests/unit/dashboard-kit-sweep.test.ts` bevakar kitadoptionen: inga span-element med
-   Material-ligaturer under `src/app` eller `src/shared/components`; i dashboardträdet
-   (`src/app/(dashboard)` och `src/shared/components`) inga råa `<select>`, `<textarea>` eller
-   `<table>` och inga handgjorda `role="dialog"` utanför de listade undantagen (`Select`-adapterns
-   nativa gren, `RequestLoggerDetail`); varje rå `<button>` eller `<input>` där behöver en kommentar
-   som innehåller `kit-exception:` (med motiveringen) och som slutar högst 3 rader ovanför;
-   palettnyanser och `dark:`-varianter endast i de filer som testet listar.
-7. Verifiera båda temana och viewporten på 390 px före en PR (skärmdumpar); `tests/e2e/a11y.spec.ts`
-   kör axe.
+1. Tokens, aldrig bokstavliga. Undantag bevarade med avsikt: den alltid mörka konsolterminalen och `STATUS_HEX` (`src/shared/constants/statusColors.ts`), den upplösta hex-spegeln i kitstatuspaletten för uppringare som behöver en bokstavlig hex. De kategoriska paletterna är inget undantag längre: de åker på kitets fem kartpoletter (`--color-chart-1..5`) genom `src/shared/utils/categoricalPalette.ts` och, för routingstrategier, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges och orkestreringsduken läser de temamedvetna `--orch-status-*` -variablerna (`src/shared/components/flow/edgeStyles.ts`).
+2. Patcha aldrig `packages/ui-kit/src` för hand: synkronisera med `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit-grinden `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) misslyckas på någon byte som skiljer sig från den fästa uppströms-commit (den hoppar över med en varning när uppströmsklonen, `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, är frånvarande). När kitet saknar något, arbeta runt det i adaptern eller skärmen och be uppströms om det.
+3. Kittextens standardinställningar är engelska (`label = "Loading"`, `loadingLabel = "Loading table"`…) – skicka översatta strängar från `useTranslations(...)` närhelst en kitkomponent återger text.
+4. Tailwind-verktyg vinner över kitkomponentklasser (kitet deklarerar att `@layer theme, base, components, utilities` och dess regler finns i `components`) — använd verktyg för avstånd och layout, inte för att färga om kitkomponenter.
+5. Rubriker: `.ci-heading` för sid- och avsnittsrubriker; `.ci-dashboard-display` endast för stor, gles visningstext som statuskoden för felsidan. Båda använder Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` skyddar satsantagandet: inget materialligaturspann under `src/app` eller `src/shared/components`; i instrumentpanelsträdet (`src/app/(dashboard)` och `src/shared/components`) ingen rå `<select>`, `<textarea>` eller `<table>` och ingen handrullad `role="dialog"` utanför de listade undantagen ( `Select` adapterns ursprungliga gren, `RequestLoggerDetail`); varje rå `<button>` eller `<input>` där behöver en kommentar som innehåller `kit-exception:` (med anledningen) som slutar högst 3 rader ovanför den; palettnyanser och `dark:` -varianter endast i filerna som testet listar.
+7. Verifiera båda teman och visningsporten på 390 px före en PR (skärmdumpar); `tests/e2e/a11y.spec.ts` kör axe.
 
 ## 3. Lägga till en skärm
 
@@ -145,50 +117,62 @@
    jämför den renderade markupen före och efter ändringen; ändringar i padding eller wrappers sprider sig till
    varje skärm.
 
-## 5. Uppdatera kitet
+## 5. Uppdatera satsen
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopierar uppströms-`src/` vid den commiten till
-`packages/ui-kit/src` och tillämpar den enda tillåtna transformationen (den tar bort `.js`-ändelsen från
-relativa importer). Sedan: granska `git diff packages/ui-kit`, gör en visuell genomgång av providers,
-settings, combos, usage och endpoint i båda temana, kör `npm run check:ui-kit-snapshot` och
-`npm run test:vitest:ui`, och öppna PR:en med uppströms ändringslogg.
+`npm run check:ui-kit-upstream` jämför versionen som är fäst i `packages/ui-kit/UPSTREAM.md` med den senaste `v*` taggen i uppströmsrepo och skriver ut synkkommandot när en release är ute.
+
+Det dagliga `UI Kit upstream watch` -arbetsflödet (`.github/workflows/ui-kit-upstream-watch.yml`) kör samma kontroll. Medan stiftet är bakom, håller `scripts/ci/ui-kit-sync-pr.sh` en sync PR öppen mot den högsta `release/vX.Y.Z` -grenen, på den rullande grenen `chore/ui-kit-sync-latest`. Det går aldrig samman: varje kitversion behöver fortfarande en visuell kontroll av den lokala VPS. Grenen byggs om när en nyare release är ute och lämnas ifred annars. En öppen PR med commits som skjuts för hand skrivs inte över, och en PR för en version som en underhållare stängde osammanfogad förblir stängd tills en nyare version.
+
+När ingen PR kan öppnas (målfrigivningen är fryst, PR har commits som skjutits för hand, PR stängdes eller ingen PR token är inställd) håller arbetsflödet ett spårningsproblem öppet som säger varför.
+
+Arbetsflödet använder två hemligheter:
+
+- `secrets.UI_KIT_READ_TOKEN`: en skrivskyddad token för den privata uppströmsrepo. När arbetsflödet inte kan läsa uppströms (ingen token, en token som slutat fungera eller GitHub oåtkomlig) förblir körningen grön men skriver en varning och håller ett separat problem öppet, som stänger sig själv när en senare körning kan läsas uppströms igen.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: en finkornig token på det här arkivet med skrivåtkomst för innehåll och drag. Standard `GITHUB_TOKEN` kan inte skapa PRs här, och en PR som den öppnade skulle inte trigga CI. Utan denna token driver arbetsflödet bara grenen.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopierar uppströms- `src/` vid den commit (`latest` = den senaste `v*` taggen) till `packages/ui-kit/src`, tillämpar den enda tillåtna transformationen (den tar bort `.js` suffixet från relativa importer) och ställer in arbetsyteversionen i `packages/ui-kit/package.json` och `package-lock.json` till den uppströms. Sedan: granska `git diff packages/ui-kit`, gör ett visuellt pass på leverantörer, inställningar, kombinationer, användning och slutpunkt i båda teman, kör `npm run check:ui-kit-snapshot` och `npm run test:vitest:ui` och öppna PR med uppströmsändringsloggen.
 
 ## 6. README-diagram
 
-De tolv diagram som rot-`README.md` bäddar in (`docs/diagrams/*.svg`) är kitet applicerat på en statisk
-bild, och de genereras, inte ritas för hand: 13 generatorfiler under `scripts/docs/gen-readme-*.mjs`
-(tolv diagram plus drivrutinen `gen-readme-diagrams.mjs`) och 12 staleness-tester under
-`tests/unit/docs/readme-*-svg.test.ts`, ett per diagram, som var och en bytejämför den committade filen med
-dess generators utdata (jobbet `test-unit`).
+De tolv diagrammen som rotens `README.md` bäddar in (`docs/diagrams/*.svg`) är kitet som tillämpas på en statisk
+bild, och de genereras, inte ritas för hand: 13 generatorfiler i `scripts/docs/gen-readme-*.mjs`
+(tolv diagram plus drivrutinen `gen-readme-diagrams.mjs`) och 12 tester för inaktualitet i
+`tests/unit/docs/readme-*-svg.test.ts`, ett per diagram, som bytejämför den incheckade filen med resultatet från dess
+generator (jobbet `test-unit`).
 
 - **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierar paletten från `packages/ui-kit/src/ci-tokens.css`
-  (låst mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`) och definierar textrollerna på kitets
-  typsnitt — Instrument Serif för display, Inter för UI-text, IBM Plex Mono för siffror och kod, samma
-  `@fontsource`-paket som `src/app/globals.css` laddar för dashboarden. Ljusa värden ligger på `:root`, mörka
-  värden bakom `prefers-color-scheme: dark`, inne i filen, så att varje bild följer betraktarens schema på
-  GitHub.
-- **Typsnitt.** `scripts/docs/readme-fonts.mjs` skapar delmängder av dessa woff2-filer med de glyfer varje
-  diagram ritar och bäddar in dem som `@font-face` `data:`-URI:er — det enda sättet kitets typografi når en
-  README-bild, eftersom GitHub Markdown inte medför någon CSS och camo-proxyn blockerar all extern hämtning.
-  Delmängderna är enbart latin; symbolglyferna som faller tillbaka på systemstacken tillåts en och en i
-  `SYMBOL_FALLBACKS`, och varje annan otäckt glyf kastar ett fel.
-- **Generera om.** `npm run docs:readme-diagrams` skriver om alla tolv i README-ordning och skriver ut en rad
-  per fil med dess storlek. En enskild generator kan också köras separat
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` behöver `node --import tsx/esm` eftersom dess
-  siffror kommer från den levande katalogladdaren i `open-sse/config/freeModelCatalog.ts`; CI-konsekvensen av
-  en katalogändring finns i `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Committa generatorn
-  och SVG:n tillsammans.
-- **Verifiering.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderar en fil så som GitHub
-  serverar den (en `<img>`-tagg, camos `Content-Security-Policy`, `image/svg+xml`), fångar en ljus och en mörk
-  bildruta och rapporterar de externa typsnittsförfrågningar sidan gjorde (måste vara 0).
-- **Budget.** Under 200 KB per fil (varje staleness-test påstår det); 500 KB är det hårda taket för varje
-  README-bild (SVG-studiovaliderarens regel).
-- **Oförändrad text, siffror från gate-kontrollen.** Rebrandingen ändrade typsnitt och palett, inte ord: varje
-  generator bär sitt diagrams text i en `*_COPY`-konstant (eller bygger den från den levande katalogen) som är
-  både den ritade texten och indatan för typsnittsdelmängden. Kanoniska siffror stannar i `<text>`-noder,
-  lästa av `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); staleness-testerna för de diagram
-  som gaten läser kör också dess validerare på den genererade filen, så att en siffra som driver iväg från
-  koden fäller testet — åtgärda källan som gaten läser, aldrig siffran i generatorn.
+  (låst mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`) och definierar textrollerna på
+  kitets typskala: Switzer i kitets vikter (400/500/600, display i 500) och teckenavstånd för
+  allt, utom kodrollerna (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), som
+  är IBM Plex Mono och endast används för kommandon, URL:er, identifierare och terminalskärmar.
+  Ljusa värden ligger på `:root`, mörka värden bakom `prefers-color-scheme: dark`, i filen, så att varje
+  bild följer visningsprogrammets schema på GitHub.
+- **Teckensnitt.** GitHub Markdown innehåller ingen CSS och camo-proxyn blockerar alla externa hämtningar, så kitets
+  typografi måste följa med i filen. `scripts/docs/readme-outline.mjs`, det sista steget i varje generator, formar
+  Switzer-rollerna med HarfBuzz och ritar dem som vektorlinjer (`<defs>`-sökvägar och `<use>`), medan pilarna
+  och geometriska symboler som Switzer saknar ritas utifrån sina egna mått. Konturer, aldrig ett inbäddat
+  teckensnitt: Switzers licens (`packages/ui-kit/src/fonts/FFL.txt`) förbjuder subsettering och formatkonvertering
+  utan skriftligt samtycke och tillåter vektorteckningar, så återinför inte en Switzer-`@font-face` eller
+  `data:`-URI. Det enda teckensnitt som lämnas kvar i en fil är OFL-delmängden av IBM Plex Mono för det som
+  fortfarande är riktig kodtext (`scripts/docs/readme-fonts.mjs`), byggd från dessa tecken; alla glyfer som den
+  inte kan bädda in orsakar ett fel.
+- **Generera om.** `npm run docs:readme-diagrams` skriver om alla tolv i README-ordning och skriver ut en rad per
+  fil med dess storlek. En enskild generator kan också köras separat (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` behöver `node --import tsx/esm` eftersom dess figurer kommer från den aktiva katalogladdaren i
+  `open-sse/config/freeModelCatalog.ts`; CI-konsekvensen av en katalogändring finns i
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Checka in generatorn och SVG-filen tillsammans.
+- **Verifiering.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderar en fil på det sätt GitHub
+  levererar den (en `<img>`-tagg, camo:s `Content-Security-Policy`, `image/svg+xml`), tar en ljus och en
+  mörk bild och rapporterar de externa teckensnittsbegäranden som sidan gjorde (måste vara 0).
+- **Budget.** Under 200 KB per fil (varje test för inaktualitet hävdar detta); 500 KB är den hårda gränsen för
+  alla README-bilder (SVG-studiots valideringsregel).
+- **Kopiera oförändrat, antal från kontrollen.** Omprofileringen ändrade typografi och palett, inte ord: varje
+  generator innehåller diagrammets text i en `*_COPY`-konstant (eller bygger den från den aktiva katalogen) som
+  både är den ritade texten och indata till kontursteget. Kanoniska figurer finns kvar i `<text>`-noder
+  (osynliga när de väl har konturiserats, `fill-opacity:0`), som läses av `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`); diagrammens tester för inaktualitet som styr kontrollerna kör också
+  dess validerare på den genererade filen, så en figur som avviker från koden gör att testet misslyckas — korrigera
+  källan som kontrollen läser, aldrig talet i generatorn.
 
 ## 7. Referensindex
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Állapot:** az irányítópult a **Keak CI UI Kit**-re (`@keak/cheaper-inference-ui-kit`) épül, amely a `packages/ui-kit` workspace-csomagként van beágyazva (`@omniroute/ui-kit`; az upstream pillanatkép a `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` védi). A világos téma a kanonikus téma; az alapértelmezett beállítás a `system`. A kiemelőszín a Keak lime (`--ci-color-accent`). Az Inter (letter-spacing 0, `--ci-letter-spacing-ui`) a felhasználói felület betűcsaládja, az Instrument Serif kizárólag nagy méretű, ritkás megjelenítésű szövegekhez (`.ci-dashboard-display`), az IBM Plex Mono pedig a kódhoz használatos — mindegyik saját tárhelyről, a `src/app/globals.css` elején található `@fontsource/*` importokon keresztül töltődik be. Minden ikon egy Lucide-glifa.
+> **Állapot:** a műszerfal a** Keak CI UI készlet** (`@keak/cheaper-inference-ui-kit`), a `packages/ui-kit` munkaterület (`@omniroute/ui-kit`; az upstream pillanatkép rögzítve van `packages/ui-kit/UPSTREAM.md` -ben, és `npm run check:ui-kit-snapshot` védi). A fény a kanonikus téma; az alapértelmezett beállítás a `system`. Az akcentus a Keak lime (`--ci-color-accent`). A Switzer az egyetlen család UI hoz, a kijelzőhöz és a kódszöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ennek megoldása), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Scripts Switzer hiányzik a karakterjelről karakterjelre (`src/app/globals.css`): Inter a cirill, görög és vietnami, és csak `html[dir="rtl"]` alatt a Vazirmatn az arab írásra. Minden ikon egy Lucide jelkép.
 
 ## 1. Hol mi található
 
@@ -87,40 +87,13 @@
 
 ## 2. Szabályok
 
-1. Tokenek, soha literálok. A szándékosan megtartott kivételek: a mindig sötét konzolterminál és a
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), amely a kit státuszpalettájának feloldott
-   hex-értékekkel dolgozó tükre azoknak a hívóknak, amelyeknek literál hexre van szükségük. A
-   kategorikus paletták már nem kivételek: a kit öt diagram-tokenjére (`--color-chart-1..5`) épülnek a
-   `src/shared/utils/categoricalPalette.ts` segítségével, útválasztási stratégiák esetén pedig a
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` segítségével; a ReactFlow-élek és az
-   orchesztrációs vászon a tématudatos `--orch-status-*` változókat olvassák
-   (`src/shared/components/flow/edgeStyles.ts`).
-2. Soha ne módosítsd kézzel a `packages/ui-kit/src` mappát: szinkronizálj a
-   `scripts/dev/sync-ui-kit.sh <commit>` paranccsal; a `npm run check:ui-kit-snapshot` pre-commit kapu
-   (`.husky/pre-commit`) minden olyan bájt esetén hibát jelez, amely eltér a rögzített upstream
-   committól (figyelmeztetéssel kihagyja, ha az upstream klón, a `UI_KIT_CLONE` vagy a
-   `_references/cheaper-inference-ui-kit` hiányzik). Ha a kitből valami hiányzik, kerüld meg az
-   adapterben vagy a képernyőben, és kérd meg az upstreamet rá.
-3. A kit szöveges alapértelmezései angolok (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   adj át lefordított stringeket a `useTranslations(...)` segítségével, amikor egy kit-komponens
-   szöveget jelenít meg.
-4. A Tailwind utility-osztályok felülírják a kit komponensosztályait (a kit deklarálja az
-   `@layer theme, base, components, utilities` rétegeket, és a szabályai a `components` rétegben
-   élnek) — használd az utility-ket térközhöz és elrendezéshez, ne a kit-komponensek
-   újraszínezésére.
-5. Címsorok: `.ci-heading` (Inter, betűköz-módosítás nélkül) oldal- és szakaszcímekhez;
-   `.ci-dashboard-display` (Instrument Serif) csak nagy, ritkán előforduló kiemelt szöveghez, például
-   a hibaoldal státuszkódjához.
-6. A `tests/unit/dashboard-kit-sweep.test.ts` őrzi a kit bevezetését: nincs Material-ligatúrás span a
-   `src/app` vagy a `src/shared/components` alatt; a dashboard-fában (`src/app/(dashboard)` és
-   `src/shared/components`) nincs nyers `<select>`, `<textarea>` vagy `<table>`, és nincs kézzel
-   készített `role="dialog"` a felsorolt kivételeken kívül (a `Select` adapter natív ága, a
-   `RequestLoggerDetail`); minden ottani nyers `<button>`-hoz vagy `<input>`-hoz egy `kit-exception:`
-   szöveget (az indoklással együtt) tartalmazó megjegyzés kell, amely legfeljebb 3 sorral felette ér
-   véget; paletta-színárnyalatok és `dark:` változatok csak a teszt által felsorolt fájlokban
-   fordulhatnak elő.
-7. PR előtt ellenőrizd mindkét témát és a 390 px-es nézetablakot (képernyőképekkel); a
-   `tests/e2e/a11y.spec.ts` futtatja az axe-et.
+1. Tokenek, soha nem literálok. Szándékosan tartott kivételek: a mindig sötét konzolterminál és `STATUS_HEX` (`src/shared/constants/statusColors.ts`), a kit állapotpaletta feloldott hexadecimális tükre azoknak a hívóknak, akiknek szó szerinti hexára van szükségük. A kategorikus paletták sem kivételek többé: a készlet öt chart tokenjén (`--color-chart-1..5`) haladnak `src/shared/utils/categoricalPalette.ts` keresztül, az útválasztási stratégiáknál pedig `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` keresztül; ReactFlow élek és a hangszerelési vászon olvassa a téma-tudatos `--orch-status-*` változókat (`src/shared/components/flow/edgeStyles.ts`).
+2. Soha ne foltozza meg `packages/ui-kit/src` kézzel: szinkronizálás a `scripts/dev/sync-ui-kit.sh <commit>`; a pre-commit kapu `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) meghiúsul minden olyan bájton, amely eltér a rögzített upstream véglegesítéstől (figyelmeztetéssel átugorja, ha az upstream klón, `UI_KIT_CLONE` vagy `_references/cheaper-inference-ui-kit` hiányzik). Ha a készletből hiányzik valami, kerülje meg az adapterben vagy a képernyőn, és kérje felfelé.
+3. A készletszöveg alapértelmezett beállításai az angol (`label = "Loading"`, `loadingLabel = "Loading table"`…) – `useTranslations(...)` ből lefordított karakterláncok átadása minden alkalommal, amikor a készlet összetevője szöveget jelenít meg.
+4. A Tailwind segédprogramok megnyerik a készletkomponens-osztályokat (a készlet `@layer theme, base, components, utilities` deklarálja, és a szabályai `components`-ben élnek) – a segédprogramokat a térközök és az elrendezés megadására használja, ne a készlet összetevőinek átszínezésére.
+5. Címsorok: `.ci-heading` az oldal- és szakaszcímekhez; `.ci-dashboard-display` csak a nagy, ritka kijelzőszövegekhez, például a hibaoldal állapotkódjához. Mindkettő Switzert használ.
+6. `tests/unit/dashboard-kit-sweep.test.ts` védi a készlet elfogadását: nincs anyagi ligatúra tartomány `src/app` vagy `src/shared/components` alatt; a műszerfalfában (`src/app/(dashboard)` és `src/shared/components`) nincs nyers `<select>`, `<textarea>` vagy `<table>`, és nincs kézzel görgetett `role="dialog"` a felsorolt kivételeken kívül (a `Select` adapter natív ága, `RequestLoggerDetail`); minden nyers `<button>` vagy `<input>` szükség van egy megjegyzésre, amely `kit-exception:` tartalmaz (az indoklással), amely legfeljebb 3 sorral felette végződik; paletta színárnyalatok és `dark:` változatok csak a tesztlistán szereplő fájlokban.
+7. Ellenőrizze mindkét témát és a 390 képpontos nézetet a PR előtt (képernyőképek); `tests/e2e/a11y.spec.ts` fut axe.
 
 ## 3. Képernyő hozzáadása
 
@@ -155,57 +128,31 @@ components` részében, ha a javítás stílusjellegű), soha ne a `packages/ui-
    adapternél hasonlítsd össze a renderelt markupot a változtatás előtt és után — a padding- vagy
    wrapper-változások minden képernyőre továbbterjednek.
 
-## 5. A kit frissítése
+## 5. A készlet frissítése
 
-A `scripts/dev/sync-ui-kit.sh <commit> [clone]` az adott commitnál az upstream `src/` tartalmát a
-`packages/ui-kit/src` könyvtárba másolja, és alkalmazza az egyetlen megengedett átalakítást (levágja a
-`.js` végződést a relatív importokról). Ezután: nézd át a `git diff packages/ui-kit` kimenetét, végezz
-vizuális átnézést a providers, settings, combos, usage és endpoint felületeken mindkét témában, futtasd az
-`npm run check:ui-kit-snapshot` és az `npm run test:vitest:ui` parancsot, és nyisd meg a PR-t az upstream
-changeloggal.
+`npm run check:ui-kit-upstream` összehasonlítja a `packages/ui-kit/UPSTREAM.md` ben rögzített verziót az upstream repo legújabb `v*` címkéjével, és kiírja a szinkronizálási parancsot, amikor egy kiadás megjelent.
 
-## 6. README-diagramok
+A napi `UI Kit upstream watch` munkafolyamat (`.github/workflows/ui-kit-upstream-watch.yml`) ugyanazt az ellenőrzést futtatja. Amíg a tű mögött van, `scripts/ci/ui-kit-sync-pr.sh` egy szinkronizáló PR nyitva tart a legmagasabb `release/vX.Y.Z` ágon, a `chore/ui-kit-sync-latest` gördülő ágon. Soha nem olvad össze: minden készletkiadást továbbra is vizuálisan ellenőrizni kell a helyi VPS n. Az ág újjáépül, amikor egy újabb kiadás megjelenik, és különben magára hagyják. Egy nyitott PR amely kézzel tolja a véglegesítéseket, nem íródik felül, és egy olyan verzióhoz tartozó PR, amelyet a karbantartó bezárt, összevonva zárva marad, egészen egy újabb kiadásig.
 
-A gyökérkönyvtárban lévő `README.md` által beágyazott tizenkét diagram (`docs/diagrams/*.svg`) a kitet
-jeleníti meg statikus képként, és ezek nem kézzel rajzoltak, hanem generáltak: 13 generátorfájl a
-`scripts/docs/gen-readme-*.mjs` útvonalon (tizenkét diagram plusz a `gen-readme-diagrams.mjs` vezérlő),
-valamint 12 elavulásteszt a `tests/unit/docs/readme-*-svg.test.ts` útvonalon, diagramonként egy-egy,
-amelyek bájtról bájtra összehasonlítják a commitolt fájlt a saját generátoruk kimenetével (`test-unit`
-job).
+Ha nem lehet megnyitni PR (a célkiadás le van fagyva, a PR kézzel tolták a véglegesítéseket, a PR zárva volt, vagy nincs beállítva PR token), a munkafolyamat nyitva tart egy nyomkövetési problémát, amely megmondja, hogy miért.
 
-- **Tokenek.** A `scripts/docs/readme-diagram-theme.mjs` a palettát a `packages/ui-kit/src/ci-tokens.css`
-  fájlból másolja (ehhez a fájlhoz a `tests/unit/docs/readme-diagram-theme.test.ts` rögzíti), és a kit
-  betűtípusain definiálja a szövegszerepeket — Instrument Serif a display szöveghez, Inter a felületi
-  szöveghez, IBM Plex Mono a számadatokhoz és a kódhoz, ugyanazok a `@fontsource` csomagok, amelyeket a
-  `src/app/globals.css` az irányítópulthoz tölt be. A világos értékek a `:root` alatt, a sötét értékek
-  pedig a `prefers-color-scheme: dark` mögött találhatók a fájlon belül, így minden kép a GitHubon a
-  megtekintő színsémáját követi.
-- **Betűtípusok.** A `scripts/docs/readme-fonts.mjs` ezekből a woff2-fájlokból az egyes diagramok által
-  kirajzolt glifekre szűkített részhalmazt készít, és `@font-face` `data:` URI-ként ágyazza be őket — ez
-  az egyetlen módja annak, hogy a kit tipográfiája eljusson egy README-képbe, mivel a GitHub Markdown nem
-  hordoz CSS-t, a camo proxy pedig minden külső lekérést blokkol. A részhalmazok kizárólag latin
-  karaktereket tartalmaznak; a rendszer-betűkészletre visszaeső szimbólumglifek egyenként engedélyezettek
-  a `SYMBOL_FALLBACKS` konstansban, minden más lefedetlen glif hibát dob.
-- **Újragenerálás.** Az `npm run docs:readme-diagrams` mind a tizenkettőt a README-beli sorrendben
-  újraírja, és fájlonként egy sort nyomtat a méretével. Egyetlen generátor önállóan is fut
-  (`node scripts/docs/gen-readme-<name>.mjs`; a `free-tier-budget`-hez `node --import tsx/esm` szükséges,
-  mert a számadatai az `open-sse/config/freeModelCatalog.ts` élő katalógusbetöltőjéből származnak; a
-  katalógusváltozás CI-következménye a `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` részben
-  található). A generátort és az SVG-t együtt commitold.
-- **Proba.** A `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` úgy rendereli a fájlt, ahogy a
-  GitHub kiszolgálja (egy `<img>` tag, a camo `Content-Security-Policy`-je, `image/svg+xml`), rögzít egy
-  világos és egy sötét képkockát, és jelenti az oldal által küldött külső betűtípus-kéréseket (ennek
-  0-nak kell lennie).
-- **Méretkeret.** Fájlonként 200 KB alatt (minden elavulásteszt ezt ellenőrzi); 500 KB a szigorú felső
-  korlát bármely README-képnél (az SVG-studio validátor szabálya).
-- **Változatlan szöveg, a számok a gate-től.** A rebrand a betűtípust és a palettát változtatta meg, nem a
-  szöveget: minden generátor a diagramja szövegét egy `*_COPY` konstansban hordozza (vagy az élő
-  katalógusból építi fel), amely egyszerre a kirajzolt szöveg és a betűtípus-részhalmaz bemenete. A
-  kanonikus számadatok `<text>` csomópontokban maradnak, amelyeket a `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`) olvas; azoknak a diagramoknak az elavulástesztjei,
-  amelyeket a gate olvas, a generált fájlon is lefuttatják annak validátorait, így a kódtól eltérő
-  számadat megbuktatja a tesztet — javítsd a gate által olvasott forrást, soha ne a generátorban lévő
-  számot.
+A munkafolyamat két titkot használ:
+
+- `secrets.UI_KIT_READ_TOKEN`: csak olvasható token a privát upstream repóhoz. Ha a munkafolyamat nem tudja olvasni az upstreamet (nincs token, egy token, amely leállt, vagy GitHub nem érhető el), a futtatás zölden marad, de figyelmeztetést ír, és nyitva tart egy külön problémát, amely bezárul, ha egy későbbi futás ismét képes olvasni az áramlás irányába.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: egy finom szemcsés token ezen a tárhelyen, tartalom- és lehívási kéréssel. Az alapértelmezett `GITHUB_TOKEN` itt nem tud PRs létrehozni, és az általa megnyitott PR nem váltja ki CI. E token nélkül a munkafolyamat csak az ágat tolja.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` átmásolja az upstream `src/` az adott véglegesítésnél (`latest` = a legújabb `v*` címke) `packages/ui-kit/src` be, alkalmazza az egyetlen engedélyezett átalakítást (elhagyja a `.js` utótagot a relatív importálásból), és beállítja a `packages/ui-kit/package.json` és `package-lock.json` munkaterület verzióját az upstream verzióra. Ezután tekintse át `git diff packages/ui-kit`, végezzen vizuális átadást a szolgáltatókról, a beállításokról, a kombinációkról, a használatról és a végpontról mindkét témában, futtassa `npm run check:ui-kit-snapshot` és `npm run test:vitest:ui`, és nyissa meg a PR az upstream változásnaplóval.
+
+## 6. README diagramok
+
+A `README.md` gyökér beágyazott tizenkét diagramja (`docs/diagrams/*.svg`) a statikus képre alkalmazott készlet, és generálásuk nem kézzel történik: 13 generátorfájl `scripts/docs/gen-readme-*.mjs` ben (tizenkét diagram plusz a `gen-readme-diagrams.mjs` illesztőprogram) és 12 elavultsági teszt `tests/unit/docs/readme-*-svg.test.ts` nél, diagramonként egy, minden egyes byte-com-fájl a kimeneti `test-unit` jával.
+
+- **Tokenek.** `scripts/docs/readme-diagram-theme.mjs` átmásolja a palettát `packages/ui-kit/src/ci-tokens.css` ből (a fájlhoz `tests/unit/docs/readme-diagram-theme.test.ts` rögzíti), és meghatározza a szövegszerepeket a készlet típusskáláján: Switzer a készlet súlyainál (400/500/600, kijelzés 500-nál) és mindent követ, kivéve a kódszerepeket (`.cmd`, `.term`, `.term-lg` `.mono`, `.mono-xs`), amelyek IBM Plex Mono `.mono-sm` és csak parancsokhoz, URLs, azonosítókhoz és terminálképernyőkhöz használhatók. A világos értékek `:root`-n, a sötét értékek `prefers-color-scheme: dark` mögött helyezkednek el a fájl belsejében, így minden kép követi a néző GitHub sémáját.
+- **Betűtípusok.** GitHub Markdown nem hordoz CSS, és a camo proxy blokkol minden külső letöltést, így a készlet típusának a fájlon belül kell utaznia. `scripts/docs/readme-outline.mjs`, minden generátor utolsó lépése, HarfBuzz vel formálja meg a Switzer-szerepeket, és vektoros körvonalakként rajzolja meg őket (`<defs>` paths és `<use>`), a nyilak és geometriai szimbólumok pedig hiányoznak Switzerből a saját metrikái alapján. Körvonalak, soha nem beágyazott betűtípus: A Switzer licence (`packages/ui-kit/src/fonts/FFL.txt`) tiltja a részhalmazok és a formátum konvertálását írásos hozzájárulás nélkül, és engedélyezi a vektoros rajzokat, ezért ne vezessen be újra Switzer `@font-face` vagy `data:` URI betűtípust. Az egyetlen betűkészlet a fájlban a OFL IBM Plex Mono részhalmaz, amely valódi kódszöveg marad (`scripts/docs/readme-fonts.mjs`), amely ezekből a karakterekből épül fel; bármilyen karakterjelet nem tud beágyazni dobásokat.
+- **Regenerátum.** `npm run docs:readme-diagrams` átírja mind a tizenkettőt README sorrendben, és fájlonként egy sort nyomtat a méretével együtt. Egyetlen generátor önállóan is fut (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` van szüksége, mert az adatok a `open-sse/config/freeModelCatalog.ts` élő katalógusbetöltőjéből származnak; a katalógusváltás CI következménye `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`-ben van). Kösd le a generátort és a SVG együtt.
+- **Bizonyíték.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` úgy jeleníti meg a fájlt, ahogyan GitHub kiszolgálja ( `<img>` címke, camo's `Content-Security-Policy`, `image/svg+xml`), rögzít egy világos és egy sötét keretet, és jelenti a külső betűtípus kéréseket az oldal elkészítéséhez (0-nak kell lennie).
+- **Költségvetés.** 200 KB alatt fájlonként (minden elévültségi teszt ezt igazolja); 500 KB a kemény sapka minden README képhez (a SVG studio validátor szabálya).
+- **Másolás változatlanul, a kaputól számítva.** Az új márka típusát és palettáját változtatta meg, nem szavakat: minden generátor a diagram másolatát egy `*_COPY` konstansban hordozza (vagy az élő katalógusból építi fel), amely egyszerre a rajzolt szöveg és a körvonalazás lépésének bemenete. A kanonikus alakzatok `<text>` csomópontokban maradnak (a körvonalazás után láthatatlanok, `fill-opacity:0`), `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) olvassa el; a diagramok elavultsági tesztjei, amelyeket a gate olvas, szintén a generált fájlon futtatják a validátorait, így a kódtól elsodródó figura megbukik a —.
 
 ## 7. Referenciaindex
 

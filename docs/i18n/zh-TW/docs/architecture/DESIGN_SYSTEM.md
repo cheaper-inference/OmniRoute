@@ -4,7 +4,7 @@
 
 ---
 
-> **狀態：** 儀表板建構於 **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）之上，以 vendor 方式納入為工作區中的 `packages/ui-kit`（`@omniroute/ui-kit`；上游快照固定於 `packages/ui-kit/UPSTREAM.md`，並由 `npm run check:ui-kit-snapshot` 把關）。亮色（Light）為標準主題；預設偏好為 `system`。強調色為 Keak 萊姆綠（`--ci-color-accent`）。Inter（letter-spacing 0，`--ci-letter-spacing-ui`）為 UI 字體家族，Instrument Serif 僅用於大型而稀疏的展示文字（`.ci-dashboard-display`），IBM Plex Mono 用於程式碼——以上皆透過 `src/app/globals.css` 頂部的 `@fontsource/*` 匯入自行託管。每個圖示均為 Lucide 字形。
+> **地位：**儀表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作為工作區`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中並由`npm run check:ui-kit-snapshot`保護) 提供。光是典型的主題；預設首選項是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、顯示和程式碼文字（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析為它）的單一系列，由套件本身自託管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`導入）。瑞士文字缺乏逐字形的下降（`src/app/globals.css`）：Inter 用於西里爾文、希臘語和越南語，僅在`html[dir="rtl"]`下，Vazirmatn 用於阿拉伯文。每個圖示都是 Lucide 字形。
 
 ## 1. 各項內容的所在位置
 
@@ -72,35 +72,13 @@
 
 ## 2. 規則
 
-1. 一律使用 Token,絕不使用字面值。刻意保留的例外:永遠深色的主控台終端機,以及
-   `STATUS_HEX`(`src/shared/constants/statusColors.ts`)——它是 kit 狀態調色盤的已解析 hex
-   鏡像,供需要 hex 字面值的呼叫端使用。類別調色盤(categorical palettes)已不再是例外:
-   它們透過 `src/shared/utils/categoricalPalette.ts` 建立在 kit 的五個圖表 token
-   (`--color-chart-1..5`)之上,而路由策略則透過
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`;ReactFlow 的連線(edges)與編排
-   畫布(orchestration canvas)讀取具主題感知的 `--orch-status-*` 變數
-   (`src/shared/components/flow/edgeStyles.ts`)。
-2. 絕不要手動修改 `packages/ui-kit/src`:請用 `scripts/dev/sync-ui-kit.sh <commit>` 同步;
-   pre-commit 閘門 `npm run check:ui-kit-snapshot`(`.husky/pre-commit`)會在任何與釘選的
-   上游 commit 有一個位元組不同時失敗(當上游複製 `UI_KIT_CLONE` 或
-   `_references/cheaper-inference-ui-kit` 不存在時,會發出警告並跳過)。當 kit 缺少某項功能時,
-   請在 adapter 或畫面中設法繞過,並向上游提出需求。
-3. Kit 文字的預設值為英文(`label = "Loading"`、`loadingLabel = "Loading table"`……)——
-   每當 kit 元件要渲染文字時,都應傳入來自 `useTranslations(...)` 的翻譯字串。
-4. Tailwind 工具類別的優先權高於 kit 元件類別(kit 宣告了
-   `@layer theme, base, components, utilities`,其規則位於 `components` 層)——請用工具類別
-   處理間距與版面,而不是用來重新著色 kit 元件。
-5. 標題:頁面與區段標題使用 `.ci-heading`(Inter,無字距);`.ci-dashboard-display`
-   (Instrument Serif)僅用於大型、稀疏的展示文字,例如錯誤頁面的狀態碼。
-6. `tests/unit/dashboard-kit-sweep.test.ts` 把關 kit 的採用情形:`src/app` 或
-   `src/shared/components` 底下不得出現 Material 連字(ligature)span;在 dashboard 樹內
-   (`src/app/(dashboard)` 與 `src/shared/components`),除了列出的例外(`Select` adapter 的
-   原生分支、`RequestLoggerDetail`)之外,不得使用原生 `<select>`、`<textarea>` 或 `<table>`,
-   也不得手刻 `role="dialog"`;該處每個原生 `<button>` 或 `<input>` 都需要一則包含
-   `kit-exception:`(附原因)的註解,且註解結尾距離該元素最多 3 行;調色盤色相(hue)與
-   `dark:` 變體僅限出現在測試所列的檔案中。
-7. 提交 PR 前,驗證兩種主題與 390 px 檢視區(附螢幕截圖);`tests/e2e/a11y.spec.ts` 會執行
-   axe。
+1. 令牌，絕不是字面意思。刻意保留的例外：始終黑暗的控制台終端和`STATUS_HEX` (`src/shared/constants/statusColors.ts`)，工具包狀態調色板的解析十六進位鏡像，供需要文字十六進制的呼叫者使用。分類調色板不再例外：它們依賴套件的五個圖表標記（`--color-chart-1..5`）到`src/shared/utils/categoricalPalette.ts` ，以及用於路由策略的`src/app/(dashboard)/dashboard/combos/strategyPalette.ts`； ReactFlow邊緣和編排畫布讀取主題感知的`--orch-status-*`變數 (`src/shared/components/flow/edgeStyles.ts`)。
+2. 切勿手動修補`packages/ui-kit/src` ：與`scripts/dev/sync-ui-kit.sh <commit>`同步；預先提交門`npm run check:ui-kit-snapshot` (`.husky/pre-commit`) 在與固定的上游提交不同的任何位元組上失敗（當上游克隆`UI_KIT_CLONE`或`_references/cheaper-inference-ui-kit`不存在時，它會跳過並發出警告）。當套件缺少某些內容時，請在適配器或螢幕中解決它並向上游詢問。
+3. 套件文字預設為英文（`label = "Loading"`、 `loadingLabel = "Loading table"`...） - 每當套件元件呈現文字時，都會從`useTranslations(...)`傳遞翻譯後的字串。
+4. Tailwind 實用程式勝過套件元件類別（套件宣告`@layer theme, base, components, utilities`及其規則位於`components`）－使用公用程式進行間距和佈局，而不是重新著色套件元件。
+5. 標題： `.ci-heading`用於頁面和章節標題； `.ci-dashboard-display`僅適用於大而稀疏的顯示文本，例如錯誤頁面狀態代碼。兩者都使用瑞士語。
+6. `tests/unit/dashboard-kit-sweep.test.ts`保護套件採用： `src/app`或`src/shared/components`下無材料結紮跨度；在儀表板樹（`src/app/(dashboard)`和`src/shared/components`）中，沒有原始`<select>`、 `<textarea>`或`<table>` ，並且在列出的例外之外沒有手工製作的`role="dialog"` （ `Select`的本機分支具有`dark:` `RequestLoggerDetail` `kit-exception:` `<button>` `<input>`測試列出的檔案中。
+7. 在PR之前驗證兩個主題和 390 px 視口（螢幕截圖）； `tests/e2e/a11y.spec.ts`運行斧頭。
 
 ## 3. 新增畫面
 
@@ -128,20 +106,31 @@
 3. 針對 kit 缺口的變通做法應放在轉接器中（若修正屬於樣式，則放在 `globals.css` 的 `@layer components`），絕不放在 `packages/ui-kit/src`。
 4. 新增或更新 `tests/unit/ui/adapters/<name>.test.tsx`。對於有許多呼叫方的轉接器，請比較變更前後渲染出的標記——內距或包裝層的變動會擴散到每個畫面。
 
-## 5. 更新 kit
+## 5. 更新套件
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` 會將該 commit 的上游 `src/` 複製到 `packages/ui-kit/src`，並套用唯一允許的轉換（移除相對匯入的 `.js` 後綴）。接著：檢視 `git diff packages/ui-kit`，在兩種主題下對 providers、settings、combos、usage 與 endpoint 各頁面進行目視檢查，執行 `npm run check:ui-kit-snapshot` 與 `npm run test:vitest:ui`，然後附上上游更新日誌提交 PR。
+`npm run check:ui-kit-upstream`將`packages/ui-kit/UPSTREAM.md`中固定的版本與上游儲存庫的最新`v*`標籤進行比較，並在發佈時列印同步命令。
 
-## 6. README 圖表
+每日`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 執行相同的檢查。當 pin 位於後面時， `scripts/ci/ui-kit-sync-pr.sh`會在滾動分支`chore/ui-kit-sync-latest`上針對最高`release/vX.Y.Z`分支保持一個同步PR開啟。它永遠不會合併：每個套件版本仍然需要對本地VPS進行目視檢查。當新版本發佈時，分支會被重建，否則就不會發生。手動提交的開放PR不會被覆蓋，並且維護者關閉未合併的版本的PR將保持關閉狀態，直到新版本發布。
 
-根目錄 `README.md` 內嵌的十二張圖表（`docs/diagrams/*.svg`）是套用 kit 所產生的靜態圖片，而且它們是產生出來的，並非手繪：13 個產生器檔案位於 `scripts/docs/gen-readme-*.mjs`（十二張圖表加上 `gen-readme-diagrams.mjs` 驅動程式），另有 12 個位於 `tests/unit/docs/readme-*-svg.test.ts` 的時效性（staleness）測試，每張圖一個，各自將已提交的檔案與其產生器的輸出做位元組比對（job `test-unit`）。
+當無法開啟PR時（目標版本被凍結、 PR已手動提交、 PR已關閉或未設定PR令牌），工作流程會保持一個追蹤問題處於開啟狀態，並說明原因。
 
-- **Token。** `scripts/docs/readme-diagram-theme.mjs` 從 `packages/ui-kit/src/ci-tokens.css` 複製調色盤（由 `tests/unit/docs/readme-diagram-theme.test.ts` 釘定對照該檔案），並在 kit 字體上定義文字角色——Instrument Serif 用於標題展示、Inter 用於 UI 文字、IBM Plex Mono 用於數字與程式碼，與 `src/app/globals.css` 為儀表板載入的 `@fontsource` 套件相同。淺色值位於 `:root`，深色值放在檔案內的 `prefers-color-scheme: dark` 之後，因此每張圖片在 GitHub 上都會跟隨檢視者的色彩配置。
-- **字體。** `scripts/docs/readme-fonts.mjs` 將這些 woff2 檔案子集化為每張圖實際繪製的字形，並以 `@font-face` 的 `data:` URI 內嵌——這是 kit 字體排印能進入 README 圖片的唯一方式，因為 GitHub Markdown 不帶 CSS，且 camo 代理會阻擋所有外部請求。子集僅含拉丁字元；會退回系統字體堆疊的符號字形在 `SYMBOL_FALLBACKS` 中逐一允許，任何其他未涵蓋的字形都會拋出錯誤。
-- **重新產生。** `npm run docs:readme-diagrams` 會依 README 順序重寫全部十二張圖，並為每個檔案輸出一行大小資訊。單一產生器也可獨立執行（`node scripts/docs/gen-readme-<name>.mjs`；`free-tier-budget` 需要 `node --import tsx/esm`，因為其數字來自 `open-sse/config/freeModelCatalog.ts` 中的即時目錄載入器；目錄變更對 CI 的影響見 `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`）。請將產生器與 SVG 一起提交。
-- **驗證。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` 會以 GitHub 實際提供的方式渲染檔案（一個 `<img>` 標籤、camo 的 `Content-Security-Policy`、`image/svg+xml`），擷取一個淺色與一個深色畫面，並回報頁面發出的外部字體請求數（必須為 0）。
-- **大小預算。** 每個檔案低於 200 KB（每個時效性測試都有此斷言）；任何 README 圖片的硬性上限為 500 KB（SVG studio 驗證器的規則）。
-- **文案不變，數字以關卡為準。** 這次品牌重塑改變的是字體與調色盤，而非文字：每個產生器將其圖表的文案放在 `*_COPY` 常數中（或從即時目錄建構），它同時是繪製出的文字與字體子集化的輸入。正式數字保留在 `<text>` 節點中，由 `check:docs-counts`（`scripts/check/check-docs-counts-sync.mjs`）讀取；該關卡所讀取之圖表的時效性測試，也會對產生的檔案執行其驗證器，因此某個數字一旦與程式碼有所偏差就會導致測試失敗——請修正關卡所讀取的來源，絕不要改產生器中的數字。
+這個工作流程使用兩個秘密：
+
+- `secrets.UI_KIT_READ_TOKEN`：私有上游儲存庫的唯讀令牌。當工作流程無法讀取上游（沒有令牌、令牌停止工作或GitHub無法存取）時，運行將保持綠色，但會寫入一條警告並保持一個單獨的問題處於開啟狀態，一旦稍後的運行可以再次讀取上游，該問題就會自行關閉。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`：此儲存庫上的細粒度令牌，具有內容和拉取請求寫入權限。預設的`GITHUB_TOKEN`不能在這裡建立PRs ，而且它開啟的PR不會觸發CI。如果沒有此令牌，工作流程只會推送分支。
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`將該提交處的上游`src/` （`latest` =最新的`v*`標記）複製到`packages/ui-kit/src`中，應用單一允許的轉換（它從相對導入中刪除`.js`後綴），並將`packages/ui-kit/package.json`和`package-lock.json`中的工作區版本設定為上游版本。然後：檢視`git diff packages/ui-kit`，對兩個主題中的提供者、設定、組合、用法和端點進行視覺化傳遞，運行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，並使用上游變更日誌開啟PR 。
+
+## README圖
+
+根`README.md`嵌入的 12 個圖表 (`docs/diagrams/*.svg`) 是應用於靜態圖像的套件，它們是生成的，而不是手工繪製的： `scripts/docs/gen-readme-*.mjs`上的 13 個生成器檔案（12 個圖表加上`gen-readme-diagrams.mjs`驅動程式）和`tests/unit/docs/readme-*-svg.test.ts`上的 12 個過時測試，每個圖表一個，每個位元組將提交的檔案與其生成器的輸出作業（ `test-unit`）。
+
+- **代幣。** `scripts/docs/readme-diagram-theme.mjs`從`packages/ui-kit/src/ci-tokens.css`複製調色盤（由`tests/unit/docs/readme-diagram-theme.test.ts`固定在該檔案上），並在套件的字體比例上定義文字角色：Switzer 在套件的權重（400/500/600，顯示為 500）並追蹤所有內容，但程式碼角色（`.cmd`、 `.term`、 `.term-lg`、 `.mono`、 `.mono-sm`且URLs `.mono-xs` IBM用於指令，標識符和終端螢幕。檔案內的亮值位於`:root`上，暗值位於`prefers-color-scheme: dark`後面，因此每個影像都遵循檢視者在GitHub上的方案。
+- **字體。** GitHub Markdown 不攜帶CSS ，且迷彩代理會阻止每個外部獲取，因此套件類型必須在文件內傳輸。 `scripts/docs/readme-outline.mjs`是每個生成器的最後一步，它使用HarfBuzz來塑造 Switzer 角色，並將它們繪製為向量輪廓（`<defs>`路徑和`<use>`），並使用 Switzer 缺乏的根據其自己的度量繪製的箭頭和幾何符號。輪廓，絕不是嵌入字體：Switzer 的許可證 (`packages/ui-kit/src/fonts/FFL.txt`) 禁止在未經書面同意的情況下進行子集化和格式轉換，並允許向量圖形，因此不要重新引入 Switzer `@font-face`或`data:` URI。文件中留下的一種字體是OFL IBM Plex Mono 子集，用於保留真實代碼文字 (`scripts/docs/readme-fonts.mjs`)，由這些字元建構；任何不能嵌入的字形都會拋出異常。
+- **再生。** `npm run docs:readme-diagrams`按README順序重寫所有 12 個文件，並為每個文件列印一行及其大小。單一生成器也可以獨立運作（`node scripts/docs/gen-readme-<name>.mjs`； `free-tier-budget`需要`node --import tsx/esm`因為它的資料來自`open-sse/config/freeModelCatalog.ts`中的即時目錄載入器；目錄變更的CI結果位於`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`中）。將生成器和SVG一起提交。
+- **證明。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`以GitHub服務的方式渲染檔案（ `<img>`標籤、camo 的`Content-Security-Policy`、 `image/svg+xml`），捕捉淺色和深色框架並報告頁面發出的外部字體請求（必須為 0）。
+- **預算。**每個檔案低於 200 個KB （每個過時測試都斷言這一點）； 500 KB是任何README鏡像的硬上限（ SVG studio 驗證器的規則）。
+- **複製不變，從門開始計數。**品牌重塑改變了類型和調色板，而不是單字：每個生成器在`*_COPY`常數中攜帶其圖表的副本（或從實時目錄構建它），該常數既是繪製的文本也是大綱步驟的輸入。規範圖形保留在`<text>`節點中（輪廓一旦勾勒就不可見， `fill-opacity:0`），由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 讀取；門讀取的圖表的陳舊性測試也在生成的文件上運行其驗證器，因此與代碼漂移的數字無法通過測試—修復門讀取的源，而不是生成器中的數字。
 
 ## 7. 參考索引
 

@@ -4,13 +4,7 @@
 
 ---
 
-> **Tila:** hallintapaneeli on rakennettu **Keak CI UI Kit** -kirjaston (`@keak/cheaper-inference-ui-kit`) päälle, vendoituna
-> workspace-pakettina `packages/ui-kit` (`@omniroute/ui-kit`; upstream-otos on kiinnitetty tiedostossa
-> `packages/ui-kit/UPSTREAM.md` ja sitä valvoo `npm run check:ui-kit-snapshot`). Vaalea on kanoninen
-> teema; oletusvalinta on `system`. Korostusvärinä on Keak-lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) on käyttöliittymän kirjasinperhe, Instrument Serif vain suurille
-> harvoille näyttöteksteille (`.ci-dashboard-display`), IBM Plex Mono koodille — kaikki itse isännöityinä
-> tiedoston `src/app/globals.css` alussa olevien `@fontsource/*`-tuontien kautta. Jokainen kuvake on Lucide-glyyfi.
+> **Status:** kojelauta on rakennettu** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), toimitetaan työtilana `packages/ui-kit` (`@omniroute/ui-kit`; alkuvirran tilannekuva on kiinnitetty `packages/ui-kit/UPSTREAM.md` ään ja sitä suojaa `npm run check:ui-kit-snapshot`). Valo on kanoninen teema; oletusasetus on `system`. Aksentti on Keak lime (`--ci-color-accent`). Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Scripts Switzeristä puuttuu kaatuminen kuvio kerrallaan (`src/app/globals.css`): Inter kyrilliselle, kreikalle ja vietnam ja vain `html[dir="rtl"]`:n alla Vazirmatn arabialle. Jokainen kuvake on Luciden merkki.
 
 ## 1. Missä asiat sijaitsevat
 
@@ -84,34 +78,13 @@ variant="primary"` on kitin `default`-nappi (`--ci-button-primary-*`: kääntein
 
 ## 2. Säännöt
 
-1. Tokeneja, ei koskaan literaaliarvoja. Tarkoituksella jätetyt poikkeukset: aina tumma konsolipääte ja
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), kitin tilapaletin ratkaistu heksapeili kutsujille,
-   jotka tarvitsevat literaaliheksan. Kategoriset paletit eivät ole enää poikkeus:
-   ne nojaavat kitin viiteen kaaviotokeniin (`--color-chart-1..5`) tiedoston
-   `src/shared/utils/categoricalPalette.ts` kautta ja reititysstrategioiden osalta tiedoston
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` kautta; ReactFlow-reunat ja
-   orkestrointikanvas lukevat teematietoiset `--orch-status-*`-muuttujat (`src/shared/components/flow/edgeStyles.ts`).
-2. Älä koskaan korjaa `packages/ui-kit/src`-hakemistoa käsin: synkronoi komennolla `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit-portti `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) epäonnistuu mistä tahansa tavusta,
-   joka poikkeaa kiinnitetystä upstream-commitista (se ohittaa varoituksella, kun upstream-klooni,
-   `UI_KIT_CLONE` tai `_references/cheaper-inference-ui-kit`, puuttuu). Kun kitistä puuttuu jotain,
-   kierrä ongelma adapterissa tai näytössä ja pyydä sitä upstreamilta.
-3. Kitin tekstien oletukset ovat englanniksi (`label = "Loading"`, `loadingLabel = "Loading table"`…) — välitä käännettyjä
-   merkkijonoja `useTranslations(...)`-funktiosta aina, kun kit-komponentti renderöi tekstiä.
-4. Tailwind-apuluokat voittavat kit-komponenttien luokat (kit määrittelee
-   `@layer theme, base, components, utilities` ja sen säännöt elävät `components`-kerroksessa) — käytä apuluokkia
-   välistykseen ja asetteluun, ei kit-komponenttien uudelleenvärjäämiseen.
-5. Otsikot: `.ci-heading` (Inter, ei merkivälistystä) sivu- ja osio-otsikoille; `.ci-dashboard-display`
-   (Instrument Serif) vain suurelle, harvalle esitystekstille kuten virhesivun tilakoodille.
-6. `tests/unit/dashboard-kit-sweep.test.ts` vartioi kitin käyttöönottoa: ei Material-ligatuuri-span-elementtejä
-   `src/app`- tai `src/shared/components`-hakemistojen alla; dashboard-puussa (`src/app/(dashboard)` ja
-   `src/shared/components`) ei raakoja `<select>`-, `<textarea>`- tai `<table>`-elementtejä eikä käsin tehtyjä
-   `role="dialog"`-elementtejä lueteltujen poikkeusten ulkopuolella (`Select`-adapterin natiivihaara,
-   `RequestLoggerDetail`); jokainen raaka `<button>` tai `<input>` siellä tarvitsee kommentin, joka sisältää
-   `kit-exception:` (perusteluineen) ja päättyy korkeintaan 3 riviä sen yläpuolella; palettisävyt ja `dark:`-variantit
-   vain tiedostoissa, jotka testi listaa.
-7. Varmista molemmat teemat ja 390 px:n näyttöalue ennen PR:ää (kuvakaappaukset); `tests/e2e/a11y.spec.ts` ajaa
-   axen.
+1. Tokenit, ei koskaan kirjaimet. Tarkoituksenmukaisesti pidetyt poikkeukset: aina tumma konsolipääte ja `STATUS_HEX` (`src/shared/constants/statusColors.ts`), setin tilapaletin resoluutioinen hex-peili soittajille, jotka tarvitsevat kirjaimellisen heksan. Kategoriset paletit eivät ole enää poikkeus: ne kulkevat sarjan viidellä karttatunnuksella (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` ja reititysstrategioiden osalta `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` kautta; ReactFlow reunat ja orkestrointikangas lukevat teematietoisia `--orch-status-*` muuttujia (`src/shared/components/flow/edgeStyles.ts`).
+2. Älä koskaan korjaa `packages/ui-kit/src` käsin: synkronoi `scripts/dev/sync-ui-kit.sh <commit>` kanssa; pre-commit portti `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) epäonnistuu missä tahansa tavussa, joka eroaa kiinnitetystä ylävirran vahvistuksesta (se ohittaa varoituksen kanssa, kun ylävirran klooni, `UI_KIT_CLONE` tai `_references/cheaper-inference-ui-kit`, puuttuu). Kun sarjasta puuttuu jotain, kierrä se sovittimessa tai näytössä ja pyydä sitä alkupäässä.
+3. Kitin tekstin oletusasetukset ovat englanti (`label = "Loading"`, `loadingLabel = "Loading table"`…) – välität käännetyt merkkijonot `useTranslations(...)` stä aina, kun pakkauksen komponentti hahmontaa tekstiä.
+4. Tailwind-apuohjelmat voittaa sarjan komponenttiluokat (sarja ilmoittaa `@layer theme, base, components, utilities` ja sen säännöt elävät `components` ssä) — käytä apuohjelmia väliin ja asetteluihin, älä värjätä sarjan osia.
+5. Otsikot: `.ci-heading` sivujen ja osien otsikoille; `.ci-dashboard-display` vain suurelle, harvoille näyttöteksteille, kuten virhesivun tilakoodille. Molemmat käyttävät Switzeriä.
+6. `tests/unit/dashboard-kit-sweep.test.ts` suojelee sarjan käyttöönottoa: ei materiaalin ligatuuriväliä `src/app` tai `src/shared/components` alla; kojelautapuussa (`src/app/(dashboard)` ja `src/shared/components`) ei raaka- `<select>`, `<textarea>` tai `<table>` eikä käsin rullattu `role="dialog"` lueteltujen poikkeusten ulkopuolella ( `Select` sovittimen alkuperäinen haara, `RequestLoggerDetail`); jokainen raaka `<button>` tai `<input>` tarvitsee kommentin, joka sisältää `kit-exception:` (syyn kanssa), joka päättyy enintään 3 riviä sen yläpuolelle; paletin sävyjä ja `dark:` -variantteja vain testiluetteloissa olevissa tiedostoissa.
+7. Tarkista molemmat teemat ja 390 pikselin näkymä ennen PR (kuvakaappaukset); `tests/e2e/a11y.spec.ts` juoksee kirveen.
 
 ## 3. Näytön lisääminen
 
@@ -139,20 +112,31 @@ variant="primary"` on kitin `default`-nappi (`--ci-button-primary-*`: kääntein
 3. Kitin puutteiden kiertotavat sijaitsevat sovittimessa (tai tiedoston `globals.css` osassa `@layer components`, kun korjaus on tyylillinen), ei koskaan hakemistossa `packages/ui-kit/src`.
 4. Lisää tai päivitä `tests/unit/ui/adapters/<name>.test.tsx`. Jos sovittimella on monia kutsujia, vertaile renderöityä HTML:ää ennen muutosta ja sen jälkeen — täyte- tai wrapper-muutokset leviävät jokaiseen näkymään.
 
-## 5. Kitin päivittäminen
+## 5. Sarjan päivittäminen
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopioi kyseisessä commitissa olevan upstreamin `src/`-hakemiston kohteeseen `packages/ui-kit/src` ja soveltaa ainoan sallitun muunnoksen (se pudottaa `.js`-päätteen suhteellisista importeista). Tämän jälkeen: käy läpi `git diff packages/ui-kit`, tee visuaalinen tarkistus providers-, settings-, combos-, usage- ja endpoint-näkymille molemmissa teemoissa, aja `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ja avaa PR, johon liität upstreamin muutoslokin.
+`npm run check:ui-kit-upstream` vertaa `packages/ui-kit/UPSTREAM.md` kiinnitettyä versiota ylävirran repon uusimpaan `v*` tunnisteeseen ja tulostaa synkronointikomennon, kun julkaisu on julkaistu.
 
-## 6. README-kaaviot
+Päivittäinen `UI Kit upstream watch` -työnkulku (`.github/workflows/ui-kit-upstream-watch.yml`) suorittaa saman tarkistuksen. Kun tappi on takana, `scripts/ci/ui-kit-sync-pr.sh` pitää yhden synkronoinnin PR auki korkeinta `release/vX.Y.Z` haaraa vasten, vierivällä haaralla `chore/ui-kit-sync-latest`. Se ei koskaan sulaudu yhteen: jokainen sarjan julkaisu vaatii silti visuaalisen tarkistuksen paikallisessa VPS ssä. Haara rakennetaan uudelleen, kun uudempi julkaisu on julkaistu ja jätetään muuten yksin. Avoin PR jossa on käsin työnnetty sitoumus, ei kirjoiteta päälle, ja PR versiolle, jonka ylläpitäjä sulki yhdistämättä, pysyy suljettuna uudempaan julkaisuun asti.
 
-Juurihakemiston `README.md`-tiedoston upottamat kaksitoista kaaviota (`docs/diagrams/*.svg`) ovat kitin soveltamista staattiseen kuvaan, ja ne on generoitu, ei piirretty käsin: 13 generaattoritiedostoa polussa `scripts/docs/gen-readme-*.mjs` (kaksitoista kaaviota plus `gen-readme-diagrams.mjs`-ajuri) ja 12 vanhentumistestiä polussa `tests/unit/docs/readme-*-svg.test.ts`, yksi kutakin kaaviota kohden, ja kukin vertaa tavu tavulta commitattua tiedostoa generaattorinsa tulokseen (työ `test-unit`).
+Kun PR ei voida avata (kohdejulkaisu on jäädytetty, PR on sitoumuksia työnnetty käsin, PR on suljettu tai PR -tunnusta ei ole asetettu), työnkulku pitää yhden seurantaongelman auki, mikä kertoo miksi.
 
-- **Tokenit.** `scripts/docs/readme-diagram-theme.mjs` kopioi värimaailman tiedostosta `packages/ui-kit/src/ci-tokens.css` (tiedosto on lukittu kyseiseen tiedostoon testillä `tests/unit/docs/readme-diagram-theme.test.ts`) ja määrittelee tekstiroolit kitin kirjasinlajeille — Instrument Serif display-teksteille, Inter käyttöliittymäteksteille, IBM Plex Mono luvuille ja koodille, samat `@fontsource`-paketit, jotka `src/app/globals.css` lataa kojetaulua varten. Vaaleat arvot sijaitsevat `:root`-valitsimessa, tummat arvot `prefers-color-scheme: dark` -mediaehdon takana tiedoston sisällä, joten jokainen kuva seuraa katselijan teemaa GitHubissa.
-- **Fontit.** `scripts/docs/readme-fonts.mjs` karsii näistä woff2-tiedostoista alijoukot, jotka sisältävät vain ne glyyfit, joita kukin kaavio piirtää, ja upottaa ne `@font-face`-määreinä `data:`-URI:eina — ainoa tapa, jolla kitin typografia päätyy README-kuvaan, koska GitHubin Markdown ei kuljeta CSS:ää ja camo-välityspalvelin estää kaikki ulkoiset pyynnöt. Alijoukot sisältävät vain latinalaisen merkistön; järjestelmäpinoon varautuvat symboliglyyfit sallitaan yksitellen vakiossa `SYMBOL_FALLBACKS`, ja mikä tahansa muu kattamaton glyyfi heittää poikkeuksen.
-- **Uudelleengenerointi.** `npm run docs:readme-diagrams` kirjoittaa kaikki kaksitoista uudelleen README-järjestyksessä ja tulostaa tiedostoa kohden yhden rivin sen koon kera. Yksittäisen generaattorin voi ajaa myös itsenäisesti (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` vaatii ajon muodossa `node --import tsx/esm`, koska sen luvut tulevat live-katalogin lataajasta tiedostossa `open-sse/config/freeModelCatalog.ts`; katalogimuutoksen CI-seuraus on kuvattu tiedostossa `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Tee commit, jossa generaattori ja SVG ovat yhdessä.
-- **Todistus.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderöi tiedoston samalla tavalla kuin GitHub sen tarjoilee (`<img>`-tagina, camon `Content-Security-Policy` -otsakkeella, tyyppinä `image/svg+xml`), ottaa kuvakaappauksen vaaleassa ja tummassa teemassa ja raportoi sivun tekemät ulkoiset fonttipyynnöt (määrän täytyy olla 0).
-- **Kokobudjetti.** Alle 200 KB tiedostoa kohden (jokainen vanhentumistesti varmistaa tämän); 500 KB on ehdoton yläraja mille tahansa README-kuvalle (SVG studio -validaattorin sääntö).
-- **Teksti ennallaan, luvut portista.** Rebrändäys muutti kirjasimet ja värimaailman, ei sanoja: jokainen generaattori kuljettaa kaavionsa tekstisisältöä `*_COPY`-vakiossa (tai rakentaa sen live-katalogista), ja sama vakio toimii sekä piirrettävänä tekstinä että fonttialijoukon syötteenä. Kanoniset luvut pysyvät `<text>`-solmuissa, joita `check:docs-counts` lukee (`scripts/check/check-docs-counts-sync.mjs`); niiden kaavioiden vanhentumistestit, joita portti lukee, ajavat myös sen validaattorit generoidulle tiedostolle, joten luku, joka ajautuu eroon koodista, kaataa testin — korjaa lähde, jota portti lukee, älä koskaan numeroa generaattorissa.
+Työnkulku käyttää kahta salaisuutta:
+
+- `secrets.UI_KIT_READ_TOKEN`: vain luku -token yksityiselle ylävirran repolle. Kun työnkulku ei pysty lukemaan ylävirtaa (ei merkkiä, merkkiä, joka lakkasi toimimasta, tai GitHub ei ole tavoitettavissa), ajo pysyy vihreänä, mutta kirjoittaa varoituksen ja pitää yhden erillisen ongelman auki, joka sulkeutuu, kun myöhempi ajo voi lukea vastavirtaan uudelleen.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: hienojakoinen merkki tässä arkiston Sisältö- ja Pull-pyynnöillä kirjoitusoikeuksilla. Oletusarvoinen `GITHUB_TOKEN` ei voi luoda PRs tähän, ja sen avaama PR ei laukaisi CI. Ilman tätä merkkiä työnkulku vain työntää haaraa.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopioi ylävirran `src/` kyseisessä vahvistuksessa (`latest` = uusin `v*` tunniste) `packages/ui-kit/src` ksi, käyttää yksittäistä sallittua muunnosta (poistaa `.js` liitteen suhteellisista tuonnista) ja asettaa työtilan version `packages/ui-kit/package.json` :ssa ja `package-lock.json` ssä ylävirran versioksi. Sitten: tarkista `git diff packages/ui-kit`, tee visuaalinen välitys palveluntarjoajille, asetuksille, yhdistelmälle, käytölle ja päätepisteelle molemmissa teemoissa, suorita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ja avaa PR ylävirran muutoslokin avulla.
+
+## 6. README kaaviot
+
+Kaksitoista kaaviota, jotka juuren `README.md` upottaa (`docs/diagrams/*.svg`) ovat staattiseen kuvaan sovellettavia sarjoja, ja ne luodaan, ei piirretty käsin: 13 generaattoritiedostoa `scripts/docs/gen-readme-*.mjs` ssä (kaksitoista kaaviota plus `gen-readme-diagrams.mjs` -ohjain) ja 12 vanhentumistestiä osoitteessa `tests/unit/docs/readme-*-svg.test.ts`, yksi kaaviota kohden, jokainen tavufzs-tiedosto generoi tuotoksen `test-unit`.
+
+- **Tokenit.** `scripts/docs/readme-diagram-theme.mjs` kopioi paletin `packages/ui-kit/src/ci-tokens.css` stä (kiinnitetty kyseiseen tiedostoon `tests/unit/docs/readme-diagram-theme.test.ts`:llä) ja määrittää tekstiroolit pakkauksen tyyppiasteikolla: Switzer sarjan painoilla (400/500/600, näyttö 500) ja jäljittää kaikkea paitsi koodirooleja (`.cmd` `.mono-xs` `.term`, `.term-lg` `.mono`, `.mono-sm`), jotka ovat IBM Plex Mono ja ovat vain komentoja, URLs, tunnisteita ja pääteruutuja varten. Vaaleat arvot sijaitsevat tiedoston sisällä `:root` ssä, tummat arvot `prefers-color-scheme: dark` takana, joten jokainen kuva noudattaa katsojan kaavaa GitHub:ssa.
+- **Fontit.** GitHub Markdown ei sisällä CSS ja camo-välityspalvelin estää jokaisen ulkoisen haun, joten sarjatyypin on kuljetettava tiedoston sisällä. `scripts/docs/readme-outline.mjs`, jokaisen generaattorin viimeinen vaihe, muotoilee Switzerin roolit HarfBuzz llä ja piirtää ne vektorikuviksi (`<defs>` paths ja `<use>`) ja Switzeriltä puuttuvat nuolet ja geometriset symbolit piirrettyinä omilla mittareilla. Ääriviivat, ei koskaan upotettua fonttia: Sveitsin lisenssi (`packages/ui-kit/src/fonts/FFL.txt`) kieltää osajoukkojen ja muotojen muuntamisen ilman kirjallista lupaa ja sallii vektoripiirrokset, joten älä ota uudelleen käyttöön Switzer `@font-face` tai `data:` URI. Yksi tiedostoon jätetty fontti on OFL IBM Plex Mono -alijoukko sille, mikä pysyy todellisena kooditekstinä (`scripts/docs/readme-fonts.mjs`), joka on rakennettu näistä merkeistä; mikä tahansa kuvio, johon se ei voi upottaa heittoja.
+- **Luo uudelleen.** `npm run docs:readme-diagrams` kirjoittaa uudelleen kaikki kaksitoista README järjestyksessä ja tulostaa yhden rivin tiedostoa kohden sen koossa. Yksi generaattori toimii myös yksinään (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` tarvitsee `node --import tsx/esm` koska sen luvut tulevat `open-sse/config/freeModelCatalog.ts`:n live-luettelolatausohjelmasta; luettelon muutoksen CI seuraus on `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Yhdistä generaattori ja SVG yhdessä.
+- **Todiste.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderöi tiedoston tavalla, jolla GitHub palvelee sitä ( `<img>` -tunniste, camon `Content-Security-Policy`, `image/svg+xml`), kaappaa vaalean ja tumman kehyksen ja raportoi ulkoisen kirjasimen pyynnöt tehdystä sivusta (täytyy olla 0).
+- **Budjetti.** Alle 200 KB tiedostoa kohden (jokainen vanhentumistesti vahvistaa sen); 500 KB on minkä tahansa README kuvan kova yläraja ( SVG studio validaattorin sääntö).
+- **Kopio muuttumattomana, laskee portista.** Rebrändi muutti tyyppiä ja palettia, ei sanoja: jokainen generaattori kuljettaa kaavion kopion `*_COPY` -vakiossa (tai rakentaa sen live-luettelosta), joka on sekä piirretty teksti että ääriviivavaiheen syöttö. Kanoniset luvut pysyvät `<text>` solmuissa (näkymättömät kerran ääriviivattuna, `fill-opacity:0`), luetaan `check:docs-counts` :llä (`scripts/check/check-docs-counts-sync.mjs`); portin lukemien kaavioiden vanhentumistestit suorittavat myös validaattorinsa luodulle tiedostolle, joten koodista ajautunut luku epäonnistuu testissä — korjaa portin lukema lähde, ei koskaan generaattorin numero.
 
 ## 7. Viiteindeksi
 

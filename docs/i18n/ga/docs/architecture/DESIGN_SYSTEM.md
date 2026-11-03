@@ -4,14 +4,7 @@
 
 ---
 
-> **Stádas:** tá an painéal tógtha ar an **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), agus é
-> curtha san áireamh go díreach (vendored) mar spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá
-> snapsháil an tsrutha uachtaraigh greamaithe i `packages/ui-kit/UPSTREAM.md` agus é á chosaint ag
-> `npm run check:ui-kit-snapshot`). Is é an téama Éadrom an téama canónta; is í `system` an rogha
-> réamhshocraithe. Is é lime Keak an t-aicsean (`--ci-color-accent`). Is í Inter (spásáil litreach 0,
-> `--ci-letter-spacing-ui`) clann an UI, Instrument Serif le haghaidh téacs taispeána mór gann amháin
-> (`.ci-dashboard-display`), IBM Plex Mono don chód — féin-óstáilte go léir trí na h-allmhairí
-> `@fontsource/*` ag barr `src/app/globals.css`. Is glif Lucide gach deilbhín.
+> **Stádas:** tá an deais tógtha ar an** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), díolta mar an spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá an pictiúr in aghaidh an tsrutha pinned i `packages/ui-kit/UPSTREAM.md` agus cosanta ag `npm run check:ui-kit-snapshot`). Is é solas an téama canónach; Is é `system` an rogha réamhshocraithe. Is é an accent ná Keak aoil (`--ci-color-accent`). Is é Switzer an teaghlach aonair le haghaidh UI, taispeáint agus cód téacs (`--ci-font-ui`; `--ci-font-display` agus `--ci-font-mono` réiteach dó ), féin-óstáil ag an trealamh féin (`packages/ui-kit/src/ci-fonts.css`, allmhairithe ag `ci-tokens.css`). Scripteanna Ní thiteann Switzer trí glyph trí glyph (`src/app/globals.css`): Idir le haghaidh Coireallach, Gréigis agus Vítneaimis agus, faoi `html[dir="rtl"]` amháin, Vazirmatn don script Araibis. Is glyph Lucide gach íocón.
 
 ## 1. Cá bhfuil rudaí suite
 
@@ -25,37 +18,13 @@
 
 ## 2. Rialacha
 
-1. Tocanna, riamh litreacha. Eisceachtaí coinnithe d'aon ghnó: an teirminéal consól atá dorcha i gcónaí agus
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), an scáthán hex réitithe de phailéad stádais an
-   kit do ghlaoiteoirí a dteastaíonn hex litríúil uathu. Ní eisceacht iad na pailéid chatagóireacha níos mó:
-   tá siad á n-iompar ag cúig thocan cairte an kit (`--color-chart-1..5`) trí
-   `src/shared/utils/categoricalPalette.ts` agus, i gcás straitéisí ródaithe,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; léann himill ReactFlow agus canbhás an
-   orchestaithe na hathróga `--orch-status-*` atá feasach ar an téama
-   (`src/shared/components/flow/edgeStyles.ts`).
-2. Ná paistigh `packages/ui-kit/src` de láimh choíche: sincronaigh le
-   `scripts/dev/sync-ui-kit.sh <commit>`; theipeann an geata réamh-commit
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ar aon bheart atá difriúil ón commit upstream atá
-   pionnáilte (scipeálann sé le rabhadh nuair a bhíonn an clón upstream, `UI_KIT_CLONE` nó
-   `_references/cheaper-inference-ui-kit`, as láthair). Nuair a bhíonn rud éigin in easnamh sa kit, déan slí
-   timpeall air san adapter nó sa scáileán agus iarr ó upstream é.
-3. Is Béarla iad réamhshocruithe téacs an kit (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   cuir teaghráin aistrithe ó `useTranslations(...)` ar aghaidh aon uair a thaispeánann comhpháirt kit téacs.
-4. Is fóntais Tailwind a bhuaileann ar ranganna comhpháirte an kit (fógraíonn an kit
-   `@layer theme, base, components, utilities` agus tá a rialacha suite i `components`) — úsáid fóntais do
-   spásáil agus leagan amach, ní chun comhpháirteanna kit a athdhathú.
-5. Ceannteidil: `.ci-heading` (Inter, gan spásáil litreach) do theidil leathanaigh agus rannóg;
-   `.ci-dashboard-display` (Instrument Serif) amháin do théacs taispeána mór, gann ar nós cód stádais an
-   leathanaigh earráide.
-6. Cosnaíonn `tests/unit/dashboard-kit-sweep.test.ts` glacadh an kit: gan span ligatúr Material faoi
-   `src/app` ná `src/shared/components`; i gcrann an deaisbhóird (`src/app/(dashboard)` agus
-   `src/shared/components`) gan `<select>`, `<textarea>` ná `<table>` amh agus gan `role="dialog"`
-   lámhscríofa lasmuigh de na heisceachtaí liostaithe (craobh dhúchais an adapter `Select`,
-   `RequestLoggerDetail`); teastaíonn nóta tráchta ina bhfuil `kit-exception:` (leis an gcúis) ó gach
-   `<button>` nó `<input>` amh ann, a chríochnaíonn 3 líne ar a mhéid os a chionn; dathghráin an phailéad
-   agus athruithe `dark:` sna comhaid a liostaíonn an tástáil amháin.
-7. Fíoraigh an dá théama agus an port-amhairc 390 px roimh PR (scáileáin); ritheann
-   `tests/e2e/a11y.spec.ts` axe.
+1. Comharthaí, ní litriúil riamh. Eisceachtaí coinnithe chun críche: an teirminéal consól i gcónaí-dorcha agus `STATUS_HEX` (`src/shared/constants/statusColors.ts`), an scáthán heicsidheachúlach réitithe ar an bpailéad stádais feiste do ghlaoiteoirí a bhfuil heicsidheachúlacht liteartha de dhíth orthu. Ní haon eisceacht iad na pailéid chatagóireacha níos mó: marcálann siad ar chúig chomhartha cairte an trealaimh (`--color-chart-1..5`) trí `src/shared/utils/categoricalPalette.ts` agus, le haghaidh straitéisí ródaithe, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; Léann imill ReactFlow agus an chanbhás ceolfhoirneachta na hathróga `--orch-status-*` atá feasach ar an téama (`src/shared/components/flow/edgeStyles.ts`).
+2. Ná paiste `packages/ui-kit/src` de láimh riamh: sioncronaigh le `scripts/dev/sync-ui-kit.sh <commit>`; teipeann ar an ngeata réamh-gheallta `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ar aon bheart atá éagsúil leis an gceangal pinned in aghaidh an tsrutha (scipeann sé le rabhadh nuair a bhíonn an clón in aghaidh an tsrutha, `UI_KIT_CLONE` nó `_references/cheaper-inference-ui-kit`, as láthair). Nuair a bhíonn rud éigin in easnamh ar an trealamh, oibrigh timpeall air san oiriúntóir nó ar an scáileán agus iarr in aghaidh an tsrutha é.
+3. Is iad na mainneachtainí téacs paitinne ná Béarla (`label = "Loading"`, `loadingLabel = "Loading table"`…) — teaghráin aistrithe ó `useTranslations(...)` aon uair a rindreálann comhpháirt feiste téacs.
+4. Bíonn bua ag fóntais Tailwind ar ranganna comhpháirte an trealaimh (dearbhaíonn an trealamh go bhfuil `@layer theme, base, components, utilities` agus a rialacha beo i `components`) - fóntais a úsáid le haghaidh spásáil agus leagan amach, gan ath-dath a dhéanamh ar chomhpháirteanna feiste.
+5. Ceannteidil: `.ci-heading` do theidil leathanaigh agus rannáin; `.ci-dashboard-display` ach amháin le haghaidh téacs taispeántais mór tanaí, mar shampla an cód stádais earráid-leathanaigh. Úsáideann an bheirt acu Switzer.
+6. gardaí `tests/unit/dashboard-kit-sweep.test.ts` an trealamh a ghlacadh: gan aon Réise ligature ábhar faoi `src/app` nó `src/shared/components`; sa chrann painéal (`src/app/(dashboard)` agus `src/shared/components`) gan aon `<select>` amh , `<textarea>` nó `<table>` agus gan aon `role="dialog"` lámh-rollta lasmuigh de na heisceachtaí liostaithe (brainse dúchais an oiriúntóra `Select`, `RequestLoggerDetail`); gach `<button>` amh nó `<input>` tá gá le trácht ina bhfuil `kit-exception:` (leis an gcúis) a chríochnaíonn ar a mhéad 3 línte os a chionn; hues pailéad agus leagan `dark:` amháin sna comhaid ar na liostaí tástála.
+7. Fíoraigh an dá théama agus an radharc 390 px roimh PR (scáileáin); ritheann `tests/e2e/a11y.spec.ts` tua.
 
 ## 3. Scáileán a chur leis
 
@@ -89,49 +58,38 @@
 4. Cuir `tests/unit/ui/adapters/<name>.test.tsx` leis nó nuashonraigh é. I gcás cuibheora a bhfuil go leor glaoiteoirí aige, déan
    comparáid idir an mharcáil rindreáilte roimh an athrú agus ina dhiaidh — scaipfidh athruithe ar an stuáil nó ar an bhfillteán chuig gach scáileán.
 
-## 5. An kit a nuashonrú
+## 5. An trealamh a nuashonrú
 
-Cóipeálann `scripts/dev/sync-ui-kit.sh <commit> [clone]` an `src/` uasabhraí ag an dtiomantas sin isteach i
-`packages/ui-kit/src` agus cuireann sé an t-aon chlaochlú ceadaithe amháin i bhfeidhm (baineann sé an iarmhír `.js` de na
-hiompórtálacha coibhneasta). Ansin: déan athbhreithniú ar `git diff packages/ui-kit`, tabhair pas amhairc do na soláthraithe,
-socruithe, teaglaim, úsáid agus críochphointe sa dá théama, rith `npm run check:ui-kit-snapshot` agus `npm run test:vitest:ui`, agus
-oscail an PR leis an loga athruithe uasabhraí.
+Déanann `npm run check:ui-kit-upstream` comparáid idir an leagan atá pinned in `packages/ui-kit/UPSTREAM.md` leis an gclib `v*` is nuaí den repo in aghaidh an tsrutha agus priontaí an t-ordú sioncronaithe nuair a bhíonn scaoileadh amach.
 
-## 6. Léaráidí README
+Ritheann an sreabhadh oibre laethúil `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) an tseiceáil chéanna. Cé go bhfuil an bioráin taobh thiar de, coinníonn `scripts/ci/ui-kit-sync-pr.sh` sync PR amháin ar oscailt i gcoinne an bhrainse `release/vX.Y.Z` is airde, ar an mbrainse rollta `chore/ui-kit-sync-latest`. Ní chumasc sé riamh: tá seiceáil amhairc ar an VPS áitiúil fós ag teastáil ó gach scaoileadh feiste. Déantar an brainse a atógáil nuair a bhíonn scaoileadh níos nuaí amach agus fágtar é ina aonar ar shlí eile. Ní fhorscríobhtar PR oscailte le gealltanais arna bhrú de láimh, agus fanann PR le haghaidh leagan a dhún cothaitheoir gan chumasc dúnta go dtí go scaoiltear amach níos nuaí é.
 
-Is é an kit curtha i bhfeidhm ar íomhá statach iad an dá léaráid déag a leabaíonn `README.md` na fréimhe
-(`docs/diagrams/*.svg`), agus gintear iad, ní tharraingítear de láimh iad: 13 comhad gineadóra ag `scripts/docs/gen-readme-*.mjs`
-(an dá léaráid déag móide tiománaí `gen-readme-diagrams.mjs`) agus 12 tástáil as-dáta ag
-`tests/unit/docs/readme-*-svg.test.ts`, ceann in aghaidh na léaráide, agus gach ceann acu ag déanamh comparáid bheart ar bheart idir an
-comhad tiomanta agus aschur a ghineadóra (post `test-unit`).
+Nuair nach féidir aon PR a oscailt (tá an scaoileadh sprice reoite, tá an PR geallta a bhrú de láimh, dúnadh an PR, nó níl aon chomhartha PR socraithe) coinníonn an sreabhadh oibre saincheist rianaithe amháin oscailte a deir cén fáth.
 
-- **Tóiceanna.** Cóipeálann `scripts/docs/readme-diagram-theme.mjs` an pailéad ó `packages/ui-kit/src/ci-tokens.css`
-  (pionnáilte in aghaidh an chomhaid sin ag `tests/unit/docs/readme-diagram-theme.test.ts`) agus sainmhíníonn sé na róil téacs ar
-  aghaidheanna cló an kit — Instrument Serif don taispeáint, Inter do théacs UI, IBM Plex Mono d'fhigiúirí agus do chód, na
-  pacáistí `@fontsource` céanna a luchtaíonn `src/app/globals.css` don deais. Suíonn na luachanna éadroma ar `:root`, agus na luachanna
-  dorcha taobh thiar de `prefers-color-scheme: dark`, laistigh den chomhad, ionas go leanann gach íomhá scéim an bhreathnóra ar
-  GitHub.
-- **Clónna.** Déanann `scripts/docs/readme-fonts.mjs` fothacair de na comhaid woff2 sin de réir na nglifí a tharraingíonn gach léaráid
-  agus leabaíonn sé iad mar URIanna `data:` `@font-face` — an t-aon bhealach a shroicheann clóghrafaíocht an kit íomhá README, ós rud é
-  nach n-iompraíonn GitHub Markdown CSS ar bith agus go gcoisceann seachfhreastalaí camo gach iarratas seachtrach. Níl sna fothacair ach
-  glifí Laidineacha; ceadaítear na glifí siombail a fhilleann siar ar chruach chlónna an chórais ceann ar cheann i `SYMBOL_FALLBACKS`,
-  agus caitheann aon ghlif eile nach bhfuil clúdaithe earráid.
-- **Athghin.** Athscríobhann `npm run docs:readme-diagrams` an dá cheann déag in ord an README agus priontálann sé líne amháin in aghaidh
-  an chomhaid lena mhéid. Is féidir gineadóir aonair a rith ina aonar freisin (`node scripts/docs/gen-readme-<name>.mjs`;
-  teastaíonn `node --import tsx/esm` ó `free-tier-budget` mar tagann a fhigiúirí ó luchtaire beo an chatalaigh in
-  `open-sse/config/freeModelCatalog.ts`; tá iarmhairt CI athrú catalaigh le fáil i
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Tiomáin an gineadóir agus an SVG le chéile.
-- **Cruthúnas.** Rindreálann `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` comhad ar an gcaoi a sheirbheálann GitHub
-  é (clib `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), gabhann sé fráma éadrom agus fráma dorcha
-  agus tuairiscíonn sé na hiarratais chló sheachtracha a rinne an leathanach (ní mór dó a bheith 0).
-- **Buiséad.** Níos lú ná 200 KB in aghaidh an chomhaid (dearbhaíonn gach tástáil as-dáta é); is é 500 KB an uasteorainn chrua d'aon
-  íomhá README (riail an bhailíochtaitheora stiúideo SVG).
-- **Cóip gan athrú, figiúirí ón gheata.** D'athraigh an t-athbhrandáil an chlóghrafaíocht agus an pailéad, ní na focail: iompraíonn gach
-  gineadóir cóip a léaráide i dtairiseach `*_COPY` (nó tógann sé ón gcatalóg beo í) a fheidhmíonn mar an téacs a tharraingítear
-  agus mar ionchur an fhotacair chló araon. Fanann na figiúirí canónta i nóid `<text>`, léite ag `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); ritheann tástálacha as-dáta na léaráidí a léann an geata a
-  bhailíochtaitheoirí ar an gcomhad ginte freisin, mar sin teipfidh an tástáil má sheachránaíonn figiúr ón gcód — ceartaigh
-  an foinse a léann an geata, riamh an uimhir sa ghineadóir.
+Úsáideann an sreabhadh oibre dhá rún:
+
+- `secrets.UI_KIT_READ_TOKEN`: comhartha inléite amháin don repo príobháideach réamhtheachtacha. Nuair nach féidir leis an sreabhadh oibre léamh in aghaidh an tsrutha (gan aon chomhartha, comhartha a stop ag obair, nó GitHub dosroichte) fanann an rith glas ach scríobhann sé rabhadh agus coinníonn sé saincheist ar leith amháin oscailte, a dhúnann é féin uair amháin sa rith níos déanaí is féidir léamh in aghaidh an tsrutha arís.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: comhartha mín ar an stór seo le hiarratais ar Ábhar agus Tarraingt rochtain scríofa. Ní féidir leis an `GITHUB_TOKEN` réamhshocraithe PRs a chruthú anseo, agus ní spreagfadh PR a d'oscail sé CI. Gan an comhartha seo ní bhrúnn an sreabhadh oibre ach an brainse.
+
+Déanann `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` an `src/` in aghaidh an tsrutha a chóipeáil ag an ngealltanas sin (`latest` = an chlib `v*` is nua) go `packages/ui-kit/src`, cuireann sé an claochlú aonair ceadaithe i bhfeidhm (titeann sé an iarmhír `.js` ó allmhairí coibhneasta), agus socraíonn sé an leagan spáis oibre i `packages/ui-kit/package.json` agus `package-lock.json` chuig an gceann in aghaidh an tsrutha. Ansin: athbhreithniú `git diff packages/ui-kit`, déan pas amhairc ar sholáthraithe, socruithe, teaglama, úsáid agus críochphointe sa dá théama, reáchtáil `npm run check:ui-kit-snapshot` agus `npm run test:vitest:ui`, agus oscail an PR leis an changelog in aghaidh an tsrutha.
+
+## 6. Léaráidí an README
+
+Is iad an dá léaráid dhéag a leabaíonn an fhréamhchomhad `README.md` (`docs/diagrams/*.svg`) an trealamh a chuirtear i bhfeidhm ar íomhá statach, agus gintear iad seachas iad a tharraingt de láimh: 13 chomhad gineadóra ag `scripts/docs/gen-readme-*.mjs`
+(dhá léaráid dhéag agus an tiománaí `gen-readme-diagrams.mjs`) agus 12 thástáil seandachta ag
+`tests/unit/docs/readme-*-svg.test.ts`, ceann in aghaidh na léaráide, agus déanann gach ceann comparáid beart ar bheart idir an comhad tiomnaithe agus aschur a ghineadóra (job `test-unit`).
+
+- **Comharthaí.** Cóipeálann `scripts/docs/readme-diagram-theme.mjs` an pailéad ó `packages/ui-kit/src/ci-tokens.css`
+  (faoi ghlas i gcoinne an chomhaid sin ag `tests/unit/docs/readme-diagram-theme.test.ts`) agus sainmhíníonn sé róil an téacs ar scála cló an trealaimh: Switzer ag meáchain an trealaimh (400/500/600, taispeáint ag 500) agus rianú do gach rud, seachas na róil chóid (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), ar IBM Plex Mono iad agus nach n-úsáidtear ach le haghaidh orduithe, URLanna, aitheantóirí agus scáileáin teirminéil.
+  Tá na luachanna éadroma suite ar `:root`, agus na luachanna dorcha taobh thiar de `prefers-color-scheme: dark`, taobh istigh den chomhad, ionas go leanann gach íomhá scéim an lucht féachana ar GitHub.
+- **Clónna.** Níl aon CSS ag Markdown GitHub agus cuireann an seachfhreastalaí camo bac ar gach aisghabháil sheachtrach, mar sin caithfidh cló an trealaimh a bheith sa chomhad. Déanann `scripts/docs/readme-outline.mjs`, an chéim dheireanach de gach gineadóir, róil Switzer a mhúnlú le HarfBuzz agus tarraingíonn sé iad mar imlínte veicteora (`<defs>` paths agus `<use>`), agus tarraingítear na saigheada agus na siombailí geoiméadracha nach bhfuil ag Switzer ar a mhéadrachtaí féin. Imlínte amháin, gan cló leabaithe: cuireann ceadúnas Switzer (`packages/ui-kit/src/fonts/FFL.txt`) cosc ar fho-thacarú agus ar thiontú formáide gan toiliú scríofa agus ceadaíonn sé líníochtaí veicteora, mar sin ná tabhair isteach `@font-face` Switzer ná URI `data:` arís. Is é an t-aon chló atá fágtha i gcomhad ná an fothacar IBM Plex Mono faoi OFL don rud a fhanann ina fhíorthéacs cóid (`scripts/docs/readme-fonts.mjs`), tógtha ó na carachtair sin; caitear earráid mura féidir leis aon ghliúf a leabú.
+- **Athghiniúint.** Athscríobhann `npm run docs:readme-diagrams` na dhá cheann déag go léir in ord an README agus priontálann sé líne amháin in aghaidh an chomhaid lena mhéid. Ritheann gineadóir aonair leis féin freisin (`node scripts/docs/gen-readme-<name>.mjs`;
+  teastaíonn `node --import tsx/esm` ó `free-tier-budget` toisc go dtagann a fhigiúirí ón lódálaí beo catalóige in `open-sse/config/freeModelCatalog.ts`; tá iarmhairt CI d’athrú catalóige in
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Tiomnaigh an gineadóir agus an SVG le chéile.
+- **Cruthúnas.** Rindreálann `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` comhad ar an mbealach a sheolann GitHub é (clib `<img>`, `Content-Security-Policy` de chuid camo, `image/svg+xml`), gabhann sé fráma éadrom agus fráma dorcha agus tuairiscíonn sé na hiarratais ar chlónna seachtracha a rinne an leathanach (ní mór gur 0 iad).
+- **Buiséad.** Faoi 200 KB in aghaidh an chomhaid (cuireann gach tástáil seandachta é sin i bhfeidhm); is é 500 KB an teorainn chrua d’aon íomhá README (riail bhailíochtóir stiúideo SVG).
+- **Cóip gan athrú, comhairimh ón ngeata.** D’athraigh an t-athbhrandáil an cló agus an pailéad, ní na focail: tá cóip gach léaráide i ngineadóir i dtairiseach `*_COPY` (nó tógtar í ón gcatalóg bheo) atá ina téacs tarraingthe agus ina hionchur don chéim imlínithe araon. Fanann na figiúirí canónacha i nóid `<text>` (dofheicthe nuair a dhéantar imlíne díobh, `fill-opacity:0`), agus léann `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) iad; ritheann tástálacha seandachta na léaráidí a dhéanann léamh a gheata freisin a mbailíochtóirí ar an gcomhad ginte, mar sin teipeann ar an tástáil má imíonn figiúr ón gcód — ceartaigh an fhoinse a léann an geata, ná ceartaigh an uimhir sa ghineadóir riamh.
 
 ## 7. Innéacs tagartha
 
