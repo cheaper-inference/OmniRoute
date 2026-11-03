@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil ta et øyeblikksbilde av de nåvørende tilkoblede leverandørene/modellene som matcher denne malen i en redigerbar kombinasjon.",
     "duplicateAutoComboFailedPrefix": "Duplisering av auto-kombinasjon mislyktes:",
     "duplicateAutoComboUnknownError": "Ukjent feil",
-    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}"
+    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}",
+    "fallbackSummary": "{rate}% av forespurningene gikk til fallback, i snitt ~{skips} mål hoppet over hver"
   },
   "costs": {
     "title": "Kostnader",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "Anonym fallback aktivert for {provider}",
     "anonymousFallbackDisabled": "Anonym fallback deaktivert for {provider} — utmattede tilkoblinger vil hoppe over denne leverandøren",
     "anonymousFallbackUpdateFailed": "Kunne ikke oppdatere anonym fallback-innstilling",
+    "retryDelayTitle": "Forsinkelse før nytt forsøk",
+    "retryDelayDesc": "Hvor lenge en tilkobling hviler etter en hastighetsgrensefeil når leverandøren ikke oppgir når det skal prøves igjen. Automatisk bruker den innebygde backoffen; et tilbakestillingstidspunkt sendt av leverandøren går alltid foran.",
+    "retryDelayAuto": "Automatisk",
+    "retryDelaySaved": "Forsinkelse før nytt forsøk lagret",
+    "retryDelayUpdateFailed": "Kunne ikke oppdatere forsinkelse før nytt forsøk",
     "batchDeleteFailed": "Batch sletting mislyktes",
     "batchDeleteNetworkError": "Nettverksfeil under batch-sletting",
     "batchUpdateFailed": "Batchoppdatering mislyktes",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Oppstrømstatus",
     "noResponse": "Ingen respons",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Overskrifter etter",
     "firstChunkAfter": "Første del etter",
     "servedBy": "Tjenestet av",

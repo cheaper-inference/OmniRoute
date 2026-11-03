@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uygun olarak şu anda bağlı olan sağlayıcıları/modelleri düzenlenebilir bir kombinasyonda yakalayacaktır.",
     "duplicateAutoComboFailedPrefix": "Otomatik kombinasyon kopyalanamadı:",
     "duplicateAutoComboUnknownError": "Bilinmeyen hata",
-    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur"
+    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur",
+    "fallbackSummary": "İsteklerin %{rate}'i yedek hedeflere geçti, her seferinde ~{skips} hedef atlandı"
   },
   "costs": {
     "title": "Maliyetler",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "{provider} için anonim geri dönüş etkinleştirildi",
     "anonymousFallbackDisabled": "{provider} için anonim yedekleme devre dışı — tükenen bağlantılar bu sağlayıcıyı atlayacak",
     "anonymousFallbackUpdateFailed": "Anonim yedek ayarını güncellemeyi başaramadı",
+    "retryDelayTitle": "Yeniden deneme gecikmesi",
+    "retryDelayDesc": "Sağlayıcı ne zaman yeniden deneneceğini belirtmediğinde, hız sınırı hatasından sonra bağlantının ne kadar bekleyeceği. Otomatik mod yerleşik geri çekilmeyi kullanır; sağlayıcının gönderdiği sıfırlama zamanı her zaman önceliklidir.",
+    "retryDelayAuto": "Otomatik",
+    "retryDelaySaved": "Yeniden deneme gecikmesi kaydedildi",
+    "retryDelayUpdateFailed": "Yeniden deneme gecikmesi güncellenemedi",
     "batchDeleteFailed": "Toplu silme başarısız oldu",
     "batchDeleteNetworkError": "Toplu silme sırasında ağ hatası",
     "batchUpdateFailed": "Toplu güncelleme başarısız oldu",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Yukarı Akış Durumu",
     "noResponse": "Yanıt Yok",
     "egressIp": "Çıkış IP'si",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Başlıklar sonrası",
     "firstChunkAfter": "İlk parça sonrası",
     "servedBy": "Tarafından Sunuldu",

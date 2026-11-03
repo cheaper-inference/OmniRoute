@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Dadurch werden die aktuell verbundenen Anbieter/Modelle, die dieser Vorlage entsprechen, in einer bearbeitbaren Kombination gespeichert.",
     "duplicateAutoComboFailedPrefix": "Automatische Kombination konnte nicht dupliziert werden:",
     "duplicateAutoComboUnknownError": "Unbekannter Fehler",
-    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}"
+    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}",
+    "fallbackSummary": "{rate} % der Anfragen haben den Fallback genutzt, jede übersprang im Durchschnitt ~{skips} Ziele"
   },
   "costs": {
     "title": "Kosten",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "Anonymer Fallback für {provider} aktiviert",
     "anonymousFallbackDisabled": "Anonymer Fallback für {provider} deaktiviert — erschöpfte Verbindungen überspringen diesen Anbieter",
     "anonymousFallbackUpdateFailed": "Fehler beim Aktualisieren der anonymen Fallback-Einstellung",
+    "retryDelayTitle": "Wiederholungsverzögerung",
+    "retryDelayDesc": "Wie lange eine Verbindung nach einem Rate-Limit-Fehler pausiert, wenn der Anbieter nicht angibt, wann erneut versucht werden soll. Automatisch nutzt das eingebaute Backoff; eine vom Anbieter gesendete Reset-Zeit hat immer Vorrang.",
+    "retryDelayAuto": "Automatisch",
+    "retryDelaySaved": "Wiederholungsverzögerung gespeichert",
+    "retryDelayUpdateFailed": "Wiederholungsverzögerung konnte nicht aktualisiert werden",
     "batchDeleteFailed": "Batch-Löschung fehlgeschlagen",
     "batchDeleteNetworkError": "Netzwerkfehler während der Batch-Löschung",
     "batchUpdateFailed": "Batch-Aktualisierung fehlgeschlagen",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Upstream-Status",
     "noResponse": "Keine Antwort",
     "egressIp": "Egress-IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Header nach",
     "firstChunkAfter": "Erster Chunk danach",
     "servedBy": "Bedient durch",

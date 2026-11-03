@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
+    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů"
   },
   "costs": {
     "title": "Náklady",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "Anonymní záložní možnost povolena pro {provider}",
     "anonymousFallbackDisabled": "Anonymní záložní možnost zakázána pro {provider} — vyčerpané připojení tuto službu přeskočí",
     "anonymousFallbackUpdateFailed": "Nepodařilo se aktualizovat nastavení anonymního záložního režimu",
+    "retryDelayTitle": "Prodleva opakování",
+    "retryDelayDesc": "Jak dlouho připojení odpočívá po chybě překročení limitu, když poskytovatel neuvede, kdy to zkusit znovu. Automatický režim používá vestavěný backoff; čas resetu zaslaný poskytovatelem má vždy přednost.",
+    "retryDelayAuto": "Automaticky",
+    "retryDelaySaved": "Prodleva opakování uložena",
+    "retryDelayUpdateFailed": "Nepodařilo se aktualizovat prodlevu opakování",
     "batchDeleteFailed": "Hromadné odstranění selhalo",
     "batchDeleteNetworkError": "Chyba sítě během hromadného mazání",
     "batchUpdateFailed": "Hromadná aktualizace selhala",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "Stav nahoře",
     "noResponse": "Žádná odpověď",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Záhlaví po",
     "firstChunkAfter": "První část po",
     "servedBy": "Poskytováno",

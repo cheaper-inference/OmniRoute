@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "ይህ ከዚህ አብነት ጋር የሚዛመዱትን በአሁኑ ጊዜ የተገናኙ አቅራቢዎች/ሞዴሎች ቅጽበታዊ ቅጂ ወደሚስተካከል ጥምረት ይቀይራል።",
     "duplicateAutoComboFailedPrefix": "ራስ-ሰር ጥምረቱን ማባዛት አልተሳካም፦",
     "duplicateAutoComboUnknownError": "ያልታወቀ ስህተት",
-    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር"
+    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
+    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን"
   },
   "costs": {
     "title": "ወጪዎች",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "ስም-አልባ ተተኪ ለ{provider} ነቅቷል",
     "anonymousFallbackDisabled": "ስም-አልባ ተተኪ ለ{provider} ተሰናክሏል — ያለቁ ግንኙነቶች ይህን አቅራቢ ይዘሉታል",
     "anonymousFallbackUpdateFailed": "የስም-አልባ ተተኪ ቅንብርን ማዘመን አልተሳካም",
+    "retryDelayTitle": "የዳግም ሙከራ መዘግየት",
+    "retryDelayDesc": "አቅራቢው መቼ እንደገና መሞከር እንዳለበት ካልገለጸ ከፍጥነት ገደብ ስህተት በኋላ ግንኙነቱ ምን ያህል ጊዜ እንደሚያርፍ። ራስ-ሰር አብሮ የተሰራውን የመመለሻ ጊዜ ይጠቀማል፤ አቅራቢው የሚልከው የዳግም ማስጀመሪያ ጊዜ ሁልጊዜ ይቀድማል።",
+    "retryDelayAuto": "ራስ-ሰር",
+    "retryDelaySaved": "የዳግም ሙከራ መዘግየት ተቀምጧል",
+    "retryDelayUpdateFailed": "የዳግም ሙከራ መዘግየትን ማዘመን አልተሳካም",
     "batchDeleteFailed": "በቡድን መሰረዝ አልተሳካም",
     "batchDeleteNetworkError": "በቡድን ስረዛ ወቅት የአውታረ መረብ ስህተት ተከስቷል",
     "batchUpdateFailed": "በቡድን ማዘመን አልተሳካም",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "ከላይ የሚገኝ ሁኔታ",
     "noResponse": "አንድ እንደማይመልስ",
     "egressIp": "ወጣት አይፒ",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "አርከቶች በኋላ",
     "firstChunkAfter": "የመጀመሪያ ቁርጽ በኋ�",
     "servedBy": "የተሰጠ በ",

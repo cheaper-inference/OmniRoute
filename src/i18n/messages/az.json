@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uyğun olan hazırkı qoşulmuş provayderləri/modeləri redaktə oluna bilən kombo kimi saxlayacaq.",
     "duplicateAutoComboFailedPrefix": "Avtokombo kopyalanması uğursuz oldu:",
     "duplicateAutoComboUnknownError": "Naməlum xəta",
-    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat"
+    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
+    "fallbackSummary": "Sorğuların {rate}-i ehtiyat rejimindən istifadə etdi, hər sorğuda təqribən {skips} obyekti atlandı"
   },
   "costs": {
     "title": "Xərclər",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "{provider} üçün anonim ehtiyat aktivdir",
     "anonymousFallbackDisabled": "{provider} üçün anonim ehtiyat deaktiv edilib — tükənmiş bağlantılar bu provayderi atlayacaq",
     "anonymousFallbackUpdateFailed": "Anonim ehtiyat parametrlərini yeniləmək mümkün olmadı",
+    "retryDelayTitle": "Təkrar cəhd gecikməsi",
+    "retryDelayDesc": "Provayder nə vaxt təkrar cəhd ediləcəyini bildirmədikdə, sürət limiti xətasından sonra bağlantının nə qədər gözləyəcəyi. Avtomatik rejim daxili geri çəkilmədən istifadə edir; provayderin göndərdiyi sıfırlama vaxtı həmişə üstündür.",
+    "retryDelayAuto": "Avtomatik",
+    "retryDelaySaved": "Təkrar cəhd gecikməsi saxlanıldı",
+    "retryDelayUpdateFailed": "Təkrar cəhd gecikməsini yeniləmək alınmadı",
     "batchDeleteFailed": "Kütləvi silmə baş tutmadı",
     "batchDeleteNetworkError": "Kütləvi silmə zamanı şəbəkə xətası",
     "batchUpdateFailed": "Kütləvi yeniləmə uğursuz oldu",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "Yuxarı axın statusu",
     "noResponse": "Cavab yoxdur",
     "egressIp": "Çıxış IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Başlıqlar sonra",
     "firstChunkAfter": "İlk hissə sonra",
     "servedBy": "Təmin edən",

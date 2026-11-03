@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Cela capturera les fournisseurs/modèles actuellement connectés qui correspondent à ce modèle dans une combinaison modifiable.",
     "duplicateAutoComboFailedPrefix": "Échec de la duplication de la combinaison automatique :",
     "duplicateAutoComboUnknownError": "Erreur inconnue",
-    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}"
+    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}",
+    "fallbackSummary": "{rate}% des requêtes ont été basculées, environ {skips} cibles ont été ignorées par requête"
   },
   "costs": {
     "title": "Coûts",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "Fallback anonyme activé pour {provider}",
     "anonymousFallbackDisabled": "Le secours anonyme désactivé pour {provider} — les connexions épuisées ignoreront ce fournisseur",
     "anonymousFallbackUpdateFailed": "Échec de la mise à jour du paramètre de secours anonyme",
+    "retryDelayTitle": "Délai avant nouvelle tentative",
+    "retryDelayDesc": "Durée de repos d'une connexion après une erreur de limite de débit lorsque le fournisseur n'indique pas quand réessayer. Le mode automatique utilise le backoff intégré ; une heure de réinitialisation envoyée par le fournisseur l'emporte toujours.",
+    "retryDelayAuto": "Automatique",
+    "retryDelaySaved": "Délai avant nouvelle tentative enregistré",
+    "retryDelayUpdateFailed": "Échec de la mise à jour du délai avant nouvelle tentative",
     "batchDeleteFailed": "Échec de la suppression groupée",
     "batchDeleteNetworkError": "Erreur réseau lors de la suppression groupée",
     "batchUpdateFailed": "Échec de la mise à jour groupée",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "État amont",
     "noResponse": "Aucune réponse",
     "egressIp": "IP de sortie",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "En-têtes après",
     "firstChunkAfter": "Premier bloc après",
     "servedBy": "Servi par",

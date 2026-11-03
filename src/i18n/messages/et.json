@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "See salvestab hetkel ühendatud ja sellele mallile vastavad teenusepakkujad/mudelid redigeeritavasse kombinatsiooni.",
     "duplicateAutoComboFailedPrefix": "Automaatse kombinatsiooni dubleerimine ebaõnnestus:",
     "duplicateAutoComboUnknownError": "Tundmatu viga",
-    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon"
+    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
+    "fallbackSummary": "{rate}% palvastest kasutas tagasilükkumist, keskmiselt hüljati igaühes ~{skips} sihtpunkti"
   },
   "costs": {
     "title": "Kulud",
@@ -6887,6 +6888,11 @@
     "anonymousFallbackEnabled": "Teenusepakkuja {provider} anonüümne varurežiim on lubatud",
     "anonymousFallbackDisabled": "Teenusepakkuja {provider} anonüümne varurežiim on keelatud — ammendunud ühenduste korral jäetakse see teenusepakkuja vahele",
     "anonymousFallbackUpdateFailed": "Anonüümse varurežiimi seadistuse värskendamine nurjus",
+    "retryDelayTitle": "Kordusviivitus",
+    "retryDelayDesc": "Kui kaua ühendus pärast kiiruspiirangu viga puhkab, kui teenusepakkuja ei ütle, millal uuesti proovida. Automaatne režiim kasutab sisseehitatud ooteaega; teenusepakkuja saadetud lähtestamisaeg on alati ülimuslik.",
+    "retryDelayAuto": "Automaatne",
+    "retryDelaySaved": "Kordusviivitus salvestatud",
+    "retryDelayUpdateFailed": "Kordusviivituse värskendamine ebaõnnestus",
     "batchDeleteFailed": "Hulgikustutamine nurjus",
     "batchDeleteNetworkError": "Hulgikustutamisel tekkis võrguviga",
     "batchUpdateFailed": "Hulgvärskendamine nurjus",
@@ -15380,6 +15386,7 @@
     "upstreamStatus": "Ülesvoolu olek",
     "noResponse": "Ei vastata",
     "egressIp": "Väljaminev IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Päised pärast",
     "firstChunkAfter": "Esimene tükk pärast",
     "servedBy": "Teenindab",

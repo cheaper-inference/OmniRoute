@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "វានឹងថតស្ថានភាពបច្ចុប្បន្ននៃអ្នកផ្តល់សេវា/ម៉ូដែលដែលបានតភ្ជាប់ និងត្រូវគ្នានឹងគំរូនេះ ទៅជាបន្សំដែលអាចកែសម្រួលបាន។",
     "duplicateAutoComboFailedPrefix": "មិនអាចចម្លងបន្សំស្វ័យប្រវត្តិបានទេ៖",
     "duplicateAutoComboUnknownError": "កំហុសដែលមិនស្គាល់",
-    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}"
+    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
+    "fallbackSummary": "សំណើរ {rate}% បានប្រើជម្រើស រហូតដល់ ~{skips} គោលដៅ ដែលបានរំលង"
   },
   "costs": {
     "title": "ការចំណាយ",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "បានបើកជម្រើសបម្រុងអនាមិកសម្រាប់ {provider}",
     "anonymousFallbackDisabled": "បានបិទជម្រើសបម្រុងអនាមិកសម្រាប់ {provider} — នៅពេលការតភ្ជាប់ត្រូវបានប្រើអស់ ប្រព័ន្ធនឹងរំលងអ្នកផ្តល់សេវានេះ",
     "anonymousFallbackUpdateFailed": "មិនអាចធ្វើបច្ចុប្បន្នភាពការកំណត់ជម្រើសបម្រុងអនាមិកបានទេ",
+    "retryDelayTitle": "ការពន្យារពេលព្យាយាមម្តងទៀត",
+    "retryDelayDesc": "រយៈពេលដែលការតភ្ជាប់សម្រាកបន្ទាប់ពីកំហុសដែនកំណត់អត្រា នៅពេលអ្នកផ្តល់សេវាមិនប្រាប់ថាពេលណាត្រូវព្យាយាមម្តងទៀត។ ស្វ័យប្រវត្តិប្រើការពន្យារដែលមានស្រាប់; ពេលវេលាកំណត់ឡើងវិញដែលអ្នកផ្តល់សេវាផ្ញើមកតែងតែមានអាទិភាព។",
+    "retryDelayAuto": "ស្វ័យប្រវត្តិ",
+    "retryDelaySaved": "បានរក្សាទុកការពន្យារពេលព្យាយាមម្តងទៀត",
+    "retryDelayUpdateFailed": "បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពការពន្យារពេលព្យាយាមម្តងទៀត",
     "batchDeleteFailed": "ការលុបជាបាច់បានបរាជ័យ",
     "batchDeleteNetworkError": "កំហុសបណ្តាញអំឡុងពេលលុបជាបាច់",
     "batchUpdateFailed": "ការធ្វើបច្ចុប្បន្នភាពជាបាច់បានបរាជ័យ",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "ស្ថានភាពអ៊ុបស្ត្រីម",
     "noResponse": "មិនមានការឆ្លើយតប",
     "egressIp": "អ៊ីភីចេញ",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "ក្បាលបន្ទាប់",
     "firstChunkAfter": "បំណែកដំបូងបន្ទាប់",
     "servedBy": "បានផ្តល់ដោយ",

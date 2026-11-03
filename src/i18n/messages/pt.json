@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "Isto irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
+    "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma"
   },
   "costs": {
     "title": "Custos",
@@ -6964,6 +6965,11 @@
     "anonymousFallbackEnabled": "Fallback anónimo ativado para {provider}",
     "anonymousFallbackDisabled": "Fallback anónimo desativado para {provider} — conexões esgotadas irão ignorar este provedor",
     "anonymousFallbackUpdateFailed": "Falha ao atualizar a configuração de fallback anónimo",
+    "retryDelayTitle": "Atraso de nova tentativa",
+    "retryDelayDesc": "Quanto tempo uma ligação descansa após um erro de limite de taxa quando o fornecedor não indica quando tentar novamente. Automático usa o backoff integrado; uma hora de reposição enviada pelo fornecedor prevalece sempre.",
+    "retryDelayAuto": "Automático",
+    "retryDelaySaved": "Atraso de nova tentativa guardado",
+    "retryDelayUpdateFailed": "Falha ao atualizar o atraso de nova tentativa",
     "batchDeleteFailed": "A eliminação em lote falhou",
     "batchDeleteNetworkError": "Erro de rede durante a eliminação em lote",
     "batchUpdateFailed": "Atualização em lote falhou",
@@ -15457,6 +15463,7 @@
     "upstreamStatus": "Estado do ajuste",
     "noResponse": "Sem resposta",
     "egressIp": "IP de saída",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Cabeçalhos após",
     "firstChunkAfter": "Primeiro bloco após",
     "servedBy": "Servido por",
