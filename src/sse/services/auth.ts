@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
 import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
+import { classifyGeminiProjectBlock } from "./geminiProjectBlock.ts";
 import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
@@ -2574,6 +2575,23 @@ export async function markAccountUnavailable(
     const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
     const isPerModelQuotaProvider =
       hasPerModelQuota(provider, model, connectionPassthroughModels) || isModelScopedClaudeQuota;
+    // Project-wide billing/free-tier failures affect every Gemini model under
+    // these credentials. Park the connection before any per-model quota logic.
+    const geminiProjectBlock = classifyGeminiProjectBlock(provider, status, errorText);
+    if (geminiProjectBlock) {
+      const cooldownMs = 6 * 60 * 60 * 1000;
+      await updateProviderConnection(connectionId, {
+        lastErrorType: geminiProjectBlock,
+        lastError: geminiProjectBlock,
+        lastErrorAt: new Date().toISOString(),
+        errorCode: status,
+        backoffLevel: 0,
+        rateLimitedUntil: getUnavailableUntil(cooldownMs),
+        testStatus: "unavailable",
+      });
+      return { shouldFallback: true, cooldownMs };
+    }
+
     // #10334 — connection-scope branch: the matched provider rule declared scope
     // "connection" for account-wide quota exhaustion (agentrouter "额度不足";
     // exclusive in practice — no opencode-family rule matches 403 today).
