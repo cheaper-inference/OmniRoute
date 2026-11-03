@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ilmainen AI-yhdyskäytävä
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Jokainen AI-työkalu → 380 tarjoajaa — 150+ ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ILMAISEKSI Claude / GPT / Geminiin automaattisella varareitityksellä. RTK + Caveman -pinoitettu pakkaus säästää 15–95 % tokeneista (~89 % keskimäärin) — älä koskaan ylitä rajoja. 380 AI-tarjoajaa · 150+ ilmaista tasoa · ~1,62 mrd ilmaista tokenia/kk · 20 reititysstrategiaa · $0 aloitukseen."/>
 
 </div>
@@ -1812,7 +1814,7 @@ MIT-lisenssi – katso lisätiedot tiedostosta [LICENSE](LICENSE).
 
 **[⬆ Takaisin alkuun](#-omniroute)** · Rakennettu ❤️ avoimen lähdekoodin AI-yhteisölle.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions käytössä yhteisön kysymyksiin ja vastauksiin -->

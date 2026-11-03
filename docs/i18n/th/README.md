@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — เกตเวย์ AI ฟรี
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ไม่ต้องหยุดเขียนโค้ดอีกต่อไป ทุกเครื่องมือ AI → 380 ผู้ให้บริการ — 150+ ฟรี — ผ่าน endpoint เดียว Claude Code, Codex, Cursor, Cline, Copilot & Antigravity สู่ Claude / GPT / Gemini ฟรี พร้อมระบบ fallback อัตโนมัติ RTK + Caveman บีบอัดโทเคนลด 15–95% (เฉลี่ย ~89%) — ไม่ต้องกลัวชนขีดจำกัด 380 ผู้ให้บริการ AI · 150+ ฟรี · ~1.62B โทเคนฟรี/เดือน · 20 กลยุทธ์การจัดเส้นทาง · เริ่มต้นฟรี $0"/>
 
 </div>
@@ -1803,7 +1805,7 @@ OmniRoute ยืนอยู่บนไหล่ของยักษ์ให�
 
 **[⬆ กลับขึ้นด้านบน](#-omniroute)** · สร้างด้วย ❤️ เพื่อชุมชน AI โอเพนซอร์ส
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · สัญญาอนุญาต MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · สัญญาอนุญาต MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- เปิดใช้งาน GitHub Discussions สำหรับคำถามและคำตอบของชุมชน -->

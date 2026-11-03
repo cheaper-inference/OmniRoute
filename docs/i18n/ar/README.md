@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — بوابة الذكاء الاصطناعي المجانية
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — لا تتوقف عن البرمجة أبدًا. كل أداة ذكاء اصطناعي → 380 مزود — أكثر من 150 مجانية — عبر نقطة نهاية واحدة. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity إلى Claude / GPT / Gemini المجانية مع التحويل التلقائي عند الفشل. ضغط مكدس RTK + Caveman يوفر من 15–95% من الرموز (~89% متوسط) — لن تصل إلى الحدود أبدًا. 380 مزود ذكاء اصطناعي · أكثر من 150 طبقة مجانية · ~1.62 مليار رمز مجاني شهريًا · 20 استراتيجية توجيه · $0 للبدء."/>
 
 </div>
@@ -1803,7 +1805,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ العودة إلى الأعلى](#-omniroute)** · صُنع بـ ❤️ لمجتمع الذكاء الاصطناعي مفتوح المصدر.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · رخصة MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · رخصة MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- تم تفعيل نقاشات GitHub لأسئلة وأجوبة المجتمع -->

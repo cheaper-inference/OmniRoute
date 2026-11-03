@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ẹnu-ọ̀nà AI Ọ̀fẹ́
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Má ṣe dá kóòdù dúró láé. Gbogbo irinṣẹ́ AI → àwọn olùpèsè 380 — 150+ ọ̀fẹ́ — nípasẹ̀ endpoint kan. Claude Code, Codex, Cursor, Cline, Copilot àti Antigravity sí Claude / GPT / Gemini Ọ̀fẹ́ pẹ̀lú àyípadà aládàáṣiṣẹ́. Ìfúnpọ̀ RTK + Caveman tí a kó jọ ń fi 15–95% àwọn token pamọ́ (~89% ní àárín) — má ṣe dé ààlà láé. Àwọn olùpèsè AI 380 · àwọn ìpele ọ̀fẹ́ 150+ · ~1.62B token ọ̀fẹ́/oṣù · àwọn ọgbọ́n ìtọ́sọ́nà 20 · $0 láti bẹ̀rẹ̀."/>
 
 </div>
@@ -1815,7 +1817,7 @@ Iwe-aṣẹ MIT - wo [LICENSE](LICENSE) fún àlàyé.
 
 **[⬆ Padà sókè](#-omniroute)** · A kọ́ ọ́ pẹ̀lú ❤️ fún àwùjọ AI orísun ṣíṣílẹ̀.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Iwe-aṣẹ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Iwe-aṣẹ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- A gba GitHub Discussions láàyè fún ìbéèrè àti ìdáhùn àwùjọ -->

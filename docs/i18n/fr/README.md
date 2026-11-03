@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — La passerelle IA gratuite
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ne cessez jamais de coder. Tous les outils IA → 380 fournisseurs — 150+ gratuits — via un seul endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity vers Claude / GPT / Gemini GRATUITS avec bascule automatique. Compression empilée RTK + Caveman économise 15–95% de tokens (~89% en moyenne) — ne jamais atteindre les limites. 380 fournisseurs IA · 150+ offres gratuites · ~1,62 Md de tokens gratuits/mois · 20 stratégies de routage · 0 $ pour commencer."/>
 
 </div>
@@ -1806,7 +1808,7 @@ Licence MIT - voir [LICENSE](LICENSE) pour plus de détails.
 
 **[⬆ Retour en haut](#-omniroute)** · Conçu avec ❤️ pour la communauté IA open source.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licence MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licence MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions activé pour les questions/réponses de la communauté -->

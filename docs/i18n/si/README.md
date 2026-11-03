@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — නොමිලේ AI ද්වාරය
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — කේතය ලිවීම නවත්වන්න එපා. සෑම AI මෙවලමක්ම → සැපයුම්කරුවන් 380ක් — නොමිලේ 150+ — එකම අවසන් ලක්ෂ්යයක් හරහා. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity නොමිලේ Claude / GPT / Gemini වෙත ස්වයංක්රීය-ආපසු වැටීම සමඟ. RTK + Caveman ස්ථරගත සම්පීඩනයෙන් ටෝකන 15–95%ක් (සාමාන්යයෙන් ~89%) ඉතිරි කරයි — සීමා නොමැත. AI සැපයුම්කරුවන් 380ක් · නොමිලේ තට්ටු 150+ · ~1.62B නොමිලේ ටෝකන/මාසයකට · මාර්ගගත කිරීමේ උපාය මාර්ග 20ක් · ආරම්භයට $0."/>
 
 </div>
@@ -1805,7 +1807,7 @@ MIT බලපත්රය - විස්තර සඳහා [LICENSE](LICENSE) �
 
 **[⬆ ආපසු ඉහළට](#-omniroute)** · විවෘත මූලාශ්ර AI ප්රජාව වෙනුවෙන් ❤️ සමඟ නිර්මාණය කරන ලදී.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT බලපත්රය · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT බලපත්රය · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- ප්රජා ප්රශ්නෝත්තර සඳහා GitHub Discussions සක්රීය කර ඇත -->

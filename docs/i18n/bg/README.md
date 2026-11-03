@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Безплатният AI шлюз
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никога не спирайте да кодирате. Всеки AI инструмент → 380 доставчици — 150+ безплатни — през един крайна точка. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity във БЕЗПЛАТЕН Claude / GPT / Gemini с автоматичен fallback. RTK + Caveman компресията спестява 15–95% токени (~89% средно) — никога не достигайте лимити. 380 AI доставчици · 150+ безплатни нива · ~1.62B безплатни токени/месец · 20 стратегии за маршрутизиране · $0 за старт."/>
 
 </div>
@@ -1814,7 +1816,7 @@ MIT License – вижте [LICENSE](LICENSE) за подробности.
 
 **[⬆ Обратно към началото](#-omniroute)** · Създаден с ❤️ за общността на отворения код в AI.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions е активиран за въпроси и отговори в общността -->
