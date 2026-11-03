@@ -6,12 +6,12 @@
 //
 //   node scripts/docs/gen-readme-works-zero-config.mjs [--out path.svg]
 //
-// Everything the strip draws lives in WORKS_ZERO_CONFIG_COPY: it is both the drawn text and the
-// subset input for the embedded fonts, so a glyph can never be drawn without being embedded.
+// Everything the strip draws lives in WORKS_ZERO_CONFIG_COPY: it is both the drawn text and what the
+// outlining step shapes (scripts/docs/readme-outline.mjs).
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
-import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { outlineSvg } from "./readme-outline.mjs";
+import { svgOpen, gridDefs, esc, afterKicker, roleWidth } from "./readme-diagram-theme.mjs";
 
 // Step tiles: geometry, status token, number-circle fill, icon path(s) and the tile's own text
 // (number, title, command line, body lines, optional trailing mono line).
@@ -26,6 +26,7 @@ const STEPS = [
     number: "1",
     title: "Install and start",
     command: "$ npm i -g omniroute",
+    code: true,
     body: ["Then run omniroute; open"],
     mono: "localhost:20128",
   },
@@ -51,6 +52,7 @@ const STEPS = [
     number: "3",
     title: "Use your tool",
     command: "localhost:20128/v1",
+    code: true,
     body: ['Set model to "auto"', "Eligible connections + fallback."],
   },
 ];
@@ -97,13 +99,15 @@ function tile(i) {
   );
   lines.push(`    <circle cx="${s.x + 40}" cy="172" r="15" class="${s.bubble}"/>`);
   lines.push(
-    `    <text x="${s.x + 40}" y="178" text-anchor="middle" class="cmd" style="fill:var(--${s.tone})">${esc(s.number)}</text>`
+    `    <text x="${s.x + 40}" y="178" text-anchor="middle" class="h3" style="font-size:16px;fill:var(--${s.tone})">${esc(s.number)}</text>`
   );
   lines.push(
     `    <g transform="translate(${s.x + 68},161)" class="stroke-${s.tone}" stroke-width="${s.iconWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round">${s.icon}</g>`
   );
   lines.push(`    <text x="${s.x + 100}" y="179" class="h3">${esc(s.title)}</text>`);
-  lines.push(`    <text x="${ix}" y="222" class="mono">${esc(s.command)}</text>`);
+  lines.push(
+    `    <text x="${ix}" y="222" class="${s.code ? "mono" : "label"}">${esc(s.command)}</text>`
+  );
   // Two lines under the command, 21px apart: the body lines, then the mono line if the tile has one.
   const under = [
     ...s.body.map((t) => `class="body">${esc(t)}`),
@@ -116,76 +120,64 @@ function tile(i) {
 
 export async function renderReadmeWorksZeroConfig() {
   const C = WORKS_ZERO_CONFIG_COPY;
-  const { css } = await buildFontFaceCss({
-    ui: [C.headline[0], ...C.stepBody].join(""),
-    uiBold: [C.headline[1], ...C.stepTitles, ...C.chips].join(""),
-    mono: [
-      ...C.kicker,
-      ...C.stepNumbers,
-      ...C.stepCommands,
-      ...C.stepMono,
-      ...C.footer,
-      ...C.footerRight,
-    ].join(""),
-  });
-
-  const chips = [
-    [40, 168],
-    [224, 168],
-    [408, 188],
-  ]
-    .map(
-      ([x, w], i) =>
+  // Pills fit their label: 24 px of padding each side, 16 px between them.
+  let chipX = 40;
+  const chips = C.chips
+    .map((label) => {
+      const w = Math.ceil(roleWidth("h4", label)) + 48;
+      const x = chipX;
+      chipX += w + 16;
+      return (
         `    <g transform="translate(${x},332)">\n` +
         `      <rect x="0" y="0" width="${w}" height="34" rx="17" class="ok-bg stroke-ok" stroke-opacity="0.45" stroke-width="1"/>\n` +
-        `      <text x="24" y="22" class="h4">${esc(C.chips[i])}</text>\n` +
+        `      <text x="24" y="22" class="h4">${esc(label)}</text>\n` +
         `    </g>`
-    )
+      );
+    })
     .join("\n");
 
-  return (
+  return outlineSvg(
     svgOpen({
       viewBox: `0 0 ${W} ${H}`,
       title:
         "Install and start OmniRoute, connect an eligible provider with your own account, then configure your tool. Auto routing depends on eligible connections and provider limits.",
       desc: "Animated flow card: three step tiles (Install and start, Connect provider, Use your tool) fade in left to right, a dot travels along the connectors between them in a loop, and the final check pulses.",
-      fontFaceCss: css,
     }) +
-    gridDefs("wzc-grid") +
-    `  <defs>\n` +
-    `    <path id="wzc-c1" d="M 372 218 L 432 218"/>\n` +
-    `    <path id="wzc-c2" d="M 767 218 L 827 218"/>\n` +
-    `  </defs>\n` +
-    `  <rect class="bg" x="0" y="0" width="${W}" height="${H}"/>\n` +
-    `  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#wzc-grid)"/>\n` +
-    // header
-    `  <text x="40" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
-    `  <line x1="300" y1="51" x2="1160" y2="51" class="rule" stroke-width="1"/>\n` +
-    `  <text x="40" y="98" class="sub">${esc(C.headline[0])}<tspan font-weight="600" style="fill:var(--ok)">${esc(C.headline[1])}</tspan></text>\n` +
-    // connectors (under the tiles) + travelling dots: lime = the request leaving the install
-    // step, ok = the answer reaching the tool. The lime dot carries a hairline ink stroke so it
-    // reads on the light canvas too.
-    `  <g class="rule" stroke-width="2" stroke-dasharray="5 5" fill="none">\n` +
-    `    <use href="#wzc-c1"/>\n    <use href="#wzc-c2"/>\n  </g>\n` +
-    `  <circle r="4" class="accent stroke-ink" stroke-width="1">\n` +
-    `    <animateMotion dur="2.6s" begin="1.4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wzc-c1"/></animateMotion>\n` +
-    `    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.6s" begin="1.4s" repeatCount="indefinite"/>\n` +
-    `  </circle>\n` +
-    `  <circle r="4" class="ok">\n` +
-    `    <animateMotion dur="2.6s" begin="1.9s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wzc-c2"/></animateMotion>\n` +
-    `    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.6s" begin="1.9s" repeatCount="indefinite"/>\n` +
-    `  </circle>\n` +
-    [0, 1, 2].map((i) => tile(i)).join("\n") +
-    "\n" +
-    // "your ___" chips
-    `  <g opacity="0">\n` +
-    `    <animate attributeName="opacity" values="0;1" dur="0.5s" begin="1.3s" fill="freeze"/>\n` +
-    chips +
-    `\n  </g>\n` +
-    // footer
-    `  <text x="40" y="406" class="mono-sm" style="fill:var(--muted)"><tspan style="fill:var(--ok)">${esc(C.footer[0])}</tspan>${esc(C.footer[1])}</text>\n` +
-    `  <text x="1160" y="406" text-anchor="end" class="kicker">${esc(C.footerRight[0])}</text>\n` +
-    "</svg>\n"
+      gridDefs("wzc-grid") +
+      `  <defs>\n` +
+      `    <path id="wzc-c1" d="M 372 218 L 432 218"/>\n` +
+      `    <path id="wzc-c2" d="M 767 218 L 827 218"/>\n` +
+      `  </defs>\n` +
+      `  <rect class="bg" x="0" y="0" width="${W}" height="${H}"/>\n` +
+      `  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#wzc-grid)"/>\n` +
+      // header
+      `  <text x="40" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
+      `  <line x1="${afterKicker(40, C.kicker[0])}" y1="51" x2="1160" y2="51" class="rule" stroke-width="1"/>\n` +
+      `  <text x="40" y="98" class="sub">${esc(C.headline[0])}<tspan font-weight="600" style="fill:var(--ok)">${esc(C.headline[1])}</tspan></text>\n` +
+      // connectors (under the tiles) + travelling dots: lime = the request leaving the install
+      // step, ok = the answer reaching the tool. The lime dot carries a hairline ink stroke so it
+      // reads on the light canvas too.
+      `  <g class="rule" stroke-width="2" stroke-dasharray="5 5" fill="none">\n` +
+      `    <use href="#wzc-c1"/>\n    <use href="#wzc-c2"/>\n  </g>\n` +
+      `  <circle r="4" class="accent stroke-ink" stroke-width="1" opacity="0">\n` +
+      `    <animateMotion dur="2.6s" begin="1.4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wzc-c1"/></animateMotion>\n` +
+      `    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.6s" begin="1.4s" repeatCount="indefinite"/>\n` +
+      `  </circle>\n` +
+      `  <circle r="4" class="ok" opacity="0">\n` +
+      `    <animateMotion dur="2.6s" begin="1.9s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wzc-c2"/></animateMotion>\n` +
+      `    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.6s" begin="1.9s" repeatCount="indefinite"/>\n` +
+      `  </circle>\n` +
+      [0, 1, 2].map((i) => tile(i)).join("\n") +
+      "\n" +
+      // "your ___" chips
+      `  <g opacity="0">\n` +
+      `    <animate attributeName="opacity" values="0;1" dur="0.5s" begin="1.3s" fill="freeze"/>\n` +
+      chips +
+      `\n  </g>\n` +
+      // footer
+      `  <text x="40" y="406" class="label-sm" style="fill:var(--muted)"><tspan style="fill:var(--ok)">${esc(C.footer[0])}</tspan>${esc(C.footer[1])}</text>\n` +
+      `  <text x="1160" y="406" text-anchor="end" class="kicker">${esc(C.footerRight[0])}</text>\n` +
+      "</svg>\n"
   );
 }
 

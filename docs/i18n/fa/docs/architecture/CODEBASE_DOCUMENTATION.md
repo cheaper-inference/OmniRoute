@@ -458,7 +458,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -488,7 +488,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ماژول مجری سطح بالا (`*.ts` منهای `base.ts`، `index.ts` و تست — تعداد `npm run check:docs-counts` اندازه گیری می شود). هر کلاس اجرا کننده `BaseExecutor` (`base.ts`) را مستقیماً یا از طریق `DefaultExecutor` یا مجری دیگری گسترش می دهد. ماژولهای باقیمانده کمککنندههای هر ارائهدهنده هستند (طرحوارههای ابزار، آداپتورهای fetch/TTS ، کنترلکنندههای عجیب و غریب). مجریان عبارتند از:
+158 ماژول مجری سطح بالا (`*.ts` منهای `base.ts`، `index.ts` و تست — تعداد `npm run check:docs-counts` اندازه گیری می شود). هر کلاس اجرا کننده `BaseExecutor` (`base.ts`) را مستقیماً یا از طریق `DefaultExecutor` یا مجری دیگری گسترش می دهد. ماژولهای باقیمانده کمککنندههای هر ارائهدهنده هستند (طرحوارههای ابزار، آداپتورهای fetch/TTS ، کنترلکنندههای عجیب و غریب). مجریان عبارتند از:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `index.ts`, `claudeIdentity.ts`.
 
