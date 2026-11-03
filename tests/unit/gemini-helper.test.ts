@@ -196,3 +196,44 @@ test("convertOpenAIContentToParts still maps image_url data URIs (regression)", 
   assert.ok(inline, "image_url must still convert to inlineData");
   assert.equal(inline.inlineData.mimeType, "image/png");
 });
+
+
+test("convertOpenAIContentToParts forwards per-image ultra-high media resolution", () => {
+  const content = [{
+    type: "image_url",
+    image_url: {
+      url: "data:image/jpeg;base64,/9j/4AAQ",
+      media_resolution: "ultra_high",
+    },
+  }];
+  const parts = gemini.convertOpenAIContentToParts(content);
+  const inline = parts.find((p) => p.inlineData);
+  assert.ok(inline);
+  assert.deepEqual(inline.mediaResolution, { level: "MEDIA_RESOLUTION_ULTRA_HIGH" });
+});
+
+test("convertOpenAIContentToParts accepts enum-style media resolution on the content part", () => {
+  const content = [{
+    type: "image_url",
+    media_resolution: "MEDIA_RESOLUTION_HIGH",
+    image_url: { url: "https://example.com/image.jpg" },
+  }];
+  const parts = gemini.convertOpenAIContentToParts(content);
+  const remote = parts.find((p) => p.fileData);
+  assert.ok(remote);
+  assert.deepEqual(remote.mediaResolution, { level: "MEDIA_RESOLUTION_HIGH" });
+});
+
+test("convertOpenAIContentToParts ignores invalid media resolution instead of forwarding garbage", () => {
+  const content = [{
+    type: "image_url",
+    image_url: {
+      url: "data:image/png;base64,iVBORw0KGgo=",
+      media_resolution: "gigantic",
+    },
+  }];
+  const parts = gemini.convertOpenAIContentToParts(content);
+  const inline = parts.find((p) => p.inlineData);
+  assert.ok(inline);
+  assert.equal(inline.mediaResolution, undefined);
+});

@@ -199,6 +199,25 @@ function normalizeAudioMimeType(format: unknown): string {
 }
 
 // Convert OpenAI content to Gemini parts
+function normalizeGeminiMediaResolution(...values: unknown[]): JsonRecord | undefined {
+  const allowed = new Set([
+    "MEDIA_RESOLUTION_UNSPECIFIED",
+    "MEDIA_RESOLUTION_LOW",
+    "MEDIA_RESOLUTION_MEDIUM",
+    "MEDIA_RESOLUTION_HIGH",
+    "MEDIA_RESOLUTION_ULTRA_HIGH",
+  ]);
+  for (const value of values) {
+    if (typeof value !== "string" || !value.trim()) continue;
+    let normalized = value.trim().toUpperCase().replace(/[\s-]+/g, "_");
+    if (!normalized.startsWith("MEDIA_RESOLUTION_")) {
+      normalized = `MEDIA_RESOLUTION_${normalized}`;
+    }
+    if (allowed.has(normalized)) return { level: normalized };
+  }
+  return undefined;
+}
+
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 
@@ -315,6 +334,18 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
           fileUrl?.url ||
           fileObj?.url ||
           docObj?.url;
+        // Gemini 3 supports per-media-part resolution up to ULTRA_HIGH. OpenAI
+        // Chat Completions has no standard equivalent, so OmniRoute accepts the
+        // provider extension on either the content part or nested image_url.
+        // This is deliberately separate from OpenAI's `detail` field: mapping
+        // detail=high implicitly would change tokenization for every existing
+        // Gemini request, while media_resolution is explicit opt-in.
+        const mediaResolution = normalizeGeminiMediaResolution(
+          rec.media_resolution,
+          rec.mediaResolution,
+          imageUrl?.media_resolution,
+          imageUrl?.mediaResolution
+        );
         if (typeof fileData === "string" && fileData.startsWith("data:")) {
           const commaIndex = fileData.indexOf(",");
           if (commaIndex !== -1) {
@@ -324,6 +355,7 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
 
             parts.push({
               inlineData: { mimeType, data },
+              ...(mediaResolution ? { mediaResolution } : {}),
             });
           }
         } else if (typeof fileData === "string" && /^https?:\/\//i.test(fileData)) {
@@ -335,6 +367,7 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
           // a HEAD request to sniff it; Gemini infers the concrete type on fetch.
           parts.push({
             fileData: { fileUri: fileData, mimeType: "image/*" },
+            ...(mediaResolution ? { mediaResolution } : {}),
           });
         }
       }
