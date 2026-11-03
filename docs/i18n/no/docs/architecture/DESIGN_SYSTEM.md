@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** dashbordet er bygget på** Keak CI UI sett** (`@keak/cheaper-inference-ui-kit`), leverandør som arbeidsområdet `packages/ui-kit` (`@omniroute/ui-kit`; oppstrøms øyeblikksbildet er festet i `packages/ui-kit/UPSTREAM.md` og beskyttet av `npm run check:ui-kit-snapshot`). Lys er det kanoniske temaet; standardpreferansen er `system`. Aksenten er Keak lime (`--ci-color-accent`). Switzer er enkeltfamilien for UI, visning og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løser seg etter det), selvvertert av selve settet (`packages/ui-kit/src/ci-fonts.css`, importert av `ci-tokens.css`). Hvert ikon er en Lucide-glyph.
+> **Status:** dashbordet er bygget på** Keak CI UI sett** (`@keak/cheaper-inference-ui-kit`), leverandør som arbeidsområdet `packages/ui-kit` (`@omniroute/ui-kit`; oppstrøms øyeblikksbildet er festet i `packages/ui-kit/UPSTREAM.md` og beskyttet av `npm run check:ui-kit-snapshot`). Lys er det kanoniske temaet; standardpreferansen er `system`. Aksenten er Keak lime (`--ci-color-accent`). Switzer er enkeltfamilien for UI, display og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løser seg etter det), selvvertert av selve settet (`packages/ui-kit/src/ci-fonts.css`, importert av `ci-tokens.css`). Skript Switzer mangler fall gjennom glyph for glyph (`src/app/globals.css`): Inter for kyrillisk, gresk og vietnamesisk og, bare under `html[dir="rtl"]`, Vazirmatn for arabisk skrift. Hvert ikon er en Lucide-glyph.
 
 ## 1. Hvor ting ligger
 

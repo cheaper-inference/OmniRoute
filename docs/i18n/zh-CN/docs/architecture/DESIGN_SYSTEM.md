@@ -4,7 +4,7 @@
 
 ---
 
-> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。每个图标都是 Lucide 字形。
+> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。瑞士文字缺乏逐个字形的下降（`src/app/globals.css`）：Inter 用于西里尔文、希腊语和越南语，仅在`html[dir="rtl"]`下，Vazirmatn 用于阿拉伯文。每个图标都是 Lucide 字形。
 
 ## 1. 内容所在位置
 

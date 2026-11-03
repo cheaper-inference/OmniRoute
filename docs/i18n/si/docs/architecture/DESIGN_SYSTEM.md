@@ -4,7 +4,7 @@
 
 ---
 
-> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත** Keak CI UI කට්ටලය** (`@keak/cheaper-inference-ui-kit`), වැඩබිම `packages/ui-kit` (`@omniroute/ui-kit`; උඩු ගංවතුර ස්නැප්ෂොට් එක `packages/ui-kit/UPSTREAM.md` හි අමුණා ඇති අතර `npm run check:ui-kit-snapshot` මගින් ආරක්ෂා කර ඇත). ආලෝකය කැනොනිකල් තේමාවයි; පෙරනිමි මනාපය `system` වේ. උච්චාරණය Keak දෙහි (`--ci-color-accent`) වේ. Switzer යනු UI, සංදර්ශකය සහ කේත පෙළ (`--ci-font-ui`; `--ci-font-display` සහ `--ci-font-mono` එයට නිරාකරණය කිරීම), කට්ටලය විසින්ම ස්වයං-සත්කාරක (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` විසින් ආනයනය කරන ලද) සඳහා තනි පවුලකි. සෑම නිරූපකයක්ම Lucide glyph වේ.
+> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත** Keak CI UI කට්ටලය** (`@keak/cheaper-inference-ui-kit`), වැඩබිම `packages/ui-kit` (`@omniroute/ui-kit`; උඩු ගංවතුර ස්නැප්ෂොට් එක `packages/ui-kit/UPSTREAM.md` හි අමුණා ඇති අතර `npm run check:ui-kit-snapshot` මගින් ආරක්ෂා කර ඇත). ආලෝකය කැනොනිකල් තේමාවයි; පෙරනිමි මනාපය `system` වේ. උච්චාරණය Keak දෙහි (`--ci-color-accent`) වේ. Switzer යනු UI, සංදර්ශකය සහ කේත පෙළ (`--ci-font-ui`; `--ci-font-display` සහ `--ci-font-mono` එයට නිරාකරණය කිරීම), කට්ටලය විසින්ම ස්වයං-සත්කාරක (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` විසින් ආනයනය කරන ලද) සඳහා තනි පවුලකි. ස්ක්‍රිප්ට් ස්විට්සර් හි ග්ලයිෆ් මගින් ග්ලයිෆ් (`src/app/globals.css`) පහත වැටීමක් නොමැත: සිරිලික්, ග්‍රීක සහ වියට්නාම සඳහා අන්තර් සහ, `html[dir="rtl"]` යටතේ පමණක්, අරාබි අක්ෂර සඳහා වසීර්මාට්. සෑම නිරූපකයක්ම Lucide glyph වේ.
 
 ## 1. දේවල් තිබෙන තැන
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **অবস্থা:** ড্যাশবোর্ড নির্মিত হয়** Keak CI UI কিট** (`@keak/cheaper-inference-ui-kit`), ওয়ার্কস্পেস `packages/ui-kit` হিসাবে বিক্রীত (`@omniroute/ui-kit`; আপস্ট্রিম স্ন্যাপশট `packages/ui-kit/UPSTREAM.md` এ পিন করা হয় এবং `npm run check:ui-kit-snapshot` দ্বারা সুরক্ষিত)। আলো ক্যানোনিকাল থিম; ডিফল্ট পছন্দ `system`. উচ্চারণ হল Keak চুন (`--ci-color-accent`)। সুইজার হল UI, ডিসপ্লে এবং কোড টেক্সটের জন্য একক পরিবার (`--ci-font-ui`; `--ci-font-display` এবং `--ci-font-mono` এর সমাধান), কিট নিজেই দ্বারা স্ব-হোস্ট করা (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` দ্বারা আমদানি করা)। প্রতিটি আইকন একটি লুসাইড গ্লিফ।
+> **অবস্থা:** ড্যাশবোর্ড নির্মিত হয়** Keak CI UI কিট** (`@keak/cheaper-inference-ui-kit`), ওয়ার্কস্পেস `packages/ui-kit` হিসাবে বিক্রীত (`@omniroute/ui-kit`; আপস্ট্রিম স্ন্যাপশট `packages/ui-kit/UPSTREAM.md` এ পিন করা হয় এবং `npm run check:ui-kit-snapshot` দ্বারা সুরক্ষিত)। আলো ক্যানোনিকাল থিম; ডিফল্ট পছন্দ `system`. উচ্চারণ হল Keak চুন (`--ci-color-accent`)। সুইজার হল UI, ডিসপ্লে এবং কোড টেক্সটের জন্য একক পরিবার (`--ci-font-ui`; `--ci-font-display` এবং `--ci-font-mono` এর সমাধান), কিট নিজেই দ্বারা স্ব-হোস্ট করা (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` দ্বারা আমদানি করা)। স্ক্রিপ্ট সুইজারে গ্লাইফ দ্বারা গ্লাইফের মাধ্যমে পড়ার অভাব রয়েছে (`src/app/globals.css`): সিরিলিক, গ্রীক এবং ভিয়েতনামের জন্য ইন্টার এবং আরবি লিপির জন্য শুধুমাত্র `html[dir="rtl"]`, Vazirmatn এর অধীনে। প্রতিটি আইকন একটি লুসাইড গ্লিফ।
 
 ## ১. জিনিসগুলো কোথায় থাকে
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Stato:** il cruscotto è costruito su** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), venduto come area di lavoro `packages/ui-kit` (`@omniroute/ui-kit`; lo snapshot upstream è bloccato in `packages/ui-kit/UPSTREAM.md` e protetto da `npm run check:ui-kit-snapshot`). La luce è il tema canonico; la preferenza predefinita è `system`. L'accento è Keak lime (`--ci-color-accent`). Switzer è l'unica famiglia per UI, visualizzazione e testo in codice (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` si risolvono in esso), ospitata autonomamente dal kit stesso (`packages/ui-kit/src/ci-fonts.css`, importato da `ci-tokens.css`). Ogni icona è un glifo Lucide.
+> **Stato:** il cruscotto è costruito su** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), venduto come area di lavoro `packages/ui-kit` (`@omniroute/ui-kit`; lo snapshot upstream è bloccato in `packages/ui-kit/UPSTREAM.md` e protetto da `npm run check:ui-kit-snapshot`). La luce è il tema canonico; la preferenza predefinita è `system`. L'accento è Keak lime (`--ci-color-accent`). Switzer è l'unica famiglia per UI, visualizzazione e testo in codice (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` si risolvono in esso), ospitata autonomamente dal kit stesso (`packages/ui-kit/src/ci-fonts.css`, importato da `ci-tokens.css`). Le scritture in Svizzera mancano grazie al glifo per glifo (`src/app/globals.css`): Inter per cirillico, greco e vietnamita e, solo sotto `html[dir="rtl"]`, Vazirmatn per la scrittura araba. Ogni icona è un glifo Lucide.
 
 ## 1. Dove si trovano le cose
 
