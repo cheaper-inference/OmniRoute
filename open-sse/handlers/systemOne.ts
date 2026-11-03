@@ -88,17 +88,41 @@ function buildSuccessResponse(
   return new Response(JSON.stringify(parsed), { status: 200, headers });
 }
 
+/** Shortest run of a secret's characters that is treated as that secret. */
+const SECRET_FRAGMENT_LEN = 8;
+
 /**
  * Strip this connection's own secrets (token, Cloudflare account id) from text
  * that leaves the handler. Upstream errors and transport exceptions may echo
- * them verbatim, and the shared sanitizer does not know unlabelled values.
+ * them, and the shared sanitizer does not know unlabelled values. Any run of
+ * SECRET_FRAGMENT_LEN or more consecutive characters of a secret is removed,
+ * so a secret cut by truncation or with a few characters escaped or encoded
+ * (`\u004f…`, `%4f…`) is still caught.
  */
 function redactConnectionSecrets(text: string, credentials: SystemOneCredentials | null): string {
   const accountId = credentials?.providerSpecificData?.accountId;
   const secrets = [credentials?.apiKey, credentials?.accessToken, accountId].filter(
-    (value): value is string => typeof value === "string" && value.length >= 8
+    (value): value is string => typeof value === "string" && value.length >= SECRET_FRAGMENT_LEN
   );
-  return secrets.reduce((out, secret) => out.split(secret).join("[redacted]"), text);
+  if (secrets.length === 0 || text.length < SECRET_FRAGMENT_LEN) return text;
+  const fragments = new Set<string>();
+  for (const secret of secrets) {
+    for (let i = 0; i + SECRET_FRAGMENT_LEN <= secret.length; i++) {
+      fragments.add(secret.slice(i, i + SECRET_FRAGMENT_LEN));
+    }
+  }
+  const covered = new Uint8Array(text.length);
+  for (let i = 0; i + SECRET_FRAGMENT_LEN <= text.length; i++) {
+    if (fragments.has(text.slice(i, i + SECRET_FRAGMENT_LEN))) {
+      covered.fill(1, i, i + SECRET_FRAGMENT_LEN);
+    }
+  }
+  let out = "";
+  for (let i = 0; i < text.length; i++) {
+    if (!covered[i]) out += text[i];
+    else if (i === 0 || !covered[i - 1]) out += "[redacted]";
+  }
+  return out;
 }
 
 /**
@@ -109,7 +133,9 @@ function redactConnectionSecrets(text: string, credentials: SystemOneCredentials
 function safeErrorText(text: string, options: SystemOneProxyOptions): string {
   // TypeSafe/OpenRouter keep #17994's behaviour; the Cloudflare URL carries the account id.
   if (options.target.backend !== "cloudflare") return text;
-  return redactConnectionSecrets(sanitizeErrorMessage(text), options.credentials);
+  // Before and after: the sanitizer both truncates and decodes escapes.
+  const pre = redactConnectionSecrets(text, options.credentials);
+  return redactConnectionSecrets(sanitizeErrorMessage(pre), options.credentials);
 }
 
 const SAFE_MODEL_ID = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/;
@@ -136,10 +162,23 @@ function projectCloudflareResult(
   for (const field of ["input_tokens", "output_tokens", "cost"] as const) {
     if (typeof rawUsage[field] === "number") usage[field] = rawUsage[field];
   }
-  const answers = JSON.parse(
-    redactConnectionSecrets(JSON.stringify(native.answers ?? {}), credentials)
-  ) as unknown;
+  const answers = redactStrings(native.answers ?? {}, credentials);
   return { model, answers, usage };
+}
+
+/** Redact secrets inside every string of a JSON value (answers), keeping its shape. */
+function redactStrings(value: unknown, credentials: SystemOneCredentials | null): unknown {
+  if (typeof value === "string") return redactConnectionSecrets(value, credentials);
+  if (Array.isArray(value)) return value.map((item) => redactStrings(item, credentials));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [
+        redactConnectionSecrets(k, credentials),
+        redactStrings(v, credentials),
+      ])
+    );
+  }
+  return value;
 }
 
 interface DecisionRequest {

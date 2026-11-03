@@ -274,3 +274,35 @@ test("cloudflare: success results keep only model, answers and usage, without se
     });
   }
 });
+
+test("cloudflare: partial and encoded secrets are redacted in errors, exceptions and answers", async () => {
+  const token = "cf-test-token";
+  const variants = [
+    "%63" + token.slice(1),
+    "\\x63" + token.slice(1),
+    "\\\\u0063" + token.slice(1),
+    token.slice(0, -1),
+  ];
+  for (const variant of variants) {
+    const err = await call(
+      "cloudflare-ai/jev",
+      jsonResponse(403, { success: false, errors: [{ message: `Denied ${variant}` }] })
+    );
+    assert.equal((await err.response.text()).includes("f-test-tok"), false, variant);
+    const ok = await call(
+      "cloudflare-ai/clef",
+      jsonResponse(200, {
+        success: true,
+        result: { model: "clef", answers: { q: { answer: `x ${variant}` } }, usage: {} },
+      })
+    );
+    assert.equal((await ok.response.text()).includes("f-test-tok"), false, variant);
+  }
+  const long = "Denied ".padEnd(4097 - ACCOUNT.length, ".") + ACCOUNT + " rejected";
+  const capped = await call(
+    "cloudflare-ai/jev",
+    jsonResponse(200, { success: false, errors: [{ message: long }] })
+  );
+  assert.equal(capped.response.status, 502);
+  assert.equal((await capped.response.text()).includes(ACCOUNT.slice(0, 12)), false);
+});
