@@ -27,6 +27,14 @@
  *                                  source_hash — mechanical mirror rewrites stop
  *                                  showing up as `target changed` while genuine
  *                                  source drift is still reported)
+ *   npm run i18n:run -- --failures-json=<path>
+ *                                 (also write the run summary and the failed
+ *                                  (source, locale) units as JSON)
+ *
+ * Exit codes of a translation run: 0 every work unit translated; 3 (EXIT_PARTIAL) at
+ * least one unit translated and at least one failed: the successful mirrors and their
+ * state records are written, a failed unit keeps its mirror and its state record exactly
+ * as they were; 1 nothing could be translated, or any other error.
  *
  * Backend (configured via env, never committed):
  *   OMNIROUTE_TRANSLATION_API_URL     e.g. https://cloud.omniroute.dev/v1
@@ -60,8 +68,9 @@ import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import {
   isFallbackWorthy,
-  isQuotaLike,
   llmCircuit,
+  noteLlmFailure,
+  noteLlmSuccess,
   resolveModelChain,
   translationEngine as sharedTranslationEngine,
   googleFallbackEnabled as sharedGoogleFallbackEnabled,
@@ -195,6 +204,7 @@ function parseArgs(argv) {
     adopt: false,
     targetsOnly: false,
     concurrency: null,
+    failuresJson: null,
   };
   for (const arg of argv.slice(2)) {
     if (arg === "--force") opts.force = true;
@@ -220,6 +230,7 @@ function parseArgs(argv) {
         .map((s) => s.trim())
         .filter(Boolean);
     else if (arg.startsWith("--concurrency=")) opts.concurrency = Number(arg.slice(14));
+    else if (arg.startsWith("--failures-json=")) opts.failuresJson = arg.slice(16);
     else if (arg === "--help" || arg === "-h") {
       console.log(
         [
@@ -232,6 +243,9 @@ function parseArgs(argv) {
           "  --adopt              Rebuild .i18n-state.json from the files on disk (no API calls)",
           "  --targets-only       With --adopt: re-hash only the mirrors, keeping every source_hash",
           "  --concurrency=<n>    Parallel API requests (default: env CONCURRENCY or 4)",
+          "  --failures-json=<p>  Write the run summary and the failed units to <p> as JSON",
+          "",
+          "Exit: 0 all translated, 3 partial (failed units left untouched), 1 none translated or error",
         ].join("\n")
       );
       process.exit(0);
@@ -562,12 +576,89 @@ export function validateTranslatedChunk(source, output) {
       `inline code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
     );
   }
+  problems.push(...htmlStructureProblems(source, text));
+  const leaked = countMatches(LEAKED_PLACEHOLDER, text) - countMatches(LEAKED_PLACEHOLDER, source);
+  if (leaked > 0) problems.push(`leaked translator placeholder x${leaked}`);
   return { text, problems };
+}
+
+// The Google engine's masking tokens (`<span translate="no">zqa</span>`, bare `zqi`, private-use
+// placeholders): none may survive into a mirror (ja, 2026-10-28, shipped `zqi` / `zqo`).
+const LEAKED_PLACEHOLDER = /<span translate=|(?<!\p{L})zq[a-z]+(?!\p{L})|[\ue000-\uf8ff]/gu;
+const HTML_TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])[^>]*?(\/?)>/g;
+const HTML_CODE = /<(code|kbd|samp)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+const VOID_TAGS = new Set(["br", "hr", "img", "input", "meta", "link", "wbr", "source", "col"]);
+
+// Prose an HTML tag can live in: outside fences and outside backtick code spans (a tag inside
+// backticks is a literal, compared by lostInlineCode). <think> is checked on its own above.
+function htmlProse(markdown) {
+  return proseOutsideFences(markdown).replace(/(`+)[^\n]*?\1/g, "");
+}
+
+function htmlTags(prose) {
+  const tags = [];
+  for (const m of prose.matchAll(HTML_TAG)) {
+    const name = m[2].toLowerCase();
+    if (name === "think") continue;
+    tags.push({ name, close: m[1] === "/", single: m[3] === "/" || VOID_TAGS.has(name) });
+  }
+  return tags;
+}
+
+function nestsWell(tags) {
+  const stack = [];
+  for (const t of tags) {
+    if (t.single) continue;
+    if (!t.close) stack.push(t.name);
+    else if (stack.pop() !== t.name) return false;
+  }
+  return stack.length === 0;
+}
+
+// README's tech-stack table is HTML inside markdown: a translated `<tr>` row must keep every tag
+// (by name, opening and closing counted apart), the source's nesting, and the exact text of its
+// `<code>` / `<kbd>` / `<samp>` spans, the same contract lostInlineCode applies to backticks.
+export function htmlStructureProblems(source, translated) {
+  const problems = [];
+  const src = htmlProse(source);
+  const out = htmlProse(translated);
+  const srcTags = htmlTags(src);
+  const outTags = htmlTags(out);
+  const tally = (tags) => {
+    const counts = new Map();
+    for (const t of tags) {
+      const key = `<${t.close ? "/" : ""}${t.name}>`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return counts;
+  };
+  const before = tally(srcTags);
+  const after = tally(outTags);
+  const changed = [...new Set([...before.keys(), ...after.keys()])]
+    .filter((key) => (before.get(key) ?? 0) !== (after.get(key) ?? 0))
+    .map((key) => `${key} ${after.get(key) ?? 0}/${before.get(key) ?? 0}`);
+  if (changed.length) problems.push(`html tags ${changed.slice(0, 4).join(", ")}`);
+  if (nestsWell(srcTags) && !nestsWell(outTags)) problems.push("html nesting broken");
+  const codes = (prose) => {
+    const spans = new Map();
+    for (const m of prose.matchAll(HTML_CODE)) spans.set(m[2], (spans.get(m[2]) ?? 0) + 1);
+    return spans;
+  };
+  const srcCode = codes(src);
+  const outCode = codes(out);
+  const lost = [...srcCode].filter(([span, n]) => (outCode.get(span) ?? 0) < n).map(([s]) => s);
+  if (lost.length) {
+    const shown = lost.slice(0, 3).map((span) => `<code>${span}</code>`);
+    problems.push(
+      `html code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
+    );
+  }
+  return problems;
 }
 
 // Inline code spans outside fenced blocks, counted by content. Soft-wrapped lines of a paragraph
 // are joined first, because a CommonMark code span may cross a line break.
-function inlineCodeSpans(markdown) {
+function proseOutsideFences(markdown) {
   const prose = [];
   let inFence = false;
   for (const line of markdown.split("\n")) {
@@ -576,7 +667,11 @@ function inlineCodeSpans(markdown) {
       prose.push("");
     } else prose.push(inFence ? "" : line);
   }
-  const joined = prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+  return prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+}
+
+function inlineCodeSpans(markdown) {
+  const joined = proseOutsideFences(markdown);
   const spans = new Map();
   for (const match of joined.matchAll(/(?<!`)`([^`\n]+)`(?!`)/g)) {
     const span = match[1].replace(/\s+/g, " ").trim();
@@ -1045,12 +1140,11 @@ export async function translateBody(body, localeEntry, backend) {
           call: backend.callChat ?? callChat,
           label,
         });
+        noteLlmSuccess();
       } catch (err) {
         if (!fallback) throw err;
-        if (isQuotaLike(err) && !llmCircuit.open) {
-          // quota / credits / auth: the backend will not recover mid-run, so stop asking it
-          llmCircuit.open = true;
-          llmCircuit.reason = String(err?.message ?? err).slice(0, 160);
+        // quota / credits / auth, or LLM_FAILURE_LIMIT failures in a row: stop asking the LLM
+        if (noteLlmFailure(err)) {
           logWarn(
             `  LLM backend unavailable (${llmCircuit.reason}) — the rest of this run uses Google`
           );
@@ -1106,6 +1200,41 @@ function createLimiter(max) {
 }
 
 // ----- Main ----------------------------------------------------------------
+
+// A run where some units translated and some failed. The workflow commits the good mirrors
+// and lists the failed units; a failed unit is never written and never gets a state record.
+export const EXIT_PARTIAL = 3;
+
+export function translationExitCode({ translated, failed }) {
+  if (!failed) return 0;
+  return translated > 0 ? EXIT_PARTIAL : 1;
+}
+
+/**
+ * The drift a partial run is allowed to leave behind: a source none of whose locales
+ * translated keeps its recorded `source_hash`, and a failed (source, locale) keeps its
+ * mirror (missing or hand-edited). Everything else in the drift report still blocks.
+ */
+export function blockingDrift(report, failures, translated = []) {
+  // A report without the drift lists (e.g. `missing-state`) can never be excused.
+  const lists = ["driftedSources", "missingTargets", "driftedTargets"];
+  if (!lists.every((k) => Array.isArray(report?.[k]))) {
+    return [{ kind: "report", rel: String(report?.reason ?? "unreadable drift report") }];
+  }
+  const translatedRels = new Set(translated.map((t) => t.rel));
+  const failedRels = new Set(failures.map((f) => f.rel).filter((rel) => !translatedRels.has(rel)));
+  const failedUnits = new Set(failures.map((f) => `${f.rel}\u0000${f.locale}`));
+  const blocking = [];
+  for (const x of report.driftedSources) {
+    if (!failedRels.has(x.rel)) blocking.push({ kind: "driftedSources", ...x });
+  }
+  for (const kind of ["missingTargets", "driftedTargets"]) {
+    for (const x of report[kind]) {
+      if (!failedUnits.has(`${x.rel}\u0000${x.locale}`)) blocking.push({ kind, ...x });
+    }
+  }
+  return blocking;
+}
 
 /**
  * Merge one run's (source, locale) records into a freshly re-read state. Source-level
@@ -1253,9 +1382,10 @@ async function main() {
   const touched = [];
   for (const rel of sources) {
     const { hash: sourceHash } = sourceHashes.get(rel);
-    const entry =
-      state.sources[rel] || (state.sources[rel] = { source_hash: sourceHash, locales: {} });
-    entry.source_hash = sourceHash;
+    // The source-level hash moves only with a translated unit (mergeStateUpdates); setting it
+    // here would also reach the save-time fallback below and mark a source whose every locale
+    // failed as translated.
+    const entry = state.sources[rel] || (state.sources[rel] = { source_hash: null, locales: {} });
 
     for (const locale of targetLocales) {
       stats.considered++;
@@ -1374,14 +1504,31 @@ async function main() {
     `summary: translated=${stats.translated}, skipped=${stats.skipped}, failed=${stats.failed}, total considered=${stats.considered}, elapsed=${elapsedSec}s`
   );
 
+  if (opts.failuresJson) {
+    const translatedUnits = touched.map(({ rel, locale }) => ({ rel, locale }));
+    const summary = { ...stats, failures, translatedUnits };
+    await fs.writeFile(
+      path.resolve(opts.failuresJson),
+      `${JSON.stringify(summary, null, 2)}\n`,
+      "utf8"
+    );
+  }
+
   if (failures.length) {
     logWarn(`${failures.length} failures:`);
     for (const f of failures) console.warn(`  - ${f.rel} [${f.locale}]: ${f.error}`);
-    process.exit(1);
+    const code = translationExitCode(stats);
+    if (code === EXIT_PARTIAL) {
+      logWarn(
+        `partial run: ${stats.translated} translated and recorded, ${failures.length} left as they were`
+      );
+    }
+    process.exit(code);
   }
 }
 
-const isDirectRun = import.meta.url === pathToFileURL(process.argv[1]).href;
+// argv[1] is unset under `node -e` (the refresh workflow imports blockingDrift that way).
+const isDirectRun = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isDirectRun) {
   main().catch((err) => {
     logError(err?.stack || err?.message || String(err));

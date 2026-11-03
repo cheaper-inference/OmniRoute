@@ -89,6 +89,12 @@ import {
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import {
+  AGENTIC_STALL_COMBO_REASON,
+  agenticStallOutcome,
+  isAgenticStallComboAttempt,
+} from "./agenticStallFailover.ts";
+import { holdAttemptResponse } from "./truncatedStreamFailover.ts";
+import {
   TRANSIENT_FOR_SEMAPHORE,
   MAX_FALLBACK_WAIT_MS,
   classifyQualityFailure,
@@ -108,6 +114,7 @@ import {
   requestScopedReplayKey,
   resolvePersistedConnectionCooldownSkipReason,
 } from "./comboPredicates.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { handlePreContentStreamRetry } from "./executeTargetClassify.ts";
 import {
   handleEmptyContentRetry,
@@ -173,6 +180,7 @@ export async function handleRoundRobinCombo({
   requestHeaders: _requestHeaders = null,
   relayOptions,
   perTargetAdmission = null,
+  heldAttempt = {},
 }: HandleRoundRobinOptions): Promise<Response> {
   const config = settings
     ? resolveComboConfig(combo, settings)
@@ -927,6 +935,33 @@ export async function handleRoundRobinCombo({
               fallbackCount++;
               break; // move to next model
             }
+            // #13954 (opt-in): same contract as the priority loop (agenticStallFailover.ts).
+            if (
+              await isAgenticStallComboAttempt({
+                body,
+                result,
+                modelStr,
+                hasNextTarget: offset + 1 < modelCount,
+                log,
+              })
+            ) {
+              log.warn("COMBO-RR", `${modelStr} ${AGENTIC_STALL_COMBO_REASON}`);
+              rrEvents.failed(AGENTIC_STALL_COMBO_REASON, Date.now() - startTime);
+              recordComboRequest(combo.name, modelStr, {
+                success: false,
+                latencyMs: Date.now() - startTime,
+                fallbackCount,
+                strategy: "round-robin",
+                target: toRecordedTarget(target),
+              });
+              recordedAttempts++;
+              lastError = AGENTIC_STALL_COMBO_REASON;
+              lastStatus = 502;
+              rrOutcomes.push(agenticStallOutcome(modelStr));
+              holdAttemptResponse(heldAttempt, result);
+              fallbackCount++;
+              break; // move to next model
+            }
             const latencyMs = Date.now() - startTime;
             log.info(
               "COMBO-RR",
@@ -1287,7 +1322,12 @@ export async function handleRoundRobinCombo({
             !(
               (result.status === 500 || result.status === 429) &&
               hasPerModelQuota(provider, rawModel)
-            )
+            ) &&
+            // Same rationale as the provider breaker in executeTargetAttempt.ts:
+            // a failure raised by our own shutdown must not cool the provider
+            // down for every later request. The drain flag is read live on
+            // every call — it never latches.
+            !isDraining()
           ) {
             recordProviderCooldown(
               provider,

@@ -163,7 +163,7 @@ OmniRoute розкриває 6 навичок A2A, підключених до `
 | Звіт про здоров'я       | `health-report`      | Агрегує автоматичний вимикач, час відновлення, стан блокування для кожного постачальника                                                                         | здоров'я, стійкість         | «Показати стан здоров'я всіх постачальників» |
 | Список можливостей      | `list-capabilities`  | Повертає повний каталог навичок агента з 45 записів (23 API + 21 CLI + 1 конфігурація) як таблицю уцінки з необробленим SKILL.md URLs для впровадження контексту | каталог, відкриття, навички | «Перерахувати всі можливості OmniRoute »     |
 
-> Картка агента повинна бути узгоджена з поточним каталогом постачальників 377; кількість провайдерів і метадані free/no-auth отримані з реєстру часу виконання.
+> Картка агента повинна бути узгоджена з поточним каталогом постачальників 380; кількість провайдерів і метадані free/no-auth отримані з реєстру часу виконання.
 
 ### Деталі навичок `list-capabilities`
 
@@ -197,17 +197,17 @@ OmniRoute розкриває 6 навичок A2A, підключених до `
 
 ---
 
-## Додавання нової навички
+## Додавання нового навику
 
-1. **Створіть файл навички:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Створити файл навичок:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Експортуйте асинхронну функцію `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Дотримуйтеся структури наявних навичок, як-от `smartRouting.ts`.
+   Експортуйте асинхронну функцію `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Дотримуйтеся форми наявних навичок, таких як `smartRouting.ts`.
 
-2. **Зареєструйте обробник:** у `src/lib/a2a/taskExecution.ts` додайте запис до `A2A_SKILL_HANDLERS`:
+2. **Обробник реєстрації:** у `src/lib/a2a/taskExecution.ts` додайте запис до `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...наявні навички
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ OmniRoute розкриває 6 навичок A2A, підключених до `
    };
    ```
 
-3. **Опублікуйте в картці агента:** у `src/app/.well-known/agent.json/route.ts` додайте до масиву `skills`:
+3. **Викрити в картці агента:** у `src/lib/a2a/agentCardMetadata.ts` (спільно для `/.well-known/agent.json` і `/.well-known/agent-card.json`), додайте до масиву `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ OmniRoute розкриває 6 навичок A2A, підключених до `
    }
    ```
 
-4. **Напишіть тести:** `tests/unit/a2a-<your-skill>.test.ts`. Перевірте успішний сценарій і сценарій помилки.
+4. **Написати тести:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Задокументуйте** нову навичку в таблиці `Available Skills` цього файлу.
+5. **документ** новий навик у таблиці `Available Skills` цього файлу.
 
 ---
 

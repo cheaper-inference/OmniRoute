@@ -153,34 +153,34 @@ Cookie считается сеансом только в том случае, е
 с отключенным входом сохраняют путь восстановления и могут задать пароль без него, так как оба привязаны
 к хосту, которому принадлежит каталог данных.
 
-## Конвейер
+## Трубопровод
 
 ```
-Входящий запрос → src/proxy.ts
-  → runAuthzPipeline() в src/server/authz/pipeline.ts
-    1. Удалить доверенные внутренние заголовки (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Сгенерировать идентификатор запроса, классифицировать маршрут через classifyRoute()
-    3. Если pathname == "/" → перенаправить на /dashboard
-    4. Если идёт завершение работы (штатное отключение) и /api/* → 503
-    5. Если запрос к /api/* использует не GET → применить проверку checkBodySize()
-    6. Если OPTIONS → предварительный CORS-запрос 204
-    7. Если options.enforce == false → пропустить дальше с заголовками класса маршрута
-    8. Иначе: POLICIES[routeClass].evaluate(ctx)
-       - разрешено → установить x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - отклонено  → ошибка JSON с correlation_id (страницы панели управления → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Доверенные внутренние заголовки (определённые в `src/server/authz/headers.ts`) **удаляются из входящих запросов** перед классификацией — клиенты не могут заранее задать `x-omniroute-auth-*`, чтобы выдать себя за субъекта.
+Доверенные внутренние заголовки (определенные в `src/server/authz/headers.ts`)** удален из входящих запросов** перед классификацией клиенты — не могут предварительно заполнить `x-omniroute-auth-*`, чтобы олицетворять субъекта.
 
-### Контракты политик
+### Политические контракты
 
-Для каждого класса маршрутов предусмотрена политика в `src/server/authz/policies/`:
+У каждого класса маршрутов есть политика в `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — всегда возвращает `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — извлекает Bearer и проверяет его через `validateApiKey()`. Переходит к анонимному доступу только тогда, когда эффективный флаг функции `REQUIRE_API_KEY` отключён. Эффективное значение флага определяется через `isRequireApiKeyEnabled()` (`переопределение флага функции в БД > process.env.REQUIRE_API_KEY > значение по умолчанию`), поэтому флаги функций панели управления и переменные окружения согласованно управляют `/api/v1/*`, `/api/v1beta/*` и псевдонимами; при сбоях распознавателя доступ запрещается. Разрешает запросы с сессией панели управления к маршрутам клиентского API (включая `/api/v1/models`, используемый каталогом моделей панели управления).
-- **`managementPolicy`** (`policies/management.ts`) — принимает сессию панели управления и внутренние запросы синхронизации моделей (сопоставляемые с `/api/providers/[name]/(sync-models|models)`) либо полностью пропускает проверку, если `isAuthRequired()` возвращает false. Возвращает 403 (`AUTH_001`), если Bearer-токен присутствует, но недействителен, и 401 в остальных случаях. Кроме того, до выполнения любой ветви аутентификации применяет уровни защиты маршрутов (LOCAL_ONLY / ALWAYS_PROTECTED) — см. [Уровни защиты маршрутов](../security/ROUTE_GUARD_TIERS.md). К путям LOCAL_ONLY из `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (на данный момент: `/api/mcp/`) можно обращаться не с loopback-адреса, если Bearer-ключ имеет область действия `manage`; для всех остальных путей LOCAL_ONLY независимо от области действия сохраняется строгое требование loopback-адреса.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — извлекает Bearer и проверяет через `validateApiKey()`. Переходит в анонимный режим только тогда, когда флаг эффективной функции `REQUIRE_API_KEY` отключен. Действующий флаг разрешается через `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), поэтому флаги функций панели мониторинга и переменные среды последовательно управляют `/api/v1/*`, `/api/v1beta/*` и псевдонимами; сбои резольвера не закрываются. Разрешает запросы сеанса информационной панели по клиентским маршрутам API (включая `/api/v1/models`, используемый каталогом моделей информационной панели). Когда Entra ID SSO включен, носитель, структурно являющийся токеном Entra (три сегмента base64url, `RS*` alg, `kid`), обрабатывается веткой SSO** до** `validateApiKey()` и его вердикт окончательный. — он никогда не попадает в путь ключа API или в ветвь деградации до анонимности, поэтому сбой в работе провайдера идентификации не может стать открытым доступом. Статические ключи API не затрагиваются. См. [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — принимает сеанс информационной панели, внутренние запросы синхронизации модели (сопоставленные с `/api/providers/[name]/(sync-models|models)`) или полностью пропускает, если `isAuthRequired()` возвращает false. Возвращает 403 (`AUTH_001`), если токен носителя присутствует, но недействителен, в противном случае — 401. Также применяет уровни защиты маршрута (LOCAL_ONLY / ALWAYS_PROTECTED) перед любой веткой аутентификации — см. [Уровни защиты маршрута](../security/ROUTE_GUARD_TIERS.md). Доступ к путям LOCAL_ONLY в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (сегодня: `/api/mcp/`) можно получить без обратной связи, когда ключ носителя несет область действия `manage` ; все остальные пути LOCAL_ONLY остаются строгими с обратной связью независимо от области действия.
 
-При успешном выполнении политика возвращает `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Нижестоящие обработчики могут получить его через `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts` вместо повторного выполнения логики аутентификации.
+Успешная политика возвращает `AuthSubject` с помощью `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Нижестоящие обработчики могут прочитать его через `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts` вместо повторного запуска логики аутентификации.
 
 ## Список публичных маршрутов
 
@@ -339,23 +339,23 @@ export async function POST(request: Request) {
 
 ## Отладка
 
-Конвейер всегда добавляет к ответам следующие заголовки:
+Конвейер всегда помечает ответы:
 
 ```
-x-request-id:               <идентификатор корреляции, дублируемый в телах ошибок>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Для аутентифицированных запросов заголовки вышестоящего запроса (на стороне обработчика) также содержат:
+Для аутентифицированных запросов заголовки запросов восходящего потока (на стороне обработчика) также включают:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<последние 4 символа> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (необязательно)
-x-omniroute-auth-scopes:    список, разделённый запятыми
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Используйте `assertAuth(req, expectedClass)` внутри обработчиков — эта функция выбрасывает `AuthzAssertionError` с кодом `AUTHZ_NOT_INITIALIZED`, если промежуточное ПО было обойдено (это помогает выявлять регрессии конфигурации в тестах).
+Используйте `assertAuth(req, expectedClass)` внутри обработчиков — он выдает `AuthzAssertionError` с кодом `AUTHZ_NOT_INITIALIZED` если промежуточное программное обеспечение было обойдено (полезно для обнаружения регрессий конфигурации в тестах).
 
 ## См. также
 
