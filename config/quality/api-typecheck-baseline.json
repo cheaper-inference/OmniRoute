@@ -8,9 +8,6 @@
   "open-sse/utils/sseHeartbeat.ts": {
     "TS2353": 1
   },
-  "open-sse/utils/stream.ts": {
-    "TS2353": 1
-  },
   "src/app/api/assess/route.ts": {
     "TS2339": 1
   },
@@ -23,32 +20,17 @@
   "src/app/api/cli-tools/claude-settings/route.ts": {
     "TS2339": 1
   },
-  "src/app/api/cli-tools/cline-settings/route.ts": {
-    "TS2339": 5
-  },
   "src/app/api/cli-tools/codex-settings/route.ts": {
     "TS2345": 2
   },
   "src/app/api/cli-tools/grok-build-settings/route.ts": {
     "TS2304": 1
   },
-  "src/app/api/cli-tools/hermes-agent-settings/route.ts": {
-    "TS2345": 1
-  },
-  "src/app/api/cli-tools/letta-settings/route.ts": {
-    "TS2339": 1
-  },
-  "src/app/api/cli-tools/omp-settings/route.ts": {
-    "TS2339": 8
-  },
   "src/app/api/cli-tools/qwen-settings/route.ts": {
     "TS2322": 1
   },
   "src/app/api/combos/auto/route.ts": {
     "TS2322": 1
-  },
-  "src/app/api/combos/test/route.ts": {
-    "TS2345": 1
   },
   "src/app/api/compression/compare/route.ts": {
     "TS2345": 1
@@ -64,9 +46,6 @@
   },
   "src/app/api/copilot/chat/route.ts": {
     "TS2345": 1
-  },
-  "src/app/api/guardrails/test/route.ts": {
-    "TS2554": 1
   },
   "src/app/api/internal/codex-responses-ws/route.ts": {
     "TS2339": 4
@@ -86,9 +65,6 @@
   "src/app/api/model-combo-mappings/route.ts": {
     "TS2339": 1
   },
-  "src/app/api/models/alias/route.ts": {
-    "TS2339": 5
-  },
   "src/app/api/models/route.ts": {
     "TS2345": 3,
     "TS2538": 1
@@ -100,12 +76,8 @@
     "TS2339": 3
   },
   "src/app/api/oauth/codex/import/route.ts": {
-    "TS2554": 1,
     "TS2353": 1,
     "TS2339": 3
-  },
-  "src/app/api/oauth/cursor/login/poll/route.ts": {
-    "TS2554": 1
   },
   "src/app/api/oauth/kiro/auto-import/route.ts": {
     "TS2345": 1
@@ -125,17 +97,14 @@
   "src/app/api/providers/[id]/models/route.ts": {
     "TS2367": 1,
     "TS2339": 2,
-    "TS2322": 2,
-    "TS2554": 2,
-    "TS2345": 3
+    "TS2322": 2
   },
   "src/app/api/providers/[id]/refresh-cursor/route.ts": {
     "TS2352": 1
   },
   "src/app/api/providers/[id]/refresh/route.ts": {
     "TS2345": 1,
-    "TS2698": 1,
-    "TS2339": 6
+    "TS2698": 1
   },
   "src/app/api/providers/[id]/sync-models/route.ts": {
     "TS2345": 1
@@ -152,7 +121,6 @@
   },
   "src/app/api/providers/route.ts": {
     "TS2352": 1,
-    "TS2322": 2,
     "TS2345": 3
   },
   "src/app/api/providers/test-batch/route.ts": {
@@ -189,11 +157,7 @@
     "TS2339": 1
   },
   "src/app/api/settings/cache-config/route.ts": {
-    "TS2339": 1,
     "TS2322": 1
-  },
-  "src/app/api/settings/database/route.ts": {
-    "TS2345": 1
   },
   "src/app/api/settings/models-dev/route.ts": {
     "TS2339": 1
@@ -234,24 +198,16 @@
   "src/app/api/tools/agent-bridge/agents/[id]/detected-models/route.ts": {
     "TS2769": 1
   },
-  "src/app/api/tools/traffic-inspector/internal/ingest/route.ts": {
-    "TS1117": 2,
-    "TS2345": 1
-  },
   "src/app/api/tools/traffic-inspector/ws/route.ts": {
     "TS2578": 1
   },
   "src/app/api/translator/send/route.ts": {
     "TS2345": 1,
-    "TS2322": 1,
-    "TS2339": 1
+    "TS2322": 1
   },
   "src/app/api/translator/translate/route.ts": {
     "TS2345": 1,
     "TS2322": 1
-  },
-  "src/app/api/usage/analytics/route.ts": {
-    "TS2352": 15
   },
   "src/app/api/usage/combo-health-autopilot/route.ts": {
     "TS2769": 2
@@ -269,11 +225,11 @@
     "TS2339": 1
   },
   "src/app/api/v1/images/edits/route.ts": {
-    "TS2339": 18,
-    "TS2322": 4
+    "TS2339": 15,
+    "TS2322": 3
   },
   "src/app/api/v1/messages/count_tokens/route.ts": {
-    "TS2339": 2,
+    "TS2339": 1,
     "TS2322": 1
   },
   "src/app/api/v1/music/generations/route.ts": {
@@ -289,9 +245,6 @@
   "src/app/api/v1/providers/[provider]/embeddings/route.ts": {
     "TS2339": 3,
     "TS2322": 1
-  },
-  "src/app/api/v1/providers/[provider]/images/generations/route.ts": {
-    "TS2339": 5
   },
   "src/app/api/v1/rerank/route.ts": {
     "TS2339": 2
@@ -322,32 +275,14 @@
   "src/app/api/version-manager/start/route.ts": {
     "TS2339": 1
   },
-  "src/app/api/version-manager/stop/route.ts": {
-    "TS2339": 1
-  },
-  "src/app/api/webhooks/[id]/route.ts": {
-    "TS2554": 1
-  },
   "src/app/api/webhooks/[id]/test/route.ts": {
     "TS2352": 2
-  },
-  "src/app/api/webhooks/route.ts": {
-    "TS2554": 1,
-    "TS2345": 1
   },
   "src/lib/db/tierConfig.ts": {
     "TS2345": 2
   },
-  "src/lib/monitoring/comboHealthAutopilot.ts": {
-    "TS2305": 1,
-    "TS2345": 1
-  },
   "src/lib/monitoring/providerHealthAutopilot.ts": {
     "TS2352": 4
-  },
-  "src/lib/omnirouteStatus.ts": {
-    "TS2322": 1,
-    "TS2558": 1
   },
   "src/lib/providerModels/managedModelImport.ts": {
     "TS2352": 4
@@ -364,32 +299,105 @@
   "src/lib/usage/comboForecast.ts": {
     "TS2345": 1
   },
-  "src/lib/usage/comboHealth.ts": {
-    "TS2345": 1
-  },
   "src/lib/usage/comboScoringInspector.ts": {
     "TS2352": 1,
     "TS2741": 1
   },
-  "src/lib/usage/providerWindowCosts.ts": {
-    "TS2322": 2,
-    "TS2558": 5,
-    "TS2339": 12,
-    "TS2345": 1
-  },
-  "src/lib/vscode/modelPresentation.ts": {
-    "TS2554": 1
-  },
   "src/lib/ws/handshake.ts": {
     "TS2339": 1
   },
-  "src/mitm/detection/index.ts": {
-    "TS2741": 1
+  "_program": {
+    "files": 4372,
+    "include": [
+      "src/app/api/**/*.ts",
+      "src/app/api/**/*.tsx"
+    ],
+    "exclude": [],
+    "compilerOptions": {
+      "target": "ES2022",
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "esnext"
+      ],
+      "allowJs": true,
+      "checkJs": false,
+      "skipLibCheck": true,
+      "strict": false,
+      "noEmit": true,
+      "esModuleInterop": true,
+      "module": "esnext",
+      "moduleResolution": "bundler",
+      "allowImportingTsExtensions": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "jsx": "react-jsx",
+      "incremental": true,
+      "forceConsistentCasingInFileNames": true,
+      "paths": {
+        "@/*": [
+          "./src/*"
+        ],
+        "@omniroute/open-sse": [
+          "./open-sse"
+        ],
+        "@omniroute/open-sse/*": [
+          "./open-sse/*"
+        ],
+        "@omniroute/browser-pool": [
+          "./packages/browser-pool/src"
+        ],
+        "@omniroute/ui-kit": [
+          "./packages/ui-kit/src"
+        ],
+        "@omniroute/ui-kit/*": [
+          "./packages/ui-kit/src/*"
+        ]
+      },
+      "plugins": [
+        {
+          "name": "next"
+        }
+      ],
+      "tsBuildInfoFile": ".tsbuildinfo-typecheck-api"
+    }
   },
-  "src/mitm/inspector/httpProxyServer.ts": {
-    "TS2769": 1
-  },
-  "src/shared/schemas/cliCatalog.ts": {
-    "TS2554": 2
+  "_nocheck": [
+    "open-sse/executors/bedrock.ts",
+    "open-sse/services/provider.ts",
+    "open-sse/services/tokenRefresh.ts",
+    "open-sse/services/tokenRefresh/casGuard.ts",
+    "open-sse/services/tokenRefresh/circuitBreaker.ts",
+    "open-sse/services/tokenRefresh/providers/claudeOAuth.ts",
+    "open-sse/services/tokenRefresh/providers/cline.ts",
+    "open-sse/services/tokenRefresh/providers/codebuddyCn.ts",
+    "open-sse/services/tokenRefresh/providers/codebuddyIntl.ts",
+    "open-sse/services/tokenRefresh/providers/codebuddyShared.ts",
+    "open-sse/services/tokenRefresh/providers/codex.ts",
+    "open-sse/services/tokenRefresh/providers/copilot.ts",
+    "open-sse/services/tokenRefresh/providers/github.ts",
+    "open-sse/services/tokenRefresh/providers/gitlabDuo.ts",
+    "open-sse/services/tokenRefresh/providers/google.ts",
+    "open-sse/services/tokenRefresh/providers/kimiCoding.ts",
+    "open-sse/services/tokenRefresh/providers/kiro.ts",
+    "open-sse/services/tokenRefresh/providers/openference.ts",
+    "open-sse/services/tokenRefresh/providers/qoder.ts",
+    "open-sse/services/tokenRefresh/providers/workbuddy.ts",
+    "open-sse/services/tokenRefresh/rotationMap.ts",
+    "open-sse/services/tokenRefresh/shared.ts",
+    "open-sse/services/wildcardRouter.ts",
+    "open-sse/utils/proxyFetch.ts",
+    "src/lib/tokenHealthCheck.ts",
+    "src/lib/tokenHealthCheckCopilot.ts",
+    "src/lib/usage/migrations.ts"
+  ],
+  "_suppressions": {
+    "open-sse/executors/copilot-web.ts": 1,
+    "open-sse/mcp-server/server.ts": 21,
+    "open-sse/services/usage/qoder.ts": 1,
+    "src/app/api/system/env/repair/route.ts": 1,
+    "src/app/api/tools/traffic-inspector/ws/route.ts": 1,
+    "src/lib/cli-helper/claudeProfileAutoSync.ts": 1,
+    "src/lib/cli-helper/codexProfileAutoSync.ts": 1
   }
 }

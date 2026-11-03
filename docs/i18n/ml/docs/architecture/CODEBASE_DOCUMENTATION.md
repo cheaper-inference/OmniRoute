@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -485,7 +485,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ടോപ്പ്-ലെവൽ എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (`*.ts` മൈനസ് `base.ts`, `index.ts`, ടെസ്റ്റുകൾ — കൗണ്ട് `npm run check:docs-counts` അളവുകൾ). എല്ലാ എക്സിക്യൂട്ടർ ക്ലാസ്സും `BaseExecutor` (`base.ts`), നേരിട്ടോ അല്ലെങ്കിൽ `DefaultExecutor` വഴിയോ മറ്റൊരു എക്സിക്യൂട്ടർ വഴിയോ നീട്ടുന്നു; ശേഷിക്കുന്ന മൊഡ്യൂളുകൾ ഓരോ പ്രൊവൈഡർ സഹായികളാണ് (ടൂൾ സ്കീമുകൾ, fetch/TTS അഡാപ്റ്ററുകൾ, ക്വിർക്ക് ഹാൻഡ്ലറുകൾ). എക്സിക്യൂട്ടീവുകളിൽ ഉൾപ്പെടുന്നു:
+158 ടോപ്പ്-ലെവൽ എക്സിക്യൂട്ടർ മൊഡ്യൂളുകൾ (`*.ts` മൈനസ് `base.ts`, `index.ts`, ടെസ്റ്റുകൾ — കൗണ്ട് `npm run check:docs-counts` അളവുകൾ). എല്ലാ എക്സിക്യൂട്ടർ ക്ലാസ്സും `BaseExecutor` (`base.ts`), നേരിട്ടോ അല്ലെങ്കിൽ `DefaultExecutor` വഴിയോ മറ്റൊരു എക്സിക്യൂട്ടർ വഴിയോ നീട്ടുന്നു; ശേഷിക്കുന്ന മൊഡ്യൂളുകൾ ഓരോ പ്രൊവൈഡർ സഹായികളാണ് (ടൂൾ സ്കീമുകൾ, fetch/TTS അഡാപ്റ്ററുകൾ, ക്വിർക്ക് ഹാൻഡ്ലറുകൾ). എക്സിക്യൂട്ടീവുകളിൽ ഉൾപ്പെടുന്നു:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `qoder`, പ്ലസ് `devin-desktop`(പങ്കിട്ട ഐഡൻ്റിറ്റി സഹായി) `pollinations` `claudeIdentity.ts` (രജിസ്ട്രി) `index.ts`
 
