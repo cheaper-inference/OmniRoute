@@ -4,7 +4,7 @@
 
 ---
 
-> **Ọnọdụ:** a na-ewu dashboard na** Ngwa CI UI** (`@keak/cheaper-inference-ui-kit`), nke a na-erere dị ka ebe ọrụ `packages/ui-kit` (`@omniroute/ui-kit`; ihe nlere anya elu ka etinyere na `packages/ui-kit/UPSTREAM.md` ma `npm run check:ui-kit-snapshot` na-echekwa ya). Ìhè bụ isiokwu nke akwụkwọ nsọ; mmasị ndabara bụ `system`. Asụsụ a bụ Keak lime (`--ci-color-accent`). Switzer bụ otu ezinụlọ maka UI, ngosi na ederede koodu (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` kpebisiri ike na ya), nke ngwa ahụ n'onwe ya kwadoro (`packages/ui-kit/src/ci-fonts.css`, nke `ci-tokens.css` bubata). Akara ngosi ọ bụla bụ Lucide glyph.
+> **Ọnọdụ:** a na-ewu dashboard na** Ngwa CI UI** (`@keak/cheaper-inference-ui-kit`), nke a na-erere dị ka ebe ọrụ `packages/ui-kit` (`@omniroute/ui-kit`; ihe nlere anya elu ka etinyere na `packages/ui-kit/UPSTREAM.md` ma `npm run check:ui-kit-snapshot` na-echekwa ya). Ìhè bụ isiokwu nke akwụkwọ nsọ; mmasị ndabara bụ `system`. Asụsụ a bụ Keak lime (`--ci-color-accent`). Switzer bụ otu ezinụlọ maka UI, ngosi na ederede koodu (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` kpebisiri ike na ya), nke ngwa ahụ n'onwe ya kwadoro (`packages/ui-kit/src/ci-fonts.css`, nke `ci-tokens.css` bubata). Ederede Switzer enweghị ọdịda site na glyph site glyph (`src/app/globals.css`): Inter maka Cyrillic, Greek na Vietnamese na, naanị n'okpuru `html[dir="rtl"]`, Vazirmatn maka edemede Arabik. Akara ngosi ọ bụla bụ Lucide glyph.
 
 ## 1. Ebe ihe ndị a dị
 

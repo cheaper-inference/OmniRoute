@@ -4,7 +4,7 @@
 
 ---
 
-> **સ્થિતિ:** ડેશબોર્ડ પર બનેલ છે** Keak CI UI કિટ** (`@keak/cheaper-inference-ui-kit`), વર્કસ્પેસ `packages/ui-kit` તરીકે વેચવામાં આવે છે (`@omniroute/ui-kit`; અપસ્ટ્રીમ સ્નેપશોટ `packages/ui-kit/UPSTREAM.md` માં પિન કરેલ છે અને `npm run check:ui-kit-snapshot` દ્વારા સુરક્ષિત છે). પ્રકાશ કેનોનિકલ થીમ છે; મૂળભૂત પસંદગી `system` છે. ઉચ્ચાર કીક લાઈમ (`--ci-color-accent`) છે. સ્વિટ્ઝર એ UI, ડિસ્પ્લે અને કોડ ટેક્સ્ટ (`--ci-font-ui`; `--ci-font-display` અને `--ci-font-mono` રિઝોલ્યુશન) માટેનું એકલ કુટુંબ છે, જે કીટ દ્વારા જ સ્વ-હોસ્ટ કરવામાં આવે છે (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` દ્વારા આયાત કરેલું). દરેક ચિહ્ન એ લ્યુસાઇડ ગ્લિફ છે.
+> **સ્થિતિ:** ડેશબોર્ડ પર બનેલ છે** Keak CI UI કિટ** (`@keak/cheaper-inference-ui-kit`), વર્કસ્પેસ `packages/ui-kit` તરીકે વેચવામાં આવે છે (`@omniroute/ui-kit`; અપસ્ટ્રીમ સ્નેપશોટ `packages/ui-kit/UPSTREAM.md` માં પિન કરેલ છે અને `npm run check:ui-kit-snapshot` દ્વારા સુરક્ષિત છે). પ્રકાશ કેનોનિકલ થીમ છે; મૂળભૂત પસંદગી `system` છે. ઉચ્ચાર કીક લાઈમ (`--ci-color-accent`) છે. સ્વિટ્ઝર એ UI, ડિસ્પ્લે અને કોડ ટેક્સ્ટ (`--ci-font-ui`; `--ci-font-display` અને `--ci-font-mono` રિઝોલ્યુશન) માટેનું એકલ કુટુંબ છે, જે કીટ દ્વારા જ સ્વ-હોસ્ટ કરવામાં આવે છે (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` દ્વારા આયાત કરેલું). સ્ક્રિપ્ટ્સ સ્વિટ્ઝરમાં ગ્લિફ દ્વારા ગ્લિફ દ્વારા ફોલનો અભાવ છે (`src/app/globals.css`): સિરિલિક, ગ્રીક અને વિયેતનામીસ માટે ઇન્ટર અને અરબી લિપિ માટે માત્ર `html[dir="rtl"]` હેઠળ, વઝિરમાટન. દરેક ચિહ્ન એ લ્યુસાઇડ ગ્લિફ છે.
 
 ## 1. વસ્તુઓ ક્યાં રહેલી છે
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **حیثیت:** ڈیش بورڈ پر بنایا گیا ہے۔** Keak CI UI کٹ** (`@keak/cheaper-inference-ui-kit`)، ورک اسپیس `packages/ui-kit` کے طور پر فروخت کیا جاتا ہے (`@omniroute/ui-kit`؛ اپ اسٹریم اسنیپ شاٹ کو `packages/ui-kit/UPSTREAM.md` میں پن کیا جاتا ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ کیا جاتا ہے)۔ روشنی کیننیکل تھیم ہے۔ پہلے سے طے شدہ ترجیح `system` ہے۔ لہجہ Keak lime (`--ci-color-accent`) ہے۔ سوئٹزر UI، ڈسپلے اور کوڈ ٹیکسٹ کے لیے واحد خاندان ہے (`--ci-font-ui`؛ `--ci-font-display` اور `--ci-font-mono` اسے حل کرتا ہے)، خود کٹ کے ذریعے میزبانی کرتا ہے (`packages/ui-kit/src/ci-fonts.css`، درآمد شدہ بذریعہ `ci-tokens.css`)۔ ہر آئیکن ایک لوسائیڈ گلیف ہے۔
+> **حیثیت:** ڈیش بورڈ پر بنایا گیا ہے۔** Keak CI UI کٹ** (`@keak/cheaper-inference-ui-kit`)، ورک اسپیس `packages/ui-kit` کے طور پر فروخت کیا جاتا ہے (`@omniroute/ui-kit`؛ اپ اسٹریم اسنیپ شاٹ کو `packages/ui-kit/UPSTREAM.md` میں پن کیا جاتا ہے اور `npm run check:ui-kit-snapshot` کے ذریعے محفوظ کیا جاتا ہے)۔ روشنی کیننیکل تھیم ہے۔ پہلے سے طے شدہ ترجیح `system` ہے۔ لہجہ Keak lime (`--ci-color-accent`) ہے۔ سوئٹزر UI، ڈسپلے اور کوڈ ٹیکسٹ کے لیے واحد خاندان ہے (`--ci-font-ui`؛ `--ci-font-display` اور `--ci-font-mono` اسے حل کرتا ہے)، خود کٹ کے ذریعے میزبانی کرتا ہے (`packages/ui-kit/src/ci-fonts.css`، درآمد شدہ بذریعہ `ci-tokens.css`)۔ اسکرپٹس سوئٹزر میں گلائف کے ذریعے گلف کے ذریعے گرنے کی کمی ہے (`src/app/globals.css`): سیریلک، یونانی اور ویتنامی کے لیے انٹر اور عربی رسم الخط کے لیے صرف `html[dir="rtl"]`، Vazirmatn کے تحت۔ ہر آئیکن ایک لوسائیڈ گلیف ہے۔
 
 ## 1. چیزیں کہاں موجود ہیں
 

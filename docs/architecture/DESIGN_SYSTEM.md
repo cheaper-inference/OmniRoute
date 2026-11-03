@@ -11,7 +11,9 @@ lastUpdated: 2026-10-27
 > theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Switzer is
 > the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
 > `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
-> imported by `ci-tokens.css`). Every icon is a Lucide glyph.
+> imported by `ci-tokens.css`). Scripts Switzer lacks fall through glyph by glyph (`src/app/globals.css`):
+> Inter for Cyrillic, Greek and Vietnamese and, only under `html[dir="rtl"]`, Vazirmatn for Arabic script.
+> Every icon is a Lucide glyph.
 
 ## 1. Where things live
 
