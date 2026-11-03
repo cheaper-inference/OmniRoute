@@ -74,6 +74,16 @@ curl -i \
 
 A non-manage key (or no Bearer) returns `403 LOCAL_ONLY`. The sibling prefix `/api/cli-tools/runtime/*` is intentionally NOT bypassable — see [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin validation
+
+After authentication, every request to `/api/mcp/*` — the transports and the management routes such as `status`, `tools`, `audit` and `restart` — has its `Origin` header validated, whatever the caller (API key, CLI token, dashboard session, or anonymous loopback with login disabled). This is the DNS-rebinding protection the MCP Streamable HTTP spec requires.
+
+- **No `Origin` header** → allowed. The OmniRoute CLI, SDK and IDE clients do not send one.
+- **Allowed `Origin`** → `localhost`, `127.0.0.1` or `[::1]` on any port, or OmniRoute's own public origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, a trusted reverse proxy's forwarded origin (`OMNIROUTE_TRUST_PROXY`, only when no base URL is set), or a direct loopback/LAN IP host. The `Host` header alone never makes an origin trusted.
+- **Any other `Origin`, including `null`** → `403` with a JSON-RPC error body: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. A dashboard session that presents a valid CSRF token is still accepted, as for other dashboard writes.
+
+A browser MCP client served behind a reverse proxy needs `OMNIROUTE_PUBLIC_BASE_URL`; there is no allow-list for other origins. CORS preflight (`OPTIONS`) is not Origin-checked; the request that follows is.
+
 ## IDE Configuration
 
 See [MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) for Claude Desktop,
@@ -307,12 +317,12 @@ access token to a mutating management route get HTTP 403
 That rank is `scopeSatisfies`. It does not consult the MCP table, and the MCP
 matcher does not consult it.
 
-| Namespace          | Credential                                                | Checker                | A pass allows                                                |
-| :----------------- | :-------------------------------------------------------- | :--------------------- | :----------------------------------------------------------- |
-| API-key management | `api_keys.scopes`                                         | `hasManageScope`       | Management REST for that Bearer key                          |
-| API-key additive   | same array, one exact string                              | the helper named below | Only that one capability                                     |
-| MCP tool scopes    | same array, else MCP `_meta`, else `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | That tool, once enforcement is on                            |
-| Access token       | `oma_live_…`                                              | `scopeSatisfies`       | The management route whose method and path require that rank |
+| Namespace          | Credential                                                                | Checker                | A pass allows                                                |
+| :----------------- | :------------------------------------------------------------------------ | :--------------------- | :----------------------------------------------------------- |
+| API-key management | `api_keys.scopes`                                                         | `hasManageScope`       | Management REST for that Bearer key                          |
+| API-key additive   | same array, one exact string                                              | the helper named below | Only that one capability                                     |
+| MCP tool scopes    | same array, else MCP `_meta` (HTTP/SSE only), else `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | That tool, once enforcement is on                            |
+| Access token       | `oma_live_…`                                                              | `scopeSatisfies`       | The management route whose method and path require that rank |
 
 Minting each credential is covered in
 [Management Authentication](../guides/MANAGEMENT-AUTH.md).
@@ -361,7 +371,9 @@ Enforcement is off unless `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (default
 `false`). While it is off, `evaluateToolScopes` allows the call and skips the
 catalog. While it is on, HTTP uses the Bearer key's `api_keys.scopes` as
 `authInfo` (see [Per-key HTTP scope binding](#per-key-http-scope-binding-7895)).
-When no key scopes resolve, the granted set falls through to MCP `_meta`, then
+When no key scopes resolve, the granted set falls through to MCP `_meta` (honored only
+for HTTP/SSE callers, inside an HTTP auth context; a stdio caller's `_meta` is ignored
+because the client controls it and it carries no per-caller identity), then
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Access-token scopes
@@ -461,7 +473,9 @@ the `_meta` and `OMNIROUTE_MCP_SCOPES` env fallback — this only populates that
 highest-priority source, which was previously unfed over HTTP. When no API key resolves
 (no header, invalid key), `authInfo` stays `undefined` and resolution falls through to the
 existing `meta`/env chain unchanged. stdio has no per-caller identity (see
-`mcpCallerIdentity.ts`) and is unaffected — it stays on the `_meta`/env fallback chain.
+`mcpCallerIdentity.ts`) and is unaffected by per-key binding — it skips the `_meta` step
+(`_meta` is honored only inside an HTTP auth context, #15159) and resolves from the
+`OMNIROUTE_MCP_SCOPES` env key alone.
 
 **Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only

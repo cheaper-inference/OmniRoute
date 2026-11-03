@@ -25,24 +25,24 @@ Caveman улаз:    46% уштеде
 Опсег:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Шта компримује
+## Šta komprimuje
 
-Уграђени каталог тренутно садржи 49 филтера у следећим категоријама:
+Ugrađeni katalog trenutno isporučuje 56 filtera raspoređenih u ove kategorije:
 
-| Категорија | Примери                                                       |
+| Kategorija | Primeri                                                       |
 | ---------- | ------------------------------------------------------------- |
 | `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, Playwright, Go тестови, Cargo тестови   |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testovi  |
 | `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, генеричке евиденције љуске              |
-| `docker`   | `docker ps`, Docker евиденције                                |
+| `shell`    | `ls`, `find`, `grep`, generički shell logovi                  |
+| `docker`   | `docker ps`, Docker logovi                                    |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON излаз, трагови стека, резервна обрада генеричког излаза  |
+| `generic`  | JSON izlaz, stack trace-ovi, generički fallback za izlaz      |
 
-Детектор у `open-sse/services/compression/engines/rtk/commandDetector.ts` класификује излаз
-пре избора филтера. Филтери такође могу да се подударају према обрасцу команде или регуларном изразу излаза када класа
-команде није довољна.
+Detektor u `open-sse/services/compression/engines/rtk/commandDetector.ts` klasifikuje izlaz
+pre izbora filtera. Filteri se takođe mogu poklapati po obrascu komande ili regex-u izlaza
+kada klasa komande nije dovoljna.
 
 ## Разрешавање филтера
 
@@ -352,61 +352,61 @@ node --import tsx/esm --test \
 
 ---
 
-## Нивои интензитета (v3.8.16+)
+## Nivoi intenziteta (v3.8.16+)
 
-RTK подржава **3 нивоа интензитета** који успостављају равнотежу између **агресивности компресије** и **безбедности**. Ниво се подешава преко `config.intensity` у конфигурацији механизма.
+RTK podržava **3 nivoa intenziteta** koji predstavljaju kompromis između **agresivnosti kompresije** i **bezbednosti**. Nivo se podešava preko `config.intensity` u konfiguraciji engine-a.
 
-### Три нивоа
+### 3 nivoa
 
-| Ниво                       | Праг скраћивања     | Уштеда токена | Ризик       | Најпогодније за                    |
-| -------------------------- | ------------------- | ------------- | ----------- | ---------------------------------- |
-| `minimal`                  | 24 реда по одељку   | ~20-40%       | Веома низак | Продукцију са критичним контекстом |
-| `standard` (подразумевано) | 24 реда по одељку   | ~50-70%       | Низак       | Свакодневне сесије програмирања    |
-| `aggressive`               | 16 редова по одељку | ~70-90%       | Средњи      | Дуге сесије, максималну уштеду     |
+| Nivo                       | Prag skraćivanja     | Ušteda tokena | Rizik       | Najbolje za                        |
+| -------------------------- | -------------------- | ------------- | ----------- | ---------------------------------- |
+| `minimal`                  | 24 linije po sekciji | ~20-40%       | Veoma nizak | Produkcija sa kritičnim kontekstom |
+| `standard` (podrazumevano) | 24 linije po sekciji | ~50-70%       | Nizak       | Svakodnevne sesije kodiranja       |
+| `aggressive`               | 16 linija po sekciji | ~70-90%       | Srednji     | Duge sesije, maksimalna ušteda     |
 
-### Где долази до скраћивања
+### Gde se dešava skraćivanje
 
-Праг скраћивања утиче на `lineFilter.ts`:
+Prag skraćivanja utiče na `lineFilter.ts`:
 
 ```ts
-// Из open-sse/services/compression/engines/rtk/index.ts:329-330
+// Iz open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Чувају се и **почетак** и **крај** сваког одељка; садржај у средини се одбацује када се активира скраћивање.
+I **početak** i **kraj** svake sekcije se čuvaju; središnji sadržaj se odbacuje kada se skraćivanje aktivira.
 
-### Шта остаје, а шта се одсеца
+### Šta ostaje, a šta se uklanja
 
-| Садржај                      | minimal     | standard    | aggressive  |
+| Sadržaj                      | minimal     | standard    | aggressive  |
 | ---------------------------- | ----------- | ----------- | ----------- |
-| Грешке / трагови стека       | ✅ сачувано | ✅ сачувано | ✅ сачувано |
-| Неуспешни тестови            | ✅ сачувано | ✅ сачувано | ✅ сачувано |
-| Грешке при изградњи          | ✅ сачувано | ✅ сачувано | ✅ сачувано |
-| Успешни тестови (опширни)    | ✅ сачувано | 🟡 сажето   | 🟡 сажето   |
-| Рутински излаз (инфо записи) | 🟡 сажето   | 🟡 сажето   | ❌ одбачено |
-| Траке напретка               | 🟡 сажето   | ❌ одбачено | ❌ одбачено |
-| Банер / ASCII графика        | 🟡 сажето   | ❌ одбачено | ❌ одбачено |
+| Greške / stack trace-ovi     | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Neuspeli testovi             | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Greške pri build-u           | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Uspešni testovi (opširno)    | ✅ sačuvano | 🟡 sažeto   | 🟡 sažeto   |
+| Rutinski izlaz (info logovi) | 🟡 sažeto   | 🟡 sažeto   | ❌ odbačeno |
+| Trake napretka               | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
+| Baner / ASCII art            | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
 
-### Избор одговарајућег интензитета
+### Izbor pravog intenziteta
 
 ```
-                  Да ли је губитак контекста катастрофалан?
+                  Da li je gubitak konteksta katastrofalan?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     ДА          НЕ       НИСТЕ СИГУРНИ
+     DA          NE         NE ZNATE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Колико је       Прво испробајте `standard`
-      │      проток критичан? (ради у 80% случајева)
+      │     Koliko je bitna   Prvo probajte `standard`
+      │     propusnost?       (radi za 80% slučajeva)
       │           │
       │      ┌────┴────┐
       │      │         │
-      │    НИЗАК      ВИСОК
+      │    NIZAK     VISOK
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -414,9 +414,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### Конфигурисање интензитета
+### Konfigurisanje intenziteta
 
-**По комбинацији** (у конфигурацији комбинације):
+**Po combo-u** (u konfiguraciji combo-a):
 
 ```json
 {
@@ -429,11 +429,11 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**Програмски**:
+**Programski**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) је
-`CompressionEngine` и нема метод `updateConfig`. Уместо тога, ажурирајте конфигурацију механизма
-преко помоћне функције регистра:
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
+`CompressionEngine` i nema metodu `updateConfig`. Umesto toga, ažurirajte konfiguraciju
+engine-a preko pomoćnika registra:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -441,9 +441,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Провера ефекта
+### Provera efekta
 
-Користите **контролну проверу** (погледајте испод) да бисте потврдили да је ваш филтер безбедан при изабраном интензитету:
+Koristite **Verify Gate** (pogledajte ispod) da biste potvrdili da je vaš filter bezbedan pri izabranom intenzitetu:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

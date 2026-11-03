@@ -479,7 +479,20 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
 
-  // ──────────────── Policies (7) ────────────────
+  // ──────────────── Policies (8) ────────────────
+  {
+    key: "UNPRICED_USAGE_BUDGET_POLICY",
+    label: "Unpriced Usage Budget Policy",
+    description:
+      "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. 'fail_closed' (default) marks the window as exceeded so an unknown cost can never slip past a hard cap (#12341). 'count_as_zero' counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way.",
+    descriptionI18nKey: "featureFlags.definitions.UNPRICED_USAGE_BUDGET_POLICY.description",
+    category: "policies",
+    defaultValue: "fail_closed",
+    type: "enum",
+    enumValues: ["fail_closed", "count_as_zero"],
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
   {
     key: "TOOL_POLICY_MODE",
     label: "Tool Policy Mode",
@@ -1329,5 +1342,29 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     type: "boolean",
     requiresRestart: false,
     warningLevel: "caution",
+  },
+  {
+    key: "CURSOR_GROK_47_DROP_MAX_EFFORT",
+    label: "Cursor Grok 4.7: Drop the max Effort Tier",
+    description:
+      "Stop offering and forwarding the max reasoning effort for Cursor Grok 4.7, which Cursor's docs do not list (low, medium, high, xhigh only): the grok-4.7-max fallback alias disappears from the catalog and a max effort request is sent without an effort parameter. Off by default: max stays offered and forwarded, as a live AgentService/Run probe accepted it.",
+    descriptionI18nKey: "featureFlagCursorGrok47DropMaxEffortDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE",
+    label: "Compression Cache Stats: Automatic-Prefix Eligibility",
+    description:
+      "In the compression cache stats, count a compressed request to an automatic-prefix-caching provider (OpenAI, Codex, Azure, or a custom connection that declares prompt caching with marker stripping) as an estimated cache hit even without cache_control markers. The estimate is a cache-eligibility signal, not an observed hit, so the reported hit rate for those providers trends toward 100%. Off by default: only a request carrying cache_control markers to a caching provider counts as an estimated hit, so automatic-prefix providers keep reporting 0.",
+    descriptionI18nKey: "featureFlagCompressionCacheAutomaticPrefixEstimateDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
   },
 ];

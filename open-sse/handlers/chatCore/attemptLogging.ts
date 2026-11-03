@@ -24,7 +24,11 @@ import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
-import { readAddedWait } from "../../utils/proxyFetch.ts";
+import {
+  readAddedWait,
+  readUpstreamDispatchedAt,
+  queueWaitMsFromDispatch,
+} from "../../utils/proxyFetch.ts";
 import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
@@ -254,6 +258,7 @@ export type PersistAttemptLogsArgs = {
   clientResponse?: unknown;
   claudeCacheMeta?: Record<string, unknown>;
   claudeCacheUsageMeta?: Record<string, unknown>;
+  geminiPromptCache?: Record<string, unknown> | null;
   cacheSource?: "upstream" | "semantic";
   /**
    * #13130: time to the first forwarded stream chunk (ms), as measured by
@@ -410,6 +415,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     clientResponse,
     claudeCacheMeta,
     claudeCacheUsageMeta,
+    geminiPromptCache,
     cacheSource,
     ttft,
   } = args;
@@ -567,6 +573,11 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   // capture sink by the executor. Fail-soft: null outside a capture or when
   // nothing was published — the row stores NULL (no wait), never throws.
   const addedWait = readAddedWait();
+  // First-upstream-dispatch stamp for queue_wait_ms: how long this execution
+  // waited inside OmniRoute (scheduling, translation, parking) before the
+  // first byte left for the provider. Null when nothing was dispatched
+  // (rejected before egress) — mirrors the addedWait late-read above.
+  const upstreamDispatchedAt = readUpstreamDispatchedAt();
   saveCallLog({
     pendingRequestId: ctx.pendingRequestId,
     method: "POST",
@@ -592,6 +603,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
       attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
         ...accountRotationMeta,
         claudePromptCache: claudeCacheMeta,
+        geminiPromptCache,
       })
     ),
     responseBody: cloneBoundedChatLogPayload(
@@ -605,6 +617,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
             }
           : null,
         claudePromptCacheUsage: claudeCacheUsageMeta,
+        geminiPromptCache,
         // Operators can tell estimated token counts (and the cost derived from them)
         // apart from provider-reported ones. Log-only: billing is unchanged.
         usageEstimated: isEstimatedUsage(tokens) ? true : null,
@@ -629,6 +642,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     responseId: extractResponsesId(sourceFormat, clientResponse),
     videoContentRemoved: videoContentRemoved || false,
     addedWaitMs: addedWait?.ms ?? null,
+    queueWaitMs: queueWaitMsFromDispatch(upstreamDispatchedAt, startTime),
     addedWaitCause: addedWait?.cause ?? null,
   }).catch(() => {});
 
