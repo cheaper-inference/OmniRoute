@@ -138,34 +138,34 @@ integrato:
 
 Alcune azioni di `MANAGEMENT` sono **riservate all'operatore**: una chiave `manage` non basta. Esportare le credenziali memorizzate (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ripristinare un backup sopra i dati attivi (`POST /api/db-backups/import` incluso `dryRun=true`, `POST /api/db-backups` con ripristino per id, `POST /api/settings/import-json`) ed eliminare i punti di ripristino (la pulizia con `DELETE /api/db-backups` e `PATCH /api/db-backups`, perché la retention che salva guida la potatura automatica dopo ogni backup) richiedono una sessione della dashboard, l'identità della CLI locale o il login disabilitato. Emettere un token di sincronizzazione (`POST /api/sync/tokens`) e creare un token di accesso CLI con scope `admin` (`POST /api/cli/tokens`) richiedono, in ogni modalità di login, una sessione della dashboard o l'identità della CLI locale. Le chiavi API di qualunque scope e i token di accesso `oma_` non sono credenziali operatore: ricevono `403` ogni volta che ne è richiesta una. Il controllo si trova in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Anche la modifica delle impostazioni di login è riservata all'operatore: `POST /api/settings/require-login` (impostare la password di gestione / attivare o disattivare `requireLogin`) accetta solo queste credenziali una volta che esiste una password. La finestra di bootstrap del primo avvio (nessuna password ancora) resta invariata, e una sessione della dashboard deve inviare `currentPassword` per sostituire la password (`403` se manca o è errata, registrato come `settings.update_failed`). La CLI locale e un'istanza con login disabilitato mantengono il percorso di recupero e possono impostare una password senza questo passaggio, poiché entrambi sono vincolati all'host che possiede la directory dei dati.
 
-## Pipeline
+## Conduttura
 
 ```
-Richiesta in arrivo → src/proxy.ts
+Incoming request → src/proxy.ts
   → runAuthzPipeline() in src/server/authz/pipeline.ts
-    1. Rimuove gli header interni attendibili (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Genera l'ID della richiesta e classifica la route tramite classifyRoute()
-    3. Se pathname == "/" → reindirizza a /dashboard
-    4. Se è in corso lo svuotamento (arresto controllato) e /api/* → 503
-    5. Se il metodo non è GET e il percorso è /api/* → applica il controllo checkBodySize()
-    6. Se OPTIONS → preflight CORS 204
-    7. Se options.enforce == false → prosegue senza controllo con gli header della classe della route
-    8. Altrimenti: POLICIES[routeClass].evaluate(ctx)
-       - allow  → imposta x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → errore JSON con correlation_id (pagine della dashboard → 302 /login)
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Gli header interni attendibili (definiti in `src/server/authz/headers.ts`) vengono **rimossi dalle richieste in arrivo** prima della classificazione: i client non possono precompilare `x-omniroute-auth-*` per impersonare un soggetto.
+Le intestazioni interne attendibili (definite in `src/server/authz/headers.ts`) lo sono** spogliato dalle richieste in arrivo** prima della classificazione i client — non possono precompilare `x-omniroute-auth-*` per impersonare un soggetto.
 
-### Contratti delle policy
+### Contratti politici
 
-Ogni classe di route ha una policy in `src/server/authz/policies/`:
+Ogni classe di percorso ha una politica in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — restituisce sempre `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — estrae il token Bearer e lo convalida tramite `validateApiKey()`. Consente l'accesso anonimo solo quando il feature flag effettivo `REQUIRE_API_KEY` è disabilitato. Il flag effettivo viene risolto tramite `isRequireApiKeyEnabled()` (`override del feature flag nel DB > process.env.REQUIRE_API_KEY > valore predefinito`), in modo che i feature flag della dashboard e le variabili d'ambiente regolino in modo coerente `/api/v1/*`, `/api/v1beta/*` e gli alias; in caso di errori del resolver, l'accesso viene negato. Consente le richieste con sessione della dashboard sulle route API client (inclusa `/api/v1/models`, utilizzata dal catalogo dei modelli della dashboard).
-- **`managementPolicy`** (`policies/management.ts`) — accetta una sessione della dashboard, le richieste interne di sincronizzazione dei modelli (corrispondenti a `/api/providers/[name]/(sync-models|models)`) oppure ignora completamente il controllo se `isAuthRequired()` restituisce false. Restituisce 403 (`AUTH_001`) quando è presente un token Bearer non valido, altrimenti 401. Applica inoltre i livelli di protezione delle route (LOCAL_ONLY / ALWAYS_PROTECTED) prima di qualsiasi ramo di autenticazione — vedere [Livelli di protezione delle route](../security/ROUTE_GUARD_TIERS.md). I percorsi LOCAL_ONLY in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (attualmente: `/api/mcp/`) possono essere raggiunti da indirizzi non loopback quando la chiave Bearer include l'ambito `manage`; tutti gli altri percorsi LOCAL_ONLY restano limitati rigorosamente al loopback, indipendentemente dall'ambito.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — estrae Bearer, convalida tramite `validateApiKey()`. Diventa anonimo solo quando il flag della funzione `REQUIRE_API_KEY` effettiva è disabilitato. Il flag effettivo viene risolto tramite `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) in modo che i flag delle funzionalità del dashboard e le variabili di ambiente governino `/api/v1/*`, `/api/v1beta/*` e gli alias in modo coerente; i guasti del risolutore falliscono la chiusura. Consente richieste di sessione del dashboard sulle rotte API del client (incluso `/api/v1/models`, utilizzato dal catalogo dei modelli del dashboard). Quando Entra ID SSO è abilitato, un Bearer che è strutturalmente un token Entra (tre segmenti base64url, `RS*` alg, `kid`) viene gestito dal ramo SSO** Prima** `validateApiKey()` e il suo verdetto è definitivo — non cade mai nel percorso della chiave API o nel ramo degradato in anonimo, quindi un'interruzione del provider di identità non può diventare accesso aperto. Le chiavi statiche API non sono interessate. Vedi [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — accetta la sessione del dashboard, le richieste di sincronizzazione del modello interno (abbinate a `/api/providers/[name]/(sync-models|models)`) o salta completamente se `isAuthRequired()` restituisce false. Restituisce 403 (`AUTH_001`) quando un token Portatore è presente ma non valido, 401 altrimenti. Applica anche i livelli di protezione del percorso (LOCAL_ONLY / ALWAYS_PROTECTED) prima di qualsiasi ramo di autenticazione — vedere [Livelli di protezione del percorso](../security/ROUTE_GUARD_TIERS.md). È possibile accedere ai percorsi LOCAL_ONLY in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (oggi: `/api/mcp/`) da non-loopback quando la chiave Bearer ha l'ambito `manage` ; tutti gli altri percorsi LOCAL_ONLY rimangono di loopback rigoroso indipendentemente dall'ambito.
 
-Una policy completata con successo restituisce `AuthSubject` con `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Gli handler downstream possono leggerlo tramite `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts`, anziché rieseguire la logica di autenticazione.
+Una policy di successo restituisce `AuthSubject` con `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. I gestori downstream possono leggerlo tramite `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` invece di rieseguire la logica di autenticazione.
 
 ## Elenco delle route pubbliche
 
@@ -319,20 +319,20 @@ Gli endpoint `/api/v1/agents/tasks/*` e `/api/resilience/model-cooldowns` **ora 
 La pipeline contrassegna sempre le risposte con:
 
 ```
-x-request-id:               <ID di correlazione, riportato nei corpi degli errori>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Per le richieste autenticate, le intestazioni della richiesta upstream (lato handler) includono anche:
+Per le richieste autenticate, le intestazioni delle richieste upstream (lato gestore) includono anche:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<ultime-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (facoltativo)
-x-omniroute-auth-scopes:    elenco separato da virgole
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Usa `assertAuth(req, expectedClass)` all'interno degli handler: genera un `AuthzAssertionError` con codice `AUTHZ_NOT_INITIALIZED` se il middleware è stato bypassato (utile per individuare regressioni della configurazione nei test).
+Usa `assertAuth(req, expectedClass)` all'interno dei gestori — genera `AuthzAssertionError` con il codice `AUTHZ_NOT_INITIALIZED` se il middleware è stato bypassato (utile per individuare le regressioni di configurazione nei test).
 
 ## Vedi Anche
 

@@ -161,31 +161,31 @@ JWT ची पडताळणी **आणि** त्यामध्ये `auth
 ## पाइपलाइन
 
 ```
-येणारी विनंती → src/proxy.ts
-  → src/server/authz/pipeline.ts मधील runAuthzPipeline()
-    1. विश्वासार्ह अंतर्गत हेडर काढून टाका (x-omniroute-auth-*, x-omniroute-route-class)
-    2. विनंती आयडी तयार करा, classifyRoute() द्वारे मार्गाचे वर्गीकरण करा
-    3. pathname == "/" असल्यास → /dashboard कडे पुनर्निर्देशित करा
-    4. ड्रेनिंग सुरू असल्यास (सुरक्षित शटडाउन) आणि /api/* असल्यास → 503
-    5. non-GET /api/* असल्यास → checkBodySize() गार्ड
-    6. OPTIONS असल्यास → CORS प्रीफ्लाइट 204
-    7. options.enforce == false असल्यास → route-class हेडरसह पुढे पाठवा
-    8. अन्यथा: POLICIES[routeClass].evaluate(ctx)
-       - परवानगी  → x-omniroute-auth-{kind,id,label,scopes} मुद्रांकित करा → NextResponse.next()
-       - नकार → correlation_id सह JSON त्रुटी (डॅशबोर्ड पृष्ठे → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-विश्वासार्ह अंतर्गत हेडर (`src/server/authz/headers.ts` मध्ये परिभाषित) वर्गीकरणापूर्वी **येणाऱ्या विनंत्यांमधून काढून टाकले जातात** — एखाद्या सब्जेक्टचे प्रतिरूपण करण्यासाठी क्लायंट `x-omniroute-auth-*` आधीच भरू शकत नाहीत.
+विश्वसनीय अंतर्गत शीर्षलेख ( `src/server/authz/headers.ts` मध्ये परिभाषित) आहेत** येणाऱ्या विनंत्यांमधून काढून टाकले** वर्गीकरणापूर्वी — क्लायंट एखाद्या विषयाची तोतयागिरी करण्यासाठी `x-omniroute-auth-*` पूर्व-पॉप्युलेट करू शकत नाहीत.
 
-### पॉलिसी करार
+### धोरण करार
 
-प्रत्येक मार्ग वर्गाची `src/server/authz/policies/` मध्ये एक पॉलिसी आहे:
+प्रत्येक मार्ग वर्गाचे `src/server/authz/policies/` मध्ये धोरण आहे:
 
-- **`publicPolicy`** (`policies/public.ts`) — नेहमी `allow({ kind: "anonymous", id: "anonymous" })` परत करते.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer काढते आणि `validateApiKey()` द्वारे त्याची पडताळणी करते. प्रभावी `REQUIRE_API_KEY` फीचर फ्लॅग अक्षम असतानाच निनावी प्रवेशाची अनुमती देते. प्रभावी फ्लॅग `isRequireApiKeyEnabled()` (`DB फीचर फ्लॅग ओव्हरराइड > process.env.REQUIRE_API_KEY > डीफॉल्ट`) द्वारे निर्धारित केला जातो, त्यामुळे डॅशबोर्ड फीचर फ्लॅग आणि पर्यावरणीय चल `/api/v1/*`, `/api/v1beta/*` आणि त्यांच्या उपनावांवर सुसंगतपणे नियंत्रण ठेवतात; रिझॉल्वर अयशस्वी झाल्यास प्रवेश नाकारला जातो. क्लायंट API मार्गांवर डॅशबोर्ड-सत्र विनंत्यांना अनुमती देते (डॅशबोर्ड मॉडेल कॅटलॉगद्वारे वापरल्या जाणाऱ्या `/api/v1/models` सह).
-- **`managementPolicy`** (`policies/management.ts`) — डॅशबोर्ड सत्र, अंतर्गत मॉडेल-सिंक विनंत्या (`/api/providers/[name]/(sync-models|models)` शी जुळणाऱ्या) स्वीकारते किंवा `isAuthRequired()` ने false परत केल्यास पूर्णपणे वगळते. Bearer टोकन उपस्थित पण अवैध असल्यास 403 (`AUTH_001`), अन्यथा 401 परत करते. कोणत्याही प्रमाणीकरण शाखेपूर्वी route-guard स्तरही (LOCAL_ONLY / ALWAYS_PROTECTED) लागू करते — [मार्ग गार्ड स्तर](../security/ROUTE_GUARD_TIERS.md) पहा. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` मधील LOCAL_ONLY पथ (सध्या: `/api/mcp/`) Bearer कीमध्ये `manage` स्कोप असल्यास non-loopback वरून वापरता येतात; स्कोप कोणताही असला तरी इतर सर्व LOCAL_ONLY पथांसाठी strict-loopback बंधन कायम राहते.
+- **`publicPolicy`** (`policies/public.ts`) — नेहमी `allow({ kind: "anonymous", id: "anonymous" })` परत करतो.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — बेअरर काढतो, `validateApiKey()` द्वारे प्रमाणित करतो. जेव्हा प्रभावी `REQUIRE_API_KEY` वैशिष्ट्य ध्वज अक्षम केला जातो तेव्हाच निनावीवर पडतो. प्रभावी ध्वजाचे निराकरण `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) द्वारे केले जाते म्हणून डॅशबोर्ड वैशिष्ट्य ध्वज आणि पर्यावरण व्हेरिएबल्स `/api/v1/*`, `/api/v1beta/*`, आणि उपनामे सातत्याने नियंत्रित करतात; निराकरणकर्ता अपयश अयशस्वी बंद. क्लायंट API मार्गांवर डॅशबोर्ड-सत्र विनंत्यांना अनुमती देते ( `/api/v1/models`, डॅशबोर्ड मॉडेल कॅटलॉगद्वारे वापरलेले). जेव्हा Entra ID SSO सक्षम केले जाते, तेव्हा एक वाहक जो संरचनात्मकदृष्ट्या एक Entra टोकन असतो (तीन बेस64url सेगमेंट, `RS*` alg, `kid`) SSO शाखेद्वारे हाताळला जातो.** आधी** `validateApiKey()` आणि त्याचा निर्णय अंतिम — आहे, तो कधीही API-की मार्ग किंवा डीग्रेड-टू-अनामिक शाखेत येत नाही, म्हणून ओळख-प्रदाता आउटेज ओपन ऍक्सेस होऊ शकत नाही. स्थिर API की अप्रभावित आहेत. [Entra ID SSO](../security/ENTRA_SSO.md) पहा.
+- **`managementPolicy`** (`policies/management.ts`) — डॅशबोर्ड सत्र स्वीकारते, अंतर्गत मॉडेल-सिंक विनंत्या ( `/api/providers/[name]/(sync-models|models)` विरुद्ध जुळतात), किंवा `isAuthRequired()` खोटे परत आल्यास पूर्णपणे वगळते. 403 (`AUTH_001`) परत करते जेव्हा बेअरर टोकन उपस्थित असते परंतु अवैध असते, अन्यथा 401. कोणत्याही ऑथ ब्रांच — [रूट गार्ड टियर्स](../security/ROUTE_GUARD_TIERS.md) पाहण्यापूर्वी रूट-गार्ड टियर्स (LOCAL_ONLY / ALWAYS_PROTECTED) लागू करते. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` मधील LOCAL_ONLY पथ (आज: `/api/mcp/`) नॉन-लूपबॅकमधून प्रवेश केला जाऊ शकतो जेव्हा बेअरर की `manage` स्कोप असते; इतर सर्व LOCAL_ONLY मार्ग व्याप्तीची पर्वा न करता कठोर-लूपबॅक राहतात.
 
-यशस्वी पॉलिसी `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` असलेला `AuthSubject` परत करते. प्रमाणीकरण लॉजिक पुन्हा चालवण्याऐवजी डाउनस्ट्रीम हँडलर `src/server/authz/assertAuth.ts` मधील `assertAuth(request, "CLIENT_API")` द्वारे तो वाचू शकतात.
+यशस्वी पॉलिसी `AuthSubject` सह `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` परत करते. डाउनस्ट्रीम हँडलर्स ऑथ लॉजिक पुन्हा चालवण्याऐवजी `src/server/authz/assertAuth.ts` मध्ये `assertAuth(request, "CLIENT_API")` द्वारे वाचू शकतात.
 
 ## सार्वजनिक रूट्सची सूची
 
@@ -333,23 +333,23 @@ API की मध्ये `scopes` ॲरे असतो (JSON म्हणू
 
 ## डीबगिंग
 
-पाइपलाइन प्रतिसादांवर नेहमी खालील शिक्के लावते:
+पाइपलाइन नेहमी प्रतिसादांवर शिक्का मारते:
 
 ```
-x-request-id:               <सहसंबंध आयडी, त्रुटीच्या मजकुरात पुन्हा दर्शविला जातो>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-प्रमाणीकृत विनंत्यांसाठी, अपस्ट्रीम (हँडलर-बाजूच्या) विनंती हेडर्समध्ये पुढील गोष्टीदेखील समाविष्ट असतात:
+प्रमाणीकृत विनंत्यांसाठी अपस्ट्रीम (हँडलर-साइड) विनंती शीर्षलेखांमध्ये हे देखील समाविष्ट आहे:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<शेवटचे-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (पर्यायी)
-x-omniroute-auth-scopes:    स्वल्पविरामाने विभक्त केलेली सूची
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-हँडलर्समध्ये `assertAuth(req, expectedClass)` वापरा — मिडलवेअर वगळले गेले असल्यास ते `AUTHZ_NOT_INITIALIZED` कोडसह `AuthzAssertionError` फेकते (चाचण्यांमधील कॉन्फिगरेशन रिग्रेशन्स शोधण्यासाठी उपयुक्त).
+जर मिडलवेअर बायपास केले गेले असेल तर — हँडलर्सच्या आत `assertAuth(req, expectedClass)` वापरा ते `AUTHZ_NOT_INITIALIZED` कोडसह `AuthzAssertionError` टाकते (चाचण्यांमध्ये कॉन्फिगरेशन रीग्रेशन्स पकडण्यासाठी उपयुक्त).
 
 ## हे देखील पहा
 
