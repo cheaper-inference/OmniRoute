@@ -44,7 +44,16 @@ export function shapeForClientFormat(
     case "openai-responses":
       return HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
     default:
-      return HEARTBEAT_SHAPES.COMMENT;
+      // Unmapped/unknown client formats are overwhelmingly [OI]-Chat-compatible
+      // (custom gateways, executors that don't declare a format). The old
+      // COMMENT default produced a no-op heartbeat whenever
+      // OMNIROUTE_SSE_COMMENTS was unset (#10524 default), so those streams had
+      // NO keepalive at all — clients with an idle watchdog aborted healthy
+      // streams during long upstream silences. Emit a real `data:` Chat
+      // Completions chunk instead: it is parseable by every [OI]-compatible
+      // client (same shape as the early-keepalive OPENAI_KEEPALIVE_FRAME) and
+      // keeps the stream alive without the strict-client comment risk.
+      return HEARTBEAT_SHAPES.OPENAI_CHUNK;
   }
 }
 
@@ -130,6 +139,10 @@ export function createSseHeartbeatTransform({
 
   return new TransformStream<Uint8Array, Uint8Array>({
     start(controller) {
+      // Abort stops the timer IMMEDIATELY via the listener below; the
+      // aborted-check inside the callback is only a belt-and-suspenders for a
+      // signal that aborts between the listener registration and the same-tick
+      // callback, and for signals attached after interval creation.
       intervalId = globalThis.setInterval(() => {
         if (signal?.aborted) {
           stop();
@@ -155,6 +168,12 @@ export function createSseHeartbeatTransform({
         intervalId.unref?.();
       }
 
+      if (signal?.aborted) {
+        // Signal already aborted before registration: clear synchronously now
+        // instead of leaving the timer armed until its next tick.
+        stop();
+        return;
+      }
       signal?.addEventListener("abort", stop, { once: true });
     },
 

@@ -95,6 +95,7 @@ function isTlsFingerprintEnabled() {
   return process.env.ENABLE_TLS_FINGERPRINT === "true";
 }
 
+3: @ours
 type TlsClientLike = {
   available: boolean;
   fetch: (url: string, options?: TlsFetchOptions) => Promise<Response>;
@@ -147,6 +148,34 @@ function tagProxyUnreachable<T>(err: T): T {
     e.errorCode = "proxy_unreachable";
   }
   return err;
+}
+
+/**
+ * Transport-level failure codes/messages that qualify for the retry-once-on-
+ * fresh-socket recovery in the direct and relay egress paths. ECONNRESET/EPIPE
+ * were added because a stale pooled socket the server half-closed surfaced as
+ * an immediate client-visible error ("ECONNRESET: The socket connection was
+ * closed unexpectedly") instead of the transparent retry the other transport
+ * codes get (see streamRecovery.RETRYABLE_TRANSPORT_CODES for the same class).
+ */
+export function isTransportRetryableError(msg: string, errCode: unknown): boolean {
+  return (
+    msg.includes("fetch failed") ||
+    errCode === "ECONNREFUSED" ||
+    msg.includes("ECONNREFUSED") ||
+    errCode === "EAI_AGAIN" ||
+    msg.includes("EAI_AGAIN") ||
+    errCode === "ENOTFOUND" ||
+    msg.includes("ENOTFOUND") ||
+    errCode === "ETIMEDOUT" ||
+    msg.includes("ETIMEDOUT") ||
+    errCode === "ECONNRESET" ||
+    msg.includes("ECONNRESET") ||
+    errCode === "EPIPE" ||
+    msg.includes("EPIPE") ||
+    (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
+    msg.includes("UND_ERR")
+  );
 }
 
 /** Per-request TLS identity and success telemetry. */
@@ -906,19 +935,7 @@ async function patchedFetchUnrecorded(
         // Retry/fallback only for connection errors, never HTTP errors.
         tagProxyUnreachable(dispatcherError);
         const errCode = (dispatcherError as { code?: unknown })?.code;
-        if (
-          msg.includes("fetch failed") ||
-          errCode === "ECONNREFUSED" ||
-          msg.includes("ECONNREFUSED") ||
-          errCode === "EAI_AGAIN" ||
-          msg.includes("EAI_AGAIN") ||
-          errCode === "ENOTFOUND" ||
-          msg.includes("ENOTFOUND") ||
-          errCode === "ETIMEDOUT" ||
-          msg.includes("ETIMEDOUT") ||
-          (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
-          msg.includes("UND_ERR")
-        ) {
+        if (isTransportRetryableError(msg, errCode)) {
           if (attempt === 0 && maxAttempts > 1) {
             // Retry after a short fixed backoff on a fresh socket.
             lastDispatcherError = dispatcherError;
@@ -1081,12 +1098,7 @@ async function patchedFetchUnrecorded(
         if (isCallerAbort(relayError, options?.signal)) throw relayError;
         const msg = relayError instanceof Error ? relayError.message : String(relayError);
         const errCode = (relayError as { code?: unknown })?.code;
-        const isTransportFailure =
-          msg.includes("fetch failed") ||
-          errCode === "ECONNREFUSED" ||
-          msg.includes("ECONNREFUSED") ||
-          (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
-          msg.includes("UND_ERR");
+        const isTransportFailure = isTransportRetryableError(msg, errCode);
         if (attempt === 0 && maxRelayAttempts > 1 && isTransportFailure) {
           lastRelayError = relayError;
           // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a

@@ -111,6 +111,50 @@ export const OPENAI_RESPONSES_ERROR_FRAME = ENCODER.encode(
 const MAX_RETRY_AFTER_SECONDS = 3600;
 
 /**
+ * Wrap a fast-path verbatim SSE body so a mid-flight upstream failure appends
+ * ONE format-correct terminal error frame before the stream closes. Bytes flow
+ * through untouched until the error; healthy streams stay byte-identical.
+ * Converts an abrupt transport close (client sees "connection dropped
+ * mid-response") into a deliberate, parseable failure event the client's retry
+ * logic can react to.
+ */
+function wrapSseBodyWithMidStreamFailure(
+  body: ReadableStream<Uint8Array>,
+  format: "anthropic" | "responses" | "chat",
+  buildFrame: (fmt: "anthropic" | "responses" | "chat") => Uint8Array
+): ReadableStream<Uint8Array> {
+  const reader = body.getReader();
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(value);
+      } catch {
+        // Upstream failed mid-flight — emit the terminal error frame, then close.
+        try {
+          controller.enqueue(buildFrame(format));
+        } catch {
+          /* consumer gone */
+        }
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
+        reader.cancel().catch(() => {});
+      }
+    },
+    cancel(reason) {
+      reader.cancel(reason).catch(() => {});
+    },
+  });
+}
+
+/**
  * Seconds a client should wait before retrying, from the handler's error response:
  * `Retry-After` (delta-seconds or HTTP-date) first, then OmniRoute's
  * `x-omniroute-retry-after-seconds`. Clamped to 0..3600; null when neither is usable.
@@ -508,6 +552,40 @@ export async function withEarlyStreamKeepalive(
           return "chat";
         }
       })();
+  // Terminal frame appended after partial content was already forwarded. The
+  // zero-content path reuses `errorFrame` verbatim (it may carry a custom
+  // message configured by the caller); after partial content the client only
+  // needs a well-formed terminal marker for its format, so these frames use a
+  // fixed generic message that matches what the internal pipeline's
+  // resolveSilentCloseOutcome would have surfaced for the same condition.
+  const buildPartialContentErrorFrame = (
+    format: "anthropic" | "responses" | "chat"
+  ): Uint8Array => {
+    const message = "Upstream stream ended without a terminal marker.";
+    if (format === "anthropic") {
+      return ENCODER.encode(
+        `event: error\ndata: ${JSON.stringify({
+          error: { message, type: "stream_error" },
+        })}\n\n`
+      );
+    }
+    if (format === "responses") {
+      return ENCODER.encode(
+        `data: ${JSON.stringify({
+          type: "error",
+          code: null,
+          message,
+          param: null,
+          sequence_number: SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+        })}\n\n`
+      );
+    }
+    return ENCODER.encode(
+      `data: ${JSON.stringify({
+        error: { message, type: "stream_error" },
+      })}\n\n`
+    );
+  };
   const correlationId = options.correlationId;
   const deadlineController = options.deadlineController ?? null;
   // Absolute last-resort bound, started at wrapper call time (not at slow-path
@@ -561,7 +639,32 @@ export async function withEarlyStreamKeepalive(
     if (deadlineTimer) clearTimeout(deadlineTimer);
     releaseDeadlineController(deadlineController);
     const result = raced.result;
-    if (result.status === "fulfilled") return result.response;
+    if (result.status === "fulfilled") {
+      const response = result.response;
+      const contentType = (response.headers.get("content-type") || "").toLowerCase();
+      // A verbatim SSE body that fails mid-flight (ECONNRESET etc.) would
+      // surface its raw error to the client as an abrupt transport close with
+      // no terminal marker — the same disconnect-reporting gap the slow path
+      // guards against. Wrap the body so a mid-flight failure appends a
+      // format-correct terminal error frame; bytes that already crossed are
+      // untouched, and healthy streams stay byte-identical (zero-copy passthrough
+      // until an error actually occurs).
+      if (response.body && contentType.includes("text/event-stream")) {
+        return new Response(
+          wrapSseBodyWithMidStreamFailure(
+            response.body,
+            errorFrameFormat,
+            buildPartialContentErrorFrame
+          ),
+          {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+          }
+        );
+      }
+      return response;
+    }
     throw result.error;
   }
 
