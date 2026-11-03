@@ -281,25 +281,17 @@ lockout-_toestand_ is vluchtig.
 
 ---
 
-## 4. Quota-share-concurrencybeheer (v3.8.36)
+## 4. Gelijktijdigheidscontrole van quota-aandelen (v3.8.36)
 
-Abonnementsaccounts (GLM, MiniMax, enz.) accepteren vaak slechts ~1–3 gelijktijdige
-requests; bij overschrijving ontstaan 429's en cooldowns. Dit is acuut bij
-**quota-share**-combo's (`qtSd/…`), waarbij meerdere API-sleutels één upstream-
-account delen. Drie lagen voorkomen dat een gedeeld account wordt overstroomd.
+Abonnementsaccounts (GLM, MiniMax, etc.) accepteren vaak alleen ~ 1–3 gelijktijdige verzoeken; als je dat overschrijdt, worden 429's en cooldowns geactiveerd. Dit is acuut onder** quota-aandeel** (`qtSd/…`) combo's, waarbij verschillende API sleutels één upstream-account delen. Drie lagen zorgen ervoor dat een gedeeld account niet overstroomt.
 
-### Concurrencyplafond per connectie (`max_concurrent`)
+### Gelijktijdigheidslimiet per verbinding (`max_concurrent`)
 
-Elke providerconnectie kan een `max_concurrent`-plafond declareren
-(`provider_connections.max_concurrent`, ingesteld in de connectiemodaal / API / DB).
-Laat het veld leeg voor geen limiet. Dit is de enige knop die de serialisatielaag
-hieronder aanstuurt — stel deze in op de werkelijke concurrency van het account
-(bijv. GLM ~1, MiniMax ~2).
+Elke provideraansluiting kan een `max_concurrent` plafond declareren (`provider_connections.max_concurrent`, ingesteld in de aansluiting modal / API / DB). Laat het onbeperkt leeg. Dit is de enige knop die de serialisatielaag onder — aanstuurt en deze instelt op de echte gelijktijdigheid van het account (bijvoorbeeld GLM ~ 1, MiniMax ~ 2).
 
-### Concurrencyplafonds per model (`modelConcurrency`)
+### Gelijktijdigheidslimieten per model (`modelConcurrency`)
 
-Een connectie kan daarnaast exacte concurrencyplafonds per model declareren
-binnen zijn `rateLimitOverrides`-map:
+Een verbinding kan bovendien exacte gelijktijdigheidsplafonds per model declareren in de `rateLimitOverrides` -kaart:
 
 ```json
 {
@@ -310,76 +302,32 @@ binnen zijn `rateLimitOverrides`-map:
 }
 ```
 
-Stel dit in via de connectiemodaal (**Rate limit-overschrijvingen →
-Concurrencyplafonds per model**, één `model=cap` per regel) of via
-`PATCH /api/providers/[id]` met dezelfde JSON-vorm. Belangrijkste semantiek:
+Stel het in het verbindingsmodal (** Tarieflimiet overschrijft → Gelijktijdigheidslimieten per model** , één `model=cap` per regel) of via `PATCH /api/providers/[id]` met dezelfde JSON vorm. Belangrijkste semantiek:
 
-- **Connectiebreed vs. modelspecifiek:** `maxConcurrent` blijft het gedeelde
-  connectiebrede plafond. Wanneer beide van toepassing zijn, worden beide gates
-  atomair verkregen in dezelfde samengestelde gate
-  (`global → provider → account → model`); het effectieve gedrag is de
-  striktere toepasselijke limiet.
-- **Exacte modelsleutel-match:** de sleutel is de modelstring die na
-  routingresolutie aan de executor wordt doorgegeven — normaal gesproken de kale
-  upstream-model-id (`glm-5`), geen client-side `provider/model`-alias
-  (`zai/glm-5` matcht niet met `glm-5`). Waarden zijn positieve gehele getallen
-  die als plafond voor gelijktijdige requests gelden.
-- **Lokale wachtrij, geen discovery:** overtollige requests worden lokaal in de
-  wachtrij geplaatst met de bestaande wachtrij-/timeoutsemantiek (getypte
-  toelatingsfouten `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute
-  ontdekt of leidt geen upstream-beleid af — het handhaaft exact de plafonds die
-  de operator heeft geconfigureerd. Een verzadigde modelgate schakelt de provider
-  nooit uit en creëert nooit een permanente model-lockout; upstream
-  429-/cooldown-/fallbackgedrag blijft het vangnet bij fouten.
-- **Scope per connectie, per proces:** plafonds gelden per databaseconnectie en
-  worden in-memory vastgehouden, dus twee connecties die dezelfde upstream-
-  API-sleutel hergebruiken coördineren niet met elkaar.
-- **Niet geconfigureerd betekent ongewijzigd:** het weglaten van de map (of het
-  leeg laten van het dashboardveld) voegt geen modelgate toe. Voorbeeldconfiguratie
-  zonder een universele providerlimiet te veronderstellen:
+- **Verbindingsbreed versus modelspecifiek:** `maxConcurrent` blijft het gedeelde verbindingsbrede plafond. Wanneer beide van toepassing zijn, worden beide poorten atomair verkregen in dezelfde samengestelde poort (`global → provider → account → model`); het effectieve gedrag is de strengste geldende grens.
+- **Exacte overeenkomst tussen model en sleutel:** de sleutel is de modelstring die wordt doorgegeven aan de uitvoerder na routeringsresolutie — normaal gesproken de kale upstream-model-ID (`glm-5`), niet een `provider/model` alias aan de clientzijde (`zai/glm-5` komt niet overeen met `glm-5`). Waarden zijn plafonds voor gelijktijdige aanvragen met positieve gehele getallen.
+- **Lokale wachtrij, geen detectie:** overtollige verzoeken worden lokaal in de wachtrij geplaatst met de bestaande queue/timeout semantiek (getypte `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` -toegangsfouten). OmniRoute ontdekt of leidt geen upstream-beleid af. — dwingt de exacte plafonds af die de operator heeft geconfigureerd. Een verzadigde modelpoort schakelt de provider nooit uit en creëert nooit een permanente modeluitsluiting; stroomopwaarts 429/cooldown/fallback -gedrag blijft de foutbackstop.
+- **Per verbinding, per procesbereik:** caps zijn per databaseverbinding en worden in het geheugen bewaard, dus twee verbindingen die dezelfde upstream API sleutel hergebruiken, coördineren niet met elkaar.
+- **Niet-geconfigureerd betekent ongewijzigd:** het weglaten van de kaart (of het leeg laten van het dashboardveld) voegt geen modelpoort toe. Voorbeeldconfiguratie zonder enige universele providerlimiet op te leggen:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serialisatie van quota-share-requests
+### Serialisatie van aanvragen voor het delen van quota
 
-Wanneer een quota-share-dispatch een connectie target die een positieve
-`max_concurrent` declareert, worden gelijktijdige requests naar dat **account**
-geserialiseerd via een semafoor per connectie (sleutel `qsconn:<connectionId>`):
-overtollige requests **wachten in de wachtrij** in plaats van het account te
-overspoelen. Het is **fail-open** — een verzadigde wachtrij of timeout gaat zonder
-slot door in plaats van ooit een dispatcheerbare request af te wijzen. In-/uitschakelen
-via **Instellingen → Veerkracht → Quota-share-concurrency per connectie**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standaard aan).
-Zonder een `max_concurrent`-plafond blijft het gedrag ongewijzigd.
+Wanneer een quota-share-verzending zich richt op een verbinding die een positieve `max_concurrent` declareert, worden daar gelijktijdige aanvragen voor ingediend** rekening** worden geserialiseerd via een semafoor per verbinding (sleutel `qsconn:<connectionId>`): overtollige verzoeken** wacht in de rij** in plaats van de rekening te laten overstromen. Het is** fail-open** — een verzadigde wachtrij of time-out verloopt zonder een slot in plaats van ooit een verzendbaar verzoek af te wijzen. Schakel in** Instellingen → Veerkracht → Gelijktijdigheid van quotumaandeel per verbinding** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standaard ingeschakeld). Zonder een `max_concurrent` limiet blijft het gedrag ongewijzigd.
 
-> De quota-share-routinggate (`selectQuotaShareTarget`, DRR + P2C) is zelf
-> fail-open en _deprioriteert_ alleen een connectie die op zijn limiet zit — met een
-> pool van één connectie kan hij geen harde limiet afdwingen, dus deze semafoor is
-> wat de vloed daadwerkelijk indamt.
+> De quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) is zelf fail-open en _deprioritiseert_ alleen een at-cap-verbinding — met een pool met één verbinding die niet hard kan worden beperkt, dus deze semafoor is wat feitelijk de flood bevat.
 
-### Cooldown-bewuste retry voor combo's
+### Combo cooldown-bewuste nieuwe poging
 
-Voor elke combostrategie (indien ingeschakeld) wacht een request die een 429 zou
-materialiseren voor een KORTE transiënte cooldown deze af en dispatcheert opnieuw
-in plaats van de 429 terug te geven — dit dekt Gemini-klasse TPM/RPM-vensters
-(~60s retry-after) bij multi-model-combo's, bijv. wanneer beide targets van een
-2-model-combo een rate limit per model raken. Begrensd door `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) in **Instellingen → Veerkracht**.
-Er wordt nooit gewacht op `quota_exhausted` (vergrendeld tot middernacht) of op
-auth-/not-found-redenen.
+Voor elke combo-strategie (indien ingeschakeld) wacht een verzoek dat een 429 voor een tijdelijke SHORT cooldown zou kristalliseren, op het wachten en verzendt het opnieuw in plaats van de 429 — terug te sturen. Dit heeft betrekking op TPM/RPM -vensters van de Gemini-klasse (~ 60s retry-after) op combo's met meerdere modellen, bijvoorbeeld beide doelen van een combo met 2 modellen die een snelheidslimiet per model bereiken. Gegrenst door `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) in** Instellingen → Veerkracht** . Het wacht nooit op `quota_exhausted` (vergrendeld tot middernacht) of auth/not-found redenen.
 
-Dezelfde gate dekt het geval vóór dispatch (#16319): wanneer elk target van een
-combo wordt overgeslagen voordat ook maar één poging is gedaan omdat het model in
-een korte transiënte lockout zit, wacht het nul-pogingen-pad de lock uit onder
-dezelfde plafonds en dispatcheert opnieuw, in plaats van een hintloze
-`503 ALL_TARGETS_SKIPPED` te beantwoorden. Wanneer wachten niet is toegestaan
-(plafond, pogingen of budget uitgeput, of de feature uit), wordt de terminale
-respons opgewaardeerd naar `429 rate_limit_error` met `retry_after` / `reset_at`
-van de vroegst aflopende transiënte lock; quota-, auth- en not-found-locks
-behouden de hintloze 503.
+Een combo kan zich afmelden met `config.comboCooldownWaitEnabled: false`. Alleen letterlijke `false` schakelt deze gedeelde combo-wachttijden uit (afkoelperiode na verzending en circuit-open/model-lock wachttijden vóór verzending) en hun verlenging van de time-out-minimum voor het wachtbudget. Ontbrekend of `true` handhaaft het mondiale beleid; `true` kan wachten voor globaal uitgeschakeld niet inschakelen. Een expliciete `targetTimeoutMs` wint nog steeds. Deze opt-out verandert niets aan de afzonderlijke wachttijd vóór verzending van de native Codex-turn-pin.
+
+Dezelfde poort dekt de pre-dispatch-zaak (#16319): wanneer elk doelwit van een combo wordt overgeslagen voordat er een poging wordt gedaan, omdat het model zich in een korte voorbijgaande lock-out bevindt, wacht het nul-poging-pad op de lock-out onder dezelfde plafonds en verzendt het opnieuw, in plaats van een hintloze `503 ALL_TARGETS_SKIPPED` te beantwoorden. Als er niet gewacht mag worden (plafond, poging of budget opgebruikt, of de functie uitgeschakeld), wordt de terminalrespons geüpgraded naar `429 rate_limit_error` met `retry_after` / `reset_at` vanaf de vroegste tijdelijke vergrendelingsverloop; quota, auth en not-found sloten behouden de hintloze 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

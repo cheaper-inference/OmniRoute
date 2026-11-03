@@ -291,26 +291,17 @@ Lockout-_Zustand_ ist ephemer.
 
 ---
 
-## 4. Quota-Share-Parallelitätssteuerung (v3.8.36)
+## 4. Quota-Share-Parallelitätskontrolle (v3.8.36)
 
-Abonnement-Konten (GLM, MiniMax usw.) akzeptieren oft nur ~1–3 gleichzeitige
-Anfragen; eine Überschreitung löst 429-Fehler und Cooldowns aus. Besonders akut
-ist dies bei **Quota-Share**-Kombos (`qtSd/…`), bei denen sich mehrere
-API-Schlüssel ein Upstream-Konto teilen. Drei Ebenen verhindern, dass ein
-geteiltes Konto überflutet wird.
+Abonnementkonten (GLM, MiniMax usw.) akzeptieren häufig nur 1–3 gleichzeitige ~ Anfragen; Wird dieser Wert überschritten, werden 429 Sekunden und Abklingzeiten ausgelöst. Das ist akut unter** Quotenanteil** (`qtSd/…`)-Kombinationen, bei denen sich mehrere API Schlüssel ein Upstream-Konto teilen. Drei Schichten verhindern, dass ein gemeinsames Konto überflutet wird.
 
-### Parallelitätslimit pro Verbindung (`max_concurrent`)
+### Parallelitätsobergrenze pro Verbindung (`max_concurrent`)
 
-Jede Provider-Verbindung kann ein `max_concurrent`-Limit deklarieren
-(`provider_connections.max_concurrent`, gesetzt im Verbindungsmodal / per API / DB).
-Leer lassen für kein Limit. Dies ist der zentrale Regler, der die unten
-beschriebene Serialisierungsebene steuert – auf die tatsächliche Parallelität
-des Kontos setzen (z. B. GLM ~1, MiniMax ~2).
+Jede Anbieterverbindung kann eine `max_concurrent` Obergrenze deklarieren (`provider_connections.max_concurrent`, festgelegt im Verbindungsmodal / API / DB). Lassen Sie es leer, damit es keine Begrenzung gibt. Dies ist der einzelne Knopf, der die darunter liegende Serialisierungsschicht steuert. — stellt ihn auf die tatsächliche Parallelität des Kontos ein (z. B. GLM ~ 1, MiniMax ~ 2).
 
-### Parallelitätslimits pro Modell (`modelConcurrency`)
+### Parallelitätsobergrenzen pro Modell (`modelConcurrency`)
 
-Eine Verbindung kann zusätzlich exakte Parallelitätslimits pro Modell
-innerhalb ihrer `rateLimitOverrides`-Map deklarieren:
+Eine Verbindung kann zusätzlich in ihrer `rateLimitOverrides` -Karte genaue Obergrenzen für die Parallelität pro Modell deklarieren:
 
 ```json
 {
@@ -321,79 +312,32 @@ innerhalb ihrer `rateLimitOverrides`-Map deklarieren:
 }
 ```
 
-Im Verbindungsmodal einstellen (**Rate-Limit-Überschreibungen → Parallelitätslimits
-pro Modell**, ein `model=cap` pro Zeile) oder über
-`PATCH /api/providers/[id]` mit derselben JSON-Struktur. Wichtige Semantik:
+Stellen Sie es im Verbindungsmodal ein (** Die Ratenbegrenzung setzt → -Parallelitätsobergrenzen pro Modell außer Kraft** , ein `model=cap` pro Zeile) oder über `PATCH /api/providers/[id]` mit der gleichen JSON Form. Schlüsselsemantik:
 
-- **Verbindungsweit vs. modellspezifisch:** `maxConcurrent` bleibt das gemeinsame
-  verbindungsweite Limit. Wenn beide gelten, werden beide Gates atomar
-  im selben zusammengesetzten Gate erworben
-  (`global → provider → account → model`); das effektive Verhalten entspricht dem
-  strengeren anwendbaren Limit.
-- **Exakte Modellschlüssel-Übereinstimmung:** Der Schlüssel ist der Modellstring,
-  der nach der Routing-Auflösung an den Executor übergeben wird – normalerweise
-  die reine Upstream-Modell-ID (`glm-5`), nicht ein clientseitiger
-  `provider/model`-Alias (`zai/glm-5` stimmt nicht mit `glm-5` überein). Werte
-  sind positive ganzzahlige Obergrenzen für gleichzeitige Anfragen.
-- **Lokale Einreihung, keine Erkennung:** Überschüssige Anfragen reihen sich lokal
-  mit der bestehenden Warteschlangen-/Timeout-Semantik ein (typisierte
-  `SEMAPHORE_TIMEOUT`- / `SEMAPHORE_QUEUE_FULL`-Zulassungsfehler). OmniRoute
-  erkennt bzw. erschließt keine Upstream-Richtlinien – es erzwingt exakt die
-  Obergrenzen, die der Betreiber konfiguriert hat. Ein gesättigtes Modell-Gate
-  deaktiviert den Provider niemals und erzeugt niemals eine permanente
-  Modellsperre; das Upstream-Verhalten bei 429/Cooldown/Fallback bleibt die
-  letzte Fehlerabsicherung.
-- **Geltungsbereich pro Verbindung und Prozess:** Limits gelten pro
-  Datenbankverbindung und werden im Speicher gehalten; zwei Verbindungen, die
-  denselben Upstream-API-Schlüssel wiederverwenden, stimmen sich daher nicht
-  untereinander ab.
-- **Nicht konfiguriert heißt unverändert:** Das Weglassen der Map (oder ein leer
-  gelassenes Dashboard-Feld) fügt kein Modell-Gate hinzu. Beispielkonfiguration,
-  ohne ein universelles Provider-Limit zu behaupten:
+- **Verbindungsweit vs. modellspezifisch:** `maxConcurrent` bleibt die gemeinsame verbindungsweite Obergrenze. Wenn beides zutrifft, werden beide Gates atomar im selben zusammengesetzten Gate (`global → provider → account → model`) erfasst; das effektive Verhalten ist der strengere anwendbare Grenzwert.
+- **Exakte Modell-Schlüssel-Übereinstimmung:** Der Schlüssel ist die Modellzeichenfolge, die nach der Routing-Auflösung an den Executor übergeben wird — ist normalerweise die nackte Upstream-Modell-ID (`glm-5`), kein clientseitiger `provider/model` Alias (`zai/glm-5` stimmt nicht mit `glm-5` überein). Bei den Werten handelt es sich um positive, ganzzahlige Obergrenzen für gleichzeitige Anforderungen.
+- **Lokale Warteschlange, keine Erkennung:** Überschüssige Anfragen werden lokal mit der vorhandenen queue/timeout Semantik in die Warteschlange gestellt (typisierte `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` Zulassungsfehler). OmniRoute erkennt oder leitet keine Upstream-Richtlinie ab, — erzwingt die genauen Obergrenzen, die der Betreiber konfiguriert hat. Ein gesättigtes Modelltor deaktiviert niemals den Anbieter und führt niemals zu einer dauerhaften Modellsperre. Das Upstream- 429/cooldown/fallback Verhalten bleibt der Fehler-Backstop.
+- **Umfang pro Verbindung, pro Prozess:** Die Obergrenzen gelten pro Datenbankverbindung und werden im Speicher gehalten, sodass zwei Verbindungen, die denselben Upstream- API Schlüssel wiederverwenden, nicht miteinander koordiniert werden.
+- **Unkonfiguriert bedeutet unverändert:** Wenn Sie die Karte weglassen (oder das Dashboard-Feld leer lassen), wird kein Modell-Gate hinzugefügt. Beispielkonfiguration ohne Durchsetzung eines Universal-Provider-Limits:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Quota-Share-Anfragenserialisierung
+### Serialisierung von Kontingentanteil-Anfragen
 
-Wenn ein Quota-Share-Dispatch auf eine Verbindung zielt, die ein positives
-`max_concurrent` deklariert, werden gleichzeitige Anfragen an dieses **Konto**
-über ein Semaphor pro Verbindung serialisiert (Schlüssel `qsconn:<connectionId>`):
-Überschüssige Anfragen **warten in der Warteschlange**, statt das Konto zu
-überfluten. Der Mechanismus ist **fail-open** – eine volle Warteschlange oder ein
-Timeout setzt die Verarbeitung ohne Slot fort, statt jemals eine dispatchfähige
-Anfrage abzulehnen. Umschaltbar unter **Einstellungen → Resilienz →
-Quota-Share-Parallelität pro Verbindung**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standardmäßig
-aktiviert). Ohne ein `max_concurrent`-Limit bleibt das Verhalten unverändert.
+Wenn ein Quota-Share-Dispatch auf eine Verbindung abzielt, die ein positives `max_concurrent` deklariert, werden gleichzeitige Anfragen an diese gesendet** Konto** werden über ein verbindungsspezifisches Semaphor (Schlüssel `qsconn:<connectionId>`) serialisiert: überschüssige Anfragen** in der Warteschlange warten** anstatt das Konto zu überschwemmen. Es ist** Fail-Open** Bei einer gesättigten Warteschlange oder einer Zeitüberschreitung wird — ohne einen Slot fortgesetzt, anstatt jemals eine zuteilbare Anfrage abzulehnen. Einschalten** Einstellungen → Resilience → Kontingentanteil pro Verbindung Parallelität** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standardmäßig aktiviert). Ohne eine `max_concurrent` Obergrenze bleibt das Verhalten unverändert.
 
-> Das Quota-Share-Routing-Gate (`selectQuotaShareTarget`, DRR + P2C) ist selbst
-> fail-open und stuft eine ausgelastete Verbindung lediglich _herab_ – bei einem
-> Pool mit nur einer Verbindung kann es kein hartes Limit durchsetzen, daher ist
-> dieses Semaphor das, was die Flut tatsächlich eindämmt.
+> Das Quota-Share-Routing-Gate (`selectQuotaShareTarget`, DRR + P2C) ist selbst ausfallsicher und _depriorisiert_ nur eine At-Cap-Verbindung — mit einem Single-Connection-Pool, den es nicht hart begrenzen kann, daher ist dieses Semaphor das, was tatsächlich die Flut enthält.
 
-### Cooldown-bewusste Combo-Wiederholung
+### Kombinierter, abklingzeitabhängiger Wiederholungsversuch
 
-Bei jeder Kombo-Strategie (sofern aktiviert) wartet eine Anfrage, die einen 429
-für einen KURZEN transienten Cooldown als Ergebnis fixieren würde, diesen ab und
-dispatcht erneut, statt den 429 zurückzugeben – dies deckt TPM/RPM-Fenster der
-Gemini-Klasse (~60s Retry-After) bei Multi-Modell-Kombos ab, etwa wenn beide
-Ziele einer 2-Modell-Kombo ein modellbezogenes Rate-Limit erreichen. Begrenzt
-durch `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`)
-unter **Einstellungen → Resilienz**. Es wartet niemals bei `quota_exhausted`
-(bis Mitternacht gesperrt) oder bei Authentifizierungs-/Nicht-gefunden-Gründen.
+Für jede Combo-Strategie (sofern aktiviert) wartet eine Anfrage, die einen 429 für eine vorübergehende SHORT Abklingzeit kristallisieren würde, ab und sendet sie erneut, anstatt den 429 — zurückzugeben. Dies deckt TPM/RPM Fenster der Gemini-Klasse (~ 60 Sekunden Wiederholung nach) bei Multi-Modell-Combos ab, z. B. wenn beide Ziele einer 2-Modell-Combo ein Ratenlimit pro Modell erreichen. Begrenzt durch `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) in** Einstellungen → Resilienz** . Es wird nie auf `quota_exhausted` (bis Mitternacht gesperrt) oder auth/not-found Gründe gewartet.
 
-Dasselbe Gate deckt den Pre-Dispatch-Fall ab (#16319): Wenn jedes Ziel einer
-Kombo übersprungen wird, bevor auch nur ein Versuch unternommen wurde, weil sich
-sein Modell in einer kurzen transienten Sperre befindet, wartet der
-Null-Versuch-Pfad die Sperre unter denselben Obergrenzen ab und dispatcht erneut,
-statt mit einem hinweislosen `503 ALL_TARGETS_SKIPPED` zu antworten. Wenn kein
-Warten erlaubt ist (Obergrenze, Versuche oder Budget erschöpft oder das Feature
-deaktiviert), wird die terminale Antwort auf `429 rate_limit_error` hochgestuft
-und trägt `retry_after` / `reset_at` vom frühesten Ablauf einer transienten
-Sperre; Quota-, Auth- und Nicht-gefunden-Sperren behalten die hinweislose 503 bei.
+Eine Kombination kann mit `config.comboCooldownWaitEnabled: false` deaktiviert werden. Nur das wörtliche `false` deaktiviert diese gemeinsamen Combo-Wartezeiten (Abklingzeit nach dem Versand und circuit-open/model-lock -Wartezeiten vor dem Versand) und ihre Verlängerung des Wartebudget-Timeouts. Fehlt oder `true` bleibt die globale Richtlinie erhalten; `true` kann das global deaktivierte Warten nicht aktivieren. Ein explizites `targetTimeoutMs` gewinnt immer noch. Durch diese Abmeldung ändert sich nichts an der separaten Wartezeit vor dem Versand des Native-Codex-Turn-Pins.
+
+Das gleiche Gate deckt den Pre-Dispatch-Fall ab (#16319): Wenn jedes Ziel einer Combo übersprungen wird, bevor irgendein Versuch unternommen wird, weil sich das Modell in einer kurzen vorübergehenden Sperre befindet, wartet der Null-Versuchs-Pfad die Sperre unter denselben Obergrenzen ab und sendet erneut, anstatt auf ein `503 ALL_TARGETS_SKIPPED` ohne Hinweis zu antworten. Wenn keine Wartezeit zulässig ist (Obergrenze, Versuch oder Budget ausgeschöpft oder die Funktion deaktiviert), wird die Terminalantwort auf `429 rate_limit_error` aktualisiert und trägt `retry_after` / `reset_at` ab dem frühesten Ablauf der vorübergehenden Sperre; Kontingent-, Authentifizierungs- und nicht gefundene Sperren behalten den Hinweis-losen 503 bei.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
