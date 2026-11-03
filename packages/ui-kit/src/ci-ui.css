@@ -130,8 +130,8 @@
   }
 
   .ci-button:hover {
-    color: var(--ci-color-accent-foreground);
-    background: var(--ci-color-accent);
+    color: var(--ci-button-primary-fg);
+    background: var(--ci-button-primary-hover);
   }
 
   .ci-button:active {

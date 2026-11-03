@@ -109,7 +109,7 @@ export function StackedBarChart({
             {showGrid && <CartesianGrid strokeDasharray="2 4" vertical={false} stroke="var(--ci-color-border)" />}
             <XAxis dataKey="label" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={24} tick={{ fontSize: 11, fill: "var(--ci-color-text-muted)" }} />
             <YAxis width={48} tickLine={false} axisLine={false} tickCount={yTickCount} allowDecimals={allowDecimals} tickFormatter={valueFormatter} tick={{ fontSize: 11, fill: "var(--ci-color-text-muted)" }} />
-            <Tooltip active={keyboardTooltip ? false : undefined} filterNull={false}
+            <Tooltip active={keyboardTooltip ? false : undefined} filterNull={false} cursor={false}
               labelFormatter={(label, payload) => payload?.[0]?.payload?.tooltipLabel || label}
               content={properties => <DefaultTooltipContent {...properties} payload={properties.payload?.map(entry => ({ ...entry, value: entry.value ?? unavailableLabel }))} formatter={(value, name) => [typeof value === "number" ? valueFormatter(value) : value, name]} />}
               contentStyle={tooltipStyle} />
