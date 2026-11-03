@@ -21,7 +21,9 @@
     "istanbul-lib-instrument": "Official IstanbulJS original-source instrumenter, pinned at 6.0.3 (BSD-3-Clause). npm provenance checked on 2026-09-22: repository istanbuljs/istanbuljs, package created 2015-11-21. Common Node/Vitest coverage instrumentation with real parity regression; review in PR #14524. Does not change coverage floors or activate rollout.",
     "react-day-picker": "DayPicker 10.0.1 required by packages/ui-kit's calendar. KEA-7886 — CI UI Kit runtime dependency.",
     "vite": "",
-    "subset-font": "devDependency used only by scripts/docs/readme-fonts.mjs to subset the @fontsource woff2 files (Inter, Instrument Serif, IBM Plex Mono) to the glyphs each README SVG draws, so the UI kit typography can be embedded as data: URIs that render inside GitHub's <img> sandbox. BSD-3-Clause; HarfBuzz compiled to WASM (harfbuzzjs, MIT), no native build, no network at runtime. Maintained by papandreou (assetgraph), 2.x line since 2022."
+    "harfbuzzjs": "devDependency used only by scripts/docs/readme-outline.mjs to shape the kit's Switzer text roles and turn them into vector outlines for the README SVGs (the font's licence forbids embedding a subset). MIT; HarfBuzz compiled to WASM, no native build, no network at runtime. Already in the tree through subset-font; pinned exact at 1.6.4.",
+    "fontverter": "devDependency used only by scripts/docs/readme-outline.mjs to read the vendored Switzer woff2 into memory as sfnt for HarfBuzz; nothing it converts is ever written or embedded. BSD-3-Clause; maintained by papandreou (assetgraph). Already in the tree through subset-font; pinned exact at 2.0.0.",
+    "subset-font": "devDependency used only by scripts/docs/readme-fonts.mjs to subset the OFL IBM Plex Mono @fontsource woff2 to the code characters each README SVG keeps as real text, embedded as a data: URI that renders inside GitHub's <img> sandbox. BSD-3-Clause; HarfBuzz compiled to WASM (harfbuzzjs, MIT), no native build, no network at runtime. Maintained by papandreou (assetgraph), 2.x line since 2022."
   },
   "allowed": [
     "@agentclientprotocol/sdk",
@@ -104,10 +106,12 @@
     "fast-copy",
     "fetch-socks",
     "fflate",
+    "fontverter",
     "fumadocs-core",
     "fumadocs-mdx",
     "fumadocs-ui",
     "glob",
+    "harfbuzzjs",
     "http-proxy-middleware",
     "https-proxy-agent",
     "httpyac",

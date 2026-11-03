@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ထိပ်တန်းအဆင့် executor modules (`*.ts` အနှုတ် `base.ts`၊ `index.ts` နှင့် စမ်းသပ်မှုများ — အရေအတွက် `npm run check:docs-counts` အစီအမံများ)။ executor အတန်းတိုင်းသည် `BaseExecutor` (`base.ts`) ကို တိုက်ရိုက် သို့မဟုတ် `DefaultExecutor` သို့မဟုတ် အခြားသော executor မှတဆင့် တိုးချဲ့သည်။ ကျန်ရှိသော module များသည် per-provider helpers (tool schemas၊ fetch/TTS adapters၊ quirk handlers) များဖြစ်သည်။ စီမံဆောင်ရွက်သူများ ပါဝင်သည်-
+158 ထိပ်တန်းအဆင့် executor modules (`*.ts` အနှုတ် `base.ts`၊ `index.ts` နှင့် စမ်းသပ်မှုများ — အရေအတွက် `npm run check:docs-counts` အစီအမံများ)။ executor အတန်းတိုင်းသည် `BaseExecutor` (`base.ts`) ကို တိုက်ရိုက် သို့မဟုတ် `DefaultExecutor` သို့မဟုတ် အခြားသော executor မှတဆင့် တိုးချဲ့သည်။ ကျန်ရှိသော module များသည် per-provider helpers (tool schemas၊ fetch/TTS adapters၊ quirk handlers) များဖြစ်သည်။ စီမံဆောင်ရွက်သူများ ပါဝင်သည်-
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` (အကူအညီ) နှင့် `index.ts`
 
