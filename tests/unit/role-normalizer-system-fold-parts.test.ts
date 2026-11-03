@@ -32,11 +32,10 @@ function visionFirstTurn() {
 }
 
 test("1. the fold keeps the image part of the first user message", () => {
-  const folded = normalizeSystemRole(
-    visionFirstTurn() as never,
-    "glm",
-    FOLDING_MODEL
-  ) as Array<{ role: string; content: unknown }>;
+  const folded = normalizeSystemRole(visionFirstTurn() as never, "glm", FOLDING_MODEL) as Array<{
+    role: string;
+    content: unknown;
+  }>;
 
   assert.equal(folded.length, 2, "system message is folded away");
   const firstUser = folded[0];
@@ -46,7 +45,9 @@ test("1. the fold keeps the image part of the first user message", () => {
   const parts = firstUser.content as Array<{ type?: string; text?: string }>;
   const imagePart = parts.find((p) => p.type === "image_url");
   assert.ok(imagePart, "image part survives the fold");
-  const systemTextPart = parts.find((p) => p.type === "text" && p.text?.includes("[System Instructions]"));
+  const systemTextPart = parts.find(
+    (p) => p.type === "text" && p.text?.includes("[System Instructions]")
+  );
   assert.ok(systemTextPart, "system instructions are prepended as a text part");
   assert.ok(
     (systemTextPart as { text?: string }).text?.includes("You are a helpful assistant."),
@@ -69,10 +70,7 @@ test("2. string-content first user turn keeps the historical flat fold", () => {
 
   assert.equal(folded.length, 1);
   assert.equal(folded[0].role, "user");
-  assert.equal(
-    folded[0].content,
-    "[System Instructions]\nBe terse.\n\n[User Message]\nhi"
-  );
+  assert.equal(folded[0].content, "[System Instructions]\nBe terse.\n\n[User Message]\nhi");
 });
 
 test("3. no first user message: system inserted as its own user turn (unchanged)", () => {
@@ -95,4 +93,33 @@ test("4. system-capable models leave the messages untouched", () => {
   const result = normalizeSystemRole(input as never, "glm", "glm-5.2") as typeof input;
   assert.equal(result.length, 3);
   assert.equal(result[0].role, "system");
+});
+
+test("5. text-only array first user turn keeps the historical flat fold", () => {
+  const folded = normalizeSystemRole(
+    [
+      { role: "system", content: "Be terse." },
+      { role: "user", content: [{ type: "text", text: "hi" }] },
+    ] as never,
+    "glm",
+    FOLDING_MODEL
+  ) as Array<{ role: string; content: unknown }>;
+
+  assert.equal(folded.length, 1);
+  assert.equal(folded[0].role, "user");
+  assert.equal(folded[0].content, "[System Instructions]\nBe terse.\n\n[User Message]\nhi");
+});
+
+test("6. image fold keeps part order (system text first) and does not mutate the input", () => {
+  const input = visionFirstTurn();
+  const snapshot = JSON.stringify(input);
+  const folded = normalizeSystemRole(input as never, "glm", FOLDING_MODEL) as Array<{
+    role: string;
+    content: Array<{ type: string }>;
+  }>;
+  assert.deepEqual(
+    folded[0].content.map((p) => p.type),
+    ["text", "text", "image_url"]
+  );
+  assert.equal(JSON.stringify(input), snapshot, "input messages are not mutated");
 });
