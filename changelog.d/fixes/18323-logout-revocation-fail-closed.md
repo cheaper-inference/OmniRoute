@@ -1,0 +1,1 @@
+- **fix(auth):** dashboard logout only reports success after the session revocation is saved, returns a retryable 503 instead of a false sign-out, and no longer loses a revocation when two sign-outs race ([#18323](https://github.com/cheaper-inference/OmniRoute/pull/18323)) — thanks @MiRHaDi

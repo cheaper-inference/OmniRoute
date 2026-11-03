@@ -1,6 +1,6 @@
 export const runtime = "nodejs";
 
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { z } from "zod";
 import { NextResponse } from "next/server";
@@ -72,6 +72,15 @@ function getStatsPath() {
   return path.join(getMitmDir(), "stats.json");
 }
 
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function defaultTargets(port = DEFAULT_PORT): MitmTargetRoute[] {
   const allHosts = [
     ANTIGRAVITY_MITM_PROFILE.targetHost,
@@ -99,9 +108,9 @@ function defaultTargets(port = DEFAULT_PORT): MitmTargetRoute[] {
   ];
 }
 
-function readConfig(): MitmConfig {
+async function readConfig(): Promise<MitmConfig> {
   try {
-    JSON.parse(fs.readFileSync(getConfigPath(), "utf8"));
+    JSON.parse(await fs.readFile(getConfigPath(), "utf8"));
     return {
       port: DEFAULT_PORT,
       targets: defaultTargets(DEFAULT_PORT),
@@ -114,15 +123,15 @@ function readConfig(): MitmConfig {
   }
 }
 
-function writeConfig() {
+async function writeConfig() {
   const mitmDir = getMitmDir();
-  fs.mkdirSync(mitmDir, { recursive: true });
-  fs.writeFileSync(getConfigPath(), JSON.stringify({ port: DEFAULT_PORT }, null, 2));
+  await fs.mkdir(mitmDir, { recursive: true });
+  await fs.writeFile(getConfigPath(), JSON.stringify({ port: DEFAULT_PORT }, null, 2));
 }
 
-function readStats(): MitmStats {
+async function readStats(): Promise<MitmStats> {
   try {
-    const raw = JSON.parse(fs.readFileSync(getStatsPath(), "utf8"));
+    const raw = JSON.parse(await fs.readFile(getStatsPath(), "utf8"));
     return {
       startedAt: typeof raw.startedAt === "string" ? raw.startedAt : null,
       totalRequests: Number(raw.totalRequests || 0),
@@ -146,8 +155,8 @@ function readStats(): MitmStats {
 async function buildMitmResponse() {
   const { getMitmStatus, getCachedPassword } = await import("@/mitm/manager.runtime");
   const status = await getMitmStatus();
-  const config = readConfig();
-  const stats = readStats();
+  const config = await readConfig();
+  const stats = await readStats();
 
   return {
     running: status.running,
@@ -155,7 +164,7 @@ async function buildMitmResponse() {
     dnsConfigured: status.dnsConfigured || false,
     // The cert of the ACTIVE model (ca.crt under the root-CA model,
     // server.crt on a legacy-leaf install) — never a stale legacy leaf.
-    certExists: status.certExists || fs.existsSync(resolveActiveMitmCert().certPath),
+    certExists: status.certExists || (await fileExists(resolveActiveMitmCert().certPath)),
     hasCachedPassword: !!getCachedPassword(),
     port: config.port,
     targets: config.targets,
@@ -171,10 +180,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     if (searchParams.get("download") === "cert") {
       const { certPath, mode } = resolveActiveMitmCert();
-      if (!fs.existsSync(certPath)) {
+      if (!(await fileExists(certPath))) {
         return NextResponse.json({ error: activeCertMissingMessage(mode) }, { status: 404 });
       }
-      return new NextResponse(fs.readFileSync(certPath), {
+      return new NextResponse(await fs.readFile(certPath), {
         headers: {
           "Content-Type": "application/x-pem-file",
           "Content-Disposition": `attachment; filename="${activeCertDownloadName(mode)}"`,
@@ -202,7 +211,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const config = readConfig();
+    const config = await readConfig();
     if (parsed.data.port !== undefined && parsed.data.port !== DEFAULT_PORT) {
       return NextResponse.json({ error: MITM_PORT_ERROR }, { status: 400 });
     }
@@ -210,7 +219,7 @@ export async function PUT(request: Request) {
     if (parsed.data.port !== undefined) {
       config.port = DEFAULT_PORT;
       config.targets = defaultTargets(config.port);
-      writeConfig();
+      await writeConfig();
     }
 
     if (typeof parsed.data.enabled === "boolean") {

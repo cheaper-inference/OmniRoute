@@ -141,34 +141,34 @@ kompletteras endast:
 
 Vissa `MANAGEMENT`-åtgärder är **endast för operatören**: en nyckel med scopet `manage` räcker inte. Att exportera lagrade inloggningsuppgifter (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), återställa en backup över de aktuella datan (`POST /api/db-backups/import`, inklusive `dryRun=true`, `POST /api/db-backups` för återställning via id, `POST /api/settings/import-json`) och förstöra återställningspunkter (`DELETE /api/db-backups` för rensning, samt `PATCH /api/db-backups` eftersom den sparade retentionen styr den automatiska gallringen efter varje backup) kräver en dashboardsession, den lokala CLI-identiteten eller att inloggningen är avstängd. Att utfärda en synk-token (`POST /api/sync/tokens`) och att skapa en `admin`-åtkomsttoken för CLI (`POST /api/cli/tokens`) kräver en dashboardsession eller den lokala CLI-identiteten i alla inloggningslägen. API-nycklar med vilket scope som helst och `oma_`-åtkomsttokens är inte operatörsinloggningsuppgifter: de får `403` närhelst en sådan krävs. Kontrollen finns i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Ändring av inloggningsinställningarna är också endast för operatören: `POST /api/settings/require-login` (sätt hanteringslösenordet / växla `requireLogin`) accepterar bara dessa uppgifter när ett lösenord väl finns. Bootstrap-fönstret vid första start (inget lösenord ännu) är oförändrat. En dashboardsession måste skicka `currentPassword` för att ersätta lösenordet (`403` när det saknas eller är fel, granskat som `settings.update_failed`). Den lokala CLI:n och en instans med avstängd inloggning behåller återställningsvägen och får sätta ett lösenord utan det, eftersom båda är bundna till värden som äger datakatalogen.
 
-## Pipeline
+## Rörledning
 
 ```
-Inkommande begäran → src/proxy.ts
-  → runAuthzPipeline() i src/server/authz/pipeline.ts
-    1. Ta bort betrodda interna headers (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Generera begärande-id, klassificera rutten via classifyRoute()
-    3. Om pathname == "/" → omdirigera till /dashboard
-    4. Om systemet töms (ordnad nedstängning) och /api/* → 503
-    5. Om icke-GET /api/* → kontrollera med skyddet checkBodySize()
-    6. Om OPTIONS → CORS-förhandskontroll 204
-    7. Om options.enforce == false → släpp igenom med headers för ruttklass
-    8. Annars: POLICIES[routeClass].evaluate(ctx)
-       - allow  → stämpla x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → JSON-fel med correlation_id (kontrollpanelsidor → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Betrodda interna headers (definierade i `src/server/authz/headers.ts`) **tas bort från inkommande begäranden** före klassificering — klienter kan inte fylla i `x-omniroute-auth-*` i förväg för att utge sig för att vara ett subjekt.
+Pålitliga interna rubriker (definierade i `src/server/authz/headers.ts`) är** tas bort från inkommande förfrågningar** före klassificering kan — -klienter inte förfylla `x-omniroute-auth-*` för att imitera ett subjekt.
 
-### Policykontrakt
+### Försäkringsavtal
 
 Varje ruttklass har en policy i `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnerar alltid `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — extraherar Bearer och validerar via `validateApiKey()`. Fortsätter till anonym åtkomst endast när den effektiva funktionsflaggan `REQUIRE_API_KEY` är inaktiverad. Den effektiva flaggan fastställs via `isRequireApiKeyEnabled()` (`åsidosättning av databasens funktionsflagga > process.env.REQUIRE_API_KEY > standardvärde`), så att kontrollpanelens funktionsflaggor och miljövariabler styr `/api/v1/*`, `/api/v1beta/*` och alias konsekvent; fel i resolvern resulterar i nekad åtkomst. Tillåter begäranden med kontrollpanelssession på klient-API-rutter (inklusive `/api/v1/models`, som används av kontrollpanelens modellkatalog).
-- **`managementPolicy`** (`policies/management.ts`) — accepterar kontrollpanelssessioner, interna begäranden om modellsynkronisering (matchade mot `/api/providers/[name]/(sync-models|models)`), eller hoppar över kontrollen helt om `isAuthRequired()` returnerar false. Returnerar 403 (`AUTH_001`) när en Bearer-token finns men är ogiltig, annars 401. Tillämpar även ruttskyddsnivåerna (LOCAL_ONLY / ALWAYS_PROTECTED) före varje autentiseringsgren — se [Ruttskyddsnivåer](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY-sökvägar i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (för närvarande: `/api/mcp/`) kan nås från andra adresser än loopback när Bearer-nyckeln har omfånget `manage`; alla andra LOCAL_ONLY-sökvägar förblir strikt begränsade till loopback oavsett omfång.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — extraherar bärare, validerar via `validateApiKey()`. Går igenom till anonym endast när den effektiva `REQUIRE_API_KEY` funktionsflaggan är inaktiverad. Den effektiva flaggan löses genom `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) så Dashboard-funktionsflaggor och miljövariabler styr `/api/v1/*`, `/api/v1beta/*` och alias konsekvent; resolver misslyckanden stängs. Tillåter förfrågningar om instrumentpanelsessioner på klientens API rutter (inklusive `/api/v1/models`, som används av instrumentpanelens modellkatalog). När Entra ID SSO är aktiverat, hanteras en bärare som strukturellt är en Entra-token (tre base64url-segment, `RS*` alg, `kid`) av SSO -grenen** före** `validateApiKey()` och dess dom är slutgiltig — den faller aldrig igenom API-nyckelns sökväg eller grenen degradera till anonym, så ett avbrott i identitetsleverantören kan inte bli öppen åtkomst. Statiska API nycklar påverkas inte. Se [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — accepterar instrumentpanelsessioner, interna modellsynkroniseringsbegäranden (matchad mot `/api/providers/[name]/(sync-models|models)`), eller hoppar över helt om `isAuthRequired()` returnerar falskt. Returnerar 403 (`AUTH_001`) när en bärartoken är närvarande men ogiltig, 401 annars. Upprätthåller också ruttskyddsnivåerna (LOCAL_ONLY / ALWAYS_PROTECTED) före någon auktoritetsgren — se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY vägar i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (idag: `/api/mcp/`) kan nås från icke-loopback när bärarnyckeln bär `manage` omfattningen; alla andra LOCAL_ONLY -vägar förblir strikt-loopback oavsett omfattning.
 
-En lyckad policy returnerar `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Efterföljande hanterare kan läsa det via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` i stället för att köra autentiseringslogiken igen.
+En framgångsrik policy returnerar `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Nedströmshanterare kan läsa den via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` istället för att köra autentiseringslogik igen.
 
 ## Lista över publika routes
 
@@ -316,20 +316,20 @@ Slutpunkterna `/api/v1/agents/tasks/*` och `/api/resilience/model-cooldowns` **k
 Pipelinen stämplar alltid svar med:
 
 ```
-x-request-id:               <korrelations-id, återges i felmeddelandets brödtext>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-För autentiserade begäranden inkluderar begärandehuvudena uppströms (på hanterarsidan) även:
+För autentiserade förfrågningar inkluderar uppströms (hanterare-sidan) förfrågningsrubriker också:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (valfritt)
-x-omniroute-auth-scopes:    kommaseparerad lista
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Använd `assertAuth(req, expectedClass)` inuti hanterare — den utlöser `AuthzAssertionError` med koden `AUTHZ_NOT_INITIALIZED` om mellanprogramvaran kringgicks (användbart för att upptäcka konfigurationsregressioner i tester).
+Använd `assertAuth(req, expectedClass)` inuti hanterare — den kastar `AuthzAssertionError` med koden `AUTHZ_NOT_INITIALIZED` om mellanvaran förbigicks (användbart för att fånga konfigurationsregressioner i tester).
 
 ## Se även
 
