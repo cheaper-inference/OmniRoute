@@ -23,6 +23,7 @@ import { mergeHistoricalToolIdentities } from "./openai-responses/historyToolIde
 import { openaiToOpenAIResponsesRequest } from "./openai-responses/toResponses.ts";
 import { coerceToolCallArguments } from "../helpers/toolArguments.ts";
 import { chatStrictFrom } from "../helpers/toolStrict.ts";
+import { stripInvalidSchemaConstructs } from "../helpers/schemaCoercion.ts";
 import {
   JsonRecord,
   RESPONSES_STORE_MARKER,
@@ -136,6 +137,25 @@ function normalizeRoleBasedToolCalls(toolCalls: unknown): JsonRecord[] {
       // element's own type; the literal satisfies JsonRecord at the return.
       .filter((toolCall): toolCall is NonNullable<typeof toolCall> => toolCall !== null)
   );
+}
+
+/**
+ * #18679: client tool schemas reach the Chat upstream as-is, including the invalid
+ * constructs that deep-truncating harnesses emit (`"enum": "[MaxDepth]"`, index-keyed
+ * objects where an array is required). Strict OpenAI-compatible validators reject them
+ * before inference (Ollama Cloud: `cannot unmarshal string into ... ToolProperty.enum`).
+ * Run every emitted `function.parameters` through the same sanitizer the Claude path uses.
+ */
+function sanitizeChatToolParameters(tools: unknown[]): unknown[] {
+  return tools.map((toolValue) => {
+    const tool = toRecord(toolValue);
+    const fn = toRecord(tool.function);
+    if (fn.parameters === undefined) return toolValue;
+    return {
+      ...tool,
+      function: { ...fn, parameters: stripInvalidSchemaConstructs(fn.parameters) },
+    };
+  });
 }
 
 /**
@@ -795,6 +815,7 @@ export function openaiResponsesToOpenAIRequest(
           },
         };
       });
+    result.tools = sanitizeChatToolParameters(result.tools as unknown[]);
   }
 
   // Filter orphaned tool results (no matching tool_call in assistant messages)
