@@ -12,13 +12,13 @@
 
 ## Mis see on
 
-OmniRoute registreerib 377 pakkujat, sealhulgas on märgitud 155 kataloogikirjet**free/no-auth** (no-auth, free-tier OAuth või free-tier API -võti — vaadake [Free Tiers Guide'i](../getting-started/FREE-TIERS-GUIDE.md) ja täielikku [Free Tiers'i kataloogi](../reference/FREE_TIERS.md) ). Konks: tasuta pakkujate mudeli kvaliteet on väga erinev. Autentimata teenusepakkuja, mis teenindab piirimudelit, on palju kasulikum kui see, mis teenindab väikest pärandmudelit.
+OmniRoute registreerib 380 pakkujat, sealhulgas on märgitud 155 kataloogikirjet**free/no-auth** (no-auth, free-tier OAuth või vabataseme API klahv — vt [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ja täielikku [Free Tiersi kataloogi](../reference/FREE_TIERS.md) ). Konks: tasuta pakkujate mudeli kvaliteet on väga erinev. Autentimata teenusepakkuja, mis teenindab piirimudelit, on palju kasulikum kui see, mis teenindab väikest pärandmudelit.
 
-**Tasuta pakkujate edetabel** vastused"** milline tasuta pakkuja annab mulle parima mudeli?** ", liitudes iga tasuta pakkuja kataloogiga** rahvahulgast hangitud kvaliteediskoorid** alates** Arena AI edetabel** (human-preference ELO, sama idee LMArena chatbot arena taga). Seejärel järjestatakse pakkujad nende tugevuse järgi** parim tasuta mudel** .
+**Tasuta pakkujate edetabel** vastused"** milline tasuta pakkuja annab mulle parima mudeli?** ", liitudes iga tasuta pakkuja kataloogiga** rahvahulgast hangitud kvaliteediskoorid** alates** Arena AI edetabel** (inimeste eelistus ELO, sama idee LMArena chatbot areeni taga). Seejärel järjestatakse pakkujad nende tugevuse järgi** parim tasuta mudel** .
 
 Pingerida arvutatakse kolmest tegelikust allikast:
 
-1. Tasuta pakkujate loendid — `NOAUTH_PROVIDERS`, pluss `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` kirjed on märgistatud `hasFree` (`src/shared/constants/providers.ts`).
+1. Tasuta pakkuja loetleb — `NOAUTH_PROVIDERS` ja `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` kirjed, mis on märgistatud `hasFree` (`src/shared/constants/providers.ts`).
 2. Iga pakkuja mudelikataloog pakkuja registrist (`open-sse/config/providerRegistry.ts`).
 3. Arena ELO sünkroonimismootori (`src/lib/arenaEloSync.ts`) `model_intelligence` DB tabelisse salvestatud ELO-st tuletatud ülesannete sobivuse tulemused.
 

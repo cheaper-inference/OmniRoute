@@ -4,7 +4,7 @@
 
 ---
 
-> **Postavení:** palubní deska je postavena na** Sada Keak CI UI** (`@keak/cheaper-inference-ui-kit`), dodávaný jako pracovní prostor `packages/ui-kit` (`@omniroute/ui-kit`; upstream snímek je připnut v `packages/ui-kit/UPSTREAM.md` a chráněn `npm run check:ui-kit-snapshot`). Světlo je kanonické téma; výchozí preference je `system`. Akcentem je keak limetka (`--ci-color-accent`). Switzer je jediná rodina pro UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` se na něj rozlišují), kterou vlastní sada (`packages/ui-kit/src/ci-fonts.css`, importováno `ci-tokens.css`). Každá ikona je lucidní glyf.
+> **Postavení:** palubní deska je postavena na** Sada Keak CI UI** (`@keak/cheaper-inference-ui-kit`), dodávaný jako pracovní prostor `packages/ui-kit` (`@omniroute/ui-kit`; upstream snímek je připnut v `packages/ui-kit/UPSTREAM.md` a chráněn `npm run check:ui-kit-snapshot`). Světlo je kanonické téma; výchozí preference je `system`. Akcentem je keak limetka (`--ci-color-accent`). Switzer je jediná rodina pro UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` se na něj rozlišují), kterou vlastní sada samotná (`packages/ui-kit/src/ci-fonts.css`, importováno `ci-tokens.css`). Skripty Switzer postrádá procházení glyfem po glyfu (`src/app/globals.css`): Inter pro cyrilici, řečtinu a vietnamštinu a pouze pod `html[dir="rtl"]` Vazirmatn pro arabské písmo. Každá ikona je lucidní glyf.
 
 ## 1. Kde co je
 
@@ -116,7 +116,7 @@
 
 ## 5. Aktualizace sady
 
-`npm run check:ui-kit-upstream` porovná verzi připojenou v `packages/ui-kit/UPSTREAM.md` s nejnovější značkou `v*` upstream repo a vytiskne příkaz synchronizace, když je vydání k dispozici. Týdenní pracovní postup `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) spouští stejnou kontrolu a udržuje jeden problém se sledováním otevřený, zatímco je pin pozadu; upstream repo je soukromý, takže pracovní postup potřebuje token pouze pro čtení v tajném klíči `UI_KIT_READ_TOKEN` a bez něj zůstane nečinný.
+`npm run check:ui-kit-upstream` porovná verzi připojenou v `packages/ui-kit/UPSTREAM.md` s nejnovější značkou `v*` upstream repo a vytiskne příkaz synchronizace, když je vydání k dispozici. Týdenní pracovní postup `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) spouští stejnou kontrolu a udržuje jeden problém se sledováním otevřený, zatímco je pin pozadu; upstream repo je soukromý, takže pracovní postup potřebuje token pouze pro čtení v tajném klíči `UI_KIT_READ_TOKEN`. Když nemůže číst upstream (žádný token, token, který přestal fungovat nebo GitHub nedostupné), běh zůstane zelený, ale zapíše varování a ponechá otevřený jeden samostatný problém, který se sám zavře, jakmile pozdější běh může znovu číst proti proudu.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` zkopíruje upstream `src/` při tomto odevzdání (`latest` = nejnovější tag `v*` ) do `packages/ui-kit/src`, použije jedinou povolenou transformaci (vypustí příponu `.js` z relativních importů) a nastaví verzi pracovního prostoru v `packages/ui-kit/package.json` a `package-lock.json` na upstream. Poté: zkontrolujte `git diff packages/ui-kit`, proveďte vizuální předání poskytovatelů, nastavení, komba, použití a koncového bodu v obou tématech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a otevřete PR pomocí upstream changelogu.
 
