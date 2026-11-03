@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Це зробить знімок поточно підключених постачальників/моделей, які відповідають цьому шаблону, у редаговане комбо.",
     "duplicateAutoComboFailedPrefix": "Не вдалося дублювати автоматичне комбо:",
     "duplicateAutoComboUnknownError": "Невідома помилка",
-    "duplicateAutoComboTitle": "Створити статичне комбо з {name}"
+    "duplicateAutoComboTitle": "Створити статичне комбо з {name}",
+    "fallbackSummary": "Побічних {rate}% запитів, пропущено ~{skips} цілей за кожен раз"
   },
   "costs": {
     "title": "Витрати",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Статус верхнього потоку",
     "noResponse": "Немає відповіді",
     "egressIp": "Egress IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Заголовки після",
     "firstChunkAfter": "Перший фрагмент після",
     "servedBy": "Обслуговується",

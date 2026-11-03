@@ -18,7 +18,11 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildRecoveryHint } from "../../open-sse/services/combo/pinRecovery.ts";
+import {
+  buildRecoveryHint,
+  resolveAllFailedTerminalReason,
+} from "../../open-sse/services/combo/pinRecovery.ts";
+import { classifyComboOutcome } from "../../open-sse/services/combo/comboErrorAggregation.ts";
 import { isQuotaExhaustionResponse } from "../../open-sse/services/combo/quotaExhaustion.ts";
 
 test("buildRecoveryHint: quota_exhausted terminalReason maps to switch-combo, not retry", () => {
@@ -41,7 +45,9 @@ test("buildRecoveryHint: the raw upstream message (pre-fix behavior) still falls
 
 test("isQuotaExhaustionResponse: HTTP 403 insufficient_quota code is classified as quota exhaustion (#10966 repro)", async () => {
   const response = new Response(
-    JSON.stringify({ error: { code: "insufficient_quota", message: "Insufficient account balance." } }),
+    JSON.stringify({
+      error: { code: "insufficient_quota", message: "Insufficient account balance." },
+    }),
     { status: 403 }
   );
   const exhausted = await isQuotaExhaustionResponse(response, "some-provider", "some-model", null);
@@ -53,7 +59,8 @@ test("isQuotaExhaustionResponse: HTTP 403 AUTHZ_INSUFFICIENT_BALANCE type is cla
     JSON.stringify({
       error: {
         type: "AUTHZ_INSUFFICIENT_BALANCE",
-        message: "Insufficient account balance. Top up your account at https://example.invalid/billing",
+        message:
+          "Insufficient account balance. Top up your account at https://example.invalid/billing",
       },
     }),
     { status: 403 }
@@ -87,4 +94,42 @@ test("isQuotaExhaustionResponse: 402 payment-required still classified as quota 
   );
   const exhausted = await isQuotaExhaustionResponse(response, "some-provider", "some-model", null);
   assert.equal(exhausted, true);
+});
+
+test("resolveAllFailedTerminalReason: all-quota failures still resolve to quota_exhausted", () => {
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: true,
+    allObservedFailuresQuota: true,
+    comboErrors: [{ kind: "rate_limit" }, { kind: "model" }],
+    lastError: "Insufficient account balance.",
+  });
+  assert.equal(reason, "quota_exhausted");
+});
+
+test("resolveAllFailedTerminalReason: quota keeps precedence over all-auth outcomes (#18360)", () => {
+  // A 403 insufficient_quota body classifies as "auth" by status, yet it is a
+  // quota exhaustion. The quota reason must win so the top-up hint is kept.
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: true,
+    allObservedFailuresQuota: true,
+    comboErrors: [{ kind: classifyComboOutcome(403, "Insufficient account balance.") }],
+    lastError: "Insufficient account balance.",
+  });
+  assert.equal(reason, "quota_exhausted");
+});
+
+test("#18360 repro: an all-auth combo no longer recommends retry", () => {
+  const raw = "[502]: Upstream rejected token: Authorization Failed (invalid token)";
+  assert.equal(classifyComboOutcome(502, raw), "auth");
+  // The raw string alone still falls through to retry, which is why the loop
+  // must stamp a stable reason instead of forwarding it.
+  assert.equal(buildRecoveryHint(raw).action, "retry");
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: true,
+    allObservedFailuresQuota: false,
+    comboErrors: [{ kind: classifyComboOutcome(502, raw) }],
+    lastError: raw,
+  });
+  assert.equal(reason, "authentication_rejected");
+  assert.notEqual(buildRecoveryHint(reason).action, "retry");
 });
