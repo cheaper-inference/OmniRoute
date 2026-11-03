@@ -25,7 +25,7 @@ test("text-only ChatGPT Web and its retired alias stay absent from the image cat
   });
 });
 
-test("Codex image catalog exposes the GPT-5.6 hosted-tool ids and the GPT Image models", () => {
+test("Codex image catalog exposes the hosted-tool ids and the GPT Image models", () => {
   assert.deepEqual(IMAGE_PROVIDERS.codex.models, [
     {
       id: "gpt-6.1-sol",
@@ -68,7 +68,7 @@ test("Codex gpt-6.1-sol resolves as an image model under every accepted spelling
   }
 });
 
-test("Codex GPT-5.6 image listings do not shadow the chat catalog ids", () => {
+test("Codex hosted image listings do not shadow the chat catalog ids", () => {
   const imageModels = getAllImageModels().filter((model) => model.provider === "codex");
   assert.deepEqual(
     imageModels.map((model) => model.id),

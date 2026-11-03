@@ -15,51 +15,70 @@ OmniRoute записывает административные действия
 
 ### События административного аудита (`audit_log`)
 
-Каждый вызов `logAuditEvent({ action, actor, target, details, ... })` создает одну строку. Строки действий соответствуют шаблону `domain.verb` (или `domain.verb.outcome`). Подтвержденные типы действий в дереве исходного кода включают:
+Каждый вызов `logAuditEvent({ action, actor, target, details, ... })` создает
+одну строку. Строки действий следуют шаблону `domain.verb` (или
+`domain.verb.outcome`). Подтвержденные типы действий в дереве исходного кода:
 
-| Действие                             | Источник                                |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Действие                             | Источник                                 |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Каждая запись содержит `action`, `actor` (по умолчанию — `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` и `timestamp`. Конфиденциальные ключи (`apiKey`, `accessToken`, `refreshToken`, `password`, любые ключи, соответствующие шаблонам `*token`/`*secret`/`*apikey`, и т. д.) перед записью строки рекурсивно заменяются на `"[redacted]"`.
+Каждая запись содержит `action`, `actor` (по умолчанию — `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` и `timestamp`. Конфиденциальные ключи (`apiKey`, `accessToken`,
+`refreshToken`, `password`, все ключи, соответствующие шаблонам
+`*token`/`*secret`/`*apikey`, и т. д.) рекурсивно заменяются на `"[redacted]"`
+до записи строки.
+
+Строки `api_key.auth.touch` регистрируют успешные операции с метаданными API-ключей
+и чтения для обнаружения (GET/HEAD), которые никогда не попадают в журнал
+запросов: какой ключ использовался, когда и нормализованный путь; записи
+объединяются и ограничиваются 1 000 строками. Ключи с `noLog` и ключ окружения
+пропускаются. IP-адрес и user-agent вызывающей стороны добавляются только при
+включенном функциональном флаге `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` (по
+умолчанию выключен).
 
 ### Вызовы инструментов MCP (`mcp_tool_audit`)
 
-Каждый вызов инструмента MCP записывает строку через `open-sse/mcp-server/audit.ts`. Схема (из `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Каждый вызов инструмента MCP записывает строку через
+`open-sse/mcp-server/audit.ts`. Схема (из
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Столбец          | Примечания                                            |
-| ---------------- | ----------------------------------------------------- |
-| `id`             | автоинкремент                                         |
-| `tool_name`      | идентификатор инструмента MCP                         |
-| `input_hash`     | sha256 входных данных (полезная нагрузка не хранится) |
-| `output_summary` | краткая усеченная сводка                              |
-| `duration_ms`    | фактическое время выполнения                          |
-| `api_key_id`     | вызывающая сторона (может быть `null`)                |
-| `success`        | `1` / `0`                                             |
-| `error_code`     | итоговый код ошибки при сбое                          |
-| `created_at`     | временная метка ISO                                   |
+| Столбец          | Примечания                                               |
+| ---------------- | -------------------------------------------------------- |
+| `id`             | автоинкремент                                            |
+| `tool_name`      | идентификатор инструмента MCP                            |
+| `input_hash`     | sha256 входных данных (полезная нагрузка не сохраняется) |
+| `output_summary` | краткое усеченное резюме                                 |
+| `duration_ms`    | фактическое время выполнения                             |
+| `api_key_id`     | вызывающая сторона (может быть `null`)                   |
+| `success`        | `1` / `0`                                                |
+| `error_code`     | конечный код ошибки при сбое                             |
+| `created_at`     | временная метка ISO                                      |
 
 ### Журналы запросов / использования
 
-Это операционная телеметрия (не являющаяся в строгом смысле административным аудитом), но для нее используется тот же конвейер хранения:
+Это операционная телеметрия (не строго административный аудит), но для них
+используется тот же конвейер хранения:
 
-- `usage_history` — агрегированные данные об использовании для каждого запроса
-- `call_logs` — полный журнал каждого запроса (с ограничением числа строк, см. ниже)
-- `proxy_logs` — журнал прокси-трафика (с ограничением числа строк)
-- `request_detail_logs` — устаревший подробный журнал запросов (по-прежнему очищается при наличии)
+- `usage_history` — сводные данные об использовании для каждого запроса
+- `call_logs` — полный журнал каждого запроса (с ограничением количества строк, см. ниже)
+- `proxy_logs` — журнал прокси-трафика (с ограничением количества строк)
+- `request_detail_logs` — устаревший подробный журнал запросов (по-прежнему очищается, если присутствует)
 
 ## Схема хранилища
 
