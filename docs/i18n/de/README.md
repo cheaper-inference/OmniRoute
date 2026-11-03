@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute-Dashboard" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — Das kostenlose KI-Gateway
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Erstellt von [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nie wieder mit dem Coden aufhören. Jedes KI-Tool → 380 Anbieter — 150+ kostenlos — über einen Endpunkt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity in KOSTENLOSE Claude / GPT / Gemini mit automatischem Fallback. RTK + Caveman gestapelte Kompression spart 15–95% Tokens (~89% im Schnitt) — nie wieder Limits erreichen. 380 KI-Anbieter · 150+ kostenlose Tarife · ~1,62 Mrd. kostenlose Tokens/Monat · 20 Routing-Strategien · $0 Startkosten."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Höre niemals auf zu programmieren. Jedes KI-Tool → 380 Anbieter — 150+ kostenlos — über einen einzigen Endpunkt. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity in KOSTENLOSES Claude / GPT / Gemini mit automatischem Fallback. RTK + Caveman-gestapelte Komprimierung spart 15–95 % Tokens (~89 % im Durchschnitt) — erreiche niemals Limits. 380 KI-Anbieter · 150+ kostenlose Tarife · ~1,62 Mrd. kostenlose Tokens/Monat · 20 Routing-Strategien · Start bei 0 $."/>
 
 </div>
 
@@ -1301,22 +1301,22 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
 <table>
   <tr><th align="left">Ebene</th><th align="left">Technologie</th></tr>
   <tr><td nowrap><b>Laufzeit</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Sprache</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> in <code>src/</code> und <code>open-sse/</code> (seit v2.0 kein <code>any</code> im Kern)</td></tr>
+  <tr><td nowrap><b>Sprache</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> in <code>src/</code> und <code>open-sse/</code> (kein <code>any</code> im Kern seit v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
   <tr><td nowrap><b>Datenbank</b></td><td>better-sqlite3 (SQLite, WAL-Journaling) + LowDB (JSON-Legacy) — 147 Domänenmodule, 221 Migrationen</td></tr>
-  <tr><td nowrap><b>Speicher</b></td><td>SQLite-FTS5-Volltextsuche + int8-quantisierte Vektoreinbettungen, typisierte Abklingfunktion</td></tr>
-  <tr><td nowrap><b>Schemata</b></td><td>Zod 4 — MCP-Tool-E/A-Validierung + API-Verträge</td></tr>
+  <tr><td nowrap><b>Speicher</b></td><td>SQLite-FTS5-Volltextsuche + int8-quantisierte Vektor-Embeddings, typisierter Zerfall</td></tr>
+  <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — MCP-Tool-I/O-Validierung + API-Verträge</td></tr>
   <tr><td nowrap><b>Protokolle</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Streaming</b></td><td>Server-Sent Events (SSE) + WebSocket-Bridge (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Komprimierung</b></td><td>12-Engine-Pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Authentifizierung &amp; Sicherheit</b></td><td>OAuth 2.0 (PKCE) + JWT + API-Schlüssel + MCP-bereichsbezogene Authentifizierung · AES-256-GCM im Ruhezustand · DOMPurify</td></tr>
-  <tr><td nowrap><b>Tarnung</b></td><td>wreq-js — JA3- / JA4-TLS-Fingerabdruck-Imitation, 3-stufiger Proxy</td></tr>
-  <tr><td nowrap><b>Resilienz</b></td><td>Circuit Breaker, exponentielles Backoff, Schutz vor dem Thundering-Herd-Problem, automatische Combo-Selbstheilung</td></tr>
+  <tr><td nowrap><b>Authentifizierung &amp; Sicherheit</b></td><td>OAuth 2.0 (PKCE) + JWT + API-Schlüssel + MCP-Authentifizierung mit Berechtigungsumfang · AES-256-GCM im Ruhezustand · DOMPurify</td></tr>
+  <tr><td nowrap><b>Tarnung</b></td><td>wreq-js — JA3-/JA4-TLS-Fingerabdruck-Imitation, Proxy mit 3 Ebenen</td></tr>
+  <tr><td nowrap><b>Ausfallsicherheit</b></td><td>Schutzschalter, exponentielles Backoff, Schutz vor Überlastungsspitzen, automatische Selbstheilung von Kombinationen</td></tr>
   <tr><td nowrap><b>Protokollierung</b></td><td>pino — strukturierte JSON-Protokolle mit Anfragekontext</td></tr>
-  <tr><td nowrap><b>Tests</b></td><td>Node.js-Test-Runner + Vitest — <b>über 60.000 statische Testdeklarationen</b> in mehr als 8.400 erfassten Testdateien (Unit, Integration, E2E, Sicherheit, Ökosystem)</td></tr>
+  <tr><td nowrap><b>Tests</b></td><td>Node.js-Test-Runner + Vitest — <b>über 60.000 statische Testdeklarationen</b> in über 8.400 erfassten Testdateien (Unit, Integration, E2E, Sicherheit, Ökosystem)</td></tr>
   <tr><td nowrap><b>Plattformen</b></td><td>Desktop (Electron) · Android (Termux) · PWA (jeder Browser)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatische Veröffentlichung auf npm + Docker Hub bei Releases</td></tr>
-  <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Webseite</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1808,15 +1808,15 @@ OmniRoute steht auf den Schultern von Giganten. Es begann als Fork von **[9route
 
 ## 📄 Lizenz
 
-MIT-Lizenz – Details siehe [LICENSE](LICENSE).
+MIT-Lizenz – siehe [LICENSE](LICENSE) für weitere Informationen.
 
 ---
 
 <div align="center">
 
-**[⬆ Nach oben](#-omniroute)** · Mit ❤️ für die Open-Source-KI-Community gebaut.
+**[⬆ Zurück nach oben](#-omniroute)** · Mit ❤️ für die Open-Source-KI-Community entwickelt.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-Lizenz · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Erstellt von <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-Lizenz · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions für Community-Q&A aktiviert -->
+<!-- GitHub-Diskussionen für Community-Fragen und -Antworten aktiviert -->
