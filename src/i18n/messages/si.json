@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "තාවකාලික විරාම කාලය මඟ හරින්න, එවිට ප්රතිසාධනය කළ හැකි දෝෂවලින් පසුවත් මෙම සම්බන්ධතාව සුදුසු තත්ත්වයේ පවතී (තහනම් කළ/කල් ඉකුත් වූ වැනි අවසාන තත්ත්වයන් තවමත් අදාළ වේ).",
     "disableCoolingLabel": "මෙම සම්බන්ධතාව සඳහා විරාම කාලය අක්රිය කරන්න",
+    "keepMidConversationSystemDescription": "පද්ධති පණිවිඩ ඉහළ මට්ටමේ පද්ධති ප්‍රේරකයට ගෙන යාම වෙනුවට පණිවිඩ ලැයිස්තුව තුළ මැද සංවාදයක් තබන්න, එම නිසා ක්ෂණික හැඹිලිය හැරීම් හරහා පහර දෙයි. මෙම upstream පණිවිඩ තුළ \"පද්ධතිය\" භූමිකාව පිළිගන්නේ නම් පමණක් සබල කරන්න (එසේ නොමැති නම් එය 400 ට පිළිතුරු දෙයි).",
+    "keepMidConversationSystemLabel": "මධ්‍ය සංවාද පද්ධති පණිවිඩ ස්ථානගතව තබා ගන්න",
     "bulkPasteAdded": "{count, plural, one {යතුර 1ක් එක් කරන ලදී} other {යතුරු #ක් එක් කරන ලදී}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {අනුපිටපත 1ක් මඟ හරින ලදී} other {අනුපිටපත් #ක් මඟ හරින ලදී}}",
     "bulkPasteHint": "එක් පේළියකට එක් API යතුරක් අලවන්න. හිස් පේළි නොසලකා හරින අතර අනුපිටපත් යතුරු මඟ හරිනු ලැබේ.",

@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ohita tilapäinen jäädytysaika, jotta tämä yhteys pysyy käytettävissä myös palautettavien virheiden jälkeen (lopulliset tilat, kuten estetty/vanhentunut, ovat edelleen voimassa).",
     "disableCoolingLabel": "Poista jäädytysaika käytöstä tälle yhteydelle",
+    "keepMidConversationSystemDescription": "Jätä keskustelun puolivälissä lähetetyt järjestelmäviestit viestiluetteloon sen sijaan, että siirrät ne ylimmän tason järjestelmäkehotteeseen, jotta kehotteiden välimuisti osuu jatkuvasti käännöksissä. Ota käyttöön vain, jos tämä ylävirta hyväksyy roolin \"järjestelmä\" viestien sisällä (muuten se vastaa 400).",
+    "keepMidConversationSystemLabel": "Pidä keskustelun puolivälissä olevat järjestelmäviestit paikoillaan",
     "bulkPasteAdded": "{count, plural, one {1 avain lisätty} other {# avainta lisätty}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 päällekkäinen avain ohitettu} other {# päällekkäistä avainta ohitettu}}",
     "bulkPasteHint": "Liitä yksi API-avain kullekin riville. Tyhjät rivit jätetään huomiotta ja päällekkäiset avaimet ohitetaan.",

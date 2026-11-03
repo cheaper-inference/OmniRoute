@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "क्षणिक कूलडाउन छोड्नुहोस्, ताकि पुनःप्राप्त गर्न सकिने त्रुटिहरूपछि पनि यो जडान योग्य रहोस् (प्रतिबन्धित/म्याद सकिएको जस्ता अन्तिम अवस्थाहरू अझै लागू हुन्छन्)।",
     "disableCoolingLabel": "यस जडानका लागि कूलडाउन असक्षम गर्नुहोस्",
+    "keepMidConversationSystemDescription": "प्रणाली सन्देशहरूलाई शीर्ष-स्तर प्रणाली प्रम्प्टमा सार्नुको सट्टा सन्देश सूची भित्र मध्य-वार्तालाप पठाउनुहोस्, त्यसैले प्रम्प्ट क्यासले पालैपालो हिर्काइरहन्छ। यदि यो अपस्ट्रिमले सन्देशहरू भित्र भूमिका \"प्रणाली\" स्वीकार गर्छ भने मात्र सक्षम गर्नुहोस् (अन्यथा यसले 400 जवाफ दिन्छ)।",
+    "keepMidConversationSystemLabel": "मध्य-वार्तालाप प्रणाली सन्देशहरू ठाउँमा राख्नुहोस्",
     "bulkPasteAdded": "{count, plural, one {1 कुञ्जी थपियो} other {# कुञ्जीहरू थपिए}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 दोहोरिएको कुञ्जी छोडियो} other {# दोहोरिएका कुञ्जीहरू छोडिए}}",
     "bulkPasteHint": "प्रत्येक लाइनमा एउटा API कुञ्जी टाँस्नुहोस्। खाली लाइनहरू बेवास्ता गरिन्छन् र दोहोरिएका कुञ्जीहरू छोडिन्छन्।",

@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Բաց թողնել ժամանակավոր սպասման ժամանակահատվածը, որպեսզի այս կապը հասանելի մնա նույնիսկ վերականգնելի սխալներից հետո (վերջնական վիճակները, օրինակ՝ արգելափակված/ժամկետանց, շարունակում են կիրառվել)։",
     "disableCoolingLabel": "Անջատել այս կապի սպասման ժամանակահատվածը",
+    "keepMidConversationSystemDescription": "Համակարգային հաղորդագրությունները, որոնք ուղարկվել են խոսակցության կեսին, թողեք հաղորդագրությունների ցանկի ներսում՝ դրանք վերին մակարդակի համակարգի հուշում տեղափոխելու փոխարեն, այնպես որ հուշումների քեշը շարունակում է շրջվել: Միացնել միայն այն դեպքում, եթե այս վերին հոսանքն ընդունում է դերերի «համակարգը» հաղորդագրությունների ներսում (հակառակ դեպքում այն պատասխանում է 400-ին):",
+    "keepMidConversationSystemLabel": "Պահպանեք զրույցի ընթացքում համակարգային հաղորդագրությունները տեղում",
     "bulkPasteAdded": "{count, plural, one {Ավելացվել է 1 բանալի} other {Ավելացվել է # բանալի}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Բաց է թողնվել 1 կրկնօրինակ} other {Բաց է թողնվել # կրկնօրինակ}}",
     "bulkPasteHint": "Տեղադրեք յուրաքանչյուր տողում մեկ API բանալի։ Դատարկ տողերն անտեսվում են, իսկ կրկնվող բանալիները՝ բաց թողնվում։",

@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "താൽക്കാലിക കൂൾഡൗൺ ഒഴിവാക്കുക, അതുവഴി വീണ്ടെടുക്കാവുന്ന പിശകുകൾക്ക് ശേഷവും ഈ കണക്ഷൻ യോഗ്യമായി തുടരും (നിരോധിച്ചത്/കാലഹരണപ്പെട്ടത് പോലുള്ള അന്തിമ നിലകൾ തുടർന്നും ബാധകമാണ്).",
     "disableCoolingLabel": "ഈ കണക്ഷന്റെ കൂൾഡൗൺ പ്രവർത്തനരഹിതമാക്കുക",
+    "keepMidConversationSystemDescription": "സിസ്റ്റം സന്ദേശങ്ങൾ ഉയർന്ന തലത്തിലുള്ള സിസ്റ്റം പ്രോംപ്റ്റിലേക്ക് നീക്കുന്നതിന് പകരം സന്ദേശ ലിസ്റ്റിനുള്ളിൽ സംഭാഷണത്തിൻ്റെ മധ്യത്തിൽ വിടുക, അതിനാൽ പ്രോംപ്റ്റ് കാഷെ തിരിവുകളിലുടനീളം അടിക്കുന്നത് തുടരുന്നു. ഈ അപ്സ്ട്രീം സന്ദേശങ്ങൾക്കുള്ളിൽ റോൾ \"സിസ്റ്റം\" സ്വീകരിച്ചാൽ മാത്രം പ്രവർത്തനക്ഷമമാക്കുക (അല്ലെങ്കിൽ അത് 400-ന് ഉത്തരം നൽകുന്നു).",
+    "keepMidConversationSystemLabel": "മധ്യ-സംഭാഷണ സിസ്റ്റം സന്ദേശങ്ങൾ സ്ഥലത്ത് സൂക്ഷിക്കുക",
     "bulkPasteAdded": "{count, plural, one {1 കീ ചേർത്തു} other {# കീകൾ ചേർത്തു}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 തനിപ്പകർപ്പ് ഒഴിവാക്കി} other {# തനിപ്പകർപ്പുകൾ ഒഴിവാക്കി}}",
     "bulkPasteHint": "ഓരോ വരിയിലും ഒരു API കീ വീതം ഒട്ടിക്കുക. ശൂന്യമായ വരികൾ അവഗണിക്കുകയും തനിപ്പകർപ്പ് കീകൾ ഒഴിവാക്കുകയും ചെയ്യും.",

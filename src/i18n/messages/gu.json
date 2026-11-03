@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "અસ્થાયી કૂલડાઉન છોડો જેથી પુનઃપ્રાપ્ત કરી શકાય તેવી ભૂલો પછી પણ આ કનેક્શન પાત્ર રહે (પ્રતિબંધિત/સમાપ્ત જેવી ટર્મિનલ સ્થિતિઓ હજુ પણ લાગુ પડે છે).",
     "disableCoolingLabel": "આ કનેક્શન માટે કૂલડાઉન અક્ષમ કરો",
+    "keepMidConversationSystemDescription": "સિસ્ટમ સંદેશાઓને ઉચ્ચ-સ્તરના સિસ્ટમ પ્રોમ્પ્ટમાં ખસેડવાને બદલે સંદેશ સૂચિની અંદર મધ્ય-વાતચીત મોકલવામાં આવે છે, તેથી પ્રોમ્પ્ટ કેશ સમગ્ર વળાંક પર અથડાતું રહે છે. જો આ અપસ્ટ્રીમ સંદેશાઓની અંદર ભૂમિકા \"સિસ્ટમ\" સ્વીકારે તો જ સક્ષમ કરો (અન્યથા તે 400 નો જવાબ આપે છે).",
+    "keepMidConversationSystemLabel": "મધ્ય-વાતચીત સિસ્ટમ સંદેશાઓને સ્થાને રાખો",
     "bulkPasteAdded": "{count, plural, one {1 કી ઉમેરાઈ} other {# કીઓ ઉમેરાઈ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ડુપ્લિકેટ અવગણાયું} other {# ડુપ્લિકેટ્સ અવગણાયા}}",
     "bulkPasteHint": "દરેક લાઇનમાં એક API કી પેસ્ટ કરો. ખાલી લાઇનો અવગણવામાં આવે છે અને ડુપ્લિકેટ કીઓ છોડવામાં આવે છે.",

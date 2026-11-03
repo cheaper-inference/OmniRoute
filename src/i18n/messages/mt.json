@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Aqbeż il-perjodu ta’ stennija temporanju sabiex din il-konnessjoni tibqa’ eliġibbli anke wara żbalji li jistgħu jiġu rkuprati (l-istati terminali bħal ipprojbiti jew skaduti xorta jibqgħu japplikaw).",
     "disableCoolingLabel": "Iddiżattiva l-perjodu ta’ stennija għal din il-konnessjoni",
+    "keepMidConversationSystemDescription": "Ħalli l-messaġġi tas-sistema mibgħuta f'nofs il-konversazzjoni ġewwa l-lista tal-messaġġi minflok iċċaqlaqhom fil-pront tas-sistema tal-ogħla livell, sabiex il-cache fil-pront jibqa' jolqot minn dawriet. Ippermetta biss jekk dan upstream jaċċetta rwol \"sistema\" ġewwa messaġġi (inkella twieġeb 400).",
+    "keepMidConversationSystemLabel": "Żomm il-messaġġi tas-sistema ta’ nofs il-konversazzjoni f’posthom",
     "bulkPasteAdded": "{count, plural, one {Żdiedet ċavetta waħda} other {Żdiedu # ċwievet}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Inqabeż duplikat wieħed} other {Inqabżu # duplikati}}",
     "bulkPasteHint": "Waħħal ċavetta tal-API waħda f’kull linja. Il-linji vojta jiġu injorati u ċ-ċwievet duplikati jinqabżu.",

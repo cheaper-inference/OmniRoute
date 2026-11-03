@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ይህ ግንኙነት ሊታረሙ ከሚችሉ ስህተቶች በኋላም ብቁ ሆኖ እንዲቆይ ጊዜያዊውን የማቀዝቀዝ ጊዜ ይዝለሉ (እንደ የታገደ/ጊዜው ያለፈ ያሉ የመጨረሻ ሁኔታዎች አሁንም ተፈጻሚ ናቸው)።",
     "disableCoolingLabel": "ለዚህ ግንኙነት የማቀዝቀዝ ጊዜን አሰናክል",
+    "keepMidConversationSystemDescription": "ወደ ከፍተኛ ደረጃ የስርዓት መጠየቂያ ከማስገባት ይልቅ በመልእክት ዝርዝሩ ውስጥ የተላኩትን የስርዓት መልእክቶች መካከለኛ ውይይት ውስጥ ይተው፣ ስለዚህ የጥያቄው መሸጎጫ ተራ በተራ መምታቱን ይቀጥላል። ይህ የላይኛው ዥረት በመልእክቶች ውስጥ ሚና \"ስርዓት\" የሚቀበል ከሆነ ብቻ ያንቁ (አለበለዚያ 400 ይመልሳል)።",
+    "keepMidConversationSystemLabel": "የመሃል የውይይት ስርዓት መልዕክቶችን በቦታቸው ያቆዩ",
     "bulkPasteAdded": "{count, plural, one {1 ቁልፍ ታክሏል} other {# ቁልፎች ታክለዋል}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 የተደገመ ቁልፍ ታልፏል} other {# የተደገሙ ቁልፎች ታልፈዋል}}",
     "bulkPasteHint": "በእያንዳንዱ መስመር አንድ API ቁልፍ ይለጥፉ። ባዶ መስመሮች ችላ ይባላሉ፣ የተደገሙ ቁልፎችም ይዘለላሉ።",

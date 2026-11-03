@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "অস্থায়ী কুলডাউন এড়িয়ে যান যাতে পুনরুদ্ধারযোগ্য ত্রুটির পরেও এই সংযোগটি যোগ্য থাকে (নিষিদ্ধ/মেয়াদোত্তীর্ণের মতো টার্মিনাল অবস্থাগুলি এখনও প্রযোজ্য)।",
     "disableCoolingLabel": "এই সংযোগের জন্য কুলডাউন নিষ্ক্রিয় করুন",
+    "keepMidConversationSystemDescription": "সিস্টেম বার্তাগুলিকে শীর্ষ-স্তরের সিস্টেম প্রম্পটে স্থানান্তর করার পরিবর্তে বার্তা তালিকার মধ্যে মধ্য-কথোপকথন পাঠানো ছেড়ে দিন, তাই প্রম্পট ক্যাশে বার বার আঘাত করতে থাকে। শুধুমাত্র সক্রিয় করুন যদি এই আপস্ট্রিম বার্তাগুলির মধ্যে ভূমিকা \"সিস্টেম\" গ্রহণ করে (অন্যথায় এটি 400 উত্তর দেয়)।",
+    "keepMidConversationSystemLabel": "মধ্য-কথোপকথনের সিস্টেম বার্তাগুলিকে জায়গায় রাখুন",
     "bulkPasteAdded": "{count, plural, one {১টি কী যোগ করা হয়েছে} other {#টি কী যোগ করা হয়েছে}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {১টি সদৃশ বাদ দেওয়া হয়েছে} other {#টি সদৃশ বাদ দেওয়া হয়েছে}}",
     "bulkPasteHint": "প্রতি লাইনে একটি করে API কী পেস্ট করুন। ফাঁকা লাইন উপেক্ষা করা হবে এবং সদৃশ কীগুলো বাদ দেওয়া হবে।",

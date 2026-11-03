@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "រំលងរយៈពេលរង់ចាំបណ្តោះអាសន្ន ដើម្បីឱ្យការតភ្ជាប់នេះនៅតែអាចប្រើបាន សូម្បីតែបន្ទាប់ពីមានកំហុសដែលអាចស្ដារឡើងវិញបានក៏ដោយ (ស្ថានភាពបញ្ចប់ដូចជា ត្រូវបានហាមឃាត់/ផុតកំណត់ នៅតែអនុវត្ត)។",
     "disableCoolingLabel": "បិទរយៈពេលរង់ចាំសម្រាប់ការតភ្ជាប់នេះ",
+    "keepMidConversationSystemDescription": "ទុកសារប្រព័ន្ធដែលបានផ្ញើការសន្ទនាពាក់កណ្តាលនៅក្នុងបញ្ជីសារ ជំនួសឱ្យការផ្លាស់ទីពួកវាទៅក្នុងប្រអប់បញ្ចូលប្រព័ន្ធកម្រិតកំពូល ដូច្នេះឃ្លាំងសម្ងាត់ភ្លាមៗនៅតែបន្តឆ្លងកាត់។ បើកដំណើរការបានលុះត្រាតែប្រភពខាងលើទទួលយកតួនាទី \"ប្រព័ន្ធ\" នៅក្នុងសារ (បើមិនដូច្នេះទេ វាឆ្លើយ 400)។",
+    "keepMidConversationSystemLabel": "រក្សាសារប្រព័ន្ធសន្ទនាពាក់កណ្តាលនៅនឹងកន្លែង",
     "bulkPasteAdded": "{count, plural, one {បានបន្ថែមសោ 1} other {បានបន្ថែមសោ #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {បានរំលងសោស្ទួន 1} other {បានរំលងសោស្ទួន #}}",
     "bulkPasteHint": "បិទភ្ជាប់ API key មួយក្នុងមួយបន្ទាត់។ បន្ទាត់ទទេនឹងមិនត្រូវបានអើពើ ហើយសោស្ទួននឹងត្រូវបានរំលង។",

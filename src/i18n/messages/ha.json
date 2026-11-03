@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Tsallake lokacin dakatawa na wucin gadi domin wannan haɗin ya ci gaba da cancanta ko bayan kurakuran da za a iya gyarawa (har yanzu yanayin ƙarshe kamar an hana/an ƙare suna aiki).",
     "disableCoolingLabel": "Kashe lokacin dakatawa na wannan haɗin",
+    "keepMidConversationSystemDescription": "A bar saƙon tsarin da aka aika tsakiyar tattaunawa a cikin jerin saƙon maimakon matsar da su zuwa babban matakin tsarin faɗakarwa, don haka cache ɗin gaggawa ta ci gaba da bugawa a cikin juyi. Kunna kawai idan wannan na sama ya karɓi rawar \"tsarin\" a cikin saƙonni (in ba haka ba yana amsa 400).",
+    "keepMidConversationSystemLabel": "Ajiye saƙonnin tsarin tattaunawa a tsakiyar wuri",
     "bulkPasteAdded": "{count, plural, one {An ƙara maɓalli 1} other {An ƙara maɓallai #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {An tsallake kwafi 1} other {An tsallake kwafi #}}",
     "bulkPasteHint": "Liƙa maɓallin API ɗaya a kowane layi. Ana watsi da layukan da babu komai kuma ana tsallake maɓallan da aka maimaita.",

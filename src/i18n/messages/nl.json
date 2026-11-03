@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Sla de tijdelijke afkoelperiode over, zodat deze verbinding in aanmerking blijft komen, zelfs na herstelbare fouten (definitieve statussen zoals verbannen/verlopen zijn nog steeds van toepassing).",
     "disableCoolingLabel": "Afkoelperiode uitschakelen voor deze verbinding",
+    "keepMidConversationSystemDescription": "Laat systeemberichten die tijdens een gesprek zijn verzonden in de berichtenlijst staan in plaats van ze naar de systeemprompt op het hoogste niveau te verplaatsen, zodat de promptcache afwisselend blijft. Alleen inschakelen als deze upstream de rol \"systeem\" in berichten accepteert (anders antwoordt hij 400).",
+    "keepMidConversationSystemLabel": "Houd de berichten in het midden van het gesprekssysteem op hun plaats",
     "bulkPasteAdded": "{count, plural, one {1 sleutel toegevoegd} other {# sleutels toegevoegd}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicaat overgeslagen} other {# duplicaten overgeslagen}}",
     "bulkPasteHint": "Plak één API-sleutel per regel. Lege regels worden genegeerd en dubbele sleutels worden overgeslagen.",

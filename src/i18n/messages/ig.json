@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Mafee oge nkwụsị nwa oge ka njikọ a nọgide bụrụ nke a pụrụ iji ọbụna mgbe njehie ndị a pụrụ idozi mere (ọnọdụ njedebe dịka amachibidoro/agwụla ka na-emetụta ya).",
     "disableCoolingLabel": "Gbanyụọ oge nkwụsị maka njikọ a",
+    "keepMidConversationSystemDescription": "Hapụ ozi sistemụ ezigara mkparịta ụka etiti n'ime ndepụta ozi kama ịkwaga ha n'ime sistemụ ọkwa dị elu, yabụ cache ozugbo na-aga n'ihu na-akụgharị n'ofe ntụgharị. Kwado naanị ma ọ bụrụ na mgbago elu a na-anabata ọrụ \"sistemu\" n'ime ozi (ma ọ bụghị ya ọ na-aza 400).",
+    "keepMidConversationSystemLabel": "Debe ozi sistemụ mkparịta ụka n'etiti ebe",
     "bulkPasteAdded": "{count, plural, one {Agbakwunyere igodo 1} other {Agbakwunyere igodo #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Amafere oyiri 1} other {Amafere oyiri #}}",
     "bulkPasteHint": "Tapawa otu igodo API n'ahịrị ọ bụla. A na-eleghara ahịrị efu anya ma na-amafe igodo ndị bụ oyiri.",

@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Scipeáil an tréimhse fhuaraithe neamhbhuan ionas go bhfanann an ceangal seo incháilithe fiú tar éis earráidí in-aisghabhála (tá feidhm fós ag stáit chríochacha amhail toirmiscthe/éagtha).",
     "disableCoolingLabel": "Díchumasaigh an tréimhse fhuaraithe don cheangal seo",
+    "keepMidConversationSystemDescription": "Fág teachtaireachtaí córais a sheoltar i lár an chomhrá taobh istigh den liosta teachtaireachtaí seachas iad a bhogadh isteach sa chóras barrleibhéil leid, mar sin coinníonn an taisce pras ag bualadh trasna sealaíochta. Ná cumasaigh ach amháin má ghlacann an réamhtheachtacha seo le \"córas\" ról laistigh de theachtaireachtaí (ar shlí eile freagraíonn sé 400).",
+    "keepMidConversationSystemLabel": "Coinnigh teachtaireachtaí córais lárchomhrá i bhfeidhm",
     "bulkPasteAdded": "{count, plural, one {1 eochair curtha leis} other {# eochracha curtha leis}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dúblach scipeáilte} other {# dúblacha scipeáilte}}",
     "bulkPasteHint": "Greamaigh eochair API amháin in aghaidh an líne. Déantar neamhaird ar línte folmha agus scipeáiltear eochracha dúblacha.",

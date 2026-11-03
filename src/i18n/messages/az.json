@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Müvəqqəti soyuma müddətini atlayın ki, bu bağlantı bərpa edilə bilən xətalardan sonra belə uyğun qalsın (bloklanmış/vaxtı keçmiş kimi terminal vəziyyətlər hələ də tətbiq olunur).",
     "disableCoolingLabel": "Bu bağlantı üçün soyuma müddətini söndürün",
+    "keepMidConversationSystemDescription": "Söhbətin ortasında göndərilmiş sistem mesajlarını yuxarı səviyyəli sistem sorğusuna köçürmək əvəzinə mesaj siyahısında buraxın, beləliklə, sorğu keşi növbələr arasında vurmağa davam edir. Yalnız bu yuxarı axını mesajlar daxilində rol \"sistemini\" qəbul etdikdə aktivləşdirin (əks halda 400 cavab verir).",
+    "keepMidConversationSystemLabel": "Söhbətin ortasındakı sistem mesajlarını yerində saxlayın",
     "bulkPasteAdded": "{count, plural, one {1 açar əlavə edildi} other {# açar əlavə edildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dublikat nəzərə alınmadı} other {# dublikat nəzərə alınmadı}}",
     "bulkPasteHint": "Hər sətirə bir API açarı yapışdırın. Boş sətirlər və dublikat açarlar nəzərə alınmır.",

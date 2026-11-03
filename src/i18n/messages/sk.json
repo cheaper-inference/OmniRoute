@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskočiť prechodný cooldown (doba chladnutia), aby toto pripojenie zostalo oprávnené aj po odstrániteľných chybách (konečné stavy ako zablokované/vypršané stále platia).",
     "disableCoolingLabel": "Zakázať cooldown pre toto pripojenie",
+    "keepMidConversationSystemDescription": "Systémové správy odoslané počas konverzácie ponechajte v zozname správ namiesto toho, aby ste ich presunuli do systémového príkazu najvyššej úrovne, takže vyrovnávacia pamäť výziev neustále naráža na všetky ťahy. Povoliť iba vtedy, ak tento upstream akceptuje rolu \"systém\" vo vnútri správ (inak odpovie 400).",
+    "keepMidConversationSystemLabel": "Udržujte systémové správy uprostred konverzácie na mieste",
     "bulkPasteAdded": "{count, plural, one {Pridaný 1 kľúč} few {Pridané # kľúče} other {Pridaných # kľúčov}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Preskočený 1 duplikát} few {Preskočené # duplikáty} other {Preskočených # duplikátov}}",
     "bulkPasteHint": "Vložte jeden kľúč API na každý riadok. Prázdne riadky sa ignorujú a duplicitné kľúče sa preskočia.",

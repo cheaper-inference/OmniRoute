@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "تخطي فترة التهدئة المؤقتة حتى يظل هذا الاتصال مؤهلاً حتى بعد الأخطاء القابلة للاسترداد (لا تزال الحالات النهائية مثل banned/expired سارية).",
     "disableCoolingLabel": "تعطيل فترة التهدئة لهذا الاتصال",
+    "keepMidConversationSystemDescription": "اترك رسائل النظام مرسلة في منتصف المحادثة داخل قائمة الرسائل بدلاً من نقلها إلى مطالبة النظام ذات المستوى الأعلى، بحيث تستمر ذاكرة التخزين المؤقت للمطالبة في النقر عبر المنعطفات. قم بالتمكين فقط إذا كان هذا المنبع يقبل دور \"النظام\" داخل الرسائل (وإلا فإنه يجيب على 400).",
+    "keepMidConversationSystemLabel": "احتفظ برسائل نظام منتصف المحادثة في مكانها",
     "bulkPasteAdded": "المفاتيح المضافة: {count, plural, one {أُضيف مفتاح واحد} other {أُضيف # من المفاتيح}}",
     "bulkPasteDuplicatesIgnored": "التكرارات المتجاهلة: {count, plural, one {تُخطي تكرار واحد} other {تُخطي # من التكرارات}}",
     "bulkPasteHint": "ألصق مفتاح API واحدًا في كل سطر. تُتجاهل الأسطر الفارغة والمفاتيح المكررة.",

@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ਅਸਥਾਈ ਕੂਲਡਾਊਨ ਨੂੰ ਛੱਡੋ ਤਾਂ ਜੋ ਸੁਧਾਰੀ ਜਾ ਸਕਣ ਵਾਲੀਆਂ ਗਲਤੀਆਂ ਤੋਂ ਬਾਅਦ ਵੀ ਇਹ ਕਨੈਕਸ਼ਨ ਯੋਗ ਰਹੇ (ਪਾਬੰਦੀਸ਼ੁਦਾ/ਮਿਆਦ ਪੁੱਗਣ ਵਰਗੀਆਂ ਅੰਤਿਮ ਸਥਿਤੀਆਂ ਫਿਰ ਵੀ ਲਾਗੂ ਹੁੰਦੀਆਂ ਹਨ)।",
     "disableCoolingLabel": "ਇਸ ਕਨੈਕਸ਼ਨ ਲਈ ਕੂਲਡਾਊਨ ਅਯੋਗ ਕਰੋ",
+    "keepMidConversationSystemDescription": "ਸਿਸਟਮ ਸੁਨੇਹਿਆਂ ਨੂੰ ਸਿਖਰ-ਪੱਧਰ ਦੇ ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ ਵਿੱਚ ਲਿਜਾਣ ਦੀ ਬਜਾਏ ਸੁਨੇਹਾ ਸੂਚੀ ਵਿੱਚ ਮੱਧ-ਗੱਲਬਾਤ ਭੇਜੋ, ਇਸਲਈ ਪ੍ਰੋਂਪਟ ਕੈਸ਼ ਵਾਰੀ-ਵਾਰੀ ਹਿੱਟ ਕਰਦਾ ਰਹਿੰਦਾ ਹੈ। ਸਿਰਫ ਤਾਂ ਹੀ ਸਮਰੱਥ ਕਰੋ ਜੇਕਰ ਇਹ ਅੱਪਸਟਰੀਮ ਸੁਨੇਹਿਆਂ ਦੇ ਅੰਦਰ ਭੂਮਿਕਾ \"ਸਿਸਟਮ\" ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ (ਨਹੀਂ ਤਾਂ ਇਹ 400 ਦਾ ਜਵਾਬ ਦਿੰਦਾ ਹੈ)।",
+    "keepMidConversationSystemLabel": "ਮੱਧ-ਗੱਲਬਾਤ ਸਿਸਟਮ ਸੰਦੇਸ਼ਾਂ ਨੂੰ ਥਾਂ 'ਤੇ ਰੱਖੋ",
     "bulkPasteAdded": "{count, plural, one {1 ਕੁੰਜੀ ਜੋੜੀ ਗਈ} other {# ਕੁੰਜੀਆਂ ਜੋੜੀਆਂ ਗਈਆਂ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ਡੁਪਲੀਕੇਟ ਛੱਡਿਆ ਗਿਆ} other {# ਡੁਪਲੀਕੇਟ ਛੱਡੇ ਗਏ}}",
     "bulkPasteHint": "ਹਰ ਲਾਈਨ ਵਿੱਚ ਇੱਕ API ਕੁੰਜੀ ਪੇਸਟ ਕਰੋ। ਖਾਲੀ ਲਾਈਨਾਂ ਨੂੰ ਅਣਡਿੱਠਾ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ ਡੁਪਲੀਕੇਟ ਕੁੰਜੀਆਂ ਛੱਡ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।",

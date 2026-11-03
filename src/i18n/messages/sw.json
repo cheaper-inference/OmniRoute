@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ruka muda wa utulivu wa mpito ili muunganisho huu uendelee kustahiki hata baada ya hitilafu zinazoweza kurekebishwa (hali za mwisho kama vile zilizopigwa marufuku/zilizopitwa na wakati bado zinatumika).",
     "disableCoolingLabel": "Zima muda wa utulivu kwa muunganisho huu",
+    "keepMidConversationSystemDescription": "Acha ujumbe wa mfumo uliotumwa katikati ya mazungumzo ndani ya orodha ya ujumbe badala ya kuwahamisha hadi kwenye kidokezo cha mfumo wa kiwango cha juu, kwa hivyo akiba ya papo hapo inaendelea kupiga zamu. Washa tu ikiwa mkondo huu wa juu unakubali jukumu la \"mfumo\" ndani ya ujumbe (vinginevyo hujibu 400).",
+    "keepMidConversationSystemLabel": "Weka ujumbe wa mfumo wa mazungumzo katikati",
     "bulkPasteAdded": "{count, plural, one {Ufunguo 1 umeongezwa} other {Funguo # zimeongezwa}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Nakala rudufu 1 imerukwa} other {Nakala rudufu # zimerukwa}}",
     "bulkPasteHint": "Bandika ufunguo mmoja wa API kwa kila mstari. Mistari tupu hupuuzwa na funguo zilizorudiwa hurukwa.",

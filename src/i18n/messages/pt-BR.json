@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Permite que esta conta use créditos pagos depois que a cota da assinatura atingir o limite de corte. Requer créditos disponíveis informados pela OpenAI; pode gerar cobranças. Os limites do Spark e os cooldowns do upstream continuam se aplicando. A disponibilidade de créditos é verificada mesmo se o preflight de cota estiver desabilitado.",
     "disableCoolingDescription": "Ignore o tempo de espera transitório para que esta conexão permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado ainda se aplicam).",
     "disableCoolingLabel": "Desativar o tempo de espera para esta conexão",
+    "keepMidConversationSystemDescription": "Deixe as mensagens do sistema enviadas no meio da conversa dentro da lista de mensagens em vez de movê-las para o prompt de nível superior do sistema, para que o cache de prompts continue atingindo os turnos. Habilite apenas se este upstream aceitar a função \"sistema\" dentro das mensagens (caso contrário, ele responderá 400).",
+    "keepMidConversationSystemLabel": "Mantenha as mensagens do sistema no meio da conversa em vigor",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicata ignorada} other {# duplicatas ignoradas}}",
     "bulkPasteHint": "Cole uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são puladas.",

@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Jäta ajutine ooteaeg vahele, et see ühendus jääks kasutatavaks ka pärast taastatavaid vigu (lõppolekud, nagu blokeeritud või aegunud, kehtivad endiselt).",
     "disableCoolingLabel": "Keela selle ühenduse ooteaeg",
+    "keepMidConversationSystemDescription": "Jätke vestluse keskel saadetud süsteemisõnumid sõnumiloendisse selle asemel, et teisaldada need kõrgeima taseme süsteemiviipale, nii et viipade vahemälu liigub pidevalt üle pöörde. Luba ainult siis, kui see ülesvoolu aktsepteerib sõnumite sees rolli \"süsteem\" (muidu vastab 400).",
+    "keepMidConversationSystemLabel": "Hoidke vestluse keskel olevad süsteemisõnumid paigas",
     "bulkPasteAdded": "{count, plural, one {Lisati 1 võti} other {Lisati # võtit}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikaat jäeti vahele} other {# duplikaati jäeti vahele}}",
     "bulkPasteHint": "Kleepige igale reale üks API-võti. Tühje ridu eiratakse ja duplikaatvõtmed jäetakse vahele.",

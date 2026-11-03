@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ข้ามคูลดาวน์ชั่วคราวเพื่อให้การเชื่อมต่อนี้ยังคงมีสิทธิ์ใช้งานได้แม้หลังจากเกิดข้อผิดพลาดที่กู้คืนได้ (สถานะสิ้นสุด เช่น ถูกแบน/หมดอายุ ยังคงมีผลอยู่)",
     "disableCoolingLabel": "ปิดใช้งานคูลดาวน์สำหรับการเชื่อมต่อนี้",
+    "keepMidConversationSystemDescription": "ปล่อยให้ข้อความระบบที่ส่งระหว่างการสนทนาอยู่ในรายการข้อความ แทนที่จะย้ายไปยังพรอมต์ระบบระดับบนสุด ดังนั้นแคชของพรอมต์จะยังคงส่งข้ามผลัดกัน เปิดใช้งานเฉพาะเมื่ออัปสตรีมนี้ยอมรับบทบาท \"ระบบ\" ภายในข้อความ (ไม่เช่นนั้นจะตอบ 400)",
+    "keepMidConversationSystemLabel": "เก็บข้อความของระบบการสนทนาระหว่างสนทนาไว้",
     "bulkPasteAdded": "{count, plural, one {เพิ่มคีย์แล้ว 1 คีย์} other {เพิ่มคีย์แล้ว # คีย์}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {ข้ามคีย์ที่ซ้ำ 1 คีย์} other {ข้ามคีย์ที่ซ้ำ # คีย์}}",
     "bulkPasteHint": "วาง API key หนึ่งคีย์ต่อบรรทัด ระบบจะละเว้นบรรทัดว่างและข้ามคีย์ที่ซ้ำกัน",

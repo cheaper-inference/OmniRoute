@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Permite que esta cuenta use créditos de pago cuando su cuota de suscripción alcance el umbral. Requiere créditos disponibles informados por OpenAI; puede generar cargos. Los límites de Spark y los enfriamientos del proveedor siguen aplicándose. La disponibilidad de créditos se comprueba aunque la verificación previa de cuota esté desactivada, salvo que el filtrado local de cuota esté totalmente desactivado (verificación previa de cuota y política de límites, ambas desactivadas).",
     "disableCoolingDescription": "Omite el tiempo de espera transitorio para que esta conexión siga siendo apta incluso después de errores recuperables (los estados terminales, como bloqueado o caducado, siguen siendo aplicables).",
     "disableCoolingLabel": "Desactivar el tiempo de espera para esta conexión",
+    "keepMidConversationSystemDescription": "Deje los mensajes del sistema enviados a mitad de la conversación dentro de la lista de mensajes en lugar de moverlos al mensaje del sistema de nivel superior, para que el caché de mensajes siga apareciendo en todos los turnos. Habilítelo solo si este upstream acepta el rol \"sistema\" dentro de los mensajes (de lo contrario, responde 400).",
+    "keepMidConversationSystemLabel": "Mantenga los mensajes del sistema a mitad de la conversación en su lugar",
     "bulkPasteAdded": "{count, plural, one {1 clave añadida} other {# claves añadidas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicado omitido} other {# duplicados omitidos}}",
     "bulkPasteHint": "Pega una clave de API por línea. Las líneas vacías se ignoran y las claves duplicadas se omiten.",

@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускати тимчасовий період очікування, щоб це підключення залишалося доступним навіть після відновлюваних помилок (термінальні стани, як-от banned/expired, все одно застосовуються).",
     "disableCoolingLabel": "Вимкнути період очікування для цього підключення",
+    "keepMidConversationSystemDescription": "Залиште системні повідомлення, надіслані під час розмови, у списку повідомлень замість того, щоб переміщувати їх у системну підказку верхнього рівня, щоб кеш підказок постійно потрапляв по черзі. Увімкніть, лише якщо цей вихідний поток приймає роль \"система\" всередині повідомлень (інакше він відповідає 400).",
+    "keepMidConversationSystemLabel": "Зберігайте системні повідомлення в середині розмови",
     "bulkPasteAdded": "{count, plural, one {Додано 1 ключ} few {Додано # ключі} many {Додано # ключів} other {Додано # ключа}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Пропущено 1 дублікат} few {Пропущено # дублікати} many {Пропущено # дублікатів} other {Пропущено # дубліката}}",
     "bulkPasteHint": "Вставте по одному API-ключу в кожному рядку. Порожні рядки ігноруються, а дублікати ключів пропускаються.",

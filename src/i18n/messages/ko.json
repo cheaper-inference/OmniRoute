@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "일시적인 쿨다운을 건너뛰어 복구 가능한 오류가 발생한 후에도 이 연결이 사용 가능한 상태로 유지되도록 합니다(차단됨/만료됨과 같은 최종 상태는 여전히 적용됨).",
     "disableCoolingLabel": "이 연결에 대한 쿨다운 비활성화",
+    "keepMidConversationSystemDescription": "시스템 메시지를 최상위 시스템 프롬프트로 이동하는 대신 메시지 목록 내부의 대화 중간에 전송된 상태로 두십시오. 그러면 프롬프트 캐시가 차례대로 계속 히트합니다. 이 업스트림이 메시지 내에서 \"시스템\" 역할을 수락하는 경우에만 활성화됩니다(그렇지 않으면 400으로 응답).",
+    "keepMidConversationSystemLabel": "대화 도중 시스템 메시지를 제자리에 유지",
     "bulkPasteAdded": "{count, plural, one {키 1개 추가됨} other {키 #개 추가됨}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {중복 1개 건너뜀} other {중복 #개 건너뜀}}",
     "bulkPasteHint": "한 줄에 API 키 하나씩 붙여넣으세요. 빈 줄은 무시되며 중복 키는 건너뜁니다.",

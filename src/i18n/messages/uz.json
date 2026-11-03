@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vaqtinchalik kutish davrini chetlab o‘tadi, shunda ushbu ulanish tiklanadigan xatolardan keyin ham foydalanish uchun yaroqli bo‘lib qoladi (bloklangan yoki muddati tugagan kabi yakuniy holatlar baribir amal qiladi).",
     "disableCoolingLabel": "Ushbu ulanish uchun kutish davrini o‘chirish",
+    "keepMidConversationSystemDescription": "Suhbat o‘rtasida yuborilgan tizim xabarlarini yuqori darajadagi tizim so‘roviga o‘tkazish o‘rniga xabarlar ro‘yxati ichida qoldiring, shunda so‘rov keshi burilishlar bo‘ylab tegib turadi. Agar bu yuqori oqim xabarlar ichidagi rol \"tizim\" ni qabul qilsa, yoqing (aks holda u 400 ga javob beradi).",
+    "keepMidConversationSystemLabel": "Suhbat o'rtasida tizim xabarlarini joyida saqlang",
     "bulkPasteAdded": "{count, plural, one {1 ta kalit qo‘shildi} other {# ta kalit qo‘shildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ta takroriy kalit o‘tkazib yuborildi} other {# ta takroriy kalit o‘tkazib yuborildi}}",
     "bulkPasteHint": "Har bir qatorga bittadan API kalitini joylang. Bo‘sh qatorlar e’tiborga olinmaydi va takroriy kalitlar o‘tkazib yuboriladi.",

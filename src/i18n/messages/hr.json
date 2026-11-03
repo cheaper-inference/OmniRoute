@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskoči privremeno razdoblje mirovanja kako bi ova veza ostala dostupna čak i nakon pogrešaka od kojih se moguće oporaviti (terminalna stanja poput zabrane ili isteka i dalje se primjenjuju).",
     "disableCoolingLabel": "Onemogući razdoblje mirovanja za ovu vezu",
+    "keepMidConversationSystemDescription": "Ostavite sistemske poruke poslane usred razgovora unutar popisa poruka umjesto da ih premjestite u prompt sustava najviše razine, tako da predmemorija prompta neprestano pogađa. Omogući samo ako ovaj uzvodni sustav prihvaća ulogu \"sustav\" unutar poruka (inače odgovara 400).",
+    "keepMidConversationSystemLabel": "Držite poruke sustava usred razgovora na mjestu",
     "bulkPasteAdded": "{count, plural, one {dodan 1 ključ} few {dodana # ključa} other {dodano # ključeva}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {preskočen 1 duplikat} few {preskočena # duplikata} other {preskočeno # duplikata}}",
     "bulkPasteHint": "Zalijepite jedan API ključ po retku. Prazni reci se ignoriraju, a duplikati se preskaču.",

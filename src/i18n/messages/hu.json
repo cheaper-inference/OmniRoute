@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Az átmeneti várakozási idő kihagyása, hogy ez a kapcsolat helyreállítható hibák után is használható maradjon (a végleges állapotok, például a letiltás vagy lejárat továbbra is érvényesek).",
     "disableCoolingLabel": "Lehűlési idő (cooldown) letiltása ehhez a kapcsolathoz",
+    "keepMidConversationSystemDescription": "A beszélgetés közben elküldött rendszerüzeneteket hagyja az üzenetlistán belül ahelyett, hogy a legfelső szintű rendszerpromptba helyezné át őket, így a gyorsítótár folyamatosan üti egymást. Csak akkor engedélyezze, ha ez az upstream elfogadja a \"rendszer\" szerepkört az üzenetekben (egyébként 400-at válaszol).",
+    "keepMidConversationSystemLabel": "Tartsa a helyén a beszélgetés közbeni rendszerüzeneteket",
     "bulkPasteAdded": "{count, plural, one {1 kulcs hozzáadva} other {# kulcs hozzáadva}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ismétlődő kulcs kihagyva} other {# ismétlődő kulcs kihagyva}}",
     "bulkPasteHint": "Illessz be soronként egy API-kulcsot. Az üres sorokat figyelmen kívül hagyjuk, az ismétlődő kulcsokat pedig kihagyjuk.",

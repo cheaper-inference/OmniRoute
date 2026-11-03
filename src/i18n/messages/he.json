@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "דלג על תקופת הצינון הזמנית כדי שחיבור זה יישאר זמין גם לאחר שגיאות הניתנות לשחזור (מצבים סופיים כמו חסום/פג תוקף עדיין חלים).",
     "disableCoolingLabel": "השבת תקופת צינון עבור חיבור זה",
+    "keepMidConversationSystemDescription": "השאר הודעות מערכת שנשלחו באמצע השיחה בתוך רשימת ההודעות במקום להעביר אותן להנחיית המערכת ברמה העליונה, כך שמטמון ההנחיות ימשיך להכות על פני פניות. הפעל רק אם זה במעלה הזרם מקבל תפקיד \"מערכת\" בתוך הודעות (אחרת הוא עונה 400).",
+    "keepMidConversationSystemLabel": "שמור על הודעות מערכת באמצע השיחה במקום",
     "bulkPasteAdded": "{count, plural, one {נוסף מפתח אחד} other {נוספו # מפתחות}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {דילוג על כפילות אחת} other {דילוג על # כפילויות}}",
     "bulkPasteHint": "יש להדביק מפתח API אחד בכל שורה. המערכת מתעלמת משורות ריקות ומדלגת על מפתחות כפולים.",

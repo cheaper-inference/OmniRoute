@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "一時的なクールダウンをスキップし、回復可能なエラーの後でもこの接続を対象として維持します (banned/expired などの終端状態は引き続き適用されます)。",
     "disableCoolingLabel": "この接続のクールダウンを無効化",
+    "keepMidConversationSystemDescription": "会話中に送信されたシステム メッセージを最上位のシステム プロンプトに移動するのではなく、メッセージ リスト内に残しておきます。これにより、プロンプト キャッシュはターンを超えてヒットし続けます。このアップストリームがメッセージ内で役割「システム」を受け入れる場合にのみ有効にします (そうでない場合は 400 と応答します)。",
+    "keepMidConversationSystemLabel": "会話中のシステム メッセージを適切な位置に維持する",
     "bulkPasteAdded": "{count, plural, one {1件のキーを追加しました} other {#件のキーを追加しました}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {重複した1件をスキップしました} other {重複した#件をスキップしました}}",
     "bulkPasteHint": "1行につき1つのAPIキーを貼り付けてください。空行は無視され、重複するキーはスキップされます。",

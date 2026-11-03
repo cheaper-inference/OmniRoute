@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Langkau tempoh bertenang sementara supaya sambungan ini kekal layak walaupun selepas ralat yang boleh dipulihkan (keadaan terminal seperti disekat/tamat tempoh masih terpakai).",
     "disableCoolingLabel": "Nyahdayakan tempoh bertenang untuk sambungan ini",
+    "keepMidConversationSystemDescription": "Biarkan mesej sistem yang dihantar pertengahan perbualan di dalam senarai mesej dan bukannya mengalihkannya ke gesaan sistem peringkat atas, jadi cache gesaan terus merentasi selekoh. Dayakan hanya jika huluan ini menerima peranan \"sistem\" dalam mesej (jika tidak, ia menjawab 400).",
+    "keepMidConversationSystemLabel": "Simpan mesej sistem pertengahan perbualan di tempatnya",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambah} other {# kunci ditambah}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 pendua dilangkau} other {# pendua dilangkau}}",
     "bulkPasteHint": "Tampal satu kunci API bagi setiap baris. Baris kosong akan diabaikan dan kunci pendua akan dilangkau.",

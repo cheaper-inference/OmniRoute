@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Παραλείπει την προσωρινή περίοδο αναμονής, ώστε αυτή η σύνδεση να παραμένει διαθέσιμη προς επιλογή ακόμα και μετά από σφάλματα από τα οποία μπορεί να ανακάμψει (οι τελικές καταστάσεις, όπως η απαγόρευση ή η λήξη, εξακολουθούν να ισχύουν).",
     "disableCoolingLabel": "Απενεργοποίηση περιόδου αναμονής για αυτή τη σύνδεση",
+    "keepMidConversationSystemDescription": "Αφήστε τα μηνύματα συστήματος που αποστέλλονται κατά τη διάρκεια της συνομιλίας μέσα στη λίστα μηνυμάτων αντί να τα μετακινήσετε στην προτροπή συστήματος ανώτατου επιπέδου, έτσι ώστε η κρυφή μνήμη προτροπής να συνεχίζει να χτυπά σε όλες τις στροφές. Ενεργοποίηση μόνο εάν αυτό το upstream δέχεται το \"σύστημα\" ρόλων μέσα στα μηνύματα (διαφορετικά απαντά 400).",
+    "keepMidConversationSystemLabel": "Διατηρήστε τα μηνύματα του συστήματος κατά τη διάρκεια της συνομιλίας στη θέση τους",
     "bulkPasteAdded": "{count, plural, one {Προστέθηκε 1 κλειδί} other {Προστέθηκαν # κλειδιά}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Παραλείφθηκε 1 διπλότυπο} other {Παραλείφθηκαν # διπλότυπα}}",
     "bulkPasteHint": "Επικολλήστε ένα κλειδί API ανά γραμμή. Οι κενές γραμμές αγνοούνται και τα διπλότυπα κλειδιά παραλείπονται.",

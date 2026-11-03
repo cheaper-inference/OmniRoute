@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vorübergehende Abklingzeit überspringen, damit diese Verbindung auch nach behebbaren Fehlern verfügbar bleibt (endgültige Zustände wie gesperrt/abgelaufen gelten weiterhin).",
     "disableCoolingLabel": "Abklingzeit für diese Verbindung deaktivieren",
+    "keepMidConversationSystemDescription": "Lassen Sie Systemnachrichten, die während der Konversation gesendet werden, in der Nachrichtenliste, anstatt sie in die Systemaufforderung der obersten Ebene zu verschieben, damit der Eingabeaufforderungscache weiterhin über alle Runden hinweg zutrifft. Nur aktivieren, wenn dieser Upstream die Rolle „System“ in Nachrichten akzeptiert (andernfalls antwortet er mit 400).",
+    "keepMidConversationSystemLabel": "Behalten Sie die Systemnachrichten während des Gesprächs bei",
     "bulkPasteAdded": "{count, plural, one {1 Schlüssel hinzugefügt} other {# Schlüssel hinzugefügt}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 Duplikat übersprungen} other {# Duplikate übersprungen}}",
     "bulkPasteHint": "Fügen Sie pro Zeile einen API-Schlüssel ein. Leere Zeilen werden ignoriert und doppelte Schlüssel übersprungen.",

@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ignorar o cooldown transitório para que esta ligação permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado continuam a aplicar-se).",
     "disableCoolingLabel": "Desativar cooldown para esta ligação",
+    "keepMidConversationSystemDescription": "Deixe as mensagens do sistema enviadas no meio da conversa dentro da lista de mensagens em vez de as mover para o prompt de nível superior do sistema, para que a cache de prompts continue a atingir os turnos. Active apenas se este upstream aceitar a função \"system\" dentro das mensagens (caso contrário, responderá 400).",
+    "keepMidConversationSystemLabel": "Mantenha as mensagens do sistema no meio da conversação em vigor",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicado ignorado} other {# duplicados ignorados}}",
     "bulkPasteHint": "Cola uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são ignoradas.",

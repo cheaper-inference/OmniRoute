@@ -6238,6 +6238,8 @@
     "claudeAutoLimitResetDescription": "Khi tài khoản này đạt giới hạn sử dụng 5 giờ và có thể đặt lại giới hạn phiên, OmniRoute sẽ tự động sử dụng lượt đặt lại đó rồi thử lại ở tốc độ tối đa. Thao tác này sử dụng lượt đặt lại mỗi tuần một lần của tài khoản và vẫn được tính vào giới hạn hằng tuần.",
     "disableCoolingDescription": "Bỏ qua thời gian chờ tạm thời để kết nối này vẫn đủ điều kiện hoạt động ngay cả sau các lỗi có thể khôi phục (các trạng thái cuối cùng như bị cấm hoặc hết hạn vẫn áp dụng).",
     "disableCoolingLabel": "Vô hiệu hóa thời gian chờ cho kết nối này",
+    "keepMidConversationSystemDescription": "Để các tin nhắn hệ thống được gửi giữa cuộc trò chuyện bên trong danh sách tin nhắn thay vì chuyển chúng vào lời nhắc hệ thống cấp cao nhất, để bộ nhớ đệm lời nhắc tiếp tục chuyển sang các lượt khác. Chỉ bật nếu luồng ngược này chấp nhận vai trò \"hệ thống\" bên trong các tin nhắn (nếu không nó sẽ trả lời 400).",
+    "keepMidConversationSystemLabel": "Giữ nguyên các thông báo của hệ thống giữa cuộc trò chuyện",
     "bulkPasteAdded": "{count, plural, one {Đã thêm 1 khóa} other {Đã thêm # khóa}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Đã bỏ qua 1 khóa trùng lặp} other {Đã bỏ qua # khóa trùng lặp}}",
     "bulkPasteHint": "Dán một khóa API trên mỗi dòng. Các dòng trống sẽ bị bỏ qua và các khóa trùng lặp sẽ bị bỏ qua.",

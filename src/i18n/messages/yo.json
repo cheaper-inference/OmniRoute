@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Fò àkókò ìsinmi fún ìgbà díẹ̀ náà kọjá, kí ìsopọ̀ yìí lè ṣì yẹ fún lílo lẹ́yìn àwọn àṣìṣe tí a lè ṣàtúnṣe (àwọn ipò ìparí bíi banned/expired ṣì kan án).",
     "disableCoolingLabel": "Pa àkókò ìsinmi fún ìsopọ̀ yìí",
+    "keepMidConversationSystemDescription": "Fi awọn ifiranṣẹ eto silẹ ti a firanṣẹ ni aarin-ibaraẹnisọrọ inu atokọ ifiranṣẹ dipo gbigbe wọn sinu itọsi eto ipele-oke, nitorinaa kaṣe iyara n tẹsiwaju lilu kọja awọn iyipada. Mu ṣiṣẹ nikan ti oke yii ba gba ipa “eto” inu awọn ifiranṣẹ (bibẹẹkọ o dahun 400).",
+    "keepMidConversationSystemLabel": "Jeki aarin-ibaraẹnisọrọ eto awọn ifiranṣẹ ni ibi",
     "bulkPasteAdded": "{count, plural, one {A ṣàfikún kọ́kọ́rọ́ 1} other {A ṣàfikún àwọn kọ́kọ́rọ́ #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {A fò ó kọjá ẹ̀dà àdáwòkọ 1} other {A fò ó kọjá àwọn ẹ̀dà àdáwòkọ #}}",
     "bulkPasteHint": "Lẹ kọ́kọ́rọ́ API kan sí ìlà kọ̀ọ̀kan. A ó fo àwọn ìlà òfo kọjá, a ó sì fo àwọn kọ́kọ́rọ́ àdáwòkọ kọjá.",

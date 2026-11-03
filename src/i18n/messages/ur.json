@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "عارضی کول ڈاؤن کو چھوڑیں تاکہ یہ کنکشن قابلِ بحالی غلطیوں کے بعد بھی اہل رہے (حتمی حالتیں جیسے banned/expired اب بھی لاگو ہوں گی)۔",
     "disableCoolingLabel": "اس کنکشن کے لیے کول ڈاؤن غیر فعال کریں",
+    "keepMidConversationSystemDescription": "چھوڑیں سسٹم کے پیغامات کو میسج لسٹ کے اندر درمیانی گفتگو میں بھیجے جانے کے بجائے انہیں ٹاپ لیول سسٹم پرامپٹ میں لے جایا جاتا ہے، اس لیے پرامپٹ کیش موڑ پر آتا رہتا ہے۔ صرف اس صورت میں فعال کریں جب یہ اپ اسٹریم پیغامات کے اندر کردار \"سسٹم\" کو قبول کرتا ہے (بصورت دیگر یہ 400 کا جواب دیتا ہے)۔",
+    "keepMidConversationSystemLabel": "درمیانی گفتگو کے نظام کے پیغامات کو جگہ پر رکھیں",
     "bulkPasteAdded": "{count, plural, one {1 کلید شامل کی گئی} other {# کلیدیں شامل کی گئیں}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 تکراری کلید چھوڑ دی گئی} other {# تکراری کلیدیں چھوڑ دی گئیں}}",
     "bulkPasteHint": "ہر سطر میں ایک API کلید چسپاں کریں۔ خالی سطروں کو نظر انداز کیا جاتا ہے اور تکراری کلیدیں چھوڑ دی جاتی ہیں۔",

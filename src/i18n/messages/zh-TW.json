@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "跳過暫時冷卻，使此連線在可恢復錯誤後仍保持資格（已停用/已過期等終止狀態仍適用）。",
     "disableCoolingLabel": "對此連線停用冷卻",
+    "keepMidConversationSystemDescription": "將對話中傳送的系統訊息保留在訊息清單中，而不是將其移至頂級系統提示中，以便提示快取不斷命中。僅當該上游接受訊息內的角色「system」時才啟用（否則它會回答 400）。",
+    "keepMidConversationSystemLabel": "將對話中的系統訊息保留在適當的位置",
     "bulkPasteAdded": "{count, plural, one {已新增 1 個 key} other {已新增 # 個 key}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {已跳過 1 個重複項} other {已跳過 # 個重複項}}",
     "bulkPasteHint": "每行貼上一個 API 金鑰。空行會被忽略，重複金鑰會被跳過。",

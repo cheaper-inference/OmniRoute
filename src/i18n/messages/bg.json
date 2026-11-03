@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускане на временния период на изчакване, така че тази връзка да остане допустима дори след възстановими грешки (терминалните състояния като блокиран/изтекъл все още се прилагат).",
     "disableCoolingLabel": "Деактивиране на периода на изчакване за тази връзка",
+    "keepMidConversationSystemDescription": "Оставете системните съобщения, изпратени по време на разговор, вътре в списъка със съобщения, вместо да ги преместите в системния подкана от най-високо ниво, така че кешът на подканите да продължава да удря наред. Активирайте само ако този upstream приема роля \"система\" в съобщенията (в противен случай отговаря на 400).",
+    "keepMidConversationSystemLabel": "Поддържайте системните съобщения по средата на разговора",
     "bulkPasteAdded": "{count, plural, one {Добавен е 1 ключ} other {Добавени са # ключа}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Пропуснат е 1 дублиран ключ} other {Пропуснати са # дублирани ключа}}",
     "bulkPasteHint": "Поставете по един API ключ на ред. Празните редове се игнорират, а дублираните ключове се пропускат.",

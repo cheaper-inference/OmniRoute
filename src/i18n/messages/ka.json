@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "გამოტოვეთ დროებითი დაყოვნების პერიოდი, რათა ეს კავშირი აღდგენადი შეცდომების შემდეგაც ხელმისაწვდომი დარჩეს (ტერმინალური მდგომარეობები, როგორიცაა დაბლოკილი/ვადაგასული, კვლავ მოქმედებს).",
     "disableCoolingLabel": "ამ კავშირისთვის დაყოვნების პერიოდის გამორთვა",
+    "keepMidConversationSystemDescription": "საუბრის შუა რიცხვებში გაგზავნილი სისტემის შეტყობინებები დატოვეთ შეტყობინებების სიაში, ნაცვლად იმისა, რომ გადაიტანოთ ისინი ზედა დონის სისტემის მოთხოვნაში, ასე რომ, მოთხოვნის ქეში აგრძელებს მონაცვლეობას. ჩართვა მხოლოდ იმ შემთხვევაში, თუ ეს ზემოთ ნაკადში მიიღებს როლურ \"სისტემას\" შეტყობინებებში (წინააღმდეგ შემთხვევაში ის პასუხობს 400-ს).",
+    "keepMidConversationSystemLabel": "შეინახეთ შუა საუბრის სისტემის შეტყობინებები ადგილზე",
     "bulkPasteAdded": "{count, plural, one {დამატებულია 1 გასაღები} other {დამატებულია # გასაღები}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {გამოტოვებულია 1 დუბლიკატი} other {გამოტოვებულია # დუბლიკატი}}",
     "bulkPasteHint": "თითო ხაზზე ჩასვით თითო API გასაღები. ცარიელი ხაზები უგულებელყოფილია, ხოლო დუბლირებული გასაღებები გამოტოვებულია.",

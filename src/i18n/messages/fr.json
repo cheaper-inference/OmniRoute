@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ignorer le délai de récupération temporaire pour que cette connexion reste éligible même après des erreurs récupérables (les états terminaux comme banni/expiré s'appliquent toujours).",
     "disableCoolingLabel": "Désactiver le délai de récupération pour cette connexion",
+    "keepMidConversationSystemDescription": "Laissez les messages système envoyés au milieu d'une conversation dans la liste de messages au lieu de les déplacer vers l'invite système de niveau supérieur, afin que le cache d'invite continue de fonctionner d'un tour à l'autre. Activer uniquement si cet amont accepte le rôle \"système\" dans les messages (sinon il répond 400).",
+    "keepMidConversationSystemLabel": "Gardez les messages du système en cours de conversation en place",
     "bulkPasteAdded": "{count, plural, one {1 clé ajoutée} other {# clés ajoutées}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 doublon ignoré} other {# doublons ignorés}}",
     "bulkPasteHint": "Collez une clé API par ligne. Les lignes vides sont ignorées, tout comme les clés en double.",

@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "نادیده گرفتن دوره خنک‌سازی گذرا تا این اتصال حتی پس از خطاهای قابل بازیابی واجد شرایط باقی بماند (حالت‌های نهایی مانند مسدود شده/منقضی شده همچنان اعمال می‌شوند).",
     "disableCoolingLabel": "غیرفعال کردن دوره خنک‌سازی برای این اتصال",
+    "keepMidConversationSystemDescription": "پیامهای سیستمی را که در اواسط مکالمه ارسال میشوند، در فهرست پیامها قرار دهید، بهجای انتقال آنها به اعلان سیستم سطح بالا، بنابراین کش اعلانها همچنان در سراسر نوبتها ضربه میزنند. فقط در صورتی فعال شود که این بالادست «سیستم» نقش را در پیامها بپذیرد (در غیر این صورت به 400 پاسخ میدهد).",
+    "keepMidConversationSystemLabel": "پیام های سیستم میان مکالمه را در جای خود نگه دارید",
     "bulkPasteAdded": "{count, plural, one {۱ کلید اضافه شد} other {# کلید اضافه شد}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {۱ مورد تکراری نادیده گرفته شد} other {# مورد تکراری نادیده گرفته شد}}",
     "bulkPasteHint": "در هر خط یک کلید API جایگذاری کنید. خطوط خالی نادیده گرفته میشوند و کلیدهای تکراری رد میشوند.",

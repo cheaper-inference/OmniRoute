@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Pomiń tymczasowy cooldown, aby to połączenie pozostało kwalifikowalne nawet po błędach podlegających naprawie (stany terminalne, takie jak banned/expired, nadal obowiązują).",
     "disableCoolingLabel": "Wyłącz cooldown dla tego połączenia",
+    "keepMidConversationSystemDescription": "Pozostaw wiadomości systemowe wysłane w trakcie rozmowy na liście wiadomości, zamiast przenosić je do monitu systemowego najwyższego poziomu, dzięki czemu pamięć podręczna podpowiedzi będzie trafiać na zmianę. Włącz tylko wtedy, gdy ten upstream akceptuje rolę „systemu” w wiadomościach (w przeciwnym razie odpowiada 400).",
+    "keepMidConversationSystemLabel": "Przechowuj wiadomości systemowe w trakcie rozmowy na swoim miejscu",
     "bulkPasteAdded": "{count, plural, one {Dodano 1 klucz} other {Dodano # kluczy}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Pominięto 1 duplikat} other {Pominięto # duplikatów}}",
     "bulkPasteHint": "Wklej jeden klucz API w wierszu. Puste linie są ignorowane, a zduplikowane klucze są pomijane.",

@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Praleisti laikiną atvėsimo laikotarpį, kad šį ryšį būtų galima naudoti net ir po klaidų, po kurių galima atkurti veikimą (galutinės būsenos, pvz., užblokavimas ar galiojimo pabaiga, vis tiek taikomos).",
     "disableCoolingLabel": "Išjungti šio ryšio atvėsimo laikotarpį",
+    "keepMidConversationSystemDescription": "Palikite sistemos pranešimus, išsiųstus pokalbio viduryje, pranešimų sąraše, o ne perkelkite juos į aukščiausio lygio sistemos raginimą, kad raginimo talpykla būtų rodoma visuose posūkiuose. Įjungti tik tuo atveju, jei ši prieš srovę priima „sistemos“ vaidmenį pranešimuose (kitaip atsako į 400).",
+    "keepMidConversationSystemLabel": "Laikykite pokalbio viduryje esančius sistemos pranešimus",
     "bulkPasteAdded": "{count, plural, one {Pridėtas 1 raktas} other {Pridėta # raktų}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Praleistas 1 pasikartojantis raktas} other {Praleista # pasikartojančių raktų}}",
     "bulkPasteHint": "Įklijuokite po vieną API raktą kiekvienoje eilutėje. Tuščios eilutės ignoruojamos, o pasikartojantys raktai praleidžiami.",

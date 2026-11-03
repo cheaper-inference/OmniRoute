@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Hoppa över den tillfälliga cooldown-perioden så att denna anslutning förblir tillgänglig även efter återställningsbara fel (slutgiltiga tillstånd som banned/expired gäller fortfarande).",
     "disableCoolingLabel": "Inaktivera cooldown för denna anslutning",
+    "keepMidConversationSystemDescription": "Lämna systemmeddelanden som skickas mitt i konversationen i meddelandelistan istället för att flytta dem till systemprompten på översta nivån, så promptcachen fortsätter att slå över svängarna. Aktivera endast om denna uppströms accepterar rollen \"system\" i meddelanden (annars svarar den 400).",
+    "keepMidConversationSystemLabel": "Håll meddelanden i mitten av konversationen på plats",
     "bulkPasteAdded": "{count, plural, one {1 nyckel tillagd} other {# nycklar tillagda}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dubblett överhoppad} other {# dubbletter överhoppade}}",
     "bulkPasteHint": "Klistra in en API-nyckel per rad. Tomma rader ignoreras och dubblettnycklar hoppas över.",

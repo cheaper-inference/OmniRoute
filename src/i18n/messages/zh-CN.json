@@ -6322,6 +6322,8 @@
     "allowCodexPaidCreditsDescription": "允许此账户在订阅配额达到上限后使用付费额度。要求 OpenAI 报告有可用额度；可能产生费用。Spark 限额和上游冷却仍然适用。即使配额预检关闭也会检查额度可用性，除非本地配额过滤完全关闭（配额预检和限额策略都关闭）。",
     "disableCoolingDescription": "跳过瞬态冷却，以便此连接在发生可恢复错误后仍符合条件（被禁/过期等终态仍适用）。",
     "disableCoolingLabel": "禁用此连接的冷却",
+    "keepMidConversationSystemDescription": "将对话中发送的系统消息保留在消息列表中，而不是将其移至顶级系统提示中，以便提示缓存不断命中。仅当该上游接受消息内的角色“system”时才启用（否则它会回答 400）。",
+    "keepMidConversationSystemLabel": "将对话中的系统消息保留在适当的位置",
     "bulkPasteAdded": "{count, plural, one {已添加 1 个 key} other {已添加 # 个 key}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {已跳过 1 个重复项} other {已跳过 # 个重复项}}",
     "bulkPasteHint": "每行粘贴一个 API 密钥。空行会被忽略，重复密钥会被跳过。",

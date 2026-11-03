@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Izlaist pārejošo nogaidīšanas periodu, lai šo savienojumu varētu izmantot arī pēc novēršamām kļūdām (galīgie stāvokļi, piemēram, bloķēts savienojums vai beidzies derīguma termiņš, joprojām ir spēkā).",
     "disableCoolingLabel": "Atspējot nogaidīšanas periodu šim savienojumam",
+    "keepMidConversationSystemDescription": "Sarunas vidū nosūtītos sistēmas ziņojumus atstājiet ziņojumu sarakstā, nevis pārvietojiet tos uz augstākā līmeņa sistēmas uzvedni, lai uzvednes kešatmiņa tiktu rādīta vairākos pagriezienos. Iespējot tikai tad, ja šī augšpuse pieņem lomu \"sistēma\" ziņojumos (pretējā gadījumā tā atbild uz 400).",
+    "keepMidConversationSystemLabel": "Sarunas vidū saglabājiet sistēmas ziņojumus vietā",
     "bulkPasteAdded": "{count, plural, one {Pievienota 1 atslēga} other {Pievienotas # atslēgas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Izlaists 1 dublikāts} other {Izlaisti # dublikāti}}",
     "bulkPasteHint": "Ielīmējiet vienu API atslēgu katrā rindā. Tukšās rindas tiek ignorētas, un dublētās atslēgas tiek izlaistas.",

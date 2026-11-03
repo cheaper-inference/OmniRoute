@@ -6245,6 +6245,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Omite perioada de răcire tranzitorie, astfel încât această conexiune să rămână eligibilă chiar și după erori recuperabile (stările terminale precum blocat/expirat se aplică în continuare).",
     "disableCoolingLabel": "Dezactivează perioada de răcire pentru această conexiune",
+    "keepMidConversationSystemDescription": "Lăsați mesajele de sistem trimise la mijlocul conversației în lista de mesaje, în loc să le mutați în promptul de sistem de nivel superior, astfel încât memoria cache a prompturilor continuă să lovească în rânduri. Activați numai dacă acest sistem în amonte acceptă rolul „sistem” în interiorul mesajelor (în caz contrar, răspunde la 400).",
+    "keepMidConversationSystemLabel": "Păstrați mesajele sistemului de la mijlocul conversației în loc",
     "bulkPasteAdded": "{count, plural, one {1 cheie adăugată} other {# chei adăugate}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicat omis} other {# duplicate omise}}",
     "bulkPasteHint": "Lipește câte o cheie API pe fiecare rând. Rândurile goale sunt ignorate, iar cheile duplicate sunt omise.",
