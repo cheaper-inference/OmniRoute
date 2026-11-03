@@ -2,7 +2,16 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Modal } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { Button, Checkbox, Input, Modal, Select } from "@/shared/components";
 
 interface OAuthExportImportModalProps {
   isOpen: boolean;
@@ -214,22 +223,25 @@ export function OAuthExportImportModal({
           <label className="text-xs text-text-muted" htmlFor="oauth-export-provider">
             {t("oauthExportProviderLabel")}
           </label>
-          <select
+          <Select
             id="oauth-export-provider"
+            compact
+            className="w-auto"
+            selectClassName="text-xs"
             value={provider}
             disabled={importing}
             onChange={(e) => setProvider(e.target.value)}
-            className="text-xs rounded-lg border border-border bg-bg-subtle px-2 py-1.5 text-text-primary"
           >
             <option value="antigravity">antigravity</option>
             <option value="agy">agy</option>
-          </select>
-          <input
+          </Select>
+          <Input
             ref={fileInputRef}
             type="file"
             aria-label={t("oauthExportFileAria")}
             disabled={importing}
             accept=".json,application/json"
+            tabIndex={-1}
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -249,9 +261,9 @@ export function OAuthExportImportModal({
         </div>
 
         {parseError && (
-          <div className="px-3 py-2 rounded border border-red-500/30 bg-red-500/10 text-sm text-red-400">
+          <Alert variant="critical" dismissible={false}>
             {parseError}
-          </div>
+          </Alert>
         )}
 
         {preview.length > 0 && (
@@ -260,60 +272,62 @@ export function OAuthExportImportModal({
               {t("oauthExportDetected", { count: preview.length })}
             </div>
             <div className="overflow-x-auto max-h-64 overflow-y-auto rounded border border-border">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-left text-text-muted border-b border-border bg-bg-subtle sticky top-0">
-                    <th className="py-1.5 px-2">
-                      <input
-                        type="checkbox"
+              <Table
+                className="text-xs"
+                containerClassName="overflow-visible rounded-none border-0"
+                persistentScrollbars={false}
+              >
+                <TableHeader className="sticky top-0">
+                  <TableRow>
+                    <TableHead className="h-auto px-2 py-1.5">
+                      <Checkbox
                         aria-label={t("oauthExportSelectAll")}
                         disabled={importing}
                         checked={selectedCount === preview.length}
                         onChange={(e) => toggleAll(e.target.checked)}
                       />
-                    </th>
-                    <th className="py-1.5 px-2">{t("oauthExportColEmail")}</th>
-                    <th className="py-1.5 px-2">{t("oauthExportColProvider")}</th>
-                    <th className="py-1.5 px-2">{t("oauthExportColRefresh")}</th>
-                  </tr>
-                </thead>
-                <tbody>
+                    </TableHead>
+                    <TableHead className="h-auto px-2 py-1.5">{t("oauthExportColEmail")}</TableHead>
+                    <TableHead className="h-auto px-2 py-1.5">
+                      {t("oauthExportColProvider")}
+                    </TableHead>
+                    <TableHead className="h-auto px-2 py-1.5">
+                      {t("oauthExportColRefresh")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {preview.map((row) => (
-                    <tr key={row.index} className="border-b border-border/40">
-                      <td className="py-1 px-2">
-                        <input
-                          type="checkbox"
+                    <TableRow key={row.index}>
+                      <TableCell className="h-auto px-2 py-1">
+                        <Checkbox
                           aria-label={t("oauthExportSelectAccount", { index: row.index + 1 })}
                           disabled={importing}
                           checked={row.selected}
                           onChange={() => toggleRow(row.index)}
                         />
-                      </td>
-                      <td className="py-1 px-2 font-medium text-text-main">
+                      </TableCell>
+                      <TableCell className="h-auto px-2 py-1 font-medium text-text-main">
                         {row.email || t("oauthExportNoEmail")}
-                      </td>
-                      <td className="py-1 px-2 font-mono text-text-muted">{row.provider}</td>
-                      <td
-                        className={`py-1 px-2 ${row.hasRefreshToken ? "text-emerald-400" : "text-amber-400"}`}
+                      </TableCell>
+                      <TableCell className="h-auto px-2 py-1 font-mono text-text-muted">
+                        {row.provider}
+                      </TableCell>
+                      <TableCell
+                        className={`h-auto px-2 py-1 ${row.hasRefreshToken ? "text-success" : "text-warning"}`}
                       >
                         {row.hasRefreshToken ? t("oauthExportYes") : t("oauthExportNo")}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </>
         )}
 
         {outcome && (
-          <div
-            className={`px-3 py-2 rounded border text-sm ${
-              failed
-                ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
-                : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-            }`}
-          >
+          <Alert variant={failed ? "warning" : "success"} dismissible={false}>
             {t("oauthExportResult", {
               imported: outcome.imported,
               total: outcome.total,
@@ -326,7 +340,7 @@ export function OAuthExportImportModal({
                 ))}
               </ul>
             )}
-          </div>
+          </Alert>
         )}
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">

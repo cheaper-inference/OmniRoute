@@ -140,31 +140,31 @@ JWTهای دیگری نیز وجود دارند که با `JWT_SECRET` امضا 
 ## خط لوله
 
 ```
-درخواست ورودی → src/proxy.ts
-  → runAuthzPipeline() در src/server/authz/pipeline.ts
-    1. حذف هدرهای داخلی مورداعتماد (x-omniroute-auth-*, x-omniroute-route-class)
-    2. تولید شناسه درخواست و طبقهبندی مسیر از طریق classifyRoute()
-    3. اگر pathname == "/" → هدایت به /dashboard
-    4. اگر در حال تخلیه (خاموشسازی تدریجی) باشد و مسیر /api/* باشد → 503
-    5. اگر درخواست غیر GET به /api/* باشد → بررسی محافظ checkBodySize()
-    6. اگر OPTIONS باشد → پیشدرخواست CORS با وضعیت 204
-    7. اگر options.enforce == false باشد → عبور مستقیم همراه با هدرهای کلاس مسیر
-    8. در غیر این صورت: POLICIES[routeClass].evaluate(ctx)
-       - مجاز  → درج x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - رد → خطای JSON همراه با correlation_id (صفحات داشبورد → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-هدرهای داخلی مورداعتماد (تعریفشده در `src/server/authz/headers.ts`) پیش از طبقهبندی، **از درخواستهای ورودی حذف میشوند** — کلاینتها نمیتوانند برای جعل هویت یک موجودیت، `x-omniroute-auth-*` را از پیش مقداردهی کنند.
+هدرهای داخلی قابل اعتماد (تعریف شده در `src/server/authz/headers.ts`) هستند** از درخواست های دریافتی حذف شده است** قبل از طبقه بندی، مشتریان — نمی توانند `x-omniroute-auth-*` برای جعل هویت یک موضوع از قبل پر کنند.
 
-### قراردادهای سیاست
+### قراردادهای سیاستی
 
-هر کلاس مسیر، یک سیاست در `src/server/authz/policies/` دارد:
+هر کلاس مسیر یک خط مشی در `src/server/authz/policies/` دارد:
 
 - **`publicPolicy`** (`policies/public.ts`) — همیشه `allow({ kind: "anonymous", id: "anonymous" })` را برمیگرداند.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer را استخراج کرده و از طریق `validateApiKey()` اعتبارسنجی میکند. تنها زمانی به حالت ناشناس بازمیگردد که پرچم قابلیت مؤثر `REQUIRE_API_KEY` غیرفعال باشد. پرچم مؤثر از طریق `isRequireApiKeyEnabled()` (`بازنویسی پرچم قابلیت پایگاه داده > process.env.REQUIRE_API_KEY > مقدار پیشفرض`) تعیین میشود تا پرچمهای قابلیت داشبورد و متغیرهای محیطی، `/api/v1/*`، `/api/v1beta/*` و نامهای مستعار را بهطور یکسان کنترل کنند؛ خطاهای تعیین مقدار باعث رد بسته درخواست میشوند. درخواستهای دارای نشست داشبورد را در مسیرهای API کلاینت مجاز میداند (از جمله `/api/v1/models` که کاتالوگ مدل داشبورد از آن استفاده میکند).
-- **`managementPolicy`** (`policies/management.ts`) — نشست داشبورد یا درخواستهای داخلی همگامسازی مدل را میپذیرد (که با `/api/providers/[name]/(sync-models|models)` تطبیق داده میشوند)، یا اگر `isAuthRequired()` مقدار false برگرداند، بهطور کامل از بررسی صرفنظر میکند. اگر توکن Bearer وجود داشته باشد اما نامعتبر باشد، 403 (`AUTH_001`) و در غیر این صورت 401 برمیگرداند. همچنین پیش از هر شاخه احراز هویت، سطوح محافظ مسیر (LOCAL_ONLY / ALWAYS_PROTECTED) را اعمال میکند — به [سطوح محافظ مسیر](../security/ROUTE_GUARD_TIERS.md) مراجعه کنید. مسیرهای LOCAL_ONLY در `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (در حال حاضر: `/api/mcp/`) زمانی از نشانی غیر loopback قابلدسترسی هستند که کلید Bearer دارای حوزه دسترسی `manage` باشد؛ سایر مسیرهای LOCAL_ONLY، صرفنظر از حوزه دسترسی، همچنان بهطور سختگیرانه به loopback محدود میمانند.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — را استخراج میکند، از طریق `validateApiKey()` تأیید میکند. تنها زمانی که پرچم ویژگی موثر `REQUIRE_API_KEY` غیرفعال باشد، به ناشناس می رسد. پرچم مؤثر از طریق `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) حل میشود، بنابراین پرچمهای ویژگی داشبورد و متغیرهای محیطی به طور مداوم `/api/v1/*`، `/api/v1beta/*` و نامهای مستعار را کنترل میکنند. خرابی های حل کننده با شکست مواجه می شوند. به درخواستهای جلسه داشبورد در مسیرهای API مشتری (از جمله `/api/v1/models` که توسط کاتالوگ مدل داشبورد استفاده میشود) اجازه میدهد. هنگامی که Entra ID SSO فعال است، یک حامل که از نظر ساختاری یک توکن Entra است (سه بخش base64url، `RS*` alg، `kid`) توسط شاخه SSO مدیریت میشود.** قبل از** `validateApiKey()` و حکم آن نهایی است — هرگز به مسیر کلید API یا شاخه تنزل به ناشناس نمیافتد، بنابراین قطعی ارائهدهنده هویت نمیتواند به دسترسی باز تبدیل شود. کلیدهای ثابت API تحت تأثیر قرار نمی گیرند. [Entra ID SSO](../security/ENTRA_SSO.md) را ببینید.
+- **`managementPolicy`** (`policies/management.ts`) — جلسه داشبورد، درخواستهای داخلی همگامسازی مدل (مطابق با `/api/providers/[name]/(sync-models|models)`) را میپذیرد، یا اگر `isAuthRequired()` false را برگرداند، بهطور کامل رد میشود. 403 (`AUTH_001`) را هنگامی که یک توکن حامل وجود دارد اما نامعتبر است، برمیگرداند، در غیر این صورت 401. همچنین ردیفهای محافظ مسیر (LOCAL_ONLY / ALWAYS_PROTECTED) را قبل از هر شعبه auth — اجرا میکند. [Route Guard Tiers را](../security/ROUTE_GUARD_TIERS.md) ببینید. مسیرهای LOCAL_ONLY در `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (امروز: `/api/mcp/`) ممکن است از غیر حلقه بک دسترسی داشته باشند زمانی که کلید حامل محدوده `manage` را حمل می کند. تمام مسیرهای LOCAL_ONLY دیگر بدون در نظر گرفتن دامنه، دارای حلقه بک سخت هستند.
 
-یک سیاست موفق، `AuthSubject` را با `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` برمیگرداند. کنترلکنندههای پاییندستی میتوانند بهجای اجرای مجدد منطق احراز هویت، آن را از طریق `assertAuth(request, "CLIENT_API")` در `src/server/authz/assertAuth.ts` بخوانند.
+یک سیاست موفق `AuthSubject` با `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` برمی گرداند. کنترلکنندههای پاییندست میتوانند آن را از طریق `assertAuth(request, "CLIENT_API")` در `src/server/authz/assertAuth.ts` به جای اجرای مجدد منطق احراز هویت بخوانند.
 
 ## فهرست مسیرهای عمومی
 
@@ -297,25 +297,25 @@ export async function POST(request: Request) {
 - فهرست مجاز عمومی: `tests/unit/public-api-routes.test.ts`.
 - اجرای متمرکز: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## اشکالزدایی
+## اشکال زدایی
 
-پایپلاین همیشه پاسخها را با موارد زیر نشانهگذاری میکند:
+خط لوله همیشه پاسخ ها را با موارد زیر نشان می دهد:
 
 ```
-x-request-id:               <شناسه همبستگی، تکرارشده در بدنه خطاها>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-برای درخواستهای احراز هویتشده، هدرهای درخواست بالادستی (سمت هندلر) نیز شامل موارد زیر هستند:
+برای درخواستهای احراز هویت، سرصفحههای درخواست بالادستی (کنترلکننده) نیز شامل موارد زیر است:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<چهار نویسه آخر> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (اختیاری)
-x-omniroute-auth-scopes:    فهرست جداشده با ویرگول
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-درون هندلرها از `assertAuth(req, expectedClass)` استفاده کنید — اگر میانافزار دور زده شده باشد، این تابع خطای `AuthzAssertionError` را با کد `AUTHZ_NOT_INITIALIZED` ایجاد میکند (که برای شناسایی پسرفتهای پیکربندی در تستها مفید است).
+در صورت دور زدن میانافزار `assertAuth(req, expectedClass)` در هندلرهای — استفاده کنید. در صورت دور زدن میانافزار `AuthzAssertionError` با کد `AUTHZ_NOT_INITIALIZED` پرتاب میکند (مفید برای گرفتن رگرسیونهای پیکربندی در آزمایشها).
 
 ## همچنین ببینید
 

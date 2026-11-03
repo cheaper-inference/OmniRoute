@@ -293,81 +293,69 @@ Oba transporty SSE a Streamable HTTP sú zablokované, kým nie je server MCP po
 
 ## Autentifikácia a rozsahy
 
-MCP volania nástrojov čítajú reťazce rozsahov od volajúceho. Táto kontrola patrí do jedného zo troch nezávislých menných priestorov. Úspech jedného kontrolóra neznamená úspech ostatných. Pravidlá sú v sekcii [Tri menné priestory rozsahov](#three-scope-namespaces). Katalóg nástrojov je v sekcii [Rozsahy nástrojov MCP](#mcp-tool-scopes).
+volania nástroja MCP čítajú reťazce rozsahu od volajúceho. Táto kontrola je jedným z troch nezávislých menných priestorov. Prihrávka od jednej dámy nie je prihrávka od ostatných. Pravidlá sú [tri rozsahy názvov](#three-scope-namespaces). Katalóg nástrojov je [rozsahy nástrojov MCP](#mcp-tool-scopes).
 
-### Tri menné priestory rozsahov
+### Tri rozsahy názvov
 
-`manage` na API kľúči, `read:compression` na MCP nástroji a `read` na prístupovom tokene `oma_live_…` sú tri rôzne povolenia. Volajúci, ktorý pošle prístupový token `read` na meniacu sa správcovskú trasu, dostane HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Toto poradie určuje `scopeSatisfies` (nekonzultuje tabuľku MCP a ani matcher MCP ho nekonzultuje).
+`manage` na kľúči API, `read:compression` na nástroji MCP a `read` na prístupovom tokene `oma_live_…` sú tri rôzne granty. Volajúci, ktorí pošlú prístupový token `read` do mutujúcej riadiacej cesty, získajú HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Táto úroveň je `scopeSatisfies`. Neprehliada tabuľku MCP a porovnávač MCP ju nekonzultuje.
 
-| Menný priestor        | Prihlásenka                                                                | Kontrolór                      | Úspech umožňuje                                                |
-| :-------------------- | :------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------------- |
-| Správa API kľúčmi     | `api_keys.scopes`                                                          | `hasManageScope`               | Správcovské REST API pre daný Bearer kľúč                      |
-| Aditívne API kľúč     | rovnaké pole, jeden presný reťazec                                         | pomocná funkcia uvedená nižšie | Len tú jedinú schopnosť                                        |
-| Rozsahy nástrojov MCP | rovnaké pole, inak MCP `_meta` (iba HTTP/SSE), inak `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Ten nástroj, po zapnutí vynucovania                            |
-| Prístupový token      | `oma_live_…`                                                               | `scopeSatisfies`               | Správcovskú trasu, ktorej metóda a cesta vyžadujú toto poradie |
+| Menný priestor        | Poverenie                                                                   | Dáma                        | Prihrávka umožňuje                                            |
+| :-------------------- | :-------------------------------------------------------------------------- | :-------------------------- | :------------------------------------------------------------ |
+| Správa kľúčov API     | `api_keys.scopes`                                                           | `hasManageScope`            | Manažment REST pre tento nosný kľúč                           |
+| Prísada kľúča API     | rovnaké pole, jeden presný reťazec                                          | nižšie menovaného pomocníka | Iba jedna schopnosť                                           |
+| rozsahy nástrojov MCP | rovnaké pole, inak MCP `_meta` (len HTTP/SSE ), inak `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Tento nástroj, keď bude presadzovanie zapnuté                 |
+| Prístupový token      | `oma_live_…`                                                                | `scopeSatisfies`            | Cesta manažmentu, ktorej metóda a cesta vyžadujú túto hodnosť |
 
-Vydávanie každej prihlásenky je opísané v [Správcovskej autentifikácii](../guides/MANAGEMENT-AUTH.md).
+Razba každého poverenia je zahrnutá v [Manažérskej autentifikácii](../guides/MANAGEMENT-AUTH.md).
 
-#### Rozsahy API kľúča
+#### Rozsahy kľúčov API
 
-Jedno pole `api_keys.scopes` slúži dvom účelom. Používajú rôzne funkcie.
+Jedno pole `api_keys.scopes` napája dve úlohy. Využívajú rôzne funkcie.
 
-**Správcovské REST API.** `manage` a `admin` sú členmi `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` je to, čo autorizuje správcovské trasy pre daný kľúč. `admin` je na tých trasách schopný správy. Slovo `admin` tu nie je poradie prístupového tokenu a nerozširuje sa do rozsahov nástrojov MCP.
+**Manažment REST.** `manage` a `admin` sú členmi `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` je to, čo oprávňuje riadiace cesty pre tento kľúč. `admin` je na týchto trasách schopný správy. Slovo `admin` tu nie je hodnosťou prístupového tokenu a nerozširuje sa do rozsahu nástrojov MCP.
 
-**Aditívne reťazce.** Každý z nich je presná skúška členstva a každý zostáva mimo `MANAGEMENT_API_KEY_SCOPES`.
+**Prídavné struny.** Každý z nich je presným testom členstva a každý zostáva mimo `MANAGEMENT_API_KEY_SCOPES`.
 
-| Rozsah                         | Úspech umožňuje                                                                                                                                                           |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | Iba výnimku LOCAL_ONLY pre `/api/mcp/` mimo loopbacku (`hasMcpConnectOrManageScope`). Kľúč s `manage` alebo `admin` stále prejde touto výnimkou.                          |
-| `self:usage`                   | `GET /api/v1/me/status` pre tento kĺč (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` pridáva tento rozsah pri vytvorení (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Kvóty nadriadeného účtu v tomto payloadu stavu (`src/lib/usage/apiKeySelfService.ts`). Trasa stavu stále vyžaduje `self:usage`.                                           |
-| `policy:bypass-provider-quota` | Inferenčné volania tohto kľúča obchádzajú politiku kvót poskytovateľa (`hasProviderQuotaBypassScope` v `src/sse/handlers/chat.ts`).                                       |
+| Rozsah                         | Prihrávka umožňuje                                                                                                                                                       |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Iba vyrezanie `/api/mcp/` LOCAL_ONLY bez spätnej slučky (`hasMcpConnectOrManageScope`). Kľúč s `manage` alebo `admin` stále prechádza týmto vyrezaním.                   |
+| `self:usage`                   | `GET /api/v1/me/status` pre tento kľúč (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` pridá tento rozsah pri vytváraní (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Kvóty upstreamových účtov v rámci tohto stavu užitočného zaťaženia (`src/lib/usage/apiKeySelfService.ts`). Cesta stavu stále vyžaduje `self:usage`.                      |
+| `policy:bypass-provider-quota` | Volania odvodenia tohto kľúča preskočia politiku kvóty poskytovateľa (`hasProviderQuotaBypassScope` v `src/sse/handlers/chat.ts`).                                       |
 
 #### Zhoda
 
-Katalógom je tabuľka v sekcii [Rozsahy nástrojov MCP](#mcp-tool-scopes). Nepovažujte `MCP_SCOPE_LIST` v `src/shared/constants/mcpScopes.ts` za tento katalóg: ide o pôvodnú typovanú podmnožinu. Neskoršie nástroje deklarájú ďalšie rozsahy popri ňom (`read:notion`, `read:skills`, `read:local-corpus` a zvyšok tabuľky).
+Katalóg je tabuľka pod [rozsahmi nástrojov MCP](#mcp-tool-scopes). Nepovažujte `MCP_SCOPE_LIST` v `src/shared/constants/mcpScopes.ts` za katalóg: je to originálna typizovaná podmnožina. Neskoršie nástroje deklarujú popri ňom ďalšie rozsahy (`read:notion`, `read:skills`, `read:local-corpus` a zvyšok tabuľky).
 
-`evaluateToolScopes` v `open-sse/mcp-server/scopeEnforcement.ts` povoľuje volanie, keď každý požadovaný rozsah zodpovedá niektorému udelenému rozsahu:
+`evaluateToolScopes` v `open-sse/mcp-server/scopeEnforcement.ts` umožňuje volanie, keď sa každý požadovaný rozsah zhoduje s niektorým udeleným rozsahom:
 
 - `*` zodpovedá každému požadovanému rozsahu.
-- Udelený rozsah končiaci sa na `*` zodpovedá požadovanému rozsahu, ktorý sa začína predponou pred hviezdičkou. `read:*` zodpovedá `read:compression`.
-- Každý iný udelený rozsah zodpovedá iba identickému požadovanému reťazcu.
+- Pridelený rozsah, ktorý končí na `*` sa zhoduje s požadovaným rozsahom, ktorý začína predponou pred hviezdičkou. `read:*` zodpovedá `read:compression`.
+- Každý ďalší pridelený rozsah sa zhoduje iba s identickým požadovaným reťazcom.
 
-Kľúč, ktorého rozsahy sú `["manage"]`, zlyhá na `scopeMatches` pre `read:compression`. To isté volanie zlyhá aj pre `admin`, `mcp:connect`, `read` a `write`, ak sú to jediné udelené reťazce. Medzi rozsahmi nástrojov MCP neexistuje žiadna hierarchia nad rámec koncovej `*`.
+Kľúč, ktorého rozsahy sú `["manage"]`, zlyhá `scopeMatches` pre `read:compression`. Rovnaké volanie zlyhá pre `admin`, `mcp:connect`, `read` a `write`, ak sú to jediné povolené reťazce. Neexistuje žiadna hierarchia medzi rozsahmi nástrojov MCP za koncovým `*`.
 
-Vynucovanie je vypnuté, kým `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (predvolene `false`). Kým je vypnuté, `evaluateToolScopes` povoľuje volanie a preskočí katalóg. Keď je zapnuté, HTTP používa `api_keys.scopes` Bearer kľúča ako `authInfo` (pozri [Viazanie rozsahov HTTP na jednotlivé kľúče](#per-key-http-scope-binding-7895)). Keď sa nerozriešia žiadne rozsahy kľúča, udelená množina prepadne na MCP `_meta` (respektované iba pre HTTP/SSE volajúcich, v kontexte HTTP autentifikácie; `_meta` stdio volajúceho sa ignoruje, pretože ho kontroluje klient a neprináša identitu konkrétneho volajúceho), potom `OMNIROUTE_MCP_SCOPES`.
+Vynucovanie je vypnuté, pokiaľ nie je `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (predvolené `false`). Kým je vypnutý, `evaluateToolScopes` povolí hovor a preskočí katalóg. Keď je HTTP zapnuté, používa `api_keys.scopes` nosného kľúča ako `authInfo` (pozri [Väzba rozsahu HTTP pre jednotlivé kľúče](#per-key-http-scope-binding-7895) ). Keď sa nevyriešia žiadne kľúčové rozsahy, pridelená množina prepadne na MCP `_meta` (uplatňuje sa len pre volajúcich HTTP/SSE v rámci kontextu HTTP auth; `_meta` volajúceho stdio sa ignoruje, pretože ho ovláda klient a nenesie žiadnu identitu pre volajúceho), potom `OMNIROUTE_MCP_SCOPES`.
 
-#### Rozsahy prístupového tokenu
+#### Rozsahy prístupových tokenov
 
-Tokeny `oma_live_…` (`src/lib/accessTokens/scopes.ts`) nesú `read`, `write` alebo `admin`. `scopeSatisfies` je poradie: `admin` pokrýva `write` a `read` a `write` pokrýva `read`. Neznáme rozsahy nepokrývajú nič.
+žetóny `oma_live_…` (`src/lib/accessTokens/scopes.ts`) nesú `read`, `write` alebo `admin`. `scopeSatisfies` je poradie: `admin` pokrýva `write` a `read` a `write` zahŕňa `read`. Neznáme rozsahy nepokrývajú nič.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) porovnáva toto poradie s `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) porovnáva toto hodnotenie s `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` a `OPTIONS` vyžadujú `read`.
-- Všetky ostatné metódy vyžadujú `write`.
-- Cesty v `ADMIN_SCOPE_PREFIXES` vyžadujú `admin` pre každú metódu. `/api/mcp`
-  je v tomto zozname, takže prístupový token s `write` stále nemôže volať HTTP
-  rozhranie MCP.
-- Cesty v `ADMIN_MUTATION_PREFIXES` vyžadujú `admin` iba pri mutáciách.
-- Cesty v `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) vyžadujú `admin` iba pri mutáciách, a to len na
-  tejto presnej ceste — ostatné podciesty `/api/settings/*` si zachovávajú `write`.
+- Každá iná metóda vyžaduje `write`.
+- Cesty v `ADMIN_SCOPE_PREFIXES` vyžadujú `admin` pre každú metódu. `/api/mcp` je na tomto zozname, takže prístupový token `write` stále nemôže volať povrch MCP HTTP.
+- Cesty v `ADMIN_MUTATION_PREFIXES` vyžadujú `admin` iba pre mutácie.
+- Cesty v `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) vyžadujú `admin` iba pre mutácie a iba na tejto presnej ceste — ostatné podcesty `/api/settings/*` uchovávajú `write`.
 
-`PATCH /api/keys/{id}` je mutácia a nie je v uvedených zoznamoch pre `admin`, takže
-token s `read` dostane 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Túto podmienku spĺňa token s `write` alebo `admin`. Dashboard JWT, loopback CLI
-token typu machine-id a API kľúč s `manage` alebo `admin` používajú iné vety
-a nie sú touto hierarchiou obmedzené.
+`PATCH /api/keys/{id}` je mutácia a nie je na týchto zoznamoch správcov, takže token `read` dostane 403 `Access token scope 'read' is insufficient; 'write' required.` Prístupový token `write` alebo `admin` vyhovuje tejto ceste. Dashboard JWT, token CLI stroja so spätnou väzbou a kľúč API so `manage` alebo `admin` preberajú ďalšie vetvy a nie sú zúžené o túto úroveň.
 
-Prístupový token, ktorý prejde `scopeSatisfies` pre `/api/mcp`, prekonal len
-bránu správy. Volania nástrojov stále spúšťajú `scopeMatches` oproti rozsahom
-API kľúčov. Hierarchia prístupového tokenu nie je vstupom pre `scopeMatches`.
+Prístupový token, ktorý prechádza `scopeSatisfies` pre `/api/mcp`, vyčistil iba bránu správy. Volania nástrojov stále bežia `scopeMatches` proti rozsahom kľúčov API. Hodnotenie prístupového tokenu nie je vstupom do `scopeMatches`.
 
-### Rozsahy nástrojov MCP
+### rozsahy nástrojov MCP
 
-Vynucovanie rozsahov je centralizované v `open-sse/mcp-server/scopeEnforcement.ts`.
-Každý nástroj vyžaduje konkrétne rozsahy:
+Presadzovanie rozsahu je centralizované v `open-sse/mcp-server/scopeEnforcement.ts`. Každý nástroj vyžaduje špecifické rozsahy:
 
 | Rozsah                | Nástroje                                                                                                                                                                               |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -402,52 +390,22 @@ Každý nástroj vyžaduje konkrétne rozsahy:
 | `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                     |
 | `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                        |
 | `read:obsidian`       | 13 nástrojov na čítanie — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 nástrojov na zápis — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
+| `write:obsidian`      | 9 zapisovacie nástroje — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                      |
 
-Podporované sú aj rozsahy so zástupným znakom: `read:*` udeľuje všetky rozsahy na čítanie, `*` udeľuje plný prístup.
+Podporované sú rozsahy zástupných znakov: `read:*` udeľuje všetky rozsahy čítania, `*` poskytuje úplný prístup.
 
-### `mcp:connect` — úzka schopnosť pre route (#7895)
+### `mcp:connect` — schopnosť úzkej trasy (#7895)
 
-Prístup k transportu MCP cez HTTP/SSE (`/api/mcp/*`) z mimo loopback siete vyžaduje
-výnimku `/api/mcp/` LOCAL_ONLY (pozri `docs/security/ROUTE_GUARD_TIERS.md`). Históričky
-táto výnimka prijímala iba API kľúč s úplným rozsahom `manage`/`admin` — príliš široký pre
-volajúceho, ktorý potrebuje iba komunikovať s MCP. `src/shared/constants/managementScopes.ts` teraz
-exportuje `MCP_CONNECT_SCOPE = "mcp:connect"`: doplnkový, úzky rozsah (rovnaký precedens ako
-`SELF_USAGE_SCOPE`), ktorý autorizuje VÝHRADNE obchádzku `/api/mcp/` v
-`src/server/authz/policies/management.ts` — neudelí žiadny iný prístup k management routom
-a zámerne zostáva MIMO `MANAGEMENT_API_KEY_SCOPES`. Kľúč s `manage`/`admin`
-stále prejde výnimkou bez zmeny; `mcp:connect` je alternatíva s nižšími privilégiami pre
-vzdialených volajúcich používajúcich iba MCP, ktorá sa overuje cez `hasMcpConnectOrManageScope()`.
+Dosiahnutie transportu HTTP/SSE MCP (`/api/mcp/*`) z non-loopback vyžaduje `/api/mcp/` LOCAL_ONLY carve-out (pozri `docs/security/ROUTE_GUARD_TIERS.md`). Historicky toto vyčlenenie akceptovalo iba plné `manage`/`admin` -scope API kľúč — príliš široký pre volajúceho, ktorý potrebuje iba hovoriť MCP. `src/shared/constants/managementScopes.ts` teraz exportuje `MCP_CONNECT_SCOPE = "mcp:connect"`: aditívny, úzky rozsah (rovnaký precedens ako `SELF_USAGE_SCOPE`), ktorý povoľuje ONLY premostenie `/api/mcp/` v `src/server/authz/policies/management.ts` — neudeľuje žiadny iný prístup k riadeniu a je zámerne uchovávaný OUT `MANAGEMENT_API_KEY_SCOPES`. Kľúč držiaci `manage`/`admin` stále prechádza cez vyňatie nezmenené; `mcp:connect` je alternatíva s nižším privilégiom pre vzdialených volajúcich len MCP, overených cez `hasMcpConnectOrManageScope()`.
 
-### Viazanie rozsahov na jednotlivé kľúče cez HTTP (#7895)
+### Väzba rozsahu HTTP na kľúč (#7895)
 
-Cez HTTP/SSE teraz `open-sse/mcp-server/httpTransport.ts` zisťuje skutočné rozsahy
-`api_keys.scopes` volajúceho pomocou `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-a odovzdáva ich MCP SDK cez `transport.handleRequest(req, { authInfo })`, takže
-`extra.authInfo.scopes` dorazujúce ku každému volaniu nástroja odráža vlastné rozsahy kľúča Bearer.
-`scopeEnforcement.ts` — jeho `resolveCallerScopeContext()` už dávala `authInfo` prednosť pred
-`_meta` a záložným riešením cez premennú prostredia `OMNIROUTE_MCP_SCOPES` — toto riešenie iba napĺňa tento prvý,
-najvyššie prioritizovaný zdroj, ktorý cez HTTP doteraz nebol naplnený. Ak sa nerozrieši žiadny API kľúč
-(chýba hlavička, neplatný kľúč), `authInfo` zostáva `undefined` a rozlíšenie prejde bez zmeny na
-existujúci reťazec `meta`/env. stdio nemá identitu jednotlivých volajúcich (pozri
-`mcpCallerIdentity.ts`) a viazanie na jednotlivé kľúče ho neovplyvňuje — preskočí krok `_meta`
-(`_meta` sa rešpektuje iba vnútri HTTP auth kontextu, #15159) a rozsahy zisťuje výhradne z
-kľúča prostredia `OMNIROUTE_MCP_SCOPES`.
+Cez HTTP/SSE teraz `open-sse/mcp-server/httpTransport.ts` rozlišuje skutočné `api_keys.scopes` volajúceho cez `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) a odovzdáva ho MCP `transport.handleRequest(req, { authInfo })` SDK, takže `extra.authInfo.scopes` dosiahnutie každého volania nástroja odráža vlastné rozsahy nosného kľúča. `scopeEnforcement.ts` `resolveCallerScopeContext()` už uprednostnil `authInfo` pred `_meta` a `OMNIROUTE_MCP_SCOPES` env záložný zdroj — tým sa naplní iba prvý zdroj s najvyššou prioritou, ktorý bol predtým nenapájaný pred HTTP. Keď sa nevyrieši žiadny kľúč API (žiadna hlavička, neplatný kľúč), `authInfo` zostane `undefined` a rozlíšenie prepadne do existujúceho reťazca `meta`/ env nezmenené. stdio nemá žiadnu identitu pre volajúceho (pozri `mcpCallerIdentity.ts`) a nie je ovplyvnené väzbou na kľúč — preskočí krok `_meta` (`_meta` sa rešpektuje iba v kontexte HTTP auth, #15159) a vyhodnotí sa zo samotného kľúča `OMNIROUTE_MCP_SCOPES` env.
 
-**Vynucovanie je pre HTTP/SSE volajúcich s úzkym rozsahom zapnuté vždy, bez ohľadu na
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` s predvolenou hodnotou `false` je bezpečné iba
-pre lokálny/stdio tok s jedným operátorom, kde neexistuje identita volajúceho, voči ktorej by sa rozsahy
-určovali. `open-sse/mcp-server/server.ts::withScopeEnforcement()` bezpodmienečne zapne vynucovanie
-rozsahov pre jednotlivé nástroje (`shouldForceScopeEnforcement()` v `scopeEnforcement.ts`)
-vždy, keď `resolveCallerScopeContext()` rozlíšilo
-`source === "authInfo"` (t. j. skutočnú hlavičku HTTP Authorization s identitou konkrétneho kľúča, len HTTP/SSE) A daný
-kľúč nemá úplný rozsah `manage`/`admin`. Tým sa uzatvára medzera, v ktorej by kľúč s IBA
-úzkym rozsahom `mcp:connect` pre obchádzku — dokumentovaným vyššie ako niečo, čo neautorizuje nič iné než
-výnimku `/api/mcp/` LOCAL_ONLY — mohol po tom, čo operátor
-umožnil vzdialený prístup k MCP mimo loopback, spustiť každý MCP nástroj, len preto, že `OMNIROUTE_MCP_ENFORCE_SCOPES` sa dodáva
-s predvolenou hodnotou `false`. Úplný kľúč `manage`/`admin` cez HTTP a každý stdio/lokálny volajúci si
-zachovávajú doterajšie správanie riadené `OMNIROUTE_MCP_ENFORCE_SCOPES`.
+**Presadzovanie je vynútené pre volajúcich HTTP/SSE s úzkym rozsahom bez ohľadu na `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Predvolená hodnota `OMNIROUTE_MCP_ENFORCE_SCOPES` na `false` je bezpečná len pre tok local/stdio s jedným operátorom, kde neexistuje žiadna identita volajúceho, ktorá by sa dala použiť. `open-sse/mcp-server/server.ts::withScopeEnforcement()` bezpodmienečne zapne vynútenie rozsahu pre jednotlivé nástroje (`shouldForceScopeEnforcement()` v `scopeEnforcement.ts`) vždy, keď `resolveCallerScopeContext()` vyrieši `source === "authInfo"` (tj skutočná hlavička HTTP autorizácie na kľúč, HTTP/SSE-only) AND tento kľúč neobsahuje plný rozsah `manage`/`admin`. Tým sa uzatvára medzera, v ktorej kľúč, ktorý drží ONLY úzky rozsah `mcp:connect` premostenia — zdokumentovaný vyššie ako autorizujúci nič iné ako vyňatie `/api/mcp/` LOCAL_ONLY — by inak mohol vyvolať každý nástroj MCP keď operátor povolil prístup remote/non-loopback MCP, jednoducho preto, že `OMNIROUTE_MCP_ENFORCE_SCOPES` štandardne dodáva `false`. Úplný kľúč `manage`/`admin` nad HTTP a každý volajúci stdio/local ponechajú existujúce správanie `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated nezmenené.
+
+---
 
 ## Premenné prostredia
 
