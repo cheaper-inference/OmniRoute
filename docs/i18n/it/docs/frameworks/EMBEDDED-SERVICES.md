@@ -45,7 +45,25 @@ Tutti e otto seguono lo stesso modello di vigilanza:
 - OmniRoute li installa sotto `DATA_DIR/services/{name}/` (isolato da `package.json` di OmniRoute)
 - OmniRoute li genera e li monitora come processi figli
 - OmniRoute inserisce una chiave API effimera nell'ambiente del bambino e la ruota senza tempi di inattività (ove applicabile)
-- Tutti i percorsi di gestione (`/api/services/*`) lo sono**LOCAL_ONLY** — accessibile solo da loopback (regola difficile n. 17)
+- Tutti i percorsi di gestione (`/api/services/*`) lo sono**LOCAL_ONLY** — accessibile solo da loopback (regola difficile #17)
+
+### Core proxy gestiti
+
+Il campo Host proxy personalizzato accetta anche un collegamento di origine V2Ray. Selezionare** scatola di canto** O** Raggi X** esplicitamente, quindi fare clic su Salva. La digitazione non scarica né avvia mai un core. Save verifica l'archivio della versione ufficiale, convalida la configurazione nativa, avvia un listener SOCKS localhost distinto e solo successivamente scrive l'assegnazione del registro del proxy. L'attivazione non riuscita ripristina la configurazione e il processo gestiti precedenti. `STORAGE_ENCRYPTION_KEY` è obbligatorio; i collegamenti di origine sono crittografati.
+
+I file gestiti risiedono in `DATA_DIR/services/managed-proxy/`, separati da TPROXY. Esiste un processo di proprietà per core selezionato, fino a 100 ascoltatori. Non viene modificato alcun avvio automatico o impostazione predefinita del routing globale. Il salvataggio riuscito ricorda l'attivazione solo per questo core gestito; l'avvio dell'applicazione ripristina i core salvati abilitati utilizzando il file binario già verificato, mai un download all'avvio. L'arresto esplicito cancella il flag di attivazione. Un binario mancante o danneggiato richiede il nuovo salvataggio di una fonte. La cancellazione del registro rimuove la sorgente e il listener localmente; le modifiche ordinarie dell'endpoint vengono rifiutate per le righe gestite in modo che l'origine salvata non possa allontanarsi silenziosamente dal relativo ascoltatore instradato.
+
+| Formato sorgente                      | scatola di canto                                                                    | Raggi X                                                                             |
+| ------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Conversione supportata                                                              | Conversione supportata                                                              |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Conversione supportata                                                              | Respinto; utilizzare un nucleo compatibile                                          |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Supportato per VLESS/VMess/Trojan                                                   | Supportato per VLESS/VMess/Trojan                                                   |
+| trasporto XHTTP URI                   | Respinto                                                                            | Conversione supportata                                                              |
+| JSON nativo in uscita                 | Proxy protocols/options consentito del core selezionato, controllato in modo nativo | Proxy protocols/options consentito del core selezionato, controllato in modo nativo |
+
+Opzioni di collegamento sconosciute, flag TLS non sicuri, plug-in esterni, opzioni di percorso file locale e combinazioni non supportate vengono rifiutate anziché scartate silenziosamente. Gli oggetti nativi sono definizioni in uscita, non configurazioni dell'intero nucleo; Le uscite control/direct/bypass non sono accettate. WireGuard su sing-box 1.14 utilizza endpoint, quindi non è accettato come uscita nativa. Questo non è un convertitore per tutti i formati; SSR, i collegamenti legacy whole-base64 Shadowsocks, gli oggetti Clash arbitrari e le varianti di trasporto assenti dalla tabella richiedono un formato sorgente supportato separatamente.
+
+`/api/services/managed-proxy` è autenticato e funziona solo in loopback: GET elenca i metadati redatti, POST salva `{core,name,sourceLink,id?,assignment?}`, PATCH accetta `{core,action:"start"|"stop"}`. La pipeline peer-stamp attendibile dell'host deve essere presente. La diagnostica core nativa viene eliminata perché può contenere credenziali; gli eventi del ciclo di vita utilizzano il registratore di file dell'applicazione strutturata esistente senza collegamenti di origine o payload upstream. Allega solo i log delle applicazioni disinfettati per il supporto. Le versioni ufficiali sono fissate a sing-box 1.14.3 e Xray 26.3.27 con manifest release-asset SHA-256 ; gli aggiornamenti futuri richiedono la modifica insieme della versione e di tutti i digest verificati.
 
 ### Decisioni chiave (dal piano di progettazione)
 

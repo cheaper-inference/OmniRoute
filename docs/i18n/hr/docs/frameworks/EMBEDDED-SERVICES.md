@@ -47,6 +47,24 @@ Svih osam slijedi isti model nadzora:
 - OmniRoute ubacuje efemerni API ključ u djetetovu okolinu i rotira ga bez prekida (gdje je primjenjivo)
 - Sve rute upravljanja (`/api/services/*`) su**LOCAL_ONLY** — dostupan samo iz povratne petlje (tvrdo pravilo #17)
 
+### Upravljane proxy jezgre
+
+Polje Custom proxy host također prihvaća vezu izvora V2Ray. Odaberite** kutija za pjevanje** ili** Xray** izričito, zatim kliknite Spremi. Upisivanje nikada ne preuzima niti pokreće jezgru. Spremanje provjerava službenu arhivu izdanja, provjerava izvornu konfiguraciju, pokreće poseban localhost SOCKS slušač i tek onda zapisuje dodjelu proxy registra. Neuspjela aktivacija vraća prethodnu upravljanu konfiguraciju i proces. potreban je `STORAGE_ENCRYPTION_KEY` ; izvorne veze su šifrirane.
+
+Upravljane datoteke žive pod `DATA_DIR/services/managed-proxy/`, odvojeno od TPROXY. Postoji jedan proces u vlasništvu po odabranoj jezgri, do 100 slušatelja. Zadane postavke automatskog pokretanja ili globalnog usmjeravanja nisu promijenjene. Uspješno spremanje pamti aktivaciju samo za ovu upravljanu jezgru; pokretanje aplikacije vraća omogućene spremljene jezgre pomoću već provjerene binarne datoteke, nikad preuzimanja tijekom pokretanja. Eksplicitno zaustavljanje briše tu oznaku za aktivaciju. Binarna datoteka koja nedostaje ili je oštećena zahtijeva ponovno spremanje izvora. Brisanje registra uklanja izvor i slušatelja lokalno; obična uređivanja krajnje točke odbijaju se za upravljane retke tako da spremljeni izvor ne može tiho odlutati od svog preusmjerenog slušatelja.
+
+| Izvorni format                          | kutija za pjevanje                                                 | Xray                                                               |
+| --------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| VLESS, VMess, trojanac, Shadowsocks URI | Podržana konverzija                                                | Podržana konverzija                                                |
+| Hysteria2/hy2, TUIC, AnyTLS URI         | Podržana konverzija                                                | Odbijen; koristite kompatibilnu jezgru                             |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade   | Podržano za VLESS/VMess/Trojan                                     | Podržano za VLESS/VMess/Trojan                                     |
+| XHTTP URI prijevoz                      | Odbijen                                                            | Podržana konverzija                                                |
+| Izvorni izlazni JSON                    | Dopušteni proxy protocols/options odabrane jezgre, izvorno označen | Dopušteni proxy protocols/options odabrane jezgre, izvorno označen |
+
+Nepoznate opcije žica, nesigurne TLS oznake, vanjski dodaci, opcije lokalnog puta datoteke i nepodržane kombinacije odbijaju se umjesto da se tiho odbacuju. Izvorni objekti su izlazne definicije, a ne konfiguracije cijele jezgre; control/direct/bypass odlasci se ne prihvaćaju. WireGuard na sing-boxu 1.14 koristi krajnje točke, tako da nije prihvaćen kao izvorni izlaz. Ovo nije pretvarač svih formata; SSR, naslijeđene whole-base64 Shadowsocks veze, proizvoljni Clash objekti i varijante prijenosa kojih nema u tablici trebaju posebno podržan izvorni format.
+
+`/api/services/managed-proxy` je autentificiran i koristi samo povratnu petlju: GET ispisuje redigirane metapodatke, POST sprema `{core,name,sourceLink,id?,assignment?}`, PATCH prihvaća `{core,action:"start"|"stop"}`. Hostov pouzdani peer-stamp cjevovod mora biti prisutan. Izvorna jezgrena dijagnostika je potisnuta jer može sadržavati vjerodajnice; događaji životnog ciklusa koriste postojeći logger strukturirane aplikacijske datoteke bez izvornih veza ili uzvodnog sadržaja. Za podršku priložite samo pročišćene zapisnike aplikacija. Službene verzije prikvačene su na sing-box 1.14.3 i Xray 26.3.27 s manifestima SHA-256 za izdavanje sredstava; buduća ažuriranja zahtijevaju promjenu verzije i svih provjerenih sažetaka zajedno.
+
 ### Ključne odluke (iz plana dizajna)
 
 | Odluka                                      | Vrijednost                                                                       |

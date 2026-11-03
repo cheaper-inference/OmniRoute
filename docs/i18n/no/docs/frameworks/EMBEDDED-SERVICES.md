@@ -36,7 +36,7 @@ Innebygde tjenester er lokalt installerte prosesssidevognverktøy som OmniRoute 
 | **Mux**         | `mux` (hodeløs `mux server`)      |     8322      | Lokal agent-orkestreringsdemon (coder/mux). Livssyklusadministrert kun — ikke et rutemål (ingen LLM proxying).                                                                                                                                                                                                                      |
 | **Bifrost**     | `@maximhq/bifrost`                |     8080      | Gå til AI-gateway relé backend. Når du løper, automatisk valgt av reléruten (`/v1/relay/`)                                                                                                                                                                                                                                          |
 | **Dario**       | `@askalf/dario`                   |     3456      | Claude-abonnement proxy — alternative/failover til CLIProxyAPI for Claude-kode-formet trafikk; den injiserte nøkkelen blir `DARIO_ADMIN_TOKEN` som porterer dens `/admin/*` OAuth kontrollplan                                                                                                                                      |
-| **åpen-wa**     | `@open-wa/wa-automate`            |     8323      | WhatsApp webautomatisering (hodeløs Chromium via Puppeteer). Kun livssyklusadministrert — ikke et rutemål.                                                                                                                                                                                                                          |
+| **åpen-wa**     | `@open-wa/wa-automate`            |     8323      | WhatsApp webautomatisering (hodeløs Chromium via Puppeteer). Kun livssyklusstyrt — ikke et rutemål.                                                                                                                                                                                                                                 |
 | **LLMLingua**   | `@atjsh/llmlingua-2`              |     20135     | Prompt-komprimering sidevogn — ekte LLMLingua-2 ONNX modell (JS/TS port av Microsoft sin algoritme). `open-sse/services/compression/engines/llmlingua/index.ts` sender `/compress` over HTTP til den, og faller tilbake til den igangværende arbeidertråden når sidevognen er nede. Livssyklus-administrert bare — ikke et rutemål. |
 | **synge-boks**  | GitHub release binær (`singbox`)  |     20140     | TPROXY sidevogn som støtter `applyTproxy()` transparente proxy-avskjæring (`src/mitm/tproxy/setup.ts`). Installasjonsprogrammet laster ned den festede, kontrollsum-verifiserte utgivelsen. Kun livssyklusstyrt — ikke et rutemål (ingen LLM proxying)                                                                              |
 
@@ -47,16 +47,34 @@ Alle åtte følger samme tilsynsmodell:
 - OmniRoute injiserer en flyktig API nøkkel inn i barnets miljø og roterer den uten nedetid (der det er aktuelt)
 - Alle forvaltningsruter (`/api/services/*`) er**LOCAL_ONLY** — kun tilgjengelig fra loopback (hard regel #17)
 
+### Administrerte proxy-kjerner
+
+Egendefinert proxy-vertsfeltet godtar også en V2Ray -kildekobling. Velge** synge-boks** eller** Røntgen** eksplisitt, og klikk deretter på Lagre. Skriving laster aldri ned eller starter en kjerne. Lagre verifiserer det offisielle utgivelsesarkivet, validerer opprinnelig konfigurasjon, starter en distinkt localhost SOCKS -lytter, og først da skriver proxy-registertilordningen. Mislykket aktivering gjenoppretter den tidligere administrerte konfigurasjonen og prosessen. `STORAGE_ENCRYPTION_KEY` kreves; kildelenker er kryptert.
+
+Administrerte filer lever under `DATA_DIR/services/managed-proxy/`, atskilt fra TPROXY. Det er én eiet prosess per valgt kjerne, opptil 100 lyttere. Ingen autostart eller global rutingstandard er endret. Vellykket lagring husker aktivering kun for denne administrerte kjernen; programoppstart gjenoppretter aktiverte lagrede kjerner ved å bruke den allerede verifiserte binære filen, aldri en nedlasting ved oppstart. Eksplisitt stopp fjerner dette aktiveringsflagget. En manglende eller skadet binærfil krever lagring av en kilde på nytt. Sletting av register fjerner kilden og lytteren lokalt; Vanlige endepunktsredigeringer avvises for administrerte rader, slik at den lagrede kilden ikke kan drive fra den rutede lytteren.
+
+| Kildeformat                           | synge-boks                                                            | Røntgen                                                               |
+| ------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Støttet konvertering                                                  | Støttet konvertering                                                  |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Støttet konvertering                                                  | Avvist; bruk en kompatibel kjerne                                     |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Støttes for VLESS/VMess/Trojan                                        | Støttes for VLESS/VMess/Trojan                                        |
+| XHTTP URI transport                   | Avvist                                                                | Støttet konvertering                                                  |
+| Innfødt utgående JSON                 | Den valgte kjernens tillatte proxy protocols/options, sjekket innfødt | Den valgte kjernens tillatte proxy protocols/options, sjekket innfødt |
+
+Ukjente ledningsalternativer, usikre TLS flagg, eksterne plugins, lokale filbanealternativer og ustøttede kombinasjoner avvises i stedet for å forkastes stille. Innfødte objekter er utgående definisjoner, ikke hele kjernekonfigurasjoner; control/direct/bypass utgående er ikke akseptert. WireGuard på sing-box 1.14 bruker endepunkter, så det er ikke akseptert som en opprinnelig utgående. Dette er ikke en konverterer i alle formater; SSR, eldre whole-base64 Shadowsocks-koblinger, vilkårlige Clash-objekter og transportvarianter som mangler fra tabellen trenger et separat støttet kildeformat.
+
+`/api/services/managed-proxy` er autentisert og loopback-bare: GET viser redigerte metadata, POST lagrer `{core,name,sourceLink,id?,assignment?}`, PATCH godtar `{core,action:"start"|"stop"}`. Vertens pålitelige peer-stamp pipeline må være til stede. Innfødt kjernediagnostikk undertrykkes fordi de kan inneholde legitimasjon; livssyklushendelser bruker den eksisterende strukturerte applikasjonsfilloggeren uten kildekoblinger eller oppstrøms nyttelast. Legg kun ved desinfiserte applikasjonslogger for støtte. Offisielle versjoner er festet til sing-box 1.14.3 og Xray 26.3.27 med SHA-256 -manifester for release-asset; fremtidige oppdateringer krever endring av versjonen og alle verifiserte sammendrag.
+
 ### Nøkkelbeslutninger (fra designplan)
 
-| Avgjørelse                              | Verdi                                                                     |
-| --------------------------------------- | ------------------------------------------------------------------------- |
-| Dashboard-tilgang til 9Router native UI | Omvendt proxy ved `/dashboard/providers/services/9router/embed/*`         |
-| Installasjonsmekanisme                  | `npm install {package}` via `execFile` (ingen skallinterpolasjon)         |
-| Forbruksmodus                           | Leverandør registrert som `9router/{sub}/{model}` i rutingmotor           |
-| API nøkkelstyring                       | OmniRoute genererer, krypterer at-rest (AES-256-GCM) og injiserer via env |
-| Dashboard plassering                    | `/dashboard/providers/services` (tre faner)                               |
-| Autostart                               | Veksle per tjeneste, standard OFF                                         |
+| Avgjørelse                              | Verdi                                                                      |
+| --------------------------------------- | -------------------------------------------------------------------------- |
+| Dashboard-tilgang til 9Router native UI | Omvendt proxy ved `/dashboard/providers/services/9router/embed/*`          |
+| Installasjonsmekanisme                  | `npm install {package}` via `execFile` (ingen skallinterpolasjon)          |
+| Forbruksmodus                           | Leverandør registrert som `9router/{sub}/{model}` i rutingmotor            |
+| API nøkkelstyring                       | OmniRoute genererer, krypterer at-rest (AES-256-GCM), og injiserer via env |
+| Dashboard plassering                    | `/dashboard/providers/services` (tre faner)                                |
+| Autostart                               | Veksle per tjeneste, standard OFF                                          |
 
 ---
 

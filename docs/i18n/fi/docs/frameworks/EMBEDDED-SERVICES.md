@@ -45,18 +45,36 @@ Kaikki kahdeksan noudattavat samaa valvontamallia:
 - OmniRoute asentaa ne `DATA_DIR/services/{name}/` n alle (eristettynä OmniRoute:n omasta `package.json`)
 - OmniRoute synnyttää ja valvoo niitä lapsiprosesseina
 - OmniRoute ruiskuttaa lyhytaikaisen API -avaimen lapsen ympäristöön ja pyörittää sitä ilman seisokkeja (tarvittaessa)
-- Kaikki hallintareitit (`/api/services/*`) ovat**LOCAL_ONLY** — käytettävissä vain silmukan kautta (kova sääntö 17)
+- Kaikki hallintareitit (`/api/services/*`) ovat**LOCAL_ONLY** — käytettävissä vain silmukan kautta (kova sääntö #17)
+
+### Hallitut välityspalvelinytimet
+
+Mukautettu välityspalvelimen isäntäkenttä hyväksyy myös V2Ray -lähdelinkin. Valitse** laululaatikko** tai** Xray** nimenomaisesti ja napsauta sitten Tallenna. Kirjoittaminen ei koskaan lataa tai aloita ydintä. Tallenna vahvistaa virallisen julkaisuarkiston, vahvistaa alkuperäiset asetukset, käynnistää erillisen localhost SOCKS -kuuntelijan ja vasta sitten kirjoittaa välityspalvelimen rekisterimäärityksen. Epäonnistunut aktivointi palauttaa aiemman hallitun kokoonpanon ja prosessin. `STORAGE_ENCRYPTION_KEY` vaaditaan; lähdelinkit ovat salattuja.
+
+Hallitut tiedostot ovat `DATA_DIR/services/managed-proxy/` ssa erillään TPROXY stä. Valittua ydintä kohden on yksi omistettu prosessi, jopa 100 kuuntelijaa. Mitään automaattista käynnistystä tai yleistä reititystä ei ole muutettu. Onnistunut tallennus muistaa vain tämän hallitun ytimen aktivoinnin; sovelluksen käynnistys palauttaa käytössä olevat tallennetut ytimet käyttämällä jo vahvistettua binaaritiedostoa, ei koskaan käynnistysajan latausta. Explicit Stop tyhjentää aktivointilipun. Puuttuva tai vaurioitunut binaari vaatii lähteen uudelleentallentamisen. Rekisterin poistaminen poistaa lähteen ja kuuntelijan paikallisesti; tavalliset päätepisteen muokkaukset hylätään hallituille riveille, joten tallennettu lähde ei voi hiljaa ajautua pois reititetystä kuuntelijastaan.
+
+| Lähdemuoto                                  | laululaatikko                                                                     | Xray                                                                              |
+| ------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| VLESS, VMess, troijalainen, Shadowsocks URI | Tuettu muunnos                                                                    | Tuettu muunnos                                                                    |
+| Hysteria2/hy2, TUIC, AnyTLS URI             | Tuettu muunnos                                                                    | Hylätty; käytä yhteensopivaa ydintä                                               |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade       | Tuettu VLESS/VMess/Trojan                                                         | Tuettu VLESS/VMess/Trojan                                                         |
+| XHTTP URI                                   | Hylätty                                                                           | Tuettu muunnos                                                                    |
+| Alkuperäinen lähtevä JSON                   | Valitun ytimen sallittu välityspalvelin protocols/options, tarkistettu natiivisti | Valitun ytimen sallittu välityspalvelin protocols/options, tarkistettu natiivisti |
+
+Tuntemattomat johtovaihtoehdot, suojaamattomat TLS -liput, ulkoiset laajennukset, paikalliset tiedostopolkuvaihtoehdot ja ei-tuetut yhdistelmät hylätään sen sijaan, että ne hylätään hiljaa. Natiiviobjektit ovat lähteviä määritelmiä, eivät koko ytimen kokoonpanoja; control/direct/bypass -lähtöjä ei hyväksytä. WireGuard sing-box 1.14:ssä käyttää päätepisteitä, joten sitä ei hyväksytä alkuperäisenä lähteenä. Tämä ei ole kaikkien formaattien muunnin; SSR, vanhat whole-base64 Shadowsocks -linkit, mielivaltaiset Clash-objektit ja taulukosta puuttuvat siirtomuunnelmat tarvitsevat erikseen tuetun lähdemuodon.
+
+`/api/services/managed-proxy` on todennettu ja vain takaisinkytkentä: GET luettelee redaktoidut metatiedot, POST tallentaa `{core,name,sourceLink,id?,assignment?}`, PATCH hyväksyy `{core,action:"start"|"stop"}`. Isännän luotetun vertaisleimaputken on oltava käytössä. Alkuperäiset ydindiagnostiikat estetään, koska ne voivat sisältää valtuustietoja; elinkaaritapahtumat käyttävät olemassa olevaa strukturoitua sovellustiedostologgeria ilman lähdelinkkejä tai ylävirran hyötykuormia. Liitä vain puhtaat sovelluslokit tukea varten. Viralliset versiot on kiinnitetty sing-boxiin 1.14.3 ja Xray 26.3.27 release-asset SHA-256 -luetteloilla; tulevat päivitykset vaativat version ja kaikkien vahvistettujen tiivistelmien muuttamisen yhdessä.
 
 ### Keskeiset päätökset (suunnittelusuunnitelmasta)
 
 | Päätös                                       | Arvo                                                                                   |
 | -------------------------------------------- | -------------------------------------------------------------------------------------- |
 | Pääsy kojelautaan 9Routerin alkuperäiseen UI | Käänteinen välityspalvelin osoitteessa `/dashboard/providers/services/9router/embed/*` |
-| Asennusmekanismi                             | `npm install {package}` `execFile` kautta (ei shellin interpolointia)                  |
+| Asennusmekanismi                             | `npm install {package}` `execFile` kautta (ei kuoriinterpolointia)                     |
 | Kulutustila                                  | Palveluntarjoaja on rekisteröity reititysmoottoriin nimellä `9router/{sub}/{model}`    |
 | API avainten hallinta                        | OmniRoute luo, salaa lepotilassa (AES-256-GCM) ja ruiskuttaa env:n kautta              |
 | Kojelaudan sijainti                          | `/dashboard/providers/services` (kolme välilehteä)                                     |
-| Automaattinen käynnistys                     | Vaihda palvelukohtaisesti, oletus OFF                                                  |
+| Automaattinen käynnistys                     | Vaihda palvelukohtaisesti, oletusarvoinen OFF                                          |
 
 ---
 

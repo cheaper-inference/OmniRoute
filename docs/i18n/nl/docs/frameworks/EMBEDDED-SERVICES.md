@@ -47,6 +47,24 @@ Alle acht volgen hetzelfde toezichtmodel:
 - OmniRoute injecteert een kortstondige API sleutel in de omgeving van het kind en roteert deze zonder onderbreking (indien van toepassing)
 - Alle beheerroutes (`/api/services/*`) zijn dat**LOCAL_ONLY** — alleen toegankelijk via loopback (harde regel #17)
 
+### Beheerde proxykernen
+
+Het veld Aangepaste proxyhost accepteert ook een V2Ray bronlink. Selecteer** zangdoos** of** Röntgenfoto** expliciet en klik vervolgens op Opslaan. Door te typen wordt nooit een kern gedownload of gestart. Save verifieert het officiële release-archief, valideert de eigen configuratie, start een aparte localhost SOCKS listener en schrijft dan pas de proxy-registertoewijzing. Bij een mislukte activering worden de vorige beheerde configuratie en het vorige beheerde proces hersteld. `STORAGE_ENCRYPTION_KEY` is vereist; bronlinks zijn gecodeerd.
+
+Beheerde bestanden staan onder `DATA_DIR/services/managed-proxy/`, gescheiden van TPROXY. Er is één eigen proces per geselecteerde kern, maximaal 100 luisteraars. Er is geen standaard voor automatisch starten of globale routering gewijzigd. Succesvol opslaan onthoudt alleen de activering voor deze beheerde kern; het opstarten van de applicatie herstelt ingeschakelde opgeslagen kernen met behulp van het reeds geverifieerde binaire bestand, nooit een download tijdens het opstarten. Expliciete stop wist die activeringsvlag. Voor een ontbrekend of beschadigd binair bestand moet een bron opnieuw worden opgeslagen. Door het register te verwijderen worden de bron en luisteraar lokaal verwijderd; gewone eindpuntbewerkingen worden afgewezen voor beheerde rijen, zodat de opgeslagen bron niet stilletjes van de gerouteerde luisteraar kan afwijken.
+
+| Bronformaat                           | zangdoos                                                                      | Röntgenfoto                                                                   |
+| ------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Ondersteunde conversie                                                        | Ondersteunde conversie                                                        |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Ondersteunde conversie                                                        | Afgewezen; gebruik een compatibele kern                                       |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Ondersteund voor VLESS/VMess/Trojan                                           | Ondersteund voor VLESS/VMess/Trojan                                           |
+| XHTTP URI vervoer                     | Afgewezen                                                                     | Ondersteunde conversie                                                        |
+| Inheemse uitgaande JSON               | Geselecteerde core's toegestane proxy protocols/options, native gecontroleerd | Geselecteerde core's toegestane proxy protocols/options, native gecontroleerd |
+
+Onbekende draadopties, onveilige TLS vlaggen, externe plug-ins, lokale bestandspadopties en niet-ondersteunde combinaties worden afgewezen in plaats van stilzwijgend weggegooid. Native objecten zijn uitgaande definities, geen volledige kernconfiguraties; control/direct/bypass uitgaande verbindingen worden niet geaccepteerd. WireGuard op sing-box 1.14 gebruikt eindpunten, dus het wordt niet geaccepteerd als native uitgaand verkeer. Dit is geen converter voor alle formaten; SSR, oudere whole-base64 Shadowsocks-koppelingen, willekeurige Clash-objecten en transportvarianten die niet in de tabel voorkomen, hebben een afzonderlijk ondersteund bronformaat nodig.
+
+`/api/services/managed-proxy` is geauthenticeerd en alleen loopback: GET geeft geredigeerde metadata weer, POST slaat `{core,name,sourceLink,id?,assignment?}` op, PATCH accepteert `{core,action:"start"|"stop"}`. De vertrouwde peer-stamp-pijplijn van de host moet aanwezig zijn. Native core-diagnostiek wordt onderdrukt omdat deze referenties kan bevatten; levenscyclusgebeurtenissen gebruiken de bestaande gestructureerde applicatiebestandslogger zonder bronlinks of upstream-payloads. Voeg ter ondersteuning alleen opgeschoonde applicatielogboeken toe. Officiële versies zijn vastgemaakt aan sing-box 1.14.3 en Xray 26.3.27 met release-asset SHA-256 manifesten; toekomstige updates vereisen het samen wijzigen van de versie en alle geverifieerde samenvattingen.
+
 ### Kernbeslissingen (uit ontwerpplan)
 
 | Beslissing                             | Waarde                                                                    |

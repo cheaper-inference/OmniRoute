@@ -47,11 +47,29 @@ Alle otte følger den samme tilsynsmodel:
 - OmniRoute sprøjter en flygtig API nøgle ind i barnets omgivelser og roterer den uden nedetid (hvor det er relevant)
 - Alle ledelsesruter (`/api/services/*`) er**LOCAL_ONLY** — kun tilgængelig fra loopback (hård regel #17)
 
+### Administrerede proxykerner
+
+Feltet Custom proxy-vært accepterer også et V2Ray -kildelink. Vælge** synge-boks** eller** Røntgen** udtrykkeligt, og klik derefter på Gem. Indtastning downloader eller starter aldrig en kerne. Save verificerer det officielle udgivelsesarkiv, validerer den oprindelige konfiguration, starter en særskilt localhost SOCKS lytter og skriver først derefter proxy-registry-tildelingen. Mislykket aktivering gendanner den tidligere administrerede konfiguration og proces. `STORAGE_ENCRYPTION_KEY` er påkrævet; kildelinks er krypteret.
+
+Administrerede filer lever under `DATA_DIR/services/managed-proxy/`, adskilt fra TPROXY. Der er én ejet proces pr. udvalgt kerne, op til 100 lyttere. Ingen autostart eller global routing-standard er ændret. Vellykket lagring husker kun aktivering for denne administrerede kerne; applikationsstart gendanner aktiverede gemte kerner ved hjælp af den allerede verificerede binære, aldrig en download-tid ved opstart. Eksplicit stop rydder dette aktiveringsflag. En manglende eller beskadiget binærfil kræver genlagring af en kilde. Sletning af registreringsdatabasen fjerner kilden og lytteren lokalt; almindelige slutpunktsredigeringer afvises for administrerede rækker, så den gemte kilde ikke stille kan glide fra sin dirigerede lytter.
+
+| Kildeformat                           | synge-boks                                                                 | Røntgen                                                                    |
+| ------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Understøttet konvertering                                                  | Understøttet konvertering                                                  |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Understøttet konvertering                                                  | Afvist; bruge en kompatibel kerne                                          |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Understøttet til VLESS/VMess/Trojan                                        | Understøttet til VLESS/VMess/Trojan                                        |
+| XHTTP URI transport                   | Afvist                                                                     | Understøttet konvertering                                                  |
+| Native udgående JSON                  | Den valgte kernes tilladte proxy protocols/options, kontrolleret indbygget | Den valgte kernes tilladte proxy protocols/options, kontrolleret indbygget |
+
+Ukendte ledningsindstillinger, usikre TLS flag, eksterne plugins, lokale filstiindstillinger og ikke-understøttede kombinationer afvises i stedet for at kassere dem. Native objekter er udgående definitioner, ikke hele kernekonfigurationer; control/direct/bypass udgående accepteres ikke. WireGuard på sing-box 1.14 bruger endepunkter, så det accepteres ikke som en native udgående. Dette er ikke en konverter til alle formater; SSR, legacy whole-base64 Shadowsocks-links, vilkårlige Clash-objekter og transportvarianter fraværende i tabellen har brug for et separat understøttet kildeformat.
+
+`/api/services/managed-proxy` er autentificeret og loopback-only: GET viser redigerede metadata, POST gemmer `{core,name,sourceLink,id?,assignment?}`, PATCH accepterer `{core,action:"start"|"stop"}`. Værtens betroede peer-stamp pipeline skal være til stede. Indbygget kernediagnostik undertrykkes, fordi de kan indeholde legitimationsoplysninger; livscyklushændelser bruger den eksisterende strukturerede applikationsfillogger uden kildelinks eller upstream-nyttelast. Vedhæft kun desinficerede applikationslogfiler til support. Officielle versioner er fastgjort til sing-box 1.14.3 og Xray 26.3.27 med release-asset SHA-256 manifester; fremtidige opdateringer kræver ændring af versionen og alle verificerede sammendrag.
+
 ### Nøglebeslutninger (fra designplan)
 
 | Afgørelse                              | Værdi                                                                     |
 | -------------------------------------- | ------------------------------------------------------------------------- |
-| Dashboard adgang til 9Router native UI | Omvendt proxy ved `/dashboard/providers/services/9router/embed/*`         |
+| Dashboard-adgang til 9Router native UI | Omvendt proxy ved `/dashboard/providers/services/9router/embed/*`         |
 | Installationsmekanisme                 | `npm install {package}` via `execFile` (ingen shell-interpolation)        |
 | Forbrugstilstand                       | Udbyder registreret som `9router/{sub}/{model}` i routing engine          |
 | API nøglestyring                       | OmniRoute genererer, krypterer at-rest (AES-256-GCM) og injicerer via env |

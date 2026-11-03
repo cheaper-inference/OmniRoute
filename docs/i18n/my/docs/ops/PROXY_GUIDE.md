@@ -549,7 +549,7 @@ curl "http://localhost:20128/api/settings/oneproxy?action=status"
 
 ## Database Schema
 
-### `proxy_registry` Table
+### `proxy_registry` ဇယား
 
 ```sql
 CREATE TABLE proxy_registry (
@@ -563,11 +563,11 @@ CREATE TABLE proxy_registry (
   region TEXT,
   notes TEXT,
   status TEXT DEFAULT 'active',
-  source TEXT NOT NULL DEFAULT 'manual',    -- 'manual' သို့မဟုတ် 'oneproxy'
-  quality_score INTEGER,                     -- 0-100 (1proxy အတွက်သာ)
-  latency_ms INTEGER,                        -- မီလီစက္ကန့် (1proxy အတွက်သာ)
+  source TEXT NOT NULL DEFAULT 'manual',    -- 'manual' or 'oneproxy'
+  quality_score INTEGER,                     -- 0-100 (1proxy only)
+  latency_ms INTEGER,                        -- milliseconds (1proxy only)
   anonymity TEXT,                            -- transparent/anonymous/elite
-  google_access INTEGER DEFAULT 0,           -- Google ကို ဝင်ရောက်နိုင်ပါသလား။ (1proxy)
+  google_access INTEGER DEFAULT 0,           -- can access Google? (1proxy)
   last_validated TEXT,                       -- ISO timestamp (1proxy)
   country_code TEXT,                         -- ISO 2-letter code (1proxy)
   created_at TEXT NOT NULL,
@@ -575,14 +575,14 @@ CREATE TABLE proxy_registry (
 );
 ```
 
-### `proxy_assignments` Table
+### `proxy_assignments` ဇယား
 
 ```sql
 CREATE TABLE proxy_assignments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   proxy_id TEXT NOT NULL REFERENCES proxy_registry(id),
   scope TEXT NOT NULL,        -- 'global', 'provider', 'account', 'combo'
-  scope_id TEXT,              -- provider ID၊ connection ID သို့မဟုတ် combo ID
+  scope_id TEXT,              -- provider ID, connection ID, or combo ID
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   UNIQUE(scope, scope_id)
