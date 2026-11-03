@@ -137,34 +137,34 @@ song song với đăng nhập bằng mật khẩu mặc định — đăng nhậ
 
 Một số hành động `MANAGEMENT` chỉ dành cho **operator**: khóa `manage` là không đủ. Việc xuất thông tin xác thực đã lưu (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), khôi phục bản sao lưu đè lên dữ liệu trực tiếp (`POST /api/db-backups/import` kể cả với `dryRun=true`, `POST /api/db-backups` khôi phục theo id, `POST /api/settings/import-json`), và hủy các điểm khôi phục (`DELETE /api/db-backups` dọn dẹp, và `PATCH /api/db-backups` vì thời gian lưu giữ mà nó duy trì điều khiển việc cắt tỉa tự động sau mỗi bản sao lưu) đều yêu cầu phiên dashboard, chủ thể CLI cục bộ, hoặc đăng nhập đã bị tắt. Việc cấp token đồng bộ (`POST /api/sync/tokens`) và đúc access token CLI `admin` (`POST /api/cli/tokens`) yêu cầu phiên dashboard hoặc chủ thể CLI cục bộ trong mọi chế độ đăng nhập. Khóa API thuộc bất kỳ phạm vi nào và access token `oma_` không phải là thông tin xác thực operator: chúng nhận `403` bất cứ khi nào cần đến. Kiểm tra nằm trong `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Việc thay đổi cài đặt đăng nhập cũng chỉ dành cho operator: `POST /api/settings/require-login` (đặt mật khẩu quản trị / bật tắt `requireLogin`) chỉ chấp nhận các thông tin xác thực đó khi đã có mật khẩu — cửa sổ bootstrap lần đầu (chưa có mật khẩu) giữ nguyên — và phiên dashboard phải gửi `currentPassword` để thay mật khẩu (`403` khi thiếu hoặc sai, được ghi audit là `settings.update_failed`). CLI cục bộ và một instance đã tắt đăng nhập giữ lại đường khôi phục và có thể đặt mật khẩu mà không cần nó, vì cả hai đều gắn với host sở hữu thư mục dữ liệu.
 
-## Pipeline
+## Đường ống
 
 ```
-Yêu cầu đến → src/proxy.ts
-  → runAuthzPipeline() trong src/server/authz/pipeline.ts
-    1. Loại bỏ các header nội bộ đáng tin cậy (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Tạo ID yêu cầu, phân loại tuyến qua classifyRoute()
-    3. Nếu pathname == "/" → chuyển hướng đến /dashboard
-    4. Nếu đang rút dần lưu lượng (tắt hệ thống an toàn) và /api/* → 503
-    5. Nếu không phải GET và thuộc /api/* → áp dụng cơ chế bảo vệ checkBodySize()
-    6. Nếu OPTIONS → CORS preflight 204
-    7. Nếu options.enforce == false → cho đi qua kèm các header lớp tuyến
-    8. Nếu không: POLICIES[routeClass].evaluate(ctx)
-       - cho phép  → đóng dấu x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - từ chối → lỗi JSON kèm correlation_id (các trang bảng điều khiển → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Các header nội bộ đáng tin cậy (được định nghĩa trong `src/server/authz/headers.ts`) được **loại bỏ khỏi các yêu cầu đến** trước khi phân loại — client không thể điền trước `x-omniroute-auth-*` để mạo danh một chủ thể.
+Các tiêu đề nội bộ đáng tin cậy (được xác định trong `src/server/authz/headers.ts`) là** bị loại bỏ khỏi các yêu cầu đến** trước khi phân loại máy khách — không thể điền trước `x-omniroute-auth-*` để mạo danh một chủ đề.
 
 ### Hợp đồng chính sách
 
 Mỗi lớp tuyến có một chính sách trong `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — luôn trả về `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — trích xuất Bearer, xác thực qua `validateApiKey()`. Chỉ chuyển sang chế độ ẩn danh khi cờ tính năng `REQUIRE_API_KEY` hiệu lực bị tắt. Cờ hiệu lực được phân giải thông qua `isRequireApiKeyEnabled()` (`ghi đè bằng cờ tính năng trong DB > process.env.REQUIRE_API_KEY > giá trị mặc định`) để các Cờ tính năng trên Bảng điều khiển và biến môi trường chi phối `/api/v1/*`, `/api/v1beta/*` và các bí danh một cách nhất quán; lỗi bộ phân giải sẽ mặc định từ chối. Cho phép các yêu cầu có phiên bảng điều khiển trên các tuyến API client (bao gồm `/api/v1/models`, được danh mục mô hình của bảng điều khiển sử dụng).
-- **`managementPolicy`** (`policies/management.ts`) — chấp nhận phiên bảng điều khiển, các yêu cầu đồng bộ mô hình nội bộ (được đối sánh với `/api/providers/[name]/(sync-models|models)`), hoặc bỏ qua hoàn toàn nếu `isAuthRequired()` trả về false. Trả về 403 (`AUTH_001`) khi có token Bearer nhưng không hợp lệ, nếu không thì trả về 401. Đồng thời thực thi các cấp bảo vệ tuyến (LOCAL_ONLY / ALWAYS_PROTECTED) trước mọi nhánh xác thực — xem [Các cấp bảo vệ tuyến](../security/ROUTE_GUARD_TIERS.md). Các đường dẫn LOCAL_ONLY trong `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hiện tại: `/api/mcp/`) có thể được truy cập từ địa chỉ không phải loopback khi khóa Bearer có phạm vi `manage`; tất cả các đường dẫn LOCAL_ONLY khác vẫn bị giới hạn nghiêm ngặt ở loopback bất kể phạm vi.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — trích xuất Bearer, xác thực thông qua `validateApiKey()`. Chỉ chuyển sang ẩn danh khi cờ tính năng `REQUIRE_API_KEY` hiệu quả bị tắt. Cờ hiệu quả được giải quyết thông qua `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) vì vậy Cờ tính năng của Bảng điều khiển và các biến môi trường chi phối `/api/v1/*`, `/api/v1beta/*` và bí danh một cách nhất quán; lỗi trình giải quyết không đóng được. Cho phép yêu cầu phiên bảng thông tin trên các tuyến API của máy khách (bao gồm `/api/v1/models`, được sử dụng bởi danh mục mô hình bảng thông tin). Khi Entra ID SSO được bật, Bearer có cấu trúc là mã thông báo Entra (ba phân đoạn base64url, `RS*` alg, `kid`) được xử lý bởi nhánh SSO** trước** `validateApiKey()` và phán quyết của nó là — cuối cùng, nó không bao giờ đi đến đường dẫn khóa API hoặc nhánh chuyển đổi thành ẩn danh, do đó, việc ngừng hoạt động của nhà cung cấp danh tính không thể trở thành quyền truy cập mở. Các phím API tĩnh không bị ảnh hưởng. Xem [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — chấp nhận phiên bảng điều khiển, yêu cầu đồng bộ hóa mô hình nội bộ (khớp với `/api/providers/[name]/(sync-models|models)`) hoặc bỏ qua hoàn toàn nếu `isAuthRequired()` trả về sai. Trả về 403 (`AUTH_001`) khi có mã thông báo Bearer nhưng không hợp lệ, nếu không thì trả về 401. Đồng thời thực thi các cấp độ bảo vệ tuyến đường (LOCAL_ONLY / ALWAYS_PROTECTED) trước bất kỳ nhánh xác thực — hãy xem [Cấp độ bảo vệ tuyến đường](../security/ROUTE_GUARD_TIERS.md). Các đường dẫn LOCAL_ONLY trong `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hôm nay: `/api/mcp/`) có thể được truy cập từ chế độ không lặp lại khi khóa Bearer mang phạm vi `manage` ; tất cả các đường dẫn LOCAL_ONLY khác vẫn ở chế độ vòng lặp nghiêm ngặt bất kể phạm vi.
 
-Một chính sách thành công trả về `AuthSubject` với `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Các handler phía sau có thể đọc chủ thể này qua `assertAuth(request, "CLIENT_API")` trong `src/server/authz/assertAuth.ts` thay vì chạy lại logic xác thực.
+Chính sách thành công trả về `AuthSubject` với `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Trình xử lý xuôi dòng có thể đọc nó qua `assertAuth(request, "CLIENT_API")` trong `src/server/authz/assertAuth.ts` thay vì chạy lại logic xác thực.
 
 ## Danh sách route công khai
 
@@ -315,23 +315,23 @@ Các endpoint `/api/v1/agents/tasks/*` và `/api/resilience/model-cooldowns` **h
 
 ## Gỡ lỗi
 
-Pipeline luôn đóng dấu các phản hồi bằng:
+Quy trình luôn đóng dấu phản hồi bằng:
 
 ```
-x-request-id:               <ID tương quan, được lặp lại trong phần thân lỗi>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Đối với các yêu cầu đã xác thực, các header yêu cầu ở phía upstream (phía handler) cũng bao gồm:
+Đối với các yêu cầu được xác thực, các tiêu đề yêu cầu ngược dòng (phía trình xử lý) cũng bao gồm:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4-ký-tự-cuối> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (tùy chọn)
-x-omniroute-auth-scopes:    danh sách phân tách bằng dấu phẩy
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Sử dụng `assertAuth(req, expectedClass)` bên trong các handler — hàm này ném `AuthzAssertionError` với mã `AUTHZ_NOT_INITIALIZED` nếu middleware bị bỏ qua (hữu ích để phát hiện các lỗi hồi quy cấu hình trong quá trình kiểm thử).
+Sử dụng `assertAuth(req, expectedClass)` bên trong trình xử lý — nó sẽ ném `AuthzAssertionError` với mã `AUTHZ_NOT_INITIALIZED` nếu phần mềm trung gian bị bỏ qua (hữu ích để phát hiện các hồi quy cấu hình trong các thử nghiệm).
 
 ## Xem thêm
 
