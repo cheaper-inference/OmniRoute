@@ -25,6 +25,7 @@ import {
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
+import { isRequestScopedMisalignmentRefusal } from "../utils/providerSafety.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
 import { getProviderCategory, isLocalProvider } from "../config/providerRegistry.ts";
 import {
@@ -1738,7 +1739,10 @@ export function checkFallbackError(
   }
   // A policy refusal belongs to this input, even when relayed with a 403/5xx.
   // Preserve the refusal; rotating accounts or cooling them down cannot repair it.
-  if (isContentPolicyRefusal(structuredError)) {
+  if (
+    isContentPolicyRefusal(structuredError) ||
+    isRequestScopedMisalignmentRefusal({ status, code: structuredError?.code })
+  ) {
     return {
       shouldFallback: false,
       cooldownMs: 0,
