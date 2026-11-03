@@ -34,7 +34,7 @@
 import type { QuotaInfo } from "./quotaPreflight.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "../utils/numeric.ts";
 
 const SELF_PATH = "/api/user/self";
 
@@ -219,9 +219,7 @@ export function invalidateNewApiAggregatorQuotaCache(connectionId: string): void
  * Check whether a connection has opted in to New-API aggregator balance
  * detection. Used by the dynamic dispatch in quotaPreflight / quotaMonitor.
  */
-export function isNewApiAggregatorBalanceConnection(
-  connection?: Record<string, unknown>
-): boolean {
+export function isNewApiAggregatorBalanceConnection(connection?: Record<string, unknown>): boolean {
   const providerSpecificData = toRecord(connection?.providerSpecificData);
   return providerSpecificData.newApiAggregatorBalance === true;
 }
