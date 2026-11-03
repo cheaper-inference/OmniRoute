@@ -13,7 +13,12 @@ import { randomUUID } from "node:crypto";
 import { createMcpServer } from "./server.ts";
 import { resolveMcpCallerAuthInfo, withMcpHttpAuthContext } from "./httpAuthContext.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
-import { activeStreamableRequests } from "./sessionActivity.ts";
+import {
+  noteStreamableInflight,
+  noteStreamableOpenStream,
+  purgeStreamableActivity,
+  streamableActivity,
+} from "./sessionActivity.ts";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
@@ -31,21 +36,43 @@ type StreamableSession = {
 
 const _streamableSessions = new Map<string, StreamableSession>();
 
-const MCP_SESSION_IDLE_MS = 5 * 60 * 1000;
+const DEFAULT_MCP_SESSION_IDLE_MS = 5 * 60 * 1000;
+
+/**
+ * Streamable-HTTP session idle limit in ms, read from
+ * `OMNIROUTE_MCP_SESSION_IDLE_MS`. Non-numeric or non-positive values fall
+ * back to the historical five-minute default.
+ */
+export function resolveMcpSessionIdleMs(): number {
+  const raw = process.env.OMNIROUTE_MCP_SESSION_IDLE_MS;
+  if (raw === undefined) return DEFAULT_MCP_SESSION_IDLE_MS;
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_MCP_SESSION_IDLE_MS;
+}
 
 export function shouldReapSession(
-  session: { lastActivityAt: number; activeRequests?: number },
+  session: { lastActivityAt: number; activeRequests?: number; openStreams?: number },
   nowMs: number
 ): boolean {
   if ((session.activeRequests ?? 0) > 0) return false;
-  return nowMs - session.lastActivityAt > MCP_SESSION_IDLE_MS;
+  if ((session.openStreams ?? 0) > 0) return false;
+  return nowMs - session.lastActivityAt > resolveMcpSessionIdleMs();
 }
 
 const _mcpSessionSweep = setInterval(() => {
   const now = Date.now();
   for (const [sessionId, session] of _streamableSessions) {
-    const activeRequests = activeStreamableRequests(sessionId);
-    if (shouldReapSession({ lastActivityAt: session.lastActivityAt, activeRequests }, now)) {
+    const activity = streamableActivity(sessionId);
+    if (
+      shouldReapSession(
+        {
+          lastActivityAt: session.lastActivityAt,
+          activeRequests: activity.inflight,
+          openStreams: activity.openStreams,
+        },
+        now
+      )
+    ) {
       try {
         closeStreamableSession(sessionId);
       } catch {}
@@ -81,6 +108,7 @@ function closeStreamableSession(sessionId: string): void {
     // ignore shutdown errors
   }
   _streamableSessions.delete(sessionId);
+  purgeStreamableActivity(sessionId);
 }
 
 function closeAllStreamableSessions(): void {
@@ -96,8 +124,6 @@ function ensureSseServer(): {
   if (_sseServer && _sseTransport) {
     return { server: _sseServer, transport: _sseTransport };
   }
-
-  closeAllStreamableSessions();
 
   _sseServer = createMcpServer();
   _sseTransport = new WebStandardStreamableHTTPServerTransport({
@@ -228,6 +254,51 @@ function withSessionHeader(response: Response, sessionId: string): Response {
   });
 }
 
+/**
+ * Count an open SSE stream for a session while its body stays alive. The body
+ * is re-served through a pull-based ReadableStream so the counter is released
+ * exactly once, on natural end, consumer cancel, or body error.
+ */
+function trackOpenSseStream(sessionId: string, response: Response): Response {
+  noteStreamableOpenStream(sessionId, 1);
+  let released = false;
+  const release = () => {
+    if (released) return;
+    released = true;
+    noteStreamableOpenStream(sessionId, -1);
+  };
+  const reader = response.body!.getReader();
+  const body = new ReadableStream({
+    async pull(controller: ReadableStreamDefaultController<Uint8Array>) {
+      let result: ReadableStreamReadResult<Uint8Array>;
+      try {
+        result = await reader.read();
+      } catch (err) {
+        release();
+        controller.error(err);
+        return;
+      }
+      if (result.done) {
+        release();
+        controller.close();
+      } else {
+        controller.enqueue(result.value);
+      }
+    },
+    cancel() {
+      reader.cancel().catch((err: unknown) => {
+        console.error("[MCP] Failed to cancel upstream SSE body:", err);
+      });
+      release();
+    },
+  });
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
 async function handleStreamableRequest(request: Request): Promise<Response> {
   const sessionId = request.headers.get("mcp-session-id");
 
@@ -262,11 +333,18 @@ async function handleStreamableRequest(request: Request): Promise<Response> {
       return errorResponse("Not Found: Unknown Mcp-Session-Id header", -32000, 404);
     }
 
+    noteStreamableInflight(sessionId, 1);
     try {
       session.lastActivityAt = Date.now();
-      const response = await withMcpHttpAuthContext(request, () =>
+      let response = await withMcpHttpAuthContext(request, () =>
         handleRequestWithAuthInfo(session.transport, request)
       );
+      // The SSE response body stays open until the JSON-RPC response is
+      // delivered (an in-flight tool call) or the GET subscription ends, so an
+      // open body is transport-level activity for both POST and GET.
+      if (response.headers.get("content-type")?.toLowerCase().includes("text/event-stream")) {
+        response = trackOpenSseStream(sessionId, response);
+      }
       if (request.method === "DELETE") {
         closeStreamableSession(sessionId);
       }
@@ -280,6 +358,8 @@ async function handleStreamableRequest(request: Request): Promise<Response> {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
+    } finally {
+      noteStreamableInflight(sessionId, -1);
     }
   }
 
@@ -357,11 +437,13 @@ export function getMcpHttpStatus(): {
   transport: string | null;
   startedAt: number | null;
   uptime: string | null;
+  sessionCount: number;
+  oldestSessionAt: number | null;
+  newestSessionAt: number | null;
 } {
-  const streamableStartedAt =
-    _streamableSessions.size > 0
-      ? Math.min(...Array.from(_streamableSessions.values(), (session) => session.startedAt))
-      : null;
+  const startedAts = Array.from(_streamableSessions.values(), (session) => session.startedAt);
+  const streamableStartedAt = startedAts.length > 0 ? Math.min(...startedAts) : null;
+  const newestSessionAt = startedAts.length > 0 ? Math.max(...startedAts) : null;
   const startedAt = streamableStartedAt ?? _sseStartedAt;
   const transport = _streamableSessions.size > 0 ? "streamable-http" : _sseTransport ? "sse" : null;
   const online = transport !== null;
@@ -371,6 +453,9 @@ export function getMcpHttpStatus(): {
     transport,
     startedAt,
     uptime: startedAt ? `${Math.floor((Date.now() - startedAt) / 1000)}s` : null,
+    sessionCount: _streamableSessions.size,
+    oldestSessionAt: streamableStartedAt,
+    newestSessionAt,
   };
 }
 
