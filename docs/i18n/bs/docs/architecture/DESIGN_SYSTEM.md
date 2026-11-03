@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** kontrolna tabla je izgrađena na** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), isporučeno kao radni prostor `packages/ui-kit` (`@omniroute/ui-kit`; gornji snimak je zakačen u `packages/ui-kit/UPSTREAM.md` i čuva ga `npm run check:ui-kit-snapshot`). Svetlost je kanonska tema; zadana postavka je `system`. Naglasak je Keak lime (`--ci-color-accent`). Switzer je jedinstvena porodica za UI, prikaz i tekst koda (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju ga), koji sam hostuje sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvezen od `ci-tokens.css`). Svaka ikona je Lucide glif.
+> **Status:** kontrolna tabla je izgrađena na** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), isporučeno kao radni prostor `packages/ui-kit` (`@omniroute/ui-kit`; gornji snimak je zakačen u `packages/ui-kit/UPSTREAM.md` i čuva ga `npm run check:ui-kit-snapshot`). Svetlost je kanonska tema; zadana postavka je `system`. Naglasak je Keak lime (`--ci-color-accent`). Switzer je jedinstvena porodica za UI, prikaz i tekst koda (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` ga rješavaju), koji sam hostuje sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvezen od `ci-tokens.css`). Skripte Switzeru nedostaju propadanje glif po glif (`src/app/globals.css`): Inter za ćirilicu, grčki i vijetnamski i, samo pod `html[dir="rtl"]`, Vazirmatn za arapsko pismo. Svaka ikona je Lucide glif.
 
 ## 1. Gdje se stvari nalaze
 
@@ -117,7 +117,7 @@
 
 ## 5. Ažuriranje kompleta
 
-`npm run check:ui-kit-upstream` upoređuje verziju zakačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repo-a i ispisuje naredbu za sinhronizaciju kada izdanje izađe. Sedmični `UI Kit upstream watch` radni tok (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru i drži jedan problem praćenja otvorenim dok je pin iza; upstream repo je privatan, tako da je toku rada potreban token samo za čitanje u `UI_KIT_READ_TOKEN` tajni i ostaje inertan bez njega.
+`npm run check:ui-kit-upstream` upoređuje verziju zakačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repo-a i ispisuje naredbu za sinhronizaciju kada izdanje izađe. Sedmični `UI Kit upstream watch` radni tok (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru i drži jedan problem praćenja otvorenim dok je pin iza; upstream repo je privatan, tako da je za radni tok potreban token samo za čitanje u `UI_KIT_READ_TOKEN` tajni. Kada ne može čitati uzvodno (bez tokena, token koji je prestao raditi ili GitHub nedostupan), izvođenje ostaje zeleno, ali piše upozorenje i drži jedno zasebno pitanje otvorenim, koje se zatvara jednom kada kasnije pokretanje može ponovo čitati uzvodno.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopira uzvodni `src/` kod tog urezivanja (`latest` = najnoviji `v*` tag) u `packages/ui-kit/src`, primjenjuje jednu dozvoljenu transformaciju (ispušta `.js` sufiks iz relativnog uvoza) i postavlja verziju radnog prostora u `packages/ui-kit/package.json` i `package-lock.json` na onu uzvodnu. Zatim: pregledajte `git diff packages/ui-kit`, izvršite vizualni pregled dobavljača, postavki, kombinacija, upotrebe i krajnje točke u obje teme, pokrenite `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otvorite PR sa upstream dnevnikom promjena.
 

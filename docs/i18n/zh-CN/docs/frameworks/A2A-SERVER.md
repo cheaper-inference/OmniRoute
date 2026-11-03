@@ -151,7 +151,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 可用技能
 
-OmniRoute公开了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中的 6 个A2A技能。每个技能模块都位于`src/lib/a2a/skills/`中。
+OmniRoute公开了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中连接的 6 个A2A技能。每个技能模块都位于`src/lib/a2a/skills/`中。
 
 | 技能       | ID                   | 描述                                                                                                        | 标签             | 示例                       |
 | :--------- | :------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------- | :------------------------- |
@@ -162,7 +162,7 @@ OmniRoute公开了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中的 6 个
 | 健康报告   | `health-report`      | 聚合每个提供者的断路器、冷却时间、锁定状态                                                                  | 健康、韧性       | “显示所有提供者的健康状况” |
 | 列出能力   | `list-capabilities`  | 返回完整的 45 条目代理技能目录（23 API + 21 CLI + 1 配置）作为降价表，并使用原始SKILL.md URLs进行上下文注入 | 目录、发现、技能 | “列出所有OmniRoute功能”    |
 
-> 代理卡应与实时 377 提供者目录保持一致；提供者计数和free/no-auth数据源自运行时注册表。
+> 代理卡应与实时 380 提供者目录保持一致；提供者计数和free/no-auth数据源自运行时注册表。
 
 ### `list-capabilities`技能详情
 
@@ -200,13 +200,13 @@ JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表�
 
 1. **创建技能文件：** `src/lib/a2a/skills/<your-skill>.ts`
 
-   导出一个异步函数 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。遵循现有技能（例如 `smartRouting.ts`）的结构。
+   导出异步函数`(task: A2ATask) => Promise<{ artifacts, metadata }>`。遵循`smartRouting.ts`等现有技能的形状。
 
-2. **注册处理程序：** 在 `src/lib/a2a/taskExecution.ts` 中，向 `A2A_SKILL_HANDLERS` 添加一个条目：
+2. **注册处理程序：**在`src/lib/a2a/taskExecution.ts`中，向`A2A_SKILL_HANDLERS`添加一个条目：
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...现有技能
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -214,21 +214,21 @@ JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表�
    };
    ```
 
-3. **在 Agent Card 中公开：** 在 `src/lib/a2a/agentCardMetadata.ts`（由 `/.well-known/agent.json` 和 `/.well-known/agent-card.json` 共享）中，向 `skills` 数组追加以下内容：
+3. **在代理卡中公开：**在`src/lib/a2a/agentCardMetadata.ts` （由`/.well-known/agent.json`和`/.well-known/agent-card.json`共享）中，追加到`skills`数组：
 
    ```json
    {
      "id": "your-skill",
-     "name": "您的技能",
-     "description": "简短且聚焦意图的描述",
-     "tags": ["路由", "配额"],
-     "examples": ["自然语言调用示例"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **编写测试：** `tests/unit/a2a-<your-skill>.test.ts`。覆盖正常路径和错误路径。
+4. **编写测试：** `tests/unit/a2a-<your-skill>.test.ts`.覆盖快乐路径+错误路径。
 
-5. **记录文档：** 在此文件的 `Available Skills` 表格中记录新技能。
+5. **文档**该文件的`Available Skills`表中的新技能。
 
 ---
 

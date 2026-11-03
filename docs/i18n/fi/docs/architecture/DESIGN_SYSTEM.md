@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** kojelauta on rakennettu** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), toimitetaan työtilana `packages/ui-kit` (`@omniroute/ui-kit`; alkuvirran tilannekuva on kiinnitetty `packages/ui-kit/UPSTREAM.md` ään ja sitä suojaa `npm run check:ui-kit-snapshot`). Valo on kanoninen teema; oletusasetus on `system`. Aksentti on Keak lime (`--ci-color-accent`). Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Jokainen kuvake on Luciden merkki.
+> **Status:** kojelauta on rakennettu** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), toimitetaan työtilana `packages/ui-kit` (`@omniroute/ui-kit`; alkuvirran tilannekuva on kiinnitetty `packages/ui-kit/UPSTREAM.md` ään ja sitä suojaa `npm run check:ui-kit-snapshot`). Valo on kanoninen teema; oletusasetus on `system`. Aksentti on Keak lime (`--ci-color-accent`). Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Scripts Switzeristä puuttuu kaatuminen kuvio kerrallaan (`src/app/globals.css`): Inter kyrilliselle, kreikalle ja vietnam ja vain `html[dir="rtl"]`:n alla Vazirmatn arabialle. Jokainen kuvake on Luciden merkki.
 
 ## 1. Missä asiat sijaitsevat
 
@@ -114,7 +114,7 @@ variant="primary"` on kitin `default`-nappi (`--ci-button-primary-*`: kääntein
 
 ## 5. Sarjan päivittäminen
 
-`npm run check:ui-kit-upstream` vertaa `packages/ui-kit/UPSTREAM.md` kiinnitettyä versiota ylävirran repon uusimpaan `v*` tunnisteeseen ja tulostaa synkronointikomennon, kun julkaisu on julkaistu. Viikoittainen `UI Kit upstream watch` -työnkulku (`.github/workflows/ui-kit-upstream-watch.yml`) suorittaa saman tarkistuksen ja pitää yhden seurantaongelman auki, kun nasta on takana. ylävirran repo on yksityinen, joten työnkulku tarvitsee vain luku -tunnuksen `UI_KIT_READ_TOKEN` salaisuuteen ja pysyy inerttinä ilman sitä.
+`npm run check:ui-kit-upstream` vertaa `packages/ui-kit/UPSTREAM.md` kiinnitettyä versiota ylävirran repon uusimpaan `v*` tunnisteeseen ja tulostaa synkronointikomennon, kun julkaisu on julkaistu. Viikoittainen `UI Kit upstream watch` -työnkulku (`.github/workflows/ui-kit-upstream-watch.yml`) suorittaa saman tarkistuksen ja pitää yhden seurantaongelman auki, kun nasta on takana. ylävirran repo on yksityinen, joten työnkulku tarvitsee vain luku -tunnuksen `UI_KIT_READ_TOKEN` salaisessa salassa. Kun se ei pysty lukemaan ylävirtaa (ei merkkiä, merkkiä, joka lakkasi toimimasta, tai GitHub ei ole tavoitettavissa), ajo pysyy vihreänä, mutta kirjoittaa varoituksen ja pitää yhden erillisen ongelman auki, joka sulkeutuu, kun myöhempi ajo voi lukea vastavirtaan uudelleen.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopioi ylävirran `src/` kyseisessä vahvistuksessa (`latest` = uusin `v*` tunniste) `packages/ui-kit/src` ksi, käyttää yksittäistä sallittua muunnosta (poistaa `.js` liitteen suhteellisista tuonnista) ja asettaa työtilan version `packages/ui-kit/package.json` :ssa ja `package-lock.json` ssä ylävirran versioksi. Sitten: tarkista `git diff packages/ui-kit`, tee visuaalinen välitys palveluntarjoajille, asetuksille, yhdistelmälle, käytölle ja päätepisteelle molemmissa teemoissa, suorita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ja avaa PR ylävirran muutoslokin avulla.
 

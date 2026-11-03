@@ -25,27 +25,27 @@ omniroute launch --profile glm52  # Claude Code izmanto glm/glm-5.2, izmantojot 
 
 ---
 
-## Kā Claude Code savienojas ar vārteju
+## Kā Claude kods savienojas ar vārteju
 
-Claude Code sazinās, izmantojot **Anthropic Messages API**, un tiek novirzīts uz
-pielāgotu galapunktu ar vides mainīgajiem (tam nav karodziņa `--base-url`):
+Claude Code runā par**Anthropic Ziņojumi API** un ir norādīts uz pielāgotu beigu punktu ar vides mainīgajiem (tam nav `--base-url` karoga):
 
-| Mainīgais                                    | Nolūks                                                                                                 |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | Vārtejas saknes URL (Claude Code pievieno `/v1/messages`). **Bez `/v1` sufiksa.**                      |
-| `ANTHROPIC_AUTH_TOKEN`                       | Tiek nosūtīts kā `Authorization: Bearer …` — izmantojiet savu OmniRoute piekļuves pilnvaru/API atslēgu |
-| `ANTHROPIC_API_KEY`                          | Alternatīva: tiek nosūtīts kā `x-api-key`. Ja iestatīti abi, priekšroka ir `ANTHROPIC_AUTH_TOKEN`      |
-| `ANTHROPIC_MODEL`                            | Piespiedu kārtā izmanto konkrētu modeli (ignorē `/model` izvēlnes noklusējumu)                         |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → iebūvētajā `/model` izvēlnē tiek rādīti `claude*`/`anthropic*` modeļi no `/v1/models`            |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ierobežo izvades marķieru skaitu katrai atbildei (piem., `65536`)                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Marķieru slieksnis automātiskajai saspiešanai                                                          |
+| Mainīgs                                      | Mērķis                                                                                              |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Vārtejas sakne URL (Claude kods pievieno `/v1/messages`).** Nav `/v1` sufiksa.**                    |
+| `ANTHROPIC_AUTH_TOKEN`                       | Nosūtīts kā `Authorization: Bearer …` — izmantojiet savu OmniRoute piekļuves pilnvaru / API atslēgu |
+| `ANTHROPIC_API_KEY`                          | Alternatīva: nosūtīts kā `x-api-key`. Ja abi ir iestatīti, `ANTHROPIC_AUTH_TOKEN` uzvar             |
+| `ANTHROPIC_MODEL`                            | Konkrēta modeļa piespiedu izmantošana (ignorē `/model` atlasītāja noklusējuma iestatījumu)          |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → vietējā `/model` atlasītājā ir uzskaitīti `claude*`/`anthropic*` modeļi no `/v1/models`       |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ierobežot izvades marķierus vienai atbildei (piemēram, `65536`)                                     |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokena slieksnis automātiskai sablīvēšanai                                                          |
 
-> Vides mainīgie tiek nolasīti **vienu reizi palaišanas laikā** — pēc to maiņas
-> restartējiet Claude Code.
+> Env vars tiek lasīti** vienreiz palaišanas laikā** — restartējiet Claude kodu pēc to maiņas.
 
-`omniroute launch` iestata tos visus jūsu vietā: tas nosaka bāzes URL un pilnvaru
-no aktīvā konteksta (tādēļ pēc `omniroute connect <vps>` komanda `omniroute launch`
-vienkārši darbojas), pārbauda servera darbspēju un izpilda `claude`.
+Akreditācijas datiem, kas rotē fiksētas virknes vietā, iestatiet `apiKeyHelper` `~/.claude/settings.json` uz komandu, kas drukā pašreizējos akreditācijas datus stdout. Claude kods pēc noklusējuma kešatmiņā saglabā savu izvadi piecas minūtes (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to ignorē) un nosūta vērtību gan `Authorization: Bearer` gan `x-api-key`. Skriptam ir jādrukā akreditācijas dati un nekas cits — reklāmkarogs līdzās tam neizdodas palīgs versijā v2.1.227 +.
+
+Šādi darbojas Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` API atslēgas vietā izdrukā īslaicīgu Entra piekļuves pilnvaru, ko OmniRoute pārbauda. Skatiet [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` iestata to visu jūsu vietā: tas atrisina pamata URL + marķieri no aktīvā konteksta (tātad `omniroute connect <vps>` pēc tam `omniroute launch` vienkārši darbojas), pārbauda servera stāvokli un izpilda `claude`.
 
 ---
 
