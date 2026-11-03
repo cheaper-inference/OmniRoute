@@ -59,13 +59,13 @@ export async function discoverDecisionModels(
     throw new DecisionError(response.status, "model_discovery_failed");
   }
   const payload = record(await readDecisionJson(response, 502, signal));
-  const rows = payload.data ?? payload.models;
+  const rows = payload.data ?? payload.models ?? payload.result;
   if (!Array.isArray(rows) || rows.length > 2048)
     throw new DecisionError(502, "invalid_model_catalog");
   const models: DecisionModel[] = [];
   for (const item of rows) {
     const row = record(item);
-    const id = row.id ?? row.name ?? row.model;
+    const id = backend.discovery === "cloudflare" ? row.name : (row.id ?? row.name ?? row.model);
     if (typeof id !== "string" || !id || id.length > 512) continue;
     const found = await discoverDecisionRow(backend, credentials, fetcher, signal, id, asModel);
     models.push(...found);
@@ -81,7 +81,12 @@ async function discoverDecisionRow(
   id: string,
   asModel: (id: string, vision?: boolean) => DecisionModel
 ): Promise<DecisionModel[]> {
-  if (backend.discovery === "openai") {
+  if (backend.discovery === "cloudflare") {
+    // Workers AI does not expose a decision task: these documented native models
+    // share System One. Other task models must never enter this catalog.
+    if (["@cf/cloudflare/clef", "@cf/cloudflare/clef-flash"].includes(id))
+      return [asModel(id, true)];
+  } else if (backend.discovery === "openai") {
     // Official Decisions API currently supports this model only; ordinary OpenAI models stay chat.
     if (id === "gpt-6-luna") return [asModel(id)];
   } else if (backend.discovery === "ollama") {

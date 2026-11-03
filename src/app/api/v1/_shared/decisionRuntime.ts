@@ -54,10 +54,10 @@ async function selectDecision(request: Request, provider: string, model: string)
     throw new DecisionError(403, "connection_scope_denied");
   if (isAllRateLimitedCredentials(credentials)) throw new DecisionError(429, "provider_cooldown");
   return {
-    backend: resolveDecisionBackend(
-      resolveProviderId(provider),
-      credentials as DecisionCredentials
-    ),
+    backend: {
+      ...resolveDecisionBackend(resolveProviderId(provider), credentials as DecisionCredentials),
+      provider,
+    },
     credentials: credentials as DecisionCredentials,
   };
 }

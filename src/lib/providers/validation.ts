@@ -200,7 +200,12 @@ export async function validateProviderApiKey({
     return { valid: false, error: "Provider and API key required", unsupported: false };
   }
 
-  if (provider === "basal" || provider === "julia-local" || providerSpecificData.decision) {
+  if (
+    provider === "basal" ||
+    provider === "julia-local" ||
+    providerSpecificData.decision ||
+    ["decisions", "systemone"].includes(providerSpecificData.apiType)
+  ) {
     return validateDecisionProvider({ provider, apiKey, providerSpecificData });
   }
 

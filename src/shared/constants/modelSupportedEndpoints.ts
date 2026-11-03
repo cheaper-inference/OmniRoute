@@ -97,6 +97,8 @@ export function defaultEndpointsForProviderNodeApiType(
       return ["audio-transcriptions"];
     case "images-generations":
       return ["images"];
+    case "systemone":
+      return ["systemone"];
     case "decisions":
       return ["decisions"];
     default:

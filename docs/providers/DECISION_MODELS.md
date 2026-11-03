@@ -225,3 +225,38 @@ PRs [#14667](https://github.com/cheaper-inference/OmniRoute/pull/14667),
 reviewed on 2026-11-03. No unfinished routing strategy is merged here. A later
 combo integration can consume the native gateway after explicit protocol and
 fallback-policy selection; this contribution adds no parallel combo engine.
+
+## Universal provider setup and dashboard
+
+Decision models use normal provider connections and per-model metadata. In
+Providers, add or edit a compatible provider and choose **System One (typed
+decisions)** or **Decisions (OpenAI)** as its API type. Set its base URL to the
+server API root (for example `https://decider.example/v1`). The default inference
+path is `/systemone` or `/decisions`; the default model-discovery path is
+`/models`. Advanced endpoint and model paths override these defaults. Import or
+add models through the normal provider model list. Their native endpoint metadata
+is retained and decision-only rows are typed `decisions`, separately from chat.
+
+This works for an operator-hosted Julia-1, Basal, or any server implementing one
+of these protocols; no provider-name allowlist is needed. Servers without model
+discovery may instead declare `providerSpecificData.decision.models` explicitly,
+with `format` and the full `endpoint`. A declaration does not prove reachability.
+
+The Endpoints page always shows `/v1/decisions`, `/v1/systemone`, and the scoped
+`/v1/systemone/models` catalog. Counts come from typed catalog metadata. Copy uses
+the same selected base URL as other endpoints. Matching a protocol does not grant
+access: normal model/connection/key restrictions remain mandatory.
+
+Ollama Cloud uses the existing account connection and its native capability proof,
+then calls `https://ollama.com/v1/systemone`; it does not require a local Ollama
+server. A name containing `clef` is not capability evidence. Cloudflare Workers AI
+uses the existing token/account ID, discovers documented Clef/Clef Flash entries,
+calls the per-model Workers endpoint and unwraps its response envelope. Other
+System One providers, including TypeSafe Jev and OpenRouter, retain their existing
+routes and catalog behavior. Protocol payloads are never translated to chat.
+
+Sources: [Ollama decisions](https://docs.ollama.com/capabilities/decision),
+[Cloudflare Clef](https://developers.cloudflare.com/workers-ai/models/clef/),
+[Cloudflare discovery](https://developers.cloudflare.com/api/resources/ai/subresources/models/methods/list/).
+These source changes require a new deployment. Tests using mocked providers do
+not establish live inference or the billing terms of an individual account.

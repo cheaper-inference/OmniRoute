@@ -507,3 +507,66 @@ describe("reliability and security", () => {
       expect(() => splitDecisionModel(id)).toThrow();
   });
 });
+
+describe("provider-independent decision connections", () => {
+  it.each(["decisions", "systemone"])(
+    "resolves a compatible %s server without a provider allowlist",
+    (apiType) => {
+      const backend = resolveDecisionBackend("openai-compatible-custom", {
+        providerSpecificData: {
+          apiType,
+          baseUrl: "https://decider.example/v1",
+          modelsPath: "/catalog",
+        },
+      });
+      expect(backend.format).toBe(apiType);
+      expect(backend.url).toBe(`https://decider.example/v1/${apiType}`);
+      expect(backend.modelsUrl).toBe("https://decider.example/v1/catalog");
+    }
+  );
+  it("supports an explicitly configured arbitrary hosted engine", () => {
+    expect(
+      resolveDecisionBackend("custom-julia", {
+        providerSpecificData: {
+          decision: {
+            format: "systemone",
+            endpoint: "https://julia.example/judge",
+            models: ["julia-1"],
+          },
+        },
+      }).models
+    ).toEqual(["julia-1"]);
+  });
+  it("routes Ollama Cloud through its native capability discovery", () => {
+    expect(resolveDecisionBackend("ollama-cloud", {})).toMatchObject({
+      url: "https://ollama.com/v1/systemone",
+      modelsUrl: "https://ollama.com/api/tags",
+      discovery: "ollama",
+    });
+  });
+});
+
+describe("Cloudflare System One transport", () => {
+  it("uses discovered names, model-specific Workers URL and unwraps native answers", async () => {
+    const fetcher = vi.fn(async (url: string, _credentials: unknown, init: RequestInit) => {
+      if (init.method !== "POST")
+        return Response.json({
+          success: true,
+          result: [{ id: "opaque-id", name: "@cf/cloudflare/clef" }, { name: "@cf/meta/chat" }],
+        });
+      expect(url).toBe(
+        "https://api.cloudflare.com/client/v4/accounts/account-test/ai/run/%40cf/cloudflare/clef"
+      );
+      expect(JSON.parse(String(init.body)).model).toBe("clef");
+      return Response.json({ success: true, result: native });
+    });
+    const s = setup({ fetch: fetcher }, { accountId: "account-test" });
+    const response = await s.post(
+      request({ ...state, model: "cloudflare-ai/@cf/cloudflare/clef" }),
+      "systemone"
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).answers).toEqual(native.answers);
+    expect(s.observations[0].cost).toBeNull();
+  });
+});

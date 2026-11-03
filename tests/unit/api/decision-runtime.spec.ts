@@ -243,3 +243,36 @@ describe("discovery connection record validation", () => {
     expect(deps.fetch).not.toHaveBeenCalled();
   });
 });
+
+describe("universal native decision catalog", () => {
+  it("discovers Cloud decisions only on allowed connections and preserves key model scope", async () => {
+    deps.valid.mockResolvedValue(true);
+    deps.policy.mockResolvedValue({ rejection: null });
+    deps.scope.mockResolvedValue({ allowedConnections: ["sub"], rejection: null });
+    deps.metadata.mockResolvedValue({});
+    deps.allowed.mockResolvedValue(true);
+    deps.connections.mockResolvedValue([
+      { id: "sub", provider: "ollama-cloud", apiKey: "sub-test" },
+      { id: "credits", provider: "ollama-cloud", apiKey: "credits-test" },
+    ]);
+    deps.fetch.mockImplementation(async (url: string, credentials: Record<string, unknown>) => {
+      expect(credentials.connectionId).toBe("sub");
+      return Response.json(
+        url.endsWith("/api/show")
+          ? { capabilities: ["decision", "vision"] }
+          : { models: [{ name: "clef:27b" }, { name: "chat-only" }] }
+      );
+    });
+    // A capability response for both rows above is deliberate: names are never gates.
+    const response = await GET(
+      new Request("http://gateway/v1/systemone/models", {
+        headers: { authorization: "Bearer client-test" },
+      })
+    );
+    expect(response.status).toBe(200);
+    const data = (await response.json()).data;
+    expect(data[0].id).toBe("ollamacloud/clef:27b");
+    expect(data[0].supported_endpoints).toEqual(["systemone"]);
+    expect(deps.allowed).toHaveBeenCalledWith("client-test", "ollamacloud/clef:27b");
+  });
+});

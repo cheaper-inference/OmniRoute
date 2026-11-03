@@ -1,3 +1,4 @@
+import { getProviderAlias } from "@/shared/constants/providers";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getApiKeyMetadata, isModelAllowedForKey } from "@/lib/db/apiKeys";
 import { extractApiKey } from "@/sse/services/auth";
@@ -27,7 +28,10 @@ function catalogConnection(row: Record<string, unknown>): DecisionCredentials | 
     throw new Error("Invalid connection record");
   const providerSpecificData = record(row.providerSpecificData);
   if (
-    !["openai", "ollama-local", "basal", "julia-local"].includes(provider) &&
+    !["openai", "ollama-cloud", "ollama-local", "basal", "julia-local", "cloudflare-ai"].includes(
+      provider
+    ) &&
+    !["decisions", "systemone"].includes(String(providerSpecificData.apiType)) &&
     !providerSpecificData.decision
   )
     return null;
@@ -59,7 +63,13 @@ async function collectDecisionCatalog(
       if (!credentials) continue;
       if (allowedConnections && !allowedConnections.includes(credentials.connectionId)) continue;
       const provider = row.provider as string;
-      const backend = resolveDecisionBackend(provider, credentials);
+      const backend = {
+        ...resolveDecisionBackend(provider, credentials),
+        provider:
+          typeof credentials.providerSpecificData?.prefix === "string"
+            ? credentials.providerSpecificData.prefix
+            : getProviderAlias(provider),
+      };
       const signal = AbortSignal.any([
         catalogSignal,
         AbortSignal.timeout(Math.min(backend.timeoutMs, 10_000)),

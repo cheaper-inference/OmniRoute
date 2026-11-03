@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- **feat(decisions):** expose native decision endpoint cards and compatible-provider protocol selection; preserve typed model metadata, add Ollama Cloud capability discovery and Cloudflare Workers AI transport using normal scoped connections.
+
 - **fix(decisions):** split native gateway admission, discovery, transport and fallback helpers to meet complexity limits, and classify scoped credential selection and read-only catalog lookup in the hard-session-lease inventory.
 ### ✨ New Features
 

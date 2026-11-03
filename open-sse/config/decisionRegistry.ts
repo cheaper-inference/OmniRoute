@@ -44,6 +44,12 @@ function decisionDefaults(base: string | null) {
       modelsUrl: "https://api.openai.com/v1/models",
       discovery: "openai",
     },
+    "ollama-cloud": {
+      format: "systemone",
+      url: "https://ollama.com/v1/systemone",
+      modelsUrl: "https://ollama.com/api/tags",
+      discovery: "ollama",
+    },
     "ollama-local": {
       format: "systemone",
       url: `${defaultBase || "http://localhost:11434"}/v1/systemone`,
@@ -66,12 +72,24 @@ export function resolveDecisionBackend(
 ): DecisionBackend {
   const data = record(credentials.providerSpecificData);
   const base = typeof data.baseUrl === "string" ? data.baseUrl.replace(/\/+$/, "") : null;
-  const config = parseDecisionConfiguration(data.decision);
+  const config = parseDecisionConfiguration(data.decision) || compatibleDecisionConfiguration(data);
   const entry = decisionDefaults(base)[provider];
+  if (provider === "cloudflare-ai" && !config) return cloudflareDecisionBackend(data);
   if (!config && !entry) throw new DecisionError(400, "unsupported_decision_provider");
   if (!entry && !config?.modelsEndpoint && !config?.models?.length)
     throw new DecisionError(503, "decision_model_configuration_required");
   return buildDecisionBackend(provider, config || {}, entry);
+}
+
+/** Compatible nodes use the same URL/path fields as every other provider. */
+function compatibleDecisionConfiguration(data: Record<string, unknown>) {
+  if (data.apiType !== "decisions" && data.apiType !== "systemone") return null;
+  if (typeof data.baseUrl !== "string")
+    throw new DecisionError(503, "decision_model_configuration_required");
+  const base = data.baseUrl.replace(/\/+$/, "");
+  const endpoint = `${base}${typeof data.chatPath === "string" && data.chatPath ? data.chatPath : `/${data.apiType}`}`;
+  const modelsEndpoint = `${base}${typeof data.modelsPath === "string" && data.modelsPath ? data.modelsPath : "/models"}`;
+  return parseDecisionConfiguration({ format: data.apiType, endpoint, modelsEndpoint });
 }
 
 function parseDecisionConfiguration(value: unknown) {
@@ -99,5 +117,21 @@ function buildDecisionBackend(
     models: config.models,
     fallbackModels: config.fallbackModels || [],
     timeoutMs: config.timeoutMs || 30_000,
+  };
+}
+
+function cloudflareDecisionBackend(data: Record<string, unknown>): DecisionBackend {
+  if (typeof data.accountId !== "string" || !/^[a-zA-Z0-9_-]{1,128}$/.test(data.accountId))
+    throw new DecisionError(503, "decision_model_configuration_required");
+  const base = `https://api.cloudflare.com/client/v4/accounts/${data.accountId}/ai`;
+  return {
+    provider: "cloudflare-ai",
+    format: "systemone",
+    url: `${base}/run`,
+    modelsUrl: `${base}/models/search?search=clef&per_page=100`,
+    discovery: "cloudflare",
+    transport: "cloudflare",
+    fallbackModels: [],
+    timeoutMs: 30_000,
   };
 }

@@ -81,18 +81,26 @@ async function runDecisionAttempt(
     const catalog = await discoverDecisionModels(backend, credentials, runtime.fetch, signal);
     if (!catalog.some((row) => row.id === `${provider}/${model}`))
       throw new DecisionError(404, "decision_model_not_found");
-    const upstream = await runtime.fetch(backend.url, credentials, {
+    const upstreamUrl =
+      backend.transport === "cloudflare"
+        ? `${backend.url}/${model.split("/").map(encodeURIComponent).join("/")}`
+        : backend.url;
+    const upstreamModel = backend.transport === "cloudflare" ? model.split("/").at(-1) : model;
+    const upstream = await runtime.fetch(upstreamUrl, credentials, {
       method: "POST",
       headers: decisionHeaders(credentials),
       signal,
-      body: JSON.stringify({ ...body, model }),
+      body: JSON.stringify({ ...body, model: upstreamModel }),
     });
     attempt.status = upstream.status;
     if (!upstream.ok) {
       await upstream.body?.cancel();
       throw new DecisionError(upstream.status, `upstream_http_${upstream.status}`);
     }
-    result = record(await readDecisionJson(upstream, 502, signal));
+    const payload = record(await readDecisionJson(upstream, 502, signal));
+    if (backend.transport === "cloudflare" && payload.success === false)
+      throw new DecisionError(502, "upstream_envelope_failed");
+    result = backend.transport === "cloudflare" ? record(payload.result) : payload;
     validateNativeAnswers(format, result.answers);
     attempt.usage = result.usage && typeof result.usage === "object" ? record(result.usage) : null;
     attempt.cost = attempt.usage ? finiteCost(attempt.usage) : null;

@@ -14,7 +14,8 @@ export interface DecisionBackend {
   format: DecisionFormat;
   url: string;
   modelsUrl: string;
-  discovery: "openai" | "ollama" | "systemone";
+  discovery: "openai" | "ollama" | "systemone" | "cloudflare";
+  transport?: "cloudflare";
   /** Only operator-managed servers without discovery need an explicit model list. */
   models?: string[];
   fallbackModels: string[];
