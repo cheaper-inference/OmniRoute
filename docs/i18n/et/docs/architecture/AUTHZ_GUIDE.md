@@ -143,34 +143,35 @@ täiendatakse:
 
 Mõned `MANAGEMENT` toimingud on **ainult operaatorile**: `manage`-võti ei ole piisav. Salvestatud mandaatide eksportimine (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), varukoopia taastamine praegusete andmete peale (`POST /api/db-backups/import`, sh `dryRun=true`, `POST /api/db-backups` taastamine ID järgi, `POST /api/settings/import-json`) ning taastepunktide hävitamine (`DELETE /api/db-backups` puhastus ja `PATCH /api/db-backups`, sest salvestatud säilitusaeg juhib automaatset puhastamist iga varukoopia järel) nõuavad armatuurlaua seanssi, kohalikku CLI-identiteeti või seda, et sisselogimine on keelatud. Sünkroonimistokeni väljastamine (`POST /api/sync/tokens`) ja `admin`-ulatusega CLI juurdepääsutokeni loomine (`POST /api/cli/tokens`) nõuavad armatuurlaua seanssi või kohalikku CLI-identiteeti igas sisselogimisrežiimis. API-võtmed igas ulatuses ja `oma_` juurdepääsutokenid ei ole operaatori mandaadid: need saavad vastuseks `403`, kui see on nõutav. Kontroll asub failis `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Sisselogimisseadete muutmine on samuti ainult operaatorile: `POST /api/settings/require-login` (haldusparooli määramine / `requireLogin` lülitamine) aktsepteerib neid mandaate pärast seda, kui parool on olemas. Esmase käivituse bootstrap-aken (parooli veel pole) on muutumatu ning armatuurlaua seanss peab parooli asendamiseks saatma `currentPassword`-i (`403`, kui see puudub või on vale, logitud kui `settings.update_failed`). Kohalik CLI ja instants, kus sisselogimine on keelatud, säilitavad taastamistee ning võivad parooli seada ilma selleta, sest mõlemad on seotud andmekataloogi omava hostiga.
 
-## Töötluskonveier
+## Konveier
 
 ```
-Sissetulev päring → src/proxy.ts
+Saabuv päring → src/proxy.ts
   → runAuthzPipeline() failis src/server/authz/pipeline.ts
-    1. Eemalda usaldatud sisemised päised (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Genereeri päringu ID, klassifitseeri marsruut funktsiooniga classifyRoute()
-    3. Kui pathname == "/" → suuna ümber asukohta /dashboard
-    4. Kui toimub tühjendamine (sujuv sulgemine) ja /api/* → 503
-    5. Kui mitte-GET /api/* → kontrolli kaitsemehhanismiga checkBodySize()
+    1. Usaldusväärsete sisemiste päiste eemaldamine (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Päringu ID genereerimine, marsruudi klassifitseerimine funktsiooni classifyRoute() kaudu
+    3. Kui pathname == "/" → suuna ümber aadressile /dashboard
+    4. Kui toimub tühjendus (sujuv sulgemine) ja tegemist on /api/* päringuga → 503
+    5. Kui /api/* päring ei ole GET → kontrolli checkBodySize() kaitset
     6. Kui OPTIONS → CORS-i eelkontroll 204
-    7. Kui options.enforce == false → lase läbi koos marsruudiklassi päistega
-    8. Vastasel juhul: POLICIES[routeClass].evaluate(ctx)
-       - luba   → lisa x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - lükka tagasi → JSON-viga koos correlation_id-ga (töölaua lehed → 302 /login)
+    7. Kui options.enforce == false → edasta koos route-class päistega
+    8. Muul juhul: POLICIES[routeClass].evaluate(ctx)
+       - allow  → lisa x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON-i viga koos correlation_id-ga (juhtpaneeli lehed → 302 /login)
 ```
 
-Usaldatud sisemised päised (määratletud failis `src/server/authz/headers.ts`) **eemaldatakse sissetulevatest päringutest** enne klassifitseerimist — kliendid ei saa subjekti kehastamiseks päiseid `x-omniroute-auth-*` eelnevalt määrata.
+Usaldusväärsed sisemised päised (määratletud failis `src/server/authz/headers.ts`) **eemaldatakse sissetulevatest päringutest** enne klassifitseerimist — kliendid ei saa subjekti kehastamiseks eeltäita päiseid `x-omniroute-auth-*`.
 
-### Reeglistike lepingud
+### Poliitikalepped
 
-Igal marsruudiklassil on kataloogis `src/server/authz/policies/` oma reeglistik:
+Igal marsruudiklassil on poliitika asukohas `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — tagastab alati `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — eraldab Bearer-väärtuse ja valideerib selle funktsiooniga `validateApiKey()`. Lubab anonüümse juurdepääsu ainult siis, kui kehtiv funktsioonilipp `REQUIRE_API_KEY` on keelatud. Kehtiv lipp tuvastatakse funktsiooniga `isRequireApiKeyEnabled()` (`andmebaasi funktsioonilipu ülekirjutus > process.env.REQUIRE_API_KEY > vaikeväärtus`), et töölaua funktsioonilipud ja keskkonnamuutujad haldaksid marsruute `/api/v1/*`, `/api/v1beta/*` ning aliaseid ühetaoliselt; lahendaja tõrgete korral juurdepääs keelatakse. Lubab kliendi API marsruutidel töölaua seansiga päringuid (sealhulgas `/api/v1/models`, mida kasutab töölaua mudelikataloog).
-- **`managementPolicy`** (`policies/management.ts`) — aktsepteerib töölaua seanssi ja sisemisi mudelite sünkroonimise päringuid (mida võrreldakse mustriga `/api/providers/[name]/(sync-models|models)`) või jätab kontrolli täielikult vahele, kui `isAuthRequired()` tagastab väärväärtuse. Kui Bearer-tõend on olemas, kuid kehtetu, tagastab 403 (`AUTH_001`), muul juhul 401. Samuti jõustab enne mis tahes autentimisharu marsruudikaitse tasemed (LOCAL_ONLY / ALWAYS_PROTECTED) — vt [Marsruudikaitse tasemed](../security/ROUTE_GUARD_TIERS.md). Loendis `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` olevatele LOCAL_ONLY teedele (praegu `/api/mcp/`) pääseb juurde ka väljastpoolt loopback-liidest, kui Bearer-võtmel on `manage`-ulatus; kõik muud LOCAL_ONLY teed jäävad olenemata ulatusest rangelt loopback-liidesega piiratuks.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — eraldab Beareri, valideerib selle funktsiooni `validateApiKey()` kaudu. Läheb anonüümseks üle ainult siis, kui tegelik `REQUIRE_API_KEY` funktsioonilipp on keelatud. Tegelik lipp lahendatakse funktsiooni `isRequireApiKeyEnabled()` kaudu (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), mistõttu juhtpaneeli funktsioonilipud ja keskkonnamuutujad juhivad järjepidevalt marsruute `/api/v1/*`, `/api/v1beta/*` ja nende aliaseid; lahendaja tõrked sulgevad juurdepääsu. Lubab juhtpaneeli seansi päringud kliendi API marsruutidel, sealhulgas marsruudil `/api/v1/models`, mida kasutatakse juhtpaneeli mudelikataloogis.
+  Kui Entra ID SSO on lubatud, käsitletakse struktuurilt Entra tokenina olevat Bearerit (kolm base64url-segmenti, `RS*` algoritm, `kid`) SSO-harus **enne** funktsiooni `validateApiKey()` ning selle otsus on lõplik — see ei lähe kunagi üle API-võtme teele ega anonüümseks taandumise harusse, mistõttu identiteedipakkuja katkestus ei saa muutuda avatud juurdepääsuks. Staatilisi API-võtmeid see ei mõjuta. Vt [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — aktsepteerib juhtpaneeli seansi, sisemisi mudelite sünkroonimise päringuid (sobitatud mustriga `/api/providers/[name]/(sync-models|models)`) või jätab kontrolli täielikult vahele, kui `isAuthRequired()` tagastab väärtuse `false`. Tagastab väärtuse 403 (`AUTH_001`), kui Beareri token on olemas, kuid kehtetu, muul juhul 401. Samuti jõustab marsruudivalve tasemed (LOCAL_ONLY / ALWAYS_PROTECTED) enne mis tahes autentimisharu — vt [Marsruudivalve tasemed](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY`-i teed prefiksis `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (praegu: `/api/mcp/`) võivad olla mitte-loopback-aadressilt juurdepääsetavad, kui Beareri võti sisaldab ulatust `manage`; kõik muud `LOCAL_ONLY`-i teed jäävad ulatusest olenemata rangelt loopback-põhiseks.
 
-Edukas reeglistik tagastab `AuthSubject`-objekti väärtusega `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Allavoo töötlejad saavad seda lugeda failis `src/server/authz/assertAuth.ts` oleva funktsiooni `assertAuth(request, "CLIENT_API")` kaudu, selle asemel et autentimisloogikat uuesti käivitada.
+Edukalt lõpetanud poliitika tagastab `AuthSubject`-i, mille `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Alamjärgu töötlejad saavad seda lugeda funktsiooni `assertAuth(request, "CLIENT_API")` kaudu failis `src/server/authz/assertAuth.ts`, selle asemel et autentimisloogikat uuesti käivitada.
 
 ## Avalike marsruutide loend
 
@@ -319,23 +320,23 @@ Lõpp-punktid `/api/v1/agents/tasks/*` ja `/api/resilience/model-cooldowns` **n�
 
 ## Silumine
 
-Konveier märgistab vastused alati järgmiste päistega:
+Konveier lisab vastustele alati järgmised päised:
 
 ```
-x-request-id:               <korrelatsiooni ID, kajastub veavastustes>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Autenditud päringute puhul sisaldavad ülesvoolu (töötleja poolel olevad) päringupäised ka järgmist:
+Autenditud päringute korral sisaldavad ülesvoolu (käsitlejapoolsed) päringupäised samuti järgmist:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<viimased 4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (valikuline)
-x-omniroute-auth-scopes:    komadega eraldatud loend
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Kasutage töötlejates funktsiooni `assertAuth(req, expectedClass)` — kui vahevara jäeti vahele, väljastab see vea `AuthzAssertionError` koodiga `AUTHZ_NOT_INITIALIZED` (kasulik konfiguratsiooni regressioonide tuvastamiseks testides).
+Kasutage käsitlejates `assertAuth(req, expectedClass)` — see väljastab `AuthzAssertionError`i koodiga `AUTHZ_NOT_INITIALIZED`, kui vahevara jäeti vahele (see on kasulik konfiguratsiooni regressioonide tuvastamiseks testides).
 
 ## Vaata ka
 
