@@ -12,10 +12,7 @@ export async function readDecisionJson(
   status = 502,
   signal?: AbortSignal
 ): Promise<unknown> {
-  if (Number(message.headers.get("content-length")) > DECISION_MAX_BYTES) {
-    await message.body?.cancel();
-    throw new DecisionError(status === 400 ? 413 : status, "payload_too_large");
-  }
+  await checkDecisionLength(message, status);
   const reader = message.body?.getReader();
   if (!reader) throw new DecisionError(status, "invalid_json");
   const cancel = () => {
@@ -37,20 +34,24 @@ export async function readDecisionJson(
       chunks.push(result.value);
     }
     if (signal?.aborted) throw new DecisionError(504, "timeout_or_cancelled");
-    const buffer = new Uint8Array(size);
-    let offset = 0;
-    for (const chunk of chunks) {
-      buffer.set(chunk, offset);
-      offset += chunk.length;
-    }
-    try {
-      return JSON.parse(new TextDecoder().decode(buffer));
-    } catch {
-      throw new DecisionError(status, "invalid_json");
-    }
+    return parseDecisionChunks(chunks, size, status);
   } finally {
     signal?.removeEventListener("abort", cancel);
     reader.releaseLock();
+  }
+}
+
+function parseDecisionChunks(chunks: Uint8Array[], size: number, status: number): unknown {
+  const buffer = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buffer.set(chunk, offset);
+    offset += chunk.length;
+  }
+  try {
+    return JSON.parse(new TextDecoder().decode(buffer));
+  } catch {
+    throw new DecisionError(status, "invalid_json");
   }
 }
 
@@ -81,4 +82,11 @@ export async function fetchDecision(
     retry: false, // A timed-out inference may have executed; never replay it automatically.
     timeoutMs: 120_000,
   });
+}
+
+async function checkDecisionLength(message: Request | Response, status: number): Promise<void> {
+  if (Number(message.headers.get("content-length")) > DECISION_MAX_BYTES) {
+    await message.body?.cancel();
+    throw new DecisionError(status === 400 ? 413 : status, "payload_too_large");
+  }
 }

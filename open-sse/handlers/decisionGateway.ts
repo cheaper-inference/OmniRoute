@@ -45,6 +45,143 @@ function finiteCost(usage: DecisionRecord): number | null {
   return typeof cost === "number" && Number.isFinite(cost) && cost >= 0 ? cost : null;
 }
 
+function decisionFailure(error: unknown, caller: AbortSignal, timeout: AbortSignal) {
+  if (caller.aborted) return { status: 499, failure: "cancelled" };
+  if (timeout.aborted || record(error).code === "TIMEOUT")
+    return { status: 504, failure: "timeout" };
+  if (error instanceof DecisionError) return { status: error.status, failure: error.category };
+  return { status: 502, failure: "connection_failed" };
+}
+
+function validateNativeAnswers(format: DecisionFormat, answers: unknown): void {
+  const valid =
+    format === "decisions"
+      ? Array.isArray(answers)
+      : answers &&
+        !Array.isArray(answers) &&
+        typeof answers === "object" &&
+        Object.keys(answers).length > 0;
+  if (!valid) throw new DecisionError(502, "invalid_native_response");
+}
+
+async function runDecisionAttempt(
+  runtime: DecisionGatewayRuntime,
+  request: Request,
+  format: DecisionFormat,
+  body: DecisionRecord,
+  backend: DecisionBackend,
+  credentials: DecisionCredentials,
+  attempt: DecisionAttempt,
+  signal: AbortSignal,
+  timeout: AbortSignal
+): Promise<DecisionRecord | null> {
+  const { provider, model } = attempt;
+  let result: DecisionRecord | null = null;
+  try {
+    const catalog = await discoverDecisionModels(backend, credentials, runtime.fetch, signal);
+    if (!catalog.some((row) => row.id === `${provider}/${model}`))
+      throw new DecisionError(404, "decision_model_not_found");
+    const upstream = await runtime.fetch(backend.url, credentials, {
+      method: "POST",
+      headers: decisionHeaders(credentials),
+      signal,
+      body: JSON.stringify({ ...body, model }),
+    });
+    attempt.status = upstream.status;
+    if (!upstream.ok) {
+      await upstream.body?.cancel();
+      throw new DecisionError(upstream.status, `upstream_http_${upstream.status}`);
+    }
+    result = record(await readDecisionJson(upstream, 502, signal));
+    validateNativeAnswers(format, result.answers);
+    attempt.usage = result.usage && typeof result.usage === "object" ? record(result.usage) : null;
+    attempt.cost = attempt.usage ? finiteCost(attempt.usage) : null;
+    attempt.status = 200;
+  } catch (error) {
+    result = null;
+    Object.assign(attempt, decisionFailure(error, request.signal, timeout));
+  }
+  return result;
+}
+
+function decisionResponseHeaders(attempt: DecisionAttempt, target: string, attempts: number) {
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+    "X-OmniRoute-Request-Id": attempt.requestId,
+    "X-OmniRoute-Provider": attempt.provider,
+    "X-OmniRoute-Model": encodeURIComponent(target),
+    "X-OmniRoute-Latency-Ms": String(attempt.latencyMs),
+    "X-OmniRoute-Cost-Status": attempt.cost === null ? "unknown" : "known",
+    "X-OmniRoute-Usage-Status": attempt.usage === null ? "unknown" : "reported",
+    "X-OmniRoute-Fallback-Attempts": String(attempts),
+  });
+  if (attempt.cost !== null) headers.set("X-OmniRoute-Response-Cost", String(attempt.cost));
+  return headers;
+}
+
+async function runDecisionTargets(
+  runtime: DecisionGatewayRuntime,
+  request: Request,
+  format: DecisionFormat,
+  body: ReturnType<typeof validateDecisionRequest>,
+  requestId: string
+): Promise<Response> {
+  let target = body.model;
+  let fallbacks: string[] = [];
+  let attempts = 0;
+  while (true) {
+    const rejection = await runtime.authorize(request, target);
+    if (rejection) return rejection;
+    const { provider, model } = splitDecisionModel(target);
+    const selected = await runtime.select(request, provider, model);
+    const { backend, credentials } = selected;
+    if (backend.format !== format)
+      throw new DecisionError(400, "cross_format_translation_unsupported");
+    if (attempts === 0) fallbacks = backend.fallbackModels;
+    const start = Date.now();
+    const timeout = AbortSignal.timeout(backend.timeoutMs);
+    const signal = AbortSignal.any([request.signal, timeout]);
+    const attempt: DecisionAttempt = {
+      provider,
+      model,
+      endpoint: `/v1/${format}`,
+      status: 502,
+      latencyMs: 0,
+      requestId,
+      connectionId: credentials.connectionId || null,
+      failure: null,
+      usage: null,
+      cost: null,
+    };
+    const result = await runDecisionAttempt(
+      runtime,
+      request,
+      format,
+      body,
+      backend,
+      credentials,
+      attempt,
+      signal,
+      timeout
+    );
+    attempt.latencyMs = Date.now() - start;
+    await runtime.observe(request, attempt);
+    await runtime.feedback(credentials, attempt);
+    const headers = decisionResponseHeaders(attempt, target, attempts);
+    if (result) return new Response(JSON.stringify(result), { status: 200, headers });
+    // Only an explicit operator policy can substitute models. Never retry ambiguous timeouts/cancellation.
+    const fallback = nextDecisionFallback(request, attempt, fallbacks);
+    if (!fallback || attempts >= 4) {
+      const response = runtime.error(attempt.status, `Decision gateway: ${attempt.failure}`);
+      for (const [name, value] of headers) response.headers.set(name, value);
+      return response;
+    }
+    target = fallback;
+    attempts++;
+  }
+}
+
 /** Provider-neutral route factory. No vendor branches, credentials store or routing engine here. */
 export function createDecisionGateway(runtime: DecisionGatewayRuntime) {
   return async function post(request: Request, format: DecisionFormat): Promise<Response> {
@@ -61,114 +198,7 @@ export function createDecisionGateway(runtime: DecisionGatewayRuntime) {
           AbortSignal.any([request.signal, AbortSignal.timeout(10_000)])
         )
       );
-      let target = body.model;
-      let fallbacks: string[] = [];
-      let attempts = 0;
-      while (true) {
-        const rejection = await runtime.authorize(request, target);
-        if (rejection) return rejection;
-        const { provider, model } = splitDecisionModel(target);
-        const selected = await runtime.select(request, provider, model);
-        const { backend, credentials } = selected;
-        if (backend.format !== format)
-          throw new DecisionError(400, "cross_format_translation_unsupported");
-        if (attempts === 0) fallbacks = backend.fallbackModels;
-        const start = Date.now();
-        const timeout = AbortSignal.timeout(backend.timeoutMs);
-        const signal = AbortSignal.any([request.signal, timeout]);
-        const attempt: DecisionAttempt = {
-          provider,
-          model,
-          endpoint: `/v1/${format}`,
-          status: 502,
-          latencyMs: 0,
-          requestId,
-          connectionId: credentials.connectionId || null,
-          failure: null,
-          usage: null,
-          cost: null,
-        };
-        let result: DecisionRecord | null = null;
-        try {
-          const catalog = await discoverDecisionModels(backend, credentials, runtime.fetch, signal);
-          if (!catalog.some((row) => row.id === `${provider}/${model}`))
-            throw new DecisionError(404, "decision_model_not_found");
-          const upstream = await runtime.fetch(backend.url, credentials, {
-            method: "POST",
-            headers: decisionHeaders(credentials),
-            signal,
-            body: JSON.stringify({ ...body, model }),
-          });
-          attempt.status = upstream.status;
-          if (!upstream.ok) {
-            await upstream.body?.cancel();
-            throw new DecisionError(upstream.status, `upstream_http_${upstream.status}`);
-          }
-          result = record(await readDecisionJson(upstream, 502, signal));
-          const answers = result.answers;
-          if (
-            format === "decisions"
-              ? !Array.isArray(answers)
-              : !answers ||
-                Array.isArray(answers) ||
-                typeof answers !== "object" ||
-                Object.keys(answers).length === 0
-          ) {
-            throw new DecisionError(502, "invalid_native_response");
-          }
-          attempt.usage =
-            result.usage && typeof result.usage === "object" ? record(result.usage) : null;
-          attempt.cost = attempt.usage ? finiteCost(attempt.usage) : null;
-          attempt.status = 200;
-        } catch (error) {
-          result = null;
-          const code = record(error).code;
-          attempt.status = request.signal.aborted
-            ? 499
-            : timeout.aborted || code === "TIMEOUT"
-              ? 504
-              : error instanceof DecisionError
-                ? error.status
-                : 502;
-          attempt.failure = request.signal.aborted
-            ? "cancelled"
-            : timeout.aborted || code === "TIMEOUT"
-              ? "timeout"
-              : error instanceof DecisionError
-                ? error.category
-                : "connection_failed";
-        }
-        attempt.latencyMs = Date.now() - start;
-        await runtime.observe(request, attempt);
-        await runtime.feedback(credentials, attempt);
-        const headers = new Headers({
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store",
-          "X-OmniRoute-Request-Id": requestId,
-          "X-OmniRoute-Provider": provider,
-          "X-OmniRoute-Model": encodeURIComponent(target),
-          "X-OmniRoute-Latency-Ms": String(attempt.latencyMs),
-          "X-OmniRoute-Cost-Status": attempt.cost === null ? "unknown" : "known",
-          "X-OmniRoute-Usage-Status": attempt.usage === null ? "unknown" : "reported",
-          "X-OmniRoute-Fallback-Attempts": String(attempts),
-        });
-        if (attempt.cost !== null) headers.set("X-OmniRoute-Response-Cost", String(attempt.cost));
-        if (result) return new Response(JSON.stringify(result), { status: 200, headers });
-        // Only an explicit operator policy can substitute models. Never retry ambiguous timeouts/cancellation.
-        const fallback =
-          !request.signal.aborted &&
-          (attempt.status === 429 || [500, 502, 503].includes(attempt.status)) &&
-          attempt.failure?.startsWith("upstream_http_")
-            ? fallbacks.shift()
-            : null;
-        if (!fallback || attempts >= 4) {
-          const response = runtime.error(attempt.status, `Decision gateway: ${attempt.failure}`);
-          for (const [name, value] of headers) response.headers.set(name, value);
-          return response;
-        }
-        target = fallback;
-        attempts++;
-      }
+      return await runDecisionTargets(runtime, request, format, body, requestId);
     } catch (error) {
       return runtime.error(
         error instanceof DecisionError ? error.status : request.signal.aborted ? 499 : 503,
@@ -176,4 +206,10 @@ export function createDecisionGateway(runtime: DecisionGatewayRuntime) {
       );
     }
   };
+}
+
+function nextDecisionFallback(request: Request, attempt: DecisionAttempt, fallbacks: string[]) {
+  if (request.signal.aborted) return null;
+  if (![429, 500, 502, 503].includes(attempt.status)) return null;
+  return attempt.failure?.startsWith("upstream_http_") ? fallbacks.shift() : null;
 }

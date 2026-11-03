@@ -85,6 +85,10 @@ async function postHandler(request: Request): Promise<Response> {
     );
   }
 
+  return postLegacySystemOne(request, rawBody);
+}
+
+async function postLegacySystemOne(request: Request, rawBody: unknown): Promise<Response> {
   const validation = validateBody(v1SystemOneSchema, rawBody);
   if (isValidationFailure(validation)) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, validation.error.message);

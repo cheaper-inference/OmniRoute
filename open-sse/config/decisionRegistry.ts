@@ -27,17 +27,7 @@ export function splitDecisionModel(id: string): { provider: string; model: strin
   return { provider: id.slice(0, slash), model: id.slice(slash + 1) };
 }
 
-export function resolveDecisionBackend(
-  provider: string,
-  credentials: DecisionCredentials
-): DecisionBackend {
-  const data = record(credentials.providerSpecificData);
-  const base = typeof data.baseUrl === "string" ? data.baseUrl.replace(/\/+$/, "") : null;
-  const configured =
-    data.decision === undefined ? null : decisionConnectionSchema.safeParse(data.decision);
-  if (configured && !configured.success)
-    throw new DecisionError(503, "invalid_provider_configuration");
-  const config = configured?.success ? configured.data : null;
+function decisionDefaults(base: string | null) {
   const defaultBase = base?.replace(/\/v1$/, "");
   const defaults: Record<
     string,
@@ -67,21 +57,47 @@ export function resolveDecisionBackend(
       discovery: "systemone",
     },
   };
-  const entry = defaults[provider];
+  return defaults;
+}
+
+export function resolveDecisionBackend(
+  provider: string,
+  credentials: DecisionCredentials
+): DecisionBackend {
+  const data = record(credentials.providerSpecificData);
+  const base = typeof data.baseUrl === "string" ? data.baseUrl.replace(/\/+$/, "") : null;
+  const config = parseDecisionConfiguration(data.decision);
+  const entry = decisionDefaults(base)[provider];
   if (!config && !entry) throw new DecisionError(400, "unsupported_decision_provider");
-  if (!entry && !config?.modelsEndpoint && !config?.models?.length) {
+  if (!entry && !config?.modelsEndpoint && !config?.models?.length)
     throw new DecisionError(503, "decision_model_configuration_required");
-  }
+  return buildDecisionBackend(provider, config || {}, entry);
+}
+
+function parseDecisionConfiguration(value: unknown) {
+  if (value === undefined) return null;
+  const parsed = decisionConnectionSchema.safeParse(value);
+  if (!parsed.success) throw new DecisionError(503, "invalid_provider_configuration");
+  return parsed.data;
+}
+
+function buildDecisionBackend(
+  provider: string,
+  config: Partial<z.infer<typeof decisionConnectionSchema>>,
+  entry: ReturnType<typeof decisionDefaults>[string] | undefined
+): DecisionBackend {
   // Julia and future engines explicitly configure the endpoint; no runtime endpoint guess.
-  const url = config?.endpoint || entry.url;
+  const url = config.endpoint || entry?.url;
+  const format = config.format || entry?.format;
+  if (!url || !format) throw new DecisionError(503, "invalid_provider_configuration");
   return {
     provider,
-    format: config?.format || entry.format,
+    format,
     url,
-    modelsUrl: config?.modelsEndpoint || entry?.modelsUrl || new URL("models", url).href,
+    modelsUrl: config.modelsEndpoint || entry?.modelsUrl || new URL("models", url).href,
     discovery: entry?.discovery || "systemone",
-    models: config?.models,
-    fallbackModels: config?.fallbackModels || [],
-    timeoutMs: config?.timeoutMs || 30_000,
+    models: config.models,
+    fallbackModels: config.fallbackModels || [],
+    timeoutMs: config.timeoutMs || 30_000,
   };
 }

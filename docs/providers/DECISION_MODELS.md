@@ -1,7 +1,7 @@
 ---
 title: "Decision Models"
 version: 3.8.53
-lastUpdated: 2026-11-02
+lastUpdated: 2026-11-03
 ---
 
 # Decision models
@@ -83,7 +83,7 @@ container: use your operator-managed network hostname and port when needed.
 Install a decision-capable model on an Ollama version supporting System One
 (consult the current [Ollama decision documentation](https://github.com/ollama/ollama/blob/main/docs/capabilities/decision.mdx)).
 For example, `ollama pull clef-flash`. The gateway enumerates `/api/tags` and
-reads each model's Ollama�s native show endpoint capabilities. Only models declaring `decision`
+reads each model's native Ollama show endpoint capabilities. Only models declaring `decision`
 are eligible. There is no model-name allowlist; missing models and chat-only
 models receive 404. Vision capability is discovered, not guessed from a name.
 
@@ -201,6 +201,11 @@ No new environment variables are required. Existing local-provider flags are
 documented in [Environment reference](../reference/ENVIRONMENT.md).
 
 ## Verification boundary
+
+The hard-session-lease inventory classifies native credential selection as a
+scoped quota-preflight site (B) and catalog connection enumeration as read-only
+discovery (C). The catalog filters connection scope before contacting backends;
+it never selects an inference connection or changes affinity.
 
 Mocked transport, policy and billing tests require no provider credentials or
 paid services. They prove protocol behavior, not live integration. No live
