@@ -695,7 +695,9 @@
       "tests/unit/sse-cut-tool-call-arguments.test.ts",
       "tests/unit/antigravity-argon-404.test.ts",
       "tests/unit/combo/combo-resilience-no-provider-state.test.ts",
-      "tests/unit/singbox-routes-local-only.test.ts"
+      "tests/unit/singbox-routes-local-only.test.ts",
+      "tests/unit/issue-18600-muse-request-dispatch.test.ts",
+      "tests/unit/issue-18600-muse-followup-isolation.test.ts"
     ],
     "nodeArgs": [
       "--import",
