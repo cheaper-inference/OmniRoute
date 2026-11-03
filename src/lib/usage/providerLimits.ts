@@ -866,6 +866,10 @@ async function syncClaudeBootstrapIfNeeded(
     ["organization_name", "organizationName"],
     ["organization_type", "organizationType"],
     ["organization_rate_limit_tier", "organizationRateLimitTier"],
+    // The account's own tier: `rateLimitTier` is otherwise frozen at import (copied from the
+    // CLI credentials file) and goes stale when a Team admin moves seats.
+    ["user_rate_limit_tier", "rateLimitTier"],
+    ["seat_tier", "seatTier"],
   ];
 
   const nextPsd: JsonRecord = { ...psd };
@@ -1019,7 +1023,7 @@ async function fetchLiveProviderLimitsWithOptions(
     const usage = sanitizeUsageQuotasForProvider(
       connection.provider,
       (await runWithProxyContext(apiKeyProxy?.proxy ?? null, () =>
-        getUsageForProvider(connection as unknown as JsonRecord, options)
+        getUsageForProvider(connection as unknown as JsonRecord, { ...options, includePlan: true })
       )) as JsonRecord,
       await refreshLiveModelIds(connection.provider)
     );
@@ -1058,7 +1062,10 @@ async function fetchLiveProviderLimitsWithOptions(
 
       let usageData = sanitizeUsageQuotasForProvider(
         conn.provider,
-        (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
+        (await getUsageForProvider(conn as unknown as JsonRecord, {
+          ...options,
+          includePlan: true,
+        })) as JsonRecord,
         await refreshLiveModelIds(conn.provider)
       );
 
@@ -1077,7 +1084,10 @@ async function fetchLiveProviderLimitsWithOptions(
           if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
-            (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
+            (await getUsageForProvider(conn as unknown as JsonRecord, {
+              ...options,
+              includePlan: true,
+            })) as JsonRecord,
             await refreshLiveModelIds(conn.provider)
           );
         }

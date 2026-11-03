@@ -256,8 +256,8 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   // Codex serves images under ChatGPT OAuth two ways (handleCodexImageGeneration):
   //  - `gpt-image-*` ids use the dedicated `/backend-api/codex/images/{generations,edits}`
   //    routes, which take the image model as a request field (codexImages.ts);
-  //  - the GPT-5.6 ids call `/responses` with the hosted `image_generation` tool, whose
-  //    image model the backend pins to `gpt-image-2-codex`.
+  //  - the GPT-6.1/GPT-5.6 ids call `/responses` with the hosted `image_generation` tool,
+  //    whose image model the backend pins to `gpt-image-2-codex`.
   codex: {
     id: "codex",
     alias: "cx",
@@ -266,6 +266,11 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     authHeader: "bearer",
     format: "codex-responses",
     models: [
+      {
+        id: "gpt-6.1-sol",
+        catalogId: "gpt-6.1-sol-image",
+        name: "GPT 6.1 Sol (Codex Image)",
+      },
       {
         id: "gpt-5.6-sol",
         catalogId: "gpt-5.6-sol-image",
