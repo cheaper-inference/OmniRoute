@@ -11,11 +11,11 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — دروازه رایگان هوش مصنوعی
+# 🚀 OmniRoute — دروازهٔ رایگان هوش مصنوعی
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**ساختهشده توسط [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — هیچوقت کدنویسی را متوقف نکنید. هر ابزار هوش مصنوعی → ۳۸۰ ارائهدهنده — ۱۵۰+ رایگان — از طریق یک نقطه پایانی. Claude Code، Codex، Cursor، Cline، Copilot و Antigravity را به Claude / GPT / Gemini رایگان با بازگشت خودکار متصل کنید. فشردهسازی پشتهای RTK + Caveman تا ۱۵–۹۵٪ توکنها را ذخیره میکند (~۸۹٪ میانگین) — هرگز به محدودیتها نخورید. ۳۸۰ ارائهدهنده هوش مصنوعی · ۱۵۰+ پلن رایگان · ~۱.۶۲ میلیارد توکن رایگان در ماه · ۲۰ استراتژی مسیریابی · شروع از ۰ دلار."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — هرگز کدنویسی را متوقف نکنید. هر ابزار هوش مصنوعی → 380 ارائهدهنده — 150+ مورد رایگان — از طریق یک نقطهٔ پایانی. Claude Code، Codex، Cursor، Cline، Copilot و Antigravity به Claude / GPT / Gemini رایگان با بازگشت خودکار. فشردهسازی ترکیبی RTK + Caveman، 15–95٪ از توکنها (~89٪ میانگین) را ذخیره میکند — هرگز به محدودیتها نرسید. 380 ارائهدهندهٔ هوش مصنوعی · 150+ سطح رایگان · ~1.62B توکن رایگان در ماه · 20 راهبرد مسیریابی · شروع با هزینهٔ $0."/>
 
 </div>
 
@@ -1283,28 +1283,28 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 نیز از آن 
 <br/>
 <div align="center">
 
-## 🛠️ پشته فناوری
+## 🛠️ پشتهٔ فناوری
 
 </div>
 
 <table>
   <tr><th align="left">لایه</th><th align="left">فناوری</th></tr>
   <tr><td nowrap><b>زمان اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>۱۰۰٪ TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (از نسخه v2.0 در هسته هیچ <code>any</code> وجود ندارد)</td></tr>
-  <tr><td nowrap><b>چارچوب</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>۱۰۰٪ TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (از v2.0 در هسته، بدون <code>any</code>)</td></tr>
+  <tr><td nowrap><b>فریمورک</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
   <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، ثبت وقایع WAL) + LowDB (JSON قدیمی) — ۱۴۷ ماژول دامنه، ۲۲۱ مهاجرت</td></tr>
-  <tr><td nowrap><b>حافظه</b></td><td>جستوجوی تماممتن SQLite FTS5 + embeddingهای برداری کوانتیزهشده با int8، زوال نوعدار</td></tr>
+  <tr><td nowrap><b>حافظه</b></td><td>جستوجوی تماممتن SQLite FTS5 + embeddingهای برداری کوانتیزهشده با int8، با زوال نوعدار</td></tr>
   <tr><td nowrap><b>طرحوارهها</b></td><td>Zod 4 — اعتبارسنجی ورودی/خروجی ابزار MCP + قراردادهای API</td></tr>
   <tr><td nowrap><b>پروتکلها</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>جریاندهی</b></td><td>رویدادهای ارسالشده از سرور (SSE) + پل WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>فشردهسازی</b></td><td>خط لوله ۱۲ موتوره — RTK، Caveman، LLMLingua-2 (MobileBERT ONNX)، GCF، OmniGlyph</td></tr>
-  <tr><td nowrap><b>احراز هویت &amp; امنیت</b></td><td>OAuth 2.0 (PKCE) + JWT + کلیدهای API + احراز هویت دارای دامنه MCP · AES-256-GCM در حالت سکون · DOMPurify</td></tr>
-  <tr><td nowrap><b>پنهانکاری</b></td><td>wreq-js — جعل اثرانگشت TLS با JA3 / JA4، پراکسی ۳ سطحی</td></tr>
-  <tr><td nowrap><b>تابآوری</b></td><td>قطعکننده مدار، بازگشت نمایی، مقابله با هجوم همزمان، خودترمیمی خودکار ترکیبی</td></tr>
-  <tr><td nowrap><b>ثبت وقایع</b></td><td>pino — گزارشهای JSON ساختیافته با زمینه درخواست</td></tr>
-  <tr><td nowrap><b>آزمون</b></td><td>اجراکننده آزمون Node.js + Vitest — <b>بیش از ۶۰٬۰۰۰ اعلان آزمون ایستا</b> در بیش از ۸٬۴۰۰ فایل آزمون ردیابیشده (واحد، یکپارچهسازی، E2E، امنیت، اکوسیستم)</td></tr>
+  <tr><td nowrap><b>جریانسازی</b></td><td>رویدادهای ارسالی از سرور (SSE) + پل WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>فشردهسازی</b></td><td>خط لولهٔ ۱۲ موتوره — RTK، Caveman، LLMLingua-2 (MobileBERT ONNX)، GCF، OmniGlyph</td></tr>
+  <tr><td nowrap><b>احراز هویت و امنیت</b></td><td>OAuth 2.0 (PKCE) + JWT + کلیدهای API + احراز هویت محدودشدهٔ MCP · AES-256-GCM در حالت سکون · DOMPurify</td></tr>
+  <tr><td nowrap><b>پنهانکاری</b></td><td>wreq-js — جعل اثرانگشت TLS با JA3 / JA4، پروکسی ۳ سطحی</td></tr>
+  <tr><td nowrap><b>تابآوری</b></td><td>مدارشکن، پسرفت نمایی، مقابله با هجوم همزمان، خودترمیمی خودکار ترکیبی</td></tr>
+  <tr><td nowrap><b>ثبت گزارش</b></td><td>pino — گزارشهای JSON ساختاریافته با زمینهٔ درخواست</td></tr>
+  <tr><td nowrap><b>آزمون</b></td><td>اجرای آزمون Node.js + Vitest — <b>بیش از ۶۰٬۰۰۰ اعلان آزمون ایستا</b> در بیش از ۸٬۴۰۰ فایل آزمون ردیابیشده (واحد، یکپارچهسازی، E2E، امنیت، اکوسیستم)</td></tr>
   <tr><td nowrap><b>سکوها</b></td><td>رومیزی (Electron) · Android (Termux) · PWA (هر مرورگری)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — انتشار خودکار npm + انتشار در Docker Hub هنگام انتشار نسخه</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — انتشار خودکار در npm + انتشار در Docker Hub هنگام انتشار نسخه</td></tr>
   <tr><td nowrap><b>پیوندها</b></td><td><a href="https://omniroute.online">وبسایت</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1803,9 +1803,9 @@ OmniRoute بر شانههای غولها ایستاده است. این پروژ�
 
 <div align="center">
 
-**[⬆ بازگشت به بالا](#-omniroute)** · ساختهشده با ❤️ برای جامعهٔ متنباز هوش مصنوعی.
+**[⬆ بازگشت به بالا](#-omniroute)** · با ❤️ برای جامعهٔ هوش مصنوعی متنباز ساخته شده است.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · مجوز MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>ایجادشده توسط <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · مجوز MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions برای پرسش و پاسخ جامعه فعال شده است -->
+<!-- گفتوگوهای GitHub برای پرسشوپاسخ جامعه فعال هستند -->

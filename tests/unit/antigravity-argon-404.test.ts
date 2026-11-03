@@ -21,8 +21,17 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("AntigravityExecutor.shouldRetry returns false on 404 for Argon models", () => {
+function executorWithFallbackUrls() {
   const executor = new AntigravityExecutor();
+  executor.config = {
+    ...executor.config,
+    baseUrls: ["https://daily-cloudcode-pa.googleapis.com", "https://cloudcode-pa.googleapis.com"],
+  };
+  return executor;
+}
+
+test("AntigravityExecutor.shouldRetry returns false on 404 for Argon models", () => {
+  const executor = executorWithFallbackUrls();
 
   assert.equal(executor.shouldRetry(404, 0, "gemini-4-argon"), false);
   assert.equal(executor.shouldRetry(404, 0, "antigravity/gemini-4-argon-high"), false);
@@ -30,16 +39,24 @@ test("AntigravityExecutor.shouldRetry returns false on 404 for Argon models", ()
 });
 
 test("AntigravityExecutor.shouldRetry returns true on 429 for Argon models when fallback URLs exist", () => {
-  const executor = new AntigravityExecutor();
+  const executor = executorWithFallbackUrls();
 
   assert.equal(executor.shouldRetry(429, 0, "gemini-4-argon"), true);
 });
 
 test("AntigravityExecutor.shouldRetry returns true on 404 for non-Argon models when fallback URLs exist", () => {
-  const executor = new AntigravityExecutor();
+  const executor = executorWithFallbackUrls();
 
   assert.equal(executor.shouldRetry(404, 0, "gemini-3.8-flash"), true);
   assert.equal(executor.shouldRetry(404, 0), true);
+});
+
+test("AntigravityExecutor.shouldRetry returns false when no fallback URL exists", () => {
+  const executor = new AntigravityExecutor();
+
+  assert.equal(executor.shouldRetry(429, 0, "gemini-4-argon"), false);
+  assert.equal(executor.shouldRetry(404, 0, "gemini-3.8-flash"), false);
+  assert.equal(executor.shouldRetry(404, 0), false);
 });
 
 test("markAccountUnavailable on 404 for Antigravity Argon model uses normal model-only lockout without permanent PSD exclusion", async () => {
