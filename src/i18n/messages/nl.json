@@ -14351,6 +14351,9 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-retry: 403/410-weigeringen overslaan",
         "description": "Wanneer elk account in een afkoelperiode zit en de afkoelperiode die het eerst afloopt werd veroorzaakt door een 403 (toegang geweigerd) of een 410 (verdwenen), retourneer die weigering dan direct in plaats van de afkoelperiode af te wachten en het verzoek opnieuw te verzenden; een vernieuwende agentrouter connection-scoped quota-403 wordt dan opgeslagen met errorCode 429, zodat een nieuwe poging mogelijk blijft. Standaard uitgeschakeld: alleen een 401 slaat de wachttijd over en elke weigering wordt opgeslagen met de status waarmee deze is ontvangen."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "In de compressiecachestatistieken telt u een gecomprimeerde aanvraag aan een automatische prefix-cachingprovider (OpenAI, Codex, Azure of een aangepaste verbinding die promptcaching declareert met markeringsstripping) als een geschatte cachetreffer, zelfs zonder cache_control markeringen. De schatting is een signaal om in aanmerking te komen voor de cache, en niet een waargenomen hit, dus het gerapporteerde hitpercentage voor deze providers neigt naar 100%. Standaard uitgeschakeld: alleen een verzoek met cache_control markeringen naar een cachingprovider telt als een geschatte treffer, dus aanbieders van automatische voorvoegsels blijven 0 rapporteren."
       }
     }
   },

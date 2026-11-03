@@ -45,7 +45,7 @@ Ein boolesches Flag gilt als **aktiviert**, wenn sein effektiver Wert `"true"`,
 
 ## Flag-Katalog
 
-113 Flags in 6 Kategorien. **Standardwert** ist der in der Definition festgelegte Standardwert — der Wert,
+114 Flags in 6 Kategorien. **Standardwert** ist der in der Definition festgelegte Standardwert — der Wert,
 der verwendet wird, wenn weder eine DB-Überschreibung noch eine Umgebungsvariable vorhanden ist.
 
 ### Sicherheit (10)
@@ -113,7 +113,7 @@ der verwendet wird, wenn weder eine DB-Überschreibung noch eine Umgebungsvariab
 
 Wenn `UNPRICED_USAGE_BUDGET_POLICY` ausdrücklich konfiguriert ist (Datenbanküberschreibung vor Umgebung), hat es Vorrang vor `USAGE_LIMIT_IGNORE_UNPRICED`. Ohne expliziten Enum-Wert wählt die boolesche Upstream-Deaktivierungsoption `count_as_zero`; andernfalls ist der Standard `fail_closed`. Ungültige Enum-Werte und ein nicht lesbarer Speicher für Funktionsoptionen führen zur vorsorglichen Sperrung. Keine der Deaktivierungsoptionen lockert die Einschränkungen für bepreiste Ausgaben oder eine fehlgeschlagene Preisabfrage. Die Durchsetzung und der Administratorbericht bestimmen dieselbe effektive Richtlinie.
 
-### Laufzeit (54)
+### Laufzeit (55)
 
 | Schlüssel                                      | Typ     | Standard | Neustart | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------- | ------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -173,6 +173,7 @@ Wenn `UNPRICED_USAGE_BUDGET_POLICY` ausdrücklich konfiguriert ist (Datenbanküb
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`  |          | Ermöglicht es der Kontingentrichtlinie pro Zeitfenster (Sitzungs-/Wochenschwellenwerte für die Kontoauswahl), die begrenzte Parkphase bei Ausschöpfung zu berücksichtigen (#17000): Sobald die begrenzte Parkfrist abgelaufen oder die zwischengespeicherte Beobachtung älter als die Obergrenze der Parkdauer ist, schließt das Zeitfenster das Konto bis zu einem erneuten Abruf des Kontingents nicht mehr aus. Standardmäßig deaktiviert: Ein zwischengespeichertes Zeitfenster blockiert weiterhin anhand des zuletzt gemeldeten Prozentsatzes, bis sein eigener Rücksetzzeitpunkt erreicht ist.                                                                                                                                                                                                                                       |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`  |          | Für die OpenAI-kompatible Bildgenerierung (#16260): das Verbindungszeitlimit (`providerSpecificData.timeoutMs`) verwenden, andernfalls das zentrale Zeitlimit für Upstream-Abrufe (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → Standardwert 600 s) anstelle des festen Zeitbudgets von 120 s für Bilder; mit 499 antworten, wenn der Aufrufer abbricht; dem Playground ermöglichen, lang laufende Bildgenerierungsaufträge als SSE-Stream mit Keepalive-Heartbeats zu empfangen. Standardmäßig deaktiviert: Das feste Zeitbudget gilt, und ein Abbruch durch den Aufrufer wird nicht weitergegeben. Die Frist, die das Lesen des Antworttexts abdeckt, ist immer aktiviert.                                                                                                                                                                 |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`  |          | Beendet das Anbieten und Weiterleiten der Reasoning-Stufe `max` für Cursor Grok 4.7 (#17386): Die Cursor-Dokumentation nennt nur low/medium/high/xhigh, daher verschwindet der Fallback-Alias `grok-4.7-max` aus dem Katalog, und eine Anfrage mit der Stufe `max` wird ohne Parameter für die Reasoning-Stufe gesendet. Standardmäßig deaktiviert: `max` wird weiterhin angeboten und weitergeleitet, da eine tatsächliche AgentService/Run-Prüfung es akzeptiert hat.                                                                                                                                                                                                                                                                                                                                                                     |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`  |          | Zählen Sie in den Komprimierungs-Cache-Statistiken eine komprimierte Anfrage an einen Anbieter für automatisches Präfix-Caching (OpenAI, Codex, Azure oder eine benutzerdefinierte Verbindung, die Prompt-Caching mit Markierungsentfernung deklariert) als geschätzten Cache-Treffer, auch ohne `cache_control` -Markierungen (#17114). Bei der Schätzung handelt es sich um ein Cache-Eignungssignal und nicht um einen beobachteten Treffer, sodass die gemeldete Trefferquote für diese Anbieter tendenziell bei 100 % liegt. Standardmäßig deaktiviert: Nur eine Anfrage mit `cache_control` -Markierungen an einen Caching-Anbieter zählt als geschätzter Treffer, daher melden Anbieter mit automatischen Präfixen weiterhin 0.                                                                                                      |
 
 ### CLI (5)
 
@@ -260,10 +261,10 @@ Gibt jedes Flag mit seinem effektiven Wert, seiner Quelle und einer Zusammenfass
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 113 Flags
+    // ... alle 114 Flags
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -14428,6 +14428,9 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Riprova durante il cooldown: Salta i rifiuti 403/410",
         "description": "Quando tutti gli account sono in cooldown e il cooldown che termina per primo è stato causato da un 403 (accesso rifiutato) o da un 410 (non più disponibile), restituisci subito tale rifiuto invece di attendere la fine del cooldown e inviare nuovamente la richiesta; un 403 di quota con ambito di connessione per un agentrouter in rinnovo viene quindi salvato con errorCode 429 affinché rimanga ritentabile. Disattivato per impostazione predefinita: solo un 401 salta l'attesa e ogni rifiuto viene salvato con lo stato con cui è arrivato."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Nelle statistiche della cache di compressione, contare una richiesta compressa a un provider di memorizzazione nella cache con prefisso automatico (OpenAI, Codex, Azure o una connessione personalizzata che dichiara la memorizzazione nella cache dei prompt con eliminazione dei marcatori) come un riscontro stimato della cache anche senza marcatori cache_control. La stima è un segnale di idoneità della cache, non un riscontro osservato, pertanto la percentuale di riscontro segnalata per tali fornitori tende verso il 100%. Disattivato per impostazione predefinita: solo una richiesta che trasporta marcatori cache_control a un provider di caching conta come un successo stimato, quindi i provider con prefisso automatico continuano a segnalare 0."
       }
     }
   },

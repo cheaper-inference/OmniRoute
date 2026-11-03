@@ -89,6 +89,12 @@ import {
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import {
+  AGENTIC_STALL_COMBO_REASON,
+  agenticStallOutcome,
+  isAgenticStallComboAttempt,
+} from "./agenticStallFailover.ts";
+import { holdAttemptResponse } from "./truncatedStreamFailover.ts";
+import {
   TRANSIENT_FOR_SEMAPHORE,
   MAX_FALLBACK_WAIT_MS,
   classifyQualityFailure,
@@ -174,6 +180,7 @@ export async function handleRoundRobinCombo({
   requestHeaders: _requestHeaders = null,
   relayOptions,
   perTargetAdmission = null,
+  heldAttempt = {},
 }: HandleRoundRobinOptions): Promise<Response> {
   const config = settings
     ? resolveComboConfig(combo, settings)
@@ -925,6 +932,33 @@ export async function handleRoundRobinCombo({
                 handlePreContentStreamRetry(quality, retry, { maxRetries, signal, log }, modelStr)
               )
                 continue;
+              fallbackCount++;
+              break; // move to next model
+            }
+            // #13954 (opt-in): same contract as the priority loop (agenticStallFailover.ts).
+            if (
+              await isAgenticStallComboAttempt({
+                body,
+                result,
+                modelStr,
+                hasNextTarget: offset + 1 < modelCount,
+                log,
+              })
+            ) {
+              log.warn("COMBO-RR", `${modelStr} ${AGENTIC_STALL_COMBO_REASON}`);
+              rrEvents.failed(AGENTIC_STALL_COMBO_REASON, Date.now() - startTime);
+              recordComboRequest(combo.name, modelStr, {
+                success: false,
+                latencyMs: Date.now() - startTime,
+                fallbackCount,
+                strategy: "round-robin",
+                target: toRecordedTarget(target),
+              });
+              recordedAttempts++;
+              lastError = AGENTIC_STALL_COMBO_REASON;
+              lastStatus = 502;
+              rrOutcomes.push(agenticStallOutcome(modelStr));
+              holdAttemptResponse(heldAttempt, result);
               fallbackCount++;
               break; // move to next model
             }

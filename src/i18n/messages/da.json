@@ -14428,6 +14428,9 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Genforsøg ved nedkøling: Spring 403/410-afvisninger over",
         "description": "Når alle konti er i nedkøling, og den nedkøling, der udløber først, skyldtes en 403 (adgang afvist) eller en 410 (borte), returneres denne afvisning straks i stedet for at afvente nedkølingen og gensende anmodningen; en fornyende forbindelsesafgrænset agentrouter-kvote-403 gemmes derefter med errorCode 429, så den fortsat kan genforsøges. Deaktiveret som standard: Kun en 401 springer ventetiden over, og enhver afvisning gemmes med den status, den ankom med."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "I komprimeringscache-statistikken skal du tælle en komprimeret anmodning til en udbyder af automatisk præfiks-caching (OpenAI, Codex, Azure eller en brugerdefineret forbindelse, der erklærer prompt-caching med markør-stripning) som et estimeret cache-hit selv uden cache_control markører. Estimatet er et cache-kvalificeringssignal, ikke et observeret hit, så den rapporterede hitrate for disse udbydere trender mod 100 %. Deaktiveret som standard: kun en anmodning, der bærer cache_control -markører til en cachingudbyder, tæller som et estimeret hit, så udbydere af automatiske præfikser bliver ved med at rapportere 0."
       }
     }
   },

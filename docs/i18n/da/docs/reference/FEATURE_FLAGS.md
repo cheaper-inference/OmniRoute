@@ -44,7 +44,7 @@ Et boolean-flag betragtes som **aktiveret**, når dets effektive værdi er `"tru
 
 ## Flagkatalog
 
-113 flag på tværs af 6 kategorier. **Standardværdi** er definitionens standardværdi — den værdi,
+114 flag på tværs af 6 kategorier. **Standardværdi** er definitionens standardværdi — den værdi,
 der bruges, når der hverken findes en tilsidesættelse i databasen eller en miljøvariabel.
 
 ### Sikkerhed (10)
@@ -112,7 +112,7 @@ der bruges, når der hverken findes en tilsidesættelse i databasen eller en mil
 
 Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplicit konfigureret (databasetilsidesættelse før miljø), har den forrang frem for `USAGE_LIMIT_IGNORE_UNPRICED`. Uden en eksplicit enum-værdi vælger den booleske undtagelsesindstilling fra upstream `count_as_zero`; ellers er standarden `fail_closed`. Ugyldige enum-værdier og ulæselig lagring af funktionsflag medfører afvisning af sikkerhedshensyn. Ingen af undtagelsesindstillingerne lemper håndhævelsen for prissat forbrug eller et mislykket prisopslag. Håndhævelsen og administratorrapporten finder frem til den samme effektive politik.
 
-### Kørselstid (54)
+### Kørselstid (55)
 
 | Nøgle                                          | Type    | Standardværdi | Genstart | Beskrivelse                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------- | ------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Når `UNPRICED_USAGE_BUDGET_POLICY` er eksplicit konfigureret (databasetilsides�
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`       |          | Lad kvotepolitikken pr. vindue (sessions-/ugentlige tærskler, der bruges ved valg af konto) respektere den afgrænsede parkering ved udtømning (#17000): Når den begrænsede parkeringsfrist er overskredet, eller den cachelagrede observation er ældre end parkeringsgrænsen, holder vinduet op med at udelukke kontoen, indtil kvoten hentes på ny. Slået fra som standard: Et cachelagret vindue bliver ved med at blokere ud fra den sidst rapporterede procentsats indtil sit eget nulstillingstidspunkt.                                                                                                                                                                                                                                                                      |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`       |          | For OpenAI-kompatibel billedgenerering (#16260): Brug forbindelsens timeout (`providerSpecificData.timeoutMs`), ellers den centrale timeout for upstream-hentning (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → standardværdi på 600 sek.) i stedet for det faste billedbudget på 120 sek.; svar med 499, når kalderen annullerer; lad Playground modtage langvarige billedjob som en SSE-strøm med keepalive-hjerteslag. Deaktiveret som standard: Det faste budget anvendes, og annullering fra kalderen videresendes ikke. Deadline, der dækker læsning af svarindholdet, er altid aktiveret.                                                                                                                                                                                    |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`       |          | Stopper med at tilbyde og videresende ræsonneringsindsatsen `max` for Cursor Grok 4.7 (#17386): Cursors dokumentation angiver kun low/medium/high/xhigh, så reservealiaset `grok-4.7-max` forsvinder fra kataloget, og en anmodning om indsatsen `max` sendes uden en indsatsparameter. Deaktiveret som standard: `max` tilbydes og videresendes fortsat, da en direkte AgentService/Run-probe accepterede værdien.                                                                                                                                                                                                                                                                                                                                                                |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`       |          | I komprimeringscache-statistikken skal du tælle en komprimeret anmodning til en udbyder af automatisk præfiks-caching (OpenAI, Codex, Azure eller en brugerdefineret forbindelse, der erklærer prompt-caching med markør-stripning) som et estimeret cache-hit selv uden `cache_control` markører (#17114). Estimatet er et cache-kvalificeringssignal, ikke et observeret hit, så den rapporterede hitrate for disse udbydere trender mod 100 %. Deaktiveret som standard: kun en anmodning, der bærer `cache_control` -markører til en cachingudbyder, tæller som et estimeret hit, så udbydere af automatiske præfikser bliver ved med at rapportere 0.                                                                                                                         |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Returnerer alle flag med deres effektive værdi, kilde og en oversigt.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 113 flag
+    // ... alle 114 flag
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

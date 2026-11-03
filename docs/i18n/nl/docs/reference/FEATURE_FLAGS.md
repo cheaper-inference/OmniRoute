@@ -43,7 +43,7 @@ Een boolean-vlag wordt als **ingeschakeld** beschouwd wanneer de effectieve waar
 
 ## Vlaggencatalogus
 
-113 vlaggen verdeeld over 6 categorieën. **Standaardwaarde** is de standaardwaarde uit de definitie — de waarde
+114 vlaggen verdeeld over 6 categorieën. **Standaardwaarde** is de standaardwaarde uit de definitie — de waarde
 die wordt gebruikt wanneer er geen database-overschrijving en geen omgevingsvariabele aanwezig is.
 
 ### Beveiliging (10)
@@ -111,7 +111,7 @@ die wordt gebruikt wanneer er geen database-overschrijving en geen omgevingsvari
 
 Wanneer `UNPRICED_USAGE_BUDGET_POLICY` expliciet is ingesteld (database-instelling vóór omgeving), heeft deze voorrang op `USAGE_LIMIT_IGNORE_UNPRICED`. Zonder expliciete enumwaarde kiest de booleaanse upstream-uitschakeloptie `count_as_zero`; anders is de standaard `fail_closed`. Ongeldige enumwaarden en onleesbare opslag van functievlaggen leiden tot blokkering uit voorzorg. Geen van beide uitschakelopties versoepelt de handhaving voor geprijsde uitgaven of een mislukte prijsopzoeking. De handhaving en het beheerdersrapport bepalen hetzelfde effectieve beleid.
 
-### Runtime (54)
+### Runtime (55)
 
 | Sleutel                                        | Type    | Standaard | Herstart | Beschrijving                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -171,6 +171,7 @@ Wanneer `UNPRICED_USAGE_BUDGET_POLICY` expliciet is ingesteld (database-instelli
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`   |          | Laat het quotabeleid per venster (sessie-/wekelijkse drempelwaarden die worden gebruikt bij accountselectie) rekening houden met de begrensde parkeerperiode bij uitputting (#17000): zodra de uiterste deadline van de begrensde parkeerperiode is verstreken, of de gecachte waarneming ouder is dan de limiet van de parkeerperiode, sluit het venster het account niet langer uit totdat nieuwe quotagegevens worden opgehaald. Standaard uitgeschakeld: een gecacht venster blijft blokkeren op basis van het laatst gemelde percentage tot de eigen resettijd.                                                                                                                                                                                                                                             |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`   |          | Voor OpenAI-compatibele afbeeldingsgeneratie (#16260): gebruik de verbindingstime-out (`providerSpecificData.timeoutMs`), of anders de centrale time-out voor upstream-fetches (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → standaard 600 s) in plaats van het vaste afbeeldingsbudget van 120 s; antwoord met 499 wanneer de aanroeper annuleert; laat de Playground langdurige afbeeldingstaken ontvangen als een SSE-stream met keepalive-heartbeats. Standaard uitgeschakeld: het vaste budget is van toepassing en annulering door de aanroeper wordt niet doorgegeven. De deadline voor het lezen van de responsebody is altijd ingeschakeld.                                                                                                                                                              |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`   |          | Stopt het aanbieden en doorsturen van redeneerinspanning `max` voor Cursor Grok 4.7 (#17386): de documentatie van Cursor noemt alleen low/medium/high/xhigh, dus de terugvalalias `grok-4.7-max` verdwijnt uit de catalogus en een verzoek met inspanning `max` wordt zonder inspanningsparameter verstuurd. Standaard uitgeschakeld: `max` blijft aangeboden en doorgestuurd, omdat een live AgentService/Run-probe deze waarde accepteerde.                                                                                                                                                                                                                                                                                                                                                                    |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`   |          | In de compressiecachestatistieken telt u een gecomprimeerde aanvraag aan een automatische prefix-cachingprovider (OpenAI, Codex, Azure of een aangepaste verbinding die promptcaching declareert met markeringsstripping) als een geschatte cachetreffer, zelfs zonder `cache_control` markeringen (#17114). De schatting is een signaal om in aanmerking te komen voor de cache, en niet een waargenomen hit, dus het gerapporteerde hitpercentage voor deze providers neigt naar 100%. Standaard uitgeschakeld: alleen een verzoek met `cache_control` markeringen naar een cachingprovider telt als een geschatte treffer, dus aanbieders van automatische voorvoegsels blijven 0 rapporteren.                                                                                                                |
 
 ### CLI (5)
 
@@ -256,10 +257,10 @@ Retourneert elke flag met de effectieve waarde, bron en een samenvatting.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 113 flags
+    // ... alle 114 flags
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -14351,6 +14351,9 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",
         "description": "Kapag ang bawat account ay nasa cooldown at ang cooldown na unang magtatapos ay sanhi ng 403 (tinanggihan ang access) o 410 (wala na), ibalik agad ang pagtangging iyon sa halip na hintaying matapos ang cooldown at muling ipadala ang kahilingan; ang isang nagre-renew na agentrouter connection-scoped quota 403 ay pananatilihin gamit ang errorCode 429 upang manatili itong puwedeng subukang muli. Naka-off bilang default: 401 lamang ang lumalaktaw sa paghihintay, at ang bawat pagtanggi ay pinananatili gamit ang status na kasama nitong dumating."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Sa compression cache stats, bilangin ang isang naka-compress na kahilingan sa isang automatic-prefix-caching provider (OpenAI, Codex, Azure, o isang custom na koneksyon na nagdedeklara ng prompt caching na may marker stripping) bilang isang tinantyang cache hit kahit na walang cache_control marker. Ang pagtatantya ay isang signal ng pagiging kwalipikado sa cache, hindi isang naobserbahang hit, kaya ang naiulat na rate ng hit para sa mga provider na iyon ay nagte-trend sa 100%. Naka-off bilang default: isang kahilingan lang na nagdadala ng mga cache_control marker sa isang provider ng caching ang binibilang bilang isang tinantyang hit, kaya ang mga provider ng awtomatikong prefix ay patuloy na nag-uulat ng 0."
       }
     }
   },

@@ -14428,6 +14428,9 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nova tentativa em arrefecimento: ignorar recusas 403/410",
         "description": "Quando todas as contas estão em arrefecimento e o arrefecimento que termina primeiro foi causado por um 403 (acesso recusado) ou um 410 (removido), devolve essa recusa de imediato em vez de aguardar pelo fim do arrefecimento e reenviar o pedido; um 403 de quota com âmbito de ligação do agentrouter em renovação é então persistido com o errorCode 429 para permanecer passível de nova tentativa. Desativado por predefinição: apenas um 401 ignora a espera e cada recusa é persistida com o estado com que chegou."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Nas estatísticas da cache de compressão, conte um pedido comprimido para um fornecedor de cache de prefixo automático (OpenAI, Codex, Azure ou uma ligação personalizada que declare cache de prompt com remoção de marcadores) como um acerto de cache estimado mesmo sem marcadores cache_control. A estimativa é um sinal de elegibilidade da cache, não um acerto observado, pelo que a taxa de acerto reportada para estes fornecedores tende para 100%. Desativado por predefinição: apenas um pedido que transporta marcadores cache_control para um fornecedor de cache conta como um acerto estimado, pelo que os fornecedores de prefixo automático continuam a reportar 0."
       }
     }
   },

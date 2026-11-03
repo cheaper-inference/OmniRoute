@@ -13,6 +13,11 @@ import {
   normalizeAntigravitySystemInstruction,
   stripCompetitiveAgentPrompts,
 } from "../../open-sse/executors/antigravity.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+test.after(async () => {
+  await closeSharedLoggerResource();
+});
 
 test("strips the exact Claude Agent SDK identity line (9router b566b20 case)", () => {
   const input = {
@@ -198,7 +203,13 @@ for (const model of ["antigravity/claude-opus-4-8-thinking", "gemini-3.8-flash-h
     assert.equal("used_claude" in envelope.request, false);
     assert.equal("used_claude_conservative" in envelope.request, false);
     if (envelope.request.labels !== undefined) {
-      assert.deepEqual(envelope.request.labels, { keep: "request label kept" });
+      // #13125 adds its envelope identity labels next to the caller's own ones.
+      const { last_step_index, trajectory_id, ...callerLabels } = envelope.request.labels;
+      assert.equal(last_step_index, "1");
+      assert.equal(trajectory_id, String(envelope.requestId).split("/")[3]);
+      // The Claude branch field whitelist drops caller labels; Gemini keeps them.
+      const expected = model.includes("claude") ? {} : { keep: "request label kept" };
+      assert.deepEqual(callerLabels, expected);
     }
   });
 

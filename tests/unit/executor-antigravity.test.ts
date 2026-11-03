@@ -13,6 +13,11 @@ import {
 import { clearAntigravityProjectCache } from "../../open-sse/services/antigravityProjectBootstrap.ts";
 import { runWithCapture } from "../../open-sse/utils/providerRequestLogging.ts";
 import { resetAntigravity429GuardForTests } from "../../open-sse/services/antigravity429Guard.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+test.after(async () => {
+  await closeSharedLoggerResource();
+});
 
 type AntigravityTransformResult = Exclude<
   Awaited<ReturnType<AntigravityExecutor["transformRequest"]>>,
@@ -165,7 +170,7 @@ test("AntigravityExecutor.transformRequest normalizes model, project and content
     "requestType",
   ]);
   assert.equal(result.userAgent, "antigravity");
-  assert.match(result.requestId, /^agent\/\d+\/[0-9a-f]{8}$/);
+  assert.match(result.requestId, /^agent\/[0-9a-f-]{36}\/\d+\/[0-9a-f-]{36}\/2$/);
   assert.equal(result.enabledCreditTypes, undefined);
   assert.ok(result.request.sessionId);
   const request = result.request as { generationConfig?: { topK?: number; topP?: number } };

@@ -43,6 +43,8 @@ tags:
     description: Content moderation
   - name: Rerank
     description: Document reranking
+  - name: Decisions
+    description: System One typed decisions (Jev)
   - name: Search
     description: Unified web, news, and X search
   - name: Models
@@ -15414,6 +15416,57 @@ paths:
       responses:
         "200":
           description: OK
+  /api/v1/systemone:
+    post:
+      tags: [Decisions]
+      summary: System One typed decisions
+      description: >-
+        One `state` plus typed `questions` (`noul` / `choice` / `score`); the
+        backend is selected by the model id — `typesafe/jev-*` or a bare
+        `jev-*` alias routes natively to api.typesafe.ai,
+        `openrouter/<vendor>/<model>` routes to OpenRouter's alpha decisions endpoint. Answers,
+        probabilities and usage (tokens, cost) pass through untouched.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              model: typesafe/jev-latest
+              state: The customer asks for a refund
+              questions:
+                risk:
+                  type: choice
+                  choices: [low, high]
+            schema:
+              type: object
+              required: [state, questions]
+              properties:
+                model:
+                  type: string
+                state:
+                  description: Decision context — a string or an object map.
+                questions:
+                  type: object
+      responses:
+        "200":
+          description: >-
+            Upstream passthrough: `{ model, answers, usage }` with calibrated
+            probabilities. Carries the `X-OmniRoute-*` cost-telemetry headers.
+        "400":
+          description: Unknown decisions model or invalid body.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
+    get:
+      tags: [Decisions]
+      summary: List decisions-capable models
+      description: Decisions entries from the unified model catalog.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Model list (same shape as GET /api/v1/models).
   /api/v1/video-bridge/drilldown:
     delete:
       tags:

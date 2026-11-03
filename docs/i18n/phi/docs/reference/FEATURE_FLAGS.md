@@ -44,7 +44,7 @@ Itinuturing na **enabled** ang isang boolean flag kapag ang effective value nito
 
 ## Katalogo ng mga Flag
 
-113 flag sa 6 na kategorya. Ang **Default** ay ang default ng depinisyon — ang value na
+114 flag sa 6 na kategorya. Ang **Default** ay ang default ng depinisyon — ang value na
 ginagamit kapag walang DB override o environment variable.
 
 ### Seguridad (10)
@@ -112,7 +112,7 @@ ginagamit kapag walang DB override o environment variable.
 
 Kapag tahasang naka-configure ang `UNPRICED_USAGE_BUDGET_POLICY` (nauuna ang DB override sa environment), nangingibabaw ito sa `USAGE_LIMIT_IGNORE_UNPRICED`. Kapag walang tahasang enum value, pinipili ng upstream na boolean opt-out ang `count_as_zero`; kung hindi, `fail_closed` ang default. Ligtas na tinatanggihan ang mga di-wastong enum value at hindi mabasang feature-flag storage. Hindi niluluwagan ng alinmang opt-out ang limitasyon sa gastos na may presyo o ang pagtanggi sa bigong paghahanap ng presyo. Pareho ang epektibong policy na tinutukoy ng pagpapatupad at ng ulat para sa administrator.
 
-### Runtime (54)
+### Runtime (55)
 
 | Key                                            | Uri     | Default | Restart | Paglalarawan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ---------------------------------------------- | ------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Kapag tahasang naka-configure ang `UNPRICED_USAGE_BUDGET_POLICY` (nauuna ang DB 
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |         | Pahintulutan ang per-window quota policy (mga session/weekly threshold na ginagamit sa pagpili ng account) na sundin ang may hangganang paghihintay dahil sa pagkaubos (#17000): kapag lumipas na ang deadline ng capped park, o mas luma na sa park cap ang naka-cache na obserbasyon, titigil ang window sa pagbubukod sa account hanggang sa isang bagong pag-fetch ng quota. Naka-off bilang default: patuloy na bina-block ng isang naka-cache na window ang account batay sa huling iniulat nitong percentage hanggang sa sarili nitong reset time.                                                                                                                                                                                                                                                                                          |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |         | Para sa pagbuo ng larawang compatible sa OpenAI (#16260): gamitin ang timeout ng koneksyon (`providerSpecificData.timeoutMs`), o kung wala, ang sentral na timeout sa pag-fetch mula sa upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → default na 600 s) sa halip na ang nakapirming 120 s na badyet para sa larawan; tumugon gamit ang 499 kapag nagkansela ang tumatawag; hayaan ang Playground na tumanggap ng matatagal na trabaho sa pagbuo ng larawan bilang SSE stream na may mga keepalive heartbeat. Naka-off bilang default: inilalapat ang nakapirming badyet at hindi ipinapasa ang pagkansela ng tumatawag. Palaging naka-on ang deadline na sumasaklaw sa pagbasa ng katawan ng tugon.                                                                                                                                        |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Itigil ang pag-aalok at pagpapasa ng `max` na reasoning effort para sa Cursor Grok 4.7 (#17386): low/medium/high/xhigh lamang ang nakalista sa dokumentasyon ng Cursor, kaya nawawala sa katalogo ang fallback alias na `grok-4.7-max` at ipinapadala ang request na may `max` effort nang walang effort parameter. Naka-off bilang default: patuloy na iniaalok at ipinapasa ang `max`, dahil tinanggap ito ng isang live na AgentService/Run probe.                                                                                                                                                                                                                                                                                                                                                                                              |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | Sa compression cache stats, bilangin ang isang naka-compress na kahilingan sa isang automatic-prefix-caching provider (OpenAI, Codex, Azure, o isang custom na koneksyon na nagdedeklara ng prompt caching na may marker stripping) bilang isang tinantyang cache hit kahit na walang `cache_control` marker (#17114). Ang pagtatantya ay isang signal ng pagiging kwalipikado sa cache, hindi isang naobserbahang hit, kaya ang naiulat na rate ng hit para sa mga provider na iyon ay nagte-trend sa 100%. Naka-off bilang default: isang kahilingan lang na nagdadala ng mga `cache_control` marker sa isang provider ng caching ang binibilang bilang isang tinantyang hit, kaya ang mga provider ng awtomatikong prefix ay patuloy na nag-uulat ng 0.                                                                                         |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Ibinabalik ang bawat flag kasama ang aktuwal na value, source, at buod nito.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... lahat ng 113 flag
+    // ... lahat ng 114 flag
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

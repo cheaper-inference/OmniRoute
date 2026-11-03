@@ -44,7 +44,7 @@ Un flag booleano è considerato **abilitato** quando il suo valore effettivo è 
 
 ## Catalogo dei flag
 
-113 flag in 6 categorie. **Predefinito** indica il valore predefinito della definizione, utilizzato
+114 flag in 6 categorie. **Predefinito** indica il valore predefinito della definizione, utilizzato
 quando non è presente né una sostituzione nel DB né una variabile d'ambiente.
 
 ### Sicurezza (10)
@@ -112,7 +112,7 @@ quando non è presente né una sostituzione nel DB né una variabile d'ambiente.
 
 Quando `UNPRICED_USAGE_BUDGET_POLICY` è configurato esplicitamente (la sovrascrittura nel database precede l'ambiente), ha la precedenza su `USAGE_LIMIT_IGNORE_UNPRICED`. Senza un valore enum esplicito, la disattivazione booleana dell'upstream seleziona `count_as_zero`; altrimenti il valore predefinito è `fail_closed`. Valori enum non validi e un archivio illeggibile delle opzioni di funzionalità comportano un blocco per sicurezza. Nessuna delle opzioni di disattivazione allenta le restrizioni sulla spesa con prezzo definito o su una ricerca dei prezzi fallita. L'applicazione delle restrizioni e il rapporto dell'amministratore risolvono la stessa politica effettiva.
 
-### Runtime (54)
+### Runtime (55)
 
 | Chiave                                         | Tipo    | Predefinito | Riavvio | Descrizione                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | ------- | ----------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Quando `UNPRICED_USAGE_BUDGET_POLICY` è configurato esplicitamente (la sovrascr
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`     |         | Consente ai criteri per la quota per finestra (soglie di sessione/settimanali utilizzate dalla selezione degli account) di rispettare la sospensione limitata per esaurimento (#17000): una volta superata la scadenza massima della sospensione, oppure quando l'osservazione memorizzata nella cache è più vecchia del limite della sospensione, la finestra smette di escludere l'account fino a un nuovo recupero della quota. Disattivato per impostazione predefinita: una finestra memorizzata nella cache continua a bloccare in base all'ultima percentuale segnalata fino alla propria reimpostazione.                                                                                                                                                                                                                               |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`     |         | Per la generazione di immagini compatibile con OpenAI (#16260): usa il timeout della connessione (`providerSpecificData.timeoutMs`), altrimenti il timeout centrale per il recupero upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → valore predefinito di 600 s), anziché il limite fisso di 120 s per le immagini; risponde con 499 quando il chiamante annulla; consente al Playground di ricevere processi di generazione immagini di lunga durata come flusso SSE con heartbeat keepalive. Disattivato per impostazione predefinita: viene applicato il limite fisso e l'annullamento da parte del chiamante non viene propagato. La scadenza che copre la lettura del corpo della risposta è sempre attiva.                                                                                                                         |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`     |         | Smette di offrire e inoltrare lo sforzo di ragionamento `max` per Cursor Grok 4.7 (#17386): la documentazione di Cursor elenca soltanto low/medium/high/xhigh, quindi l'alias di ripiego `grok-4.7-max` scompare dal catalogo e una richiesta di sforzo `max` viene inviata senza parametro di sforzo. Disattivato per impostazione predefinita: `max` resta disponibile e viene inoltrato, poiché una verifica reale di AgentService/Run lo ha accettato.                                                                                                                                                                                                                                                                                                                                                                                     |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`     |         | Nelle statistiche della cache di compressione, contare una richiesta compressa a un provider di memorizzazione nella cache con prefisso automatico (OpenAI, Codex, Azure o una connessione personalizzata che dichiara la memorizzazione nella cache dei prompt con eliminazione dei marcatori) come un riscontro stimato della cache anche senza marcatori `cache_control` (#17114). La stima è un segnale di idoneità della cache, non un riscontro osservato, pertanto la percentuale di riscontro segnalata per tali fornitori tende verso il 100%. Disattivato per impostazione predefinita: solo una richiesta che trasporta marcatori `cache_control` a un provider di caching conta come un successo stimato, quindi i provider con prefisso automatico continuano a segnalare 0.                                                      |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Restituisce ogni flag con il relativo valore effettivo, l'origine e un riepilogo
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tutti i 113 flag
+    // ... tutti i 114 flag
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

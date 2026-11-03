@@ -14351,6 +14351,9 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-Wiederholung: 403/410-Ablehnungen überspringen",
         "description": "Wenn sich alle Konten im Cooldown befinden und der Cooldown, der als erster endet, durch einen 403 (Zugriff verweigert) oder einen 410 (nicht mehr vorhanden) verursacht wurde, wird diese Ablehnung sofort zurückgegeben, anstatt den Cooldown abzuwarten und die Anfrage erneut zu senden; ein sich erneuernder verbindungsspezifischer agentrouter-Quota-403 wird dann mit errorCode 429 gespeichert, damit er wiederholbar bleibt. Standardmäßig deaktiviert: Nur ein 401 überspringt die Wartezeit, und jede Ablehnung wird mit dem Status gespeichert, mit dem sie empfangen wurde."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "Zählen Sie in den Komprimierungs-Cache-Statistiken eine komprimierte Anfrage an einen Anbieter für automatisches Präfix-Caching (OpenAI, Codex, Azure oder eine benutzerdefinierte Verbindung, die Prompt-Caching mit Markierungsentfernung deklariert) als geschätzten Cache-Treffer, auch ohne cache_control -Markierungen. Bei der Schätzung handelt es sich um ein Cache-Eignungssignal und nicht um einen beobachteten Treffer, sodass die gemeldete Trefferquote für diese Anbieter tendenziell bei 100 % liegt. Standardmäßig deaktiviert: Nur eine Anfrage mit cache_control -Markierungen an einen Caching-Anbieter zählt als geschätzter Treffer, daher melden Anbieter mit automatischen Präfixen weiterhin 0."
       }
     }
   },

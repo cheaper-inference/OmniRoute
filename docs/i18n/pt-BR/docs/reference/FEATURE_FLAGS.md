@@ -44,7 +44,7 @@ Uma flag booleana é considerada **habilitada** quando seu valor efetivo é `"tr
 
 ## Catálogo de flags
 
-113 flags em 6 categorias. **Padrão** é o padrão da definição — o valor
+114 flags em 6 categorias. **Padrão** é o padrão da definição — o valor
 usado quando não há uma substituição no banco de dados nem uma variável de ambiente presente.
 
 ### Segurança (10)
@@ -112,7 +112,7 @@ usado quando não há uma substituição no banco de dados nem uma variável de 
 
 Quando `UNPRICED_USAGE_BUDGET_POLICY` é configurada explicitamente (a substituição no banco de dados vem antes do ambiente), ela tem precedência sobre `USAGE_LIMIT_IGNORE_UNPRICED`. Sem um valor enum explícito, a desativação booleana do upstream seleciona `count_as_zero`; caso contrário, o padrão é `fail_closed`. Valores enum inválidos e armazenamento de flags de funcionalidade ilegível resultam em bloqueio seguro. Nenhuma das opções de desativação relaxa as restrições sobre gastos com preço definido ou falhas na consulta de preços. A aplicação das restrições e o relatório do administrador resolvem a mesma política efetiva.
 
-### Runtime (54)
+### Runtime (55)
 
 | Chave                                          | Tipo    | Padrão  | Reinicialização | Descrição                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------- | ------- | ------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Quando `UNPRICED_USAGE_BUDGET_POLICY` é configurada explicitamente (a substitui
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |                 | Permite que a política de cota por janela (limites de sessão/semanais usados pela seleção de contas) respeite a suspensão limitada por esgotamento (#17000): depois que o prazo máximo da suspensão expirar, ou se a observação armazenada em cache for mais antiga que o limite da suspensão, a janela deixa de excluir a conta até que uma nova consulta de cota seja feita. Desativado por padrão: uma janela armazenada em cache continua bloqueando com base na última porcentagem informada até seu próprio horário de redefinição.                                                                                                                                                                                                                                              |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |                 | Para geração de imagens compatível com OpenAI (#16260): use o tempo limite da conexão (`providerSpecificData.timeoutMs`); caso contrário, use o tempo limite central de busca upstream (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → padrão de 600 s) em vez do limite fixo de 120 s para imagens; responda com 499 quando o chamador cancelar; permita que o Playground receba trabalhos longos de geração de imagens como um stream SSE com sinais de keepalive. Desativado por padrão: o limite fixo é aplicado e o cancelamento pelo chamador não é propagado. O prazo que abrange a leitura do corpo da resposta está sempre ativo.                                                                                                                                                |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                 | Deixa de oferecer e encaminhar o esforço de raciocínio `max` para Cursor Grok 4.7 (#17386): a documentação do Cursor lista apenas low/medium/high/xhigh, então o alias de fallback `grok-4.7-max` desaparece do catálogo e uma solicitação de esforço `max` é enviada sem parâmetro de esforço. Desativado por padrão: `max` continua sendo oferecido e encaminhado, pois uma sondagem real de AgentService/Run o aceitou.                                                                                                                                                                                                                                                                                                                                                             |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                 | Nas estatísticas do cache de compactação, conte uma solicitação compactada para um provedor de cache de prefixo automático (OpenAI, Codex, Azure ou uma conexão personalizada que declara cache de prompt com remoção de marcador) como um acerto de cache estimado mesmo sem marcadores `cache_control` (#17114). A estimativa é um sinal de elegibilidade do cache, não um acerto observado, portanto, a taxa de acerto relatada para esses provedores tende a 100%. Desativado por padrão: apenas uma solicitação que transporta marcadores `cache_control` para um provedor de cache conta como um acerto estimado, portanto, os provedores de prefixo automático continuam reportando 0.                                                                                          |
 
 ### CLI (5)
 
@@ -257,10 +258,10 @@ Retorna todas as flags com seus valores efetivos, origens e um resumo.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... todas as 113 flags
+    // ... todas as 114 flags
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

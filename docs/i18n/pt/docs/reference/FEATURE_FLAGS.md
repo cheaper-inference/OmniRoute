@@ -35,7 +35,7 @@ Um sinalizador booleano é considerado **ativado** quando o seu valor efetivo é
 
 ## Catálogo de flags
 
-113 flags distribuídas por 6 categorias. **Predefinição** é o valor predefinido na definição — o valor
+114 flags distribuídas por 6 categorias. **Predefinição** é o valor predefinido na definição — o valor
 utilizado quando não existe uma substituição na BD nem uma variável de ambiente.
 
 ### Segurança (10)
@@ -103,7 +103,7 @@ utilizado quando não existe uma substituição na BD nem uma variável de ambie
 
 Quando `UNPRICED_USAGE_BUDGET_POLICY` é configurada explicitamente (a substituição na base de dados vem antes do ambiente), tem precedência sobre `USAGE_LIMIT_IGNORE_UNPRICED`. Sem um valor enum explícito, a desativação booleana do upstream seleciona `count_as_zero`; caso contrário, a predefinição é `fail_closed`. Os valores enum inválidos e o armazenamento ilegível das opções de funcionalidade resultam em bloqueio por segurança. Nenhuma das opções de desativação relaxa as restrições sobre despesas com preço definido ou falhas na consulta de preços. A aplicação das restrições e o relatório do administrador resolvem a mesma política efetiva.
 
-### Runtime (54)
+### Runtime (55)
 
 | Chave                                          | Tipo    | Predefinição | Reinício | Descrição                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------------------------------- | ------- | ------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -163,6 +163,7 @@ Quando `UNPRICED_USAGE_BUDGET_POLICY` é configurada explicitamente (a substitui
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false`      |          | Permite que a política de quota por janela (limiares de sessão/semanais utilizados pela seleção de contas) respeite o período de suspensão limitado por esgotamento (#17000): depois de o prazo máximo de suspensão ter passado, ou se a observação em cache for mais antiga do que esse limite, a janela deixa de excluir a conta até ser feita uma nova consulta da quota. Desativado por predefinição: uma janela em cache continua a bloquear com base na última percentagem comunicada até à respetiva hora de reposição.                                                                                                                                                                                                                                                                       |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false`      |          | Para geração de imagens compatível com OpenAI (#16260): utilizar o tempo limite da ligação (`providerSpecificData.timeoutMs`) ou, caso não esteja definido, o tempo limite central de obtenção a montante (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → predefinição de 600 s), em vez do limite fixo de 120 s para imagens; responder com 499 quando o cliente cancelar; permitir que o Playground receba tarefas de imagem de longa duração como um fluxo SSE com sinais de manutenção da ligação. Desativado por predefinição: aplica-se o limite fixo e o cancelamento pelo cliente não é propagado. O prazo que abrange a leitura do corpo da resposta está sempre ativo.                                                                                                                        |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`      |          | Deixa de disponibilizar e encaminhar o esforço de raciocínio `max` para Cursor Grok 4.7 (#17386): a documentação do Cursor lista apenas low/medium/high/xhigh, pelo que o alias de fallback `grok-4.7-max` desaparece do catálogo e um pedido de esforço `max` é enviado sem parâmetro de esforço. Desativado por predefinição: `max` continua disponível e a ser encaminhado, pois uma verificação real de AgentService/Run o aceitou.                                                                                                                                                                                                                                                                                                                                                              |
+| `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`      |          | Nas estatísticas da cache de compressão, conte um pedido comprimido para um fornecedor de cache de prefixo automático (OpenAI, Codex, Azure ou uma ligação personalizada que declare cache de prompt com remoção de marcadores) como um acerto de cache estimado mesmo sem marcadores `cache_control` (#17114). A estimativa é um sinal de elegibilidade da cache, não um acerto observado, pelo que a taxa de acerto reportada para estes fornecedores tende para 100%. Desativado por predefinição: apenas um pedido que transporta marcadores `cache_control` para um fornecedor de cache conta como um acerto estimado, pelo que os fornecedores de prefixo automático continuam a reportar 0.                                                                                                   |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Devolve todos os sinalizadores com o respetivo valor efetivo, origem e um resumo
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... todos os 113 sinalizadores
+    // ... todos os 114 sinalizadores
   ],
   "summary": {
-    "total": 56,
+    "total": 114,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

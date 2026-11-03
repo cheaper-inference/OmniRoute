@@ -5,6 +5,11 @@ import { parseNonStreamingSSEPayload } from "../../open-sse/handlers/chatCore/no
 import { translateNonStreamingResponse } from "../../open-sse/handlers/responseTranslator.ts";
 import { extractUsageFromResponse } from "../../open-sse/handlers/usageExtractor.ts";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+
+test.after(async () => {
+  await closeSharedLoggerResource();
+});
 
 type Usage = {
   prompt_tokens: number;
