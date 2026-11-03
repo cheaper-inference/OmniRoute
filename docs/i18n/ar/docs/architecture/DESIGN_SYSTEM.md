@@ -4,7 +4,7 @@
 
 ---
 
-> **حالة:** لوحة القيادة مبنية على** طقم كيك CI UI** (`@keak/cheaper-inference-ui-kit`) ، يتم بيعها كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ يتم تثبيت اللقطة الأولية في `packages/ui-kit/UPSTREAM.md` وحمايتها بواسطة `npm run check:ui-kit-snapshot`). الضوء هو الموضوع الأساسي. التفضيل الافتراضي هو `system`. اللهجة هي كيك الجير (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). كل أيقونة عبارة عن حرف رسومي من Lucide.
+> **حالة:** لوحة القيادة مبنية على** طقم كيك CI UI** (`@keak/cheaper-inference-ui-kit`) ، يتم بيعها كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ يتم تثبيت اللقطة الأولية في `packages/ui-kit/UPSTREAM.md` وحمايتها بواسطة `npm run check:ui-kit-snapshot`). الضوء هو الموضوع الأساسي. التفضيل الافتراضي هو `system`. اللهجة هي كيك الجير (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). مخطوطات سويتزر تفتقر إلى الحروف الرسومية التي تتخللها (`src/app/globals.css`): Inter للسيريلية واليونانية والفيتنامية، وتحت `html[dir="rtl"]` فقط، Vazirmatn للنص العربي. كل أيقونة عبارة عن حرف رسومي من Lucide.
 
 ## 1. أين توجد الأشياء
 
