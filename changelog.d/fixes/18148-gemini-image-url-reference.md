@@ -1,0 +1,1 @@
+- **fix(sse):** Gemini image models (Antigravity and AI Studio) now answer 400 for a reference image they cannot inline, such as an http(s) URL, instead of silently generating from the text prompt alone; AI Studio also forwards inline data-URI references (#18148 — thanks @shatinz).

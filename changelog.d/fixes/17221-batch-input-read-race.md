@@ -1,0 +1,1 @@
+- **fix(batch):** Discard pending file contents after the input format changes, preserving the new selection and allowing subsequent reads ([#17221](https://github.com/diegosouzapw/OmniRoute/pull/17221)) — thanks @pacocartones

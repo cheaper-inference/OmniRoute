@@ -1,0 +1,1 @@
+- **refactor(security):** combo step ids strip the edge separator with a quantifier-free regex, so CodeQL `js/polynomial-redos` (#1165) no longer flags `slugify()` in `src/lib/combos/steps.ts`; ids are unchanged and a new test pins them.

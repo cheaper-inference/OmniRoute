@@ -1,0 +1,1 @@
+- **refactor(sse):** the completed Responses tool-item validation is separated from the stateful Codex tool-handoff watcher, with identical matching behaviour and lower cognitive complexity ([#17382](https://github.com/diegosouzapw/OmniRoute/pull/17382) - thanks @JxnLexn)

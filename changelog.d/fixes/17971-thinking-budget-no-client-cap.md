@@ -1,0 +1,1 @@
+- fix(providers): stop injecting a 4096 max_tokens ceiling when a reasoning request carries no client cap, so long outputs such as Codex compaction are no longer truncated (#17971)

@@ -1,0 +1,1 @@
+- fix(vision): keep raw image parts for mixed vision/text-only combos instead of replacing them with descriptions or an "unavailable" stub (#18008)

@@ -1,1 +1,1 @@
-Unrolled recursive retry loops into iterative attempts with RecursionGuard bounds, added decorrelated full jitter to prevent thundering herd retries on HTTP 429, and made payload size estimation circular-reference safe.
+- fix(combo): the cooldown-aware re-dispatch in `dispatchWithCooldownRetry` is now an iterative loop instead of self-recursion, and the blind retry delays (per-target retry delay, set-retry delay) use full jitter to avoid thundering-herd retries. Waits derived from a known cooldown or model-lock deadline, and the hedge delay, are not jittered.

@@ -198,7 +198,7 @@ export async function executeTargetAttempt(
     }
 
     if (retry > 0) {
-      // P0 FIX: Apply Full Jitter to prevent thundering herd on retries
+      // Full jitter on the blind exponential retry delay (no known deadline).
       const jitteredRetryDelay = calculateFullJitter(retry, {
         baseDelayMs: retryDelayMs,
         maxDelayMs: retryDelayMs * 10,
@@ -1317,17 +1317,9 @@ export async function executeTargetAttempt(
         ? Math.min(cooldownMs, fallbackDelayMs)
         : 0;
     if ([502, 503, 504].includes(result.status) && fallbackWaitMs > 0) {
-      // P0 FIX: Apply Full Jitter to fallback wait to prevent synchronized fallback storms
-      const jitteredFallbackWait = calculateFullJitter(0, {
-        baseDelayMs: fallbackWaitMs,
-        maxDelayMs: fallbackWaitMs * 3,
-      });
-      deps.log.debug?.(
-        "COMBO",
-        `Waiting ${jitteredFallbackWait}ms (jittered, base: ${fallbackWaitMs}ms) before fallback to next model`
-      );
+      deps.log.debug?.("COMBO", `Waiting ${fallbackWaitMs}ms before fallback to next model`);
       await new Promise((resolve) => {
-        const timer = setTimeout(resolve, jitteredFallbackWait);
+        const timer = setTimeout(resolve, fallbackWaitMs);
         deps.signal?.addEventListener(
           "abort",
           () => {

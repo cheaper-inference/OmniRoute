@@ -1,0 +1,1 @@
+- Preserve distinct Bedrock tool calls when a normalized history ID collides with an existing valid ID, normalize Claude tool results with the same request mapping, and omit empty-ID pairs consistently with OpenAI history. Fixes #17143.

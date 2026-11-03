@@ -1,0 +1,1 @@
+- Attribute embeddings and rerank call logs to the originally requested model and combo across direct calls, combo targets, fallbacks, successes, and upstream failures.
