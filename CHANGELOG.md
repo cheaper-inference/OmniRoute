@@ -98,6 +98,8 @@ _Living section — cycle opened at the v3.8.52 freeze (parallel-cycle model). B
 
 ### 🐛 Bug Fixes
 
+- fix(resilience): unroll retry recursion, guard stack limits and apply jitter to combo loop (#18668)
+
 ### 📝 Maintenance
 
 ---
