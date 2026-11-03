@@ -87,6 +87,41 @@ async function pickProbeEgress<A extends ScopedAccount, R extends ProbeResult>(
   return { proxy: next, account: args.account };
 }
 
+/** Everything that must hold before an egress is probed; null keeps the caller's path. */
+async function refusalProbeTarget<A extends ScopedAccount, R extends ProbeResult>(
+  args: FreeTierEgressProbeArgs<A, R>
+): Promise<{
+  status: number;
+  refusedKey: string;
+  context: ReturnType<typeof currentRequestContext>;
+} | null> {
+  const status = args.refusal.response.status;
+  if (status !== 403 && status !== 451) return null;
+  const refusedKey = args.keyOfMember(args.account);
+  if (refusedKey === null || refusedKey === DIRECT_EGRESS_SENTINEL) return null;
+  const context = currentRequestContext();
+  if (context?.freeTierEgressProbed) return null;
+  if (!isOpencodeFreeTierRefusal(status, await readRefusalText(args.refusal))) return null;
+  return { status, refusedKey, context };
+}
+
+/** Dispatch the single probe; a throw is logged and reported as null. */
+async function dispatchProbe<A extends ScopedAccount, R extends ProbeResult>(
+  args: FreeTierEgressProbeArgs<A, R>,
+  proxy: ProbeProxy,
+  probeKey: string
+): Promise<R | null> {
+  try {
+    return await args.dispatch(proxy);
+  } catch (error) {
+    args.log?.warn?.(
+      "OPENCODE",
+      `${args.cid}free-tier egress probe ${probeKey} failed (${error instanceof Error ? error.name : "error"}), returning the refusal`
+    );
+    return null;
+  }
+}
+
 /**
  * Probe one other egress after a free-tier refusal. Returns the probe result when it answered
  * 200 (the refused egress is then set aside), or null when the caller must keep its current
@@ -98,14 +133,10 @@ export async function probeFreeTierRefusalEgress<A extends ScopedAccount, R exte
   args: FreeTierEgressProbeArgs<A, R>
 ): Promise<R | null> {
   if (!enabled) return null;
-  const { refusal, account, log, cid } = args;
-  const status = refusal.response.status;
-  if (status !== 403 && status !== 451) return null;
-  const refusedKey = args.keyOfMember(account);
-  if (refusedKey === null || refusedKey === DIRECT_EGRESS_SENTINEL) return null;
-  const context = currentRequestContext();
-  if (context?.freeTierEgressProbed) return null;
-  if (!isOpencodeFreeTierRefusal(status, await readRefusalText(refusal))) return null;
+  const target = await refusalProbeTarget(args);
+  if (!target) return null;
+  const { status, refusedKey, context } = target;
+  const { refusal, log, cid } = args;
   const picked = await pickProbeEgress(args, refusedKey);
   if (!picked) return null;
   if (context) context.freeTierEgressProbed = true;
@@ -115,16 +146,8 @@ export async function probeFreeTierRefusalEgress<A extends ScopedAccount, R exte
     "OPENCODE",
     `${cid}free-tier refusal ${status} ${refusedLabel}, probing once ${probeKey}…`
   );
-  let probe: R;
-  try {
-    probe = await args.dispatch(picked.proxy);
-  } catch (error) {
-    log?.warn?.(
-      "OPENCODE",
-      `${cid}free-tier egress probe ${probeKey} failed (${error instanceof Error ? error.name : "error"}), returning the refusal`
-    );
-    return null;
-  }
+  const probe = await dispatchProbe(args, picked.proxy, probeKey);
+  if (!probe) return null;
   if (probe.response.status !== 200) {
     discardResponseBody(probe.response);
     log?.warn?.(
