@@ -114,6 +114,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:build-typecheck",
+      "command": "node scripts/check/check-build-typecheck.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:db-rules",
       "command": "node scripts/check/check-db-rules.mjs",
       "disposition": "separately-invoked"
@@ -596,6 +601,11 @@
     {
       "name": "test:mutation",
       "command": "stryker run",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "test:opencode:smoke",
+      "command": "node scripts/test/opencode-chatgpt-web-smoke.mjs",
       "disposition": "separately-invoked"
     },
     {

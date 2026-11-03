@@ -235,7 +235,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     // Fetch the pin settings (lightweight)
     fetch("/api/settings")
       .then((r) => (r.ok ? r.json() : {}))
-      .then((data) => {
+      .then((data: Record<string, unknown> | null) => {
         if (data) {
           setBlockedProviders(data.blockedProviders);
           if (typeof data.showQuickStartOnHome === "boolean") {
