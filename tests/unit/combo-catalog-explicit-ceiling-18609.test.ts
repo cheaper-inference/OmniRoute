@@ -122,6 +122,30 @@ test("#18609: the same combo once the codex connection has a synced model list (
   }
 });
 
+test("#18609: an operator CONTEXT_LENGTH_<PROVIDER> cap is limit evidence for a synced-only member and still bounds the combo", async () => {
+  const codex = (await providersDb.getProviderConnections()).find((c) => c.provider === "codex");
+  assert.ok(codex, "codex connection exists");
+  const codexId = codex.id as string;
+  await modelsDb.replaceSyncedAvailableModelsForConnection("codex", codexId, [
+    { id: "gpt-6.1-sol-xhigh", name: "GPT 6.1 Sol (xHigh)", source: "imported" },
+    { id: "gpt-6.1-terra-xhigh", name: "GPT 6.1 Terra (xHigh)", source: "imported" },
+  ]);
+  const previous = process.env.CONTEXT_LENGTH_CODEX;
+  process.env.CONTEXT_LENGTH_CODEX = "500000";
+  try {
+    const combo = await fetchCombo("combo-18609");
+    assert.equal(
+      combo.max_input_tokens,
+      500000,
+      "the operator capped codex at 500K; dropping the synced-only member would advertise 872K"
+    );
+  } finally {
+    if (previous === undefined) delete process.env.CONTEXT_LENGTH_CODEX;
+    else process.env.CONTEXT_LENGTH_CODEX = previous;
+    await modelsDb.deleteSyncedAvailableModelsForConnection("codex", codexId);
+  }
+});
+
 test("#18609: an exact override on the uncataloged member lifts the combo only to the next confirmed cap (sol 872K)", async () => {
   setOverrides("gpt-6.1-terra-xhigh");
   try {

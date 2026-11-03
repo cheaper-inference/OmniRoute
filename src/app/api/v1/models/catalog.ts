@@ -94,7 +94,11 @@ import {
   isNoAuthRawProviderPrefix,
   normalizeBlockedProviderSet,
 } from "@/shared/utils/noAuthProviders";
-import { getSourcedTokenLimit, getTokenLimit } from "@omniroute/open-sse/services/contextManager";
+import {
+  getSourcedTokenLimit,
+  getTokenLimit,
+  hasContextLengthEnvOverride,
+} from "@omniroute/open-sse/services/contextManager";
 import { extractApiKey } from "@/sse/services/auth";
 import type { ComboModelStep } from "@/lib/combos/steps";
 import {
@@ -713,7 +717,9 @@ async function buildUnifiedModelsResponseCore(
         source.providerRegistry ||
         source.staticSpec ||
         source.syncedCapability ||
-        isPositiveFiniteNumber(canonical.limits.contextWindow);
+        isPositiveFiniteNumber(canonical.limits.contextWindow) ||
+        // The operator's CONTEXT_LENGTH_<PROVIDER> / _DEFAULT cap is a declared limit.
+        hasContextLengthEnvOverride(providerId);
       const contextLength = hasLimitEvidence
         ? getSourcedTokenLimit(providerId, modelId, canonical.limits.contextWindow)
         : undefined;
