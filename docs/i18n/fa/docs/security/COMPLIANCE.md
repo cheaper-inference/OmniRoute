@@ -11,55 +11,74 @@ OmniRoute اقدامات مدیریتی، رویدادهای احراز هویت
 
 پیادهسازی در `src/lib/compliance/index.ts` (T-43 — «کنترلهای انطباق») و `src/lib/compliance/providerAudit.ts` قرار دارد. عملیات نوشتن ممیزی هرگز خطا پرتاب نمیکنند: در صورت بروز هرگونه خطا، فراخوانی بدون اطلاع نادیده گرفته میشود تا ثبت ممیزی نتواند جریان اصلی درخواست را مختل کند.
 
-## چه مواردی ثبت میشوند
+## چه چیزهایی ثبت میشوند
 
-### رویدادهای ممیزی مدیریتی (`audit_log`)
+### رویدادهای ممیزی اداری (`audit_log`)
 
-هر فراخوانی `logAuditEvent({ action, actor, target, details, ... })` یک ردیف ایجاد میکند. رشتههای اقدام از الگوی `domain.verb` (یا `domain.verb.outcome`) پیروی میکنند. انواع اقدام تأییدشده در کد منبع عبارتاند از:
+هر فراخوانی `logAuditEvent({ action, actor, target, details, ... })` یک
+ردیف تولید میکند. رشتههای action از الگوی `domain.verb` (یا
+`domain.verb.outcome`) پیروی میکنند. انواع action تأییدشده در کد شامل موارد
+زیر هستند:
 
-| اقدام                                | منبع                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-هر ورودی شامل `action`، `actor` (با مقدار پیشفرض `"system"`)، `target`، `details`/`metadata` (JSON)، `ip_address`، `resource_type`، `status`، `request_id` و `timestamp` است. کلیدهای حساس (`apiKey`، `accessToken`، `refreshToken`، `password`، هر چیزی که با `*token`/`*secret`/`*apikey` مطابقت داشته باشد و غیره) پیش از نوشته شدن ردیف، بهصورت بازگشتی با `"[redacted]"` جایگزین میشوند.
+هر ورودی شامل `action`، `actor` (بهصورت پیشفرض برابر با `"system"`)،
+`target`، `details`/`metadata` (با قالب JSON)، `ip_address`، `resource_type`،
+`status`، `request_id` و `timestamp` است. کلیدهای حساس (`apiKey`،
+`accessToken`، `refreshToken`، `password`، هر چیزی مطابق با
+`*token`/`*secret`/`*apikey` و موارد مشابه) پیش از نوشتن ردیف، بهصورت بازگشتی
+با `"[redacted]"` جایگزین میشوند.
 
-### فراخوانی ابزارهای MCP (`mcp_tool_audit`)
+ردیفهای `api_key.auth.touch`، فراداده و خواندنهای موفق مربوط به کلید API
+(GET/HEAD) را ثبت میکنند که هرگز به گزارش درخواست نمیرسند: کدام کلید، چه
+زمانی و مسیر نرمالشده؛ این موارد بهصورت تجمیعی ثبت شده و تعدادشان به ۱٬۰۰۰
+ردیف محدود میشود. کلیدهای دارای `noLog` و کلید محیطی نادیده گرفته میشوند.
+نشانی IP و user-agent فراخواننده فقط زمانی اضافه میشوند که feature flag
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` فعال باشد (بهصورت پیشفرض غیرفعال است).
 
-هر بار فراخوانی ابزار MCP، از طریق `open-sse/mcp-server/audit.ts` یک ردیف مینویسد. شِما (از `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### فراخوانیهای ابزار MCP (`mcp_tool_audit`)
 
-| ستون             | توضیحات                                 |
-| ---------------- | --------------------------------------- |
-| `id`             | افزایش خودکار                           |
-| `tool_name`      | شناسه ابزار MCP                         |
-| `input_hash`     | sha256 ورودی (هیچ محتوایی ذخیره نمیشود) |
-| `output_summary` | خلاصهای کوتاه و کوتاهشده                |
-| `duration_ms`    | زمان سپریشده واقعی                      |
-| `api_key_id`     | فراخواننده (میتواند تهی باشد)           |
-| `success`        | `1` / `0`                               |
-| `error_code`     | کد خطای نهایی در صورت شکست              |
-| `created_at`     | برچسب زمانی ISO                         |
+هر فراخوانی ابزار MCP از طریق
+`open-sse/mcp-server/audit.ts` یک ردیف مینویسد. طرحواره (برگرفته از
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-### گزارشهای درخواست / مصرف
+| Column           | Notes                             |
+| ---------------- | --------------------------------- |
+| `id`             | افزایش خودکار                     |
+| `tool_name`      | شناسه ابزار MCP                   |
+| `input_hash`     | sha256 ورودی (بدون ذخیره payload) |
+| `output_summary` | خلاصه کوتاه و کوتاهشده            |
+| `duration_ms`    | زمان سپریشده                      |
+| `api_key_id`     | فراخواننده (nullable)             |
+| `success`        | `1` / `0`                         |
+| `error_code`     | کد خطای نهایی هنگام شکست          |
+| `created_at`     | مهر زمانی ISO                     |
 
-این موارد دادههای تلهمتری عملیاتی هستند (و نه صرفاً ممیزی مدیریتی)، اما از همان خط لوله نگهداری استفاده میکنند:
+### گزارشهای درخواست / استفاده
 
-- `usage_history` — تجمیع مصرف بهازای هر درخواست
-- `call_logs` — گزارش کامل بهازای هر درخواست (مشمول سقف تعداد ردیف؛ در ادامه ببینید)
-- `proxy_logs` — گزارش ترافیک پروکسی (مشمول سقف تعداد ردیف)
-- `request_detail_logs` — گزارش جزئیات درخواست قدیمی (در صورت وجود، همچنان پاکسازی میشود)
+این موارد، دادههای تلهمتری عملیاتی هستند (و دقیقاً ممیزی اداری محسوب
+نمیشوند)، اما از همان خط لوله نگهداری استفاده میکنند:
+
+- `usage_history` — خلاصهسازی استفاده بهازای هر درخواست
+- `call_logs` — گزارش کامل هر درخواست (مشمول سقف ردیف، مطابق توضیحات زیر)
+- `proxy_logs` — گزارش ترافیک پراکسی (مشمول سقف ردیف)
+- `request_detail_logs` — گزارش جزئیات قدیمی درخواست (در صورت وجود همچنان پاکسازی میشود)
 
 ## شِمای ذخیرهسازی
 
