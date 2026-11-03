@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import en from "@/i18n/messages/en.json";
 import fa from "@/i18n/messages/fa.json";
@@ -56,10 +56,12 @@ function json(body: unknown, status = 200) {
 }
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => {
+  let reject!: (reason: Error) => void;
+  const promise = new Promise<T>((done, fail) => {
     resolve = done;
+    reject = fail;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 let fetchMock: ReturnType<typeof vi.fn>;
 let saved = snapshot(false);
@@ -184,21 +186,117 @@ describe("new connection proxy preference", () => {
     expect(screen.queryByRole("switch")).toBeNull();
   });
 
-  it("remount reads the persisted selection; late reads after unmount cannot change it", async () => {
-    const stale = deferred<Response>();
-    loadReply = () => stale.promise;
-    const old = render(<GlobalConfigTab />);
-    old.unmount();
-    loadReply = async () => json(saved);
+  it("save persists across an independent remount", async () => {
     const view = render(<GlobalConfigTab />);
-    await waitFor(() => expect(control()).toBeTruthy());
-    stale.resolve(json(snapshot(true, 99)));
-    expect(control().getAttribute("aria-checked")).toBe("false");
+    await waitFor(() => expect(control().getAttribute("aria-checked")).toBe("false"));
     fireEvent.click(control());
     await waitFor(() => expect(control().getAttribute("aria-checked")).toBe("true"));
     view.unmount();
     render(<GlobalConfigTab />);
     await waitFor(() => expect(control().getAttribute("aria-checked")).toBe("true"));
+  });
+
+  it("immediate unmount cancels before a settings request starts", async () => {
+    const view = render(<GlobalConfigTab />);
+    view.unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // This is why the previous immediate-unmount test never exercised a late read.
+    expect(fetchMock.mock.calls.filter(([url]) => url === "/api/settings")).toHaveLength(0);
+  });
+
+  for (const outcome of ["response", "rejection"] as const) {
+    it(`aborts a started read and awaits its late ${outcome} after unmount`, async () => {
+      const stale = deferred<Response>();
+      const started = deferred<AbortSignal>();
+      const consumed = deferred<void>();
+      let reads = 0;
+      let pending = true;
+      const unhandled: unknown[] = [];
+      const onUnhandled = (event: PromiseRejectionEvent) => unhandled.push(event.reason);
+      window.addEventListener("unhandledrejection", onUnhandled);
+      // Bind the deferred at fetch invocation. This fixture deliberately settles
+      // despite abort, exercising consumer cleanup rather than browser fetch semantics.
+      fetchMock.mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+        if (String(input) === "/api/settings/proxy?level=global") return json({ proxy: null });
+        if (String(input) !== "/api/settings" || init?.method === "PATCH") {
+          throw new Error("Unexpected request");
+        }
+        reads++;
+        if (reads === 1) {
+          started.resolve(init?.signal as AbortSignal);
+          return stale.promise.finally(() => {
+            pending = false;
+          });
+        }
+        return json(snapshot(false, 20));
+      });
+      const old = render(<GlobalConfigTab />);
+      try {
+        await waitFor(() => expect(reads).toBe(1));
+        const signal = await started.promise;
+        expect(pending).toBe(true);
+        expect(signal.aborted).toBe(false);
+        old.unmount();
+        expect(signal.aborted).toBe(true);
+        render(<GlobalConfigTab />);
+        await waitFor(() => expect(control().getAttribute("aria-checked")).toBe("false"));
+        await act(async () => {
+          if (outcome === "response") {
+            const response = json(snapshot(true, 3));
+            const readBody = response.json.bind(response);
+            response.json = async () => {
+              const body = await readBody();
+              consumed.resolve();
+              return body;
+            };
+            stale.resolve(response);
+            await consumed.promise;
+          } else {
+            stale.reject(new TypeError("Synthetic delayed read failure"));
+            await stale.promise.catch(() => {});
+          }
+        });
+        expect(pending).toBe(false);
+        expect(control().getAttribute("aria-checked")).toBe("false");
+        expect(screen.queryByRole("alert")).toBeNull();
+        expect(reads).toBe(2);
+        expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(0);
+        expect(unhandled).toEqual([]);
+      } finally {
+        old.unmount();
+        stale.resolve(json(snapshot(true, 3)));
+        await act(async () => {
+          await stale.promise.catch(() => {});
+        });
+        window.removeEventListener("unhandledrejection", onUnhandled);
+      }
+    });
+  }
+
+  it("prevents overlapping reads and saves on the same live instance while retry is pending", async () => {
+    loadReply = async () => json({}, 503);
+    render(<GlobalConfigTab />);
+    await screen.findByRole("alert");
+    const retry = screen.getByRole("button", { name: en.common.retry });
+    const reload = deferred<Response>();
+    loadReply = () => reload.promise;
+    try {
+      fireEvent.click(retry);
+      fireEvent.click(retry);
+      expect(screen.queryByRole("button", { name: en.common.retry })).toBeNull();
+      expect(screen.queryByRole("switch")).toBeNull();
+      expect(fetchMock.mock.calls.filter(([url]) => url === "/api/settings")).toHaveLength(2);
+      await act(async () => {
+        reload.resolve(json(snapshot(true, 20)));
+      });
+      expect(control().getAttribute("aria-checked")).toBe("true");
+    } finally {
+      await act(async () => {
+        reload.resolve(json(snapshot(true, 20)));
+      });
+    }
   });
 
   for (const language of ["en", "fa"] as const) {

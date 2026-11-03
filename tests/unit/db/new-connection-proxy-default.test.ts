@@ -25,6 +25,18 @@ process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES = "true";
 process.env.PROXY_AUTO_SELECT_ENABLED = "true";
 delete process.env.INITIAL_PASSWORD;
 delete process.env.REDIS_URL;
+// A fallback-only fixture must not inherit the executor's outbound proxy.
+for (const key of [
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "ALL_PROXY",
+  "NO_PROXY",
+  "http_proxy",
+  "https_proxy",
+  "all_proxy",
+  "no_proxy",
+])
+  delete process.env[key];
 globalThis.fetch = async () => {
   throw new Error("External requests are forbidden in this fixture");
 };
@@ -44,11 +56,19 @@ const transfer = await import("../../../src/lib/transfer/providerTransfer.ts");
 const { sealJson } = await import("../../../src/lib/transfer/sealedPayload.ts");
 const bulkRoute = await import("../../../src/app/api/providers/bulk/route.ts");
 const { createAccessToken } = await import("../../../src/lib/db/accessTokens.ts");
+const transferImportRoute = await import("../../../src/app/api/settings/transfer/import/route.ts");
+const backupExportRoute = await import("../../../src/app/api/db-backups/export/route.ts");
+const backupImportRoute = await import("../../../src/app/api/db-backups/import/route.ts");
+const proxyRegistry = await import("../../../src/lib/db/proxies.ts");
+const proxyFallback = await import("../../../open-sse/utils/proxyFallback.ts");
+const { getAuditLog } = await import("../../../src/lib/compliance/index.ts");
 
-beforeEach(() => {
+beforeEach(async () => {
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.mkdirSync(dataDir, { recursive: true });
+  await settings.setProxyConfig({ global: null, providers: {}, combos: {}, keys: {} });
+  proxyFallback.clearProxyFallbackCache();
 });
 
 after(async () => {
@@ -416,4 +436,254 @@ test("historical JSON restore preserves explicit rows and does not reinterpret l
   assert.equal(stored("restored-off").proxy_enabled, 0);
   assert.equal(stored("legacy-default").proxy_enabled, 1);
   assert.equal((await settings.getSettings()).defaultNewConnectionProxyEnabled, false);
+});
+
+for (const enabled of [false, true]) {
+  test(`mixed transfer skips existing ${!enabled} and adds new default ${enabled}`, async () => {
+    const existing = await create({ name: "retained", proxyEnabled: !enabled });
+    const source = await create({ name: "incoming", apiKey: "sk-incoming-only" });
+    const passphrase = "synthetic mixed transfer passphrase";
+    const bundle = await transfer.exportProviderTransferBundle({
+      connectionIds: [String(existing.id), String(source.id)],
+      passphrase,
+    });
+    await providers.deleteProviderConnection(String(source.id));
+    await settings.updateSettings({ defaultNewConnectionProxyEnabled: enabled });
+    const response = await transferImportRoute.POST(
+      await makeManagementSessionRequest("http://localhost/api/settings/transfer/import", {
+        method: "POST",
+        body: {
+          bundle,
+          passphrase,
+          decisions: {
+            [`connection:${existing.id}`]: "skip",
+            [`connection:${source.id}`]: "add",
+          },
+        },
+      })
+    );
+    assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.deepEqual(result.applied, { providerConnections: 1, providerNodes: 0, skipped: 1 });
+    assert.equal(
+      result.items.find((item: { key: string }) => item.key === `connection:${existing.id}`)
+        .outcome,
+      "skipped"
+    );
+    const rows = await providers.getProviderConnections();
+    assert.equal(rows.length, 2);
+    assert.equal(rows.find((row) => row.id === existing.id)?.proxyEnabled, !enabled);
+    const added = rows.find((row) => row.id !== existing.id);
+    assert.ok(added);
+    assert.equal(added.name, "incoming");
+    assert.equal(added.proxyEnabled, enabled);
+    assert.equal(stored(existing.id).proxy_enabled, enabled ? 0 : 1);
+    assert.equal(stored(added.id).proxy_enabled, enabled ? 1 : 0);
+  });
+
+  test(`full SQLite export/import replaces destination policy with ${enabled} and preserves independent rows`, async () => {
+    await settings.updateSettings({ defaultNewConnectionProxyEnabled: enabled, theme: "dark" });
+    const on = await create({ name: "backup-on", proxyEnabled: true });
+    const off = await create({ name: "backup-off", apiKey: "sk-backup-off", proxyEnabled: false });
+    await settings.setProxyForLevel("key", String(off.id), {
+      type: "http",
+      host: "127.0.0.1",
+      port: 19998,
+    });
+    const assignments = await settings.getProxyConfig();
+    const response = await backupExportRoute.GET(
+      await makeManagementSessionRequest("http://localhost/api/db-backups/export")
+    );
+    assert.equal(response.status, 200);
+    const bytes = await response.arrayBuffer();
+    assert.ok(bytes.byteLength >= 4096);
+    // The supported upload replaces the isolated destination wholesale, rather
+    // than merging credentials or resolving restored rows against its preference.
+    await settings.updateSettings({ defaultNewConnectionProxyEnabled: !enabled, theme: "light" });
+    await providers.deleteProviderConnection(String(on.id));
+    await settings.setProxyConfig({});
+    const destinationOnly = await create({
+      name: "destination-only",
+      apiKey: "sk-destination-only",
+    });
+    const headers = await makeManagementSessionRequest("http://localhost/api/db-backups/import");
+    const restored = await backupImportRoute.POST(
+      new Request("http://localhost/api/db-backups/import?filename=synthetic.sqlite", {
+        method: "POST",
+        headers: headers.headers,
+        body: bytes,
+      })
+    );
+    assert.equal(restored.status, 200);
+    assert.equal((await restored.json()).connectionCount, 2);
+    assert.equal((await settings.getSettings()).defaultNewConnectionProxyEnabled, enabled);
+    assert.equal((await settings.getSettings()).theme, "dark");
+    assert.deepEqual(await settings.getProxyConfig(), assignments);
+    assert.equal(await providers.getProviderConnectionById(String(destinationOnly.id)), null);
+    assert.equal(stored(on.id).proxy_enabled, 1);
+    assert.equal(stored(off.id).proxy_enabled, 0);
+    core.resetDbInstance();
+    assert.equal((await settings.getSettings()).defaultNewConnectionProxyEnabled, enabled);
+    assert.equal(stored(on.id).proxy_enabled, 1);
+    assert.equal(stored(off.id).proxy_enabled, 0);
+    const next = await create({ name: "after-full-restore", apiKey: "sk-after-full-restore" });
+    assert.equal(stored(next.id).proxy_enabled, enabled ? 1 : 0);
+  });
+
+  test(`repeated identical ${enabled} PATCH accepts latest revision without changing accounts or unrelated settings`, async () => {
+    const existing = await create({ proxyEnabled: !enabled });
+    await settings.updateSettings({ theme: "dark", perKeyProxyEnabled: true });
+    const assignments = await settings.getProxyConfig();
+    for (let index = 0; index < 2; index++) {
+      const revision = await settings.getSettingsRevision();
+      const response = await patch({
+        defaultNewConnectionProxyEnabled: enabled,
+        expectedRevision: revision,
+      });
+      assert.equal(response.status, 200);
+      const body = await response.json();
+      // updateSettings advances the revision on every accepted transaction.
+      assert.equal(body.settingsRevision, revision + 1);
+      assert.equal(body.defaultNewConnectionProxyEnabled, enabled);
+      const get = await settingsRoute.GET(new Request("http://localhost/api/settings"));
+      assert.equal((await get.json()).defaultNewConnectionProxyEnabled, enabled);
+      assert.equal(
+        core
+          .getDbInstance()
+          .prepare(
+            "SELECT value FROM key_value WHERE namespace='settings' AND key='defaultNewConnectionProxyEnabled'"
+          )
+          .get()?.value,
+        JSON.stringify(enabled)
+      );
+      const next = await create({ name: `repeated-${index}`, apiKey: `sk-repeat-${index}` });
+      assert.equal(stored(next.id).proxy_enabled, enabled ? 1 : 0);
+      assert.equal(stored(existing.id).proxy_enabled, enabled ? 0 : 1);
+      assert.equal((await settings.getSettings()).theme, "dark");
+      assert.equal((await settings.getSettings()).perKeyProxyEnabled, true);
+      assert.deepEqual(await settings.getProxyConfig(), assignments);
+      assert.equal(
+        (await patch({ defaultNewConnectionProxyEnabled: !enabled, expectedRevision: revision }))
+          .status,
+        409
+      );
+    }
+  });
+}
+
+test("policy failures redact stored values and database diagnostics at the real bulk boundary", async (t) => {
+  const canaries = [
+    "synthetic-policy-canary-7d2",
+    "synthetic-diagnostic-canary-9a4",
+    "sk-synthetic-credential-canary-8b3",
+  ];
+  const output: unknown[][] = [];
+  for (const method of ["log", "warn", "error", "info", "debug"] as const) {
+    t.mock.method(console, method, (...args: unknown[]) => {
+      output.push(args);
+    });
+  }
+  const db = core.getDbInstance();
+  const prepare = db.prepare.bind(db);
+  let failRead = false;
+  t.mock.method(db, "prepare", (sql: string) => {
+    if (
+      failRead &&
+      sql.includes("SELECT value FROM key_value") &&
+      sql.includes("defaultNewConnectionProxyEnabled")
+    ) {
+      throw new Error(canaries[1]);
+    }
+    return prepare(sql);
+  });
+  for (const failure of ["malformed", "read"]) {
+    rawPolicy(JSON.stringify(canaries[0]));
+    failRead = failure === "read";
+    const response = await bulkRoute.POST(
+      await makeManagementSessionRequest("http://localhost/api/providers/bulk", {
+        method: "POST",
+        body: {
+          provider: "openai",
+          validateKeys: false,
+          entries: [{ name: "redaction", apiKey: canaries[2] }],
+        },
+      })
+    );
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.failed, 1);
+    assert.equal(body.success, 0);
+    assert.match(body.errors[0].message, /new.connection proxy default/i);
+    const captured = JSON.stringify({ body, output, audit: getAuditLog() });
+    assert.ok(
+      canaries.every((canary) => !captured.includes(canary)),
+      "feature errors and captured logs must omit private canaries"
+    );
+    assert.ok(!captured.includes("auth_token="));
+    assert.equal(prepare("SELECT count(*) AS n FROM provider_connections").get()?.n, 0);
+  }
+});
+
+test("fallback-only registry is effective for ON but OFF never enters selection or probing", async (t) => {
+  await settings.updateSettings({ defaultNewConnectionProxyEnabled: false, proxyEnabled: true });
+  const candidate = await proxyRegistry.createProxy({
+    name: "fallback-only",
+    type: "http",
+    host: "127.0.0.1",
+    port: 19997,
+    status: "active",
+  });
+  assert.ok(candidate);
+  assert.deepEqual(await proxyRegistry.getProxyAssignments(), []);
+  assert.equal((await settings.getProxyConfig()).global, null);
+  proxyFallback.clearProxyFallbackCache();
+  const probes: string[] = [];
+  proxyFallback.__setProxyFallbackTestHooks({
+    testSingleProxy: async (url) => {
+      probes.push(url);
+      return { ok: true, latencyMs: 1 };
+    },
+  });
+  // Observe the real candidate-list query, without replacing the resolver,
+  // selection, registry or candidate collection. Only transport is stubbed.
+  let candidateReads = 0;
+  const db = core.getDbInstance();
+  const prepare = db.prepare.bind(db);
+  t.mock.method(db, "prepare", (sql: string) => {
+    if (sql.includes("FROM proxy_registry ORDER BY")) candidateReads++;
+    return prepare(sql);
+  });
+  try {
+    const off = await create();
+    assert.equal(stored(off.id).proxy_enabled, 0);
+    assert.equal((await settings.resolveProxyForConnection(String(off.id))).level, "direct");
+    assert.equal(candidateReads, 0);
+    assert.deepEqual(probes, []);
+    const on = await create({
+      name: "eligible",
+      apiKey: "sk-fallback-eligible",
+      proxyEnabled: true,
+    });
+    const result = await settings.resolveProxyForConnection(String(on.id));
+    assert.equal(result.level, "autoSelect");
+    assert.ok(result.proxy && typeof result.proxy === "object");
+    assert.equal(result.proxy.host, "127.0.0.1");
+    assert.equal(result.proxy.port, 19997);
+    assert.ok(candidateReads > 0);
+    assert.deepEqual(probes, ["http://127.0.0.1:19997"]);
+  } finally {
+    proxyFallback.__setProxyFallbackTestHooks(null);
+    proxyFallback.clearProxyFallbackCache();
+  }
+});
+
+test("ON without configured proxy remains direct and creates no assignments", async () => {
+  await settings.updateSettings({ defaultNewConnectionProxyEnabled: true, proxyEnabled: true });
+  const before = await settings.getProxyConfig();
+  const assignments = await proxyRegistry.getProxyAssignments();
+  const row = await create();
+  assert.equal(row.proxyEnabled, true);
+  assert.equal((await settings.resolveProxyForConnection(String(row.id))).level, "direct");
+  assert.deepEqual(await settings.getProxyConfig(), before);
+  assert.deepEqual(await proxyRegistry.getProxyAssignments(), assignments);
 });
