@@ -964,6 +964,14 @@ test("v1 image generation POST refreshes an expired Antigravity token before dis
   assert.equal(calls.filter((call) => call.url.includes("oauth2.googleapis.com/token")).length, 1);
 });
 
+// grok-cli (Grok Build OAuth, #15305) sends the same xAI image body through the Grok Build
+// proxy with the CLI token-auth header; xai-oauth and xai keep api.x.ai.
+const GROK_IMAGE_ENDPOINTS: Record<string, string> = {
+  "grok-cli": "https://cli-chat-proxy.grok.com/v1/images/generations",
+  "xai-oauth": "https://api.x.ai/v1/images/generations",
+  xai: "https://api.x.ai/v1/images/generations",
+};
+
 for (const [provider, alias] of [
   ["grok-cli", "gc"],
   ["xai-oauth", "xao"],
@@ -982,7 +990,10 @@ for (const [provider, alias] of [
     );
     let imageCalls = 0;
     globalThis.fetch = async (url, options = {}) => {
-      assert.equal(String(url), "https://api.x.ai/v1/images/generations");
+      assert.equal(String(url), GROK_IMAGE_ENDPOINTS[provider]);
+      if (provider === "grok-cli") {
+        assert.equal(new Headers(options.headers).get("X-XAI-Token-Auth"), "xai-grok-cli");
+      }
       imageCalls += 1;
       assert.equal(
         new Headers(options.headers).get("Authorization"),
@@ -1046,7 +1057,7 @@ test("Grok image route refreshes and persists OAuth credentials before generatio
         expires_in: 3600,
       });
     }
-    assert.equal(String(url), "https://api.x.ai/v1/images/generations");
+    assert.equal(String(url), GROK_IMAGE_ENDPOINTS["grok-cli"]);
     assert.equal(new Headers(options.headers).get("Authorization"), "Bearer fresh-grok-token");
     return Response.json({ data: [{ url: "https://example.com/grok-image.jpg" }] });
   };
@@ -1061,10 +1072,7 @@ test("Grok image route refreshes and persists OAuth credentials before generatio
     })
   );
   assert.equal(response.status, 200, await response.clone().text());
-  assert.deepEqual(calls, [
-    "https://auth.x.ai/oauth2/token",
-    "https://api.x.ai/v1/images/generations",
-  ]);
+  assert.deepEqual(calls, ["https://auth.x.ai/oauth2/token", GROK_IMAGE_ENDPOINTS["grok-cli"]]);
   const saved = await providersDb.getProviderConnectionById(connection.id);
   assert.equal(saved?.accessToken, "fresh-grok-token");
   assert.equal(saved?.refreshToken, "rotated-grok-token");

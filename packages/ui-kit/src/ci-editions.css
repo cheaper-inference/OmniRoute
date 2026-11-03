@@ -222,3 +222,87 @@
     background: var(--ci-sidebar-active-bg);
   }
 }
+
+/* Landing continuity is an explicit document variant. Tokens alone reach
+ * existing controls and body portals; removing the modifier restores Editions.
+ * Hosts supply Inter through --font-inter or a loaded Inter font family. */
+:is(html:root:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-ci-appearance="editions"][data-ci-editions-variant="landing"], [data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+  --ci-font-ui: var(--font-inter, "Inter"), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ci-font-display: var(--ci-font-ui);
+  --ci-font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), ui-monospace, monospace;
+  --ci-color-background: #f3f0e7;
+  --ci-color-canvas: #f3f0e7;
+  --ci-color-surface: #f8f5ed;
+  --ci-color-surface-subtle: #ece8de;
+  --ci-color-surface-muted: #e5e0d5;
+  --ci-color-surface-inverse: #191a15;
+  --ci-color-foreground: #24251f;
+  --ci-color-text: #24251f;
+  --ci-color-heading: #24251f;
+  --ci-color-brand-mark: #24251f;
+  --ci-color-text-muted: #606156;
+  --ci-color-text-subtle: #606156;
+  --ci-color-text-inverse: #f4f1e8;
+  --ci-color-accent-hover: #edba94;
+  --ci-color-accent-foreground: #221b14;
+  --ci-color-border: #24251f33;
+  --ci-color-border-subtle: #24251f24;
+  --ci-color-border-strong: #24251f66;
+  --ci-color-focus: #a15e38;
+  --ci-color-focus-ring: #a15e38;
+  --ci-color-selection: #e5ac8259;
+  --ci-radius-sm: 2px;
+  --ci-radius-md: 4px;
+  --ci-radius-lg: 4px;
+  --ci-radius-xl: 6px;
+  --ci-radius-2xl: 8px;
+  --ci-radius-control: 2px;
+  --ci-radius-surface: 2px;
+  --ci-radius-pill: 2px;
+  --ci-button-primary-fg: #221b14;
+  --ci-button-primary-hover: #edba94;
+  --ci-button-accent-fg: #221b14;
+  --ci-card-border: var(--ci-color-border);
+}
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-theme="dark"][data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root[data-theme="dark"][data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]),
+[data-ci-appearance="editions"][data-ci-editions-variant="landing"][data-theme="dark"] {
+  --ci-color-background: #11120f;
+  --ci-color-canvas: #11120f;
+  --ci-color-surface: #191a16;
+  --ci-color-surface-subtle: #20211b;
+  --ci-color-surface-muted: #292a23;
+  --ci-color-foreground: #f4f1e8;
+  --ci-color-text: #f4f1e8;
+  --ci-color-heading: #f4f1e8;
+  --ci-color-brand-mark: #f4f1e8;
+  --ci-color-text-muted: #b0b0a3;
+  --ci-color-text-subtle: #a4a597;
+  --ci-color-border: #f4f1e833;
+  --ci-color-border-subtle: #f4f1e824;
+  --ci-color-border-strong: #f4f1e866;
+  --ci-color-focus: #e5ac82;
+  --ci-color-focus-ring: #e5ac82;
+}
+@media (prefers-color-scheme: dark) {
+:is(html:root:not([data-theme]):has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root:not([data-theme])[data-ci-appearance="editions"][data-ci-editions-variant="landing"]),
+:is(html:root:not([data-theme]):has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]), html:root:not([data-theme])[data-ci-appearance="editions"][data-ci-editions-variant="landing"]) :is(.ci-theme, [data-ci-appearance="editions"]) {
+  --ci-color-background: #11120f;
+  --ci-color-canvas: #11120f;
+  --ci-color-surface: #191a16;
+  --ci-color-surface-subtle: #20211b;
+  --ci-color-surface-muted: #292a23;
+  --ci-color-foreground: #f4f1e8;
+  --ci-color-text: #f4f1e8;
+  --ci-color-heading: #f4f1e8;
+  --ci-color-brand-mark: #f4f1e8;
+  --ci-color-text-muted: #b0b0a3;
+  --ci-color-text-subtle: #a4a597;
+  --ci-color-border: #f4f1e833;
+  --ci-color-border-subtle: #f4f1e824;
+  --ci-color-border-strong: #f4f1e866;
+  --ci-color-focus: #e5ac82;
+  --ci-color-focus-ring: #e5ac82;
+}
+}

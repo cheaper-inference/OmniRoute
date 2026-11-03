@@ -32,18 +32,24 @@
  */
 
 import { recordEarlyKeepaliveBytes } from "./earlyKeepaliveByteBuffer.ts";
-import { SYNTHETIC_RESPONSES_SEQUENCE_NUMBER } from "./responsesSequence.ts";
+import { classifyProviderSafetyError } from "./providerSafety.ts";
+import {
+  SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+  buildSyntheticResponsesFailedEvent,
+  buildSyntheticResponsesFailureId,
+} from "./responsesSequence.ts";
 import { withUpstreamErrorDetail } from "./upstreamErrorDetail.ts";
 import { mergeAbortSignals } from "../executors/base/mergeAbortSignals.ts";
 
 const ENCODER = new TextEncoder();
 const KEEPALIVE_FRAME = ENCODER.encode(": keepalive\n\n");
-// OpenAI-compatible keepalive: a syntactically valid empty streaming chunk.
+// OpenAI-compatible keepalive: a JSON chunk without an application choice.
 // Some OpenAI-compatible clients parse every non-empty SSE line as JSON and
 // reject legal SSE comments before their first provider chunk arrives.
-// id/model stay brand-neutral — these frames go to the client, not upstream.
+// An empty delta before the assistant role creates an untyped LangChain message
+// and drops later tool calls (#18410). No choices also avoids claiming its ID.
 export const OPENAI_KEEPALIVE_FRAME = ENCODER.encode(
-  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[{"index":0,"delta":{},"finish_reason":null}]}\n\n'
+  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[]}\n\n'
 );
 // The first slow-path frame must be a valid OpenAI chunk without creating
 // visible reasoning that clients persist into the conversation.
@@ -174,6 +180,31 @@ function buildResponsesErrorDataLine(
     parsed && typeof parsed.diagnostics === "object" && parsed.diagnostics !== null
       ? { diagnostics: parsed.diagnostics }
       : {};
+  // PROVIDER_SAFETY_STOPS_TERMINAL (#17049): a provider safety stop is terminal, and Codex
+  // reads its fatal policy code only from `response.failed`; a bare `error` frame is a
+  // disconnect to it, so it reconnects and replays the stopped conversation.
+  const safety = classifyProviderSafetyError({
+    status: meta.status,
+    code: errorObj?.code,
+    type: errorObj?.type,
+    message: errorObj?.message,
+  });
+  if (safety) {
+    return JSON.stringify(
+      buildSyntheticResponsesFailedEvent({
+        id: buildSyntheticResponsesFailureId(),
+        object: "response",
+        status: "failed",
+        error: {
+          type: "invalid_request_error",
+          code: safety.code,
+          message,
+          param,
+          status_code: safety.status,
+        },
+      })
+    );
+  }
   return JSON.stringify({
     type: "error",
     code,
@@ -768,6 +799,11 @@ export async function withEarlyStreamKeepalive(
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      // This early-keepalive response IS the response the client receives while
+      // the real turn is still prefilling — the worst possible stream for a
+      // buffering reverse proxy to sit on. Same no-buffering instruction the
+      // central header path already sets.
+      "X-Accel-Buffering": "no",
       ...extraHeaders,
     },
   });

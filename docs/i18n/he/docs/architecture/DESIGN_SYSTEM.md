@@ -4,7 +4,7 @@
 
 ---
 
-> **סטָטוּס:** לוח המחוונים בנוי על** ערכת Keak CI UI** (`@keak/cheaper-inference-ui-kit`), מסופק כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב במעלה הזרם מוצמדת ב- `packages/ui-kit/UPSTREAM.md` ומוגנת על ידי `npm run check:ui-kit-snapshot`). האור הוא הנושא הקנוני; העדפת ברירת המחדל היא `system`. המבטא הוא קיאק ליים (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
+> **סטָטוּס:** לוח המחוונים בנוי על** ערכת Keak CI UI** (`@keak/cheaper-inference-ui-kit`), מסופק כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב במעלה הזרם מוצמדת ב- `packages/ui-kit/UPSTREAM.md` ומוגנת על ידי `npm run check:ui-kit-snapshot`). האור הוא הנושא הקנוני; העדפת ברירת המחדל היא `system`. המבטא הוא קיאק ליים (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). סקריפטים שחסרים לשוויץ נופלים דרך גליף אחר גליף (`src/app/globals.css`): אינטר עבור קירילי, יווני ווייטנאמי, ורק תחת `html[dir="rtl"]`, Vazirmatn עבור כתב ערבי. כל אייקון הוא גליף Lucide.
 
 ## 1. איפה דברים נמצאים
 
@@ -43,21 +43,52 @@
 3. פתרונות עקיפה לפערים ב-kit חיים במתאם (או ב-`globals.css` תחת `@layer components` כשהתיקון הוא סגנון), לעולם לא ב-`packages/ui-kit/src`.
 4. הוסיפו או עדכנו את `tests/unit/ui/adapters/<name>.test.tsx`. עבור מתאם עם קוראים רבים, השוו את ה-markup המרונדר לפני ואחרי השינוי — שינויים ב-padding או ב-wrapper מתפשטים לכל מסך.
 
-## 5. עדכון ה-kit
+## 5. עדכון הערכה
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` מעתיק את ה-`src/` של ה-upstream באותו commit אל
-`packages/ui-kit/src` ומפעיל את הטרנספורמציה היחידה המותרת (הסרת הסיומת `.js` מייבואים יחסיים). לאחר מכן: סקרו את `git diff packages/ui-kit`, בצעו מעבר חזותי על מסכי הספקים, ההגדרות, ה-combos, השימוש ונקודת הקצה בשתי ערכות הנושא, הריצו `npm run check:ui-kit-snapshot` ו-`npm run test:vitest:ui`, ופתחו את ה-PR עם ה-changelog של ה-upstream.
+`npm run check:ui-kit-upstream` משווה את הגרסה המוצמדת ב- `packages/ui-kit/UPSTREAM.md` עם תג `v*` החדש ביותר של הריפו במעלה הזרם ומדפיס את פקודת הסינכרון כשיוצא מהדורה. זרימת העבודה השבועית `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) מפעילה את אותה בדיקה ושומרת בעיית מעקב אחת פתוחה בזמן שהסיכה מאחור; הריפו במעלה הזרם הוא פרטי, כך שזרימת העבודה צריכה אסימון לקריאה בלבד בסוד `UI_KIT_READ_TOKEN`. כאשר הוא לא יכול לקרוא במעלה הזרם (ללא אסימון, אסימון שהפסיק לעבוד או GitHub בלתי ניתן להשגה) הריצה נשארת ירוקה אך כותבת אזהרה ומשאירה בעיה אחת נפרדת פתוחה, שסוגרת את עצמה ברגע שהריצה מאוחרת יותר יכולה לקרוא שוב במעלה הזרם.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` מעתיק את ה- `src/` במעלה הזרם באותו commit (`latest` = התג `v*` החדש ביותר) ל- `packages/ui-kit/src`, מחיל את הטרנספורמציה הבודדת המותרת (הוא מוריד את סיומת `.js` מייבוא יחסי), ומגדיר את גרסת סביבת העבודה ב- `packages/ui-kit/package.json` ו- `package-lock.json` ל-upstream. לאחר מכן: בדוק את `git diff packages/ui-kit`, בצע העברת מידע חזותית על ספקים, הגדרות, שילובים, שימוש ונקודת קצה בשני הנושאים, הפעל `npm run check:ui-kit-snapshot` ו- `npm run test:vitest:ui` ופתח את PR עם יומן השינויים במעלה הזרם.
 
 ## 6. דיאגרמות README
 
-12 הדיאגרמות שהשורש `README.md` מטמיע (`docs/diagrams/*.svg`) הם הערכה המיושמת על תמונה סטטית, והם נוצרים, לא מצוירים ביד: 13 קבצי מחולל ב- `scripts/docs/gen-readme-*.mjs` (שנים-עשר דיאגרמות פלוס מנהל ההתקן `gen-readme-diagrams.mjs` ) ו-12 מבחני עיקשות ב- `tests/unit/docs/readme-*-svg.test.ts`, אחד לכל דיאגרמה, כל בייט-משווה את קובץ הפלט שלו עם המחולל `test-unit` שלו (job).
+שנים־עשר הדיאגרמות שה־`README.md` בשורש מטמיע (`docs/diagrams/*.svg`) הן ערכת העיצוב שהוחלה על
+תמונה סטטית, והן נוצרות ולא מצוירות ידנית: 13 קובצי מחוללים ב־`scripts/docs/gen-readme-*.mjs`
+(שנים־עשר דיאגרמות וכן מנהל ההתקן `gen-readme-diagrams.mjs`) ו־12 בדיקות התיישנות ב־
+`tests/unit/docs/readme-*-svg.test.ts`, אחת לכל דיאגרמה, שכל אחת משווה byte-by-byte בין הקובץ
+שנשמר במאגר לבין הפלט של המחולל שלו (המשימה `test-unit`).
 
-- **אסימונים.** `scripts/docs/readme-diagram-theme.mjs` מעתיקה את הפלטה מ- `packages/ui-kit/src/ci-tokens.css` (מוצמדת לקובץ על-ידי `tests/unit/docs/readme-diagram-theme.test.ts`) ומגדירה את תפקידי הטקסט על הפנים המוקדמות של הערכה - Instrument Serif לתצוגה, Inter לטקסט UI, IBM Plex Mono לדמויות וקוד - מחבילות `@fontsource` (לוח המחוונים עצמו משתמש ב-Switzer של הערכה מאז ערכה 0.0.66). ערכי אור יושבים על `:root`, ערכים כהים מאחורי `prefers-color-scheme: dark`, בתוך הקובץ, כך שכל תמונה עוקבת אחר סכימת הצופה ב- GitHub.
-- **גופנים.** `scripts/docs/readme-fonts.mjs` מגדיר משנה של קבצי woff2 לגליפים שכל דיאגרמה מצייר ומטמיע אותם כ- `@font-face` `data:` URIs - הדרך היחידה שבה טיפוגרפיה של ערכת מגיעה לתמונת README, מכיוון ש- GitHub Markdown אינו נושא CSS והפרוקסי של camo חוסם כל אחזור חיצוני. קבוצות המשנה הן בלטינית בלבד; גליפים של הסמלים הנופלים חזרה לערימת המערכת מותרים בזה אחר זה ב- `SYMBOL_FALLBACKS`, וכל זריקת גליפים אחרת שלא מכוסה.
-- **לְהִתְחַדֵשׁ.** `npm run docs:readme-diagrams` משכתב את כל השנים עשר בסדר README ומדפיס שורה אחת לכל קובץ עם הגודל שלו. גנרטור בודד פועל גם בעצמו (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` צריך `node --import tsx/esm` כי הנתונים שלו מגיעים ממטען הקטלוגים החי ב- `open-sse/config/freeModelCatalog.ts`; התוצאה של CI של שינוי קטלוג היא ב- `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). בצע את המחולל וה- SVG ביחד.
-- **הוֹכָחָה.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` מעבד קובץ כמו ש- GitHub משרת אותו (תג `<img>`, `Content-Security-Policy` של camo, `image/svg+xml`), לוכד מסגרת בהירה וחשוכה ומדווח על בקשות הגופן החיצוניות שהדף ביצע (חייב להיות 0).
-- **תַקצִיב.** מתחת ל-200 KB לקובץ (כל מבחן עיפון קובע זאת); 500 KB הוא הכובע הקשיח עבור כל תמונת README (כלל ה- SVG studio validator).
-- **העתק ללא שינוי, סופר מהשער.** המותג מחדש שינה את הסוג והפלטה, לא מילים: כל מחולל נושא את העותק של הדיאגרמה שלו בקבוע `*_COPY` (או בונה אותו מהקטלוג החי) שהוא גם הטקסט המצויר וגם קלט המשנה של גופן. דמויות קנוניות נשארות בצמתי `<text>`, נקראות על ידי `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); מבחני העיפון של הדיאגרמות שקורא השער מריצים גם את המאמתים שלו על הקובץ שנוצר, אז נתון שנסחף מהקוד נכשל בבדיקה - תקן את המקור שהשער קורא, לעולם לא את המספר במחולל.
+- **אסימונים.** `scripts/docs/readme-diagram-theme.mjs` מעתיק את פלטת הצבעים מ־`packages/ui-kit/src/ci-tokens.css`
+  (ומקובע מול הקובץ הזה באמצעות `tests/unit/docs/readme-diagram-theme.test.ts`) ומגדיר את תפקידי הטקסט בסולם
+  הטיפוגרפי של הערכה: Switzer במשקלי הערכה (400/500/600, תצוגה ב־500) ובמרווחי אותיות עבור
+  הכול, למעט תפקידי הקוד (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), שהם
+  IBM Plex Mono ומשמשים רק לפקודות, כתובות URL, מזהים ומסכי מסוף.
+  ערכי המצב הבהיר נמצאים ב־`:root`, וערכי המצב הכהה מאחורי `prefers-color-scheme: dark`, בתוך הקובץ, כך שכל
+  תמונה תעקוב אחר ערכת הצבעים של הצופה ב־GitHub.
+- **גופנים.** Markdown של GitHub אינו כולל CSS, ושרת ה־camo proxy חוסם כל שליפה חיצונית, לכן טיפוגרפיית הערכה
+  חייבת להיכלל בתוך הקובץ. `scripts/docs/readme-outline.mjs`, השלב האחרון של כל מחולל, מעצב את תפקידי
+  Switzer באמצעות HarfBuzz ומצייר אותם כקווי מתאר וקטוריים (`<defs>` paths ו־`<use>`), כאשר החיצים
+  והסמלים הגאומטריים שחסרים ב־Switzer מצוירים לפי המדדים שלו. קווי מתאר, לעולם לא גופן מוטמע: הרישיון של
+  Switzer (`packages/ui-kit/src/fonts/FFL.txt`) אוסר על יצירת תת־קבוצות והמרת פורמטים ללא הסכמה בכתב
+  ומתיר ציורים וקטוריים, לכן אין להחזיר `@font-face` של Switzer או URI מסוג `data:`. הגופן היחיד
+  שנותר בקובץ הוא תת־קבוצה של IBM Plex Mono ברישיון OFL עבור טקסט קוד אמיתי שנשאר
+  (`scripts/docs/readme-fonts.mjs`), שנבנית מהתווים האלה; כל גליף שאי־אפשר להטמיע גורם לשגיאה.
+- **יצירה מחדש.** `npm run docs:readme-diagrams` כותב מחדש את כל שנים־עשר הקבצים לפי סדר הופעתם ב־README
+  ומדפיס שורה אחת לכל קובץ עם הגודל שלו. ניתן להריץ מחולל יחיד גם בנפרד (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` דורש `node --import tsx/esm` מכיוון שהאיורים שלו מגיעים ממטען הקטלוג החי
+  ב־`open-sse/config/freeModelCatalog.ts`; ההשלכה של שינוי בקטלוג על CI מתועדת ב־
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). יש לבצע commit למחולל ול־SVG יחד.
+- **אימות.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` מעבד קובץ כפי ש־GitHub מגיש אותו
+  (תגית `<img>`, מדיניות `Content-Security-Policy` של camo, הסוג `image/svg+xml`), לוכד תמונה במצב בהיר
+  ובמצב כהה ומדווח על בקשות הגופנים החיצוניים שביצע הדף (המספר חייב להיות 0).
+- **מגבלת גודל.** מתחת ל־200 KB לכל קובץ (כל בדיקת התיישנות מאמתת זאת); 500 KB היא התקרה הקשיחה עבור כל
+  תמונת README (כלל מאמת ה־SVG studio).
+- **העתקה ללא שינוי, ספירות מהשער.** המיתוג מחדש שינה את הטיפוגרפיה ואת פלטת הצבעים, לא את המילים: כל מחולל
+  מכיל את הטקסט של הדיאגרמה שלו בקבוע `*_COPY` (או בונה אותו מהקטלוג החי), שמשמש גם כטקסט המצויר וגם
+  כקלט של שלב יצירת קווי המתאר. איורים קנוניים נשארים בצמתי `<text>` (בלתי נראים לאחר יצירת קווי המתאר,
+  `fill-opacity:0`), ונקראים על ידי `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`); בדיקות ההתיישנות של הדיאגרמות שהשער קורא להן מריצות גם את
+  המאמתים שלו על הקובץ שנוצר, כך שאיור שנסחף מהקוד יגרום לכישלון הבדיקה — יש לתקן את המקור שהשער קורא,
+  ולעולם לא את המספר שבמחולל.
 
 ## 7. אינדקס עיון
 

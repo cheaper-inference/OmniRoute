@@ -7,7 +7,8 @@
  * (#7548). Other `httpBackedChat` callers (e.g. duckduckgo-web) keep their
  * own independent fingerprint, which never needs to match a solved cookie.
  */
-import { CLAUDE_WEB_FINGERPRINT } from "../config/claudeWebFingerprint.ts";
+import { claudeWebFingerprint } from "../config/claudeWebFingerprint.ts";
+import { chromeUserAgent, newestChromeVersion } from "../utils/browserProfiles.ts";
 
 export interface HttpBackedChatFingerprint {
   userAgent: string;
@@ -15,15 +16,19 @@ export interface HttpBackedChatFingerprint {
   secChUaPlatform: string;
 }
 
-const DUCKDUCKGO_FALLBACK_FINGERPRINT: HttpBackedChatFingerprint = {
-  userAgent:
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
-  secChUa: '"Chromium";v="149", "Google Chrome";v="149", "Not-A.Brand";v="99"',
-  secChUaPlatform: '"macOS"',
-};
+function duckduckgoFallbackFingerprint(): HttpBackedChatFingerprint {
+  const version = newestChromeVersion();
+  return {
+    userAgent: chromeUserAgent("Macintosh; Intel Mac OS X 10_15_7", version),
+    secChUa: `"Chromium";v="${version}", "Google Chrome";v="${version}", "Not-A.Brand";v="99"`,
+    secChUaPlatform: '"macOS"',
+  };
+}
 
 export function resolveHttpBackedChatFingerprint(
   chatUrlMatchDomain: string
 ): HttpBackedChatFingerprint {
-  return chatUrlMatchDomain === "claude.ai" ? CLAUDE_WEB_FINGERPRINT : DUCKDUCKGO_FALLBACK_FINGERPRINT;
+  return chatUrlMatchDomain === "claude.ai"
+    ? claudeWebFingerprint()
+    : duckduckgoFallbackFingerprint();
 }
