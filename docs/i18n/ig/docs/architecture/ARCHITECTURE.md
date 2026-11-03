@@ -14,7 +14,7 @@ OmniRoute bụ okporo ụzọ AI mpaghara yana dashboard arụnyere na Next.js. 
 
 Ikike isi:
 
-- OpenAI-dakọtara API elu maka CLI/tools (ndị na-enye 377, modul 156 mmebe)
+- OpenAI-dakọtara API elu maka CLI/tools (ndị na-enye 380, modul 156 mmebe)
 - ntụgharị asụsụ Request/response n'ofe ụdị ndị na-eweta
 - Nlereanya combo ọdịda (usoro ihe nlere ọtụtụ)
 - Nzọụkwụ ngwakọta ahaziri ahazi (`provider + model + connection`) yana ịtụ oge ojiri aga site na `compositeTiers`
@@ -33,16 +33,16 @@ Ikike isi:
 - Chee echiche mkpado mkpado (`<think>...</think>`) maka ụdị echiche
 - Idocha nzaghachi maka ndakọrịta OpenAI SDK siri ike
 - Nhazi nke ọrụ (usoro → onye nrụpụta, onye ọrụ → sistemụ) maka ndakọrịta ndị na-eweta obe
-- Ntugharị mmepụta ahaziri (json_schema → Gemini nzaghachiSchema)
+- Ntugharị mmepụta ahaziri (json_schema → Gemini responseSchema)
 - Nkwụsi ike mpaghara maka ndị na-eweta, igodo, utu aha, combos, ntọala, ọnụahịa (modul DB 122)
 - Usage/cost nsuso na ịrịọ ndekọ
 - Mmekọrịta igwe ojii nhọrọ maka mmekọrịta multi-device/state
 - IP allowlist/blocklist maka njikwa ohere API
 - Njikwa mmefu ego iche echiche (passthrough/auto/custom/adaptive)
 - Usoro ịgba ọgwụ mgbochi ọrịa zuru ụwa ọnụ
-- Nleba anya na akara mkpịsị aka oge
+- Nleba nke oge na akara mkpịsị aka
 - Na-eji profaịlụ ndị na-eweta ndị na-eweta ihe na-eme ka mmachi ọnụego kwa-akaụntụ kwalite
-- Usoro ihe nkesa sekit maka nkwụsi ike nke onye na-eweta ya
+- Usoro ihe nkesa sekit maka nkwụsi ike nke ndị na-eweta ya
 - Nchekwa igwe mgbochi égbè eluigwe nwere mkpọchi mutex
 - cache mbinye aka dabere na mbinye aka
 - Ngalaba oyi akwa: iwu ọnụ ahịa, amụma ọdịda, amụma mkpọchi
@@ -58,7 +58,7 @@ Ikike isi:
 - MCP Server (ngwaọrụ 110) nwere ụgbọ njem 3 (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) nwere nkà na usoro ndụ ọrụ
 - Sistemụ ebe nchekwa (mwepụta, ịgba ọgwụ, iweghachi, nchịkọta)
-- Sistemụ nka (ndebanye aha, onye mmebe, igbe ájá, nka arụnyere n'ime)
+- Sistemụ nka (ndebanye aha, onye mmebe, igbe ájá, nka arụnyere)
 - MITM proxy nwere njikwa akwụkwọ yana njikwa DNS
 - Ngwa ngwa ịgba ọgwụ mgbochi etiti
 - Pipeline mkpakọ ngwa ngwa na Caveman, RTK, pipeline ekpokọtara, combos mkpakọ, ngwugwu asụsụ, na nyocha.
@@ -68,7 +68,7 @@ Ikike isi:
 - OAuth mmezi gburugburu ebe obibi edinam
 - akwa mmiri WebSocket maka ndị ahịa WS OpenAI dakọtara (`/v1/ws`)
 - Njikwa mmekọrịta mmekọrịta (issue/revoke, ETag-ụdị config budata)
-- GLM Thinking (`glmt`) preset nke onye na-eweta klas mbụ
+- GLM Thinking (`glmt`) preset nke onye na-eweta ọkwa mbụ
 - Ngụkọ ngwakọ ngwakọ ( `/messages/count_tokens` n'akụkụ onye na-eweta ya nwere ndaghachi azụ n'uche)
 - Model utu aha auto-seeding (30 + cross-proxy dialect normalizations na mmalite)
 - Ọpụpụ enweghị nchekwa yana onye nche SSRF, igbochi URL nkeonwe yana nwaa nhazigharị

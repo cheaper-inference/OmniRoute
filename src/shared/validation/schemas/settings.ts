@@ -12,7 +12,7 @@ import {
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 import { AUTO_DISABLE_BANNED_SCOPES } from "@/shared/utils/autoDisableBanned";
-import { CLI_VERSION_KEYS, CLI_VERSION_PATTERN } from "@/shared/constants/cliVersions";
+import { CLI_VERSION_KEYS, CLI_VERSION_PATTERN } from "@omniroute/open-sse/config/cliVersions.ts";
 
 // Single source of truth: ../settingsSchemas (the schema the runtime settings route validates
 // against). Re-exported here so this modular barrel stays in exact lockstep — a divergent local
@@ -252,6 +252,7 @@ export const updateResilienceSchema = z
             rpm: z.number().int().min(1).optional(),
             concurrency: z.number().int().min(1).optional(),
             providerConcurrency: z.number().int().min(0).max(100_000).optional(),
+            rateLimitCooldownSeconds: z.number().int().min(1).max(21_600).optional(),
           })
           .strict()
       )

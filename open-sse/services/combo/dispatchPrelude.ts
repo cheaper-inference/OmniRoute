@@ -54,6 +54,7 @@ import {
   validateResponseQuality,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import { AGENTIC_STALL_COMBO_REASON, isAgenticStallComboAttempt } from "./agenticStallFailover.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import type {
   ComboCollectionLike,
@@ -222,8 +223,10 @@ export function buildDefaultNesting(
  * strategy (200-but-empty, or a transient upstream status worth failing over).
  */
 async function evaluatePinnedResponse(args: {
+  body: Record<string, unknown>;
   pinnedResult: Response;
   pinnedModel: string;
+  hasOtherTargets: boolean;
   clientRequestedStream: boolean;
   config: ComboSetupConfig;
   log: ComboLogger;
@@ -231,8 +234,10 @@ async function evaluatePinnedResponse(args: {
   signal?: AbortSignal | null;
 }): Promise<Response | null> {
   const {
+    body,
     pinnedResult,
     pinnedModel,
+    hasOtherTargets,
     clientRequestedStream,
     config,
     log,
@@ -256,11 +261,21 @@ async function evaluatePinnedResponse(args: {
       releaseRejectedQualityResponse(pinnedClone, pinnedResult);
       return errorResponse(499, "Client disconnected");
     }
-    if (pinnedQuality.valid) return pinnedResult;
+    // #13954 (opt-in): a stalled pin gives the turn back to the combo strategy.
+    const pinnedStalled =
+      pinnedQuality.valid &&
+      (await isAgenticStallComboAttempt({
+        body,
+        result: pinnedResult,
+        modelStr: pinnedModel,
+        hasNextTarget: hasOtherTargets,
+        log,
+      }));
+    if (pinnedQuality.valid && !pinnedStalled) return pinnedResult;
     releaseRejectedQualityResponse(pinnedClone, pinnedResult);
     log.warn(
       "COMBO",
-      `Pinned model ${pinnedModel} returned 200 but failed quality check: ${pinnedQuality.reason}, falling through to combo retry/fallback`
+      `Pinned model ${pinnedModel} returned 200 but ${pinnedStalled ? AGENTIC_STALL_COMBO_REASON : `failed quality check: ${pinnedQuality.reason}`}, falling through to combo retry/fallback`
     );
     return null;
   }
@@ -382,8 +397,10 @@ export async function tryPinnedModelDispatch(args: {
     }
     if (pinnedResult) {
       const accepted = await evaluatePinnedResponse({
+        body,
         pinnedResult,
         pinnedModel,
+        hasOtherTargets: comboTargets.length > 1,
         clientRequestedStream,
         config,
         log,
