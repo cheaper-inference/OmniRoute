@@ -163,7 +163,7 @@ OmniRoute paljastaa 6 A2A -taitoa yhdistettynä `src/lib/a2a/taskExecution.ts::A
 | Terveysraportti         | `health-report`      | Aggregaatit katkaisija, jäähdytys, lukitustila palveluntarjoajan mukaan                                                                                      | terveyttä, kestävyyttä      | "Näytä kaikkien palveluntarjoajien terveydentila" |
 | Listaa ominaisuudet     | `list-capabilities`  | Palauttaa koko 45 merkinnän Agent Skills -luettelon (23 API + 21 CLI + 1 config) merkintätaulukkona, jossa on raaka SKILL.md URLs kontekstin lisäystä varten | luettelo, löytö, taidot     | "Lista kaikki OmniRoute -ominaisuudet"            |
 
-> Agenttikortti tulee pitää linjassa reaaliaikaisen 377-palveluntarjoajan luettelon kanssa; palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
+> Agenttikortti tulee pitää linjassa reaaliaikaisen 380-palveluntarjoajan luettelon kanssa. palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
 
 ### `list-capabilities` Skill Detail
 
@@ -201,13 +201,13 @@ JSON-RPC-päätepiste `/a2a` on ensisijainen A2A-käyttöpiste. Alla olevat REST
 
 1. **Luo taitotiedosto:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Vie asynkroninen funktio `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Noudata olemassa olevien taitojen, kuten `smartRouting.ts`, rakennetta.
+   Vie asynkroninen funktio `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Seuraa olemassa olevien taitojen, kuten `smartRouting.ts` muotoa.
 
-2. **Rekisteröi käsittelijä:** lisää tiedostossa `src/lib/a2a/taskExecution.ts` merkintä kohteeseen `A2A_SKILL_HANDLERS`:
+2. **Rekisterinpitäjä:** `src/lib/a2a/taskExecution.ts`:ssa lisää merkintä `A2A_SKILL_HANDLERS`:hen:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...olemassa olevat taidot
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC-päätepiste `/a2a` on ensisijainen A2A-käyttöpiste. Alla olevat REST
    };
    ```
 
-3. **Tuo esiin Agent Cardissa:** lisää tiedoston `src/lib/a2a/agentCardMetadata.ts` (jota `/.well-known/agent.json` ja `/.well-known/agent-card.json` käyttävät yhdessä) `skills`-taulukkoon:
+3. **Paljasta agenttikortissa:** `src/lib/a2a/agentCardMetadata.ts` ssa (jakaneet `/.well-known/agent.json` ja `/.well-known/agent-card.json`), lisää `skills` taulukkoon:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC-päätepiste `/a2a` on ensisijainen A2A-käyttöpiste. Alla olevat REST
    }
    ```
 
-4. **Kirjoita testit:** `tests/unit/a2a-<your-skill>.test.ts`. Testaa onnistunut suorituspolku ja virhepolku.
+4. **Kirjoita testit:** `tests/unit/a2a-<your-skill>.test.ts`. Kansi onnellinen polku + virhepolku.
 
-5. **Dokumentoi** uusi taito tämän tiedoston `Available Skills` -taulukossa.
+5. **Asiakirja** uusi taito tämän tiedoston `Available Skills` taulukossa.
 
 ---
 
