@@ -2,7 +2,6 @@
 // calls (#15448). Split from deepseekWebTools.ts so the parser stays under its size cap;
 // deepseekWebTools.ts re-exports the public detectors.
 
-import { asRecordOrNull as canonicalAsRecordOrNull } from "../utils/recordHelpers.ts";
 import Ajv2020, { type ValidateFunction } from "ajv/dist/2020.js";
 
 import {
@@ -22,7 +21,9 @@ const ajv = new Ajv2020({ strict: false, allErrors: false, validateFormats: fals
 const toolValidatorCache = new WeakMap<object, Map<string, ValidateFunction | null>>();
 
 export function asRecord(value: unknown): Record<string, unknown> | null {
-  return canonicalAsRecordOrNull(value);
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }
 
 function requestedToolDefinition(requestedTools: unknown, name: string): OpenAIToolDef | null {

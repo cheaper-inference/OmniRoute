@@ -1,4 +1,3 @@
-import { asRecord } from "./recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 export type ResponsesFailureOutputStringField = "id" | "text" | "refusal";
@@ -8,6 +7,9 @@ export type ResponsesFailureOutputStringProjector = (
   value: string
 ) => string;
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 /**
  * Retain only public assistant text/refusal output from a failed Responses payload.

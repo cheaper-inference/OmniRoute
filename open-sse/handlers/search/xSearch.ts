@@ -5,7 +5,6 @@
  * and not the X Developer Platform MCP at api.x.com/mcp.
  */
 
-import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 
 export const X_SEARCH_PROVIDER_ID = "x-search";
@@ -32,6 +31,11 @@ export type XSearchHit = {
 const X_POST_URL_RE = /^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/([^/?#]+)\/status\/(\d+)/i;
 const X_PROFILE_URL_RE = /^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/([^/?#]+)\/?$/i;
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
 
 function timeRangeToFromDate(timeRange?: string): string | undefined {
   if (!timeRange || timeRange === "any" || timeRange === "hour") return undefined;
@@ -52,7 +56,13 @@ function handlesFromDomainFilter(domainFilter?: string[]): string[] | undefined 
   if (!domainFilter?.length) return undefined;
   const handles = domainFilter
     .filter((d) => !d.startsWith("-"))
-    .map((d) => d.replace(/^@/, "").replace(/^(?:www\.)?(?:x|twitter)\.com\//i, "").split("/")[0])
+    .map(
+      (d) =>
+        d
+          .replace(/^@/, "")
+          .replace(/^(?:www\.)?(?:x|twitter)\.com\//i, "")
+          .split("/")[0]
+    )
     .filter((h) => /^[A-Za-z0-9_]{1,15}$/.test(h))
     .slice(0, 20);
   return handles.length ? handles : undefined;
@@ -97,11 +107,7 @@ function walkForUrls(value: unknown, urls: string[], seen: Set<string>, depth = 
   for (const nested of Object.values(rec)) walkForUrls(nested, urls, seen, depth + 1);
 }
 
-export function extractXSearchHits(
-  data: unknown,
-  query: string,
-  maxResults: number
-): XSearchHit[] {
+export function extractXSearchHits(data: unknown, query: string, maxResults: number): XSearchHit[] {
   const rec = asRecord(data) ?? {};
   const urls: string[] = [];
   const seen = new Set<string>();

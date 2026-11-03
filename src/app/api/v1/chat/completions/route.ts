@@ -1,4 +1,3 @@
-import { isRecord } from "@/shared/utils/recordHelpers";
 import { z } from "zod";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { callCloudWithMachineId } from "@/shared/utils/cloud";
@@ -65,6 +64,11 @@ function ensureInitialized() {
   }
   return initPromise;
 }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 // Minimal request-shape validation (Rule #7 / T06 gate). This is the hottest path in the
 // proxy, and the body is already parsed exactly once above into `parsedBody` (see the
 // #4380/#7862 comment on the single `request.json()` call) — so this only runs `.safeParse()`

@@ -6,7 +6,6 @@
  *
  * @module lib/usage/usageStats
  */
-import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { getDbInstance } from "../db/core";
 import { getApiKeys } from "../db/apiKeys";
@@ -84,6 +83,11 @@ function buildConnectionDisplayMap(
   }
   return connectionMap;
 }
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 function toStringOrEmpty(value: unknown): string {
   return typeof value === "string" ? value : "";
 }

@@ -31,9 +31,7 @@ export async function createNodeSqliteAdapter(filePath: string): Promise<SqliteA
   const checkpointTimer = setInterval(() => {
     try {
       db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-    } catch (err) {
-      console.debug?.("[DB] nodeSqliteAdapter periodic checkpoint failed:", err);
-    }
+    } catch {}
   }, CHECKPOINT_INTERVAL_MS);
   (checkpointTimer as unknown as NodeJS.Timeout).unref?.();
 
@@ -54,9 +52,7 @@ export async function createNodeSqliteAdapter(filePath: string): Promise<SqliteA
     clearInterval(checkpointTimer as unknown as NodeJS.Timeout);
     try {
       db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-    } catch (err) {
-      console.debug?.("[DB] nodeSqliteAdapter exit checkpoint failed:", err);
-    }
+    } catch {}
     process.removeListener("beforeExit", onBeforeExit);
     process.removeListener("SIGINT", onSignal);
     process.removeListener("SIGTERM", onSignal);

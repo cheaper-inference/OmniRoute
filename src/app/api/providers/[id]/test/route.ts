@@ -858,9 +858,7 @@ export async function testOAuthConnection(
         if (typeof parsed?.error?.message === "string" && parsed.error.message.trim()) {
           upstreamDetail = `: ${sanitizeUpstreamBodyText(parsed.error.message)}`;
         }
-      } catch (err) {
-        console.debug?.("[API] Failed to parse upstream error body text:", err);
-      }
+      } catch {}
     }
 
     // #12958: surface the real upstream body for a gitlab-duo 403 that also fails the
@@ -1144,13 +1142,9 @@ export async function testSingleConnection(
         error: result.valid ? null : result.error || null,
         sourceFormat: "test",
         targetFormat: "test",
-      }).catch((err) => {
-        console.debug?.("[API] Failed to save call log promise in connection test:", err);
-      });
+      }).catch(() => {});
     }
-  } catch (err) {
-    console.debug?.("[API] Failed to save call log for connection test:", err);
-  }
+  } catch {}
 
   // Log to Proxy tab (proxy_logs table)
   try {
@@ -1168,9 +1162,7 @@ export async function testSingleConnection(
       account: connectionId?.slice(0, 8) || null,
       tlsFingerprint: false,
     });
-  } catch (err) {
-    console.debug?.("[API] Failed to log proxy event for connection test:", err);
-  }
+  } catch {}
 
   return {
     valid: result.valid,

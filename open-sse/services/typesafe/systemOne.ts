@@ -8,7 +8,6 @@
  * Docs: https://docs.typesafe.ai/api
  */
 
-import { isRecord } from "../../utils/recordHelpers.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 export const TYPESAFE_PROVIDER_ID = "typesafe";
@@ -85,6 +84,9 @@ function unavailable(
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function toFiniteNumber(value: unknown): number | null {
   const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;

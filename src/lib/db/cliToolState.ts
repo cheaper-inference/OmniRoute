@@ -10,7 +10,6 @@
  *
  * @module lib/db/cliToolState
  */
-import { asRecordOrNull as toRecord } from "@/shared/utils/recordHelpers";
 
 import { getDbInstance, isBuildPhase, isCloud } from "./core";
 
@@ -38,6 +37,11 @@ function parseJsonValue(raw: string): unknown {
     return null;
   }
 }
+
+function toRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
+
 // ──────────────── Last Configured Timestamp ────────────────
 
 /**

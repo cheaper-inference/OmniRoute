@@ -1,4 +1,3 @@
-import { isRecord } from "../../utils/recordHelpers.ts";
 import { createHash } from "crypto";
 
 import { cleanJSONSchemaForAntigravity } from "./geminiHelper.ts";
@@ -53,6 +52,9 @@ const OBJECT_VALUED_SCHEMA_KEYWORDS = new Set([
   "xml",
 ]);
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 /**
  * Gemini/Vertex requires every functionDeclaration.parameters to be an OBJECT-typed schema

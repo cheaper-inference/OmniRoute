@@ -1,4 +1,3 @@
-import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { randomUUID } from "node:crypto";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 
@@ -49,6 +48,9 @@ type GlmExecuteResult = Awaited<ReturnType<DefaultExecutor["execute"]>> & {
   targetFormat?: string;
 };
 
+function asRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
 
 function getEffectiveKey(credentials: ProviderCredentials): string {
   const extraKeys = (credentials.providerSpecificData?.extraApiKeys as string[] | undefined) ?? [];

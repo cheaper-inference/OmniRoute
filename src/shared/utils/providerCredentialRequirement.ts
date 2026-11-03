@@ -21,7 +21,7 @@
  * sync: registering a provider the usual way is enough.
  */
 import { NOAUTH_PROVIDERS } from "../constants/providers/noauth.ts";
-import { PROVIDER_METADATA } from "@omniroute/open-sse/config/providers/metadata";
+import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 
 export type CredentialRequirement =
   /** Never needs a credential — the connect form does not even ask for one. */
@@ -39,22 +39,22 @@ export function worksWithoutCredential(req: CredentialRequirement): boolean {
 }
 
 export function getCredentialRequirement(providerId: string): CredentialRequirement {
-  const meta = PROVIDER_METADATA[providerId];
+  const entry = REGISTRY[providerId];
 
   // Checked before `noAuth`: a literal anonymous token means the executor can
   // call upstream with no user credential (Kilo's `anonymous`, AI Horde's
   // `0000000000`) *and* that a real key is still honoured — AI Horde trades one
   // for higher queue priority. That is "optional", not "none", even though the
   // connect form hides the field.
-  if (meta?.anonymousApiKey) return "optional";
+  if (entry?.anonymousApiKey) return "optional";
 
   const noAuth = (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[providerId];
   if (noAuth?.noAuth === true) return "none";
 
-  if (!meta) return "required";
-  if (meta.authType === "none") return "none";
-  if (meta.authType === "optional") return "optional";
-  if (meta.authType === "oauth") return "oauth";
+  if (!entry) return "required";
+  if (entry.authType === "none") return "none";
+  if (entry.authType === "optional") return "optional";
+  if (entry.authType === "oauth") return "oauth";
   return "required";
 }
 
@@ -64,7 +64,7 @@ export function getCredentialRequirement(providerId: string): CredentialRequirem
  * must be built from.
  */
 export function listNoCredentialProviders(): string[] {
-  const ids = new Set([...Object.keys(NOAUTH_PROVIDERS), ...Object.keys(PROVIDER_METADATA)]);
+  const ids = new Set([...Object.keys(NOAUTH_PROVIDERS), ...Object.keys(REGISTRY)]);
   return [...ids].filter((id) => worksWithoutCredential(getCredentialRequirement(id))).sort();
 }
 

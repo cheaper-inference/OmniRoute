@@ -1,4 +1,3 @@
-import { asRecordOrNull as toRecord } from "../utils/recordHelpers.ts";
 import {
   registerQuotaCacheInvalidator,
   registerQuotaFetcher,
@@ -40,6 +39,9 @@ interface CacheEntry {
 const quotaCache = new Map<string, CacheEntry>();
 const inFlightRequests = new Map<string, Promise<Context7Quota | null>>();
 
+function toRecord(v: unknown): Record<string, unknown> | null {
+  return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+}
 
 export function extractContext7Token(connection?: Record<string, unknown>): string | null {
   if (!connection) return null;

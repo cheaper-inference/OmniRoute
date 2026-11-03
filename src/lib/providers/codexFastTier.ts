@@ -1,4 +1,3 @@
-import { asRecord } from "@/shared/utils/recordHelpers";
 import {
   getCodexRequestDefaults,
   normalizeCodexServiceTier,
@@ -6,6 +5,11 @@ import {
 } from "./requestDefaults";
 
 type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 export type CodexFastTierValue = CodexServiceTier;
 export type CodexGlobalServiceMode = "none" | CodexServiceTier;
 

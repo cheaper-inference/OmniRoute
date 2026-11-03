@@ -29,7 +29,6 @@
  * Registration: call registerCrofUsageFetcher() once at server startup.
  */
 
-import { toRecord } from "../utils/recordHelpers.ts";
 import {
   registerQuotaCacheInvalidator,
   registerQuotaFetcher,
@@ -80,6 +79,11 @@ function toNumber(value: unknown): number | null {
   return null;
 }
 
+function toRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
 
 function getApiKey(connection: Record<string, unknown> | undefined): string | null {
   const raw = connection?.apiKey;

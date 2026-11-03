@@ -1,4 +1,3 @@
-import { asRecord } from "../utils/recordHelpers.ts";
 import { randomUUID } from "node:crypto";
 
 import {
@@ -67,6 +66,9 @@ type GitLabRequestTarget = {
   headers: Record<string, string>;
 };
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function extractTextContent(content: unknown): string {
   if (typeof content === "string") {

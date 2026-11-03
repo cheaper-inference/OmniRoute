@@ -1,4 +1,3 @@
-import { isRecord } from "../../utils/recordHelpers.ts";
 import { SchemaPreparationError } from "../../utils/schemaErrors.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -17,6 +16,8 @@ const SCHEMA_MAP_KEYS = new Set([
 /** Data-valued keywords: their contents are instance values, not subschemas. */
 const DATA_KEYS = new Set(["const", "enum", "default", "examples", "required"]);
 
+const isRecord = (value: unknown): value is JsonRecord =>
+  !!value && typeof value === "object" && !Array.isArray(value);
 
 const isNullBranch = (branch: JsonRecord): boolean =>
   (branch.type === "null" &&

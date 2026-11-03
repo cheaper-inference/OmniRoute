@@ -1,7 +1,6 @@
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth.ts";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver.ts";
-import { validateApiKey } from "@/lib/db/apiKeys";
 import type { AuthOutcome, PolicyContext, RoutePolicy } from "../context";
 import { allow, reject } from "../context";
 
@@ -54,6 +53,7 @@ export const clientApiPolicy: RoutePolicy = {
       return reject(401, "AUTH_002", "Authentication required");
     }
 
+    const { validateApiKey } = await import("../../../lib/db/apiKeys");
     for (const credential of credentials) {
       // The subject is the credential that actually validated, so identity and
       // usage never bind to a stale Bearer sent next to a valid x-api-key.

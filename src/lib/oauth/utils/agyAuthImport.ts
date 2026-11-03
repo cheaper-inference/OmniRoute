@@ -1,4 +1,3 @@
-import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import {
   getProviderConnections,
   createProviderConnection,
@@ -16,6 +15,11 @@ import {
 } from "@/lib/oauth/antigravityProjectGate";
 
 type JsonRecord = Record<string, unknown>;
+
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 function toNonEmptyString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();

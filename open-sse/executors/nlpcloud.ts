@@ -1,4 +1,3 @@
-import { asRecord } from "../utils/recordHelpers.ts";
 import { randomUUID } from "node:crypto";
 
 import {
@@ -23,6 +22,9 @@ type NlpCloudHistoryEntry = {
 const DEFAULT_MODEL = "chatdolphin";
 const DEFAULT_BASE_URL = "https://api.nlpcloud.io/v1/gpu";
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function extractTextContent(content: unknown): string {
   if (typeof content === "string") {

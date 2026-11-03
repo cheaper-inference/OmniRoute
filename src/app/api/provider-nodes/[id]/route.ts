@@ -1,6 +1,4 @@
-import { asRecord } from "@/shared/utils/recordHelpers";
 import { NextResponse } from "next/server";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import {
   deleteModelAliasesForProvider,
   deleteProviderConnectionsByProvider,
@@ -16,6 +14,11 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { validateProviderNodeBaseUrl } from "../urlGuard";
 
 type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 function sanitizeAnthropicBaseUrl(baseUrl: string) {
   return (baseUrl || "")
     .trim()
@@ -32,9 +35,6 @@ function sanitizeClaudeCodeCompatibleBaseUrl(baseUrl: string) {
 
 // PUT /api/provider-nodes/[id] - Update provider node
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = await requireManagementAuth(request);
-  if (authError) return authError;
-
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -56,8 +56,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { name, prefix, apiType, baseUrl, chatPath, modelsPath, customHeaders, iconUrl, dailyQuotaResetTimezone, dailyQuotaResetHour } =
-      validation.data;
+    const {
+      name,
+      prefix,
+      apiType,
+      baseUrl,
+      chatPath,
+      modelsPath,
+      customHeaders,
+      iconUrl,
+      dailyQuotaResetTimezone,
+      dailyQuotaResetHour,
+    } = validation.data;
     const node: any = await getProviderNodeById(id);
 
     if (!node) {
@@ -110,9 +120,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const updated = await updateProviderNode(id, updates);
 
     try {
-      const { registerMoonshotFetchersForNodes } = await import(
-        "@omniroute/open-sse/services/moonshotQuotaFetcher.ts"
-      );
+      const { registerMoonshotFetchersForNodes } =
+        await import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts");
       registerMoonshotFetchersForNodes([
         {
           id: typeof updated?.id === "string" ? updated.id : id,
@@ -164,10 +173,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 // DELETE /api/provider-nodes/[id] - Delete provider node and its connections
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const authError = await requireManagementAuth(request);
-  if (authError) return authError;
-
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const node = await getProviderNodeById(id);

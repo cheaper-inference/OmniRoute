@@ -1,4 +1,3 @@
-import { asRecord } from "../utils/recordHelpers.ts";
 import { randomUUID } from "node:crypto";
 
 import {
@@ -26,6 +25,9 @@ const ROLE_LABELS: Record<string, string> = {
   assistant: "Assistant",
 };
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function extractTextContent(content: unknown): string {
   if (typeof content === "string") return content;

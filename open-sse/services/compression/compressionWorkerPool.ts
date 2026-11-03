@@ -132,6 +132,7 @@ function isWorkerOutOfMemory(error: unknown): boolean {
   return (error as NodeJS.ErrnoException | undefined)?.code === "ERR_WORKER_OUT_OF_MEMORY";
 }
 interface PendingJob extends CompressionWorkerJob {
+  originalBody: Record<string, unknown>;
   resolve: (result: CompressionResult) => void;
   // #13145: a worker failure must be reportable to the caller. Without a reject path the
   // pool could only degrade to `unchanged(...)`, which silently disabled compression for
@@ -147,7 +148,6 @@ interface PoolWorker {
 }
 
 export class CompressionWorkerPool {
-  private readonly MAX_QUEUE_SIZE = Number(process.env.OMNI_COMPRESSION_MAX_QUEUE_SIZE) || 50;
   private readonly queue: PendingJob[] = [];
   private readonly workers = new Set<PoolWorker>();
   private nextId = 1;
@@ -206,30 +206,25 @@ export class CompressionWorkerPool {
       notifyCompressionFailOpen(reason);
       return Promise.reject(new CompressionWorkerError(reason, true));
     }
-    const { promise, resolve, reject } = Promise.withResolvers<CompressionResult>();
-
-    if (this.queue.length >= this.MAX_QUEUE_SIZE) {
-      reject(new Error("Compression queue full"));
-      return promise;
-    }
-
-    this.queue.push({
-      id: this.nextId++,
-      body,
-      mode,
-      options,
-      resolve,
-      reject,
-      onEngineStep,
+    return new Promise((resolve, reject) => {
+      this.queue.push({
+        id: this.nextId++,
+        body,
+        mode,
+        options,
+        originalBody: body,
+        resolve,
+        reject,
+        onEngineStep,
+      });
+      this.dispatch();
     });
-    this.dispatch();
-    return promise;
   }
   async close(): Promise<void> {
-    for (const job of this.queue.splice(0)) job.resolve(unchanged(job.body));
+    for (const job of this.queue.splice(0)) job.resolve(unchanged(job.originalBody));
     for (const slot of this.workers) {
       const job = slot.job;
-      if (job) job.resolve(unchanged(job.body));
+      if (job) job.resolve(unchanged(job.originalBody));
       slot.job = null;
     }
     await Promise.all([...this.workers].map((slot) => this.remove(slot)));
@@ -307,6 +302,7 @@ export class CompressionWorkerPool {
       // uses structured clone, and leaking any function into the wire job throws
       // DataCloneError before the worker ever sees it.
       const {
+        originalBody: _body,
         resolve: _resolve,
         reject: _reject,
         onEngineStep: _step,

@@ -12,9 +12,8 @@
  * they must reach generativelanguage.googleapis.com as Content parts — do
  * not collapse the OpenAI `input` array to string[].
  */
-import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 
-import { isCanonicalEmbeddingItem } from "./jinaNativeEmbeddingInput";
+import { isCanonicalEmbeddingItem, isPlainObject } from "./jinaNativeEmbeddingInput";
 
 export type GeminiEmbeddingModality = "text" | "image" | "audio" | "video" | "document";
 
@@ -23,6 +22,11 @@ const GEMINI_EMBEDDING_2_IDS = new Set(["gemini-embedding-2", "gemini-embedding-
 export function isGeminiEmbedding2Family(modelId: string | null | undefined): boolean {
   return typeof modelId === "string" && GEMINI_EMBEDDING_2_IDS.has(modelId);
 }
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return isPlainObject(value) ? value : null;
+}
+
 function mimeFromInline(value: Record<string, unknown>): string | null {
   const snake = asRecord(value.inline_data);
   if (typeof snake?.mime_type === "string") return snake.mime_type;
@@ -52,7 +56,9 @@ export function isGeminiNativePart(value: unknown): boolean {
   const record = asRecord(value);
   if (!record || isCanonicalEmbeddingItem(record)) return false;
   if (typeof record.text === "string" && record.text.trim().length > 0) {
-    return !("image" in record) && !("audio" in record) && !("video" in record) && !("pdf" in record);
+    return (
+      !("image" in record) && !("audio" in record) && !("video" in record) && !("pdf" in record)
+    );
   }
   if (asRecord(record.inline_data)?.data || asRecord(record.inlineData)?.data) return true;
   if (asRecord(record.file_data)?.file_uri || asRecord(record.fileData)?.fileUri) return true;
@@ -75,7 +81,9 @@ export function isGeminiNativeEmbedRequest(value: unknown): boolean {
 }
 
 export function isGeminiNativeEmbeddingItem(value: unknown): boolean {
-  return isGeminiNativePart(value) || isGeminiNativeContent(value) || isGeminiNativeEmbedRequest(value);
+  return (
+    isGeminiNativePart(value) || isGeminiNativeContent(value) || isGeminiNativeEmbedRequest(value)
+  );
 }
 
 /**

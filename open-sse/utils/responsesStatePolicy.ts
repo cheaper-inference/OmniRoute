@@ -1,4 +1,3 @@
-import { toRecord } from "./recordHelpers.ts";
 import { isOpenAIResponsesStoreEnabled } from "@/lib/providers/requestDefaults";
 import {
   DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE,
@@ -20,6 +19,9 @@ type ApplyResponsesPreviousResponseIdPolicyOptions = {
 
 const MODE_SET = new Set<string>(RESPONSES_PREVIOUS_RESPONSE_ID_MODES);
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 export function normalizeResponsesPreviousResponseIdMode(
   value: unknown

@@ -30,9 +30,7 @@ async function postHandler(request) {
   try {
     const body = await clonedReq.json();
     modelName = body.model || "llama3.2";
-  } catch (err) {
-    console.debug?.("[API] Failed to parse cloned request body for modelName in /v1/api/chat:", err);
-  }
+  } catch {}
 
   const response = await handleChat(request);
   return transformToOllama(response, modelName);

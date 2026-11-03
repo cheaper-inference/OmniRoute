@@ -70,9 +70,7 @@ export async function POST(request: Request) {
     try {
       const settings = await getSettings();
       hidePaid = settings?.hidePaidModels === true;
-    } catch (err) {
-      console.debug?.("[API] /api/models/test failed to read hidePaidModels setting:", err);
-    }
+    } catch {}
     if (
       hidePaid &&
       !(providerHasFreeModels(providerId) && isFreeModel(providerId, { id: modelId }))

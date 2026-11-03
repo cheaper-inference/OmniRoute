@@ -7,7 +7,6 @@
  *
  * @module lib/resilience/settings/normalize
  */
-import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { resolveFeatureFlag } from "@/shared/utils/featureFlags";
 import type {
@@ -27,6 +26,11 @@ import type {
   ProviderQuotaOverrideSettings,
   CredentialHealthCheckSettings,
 } from "./types";
+
+export function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 export function toInteger(
   value: unknown,
   fallback: number,
@@ -581,5 +585,3 @@ function valuesEqual(first: unknown, second: unknown): boolean {
   }
   return false;
 }
-
-export { asRecord };

@@ -4,7 +4,6 @@
  * CRUD against the key_value table under namespace "provider_param_filters".
  * Follows the established key_value pattern from databaseSettings.ts.
  */
-import { isRecord } from "@/shared/utils/recordHelpers";
 
 import { getDbInstance } from "./core";
 
@@ -39,6 +38,11 @@ function bumpCacheGeneration(): void {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 function parseStoredValue(raw: unknown): unknown {
   if (typeof raw !== "string") return raw;
   try {

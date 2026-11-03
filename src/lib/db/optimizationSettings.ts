@@ -1,4 +1,3 @@
-import { isRecord } from "@/shared/utils/recordHelpers";
 import { DEFAULT_DATABASE_SETTINGS, type DatabaseSettings } from "@/types/databaseSettings";
 
 import type { SqliteAdapter } from "./adapters/types";
@@ -49,6 +48,11 @@ function parseKeyValueJson(raw: string | null | undefined): unknown {
     return raw;
   }
 }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 function normalizeAutoVacuumMode(value: unknown, fallback: AutoVacuumMode): AutoVacuumMode {
   return typeof value === "string" && value in AUTO_VACUUM_MODE_TO_PRAGMA
     ? (value as AutoVacuumMode)

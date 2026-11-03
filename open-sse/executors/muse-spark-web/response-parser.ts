@@ -1,7 +1,6 @@
 // Pure Meta AI SSE/JSON response parsing + content/reasoning/error extraction.
 // Extracted verbatim from muse-spark-web.ts. No host state/fetch/auth.
 
-import { isRecord as canonicalIsRecord } from "../../utils/recordHelpers.ts";
 export type MetaSseFrame = {
   event: string;
   data: string;
@@ -18,7 +17,7 @@ export type ParsedMetaAiResponse = {
 };
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
-  return canonicalIsRecord(value);
+  return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
 export function parseMetaSseFrames(text: string): MetaSseFrame[] {

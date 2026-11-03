@@ -15,7 +15,6 @@
  */
 
 // Thinking budget modes
-import { toRecord } from "../utils/recordHelpers.ts";
 export const ThinkingMode = {
   AUTO: "auto", // Strip all client thinking/reasoning fields (provider invents defaults)
   PASSTHROUGH: "passthrough", // No changes — client fully controls thinking
@@ -144,6 +143,9 @@ function getConfig(): ThinkingBudgetConfig {
   return _store[GLOBAL_KEY]!;
 }
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function getStringField(record: JsonRecord, key: string): string {
   const value = record[key];

@@ -1,4 +1,3 @@
-import { asRecordOrNull as toRecord } from "./recordHelpers.ts";
 import { createHash } from "node:crypto";
 import {
   REASONING_CONTROL_DETECTED_BACKENDS,
@@ -19,6 +18,9 @@ export {
 type JsonRecord = Record<string, unknown>;
 const MAX_TRANSPARENT_OWNER_DEPTH = 3;
 
+function toRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
 
 export function getReasoningControlEndpointFingerprint(
   providerSpecificData: unknown

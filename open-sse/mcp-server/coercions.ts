@@ -22,7 +22,6 @@
  * `toUptimeString` and `normalizeComboModels` below).
  */
 
-import { toRecord as canonicalToRecord } from "../utils/recordHelpers.ts";
 import {
   getComboModelProvider,
   getComboModelString,
@@ -35,8 +34,8 @@ export type JsonRecord = Record<string, unknown>;
  * Narrow an unknown to a plain object; anything else (including arrays, which
  * are objects but not records) becomes `{}` so a caller can index it safely.
  */
-export function toRecord(value: unknown): Record<string, unknown> {
-  return canonicalToRecord(value);
+export function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
 /** Narrow an unknown to an array; anything else becomes `[]`. */

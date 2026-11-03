@@ -93,23 +93,22 @@ describe("usageAnalytics/sources — buildUnifiedSource", () => {
 const host = await import("../../src/lib/db/usageAnalytics.ts");
 
 describe("usageAnalytics.ts public API surface", () => {
-  // the runtime functions (the row/param interfaces are type-only and erased at
-  // runtime, so they are asserted via typecheck, not here)
+  // the 22 runtime functions (the 17 row/param interfaces are type-only and
+  // erased at runtime, so they are asserted via typecheck, not here)
   const expectedFns = [
     "buildUnifiedSource", // re-exported from sources
     "buildPresetUnifiedSource", // re-exported from sources
     "getUsageSummary",
     "getDailyUsage",
-    "getModelUsageMatrixRows",
-    "deriveDailyCostRows",
+    "getDailyCostRows",
     "getHeatmapRows",
-    "deriveModelUsageRows",
-    "deriveProviderCostRows",
-    "deriveProviderUsageRows",
+    "getModelUsageRows",
+    "getProviderCostRows",
+    "getProviderUsageRows",
     "getAccountCostRows",
     "getAccountUsageRows",
     "getApiKeyUsageRows",
-    "deriveServiceTierUsageRows",
+    "getServiceTierUsageRows",
     "getApiKeyMetadataRows",
     "getWeeklyPatternRows",
     "getPresetCostModelRows",
@@ -137,7 +136,13 @@ describe("usageAnalytics.ts public API surface", () => {
 // are counted correctly instead of as 1-per-row.
 
 describe("usageAnalytics queries use SUM(requests) not COUNT(*)", () => {
-  const queriesUsingCount = ["getUsageSummary", "getDailyUsage", "getModelUsageMatrixRows"];
+  const queriesUsingCount = [
+    "getUsageSummary",
+    "getDailyUsage",
+    "getModelUsageRows",
+    "getProviderUsageRows",
+    "getServiceTierUsageRows",
+  ];
 
   for (const fn of queriesUsingCount) {
     it(`${fn} uses SUM(requests) not COUNT(*)`, () => {
@@ -169,8 +174,8 @@ describe("usageAnalytics queries use SUM(requests) not COUNT(*)", () => {
     );
   });
 
-  it("getModelUsageMatrixRows uses SUM(CASE WHEN success=1 THEN requests ELSE 0 END) for successfulRequests", () => {
-    const src = host.getModelUsageMatrixRows.toString();
+  it("getModelUsageRows uses SUM(CASE WHEN success=1 THEN requests ELSE 0 END) for successfulRequests", () => {
+    const src = host.getModelUsageRows.toString();
     assert.ok(
       src.includes("SUM(CASE WHEN success = 1 THEN requests ELSE 0 END)"),
       "successfulRequests must weight by requests, not count 1-per-row"

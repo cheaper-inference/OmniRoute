@@ -40,7 +40,6 @@
  * Registration: call registerLlmgatewayQuotaFetcher() once at server startup.
  */
 
-import { toRecord } from "../utils/recordHelpers.ts";
 import {
   registerQuotaCacheInvalidator,
   registerQuotaFetcher,
@@ -100,6 +99,11 @@ if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+function toRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
 
 /**
  * Parse a DevPass USD value. Upstream returns decimal STRINGS ("31.42"), but we

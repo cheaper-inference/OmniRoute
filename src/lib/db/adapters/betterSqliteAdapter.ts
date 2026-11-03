@@ -75,9 +75,7 @@ export function createBetterSqliteAdapter(db: import("better-sqlite3").Database)
     checkpoint(mode = "TRUNCATE"): void {
       try {
         db.pragma(`wal_checkpoint(${mode})`);
-      } catch (err) {
-        console.debug?.(`[DB] better-sqlite3 wal_checkpoint(${mode}) failed:`, err);
-      }
+      } catch {}
     },
 
     close(): void {

@@ -6,7 +6,6 @@
  * / Fase 9). Logic unchanged; re-exported from combo.ts for compatibility.
  */
 
-import { isRecord } from "../../utils/recordHelpers.ts";
 import {
   createSSEDataLineNormalizer,
   hasOpenAIFinishReason,
@@ -251,6 +250,9 @@ function responsesApiOutputHasContent(output: unknown): boolean {
   );
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 /**
  * Whether an `error` field carries a real failure signal. A key-presence check

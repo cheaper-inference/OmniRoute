@@ -1,4 +1,3 @@
-import { isRecord } from "@/shared/utils/recordHelpers";
 import fs from "node:fs";
 
 import { DEFAULT_DATABASE_SETTINGS, type DatabaseSettings } from "@/types/databaseSettings";
@@ -93,6 +92,11 @@ const LEGACY_FLAT_KEYS: {
     optimizeOnStartup: ["optimizeOnStartup"],
   },
 };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 function cloneDefaultSettings(): UserDatabaseSettings {
   return structuredClone(DEFAULT_DATABASE_SETTINGS) as UserDatabaseSettings;
 }

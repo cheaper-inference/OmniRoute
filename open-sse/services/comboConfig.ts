@@ -5,7 +5,6 @@
  * Most specific wins.
  */
 
-import { isRecord } from "../utils/recordHelpers.ts";
 import { MAX_TIMER_TIMEOUT_MS } from "../../src/shared/utils/runtimeTimeouts.ts";
 import type { ComboCooldownWaitSettings } from "../../src/lib/resilience/settings.ts";
 import type { ResponseValidationConfig } from "./combo/responseValidation.ts";
@@ -234,6 +233,9 @@ type ComboSettingsLike =
   | null
   | undefined;
 
+function isRecord(value: unknown): value is ComboConfigRecord {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function normalizePositiveTimeoutMs(value: unknown): number {
   const numericValue = Number(value);

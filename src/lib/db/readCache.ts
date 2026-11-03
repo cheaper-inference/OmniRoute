@@ -114,31 +114,6 @@ export async function getCachedPricing(): Promise<Record<string, unknown>> {
     return getPricing();
   });
 }
-function sortObjectKeys(value: unknown): unknown {
-  if (value === null || typeof value !== "object") return value;
-  if (Array.isArray(value)) {
-    return value.map(sortObjectKeys);
-  }
-  const obj = value as Record<string, unknown>;
-  const keys = Object.keys(obj).sort();
-  const sorted: Record<string, unknown> = {};
-  for (const key of keys) {
-    if (obj[key] !== undefined) {
-      sorted[key] = sortObjectKeys(obj[key]);
-    }
-  }
-  return sorted;
-}
-
-export function canonicalizeFilterKey(filter?: Record<string, unknown>): string {
-  if (!filter || typeof filter !== "object") return "all";
-  const keys = Object.keys(filter);
-  if (keys.length === 0) return "all";
-  const sorted = sortObjectKeys(filter) as Record<string, unknown>;
-  if (Object.keys(sorted).length === 0) return "all";
-  return JSON.stringify(sorted);
-}
-
 /**
  * Cached wrapper for getProviderConnections.
  * Used in request hot-paths (usageStats, callLogs, usageHistory, catalog, virtualFactory).
@@ -147,7 +122,7 @@ export function canonicalizeFilterKey(filter?: Record<string, unknown>): string 
 export async function getCachedProviderConnections(
   filter?: Record<string, unknown>
 ): Promise<unknown[]> {
-  const cacheKey = canonicalizeFilterKey(filter);
+  const cacheKey = filter && Object.keys(filter).length > 0 ? JSON.stringify(filter) : "all";
 
   return connectionsCache.load(cacheKey, async () => {
     const { getProviderConnections } = await import("@/lib/db/providers");
@@ -167,7 +142,7 @@ const rawConnectionsCache = new TTLCache<unknown[]>(CONNECTIONS_TTL_MS, 500);
 export async function getCachedRawProviderConnections(
   filter?: Record<string, unknown>
 ): Promise<unknown[]> {
-  const key = canonicalizeFilterKey(filter);
+  const key = JSON.stringify(filter ?? {});
   return rawConnectionsCache.load(key, async () => {
     const { getRawProviderConnections } = await import("./providers");
     return getRawProviderConnections(filter);
@@ -203,11 +178,53 @@ export async function getCachedProviderConnectionById(
 export async function getCachedProviderNodes(
   filter?: Record<string, unknown>
 ): Promise<(Record<string, unknown> | null)[]> {
-  const cacheKey = canonicalizeFilterKey(filter);
+  const cacheKey = filter ? JSON.stringify(filter) : "all";
   return nodesCache.load(cacheKey, async () => {
     const { getProviderNodes } = await import("@/lib/db/providers");
     return getProviderNodes(filter);
   });
+}
+
+// ──────────────── LKGP Cache Wrappers ────────────────
+
+interface LKGPRecordCache {
+  provider: string;
+  connectionId?: string;
+}
+
+const lkgpCache = new TTLCache<LKGPRecordCache | null>(SETTINGS_TTL_MS);
+
+export async function getCachedLKGP(
+  comboName: string,
+  modelId: string
+): Promise<LKGPRecordCache | null> {
+  const cacheKey = `lkgp:${comboName}:${modelId}`;
+  return lkgpCache.load(cacheKey, async () => {
+    const { getLKGP } = await import("@/lib/db/settings");
+    return getLKGP(comboName, modelId);
+  });
+}
+
+export async function setCachedLKGP(
+  comboName: string,
+  modelId: string,
+  providerId: string,
+  connectionId?: string
+): Promise<void> {
+  const { setLKGP } = await import("@/lib/db/settings");
+  await setLKGP(comboName, modelId, providerId, connectionId);
+  lkgpCache.invalidate(`lkgp:${comboName}:${modelId}`);
+}
+
+/**
+ * Invalidate one persisted LKGP pin by its `${comboName}:${modelId}` storage key,
+ * or every cached LKGP pin when no key is provided. Used both when a target
+ * fails (`clearLKGP`) and when its provider connection is deleted (#8887,
+ * `deleteLKGPByConnectionIds`), so a stale pin cannot be served from memory
+ * for the rest of the TTL window.
+ */
+export function invalidateCachedLKGP(pinKey?: string): void {
+  lkgpCache.invalidate(pinKey ? `lkgp:${pinKey}` : undefined);
 }
 
 // ──────────────── Combo Cache Invalidation Signal ────────────────

@@ -16,7 +16,6 @@
  * sides share the same (source, identity) pair.
  */
 import type { HistoryItem } from "./historyModel";
-import { isRecord } from "@/shared/utils/recordHelpers";
 
 export interface RunEvent {
   label: string;
@@ -47,6 +46,10 @@ export interface RunComparison {
   left: RunSide;
   right: RunSide;
   deltas: RunDeltas;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isNonEmptyString(value: unknown): value is string {

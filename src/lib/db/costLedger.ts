@@ -12,7 +12,6 @@
  *
  * @module db/costLedger
  */
-import { asRecord } from "@/shared/utils/recordHelpers";
 
 import { getDbInstance } from "./core";
 import { toNumber } from "@/shared/utils/numeric";
@@ -56,6 +55,12 @@ export interface RunCostRow {
   amountUsd: number;
   requestId: string;
   timestamp: string;
+}
+
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
 function toNonNegative(value: unknown): number {

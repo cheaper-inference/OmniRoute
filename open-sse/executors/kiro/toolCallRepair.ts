@@ -23,7 +23,6 @@
  *
  * Gated by the KIRO_TOOL_CALL_REPAIR_ENABLED feature flag (on by default).
  */
-import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import type { ExecutorLog } from "../base.ts";
 import { encodeSse } from "../kiroToolCallValidation.ts";
@@ -48,6 +47,8 @@ export function isKiroToolCallRepairEnabled(): boolean {
 
 type JsonRecord = Record<string, unknown>;
 
+const asRecord = (value: unknown): JsonRecord | null =>
+  value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
 
 /**
  * Copy the translated Kiro payload and append the corrective instruction to

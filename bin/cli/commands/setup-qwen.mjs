@@ -12,13 +12,11 @@ import {
 import os from "node:os";
 import path from "node:path";
 
-function normalizeQwenCodeBaseUrl(value) {
-  const baseUrl = String(value || "")
-    .trim()
-    .replace(/\/+$/, "");
-  if (!baseUrl) return "";
-  return baseUrl.endsWith("/v1") ? baseUrl : `${baseUrl}/v1`;
-}
+import {
+  mergeQwenCodeEnv,
+  mergeQwenCodeSettings,
+  normalizeQwenCodeBaseUrl,
+} from "../../../src/shared/services/qwenCodeConfig.ts";
 import { resolveActiveContext } from "../contexts.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 import { createPrompt, printError, printHeading, printInfo, printSuccess } from "../io.mjs";
@@ -135,9 +133,6 @@ export async function runSetupQwenCommand(opts = {}) {
   }
 
   try {
-    const { mergeQwenCodeSettings, mergeQwenCodeEnv } = await import(
-      "../../../src/shared/services/qwenCodeConfig.ts"
-    );
     const settings = mergeQwenCodeSettings(readSettings(settingsPath), { baseUrl, model });
     const envText = mergeQwenCodeEnv(readText(envPath), apiKey);
     const settingsText = `${JSON.stringify(settings, null, 2)}\n`;

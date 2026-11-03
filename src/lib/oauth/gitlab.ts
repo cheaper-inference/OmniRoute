@@ -1,4 +1,4 @@
-import { asRecord } from "@/shared/utils/recordHelpers";
+type JsonRecord = Record<string, unknown>;
 
 export type GitLabDirectAccessDetails = {
   token: string;
@@ -9,6 +9,11 @@ export type GitLabDirectAccessDetails = {
 
 export const GITLAB_DUO_DEFAULT_BASE_URL =
   process.env.GITLAB_DUO_BASE_URL || process.env.GITLAB_BASE_URL || "https://gitlab.com";
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 export function normalizeGitLabBaseUrl(baseUrl?: unknown): string {
   const raw = typeof baseUrl === "string" ? baseUrl.trim() : "";
   return (raw || GITLAB_DUO_DEFAULT_BASE_URL).replace(/\/$/, "");

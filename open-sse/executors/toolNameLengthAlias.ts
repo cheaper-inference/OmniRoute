@@ -1,4 +1,3 @@
-import { isRecord } from "../utils/recordHelpers.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
 import { normalizeOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
 
@@ -10,6 +9,9 @@ import { normalizeOpenAIToolNames } from "../translator/helpers/toolCallHelper.t
  */
 export type ToolNameNormalizer = (body: unknown, maxLength: number) => Map<string, string>;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 /**
  * Merges `aliases` into the request-scoped `_toolNameMap` side channel that chatCore

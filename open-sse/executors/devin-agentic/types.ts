@@ -1,4 +1,3 @@
-import { asRecord as canonicalAsRecord } from "../../utils/recordHelpers.ts";
 export type JsonRecord = Record<string, unknown>;
 
 export type AnthropicTool = {
@@ -48,8 +47,8 @@ export class DevinAgenticBridgeError extends Error {
   }
 }
 
-export function asRecord(value: unknown): Record<string, unknown> {
-  return canonicalAsRecord(value);
+export function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
 export function estimateTokens(text: string): number {

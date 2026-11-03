@@ -6,8 +6,8 @@
 
 import type { A2ATask, TaskArtifact } from "../taskManager";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
-import { asRecord, type JsonRecord } from "@/shared/utils/recordHelpers";
-import { toNumber } from "@/shared/utils/numeric";
+
+type JsonRecord = Record<string, unknown>;
 
 type ProviderHealthEntry = {
   state?: string;
@@ -30,6 +30,14 @@ async function healthFetch(path: string): Promise<JsonRecord> {
     throw new Error(`API [${response.status}]: ${await response.text().catch(() => "error")}`);
   }
   return response.json();
+}
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function toNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function summarizeProviderHealth(providerHealth: unknown) {

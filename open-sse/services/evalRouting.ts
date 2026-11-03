@@ -1,4 +1,3 @@
-import { isRecord } from "../utils/recordHelpers.ts";
 import type { PersistedEvalRun } from "../../src/lib/db/evals.ts";
 import { listModelEvalRunsForRouting } from "../../src/lib/db/evals.ts";
 import { parseModel } from "./model.ts";
@@ -56,6 +55,9 @@ function pruneEvalRoutingCache(now = Date.now()): void {
   }
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function toStringList(value: unknown, maxItems: number): string[] {
   if (!Array.isArray(value)) return [];

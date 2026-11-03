@@ -1,4 +1,3 @@
-import { toRecord } from "../utils/recordHelpers.ts";
 import { FORMATS } from "../translator/formats.ts";
 
 export const OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME = "omniroute_web_search";
@@ -25,6 +24,9 @@ export interface WebSearchFallbackPlan {
   convertedToolCount: number;
 }
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function isBuiltInWebSearchTool(tool: unknown): tool is JsonRecord {
   const toolRecord = toRecord(tool);

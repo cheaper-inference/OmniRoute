@@ -17,7 +17,6 @@
  * explicitly opts in (never mutates legitimate traffic by default).
  */
 
-import { asRecordOrNull as asRecord } from "../../utils/recordHelpers.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
 
@@ -46,6 +45,11 @@ function extractSystemTexts(body: Record<string, unknown> | null | undefined): s
   return [];
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
 
 export function isClaudeCodeClassifierRequest(
   sourceFormat: string,

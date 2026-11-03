@@ -6,7 +6,6 @@
  * @changes
  * - [2026-07-24] [Composer] - Initial capacity pre-check for execute-mode runtime units
  */
-import { isRecord } from "../../utils/recordHelpers.ts";
 import { isAccountSemaphoreFull } from "../accountSemaphore.ts";
 import { resolveComboTargets } from "./comboStructure.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
@@ -19,6 +18,9 @@ import type {
 
 type CapLookup = (connectionId: string) => Promise<number | null>;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function getCombosList(allCombos: ComboCollectionLike): ComboLike[] {
   const combos = Array.isArray(allCombos) ? allCombos : allCombos?.combos || [];

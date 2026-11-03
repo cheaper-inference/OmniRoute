@@ -8,7 +8,6 @@
  * The result URL is upstream-supplied, so it is downloaded through the SSRF-hardened
  * `fetchRemoteMedia` (public-only guard + DNS pinning), never a bare `fetch`.
  */
-import { asRecord } from "../utils/recordHelpers.ts";
 import { resolveAlibabaProviderMediaBaseUrl } from "../handlers/videoGeneration/dashscopeHandler.ts";
 import { fetchRemoteMedia } from "../utils/chatgptWebAttachments.ts";
 import { CORS_HEADERS } from "../utils/cors.ts";
@@ -20,6 +19,7 @@ const SPEECH_SYNTHESIZER_PATH = "/services/audio/tts/SpeechSynthesizer";
 export const DASHSCOPE_TTS_DEFAULT_VOICE = "longanlingxin";
 const DASHSCOPE_TTS_MAX_AUDIO_BYTES = 50 * 1024 * 1024;
 
+type JsonRecord = Record<string, unknown>;
 
 interface DashscopeTtsProviderConfig {
   id: string;
@@ -31,6 +31,9 @@ interface DashscopeTtsCredentials {
   providerSpecificData?: unknown;
 }
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function resolveSpeechSynthesizerUrl(
   providerConfig: DashscopeTtsProviderConfig,

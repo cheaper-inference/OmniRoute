@@ -91,6 +91,8 @@ export async function clearLKGP(comboName: string, modelId: string): Promise<voi
   const db = getDbInstance();
   const key = `${comboName}:${modelId}`;
   db.prepare("DELETE FROM key_value WHERE namespace = 'lkgp' AND key = ?").run(key);
+  const { invalidateCachedLKGP } = await import("../readCache");
+  invalidateCachedLKGP(key);
 }
 
 /**
@@ -103,6 +105,14 @@ export async function clearLKGP(comboName: string, modelId: string): Promise<voi
  */
 export async function deleteLKGPByComboName(comboName: string): Promise<number> {
   const staleKeys = deleteLKGPRowsByComboName(comboName);
+
+  if (staleKeys.length === 0) return 0;
+
+  const { invalidateCachedLKGP } = await import("../readCache");
+  for (const key of staleKeys) {
+    invalidateCachedLKGP(key);
+  }
+
   return staleKeys.length;
 }
 
@@ -150,6 +160,11 @@ export async function deleteLKGPByConnectionIds(connectionIds: string[]): Promis
   const deleteStatement = db.prepare("DELETE FROM key_value WHERE namespace = 'lkgp' AND key = ?");
   for (const key of staleKeys) {
     deleteStatement.run(key);
+  }
+
+  const { invalidateCachedLKGP } = await import("../readCache");
+  for (const key of staleKeys) {
+    invalidateCachedLKGP(key);
   }
 
   return staleKeys.length;

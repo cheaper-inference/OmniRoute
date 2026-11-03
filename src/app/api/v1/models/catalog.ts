@@ -215,9 +215,7 @@ export async function getUnifiedModelsResponse(
   try {
     try {
       settingsForAuth = await getSettings();
-    } catch (err) {
-      console.debug?.("[API] Failed to read settings for catalog auth:", err);
-    }
+    } catch {}
     // #9147: yield before auth check to allow event loop tick
     await yieldCatalogBuildTurn();
     const authRejection = await getModelCatalogAuthRejection(request, settingsForAuth, {
@@ -225,8 +223,7 @@ export async function getUnifiedModelsResponse(
       ...diagnosticHeaders,
     });
     if (authRejection) return authRejection;
-  } catch (err) {
-    console.debug?.("[API] Auth check failure in catalog fast path, falling through to full builder:", err);
+  } catch {
     // Fall through to full builder on auth-check failure; core handles errors.
   }
 
@@ -328,9 +325,8 @@ async function buildUnifiedModelsResponseCore(
     let settings: Record<string, any> = {};
     try {
       settings = await getSettings();
-    } catch (err) {
-      console.debug?.("[API] Failed to read settings for catalog build:", err);
-    }
+    } catch {}
+
     const authRejection = await getModelCatalogAuthRejection(request, settings, {
       ...corsHeaders,
       ...diagnosticHeaders,

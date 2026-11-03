@@ -30,7 +30,6 @@
  * branches, are forwarded unchanged.
  */
 
-import { isRecord } from "../utils/recordHelpers.ts";
 type JsonRecord = Record<string, unknown>;
 
 interface SharedShape {
@@ -62,6 +61,9 @@ const MAX_REF_HOPS = 32;
 const MAX_UNION_DEPTH = 8;
 const MAX_ROOT_BRANCHES = 64;
 
+function isRecord(value: unknown): value is JsonRecord {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function stringList(value: unknown): string[] {
   return Array.isArray(value)

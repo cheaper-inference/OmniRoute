@@ -1,4 +1,3 @@
-import { asRecordOrNull as asRecord } from "../utils/recordHelpers.ts";
 import { isAdaptiveThinkingOnly } from "../../src/shared/constants/modelSpecs.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -17,6 +16,9 @@ const HAIKU_CONSTRAINT_PATTERN = /haiku/i;
 // hitting Haiku's output-token cap.
 const HAIKU_FALLBACK_THINKING_BUDGET = 10000;
 
+function asRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
 
 function modelRejectsAdaptiveAndEffort(modelId: string | null | undefined): boolean {
   if (typeof modelId !== "string" || modelId.length === 0) return false;

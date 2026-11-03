@@ -9,7 +9,6 @@
  *   - `purchased.balance_usd` → `credits` USD credit-balance row (only when > 0).
  */
 
-import { asRecord } from "../utils/recordHelpers.ts";
 export type OllamaCloudQuota = {
   used: number;
   total: number;
@@ -36,6 +35,9 @@ const LEGACY_WINDOWS = [
 
 type JsonRecord = Record<string, unknown>;
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function finiteNumber(value: unknown): number | null {
   if (typeof value !== "number" && typeof value !== "string") return null;

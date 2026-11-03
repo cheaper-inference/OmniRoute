@@ -63,7 +63,6 @@ import {
   ensureUsageHistoryAccountIndex,
   ensureUsageHistoryColumns,
   ensureCallLogsColumns,
-  ensureCostLedgerColumns,
   hasTable,
   quoteIdentifier,
   getTableColumns,
@@ -1025,7 +1024,6 @@ export function getDbInstance(): SqliteDatabase {
     ensureUsageHistoryColumns(memoryDb);
     ensureUsageHistoryAccountIndex(memoryDb);
     ensureCallLogsColumns(memoryDb);
-    ensureCostLedgerColumns(memoryDb);
     ensureProviderConnectionsColumns(memoryDb);
     setDb(memoryDb);
     return memoryDb;
@@ -1283,7 +1281,6 @@ export function getDbInstance(): SqliteDatabase {
     ensureProviderConnectionsColumns(db);
     ensureUsageHistoryColumns(db);
     ensureCallLogsColumns(db);
-    ensureCostLedgerColumns(db);
     db.exec(SCHEMA_INDEXES_SQL);
 
     // ── Versioned Migrations ──

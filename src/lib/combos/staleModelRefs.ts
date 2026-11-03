@@ -7,7 +7,6 @@
  * combos; removal is the separate opt-in in `./staleModelPrune`. Wildcard steps (`provider/*`) resolve live and combo refs
  * are checked on their own, so both are skipped.
  */
-import { isRecord } from "@/shared/utils/recordHelpers";
 
 import { getCombos } from "@/lib/db/combos";
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
@@ -20,6 +19,11 @@ export type StaleComboModelRef = {
   stepId: string | null;
   model: string;
 };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
 export function isExplicitModelStep(step: unknown): boolean {
   if (typeof step === "string") return true;
   if (!isRecord(step)) return false;

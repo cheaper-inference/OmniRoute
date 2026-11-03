@@ -10,31 +10,22 @@ export async function GET() {
 
     let comboMetrics: Record<string, unknown> = {};
     try {
-      const { getAllComboMetrics } = await import(
-        "@omniroute/open-sse/services/comboMetrics.ts"
-      );
+      const { getAllComboMetrics } = await import("@omniroute/open-sse/services/comboMetrics.ts");
       comboMetrics = getAllComboMetrics() as Record<string, unknown>;
-    } catch (err) {
-      console.warn("Failed to load combo metrics for provider stats:", err);
-    }
+    } catch {}
 
     let telemetry: Record<string, unknown> = {};
     try {
       const { getTelemetrySummary } = await import("@/shared/utils/requestTelemetry");
       telemetry = getTelemetrySummary(300000) as Record<string, unknown>;
-    } catch (err) {
-      console.warn("Failed to load telemetry summary for provider stats:", err);
-    }
+    } catch {}
 
     let toolLatency: Record<string, unknown> = {};
     try {
-      const { getToolLatencyByProvider } = await import(
-        "@omniroute/open-sse/services/toolLatencyTracker"
-      );
+      const { getToolLatencyByProvider } =
+        await import("@omniroute/open-sse/services/toolLatencyTracker");
       toolLatency = getToolLatencyByProvider() as Record<string, unknown>;
-    } catch (err) {
-      console.warn("Failed to load tool latency for provider stats:", err);
-    }
+    } catch {}
 
     const resolveName = (provider: string, nodeName: string | null) => {
       if (nodeName?.trim()) return nodeName.trim();

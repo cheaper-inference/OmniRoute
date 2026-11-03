@@ -1,4 +1,3 @@
-import { asRecord } from "@/shared/utils/recordHelpers";
 import { z } from "zod";
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
 import {
@@ -23,6 +22,11 @@ import type { CallLogDetailState } from "../callLogArtifacts";
 export { toNumber } from "@/shared/utils/numeric";
 
 type JsonRecord = Record<string, unknown>;
+
+export function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 export function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
@@ -242,5 +246,3 @@ export function toStoredErrorType(value: unknown): ErrorTypeContract | null {
   const parsed = getStoredErrorTypeSchema().safeParse(value);
   return parsed.success ? parsed.data : "unknown";
 }
-
-export { asRecord };

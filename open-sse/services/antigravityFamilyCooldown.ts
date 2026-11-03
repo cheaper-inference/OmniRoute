@@ -2,17 +2,16 @@
  * Persist Antigravity/agy quota cooldowns per model family (gemini vs claude)
  * on the connection row, without cooling the whole account.
  */
-import { asRecord } from "../utils/recordHelpers.ts";
 import { lockModel } from "./accountFallback.ts";
-import {
-  getAntigravityQuotaFamily,
-  isAntigravityQuotaProvider,
-} from "./antigravityQuotaFamily.ts";
+import { getAntigravityQuotaFamily, isAntigravityQuotaProvider } from "./antigravityQuotaFamily.ts";
 
 type JsonRecord = Record<string, unknown>;
 
 const FAMILY_PSD_KEY = "antigravityFamilyRateLimitedUntil";
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function parseUntilMs(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -46,12 +45,12 @@ export async function persistAntigravityFamilyCooldown(params: {
   const family = getAntigravityQuotaFamily(params.model);
   if (family === "other") return null;
 
-  const { getProviderConnectionById, updateProviderConnection } = await import(
-    "@/lib/db/providers"
-  );
-  const conn = (await getProviderConnectionById(params.connectionId)) as
-    | { provider?: string; providerSpecificData?: JsonRecord | null }
-    | null;
+  const { getProviderConnectionById, updateProviderConnection } =
+    await import("@/lib/db/providers");
+  const conn = (await getProviderConnectionById(params.connectionId)) as {
+    provider?: string;
+    providerSpecificData?: JsonRecord | null;
+  } | null;
   if (!conn || !isAntigravityQuotaProvider(conn.provider ?? null)) return null;
 
   const psd = asRecord(conn.providerSpecificData);

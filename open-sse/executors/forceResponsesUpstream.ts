@@ -1,4 +1,3 @@
-import { isRecord } from "../utils/recordHelpers.ts";
 import { getOpenAICompatibleType } from "../services/provider.ts";
 
 /**
@@ -14,6 +13,9 @@ import { getOpenAICompatibleType } from "../services/provider.ts";
 
 type CredentialsLike = { providerSpecificData?: Record<string, unknown> | null };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 export function shouldForceResponsesUpstream(
   provider: string,

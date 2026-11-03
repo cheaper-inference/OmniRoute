@@ -1,4 +1,3 @@
-import { isRecord } from "../../utils/recordHelpers.ts";
 type MessageLike = {
   role?: unknown;
   content?: unknown;
@@ -63,6 +62,9 @@ type KiroToolResultPath = {
   contentIndex: number;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function normalizeRole(role: unknown, fallback: string): string {
   if (typeof role !== "string" || role.length === 0) return fallback;

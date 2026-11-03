@@ -1,4 +1,3 @@
-import { isRecord } from "../../../../utils/recordHelpers.ts";
 import { createCompressionStats } from "../../stats.ts";
 import {
   DEFAULT_CODEX_RESPONSES_CONFIG,
@@ -91,6 +90,9 @@ const CODEX_SCHEMA: EngineConfigField[] = [
   },
 ];
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function bounded(value: unknown, fallback: number, min: number, max: number): number {
   return typeof value === "number" && Number.isFinite(value)

@@ -121,9 +121,7 @@ export function createBunSqliteAdapter(db: BunSqliteDatabaseLike, filePath: stri
       } catch (error) {
         try {
           db.exec("ROLLBACK");
-        } catch (rollbackErr) {
-          console.debug?.("[DB] bun-sqlite immediate rollback failed:", rollbackErr);
-        }
+        } catch {}
         throw error;
       }
     },
@@ -132,18 +130,14 @@ export function createBunSqliteAdapter(db: BunSqliteDatabaseLike, filePath: stri
       if (filePath === ":memory:") return;
       try {
         db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-      } catch (err) {
-        console.debug?.("[DB] bun-sqlite wal_checkpoint before backup failed:", err);
-      }
+      } catch {}
       await fs.promises.copyFile(filePath, destination);
     },
 
     checkpoint(mode = "TRUNCATE"): void {
       try {
         db.exec(`PRAGMA wal_checkpoint(${mode})`);
-      } catch (err) {
-        console.debug?.(`[DB] bun-sqlite wal_checkpoint(${mode}) failed:`, err);
-      }
+      } catch {}
     },
 
     close(): void {

@@ -5,7 +5,7 @@
  * poll for completion, and fetch output files from a ComfyUI server.
  */
 
-import { toRecord } from "./recordHelpers.ts";
+type JsonRecord = Record<string, unknown>;
 
 type ComfyOutputFile = {
   filename: string;
@@ -23,6 +23,9 @@ type ComfyHistoryEntry = {
   outputs?: Record<string, ComfyNodeOutput>;
 };
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 /**
  * Submit a workflow to ComfyUI for execution.

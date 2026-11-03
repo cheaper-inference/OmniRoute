@@ -97,8 +97,14 @@ export async function POST(request: Request) {
   }
   const { providerId, modelIds, connectionId, respectRateLimit, autoHideFailed } = validation.data;
   const providerConnections = await getProviderConnections({ provider: providerId });
-  if (providerConnections.length > 0 && providerConnections.every((connection) => connection.isActive === false)) {
-    return NextResponse.json({ error: { message: `Provider ${providerId} has no active connections` } }, { status: 409 });
+  if (
+    providerConnections.length > 0 &&
+    providerConnections.every((connection) => connection.isActive === false)
+  ) {
+    return NextResponse.json(
+      { error: { message: `Provider ${providerId} has no active connections` } },
+      { status: 409 }
+    );
   }
 
   // #6328 (follow-up to #6495): REMOVE — not just hide — paid Test-all dispatches
@@ -109,9 +115,7 @@ export async function POST(request: Request) {
   try {
     const settings = await getSettings();
     hidePaid = settings?.hidePaidModels === true;
-  } catch (err) {
-    console.debug?.("[API] /api/models/test-all failed to read hidePaidModels setting:", err);
-  }
+  } catch {}
 
   log.info(
     "MODEL_TEST_ALL",

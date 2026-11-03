@@ -1,5 +1,4 @@
 // @ts-nocheck
-import { asRecord } from "../utils/recordHelpers.ts";
 import {
   BedrockRuntimeClient,
   ConverseCommand,
@@ -15,6 +14,9 @@ import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 
 const encoder = new TextEncoder();
 
+function asRecord(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
 
 function getCustomUserAgent(providerSpecificData) {
   const value = asRecord(providerSpecificData).customUserAgent;

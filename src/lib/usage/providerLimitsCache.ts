@@ -1,4 +1,3 @@
-import { isRecord } from "@/shared/utils/recordHelpers";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { sanitizeProviderBillingStatus } from "@/shared/utils/providerBilling";
 import { GROK_BUILD_ADDITIONAL_CREDITS_URL } from "@/shared/utils/grokBilling";
@@ -8,6 +7,11 @@ const GROK_CLI_PROVIDER = "grok-cli";
 const GLM_RESET_CARD_PROVIDERS = new Set(["glm", "glm-cn", "glmt", "zai"]);
 
 type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
 function hasUsableCachedData(cache: ProviderLimitsCacheEntry | null | undefined): boolean {
   return Boolean(
     cache?.billing ||

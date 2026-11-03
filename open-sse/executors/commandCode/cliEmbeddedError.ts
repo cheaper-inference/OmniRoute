@@ -11,7 +11,6 @@
 // Response carrying the embedded status. Otherwise the bytes read so far are
 // replayed in front of the same reader, so the converters see the full body.
 
-import { isRecord } from "../../utils/recordHelpers.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../../utils/error.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -26,6 +25,9 @@ const CONTENT_EVENT_TYPES = new Set([
   "finish",
 ]);
 
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 function parsePeekLine(line: string): JsonRecord | null | "done" {
   let trimmed = line.trim();

@@ -1,4 +1,3 @@
-import { asRecord as toRecord } from "@/shared/utils/recordHelpers";
 import { clearHealthCheckLogCache } from "@/lib/tokenHealthCheck";
 import { setCustomBannedSignals } from "@omniroute/open-sse/services/accountFallback.ts";
 import {
@@ -116,6 +115,11 @@ function isTruthyEnvFlag(value: string | undefined): boolean {
   if (typeof value !== "string") return false;
   return new Set(["1", "true", "yes", "on"]).has(value.trim().toLowerCase());
 }
+
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 function stableSerialize(value: unknown): string {
   return JSON.stringify(canonicalize(value));
 }

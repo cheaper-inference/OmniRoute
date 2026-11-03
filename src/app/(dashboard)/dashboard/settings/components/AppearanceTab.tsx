@@ -468,9 +468,7 @@ export default function AppearanceTab() {
                   <img
                     src={settings.customLogoBase64 || settings.customLogoUrl}
                     alt={t("appearanceLogoPreviewAlt")}
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 aspect-square rounded border border-border object-contain bg-surface"
+                    className="h-10 w-10 rounded border border-border object-contain bg-surface"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                     }}
@@ -548,9 +546,7 @@ export default function AppearanceTab() {
                   <img
                     src={settings.customLogoBase64 || settings.customLogoUrl}
                     alt={t("appearanceLogoPreviewAlt")}
-                    width={48}
-                    height={48}
-                    className="h-12 w-auto max-w-full aspect-square rounded object-contain"
+                    className="h-12 w-auto max-w-full rounded"
                   />
                 </div>
               )}
@@ -575,9 +571,7 @@ export default function AppearanceTab() {
                   <img
                     src={settings.customFaviconBase64 || settings.customFaviconUrl}
                     alt={t("appearanceFaviconPreviewAlt")}
-                    width={40}
-                    height={40}
-                    className="h-10 w-10 aspect-square rounded border border-border object-contain bg-surface"
+                    className="h-10 w-10 rounded border border-border object-contain bg-surface"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                     }}
@@ -661,9 +655,7 @@ export default function AppearanceTab() {
                   <img
                     src={settings.customFaviconBase64 || settings.customFaviconUrl}
                     alt={t("appearanceFaviconPreviewAlt")}
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 aspect-square rounded object-contain"
+                    className="h-8 w-8 rounded"
                   />
                 </div>
               )}

@@ -5,7 +5,6 @@
  * file under the file-size cap; behavior is unchanged).
  */
 
-import { asRecord as canonicalAsRecord } from "../utils/recordHelpers.ts";
 export type AlibabaFreeTierQuotaEntry = {
   model: string;
   freeTierOnly: boolean;
@@ -32,7 +31,9 @@ export type AlibabaFreeTierQuotaSnapshot = {
 };
 
 export function asRecord(value: unknown): Record<string, unknown> {
-  return canonicalAsRecord(value);
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 export function toTrimmedString(value: unknown): string | null {

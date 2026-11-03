@@ -4,7 +4,6 @@ import type {
   AgentStateEntry,
   AgentMappingsMap,
 } from "./AgentBridgePageClient";
-import { isRecord } from "@/shared/utils/recordHelpers";
 
 function defaultServerState(): AgentBridgeServerState {
   return {
@@ -26,6 +25,10 @@ export const DEFAULT_AGENT_BRIDGE_STATE: AgentBridgePageData = {
   bypassPatterns: [],
   mappings: {},
 };
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
 
 /**
  * Normalize whatever `/api/tools/agent-bridge/state` returns into the shape the

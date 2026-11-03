@@ -1,4 +1,3 @@
-import { asRecord } from "./recordHelpers.ts";
 import { cloneLogPayload } from "@/lib/logPayloads";
 import { toNumber } from "@/shared/utils/numeric";
 import { FORMATS } from "../translator/formats.ts";
@@ -53,6 +52,9 @@ function getEventName(payload: unknown): string | undefined {
   return undefined;
 }
 
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function toString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;

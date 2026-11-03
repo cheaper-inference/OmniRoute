@@ -1,4 +1,3 @@
-import { asRecord } from "@/shared/utils/recordHelpers";
 import { NextResponse } from "next/server";
 import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
@@ -41,6 +40,11 @@ import {
 import { logAuditEvent } from "@/lib/compliance/index";
 
 type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 function toNonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }

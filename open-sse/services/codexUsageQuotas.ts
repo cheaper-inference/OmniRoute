@@ -1,4 +1,3 @@
-import { toRecord } from "../utils/recordHelpers.ts";
 import {
   CODEX_RESERVE_DISPLAY_NAME,
   CODEX_RESERVE_QUOTA_SESSION,
@@ -33,6 +32,9 @@ export function getFieldValue(record: unknown, ...keys: string[]): unknown {
   return null;
 }
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function toNumber(value: unknown, fallback = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;

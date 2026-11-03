@@ -1,4 +1,3 @@
-import { asRecordOrNull as asRecord } from "@/shared/utils/recordHelpers";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
@@ -65,6 +64,13 @@ function json(body: unknown, status = 200): Response {
     headers: { "Content-Type": "application/json", ...CORS_HEADERS },
   });
 }
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
 function stringify(value: unknown): string {
   if (typeof value === "string") return value;
   try {

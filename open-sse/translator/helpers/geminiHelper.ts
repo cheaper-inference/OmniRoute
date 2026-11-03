@@ -1,6 +1,5 @@
 // Gemini helper functions for translator
 
-import { toRecord } from "../../utils/recordHelpers.ts";
 import { safeParseJSON } from "./jsonUtil.ts";
 import { coerceSchemaValueShapes } from "./schemaValueShapes.ts";
 import { createSchemaBudget, createSchemaMeter } from "./schemaBudget.ts";
@@ -388,6 +387,9 @@ function cloneSchemaValue(value: unknown): unknown {
   return value;
 }
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 // Maps of schemas — the container itself is not a bare property map (#12269).
 const SCHEMA_MAP_KEYS = new Set([

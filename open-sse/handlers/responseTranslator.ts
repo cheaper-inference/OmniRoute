@@ -1,4 +1,3 @@
-import { toRecord } from "../utils/recordHelpers.ts";
 import {
   applyToolCallShimToBuffer,
   findToolCallSchema,
@@ -35,6 +34,9 @@ import {
 
 type JsonRecord = Record<string, unknown>;
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function toString(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;

@@ -1,8 +1,13 @@
 import { wildcardMatch } from "@omniroute/open-sse/services/wildcardRouter.ts";
-import { asRecord } from "@/shared/utils/recordHelpers";
+
+type JsonRecord = Record<string, unknown>;
 
 interface ConnectionLike {
   providerSpecificData?: unknown;
+}
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
 function normalizePattern(value: unknown): string | null {

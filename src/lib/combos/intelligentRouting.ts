@@ -1,4 +1,4 @@
-import { isRecord } from "@/shared/utils/recordHelpers";
+type JsonRecord = Record<string, unknown>;
 
 export const INTELLIGENT_STRATEGIES = ["auto", "lkgp"] as const;
 export const INTELLIGENT_ROUTING_FILTERS = ["all", "intelligent", "deterministic"] as const;
@@ -109,6 +109,11 @@ export const FACTOR_LABELS: Record<keyof IntelligentRoutingWeights, string> = {
   quality: "Observed Quality",
   reliability: "Observed Reliability",
 };
+
+function isRecord(value: unknown): value is JsonRecord {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
 function toFiniteNumber(value: unknown): number | null {
   const numericValue = Number(value);
   return Number.isFinite(numericValue) ? numericValue : null;

@@ -1,4 +1,3 @@
-import { asRecord } from "@/shared/utils/recordHelpers";
 import { createHash } from "crypto";
 import { getApiKeys } from "@/lib/db/apiKeys";
 import { getCombos } from "@/lib/db/combos";
@@ -19,6 +18,11 @@ export interface ConfigSyncBundle {
   apiKeys: JsonRecord[];
   reasoningRoutingRules: JsonRecord[];
 }
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
 function sanitizeSettingsForSync(settings: unknown): JsonRecord {
   const record = asRecord(settings);
   const {

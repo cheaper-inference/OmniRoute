@@ -1,4 +1,3 @@
-import { isRecord } from "@/shared/utils/recordHelpers";
 import {
   isUserCallableAntigravityModelId,
   toClientAntigravityModelId,
@@ -6,6 +5,11 @@ import {
 import { isUserVisibleAgyQuotaModelId } from "@omniroute/open-sse/config/agyModels.ts";
 
 type JsonRecord = Record<string, unknown>;
+
+export function isRecord(value: unknown): value is JsonRecord {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 // Family aggregate buckets from retrieveUserQuotaSummary are not model ids. Dropping
 // them here is why Token Monitor only ever saw the 5-hour bar (#15359); the session
 // windows are the family 5-hour pools (#13739). Any other *_weekly key is a quota
@@ -108,5 +112,3 @@ export function sanitizeUsageQuotasForProvider(
   const sanitizedQuotas = normalizeUsageQuotasForProvider(provider, usage.quotas, liveModelIds);
   return sanitizedQuotas === usage.quotas ? usage : { ...usage, quotas: sanitizedQuotas };
 }
-
-export { isRecord };

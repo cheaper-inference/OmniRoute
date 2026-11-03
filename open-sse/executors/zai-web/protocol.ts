@@ -1,4 +1,3 @@
-import { asRecordOrNull as canonicalAsRecordOrNull } from "../../utils/recordHelpers.ts";
 import { Buffer } from "node:buffer";
 import { createHmac, randomUUID } from "node:crypto";
 import type { ProviderCredentials } from "../base.ts";
@@ -103,7 +102,9 @@ const ZAI_MODEL_CAPABILITIES: Record<string, ZaiModelCapabilities> = {
 };
 
 export function asRecord(value: unknown): Record<string, unknown> | null {
-  return canonicalAsRecordOrNull(value);
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }
 
 function browserFailureDetail(body: Buffer): string {

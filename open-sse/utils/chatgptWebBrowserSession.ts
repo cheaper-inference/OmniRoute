@@ -1,4 +1,3 @@
-import { isRecord } from "./recordHelpers.ts";
 import { Buffer } from "node:buffer";
 
 import type { ChatGptWebResolvedAttachment } from "./chatgptWebAttachments.ts";
@@ -13,6 +12,7 @@ import {
   parseChatGptWebConversationHandoff,
 } from "./chatgptWebTransport.ts";
 
+type JsonRecord = Record<string, unknown>;
 type Page = import("playwright").Page;
 
 const CHATGPT_WEB_ORIGIN = "https://chatgpt.com";
@@ -73,6 +73,9 @@ export interface PlaywrightChatGptWebBrowserSessionOptions {
   ) => Promise<string>;
 }
 
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 function requirePrompt(value: string): string {
   if (typeof value !== "string" || !value.trim()) {

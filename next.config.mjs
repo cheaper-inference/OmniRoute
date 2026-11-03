@@ -233,6 +233,7 @@ const nextConfig = {
     // 73 files, no deep re-export graph); the spike and Task 2 production builds
     // stayed at the base's 232 warnings with no heap growth. open-sse stays out.
     optimizePackageImports: [
+      "lobehub/icons",
       "@lobehub/icons",
       "lucide-react",
       "@omniroute/ui-kit",
@@ -240,9 +241,6 @@ const nextConfig = {
       "lodash",
       "lodash-es",
       "next-intl",
-      "@xyflow/react",
-      "recharts",
-      "@dnd-kit/core",
     ],
   },
   outputFileTracingRoot: projectRoot,

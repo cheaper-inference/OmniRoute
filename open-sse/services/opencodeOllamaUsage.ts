@@ -1,4 +1,3 @@
-import { toRecord } from "../utils/recordHelpers.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { fetchOllamaCloudBalance } from "./ollamaCloudBalance.ts";
 
@@ -28,6 +27,9 @@ type OllamaCloudUsage = {
 type OllamaCloudConfig =
   { state: "configured"; cookie: string } | { state: "invalid"; error: string } | { state: "none" };
 
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
 
 function toNumber(value: unknown, fallback = 0): number {
   const parsed =

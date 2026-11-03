@@ -32,7 +32,6 @@
  * matches, which is what `interleavedField` on a registry model declares.
  */
 
-import { isRecord } from "./recordHelpers.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -48,6 +47,9 @@ function isBlank(value: unknown): boolean {
   return false;
 }
 
+function isRecord(value: unknown): value is JsonRecord {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
 
 function hasToolCalls(message: unknown): boolean {
   if (!isRecord(message)) return false;
@@ -236,9 +238,7 @@ function openCallGroup(state: SequenceState, message: JsonRecord, ids: string[])
 }
 
 function sameOrder(next: unknown[], original: unknown[]): boolean {
-  return (
-    next.length === original.length && next.every((value, index) => value === original[index])
-  );
+  return next.length === original.length && next.every((value, index) => value === original[index]);
 }
 
 export function normalizeToolSequence(messages: unknown[]): unknown[] {
@@ -366,7 +366,10 @@ export function foldTrailingCommentary(messages: unknown[], declaresTools: boole
  * Used for upstreams that reject a body naming a competing client. Applied to
  * string values only, so keys, numbers, and structure are never touched.
  */
-export function replaceBodyStrings(value: unknown, replacements: ReadonlyArray<readonly [string, string]>): unknown {
+export function replaceBodyStrings(
+  value: unknown,
+  replacements: ReadonlyArray<readonly [string, string]>
+): unknown {
   if (replacements.length === 0) return value;
   if (typeof value === "string") {
     let out = value;

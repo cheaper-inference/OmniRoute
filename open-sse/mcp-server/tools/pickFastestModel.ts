@@ -187,7 +187,7 @@ function dedupeCandidates(candidates: SpeedCandidate[]): SpeedCandidate[] {
 
 async function applyWinnerToCombo(
   targetCombo: JsonRecord,
-  _winner: { provider: string; model: string }
+  winner: { provider: string; model: string }
 ) {
   const comboId = toString(targetCombo.id);
   const comboData = toRecord(targetCombo.data);

@@ -6,7 +6,6 @@
  * identified by baseUrl host, not by provider id (those ids are uuids).
  */
 
-import { asRecord } from "../../utils/recordHelpers.ts";
 import { moonshotProvider } from "../../config/providers/registry/moonshot/index.ts";
 import { kimiProvider } from "../../config/providers/registry/kimi/index.ts";
 
@@ -20,6 +19,11 @@ export type MoonshotOriginConnection = {
   providerSpecificData?: unknown;
 };
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
 
 export function parseMoonshotOrigin(baseUrl: string | null | undefined): string | null {
   if (typeof baseUrl !== "string" || baseUrl.trim() === "") return null;

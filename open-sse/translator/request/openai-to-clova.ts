@@ -13,7 +13,6 @@
  *   - FC:         https://api.ncloud-docs.com/docs/clovastudio-chatcompletionsv3-fc
  *   - SO:         https://api.ncloud-docs.com/docs/clovastudio-chatcompletionsv3-so
  */
-import { asRecordOrNull as toRecord } from "../../utils/recordHelpers.ts";
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 
@@ -51,6 +50,9 @@ const CLOVA_THINKING_EFFORTS: ReadonlySet<string> = new Set(["none", "low", "med
 
 type JsonRecord = Record<string, unknown>;
 
+function toRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
 
 function nonEmptyString(value: unknown): string {
   return typeof value === "string" && value.length > 0 ? value : "";
