@@ -608,22 +608,22 @@ post_install() {
 
 ---
 
-## 📊 ရနိုင်သော မော်ဒယ်များ
+## 📊 ရရှိနိုင်သော မော်ဒယ်များ
 
 <details>
-<summary><b>ရနိုင်သော မော်ဒယ်အားလုံးကို ကြည့်ရန်</b></summary>
+<summary><b>ရရှိနိုင်သော မော်ဒယ်များအားလုံးကို ကြည့်ရန်</b></summary>
 
-> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ ရွေးချယ်စုစည်းထားခြင်း ဖြစ်ပါသည်။ Cloud catalog များ (Gemini, OpenRouter စသည်) ကို dynamic ပုံစံဖြင့် sync လုပ်ထားပါသည် — live catalog အပြည့်အစုံကို ကြည့်ရန် **ဒက်ရှ်ဘုတ် → Providers → [provider] → ရနိုင်သော မော်ဒယ်များ** ကို ဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ဆိုပါ။
+> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ စုစည်းထားခြင်းဖြစ်သည်။ Cloud catalog များ (Gemini၊ OpenRouter စသည်) ကို အလိုအလျောက် တစ်ပြိုင်တည်းပြုလုပ်ထားသည် — လက်ရှိ catalog အပြည့်အစုံကို ကြည့်ရန် **Dashboard → Providers → [provider] → Available Models** ကို ဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ပါ။
 >
-> ပံ့ပိုးပေးသူတစ်ခုခု၏ built-in စာရင်းမှာ ပြောင်းလဲသွားနေပါက၊ live upstream catalog ကို ဆွဲယူရန် ထိုစာမျက်နှာရှိ **/models မှ ထည့်သွင်းရန်** ကို အသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကို ဖွင့်ပါ)။ ဤအချက်ကို v3.8.50 တွင် LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် အတည်ပြုပြီးဖြစ်ပြီး၊ Pollinations ၏ အမည်မသိ ဝင်ရောက်မှုမှာ တူညီသော စမ်းသပ်မှုအတွင်းပင် upstream ကန့်သတ်ချက် ရှိနေဆဲဖြစ်ပါသည်။
+> Provider တစ်ခု၏ built-in စာရင်းသည် နောက်ဆုံး upstream စာရင်းနှင့် ကွာဟနေပါက၊ ထိုစာမျက်နှာရှိ **Import from /models** ကို အသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကို ဖွင့်ပါ)။ ထိုသို့ပြုလုပ်ခြင်းဖြင့် လက်ရှိ upstream catalog ကို ရယူနိုင်သည်။ ၎င်းကို LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် v3.8.50 တွင် စစ်ဆေးအတည်ပြုထားသည်။ တူညီသော စမ်းသပ်မှုအတွင်း Pollinations ၏ အမည်မဖော်ပြသော အသုံးပြုခွင့်မှာ upstream ကန့်သတ်ချက်အတွင်း ဆက်လက်ရှိနေခဲ့သည်။
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort အဆင့်များ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ အားထုတ်မှုအဆင့်များ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — အခမဲ့ OAuth: **ဒက်ရှ်ဘုတ် → Providers → Kiro → ရနိုင်သော မော်ဒယ်များ** အောက်တွင် ပြသထားသော live catalog ကို အသုံးပြုပါ။ ရနိုင်မှုမှာ အကောင့်နှင့် plan ပေါ် မူတည်ပါသည်။
+**Kiro (`kr/`)** — အခမဲ့ OAuth: **Dashboard → Providers → Kiro → Available Models** အောက်တွင် ပြသထားသော လက်ရှိ catalog ကို အသုံးပြုပါ။ ရရှိနိုင်မှုသည် အကောင့်နှင့် အစီအစဉ်ပေါ် မူတည်သည်။
 
 **Qoder (`if/`)** — အခမဲ့ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -631,17 +631,17 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — လစဉ် $9 flat သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — တစ်လလျှင် $9 သတ်မှတ်နှုန်း သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — အလွန်မြန်ဆန်: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — အလွန်မြန်ဆန်သော: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok မူရင်း: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU တွင် host လုပ်ထား: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU တွင် hosting ပြုလုပ်ထားသော: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ရှာဖွေမှု ပံ့ပိုးထား: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — ရှာဖွေမှုဖြင့် ဖြည့်စွက်ထားသော: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (အခမဲ့), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -649,19 +649,19 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG အဓိက: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG ကို အဓိကထားသော: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — လုပ်ငန်းသုံး: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် live sync လုပ်ထားပါသည် — static စာရင်း မရှိပါ။ **ဒက်ရှ်ဘုတ် → Providers** တွင် key တစ်ခု ချိတ်ဆက်ပါ၊ ပြီးနောက် လက်ရှိ catalog ကို ထည့်သွင်းရန် **ရနိုင်သော မော်ဒယ်များ** ကို အသုံးပြုပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
+**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် တိုက်ရိုက် တစ်ပြိုင်တည်းပြုလုပ်သည် — static စာရင်းမရှိပါ။ **Dashboard → Providers** တွင် key တစ်ခု ချိတ်ဆက်ပြီး **Available Models** ကို အသုံးပြုကာ လက်ရှိ catalog ကို ထည့်သွင်းပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
 
-**အခြား သဟဇာတဖြစ်သော ပံ့ပိုးပေးသူများ** (ရွေးချယ်ထားသော): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် မော်ဒယ်စာရင်းကို ထိန်းသိမ်းထားပြီး၊ ပံ့ပိုးပေးသူက `/models` endpoint ကို ပုံပေါ်စေပါက auto-sync လုပ်နိုင်ပါသည်။
+**အခြား ကိုက်ညီသော provider များ** (ရွေးချယ်ထားသည်): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် မော်ဒယ်စာရင်းကို ထိန်းသိမ်းထားပြီး provider က `/models` endpoint ကို ဖော်ပြထားပါက အလိုအလျောက် တစ်ပြိုင်တည်းပြုလုပ်နိုင်သည်။
 
-**မော်ဒယ် ID များဆိုင်ရာ မှတ်ချက်:** OmniRoute သည် provider-native ID များ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ကို အသုံးပြုပါသည်။ အချို့ ID များတွင် အစက်အပြောက်ပါ ဗားရှင်းများ ပါဝင်သည်မှာ upstream API က ထိုပုံစံအတိုင်း တောင်းဆိုသောကြောင့် ဖြစ်ပါသည်။ မော်ဒယ်တစ်ခုခုသည် အထက်ပါစာရင်းတွင် မပါဝင်ပါက `omniroute models --search <term>` ကို run လုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ဆိုပြီး ရနိုင်မှုကို အတည်ပြုပါ။
+**မော်ဒယ် ID များအကြောင်း မှတ်ချက်:** OmniRoute သည် provider-native ID များကို အသုံးပြုသည် (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)။ အချို့ ID များတွင် dotted version များ ပါဝင်သည်မှာ upstream API က ထိုပုံစံအတိုင်း မျှော်မှန်းထားသောကြောင့် ဖြစ်သည်။ မော်ဒယ်တစ်ခုကို အထက်ပါစာရင်းတွင် မတွေ့ပါက ရရှိနိုင်မှုကို အတည်ပြုရန် `omniroute models --search <term>` ကို run ပြုလုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ပါ။
 
 </details>
 
