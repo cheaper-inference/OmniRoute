@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ಉನ್ನತ ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಮೈನಸ್ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳು — ಎಣಿಕೆ `npm run check:docs-counts` ಅಳತೆಗಳು). ಪ್ರತಿ ಎಕ್ಸಿಕ್ಯೂಟರ್ ವರ್ಗವು `BaseExecutor` (`base.ts`) ಅನ್ನು ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕರು (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, fetch/TTS ಅಡಾಪ್ಟರ್ಗಳು, ಕ್ವಿರ್ಕ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಕಾರ್ಯನಿರ್ವಾಹಕರು ಸೇರಿವೆ:
+158 ಉನ್ನತ ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಮೈನಸ್ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳು — ಎಣಿಕೆ `npm run check:docs-counts` ಅಳತೆಗಳು). ಪ್ರತಿ ಎಕ್ಸಿಕ್ಯೂಟರ್ ವರ್ಗವು `BaseExecutor` (`base.ts`) ಅನ್ನು ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕರು (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, fetch/TTS ಅಡಾಪ್ಟರ್ಗಳು, ಕ್ವಿರ್ಕ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಕಾರ್ಯನಿರ್ವಾಹಕರು ಸೇರಿವೆ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `qoder`, ಜೊತೆಗೆ `devin-desktop` `pollinations` ಹಂಚಿದ ಗುರುತಿನ ಸಹಾಯಕ) ಮತ್ತು `claudeIdentity.ts` (ನೋಂದಣಿ) `index.ts`
 

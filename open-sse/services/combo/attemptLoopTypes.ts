@@ -59,8 +59,9 @@ export type AttemptLoopState = {
   requestScopedRejectedModelKeys?: Set<string>;
   observeFailure(quotaExhausted: boolean, targetExecutionKey?: string): void;
   /**
-   * Last partial result of a target whose stream was cut (#18460 follow-up), returned when
-   * no later target succeeds (`truncatedStreamFailover.ts`).
+   * Last result of a target the combo moved on from, returned when no later target
+   * succeeds: a stream cut in transit (#18460 follow-up, `truncatedStreamFailover.ts`) or
+   * an agentic stall (#13954, `agenticStallFailover.ts`).
    */
   heldTruncatedResponse?: Response | null;
 };

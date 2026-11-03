@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 moduli esecutori di livello superiore (`*.ts` meno `base.ts`, `index.ts` e test — misurano il conteggio `npm run check:docs-counts` ). Ogni classe di esecutore estende `BaseExecutor` (`base.ts`), direttamente o tramite `DefaultExecutor` o un altro esecutore; i moduli rimanenti sono aiutanti per provider (schemi di strumenti, adattatori fetch/TTS, gestori di quirk). Gli esecutori includono:
+158 moduli esecutori di livello superiore (`*.ts` meno `base.ts`, `index.ts` e test — misurano il conteggio `npm run check:docs-counts` ). Ogni classe di esecutore estende `BaseExecutor` (`base.ts`), direttamente o tramite `DefaultExecutor` o un altro esecutore; i moduli rimanenti sono aiutanti per provider (schemi di strumenti, adattatori fetch/TTS, gestori di quirk). Gli esecutori includono:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, più `claudeIdentity.ts` (assistente identità condivisa) e `index.ts` (registro).
 
