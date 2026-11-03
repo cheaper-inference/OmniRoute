@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Il-Gateway AI B'xejn
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqafx tikteb il-kodiċi. Kull għodda AI → 380 fornitur — 150+ b’xejn — minn endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity f’Claude / GPT / Gemini B’XEJN b’fallback awtomatiku. RTK + Caveman stacked compression tiffranka 15–95% tokens (~89% medja) — qatt ma tilħaq il-limiti. 380 fornitur AI · 150+ livelli b’xejn · ~1.62B tokens b’xejn/kull xahar · 20 strateġija ta’ routing · $0 biex tibda."/>
 
 </div>
@@ -1293,7 +1295,7 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lingwa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> f’<code>src/</code> u <code>open-sse/</code> (l-ebda <code>any</code> fil-qalba minn v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legacy) — 147-il modulu tad-dominju, 221 migrazzjoni</td></tr>
+  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legacy) — 147-il modulu tad-dominju, 222 migrazzjoni</td></tr>
   <tr><td nowrap><b>Memorja</b></td><td>Test sħiħ f’SQLite FTS5 + embeddings vettorjali kwantizzati għal int8, tnaqqis ittajpjat</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — validazzjoni tal-I/O tal-għodod MCP + kuntratti tal-API</td></tr>
   <tr><td nowrap><b>Protokolli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1806,7 +1808,7 @@ Liċenzja MIT - ara [LICENSE](LICENSE) għad-dettalji.
 
 **[⬆ Lura fil-quċċata](#-omniroute)** · Mibni b'❤️ għall-komunità open-source tal-IA.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions attivati għall-mistoqsijiet u tweġibiet tal-komunità -->

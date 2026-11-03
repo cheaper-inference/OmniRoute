@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ang Libreng AI Gateway
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Huwag tumigil sa pag-code. Bawat AI tool → 380 provider — 150+ libre — sa iisang endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity papunta sa LIBRENG Claude / GPT / Gemini na may auto-fallback. RTK + Caveman stacked compression nakakatipid ng 15–95% tokens (~89% avg) — hindi ka mauubusan ng limit. 380 AI provider · 150+ libreng tier · ~1.62B libreng tokens/buwan · 20 routing strategies · ₱0 panimula."/>
 
 </div>
@@ -1290,7 +1292,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Wika</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> sa <code>src/</code> at <code>open-sse/</code> (walang <code>any</code> sa core mula pa noong v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 147 domain module, 221 migration</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 147 domain module, 222 migration</td></tr>
   <tr><td nowrap><b>Memorya</b></td><td>SQLite FTS5 full-text + mga vector embedding na naka-quantize sa int8, typed decay</td></tr>
   <tr><td nowrap><b>Mga Schema</b></td><td>Zod 4 — validation ng MCP tool I/O + mga kontrata ng API</td></tr>
   <tr><td nowrap><b>Mga Protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1803,7 +1805,7 @@ MIT License - tingnan ang [LICENSE](LICENSE) para sa mga detalye.
 
 **[⬆ Bumalik sa itaas](#-omniroute)** · Ginawa nang may ❤️ para sa komunidad ng open-source AI.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Naka-enable ang GitHub Discussions para sa Q&A ng komunidad -->

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Tasuta AI värav
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ära lõpeta kunagi kodeerimist. Iga AI tööriist → 380 pakkujat — 150+ tasuta — läbi ühe lõpp-punkti. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity TASUTA Claude / GPT / Gemini kaudu automaatse varutöötlusega. RTK + Caveman virnastatud tihendus säästab 15–95% märke (~89% keskmiselt) — ära kunagi ületa piire. 380 AI pakkujat · 150+ tasuta taset · ~1,62B tasuta märki/kuu · 20 marsruutimisstrateegiat · $0 alustamiseks."/>
 
 </div>
@@ -1305,7 +1307,7 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   <tr><td nowrap><b>Käituskeskkond</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloogides <code>src/</code> ja <code>open-sse/</code> (tuumas pole alates versioonist v2.0 ühtegi <code>any</code>-tüüpi)</td></tr>
   <tr><td nowrap><b>Raamistik</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-i logimine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 221 migratsiooni</td></tr>
+  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-i logimine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 222 migratsiooni</td></tr>
   <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstiotsing + int8-kvantiseeritud vektormanused, tüübitud kahanemine</td></tr>
   <tr><td nowrap><b>Skeemid</b></td><td>Zod 4 — MCP tööriistade sisendi/väljundi valideerimine + API lepingud</td></tr>
   <tr><td nowrap><b>Protokollid</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1818,7 +1820,7 @@ MIT litsents - üksikasju leiad failist [LICENSE](LICENSE).
 
 **[⬆ Tagasi üles](#-omniroute)** · Tehtud ❤️-ga avatud lähtekoodiga AI-kogukonna jaoks.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions on lubatud kogukonna küsimuste ja vastuste jaoks -->

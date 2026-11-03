@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Az ingyenes AI átjáró
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Soha ne hagyd abba a kódolást. Minden AI eszköz → 380 szolgáltató — 150+ ingyenes — egyetlen végponton keresztül. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity INGYENES Claude / GPT / Gemini szolgáltatásba automatikus átváltással. RTK + Caveman rétegzett tömörítés 15–95% token megtakarítást eredményez (~89% átlag) — soha ne érj el korlátokat. 380 AI szolgáltató · 150+ ingyenes csomag · ~1,62 milliárd ingyenes token/hó · 20 útválasztási stratégia · $0 kezdőtőke."/>
 
 </div>
@@ -1293,7 +1295,7 @@ Kanonikus mérőszámok 2026-10-18-án: **1.976 egyedi videó** · **20.220.289 
   <tr><td nowrap><b>Futtatókörnyezet</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Nyelv</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a <code>src/</code> és <code>open-sse/</code> könyvtárakban (a v2.0 óta nincs <code>any</code> a magban)</td></tr>
   <tr><td nowrap><b>Keretrendszer</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 147 tartományi modul, 221 migráció</td></tr>
+  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 147 tartományi modul, 222 migráció</td></tr>
   <tr><td nowrap><b>Memória</b></td><td>SQLite FTS5 teljes szövegű keresés + int8-kvantált vektorbeágyazások, típusos leépülés</td></tr>
   <tr><td nowrap><b>Sémák</b></td><td>Zod 4 — MCP-eszközök I/O-ellenőrzése + API-szerződések</td></tr>
   <tr><td nowrap><b>Protokollok</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1806,7 +1808,7 @@ MIT licenc – részletekért lásd a [LICENSE](LICENSE) fájlt.
 
 **[⬆ Vissza a tetejére](#-omniroute)** · ❤️-vel készült a nyílt forráskódú AI-közösség számára.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licenc · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licenc · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions engedélyezve a közösségi kérdések és válaszok számára -->

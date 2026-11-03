@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Bezplatná AI brána
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikdy nepřestávejte kódovat. Každý AI nástroj → 380 poskytovatelů — 150+ zdarma — přes jeden endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity do ZDARMA Claude / GPT / Gemini s automatickým přepínáním při výpadku. RTK + Caveman vrstvená komprese šetří 15–95 % tokenů (~89 % průměr) — nikdy nenarazíte na limity. 380 AI poskytovatelů · 150+ bezplatných tarifů · ~1,62 mld. bezplatných tokenů/měsíc · 20 směrovacích strategií · $0 na začátek."/>
 
 </div>
@@ -1301,7 +1303,7 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> v adresářích <code>src/</code> a <code>open-sse/</code> (v jádře od v2.0 žádné <code>any</code>)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší JSON) — 147 doménových modulů, 221 migrací</td></tr>
+  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší JSON) — 147 doménových modulů, 222 migrací</td></tr>
   <tr><td nowrap><b>Paměť</b></td><td>Fulltextové vyhledávání SQLite FTS5 + vektorové embeddingy kvantizované na int8, typovaný útlum</td></tr>
   <tr><td nowrap><b>Schémata</b></td><td>Zod 4 — validace vstupů a výstupů nástrojů MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1814,7 +1816,7 @@ Licence MIT – podrobnosti naleznete v [LICENSE](LICENSE).
 
 **[⬆ Zpět nahoru](#-omniroute)** · Vytvořeno s ❤️ pro open-source AI komunitu.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licence MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licence MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions zapnuty pro komunitní Q&A -->

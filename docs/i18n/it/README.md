@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Il Gateway AI Gratuito
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Non smettere mai di programmare. Ogni strumento AI → 380 provider — oltre 150 gratuiti — tramite un unico endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity in Claude / GPT / Gemini GRATUITI con fallback automatico. Compressione impilata RTK + Caveman risparmia dal 15 al 95% dei token (~89% in media) — non raggiungere mai i limiti. 380 provider AI · oltre 150 piani gratuiti · ~1,62 miliardi di token gratuiti/mese · 20 strategie di instradamento · $0 per iniziare."/>
 
 </div>
@@ -1304,7 +1306,7 @@ Metriche canoniche al 2026-10-18: **1.976 video unici** · **20.220.289 visualiz
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Linguaggio</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> in <code>src/</code> e <code>open-sse/</code> (<code>any</code> assente nel core dalla v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legacy) — 147 moduli di dominio, 221 migrazioni</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legacy) — 147 moduli di dominio, 222 migrazioni</td></tr>
   <tr><td nowrap><b>Memoria</b></td><td>Ricerca full-text SQLite FTS5 + embedding vettoriali quantizzati int8, decadimento tipizzato</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — convalida I/O degli strumenti MCP + contratti API</td></tr>
   <tr><td nowrap><b>Protocolli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1817,7 +1819,7 @@ Licenza MIT - consulta [LICENSE](LICENSE) per i dettagli.
 
 **[⬆ Torna all'inizio](#-omniroute)** · Realizzato con ❤️ per la comunità AI open-source.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licenza MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licenza MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions abilitato per domande e risposte della community -->

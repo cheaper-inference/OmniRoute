@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Brezplačni AI prehod
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikoli ne nehaj programirati. Vsako AI orodje → 380 ponudnikov — 150+ brezplačnih — prek ene končne točke. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity v BREZPLAČNI Claude / GPT / Gemini z avtomatskim preklopom. RTK + Caveman stisnjena kompresija prihrani 15–95% žetonov (~89% povprečno) — nikoli ne presezi omejitev. 380 AI ponudnikov · 150+ brezplačnih paketov · ~1,62 milijarde brezplačnih žetonov/mesec · 20 strategij usmerjanja · $0 za začetek."/>
 
 </div>
@@ -1302,7 +1304,7 @@ Kanonične metrike na dan 2026-10-18: **1.976 edinstvenih videoposnetkov** · **
   <tr><td nowrap><b>Izvajalno okolje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> in <code>open-sse/</code> (v jedru od v2.0 ni nobenega <code>any</code>)</td></tr>
   <tr><td nowrap><b>Ogrodje</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Zbirka podatkov</b></td><td>better-sqlite3 (SQLite, beleženje WAL) + LowDB (podedovani JSON) — 147 domenskih modulov, 221 migracij</td></tr>
+  <tr><td nowrap><b>Zbirka podatkov</b></td><td>better-sqlite3 (SQLite, beleženje WAL) + LowDB (podedovani JSON) — 147 domenskih modulov, 222 migracij</td></tr>
   <tr><td nowrap><b>Pomnilnik</b></td><td>Polno besedilno iskanje SQLite FTS5 + vektorske vložitve, kvantizirane z int8, s tipiziranim bledenjem</td></tr>
   <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — preverjanje V/I orodij MCP + pogodbe API</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1815,7 +1817,7 @@ Licenca MIT – podrobnosti si oglejte v datoteki [LICENSE](LICENSE).
 
 **[⬆ Nazaj na vrh](#-omniroute)** · Zgrajeno z ❤️ za odprtokodno skupnost umetne inteligence.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licenca MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licenca MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Razprave GitHub so omogočene za vprašanja in odgovore skupnosti -->

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — အခမဲ့ AI Gateway
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Coding ကို မရပ်တန့်ပါနဲ့။ AI ကိရိယာတိုင်း → ၃၈၀ ခုသော ပံ့ပိုးသူများ — ၁၅၀+ ခု အခမဲ့ — တစ်ခုတည်းသော endpoint မှတစ်ဆင့်။ Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ကို အခမဲ့ Claude / GPT / Gemini သို့ auto-fallback ဖြင့်။ RTK + Caveman စုစည်းထားသော compression ဖြင့် token များကို ၁၅–၉၅% (ပျမ်းမျှ ~၈၉%) ထိ ချွေတာနိုင်သည် — အကန့်အသတ် မကျော်သွားပါစေ။ ၃၈၀ ခုသော AI ပံ့ပိုးသူများ · ၁၅၀+ အခမဲ့အဆင့်များ · ~၁.၆၂ ဘီလီယံ အခမဲ့ token များ/လ · ၂၀ ခုသော routing မဟာဗျူဟာများ · စတင်ရန် $0။"/>
 
 </div>
@@ -1295,7 +1297,7 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ဘာသာစကား</b></td><td>TypeScript 6.0 — <code>src/</code> နှင့် <code>open-sse/</code> တစ်လျှောက် <b>100% TypeScript</b> (v2.0 မှစ၍ core တွင် <code>any</code> လုံးဝမရှိ)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON အဟောင်းစနစ်) — ဒိုမိန်းမော်ဂျူး 147 ခု၊ migration 221 ခု</td></tr>
+  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON အဟောင်းစနစ်) — ဒိုမိန်းမော်ဂျူး 147 ခု၊ migration 222 ခု</td></tr>
   <tr><td nowrap><b>မှတ်ဉာဏ်</b></td><td>SQLite FTS5 အပြည့်အစုံစာသား + int8-quantized vector embeddings၊ typed decay</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
   <tr><td nowrap><b>ပရိုတိုကောများ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1808,7 +1810,7 @@ MIT လိုင်စင် - အသေးစိတ်အတွက် [LICENSE]
 
 **[⬆ အပေါ်ဆုံးသို့ ပြန်သွားရန်](#-omniroute)** · open-source AI အသိုင်းအဝိုင်းအတွက် ❤️ ဖြင့် တည်ဆောက်ထားပါသည်။
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- အသိုင်းအဝိုင်း Q&A အတွက် GitHub Discussions ကို ဖွင့်ထားပါသည် -->

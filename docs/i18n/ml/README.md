@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — സൗജന്യ AI ഗേറ്റ്വേ
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ഒരിക്കലും കോഡിംഗ് നിർത്തേണ്ടതില്ല. എല്ലാ AI ടൂളുകളും → 380 പ്രൊവൈഡർമാർ — 150+ സൗജന്യമായി — ഒരു എൻഡ്പോയിന്റ് വഴി. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity നെ സൗജന്യ Claude / GPT / Gemini യിലേക്ക് ഓട്ടോ-ഫോൾബാക്ക് ഉപയോഗിച്ച്. RTK + Caveman സ്റ്റാക്ക് ചെയ്ത കംപ്രഷൻ 15–95% ടോക്കൺസ് (~89% ശരാശരി) സംരക്ഷിക്കുന്നു — ഒരിക്കലും പരിധി തികയില്ല. 380 AI പ്രൊവൈഡർമാർ · 150+ സൗജന്യ ടിയറുകൾ · ~1.62B സൗജന്യ ടോക്കൺസ്/മാസം · 20 റൂട്ടിംഗ് സ്ട്രാറ്റജികൾ · ആരംഭിക്കാൻ ₹0."/>
 
 </div>
@@ -1292,7 +1294,7 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
   <tr><td nowrap><b>റൺടൈം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിൽ <b>100% TypeScript</b> (v2.0 മുതൽ കോറിൽ പൂജ്യം <code>any</code>)</td></tr>
   <tr><td nowrap><b>ഫ്രെയിംവർക്ക്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മോഡ്യൂളുകൾ, 221 മൈഗ്രേഷനുകൾ</td></tr>
+  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL ജേണലിംഗ്) + LowDB (JSON ലെഗസി) — 147 ഡൊമെയ്ൻ മോഡ്യൂളുകൾ, 222 മൈഗ്രേഷനുകൾ</td></tr>
   <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 പൂർണ്ണ-ടെക്സ്റ്റ് + int8-ക്വാണ്ടൈസ് ചെയ്ത വെക്റ്റർ എംബെഡ്ഡിംഗുകൾ, ടൈപ്പ് ചെയ്ത ഡിക്കേ</td></tr>
   <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O വാലിഡേഷൻ + API കരാറുകൾ</td></tr>
   <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ MIT ലൈസൻസ് - വിശദാംശങ്ങൾക്കായി [LI
 
 **[⬆ മുകളിലേക്ക് മടങ്ങുക](#-omniroute)** · ഓപ്പൺ സോഴ്സ് AI കമ്മ്യൂണിറ്റിക്കായി ❤️ ഉപയോഗിച്ച് നിർമ്മിച്ചത്.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- കമ്മ്യൂണിറ്റി ചോദ്യോത്തരങ്ങൾക്കായി GitHub Discussions പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്നു -->

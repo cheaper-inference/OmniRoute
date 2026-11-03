@@ -81,7 +81,6 @@ function getRangeStartIso(range: string): string | null {
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 type PricingByProvider = Record<string, Record<string, Record<string, unknown>>>;
-type UsageRows = Array<Record<string, unknown>>;
 function appendWhereCondition(whereClause: string, condition: string): string {
   return whereClause ? `${whereClause} AND (${condition})` : `WHERE (${condition})`;
 }
@@ -239,10 +238,13 @@ async function computeAnalyticsResponse(
       return NextResponse.json({ byApiKey });
     }
 
-    const summaryRow = getUsageSummary(unifiedSource, unifiedParams) as Record<string, unknown>;
+    const summaryRow = getUsageSummary(unifiedSource, unifiedParams) as unknown as Record<
+      string,
+      unknown
+    >;
 
-    const dailyRows = getDailyUsage(unifiedSource, unifiedParams) as UsageRows;
-    const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const dailyRows = getDailyUsage(unifiedSource, unifiedParams);
+    const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams);
 
     const heatmapStart = new Date();
     heatmapStart.setUTCDate(heatmapStart.getUTCDate() - 364);
@@ -264,26 +266,26 @@ async function computeAnalyticsResponse(
       });
     }
 
-    const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams) as UsageRows;
+    const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams);
 
-    const modelRows = getModelUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const modelRows = getModelUsageRows(unifiedSource, unifiedParams);
 
-    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams);
 
-    const providerRows = getProviderUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerRows = getProviderUsageRows(unifiedSource, unifiedParams);
 
     const accountCostWhereClause = whereClause
       .replace(/timestamp/g, "usage_history.timestamp")
       .replace(/api_key_/g, "usage_history.api_key_");
-    const accountCostRows = getAccountCostRows(accountCostWhereClause, params) as UsageRows;
+    const accountCostRows = getAccountCostRows(accountCostWhereClause, params);
 
-    const accountRows = getAccountUsageRows(accountCostWhereClause, params) as UsageRows;
+    const accountRows = getAccountUsageRows(accountCostWhereClause, params);
 
-    const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params) as UsageRows;
+    const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params);
 
-    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams);
 
-    const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params) as UsageRows;
+    const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params);
 
     const apiKeyMetadata = new Map<string, { latestName: string; aliases: Set<string> }>();
     for (const row of apiKeyMetadataRows) {
@@ -300,9 +302,9 @@ async function computeAnalyticsResponse(
       apiKeyMetadata.set(groupKey, existing);
     }
 
-    const weeklyRows = getWeeklyPatternRows(unifiedSource, unifiedParams) as UsageRows;
+    const weeklyRows = getWeeklyPatternRows(unifiedSource, unifiedParams);
 
-    const fallbackRow = getFallbackStats(whereClause, params) as Record<string, unknown>;
+    const fallbackRow = getFallbackStats(whereClause, params) as unknown as Record<string, unknown>;
     const errorBreakdown = getErrorTypeBreakdown(whereClause, params);
 
     const cachedInput = getCachedInputAnalytics(
@@ -709,7 +711,7 @@ async function computeAnalyticsResponse(
           apiKeyParams: apiKeyParamEntries,
         });
 
-        const presetModelRows = getPresetCostModelRows(pSrc, pParams) as UsageRows;
+        const presetModelRows = getPresetCostModelRows(pSrc, pParams);
 
         let presetTotalCost = 0;
         for (const row of presetModelRows) {

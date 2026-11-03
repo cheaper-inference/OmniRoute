@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — ఉచిత AI గేట్వే
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — కోడింగ్ ఆపకండి. ప్రతి AI టూల్ → 380 ప్రొవైడర్లు — 150+ ఉచితం — ఒకే ఎండ్పాయింట్ ద్వారా. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ను ఉచిత Claude / GPT / Gemini లోకి ఆటో-ఫాల్బ్యాక్తో. RTK + Caveman స్టాక్డ్ కాంప్రెషన్ 15–95% టోకెన్లను (సగటు ~89%) సేవ్ చేస్తుంది — ఎప్పుడూ లిమిట్స్ను తాకవద్దు. 380 AI ప్రొవైడర్లు · 150+ ఉచిత టియర్స్ · ~1.62B ఉచిత టోకెన్లు/నెల · 20 రూటింగ్ స్ట్రాటజీలు · ప్రారంభానికి $0."/>
 
 </div>
@@ -1293,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 కూడా ద�
   <tr><td nowrap><b>రన్టైమ్</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>భాష</b></td><td>TypeScript 6.0 — <code>src/</code> మరియు <code>open-sse/</code> అంతటా <b>100% TypeScript</b> (v2.0 నుండి కోర్లో సున్నా <code>any</code>)</td></tr>
   <tr><td nowrap><b>ఫ్రేమ్వర్క్</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూళ్లు, 221 మైగ్రేషన్లు</td></tr>
+  <tr><td nowrap><b>డేటాబేస్</b></td><td>better-sqlite3 (SQLite, WAL జర్నలింగ్) + LowDB (JSON లెగసీ) — 147 డొమైన్ మాడ్యూళ్లు, 222 మైగ్రేషన్లు</td></tr>
   <tr><td nowrap><b>మెమరీ</b></td><td>SQLite FTS5 పూర్తి-పాఠ్య + int8-క్వాంటైజ్ చేసిన వెక్టర్ ఎంబెడ్డింగ్లు, టైప్డ్ డికే</td></tr>
   <tr><td nowrap><b>స్కీమాలు</b></td><td>Zod 4 — MCP టూల్ I/O వాలిడేషన్ + API కాంట్రాక్టులు</td></tr>
   <tr><td nowrap><b>ప్రోటోకాల్లు</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1806,7 +1808,7 @@ MIT లైసెన్స్ - వివరాల కోసం [LICENSE](LICENSE
 
 **[⬆ పైకి తిరిగి వెళ్ళండి](#-omniroute)** · ఓపెన్-సోర్స్ AI కమ్యూనిటీ కోసం ❤️తో నిర్మించబడింది.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- కమ్యూనిటీ Q&A కోసం GitHub Discussions ప్రారంభించబడ్డాయి -->

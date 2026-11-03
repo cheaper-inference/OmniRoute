@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Nemokamas AI šliuzas
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Niekada nenustokite programuoti. Kiekvienas AI įrankis → 380 tiekėjų — 150+ nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity į NEMOKAMĄ Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman suspaudimas sumažina 15–95% žetonų (~89% vidutiniškai) — niekada nepasieksite ribų. 380 AI tiekėjų · 150+ nemokamų planų · ~1,62 mlrd. nemokamų žetonų/mėn. · 20 maršruto strategijų · $0 pradžiai."/>
 
 </div>
@@ -1304,7 +1306,7 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td nowrap><b>Vykdymo aplinka</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> visame <code>src/</code> ir <code>open-sse/</code> kode (pagrindiniame kode nuo v2.0 nėra nė vieno <code>any</code>)</td></tr>
   <tr><td nowrap><b>Komponentų sistema</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalavimas) + LowDB (JSON senoji sistema) — 147 domeno modulių, 221 migracijų</td></tr>
+  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalavimas) + LowDB (JSON senoji sistema) — 147 domeno modulių, 222 migracijų</td></tr>
   <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 viso teksto paieška + int8 kvantuoti vektoriniai įterpiniai, tipizuotas nykimas</td></tr>
   <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties / išvesties validavimas + API sutartys</td></tr>
   <tr><td nowrap><b>Protokolai</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1817,7 +1819,7 @@ MIT licencija – išsamesnę informaciją rasite [LICENSE](LICENSE).
 
 **[⬆ Grįžti į viršų](#-omniroute)** · Sukurta su ❤️ atvirojo kodo AI bendruomenei.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licencija · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions įjungta bendruomenės klausimams ir atsakymams -->

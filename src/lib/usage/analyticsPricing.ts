@@ -195,7 +195,7 @@ function getPriceableTokens(row: Record<string, unknown>): Record<string, number
 }
 
 export function computeUsageRowCost(
-  row: Record<string, unknown>,
+  input: object,
   pricingByProvider: PricingByProvider,
   providerAliasMap: Record<string, string>,
   normalizeModelName: (model: string) => string,
@@ -203,6 +203,8 @@ export function computeUsageRowCost(
   flatRateAsZero = true,
   pricingContext?: PricingResolutionContext
 ): number {
+  // Concrete query rows have no index signature; widen only at this boundary.
+  const row = input as Record<string, unknown>;
   const provider = toStringValue(row.provider);
   const model = toStringValue(row.model);
   if (!provider || !model) return 0;
@@ -243,7 +245,7 @@ export function computeUsageRowCost(
 }
 
 export function computeUsageRowStandardCost(
-  row: Record<string, unknown>,
+  input: object,
   pricingByProvider: PricingByProvider,
   providerAliasMap: Record<string, string>,
   normalizeModelName: (model: string) => string,
@@ -251,6 +253,7 @@ export function computeUsageRowStandardCost(
   flatRateAsZero = true,
   pricingContext?: PricingResolutionContext
 ): number {
+  const row = input as Record<string, unknown>;
   // Only archived tier-specific costs are re-priced for the standard comparison.
   const keepsReportedCost = toNumber(row.isAggregated ?? row.is_aggregated) === 0;
   const reportedCost = keepsReportedCost ? toNumber(row.storedCost ?? row.stored_cost) : 0;
@@ -274,10 +277,12 @@ export function computeUsageRowStandardCost(
 }
 
 export function computeUsageSavingsTokens(
-  row: Record<string, unknown>,
+  input: object,
   serviceTier: string,
   getCodexFastCostMultiplier: GetCodexFastCostMultiplier
 ): number {
+  // Concrete query rows have no index signature; widen only at this boundary.
+  const row = input as Record<string, unknown>;
   const provider = toStringValue(row.provider);
   const model = toStringValue(row.model);
   const totalTokens = toNumber(row.totalTokens);

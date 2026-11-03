@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Lango la AI Bure
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usikome kamwe kuandika msimbo. Kila zana ya AI → watoa huduma 380 — 150+ bure — kupitia kituo kimoja. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity hadi CLAUDE / GPT / GEMINI BURE kwa kubadilisha kiotomatiki. RTK + Caveman compression iliyounganishwa huokoa tokeni 15–95% (~89% wastani) — usiwahi kufikia kikomo. Watoa huduma 380 wa AI · 150+ viwango vya bure · ~1.62B tokeni bure/mwezi · Mikakati 20 ya uelekezaji · $0 kuanza."/>
 
 </div>
@@ -1226,7 +1228,7 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
   <tr><td nowrap><b>Mazingira ya utekelezaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> katika <code>src/</code> na <code>open-sse/</code> (<code>any</code> sifuri katika msingi tangu v2.0)</td></tr>
   <tr><td nowrap><b>Kiunzi</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa WAL) + LowDB (JSON ya urithi) — moduli 147 za kikoa, uhamishaji 221</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa WAL) + LowDB (JSON ya urithi) — moduli 147 za kikoa, uhamishaji 222</td></tr>
   <tr><td nowrap><b>Kumbukumbu</b></td><td>SQLite FTS5 kwa utafutaji kamili wa maandishi + embeddings za vekta zilizokadiriwa kwa int8, upunguzaji wenye aina</td></tr>
   <tr><td nowrap><b>Skima</b></td><td>Zod 4 — uthibitishaji wa I/O ya zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1739,7 +1741,7 @@ Leseni ya MIT - tazama [LICENSE](LICENSE) kwa maelezo.
 
 **[⬆ Rudi juu](#-omniroute)** · Imeundwa kwa ❤️ kwa ajili ya jumuiya ya AI ya chanzo huria.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Majadiliano ya GitHub yamewashwa kwa ajili ya maswali na majibu ya jumuiya -->

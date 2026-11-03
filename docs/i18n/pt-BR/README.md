@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — O Gateway de IA Gratuito
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nunca pare de codar. Todas as ferramentas de IA → 380 provedores — 150+ gratuitos — por um único endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity em Claude / GPT / Gemini GRATUITOS com fallback automático. Compressão empilhada RTK + Caveman economiza 15–95% dos tokens (~89% em média) — nunca atinja os limites. 380 provedores de IA · 150+ planos gratuitos · ~1,62B tokens gratuitos/mês · 20 estratégias de roteamento · $0 para começar."/>
 
 </div>
@@ -1293,7 +1295,7 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Linguagem</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> em <code>src/</code> e <code>open-sse/</code> (zero <code>any</code> no núcleo desde a v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Banco de dados</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON legado) — 147 módulos de domínio, 221 migrações</td></tr>
+  <tr><td nowrap><b>Banco de dados</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON legado) — 147 módulos de domínio, 222 migrações</td></tr>
   <tr><td nowrap><b>Memória</b></td><td>Pesquisa de texto completo com SQLite FTS5 + embeddings vetoriais quantizados em int8, decaimento tipado</td></tr>
   <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validação de E/S de ferramentas MCP + contratos de API</td></tr>
   <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1806,7 +1808,7 @@ Licença MIT - consulte [LICENSE](LICENSE) para obter detalhes.
 
 **[⬆ Voltar ao topo](#-omniroute)** · Feito com ❤️ para a comunidade de IA de código aberto.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licença MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licença MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Discussões do GitHub habilitadas para perguntas e respostas da comunidade -->

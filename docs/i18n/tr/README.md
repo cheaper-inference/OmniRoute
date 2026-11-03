@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ücretsiz Yapay Zeka Geçidi
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmaya asla ara verme. Her yapay zeka aracı → 380 sağlayıcı — 150+ ücretsiz — tek bir uç noktadan. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity'i OTOMATİK yedeklemeli ÜCRETSİZ Claude / GPT / Gemini'ye yönlendir. RTK + Caveman yığınlı sıkıştırma ile %15–95 arası token tasarrufu (~%89 ortalama) — asla sınırları aşma. 380 yapay zeka sağlayıcı · 150+ ücretsiz katman · ~1,62Milyar ücretsiz token/ay · 20 yönlendirme stratejisi · Başlangıç maliyeti $0."/>
 
 </div>
@@ -1292,7 +1294,7 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
   <tr><td nowrap><b>Çalışma zamanı</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dil</b></td><td>TypeScript 6.0 — <code>src/</code> ve <code>open-sse/</code> genelinde <b>%100 TypeScript</b> (v2.0'dan bu yana çekirdekte sıfır <code>any</code>)</td></tr>
   <tr><td nowrap><b>Çatı</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Veritabanı</b></td><td>better-sqlite3 (SQLite, WAL günlükleme) + LowDB (JSON legacy) — 147 alan modülü, 221 migration</td></tr>
+  <tr><td nowrap><b>Veritabanı</b></td><td>better-sqlite3 (SQLite, WAL günlükleme) + LowDB (JSON legacy) — 147 alan modülü, 222 migration</td></tr>
   <tr><td nowrap><b>Bellek</b></td><td>SQLite FTS5 tam metin + int8 nicelemeli vektör gömmeleri, türü belirlenmiş azalma</td></tr>
   <tr><td nowrap><b>Şemalar</b></td><td>Zod 4 — MCP aracı G/Ç doğrulaması + API sözleşmeleri</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ MIT Lisansı - ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 **[⬆ Başa dön](#-omniroute)** · Açık kaynaklı yapay zeka topluluğu için ❤️ ile geliştirildi.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisansı · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisansı · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Topluluk soru-cevabı için GitHub Discussions etkinleştirildi -->

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — שער ה-AI החינמי
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — אף פעם אל תפסיק לקודד. כל כלי AI → 380 ספקים — 150+ חינמיים — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ל- Claude / GPT / Gemini חינמיים עם מעבר אוטומטי במקרה של כשל. דחיסה משולבת RTK + Caveman חוסכת 15–95% טוקנים (~89% בממוצע) — לעולם לא תגיעו למגבלות. 380 ספקי AI · 150+ מסלולים חינמיים · ~1.62B טוקנים חינמיים בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
 
 </div>
@@ -1289,7 +1291,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
   <tr><td nowrap><b>סביבת ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל רחבי <code>src/</code> ו־<code>open-sse/</code> (אפס <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>מסגרת</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 221 מיגרציות</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 222 מיגרציות</td></tr>
   <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא באמצעות SQLite FTS5 + הטמעות וקטוריות מכוּמתות int8, דעיכה עם טיפוסים</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1802,7 +1804,7 @@ OmniRoute עומד על כתפי ענקים. הוא התחיל כ-fork של **[9
 
 **[⬆ חזרה למעלה](#-omniroute)** · נבנה עם ❤️ עבור קהילת ה-AI בקוד פתוח.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions מופעל לשאלות ותשובות של הקהילה -->

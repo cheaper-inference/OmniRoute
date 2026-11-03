@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — ಉಚಿತ AI ಗೇಟ್ವೇ
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ಎಂದಿಗೂ ಕೋಡಿಂಗ್ ನಿಲ್ಲಿಸಬೇಡಿ. ಪ್ರತಿಯೊಂದು AI ಸಾಧನ → ೩೮೦ ಪೂರೈಕೆದಾರರು — ೧೫೦+ ಉಚಿತ — ಒಂದೇ ಎಂಡ್ಪಾಯಿಂಟ್ ಮೂಲಕ. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ಅನ್ನು ಉಚಿತ Claude / GPT / Gemini ಗೆ ಸ್ವಯಂ-ಫಾಲ್ಬ್ಯಾಕ್ ಸಹಿತ. RTK + Caveman ಸ್ಟ್ಯಾಕ್ ಮಾಡಿದ ಸಂಕುಚನವು ೧೫–೯೫% ಟೋಕನ್ಗಳನ್ನು ಉಳಿಸುತ್ತದೆ (~೮೯% ಸರಾಸರಿ) — ಎಂದಿಗೂ ಮಿತಿಯನ್ನು ತಲುಪಬೇಡಿ. ೩೮೦ AI ಪೂರೈಕೆದಾರರು · ೧೫೦+ ಉಚಿತ ಹಂತಗಳು · ~೧.೬೨B ಉಚಿತ ಟೋಕನ್ಗಳು/ತಿಂಗಳು · ೨೦ ಮಾರ್ಗಸೂಚಿ ತಂತ್ರಗಳು · ಪ್ರಾರಂಭಿಸಲು $೦."/>
 
 </div>
@@ -1289,7 +1291,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ಕೂಡ ಇದ�
   <tr><td nowrap><b>ರನ್ಟೈಮ್</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ಭಾಷೆ</b></td><td>TypeScript 6.0 — <code>src/</code> ಮತ್ತು <code>open-sse/</code>ಗಳಲ್ಲಿ <b>100% TypeScript</b> (v2.0ರಿಂದ ಕೋರ್ನಲ್ಲಿ ಶೂನ್ಯ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ಫ್ರೇಮ್ವರ್ಕ್</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ಡೇಟಾಬೇಸ್</b></td><td>better-sqlite3 (SQLite, WAL ಜರ್ನಲಿಂಗ್) + LowDB (JSON ಲೆಗಸಿ) — 147 ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು, 221 ಮೈಗ್ರೇಶನ್ಗಳು</td></tr>
+  <tr><td nowrap><b>ಡೇಟಾಬೇಸ್</b></td><td>better-sqlite3 (SQLite, WAL ಜರ್ನಲಿಂಗ್) + LowDB (JSON ಲೆಗಸಿ) — 147 ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು, 222 ಮೈಗ್ರೇಶನ್ಗಳು</td></tr>
   <tr><td nowrap><b>ಮೆಮೊರಿ</b></td><td>SQLite FTS5 ಪೂರ್ಣ-ಪಠ್ಯ + int8-ಕ್ವಾಂಟೈಸ್ ಮಾಡಿದ ವೆಕ್ಟರ್ ಎಂಬೆಡಿಂಗ್ಗಳು, ಟೈಪ್ ಮಾಡಿದ ಡಿಕೇ</td></tr>
   <tr><td nowrap><b>ಸ್ಕೀಮಾಗಳು</b></td><td>Zod 4 — MCP ಟೂಲ್ I/O ಪರಿಶೀಲನೆ + API ಒಪ್ಪಂದಗಳು</td></tr>
   <tr><td nowrap><b>ಪ್ರೋಟೋಕಾಲ್ಗಳು</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1802,7 +1804,7 @@ MIT ಪರವಾನಗಿ - ವಿವರಗಳಿಗಾಗಿ [LICENSE](LICENSE)
 
 **[⬆ ಮೇಲಕ್ಕೆ ಹಿಂತಿರುಗಿ](#-omniroute)** · ಮುಕ್ತ-ಮೂಲ AI ಸಮುದಾಯಕ್ಕಾಗಿ ❤️ ನಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ಪರವಾನಗಿ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ಪರವಾನಗಿ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- ಸಮುದಾಯ ಪ್ರಶ್ನೋತ್ತರಕ್ಕಾಗಿ GitHub Discussions ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ -->

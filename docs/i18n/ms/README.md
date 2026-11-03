@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Gerbang AI Percuma
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Teruskan pengekodan tanpa henti. Setiap alat AI → 380 penyedia — 150+ percuma — melalui satu titik akhir. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke dalam Claude / GPT / Gemini PERCUMA dengan auto-fallback. Pemampatan bertindan RTK + Caveman menjimatkan 15–95% token (~89% purata) — tidak pernah melebihi had. 380 penyedia AI · 150+ pelan percuma · ~1.62B token percuma/bulan · 20 strategi penghalaan · $0 untuk bermula."/>
 
 </div>
@@ -1289,7 +1291,7 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
   <tr><td nowrap><b>Masa jalan</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentasi <code>src/</code> dan <code>open-sse/</code> (<code>any</code> sifar dalam teras sejak v2.0)</td></tr>
   <tr><td nowrap><b>Rangka kerja</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengjurnalan WAL) + LowDB (JSON legasi) — 147 modul domain, 221 migrasi</td></tr>
+  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengjurnalan WAL) + LowDB (JSON legasi) — 147 modul domain, 222 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>Teks penuh SQLite FTS5 + benaman vektor terkuantum int8, pereputan bertip</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — pengesahan I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1802,7 +1804,7 @@ Lesen MIT - lihat [LICENSE](LICENSE) untuk butiran.
 
 **[⬆ Kembali ke atas](#-omniroute)** · Dibina dengan ❤️ untuk komuniti AI sumber terbuka.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Lesen MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lesen MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions didayakan untuk soal jawab komuniti -->

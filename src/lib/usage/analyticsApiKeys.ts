@@ -1,7 +1,7 @@
-import type { ApiKeyTotalsRow } from "../db/usageAnalytics";
+import type { ApiKeyTotalsRow, ApiKeyUsageRow } from "../db/usageAnalytics";
 import { roundCost, toStringValue } from "./analyticsPricing";
 
-type UsageRow = Record<string, unknown>;
+type UsageRow = ApiKeyUsageRow;
 type KeyMetadata = { latestName: string; aliases: Set<string> };
 type ApiKeyTotal = {
   apiKeyId: string;
