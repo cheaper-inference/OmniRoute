@@ -111,7 +111,7 @@ export async function acquireTurnExecutionWithWait(
   opts: TurnExecutionWaitOptions = {}
 ): Promise<TurnExecutionAcquireResult> {
   const turn = acquireTurnExecution(key);
-  if (turn.acquired) return turn;
+  if (turn.acquired === true) return turn;
 
   const timeoutMs = opts.timeoutMs ?? TURN_WAIT_TIMEOUT_MS;
   const pollMs = opts.pollMs ?? TURN_WAIT_POLL_MS;
@@ -121,8 +121,8 @@ export async function acquireTurnExecutionWithWait(
     `duplicate waiting cid=${traceId ?? "?"} retry=${turn.retryCount} ageMs=${turn.ageMs}`
   );
   const deadline = Date.now() + timeoutMs;
-  let current = turn;
-  while (!current.acquired && Date.now() < deadline && !signal?.aborted) {
+  let current: TurnExecutionAcquireResult = turn;
+  while (current.acquired === false && Date.now() < deadline && !signal?.aborted) {
     await new Promise((resolve) => setTimeout(resolve, pollMs));
     current = acquireTurnExecution(key);
   }

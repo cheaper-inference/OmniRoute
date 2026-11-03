@@ -52,6 +52,7 @@ import { mergeAbortSignals } from "@omniroute/open-sse/executors/base.ts";
 import { resolveRequestAutoControls } from "@omniroute/open-sse/services/autoCombo/requestControls.ts";
 import { isVerifiedNativeCodexRequest } from "@omniroute/open-sse/config/codexIdentity.ts";
 import { resolveCompressionSettings } from "@omniroute/open-sse/handlers/chatCore/compressionSettings.ts";
+import { runWithTurnExecutionOwnership } from "@omniroute/open-sse/handlers/chatCore/turnExecutionContext.ts";
 import type { CompressionExclusions } from "@omniroute/open-sse/services/compression/exclusions.ts";
 import { resolveComboConfig } from "@omniroute/open-sse/services/comboConfig.ts";
 import { injectHandoffIntoBody } from "@omniroute/open-sse/services/contextHandoff.ts";
@@ -1451,7 +1452,13 @@ async function handleChatImplementation(
   );
 }
 
-export const handleChat = chatAdmission.withChatAdmission(handleChatImplementation);
+// One turn-execution ownership scope per client request (#18716): every account retry, rotation
+// and combo leg of this request re-enters chatCore under it and reuses the turn slot the request
+// already holds instead of 409ing itself. A scope per dispatch would not span those attempts.
+export const handleChat = chatAdmission.withChatAdmission(
+  (...args: Parameters<typeof handleChatImplementation>) =>
+    runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+);
 
 function readEmptyStreamSiblingRecoveryFlag(): boolean {
   try {
