@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — 무료 AI 게이트웨이
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 코딩을 멈추지 마세요. 모든 AI 도구 → 380개 제공업체 — 150개 이상 무료 — 하나의 엔드포인트로. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity를 무료 Claude / GPT / Gemini로 자동 폴백. RTK + Caveman 스택 압축으로 토큰 15–95% 절감(~89% 평균) — 한도에 도달하지 마세요. 380개 AI 제공업체 · 150개 이상 무료 티어 · 월 약 16억 2천만 무료 토큰 · 20가지 라우팅 전략 · 시작 비용 $0."/>
 
 </div>
@@ -1290,7 +1292,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   <tr><td nowrap><b>런타임</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>언어</b></td><td>TypeScript 6.0 — <code>src/</code> 및 <code>open-sse/</code> 전반에서 <b>100% TypeScript</b> 사용 (v2.0 이후 코어에 <code>any</code> 없음)</td></tr>
   <tr><td nowrap><b>프레임워크</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (레거시 JSON) — 147개 도메인 모듈, 220개 마이그레이션</td></tr>
+  <tr><td nowrap><b>데이터베이스</b></td><td>better-sqlite3 (SQLite, WAL 저널링) + LowDB (레거시 JSON) — 147개 도메인 모듈, 221개 마이그레이션</td></tr>
   <tr><td nowrap><b>메모리</b></td><td>SQLite FTS5 전문 검색 + int8 양자화 벡터 임베딩, 타입 기반 감쇠</td></tr>
   <tr><td nowrap><b>스키마</b></td><td>Zod 4 — MCP 도구 I/O 검증 + API 계약</td></tr>
   <tr><td nowrap><b>프로토콜</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1803,7 +1805,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE)를 참조하세요.
 
 **[⬆ 맨 위로 돌아가기](#-omniroute)** · 오픈소스 AI 커뮤니티를 위해 ❤️를 담아 제작했습니다.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT 라이선스 · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT 라이선스 · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- 커뮤니티 Q&A를 위해 GitHub Discussions가 활성화되어 있습니다 -->

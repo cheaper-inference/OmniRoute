@@ -30,10 +30,10 @@ import {
   type ProviderMessageTranslator,
   type CompatByProtocolMap,
 } from "../providerPageHelpers";
-import { useNotificationStore } from "@/store/notificationStore";
+import type { NotificationStore } from "@/store/notificationStore";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 
-type NotifyStore = ReturnType<typeof useNotificationStore>;
+type NotifyStore = NotificationStore;
 
 // ──── types ──────────────────────────────────────────────────────────────────
 

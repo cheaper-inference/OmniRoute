@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Бесплатни AI Гејтвеј
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никада не престајте да кодирате. Сваки AI алат → 380 провајдера — 150+ бесплатних — преко једне крајње тачке. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity у БЕСПЛАТНИ Claude / GPT / Gemini са аутоматским пребацивањем. RTK + Caveman компресија штеди 15–95% токена (~89% у просеку) — никада не достижете лимите. 380 AI провајдера · 150+ бесплатних нивоа · ~1.62B бесплатних токена/месечно · 20 стратегија рутирања · $0 за почетак."/>
 
 </div>
@@ -1302,7 +1304,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
   <tr><td nowrap><b>Окружење извршавања</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у директоријумима <code>src/</code> и <code>open-sse/</code> (без <code>any</code> у језгру од верзије v2.0)</td></tr>
   <tr><td nowrap><b>Оквир</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (наслеђени JSON) — 147 доменских модула, 220 миграција</td></tr>
+  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (наслеђени JSON) — 147 доменских модула, 221 миграција</td></tr>
   <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 претрага целог текста + векторски уграђени записи квантизовани на int8, типизовано опадање</td></tr>
   <tr><td nowrap><b>Шеме</b></td><td>Zod 4 — валидација улаза/излаза MCP алата + API уговори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1815,7 +1817,7 @@ MIT лиценца – погледајте [LICENSE](LICENSE) за детаље
 
 **[⬆ Назад на врх](#-omniroute)** · Направљено са ❤️ за open-source AI заједницу.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT лиценца · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT лиценца · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions су омогућене за питања и одговоре у заједници -->
