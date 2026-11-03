@@ -75,22 +75,6 @@ class ManualClock extends FakeClock {
   }
 }
 
-const originalProxyResolver = connectionProxyTestOverride.resolveProxyForConnection;
-test.before(async () => {
-  connectionProxyTestOverride.resolveProxyForConnection = async () => null;
-  const originalFetch = globalThis.fetch;
-  try {
-    await fetchWithConnectionProxy("throttle-fixture", "https://warmup.invalid/", undefined, {
-      fetchFn: async () => new Response("{}"),
-    });
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-test.after(() => {
-  connectionProxyTestOverride.resolveProxyForConnection = originalProxyResolver;
-});
-
 function installSharedThrottle(clock: FakeClock | null) {
   const shared = new MinIntervalThrottle({
     minIntervalMs: INTERVAL_MS,
