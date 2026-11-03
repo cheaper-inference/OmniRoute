@@ -866,6 +866,10 @@ async function syncClaudeBootstrapIfNeeded(
     ["organization_name", "organizationName"],
     ["organization_type", "organizationType"],
     ["organization_rate_limit_tier", "organizationRateLimitTier"],
+    // The account's own tier: `rateLimitTier` is otherwise frozen at import (copied from the
+    // CLI credentials file) and goes stale when a Team admin moves seats.
+    ["user_rate_limit_tier", "rateLimitTier"],
+    ["seat_tier", "seatTier"],
   ];
 
   const nextPsd: JsonRecord = { ...psd };

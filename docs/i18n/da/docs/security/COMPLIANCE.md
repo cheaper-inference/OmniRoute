@@ -11,55 +11,73 @@ OmniRoute registrerer administrative handlinger, godkendelseshændelser, ændrin
 
 Implementeringen findes i `src/lib/compliance/index.ts` (T-43 — "Overholdelseskontroller") og `src/lib/compliance/providerAudit.ts`. Revisionsskrivninger kaster aldrig fejl: Ved enhver fejl ignoreres kaldet lydløst, så revisionslogning ikke kan afbryde hovedflowet for anmodningen.
 
-## Hvad logges
+## Hvad bliver logget
 
-### Administrative revisionshændelser (`audit_log`)
+### Administrative audit-hændelser (`audit_log`)
 
-Hvert kald til `logAuditEvent({ action, actor, target, details, ... })` opretter én række. Handlingsstrenge følger mønstret `domain.verb` (eller `domain.verb.outcome`). Bekræftede handlingstyper i kildekoden omfatter:
+Hvert kald til `logAuditEvent({ action, actor, target, details, ... })` producerer
+én række. Handlingsstrenge følger et `domain.verb`- (eller `domain.verb.outcome`-)
+mønster. Bekræftede handlingstyper i træet omfatter:
 
-| Handling                             | Kilde                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Handling                             | Kilde                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Hver post registrerer `action`, `actor` (har som standard værdien `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` og `timestamp`. Følsomme nøgler (`apiKey`, `accessToken`, `refreshToken`, `password`, alt, der matcher `*token`/`*secret`/`*apikey` osv.) maskeres rekursivt som `"[redacted]"`, før rækken skrives.
+Hver post registrerer `action`, `actor` (standardværdi er `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` og `timestamp`. Følsomme nøgler (`apiKey`, `accessToken`,
+`refreshToken`, `password`, alt der matcher `*token`/`*secret`/`*apikey`,
+osv.) redigeres rekursivt til `"[redacted]"`, før rækken skrives.
 
-### Kald af MCP-værktøjer (`mcp_tool_audit`)
+Rækker med `api_key.auth.touch` registrerer vellykkede API-nøglemetadata- og
+opdagelseslæsninger (GET/HEAD), der aldrig når requestloggen: hvilken nøgle,
+hvornår og den normaliserede sti, samlet og begrænset til 1.000 rækker. Nøgler
+med `noLog` samt miljønøglen springes over. Den kaldendes IP-adresse og
+user-agent tilføjes kun, når funktionsflaget
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` er aktiveret (deaktiveret som
+standard).
 
-Hvert kald af et MCP-værktøj skriver en række via `open-sse/mcp-server/audit.ts`. Skema (fra `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### MCP-værktøjskald (`mcp_tool_audit`)
 
-| Kolonne          | Bemærkninger                             |
-| ---------------- | ---------------------------------------- |
-| `id`             | automatisk inkrementering                |
-| `tool_name`      | MCP-værktøjsidentifikator                |
-| `input_hash`     | sha256 af input (ingen nyttedata gemmes) |
-| `output_summary` | kort, afkortet opsummering               |
-| `duration_ms`    | forløbet tid                             |
-| `api_key_id`     | kalder (kan være null)                   |
-| `success`        | `1` / `0`                                |
-| `error_code`     | afsluttende fejlkode ved fejl            |
-| `created_at`     | ISO-tidsstempel                          |
+Hver MCP-værktøjskald skriver en række via
+`open-sse/mcp-server/audit.ts`. Skema (fra
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-### Anmodnings-/forbrugslogfiler
+| Kolonne          | Bemærkninger                           |
+| ---------------- | -------------------------------------- |
+| `id`             | autoincrement                          |
+| `tool_name`      | MCP-værktøjsidentifikator              |
+| `input_hash`     | sha256 af input (ingen payload gemmes) |
+| `output_summary` | kort, afkortet oversigt                |
+| `duration_ms`    | forløbet tid                           |
+| `api_key_id`     | kalder (kan være null)                 |
+| `success`        | `1` / `0`                              |
+| `error_code`     | afsluttende fejlkode ved fejl          |
+| `created_at`     | ISO-tidsstempel                        |
 
-Disse er driftsmæssig telemetri (ikke udelukkende administrativ revision), men bruger den samme opbevaringspipeline:
+### Request- / brugslogs
 
-- `usage_history` — samlet forbrug pr. anmodning
-- `call_logs` — fuldstændig log pr. anmodning (underlagt rækkegrænse, se nedenfor)
-- `proxy_logs` — log over proxytrafik (underlagt rækkegrænse)
-- `request_detail_logs` — ældre detaljeret anmodningslog (beskæres stadig, hvis den findes)
+Dette er operationel telemetri (ikke strengt taget administrativ audit), men
+de deler den samme opbevaringspipeline:
+
+- `usage_history` — samlet brugsdata pr. request
+- `call_logs` — fuld log pr. request (underlagt rækkegrænse, se nedenfor)
+- `proxy_logs` — proxy-trafiklog (underlagt rækkegrænse)
+- `request_detail_logs` — ældre detaljeret requestlog (beskæres stadig, hvis den findes)
 
 ## Lagringsskema
 

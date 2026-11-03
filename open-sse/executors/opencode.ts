@@ -1690,9 +1690,9 @@ export class OpencodeExecutor extends BaseExecutor {
 
     const prompt =
       "You must respond with valid JSON that strictly follows " +
-      "this JSON schema:\\n```json\\n" +
+      "this JSON schema:\n```json\n" +
       schemaJson +
-      "\\n```\\nRespond ONLY with the JSON object, no other text and no markdown code fences.";
+      "\n```\nRespond ONLY with the JSON object, no other text and no markdown code fences.";
 
     const messages: Array<Record<string, unknown>> = Array.isArray(record.messages)
       ? (record.messages as Array<Record<string, unknown>>).map((message) => ({ ...message }))
@@ -1702,12 +1702,9 @@ export class OpencodeExecutor extends BaseExecutor {
 
     if (systemMessage) {
       if (typeof systemMessage.content === "string") {
-        systemMessage.content = `${systemMessage.content}\\n\\n${prompt}`;
+        systemMessage.content = `${systemMessage.content}\n\n${prompt}`;
       } else if (Array.isArray(systemMessage.content)) {
-        systemMessage.content = [
-          ...systemMessage.content,
-          { type: "text", text: `\\n\\n${prompt}` },
-        ];
+        systemMessage.content = [...systemMessage.content, { type: "text", text: `\n\n${prompt}` }];
       }
     } else {
       messages.unshift({
