@@ -10,9 +10,9 @@ import { getTranslations } from "next-intl/server";
 
 // ── Locale detection ────────────────────────────────────────────────────────
 
-function getDocsLocale(): string {
+async function getDocsLocale(): Promise<string> {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     return (cookieStore as any).get(LOCALE_COOKIE)?.value || DEFAULT_LOCALE;
   } catch {
     return DEFAULT_LOCALE;
@@ -82,7 +82,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const locale = getDocsLocale();
+  const locale = await getDocsLocale();
   const i18nHtml = await tryI18nFallback(params.slug, locale);
 
   if (i18nHtml) {
