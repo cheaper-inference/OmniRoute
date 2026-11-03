@@ -170,32 +170,32 @@ Hatókörök (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, 
 ## Tesztek futtatása
 
 ```bash
-# Minden teszt (unit + vitest + ecosystem + e2e)
+# Minden teszt (egységtesztek + Vitest + ökoszisztéma + E2E)
 npm run test:all
 
 # Egyetlen tesztfájl (a Node.js natív tesztfuttatója — a legtöbb teszt ezt használja)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Csak a módosítás által érintett unit tesztek (ugyanaz a TIA-szelektor, mint a CI ellenőrzésénél, #8084)
+# Csak a módosítás által érintett egységtesztek (ugyanaz a TIA-szelektor, mint a CI-kapuban, #8084)
 npm run test:scoped            # az utolsó commitban (vagy a munkafában) lévő módosítások
-npm run test:scoped:staged     # csak a stage-elt módosítások — jól használható pre-commit futtatással
-npm run test:scoped:full       # először újraépíti az importgráf-térképet (fájlok hozzáadása/áthelyezése után)
-# Az 1-es kilépési kód + "run the full suite" azt jelenti, hogy egy központi fájl (tsconfig, package.json, …) vagy egy
-# nem feltérképezett forrás módosult — a szelektor biztonságosan hibázik, soha nem hagy ki csendben teszteket.
+npm run test:scoped:staged     # csak az előkészített módosítások — jól használható pre-commit futtatással
+npm run test:scoped:full       # előbb újraépíti az importgráf leképezését (fájlok hozzáadása/áthelyezése után)
+# Az 1-es kilépési kód + „futtassa a teljes tesztcsomagot” azt jelenti, hogy egy központi fájl (tsconfig, package.json, …) vagy egy
+# leképezetlen forrás módosult — a szelektor biztonságosan hibára fut, és soha nem hagy ki semmit észrevétlenül.
 
 # Vitest (MCP-kiszolgáló, autoCombo, gyorsítótár)
 npm run test:vitest
 
-# E2E tesztek (Playwright szükséges)
+# E2E-tesztek (Playwright szükséges)
 npm run test:e2e
 
-# Protokollkliensek E2E tesztjei (MCP-transzportok, A2A)
+# Protokollkliensek E2E-tesztjei (MCP-transzportok, A2A)
 npm run test:protocols:e2e
 
 # Ökoszisztéma-kompatibilitási tesztek
 npm run test:ecosystem
 
-# Lefedettségi küszöb: 60% utasítás-/sor-/függvény-/áglefedettség
+# Lefedettségi küszöb: 60% az utasítások/sorok/függvények/elágazások esetén
 npm run test:coverage
 npm run coverage:report
 
@@ -203,51 +203,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Feltételes, valós upstream combo smoke teszt (VPS-hozzáférést és valós szolgáltatói krediteket igényel)
-# VALÓS szolgáltatókat ér el — kis költséggel jár. SOHA nem fut CI-ben. A feltétel nélkül szabályosan kihagyásra kerül.
+# Kapuzott, valódi külső szolgáltatásokat használó combo-gyorsteszt (VPS-hozzáférést + valódi szolgáltatói krediteket igényel)
+# VALÓDI szolgáltatókat hív meg — némi költséggel jár. SOHA nem fut CI-ben. A kapu nélkül szabályosan kihagyásra kerül.
 # Szükséges: ssh root@192.168.0.15 hozzáférés (egy írásvédett DB-pillanatképet tölt be a VPS-ről).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# 3. fázisú élő VPS smoke teszt — egyszerű Node ESM-szkriptek, amelyek közvetlenül az élő .15-ös kiszolgálót érik el.
-# Szükséges: ssh root@192.168.0.15 hozzáférés (a combók létrehozása/lebontása SSH-n keresztül, sqlite használatával történik).
-# VALÓS szolgáltatókat ér el (kis költséggel). Csak __live_test__* combókat hoz létre/töröl. SOHA nem fut CI-ben.
-# A .15-ös gépen REQUIRE_API_KEY=false, ezért nincs szükség API-kulcsra, de ha be vannak állítva, figyelembe veszi a COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY értékét.
-npm run test:combo:live:vps              # 7 HTTP-forgatókönyv (prioritásos/round-robin/súlyozott/költségalapú/fúziós/automatikus + állapot)
-npm run test:combo:live:vps:failover     # hozzáad egy valós, szolgáltatók közötti feladatátvételi forgatókönyvet (összesen 8)
+# 3. fázisú VPS élő gyorsteszt — egyszerű Node ESM-szkriptek, közvetlenül az élő .15-ös kiszolgálót hívják meg.
+# Szükséges: ssh root@192.168.0.15 hozzáférés (a combo-k létrehozása/lebontása SSH-n keresztül, sqlite használatával történik).
+# VALÓDI szolgáltatókat hív meg (kis költséggel). Csak __live_test__* combo-kat hoz létre/töröl. SOHA nem fut CI-ben.
+# A .15-ös gépen REQUIRE_API_KEY=false, így nincs szükség API-kulcsra, de figyelembe veszi a COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY értékét, ha be van állítva.
+npm run test:combo:live:vps              # 7 HTTP-forgatókönyv (prioritásos/ciklikus/súlyozott/költség/fúzió/automatikus + állapotellenőrzés)
+npm run test:combo:live:vps:failover     # hozzáad egy valódi, szolgáltatók közötti feladatátvételi forgatókönyvet (összesen 8)
 ```
 
-Megjegyzések a lefedettségről:
+Megjegyzések a lefedettséghez:
 
-- Az `npm run test:coverage` méri a forráskód lefedettségét a fő unit tesztcsomaghoz, kizárja a `tests/**` fájlokat, és tartalmazza az `open-sse/**` fájlokat
-- A pull requesteknek fenn kell tartaniuk a **60%+** utasítás-/sor-/függvény-/áglefedettségi küszöböt
-- Ha egy PR módosítja a `src/`, `open-sse/`, `electron/` vagy `bin/` könyvtárban lévő éles kódot, ugyanabban a PR-ben automatizált teszteket is hozzá kell adnia vagy frissítenie kell
+- Az `npm run test:coverage` a fő egységtesztcsomag forráskód-lefedettségét méri, kizárja a `tests/**` fájlokat, és tartalmazza az `open-sse/**` fájlokat
+- A pull requesteknek az utasítások/sorok/függvények/elágazások lefedettségi küszöbét **60%+** értéken kell tartaniuk
+- Ha egy PR módosítja az éles kódot a `src/`, `open-sse/`, `electron/` vagy `bin/` könyvtárban, ugyanabban a PR-ben automatizált teszteket is hozzá kell adni vagy frissíteni kell
 - Az `npm run coverage:report` kiírja a legutóbbi lefedettségi futtatás részletes, fájlonkénti jelentését
 - Az `npm run test:coverage:legacy` megőrzi a régebbi mérőszámot a korábbi eredményekkel való összehasonlításhoz
-- A lefedettség szakaszos fejlesztési ütemtervét lásd a `docs/ops/COVERAGE_PLAN.md` fájlban
+- A lefedettség fokozatos javításának ütemtervét lásd a `docs/ops/COVERAGE_PLAN.md` fájlban
 
-### Pull request követelményei
+### Pull requestek követelményei
 
 PR megnyitása előtt használd a
-[hozzájárulási Golden Path útmutatót](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), hogy lefuttasd a módosításaidhoz
-tartozó célzott ciklust. A teljes unit tesztcsomag (4 CI-shard), a Vitest, a **60%+** lefedettségi küszöb és
-az éles build a CI felelőssége — helyi futtatásuk nem ad olyan további információt, amelyet a PR
-ellenőrzései ne biztosítanának, kisebb gépeken pedig túlterhelhetik a rendszert (#8084):
+[hozzájárulás ajánlott folyamatát](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), hogy lefuttasd a módosításaidhoz
+tartozó célzott ciklust. A teljes egységtesztcsomagért (4 CI-szegmens), a Vitestért, a **60%+** lefedettségi küszöbért és
+az éles buildért a CI felel — ezek helyi futtatása nem ad olyan többletinformációt, amelyet a PR
+ellenőrzései ne biztosítanának, kisebb gépeken pedig teljesen leterhelheti a gazdagépet (#8084):
 
 - Futtasd a módosításodat lefedő tesztfájlokat: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Futtasd az `npm run lint` parancsot
-- Éles kód módosításakor ugyanabban a PR-ben adj hozzá vagy frissíts automatizált teszteket
-- Ha az éles kód módosult, a PR leírásában tüntesd fel a módosított vagy hozzáadott tesztfájlokat
-- Ellenőrizd a SonarQube eredményét a PR-ben, ha a projekt titkos értékei be vannak állítva a CI-ben
+- Ha az éles kód módosul, ugyanabban a PR-ben adj hozzá vagy frissíts automatizált teszteket
+- A `node:test` fájlokban minden legfelső szintű `await` kifejezést (például `await import(...)`) az első `test()` / `describe()` elé helyezz: a `--test-force-exit` használatakor az utána regisztrált tesztek észrevétlenül kimaradhatnak (#18045; ezt az `npm run check:test-tla-order` kényszeríti ki)
+- Ha az éles kód módosult, a PR leírásában sorold fel a módosított vagy hozzáadott tesztfájlokat
+- Ellenőrizd a SonarQube eredményét a PR-en, ha a projekt titkos értékei konfigurálva vannak a CI-ben
 
-A tesztek jelenlegi állapota: **122 unit tesztfájl**, amelyek az alábbiakat fedik le:
+A tesztek jelenlegi állapota: **122 egységtesztfájl**, amelyek a következőket fedik le:
 
 - Szolgáltatói fordítók és formátumkonverzió
-- Sebességkorlátozás, áramkör-megszakító és hibatűrés
+- Sebességkorlátozás, megszakító és ellenálló képesség
 - Szemantikus gyorsítótár, idempotencia, folyamatkövetés
 - Adatbázis-műveletek és séma (21 DB-modul)
 - OAuth-folyamatok és hitelesítés
 - API-végpontok validációja (Zod v4)
-- MCP-kiszolgálóeszközök és hatókörök kikényszerítése
+- MCP-kiszolgálóeszközök és hatókör-kikényszerítés
 - Memória- és Skills-rendszerek
 
 ---

@@ -31,6 +31,16 @@ test("a Responses stream that only carries an error frame reports failed with th
   assert.deepEqual(parsed.error, { type: "server_error", message: "upstream boom" });
 });
 
+test("an error-only payload with no Responses snapshot stays null for the generic SSE path (#3324)", () => {
+  // A CLI executor that always answers text/event-stream signals failure with a bare
+  // `data: {"error":{...}}` chunk: no response.created, no choices. That is not a Responses
+  // stream, so the Responses parser must not synthesize a failed snapshot for it — the
+  // non-streaming leg surfaces the message as a 502 `invalid_sse_payload` instead.
+  const raw = sse([{ error: { message: "Devin CLI not found" } }]);
+
+  assert.equal(parseSSEToResponsesOutput(raw, "gpt-test"), null);
+});
+
 test("a normal terminal snapshot still reports completed and carries no error", () => {
   const raw = sse([
     { type: "response.created", response: { id: "resp_ok", object: "response", output: [] } },

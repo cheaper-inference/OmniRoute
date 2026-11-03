@@ -1,0 +1,1 @@
+- **perf(db):** index `token_ledger` by direction (migration 224: `idx_token_ledger_to_created`, `idx_token_ledger_from_created`) so the balance and history reads no longer full-scan the append-only ledger, and `getBalance()` now nets credits and debits in one statement — `transferTokens()` calls it inside its write transaction, so the scan was write-lock hold time (#17924)

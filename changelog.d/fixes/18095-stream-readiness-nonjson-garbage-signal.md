@@ -1,0 +1,1 @@
+- **fix(sse):** a non-JSON `data:` line no longer counts as useful stream content, so a proxy error page or a truncated fragment served under `data:` cannot satisfy the empty-turn verdict or the content watcher ([#18095](https://github.com/cheaper-inference/OmniRoute/pull/18095)) — thanks @maxmad64bis

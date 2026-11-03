@@ -1,0 +1,1 @@
+- **fix(mcp):** bound and paginate `omniroute_list_models_catalog` results with stable cursors, search, summary mode, explicit totals, and per-provider failure reporting so large or partially unavailable catalogs remain usable.

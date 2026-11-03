@@ -5,6 +5,10 @@ import { jwtVerify, createRemoteJWKSet } from "jose";
 import { cookies } from "next/headers";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 import {
+  matchesOidcAdmissionClaim,
+  oidcAdmissionClaimSchema,
+} from "@/shared/utils/oidcAdmissionClaim";
+import {
   getDashboardJwtSecret,
   mintDashboardSessionToken,
 } from "@/shared/utils/dashboardSessionToken";
@@ -94,7 +98,17 @@ export async function GET(request: Request) {
     ? settings.oidcAllowedSubjects.filter((v: unknown) => typeof v === "string" && v.trim() !== "")
     : [];
 
-  if (!enabled || !rawIssuer || !clientId || !clientSecret || allowed.length === 0) {
+  const rawAdmissionClaim = settings.oidcAdmissionClaim;
+  const admissionClaim =
+    rawAdmissionClaim == null ? null : oidcAdmissionClaimSchema.safeParse(rawAdmissionClaim);
+  if (
+    !enabled ||
+    !rawIssuer ||
+    !clientId ||
+    !clientSecret ||
+    (rawAdmissionClaim != null && !admissionClaim?.success) ||
+    (allowed.length === 0 && !admissionClaim)
+  ) {
     return NextResponse.redirect(new URL("/login?oidc_error=not_configured", originEarly));
   }
 
@@ -228,8 +242,11 @@ export async function GET(request: Request) {
       if (v === sub) return true;
       return email !== "" && v.toLowerCase() === email;
     });
-    if (!ok) {
+    if (allowed.length > 0 && !ok) {
       return NextResponse.redirect(new URL("/login?oidc_error=subject_not_allowed", originEarly));
+    }
+    if (admissionClaim?.success && !matchesOidcAdmissionClaim(payload, admissionClaim.data)) {
+      return NextResponse.redirect(new URL("/login?oidc_error=role_not_allowed", originEarly));
     }
   } catch {
     return NextResponse.redirect(new URL("/login?oidc_error=id_token_invalid", originEarly));

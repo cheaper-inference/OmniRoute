@@ -354,6 +354,7 @@ function AccessCombosPanelPanelContent({ context }: { context: AccessFormContext
       setSelectedCombos={form.setSelectedCombos}
       toggleCombo={form.toggleCombo}
       setAllowAutoCombos={form.setAllowAutoCombos}
+      setAllowCcDiscoveryAliases={form.setAllowCcDiscoveryAliases}
       errors={form.tabErrors.combos}
     />
   );
@@ -367,6 +368,9 @@ function AccessConnectionsPanelPanelContent({ context }: { context: AccessFormCo
       allConnections={allConnections}
       setAllowAllConnections={form.setAllowAllConnections}
       setSelectedConnections={form.setSelectedConnections}
+      togglePreferredConnection={form.togglePreferredConnection}
+      movePreferredConnection={form.movePreferredConnection}
+      clearPreferredConnections={form.clearPreferredConnections}
       errors={form.tabErrors.connections}
     />
   );

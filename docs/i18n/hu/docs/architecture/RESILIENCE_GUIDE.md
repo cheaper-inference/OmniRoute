@@ -62,15 +62,15 @@ A küszöbérték alatt a szolgáltató **nem** minősül hűlés alatt állóna
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Regressziós ellenőrzés: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Kapcsolati cooldown
+## 2. Kapcsolat-cooldown
 
 **Hatókör:** egyetlen szolgáltatói kapcsolat/fiók/kulcs.
 
-**Cél:** egy hibás kulcs kihagyása, miközben az ugyanazon szolgáltatóhoz tartozó többi kapcsolat tovább kiszolgálja a kéréseket.
+**Cél:** egy hibás kulcs kihagyása, miközben ugyanannak a szolgáltatónak a többi kapcsolata tovább szolgálja ki a kéréseket.
 
 **Megvalósítás:**
 
-- Nem elérhetőként jelölés: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Elérhetetlenné tétel: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Kiválasztás: `getProviderCredentials*` ugyanabban a fájlban
 - Cooldown-számítás: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Beállítások: `src/lib/resilience/settings.ts`
@@ -84,131 +84,96 @@ Regressziós ellenőrzés: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 **Alapértelmezett cooldownok:**
 
-- OAuth alapérték: 5s
-- API-kulcs alapérték: 3s
-- API-kulcs 429: előnyben részesíti a forrásoldali `Retry-After`/reset fejléceket/elemezhető reset-szöveget
+- OAuth alapérték: 5 mp
+- API-kulcs alapérték: 3 mp
+- API-kulcs 429: előnyben részesíti az upstream `Retry-After`/reset-fejléceket vagy az értelmezhető reset-szöveget
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
-**Védelem a thundering-herd-effektus ellen:** megakadályozza, hogy az egyidejű hibák túlzottan meghosszabbítsák a cooldownt, vagy kétszer is növeljék a `backoffLevel` értékét.
+**Thundering-herd elleni védelem:** megakadályozza, hogy az egyidejű hibák túlzottan meghosszabbítsák a cooldownt, vagy kétszeresen növeljék a `backoffLevel` értékét.
 
-**A párhuzamossági korlát miatti 429-es válaszok nem másznak fel a backoff-létrán.** Egy `429`, amelynek törzse
-párhuzamossági korlátot jelez ("too many concurrent requests", "concurrency limit", "parallel request
-limit", GLM `并发数过高`), azt jelenti, hogy a fiók egészséges, csak foglalt.
-A `checkFallbackError()` ekkor `concurrency_limited` indokot ad vissza: azonnal át kell váltani a következő
-kapcsolatra, ez a kapcsolat pedig fix `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) ideig vagy a
-forrásoldali újrapróbálkozási javaslat szerint hűl le, a `backoffLevel` változatlan marad, és beállításra kerül a `skipProviderBreaker`.
-A kifejezett kvótajelzésű törzs továbbra is elsőbbséget élvez, így az a törzs, amely kvótamintára is
-illeszkedik, kvótaítélet marad. Felismerés: `looksLikeConcurrencyLimit()` a `src/shared/utils/classify429.ts` fájlban;
-ítélet: `open-sse/services/accountFallback/concurrencyLimit429.ts`. A `classify429()` (a
-megszakító `FailureKind` típusa) változatlan, és ezekre a törzsekre továbbra is `rate_limit` értéket ad.
+**A párhuzamossági korlátot jelző 429-es hibák nem lépdelnek feljebb a backoff-létrán.** Egy olyan `429`, amelynek törzse párhuzamossági korlátot jelez ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`), azt jelenti, hogy a fiók egészséges, csak foglalt. A `checkFallbackError()` `concurrency_limited` indokot ad vissza: azonnal átvált a következő kapcsolatra, ezt pedig rögzített `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 mp) időre vagy az upstream újrapróbálkozási javaslatára hűti le, a `backoffLevel` változatlan marad, és beállítja a `skipProviderBreaker` jelzőt. A kifejezett kvótás törzs továbbra is nyer, így egy olyan törzs, amely kvótamintára is illeszkedik, kvótadöntés marad. Felismerés: `looksLikeConcurrencyLimit()` a `src/shared/utils/classify429.ts` fájlban; döntés: `open-sse/services/accountFallback/concurrencyLimit429.ts`. A `classify429()` (a megszakító `FailureKind` típusa) változatlan, és ezekre a törzsekre továbbra is `rate_limit` értéket ad.
 
-**A stream tartalmi megakadásai nem hűtik le a fiókot.** Amikor a tartalom-megakadási watchdog
-(`open-sse/utils/streamHandler.ts`) felad egy streamet, amely időben nem küldött modellkimenetet,
-a `markAccountUnavailable()` rögzíti a hibát a kapcsolaton, de nem állít be
-cooldownt: a megakadás ahhoz a kéréshez tartozik, leggyakrabban egy hosszú érvelési körhöz, amely még
-nem adott kimenetet. Az operátorok a `resilienceSettings.streamStallCooldown.enabled`
-beállítással visszakapcsolhatják ezt a viselkedést (alapértelmezés: `false`).
+**A stream tartalmi akadozásai nem hűtik le a fiókot.** Amikor a tartalmi akadozást figyelő watchdog (`open-sse/utils/streamHandler.ts`) felad egy olyan streamet, amely időben nem küldött modellkimenetet, a `markAccountUnavailable()` rögzíti ugyan a hibát a kapcsolaton, de nem állít be cooldownt: az akadozás az adott kéréshez tartozik, leggyakrabban egy hosszú, még kimenet nélküli gondolkodási körhöz. Az operátorok visszakapcsolhatják ezt a `resilienceSettings.streamStallCooldown.enabled` beállítással (alapértelmezés: `false`).
 
-**Az érvelési keretek újraindítják a tartalom-megakadási keretet.** Egy érvelő modell az első
-látható tokenje előtt percekig gondolkodhat: a Claude `thinking_delta` kereteket streamel, amelyek
-gondolkodási szövege üres is lehet, a Responses API pedig egymás után streameli az érvelési
-elemeket. Az `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) felismeri
-ezeket a kereteket, és a watchdog minden egyesnél újraindítja a keretét ahelyett, hogy megszakítaná
-a kört. Ezek továbbra sem számítanak modellkimenetnek, így a csak érveléssel végződő kör
-továbbra is üresként kerül jelentésre, és az a kör, amely befejezi az érvelést, és csak heartbeateket
-küld, továbbra is kiváltja a watchdogot.
+**Opcionális késleltetési jel a `p2c` fiókválasztáshoz.** Minden elküldött kísérlet rögzíti az első bájtig eltelt időt és az eredményt kapcsolatonként (és kapcsolat + modell szerint) egy memóriabeli mozgóablakban: az utolsó 20 minta 15 percen belül (`open-sse/services/connectionLatencyTracker.ts`, a `src/sse/handlers/chatHelpers.ts` fájlban található `safeLogEvents()` függvényből rögzítve). Amikor a `resilienceSettings.p2cLatency.weight` nagyobb, mint `0` (tartomány: 0–20, alapértelmezés `0` = kikapcsolva), a `compareP2CConnections()` a `src/sse/services/auth.ts` fájlban legfeljebb `weight` pontot ad a pár mindkét jelöltjéhez. Ennek fele a késleltetésből adódik, a gyorsabb jelölthöz viszonyított arányként (a kétszeres lassúság a teljes felet kiteszi), a másik fele pedig a mozgó hibaarányból. Ez a tag csak akkor érvényesül, ha mindkét jelölt legalább 3 mintával rendelkezik, így az új fiókok nincsenek hátrányban, és a plafonja a kvóta-blokkolt és kvóta-kimerült büntetések alatt marad. Nem hoz létre saját megszakítót: a hibás fiókokat továbbra is a cooldown-, kizárási és megszakítórétegek kezelik. Beállítása: `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-A Kiro bináris `reasoningContentEvent` keretei nem üres aláírással az executoron áthaladva üres
-`reasoning_content` deltaként őrzik meg ezt az érvelési tevékenységet. Az aláírás
-nem kerül továbbításra. A metaadatok, a hiányos keretek és az üres aláírások nem indítják újra a
-tartalmi keretet; a független aktív-stream időtúllépés és a kliensoldali megszakítás továbbra is
-érvényes (`open-sse/executors/kiro/reasoning.ts`).
+**A gondolkodási (reasoning) keretek újraindítják a tartalmi akadozás költségkeretét.** Egy reasoning-modell az első látható token előtt percekig gondolkodhat: a Claude `thinking_delta` kereteket streamel, amelyek gondolkodási szövege üres lehet, a Responses API pedig egymás utáni reasoning-elemeket streamel. Az `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) felismeri ezeket a kereteket, és a watchdog minden egyes ilyen keretnél újraindítja a költségkeretét ahelyett, hogy megszakítaná a kört. Ezek továbbra sem számítanak modellkimenetnek, így egy csak gondolkodással záródó kör továbbra is üresként kerül jelentésre, és egy olyan kör, amely abbahagyja a gondolkodást és csak heartbeateket küld, továbbra is kiváltja a watchdogot.
 
-**Végállapotok (NEM cooldownok):**
+A Kiro bináris `reasoningContentEvent` keretei nem üres aláírással az executoron keresztül üres `reasoning_content` deltaként őrzik meg ezt a gondolkodási aktivitást. Az aláírás nem kerül továbbításra. A metaadatok, a hiányos keretek és az üres aláírások nem indítják újra a tartalmi költségkeretet; a független aktív-stream időtúllépés és a kliensoldali megszakítás továbbra is érvényes (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — a tiltottkulcsszó- / fióktiltás-észlelés állítja be (lásd [BAN_DETECTION](../security/BAN_DETECTION.md)), valamint három egymást követő forrásoldali, kérésenkénti elutasítás (`request_rejected`, pl. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); egyetlen elutasítás csak lehűti a kapcsolatot
-- `expired` (korlátozott számú újrapróbálkozás után vált végállapotba — `EXPIRED_RETRY_MAX = 3` exponenciális backoff-fal —, így az átmeneti OAuth-hibák öngyógyulhatnak, mielőtt a fiók véglegesen deaktiválódna)
+**Terminális állapotok (NEM cooldownok):**
+
+- `banned` — a tiltott kulcsszavas / fióktiltás-felismerés állítja be (lásd [BAN_DETECTION](../security/BAN_DETECTION.md)), valamint három egymást követő upstream kérésenkénti elutasítás (`request_rejected`, pl. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); egyetlen elutasítás csak cooldownba helyezi a kapcsolatot
+- `expired` (korlátozott számú újrapróbálkozás után válik terminálissá — `EXPIRED_RETRY_MAX = 3` exponenciális backoffal —, így az átmeneti OAuth-hibák öngyógyulhatnak, mielőtt a fiók véglegesen inaktiválódna)
 - `credits_exhausted`
 
-Ezek addig fennmaradnak, amíg a hitelesítő adatok meg nem változnak, vagy egy operátor vissza nem állítja őket. A végállapotokat nem szabad felülírni átmeneti cooldown-állapottal.
+Ezek mindaddig fennmaradnak, amíg a hitelesítő adatok meg nem változnak, vagy egy operátor vissza nem állítja őket. Ne írd felül a terminális állapotokat átmeneti cooldown-állapottal.
 
-**Lusta helyreállás:** amikor a `rateLimitedUntil` lejár, a kapcsolat újra jogosulttá válik. Sikeres használat esetén a `clearAccountError()` törli az összes hibamezőt.
+**Lusta helyreállás:** amikor a `rateLimitedUntil` lejár, a kapcsolat újra választhatóvá válik. Sikeres használatkor a `clearAccountError()` törli az összes hibamezőt.
 
-### Claude OAuth használati korlát: alacsonyabb prioritású sáv + munkamenetkorlát-visszaállítás
+### Claude OAuth használati korlát: alacsonyabb prioritású sáv + munkamenet-korlát visszaállítása
 
-**Hatókör:** egy Claude-előfizetéses (OAuth) kapcsolat. Mindkét funkció **kapcsolatonként
-opt-in** (Kapcsolat szerkesztése → Claude szakasz → `lowPriorityMode` / `autoLimitReset` a
-`providerSpecificData` mezőben, mindkettő alapértelmezetten ki van kapcsolva), és a Claude Code `/low-priority` és
-`/limit-reset` parancsait tükrözi (a wire contract a Claude Code 2.1.263 verzióból lett rögzítve).
+**Hatókör:** egy Claude-előfizetéses (OAuth) kapcsolat. Mindkét funkció **kapcsolatonként opcionális** (Kapcsolat szerkesztése → Claude szakasz → `lowPriorityMode` / `autoLimitReset` a `providerSpecificData` mezőben, mindkettő alapértelmezetten ki van kapcsolva), és a Claude Code `/low-priority` és `/limit-reset` parancsait tükrözik (a vezetékes szerződés a Claude Code 2.1.263 verzióból rögzítve).
 
 **Megvalósítás:**
 
 - Állapotgép + válaszosztályozás: `open-sse/services/claudeLowPriority.ts`
-- Reset-állapot/igénylés-kliens: `open-sse/services/claudeLimitReset.ts`
-- Executor-hook (fejlécbeszúrás + azonos fiókos újrapróbálkozás): `open-sse/executors/base.ts::execute()`
-- Opt-in perzisztencia: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Visszaállítás-állapot/igénylés kliens: `open-sse/services/claudeLimitReset.ts`
+- Executor hook (fejlécinjekció + azonos fiókú újrapróbálkozás): `open-sse/executors/base.ts::execute()`
+- Opcionális (opt-in) perzisztencia: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Kiváltó esemény:** az 5 órás használati korlát — egy `429`, amelynek fejlécei
-`anthropic-ratelimit-unified-status: rejected` értéket hordoznak, és amennyiben a fiók jogosult,
-`anthropic-ratelimit-unified-slow-offer: treatment` értéket is. Az első korlát-429
-előtt semmi sem kerül elküldésre; az egységes fejlécek nélküli burst 429 a normál cooldown-úton halad.
+**Kiváltó esemény:** az 5 órás használati korlát — egy `429`-es válasz, amelynek fejlécei az `anthropic-ratelimit-unified-status: rejected` értéket hordozzák, és amennyiben a fiók jogosult, az `anthropic-ratelimit-unified-slow-offer: treatment` értéket is. Semmi sem kerül elküldésre az első korlát-429 előtt; az egységes fejlécek nélküli csúcsterheléses 429 a szokásos cooldown-útvonalon halad.
 
 **Alacsonyabb prioritású sáv** (`lowPriorityMode`):
 
-- A wall 429-es válaszánál a végrehajtó elfogadja az ajánlatot, és azonnal újrapróbálkozik **ugyanazzal** a fiókkal az `anthropic-usage-limit: slow` fejléccel; a sáv a bejelentett `anthropic-ratelimit-unified-reset` időpontig (+60 mp türelmi idő) aktív marad, és az ebben az ablakban küldött minden kérés hordozza a fejlécet. Az elfogott 429-es soha nem jut el a `handleChatCore` függvényig, így a kapcsolat **nem** kerül cooldown állapotba, és nem rotálódik el.
-- A későbbi válaszokban megjelenő `anthropic-ratelimit-unified-slow-status`: az `active` / `not_needed` megtartja a sávot; `slot_busy` (429) vagy `529` esetén a rendszer kivárja a szerver `anthropic-ratelimit-unified-slow-retry-after` értékét (alapértelmezett 20 mp, korlát 5–600 mp, ±30% jitter), majd újrapróbálkozik, az `anthropic-ratelimit-unified-slow-max-wait` által korlátozva (alapértelmezett 20 perc, korlát 1 perc–6 óra) — ezen túl a sáv véget ér, és egy 10 perces lehűlés blokkolja az újbóli elfogadást. A várakozást emellett a kérés saját upstream-indítási időtúllépéséből hátralévő idő is korlátozza (`resolveFetchStartTimeout`, alapértelmezetten 10 perc) mínusz 5 mp-es biztonsági tartalék: e korlát nélkül a 20 perces alapértelmezett max-wait túlélné a kérést, és az alvás a várakozás közepén megszakadna, ami a szabályos `max_wait` vég + lehűlés helyett `TimeoutError` hibát eredményezne.
-- A `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, az 5 órás ablak átfordulása, vagy az `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (amely bármely státusz esetén `extra_usage`-ként zárja le a sávot, mivel a fizetett túllépés most már fedezi a wallt) lezárja a sávot; a válasz ezután a normál cooldown-útvonalra kerül. A `budget_exhausted` állapotot a rendszer a bejelentett költségkeret-visszaállításig megjegyzi (≤ 8 nap).
-- A wall-ellenőrzés a végrehajtó saját, 400-as válaszok által vezérelt, kísérleten belüli újrapróbálkozásai (kontextusszerkesztés, thinking/effort-korlátozások, paraméter-öntanulás) után fut, így az a wall 429-es is elfogásra kerül — ahelyett, hogy a cooldown-útvonalra jutna —, amely csak az egyik ilyen újrapróbálkozásnál bukkan fel.
-- Az állapot kapcsolatonként a memóriában tárolódik (egy újraindítás egy extra wall 429-es hibába kerül az újbóli elfogadáshoz).
+- A korlát-429-nél az executor elfogadja az ajánlatot, és azonnal újrapróbálkozik **ugyanazzal** a fiókkal az `anthropic-usage-limit: slow` fejléccel; a sáv a bejelentett `anthropic-ratelimit-unified-reset` időpontjáig (+60 mp türelmi idő) marad aktív, és az ebben az ablakban küldött minden kérés hordozza a fejlécet. Az elfogott 429 soha nem jut el a `handleChatCore`-hoz, így a kapcsolat **nem** kerül cooldown-ba, és nem lesz elrotálva.
+- A későbbi válaszokon megjelenő `anthropic-ratelimit-unified-slow-status`: az `active` / `not_needed` értékek megtartják a sávot; `slot_busy` (429) vagy egy `529`-es válasz esetén a rendszer a kiszolgáló `anthropic-ratelimit-unified-slow-retry-after` értékéig vár (alapértelmezés 20 mp, korlátozva 5–600 mp közé, ±30% jitterrel), majd újrapróbálkozik, az `anthropic-ratelimit-unified-slow-max-wait` által behatárolva (alapértelmezés 20 perc, korlátozva 1 perc–6 óra közé) — ezen túl a sáv véget ér, és egy 10 perces lehűlési idő (cool-off) blokkolja az újbóli elfogadást. A várakozást ezen felül korlátozza a kérés saját upstream-indítási időtúllépéséből hátralévő idő (`resolveFetchStartTimeout`, alapértelmezésben 10 perc) mínusz egy 5 másodperces ráhagyás: e korlát nélkül a 20 perces alapértelmezett maximális várakozás túlélné a kérést, és az alvás várakozás közben megszakadna, ami a szabályos `max_wait`-vég + cool-off helyett `TimeoutError`-t eredményezne.
+- A `weekly_limit` / `budget_exhausted` / `off` / `ineligible` értékek, az 5 órás ablak átfordulása, vagy az `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (amely bármely állapot mellett `extra_usage`-ként zárja le, mivel a fizetett túllépés már fedezi a korlátot) befejezi a sávot; a válasz ekkor a szokásos cooldown-útvonalra kerül. A `budget_exhausted` állapotot a rendszer a bejelentett költségkeret-visszaállításig megjegyzi (≤ 8 nap).
+- A korlátellenőrzés az executor saját, 400-as válaszok által kiváltott, kísérleten belüli újrapróbálkozásai (kontextusszerkesztés, thinking/effort korlátozások, paraméter-öntanulás) után fut, így az a korlát-429 is el lesz fogva, amely csak az egyik ilyen újrapróbálkozásnál bukkan fel, ahelyett, hogy a cooldown-útvonalra jutna.
+- Az állapot kapcsolatonként, memóriában tárolódik (egy újraindítás egy extra korlát-429-be kerül az újbóli elfogadáshoz).
 
-**Munkamenetkorlát-visszaállítás** (`autoLimitReset`, amely a sáv előtt kerül megpróbálásra, ha mindkettő be van kapcsolva):
+**Munkamenetkorlát-visszaállítás** (`autoLimitReset`, amelyet a rendszer a sáv előtt próbál meg, ha mindkettő be van kapcsolva):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → a válasz `juniper_tide` blokkja; ha `arm: "reset"` és `available: true`, akkor `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` a `{ "program": "juniper_tide" }` törzzsel (a szervezet UUID-ját a `providerSpecificData.organizationUUID` szolgáltatja, tartalékként a bootstrap).
-- `result: reset|not_limited` → a kérés teljes sebességgel újrapróbálkozik (slow fejléc nélkül). Az `already_used` / `not_offered` memoizálja a `next_available_at` értéket (alapértelmezett egy hét); bármilyen hiba 15 perces visszavárakozást vált ki. A visszaállítás hetente egyszer érhető el, és továbbra is beleszámít a heti korlátba.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` blokk; ha `arm: "reset"` és `available: true`, akkor `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` a következő törzzsel: `{ "program": "juniper_tide" }` (a szervezet UUID-ja a `providerSpecificData.organizationUUID` mezőből, bootstrap-tartalékkal).
+- `result: reset|not_limited` → a kérés teljes sebességgel újrapróbálkozik (slow-fejléc nélkül). Az `already_used` / `not_offered` esetekben a rendszer memoizálja a `next_available_at` értéket (alapértelmezésben egy hét); bármilyen hiba 15 perces visszatartást (backoff) eredményez. A visszaállítás hetente egyszer vehető igénybe, és továbbra is beleszámít a heti korlátba.
 
-Regressziós védelmek: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+Regressziós védelmek: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Munkamenet-affinitás (#7274)
 
-**Hatókör:** egy kliens-munkamenet (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` fejléc) egy kapcsolathoz rögzítve, **bármely** szolgáltató esetén.
+**Hatókör:** egy kliens-munkamenet (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` fejléc) egyetlen kapcsolathoz rögzítve, **bármely** szolgáltató esetén.
 
-**Cél:** egy többfordulós ügynök (Claude Code, aider, egyéni ügynökök) megtartása ugyanazon a fiókon a kérések során, csökkentve a fiókok közötti kontextusvesztést és az ismétlődő hidegindítási 429-es hibákat azoknál a szolgáltatóknál, ahol fiókonkénti munkamenet-állapot létezik.
+**Cél:** egy többfordulatú ügynököt (Claude Code, aider, egyéni ügynökök) a kérések során ugyanazon a fiókon tartani, csökkentve a fiókok közötti kontextusvesztést és az ismétlődő hidegindítási 429-es válaszokat azoknál a szolgáltatóknál, amelyek fiókonkénti munkamenet-állapottal rendelkeznek.
 
 **Megvalósítás:**
 
 - TTL-feloldás: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
 - Rögzítés kiválasztása/létrehozása: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
 - Fejléckinyerés (általános, bármely szolgáltatóhoz): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Perzisztensen tárolt rögzítési tábla: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Beállítás: `sessionAffinityTtlMs` (globális TTL ezredmásodpercben, `0` kikapcsolja) — `src/lib/db/settings.ts`. A Codex-specifikus `codexSessionAffinityTtlMs` beállításból nevezte át a `124_generic_session_affinity_ttl.sql` migráció, amely minden korábban beállított Codex TTL-t átvisz az új alapértelmezettként.
+- Perzisztált rögzítési tábla: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Beállítás: `sessionAffinityTtlMs` (globális TTL ezredmásodpercben, `0` letiltja) — `src/lib/db/settings.ts`. A korábbi, Codex-specifikus `codexSessionAffinityTtlMs` beállításról a `124_generic_session_affinity_ttl.sql` migráció nevezte át, amely minden korábban beállított Codex-TTL-t az új alapértelmezettként visz tovább.
 
-A #7274 előtt a `resolveSessionAffinityTtlMs()` a `codex` kivételével minden szolgáltatónál azonnal `0`-t adott vissza, így a TTL-beállítás (és a munkamenet-fejlécek) sehol máshol nem volt hatással, pedig a rögzítési mechanizmus és a fejléckinyerés már akkor is szolgáltatófüggetlen volt. A javítás eltávolította ezt a korai visszatérést; a TTL mostantól egységesen minden szolgáltatóra érvényes, amint globálisan `0` fölé állítják.
+A #7274 előtt a `resolveSessionAffinityTtlMs()` a `codex` kivételével minden szolgáltatónál azonnal `0`-val tért vissza, így a TTL-beállításnak (és a munkamenet-fejléceknek) sehol máshol nem volt hatása, pedig a rögzítési mechanizmus és a fejléckinyerés már akkor is szolgáltatófüggetlen volt. A javítás eltávolította ezt a korai visszatérést; a TTL mostantól egységesen minden szolgáltatóra érvényes, amint globálisan `0` fölé állítják.
 
-A három munkamenet-affinitási fejléc soha nem kerül továbbításra upstream felé — a végrehajtók a saját upstream-fejléceiket a nulláról építik fel, ahelyett hogy átengednék a kliensfejléceket, így ez kizárólag belső korrelációs azonosító marad.
+A három munkamenet-affinitási fejléc soha nem kerül továbbításra az upstream felé — az executorok a saját upstream-fejléceiket a nulláról építik fel, ahelyett, hogy a kliensfejléceket átengednék, így ez kizárólag belső korrelációs azonosító marad.
 
-### Exkluzív felügyelt munkamenet-kapcsolatbérletek
+### Exkluzív, felügyelt munkamenet-kapcsolatbérletek
 
-**Hatókör:** egy aktív, felügyelt HTTP-kliens/-munkamenet egy jogosult OmniRoute-kapcsolatot birtokol.
+**Hatókör:** egy aktív, felügyelt HTTP-kliens/munkamenet egy jogosult OmniRoute-kapcsolatot birtokol.
 
-**Cél:** tartós, exkluzív kapcsolattulajdonlás biztosítása azoknak a klienseknek, amelyeknek a kérések között merev útválasztási korlátra van szükségük. Ez eltér a munkamenet-affinitástól, amely csupán lágy folytonossági preferencia: egy exkluzív bérlet SQLite-ban őrzi az életciklus-állapotot, globálisan kikényszeríti az aktív tulajdonos és az aktív kapcsolat egyediségét, és a szolgáltató felé történő továbbítás előtt elutasítja az elavult generációt.
+**Cél:** tartós, exkluzív kapcsolattulajdonlást biztosítani azoknak a klienseknek, amelyeknek a kérések között szigorú útválasztási korlátra van szükségük. Ez eltér a munkamenet-affinitástól, amely csupán lágysúlyú folytonossági preferencia: az exkluzív bérlet SQLite-ban őrzi az életciklus-állapotot, globálisan kikényszeríti az aktív tulajdonos és az aktív kapcsolat egyediségét, és a szolgáltató-felé történő továbbítás (dispatch) előtt elutasítja az elavult generációt.
 
-A funkció API-kulcsonként opt-in. A felügyelt kulcsnak rendelkeznie kell a `lease:exclusive` hatókörrel és egy explicit, nem üres `allowedConnections` listával. Az életciklus-végpontot bármely HTTP-kliens használhatja; nincs szükség kliensnévre, user-agentre, szolgáltatóra, OAuth-módszerre vagy modellre. A bérlet kapcsolatot birtokol, nem modellt, így a modellváltás megtartja a kötést, amíg a kapcsolat a szokásos módon jogosult marad. A normál modell-, kvóta-, egészségügyi, cooldown- és engedélyezési lista szabályok továbbra is mérvadóak, és ugyanazt a generációt átvihetik egy másik szabad, jogosult kapcsolatra.
+A funkció API-kulcsonként opt-in jellegű. A felügyelt kulcsnak rendelkeznie kell a `lease:exclusive` hatókörrel és egy explicit, nem üres `allowedConnections` listával. Az életciklus-végpontot bármely HTTP-kliens használhatja; nincs szükség kliensnévre, user-agentre, szolgáltatóra, OAuth-módszerre vagy modellre. A bérlet egy kapcsolatot birtokol, nem egy modellt, így a modellváltás megőrzi a kötést, amíg a kapcsolat a szokásos módon jogosult marad. A szokásos modell-, kvóta-, állapot-, cooldown- és engedélyezési-lista-szabályok továbbra is irányadók, és ugyanazt a generációt áthelyezhetik egy másik szabad, jogosult kapcsolatra.
 
-Az életciklus a `POST /api/v1/session-leases` végpontra épül, `acquire`, `renew` és `release` JSON-műveletekkel.
-A felügyelt inferenciakérések megadják az átlátszatlan `X-OmniRoute-Lease-Owner` értéket és a pontos
-`X-OmniRoute-Lease-Generation` értéket. A tulajdonos a `vlo_` előtagból és az azt követő 43 base64url karakterből áll; csak a SHA-256-kivonatát tárolja a rendszer. Minden végső továbbítási kirekesztés hozzáköti a hitelesített API-kulcs-azonosítót és az aktív kapcsolatazonosítót is. A bérletvezérlő fejlécek eltávolításra kerülnek a naplókból, a megőrzött kéréspillanatképekből és az upstream-végrehajtó fejléceiből.
+Az életciklus a `POST /api/v1/session-leases` végpont, `acquire`, `renew` és `release` JSON-műveletekkel. A felügyelt inferenciakérések az opakus `X-OmniRoute-Lease-Owner` értéket és a pontos `X-OmniRoute-Lease-Generation` értéket adják meg. A tulajdonos-azonosító a `vlo_` karakterlánc után 43 base64url karakterből áll; a rendszer csak a SHA-256 hash-ét tárolja. Minden végső dispatch-fence az azonosított API-kulcs-ID-hez és az aktív kapcsolat-ID-hez is kötődik. A bérletvezérlő fejlécek eltávolításra kerülnek a naplókból, a megőrzött kérés-pillanatképekből és az upstream-végrehajtó fejléceiből.
 
-Ha a közönséges útválasztásnak vannak jogosult felügyelt jelöltjei, de minden szabad jelöltet idegen aktív bérlet foglal le, az OmniRoute HTTP `429` választ ad, „a bérletkapacitás nem áll rendelkezésre" kóddal, „kapacitásra várakozó" állapottal és a legkorábbi releváns lejáratból származtatott korlátozott `Retry-After` értékkel.
-A közönséges üres jogosultság nem bérletversengés, és megtartja a meglévő útválasztási hibaszemantikáját.
+Ha a szokásos útválasztás jogosult felügyelt jelölteket talál, de minden szabad jelöltet idegen aktív bérlet foglal, az OmniRoute HTTP `429` választ, lease-capacity-unavailable kódot, waiting-for-capacity állapotot és a legkorábbi releváns lejáratból származó korlátozott `Retry-After` értéket ad. A szokásos üres jogosultság nem bérlet-versengés, és megőrzi a meglévő útválasztási hibaszemantikát.
 
-A kapcsolódó mechanizmusok elkülönülve maradnak:
+A kapcsolódó mechanizmusok különállóak maradnak:
 
-- Az OAuth-munkamenet-foglaltság az OAuth-fiókok folyamaton belüli, lágy szétosztása.
-- A fiókszemáforok a kérések párhuzamosságára vonatkozó engedélyeket adnak ki, és a kérés befejezésekor megszűnnek.
-- A kizárólagos felügyelt munkamenet-bérletek tartós életciklus-tulajdonjogot biztosítanak generációs kirekesztéssel.
-
----
+- Az OAuth-munkamenet-foglaltság folyamat-helyi, laza elosztás az OAuth-fiókok számára.
+- A fiókszemáforok kérés-párhuzamossági engedélyeket adnak, és a kérés befejezésekor véget érnek.
+- Az exkluzív felügyelt munkamenet-bérletek tartós életciklus-tulajdonjogot jelentenek generációs fence-szel.
 
 ## 3. Modellzárolás
 

@@ -17,51 +17,119 @@ OmniRoute memiliki pipeline otorisasi yang sadar rute yang menjaga setiap permin
 
 ### 1. Kunci API (Bearer)
 
-Digunakan untuk API klien yang kompatibel dengan OpenAI/Anthropic/Gemini dan beberapa rute manajemen ketika kunci memiliki cakupan `manage`.
+Digunakan untuk API klien yang kompatibel dengan OpenAI/Anthropic/Gemini dan beberapa rute pengelolaan ketika kunci memiliki cakupan `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Divalidasi oleh `isValidApiKey()` / `extractApiKey()` di `src/sse/services/auth.ts` dan diekspor ulang melalui `src/shared/utils/apiAuth.ts`. Validator juga menerima variabel lingkungan `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` sebagai kunci passthrough persisten (issue #1350).
+Divalidasi oleh `isValidApiKey()` / `extractApiKey()` di `src/sse/services/auth.ts` dan diekspor ulang melalui `src/shared/utils/apiAuth.ts`. Validator juga menerima variabel lingkungan `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` sebagai kunci passthrough persisten (masalah #1350).
 
-### 2. Sesi Dashboard (cookie auth_token)
+### 2. Sesi Dasbor (cookie auth_token)
 
-Untuk halaman dashboard dan operasi admin.
+Untuk halaman dasbor dan operasi admin.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie hanya dianggap sesi ketika JWT terverifikasi **dan** memuat `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Setiap konsumen cookie — pelindung rute dashboard (`isDashboardSessionAuthenticated()`), penyegaran pipeline authz, jabat tangan WebSocket, server langsung, `/api/settings/require-login`, `/api/auth/status` — melewati helper ini.
-JWT lain yang ditandatangani dengan `JWT_SECRET` juga ada — passthrough Cursor CLI menerbitkan token `iss "omniroute" / aud "cursor-cli"` untuk pemegang kunci — dan token tersebut tidak pernah dianggap sesi (#13298).
+Cookie hanya dianggap sebagai sesi ketika JWT berhasil diverifikasi **dan** memiliki `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Setiap
+pengguna cookie (penjaga rute dasbor (`isDashboardSessionAuthenticated()`), penyegaran pipeline authz, handshake WebSocket, server
+live, `/api/settings/require-login`, `/api/auth/status`) menggunakan helper tersebut.
+Terdapat JWT lain yang ditandatangani dengan `JWT_SECRET` — passthrough Cursor CLI menerbitkan
+token `iss "omniroute" / aud "cursor-cli"` untuk pemegang kunci — dan token tersebut tidak pernah dianggap sebagai sesi
+(#13298).
 
-Diverifikasi oleh `isDashboardSessionAuthenticated()` di `src/shared/utils/apiAuth.ts`. Pipeline memperbarui JWT secara otomatis ketika sisa masa berlakunya kurang dari 7 hari dari masa berlaku 30 hari.
+Diverifikasi oleh `isDashboardSessionAuthenticated()` di `src/shared/utils/apiAuth.ts`. Pipeline secara otomatis menyegarkan JWT ketika masa berlakunya tersisa kurang dari 7 hari dari total masa berlaku 30 hari.
 
-Sesi juga dapat berakhir sebelum 30 hari berlalu, karena setiap penerbit melewati `mintDashboardSessionToken` (waktu terbit `iat` dan ID `jti`), dan verifier memeriksa dua pengaturan: `sessionsValidAfter`, yang diatur oleh perubahan kata sandi sehingga setiap sesi yang diterbitkan sebelumnya berhenti terverifikasi (browser yang mengubah kata sandi mendapat cookie baru), dan `revokedDashboardSessions`, yang ditambahi `jti` sesi yang keluar oleh `POST /api/auth/logout`. Sesi yang dibuat oleh rilis lama tidak memuat klaim ini dan tetap valid sampai perubahan kata sandi pertama. Jika pengaturan tidak dapat dibaca, sesi tidak dipercaya.
+Sesi juga dapat berakhir sebelum 30 hari, karena setiap penerbit menggunakan `mintDashboardSessionToken` (waktu penerbitan `iat` dan ID `jti`) dan pemverifikasi memeriksa dua pengaturan: `sessionsValidAfter`, yang ditetapkan ketika kata sandi diubah sehingga setiap sesi yang diterbitkan sebelumnya tidak lagi berhasil diverifikasi (browser yang mengubah kata sandi mendapatkan cookie baru), dan `revokedDashboardSessions`, tempat `POST /api/auth/logout` menambahkan `jti` milik sesi yang telah keluar. Sesi yang diterbitkan oleh rilis lama tidak memiliki kedua klaim tersebut dan tetap valid hingga perubahan kata sandi pertama. Jika pengaturan tidak dapat dibaca, sesi tidak dipercaya.
 
-Beberapa rute manajemen menerima **salah satu** mode: cookie ATAU `Bearer <key>` ketika kunci API memiliki cakupan `manage` (atau `admin`). Inilah yang memungkinkan alur kerja "dapat dikonfigurasi melalui panggilan API" yang ditambahkan di v3.8.
+Beberapa rute pengelolaan menerima **salah satu** mode: cookie ATAU `Bearer <key>` ketika kunci API memiliki cakupan `manage` (atau `admin`). Inilah yang memungkinkan alur kerja "dapat dikonfigurasi melalui panggilan API" yang ditambahkan dalam v3.8.
 
 #### Gerbang login OIDC opsional (#6973)
 
-Login admin dashboard juga mendukung alur OIDC (OpenID Connect) yang **opsional** di samping login kata sandi default — login kata sandi tidak pernah dihapus, hanya ditambah:
+Login admin dasbor juga mendukung alur OIDC (OpenID Connect) yang **bersifat opsional**
+bersama dengan login kata sandi default — login kata sandi tidak pernah dihapus, hanya
+dilengkapi:
 
-- Aktif hanya jika `settings.oidcEnabled === true` **dan** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` semuanya dikonfigurasi (Settings → Auth). Jika tidak, `GET /api/auth/oidc/login` mengembalikan `400`.
-- `GET /api/auth/oidc/login` menemukan `authorization_endpoint` dari `/.well-known/openid-configuration` milik issuer (kembali ke `<issuer>/authorize`), membangun URI redirect dari permintaan masuk (menghormati `x-forwarded-proto`), dan mengarahkan ke IdP dengan nilai `state` acak yang disimpan dalam cookie `oidc_state` yang `httpOnly`.
-- `GET /api/auth/oidc/callback` memvalidasi `state`, menukar kode otorisasi, dan memverifikasi tanda tangan ID token melalui JWKS issuer (`createRemoteJWKSet` dari `jose`, di-cache per URI JWKS), dengan pemeriksaan `issuer`/`audience`. Daftar izin `oidcAllowedSubjects` wajib: daftar ini dicocokkan dengan klaim `sub` token atau klaim `email` — klaim email hanya diterima ketika `email_verified === true`, sehingga email yang belum diverifikasi di IdP tidak akan pernah lolos gerbang ini — dan tanpa entri, callback menolak setiap login (`not_configured`).
-- Jika berhasil, ia menerbitkan JWT `auth_token` 30 hari yang **persis sama** dengan yang diterbitkan login kata sandi (`src/app/api/auth/login/route.ts`), sehingga sisa pipeline sesi dashboard (penyegaran otomatis, flag cookie) tidak berubah — OIDC hanya mengganti cara cookie diterbitkan, bukan apa yang diberikannya.
-- Setiap pengaturan `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) berada di `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` menjawab `400 PASSWORD_REQUIRED` kecuali body memuat kata sandi manajemen sebagai `currentPassword` (`401 PASSWORD_MISMATCH` jika salah). `oidcDisablePasswordLogin` melarang _login_ dengan kata sandi (`POST /api/auth/login`) tetapi tetap menyimpan hash kata sandi, dan autentikasi ulang tetap memeriksanya terhadap `currentPassword`.
-- `corsOrigins` dan `bruteForceProtection` juga berada di `SECURITY_IMPACTING_SETTINGS_KEYS`: melonggarkan salah satunya melemahkan pertahanan login, sehingga keduanya memerlukan autentikasi ulang `currentPassword` yang sama (tab Security memintanya) dan impor JSON membuangnya.
-- Setiap kunci kebijakan keamanan — entri `SECURITY_IMPACTING_SETTINGS_KEYS`, setiap kunci `oidc*`, dan status sesi dashboard — hanya **untuk operator** pada `PATCH /api/settings`: kunci API dengan cakupan manage atau token akses `oma_` ditolak dengan `403` meskipun mengirim `currentPassword` yang benar, dan penolakannya dicatat sebagai `settings.update_failed` dengan `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` di `src/lib/api/operatorCredential.ts`). Pengaturan biasa (tema, preferensi tampilan) tetap dapat ditulis oleh kunci `manage` atau token akses `admin`. Setiap mutasi pada `/api/settings` itu sendiri (dan `/api/settings/require-login`) juga memerlukan cakupan token akses `admin` (`ADMIN_MUTATION_EXACT_PATHS` di `src/server/authz/accessScopes.ts`, pencocokan jalur persis); `GET` memerlukan `read`, sedangkan sub-rute `/api/settings/*` lainnya (proxy, default combo, alias model, kompresi, pembersihan…) tetap menggunakan cakupan `write` yang disimpulkan dari metode.
-- `POST /api/settings/import-json` melewati autentikasi ulang tersebut, sehingga sebelum menulis ia membuang setiap kunci di `IMPORT_STRIPPED_SETTINGS_KEYS` (file yang sama): kata sandi dan `currentPassword`, setiap entri `SECURITY_IMPACTING_SETTINGS_KEYS`, dan status sesi dashboard (`sessionsValidAfter`, `revokedDashboardSessions`). Dengan demikian, mengimpor cadangan lama tidak dapat menghidupkan kembali sesi yang sudah diakhiri oleh perubahan kata sandi atau keluar.
-- Aktif hanya jika `settings.oidcEnabled === true` **dan** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` semuanya dikonfigurasi (Settings → Auth). Jika tidak, `GET /api/auth/oidc/login` mengembalikan `400`.
-- `GET /api/auth/oidc/login` menemukan `authorization_endpoint` dari `/.well-known/openid-configuration` milik issuer (kembali ke `<issuer>/authorize`), membangun URI redirect dari permintaan masuk (menghormati `x-forwarded-proto`), dan mengarahkan ke IdP dengan nilai `state` acak yang disimpan dalam cookie `oidc_state` yang `httpOnly`.
-- `GET /api/auth/oidc/callback` memvalidasi `state`, menukar kode otorisasi, dan memverifikasi tanda tangan ID token melalui JWKS issuer (`createRemoteJWKSet` dari `jose`, di-cache per URI JWKS), dengan pemeriksaan `issuer`/`audience`. Daftar izin `oidcAllowedSubjects` wajib: daftar ini dicocokkan dengan klaim `sub` token atau klaim `email` — klaim email hanya diterima ketika `email_verified === true`, sehingga email yang belum diverifikasi di IdP tidak akan pernah lolos gerbang ini — dan tanpa entri, callback menolak setiap login (`not_configured`).
-- Jika berhasil, ia menerbitkan JWT `auth_token` 30 hari yang **persis sama** dengan yang diterbitkan login kata sandi (`src/app/api/auth/login/route.ts`), sehingga sisa pipeline sesi dashboard (penyegaran otomatis, flag cookie) tidak berubah — OIDC hanya mengganti cara cookie diterbitkan, bukan apa yang diberikannya.
-- Setiap pengaturan `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) berada di `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` menjawab `400 PASSWORD_REQUIRED` kecuali body memuat kata sandi manajemen sebagai `currentPassword` (`401 PASSWORD_MISMATCH` jika salah). `oidcDisablePasswordLogin` melarang _login_ dengan kata sandi (`POST /api/auth/login`) tetapi tetap menyimpan hash kata sandi, dan autentikasi ulang tetap memeriksanya terhadap `currentPassword`.
-- `corsOrigins` dan `bruteForceProtection` juga berada di `SECURITY_IMPACTING_SETTINGS_KEYS`: melonggarkan salah satunya melemahkan pertahanan login, sehingga keduanya memerlukan autentikasi ulang `currentPassword` yang sama (tab Security memintanya) dan impor JSON membuangnya.
-- Setiap kunci kebijakan keamanan — entri `SECURITY_IMPACTING_SETTINGS_KEYS`, setiap kunci `oidc*`, dan status sesi dashboard — hanya **untuk operator** pada `PATCH /api/settings`: kunci API dengan cakupan manage atau token akses `oma_` ditolak dengan `403` meskipun mengirim `currentPassword` yang benar, dan penolakannya dicatat sebagai `settings.update_failed` dengan `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` di `src/lib/api/operatorCredential.ts`). Pengaturan biasa (tema, preferensi tampilan) tetap dapat ditulis oleh kunci `manage` atau token akses `admin`. Setiap mutasi pada `/api/settings` itu sendiri (dan `/api/settings/require-login`) juga memerlukan cakupan token akses `admin` (`ADMIN_MUTATION_EXACT_PATHS` di `src/server/authz/accessScopes.ts`, pencocokan jalur persis); `GET` memerlukan `read`, sedangkan sub-rute `/api/settings/*` lainnya (proxy, default combo, alias model, kompresi, pembersihan…) tetap menggunakan cakupan `write` yang disimpulkan dari metode.
-- `POST /api/settings/import-json` melewati autentikasi ulang tersebut, sehingga sebelum menulis ia membuang setiap kunci di `IMPORT_STRIPPED_SETTINGS_KEYS` (file yang sama): kata sandi dan `currentPassword`, setiap entri `SECURITY_IMPACTING_SETTINGS_KEYS`, dan status sesi dashboard (`sessionsValidAfter`, `revokedDashboardSessions`). Dengan demikian, mengimpor cadangan lama tidak dapat menghidupkan kembali sesi yang sudah diakhiri oleh perubahan kata sandi atau keluar.
+- Dinonaktifkan kecuali jika `settings.oidcEnabled === true` **dan** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` semuanya telah dikonfigurasi (Pengaturan → Autentikasi).
+  Jika tidak, `GET /api/auth/oidc/login` mengembalikan `400`.
+- `GET /api/auth/oidc/login` menemukan `authorization_endpoint` dari
+  `/.well-known/openid-configuration` milik penerbit (dengan fallback ke
+  `<issuer>/authorize`), membuat URI pengalihan dari permintaan yang masuk
+  (memperhitungkan `x-forwarded-proto`), dan mengalihkan ke IdP dengan `state`
+  acak yang disimpan dalam cookie `oidc_state` beratribut `httpOnly`.
+- `GET /api/auth/oidc/callback` memvalidasi `state`, menukarkan kode otorisasi,
+  dan memverifikasi tanda tangan token ID melalui JWKS milik penerbit
+  (`createRemoteJWKSet` dari `jose`, di-cache per URI JWKS) dengan pemeriksaan
+  `issuer`/`audience`. Akses ke dasbor memerlukan daftar `oidcAllowedSubjects`
+  yang tidak kosong, kebijakan `oidcAdmissionClaim`, atau keduanya. Daftar
+  subjek mencocokkan `sub` atau `email` hanya ketika `email_verified === true`.
+  Kebijakan klaim opsional menggunakan jalur klaim token ID yang dipisahkan
+  dengan titik (misalnya, `realm_access.roles`) dan array nilai yang diterima;
+  klaim yang ditemukan harus berupa array string yang berisi setidaknya satu
+  nilai yang diterima. Jika kedua kebijakan dikonfigurasi, keduanya harus
+  lolos. Klaim yang tidak ada/tidak valid akan ditolak secara tertutup, dan
+  tanpa salah satu kebijakan tersebut, callback menolak proses masuk
+  (`not_configured`). Konfigurasi lama yang hanya menggunakan subjek tetap
+  berfungsi tanpa perubahan.
+- Keycloak biasanya memetakan peran realm ke dalam token akses, tidak selalu ke
+  dalam token ID. Untuk mewajibkan peran realm `admin`, konfigurasikan protocol
+  mapper untuk klien ini yang menyertakan `realm_access.roles` dalam **token
+  ID**-nya, lalu atur `oidcAdmissionClaim` ke
+  `{ "path": "realm_access.roles", "values": ["admin"] }`. Periksa klaim token
+  ID yang sebenarnya untuk klien ini sebelum mengaktifkan akses yang hanya
+  berbasis peran; aplikasi tidak membaca peran token akses. Penolakan token di
+  sisi IdP dapat melengkapi, tetapi tidak menggantikan, pemeriksaan di sisi
+  aplikasi ini.
+- Jika berhasil, proses ini menerbitkan JWT `auth_token` 30 hari yang **sama
+  persis** dengan yang diterbitkan oleh proses masuk menggunakan kata sandi
+  (`src/app/api/auth/login/route.ts`), sehingga seluruh alur sesi dasbor
+  lainnya (penyegaran otomatis, flag cookie) tidak berubah — OIDC hanya
+  menggantikan cara cookie diterbitkan, bukan hak akses yang diberikannya.
+  Perubahan pada peran/grup IdP tidak membatalkan sesi OmniRoute yang sudah
+  ada; proses keluar, rotasi kata sandi, atau kedaluwarsa sesi tetap menentukan
+  masa berlakunya.
+- Setiap pengaturan `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) terdapat dalam
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  merespons dengan `400 PASSWORD_REQUIRED` kecuali jika isi permintaan
+  menyertakan kata sandi pengelolaan sebagai `currentPassword`
+  (`401 PASSWORD_MISMATCH` jika salah). `oidcDisablePasswordLogin` menolak
+  proses _masuk_ menggunakan kata sandi (`POST /api/auth/login`), tetapi tetap
+  menyimpan hash kata sandi, dan autentikasi ulang tetap memeriksa
+  `currentPassword` terhadap hash tersebut.
+- `corsOrigins` dan `bruteForceProtection` juga terdapat dalam
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: melonggarkan salah satunya akan
+  melemahkan pertahanan proses masuk, sehingga keduanya memerlukan autentikasi
+  ulang `currentPassword` yang sama (tab Keamanan akan memintanya), dan impor
+  JSON akan menghapus keduanya.
+- Setiap kunci kebijakan keamanan — entri `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  setiap kunci `oidc*`, dan status sesi dasbor — **hanya dapat diubah oleh
+  operator** pada `PATCH /api/settings`: kunci API dengan cakupan `manage` atau
+  token akses `oma_` akan ditolak dengan `403` meskipun mengirimkan
+  `currentPassword` yang benar, dan penolakan tersebut diaudit sebagai
+  `settings.update_failed` dengan `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` dalam `src/lib/api/operatorCredential.ts`).
+  Pengaturan biasa (tema, preferensi tampilan) tetap dapat ditulis menggunakan
+  kunci `manage` atau token akses `admin`. Setiap mutasi terhadap
+  `/api/settings` itu sendiri (dan `/api/settings/require-login`) juga
+  memerlukan cakupan token akses `admin` (`ADMIN_MUTATION_EXACT_PATHS` dalam
+  `src/server/authz/accessScopes.ts`, pencocokan jalur persis); `GET` tetap
+  memerlukan `read`, sedangkan subrute `/api/settings/*` lainnya (proxy, default
+  kombinasi, alias model, kompresi, pembersihan…) tetap menggunakan cakupan
+  `write` yang ditentukan berdasarkan metode.
+- `POST /api/settings/import-json` melewati autentikasi ulang tersebut, sehingga
+  menghapus setiap kunci dalam `IMPORT_STRIPPED_SETTINGS_KEYS` (file yang sama)
+  sebelum menulis: kata sandi dan `currentPassword`, setiap entri
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, serta status sesi dasbor
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Karena itu, mengimpor
+  cadangan lama tidak dapat menghidupkan kembali sesi yang sebelumnya telah
+  diakhiri oleh perubahan kata sandi atau proses keluar.
 
 ## Kelas Rute
 
@@ -75,34 +143,34 @@ Login admin dashboard juga mendukung alur OIDC (OpenID Connect) yang **opsional*
 
 Beberapa aksi `MANAGEMENT` bersifat **khusus operator**: kunci `manage` tidak cukup. Mengekspor kredensial tersimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), memulihkan cadangan di atas data aktif (`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan berdasarkan id, `POST /api/settings/import-json`), dan menghancurkan titik pemulihan (`DELETE /api/db-backups` untuk pembersihan, dan `PATCH /api/db-backups` karena retensi yang disimpannya menggerakkan pemangkasan otomatis setelah setiap cadangan) memerlukan sesi dashboard, subjek CLI lokal, atau login yang dinonaktifkan. Menerbitkan token sinkronisasi (`POST /api/sync/tokens`) dan mencetak token akses CLI `admin` (`POST /api/cli/tokens`) memerlukan sesi dashboard atau subjek CLI lokal di setiap mode login. Kunci API dengan cakupan apa pun dan token akses `oma_` bukan kredensial operator: mereka mendapat `403` setiap kali salah satunya diperlukan. Pemeriksaannya ada di `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Mengubah pengaturan login juga khusus operator: `POST /api/settings/require-login` (mengatur kata sandi manajemen / mengaktifkan-menonaktifkan `requireLogin`) hanya menerima kredensial tersebut setelah kata sandi ada — jendela bootstrap pertama kali (belum ada kata sandi) tidak berubah — dan sesi dashboard harus mengirim `currentPassword` untuk mengganti kata sandi (`403` jika tidak ada atau salah, dicatat sebagai `settings.update_failed`). CLI lokal dan instans dengan login dinonaktifkan mempertahankan jalur pemulihan dan dapat mengatur kata sandi tanpanya, karena keduanya terikat pada host yang memiliki direktori data.
 
-## Pipeline
+## Saluran pipa
 
 ```
-Permintaan masuk → src/proxy.ts
-  → runAuthzPipeline() di src/server/authz/pipeline.ts
-    1. Hapus header internal tepercaya (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Buat ID permintaan, klasifikasikan rute melalui classifyRoute()
-    3. Jika pathname == "/" → alihkan ke /dashboard
-    4. Jika sedang menguras koneksi (penghentian secara bertahap) dan /api/* → 503
-    5. Jika non-GET /api/* → pemeriksaan checkBodySize()
-    6. Jika OPTIONS → preflight CORS 204
-    7. Jika options.enforce == false → teruskan dengan header kelas rute
-    8. Jika tidak: POLICIES[routeClass].evaluate(ctx)
-       - izinkan → tambahkan x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - tolak   → kesalahan JSON dengan correlation_id (halaman dashboard → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Header internal tepercaya (didefinisikan di `src/server/authz/headers.ts`) **dihapus dari permintaan masuk** sebelum klasifikasi — klien tidak dapat mengisi `x-omniroute-auth-*` terlebih dahulu untuk menyamar sebagai suatu subjek.
+Header internal tepercaya (didefinisikan dalam `src/server/authz/headers.ts`) adalah** dihapus dari permintaan masuk** sebelum klasifikasi — klien tidak dapat mengisi `x-omniroute-auth-*` terlebih dahulu untuk meniru subjek.
 
 ### Kontrak kebijakan
 
 Setiap kelas rute memiliki kebijakan di `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — selalu mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Bearer, memvalidasinya melalui `validateApiKey()`. Hanya beralih ke anonim ketika feature flag efektif `REQUIRE_API_KEY` dinonaktifkan. Flag efektif ditentukan melalui `isRequireApiKeyEnabled()` (`penggantian feature flag DB > process.env.REQUIRE_API_KEY > default`) sehingga Feature Flags Dashboard dan variabel lingkungan mengatur `/api/v1/*`, `/api/v1beta/*`, serta aliasnya secara konsisten; kegagalan resolver akan menolak akses secara default. Mengizinkan permintaan sesi dashboard pada rute API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model dashboard).
-- **`managementPolicy`** (`policies/management.ts`) — menerima sesi dashboard, permintaan sinkronisasi model internal (dicocokkan dengan `/api/providers/[name]/(sync-models|models)`), atau melewatkan pemeriksaan sepenuhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) ketika token Bearer tersedia tetapi tidak valid, dan 401 jika tidak. Kebijakan ini juga memberlakukan tingkatan penjaga rute (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum cabang autentikasi apa pun — lihat [Tingkatan Penjaga Rute](../security/ROUTE_GUARD_TIERS.md). Path LOCAL_ONLY di `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (saat ini: `/api/mcp/`) dapat diakses dari non-loopback ketika kunci Bearer memiliki scope `manage`; semua path LOCAL_ONLY lainnya tetap dibatasi secara ketat ke loopback terlepas dari scope.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Pembawa, memvalidasi melalui `validateApiKey()`. Masuk ke anonim hanya ketika tanda fitur `REQUIRE_API_KEY` yang efektif dinonaktifkan. Bendera yang efektif diselesaikan melalui `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) sehingga Bendera Fitur Dasbor dan variabel lingkungan mengatur `/api/v1/*`, `/api/v1beta/*`, dan alias secara konsisten; kegagalan penyelesai gagal ditutup. Mengizinkan permintaan sesi dasbor pada rute API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model dasbor). Ketika Entra ID SSO diaktifkan, Pembawa yang secara struktural merupakan token Entra (tiga segmen base64url, `RS*` alg, `kid`) ditangani oleh cabang SSO** sebelum** `validateApiKey()` dan putusannya bersifat final — tidak pernah masuk ke jalur kunci API atau cabang degradasi ke anonim, sehingga penghentian penyedia identitas tidak dapat menjadi akses terbuka. Kunci API statis tidak terpengaruh. Lihat [Masuk ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — menerima sesi dasbor, permintaan sinkronisasi model internal (cocok dengan `/api/providers/[name]/(sync-models|models)`), atau melompati seluruhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) ketika token Pembawa ada tetapi tidak valid, 401 sebaliknya. Juga menerapkan tingkatan penjaga rute (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum cabang autentikasi mana pun — lihat [Tingkatan Penjaga Rute](../security/ROUTE_GUARD_TIERS.md). jalur LOCAL_ONLY di `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) dapat diakses dari non-loopback ketika kunci Pembawa membawa cakupan `manage` ; semua jalur LOCAL_ONLY lainnya tetap loopback ketat terlepas dari cakupannya.
 
-Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Handler downstream dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` tanpa menjalankan ulang logika autentikasi.
+Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Penangan hilir dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` alih-alih menjalankan kembali logika autentikasi.
 
 ## Daftar Rute Publik
 
@@ -241,25 +309,25 @@ Endpoint `/api/v1/agents/tasks/*` dan `/api/resilience/model-cooldowns` **kini m
 - Daftar izin publik: `tests/unit/public-api-routes.test.ts`.
 - Jalankan pengujian terfokus: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Debugging
+## Men-debug
 
 Pipeline selalu menandai respons dengan:
 
 ```
-x-request-id:               <ID korelasi, ditampilkan kembali dalam isi error>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Untuk permintaan yang diautentikasi, header permintaan upstream (di sisi handler) juga mencakup:
+Untuk permintaan yang diautentikasi, header permintaan upstream (sisi pengendali) juga mencakup:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4 karakter terakhir> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (opsional)
-x-omniroute-auth-scopes:    daftar yang dipisahkan koma
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Gunakan `assertAuth(req, expectedClass)` di dalam handler — fungsi ini melempar `AuthzAssertionError` dengan kode `AUTHZ_NOT_INITIALIZED` jika middleware dilewati (berguna untuk mendeteksi regresi konfigurasi dalam pengujian).
+Gunakan `assertAuth(req, expectedClass)` di dalam penangan — ia melempar `AuthzAssertionError` dengan kode `AUTHZ_NOT_INITIALIZED` jika middleware dilewati (berguna untuk menangkap regresi konfigurasi dalam pengujian).
 
 ## Lihat Juga
 

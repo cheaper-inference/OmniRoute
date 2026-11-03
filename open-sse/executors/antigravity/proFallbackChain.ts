@@ -4,6 +4,7 @@
 // Extracted from antigravity.ts (file-size cap) -- mirrors the existing
 // antigravity/sseCollect.ts submodule pattern.
 import type { ExecuteInput } from "../base.ts";
+import { isAntigravityPreResponseTimeout } from "../../services/antigravityTimeout.ts";
 
 /** Shape of one execute()/executeOnce() result (kept local to avoid importing the class). */
 export type AntigravityExecuteResult = {
@@ -42,7 +43,7 @@ export function handleAntigravityFallbackChainError(
   resolvedUpstreamId: string
 ): AntigravityFallbackChainErrorOutcome {
   // Abort signal (user disconnect) — propagate immediately, do not retry.
-  if (isAntigravityAbortError(input, error)) {
+  if (isAntigravityAbortError(input, error) || isAntigravityPreResponseTimeout(error)) {
     return { action: "throw", error };
   }
   if (i < chain.length - 1) {

@@ -4,7 +4,10 @@ import { describe, it } from "node:test";
 import { REGISTRY } from "../../open-sse/config/providers/index.ts";
 import { getExecutor } from "../../open-sse/executors/index.ts";
 import { requiresReasoningReplay } from "../../open-sse/services/reasoningCache.ts";
-import { PROVIDER_MODELS_CONFIG } from "../../src/app/api/providers/[id]/models/discovery/providerModelsConfig.ts";
+import {
+  assembleProviderModelsHeaders,
+  PROVIDER_MODELS_CONFIG,
+} from "../../src/app/api/providers/[id]/models/discovery/providerModelsConfig.ts";
 import {
   combineContent,
   foldTrailingCommentary,
@@ -312,6 +315,25 @@ describe("model discovery", () => {
     assert.equal(config.headers["X-Product"], "SaaS");
     assert.equal(config.authHeader, "Authorization");
     assert.equal(config.authPrefix, "Bearer ");
+  });
+
+  it("sends the required client identity on authenticated discovery requests", () => {
+    const headers = assembleProviderModelsHeaders(
+      PROVIDER_MODELS_CONFIG.workbuddy,
+      "workbuddy-token"
+    );
+
+    assert.equal(headers.Authorization, "Bearer workbuddy-token");
+    assert.equal(headers["User-Agent"], "WorkBuddy/5.5.6");
+    assert.equal(headers["X-Product"], "SaaS");
+    assert.equal(headers["X-IDE-Type"], "WorkBuddy");
+    assert.equal(headers["X-IDE-Name"], "WorkBuddy");
+    assert.equal(headers["X-IDE-Version"], "5.5.6");
+    assert.equal(headers["X-Requested-With"], "XMLHttpRequest");
+    assert.equal(headers["X-Domain"], "www.workbuddy.ai");
+    assert.equal(headers["X-Agent-Intent"], undefined);
+    assert.equal(headers["X-Agent-Purpose"], undefined);
+    assert.equal(headers["X-Agent-Type"], undefined);
   });
 
   it("maps the catalogue payload to ids and names", () => {

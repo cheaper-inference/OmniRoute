@@ -1,0 +1,1 @@
+- **fix(api):** provider model discovery now reports an unreachable upstream (connection refused, DNS or TLS failure) with no cached or local catalog as `502 UPSTREAM_UNREACHABLE` instead of a generic 500, and the timeout (504) response no longer echoes the request URL's `?key=` credential ([#18294](https://github.com/cheaper-inference/OmniRoute/pull/18294)) — thanks @alfep
