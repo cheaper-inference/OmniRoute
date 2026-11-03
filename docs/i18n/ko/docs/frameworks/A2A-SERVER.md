@@ -161,7 +161,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` 에 연결된 6개�
 | 건강 보고서   | `health-report`      | 공급자별로 회로 차단기, 쿨다운, 잠금 상태를 집계합니다.                                                                                          | 건강, 회복력         | "모든 공급자의 상태 표시"                        |
 | 목록 기능     | `list-capabilities`  | 전체 45개 항목 에이전트 기술 카탈로그(23 API + 21 CLI + 1 config)를 컨텍스트 삽입을 위한 원시 SKILL.md URLs 포함된 마크다운 테이블로 반환합니다. | 카탈로그, 발견, 기술 | "모든 OmniRoute 기능 나열"                       |
 
-> 에이전트 카드는 실시간 377 제공업체 카탈로그와 일치하도록 유지되어야 합니다. 공급자 수와 free/no-auth 메타데이터는 런타임 레지스트리에서 제공됩니다.
+> 에이전트 카드는 실시간 380 공급자 카탈로그와 일치하도록 유지되어야 합니다. 공급자 수와 free/no-auth 메타데이터는 런타임 레지스트리에서 제공됩니다.
 
 ### `list-capabilities` 스킬 상세
 
@@ -195,17 +195,17 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
 
 ---
 
-## 새 스킬 추가하기
+## 새로운 스킬 추가
 
 1. **스킬 파일 생성:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   비동기 함수 `(task: A2ATask) => Promise<{ artifacts, metadata }>`를 내보냅니다. `smartRouting.ts`와 같은 기존 스킬의 구조를 따르세요.
+   비동기 함수 `(task: A2ATask) => Promise<{ artifacts, metadata }>` 내보냅니다. `smartRouting.ts` 등 기존 스킬의 형태를 따릅니다.
 
-2. **핸들러 등록:** `src/lib/a2a/taskExecution.ts`에서 `A2A_SKILL_HANDLERS`에 항목을 추가합니다.
+2. **핸들러 등록:** `src/lib/a2a/taskExecution.ts` 에서 `A2A_SKILL_HANDLERS` 에 항목을 추가합니다.
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...기존 스킬
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -213,7 +213,7 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
    };
    ```
 
-3. **Agent Card에 공개:** `src/lib/a2a/agentCardMetadata.ts`(`/.well-known/agent.json` 및 `/.well-known/agent-card.json`에서 공유됨)의 `skills` 배열에 다음을 추가합니다.
+3. **에이전트 카드에 노출:** `src/lib/a2a/agentCardMetadata.ts` ( `/.well-known/agent.json` 및 `/.well-known/agent-card.json` 에서 공유)에서 `skills` 배열에 추가합니다.
 
    ```json
    {
@@ -225,9 +225,9 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
    }
    ```
 
-4. **테스트 작성:** `tests/unit/a2a-<your-skill>.test.ts`. 정상 경로와 오류 경로를 모두 다룹니다.
+4. **테스트 작성:** `tests/unit/a2a-<your-skill>.test.ts`. 행복한 경로 + 오류 경로를 다루세요.
 
-5. 이 파일의 `Available Skills` 표에 새 스킬을 **문서화합니다**.
+5. **문서** 이 파일의 `Available Skills` 테이블에 있는 새로운 스킬입니다.
 
 ---
 

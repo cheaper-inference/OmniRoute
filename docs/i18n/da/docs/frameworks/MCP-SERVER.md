@@ -299,107 +299,71 @@ Både SSE- og streambare HTTP-transporter er blokeret, indtil MCP-serveren er ak
 
 ---
 
-## Autentificering & scopes
+## Autentificering og omfang
 
-MCP-toolkald læser scope-strenge fra den kaldende part. Denne kontrol er én af tre uafhængige navnerum. Et gennemført check fra den ene checker er ikke et gennemført check fra de andre. Reglerne er [Tre scope-navnerum](#three-scope-namespaces). Værktøjskataloget er [MCP-toolscopes](#mcp-tool-scopes).
+MCP -værktøjet kalder læseområdestrenge fra den, der ringer. Denne kontrol er en af tre uafhængige navneområder. En aflevering fra en brik er ikke en aflevering fra de andre. Reglerne er [tre scope namespaces](#three-scope-namespaces). Værktøjskataloget er [MCP tool scopes](#mcp-tool-scopes).
 
-### Tre scope-navnerum
+### Tre scope navnerum
 
-`manage` på en API-nøgle, `read:compression` på et MCP-værktøj og `read` på et `oma_live_…`-adgangstoken er tre forskellige bevilligelser. Kaldere, der sender et `read`-adgangstoken til en muterende administrationsrute, får HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Denne rangering er `scopeSatisfies`. Den slår ikke MCP-tabellen op, og MCP-matcheren slår den heller ikke op.
+`manage` på en API nøgle, `read:compression` på et MCP -værktøj og `read` på et `oma_live_…` adgangstoken er tre forskellige tildelinger. Opkaldere, der sender et `read` -adgangstoken til en muterende administrationsrute, får HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Denne rang er `scopeSatisfies`. Den konsulterer ikke MCP tabellen, og MCP matcheren konsulterer den ikke.
 
-| Navnerum          | Credential                                                                    | Checker                   | Et gennemført check tillader                                |
-| :---------------- | :---------------------------------------------------------------------------- | :------------------------ | :---------------------------------------------------------- |
-| API-nøglestyring  | `api_keys.scopes`                                                             | `hasManageScope`          | Administrations-REST for den pågældende Bearer-nøgle        |
-| API-nøgle-additiv | samme array, én præcis streng                                                 | hjælpefunktionen nedenfor | Kun den ene egenskab                                        |
-| MCP-toolscopes    | samme array, ellers MCP `_meta` (kun HTTP/SSE), ellers `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Det værktøj, når håndhævelsen er slået til                  |
-| Adgangstoken      | `oma_live_…`                                                                  | `scopeSatisfies`          | Den administrationsrute, hvis metode og sti kræver den rang |
+| Navneområde        | Legitimationsoplysninger                                                       | Checker                  | Et pas tillader                                   |
+| :----------------- | :----------------------------------------------------------------------------- | :----------------------- | :------------------------------------------------ |
+| API-nøglestyring   | `api_keys.scopes`                                                              | `hasManageScope`         | Management REST for den bærernøgle                |
+| API-nøgle additiv  | samme array, en nøjagtig streng                                                | hjælperen nævnt nedenfor | Kun den ene evne                                  |
+| MCP værktøj scopes | samme array, ellers MCP `_meta` (kun HTTP/SSE ), ellers `OMNIROUTE_MCP_SCOPES` | `scopeMatches`           | Det værktøj, når håndhævelsen er aktiveret        |
+| Adgangstoken       | `oma_live_…`                                                                   | `scopeSatisfies`         | Ledelsesruten, hvis metode og vej kræver den rang |
 
-Udstedelsen af hvert credential er dækket i
-[Management-autentificering](../guides/MANAGEMENT-AUTH.md).
+Prægning af hver legitimationsoplysninger er dækket af [Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
-#### API-nøglescopes
+#### API-nøgle-omfang
 
-Ét `api_keys.scopes`-array servér to jobs. De bruger forskellige funktioner.
+Et `api_keys.scopes` array leverer to job. De bruger forskellige funktioner.
 
-**Administrations-REST.** `manage` og `admin` er medlemmerne af
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` er det, der autoriserer administrationsruter for den nøgle. `admin` er
-administrationskapabel på disse ruter. Ordet `admin` her er ikke adgangstokenets rang,
-og det udvides ikke til MCP-toolscopes.
+**Ledelse REST.** `manage` og `admin` er medlemmerne af `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` er det, der autoriserer administrationsruter for den nøgle. `admin` er styringsegnet på disse ruter. Ordet `admin` her er ikke adgangstokens rang, og det udvides ikke til MCP -værktøjsomfang.
 
-**Additive strenge.** Hver af dem er et præcist medlemskabstest, og hver af dem holder
-sig uden for `MANAGEMENT_API_KEY_SCOPES`.
+**Additive strenge.** Hver enkelt er en eksakt medlemskabstest, og hver enkelt forbliver uden for `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scope                          | Et gennemført check tillader                                                                                                                                                 |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Kun undtagelsen for `/api/mcp/` uden loopback med LOCAL_ONLY (`hasMcpConnectOrManageScope`). En nøgle med `manage` eller `admin` består stadig den undtagelse.               |
-| `self:usage`                   | `GET /api/v1/me/status` for denne nøgle (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` tilføjer dette scope ved oprettelse (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Opstrøms konto-kvoter i den status-payload (`src/lib/usage/apiKeySelfService.ts`). Statusruten kræver stadig `self:usage`.                                                   |
-| `policy:bypass-provider-quota` | Denne nøgles inferensopkald springer udbyder-kvotepolitiken over (`hasProviderQuotaBypassScope` i `src/sse/handlers/chat.ts`).                                               |
+| Omfang                         | Et pas tillader                                                                                                                                                           |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Den ikke-loopback `/api/mcp/` LOCAL_ONLY carve-out kun (`hasMcpConnectOrManageScope`). En nøgle med `manage` eller `admin` passerer stadig denne udskæring.               |
+| `self:usage`                   | `GET /api/v1/me/status` for denne nøgle (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` tilføjer dette omfang på oprette (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Opstrømskontokvoter inden for denne statusnyttelast (`src/lib/usage/apiKeySelfService.ts`). Statusruten kræver stadig `self:usage`.                                       |
+| `policy:bypass-provider-quota` | Denne nøgles slutningsopkald springer udbyderkvotepolitikken over (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                          |
 
-#### Matchning
+#### Matchende
 
-Kataloget er tabellen under [MCP-toolscopes](#mcp-tool-scopes). Behandl ikke
-`MCP_SCOPE_LIST` i `src/shared/constants/mcpScopes.ts` som det katalog: det er det
-oprindelige typede delmængde. Senere værktøjer erklærer yderligere scopes ved siden af
-det (`read:notion`, `read:skills`, `read:local-corpus` og resten af tabellen).
+Kataloget er tabellen under [MCP tool scopes](#mcp-tool-scopes). Behandl ikke `MCP_SCOPE_LIST` i `src/shared/constants/mcpScopes.ts` som det katalog: det er den originale indtastede undergruppe. Senere værktøjer erklærer yderligere omfang ved siden af (`read:notion`, `read:skills`, `read:local-corpus` og resten af tabellen).
 
-`evaluateToolScopes` i `open-sse/mcp-server/scopeEnforcement.ts` tillader et kald,
-når hvert påkrævet scope matcher et tildelt scope:
+`evaluateToolScopes` i `open-sse/mcp-server/scopeEnforcement.ts` tillader et opkald, når hvert påkrævet omfang matcher et givet omfang:
 
-- `*` matcher ethvert påkrævet scope.
-- Et tildelt scope, der ender med `*`, matcher et påkrævet scope, der starter med
-  præfikset før stjernen. `read:*` matcher `read:compression`.
-- Ethvert andet tildelt scope matcher kun den identiske påkrævede streng.
+- `*` matcher alle nødvendige omfang.
+- Et givet omfang, der ender på `*` matcher et påkrævet omfang, der starter med præfikset før stjernen. `read:*` matcher `read:compression`.
+- Hvert andet tildelt omfang matcher kun den identiske påkrævede streng.
 
-En nøgle, hvis scopes er `["manage"]`, fejler `scopeMatches` for `read:compression`.
-Det samme kald fejler for `admin`, `mcp:connect`, `read` og `write`, når disse er de
-eneste tildelte strenge. Der er ingen hierarki blandt MCP-toolscopes ud over den
-afsluttende `*`.
+En nøgle, hvis omfang er `["manage"]` fejler `scopeMatches` for `read:compression`. Det samme kald mislykkes for `admin`, `mcp:connect`, `read` og `write` når det er de eneste tildelte strenge. Der er intet hierarki blandt MCP værktøjets omfang ud over den efterfølgende `*`.
 
-Håndhævelse er slået fra, medmindre `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (standard
-`false`). Mens den er fra, tillader `evaluateToolScopes` kaldet og springer kataloget
-over. Mens den er til, bruger HTTP Bearer-nøglens `api_keys.scopes` som `authInfo` (se
-[HTTP-scopebinding pr. nøgle](#per-key-http-scope-binding-7895)). Når ingen nøglescopes
-kan findes, falder det tildelte sæt gennem til MCP `_meta` (anerkendes kun for
-HTTP/SSE-kaldere, inden for en HTTP-auth-kontekst; en stdio-callers `_meta` ignoreres,
-fordi klienten kontrollerer den, og den rummer ingen identitet pr. kaller), og derefter
-`OMNIROUTE_MCP_SCOPES`.
+Håndhævelse er slået fra, medmindre `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (standard `false`). Mens den er slukket, tillader `evaluateToolScopes` opkaldet og springer kataloget over. Mens den er tændt, bruger HTTP bærernøglens `api_keys.scopes` som `authInfo` (se [Per-key HTTP scope binding](#per-key-http-scope-binding-7895) ). Når ingen nøgleomfang løses, falder det tildelte sæt igennem til MCP `_meta` (kun æret for HTTP/SSE opkaldere, inden for en HTTP authorisont; en stdio-opkalders `_meta` ignoreres, fordi klienten kontrollerer den, og den har ingen identitet pr. opkald), så `OMNIROUTE_MCP_SCOPES`.
 
-#### Adgangstoken-scopes
+#### Adgangstoken-omfang
 
-`oma_live_…`-tokens (`src/lib/accessTokens/scopes.ts`) bærer `read`, `write` eller
-`admin`. `scopeSatisfies` er en rang: `admin` dækker `write` og `read`, og `write`
-dækker `read`. Ukendte scopes dækker intet.
+`oma_live_…` tokens (`src/lib/accessTokens/scopes.ts`) bærer `read`, `write` eller `admin`. `scopeSatisfies` er en rang: `admin` dækker `write` og `read`, og `write` dækker `read`. Ukendte omfang dækker intet.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) sammenligner den
-rang med `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) sammenligner denne rang med `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` og `OPTIONS` kræver `read`.
-- Alle andre metoder kræver `write`.
-- Stier i `ADMIN_SCOPE_PREFIXES` kræver `admin` for alle metoder. `/api/mcp`
-  er på denne liste, så et `write`-adgangstoken stadig ikke kan kalde MCP
-  HTTP-overfladen.
-- Stier i `ADMIN_MUTATION_PREFIXES` kræver `admin` kun for mutationer.
-- Stier i `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) kræver `admin` kun for mutationer, og kun på
-  den præcise sti — andre `/api/settings/*`-underruter beholder `write`.
+- Hver anden metode kræver `write`.
+- Stier i `ADMIN_SCOPE_PREFIXES` kræver `admin` for hver metode. `/api/mcp` er på den liste, så et `write` adgangstoken kan stadig ikke kalde MCP HTTP overfladen.
+- Stier i `ADMIN_MUTATION_PREFIXES` kræver kun `admin` for mutationer.
+- Stier i `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) kræver kun `admin` for mutationer, og kun på den nøjagtige vej — beholder andre `/api/settings/*` -underruter `write`.
 
-`PATCH /api/keys/{id}` er en mutation og står ikke på de admin-lister, så et
-`read`-token modtager 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Et `write`- eller `admin`-adgangstoken opfylder denne rute. Et dashboard-JWT,
-loopback CLI-maskin-id-tokenet og en API-nøgle med `manage` eller `admin`
-følger andre grene og indsnævres ikke af denne rang.
+`PATCH /api/keys/{id}` er en mutation og er ikke på disse admin-lister, så et `read` token modtager 403 `Access token scope 'read' is insufficient; 'write' required.` Et `write` eller `admin` adgangstoken opfylder denne rute. Et dashboard JWT, loopback CLI machine-id token og en API tast med `manage` eller `admin` tager andre forgreninger og er ikke indsnævret af denne rang.
 
-Et adgangstoken, der består `scopeSatisfies` for `/api/mcp`, har kun bestået
-administrationsporten. Værktøjskald kører stadig `scopeMatches` mod
-API-nøglernes scopes. Adgangstokenets rang er ikke en indgang til `scopeMatches`.
+Et adgangstoken, der passerer `scopeSatisfies` for `/api/mcp`, har kun ryddet administrationsporten. Værktøjskald kører stadig `scopeMatches` mod API-nøgle-omfang. Adgangstokens rang er ikke et input til `scopeMatches`.
 
-### MCP-værktøjsscope
+### MCP værktøj scopes
 
-Scope-håndhævelse er centraliseret i `open-sse/mcp-server/scopeEnforcement.ts`.
-Hvert værktøj kræver specifikke scopes:
+Håndhævelsen af omfanget er centraliseret i `open-sse/mcp-server/scopeEnforcement.ts`. Hvert værktøj kræver specifikke omfang:
 
 | Omfang                | Værktøjer                                                                                                                                                                       |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -437,50 +401,17 @@ Hvert værktøj kræver specifikke scopes:
 | `write:obsidian`      | 9 skriveværktøjer — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
 
-Wildcard-scopes understøttes: `read:*` giver alle læse-scopes, `*` giver fuld adgang.
+Wildcard-omfang er understøttet: `read:*` giver alle læse-scopes, `*` giver fuld adgang.
 
-### `mcp:connect` — snæver rutefunktion (#7895)
+### `mcp:connect` — mulighed for smal rute (#7895)
 
-At nå HTTP/SSE MCP-transporten (`/api/mcp/*`) fra ikke-loopback kræver
-`/api/mcp/` LOCAL_ONLY-undtagelsen (se `docs/security/ROUTE_GUARD_TIERS.md`). Historisk
-accepterede den undtagelse kun en API-nøgle med fuld `manage`/`admin`-scope — for bredt til en
-opkalder, der kun har brug for at tale MCP. `src/shared/constants/managementScopes.ts` eksporterer nu
-`MCP_CONNECT_SCOPE = "mcp:connect"`: et additivt, snævert scope (samme præcedens som
-`SELF_USAGE_SCOPE`), der kun autoriserer `/api/mcp/`-undtagelsen i
-`src/server/authz/policies/management.ts` — det giver ingen anden adgang til management-ruter
-og er bevidst holdt UDEN FOR `MANAGEMENT_API_KEY_SCOPES`. En nøgle med `manage`/`admin`
-består fortsat uændret gennem undtagelsen; `mcp:connect` er et lavere privilegiet alternativ til
-eksterne MCP-only opkaldere, kontrolleret via `hasMcpConnectOrManageScope()`.
+At nå HTTP/SSE MCP transporten (`/api/mcp/*`) fra ikke-loopback kræver `/api/mcp/` LOCAL_ONLY -udskillelsen (se `docs/security/ROUTE_GUARD_TIERS.md`). Historisk set accepterede denne udskæring kun en fuld `manage`/`admin` -scope API -tast — for bred til en opkalder, der kun behøver at tale MCP. `src/shared/constants/managementScopes.ts` eksporterer nu `MCP_CONNECT_SCOPE = "mcp:connect"`: et additiv, snævert omfang (samme præcedens som `SELF_USAGE_SCOPE`), der autoriserer ONLY `/api/mcp/` bypasset i `src/server/authz/policies/management.ts` — det giver ingen anden administrationsruteadgang og holdes bevidst OUT af `MANAGEMENT_API_KEY_SCOPES`. En nøgle med `manage`/`admin` passerer stadig udskæringen uændret; `mcp:connect` er et alternativ med lavere privilegier for fjernopkaldere, der kun har MCP, kontrolleret via `hasMcpConnectOrManageScope()`.
 
-### Per-nøgle HTTP scope-binding (#7895)
+### Per-nøgle HTTP scope binding (#7895)
 
-Over HTTP/SSE opløser `open-sse/mcp-server/httpTransport.ts` nu opkalderens reelle
-`api_keys.scopes` via `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-og videregiver dem til MCP SDK'ets `transport.handleRequest(req, { authInfo })`, så
-`extra.authInfo.scopes` der når hvert værktøjskald afspejler Bearer-nøglens egne scopes.
-`scopeEnforcement.ts`'s `resolveCallerScopeContext()` prioriterede allerede `authInfo` over
-`_meta`- og `OMNIROUTE_MCP_SCOPES`-miljøvariablen som fallback — dette udfylder blot denne første,
-højest prioriterede kilde, som tidligere ikke blev fyldt over HTTP. Når ingen API-nøgle kan
-opløses (ingen header, ugyldig nøgle), forbliver `authInfo` `undefined`, og opløsningen falder
-gennem til den eksisterende `meta`-/env-kæde uændret. stdio har ingen identitet pr. opkalder (se
-`mcpCallerIdentity.ts`) og påvirkes ikke af per-nøgle-binding — det springer `_meta`-trinnet over
-(`_meta` respekteres kun inden for en HTTP-auth-kontekst, #15159) og opløses udelukkende ud fra
-miljøvariablen `OMNIROUTE_MCP_SCOPES`.
+Over HTTP/SSE løser `open-sse/mcp-server/httpTransport.ts` nu kalderens reelle `api_keys.scopes` via `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) og sender det til MCP SDK `transport.handleRequest(req, { authInfo })`, så `extra.authInfo.scopes` når hvert værktøjskald afspejler bærer-nøglens egne omfang. `scopeEnforcement.ts`'s `resolveCallerScopeContext()` har allerede prioriteret `authInfo` over `_meta` og `OMNIROUTE_MCP_SCOPES` env fallback — dette udfylder kun den første kilde med højest prioritet, som tidligere var unfedet over HTTP. Når ingen API -nøgle løses (ingen header, ugyldig nøgle), forbliver `authInfo` `undefined`, og opløsningen falder igennem til den eksisterende `meta`/env-kæde uændret. stdio har ingen per-kalder-identitet (se `mcpCallerIdentity.ts`) og er upåvirket af per-key-binding — det springer `_meta` trinnet over (`_meta` honoreres kun inde i en HTTP authorisont, #15159) og løser alene fra `OMNIROUTE_MCP_SCOPES` env-nøglen.
 
-**Håndhævelse tvinges til at være slået til for HTTP/SSE-opkaldere med snævre scopes, uanset
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** At `OMNIROUTE_MCP_ENFORCE_SCOPES` har `false` som standard er
-kun sikkert for det lokale/stdio-arbejdsflow med en enkelt operatør, hvor der ikke findes nogen
-identitet pr. opkalder at skalbere mod. `open-sse/mcp-server/server.ts::withScopeEnforcement()`
-slår håndhævelse af scopes pr. værktøj ubetinget til (`shouldForceScopeEnforcement()` i
-`scopeEnforcement.ts`), når `resolveCallerScopeContext()` har opløst
-`source === "authInfo"` (dvs. et reelt HTTP Authorization-header pr. nøgle, kun HTTP/SSE) OG
-denne nøgle ikke har fuldt `manage`/`admin`-scope. Dette lukker det hull, hvor en nøgle, der kun
-indeholder det snævre `mcp:connect`-undtagelses-scope — dokumenteret ovenfor som værende autoriserende
-intet andet end `/api/mcp/`-undtagelsen LOCAL_ONLY — ellers kunne kalde alle MCP-værktøjer, når
-en operatør aktiverede fjernadgang/ikke-loopback MCP-tilgang, alene fordi
-`OMNIROUTE_MCP_ENFORCE_SCOPES` leveres med `false` som standard. En fuld `manage`/`admin`-nøgle
-over HTTP samt alle stdio/lokale opkaldere beholder den eksisterende
-`OMNIROUTE_MCP_ENFORCE_SCOPES`-styrede adfærd uændret.
+**Håndhævelse er tvunget til for snævre HTTP/SSE opkaldere uanset `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` der som standard er `false` er kun sikkert for local/stdio single-operator flowet, hvor der ikke er nogen identitet pr. `open-sse/mcp-server/server.ts::withScopeEnforcement()` aktiverer per-tool scope håndhævelse ubetinget (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`), når `resolveCallerScopeContext()` løst `source === "authInfo"` (dvs. en reel per-key HTTP Authorization header, HTTP/SSE-only) AND denne nøgle har ikke fuld `manage`/`admin` scope. Dette lukker hullet, hvor en nøgle, der holder ONLY det smalle `mcp:connect` bypass scope — som er dokumenteret ovenfor som ikke autoriserer andet end `/api/mcp/` LOCAL_ONLY carve-out — ellers kunne påkalde hvert MCP værktøj, når en operatør aktiverede remote/non-loopback MCP adgang, simpelthen fordi `OMNIROUTE_MCP_ENFORCE_SCOPES` sender `false` som standard. En fuld `manage`/`admin` -nøgle over HTTP, og hver stdio/local -opkalder, holder den eksisterende `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated -adfærd uændret.
 
 ---
 
