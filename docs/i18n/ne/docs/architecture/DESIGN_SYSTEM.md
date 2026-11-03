@@ -4,7 +4,7 @@
 
 ---
 
-> **स्थिति:** ड्यासबोर्ड मा निर्मित छ** Keak CI UI किट** (`@keak/cheaper-inference-ui-kit`), कार्यक्षेत्र `packages/ui-kit` (`@omniroute/ui-kit`; अपस्ट्रिम स्न्यापसट `packages/ui-kit/UPSTREAM.md` मा पिन गरिएको छ र `npm run check:ui-kit-snapshot` द्वारा संरक्षित छ) को रूपमा बिक्री गरिएको छ। प्रकाश क्यानोनिकल विषयवस्तु हो; पूर्वनिर्धारित प्राथमिकता `system` हो। उच्चारण केक लाइम (`--ci-color-accent`) हो। स्विट्जर UI, डिस्प्ले र कोड टेक्स्ट (`--ci-font-ui`; `--ci-font-display` र `--ci-font-mono` रिजोल्युसन) को लागि एकल परिवार हो, किट आफैंद्वारा स्व-होस्ट गरिएको (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयात गरिएको)। प्रत्येक प्रतिमा लुसाइड ग्लाइफ हो।
+> **स्थिति:** ड्यासबोर्ड मा निर्मित छ** Keak CI UI किट** (`@keak/cheaper-inference-ui-kit`), कार्यक्षेत्र `packages/ui-kit` (`@omniroute/ui-kit`; अपस्ट्रिम स्न्यापसट `packages/ui-kit/UPSTREAM.md` मा पिन गरिएको छ र `npm run check:ui-kit-snapshot` द्वारा संरक्षित छ) को रूपमा बिक्री गरिएको छ। प्रकाश क्यानोनिकल विषयवस्तु हो; पूर्वनिर्धारित प्राथमिकता `system` हो। उच्चारण केक लाइम (`--ci-color-accent`) हो। स्विट्जर UI, डिस्प्ले र कोड टेक्स्ट (`--ci-font-ui`; `--ci-font-display` र `--ci-font-mono` रिजोल्युसन) को लागि एकल परिवार हो, किट आफैंद्वारा स्व-होस्ट गरिएको (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयात गरिएको)। लिपिहरू स्विट्जरमा ग्लाइफद्वारा ग्लाइफ (`src/app/globals.css`) को कमी छैन : सिरिलिक, ग्रीक र भियतनामीका लागि इन्टर र अरबी लिपिको लागि मात्र `html[dir="rtl"]`, Vazirmatn अन्तर्गत। प्रत्येक प्रतिमा लुसाइड ग्लाइफ हो।
 
 ## १. चीजहरू कहाँ रहेका छन्
 

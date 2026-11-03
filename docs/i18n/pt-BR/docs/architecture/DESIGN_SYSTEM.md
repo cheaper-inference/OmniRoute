@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** o painel é construído no** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendido como o espaço de trabalho `packages/ui-kit` (`@omniroute/ui-kit`; o instantâneo upstream é fixado em `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). A luz é o tema canônico; a preferência padrão é `system`. O sotaque é Keak lime (`--ci-color-accent`). Switzer é a única família para UI, display e texto de código (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` resolvem isso), auto-hospedado pelo próprio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Cada ícone é um glifo Lucide.
+> **Status:** o painel é construído no** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendido como o espaço de trabalho `packages/ui-kit` (`@omniroute/ui-kit`; o instantâneo upstream é fixado em `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). A luz é o tema canônico; a preferência padrão é `system`. O sotaque é Keak lime (`--ci-color-accent`). Switzer é a única família para UI, display e texto de código (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` resolvem isso), auto-hospedado pelo próprio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Scripts O Switzer carece de glifo por glifo (`src/app/globals.css`): Inter para cirílico, grego e vietnamita e, apenas sob `html[dir="rtl"]`, Vazirmatn para escrita árabe. Cada ícone é um glifo Lucide.
 
 ## 1. Onde as coisas ficam
 

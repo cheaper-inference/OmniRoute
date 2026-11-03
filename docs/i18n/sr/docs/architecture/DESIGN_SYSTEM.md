@@ -4,7 +4,7 @@
 
 ---
 
-> **Статус:** контролна табла је изграђена на** Кеак CI UI Кит** (`@keak/cheaper-inference-ui-kit`), испоручено као радни простор `packages/ui-kit` (`@omniroute/ui-kit`; горњи снимак је закачен у `packages/ui-kit/UPSTREAM.md` и чува га `npm run check:ui-kit-snapshot`). Светлост је канонска тема; подразумевана преференција је `system`. Акценат је Кеак лиме (`--ci-color-accent`). Свитзер је јединствена породица за UI, приказ и текст кода (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` га решавају), који сам хостује сам комплет (`packages/ui-kit/src/ci-fonts.css`, увезен од `ci-tokens.css`). Свака икона је Луциде глиф.
+> **Статус:** контролна табла је изграђена на** Кеак CI UI Кит** (`@keak/cheaper-inference-ui-kit`), испоручено као радни простор `packages/ui-kit` (`@omniroute/ui-kit`; горњи снимак је закачен у `packages/ui-kit/UPSTREAM.md` и чува га `npm run check:ui-kit-snapshot`). Светлост је канонска тема; подразумевана преференција је `system`. Акценат је Кеак лиме (`--ci-color-accent`). Свитзер је јединствена породица за UI, приказ и текст кода (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` га решавају), који сам хостује сам комплет (`packages/ui-kit/src/ci-fonts.css`, увезен од `ci-tokens.css`). Скрипте Свитзер-у недостају падају кроз глиф по глиф (`src/app/globals.css`): Интер за ћирилицу, грчки и вијетнамски и, само под `html[dir="rtl"]`, Вазирматн за арапско писмо. Свака икона је Луциде глиф.
 
 ## 1. Gde se šta nalazi
 

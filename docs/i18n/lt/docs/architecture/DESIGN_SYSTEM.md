@@ -4,7 +4,7 @@
 
 ---
 
-> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Akcentas – Keak lime (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Kiekviena piktograma yra Lucide glifas.
+> **Būsena:** prietaisų skydelis pastatytas ant** Keak CI UI rinkinys** (`@keak/cheaper-inference-ui-kit`), tiekiama kaip darbo sritis `packages/ui-kit` (`@omniroute/ui-kit`; momentinė nuotrauka prieš srovę yra prisegta `packages/ui-kit/UPSTREAM.md` ir saugoma `npm run check:ui-kit-snapshot`). Šviesa yra kanoninė tema; numatytoji nuostata yra `system`. Akcentas – Keak lime (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Scenarijai Šveicarijoje trūksta kritimo po glifo (`src/app/globals.css`): „Inter“ kirilicai, graikų ir vietnamiečių kalbai ir, tik pagal `html[dir="rtl"]`, „Vazirmatn“ arabų rašmenims. Kiekviena piktograma yra Lucide glifas.
 
 ## 1. Kur kas saugoma
 

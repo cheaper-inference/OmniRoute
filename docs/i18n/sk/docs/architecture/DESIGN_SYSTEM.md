@@ -4,7 +4,7 @@
 
 ---
 
-> **Stav:** prístrojová doska je postavená na** Súprava Keak CI UI** (`@keak/cheaper-inference-ui-kit`), dodávaný ako pracovný priestor `packages/ui-kit` (`@omniroute/ui-kit`; snímka proti prúdu je pripnutá v `packages/ui-kit/UPSTREAM.md` a chránená `npm run check:ui-kit-snapshot`). Svetlo je kanonickou témou; predvolená preferencia je `system`. Akcentom je keak limetka (`--ci-color-accent`). Switzer je jediná rodina pre UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` sa naň rozlíšia), ktorý je hostený samotnou súpravou (`packages/ui-kit/src/ci-fonts.css`, importované `ci-tokens.css`). Každá ikona je symbolom Lucide.
+> **Stav:** prístrojová doska je postavená na** Súprava Keak CI UI** (`@keak/cheaper-inference-ui-kit`), dodávaný ako pracovný priestor `packages/ui-kit` (`@omniroute/ui-kit`; snímka proti prúdu je pripnutá v `packages/ui-kit/UPSTREAM.md` a chránená `npm run check:ui-kit-snapshot`). Svetlo je kanonickou témou; predvolená preferencia je `system`. Akcentom je keak limetka (`--ci-color-accent`). Switzer je jediná rodina pre UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` sa naň rozlíšia), ktorý je hostený samotnou súpravou (`packages/ui-kit/src/ci-fonts.css`, importované `ci-tokens.css`). Skriptá Switzerovi chýba možnosť prechodu glyfom po glyfu (`src/app/globals.css`): Inter pre cyriliku, gréčtinu a vietnamčinu a iba pod `html[dir="rtl"]` Vazirmatn pre arabské písmo. Každá ikona je symbolom Lucide.
 
 ## 1. Kde sa čo nachádza
 

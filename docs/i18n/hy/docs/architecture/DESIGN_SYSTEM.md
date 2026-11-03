@@ -4,7 +4,7 @@
 
 ---
 
-> **Կարգավիճակը:** վահանակը կառուցված է** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), վաճառվում է որպես աշխատանքային տարածք `packages/ui-kit` (`@omniroute/ui-kit`; վերևի հոսանքով նկարը ամրացված է `packages/ui-kit/UPSTREAM.md` ով և պահպանվում է `npm run check:ui-kit-snapshot`): Լույսը կանոնական թեման է. լռելյայն նախապատվությունը `system` է: Առոգանությունը Keak lime-ն է (`--ci-color-accent`): Switzer-ը UI, ցուցադրման և կոդերի տեքստի (`--ci-font-ui`; `--ci-font-display` և `--ci-font-mono` լուծում են դրան) մեկ ընտանիքն է, որը ինքնակառավարվում է հենց փաթեթի կողմից (`packages/ui-kit/src/ci-fonts.css`, ներմուծված `ci-tokens.css` կողմից): Յուրաքանչյուր պատկերակ Lucide հոլովակ է:
+> **Կարգավիճակը:** վահանակը կառուցված է** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), վաճառվում է որպես աշխատանքային տարածք `packages/ui-kit` (`@omniroute/ui-kit`; վերևի հոսանքով նկարը ամրացված է `packages/ui-kit/UPSTREAM.md` ով և պահպանվում է `npm run check:ui-kit-snapshot`): Լույսը կանոնական թեման է. լռելյայն նախապատվությունը `system` է: Առոգանությունը Keak lime-ն է (`--ci-color-accent`): Switzer-ը UI, ցուցադրման և կոդերի տեքստի (`--ci-font-ui`; `--ci-font-display` և `--ci-font-mono` լուծում են դրան) մեկ ընտանիքն է, որը ինքնակառավարվում է հենց փաթեթի կողմից (`packages/ui-kit/src/ci-fonts.css`, ներմուծված `ci-tokens.css` կողմից): Սցենարներ Շվեյցարիայից բացակայում է հոլովը հոլովով (`src/app/globals.css`)՝ Inter կիրիլիցայով, հունարենով և վիետնամերենով և միայն `html[dir="rtl"]` տակով, Vazirmatn արաբական տառերով: Յուրաքանչյուր պատկերակ Lucide հոլովակ է:
 
 ## 1. Ինչ որտեղ է գտնվում
 
