@@ -7,6 +7,9 @@ vi.mock("next-intl", () => ({
 }));
 vi.mock("@/shared/components", () => ({
   Card: ({ children }: PropsWithChildren) => <div>{children}</div>,
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
+  Select: (props: React.SelectHTMLAttributes<HTMLSelectElement>) => <select {...props} />,
+  Textarea: (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...props} />,
   Button: ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) => (
     <button {...props}>{children}</button>
   ),

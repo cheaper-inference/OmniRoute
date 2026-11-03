@@ -33,7 +33,7 @@ export default function FalNativePanel({ connectionId }: { connectionId: string 
         </>
       )}
       {c.visibleError && (
-        <p role="alert" className="text-red-500">
+        <p role="alert" className="text-error">
           {c.visibleError}
         </p>
       )}

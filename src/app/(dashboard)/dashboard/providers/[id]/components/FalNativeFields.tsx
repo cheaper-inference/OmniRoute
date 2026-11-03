@@ -1,18 +1,18 @@
 "use client";
-import { Button } from "@/shared/components";
+import { Button, Input, Select, Textarea } from "@/shared/components";
 import type { FalPanelController, FalValue } from "./useFalNativeController";
 type Props = { c: FalPanelController };
 
 export function FalSearch({ c }: Props) {
   return (
     <div className="flex flex-wrap gap-2">
-      <input
+      <Input
         aria-label={c.common("search")}
         value={c.query}
         onChange={(e) => c.patch({ query: e.target.value, cursor: null })}
         className="rounded border bg-transparent p-2"
       />
-      <input
+      <Input
         aria-label={c.t("category")}
         placeholder={c.t("category")}
         value={c.category}
@@ -34,7 +34,7 @@ export function FalEndpoint({ c }: Props) {
   const select = (endpoint: string) => c.patch({ endpoint, definition: null });
   return (
     <>
-      <select
+      <Select
         aria-label={c.t("endpoint")}
         className="w-full rounded border bg-transparent p-2"
         value={c.endpoint}
@@ -46,9 +46,9 @@ export function FalEndpoint({ c }: Props) {
             {m.metadata?.display_name ?? m.endpoint_id} · {m.metadata?.category ?? ""}
           </option>
         ))}
-      </select>
+      </Select>
       <div className="flex gap-2">
-        <input
+        <Input
           aria-label={c.t("endpoint")}
           value={c.endpoint}
           onChange={(e) => select(e.target.value)}
@@ -77,7 +77,7 @@ function ScalarField({ c, name, field }: Props & { name: string; field: FalValue
         {name in (c.definition?.capabilities.reasoning ?? {}) ? ` · ${c.t("reasoning")}` : ""}
       </span>
       {options ? (
-        <select
+        <Select
           className="rounded border bg-transparent p-2"
           value={value === undefined ? "" : String(value)}
           onChange={(e) =>
@@ -93,9 +93,9 @@ function ScalarField({ c, name, field }: Props & { name: string; field: FalValue
               {String(v)}
             </option>
           ))}
-        </select>
+        </Select>
       ) : (
-        <input
+        <Input
           className="rounded border bg-transparent p-2"
           type={field.type === "number" || field.type === "integer" ? "number" : "text"}
           value={String(value ?? "")}
@@ -143,7 +143,7 @@ export function FalInputs({ c }: Props) {
             .map(([name, field]) => (
               <label className="text-sm" key={name}>
                 {name}
-                <input
+                <Input
                   type="file"
                   multiple={field.type === "array" || name.endsWith("_urls")}
                   onChange={(e) => {
@@ -157,7 +157,7 @@ export function FalInputs({ c }: Props) {
       )}
       <label className="block text-sm">
         {c.t("input")}
-        <textarea
+        <Textarea
           className="min-h-40 w-full rounded border bg-transparent p-2 font-mono"
           value={c.input}
           onChange={(e) => c.patch({ input: e.target.value, error: "" })}
@@ -170,7 +170,7 @@ export function FalInputs({ c }: Props) {
 export function FalExecution({ c }: Props) {
   return (
     <div className="flex gap-2">
-      <select
+      <Select
         aria-label={c.t("transport")}
         value={c.transport}
         onChange={(e) => c.patch({ transport: e.target.value })}
@@ -181,7 +181,7 @@ export function FalExecution({ c }: Props) {
           .map((name) => (
             <option key={name}>{name}</option>
           ))}
-      </select>
+      </Select>
       <Button
         disabled={c.busy || !c.definition || !c.valid}
         onClick={() => c.action(() => c.run())}
@@ -201,7 +201,7 @@ export function FalRecovery({ c }: Props) {
           ? c.t("submissionUnknown")
           : c.activeReceipt.status}
       </p>
-      <select
+      <Select
         aria-label={c.t("recoveryRecord")}
         value={c.activeReceipt.key}
         onChange={(e) => c.selectReceipt(e.target.value)}
@@ -211,7 +211,7 @@ export function FalRecovery({ c }: Props) {
             {r.endpoint} · {r.connection} · {r.jobId ?? r.status}
           </option>
         ))}
-      </select>
+      </Select>
       <Button
         disabled={
           c.busy ||
@@ -230,7 +230,7 @@ export function FalRecovery({ c }: Props) {
 export function FalJobs({ c }: Props) {
   return (
     <div className="flex gap-2">
-      <input
+      <Input
         aria-label={c.t("job")}
         placeholder={c.t("job")}
         value={c.currentJobId}
@@ -252,7 +252,7 @@ export function FalRegistration({ c }: Props) {
       <summary>{c.t("register")}</summary>
       <label className="block">
         {c.t("schema")}
-        <textarea
+        <Textarea
           className="min-h-40 w-full rounded border bg-transparent p-2 font-mono"
           value={c.schema}
           onChange={(e) => c.patch({ schema: e.target.value })}
