@@ -7,6 +7,7 @@ import http from "node:http";
 import net from "node:net";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { drainTestWorkers } from "../_helpers/forkedTestWorkers.mjs";
 import { stopTestProcess } from "../_helpers/stopTestProcess.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-batch-e2e-rl-"));
@@ -173,7 +174,13 @@ function createServerProcess() {
   // closed with 401 — the same trap #11535 and #14403 fixed in the protocol and ecosystem harnesses.
   const child = spawn(
     process.execPath,
-    ["--max-old-space-size=8192", "scripts/dev/run-next.mjs", "dev"],
+    [
+      "--max-old-space-size=8192",
+      "--import",
+      "./tests/_helpers/forkedTestWorkers.mjs",
+      "scripts/dev/run-next.mjs",
+      "dev",
+    ],
     {
       cwd: REPO_ROOT,
       env: {
@@ -196,7 +203,7 @@ function createServerProcess() {
         OMNIROUTE_HIDE_HEALTHCHECK_LOGS: "true",
         PATH: process.env.PATH,
       },
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["ignore", "pipe", "pipe", "ipc"],
     }
   );
 
@@ -366,7 +373,13 @@ test.after(async () => {
     try {
       if (batchWorker) await stopTestProcess(batchWorker.child);
     } finally {
-      if (app) await stopTestProcess(app.child);
+      if (app) {
+        try {
+          await drainTestWorkers(app.child);
+        } finally {
+          await stopTestProcess(app.child);
+        }
+      }
     }
   } finally {
     try {
