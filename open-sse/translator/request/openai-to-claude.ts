@@ -9,7 +9,6 @@ import {
   applyKimiCodingThinking,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
 import {
   getDefaultThinkingBudget,
@@ -17,6 +16,7 @@ import {
 } from "../../../src/shared/constants/modelSpecs.ts";
 import { fitThinkingToMaxTokens } from "./openai-to-claude/thinkingBudget.ts";
 import { enforceToolResultAdjacency } from "./openai-to-claude/toolResultAdjacency.ts";
+import { unwrapOpenAIToolDefinition } from "./openai-to-claude/unwrapToolDefinition.ts";
 import { resolveToolResultId } from "./openai-to-claude/sanitizeToolResultId.ts";
 import {
   openAiImagePartToClaudeBlock,
@@ -85,6 +85,36 @@ type ClaudeTool = {
  * text block has text: "". Must also recurse into nested tool_result.content.
  * Ref: sub2api PR #1212
  */
+/**
+ * Anthropic rejects `cache_control` anywhere inside `tool_result.content`:
+ *
+ *   messages.N.content.0.tool_result.content.0.cache_control: cache_control may
+ *   not be specified within `tool_result.content`. Instead, place it directly
+ *   on `tool_result`
+ *
+ * Strip every nested marker off a tool_result's content blocks and return the
+ * first one so the caller can place it on the `tool_result` block itself. The
+ * marker is only meaningful once per block, so the first wins.
+ */
+export function hoistNestedToolResultCacheControl(content: unknown): {
+  content: unknown;
+  cacheControl: unknown;
+} {
+  if (!Array.isArray(content)) return { content, cacheControl: undefined };
+  let cacheControl: unknown;
+  let found = false;
+  const cleaned = content.map((block) => {
+    if (!block || typeof block !== "object") return block;
+    const rec = block as Record<string, unknown>;
+    if (rec.cache_control === undefined) return block;
+    found = true;
+    const { cache_control, ...rest } = rec;
+    if (cacheControl === undefined) cacheControl = cache_control;
+    return rest;
+  });
+  return { content: found ? cleaned : content, cacheControl };
+}
+
 export function stripEmptyTextBlocks(content: unknown[] | undefined): unknown[] {
   if (!Array.isArray(content)) return content ?? [];
   return content
@@ -363,8 +393,13 @@ export function openaiToClaudeRequest(
           provider: routedProvider,
           model,
           disabled: credentials?._videoTranscriptSensitive === true,
+          connectionId:
+            typeof credentials?._connectionId === "string" ? credentials._connectionId : undefined,
         },
-        pendingToolUseIds
+        pendingToolUseIds,
+        result.thinking && typeof result.thinking.type === "string"
+          ? result.thinking.type
+          : undefined
       );
       if (newRole === "assistant") {
         pendingToolUseIds = blocks.filter((b) => b.type === "tool_use").map((b) => String(b.id));
@@ -440,15 +475,9 @@ export function openaiToClaudeRequest(
         // `tools` is not validated entry by entry: a null (or non-object) entry is dropped, as
         // an entry without a name already is, instead of failing the whole request.
         if (!tool || typeof tool !== "object") return null;
-        // Function-shaped tools arrive in two flavors from real clients:
-        //   (a) openai-spec: { type: "function", function: { name, ... } }
-        //   (b) bare/loose:  { function: { name, ... } }   (no parent `type`)
-        // Unwrap `tool.function` whenever it is present, regardless of the
-        // parent `type` field — some OpenAI-shape clients omit the wrapper's
-        // `type: "function"` entirely. Previously that bare shape fell
-        // through to `toolData = tool` (the wrapper itself, with no `.name`),
-        // producing an empty `originalName` and silently dropping the tool.
-        const toolData = tool.function ?? tool;
+        // Unwrap spec, bare `{ function }` and Chat Completions `{ type: "custom", custom }`
+        // tools; reading the name off the wrapper itself silently dropped the tool.
+        const toolData = unwrapOpenAIToolDefinition(tool);
         const originalName = typeof toolData.name === "string" ? toolData.name.trim() : "";
 
         if (!originalName) {
@@ -466,8 +495,11 @@ export function openaiToClaudeRequest(
 
         // Normalize input_schema: Anthropic requires `properties` when type is "object" (#595).
         // MCP tools (e.g. pencil, computer_use) may omit properties on object-type schemas.
-        const rawSchema: Record<string, unknown> = toolData.parameters ||
-          toolData.input_schema || { type: "object", properties: {}, required: [] };
+        const rawSchema = (toolData.parameters ||
+          toolData.input_schema || { type: "object", properties: {}, required: [] }) as Record<
+          string,
+          unknown
+        >;
         const withProperties =
           rawSchema.type === "object" && !rawSchema.properties
             ? { ...rawSchema, properties: {} }
@@ -601,8 +633,14 @@ function getContentBlocksFromMessage(
   disableToolPrefix = false,
   thinkingEnabledForRequest = false,
   isKimiCoding = false,
-  thinkingBinding: { provider?: unknown; model?: unknown; disabled?: boolean } = {},
-  pendingToolUseIds: string[] = []
+  thinkingBinding: {
+    provider?: unknown;
+    model?: unknown;
+    disabled?: boolean;
+    connectionId?: unknown;
+  } = {},
+  pendingToolUseIds: string[] = [],
+  thinkingTypeForRequest: string | undefined = undefined
 ) {
   const blocks: ClaudeContentBlock[] = [];
 
@@ -614,14 +652,24 @@ function getContentBlocksFromMessage(
     const toolContent = normalizeToolResultImages(
       Array.isArray(msg.content) ? stripEmptyTextBlocks(msg.content) : msg.content
     );
+    // A nested `cache_control` is invalid inside `tool_result.content`; hoist it
+    // onto the tool_result block. Also accept a marker already hoisted onto the
+    // tool MESSAGE by filterToOpenAIFormat (openai-compat passthrough path).
+    const { content: hoistedContent, cacheControl } =
+      hoistNestedToolResultCacheControl(toolContent);
+    const toolResultCacheControl =
+      msg.cache_control !== undefined ? msg.cache_control : cacheControl;
     blocks.push({
       type: "tool_result",
       tool_use_id: sanitizedToolUseId,
-      content: toolContent,
+      content: hoistedContent,
       // Zed's cloud proxy (cloud.zed.dev/completions) strictly requires
       // `is_error` on every Anthropic tool_result block. OpenAI tool messages
       // carry no such flag, so default to false unless the caller set it explicitly.
       is_error: msg.is_error ?? false,
+      // The hoisted `cache_control` marker belongs on the tool_result block
+      // itself — Anthropic rejects it inside `tool_result.content`.
+      ...(toolResultCacheControl !== undefined && { cache_control: toolResultCacheControl }),
     });
   } else if (msg.role === "user") {
     if (typeof msg.content === "string") {
@@ -642,13 +690,18 @@ function getContentBlocksFromMessage(
           const resultContent = normalizeToolResultImages(
             Array.isArray(part.content) ? stripEmptyTextBlocks(part.content) : part.content
           );
+          // Same tool_result.content restriction as the role:"tool" branch above.
+          const hoisted = hoistNestedToolResultCacheControl(resultContent);
+          const partCacheControl =
+            part.cache_control !== undefined ? part.cache_control : hoisted.cacheControl;
           blocks.push({
             type: "tool_result",
             tool_use_id: toolUseId, // #7705
-            content: resultContent,
+            content: hoisted.content,
             // Always emit a boolean: Zed's strict Anthropic parser rejects
             // tool_result blocks with a missing `is_error` field.
             is_error: part.is_error ?? false,
+            ...(partCacheControl !== undefined && { cache_control: partCacheControl }),
           });
         } else if (part.type === "image_url" || part.type === "image") {
           const imageBlock = openAiImagePartToClaudeBlock(part);
@@ -712,10 +765,9 @@ function getContentBlocksFromMessage(
           if (part.type === "redacted_thinking" && part.data === "") {
             continue; // drop — same: empty data from non-Anthropic provider
           }
-          blocks.push({
-            ...part,
-            signature: part.signature || DEFAULT_THINKING_CLAUDE_SIGNATURE,
-          });
+          // Never fabricate a signature: the DEFAULT blob is a real encrypted thought from an
+          // unrelated session and Claude decrypts it as its own reasoning.
+          blocks.push({ ...part });
         } else if (part.type === "tool_use") {
           // Tool name already has prefix from tool declarations, keep as-is
           // CRITICAL: Skip tool_use blocks with empty name (causes Claude 400 error)
@@ -782,13 +834,20 @@ function getContentBlocksFromMessage(
     // Signed-thinking continuity: the client (OpenAI Chat / Responses) never held the
     // signed blocks Claude produced for this tool turn, but claude-to-openai stored them
     // keyed by the tool_use ids. Restore them verbatim before the owning tool_use —
-    // only for the same provider + model, only when this request has thinking on and
-    // the client sent no thinking block of its own, never for a video-derived request.
-    // A miss keeps the #5312 placeholder.
+    // only for MANUAL extended thinking (`type:"enabled"`), for the same provider +
+    // model + connection, only when the client sent no thinking block of its own,
+    // never for a video-derived request. A miss injects nothing.
+    // #17324 recurrence (2026-10-27): adaptive-only models (Opus 4.7+/5.x, Fable 5)
+    // accept a tool_use turn with NO thinking block at all, but replaying stored
+    // signed blocks there breaks Anthropic's warm-cache block-equality whenever the
+    // restore hits/misses differently than the turn that warmed the cache (TTL,
+    // eviction, completed-turn rewrite) → 400 "latest assistant message cannot be
+    // modified".
     if (
       !isKimiCoding &&
       !thinkingBinding.disabled &&
       thinkingEnabledForRequest &&
+      thinkingTypeForRequest === "enabled" &&
       hasToolUseBlock &&
       !hasThinkingBlock
     ) {
@@ -796,6 +855,7 @@ function getContentBlocksFromMessage(
         toolUseIds: blocks.filter((b) => b.type === "tool_use").map((b) => b.id),
         provider: thinkingBinding.provider,
         model: thinkingBinding.model,
+        connectionId: thinkingBinding.connectionId,
       });
       if (restored) {
         blocks.unshift(...restored);
@@ -804,17 +864,10 @@ function getContentBlocksFromMessage(
     }
     if (isKimiCoding && typeof msg.reasoning_content === "string" && !hasThinkingBlock) {
       blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
-    } else if (
-      msg.reasoning_content &&
-      thinkingEnabledForRequest &&
-      hasToolUseBlock &&
-      !hasThinkingBlock
-    ) {
-      blocks.unshift({
-        type: "redacted_thinking",
-        data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-      });
     }
+    // A store miss injects nothing: adaptive thinking has no precursor requirement, and
+    // prepareClaudeRequest disables manual thinking when the final tool turn has no
+    // genuine block.
   }
 
   return blocks;

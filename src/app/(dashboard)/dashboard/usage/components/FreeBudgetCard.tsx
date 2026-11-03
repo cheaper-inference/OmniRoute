@@ -3,7 +3,20 @@
 import { useState, useEffect, useMemo } from "react";
 import React from "react";
 import { useTranslations } from "next-intl";
+import { PROVIDER_COLORS as CHART_SERIES_COLORS } from "@/shared/components/analytics/chartColors";
+import Select from "@/shared/components/Select";
+import Input from "@/shared/components/Input";
+import Checkbox from "@/shared/components/Checkbox";
+import Icon from "@/shared/components/Icon";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -142,19 +155,8 @@ const DEFAULT_LABELS: FreeBudgetLabels = {
   },
 };
 
-// Distinct hues for stacked bar segments (cycling)
-const BAR_HUES = [
-  "#6366f1",
-  "#10b981",
-  "#f59e0b",
-  "#3b82f6",
-  "#ec4899",
-  "#14b8a6",
-  "#f97316",
-  "#8b5cf6",
-  "#06b6d4",
-  "#84cc16",
-];
+// Distinct hues for stacked bar segments (cycling) — the shared analytics chart-token palette.
+const BAR_HUES = CHART_SERIES_COLORS;
 
 const RECURRING_TYPES = new Set(["recurring-daily", "recurring-monthly", "keyless"]);
 
@@ -270,13 +272,13 @@ function tosBadge(
   labels: FreeBudgetLabels
 ): { icon: string; cls: string; title: string } | null {
   if (tos === "avoid") {
-    return { icon: "warning", cls: "text-amber-400", title: labels.tosTitles.avoid };
+    return { icon: "warning", cls: "text-warning", title: labels.tosTitles.avoid };
   }
   if (tos === "caution") {
     return { icon: "bolt", cls: "text-text-muted", title: labels.tosTitles.caution };
   }
   if (tos === "ok") {
-    return { icon: "check_circle", cls: "text-emerald-500", title: labels.tosTitles.ok };
+    return { icon: "check_circle", cls: "text-success", title: labels.tosTitles.ok };
   }
   return null;
 }
@@ -287,7 +289,7 @@ function tosBadge(
 
 function Kpi({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-3 py-2 rounded-md border border-border bg-black/[0.015] dark:bg-white/[0.015]">
+    <div className="flex flex-col gap-0.5 px-3 py-2 rounded-md border border-border bg-surface-2">
       <span className="text-[10px] uppercase tracking-wide text-text-muted">{label}</span>
       <span className={`text-[19px] font-bold tabular-nums ${valueClass ?? "text-text-main"}`}>
         {value}
@@ -307,11 +309,11 @@ function FreeTypeBadge({ freeType, label }: { freeType: string; label: string })
       data-testid="free-type-badge"
       className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap ${
         isKeyless
-          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
-          : "border-border bg-black/[0.02] dark:bg-white/[0.03] text-text-muted"
+          ? "border-success/40 bg-success/10 text-success"
+          : "border-border bg-surface-2 text-text-muted"
       }`}
     >
-      {isKeyless && <span className="material-symbols-outlined text-[10px]">lock_open</span>}
+      {isKeyless && <Icon name="lock_open" size={10} />}
       {label}
     </span>
   );
@@ -380,7 +382,7 @@ export function FreeBudgetView({
     <div className="rounded-lg border border-border bg-surface">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
-        <span className="material-symbols-outlined text-[14px] text-text-muted">savings</span>
+        <Icon name="savings" size={14} className="text-text-muted" />
         <span className="text-[13px] font-semibold text-text-main">{labels.title}</span>
         {freshness && (
           <span
@@ -402,7 +404,7 @@ export function FreeBudgetView({
         <Kpi
           label={labels.firstMonth}
           value={`~${fmt(firstMonthRealisticTokens)}`}
-          valueClass="text-emerald-500"
+          valueClass="text-success"
         />
         <Kpi label={labels.usedThisMonth} value={fmt(usedThisMonth)} valueClass="text-text-muted" />
       </div>
@@ -432,13 +434,11 @@ export function FreeBudgetView({
       {keylessProviders.length > 0 && (
         <div
           data-testid="keyless-section"
-          className="mx-3 mt-2 rounded-md border border-emerald-500/30 bg-emerald-500/5 px-3 py-2"
+          className="mx-3 mt-2 rounded-md border border-success/30 bg-success/5 px-3 py-2"
         >
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[14px] text-emerald-500">
-              lock_open
-            </span>
-            <span className="text-[11px] font-semibold text-emerald-500">{labels.noApiKey}</span>
+            <Icon name="lock_open" size={14} className="text-success" />
+            <span className="text-[11px] font-semibold text-success">{labels.noApiKey}</span>
             <span className="text-[10.5px] text-text-muted">
               ({keylessModels.length}个模型 · {keylessProviders.length}个提供者)
             </span>
@@ -448,7 +448,7 @@ export function FreeBudgetView({
               <span
                 key={p}
                 className="inline-flex items-center rounded-full border px-2 py-0.5 text-[10.5px] text-text-muted tabular-nums"
-                style={{ borderColor: providerColor.get(p) ?? "var(--border)" }}
+                style={{ borderColor: providerColor.get(p) ?? "var(--color-border)" }}
               >
                 {p}
               </span>
@@ -459,22 +459,20 @@ export function FreeBudgetView({
 
       {/* Boost + uncapped callouts */}
       {boostMonthlyTokens > 0 && (
-        <div className="mx-3 mt-2 flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5">
-          <span className="material-symbols-outlined text-[14px] text-emerald-500">bolt</span>
-          <span className="text-[11px] text-emerald-500">
-            {labels.boost(fmt(boostMonthlyTokens))}
-          </span>
+        <div className="mx-3 mt-2 flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-1.5">
+          <Icon name="bolt" size={14} className="text-success" />
+          <span className="text-[11px] text-success">{labels.boost(fmt(boostMonthlyTokens))}</span>
         </div>
       )}
       {uncappedProviders.length > 0 && (
-        <div className="mx-3 mt-2 rounded-md border border-border bg-black/[0.015] dark:bg-white/[0.015] px-3 py-2">
+        <div className="mx-3 mt-2 rounded-md border border-border bg-surface-2 px-3 py-2">
           <span className="text-[11px] text-text-muted">{labels.uncapped}</span>
           <div className="mt-1 flex flex-wrap gap-1">
             {uncappedProviders.map((p) => (
               <span
                 key={p}
                 className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-[10.5px] text-text-muted tabular-nums"
-                style={{ borderColor: providerColor.get(p) ?? "var(--border)" }}
+                style={{ borderColor: providerColor.get(p) ?? "var(--color-border)" }}
               >
                 {p}
               </span>
@@ -483,8 +481,8 @@ export function FreeBudgetView({
         </div>
       )}
       {gatedRecurringTokens > 0 && (
-        <div className="mx-3 mt-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
-          <span className="text-[11px] text-amber-600 dark:text-amber-400">
+        <div className="mx-3 mt-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2">
+          <span className="text-[11px] text-warning">
             {labels.gated(fmt(gatedRecurringTokens))}
           </span>
           <div className="mt-1 flex flex-wrap gap-1">
@@ -502,9 +500,9 @@ export function FreeBudgetView({
 
       {/* ToS-restricted callout */}
       {avoidModels.length > 0 && (
-        <div className="mx-3 mt-2 flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-1.5">
-          <span className="material-symbols-outlined text-[14px] text-text-muted">warning</span>
-          <span className="text-[11px] text-amber-400">
+        <div className="mx-3 mt-2 flex items-center gap-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-1.5">
+          <Icon name="warning" size={14} className="text-text-muted" />
+          <span className="text-[11px] text-warning">
             {labels.tosRestricted(avoidModels.length)}
           </span>
         </div>
@@ -512,76 +510,77 @@ export function FreeBudgetView({
 
       {/* Per-model table */}
       <div className="px-3 pb-3 pt-2">
-        <div className="overflow-x-auto">
-          <table className="w-full text-[11px]" data-testid="budget-table">
-            <thead>
-              <tr className="text-text-muted text-left border-b border-border">
-                <th className="font-medium py-1 pr-2">{labels.provider}</th>
-                <th className="font-medium py-1 pr-2">{labels.model}</th>
-                <th className="font-medium py-1 pr-2">{labels.type}</th>
-                <th className="font-medium py-1 pr-2 text-right">{labels.tokensMonth}</th>
-                <th className="font-medium py-1 pr-1 text-center">ToS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="py-3 text-center text-text-muted">
-                    No models match the current filters.
-                  </td>
-                </tr>
-              )}
-              {rows.map((m) => {
-                const badge = tosBadge(m.tos, labels);
-                const amount =
-                  m.monthlyTokens > 0
-                    ? fmt(m.monthlyTokens)
-                    : m.creditTokens > 0
-                      ? labels.credit(fmt(m.creditTokens))
-                      : "—";
-                return (
-                  <tr
-                    key={`${m.provider}:${m.modelId}`}
-                    className="border-b border-border/40 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
-                  >
-                    <td className="py-1 pr-2">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span
-                          className="inline-block w-2 h-2 rounded-sm flex-shrink-0"
-                          style={{ background: providerColor.get(m.provider) ?? BAR_HUES[0] }}
-                        />
-                        <span className="text-text-muted">{m.provider}</span>
-                      </span>
-                    </td>
-                    <td
-                      className="py-1 pr-2 text-text-main truncate max-w-[180px]"
-                      title={m.modelId}
-                    >
-                      {m.displayName}
-                    </td>
-                    <td className="py-1 pr-2">
-                      <FreeTypeBadge
-                        freeType={m.freeType}
-                        label={labels.freeTypes[m.freeType] ?? m.freeType}
+        <Table
+          className="min-w-0 text-[11px] [&_td]:h-auto [&_th]:h-auto"
+          containerClassName="rounded-none border-0"
+          scrollbarLabel={labels.model}
+          data-testid="budget-table"
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead className="font-medium py-1 pr-2">{labels.provider}</TableHead>
+              <TableHead className="font-medium py-1 pr-2">{labels.model}</TableHead>
+              <TableHead className="font-medium py-1 pr-2">{labels.type}</TableHead>
+              <TableHead className="font-medium py-1 pr-2 text-right">
+                {labels.tokensMonth}
+              </TableHead>
+              <TableHead className="font-medium py-1 pr-1 text-center">ToS</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-3 text-center text-text-muted">
+                  No models match the current filters.
+                </TableCell>
+              </TableRow>
+            )}
+            {rows.map((m) => {
+              const badge = tosBadge(m.tos, labels);
+              const amount =
+                m.monthlyTokens > 0
+                  ? fmt(m.monthlyTokens)
+                  : m.creditTokens > 0
+                    ? labels.credit(fmt(m.creditTokens))
+                    : "—";
+              return (
+                <TableRow key={`${m.provider}:${m.modelId}`}>
+                  <TableCell className="py-1 pr-2">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span
+                        className="inline-block w-2 h-2 rounded-sm flex-shrink-0"
+                        style={{ background: providerColor.get(m.provider) ?? BAR_HUES[0] }}
                       />
-                    </td>
-                    <td className="py-1 pr-2 text-right text-text-main tabular-nums">{amount}</td>
-                    <td className="py-1 pr-1 text-center">
-                      {badge && (
-                        <span
-                          className={`material-symbols-outlined text-[13px] ${badge.cls}`}
-                          title={badge.title}
-                        >
-                          {badge.icon}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      <span className="text-text-muted">{m.provider}</span>
+                    </span>
+                  </TableCell>
+                  <TableCell
+                    className="py-1 pr-2 text-text-main truncate max-w-[180px]"
+                    title={m.modelId}
+                  >
+                    {m.displayName}
+                  </TableCell>
+                  <TableCell className="py-1 pr-2">
+                    <FreeTypeBadge
+                      freeType={m.freeType}
+                      label={labels.freeTypes[m.freeType] ?? m.freeType}
+                    />
+                  </TableCell>
+                  <TableCell className="py-1 pr-2 text-right text-text-main tabular-nums">
+                    {amount}
+                  </TableCell>
+                  <TableCell className="py-1 pr-1 text-center">
+                    {badge && (
+                      <span className={`inline-flex ${badge.cls}`} title={badge.title}>
+                        <Icon name={badge.icon} size={13} ariaLabel={badge.title} />
+                      </span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
@@ -622,21 +621,23 @@ export default function FreeBudgetCard() {
     <div className="flex flex-col gap-2">
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-2 px-1 text-[11px] text-text-muted">
-        <input
-          type="text"
+        <Input
+          type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search model, provider…"
-          aria-label="Search free models"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchAria")}
           data-testid="budget-search-input"
-          className="rounded border border-border bg-surface px-2 py-1 text-[11px] text-text-main placeholder:text-text-muted min-w-[160px]"
+          className="min-w-[160px]"
+          inputClassName="text-[11px]"
         />
-        <select
+        <Select
+          compact
           value={providerFilter}
           onChange={(e) => setProviderFilter(e.target.value)}
-          aria-label="Filter by provider"
+          aria-label={t("filterProviderAria")}
           data-testid="budget-provider-select"
-          className="rounded border border-border bg-surface px-1.5 py-1 text-[11px] text-text-main"
+          className="w-auto"
         >
           <option value="all">{t("allProviders")}</option>
           {providers.map((p) => (
@@ -644,37 +645,33 @@ export default function FreeBudgetCard() {
               {p}
             </option>
           ))}
-        </select>
-        <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={keylessOnly}
-            onChange={(e) => setKeylessOnly(e.target.checked)}
-            className="accent-emerald-500"
-            data-testid="budget-keyless-toggle"
-          />
-          Keyless only
-        </label>
-        <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={hideAvoid}
-            onChange={(e) => setHideAvoid(e.target.checked)}
-            className="accent-indigo-500"
-          />
-          {t("hideTosRestricted")}
-        </label>
-        <span className="ml-auto inline-flex items-center gap-1.5">
+        </Select>
+        <Checkbox
+          label={t("keylessOnly")}
+          checked={keylessOnly}
+          onChange={(e) => setKeylessOnly(e.target.checked)}
+          data-testid="budget-keyless-toggle"
+          className="text-[11px]"
+        />
+        <Checkbox
+          label={t("hideTosRestricted")}
+          checked={hideAvoid}
+          onChange={(e) => setHideAvoid(e.target.checked)}
+          className="text-[11px]"
+        />
+        <span className="ml-auto inline-flex min-w-0 max-w-full items-center gap-1.5">
           {t("sort")}
-          <select
+          <Select
+            compact
             value={sort}
             onChange={(e) => setSort(e.target.value as FreeBudgetSort)}
-            className="rounded border border-border bg-surface px-1.5 py-0.5 text-[11px] text-text-main"
+            aria-label={t("sort")}
+            className="w-auto min-w-0"
           >
             <option value="tokens">{t("tokensMonth")}</option>
             <option value="provider">{t("provider")}</option>
             <option value="name">{t("modelName")}</option>
-          </select>
+          </Select>
         </span>
       </div>
       <FreeBudgetView

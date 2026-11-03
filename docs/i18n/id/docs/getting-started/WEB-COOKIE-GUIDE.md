@@ -4,9 +4,9 @@
 
 ---
 
-Penyedia Web Cookie memungkinkan OmniRoute menggunakan layanan AI melalui sesi browser Anda yang sudah ada, bukan melalui kunci API. Penyedia ini berguna ketika Anda sudah memiliki akses ke suatu layanan melalui situs webnya dan ingin OmniRoute menggunakan sesi terautentikasi yang sama.
+Penyedia Web Cookie memungkinkan OmniRoute menggunakan layanan AI melalui sesi browser Anda yang sudah ada, alih-alih menggunakan kunci API. Penyedia ini berguna ketika Anda sudah memiliki akses ke suatu layanan melalui situs webnya dan ingin OmniRoute menggunakan sesi terautentikasi yang sama.
 
-Tidak seperti penyedia berbasis kunci API, penyedia Web Cookie melakukan autentikasi menggunakan kredensial yang dikirim browser Anda ke situs web.
+Tidak seperti penyedia berbasis kunci API, penyedia Web Cookie melakukan autentikasi menggunakan kredensial yang dikirimkan browser Anda ke situs web.
 
 ---
 
@@ -26,13 +26,13 @@ DevTools
 → Cookies
 ```
 
-Meskipun cookie ini terlihat benar, cookie tersebut mungkin:
+Meskipun cookie tersebut terlihat benar, cookie tersebut mungkin:
 
-- kedaluwarsa
+- sudah kedaluwarsa
 - tidak lengkap
 - tidak menyertakan cookie yang hanya dikirim pada permintaan terautentikasi
 
-Penggunaan nilai-nilai ini dapat menyebabkan kegagalan autentikasi meskipun tampak valid.
+Menggunakan nilai-nilai ini dapat menyebabkan kegagalan autentikasi meskipun terlihat valid.
 
 ## Salin dari Permintaan Aktif
 
@@ -42,7 +42,7 @@ Sebagai gantinya, gunakan cookie dari permintaan yang berhasil:
 DevTools
 → Network
 → Muat ulang halaman
-→ Buka permintaan obrolan atau percakapan
+→ Buka permintaan chat atau percakapan
 → Request Headers
 → Cookie
 ```
@@ -61,7 +61,7 @@ Proses penyiapannya sama untuk sebagian besar penyedia Web Cookie.
 2. Buka Developer Tools browser.
 3. Buka tab **Network**.
 4. Muat ulang halaman.
-5. Buka permintaan obrolan atau percakapan yang terautentikasi.
+5. Buka permintaan chat atau percakapan yang terautentikasi.
 6. Salin kredensial autentikasi yang diperlukan.
 7. Buka OmniRoute.
 8. Buka **Providers → Add Provider**.
@@ -76,75 +76,75 @@ Kredensial yang diperlukan bergantung pada penyedia.
 
 # Format Kredensial Penyedia
 
-Situs web yang berbeda menyimpan autentikasi dengan cara yang berbeda. Beberapa hanya memerlukan cookie, sedangkan yang lain mungkin memerlukan header atau token tambahan.
+Setiap situs web menyimpan autentikasi dengan cara yang berbeda. Beberapa hanya memerlukan cookie, sedangkan yang lain mungkin memerlukan header atau token tambahan.
 
 | Penyedia                        | Format Kredensial                | Panduan Penyedia                 |
 | ------------------------------- | -------------------------------- | -------------------------------- |
 | Claude Web                      | Header permintaan Cookie lengkap | `docs/providers/CLAUDE_WEB.md`   |
 | ChatGPT Web (Codex)             | Header Cookie lengkap            | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(verifikasi)_                   |                                  |
-| Copilot Web                     | _(verifikasi)_                   | `docs/providers/COPILOT-M365.md` |
+| Gemini Web                      | _(perlu diverifikasi)_           |                                  |
+| Copilot Web                     | _(perlu diverifikasi)_           | `docs/providers/COPILOT-M365.md` |
 | Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath    | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(verifikasi)_                   |                                  |
+| Grok Web                        | _(perlu diverifikasi)_           |                                  |
 | ...                             | ...                              | ...                              |
 
-> Perbarui tabel ini saat penyedia Web Cookie baru ditambahkan atau penyedia yang ada mengubah persyaratan autentikasinya.
+> Perbarui tabel ini saat penyedia Web Cookie baru ditambahkan atau penyedia yang sudah ada mengubah persyaratan autentikasinya.
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) adalah platform chat konsumen gratis yang tidak memerlukan pendaftaran — sesi dibuat secara anonim pada kunjungan pertama dan dipertahankan melalui tiga cookie: `uid`, `si_usr_id`, dan `si_ses_id`. OmniRoute meneruskan endpoint `/api/dispatch` yang sama melalui satu id model (`notrack-c`, alias `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) adalah platform obrolan konsumen gratis yang tidak memerlukan pendaftaran — sesi dibuat secara anonim pada kunjungan pertama dan dipertahankan melalui tiga cookie: `uid`, `si_usr_id`, dan `si_ses_id`. OmniRoute mem-proxy endpoint `/api/dispatch` yang sama melalui satu ID model (`notrack-c`, alias `ntw`).
 
-### Langkah-langkah untuk terhubung
+### Langkah-langkah untuk menghubungkan
 
 1. Buka [notrack.ai](https://notrack.ai) di browser Anda dan biarkan cookie sesi anonim ditetapkan.
-2. Buka **DevTools → Network**, muat ulang halaman, lalu klik permintaan `/api` apa pun.
-3. Di **Request Headers**, salin seluruh nilai header `Cookie`.
+2. Buka **DevTools → Network**, muat ulang halaman, lalu klik permintaan `/api` mana pun.
+3. Di **Request Headers**, salin nilai lengkap header `Cookie`.
 4. Di OmniRoute, buka **Providers → Add Provider → NoTrack Web (Free)**.
-5. Tempel string cookie ke kolom `apiKey`, lalu klik **Save**.
+5. Tempelkan string cookie ke kolom `apiKey`, lalu klik **Save**.
 
-OmniRoute mengekstrak `uid`, `si_usr_id`, dan `si_ses_id` dari string yang ditempelkan, lalu membuat ulang header `Cookie` yang bersih hanya dengan pasangan tersebut — ditambah `nt_session` (token `ntk_…` yang ditetapkan untuk akun yang telah masuk) jika tersedia. Jika salah satu dari ketiganya tidak ada, string mentah yang ditempelkan akan diteruskan tanpa perubahan sehingga operator dapat bereksperimen dengan format alternatif.
+OmniRoute mengekstrak `uid`, `si_usr_id`, dan `si_ses_id` dari string yang ditempelkan, lalu membuat ulang header `Cookie` yang bersih hanya dengan pasangan tersebut — ditambah `nt_session` (token `ntk_…` yang ditetapkan untuk akun yang telah masuk) jika tersedia. Jika salah satu dari ketiganya tidak ada, string mentah yang ditempelkan akan diteruskan tanpa perubahan agar operator dapat bereksperimen dengan format alternatif.
 
-### Id model
+### ID model
 
-| Id model    | Nama tampilan | Catatan                                                  |
+| ID model    | Nama tampilan | Catatan                                                  |
 | ----------- | ------------- | -------------------------------------------------------- |
 | `notrack-c` | NoTrack C     | Default — model dispatch upstream `C`.                   |
 | `C`         | NoTrack C     | Alias untuk `notrack-c` (kode dispatch upstream mentah). |
 | `notrack`   | NoTrack C     | Alias untuk `notrack-c`.                                 |
 | `ntw`       | NoTrack C     | Alias singkat untuk `notrack-c`.                         |
 
-Keempat id model dipetakan ke model dispatch upstream yang sama (`C`).
+Keempat ID model dipetakan ke model dispatch upstream yang sama (`C`).
 
 ### Opsi permintaan
 
-Eksekutor menerima kolom opsional berikut dalam isi permintaan:
+Eksekutor menerima kolom opsional berikut dalam body permintaan:
 
-| Kolom isi             | Default | Tujuan                                                                          |
+| Kolom body            | Default | Tujuan                                                                          |
 | --------------------- | ------- | ------------------------------------------------------------------------------- |
-| `notrack_mode`        | `usual` | Mode dispatch (string berformat bebas; upstream menerima `usual`, …)            |
+| `notrack_mode`        | `usual` | Mode dispatch (string bebas; upstream menerima `usual`, …)                      |
 | `notrack_max_turns`   | `6`     | Jumlah giliran internal yang dapat dilakukan upstream sebelum menjawab.         |
-| `notrack_chat_id`     | `null`  | Melanjutkan chat upstream yang sudah ada (hilangkan untuk chat baru).           |
-| `notrack_attachments` | `[]`    | Larik deskriptor lampiran upstream yang diteruskan apa adanya.                  |
+| `notrack_chat_id`     | `null`  | Melanjutkan obrolan upstream yang sudah ada (hilangkan untuk obrolan baru).     |
+| `notrack_attachments` | `[]`    | Array pass-through berisi deskriptor lampiran upstream.                         |
 | `notrack_regenerate`  | `false` | Atur ke `true` untuk meminta jawaban yang dibuat ulang bagi giliran sebelumnya. |
 
 ### Kemampuan
 
-- Penyelesaian chat **streaming dan non-streaming**.
-- **Pemanggilan alat** — atur `tools: [...]` pada permintaan; eksekutor melakukan serialisasi ke dalam kontrak amplop pemanggilan alat dan mengurai respons model kembali menjadi `tool_calls` OpenAI.
+- Penyelesaian obrolan **streaming dan non-streaming**.
+- **Pemanggilan alat** — tetapkan `tools: [...]` pada permintaan; eksekutor melakukan serialisasi ke dalam kontrak envelope pemanggilan alat dan mengurai respons model kembali menjadi `tool_calls` OpenAI.
 - **`response_format`** — `json_object` dan `json_schema` didukung. Eksekutor mengekstrak objek JSON pertama dari balasan model dan mengubahnya menjadi string sebelum dikembalikan.
-- **Petunjuk penalaran** — eksekutor memancarkan delta `reasoning` saat upstream mengirimkan peristiwa `thinking`.
+- **Petunjuk penalaran** — eksekutor mengirimkan delta `reasoning` ketika upstream mengirimkan peristiwa `thinking`.
 
 ### Keterbatasan
 
-- Upstream memberlakukan kuota penggunaan anonim — saat batas tercapai, eksekutor menampilkan status 429 dengan pesan yang mudah dipahami.
-- Semua id model mengarah ke model dispatch upstream yang sama; tidak ada pilihan per model.
-- Eksekutor tidak memanggil endpoint `/api/chats` milik upstream, sehingga riwayat chat/sesi tidak dikelola secara otomatis. Gunakan `notrack_chat_id` untuk melanjutkan chat upstream yang sudah ada.
+- Upstream memberlakukan kuota penggunaan anonim — ketika batas tersebut tercapai, eksekutor menampilkan 429 dengan pesan yang ramah.
+- Semua ID model mengarah ke model dispatch upstream yang sama; tidak ada peralihan per model.
+- Eksekutor tidak memanggil endpoint `/api/chats` milik upstream, sehingga riwayat obrolan/sesi tidak dikelola secara otomatis. Gunakan `notrack_chat_id` untuk melanjutkan obrolan upstream yang sudah ada.
 
 ---
 
-# Yang Dapat dan Tidak Dapat Dilakukan oleh Penyedia Cookie Web
+# Hal yang Dapat dan Tidak Dapat Dilakukan oleh Penyedia Cookie Web
 
-Penyedia Cookie Web menggunakan kembali antarmuka chat sebuah situs web. Penyedia ini **tidak** menawarkan kemampuan yang sama seperti API resmi.
+Penyedia Cookie Web menggunakan kembali antarmuka obrolan sebuah situs web. Penyedia tersebut **tidak** menawarkan kemampuan yang sama seperti API resmi.
 
 ## Didukung
 
@@ -163,15 +163,15 @@ Penyedia Cookie Web menggunakan kembali antarmuka chat sebuah situs web. Penyedi
 
 Ini adalah perilaku yang diharapkan dan **bukan** bug.
 
-Jika Anda memerlukan eksekusi alat, pengeditan file otomatis, atau alur kerja agen lainnya, gunakan **penyedia berbasis kunci API**, bukan penyedia Web Cookie.
+Jika Anda memerlukan eksekusi alat, pengeditan file otomatis, atau alur kerja agen lainnya, gunakan **penyedia dengan kunci API** sebagai pengganti penyedia Web Cookie.
 
 ---
 
 # Catatan Validasi
 
-Keberhasilan **Test Connection** atau validasi cookie hanya memverifikasi bahwa kredensial yang diberikan tampaknya memiliki format yang diharapkan.
+Keberhasilan **Uji Koneksi** atau validasi cookie hanya memverifikasi bahwa kredensial yang diberikan tampaknya memiliki format yang diharapkan.
 
-Hingga Issue #7857 diselesaikan, validasi yang berhasil **tidak menjamin** bahwa penyedia akan berhasil melakukan autentikasi.
+Hingga Masalah #7857 terselesaikan, keberhasilan validasi **tidak menjamin** bahwa penyedia akan berhasil melakukan autentikasi.
 
 Jika autentikasi masih gagal, pastikan Anda menyalin kredensial dari permintaan jaringan aktif, bukan dari penyimpanan cookie browser.
 
@@ -210,15 +210,28 @@ Salin ulang kredensial dari permintaan jaringan baru setelah berhasil membuka pe
 
 Penyedia Web Cookie menggunakan sesi browser Anda yang sudah ada.
 
-Jika sesi browser Anda kedaluwarsa atau Anda keluar, Anda harus menyalin kumpulan kredensial baru. Untuk mengotomatiskan pembaruan cookie bagi penyedia web yang didukung, lihat alat pendamping [Ekstensi Sinkronisasi Sesi Browser](../guides/SESSION-SYNC-EXTENSION.md).
+Jika sesi browser kedaluwarsa atau Anda keluar, Anda harus menyalin serangkaian kredensial baru. Untuk mengotomatiskan pembaruan cookie bagi penyedia web yang didukung, lihat alat pendamping [Ekstensi Sinkronisasi Sesi Browser](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
-## Test Connection Berhasil tetapi Permintaan Gagal
+## Uji Koneksi Berhasil tetapi Permintaan Gagal
 
-Hingga Issue #7857 diselesaikan, lolos validasi tidak menjamin bahwa permintaan autentikasi akan berhasil.
+Hingga Masalah #7857 terselesaikan, lolos validasi tidak menjamin bahwa permintaan autentikasi akan berhasil.
 
-Salin ulang kredensial Anda dari permintaan terautentikasi yang baru sebelum melakukan pemecahan masalah lebih lanjut.
+Salin ulang kredensial Anda dari permintaan terautentikasi baru sebelum melanjutkan pemecahan masalah.
+
+---
+
+## ChatGPT Web Gagal dengan "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Kredensial tidak bermasalah — kesalahan tersebut berasal dari bridge, bukan dari sesi. chatgpt.com menetapkan ID modulnya untuk setiap deployment, dan sebelumnya bridge menetapkan secara tetap ID helper Sentinel yang dibuatnya, sehingga proses build ulang chatgpt.com yang mengganti nama helper tersebut menyebabkan setiap giliran gagal meskipun cookie tetap valid. Melakukan otorisasi ulang pada koneksi tidak dapat memperbaikinya.
+
+Build yang me-resolve modul melalui runtime halaman itu sendiri tidak menetapkan ID secara tetap dan tidak mengalami masalah ini. Jika Anda melihat kesalahan tersebut, tingkatkan versi OmniRoute dan jalankan kembali pemeriksaan koneksi.
 
 ---
 
@@ -228,14 +241,14 @@ Untuk panduan lengkap khusus penyedia, lihat:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Panduan Claude Web menunjukkan proses penyiapan lengkap untuk penyedia Web Cookie dan berfungsi sebagai implementasi referensi.
+Panduan Claude Web menunjukkan proses penyiapan lengkap untuk penyedia Web Cookie dan berfungsi sebagai implementasi acuan.
 
 ---
 
 # Praktik Terbaik
 
-- Salin kredensial dari permintaan terautentikasi yang baru.
+- Salin kredensial dari permintaan terautentikasi baru.
 - Hindari menggunakan kembali cookie lama.
-- Pastikan sesi browser Anda tetap aktif saat menggunakan penyedia Web Cookie.
+- Jaga agar sesi browser Anda tetap aktif saat menggunakan penyedia Web Cookie.
 - Perlakukan cookie yang disalin sebagai kredensial sensitif.
-- Gunakan penyedia berbasis kunci API saat Anda memerlukan pemanggilan fungsi atau alur kerja agen.
+- Gunakan penyedia dengan kunci API saat Anda memerlukan pemanggilan fungsi atau alur kerja agen.

@@ -1,0 +1,1 @@
+- **fix(mcp,a2a):** Honor explicit combo selection in MCP `route_request` and A2A `smart-routing`, and distinguish requested combos from gateway-confirmed routing in A2A decision telemetry ([#17235](https://github.com/diegosouzapw/OmniRoute/pull/17235)) — thanks @fabioKoruja00

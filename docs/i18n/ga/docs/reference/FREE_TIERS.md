@@ -44,17 +44,18 @@ Na ranníocóirí **doiciméadaithe** is mó: `mistral` 1.00B, `nara` 210M, `llm
 
 ---
 
-## Athnuachan 2026-06-17 — cad a d’athraigh ó 2026-06-05
+## 2026-06-17 athnuachan — cad a athraíodh ó 2026-06-05
 
-Rinneadh athnuachan ar an gcatalóg iomlán trí bhabhta taighde gréasáin le 50 gníomhaire (doiciméid oifigiúla + nuacht ó na 7 lá deiridh, fíoraithe go frithchúiseach). Na buaicphointí:
+Rinne pas taighde gréasáin le 50 gníomhaire (doiciméid oifigiúla + nuacht an 7 lá seo caite, fíoraithe go frithpháirteach) athnuachan ar an gcatalóg ar fad. Buaicphointí:
 
-- **Bainte / gan sraith saor in aisce (2026):** `chutes` (tháinig deireadh leis an tsraith saor in aisce 2026-03), `phind` (dúnadh an chuideachta 2026-01), `kluster` (cuireadh deireadh leis 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (tarraingíodh siar saor-rochtain MiMo 2026-05-24, tháinig deireadh le cur chun cinn Nemotron 2026-06 — athfhíoraithe 2026-06-18), `aimlapi` (an tsraith saor in aisce curtha ar sos — athfhíoraithe 2026-06-18), `yi` (Yi-Light scortha, íoc de réir úsáide — athfhíoraithe 2026-06-18), `featherless-ai` (gan sraith saor in aisce faoi láthair), `chipotle` (“Pepper AI” Chipotle — tugann an ghiuirléid comhrá Amelia `amelia.chipotle.com`, a ndearnadh innealtóireacht droim ar ais uirthi agus lenar labhair an soláthraí, 404 anois ar gach bealach, an fhréamh san áireamh; díchoimisiúnaíodh/bogadh an t-inneall cúil, deimhnithe 2026-09-15 — bainte go hiomlán den chatalóg, #13131/#4037). Fanann `iflytek` / `sparkdesk` liostaithe ach tá nóta rabhaidh ToS leo (tá Spark Lite saor in aisce; cuireann na ToS srian le húsáid seachfhreastalaí/athsheachadta).
-- **Gemini** — dúnadh `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 agus d’fhág `2.5 Pro` an tsraith saor in aisce (2026-04); níl sa tsraith saor in aisce anois ach **teaghlach Flash** (2.5/3/3.1/3.5 Flash + Gemma). Déanann an chatalóg **comhthiomsú** ar theaghlach Flash anois (bhí an figiúr á bhoilsciú roimhe seo trí gach malairt a chomhaireamh ar leithligh: 462M → 60M).
-- **Uimhreacha ceartaithe:** `cloudflare-ai` 122M → **30M** (an fíor-theorainn, 10k Néarón/lá), athaicmíodh `doubao` mar chreidmheas aonuaire clárúcháin (ní creidmheas athfhillteach), `llm7` 4M → **150M** (5M comhartha/lá de réir na ndoiciméad), cuireadh deireadh le críochphointí “-Free” `together` → baineadh an creidmheas clárúcháin $25 freisin (teastaíonn ceannach íosta $5, gan triail saor in aisce), tháinig deireadh le Preview `longcat` + scoireadh na samhlacha Flash → **LongCat-2.0** amháin, athaicmithe mar chreidmheas aonuaire clárúcháin de **10M** comhartha (faoi réir KYC, ní athfhillteach).
-- **Soláthraithe nua saor in aisce a aimsíodh:** ⭐ **Kilo Code** (`kilo-gateway` — tacar rothlach “Auto Free”: teaghlach NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 shamhail chódaithe rothlacha saor in aisce), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash saor in aisce go buan + bónas clárúcháin 20M), agus Trinity Large Preview de chuid `arcee-ai`.
-- **Sraitheanna macánta nua** (féach an Mhodheolaíocht): catagóir _saor-in-aisce-go-buan-ach-gan-uasteorainn_ (fíorrochtain athfhillteach, gan uasteorainn comharthaí le comhaireamh) agus _treisiú díghlasála trí éarlais_ (OpenRouter $10 → +24M/mí), agus taispeántar an dá cheann **ar leithligh** ionas nach mboilscíonn siad an príomhfhigiúr choíche.
+- **Bainte / gan sraith saor in aisce (2026):** `chutes` (chríochnaigh an tsraith saor in aisce 2026-03), `phind` (dhún an chuideachta 2026-01), `kluster` (curtha as feidhm 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo saor in aisce aisghairmithe 2026-05-24, chríochnaigh an promóisean Nemotron 2026-06 — athfhíoraithe 2026-06-18), `aimlapi` (sraith saor in aisce curtha ar sos — athfhíoraithe 2026-06-18), `yi` (Yi-Light scortha, íoc de réir úsáide — athfhíoraithe 2026-06-18), `featherless-ai` (gan sraith saor in aisce faoi láthair), `chipotle` ("Pepper AI" Chipotle — tugann an giuirléid comhrá Amelia ag `amelia.chipotle.com`, a rinneadh droim-innealtóireacht uirthi agus a raibh an soláthraí ag cumarsáid léi, 404 anois ar gach bealach, an fhréamh san áireamh; cúlchríoch dhíchomisiúnaithe/bogtha, deimhnithe 2026-09-15 — bainte go hiomlán as an gcatalóg, #13131/#4037). Fanann `iflytek` / `sparkdesk` liostaithe ach tá nóta aireachais ToS leo (tá Spark Lite saor in aisce; cuireann an ToS srian ar úsáid proxy/relay).
+- **Gemini** — dúnadh `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 agus d'fhág `2.5 Pro` an tsraith saor in aisce (2026-04); is é **teaghlach Flash amháin** atá sa tsraith saor in aisce anois (2.5/3/3.1/3.5 Flash + Gemma). **Comhthiomsaíonn** an chatalóg teaghlach Flash anois (bhí sé ró-mhór mar gur comhairíodh gach leagan as a chéile: 462M → 60M).
+- **Uimhreacha ceartaithe:** `cloudflare-ai` 122M → **30M** (an 10k-Neurons/lá iarbhír), `doubao` athaicmithe mar chreidmheas síniúcháin aonuaire (nach n-athnuaítear), `llm7` 4M → **150M** (5M comharthaí/lá doiciméadaithe), `together` críochphointí "-Free" curtha ar ceal → baineadh an creidmheas síniúcháin $25 freisin (éilíonn sé íoscheannach $5, gan triail saor in aisce), `longcat` chríochnaigh an Réamhamharc + samhlacha Flash scortha → **LongCat-2.0** amháin, athaicmithe mar chreidmheas síniúcháin aonuaire **10M**-comhartha (faoi gheata KYC, nach n-athnuaítear).
+- **Tá inferince dhíreach Poolside ag teacht chun deiridh (fíoraithe 2026-10-20):** fógraíonn an [t-ardán oifigiúil](https://platform.poolside.ai/) múchadh ar **2026-10-31** agus treoraíonn sé úsáideoirí a shamhlacha a íoslódáil ó Hugging Face le haghaidh féin-óstála. Iompraíonn an soláthraí díreach `poolside` an rabhadh seo. Níl aon iontrálacha díreacha Poolside sa chatalóg saor in aisce lámhchurtha; is le `kilo-gateway` na hiontrálacha atá ainmnithe as Poolside. Ní bhunaíonn an fógra seo infhaighteacht na samhlacha a fhreastalaíonn Kilo, Cline, NVIDIA nó geataí eile, mar sin ní scorthar na liostáil sin ar an mbunús sin.
+- **Soláthraithe saor in aisce nua aimsithe:** ⭐ **Kilo Code** (`kilo-gateway` — tacar rothlach "Auto Free": teaghlach NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 samhail chódaithe saor in aisce a rothlaíonn, athnuaithe 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash saor in aisce go buan + bónas síniúcháin 20M), agus `arcee-ai` Trinity Large Preview.
+- **Sraitheanna macánta nua** (féach an Mhodheolaíocht): catagóir _saor in aisce go buan ach gan uasteorainn_ (rochtain athfhillteach iarbhír, gan uasteorainn chomharthaí le comhaireamh) agus _treiseadh díghlasála éarlais_ (OpenRouter $10 → +24M/mo), taispeántar an bheirt **ar leithligh** ionas nach ndéanfaidh siad an phríomhuimhir a mhéadú riamh.
 
-> Is léargas **2026-06-05** é an tábla mionsonraithe de réir soláthraí níos faide síos; tá tosaíocht ag na hathruithe thuas air. Is í an chatalóg de réir samhla `open-sse/config/freeModelCatalog.ts` an fhoinse bheo chanónach.
+> Is é an tábla mionsonraithe in aghaidh an tsoláthraí níos faide síos an **ghrianghraf 2026-06-05**; is iad na difríochtaí thuas a thagann ina ionad. Is é an chatalóg beo in aghaidh na samhla `open-sse/config/freeModelCatalog.ts` an foinse chanonach.
 
 ---
 
@@ -110,7 +111,7 @@ d'aon ghnó.
 ## Modheolaíocht & caveatanna
 
 - Is **meastacháin uasteorann** iad na huimhreacha ó theorainneacha doiciméadaithe shraith saor in aisce gach soláthraí amhail **2026-06-17**, a bailíodh trí thaighde gréasáin. Athraíonn sraitheanna saor in aisce i gcónaí — fíoraigh arís iad sula mbraitheann tú ar fhigiúr.
-- **Cad dó a seasann iontráil i ndáiríre.** Níl rátáil mhuiníne in aghaidh an ró ag aon iontráil, agus ní fhreastalaíonn an API ceann ar bith — caith le gach figiúr thuas mar mheastachán den cháilíocht chéanna, nach luaitear. Tá dhá fhíric éagsúil, toisc go ndéantar iad a choimeád de láimh seachas iad a thuiscint: tá stad crua atá doiciméadaithe go neamhspleách ag 44 iontráil (39 díobh sin na rónna xKiro, a roinneann go léir an liúntas laethúil céanna), agus tá nochtadh maidir le hoiliúint leideanna ag 12 iontráil. Ní shocraítear `hardStopGuaranteed` ach amháin nuair a deir téarmaí an tsoláthraí féin go ndiúltaítear don iarratas má sháraítear an liúntas saor in aisce, seachas tosú go ciúin ar tháille a ghearradh ort, agus an fhoinse i nóta tráchta in aice leis an iontráil; ní shocraítear é mar `true` de réir réamhshocraithe riamh, agus fágtar gan socrú iontráil nach bhfuil fíoraithe ag aon duine. Mar sin, ciallaíonn easpa brataí stad crua "níor bunaíodh é", seachas "is eol dúinn go ngearrfaidh sé táille ort". Ní chuireann **mód STRICT** (an chosaint ródaithe roghnach `freeAccessPolicy=strict`) muinín ach in iontrálacha a bhfuil an bhratach acu; eisiatar gach sraith saor in aisce eile mar `no-hard-stop` (féach `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Nuair a scagann an chosaint linn, tuairiscíonn an loga atá infheicthe don oibreoir líon na n-eisiamh agus a sciar `no-hard-stop`.
+- **Cad dó a seasann iontráil i ndáiríre.** Níl rátáil mhuiníne in aghaidh an ró ag aon iontráil, agus ní fhreastalaíonn an API ceann ar bith — caith le gach figiúr thuas mar mheastachán den cháilíocht chéanna, nach luaitear. Tá dhá fhíric éagsúil, toisc go ndéantar iad a choimeád de láimh seachas iad a thuiscint: tá stad crua atá doiciméadaithe go neamhspleách ag 44 iontráil (39 díobh sin na rónna xKiro, a roinneann go léir an liúntas laethúil céanna), agus tá nochtadh maidir le hoiliúint leideanna ag 20 iontráil. Ní shocraítear `hardStopGuaranteed` ach amháin nuair a deir téarmaí an tsoláthraí féin go ndiúltaítear don iarratas má sháraítear an liúntas saor in aisce, seachas tosú go ciúin ar tháille a ghearradh ort, agus an fhoinse i nóta tráchta in aice leis an iontráil; ní shocraítear é mar `true` de réir réamhshocraithe riamh, agus fágtar gan socrú iontráil nach bhfuil fíoraithe ag aon duine. Mar sin, ciallaíonn easpa brataí stad crua "níor bunaíodh é", seachas "is eol dúinn go ngearrfaidh sé táille ort". Ní chuireann **mód STRICT** (an chosaint ródaithe roghnach `freeAccessPolicy=strict`) muinín ach in iontrálacha a bhfuil an bhratach acu; eisiatar gach sraith saor in aisce eile mar `no-hard-stop` (féach `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Nuair a scagann an chosaint linn, tuairiscíonn an loga atá infheicthe don oibreoir líon na n-eisiamh agus a sciar `no-hard-stop`.
 - `estMonthlyFreeTokens` = comharthaí míosúla athfhillteacha amháin. **Ní athfhilleann creidmheasanna clárúcháin aonuaire** agus áirítear iad mar 0. Áirítear sraitheanna a scoireadh mar 0 freisin.
 - Uasteorainn laethúil comharthaí → `monthly = daily × 30`. Mura bhfuil doiciméadaithe ach RPD → `RPD × ~800 output tokens × 30`. Mura bhfuil ann ach RPM/TPM (gan uasteorainn laethúil) → **gan uasteorainn** (féach thíos).
 - **Saor in aisce go buan, ach gan uasteorainn fhoilsithe comharthaí** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): is fíor-rochtain shaor in aisce athfhillteach iad seo, atá teoranta de réir ráta/comhthráthachta. Aicmímid iad mar `recurring-uncapped` agus **ní shuimímid riamh iad** — dá n-iolrófaí `RPM × 24/7 × 30d`, chruthófaí uasteorainn bhréagach (an boilsciú a ndiúltaímid dó). Liostaítear iad ionas go mbeidh a fhios agat go bhfuil siad ann.
@@ -238,75 +239,75 @@ Is suimeanna de lipéid in aghaidh na samhla iad formhór na bhfigiúirí “com
 
 ---
 
-## Sraith saor in aisce de réir soláthraí (Bytez/Nous seiceáilte 2026-10-15; sraitheanna athiniúchta 2026-09-02; cinn eile 2026-06-17)
+## Sraith saor in aisce de réir soláthraí (Bytez/Nous seiceáilte 2026-10-15; sraitheanna ath-iniúchta 2026-09-02; cinn eile 2026-06-17)
 
-> Athghinte ón gcatalóg de réir samhla (`open-sse/config/freeModelCatalog.ts`), agus dúblálacha bainte ar fud na linne. Sórtáilte de réir comharthaí seasta athfhillteacha/mí. `uncapped*` = saor in aisce go buan ach gan uasteorainn chomharthaí foilsithe (teoranta de réir ráta/comhthráthachta) — rochtain iarbhír, **nach gcuirtear** san áireamh sa phríomhfhigiúr. `—` = creidmheas amháin / gan eochair / ní féidir é a chainníochtú ina chomharthaí.
+> Athghinte ón gcatalóg de réir samhla (`open-sse/config/freeModelCatalog.ts`), agus dúblálacha bainte de réir linnte. Sórtáilte de réir comharthaí seasta athfhillteacha/mí. `uncapped*` = saor in aisce go buan ach gan uasteorainn chomharthaí fhoilsithe (teoranta de réir ráta/comhthreomhaireachta) — rochtain iarbhír, **nach** gcuirtear san áireamh sa phríomhfhigiúr. `—` = creidmheas amháin / gan eochair / ní féidir é a chainníochtú de réir comharthaí.
 
-| Soláthraí        | Cineál saor in aisce   | Comharthaí seasta/mí | Creidmheas na chéad mhí | Téarmaí Seirbhíse | Samhlacha |
-| ---------------- | ---------------------- | -------------------- | ----------------------- | ----------------- | --------- |
-| `mistral`        | athfhillteach          | ~1.00B               | —                       | rabhadh           | 5         |
-| `nara`           | athfhillteach          | ~210M                | —                       | rabhadh           | 8         |
-| `llm7`           | athfhillteach          | ~150M                | —                       | rabhadh           | 4         |
-| `xkiro`          | athfhillteach          | ~150M                | —                       | rabhadh           | 39        |
-| `longcat`        | aonuaire               | —                    | 10M                     | rabhadh           | 1         |
-| `cerebras`       | aonuaire               | —                    | creidmheas $5           | rabhadh           | 2         |
-| `cloudflare-ai`  | athfhillteach          | ~30M                 | —                       | rabhadh           | 9         |
-| `groq`           | athfhillteach          | ~30M                 | —                       | rabhadh           | 5         |
-| `api-airforce`   | athfhillteach          | ~24M                 | —                       | rabhadh           | 7         |
-| `bluesminds`     | athfhillteach          | ~7M                  | —                       | débhríoch         | 22        |
-| `sambanova`      | athfhillteach          | ~6M                  | —                       | rabhadh           | 5         |
-| `arcee-ai`       | athfhillteach          | ~5M                  | —                       | rabhadh           | 1         |
-| `bazaarlink`     | athfhillteach          | ~4M                  | —                       | rabhadh           | 32        |
-| `openrouter`     | athfhillteach          | ~1M                  | —                       | rabhadh           | 1         |
-| `cohere`         | athfhillteach          | ~800K                | —                       | rabhadh           | 6         |
-| `huggingchat`    | athfhillteach          | ~500K                | —                       | rabhadh           | 4         |
-| `morph`          | athfhillteach          | ~400K                | —                       | ceart go leor     | 2         |
-| `huggingface`    | athfhillteach          | ~200K                | —                       | rabhadh           | 6         |
-| `kiro`           | athfhillteach          | ~25K                 | —                       | seachain          | 12        |
-| `glm-cn`         | gan teorainn           | gan teorainn\*       | ~20M                    | ceart go leor     | 4         |
-| `baidu`          | gan teorainn           | gan teorainn\*       | —                       | rabhadh           | 1         |
-| `gemini`         | gan teorainn           | gan teorainn\*       | —                       | rabhadh           | 4         |
-| `kilo-gateway`   | gan teorainn           | gan teorainn\*       | —                       | rabhadh           | 7         |
-| `ollama-cloud`   | gan teorainn           | gan teorainn\*       | —                       | débhríoch         | 8         |
-| `opencode-zen`   | gan teorainn           | gan teorainn\*       | —                       | rabhadh           | 6         |
-| `tencent`        | gan teorainn           | gan teorainn\*       | —                       | rabhadh           | 1         |
-| `vertex`         | creidmheas clárúcháin  | —                    | ~300M                   | rabhadh           | 10        |
-| `agentrouter`    | creidmheas clárúcháin  | —                    | ~200M                   | rabhadh           | 4         |
-| `predibase`      | creidmheas clárúcháin  | —                    | ~25M                    | rabhadh           | 1         |
-| `doubao`         | creidmheas clárúcháin  | —                    | ~15M                    | débhríoch         | 1         |
-| `ai21`           | creidmheas clárúcháin  | —                    | ~10M                    | seachain          | 2         |
-| `deepseek`       | creidmheas clárúcháin  | —                    | ~5M                     | ceart go leor     | 2         |
-| `hyperbolic`     | creidmheas clárúcháin  | —                    | ~5M                     | ceart go leor     | 8         |
-| `nscale`         | creidmheas clárúcháin  | —                    | ~5M                     | rabhadh           | 6         |
-| `bytez`          | creidmheas (athfhill.) | —                    | anaithnid               | débhríoch         | 1         |
-| `deepinfra`      | creidmheas clárúcháin  | —                    | ~1M                     | rabhadh           | 22        |
-| `fireworks`      | creidmheas clárúcháin  | —                    | ~1M                     | seachain          | 10        |
-| `nebius`         | creidmheas clárúcháin  | —                    | ~1M                     | rabhadh           | 1         |
-| `qoder`          | creidmheas clárúcháin  | —                    | ~1M                     | rabhadh           | 14        |
-| `scaleway`       | creidmheas clárúcháin  | —                    | ~1M                     | ceart go leor     | 6         |
-| `novita`         | creidmheas clárúcháin  | —                    | ~500K                   | rabhadh           | 1         |
-| `agy`            | gan eochair            | —                    | —                       | seachain          | 16        |
-| `baichuan`       | gan eochair            | —                    | —                       | débhríoch         | 1         |
-| `blackbox`       | gan eochair            | —                    | —                       | seachain          | 6         |
-| `coze`           | gan eochair            | —                    | —                       | seachain          | 1         |
-| `duckduckgo-web` | gan eochair            | —                    | —                       | seachain          | 6         |
-| `freemodel-dev`  | gan eochair            | —                    | —                       | anaithnid         | 4         |
-| `friendliai`     | gan eochair            | —                    | —                       | seachain          | 2         |
-| `iflytek`        | gan eochair            | —                    | —                       | seachain          | 1         |
-| `inference-net`  | gan eochair            | —                    | —                       | rabhadh           | 3         |
-| `liquid`         | gan eochair            | —                    | —                       | anaithnid         | 1         |
-| `monsterapi`     | gan eochair            | —                    | —                       | débhríoch         | 1         |
-| `muse-spark-web` | gan eochair            | —                    | —                       | seachain          | 3         |
-| `nlpcloud`       | gan eochair            | —                    | —                       | seachain          | 1         |
-| `nvidia`         | gan eochair            | —                    | —                       | rabhadh           | 13        |
-| `pollinations`   | gan eochair            | —                    | —                       | rabhadh           | 31        |
-| `publicai`       | gan eochair            | —                    | —                       | rabhadh           | 3         |
-| `reka`           | gan eochair            | —                    | —                       | rabhadh           | 2         |
-| `sensenova`      | gan eochair            | —                    | —                       | rabhadh           | 1         |
-| `sparkdesk`      | gan eochair            | —                    | —                       | rabhadh           | 1         |
-| `stepfun`        | gan eochair            | —                    | —                       | ceart go leor     | 1         |
-| `t3-web`         | gan eochair            | —                    | —                       | seachain          | 23        |
-| `uncloseai`      | gan eochair            | —                    | —                       | rabhadh           | 3         |
+| Soláthraí        | Cineál saor in aisce  | Comharthaí seasta/mí | Creidmheas na chéad mhí | Téarmaí Seirbhíse | Samhlacha |
+| ---------------- | --------------------- | -------------------- | ----------------------- | ----------------- | --------- |
+| `mistral`        | athfhillteach         | ~1.00B               | —                       | rabhadh           | 5         |
+| `nara`           | athfhillteach         | ~210M                | —                       | rabhadh           | 8         |
+| `llm7`           | athfhillteach         | ~150M                | —                       | rabhadh           | 4         |
+| `xkiro`          | athfhillteach         | ~150M                | —                       | rabhadh           | 39        |
+| `longcat`        | aonuaire              | —                    | 10M                     | rabhadh           | 1         |
+| `cerebras`       | aonuaire              | —                    | creidmheas $5           | rabhadh           | 2         |
+| `cloudflare-ai`  | athfhillteach         | ~30M                 | —                       | rabhadh           | 9         |
+| `groq`           | athfhillteach         | ~30M                 | —                       | rabhadh           | 5         |
+| `api-airforce`   | athfhillteach         | ~24M                 | —                       | rabhadh           | 7         |
+| `bluesminds`     | athfhillteach         | ~7M                  | —                       | débhríoch         | 22        |
+| `sambanova`      | athfhillteach         | ~6M                  | —                       | rabhadh           | 5         |
+| `arcee-ai`       | athfhillteach         | ~5M                  | —                       | rabhadh           | 1         |
+| `bazaarlink`     | athfhillteach         | ~4M                  | —                       | rabhadh           | 32        |
+| `openrouter`     | athfhillteach         | ~1M                  | —                       | rabhadh           | 1         |
+| `cohere`         | athfhillteach         | ~800K                | —                       | rabhadh           | 6         |
+| `huggingchat`    | athfhillteach         | ~500K                | —                       | rabhadh           | 4         |
+| `morph`          | athfhillteach         | ~400K                | —                       | ceart go leor     | 2         |
+| `huggingface`    | athfhillteach         | ~200K                | —                       | rabhadh           | 6         |
+| `kiro`           | athfhillteach         | ~25K                 | —                       | seachain          | 12        |
+| `glm-cn`         | gan teorainn          | gan teorainn\*       | ~20M                    | ceart go leor     | 4         |
+| `baidu`          | gan teorainn          | gan teorainn\*       | —                       | rabhadh           | 1         |
+| `gemini`         | gan teorainn          | gan teorainn\*       | —                       | rabhadh           | 4         |
+| `kilo-gateway`   | gan teorainn          | gan teorainn\*       | —                       | rabhadh           | 7         |
+| `ollama-cloud`   | gan teorainn          | gan teorainn\*       | —                       | débhríoch         | 8         |
+| `opencode-zen`   | gan teorainn          | gan teorainn\*       | —                       | rabhadh           | 10        |
+| `tencent`        | gan teorainn          | gan teorainn\*       | —                       | rabhadh           | 1         |
+| `vertex`         | creidmheas clárúcháin | —                    | ~300M                   | rabhadh           | 10        |
+| `agentrouter`    | creidmheas clárúcháin | —                    | ~200M                   | rabhadh           | 4         |
+| `predibase`      | creidmheas clárúcháin | —                    | ~25M                    | rabhadh           | 1         |
+| `doubao`         | creidmheas clárúcháin | —                    | ~15M                    | débhríoch         | 1         |
+| `ai21`           | creidmheas clárúcháin | —                    | ~10M                    | seachain          | 2         |
+| `deepseek`       | creidmheas clárúcháin | —                    | ~5M                     | ceart go leor     | 2         |
+| `hyperbolic`     | creidmheas clárúcháin | —                    | ~5M                     | ceart go leor     | 8         |
+| `nscale`         | creidmheas clárúcháin | —                    | ~5M                     | rabhadh           | 6         |
+| `bytez`          | creidmheas (athfh.)   | —                    | anaithnid               | débhríoch         | 1         |
+| `deepinfra`      | creidmheas clárúcháin | —                    | ~1M                     | rabhadh           | 22        |
+| `fireworks`      | creidmheas clárúcháin | —                    | ~1M                     | seachain          | 10        |
+| `nebius`         | creidmheas clárúcháin | —                    | ~1M                     | rabhadh           | 1         |
+| `qoder`          | creidmheas clárúcháin | —                    | ~1M                     | rabhadh           | 14        |
+| `scaleway`       | creidmheas clárúcháin | —                    | ~1M                     | ceart go leor     | 6         |
+| `novita`         | creidmheas clárúcháin | —                    | ~500K                   | rabhadh           | 1         |
+| `agy`            | gan eochair           | —                    | —                       | seachain          | 16        |
+| `baichuan`       | gan eochair           | —                    | —                       | débhríoch         | 1         |
+| `blackbox`       | gan eochair           | —                    | —                       | seachain          | 6         |
+| `coze`           | gan eochair           | —                    | —                       | seachain          | 1         |
+| `duckduckgo-web` | gan eochair           | —                    | —                       | seachain          | 6         |
+| `freemodel-dev`  | gan eochair           | —                    | —                       | anaithnid         | 4         |
+| `friendliai`     | gan eochair           | —                    | —                       | seachain          | 2         |
+| `iflytek`        | gan eochair           | —                    | —                       | seachain          | 1         |
+| `inference-net`  | gan eochair           | —                    | —                       | rabhadh           | 3         |
+| `liquid`         | gan eochair           | —                    | —                       | anaithnid         | 1         |
+| `monsterapi`     | gan eochair           | —                    | —                       | débhríoch         | 1         |
+| `muse-spark-web` | gan eochair           | —                    | —                       | seachain          | 3         |
+| `nlpcloud`       | gan eochair           | —                    | —                       | seachain          | 1         |
+| `nvidia`         | gan eochair           | —                    | —                       | rabhadh           | 13        |
+| `pollinations`   | gan eochair           | —                    | —                       | rabhadh           | 31        |
+| `publicai`       | gan eochair           | —                    | —                       | rabhadh           | 3         |
+| `reka`           | gan eochair           | —                    | —                       | rabhadh           | 2         |
+| `sensenova`      | gan eochair           | —                    | —                       | rabhadh           | 1         |
+| `sparkdesk`      | gan eochair           | —                    | —                       | rabhadh           | 1         |
+| `stepfun`        | gan eochair           | —                    | —                       | ceart go leor     | 1         |
+| `t3-web`         | gan eochair           | —                    | —                       | seachain          | 23        |
+| `uncloseai`      | gan eochair           | —                    | —                       | rabhadh           | 3         |
 
 ---
 

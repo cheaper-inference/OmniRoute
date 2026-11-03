@@ -37,6 +37,10 @@ const claudeProfileSyncSrc = readFileSync(
   join(import.meta.dirname, "../../src/lib/cli-helper/claudeProfileAutoSync.ts"),
   "utf8"
 );
+const profileCatalogSrc = readFileSync(
+  join(import.meta.dirname, "../../src/lib/cli-helper/profileCatalog.ts"),
+  "utf8"
+);
 
 test("POST /api/providers auto-sync uses the trusted internal origin (not request.url) — #323", () => {
   assert.ok(
@@ -72,8 +76,12 @@ test("POST /api/sync/initialize never forwards the client Origin to model sync",
 });
 
 test("credential-forwarding CLI profile self-fetches reject redirects", () => {
+  // The credential-forwarding catalog fetch lives in one shared helper...
+  assert.match(profileCatalogSrc, /redirect:\s*["']error["']/);
+  // ...and both profile auto-syncs must go through it instead of fetching directly.
   for (const source of [codexProfileSyncSrc, claudeProfileSyncSrc]) {
-    assert.match(source, /redirect:\s*["']error["']/);
+    assert.match(source, /loadProfileCatalog\(/);
+    assert.doesNotMatch(source, /\bfetch\w*\(/);
   }
 });
 

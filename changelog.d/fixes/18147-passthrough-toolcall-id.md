@@ -1,0 +1,1 @@
+- **fix(sse):** Passthrough streams now give a tool-call slot opener a string `id` when the upstream omits it, so strict OpenAI-compatible clients no longer abort with "Expected 'id' to be a string." (#18147 — thanks @fathonix).

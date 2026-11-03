@@ -274,7 +274,7 @@ test("nightly-v4-build: schedule + dispatch only, gated on develop existing", ()
     // Scheduled runs stay upstream (scripts/check/check-workflows.mjs scheduled-guard).
     assert.match(
       job.if ?? "",
-      /github\.event_name != 'schedule' \|\| github\.repository == 'diegosouzapw\/OmniRoute'/,
+      /github\.event_name != 'schedule' \|\| github\.repository == 'cheaper-inference\/OmniRoute'/,
       `job ${id} needs the upstream-only schedule guard`
     );
   }

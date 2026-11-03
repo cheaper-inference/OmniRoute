@@ -2,6 +2,22 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import { cn } from "@/shared/utils/cn";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import FileDetailModal from "./FileDetailModal";
 import ExpirationBadge from "./components/ExpirationBadge";
@@ -47,21 +63,21 @@ interface FilesListTabProps {
   batches?: BatchRecord[];
 }
 
-const PURPOSE_STYLES_MAP: Record<string, string> = {
-  batch: "bg-blue-500/15 text-blue-400 border-blue-500/25",
-  "batch-output": "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-  "fine-tune": "bg-violet-500/15 text-violet-400 border-violet-500/25",
-  assistants: "bg-yellow-500/15 text-yellow-400 border-yellow-500/25",
+// Purpose → Badge adapter tone (fine-tune keeps a tone of its own, as its violet chip did).
+const PURPOSE_TONES: Record<string, "info" | "success" | "primary" | "warning"> = {
+  batch: "info",
+  "batch-output": "success",
+  "fine-tune": "primary",
+  assistants: "warning",
 };
 
 const TERMINAL_STATUSES = new Set(["completed", "failed", "cancelled", "expired"]);
 
-function Badge({ value, styles }: Readonly<{ value: string; styles: Record<string, string> }>) {
-  const cls = styles[value] ?? "bg-gray-500/15 text-gray-400 border-gray-500/25";
+function PurposeBadge({ value }: Readonly<{ value: string }>) {
   return (
-    <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium border ${cls}`}>
+    <Badge variant={PURPOSE_TONES[value] ?? "default"} size="sm" className="whitespace-nowrap">
       {value}
-    </span>
+    </Badge>
   );
 }
 
@@ -138,79 +154,72 @@ export default function FilesListTab({
   return (
     <div className="flex flex-col gap-4">
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
-        <span className="text-sm text-[var(--color-text-muted)] self-center">
+      <Card padding="sm" className="flex flex-wrap items-center gap-3">
+        <span className="text-sm text-text-muted">
           {typeof filesTotal === "number"
             ? t("batchFilesCount", { count: filesTotal })
             : t("batchFilesListFilesTable")}
         </span>
-        <input
+        <Input
           type="text"
+          icon="search"
           placeholder={t("batchFilesListSearchPlaceholder")}
+          aria-label={t("batchFilesListSearchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 min-w-[200px] px-3 py-2 rounded-lg text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-2 focus:outline-[var(--color-accent)]"
+          className="flex-1 min-w-[200px]"
         />
-        <select
+        <Select
           value={purposeFilter}
           onChange={(e) => setPurposeFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-main)] focus:outline-2 focus:outline-[var(--color-accent)]"
+          aria-label={t("batchFilesPurpose")}
+          className="w-auto"
         >
           {purposes.map((p) => (
             <option key={p} value={p}>
               {p === "all" ? t("batchFilesAllPurposes") : t(`batchFilePurpose.${p}`)}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Card>
 
       {/* Table */}
-      <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-        <table className="w-full text-sm" role="table" aria-label={t("batchFilesListFilesTable")}>
-          <thead>
-            <tr className="bg-[var(--color-bg-alt)] border-b border-[var(--color-border)]">
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                ID
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                {t("batchFilesFilename")}
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                {t("batchFilesPurpose")}
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                {t("filesListSizeColumn")}
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                {t("filesListUsedByColumn")}
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                {t("created")}
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                {t("batchFilesExpires")}
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-[var(--color-text-muted)] uppercase text-xs tracking-wider">
-                {/* Actions */}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+      <Card padding="none" className="overflow-hidden">
+        <Table
+          className="text-sm"
+          aria-label={t("batchFilesListFilesTable")}
+          scrollbarLabel={t("batchFilesListFilesTable")}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>{t("batchFilesFilename")}</TableHead>
+              <TableHead>{t("batchFilesPurpose")}</TableHead>
+              <TableHead>{t("filesListSizeColumn")}</TableHead>
+              <TableHead>{t("filesListUsedByColumn")}</TableHead>
+              <TableHead>{t("created")}</TableHead>
+              <TableHead>{t("batchFilesExpires")}</TableHead>
+              <TableHead>
+                <span className="ci-sr-only">{t("actions")}</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {loading && filtered.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-[var(--color-text-muted)]">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--color-accent)]" />
+              <TableRow>
+                <TableCell colSpan={8} className="py-10 text-center text-text-muted">
+                  <div role="status" className="flex items-center justify-center gap-2">
+                    <Icon name="progress_activity" size={20} className="animate-spin text-accent" />
                     {t("loading")}
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : filtered.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-[var(--color-text-muted)]">
+              <TableRow>
+                <TableCell colSpan={8} className="py-10 text-center text-text-muted">
                   {t("batchFilesNoneFound")}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               filtered.map((file) => {
                 const fileCreatedAt = file.createdAt;
@@ -227,37 +236,32 @@ export default function FilesListTab({
                 const canDelete = related.length === 0 || allTerminal;
 
                 return (
-                  <tr
+                  <TableRow
                     key={file.id}
                     onClick={() => handleFileClick(file)}
-                    className={`border-b border-[var(--color-border)] cursor-pointer transition-colors ${
-                      selectedFileId === file.id
-                        ? "bg-[var(--color-accent)]/10"
-                        : "hover:bg-[var(--color-bg-alt)]"
-                    }`}
+                    data-state={selectedFileId === file.id ? "selected" : undefined}
+                    className={cn("cursor-pointer", selectedFileId === file.id && "bg-accent/10")}
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-text-muted)] max-w-[140px]">
+                    <TableCell className="font-mono text-xs text-text-muted max-w-[140px]">
                       <span className="truncate block" title={file.id}>
                         {file.id}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-[var(--color-text-main)] text-xs max-w-[180px]">
+                    </TableCell>
+                    <TableCell className="text-text-main text-xs max-w-[180px]">
                       <span className="truncate block" title={file.filename}>
                         {file.filename}
                       </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge value={file.purpose} styles={PURPOSE_STYLES_MAP} />
-                    </td>
-                    <td className="px-4 py-3 text-xs text-[var(--color-text-muted)] whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
+                      <PurposeBadge value={file.purpose} />
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
                       {formatBytes(file.bytes)}
-                    </td>
+                    </TableCell>
                     {/* "Used by" column (D12) — shows batch id + role (input/output/error) per plan §4 */}
-                    <td className="px-4 py-3 text-xs">
+                    <TableCell className="text-xs">
                       {related.length === 0 ? (
-                        <span className="text-[var(--color-text-muted)]">
-                          {t("filesListUsedByNone")}
-                        </span>
+                        <span className="text-text-muted">{t("filesListUsedByNone")}</span>
                       ) : (
                         (() => {
                           const roleFor = (b: BatchRecord): string =>
@@ -272,18 +276,13 @@ export default function FilesListTab({
                               title={related.map((b) => `${b.id} (${roleFor(b)})`).join(", ")}
                             >
                               {related.slice(0, 2).map((b) => (
-                                <span
-                                  key={b.id}
-                                  className="font-mono text-[10px] text-[var(--color-text-main)]"
-                                >
+                                <span key={b.id} className="font-mono text-[10px] text-text-main">
                                   {b.id.slice(0, 12)}…{" "}
-                                  <span className="text-[var(--color-text-muted)]">
-                                    ({roleFor(b)})
-                                  </span>
+                                  <span className="text-text-muted">({roleFor(b)})</span>
                                 </span>
                               ))}
                               {related.length > 2 && (
-                                <span className="text-[10px] text-[var(--color-text-muted)]">
+                                <span className="text-[10px] text-text-muted">
                                   +{related.length - 2}
                                 </span>
                               )}
@@ -291,37 +290,41 @@ export default function FilesListTab({
                           );
                         })()
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-[var(--color-text-muted)] whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
                       {fileCreatedAt ? relativeTime(fileCreatedAt, locale) : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-[var(--color-text-muted)] whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
                       {fileExpiresAt ? (
                         <ExpirationBadge expiresAt={fileExpiresAt} variant="compact" />
                       ) : (
-                        <span className="text-xs text-[var(--color-text-muted)]">
+                        <span className="text-xs text-text-muted">
                           {t("batchFilesNeverExpires")}
                         </span>
                       )}
-                    </td>
+                    </TableCell>
                     {/* Actions column */}
-                    <td
-                      className="px-4 py-3 whitespace-nowrap"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <TableCell className="whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
                         {/* Download button */}
                         <a
                           href={`/api/v1/files/${file.id}/content`}
                           download={file.filename}
-                          className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-bg-alt)] transition-colors"
+                          className={buttonVariants({
+                            variant: "ghost",
+                            size: "icon-sm",
+                            className: "text-text-muted hover:text-accent",
+                          })}
                           title={t("filesListDownload")}
+                          aria-label={t("filesListDownload")}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <span className="material-symbols-outlined text-[16px]">download</span>
+                          <Icon name="download" size={16} />
                         </a>
                         {/* Delete button */}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             void handleDeleteFile(file);
@@ -330,21 +333,25 @@ export default function FilesListTab({
                           title={
                             canDelete ? t("filesListDelete") : t("batchFileInUseByActiveBatch")
                           }
-                          className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-red-400 hover:bg-[var(--color-bg-alt)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          aria-label={
+                            canDelete ? t("filesListDelete") : t("batchFileInUseByActiveBatch")
+                          }
+                          className="text-text-muted hover:text-error"
                         >
-                          <span className="material-symbols-outlined text-[16px]">
-                            {deletingId === file.id ? "hourglass_empty" : "delete"}
-                          </span>
-                        </button>
+                          <Icon
+                            name={deletingId === file.id ? "hourglass_empty" : "delete"}
+                            size={16}
+                          />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
       {/* File Info Modal */}
       {selectedFile && (

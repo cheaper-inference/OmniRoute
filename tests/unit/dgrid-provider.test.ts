@@ -9,6 +9,13 @@ const { PROVIDER_ENDPOINTS } = await import("../../src/shared/constants/config.t
 const { REGISTRY: providerRegistry } = await import("../../open-sse/config/providerRegistry.ts");
 const { isValidModel } = await import("../../src/shared/constants/models.ts");
 
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-dgrid-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
+
 const DGRID_CHAT_URL = "https://api.dgrid.ai/v1/chat/completions";
 const DGRID_MODELS_URL = "https://api.dgrid.ai/v1/models";
 const DGRID_FREE_ROUTER = "dgridai/free";
@@ -61,13 +68,6 @@ test("DGrid accepts the free router and the 200+ live catalog via passthrough mo
   assert.equal(isValidModel("dgrid", "openai/gpt-4o"), true);
   assert.equal(isValidModel("dgrid", "anthropic/claude-sonnet-4"), true);
 });
-
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-dgrid-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
-
-const core = await import("../../src/lib/db/core.ts");
-const providersDb = await import("../../src/lib/db/providers.ts");
-const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
 
 async function resetStorage() {
   core.resetDbInstance();

@@ -6,6 +6,9 @@ import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../src/i18n/messages/en.json";
 import ReasoningRoutingRules from "../../../src/shared/components/ReasoningRoutingRules";
 import RoutingPageClient from "../../../src/app/(dashboard)/dashboard/api-manager/routing/RoutingPageClient";
+// The editor's pickers are kit (Radix) Selects since KEA-7886 (Select adapter, `options`
+// mode): no DOM <select>, so changes go through the menu instead of fireEvent.change.
+import { chooseKitSelectValue, kitSelectValue } from "../../helpers/kitSelect";
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams() }));
 
@@ -121,10 +124,11 @@ describe("isolated routing editor", () => {
   it("stores a selected source combo NAME while keeping the key scope", async () => {
     const writes = setup();
     fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
-    fireEvent.change(screen.getByLabelText("Match requests for"), { target: { value: "combo" } });
-    fireEvent.change(screen.getByRole("combobox", { name: "Source combo" }), {
-      target: { value: "gpt-5.6-luna-combo" },
-    });
+    chooseKitSelectValue(screen.getByRole("combobox", { name: "Match requests for" }), "combo");
+    chooseKitSelectValue(
+      screen.getByRole("combobox", { name: "Source combo" }),
+      "gpt-5.6-luna-combo"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     await waitFor(() => expect(writes).toHaveLength(1));
     expect(writes[0]).toMatchObject({
@@ -158,14 +162,10 @@ describe("isolated routing editor", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Name", exact: true }), {
       target: { value: "Changed draft" },
     });
-    fireEvent.change(screen.getByRole("combobox", { name: "API key" }), {
-      target: { value: "second" },
-    });
+    chooseKitSelectValue(screen.getByRole("combobox", { name: "API key" }), "second");
     expect(screen.getByRole("dialog")).not.toBeNull();
     fireEvent.click(screen.getByRole("dialog").querySelector("button")!);
-    expect((screen.getByRole("combobox", { name: "API key" }) as HTMLSelectElement).value).toBe(
-      "key"
-    );
+    expect(kitSelectValue(screen.getByRole("combobox", { name: "API key" }))).toBe("key");
   });
 
   it("does not offer writes after a failed configuration load", async () => {

@@ -16,11 +16,26 @@ import { syncToCloud } from "@/lib/cloudSync";
 import { setQuotaCache } from "@/domain/quotaCache";
 import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
+import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
+import {
+  clearModelLock,
+  getAllModelLockouts,
+} from "@omniroute/open-sse/services/accountFallback.ts";
+import { RateLimitReason } from "@omniroute/open-sse/config/constants.ts";
+import {
+  claudeQuotaMatchesModel,
+  isClaudeQuotaMetadata,
+  isExplicitClaudeQuota429Text,
+} from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { getMachineId } from "@/shared/utils/machine";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
 import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./providerLimitsCache";
 import { getCredentialRefreshExecutor } from "@omniroute/open-sse/executors/credential.ts";
 import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
+import {
+  fetchAndSeedClaudeResetCreditUsage,
+  withClaudeResetCreditCount,
+} from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import {
@@ -64,6 +79,9 @@ const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   "nan",
   "apmix",
   "deepseek",
+  // StepFun account balance (GET /v1/accounts; base-URL override selects
+  // China vs international platform — same override the chat path honors)
+  "stepfun",
   "xiaomi-mimo",
   "vertex",
   "vertex-partner",
@@ -412,11 +430,11 @@ export function shouldClearErrorStateOnValidProbe(
 /**
  * May an active cooldown be released because the REAL quota windows recovered?
  *
- * Only the synthetic-cooldown case (#10534) qualifies: lastErrorType
- * "quota_exhausted" plus every governing window past its real reset with quota
- * left. A window that is still exhausted — or whose reset is unknown/unparseable
- * — keeps the connection locked, matching the kimi-coding partial-refresh
- * semantics.
+ * An ordinary quota poll may not overrule a real upstream 429 (#11277).
+ * There are only two narrow recovery paths: a synthetic cooldown whose real
+ * windows have elapsed (#10534), or a Claude weekly reset event positively
+ * observed AFTER that exact 429 with every reported quota window replenished
+ * (#17043). Unobserved/partial/stale windows preserve the original cooldown.
  */
 
 /**
@@ -443,24 +461,159 @@ export function shouldClearErrorStateOnValidProbe(
  * window elapses, the next probe clears the state normally.
  */
 
+/**
+ * A weekly reset event cannot release an unrelated Claude RPM or monthly-spend
+ * cooldown. Require weekly provenance from the persisted upstream error: either
+ * a named weekly window or Claude's native account-rate-limit quota wording.
+ */
+export function isClaudeWeeklyQuota429Signal(errorText: string | null | undefined): boolean {
+  if (!errorText) return false;
+  const lower = errorText.toLowerCase();
+  return (
+    lower.includes("weekly") ||
+    lower.includes("seven_day") ||
+    lower.includes("seven day") ||
+    lower.includes("7-day") ||
+    lower.includes("7d") ||
+    (lower.includes("would exceed your account's rate limit") &&
+      isExplicitClaudeQuota429Text(errorText))
+  );
+}
+
+/** A reset event must not make one full/unknown governing window disappear. */
+export function everyQuotaWindowReplenished(usage: JsonRecord): boolean {
+  if (usage.message || usage._stale || !isRecord(usage.quotas)) return false;
+  const windows = Object.values(usage.quotas);
+  return (
+    windows.length > 0 &&
+    windows.every((value) => {
+      if (!isRecord(value) || value.unlimited === true || value.fractionReported === false) {
+        return false;
+      }
+      const remaining =
+        typeof value.remainingPercentage === "number"
+          ? value.remainingPercentage
+          : typeof value.remaining === "number"
+            ? value.remaining
+            : null;
+      return remaining !== null && Number.isFinite(remaining) && remaining > 0;
+    })
+  );
+}
+
+/** A partial session-only poll is not proof of a recovered weekly allowance. */
+export function hasRecoveredClaudeWeeklyWindow(usage: JsonRecord): boolean {
+  if (!isRecord(usage.quotas)) return false;
+  return Object.entries(usage.quotas).some(([key, value]) => {
+    // Normalized Claude quotas put model-scoped buckets in modelQuotas.
+    // Reject similarly named rows here rather than treating a recovered
+    // Opus/Haiku weekly bucket as recovered account-wide capacity.
+    const normalized = key.trim().toLowerCase();
+    if (!["weekly", "weekly (7d)", "7d"].includes(normalized)) return false;
+    if (!isRecord(value) || value.fractionReported === false || value.unlimited === true) {
+      return false;
+    }
+    const remaining =
+      typeof value.remainingPercentage === "number"
+        ? value.remainingPercentage
+        : typeof value.remaining === "number"
+          ? value.remaining
+          : null;
+    return remaining !== null && Number.isFinite(remaining) && remaining > 0;
+  });
+}
+
+/**
+ * A recovered account-wide bucket does not prove that an existing model-specific
+ * quota lock has recovered. Clear it only when the fresh response supplies an
+ * explicit matching weekly model quota with positive, reported remaining capacity.
+ * Missing/empty/unknown model telemetry must fail closed (#17043).
+ */
+export function hasBlockingClaudeModelQuota(usage: JsonRecord, model: string): boolean {
+  if (!isRecord(usage.modelQuotas)) return true;
+  const matchingScopes = Object.values(usage.modelQuotas).filter((value) => {
+    if (!isRecord(value) || !isClaudeQuotaMetadata(value.claudeQuota)) return false;
+    return (
+      value.claudeQuota.kind === "weekly_scoped" &&
+      claudeQuotaMatchesModel(value.claudeQuota, model)
+    );
+  });
+  if (matchingScopes.length === 0) return true;
+  return matchingScopes.some((value) => {
+    if (!isRecord(value)) return true;
+    if (value.fractionReported === false || value.unlimited === true) return true;
+    const remaining =
+      typeof value.remainingPercentage === "number"
+        ? value.remainingPercentage
+        : typeof value.remaining === "number"
+          ? value.remaining
+          : null;
+    return remaining === null || !Number.isFinite(remaining) || remaining <= 0;
+  });
+}
+
+function canRecoverClaudeFromObservedReset(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): boolean {
+  return (
+    connection.provider === "claude" &&
+    (connection.lastErrorType === "quota_exhausted" ||
+      // Older 429 records used the generic RPM classifier for Claude's
+      // weekly-quota text. Only admit such a record with the full positive
+      // reset evidence and an explicit long-window signal.
+      connection.lastErrorType === "rate_limited") &&
+    isClaudeWeeklyQuota429Signal(connection.lastError) &&
+    connection.lastErrorSource !== "extra_usage" &&
+    Number(connection.errorCode) === 429 &&
+    hasObservedClaudeQuotaResetAfter(connection.id, connection.lastErrorAt) &&
+    everyQuotaWindowReplenished(usage) &&
+    hasRecoveredClaudeWeeklyWindow(usage)
+  );
+}
+
+function clearRecoveredClaudeQuotaModelLocks(connectionId: string, usage: JsonRecord): void {
+  const accountLocks = getAllModelLockouts().filter(
+    (lock) => lock.connectionId === connectionId && lock.provider === "claude"
+  );
+  // clearModelLock removes *all* lock keys for a model. Never let quota
+  // recovery erase an unrelated capacity/auth/not-found lock on that model.
+  const unrelatedModels = new Set(
+    accountLocks
+      .filter((lock) => lock.reason !== RateLimitReason.QUOTA_EXHAUSTED)
+      .map((lock) => lock.model)
+  );
+  for (const lock of accountLocks) {
+    if (lock.reason !== RateLimitReason.QUOTA_EXHAUSTED) continue;
+    if (unrelatedModels.has(lock.model)) continue;
+    if (hasBlockingClaudeModelQuota(usage, lock.model)) continue;
+    clearModelLock(lock.provider, lock.connectionId, lock.model);
+  }
+}
+
 export async function maybeClearRecoveredQuotaState(
   connection: ProviderConnectionLike,
   usage: JsonRecord
 ): Promise<ProviderConnectionLike> {
   if (!hasUsableQuota(usage)) return connection;
   if (isTerminalStatusForQuotaRecovery(connection.testStatus)) return connection;
+  let verifiedResetRecovery = false;
   if (hasActiveCooldown(connection)) {
     // A future rateLimitedUntil written from a real upstream signal is a hard
     // statement no poller may overrule (#11277) — executor-sourced rate limits
-    // and extra-usage policy blocks included. Only a SYNTHETIC cooldown (a
-    // quota_exhausted lock persisted without an upstream reset, e.g. the
-    // Claude-subscription poller's 1h lockout) yields to positive live-window
-    // evidence that the real quota has already replenished past its reset.
+    // and extra-usage policy blocks included. Two independently evidenced
+    // exceptions exist: an outlived synthetic cooldown and a recorded Claude
+    // weekly reset observed after the 429 with fresh, usable windows.
     const syntheticRecoveryOverride =
       connection.lastErrorType === "quota_exhausted" &&
       connection.lastErrorSource !== "extra_usage" &&
       syntheticCooldownOutlivedByRealWindows(usage);
-    if (!syntheticRecoveryOverride) return connection;
+    // #17043: unlike an ordinary quota poll, a persisted weekly reset event
+    // observed after the last 429 is independent positive evidence. It can
+    // release only a Claude quota-exhaustion lock with every live window open.
+    const observedResetOverride = canRecoverClaudeFromObservedReset(connection, usage);
+    if (!syntheticRecoveryOverride && !observedResetOverride) return connection;
+    verifiedResetRecovery = observedResetOverride;
   }
 
   const hasTransientState =
@@ -496,6 +649,12 @@ export async function maybeClearRecoveredQuotaState(
   } catch (dbError) {
     console.warn("[ProviderLimits] Failed to clear recovered quota state:", dbError);
     return connection;
+  }
+
+  if (cleared && verifiedResetRecovery) {
+    // Only quota-family locks belong to this reset. Preserve auth, capacity,
+    // missing-model, and generic RPM locks for their own recovery path.
+    clearRecoveredClaudeQuotaModelLocks(connection.id, usage);
   }
 
   if (!cleared) {
@@ -558,18 +717,71 @@ async function syncClaudeExtraUsageStateIfNeeded(
   };
 }
 
-/** Persist Antigravity tier from live loadCodeAssist on quota refresh (not only OAuth). */
-async function syncAntigravitySubscriptionIfNeeded(
+const AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS = ["gemini-4*", "*argon*"] as const;
+
+/** Ineligible: flag the account and append the auto-managed Argon exclusions (keeps operator ones). */
+function markArgonIneligible(
+  psd: Record<string, unknown>,
+  nextPsd: Record<string, unknown>
+): boolean {
+  let changed = false;
+  if (psd.hasArgon !== false) {
+    nextPsd.hasArgon = false;
+    changed = true;
+  }
+
+  const existing = Array.isArray(psd.excludedModels)
+    ? psd.excludedModels.filter((m): m is string => typeof m === "string")
+    : [];
+  const missing = AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS.filter(
+    (pattern) => !existing.includes(pattern)
+  );
+  if (missing.length > 0) {
+    nextPsd.excludedModels = [...existing, ...missing];
+    changed = true;
+  }
+  return changed;
+}
+
+/** Eligible: flag the account and strip only the auto-managed Argon exclusions. */
+function markArgonEligible(
+  psd: Record<string, unknown>,
+  nextPsd: Record<string, unknown>
+): boolean {
+  let changed = false;
+  if (psd.hasArgon !== true) {
+    nextPsd.hasArgon = true;
+    changed = true;
+  }
+
+  if (!Array.isArray(psd.excludedModels)) return changed;
+  const autoSet = new Set<string>(AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS);
+  const filtered = psd.excludedModels.filter((m) => typeof m !== "string" || !autoSet.has(m));
+  if (filtered.length !== psd.excludedModels.length) {
+    nextPsd.excludedModels = filtered;
+    changed = true;
+  }
+  return changed;
+}
+
+export function applyAntigravityArgonEligibilityToPsd(
+  psd: Record<string, unknown>,
+  hasArgon: unknown
+): { nextPsd: Record<string, unknown>; changed: boolean } {
+  const nextPsd: Record<string, unknown> = { ...psd };
+  if (typeof hasArgon !== "boolean") return { nextPsd, changed: false };
+  const changed = hasArgon ? markArgonEligible(psd, nextPsd) : markArgonIneligible(psd, nextPsd);
+  return { nextPsd, changed };
+}
+
+/** Copy tier, plan and a newly discovered projectId from loadCodeAssist into nextPsd. */
+function applyAntigravitySubscriptionInfoToPsd(
   connection: ProviderConnectionLike,
-  usage: JsonRecord
-): Promise<ProviderConnectionLike> {
-  if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
-
+  usage: JsonRecord,
+  psd: JsonRecord,
+  nextPsd: JsonRecord
+): { changed: boolean; nextProjectId?: string } {
   const subscriptionInfo = usage.subscriptionInfo;
-  if (!subscriptionInfo) return connection;
-
-  const psd = (connection.providerSpecificData || {}) as JsonRecord;
-  const nextPsd: JsonRecord = { ...psd };
   let changed = false;
 
   const tierId = extractCodeAssistOnboardTierId(subscriptionInfo);
@@ -594,11 +806,35 @@ async function syncAntigravitySubscriptionIfNeeded(
     subscriptionInfo as Record<string, unknown>
   );
   const storedProjectId = getStoredAntigravityProjectId(connection);
-  let nextProjectId: string | undefined;
   if (discoveredProjectId && !storedProjectId) {
     nextPsd.projectId = discoveredProjectId;
-    nextProjectId = discoveredProjectId;
-    changed = true;
+    return { changed: true, nextProjectId: discoveredProjectId };
+  }
+  return { changed };
+}
+
+/** Persist Antigravity tier from live loadCodeAssist and Argon eligibility on quota refresh (not only OAuth). */
+async function syncAntigravitySubscriptionIfNeeded(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): Promise<ProviderConnectionLike> {
+  if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
+  if (!usage.subscriptionInfo && typeof usage.hasArgon !== "boolean") return connection;
+
+  const psd = (connection.providerSpecificData || {}) as JsonRecord;
+  let nextPsd: JsonRecord = { ...psd };
+  const subscriptionResult = usage.subscriptionInfo
+    ? applyAntigravitySubscriptionInfoToPsd(connection, usage, psd, nextPsd)
+    : { changed: false };
+  let changed = subscriptionResult.changed;
+  const nextProjectId = subscriptionResult.nextProjectId;
+
+  if (typeof usage.hasArgon === "boolean") {
+    const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);
+    if (argonResult.changed) {
+      nextPsd = argonResult.nextPsd;
+      changed = true;
+    }
   }
 
   if (!changed) return connection;
@@ -755,7 +991,11 @@ export async function fetchLiveProviderLimits(connectionId: string): Promise<{
 
 async function fetchLiveProviderLimitsWithOptions(
   connectionId: string,
-  options: { forceRefresh?: boolean; allowRotatingRefresh?: boolean } = {}
+  options: {
+    forceRefresh?: boolean;
+    allowRotatingRefresh?: boolean;
+    includeResetCredits?: boolean;
+  } = {}
 ): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
@@ -832,9 +1072,9 @@ async function fetchLiveProviderLimitsWithOptions(
           allowRotatingRefresh: true,
           force: true,
         });
-        if (forced.refreshed) {
+        if (forced.refreshed || forced.adopted) {
           conn = forced.connection;
-          await syncToCloudIfEnabled();
+          if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
             (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
@@ -843,6 +1083,11 @@ async function fetchLiveProviderLimitsWithOptions(
         }
       }
 
+      // Only the dashboard's on-demand refresh lists credits; background polls keep
+      // their base usage request and never trigger reset-credit activity.
+      if (options.includeResetCredits && conn.provider === "claude" && conn.accessToken) {
+        await fetchAndSeedClaudeResetCreditUsage(conn.id, conn.accessToken);
+      }
       connection = conn;
       return { usage: usageData };
     });
@@ -929,14 +1174,19 @@ async function fetchLiveProviderLimitsWithOptions(
 
   return {
     connection,
-    usage: result.usage,
+    // Claude's banked reset-credit count is invisible to the regular usage poll; attach the
+    // count the user-opened list (or the opt-in auto-reset) last seeded, or omit it (unknown).
+    usage:
+      connection.provider === "claude"
+        ? withClaudeResetCreditCount(connection.id, result.usage)
+        : result.usage,
   };
 }
 
 export async function fetchAndPersistProviderLimits(
   connectionId: string,
   source: SyncSource = "manual",
-  opts: { allowRotatingRefresh?: boolean } = {}
+  opts: { allowRotatingRefresh?: boolean; includeResetCredits?: boolean } = {}
 ): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
@@ -945,6 +1195,7 @@ export async function fetchAndPersistProviderLimits(
   const { connection, usage } = await fetchLiveProviderLimitsWithOptions(connectionId, {
     forceRefresh: source === "manual",
     allowRotatingRefresh: opts.allowRotatingRefresh,
+    includeResetCredits: opts.includeResetCredits,
   });
   const newCache = toProviderLimitsCacheEntry(usage, source);
   const previous = getProviderLimitsCache(connectionId);
@@ -953,12 +1204,24 @@ export async function fetchAndPersistProviderLimits(
   // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
   // Serve the prior entry instead; only successful fetches update the cache.
   if (cache === previous && newCache.message) {
+    // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
+    // so a cached count — e.g. from before a redeem — must not come back through here.
+    const isClaude = connection.provider === "claude";
+    const bankedResetCredits = isClaude ? newCache.bankedResetCredits : previous.bankedResetCredits;
+    let served = previous;
+    if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
+      const { bankedResetCredits: _cached, ...rest } = previous;
+      served = setProviderLimitsCache(
+        connectionId,
+        bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
+      );
+    }
     const staleUsage: JsonRecord = {
       ...usage,
       quotas: previous.quotas,
       modelQuotas: previous.modelQuotas,
       plan: previous.plan ?? usage.plan ?? null,
-      bankedResetCredits: previous.bankedResetCredits,
+      bankedResetCredits,
       paidCredits: previous.paidCredits,
       billing: previous.billing,
       message: null,
@@ -966,7 +1229,8 @@ export async function fetchAndPersistProviderLimits(
       _staleSince: previous.fetchedAt,
       _staleReason: newCache.message,
     };
-    return { connection, usage: staleUsage, cache: previous };
+    if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
+    return { connection, usage: staleUsage, cache: served };
   }
 
   const mergedUsage: JsonRecord = {

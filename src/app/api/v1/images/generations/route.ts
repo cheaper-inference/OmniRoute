@@ -49,6 +49,7 @@ import {
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
+import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
@@ -434,6 +435,7 @@ async function postHandler(request, context) {
     // requested `n` must not be charged for the missing ones (#16398 follow-up).
     const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
     const costUsd = await calculateModalCost("image", provider, body.model, { n });
+    recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,

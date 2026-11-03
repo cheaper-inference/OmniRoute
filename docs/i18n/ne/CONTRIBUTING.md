@@ -172,35 +172,35 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Test हरू चलाउने
+## परीक्षणहरू सञ्चालन गर्ने
 
 ```bash
-# सबै test हरू (unit + vitest + ecosystem + e2e)
+# सबै परीक्षणहरू (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# एउटा test file (Node.js को native test runner — अधिकांश test ले यही प्रयोग गर्छन्)
+# एउटै परीक्षण फाइल (Node.js को नेटिभ परीक्षण रनर — अधिकांश परीक्षणहरूले यही प्रयोग गर्छन्)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# तपाईंको परिवर्तनबाट प्रभावित unit test हरू मात्र (CI gate कै TIA selector, #8084)
-npm run test:scoped            # पछिल्लो commit मा भएका परिवर्तनहरू (वा working tree)
+# तपाईंको परिवर्तनबाट प्रभावित unit परीक्षणहरू मात्र (CI gate कै TIA selector, #8084)
+npm run test:scoped            # पछिल्लो commit (वा working tree) का परिवर्तनहरू
 npm run test:scoped:staged     # staged परिवर्तनहरू मात्र — pre-commit run सँग राम्रोसँग मिल्छ
-npm run test:scoped:full       # पहिले import-graph map पुनः निर्माण गर्नुहोस् (file थपेपछि/सारेपछि)
-# Exit 1 + "run the full suite" को अर्थ hub file (tsconfig, package.json, …) वा
+npm run test:scoped:full       # पहिले import-graph map पुनर्निर्माण गर्नुहोस् (फाइलहरू थपेपछि/सारेपछि)
+# Exit 1 + "पूर्ण suite चलाउनुहोस्" को अर्थ hub file (tsconfig, package.json, …) वा
 # map नगरिएको source परिवर्तन भएको हो — selector सुरक्षित रूपमा असफल हुन्छ, यसले कहिल्यै चुपचाप छोड्दैन।
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E test हरू (Playwright आवश्यक पर्छ)
+# E2E परीक्षणहरू (Playwright आवश्यक पर्छ)
 npm run test:e2e
 
-# Protocol client E2E (MCP transports, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility test हरू
+# Ecosystem compatibility परीक्षणहरू
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches का लागि 60%
+# Coverage gate: statements/lines/functions/branches मा 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -208,52 +208,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gate गरिएको वास्तविक-upstream combo smoke (VPS पहुँच + वास्तविक provider credits आवश्यक पर्छ)
-# वास्तविक provider हरूमा request पठाउँछ — थोरै लागत लाग्छ। CI मा कहिल्यै चल्दैन। gate नभएमा सफासँग skip हुन्छ।
+# Gate गरिएको वास्तविक upstream combo smoke (VPS पहुँच + वास्तविक provider credits आवश्यक पर्छ)
+# वास्तविक providers मा अनुरोध पठाउँछ — थोरै खर्च हुन्छ। CI मा कहिल्यै चल्दैन। gate नभएमा सफा रूपमा skip हुन्छ।
 # आवश्यक: ssh root@192.168.0.15 पहुँच (VPS बाट read-only DB snapshot source गर्छ)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — साधारण Node ESM script हरू, live .15 server मा सिधै request पठाउँछन्।
-# आवश्यक: ssh root@192.168.0.15 पहुँच (combo हरू SSH sqlite मार्फत सिर्जना/हटाइन्छन्)।
-# वास्तविक provider हरूमा request पठाउँछ (सानो लागत)। __live_test__* combo हरू मात्र सिर्जना/मेटाउँछ। CI मा कहिल्यै चल्दैन।
+# Phase-3 VPS live smoke — साधारण Node ESM scripts, live .15 server मा सीधै अनुरोध पठाउँछन्।
+# आवश्यक: ssh root@192.168.0.15 पहुँच (combos लाई SSH sqlite मार्फत सिर्जना/हटाइन्छ)।
+# वास्तविक providers मा अनुरोध पठाउँछ (सानो खर्च)। __live_test__* combos मात्र सिर्जना/मेटाउँछ। CI मा कहिल्यै चल्दैन।
 # .15 मा REQUIRE_API_KEY=false भएकाले API key आवश्यक पर्दैन, तर सेट गरिएको भए COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY लाई मान्छ।
-npm run test:combo:live:vps              # 7 HTTP scenario हरू (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # वास्तविक cross-provider failover scenario थप्छ (जम्मा 8)
+npm run test:combo:live:vps              # 7 HTTP परिदृश्यहरू (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # वास्तविक cross-provider failover परिदृश्य थप्छ (जम्मा 8)
 ```
 
 Coverage सम्बन्धी टिप्पणीहरू:
 
 - `npm run test:coverage` ले मुख्य unit test suite को source coverage मापन गर्छ, `tests/**` लाई समावेश गर्दैन, र `open-sse/**` लाई समावेश गर्छ
-- Pull request हरूले statements/lines/functions/branches का लागि coverage gate **60%+** मा कायम राख्नुपर्छ
-- कुनै PR ले `src/`, `open-sse/`, `electron/`, वा `bin/` भित्रको production code परिवर्तन गर्छ भने, त्यसै PR मा automated test थप्न वा अद्यावधिक गर्नुपर्छ
-- `npm run coverage:report` ले पछिल्लो coverage run बाट विस्तृत file-by-file report प्रिन्ट गर्छ
+- Pull requests ले statements/lines/functions/branches मा coverage gate **60%+** कायम राख्नुपर्छ
+- यदि PR ले `src/`, `open-sse/`, `electron/`, वा `bin/` भित्रको production code परिवर्तन गर्छ भने, त्यही PR मा automated tests थप्न वा अद्यावधिक गर्नुपर्छ
+- `npm run coverage:report` ले पछिल्लो coverage run बाट विस्तृत file-by-file report देखाउँछ
 - `npm run test:coverage:legacy` ले ऐतिहासिक तुलनाका लागि पुरानो metric सुरक्षित राख्छ
 - चरणबद्ध coverage सुधार roadmap का लागि `docs/ops/COVERAGE_PLAN.md` हेर्नुहोस्
 
 ### Pull Request का आवश्यकताहरू
 
-PR खोल्नुअघि, तपाईंले परिवर्तन गरेको भागका लागि केन्द्रित loop चलाउन
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) प्रयोग गर्नुहोस्।
-पूर्ण unit suite (4 CI shards), Vitest, **60%+** coverage gate, र production build को
-जिम्मेवारी CI को हो — तिनलाई स्थानीय रूपमा चलाउँदा PR का जाँचहरूले पहिल्यै नदिने कुनै थप
-संकेत प्राप्त हुँदैन, र साना machine हरूमा यसले host लाई अत्यधिक व्यस्त बनाउन सक्छ (#8084):
+PR खोल्नुअघि, तपाईंले परिवर्तन गर्नुभएको कुराका लागि focused loop चलाउन
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) प्रयोग गर्नुहोस्। पूर्ण unit suite (4 CI shards), Vitest, **60%+** coverage gate, र
+production build CI को जिम्मेवारी हुन् — तिनलाई स्थानीय रूपमा चलाउँदा PR
+checks ले पहिल्यै नदिने कुनै अतिरिक्त संकेत प्राप्त हुँदैन, र साना machines मा यसले host लाई अत्यधिक व्यस्त बनाउन सक्छ (#8084):
 
-- तपाईंको परिवर्तन समेट्ने test file हरू चलाउनुहोस्: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- तपाईंको परिवर्तन समेट्ने test files चलाउनुहोस्: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` चलाउनुहोस्
-- production code परिवर्तन हुँदा त्यसै PR मा automated test हरू समावेश वा अद्यावधिक गर्नुहोस्
-- production code परिवर्तन भएको अवस्थामा PR description मा परिवर्तन वा थप गरिएका test file हरू समावेश गर्नुहोस्
-- CI मा project secrets configure गरिएका छन् भने PR मा SonarQube को नतिजा जाँच गर्नुहोस्
+- production code परिवर्तन हुँदा त्यही PR मा automated tests समावेश वा अद्यावधिक गर्नुहोस्
+- `node:test` files मा, प्रत्येक top-level `await` (जस्तै `await import(...)`) लाई पहिलो `test()` / `describe()` भन्दा अगाडि राख्नुहोस्: `--test-force-exit` अन्तर्गत, त्यसपछि दर्ता गरिएका tests कहिलेकाहीँ चुपचाप नचल्न सक्छन् (#18045; `npm run check:test-tla-order` द्वारा लागू गरिएको)
+- production code परिवर्तन हुँदा परिवर्तन गरिएका वा थपिएका test files लाई PR description मा समावेश गर्नुहोस्
+- CI मा project secrets configure गरिएका बेला PR मा SonarQube result जाँच गर्नुहोस्
 
-हालको test स्थिति: निम्नलाई समेट्ने **122 unit test file हरू**:
+हालको परीक्षण स्थिति: **122 unit test files**, जसले निम्न कुराहरू समेट्छन्:
 
-- Provider translator र format conversion
+- Provider translators र format conversion
 - Rate limiting, circuit breaker, र resilience
 - Semantic cache, idempotency, progress tracking
-- Database operation र schema (21 DB modules)
-- OAuth flow र authentication
+- Database operations र schema (21 DB modules)
+- OAuth flows र authentication
 - API endpoint validation (Zod v4)
-- MCP server tool र scope enforcement
-- Memory र Skills system हरू
+- MCP server tools र scope enforcement
+- Memory र Skills systems
 
 ---
 

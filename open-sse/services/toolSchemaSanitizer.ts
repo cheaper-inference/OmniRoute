@@ -164,6 +164,80 @@ export function sanitizeOpenAITools(tools: unknown[]): unknown[] {
   return tools.map(sanitizeOpenAITool);
 }
 
+/**
+ * Whether an anyOf branch can be flattened into the root object schema: a
+ * plain object without a `$ref` whose declared `type` (when present) admits
+ * "object" — absent, `"object"`, or a type array containing "object".
+ * Branches that fail (a `$ref`, `type: "string"`, …) keep the `anyOf`
+ * untouched instead of being merged into a wider object schema.
+ */
+function objectCompatibleBranch(branch: unknown): boolean {
+  if (!isPlainObject(branch)) return false;
+  if (hasOwn(branch, "$ref")) return false;
+  const type = branch.type;
+  return (
+    type === undefined || type === "object" || (Array.isArray(type) && type.includes("object"))
+  );
+}
+
+function applyAnyOfBranch(merged: Record<string, unknown>, branch: unknown): void {
+  if (!isPlainObject(branch)) return;
+  if (isPlainObject(branch.properties)) {
+    const base = isPlainObject(merged.properties) ? merged.properties : {};
+    // First definition wins: a property already declared by the root or an earlier branch
+    // is never overwritten by a later branch that declares the same key.
+    const next: Record<string, unknown> = { ...base };
+    for (const [key, value] of Object.entries(branch.properties)) {
+      if (!hasOwn(next, key)) next[key] = value;
+    }
+    merged.properties = next;
+  }
+  if (branch.additionalProperties !== undefined && merged.additionalProperties === undefined) {
+    merged.additionalProperties = branch.additionalProperties;
+  }
+  if (branch.type === "object" && merged.type === undefined) {
+    merged.type = "object";
+  }
+}
+
+/**
+ * `anyOf` means "any one branch", so a flattened schema may only require what EVERY
+ * branch requires: the intersection of the branches' `required` lists. A branch without
+ * `required` requires nothing, which empties the intersection.
+ */
+function intersectBranchRequired(branches: unknown[]): string[] {
+  let common: string[] | null = null;
+  for (const branch of branches) {
+    const required =
+      isPlainObject(branch) && Array.isArray(branch.required)
+        ? (branch.required as unknown[]).filter((r): r is string => typeof r === "string")
+        : [];
+    common = common === null ? [...new Set(required)] : common.filter((r) => required.includes(r));
+  }
+  return common ?? [];
+}
+
+function mergeRootAnyOfBranches(
+  parameters: Record<string, unknown>,
+  branches: unknown[]
+): Record<string, unknown> {
+  const merged = { ...parameters };
+  delete merged.anyOf;
+  for (const branch of branches) applyAnyOfBranch(merged, branch);
+  const rootRequired = Array.isArray(parameters.required) ? (parameters.required as string[]) : [];
+  const required = [...new Set([...rootRequired, ...intersectBranchRequired(branches)])];
+  if (required.length > 0) {
+    const validKeys = isPlainObject(merged.properties)
+      ? new Set(Object.keys(merged.properties))
+      : null;
+    merged.required = validKeys ? required.filter((r) => validKeys.has(r)) : required;
+  } else {
+    delete merged.required;
+  }
+  if (merged.type === undefined) merged.type = "object";
+  return merged;
+}
+
 export function flattenOpenAIToolRootAnyOf(tools: unknown): unknown {
   if (!Array.isArray(tools)) return tools;
   return tools.map((tool) => {
@@ -173,9 +247,11 @@ export function flattenOpenAIToolRootAnyOf(tools: unknown): unknown {
     const fn = isPlainObject(next.function) ? { ...next.function } : next;
     if (!isPlainObject(fn.parameters) || !hasOwn(fn.parameters, "anyOf")) return tool;
 
-    const parameters = { ...fn.parameters };
-    delete parameters.anyOf;
-    fn.parameters = parameters;
+    const branches = fn.parameters.anyOf;
+    if (!Array.isArray(branches) || branches.length === 0) return tool;
+    if (!branches.every(objectCompatibleBranch)) return tool;
+
+    fn.parameters = mergeRootAnyOfBranches(fn.parameters, branches);
     if (fn !== next) next.function = fn;
     return next;
   });

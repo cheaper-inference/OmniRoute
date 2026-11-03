@@ -39,7 +39,9 @@ test("all cli-tools route handlers require the shared management auth guard", ()
     const handlerCount = (content.match(/export async function (GET|POST|PUT|DELETE)\(/g) || [])
       .length;
     const authCount = (
-      content.match(/const authError = await requireCliToolsAuth\(request\);/g) || []
+      content.match(
+        /const authError = await requireCliToolsAuth\(request(?:, \{ alwaysRequireAuth: true \})?\);/g
+      ) || []
     ).length;
     const returnCount = (
       content.match(
@@ -74,7 +76,8 @@ test("cli-tools auth helper delegates to management auth", () => {
     "requireCliToolsAuth should reuse the shared management auth helper"
   );
   assert.ok(
-    content.includes("return requireManagementAuth(request);"),
+    content.includes("return requireManagementAuth(request);") ||
+      content.includes("return requireManagementAuth(request, options);"),
     "requireCliToolsAuth should delegate directly to requireManagementAuth"
   );
 });

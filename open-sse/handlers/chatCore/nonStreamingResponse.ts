@@ -58,7 +58,7 @@ import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
-import { deleteSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
+import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
 
@@ -112,6 +112,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     extractSessionAffinityKey,
     extractUsageFromResponse,
     finalBody: _finalBody,
+    geminiPromptCacheMode,
     finalizePendingScope,
     getCurrentConnectionId,
     getManagedLeaseFenceErrorCode,
@@ -127,6 +128,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     injectionResult,
     isCombo,
     isJsonRecord,
+    isScopedGeminiCacheTarget,
     isLocalStreamLifecycleError,
     isSemaphoreCapacityError,
     isServerOwnedToolLoopEnabled,
@@ -198,6 +200,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     requestToolIdentityMap,
     stream,
     toolNameMap,
+    tokensCompressed,
     traceEnabled,
     videoBridgeObserved,
   } = deps;
@@ -307,11 +310,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
               extractSessionAffinityKey(body, clientRawRequest?.headers) ||
               null;
             if (!key) return;
-            try {
-              deleteSessionAccountAffinity(key, "codex");
-            } catch {
-              // best-effort
-            }
+            deleteSessionAccountAffinityBestEffort(key, "codex");
           },
           onAuditAccountRotation: (params) => {
             logAuditEvent({
@@ -441,7 +440,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         cacheSource: "upstream",
       });
       persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
-      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
       return {
         response: err,
         carry: {
@@ -591,7 +597,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           persistFailureUsage,
           persistAttemptLogs,
           trackPendingRequest,
-          pendingRequestId,
+          pendingRequestId: pendingScope.owner ?? pendingRequestId,
         }),
         carry: {
           translatedBody,
@@ -679,7 +685,15 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       usage,
       toolLoopUsage != null
     );
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(usage);
+    const cacheUsageLogMeta = buildCacheUsageLogMeta(
+      usage,
+      isScopedGeminiCacheTarget
+        ? {
+            mode: geminiPromptCacheMode,
+            compressionTokens: tokensCompressed || undefined,
+          }
+        : undefined
+    );
     if (usage && typeof usage === "object") {
       attachCompressionUsageReceiptAfterAnalytics(usage as Record<string, unknown>, "provider");
       if (provider === "gemini") {
@@ -809,6 +823,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         clientResponse: buildErrorBody(HTTP_STATUS.BAD_REQUEST, guardrailMessage),
         claudeCacheMeta: claudePromptCacheLogMeta,
         claudeCacheUsageMeta: cacheUsageLogMeta,
+        geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
       recordChatCallCost(
@@ -907,10 +922,18 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         clientResponse: malformedClientBody,
         claudeCacheMeta: claudePromptCacheLogMeta,
         claudeCacheUsageMeta: cacheUsageLogMeta,
+        geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
       persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
-      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
       // Routing event (feedback foundation) — record the malformed outcome so
       // the quality tracker de-prioritizes this model over time.
       void emitRoutingEvent(
@@ -930,6 +953,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           status: HTTP_STATUS.BAD_GATEWAY,
           finishReason: routingFinishReason(translatedResponse),
           connectionId: credentials?.connectionId ?? null,
+          apiKeyId: apiKeyInfo?.id ?? null,
         })
       );
       return {
@@ -990,6 +1014,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       clientResponse: translatedResponse,
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
+      geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
       cacheSource: "upstream",
     });
     recordChatCallCost(
@@ -1089,6 +1114,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         status: 200,
         finishReason: routingFinishReason(translatedResponse),
         connectionId: credentials?.connectionId ?? null,
+        apiKeyId: apiKeyInfo?.id ?? null,
       })
     );
 
@@ -1117,7 +1143,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       },
     };
   } catch (error) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)

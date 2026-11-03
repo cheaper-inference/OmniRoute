@@ -40,7 +40,7 @@ export default function CompanionCommand({
           {common("copy")}
         </Button>
       </div>
-      <pre className="max-w-full whitespace-pre-wrap break-all rounded-control bg-black/5 p-3 text-xs leading-relaxed text-text-main dark:bg-white/5">
+      <pre className="max-w-full whitespace-pre-wrap break-all rounded-control bg-bg-subtle p-3 text-xs leading-relaxed text-text-main">
         <code>{command}</code>
       </pre>
       {hint && <p className="max-w-prose text-sm text-text-muted">{hint}</p>}

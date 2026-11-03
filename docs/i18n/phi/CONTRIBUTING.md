@@ -173,15 +173,15 @@ Mga scope (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci
 # Lahat ng test (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Isang test file (katutubong test runner ng Node.js — ito ang ginagamit ng karamihan sa mga test)
+# Isang test file (native test runner ng Node.js — ito ang ginagamit ng karamihan sa mga test)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Tanging mga unit test na apektado ng iyong pagbabago (kaparehong TIA selector ng CI gate, #8084)
-npm run test:scoped            # mga pagbabago sa huling commit (o sa working tree)
-npm run test:scoped:staged     # mga staged na pagbabago lamang — mahusay na ipares sa pre-commit na pagpapatakbo
-npm run test:scoped:full       # buuin munang muli ang import-graph map (pagkatapos magdagdag/maglipat ng mga file)
-# Ang Exit 1 + "patakbuhin ang buong suite" ay nangangahulugang may hub file (tsconfig, package.json, …) o
-# hindi naka-map na source na nagbago — ligtas na nabibigo ang selector at hindi ito tahimik na lumalaktaw kailanman.
+# Ang mga unit test lang na apektado ng iyong pagbabago (kaparehong TIA selector ng CI gate, #8084)
+npm run test:scoped            # mga pagbabago sa pinakabagong commit (o sa working tree)
+npm run test:scoped:staged     # mga staged na pagbabago lang — mahusay na ipares sa isang pre-commit run
+npm run test:scoped:full       # buuing muli muna ang import-graph map (pagkatapos magdagdag/maglipat ng mga file)
+# Ang Exit 1 + "run the full suite" ay nangangahulugang nagbago ang isang hub file (tsconfig, package.json, …) o
+# isang hindi naka-map na source — ligtas na nabibigo ang selector at hindi ito kailanman tahimik na lumalaktaw.
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
@@ -203,43 +203,44 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gated na real-upstream combo smoke test (nangangailangan ng access sa VPS + totoong provider credits)
-# Kumokonekta sa mga TOTOONG provider — may kaunting gastos. HINDI KAILANMAN tumatakbo sa CI. Maayos na nilalaktawan kapag wala ang gate.
+# Gated na real-upstream combo smoke test (nangangailangan ng access sa VPS + tunay na provider credits)
+# Kumokonekta sa mga TUNAY na provider — may kaunting gastos. HINDI KAILANMAN tumatakbo sa CI. Maayos na nilalaktawan kapag wala ang gate.
 # Kailangan: access sa ssh root@192.168.0.15 (kumukuha ng read-only na DB snapshot mula sa VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke test — mga payak na Node ESM script na direktang kumokonekta sa live na .15 server.
-# Nangangailangan ng: access sa ssh root@192.168.0.15 (ginagawa/binubura ang mga combo sa pamamagitan ng SSH sqlite).
-# Kumokonekta sa mga TOTOONG provider (maliit na gastos). Gumagawa/nagbubura lamang ng mga __live_test__* combo. HINDI KAILANMAN tumatakbo sa CI.
-# REQUIRE_API_KEY=false sa .15 kaya hindi kailangan ng API key, ngunit sinusunod ang COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY kung itinakda.
+# Phase-3 VPS live smoke test — mga plain Node ESM script na direktang kumokonekta sa live na .15 server.
+# Nangangailangan ng: access sa ssh root@192.168.0.15 (ginagawa/inaalis ang mga combo sa pamamagitan ng SSH sqlite).
+# Kumokonekta sa mga TUNAY na provider (maliit na gastos). Gumagawa/nagbubura lang ng mga __live_test__* combo. HINDI KAILANMAN tumatakbo sa CI.
+# REQUIRE_API_KEY=false sa .15 kaya hindi kailangan ng API key, ngunit sinusunod ang COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY kung nakatakda.
 npm run test:combo:live:vps              # 7 HTTP scenario (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # nagdaragdag ng totoong cross-provider failover scenario (8 sa kabuuan)
+npm run test:combo:live:vps:failover     # nagdaragdag ng tunay na cross-provider failover scenario (8 sa kabuuan)
 ```
 
-Mga tala tungkol sa coverage:
+Mga tala sa coverage:
 
 - Sinusukat ng `npm run test:coverage` ang source coverage para sa pangunahing unit test suite, hindi isinasama ang `tests/**`, at isinasama ang `open-sse/**`
-- Dapat mapanatili ng mga pull request ang coverage gate na **60%+** para sa statements/lines/functions/branches
+- Dapat panatilihin ng mga pull request ang coverage gate sa **60%+** para sa statements/lines/functions/branches
 - Kung binabago ng isang PR ang production code sa `src/`, `open-sse/`, `electron/`, o `bin/`, dapat itong magdagdag o mag-update ng mga automated test sa parehong PR
 - Ipinapakita ng `npm run coverage:report` ang detalyadong ulat para sa bawat file mula sa pinakabagong coverage run
-- Pinapanatili ng `npm run test:coverage:legacy` ang mas lumang sukatan para sa makasaysayang paghahambing
-- Tingnan ang `docs/ops/COVERAGE_PLAN.md` para sa roadmap ng unti-unting pagpapahusay ng coverage
+- Pinapanatili ng `npm run test:coverage:legacy` ang mas lumang metric para sa makasaysayang paghahambing
+- Tingnan ang `docs/ops/COVERAGE_PLAN.md` para sa phased roadmap ng pagpapahusay sa coverage
 
 ### Mga Kinakailangan sa Pull Request
 
 Bago magbukas ng PR, gamitin ang
 [Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) upang patakbuhin ang nakatuong loop para sa
-iyong binago. Ang buong unit suite (4 na CI shard), Vitest, ang **60%+** coverage gate, at
-ang production build ay responsibilidad ng CI — walang naidaragdag na impormasyon ang lokal na pagpapatakbo sa mga ito na
-hindi pa ibibigay sa iyo ng mga pagsusuri sa PR, at sa mas maliliit na machine ay maaari nitong sagarin ang host (#8084):
+binago mo. Responsibilidad ng CI ang buong unit suite (4 na CI shard), Vitest, ang **60%+** coverage gate, at
+ang production build — walang naidaragdag na signal ang lokal na pagpapatakbo sa mga ito na hindi pa ibibigay ng mga
+pagsusuri sa PR, at sa mas maliliit na machine maaari nitong lubusang gamitin ang host (#8084):
 
 - Patakbuhin ang mga test file na sumasaklaw sa iyong pagbabago: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Patakbuhin ang `npm run lint`
 - Isama o i-update ang mga automated test sa parehong PR tuwing nagbabago ang production code
+- Sa mga `node:test` file, ilagay ang bawat top-level na `await` (gaya ng `await import(...)`) bago ang unang `test()` / `describe()`: sa ilalim ng `--test-force-exit`, ang mga test na inirehistro pagkatapos nito ay maaaring tahimik na hindi tumakbo (#18045; ipinapatupad ng `npm run check:test-tla-order`)
 - Isama sa paglalarawan ng PR ang mga binago o idinagdag na test file kapag nagbago ang production code
-- Suriin ang resulta ng SonarQube sa PR kapag naka-configure sa CI ang mga secret ng proyekto
+- Suriin ang resulta ng SonarQube sa PR kapag naka-configure ang mga project secret sa CI
 
-Kasalukuyang katayuan ng mga test: **122 unit test file** na sumasaklaw sa:
+Kasalukuyang katayuan ng test: **122 unit test file** na sumasaklaw sa:
 
 - Mga provider translator at conversion ng format
 - Rate limiting, circuit breaker, at resilience

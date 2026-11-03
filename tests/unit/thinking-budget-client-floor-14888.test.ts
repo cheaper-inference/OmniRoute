@@ -34,7 +34,7 @@ test("keeps a client-supplied max_completion_tokens below the floor", () => {
   assert.equal(body.max_tokens, undefined);
 });
 
-test("still fills the floor when the client omitted the budget", () => {
+test("does not fabricate a ceiling when the client omitted the budget (#17971)", () => {
   const executor = new DefaultExecutor("moonshot");
   const body = {
     model: "kimi-k3",
@@ -42,7 +42,7 @@ test("still fills the floor when the client omitted the budget", () => {
   } as Record<string, unknown>;
 
   executor.ensureThinkingBudget(body, "kimi-k3");
-  assert.equal(body.max_tokens, 4096);
+  assert.equal(body.max_tokens, undefined);
 });
 
 test("keeps a caller max_tokens above the thinking floor (#14888)", () => {

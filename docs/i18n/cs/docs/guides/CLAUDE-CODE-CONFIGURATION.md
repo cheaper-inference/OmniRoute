@@ -27,69 +27,78 @@ omniroute launch --profile glm52  # Claude Code používající glm/glm-5.2 pře
 
 ## Jak se Claude Code připojuje k bráně
 
-Claude Code komunikuje prostřednictvím **Anthropic Messages API** a na vlastní
-koncový bod se směruje pomocí proměnných prostředí (nemá příznak `--base-url`):
+Claude Code mluví**Anthropic Zprávy API** a ukazuje na vlastní koncový bod s proměnnými prostředí (nemá žádný příznak `--base-url` ):
 
-| Proměnná                                     | Účel                                                                                                   |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | Kořenová URL brány (Claude Code připojí `/v1/messages`). **Bez přípony `/v1`.**                        |
-| `ANTHROPIC_AUTH_TOKEN`                       | Odesílá se jako `Authorization: Bearer …` — použijte svůj přístupový token / API klíč OmniRoute        |
-| `ANTHROPIC_API_KEY`                          | Alternativa: odesílá se jako `x-api-key`. Pokud jsou nastaveny obě, má přednost `ANTHROPIC_AUTH_TOKEN` |
-| `ANTHROPIC_MODEL`                            | Vynutí konkrétní model (přepíše výchozí volbu nástroje `/model`)                                       |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → nativní nástroj `/model` zobrazí modely `claude*`/`anthropic*` z `/v1/models`                    |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Omezí počet výstupních tokenů na odpověď (např. `65536`)                                               |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prahová hodnota tokenů pro automatickou kompakci                                                       |
+| Variabilní                                   | Účel                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Kořen brány URL ( ke kódu Claude se připojuje `/v1/messages`).** Žádná přípona `/v1`.**           |
+| `ANTHROPIC_AUTH_TOKEN`                       | Odesláno jako `Authorization: Bearer …` — pomocí vašeho přístupového tokenu OmniRoute / klíče API |
+| `ANTHROPIC_API_KEY`                          | Alternativa: odesláno jako `x-api-key`. Pokud jsou oba nastaveny, `ANTHROPIC_AUTH_TOKEN` vyhrává  |
+| `ANTHROPIC_MODEL`                            | Vynutit konkrétní model (přepíše výchozí nastavení výběru `/model` )                              |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → nativní výběr `/model` uvádí modely `claude*`/`anthropic*` od `/v1/models`                  |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Omezení výstupních tokenů na odpověď (např. `65536`)                                              |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Práh tokenu pro automatické zhutňování                                                            |
 
-> Proměnné prostředí se načítají **pouze jednou při spuštění** — po jejich změně Claude Code restartujte.
+> Env vars jsou načteny** jednou při spuštění** — restartujte kód Claude po jejich změně.
 
-`omniroute launch` nastaví všechny tyto proměnné za vás: zjistí základní URL a token
-z aktivního kontextu (takže po `omniroute connect <vps>` stačí spustit
-`omniroute launch`), zkontroluje stav serveru a spustí `claude`.
+Pro pověření, které se otáčí místo pevného řetězce, nastavte `apiKeyHelper` v `~/.claude/settings.json` na příkaz, který vytiskne aktuální pověření na stdout. Claude Code standardně ukládá svůj výstup do mezipaměti po dobu pěti minut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to přepíše) a odešle hodnotu v `Authorization: Bearer` i `x-api-key`. Skript musí vytisknout pověření a nic jiného — banner vedle něj selže pomocník na v2.1.227 +.
+
+Takto funguje Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` vytiskne krátkodobý přístupový token Entra, který OmniRoute ověří namísto klíče API. Viz [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` nastaví toto vše za vás: vyhodnotí základní token URL + z aktivního kontextu (takže `omniroute connect <vps>` a pak `omniroute launch` prostě funguje), zkontroluje stav serveru a spustí `claude`.
 
 ---
 
-## Aliasy pro zjišťování modelů — zobrazení modelů jiných než Claude v nástroji `/model`
+## Aliasy pro detekci — zobrazení modelů mimo Claude ve výběru `/model`
 
-Zjišťování modelů brány v Claude Code zobrazuje pouze ID začínající na `claude`
-nebo `anthropic`, takže při nastavení `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
-nativní nástroj `/model` běžně zobrazuje **pouze** modely Claude/Anthropic z OmniRoute —
-`kimi/kimi-k2.6` ani `glm/glm-5.2` se nikdy nezobrazí, přestože směrování funguje správně.
+Detekce modelů brány v Claude Code vypisuje pouze ID začínající na `claude`
+nebo `anthropic`, takže s `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` nativní
+výběr `/model` obvykle zobrazuje **pouze** Claude/Anthropic modely OmniRoute —
+`kimi/kimi-k2.6` nebo `glm/glm-5.2` se nikdy neobjeví, přestože směrování funguje.
 
-OmniRoute může zrcadlit libovolný povolený model (i kombinaci) pod ID `claude/…`,
-aby prošel tímto filtrem a zobrazil se ve výběru:
+OmniRoute může libovolný povolený model (a kombinaci) zrcadlit pod ID `claude/…`,
+takže projde tímto filtrem a zobrazí se ve výběru:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<kombinace "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Když v Claude Code vyberete některý z těchto modelů, OmniRoute před směrováním
-odebere obal `claude/` a obnoví skutečné ID — pravé ID `claude/<real-claude-model>`
-(skutečného poskytovatele Claude OAuth) vždy ponechá beze změny.
+Když v Claude Code jeden z těchto aliasů vyberete, OmniRoute před směrováním
+odstraní obal `claude/` a vrátí skutečné ID — opravdové ID `claude/<real-claude-model>`
+(skutečný poskytovatel Claude OAuth) zůstane vždy nedotčeno.
 
-**Ve výchozím nastavení je tato funkce vypnutá** a řídí ji tříúrovňové nastavení
-(nejkonkrétnější úroveň má přednost), takže běžný OmniRoute nezdvojuje svůj katalog
-pro klienty, kteří Claude Code nepoužívají:
+Ve výchozím nastavení se zrcadlí pouze základní ID. S opt-in příznakem funkce
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` se varianty úrovně uvažování (reasoning effort),
+které katalog již obsahuje (např. `codex/gpt-6-sol-high`), zrcadlí jako jakékoli jiné
+ID, takže Claude Code může vybrat explicitní úroveň úsilí, a vestavěná ID `auto/*`,
+která cesta zpracování požadavku nedokáže materializovat, se nezrcadlí. Zda se
+varianty úsilí vůbec vypisují, stále řídí `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+zrcadlení nikdy nepřidá variantu, kterou základní katalog nemá.
 
-| Úroveň       | Kde                                                                                                  |
-| ------------ | ---------------------------------------------------------------------------------------------------- |
-| Model        | Stránka podrobností poskytovatele → přepínač „Zobrazit v Claude Code“ pro každý model                |
-| Poskytovatel | Stránka podrobností poskytovatele → přepínač na úrovni poskytovatele (platí pro všechny jeho modely) |
-| Globální     | Nastavení → Příznaky funkcí → `EXPOSE_CC_DISCOVERY_ALIASES` (ve výchozím nastavení vypnuto)          |
+**Tato funkce je ve výchozím nastavení vypnutá** a řídí se tříúrovňovou bránou
+(vítězí nejkonkrétnější), takže obyčejná instance OmniRoute nikdy nezdvojuje svůj
+katalog pro klienty, kteří nepoužívají Claude Code:
+
+| Úroveň       | Kde                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------- |
+| Model        | Stránka detailu poskytovatele → přepínač „Zveřejnit v Claude Code“ u jednotlivých modelů       |
+| Poskytovatel | Stránka detailu poskytovatele → přepínač na úrovni poskytovatele (pokrývá všechny jeho modely) |
+| Globální     | Nastavení → Příznaky funkcí → `EXPOSE_CC_DISCOVERY_ALIASES` (ve výchozím nastavení vypnuto)    |
 
 Proměnná prostředí `EXPOSE_CC_DISCOVERY_ALIASES` vynutí zapnutí globální úrovně
-a má přednost před nastavením v ovládacím panelu (obrazovka Příznaky funkcí zobrazí
-poznámku „aktivní prostřednictvím proměnné prostředí“, pokud je takto aktivována).
-Přepínače pro jednotlivé poskytovatele a modely toto nastavení dále upřesňují —
-například globálně vypnuto + zapnutý poskytovatel Kimi zobrazí pouze modely Kimi.
+a má přednost před přepsáním z dashboardu (obrazovka Příznaky funkcí v takovém
+případě zobrazuje poznámku „aktivní prostřednictvím proměnné prostředí“). Přepínače
+pro jednotlivé poskytovatele a modely nastavení dále zpřesňují — např. globálně
+vypnuto + poskytovatel Kimi zapnut zveřejní pouze modely Kimi.
 
-> ⚠️ **Neshoda velikosti okna u modelů jiných než Claude.** Claude Code předpokládá
-> kontextové okno o velikosti 200K pro každé ID, které nerozpozná (skutečnou velikost
-> okna nedokáže z `/v1/models` načíst). Pro model s větším oknem (např. 256K u Kimi K2)
-> nastavte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na hodnotu nižší, než je skutečná velikost
-> okna modelu, aby se automatická kompakce nespouštěla předčasně. Výše uvedené
-> vygenerované profily toto již nastavují pro každý model.
+> ⚠️ **Nesoulad kontextového okna u modelů mimo Claude.** Claude Code předpokládá
+> kontextové okno 200K pro jakékoli ID, které nepozná (skutečné okno nemůže přečíst
+> z `/v1/models`). U modelu s větším oknem (např. 256K u Kimi K2) nastavte
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na hodnotu pod skutečným oknem modelu, aby se
+> automatická kompaktace nespustila předčasně. Výše vygenerované profily to již
+> provádějí pro každý model zvlášť.
 
 ---
 
