@@ -1,4 +1,5 @@
 export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
+  "systemone",
   "chat",
   "responses",
   "embeddings",
@@ -46,10 +47,9 @@ export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
   // modality type. Return before the media checks so a multimodal chat model
   // is not classified as image, audio, embedding, or rerank.
   if (endpoints.includes("chat") || endpoints.includes("responses")) return {};
-  // System One decisions are their own kind, not a chat-adjacent text format:
-  // the request is {state, questions} and the response is typed answers with
-  // calibrated probabilities (#13987).
-  if (endpoints.includes("decisions")) return { type: "decisions" };
+  // Native decision models are distinct from conversation models.
+  if (endpoints.includes("decisions") || endpoints.includes("systemone"))
+    return { type: "decisions" };
   const primary = (
     [
       ["embeddings", "embedding"],

@@ -279,6 +279,7 @@ export const providerModelMutationSchema = z.object({
   source: z.string().trim().max(80).optional(),
   apiFormat: z
     .enum([
+      "systemone",
       "chat-completions",
       "responses",
       "embeddings",

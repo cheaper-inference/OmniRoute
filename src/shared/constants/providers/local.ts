@@ -3,6 +3,33 @@
  * Pure data literal; re-exported by the providers.ts barrel. No behavior change.
  */
 export const LOCAL_PROVIDERS = {
+  basal: {
+    id: "basal",
+    alias: "basal",
+    name: "Basal",
+    serviceKinds: [],
+    icon: "rule",
+    color: "#277A66",
+    textIcon: "BA",
+    website: "https://github.com/rkinas/basal",
+    authHint:
+      "Optional API key. Configure the basal-serve base URL for native System One decisions.",
+    localDefault: "http://localhost:8000/v1",
+    passthroughModels: false,
+  },
+  "julia-local": {
+    id: "julia-local",
+    alias: "julia-local",
+    name: "Julia (System One server)",
+    serviceKinds: [],
+    icon: "rule",
+    color: "#6454A5",
+    textIcon: "JU",
+    website: "https://huggingface.co/SupersonicLabs/Julia-1",
+    authHint:
+      "Optional API key. Configure decision.endpoint and decision.models for your Julia server.",
+    passthroughModels: false,
+  },
   "mlx-gemma": {
     id: "mlx-gemma",
     serviceKinds: ["llm"],

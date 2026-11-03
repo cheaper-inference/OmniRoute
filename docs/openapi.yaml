@@ -294,6 +294,229 @@ tags:
     description: Webhooks endpoints (generated route coverage)
 
 paths:
+  /v1/decisions:
+    post:
+      operationId: createDecision
+      tags: [Decisions]
+      summary: Invoke a native OpenAI Decisions model
+      description: Requires a client API key. Input and native answers are preserved. Cross-format translation is unsupported.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, input, questions]
+              additionalProperties: true
+              properties:
+                model:
+                  type: string
+                  example: openai/gpt-6-luna
+                input:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: object
+                        additionalProperties: true
+                    - type: object
+                      additionalProperties: true
+                questions:
+                  type: array
+                  minItems: 1
+                  maxItems: 400
+                  items:
+                    type: object
+                    required: [type, instructions]
+                    additionalProperties: true
+                    properties:
+                      type:
+                        type: string
+                        enum: [predicate, choice, score]
+                      name:
+                        type: string
+                      instructions:
+                        oneOf:
+                          - type: string
+                          - type: array
+                            items:
+                              type: object
+                      choices:
+                        type: array
+                        minItems: 2
+                        maxItems: 255
+                        items:
+                          type: object
+                          required: [value]
+                          properties:
+                            value:
+                              type: [string, boolean]
+                            description:
+                              type: string
+                      levels:
+                        type: array
+                        minItems: 2
+                        maxItems: 10
+                        items:
+                          type: object
+                          required: [label]
+                          properties:
+                            label:
+                              type: string
+                            description:
+                              type: string
+      responses:
+        "200":
+          description: Native decision answers, refusals, probabilities and usage
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  answers:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        "400":
+          description: Invalid native request or unsupported protocol conversion
+        "401":
+          description: Client or upstream authentication failed
+        "403":
+          description: Endpoint, model, connection or upstream permission denied
+        "404":
+          description: Decision model not available
+        "413":
+          description: Request exceeds 16 MiB
+        "429":
+          description: Key rate limit, provider cooldown or upstream rate limit
+        "502":
+          description: Upstream transport, JSON or response-size failure
+        "503":
+          description: No eligible active connection or policy backend unavailable
+        "504":
+          description: Upstream timeout
+  /v1/systemone:
+    post:
+      operationId: createSystemOneDecision
+      tags: [Decisions]
+      summary: Invoke a native System One model
+      description: Native noul, choice and score questions. No conversion to chat or OpenAI Decisions.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, state, questions]
+              additionalProperties: true
+              properties:
+                model:
+                  type: string
+                  example: ollama-local/clef-flash
+                state:
+                  description: Native JSON or text state
+                questions:
+                  type: object
+                  minProperties: 1
+                  maxProperties: 400
+                  additionalProperties:
+                    type: object
+                    required: [type, instructions]
+                    additionalProperties: true
+                    properties:
+                      type:
+                        type: string
+                        enum: [noul, choice, score]
+                      instructions:
+                        type: string
+                      criteria:
+                        oneOf:
+                          - type: object
+                            additionalProperties:
+                              type: string
+                          - type: array
+                            minItems: 2
+                            items:
+                              type: string
+      responses:
+        "200":
+          description: Native named answers with probabilities, confidence and usage
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  answers:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      additionalProperties: true
+        "400":
+          description: Invalid native request or unsupported question type
+        "401":
+          description: Client or upstream authentication failed
+        "403":
+          description: Endpoint, model, connection or upstream permission denied
+        "404":
+          description: Decision model not available
+        "413":
+          description: Request exceeds 16 MiB
+        "429":
+          description: Key rate limit, provider cooldown or upstream rate limit
+        "502":
+          description: Upstream transport, JSON or response-size failure
+        "503":
+          description: No eligible active connection or policy backend unavailable
+        "504":
+          description: Upstream timeout
+  /v1/systemone/models:
+    get:
+      operationId: listDecisionModels
+      tags: [Decisions]
+      summary: List accessible native decision models
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Scoped catalog, with X-OmniRoute-Catalog-Status complete or partial
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    const: list
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                          const: decisions
+                        owned_by:
+                          type: string
+                        supported_endpoints:
+                          type: array
+                          items:
+                            type: string
+                            enum: [decisions, systemone]
+                        pricing:
+                          type: "null"
+        "401":
+          description: Valid OmniRoute API key required
+        "403":
+          description: Endpoint or connection scope denied
   /api/v1/session-leases:
     post:
       tags:

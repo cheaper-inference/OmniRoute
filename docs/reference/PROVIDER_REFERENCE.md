@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.53
-lastUpdated: 2026-10-29
+lastUpdated: 2026-11-03
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-10-29
+> **Last generated:** 2026-11-03
 
-Total providers: **380**. See category breakdown below.
+Total providers: **382**. See category breakdown below.
 
 ## Categories
 
@@ -383,12 +383,14 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zerolimitai` | `zerolimitai` | ZeroLimitAI | API key, aggregator | [link](https://www.zerolimitai.com) | Temporary free trial is advertised, but official pages conflict between 3 and 7 days; a 100-calls/day claim is not treated as permanent. |
 | `zylo-api` | `zylo` | Zylo API | API key, aggregator | [link](https://zyloai.net) | Basic plan: 10 RPM, 7,200 requests/day and 200,000 tokens/day; limited to Basic text models. |
 
-## Local Providers (14)
+## Local Providers (16)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
+| `basal` | `basal` | Basal | Local | [link](https://github.com/rkinas/basal) | Optional API key. Configure the basal-serve base URL for native System One decisions. |
 | `comfyui` | `comfyui` | ComfyUI | Local | [link](https://github.com/comfyanonymous/ComfyUI) | No API key required. Configure the local ComfyUI base URL (default: http://localhost:8188). |
 | `docker-model-runner` | `dmr` | Docker Model Runner | Local, self-hosted | [link](https://docs.docker.com/ai/model-runner/) | API key optional. Configure the local Docker Model Runner OpenAI-compatible base URL (default: http://localhost:12434/v1). |
+| `julia-local` | `julia-local` | Julia (System One server) | Local | [link](https://huggingface.co/SupersonicLabs/Julia-1) | Optional API key. Configure decision.endpoint and decision.models for your Julia server. |
 | `lemonade` | `lemonade` | Lemonade Server | Local, self-hosted | [link](https://lemonade-server.ai) | API key optional. Configure the local Lemonade OpenAI-compatible base URL (default: http://localhost:13305/api/v1). |
 | `llama-cpp` | `llamacpp` | llama.cpp | Local, self-hosted | [link](https://github.com/ggml-org/llama.cpp) | API key optional (use any value, e.g. sk-no-key-required). Configure the llama-server OpenAI-compatible base URL (default: http://127.0.0.1:8080/v1). Note: if Llamafile is also installed, both default to port 8080 — run only one at a time or override the port. |
 | `llamafile` | `llamafile` | Llamafile | Local, self-hosted | [link](https://github.com/Mozilla-Ocho/llamafile) | API key optional. Configure the local Llamafile OpenAI-compatible base URL (default: http://127.0.0.1:8080/v1). |

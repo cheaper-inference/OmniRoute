@@ -339,6 +339,10 @@ export async function calculateCostDetailed(
   const exactCostUsd = extractExactCostUsd(tokens);
   if (exactCostUsd !== null) return { costUsd: exactCostUsd, priced: true };
 
+  // Native decision prices are endpoint-specific. Never borrow a chat price;
+  // keep the marker through usage rollups and existing team budget accounting.
+  if (options.serviceTier === "decision-native") return { costUsd: 0, priced: false };
+
   try {
     const pricing = await resolvePricingRow(provider, model);
     // No pricing row anywhere — this is the #12341 case (e.g. a provider's own

@@ -105,3 +105,17 @@ test("defaultEndpointsForProviderNodeApiType maps a decisions node to decisions 
   assert.deepEqual(defaultEndpointsForProviderNodeApiType("decisions"), ["decisions"]);
   assert.deepEqual(defaultEndpointsForProviderNodeApiType("Decisions "), ["decisions"]);
 });
+
+test("decision-only discovered Ollama rows survive model mutation validation without becoming chat", () => {
+  const parsed = providerModelMutationSchema.parse({
+    provider: "ollama-local",
+    modelId: "clef:27b",
+    apiFormat: "systemone",
+    supportedEndpoints: ["systemone"],
+  });
+  assert.deepEqual(parsed.supportedEndpoints, ["systemone"]);
+  assert.deepEqual(classifyModelSupportedEndpoints(parsed.supportedEndpoints), {
+    type: "decisions",
+  });
+  assert.deepEqual(classifyModelSupportedEndpoints(["chat", "systemone"]), {});
+});

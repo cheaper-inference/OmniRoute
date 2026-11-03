@@ -1,4 +1,5 @@
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
+import { validateDecisionProvider } from "./validation/decision";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
   isClaudeCodeCompatibleProvider,
@@ -197,6 +198,10 @@ export async function validateProviderApiKey({
 
   if (!provider || (requiresApiKey && !apiKey)) {
     return { valid: false, error: "Provider and API key required", unsupported: false };
+  }
+
+  if (provider === "basal" || provider === "julia-local" || providerSpecificData.decision) {
+    return validateDecisionProvider({ provider, apiKey, providerSpecificData });
   }
 
   if (isOpenAICompatibleProvider(provider)) {

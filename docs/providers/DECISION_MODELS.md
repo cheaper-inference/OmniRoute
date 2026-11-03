@@ -1,0 +1,222 @@
+---
+title: "Decision Models"
+version: 3.8.53
+lastUpdated: 2026-11-02
+---
+
+# Decision models
+
+Decision models evaluate evidence and return typed answers. They use native
+decision endpoints, independently of chat executors and combo strategies.
+
+| Gateway endpoint           | Native protocol  | Request questions                   | Response answers     |
+| -------------------------- | ---------------- | ----------------------------------- | -------------------- |
+| `POST /v1/decisions`       | OpenAI Decisions | Array of predicate, choice, score   | Array                |
+| `POST /v1/systemone`       | System One       | Named object of noul, choice, score | Named object         |
+| `GET /v1/systemone/models` | Gateway catalog  | None                                | Qualified model rows |
+
+Inference through the new adapters and the new discovery endpoint require a
+valid OmniRoute client API key, including with keyless chat enabled. The existing
+TypeSafe/OpenRouter route retains its established authentication policy. The `decisions` endpoint category controls inference
+and discovery. Normal key model restrictions, budgets, rate limits, connection
+scope and quota preflight apply. An upstream credential is never a client key.
+
+## Configure existing provider connections
+
+Create connections using the dashboard or the authenticated `POST /api/providers`
+management API. Store provider credentials in the connection's normal `apiKey`
+field. Use the existing `providerSpecificData` object for operator configuration:
+
+```json
+{
+  "provider": "basal",
+  "name": "Local decisions",
+  "allowNoCredential": true,
+  "providerSpecificData": {
+    "baseUrl": "http://basal:8000/v1"
+  }
+}
+```
+
+This is a management request, not an inference body. `allowNoCredential` is
+supported for local providers; omit it and supply `apiKey` when authentication
+is configured. Protect the management API and keep credentials out of logs.
+
+### OpenAI
+
+Use an existing **OpenAI API** connection (`provider: openai`). ChatGPT
+subscriptions and OAuth credentials do not grant OpenAI API access. The gateway
+uses `https://api.openai.com/v1/decisions`; discovery checks the account's
+`/v1/models` and currently exposes `openai/gpt-6-luna` for Decisions. This model
+may also support other endpoints; its ordinary chat classification is preserved.
+
+```bash
+curl http://localhost:20128/v1/decisions \
+  -H "Authorization: Bearer $OMNIROUTE_CLIENT_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"openai/gpt-6-luna","input":"Please refund the duplicate charge.","questions":[{"type":"predicate","name":"refund","instructions":"Is a refund requested?"},{"type":"choice","name":"team","instructions":"Choose a team","choices":[{"value":"billing"},{"value":"support"}]},{"type":"score","name":"urgency","instructions":"Rate urgency","levels":[{"label":"routine"},{"label":"urgent"}]}]}'
+```
+
+Native input messages, tool calls and outputs, image/JSON parts, instruction
+content parts and cache fields are forwarded intact. The upstream validates
+the full native content contract. Only the gateway model prefix is removed.
+An example predicate response shape is:
+
+```json
+{
+  "model": "gpt-6-luna",
+  "answers": [{ "type": "predicate", "name": "refund", "probability": 0.95 }],
+  "usage": { "input_tokens": 42, "output_tokens": 0, "total_tokens": 42 }
+}
+```
+
+Values here illustrate the shape; they are not a live inference receipt.
+Native confidence, probability, refusal and usage fields are returned unchanged.
+
+### Ollama
+
+Use the existing `ollama-local` connection with, for example,
+`providerSpecificData.baseUrl: http://ollama:11434/v1`. The default is
+`http://localhost:11434/v1`. Inside a container, `localhost` addresses that
+container: use your operator-managed network hostname and port when needed.
+
+Install a decision-capable model on an Ollama version supporting System One
+(consult the current [Ollama decision documentation](https://github.com/ollama/ollama/blob/main/docs/capabilities/decision.mdx)).
+For example, `ollama pull clef-flash`. The gateway enumerates `/api/tags` and
+reads each model's Ollama�s native show endpoint capabilities. Only models declaring `decision`
+are eligible. There is no model-name allowlist; missing models and chat-only
+models receive 404. Vision capability is discovered, not guessed from a name.
+
+```bash
+curl http://localhost:20128/v1/systemone \
+  -H "Authorization: Bearer $OMNIROUTE_CLIENT_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"ollama-local/clef-flash","state":"Please refund the duplicate charge.","questions":{"refund":{"type":"noul","instructions":"Is a refund requested?"}}}'
+```
+
+### Basal
+
+Start `basal-serve --model <installed-model-id>` according to the
+[Basal server documentation](https://github.com/rkinas/basal/blob/main/docs/API.md).
+Create a `basal` connection pointing at its base URL. Defaults are
+`http://localhost:8000/v1/systemone` and discovery via `/v1/models`.
+Both `models[].name` and OpenAI-shaped `data[].id` catalogs are supported.
+No Basal version or variant is hardcoded. Select the discovered identifier:
+
+```json
+{
+  "model": "basal/<discovered-model-id>",
+  "state": { "ticket": "A critical service is unavailable" },
+  "questions": {
+    "urgency": {
+      "type": "score",
+      "instructions": "Rate urgency",
+      "criteria": ["Routine", "Soon", "Immediate"]
+    },
+    "team": {
+      "type": "choice",
+      "instructions": "Choose a team",
+      "criteria": { "billing": "Payments", "technical": "Software" }
+    }
+  }
+}
+```
+
+The initial gateway supports the common System One question types `noul`,
+`choice` and `score`. Basal-specific question types such as `multi`, `act` and
+`tool` are rejected. Additional native fields on supported questions and bodies
+are preserved and validated by the configured upstream. Answers and refusal
+fields are never converted, rounded or synthesized.
+
+### Julia and other configured engines
+
+Julia-1 is a model family, not a promise of one standard HTTP server. Serve it
+behind a System One-compatible implementation. Create a `julia-local`
+connection with an explicit endpoint and model identifier:
+
+```json
+{
+  "provider": "julia-local",
+  "name": "Julia server",
+  "allowNoCredential": true,
+  "providerSpecificData": {
+    "decision": {
+      "format": "systemone",
+      "endpoint": "http://julia:9000/custom/systemone",
+      "models": ["julia-1"],
+      "timeoutMs": 30000
+    }
+  }
+}
+```
+
+Call `/v1/systemone` with `model: julia-local/julia-1`. An explicit `models` list
+is an operator declaration, not a server discovery or inference receipt. If
+the server supports discovery, configure `modelsEndpoint` and omit `models`.
+Ollama always uses actual capability discovery, even with an explicit list.
+
+The same `decision` block can opt an existing provider connection into either
+native protocol. The merged TypeSafe/OpenRouter System One route remains available, including
+bare `jev-*` aliases, its default model and `GET /v1/systemone`. Operators must select the actual native
+protocol and URL; similarly named Decisions APIs are not wire-compatible.
+
+## Discovery, routing and limits
+
+`GET /v1/systemone/models` returns qualified IDs, `type: decisions`,
+`supported_endpoints`, decision/vision capability and `pricing: null`. It
+includes both native protocols and filters by the caller's connection/model
+scope. `X-OmniRoute-Catalog-Status` is `partial` on backend failures. Enumeration
+does not rotate account selection. Decision-only synced models are excluded
+from chat selection; mixed models retain chat capabilities.
+
+No cross-format translation is implemented. Sending OpenAI input to a System
+One model, or vice versa, returns 400. New adapters require qualified IDs; existing TypeSafe aliases remain supported. Default
+routing never substitutes another model. An operator can configure up to four
+qualified `fallbackModels` in the primary connection's `decision` block. Each
+fallback is independently authorized, scoped, discovered and quota-checked.
+Only explicit upstream HTTP 429/500/502/503 failures trigger fallback; ambiguous
+timeouts, cancellation, invalid bodies and connection failures are not replayed.
+Fallbacks must use the same native protocol. Existing combo selection is separate.
+
+Requests and responses are capped at 16 MiB of decoded bytes. Request intake
+is bounded to 10 seconds. Attempts default to 30 seconds, configurable from
+100 ms to 120 seconds. Discovery has an additional total 30-second catalog
+deadline. The normal provider proxy, DNS/SSRF guard and local-provider policy
+apply; redirects are disabled and cloud metadata addresses remain blocked.
+Clients cannot choose upstream URLs: unknown native request fields are data
+forwarded to the configured server and never control the gateway transport.
+
+Logs contain metadata only: provider/model/endpoint, status, latency, request ID,
+selected connection and failure category. No prompts, state, questions, native
+answers or credentials are supplied to the log artifact store. Native token
+usage is tracked when present. Provider-reported USD cost, including explicit
+zero, is authoritative; missing costs remain unknown. Decision usage does not
+inherit a chat token price for the same model. The existing unknown-spend budget
+policy applies to usage-limited keys. Response headers include
+`X-OmniRoute-Request-Id`, `X-OmniRoute-Provider`, `X-OmniRoute-Model`,
+`X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cost-Status`, `X-OmniRoute-Usage-Status`
+and `X-OmniRoute-Response-Cost` when cost is reported.
+
+No new environment variables are required. Existing local-provider flags are
+documented in [Environment reference](../reference/ENVIRONMENT.md).
+
+## Verification boundary
+
+Mocked transport, policy and billing tests require no provider credentials or
+paid services. They prove protocol behavior, not live integration. No live
+OpenAI, Ollama, Basal or Julia inference is claimed by these tests.
+
+## Upstream integration
+
+This change extends merged [PR #17994](https://github.com/cheaper-inference/OmniRoute/pull/17994)
+without replacing its TypeSafe/OpenRouter proxy, default aliases or GET catalog.
+The new OpenAI `/v1/decisions` route uses the native OpenAI array contract. It is
+not an alias for OpenRouter's System One protocol.
+
+PRs [#14667](https://github.com/cheaper-inference/OmniRoute/pull/14667),
+[#18555](https://github.com/cheaper-inference/OmniRoute/pull/18555),
+[#15279](https://github.com/cheaper-inference/OmniRoute/pull/15279) and
+[#14498](https://github.com/cheaper-inference/OmniRoute/pull/14498) were open when
+reviewed on 2026-11-03. No unfinished routing strategy is merged here. A later
+combo integration can consume the native gateway after explicit protocol and
+fallback-policy selection; this contribution adds no parallel combo engine.
