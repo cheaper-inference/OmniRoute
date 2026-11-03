@@ -13863,10 +13863,10 @@
           "updated_at": "2026-11-02T21:06:27.544Z"
         },
         "ta": {
-          "source_hash": "47ada89e38047742e51819dd7fff19a767bf2247849faa3db197acda69a160db",
-          "target_hash": "30a5af9d9e7bcfa0fde7f7fc7ec073dee636c0252eeafe96705f453ed8cfa3c8",
+          "source_hash": "efc5bea7f1725a610467dbf930287e2aef83938d0a3861a201d6f5dab601b38c",
+          "target_hash": "f7f0874a43fa8b805412f69f57f40010d2f3e89c5a6606b530b4df0ac13e293e",
           "section_hashes": [
-            "ac21763d1652",
+            "f1a42946fca5",
             "466f823d8d87",
             "fe9458cc9c60",
             "dd9f65f1be47",
@@ -13875,7 +13875,7 @@
             "650cfd631456",
             "a11cd97d929e"
           ],
-          "updated_at": "2026-11-02T15:47:15.623Z"
+          "updated_at": "2026-11-03T06:09:55.214Z"
         },
         "te": {
           "source_hash": "efc5bea7f1725a610467dbf930287e2aef83938d0a3861a201d6f5dab601b38c",
