@@ -2463,6 +2463,23 @@ export async function markAccountUnavailable(
       };
     }
 
+    // Per-request refusal (#12859/#18574): chatCore already excluded this exact model with a
+    // `request_rejected` lockout and recorded the refusal on the connection. Now that the
+    // exclusion is model-scoped the connection carries no cooldown, so the guard above no
+    // longer catches the duplicate — without this one the generic path below would overwrite
+    // `lastErrorType` with `server_error` and stack a second 5s lockout on the same model.
+    if (
+      provider &&
+      model &&
+      getModelLockoutInfo(provider, connectionId, model)?.reason === "request_rejected"
+    ) {
+      log.info(
+        "AUTH",
+        `${connectionId.slice(0, 8)} ${provider}:${model} already excluded by a request_rejected lockout, skipping duplicate mark`
+      );
+      return { shouldFallback: true, cooldownMs: 0 };
+    }
+
     // T09: Codex scope-aware lockout guard (codex vs spark independent pools).
     if (provider === "codex" && typeof model === "string" && model.trim().length > 0) {
       const scopeRateLimitedUntil = conn ? getCodexChildCooldown(conn, model) : null;

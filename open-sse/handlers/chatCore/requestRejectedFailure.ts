@@ -76,7 +76,7 @@ export async function handleRequestRejectedFailure(params: {
     }
   }
 
-  const verdict = recordRequestRejected(connectionId, targetModel, Date.now());
+  const verdict = recordRequestRejected(connectionId, targetModel);
 
   if (!verdict.counted) {
     console.warn(
