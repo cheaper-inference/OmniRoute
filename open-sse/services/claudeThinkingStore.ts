@@ -103,8 +103,12 @@ function cloneSegments(segments: ClaudeThinkingSegment[]): ClaudeThinkingSegment
   }));
 }
 
+function blocksOfSegments(segments: ClaudeThinkingSegment[]): ClaudeSignedThinkingBlock[] {
+  return segments.flatMap((segment) => segment.blocks);
+}
+
 function blocksOf(entry: Entry): ClaudeSignedThinkingBlock[] {
-  return entry.segments.flatMap((segment) => segment.blocks);
+  return blocksOfSegments(entry.segments);
 }
 
 function deleteKey(key: string) {
@@ -128,6 +132,50 @@ function pruneExpired(now: number) {
   }
 }
 
+function isThinkingBlockType(type: unknown): boolean {
+  return type === "thinking" || type === "redacted_thinking";
+}
+
+function toolUseIdOf(record: Record<string, unknown>): string | null {
+  return record.type === "tool_use" && typeof record.id === "string" && record.id
+    ? record.id
+    : null;
+}
+
+/**
+ * Split an ordered assistant content array into replay segments: each tool_use id
+ * owns the signed blocks emitted since the previous tool_use. Returns null unless
+ * every thinking-ish block is replayable and anchored to a following tool_use, the
+ * turn owns at least one thinking block, and its total size fits the entry bound.
+ */
+function collectThinkingSegments(
+  content: unknown
+): { segments: ClaudeThinkingSegment[]; size: number } | null {
+  if (!Array.isArray(content)) return null;
+  const segments: ClaudeThinkingSegment[] = [];
+  let pending: ClaudeSignedThinkingBlock[] = [];
+  let size = 0;
+  for (const block of content) {
+    const record = (block ?? {}) as Record<string, unknown>;
+    if (isThinkingBlockType(record.type)) {
+      const normalized = normalizeBlock(block);
+      if (!normalized) return null;
+      pending.push(normalized);
+      size += blockSize(normalized);
+      continue;
+    }
+    const toolUseId = toolUseIdOf(record);
+    if (toolUseId !== null) {
+      segments.push({ toolUseId, blocks: pending });
+      pending = [];
+    }
+  }
+  // Thinking after the last tool_use has no anchor to replay against.
+  if (size === 0 || size > MAX_CLAUDE_THINKING_ENTRY_CHARS || pending.length > 0) return null;
+  if (segments.length === 0) return null;
+  return { segments, size };
+}
+
 /**
  * Remember the signed thinking blocks of one assistant turn, in their original
  * layout, under each of its tool_use ids. `content` is the ordered content array
@@ -141,26 +189,10 @@ export function storeClaudeThinkingBlocks(args: {
   connectionId?: unknown;
 }): boolean {
   const model = normalizeClaudeThinkingModel(args.model);
-  if (!model || !Array.isArray(args.content)) return false;
-
-  const segments: ClaudeThinkingSegment[] = [];
-  let pending: ClaudeSignedThinkingBlock[] = [];
-  let size = 0;
-  for (const block of args.content) {
-    const record = (block ?? {}) as Record<string, unknown>;
-    if (record.type === "thinking" || record.type === "redacted_thinking") {
-      const normalized = normalizeBlock(block);
-      if (!normalized) return false;
-      pending.push(normalized);
-      size += blockSize(normalized);
-    } else if (record.type === "tool_use" && typeof record.id === "string" && record.id) {
-      segments.push({ toolUseId: record.id, blocks: pending });
-      pending = [];
-    }
-  }
-  // Thinking after the last tool_use has no anchor to replay against.
-  if (size === 0 || size > MAX_CLAUDE_THINKING_ENTRY_CHARS || pending.length > 0) return false;
-  if (segments.length === 0) return false;
+  if (!model) return false;
+  const layout = collectThinkingSegments(args.content);
+  if (!layout) return false;
+  const { segments, size } = layout;
 
   const now = Date.now();
   const provider = normalizeProvider(args.provider);
@@ -207,6 +239,13 @@ export function storeClaudeThinkingFromResponse(
   });
 }
 
+/** Fresh copy of a stored layout, with every block marked as server-restored. */
+function cloneRestoredSegments(stored: ClaudeThinkingSegment[]): ClaudeThinkingSegment[] {
+  const segments = cloneSegments(stored);
+  for (const block of blocksOfSegments(segments)) restoredBlocks.add(block);
+  return segments;
+}
+
 /**
  * Return fresh copies of the turn layout stored for the first tool_use id that
  * hits with the same provider + model + connection binding, or null.
@@ -234,9 +273,7 @@ export function restoreClaudeThinkingBlocks(args: {
     if (!entry) continue;
     if (entry.provider !== provider || entry.model !== model) return null;
     if (entry.connectionId !== connectionId) return null;
-    const segments = cloneSegments(entry.segments);
-    for (const segment of segments) for (const block of segment.blocks) restoredBlocks.add(block);
-    return segments;
+    return cloneRestoredSegments(entry.segments);
   }
   return null;
 }
