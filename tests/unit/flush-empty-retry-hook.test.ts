@@ -44,6 +44,7 @@ function setFlag(enabled: boolean) {
 
 async function resetStorage() {
   clearInflight();
+  await callLogs.waitForCallLogSaves(20_000);
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
@@ -169,6 +170,7 @@ test.afterEach(async () => {
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
+  await callLogs.closeCallLogSaves();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -303,12 +305,15 @@ test("a failed retry logs the call against the connection that served it", async
   await drainText(response);
   assert.deepEqual(dispatches, [served.apiKey, other.apiKey]);
   await callLogs.waitForCallLogSaves(2000);
-  const logged = (await callLogs.getCallLogs({})) as Array<{ connectionId?: string | null }>;
-  assert.equal(logged.length, 1, `expected one call log, got ${logged.length}`);
+  const logged = await callLogs.getCallLogs({});
+  assert.equal(logged.length, 2, "logical outcome plus rejected physical retry");
+  const logical = logged.find((row) => row.requestType !== "upstream_http_attempt");
+  assert.equal(logical?.connectionId, served.id, "kept response retains its account");
+  assert.equal(logical?.upstreamHttp?.send?.ordinal, 1);
+  assert.equal(logical?.upstreamHttp?.send?.connectionId, served.id);
   assert.equal(
-    logged[0].connectionId,
-    served.id,
-    "the kept response came from the first account, not the failed retry"
+    logged.find((row) => row.requestType === "upstream_http_attempt")?.connectionId,
+    other.id
   );
 });
 
@@ -474,4 +479,50 @@ test("direct openai→openai: a real answer is served without a retry (#17461)",
   const bodyText = await drainText(response);
   assert.equal(dispatches.length, 1, `a real answer must not be retried, got ${dispatches.length}`);
   assert.match(bodyText, /answered-once/, "client must receive the answer");
+});
+
+test("adopted empty-turn retries finalize the selected ordinal and account", async () => {
+  for (const [emptySends, rejectLast] of [
+    [1, false],
+    [2, false],
+    [2, true],
+  ] as const) {
+    await resetStorage();
+    await settingsDb.updateSettings({ fallbackStrategy: "round-robin", stickyRoundRobinLimit: 1 });
+    const accounts = [
+      await seedGemini("selected-retry-a", "sk-selected-retry-a"),
+      await seedGemini("selected-retry-b", "sk-selected-retry-b"),
+    ];
+    const dispatches: string[] = [];
+    stubFetch(dispatches, (_auth, index) =>
+      index < emptySends
+        ? reasoningOnlyStreamResponse()
+        : rejectLast
+          ? Response.json({ error: { message: "rejected retry" } }, { status: 500 })
+          : contentStreamResponse("selected-empty-retry")
+    );
+    const response = await handleChat(streamRequest());
+    const text = await drainText(response);
+    if (!rejectLast) assert.match(text, /selected-empty-retry/);
+    assert.equal(dispatches.length, emptySends + 1);
+    assert.equal(await callLogs.waitForCallLogSaves(20_000), true);
+    const rows = await callLogs.getCallLogs({});
+    assert.equal(rows.length, dispatches.length);
+    const logical = rows.find((row) => row.requestType !== "upstream_http_attempt");
+    const ordinal = rejectLast ? emptySends : emptySends + 1;
+    const account = accounts.find((entry) => entry.apiKey === dispatches[ordinal - 1]);
+    assert.ok(account);
+    assert.equal(logical?.upstreamHttp?.send?.ordinal, ordinal);
+    assert.equal(logical?.upstreamHttp?.send?.connectionId, account.id);
+    assert.equal(logical?.connectionId, account.id);
+    assert.deepEqual(
+      rows
+        .filter((row) => row.requestType === "upstream_http_attempt")
+        .map((row) => row.upstreamHttp?.send?.ordinal)
+        .sort(),
+      Array.from({ length: dispatches.length }, (_, index) => index + 1).filter(
+        (value) => value !== ordinal
+      )
+    );
+  }
 });
