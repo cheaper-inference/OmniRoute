@@ -868,7 +868,10 @@ Web/search provider abstraction (Tavily, Brave, Exa, Serper, etc.).
 first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are
 used only when nothing else is configured. A self-hosted SearXNG counts as configured once its
 connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it
-then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover.
+then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover. A
+SearXNG connection that stores a token is auto-selected only over `https://` or loopback
+`http://`; over remote plain `http://` it is used only when requested by name, so
+auto-selection never sends the token in cleartext.
 
 ### Exa and Tavily `provider_options`
 

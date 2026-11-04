@@ -47,16 +47,16 @@ async function seed(
   });
 }
 
-const seedSearxng = (baseUrl: string) =>
-  seed("searxng-search", { authType: "none", apiKey: null, providerSpecificData: { baseUrl } });
+const seedSearxng = (baseUrl: string, apiKey: string | null = null) =>
+  seed("searxng-search", { authType: "none", apiKey, providerSpecificData: { baseUrl } });
 
-function mockFetch(searxngStatus = 200) {
+function mockFetch(searxngStatus = 200, searxngBase = SEARXNG_URL) {
   const calls: string[] = [];
   const original = globalThis.fetch;
   globalThis.fetch = async (url) => {
     const u = String(url);
     calls.push(u);
-    if (u.startsWith(SEARXNG_URL)) {
+    if (u.startsWith(searxngBase)) {
       if (searxngStatus !== 200) return new Response("upstream down", { status: searxngStatus });
       return new Response(
         JSON.stringify({
@@ -166,6 +166,90 @@ test("without a SearXNG connection the keyed provider is selected as before", as
       "brave-search"
     );
     assert.equal((await routeSearch("route no searxng connection")).body.provider, "brave-search");
+  } finally {
+    f.restore();
+  }
+});
+
+test("a configured SearXNG and a keyed $0 provider: /v1/search and executeWebSearch agree", async () => {
+  // ollama-search is also $0 and non-fallback; the route must rank the same admitted
+  // candidates as executeWebSearch instead of taking selectProvider's pick first.
+  await seed("ollama-search");
+  await seedSearxng(SEARXNG_URL);
+  const f = mockFetch();
+  try {
+    assert.equal(
+      (await executeWebSearch({ query: "two zero-cost providers" })).data.provider,
+      "searxng-search"
+    );
+    assert.equal(
+      (await routeSearch("route two zero-cost providers")).body.provider,
+      "searxng-search"
+    );
+    assert.ok(
+      f.calls.every((u) => u.startsWith(SEARXNG_URL)),
+      "ollama never called"
+    );
+  } finally {
+    f.restore();
+  }
+});
+
+test("a SearXNG that would send its stored token over remote plain HTTP is not auto-selected", async () => {
+  const remote = "http://10.20.30.40:8888";
+  await seed("brave-search");
+  await seedSearxng(remote, "searxng-secret");
+  const f = mockFetch(200, remote);
+  try {
+    assert.equal(
+      (await executeWebSearch({ query: "remote http token" })).data.provider,
+      "brave-search"
+    );
+    assert.equal((await routeSearch("route remote http token")).body.provider, "brave-search");
+    assert.ok(
+      !f.calls.some((u) => u.startsWith(remote)),
+      "token never sent in cleartext by auto-select"
+    );
+    // Explicit selection is unchanged (the operator asked for it by name).
+    const explicit = await executeWebSearch({
+      query: "explicit remote http",
+      provider: "searxng-search",
+    });
+    assert.equal(explicit.data.provider, "searxng-search");
+  } finally {
+    f.restore();
+  }
+});
+
+test("a tokened SearXNG over HTTPS or on loopback HTTP is still auto-selected", async () => {
+  for (const base of [
+    "https://search.example.org",
+    "http://127.0.0.1:9191",
+    "http://localhost:9192",
+  ]) {
+    await resetStorage();
+    await seed("brave-search");
+    await seedSearxng(base, "searxng-secret");
+    const f = mockFetch(200, base);
+    try {
+      assert.equal(
+        (await executeWebSearch({ query: `tokened ${base}` })).data.provider,
+        "searxng-search",
+        base
+      );
+    } finally {
+      f.restore();
+    }
+  }
+});
+
+test("a tokenless SearXNG on a cluster-internal HTTP address is auto-selected", async () => {
+  const internal = "http://searxng.internal:8080";
+  await seed("brave-search");
+  await seedSearxng(internal);
+  const f = mockFetch(200, internal);
+  try {
+    assert.equal((await routeSearch("cluster internal http")).body.provider, "searxng-search");
   } finally {
     f.restore();
   }

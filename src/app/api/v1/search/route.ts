@@ -247,42 +247,26 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
   } else {
-    // Auto-select — try the resolved provider first, then iterate others by cost
-    const selectedCredentials = await resolveSearchExecutionCredentials(
-      providerConfig,
-      allowedConnections
-    );
-    if (isAllRateLimitedCredentials(selectedCredentials)) {
-      firstRateLimitedCredentials = {
-        providerId: providerConfig.id,
-        credentials: selectedCredentials,
-      };
-    } else {
-      credentials = selectedCredentials;
-    }
+    // Auto-select: walk the same admitted, cost-ranked candidates executeWebSearch uses
+    // (a configured SearXNG included), so /v1/search and the web_search tool agree even
+    // when two providers tie on cost. selectProvider's pick is only a seed for errors.
+    const sortedIds = autoSearchCandidates(body.search_type)
+      .filter((provider) => !isProviderBlockedByIdOrAlias(provider.id, blockedProviders))
+      .map((p) => p.id);
 
-    if (!credentials) {
-      // Sort by cost to find cheapest with credentials (fallback-only providers
-      // are reached via the last-resort step below, never the primary pick).
-      const sortedIds = autoSearchCandidates(body.search_type)
-        .filter((provider) => !isProviderBlockedByIdOrAlias(provider.id, blockedProviders))
-        .map((p) => p.id);
-
-      for (const pid of sortedIds) {
-        if (pid === providerConfig.id) continue;
-        const altConfig = getSearchProvider(pid);
-        const altCreds = altConfig
-          ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
-          : null;
-        if (isAllRateLimitedCredentials(altCreds)) {
-          firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
-          continue;
-        }
-        if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
-          providerConfig = altConfig;
-          credentials = altCreds;
-          break;
-        }
+    for (const pid of sortedIds) {
+      const altConfig = getSearchProvider(pid);
+      const altCreds = altConfig
+        ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
+        : null;
+      if (isAllRateLimitedCredentials(altCreds)) {
+        firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
+        continue;
+      }
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
+        providerConfig = altConfig;
+        credentials = altCreds;
+        break;
       }
     }
 

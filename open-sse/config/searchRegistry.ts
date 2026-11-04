@@ -585,6 +585,7 @@ export function isUnconfiguredLoopbackSearchProvider(
  * with `primaryWhenConfigured` and the operator's stored connection names a real base URL
  * (not the catalog default). A self-hosted SearXNG configured that way is a $0 engine the
  * operator chose, so it ranks by cost with the keyed providers instead of only after them.
+ * A connection whose stored token would cross the network over plain http:// is excluded.
  * Without such a connection it stays fallback-only (#9543, #10976).
  */
 export function isOperatorConfiguredPrimary(
@@ -598,7 +599,27 @@ export function isOperatorConfiguredPrimary(
     psd && typeof psd === "object" && typeof (psd as Record<string, unknown>).baseUrl === "string"
       ? String((psd as Record<string, unknown>).baseUrl).trim()
       : "";
-  return baseUrl.length > 0 && !isUnconfiguredLoopbackSearchProvider({ ...provider, baseUrl });
+  if (!baseUrl || isUnconfiguredLoopbackSearchProvider({ ...provider, baseUrl })) return false;
+  // Auto-select must not widen where a stored token travels in cleartext: a connection that
+  // carries one (sent as `Authorization: Bearer`) over plain http:// to a non-loopback host
+  // stays reachable only by explicit selection. Tokenless http:// (cluster-internal
+  // deployments) and loopback http:// never put a secret on the wire.
+  const c = credentials as { apiKey?: unknown; accessToken?: unknown };
+  const hasToken = Boolean(c.apiKey || c.accessToken);
+  return !(hasToken && isRemoteCleartextUrl(baseUrl));
+}
+
+/** http:// to anything but loopback (localhost, 127.0.0.0/8, ::1). Unparsable → treated as remote. */
+function isRemoteCleartextUrl(raw: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return true;
+  }
+  if (url.protocol !== "http:") return false;
+  const host = url.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  return !(host === "localhost" || host === "::1" || /^127(?:\.\d{1,3}){3}$/.test(host));
 }
 
 /**
