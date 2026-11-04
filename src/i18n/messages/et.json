@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP-server",
-        "description": "Loo ühendus OmniRoute MCP-serveriga (110 tööriista, 3 transpordiviisi: SSE/stdio/HTTP). Hõlmab marsruutimise, vahemälu, tihendamise, mälu, oskuste, teenusepakkujate ja auditi tööriistu 33 õiguste kehtivusala piires."
+        "description": "Loo ühendus OmniRoute MCP-serveriga (129 tööriista, 3 transpordiviisi: SSE/stdio/HTTP). Hõlmab marsruutimise, vahemälu, tihendamise, mälu, oskuste, teenusepakkujate ja auditi tööriistu 34 õiguste kehtivusala piires."
       },
       "omni-agents-a2a": {
         "name": "Agendid ja A2A-protokoll",

@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "Sava MCP",
-        "description": "Jikọọ na sava OmniRoute MCP (ngwaọrụ 110, ụzọ mbufe 3: SSE/stdio/HTTP). Ọ na-ekpuchi nduzi ụzọ, cache, mkpakọ, ebe nchekwa, nka, ndị na-eweta ọrụ, na ngwaọrụ nyocha n'ofe oke ikike 33."
+        "description": "Jikọọ na sava OmniRoute MCP (ngwaọrụ 129, ụzọ mbufe 3: SSE/stdio/HTTP). Ọ na-ekpuchi nduzi ụzọ, cache, mkpakọ, ebe nchekwa, nka, ndị na-eweta ọrụ, na ngwaọrụ nyocha n'ofe oke ikike 34."
       },
       "omni-agents-a2a": {
         "name": "Ndị Nnọchi Anya na Usoro A2A",

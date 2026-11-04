@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "Serveur MCP",
-        "description": "Se connecter au serveur MCP d'OmniRoute (110 outils, 3 transports : SSE/stdio/HTTP). Couvre le routage, le cache, la compression, la mémoire, les compétences, les fournisseurs et les outils d'audit sur 33 scopes de permission."
+        "description": "Se connecter au serveur MCP d'OmniRoute (129 outils, 3 transports : SSE/stdio/HTTP). Couvre le routage, le cache, la compression, la mémoire, les compétences, les fournisseurs et les outils d'audit sur 34 scopes de permission."
       },
       "omni-agents-a2a": {
         "name": "Agents et protocole A2A",

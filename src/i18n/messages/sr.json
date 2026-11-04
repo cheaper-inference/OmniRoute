@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP server",
-        "description": "Povežite se sa OmniRoute MCP serverom (110 alata, 3 transporta: SSE/stdio/HTTP). Obuhvata alate za rutiranje, keš, kompresiju, memoriju, veštine, provajdere i reviziju u okviru 33 obima ovlašćenja."
+        "description": "Povežite se sa OmniRoute MCP serverom (129 alata, 3 transporta: SSE/stdio/HTTP). Obuhvata alate za rutiranje, keš, kompresiju, memoriju, veštine, provajdere i reviziju u okviru 34 obima ovlašćenja."
       },
       "omni-agents-a2a": {
         "name": "Agenti i A2A protokol",
