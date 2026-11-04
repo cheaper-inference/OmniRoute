@@ -3,6 +3,7 @@ import {
   getRegistryEntry,
 } from "@omniroute/open-sse/config/providerRegistry";
 import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
+import { resolveAntigravityModelId } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
 import { getProviderModels, PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
 import {
   ensureCursorAutoCatalogEntry,
@@ -571,14 +572,19 @@ export async function reconcileProvidersWithActiveSyncedCatalog(
       slash > 0 && catalogLookupIds(canonicalProvider).includes(requestedProvider);
     const requestedIds = isProviderPrefix ? [modelId.slice(slash + 1), modelId] : [modelId];
 
-    // A public model may route to another live wire id. In particular,
-    // Antigravity Gemini 3.7 tier display ids share one -tiered wire endpoint.
-    const registryModel = getProviderModels(provider).find((row) => requestedIds.includes(row.id));
+    // The Antigravity registry exposes shared wire ids for some display tiers.
+    // Resolve only declared aliases, and only for this provider family: arbitrary
+    // slash-containing model ids and invented effort suffixes stay authoritative.
+    const liveCandidates =
+      canonicalProvider === "antigravity" || canonicalProvider === "agy"
+        ? Array.from(new Set([...requestedIds, ...requestedIds.map(resolveAntigravityModelId)]))
+        : requestedIds;
+    const registryModel = getProviderModels(provider).find((row) => liveCandidates.includes(row.id));
     const acceptedLiveIds = Array.isArray(registryModel?.liveCatalogIds)
       ? registryModel.liveCatalogIds
       : [];
     const modelIsLive = catalog.models.some(
-      (row) => requestedIds.includes(row.id) || acceptedLiveIds.includes(row.id)
+      (row) => liveCandidates.includes(row.id) || acceptedLiveIds.includes(row.id)
     );
     // Cursor auto-router: always allow `auto` / router variants even if a stale live
     // catalog omitted them (AvailableModels / agent list often returns wire id

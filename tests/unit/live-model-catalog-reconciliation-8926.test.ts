@@ -13,8 +13,11 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "live-catalog-8926-te
 const core = await import("../../src/lib/db/core.ts");
 const { addCustomModel, replaceSyncedAvailableModelsForConnection } =
   await import("../../src/lib/db/models.ts");
-const { getActiveSyncedCatalog, getAllActiveSyncedModels } =
-  await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+const {
+  getActiveSyncedCatalog,
+  getAllActiveSyncedModels,
+  reconcileProvidersWithActiveSyncedCatalog,
+} = await import("../../src/lib/db/models/activeSyncedCatalog.ts");
 const { isRegisteredProviderEffortVariant } =
   await import("../../open-sse/utils/registeredEffortVariants.ts");
 
@@ -120,6 +123,19 @@ test("Antigravity Gemini 3.7 display tiers match the shared live -tiered wire id
     assert.deepEqual(result.providers, ["antigravity"], requested);
     assert.deepEqual(result.excludedProviders, [], requested);
   }
+
+  const qualified = await reconcileProvidersWithActiveSyncedCatalog(
+    ["antigravity"],
+    "agy/gemini-3.7-flash-high"
+  );
+  assert.deepEqual(qualified.providers, ["antigravity"]);
+
+  const invented = await reconcileProvidersWithActiveSyncedCatalog(
+    ["antigravity"],
+    "gemini-3.7-flash-ultra"
+  );
+  assert.deepEqual(invented.providers, [], "unregistered tiers must still be rejected");
+  assert.deepEqual(invented.excludedProviders, ["antigravity"]);
 });
 
 test("#8926: active alternative provider remains eligible", async () => {
