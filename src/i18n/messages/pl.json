@@ -14170,6 +14170,10 @@
         "label": "Kolejność w puli współdzielonego egressu",
         "description": "W przypadku dostawców, których limit jest dzielony według adresu wyjściowego (egress), umieszcza członka puli współdzielącego zaobserwowany adres wyjściowy niedawno odrzuconego członka tuż za sprawnymi członkami. Wpływa tylko na kolejność, nigdy nie wyklucza. Wymaga PROXY_SKIP_RECENTLY_FAILED, który generuje odczytywany sygnał odmowy. Domyślnie wyłączone: kolejność wyboru jest dokładnie taka sama jak w zwykłej rotacji."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rejestrowanie atrybucji rotacji",
         "description": "Rotacja opencode rejestruje, które konto obsłużyło żądanie lub zostało pominięte (wyłącznie zamaskowane identyfikatory, nigdy pełne identyfikatory kont) i łączy wpisy w dzienniku proxy z ich żądaniem, dzięki czemu operator może odróżnić pominięte konta od nieużywanych. Domyślnie wyłączone: brak dodatkowych wierszy dziennika i brak zapisywanych dodatkowych kolumn."
@@ -14401,6 +14405,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: zatrzymanie przy odmowie z powodu zasad treści",
         "description": "Gdy cel combo odpowie dokładną odmową z powodu zasad dotyczących treści (kod lub typ cyber_policy / content_policy_violation), zatrzymaj combo i zwróć tę odmowę, nawet jeśli pozostałe cele to inne modele, zamiast przechodzić do następnego celu. Domyślnie wyłączone: odmowa nigdy nie nakłada na konto okresu karencji ani nie aktywuje wyłącznika awaryjnego dostawcy, a combo przechodzi do kolejnego celu dokładnie tak jak dotychczas."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponawianie w okresie schładzania: pomijaj odmowy 403/410",
