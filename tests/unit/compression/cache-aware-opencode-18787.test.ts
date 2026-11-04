@@ -150,6 +150,72 @@ test("#18787: a cold request sends the original history, then only new tool outp
   assert.deepEqual((third.body.messages as unknown[]).at(-1), thirdBody.messages.at(-1));
 });
 
+test("#18787: an over-2 MiB raw prefix remains cacheable without retaining its payload", async () => {
+  const largeSystem = { role: "system", content: "stable ".repeat(320_000) };
+  const history = [largeSystem, { role: "user", content: "Inspect this source" }];
+  const coldBody = { model, messages: history };
+  const localOptions = { ...options, sessionId: "large-prefix" };
+  let calls = 0;
+  const compress = async (input: Record<string, unknown>): Promise<CompressionResult> => {
+    calls += 1;
+    const messages = (input.messages as Array<Record<string, unknown>>).map((message) =>
+      message.role === "tool" ? { ...message, content: "compressed tool output" } : message
+    );
+    return { body: { ...input, messages }, compressed: true, stats: null };
+  };
+
+  const cold = await applyLiveZoneCompression(coldBody, localOptions, compress);
+  assert.strictEqual(cold.body, coldBody);
+  assert.equal(calls, 0);
+  assert.equal(getLiveZoneCacheStats().entries, 1);
+  assert.ok(getLiveZoneCacheStats().bytes < 2 * 1024 * 1024);
+
+  const assistant = { role: "assistant", content: "Calling tool" };
+  const tool = { role: "tool", tool_call_id: "large-prefix-call-1", content: "tool output ".repeat(250) };
+  const warmBody = { ...coldBody, messages: [...history, assistant, tool] };
+  const warm = await applyLiveZoneCompression(warmBody, localOptions, compress);
+  const warmItems = warm.body.messages as Array<Record<string, unknown>>;
+  assert.equal(calls, 1);
+  assert.deepEqual(warmItems.slice(0, 3), [...history, assistant]);
+  assert.equal(warmItems[3]?.content, "compressed tool output");
+  assert.equal(warm.stats?.liveZone?.cacheHit, true);
+  assert.ok(getLiveZoneCacheStats().bytes < 2 * 1024 * 1024);
+
+  const thirdBody = { ...coldBody, messages: [...warmBody.messages, { role: "user", content: "Next step" }] };
+  const third = await applyLiveZoneCompression(thirdBody, localOptions, compress);
+  assert.equal(calls, 1, "previously compressed tools should be replayed from sparse patches");
+  assert.deepEqual((third.body.messages as unknown[]).slice(0, 4), warmItems);
+  assert.deepEqual(thirdBody.messages[3], tool, "the source history must remain unmodified");
+});
+
+test("#18787: an oversized transformed tool item fails closed without losing the raw baseline", async () => {
+  const localOptions = { ...options, sessionId: "oversized-patch" };
+  const cold = await applyLiveZoneCompression(firstBody, localOptions, async () => {
+    throw new Error("cold prefix must not invoke compression");
+  });
+  assert.strictEqual(cold.body, firstBody);
+
+  const tool = { role: "tool", tool_call_id: "oversized-patch-1", content: "raw tool output" };
+  const warmBody = {
+    ...firstBody,
+    messages: [...baseMessages, { role: "assistant", content: "Calling tool" }, tool],
+  };
+  const warm = await applyLiveZoneCompression(warmBody, localOptions, async (input) => ({
+    body: {
+      ...input,
+      messages: (input.messages as Array<Record<string, unknown>>).map((item) =>
+        item.role === "tool" ? { ...item, content: "X".repeat(2 * 1024 * 1024 + 512) } : item
+      ),
+    },
+    compressed: true,
+    stats: null,
+  }));
+  assert.strictEqual(warm.body, warmBody, "never emit an unreplayable transformed prefix");
+  assert.equal(warm.compressed, false);
+  assert.equal(getLiveZoneCacheStats().entries, 1);
+  assert.ok(getLiveZoneCacheStats().bytes < 2 * 1024 * 1024);
+});
+
 test("#18787: a new session after eviction also begins from an unmodified prefix", async () => {
   let calls = 0;
   const compress = async (body: Record<string, unknown>): Promise<CompressionResult> => {
