@@ -7,6 +7,8 @@
  * executor config.appVersion still wins over both.
  */
 
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
+
 export const ZED_CLIENT_VERSION = "0.200.0";
 
 const ZED_RELEASE_URL = "https://api.github.com/repos/zed-industries/zed/releases/latest";
@@ -54,7 +56,12 @@ function readFreshCache(): string | null {
  * itself never waits on the network.
  */
 export function getZedClientVersion(): string {
-  if (typeof process !== "undefined" && !process.env.NODE_TEST_CONTEXT && !readFreshCache() && !inFlight) {
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !readFreshCache() &&
+    !inFlight
+  ) {
     void refreshZedClientVersion();
   }
   return pickAtLeastPin(readFreshCache());

@@ -58,10 +58,13 @@ const {
 // tool_call wrapper repair, default on) to 86.
 // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
 // published catalog, default off) takes it to 87.
-// UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) takes it to 114;
+// UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) takes it to 113.
+// COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) takes it to 114.
 // API_KEY_AUDIT_CLIENT_DETAILS_ENABLED (#17982, client IP + user-agent on api_key.auth.touch
 // audit rows, default off) takes it to 115.
-const EXPECTED_FEATURE_FLAG_COUNT = 115;
+// CLAUDE_CACHE_TAIL_TTL_1H (1h TTL for the Claude cache conversation tail, default off)
+// takes it to 116.
+const EXPECTED_FEATURE_FLAG_COUNT = 116;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
