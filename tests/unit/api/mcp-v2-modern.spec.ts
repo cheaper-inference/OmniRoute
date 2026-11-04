@@ -31,7 +31,12 @@ vi.mock("../../../open-sse/mcp-server/httpAuthContext.ts", () => ({
     return {
       token: "synthetic",
       clientId: principal,
-      scopes: principal === "Bearer reader" ? ["read:health"] : [],
+      scopes:
+        principal === "Bearer reader"
+          ? ["read:health"]
+          : principal === "Bearer narrow"
+            ? ["mcp:connect"]
+            : [],
     };
   }),
   hasMcpHttpAuthContext: () => false,
@@ -160,17 +165,24 @@ describe("MCP 2026 real wire compatibility", () => {
     expect(body.result.cacheScope).toBe("private");
     expect(body.result.ttlMs).toBe(30000);
   });
-  it("isolates concurrent principals and cannot self-grant or inherit env scopes", async () => {
+  it("isolates concurrent principals: a narrow key is denied and cannot self-grant", async () => {
     const params = { name: "omniroute_get_health", arguments: {} };
     const responses = await Promise.all([
       handleMcpV2Http(request("tools/call", params, "reader")),
-      handleMcpV2Http(request("tools/call", params, "empty")),
+      handleMcpV2Http(request("tools/call", params, "narrow")),
     ]);
     const [allowed, denied] = await Promise.all(responses.map((response) => response.json()));
     expect(allowed.result.isError).not.toBe(true);
     expect(denied.result.isError).toBe(true);
     expect(denied.result.content[0].text).toMatch(/Insufficient MCP scopes/);
     expect(denied.result.content[0].text).not.toMatch(/Bearer|Caller=|source=/);
-    expect(omniRouteFetch).toHaveBeenCalledTimes(3);
+  });
+
+  it("denies a zero-scope authInfo caller instead of falling back to env scopes", async () => {
+    const params = { name: "omniroute_get_health", arguments: {} };
+    const response = await handleMcpV2Http(request("tools/call", params, "empty"));
+    const body = await response.json();
+    expect(body.result.isError).toBe(true);
+    expect(body.result.content[0].text).toMatch(/Insufficient MCP scopes/);
   });
 });

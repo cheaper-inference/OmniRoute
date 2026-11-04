@@ -30,7 +30,7 @@ import {
   costReportTool,
 } from "../schemas/tools.ts";
 import { omniRouteFetch } from "../internalFetch.ts";
-import { getMcpV2HostHooks } from "./hostHooks.ts";
+import { getMcpV2HostHooks, registerMcpV2HostHooks, type McpV2HostHooks } from "./hostHooks.ts";
 import {
   buildScopeDenialMessage,
   evaluateToolScopes,
@@ -871,13 +871,18 @@ export { CACHE_TTL, PROTOCOL_VERSION, SERVER_VERSION, SERVER_NAME };
  *
  * Gated: v2 is experimental and off by default. Without OMNIROUTE_MCP_V2=true this
  * refuses to start rather than silently exposing a second, less-tested surface.
+ *
+ * Host hooks (scope enforcement, combo resolution, quota normalization) are supplied
+ * by the caller, because open-sse/ must not import src/. Pass the same implementations
+ * the HTTP route registers; omitting them falls back to the pass-through defaults.
  */
-export async function startMcpStdioV2(): Promise<StdioServerHandle> {
+export async function startMcpStdioV2(hooks?: Partial<McpV2HostHooks>): Promise<StdioServerHandle> {
   if (!isMcpV2Enabled()) {
     throw new Error(
       "MCP v2 sidecar is disabled. Set OMNIROUTE_MCP_V2=true to enable the experimental 2026-07-28 server."
     );
   }
+  if (hooks) registerMcpV2HostHooks(hooks);
   return serveStdio(() => createMcpServerV2().server, {
     onerror: (error) => console.error("[MCP v2]", sanitizeErrorMessage(error.message)),
   });
