@@ -460,7 +460,7 @@ function resolveUsableAndReset(
   windows: ExpiryWindow[],
   nowMs: number,
   skipUnreported: boolean
-): { usable: number; msUntilReset: number } {
+): { usable: number; msUntilReset: number; sessionIsCapOnly: boolean } {
   const hasLongerWindow = windows.some((entry) => !entry.session);
   let usable = 1;
   let msUntilReset = Number.POSITIVE_INFINITY;
@@ -479,6 +479,8 @@ function resolveUsableAndReset(
   return {
     usable,
     msUntilReset: Number.isFinite(msUntilReset) ? msUntilReset : msUntilSessionReset,
+    // Only when no longer window reports a reset may the session set the deadline (#18541).
+    sessionIsCapOnly: hasLongerWindow && Number.isFinite(msUntilReset),
   };
 }
 
@@ -506,8 +508,10 @@ function projectExpiryScore(
   let hasReset = false;
   for (const { key, window, session } of windows) {
     if (window.fractionReported === false && ctx.skipUnreported) continue;
-    // An unreported longer reset is a conservative deadline fallback, not
-    // evidence that the session's entire balance must be spent in a few hours.
+    // A session refills many times before a longer window resets, so its reset is not
+    // where quota is lost (#18541); it already caps `usable`. This also covers an
+    // unreported longer reset, a conservative deadline fallback that is not evidence
+    // that the session's entire balance must be spent in a few hours (#18552).
     if (session && ctx.skipSession) continue;
     const resetMs = parseResetTimeMs(window.resetAt);
     if (!Number.isFinite(resetMs)) continue;
@@ -543,9 +547,10 @@ function projectExpiryScore(
  * has already passed has refilled and caps nothing. The session reset is still
  * the deadline when it is the only window, or when no longer window reports one.
  *
- * With burn telemetry, each window's expiring tranche is projected to its own
- * reset so a short session window is not scored using weekly burn, while the
- * tightest-window bound on `usable` is preserved.
+ * With burn telemetry, each deadline window's expiring tranche is projected to
+ * its own reset, while the tightest-window bound on `usable` is preserved. The
+ * session follows the deadline rule above: it is scored on its own reset only
+ * when no longer window reports one (#18541).
  *
  * Deliberately different from `scoreResetAwareQuota`, which ranks mostly on
  * leftover and adds `resetUrgency * (1 - remaining)` — a RECOVERY signal that
@@ -573,9 +578,12 @@ export function scoreExpiryFirstQuota(
   if (windows.length === 0) return { score: 0 };
   if (windows.every(({ window }) => window.fractionReported === false)) return { score: 0 };
   const hasReportedLongerReset = hasLongerReset(windows, true);
-  const hasUnreportedLongerReset = hasLongerReset(windows, false);
 
-  const { usable, msUntilReset } = resolveUsableAndReset(windows, nowMs, hasReportedLongerReset);
+  const { usable, msUntilReset, sessionIsCapOnly } = resolveUsableAndReset(
+    windows,
+    nowMs,
+    hasReportedLongerReset
+  );
 
   if (usable <= config.exhaustedFloor) return { score: 0 };
   if (!metrics) {
@@ -593,7 +601,7 @@ export function scoreExpiryFirstQuota(
     capacityWeight,
     burnRates: metrics.burnFractionPerHourByWindow || {},
     skipUnreported: hasReportedLongerReset,
-    skipSession: hasUnreportedLongerReset,
+    skipSession: sessionIsCapOnly,
   });
   if (!hasReset) return { score: usable * capacityWeight };
   return { score };

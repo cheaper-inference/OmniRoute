@@ -1,5 +1,5 @@
 // README "the promise" card in the Cheaper Inference UI Kit style (KEA-6307): six pillar tiles
-// in a 3 × 2 grid with a lime highlight sweeping from tile to tile on a 12 s cycle. Output is
+// in a 3 × 2 grid with an accent highlight sweeping from tile to tile on a 12 s cycle. Output is
 // committed as docs/diagrams/promise-pillars.svg; tests/unit/docs/readme-promise-pillars-svg.test.ts
 // fails when the committed file no longer matches this generator, and runs the counts gate's own
 // validators on it (provider total, MCP tool count, free-forever providers).
@@ -126,7 +126,7 @@ function pillar(i, C) {
   return (
     `  <g>\n` +
     `    <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="12" class="surface" stroke-width="1"/>\n` +
-    // Sweep highlight: a lime wash + lime border, the one brand emphasis of this card.
+    // Sweep highlight: an accent wash + accent border, the one brand emphasis of this card.
     `    <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="12" class="accent-soft stroke-accent" stroke-width="2" opacity="0">` +
     `<animate attributeName="opacity" values="${p.sweep.values}" keyTimes="${p.sweep.keyTimes}" dur="12s" begin="3s" repeatCount="indefinite"/></rect>\n` +
     `    <rect x="${x}" y="${y + 16}" width="4" height="132" rx="2" class="${p.tone}"/>\n` +

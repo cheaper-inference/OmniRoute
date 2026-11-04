@@ -1552,7 +1552,7 @@ Loopback သီးသန့် စီမံခန့်ခွဲမှု route 
 
 ---
 
-## အသံစာသားအဖြစ်ပြောင်းခြင်း
+## အသံမှ စာသားပြောင်းခြင်း
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1560,9 +1560,12 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-ပြင်ဆင်သတ်မှတ်ထားသော STT ပံ့ပိုးသူမည်သည့်ခုကိုမဆို အသုံးပြု၍ အသံဖိုင်များကို စာသားအဖြစ်ပြောင်းပါ။ လမ်းကြောင်း၏ ပထမအပိုင်းသည် မူရင်းပံ့ပိုးသူကို ရွေးချယ်ပေးသည် (`openai/…`, `deepgram/…`)။ အခြားရောင်းချသူ၏ မော်ဒယ်ကို ပြန်လည်တင်ပို့ပေးသော Gateway များသည် အရည်အချင်းပြည့်မီသော ID (`openrouter/deepgram/nova-3`) ကို အသုံးပြုသည်။
+ပြင်ဆင်သတ်မှတ်ထားသော STT provider တစ်ခုခုကို အသုံးပြု၍ အသံဖိုင်များကို စာသားပြောင်းပါ။ ပထမဆုံး path
+segment သည် native provider (`openai/…`, `deepgram/…`) ကို ရွေးချယ်ပေးသည်။ အခြား vendor ၏ model ကို
+ပြန်လည်ဖြန့်ဝေပေးသော gateway များသည် qualified id
+(`openrouter/deepgram/nova-3`) ကို အသုံးပြုသည်။
 
-**တောင်းဆိုမှု:**
+**တောင်းဆိုချက်:**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1571,7 +1574,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-**တုံ့ပြန်မှု:**
+**တုံ့ပြန်ချက်:**
 
 ```json
 {
@@ -1582,14 +1585,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**မော်ဒယ် ID နမူနာများ:** `openai/whisper-1` (OpenAI key လိုအပ်သည်)၊
+**ဥပမာ model ids:** `openai/whisper-1` (OpenAI key လိုအပ်သည်)၊
 `openrouter/deepgram/nova-3` (OpenRouter key လိုအပ်သည်)၊
-`deepgram/nova-3` (မူရင်း Deepgram key လိုအပ်သည်)။ ရိုးရိုး
-`deepgram/nova-3` တောင်းဆိုမှုသည် OpenRouter ကို **အသုံးမပြုပါ**။
+`deepgram/nova-3` (native Deepgram key လိုအပ်သည်)။ သီးခြား
+`deepgram/nova-3` တောင်းဆိုချက်သည် OpenRouter ကို အသုံးမပြုပါ။
 
-**ပံ့ပိုးထားသော ဖိုင်အမျိုးအစားများ:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`။
+**ပံ့ပိုးထားသော ဖိုင်အမျိုးအစားများ:** `mp3`၊ `wav`၊ `m4a`၊ `flac`၊ `ogg`၊ `webm`။
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket မှတစ်ဆင့် file-mode transcription ကို လုပ်ဆောင်သည် (Gemini API key လိုအပ်သည်)။ အပ်လုဒ်ကို
+`ffmpeg` ဖြင့် 16 kHz mono PCM သို့ ပြောင်းပြီး (`PATH` တွင် ရှိရမည်၊ သို့မဟုတ် ဖိုင်သည် 16 kHz mono PCM WAV ဖြစ်ပြီးသားဖြစ်ရမည်) session သို့
+streaming ပြုလုပ်ကာ အပြီးသတ်စာသားကို `{ "text": "..." }` အဖြစ် ပြန်ပေးသည်။ ရွေးချယ်နိုင်သော `language` နှင့် `prompt` form fields
+များကို ဆက်လက်ပေးပို့သည်။ ကန့်သတ်ချက်များမှာ 25 MiB ထက်ကြီးသော အပ်လုဒ်များ သို့မဟုတ် decode ပြုလုပ်ပြီးနောက် 10 မိနစ်ထက်ရှည်သော အသံများအတွက်
+`413` ပြန်ပေးသည်။ ပြောင်းလဲမှုလုပ်ဆောင်ချိန် 60 s ထက်ကျော်လွန်ပါက ရပ်တန့်စေပြီး `504` ပြန်ပေးသည်။ API key ကို
+`x-goog-api-key` header တွင်သာ ပေးပို့ပြီး WebSocket URL တွင် မည်သည့်အခါမျှ မထည့်သွင်းပါ။
 
 ## Ollama နှင့် ကိုက်ညီမှု
 
