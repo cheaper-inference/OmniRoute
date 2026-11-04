@@ -1507,10 +1507,10 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-使用任何已設定的 STT 提供者轉錄音訊檔案。第一個路徑區段會選取原生提供者（`openai/…`、`deepgram/…`）。重新匯出其他廠商模型的閘道會使用限定識別碼
+使用任何已設定的 STT 提供者轉錄音訊檔案。第一個路徑片段會選取原生提供者（`openai/…`、`deepgram/…`）。重新匯出其他廠商模型的閘道會使用限定識別碼
 （`openrouter/deepgram/nova-3`）。
 
-**要求：**
+**請求：**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1530,14 +1530,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**模型識別碼範例：** `openai/whisper-1`（需要 OpenAI 金鑰）、
+**模型 ID 範例：** `openai/whisper-1`（需要 OpenAI 金鑰）、
 `openrouter/deepgram/nova-3`（需要 OpenRouter 金鑰）、
-`deepgram/nova-3`（需要原生 Deepgram 金鑰）。單獨的
-`deepgram/nova-3` 要求**不會**使用 OpenRouter。
+`deepgram/nova-3`（需要原生 Deepgram 金鑰）。單獨使用
+`deepgram/nova-3` 的請求**不會**使用 OpenRouter。
 
 **支援的格式：** `mp3`、`wav`、`m4a`、`flac`、`ogg`、`webm`。
 
----
+**Gemini Live（`gemini/gemini-3.5-transcribe-live`）：** 透過 Gemini Live
+WebSocket 以檔案模式進行轉錄（需要 Gemini API 金鑰）。上傳內容會使用 `ffmpeg`
+轉換為 16 kHz 單聲道 PCM（除非檔案已是 16 kHz 單聲道 PCM WAV，否則 `ffmpeg` 必須位於
+`PATH` 中），串流至工作階段後，會以 `{ "text": "..." }` 的形式傳回最終文字。選用的
+`language` 和 `prompt` 表單欄位會被轉送。限制：超過 25 MiB 的上傳檔案或解碼後長度超過 10 分鐘的音訊會回應
+`413`；執行時間超過 60 秒的轉換程序會被終止，並回應 `504`。API 金鑰只會透過
+`x-goog-api-key` 標頭傳送，絕不會放在 WebSocket URL 中。
 
 ## Ollama 相容性
 
@@ -1628,7 +1634,7 @@ Content-Type: application/json
 }
 ```
 
-> **結構描述注意事項**（`setBudgetSchema`）：必須提供 `apiKeyId`；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 至少其中一項必須大於零。選用欄位：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。舊版 `{keyId, limit, period}` 結構會回傳 `400 Bad Request`。
+> **結構描述備註** (`setBudgetSchema`)：`apiKeyId` 為必要欄位；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 至少其中一項必須大於零。選用欄位：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。舊版 `{keyId, limit, period}` 格式會傳回 `400 Bad Request`。
 
 ## 權杖限制
 

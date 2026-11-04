@@ -1623,7 +1623,7 @@ Kanalimudelit (`latest` = v3 kuni 4.0 GA-ni, `next` = rc, `nightly` = `develop` 
 
 ---
 
-## Heli transkribeerimine
+## Helisalvestiste transkribeerimine
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1631,9 +1631,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkribeerige helifaile mis tahes konfigureeritud STT-teenusepakkuja abil. Esimene
-tee segment määrab natiivse teenusepakkuja (`openai/…`, `deepgram/…`). Lüüsid, mis
-ekspordivad uuesti mõne teise tarnija mudelit, kasutavad kvalifitseeritud ID-d
+Transkribeerige helifaile mis tahes konfigureeritud STT-pakkuja abil. Esimene
+tee segment valib natiivse pakkuja (`openai/…`, `deepgram/…`). Lüüsid, mis
+ekspordivad edasi mõne teise tarnija mudelit, kasutavad kvalifitseeritud ID-d
 (`openrouter/deepgram/nova-3`).
 
 **Päring:**
@@ -1656,12 +1656,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Näidismudelite ID-d:** `openai/whisper-1` (vajab OpenAI võtit),
+**Mudelite ID-de näited:** `openai/whisper-1` (vajab OpenAI võtit),
 `openrouter/deepgram/nova-3` (vajab OpenRouteri võtit),
-`deepgram/nova-3` (vajab natiivset DeepGrami võtit). Tavaline
+`deepgram/nova-3` (vajab natiivset DeepGrami võtit). Paljas
 `deepgram/nova-3` päring **ei** kasuta OpenRouterit.
 
 **Toetatud vormingud:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** failirežiimis transkribeerimine Gemini Live'i
+WebSocketi kaudu (vajab Gemini API võtit). Üleslaaditud fail teisendatakse 16 kHz mono-PCM-iks
+`ffmpeg` abil (see peab olema `PATH`-is, välja arvatud juhul, kui fail on juba 16 kHz mono PCM WAV),
+voogedastatakse seanssi ja lõplik tekst tagastatakse kujul `{ "text": "..." }`. Valikulised
+`language`- ja `prompt`-vormiväljad edastatakse edasi. Piirangud: üle 25 MiB suurused üleslaadimised või
+üle 10 minuti pikkune dekodeeritud heli annavad vastuseks `413`; üle 60 sekundi kestev teisendus
+katkestatakse ja vastuseks antakse `504`. API-võti saadetakse ainult päises `x-goog-api-key`, mitte kunagi WebSocketi URL-is.
 
 ---
 

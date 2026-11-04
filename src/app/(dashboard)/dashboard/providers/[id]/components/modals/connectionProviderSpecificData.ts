@@ -22,6 +22,7 @@ type FormData = QuotaScrapingFieldValues &
     ccCompatibleContext1m: boolean;
     ccCompatibleRedactThinking: boolean;
     ccCompatibleSummarizeThinking: boolean;
+    commandCodeZdrEnabled?: boolean;
     consoleApiKey: string;
     customUserAgent: string;
     huggingfaceBillTo: string;
@@ -47,7 +48,8 @@ type ProviderSpecificData = Record<string, unknown>;
 // bailian-coding-plan reuses consoleApiKey as its console token; agentrouter (#6850)
 // reuses the same generic field for its New-API System Access Token, paired with
 // newApiUserId (the New-Api-User header value). See agentrouterQuotaFetcher.ts.
-const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter"]);
+// tokenrouter stores its optional Management Key here (open-sse/services/usage/tokenrouter.ts).
+const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter", "tokenrouter"]);
 
 export function assignM365RefreshToken(
   provider: string | undefined,
@@ -107,6 +109,9 @@ export function buildAddProviderSpecificData(options: {
   if (provider === "agentrouter" && formData.newApiUserId.trim()) {
     data.newApiUserId = formData.newApiUserId.trim();
   }
+  if (provider === "command-code" && formData.commandCodeZdrEnabled === true) {
+    data.zdrEnabled = true;
+  }
   assignQuotaScrapingProviderData(provider, formData, data);
   if (isGooglePse && formData.cx.trim()) data.cx = formData.cx.trim();
   if (provider === "aws-polly") {
@@ -136,6 +141,15 @@ export function buildAddProviderSpecificData(options: {
   }
   assignM365RefreshToken(provider, formData, data);
   return Object.keys(data).length > 0 ? data : undefined;
+}
+
+/** Edit: an explicit boolean (never undefined) so the PUT merge can turn ZDR back off. */
+function assignCommandCodeZdrOnEdit(
+  provider: string,
+  formData: FormData,
+  target: ProviderSpecificData
+): void {
+  if (provider === "command-code") target.zdrEnabled = formData.commandCodeZdrEnabled === true;
 }
 
 export function assignEditApiKeyProviderSpecificData(options: {
@@ -179,6 +193,7 @@ export function assignEditApiKeyProviderSpecificData(options: {
   if (o.provider === "agentrouter") {
     o.target.newApiUserId = o.formData.newApiUserId.trim() || undefined;
   }
+  assignCommandCodeZdrOnEdit(o.provider, o.formData, o.target);
   assignQuotaScrapingProviderData(o.provider, o.formData, o.target);
   if (o.formData.validationModelId) o.target.validationModelId = o.formData.validationModelId;
   if (o.isGooglePse) o.target.cx = o.formData.cx.trim() || undefined;

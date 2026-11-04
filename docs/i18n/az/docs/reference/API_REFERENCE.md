@@ -1537,7 +1537,7 @@ Kanal modeli (`latest` = 4.0 GA buraxılışına qədər v3, `next` = rc, `night
 
 ---
 
-## Audio Transkripsiyası
+## Audio transkripsiyası
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1545,10 +1545,8 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-İstənilən konfiqurasiya edilmiş STT provayderindən istifadə edərək audio faylları transkripsiya edin. Yolun ilk
-seqmenti yerli provayderi seçir (`openai/…`, `deepgram/…`). Başqa vendorun modelini
-yenidən ixrac edən gateway-lər kvalifikasiyalı id-dən istifadə edir
-(`openrouter/deepgram/nova-3`).
+İstənilən konfiqurasiya edilmiş STT provayderindən istifadə etməklə audio fayllarını transkripsiya edin. Yolun ilk seqmenti yerli provayderi (`openai/…`, `deepgram/…`) seçir. Başqa təchizatçının modelini yenidən ixrac edən şlüzlər kvalifikasiya olunmuş identifikatordan
+(`openrouter/deepgram/nova-3`) istifadə edir.
 
 **Sorğu:**
 
@@ -1570,12 +1568,18 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Nümunə model id-ləri:** `openai/whisper-1` (OpenAI açarı tələb edir),
+**Nümunə model identifikatorları:** `openai/whisper-1` (OpenAI açarı tələb edir),
 `openrouter/deepgram/nova-3` (OpenRouter açarı tələb edir),
 `deepgram/nova-3` (yerli Deepgram açarı tələb edir). Sadə
-`deepgram/nova-3` sorğusu OpenRouter-dan **istifadə etmir**.
+`deepgram/nova-3` sorğusu OpenRouter-dən istifadə etmir.
 
 **Dəstəklənən formatlar:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket-i üzərindən fayl rejimində transkripsiya (Gemini API açarı tələb olunur). Yükləmə `ffmpeg`
+ilə 16 kHz mono PCM-ə çevrilir (`PATH`-də olmalıdır; fayl artıq 16 kHz mono PCM WAV deyilsə), sessiyaya
+axın şəklində ötürülür və yekunlaşdırılmış mətn `{ "text": "..." }` kimi qaytarılır. İxtiyari `language` və `prompt` form sahələri ötürülür. Məhdudiyyətlər: 25 MiB-dən böyük yükləmələr və ya müddəti 10 dəqiqədən uzun dekodlaşdırılmış audio üçün
+`413` cavabı qaytarılır; 60 saniyədən uzun davam edən çevirmə dayandırılır və `504` cavabı qaytarılır. API açarı yalnız `x-goog-api-key` başlığında göndərilir, WebSocket URL-ində heç vaxt göndərilmir.
 
 ---
 

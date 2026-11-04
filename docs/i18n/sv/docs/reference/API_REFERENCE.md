@@ -1644,10 +1644,10 @@ Content-Type: multipart/form-data
 
 Transkribera ljudfiler med valfri konfigurerad STT-leverantör. Det första segmentsökvägen
 väljer den inbyggda leverantören (`openai/…`, `deepgram/…`). Gateways som
-vidareexporterar en annan leverantörs modell använder ett kvalificerat id
+exporterar en annan leverantörs modell använder ett kvalificerat id
 (`openrouter/deepgram/nova-3`).
 
-**Begäran:**
+**Förfrågan:**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1669,10 +1669,18 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Exempel på modell-id:n:** `openai/whisper-1` (kräver en OpenAI-nyckel),
 `openrouter/deepgram/nova-3` (kräver en OpenRouter-nyckel),
-`deepgram/nova-3` (kräver en inbyggd Deepgram-nyckel). En begäran med enbart
+`deepgram/nova-3` (kräver en inbyggd Deepgram-nyckel). En begäran med endast
 `deepgram/nova-3` använder **inte** OpenRouter.
 
 **Format som stöds:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** filbaserad transkribering över Gemini Live
+WebSocket (kräver en Gemini API-nyckel). Uppladdningen konverteras till 16 kHz mono-PCM med `ffmpeg`
+(måste finnas i `PATH`, såvida filen inte redan är en 16 kHz mono-PCM WAV), strömmas till sessionen och
+den slutgiltiga texten returneras som `{ "text": "..." }`. Valfria formulärfält för `language` och `prompt`
+vidarebefordras. Begränsningar: uppladdningar över 25 MiB eller avkodat ljud som är längre än 10 minuter
+besvaras med `413`; en konvertering som körs längre än 60 s avslutas och besvaras med `504`. API-nyckeln
+skickas endast i huvudet `x-goog-api-key`, aldrig i WebSocket-URL:en.
 
 ---
 

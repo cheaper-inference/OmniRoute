@@ -135,11 +135,62 @@ test("isRetryableStreamError: client aborts and unknown errors are NOT retryable
   assert.equal(isRetryableStreamError("nope"), false);
 });
 
-test("hasTerminalMarker detects OpenAI and Anthropic stream terminators", () => {
+test("hasTerminalMarker detects OpenAI, Anthropic, Responses, and Gemini stream terminators", () => {
   assert.equal(hasTerminalMarker(enc("data: {...}\n\ndata: [DONE]\n\n")), true);
   assert.equal(hasTerminalMarker(enc("event: message_stop\ndata: {}\n\n")), true);
-  assert.equal(hasTerminalMarker(enc("data: {\"choices\":[]}\n\n")), false);
+  assert.equal(
+    hasTerminalMarker(
+      enc(
+        'data: {"candidates":[{"content":{"role":"model","parts":[{"functionCall":{"name":"read","args":{"path":"README.md"}}}]},"finishReason":"STOP"}]}\n\n'
+      )
+    ),
+    true
+  );
+  assert.equal(
+    hasTerminalMarker(
+      enc(
+        'data: {"candidates":[{"content":{"role":"model","parts":[{"text":"partial"}]},"finishReason":null}]}\n\n'
+      )
+    ),
+    false
+  );
+  assert.equal(
+    hasTerminalMarker(
+      enc('data: {"candidates":[{"content":{"role":"model","parts":[{"text":"partial"}]}}]}\n\n')
+    ),
+    false
+  );
+  assert.equal(hasTerminalMarker(enc('data: {"choices":[]}\n\n')), false);
   assert.equal(hasTerminalMarker(enc("")), false);
+});
+
+test("createRecoverableStream passes a clean short Gemini SSE stream straight through without 4x retry", async () => {
+  let reopened = 0;
+  let finalizeCount = 0;
+  const geminiChunks = [
+    'data: {"candidates":[{"content":{"role":"model","parts":[{"text":"thinking...","thought":true}]}}]}\n\n',
+    'data: {"candidates":[{"content":{"role":"model","parts":[{"functionCall":{"name":"read","args":{"path":"docs/AI/LOCAL_DEV.md"}}},{"thoughtSignature":"sig123"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":100,"candidatesTokenCount":25}}\n\n',
+  ];
+  const attempt1 = makeStream(geminiChunks, "close");
+
+  const rs = createRecoverableStream(
+    attempt1,
+    async () => {
+      reopened++;
+      return makeStream(geminiChunks, "close");
+    },
+    { finalize: () => finalizeCount++, now: () => 0 }
+  );
+
+  const { text, errored } = await readAll(rs);
+  assert.equal(errored, null);
+  assert.equal(
+    reopened,
+    0,
+    "completed Gemini SSE stream with finishReason must not trigger early-retry"
+  );
+  assert.equal(text, geminiChunks.join(""));
+  assert.equal(finalizeCount, 1);
 });
 
 test("createRecoverableStream retries an early truncation transparently", async () => {
