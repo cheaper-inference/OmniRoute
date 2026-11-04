@@ -118,39 +118,42 @@
 
 ---
 
-## 📖 प्रदाता सेटअप
+## 📖 Provider सेटअप
 
-CSV किंवा JSON फाइलमधून मोठ्या प्रमाणात API-की कनेक्शन्स जोडण्यासाठी, **डॅशबोर्ड → प्रदाते → फाइलमधून आयात करा** वापरा. स्तंभांचे स्थान निश्चित आहे (`provider,name,apiKey,baseUrl,priority`); `provider` हा आधीपासून व्यवस्थापित प्रदाता किंवा सुसंगत नोड म्हणून अस्तित्वात असणे आवश्यक आहे. [CSV किंवा JSON फाइलमधून प्रदाते आयात करा](../providers/CSV-IMPORT.md) पहा.
+CSV किंवा JSON फाइलमधून API-key कनेक्शन्स मोठ्या प्रमाणावर जोडण्यासाठी **Dashboard → Providers → Import from file** वापरा. कॉलम्सची स्थिती निश्चित आहे (`provider,name,apiKey,baseUrl,priority`); `provider` हा व्यवस्थापित provider किंवा सुसंगत node म्हणून आधीपासून अस्तित्वात असणे आवश्यक आहे. [CSV किंवा JSON फाइलमधून providers आयात करा](../providers/CSV-IMPORT.md) पहा.
 
-### 🔐 सदस्यता प्रदाते
+### 🔐 सबस्क्रिप्शन Providers
 
 #### Claude Code (Pro/Max)
 
 ```bash
-डॅशबोर्ड → प्रदाते → Claude Code कनेक्ट करा
-→ OAuth लॉगिन → स्वयंचलित टोकन रिफ्रेश
-→ 5-तासांची + साप्ताहिक कोटा ट्रॅकिंग
+Dashboard → Providers → Connect Claude Code
+→ OAuth लॉगिन → टोकनचे स्वयंचलित रिफ्रेश
+→ 5-तास + साप्ताहिक कोटा ट्रॅकिंग
 
-मॉडेल्स:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**उपयुक्त सूचना:** जटिल कार्यांसाठी Opus आणि वेगासाठी Sonnet वापरा. OmniRoute प्रत्येक मॉडेलनुसार कोटा ट्रॅक करते!
+**उपयुक्त सूचना:** जटिल कामांसाठी Opus आणि वेगासाठी Sonnet वापरा. OmniRoute प्रत्येक model साठी कोटा ट्रॅक करते!
 
-OmniRoute होस्टवर ब्राउझर नाही? Claude Code मध्ये लॉगिन केलेल्या कोणत्याही ठिकाणी `claude setup-token` चालवा आणि एक वर्षासाठी वैध असलेले टोकन **Setup Token** टॅबमध्ये पेस्ट करा. [सेटअप टोकनसह Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) पहा.
+OmniRoute host वर ब्राउझर उपलब्ध नसल्यास, Claude Code मध्ये कुठेही लॉग इन असताना `claude setup-token` चालवा आणि एक वर्षासाठी वैध टोकन **Setup Token** टॅबमध्ये पेस्ट करा. [Setup token सह Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) पहा.
 
-Claude आणि Claude Code-सुसंगत रूट्स Opus आणि Sonnet मॉडेल्ससाठी `max` विचार-प्रयत्न पातळी कायम ठेवतात. Haiku मॉडेल्स `max` प्रयत्न स्तर स्वीकारत नाहीत, त्यामुळे विनंती अपस्ट्रीमकडे पाठवण्यापूर्वी OmniRoute ती उच्च विचार-बजेटवर डाउनग्रेड करते.
+Claude आणि Claude Code-सुसंगत routes, Opus आणि Sonnet
+models साठी `max` thinking effort कायम ठेवतात. Haiku models `max` effort tier स्वीकारत
+नाहीत, त्यामुळे OmniRoute upstream कडे पाठवण्यापूर्वी ही विनंती high thinking budget वर
+कमी करते.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-डॅशबोर्ड → प्रदाते → Codex कनेक्ट करा
-→ OAuth लॉगिन (पोर्ट 1455)
-→ 5-तासांची + साप्ताहिक रीसेट
+Dashboard → Providers → Connect Codex
+→ OAuth लॉगिन (port 1455)
+→ 5-तास + साप्ताहिक रीसेट
 
-मॉडेल्स:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +163,11 @@ Claude आणि Claude Code-सुसंगत रूट्स Opus आणि S
 #### GitHub Copilot
 
 ```bash
-डॅशबोर्ड → प्रदाते → GitHub कनेक्ट करा
+Dashboard → Providers → Connect GitHub
 → GitHub द्वारे OAuth
 → मासिक रीसेट (महिन्याच्या 1 तारखेला)
 
-मॉडेल्स:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +175,74 @@ Claude आणि Claude Code-सुसंगत रूट्स Opus आणि S
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 स्वस्त प्रदाते
+**AI Credits (टोकन-आधारित बिलिंग).** GitHub खात्यासाठी `credits_used` अहवाल देत असल्यास,
+Provider Limits कार्डमध्ये सध्याच्या बिलिंग कालावधीत वापरलेल्या credits सह **AI Credits** पंक्ती
+दिसते; अमर्यादित organization plans वरही ती दिसते.
+
+**स्थानिक AI Credits मर्यादा.** GitHub कनेक्शन संपादित करा आणि प्रत्येक बिलिंग कालावधीसाठी
+**AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`) सेट करा. रिक्त
+ठेवल्यास ही मर्यादा अक्षम होते; `0` असल्यास कनेक्शन नेहमी वगळले जाते. शेवटचे वापर-वाचन
+मर्यादेइतके किंवा त्यापेक्षा जास्त असल्यास, खाते निवडताना हे कनेक्शन वगळले जाते आणि routing
+तुमच्या इतर कनेक्शन्सकडे fallback करते, जसे quota-policy cutoff लागू झाल्यावर होते. ही तपासणी
+नियतकालिक quota refresh आधीच संकलित करत असलेल्या वापराच्या माहितीवर आधारित असते — request
+path वर ती कधीही GitHub ला कॉल करत नाही — आणि ती fail open पद्धतीने कार्य करते: वाचन उपलब्ध
+नसल्यास किंवा ते जुने असल्यास (15 मिनिटांपेक्षा जुने, किंवा आधीच रीसेट झालेल्या बिलिंग
+कालावधीतील) कनेक्शन ब्लॉक केले जात नाही. ही स्थानिक सुरक्षा आहे, **हमीची खर्च मर्यादा नाही**:
+GitHub च्या अहवालातील विलंब, refresh interval, सुरू असलेल्या requests आणि OmniRoute बाहेरील
+वापरामुळे ही मर्यादा ओलांडली जाऊ शकते. कठोर मर्यादेसाठी GitHub ची स्वतःची spending controls
+वापरा.
+
+### 💰 स्वस्त Providers
 
 #### GLM-4.7 (दररोज रीसेट, $0.6/1M)
 
-1. नोंदणी करा: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan मधून API की मिळवा
-3. डॅशबोर्ड → API की जोडा: प्रदाता: `glm`, API की: `your-key`
+1. साइन अप करा: [Zhipu AI](https://open.bigmodel.cn)
+2. Coding Plan मधून API key मिळवा
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**वापर:** `glm/glm-4.7` — **उपयुक्त सूचना:** Coding Plan मध्ये 1/7 खर्चात 3× कोटा मिळतो! दररोज सकाळी 10:00 वाजता रीसेट होतो.
+**वापर:** `glm/glm-4.7` — **उपयुक्त सूचना:** Coding Plan 1/7 खर्चात 3× कोटा देते! दररोज सकाळी 10:00 वाजता रीसेट.
 
 #### MiniMax M2.1 (5 तासांनी रीसेट, $0.20/1M)
 
-1. नोंदणी करा: [MiniMax](https://www.minimax.io)
-2. API की मिळवा → डॅशबोर्ड → API की जोडा
+1. साइन अप करा: [MiniMax](https://www.minimax.io)
+2. API key मिळवा → Dashboard → Add API Key
 
-**वापर:** `minimax/MiniMax-M2.1` — **उपयुक्त सूचना:** मोठ्या संदर्भासाठी सर्वात स्वस्त पर्याय (1M टोकन्स)!
+**वापर:** `minimax/MiniMax-M2.1` — **उपयुक्त सूचना:** दीर्घ context साठी सर्वात स्वस्त पर्याय (1M tokens)!
 
-#### Kimi K2 (दरमहा निश्चित $9)
+#### Kimi K2 ($9/महिना निश्चित)
 
-1. सदस्यता घ्या: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API की मिळवा → डॅशबोर्ड → API की जोडा
+1. सबस्क्राइब करा: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. API key मिळवा → Dashboard → Add API Key
 
-**वापर:** `kimi/kimi-k2.5` — **उपयुक्त सूचना:** 10M टोकन्ससाठी दरमहा निश्चित $9 = प्रभावी खर्च $0.90/1M!
+**वापर:** `kimi/kimi-k2.5` — **उपयुक्त सूचना:** 10M tokens साठी निश्चित $9/महिना = प्रत्यक्ष खर्च $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. नोंदणी करा: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API की तयार करा → डॅशबोर्ड → API की जोडा: प्रदाता: `qianfan`
+1. साइन अप करा: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. Qianfan API key तयार करा → Dashboard → Add API Key: Provider: `qianfan`
 
-**वापर:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, किंवा अन्य Qianfan OpenAI-सुसंगत मॉडेल ID.
+**वापर:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, किंवा इतर Qianfan OpenAI-सुसंगत model ID.
 
-### 🆓 मोफत प्रदाते
+### 🆓 मोफत Providers
 
-प्रमाणीकरणाची आवश्यकता नसलेल्या मोफत प्रदात्यांच्या प्रदाता पृष्ठावर **प्रमाणीकरण आवश्यक नाही** याच्या शेजारी एक स्विच असतो.
-तो बंद केल्यास संबंधित प्रदाता अक्षम होतो, प्रदाते कॉन्फिगर केलेल्या/संक्षिप्त दृश्यांमधून काढला जातो आणि
-त्याची मॉडेल्स `/v1/models` मधून काढली जातात.
+प्रमाणीकरणाची आवश्यकता नसलेल्या मोफत providers च्या provider पेजवर **No authentication required**
+च्या बाजूला एक switch असतो. तो बंद केल्यास provider अक्षम होतो, Providers configured/compact
+views मधून तो काढला जातो आणि त्याचे models `/v1/models` मधून काढले जातात.
 
-#### Qoder (9 मोफत मॉडेल्स)
+#### Qoder (9 मोफत models)
 
 ```bash
-डॅशबोर्ड → Qoder कनेक्ट करा → OAuth लॉगिन → प्रवेश सध्याच्या प्रदाता मर्यादांच्या अधीन आहे
+Dashboard → Connect Qoder → OAuth लॉगिन → प्रवेश सध्याच्या provider मर्यादांच्या अधीन आहे
 
-मॉडेल्स: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude मोफत)
 
 ```bash
-डॅशबोर्ड → Kiro कनेक्ट करा → AWS Builder ID किंवा Google/GitHub → दरमहा ~50 क्रेडिट्स
+Dashboard → Connect Kiro → AWS Builder ID किंवा Google/GitHub → दरमहा सुमारे 50 credits
 
-मॉडेल्स: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -612,17 +632,17 @@ post_install() {
 <details>
 <summary><b>सर्व उपलब्ध मॉडेल्स पहा</b></summary>
 
-> खालील यादी v3.8.0 साठी `open-sse/config/providerRegistry.ts` मधून संकलित केली आहे. क्लाउड कॅटलॉग (Gemini, OpenRouter इ.) डायनॅमिकली सिंक केले जातात — संपूर्ण थेट कॅटलॉगसाठी **डॅशबोर्ड → प्रोव्हायडर → [provider] → उपलब्ध मॉडेल्स** उघडा किंवा `GET /api/models/catalog` कॉल करा.
+> खालील यादी v3.8.0 साठी `open-sse/config/providerRegistry.ts` मधून तयार केलेली आहे. क्लाउड कॅटलॉग (Gemini, OpenRouter इ.) डायनॅमिक पद्धतीने समक्रमित केले जातात — संपूर्ण लाइव्ह कॅटलॉगसाठी **डॅशबोर्ड → प्रदाते → [प्रदाता] → उपलब्ध मॉडेल्स** उघडा किंवा `GET /api/models/catalog` कॉल करा.
 >
-> जर प्रोव्हायडरची अंगभूत यादी बदलली असेल, तर थेट अपस्ट्रीम कॅटलॉग आणण्यासाठी त्या पृष्ठावरील **/models वरून आयात करा** वापरा (किंवा **ऑटो-सिंक** सक्षम करा). हे v3.8.50 मध्ये LLM7.io (`gemini-3.1-flash-lite`) आणि UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) साठी सत्यापित करण्यात आले; त्याच चाचणी फेरीदरम्यान Pollinations अनामिक प्रवेश अपस्ट्रीम-मर्यादितच राहिला.
+> एखाद्या प्रदात्याची अंगभूत यादी बदलली असल्यास, लाइव्ह अपस्ट्रीम कॅटलॉग आणण्यासाठी त्या पृष्ठावरील **/models मधून आयात करा** वापरा (किंवा **ऑटो-सिंक** सक्षम करा). LLM7.io (`gemini-3.1-flash-lite`) आणि UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) साठी v3.8.50 मध्ये याची पडताळणी करण्यात आली; त्याच चाचणी फेरीदरम्यान Pollinations चा अनामिक प्रवेश अपस्ट्रीम मर्यादितच राहिला.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort स्तर: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort tiers: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — मोफत OAuth: **डॅशबोर्ड → प्रोव्हायडर → Kiro → उपलब्ध मॉडेल्स** अंतर्गत दाखवलेली थेट यादी वापरा. उपलब्धता खाते आणि प्लॅनवर अवलंबून असते.
+**Kiro (`kr/`)** — मोफत OAuth: **डॅशबोर्ड → प्रदाते → Kiro → उपलब्ध मॉडेल्स** अंतर्गत दाखवलेला लाइव्ह कॅटलॉग वापरा. उपलब्धता खाते आणि प्लॅनवर अवलंबून असते.
 
 **Qoder (`if/`)** — मोफत OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +650,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/महिना फ्लॅट किंवा प्रति-वापर: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo निश्चित शुल्क किंवा वापरानुसार: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API की: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — अत्यंत वेगवान: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — अतिवेगवान: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok नेटिव्ह: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-होस्टेड: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-होस्टेड: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — शोध-वर्धित: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — शोध-सहाय्यित: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ओपन-सोर्स: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (मोफत), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — मुक्त-स्रोत: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (मोफत), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — जलद इन्फरन्स: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — जलद अनुमान: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — वेफर-स्केल: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-केंद्रित: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — एंटरप्राइज: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — एंटरप्राइझ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google कडून प्रत्येक API key साठी थेट सिंक केले जाते — स्थिर यादी नाही. **डॅशबोर्ड → प्रोव्हायडर** मध्ये key कनेक्ट करा आणि मग वर्तमान कॅटलॉग आयात करण्यासाठी **उपलब्ध मॉडेल्स** वापरा (उदा. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google कडून API कीनुसार लाइव्ह समक्रमित; स्थिर यादी नाही. **डॅशबोर्ड → प्रदाते** मध्ये की कनेक्ट करा, त्यानंतर सध्याचा कॅटलॉग आयात करण्यासाठी **उपलब्ध मॉडेल्स** वापरा (उदा. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**इतर सुसंगत प्रोव्हायडर** (निवडक): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` मार्फत), `azure-ai`, `openrouter` (पासथ्रू कॅटलॉग), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. प्रत्येक प्रोव्हायडर `providerRegistry.ts` मध्ये स्वतःची मॉडेल यादी राखतो आणि प्रोव्हायडर `/models` एंडपॉइंट उपलब्ध करून देतो तेव्हा ऑटो-सिंक केले जाऊ शकते.
+**इतर सुसंगत प्रदाते** (निवडक): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` द्वारे), `azure-ai`, `openrouter` (पासथ्रू कॅटलॉग), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. प्रत्येकाची स्वतःची मॉडेल यादी `providerRegistry.ts` मध्ये असते आणि प्रदाता `/models` एंडपॉइंट उपलब्ध करून देत असल्यास ती ऑटो-सिंक केली जाऊ शकते.
 
-**मॉडेल ID बद्दल टीप:** OmniRoute प्रोव्हायडर-नेटिव्ह ID वापरते (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). काही ID मध्ये बिंदुयुक्त आवृत्त्या असतात कारण अपस्ट्रीम API त्या तशाच अपेक्षित करते. जर एखादे मॉडेल वर सूचीबद्ध केलेले नसेल, तर उपलब्धता निश्चित करण्यासाठी `omniroute models --search <term>` चालवा किंवा `GET /api/models/catalog` वापरा.
+**मॉडेल ID विषयी नोंद:** OmniRoute प्रदाता-नेटिव्ह ID वापरते (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). काही ID मध्ये डॉट असलेली आवृत्ती असते, कारण अपस्ट्रीम API त्यांची अशीच अपेक्षा करते. एखादे मॉडेल वरील यादीत नसल्यास, उपलब्धता निश्चित करण्यासाठी `omniroute models --search <term>` चालवा किंवा `GET /api/models/catalog` वापरा.
 
 </details>
 

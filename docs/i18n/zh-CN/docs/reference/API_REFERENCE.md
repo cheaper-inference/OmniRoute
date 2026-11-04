@@ -1452,8 +1452,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-使用任何已配置的 STT 提供者转录音频文件。第一个路径
-片段选择原生提供者（`openai/…`、`deepgram/…`）。重新导出其他厂商模型的网关使用限定 ID
+使用任何已配置的 STT 提供者转录音频文件。第一个路径段选择原生提供者（`openai/…`、`deepgram/…`）。重新导出其他供应商模型的网关使用限定 ID
 （`openrouter/deepgram/nova-3`）。
 
 **请求：**
@@ -1476,12 +1475,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**示例模型 ID：** `openai/whisper-1`（需要 OpenAI 密钥）、
+**模型 ID 示例：**`openai/whisper-1`（需要 OpenAI 密钥）、
 `openrouter/deepgram/nova-3`（需要 OpenRouter 密钥）、
-`deepgram/nova-3`（需要原生 Deepgram 密钥）。不带限定的
+`deepgram/nova-3`（需要原生 Deepgram 密钥）。单独的
 `deepgram/nova-3` 请求**不会**使用 OpenRouter。
 
-**支持的格式：** `mp3`、`wav`、`m4a`、`flac`、`ogg`、`webm`。
+**支持的格式：**`mp3`、`wav`、`m4a`、`flac`、`ogg`、`webm`。
+
+**Gemini Live（`gemini/gemini-3.5-transcribe-live`）：**通过 Gemini Live
+WebSocket 进行文件模式转录（需要 Gemini API 密钥）。上传的文件会使用 `ffmpeg`
+转换为 16 kHz 单声道 PCM（除非文件已经是 16 kHz 单声道 PCM WAV，否则 `ffmpeg` 必须位于
+`PATH` 中），然后流式传输到会话，并以 `{ "text": "..." }` 的形式返回最终文本。可选的
+`language` 和 `prompt` 表单字段会被转发。限制：超过 25 MiB 的上传文件或解码后时长超过 10 分钟的音频会返回
+`413`；运行时间超过 60 秒的转换会被终止并返回 `504`。API 密钥仅通过
+`x-goog-api-key` 标头发送，绝不会出现在 WebSocket URL 中。
 
 ---
 
@@ -1574,7 +1581,7 @@ Content-Type: application/json
 }
 ```
 
-> **架构说明**（`setBudgetSchema`）：必须提供 `apiKeyId`；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 中至少有一个必须大于零。可选字段：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。旧版 `{keyId, limit, period}` 结构会返回 `400 Bad Request`。
+> **架构说明**（`setBudgetSchema`）：`apiKeyId` 为必填项；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 中至少有一个必须大于零。可选字段：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。旧版 `{keyId, limit, period}` 结构将返回 `400 Bad Request`。
 
 ## 令牌限制
 
