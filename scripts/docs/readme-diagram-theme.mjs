@@ -47,10 +47,11 @@
 // rgb(242 240 232 / .22), pinned by the test); `grid` is the one value that is not a kit token —
 // a lighter tint of the border for the canvas pattern.
 //
-// One measured exception: light `warn` is the kit's Editions --ci-color-warning (#99631f) scaled
-// to 90 % per channel (same hue), #8a591c. The kit value is 4.46:1 on the canvas and 4.09:1 on
-// warnBg, below WCAG AA for the warn text the diagrams draw; #8a591c is ≥ 4.5:1 on every light
-// background (bg, surface, warnBg, surfaceSubtle, surfaceMuted). The test pins the derivation.
+// One measured exception: light `warn` is #8a591c, the kit's Editions --ci-color-warning hue a
+// little darker. Kit 0.0.88 (upstream #155) brought the kit value to #8c5a1b, which clears AA on
+// the canvas, the surface and warnBg but measures 4.46:1 on surfaceMuted, a surface the diagrams
+// also draw warn text on; #8a591c is ≥ 4.5:1 on every light background (bg, surface, warnBg,
+// surfaceSubtle, surfaceMuted). The test pins it and fails once the kit value clears them all.
 //
 // extraCss naming: diagram-local classes and custom properties passed through svgOpen's
 // `extraCss` carry the diagram's abbreviation as a prefix (`rl-…`, `cmp-…`, `--inv-*`…), never a

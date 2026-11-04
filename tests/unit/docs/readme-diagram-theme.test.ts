@@ -83,16 +83,6 @@ const STATUS_AND_SURFACE_TOKENS: Record<string, string> = {
   accentSoft: "--ci-color-accent-surface-range",
 };
 
-// The one measured exception (readme-diagram-theme.mjs header): light warn is the kit's warning
-// scaled to 90 % per channel, because the kit value is below AA for text on the light canvas.
-const WARN_SCALE = 0.9;
-const scaleHex = (hex: string, k: number) =>
-  "#" +
-  [1, 3, 5]
-    .map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k))
-    .map((c) => c.toString(16).padStart(2, "0"))
-    .join("");
-
 // WCAG 2.x contrast; a translucent colour is composited over the background first.
 const rgbOf = (c: string, over?: number[]): number[] => {
   const hex = /^#([0-9a-f]{6})$/i.exec(c);
@@ -173,12 +163,17 @@ test("every KIT value equals what its Editions token resolves to (light warn exc
   }
 });
 
-test("light warn is the kit warning darkened 10 % — and only because the kit value misses AA", () => {
+test("light warn darkens the kit warning only while the kit value misses AA on a diagram surface", () => {
   const kitWarn = resolve("--ci-color-warning", lightBlock);
-  assert.equal(kitWarn, "#99631f");
-  assert.equal(KIT.light.warn, scaleHex(kitWarn, WARN_SCALE));
-  assert.ok(contrast(kitWarn, KIT.light.bg) < 4.5, "the kit warning is below AA on the canvas");
-  for (const bg of ["bg", "surface", "warnBg", "surfaceSubtle", "surfaceMuted"]) {
+  assert.equal(kitWarn, "#8c5a1b");
+  const surfaces = ["bg", "surface", "warnBg", "surfaceSubtle", "surfaceMuted"];
+  // The kit value (AA since kit 0.0.88 on bg, surface and warnBg) still misses one diagram surface;
+  // when it clears all of them, drop the override and use the kit value as is.
+  assert.ok(
+    surfaces.some((bg) => contrast(kitWarn, KIT.light[bg]) < 4.5),
+    "the kit warning clears AA everywhere: use it in readme-diagram-theme.mjs"
+  );
+  for (const bg of surfaces) {
     const ratio = contrast(KIT.light.warn, KIT.light[bg]);
     assert.ok(ratio >= 4.5, `light warn on ${bg}: ${ratio.toFixed(2)}:1`);
   }
