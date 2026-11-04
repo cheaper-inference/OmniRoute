@@ -1594,7 +1594,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transcribe archivos de audio utilizando cualquier proveedor STT configurado. El primer segmento de la ruta selecciona el proveedor nativo (`openai/…`, `deepgram/…`). Las pasarelas que vuelven a exportar el modelo de otro proveedor utilizan un id cualificado
+Transcribe archivos de audio utilizando cualquier proveedor STT configurado. El primer segmento de la ruta
+selecciona el proveedor nativo (`openai/…`, `deepgram/…`). Las puertas de enlace que
+vuelven a exportar el modelo de otro proveedor utilizan un ID cualificado
 (`openrouter/deepgram/nova-3`).
 
 **Solicitud:**
@@ -1617,12 +1619,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Ids de modelo de ejemplo:** `openai/whisper-1` (requiere una clave de OpenAI),
+**Ejemplos de IDs de modelo:** `openai/whisper-1` (requiere una clave de OpenAI),
 `openrouter/deepgram/nova-3` (requiere una clave de OpenRouter),
-`deepgram/nova-3` (requiere una clave nativa de Deepgram). Una solicitud básica a
-`deepgram/nova-3` **no** utiliza OpenRouter.
+`deepgram/nova-3` (requiere una clave nativa de Deepgram). Una solicitud a
+`deepgram/nova-3` sin prefijo **no** utiliza OpenRouter.
 
 **Formatos compatibles:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transcripción en modo archivo a través del
+WebSocket de Gemini Live (requiere una clave de API de Gemini). La carga se convierte a PCM mono de 16 kHz con `ffmpeg`
+(`PATH` debe incluirlo, a menos que el archivo ya sea un WAV PCM mono de 16 kHz), se transmite a la sesión y
+se devuelve el texto finalizado como `{ "text": "..." }`. Los campos de formulario opcionales `language` y `prompt`
+se reenvían. Límites: las cargas superiores a 25 MiB o el audio decodificado de más de 10 minutos responden con
+`413`; una conversión que tarde más de 60 s se cancela y responde con `504`. La clave de API se envía
+únicamente en el encabezado `x-goog-api-key`, nunca en la URL del WebSocket.
 
 ---
 

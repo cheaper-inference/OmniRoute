@@ -1602,7 +1602,7 @@ Content-Type: multipart/form-data
 
 Transkribuokite garso failus naudodami bet kurį sukonfigūruotą STT teikėją. Pirmasis kelio
 segmentas nurodo savąjį teikėją (`openai/…`, `deepgram/…`). Tarpiniai serveriai, kurie
-iš naujo eksportuoja kito tiekėjo modelį, naudoja kvalifikuotą ID
+pakartotinai teikia kito tiekėjo modelį, naudoja kvalifikuotą identifikatorių
 (`openrouter/deepgram/nova-3`).
 
 **Užklausa:**
@@ -1625,12 +1625,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Modelių ID pavyzdžiai:** `openai/whisper-1` (reikalingas OpenAI raktas),
+**Modelių identifikatorių pavyzdžiai:** `openai/whisper-1` (reikalingas OpenAI raktas),
 `openrouter/deepgram/nova-3` (reikalingas OpenRouter raktas),
-`deepgram/nova-3` (reikalingas savasis Deepgram raktas). Atskira
-`deepgram/nova-3` užklausa **nenaudoja** OpenRouter.
+`deepgram/nova-3` (reikalingas savasis Deepgram raktas). Užklausa su paprastu
+`deepgram/nova-3` **nenaudoja** OpenRouter.
 
 **Palaikomi formatai:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** failų režimo transkribavimas per „Gemini Live“
+WebSocket (reikalingas Gemini API raktas). Įkeltas failas konvertuojamas į 16 kHz mono PCM naudojant `ffmpeg`
+(`ffmpeg` turi būti nurodytas `PATH`, nebent failas jau yra 16 kHz mono PCM WAV), perduodamas į seansą, o
+užbaigtas tekstas grąžinamas kaip `{ "text": "..." }`. Pasirinktiniai `language` ir `prompt` formų laukai
+persiunčiami toliau. Apribojimai: įkėlimams, didesniems nei 25 MiB, arba dekoduotam garsui, ilgesniam nei
+10 minučių, grąžinamas atsakymas `413`; jei konvertavimas trunka ilgiau nei 60 s, jis nutraukiamas ir
+grąžinamas atsakymas `504`. API raktas siunčiamas tik `x-goog-api-key` antraštėje, niekada ne WebSocket URL.
 
 ---
 
