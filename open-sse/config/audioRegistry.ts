@@ -42,6 +42,12 @@ export interface AudioProvider {
    * Absent means the OpenAI stock default ("alloy").
    */
   defaultVoice?: string;
+  /**
+   * The adapter can only run the models listed in `models` (e.g. Gemini Live's
+   * BidiGenerateContent socket), not every model the provider tags with this
+   * endpoint. Endpoint-adapter evidence (#16929) is then scoped per model.
+   */
+  modelScoped?: boolean;
   models: AudioModel[];
 }
 
@@ -296,6 +302,21 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "bearer",
     format: "syntx-audio",
     models: toSyntxTranscriptionModels(),
+  },
+  // Kept last on purpose: the audio/video bridges auto-pick the FIRST catalog
+  // model with usable credentials (selectAudioBridgeModel), so a Gemini key must
+  // not pre-empt the established STT providers' auto-selection order.
+  gemini: {
+    id: "gemini",
+    baseUrl:
+      "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-live",
+    // Only Live-capable models run over BidiGenerateContent; other Gemini models
+    // tagged audio-transcriptions keep having no adapter (#16929).
+    modelScoped: true,
+    models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
   },
 };
 
