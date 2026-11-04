@@ -45,7 +45,7 @@ export class CheaperInferenceExecutor extends BaseExecutor {
           400,
           `This Cheaper Inference model has no verified ${kind} input transport. Select a supported model such as gemini-4-argon.`,
           input.body,
-          this.buildUrl(input.model, input.stream, 0, input.credentials)
+          this.buildUrl(input.model, input.stream, 0)
         );
       }
     }
