@@ -1380,6 +1380,30 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "PROXY_STRICT_POST_REPLAY_ENABLED",
+    label: "Proxy Fetch: Strict POST Replay",
+    description:
+      "For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket.",
+    descriptionI18nKey: "featureFlagProxyStrictPostReplayEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED",
+    label: "Responses: Transport-Only Keepalive",
+    description:
+      "Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event.",
+    descriptionI18nKey: "featureFlagResponsesTransportKeepaliveEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE",
     label: "Compression Cache Stats: Automatic-Prefix Eligibility",
     description:
