@@ -51,6 +51,13 @@ export interface QuotaCacheEntry {
 // #14359 — a park is trusted at most EXHAUSTED_MAX_PARK_MS past its observation; a far weekly-window reset must not block for days.
 export const EXHAUSTED_MAX_PARK_MS = 30 * 60 * 1000;
 
+export const ACTIVE_TTL_MS = 5 * 60 * 1000; // 5 minutes for active accounts
+
+export function parseDate(value: string): number | null {
+  const ms = new Date(value).getTime();
+  return Number.isNaN(ms) ? null : ms;
+}
+
 // ─── State ──────────────────────────────────────────────────────────────────
 //
 // #8065 — Next.js `output: "standalone"` builds can load this module from

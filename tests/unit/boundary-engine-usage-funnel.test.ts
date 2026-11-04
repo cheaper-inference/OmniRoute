@@ -49,7 +49,9 @@ for (const [file, specifier] of VIA_IMAGE_RESULT) {
     assert.doesNotMatch(s, /from ["'](?:@\/|(?:\.\.\/)+src\/)lib\/usageDb/);
     assert.match(
       s,
-      new RegExp(`import \\{ saveCallLog \\} from "${specifier.replace(/[./]/g, "\\$&")}";`)
+      new RegExp(
+        `import \\{ saveCallLog \\} from "${specifier.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}";`
+      )
     );
   });
 }

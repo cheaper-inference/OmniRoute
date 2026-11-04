@@ -1939,15 +1939,15 @@
     "unpricedUsageMore": "…na {count} ọzọ",
     "unpricedUsageConfigure": "Tọọ ọnụahịa",
     "unpricedUsageDismiss": "Mechie",
-    "systemMetricsTitle": "System metrics",
-    "systemMetricsActive": "Monitoring active",
-    "systemMetricsLoading": "Loading...",
+    "systemMetricsTitle": "Usoro metrik",
+    "systemMetricsActive": "nlekota oru",
+    "systemMetricsLoading": "Na-ebu...",
     "systemMetricsCpu": "CPU",
-    "systemMetricsMemory": "Memory",
-    "systemMetricsHost": "VPS / Host",
+    "systemMetricsMemory": "Ebe nchekwa",
+    "systemMetricsHost": "VPS / onye ọbịa",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
-    "systemMetricsProcessCpu": "OmniRoute (process)",
-    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
+    "systemMetricsProcessCpu": "OmniRoute (usoro)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / ikpo)"
   },
   "analytics": {
     "title": "Nnyocha Data",
@@ -14183,12 +14183,12 @@
         "description": "Maka ndị na-eweta ọrụ ndị e ji adreesị egress kee quota ha, dozie onye òtù na-ekekọrịta adreesị egress a hụrụ nke onye a jụrụ n'oge na-adịbeghị anya n'okpuru ndị òtù ahụ dị mma. Naanị n'usoro, ọ dịghị mgbe a na-ewepụ ya. Chọrọ PROXY_SKIP_RECENTLY_FAILED, nke na-ewepụta akara ọjụjụ ọ na-agụ. Agbanyụrụ na ndabara: usoro nhọrọ bụ kpọmkwem ntụgharị nkịtị."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Ọjụjụ oke nke ihe nlere anya",
+        "description": "Tinye opencode quota 429 naanị na ihe nlereanya kụrụ ya, yabụ otu egress ahụ na-aga n'ihu na-ejere ụdị ndị ọzọ ozi, wee kpochapụ ya naanị mgbe ihe nlereanya ahụ ga-aga nke ọma. Ndị na-eri ihe na-enweghị ihe nlereanya (ntụgharị ọdọ mmiri, ogige ntụrụndụ na ịmegharị, visibiliti admin, selector trigger, health sweep) ka na-ahụ ya. Achọrọ PROXY_SKIP_RECENTLY_FAILED, nke na-emepụta ọjụjụ ahụ. Gbanyụọ na ndabara: otu nha ụdị 429 na-ewepụta ọpụpụ maka ụdị ọ bụla."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Nweta proxy: ikwugharị POST siri ike",
+        "description": "Maka arịrịọ na-abụghị nkeidempotent (POST, PUT, PATCH, DELETE), zipu mgbe njehie njem (ọhụrụ socket, proxy fallback, nwa amaala ọdịda) naanị mgbe njehie ahụ gosipụtara na ọ dịghị ihe ezigara: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ma ọ bụ oge njikọ. Njehie sọket ka edechara nwere ike ịpụta na elu na-anabata arịrịọ ahụ, yabụ nzigharị nwere ike iwepụta ma kwụọ ya ugboro abụọ. Gbanyụọ na ndabara: ahụ a na-emegharịgharị na-ewe iwe otu ugboro na mperi njem ọ bụla, nke na-eweghachikwa oghere agbakọchara."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Ndekọ Njirimara Ntụgharị",
@@ -14427,8 +14427,8 @@
         "description": "Mgbe ebumnuche combo zaghachiri site n'ajụjụ doro anya nke content-policy (koodu ma ọ bụ ụdị cyber_policy / content_policy_violation), kwụsị combo ahụ ma weghachi ajụjụ ahụ ọbụlagodi mgbe ebumnuche ndị fọdụrụ bụ ụdị dị iche iche, kama ịga n'ihu na ebumnuche na-esonụ. Agbanyụrụ na ndabara: ajụjụ ahụ anaghị eme ka akaụntụ dajụọ ma ọ bụ kpalite provider breaker, combo na-agakwa n'ihu na ebumnuche ya na-esonụ kpọmkwem dịka ọ dị na mbụ."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Azịza: idobe ndụ naanị n'ụgbọ njem",
+        "description": "Zipu nzaghachi na-echekwa ndụ dị ka ahịrị oghere kama ịme ihe omume response.in_progress, yabụ foto sịntetịt enweghị ike dochie ezigbo nzaghachi na SDK gọọmentị. Ahịrị oghere adịghị eziga mmemme SSE, yabụ na onye na-ahụ maka ndị ahịa na-emegharị naanị na mmemme agaghị emegharị ya n'oge ogologo oge ịgbachi nkịtị. Gbanyụọ na ndabara: ndị ngụ oge na-eziga mmemme response.in_progress kwesịrị ekwesị."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nnwagharị Cooldown: Mafere Ọjụjụ 403/410",
