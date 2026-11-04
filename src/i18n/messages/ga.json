@@ -2554,7 +2554,8 @@
       "webFetch": "Aisghabháil Gréasáin",
       "video": "Físeán",
       "music": "Ceol",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Cinntí"
     },
     "noProviders": "Níl aon soláthraí cumraithe don chineál seo fós.",
     "addConnection": "Cuir Nasc Leis",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "Ceanglaíocá saincheaptha ChatGPT",
     "doctorChecking": "Ag seiceáil stádas…",
     "doctorCheck": "Seiceáil stádas an dochtúra",
-    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta"
+    "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta",
+    "categoryDecisions": "Cinntí",
+    "decisionProvidersHeading": "Samhlacha cinnteoireachta",
+    "decisionProvidersDesc": "Cinntí dúchasacha clóscríofa trí chuntais soláthraithe atá ann cheana. Cumraigh an críochphointe cinnteoireachta tacaithe agus seiceáil infhaighteacht na samhla."
   },
   "settings": {
     "title": "Socruithe",

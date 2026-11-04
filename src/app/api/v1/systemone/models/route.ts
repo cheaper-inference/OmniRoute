@@ -1,3 +1,4 @@
+import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getSpecialtyModelsResponse } from "../../_shared/specialtyCatalog";
 import { getProviderAlias } from "@/shared/constants/providers";
 import { getProviderConnections } from "@/lib/db/providers";
@@ -28,7 +29,10 @@ function catalogConnection(row: Record<string, unknown>): DecisionCredentials | 
   )
     throw new Error("Invalid connection record");
   const providerSpecificData = record(row.providerSpecificData);
+  const nativeFormat = getRegistryEntry(provider)?.format;
   if (
+    nativeFormat !== "systemone" &&
+    nativeFormat !== "decisions" &&
     !["openai", "ollama-cloud", "ollama-local", "basal", "julia-local", "cloudflare-ai"].includes(
       provider
     ) &&

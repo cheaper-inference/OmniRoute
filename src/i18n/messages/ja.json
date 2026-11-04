@@ -2554,7 +2554,8 @@
       "webFetch": "Webフェッチ",
       "video": "動画",
       "music": "音楽",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "判断"
     },
     "noProviders": "この種類に対して設定されているプロバイダーはまだありません。",
     "addConnection": "接続を追加",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPTカスタムコネクタ",
     "doctorChecking": "状態を確認中…",
     "doctorCheck": "ドクター状態を確認する",
-    "fallbackRetryBackendTitle": "フォールバック再試行バックエンド"
+    "fallbackRetryBackendTitle": "フォールバック再試行バックエンド",
+    "categoryDecisions": "判断",
+    "decisionProvidersHeading": "判断モデル",
+    "decisionProvidersDesc": "既存のプロバイダーアカウントでネイティブな型付き判断を利用します。対応する判断エンドポイントを設定し、モデルの利用可否を確認してください。"
   },
   "settings": {
     "title": "設定",

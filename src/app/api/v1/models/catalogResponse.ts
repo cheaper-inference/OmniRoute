@@ -410,7 +410,9 @@ export async function finalizeCatalogResponse(
     }
   }
   await yieldTurn();
-  const enrichedModels = disambiguateCatalogModelNames(enriched);
+  const enrichedModels = disambiguateCatalogModelNames(
+    annotateNativeDecisionCapabilities(enriched)
+  );
   await yieldTurn();
   const orderedModels = sortCatalogModelsProviderGrouped(enrichedModels);
   await yieldTurn();

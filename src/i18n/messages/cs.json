@@ -2631,7 +2631,8 @@
       "webFetch": "Načtení webu",
       "video": "Video",
       "music": "Hudba",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Rozhodnutí"
     },
     "noProviders": "Pro tento druh zatím nejsou nakonfigurováni žádní poskytovatelé.",
     "addConnection": "Přidat připojení",
@@ -7084,7 +7085,10 @@
     "chatgptConnectorLabel": "Vlastní konektor ChatGPT",
     "doctorChecking": "Kontroluje se stav…",
     "doctorCheck": "Zkontrolovat stav diagnostiky",
-    "fallbackRetryBackendTitle": "Záložní backend pro opakování"
+    "fallbackRetryBackendTitle": "Záložní backend pro opakování",
+    "categoryDecisions": "Rozhodnutí",
+    "decisionProvidersHeading": "Rozhodovací modely",
+    "decisionProvidersDesc": "Nativní typovaná rozhodnutí přes stávající účty poskytovatelů. Nastavte podporovaný koncový bod pro rozhodování a ověřte dostupnost modelu."
   },
   "settings": {
     "title": "Nastavení",

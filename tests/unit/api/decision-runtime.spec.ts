@@ -304,3 +304,32 @@ it("unions the scoped legacy TypeSafe and OpenRouter catalog with native results
     "openrouter/typesafe/jev-1.13",
   ]);
 });
+
+it("lists the native Supersonic default model using only its scoped API-key connection", async () => {
+  deps.valid.mockResolvedValue(true);
+  deps.policy.mockResolvedValue({ rejection: null });
+  deps.scope.mockResolvedValue({ allowedConnections: ["julia-account"], rejection: null });
+  deps.metadata.mockResolvedValue({});
+  deps.allowed.mockResolvedValue(true);
+  deps.connections.mockResolvedValue([
+    { id: "julia-account", provider: "supersoniclabs", apiKey: "test" },
+  ]);
+  deps.fetch.mockClear();
+  const response = await GET(
+    new Request("http://gateway/v1/systemone/models", {
+      headers: { authorization: "Bearer client-test" },
+    })
+  );
+  expect(response.status).toBe(200);
+  expect((await response.json()).data).toEqual([
+    expect.objectContaining({ id: "supersoniclabs/julia-1", supported_endpoints: ["systemone"] }),
+  ]);
+  expect(deps.fetch).not.toHaveBeenCalled();
+  deps.allowed.mockResolvedValue(false);
+  const denied = await GET(
+    new Request("http://gateway/v1/systemone/models", {
+      headers: { authorization: "Bearer client-test" },
+    })
+  );
+  expect((await denied.json()).data).toEqual([]);
+});

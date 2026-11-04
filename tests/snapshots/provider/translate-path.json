@@ -5865,6 +5865,29 @@
       "stream": "https://ai.sumopod.com/v1/chat/completions"
     }
   },
+  "supersoniclabs": {
+    "format": "systemone",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.supersoniclabs.ai/v1/systemone",
+      "stream": "https://api.supersoniclabs.ai/v1/systemone"
+    }
+  },
   "synthetic": {
     "format": "openai",
     "headers": {

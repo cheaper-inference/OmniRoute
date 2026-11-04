@@ -2631,7 +2631,8 @@
       "webFetch": "Irkupru mill-Web",
       "video": "Vidjo",
       "music": "Mużika",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Deċiżjonijiet"
     },
     "noProviders": "Għad m’hemm ebda fornitur ikkonfigurat għal dan it-tip.",
     "addConnection": "Żid Konnessjoni",
@@ -7084,7 +7085,10 @@
     "chatgptConnectorLabel": "Konnezzjoni ċċattiva ChatGPT",
     "doctorChecking": "Nistaqsi d-dejja…",
     "doctorCheck": "Iċċekkja d-dejja tad-doctor",
-    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback"
+    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback",
+    "categoryDecisions": "Deċiżjonijiet",
+    "decisionProvidersHeading": "Mudelli ta’ deċiżjoni",
+    "decisionProvidersDesc": "Deċiżjonijiet nattivi b’tipi definiti permezz ta’ kontijiet eżistenti tal-fornituri. Ikkonfigura l-punt tat-tmiem appoġġjat u vverifika d-disponibbiltà tal-mudell."
   },
   "settings": {
     "title": "Issettjar",

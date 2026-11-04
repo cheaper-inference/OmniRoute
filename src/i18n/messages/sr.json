@@ -2554,7 +2554,8 @@
       "webFetch": "Преузимање веб садржаја",
       "video": "Видео",
       "music": "Музика",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Одлуке"
     },
     "noProviders": "За ову врсту још нема конфигурисаних провајдера.",
     "addConnection": "Додај везу",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPT прилагођени конектор",
     "doctorChecking": "Провера статуса…",
     "doctorCheck": "Провери статус лекара",
-    "fallbackRetryBackendTitle": "Задња резорна линија за поновни покушај"
+    "fallbackRetryBackendTitle": "Задња резорна линија за поновни покушај",
+    "categoryDecisions": "Одлуке",
+    "decisionProvidersHeading": "Модели за одлучивање",
+    "decisionProvidersDesc": "Изворне типизиране одлуке преко постојећих налога добављача. Подесите подржану крајњу тачку за одлуке и проверите доступност модела."
   },
   "settings": {
     "title": "Подешавања",

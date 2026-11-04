@@ -2554,7 +2554,8 @@
       "webFetch": "Urejeshaji wa Wavuti",
       "video": "Video",
       "music": "Muziki",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Maamuzi"
     },
     "noProviders": "Hakuna watoa huduma walioundwa kwa ajili ya aina hii bado.",
     "addConnection": "Ongeza Muunganisho",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "Muunganishaji maalum wa ChatGPT",
     "doctorChecking": "Inathibitisha hali…",
     "doctorCheck": "Thibitisha hali ya mwanga",
-    "fallbackRetryBackendTitle": "Backend ya jaribio la upandaji"
+    "fallbackRetryBackendTitle": "Backend ya jaribio la upandaji",
+    "categoryDecisions": "Maamuzi",
+    "decisionProvidersHeading": "Miundo ya maamuzi",
+    "decisionProvidersDesc": "Maamuzi asilia yenye aina maalum kupitia akaunti zilizopo za watoa huduma. Sanidi sehemu ya mwisho ya maamuzi inayotumika na uthibitishe upatikanaji wa muundo."
   },
   "settings": {
     "title": "Mipangilio",

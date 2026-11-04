@@ -2554,7 +2554,8 @@
       "webFetch": "Preluare web",
       "video": "Video",
       "music": "Muzică",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Decizii"
     },
     "noProviders": "Nu există încă furnizori configurați pentru acest tip.",
     "addConnection": "Adaugă conexiune",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "Conector personalizat pentru ChatGPT",
     "doctorChecking": "Verificarea stării…",
     "doctorCheck": "Verifică starea doctorului",
-    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback"
+    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback",
+    "categoryDecisions": "Decizii",
+    "decisionProvidersHeading": "Modele de decizie",
+    "decisionProvidersDesc": "Decizii native tipizate prin conturile existente ale furnizorilor. Configurați endpointul de decizie acceptat și verificați disponibilitatea modelului."
   },
   "settings": {
     "title": "Setări",

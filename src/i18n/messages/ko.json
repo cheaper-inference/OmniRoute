@@ -2554,7 +2554,8 @@
       "webFetch": "웹 가져오기",
       "video": "비디오",
       "music": "음악",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "결정"
     },
     "noProviders": "이 종류에 대해 구성된 공급자가 아직 없습니다.",
     "addConnection": "연결 추가",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPT 커스텀 커넥터",
     "doctorChecking": "상태를 확인하는 중…",
     "doctorCheck": "doctor 상태 확인",
-    "fallbackRetryBackendTitle": "폴백 재시도 백엔드"
+    "fallbackRetryBackendTitle": "폴백 재시도 백엔드",
+    "categoryDecisions": "결정",
+    "decisionProvidersHeading": "결정 모델",
+    "decisionProvidersDesc": "기존 제공업체 계정으로 네이티브 타입 지정 결정을 사용합니다. 지원되는 결정 엔드포인트를 구성하고 모델 사용 가능 여부를 확인하세요."
   },
   "settings": {
     "title": "설정",

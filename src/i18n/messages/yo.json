@@ -2554,7 +2554,8 @@
       "webFetch": "Gbígba láti Wẹ́ẹ̀bù",
       "video": "Fídíò",
       "music": "Orin",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Àwọn ìpinnu"
     },
     "noProviders": "Kò sí àwọn olùpèsè tí a ti ṣètò fún irú èyí síbẹ̀.",
     "addConnection": "Ṣàfikún Àsopọ̀",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "Oju iṣẹ akoran ChatGPT",
     "doctorChecking": "Nṣayẹwo ipo…",
     "doctorCheck": "Ṣayẹwo ipo dokita",
-    "fallbackRetryBackendTitle": "Oníṣẹ́ àsọtẹ́lẹ́ ìṣọ̀ṣe"
+    "fallbackRetryBackendTitle": "Oníṣẹ́ àsọtẹ́lẹ́ ìṣọ̀ṣe",
+    "categoryDecisions": "Àwọn ìpinnu",
+    "decisionProvidersHeading": "Àwọn àwòṣe ìpinnu",
+    "decisionProvidersDesc": "Àwọn ìpinnu ìbílẹ̀ tí irú wọn jẹ́ pàtó nípasẹ̀ àkọọ́lẹ̀ olùpèsè tó wà. Ṣètò ibi ìparí ìpinnu tí a ṣe àtìlẹ́yìn fún, kí o sì jẹ́rìí pé àwòṣe náà wà."
   },
   "settings": {
     "title": "Àwọn Ààtò",

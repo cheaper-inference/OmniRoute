@@ -2554,7 +2554,8 @@
       "webFetch": "การดึงข้อมูลเว็บ",
       "video": "วิดีโอ",
       "music": "เพลง",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "การตัดสินใจ"
     },
     "noProviders": "ยังไม่มีการกำหนดค่าผู้ให้บริการสำหรับประเภทนี้",
     "addConnection": "เพิ่มการเชื่อมต่อ",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "Custom connector ของ ChatGPT",
     "doctorChecking": "กำลังตรวจสอบสถานะ…",
     "doctorCheck": "ตรวจสถานะ doctor",
-    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่"
+    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่",
+    "categoryDecisions": "การตัดสินใจ",
+    "decisionProvidersHeading": "โมเดลการตัดสินใจ",
+    "decisionProvidersDesc": "การตัดสินใจแบบเนทีฟที่กำหนดชนิดผ่านบัญชีผู้ให้บริการที่มีอยู่ กำหนดค่าเอนด์พอยต์การตัดสินใจที่รองรับและตรวจสอบความพร้อมใช้งานของโมเดล"
   },
   "settings": {
     "title": "การตั้งค่า",

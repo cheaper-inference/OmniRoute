@@ -2554,7 +2554,8 @@
       "webFetch": "Turinio gavimas iš žiniatinklio",
       "video": "Vaizdo įrašas",
       "music": "Muzika",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Sprendimai"
     },
     "noProviders": "Šiam tipui kol kas nėra sukonfigūruotų teikėjų.",
     "addConnection": "Pridėti ryšį",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPT pasirinktinė jungtis",
     "doctorChecking": "Tikrinamas būsena…",
     "doctorCheck": "Patikrinti doctor būseną",
-    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas"
+    "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas",
+    "categoryDecisions": "Sprendimai",
+    "decisionProvidersHeading": "Sprendimų modeliai",
+    "decisionProvidersDesc": "Tipizuoti sprendimai per esamas teikėjų paskyras. Sukonfigūruokite palaikomą sprendimų galinį tašką ir patikrinkite modelio prieinamumą."
   },
   "settings": {
     "title": "Nustatymai",

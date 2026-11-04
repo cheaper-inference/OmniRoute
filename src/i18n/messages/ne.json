@@ -2554,7 +2554,8 @@
       "webFetch": "वेबबाट सामग्री प्राप्ति",
       "video": "भिडियो",
       "music": "सङ्गीत",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "निर्णयहरू"
     },
     "noProviders": "यस प्रकारका लागि अहिलेसम्म कुनै प्रदायक कन्फिगर गरिएको छैन।",
     "addConnection": "जडान थप्नुहोस्",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
     "doctorChecking": "स्थिति जाँच गर्दै…",
     "doctorCheck": "डक्टर स्थिति जाँच गर्नुहोस्",
-    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड"
+    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड",
+    "categoryDecisions": "निर्णयहरू",
+    "decisionProvidersHeading": "निर्णय मोडेलहरू",
+    "decisionProvidersDesc": "विद्यमान प्रदायक खातामार्फत निश्चित प्रकारका नेटिभ निर्णयहरू। समर्थित निर्णय एन्डपोइन्ट कन्फिगर गर्नुहोस् र मोडेलको उपलब्धता जाँच्नुहोस्।"
   },
   "settings": {
     "title": "सेटिङहरू",

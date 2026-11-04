@@ -2554,7 +2554,8 @@
       "webFetch": "वेब फ़ेच",
       "video": "वीडियो",
       "music": "संगीत",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "निर्णय"
     },
     "noProviders": "इस प्रकार के लिए अभी तक कोई प्रदाता कॉन्फ़िगर नहीं किया गया है।",
     "addConnection": "कनेक्शन जोड़ें",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
     "doctorChecking": "स्टेटस जांचा जा रहा है…",
     "doctorCheck": "डॉक्टर स्टेटस जांचें",
-    "fallbackRetryBackendTitle": "फ़ॉलबैक रीट्राई बैकएंड"
+    "fallbackRetryBackendTitle": "फ़ॉलबैक रीट्राई बैकएंड",
+    "categoryDecisions": "निर्णय",
+    "decisionProvidersHeading": "निर्णय मॉडल",
+    "decisionProvidersDesc": "मौजूदा प्रदाता खातों के माध्यम से निश्चित प्रकार वाले नेटिव निर्णय। समर्थित निर्णय एंडपॉइंट कॉन्फ़िगर करें और मॉडल की उपलब्धता जाँचें।"
   },
   "settings": {
     "title": "सेटिंग्स",

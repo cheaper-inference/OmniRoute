@@ -2554,7 +2554,8 @@
       "webFetch": "Ambilan Web",
       "video": "Video",
       "music": "Muzik",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Keputusan"
     },
     "noProviders": "Tiada penyedia yang dikonfigurasikan untuk jenis ini lagi.",
     "addConnection": "Tambah Sambungan",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "Pembangun litar khas ChatGPT",
     "doctorChecking": "Memeriksa status…",
     "doctorCheck": "Semak status doktor",
-    "fallbackRetryBackendTitle": "Backend percubaan semula semula jadi"
+    "fallbackRetryBackendTitle": "Backend percubaan semula semula jadi",
+    "categoryDecisions": "Keputusan",
+    "decisionProvidersHeading": "Model keputusan",
+    "decisionProvidersDesc": "Keputusan natif berjenis melalui akaun penyedia sedia ada. Konfigurasikan titik akhir keputusan yang disokong dan semak ketersediaan model."
   },
   "settings": {
     "title": "tetapan",

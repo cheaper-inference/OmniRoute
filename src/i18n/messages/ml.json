@@ -2631,7 +2631,8 @@
       "webFetch": "വെബ് ഉള്ളടക്കം ലഭ്യമാക്കൽ",
       "video": "വീഡിയോ",
       "music": "സംഗീതം",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "തീരുമാനങ്ങൾ"
     },
     "noProviders": "ഈ തരത്തിനായി ഇതുവരെ പ്രൊവൈഡർമാരെയൊന്നും കോൺഫിഗർ ചെയ്തിട്ടില്ല.",
     "addConnection": "കണക്ഷൻ ചേർക്കുക",
@@ -7084,7 +7085,10 @@
     "chatgptConnectorLabel": "ChatGPT ഇഷ്ടാനുസൃത കണക്ടർ",
     "doctorChecking": "സ്ഥിതി പരിശോധിക്കുന്നു…",
     "doctorCheck": "ഡോക്ടർ (doctor) സ്ഥിതി പരിശോധിക്കുക",
-    "fallbackRetryBackendTitle": "പരിഹാര റീട്രൈ ബാക്ക്എൻഡ്"
+    "fallbackRetryBackendTitle": "പരിഹാര റീട്രൈ ബാക്ക്എൻഡ്",
+    "categoryDecisions": "തീരുമാനങ്ങൾ",
+    "decisionProvidersHeading": "തീരുമാന മോഡലുകൾ",
+    "decisionProvidersDesc": "നിലവിലുള്ള ദാതാവിന്റെ അക്കൗണ്ടുകൾ വഴി നിർദ്ദിഷ്ട തരത്തിലുള്ള നേറ്റീവ് തീരുമാനങ്ങൾ. പിന്തുണയ്ക്കുന്ന തീരുമാന എൻഡ്‌പോയിന്റ് ക്രമീകരിച്ച് മോഡലിന്റെ ലഭ്യത പരിശോധിക്കുക."
   },
   "settings": {
     "title": "ക്രമീകരണങ്ങൾ",

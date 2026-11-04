@@ -2631,7 +2631,8 @@
       "webFetch": "ဝဘ်မှ ရယူမှု",
       "video": "ဗီဒီယို",
       "music": "ဂီတ",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "ဆုံးဖြတ်ချက်များ"
     },
     "noProviders": "ဤအမျိုးအစားအတွက် ဝန်ဆောင်မှုပေးသူများကို မသတ်မှတ်ရသေးပါ။",
     "addConnection": "ချိတ်ဆက်မှု ထည့်ရန်",
@@ -7084,7 +7085,10 @@
     "chatgptConnectorLabel": "ChatGPT စိတ်ကြိုက် connector",
     "doctorChecking": "အခြေအနေစစ်ဆေးနေသည်…",
     "doctorCheck": "doctor အခြေအနေ စစ်ဆေးရန်",
-    "fallbackRetryBackendTitle": "အစမ်းပြန်လည်စက်"
+    "fallbackRetryBackendTitle": "အစမ်းပြန်လည်စက်",
+    "categoryDecisions": "ဆုံးဖြတ်ချက်များ",
+    "decisionProvidersHeading": "ဆုံးဖြတ်ချက် မော်ဒယ်များ",
+    "decisionProvidersDesc": "ရှိပြီးသား ဝန်ဆောင်မှုပေးသူအကောင့်များမှတစ်ဆင့် အမျိုးအစားသတ်မှတ်ထားသော မူရင်းဆုံးဖြတ်ချက်များကို အသုံးပြုပါ။ ပံ့ပိုးထားသော ဆုံးဖြတ်ချက် endpoint ကို ပြင်ဆင်ပြီး မော်ဒယ်ရရှိနိုင်မှုကို စစ်ဆေးပါ။"
   },
   "settings": {
     "title": "ဆက်တင်များ",

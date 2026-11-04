@@ -2554,7 +2554,8 @@
       "webFetch": "Webbhämtning",
       "video": "Video",
       "music": "Musik",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Beslut"
     },
     "noProviders": "Inga leverantörer har konfigurerats för denna typ än.",
     "addConnection": "Lägg till anslutning",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPT anpassad koppling",
     "doctorChecking": "Kontrollerar status…",
     "doctorCheck": "Kontrollera läkarestatus",
-    "fallbackRetryBackendTitle": "Reserverad återförsöksbackend"
+    "fallbackRetryBackendTitle": "Reserverad återförsöksbackend",
+    "categoryDecisions": "Beslut",
+    "decisionProvidersHeading": "Beslutsmodeller",
+    "decisionProvidersDesc": "Inbyggda typade beslut via befintliga leverantörskonton. Konfigurera den stödda beslutsändpunkten och kontrollera modellens tillgänglighet."
   },
   "settings": {
     "title": "Inställningar",

@@ -2554,7 +2554,8 @@
       "webFetch": "Pengambilan Web",
       "video": "Video",
       "music": "Musik",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Keputusan"
     },
     "noProviders": "Belum ada penyedia yang dikonfigurasi untuk jenis ini.",
     "addConnection": "Tambah Koneksi",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "Konektor kustom ChatGPT",
     "doctorChecking": "Memeriksa status…",
     "doctorCheck": "Periksa status doctor",
-    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback"
+    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback",
+    "categoryDecisions": "Keputusan",
+    "decisionProvidersHeading": "Model keputusan",
+    "decisionProvidersDesc": "Keputusan native bertipe melalui akun penyedia yang ada. Konfigurasikan endpoint keputusan yang didukung dan periksa ketersediaan model."
   },
   "settings": {
     "title": "Pengaturan",

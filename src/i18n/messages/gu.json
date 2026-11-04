@@ -2554,7 +2554,8 @@
       "webFetch": "વેબ ફેચ",
       "video": "વિડિઓ",
       "music": "મ્યુઝિક",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "નિર્ણયો"
     },
     "noProviders": "આ પ્રકાર માટે હજી સુધી કોઈ પ્રદાતાઓ ગોઠવેલ નથી.",
     "addConnection": "કનેક્શન ઉમેરો",
@@ -7007,7 +7008,10 @@
     "chatgptConnectorLabel": "ChatGPT કસ્ટમ કનેક્ટર",
     "doctorChecking": "સ્થિતિ તપાસવામાં…",
     "doctorCheck": "ડૉક્ટર સ્થિતિ તપાસો",
-    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ"
+    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ",
+    "categoryDecisions": "નિર્ણયો",
+    "decisionProvidersHeading": "નિર્ણય મોડેલો",
+    "decisionProvidersDesc": "હાલના પ્રદાતા ખાતાઓ દ્વારા ચોક્કસ પ્રકારના નેટિવ નિર્ણયો. સમર્થિત નિર્ણય એન્ડપોઇન્ટ ગોઠવો અને મોડેલની ઉપલબ્ધતા ચકાસો."
   },
   "settings": {
     "title": "સેટિંગ્સ",

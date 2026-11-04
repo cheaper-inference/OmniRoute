@@ -2631,7 +2631,8 @@
       "webFetch": "جلب الويب",
       "video": "فيديو",
       "music": "موسيقى",
-      "ocr": "التعرف الضوئي على الحروف"
+      "ocr": "التعرف الضوئي على الحروف",
+      "decisions": "القرارات"
     },
     "noProviders": "لم يتم تكوين أي موفري لهذا النوع حتى الآن.",
     "addConnection": "إضافة اتصال",
@@ -7084,7 +7085,10 @@
     "chatgptConnectorLabel": "موصل ChatGPT المخصص",
     "doctorChecking": "جارٍ التحقق من الحالة…",
     "doctorCheck": "التحقق من حالة الطبيب",
-    "fallbackRetryBackendTitle": "الخادم الاحتياطي لإعادة المحاولة"
+    "fallbackRetryBackendTitle": "الخادم الاحتياطي لإعادة المحاولة",
+    "categoryDecisions": "القرارات",
+    "decisionProvidersHeading": "نماذج القرار",
+    "decisionProvidersDesc": "قرارات أصلية ذات أنواع محددة عبر حسابات المزوّدين الحالية. اضبط نقطة نهاية القرارات المدعومة وتحقّق من توفر النموذج."
   },
   "settings": {
     "title": "الإعدادات",

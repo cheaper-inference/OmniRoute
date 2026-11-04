@@ -1672,5 +1672,8 @@ test("management catalog exposes raw endpoint metadata even with combos-only dis
   assert.ok(julia);
   assert.deepEqual(julia.supported_endpoints, ["systemone"]);
   assert.equal(julia.context_length, null);
+  assert.equal((julia.capabilities as Record<string, unknown>).tool_calling, false);
+  assert.equal((julia.capabilities as Record<string, unknown>).reasoning, false);
+  assert.equal(julia.pricing, null);
   assert.ok(body.catalog.supersoniclabs);
 });
