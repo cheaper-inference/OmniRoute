@@ -281,25 +281,25 @@ aktif bersifat ephemeral.
 
 ---
 
-## 4. Kendali Konkurensi Quota-Share (v3.8.36)
+## 4. Kontrol Konkuren Berbagi Kuota (v3.8.36)
 
-Akun langganan (GLM, MiniMax, dll.) sering kali hanya menerima ~1–3 permintaan
-konkuren; melebihi batas itu memicu 429 dan cooldown. Hal ini sangat krusial pada
-kombo **quota-share** (`qtSd/…`), di mana beberapa API key berbagi satu akun
-upstream. Tiga lapisan menjaga akun bersama agar tidak kebanjiran.
+Akun langganan (GLM, MiniMax, dll.) sering kali hanya menerima ~1–3
+permintaan konkuren; melebihi jumlah tersebut akan memicu 429 dan cooldown. Hal ini sangat
+terasa pada combo **quota-share** (`qtSd/…`), ketika beberapa kunci API berbagi satu akun
+upstream. Tiga lapisan mencegah akun bersama dibanjiri permintaan.
 
 ### Batas konkurensi per koneksi (`max_concurrent`)
 
-Setiap koneksi provider dapat mendeklarasikan batas maksimum `max_concurrent`
-(`provider_connections.max_concurrent`, diatur di modal koneksi / API / DB).
-Biarkan kosong untuk tanpa batas. Ini adalah satu-satunya pengaturan yang
-menggerakkan lapisan serialisasi di bawah — atur sesuai konkurensi nyata akun
-(mis. GLM ~1, MiniMax ~2).
+Setiap koneksi provider dapat menetapkan batas atas `max_concurrent`
+(`provider_connections.max_concurrent`, yang diatur dalam modal koneksi / API / DB).
+Biarkan kosong jika tidak ingin menetapkan batas. Ini adalah satu-satunya pengaturan yang
+mengendalikan lapisan serialisasi di bawah — atur ke konkurensi nyata akun tersebut
+(misalnya GLM ~1, MiniMax ~2).
 
 ### Batas konkurensi per model (`modelConcurrency`)
 
-Sebuah koneksi juga dapat mendeklarasikan batas konkurensi per model yang tepat
-di dalam map `rateLimitOverrides`-nya:
+Koneksi juga dapat menetapkan batas atas konkurensi per model secara tepat
+di dalam map `rateLimitOverrides`:
 
 ```json
 {
@@ -310,33 +310,33 @@ di dalam map `rateLimitOverrides`-nya:
 }
 ```
 
-Atur di modal koneksi (**Rate limit overrides → Per-model
+Atur dalam modal koneksi (**Rate limit overrides → Per-model
 concurrency caps**, satu `model=cap` per baris) atau melalui
 `PATCH /api/providers/[id]` dengan bentuk JSON yang sama. Semantik kunci:
 
-- **Cakupan koneksi vs spesifik model:** `maxConcurrent` tetap menjadi batas
-  bersama untuk seluruh koneksi. Ketika keduanya berlaku, kedua gerbang
-  diperoleh secara atomik dalam gerbang komposit yang sama
-  (`global → provider → account → model`); perilaku efektifnya adalah batas
-  yang lebih ketat di antara yang berlaku.
-- **Pencocokan kunci model secara persis:** kuncinya adalah string model yang
-  diteruskan ke executor setelah resolusi routing — biasanya id model upstream
-  apa adanya (`glm-5`), bukan alias `provider/model` sisi klien (`zai/glm-5`
-  tidak cocok dengan `glm-5`). Nilainya adalah batas permintaan konkuren
-  berupa bilangan bulat positif.
-- **Antrean lokal, tanpa discovery:** permintaan berlebih mengantre secara
-  lokal dengan semantik antrean/timeout yang sudah ada (error admission bertipe
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute tidak menemukan atau
-  menyimpulkan kebijakan upstream — ia menegakkan batas persis yang
-  dikonfigurasikan operator. Gerbang model yang jenuh tidak pernah menonaktifkan
-  provider dan tidak pernah membuat lockout model permanen; perilaku
-  429/cooldown/fallback upstream tetap menjadi pengaman error.
-- **Cakupan per koneksi, per proses:** batas berlaku per koneksi database dan
-  disimpan di memori, sehingga dua koneksi yang memakai ulang API key upstream
-  yang sama tidak saling berkoordinasi.
+- **Berlaku untuk seluruh koneksi vs khusus model:** `maxConcurrent` tetap menjadi batas
+  bersama yang berlaku untuk seluruh koneksi. Jika keduanya berlaku, kedua gate diperoleh
+  secara atomik dalam composite gate yang sama
+  (`global → provider → account → model`); perilaku efektifnya adalah batas yang lebih
+  ketat dari batas yang berlaku.
+- **Pencocokan kunci model secara tepat:** kunci tersebut adalah string model yang
+  diteruskan ke executor setelah resolusi routing — biasanya ID model upstream tanpa
+  tambahan (`glm-5`), bukan alias `provider/model` di sisi klien (`zai/glm-5` tidak
+  cocok dengan `glm-5`). Nilai harus berupa batas konkurensi permintaan positif berupa
+  bilangan bulat.
+- **Queue lokal, tanpa discovery:** permintaan berlebih masuk ke queue lokal dengan
+  semantik queue/timeout yang sudah ada (error admission bertipe `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL`). OmniRoute tidak menemukan atau menyimpulkan kebijakan
+  upstream — OmniRoute menegakkan batas persis yang dikonfigurasi operator. Model gate
+  yang penuh tidak pernah menonaktifkan provider dan tidak pernah membuat pemblokiran model
+  permanen; perilaku 429/cooldown/fallback dari upstream tetap menjadi penanganan error
+  terakhir.
+- **Cakupan per koneksi, per proses:** batas berlaku per koneksi database dan disimpan
+  di memori, sehingga dua koneksi yang menggunakan kembali kunci API upstream yang sama
+  tidak saling berkoordinasi.
 - **Tidak dikonfigurasi berarti tidak berubah:** menghilangkan map (atau membiarkan
-  kolom dashboard kosong) tidak menambahkan gerbang model. Contoh konfigurasi
-  tanpa menyatakan batas provider universal apa pun:
+  kolom dashboard kosong) tidak menambahkan model gate. Contoh konfigurasi tanpa
+  menetapkan batas provider universal apa pun:
 
 ```text
 glm-5=1
@@ -345,41 +345,48 @@ glm-4.7=3
 
 ### Serialisasi permintaan quota-share
 
-Ketika dispatch quota-share menargetkan koneksi yang mendeklarasikan
-`max_concurrent` positif, permintaan konkuren ke **akun** tersebut diserialkan
-melalui semaphore per koneksi (kunci `qsconn:<connectionId>`): permintaan berlebih
-**menunggu dalam antrean** alih-alih membanjiri akun. Sifatnya **fail-open** —
-antrean yang jenuh atau timeout tetap melanjutkan tanpa slot, dan tidak pernah
-menolak permintaan yang dapat di-dispatch. Aktif/nonaktifkan di **Settings →
-Resilience → Quota-share per-connection concurrency**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, default aktif). Tanpa
-batas `max_concurrent`, perilakunya tidak berubah.
+Ketika dispatch quota-share menargetkan koneksi yang menetapkan `max_concurrent` positif,
+permintaan konkuren ke **akun** tersebut diserialisasikan melalui semaphore per koneksi
+(kunci `qsconn:<connectionId>`): permintaan berlebih **menunggu di dalam queue**
+alih-alih membanjiri akun. Fitur ini **fail-open** — queue yang penuh atau timeout akan
+melanjutkan proses tanpa slot, bukan menolak permintaan yang dapat di-dispatch. Aktifkan atau
+nonaktifkan di **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, default
+aktif). Tanpa batas `max_concurrent`, perilakunya tidak berubah.
 
-> Gerbang routing quota-share (`selectQuotaShareTarget`, DRR + P2C) sendiri
-> bersifat fail-open dan hanya _menurunkan prioritas_ koneksi yang mencapai batas
-> — dengan pool satu koneksi ia tidak bisa membatasi secara keras, sehingga
-> semaphore inilah yang sebenarnya membendung banjir permintaan.
+> Gate routing quota-share (`selectQuotaShareTarget`, DRR + P2C) sendiri
+> bersifat fail-open dan hanya _menurunkan prioritas_ koneksi yang telah mencapai batas —
+> dengan pool yang hanya memiliki satu koneksi, gate ini tidak dapat membatasi secara
+> ketat, sehingga semaphore inilah yang benar-benar menahan lonjakan permintaan.
 
-### Retry sadar cooldown pada kombo
+### Retry combo yang mempertimbangkan cooldown
 
-Untuk setiap strategi kombo (bila diaktifkan), permintaan yang akan mengkristalkan
-429 untuk cooldown transien SINGKAT akan menunggunya lalu melakukan dispatch ulang
-alih-alih mengembalikan 429 — ini mencakup jendela TPM/RPM kelas Gemini
-(retry-after ~60 detik) pada kombo multi-model, mis. kedua target kombo 2 model
-sama-sama terkena rate limit per model. Dibatasi oleh `comboCooldownWait`
+Untuk setiap strategi combo (jika diaktifkan), permintaan yang akan menghasilkan 429
+untuk cooldown transien SHORT akan menunggu hingga cooldown berakhir lalu melakukan
+dispatch ulang, bukan mengembalikan 429 — ini mencakup jendela TPM/RPM kelas Gemini
+(~60 dtk retry-after) pada combo multi-model, misalnya ketika kedua target combo
+2-model terkena batas laju per model. Perilaku ini dibatasi oleh `comboCooldownWait`
 (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) di **Settings → Resilience**.
-Ia tidak pernah menunggu pada `quota_exhausted` (terkunci hingga tengah malam)
-atau alasan auth/not-found.
+Fitur ini tidak pernah menunggu `quota_exhausted` (terkunci hingga tengah malam) atau
+alasan auth/not-found.
 
-Gerbang yang sama mencakup kasus pra-dispatch (#16319): ketika setiap target
-kombo dilewati sebelum percobaan apa pun dilakukan karena modelnya berada dalam
-lockout transien singkat, jalur tanpa percobaan ini menunggu lockout tersebut
-di bawah batas yang sama lalu melakukan dispatch ulang, alih-alih menjawab
-`503 ALL_TARGETS_SKIPPED` tanpa petunjuk. Ketika penantian tidak diizinkan
-(batas, percobaan, atau bujet habis, atau fitur dimatikan), respons terminal
-ditingkatkan menjadi `429 rate_limit_error` yang membawa `retry_after` /
-`reset_at` dari kedaluwarsa lock transien paling awal; lock kuota, auth, dan
-not-found tetap menghasilkan 503 tanpa petunjuk.
+Combo dapat memilih untuk tidak ikut serta dengan `config.comboCooldownWaitEnabled: false`.
+Hanya `false` literal yang menonaktifkan penantian combo bersama ini (cooldown setelah
+dispatch dan penantian circuit-open/model-lock sebelum dispatch) serta perluasan batas
+bawah timeout berdasarkan anggaran penantian. Nilai yang tidak ada atau `true` akan
+mempertahankan kebijakan global; `true` tidak dapat mengaktifkan penantian yang dinonaktifkan
+secara global. `targetTimeoutMs` eksplisit tetap memiliki prioritas. Pilihan ini tidak
+mengubah penantian native-Codex turn-pin sebelum dispatch yang terpisah.
+
+Gate yang sama mencakup kasus sebelum dispatch (#16319): ketika setiap target combo
+dilewati sebelum percobaan apa pun dilakukan karena modelnya berada dalam penguncian
+transien singkat, jalur dengan nol percobaan akan menunggu hingga penguncian berakhir
+dengan batas yang sama lalu melakukan dispatch ulang, alih-alih mengembalikan
+`503 ALL_TARGETS_SKIPPED` tanpa petunjuk. Jika tidak ada penantian yang diizinkan
+(batas waktu, jumlah percobaan, atau anggaran habis, atau fitur dinonaktifkan), respons
+terminal ditingkatkan menjadi `429 rate_limit_error` yang membawa `retry_after` /
+`reset_at` dari waktu berakhirnya penguncian transien paling awal; penguncian kuota,
+auth, dan not-found tetap menghasilkan 503 tanpa petunjuk.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
