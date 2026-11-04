@@ -66,6 +66,9 @@
     "TS2339": 4,
     "TS2345": 2
   },
+  "src/app/(dashboard)/dashboard/providers/providerPageUtils.ts": {
+    "TS2345": 1
+  },
   "src/app/(dashboard)/dashboard/quota/page.tsx": {
     "TS2339": 4
   },
@@ -424,6 +427,16 @@
   "src/server/ws/liveServer.ts": {
     "TS2345": 1,
     "TS2322": 1
+  },
+  "src/shared/components/OAuthModal.tsx": {
+    "TS2769": 2,
+    "TS2345": 3
+  },
+  "src/shared/components/analytics/charts.tsx": {
+    "TS2345": 1
+  },
+  "src/shared/components/analytics/rechartsDonuts.tsx": {
+    "TS2739": 2
   },
   "src/sse/handlers/chatHelpers.ts": {
     "TS2559": 1

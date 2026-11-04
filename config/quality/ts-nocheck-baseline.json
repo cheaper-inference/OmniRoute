@@ -22,7 +22,7 @@
     "src/lib/usage/migrations.ts"
   ],
   "_program": {
-    "files": 6122,
+    "files": 6072,
     "include": [
       "electron/**/*.d.ts",
       "src/**/*.ts",
@@ -48,9 +48,7 @@
       ".next-playwright",
       ".claude",
       ".scratch",
-      ".source",
-      "packages/ui-kit/src/index.ts",
-      "packages/ui-kit/src/reporting-charts.tsx"
+      ".source"
     ],
     "compilerOptions": {
       "target": "ES2022",
