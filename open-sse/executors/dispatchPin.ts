@@ -21,7 +21,11 @@ import {
  */
 export function assertDispatchUrlAllowed(provider: string, url: string): void {
   if (!url) return;
-  if (isLocalProvider(provider) || isSelfHostedChatProvider(provider)) return;
+  if (isLocalProvider(provider) || isSelfHostedChatProvider(provider)) {
+    // Exempt from public-host checks, never from the cloud-metadata block (F-C4-09).
+    parseAndValidateNonMetadataUrl(url);
+    return;
+  }
   if (getProviderValidationGuard() === "public-only") {
     parseAndValidatePublicUrl(url);
     return;
