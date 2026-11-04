@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-115 flags across 6 categories. **Default** is the definition default — the value
+116 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (11)
@@ -120,7 +120,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (55)
+### Runtime (56)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -168,6 +168,7 @@ same effective policy.
 | `CATALOG_MIRROR_REFINEMENTS_ENABLED`           | boolean | `false` |         | Refine the `claude/` discovery and functional-gateway mirrors on `/v1/models`. Off by default: both mirror passes behave exactly as before. On: `claude/` discovery mirrors also cover listed reasoning-effort variants (`-low`/`-medium`/`-high`/`-xhigh`), skip built-in `auto/*` ids the request path cannot materialize and skip an alias already listed; functional-gateway mirrors skip combos and OmniRoute-synthesized ids (`claude/`, `no-think/`), take the owner from `owned_by`, never use the owner as its own gateway, skip gateways disabled in `blockedProviders` and models outside a gateway's authoritative live catalog.    |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM` | boolean | `false` |         | On plain `anthropic-compatible-*` relays (claude → claude passthrough), keep mid-conversation `role: "system"` turns inside `messages[]` instead of hoisting them into the top-level `system` parameter, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the `mid-conversation-system-2026-04-07` `anthropic-beta` (forwarded upstream as-is). Off by default: every system turn is hoisted exactly as before, because relays without the beta reject `role: "system"` messages with 400.                                                                                                       |
+| `CLAUDE_CACHE_TAIL_TTL_1H`                     | boolean | `false` |         | Mark the conversation tail that OmniRoute anchors for Claude prompt caching (the second-to-last user turn and the last assistant turn) with the same `1h` TTL already used for `system` and `tools`, so a pause longer than five minutes does not rewrite the cached prefix. Vertex keeps the 5m TTL. Off by default: the tail keeps the 5m TTL exactly as before. A 1h cache write costs 2x the input price instead of 1.25x, so fast agent loops that never idle past five minutes pay more with this on. Client-managed (passthrough) markers are never changed.                                                                             |
 | `MODELS_DEV_EFFORT_TIERS_ENABLED`              | boolean | `false` |         | Use the reasoning effort tiers models.dev publishes (narrowed to the known effort vocabulary) when neither an operator override nor the provider registry declares any, and treat a declared empty tier list as "no tiers" in `/v1/models` `effort_tiers` and combo tier intersections. Off by default: `effort_tiers` and resolved `supportedThinkingEfforts` stay exactly as before.                                                                                                                                                                                                                                                          |
 | `AUTO_REQUEST_RESOLVED_CAPABILITIES`           | boolean | `false` |         | auto/* requests build the candidate pool with resolved model capabilities (vision, reasoning, thinking) and observed quality scores in one bulk read (#16419). Off by default: request-time snapshot weights stay exactly as before. On: those signals feed the snapshot weights, so candidate weights and selection can change.                                                                                                                                                                                                                                                                                                                |
 | `AUTO_COMBO_KEYLESS_TRANSPORT_GATE`            | boolean | `false` |         | Hold keyless (no-auth) providers whose transport needs a local browser (`browserBacked`) or a locally installed CLI (`isLocalCli`) out of the `auto/*` candidate pool, so a hung member cannot stall an auto request until the per-target timeout (#17036). Off by default: the keyless pool is unchanged. Direct `<alias>/<model>` calls work either way.                                                                                                                                                                                                                                                                                      |
@@ -266,10 +267,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 115 flags
+    // ... all 116 flags
   ],
   "summary": {
-    "total": 115,
+    "total": 116,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -49,6 +49,7 @@
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
+import { writePublicOpenApi } from "./publicOpenApi.mjs";
 import { colocateLlmlinguaOptionals, SEED_PACKAGES } from "./colocateOptionals.mjs";
 import { WREQ_JS_NATIVE_BINDINGS } from "./wreqJsNative.mjs";
 
@@ -751,6 +752,7 @@ function copyStaticAndPublic({ distDir, relDistDir, projectRoot, resolvedOutDir 
   const publicSrc = path.join(projectRoot, "public");
   if (fsSync.existsSync(publicSrc)) {
     fsSync.cpSync(publicSrc, path.join(resolvedOutDir, "public"), { recursive: true, force: true });
+    writePublicOpenApi(projectRoot, resolvedOutDir);
     stampServiceWorkerBuildId(resolvedOutDir);
   }
 }
@@ -1248,6 +1250,7 @@ export function assembleStandalone({
     // overwrites the build-id stamp copyStaticAndPublic just wrote. Stamp
     // again after that copy, or sw.js ships with the generic cache name and
     // a browser keeps the previous deploy's worker.
+    writePublicOpenApi(projectRoot, resolvedOutDir);
     stampServiceWorkerBuildId(resolvedOutDir);
     // Repair hollow externalized package dirs in BOTH locations Turbopack's standalone
     // tracer can populate: the top-level bundle node_modules, and — for projects with a

@@ -13,17 +13,20 @@ import {
   esc,
 } from "../../../scripts/docs/readme-diagram-theme.mjs";
 
+// ci-tokens.css still owns the type scale (tracking, weights) the Switzer roles are checked
+// against; the PALETTE is the kit's Editions appearance, OmniRoute's default look.
 const tokens = readFileSync("packages/ui-kit/src/ci-tokens.css", "utf8");
+const editions = readFileSync("packages/ui-kit/src/ci-editions.css", "utf8");
 
-// --- ci-tokens.css as data: the light (:root) and dark ([data-theme="dark"]) blocks -----------
-// KIT must hold the literal value each kit token resolves to inside its own block (following
-// var(--…) chains; primitives live only on :root, so the dark block falls back to it).
+// --- ci-editions.css as data: the light block and the data-theme="dark" block ---------------
+// KIT must hold the literal value each Editions token has inside its own block (following
+// var(--…) chains; the dark block redeclares only what changes, so it falls back to light).
 
 function parseBlock(selectorStart: string): Map<string, string> {
-  const start = tokens.indexOf(selectorStart);
-  assert.ok(start >= 0, `block not found in ci-tokens.css: ${selectorStart}`);
-  const end = tokens.indexOf("\n}", start);
-  const body = tokens.slice(start, end);
+  const start = editions.indexOf(selectorStart);
+  assert.ok(start >= 0, `block not found in ci-editions.css: ${selectorStart}`);
+  const end = editions.indexOf("\n}", start);
+  const body = editions.slice(editions.indexOf("{", start) + 1, end);
   const decls = new Map<string, string>();
   for (const m of body.matchAll(/(--[\w-]+):\s*([^;]+);/g)) {
     decls.set(m[1], m[2].replace(/\s+/g, " ").trim());
@@ -31,25 +34,38 @@ function parseBlock(selectorStart: string): Map<string, string> {
   return decls;
 }
 
-const lightBlock = parseBlock(":root,\n.ci-theme {");
-const darkBlock = parseBlock(':root[data-theme="dark"],');
+const lightBlock = parseBlock(':is(html:root:has([data-ci-appearance="editions"])');
+const darkBlock = parseBlock(
+  ':is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"])'
+);
 
-// rgb(4 13 16 / 0.14) → rgba(4,13,16,0.14): the module writes the comma form (same colour).
+// rgb(32 33 28 / .22) → rgba(32,33,28,0.22): the module writes the comma form (same colour).
 const normalize = (v: string) =>
   v.replace(
-    /^rgb\((\d+) (\d+) (\d+) \/ ([\d.]+)\)$/,
-    (_, r: string, g: string, b: string, a: string) => `rgba(${r},${g},${b},${a})`
+    /^rgb\((\d+) (\d+) (\d+) \/ (\d*\.?\d+)\)$/,
+    (_, r: string, g: string, b: string, a: string) =>
+      `rgba(${r},${g},${b},${a.startsWith(".") ? `0${a}` : a})`
   );
 
 function resolve(name: string, block: Map<string, string>, depth = 0): string {
   assert.ok(depth < 8, `var() chain too deep for ${name}`);
   const raw = block.get(name) ?? lightBlock.get(name);
-  assert.ok(raw, `${name} missing from ci-tokens.css`);
+  assert.ok(raw, `${name} missing from ci-editions.css`);
   const ref = raw.match(/^var\((--[\w-]+)\)$/);
   return ref ? resolve(ref[1], block, depth + 1) : normalize(raw);
 }
 
-// KIT key → kit token (task 6.0 brief). Later diagrams rely on these exact key names.
+// KIT key → Editions token. Later diagrams rely on these exact key names.
+const BASE_TOKENS: Record<string, string> = {
+  bg: "--ci-color-background",
+  surface: "--ci-color-surface",
+  ink: "--ci-color-heading",
+  body: "--ci-color-text",
+  muted: "--ci-color-text-muted",
+  border: "--ci-color-border",
+  accent: "--ci-color-accent",
+  accentInk: "--ci-color-accent-foreground",
+};
 const STATUS_AND_SURFACE_TOKENS: Record<string, string> = {
   ok: "--ci-color-success",
   okBg: "--ci-color-success-bg",
@@ -67,32 +83,68 @@ const STATUS_AND_SURFACE_TOKENS: Record<string, string> = {
   accentSoft: "--ci-color-accent-surface-range",
 };
 
-test("every kit color used by the diagrams exists verbatim in ci-tokens.css", () => {
+// The one measured exception (readme-diagram-theme.mjs header): light warn is the kit's warning
+// scaled to 90 % per channel, because the kit value is below AA for text on the light canvas.
+const WARN_SCALE = 0.9;
+const scaleHex = (hex: string, k: number) =>
+  "#" +
+  [1, 3, 5]
+    .map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k))
+    .map((c) => c.toString(16).padStart(2, "0"))
+    .join("");
+
+// WCAG 2.x contrast; a translucent colour is composited over the background first.
+const rgbOf = (c: string, over?: number[]): number[] => {
+  const hex = /^#([0-9a-f]{6})$/i.exec(c);
+  if (hex) return [0, 2, 4].map((i) => parseInt(hex[1].slice(i, i + 2), 16));
+  const m = /^rgba\((\d+),(\d+),(\d+),([\d.]+)\)$/.exec(c);
+  assert.ok(m && over, `colour ${c} needs a background to composite on`);
+  const a = Number(m[4]);
+  return [m[1], m[2], m[3]].map((v, i) => Math.round(Number(v) * a + over[i] * (1 - a)));
+};
+const luminance = (rgb: number[]) => {
+  const [r, g, b] = rgb
+    .map((c) => c / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (fg: string, bg: string, base?: string) => {
+  const under = base ? rgbOf(base) : undefined;
+  const [hi, lo] = [luminance(rgbOf(fg, rgbOf(bg, under))), luminance(rgbOf(bg, under))].sort(
+    (x, y) => y - x
+  );
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+test("every Editions color used by the diagrams exists verbatim in ci-editions.css", () => {
   for (const hex of [
-    "#fbfbf8",
-    "#ffffff",
-    "#040d10",
-    "#031a1b",
-    "#575f5f",
-    "#d8ff00",
-    "#0d191c",
-    "#f1f7f7",
-    "#c7cbc5",
+    "#f3f1e9",
+    "#faf9f4",
+    "#20211c",
+    "#626459",
+    "#e5ac82",
+    "#241b15",
+    "#11120f",
+    "#191a16",
+    "#f2f0e8",
+    "#a5a69b",
   ]) {
-    assert.ok(tokens.includes(hex), `${hex} missing from ci-tokens.css`);
+    assert.ok(editions.includes(hex), `${hex} missing from ci-editions.css`);
   }
-  assert.equal(KIT.light.accent, "#d8ff00");
-  assert.equal(KIT.dark.bg, "#040d10");
+  assert.equal(KIT.light.accent, "#e5ac82");
+  assert.equal(KIT.dark.bg, "#11120f");
+  assert.doesNotMatch(JSON.stringify(KIT), /#d8ff00|216,255,0/i, "no Classic lime left");
 });
 
-test("the token parser reads ci-tokens.css the way the brief does (sanity pins)", () => {
-  assert.equal(resolve("--ci-color-success", lightBlock), "#087a4f");
-  assert.equal(resolve("--ci-color-success", darkBlock), "#5dd6a5");
-  assert.equal(resolve("--ci-color-surface-inverse", lightBlock), "#040d10");
-  assert.equal(resolve("--ci-color-text-inverse", lightBlock), "#f1f7f7");
-  assert.equal(resolve("--ci-color-track", lightBlock), "rgba(4,13,16,0.14)");
-  assert.equal(resolve("--ci-color-track", darkBlock), "rgba(241,247,247,0.2)");
-  assert.equal(resolve("--ci-color-accent-surface-range", lightBlock), "rgba(216,255,0,0.22)");
+test("the token parser reads ci-editions.css the way the module does (sanity pins)", () => {
+  assert.equal(resolve("--ci-color-success", lightBlock), "#3c735b");
+  assert.equal(resolve("--ci-color-success", darkBlock), "#9ecbbb");
+  assert.equal(resolve("--ci-color-surface-inverse", lightBlock), "#11120f");
+  assert.equal(resolve("--ci-color-surface-inverse", darkBlock), "#11120f", "light fallback");
+  assert.equal(resolve("--ci-color-text-inverse", lightBlock), "#f2f0e8");
+  assert.equal(resolve("--ci-color-track", lightBlock), "rgba(32,33,28,0.18)");
+  assert.equal(resolve("--ci-color-track", darkBlock), "rgba(242,240,232,0.18)");
+  assert.equal(resolve("--ci-color-accent-surface-range", lightBlock), "rgba(229,172,130,0.18)");
 });
 
 test("KIT keeps its original keys and adds the status, surface and inverse tokens", () => {
@@ -112,10 +164,23 @@ test("KIT keeps its original keys and adds the status, surface and inverse token
   assert.deepEqual(Object.keys(KIT.dark), [...original, ...added]);
 });
 
-test("every new KIT value equals what its kit token resolves to in ci-tokens.css", () => {
-  for (const [key, token] of Object.entries(STATUS_AND_SURFACE_TOKENS)) {
-    assert.equal(KIT.light[key], resolve(token, lightBlock), `light ${key} (${token})`);
+test("every KIT value equals what its Editions token resolves to (light warn excepted)", () => {
+  for (const [key, token] of Object.entries({ ...BASE_TOKENS, ...STATUS_AND_SURFACE_TOKENS })) {
+    if (key !== "warn") {
+      assert.equal(KIT.light[key], resolve(token, lightBlock), `light ${key} (${token})`);
+    }
     assert.equal(KIT.dark[key], resolve(token, darkBlock), `dark ${key} (${token})`);
+  }
+});
+
+test("light warn is the kit warning darkened 10 % — and only because the kit value misses AA", () => {
+  const kitWarn = resolve("--ci-color-warning", lightBlock);
+  assert.equal(kitWarn, "#99631f");
+  assert.equal(KIT.light.warn, scaleHex(kitWarn, WARN_SCALE));
+  assert.ok(contrast(kitWarn, KIT.light.bg) < 4.5, "the kit warning is below AA on the canvas");
+  for (const bg of ["bg", "surface", "warnBg", "surfaceSubtle", "surfaceMuted"]) {
+    const ratio = contrast(KIT.light.warn, KIT.light[bg]);
+    assert.ok(ratio >= 4.5, `light warn on ${bg}: ${ratio.toFixed(2)}:1`);
   }
 });
 
@@ -124,14 +189,42 @@ test("border is pinned to the kit's --ci-color-border in both blocks", () => {
   assert.equal(KIT.dark.border, resolve("--ci-color-border", darkBlock));
 });
 
+test("every text colour clears WCAG AA (4.5:1) on every surface it is drawn on, both schemes", () => {
+  for (const scheme of ["light", "dark"] as const) {
+    const k = KIT[scheme];
+    const surfaces = ["bg", "surface", "surfaceSubtle", "surfaceMuted"];
+    for (const fg of ["ink", "body", "muted"]) {
+      for (const bg of surfaces) {
+        const ratio = contrast(k[fg], k[bg]);
+        assert.ok(ratio >= 4.5, `${scheme} ${fg} on ${bg}: ${ratio.toFixed(2)}:1`);
+      }
+      const soft = contrast(k[fg], k.accentSoft, k.surface);
+      assert.ok(soft >= 4.5, `${scheme} ${fg} on accentSoft: ${soft.toFixed(2)}:1`);
+    }
+    for (const tone of ["ok", "warn", "err", "info"]) {
+      for (const bg of [`${tone}Bg`, "bg", "surface"]) {
+        const ratio = contrast(k[tone], k[bg]);
+        assert.ok(ratio >= 4.5, `${scheme} ${tone} on ${bg}: ${ratio.toFixed(2)}:1`);
+      }
+    }
+    assert.ok(contrast(k.accentInk, k.accent) >= 4.5, `${scheme} accentInk on accent`);
+    assert.ok(contrast(k.inverseText, k.inverseBg) >= 4.5, `${scheme} inverse text`);
+    // cli-terminal paints its inverse panel with the DARK status colours in both schemes.
+    for (const tone of ["ok", "warn", "err", "muted"]) {
+      const ratio = contrast(KIT.dark[tone], k.inverseBg);
+      assert.ok(ratio >= 4.5, `${scheme} inverse panel ${tone}: ${ratio.toFixed(2)}:1`);
+    }
+  }
+});
+
 test("themeCss declares the light palette and a dark override behind prefers-color-scheme", () => {
   const css = themeCss();
-  assert.match(css, /:root\{[^}]*--bg:#fbfbf8[^}]*--accent:#d8ff00/);
+  assert.match(css, /:root\{[^}]*--bg:#f3f1e9[^}]*--accent:#e5ac82/);
   assert.match(
     css,
-    /@media \(prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10[^}]*--ink:#ffffff/
+    /@media \(prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f[^}]*--ink:#f2f0e8/
   );
-  assert.match(css, /--accent-ink:#040d10/);
+  assert.match(css, /--accent-ink:#241b15/);
 });
 
 test("themeCss carries the status colors in both blocks under kebab-case variable names", () => {
@@ -140,11 +233,11 @@ test("themeCss carries the status colors in both blocks under kebab-case variabl
   const dark = css.match(/@media \(prefers-color-scheme: dark\)\{:root\{([^}]*)\}\}/)?.[1] ?? "";
   assert.ok(light && dark, "both :root blocks present");
   const pairs: Array<[string, string, string]> = [
-    ["--ok", "#087a4f", "#5dd6a5"],
-    ["--err", "#bf3636", "#ff8f8f"],
-    ["--warn", "#a75a00", "#f4cf8b"],
-    ["--info", "#2869d8", "#8fbaff"],
-    ["--inverse-bg", "#040d10", "#040d10"],
+    ["--ok", "#3c735b", "#9ecbbb"],
+    ["--err", "#ae4340", "#edaaa1"],
+    ["--warn", "#8a591c", "#e5c28c"],
+    ["--info", "#526b80", "#a6bfd0"],
+    ["--inverse-bg", "#11120f", "#11120f"],
   ];
   for (const [name, l, d] of pairs) {
     assert.ok(light.includes(`${name}:${l}`), `light ${name}:${l}`);
@@ -194,14 +287,24 @@ test("Switzer roles declare no font family, code roles sit on the mono stack", (
 });
 
 test("the kit's type tokens are the source of the Switzer roles", () => {
-  const em = (name: string) => Number(lightBlock.get(name)?.replace("em", ""));
+  // Type tokens live in ci-tokens.css's base (:root, .ci-theme) block, not in the palette.
+  const typeStart = tokens.indexOf(":root,\n.ci-theme {");
+  assert.ok(typeStart >= 0, "ci-tokens.css has its :root, .ci-theme block");
+  const typeBlock = new Map(
+    [
+      ...tokens
+        .slice(typeStart, tokens.indexOf("\n}", typeStart))
+        .matchAll(/(--[\w-]+):\s*([^;]+);/g),
+    ].map((m) => [m[1], m[2].trim()])
+  );
+  const em = (name: string) => Number(typeBlock.get(name)?.replace("em", ""));
   assert.equal(SWITZER_ROLES.headline.tracking, em("--ci-letter-spacing-display"));
   assert.equal(SWITZER_ROLES.h2.tracking, em("--ci-type-heading-tracking"));
   assert.equal(SWITZER_ROLES.num.tracking, em("--ci-type-metric-tracking"));
   assert.equal(SWITZER_ROLES.kicker.tracking, em("--ci-letter-spacing-caps"));
   assert.equal(SWITZER_ROLES.small.tracking, em("--ci-type-caption-tracking"));
   assert.match(tokens, /--ci-font-display: var\(--ci-font-ui\)/);
-  assert.equal(Number(lightBlock.get("--ci-font-weight-medium")), SWITZER_ROLES.headline.weight);
+  assert.equal(Number(typeBlock.get("--ci-font-weight-medium")), SWITZER_ROLES.headline.weight);
   for (const { weight } of Object.values(SWITZER_ROLES)) {
     assert.ok([400, 500, 600].includes(weight), `the kit has no weight ${weight}`);
   }
