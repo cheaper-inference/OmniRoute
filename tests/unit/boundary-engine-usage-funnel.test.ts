@@ -25,6 +25,15 @@ const VIA_IMAGE_RESULT: Array<[file: string, specifier: string]> = [
   ["open-sse/handlers/imageUpscale/shared.ts", "../imageResult.ts"],
 ];
 
+// Loading the usage store runs its startup migration, which opens the SQLite singleton in the
+// isolated DATA_DIR. Close it so the harness can remove the directory on exit (on Windows an open
+// handle keeps storage.sqlite* behind). getDbInstance() reopens lazily, so later files that share
+// this process (--test-isolation=none) are unaffected.
+test.after(async () => {
+  const core = await import("../../src/lib/db/core.ts");
+  core.resetDbInstance();
+});
+
 test("imageResult.saveCallLog is the same function object as the usage store's", async () => {
   const funnel = await import("../../open-sse/handlers/imageResult.ts");
   const usageDb = await import("../../src/lib/usageDb.ts");
