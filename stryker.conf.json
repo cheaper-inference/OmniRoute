@@ -425,6 +425,7 @@
       "tests/unit/metered-budget-must-not-disable-flat-rate.test.ts",
       "tests/unit/middleware-header-strip-5849.test.ts",
       "tests/unit/middleware-hooks-error-sanitization.test.ts",
+      "tests/unit/misalignment-refusal-account-state.test.ts",
       "tests/unit/model-catalog-runtime-invalidation.test.ts",
       "tests/unit/model-cooldowns-route-auth.test.ts",
       "tests/unit/model-cooldowns-route.test.ts",
