@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Các phần proxy",
     "requestBodyLimitTitle": "Giới hạn phần thân yêu cầu",
     "requestBodyLimitDescription": "Kích thước payload API tối đa được chấp nhận trước khi phần thân yêu cầu được phân tích cú pháp. Các tuyến tải lên chuyên dụng vẫn duy trì giới hạn tích hợp ít nhất 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions và Responses chấp nhận tối đa 50 MB cho đến khi bạn lưu giới hạn tại đây. Giới hạn đã lưu cũng áp dụng cho chúng, dù thấp hơn hay cao hơn.",
     "requestBodyLimitInputLabel": "Giới hạn phần thân yêu cầu tính bằng MB",
     "requestBodyLimitEmptyError": "Nhập giới hạn tính bằng MB",
     "requestBodyLimitWholeNumberError": "Sử dụng một số nguyên",
