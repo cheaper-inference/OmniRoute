@@ -36,6 +36,13 @@ export function listInputModalities(): InputModalityMap {
   return values;
 }
 
+/** Refresh the cached modality declarations when the model catalog changes. */
+function cachedInputModalities(): InputModalityMap {
+  const version = getModelCatalogCacheVersion();
+  if (cache?.version !== version) cache = { version, values: listInputModalities() };
+  return cache.values;
+}
+
 /** Resolve declarations for this model/account, preserving unknown-model capability fallback. */
 export function getInputModalities(
   provider: string | null,
@@ -44,12 +51,7 @@ export function getInputModalities(
   connectionId?: string | null
 ): readonly string[] | undefined {
   if (!provider || !model) return undefined;
-  let values = bulk;
-  if (!values) {
-    const version = getModelCatalogCacheVersion();
-    if (cache?.version !== version) cache = { version, values: listInputModalities() };
-    values = cache.values;
-  }
+  const values = bulk ?? cachedInputModalities();
   const found = connectionId
     ? values.get(`${provider}:${connectionId}`)?.get(model)
     : values.get(provider)?.get(model);
