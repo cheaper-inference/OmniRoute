@@ -7,6 +7,7 @@ import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.t
 import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
 import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
+import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
 import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
@@ -2402,6 +2403,11 @@ export async function markAccountUnavailable(
 
   try {
     await currentMutex;
+
+    // A concurrent cooldown or terminal-state write must not turn this refusal into rotation.
+    if (isRequestScopedMisalignmentRefusal({ status, code: options.structuredError?.code })) {
+      return { shouldFallback: false, cooldownMs: 0 };
+    }
 
     // STRICT_ZERO_COST: this connection just failed (whatever the reason) —
     // drop any cached "SAFE" free-allowance reading for it immediately rather
