@@ -116,7 +116,8 @@ export function detectCachingContext(
           ),
     usesAutomaticPrefixCaching: providerUsesAutomaticPrefixCaching(
       provider,
-      context.connectionCacheOverride
+      context.connectionCacheOverride,
+      context.model ?? normalizeString(bodyRecord.model)
     ),
   };
 }
