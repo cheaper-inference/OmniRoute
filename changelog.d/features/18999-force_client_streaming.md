@@ -1,0 +1,1 @@
+- #18999: feat(chat): optionally convert client stream=false to stream=true for immediate 
