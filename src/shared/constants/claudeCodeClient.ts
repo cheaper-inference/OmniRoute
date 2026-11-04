@@ -12,6 +12,7 @@
  * uses that version when it is newer than the pin. The dashboard override
  * (`cliVersions.ts`) wins over everything, then the env override. The lookup is fire-and-forget; a cold or failed fetch stays on the pin.
  */
+import { canStartBackgroundRefresh } from "../utils/backgroundRefresh";
 import {
   getCliVersionOverride,
   type CliVersionSource,
@@ -79,7 +80,7 @@ function readFreshCache(): string | null {
 }
 
 function shouldAutoRefreshClaudeCodeVersion(): boolean {
-  if (typeof process === "undefined") return false;
+  if (!canStartBackgroundRefresh()) return false;
   return !process.env.NODE_TEST_CONTEXT && !process.env.VITEST && process.env.NODE_ENV !== "test";
 }
 
