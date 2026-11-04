@@ -828,9 +828,9 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
     }
   }
 
-  if (detailState === "ready" && typeof responseId === "string") {
-    // The durable row is now authoritative; drop the bridge entry instead
-    // of letting it idle until its TTL.
+  if (typeof responseId === "string") {
+    // The write has settled: whether ready or missing/none, no temporary
+    // continuation bridge should retain the full request history any longer.
     clearPendingContinuationState(responseId);
   }
 
