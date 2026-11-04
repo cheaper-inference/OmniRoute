@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
 import { setCodexUsageFetchForTests } from "../../open-sse/services/usage/codex.ts";
+import { connectionProxyTestOverride } from "../../open-sse/services/connectionProxyFetch.ts";
 import {
   MinIntervalThrottle,
   resetQuotaFetchThrottle,
@@ -71,6 +72,11 @@ test("#15172 concurrent Codex usage fetches start at least one interval apart", 
   const clock = new FakeClock();
   const restoreThrottle = installSharedThrottle(clock);
   const { starts, restore } = installUsageFetch(clock);
+  // These connection ids go through fetchWithConnectionProxy. Keep proxy
+  // resolution off the settings DB and proxy auto-select, so no real I/O runs
+  // between the gate and the fetch stub while the virtual clock is shared.
+  const previousProxyResolver = connectionProxyTestOverride.resolveProxyForConnection;
+  connectionProxyTestOverride.resolveProxyForConnection = async () => ({ proxy: null });
 
   try {
     const connections = ["a", "b", "c", "d"].map((id) => ({
@@ -90,6 +96,7 @@ test("#15172 concurrent Codex usage fetches start at least one interval apart", 
       );
     }
   } finally {
+    connectionProxyTestOverride.resolveProxyForConnection = previousProxyResolver;
     restore();
     restoreThrottle();
   }
