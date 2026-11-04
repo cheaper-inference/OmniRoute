@@ -119,7 +119,11 @@ export function synthesizeOpenAiSseFromJson(jsonText: string): string {
       emitDelta({ content: message.content });
     }
     if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
-      emitDelta({ tool_calls: message.tool_calls });
+      // Stream deltas need `index`; non-stream tool_calls have none, and readers
+      // default a missing index to 0, so every call would merge into one slot.
+      emitDelta({
+        tool_calls: message.tool_calls.map((tc, i) => (isRecord(tc) ? { index: i, ...tc } : tc)),
+      });
     }
 
     const finishReason = normalizeOpenAICompatibleFinishReasonString(choice.finish_reason);
