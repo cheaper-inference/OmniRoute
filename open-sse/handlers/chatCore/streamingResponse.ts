@@ -448,12 +448,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     if (isHedgeCancelledReasonError(error)) {
       streamController.handleError(createSafeAbortError());
       return {
-        response: createErrorResult(
-          599,
-          "Superseded by hedge sibling",
-          null,
-          "hedge_cancelled"
-        ),
+        response: createErrorResult(599, "Superseded by hedge sibling", null, "hedge_cancelled"),
         carry: {
           translatedBody,
           currentModel,
@@ -632,7 +627,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
   // that may be from the modification rather than a genuine auth failure, so we
   // skip the credential refresh attempt in that case.
   const hadStreamOptions =
-    targetFormat === FORMATS.OPENAI_RESPONSES && "stream_options" in translatedBody;
+    provider !== "codex" &&
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    "stream_options" in translatedBody;
   if (hadStreamOptions) {
     delete translatedBody.stream_options;
   }

@@ -81,19 +81,22 @@ function buildCodexThinkingMetadata(
   modelInfo: Record<string, unknown> | null | undefined,
   requestBody: Record<string, unknown> | undefined
 ): Record<string, unknown> | null {
-  if (provider !== "codex" || !Array.isArray(modelInfo?.supportedThinkingEfforts)) return null;
+  if (provider !== "codex") return null;
+  const hasCatalog = Array.isArray(modelInfo?.supportedThinkingEfforts);
+  const requestedThinkingEffort =
+    (requestBody?.reasoning as Record<string, unknown> | undefined)?.effort ??
+    requestBody?.reasoning_effort;
+  if (!hasCatalog && requestedThinkingEffort === undefined) return null;
   return {
-    model: modelInfo.model,
-    supportedThinkingEfforts: modelInfo.supportedThinkingEfforts,
-    defaultThinkingEffort: modelInfo.defaultThinkingEffort,
-    resolvedThinkingEffort: modelInfo.resolvedThinkingEffort,
-    ...(requestBody
+    ...(hasCatalog
       ? {
-          requestedThinkingEffort:
-            (requestBody.reasoning as Record<string, unknown> | undefined)?.effort ??
-            requestBody.reasoning_effort,
+          model: modelInfo?.model,
+          supportedThinkingEfforts: modelInfo?.supportedThinkingEfforts,
+          defaultThinkingEffort: modelInfo?.defaultThinkingEffort,
+          resolvedThinkingEffort: modelInfo?.resolvedThinkingEffort,
         }
       : {}),
+    ...(requestedThinkingEffort !== undefined ? { requestedThinkingEffort } : {}),
   };
 }
 
