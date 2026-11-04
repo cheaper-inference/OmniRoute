@@ -1,0 +1,1 @@
+- Accept live wire IDs declared by provider models during authoritative catalog reconciliation, while preserving slash-containing model IDs and recognizing only genuine provider prefixes.

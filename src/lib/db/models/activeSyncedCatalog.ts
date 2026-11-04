@@ -3,7 +3,7 @@ import {
   getRegistryEntry,
 } from "@omniroute/open-sse/config/providerRegistry";
 import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
-import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
+import { getProviderModels, PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
 import {
   ensureCursorAutoCatalogEntry,
   ensureCursorGrokEffortAliases,
@@ -562,17 +562,32 @@ export async function reconcileProvidersWithActiveSyncedCatalog(
   const excludedProviders: string[] = [];
 
   for (const { provider, catalog } of states) {
-    const modelIsLive = catalog.models.some((model) => model.id === modelId);
+    // Only strip a qualified provider/model prefix when it matches the provider.
+    // Literal model IDs can themselves contain slashes (e.g. nvidia/vendor/model).
+    const slash = modelId.indexOf("/");
+    const canonicalProvider = resolveStoredProviderId(provider);
+    const requestedProvider = slash > 0 ? resolveStoredProviderId(modelId.slice(0, slash)) : "";
+    const isProviderPrefix =
+      slash > 0 && catalogLookupIds(canonicalProvider).includes(requestedProvider);
+    const requestedIds = isProviderPrefix ? [modelId.slice(slash + 1), modelId] : [modelId];
+
+    // A public model may route to another live wire id. In particular,
+    // Antigravity Gemini 3.7 tier display ids share one -tiered wire endpoint.
+    const registryModel = getProviderModels(provider).find((row) => requestedIds.includes(row.id));
+    const acceptedLiveIds = Array.isArray(registryModel?.liveCatalogIds)
+      ? registryModel.liveCatalogIds
+      : [];
+    const modelIsLive = catalog.models.some(
+      (row) => requestedIds.includes(row.id) || acceptedLiveIds.includes(row.id)
+    );
     // Cursor auto-router: always allow `auto` / router variants even if a stale live
     // catalog omitted them (AvailableModels / agent list often returns wire id
     // `default` only; listing injects `auto` + cost/balance/intelligence).
     const cursorAutoAllow =
-      provider === "cursor" &&
-      (modelId === "auto" ||
-        modelId === "default" ||
-        modelId === "auto-cost" ||
-        modelId === "auto-balance" ||
-        modelId === "auto-intelligence");
+      canonicalProvider === "cursor" &&
+      ["auto", "default", "auto-cost", "auto-balance", "auto-intelligence"].some(
+        (id) => requestedIds.includes(id)
+      );
 
     if (!catalog.authoritative || modelIsLive || cursorAutoAllow) {
       providers.push(provider);
