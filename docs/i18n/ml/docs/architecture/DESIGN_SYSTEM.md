@@ -4,81 +4,101 @@
 
 ---
 
-> **നില:** ഡാഷ്ബോർഡ് നിർമ്മിച്ചിരിക്കുന്നത്** Keak CI UI കിറ്റ്** (`@keak/cheaper-inference-ui-kit`), വർക്ക്സ്പെയ്സ് `packages/ui-kit` (`@omniroute/ui-kit`; അപ്സ്ട്രീം സ്നാപ്പ്ഷോട്ട് `packages/ui-kit/UPSTREAM.md` ൽ പിൻ ചെയ്ത് `npm run check:ui-kit-snapshot` സംരക്ഷിച്ചിരിക്കുന്നു) ആയി വെണ്ടർ ചെയ്യുന്നു. വെളിച്ചമാണ് കാനോനിക്കൽ തീം; സ്ഥിരസ്ഥിതി മുൻഗണന `system` ആണ്. Keak lime (`--ci-color-accent`) ആണ് ഉച്ചാരണം. UI, ഡിസ്പ്ലേ, കോഡ് ടെക്സ്റ്റ് (`--ci-font-ui`; `--ci-font-display`, `--ci-font-mono` എന്നിവ പരിഹരിക്കുക), കിറ്റ് തന്നെ സ്വയം ഹോസ്റ്റ് ചെയ്ത (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ഇറക്കുമതി ചെയ്തത്) ഏക കുടുംബമാണ് സ്വിറ്റ്സർ. ഓരോ ഐക്കണും ഒരു ലൂസിഡ് ഗ്ലിഫാണ്.
+> **നില:** ഡാഷ്ബോർഡ് **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) അടിസ്ഥാനമാക്കിയാണ് നിർമ്മിച്ചിരിക്കുന്നത്; ഇത്
+> `packages/ui-kit` (`@omniroute/ui-kit`) വർക്ക്സ്പേസായി വെൻഡർ ചെയ്തിരിക്കുന്നു (അപ്സ്ട്രീം സ്നാപ്പ്ഷോട്ട്
+> `packages/ui-kit/UPSTREAM.md`-ൽ പിൻ ചെയ്തിട്ടുള്ളതും `npm run check:ui-kit-snapshot` ഉപയോഗിച്ച് സംരക്ഷിക്കപ്പെട്ടിട്ടുള്ളതുമാണ്). Light ആണ് കാനോനിക്കൽ
+> തീം; ഡിഫോൾട്ട് മുൻഗണന `system` ആണ്. ഡിഫോൾട്ട് പാലറ്റ് കിറ്റിന്റെ **Editions** രൂപഭാവമാണ്
+> (ഊഷ്മളമായ പേപ്പർ ന്യൂട്രലുകളും കോപ്പർ ആക്സന്റ് `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); ക്രമീകരണങ്ങൾ →
+> രൂപഭാവം → വർണ്ണ പാലറ്റ് എന്നതിൽ **Classic** ലഭ്യമാണ്; ഇത് ലൈം ആക്സന്റോടുകൂടിയ കിറ്റിന്റെ അടിസ്ഥാന ടോക്കണുകളാണ്. UI, ഡിസ്പ്ലേ, കോഡ് ടെക്സ്റ്റ് എന്നിവയ്ക്കെല്ലാം
+> ഉപയോഗിക്കുന്ന ഏക ഫോണ്ട് ഫാമിലിയാണ് Switzer (`--ci-font-ui`; `--ci-font-display`, `--ci-font-mono`
+> എന്നിവ ഇതിലേക്കാണ് റിസോൾവ് ചെയ്യുന്നത്); കിറ്റ് തന്നെയാണ് ഇത് സ്വയം ഹോസ്റ്റ് ചെയ്യുന്നത് (`packages/ui-kit/src/ci-fonts.css`,
+> `ci-tokens.css` ഇമ്പോർട്ട് ചെയ്യുന്നു). Switzer പിന്തുണയ്ക്കാത്ത ലിപികൾ ഓരോ ഗ്ലിഫ് വീതം ഫാൾബാക്ക് ചെയ്യുന്നു (`src/app/globals.css`):
+> സിറിലിക്, ഗ്രീക്ക്, വിയറ്റ്നാമീസ് എന്നിവയ്ക്ക് Inter-ഉം, `html[dir="rtl"]`-ന് കീഴിൽ മാത്രം അറബിക് ലിപിക്ക് Vazirmatn-ഉം ഉപയോഗിക്കുന്നു.
+> എല്ലാ ഐക്കണുകളും Lucide ഗ്ലിഫുകളാണ്.
 
-## 1. കാര്യങ്ങൾ എവിടെയാണ്
+## 1. കാര്യങ്ങൾ എവിടെയാണ് സ്ഥിതിചെയ്യുന്നത്
 
-- **കിറ്റ്.** `packages/ui-kit/src` എന്നത് `packages/ui-kit/UPSTREAM.md`-ൽ പിൻ ചെയ്തിരിക്കുന്ന കമ്മിറ്റിലെ
-  അപ്സ്ട്രീം `src/`-ന്റെ ബൈറ്റ്-ടു-ബൈറ്റ് പകർപ്പാണ് (ലൈസൻസ് അനുമതിയും അതിൽ രേഖപ്പെടുത്തിയിട്ടുണ്ട്); പ്രാദേശിക
-  പാച്ചുകൾ `PATCHES.md`-ൽ ലിസ്റ്റ് ചെയ്തിട്ടുണ്ട് (ഒന്നുമില്ല). ബിൽഡ് ഒന്നും ഇല്ലാതെ ഇത് സോഴ്സായി
-  ഉപയോഗിക്കുന്നു: `next.config.mjs` ഇതിനെ ട്രാൻസ്പൈൽ ചെയ്യുന്നു, കൂടാതെ `tsconfig.json` `@omniroute/ui-kit` →
-  `packages/ui-kit/src` എന്നതിലേക്കും `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` എന്നതിലേക്കും മാപ്പ്
-  ചെയ്യുന്നു (`vitest.config.ts`-ലും `vitest.mcp.config.ts`-ലും അതേ അലിയാസ് ഉണ്ട്). ഒരു കിറ്റ് കോംപോണന്റ്
-  അതിന്റെ സബ്പാത്ത് വഴി ഇംപോർട്ട് ചെയ്യുക (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…),
-  ഒരിക്കലും `@omniroute/ui-kit` ബാരൽ വഴി അല്ല: ബാരൽ ഓരോ ഇംപോർട്ടറിലേക്കും എല്ലാ കോംപോണന്റുകളെയും (ഡേറ്റ്
-  പിക്കർ ഉൾപ്പെടെ) വലിച്ചുകൊണ്ടുവരുന്നു. കിറ്റ് സ്റ്റൈൽഷീറ്റ് `src/app/globals.css` വഴിയാണ് കടന്നുവരുന്നത്
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **ടോക്കണുകൾ.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ടോക്കണുകൾ പ്രഖ്യാപിക്കുന്നു;
-  `src/app/globals.css` അവയെ ലെഗസി OmniRoute പേരുകളുമായി (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) ബ്രിഡ്ജ് ചെയ്യുന്നു, അതിനാൽ
-  നിലവിലുള്ള `var(--color-*)` റീഡുകളും Tailwind യൂട്ടിലിറ്റികളും പ്രവർത്തിക്കുന്നതായി തുടരും. പുതിയ കോഡ്
-  Tailwind യൂട്ടിലിറ്റികൾ (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`,
-  `bg-chart-1`…) അല്ലെങ്കിൽ കിറ്റ് ക്ലാസുകൾ ഉപയോഗിക്കുന്നു — ഒരിക്കലും ഒരു ഹെക്സ് വാല്യു അല്ല
-  (`tests/unit/design-kit-bridge.test.ts` ബ്രിഡ്ജ് നിർബന്ധിക്കുന്നു). `text-primary` `--text-color-primary`
-  വഴി `--color-primary-ink`-ലേക്ക് റിസോൾവ് ചെയ്യുന്നു (ലൈറ്റിൽ lime-800, ഡാർക്കിൽ lime ആക്സന്റ്), അതിനാൽ
-  `bg-primary`/`border-primary` lime സർഫേസ് നിലനിർത്തുമ്പോൾ തന്നെ പ്രൈമറി ടെക്സ്റ്റ് വായിക്കാവുന്നതായി
-  നിൽക്കുന്നു. ചാർട്ട് സീരീസ് `--color-chart-1` … `--color-chart-5` ഉപയോഗിക്കുന്നു.
-- **തീമുകൾ.** `<html className="ci-theme">` (`src/app/layout.tsx`) ഡോക്യുമെന്റിനെ കിറ്റ് തീമിലേക്ക്
-  ഓപ്റ്റ്-ഇൻ ചെയ്യുന്നു. മുൻഗണന `light`, `dark` അല്ലെങ്കിൽ `system` ആണ്
-  (`src/shared/constants/appConfig.ts`-ൽ `THEME_CONFIG.defaultTheme = "system"`; `system`
-  `prefers-color-scheme`-എ പിന്തുടരുന്നു). `src/store/themeStore.ts`-ലെ `applyTheme()` (ഹൈഡ്രേഷന് മുമ്പ്
-  ഓടുന്ന `src/app/layout.tsx`-ലെ ഇൻലൈൻ ബൂട്ട്സ്ട്രാപ്പ് സ്ക്രിപ്റ്റും ഇതിനെ പ്രതിഫലിപ്പിക്കുന്നു)
-  `data-theme="dark"|"light"` സെറ്റ് ചെയ്യുകയും `<html>`-ൽ `.dark` ക്ലാസ് ഒരുമിച്ച് ടോഗിൾ ചെയ്യുകയും
-  ചെയ്യുന്നു. കിറ്റിന്റെ ഡാർക്ക് ടോക്കൺ സെറ്റ് `data-theme="dark"`-ലാണ് അടിസ്ഥാനപ്പെടുത്തിയിരിക്കുന്നത്
-  (`packages/ui-kit/src/ci-tokens.css`); OmniRoute-ന്റെ സ്വന്തം ഡാർക്ക് ഓവർറൈഡുകളും (`globals.css`-ലെ `.dark`
-  ബ്ലോക്ക്) ലെഗസി Tailwind `dark:` യൂട്ടിലിറ്റികളും `.dark` ക്ലാസിലാണ് അടിസ്ഥാനപ്പെടുത്തിയിരിക്കുന്നത്.
-  ആക്സന്റ് കളർ പ്രീസെറ്റുകളൊന്നുമില്ല: ആക്സന്റ് എപ്പോഴും കിറ്റിൽ നിന്നാണ് വരുന്നത്, കൂടാതെ പഴയ ബിൽഡിൽ നിന്ന്
-  നിലനിർത്തിയ ഒരു പ്രീസെറ്റ് സ്റ്റോർ ലോഡ് ചെയ്യുമ്പോൾ ഉപേക്ഷിക്കപ്പെടുന്നു.
-- **കോംപോണന്റുകൾ (അഡാപ്റ്ററുകൾ).** `src/shared/components/index.tsx` OmniRoute കോംപോണന്റ് API
-  നിലനിർത്തുന്നു (അതേ പേരുകൾ, ഡിഫോൾട്ട് എക്സ്പോർട്ടുകൾ, പ്രോപ്പുകൾ), അതിന് പിന്നിലുള്ള പ്രിമിറ്റീവുകൾ
-  കിറ്റിന് മുകളിലുള്ള അഡാപ്റ്ററുകളാണ്: ഫോമുകൾ (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
-  `Badge`, `Card`), ഓവർലേകളും ഫീഡ്ബാക്കും (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), ഘടന (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`), ടേബിളുകൾ (`DataTable`, `FilterBar`, `ColumnToggle`,
-  `FilterPills`, `PresetSlider`). ഒരു അഡാപ്റ്റർ കിറ്റ് കോംപോണന്റിനെ സബ്പാത്ത് വഴി ഇംപോർട്ട് ചെയ്യുകയും ലെഗസി
-  പ്രോപ്പുകളെ അതിലേക്ക് മാപ്പ് ചെയ്യുകയും ചെയ്യുന്നു — ഉദാഹരണത്തിന് `Button variant="primary"` കിറ്റിന്റെ
-  `default` ബട്ടണാണ് (`--ci-button-primary-*`: ലൈറ്റിൽ ഇൻവേഴ്സ് സർഫേസ്, ഡാർക്കിൽ അതിന്റെ
-  `--ci-color-accent-foreground` ഇങ്ക് നിറത്തോടെയുള്ള ആക്സന്റ്), `danger` എന്നത് `destructive` ആണ്,
-  `warning` എന്നത് `outline` കൂടാതെ `.ci-button--warning` എക്സ്റ്റൻഷനുമാണ്. `globals.css`-ന്റെ അവസാനത്തിലുള്ള
-  (`@layer components`) `.ci-button--warning`, `.ci-badge[data-tone]` നിയമങ്ങൾ കിറ്റ് ക്ലാസുകൾക്ക് മുകളിലുള്ള
-  OmniRoute എക്സ്റ്റൻഷനുകളാണ്. `tests/unit/ui/adapters/*.test.tsx` ഓരോ അഡാപ്റ്ററെയും പിൻ ചെയ്യുന്നു.
-- **ഷെൽ.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` റെൻഡർ ചെയ്യുന്നു, അത്
-  `src/shared/components/layouts/DashboardShell.tsx` റെൻഡർ ചെയ്യുന്നു: കിറ്റ് `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute-ന്റെ നാവിഗേഷൻ ലോജിക്
-  `src/shared/components/Sidebar.tsx`-ൽ. `#main-content`-ലേക്കുള്ള ഒരു "ഉള്ളടക്കത്തിലേക്ക് പോവുക" ലിങ്ക്
-  ആദ്യത്തെ ഫോക്കസ് ചെയ്യാവുന്ന എലിമെന്റാണ്. `src/shared/components/Header.tsx`-ൽ കിറ്റ് `SidebarTrigger`
-  (ഷെല്ലിന്റെ ഏക സൈഡ്ബാർ ടോഗിൾ), Keak `ProductSwitcher`, കമാൻഡ്-പാലറ്റ് ഓപ്പണർ എന്നിവ ഉണ്ട്;
-  `#main-content`-നുള്ളിൽ ഒരു കിറ്റ് `PageHeader` (`.ci-page-header`) മൗണ്ട് ചെയ്തിട്ടില്ലാത്ത സമയത്ത് മാത്രമേ
-  അത് റൂട്ട് ടൈറ്റിൽ കാണിക്കൂ, അതിനാൽ സ്വന്തം `PageHeader` ഉള്ള ഒരു പേജിന് ഒരു `h1` മാത്രമേ ഉണ്ടാവൂ.
-  `src/shared/components/CommandPalette.tsx` ഒരു കിറ്റ് `Dialog` ആണ്.
-- **ഐക്കണുകൾ.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) പേരിനെ (സ്ക്രീനുകൾ
-  ഉപയോഗിക്കുന്ന Material Symbols പദാവലി) `ICON_MAP` (`src/shared/constants/iconMap.ts`) വഴി ഒരു Lucide
-  ഗ്ലിഫിലേക്ക് റിസോൾവ് ചെയ്യുന്നു. Material Symbols ഫോണ്ടും പാക്കേജും ഇനി ഇല്ല: മാപ്പിൽ ഇല്ലാത്ത ഒരു പേര്
-  ഒരു നിഷ്പക്ഷ പ്ലേസ്ഹോൾഡർ ഗ്ലിഫ് (`data-icon-missing="true"`) റെൻഡർ ചെയ്യുകയും പ്രൊഡക്ഷന് പുറത്ത് ഒരു
-  കൺസോൾ മുന്നറിയിപ്പ് ലോഗ് ചെയ്യുകയും ചെയ്യുന്നു. `npm run gen:icon-map` ഉപയോഗത്തിലുള്ളതും മാപ്പിൽ ഇല്ലാത്തതുമായ
-  പേരുകൾ പ്രിന്റ് ചെയ്യുന്നു (`tests/unit/icon-map-coverage.test.ts` Lucide ഐക്കൺ ഇല്ലാത്ത ഏത് പേരിലും
-  പരാജയപ്പെടുന്നു; `tests/unit/icon-map-object-values.test.ts` ലുക്കപ്പ് ഓബ്ജക്ടുകളിൽ സൂക്ഷിച്ചിരിക്കുന്ന
-  പേരുകൾ കവർ ചെയ്യുന്നു); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ലിറ്ററൽ
-  `<span className="material-symbols-outlined">` സ്പാനുകളെ `<Icon>` ആക്കി തിരുത്തിയെഴുതുന്നു.
-- **ബ്രാൻഡ്.** `src/shared/components/OmniRouteLogo.tsx` കിറ്റിനെ റാപ്പ് ചെയ്യുന്നു: ഡിഫോൾട്ട് എക്സ്പോർട്ടായ
-  `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (ഇൻലൈൻ SVG, `basePath`-സേഫ്) റെൻഡർ
-  ചെയ്യുന്നു, കൂടാതെ `OmniRouteLockup` `ProductLockup product="omniroute"` (ആക്സസിബിൾ നെയിം "Keak
-  OmniRoute") റെൻഡർ ചെയ്യുന്നു, അല്ലെങ്കിൽ വൈറ്റ്-ലേബൽ ഓപ്പറേറ്റർമാർക്കായി അവരുടേതായ `name`/`logoSrc`.
-  പ്രോഡക്ട്-സ്വിച്ചർ ലക്ഷ്യസ്ഥാനങ്ങൾ `src/shared/constants/keakProducts.ts`-ൽ ആണ് (`KEAK_PRODUCT_LINKS`,
-  `KEAK_ACTIVE_PRODUCT`). സ്റ്റാൻഡ്എലോൺ സ്ക്രീനുകൾ — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
-  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx`, കൂടാതെ
-  `src/shared/components/ErrorPageScaffold.tsx` — ലോക്കപ്പ് കാണിക്കുന്നു;
-  `tests/unit/brand-pages-static.test.ts` അതിനെ കാവൽ ചെയ്യുന്നു.
+- **കിറ്റ്.** `packages/ui-kit/src` എന്നത് `packages/ui-kit/UPSTREAM.md`-ൽ പിൻ ചെയ്തിരിക്കുന്ന കമ്മിറ്റിലെ അപ്സ്ട്രീം `src/`-ന്റെ ബൈറ്റ്-ഫോർ-ബൈറ്റ് പകർപ്പാണ് (`packages/ui-kit/UPSTREAM.md` ലൈസൻസ് അനുമതിയും രേഖപ്പെടുത്തുന്നു); പ്രാദേശിക പാച്ചുകൾ `PATCHES.md` പട്ടികപ്പെടുത്തുന്നു (ഒന്നുമില്ല). ബിൽഡ് ഇല്ലാതെ ഇത് സോഴ്സായി ഉപയോഗിക്കുന്നു: `next.config.mjs` അതിനെ ട്രാൻസ്പൈൽ ചെയ്യുന്നു, കൂടാതെ
+  `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` എന്നും `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` എന്നും മാപ്പ് ചെയ്യുന്നു (`vitest.config.ts`, `vitest.mcp.config.ts` എന്നിവയിലും ഇതേ അപരനാമമുണ്ട്). ഒരു
+  കിറ്റ് ഘടകം അതിന്റെ സബ്പാത്ത് വഴി ഇംപോർട്ട് ചെയ്യുക (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ഒരിക്കലും
+  `@omniroute/ui-kit` ബാരൽ വഴി ചെയ്യരുത്: ബാരൽ എല്ലാ ഘടകങ്ങളെയും (തീയതി പിക്കർ ഉൾപ്പെടെ)
+  ഓരോ ഇംപോർട്ടറിലേക്കും ഉൾപ്പെടുത്തുന്നു. കിറ്റ് സ്റ്റൈൽഷീറ്റ് `src/app/globals.css` വഴി പ്രവേശിക്കുന്നു
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, പൂർണ്ണമായ ഷീറ്റ്: കോർ `ci-ui.css` കൂടാതെ എല്ലാ പാറ്റേൺ കുടുംബങ്ങളും).
+- **ടോക്കണുകൾ.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ടോക്കണുകൾ പ്രഖ്യാപിക്കുന്നു; `src/app/globals.css`
+  അവയെ ലെഗസി OmniRoute പേരുകളിലേക്ക് (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) ബന്ധിപ്പിക്കുന്നു, അതിനാൽ നിലവിലുള്ള `var(--color-*)` റീഡുകളും Tailwind
+  യൂട്ടിലിറ്റികളും തുടർന്നും പ്രവർത്തിക്കുന്നു. പുതിയ കോഡ് Tailwind യൂട്ടിലിറ്റികൾ (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) അല്ലെങ്കിൽ കിറ്റ് ക്ലാസുകൾ ഉപയോഗിക്കുന്നു — ഹെക്സ് മൂല്യം ഒരിക്കലും ഉപയോഗിക്കരുത്
+  (`tests/unit/design-kit-bridge.test.ts` ഈ ബന്ധം നിർബന്ധമാക്കുന്നു). `text-primary`,
+  `--text-color-primary` വഴി `--color-primary-ink` ആയി പരിഹരിക്കപ്പെടുന്നതിനാൽ പ്രൈമറി ടെക്സ്റ്റ് വായിക്കാവുന്നതായി തുടരുന്നു; അതേസമയം
+  `bg-primary`/`border-primary` ആക്സന്റ് സർഫേസ് നിലനിർത്തുന്നു: Editions-ൽ അത് കിറ്റിന്റെ
+  `--ci-color-accent-active` ആണ് (ലൈറ്റിൽ ഡീപ് കോപ്പർ `#99562f`, ഡാർക്കിൽ കോപ്പർ ആക്സന്റ്); Classic-ൽ,
+  ലൈറ്റിൽ lime-800-ഉം ഡാർക്കിൽ ലൈം ആക്സന്റുമാണ്. ചാർട്ട് സീരീസ്
+  `--color-chart-1` … `--color-chart-5` ഉപയോഗിക്കുന്നു.
+- **തീമുകൾ.** `<html className="ci-theme">` (`src/app/layout.tsx`) ഡോക്യുമെന്റിനെ കിറ്റ് തീമിലേക്ക് ഉൾപ്പെടുത്തുന്നു.
+  മുൻഗണന `light`, `dark` അല്ലെങ്കിൽ `system` ആണ് (`src/shared/constants/appConfig.ts`-ൽ `THEME_CONFIG.defaultTheme = "system"`;
+  `system`, `prefers-color-scheme` പിന്തുടരുന്നു). `src/store/themeStore.ts`-ലെ `applyTheme()` (ഹൈഡ്രേഷനു മുമ്പ് പ്രവർത്തിക്കുന്ന,
+  `src/app/layout.tsx`-ൽ ഇൻലൈൻ ചെയ്ത `THEME_BOOT_SCRIPT` ഇതിനെ പ്രതിഫലിപ്പിക്കുന്നു)
+  `data-theme="dark"|"light"` സജ്ജമാക്കുകയും അതോടൊപ്പം `<html>`-ലെ `.dark` ക്ലാസ് ടോഗിൾ ചെയ്യുകയും ചെയ്യുന്നു.
+  കിറ്റിന്റെ ഡാർക്ക് ടോക്കൺ സെറ്റ് `data-theme="dark"`-നെ അടിസ്ഥാനമാക്കിയുള്ളതാണ് (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoute-ന്റെ സ്വന്തം ഡാർക്ക് ഓവർറൈഡുകളും (`globals.css`-ലെ `.dark` ബ്ലോക്ക്) ലെഗസി Tailwind `dark:`
+  യൂട്ടിലിറ്റികളും `.dark` ക്ലാസിനെ അടിസ്ഥാനമാക്കുന്നു. ആക്സന്റ് നിറ പ്രീസെറ്റുകളൊന്നുമില്ല: ആക്സന്റ് എല്ലായ്പ്പോഴും
+  കിറ്റിൽ നിന്നാണ് വരുന്നത്, പഴയ ബിൽഡിൽ നിന്നുള്ള പെർസിസ്റ്റ് ചെയ്ത പ്രീസെറ്റ് സ്റ്റോർ ലോഡ് ചെയ്യുമ്പോൾ ഒഴിവാക്കപ്പെടുന്നു.
+- **പാലറ്റുകൾ.** രണ്ടെണ്ണം, രണ്ടും കിറ്റിൽ നിന്നുള്ളവ (`src/shared/constants/appearancePalette.ts`): ഡിഫോൾട്ടായ `editions`,
+  കൂടാതെ `classic`. Editions എന്നത് `<html>`-ലെ കിറ്റിന്റെ `data-ci-appearance="editions"` ആട്രിബ്യൂട്ടാണ്; `ci-editions.css`
+  (`ci-ui.css` ഇംപോർട്ട് ചെയ്യുന്നത്) അതിനെ `data-theme`-നൊപ്പം സംയോജിപ്പിക്കുന്നു; Classic എന്നത് ആട്രിബ്യൂട്ട്
+  ഇല്ലാത്ത അവസ്ഥയാണ്. റൂട്ട് ലേഔട്ട് സെർവറിൽ ആട്രിബ്യൂട്ട് റെൻഡർ ചെയ്യുന്നതിനാൽ ഒന്നും സ്റ്റോർ ചെയ്തിട്ടില്ലാത്ത (അല്ലെങ്കിൽ JS ഇല്ലാത്ത)
+  സന്ദർശകന് എല്ലാ സർഫേസിലും — ഡാഷ്ബോർഡ്, ലോഗിൻ, `/status`, എറർ പേജുകൾ, `/docs`, PWA എന്നിവയിൽ — Editions ലഭിക്കുന്നു. തിരഞ്ഞെടുത്തത്
+  അതേ `theme` സ്റ്റോറിൽ തീമിനടുത്തായി പെർസിസ്റ്റ് ചെയ്യപ്പെടുന്നു (`src/store/themeStore.ts`-ലെ `palette`, `setPalette()`, `applyPalette()`)
+  കൂടാതെ പെയിന്റിന് മുമ്പ് `THEME_BOOT_SCRIPT`
+  (`src/shared/utils/themeBootScript.ts`, ലേഔട്ടിന്റെ `<head>`-ൽ ഇൻലൈൻ ചെയ്തത്) പ്രയോഗിക്കുന്നു; സ്റ്റോർ ചെയ്ത പാലറ്റ്
+  `"classic"` ആയിരിക്കുമ്പോൾ മാത്രം ഇത് ആട്രിബ്യൂട്ട് നീക്കംചെയ്യുന്നു; റൂട്ട് ലേഔട്ടിന് പുറത്തുള്ള `src/app/global-error.tsx`
+  അതേ സ്റ്റോറിൽ നിന്ന് ഇത് പ്രയോഗിക്കുന്നു. മറ്റേതെങ്കിലും എലമെന്റിൽ `data-ci-appearance` ഇടരുത്: കിറ്റ് അതിനെ
+  `html:root:has([data-ci-appearance="editions"])` ഉപയോഗിച്ച് മാച്ച് ചെയ്യുന്നതിനാൽ ഒരു ഡിസെൻഡന്റ് പോലും മുഴുവൻ ഡോക്യുമെന്റിനെ മാറ്റും.
+  Editions-ലെ `data-ci-editions-variant="landing"` വേരിയന്റ് മാർക്കറ്റിംഗ് പേജുകൾക്കുള്ളതാണ്, ഡാഷ്ബോർഡിനുള്ളതല്ല.
+  ബ്രൗസർ ക്രോമിന് (`viewport.themeColor`, വെബ് മാനിഫെസ്റ്റ്) CSS-ഓ സ്റ്റോർ ചെയ്ത തിരഞ്ഞെടുപ്പോ വായിക്കാനാകില്ല, അതിനാൽ അത്
+  ഡിഫോൾട്ട് പിന്തുടരുന്നു: `src/shared/constants/pwaThemeColors.ts`-ലെ `PWA_THEME_COLORS` ആണ്
+  Editions-ലെ `--ci-color-background`-ന്റെ (`#f3f1e9` / `#11120f`) ഏക പ്രതിഫലനം; ഇത്
+  `tests/unit/pwa-theme-colors.test.ts` വഴി `ci-editions.css`-ലേക്ക് പിൻ ചെയ്തിരിക്കുന്നു. Monaco അതിന്റെ നിറങ്ങൾ ഒരു പ്രോബിൽ നിന്ന് വായിക്കുന്നു (`monacoKitTheme.ts`);
+  Editions-ൽ, കിറ്റ് Editions ലൈറ്റ്/ഡാർക്ക് റൂട്ടിൽ നിന്ന് പരിഹരിക്കുന്നതിനാൽ, ഒരൊറ്റ സിങ്ക്രണസ് പാസിനായി പ്രോബ് റീഡ് റൂട്ട് `data-theme` ഫ്ലിപ്പ് ചെയ്യുന്നു.
+- **ഘടകങ്ങൾ (അഡാപ്റ്ററുകൾ).** `src/shared/components/index.tsx` OmniRoute ഘടക API നിലനിർത്തുന്നു (അതേ
+  പേരുകൾ, ഡിഫോൾട്ട് എക്സ്പോർട്ടുകൾ, പ്രോപ്പുകൾ), അതിന് പിന്നിലെ പ്രിമിറ്റീവുകൾ കിറ്റിന് മുകളിലുള്ള അഡാപ്റ്ററുകളാണ്: ഫോമുകൾ
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ഓവർലേകളും ഫീഡ്ബാക്കും
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  ഘടന (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`), ടേബിളുകൾ
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ഒരു അഡാപ്റ്റർ കിറ്റ്
+  ഘടകത്തെ സബ്പാത്ത് വഴി ഇംപോർട്ട് ചെയ്ത് ലെഗസി പ്രോപ്പുകൾ അതിലേക്ക് മാപ്പ് ചെയ്യുന്നു — ഉദാഹരണത്തിന് `Button variant="primary"` എന്നത്
+  കിറ്റിലെ `default` ബട്ടണാണ് (`--ci-button-primary-*`: ലൈറ്റിൽ ഇൻവേഴ്സ് സർഫേസ്, ഡാർക്കിൽ അതിന്റെ
+  `--ci-color-accent-foreground` ഇങ്കോടുകൂടിയ ആക്സന്റ്), `danger` എന്നത് `destructive` ആണ്, `warning` എന്നത് `outline`-നൊപ്പം
+  `.ci-button--warning` എക്സ്റ്റൻഷനാണ്. `globals.css`-ന്റെ അവസാനത്തിലുള്ള (`@layer components`)
+  `.ci-button--warning`, `.ci-badge[data-tone]` നിയമങ്ങൾ കിറ്റ് ക്ലാസുകൾക്ക് മുകളിലുള്ള OmniRoute എക്സ്റ്റൻഷനുകളാണ്.
+  `tests/unit/ui/adapters/*.test.tsx` ഓരോ അഡാപ്റ്ററും പിൻ ചെയ്യുന്നു.
+- **ഷെൽ.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout` റെൻഡർ ചെയ്യുന്നു; അത്
+  `src/shared/components/layouts/DashboardShell.tsx` റെൻഡർ ചെയ്യുന്നു: കിറ്റിലെ `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), കൂടാതെ OmniRoute-ന്റെ നാവിഗേഷൻ ലോജിക്
+  `src/shared/components/Sidebar.tsx`-ലുണ്ട്. `#main-content`-ലേക്കുള്ള "ഉള്ളടക്കത്തിലേക്ക് പോകുക" ലിങ്കാണ് ഫോക്കസ് ചെയ്യാവുന്ന ആദ്യത്തെ
+  എലമെന്റ്. `src/shared/components/Header.tsx`-ൽ കിറ്റിലെ `SidebarTrigger` (ഷെല്ലിലെ ഏക സൈഡ്ബാർ
+  ടോഗിൾ), Keak `ProductSwitcher`, കമാൻഡ്-പാലറ്റ് ഓപ്പണർ എന്നിവയുണ്ട്; `#main-content`-നുള്ളിൽ കിറ്റ് `PageHeader`
+  (`.ci-page-header`) മൗണ്ട് ചെയ്തിട്ടില്ലാത്തപ്പോൾ മാത്രം ഇത് റൂട്ട് ടൈറ്റിൽ കാണിക്കുന്നു, അതിനാൽ സ്വന്തം
+  `PageHeader` ഉള്ള പേജിന് ഒരൊറ്റ `h1` മാത്രമേ ഉണ്ടാകൂ. `src/shared/components/CommandPalette.tsx` ഒരു കിറ്റ് `Dialog` ആണ്.
+- **ഐക്കണുകൾ.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) പേര് (സ്ക്രീനുകൾ ഉപയോഗിക്കുന്ന
+  Material Symbols പദാവലി) `ICON_MAP` (`src/shared/constants/iconMap.ts`) വഴി ഒരു
+  Lucide ഗ്ലിഫിലേക്ക് പരിഹരിക്കുന്നു. Material Symbols ഫോണ്ടും പാക്കേജും നീക്കംചെയ്തിരിക്കുന്നു: മാപ്പിൽ ഇല്ലാത്ത ഒരു പേര്
+  നിഷ്പക്ഷമായ ഒരു പ്ലേസ്ഹോൾഡർ ഗ്ലിഫ് (`data-icon-missing="true"`) റെൻഡർ ചെയ്യുകയും production-ന് പുറത്ത് ഒരു കൺസോൾ മുന്നറിയിപ്പ് ലോഗ് ചെയ്യുകയും ചെയ്യുന്നു.
+  `npm run gen:icon-map` ഉപയോഗത്തിലുള്ളതും മാപ്പിൽ ഇല്ലാത്തതുമായ പേരുകൾ പ്രിന്റ് ചെയ്യുന്നു
+  (`tests/unit/icon-map-coverage.test.ts` Lucide ഐക്കൺ ഇല്ലാത്ത ഏതൊരു പേരിലും പരാജയപ്പെടുന്നു;
+  `tests/unit/icon-map-object-values.test.ts` ലുക്കപ്പ് ഒബ്ജക്റ്റുകളിൽ സംഭരിച്ചിരിക്കുന്ന പേരുകൾ പരിശോധിക്കുന്നു);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ലിറ്ററൽ
+  `<span className="material-symbols-outlined">` സ്പാനുകളെ `<Icon>` ആയി മാറ്റിയെഴുതുന്നു.
+- **ബ്രാൻഡ്.** `src/shared/components/OmniRouteLogo.tsx` കിറ്റിനെ പൊതിയുന്നു: ഡിഫോൾട്ട് എക്സ്പോർട്ടായ `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"` (ഇൻലൈൻ SVG, `basePath`-സുരക്ഷിതം) റെൻഡർ ചെയ്യുകയും
+  `OmniRouteLockup` `ProductLockup product="omniroute"` (ആക്സസ് ചെയ്യാവുന്ന പേര് "Keak OmniRoute") റെൻഡർ ചെയ്യുകയും ചെയ്യുന്നു; അല്ലെങ്കിൽ,
+  വൈറ്റ്-ലേബൽ ഓപ്പറേറ്റർമാർക്കായി അവരുടെ സ്വന്തം `name`/`logoSrc` റെൻഡർ ചെയ്യുന്നു. പ്രോഡക്റ്റ്-സ്വിച്ചർ ലക്ഷ്യസ്ഥാനങ്ങൾ
+  `src/shared/constants/keakProducts.ts`-ൽ (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ലഭ്യമാണ്. സ്വതന്ത്ര
+  സ്ക്രീനുകൾ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx`, `src/shared/components/ErrorPageScaffold.tsx`
+  എന്നിവ — ലോക്കപ്പ് കാണിക്കുന്നു; `tests/unit/brand-pages-static.test.ts` അത് സംരക്ഷിക്കുന്നു.
 
 ## 2. നിയമങ്ങൾ
 
@@ -122,32 +142,50 @@
 
 ## 5. കിറ്റ് അപ്ഡേറ്റ് ചെയ്യുന്നു
 
-`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ൽ പിൻ ചെയ്തിരിക്കുന്ന പതിപ്പിനെ അപ്സ്ട്രീം റിപ്പോയുടെ ഏറ്റവും പുതിയ `v*` ടാഗുമായി താരതമ്യം ചെയ്യുകയും ഒരു റിലീസ് കഴിയുമ്പോൾ സമന്വയ കമാൻഡ് പ്രിൻ്റ് ചെയ്യുകയും ചെയ്യുന്നു. പ്രതിവാര `UI Kit upstream watch` വർക്ക്ഫ്ലോ (`.github/workflows/ui-kit-upstream-watch.yml`) ഒരേ ചെക്ക് പ്രവർത്തിപ്പിക്കുകയും പിൻ പിന്നിലായിരിക്കുമ്പോൾ ഒരു ട്രാക്കിംഗ് പ്രശ്നം തുറന്ന് സൂക്ഷിക്കുകയും ചെയ്യുന്നു; അപ്സ്ട്രീം റിപ്പോ സ്വകാര്യമാണ്, അതിനാൽ വർക്ക്ഫ്ലോയ്ക്ക് `UI_KIT_READ_TOKEN` രഹസ്യത്തിൽ ഒരു റീഡ്-ഒൺലി ടോക്കൺ ആവശ്യമാണ്, കൂടാതെ അത് നിഷ്ക്രിയമായി തുടരും.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ൽ പിൻ ചെയ്തിരിക്കുന്ന പതിപ്പിനെ അപ്സ്ട്രീം റിപ്പോയുടെ ഏറ്റവും പുതിയ `v*` ടാഗുമായി താരതമ്യം ചെയ്യുകയും ഒരു റിലീസ് കഴിയുമ്പോൾ സമന്വയ കമാൻഡ് പ്രിൻ്റ് ചെയ്യുകയും ചെയ്യുന്നു.
+
+പ്രതിദിന `UI Kit upstream watch` വർക്ക്ഫ്ലോ (`.github/workflows/ui-kit-upstream-watch.yml`) സമാന പരിശോധന നടത്തുന്നു. പിൻ പിന്നിലായിരിക്കുമ്പോൾ, റോളിംഗ് ബ്രാഞ്ചിൽ `chore/ui-kit-sync-latest` ഉയർന്ന `release/vX.Y.Z` ശാഖയ്ക്കെതിരെ `scripts/ci/ui-kit-sync-pr.sh` ഒരു സമന്വയ PR തുറന്നിടുന്നു. ഇത് ഒരിക്കലും ലയിക്കുന്നില്ല: ഓരോ കിറ്റ് റിലീസിനും ഇപ്പോഴും ലോക്കൽ VPS ൽ ഒരു ദൃശ്യ പരിശോധന ആവശ്യമാണ്. ഒരു പുതിയ പതിപ്പ് പുറത്തിറങ്ങുമ്പോൾ ബ്രാഞ്ച് പുനർനിർമ്മിക്കപ്പെടുകയും അല്ലാത്തപക്ഷം തനിച്ചായിരിക്കുകയും ചെയ്യുന്നു. കൈകൊണ്ട് പുഷ് ചെയ്ത കമ്മിറ്റുകളുള്ള ഒരു ഓപ്പൺ PR പുനരാലേഖനം ചെയ്യപ്പെടുന്നില്ല, കൂടാതെ ഒരു മെയിൻ്റനർ അടച്ച പതിപ്പിനുള്ള PR ഒരു പുതിയ റിലീസ് വരെ അടച്ചിരിക്കും.
+
+ഒരു PR തുറക്കാൻ കഴിയാത്തപ്പോൾ (ടാർഗെറ്റ് റിലീസ് ഫ്രീസുചെയ്തിരിക്കുന്നു, PR കൈകൊണ്ട് പുഷ് ചെയ്തിരിക്കുന്നു, PR അടച്ചു, അല്ലെങ്കിൽ PR ടോക്കൺ സജ്ജീകരിച്ചിട്ടില്ല) വർക്ക്ഫ്ലോ ഒരു ട്രാക്കിംഗ് പ്രശ്നം തുറന്ന് സൂക്ഷിക്കുന്നു, അത് എന്തുകൊണ്ടെന്ന് പറയുന്നു.
+
+വർക്ക്ഫ്ലോ രണ്ട് രഹസ്യങ്ങൾ ഉപയോഗിക്കുന്നു:
+
+- `secrets.UI_KIT_READ_TOKEN`: സ്വകാര്യ അപ്സ്ട്രീം റിപ്പോയ്ക്കായി ഒരു വായന-മാത്രം ടോക്കൺ. വർക്ക്ഫ്ലോയ്ക്ക് അപ്സ്ട്രീം വായിക്കാൻ കഴിയാതെ വരുമ്പോൾ (ടോക്കൺ ഇല്ല, ജോലി നിർത്തിയ ടോക്കൺ, അല്ലെങ്കിൽ GitHub ലഭ്യമല്ല) റൺ പച്ചയായി തുടരുന്നു, പക്ഷേ ഒരു മുന്നറിയിപ്പ് എഴുതുകയും ഒരു പ്രത്യേക പ്രശ്നം തുറന്ന് സൂക്ഷിക്കുകയും ചെയ്യുന്നു, അത് ഒരിക്കൽ അടച്ചാൽ പിന്നീടുള്ള ഓട്ടത്തിന് വീണ്ടും അപ്സ്ട്രീം വായിക്കാൻ കഴിയും.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: ഈ ശേഖരത്തിൽ ഉള്ളടക്കവും പുൾ അഭ്യർത്ഥനകളും റൈറ്റ് ആക്സസ് ഉള്ള ഒരു സൂക്ഷ്മമായ ടോക്കൺ. സ്ഥിരസ്ഥിതി `GITHUB_TOKEN` ഇവിടെ PRs സൃഷ്ടിക്കാൻ കഴിയില്ല, കൂടാതെ അത് തുറന്ന ഒരു PR CI ട്രിഗർ ചെയ്യില്ല. ഈ ടോക്കൺ ഇല്ലാതെ വർക്ക്ഫ്ലോ ശാഖയെ മാത്രം തള്ളുന്നു.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ആ കമ്മിറ്റിലെ അപ്സ്ട്രീം `src/` (`latest` = ഏറ്റവും പുതിയ `v*` ടാഗ്) `packages/ui-kit/src` ലേക്ക് പകർത്തുന്നു, അനുവദനീയമായ ഒറ്റ പരിവർത്തനം പ്രയോഗിക്കുന്നു (അത് ആപേക്ഷിക ഇറക്കുമതികളിൽ നിന്ന് `.js` സഫിക്സ് ഒഴിവാക്കുന്നു), കൂടാതെ `packages/ui-kit/package.json`, `package-lock.json` എന്നിവയിലെ വർക്ക്സ്പെയ്സ് പതിപ്പ് അപ്സ്ട്രീം ഒന്നിലേക്ക് സജ്ജമാക്കുന്നു. തുടർന്ന്: `git diff packages/ui-kit` അവലോകനം ചെയ്യുക, ദാതാക്കൾ, ക്രമീകരണങ്ങൾ, കോമ്പോകൾ, ഉപയോഗം, എൻഡ്പോയിൻ്റ് എന്നിവയിൽ രണ്ട് തീമുകളിലും ഒരു വിഷ്വൽ പാസ് ചെയ്യുക, `npm run check:ui-kit-snapshot`, `npm run test:vitest:ui` എന്നിവ പ്രവർത്തിപ്പിക്കുക, കൂടാതെ അപ്സ്ട്രീം ചേഞ്ച്ലോഗ് ഉപയോഗിച്ച് PR തുറക്കുക.
 
-## 6. README ഡയഗ്രമുകൾ
+## 6. README ഡയഗ്രാമുകൾ
 
-റൂട്ട് `README.md` ഉൾച്ചേർത്ത (`docs/diagrams/*.svg`) പന്ത്രണ്ട് ഡയഗ്രമുകൾ ഒരു സ്റ്റാറ്റിക് ഇമേജിൽ പ്രയോഗിക്കുന്ന കിറ്റാണ്, അവ ജനറേറ്റ് ചെയ്യുന്നത്, കൈകൊണ്ട് വരച്ചതല്ല: `scripts/docs/gen-readme-*.mjs` ൽ 13 ജനറേറ്റർ ഫയലുകൾ (പന്ത്രണ്ട് ഡയഗ്രമുകളും `gen-readme-diagrams.mjs` ഡ്രൈവറും) കൂടാതെ `tests/unit/docs/readme-*-svg.test.ts` ഓരോന്നിനും പ്രതിജ്ഞാബദ്ധമായ ഫയലിൽ 12 സ്റ്റാലെനസ് ടെസ്റ്റുകൾ. ജനറേറ്ററിൻ്റെ ഔട്ട്പുട്ട് (ജോലി `test-unit`).
+റൂട്ട് `README.md` എംബെഡ് ചെയ്യുന്ന പന്ത്രണ്ട് ഡയഗ്രാമുകൾ (`docs/diagrams/*.svg`) ഒരു സ്റ്റാറ്റിക് ഇമേജിൽ പ്രയോഗിച്ച കിറ്റാണ്; അവ കൈകൊണ്ട് വരച്ചതല്ല, ജനറേറ്റ് ചെയ്തവയാണ്: `scripts/docs/gen-readme-*.mjs`-ൽ 13 ജനറേറ്റർ ഫയലുകൾ (പന്ത്രണ്ട് ഡയഗ്രാമുകളും `gen-readme-diagrams.mjs` ഡ്രൈവറും), കൂടാതെ ഓരോ ഡയഗ്രാമിനും ഒന്ന് വീതം `tests/unit/docs/readme-*-svg.test.ts`-ൽ 12 പഴക്കപരിശോധനകൾ; ഓരോന്നും കമ്മിറ്റ് ചെയ്ത ഫയലിനെ അതിന്റെ ജനറേറ്ററിന്റെ ഔട്ട്പുട്ടുമായി ബൈറ്റ് തലത്തിൽ താരതമ്യം ചെയ്യുന്നു (ജോബ് `test-unit`).
 
-- **ടോക്കണുകൾ.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ൽ നിന്ന് പാലറ്റ് പകർത്തുന്നു (ആ ഫയലിന് നേരെ `tests/unit/docs/readme-diagram-theme.test.ts` പിൻ ചെയ്തിരിക്കുന്നു) കൂടാതെ കിറ്റിൻ്റെ മുൻ മുഖങ്ങളിലെ ടെക്സ്റ്റ് റോളുകൾ നിർവചിക്കുന്നു - ഡിസ്പ്ലേയ്ക്കുള്ള ഇൻസ്ട്രുമെൻ്റ് സെറിഫ്, UI ടെക്സ്റ്റിന് ഇൻ്റർ, ഫിഗറുകൾക്കും കോഡിനുമുള്ള IBM പ്ലെക്സ് മോണോ - `@fontsource` പാക്കേജുകളിൽ നിന്ന് (ഡാഷ്ബോർഡ് kitz0 തന്നെ kitz.0 ഉപയോഗിക്കുന്നതിനാൽ). ലൈറ്റ് മൂല്യങ്ങൾ ഫയലിനുള്ളിൽ `:root` ലും ഇരുണ്ട മൂല്യങ്ങൾ `prefers-color-scheme: dark` പിന്നിലും ഇരിക്കുന്നു, അതിനാൽ ഓരോ ചിത്രവും GitHub യിലെ കാഴ്ചക്കാരൻ്റെ സ്കീം പിന്തുടരുന്നു.
-- **ഫോണ്ടുകൾ.** `scripts/docs/readme-fonts.mjs` ആ woff2 ഫയലുകളെ ഓരോ ഡയഗ്രാമും വരയ്ക്കുകയും അവയെ `@font-face` `data:` URIs ആയി എംബഡ് ചെയ്യുകയും ചെയ്യുന്നു - GitHub മാർക്ക്ഡൌണിൽ CSS ഇല്ലാതിരിക്കുകയും കാമോ പ്രോക്സി എല്ലാ എക്സ്റ്റേണൽ ഫെച്ചും തടയുകയും ചെയ്യുന്നതിനാൽ കിറ്റ് ടൈപ്പോഗ്രാഫി ഒരു README ഇമേജിലേക്ക് എത്തുന്നു. ഉപവിഭാഗങ്ങൾ ലാറ്റിൻ മാത്രം; സിസ്റ്റം സ്റ്റാക്കിലേക്ക് തിരികെ വരുന്ന ചിഹ്ന ഗ്ലിഫുകൾ ഓരോന്നായി `SYMBOL_FALLBACKS` ലും മറ്റേതെങ്കിലും മറയ്ക്കാത്ത ഗ്ലിഫ് ത്രോകളും അനുവദനീയമാണ്.
-- **പുനരുജ്ജീവിപ്പിക്കുക.** `npm run docs:readme-diagrams` എല്ലാ പന്ത്രണ്ടും README ക്രമത്തിൽ മാറ്റിയെഴുതുകയും അതിൻ്റെ വലുപ്പത്തിൽ ഒരു ഫയലിന് ഒരു വരി പ്രിൻ്റ് ചെയ്യുകയും ചെയ്യുന്നു. ഒരൊറ്റ ജനറേറ്ററും സ്വന്തമായി പ്രവർത്തിക്കുന്നു (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` ആവശ്യമാണ്, കാരണം അതിൻ്റെ കണക്കുകൾ `open-sse/config/freeModelCatalog.ts` ലെ ലൈവ് കാറ്റലോഗ് ലോഡറിൽ നിന്നാണ് വരുന്നത്; കാറ്റലോഗ് മാറ്റത്തിൻ്റെ CI അനന്തരഫലം `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ലാണ്). ജനറേറ്ററും SVG ഉം ഒരുമിച്ച് കമ്മിറ്റ് ചെയ്യുക.
-- **തെളിവ്.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ഒരു ഫയലിനെ GitHub സേവിക്കുന്ന രീതിയിൽ റെൻഡർ ചെയ്യുന്നു (ഒരു `<img>` ടാഗ്, camo's `Content-Security-Policy`, `image/svg+xml`), ഒരു വെളിച്ചവും ഇരുണ്ട ഫ്രെയിമും പിടിച്ചെടുക്കുകയും പേജ് ഉണ്ടാക്കിയ ബാഹ്യ ഫോണ്ട് അഭ്യർത്ഥനകൾ റിപ്പോർട്ട് ചെയ്യുകയും ചെയ്യുന്നു (0 ആയിരിക്കണം).
-- **ബജറ്റ്.** ഓരോ ഫയലിനും 200 KB ൽ താഴെ (ഓരോ സ്റ്റെലെൻസ് ടെസ്റ്റും അത് ഉറപ്പിക്കുന്നു); 500 KB എന്നത് ഏതൊരു README ഇമേജിനും ഹാർഡ് ക്യാപ് ആണ് ( SVG സ്റ്റുഡിയോ വാലിഡേറ്ററിൻ്റെ നിയമം).
-- **പകർപ്പ് മാറ്റമില്ലാതെ, ഗേറ്റിൽ നിന്ന് എണ്ണുന്നു.** റീബ്രാൻഡ് മാറ്റിയ തരവും പാലറ്റും വാക്കുകളല്ല: ഓരോ ജനറേറ്ററും അതിൻ്റെ ഡയഗ്രമിൻ്റെ പകർപ്പ് ഒരു `*_COPY` സ്ഥിരാങ്കത്തിൽ (അല്ലെങ്കിൽ തത്സമയ കാറ്റലോഗിൽ നിന്ന് നിർമ്മിക്കുന്നു) കൊണ്ടുപോകുന്നു, അത് വരച്ച വാചകവും ഫോണ്ട്-സബ്സെറ്റ് ഇൻപുട്ടും ആണ്. കാനോനിക്കൽ രൂപങ്ങൾ `<text>` നോഡുകളിൽ തുടരുന്നു, `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) വായിക്കുന്നു; ഗേറ്റ് വായിക്കുന്ന ഡയഗ്രമുകളുടെ സ്റ്റെലെനസ് ടെസ്റ്റുകൾ ജനറേറ്റ് ചെയ്ത ഫയലിൽ അതിൻ്റെ വാലിഡേറ്ററുകളും പ്രവർത്തിപ്പിക്കുന്നു, അതിനാൽ കോഡിൽ നിന്ന് വ്യതിചലിക്കുന്ന ഒരു കണക്ക് പരിശോധനയിൽ പരാജയപ്പെടുന്നു - ഗേറ്റ് വായിക്കുന്ന ഉറവിടം ശരിയാക്കുക, ജനറേറ്ററിലെ നമ്പറല്ല.
+- **ടോക്കണുകൾ.** `scripts/docs/readme-diagram-theme.mjs`, Editions പാലറ്റ് (ഡിഫോൾട്ട് രൂപഭാവം)
+  `packages/ui-kit/src/ci-editions.css`-ൽ നിന്ന് പകർത്തുന്നു (`tests/unit/docs/readme-diagram-theme.test.ts` ഉപയോഗിച്ച്
+  ആ ഫയലിനോട് പിൻ ചെയ്തിരിക്കുന്നു; രണ്ട് സ്കീമുകളിലെയും എല്ലാ സർഫേസുകളിലെ ഓരോ ടെക്സ്റ്റ് നിറത്തിനും WCAG AA പാലിക്കുന്നുണ്ടെന്നും ഇത് പരിശോധിക്കുന്നു; ഒരേയൊരു അപവാദം ലൈറ്റ് `warn` ആണ്—കിറ്റിലെ മൂല്യം ക്യാൻവാസിൽ 4.46:1 ആയതിനാൽ കിറ്റ് മുന്നറിയിപ്പ് 10 % ഇരുണ്ടതാക്കിയതാണ് ഇത്) കൂടാതെ കിറ്റിന്റെ ടൈപ്പ് സ്കെയിലിൽ (`ci-tokens.css`) ടെക്സ്റ്റ് റോളുകൾ നിർവചിക്കുന്നു: കിറ്റിന്റെ വെയ്റ്റുകളിൽ (400/500/600, ഡിസ്പ്ലേയ്ക്ക് 500) Switzer, എല്ലാറ്റിനും ട്രാക്കിങ്ങും; എന്നാൽ കോഡ് റോളുകൾ (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) മാത്രം ഇതിൽനിന്ന് വ്യത്യസ്തമാണ്—അവ IBM Plex Mono ഉപയോഗിക്കുന്നു, കൂടാതെ കമാൻഡുകൾ, URL-കൾ, ഐഡന്റിഫയറുകൾ, ടെർമിനൽ സ്ക്രീനുകൾ എന്നിവയ്ക്കായി മാത്രമുള്ളവയാണ്.
+  ലൈറ്റ് മൂല്യങ്ങൾ `:root`-ലും ഡാർക്ക് മൂല്യങ്ങൾ ഫയലിനുള്ളിലെ `prefers-color-scheme: dark`-ന് പിന്നിലുമാണ് ഉള്ളത്; അതിനാൽ ഓരോ ഇമേജും GitHub-ൽ കാഴ്ചക്കാരന്റെ സ്കീം പിന്തുടരുന്നു.
+- **ഫോണ്ടുകൾ.** GitHub Markdown CSS ഉൾക്കൊള്ളുന്നില്ല, കൂടാതെ camo പ്രോക്സി എല്ലാ ബാഹ്യ ഫെച്ചുകളും തടയുന്നു; അതിനാൽ കിറ്റ് ടൈപ്പ് ഫയലിനുള്ളിൽ തന്നെ ഉൾപ്പെടുത്തണം. ഓരോ ജനറേറ്ററിന്റെയും അവസാന ഘട്ടമായ `scripts/docs/readme-outline.mjs`, HarfBuzz ഉപയോഗിച്ച് Switzer റോളുകൾ ഷേപ്പ് ചെയ്യുകയും അവയെ വെക്റ്റർ ഔട്ട്ലൈനുകളായി (`<defs>` പാത്തുകളും `<use>`-ഉം) വരയ്ക്കുകയും ചെയ്യുന്നു; Switzer-ൽ ഇല്ലാത്ത അമ്പുകളും ജ്യാമിതീയ ചിഹ്നങ്ങളും അതിന്റെ സ്വന്തം മെട്രിക്കുകൾ ഉപയോഗിച്ച് വരയ്ക്കുന്നു. എംബെഡ് ചെയ്ത ഫോണ്ടല്ല, എല്ലായ്പ്പോഴും ഔട്ട്ലൈനുകൾ മാത്രം: Switzer-ന്റെ ലൈസൻസ് (`packages/ui-kit/src/fonts/FFL.txt`) രേഖാമൂലമുള്ള സമ്മതമില്ലാതെ സബ്സെറ്റിങ്ങും ഫോർമാറ്റ് പരിവർത്തനവും നിരോധിക്കുകയും വെക്റ്റർ ഡ്രോയിങ്ങുകൾ അനുവദിക്കുകയും ചെയ്യുന്നതിനാൽ, Switzer `@font-face` അല്ലെങ്കിൽ `data:` URI വീണ്ടും ഉൾപ്പെടുത്തരുത്. ഫയലിൽ അവശേഷിക്കുന്ന ഒരേയൊരു ഫോണ്ട് യഥാർത്ഥ കോഡ് ടെക്സ്റ്റായി തുടരുന്നവയ്ക്കുള്ള OFL IBM Plex Mono സബ്സെറ്റാണ് (`scripts/docs/readme-fonts.mjs`); ആ പ്രതീകങ്ങളിൽ നിന്നാണ് ഇത് നിർമ്മിക്കുന്നത്, എംബെഡ് ചെയ്യാൻ കഴിയാത്ത ഏതൊരു ഗ്ലിഫും പിശക് സൃഷ്ടിക്കും.
+- **വീണ്ടും ജനറേറ്റ് ചെയ്യുക.** `npm run docs:readme-diagrams` README ക്രമത്തിൽ പന്ത്രണ്ടെണ്ണവും വീണ്ടും എഴുതുകയും ഓരോ ഫയലിനും അതിന്റെ വലുപ്പം ഉൾപ്പെടുന്ന ഒരു വരി പ്രിന്റ് ചെയ്യുകയും ചെയ്യുന്നു. ഒറ്റ ജനറേറ്ററും തനിച്ച് പ്രവർത്തിപ്പിക്കാം (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`-ന്റെ കണക്കുകൾ `open-sse/config/freeModelCatalog.ts`-ലെ ലൈവ് കാറ്റലോഗ് ലോഡറിൽ നിന്നാണ് വരുന്നത് എന്നതിനാൽ അതിന് `node --import tsx/esm` ആവശ്യമാണ്; കാറ്റലോഗ് മാറ്റത്തിന്റെ CI പ്രത്യാഘാതം `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`-ൽ ഉണ്ട്). ജനറേറ്ററും SVG-യും ഒരുമിച്ച് കമ്മിറ്റ് ചെയ്യുക.
+- **തെളിവ്.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`, GitHub ഒരു ഫയൽ നൽകുന്ന അതേ രീതിയിൽ
+  അത് റെൻഡർ ചെയ്യുന്നു (ഒരു `<img>` ടാഗ്, camo-യുടെ `Content-Security-Policy`, `image/svg+xml`), ഒരു ലൈറ്റ് ഫ്രെയിമും ഒരു ഡാർക്ക് ഫ്രെയിമും ക്യാപ്ചർ ചെയ്യുകയും പേജ് നടത്തിയ ബാഹ്യ ഫോണ്ട് അഭ്യർത്ഥനകൾ റിപ്പോർട്ട് ചെയ്യുകയും ചെയ്യുന്നു (0 ആയിരിക്കണം).
+- **ബജറ്റ്.** ഓരോ ഫയലും 200 KB-യിൽ താഴെയായിരിക്കണം (ഓരോ പഴക്കപരിശോധനയും ഇത് ഉറപ്പാക്കുന്നു); ഏതൊരു README
+  ഇമേജിനുമുള്ള പരമാവധി പരിധി 500 KB ആണ് (SVG സ്റ്റുഡിയോ വാലിഡേറ്ററിന്റെ നിയമം).
+- **പകർപ്പ് മാറ്റമില്ലാതെ, എണ്ണങ്ങൾ ഗേറ്റിൽ നിന്ന്.** റീബ്രാൻഡിങ്ങിൽ ടൈപ്പും പാലറ്റും മാറി, വാക്കുകൾ മാറിയില്ല: ഓരോ ജനറേറ്ററും അതിന്റെ ഡയഗ്രാമിന്റെ പകർപ്പ് ഒരു `*_COPY` സ്ഥിരാങ്കത്തിൽ ഉൾക്കൊള്ളുന്നു (അല്ലെങ്കിൽ ലൈവ് കാറ്റലോഗിൽ നിന്ന് അത് നിർമ്മിക്കുന്നു); അതുതന്നെയാണ് വരയ്ക്കുന്ന ടെക്സ്റ്റും ഔട്ട്ലൈൻ ഘട്ടത്തിന്റെ ഇൻപുട്ടും. കാനോനിക്കൽ കണക്കുകൾ `<text>` നോഡുകളിൽ തുടരുന്നു (ഔട്ട്ലൈൻ ചെയ്തുകഴിഞ്ഞാൽ അദൃശ്യം, `fill-opacity:0`), അവ `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) വായിക്കുന്നു; ആ ഗേറ്റ് വായിക്കുന്ന ഡയഗ്രാമുകളുടെ പഴക്കപരിശോധനകൾ ജനറേറ്റ് ചെയ്ത ഫയലിൽ അതിന്റെ വാലിഡേറ്ററുകളും പ്രവർത്തിപ്പിക്കുന്നു. അതിനാൽ കോഡിൽ നിന്ന് വ്യതിചലിക്കുന്ന ഒരു കണക്ക് പരിശോധന പരാജയപ്പെടുത്തും—ജനറേറ്ററിലെ സംഖ്യയല്ല, ഗേറ്റ് വായിക്കുന്ന സോഴ്സാണ് തിരുത്തേണ്ടത്.
 
-## 7. അവലംബ സൂചിക
+## 7. റഫറൻസ് സൂചിക
 
 - `src/app/globals.css` — ടോക്കൺ ബ്രിഡ്ജ്, `.dark` ഓവർറൈഡുകൾ, OmniRoute `@layer components` വിപുലീകരണങ്ങൾ
 - `packages/ui-kit/UPSTREAM.md` — പിൻ ചെയ്ത അപ്സ്ട്രീം കമ്മിറ്റും ലൈസൻസ് അംഗീകാരവും; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` ഉം അതിന് അടുത്തുള്ള അഡാപ്റ്ററുകളും; `src/shared/components/layouts/DashboardShell.tsx`,
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
+  `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` കൂടാതെ അതിനടുത്തുള്ള അഡാപ്റ്ററുകൾ; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`,
+  `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`,
+  `src/shared/constants/statusColors.ts`
 - `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
   `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

@@ -98,6 +98,8 @@
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
 - [`GET /api/v1/providers/{provider}/limits`](#get-apiv1providersproviderlimits)
 - [`PUT /api/v1/providers/{provider}/limits`](#put-apiv1providersproviderlimits)
+- [`GET /api/v1/quota-recoveries/{id}`](#get-apiv1quota-recoveriesid)
+- [`DELETE /api/v1/quota-recoveries/{id}`](#delete-apiv1quota-recoveriesid)
 - [`GET /api/v1/quotas/check`](#get-apiv1quotascheck)
 - [`GET /api/v1/registered-keys`](#get-apiv1registered-keys)
 - [`POST /api/v1/registered-keys`](#post-apiv1registered-keys)
@@ -109,6 +111,8 @@
 - [`POST /api/v1/responses/{path}`](#post-apiv1responsespath)
 - [`GET /api/v1/search/analytics`](#get-apiv1searchanalytics)
 - [`POST /api/v1/segment`](#post-apiv1segment)
+- [`GET /api/v1/systemone`](#get-apiv1systemone)
+- [`POST /api/v1/systemone`](#post-apiv1systemone)
 - [`GET /api/v1/video-bridge/drilldown`](#get-apiv1video-bridgedrilldown)
 - [`DELETE /api/v1/video-bridge/drilldown`](#delete-apiv1video-bridgedrilldown)
 - [`GET /api/v1/videos/generations`](#get-apiv1videosgenerations)
@@ -1170,6 +1174,26 @@ curl -X PUT http://localhost:20128/api/v1/providers/{provider}/limits \
   -d '{}'
 ```
 
+### GET /api/v1/quota-recoveries/{id}
+
+Poll a quota recovery ticket
+
+Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or `POST /api/v1/responses` turn that failed with a terminal quota error. A request opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for up to 24 h). Instead of the quota error the caller then receives `202` with `recovery.poll` pointing here. Tickets are visible only to the API key that created them.
+
+```bash
+curl http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### DELETE /api/v1/quota-recoveries/{id}
+
+Cancel a quota recovery ticket
+
+```bash
+curl -X DELETE http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
 ### GET /api/v1/quotas/check
 
 GET quotas › check
@@ -1291,6 +1315,30 @@ POST segment
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/segment \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/v1/systemone
+
+List decisions-capable models
+
+Decisions entries from the unified model catalog.
+
+```bash
+curl http://localhost:20128/api/v1/systemone \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/systemone
+
+System One typed decisions
+
+One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/systemone \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

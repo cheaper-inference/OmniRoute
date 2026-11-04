@@ -13,6 +13,8 @@ Core reference for the OmniRoute API. It covers the public `/v1` surface and the
 For the focused OpenAI-compatible protocol and provider capability matrix, see
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
+Each deployment serves its own copy of the spec at `/openapi.yaml`, generated from `docs/openapi.yaml` during the build. It carries the build's version and a relative server URL (`./`), so requests stay on the host that served the document. A tool that imports the downloaded file has no such host, and needs the base URL set by hand.
+
 ---
 
 ## Table of Contents
@@ -31,6 +33,7 @@ For the focused OpenAI-compatible protocol and provider capability matrix, see
 - [WebSocket Streaming](#websocket-streaming)
 - [Quotas & Issues Reporting](#quotas--issues-reporting)
 - [Semantic Cache](#semantic-cache)
+- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
 - [Dashboard & Management](#dashboard--management)
 - [Combo Management](#combo-management)
 - [Webhooks](#webhooks)
@@ -890,7 +893,8 @@ The generic `time_range` now reaches both providers: Exa gets `startPublishedDat
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
 
-Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
+Exa results keep `id`, `highlights` (every highlight, not only the first one used as the
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
 Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for
@@ -1220,6 +1224,42 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+## CLIProxyAPI Management Compatibility
+
+OmniRoute answers the three [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+management endpoints that usage dashboards call to read Claude and Codex subscription limits
+(for example T3 Code's `cliproxy` usage-limit source). Point the client's base URL at
+OmniRoute and use an API key with the `manage` scope as its management key. The routes are
+served at `/v0/management/*` and at `/api/v0/management/*`.
+
+| Method | Path                         | Description                                                                                                                                    |
+| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. No tokens                        |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Sends one allowlisted request with the account's token and returns `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Clears the connection cooldown, model lockouts and Codex per-scope cooldowns of one account                             |
+
+- `auth_index` is the OmniRoute connection id. `provider` is `claude` or `codex` (OAuth
+  connections only; the `anthropic` API-key provider is not listed). For Codex,
+  `id_token.chatgpt_account_id` is the stored workspace id and `plan_type` the stored plan.
+- `api-call` is not a generic proxy. It accepts only Claude `GET
+https://api.anthropic.com/api/oauth/usage` and Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` and
+  `POST .../wham/rate-limit-reset-credits/consume`, each only for an account of the matching
+  provider. Anything else returns `403` without contacting the upstream. The caller's
+  `Authorization` header (including the `$TOKEN$` placeholder) is ignored: OmniRoute injects
+  the connection's access token, refreshing it first when it is near expiry, and forwards only
+  allowlisted headers (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). A missing `Chatgpt-Account-Id` defaults to the stored workspace id.
+  Requests time out after 15 seconds and use the connection's proxy.
+- `reset-quota` leaves terminal states (banned, expired, credits_exhausted) alone. An unknown
+  `auth_index` returns `404`.
+
+**Auth:** dashboard session or a `manage`-scoped API key, required even when login is disabled
+(the paths are in `ALWAYS_PROTECTED_API_PATHS`). Inference-only keys get `403`. Source:
+`src/lib/cliproxyCompat/managementApi.ts`.
+
+---
+
 ## Dashboard & Management
 
 Management routes (`/api/*` except public auth/login) are **not** authorized by
@@ -1255,6 +1295,12 @@ clears it to restore the default. `GET /api/provider-models?provider=<provider>`
 values in `modelOutputOverrides`, including models without a custom-model row. The override
 uses the runtime `max_output_tokens` capability and survives a model re-sync. The OpenAI-compatible
 provider page offers the same edit/clear controls and marks models with explicit vision support.
+
+On a compatible provider node, the write paths (`POST`, `PUT`, `PATCH`, `DELETE` and
+`/api/provider-models/validate-and-add`) store the model id as the bare upstream id: an id
+pasted from a prefixed listing has any leading stack of the node's own prefix collapsed, and
+responses echo the stored id. Canonical providers' slashed ids (e.g. `nvidia/nemotron-…`) are
+stored verbatim. `/v1/models` never emits a stacked `<prefix>/<prefix>/<model>` id.
 
 Custom Chat Completions nodes adapt explicit reasoning opt-outs to the upstream backend. A
 successful connection test automatically selects chat-template controls for each exact model ID
@@ -1300,11 +1346,35 @@ verdicts; the second stage can still produce its requested visible reasoning as 
 
 | Endpoint              | Method   | Description                   |
 | --------------------- | -------- | ----------------------------- |
+| `/api/models`         | GET/PUT  | Model list / alias update     |
 | `/api/models/alias`   | GET/POST | Model aliases                 |
 | `/api/models/catalog` | GET      | All models by provider + type |
 | `/api/combos*`        | Various  | Combo management              |
 | `/api/keys*`          | Various  | API key management            |
 | `/api/pricing`        | GET      | Model pricing                 |
+
+#### Model limit provenance
+
+`GET /api/models?withLimits=1` (also `true`; `0`/`false` or omitting it keeps the default
+payload unchanged) adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and a `capsSource`
+object to every model row. `capsSource` names the rule that supplied each limit, so a
+surprising limit (for example 128k on a 1M model) can be traced to its origin. The resolved
+values are the same ones routing uses; the flag only adds fields and never changes a value.
+Any other `withLimits` value is rejected with `400`.
+
+| `capsSource` value                           | Origin                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `override:context`                           | Persisted context-window override (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Persisted `max_input_tokens` / `max_output_tokens` capability override |
+| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
+| `synced:<provider>/<model>`                  | models.dev synced capability row                                       |
+| `registry:<provider>/<model>`                | Provider registry entry                                                |
+| `spec:<model>`                               | Static model spec                                                      |
+| `effort-base:` prefix                        | Row borrowed from the base model of an effort-suffixed variant         |
+| `none`                                       | No source declares the limit (value is `null`)                         |
+
+Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`
+and the precedence chains in `src/lib/modelCapabilityLimits.ts`.
 
 ### Usage & Analytics
 
@@ -1617,6 +1687,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` request does **not** use OpenRouter.
 
 **Supported formats:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** file-mode transcription over the Gemini Live
+WebSocket (requires a Gemini API key). The upload is converted to 16 kHz mono PCM with `ffmpeg`
+(must be on `PATH`, unless the file is already a 16 kHz mono PCM WAV), streamed to the session and
+the finalized text is returned as `{ "text": "..." }`. Optional `language` and `prompt` form fields
+are forwarded. Limits: uploads above 25 MiB or decoded audio longer than 10 minutes answer
+`413`; a conversion that runs longer than 60 s is killed and answers `504`. The API key is sent
+in the `x-goog-api-key` header only, never in the WebSocket URL.
 
 ---
 

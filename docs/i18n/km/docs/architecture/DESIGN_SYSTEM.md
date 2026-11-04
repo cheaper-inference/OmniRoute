@@ -4,75 +4,18 @@
 
 ---
 
-> **ស្ថានភាព៖** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងនៅលើ** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ដែលបានលក់ជាកន្លែងធ្វើការ `packages/ui-kit` (`@omniroute/ui-kit`; រូបថតខាងលើត្រូវបានខ្ទាស់ជា `packages/ui-kit/UPSTREAM.md` និងការពារដោយ `npm run check:ui-kit-snapshot`) ។ ពន្លឺគឺជាប្រធានបទ Canonical; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ការសង្កត់សំឡេងគឺ Keak lime (`--ci-color-accent`) ។ ស្វ៊ីសគឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
+> **ស្ថានភាព៖** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងនៅលើ** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ដែលបានលក់ជាកន្លែងធ្វើការ `packages/ui-kit` (`@omniroute/ui-kit`; រូបថតខាងលើត្រូវបានខ្ទាស់ជា `packages/ui-kit/UPSTREAM.md` និងការពារដោយ `npm run check:ui-kit-snapshot`) ។ ពន្លឺគឺជាប្រធានបទ Canonical; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ក្ដារលាយលំនាំដើមគឺជារបស់ឧបករណ៍** ការបោះពុម្ពផ្សាយ** រូបរាង (ក្រដាសក្តៅអព្យាក្រឹតនិងការសង្កត់សំឡេងទង់ដែង `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); ការកំណត់ → រូបរាង → ការផ្តល់ជូនក្ដារលាយពណ៌** បុរាណ** , និមិត្តសញ្ញាមូលដ្ឋានរបស់ឧបករណ៍ជាមួយនឹងការសង្កត់សំឡេងកំបោរ។ ស្វ៊ីសគឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ ស្គ្រីប Switzer ខ្វះការធ្លាក់តាមរយៈ glyph ដោយ glyph (`src/app/globals.css`): Inter សម្រាប់ Cyrillic ក្រិក និងវៀតណាម ហើយមានតែក្រោម `html[dir="rtl"]`, Vazirmatn សម្រាប់អក្សរអារ៉ាប់។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
 
-## 1. កន្លែងដែលអ្វីៗស្ថិតនៅ
+## 1. កន្លែងដែលវត្ថុរស់នៅ
 
-- **Kit.** `packages/ui-kit/src` គឺជាច្បាប់ចម្លងដ៏ដូចគ្នាគ្រប់ byte នៃ `src/` របស់ upstream នៅ commit ដែលបានកំណត់ទុកក្នុង
-  `packages/ui-kit/UPSTREAM.md` (ដែលក៏កត់ត្រាការអនុញ្ញាតអាជ្ញាប័ណ្ណផងដែរ); `PATCHES.md` រាយបញ្ជី patch ក្នុងស្រុក
-  (គ្មាន)។ វាត្រូវបានប្រើប្រាស់ជា source ដោយគ្មាន build៖ `next.config.mjs` ធ្វើ transpile វា ហើយ
-  `tsconfig.json` map `@omniroute/ui-kit` → `packages/ui-kit/src` និង `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` និង `vitest.mcp.config.ts` មាន alias ដូចគ្នា)។ សូម import component
-  របស់ kit តាម subpath របស់វា (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) កុំ import តាម
-  barrel `@omniroute/ui-kit` ដាច់ខាត៖ barrel នឹងទាញ component ទាំងអស់ (រួមទាំង date picker) ចូលទៅក្នុង
-  importer នីមួយៗ។ Stylesheet របស់ kit ចូលតាមរយៈ `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`)។
-- **Token.** `packages/ui-kit/src/ci-tokens.css` ប្រកាស token `--ci-*`; `src/app/globals.css`
-  ភ្ជាប់ពួកវាទៅឈ្មោះ legacy របស់ OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) ដើម្បីឱ្យការអាន `var(--color-*)` ដែលមានស្រាប់ និង Tailwind
-  utility នៅតែបន្តដំណើរការ។ កូដថ្មីប្រើ Tailwind utility (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ឬ class របស់ kit — កុំប្រើតម្លៃ hex ដាច់ខាត
-  (`tests/unit/design-kit-bridge.test.ts` បង្ខំឱ្យគោរព bridge នេះ)។ `text-primary` បំលែងទៅជា
-  `--color-primary-ink` តាមរយៈ `--text-color-primary` (lime-800 ក្នុងរបៀបភ្លឺ ហើយ lime accent ក្នុងរបៀបងងឹត)
-  ដូច្នេះអត្ថបទ primary នៅតែអានបានងាយ ខណៈដែល `bg-primary`/`border-primary` រក្សាផ្ទៃ lime នោះ។ Chart series
-  ប្រើ `--color-chart-1` … `--color-chart-5`។
-- **ធីម.** `<html className="ci-theme">` (`src/app/layout.tsx`) បើកឱ្យឯកសារប្រើធីមរបស់ kit។
-  ចំណូលចិត្តគឺ `light`, `dark` ឬ `system` (`THEME_CONFIG.defaultTheme = "system"` ក្នុង
-  `src/shared/constants/appConfig.ts`; `system` ធ្វើតាម `prefers-color-scheme`)។ `applyTheme()` ក្នុង
-  `src/store/themeStore.ts` (មានច្បាប់ចម្លងនៅក្នុង inline bootstrap script នៃ `src/app/layout.tsx` ដែលរត់មុន
-  hydration) កំណត់ `data-theme="dark"|"light"` ហើយបិទ/បើក `.dark` class លើ `<html>` ព្រមគ្នា។ សំណុំ token
-  របៀបងងឹតរបស់ kit ផ្អែកលើ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); dark override
-  ផ្ទាល់ខ្លួនរបស់ OmniRoute (ប្លុក `.dark` ក្នុង `globals.css`) និង legacy Tailwind `dark:` utility វិញ
-  ផ្អែកលើ `.dark` class។ គ្មាន preset ពណ៌ accent ទេ៖ accent មកពី kit ជានិច្ច ហើយ preset ដែលបានរក្សាទុកពី
-  build ចាស់ ត្រូវបានបោះបង់ចោលនៅពេល store ផ្ទុកឡើង។
-- **Component (adapter).** `src/shared/components/index.tsx` រក្សា OmniRoute component API (ឈ្មោះដូចគ្នា,
-  default export និង props) ហើយ primitive នៅពីក្រោយវា គឺជា adapter លើ kit៖ form
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlay និង feedback
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  រចនាសម្ព័ន្ធ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) និងតារាង
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)។ Adapter នីមួយៗ import component
-  របស់ kit តាម subpath ហើយ map legacy props ទៅលើវា — ឧទាហរណ៍ `Button variant="primary"` គឺជា button
-  `default` របស់ kit (`--ci-button-primary-*`៖ ផ្ទៃបញ្ច្រាសក្នុងរបៀបភ្លឺ ហើយ accent ជាមួយពណ៌អក្សរ
-  `--ci-color-accent-foreground` របស់វាក្នុងរបៀបងងឹត), `danger` គឺ `destructive` ហើយ `warning` គឺ `outline`
-  បូកផ្នែកបន្ថែម `.ci-button--warning`។ ច្បាប់ `.ci-button--warning` និង `.ci-badge[data-tone]` នៅចុង
-  `globals.css` (`@layer components`) គឺជា extension របស់ OmniRoute លើ class របស់ kit។
-  `tests/unit/ui/adapters/*.test.tsx` ខ្ទាស់ adapter នីមួយៗទុក។
-- **Shell.** `src/app/(dashboard)/layout.tsx` render `DashboardLayout` ដែល render
-  `src/shared/components/layouts/DashboardShell.tsx`៖ `SidebarProvider` / `Sidebar` /
-  `SidebarInset` របស់ kit (`packages/ui-kit/src/sidebar.tsx`) ដោយមានឡូហ្ស៊ីក navigation របស់ OmniRoute នៅក្នុង
-  `src/shared/components/Sidebar.tsx`។ តំណ "skip to content" ទៅកាន់ `#main-content` គឺជាធាតុដំបូងដែលអាច
-  focus បាន។ `src/shared/components/Header.tsx` មាន `SidebarTrigger` របស់ kit (sidebar toggle តែមួយគត់របស់
-  shell), Keak `ProductSwitcher` និង command-palette opener; វាបង្ហាញចំណងជើង route តែពេលដែលគ្មាន
-  `PageHeader` របស់ kit (`.ci-page-header`) ណាមួយត្រូវបាន mount នៅខាងក្នុង `#main-content` ប៉ុណ្ណោះ ដូច្នេះ
-  ទំព័រដែលមាន `PageHeader` ផ្ទាល់ខ្លួន នឹងមាន `h1` តែមួយគត់។ `src/shared/components/CommandPalette.tsx`
-  គឺជា `Dialog` របស់ kit។
-- **Icon.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) បំលែងឈ្មោះ (វាក្យសព្ទ Material
-  Symbols ដែល screen ប្រើ) តាមរយៈ `ICON_MAP` (`src/shared/constants/iconMap.ts`) ទៅជា glyph របស់ Lucide។
-  Font និង package របស់ Material Symbols ត្រូវបានដកចេញហើយ៖ ឈ្មោះដែលខ្វះពី map នឹង render glyph placeholder
-  កណ្តាលមួយ (`data-icon-missing="true"`) ហើយកត់ console warning នៅពេលក្រៅ production។
-  `npm run gen:icon-map` បោះពុម្ពឈ្មោះដែលកំពុងត្រូវបានប្រើ ដែលខ្វះពី map
-  (`tests/unit/icon-map-coverage.test.ts` បរាជ័យលើឈ្មោះណាមួយដែលគ្មាន icon របស់ Lucide;
-  `tests/unit/icon-map-object-values.test.ts` គ្របដណ្តប់ឈ្មោះដែលត្រូវបានរក្សាទុកក្នុង lookup object);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` សរសេរឡើងវិញនូវ span ពិតប្រាកដ
-  `<span className="material-symbols-outlined">` ទៅជា `<Icon>`។
-- **ម៉ាកយីហោ.** `src/shared/components/OmniRouteLogo.tsx` រុំ kit៖ default export `OmniRouteLogo`
-  render `ProductIcon product="omniroute" variant="glyph"` (inline SVG ដែលមានសុវត្ថិភាពនឹង `basePath`) ហើយ
-  `OmniRouteLockup` render `ProductLockup product="omniroute"` (accessible name "Keak OmniRoute") ឬសម្រាប់
-  អ្នកប្រតិបត្តិការ white-label គឺជា `name`/`logoSrc` ផ្ទាល់ខ្លួនរបស់ពួកគេ។ គោលដៅរបស់ product-switcher
-  ស្ថិតនៅក្នុង `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)។
-  Screen ឈរដោយខ្លួនឯង — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` និង `src/shared/components/ErrorPageScaffold.tsx`
-  — បង្ហាញ lockup; `tests/unit/brand-pages-static.test.ts` ការពារវា។
+- **កញ្ចប់។** `packages/ui-kit/src` គឺជាការចម្លងបៃសម្រាប់បៃនៃ `src/` ខាងលើនៅការប្តេជ្ញាចិត្តដែលបានខ្ទាស់ក្នុង `packages/ui-kit/UPSTREAM.md` (ដែលក៏កត់ត្រាការអនុញ្ញាតអាជ្ញាប័ណ្ណផងដែរ); `PATCHES.md` រាយបញ្ជីបំណះក្នុងតំបន់ (គ្មាន)។ វាត្រូវបានប្រើប្រាស់ជាប្រភព ដោយគ្មានការស្ថាបនា៖ `next.config.mjs` ចម្លងវា ហើយ `tsconfig.json` ផែនទី `@omniroute/ui-kit` → `packages/ui-kit/src` និង `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` និង `vitest.mcp.config.ts` អនុវត្តឈ្មោះក្លែងក្លាយដូចគ្នា)។ នាំចូលសមាសធាតុឧបករណ៍ដោយផ្លូវរងរបស់វា (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`… ) មិនដែលឆ្លងកាត់ធុង `@omniroute/ui-kit` ទេ៖ ធុងទាញគ្រប់សមាសធាតុទាំងអស់ (រួមទាំងកម្មវិធីជ្រើសរើសកាលបរិច្ឆេទ) ទៅក្នុងអ្នកនាំចូលនីមួយៗ។ សន្លឹករចនាប័ទ្មកញ្ចប់បញ្ចូលតាមរយៈ `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"` សន្លឹកពេញលេញ៖ `ci-ui.css` ស្នូល បូកនឹងគ្រួសារគំរូនីមួយៗ)។
+- **ថូខឹន។** `packages/ui-kit/src/ci-tokens.css` ប្រកាសថូខឹន `--ci-*` ; `src/app/globals.css` ភ្ជាប់ពួកវាទៅឈ្មោះ OmniRoute កេរ្តិ៍ដំណែល (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) ដូច្នេះឧបករណ៍ប្រើប្រាស់ `var(--color-*)` ដែលមានស្រាប់ និង Tailwind បន្តដំណើរការ។ កូដថ្មីប្រើឧបករណ៍ប្រើប្រាស់ Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`… ) ឬថ្នាក់ឧបករណ៍ — មិនដែលតម្លៃគោលដប់ប្រាំមួយ (`tests/unit/design-kit-bridge.test.ts` ពង្រឹងស្ពាន) ។ `text-primary` ដោះស្រាយទៅ `--color-primary-ink` តាមរយៈ `--text-color-primary` ដូច្នេះអត្ថបទបឋមនៅតែអាចអានបាន ខណៈពេលដែល `bg-primary`/`border-primary` រក្សាផ្ទៃសង្កត់សំឡេង៖ នៅក្រោមការបោះពុម្ពវាគឺជា `--ci-color-accent-active` របស់ឧបករណ៍ ( `#99562f` ស្ពាន់ជ្រៅនៅក្នុងពន្លឺ ការសង្កត់សំឡេងទង់ដែងនៅក្នុងភាពងងឹត); នៅក្រោម Classic, lime-800 នៅក្នុងពន្លឺ និងការសង្កត់សំឡេងកំបោរនៅក្នុងទីងងឹត។ ស៊េរីគំនូសតាងប្រើ `--color-chart-1` … `--color-chart-5`.
+- **ស្បែក។** `<html className="ci-theme">` (`src/app/layout.tsx`) ជ្រើសរើសឯកសារទៅក្នុងប្រធានបទកញ្ចប់។ ចំណូលចិត្តគឺ `light`, `dark` ឬ `system` (`THEME_CONFIG.defaultTheme = "system"` in `src/shared/constants/appConfig.ts`; `system` តាម `prefers-color-scheme`)។ `applyTheme()` ក្នុង `src/store/themeStore.ts` (ឆ្លុះដោយ `THEME_BOOT_SCRIPT` បញ្ចូលក្នុង `src/app/layout.tsx` ដែលដំណើរការមុនពេលមានជាតិទឹក) កំណត់ `data-theme="dark"|"light"` និងបិទបើកថ្នាក់ `.dark` នៅលើ `<html>` ជាមួយគ្នា។ សំណុំនិមិត្តសញ្ញាងងឹតរបស់ឧបករណ៍ត្រូវបានចុចនៅលើ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); ការបដិសេធភាពងងឹតផ្ទាល់ខ្លួនរបស់ OmniRoute(ប្លុក `.dark` ក្នុង `globals.css`) និងគន្លឹះឧបករណ៍ប្រើប្រាស់ Tailwind `dark:` កេរ្តិ៍ដំណែលនៅលើថ្នាក់ `.dark` ។ មិនមានការកំណត់ពណ៌សង្កត់សំឡេងជាមុនទេ៖ ការសង្កត់សំឡេងតែងតែមកពីឧបករណ៍ ហើយការកំណត់ជាមុនដែលបន្តចេញពីការស្ថាបនាចាស់ត្រូវបានទម្លាក់នៅពេលដែលហាងផ្ទុក។
+- **ក្ដារលាយ។** ពីរ ទាំងពីកញ្ចប់ (`src/shared/constants/appearancePalette.ts`): `editions` លំនាំដើម និង `classic`។ ការបោះពុម្ពគឺជាគុណលក្ខណៈ `data-ci-appearance="editions"` របស់ឧបករណ៍នៅលើ `<html>` ដែល `ci-editions.css` (នាំចូលដោយ `ci-ui.css`) រួមបញ្ចូលគ្នាជាមួយ `data-theme`; បុរាណគឺជាអវត្តមាននៃគុណលក្ខណៈ។ ម៉ាស៊ីនមេ ប្លង់ឫស បង្ហាញគុណលក្ខណៈ ដូច្នេះអ្នកទស្សនាដែលគ្មានអ្វីត្រូវបានរក្សាទុក (ឬគ្មាន JS) ទទួលបានការបោះពុម្ពនៅលើគ្រប់ផ្ទៃ — ផ្ទាំងគ្រប់គ្រង ការចូល `/status` ទំព័រកំហុស `/docs` និង PWA។ ជម្រើសត្រូវបានបន្តនៅជាប់នឹងស្បែកក្នុងហាង `theme` ដូចគ្នា (`palette`, `setPalette()`, `applyPalette()` ក្នុង `src/store/themeStore.ts`) ហើយបានអនុវត្តមុនពេលគូរដោយ `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, inlined in the layout's `<head>`) ដែលលុបលក្ខណៈចេញតែពេលដែលក្ដារលាយដែលរក្សាទុកគឺ `"classic"`; `src/app/global-error.tsx` នៅខាងក្រៅប្លង់ឫស អនុវត្តវាពីហាងតែមួយ។ កុំដាក់ `data-ci-appearance` លើធាតុផ្សេងទៀត៖ ឧបករណ៍ត្រូវគ្នានឹង `html:root:has([data-ci-appearance="editions"])` ដូច្នេះកូនចៅម្នាក់នឹងប្តូរឯកសារទាំងមូល។ កំណែ `data-ci-editions-variant="landing"` បោះពុម្ពគឺសម្រាប់ទំព័រទីផ្សារ មិនមែនផ្ទាំងគ្រប់គ្រងទេ។ Browser chrome (`viewport.themeColor`, the web manifest ) មិនអាចអាន CSS ឬជម្រើសដែលបានរក្សាទុកទេ ដូច្នេះវាធ្វើតាមលំនាំដើម៖ `PWA_THEME_COLORS` ក្នុង `src/shared/constants/pwaThemeColors.ts` គឺជាកញ្ចក់មួយនៃកំណែ `--ci-color-background` (`#f3f1e9` / `#11120f`) ដែលត្រូវបានខ្ទាស់ទៅ `ci-editions.css` ដោយ `tests/unit/pwa-theme-colors.test.ts`។ Monaco អានពណ៌របស់វាចេញពីការស៊ើបអង្កេត (`monacoKitTheme.ts`); នៅក្រោមការបោះពុម្ព ការស៊ើបអង្កេតដែលអានត្រឡប់ root `data-theme` សម្រាប់ឆ្លងកាត់សមកាលកម្មមួយ ពីព្រោះឧបករណ៍ដោះស្រាយការបោះពុម្ព light/dark ពីឫស។
+- **សមាសធាតុ (អាដាប់ទ័រ) ។** `src/shared/components/index.tsx` រក្សាសមាសធាតុ OmniRoute API (ឈ្មោះដូចគ្នា ការនាំចេញលំនាំដើម និង props) ហើយបុព្វកាលនៅពីក្រោយវាគឺជាអាដាប់ទ័រលើឧបករណ៍៖ ទម្រង់ (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ការដាក់ជាន់លើ និងមតិកែលម្អ (`Modal`,`ConfirmModal`/ `Tooltip` `NotificationToast` `InfoTooltip` `EmptyState` `Loading`, រចនាសម្ព័ន្ធ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) និងតារាង (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`) ។ អាដាប់ទ័រនាំចូលសមាសធាតុឧបករណ៍ដោយផ្លូវរង ហើយគូសផែនទីកេរ្តិ៍ដំណែលនៅលើវា — ឧទាហរណ៍ `Button variant="primary"` គឺជាប៊ូតុង `default` (`--ci-button-primary-*`: ផ្ទៃបញ្ច្រាសក្នុងពន្លឺ ការសង្កត់សំឡេងជាមួយទឹកថ្នាំ `--ci-color-accent-foreground` របស់វានៅក្នុងភាពងងឹត) `danger` គឺ `destructive` និង `warning` គឺ `outline` បូកផ្នែកបន្ថែម `.ci-button--warning` ។ ច្បាប់ `.ci-button--warning` និង `.ci-badge[data-tone]` នៅចុងបញ្ចប់នៃ `globals.css` (`@layer components`) គឺជាផ្នែកបន្ថែម OmniRoute នៅផ្នែកខាងលើនៃថ្នាក់ឧបករណ៍។ `tests/unit/ui/adapters/*.test.tsx` ខ្ទាស់អាដាប់ទ័រនីមួយៗ។
+- **សែល។** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout` ដែលបង្ហាញ `src/shared/components/layouts/DashboardShell.tsx`: kit `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) ជាមួយនឹងតក្កវិជ្ជារុករករបស់ OmniRoute នៅក្នុង `src/shared/components/Sidebar.tsx`។ តំណភ្ជាប់ "រំលងទៅមាតិកា" ទៅ `#main-content` គឺជាធាតុដែលអាចផ្តោតបានដំបូង។ `src/shared/components/Header.tsx` កាន់ឧបករណ៍ `SidebarTrigger` (បិទបើករបារចំហៀងតែមួយគត់របស់សែល) Keak `ProductSwitcher` និងឧបករណ៍បើកក្ដារលាយពាក្យបញ្ជា; វាបង្ហាញចំណងជើងផ្លូវតែប៉ុណ្ណោះ ខណៈដែលគ្មានកញ្ចប់ `PageHeader` (`.ci-page-header`) ត្រូវបានម៉ោននៅខាងក្នុង `#main-content` ដូច្នេះទំព័រដែលមាន `PageHeader` របស់វាមាន `h1` តែមួយ។ `src/shared/components/CommandPalette.tsx` គឺជាកញ្ចប់ `Dialog`។
+- **រូបតំណាង។** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ដោះស្រាយឈ្មោះ (វាក្យសព្ទនិមិត្តសញ្ញាសម្ភារៈដែលអេក្រង់ប្រើ) តាមរយៈ `ICON_MAP` (`src/shared/constants/iconMap.ts`) ទៅជា Lucide glyph ។ ពុម្ពអក្សរ និងកញ្ចប់និមិត្តសញ្ញាសម្ភារៈត្រូវបានបាត់បង់៖ ឈ្មោះដែលបាត់ពីផែនទីបង្ហាញ glyph កន្លែងដាក់អព្យាក្រឹត (`data-icon-missing="true"`) និងកត់ត្រាការព្រមានកុងសូលនៅខាងក្រៅផលិតកម្ម។ `npm run gen:icon-map` បោះពុម្ពឈ្មោះដែលកំពុងប្រើដែលបាត់ពីផែនទី (`tests/unit/icon-map-coverage.test.ts` បរាជ័យលើឈ្មោះណាមួយដោយគ្មានរូបតំណាង Lucide; `tests/unit/icon-map-object-values.test.ts` គ្របដណ្តប់ឈ្មោះដែលរក្សាទុកក្នុងវត្ថុរកមើល); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` សរសេរឡើងវិញតាមព្យញ្ជនៈ `<span className="material-symbols-outlined">` លាតសន្ធឹងទៅ `<Icon>`។
+- **ម៉ាក។** `src/shared/components/OmniRouteLogo.tsx` រុំកញ្ចប់៖ ការនាំចេញលំនាំដើម `OmniRouteLogo` បង្ហាញ `ProductIcon product="omniroute" variant="glyph"` (ក្នុងបន្ទាត់ SVG, `basePath` -safe) និង `OmniRouteLockup` បង្ហាញ `ProductLockup product="omniroute"` (ឈ្មោះដែលអាចចូលប្រើបាន "Keak OmniRoute") ឬសម្រាប់ប្រតិបត្តិករស្លាកពណ៌ស គឺ `name`/`logoSrc` របស់ពួកគេផ្ទាល់។ ទិសដៅប្តូរផលិតផលរស់នៅក្នុង `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ។ អេក្រង់ឯករាជ្យ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` និង `src/shared/components/ErrorPageScaffold.tsx` — បង្ហាញការចាក់សោ។ `tests/unit/brand-pages-static.test.ts` ការពារវា។
 
 ## 2. ច្បាប់
 
@@ -106,7 +49,16 @@
 
 ## 5. ការធ្វើបច្ចុប្បន្នភាពឧបករណ៍
 
-`npm run check:ui-kit-upstream` ប្រៀបធៀបកំណែដែលបានខ្ទាស់ក្នុង `packages/ui-kit/UPSTREAM.md` ជាមួយនឹងស្លាក `v*` ថ្មីបំផុតនៃ repo ខាងលើ ហើយបោះពុម្ពពាក្យបញ្ជាធ្វើសមកាលកម្ម នៅពេលការចេញផ្សាយចេញ។ លំហូរការងារ `UI Kit upstream watch` ប្រចាំសប្តាហ៍ (`.github/workflows/ui-kit-upstream-watch.yml`) ដំណើរការការត្រួតពិនិត្យដូចគ្នា និងរក្សាបញ្ហាតាមដានមួយបើកចំហខណៈពេលដែលម្ជុលនៅពីក្រោយ។ repo ខាងលើមានលក្ខណៈឯកជន ដូច្នេះលំហូរការងារត្រូវការសញ្ញាសម្ងាត់ដែលអាចអានបានតែនៅក្នុង `UI_KIT_READ_TOKEN` សម្ងាត់ ហើយនៅដដែលដោយគ្មានវា។
+`npm run check:ui-kit-upstream` ប្រៀបធៀបកំណែដែលបានខ្ទាស់ក្នុង `packages/ui-kit/UPSTREAM.md` ជាមួយនឹងស្លាក `v*` ថ្មីបំផុតនៃ repo ខាងលើ ហើយបោះពុម្ពពាក្យបញ្ជាធ្វើសមកាលកម្ម នៅពេលការចេញផ្សាយចេញ។
+
+លំហូរការងារ `UI Kit upstream watch` ប្រចាំថ្ងៃ (`.github/workflows/ui-kit-upstream-watch.yml`) ដំណើរការការត្រួតពិនិត្យដូចគ្នា។ ខណៈពេលដែលម្ជុលស្ថិតនៅខាងក្រោយ `scripts/ci/ui-kit-sync-pr.sh` រក្សាសមកាលកម្មមួយ PR បើកទល់នឹងសាខា `release/vX.Y.Z` ខ្ពស់បំផុតនៅលើសាខាវិល `chore/ui-kit-sync-latest`។ វាមិនដែលបញ្ចូលគ្នាទេ៖ រាល់ការចេញផ្សាយកញ្ចប់នៅតែត្រូវការការត្រួតពិនិត្យមើលឃើញនៅលើ VPS មូលដ្ឋាន។ សាខានេះត្រូវបានសាងសង់ឡើងវិញនៅពេលដែលការចេញផ្សាយថ្មីជាងនេះចេញហើយទុកចោលតែម្នាក់ឯងបើមិនដូច្នេះទេ។ PR បើកចំហជាមួយនឹងការប្តេជ្ញាចិត្តដែលរុញដោយដៃមិនត្រូវបានសរសេរជាន់លើទេ ហើយ PR សម្រាប់កំណែដែលអ្នកថែទាំបានបិទដោយមិនបានបញ្ចូលនឹងបិទរហូតដល់ការចេញផ្សាយថ្មីជាងនេះ។
+
+នៅពេលដែលគ្មាន PR អាចត្រូវបានបើក (ការចេញផ្សាយគោលដៅត្រូវបានជាប់គាំង PR បានប្រព្រឹត្តដោយរុញដោយដៃ PR ត្រូវបានបិទ ឬមិនមានសញ្ញាសម្ងាត់ PR ត្រូវបានកំណត់) លំហូរការងាររក្សាបញ្ហាតាមដានមួយបើកចំហដែលនិយាយថាហេតុអ្វី។
+
+ដំណើរការការងារប្រើអាថ៌កំបាំងពីរ៖
+
+- `secrets.UI_KIT_READ_TOKEN`: សញ្ញាសម្ងាត់សម្រាប់អានបានតែសម្រាប់ repo ឯកជន។ នៅពេលដែលលំហូរការងារមិនអាចអានចរន្តខាងលើ (គ្មានសញ្ញាសម្ងាត់ សញ្ញាសម្ងាត់ដែលឈប់ដំណើរការ ឬ GitHub មិនអាចទៅដល់បាន) ការរត់នៅតែមានពណ៌បៃតង ប៉ុន្តែសរសេរការព្រមាន និងរក្សាបញ្ហាដាច់ដោយឡែកមួយបើក ដែលបិទដោយខ្លួនវានៅពេលដំណើរការក្រោយអាចអានចរន្តម្តងទៀត។
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: សញ្ញាសម្ងាត់ដែលមានលក្ខណៈល្អិតល្អន់នៅលើឃ្លាំងនេះជាមួយនឹងសំណើសុំចូលប្រើខ្លឹមសារ និងទាញ។ `GITHUB_TOKEN` លំនាំដើមមិនអាចបង្កើត PRs នៅទីនេះទេ ហើយ PR វាបើកនឹងមិនបង្ក CI ទេ។ បើគ្មាននិមិត្តសញ្ញានេះទេ លំហូរការងារគ្រាន់តែរុញសាខាប៉ុណ្ណោះ។
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ចម្លង `src/` ខាងលើនៅឯការប្តេជ្ញាចិត្តនោះ (`latest` = ស្លាក `v*` ថ្មីបំផុត) ទៅជា `packages/ui-kit/src` អនុវត្តការផ្លាស់ប្តូរដែលបានអនុញ្ញាតតែមួយ (វាទម្លាក់បច្ច័យ `.js` ពីការនាំចូលដែលទាក់ទង) និងកំណត់កំណែកន្លែងធ្វើការនៅក្នុង `packages/ui-kit/package.json` និង `package-lock.json` ទៅផ្នែកខាងលើ។ បន្ទាប់មក៖ ពិនិត្យមើល `git diff packages/ui-kit` ធ្វើវិចារណញាណលើអ្នកផ្តល់សេវា ការកំណត់ បន្សំ ការប្រើប្រាស់ និងចំណុចបញ្ចប់នៅក្នុងស្បែកទាំងពីរ ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយបើក PR ជាមួយនឹងការផ្លាស់ប្តូរកម្រិតខ្ពស់។
 
@@ -114,24 +66,20 @@
 
 ដ្យាក្រាមទាំងដប់ពីរដែលឫស `README.md` បង្កប់ (`docs/diagrams/*.svg`) គឺជាឧបករណ៍ដែលបានអនុវត្តចំពោះរូបភាពឋិតិវន្ត ហើយពួកវាត្រូវបានបង្កើត មិនមែនគូរដោយដៃទេ៖ ឯកសារម៉ាស៊ីនភ្លើងចំនួន 13 នៅ `scripts/docs/gen-readme-*.mjs` (ដ្យាក្រាមដប់ពីរបូកនឹងកម្មវិធីបញ្ជា `gen-readme-diagrams.mjs` ) និងការធ្វើតេស្តភាពជាប់គាំងចំនួន 12 នៅ `tests/unit/docs/readme-*-svg.test.ts` មួយក្នុងមួយដ្យាក្រាមដែលចេញឯកសារនីមួយៗ (byte-comment) `test-unit`) ។
 
-- **ថូខឹន។** `scripts/docs/readme-diagram-theme.mjs` ចម្លងក្ដារលាយពី `packages/ui-kit/src/ci-tokens.css` (ខ្ទាស់ប្រឆាំងនឹងឯកសារនោះដោយ `tests/unit/docs/readme-diagram-theme.test.ts`) និងកំណត់តួនាទីអត្ថបទនៅលើមុខមុនរបស់ឧបករណ៍ — ឧបករណ៍ Serif សម្រាប់បង្ហាញ, Inter សម្រាប់អត្ថបទ UI, IBM Plex Mono សម្រាប់តួលេខ និងកូដ — ពីកញ្ចប់ `@fontsource` (ផ្ទាំងគ្រប់គ្រងដោយខ្លួនវាប្រើ Switzer របស់ឧបករណ៍ចាប់ពី 6 ឈុត)។ តម្លៃពន្លឺស្ថិតនៅលើ `:root` តម្លៃងងឹតនៅពីក្រោយ `prefers-color-scheme: dark` នៅខាងក្នុងឯកសារ ដូច្នេះរូបភាពនីមួយៗធ្វើតាមគ្រោងការណ៍របស់អ្នកមើលនៅលើ GitHub។
-- **ពុម្ពអក្សរ។** `scripts/docs/readme-fonts.mjs` កំណត់ឯកសារ woff2 ទាំងនោះទៅជា glyphs ដែលដ្យាក្រាមនីមួយៗគូរ និងបង្កប់ពួកវាជា `@font-face` `data:` URIs — វិធីតែមួយគត់ដែលឧបករណ៍វាយអក្សរឈានដល់រូបភាព README ចាប់តាំងពី GitHub Markdown មិនផ្ទុក CSS ហើយប្រូកស៊ី camo រារាំងរាល់ការទាញយកខាងក្រៅ។ សំណុំរងគឺសម្រាប់តែឡាតាំង។ និមិត្តសញ្ញា glyphs ដែលធ្លាក់ត្រឡប់ទៅជង់ប្រព័ន្ធត្រូវបានអនុញ្ញាតម្តងមួយៗក្នុង `SYMBOL_FALLBACKS` និងការបោះ glyph ដែលមិនបានលាក់ផ្សេងទៀត។
+- **ថូខឹន។** `scripts/docs/readme-diagram-theme.mjs` ចម្លងក្ដារលាយបោះពុម្ព (រូបរាងលំនាំដើម) ពី `packages/ui-kit/src/ci-editions.css` (ខ្ទាស់ប្រឆាំងនឹងឯកសារនោះដោយ `tests/unit/docs/readme-diagram-theme.test.ts` ដែលពិនិត្យ WCAG AA សម្រាប់គ្រប់ពណ៌អត្ថបទលើគ្រប់ផ្ទៃក្នុងគ្រោងការណ៍ទាំងពីរ ករណីលើកលែងមួយ `warn` ពន្លឺគឺឧបករណ៍ព្រមានធ្វើឱ្យងងឹត 10% ពីព្រោះតម្លៃកញ្ចប់គឺ 4.46:1 នៅលើប្រភេទផ្ទាំងក្រណាត់ (ផ្ទាំងក្រណាត់)`ci-tokens.css`)៖ ស្វ៊ីសនៅទម្ងន់របស់ឧបករណ៍ (400/500/600 បង្ហាញនៅ 500) និងការតាមដានសម្រាប់អ្វីៗគ្រប់យ៉ាង លើកលែងតែតួនាទីកូដ (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) ដែលជា IBM Plex Mono និងសម្រាប់តែពាក្យបញ្ជា URLs អេក្រង់កំណត់អត្តសញ្ញាណ និងប៉ុណ្ណោះ។ តម្លៃពន្លឺស្ថិតនៅលើ `:root` តម្លៃងងឹតនៅពីក្រោយ `prefers-color-scheme: dark` នៅខាងក្នុងឯកសារ ដូច្នេះរូបភាពនីមួយៗធ្វើតាមគ្រោងការណ៍របស់អ្នកមើលនៅលើ GitHub។
+- **ពុម្ពអក្សរ។** GitHub Markdown មិនផ្ទុក CSS ហើយប្រូកស៊ី camo រារាំងរាល់ការទាញយកខាងក្រៅ ដូច្នេះប្រភេទកញ្ចប់ត្រូវធ្វើដំណើរទៅខាងក្នុងឯកសារ។ `scripts/docs/readme-outline.mjs` ដែលជាជំហានចុងក្រោយនៃម៉ាស៊ីនភ្លើងនីមួយៗ កំណត់រូបរាងតួនាទីរបស់ស្វីសដោយប្រើ HarfBuzz ហើយគូរវាជាបន្ទាត់វ៉ិចទ័រ (`<defs>` paths និង `<use>`) ជាមួយនឹងព្រួញ និងនិមិត្តសញ្ញាធរណីមាត្រ ស្វ៊ីសខ្វះការគូសលើរង្វាស់របស់វាផ្ទាល់។ គ្រោង មិនដែលបង្កប់ពុម្ពអក្សរទេ៖ អាជ្ញាប័ណ្ណរបស់ស្វីស (`packages/ui-kit/src/fonts/FFL.txt`) ហាមឃាត់ការកំណត់រង និងការបំប្លែងទម្រង់ដោយគ្មានការយល់ព្រមជាលាយលក្ខណ៍អក្សរ និងអនុញ្ញាតឱ្យគូរវ៉ិចទ័រ ដូច្នេះកុំណែនាំស្វីស `@font-face` ឬ `data:` URI ឡើងវិញ។ ពុម្ពអក្សរមួយដែលបានបន្សល់ទុកក្នុងឯកសារគឺជាសំណុំរង OFL IBM Plex Mono សម្រាប់អ្វីដែលរក្សាអត្ថបទកូដពិតប្រាកដ (`scripts/docs/readme-fonts.mjs`) ដែលបង្កើតឡើងពីតួអក្សរទាំងនោះ។ glyph ណាមួយដែលវាមិនអាចបង្កប់ការបោះ។
 - **បង្កើតឡើងវិញ។** `npm run docs:readme-diagrams` សរសេរឡើងវិញទាំងដប់ពីរនៅក្នុងលំដាប់ README ហើយបោះពុម្ពមួយបន្ទាត់ក្នុងមួយឯកសារជាមួយនឹងទំហំរបស់វា។ ម៉ាស៊ីនភ្លើងតែមួយក៏ដំណើរការដោយខ្លួនឯង (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ត្រូវការ `node --import tsx/esm` ពីព្រោះតួលេខរបស់វាបានមកពីកម្មវិធីផ្ទុកកាតាឡុកផ្ទាល់នៅក្នុង `open-sse/config/freeModelCatalog.ts` ផលវិបាក CI នៃការផ្លាស់ប្តូរកាតាឡុកគឺនៅក្នុង `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`) ។ ភ្ជាប់ម៉ាស៊ីនភ្លើង និង SVG ជាមួយគ្នា។
 - **ភស្តុតាង។** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` បង្ហាញឯកសារតាមរបៀបដែល GitHub បម្រើវា (ស្លាក `<img>`, `Content-Security-Policy` របស់ Camo , `image/svg+xml`) ចាប់យកពន្លឺ និងស៊ុមងងឹត ហើយរាយការណ៍ពុម្ពអក្សរខាងក្រៅស្នើសុំទំព័រដែលបានធ្វើ (ត្រូវតែជា 0)។
 - **ថវិកា។** នៅក្រោម 200 KB ក្នុងមួយឯកសារ (ការធ្វើតេស្តភាពជាប់គាំងនីមួយៗអះអាងវា); 500 KB គឺជាអក្សររឹងសម្រាប់រូបភាព README ណាមួយ (ច្បាប់អ្នកមានសុពលភាពស្ទូឌីយោ SVG )។
-- **ចម្លងមិនផ្លាស់ប្តូរ រាប់ពីច្រកទ្វារ។** ម៉ាកដែលបានផ្លាស់ប្តូរប្រភេទ និងក្ដារលាយ មិនមែនជាពាក្យទេ៖ ម៉ាស៊ីនភ្លើងនីមួយៗផ្ទុកច្បាប់ចម្លងនៃដ្យាក្រាមរបស់វានៅក្នុង `*_COPY` ថេរ (ឬបង្កើតវាពីកាតាឡុកបន្តផ្ទាល់) ដែលជាទាំងអត្ថបទដែលបានគូរ និងបញ្ចូលសំណុំពុម្ពអក្សរ។ តួលេខ Canonical ស្ថិតនៅក្នុងថ្នាំង `<text>` អានដោយ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); ការធ្វើតេស្តភាពជាប់គាំងនៃដ្យាក្រាមដែល gate អានក៏ដំណើរការនូវ validators របស់វានៅលើឯកសារដែលបានបង្កើត ដូច្នេះតួរលេខដែលរសាត់ចេញពី code បរាជ័យក្នុងការធ្វើតេស្ត — ជួសជុលប្រភពដែល gate អាន មិនដែលលេខនៅក្នុង generator ទេ។
+- **ចម្លងមិនផ្លាស់ប្តូរ រាប់ពីច្រកទ្វារ។** ម៉ាកដែលបានផ្លាស់ប្តូរប្រភេទ និងក្ដារលាយ មិនមែនជាពាក្យទេ៖ ម៉ាស៊ីនភ្លើងនីមួយៗផ្ទុកច្បាប់ចម្លងនៃដ្យាក្រាមរបស់វានៅក្នុង `*_COPY` ថេរ (ឬបង្កើតវាពីកាតាឡុកផ្ទាល់) ដែលជាទាំងអត្ថបទដែលបានគូរ និងការបញ្ចូលនៃជំហានគូសវាស។ តួលេខ Canonical ស្ថិតនៅក្នុងថ្នាំង `<text>` (មើលមិនឃើញនៅពេលដែលបានគូសបញ្ជាក់ `fill-opacity:0`) អានដោយ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); ការធ្វើតេស្តភាពជាប់គាំងនៃដ្យាក្រាមដែល gate អានក៏ដំណើរការនូវ validators របស់វានៅលើឯកសារដែលបានបង្កើត ដូច្នេះតួរលេខដែលរសាត់ចេញពី code បរាជ័យ ការធ្វើតេស្ត — ជួសជុលប្រភពដែល gate អាន មិនដែលលេខនៅក្នុង generator ទេ។
 
-## 7. លិបិក្រមឯកសារយោង
+## 7. សន្ទស្សន៍យោង
 
-- `src/app/globals.css` — ស្ពាន token, ការសរសេរជាន់លើ `.dark`, ផ្នែកបន្ថែម `@layer components` របស់ OmniRoute
-- `packages/ui-kit/UPSTREAM.md` — commit upstream ដែលបានកំណត់ថេរ និងការអនុញាតអាជ្ញាបណ្ណ; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` និង adapters ដែលនៅក្បែរវា; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+- `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
+- `packages/ui-kit/UPSTREAM.md` — pinned upstream commit និងការអនុញ្ញាតអាជ្ញាប័ណ្ណ; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` និងអាដាប់ទ័រនៅជាប់វា; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

@@ -4,6 +4,7 @@ import {
   type FeatureFlagDefinition,
 } from "@/shared/constants/featureFlagDefinitions";
 import { registerFeatureFlagResolver } from "@/shared/utils/featureFlagResolverBridge";
+import { isRequireApiKeyValueEnabled } from "@/shared/utils/requireApiKeyValue.mjs";
 
 /**
  * Resolve the effective value of a feature flag.
@@ -40,9 +41,14 @@ export function resolveAllFeatureFlags(): Array<{
   key: string;
   effectiveValue: string;
   source: "db" | "env" | "default";
+  configuredSource?: "db" | "env" | "default";
+  sourceKey?: string;
   definition: FeatureFlagDefinition;
 }> {
   return FEATURE_FLAG_DEFINITIONS.map((definition) => {
+    if (definition.key === "UNPRICED_USAGE_BUDGET_POLICY") {
+      return { key: definition.key, ...resolveUnpricedUsageBudgetPolicy(), definition };
+    }
     const dbOverride = getFeatureFlagOverride(definition.key);
     if (dbOverride !== undefined) {
       return { key: definition.key, effectiveValue: dbOverride, source: "db", definition };
@@ -61,9 +67,14 @@ export function resolveAllFeatureFlags(): Array<{
 }
 
 // Backward-compatible wrappers
+/**
+ * REQUIRE_API_KEY ignores case and surrounding whitespace, unlike the generic
+ * `isFeatureFlagEnabled`, so the gate agrees with the startup exposure warnings
+ * that read the same value (see requireApiKeyValue.mjs).
+ */
 export function isRequireApiKeyEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("REQUIRE_API_KEY");
+    return isRequireApiKeyValueEnabled(resolveFeatureFlag("REQUIRE_API_KEY"));
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve REQUIRE_API_KEY, defaulting to required:",
@@ -136,6 +147,59 @@ export function getModelsCatalogPrefixMode(): ModelsCatalogPrefixMode {
   const value = resolveFeatureFlag("MODELS_CATALOG_PREFIX_MODE");
   if (value === "alias" || value === "canonical") return value;
   return "dual";
+}
+
+export type UnpricedUsageBudgetPolicy = "fail_closed" | "count_as_zero";
+
+/** Runtime policy and provenance; inherited DB values are not enum overrides. */
+export function resolveUnpricedUsageBudgetPolicy(): {
+  effectiveValue: UnpricedUsageBudgetPolicy;
+  source: "db" | "env" | "default";
+  configuredSource: "db" | "env" | "default";
+  sourceKey: string;
+} {
+  const key = "UNPRICED_USAGE_BUDGET_POLICY";
+  const dbPolicy = getFeatureFlagOverride(key);
+  const explicitPolicy = dbPolicy ?? (process.env[key] || undefined);
+  if (explicitPolicy !== undefined) {
+    const source = dbPolicy !== undefined ? "db" : "env";
+    return {
+      effectiveValue: explicitPolicy === "count_as_zero" ? "count_as_zero" : "fail_closed",
+      source,
+      configuredSource: source,
+      sourceKey: key,
+    };
+  }
+  const sourceKey = "USAGE_LIMIT_IGNORE_UNPRICED";
+  const effectiveValue = isFeatureFlagEnabled(sourceKey) ? "count_as_zero" : "fail_closed";
+  const source =
+    getFeatureFlagOverride(sourceKey) !== undefined
+      ? "db"
+      : process.env[sourceKey]
+        ? "env"
+        : "default";
+  return { effectiveValue, source, configuredSource: "default", sourceKey };
+}
+
+/**
+ * How per-key USD limits treat usage that has no pricing row (#12341).
+ *
+ * Fail-safe closed: an unreadable flag store or an unknown value keeps the
+ * default `fail_closed` behavior, so a hard budget cap is never silently
+ * relaxed. An explicit enum (DB before env) takes precedence over the upstream
+ * USAGE_LIMIT_IGNORE_UNPRICED opt-out; the boolean is consulted only when no
+ * enum was configured. An invalid explicit enum must not fall through to it.
+ */
+export function getUnpricedUsageBudgetPolicy(): UnpricedUsageBudgetPolicy {
+  try {
+    return resolveUnpricedUsageBudgetPolicy().effectiveValue;
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve UNPRICED_USAGE_BUDGET_POLICY, defaulting to fail_closed:",
+      error instanceof Error ? error.message : error
+    );
+    return "fail_closed";
+  }
 }
 
 /**

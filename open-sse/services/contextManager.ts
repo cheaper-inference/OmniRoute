@@ -43,6 +43,15 @@ function getEnvOverride(provider: string): number | null {
   return null;
 }
 
+/**
+ * True when the operator set a positive `CONTEXT_LENGTH_<PROVIDER>` /
+ * `CONTEXT_LENGTH_DEFAULT` override. `resolveTokenLimit` treats it as a sourced
+ * limit, so callers that gate on "has limit evidence" (combo catalog, #18609) must too.
+ */
+export function hasContextLengthEnvOverride(provider: string): boolean {
+  return getEnvOverride(provider) !== null;
+}
+
 // Reserve tokens override from environment variable
 function getReserveTokensOverride(): number | null {
   const envValue = process.env.CONTEXT_RESERVE_TOKENS;

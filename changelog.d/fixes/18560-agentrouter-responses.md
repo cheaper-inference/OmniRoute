@@ -1,0 +1,1 @@
+- **fix(providers):** Route `gpt-6-astra`, `gpt-6.1-sol`, and `gpt-5.6-sol` through AgentRouter's Responses endpoint by default while preserving explicit connection protocol settings ([#18560](https://github.com/cheaper-inference/OmniRoute/pull/18560)) — thanks @trespassmk
