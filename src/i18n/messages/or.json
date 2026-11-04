@@ -14157,6 +14157,10 @@
         "label": "ଅଂଶୀଦାରିତ ଇଗ୍ରେସ୍ ପୁଲ୍ କ୍ରମ",
         "description": "ଯେଉଁ ପ୍ରଦାନକାରୀଙ୍କ କୋଟା ଇଗ୍ରେସ୍ ଠିକଣା ଦ୍ୱାରା ବଣ୍ଟନ କରାଯାଇଥାଏ, ସେମାନଙ୍କ ପାଇଁ ନିକଟରେ ପ୍ରତ୍ୟାଖ୍ୟାତ ସଦସ୍ୟଙ୍କ ନିରୀକ୍ଷିତ ଇଗ୍ରେସ୍ ଠିକଣା ଅଂଶୀଦାର କରୁଥିବା ଏକ ପୁଲ୍ ସଦସ୍ୟଙ୍କୁ ସୁସ୍ଥ ସଦସ୍ୟଙ୍କ ଠିକ୍ ତଳେ ସ୍ଥାନିତ କରନ୍ତୁ। କେବଳ କ୍ରମ, କଦାପି ବାଦ୍ ଦିଆଯାଏ ନାହିଁ। PROXY_SKIP_RECENTLY_FAILED ଆବଶ୍ୟକ, ଯାହା ଏହା ପଢ଼ୁଥିବା ପ୍ରତ୍ୟାଖ୍ୟାନ ସଙ୍କେତ ଉତ୍ପନ୍ନ କରେ। ଡିଫଲ୍ଟ ଭାବରେ ଅଫ୍ ଅଛି: ଚୟନ କ୍ରମ ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ସାଧାରଣ ରୋଟେସନ୍ ଅଟେ।"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ରୋଟେସନ୍ ଆଟ୍ରିବ୍ୟୁସନ୍ ଲଗିଂ",
         "description": "Opencode ରୋଟେସନ୍ ରେକର୍ଡ କରେ ଯେ କେଉଁ ଆକାଉଣ୍ଟ ସର୍ଭ କରିଥିଲା କିମ୍ବା ଏଡ଼ାଇ ଦିଆଯାଇଥିଲା (କେବଳ ମାସ୍କ୍ ହୋଇଥିବା id, କଦାପି ସମ୍ପୂର୍ଣ୍ଣ ଆକାଉଣ୍ଟ id ନୁହେଁ) ଏବଂ ପ୍ରକ୍ସି ଲଗ୍ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକୁ ସେମାନଙ୍କ ଅନୁରୋଧ ସହିତ ଲିଙ୍କ୍ କରେ, ଯାହାଦ୍ୱାରା ଅପରେଟର୍ ବାଦ୍ ଦିଆଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଅବ୍ୟବହୃତ ଆକାଉଣ୍ଟଗୁଡ଼ିକଠାରୁ ପୃଥକ ଭାବରେ ଚିହ୍ନିପାରିବେ। ଡିଫଲ୍ଟ ଭାବରେ ଅଫ୍ ଅଛି: କୌଣସି ଅତିରିକ୍ତ ଲଗ୍ ଧାଡ଼ି କିମ୍ବା ଅତିରିକ୍ତ କଲମ୍ ଲେଖାଯାଏ ନାହିଁ।"
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Content-Policy ପ୍ରତ୍ୟାଖ୍ୟାନରେ ଅଟକନ୍ତୁ",
         "description": "ଯେତେବେଳେ ଏକ combo ଟାର୍ଗେଟ୍ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ content-policy ପ୍ରତ୍ୟାଖ୍ୟାନ (କୋଡ୍ କିମ୍ବା ପ୍ରକାର cyber_policy / content_policy_violation) ସହିତ ଉତ୍ତର ଦିଏ, ପରବର୍ତ୍ତୀ ଟାର୍ଗେଟକୁ ଅଗ୍ରସର ହେବା ପରିବର୍ତ୍ତେ, combo କୁ ଅଟକାନ୍ତୁ ଏବଂ ଅବଶିଷ୍ଟ ଟାର୍ଗେଟଗୁଡ଼ିକ ଭିନ୍ନ ମଡେଲ୍ ହୋଇଥିଲେ ମଧ୍ୟ ସେହି ପ୍ରତ୍ୟାଖ୍ୟାନକୁ ଫେରାନ୍ତୁ। ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: ଏହି ପ୍ରତ୍ୟାଖ୍ୟାନ କଦାପି ଆକାଉଣ୍ଟକୁ କୁଲ୍ ଡାଉନ୍ କରେ ନାହିଁ କିମ୍ବା ପ୍ରୋଭାଇଡର୍ ବ୍ରେକର୍‌କୁ ଟ୍ରିପ୍ କରେ ନାହିଁ, ଏବଂ combo ପୂର୍ବ ଭଳି ଠିକ୍ ଏହାର ପରବର୍ତ୍ତୀ ଟାର୍ଗେଟକୁ ଅଗ୍ରସର ହୁଏ।"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "କୁଲ୍‌ଡାଉନ୍ ପୁନଃପ୍ରୟାସ: 403/410 ପ୍ରତ୍ୟାଖ୍ୟାନଗୁଡ଼ିକୁ ଏଡ଼ାନ୍ତୁ",

@@ -14157,6 +14157,10 @@
         "label": "共有イグレスプールの順序",
         "description": "イグレスアドレスごとにクォータが割り当てられているプロバイダーにおいて、最近拒否されたメンバーと観測されたイグレスアドレスを共有するプールメンバーの順位を、正常なメンバーの直下に配置します。並び替えのみで、除外されることはありません。読み取り対象となる拒否シグナルを生成する PROXY_SKIP_RECENTLY_FAILED が必要です。デフォルトで無効: 選択順序は通常のローテーションとまったく同じになります。"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ローテーション帰属のログ記録",
         "description": "Opencodeのローテーションにおいて、どのアカウントが処理したか、またはスキップされたかを記録し（完全なアカウントIDではなくマスクされたIDのみ）、プロキシログのエントリをリクエストに関連付けることで、オペレーターがスキップされたアカウントと未使用のアカウントを識別できるようにします。デフォルトで無効: 追加のログ行やカラムは書き込まれません。"
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "コンボ: コンテンツポリシー拒否時に停止",
         "description": "コンボターゲットが完全一致するコンテンツポリシー拒否（コードまたはタイプが cyber_policy / content_policy_violation）を返した場合、残りのターゲットが別のモデルであっても次のターゲットには進まず、コンボを停止してその拒否を返します。デフォルトはオフ: この拒否によってアカウントがクールダウンされたりプロバイダーブレーカーが作動したりすることはなく、コンボはこれまでと同様に次のターゲットへ進みます。"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "クールダウン再試行: 403/410拒否をスキップ",

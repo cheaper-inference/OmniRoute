@@ -14157,6 +14157,10 @@
         "label": "ลำดับโพล egress ทั่วไป",
         "description": "สำหรับผู้ให้บริการที่ปริมาณการใช้งานถูกแบ่งตามที่อยู่ egress ให้จัดอันดับสมาชิกโพลที่แบ่งปันที่อยู่ egress ที่สังเกตได้ของสมาชิกที่ถูกปฏิเสธเมื่อไม่นานมาอยู่ใต้สมาชิกที่มีสุขภาพดีเท่านั้น เป็นการจัดลำดับเท่านั้น ไม่มีการตัดออก จำเป็นต้องใช้ PROXY_SKIP_RECENTLY_FAILED ซึ่งสร้างสัญญาณการปฏิเสธให้มันอ่าน ปิดใช้งานโดยค่าเริ่มต้น: ลำดับการเลือกเป็นการวนเวียนธรรมดาเท่านั้น"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "บันทึกการระบุที่มาของลำดับการวนเวียน",
         "description": "การวนเวียนของ Opencode จะบันทึกว่าบัญชีใดให้บริการหรือถูกข้าม (เฉพาะ ID ที่ถูกบดบังเท่านั้น ไม่มีการแสดง ID บัญชีเต็มรูปแบบ) และเชื่อมโยงบันทึกเหตุการณ์โพรกซีกับคำขอ เพื่อให้ผู้ดำเนินการแยกบัญชีที่ถูกข้ามออกจากบัญชีที่ไม่ได้ใช้งานออกได้ ปิดใช้งานโดยค่าเริ่มต้น: ไม่มีบรรทัดบันทึกเพิ่มเติม และไม่มีคอลัมน์ที่เขียนเพิ่ม"
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "คอมโบ: หยุดเมื่อถูกปฏิเสธด้วยนโยบายเนื้อหา",
         "description": "เมื่อเป้าหมายคอมโตอบสนองด้วยการปฏิเสธนโยบายเนื้อหาคงที่ (โค้ดหรือประเภท cyber_policy / content_policy_violation) ให้หยุดคอมโบและส่งการปฏิเสธนั้นกลับแม้ว่าเป้าหมายที่เหลือจะเป็นโมเดลอื่น แทนที่จะดำเนินการต่อเป้าหมายถัดไป ปิดไว้เป็นค่าเริ่มต้น: การปฏิเสธจะไม่ทำให้บัญชีเย็นลงหรือทำให่เบรกก์เกอร์ผู้ให้บริการทำงาน และคอมโบจะดำเนินการต่อเป้าหมายถัดไปตามเดิม"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: ข้ามการปฏิเสธสถานะ 403/410",

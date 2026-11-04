@@ -63,8 +63,8 @@ const {
 // API_KEY_AUDIT_CLIENT_DETAILS_ENABLED (#17982, client IP + user-agent on api_key.auth.touch
 // audit rows, default off) takes it to 115.
 // CLAUDE_CACHE_TAIL_TTL_1H (1h TTL for the Claude cache conversation tail, default off)
-// takes it to 116.
-const EXPECTED_FEATURE_FLAG_COUNT = 116;
+// takes it to 116. The two #18312 transport flags, both default off, take it to 118.
+const EXPECTED_FEATURE_FLAG_COUNT = 118;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED

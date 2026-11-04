@@ -14157,6 +14157,10 @@
         "label": "Orden del pool por salida compartida",
         "description": "Para proveedores cuya cuota se agrupa por dirección de salida, clasifica a un miembro del pool que comparta la dirección de salida observada de un miembro rechazado recientemente justo por debajo de los miembros en buen estado. Solo afecta al orden, nunca se excluye. Requiere PROXY_SKIP_RECENTLY_FAILED, que genera la señal de rechazo que este lee. Desactivado por defecto: el orden de selección es exactamente la rotación simple."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Registro de atribución de rotación",
         "description": "La rotación de opencode registra qué cuenta sirvió o se omitió (solo identificadores enmascarados, nunca identificadores de cuenta completos) y vincula las entradas del registro de proxy con su solicitud, de modo que el operador pueda distinguir las cuentas omitidas de las no utilizadas. Desactivado por defecto: no se escriben líneas de registro ni columnas adicionales."
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Detener ante rechazo por política de contenido",
         "description": "Cuando un destino del combo responda con un rechazo exacto por política de contenido (código o tipo cyber_policy / content_policy_violation), detén el combo y devuelve ese rechazo incluso cuando los destinos restantes sean modelos diferentes, en lugar de avanzar al siguiente destino. Desactivado de forma predeterminada: el rechazo nunca enfría la cuenta ni dispara el disyuntor del proveedor, y el combo avanza a su siguiente destino exactamente como antes."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reintento de enfriamiento: omitir rechazos 403/410",

@@ -14157,6 +14157,10 @@
         "label": "साझा Egress पुल क्रम",
         "description": "egress ठेगानाका आधारमा कोटा निर्धारण गरिएका प्रदायकहरूका लागि, हालै अस्वीकृत सदस्यको देखिएको egress ठेगाना साझा गर्ने पुल सदस्यलाई स्वस्थ सदस्यहरूको ठ्याक्कै तल श्रेणीबद्ध गर्नुहोस्। क्रम निर्धारण मात्र गरिन्छ, कहिल्यै बहिष्कृत गरिँदैन। PROXY_SKIP_RECENTLY_FAILED आवश्यक पर्दछ, जसले यसले पढ्ने अस्वीकृति संकेत उत्पन्न गर्दछ। पूर्वनिर्धारित रूपमा निष्क्रिय: चयन क्रम ठ्याक्कै सामान्य रोटेसन जस्तै हुन्छ।"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "रोटेसन एट्रिब्युसन लगिङ",
         "description": "Opencode रोटेसनले कुन खाताले सेवा दियो वा कुन छोडियो (मास्क गरिएका id हरू मात्र, कहिल्यै पनि पूरा खाता id हरू होइन) रेकर्ड गर्दछ र प्रोक्सी लग प्रविष्टिहरूलाई तिनको अनुरोधसँग लिङ्क गर्दछ, जसले गर्दा अपरेटरले छोडिएका खाताहरूलाई प्रयोग नगरिएकाहरूबाट छुट्याउन सक्छन्। पूर्वनिर्धारित रूपमा निष्क्रिय: कुनै अतिरिक्त लग लाइनहरू छैनन्, कुनै अतिरिक्त स्तम्भहरू लेखिएका छैनन्।"
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "कम्बो: सामग्री-नीति अस्वीकृतिमा रोक्नुहोस्",
         "description": "जब कुनै कम्बो लक्ष्यले ठ्याक्कै सामग्री-नीति अस्वीकृति (कोड वा प्रकार cyber_policy / content_policy_violation) मार्फत जवाफ दिन्छ, तब अर्को लक्ष्यमा अगाडि बढ्नुको सट्टा, बाँकी लक्ष्यहरू फरक मोडेलहरू भए पनि कम्बोलाई रोक्नुहोस् र त्यो अस्वीकृति फिर्ता पठाउनुहोस्। पूर्वनिर्धारित रूपमा बन्द: यो अस्वीकृतिले कहिल्यै खातालाई कुल (cool) गर्दैन वा प्रदायक ब्रेकर ट्रिप गर्दैन, र कम्बो पहिले जस्तै ठ्याक्कै आफ्नो अर्को लक्ष्यमा अगाडि बढ्छ।"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कुलडाउन पुन: प्रयास: 403/410 अस्वीकृतिहरू छोड्नुहोस्",

@@ -14157,6 +14157,10 @@
         "label": "مشترکہ ایگریس پول آرڈر",
         "description": "ان فراہم کنندوں کے لیے جن کی کوٹا ایگریس ایڈریس کے لحاظ سے ڈھلان میں تقسیم کی گئی ہے، ایک پول ممبر کو جو حال ہی میں مسترد شدہ ممبر کی مشاہدہ شدہ ایگریس ایڈریس شیئر کرتا ہے، صحت مند ممبروں کے بالکل نیچے رینک کریں۔ صرف ترتیب، کبھی استثناء نہیں۔ اسے PROXY_SKIP_RECENTLY_FAILED درکار ہے، جو اس مستردگی سیگنل کو پیدا کرتی ہے جسے یہ پڑھتا ہے۔ بطورِ ڈیفالٹ آف ہے: انتخاب کا ترتیب بالکل عام روٹیشن جیسا ہی ہے۔"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "روٹیشن ایٹری بیوشن لاگنگ",
         "description": "Opencode روٹیشن یہ ریکارڈ کرتی ہے کہ کون سا اکاؤنٹ فراہم ہوا یا نظرانداز کیا گیا (صرف ماسکڈ آئی ڈیز، کبھی پورا اکاؤنٹ آئی ڈی نہیں) اور پراکسی لاگ اندراجات کو اپنے درخواست سے جوڑتی ہے، تاکہ آپریٹر نظرانداز کردہ اکاؤنٹس کو غیر استعمال شدہ اکاؤنٹس سے پہچان سکتا ہے۔ بطورِ ڈیفالٹ آف ہے: کوئی اضافی لاگ لائنز نہیں، کوئی اضافی کالمز لکھے نہیں جاتے۔"
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "کوڈبو: کنٹینٹ-پولیسی رجحان پر رک جائیں",
         "description": "جب کوڈبو ٹارگٹ جواب میں بالکل کنٹینٹ-پولیسی رجحان (کوڈ یا ٹائپ cyber_policy / content_policy_violation) دیتا ہے، تو کوڈبو کو روک کر اس رجحان کو واپس کریں، چاہے باقی ٹارگٹس مختلف ماڈلز ہوں، اگلے ٹارگٹ پر آگے بڑھنے کے بجائے۔ بطورِ ڈیفالٹ بند: اس رجحان سے اکاؤنٹ کول یا پرووائیڈر بریکر ٹرائپ کبھی نہیں ہوتا، اور کوڈبو بالکل پہلے کی طرح اپنے اگلے ٹارگٹ پر آگے بڑھتا ہے۔"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "کول ڈاؤن ری ٹرائی: 403/410 کی نافرمانی پر نظر انداز کریں",

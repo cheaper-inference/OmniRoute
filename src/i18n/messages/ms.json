@@ -14157,6 +14157,10 @@
         "label": "Susunan Kolam Egress Terkongsi",
         "description": "Bagi penyedia yang kuotanya dikumpulkan mengikut alamat egress, letakkan kedudukan ahli kolam yang berkongsi alamat egress tercerap bagi ahli yang baru sahaja ditolak tepat di bawah ahli yang sihat. Susunan sahaja, tidak pernah dikecualikan. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan isyarat penolakan yang dibacanya. Dimatikan secara lalai: susunan pemilihan adalah sama tepat seperti putaran biasa."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pengelogan Atribusi Putaran",
         "description": "Putaran Opencode merekodkan akaun mana yang berkhidmat atau dilangkau (ID bertopeng sahaja, tidak sekali-kali ID akaun penuh) dan memautkan entri log proksi kepada permintaannya, supaya pengendali dapat membezakan akaun yang dilangkau daripada yang tidak digunakan. Dimatikan secara lalai: tiada baris log tambahan, tiada lajur tambahan ditulis."
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombo: Berhenti atas Penolakan Dasar Kandungan",
         "description": "Apabila sasaran kombo membalas dengan penolakan dasar kandungan yang tepat (kod atau jenis cyber_policy / content_policy_violation), hentikan kombo dan kembalikan penolakan tersebut walaupun sasaran yang selebihnya adalah model yang berbeza, bukannya mara ke sasaran seterusnya. Dimatikan secara lalai: penolakan tidak sekali-kali menyejukkan akaun atau mencetuskan pemutus litar penyedia, dan kombo mara ke sasaran seterusnya sama seperti sebelum ini."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Percubaan Semula Tempoh Bertenang: Langkau Penolakan 403/410",

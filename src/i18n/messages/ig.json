@@ -14157,6 +14157,10 @@
         "label": "Usoro Òtù Egress E Kekọrịtara",
         "description": "Maka ndị na-eweta ọrụ ndị e ji adreesị egress kee quota ha, dozie onye òtù na-ekekọrịta adreesị egress a hụrụ nke onye a jụrụ n'oge na-adịbeghị anya n'okpuru ndị òtù ahụ dị mma. Naanị n'usoro, ọ dịghị mgbe a na-ewepụ ya. Chọrọ PROXY_SKIP_RECENTLY_FAILED, nke na-ewepụta akara ọjụjụ ọ na-agụ. Agbanyụrụ na ndabara: usoro nhọrọ bụ kpọmkwem ntụgharị nkịtị."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Ndekọ Njirimara Ntụgharị",
         "description": "Ntụgharị opencode na-edekọ akaụntụ jere ozi ma ọ bụ nke a mafere (naanị ID ndị e kpuchiri ekpuchi, ọ dịghị mgbe a na-ede ID akaụntụ zuru ezu) ma na-ejikọ ndekọ proxy log na arịrịọ ha, ka onye nlekọta wee nwee ike ịmata ọdịiche dị n'etiti akaụntụ ndị a mafere na ndị a na-ejighị mee ihe. Agbanyụrụ na ndabara: ọ dịghị ahịrị ndekọ ọzọ ma ọ bụ kọlụm ọzọ a na-ede."
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Kwụsị n'Ajụjụ Content-Policy",
         "description": "Mgbe ebumnuche combo zaghachiri site n'ajụjụ doro anya nke content-policy (koodu ma ọ bụ ụdị cyber_policy / content_policy_violation), kwụsị combo ahụ ma weghachi ajụjụ ahụ ọbụlagodi mgbe ebumnuche ndị fọdụrụ bụ ụdị dị iche iche, kama ịga n'ihu na ebumnuche na-esonụ. Agbanyụrụ na ndabara: ajụjụ ahụ anaghị eme ka akaụntụ dajụọ ma ọ bụ kpalite provider breaker, combo na-agakwa n'ihu na ebumnuche ya na-esonụ kpọmkwem dịka ọ dị na mbụ."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nnwagharị Cooldown: Mafere Ọjụjụ 403/410",

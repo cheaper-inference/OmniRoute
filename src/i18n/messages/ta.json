@@ -14157,6 +14157,10 @@
         "label": "பங்கு எகசஸ் பூல் வரிசை",
         "description": "egress முகவரி அடிப்படையில் ஒதுக்கீடு பிரிக்கப்படும் வழங்குநர்களுக்கு, சமீபத்தில் மறுக்கப்பட்ட உறுப்பினரின் கவனிக்கப்பட்ட egress முகவரியைப் பகிரும் pool உறுப்பினரை ஆரோக்கியமான உறுப்பினர்களுக்குச் சற்றுக் கீழே வரிசைப்படுத்தவும். வரிசை மட்டுமே; ஒருபோதும் விலக்கப்படாது. இது படிக்கும் மறுப்பு சமிக்ஞையை உருவாக்கும் PROXY_SKIP_RECENTLY_FAILED தேவை. இயல்பாக முடக்கப்பட்டது: தேர்வு வரிசை சாதாரண சுழற்சியே."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "சுழற்சி குறிப்பு ஆவணப்படுத்தல்",
         "description": "opencode சுழற்சி எந்தக் கணக்கு பரிமாற்றம் செய்யப்பட்டது அல்லது தவிர்க்கப்பட்டது என்பதைப் பதிவு செய்கிறது (மறைமுகமான id-கள் மட்டுமே, முழு கணக்கு id-கள் எப்போதும் இல்லை), மேலும் பேராக்ஸ் நாட்குறிப்புகளை அவற்றின் கோரிக்கைகளுடன் இணைக்கிறது, மேலும் நடப்பு நபர் தவறப்பட்ட கணக்குகளைப் பயன்படுத்தப்படாத கணக்குகளில் இருந்து வேறுபடுத்தி அறிய முடியும். இயல்புநிலையில் இயக்கமில்லை: கூடுதல் ஆவண வரிகள் எதுவும் இல்லை, கூடுதல் நெடுவரிசைகள் எழுதப்படாது."
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "கொம்போ (Combo): உள்ளடக்க-முறேக் நிராகரிப்பில் நிறுத்தவும்",
         "description": "ஒரு கொம்போ குறிப்பு ஒரு உரிய உள்ளடக்க-முறேக் நிராகரிப்பால் (குறியீடு அல்லது வகை cyber_policy / content_policy_violation) பதிலளிக்கிறபோது, அடுத்த குறிப்புக்கு செல்லாமல், மீதமுள்ள குறிப்புகள் வேறுபட்ட மாதிரிகள் என்றாலும், கொம்போவை நிறுத்தி அந்த நிராகரிப்பை திருப்பி அனுப்பவும். இயல்புநிலையில் அணைக்கப்பட்டது: நிராகரிப்பு ஒரு கணக்கை குளிர்விக்கவோ அல்லது பிராவிடர் பிரேக்கரை (provider breaker) அடிக்கவோ செய்யாது, மேலும் கொம்போ முன்பு இருந்தபடி அதன் அடுத்த குறிப்புக்கு செல்கிறது."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "குளோடோவேன் மீண்டும் முயற்சி: 403/410 நிராகரிப்புகளை தவிர்",

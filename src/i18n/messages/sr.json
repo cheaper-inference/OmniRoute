@@ -14157,6 +14157,10 @@
         "label": "Редослед заједничког egress пулова",
         "description": "За провајдере чија је квота буцкет-ована по egress адреси, пореди члан пулва који дели опажену egress адресу недавно одбијеног члана одмах испод здравих чланова. Само редослед, никада не искључује. Потребно је PROXY_SKIP_RECENTLY_FAILED, који генерише сигнал одбијања који се чита. Подразумевано искључено: редослед избора је тачно обична ротација."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Евиденција атрибуције ротације",
         "description": "Opencode ротација бележи који налог је послужио или био прескочен (само маскирани ID-ови, никада пуни ID-ови налога) и повезује дневник прокси-записа са захтевом, како би оператер могао да разликује прескочене налоге од неискоришћених. Подразумевано искључено: нема додатних редова у дневнику, нема додатних колона које се уписују."
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Заустави на одбијању политике садржаја",
         "description": "Када combo циљ одговори тачним одбијањем политике садржаја (код или тип cyber_policy / content_policy_violation), заустави combo и врати то одбијање чак и када су преостали циљеви различити модели, уместо да напредује ка следећем циљу. Подразумевано искључено: одбијање никада не хлади налог ни не окида осигурач пружалаца, а combo напредује ка свом следећем циљу тачно као и пре."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Поновно покретање након паузе: Прескачи одбијене захтеве 403/410",

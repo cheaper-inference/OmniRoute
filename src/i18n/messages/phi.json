@@ -14157,6 +14157,10 @@
         "label": "Pagkakasunud-sunod ng Shared Egress Pool",
         "description": "Para sa mga provider na ang quota ay naka-bucket ayon sa egress address, iranggo ang miyembro ng pool na may parehong naobserbahang egress address ng isang kamakailang tinanggihang miyembro sa ilalim lamang ng maayos na mga miyembro. Pagkakasunud-sunod lamang, hindi kailanman ibinubukod. Nangangailangan ng PROXY_SKIP_RECENTLY_FAILED, na siyang gumagawa ng refusal signal na binabasa nito. Naka-off bilang default: ang pagkakasunud-sunod ng pagpili ay eksaktong karaniwang rotation."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pag-log ng Attribution ng Rotation",
         "description": "Itinatala ng rotation ng opencode kung aling account ang nag-serve o nilaktawan (mga naka-mask na ID lamang, hindi kailanman buong account ID) at iniuugnay ang mga entry sa log ng proxy sa kanilang kahilingan, upang maipagkaiba ng operator ang mga nilaktawang account mula sa mga hindi nagamit. Naka-off bilang default: walang karagdagang linya ng log, walang karagdagang column na isinusulat."
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Huminto sa Pagtanggi sa Content-Policy",
         "description": "Kapag sumagot ang isang target ng combo ng isang eksaktong pagtanggi sa content-policy (code o uri na cyber_policy / content_policy_violation), ihinto ang combo at ibalik ang pagtangging iyon kahit na magkakaibang modelo ang mga natitirang target, sa halip na magpatuloy sa susunod na target. Naka-off bilang default: hindi kailanman pinapalamig ng pagtanggi ang account o pinapagana ang provider breaker, at uusad ang combo sa susunod nitong target eksakto tulad ng dati."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",

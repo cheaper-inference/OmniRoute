@@ -14234,6 +14234,10 @@
         "label": "শেয়ার্ড ইগ্রেস পুলের ক্রম",
         "description": "যেসব প্রোভাইডারের কোটা ইগ্রেস অ্যাড্রেস অনুযায়ী ভাগ করা হয়, তাদের ক্ষেত্রে সম্প্রতি প্রত্যাখ্যাত কোনো মেম্বারের পর্যবেক্ষিত ইগ্রেস অ্যাড্রেস শেয়ার করা পুল মেম্বারকে সুস্থ মেম্বারদের ঠিক নিচে স্থান দেওয়া হয়। এটি কেবল ক্রম নির্ধারণ করে, কখনোই বাদ দেয় না। এর জন্য PROXY_SKIP_RECENTLY_FAILED প্রয়োজন, যা প্রত্যাখ্যানের সিগন্যাল তৈরি করে। ডিফল্টভাবে বন্ধ: নির্বাচনের ক্রম পুরোপুরি সাধারণ রোটেশনের মতো থাকে।"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "রোটেশন অ্যাট্রিবিউশন লগিং",
         "description": "Opencode রোটেশন রেকর্ড করে কোন অ্যাকাউন্ট সেবা দিয়েছে বা এড়িয়ে যাওয়া হয়েছে (শুধুমাত্র মাস্ক করা আইডি, কখনোই সম্পূর্ণ অ্যাকাউন্ট আইডি নয়) এবং প্রক্সি লগ এন্ট্রিগুলোকে সেগুলোর অনুরোধের সাথে লিঙ্ক করে, যাতে অপারেটর এড়িয়ে যাওয়া অ্যাকাউন্টগুলোকে অব্যবহৃত অ্যাকাউন্ট থেকে আলাদা করতে পারেন। ডিফল্টভাবে বন্ধ: কোনো অতিরিক্ত লগ লাইন বা অতিরিক্ত কলাম লেখা হয় না।"
@@ -14465,6 +14469,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "কম্বো: কন্টেন্ট-পলিসি প্রত্যাখ্যানে থামুন",
         "description": "কোনো কম্বো টার্গেট যখন একটি সুনির্দিষ্ট কন্টেন্ট-পলিসি প্রত্যাখ্যান দিয়ে উত্তর দেয় (কোড বা টাইপ cyber_policy / content_policy_violation), তখন পরবর্তী টার্গেটে যাওয়ার পরিবর্তে কম্বোটি থামিয়ে দিন এবং অবশিষ্ট টার্গেটগুলো ভিন্ন মডেলের হলেও সেই প্রত্যাখ্যানটি ফেরত দিন। ডিফল্টভাবে নিষ্ক্রিয়: প্রত্যাখ্যানটি কখনই অ্যাকাউন্ট কুল করে না বা প্রোভাইডার ব্রেকারকে ট্রিপ করে না, এবং কম্বো আগের মতোই তার পরবর্তী টার্গেটে অগ্রসর হয়।"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "কুলডাউন রিট্রাই: 403/410 প্রত্যাখ্যান এড়িয়ে যান",

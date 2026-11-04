@@ -14157,6 +14157,10 @@
         "label": "ترتیب استخر بر اساس خروجی مشترک",
         "description": "برای ارائه‌دهندگانی که سهمیه آن‌ها بر اساس نشانی خروجی (egress) سهمیه‌بندی می‌شود، اولویت عضو استخری که دارای نشانی خروجی مشاهده‌شده مشترک با یک عضو اخیراً رد شده است، درست در زیر اعضای سالم قرار می‌گیرد. صرفاً تغییر ترتیب است و هرگز کنار گذاشته نمی‌شود. به PROXY_SKIP_RECENTLY_FAILED نیاز دارد که سیگنال رد را برای خواندن تولید می‌کند. به‌طور پیش‌فرض غیرفعال است: ترتیب انتخاب دقیقاً همان چرخش ساده است."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ثبت لاگ انتساب چرخش",
         "description": "چرخش opencode ثبت می‌کند که کدام حساب سرویس‌دهی کرده یا رد شده است (فقط شناسه‌های ماسک‌شده، هرگز شناسه‌های کامل حساب‌ها ثبت نمی‌شوند) و ورودی‌های لاگ پروکسی را به درخواست مربوطه‌شان پیوند می‌دهد تا اپراتور بتواند حساب‌های رد شده را از موارد استفاده‌نشده تشخیص دهد. به‌طور پیش‌فرض غیرفعال است: هیچ خط لاگ اضافی یا ستون جدیدی نوشته نمی‌شود."
@@ -14388,6 +14392,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: توقف در صورت رد ناشی از خط‌مشی محتوا",
         "description": "هنگامی که یکی از اهداف combo با یک رد صریح بر اساس خط‌مشی محتوا (کد یا نوع cyber_policy / content_policy_violation) پاسخ می‌دهد، combo متوقف شده و همان پاسخ رد بازگردانده می‌شود حتی اگر اهداف باقی‌مانده مدل‌های متفاوتی باشند، به‌جای اینکه به هدف بعدی برود. به‌طور پیش‌فرض غیرفعال است: این رد هرگز حساب را وارد دوره خنک‌سازی (cooldown) نکرده و مدارشکن ارائه‌دهنده را فعال نمی‌کند، و combo دقیقاً مانند گذشته به هدف بعدی خود پیش می‌رود."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "تلاش مجدد در دوره خنک‌سازی: صرف‌نظر از پاسخ‌های رد 403/410",
