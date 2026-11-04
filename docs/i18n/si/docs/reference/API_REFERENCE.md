@@ -1531,9 +1531,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-වින්යාස කර ඇති ඕනෑම STT සපයන්නෙකු භාවිතයෙන් ශ්රව්ය ගොනු පිටපත් කරන්න. පථයේ පළමු
-කොටස native සපයන්නා තෝරයි (`openai/…`, `deepgram/…`). වෙනත් වෙළෙන්දෙකුගේ
-ආකෘතියක් නැවත අපනයනය කරන Gateway එකක් සුදුසුකම් ලත් id එකක් භාවිත කරයි
+වින්යාස කර ඇති ඕනෑම STT සැපයුම්කරුවෙකු භාවිතයෙන් ශ්රව්ය ගොනු පිටපත් කරන්න. පථයේ පළමු
+කොටස native සැපයුම්කරු තෝරයි (`openai/…`, `deepgram/…`). වෙනත් වෙළෙන්දෙකුගේ ආකෘතිය
+නැවත නිරාවරණය කරන ගේට්වේ සුදුසුකම් ලත් id එකක් භාවිත කරයි
 (`openrouter/deepgram/nova-3`).
 
 **ඉල්ලීම:**
@@ -1558,12 +1558,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **උදාහරණ ආකෘති ids:** `openai/whisper-1` (OpenAI යතුරක් අවශ්ය වේ),
 `openrouter/deepgram/nova-3` (OpenRouter යතුරක් අවශ්ය වේ),
-`deepgram/nova-3` (native Deepgram යතුරක් අවශ්ය වේ). සරල
+`deepgram/nova-3` (native Deepgram යතුරක් අවශ්ය වේ). හිස්
 `deepgram/nova-3` ඉල්ලීමක් **OpenRouter භාවිත නොකරයි**.
 
 **සහාය දක්වන ආකෘති:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket හරහා ගොනු-මාදිලි පිටපත්කරණය (Gemini API යතුරක් අවශ්ය වේ). උඩුගත කිරීම
+`ffmpeg` භාවිතයෙන් 16 kHz mono PCM වෙත පරිවර්තනය කර (`ffmpeg` `PATH` මත තිබිය
+යුතුය, ගොනුව දැනටමත් 16 kHz mono PCM WAV එකක් නොවේ නම්), සැසිය වෙත ප්රවාහනය කර,
+අවසන් කළ පෙළ `{ "text": "..." }` ලෙස ආපසු ලබා දෙයි. විකල්ප `language` සහ `prompt` පෝරම ක්ෂේත්ර
+ඉදිරියට යොමු කෙරේ. සීමාවන්: 25 MiB ඉක්මවන උඩුගත කිරීම් හෝ විකේතනය කළ ශ්රව්යයේ
+දිග මිනිත්තු 10කට වඩා වැඩි නම් `413` ප්රතිචාරයක් ලැබේ; පරිවර්තනය තත්පර 60කට
+වඩා දිගු කාලයක් ධාවනය වුවහොත් එය නවතා `504` ප්රතිචාරයක් ලබා දෙයි. API යතුර
+යවනු ලබන්නේ `x-goog-api-key` ශීර්ෂය තුළ පමණක් වන අතර, කිසිවිටෙක WebSocket URL එක තුළ නොවේ.
 
 ## Ollama අනුකූලතාව
 

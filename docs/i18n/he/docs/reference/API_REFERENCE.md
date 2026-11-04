@@ -1603,10 +1603,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-תמלול קובצי אודיו באמצעות כל ספק STT שהוגדר. מקטע הנתיב הראשון בוחר את
-הספק המקורי (`openai/…`, `deepgram/…`). שערים שמייצאים מחדש מודל של ספק
-אחר משתמשים במזהה מסויג
-(`openrouter/deepgram/nova-3`).
+תמלול קובצי אודיו באמצעות כל ספק STT שהוגדר. מקטע הנתיב הראשון בוחר את הספק
+המקורי (`openai/…`, `deepgram/…`). שערים שמייצאים מחדש מודל של ספק אחר משתמשים במזהה
+מוסמך (`openrouter/deepgram/nova-3`).
 
 **בקשה:**
 
@@ -1634,6 +1633,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` ללא קידומת אינה משתמשת ב-OpenRouter.
 
 **פורמטים נתמכים:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** תמלול במצב קובץ דרך
+WebSocket של Gemini Live (דורש מפתח API של Gemini). ההעלאה מומרת ל-PCM מונו בתדר 16 kHz באמצעות `ffmpeg`
+(חייב להיות ב-`PATH`, אלא אם הקובץ כבר בפורמט WAV מסוג PCM מונו בתדר 16 kHz), מוזרמת לסשן
+והטקסט הסופי מוחזר בתור `{ "text": "..." }`. שדות הטופס האופציונליים `language` ו-`prompt`
+מועברים הלאה. מגבלות: העלאות בנפח העולה על 25 MiB או אודיו מפוענח שאורכו עולה על 10 דקות מחזירים
+`413`; המרה שנמשכת יותר מ-60 שניות מופסקת ומחזירה `504`. מפתח ה-API נשלח בכותרת
+`x-goog-api-key` בלבד, ולעולם לא בכתובת ה-URL של ה-WebSocket.
 
 ---
 
