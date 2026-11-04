@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it, before, after, mock } from "node:test";
-import { getDbInstance } from "../../src/lib/db/core.ts";
+import { getDbInstance, resetDbInstance } from "../../src/lib/db/core.ts";
+import { invalidateDbCache } from "../../src/lib/db/readCache.ts";
+import { enrichCatalogModelEntry } from "../../src/lib/modelMetadataRegistry.ts";
 import {
   getSyncedPricing,
   saveSyncedPricing,
@@ -22,6 +24,7 @@ describe("getSyncedPricing memoization", () => {
     } catch {
       // ignore
     }
+    resetDbInstance();
   });
 
   it("returns the same object reference for repeated reads within the same cache version", () => {
@@ -64,5 +67,40 @@ describe("getSyncedPricing memoization", () => {
     assert.notEqual(pricing, warm, "invalidation must rebuild, not reuse the stale object");
     assert.ok(pricing.anthropic, "cache should reflect the write, not a stale snapshot");
     assert.equal(pricing.anthropic["claude-x"].input, 1);
+  });
+
+  it("normalizes historical data once per version, including repeated catalog lookups", () => {
+    const db = getDbInstance();
+    db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+      "pricing_synced",
+      "opencode_go",
+      JSON.stringify({ "glm-5.2": { input: 1.4, output: 4.4 } })
+    );
+    invalidateDbCache("pricing");
+    const first = getSyncedPricing();
+    assert.deepEqual(first["opencode-go"]["glm-5.2"], { input: 1.4, output: 4.4 });
+    assert.equal(first.opencode_go, undefined);
+    const spy = mock.method(db, "prepare");
+    try {
+      for (let i = 0; i < 5; i++) {
+        assert.equal(getSyncedPricing(), first);
+        const entry = enrichCatalogModelEntry(
+          { id: "opencode-go/glm-5.2", owned_by: "opencode-go", root: "glm-5.2" },
+          undefined,
+          { modelsDevPricing: {}, userPricing: {} }
+        );
+        assert.deepEqual(entry.pricing, { input: 1.4, output: 4.4 });
+      }
+      const pricingReads = spy.mock.calls.filter(
+        ({ arguments: args }) => typeof args[0] === "string" && args[0].includes("pricing_synced")
+      );
+      assert.equal(
+        pricingReads.length,
+        0,
+        "warm catalog reads must not query synced pricing per model"
+      );
+    } finally {
+      spy.mock.restore();
+    }
   });
 });

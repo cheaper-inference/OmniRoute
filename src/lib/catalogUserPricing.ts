@@ -29,7 +29,7 @@ export function readUserPricingMemoized(): UserPricingByProvider {
 
 type PricingFields = Record<string, number>;
 
-const PRICING_FIELDS = ["input", "output", "cached", "cache_creation"] as const;
+const PRICING_FIELDS = ["input", "output", "cached", "reasoning", "cache_creation"] as const;
 
 /** Bulk-load the user `pricing` namespace once (sync, no per-entry SQLite). */
 export function readUserPricingSync(): UserPricingByProvider {
