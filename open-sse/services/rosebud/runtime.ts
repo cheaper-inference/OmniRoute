@@ -68,10 +68,15 @@ export class RosebudRuntime {
   async account(profile: string) {
     return this.run(profile, ["whoami"]);
   }
-  async quote(profile: string, modelId: string, input: JsonObject) {
-    const model = (await this.models(profile)).find(
-      (entry) => entry.id === modelId.replace(/^rosebud\//, "")
-    );
+  async quote(
+    profile: string,
+    modelId: string,
+    input: JsonObject,
+    known?: Awaited<ReturnType<RosebudRuntime["models"]>>[number]
+  ) {
+    const model =
+      known ??
+      (await this.models(profile)).find((entry) => entry.id === modelId.replace(/^rosebud\//, ""));
     if (!model) throw new RosebudError("unknown_model", 400);
     const validated = validateRosebudInput(model, input);
     const dir = join(rosebudRoot(), "quotes", randomUUID());
@@ -214,7 +219,7 @@ export class RosebudRuntime {
       }
       persist = true;
       await this.save(job);
-      const quote = await this.quote(profile, modelId, input);
+      const quote = await this.quote(profile, modelId, input, model);
       if (typeof quote.credits === "number") job.estimatedCredits = quote.credits;
       await writeFile(join(folder, "input.json"), JSON.stringify(input), { mode: 0o600 });
       await this.save(job);

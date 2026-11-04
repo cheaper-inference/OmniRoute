@@ -1,5 +1,9 @@
 import type { TextToolResult } from "../toolResult.ts";
-import { hasMcpHttpAuthContext, getMcpHttpPeerLocality } from "../httpAuthContext.ts";
+import {
+  getMcpHttpAuthHeadersForInternalFetch,
+  hasMcpHttpAuthContext,
+  getMcpHttpPeerLocality,
+} from "../httpAuthContext.ts";
 import { z } from "zod";
 import { rosebudPublishInput } from "../../services/rosebud/publishing.ts";
 import { omniRouteFetch } from "../internalFetch.ts";
@@ -12,6 +16,9 @@ const request = account.extend({
   maxCredits: z.number().int().nonnegative().optional(),
 });
 const job = account.extend({ jobId: z.string().regex(/^[a-f0-9]{64}$/) });
+/** Outlasts the 600s CLI limit in rosebudPublish so callers see the real outcome. */
+const GAME_OPERATION_TIMEOUT_MS = 630000;
+const DEFAULT_TIMEOUT_MS = 180000;
 function tool(name: string, action: string, description: string, schema: z.ZodType) {
   return {
     name,
@@ -25,6 +32,13 @@ function tool(name: string, action: string, description: string, schema: z.ZodTy
       ) {
         throw new Error("Rosebud CLI requires a trusted local or LAN caller");
       }
+      // The internal hop proves only the transport, so an HTTP caller must bring its own identity.
+      if (
+        hasMcpHttpAuthContext() &&
+        Object.keys(getMcpHttpAuthHeadersForInternalFetch()).length === 0
+      ) {
+        throw new Error("Rosebud tools require an authenticated caller");
+      }
       const args = schema.parse(raw) as Record<string, unknown>;
       const { connectionId, jobId, assetId, game, ...generation } = args;
       return omniRouteFetch("/api/rosebud/" + action, {
@@ -36,7 +50,11 @@ function tool(name: string, action: string, description: string, schema: z.ZodTy
           ...(game ? { game } : {}),
           ...(["generate", "quote"].includes(action) ? { request: generation } : {}),
         }),
-        signal: AbortSignal.timeout(180000),
+        signal: AbortSignal.timeout(
+          ["publish", "update", "pull"].includes(action)
+            ? GAME_OPERATION_TIMEOUT_MS
+            : DEFAULT_TIMEOUT_MS
+        ),
       });
     },
   };
@@ -99,7 +117,7 @@ export const rosebudTools = [
       action,
       "Explicit Rosebud game " +
         action +
-        "; separate from asset generation. Preserve the returned gameId for subsequent operations.",
+        "; separate from asset generation. Supply a caller-generated UUID gameId. Reuse it for retries and later operations.",
       account.extend({ game: rosebudPublishInput })
     )
   ),

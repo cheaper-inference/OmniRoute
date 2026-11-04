@@ -309,6 +309,11 @@ async function postHandler(request, _context) {
     !(await isDashboardSessionAuthenticated(request))
   )
     return errorResponse(401, "Rosebud image generation requires authentication");
+  if (
+    provider === "rosebud" &&
+    !["loopback", "lan"].includes(request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) || "")
+  )
+    return errorResponse(403, "Rosebud CLI requires a trusted local or LAN caller");
   if (provider === "rosebud" && request.headers.has("idempotency-key"))
     body.idempotency_key = request.headers.get("idempotency-key");
   let rosebudPinned: string | undefined;
@@ -366,6 +371,23 @@ async function postHandler(request, _context) {
       return errorResponse(
         error instanceof RosebudError ? error.status : 503,
         error instanceof RosebudError ? error.code : "Rosebud account selection unavailable"
+      );
+    }
+    if (!credentials) {
+      return errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `No credentials for image provider: ${provider}`
+      );
+    }
+    if (isKeyScopeBlockedCredentials(credentials)) {
+      return keyScopeBlockedResponse(provider, credentials);
+    }
+    if (isAllRateLimitedCredentials(credentials)) {
+      return unavailableResponse(
+        HTTP_STATUS.RATE_LIMITED,
+        `[${provider}] All accounts rate limited`,
+        credentials.retryAfter,
+        credentials.retryAfterHuman
       );
     }
   } else if (providerConfig && providerConfig.authType !== "none") {

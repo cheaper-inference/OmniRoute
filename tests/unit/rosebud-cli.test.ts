@@ -5,6 +5,36 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runRosebud } from "../../open-sse/services/rosebud/cli.ts";
 
+test("Windows without a script path explains the fix instead of failing to start a shim", async () => {
+  const root = await mkdtemp(join(tmpdir(), "rosebud-cli-"));
+  const saved = {
+    root: process.env.ROSEBUD_DATA_DIR,
+    script: process.env.ROSEBUD_CLI_SCRIPT,
+    bin: process.env.ROSEBUD_CLI_BIN,
+  };
+  const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
+  process.env.ROSEBUD_DATA_DIR = root;
+  delete process.env.ROSEBUD_CLI_SCRIPT;
+  delete process.env.ROSEBUD_CLI_BIN;
+  Object.defineProperty(process, "platform", { ...platform, value: "win32" });
+  try {
+    await assert.rejects(runRosebud("one", ["whoami"]), /cli_script_required_on_windows/);
+    process.env.ROSEBUD_CLI_BIN = "rosebud.cmd";
+    await assert.rejects(runRosebud("one", ["whoami"]), /cli_script_required_on_windows/);
+  } finally {
+    Object.defineProperty(process, "platform", platform);
+    for (const [name, value] of [
+      ["ROSEBUD_DATA_DIR", saved.root],
+      ["ROSEBUD_CLI_SCRIPT", saved.script],
+      ["ROSEBUD_CLI_BIN", saved.bin],
+    ] as const) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("CLI commands for the same account are serialized across concurrent requests", async () => {
   const root = await mkdtemp(join(tmpdir(), "rosebud-cli-"));
   const script = join(root, "fake.mjs");

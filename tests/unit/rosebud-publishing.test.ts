@@ -33,3 +33,15 @@ test("publishing refuses traversal and never repeats an uncertain first upload",
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("a game operation needs a caller-supplied gameId before any work starts", async () => {
+  let calls = 0;
+  await assert.rejects(
+    rosebudPublish("primary", "publish", { files: { "index.html": "x" } }, async () => {
+      calls++;
+      return {};
+    }),
+    /gameId/
+  );
+  assert.equal(calls, 0);
+});

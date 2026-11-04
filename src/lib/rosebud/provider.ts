@@ -5,7 +5,8 @@ import {
   createProviderConnection,
   updateProviderConnection,
 } from "@/lib/db/providers";
-import { getCustomModels, replaceCustomModels } from "@/lib/db/models";
+import { getCustomModels, getModelIsHidden, replaceCustomModels } from "@/lib/db/models";
+import { isOperatorDisabled } from "@/lib/providers/operatorDisable";
 import { saveRosebudCreditEvent, getRosebudCreditEvents } from "@/lib/db/rosebudCredits";
 import { rosebudRuntime, type RosebudJob } from "@omniroute/open-sse/services/rosebud/runtime.ts";
 import {
@@ -80,9 +81,11 @@ export async function rosebudAccount(id: string) {
   const { profile } = await rosebudConnection(id);
   const account = await rosebudRuntime.account(profile);
   const latest = await getProviderConnectionById(id);
+  const active = account.status === "active";
   await updateProviderConnection(id, {
-    isActive: account.status === "active",
-    testStatus: account.status === "active" ? "active" : "expired",
+    // An account check may switch a connection off, but never overrides an operator's switch-off.
+    ...(latest && isOperatorDisabled(latest) ? {} : { isActive: active }),
+    testStatus: active ? "active" : "expired",
     providerSpecificData: {
       ...providerData(latest?.providerSpecificData),
       rosebudAccount: account,
@@ -147,6 +150,20 @@ export async function discoverRosebud(id: string) {
       .concat(manual)
   );
   return { provider: "rosebud", models, source: "rosebud-cli", creditUnit: "rosebud_credits" };
+}
+/** Apply the generic model route's chat and hidden-model projection to a Rosebud catalog. */
+export function projectRosebudCatalog<C extends { models: Array<{ id: string }> }>(
+  catalog: C,
+  options: { chatOnly: boolean; excludeHidden: boolean },
+  isHidden: (provider: string, model: string) => boolean = getModelIsHidden
+): C {
+  // Rosebud is an asset provider, so it has no models for a chat surface.
+  const models = options.chatOnly
+    ? []
+    : options.excludeHidden
+      ? catalog.models.filter((model) => !isHidden("rosebud", model.id))
+      : catalog.models;
+  return { ...catalog, models };
 }
 export function recordRosebudJob(connectionId: string, job: RosebudJob) {
   try {

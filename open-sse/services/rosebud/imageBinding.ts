@@ -8,7 +8,7 @@ function canonical(value: unknown): unknown {
   if (value && typeof value === "object")
     return Object.fromEntries(
       Object.entries(value)
-        .sort(([a], [b]) => a.localeCompare(b))
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
         .map(([k, v]) => [k, canonical(v)])
     );
   return value;
@@ -88,6 +88,9 @@ export async function selectRosebudImageCredentials<T>(options: {
 }) {
   let pinned = options.pinned;
   let selected = await options.lookup(pinned ? [pinned] : options.eligible, pinned);
+  // With no pin there is no paid retry to protect: the route reports these as 400, 403 or 429.
+  if (!pinned && (!selected || !options.usable(selected as NonNullable<T>)))
+    return { credentials: selected, pinned: undefined };
   const verify = (value: T, expected?: string): NonNullable<T> => {
     const id = selectedConnectionId(value);
     if (

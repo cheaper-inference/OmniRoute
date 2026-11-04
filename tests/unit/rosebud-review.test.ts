@@ -305,3 +305,173 @@ test("route selection rejects soft pin fallback, null credentials and a lost bin
     /original_connection_unavailable/
   );
 });
+
+test("unpinned selection leaves null and rate-limited results for the route to report", async () => {
+  const limited = { allRateLimited: true, retryAfter: "soon" };
+  for (const value of [null, limited]) {
+    let bound = false;
+    const selected = await selectRosebudImageCredentials<typeof limited | null>({
+      eligible: ["a"],
+      lookup: async () => value,
+      bind: async () => {
+        bound = true;
+        return "a";
+      },
+      usable: (candidate) => !candidate.allRateLimited,
+    });
+    assert.equal(selected.credentials, value);
+    assert.equal(selected.pinned, undefined);
+    assert.equal(bound, false);
+  }
+  await assert.rejects(
+    selectRosebudImageCredentials({
+      pinned: "a",
+      eligible: ["a"],
+      lookup: async () => ({ connectionId: "a", allRateLimited: true }),
+      bind: async () => "a",
+      usable: (candidate) => !candidate.allRateLimited,
+    }),
+    /original_connection_unavailable/
+  );
+});
+
+test("an account check keeps an operator's switch-off but still activates new connections", async (context) =>
+  isolated(async () => {
+    const { createProviderConnection, getProviderConnectionById } =
+      await import("../../src/lib/db/providers.ts");
+    const { rosebudAccount } = await import("../../src/lib/rosebud/provider.ts");
+    const { rosebudRuntime } = await import("../../open-sse/services/rosebud/runtime.ts");
+    const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+    const { OPERATOR_DISABLED_AT_KEY } = await import("../../src/lib/providers/operatorDisable.ts");
+    try {
+      const fresh = await createProviderConnection({
+        provider: "rosebud",
+        isActive: false,
+        authType: "none",
+        providerSpecificData: { rosebudProfile: "fresh" },
+      });
+      const off = await createProviderConnection({
+        provider: "rosebud",
+        isActive: false,
+        authType: "none",
+        providerSpecificData: {
+          rosebudProfile: "off",
+          [OPERATOR_DISABLED_AT_KEY]: "2026-01-01T00:00:00.000Z",
+        },
+      });
+      assert.ok(fresh && off);
+      const account = context.mock.method(rosebudRuntime, "account", async () => ({
+        status: "active",
+      }));
+      await rosebudAccount(fresh.id);
+      await rosebudAccount(off.id);
+      assert.equal((await getProviderConnectionById(fresh.id))?.isActive, true);
+      assert.equal((await getProviderConnectionById(off.id))?.isActive, false);
+      assert.equal((await getProviderConnectionById(off.id))?.testStatus, "active");
+      account.mock.mockImplementation(async () => ({ status: "expired" }));
+      await rosebudAccount(fresh.id);
+      assert.equal((await getProviderConnectionById(fresh.id))?.isActive, false);
+    } finally {
+      resetDbInstance();
+    }
+  }));
+
+test("Rosebud model lists honor the chat and hidden-model projections", async () => {
+  const { projectRosebudCatalog } = await import("../../src/lib/rosebud/provider.ts");
+  const catalog = { provider: "rosebud", models: [{ id: "a" }, { id: "b" }] };
+  const hidden = (_provider: string, id: string) => id === "b";
+  const project = (chatOnly: boolean, excludeHidden: boolean) =>
+    projectRosebudCatalog(catalog, { chatOnly, excludeHidden }, hidden);
+  assert.deepEqual(project(false, false).models, catalog.models);
+  assert.deepEqual(project(false, true).models, [{ id: "a" }]);
+  assert.deepEqual(project(true, false), { provider: "rosebud", models: [] });
+});
+
+test("the internal hop does not turn a forged cookie or a remote sync into Rosebud access", async () => {
+  const { requireRosebudAccess, requireRosebudSyncAccess } =
+    await import("../../src/lib/rosebud/authorization.ts");
+  const { getInternalServiceAuthHeaders } =
+    await import("../../src/lib/api/internalServiceAuth.ts");
+  const { buildModelSyncInternalHeaders } =
+    await import("../../src/shared/services/modelSyncScheduler.ts");
+  const { AUTHZ_HEADER_PEER_LOCALITY } = await import("../../src/server/authz/headers.ts");
+  const previous = process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  const previousService = process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN;
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "test-only-stamp";
+  process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN = "test-only-service";
+  const request = (locality: string, extra: Record<string, string>) =>
+    new Request("http://localhost/api/rosebud/account", {
+      headers: { [AUTHZ_HEADER_PEER_LOCALITY]: locality, ...extra },
+    });
+  try {
+    const hop = getInternalServiceAuthHeaders();
+    assert.equal(await requireRosebudAccess(request("loopback", hop), "a"), null);
+    assert.equal(
+      (
+        await requireRosebudAccess(
+          request("loopback", { ...hop, Cookie: "auth_token=forged" }),
+          "a"
+        )
+      )?.status,
+      401
+    );
+    const sync = buildModelSyncInternalHeaders();
+    assert.equal(await requireRosebudSyncAccess(request("loopback", sync), "a"), null);
+    assert.equal((await requireRosebudSyncAccess(request("lan", sync), "a"))?.status, 401);
+    assert.equal(
+      (
+        await requireRosebudSyncAccess(
+          request("loopback", buildModelSyncInternalHeaders({ denyLocalSpawn: true })),
+          "a"
+        )
+      )?.status,
+      401
+    );
+    assert.equal((await requireRosebudAccess(request("loopback", sync), "a"))?.status, 401);
+  } finally {
+    if (previous === undefined) delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+    else process.env.OMNIROUTE_PEER_STAMP_TOKEN = previous;
+    if (previousService === undefined) delete process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN;
+    else process.env.OMNIROUTE_INTERNAL_SERVICE_TOKEN = previousService;
+  }
+});
+
+test("the Rosebud connection test explains each outcome", async () => {
+  const { testRosebudAccount } =
+    await import("../../src/app/api/providers/[id]/test/rosebudConnectionTest.ts");
+  const ok = await testRosebudAccount("a", async () => ({ status: "active" }));
+  assert.equal(ok.valid, true);
+  assert.equal(ok.diagnosis.type, "ok");
+  const expired = await testRosebudAccount("a", async () => ({ status: "expired" }));
+  assert.equal(expired.statusCode, 401);
+  assert.equal(expired.diagnosis.type, "reauth_required");
+  const down = await testRosebudAccount("a", async () => {
+    throw new RosebudError("cli_unavailable", 503);
+  });
+  assert.equal(down.statusCode, 503);
+  assert.equal(down.diagnosis.type, "runtime_error");
+  assert.equal(down.diagnosis.code, "cli_unavailable");
+  const unknown = await testRosebudAccount("a", async () => {
+    throw new Error("/private/path leaked");
+  });
+  assert.equal(unknown.error, "Rosebud account check failed");
+  assert.equal(unknown.statusCode, 502);
+});
+
+test("a generation reads the catalog once before quoting and submitting", async () =>
+  isolated(async () => {
+    let catalogReads = 0;
+    const runtime = new RosebudRuntime(async (_profile, args) => {
+      if (args[1] === "models") {
+        catalogReads++;
+        return { models: [model] };
+      }
+      if (args[1] === "quote") throw new RosebudError("stop_after_quote", 400);
+      return {};
+    });
+    await assert.rejects(
+      runtime.generate("a", { model: "test", input: { prompt: "hello" }, idempotencyKey: "one" }),
+      /stop_after_quote/
+    );
+    assert.equal(catalogReads, 1);
+  }));

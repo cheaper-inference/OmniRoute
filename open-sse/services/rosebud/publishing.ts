@@ -11,7 +11,7 @@ import {
 
 export const rosebudPublishInput = z
   .object({
-    gameId: z.string().uuid().optional(),
+    gameId: z.string().uuid(),
     title: z.string().min(1).max(255).optional(),
     description: z.string().max(4000).optional(),
     expectedVersion: z.string().min(1).max(100).optional(),
@@ -27,8 +27,7 @@ export async function rosebudPublish(
 ) {
   await rosebudProfile(profile);
   const input = rosebudPublishInput.parse(raw);
-  const gameId = input.gameId || "";
-  if (!gameId) throw new RosebudError("game_id_required", 400);
+  const gameId = input.gameId;
   const folder = join(rosebudRoot(), "games", profile, gameId);
   const state = join(folder, "project.json"),
     build = join(folder, "build");

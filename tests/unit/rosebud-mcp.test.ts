@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { rosebudTools, rosebudToolResult } from "../../open-sse/mcp-server/tools/rosebudTools.ts";
 import { rosebudArtifactType } from "../../open-sse/services/rosebud/artifact.ts";
 import { isLocalOnlyPath } from "../../src/server/authz/routeGuard.ts";
+import { withMcpHttpAuthContext } from "../../open-sse/mcp-server/httpAuthContext.ts";
+import { AUTHZ_HEADER_PEER_LOCALITY } from "../../src/server/authz/headers.ts";
 
 test("Rosebud tools are distinct, management-scoped and have no default credit cap", () => {
   assert.equal(new Set(rosebudTools.map((tool) => tool.name)).size, rosebudTools.length);
@@ -51,4 +53,53 @@ test("paid MCP generation requires an explicit retry key", () => {
       input: { prompt: "hello" },
     })
   );
+});
+
+const connectionId = "123e4567-e89b-42d3-a456-426614174000";
+const toolNamed = (name: string) => {
+  const found = rosebudTools.find((tool) => tool.name === name);
+  assert.ok(found);
+  return found;
+};
+
+test("game operations outlast the CLI limit; other tools keep the shorter timeout", async (context) => {
+  const timeouts: number[] = [];
+  context.mock.method(AbortSignal, "timeout", (ms: number) => {
+    timeouts.push(ms);
+    return new AbortController().signal;
+  });
+  context.mock.method(globalThis, "fetch", async () => new Response("{}"));
+  const game = { gameId: connectionId };
+  await toolNamed("rosebud_publish_game").handler({ connectionId, game });
+  await toolNamed("rosebud_update_game").handler({ connectionId, game });
+  await toolNamed("rosebud_pull").handler({ connectionId, game });
+  await toolNamed("rosebud_game_status").handler({ connectionId, game });
+  await toolNamed("rosebud_models").handler({ connectionId });
+  assert.deepEqual(timeouts, [630000, 630000, 630000, 180000, 180000]);
+});
+
+test("HTTP callers need a trusted locality and their own identity", async (context) => {
+  const previous = process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "test-only-stamp";
+  const fetched = context.mock.method(globalThis, "fetch", async () => new Response("{}"));
+  const call = (locality: string, extra: Record<string, string> = {}) =>
+    withMcpHttpAuthContext(
+      new Request("http://localhost/api/mcp/stream", {
+        headers: { [AUTHZ_HEADER_PEER_LOCALITY]: locality, ...extra },
+      }),
+      () => toolNamed("rosebud_models").handler({ connectionId })
+    );
+  try {
+    await assert.rejects(
+      call("remote", { Authorization: "Bearer key" }),
+      /trusted local or LAN caller/
+    );
+    await assert.rejects(call("lan"), /authenticated caller/);
+    assert.equal(fetched.mock.callCount(), 0);
+    await call("lan", { Authorization: "Bearer key" });
+    assert.equal(fetched.mock.callCount(), 1);
+  } finally {
+    if (previous === undefined) delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+    else process.env.OMNIROUTE_PEER_STAMP_TOKEN = previous;
+  }
 });

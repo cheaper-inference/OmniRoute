@@ -92,6 +92,9 @@ export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 12000
   const bin = process.env.ROSEBUD_CLI_SCRIPT
     ? process.execPath
     : process.env.ROSEBUD_CLI_BIN || "rosebud";
+  // Windows cannot start a .cmd shim without a shell, and this runner never uses one.
+  if (!process.env.ROSEBUD_CLI_SCRIPT && process.platform === "win32" && !/\.exe$/i.test(bin))
+    throw new RosebudError("cli_script_required_on_windows", 503);
   const argv = process.env.ROSEBUD_CLI_SCRIPT ? [process.env.ROSEBUD_CLI_SCRIPT, ...args] : args;
   const releaseProfile = await acquireProfileSlot(profile);
   try {

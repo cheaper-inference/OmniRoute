@@ -9,7 +9,9 @@ Rosebud is an asset provider, not a chat model. OmniRoute uses the official
 `@rosebudai/cli` and the connected account's existing Rosebud credits. It never
 converts those credits into tokens or an invented USD price, buys credits, or
 falls back to another provider. There is no default spending cap. `maxCredits`
-is an optional caller-selected safeguard.
+is an optional caller-selected safeguard on the Rosebud asset API and MCP tools.
+`/v1/images/generations` does not accept it, so send capped requests through
+those interfaces.
 
 ## Installation and authorization
 
@@ -21,6 +23,9 @@ npm install --global @rosebudai/cli@0.2.0
 
 Set `ROSEBUD_CLI_BIN` to the executable, or `ROSEBUD_CLI_SCRIPT` to the absolute
 path of the package's `dist/cli.js` (executed with OmniRoute's Node runtime).
+On Windows, set `ROSEBUD_CLI_SCRIPT`: a global npm install creates a `.cmd` shim,
+which the shell-free runner cannot start, so anything other than a `.exe` in
+`ROSEBUD_CLI_BIN` returns `cli_script_required_on_windows`.
 The executable cannot be selected by an HTTP request.
 
 Open **Providers → Rosebud AI → Connect Rosebud account**. Follow the private
