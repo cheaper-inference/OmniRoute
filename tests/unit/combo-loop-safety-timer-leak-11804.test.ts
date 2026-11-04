@@ -53,7 +53,10 @@ test("#11804: the timer handle is reachable from the function-scope cleanup", ()
     "the per-iteration timer must be published to the function-scope handle"
   );
   const declIdx = comboSrc.indexOf("let activeLoopSafetyTimer");
-  const loopIdx = comboSrc.indexOf("for (let setTry = 0");
+  const loopIdx =
+    comboSrc.indexOf("while (currentSetTry") !== -1
+      ? comboSrc.indexOf("while (currentSetTry")
+      : comboSrc.indexOf("for (let setTry = 0");
   assert.ok(declIdx > 0, "function-scope timer handle must be declared");
   assert.ok(
     declIdx < loopIdx,

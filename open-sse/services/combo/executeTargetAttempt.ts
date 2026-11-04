@@ -121,6 +121,7 @@ import {
   isReadinessFailure,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { calculateFullJitter } from "../../utils/jitterBackoff.ts";
 
 export async function executeTargetAttempt(
   opts: ExecuteTargetAttemptOptions
@@ -203,12 +204,17 @@ export async function executeTargetAttempt(
     }
 
     if (retry > 0) {
+      // Full jitter on the blind exponential retry delay (no known deadline).
+      const jitteredRetryDelay = calculateFullJitter(retry, {
+        baseDelayMs: retryDelayMs,
+        maxDelayMs: retryDelayMs * 10,
+      });
       deps.log.info(
         "COMBO",
-        `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${deps.maxRetries + 1})`
+        `Retrying ${modelStr} in ${jitteredRetryDelay}ms (attempt ${retry + 1}/${deps.maxRetries + 1}, base: ${retryDelayMs}ms)`
       );
       await new Promise((resolve) => {
-        const timer = setTimeout(resolve, retryDelayMs);
+        const timer = setTimeout(resolve, jitteredRetryDelay);
         deps.signal?.addEventListener(
           "abort",
           () => {
