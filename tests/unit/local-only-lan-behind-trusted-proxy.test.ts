@@ -76,6 +76,41 @@ test("a chain that names no client (only loopback hops) proves nothing", () => {
   });
 });
 
+test("a proxy that reports no client address does not vouch for itself", () => {
+  withTrustProxy("private", () => {
+    // Only Forwarded / Via / X-Forwarded-Proto: the stamp falls back to the proxy's own
+    // address, which is private but is the proxy, not a client it relayed.
+    for (const headers of [
+      { forwarded: `for=${TAILNET_CLIENT}` },
+      { via: "1.1 nginx" },
+      { "x-forwarded-proto": "https" },
+    ]) {
+      assert.equal(
+        isPrivateLanRequest(stamped(TAILNET_PROXY, headers)),
+        false,
+        JSON.stringify(headers)
+      );
+      assert.equal(
+        isPrivateLanRequest(stamped(`::ffff:${TAILNET_PROXY}`, headers)),
+        false,
+        `v4-mapped peer ${JSON.stringify(headers)}`
+      );
+    }
+    // A chain whose only entry is the proxy itself names no other client either.
+    assert.equal(
+      isPrivateLanRequest(stamped(TAILNET_PROXY, { "x-forwarded-for": TAILNET_PROXY })),
+      false
+    );
+    // A real reported client next to Forwarded is still judged (X-Real-IP path too).
+    assert.equal(
+      isPrivateLanRequest(
+        stamped(TAILNET_PROXY, { forwarded: "for=x", "x-real-ip": TAILNET_CLIENT })
+      ),
+      true
+    );
+  });
+});
+
 test("tunnel/CDN ingress is never LAN, even with a private-looking chain", () => {
   withTrustProxy("private", () => {
     const ctx = stamped(TAILNET_PROXY, {

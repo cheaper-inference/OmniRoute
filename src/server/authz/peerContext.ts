@@ -77,7 +77,10 @@ export function isPrivateLanRequest(ctx: PolicyContext): boolean {
  *     always carries an internet client whatever the inner hops say;
  *   - the client the stamp resolved (peer-stamp.mjs `resolveClientIp`, right-most
  *     untrusted hop) is a private-network address and not loopback: a chain of loopback
- *     hops, or a proxy that overwrites X-Forwarded-For with `$remote_addr`, names no client.
+ *     hops, or a proxy that overwrites X-Forwarded-For with `$remote_addr`, names no client;
+ *   - that client is not the proxy itself: when the proxy reports no client address
+ *     (only `Forwarded`, `Via`, `X-Forwarded-Proto`, ...), `resolveClientIp` falls back to
+ *     the peer, and a private proxy must not vouch for its own address.
  * Loopback is never derived this way: the CLI-token gate stays socket-only.
  */
 function isPrivateLanClientOfPrivateProxy(ctx: PolicyContext, peerAddress: string): boolean {
@@ -89,7 +92,17 @@ function isPrivateLanClientOfPrivateProxy(ctx: PolicyContext, peerAddress: strin
     process.env.OMNIROUTE_PEER_STAMP_TOKEN
   );
   if (!client || isLoopbackHost(client)) return false;
+  if (comparableIp(client) === comparableIp(peerAddress)) return false;
   return isPrivateLanHost(client);
+}
+
+/** The same address however the stamp spelled it (`::ffff:` IPv4-mapped, `[v6]`, case). */
+function comparableIp(address: string): string {
+  return address
+    .trim()
+    .replace(/^\[([^\]]+)\]$/, "$1")
+    .replace(/^::ffff:/i, "")
+    .toLowerCase();
 }
 
 /** Strictly-loopback machine-token check (constant-time). */
