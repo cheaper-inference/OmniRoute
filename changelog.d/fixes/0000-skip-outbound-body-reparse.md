@@ -1,0 +1,1 @@
+- **perf(sse):** large chat requests to plain (non-fingerprinted, unsigned) providers no longer re-parse the outbound body after serialization, which saves a body-sized copy and about 2.5 ms of blocking time per attempt on a 3 MB agent body

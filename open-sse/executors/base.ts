@@ -1545,7 +1545,12 @@ export class BaseExecutor {
         applyPeerTraceHeader(finalHeaders, clientHeaders, url);
         // Rides `anthropic-usage-limit: slow` once this account accepted the offer.
         const claudeSentSlow = claudeUsageLimit.applyHeader(finalHeaders, activeCredentials);
-        const serializedBody = parseSerializedBody(bodyString);
+        // Without a fingerprint or CCH signing the wire string is exactly
+        // JSON.stringify(transformedBody), so the live object already has the wire
+        // content (and its _toolNameMap); a parse-back would only copy it per attempt.
+        const wireIsLiveJson =
+          !shouldFingerprint && !(usesClaudeCodeProtocol || this.provider === "claude");
+        const serializedBody = wireIsLiveJson ? transformedBody : parseSerializedBody(bodyString);
         // #4307 — Preserve the non-enumerable tool-name cloak/remap reverse map
         // (`_toolNameMap`, set on the live `transformedBody` by
         // remapToolNamesInRequest / cloakThirdPartyToolNames) that the JSON
