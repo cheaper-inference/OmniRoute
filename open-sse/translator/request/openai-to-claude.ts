@@ -382,6 +382,24 @@ export function openaiToClaudeRequest(
     // tool result is paired with the oldest of them instead of being dropped.
     let pendingToolUseIds: string[] = [];
 
+    // Tool_call ids that appear on more than one assistant turn in the client history
+    // (a retried turn re-sends the same id for a different generation of the answer).
+    // The signed-thinking store is keyed by tool_use id and holds only the newest
+    // generation, so restoring into an older turn replays a block Anthropic never saw
+    // in that position and it answers 400 "…blocks in the latest assistant message
+    // cannot be modified". Skip the restore entirely for such turns: a request without
+    // thinking blocks is valid and is what older clients sent.
+    const toolUseIdCounts = new Map<string, number>();
+    for (const m of nonSystemMessages) {
+      for (const tc of Array.isArray(m?.tool_calls) ? m.tool_calls : []) {
+        const id = typeof tc?.id === "string" ? tc.id : "";
+        if (id) toolUseIdCounts.set(id, (toolUseIdCounts.get(id) ?? 0) + 1);
+      }
+    }
+    const ambiguousToolUseIds = new Set(
+      [...toolUseIdCounts.entries()].filter(([, n]) => n > 1).map(([id]) => id)
+    );
+
     for (const msg of nonSystemMessages) {
       const newRole = msg.role === "user" || msg.role === "tool" ? "user" : "assistant";
       const blocks = getContentBlocksFromMessage(
@@ -394,6 +412,7 @@ export function openaiToClaudeRequest(
           provider: routedProvider,
           model,
           disabled: credentials?._videoTranscriptSensitive === true,
+          ambiguousToolUseIds,
           connectionId:
             typeof credentials?._connectionId === "string" ? credentials._connectionId : undefined,
         },
@@ -639,6 +658,7 @@ function getContentBlocksFromMessage(
     model?: unknown;
     disabled?: boolean;
     connectionId?: unknown;
+    ambiguousToolUseIds?: Set<string>;
   } = {},
   pendingToolUseIds: string[] = [],
   thinkingTypeForRequest: string | undefined = undefined
@@ -847,16 +867,25 @@ function getContentBlocksFromMessage(
     // restore hits/misses differently than the turn that warmed the cache (TTL,
     // eviction, completed-turn rewrite) → 400 "latest assistant message cannot be
     // modified".
+    const ownToolUseIds = blocks.filter((b) => b.type === "tool_use").map((b) => String(b.id));
+    // A duplicated tool_call id makes the store's entry ambiguous (it may belong to a
+    // different generation of this turn); restoring it replays a block the upstream
+    // did not see here and it answers 400 "cannot be modified". Skip instead: an
+    // assistant turn without thinking blocks is accepted.
+    const hasAmbiguousToolUseId = ownToolUseIds.some((id) =>
+      thinkingBinding.ambiguousToolUseIds?.has(id)
+    );
     if (
       !isKimiCoding &&
       !thinkingBinding.disabled &&
       thinkingEnabledForRequest &&
       thinkingTypeForRequest === "enabled" &&
       hasToolUseBlock &&
-      !hasThinkingBlock
+      !hasThinkingBlock &&
+      !hasAmbiguousToolUseId
     ) {
       const restored = restoreClaudeThinkingBlocks({
-        toolUseIds: blocks.filter((b) => b.type === "tool_use").map((b) => b.id),
+        toolUseIds: ownToolUseIds,
         provider: thinkingBinding.provider,
         model: thinkingBinding.model,
         connectionId: thinkingBinding.connectionId,
