@@ -392,14 +392,14 @@ vastust kujule `429 rate_limit_error`, mis sisaldab varaseima ajutise luku
 lukud säilitavad vihjeta 503 vastuse.
 
 ```text
-#16319 · comboCooldownWait · väljasaatmiseelne (attempts = 0)
-kõik sihtmärgid jäeti vahele + ajutine mudelilukk:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → oota → saada uuesti
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← varaseima ajutise luku aegumise aeg
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  ajutine vihje puudub → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

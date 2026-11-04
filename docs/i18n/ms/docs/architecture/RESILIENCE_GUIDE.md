@@ -392,14 +392,14 @@ respons terminal dinaik taraf kepada `429 rate_limit_error` yang membawa
 awal; sekatan kuota, pengesahan dan tidak ditemui mengekalkan 503 tanpa petunjuk.
 
 ```text
-#16319 · comboCooldownWait · sebelum penghantaran (attempts = 0)
-semua sasaran dilangkau + sekatan model sementara:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → tunggu → hantar semula
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← tamat tempoh sekatan sementara paling awal
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  tiada petunjuk sementara → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

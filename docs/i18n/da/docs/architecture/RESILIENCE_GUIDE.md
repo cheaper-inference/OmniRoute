@@ -388,14 +388,14 @@ tidligste udløbning af en transient lås; quota-, auth- og not-found-låse
 beholder 503 uden hint.
 
 ```text
-#16319 · comboCooldownWait · før dispatch (forsøg = 0)
-alle mål sprunget over + transient modellås:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → vent → dispatch igen
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← tidligste udløb af transient lås
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  intet transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

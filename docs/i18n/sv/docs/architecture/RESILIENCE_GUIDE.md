@@ -382,14 +382,14 @@ den tidigaste tillfälliga låsningens utgångstid; kvot-, autentiserings- och
 ”hittades inte”-lås behåller 503-svaret utan ledtråd.
 
 ```text
-#16319 · comboCooldownWait · före dispatch (attempts = 0)
-alla mål överhoppade + tillfällig modellåsning:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → vänta → distribuera på nytt
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← tidigaste tillfälliga låsningens utgångstid
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  ingen tillfällig ledtråd → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

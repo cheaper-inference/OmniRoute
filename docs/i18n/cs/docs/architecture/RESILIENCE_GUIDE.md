@@ -398,14 +398,14 @@ terminální odpověď se změní na `429 rate_limit_error` a ponese `retry_afte
 a nenalezení si ponechávají odpověď 503 bez nápovědy.
 
 ```text
-#16319 · comboCooldownWait · před odesláním (attempts = 0)
-všechny cíle přeskočeny + dočasné blokování modelu:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → čekání → opětovné odeslání
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← nejbližší konec dočasného blokování
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  bez dočasné nápovědy → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

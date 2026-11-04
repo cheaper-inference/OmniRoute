@@ -393,14 +393,14 @@ Resilience**లోని `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttemp
 ఉంటాయి. కోటా, auth మరియు not-found లాక్లు సూచనలేని 503గానే ఉంటాయి.
 
 ```text
-#16319 · comboCooldownWait · ప్రీ-డిస్పాచ్ (attempts = 0)
-అన్ని లక్ష్యాలు స్కిప్ చేయబడ్డాయి + తాత్కాలిక మోడల్ లాక్అవుట్:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → వేచి ఉండండి → మళ్లీ డిస్పాచ్ చేయండి
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← తొలి తాత్కాలిక లాక్ ముగిసే సమయం
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  తాత్కాలిక సూచన లేదు → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

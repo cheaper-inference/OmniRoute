@@ -373,14 +373,14 @@ najranijeg isteka prolazne blokade; blokade kvote, provjere autentičnosti i
 nepronalaženja zadržavaju 503 bez naznake.
 
 ```text
-#16319 · comboCooldownWait · prije otpreme (pokušaji = 0)
-svi ciljevi preskočeni + prolazna blokada modela:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → čekanje → ponovna otprema
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← najraniji istek prolazne blokade
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  nema prolazne naznake → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

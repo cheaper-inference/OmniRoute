@@ -388,14 +388,14 @@ TPM/RPM উইন্ডো (~60s retry-after) অন্তর্ভুক্ত,
 ইঙ্গিতবিহীন 503 বজায় রাখে।
 
 ```text
-#16319 · comboCooldownWait · ডিসপ্যাচ-পূর্ব (attempts = 0)
-সব টার্গেট এড়িয়ে যাওয়া + ট্রানজিয়েন্ট মডেল লকআউট:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → অপেক্ষা → পুনরায় ডিসপ্যাচ
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← প্রাচীনতম ট্রানজিয়েন্ট লক মেয়াদ শেষ
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  কোনো ট্রানজিয়েন্ট ইঙ্গিত নেই → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

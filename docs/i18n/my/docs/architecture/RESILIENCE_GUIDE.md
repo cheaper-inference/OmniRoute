@@ -424,13 +424,13 @@ not-found lock များအတွက်မူ hint မပါသော 503 က
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
-target အားလုံး skip လုပ်ခံရခြင်း + transient model lockout:
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → စောင့် → ပြန်လည် dispatch
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← အစောဆုံး transient lock ကုန်ဆုံးချိန်
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  transient hint မရှိ → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

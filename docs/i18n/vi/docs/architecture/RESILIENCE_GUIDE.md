@@ -487,14 +487,14 @@ hết hạn khóa tạm thời sớm nhất; các khóa quota, xác thực và k
 nguyên lỗi 503 không có gợi ý.
 
 ```text
-#16319 · comboCooldownWait · trước khi phân phối (attempts = 0)
-tất cả đích bị bỏ qua + khóa mô hình tạm thời:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → chờ → phân phối lại
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← thời điểm hết hạn khóa tạm thời sớm nhất
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  không có gợi ý tạm thời → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

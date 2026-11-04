@@ -363,14 +363,14 @@ TPM/RPM ವಿಂಡೋಗಳನ್ನು (~60s retry-after) ಒಳಗೊಂಡ�
 ಮತ್ತು not-found ಲಾಕ್ಗಳು ಸೂಚನೆರಹಿತ 503 ಆಗಿಯೇ ಉಳಿಯುತ್ತವೆ.
 
 ```text
-#16319 · comboCooldownWait · ಡಿಸ್ಪ್ಯಾಚ್-ಪೂರ್ವ (ಪ್ರಯತ್ನಗಳು = 0)
-ಎಲ್ಲಾ ಗುರಿಗಳು ಸ್ಕಿಪ್ ಆಗಿವೆ + ತಾತ್ಕಾಲಿಕ ಮಾದರಿ ಲಾಕ್ಔಟ್:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → ಕಾಯುವಿಕೆ → ಮರು-ಡಿಸ್ಪ್ಯಾಚ್
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← ಅತಿ ಶೀಘ್ರದ ತಾತ್ಕಾಲಿಕ ಲಾಕ್ ಅವಧಿ ಮುಗಿಯುವ ಸಮಯ
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  ಯಾವುದೇ ತಾತ್ಕಾಲಿಕ ಸೂಚನೆ ಇಲ್ಲ → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

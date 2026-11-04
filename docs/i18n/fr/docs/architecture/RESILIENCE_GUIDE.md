@@ -406,14 +406,14 @@ quota, à l’authentification et aux ressources introuvables conservent le 503
 sans indication.
 
 ```text
-#16319 · comboCooldownWait · avant la répartition (attempts = 0)
-toutes les cibles ignorées + verrouillage transitoire du modèle :
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → attendre → redistribuer
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← expiration du verrou transitoire la plus proche
-quota_exhausted / auth_error / not_found / not_found_local :
-  aucune indication transitoire → HTTP 503 ALL_TARGETS_SKIPPED
+  retry_after / reset_at ← earliest transient lock expiry
+quota_exhausted / auth_error / not_found / not_found_local:
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

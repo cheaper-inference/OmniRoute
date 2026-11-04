@@ -386,14 +386,14 @@ vagy a költségkeret kimerült, illetve a funkció ki van kapcsolva), a végső
 `retry_after` / `reset_at` értéket tartalmazza; a kvóta-, hitelesítési és „nem található” zárolások továbbra is súgó nélküli 503-as választ adnak.
 
 ```text
-#16319 · comboCooldownWait · küldés előtti (próbálkozások = 0)
-minden célpont kihagyva + átmeneti modellzárolás:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → várakozás → újraküldés
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← a legkorábbi átmeneti zárolás lejárata
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  nincs átmeneti jelzés → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

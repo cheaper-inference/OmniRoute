@@ -380,14 +380,14 @@ iyakar lokaci, ƙoƙari ko kasafi, ko an kashe fasalin), amsar ƙarshe za ta kom
 503 marar bayani.
 
 ```text
-#16319 · comboCooldownWait · kafin dispatch (ƙoƙari = 0)
-an tsallake dukkan targets + kullewar samfur na wucin gadi:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → jira → sake dispatch
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← mafi kusa da ƙarewar kullewar wucin gadi
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  babu alamar wucin gadi → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

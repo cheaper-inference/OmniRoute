@@ -393,14 +393,14 @@ concurrency**에서 전환할 수 있습니다
 상향됩니다. 쿼터, 인증 및 찾을 수 없음 잠금은 힌트 없는 503을 유지합니다.
 
 ```text
-#16319 · comboCooldownWait · 디스패치 전 (attempts = 0)
-모든 대상이 건너뛰어짐 + 일시적 모델 잠금:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → 대기 → 다시 디스패치
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← 가장 이른 일시적 잠금 만료 시점
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  일시적 힌트 없음 → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

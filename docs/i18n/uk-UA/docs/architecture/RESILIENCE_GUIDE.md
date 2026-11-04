@@ -367,13 +367,13 @@ concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, типо
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
-усі цілі пропущено + перехідне блокування моделі:
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → очікування → повторна диспетчеризація
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← найраніше завершення перехідного блокування
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  немає підказки про перехідний стан → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

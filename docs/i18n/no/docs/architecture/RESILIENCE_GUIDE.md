@@ -400,14 +400,14 @@ tidligste utløpstiden for den midlertidige låsen; kvote-, autentiserings- og
 «ikke funnet»-låser beholder 503-svaret uten hint.
 
 ```text
-#16319 · comboCooldownWait · før distribusjon (attempts = 0)
-alle mål hoppet over + midlertidig modellås:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → vent → distribuer på nytt
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← tidligste utløp for midlertidig lås
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  ingen midlertidig hint → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

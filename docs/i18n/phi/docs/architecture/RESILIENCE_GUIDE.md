@@ -382,13 +382,13 @@ transient lock expiry; ang quota, auth at not-found lock ay nananatiling hint-le
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
-lahat ng target ay nilaktawan + transient model lockout:
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → maghintay → muling mag-dispatch
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← pinakamaagang transient lock expiry
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  walang transient hint → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

@@ -391,14 +391,14 @@ combo παραλείπεται πριν γίνει οποιαδήποτε από
 υπόδειξη.
 
 ```text
-#16319 · comboCooldownWait · πριν από την αποστολή (attempts = 0)
-όλοι οι στόχοι παραλείφθηκαν + παροδικός αποκλεισμός μοντέλου:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → αναμονή → εκ νέου αποστολή
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← παλαιότερη λήξη παροδικού αποκλεισμού
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  χωρίς παροδική υπόδειξη → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

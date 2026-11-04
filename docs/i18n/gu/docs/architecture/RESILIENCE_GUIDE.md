@@ -399,14 +399,14 @@ concurrency** માં ટૉગલ કરો
 લૉક્સ સંકેત વિનાનો 503 જ રાખે છે.
 
 ```text
-#16319 · comboCooldownWait · dispatch-પૂર્વ (attempts = 0)
-બધા લક્ષ્યો સ્કિપ + ટ્રાન્ઝિયન્ટ મોડલ લૉકઆઉટ:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → રાહ → ફરી ડિસ્પેચ
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← સૌથી વહેલી ટ્રાન્ઝિયન્ટ લૉક સમાપ્તિ
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  કોઈ ટ્રાન્ઝિયન્ટ સંકેત નહીં → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

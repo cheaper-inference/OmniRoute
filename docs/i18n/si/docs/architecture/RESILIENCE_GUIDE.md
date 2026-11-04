@@ -351,14 +351,14 @@ Combo එකකට `config.comboCooldownWaitEnabled: false` මඟින් ඉ�
 එම gate එකම dispatch-පෙර අවස්ථාව (#16319) ද ආවරණය කරයි: combo එකක සෑම target එකක්ම කිසිදු උත්සාහයකට පෙර, එහි model එක කෙටි transient lockout එකක ඇති බැවින් skip කළ විට, zero-attempt path එක එම lockout කාලය එකම සීමාවන් යටතේ බලා සිට, hint-රහිත `503 ALL_TARGETS_SKIPPED` ලබා දීම වෙනුවට නැවත dispatch කරයි. රැඳී සිටීමට අවසර නොමැති විට (ceiling, attempt හෝ budget අවසන් වූ විට, හෝ feature එක අක්රිය වූ විට), අවසාන ප්රතිචාරය earliest transient lock expiry වෙතින් `retry_after` / `reset_at` රැගෙන යන `429 rate_limit_error` බවට උසස් වේ; quota, auth සහ not-found locks hint-රහිත 503 තත්ත්වය පවත්වා ගනී.
 
 ```text
-#16319 · comboCooldownWait · dispatch-පෙර (attempts = 0)
-සියලු targets skip කර ඇත + transient model lockout:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → රැඳී සිටීම → නැවත dispatch කිරීම
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
   retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  transient hint එකක් නොමැත → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

@@ -320,14 +320,14 @@ concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, լռել
 `retry_after` / `reset_at`-ը։ quota, auth և not-found lock-երը պահպանում են հուշումներից զուրկ 503-ը։
 
 ```text
-#16319 · comboCooldownWait · dispatch-ից առաջ (attempts = 0)
-բոլոր թիրախները բաց են թողնվել + transient մոդելի lockout.
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → սպասել → կրկին dispatch անել
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← ամենավաղ transient lock-ի ժամկետի ավարտ
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  transient հուշում չկա → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

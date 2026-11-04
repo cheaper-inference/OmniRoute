@@ -354,14 +354,14 @@ TPM/RPM विंडो (~60s retry-after) समाविष्ट आहेत
 सोबत येतो; quota, auth आणि not-found लॉक संकेत-विरहित 503 कायम ठेवतात.
 
 ```text
-#16319 · comboCooldownWait · डिस्पॅचपूर्व (प्रयत्न = 0)
-सर्व लक्ष्ये वगळली + ट्रान्झियंट मॉडेल लॉकआउट:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → प्रतीक्षा → पुन्हा डिस्पॅच
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← सर्वात आधी संपणारा ट्रान्झियंट लॉक
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  ट्रान्झियंट संकेत नाही → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

@@ -371,14 +371,14 @@ zamanından alınan `retry_after` / `reset_at` değerlerini içeren
 bulunamayan kilitleri ipuçsuz 503 yanıtını korur.
 
 ```text
-#16319 · comboCooldownWait · dağıtım öncesi (attempts = 0)
-tüm hedefler atlandı + geçici model kilitlenmesi:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → bekle → yeniden dağıt
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← en erken geçici kilit sona erme zamanı
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  geçici ipucu yok → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

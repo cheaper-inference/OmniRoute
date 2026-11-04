@@ -343,14 +343,14 @@ concurrency**-ში (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, �
 იგივე ბლოკერი მოიცავს დისპეტჩერიზაციამდე შემთხვევას (#16319): როდესაც კომბოს ყველა სამიზნე გამოტოვებულია პირველივე მცდელობის დაწყებამდე, რადგან მისი მოდელი მოკლე გარდამავალ დაბლოკვაში იმყოფება, ნულოვანი მცდელობის გზა ელოდება დაბლოკვის დასრულებას იმავე ზღვრული პირობებით და ხელახლა ახორციელებს დისპეტჩერიზაციას, ნაცვლად იმისა, რომ მინიშნების გარეშე `503 ALL_TARGETS_SKIPPED` დააბრუნოს. როდესაც ლოდინი დაუშვებელია (ზღვარი, მცდელობების რაოდენობა ან ბიუჯეტი ამოწურულია, ან ფუნქცია გამორთულია), საბოლოო პასუხი იცვლება `429 rate_limit_error`-ად და შეიცავს `retry_after` / `reset_at` მნიშვნელობებს, რომლებიც აღებულია გარდამავალი დაბლოკვის ყველაზე ადრეული ვადის ამოწურვიდან; კვოტის, ავტორიზაციისა და ვერ-მიგნების დაბლოკვები კვლავ ტოვებს მინიშნების გარეშე 503-ს.
 
 ```text
-#16319 · comboCooldownWait · დისპეტჩერიზაციამდე (attempts = 0)
-ყველა სამიზნე გამოტოვებულია + გარდამავალი მოდელის დაბლოკვა:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → ლოდინი → ხელახალი დისპეტჩერიზაცია
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← გარდამავალი დაბლოკვის ყველაზე ადრეული ვადის ამოწურვა
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  გარდამავალი მინიშნება არ არსებობს → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

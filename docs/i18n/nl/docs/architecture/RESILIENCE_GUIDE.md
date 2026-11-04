@@ -390,14 +390,14 @@ van de vroegste tijdelijke blokkering; quota-, auth- en niet-gevonden-blokkering
 behouden de hintloze 503.
 
 ```text
-#16319 · comboCooldownWait · vóór dispatch (pogingen = 0)
-alle doelen overgeslagen + tijdelijke modelblokkering:
-  ingeschakeld ∧ 0 < waitMs ≤ maxWaitMs ∧ poging < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → wachten → opnieuw dispatchen
-  wachten = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← vroegste tijdelijke blokkering
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
+  enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
+    → wait → re-dispatch
+  wait = false → HTTP 429 rate_limit_error
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  geen tijdelijke hint → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

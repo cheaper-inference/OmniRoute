@@ -399,14 +399,14 @@ atbilde tiek paaugstināta uz `429 rate_limit_error`, ietverot
 autentifikācijas un “nav atrasts” bloķējumi saglabā norādi nesaturošu 503.
 
 ```text
-#16319 · comboCooldownWait · pirms nosūtīšanas (mēģinājumi = 0)
-visi mērķi izlaisti + pārejoša modeļa bloķēšana:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → gaidīt → nosūtīt atkārtoti
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← agrākās pārejošās bloķēšanas beigas
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  nav pārejošas norādes → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

@@ -412,7 +412,7 @@ Gemini (примерно 60 секунд в `retry-after`) в комбинаци
 подсказки.
 
 ```text
-#16319 · comboCooldownWait · предварительная диспетчеризация (attempts = 0)
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
 all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
     → wait → re-dispatch

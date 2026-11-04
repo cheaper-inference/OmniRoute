@@ -395,14 +395,14 @@ odgovor se unapređuje na `429 rate_limit_error` i sadrži
 kvote, autentifikacije i nepostojanja zadržavaju 503 bez napomene.
 
 ```text
-#16319 · comboCooldownWait · prije slanja (pokušaji = 0)
-svi ciljevi preskočeni + privremeno zaključavanje modela:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → čekaj → ponovo pošalji
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← najraniji istek privremenog zaključavanja
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  nema privremene napomene → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

@@ -378,14 +378,14 @@ Gemini 系の TPM/RPM ウィンドウ（約 60 秒の retry-after）を対象と
 `retry_after` / `reset_at` を含みます。クォータ、認証、存在しない対象のロックでは、ヒントなしの 503 が維持されます。
 
 ```text
-#16319 · comboCooldownWait · ディスパッチ前 (attempts = 0)
-すべての対象がスキップ + 一時的なモデルロックアウト:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → 待機 → 再ディスパッチ
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← 最も早く解除される一時ロックの有効期限
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  一時的なヒントなし → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

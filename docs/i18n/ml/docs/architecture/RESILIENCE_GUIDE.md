@@ -369,14 +369,14 @@ turn-pin ഡിസ്പാച്ചിനു മുമ്പുള്ള കാ
 ക്വോട്ടാ, auth, not-found ലോക്കുകൾ hint ഇല്ലാത്ത 503 ആയി തുടരും.
 
 ```text
-#16319 · comboCooldownWait · ഡിസ്പാച്ചിനു മുമ്പ് (attempts = 0)
-എല്ലാ ടാർഗറ്റുകളും ഒഴിവാക്കി + താൽക്കാലിക മോഡൽ ലോക്കൗട്ട്:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → കാത്തിരിക്കുക → വീണ്ടും ഡിസ്പാച്ച് ചെയ്യുക
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← ഏറ്റവും നേരത്തെയുള്ള താൽക്കാലിക ലോക്ക് അവസാനിക്കുന്ന സമയം
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  താൽക്കാലിക സൂചനയില്ല → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

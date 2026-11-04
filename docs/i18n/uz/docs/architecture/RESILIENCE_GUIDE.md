@@ -410,14 +410,14 @@ olingan `retry_after` / `reset_at` ma’lumotlarini o‘z ichiga olgan
 bloklari esa izohsiz 503 holatini saqlab qoladi.
 
 ```text
-#16319 · comboCooldownWait · dispatch’dan oldin (urinishlar = 0)
-barcha nishonlar o‘tkazib yuborildi + vaqtinchalik model bloki:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → kutish → qayta yuborish
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← eng erta vaqtinchalik blok tugashi
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  vaqtinchalik ishora yo‘q → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

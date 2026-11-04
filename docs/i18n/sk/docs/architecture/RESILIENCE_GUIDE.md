@@ -388,14 +388,14 @@ uplynutia dočasného zablokovania; blokovania kvóty, autentifikácie a nenájd
 odpoveď 503 bez nápovedy.
 
 ```text
-#16319 · comboCooldownWait · pred odoslaním (pokusy = 0)
-všetky ciele preskočené + dočasné zablokovanie modelu:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → čakať → odoslať znova
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← najskoršie uplynutie dočasného zablokovania
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  bez dočasnej nápovedy → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

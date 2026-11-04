@@ -398,14 +398,14 @@ vaxtından `retry_after` / `reset_at` daşıyan
 tapılmama kilidləri isə işarəsiz 503 olaraq qalır.
 
 ```text
-#16319 · comboCooldownWait · dispetçerlikdən əvvəl (attempts = 0)
-bütün hədəflər buraxılıb + müvəqqəti model bloklanması:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → gözlə → yenidən dispetç et
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← ən erkən müvəqqəti kilidin bitmə vaxtı
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  müvəqqəti işarə yoxdur → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

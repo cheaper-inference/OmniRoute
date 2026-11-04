@@ -398,14 +398,14 @@ kwenye muda wa mapema zaidi wa kuisha wa kufungiwa kwa mpito; kufungiwa kwa quot
 uthibitishaji na kutopatikana huendelea kutoa 503 isiyo na kidokezo.
 
 ```text
-#16319 · comboCooldownWait · kabla ya usambazaji (majaribio = 0)
-malengo yote yamerukwa + kufungiwa kwa modeli kwa muda wa mpito:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → subiri → sambaza tena
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← muda wa mapema zaidi wa kuisha wa kufungiwa kwa mpito
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  hakuna kidokezo cha mpito → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

@@ -405,14 +405,14 @@ apropiată expirare a unei blocări tranzitorii; blocările pentru cotă, autent
 și resursă inexistentă păstrează răspunsul 503 fără indicații.
 
 ```text
-#16319 · comboCooldownWait · înaintea distribuirii (attempts = 0)
-toate țintele omise + blocare tranzitorie a modelului:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → așteaptă → redistribuie
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← cea mai apropiată expirare a blocării tranzitorii
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  fără indicație tranzitorie → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

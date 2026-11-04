@@ -391,14 +391,14 @@ TPM/RPM ୱିଣ୍ଡୋ (~60s retry-after) ମଧ୍ୟ ଅନ୍ତର୍ଭ
 କୋଟା, auth ଏବଂ not-found ଲକ୍ଗୁଡ଼ିକ ହିଣ୍ଟ୍-ବିହୀନ 503 ରଖନ୍ତି।
 
 ```text
-#16319 · comboCooldownWait · ଡିସ୍ପାଚ୍-ପୂର୍ବ (attempts = 0)
-ସମସ୍ତ ଲକ୍ଷ୍ୟ ସ୍କିପ୍ ହୋଇଛି + ଟ୍ରାନ୍ସିଏଣ୍ଟ ମଡେଲ୍ ଲକ୍ଆଉଟ୍:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → ଅପେକ୍ଷା → ପୁନଃ-ଡିସ୍ପାଚ୍
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← ସବୁଠାରୁ ପ୍ରାରମ୍ଭିକ ଟ୍ରାନ୍ସିଏଣ୍ଟ ଲକ୍ ସମାପ୍ତି
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  କୌଣସି ଟ୍ରାନ୍ସିଏଣ୍ଟ ହିଣ୍ଟ୍ ନାହିଁ → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

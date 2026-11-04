@@ -392,14 +392,14 @@ opt-out ले छुट्टै native-Codex turn-pin डिस्प्या
 राख्छन्।
 
 ```text
-#16319 · comboCooldownWait · पूर्व-डिस्प्याच (attempts = 0)
-सबै लक्ष्यहरू छोडिएका + transient मोडेल लकआउट:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → wait → पुनः-डिस्प्याच
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← सबैभन्दा पहिले समाप्त हुने transient lock
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  कुनै transient hint छैन → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---

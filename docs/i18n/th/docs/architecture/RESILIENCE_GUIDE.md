@@ -389,14 +389,14 @@ concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled` ค่า
 ที่เร็วที่สุด การล็อกด้านโควตา การยืนยันตัวตน และไม่พบ จะยังคงเป็น 503 โดยไม่มีคำแนะนำ
 
 ```text
-#16319 · comboCooldownWait · ก่อนส่งคำขอ (attempts = 0)
-ข้ามเป้าหมายทั้งหมด + โมเดลถูกล็อกชั่วคราว:
+#16319 · comboCooldownWait · pre-dispatch (attempts = 0)
+all targets skipped + transient model lockout:
   enabled ∧ 0 < waitMs ≤ maxWaitMs ∧ attempt < maxAttempts ∧ budgetLeftMs ≥ waitMs
-    → รอ → ส่งคำขอใหม่
+    → wait → re-dispatch
   wait = false → HTTP 429 rate_limit_error
-  retry_after / reset_at ← เวลาสิ้นสุดการล็อกชั่วคราวที่เร็วที่สุด
+  retry_after / reset_at ← earliest transient lock expiry
 quota_exhausted / auth_error / not_found / not_found_local:
-  ไม่มีคำแนะนำชั่วคราว → HTTP 503 ALL_TARGETS_SKIPPED
+  no transient hint → HTTP 503 ALL_TARGETS_SKIPPED
 ```
 
 ---
