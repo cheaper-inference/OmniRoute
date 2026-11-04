@@ -15,19 +15,24 @@ na usoro ime ka ihe kwekọọ.
 
 ## Nhazi Mmepe
 
-### Ihe Ndị A Chọrọ Tupu Amalite
+### Ihe ndị achọrọ tupu mmalite
 
-- **Node.js** `>=22.22.2 <23`, ma ọ bụ `>=24.0.0 <27` (a tụrụ aro: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ma ọ bụ `>=24.0.0 <27` (a na-atụ aro: 24 LTS)
 - **npm** 10+
 
-> **Ndị ọrụ npm v11+ (Node 24+):** Mgbe `npm install` gachara, chọpụta na etinyere modul native:
+> **Windows na Node 24:** jiri patch release 24 LTS kachasị ọhụrụ (opekata mpe 24.20.0).
+> Releases ndị gara aga nwere ike ịkwụsị mgbe ule mechara nke ọma ma `--test-force-exit` mechie
+> process ahụ. [Windows libuv fix](https://github.com/nodejs/node/pull/61999) nke Node na-edozi
+> crash runtime a; debe nkwenye ule na nlele ọpụpụ runner ka ha rụọ ọrụ.
+
+> **Ndị ọrụ npm v11+ (Node 24+):** Mgbe `npm install` gasịrị, nyochaa na etinyere native modules:
 > `node -e "require('better-sqlite3')"`. Ọ bụrụ na ọ daa na `MODULE_NOT_FOUND`,
-> mee `npm approve-scripts better-sqlite3 && npm install`. Lee
-> [Nchọpụta na ndozi nsogbu](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> gbaa `npm approve-scripts better-sqlite3 && npm install`. Lee
+> [Nchọpụta nsogbu](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klọnụ ma Wụnye
+### Klọnụ na Wụnye
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,94 +40,89 @@ cd OmniRoute
 npm install
 ```
 
-### Mgbanwe Gburugburụ
+### Variables gburugburu ebe obibi
 
 ```bash
-# Mepụta .env gị site na ndebiri ahụ
+# Mepụta .env gị site na ndebiri
 cp .env.example .env
 
-# Mepụta ihe nzuzo ndị achọrọ
+# Mepụta nzuzo ndị achọrọ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Mgbanwe ndị bụ isi maka mmepe:
+Variables ndị bụ isi maka mmepe:
 
-| Mgbanwe                | Ndabara Mmepe            | Nkọwa                    |
+| Variable               | Ọnọdụ ndabara maka mmepe | Nkọwa                    |
 | ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | Ọdụ sava                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL ntọala maka ihu ngwa |
-| `JWT_SECRET`           | (mepụta ya n’elu)        | Ihe nzuzo mbinye aka JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Okwuntughe nbanye mbụ    |
-| `APP_LOG_LEVEL`        | `info`                   | Ọkwa nkọwa nke ndekọ     |
+| `PORT`                 | `20128`                  | Port sava                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL ntọala maka frontend |
+| `JWT_SECRET`           | (mepụta n'elu)           | Nzuzo mbinye aka JWT     |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Paswọọdụ nbanye mbụ      |
+| `APP_LOG_LEVEL`        | `info`                   | Ọkwa ọtụtụ ndekọ         |
 
-### Ntọala Bọọdụ Njikwa
+### Ntọala Dashboard
 
-Bọọdụ njikwa ahụ na-enye mgba ọkụ UI maka atụmatụ ndị nwekwara ike ịhazi site na mgbanwe gburugburụ:
+Dashboard na-enye UI toggles maka atụmatụ ndị nwekwara ike ịhazi site na variables gburugburu ebe obibi:
 
-| Ebe Ntọala Dị       | Mgba Ọkụ              | Nkọwa                                   |
-| ------------------- | --------------------- | --------------------------------------- |
-| Ntọala → Nke Dị Elu | Ọnọdụ Nchọpụta Njehie | Kwado ndekọ arịrịọ nchọpụta njehie (UI) |
-| Ntọala → Izugbe     | Ọdịdị Ogwe Akụkụ      | Gosi/zoo ngalaba ogwe akụkụ             |
+| Ebe ntọala          | Toggle             | Nkọwa                         |
+| ------------------- | ------------------ | ----------------------------- |
+| Settings → Advanced | Debug Mode         | Kwado ndekọ arịrịọ debug (UI) |
+| Settings → General  | Sidebar Visibility | Gosi/zobe ngalaba sidebar     |
 
-A na-echekwa ntọala ndị a na ọdụ data, ha na-adịgidekwa mgbe ebidoghachiri ngwa, ma na-akagbu ndabara mgbanwe gburugburụ mgbe edobere ha.
+A na-echekwa ntọala ndị a na nchekwa data ma ha na-adịgide mgbe a malitegharịrị sistemụ, na-emeri ndabara env var mgbe edobere ha.
 
-### Ịgba Ya na Kọmputa Mpaghara
+### Ịrụ Ọrụ na Kọmpụta Mpaghara
 
 ```bash
-# Ọnọdụ mmepe (ntinyegharị ozugbo)
+# Ọnọdụ mmepe (hot reload)
 npm run dev
 
-# Mwulite mmepụta
-npm run build    # next build → .build/next/ wee assembleStandalone → dist/
+# Nhazi maka production
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Nchịkọta backend/API-naanị dị ọsọ maka mgbanwe ndị ntinye-aka
+# Nhazi backend/API-only ngwa ngwa maka mgbanwe ndị ntinye aka
 npm run build:contributor
 
-# Mwulite mwepụta (mwuliteghachi dị ọcha + ihe nche HEAD — achọrọ maka mbuga)
-npm run build:release   # rm -rf .build dist && build + na-ede dist/BUILD_SHA
+# Nhazi ntọhapụ (rebuild dị ọcha + HEAD sentinel — achọrọ maka deploy)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Nhazi ọdụ a na-ejikarị
+# Nhazi port a na-ejikarị
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Mwulite onye ntinye-aka na-eme nkwado nchịkọta-naanị: ọ naghị achịkọta nkesa standalone
-ma ọ bụ wulite akụrụngwa nkwakọ native ndị na-abụghị iwu. Jiri mwulite mmepụta nkịtị mgbe
-ịchọrọ ịkwado ngwugwu a pụrụ ibuga.
+Nhazi ntinye aka na-eme nkwenye compile-only: ọ naghị achịkọta nkesa standalone ma ọ bụ wuo akụ native packaging nhọrọ. Jiri nhazi production mgbe niile mgbe ịchọrọ ịkwado bundle a pụrụ izipu.
 
-### Nhazi Nsonaazụ Mwulite
+### Nhazi Mpụta Build
 
-| Ndekọ     | Ihe Ndị Dị N’ime                                                            | Git Na-eso Ya |
-| --------- | --------------------------------------------------------------------------- | ------------- |
-| `src/`    | Koodu mmalite ngwa (TypeScript / TSX)                                       | Ee            |
-| `.build/` | Ihe etiti — nsonaazụ `next build` (git anaghị eso, `distDir = .build/next`) | Mba           |
-| `dist/`   | Ngwugwu a pụrụ ibuga — nke `assembleStandalone` chịkọtara (git anaghị eso)  | Mba           |
+| Directory | Ihe dị n'ime                                                          | A na-eso ya |
+| --------- | --------------------------------------------------------------------- | ----------- |
+| `src/`    | Isi mmalite ngwa (TypeScript / TSX)                                   | Ee          |
+| `.build/` | Ihe etiti — `next build` output (gitignored, `distDir = .build/next`) | Mba         |
+| `dist/`   | Bundle a pụrụ izipu — `assembleStandalone` chịkọtara ya (gitignored)  | Mba         |
 
-Usoro mwulite ahụ bụ otu ngafe:
+Pipeline build bụ otu ngafe:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (nsonaazụ Next.js)
-  └─ assembleStandalone()                 (na-edepụta standalone + static + public + akụrụngwa native)
-       └─ nsonaazụ: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` na-ebu ụzọ hichapụ ndekọ abụọ ahụ ma dee
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dịka ihe nche iguzosi ike n’ezi ihe nke mbuga.
+`npm run build:release` na-asachapụ directories abụọ ahụ ọzọ tupu ya emee, ma na-ede
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dịka sentinel maka iguzosi ike n'ezi ihe nke deploy.
 
-`npm run build:contributor` na-eji profaịlụ mwulite backend-naanị. Ọ na-eji stub dochie
-faịlụ UI bọọdụ njikwa nwa oge mgbe a na-ewulite, na-edobe ndị njikwa ụzọ API, ma weghachite faịlụ mbụ
-mgbe mwulite ahụ gachara. Jiri `npm run build` maka mgbanwe ndị na-emetụta UI bọọdụ njikwa ma ọ bụ maka
-nkwado mwepụta zuru ezu; profaịlụ onye ntinye-aka abụghị nnọchi maka mwulite mwepụta.
+`npm run build:contributor` na-eji backend-only build profile. Ọ na-edochi faịlụ UI dashboard nwa oge mgbe ọ na-ewu, na-edobe API route handlers, ma weghachite faịlụ mbụ ahụ mgbe build gasịrị. Jiri `npm run build` maka mgbanwe ndị metụtara UI dashboard ma ọ bụ maka nkwenye ntọhapụ zuru ezu; contributor profile abụghị nnọchi maka release build.
 
-> **Ndetu mbuga VPS:** ndekọ image dị n’ebe dị anya `/usr/lib/node_modules/omniroute/app/`
-> agbanwebeghị. Ngwa ọrụ mbuga na-eji rsync ebuga ihe ndị dị na `dist/` n’ime ya.
-> Naanị ụzọ nsonaazụ mwulite dị n’ime repo ka agbanweela (`app/` → `dist/`).
+> **Ihe gbasara deploy VPS:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> agbanwebeghị. Deploy skills na-eji rsync zipu ọdịnaya `dist/` n'ime ya.
+> Naanị ụzọ mpụta build dị n'ime repo gbanwere (`app/` → `dist/`).
 
 URL ndabara:
 
-- **Bọọdụ Njikwa**: `http://localhost:20128/dashboard`
+- **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
