@@ -447,8 +447,10 @@ async function reuseLiveZoneEntry(
 /**
  * Reuses the byte-identical transformed prefix from the previous request in a session. Engines
  * receive the ordered live suffix with frozen turn context; only appended tool outputs are rewritten.
- * Any changed prefix, missing identity,
- * unsupported body shape, serialization failure, or oversized entry fails open to full compression.
+ * For regular live-zone mode, a cold/mismatched prefix falls back to full compression.
+ * With preserveRawPrefixOnMiss enabled, it instead sends the original history unchanged
+ * and uses it as the next stable baseline; only new tool outputs are eligible on a hit.
+ * An explicitly configured global hard budget still takes precedence.
  */
 export async function applyLiveZoneCompression(
   body: Record<string, unknown>,
