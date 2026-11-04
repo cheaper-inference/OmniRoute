@@ -150,6 +150,7 @@ import { isModelExposureAllowed } from "@/shared/utils/modelExposureList";
 import { collapseProviderPrefix, resolveProviderNodePrefix } from "@/shared/utils/modelIdPrefix";
 import { isCodexDiscoveryModelExcluded } from "@/shared/services/codexDiscoveryPolicy";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+import { stripNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias";
 
 // Public API of this module is preserved after the catalog helper extraction:
 // `isVisionModelId` (vision-detection-consistency.test.ts) and
@@ -893,10 +894,27 @@ async function buildUnifiedModelsResponseCore(
       const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
       earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
     }
+    // #18726: synthesized effort variants (`<provider>/<base>-<tier>`) are appended
+    // after the base-row loops ran these checks, so a variant hidden on its own
+    // (or matched by the exposure denylist) is re-checked by its own id. A
+    // compatible-node prefix maps back to the node id the hidden row is keyed by.
+    // A `no-think/` alias of a hidden variant is checked by the real model id.
+    const isSyntheticVariantHidden = (model: Record<string, any>): boolean => {
+      const id = typeof model.id === "string" ? stripNoThinkingAlias(model.id) : "";
+      const slash = id.indexOf("/");
+      if (slash <= 0 || slash === id.length - 1) return false;
+      const providerKey = id.slice(0, slash);
+      const modelId = id.slice(slash + 1);
+      return (
+        isModelHiddenBulk(providerNodeIdByPrefix[providerKey] || providerKey, modelId) ||
+        shouldHideByExposure(providerKey, modelId)
+      );
+    };
     const postFilterContext = {
       connections,
       prefixMode,
       aliasToProviderId,
+      isSyntheticVariantHidden,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
       allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
       blockedProviders: settings.blockedProviders,

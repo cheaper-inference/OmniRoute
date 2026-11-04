@@ -90,6 +90,22 @@ async function filterUnauthorizedAppendedVariants(
 }
 
 /**
+ * #18726: the effort-variant passes synthesize `<base>-<tier>` rows after the
+ * catalog builder already applied the per-model hidden state and the exposure
+ * allow/deny list to the base rows. A row the operator hid on its own (hide
+ * `<base>-low`, keep `<base>`) does not exist yet when those filters run, so the
+ * appended variants are checked here as well, together with the per-key authorizer.
+ */
+function composeEffortVariantAuthorizer(
+  authorize: CatalogVariantAuthorizer | null,
+  isHidden: ((model: Record<string, any>) => boolean) | undefined
+): CatalogVariantAuthorizer | null {
+  if (!isHidden) return authorize;
+  if (!authorize) return (model) => !isHidden(model);
+  return (model) => !isHidden(model) && authorize(model);
+}
+
+/**
  * CATALOG_MIRROR_REFINEMENTS_ENABLED only (refined functional-gateway mirrors).
  *
  * A gateway whose live catalog is authoritative rejects any model outside it at
@@ -170,6 +186,11 @@ export async function applyCatalogPostFilters(
     /** Raw settings.blockedProviders; blocked gateways never carry mirrors. */
     blockedProviders?: unknown;
     authorizeSyntheticModel?: CatalogVariantAuthorizer;
+    /**
+     * #18726: whether a synthesized effort variant is hidden by the operator's
+     * per-model visibility or exposure list. Base rows were already filtered.
+     */
+    isSyntheticVariantHidden?: (model: Record<string, any>) => boolean;
     /** Combo targets and node prefixes for the per-entry `pricing` object. */
     pricing?: CatalogPricingContext;
     allowCcDiscoveryAliases?: boolean;
@@ -179,6 +200,10 @@ export async function applyCatalogPostFilters(
   let finalModels = models;
   const authorizeSyntheticModel =
     ctx.authorizeSyntheticModel ?? (await resolveCatalogVariantAuthorizer(request));
+  const authorizeEffortVariant = composeEffortVariantAuthorizer(
+    authorizeSyntheticModel,
+    ctx.isSyntheticVariantHidden
+  );
 
   // variants are only generated for surviving models.
   if (new URL(request.url).searchParams.get("configuredOnly") === "true") {
@@ -211,7 +236,7 @@ export async function applyCatalogPostFilters(
         beforeClaudeEffortVariants,
         ctx.prefixMode === "canonical" ? ctx.aliasToProviderId : undefined
       ),
-      authorizeSyntheticModel
+      authorizeEffortVariant
     );
   }
 
@@ -308,7 +333,7 @@ export async function applyCatalogPostFilters(
     finalModels = await filterUnauthorizedAppendedVariants(
       beforeSyncedEffortVariants,
       appendSyncedEffortVariants(beforeSyncedEffortVariants),
-      authorizeSyntheticModel
+      authorizeEffortVariant
     );
   }
 
