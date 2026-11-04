@@ -4,7 +4,7 @@ import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
 } from "./chatCore/memorySkillsInjection.ts";
-import { resolveChatCoreRequestSetup } from "./chatCore/requestSetup.ts";
+import { resolveChatCoreRequestSetup, resolveClientEchoModel } from "./chatCore/requestSetup.ts";
 import { shouldSkipNativeCodexReactiveCompaction } from "./chatCore/nativeCodexCompaction.ts";
 import {
   normalizeOpenAICompatibleTools,
@@ -27,7 +27,10 @@ export {
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
 import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
-import { acquireTurnExecution, createTurnInProgressResult } from "./chatCore/turnExecutionGuard.ts";
+import {
+  acquireTurnExecutionWithWait,
+  createTurnInProgressResult,
+} from "./chatCore/turnExecutionGuard.ts";
 import { checkSemanticCache, isSemanticCacheEnabled } from "./chatCore/semanticCache.ts";
 import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
 import {
@@ -387,6 +390,47 @@ export async function handleChatCore(args: Parameters<typeof handleChatCoreInner
   });
 }
 
+async function readLatestRefreshToken(connectionId: string): Promise<string | null> {
+  const latest = await getProviderConnectionById(connectionId);
+  return typeof latest?.refreshToken === "string" ? latest.refreshToken : null;
+}
+
+function adoptRefreshedCodexCredentials({
+  provider,
+  refreshFence,
+  targetCredentials,
+  credentials,
+  newCredentials,
+}: {
+  provider: string;
+  refreshFence: CodexConnectionFence | null;
+  targetCredentials: Record<string, unknown>;
+  credentials: Record<string, unknown>;
+  newCredentials: Record<string, unknown>;
+}): "passive" | "committed" | "stale" | null {
+  const passive = isPassiveCodex(provider);
+  if (passive) {
+    try {
+      adoptCodexConnectionFence(refreshFence, targetCredentials, {
+        ...targetCredentials,
+        ...newCredentials,
+      });
+    } catch (error) {
+      if (error instanceof StaleCodexOperationError) return "stale";
+      throw error;
+    }
+  } else {
+    if (!refreshFence) return null;
+    // Every mutex waiter adopts the same durable version instead of writing again.
+    if (!adoptCommittedCodexRefresh(newCredentials, refreshFence)) {
+      throw new StaleCodexOperationError();
+    }
+  }
+  Object.assign(targetCredentials, newCredentials);
+  Object.assign(credentials, newCredentials);
+  return passive ? "passive" : "committed";
+}
+
 async function handleChatCoreInner({
   body,
   modelInfo,
@@ -618,7 +662,11 @@ async function handleChatCoreInner({
     return idempotencyHit;
   }
 
-  const turnExecution = acquireTurnExecution(idempotencyKey);
+  const turnExecution = await acquireTurnExecutionWithWait(idempotencyKey, {
+    log,
+    traceId,
+    signal: clientRawRequest?.signal ?? null,
+  });
   if (turnExecution.acquired === false) {
     const duplicate = createTurnInProgressResult(turnExecution.retryCount);
     log?.warn?.(
@@ -902,11 +950,12 @@ async function handleChatCoreInner({
   // `opencode-zen/nemotron-3-ultra-free`) is not recognized by the client on `--resume`.
   const isClaudeCodeClient = isClaudeCodeOriginatedHeaders(clientRawRequest?.headers);
 
+  const clientEchoModel = resolveClientEchoModel(clientRawRequest?.body, requestedModel);
   let echoModel =
     (settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient) &&
-    typeof requestedModel === "string" &&
-    requestedModel
-      ? requestedModel
+    typeof clientEchoModel === "string" &&
+    clientEchoModel
+      ? clientEchoModel
       : null;
   // Auto-echo the listing-valid form for bare requests to noAuth catalog
   // providers so clients validating response.model against /v1/models don't warn.
@@ -2746,12 +2795,7 @@ async function handleChatCoreInner({
       typeof targetCredentials?.connectionId === "string"
         ? targetCredentials.connectionId.trim()
         : "";
-    const casReread = casConnectionId
-      ? async () => {
-          const latest = await getProviderConnectionById(casConnectionId);
-          return typeof latest?.refreshToken === "string" ? latest.refreshToken : null;
-        }
-      : null;
+    const casReread = casConnectionId ? () => readLatestRefreshToken(casConnectionId) : null;
 
     const newCredentials = (await refreshWithRetry(
       () =>
@@ -2772,28 +2816,16 @@ async function handleChatCoreInner({
     )) as null | Record<string, unknown>;
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
-      if (isPassiveCodex(provider)) {
-        try {
-          adoptCodexConnectionFence(
-            refreshFence, targetCredentials, { ...targetCredentials, ...newCredentials }
-          );
-        } catch (error) {
-          if (error instanceof StaleCodexOperationError) return null;
-          throw error;
-        }
-        Object.assign(targetCredentials, newCredentials);
-        Object.assign(credentials, newCredentials);
-        return newCredentials;
-      }
-      if (refreshFence) {
-        // getAccessToken persisted before releasing the mutex. Every waiter adopts
-        // that same durable version instead of issuing another fenced write.
-        if (!adoptCommittedCodexRefresh(newCredentials, refreshFence)) {
-          throw new StaleCodexOperationError();
-        }
-        credentialRefreshPersistRan = true;
-        Object.assign(targetCredentials, newCredentials);
-        Object.assign(credentials, newCredentials);
+      const adoption = adoptRefreshedCodexCredentials({
+        provider,
+        refreshFence,
+        targetCredentials,
+        credentials,
+        newCredentials,
+      });
+      if (adoption === "stale") return null;
+      if (adoption) {
+        if (adoption === "committed") credentialRefreshPersistRan = true;
         return newCredentials;
       }
       log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);

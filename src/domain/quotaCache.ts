@@ -392,6 +392,13 @@ function mergeCodexPersistedQuota(
   }
 }
 
+function codexExhaustedWindowName(scope: "codex" | "spark", window: string): string {
+  if (scope === "spark") {
+    return window === "5h" ? CODEX_SPARK_QUOTA_SESSION : CODEX_SPARK_QUOTA_WEEKLY;
+  }
+  return window === "5h" ? "session" : "weekly";
+}
+
 /** Overlay one Codex child's persisted quota facts into the existing request cache. */
 export function hydrateCodexQuotaCacheForRequest(
   connection: {
@@ -426,14 +433,7 @@ export function hydrateCodexQuotaCacheForRequest(
   mergeCodexPersistedQuota(entry, hydration.scope, hydration.quotaState);
   let exhaustedResetAt: string | null = null;
   if (hydration.exhaustedWindow) {
-    const windowName =
-      hydration.scope === "spark"
-        ? hydration.exhaustedWindow === "5h"
-          ? CODEX_SPARK_QUOTA_SESSION
-          : CODEX_SPARK_QUOTA_WEEKLY
-        : hydration.exhaustedWindow === "5h"
-          ? "session"
-          : "weekly";
+    const windowName = codexExhaustedWindowName(hydration.scope, hydration.exhaustedWindow);
     const window = entry.quotas[windowName];
     if (window) {
       entry.quotas[windowName] = { ...window, remainingPercentage: 0 };
@@ -459,10 +459,9 @@ function isCodexQuotaExhausted(
   const scopedWindowNames = quotaNames.filter((windowName) => filterWindow?.(windowName));
   return (
     scopedWindowNames.length > 0 &&
+    // Exhaustion is distinct from the operator-configured early quota cutoff.
     scopedWindowNames.every(
-      (windowName) =>
-        getQuotaWindowStatus(connectionId, windowName, DEFAULT_QUOTA_THRESHOLD_PERCENT)
-          ?.reachedThreshold
+      (windowName) => getQuotaWindowStatus(connectionId, windowName, 100)?.reachedThreshold
     )
   );
 }
@@ -547,7 +546,8 @@ function isClaudeQuotaExhaustedForRequest(
 
 export type ClaudeQuotaScopeDecision = {
   scope: "model" | "connection";
-  evidence: "none" | "blocking";
+  // "headroom": fresh telemetry proves every account-wide window has quota left (#18296).
+  evidence: "none" | "blocking" | "headroom";
   resetAt: string | null;
   cooldownMs: number | null;
 };
@@ -575,6 +575,25 @@ const BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
   resetAt: null,
   cooldownMs: null,
 };
+
+const HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
+  scope: "model",
+  evidence: "headroom",
+  resetAt: null,
+  cooldownMs: null,
+};
+
+// #18296 — Anthropic does not always report a per-model weekly window (e.g. Fable). When the
+// account-wide session AND weekly windows are both reported with quota left, an explicit quota
+// 429 can only be about the requested model, so it must not take the whole connection out.
+function hasProvenClaudeAccountHeadroom(globalWindows: QuotaInfo[]): boolean {
+  const kinds = new Set<string>();
+  for (const quota of globalWindows) {
+    if (quota.fractionReported === false || quota.remainingPercentage <= 0) return false;
+    kinds.add(quota.claudeQuota?.kind ?? "");
+  }
+  return kinds.has("session") && kinds.has("weekly_all");
+}
 
 // An explicit Claude model-credit entitlement failure is model scoped even
 // without a usable quota snapshot; never park unrelated sibling models.
@@ -680,6 +699,8 @@ export function getCachedClaudeQuotaScopeDecision(input: {
     );
   }
 
+  if (hasProvenClaudeAccountHeadroom(globalWindows)) return HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA;
+
   return CONNECTION_SCOPED_CLAUDE_QUOTA;
 }
 
@@ -755,6 +776,21 @@ export function isQuotaExhaustedForRequest(
 }
 
 /**
+ * Subscription-window exhaustion of a Codex account, ignoring its paid-credit opt-in and
+ * recent successes (those may have been paid with credits). Routing uses it to keep
+ * credit-only accounts behind accounts that still have subscription quota.
+ */
+export function isCodexSubscriptionExhaustedForRequest(
+  connectionId: string,
+  requestedModel: string | null = null
+): boolean {
+  const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
+  if (!entry) return false;
+  if (advancedWindowResetAt(entry, Date.now())) return false;
+  return isCodexQuotaExhausted(connectionId, entry, requestedModel);
+}
+
+/**
  * Store quota data for a connection (called by usage endpoint and background refresh).
  */
 export function setQuotaCache(
@@ -771,6 +807,31 @@ export function setQuotaCache(
   }
   setQuotaCacheInner(connectionId, provider, reportedQuotas, rawModelQuotas);
 }
+function preserveUnreportedExhaustion(
+  prior: QuotaCacheEntry | null,
+  modelQuotas: Record<string, QuotaInfo>,
+  quotas: Record<string, QuotaInfo>
+): boolean {
+  return Boolean(
+    prior?.exhausted &&
+    Object.keys(prior.quotas).length === 0 &&
+    isStandardQuotaExhausted(prior, Date.now()) &&
+    Object.keys(modelQuotas).length === 0 &&
+    Object.values(quotas).every((q) => q.fractionReported === false)
+  );
+}
+
+function quotaSnapshotMetadata(
+  codexOwner: ReturnType<typeof readCodexQuotaOwner>,
+  fractionReported: boolean
+): string | null {
+  if (!codexOwner && fractionReported) return null;
+  return JSON.stringify({
+    ...(!fractionReported ? { fractionReported: false } : {}),
+    ...(codexOwner ? { codexOwnerEpoch: codexOwner.epoch } : {}),
+  });
+}
+
 function setQuotaCacheInner(
   connectionId: string,
   provider: string,
@@ -788,13 +849,7 @@ function setQuotaCacheInner(
   const prior = getQuotaCache(connectionId);
   // A telemetry-only refresh is not evidence that a real upstream 429 has
   // recovered. Keep its original timestamp so it can still expire normally.
-  if (
-    prior?.exhausted &&
-    Object.keys(prior.quotas).length === 0 &&
-    isStandardQuotaExhausted(prior, Date.now()) &&
-    Object.keys(modelQuotas).length === 0 &&
-    Object.values(quotas).every((q) => q.fractionReported === false)
-  ) {
+  if (preserveUnreportedExhaustion(prior, modelQuotas, quotas)) {
     return;
   }
   const entry: QuotaCacheEntry = {
@@ -861,13 +916,7 @@ function setQuotaCacheInner(
           next_reset_at: normalized.resetAt,
           window_duration_ms: entry.windowDurationMs ?? null,
           // Persist only the interpretation, never the raw provider payload.
-          raw_data:
-            codexOwner || !fractionReported
-              ? JSON.stringify({
-                  ...(!fractionReported ? { fractionReported: false } : {}),
-                  ...(codexOwner ? { codexOwnerEpoch: codexOwner.epoch } : {}),
-                })
-              : null,
+          raw_data: quotaSnapshotMetadata(codexOwner, fractionReported),
         });
       } catch (error) {
         console.error("[quotaCache] Failed to save snapshot:", error);
@@ -893,6 +942,29 @@ export function getQuotaCache(connectionId: string): QuotaCacheEntry | null {
   return entry;
 }
 
+/**
+ * Cached quota entry, hydrated from `quota_snapshots` on a miss (#5015). Account
+ * ranking reads through this so an evicted entry is not mistaken for "no
+ * telemetry" (#18541).
+ */
+export function getQuotaCacheOrSnapshot(connectionId: string): QuotaCacheEntry | null {
+  return hydrateQuotaCacheFromSnapshots(connectionId);
+}
+
+function codexSnapshotMatchesOwner(
+  snapshot: ReturnType<typeof getLatestQuotaSnapshotsForConnection>[number],
+  owner: NonNullable<ReturnType<typeof readCodexQuotaOwner>>
+): boolean {
+  const raw = (snapshot as unknown as { rawData?: unknown }).rawData ?? snapshot.raw_data;
+  let metadata: { codexOwnerEpoch?: string } = {};
+  try {
+    metadata = typeof raw === "string" ? JSON.parse(raw) : ((raw ?? {}) as typeof metadata);
+  } catch {
+    /* legacy snapshot */
+  }
+  return metadata.codexOwnerEpoch ? metadata.codexOwnerEpoch === owner.epoch : !owner.replaced;
+}
+
 function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry | null {
   const { cache } = getState();
   const cached = getQuotaCache(connectionId);
@@ -906,18 +978,7 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
     return null;
   }
   if (codexOwner)
-    snapshots = snapshots.filter((snapshot) => {
-      const raw = (snapshot as unknown as { rawData?: unknown }).rawData ?? snapshot.raw_data;
-      let metadata: { codexOwnerEpoch?: string } = {};
-      try {
-        metadata = typeof raw === "string" ? JSON.parse(raw) : ((raw ?? {}) as typeof metadata);
-      } catch {
-        /* legacy snapshot */
-      }
-      return metadata.codexOwnerEpoch
-        ? metadata.codexOwnerEpoch === codexOwner.epoch
-        : !codexOwner.replaced;
-    });
+    snapshots = snapshots.filter((snapshot) => codexSnapshotMatchesOwner(snapshot, codexOwner));
   if (!snapshots.length) return null;
 
   const quotas: Record<string, QuotaInfo> = {};

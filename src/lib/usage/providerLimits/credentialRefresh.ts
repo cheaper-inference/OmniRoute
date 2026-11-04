@@ -106,6 +106,26 @@ function buildCredentialUpdateData(
   return updateData;
 }
 
+function captureRefreshFence(connection: ProviderConnectionLike) {
+  if (connection.provider !== "codex") return null;
+  const capture = passive.isPassiveCodex(connection.provider)
+    ? captureCodexConnectionOwnerFence
+    : captureCodexConnectionFence;
+  return capture(connection as unknown as JsonRecord, connection.id);
+}
+
+function buildRefreshCredentials(connection: ProviderConnectionLike) {
+  return {
+    connectionId: connection.id,
+    accessToken: connection.accessToken,
+    refreshToken: connection.refreshToken,
+    expiresAt: connection.tokenExpiresAt || connection.expiresAt || null,
+    providerSpecificData: connection.providerSpecificData,
+    copilotToken: connection.providerSpecificData?.copilotToken,
+    copilotTokenExpiresAt: connection.providerSpecificData?.copilotTokenExpiresAt,
+  };
+}
+
 /** Refresh and persist credentials using a caller-supplied executor resolver. */
 export async function refreshAndUpdateCredentialsWithResolver(
   connection: ProviderConnectionLike,
@@ -115,22 +135,9 @@ export async function refreshAndUpdateCredentialsWithResolver(
   if (!shouldAttemptRotatingRefresh(connection.provider, opts.allowRotatingRefresh)) {
     return { connection, refreshed: false };
   }
-  const fence =
-    connection.provider === "codex"
-      ? (passive.isPassiveCodex(connection.provider)
-          ? captureCodexConnectionOwnerFence
-          : captureCodexConnectionFence)(connection as unknown as JsonRecord, connection.id)
-      : null;
+  const fence = captureRefreshFence(connection);
   const executor = await resolveExecutor(connection.provider);
-  const credentials = {
-    connectionId: connection.id,
-    accessToken: connection.accessToken,
-    refreshToken: connection.refreshToken,
-    expiresAt: connection.tokenExpiresAt || connection.expiresAt || null,
-    providerSpecificData: connection.providerSpecificData,
-    copilotToken: connection.providerSpecificData?.copilotToken,
-    copilotTokenExpiresAt: connection.providerSpecificData?.copilotTokenExpiresAt,
-  };
+  const credentials = buildRefreshCredentials(connection);
 
   if (!opts.force && !executor.needsRefresh(credentials)) {
     return { connection, refreshed: false };

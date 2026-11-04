@@ -980,6 +980,49 @@ export type ProviderConnectionUpdateOpts = UpdateOpts & {
   onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
 };
 
+function preserveCodexFailureState(merged: JsonRecord, existing: JsonRecord): void {
+  for (const key of [
+    "testStatus",
+    "isActive",
+    "lastError",
+    "lastErrorAt",
+    "lastErrorType",
+    "lastErrorSource",
+    "errorCode",
+    "rateLimitedUntil",
+    "backoffLevel",
+  ]) {
+    merged[key] = existing[key] ?? null;
+  }
+  const latestData = toRecord(existing.providerSpecificData);
+  const nextData = { ...toRecord(merged.providerSpecificData) };
+  for (const key of [
+    "codexScopeRateLimitedUntil",
+    "codexScopeRateLimitSource",
+    "codexQuotaState",
+    "codexQuotaStateByScope",
+    "codexExhaustedWindow",
+    "codexExhaustedWindowByScope",
+  ]) {
+    if (Object.hasOwn(latestData, key)) nextData[key] = latestData[key];
+    else delete nextData[key];
+  }
+  merged.providerSpecificData = nextData;
+}
+
+function canApplyCodexConnectionUpdate(
+  id: string,
+  merged: JsonRecord,
+  existing: JsonRecord,
+  fence?: CodexConnectionFence
+): boolean {
+  if (!fence) return mayWriteCodexConnection(id);
+  // Token rotation survives newer failures, never owner/token replacement.
+  if (!isCodexConnectionFenceCurrent(fence)) return false;
+  if (!isCodexConnectionFenceCurrent(fence, true)) preserveCodexFailureState(merged, existing);
+  return true;
+}
+
 export async function updateProviderConnection(
   id: string,
   data: JsonRecord,
@@ -1051,39 +1094,9 @@ export async function updateProviderConnection(
     }
     const existingRecord = toRecord(existing);
 
-    if (opts?.expectedCodexFence) {
-      // Token rotation must survive a newer failure, but never an owner/token replacement.
-      if (!isCodexConnectionFenceCurrent(opts.expectedCodexFence)) return null;
-      if (!isCodexConnectionFenceCurrent(opts.expectedCodexFence, true)) {
-        for (const key of [
-          "testStatus",
-          "isActive",
-          "lastError",
-          "lastErrorAt",
-          "lastErrorType",
-          "lastErrorSource",
-          "errorCode",
-          "rateLimitedUntil",
-          "backoffLevel",
-        ]) {
-          merged[key] = existingCamel[key] ?? null;
-        }
-        const latestData = toRecord(existingCamel.providerSpecificData);
-        const nextData = { ...toRecord(merged.providerSpecificData) };
-        for (const key of [
-          "codexScopeRateLimitedUntil",
-          "codexScopeRateLimitSource",
-          "codexQuotaState",
-          "codexQuotaStateByScope",
-          "codexExhaustedWindow",
-          "codexExhaustedWindowByScope",
-        ]) {
-          if (Object.hasOwn(latestData, key)) nextData[key] = latestData[key];
-          else delete nextData[key];
-        }
-        merged.providerSpecificData = nextData;
-      }
-    } else if (!mayWriteCodexConnection(id)) return null;
+    if (!canApplyCodexConnectionUpdate(id, merged, existingCamel, opts?.expectedCodexFence)) {
+      return null;
+    }
     reconcileCodexUsageHistory(db, {
       connectionId: id,
       existing: existingRecord,

@@ -46,6 +46,7 @@ import {
 } from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   extractCodeAssistOnboardTierId,
   extractCodeAssistSubscriptionTier,
@@ -344,18 +345,18 @@ function isTerminalStatusForQuotaRecovery(testStatus: string | null | undefined)
   return TERMINAL_STATUSES_FOR_QUOTA_RECOVERY.has(testStatus);
 }
 
+function reportedQuotaRemaining(value: JsonRecord): number | null {
+  if (typeof value.remaining === "number") return value.remaining;
+  return typeof value.remainingPercentage === "number" ? value.remainingPercentage : null;
+}
+
 export function hasUsableQuota(usage: JsonRecord): boolean {
   const quotas = usage?.quotas;
   if (!isRecord(quotas)) return false;
   for (const value of Object.values(quotas)) {
     if (!isRecord(value)) continue;
     if (value.unlimited === true) return true;
-    const remaining =
-      typeof value.remaining === "number"
-        ? value.remaining
-        : typeof value.remainingPercentage === "number"
-          ? value.remainingPercentage
-          : null;
+    const remaining = reportedQuotaRemaining(value);
     if (remaining !== null && remaining > 0) return true;
   }
   return false;
@@ -377,12 +378,7 @@ export function syntheticCooldownOutlivedByRealWindows(
   if (windows.length === 0) return false;
   for (const value of windows) {
     if (!isRecord(value) || value.unlimited === true) return false;
-    const remaining =
-      typeof value.remaining === "number"
-        ? value.remaining
-        : typeof value.remainingPercentage === "number"
-          ? value.remainingPercentage
-          : null;
+    const remaining = reportedQuotaRemaining(value);
     if (remaining === null || remaining <= 0) return false;
     if (value.resetAt == null) return false;
     const resetMs = Date.parse(String(value.resetAt));
@@ -605,6 +601,10 @@ export async function maybeClearRecoveredQuotaState(
 ): Promise<ProviderConnectionLike> {
   if (!hasUsableQuota(usage)) return connection;
   if (isTerminalStatusForQuotaRecovery(connection.testStatus)) return connection;
+  // Google keeps reporting Antigravity quota for an account blocked by 403 VALIDATION_REQUIRED,
+  // so usable quota says nothing about that block: keep the error until a passing connection
+  // test drops the stored verification link.
+  if (readStoredVerificationUrl(connection.providerSpecificData)) return connection;
   let verifiedResetRecovery = false;
   if (hasActiveCooldown(connection)) {
     // A future rateLimitedUntil written from a real upstream signal is a hard
@@ -1001,6 +1001,22 @@ export async function fetchLiveProviderLimits(connectionId: string): Promise<{
   return fetchLiveProviderLimitsWithOptions(connectionId, { forceRefresh: false });
 }
 
+function refreshedCodexFence(
+  fence: CodexConnectionFence | null,
+  connection: ProviderConnectionLike,
+  result: { connection: ProviderConnectionLike; refreshed: boolean; adopted?: boolean }
+): CodexConnectionFence | null {
+  if (!fence || !(result.refreshed || result.adopted)) return fence;
+  return result.adopted
+    ? adoptCodexConnectionFence(
+        fence,
+        connection as unknown as JsonRecord,
+        result.connection as unknown as JsonRecord,
+        connection.id
+      )
+    : captureCodexConnectionFence(result.connection as unknown as JsonRecord, connection.id);
+}
+
 async function fetchLiveProviderLimitsWithOptions(
   connectionId: string,
   options: {
@@ -1068,16 +1084,7 @@ async function fetchLiveProviderLimitsWithOptions(
       });
       conn = result.connection;
       wasRefreshed = result.refreshed;
-      if (codexFence && (wasRefreshed || result.adopted)) {
-        codexFence = result.adopted
-          ? adoptCodexConnectionFence(
-              codexFence,
-              connection as unknown as JsonRecord,
-              conn as unknown as JsonRecord,
-              connectionId
-            )
-          : captureCodexConnectionFence(conn as unknown as JsonRecord, connectionId);
-      }
+      codexFence = refreshedCodexFence(codexFence, connection, result);
 
       if (wasRefreshed) {
         await syncToCloudIfEnabled();
@@ -1103,19 +1110,7 @@ async function fetchLiveProviderLimitsWithOptions(
           force: true,
         });
         if (forced.refreshed || forced.adopted) {
-          if (codexFence) {
-            codexFence = forced.adopted
-              ? adoptCodexConnectionFence(
-                  codexFence,
-                  conn as unknown as JsonRecord,
-                  forced.connection as unknown as JsonRecord,
-                  connectionId
-                )
-              : captureCodexConnectionFence(
-                  forced.connection as unknown as JsonRecord,
-                  connectionId
-                );
-          }
+          codexFence = refreshedCodexFence(codexFence, conn, forced);
           conn = forced.connection;
           if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
@@ -1304,6 +1299,31 @@ export async function fetchAndPersistProviderLimits(
   );
 }
 
+type FetchedLimitsCache = {
+  connectionId: string;
+  cache: ProviderLimitsCacheEntry;
+  codexFence?: CodexConnectionFence | null;
+};
+type PendingLimitsCacheEntry = {
+  connectionId: string;
+  entry: ProviderLimitsCacheEntry;
+  codexFence?: CodexConnectionFence | null;
+};
+
+function currentQuotaBatchEntries(
+  entries: PendingLimitsCacheEntry[],
+  caches: Record<string, ProviderLimitsCacheEntry>,
+  errors: Record<string, string>
+): PendingLimitsCacheEntry[] {
+  // A later account can keep this batch open after an earlier response finished.
+  return entries.filter(({ connectionId, codexFence }) => {
+    if (!codexFence || isCodexConnectionFenceCurrent(codexFence)) return true;
+    delete caches[connectionId];
+    errors[connectionId] = "Codex connection changed while the quota batch was running";
+    return false;
+  });
+}
+
 export async function syncAllProviderLimits(
   options: {
     source?: SyncSource;
@@ -1321,20 +1341,11 @@ export async function syncAllProviderLimits(
     isActive: true,
   })) as unknown as ProviderConnectionLike[];
   const connections = connectionRows.filter(isSupportedUsageConnection);
-  type FetchedCache = {
-    connectionId: string;
-    cache: ProviderLimitsCacheEntry;
-    codexFence?: CodexConnectionFence | null;
-  };
-  const cacheEntries: Array<{
-    connectionId: string;
-    entry: ProviderLimitsCacheEntry;
-    codexFence?: CodexConnectionFence | null;
-  }> = [];
+  const cacheEntries: PendingLimitsCacheEntry[] = [];
   const caches: Record<string, ProviderLimitsCacheEntry> = {};
   const errors: Record<string, string> = {};
 
-  const recordResult = (connectionId: string, result: PromiseSettledResult<FetchedCache>) => {
+  const recordResult = (connectionId: string, result: PromiseSettledResult<FetchedLimitsCache>) => {
     if (result.status === "fulfilled") {
       const { cache, codexFence } = result.value;
       const previous = getProviderLimitsCache(connectionId);
@@ -1375,7 +1386,7 @@ export async function syncAllProviderLimits(
 
   const recordChunk = (
     chunk: ProviderConnectionLike[],
-    results: PromiseSettledResult<FetchedCache>[]
+    results: PromiseSettledResult<FetchedLimitsCache>[]
   ) => {
     results.forEach((result, index) => {
       const connectionId = chunk[index]?.id;
@@ -1386,14 +1397,8 @@ export async function syncAllProviderLimits(
   await syncInChunksWithSpacing(otherConnections, concurrency, spacingMs, fetchOne, recordChunk);
   await syncInChunksWithSpacing(oauthConnections, 1, spacingMs, fetchOne, recordChunk);
 
-  // A later account can keep this batch open after an earlier response finished.
-  // Recheck before advertising/persisting any deferred result, not just after fetch.
-  const currentEntries = cacheEntries.filter(({ connectionId, codexFence }) => {
-    if (!codexFence || isCodexConnectionFenceCurrent(codexFence)) return true;
-    delete caches[connectionId];
-    errors[connectionId] = "Codex connection changed while the quota batch was running";
-    return false;
-  });
+  // Recheck before advertising/persisting deferred results, not just after fetch.
+  const currentEntries = currentQuotaBatchEntries(cacheEntries, caches, errors);
   if (currentEntries.length > 0) {
     setProviderLimitsCacheBatch(currentEntries);
   }
