@@ -27,8 +27,16 @@ test("Codex upstream limit flag survives cache writes and server reconstruction"
   const wire = {
     rate_limit: {
       limit_reached: true,
-      primary_window: { used_percent: 20, reset_at: (now + 3600000) / 1000 },
-      secondary_window: { used_percent: 20, reset_at: (now + 144 * 3600000) / 1000 },
+      primary_window: {
+        used_percent: 20,
+        limit_window_seconds: 18000,
+        reset_at: (now + 3600000) / 1000,
+      },
+      secondary_window: {
+        used_percent: 20,
+        limit_window_seconds: 604800,
+        reset_at: (now + 144 * 3600000) / 1000,
+      },
     },
     rate_limit_reached_type: "weekly",
   };
