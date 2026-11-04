@@ -142,8 +142,14 @@ function upgradeLegacySeededDefaultCompressionCombo(): void {
   );
 }
 
+// Bootstrap once per DB instance: listCompressionCombos() runs on every chat request,
+// and the INSERT OR IGNORE seed takes the write lock even when the row exists. Keyed
+// by instance so a restore/reset (new instance) bootstraps again.
+const bootstrappedDbs = new WeakSet<object>();
+
 function ensureCompressionComboTables(): void {
   const db = getDbInstance();
+  if (bootstrappedDbs.has(db)) return;
   db.exec(`
     CREATE TABLE IF NOT EXISTS compression_combos (
       id TEXT PRIMARY KEY,
@@ -192,6 +198,7 @@ function ensureCompressionComboTables(): void {
     1
   );
   upgradeLegacySeededDefaultCompressionCombo();
+  bootstrappedDbs.add(db);
 }
 
 function rowToCompressionCombo(row: unknown): CompressionCombo | null {

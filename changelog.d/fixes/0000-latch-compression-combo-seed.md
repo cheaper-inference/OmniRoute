@@ -1,0 +1,1 @@
+- **perf(db):** chat requests no longer re-run the compression-combo table bootstrap and default seed on every call, so a request no longer stalls for up to 2 s with "database is locked" while another process holds the SQLite write lock
