@@ -3703,6 +3703,8 @@
     "testStepRunning": "កំពុងសាកល្បង…",
     "testStepNotTestable": "អាចសាកល្បងបានតែជំហានដែលមានម៉ូដែលតែមួយប៉ុណ្ណោះ",
     "saving": "កំពុងរក្សាទុក...",
+    "liveAccountLabel": "acct: {id}",
+    "liveAccountTooltip": "គណនី៖ {id}",
     "liveNoProviders": "មិនទាន់មានអ្នកផ្តល់សេវាណាមួយត្រូវបានរកឃើញទេ។",
     "liveFleetDataHint": "ទិន្នន័យក្រុមម៉ូដែលត្រូវបានទទួលតាមរយៈព្រឹត្តិការណ៍បន្សំផ្ទាល់។",
     "liveActiveCount": "សកម្ម ({count})",

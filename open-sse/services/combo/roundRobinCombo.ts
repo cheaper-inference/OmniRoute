@@ -132,7 +132,7 @@ import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.t
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { isRetryAfterEligibleStatus } from "./unavailableRetryGate.ts";
 import { isRecord } from "./comboData.ts";
-import { createRRDashboardEvents } from "./rrDashboardEvents.ts";
+import { createRRDashboardEvents, selectedConnectionIdOf } from "./rrDashboardEvents.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
 import { applyRequestTagRouting } from "./autoStrategy.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
@@ -603,7 +603,13 @@ export async function handleRoundRobinCombo({
         fallbackCount++;
         continue;
       }
-      const rrEvents = createRRDashboardEvents(combo.name, modelIndex, provider, modelStr);
+      const rrEvents = createRRDashboardEvents(
+        combo.name,
+        modelIndex,
+        provider,
+        modelStr,
+        target.connectionId
+      );
       const profile = await getRuntimeProviderProfile(provider);
       const semaphoreKey = `combo:${combo.name}:${target.executionKey}`;
       let allowRateLimitedConnection =
@@ -895,7 +901,11 @@ export async function handleRoundRobinCombo({
                   rrSelectedConnectionId || target.connectionId
                 );
               }
-              rrEvents.failed(`Quality: ${quality.reason}`, Date.now() - startTime);
+              rrEvents.failed(
+                `Quality: ${quality.reason}`,
+                Date.now() - startTime,
+                selectedConnectionIdOf(result)
+              );
               // #17049: an in-stream provider safety stop is terminal for the whole combo.
               if (isProviderSafetyStreamFailure(quality)) {
                 recordComboRequest(combo.name, modelStr, {
@@ -985,7 +995,7 @@ export async function handleRoundRobinCombo({
               "COMBO-RR",
               `${modelStr} succeeded (${latencyMs}ms, ${fallbackCount} fallbacks)`
             );
-            rrEvents.succeeded(latencyMs);
+            rrEvents.succeeded(latencyMs, selectedConnectionIdOf(result));
             recordComboRequest(combo.name, modelStr, {
               success: true,
               latencyMs,
@@ -1119,7 +1129,11 @@ export async function handleRoundRobinCombo({
             }
           }
           if (isProviderCircuitOpenResult(result, errorText)) {
-            rrEvents.failed(errorText || `HTTP ${result.status}`, Date.now() - startTime);
+            rrEvents.failed(
+              errorText || `HTTP ${result.status}`,
+              Date.now() - startTime,
+              selectedConnectionIdOf(result)
+            );
             const refusal = recordLocalCircuitRefusal({
               comboName: combo.name,
               modelStr,
@@ -1294,7 +1308,11 @@ export async function handleRoundRobinCombo({
           }
 
           // Done with this model
-          rrEvents.failed(errorText || `HTTP ${result.status}`, Date.now() - startTime);
+          rrEvents.failed(
+            errorText || `HTTP ${result.status}`,
+            Date.now() - startTime,
+            selectedConnectionIdOf(result)
+          );
           recordComboRequest(combo.name, modelStr, {
             success: false,
             latencyMs: Date.now() - startTime,

@@ -3626,6 +3626,8 @@
     "testStepRunning": "Bandoma…",
     "testStepNotTestable": "Galima išbandyti tik vieno modelio žingsnius",
     "saving": "Įrašoma...",
+    "liveAccountLabel": "aktas: {id}",
+    "liveAccountTooltip": "Sąskaita: {id}",
     "liveNoProviders": "Teikėjų dar nepastebėta.",
     "liveFleetDataHint": "Modelių parko duomenys gaunami per tiesioginius kombinacijos įvykius.",
     "liveActiveCount": "Aktyvūs ({count})",

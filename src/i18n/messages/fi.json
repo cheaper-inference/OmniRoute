@@ -3626,6 +3626,8 @@
     "testStepRunning": "Testataan…",
     "testStepNotTestable": "Vain yhden mallin vaiheita voi testata",
     "saving": "Tallennetaan...",
+    "liveAccountLabel": "laki: {id}",
+    "liveAccountTooltip": "Tili: {id}",
     "liveNoProviders": "Tarjoajia ei ole vielä havaittu.",
     "liveFleetDataHint": "Laivaston tiedot saapuvat reaaliaikaisten combo-tapahtumien kautta.",
     "liveActiveCount": "Aktiiviset ({count})",

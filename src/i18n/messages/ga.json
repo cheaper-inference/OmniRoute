@@ -3626,6 +3626,8 @@
     "testStepRunning": "Á thástáil…",
     "testStepNotTestable": "Ní féidir ach céimeanna aon-samhla a thástáil",
     "saving": "Ag sábháil...",
+    "liveAccountLabel": "gníomh: {id}",
+    "liveAccountTooltip": "Cuntas: {id}",
     "liveNoProviders": "Níor braitheadh soláthraí ar bith fós.",
     "liveFleetDataHint": "Tagann sonraí an fhlít trí imeachtaí beo comhcheangail.",
     "liveActiveCount": "Gníomhach ({count})",

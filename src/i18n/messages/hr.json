@@ -3626,6 +3626,8 @@
     "testStepRunning": "Testiranje…",
     "testStepNotTestable": "Mogu se testirati samo koraci s jednim modelom",
     "saving": "Spremanje...",
+    "liveAccountLabel": "acct: {id}",
+    "liveAccountTooltip": "Račun: {id}",
     "liveNoProviders": "Još nema zabilježenih pružatelja.",
     "liveFleetDataHint": "Podaci o floti stižu putem događaja kombinacije uživo.",
     "liveActiveCount": "Aktivni ({count})",

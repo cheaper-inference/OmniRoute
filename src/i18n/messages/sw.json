@@ -3626,6 +3626,8 @@
     "testStepRunning": "Inajaribiwa…",
     "testStepNotTestable": "Ni hatua za modeli moja tu zinazoweza kujaribiwa",
     "saving": "Inahifadhi...",
+    "liveAccountLabel": "sheria: {id}",
+    "liveAccountTooltip": "Akaunti: {id}",
     "liveNoProviders": "Hakuna watoa huduma walioonekana bado.",
     "liveFleetDataHint": "Data ya kundi inafika kupitia matukio ya combo ya moja kwa moja.",
     "liveActiveCount": "Amilifu ({count})",
