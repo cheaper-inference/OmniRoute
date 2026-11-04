@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { load as parseYaml } from "js-yaml";
 import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
+import { writeReleaseGreenEslintFixture } from "../../_helpers/writeReleaseGreenEslintFixture.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const sha = "1".repeat(40);
@@ -91,10 +92,7 @@ function observe(
     const executable = (name, body) =>
       writeFileSync(join(dir, "bin", name), `#!/bin/sh\n${body}`, { mode: 0o755 });
     executable("git", `printf '%s\\n' '${sha}'`);
-    executable(
-      "npx",
-      `printf '%s\\n' '[{"filePath":"fixture.ts","errorCount":0,"warningCount":0}]'`
-    );
+    writeReleaseGreenEslintFixture(join(dir, "bin"));
     executable(
       "npm",
       `

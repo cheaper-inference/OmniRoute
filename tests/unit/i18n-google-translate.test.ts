@@ -219,3 +219,57 @@ test("a backtick or pipe the translator writes into prose cannot open a code spa
   assert.ok(out.includes("10 վրկ \\| 10 s"));
   assert.equal(out.split(/(?<!\\)\|/).length, src.split(/(?<!\\)\|/).length);
 });
+
+test("google engine preserves UI kit, font and palette names without freezing permission prose", async () => {
+  const { fetchImpl } = fakeGoogle();
+  const source =
+    "Use Keak CI UI Kit with Switzer and Inter and Vazirmatn in Editions or Classic with Lucide.";
+  const out = await google.translateMarkdownWithGoogle(source, "pt-BR", {
+    fetchImpl,
+    backoffMs: 1,
+  });
+  assert.equal(
+    out,
+    "T:USE Keak CI UI Kit WITH Switzer AND Inter AND Vazirmatn IN Editions OR Classic WITH Lucide."
+  );
+  const prose = await google.translateMarkdownWithGoogle(
+    "Contents and Pull requests remain prose here.",
+    "pt-BR",
+    { fetchImpl, backoffMs: 1 }
+  );
+  assert.equal(prose, "T:CONTENTS AND PULL REQUESTS REMAIN PROSE HERE.");
+});
+
+test("google inline restoration moves one-sided emphasis spaces outside adjacent prose", () => {
+  for (const marker of ["**", "__", "~~"]) {
+    for (const [leading, trailing] of [
+      [true, false],
+      [false, true],
+      [true, true],
+    ]) {
+      const masked = google.maskInline(`on ${marker}palette${marker} now`);
+      const translated = masked.html
+        .replace("on ", leading ? "no" : "no ")
+        .replace("palette", `${leading ? " " : ""}paleta${trailing ? " " : ""}`)
+        .replace(" now", trailing ? "agora" : " agora");
+      assert.equal(masked.restore(translated), `no ${marker}paleta${marker} agora`);
+    }
+  }
+});
+
+test("google inline restoration normalizes leading emphasis whitespace around a masked UI name", () => {
+  const masked = google.maskInline("on **Keak CI UI Kit** now");
+  const translated = masked.html
+    .replace("on ", "no")
+    .replace("</em><span", "</em> <span")
+    .replace(" now", " agora");
+  assert.equal(masked.restore(translated), "no **Keak CI UI Kit** agora");
+});
+
+test("google emphasis cleanup preserves literal code and valid punctuation boundaries", () => {
+  const source =
+    "Keep `** Editions**` and <code>__ Switzer __</code>; **palette**, __font__ and ~~old~~. Symbols: ∅ (∞), ± × ≤ ≥ ≠ = + ~ 😀 ☀️.";
+  const masked = google.maskInline(source);
+  assert.equal(masked.restore(masked.html), source);
+  assert.deepEqual(runner.lostInlineCode(source, masked.restore(masked.html)), []);
+});

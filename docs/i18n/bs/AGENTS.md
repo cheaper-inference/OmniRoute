@@ -33,7 +33,7 @@ Pokretanje testova: pogledajte [Testiranje](#testiranje) u nastavku (prvo pokren
 
 ## Kratak pregled projekta
 
-**OmniRoute** — objedinjeni AI proxy/usmjerivač. Jedna krajnja tačka, 377 LLM pružalaca usluga, automatski rezervni izbor.
+**OmniRoute** — objedinjeni AI proxy/usmjerivač. Jedna krajnja tačka, 380 LLM pružalaca usluga, automatski rezervni izbor.
 
 - API rute — `src/app/api/v1/` (ulazne tačke Next.js App Routera)
 - Obrađivači — `open-sse/handlers/` (obrada zahtjeva: razgovor, ugrađivanja itd.)
@@ -41,13 +41,13 @@ Pokretanje testova: pogledajte [Testiranje](#testiranje) u nastavku (prvo pokren
 - Prevodioci — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
 - Transformator — `open-sse/transformer/` (Responses API ↔ Chat Completions)
 - Servisi — `open-sse/services/` (kombinovano usmjeravanje, ograničenja brzine, keširanje itd.)
-- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 213 migracija)
+- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 222 migracija)
 - Domena/pravila — `src/domain/` (mehanizam pravila, pravila troškova, logika rezervnog izbora)
 - MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + moduli za memoriju/vještine/GitHub/skup/gamifikaciju/dodatke/Notion/Obsidian/lokalni korpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
 - A2A server — `src/lib/a2a/` (JSON-RPC 2.0 protokol za agente)
 - Vještine — `src/lib/skills/` (proširivi okvir za vještine); memorija — `src/lib/memory/` (trajna konverzacijska memorija)
 
-Monorepozitorij: `src/` (Next.js 16 aplikacija), `open-sse/` (radni prostor mehanizma za streaming), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
+Monorepozitorij: `src/` (aplikacija Next.js 16), `open-sse/` (radni prostor za mehanizam strimovanja), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
 
 ---
 
@@ -286,7 +286,7 @@ git push -u origin feat/your-feature
 
 **Prefiksi grana**: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`, `chore/`
 
-**Format commita** (Conventional Commits): `feat(db): add circuit breaker` — opsezi: `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`
+**Format commit poruke** (Conventional Commits): `feat(db): add circuit breaker` — opsezi: `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`
 
 **Husky hookovi**:
 
@@ -317,7 +317,7 @@ potvrđuje s operaterom (obično aktivna `release/vX.Y.Z`). Zahtjevi bez mogućn
 Potpuni protokol s komandama i historijom incidenata:
 [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md).
 
-### Provjera zelene baze (PR-ovi ne smiju nastati crveni)
+### Provjera osnovne grane (PR-ovi ne smiju biti kreirani s greškama)
 
 Prije kreiranja grane, spajanja baze u PR granu, masovnog ponovnog usmjeravanja PR-ova ili otvaranja
 PR-a, provjerite issue `🔴 Release branch not green: <branch>` na vrhu baze (oznaka `base-red`):

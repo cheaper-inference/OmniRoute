@@ -80,3 +80,47 @@ export function parseRoutingStrategyCount(source) {
     throw new Error("COUNT_FACTS_STRATEGIES_INVALID");
   return values.length;
 }
+
+// Chat catalog identity follows generateModels(): nonempty entry.models arrays,
+// alias || id namespaces, and the first nonempty entry for a namespace wins.
+// imageModels, provider images registries and discovered account models are not
+// inputs to these public claims. Repeated rows do not add another pair or raw ID.
+export function measureChatModelCounts(inventory) {
+  if (!Array.isArray(inventory) || !inventory.length)
+    throw new Error("COUNT_FACTS_CHAT_INVENTORY_UNAVAILABLE");
+  const namespaces = new Map();
+  for (const row of inventory) {
+    if (
+      !row ||
+      typeof row.id !== "string" ||
+      !row.id ||
+      row.id.includes("\0") ||
+      !Array.isArray(row.modelIds) ||
+      row.modelIds.some((id) => typeof id !== "string" || !id || id.includes("\0"))
+    )
+      throw new Error("COUNT_FACTS_CHAT_ROW_INVALID");
+    if (!row.modelIds.length) continue;
+    const namespace = row.alias || row.id;
+    if (
+      typeof namespace !== "string" ||
+      namespace.includes("\0") ||
+      Object.hasOwn(Object.prototype, namespace)
+    )
+      throw new Error("COUNT_FACTS_CHAT_NAMESPACE_INVALID");
+    if (!namespaces.has(namespace)) namespaces.set(namespace, row.modelIds);
+  }
+  if (!namespaces.size) throw new Error("COUNT_FACTS_CHAT_CATALOG_EMPTY");
+  const pairs = new Set();
+  const ids = new Set();
+  for (const [namespace, models] of namespaces) {
+    for (const id of models) {
+      pairs.add(`${namespace}\0${id}`);
+      ids.add(id);
+    }
+  }
+  return Object.freeze({
+    chatNamespaces: namespaces.size,
+    distinctProviderModelPairs: pairs.size,
+    uniqueRawModelIds: ids.size,
+  });
+}

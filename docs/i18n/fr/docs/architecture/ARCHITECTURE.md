@@ -15,7 +15,7 @@ Il fournit un point de terminaison unique compatible avec OpenAI (`/v1/*`) et ac
 
 Fonctionnalités principales :
 
-- Surface d’API compatible avec OpenAI pour les CLI/outils (380 fournisseurs, 156 modules d’exécution)
+- Surface d’API compatible avec OpenAI pour les CLI/outils (380 fournisseurs, 159 modules d’exécution)
 - Traduction des requêtes/réponses entre les formats des fournisseurs
 - Repli par combinaison de modèles (séquence de plusieurs modèles)
 - Étapes de combinaison structurées (`provider + model + connection`) avec ordonnancement à l’exécution selon `compositeTiers`
@@ -345,7 +345,7 @@ Couches de l’architecture :
   la diffusion des journaux en temps réel, la gestion des clés API et, pour 9Router, une interface utilisateur native intégrée via
   un proxy inverse interne.
 - **API** (`/api/services/{name}/*`) — 11 points de terminaison pour 9Router, 10 pour CLIProxyAPI, 8 chacun pour Bifrost / Mux / Dario,
-  tous classés **LOCAL_ONLY** (règle stricte nº 17). Un point de terminaison SSE partagé `GET /api/services/[name]/logs`
+  tous classés **LOCAL_ONLY** (règle stricte nº #17). Un point de terminaison SSE partagé `GET /api/services/[name]/logs`
   dessert les deux services.
 - **Superviseur** (`src/lib/services/`) — la classe générique `ServiceSupervisor` encapsule
   `child_process.spawn`, maintient un tampon circulaire de 5 Mo pour la diffusion SSE des journaux, une boucle

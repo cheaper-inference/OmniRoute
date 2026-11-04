@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registri pružalaca, profili zaglavlja, identitet, …
 ├── handlers/               Rukovaoci zahtjevima (chat, ugrađivanja, zvuk, slike, …)
-├── executors/              156 izvršnih modula pružalaca (klase izvršilaca + pomoćni moduli po pružaocu)
+├── executors/              159 izvršnih modula pružalaca (klase izvršilaca + pomoćni moduli po pružaocu)
 ├── translator/             Konverzija formata (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator streama Responses API ↔ Chat Completions
 ├── services/               Više od 80 servisnih modula (kombinacije, rezervne opcije, kvote, identitet, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 izvršnih modula najvišeg nivoa (`*.ts` bez `base.ts`, `index.ts` i testova — broj
+159 izvršnih modula najvišeg nivoa (`*.ts` bez `base.ts`, `index.ts` i testova — broj
 mjeri `npm run check:docs-counts`). Svaka klasa izvršioca nasljeđuje `BaseExecutor` (`base.ts`),
 direktno ili putem `DefaultExecutor` ili drugog izvršioca; preostali moduli su pomoćni moduli
 za pojedinačne pružaoce (sheme alata, fetch/TTS adapteri, rukovaoci specifičnostima). Izvršioci uključuju:

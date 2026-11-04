@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registre de furnizori, profiluri de anteturi, identitate, …
 ├── handlers/               Gestionare cereri (chat, înglobări, audio, imagini, …)
-├── executors/              156 de module executori pentru furnizori (clase de executori + utilitare specifice fiecărui furnizor)
+├── executors/              159 de module executori pentru furnizori (clase de executori + utilitare specifice fiecărui furnizor)
 ├── translator/             Conversie de format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator de flux Responses API ↔ Chat Completions
 ├── services/               Peste 80 de module de servicii (combinații, mecanisme de rezervă, cote, identitate, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 de module executori de nivel superior (`*.ts` fără `base.ts`, `index.ts` și teste — numărul
+159 de module executori de nivel superior (`*.ts` fără `base.ts`, `index.ts` și teste — numărul
 este măsurat de `npm run check:docs-counts`). Fiecare clasă de executor extinde `BaseExecutor` (`base.ts`),
 direct sau prin `DefaultExecutor` ori prin alt executor; modulele rămase sunt utilitare specifice
 fiecărui furnizor (scheme pentru instrumente, adaptoare de preluare/TTS, gestionare a particularităților). Executorii includ:

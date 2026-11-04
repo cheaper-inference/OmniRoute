@@ -23,7 +23,8 @@ import { mapImageSize } from "../translator/image/sizeMapper.ts";
 import { getCodexClientVersion, getCodexUserAgent } from "../config/codexClient.ts";
 import { isCodexFreePlan } from "../executors/codex/tools.ts";
 import { sleep } from "../utils/sleep.ts";
-import { normalizeImageBuffer } from "../utils/imageNormalize.ts";
+import { codexReferenceImageUrl } from "./imageGeneration/providers/codexReferences.ts";
+export { shrinkCodexReferenceImage } from "./imageGeneration/providers/codexReferences.ts";
 import {
   getKieErrorMessage,
   getKieErrorStatus,
@@ -2476,24 +2477,6 @@ export function mapLegacyImageQualityToImageTool(value: string): string {
   return normalized;
 }
 
-// The Codex backend answers 503 when an inline reference image is large (seen above ~400 KB);
-// a 1024px long edge keeps edits working without changing what the model sees in practice.
-const CODEX_REFERENCE_MAX_BYTES = 400_000;
-const CODEX_REFERENCE_MAX_LONG_EDGE = 1024;
-
-export async function shrinkCodexReferenceImage(image: {
-  bytes: Buffer;
-  mime?: string;
-}): Promise<{ bytes: Buffer; mime: string }> {
-  const mime = image.mime || "image/png";
-  if (image.bytes.length <= CODEX_REFERENCE_MAX_BYTES) return { bytes: image.bytes, mime };
-  const out = await normalizeImageBuffer(image.bytes, {
-    maxLongEdge: CODEX_REFERENCE_MAX_LONG_EDGE,
-  });
-  if (!out.resized) return { bytes: image.bytes, mime };
-  return { bytes: out.buffer, mime: out.mime || mime };
-}
-
 async function handleCodexImageGeneration({
   model,
   provider,
@@ -2577,10 +2560,9 @@ async function handleCodexImageGeneration({
 
   const inputContent: Array<Record<string, unknown>> = [{ type: "input_text", text: prompt }];
   for (const image of referenceImages) {
-    const reference = await shrinkCodexReferenceImage(image);
     inputContent.push({
       type: "input_image",
-      image_url: `data:${reference.mime};base64,${reference.bytes.toString("base64")}`,
+      image_url: await codexReferenceImageUrl(model, image),
     });
   }
 

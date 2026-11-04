@@ -6,25 +6,33 @@ title: "Inference Auth Posture"
 
 ## Overview
 
-`GET /v1/models` and the inference endpoints are gated by **different
-settings**. The most natural probe an operator runs to answer "is my API
-protected?" can therefore return the wrong answer.
+`REQUIRE_API_KEY` controls client API authentication in the proxy before endpoint
+handlers. It covers both `/api/v1/*` and `/v1/*`, including `GET /v1/models`. The
+catalog handler has an additional authentication setting, so the catalog response
+alone cannot establish whether inference requires authentication.
 
-| Endpoint                                                                           | Gated by                                                                                                                                           |
-| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /v1/models`                                                                   | The dashboard login posture — `isAuthRequired()`, overridable per-instance with `requireAuthForModels` (`src/app/api/v1/models/catalogRequest.ts`) |
-| `POST /v1/chat/completions`, `POST /v1/responses`, and the other client API routes | `REQUIRE_API_KEY` (`src/server/authz/policies/clientApi.ts`)                                                                                       |
+| Endpoint                                                                           | Gated by                                                                                                                                                      |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/models`                                                                   | Client API proxy authentication first; then the catalog check using `isAuthRequired()` and `requireAuthForModels` (`src/app/api/v1/models/catalogRequest.ts`) |
+| `POST /v1/chat/completions`, `POST /v1/responses`, and the other client API routes | `REQUIRE_API_KEY` (`src/server/authz/policies/clientApi.ts`)                                                                                                  |
 
 The Responses WebSocket (`/v1/responses` upgraded to `ws://`) and the `/v1/ws`
 bridge follow the same `REQUIRE_API_KEY` gate: with it on, the handshake needs a
 valid API key or dashboard session, even when the `wsAuth` setting is off.
 
-On an instance that has an admin password set and `REQUIRE_API_KEY=false`,
-`/v1/models` answers `401` while inference is open to anyone who can reach the
-port.
+With `REQUIRE_API_KEY=true`, a request without accepted credentials is rejected
+by the client API proxy even if `requireAuthForModels=false`. The client API
+policy accepts valid API keys and accepted authenticated sessions; its
+route-specific exceptions remain defined in `src/server/authz/policies/clientApi.ts`.
+
+With an admin password set, the default catalog setting and
+`REQUIRE_API_KEY=false`, `/v1/models` can answer `401` while inference remains
+open to anyone who can reach the port.
 
 > **Probing caveat:** a `401` from `/v1/models` does **not** verify that
-> inference is protected. It only tells you the dashboard requires login.
+> inference is protected. It may come from the client API proxy or the separate
+> catalog handler check. With global client authentication disabled, the catalog
+> can still require login.
 
 This is not hypothetical. In discussion #13310 a self-hosted instance behind
 Traefik had its Codex quota spent by anonymous `POST /v1/responses` traffic

@@ -458,7 +458,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 प्रदायक रजिस्ट्रीहरू, हेडर प्रोफाइलहरू, पहिचान, …
 ├── handlers/               अनुरोध ह्यान्डलरहरू (च्याट, इम्बेडिङहरू, अडियो, तस्बिर, …)
-├── executors/              156 प्रदायक एक्जिक्युटर मोड्युलहरू (एक्जिक्युटर क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
+├── executors/              159 प्रदायक एक्जिक्युटर मोड्युलहरू (एक्जिक्युटर क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
 ├── translator/             ढाँचा रूपान्तरण (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions स्ट्रिम ट्रान्सफर्मर
 ├── services/               80+ सेवा मोड्युलहरू (कम्बोहरू, फल्ब्याक, कोटाहरू, पहिचान, …)
@@ -466,7 +466,7 @@ open-sse/
 └── mcp-server/             MCP सर्भर (3 ट्रान्सपोर्ट, 33 स्कोप, 110 उपकरण)
 ```
 
-### 4.1 `open-sse/handlers/`
+### ४.१ `open-sse/handlers/`
 
 | ह्यान्डलर               | उद्देश्य                                                                   |
 | ----------------------- | -------------------------------------------------------------------------- |
@@ -486,9 +486,9 @@ open-sse/
 | `responseSanitizer.ts`  | प्रदायक-विशिष्ट अनावश्यक सामग्री हटाउँछ                                    |
 | `responseTranslator.ts` | प्रदायकको प्रतिक्रिया र अनुवादक तहबीचको संयोजक                             |
 
-### 4.2 `open-sse/executors/`
+### ४.२ `open-sse/executors/`
 
-156 शीर्ष-स्तरीय एक्जिक्युटर मोड्युलहरू (`*.ts` बाट `base.ts`, `index.ts` र परीक्षणहरू घटाएर — यो सङ्ख्या
+159 शीर्ष-स्तरीय एक्जिक्युटर मोड्युलहरू (`*.ts` बाट `base.ts`, `index.ts` र परीक्षणहरू घटाएर — यो सङ्ख्या
 `npm run check:docs-counts` ले मापन गर्छ)। प्रत्येक एक्जिक्युटर क्लासले `BaseExecutor` (`base.ts`) लाई,
 प्रत्यक्ष रूपमा वा `DefaultExecutor` अथवा अर्को एक्जिक्युटरमार्फत विस्तार गर्छ; बाँकी मोड्युलहरू प्रत्येक प्रदायकका
 सहायकहरू हुन् (उपकरण स्किमाहरू, fetch/TTS एडाप्टरहरू, विशिष्ट व्यवहार ह्यान्डलरहरू)। एक्जिक्युटरहरूमा यी समावेश छन्:
@@ -503,7 +503,7 @@ open-sse/
 > एक्जिक्युटर प्रयोग गरेर `default.ts` ले सेवा दिन्छ। पूर्ण प्रदायक क्याटलग (380 प्रदायक)
 > `src/shared/constants/providers.ts` मा छ।
 
-### 4.3 `open-sse/translator/`
+### ४.३ `open-sse/translator/`
 
 हब-एन्ड-स्पोक अनुवाद (OpenAI हब हो)।
 
@@ -522,12 +522,12 @@ open-sse/
 - **तस्बिर सहायकहरू** (`translator/image/sizeMapper.ts`)।
 - शीर्ष-स्तर: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`।
 
-### 4.4 `open-sse/transformer/`
+### ४.४ `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream`-आधारित Responses API ↔ Chat
   Completions कन्भर्टर (`responses/` रुट क्याच-अलद्वारा प्रयोग गरिने)।
 
-### 4.5 `open-sse/services/`
+### ४.५ `open-sse/services/`
 
 मुख्य विशेषताहरू (पूर्ण सूची `open-sse/services/` अन्तर्गत):
 

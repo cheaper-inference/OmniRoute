@@ -188,7 +188,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Verwaltung eingebetteter Dienste
 
 Routen zum Installieren, Starten, Stoppen und Überwachen von 9Router und CLIProxyAPI.
-Alle Pfade sind als **LOCAL_ONLY** klassifiziert (nur Loopback, feste Regel Nr. 17), da sie
+Alle Pfade sind als **LOCAL_ONLY** klassifiziert (nur Loopback, feste Regel Nr. #17), da sie
 `npm install` aufrufen und untergeordnete Prozesse starten können.
 
 ```
@@ -455,7 +455,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Anbieterregistrierungen, Headerprofile, Identität, …
 ├── handlers/               Anfrage-Handler (Chat, Embeddings, Audio, Bilder, …)
-├── executors/              156 Anbieter-Executor-Module (Executor-Klassen + anbieterspezifische Hilfsfunktionen)
+├── executors/              159 Anbieter-Executor-Module (Executor-Klassen + anbieterspezifische Hilfsfunktionen)
 ├── translator/             Formatkonvertierung (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Stream-Transformer für Responses API ↔ Chat Completions
 ├── services/               Mehr als 80 Dienstmodule (Kombinationen, Fallback, Kontingente, Identität, …)
@@ -485,7 +485,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 Executor-Module auf oberster Ebene (`*.ts` abzüglich `base.ts`, `index.ts` und Tests — diese Anzahl wird von `npm run check:docs-counts` ermittelt). Jede Executor-Klasse erweitert `BaseExecutor` (`base.ts`), direkt oder über `DefaultExecutor` beziehungsweise einen anderen Executor; bei den übrigen Modulen handelt es sich um anbieterspezifische Hilfsfunktionen (Werkzeugschemas, Fetch-/TTS-Adapter, Handler für Besonderheiten). Zu den Executoren gehören:
+159 Executor-Module auf oberster Ebene (`*.ts` abzüglich `base.ts`, `index.ts` und Tests — diese Anzahl wird von `npm run check:docs-counts` ermittelt). Jede Executor-Klasse erweitert `BaseExecutor` (`base.ts`), direkt oder über `DefaultExecutor` beziehungsweise einen anderen Executor; bei den übrigen Modulen handelt es sich um anbieterspezifische Hilfsfunktionen (Werkzeugschemas, Fetch-/TTS-Adapter, Handler für Besonderheiten). Zu den Executoren gehören:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -523,7 +523,7 @@ Hub-and-Spoke-Übersetzung (OpenAI ist der Hub).
 
 ### 4.5 `open-sse/services/`
 
-Highlights (vollständige Liste unter `open-sse/services/`):
+Ausgewählte Module (die vollständige Liste befindet sich unter `open-sse/services/`):
 
 | Bereich             | Dateien                                                                                                                                                                                                                                                  |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -44,7 +44,7 @@ export const HERO_COPY = buildHeroCopy();
 
 export async function renderReadmeHero({ counts = CURRENT_DOC_COUNTS } = {}) {
   const C = buildHeroCopy(counts);
-  // Right column: 2 × 3 stats on a kit card (surface, border, 12px radius, lime edge).
+  // Right column: 2 × 3 stats on a kit card (surface, border, 12px radius, accent edge).
   const cardX = 760;
   const cardY = 96;
   const cardW = 380;

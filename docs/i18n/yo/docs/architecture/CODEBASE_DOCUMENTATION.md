@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Àwọn àkọsílẹ̀ olùpèsè, àwọn prófáìlì àkọlé, ìdánimọ̀, …
 ├── handlers/               Àwọn olùṣàkóso ìbéèrè (ìfọ̀rọ̀wérọ̀, embeddings, ohùn, àwòrán, …)
-├── executors/              Àwọn módù amúṣẹ olùpèsè 156 (àwọn kíláàsì amúṣẹ + àwọn olùrànlọ́wọ́ fún olùpèsè kọ̀ọ̀kan)
+├── executors/              Àwọn módù amúṣẹ olùpèsè 159 (àwọn kíláàsì amúṣẹ + àwọn olùrànlọ́wọ́ fún olùpèsè kọ̀ọ̀kan)
 ├── translator/             Ìyípadà ọ̀nà-kíkọ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Olùyípadà ìṣàn Responses API ↔ Chat Completions
 ├── services/               Àwọn módù iṣẹ́ 80+ (àwọn àkójọpọ̀, fallback, àwọn ìpín, ìdánimọ̀, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Àwọn módù amúṣẹ ipele-òkè 156 (`*.ts` láìka `base.ts`, `index.ts` àti àwọn àdánwò — iye tí
+Àwọn módù amúṣẹ ipele-òkè 159 (`*.ts` láìka `base.ts`, `index.ts` àti àwọn àdánwò — iye tí
 `npm run check:docs-counts` ń wọ̀n). Gbogbo kíláàsì amúṣẹ ló ń faagun `BaseExecutor` (`base.ts`),
 tààràtàbí nípasẹ̀ `DefaultExecutor` tàbí amúṣẹ mìíràn; àwọn módù tó kù jẹ́ olùrànlọ́wọ́ fún olùpèsè
 kọ̀ọ̀kan (àwọn schema irinṣẹ́, àwọn adapter fetch/TTS, àwọn olùṣàkóso ìhùwàsí àrà ọ̀tọ̀). Àwọn amúṣẹ náà ní:

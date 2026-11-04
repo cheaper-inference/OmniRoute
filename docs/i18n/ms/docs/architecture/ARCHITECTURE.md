@@ -13,9 +13,9 @@ _Kemas kini terakhir: 2026-06-28_
 OmniRoute ialah gerbang penghalaan AI setempat dan papan pemuka yang dibina berasaskan Next.js.
 Ia menyediakan satu titik akhir yang serasi dengan OpenAI (`/v1/*`) dan menghalakan trafik merentasi berbilang penyedia huluan dengan terjemahan, mekanisme sandaran, penyegaran token dan penjejakan penggunaan.
 
-Keupayaan teras:
+Keupayaan utama:
 
-- Permukaan API yang serasi dengan OpenAI untuk CLI/alat (380 penyedia, 156 modul pelaksana)
+- Permukaan API yang serasi dengan OpenAI untuk CLI/alat (380 penyedia, 159 modul pelaksana)
 - Terjemahan permintaan/respons merentasi format penyedia
 - Mekanisme sandaran gabungan model (jujukan berbilang model)
 - Langkah gabungan berstruktur (`provider + model + connection`) dengan pengisihan masa jalan mengikut `compositeTiers`

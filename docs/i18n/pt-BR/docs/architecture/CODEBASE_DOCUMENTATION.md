@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Gerenciamento de serviços incorporados
 
 Rotas para instalar, iniciar, interromper e monitorar 9Router e CLIProxyAPI.
-Todos os caminhos são classificados como **LOCAL_ONLY** (somente loopback, regra rígida nº 17), pois podem
+Todos os caminhos são classificados como **LOCAL_ONLY** (somente loopback, regra rígida nº #17), pois podem
 invocar `npm install` e gerar processos filhos.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registros de provedores, perfis de cabeçalhos, identidade, …
 ├── handlers/               Manipuladores de requisições (chat, embeddings, áudio, imagem, …)
-├── executors/              156 módulos executores de provedores (classes de executor + auxiliares por provedor)
+├── executors/              159 módulos executores de provedores (classes de executor + auxiliares por provedor)
 ├── translator/             Conversão de formatos (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformador de stream da Responses API ↔ Chat Completions
 ├── services/               Mais de 80 módulos de serviço (combinações, fallback, cotas, identidade, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
+159 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
 é medida por `npm run check:docs-counts`). Toda classe de executor estende `BaseExecutor` (`base.ts`),
 diretamente ou por meio de `DefaultExecutor` ou de outro executor; os módulos restantes são auxiliares
 específicos de cada provedor (esquemas de ferramentas, adaptadores de busca/TTS e manipuladores de peculiaridades). Os executores incluem:
@@ -536,7 +536,7 @@ Destaques (lista completa em `open-sse/services/`):
 | Mecanismo Auto Combo       | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Resiliência                | `accountFallback.ts` (tempo de espera + bloqueio), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                 |
 | Cotas                      | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Cache                      | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Armazenamento em cache     | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Inteligência de roteamento | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Tratamento de modelos      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
 | Compressão                 | `compression/` — integração completa do mecanismo de compressão                                                                                                                                                                                          |

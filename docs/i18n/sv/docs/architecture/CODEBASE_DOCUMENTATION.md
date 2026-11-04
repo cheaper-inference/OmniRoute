@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Leverantörsregister, headerprofiler, identitet, …
 ├── handlers/               Förfrågningshanterare (chatt, inbäddningar, ljud, bild, …)
-├── executors/              156 exekverarmoduler för leverantörer (exekverarklasser + leverantörsspecifika hjälpare)
+├── executors/              159 exekverarmoduler för leverantörer (exekverarklasser + leverantörsspecifika hjälpare)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Strömtransformator för Responses API ↔ Chat Completions
 ├── services/               Över 80 tjänstemoduler (kombinationer, reservlösningar, kvoter, identitet, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 exekverarmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` och tester — antalet
+159 exekverarmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` och tester — antalet
 mäts av `npm run check:docs-counts`). Varje exekverarklass utökar `BaseExecutor` (`base.ts`),
 direkt eller via `DefaultExecutor` eller en annan exekverare. De återstående modulerna är
 leverantörsspecifika hjälpare (verktygsscheman, hämtnings-/TTS-adaptrar och hanterare av egenheter).
@@ -529,7 +529,7 @@ Nav-och-eker-översättning (OpenAI är navet).
 
 ### 4.5 `open-sse/services/`
 
-Höjdpunkter (fullständig lista under `open-sse/services/`):
+Höjdpunkter (hela listan finns under `open-sse/services/`):
 
 | Område                       | Filer                                                                                                                                                                                                                                                    |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

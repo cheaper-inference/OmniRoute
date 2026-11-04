@@ -46,35 +46,40 @@ vaš laptop                               udaljeni OmniRoute (VPS)
 
 ## Povezivanje
 
-### Sa upravljačkom lozinkom (bootstrap)
+### Lozinkom za upravljanje (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Upravljačka lozinka za http://192.168.0.15:20128: ********
+# Lozinka za upravljanje za http://192.168.0.15:20128: ********
 # ✔ Povezano na http://192.168.0.15:20128 — kontekst '192.168.0.15' (opseg: admin)
 ```
 
-Proces lozinke kreira **admin** token po defaultu (vi držite lozinku, dakle
-već imate potpunu kontrolu). Smanjite opseg sa `--scope`:
+Tok lozinke podrazumijevano izdaje token **admin** (imate lozinku, pa već
+imate potpunu kontrolu). Smanjite opseg pomoću `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Opcije: `--port <p>` (kada host nema port), `--name <ctx>` (ime konteksta),
-`--scope read|write|admin`. Puni URL se poštuje onakav kakav jeste:
+Opcije: `--port <p>` (kada host nema port), `--name <ctx>` (naziv konteksta),
+`--scope read|write|admin`. Puni URL se koristi bez izmjena:
 `omniroute connect https://omni.example.com`.
 
-### Sa prethodno generisanim tokenom
+Kada je u kontrolnoj tabli omogućena dvofaktorska autentifikacija (Postavke →
+Sigurnost), sama lozinka se odbija: CLI tada traži kod iz aplikacije za
+autentifikaciju (ili kod za oporavak). Unesite ga unaprijed pomoću `--totp <code>`
+za neinteraktivnu upotrebu.
 
-Generišite token sa opsegom na kontrolnoj tabli (ili pomoću `omniroute tokens create`) i
+### Unaprijed generisanim tokenom
+
+Generišite token s ograničenim opsegom u kontrolnoj tabli (ili pomoću `omniroute tokens create`) i
 zalijepite ga — lozinka nije potrebna:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI ga validira putem `GET /api/cli/whoami` i sprema ga kao aktivni kontekst.
+CLI ga provjerava putem `GET /api/cli/whoami` i pohranjuje kao aktivni kontekst.
 
 ---
 
@@ -392,14 +397,14 @@ omniroute contexts remove 192-168-0-15 --yes   # ukloni lokalni kontekst (čak i
 
 ---
 
-## API krajnje tačke (referenca)
+## Krajnje tačke API-ja (referenca)
 
-| Metoda | Ruta                  | Autorizacija        | Opseg                         |
-| ------ | --------------------- | ------------------- | ----------------------------- |
-| POST   | `/api/cli/connect`    | upravljačka lozinka | — (javno, zaštićeno lozinkom) |
-| GET    | `/api/cli/whoami`     | pristupni token     | čitanje                       |
-| GET    | `/api/cli/tokens`     | pristupni token     | admin                         |
-| POST   | `/api/cli/tokens`     | pristupni token     | admin                         |
-| DELETE | `/api/cli/tokens/:id` | pristupni token     | admin                         |
+| Metoda | Ruta                  | Autentikacija                 | Opseg                         |
+| ------ | --------------------- | ----------------------------- | ----------------------------- |
+| POST   | `/api/cli/connect`    | lozinka; 2FA ako je uključena | — (javno, zaštićeno lozinkom) |
+| GET    | `/api/cli/whoami`     | pristupni token               | read                          |
+| GET    | `/api/cli/tokens`     | pristupni token               | admin                         |
+| POST   | `/api/cli/tokens`     | pristupni token               | admin                         |
+| DELETE | `/api/cli/tokens/:id` | pristupni token               | admin                         |
 
-Pogledajte [openapi.yaml](../openapi.yaml) za potpune sheme.
+Pogledajte [openapi.yaml](../openapi.yaml) za potpune šeme.

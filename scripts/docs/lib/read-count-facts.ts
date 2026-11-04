@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import * as providers from "../../../src/shared/constants/providers.ts";
 import { computeFreeModelTotals } from "../../../open-sse/config/freeModelCatalog.ts";
 import { readCliCountMetadata } from "../../check/lib/staticCountMetadata.mjs";
+import { readChatModelCountSnapshot } from "../../check/lib/staticChatModelMetadata.mjs";
 export {
   countCliToolRecords,
   countCliToolCategories,
@@ -22,6 +23,7 @@ export function readDocCountFacts(root = ROOT) {
   );
   return Object.freeze({
     ...readCliCountMetadata(root),
+    ...readChatModelCountSnapshot(root).facts,
     ...measureCatalogCounts(providers, computeFreeModelTotals()),
     migrations,
     strategies,

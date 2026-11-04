@@ -312,6 +312,9 @@ jobs:
           echo "::group::check:dashboard-typecheck"
           npm run check:dashboard-typecheck || failed+=("check:dashboard-typecheck")
           echo "::endgroup::"
+          echo "::group::check:build-typecheck"
+          npm run check:build-typecheck || failed+=("check:build-typecheck")
+          echo "::endgroup::"
           # #10134: TS7 zero-new-diagnostics ratchet — folded into this non-fail-fast
           # loop (never a separate blocking step) so an earlier red gate cannot abort
           # the job and mask it (#8542 mechanism). PR-only: the base-relative
@@ -494,7 +497,7 @@ jobs:
   # Merge integrity is required regardless of who owns the PR branch.
   merge-integrity:
     needs: changes
-    name: Merge integrity (changelog + generated skills)
+    name: ${{ (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Merge integrity (changelog + generated skills)' || 'Merge integrity not requested' }}
     # Always on non-draft PRs — CHANGELOG/skills can break on docs-only merges too.
     if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') }}
     runs-on: ubuntu-latest

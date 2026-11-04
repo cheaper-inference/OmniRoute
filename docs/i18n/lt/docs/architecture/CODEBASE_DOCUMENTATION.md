@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Integruotų paslaugų valdymas
 
 Maršrutai, skirti 9Router ir CLIProxyAPI diegti, paleisti, stabdyti ir stebėti.
-Visi keliai klasifikuojami kaip **LOCAL_ONLY** (tik grįžtamojo ryšio sąsaja, griežta taisyklė Nr. 17), nes jie
+Visi keliai klasifikuojami kaip **LOCAL_ONLY** (tik grįžtamojo ryšio sąsaja, griežta taisyklė Nr. #17), nes jie
 gali iškviesti `npm install` ir kurti antrinius procesus.
 
 ```
@@ -444,7 +444,7 @@ Suskirstyta į konkrečios paskirties pakatalogius:
 
 ---
 
-## 4. `open-sse/` — Srautinio perdavimo variklio darbo sritis
+## 4. `open-sse/` — Srautinių duomenų apdorojimo variklio darbo sritis
 
 Atskira npm darbo sritis, publikuojama kaip `@omniroute/open-sse`. Apima užklausų
 apdorojimą, vykdiklius, vertiklius, paslaugas, transformatorių ir MCP serverį.
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Teikėjų registrai, antraščių profiliai, tapatybė, …
 ├── handlers/               Užklausų apdorojimo moduliai (pokalbiai, vektoriniai atvaizdai, garsas, vaizdai, …)
-├── executors/              156 teikėjų vykdiklių moduliai (vykdiklių klasės ir konkrečių teikėjų pagalbiniai moduliai)
+├── executors/              159 teikėjų vykdiklių moduliai (vykdiklių klasės ir konkrečių teikėjų pagalbiniai moduliai)
 ├── translator/             Formatų konvertavimas (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions srauto transformatorius
 ├── services/               Daugiau nei 80 paslaugų modulių (deriniai, atsarginis perjungimas, kvotos, tapatybė, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 aukščiausio lygio vykdiklių moduliai (`*.ts` atmetus `base.ts`, `index.ts` ir testus — skaičių
+159 aukščiausio lygio vykdiklių moduliai (`*.ts` atmetus `base.ts`, `index.ts` ir testus — skaičių
 nustato `npm run check:docs-counts`). Kiekviena vykdiklio klasė išplečia `BaseExecutor` (`base.ts`)
 tiesiogiai arba per `DefaultExecutor` ar kitą vykdiklį; likę moduliai yra konkretiems teikėjams
 skirti pagalbiniai moduliai (įrankių schemos, užklausų / TTS adapteriai, ypatumų apdorojimo moduliai). Vykdikliai:

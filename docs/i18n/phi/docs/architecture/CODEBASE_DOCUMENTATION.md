@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Mga registry ng provider, profile ng header, identity, …
 ├── handlers/               Mga handler ng request (chat, embeddings, audio, image, …)
-├── executors/              156 module ng executor ng provider (mga executor class + helper para sa bawat provider)
+├── executors/              159 module ng executor ng provider (mga executor class + helper para sa bawat provider)
 ├── translator/             Pag-convert ng format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer ng stream ng Responses API ↔ Chat Completions
 ├── services/               80+ module ng serbisyo (mga combo, fallback, quota, identity, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 top-level na module ng executor (`*.ts` maliban sa `base.ts`, `index.ts` at mga test — ang bilang
+159 top-level na module ng executor (`*.ts` maliban sa `base.ts`, `index.ts` at mga test — ang bilang
 na sinusukat ng `npm run check:docs-counts`). Ang bawat executor class ay nag-e-extend sa `BaseExecutor` (`base.ts`),
 nang direkta o sa pamamagitan ng `DefaultExecutor` o ibang executor; ang mga natitirang module ay mga helper
 para sa bawat provider (mga tool schema, fetch/TTS adapter, quirk handler). Kabilang sa mga executor ang:
@@ -504,7 +504,7 @@ para sa bawat provider (mga tool schema, fetch/TTS adapter, quirk handler). Kabi
 
 ### 4.3 `open-sse/translator/`
 
-Hub-and-spoke na pagsasalin (OpenAI ang hub).
+Hub-and-spoke na translation (ang OpenAI ang hub).
 
 - **9 na tagasalin ng request** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,

@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Palveluntarjoajarekisterit, otsakeprofiilit, identiteetti, …
 ├── handlers/               Pyyntökäsittelijät (keskustelu, upotukset, ääni, kuva, …)
-├── executors/              156 palveluntarjoajan suorittajamoduulia (suorittajaluokat + palveluntarjoajakohtaiset apurit)
+├── executors/              159 palveluntarjoajan suorittajamoduulia (suorittajaluokat + palveluntarjoajakohtaiset apurit)
 ├── translator/             Muotomuunnokset (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions -virran transformaattori
 ├── services/               Yli 80 palvelumoduulia (yhdistelmät, varajärjestelyt, kiintiöt, identiteetti, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ylätason suorittajamoduulia (`*.ts` ilman tiedostoja `base.ts`, `index.ts` ja testejä — tämän määrän
+159 ylätason suorittajamoduulia (`*.ts` ilman tiedostoja `base.ts`, `index.ts` ja testejä — tämän määrän
 mittaa `npm run check:docs-counts`). Jokainen suorittajaluokka perii luokan `BaseExecutor` (`base.ts`)
 joko suoraan tai luokan `DefaultExecutor` tai muun suorittajan kautta; loput moduulit ovat palveluntarjoajakohtaisia
 apureita (työkaluskeemat, fetch/TTS-sovittimet ja erikoistapausten käsittelijät). Suorittajiin kuuluvat:

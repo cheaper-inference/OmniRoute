@@ -1,0 +1,1 @@
+- **fix(sse):** the JSON-schema fallback for opencode-zen's DeepSeek models now builds its instruction with real newlines instead of a literal backslash-n, so the schema, its code fence and the system-prompt separator reach the model as line breaks (follow-up to #18241) (#18691).

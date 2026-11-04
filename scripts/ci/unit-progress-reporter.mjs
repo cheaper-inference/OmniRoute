@@ -1,25 +1,47 @@
 import { closeSync, mkdirSync, openSync, writeSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
-import { createUnitDiagnostics, diagnosticIdentity } from "./unit-diagnostics.mjs";
+import {
+  createUnitDiagnostics,
+  diagnosticIdentity,
+  createIntegrationDiagnostics,
+  integrationDiagnosticIdentity,
+  integrationSourcePath,
+} from "./unit-diagnostics.mjs";
 
-const PREFIX = "[unit-progress] ";
+const UNIT_POLICY = {
+  prefix: "[unit-progress] ",
+  directory: "unit-progress",
+  identity: diagnosticIdentity,
+  diagnostics: createUnitDiagnostics,
+  acceptsFile: (file) => /^tests\/unit\/.+\.test\.(?:[cm]?[jt]s)$/.test(file),
+};
+const INTEGRATION_POLICY = {
+  prefix: "[integration-progress] ",
+  directory: "integration-progress",
+  identity: integrationDiagnosticIdentity,
+  diagnostics: createIntegrationDiagnostics,
+  acceptsFile: (file, cwd) => integrationSourcePath(file, cwd) === file,
+};
 const PHASES = new Set(["primary", "dashboard", "serial"]);
 
-function identity(environment) {
+function identity(environment, policy) {
   const keep = (key, pattern) => (pattern.test(environment[key] || "") ? environment[key] : null);
   return {
-    phase: PHASES.has(environment.OMNIROUTE_UNIT_PHASE)
-      ? environment.OMNIROUTE_UNIT_PHASE
-      : "unknown",
+    phase:
+      policy === INTEGRATION_POLICY
+        ? "integration"
+        : PHASES.has(environment.OMNIROUTE_UNIT_PHASE)
+          ? environment.OMNIROUTE_UNIT_PHASE
+          : "unknown",
     shard: keep("TEST_SHARD", /^\d+\/\d+$/),
     sha: keep("GITHUB_SHA", /^[0-9a-f]{40}$/),
     runId: keep("GITHUB_RUN_ID", /^\d+$/),
     runAttempt: keep("GITHUB_RUN_ATTEMPT", /^\d+$/),
-    ...diagnosticIdentity(environment),
+    ...policy.identity(environment),
   };
 }
 
-function wrapperFile(event, cwd) {
+function wrapperFile(event, cwd, policy) {
   if (event.type !== "test:dequeue" && event.type !== "test:complete") return null;
   const data = event.data;
   // Child events describe test bodies, not completion of the isolated file process.
@@ -28,14 +50,14 @@ function wrapperFile(event, cwd) {
   if (/[\0\r\n]/.test(data.file) || /[\0\r\n]/.test(data.name)) return null;
   if (resolve(cwd, data.name) !== resolve(cwd, data.file)) return null;
   const file = relative(cwd, resolve(cwd, data.file)).split(sep).join("/");
-  return /^tests\/unit\/.+\.test\.(?:[cm]?[jt]s)$/.test(file) ? file : null;
+  return policy.acceptsFile(file, cwd) ? file : null;
 }
 
-function artifactSink(cwd, metadata) {
+function artifactSink(cwd, metadata, policy) {
   let descriptor;
   let failed = false;
   try {
-    const directory = join(cwd, ".artifacts", "unit-progress");
+    const directory = join(cwd, ".artifacts", policy.directory);
     mkdirSync(directory, { recursive: true });
     const shard = (metadata.shard || "unknown").replace("/", "-of-");
     descriptor = openSync(
@@ -74,14 +96,22 @@ function artifactSink(cwd, metadata) {
 
 /** Metadata-only diagnostics; never change test selection, signals, or exit codes. */
 export async function* createUnitProgressReporter(source, options = {}) {
+  yield* createProgressReporter(source, options, UNIT_POLICY);
+}
+
+export async function* createIntegrationProgressReporter(source, options = {}) {
+  yield* createProgressReporter(source, options, INTEGRATION_POLICY);
+}
+
+async function* createProgressReporter(source, options, policy) {
   const cwd = options.cwd || process.cwd();
-  const metadata = identity(options.environment || process.env);
+  const metadata = identity(options.environment || process.env, policy);
   const now = options.now || Date.now;
   const heartbeatMs = options.heartbeatMs ?? 30000;
-  const sink = options.sink || artifactSink(cwd, metadata);
+  const sink = options.sink || artifactSink(cwd, metadata, policy);
   const active = new Map();
   const completed = new Set();
-  const diagnostics = createUnitDiagnostics(cwd);
+  const diagnostics = policy.diagnostics(cwd);
   const startedAt = now();
   let startedFiles = 0;
   let timer;
@@ -100,7 +130,7 @@ export async function* createUnitProgressReporter(source, options = {}) {
       activeFiles: [...active].map(([file, at]) => ({ file, elapsedMs: Math.max(0, now() - at) })),
       artifactWriteFailed: Boolean(sink.failed),
     });
-  const line = (value) => `${PREFIX}${JSON.stringify(value)}\n`;
+  const line = (value) => `${policy.prefix}${JSON.stringify(value)}\n`;
   const tick = () =>
     new Promise((done) => {
       timer = setTimeout(() => done({ heartbeat: true }), heartbeatMs);
@@ -126,7 +156,7 @@ export async function* createUnitProgressReporter(source, options = {}) {
       const event = received.result.value;
       const failure = diagnostics.observe(event);
       if (failure) sink.write(record("test-failure", failure));
-      const file = wrapperFile(event, cwd);
+      const file = wrapperFile(event, cwd, policy);
       if (file && event.type === "test:dequeue" && !active.has(file) && !completed.has(file)) {
         active.set(file, now());
         startedFiles++;

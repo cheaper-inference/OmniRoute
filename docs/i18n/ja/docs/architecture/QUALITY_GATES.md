@@ -204,8 +204,26 @@ barrel の再エクスポートと動的インポートは、解決に関する�
 | `typecheck:core`                  | エラーなしの TypeScript コンパイル（警告は参考情報のみ）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | はい                                      |
 | `typecheck:noimplicit:core`       | 厳格な `noImplicitAny` — 将来を見据えた設定。既存の多くの呼び出し箇所には、依然として型注釈が必要                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | **参考情報**（`continue-on-error: true`） |
 | `check:dashboard-typecheck`       | `src/app/(dashboard)/**` にスコープされた `tsc` (#7033) — `typecheck:core` の厳選された27ファイルの許可リストにはダッシュボードの TSX が一切含まれておらず、`next build` も型チェックを一切行いません（`next.config.mjs` で `ignoreBuildErrors: true` が設定されています）。そのため、そこで発生した孤立識別子のリグレッション (#6625/#6909) は CI で検出できませんでした。固定されたファイルごと／TS コードごとの件数ベースライン（`config/quality/dashboard-typecheck-baseline.json`、`check:known-symbols` と同じ陳腐化強制パターン）との差分を比較します。ベースラインの件数を超える新規エラーのみがゲートを失敗させます。既存エラーを修正した場合は `--update` で段階的にベースラインを引き下げます。                                                                                                                                                                                                                                                                                                          | はい                                      |
+| `check:build-typecheck`           | `tsconfig.build.json`（`src`、`open-sse`、`packages`、`bin`、`scripts`、`electron/**/*.d.ts`）全体を対象とする本番用の型チェック。表面的な `typecheck:core` の27ファイルの許可リストと dashboard ゲートではカバーされない範囲を対象とする。`config/quality/build-typecheck-baseline.json` との差分を検出し、ファイルとコードの組み合わせごとの件数が新しく増加または上昇すると失敗し、件数が減少するとラチェットを促す。実行結果に新規または増加した組み合わせが含まれている間は `--update` を拒否し、`--force-regressions` が渡された場合にのみ許可する。また、新たに診断対象外になったファイルについても `--force-nocheck` が渡されない限り拒否する。そのため、成功させるためにベースラインを広げることと、恒久的な無視を許可することは、意図的に別々に行う操作となる。単独の `--force` は拒否される。さらに、`@ts-nocheck` を使用するファイルは診断を一切報告せず、そうでなければすべてのゲートから見えなくなるため、ビルド対象範囲について `config/quality/ts-nocheck-baseline.json` と照合する。               | はい                                      |
 
-### ジョブ: `quality-gate`
+#### 2つの型チェックプログラムは異なる答えを返す
+
+`typecheck:core` (`noImplicitAny: false`) / `typecheck:noimplicit:core` (`noImplicitAny: true`) と `check:build-typecheck` は、異なるオプションの下で異なる
+プログラムをコンパイルするため、同じファイルでも一方では問題なく、もう一方では
+エラーだらけになることがあります。
+
+`tsconfig.build.json` では `"strict": false` が設定されているため、`noImplicitAny` は
+無効です。core の設定では、より厳格なオプションを使用して厳選された27ファイルの
+許可リストをコンパイルし、各エントリのインポートグラフをたどります。そのため、
+ビルドプログラムには一度も現れないファイルも、そこでチェックされます。
+
+ファイルが型付けされているかどうかを判断する際には、この違いが重要です：
+`check:build-typecheck` で **診断がゼロであることは、ゼロを意味しません**。26ファイル
+から `@ts-nocheck` を削除したところ、ビルドプログラムでは23ファイルに問題がなく、
+そのうち16ファイルでは、厳格なプログラムで約120件の implicit-any エラーが発生しました。
+ファイルに問題がないと判断する前に、両方を確認してください。
+
+### Job: `quality-gate`
 
 `test-coverage` の後に実行されます。失敗した場合はマージをブロックします。
 
@@ -267,12 +285,8 @@ barrel の再エクスポートと動的インポートは、解決に関する�
 | `check:docs-symbols`           | ミラーではない正本ドキュメントの内部 `/api/...` URL 参照が、実在のルートまたはルート群に対応すること。プロキシ/上流/プレースホルダー/ファイルへの参照と、正当な理由のある `KNOWN_STALE_DOC_REFS` 項目は除外されます。許可リストの古い項目は失敗になります                                                                                                                                                                                                                                      | はい                                                                                                                   |
 | `i18n translation drift`       | 主要ドキュメントのソースとターゲットのハッシュ、および翻訳の来歴を検証します。PR 比較では、完全に同一の継承された失敗のみを許容します。ソース、ターゲットの欠落、ターゲットのハッシュ、古い翻訳、セクションキャッシュに関する新規または未検証の不整合はブロックします。PR 比較の外では、ソース・ターゲットの欠落・ターゲットのハッシュに関する失敗はブロックし、古い翻訳と不整合なセクションキャッシュは警告のみとなります。旧形式のセクションキャッシュが存在しないことは失敗ではありません。 | PR の新規・未検証の差異はブロックし、完全に同一の継承された差異は警告のみ。PR 以外の規則は失敗の種類によって異なります |
 
-`docs/diagrams/` 内の README 用 SVG 12 個は `scripts/docs/gen-readme-<name>.mjs` で生成され、`npm run docs:readme-diagrams` ですべて再生成できます。
-各 SVG にはバイト単位で比較するユニットテスト（`tests/unit/docs/readme-*-svg.test.ts`、ジョブ `test-unit`）があり、コミット済みファイルが古くなると失敗します。
-`check:docs-counts` はそれらの `<text>` ノードから正規の数値を読み取るため、数値の文字をアウトラインのパスに変換することはありません。
-SVG の正規数値チェックは `SVG_DIAGRAM_FILES`（`scripts/check/check-docs-counts-sync.mjs`）に列挙されたファイルを読み取ります：`docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, `public/images/tier-flow-dark.svg`, `tier-flow-light.svg`。
-永久無料のプロバイダー、カタログ項目、繰り返し利用枠のプール、スコアリング要素に関する記述の検証でも `promise-pillars.svg`, `free-tier-budget.svg`, `strategies-grid.svg` を読み取ります。
-`free-tier-budget.svg` の数値は現在のカタログを読み込むローダーから取得するため、`FREE_MODEL_BUDGETS` またはプロバイダーの表示名を変更すると、このファイルを再生成するまで CI が失敗します。
+`docs/diagrams/` 配下の 12 個の README SVG は生成物です（`scripts/docs/gen-readme-<name>.mjs`）。
+`npm run docs:readme-diagrams` ですべて再生成できます。それぞれにバイト比較のユニットテスト（`tests/unit/docs/readme-*-svg.test.ts`、ジョブ `test-unit`）があり、コミット済みファイルが古い場合は失敗します。また、`check:docs-counts` は `<text>` ノードから正規の数値を読み取ります。そのため、アウトライン化のステップでは、アウトライン化されたすべての文字列を非表示の `<text>` としてファイル内に保持します。SVG の正規数値チェックは、`SVG_DIAGRAM_FILES`（`scripts/check/check-docs-counts-sync.mjs`）に記載されたファイルを読み取ります。対象は `docs/diagrams/readme-hero.svg`、`free-tier-budget.svg`、`promise-pillars.svg`、`comparison-table.svg`、`cli-terminal.svg`、`tier-cascade.svg`、さらに `public/images/tier-flow-dark.svg` と `tier-flow-light.svg` です。free-forever、catalog-entry、recurring-pool、scoring-factors の各主張も `promise-pillars.svg`、`free-tier-budget.svg`、`strategies-grid.svg` を読み取ります。`free-tier-budget.svg` は実行中のカタログローダーから数値を取得するため、`FREE_MODEL_BUDGETS` またはプロバイダーの表示名を変更した場合、このファイルを再生成するまで CI が失敗します。
 
 ### ジョブ: `i18n-ui-coverage`
 

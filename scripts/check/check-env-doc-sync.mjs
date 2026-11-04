@@ -58,6 +58,13 @@ const IGNORE_FROM_CODE = new Set([
   // Neither is OmniRoute application configuration or belongs in a user's .env.
   "GITHUB_REPOSITORY",
   "VERSION",
+  // #17267: immutable GitHub event context consumed by the CHANGELOG comparison
+  // helper in quality.yml. These are CI inputs, never server/user configuration.
+  "CHANGELOG_EVENT_NAME",
+  "CHANGELOG_CANDIDATE_SHA",
+  "CHANGELOG_PR_BASE_SHA",
+  "CHANGELOG_MERGE_GROUP_BASE_SHA",
+  "CHANGELOG_PUSH_BEFORE_SHA",
   "RUNNER_OS",
   // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
   "ESLINT_RESULTS_JSON",

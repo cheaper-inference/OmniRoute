@@ -444,7 +444,7 @@ Dibahagikan kepada subdirektori yang berfokus:
 
 ---
 
-## 4. `open-sse/` — Ruang kerja enjin penstriman
+## 4. `open-sse/` — ruang kerja enjin penstriman
 
 Ruang kerja npm berasingan yang diterbitkan sebagai `@omniroute/open-sse`. Bertanggungjawab terhadap
 pemprosesan permintaan, pelaksana, penterjemah, perkhidmatan, pengubah dan pelayan MCP.
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Daftar penyedia, profil pengepala, identiti, …
 ├── handlers/               Pengendali permintaan (sembang, pembenaman, audio, imej, …)
-├── executors/              156 modul pelaksana penyedia (kelas pelaksana + pembantu bagi setiap penyedia)
+├── executors/              159 modul pelaksana penyedia (kelas pelaksana + pembantu bagi setiap penyedia)
 ├── translator/             Penukaran format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Pengubah strim Responses API ↔ Chat Completions
 ├── services/               80+ modul perkhidmatan (kombo, sandaran, kuota, identiti, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modul pelaksana aras atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan
+159 modul pelaksana aras atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan
 yang diukur oleh `npm run check:docs-counts`). Setiap kelas pelaksana mewarisi `BaseExecutor` (`base.ts`),
 sama ada secara langsung atau melalui `DefaultExecutor` atau pelaksana lain; modul selebihnya ialah
 pembantu bagi setiap penyedia (skema alat, penyesuai pengambilan/TTS, pengendali kekhususan). Pelaksana termasuk:

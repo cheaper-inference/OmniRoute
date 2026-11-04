@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Administración de servicios integrados
 
 Rutas para instalar, iniciar, detener y supervisar 9Router y CLIProxyAPI.
-Todas las rutas están clasificadas como **LOCAL_ONLY** (solo loopback, regla estricta n.º 17) porque
+Todas las rutas están clasificadas como **LOCAL_ONLY** (solo loopback, regla estricta n.º #17) porque
 pueden invocar `npm install` y generar procesos secundarios.
 
 ```
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registros de proveedores, perfiles de encabezados, identidad, …
 ├── handlers/               Manejadores de solicitudes (chat, embeddings, audio, imagen, …)
-├── executors/              156 módulos ejecutores de proveedores (clases ejecutoras + auxiliares por proveedor)
+├── executors/              159 módulos ejecutores de proveedores (clases ejecutoras + auxiliares por proveedor)
 ├── translator/             Conversión de formatos (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformador de streams de Responses API ↔ Chat Completions
 ├── services/               Más de 80 módulos de servicio (combinaciones, respaldo, cuotas, identidad, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 módulos ejecutores de nivel superior (`*.ts` menos `base.ts`, `index.ts` y las pruebas; el comando `npm run check:docs-counts` realiza el recuento). Cada clase ejecutora extiende `BaseExecutor` (`base.ts`), directamente o mediante `DefaultExecutor` u otro ejecutor; los módulos restantes son auxiliares específicos de cada proveedor (esquemas de herramientas, adaptadores de fetch/TTS y manejadores de particularidades). Entre los ejecutores se incluyen:
+159 módulos ejecutores de nivel superior (`*.ts` menos `base.ts`, `index.ts` y las pruebas; el comando `npm run check:docs-counts` realiza el recuento). Cada clase ejecutora extiende `BaseExecutor` (`base.ts`), directamente o mediante `DefaultExecutor` u otro ejecutor; los módulos restantes son auxiliares específicos de cada proveedor (esquemas de herramientas, adaptadores de fetch/TTS y manejadores de particularidades). Entre los ejecutores se incluyen:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -529,7 +529,7 @@ Elementos destacados (lista completa en `open-sse/services/`):
 | Motor Auto Combo             | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
 | Resiliencia                  | `accountFallback.ts` (enfriamiento + bloqueo), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
 | Cuotas                       | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Almacenamiento en caché      | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Caché                        | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Inteligencia de enrutamiento | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Gestión de modelos           | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
 | Compresión                   | `compression/` — integración completa del motor de compresión                                                                                                                                                                                            |

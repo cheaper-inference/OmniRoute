@@ -200,16 +200,31 @@ Hash coincidente não prova conteúdo correto; readoção dirigida exige revisã
 
 Faça fetch da base confirmada, confira o exit e registre seu SHA. Na worktree própria,
 faça o merge da base. Só invoque `resolve_state_merge.py` se houver conflito exclusivamente
-nos espelhos/state autorizados; confira `unresolved: 0` e o diff antes de commitar/pushar.
+nos espelhos/state autorizados e três stages regulares do state no índice. Confira o exit zero,
+o recibo `PASS`, a ausência de caminhos unmerged e o diff antes de commitar/pushar.
 Depois repita a seção 6 com os exits preservados. Qualquer falha de preparação interrompe
 a sequência; saída resumida de grep/tail não substitui o checker estrito.
 
-Regra do resolvedor: para cada doc que a onda tocou, se a entrada da base já está fresca contra a
-fonte da base (outra sessão traduziu a versão mais nova) ficam os espelhos e a entrada da base;
-senão ficam os nossos e a nossa entrada, e o doc reaparece como `source-changed` para a volta
-seguinte retraduzir só o delta. Depois ele recalcula o `target_hash` dos espelhos envolvidos a
-partir do working tree, para correções manuais não virarem `[loc]`. Conflito **fora** de
-`docs/i18n/` e `.i18n-state.json` → pare e pergunte.
+Regra do resolvedor: selecione por três vias o registro completo de cada idioma, sem misturar
+`source_hash`, `target_hash`, cache ou data de lados diferentes. Registros ou alvos alterados exigem
+prova exata da fonte final, da origem, do alvo escolhido e do cache presente. Folhas históricas
+inalteradas fora do delta ficam intactas, mesmo stale; `preservedOutsideDeltaRecords` não certifica
+sua atualidade nem qualidade. O helper **nunca recalcula hashes nem adota edições da working tree**.
+Antes da primeira alteração, confira modo regular e identidade dos stages/commits e igualdade
+entre resolver somente os marcadores e o stage escolhido. Bytes fora dos marcadores precisam
+permanecer iguais; BOM, CRLF e ausência de newline final não são normalizados.
+As fontes canônicas no delta precisam ter stage 0 regular igual aos bytes provados antes
+da primeira mutação. Antes de gravar o state, revalide os blobs stage 0 das fontes e dos alvos;
+depois de `git add` do state, comprove seu blob e revalide todos os arquivos provados
+(fontes e espelhos), seus bytes e modos no índice, antes de emitir PASS.
+Filtros Git que alterem esses bytes causam bloqueio; o helper não os desativa silenciosamente.
+Formatos diff3, marcadores ambíguos e exemplos em fences exigem conciliação separada. Conflitos bilaterais,
+origem obsoleta no delta, alvo sem prova ou perda de trechos externos ficam em HOLD, sem rehash.
+Superfícies protegidas no delta exigem revisão específica e autorização aplicável.
+Conflito só no mirror, com state no stage 0, também fica em HOLD; não fabrique stages ausentes.
+`RECOVERY_REQUIRED` informa falha após iniciar mutações: revise a alteração parcial antes de seguir.
+Os checks finais e a revisão semântica continuam obrigatórios. Conflito fora de `docs/i18n/` e
+`.i18n-state.json` interrompe a operação antes de alterar arquivos.
 
 Drift voltou a listar docs → nova volta (5 → 6 → 7). **Critério de parada:** quando uma volta
 trouxer ≤ 3 docs, ou a base não tiver andado, feche a onda; não persiga o tip indefinidamente.

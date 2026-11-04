@@ -8,14 +8,14 @@
 
 _Ostatnia aktualizacja: 2026-06-28_
 
-## Podsumowanie wykonawcze
+## Podsumowanie
 
 OmniRoute to lokalna brama routingu AI oraz panel kontrolny zbudowane w oparciu o Next.js.
 Udostępnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch do wielu dostawców nadrzędnych, obsługując translację, mechanizmy awaryjne, odświeżanie tokenów oraz śledzenie użycia.
 
 Najważniejsze możliwości:
 
-- Warstwa API zgodna z OpenAI dla narzędzi CLI i innych narzędzi (380 dostawców, 156 modułów wykonawczych)
+- Warstwa API zgodna z OpenAI dla narzędzi CLI i innych narzędzi (380 dostawców, 159 modułów wykonawczych)
 - Translacja żądań i odpowiedzi między formatami dostawców
 - Mechanizm awaryjny dla kombinacji modeli (sekwencja wielu modeli)
 - Ustrukturyzowane kroki kombinacji (`provider + model + connection`) z ustalaniem kolejności w czasie wykonywania przez `compositeTiers`

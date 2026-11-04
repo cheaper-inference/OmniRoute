@@ -14,6 +14,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
+import { writeReleaseGreenEslintFixture } from "../../_helpers/writeReleaseGreenEslintFixture.mjs";
 
 const root = new URL("../../../", import.meta.url);
 const verifier = fileURLToPath(new URL("scripts/ci/release-green-result.mjs", root));
@@ -165,11 +166,7 @@ function observe({
         `if (process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");\n`,
       { mode: 0o755 }
     );
-    writeFileSync(
-      join(bin, "npx"),
-      `#!${process.execPath}\nconsole.log(JSON.stringify([{ filePath: "fixture.ts", errorCount: 0, warningCount: 0 }]));\n`,
-      { mode: 0o755 }
-    );
+    writeReleaseGreenEslintFixture(bin);
     writeFileSync(
       join(bin, "git"),
       `#!${process.execPath}\nconsole.log(process.argv.at(-1) === "${baseSha}^{commit}" ? "${baseSha}" : "${sha}");\n`,

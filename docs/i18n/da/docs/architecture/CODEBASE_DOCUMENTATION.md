@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Administration af integrerede tjenester
 
 Ruter til installation, start, stop og overvågning af 9Router og CLIProxyAPI.
-Alle stier er klassificeret som **LOCAL_ONLY** (kun loopback, ufravigelig regel nr. 17), fordi de
+Alle stier er klassificeret som **LOCAL_ONLY** (kun loopback, ufravigelig regel nr. #17), fordi de
 kan kalde `npm install` og starte underordnede processer.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Udbyderregistre, headerprofiler, identitet, …
 ├── handlers/               Anmodningshåndteringer (chat, embeddings, lyd, billede, …)
-├── executors/              156 udbydereksekutormoduler (eksekutorklasser + udbyderspecifikke hjælpefunktioner)
+├── executors/              159 udbydereksekutormoduler (eksekutorklasser + udbyderspecifikke hjælpefunktioner)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions-streamtransformer
 ├── services/               Over 80 tjenestemoduler (kombinationer, fallback, kvoter, identitet, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 eksekutormoduler på øverste niveau (`*.ts` minus `base.ts`, `index.ts` og tests — antallet
+159 eksekutormoduler på øverste niveau (`*.ts` minus `base.ts`, `index.ts` og tests — antallet
 måles af `npm run check:docs-counts`). Hver eksekutorklasse udvider `BaseExecutor` (`base.ts`),
 enten direkte eller via `DefaultExecutor` eller en anden eksekutor; de resterende moduler er
 udbyderspecifikke hjælpefunktioner (værktøjsskemaer, fetch-/TTS-adaptere og håndtering af særheder). Eksekutorerne omfatter:
@@ -504,7 +504,7 @@ udbyderspecifikke hjælpefunktioner (værktøjsskemaer, fetch-/TTS-adaptere og h
 
 ### 4.3 `open-sse/translator/`
 
-Hub-and-spoke-oversættelse (OpenAI er omdrejningspunktet).
+Hub-and-spoke-oversættelse (OpenAI er hubben).
 
 - **9 anmodningsoversættere** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,

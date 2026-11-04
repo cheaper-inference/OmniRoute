@@ -15,7 +15,7 @@ Ele fornece um único endpoint compatível com OpenAI (`/v1/*`) e roteia o tráf
 
 Principais recursos:
 
-- Superfície de API compatível com OpenAI para CLIs/ferramentas (380 provedores, 156 módulos executores)
+- Superfície de API compatível com OpenAI para CLIs/ferramentas (380 provedores, 159 módulos executores)
 - Tradução de solicitações/respostas entre formatos de provedores
 - Fallback de combinações de modelos (sequência de vários modelos)
 - Etapas estruturadas de combinação (`provider + model + connection`) com ordenação em tempo de execução por `compositeTiers`
@@ -345,7 +345,7 @@ Camadas da arquitetura:
   streaming de logs em tempo real, gerenciamento de chaves de API e (para o 9Router) uma UI nativa incorporada por meio
   de um proxy reverso interno.
 - **API** (`/api/services/{name}/*`) — 11 endpoints para o 9Router, 10 para o CLIProxyAPI, 8 para cada um de Bifrost / Mux / Dario,
-  todos classificados como **LOCAL_ONLY** (regra rígida nº 17). Um endpoint SSE compartilhado `GET /api/services/[name]/logs`
+  todos classificados como **LOCAL_ONLY** (regra rígida nº #17). Um endpoint SSE compartilhado `GET /api/services/[name]/logs`
   atende a ambos os serviços.
 - **Supervisor** (`src/lib/services/`) — a classe genérica `ServiceSupervisor` encapsula
   `child_process.spawn`, mantém um buffer circular de 5 MB para streaming de logs via SSE, um loop de

@@ -15,7 +15,7 @@ Den tillhandahåller en enda OpenAI-kompatibel slutpunkt (`/v1/*`) och dirigerar
 
 Centrala funktioner:
 
-- OpenAI-kompatibelt API-gränssnitt för CLI/verktyg (380 leverantörer, 156 exekveringsmoduler)
+- OpenAI-kompatibelt API-gränssnitt för CLI/verktyg (380 leverantörer, 159 exekveringsmoduler)
 - Översättning av förfrågningar/svar mellan leverantörsformat
 - Reservväxling för modellkombinationer (sekvens med flera modeller)
 - Strukturerade kombinationssteg (`provider + model + connection`) med körningsordning baserad på `compositeTiers`
@@ -345,7 +345,7 @@ Arkitekturlager:
   direktströmning av loggar, hantering av API-nycklar och (för 9Router) ett inbäddat eget UI via
   en intern omvänd proxy.
 - **API** (`/api/services/{name}/*`) — 11 slutpunkter för 9Router, 10 för CLIProxyAPI, 8 vardera för Bifrost / Mux / Dario,
-  samtliga klassificerade som **LOCAL_ONLY** (fast regel nr 17). En delad SSE-slutpunkt,
+  samtliga klassificerade som **LOCAL_ONLY** (fast regel nr #17). En delad SSE-slutpunkt,
   `GET /api/services/[name]/logs`, betjänar båda tjänsterna.
 - **Övervakare** (`src/lib/services/`) — den generiska klassen `ServiceSupervisor` omsluter
   `child_process.spawn`, upprätthåller en ringbuffert på 5 MB för SSE-strömning av loggar, en loop

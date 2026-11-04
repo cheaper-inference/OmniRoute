@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Administrasjon av innebygde tjenester
 
 Ruter for installasjon, oppstart, stans og overvåking av 9Router og CLIProxyAPI.
-Alle baner er klassifisert som **LOCAL_ONLY** (kun loopback, absolutt regel nr. 17) fordi de
+Alle baner er klassifisert som **LOCAL_ONLY** (kun loopback, absolutt regel nr. #17) fordi de
 kan kjøre `npm install` og starte underordnede prosesser.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Leverandørregistre, headerprofiler, identitet, …
 ├── handlers/               Forespørselsbehandlere (chat, embeddings, lyd, bilde, …)
-├── executors/              156 leverandøreksekveringsmoduler (eksekveringsklasser + hjelpere per leverandør)
+├── executors/              159 leverandøreksekveringsmoduler (eksekveringsklasser + hjelpere per leverandør)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Strømtransformator for Responses API ↔ Chat Completions
 ├── services/               Over 80 tjenestemoduler (kombinasjoner, reserve, kvoter, identitet, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 eksekveringsmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester — antallet
+159 eksekveringsmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester — antallet
 måles av `npm run check:docs-counts`). Hver eksekveringsklasse utvider `BaseExecutor` (`base.ts`),
 direkte eller via `DefaultExecutor` eller en annen eksekverer. De resterende modulene er hjelpere
 per leverandør (verktøyskjemaer, fetch-/TTS-adaptere, håndtering av særegenheter). Eksekvererne omfatter:

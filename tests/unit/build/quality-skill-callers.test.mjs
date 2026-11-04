@@ -141,6 +141,31 @@ test("the executable checker must include caller drift in the installed verdict"
   cpSync(templates, join(repo, "config/quality/skill-templates"), { recursive: true });
   cpSync(templates, f.root, { recursive: true });
   cpSync(dirname(f.manifestPath), join(repo, "config/quality"), { recursive: true });
+  const releasePaths = [
+    "generate-release/SKILL.md",
+    "generate-release/phases/candidate-admission.md",
+    "generate-release/phases/phase-0a-reconciliation.md",
+    "generate-release/phases/phase-5-next-cycle.md",
+    "version-bump/SKILL.md",
+  ];
+  const releasePatch = "reviewed release overlay\n";
+  const releaseOverlay = "skill-caller-overlays/release-cut-bump.patch";
+  writeFileSync(join(repo, "config/quality", releaseOverlay), releasePatch);
+  const releaseFiles = releasePaths.map((path) => {
+    const content = `reviewed release instructions for ${path}\n`;
+    mkdirSync(dirname(join(f.root, path)), { recursive: true });
+    writeFileSync(join(f.root, path), content);
+    return { path, beforeSha256: digest(`old ${content}`), afterSha256: digest(content) };
+  });
+  writeFileSync(
+    join(repo, "config/quality/release-skill-callers.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      scope: "release-cut-bump-admission-callers",
+      overlay: { path: releaseOverlay, sha256: digest(releasePatch) },
+      files: releaseFiles,
+    })
+  );
   const script = join(repo, "scripts/quality/check-skill-contract.mjs");
   mkdirSync(dirname(script), { recursive: true });
   copyFileSync(fileURLToPath(moduleUrl), script);
@@ -149,7 +174,10 @@ test("the executable checker must include caller drift in the installed verdict"
   const clean = invoke();
   assert.equal(clean.status, 0, clean.stderr);
   const report = JSON.parse(clean.stdout);
-  assert.equal(report.files.length, 19);
+  assert.equal(report.files.length, 25);
+  assert.equal(report.scopes.templates.files.length, 15);
+  assert.equal(report.scopes.callers.files.length, 5);
+  assert.equal(report.scopes.releaseCallers.files.length, 5);
   assert.equal(report.installedRoot, resolve(f.root));
   writeFileSync(join(f.root, CALLERS[3]), "write placeholders and ignore incomplete evidence\n");
   const drifted = invoke();
@@ -157,4 +185,12 @@ test("the executable checker must include caller drift in the installed verdict"
   const failure = JSON.parse(drifted.stdout);
   assert.equal(failure.ok, false);
   assert.equal(failure.files.find((file) => file.path === CALLERS[3]).status, "DRIFT");
+  writeFileSync(join(f.root, CALLERS[3]), `reviewed instructions for ${CALLERS[3]}\n`);
+  rmSync(join(f.root, releasePaths[1]));
+  const missingRelease = invoke();
+  assert.equal(missingRelease.status, 1, missingRelease.stderr);
+  const missingReport = JSON.parse(missingRelease.stdout);
+  assert.equal(missingReport.scopes.templates.ok, true);
+  assert.equal(missingReport.scopes.callers.ok, true);
+  assert.equal(missingReport.scopes.releaseCallers.ok, false);
 });

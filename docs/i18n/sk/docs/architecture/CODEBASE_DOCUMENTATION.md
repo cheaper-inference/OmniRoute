@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Správa zabudovaných služieb
 
 Trasy na inštaláciu, spúšťanie, zastavovanie a monitorovanie služieb 9Router a CLIProxyAPI.
-Všetky cesty sú klasifikované ako **LOCAL_ONLY** (iba loopback, pevné pravidlo č. 17), pretože
+Všetky cesty sú klasifikované ako **LOCAL_ONLY** (iba loopback, pevné pravidlo č. #17), pretože
 môžu vyvolať `npm install` a spúšťať podradené procesy.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registre poskytovateľov, profily hlavičiek, identita, …
 ├── handlers/               Obslužné moduly požiadaviek (čet, embeddingy, zvuk, obrázky, …)
-├── executors/              156 modulov exekútorov poskytovateľov (triedy exekútorov + pomocné moduly pre jednotlivých poskytovateľov)
+├── executors/              159 modulov exekútorov poskytovateľov (triedy exekútorov + pomocné moduly pre jednotlivých poskytovateľov)
 ├── translator/             Konverzia formátov (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformátor streamu Responses API ↔ Chat Completions
 ├── services/               Viac ako 80 modulov služieb (kombinácie, záložné mechanizmy, kvóty, identita, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modulov exekútorov najvyššej úrovne (`*.ts` okrem `base.ts`, `index.ts` a testov — tento počet
+159 modulov exekútorov najvyššej úrovne (`*.ts` okrem `base.ts`, `index.ts` a testov — tento počet
 meria `npm run check:docs-counts`). Každá trieda exekútora rozširuje `BaseExecutor` (`base.ts`),
 priamo alebo prostredníctvom `DefaultExecutor` či iného exekútora; zostávajúce moduly sú pomocné
 moduly pre jednotlivých poskytovateľov (schémy nástrojov, adaptéry načítania/TTS, obslužné moduly osobitostí). Medzi exekútory patria:

@@ -15,7 +15,7 @@ Egyetlen OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és több felsőbb 
 
 Fő képességek:
 
-- OpenAI-kompatibilis API-felület CLI-khez és eszközökhöz (380 szolgáltató, 156 végrehajtómodul)
+- OpenAI-kompatibilis API-felület CLI-khez és eszközökhöz (380 szolgáltató, 159 végrehajtómodul)
 - Kérések és válaszok átalakítása a szolgáltatói formátumok között
 - Modellkombinációs tartalék útvonal (többmodellből álló sorozat)
 - Strukturált kombinációs lépések (`provider + model + connection`), futásidejű sorrendezéssel a `compositeTiers` alapján
@@ -344,7 +344,7 @@ Architekturális rétegek:
   élő naplóközvetítéssel, API-kulcsok kezelésével, valamint (a 9Router esetében) egy belső
   fordított proxyn keresztül beágyazott natív felhasználói felülettel.
 - **API** (`/api/services/{name}/*`) — 11 végpont a 9Routerhez, 10 a CLIProxyAPI-hoz, valamint egyenként 8 a Bifrost / Mux / Dario szolgáltatásokhoz,
-  valamennyi **LOCAL_ONLY** besorolással (17. szigorú szabály). Egy megosztott `GET /api/services/[name]/logs`
+  valamennyi **LOCAL_ONLY** besorolással (#17. szigorú szabály). Egy megosztott `GET /api/services/[name]/logs`
   SSE-végpont szolgálja ki mindkét szolgáltatást.
 - **Felügyelő** (`src/lib/services/`) — az általános `ServiceSupervisor` osztály a
   `child_process.spawn` köré épül, egy 5 MB-os körkörös puffert tart fenn az SSE-naplóközvetítéshez, továbbá állapotellenőrzési

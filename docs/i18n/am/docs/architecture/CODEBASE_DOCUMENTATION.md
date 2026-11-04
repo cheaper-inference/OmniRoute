@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 የአቅራቢ registries፣ የheader profiles፣ identity፣ …
 ├── handlers/               የጥያቄ handlers (ውይይት፣ embeddings፣ ድምፅ፣ ምስል፣ …)
-├── executors/              156 የአቅራቢ executor modules (executor classes + ለእያንዳንዱ አቅራቢ helpers)
+├── executors/              159 የአቅራቢ executor modules (executor classes + ለእያንዳንዱ አቅራቢ helpers)
 ├── translator/             የቅርጸት ልወጣ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions የዥረት ቀያሪ
 ├── services/               80+ የአገልግሎት modules (combos፣ fallback፣ quotas፣ identity፣ …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ከፍተኛ-ደረጃ executor modules (`*.ts` ከ`base.ts`፣ `index.ts` እና ሙከራዎች በስተቀር — ብዛቱን
+159 ከፍተኛ-ደረጃ executor modules (`*.ts` ከ`base.ts`፣ `index.ts` እና ሙከራዎች በስተቀር — ብዛቱን
 `npm run check:docs-counts` ይለካል)። እያንዳንዱ executor class `BaseExecutor` (`base.ts`)ን፣
 በቀጥታ ወይም በ`DefaultExecutor` ወይም በሌላ executor በኩል፣ ይወርሳል፤ ቀሪዎቹ modules ለእያንዳንዱ አቅራቢ
 የተዘጋጁ helpers (tool schemas፣ fetch/TTS adapters፣ ልዩ ባህሪ handlers) ናቸው። Executors የሚከተሉትን ያካትታሉ፦

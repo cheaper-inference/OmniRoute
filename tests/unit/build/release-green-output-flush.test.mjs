@@ -10,6 +10,7 @@ import { setImmediate as immediate, setTimeout as delay } from "node:timers/prom
 import test from "node:test";
 import { writeObserverJson } from "../../../scripts/quality/validate-release-green.mjs";
 import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
+import { writeReleaseGreenEslintFixture } from "../../_helpers/writeReleaseGreenEslintFixture.mjs";
 
 const observerUrl = new URL("../../../scripts/quality/validate-release-green.mjs", import.meta.url);
 
@@ -124,10 +125,7 @@ test(
         mode: 0o755,
       });
     executable("git", `console.log("${"1".repeat(40)}");`);
-    executable(
-      "npx",
-      'console.log(JSON.stringify([{filePath:"fixture.ts",errorCount:0,warningCount:0}]));'
-    );
+    writeReleaseGreenEslintFixture(join(directory, "bin"));
     executable(
       "npm",
       [

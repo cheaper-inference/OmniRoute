@@ -4,14 +4,11 @@
 
 ---
 
-> **Статус:** дашборд створено на основі **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), вбудованого
-> як workspace-пакет `packages/ui-kit` (`@omniroute/ui-kit`; знімок апстріму зафіксовано в
-> `packages/ui-kit/UPSTREAM.md` і контролюється командою `npm run check:ui-kit-snapshot`). Світла тема є канонічною;
-> типове налаштування — `system`. Акцентний колір — Keak lime (`--ci-color-accent`). Switzer — це основне сімейство шрифтів для UI та відображуваного тексту (`--ci-font-ui`; `--ci-font-display` і `--ci-font-mono` прив’язуються до нього), розміщене в самому наборі (`packages/ui-kit/src/ci-fonts.css`, імпортовано `ci-tokens.css`). Кожен значок є гліфом Lucide.
+> **Статус:** панель приладів побудована на **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), включений до цього сховища як робочий простір `packages/ui-kit` (`@omniroute/ui-kit`; попередній знімок закріплено в `packages/ui-kit/UPSTREAM.md` та охороняється `npm run check:ui-kit-snapshot`). Світло — канонічна тема; типовим параметром є `system`. Палітра за замовчуванням належить набору **Editions** зовнішній вигляд (нейтрали теплого паперу та мідний акцент `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Налаштування → Зовнішній вигляд → Палітра кольорів пропонує **Classic** , базові жетони набору з лаймовим акцентом. Switzer — це основне сімейство для UI та відображуваного тексту (`--ci-font-ui`; `--ci-font-display` і `--ci-font-mono` вирішують його), самостійно розміщене самим набором (`packages/ui-kit/src/ci-fonts.css`, імпортовано `ci-tokens.css`). Кожен значок є гліфом Lucide.
 >
-> Inter є резервним шрифтом для гліфів, відсутніх у Switzer; `--font-mono` посилається на системний стек моноширинних шрифтів `--ci-font-code`.
+> Inter є запасним варіантом для гліфів, яких немає в Switzer; `--font-mono` відображається в системному моноширинному стеку `--ci-font-code`.
 >
-> Якщо у `Switzer` немає потрібного гліфа, `src/app/globals.css` вибирає запасний шрифт окремо для кожного гліфа: `Inter` для кирилиці, грецької та в’єтнамської, а `Vazirmatn` для арабського письма лише під `html[dir="rtl"]`.
+> `src/app/globals.css` вибирає запасні шрифти для кожного гліфа, якщо `Switzer` відсутній гліф: `Inter` для кирилиці, грецької та в’єтнамської мов, а `Vazirmatn` для арабського шрифту лише під `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 
@@ -25,75 +22,16 @@
 }
 ```
 
-## 1. Де що знаходиться
+## 1. Де живуть речі
 
-- **UI-кіт.** `packages/ui-kit/src` — побайтова копія апстрімного `src/` на коміті, зафіксованому в
-  `packages/ui-kit/UPSTREAM.md` (який також містить запис про ліцензійну авторизацію); `PATCHES.md`
-  перераховує локальні патчі (жодного). Він споживається як вихідний код, без збірки: `next.config.mjs`
-  транспілює його, а `tsconfig.json` відображає `@omniroute/ui-kit` → `packages/ui-kit/src` і
-  `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` та `vitest.mcp.config.ts` містять той
-  самий аліас). Імпортуйте компонент кіта за його підшляхом (`@omniroute/ui-kit/table`,
-  `@omniroute/ui-kit/page-header`…), ніколи — через барель `@omniroute/ui-kit`: барель підтягує кожен
-  компонент (включно з вибором дати) в усіх, хто його імпортує. Таблиця стилів кіта підключається через
-  `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Токени.** `packages/ui-kit/src/ci-tokens.css` оголошує токени `--ci-*`; `src/app/globals.css`
-  зв'язує їх містком зі старими іменами OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), тож наявні звернення `var(--color-*)` та утиліти Tailwind
-  продовжують працювати. Новий код використовує утиліти Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) або класи кіта — ніколи не hex-значення
-  (`tests/unit/design-kit-bridge.test.ts` забезпечує дотримання цього містка). `text-primary` розв'язується в
-  `--color-primary-ink` через `--text-color-primary` (lime-800 у світлій темі, лаймовий акцент — у темній),
-  тож основний текст лишається читабельним, тоді як `bg-primary`/`border-primary` зберігають лаймову
-  поверхню. Серії графіків використовують `--color-chart-1` … `--color-chart-5`.
-- **Теми.** `<html className="ci-theme">` (`src/app/layout.tsx`) вмикає тему кіта для документа.
-  Параметр набуває значення `light`, `dark` або `system` (`THEME_CONFIG.defaultTheme = "system"` у
-  `src/shared/constants/appConfig.ts`; `system` слідує за `prefers-color-scheme`). `applyTheme()` у
-  `src/store/themeStore.ts` (дзеркально продубльований вбудованим bootstrap-скриптом у `src/app/layout.tsx`,
-  який виконується до гідратації) встановлює `data-theme="dark"|"light"` і водночас перемикає клас `.dark`
-  на `<html>`. Темний набір токенів кіта прив'язаний до `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); власні темні перевизначення OmniRoute (блок `.dark` у
-  `globals.css`) та застарілі утиліти Tailwind `dark:` прив'язані до класу `.dark`. Пресетів акцентних
-  кольорів немає: акцент завжди надходить із кіта, а збережений пресет зі старішої збірки відкидається під
-  час завантаження стора.
-- **Компоненти (адаптери).** `src/shared/components/index.tsx` зберігає API компонентів OmniRoute (ті
-  самі імена, експорти за замовчуванням і пропси), а примітиви за ним — це адаптери над кітом: форми
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), оверлеї та зворотний
-  зв'язок (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  структура (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) і таблиці
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Адаптер імпортує компонент кіта
-  за підшляхом і зіставляє з ним застарілі пропси — наприклад, `Button variant="primary"` — це кнопка кіта
-  `default` (`--ci-button-primary-*`: інвертована поверхня у світлій темі, акцент із чорнилом
-  `--ci-color-accent-foreground` у темній), `danger` — це `destructive`, а `warning` — `outline` плюс
-  розширення `.ci-button--warning`. Правила `.ci-button--warning` та `.ci-badge[data-tone]` наприкінці
-  `globals.css` (`@layer components`) — це розширення OmniRoute поверх класів кіта.
-  `tests/unit/ui/adapters/*.test.tsx` фіксують кожен адаптер.
-- **Оболонка.** `src/app/(dashboard)/layout.tsx` рендерить `DashboardLayout`, який рендерить
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` / `SidebarInset` із кіта
-  (`packages/ui-kit/src/sidebar.tsx`), з навігаційною логікою OmniRoute у
-  `src/shared/components/Sidebar.tsx`. Посилання «Перейти до вмісту» на `#main-content` — перший елемент, що
-  отримує фокус. `src/shared/components/Header.tsx` містить `SidebarTrigger` кіта (єдиний перемикач бічної
-  панелі в оболонці), `ProductSwitcher` від Keak і кнопку виклику командної палітри; він показує заголовок
-  маршруту лише доти, доки всередині `#main-content` не змонтовано `PageHeader` кіта (`.ci-page-header`),
-  тож сторінка з власним `PageHeader` має лише один `h1`. `src/shared/components/CommandPalette.tsx` — це
-  `Dialog` із кіта.
-- **Іконки.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) розв'язує ім'я (словник
-  Material Symbols, яким користуються екрани) через `ICON_MAP` (`src/shared/constants/iconMap.ts`) у гліф
-  Lucide. Шрифт і пакет Material Symbols видалено: ім'я, відсутнє в мапі, рендерить нейтральний
-  гліф-заглушку (`data-icon-missing="true"`) і логує попередження в консоль поза продакшеном.
-  `npm run gen:icon-map` виводить імена, які використовуються, але яких немає в мапі
-  (`tests/unit/icon-map-coverage.test.ts` падає на будь-якому імені без іконки Lucide;
-  `tests/unit/icon-map-object-values.test.ts` покриває імена, збережені в об'єктах пошуку);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` переписує літеральні спани
-  `<span className="material-symbols-outlined">` на `<Icon>`.
-- **Бренд.** `src/shared/components/OmniRouteLogo.tsx` обгортає кіт: експорт за замовчуванням
-  `OmniRouteLogo` рендерить `ProductIcon product="omniroute" variant="glyph"` (вбудований SVG, безпечний
-  щодо `basePath`), а `OmniRouteLockup` рендерить `ProductLockup product="omniroute"` (доступне ім'я — "Keak
-  OmniRoute") або, для операторів white-label, їхні власні `name`/`logoSrc`. Призначення перемикача
-  продуктів зберігаються в `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`,
-  `KEAK_ACTIVE_PRODUCT`). Автономні екрани — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
-  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` і
-  `src/shared/components/ErrorPageScaffold.tsx` — показують локап; `tests/unit/brand-pages-static.test.ts`
-  стежить за цим.
+- **Комплект.** `packages/ui-kit/src` — це побайтова копія попереднього `src/` у коміті, закріпленому в `packages/ui-kit/UPSTREAM.md` (який також записує авторизацію ліцензії); `PATCHES.md` містить список локальних виправлень. Він використовується як джерело, без створення: `next.config.mjs` транспілює його, а `tsconfig.json` відображає `@omniroute/ui-kit` → `packages/ui-kit/src` та `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` і `vitest.mcp.config.ts` містять той самий псевдонім). Імпортуйте компонент набору за його підшляхом (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), а не через ствол `@omniroute/ui-kit` : ствол завантажує кожен компонент (включаючи засіб вибору дати) до кожного імпортера. Таблиця стилів набору входить через `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, повна таблиця: ядро `ci-ui.css` плюс кожне сімейство шаблонів).
+- **Жетони.** `packages/ui-kit/src/ci-tokens.css` оголошує маркери `--ci-*` ; `src/app/globals.css` зв’язує їх із застарілими іменами OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), тому існуючі утиліти `var(--color-*)` читають і Tailwind продовжують працювати. У новому коді використовуються утиліти Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) або класи комплектів — ніколи не вказується шістнадцяткове значення (`tests/unit/design-kit-bridge.test.ts` забезпечує бридж). `text-primary` перетворюється на `--color-primary-ink` через `--text-color-primary`, тому основний текст залишається читабельним, тоді як `bg-primary`/`border-primary` зберігають акцентну поверхню: під Editions це `--ci-color-accent-active` комплекту (глибокий мідний `#99562f` у світлому, мідний акцент у темному); під Classic, lime-800 у світлому та салатовий акцент у темному. Серії діаграм використовують `--color-chart-1` … `--color-chart-5`.
+- **Теми.** `<html className="ci-theme">` (`src/app/layout.tsx`) додає документ до теми комплекту. Перевага: `light`, `dark` або `system` (`THEME_CONFIG.defaultTheme = "system"` у `src/shared/constants/appConfig.ts`; `system` слідує `prefers-color-scheme`). `applyTheme()` у `src/store/themeStore.ts` (віддзеркалений `THEME_BOOT_SCRIPT`, вбудований у `src/app/layout.tsx`, який виконується перед гідратацією) встановлює `data-theme="dark"|"light"` і перемикає клас `.dark` на `<html>` разом. Набір темних жетонів набору закріплено на `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); власні темні перевизначення OmniRoute(блок `.dark` у `globals.css`) і застарілий ключ утиліт Tailwind `dark:` у класі `.dark`. Немає попередніх налаштувань акцентного кольору: акцент завжди надходить із комплекту, а постійний стиль зі старішої збірки видаляється, коли магазин завантажується.
+- **Палітри.** Два, обидва з комплекту (`src/shared/constants/appearancePalette.ts`): `editions`, за замовчуванням, і `classic`. Editions — це атрибут `data-ci-appearance="editions"` набору на `<html>`, який `ci-editions.css` (імпортований `ci-ui.css`) поєднується з `data-theme`; Класика – це відсутність атрибута. Кореневий сервер макета рендерить атрибут, тому відвідувач без нічого збереженого (або без JS) отримує випуски на кожній поверхні — dashboard, login, `/status`, сторінки помилок, `/docs` і PWA. Вибір зберігається поряд із темою в тому самому сховищі `theme` (`palette`, `setPalette()`, `applyPalette()` і `src/store/themeStore.ts`) і застосований перед фарбуванням за допомогою `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, вбудований у `<head>` макета), який видаляє атрибут лише тоді, коли збережена палітра — `"classic"`; `src/app/global-error.tsx`, поза кореневим макетом, застосовує його з того самого магазину. Не розміщуйте `data-ci-appearance` на будь-якому іншому елементі: комплект збігає його з `html:root:has([data-ci-appearance="editions"])`, тому один нащадок перемкне весь документ. Варіант Editions `data-ci-editions-variant="landing"` призначений для маркетингових сторінок, а не для інформаційної панелі. Браузер Chrome (`viewport.themeColor`, веб-маніфест) не може читати CSS або збережений вибір, тому він дотримується стандартного значення: `PWA_THEME_COLORS` у `src/shared/constants/pwaThemeColors.ts` є єдиним дзеркалом Editions `--ci-color-background` (`#f3f1e9` / `#11120f`), закріпленим на `ci-editions.css` `tests/unit/pwa-theme-colors.test.ts`. Монако зчитує свої кольори із зонда (`monacoKitTheme.ts`); у розділі Editions зчитування зонду перевертає кореневий `data-theme` для одного синхронного проходу, тому що комплект вирішує Editions light/dark з кореня.
+- **Комплектуючі (адаптери).** `src/shared/components/index.tsx` зберігає компонент OmniRoute API (ті самі назви, експорт за замовчуванням і реквізити), а примітиви, що стоять за ним, є адаптерами набору: форми (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), накладення та відгуки (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), структура (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) і таблиці (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Адаптер імпортує компонент набору за підшляхом і відображає на ньому застарілі властивості — наприклад, `Button variant="primary"` — це кнопка `default` набору (`--ci-button-primary-*`: зворотна поверхня світла, акцент із чорнилом `--ci-color-accent-foreground` — темний), `danger` — це `destructive`, а `warning` — це `outline` плюс розширення `.ci-button--warning`. Правила `.ci-button--warning` і `.ci-badge[data-tone]` в кінці `globals.css` (`@layer components`) є розширеннями OmniRoute поверх класів набору. `tests/unit/ui/adapters/*.test.tsx` штифт кожного адаптера.
+- **оболонка.** `src/app/(dashboard)/layout.tsx` рендерить `DashboardLayout`, який рендерить `src/shared/components/layouts/DashboardShell.tsx`: комплект `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), з логікою навігації OmniRoute у `src/shared/components/Sidebar.tsx`. Посилання «перейти до вмісту» на `#main-content` є першим елементом, який можна сфокусувати. `src/shared/components/Header.tsx` містить набір `SidebarTrigger` (єдиний перемикач бічної панелі оболонки), Keak `ProductSwitcher` і засіб відкриття командної палітри; він показує лише заголовок маршруту, поки всередині `#main-content` не змонтовано комплект `PageHeader` (`.ci-page-header`), тому сторінка з власним `PageHeader` має один `h1`. `src/shared/components/CommandPalette.tsx` це комплект `Dialog`.
+- **Ікони.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) перетворює назву (словник матеріальних символів, який використовують екрани) через `ICON_MAP` (`src/shared/constants/iconMap.ts`) у гліф Lucide. Шрифт і пакет Material Symbols зникли: ім’я, відсутнє на карті, відображає нейтральний гліф-заповнювач (`data-icon-missing="true"`) і реєструє консольне попередження за межами виробництва. `npm run gen:icon-map` друкує назви, які використовуються, яких немає на карті (`tests/unit/icon-map-coverage.test.ts` не працює з будь-яким ім’ям без піктограми Lucide; `tests/unit/icon-map-object-values.test.ts` охоплює імена, що зберігаються в об’єктах пошуку); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` переписує літерал `<span className="material-symbols-outlined">` span на `<Icon>`.
+- **Бренд.** `src/shared/components/OmniRouteLogo.tsx` обгортає комплект: експортний `OmniRouteLogo` за замовчуванням рендерить `ProductIcon product="omniroute" variant="glyph"` (вбудований SVG, `basePath` -safe), а `OmniRouteLockup` рендерить `ProductLockup product="omniroute"` (доступна назва «Keak OmniRoute») або, для операторів білої мітки, їхні власні `name`/`logoSrc`. Цільові призначення для перемикача продуктів знаходяться в `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Окремі екрани — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` і `src/shared/components/ErrorPageScaffold.tsx` — показують блокування; `tests/unit/brand-pages-static.test.ts` охороняє його.
 
 ## 2. Правила
 
@@ -145,37 +83,38 @@
 
 ## 5. Оновлення кіта
 
-`npm run check:ui-kit-upstream` порівнює версію, закріплену в `packages/ui-kit/UPSTREAM.md` з найновішим тегом `v*` у вихідному репозиторії та друкує команду синхронізації, коли випуск виходить. Щотижневий робочий процес `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) запускає ту саму перевірку та зберігає одну проблему відстеження відкритою, поки шпилька позаду; вихідне репо є приватним, тому робочий процес потребує маркера лише для читання в секреті `UI_KIT_READ_TOKEN`. Якщо перевірка не може прочитати upstream (токен відсутній, перестав працювати або GitHub недоступний), вона повідомляє `unknown` і завершується з кодом `0`. Робочий процес записує попередження й намагається тримати одне окреме завдання відстеження відкритим; наступний успішний запуск закриває його після відновлення доступу. Збій API завдань GitHub спричиняє збій роботи.
+`npm run check:ui-kit-upstream` порівнює версію, закріплену в `packages/ui-kit/UPSTREAM.md` з найновішим тегом `v*` у вихідному репозиторії та друкує команду синхронізації, коли випуск виходить.
+
+Щоденний робочий процес `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) виконує ту саму перевірку. Поки штифт позаду, `scripts/ci/ui-kit-sync-pr.sh` тримає одну синхронізацію PR відкритою проти найвищої гілки `release/vX.Y.Z`, на рухомій гілці `chore/ui-kit-sync-latest`. Він ніколи не об’єднується: кожен випуск набору потребує візуальної перевірки на локальному VPS. Гілка перебудовується, коли виходить новіша версія, а в іншому випадку залишається окремою. Відкритий PR із комітами, надісланими вручну, не перезаписується, а PR для версії, яку супроводжувач закрив без злиття, залишається закритим до останнього випуску.
+
+Якщо PR не можна відкрити (цільовий випуск заморожено, PR має коміти, надіслані вручну, PR закрито або маркер PR не встановлено), у робочому процесі залишається відкритою одна проблема відстеження, яка вказує, чому.
+
+Робочий процес використовує два секрети:
+
+- `secrets.UI_KIT_READ_TOKEN`: токен лише для читання для приватного сховища вгорі. Якщо вихідна перевірка не може прочитати дані (немає маркера, маркер перестав працювати або GitHub недоступний), він повідомляє про `unknown` і завершує роботу з кодом `0`. Робочий процес пише попередження та намагається залишити відкритою одну окрему проблему відстеження; пізніший успішний запуск закриває його після повернення доступу. Помилка проблеми GitHub API не виконує завдання.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: детальний маркер у цьому сховищі з доступом для запису запитів вмісту та вилучення. Цей робочий процес відкриває або оновлює синхронізацію PRs лише тоді, коли виділений маркер налаштовано; без нього робочий процес штовхає гілку та повідомляє, що PR не було відкрито.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` копіює вихідний `src/` у цьому коміті (`latest` = найновіший тег `v*` ) у `packages/ui-kit/src`, застосовує єдину дозволену трансформацію (він видаляє суфікс `.js` із відносного імпорту) і встановлює версію робочого простору в `packages/ui-kit/package.json` і `package-lock.json` на вихідну. Потім: перегляньте `git diff packages/ui-kit`, виконайте візуальний огляд провайдерів, налаштувань, комбінацій, використання та кінцевої точки в обох темах, запустіть `npm run check:ui-kit-snapshot` і `npm run test:vitest:ui` і відкрийте PR із журналом змін у верхній частині.
 
-## 6. Діаграми README
+## 6. README діаграми
 
-Дванадцять діаграм у кореневому `README.md` (`docs/diagrams/*.svg`) застосовують набір компонентів до статичних зображень. Їх генерують, а не малюють вручну: 13 файлів генераторів у `scripts/docs/gen-readme-*.mjs` (дванадцять діаграм і керувальний скрипт `gen-readme-diagrams.mjs`) та 12 тестів актуальності у `tests/unit/docs/readme-*-svg.test.ts`, по одному на діаграму. Кожен тест побайтово порівнює файл у коміті з виводом його генератора (завдання `test-unit`).
+Дванадцять діаграм, які вбудовує коренева `README.md` (`docs/diagrams/*.svg`), — це набір, застосований до статичного зображення, і вони генеруються, а не малюються вручну: 13 файлів генератора в `scripts/docs/gen-readme-*.mjs` (дванадцять діаграм плюс драйвер `gen-readme-diagrams.mjs` ) і 12 тестів на застарілість у `tests/unit/docs/readme-*-svg.test.ts`, по одному на діаграму, кожен байт порівнює зафіксований файл із виходом генератора (завдання `test-unit`).
 
-- **Жетони.** `scripts/docs/readme-diagram-theme.mjs` копіює палітру з `packages/ui-kit/src/ci-tokens.css` (прикріплену до цього файлу `tests/unit/docs/readme-diagram-theme.test.ts`) і визначає текстові ролі на попередніх гранях набору — Instrument Serif для відображення, Inter для тексту UI, IBM Plex Mono для цифр і коду — з пакетів `@fontsource` (сама панель керування використовує Switzer набору з набору 0.0.66). Світлі значення розташовані на `:root`, темні – позаду `prefers-color-scheme: dark` усередині файлу, тому кожне зображення відповідає схемі переглядача на GitHub.
-
-- **Шрифти.** `scripts/docs/readme-fonts.mjs` скорочує ці файли woff2 до гліфів, які малює кожна діаграма, та вбудовує їх через `@font-face` як URI `data:`. Так шрифти набору залишаються всередині SVG. Локальна перевірка зображень README контролює, що під час відображення не виконуються зовнішні запити шрифтів. Підмножини містять лише латиницю; гліфи символів, що використовують системні шрифти як запасний варіант, дозволяються по одному в `SYMBOL_FALLBACKS`. Будь-який інший непокритий гліф спричиняє помилку.
-
-- **Повторне генерування.** `npm run docs:readme-diagrams` перезаписує всі дванадцять діаграм у порядку README та виводить по рядку з розміром кожного файлу. Генератор можна запускати окремо (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` потребує `node --import tsx/esm`, бо числа надходять із завантажувача поточного каталогу в `open-sse/config/freeModelCatalog.ts`; вплив зміни каталогу на CI описано в `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Додавайте генератор і SVG до одного коміту.
-
+- **Жетони.** `scripts/docs/readme-diagram-theme.mjs` копіює палітру Editions (вигляд за замовчуванням) із `packages/ui-kit/src/ci-editions.css` (прикріплену до цього файлу за допомогою `tests/unit/docs/readme-diagram-theme.test.ts`, який також перевіряє WCAG AA для кожного кольору тексту на кожній поверхні в обох схемах; єдиний виняток, світлий `warn`, це попередження про комплект, затемнене на 10%, оскільки значення комплекту становить 4,46:1 на полотні) і визначає ролі тексту в шкалі типів комплекту (`ci-tokens.css`): Switzer у вазі набору (400/500/600, відображення на 500) і відстеження для всього, окрім ролей коду (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), які є IBM Plex Mono і призначені лише для команд, URLs, ідентифікаторів і екранів терміналів. Світлі значення розташовані на `:root`, темні – позаду `prefers-color-scheme: dark` усередині файлу, тому кожне зображення відповідає схемі переглядача на GitHub.
+- **Шрифти.** GitHub Markdown не містить CSS, а проксі-сервер camo блокує кожну зовнішню вибірку, тому тип комплекту має переміщатися всередині файлу. `scripts/docs/readme-outline.mjs`, останній крок кожного генератора, формує ролі Switzer за допомогою HarfBuzz і малює їх як векторні контури (шляхи `<defs>` та `<use>`), зі стрілками та геометричними символами, яких бракує Switzer, намальованими на власних метриках. Контури, ніколи не вбудований шрифт: ліцензія Switzer (`packages/ui-kit/src/fonts/FFL.txt`) забороняє створення піднабору та перетворення формату без письмової згоди та дозволяє векторні малюнки, тому не вводьте знову Switzer `@font-face` або `data:` URI. Єдиний шрифт, що залишився у файлі, — це підмножина OFL IBM Plex Mono для того, що залишається реальним текстом коду (`scripts/docs/readme-fonts.mjs`), побудованим із цих символів; викидає будь-який гліф, який він не може вставити.
+- **Регенерувати.** `npm run docs:readme-diagrams` переписує всі дванадцять у порядку README і друкує один рядок для кожного файлу з його розміром. Єдиний генератор також працює сам по собі (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` потребує `node --import tsx/esm` оскільки його дані надходять із завантажувача живого каталогу в `open-sse/config/freeModelCatalog.ts`; наслідок зміни каталогу CI знаходиться в `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Зафіксуйте генератор і SVG разом.
 - **Підтвердження.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` відображає файл у локальній перевірці (тег `<img>`, обмежувальна `Content-Security-Policy` та відповідь `image/svg+xml`), робить світлий і темний знімки й повідомляє про зовнішні запити шрифтів зі сторінки; їх має бути 0.
 
-- **Бюджет.** Менше 200 KB на файл, що перевіряє кожен тест актуальності; 500 KB — жорстка межа для будь-якого зображення README (правило валідатора SVG studio).
+- **Бюджет.** Менше 200 KB на файл (кожен тест на застарілість підтверджує це); 500 KB — жорстке обмеження для будь-якого образу README (правило валідатора SVG studio).
+- **Спільний текст, числа з gate.** кожен генератор несе свою копію діаграми в константі `*_COPY` (або будує її з живого каталогу), яка є одночасно намальованим текстом і вхідними даними етапу окреслення. Канонічні фігури залишаються у вузлах `<text>` (невидимі після окреслення, `fill-opacity:0`), зчитуються `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); тести на застарілість діаграм, які зчитує шлюз, також запускають свої валідатори для згенерованого файлу, тому фігура, яка відхиляється від коду, не проходить тест — виправляє джерело, яке зчитує шлюз, а не число в генераторі.
 
-- **Спільний текст, числа з gate.** Кожен генератор зберігає текст діаграми в константі `*_COPY` або будує його з поточного каталогу. Той самий текст малюється та слугує входом для підмножини шрифту. Канонічні числа залишаються у вузлах `<text>`, які читає `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Тести актуальності діаграм, що їх читає gate, також запускають його валідатори на згенерованому файлі. Число, яке розходиться з кодом, спричиняє провал тесту: виправляйте джерело, яке читає gate, а не число в генераторі.
+## 7. Довідковий покажчик
 
-## 7. Покажчик довідкових матеріалів
-
-- `src/app/globals.css` — міст токенів, перевизначення `.dark`, розширення OmniRoute у `@layer components`
-- `packages/ui-kit/UPSTREAM.md` — закріплений коміт вихідного проєкту й авторизація ліцензії; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` і розташовані поруч адаптери; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+- `src/app/globals.css` — token bridge, `.dark` перевизначення, OmniRoute `@layer components` розширення
+- `packages/ui-kit/UPSTREAM.md` — закріплений попередній commit і авторизація ліцензії; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` та адаптери поруч із ним; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

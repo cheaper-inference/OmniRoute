@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Gestione dei servizi integrati
 
 Route per installare, avviare, arrestare e monitorare 9Router e CLIProxyAPI.
-Tutti i percorsi sono classificati come **LOCAL_ONLY** (solo loopback, regola rigida n. 17) perché
+Tutti i percorsi sono classificati come **LOCAL_ONLY** (solo loopback, regola rigida n. #17) perché
 possono invocare `npm install` e generare processi figlio.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registri dei provider, profili degli header, identità, …
 ├── handlers/               Gestori delle richieste (chat, embedding, audio, immagini, …)
-├── executors/              156 moduli esecutore per i provider (classi esecutore + helper specifici per provider)
+├── executors/              159 moduli esecutore per i provider (classi esecutore + helper specifici per provider)
 ├── translator/             Conversione dei formati (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Trasformatore di stream Responses API ↔ Chat Completions
 ├── services/               Oltre 80 moduli di servizio (combinazioni, fallback, quote, identità, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 moduli esecutore di primo livello (`*.ts` esclusi `base.ts`, `index.ts` e i test — il conteggio
+159 moduli esecutore di primo livello (`*.ts` esclusi `base.ts`, `index.ts` e i test — il conteggio
 viene effettuato da `npm run check:docs-counts`). Ogni classe esecutore estende `BaseExecutor` (`base.ts`),
 direttamente oppure tramite `DefaultExecutor` o un altro esecutore; i moduli rimanenti sono helper specifici
 per provider (schemi degli strumenti, adattatori fetch/TTS, gestori delle peculiarità). Gli esecutori includono:

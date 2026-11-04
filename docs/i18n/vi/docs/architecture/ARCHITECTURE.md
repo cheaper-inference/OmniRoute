@@ -15,7 +15,7 @@ Nó cung cấp một endpoint duy nhất tương thích với OpenAI (`/v1/*`) v
 
 Các khả năng cốt lõi:
 
-- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (380 nhà cung cấp, 156 mô-đun thực thi)
+- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (380 nhà cung cấp, 159 mô-đun thực thi)
 - Chuyển đổi yêu cầu/phản hồi giữa các định dạng của nhà cung cấp
 - Dự phòng theo tổ hợp mô hình (chuỗi nhiều mô hình)
 - Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`
@@ -77,7 +77,7 @@ Các khả năng cốt lõi:
 - Xác thực môi trường thời gian chạy bằng Zod khi khởi động
 - Kiểm toán tuân thủ v2 với phân trang, sự kiện CRUD của nhà cung cấp và ghi nhật ký xác thực bị SSRF chặn
 
-Mô hình thời gian chạy chính:
+Mô hình runtime chính:
 
 - Các route ứng dụng Next.js trong `src/app/api/*` triển khai cả API bảng điều khiển lẫn API tương thích
 - Lõi SSE/định tuyến dùng chung trong `src/sse/*` + `open-sse/*` xử lý việc thực thi nhà cung cấp, chuyển đổi, truyền phát, dự phòng và mức sử dụng

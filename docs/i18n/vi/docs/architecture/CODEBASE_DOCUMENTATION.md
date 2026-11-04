@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registry nhà cung cấp, cấu hình header, danh tính, …
 ├── handlers/               Trình xử lý yêu cầu (trò chuyện, embedding, âm thanh, hình ảnh, …)
-├── executors/              156 mô-đun executor của nhà cung cấp (các lớp executor + trình hỗ trợ theo từng nhà cung cấp)
+├── executors/              159 mô-đun executor của nhà cung cấp (các lớp executor + trình hỗ trợ theo từng nhà cung cấp)
 ├── translator/             Chuyển đổi định dạng (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer luồng Responses API ↔ Chat Completions
 ├── services/               Hơn 80 mô-đun dịch vụ (tổ hợp, dự phòng, hạn ngạch, danh tính, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 mô-đun executor cấp cao nhất (`*.ts` không tính `base.ts`, `index.ts` và các kiểm thử — số lượng này được đo bởi `npm run check:docs-counts`). Mọi lớp executor đều mở rộng `BaseExecutor` (`base.ts`), trực tiếp hoặc thông qua `DefaultExecutor` hay một executor khác; các mô-đun còn lại là trình hỗ trợ theo từng nhà cung cấp (schema công cụ, adapter fetch/TTS, trình xử lý các đặc điểm riêng). Các executor bao gồm:
+159 mô-đun executor cấp cao nhất (`*.ts` không tính `base.ts`, `index.ts` và các kiểm thử — số lượng này được đo bởi `npm run check:docs-counts`). Mọi lớp executor đều mở rộng `BaseExecutor` (`base.ts`), trực tiếp hoặc thông qua `DefaultExecutor` hay một executor khác; các mô-đun còn lại là trình hỗ trợ theo từng nhà cung cấp (schema công cụ, adapter fetch/TTS, trình xử lý các đặc điểm riêng). Các executor bao gồm:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,

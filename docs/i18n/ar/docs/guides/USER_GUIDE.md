@@ -118,18 +118,18 @@
 
 ---
 
-## 📖 إعداد موفّري الخدمة
+## 📖 إعداد مزوّد الخدمة
 
-لإضافة اتصالات مفاتيح API بشكل جماعي من ملف CSV أو JSON، استخدم **لوحة التحكم → موفّرو الخدمة → استيراد من ملف**. تعتمد الأعمدة على ترتيبها (`provider,name,apiKey,baseUrl,priority`)؛ ويجب أن يكون `provider` موجودًا مسبقًا كموفّر خدمة مُدار أو كعقدة متوافقة. راجع [استيراد موفّري الخدمة من ملف CSV أو JSON](../providers/CSV-IMPORT.md).
+لإضافة اتصالات مفاتيح API بشكل جماعي من ملف CSV أو JSON، استخدم **لوحة التحكم → المزوّدون → استيراد من ملف**. تكون الأعمدة موضعية (`provider,name,apiKey,baseUrl,priority`)؛ ويجب أن يكون `provider` موجودًا مسبقًا كمزوّد مُدار أو عقدة متوافقة. راجع [استيراد المزوّدين من ملف CSV أو JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 موفّرو الاشتراكات
+### 🔐 المزوّدون القائمون على الاشتراك
 
 #### Claude Code (Pro/Max)
 
 ```bash
-لوحة التحكم → موفّرو الخدمة → ربط Claude Code
-→ تسجيل الدخول عبر OAuth → تحديث الرمز المميز تلقائيًا
-→ تتبّع الحصة كل 5 ساعات + أسبوعيًا
+لوحة التحكم → المزوّدون → توصيل Claude Code
+→ تسجيل الدخول عبر OAuth → تحديث الرمز تلقائيًا
+→ تتبّع الحصة لمدة 5 ساعات + الحصة الأسبوعية
 
 النماذج:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**نصيحة احترافية:** استخدم Opus للمهام المعقدة وSonnet للسرعة. يتتبّع OmniRoute الحصة لكل نموذج!
+**نصيحة احترافية:** استخدم Opus للمهام المعقدة، وSonnet للسرعة. يتتبّع OmniRoute الحصة لكل نموذج!
 
-لا يوجد متصفح على مضيف OmniRoute؟ شغّل `claude setup-token` في أي مكان تم فيه تسجيل الدخول إلى Claude Code، والصق الرمز المميز الصالح لمدة عام في علامة التبويب **رمز الإعداد**. راجع [استخدام Claude Code مع رمز إعداد](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+ألا يوجد متصفح على مضيف OmniRoute؟ شغّل `claude setup-token` في أي مكان سجّلت فيه الدخول إلى Claude Code، ثم الصق الرمز الصالح لمدة عام في علامة التبويب **رمز الإعداد**. راجع [Claude Code باستخدام رمز إعداد](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-تحافظ مسارات Claude والمسارات المتوافقة مع Claude Code على مستوى جهد التفكير `max` لنماذج Opus وSonnet. لا تقبل نماذج Haiku مستوى الجهد `max`، لذا يخفض OmniRoute ذلك الطلب إلى ميزانية تفكير مرتفعة قبل إرساله إلى المزوّد الأساسي.
+تحافظ المسارات المتوافقة مع Claude وClaude Code على جهد التفكير `max` لنماذج Opus وSonnet.
+لا تقبل نماذج Haiku مستوى جهد `max`، لذلك يخفض OmniRoute ذلك
+الطلب إلى ميزانية تفكير عالية قبل إرساله إلى المزوّد الأصلي.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-لوحة التحكم → موفّرو الخدمة → ربط Codex
+لوحة التحكم → المزوّدون → توصيل Codex
 → تسجيل الدخول عبر OAuth (المنفذ 1455)
-→ إعادة تعيين كل 5 ساعات + أسبوعيًا
+→ إعادة تعيين لمدة 5 ساعات + إعادة تعيين أسبوعية
 
 النماذج:
   cx/gpt-5.5
@@ -160,8 +162,8 @@
 #### GitHub Copilot
 
 ```bash
-لوحة التحكم → موفّرو الخدمة → ربط GitHub
-→ المصادقة عبر OAuth من خلال GitHub
+لوحة التحكم → المزوّدون → توصيل GitHub
+→ OAuth عبر GitHub
 → إعادة تعيين شهرية (في اليوم الأول من الشهر)
 
 النماذج:
@@ -172,54 +174,59 @@
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 موفّرو الخدمة منخفضو التكلفة
+**أرصدة الذكاء الاصطناعي (فوترة قائمة على الرموز).** عندما يبلغ GitHub عن `credits_used` للحساب، تعرض بطاقة حدود المزوّد صف **أرصدة الذكاء الاصطناعي** مع الأرصدة المستهلكة في فترة الفوترة الحالية، بما في ذلك خطط المؤسسات غير المحدودة.
+
+**الحد المحلي لأرصدة الذكاء الاصطناعي.** عدّل اتصال GitHub وحدّد **حد أرصدة الذكاء الاصطناعي لكل فترة فوترة** (`providerSpecificData.githubCreditLimit`). يؤدي ترك الحقل فارغًا إلى تعطيله؛ بينما يتخطى `0` الاتصال دائمًا. عندما تكون آخر قراءة للاستخدام مساوية للحد أو أعلى منه، يتخطى اختيار الحساب ذلك الاتصال، ويعود التوجيه إلى اتصالاتك الأخرى، بالطريقة نفسها التي يعمل بها القطع وفق سياسة الحصة. يقرأ الفحص بيانات الاستخدام التي يجمعها تحديث الحصة الدوري بالفعل — ولا يستدعي GitHub مطلقًا في مسار الطلب — كما أنه يفشل في اتجاه السماح: لا تؤدي القراءة المفقودة أو القديمة (الأقدم من 15 دقيقة، أو القادمة من فترة فوترة أُعيد تعيينها بالفعل) إلى حظر الاتصال. هذا إجراء وقائي محلي، **وليس سقفًا مضمونًا للإنفاق**: قد تتجاوز تأخيرات إعداد التقارير من GitHub، وفاصل التحديث، والطلبات قيد التنفيذ، والاستخدام خارج OmniRoute هذا الحد. استخدم عناصر التحكم بالإنفاق الخاصة بـ GitHub لوضع حد صارم.
+
+### 💰 المزوّدون منخفضو التكلفة
 
 #### GLM-4.7 (إعادة تعيين يومية، $0.6/1M)
 
-1. سجّل: [Zhipu AI](https://open.bigmodel.cn)
+1. سجّل الاشتراك: [Zhipu AI](https://open.bigmodel.cn)
 2. احصل على مفتاح API من Coding Plan
-3. لوحة التحكم → إضافة مفتاح API: موفّر الخدمة: `glm`، مفتاح API: `your-key`
+3. لوحة التحكم → إضافة مفتاح API: المزوّد: `glm`، مفتاح API: `your-key`
 
-**الاستخدام:** `glm/glm-4.7` — **نصيحة احترافية:** توفّر Coding Plan حصة أكبر 3 مرات بتكلفة تعادل 1/7! تتم إعادة التعيين يوميًا الساعة 10:00 صباحًا.
+**الاستخدام:** `glm/glm-4.7` — **نصيحة احترافية:** يوفّر Coding Plan حصة أكبر بثلاث مرات بتكلفة تبلغ 1/7! تتم إعادة التعيين يوميًا في الساعة 10:00 صباحًا.
 
 #### MiniMax M2.1 (إعادة تعيين كل 5 ساعات، $0.20/1M)
 
-1. سجّل: [MiniMax](https://www.minimax.io)
-2. احصل على مفتاح API ← لوحة التحكم ← إضافة مفتاح API
+1. سجّل الاشتراك: [MiniMax](https://www.minimax.io)
+2. احصل على مفتاح API → لوحة التحكم → إضافة مفتاح API
 
-**الاستخدام:** `minimax/MiniMax-M2.1` — **نصيحة احترافية:** الخيار الأقل تكلفة للسياق الطويل (مليون رمز مميز)!
+**الاستخدام:** `minimax/MiniMax-M2.1` — **نصيحة احترافية:** الخيار الأرخص للسياق الطويل (مليون رمز)!
 
-#### Kimi K2 (سعر ثابت $9/شهريًا)
+#### Kimi K2 ($9 شهريًا بسعر ثابت)
 
 1. اشترك: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. احصل على مفتاح API ← لوحة التحكم ← إضافة مفتاح API
+2. احصل على مفتاح API → لوحة التحكم → إضافة مفتاح API
 
-**الاستخدام:** `kimi/kimi-k2.5` — **نصيحة احترافية:** سعر ثابت قدره $9/شهريًا مقابل 10 ملايين رمز مميز = تكلفة فعلية قدرها $0.90/1M!
+**الاستخدام:** `kimi/kimi-k2.5` — **نصيحة احترافية:** $9 شهريًا بسعر ثابت مقابل 10 ملايين رمز = تكلفة فعلية قدرها $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. سجّل: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. أنشئ مفتاح API لـ Qianfan ← لوحة التحكم ← إضافة مفتاح API: موفّر الخدمة: `qianfan`
+1. سجّل الاشتراك: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. أنشئ مفتاح Qianfan API → لوحة التحكم → إضافة مفتاح API: المزوّد: `qianfan`
 
-**الاستخدام:** `qianfan/ernie-5.1` أو `qianfan/ernie-x1.1` أو معرّف نموذج آخر متوافق مع OpenAI في Qianfan.
+**الاستخدام:** `qianfan/ernie-5.1` أو `qianfan/ernie-x1.1` أو أي معرّف نموذج آخر متوافق مع OpenAI من Qianfan.
 
-### 🆓 موفّرو الخدمة المجانيون
+### 🆓 المزوّدون المجانيون
 
-يتوفر لدى موفّري الخدمة المجانيين الذين لا يتطلبون مصادقة مفتاح تبديل بجانب **لا تتطلب المصادقة** في صفحة موفّر الخدمة الخاصة بهم.
-يؤدي إيقافه إلى تعطيل موفّر الخدمة وإزالته من طرق عرض موفّري الخدمة المُهيأة/المضغوطة، كما يزيل نماذجه من `/v1/models`.
+تحتوي المزوّدات المجانية التي لا تتطلب مصادقة على مفتاح تبديل بجوار **لا تتطلب مصادقة** في صفحة المزوّد.
+يؤدي إيقاف تشغيله إلى تعطيل ذلك المزوّد، وإزالته من عرضَي المزوّدين المُهيّأين والمختصرين،
+وإزالة نماذجه من `/v1/models`.
 
 #### Qoder (9 نماذج مجانية)
 
 ```bash
-لوحة التحكم → ربط Qoder → تسجيل الدخول عبر OAuth → يخضع الوصول للحدود الحالية لموفّر الخدمة
+لوحة التحكم → توصيل Qoder → تسجيل الدخول عبر OAuth → يخضع الوصول إلى حدود المزوّد الحالية
 
 النماذج: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude مجانًا)
+#### Kiro (Claude مجاني)
 
 ```bash
-لوحة التحكم → ربط Kiro → AWS Builder ID أو Google/GitHub → نحو 50 رصيدًا/شهريًا
+لوحة التحكم → توصيل Kiro → AWS Builder ID أو Google/GitHub → نحو 50 رصيدًا شهريًا
 
 النماذج: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -611,55 +618,55 @@ post_install() {
 <details>
 <summary><b>عرض جميع النماذج المتاحة</b></summary>
 
-> القائمة أدناه منتقاة من `open-sse/config/providerRegistry.ts` للإصدار v3.8.0. تتم مزامنة كتالوجات السحابة (Gemini وOpenRouter وغيرها) ديناميكيًا — للاطلاع على الكتالوج المباشر الكامل، افتح **لوحة التحكم → الموفرون → [provider] → النماذج المتاحة** أو نفّذ `GET /api/models/catalog`.
+> القائمة أدناه منتقاة من `open-sse/config/providerRegistry.ts` للإصدار v3.8.0. تتم مزامنة كتالوجات السحابة (Gemini وOpenRouter وغيرهما) ديناميكيًا — للوصول إلى الكتالوج المباشر الكامل، افتح **Dashboard → Providers → [provider] → Available Models** أو استدعِ `GET /api/models/catalog`.
 >
-> إذا كانت القائمة المدمجة لأحد الموفرين قديمة، فاستخدم **الاستيراد من /models** في تلك الصفحة (أو فعّل **المزامنة التلقائية**) لسحب الكتالوج المباشر من المصدر. تم التحقق من ذلك في الإصدار v3.8.50 لكل من LLM7.io (`gemini-3.1-flash-lite`) وUncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)؛ بينما ظل الوصول المجهول إلى Pollinations محدودًا من المصدر خلال جولة الاختبار نفسها.
+> إذا كانت القائمة المضمّنة لموفّر ما قديمة، فاستخدم **Import from /models** في تلك الصفحة (أو فعّل **Auto-Sync**) لجلب كتالوج المصدر المباشر. تم التحقق من ذلك في v3.8.50 لكلٍّ من LLM7.io (`gemini-3.1-flash-lite`) وUncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)؛ بينما ظل الوصول المجهول إلى Pollinations مقيّدًا من جهة المصدر خلال جولة الاختبار نفسها.
 
-**Claude Code (`cc/`)** — OAuth من نوع Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — مصادقة OAuth لخطي Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth من نوع Plus/Pro: `cx/gpt-5.5` (+ مستويات الجهد: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — مصادقة OAuth لخطي Plus/Pro: `cx/gpt-5.5` (+ مستويات الجهد: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — مصادقة OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth مجاني: استخدم الكتالوج المباشر المعروض ضمن **لوحة التحكم → الموفرون → Kiro → النماذج المتاحة**. يعتمد التوفر على الحساب والخطة.
+**Kiro (`kr/`)** — مصادقة OAuth مجانية: استخدم الكتالوج المباشر الظاهر ضمن **Dashboard → Providers → Kiro → Available Models**. يعتمد التوفر على الحساب والخطة.
 
-**Qoder (`if/`)** — OAuth مجاني: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
+**Qoder (`if/`)** — مصادقة OAuth مجانية: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
 
-**GLM (`glm/`، `glm-cn/`، `zai/`، `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
+**GLM (`glm/`، `glm-cn/`، `zai/`، `glmt/`)** — ‏$0.2–0.6/1M: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`، `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`، `minimax-cn/`)** — ‏$0.2/1M: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — $9 شهريًا بسعر ثابت أو حسب الاستخدام: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
+**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — ‏$9/شهريًا بسعر ثابت أو حسب الاستخدام: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — مفتاح API: `ds/deepseek-v4-pro`، `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — فائق السرعة: `groq/llama-3.3-70b-versatile`، `groq/meta-llama/llama-4-maverick-17b-128e-instruct`، `groq/qwen/qwen3-32b`، `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok الأصلي: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok أصلي: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — مُستضاف في الاتحاد الأوروبي: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/devstral-latest`، `mistral/codestral-latest`
+**Mistral (`mistral/`)** — مستضاف في الاتحاد الأوروبي: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — مدعوم بالبحث: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
+**Perplexity (`pplx/`)** — معزّز بالبحث: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
 
 **Together AI (`together/`)** — مفتوح المصدر: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (مجاني)، `together/meta-llama/Llama-Vision-Free`، `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`، `together/deepseek-ai/DeepSeek-R1`، `together/Qwen/Qwen3-235B-A22B`، `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — استدلال سريع: `fireworks/accounts/fireworks/models/kimi-k2p6`، `fireworks/accounts/fireworks/models/minimax-m2p7`، `fireworks/accounts/fireworks/models/qwen3p6-plus`، `fireworks/accounts/fireworks/models/glm-5p1`، `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — بمقياس الرقاقة (Wafer-scale): `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — على نطاق الرقاقة: `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — مركّز على RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — يركّز على RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — للمؤسسات: `nvidia/z-ai/glm-5.1`، `nvidia/minimaxai/minimax-m2.7`، `nvidia/google/gemma-4-31b-it`، `nvidia/mistralai/mistral-small-4-119b-2603`، `nvidia/mistralai/mistral-large-3-675b-instruct-2512`، `nvidia/qwen/qwen3.5-397b-a17b`، `nvidia/deepseek-ai/deepseek-v4-pro`، `nvidia/openai/gpt-oss-120b`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — للمؤسسات: `nvidia/google/gemma-4-31b-it`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`، `nvidia/nvidia/nemotron-3-ultra-550b-a55b`، `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`، `qianfan/ernie-5.0-thinking-latest`، `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`، `ollama-cloud/deepseek-v4-flash`، `ollama-cloud/kimi-k2.6`، `ollama-cloud/glm-5.1`، `ollama-cloud/minimax-m2.7`، `ollama-cloud/gemma4:31b`، `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: تتم مزامنته مباشرةً لكل مفتاح API من Google — لا توجد قائمة ثابتة. اربط مفتاحًا في **لوحة التحكم → الموفرون** ثم استخدم **النماذج المتاحة** لاستيراد الكتالوج الحالي (مثل `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: تتم المزامنة مباشرةً لكل مفتاح API من Google — لا توجد قائمة ثابتة. صِل مفتاحًا في **Dashboard → Providers** ثم استخدم **Available Models** لاستيراد الكتالوج الحالي (مثلًا `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
 
-**موفرون متوافقون آخرون** (مختارون): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (عبر `aws-bedrock`)، `azure-ai`، `openrouter` (كتالوج تمريري)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. يحتفظ كل منهم بقائمة نماذجه الخاصة في `providerRegistry.ts` ويمكن مزامنتها تلقائيًا عندما يوفّر الموفر نقطة نهاية `/models`.
+**الموفّرون الآخرون المتوافقون** (مختارون): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (عبر `aws-bedrock`)، `azure-ai`، `openrouter` (كتالوج تمرير مباشر)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. يحتفظ كل منها بقائمة النماذج الخاصة به في `providerRegistry.ts`، ويمكن مزامنته تلقائيًا عندما يوفّر الموفّر نقطة نهاية `/models`.
 
-**ملاحظة حول معرّفات النماذج:** يستخدم OmniRoute معرّفات أصلية خاصة بكل موفر (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). تتضمن بعض المعرّفات إصدارات منقّطة لأن واجهة برمجة التطبيقات للمصدر تتوقعها بهذا الشكل. إذا لم يكن أحد النماذج مدرجًا أعلاه، فنفّذ `omniroute models --search <term>` أو اطلب `GET /api/models/catalog` للتأكد من التوفر.
+**ملاحظة حول معرّفات النماذج:** يستخدم OmniRoute معرّفات أصلية للموفّرين (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). تتضمن بعض المعرّفات إصدارات منقوطة لأن واجهة API المصدر تتوقعها بهذه الصيغة. إذا لم يكن النموذج مدرجًا أعلاه، فشغّل `omniroute models --search <term>` أو استدعِ `GET /api/models/catalog` للتحقق من التوفر.
 
 </details>
 

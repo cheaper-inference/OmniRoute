@@ -118,18 +118,18 @@ Piekļuve, izmantojot: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Pakalpojumu sniedzēju iestatīšana
+## 📖 Pakalpojumu sniedzēja iestatīšana
 
-Lai masveidā pievienotu API atslēgu savienojumus no CSV vai JSON faila, izmantojiet **Informācijas panelis → Pakalpojumu sniedzēji → Importēt no faila**. Kolonnas ir pozicionālas (`provider,name,apiKey,baseUrl,priority`); laukam `provider` jau jābūt pārvaldītam pakalpojumu sniedzējam vai saderīgam mezglam. Skatiet [Pakalpojumu sniedzēju importēšana no CSV vai JSON faila](../providers/CSV-IMPORT.md).
+Lai masveidā pievienotu API atslēgu savienojumus no CSV vai JSON faila, izmantojiet **Informācijas panelis → Pakalpojumu sniedzēji → Importēt no faila**. Kolonnas ir pozicionālas (`provider,name,apiKey,baseUrl,priority`); `provider` jau ir jābūt esošam pārvaldītam pakalpojumu sniedzējam vai saderīgam mezglam. Skatiet [Pakalpojumu sniedzēju importēšana no CSV vai JSON faila](../providers/CSV-IMPORT.md).
 
-### 🔐 Abonementu pakalpojumu sniedzēji
+### 🔐 Abonēšanas pakalpojumu sniedzēji
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Informācijas panelis → Pakalpojumu sniedzēji → Savienot Claude Code
-→ OAuth pieteikšanās → Automātiska pilnvaras atsvaidzināšana
-→ 5 stundu un nedēļas kvotas uzskaite
+→ OAuth pieteikšanās → Automātiska marķiera atjaunošana
+→ 5 stundu + nedēļas kvotas uzskaite
 
 Modeļi:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modeļi:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionāļa padoms:** Sarežģītiem uzdevumiem izmantojiet Opus, bet ātrumam — Sonnet. OmniRoute uzskaita kvotu katram modelim!
+**Ieteikums:** sarežģītiem uzdevumiem izmantojiet Opus, bet ātrumam — Sonnet. OmniRoute uzskaita kvotu katram modelim!
 
-OmniRoute resursdatorā nav pārlūkprogrammas? Palaidiet `claude setup-token` jebkur, kur ir veikta pieteikšanās Claude Code, un ielīmējiet viena gada pilnvaru cilnē **Iestatīšanas pilnvara**. Skatiet [Claude Code ar iestatīšanas pilnvaru](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Vai OmniRoute resursdatorā nav pārlūkprogrammas? Palaidiet `claude setup-token` jebkur, kur esat pieteicies Claude Code, un ielīmējiet viena gada marķieri cilnē **Iestatīšanas marķieris**. Skatiet [Claude Code ar iestatīšanas marķieri](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude un ar Claude Code saderīgie maršruti Opus un Sonnet modeļiem saglabā `max` domāšanas intensitāti. Haiku modeļi nepieņem `max` intensitātes līmeni, tāpēc OmniRoute pirms pieprasījuma nosūtīšanas augšupstraumes pakalpojumam pazemina to līdz augstam domāšanas budžetam.
+Ar Claude un Claude Code saderīgie maršruti saglabā `max` domāšanas intensitāti Opus un Sonnet
+modeļiem. Haiku modeļi nepieņem `max` intensitātes līmeni, tāpēc OmniRoute pirms nosūtīšanas
+augšupielādes pakalpojumam šo pieprasījumu pazemina līdz augstam domāšanas budžetam.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Informācijas panelis → Pakalpojumu sniedzēji → Savienot Codex
 → OAuth pieteikšanās (ports 1455)
-→ Atiestatīšana ik pēc 5 stundām un reizi nedēļā
+→ 5 stundu + nedēļas atiestatīšana
 
 Modeļi:
   cx/gpt-5.5
@@ -162,7 +164,7 @@ Modeļi:
 ```bash
 Informācijas panelis → Pakalpojumu sniedzēji → Savienot GitHub
 → OAuth, izmantojot GitHub
-→ Atiestatīšana reizi mēnesī (mēneša 1. datumā)
+→ Ikmēneša atiestatīšana (mēneša 1. datumā)
 
 Modeļi:
   gh/gpt-5.5
@@ -172,41 +174,59 @@ Modeļi:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI kredīti (uz marķieriem balstīta norēķinu sistēma).** Kad GitHub kontam ziņo `credits_used`,
+pakalpojumu sniedzēja ierobežojumu kartītē tiek rādīta rinda **AI kredīti** ar pašreizējā norēķinu
+periodā izlietoto kredītu skaitu, tostarp neierobežotiem organizāciju plāniem.
+
+**Vietējais AI kredītu ierobežojums.** Rediģējiet GitHub savienojumu un iestatiet **AI kredītu
+ierobežojumu vienam norēķinu periodam** (`providerSpecificData.githubCreditLimit`). Tukša vērtība
+to atspējo; `0` vienmēr izlaiž šo savienojumu. Ja pēdējais lietojuma rādījums ir vienāds ar
+ierobežojumu vai to pārsniedz, konta atlase izlaiž šo savienojumu un maršrutēšana pāriet uz
+citiem savienojumiem, tāpat kā kvotas politikas nogriešanas gadījumā. Pārbaude nolasa lietojumu,
+ko jau apkopo periodiskā kvotas atsvaidzināšana — tā nekad neizsauc GitHub pieprasījuma ceļā —
+un darbojas pēc principa „atļaut piekļuvi kļūmes gadījumā”: trūkstošs vai novecojis rādījums
+(vecāks par 15 minūtēm vai no norēķinu perioda, kas jau ir atiestatīts) savienojumu nebloķē.
+Tas ir vietējs drošības mehānisms, **nevis garantēts tēriņu griestu ierobežojums**: GitHub
+ziņošanas aizkaves, atsvaidzināšanas intervāls, notiekošie pieprasījumi un lietojums ārpus
+OmniRoute var izraisīt ierobežojuma pārsniegšanu. Stingram ierobežojumam izmantojiet paša
+GitHub tēriņu vadīklas.
+
 ### 💰 Lēti pakalpojumu sniedzēji
 
-#### GLM-4.7 (atiestatīšana katru dienu, $0.6/1M)
+#### GLM-4.7 (ikdienas atiestatīšana, $0.6/1M)
 
 1. Reģistrējieties: [Zhipu AI](https://open.bigmodel.cn)
 2. Iegūstiet API atslēgu no Coding Plan
 3. Informācijas panelis → Pievienot API atslēgu: Pakalpojumu sniedzējs: `glm`, API atslēga: `your-key`
 
-**Lietošana:** `glm/glm-4.7` — **Profesionāļa padoms:** Coding Plan piedāvā 3× lielāku kvotu par 1/7 no izmaksām! Atiestatīšana katru dienu plkst. 10.00.
+**Izmantojiet:** `glm/glm-4.7` — **Ieteikums:** Coding Plan piedāvā 3× lielāku kvotu par 1/7 izmaksām! Atiestatīšana katru dienu plkst. 10:00.
 
-#### MiniMax M2.1 (atiestatīšana ik pēc 5 h, $0.20/1M)
+#### MiniMax M2.1 (5 stundu atiestatīšana, $0.20/1M)
 
 1. Reģistrējieties: [MiniMax](https://www.minimax.io)
 2. Iegūstiet API atslēgu → Informācijas panelis → Pievienot API atslēgu
 
-**Lietošana:** `minimax/MiniMax-M2.1` — **Profesionāļa padoms:** Lētākā iespēja garam kontekstam (1M pilnvaru)!
+**Izmantojiet:** `minimax/MiniMax-M2.1` — **Ieteikums:** lētākais variants ilgām konteksta virknēm (1M marķieru)!
 
-#### Kimi K2 (fiksēta maksa $9 mēnesī)
+#### Kimi K2 ($9 mēnesī, fiksēta maksa)
 
 1. Abonējiet: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Iegūstiet API atslēgu → Informācijas panelis → Pievienot API atslēgu
 
-**Lietošana:** `kimi/kimi-k2.5` — **Profesionāļa padoms:** Fiksēta maksa $9 mēnesī par 10M pilnvaru = faktiskās izmaksas $0.90/1M!
+**Izmantojiet:** `kimi/kimi-k2.5` — **Ieteikums:** fiksēta maksa $9 mēnesī par 10M marķieru = efektīvās izmaksas $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Reģistrējieties: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Izveidojiet Qianfan API atslēgu → Informācijas panelis → Pievienot API atslēgu: Pakalpojumu sniedzējs: `qianfan`
 
-**Lietošana:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` vai cits ar OpenAI saderīgs Qianfan modeļa ID.
+**Izmantojiet:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` vai citu ar Qianfan OpenAI saderīgu modeļa ID.
 
 ### 🆓 BEZMAKSAS pakalpojumu sniedzēji
 
-Bezmaksas pakalpojumu sniedzējiem, kuriem nav nepieciešama autentifikācija, to pakalpojumu sniedzēja lapā blakus opcijai **Autentifikācija nav nepieciešama** ir slēdzis.
-Tā izslēgšana atspējo attiecīgo pakalpojumu sniedzēju, noņem to no konfigurēto pakalpojumu sniedzēju un kompaktā skata, kā arī
+Bezmaksas pakalpojumu sniedzējiem bez autentifikācijas to pakalpojumu sniedzēja lapā blakus
+**Autentifikācija nav nepieciešama** ir pārslēdzējs.
+Tā izslēgšana atspējo šo pakalpojumu sniedzēju, noņem to no skatiem “Konfigurētie pakalpojumu sniedzēji”/kompaktais skats un
 noņem tā modeļus no `/v1/models`.
 
 #### Qoder (9 BEZMAKSAS modeļi)
@@ -610,9 +630,9 @@ Par pilnu vides mainīgo atsauci skatiet [README](../README.md).
 <details>
 <summary><b>Skatīt visus pieejamos modeļus</b></summary>
 
-> Tālāk sniegtais saraksts ir apkopots no `open-sse/config/providerRegistry.ts` versijai v3.8.0. Mākoņpakalpojumu katalogi (Gemini, OpenRouter u.c.) tiek sinhronizēti dinamiski — pilno reāllaika katalogu atveriet sadaļā **Vadības panelis → Pakalpojumu sniedzēji → [pakalpojumu sniedzējs] → Pieejamie modeļi** vai izsauciet `GET /api/models/catalog`.
+> Tālāk redzamais saraksts ir veidots no `open-sse/config/providerRegistry.ts` versijai v3.8.0. Mākoņa katalogi (Gemini, OpenRouter u. c.) tiek dinamiski sinhronizēti — lai skatītu pilno aktuālo katalogu, atveriet **Informācijas panelis → Pakalpojumu sniedzēji → [pakalpojumu sniedzējs] → Pieejamie modeļi** vai izsauciet `GET /api/models/catalog`.
 >
-> Ja pakalpojumu sniedzēja iebūvētais saraksts ir novecojis, izmantojiet tajā lapā opciju **Importēt no /models** (vai iespējojiet **Automātisko sinhronizāciju**), lai iegūtu aktuālo augšplūsmas katalogu. Tas tika pārbaudīts versijā v3.8.50 pakalpojumiem LLM7.io (`gemini-3.1-flash-lite`) un UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations anonīmā piekļuve tajā pašā testēšanas ciklā joprojām bija ierobežota no augšplūsmas puses.
+> Ja pakalpojumu sniedzēja iebūvētais saraksts vairs neatbilst aktuālajam, izmantojiet **Importēt no /models** šajā lapā (vai iespējojiet **Automātiskā sinhronizācija**), lai ielādētu aktuālo augšupstraumes katalogu. Tas tika pārbaudīts v3.8.50 versijā LLM7.io (`gemini-3.1-flash-lite`) un UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations anonīmā piekļuve tās pašas pārbaudes laikā joprojām bija ierobežota augšupstraumes pusē.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -620,7 +640,7 @@ Par pilnu vides mainīgo atsauci skatiet [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — BEZMAKSAS OAuth: izmantojiet reāllaika katalogu, kas redzams sadaļā **Vadības panelis → Pakalpojumu sniedzēji → Kiro → Pieejamie modeļi**. Pieejamība ir atkarīga no konta un plāna.
+**Kiro (`kr/`)** — BEZMAKSAS OAuth: izmantojiet aktuālo katalogu, kas redzams sadaļā **Informācijas panelis → Pakalpojumu sniedzēji → Kiro → Pieejamie modeļi**. Pieejamība ir atkarīga no konta un plāna.
 
 **Qoder (`if/`)** — BEZMAKSAS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -628,37 +648,37 @@ Par pilnu vides mainīgo atsauci skatiet [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mēn. fiksēti vai pēc lietojuma: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 mēnesī vai par lietojumu: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API atslēga: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Īpaši ātrs: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok natīvie modeļi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Vietējais Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Mitināts ES: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Mitināts ES: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Ar meklēšanas papildinājumu: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Papildināts ar meklēšanu: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Atvērtā koda: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bezmaksas), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Atvērtā pirmkoda: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bezmaksas), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Ātra secināšana: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Plāksnes mēroga: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Vafeļu mēroga: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Uz RAG orientēts: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Orientēts uz RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Korporatīvais: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Uzņēmumiem: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Reāllaikā sinhronizēts no Google katrai API atslēgai atsevišķi — statiska saraksta nav. Pievienojiet atslēgu sadaļā **Vadības panelis → Pakalpojumu sniedzēji** un pēc tam izmantojiet **Pieejamie modeļi**, lai importētu pašreizējo katalogu (piem., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Tiek sinhronizēts reāllaikā katrai API atslēgai no Google — statiska saraksta nav. Pievienojiet atslēgu sadaļā **Informācijas panelis → Pakalpojumu sniedzēji**, pēc tam izmantojiet **Pieejamie modeļi**, lai importētu aktuālo katalogu (piem., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Citi saderīgie pakalpojumu sniedzēji** (izvēlētie): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (caur `aws-bedrock`), `azure-ai`, `openrouter` (caurlaides katalogs), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Katrs no tiem uztur savu modeļu sarakstu failā `providerRegistry.ts`, un to var automātiski sinhronizēt, ja pakalpojumu sniedzējs nodrošina `/models` galapunktu.
+**Citi saderīgi pakalpojumu sniedzēji** (atlasīti): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (izmantojot `aws-bedrock`), `azure-ai`, `openrouter` (caurlaides katalogs), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Katrs no tiem uztur savu modeļu sarakstu failā `providerRegistry.ts`, un to var automātiski sinhronizēt, ja pakalpojumu sniedzējs nodrošina `/models` galapunktu.
 
-**Piezīme par modeļu ID:** OmniRoute izmanto pakalpojumu sniedzēja natīvos ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Daži ID ietver versijas ar punktiem, jo tieši tā tos sagaida augšplūsmas API. Ja modelis nav minēts iepriekšējā sarakstā, palaidiet `omniroute models --search <term>` vai izsauciet `GET /api/models/catalog`, lai pārliecinātos par pieejamību.
+**Piezīme par modeļu ID:** OmniRoute izmanto pakalpojumu sniedzēja vietējos ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Daži ID ietver versijas ar punktiem, jo augšupstraumes API tos sagaida tieši šādā formā. Ja kāds modelis iepriekš nav norādīts, palaidiet `omniroute models --search <term>` vai izsauciet `GET /api/models/catalog`, lai apstiprinātu tā pieejamību.
 
 </details>
 

@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Upravljanje vdelanih storitev
 
 Poti za namestitev, zagon, zaustavitev in spremljanje 9Router ter CLIProxyAPI.
-Vse poti so razvrščene kot **LOCAL_ONLY** (samo povratna zanka, strogo pravilo št. 17), ker lahko
+Vse poti so razvrščene kot **LOCAL_ONLY** (samo povratna zanka, strogo pravilo št. #17), ker lahko
 izvedejo `npm install` in ustvarijo podrejene procese.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registri ponudnikov, profili glav, identiteta, …
 ├── handlers/               Obdelovalniki zahtev (klepet, vdelave, zvok, slike, …)
-├── executors/              156 modulov izvajalnikov ponudnikov (razredi izvajalnikov + pomožne funkcije za posamezne ponudnike)
+├── executors/              159 modulov izvajalnikov ponudnikov (razredi izvajalnikov + pomožne funkcije za posamezne ponudnike)
 ├── translator/             Pretvorba formatov (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator tokov Responses API ↔ Chat Completions
 ├── services/               Več kot 80 storitvenih modulov (kombinacije, rezervne možnosti, kvote, identiteta, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modulov izvajalnikov na najvišji ravni (`*.ts` brez `base.ts`, `index.ts` in testov — to število
+159 modulov izvajalnikov na najvišji ravni (`*.ts` brez `base.ts`, `index.ts` in testov — to število
 meri `npm run check:docs-counts`). Vsak razred izvajalnika razširja `BaseExecutor` (`base.ts`),
 neposredno ali prek `DefaultExecutor` oziroma drugega izvajalnika; preostali moduli so pomožni
 moduli za posamezne ponudnike (sheme orodij, adapterji za pridobivanje/TTS, obdelovalniki posebnosti). Izvajalniki vključujejo:

@@ -22,7 +22,11 @@ const TEST_RE = new RegExp(
 export function selectImpacted({ changed, map }) {
   const out = new Set();
   for (const f of changed) {
-    if (HUB_RE.test(f)) return ["__RUN_ALL__"];
+    // Shared test helpers have consumers outside the source-only import map, including
+    // indirect and runtime imports. A partial or stale map cannot establish their scope.
+    if (f === "__RUN_ALL__" || f.startsWith("tests/_helpers/") || HUB_RE.test(f)) {
+      return ["__RUN_ALL__"];
+    }
     if (TEST_RE.test(f)) {
       out.add(f);
       continue;
@@ -52,19 +56,42 @@ export function changedFilesFromStdin(text) {
     .filter(Boolean);
 }
 
+// Keep removed/renamed helper paths visible without asking node:test to run deleted tests.
+// Quoted/ambiguous git paths cannot be represented by the line-oriented selection contract.
+export function changedFilesFromNameStatus(text) {
+  const changed = new Set();
+  for (const line of String(text || "")
+    .split(/\r?\n/)
+    .filter(Boolean)) {
+    const [status, ...files] = line.split("\t");
+    const renamed = /^[RC]\d+$/.test(status);
+    if (
+      (!renamed && !/^[AMDT]$/.test(status)) ||
+      files.length !== (renamed ? 2 : 1) ||
+      files.some((file) => !file || file.startsWith('"') || /[\r\n\0]/.test(file))
+    ) {
+      return ["__RUN_ALL__"];
+    }
+    for (const file of files) {
+      if (file.startsWith("tests/_helpers/")) changed.add(file);
+    }
+    if (status !== "D") changed.add(files.at(-1));
+  }
+  return [...changed].sort();
+}
+
 function changedFiles() {
+  if (process.argv.includes("--stdin-name-status")) {
+    return changedFilesFromNameStatus(fs.readFileSync(0, "utf8"));
+  }
   if (process.argv.includes("--stdin")) return changedFilesFromStdin(fs.readFileSync(0, "utf8"));
   const baseRef = process.env.GITHUB_BASE_REF;
   const baseTarget = process.env.GITHUB_BASE_SHA || (baseRef ? `origin/${baseRef}` : "HEAD~1");
-  const stdout = execFileSync(
-    "git",
-    ["diff", "--name-only", "--diff-filter=ACMR", `${baseTarget}...HEAD`],
-    { cwd: ROOT, encoding: "utf8" }
-  );
-  return stdout
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const stdout = execFileSync("git", ["diff", "--name-status", `${baseTarget}...HEAD`], {
+    cwd: ROOT,
+    encoding: "utf8",
+  });
+  return changedFilesFromNameStatus(stdout);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {

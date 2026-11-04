@@ -1,3 +1,5 @@
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
+
 export const KIMI_CODING_BASE_URL = "https://api.kimi.com/coding/v1";
 export const KIMI_CODING_MODELS_URL = `${KIMI_CODING_BASE_URL}/models`;
 export const KIMI_CODING_OPENAI_URL = `${KIMI_CODING_BASE_URL}/chat/completions`;
@@ -30,12 +32,14 @@ const KIMI_CODE_STATIC_THINKING_POLICIES: Record<string, KimiCodeThinkingPolicy>
  */
 export const KIMI_CODING_WIRE_MODEL_ALIASES: Readonly<Record<string, string>> = {
   "kimi-k3": "k3",
+  "kimi-k3.1-pro": "k3.1-pro",
+  "kimi-k3.1-pro-highspeed": "k3.1-pro-highspeed",
 };
 
 export function getKimiCodeStaticThinkingPolicy(modelId: unknown): KimiCodeThinkingPolicy | null {
   if (typeof modelId !== "string") return null;
   const normalizedModel = modelId.trim().toLowerCase().split("/").pop() || "";
-  if (/^k3(?:$|-)/.test(normalizedModel)) return KIMI_CODE_STATIC_THINKING_POLICIES.k3;
+  if (/^k3(?:$|[.-])/.test(normalizedModel)) return KIMI_CODE_STATIC_THINKING_POLICIES.k3;
   return KIMI_CODE_STATIC_THINKING_POLICIES[normalizedModel] || null;
 }
 
@@ -122,7 +126,7 @@ export function getKimiCodeCliVersion(): string {
   const override = readEnvOverride();
   if (override) return override;
   if (
-    typeof process !== "undefined" &&
+    canStartBackgroundRefresh() &&
     !process.env.NODE_TEST_CONTEXT &&
     !readFreshCache() &&
     !inFlight

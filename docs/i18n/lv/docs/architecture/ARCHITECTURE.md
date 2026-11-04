@@ -8,14 +8,14 @@
 
 _Pēdējoreiz atjaunināts: 2026-06-28_
 
-## Kopsavilkums
+## Kopsavilkums vadībai
 
 OmniRoute ir lokāla AI maršrutēšanas vārteja un informācijas panelis, kas izveidots uz Next.js bāzes.
 Tas nodrošina vienotu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē datplūsmu starp vairākiem augšupējiem pakalpojumu sniedzējiem, veicot formātu pārveidošanu, rezerves pārslēgšanu, pilnvaru atsvaidzināšanu un lietojuma uzskaiti.
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API saskarne CLI/rīkiem (380 pakalpojumu sniedzēji, 156 izpildītāju moduļi)
+- Ar OpenAI saderīga API saskarne CLI/rīkiem (380 pakalpojumu sniedzēji, 159 izpildītāju moduļi)
 - Pieprasījumu/atbilžu formātu pārveidošana starp pakalpojumu sniedzējiem
 - Modeļu kombināciju rezerves pārslēgšana (vairāku modeļu secība)
 - Strukturēti kombināciju soļi (`provider + model + connection`) ar izpildlaika secības noteikšanu pēc `compositeTiers`
@@ -345,7 +345,7 @@ Arhitektūras slāņi:
   žurnālu straumēšanu reāllaikā, API atslēgu pārvaldību un (9Router gadījumā)
   iegultu vietējo UI, izmantojot iekšēju reverso starpniekserveri.
 - **API** (`/api/services/{name}/*`) — 11 galapunkti 9Router, 10 CLIProxyAPI, 8 katram Bifrost / Mux / Dario,
-  visi klasificēti kā **LOCAL_ONLY** (stingrs noteikums Nr. 17). Kopīgs `GET /api/services/[name]/logs`
+  visi klasificēti kā **LOCAL_ONLY** (stingrs noteikums Nr. #17). Kopīgs `GET /api/services/[name]/logs`
   SSE galapunkts apkalpo abus pakalpojumus.
 - **Supervisor** (`src/lib/services/`) — vispārīgā `ServiceSupervisor` klase aptver
   `child_process.spawn`, uztur 5 MB ciklisko buferi SSE žurnālu straumēšanai, darbspējas

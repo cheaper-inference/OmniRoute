@@ -13,6 +13,8 @@ Core reference for the OmniRoute API. It covers the public `/v1` surface and the
 For the focused OpenAI-compatible protocol and provider capability matrix, see
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
+Each deployment serves its own copy of the spec at `/openapi.yaml`, generated from `docs/openapi.yaml` during the build. It carries the build's version and a relative server URL (`./`), so requests stay on the host that served the document. A tool that imports the downloaded file has no such host, and needs the base URL set by hand.
+
 ---
 
 ## Table of Contents
@@ -1687,6 +1689,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Supported formats:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** file-mode transcription over the Gemini Live
+WebSocket (requires a Gemini API key). The upload is converted to 16 kHz mono PCM with `ffmpeg`
+(must be on `PATH`, unless the file is already a 16 kHz mono PCM WAV), streamed to the session and
+the finalized text is returned as `{ "text": "..." }`. Optional `language` and `prompt` form fields
+are forwarded. Limits: uploads above 25 MiB or decoded audio longer than 10 minutes answer
+`413`; a conversion that runs longer than 60 s is killed and answers `504`. The API key is sent
+in the `x-goog-api-key` header only, never in the WebSocket URL.
+
 ---
 
 ## Ollama Compatibility
@@ -1995,17 +2005,17 @@ Persistent conversational/factual memory store, scoped per API key / session.
 
 OmniRoute ships an embedded Model Context Protocol server with 3 transports (stdio, SSE, streamable-http) and scoped tools. The dashboard endpoints below read status/audit data and proxy the HTTP transports.
 
-| Method | Path | Description |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, transport, online state, last call, top tools, 24h success rate |
-| GET | `/api/mcp/tools` | List of MCP tools with `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Open SSE stream for the SSE transport (returns `503` if MCP disabled or transport mismatch) |
-| POST | `/api/mcp/sse` | Send JSON-RPC frame on the SSE transport |
-| GET | `/api/mcp/stream` | Open SSE side of the Streamable HTTP transport (server-initiated messages) |
-| POST | `/api/mcp/stream` | Send JSON-RPC frame on the Streamable HTTP transport |
-| DELETE | `/api/mcp/stream` | End a Streamable HTTP session |
-| GET | `/api/mcp/audit` | Query audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Aggregate audit stats (totals, success rate, avg duration, top tools) |
+| Method | Path                   | Description                                                                                                              |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/mcp/status`      | Heartbeat, transport, online state, last call, top tools, 24h success rate                                               |
+| GET    | `/api/mcp/tools`       | List of MCP tools with `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                         |
+| GET    | `/api/mcp/sse`         | Open SSE stream for the SSE transport (returns `503` if MCP disabled or transport mismatch)                              |
+| POST   | `/api/mcp/sse`         | Send JSON-RPC frame on the SSE transport                                                                                 |
+| GET    | `/api/mcp/stream`      | Open SSE side of the Streamable HTTP transport (server-initiated messages)                                               |
+| POST   | `/api/mcp/stream`      | Send JSON-RPC frame on the Streamable HTTP transport                                                                     |
+| DELETE | `/api/mcp/stream`      | End a Streamable HTTP session                                                                                            |
+| GET    | `/api/mcp/audit`       | Query audit log — `?limit=`, `?offset=`, `?tool=`, `?success=true                                \| false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Aggregate audit stats (totals, success rate, avg duration, top tools)                                                    |
 
 **Auth:** the `sse`/`stream` transports honor the MCP-specific auth surface (Bearer API key with `mcp` scope); the `status`/`tools`/`audit*` routes are readable from the dashboard (no extra auth required beyond reaching the dashboard host).
 

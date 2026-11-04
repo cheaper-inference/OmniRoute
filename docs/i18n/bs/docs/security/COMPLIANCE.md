@@ -11,55 +11,73 @@ OmniRoute bilježi administrativne radnje, događaje autentifikacije, promjene �
 
 Implementacija se nalazi u `src/lib/compliance/index.ts` (T-43 — "Kontrole usklađenosti") i `src/lib/compliance/providerAudit.ts`. Zapisivanje revizije nikada ne baca izuzetak: u slučaju bilo kakvog neuspjeha, poziv se tiho zanemaruje kako revizijsko bilježenje ne bi prekinulo glavni tok zahtjeva.
 
-## Šta se bilježi
+## Šta se evidentira
 
-### Administrativni revizijski događaji (`audit_log`)
+### Administrativni događaji revizije (`audit_log`)
 
-Svaki poziv `logAuditEvent({ action, actor, target, details, ... })` proizvodi jedan red. Stringovi radnji prate obrazac `domain.verb` (ili `domain.verb.outcome`). Potvrđeni tipovi radnji u stablu uključuju:
+Svaki poziv funkcije `logAuditEvent({ action, actor, target, details, ... })` proizvodi
+jedan red. Znakovni nizovi radnji slijede obrazac
+`domain.verb` (ili `domain.verb.outcome`). Potvrđeni tipovi radnji u stablu uključuju:
 
-| Radnja                               | Izvor                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Radnja                               | Izvor                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Svaki unos bilježi `action`, `actor` (podrazumijevano `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` i `timestamp`. Osjetljivi ključevi (`apiKey`, `accessToken`, `refreshToken`, `password`, sve što odgovara `*token`/`*secret`/`*apikey`, itd.) se rekurzivno maskiraju u `"[redacted]"` prije nego što se red zapiše.
+Svaki unos bilježi `action`, `actor` (zadano na `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` i `timestamp`. Osjetljivi ključevi (`apiKey`, `accessToken`,
+`refreshToken`, `password`, sve što odgovara obrascu `*token`/`*secret`/`*apikey`,
+itd.) rekurzivno se rediguju u `"[redacted]"` prije upisa reda.
+
+Redovi `api_key.auth.touch` bilježe uspješne metapodatke API ključa i čitanja
+za otkrivanje (GET/HEAD) koja nikada ne dospiju u dnevnik zahtjeva: koji ključ,
+kada i normalizovana putanja, objedinjeno i ograničeno na najviše 1.000 redova.
+Ključevi s `noLog` i ključ okruženja se preskaču. IP adresa pozivaoca i korisnički
+agent dodaju se samo kada je zastavica funkcionalnosti
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` uključena (isključena je
+prema zadanim postavkama).
 
 ### Pozivi MCP alata (`mcp_tool_audit`)
 
-Svaki poziv MCP alata upisuje red kroz `open-sse/mcp-server/audit.ts`. Šema (iz `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Svako pozivanje MCP alata upisuje red putem
+`open-sse/mcp-server/audit.ts`. Shema (iz
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Kolona           | Napomene                              |
-| ---------------- | ------------------------------------- |
-| `id`             | automatsko povećanje                  |
-| `tool_name`      | Identifikator MCP alata               |
-| `input_hash`     | sha256 ulaza (payload nije pohranjen) |
-| `output_summary` | kratak, skraćen sažetak               |
-| `duration_ms`    | vrijeme izvršenja                     |
-| `api_key_id`     | pozivalac (može biti null)            |
-| `success`        | `1` / `0`                             |
-| `error_code`     | terminalni kod greške pri neuspjehu   |
-| `created_at`     | ISO vremenska oznaka                  |
+| Kolona           | Napomene                          |
+| ---------------- | --------------------------------- |
+| `id`             | automatsko povećavanje            |
+| `tool_name`      | identifikator MCP alata           |
+| `input_hash`     | sha256 ulaza (sadržaj se ne čuva) |
+| `output_summary` | kratak, skraćen sažetak           |
+| `duration_ms`    | proteklo vrijeme                  |
+| `api_key_id`     | pozivalac (može biti null)        |
+| `success`        | `1` / `0`                         |
+| `error_code`     | završni kod greške pri neuspjehu  |
+| `created_at`     | ISO vremenska oznaka              |
 
-### Logovi zahtjeva / upotrebe
+### Dnevnici zahtjeva / korištenja
 
-Ovo je operativna telemetrija (ne strogo administrativna revizija), ali dijeli isti cjevovod zadržavanja:
+Ovo je operativna telemetrija (nije strogo administrativna revizija), ali koristi
+isti proces zadržavanja:
 
-- `usage_history` — zbirna upotreba po zahtjevu
-- `call_logs` — potpuni log po zahtjevu (podložno ograničenju broja redova, vidi dolje)
-- `proxy_logs` — log proxy saobraćaja (podložno ograničenju broja redova)
-- `request_detail_logs` — naslijeđeni detaljni log zahtjeva (i dalje se čisti ako postoji)
+- `usage_history` — objedinjeni podaci o korištenju po zahtjevu
+- `call_logs` — potpuni dnevnik po zahtjevu (podliježe ograničenju broja redova, pogledajte u nastavku)
+- `proxy_logs` — dnevnik proxy saobraćaja (podliježe ograničenju broja redova)
+- `request_detail_logs` — naslijeđeni detaljni dnevnik zahtjeva (i dalje se uklanja ako postoji)
 
 ## Šema skladištenja
 

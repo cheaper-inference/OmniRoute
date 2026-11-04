@@ -15,7 +15,7 @@ Het biedt één OpenAI-compatibel eindpunt (`/v1/*`) en routeert verkeer naar me
 
 Kernfunctionaliteiten:
 
-- OpenAI-compatibel API-oppervlak voor CLI/tools (380 providers, 156 uitvoeringsmodules)
+- OpenAI-compatibel API-oppervlak voor CLI/tools (380 providers, 159 uitvoeringsmodules)
 - Vertaling van verzoeken en antwoorden tussen providerindelingen
 - Modelcombo-fallback (reeks van meerdere modellen)
 - Gestructureerde combostappen (`provider + model + connection`) met runtimevolgorde op basis van `compositeTiers`
@@ -77,7 +77,7 @@ Kernfunctionaliteiten:
 - Runtimevalidatie van de omgeving met Zod tijdens het opstarten
 - Compliance-audit v2 met paginering, CRUD-gebeurtenissen voor providers en logboekregistratie van door SSRF geblokkeerde validaties
 
-Primair runtimemodel:
+Primair runtime-model:
 
 - Next.js-approutes onder `src/app/api/*` implementeren zowel dashboard-API's als compatibiliteits-API's
 - Een gedeelde SSE- en routeringskern in `src/sse/*` + `open-sse/*` verwerkt provideruitvoering, vertaling, streaming, fallback en gebruik

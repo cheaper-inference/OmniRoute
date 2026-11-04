@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Pakalpojumu sniedzēju reģistri, galveņu profili, identitāte, …
 ├── handlers/               Pieprasījumu apstrādātāji (tērzēšana, iegultnes, audio, attēli, …)
-├── executors/              156 pakalpojumu sniedzēju izpildītāju moduļi (izpildītāju klases un katra pakalpojumu sniedzēja palīgmoduļi)
+├── executors/              159 pakalpojumu sniedzēju izpildītāju moduļi (izpildītāju klases un katra pakalpojumu sniedzēja palīgmoduļi)
 ├── translator/             Formātu pārveidošana (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions straumes transformators
 ├── services/               Vairāk nekā 80 pakalpojumu moduļu (kombinācijas, atkāpšanās mehānismi, kvotas, identitāte, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 augstākā līmeņa izpildītāju moduļi (`*.ts`, neskaitot `base.ts`, `index.ts` un testus — šo skaitu
+159 augstākā līmeņa izpildītāju moduļi (`*.ts`, neskaitot `base.ts`, `index.ts` un testus — šo skaitu
 nosaka `npm run check:docs-counts`). Katra izpildītāja klase tieši vai ar `DefaultExecutor`, vai cita
 izpildītāja starpniecību paplašina `BaseExecutor` (`base.ts`); pārējie moduļi ir katram pakalpojumu
 sniedzējam paredzēti palīgmoduļi (rīku shēmas, ielādes/TTS adapteri, īpatnību apstrādātāji). Izpildītāji ietver:

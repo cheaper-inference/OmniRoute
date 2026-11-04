@@ -47,8 +47,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
-import { unitDiagnosticReference } from "../ci/unit-diagnostics.mjs";
-import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
+import { buildProgressEnvironment } from "../build/buildPhaseProgress.mjs";
+import {
+  unitDiagnosticReference,
+  integrationDiagnosticReference,
+} from "../ci/unit-diagnostics.mjs";
+import { integrationPlanFromCiJob, executeIntegrationPlan } from "./integration-shards.mjs";
+import { eslintMeasurementCounts, readEslintMeasurement } from "./eslint-measurement.mjs";
 import {
   loadFullCiProfile,
   resolveFullCiComparison,
@@ -214,7 +219,8 @@ export function parseEslintJson(out) {
  * "could not parse eslint json" hides the actionable cause and sends maintainers debugging
  * the parser instead of the gate ceiling.
  */
-export function evaluateEslintRun({ code, out }, warningBaseline) {
+export function evaluateEslintRun(run, warningBaseline) {
+  const { code, out } = run;
   if (code !== 0) {
     return [
       {
@@ -229,7 +235,7 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
       },
     ];
   }
-  const parsed = parseEslintJson(out);
+  const parsed = Object.hasOwn(run, "measurement") ? run.measurement : parseEslintJson(out);
   let counts;
   try {
     counts = eslintMeasurementCounts(parsed);
@@ -755,8 +761,9 @@ async function run(cmd, cmdArgs, opts = {}) {
   const invocationId = randomUUID();
   const logPath = join(LOG_DIR, "commands", `${invocationId}.log`);
   let unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, null);
+  let integrationDiagnostics = integrationDiagnosticReference(cmdArgs, invocationId, null);
   let checkoutSha = null;
-  if (unitDiagnostics || opts.packPhase) {
+  if (unitDiagnostics || integrationDiagnostics || opts.packPhase) {
     try {
       checkoutSha = execFileSync("git", ["rev-parse", "HEAD"], {
         cwd: ROOT,
@@ -768,6 +775,8 @@ async function run(cmd, cmdArgs, opts = {}) {
     }
     if (unitDiagnostics)
       unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, checkoutSha);
+    if (integrationDiagnostics)
+      integrationDiagnostics = integrationDiagnosticReference(cmdArgs, invocationId, checkoutSha);
   }
   const packPhase = opts.packPhase
     ? makePackPhaseReference(opts.packPhase, invocationId, checkoutSha, {
@@ -780,12 +789,20 @@ async function run(cmd, cmdArgs, opts = {}) {
     invocationId,
     ...(packPhase ? { packPhase } : {}),
     ...(unitDiagnostics ? { unitDiagnostics } : {}),
+    ...(integrationDiagnostics ? { integrationDiagnostics } : {}),
   };
   const result = await runGateProcess(cmd, cmdArgs, {
     receiptIdentity,
     cwd: ROOT,
     env: buildGateEnv({
       ...opts.env,
+      ...buildProgressEnvironment(packPhase),
+      ...(integrationDiagnostics
+        ? {
+            OMNIROUTE_INTEGRATION_INVOCATION_ID: integrationDiagnostics.invocationId || "",
+            OMNIROUTE_INTEGRATION_CHECKOUT_SHA: integrationDiagnostics.checkoutSha || "",
+          }
+        : {}),
       ...(unitDiagnostics
         ? {
             OMNIROUTE_UNIT_INVOCATION_ID: unitDiagnostics.invocationId || "",
@@ -824,7 +841,7 @@ export const PACK_POLICY_TIMEOUT_MS = 3 * 60 * 1000;
 export const PACK_LANE_TIMEOUT_MS = 60 * 60 * 1000;
 
 export function makePackPhaseReference(phase, invocationId, candidateSha, context = {}) {
-  const phases = ["build-cli", "stamp-build-sha", "validate-pack-artifact"];
+  const phases = ["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"];
   if (
     !phases.includes(phase?.phaseId) ||
     !["shared", "independent-policy"].includes(phase.mode) ||
@@ -907,7 +924,15 @@ export async function runPackArtifactGate(
   const preparationBudgetMs = independentPolicy ? timeoutMs - PACK_POLICY_TIMEOUT_MS : timeoutMs;
   const deadline = now() + preparationBudgetMs;
   const steps = [
-    { phaseId: "build-cli", cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
+    // Match CI: npm runs prebuild/build/postbuild before the strict package consumer.
+    // Both commands and the stamp spend the same preparation deadline.
+    { phaseId: "build-next", cmd: npmCmd, args: ["run", "build"], env: BUILD_GATE_ENV },
+    {
+      phaseId: "build-cli",
+      cmd: npmCmd,
+      args: ["run", "build:cli"],
+      env: { ...BUILD_GATE_ENV, OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1" },
+    },
     {
       phaseId: "stamp-build-sha",
       cmd: process.execPath,
@@ -972,6 +997,23 @@ async function runUnitShards(total, pool, timeout) {
     return { shard, total, code, out };
   });
   return mergeUnitShardResults(results);
+}
+
+/** CI's integration matrix, sequential locally with the unchanged CI job ceiling per shard. */
+async function runIntegrationShards() {
+  let plan;
+  try {
+    const ci = parseYaml(readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"));
+    const { scripts } = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+    plan = integrationPlanFromCiJob(ci?.jobs?.["test-integration"], scripts);
+  } catch {
+    return {
+      code: 1,
+      out: "INCOMPLETE: integration CI plan could not be reproduced\n",
+      detail: "INCOMPLETE: integration CI matrix, command or timeout is invalid",
+    };
+  }
+  return executeIntegrationPlan(plan, (args, options) => runAsync(npmCmd, args, options));
 }
 
 async function main() {
@@ -1087,6 +1129,11 @@ async function main() {
     // pre-existing debt in config/quality/eslint-suppressions.json must not count as
     // errors here — only NET-NEW violations are release reds. The cold release runner can
     // exceed 30 minutes as the repository grows, and this pre-flight often runs under load.
+    // stdout/stderr chunks may interleave, and dependencies can print bracketed
+    // diagnostics. Keep the machine report in its own fresh file, not that stream.
+    const lintReportPath = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
+    mkdirSync(dirname(lintReportPath), { recursive: true });
+    writeFileSync(lintReportPath, "", { flag: "wx", mode: 0o600 });
     const lintRun = await run(
       "npx",
       [
@@ -1097,6 +1144,8 @@ async function main() {
         ".eslintcache",
         "--format",
         "json",
+        "--output-file",
+        lintReportPath,
         "--suppressions-location",
         "config/quality/eslint-suppressions.json",
         // An "unpruned" suppression means a previously-frozen violation was legitimately
@@ -1113,16 +1162,11 @@ async function main() {
     );
     const { out } = lintRun;
     saveGateLog("lint", out);
-    for (const result of evaluateEslintRun(lintRun, baselineValue("eslintWarnings"))) {
-      record(result);
-    }
+    let measurement = null;
     if ([0, 1].includes(lintRun.code) && ["PASS", "FAIL"].includes(lintRun.receipt.outcome)) {
       try {
-        const parsed = parseEslintJson(out);
-        eslintMeasurementCounts(parsed);
-        const path = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
-        writeFileSync(path, `${JSON.stringify(parsed)}\n`, { flag: "wx", mode: 0o600 });
-        freshLintReport = path;
+        measurement = readEslintMeasurement(lintReportPath);
+        freshLintReport = lintReportPath;
       } catch {
         record({
           id: "lint-measurement",
@@ -1132,6 +1176,12 @@ async function main() {
           detail: "no complete lint report retained for this execution",
         });
       }
+    }
+    for (const result of evaluateEslintRun(
+      { ...lintRun, measurement },
+      baselineValue("eslintWarnings")
+    )) {
+      record(result);
     }
   }
 
@@ -1362,16 +1412,9 @@ async function main() {
             timeout: 120 * 60 * 1000,
           },
       {
-        // Measured 2026-08-05 on an idle 16-core box: 22m08s hermetic (935 tests,
-        // 112 files at --test-concurrency=1, i.e. strictly serial because ~16 of
-        // them bind a port or share a DB). The old "~3-10min" estimate was stale by
-        // ~3x and the 20min ceiling killed a healthy run. 40min keeps the ceiling's
-        // real purpose — turning a genuine hang (unreleased DB handle) into a
-        // visible failure — without punishing a long-but-healthy suite.
         id: "integration",
-        label: "Integration tests (~20-25min)",
-        args: ["run", "test:integration"],
-        timeout: 40 * 60 * 1000,
+        label: "Integration tests (ci.yml shards, one at a time)",
+        run: () => runIntegrationShards(),
       },
       {
         id: "vitest",

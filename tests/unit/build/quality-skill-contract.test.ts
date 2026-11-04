@@ -17,6 +17,7 @@ test("versioned admission consumers and shared merge rules are covered by the dr
     "i18n-waves/SKILL.md",
     "i18n-waves/scripts/bootstrap.sh",
     "i18n-waves/scripts/wave.sh",
+    "i18n-waves/scripts/resolve_state_merge.py",
     "_shared/merge-gates.md",
     "_shared/validation-gate.md",
     "_shared/protected-surfaces.md",
@@ -109,6 +110,7 @@ for (const relativePath of [
   "_shared/credit-preservation.md",
   "i18n-waves/scripts/bootstrap.sh",
   "i18n-waves/scripts/wave.sh",
+  "i18n-waves/scripts/resolve_state_merge.py",
 ]) {
   test(`shared instruction dependency ${relativePath} cannot be missing or drifted`, () => {
     const dir = mkdtempSync(join(tmpdir(), "omniroute-shared-contract-"));

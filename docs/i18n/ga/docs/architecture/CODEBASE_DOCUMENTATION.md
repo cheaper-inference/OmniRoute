@@ -459,7 +459,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Clárlanna soláthraithe, próifílí ceanntásca, aitheantas, …
 ├── handlers/               Láimhseálaithe iarratas (comhrá, leabuithe, fuaim, íomhá, …)
-├── executors/              156 modúl feidhmitheora soláthraí (aicmí feidhmitheora + cúntóirí in aghaidh an tsoláthraí)
+├── executors/              159 modúl feidhmitheora soláthraí (aicmí feidhmitheora + cúntóirí in aghaidh an tsoláthraí)
 ├── translator/             Tiontú formáide (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Claochladán srutha Responses API ↔ Chat Completions
 ├── services/               80+ modúl seirbhíse (teaglamaí, cúltaca, cuótaí, aitheantas, …)
@@ -489,7 +489,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modúl feidhmitheora ardleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus tástálacha — is é sin an comhaireamh
+159 modúl feidhmitheora ardleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus tástálacha — is é sin an comhaireamh
 a thomhaiseann `npm run check:docs-counts`). Leathnaíonn gach aicme feidhmitheora `BaseExecutor` (`base.ts`),
 go díreach nó trí `DefaultExecutor` nó feidhmitheoir eile; is cúntóirí in aghaidh an tsoláthraí iad na modúil
 eile (scéimeanna uirlisí, cuibheoirí gabhála/TTS, láimhseálaithe iompraíochta neamhghnáiche). Áirítear ar na feidhmitheoirí:

@@ -15,7 +15,7 @@ Poskytuje jeden koncový bod kompatibilný s OpenAI (`/v1/*`) a smeruje prevádz
 
 Kľúčové funkcie:
 
-- API kompatibilné s OpenAI pre CLI/nástroje (380 poskytovateľov, 156 vykonávacích modulov)
+- API kompatibilné s OpenAI pre CLI/nástroje (380 poskytovateľov, 159 vykonávacích modulov)
 - Preklad požiadaviek a odpovedí medzi formátmi poskytovateľov
 - Záložné prepínanie kombinácie modelov (sekvencia viacerých modelov)
 - Štruktúrované kroky kombinácie (`provider + model + connection`) s poradím za behu podľa `compositeTiers`
@@ -77,7 +77,7 @@ Kľúčové funkcie:
 - Validácia runtime prostredia pomocou Zod pri spustení
 - Audit súladu v2 so stránkovaním, udalosťami CRUD poskytovateľov a protokolovaním validácie zablokovanej ochranou proti SSRF
 
-Primárny runtime model:
+Primárny model runtime:
 
 - Trasy aplikácie Next.js v `src/app/api/*` implementujú API ovládacieho panela aj API kompatibility
 - Zdieľané jadro SSE/smerovania v `src/sse/*` + `open-sse/*` zabezpečuje vykonávanie požiadaviek u poskytovateľov, preklad, streamovanie, záložné prepínanie a sledovanie využitia
@@ -345,7 +345,7 @@ Vrstvy architektúry:
   živým streamovaním protokolov, správou kľúčov API a (pre 9Router) vstavaným natívnym používateľským rozhraním
   prostredníctvom interného reverzného proxy servera.
 - **API** (`/api/services/{name}/*`) — 11 koncových bodov pre 9Router, 10 pre CLIProxyAPI a po 8 pre Bifrost / Mux / Dario,
-  pričom všetky sú klasifikované ako **LOCAL_ONLY** (pevné pravidlo č. 17). Zdieľaný koncový bod SSE `GET /api/services/[name]/logs`
+  pričom všetky sú klasifikované ako **LOCAL_ONLY** (pevné pravidlo č. #17). Zdieľaný koncový bod SSE `GET /api/services/[name]/logs`
   slúži obom službám.
 - **Supervízor** (`src/lib/services/`) — všeobecná trieda `ServiceSupervisor` obaľuje
   `child_process.spawn`, udržiava 5 MB kruhovú vyrovnávaciu pamäť na streamovanie protokolov cez SSE, slučku

@@ -66,14 +66,18 @@ test("the hosted suite matrix has exactly ci.yml's unit and integration shards p
   }
 });
 
-test("integration sharding preserves the complete inventory and 15-minute CI deadline", () => {
+test("integration sharding preserves the complete inventory and 15-minute CI deadline", async () => {
   const jobs = (parseYaml(ci) as { jobs: Record<string, Job> }).jobs;
   assert.equal(jobs["test-integration"]["timeout-minutes"], 15);
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
-  assert.equal(
-    pkg.scripts["test:integration:ci"].replace(" --test-shard=$TEST_SHARD", ""),
-    pkg.scripts["test:integration"],
-    "the CI command must keep every input and runner option of the complete integration suite"
+  const { integrationPlanFromCiJob } =
+    await import("../../../scripts/quality/integration-shards.mjs");
+  const plan = integrationPlanFromCiJob(jobs["test-integration"], pkg.scripts);
+  assert.equal(plan.total, 4);
+  assert.equal(plan.timeoutMs, 900000);
+  assert.deepEqual(
+    plan.commands.map((command) => command.env.TEST_SHARD),
+    ["1/4", "2/4", "3/4", "4/4"]
   );
 });
 

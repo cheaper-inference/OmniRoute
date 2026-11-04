@@ -154,7 +154,7 @@ kikundi cha kuunganisha, ukaguzi wa PR unaohitajika, lakabu ya npm au mshiriki w
 Sera iliyopo ya PR ya kulinganisha tofauti na uainishaji wa ushauri wa kikagua cha msingi
 hubaki tofauti. Upakiaji uliofanikiwa hauwezi kubadilisha matokeo ya hali yaliyofeli kuwa PASS.
 
-### Njia ya haraka ya PR ya toleo (`quality.yml`)
+### Njia ya haraka ya PR za release (`quality.yml`)
 
 `.github/workflows/quality.yml` huikamilisha CI kwenye PR za main/release, misukumo kwenda `main`,
 dispatch na vikundi vya kuunganisha. PR hutumia ukaguzi wa haraka uliochujwa kwa njia. Build rudufu
@@ -220,6 +220,23 @@ Huendeshwa kwenye kila PR kwenda `main`. Huzuia uunganishaji inaposhindwa.
 | `typecheck:core`                  | Ukusanyaji wa TypeScript bila hitilafu (maonyo ya ushauri pekee)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Ndiyo                                   |
 | `typecheck:noimplicit:core`       | `noImplicitAny` kali — inayolenga siku zijazo; maeneo mengi ya matumizi yaliyokuwepo awali bado yanahitaji maelezo ya aina                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | **Ushauri** (`continue-on-error: true`) |
 | `check:dashboard-typecheck`       | `tsc` iliyowekewa mawanda ya `src/app/(dashboard)/**` (#7033) — orodha iliyoruhusiwa ya faili 27 iliyoteuliwa ya `typecheck:core` haijumuishi TSX yoyote ya dashibodi, na `next build` pia haikagui aina zake kamwe (`next.config.mjs` huweka `ignoreBuildErrors: true`), kwa hivyo hitilafu za utambulishi yatima huko (#6625/#6909) hazikuonekana na CI. Hulinganisha tofauti dhidi ya msingi uliogandishwa wa idadi kwa kila faili/kwa kila msimbo wa TS (`config/quality/dashboard-typecheck-baseline.json`, muundo uleule wa utekelezaji dhidi ya uchakavu kama `check:known-symbols`) — ni hitilafu MPYA pekee zinazozidi idadi iliyowekwa kwenye msingi ndizo zinazosababisha kizuizi kishindwe; punguza msingi hatua kwa hatua ukitumia `--update` wakati hitilafu iliyokuwepo awali inaporekebishwa.                                                                                                                                                                                                                                                           | Ndiyo                                   |
+| `check:build-typecheck`           | Ukaguzi wa aina wa uzalishaji wa programu nzima kupitia `tsconfig.build.json` (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`), ambao haujashughulikiwi na orodha ya faili 27 ya `typecheck:core` wala lango la dashboard. Tofauti hukaguliwa dhidi ya `config/quality/build-typecheck-baseline.json`; idadi mpya au iliyoongezeka kwa kila jozi ya (faili, kodi) husababisha kushindwa, huku idadi iliyopungua ikikuomba upunguze kiwango. `--update` hukataa wakati utekelezaji una jozi mpya au iliyoongezeka isipokuwa `--force-regressions` itumike, na hukataa faili iliyonyamazishwa upya isipokuwa `--force-nocheck` itumike, hivyo kupanua msingi ili kupata mafanikio na kutoa ukimya wa kudumu ni vitendo viwili tofauti vinavyokusudiwa. `--force` pekee hukataliwa. Pia hukagua `@ts-nocheck` katika eneo la ujenzi dhidi ya `config/quality/ts-nocheck-baseline.json`, kwa sababu faili inayotumia hiyo hairipoti uchunguzi wowote kabisa na vinginevyo isingeonekana na lango lolote.                                             | Ndiyo                                   |
+
+#### Programu mbili za ukaguzi wa aina hujibu kwa njia tofauti
+
+`typecheck:core` (`noImplicitAny: false`) / `typecheck:noimplicit:core` (`noImplicitAny: true`) na `check:build-typecheck` hukusanya programu tofauti kwa chaguo
+tofauti, na faili lilelile linaweza kuwa safi katika moja na kujawa na hitilafu katika nyingine.
+
+`tsconfig.build.json` huweka `"strict": false`, kwa hiyo `noImplicitAny` imezimwa. Mipangilio
+ya msingi hukusanya orodha ya faili 27 iliyoratibiwa kwa chaguo kali zaidi na kufuata
+grafu ya uagizaji ya kila ingizo, hivyo faili ambazo hazijawahi kuonekana katika programu
+ya ujenzi bado hukaguliwa humo.
+
+Matokeo yake ni muhimu unapohukumu ikiwa faili imewekewa aina: **sifuri ya uchunguzi
+chini ya `check:build-typecheck` haimaanishi sifuri**. Kuondoa `@ts-nocheck` kutoka faili 26
+kulionyesha kuwa 23 kati yazo zilikuwa safi katika programu ya ujenzi; kumi na sita kati
+ya hizo zilionyesha takriban hitilafu 120 za `implicit-any` katika programu kali. Kagua zote
+mbili kabla ya kusema kuwa faili ni safi.
 
 ### Kazi: `quality-gate`
 
@@ -283,14 +300,18 @@ Kwa pull request kwenda `main` au `release/**`, kazi hii huendeshwa tu kwa wagom
 | `check:docs-symbols`           | Marejeleo ya URL za ndani `/api/...` katika nyaraka kuu ambazo si nakala za kioo hulingana na route halisi au familia ya routes; marejeleo ya proxy/upstream/kishikilia nafasi/faili na vipengee vyenye sababu vya `KNOWN_STALE_DOC_REFS` hayajumuishwi, na vipengee vya zamani kwenye orodha ya misamaha husababisha kushindwa                                                                                                                                                                                                                       | Ndiyo                                                                                                                                           |
 | `i18n translation drift`       | Hukagua hash za chanzo/lengwa za hati kuu na asili ya tafsiri. Ulinganisho wa PR huruhusu tu hitilafu zilizorithiwa zinazofanana kabisa; kutolingana kupya au kusikothibitishwa kwa chanzo, lengwa linalokosekana, hash ya lengwa, tafsiri iliyopitwa na wakati au akiba ya sehemu huzuia. Nje ya ulinganisho wa PR, hitilafu za chanzo/lengwa linalokosekana/hash ya lengwa huzuia, huku tafsiri zilizopitwa na wakati na akiba za sehemu zisizolingana zikibaki kuwa maonyo tu. Kutokuwepo kwa akiba ya sehemu katika muundo wa zamani si hitilafu. | Mkengeuko mpya/usiohakikishwa katika PR huzuia; mkengeuko uliorithiwa unaofanana kabisa ni onyo tu; kanuni nje ya PR hutegemea aina ya hitilafu |
 
-SVG kumi na mbili za README chini ya `docs/diagrams/` huzalishwa kwa `scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` huzalisha zote upya.
-Kila moja ina jaribio la kitengo linalolinganisha baiti kwa baiti (`tests/unit/docs/readme-*-svg.test.ts`, kazi `test-unit`), ambalo hushindwa faili iliyowekwa kwenye hazina ya msimbo inapopitwa na wakati.
-`check:docs-counts` husoma nambari kanoniki kutoka kwenye nodi zake za `<text>`, ndiyo maana nambari hazibadilishwi kamwe kuwa njia za michoro ya kontua.
-Ukaguzi wa nambari kanoniki za SVG husoma faili zilizoorodheshwa katika `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, `public/images/tier-flow-dark.svg`, `tier-flow-light.svg`.
-Ukaguzi wa madai kuhusu watoa huduma wa bure daima, maingizo ya katalogi, pool zinazojirudia na vigezo vya alama husoma pia `promise-pillars.svg`, `free-tier-budget.svg`, `strategies-grid.svg`.
-`free-tier-budget.svg` hupata takwimu zake kutoka kwa kipakiaji cha katalogi ya sasa, kwa hiyo mabadiliko ya `FREE_MODEL_BUDGETS` au jina la kuonyesha la mtoa huduma husababisha CI kushindwa hadi faili hiyo izalishwe upya.
+SVG kumi na mbili za README chini ya `docs/diagrams/` zinatengenezwa kiotomatiki (`scripts/docs/gen-readme-<name>.mjs`;
+`npm run docs:readme-diagrams` huzalisha upya zote). Kila moja ina jaribio la unit la kulinganisha byte
+(`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) ambalo hushindwa faili iliyowasilishwa inapokuwa ya zamani, na `check:docs-counts` husoma nambari za kanuni kutoka kwenye nodi zake za `<text>` — ndiyo maana hatua ya kugeuza kuwa outlines huweka kila mfuatano uliogeuzwa kuwa outline katika faili kama `<text>` isiyoonekana. Ukaguzi wa nambari za kanuni za SVG husoma faili zilizoorodheshwa katika
+`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
+`free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
+`tier-cascade.svg`, pamoja na `public/images/tier-flow-dark.svg` na `tier-flow-light.svg`; madai ya
+free-forever, catalog-entry, recurring-pool na scoring-factors pia husoma
+`promise-pillars.svg`, `free-tier-budget.svg` na `strategies-grid.svg`. `free-tier-budget.svg`
+huchora takwimu zake kutoka kwenye kipakia katalogi hai, kwa hivyo mabadiliko kwenye `FREE_MODEL_BUDGETS` au kwenye
+jina la mtoa huduma linaloonyeshwa husababisha CI kuwa nyekundu hadi faili hiyo itengenezwe upya.
 
-### Kazi: `i18n-ui-coverage`
+### Job: `i18n-ui-coverage`
 
 | Skripti                                   | Huthibitisha                                                                                                                                                                                                                     | Inazuia     |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -301,7 +322,7 @@ Ukaguzi wa madai kuhusu watoa huduma wa bure daima, maingizo ya katalogi, pool z
 
 Inahitaji `fetch-depth: 0` — kizuizi cha mabadiliko ya thamani hulinganisha `en.json` dhidi ya msingi wa uunganishaji.
 
-#### `check-ui-value-drift` — kizuizi cha tafsiri zilizopitwa na wakati
+#### `check-ui-value-drift` — gate ya tafsiri zilizopitwa na wakati
 
 Hunasa dosari moja ya i18n ambayo vizuizi vingine haviwezi kuiona kimuundo: thamani ya Kiingereza
 inaandikwa upya huku tafsiri zilizotokana na Kiingereza cha _awali_ zikibaki, hivyo

@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Μητρώα παρόχων, προφίλ κεφαλίδων, ταυτότητα, …
 ├── handlers/               Handlers αιτημάτων (chat, embeddings, ήχος, εικόνα, …)
-├── executors/              156 modules executor (κλάσεις executor + βοηθητικά ανά πάροχο)
+├── executors/              159 modules executor (κλάσεις executor + βοηθητικά ανά πάροχο)
 ├── translator/             Μετατροπή μορφής (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer ροής Responses API ↔ Chat Completions
 ├── services/               80+ modules υπηρεσιών (συνδυασμοί, fallback, ποσοστώσεις, ταυτότητα, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modules executor ανώτατου επιπέδου (`*.ts` εκτός από τα `base.ts`, `index.ts` και τα tests — το πλήθος
+159 modules executor ανώτατου επιπέδου (`*.ts` εκτός από τα `base.ts`, `index.ts` και τα tests — το πλήθος
 μετριέται από το `npm run check:docs-counts`). Κάθε κλάση executor επεκτείνει το `BaseExecutor` (`base.ts`),
 είτε απευθείας είτε μέσω του `DefaultExecutor` ή άλλου executor· τα υπόλοιπα modules είναι βοηθητικά
 ανά πάροχο (σχήματα εργαλείων, adapters fetch/TTS, handlers ιδιαιτεροτήτων). Στους executors περιλαμβάνονται:

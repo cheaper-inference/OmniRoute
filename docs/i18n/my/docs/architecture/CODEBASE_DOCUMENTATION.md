@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries၊ header profiles၊ identity၊ …
 ├── handlers/               Request handlers (chat၊ embeddings၊ audio၊ image၊ …)
-├── executors/              Provider executor module 156 ခု (executor classes + provider တစ်ခုချင်းစီအတွက် helpers)
+├── executors/              Provider executor module 159 ခု (executor classes + provider တစ်ခုချင်းစီအတွက် helpers)
 ├── translator/             Format ပြောင်းလဲမှု (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               Service module 80+ ခု (combos၊ fallback၊ quotas၊ identity၊ …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ထိပ်တန်းအဆင့် executor module 156 ခု (`*.ts` မှ `base.ts`၊ `index.ts` နှင့် tests များကို နုတ်ထားခြင်း — ဤအရေအတွက်ကို
+ထိပ်တန်းအဆင့် executor module 159 ခု (`*.ts` မှ `base.ts`၊ `index.ts` နှင့် tests များကို နုတ်ထားခြင်း — ဤအရေအတွက်ကို
 `npm run check:docs-counts` က တိုင်းတာသည်)။ Executor class တိုင်းသည် `BaseExecutor` (`base.ts`) ကို
 တိုက်ရိုက်ဖြစ်စေ၊ `DefaultExecutor` သို့မဟုတ် အခြား executor မှတစ်ဆင့်ဖြစ်စေ ဆက်ခံထားသည်။ ကျန် module များသည် provider တစ်ခုချင်းစီအတွက်
 helpers (tool schemas၊ fetch/TTS adapters၊ ထူးခြားချက်ကို ကိုင်တွယ်သည့် handlers) ဖြစ်သည်။ Executors များတွင် အောက်ပါတို့ ပါဝင်သည်-

@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Beágyazott szolgáltatások kezelése
 
 Útvonalak a 9Router és a CLIProxyAPI telepítéséhez, elindításához, leállításához és felügyeletéhez.
-Minden útvonal **LOCAL_ONLY** besorolású (csak visszacsatolási interfészen érhető el, 17. szigorú szabály), mivel
+Minden útvonal **LOCAL_ONLY** besorolású (csak visszacsatolási interfészen érhető el, #17. szigorú szabály), mivel
 meghívhatják az `npm install` parancsot, és gyermekfolyamatokat indíthatnak.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Szolgáltatói nyilvántartások, fejlécprofilok, identitás, …
 ├── handlers/               Kérelemkezelők (csevegés, beágyazások, hang, kép, …)
-├── executors/              156 szolgáltatói végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédmodulok)
+├── executors/              159 szolgáltatói végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédmodulok)
 ├── translator/             Formátumkonverzió (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions streamtranszformátor
 ├── services/               Több mint 80 szolgáltatásmodul (kombinációk, tartalék megoldások, kvóták, identitás, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 felső szintű végrehajtómodul (`*.ts`, a `base.ts`, az `index.ts` és a tesztek nélkül — ezt a számot
+159 felső szintű végrehajtómodul (`*.ts`, a `base.ts`, az `index.ts` és a tesztek nélkül — ezt a számot
 az `npm run check:docs-counts` méri). Minden végrehajtóosztály közvetlenül vagy a `DefaultExecutor`
 vagy egy másik végrehajtó közbeiktatásával kiterjeszti a `BaseExecutor` (`base.ts`) osztályt; a fennmaradó
 modulok szolgáltatónkénti segédmodulok (eszközsémák, fetch-/TTS-adapterek, sajátosságkezelők). A végrehajtók közé tartoznak:

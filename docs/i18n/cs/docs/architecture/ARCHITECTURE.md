@@ -15,7 +15,7 @@ Poskytuje jednotný koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje pro
 
 Hlavní funkce:
 
-- Rozhraní API kompatibilní s OpenAI pro CLI/nástroje (380 poskytovatelů, 156 prováděcích modulů)
+- Rozhraní API kompatibilní s OpenAI pro CLI/nástroje (380 poskytovatelů, 159 prováděcích modulů)
 - Převod požadavků a odpovědí mezi formáty jednotlivých poskytovatelů
 - Záložní přepínání mezi kombinacemi modelů (sekvence více modelů)
 - Strukturované kroky kombinací (`provider + model + connection`) s pořadím za běhu podle `compositeTiers`
@@ -345,7 +345,7 @@ Vrstvy architektury:
   živým streamováním protokolů, správou klíčů API a (pro 9Router) vestavěným nativním uživatelským rozhraním
   prostřednictvím interní reverzní proxy.
 - **API** (`/api/services/{name}/*`) — 11 koncových bodů pro 9Router, 10 pro CLIProxyAPI, po 8 pro Bifrost / Mux / Dario,
-  všechny klasifikované jako **LOCAL_ONLY** (pevné pravidlo č. 17). Sdílený koncový bod SSE `GET /api/services/[name]/logs`
+  všechny klasifikované jako **LOCAL_ONLY** (pevné pravidlo č. #17). Sdílený koncový bod SSE `GET /api/services/[name]/logs`
   obsluhuje obě služby.
 - **Supervizor** (`src/lib/services/`) — obecná třída `ServiceSupervisor` obaluje
   `child_process.spawn`, udržuje kruhovou vyrovnávací paměť o velikosti 5 MB pro streamování protokolů přes SSE, smyčku

@@ -1,13 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
-import {
-  COLLECTORS,
-  globToRegExp,
-} from "../../check/check-test-discovery.mjs";
+import { COLLECTORS, globToRegExp } from "../../check/check-test-discovery.mjs";
 
 const UNIT_CI_GLOBS = new Set([
   "tests/unit/*.test.ts",
-  "tests/unit/{api,auth,authz,build,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts",
+  "tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts",
   "tests/unit/dashboard/**/*.test.ts",
   "tests/unit/serial/**/*.test.ts",
   "tests/unit/**/*.test.mjs",

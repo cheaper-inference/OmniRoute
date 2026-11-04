@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Gestão de serviços incorporados
 
 Rotas para instalar, iniciar, parar e monitorizar o 9Router e o CLIProxyAPI.
-Todos os caminhos estão classificados como **LOCAL_ONLY** (apenas loopback, regra rígida n.º 17), uma vez que
+Todos os caminhos estão classificados como **LOCAL_ONLY** (apenas loopback, regra rígida n.º #17), uma vez que
 podem invocar `npm install` e gerar processos subordinados.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registos de fornecedores, perfis de cabeçalhos, identidade, …
 ├── handlers/               Processadores de pedidos (conversação, embeddings, áudio, imagem, …)
-├── executors/              156 módulos executores de fornecedores (classes de executor + auxiliares por fornecedor)
+├── executors/              159 módulos executores de fornecedores (classes de executor + auxiliares por fornecedor)
 ├── translator/             Conversão de formatos (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformador de streams da API Responses ↔ Chat Completions
 ├── services/               Mais de 80 módulos de serviço (combinações, recurso, quotas, identidade, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
+159 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
 é medida por `npm run check:docs-counts`). Todas as classes de executor estendem `BaseExecutor` (`base.ts`),
 diretamente ou através de `DefaultExecutor` ou de outro executor; os restantes módulos são auxiliares
 por fornecedor (esquemas de ferramentas, adaptadores de fetch/TTS, processadores de particularidades). Os executores incluem:

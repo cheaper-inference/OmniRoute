@@ -39,7 +39,7 @@ class DastToolchain(unittest.TestCase):
         self.assertEqual(context.params["max_response_time"], 30)
         self.assertEqual(context.params["request_timeout"], 20)
         self.assertTrue(context.params["no_color"])
-        self.assertEqual(context.params["include_path_regex"], "^/v1/(chat/completions|models)$|^/api/(auth|keys)")
+        self.assertEqual(context.params["include_path_regex"], "^/api/v1/(chat/completions|models)$|^/api/(auth|keys)")
         self.assertEqual(context.params["exclude_path_regex"], "^/api/auth/(oidc/|login)")
 
     def test_unknown_cli_argument_is_rejected(self):

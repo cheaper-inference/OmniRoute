@@ -4,14 +4,11 @@
 
 ---
 
-> **Status:** nadzorna ploča izgrađena je na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
-> kao workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snimka fiksirana je u
-> `packages/ui-kit/UPSTREAM.md` i zaštićena naredbom `npm run check:ui-kit-snapshot`). Svijetla tema je kanonska;
-> zadana preferencija je `system`. Akcentna boja je Keak lime (`--ci-color-accent`). Switzer je primarna obitelj fontova za UI i prikaz teksta (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju to), koju sam hostira sam kit (`packages/ui-kit/src/ci-fonts.css`, uvozi `ci-tokens.css`). Svaka ikona je Lucide glif.
+> **Status:** nadzorna ploča izgrađena je na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), uključeno u ovo spremište kao radni prostor `packages/ui-kit` (`@omniroute/ui-kit`; uzvodna snimka je pričvršćena u `packages/ui-kit/UPSTREAM.md` i zaštićena `npm run check:ui-kit-snapshot`). Svjetlost je kanonska tema; zadana postavka je `system`. Zadana paleta je kompleta **Editions** izgled (topli papir neutralni i bakreni naglasak `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Postavke → Izgled → Paleta boja nudi **Classic** , osnovni žetoni kompleta s naglaskom limete. Switzer je primarna obitelj za UI i tekst za prikaz (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju to), hostiran od strane samog kompleta (`packages/ui-kit/src/ci-fonts.css`, uvezen od strane `ci-tokens.css`). Svaka ikona je Lucide glif.
 >
-> Inter je zamjenski font za glifove koji nedostaju u Switzeru; `--font-mono` upućuje na sistemski niz fontova jednake širine `--ci-font-code`.
+> Inter je zamjena za glifove koji nedostaju iz Switzer; `--font-mono` preslikava u sustav monospace stog `--ci-font-code`.
 >
-> Kada u fontu `Switzer` nedostaje glif, `src/app/globals.css` odabire zamjenski font za svaki glif zasebno: `Inter` za ćirilicu, grčki i vijetnamski, a `Vazirmatn` za arapsko pismo samo pod `html[dir="rtl"]`.
+> `src/app/globals.css` odabire rezervne fontove po glifu kada `Switzer` nema glif: `Inter` za ćirilicu, grčki i vijetnamski, a `Vazirmatn` za arapsko pismo samo pod `html[dir="rtl"]`.
 
 `src/app/globals.css`:
 
@@ -25,76 +22,16 @@
 }
 ```
 
-## 1. Gdje se što nalazi
+## 1. Gdje stvari žive
 
-- **Kit.** `packages/ui-kit/src` bajt-po-bajt je kopija upstream `src/` na commitu fiksiranom u
-  `packages/ui-kit/UPSTREAM.md` (koji također bilježi odobrenje licence); `PATCHES.md` navodi lokalne
-  zakrpe (nema ih). Koristi se kao izvorni kod, bez izgradnje: `next.config.mjs` ga transpilira, a
-  `tsconfig.json` preslikava `@omniroute/ui-kit` → `packages/ui-kit/src` i `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` i `vitest.mcp.config.ts` nose isti alias). Komponentu kita
-  uvozite preko njezine podstaze (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nikada
-  kroz `@omniroute/ui-kit` barrel: barrel uvlači svaku komponentu (uključujući odabirač datuma) u svaki
-  modul koji ga uvozi. Stylesheet kita ulazi kroz `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokeni.** `packages/ui-kit/src/ci-tokens.css` deklarira tokene `--ci-*`; `src/app/globals.css`
-  povezuje ih sa zastarjelim imenima OmniRoutea (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), tako da postojeća čitanja `var(--color-*)` i Tailwind
-  uslužne klase i dalje rade. Novi kod koristi Tailwind uslužne klase (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ili klase kita — nikad heksadecimalnu
-  vrijednost (`tests/unit/design-kit-bridge.test.ts` nameće taj most). `text-primary` razrješava se u
-  `--color-primary-ink` kroz `--text-color-primary` (lime-800 u svijetloj temi, lime akcent u tamnoj),
-  tako da primarni tekst ostaje čitljiv dok `bg-primary`/`border-primary` zadržavaju lime površinu.
-  Serije grafova koriste `--color-chart-1` … `--color-chart-5`.
-- **Teme.** `<html className="ci-theme">` (`src/app/layout.tsx`) uključuje dokument u temu kita.
-  Postavka je `light`, `dark` ili `system` (`THEME_CONFIG.defaultTheme = "system"` u
-  `src/shared/constants/appConfig.ts`; `system` prati `prefers-color-scheme`). `applyTheme()` u
-  `src/store/themeStore.ts` (koju zrcali umetnuta bootstrap skripta u `src/app/layout.tsx`, koja se
-  izvršava prije hidratacije) postavlja `data-theme="dark"|"light"` i istovremeno uključuje/isključuje
-  klasu `.dark` na `<html>`. Tamni skup tokena kita vezan je uz `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); OmniRouteova vlastita tamna nadjačavanja (blok `.dark` u
-  `globals.css`) i zastarjele Tailwind `dark:` uslužne klase vežu se uz klasu `.dark`. Ne postoje
-  unaprijed zadane postavke boje akcenta: akcent uvijek dolazi iz kita, a sačuvana postavka iz starije
-  izrade odbacuje se pri učitavanju storea.
-- **Komponente (adapteri).** `src/shared/components/index.tsx` čuva API komponenata OmniRoutea (ista
-  imena, zadane izvoze i propse), a primitive iza njega adapteri su nad kitom: obrasci
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), prekrivni elementi i
-  povratne informacije (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`,
-  `EmptyState`, `Loading`), struktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`,
-  `Breadcrumbs`, `Avatar`) i tablice (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`,
-  `PresetSlider`). Adapter uvozi komponentu kita preko podstaze i preslikava zastarjele propse na nju —
-  na primjer, `Button variant="primary"` jest `default` gumb kita (`--ci-button-primary-*`: inverzna
-  površina u svijetloj temi, akcent s njegovom tintom `--ci-color-accent-foreground` u tamnoj), `danger`
-  je `destructive`, a `warning` je `outline` plus proširenje `.ci-button--warning`. Pravila
-  `.ci-button--warning` i `.ci-badge[data-tone]` na kraju `globals.css` (`@layer components`)
-  OmniRouteova su proširenja nad klasama kita. `tests/unit/ui/adapters/*.test.tsx` fiksiraju svaki
-  adapter.
-- **Ljuska.** `src/app/(dashboard)/layout.tsx` renderira `DashboardLayout`, koji renderira
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` / `SidebarInset`
-  kita (`packages/ui-kit/src/sidebar.tsx`), s navigacijskom logikom OmniRoutea u
-  `src/shared/components/Sidebar.tsx`. Poveznica „Preskoči na sadržaj" prema `#main-content` prvi je
-  element koji se može fokusirati. `src/shared/components/Header.tsx` sadrži `SidebarTrigger` kita
-  (jedini prekidač bočne trake u ljusci), Keak `ProductSwitcher` i otvarač naredbene palete; prikazuje
-  naslov rute samo dok unutar `#main-content` nije montiran nijedan `PageHeader` kita
-  (`.ci-page-header`), tako da stranica s vlastitim `PageHeader`om ima jedan `h1`.
-  `src/shared/components/CommandPalette.tsx` jest `Dialog` kita.
-- **Ikone.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) razrješava ime (rječnik
-  Material Symbolsa koji zasloni koriste) kroz `ICON_MAP` (`src/shared/constants/iconMap.ts`) do Lucide
-  glifa. Font i paket Material Symbolsa uklonjeni su: ime koje nedostaje u mapi renderira neutralni
-  zamjenski glif (`data-icon-missing="true"`) i izvan produkcije zapisuje upozorenje u konzolu.
-  `npm run gen:icon-map` ispisuje imena u upotrebi koja nedostaju u mapi
-  (`tests/unit/icon-map-coverage.test.ts` pada na svakom imenu bez Lucide ikone;
-  `tests/unit/icon-map-object-values.test.ts` pokriva imena pohranjena u lookup objektima);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` prepisuje doslovne
-  `<span className="material-symbols-outlined">` spanove u `<Icon>`.
-- **Brend.** `src/shared/components/OmniRouteLogo.tsx` omata kit: zadani izvoz `OmniRouteLogo`
-  renderira `ProductIcon product="omniroute" variant="glyph"` (inline SVG, siguran za `basePath`), a
-  `OmniRouteLockup` renderira `ProductLockup product="omniroute"` (pristupačno ime „Keak OmniRoute")
-  ili, za white-label operatere, njihov vlastiti `name`/`logoSrc`. Odredišta preklopnika proizvoda
-  nalaze se u `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`).
-  Samostalni zasloni — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
-  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` i
-  `src/shared/components/ErrorPageScaffold.tsx` — prikazuju lockup;
-  `tests/unit/brand-pages-static.test.ts` to štiti.
+- **Kit.** `packages/ui-kit/src` je bajt-po-bajt kopija uzvodnog `src/` na predaji prikvačenoj u `packages/ui-kit/UPSTREAM.md` (koja također bilježi autorizaciju licence); `PATCHES.md` navodi lokalne zakrpe. Konzumira se kao izvor, bez izgradnje: `next.config.mjs` ga transpilira, a `tsconfig.json` preslikava `@omniroute/ui-kit` → `packages/ui-kit/src` i `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` i `vitest.mcp.config.ts` nose isti alias). Uvezite komponentu kompleta njezinom podstazom (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), nikada kroz `@omniroute/ui-kit` bačvu: bačva povlači svaku komponentu (uključujući birač datuma) u svaki uvoznik. List stilova kompleta ulazi kroz `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, kompletan list: jezgra `ci-ui.css` plus svaka obitelj uzoraka).
+- **Tokeni.** `packages/ui-kit/src/ci-tokens.css` deklarira `--ci-*` tokene; `src/app/globals.css` ih premošćuje naslijeđenim OmniRoute nazivima (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), tako da postojeći `var(--color-*)` čita i Tailwind pomoćni programi nastavljaju raditi. Novi kod koristi pomoćne programe Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ili klase kompleta — nikad heksadecimalnu vrijednost (`tests/unit/design-kit-bridge.test.ts` provodi premošćivanje). `text-primary` se razrješava na `--color-primary-ink` do `--text-color-primary`, tako da primarni tekst ostaje čitljiv dok `bg-primary`/`border-primary` zadržavaju akcentnu površinu: pod Editions to je `--ci-color-accent-active` kompleta (duboki bakreni `#99562f` u svijetlom, bakreni naglasak u tamnom); pod Classic, lime-800 u svijetlom i naglasak limete u tamnom. Serije grafikona koriste `--color-chart-1` … `--color-chart-5`.
+- **Teme.** `<html className="ci-theme">` (`src/app/layout.tsx`) uključuje dokument u temu kompleta. Preferencija je `light`, `dark` ili `system` (`THEME_CONFIG.defaultTheme = "system"` u `src/shared/constants/appConfig.ts`; `system` slijedi `prefers-color-scheme`). `applyTheme()` u `src/store/themeStore.ts` (preslikan pomoću `THEME_BOOT_SCRIPT`, ugrađen u `src/app/layout.tsx`, koji se pokreće prije hidratacije) postavlja `data-theme="dark"|"light"` i zajedno uključuje `.dark` klasu na `<html>`. Tamni set tokena kompleta ima ključ na `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute-ova vlastita tamna nadjačavanja ( `.dark` blok u `globals.css`) i naslijeđeni ključ Tailwind `dark:` pomoćnih programa na `.dark` klasi. Ne postoje unaprijed postavljene boje naglaska: naglasak uvijek dolazi iz kompleta, a postojana unaprijed postavljena iz starije verzije odbacuje se kada se trgovina učita.
+- **Palete.** Dva, oba iz kompleta (`src/shared/constants/appearancePalette.ts`): `editions`, zadani, i `classic`. Izdanja su `data-ci-appearance="editions"` atribut kompleta na `<html>`, koji `ci-editions.css` (uvezen od strane `ci-ui.css`) kombinira sa `data-theme`; Klasika je odsutnost atributa. Poslužitelj korijenskog rasporeda renderira atribut, tako da posjetitelj bez ičega pohranjenog (ili bez JS) dobiva izdanja na svakoj površini — nadzorna ploča, prijava, `/status`, stranice s pogreškama, `/docs` i PWA. Izbor ostaje uz temu u istoj `theme` trgovini (`palette`, `setPalette()`, `applyPalette()` u `src/store/themeStore.ts`) i primjenjuje ga prije bojanja `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, umetnut u `<head>` izgleda), koji uklanja atribut samo kada je pohranjena paleta `"classic"`; `src/app/global-error.tsx`, izvan korijenskog rasporeda, primjenjuje ga iz iste trgovine. Ne stavljajte `data-ci-appearance` ni na jedan drugi element: komplet ga povezuje sa `html:root:has([data-ci-appearance="editions"])`, tako da bi jedan potomak promijenio cijeli dokument. Varijanta izdanja `data-ci-editions-variant="landing"` namijenjena je marketinškim stranicama, a ne nadzornoj ploči. Krom preglednika (`viewport.themeColor`, web manifest) ne može čitati CSS ili pohranjeni izbor, pa slijedi zadanu vrijednost: `PWA_THEME_COLORS` u `src/shared/constants/pwaThemeColors.ts` je jedno ogledalo izdanja `--ci-color-background` (`#f3f1e9` / `#11120f`), koje je `ci-editions.css` prikvačio na `tests/unit/pwa-theme-colors.test.ts`. Monako očitava svoje boje sa sonde (`monacoKitTheme.ts`); pod Editions čitanje sonde okreće root `data-theme` za jedan sinkroni prolaz, jer kit rješava Editions light/dark iz roota.
+- **Komponente (adapteri).** `src/shared/components/index.tsx` zadržava OmniRoute komponentu API (ista imena, zadani eksporti i props), a primitive iza njega su adapteri preko kompleta: obrasci (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), slojevi i povratne informacije (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), struktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) i tablice (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter uvozi komponentu kompleta po podstazi i mapira naslijeđene rekvizite na nju — na primjer `Button variant="primary"` je gumb kompleta `default` (`--ci-button-primary-*`: inverzna površina u svijetloj boji, naglasak sa svojom `--ci-color-accent-foreground` tintom u tamnoj), `danger` je `destructive`, a `warning` je `outline` plus ekstenzija `.ci-button--warning`. Pravila `.ci-button--warning` i `.ci-badge[data-tone]` na kraju `globals.css` (`@layer components`) su OmniRoute ekstenzije na vrhu klasa kompleta. `tests/unit/ui/adapters/*.test.tsx` pin svaki adapter.
+- **Ljuska.** `src/app/(dashboard)/layout.tsx` prikazuje `DashboardLayout`, koji prikazuje `src/shared/components/layouts/DashboardShell.tsx`: komplet `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), sa OmniRoute-ovom navigacijskom logikom u `src/shared/components/Sidebar.tsx`. Veza "preskoči na sadržaj" na `#main-content` je prvi element koji se može fokusirati. `src/shared/components/Header.tsx` sadrži komplet `SidebarTrigger` (jedini prekidač bočne trake ljuske), Keak `ProductSwitcher` i otvarač palete naredbi; prikazuje samo naslov rute dok nijedan komplet `PageHeader` (`.ci-page-header`) nije montiran unutar `#main-content`, tako da stranica sa svojim vlastitim `PageHeader` ima jedan `h1`. `src/shared/components/CommandPalette.tsx` je komplet `Dialog`.
+- **Ikone.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) razrješava ime (rječnik materijalnih simbola koji zasloni koriste) preko `ICON_MAP` (`src/shared/constants/iconMap.ts`) u Lucide glif. Font i paket Material Symbols su nestali: naziv koji nedostaje na karti prikazuje neutralni glif rezerviranog mjesta (`data-icon-missing="true"`) i bilježi upozorenje konzole izvan proizvodnje. `npm run gen:icon-map` ispisuje imena u upotrebi koja nedostaju na karti (`tests/unit/icon-map-coverage.test.ts` ne uspijeva na bilo kojem imenu bez ikone Lucide; `tests/unit/icon-map-object-values.test.ts` pokriva imena pohranjena u objektima pretraživanja); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` prepisuje literalne `<span className="material-symbols-outlined">` raspone u `<Icon>`.
+- **Marka.** `src/shared/components/OmniRouteLogo.tsx` omotava komplet: zadani izvoz `OmniRouteLogo` renderira `ProductIcon product="omniroute" variant="glyph"` (umetnuti SVG, `basePath` -safe) i `OmniRouteLockup` renderira `ProductLockup product="omniroute"` (dostupan naziv "Keak OmniRoute") ili, za white-label operatore, njihov vlastiti `name`/`logoSrc`. Odredišta za promjenu proizvoda žive u `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Samostalni zasloni — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` i `src/shared/components/ErrorPageScaffold.tsx` — pokazuju zaključavanje; `tests/unit/brand-pages-static.test.ts` ga čuva.
 
 ## 2. Pravila
 
@@ -160,7 +97,16 @@
 
 ## 5. Ažuriranje kita
 
-`npm run check:ui-kit-upstream` uspoređuje verziju prikvačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repoa i ispisuje naredbu sinkronizacije kada izdanje izađe. Tjedni tijek rada `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru i drži jedan problem praćenja otvorenim dok je pin iza; uzvodni repo je privatan, tako da tijek rada treba token samo za čitanje u `UI_KIT_READ_TOKEN` tajni. Ako provjera ne može čitati upstream (nema tokena, token više ne radi ili GitHub nije dostupan), prijavljuje `unknown` i završava izlaznim kodom `0`. Tijek rada zapisuje upozorenje i pokušava zadržati jedan zaseban problem za praćenje otvorenim; kasnije uspješno pokretanje zatvara ga nakon povratka pristupa. Pogreška u API-ju za GitHub probleme uzrokuje neuspjeh posla.
+`npm run check:ui-kit-upstream` uspoređuje verziju prikvačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repoa i ispisuje naredbu sinkronizacije kada izdanje izađe.
+
+Dnevni tijek rada `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru. Dok je igla iza, `scripts/ci/ui-kit-sync-pr.sh` drži jednu sinkronizaciju PR otvorenom prema najvišoj `release/vX.Y.Z` grani, na pokretnoj grani `chore/ui-kit-sync-latest`. Nikada se ne spaja: svako izdanje kompleta i dalje treba vizualnu provjeru na lokalnom VPS. Grana se ponovno gradi kada izađe novije izdanje, au suprotnom se ostavlja na miru. Otvoreni PR s predajama gurnutim rukom nije prebrisan, a PR za verziju koju je održavatelj zatvorio bez spajanja ostaje zatvoren do novijeg izdanja.
+
+Kada se PR ne može otvoriti (ciljano izdanje je zamrznuto, PR ima predaje gurnute ručno, PR je zatvoren ili PR token nije postavljen), tijek rada drži jedan problem praćenja otvorenim koji govori zašto.
+
+Tijek rada koristi dvije tajne:
+
+- `secrets.UI_KIT_READ_TOKEN`: token samo za čitanje za privatni uzvodni repo. Kada uzvodna provjera ne može pročitati podatke (nema tokena, token je prestao raditi ili GitHub nedostupan), javlja `unknown` i izlazi s kodom `0`. Tijek rada piše upozorenje i pokušava zadržati jedan zasebni problem praćenja otvorenim; kasnije uspješno pokretanje ga zatvara nakon povratka pristupa. Kvar GitHub problema API ne uspijeva posao.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: fino razrađeni token na ovom repozitoriju s pristupom za pisanje sadržaja i zahtjeva za povlačenjem. Ovaj tijek rada otvara ili ažurira sinkronizaciju PRs samo kada je namjenski token konfiguriran; bez njega tijek rada gura granu i javlja da nijedan PR nije otvoren.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopira uzvodni `src/` pri tom predanju (`latest` = najnovija `v*` oznaka) u `packages/ui-kit/src`, primjenjuje jednu dopuštenu transformaciju (ispušta `.js` sufiks iz relativnog uvoza) i postavlja verziju radnog prostora u `packages/ui-kit/package.json` i `package-lock.json` na uzvodni. Zatim: pregledajte `git diff packages/ui-kit`, vizualno prođite kroz pružatelje, postavke, kombinacije, upotrebu i krajnju točku u obje teme, pokrenite `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otvorite PR s uzvodnim dnevnikom promjena.
 
@@ -168,29 +114,21 @@
 
 Dvanaest dijagrama ugrađenih u korijenski `README.md` (`docs/diagrams/*.svg`) primjenjuje komplet na statične slike. Generirani su, a ne ručno nacrtani: 13 generatorskih datoteka u `scripts/docs/gen-readme-*.mjs` (dvanaest dijagrama i upravljački program `gen-readme-diagrams.mjs`) te 12 testova zastarjelosti u `tests/unit/docs/readme-*-svg.test.ts`, po jedan za svaki dijagram. Svaki test uspoređuje datoteku spremljenu u commitu s izlazom generatora bajt po bajt (posao `test-unit`).
 
-- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu iz `packages/ui-kit/src/ci-tokens.css` (koju je uz tu datoteku prikvačio `tests/unit/docs/readme-diagram-theme.test.ts`) i definira uloge teksta na ranijim licima kompleta — Instrument Serif za prikaz, Inter za UI tekst, IBM Plex Mono za brojke i kod — iz `@fontsource` paketa (sama nadzorna ploča koristi Switzer kompleta od kompleta 0.0.66). Svijetle vrijednosti nalaze se na `:root`, tamne vrijednosti iza `prefers-color-scheme: dark`, unutar datoteke, tako da svaka slika slijedi shemu gledatelja na GitHub.
-
-- **Fontovi.** `scripts/docs/readme-fonts.mjs` sužava te woff2 datoteke na glifove koje crta pojedini dijagram i ugrađuje ih putem `@font-face` kao URI-je `data:`. Time fontovi kompleta ostaju unutar SVG-a. Lokalna provjera slika README provjerava da renderiranje ne šalje vanjske zahtjeve za fontovima. Podskupovi sadrže samo latinične znakove; glifovi simbola koji koriste sistemske fontove kao zamjenu dopuštaju se pojedinačno u `SYMBOL_FALLBACKS`. Svaki drugi nepokriveni glif izaziva pogrešku.
-
-- **Ponovno generiranje.** `npm run docs:readme-diagrams` prepisuje svih dvanaest dijagrama redoslijedom iz README-a i ispisuje po redak s veličinom datoteke. Svaki generator radi i samostalno (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` zahtijeva `node --import tsx/esm` jer brojke dolaze iz učitavača aktualnog kataloga u `open-sse/config/freeModelCatalog.ts`; utjecaj promjene kataloga na CI opisan je u `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generator i SVG spremite u isti commit.
-
+- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu Editions (zadani izgled) iz `packages/ui-kit/src/ci-editions.css` (koju je uz tu datoteku prikvačio `tests/unit/docs/readme-diagram-theme.test.ts`, koji također provjerava WCAG AA za svaku boju teksta na svakoj površini u obje sheme; jedina iznimka, svijetli `warn`, je upozorenje o kompletu potamnjeno 10 % jer je vrijednost kompleta 4,46:1 na platnu) i definira uloge teksta na ljestvici tipa kompleta (`ci-tokens.css`): Switzer na težine kompleta (400/500/600, prikaz na 500) i praćenje za sve, osim kodnih uloga (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), koje su IBM Plex Mono i samo su za naredbe, URLs, identifikatore i ekrane terminala. Svijetle vrijednosti nalaze se na `:root`, tamne vrijednosti iza `prefers-color-scheme: dark`, unutar datoteke, tako da svaka slika slijedi shemu gledatelja na GitHub.
+- **Fontovi.** GitHub Markdown ne nosi CSS i camo proxy blokira svako vanjsko dohvaćanje, tako da vrsta kompleta mora putovati unutar datoteke. `scripts/docs/readme-outline.mjs`, posljednji korak svakog generatora, oblikuje Switzerove uloge pomoću HarfBuzz i crta ih kao vektorske obrise (`<defs>` staze i `<use>`), sa strelicama i geometrijskim simbolima koji nedostaju Switzeru iscrtanim na vlastitoj metrici. Obrisi, nikad ugrađeni font: Switzerova licenca (`packages/ui-kit/src/fonts/FFL.txt`) zabranjuje podskup i pretvorbu formata bez pisanog pristanka i dopušta vektorske crteže, stoga nemojte ponovno uvoditi Switzer `@font-face` ili `data:` URI. Jedini font koji je ostao u datoteci je OFL IBM Plex Mono podskup za ono što ostaje pravi tekst koda (`scripts/docs/readme-fonts.mjs`), izgrađen od tih znakova; svaki glif koji ne može ugraditi baca.
+- **Regenerirati.** `npm run docs:readme-diagrams` prepisuje svih dvanaest u README redoslijedu i ispisuje jedan redak po datoteci s njezinom veličinom. Jedan generator također radi samostalno (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` treba `node --import tsx/esm` jer njegove brojke dolaze iz učitavača kataloga uživo u `open-sse/config/freeModelCatalog.ts`; CI posljedica promjene kataloga je u `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Postavite generator i SVG zajedno.
 - **Dokaz.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderira datoteku u lokalnoj provjeri (oznaka `<img>`, ograničavajući `Content-Security-Policy` i odgovor `image/svg+xml`), snima svijetli i tamni prikaz te prijavljuje vanjske zahtjeve stranice za fontovima; mora ih biti 0.
 
-- **Ograničenje.** Manje od 200 KB po datoteci, što provjerava svaki test zastarjelosti; 500 KB je čvrsta granica za svaku sliku README (pravilo validatora SVG studio).
-
-- **Zajednički tekst, brojke iz gatea.** Svaki generator čuva tekst dijagrama u konstanti `*_COPY` ili ga sastavlja iz aktualnog kataloga. Isti se tekst crta i koristi kao ulaz za podskup fonta. Kanonske brojke ostaju u čvorovima `<text>`, koje čita `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Testovi zastarjelosti dijagrama koje gate čita pokreću i njegove validatore nad generiranom datotekom. Brojka koja odstupa od koda ruši test: ispravite izvor koji gate čita, nikada brojku u generatoru.
+- **Proračun.** Ispod 200 KB po datoteci (svaki test zastarjelosti to potvrđuje); 500 KB je tvrda granica za bilo koju README sliku (pravilo validatora SVG studija).
+- **Zajednički tekst, brojke iz gatea.** svaki generator nosi svoju kopiju dijagrama u `*_COPY` konstanti (ili je gradi iz živog kataloga) koja je i nacrtani tekst i ulaz koraka ocrtavanja. Kanonske figure ostaju u čvorovima `<text>` (nevidljive nakon što su ocrtane, `fill-opacity:0`), čita ih `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testovi zastarjelosti dijagrama koje vrata čitaju također pokreću svoje validatore na generiranoj datoteci, tako da brojka koja odstupa od koda ne prođe test — popravi izvor koji vrata čitaju, nikad broj u generatoru.
 
 ## 7. Kazalo referenci
 
-- `src/app/globals.css` — most tokena, nadjačavanja za `.dark`, proširenja OmniRoutea u `@layer components`
-- `packages/ui-kit/UPSTREAM.md` — prikvačeni commit nadređenog projekta i odobrenje licence; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` i prilagodnici uz njega; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+- `src/app/globals.css` — token most, `.dark` nadjačavanja, OmniRoute `@layer components` proširenja
+- `packages/ui-kit/UPSTREAM.md` — prikvačeno uzvodno izdavanje i autorizacija licence; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` i adapteri pored njega; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

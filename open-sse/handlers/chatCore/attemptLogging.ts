@@ -288,6 +288,7 @@ export type PersistAttemptLogsContext = {
   detailedLoggingEnabled: boolean;
   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
   pendingRequestId: unknown;
+  pendingRequestGeneration?: string;
   clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
   requestedModel: unknown;
   credentials: { connectionId?: string } | null | undefined;
@@ -568,7 +569,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   // Primary key is a fresh UUID from saveCallLog, not traceId. Attempts share
   // pendingRequestId and must not share the row key. correlationId still
   // pairs the row with request.started. pendingRequestId is NOT the row key: it only
-  // routes token usage to the live in-memory request row (#14324).
+  // routes token usage and generation-checked persistence linkage to the live preview.
   // Late read of the per-request added wait published on the ALS
   // capture sink by the executor. Fail-soft: null outside a capture or when
   // nothing was published — the row stores NULL (no wait), never throws.
@@ -580,6 +581,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   const upstreamDispatchedAt = readUpstreamDispatchedAt();
   saveCallLog({
     pendingRequestId: ctx.pendingRequestId,
+    pendingRequestGeneration: ctx.pendingRequestGeneration,
     method: "POST",
     path: clientRawRequest?.endpoint || "/v1/chat/completions",
     status,

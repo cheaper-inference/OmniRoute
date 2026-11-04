@@ -451,7 +451,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 提供者登錄、標頭設定檔、身分識別，……
 ├── handlers/               請求處理常式（聊天、嵌入、音訊、影像，……）
-├── executors/              156 個提供者執行器模組（執行器類別 + 各提供者的輔助程式）
+├── executors/              159 個提供者執行器模組（執行器類別 + 各提供者的輔助程式）
 ├── translator/             格式轉換（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
 ├── transformer/            Responses API ↔ Chat Completions 串流轉換器
 ├── services/               80 多個服務模組（組合、後備、配額、身分識別，……）
@@ -481,7 +481,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-共有 156 個頂層執行器模組（`*.ts`，不含 `base.ts`、`index.ts` 與測試——此數量由
+共有 159 個頂層執行器模組（`*.ts`，不含 `base.ts`、`index.ts` 與測試——此數量由
 `npm run check:docs-counts` 測量）。每個執行器類別都直接或透過 `DefaultExecutor`
 或其他執行器繼承自 `BaseExecutor`（`base.ts`）；其餘模組則是各提供者專用的輔助程式
 （工具結構描述、fetch/TTS 配接器、特殊行為處理常式）。執行器包括：

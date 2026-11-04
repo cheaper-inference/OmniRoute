@@ -458,7 +458,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Sağlayıcı kayıtları, başlık profilleri, kimlik, …
 ├── handlers/               İstek işleyicileri (sohbet, gömmeler, ses, görüntü, …)
-├── executors/              156 sağlayıcı yürütücü modülü (yürütücü sınıfları + sağlayıcıya özel yardımcılar)
+├── executors/              159 sağlayıcı yürütücü modülü (yürütücü sınıfları + sağlayıcıya özel yardımcılar)
 ├── translator/             Biçim dönüştürme (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions akış dönüştürücüsü
 ├── services/               80'den fazla hizmet modülü (kombinasyonlar, yedek mekanizmalar, kotalar, kimlik, …)
@@ -488,7 +488,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 üst düzey yürütücü modülü (`*.ts`; `base.ts`, `index.ts` ve testler hariç — bu sayı
+159 üst düzey yürütücü modülü (`*.ts`; `base.ts`, `index.ts` ve testler hariç — bu sayı
 `npm run check:docs-counts` tarafından ölçülür). Her yürütücü sınıfı, doğrudan veya
 `DefaultExecutor` ya da başka bir yürütücü üzerinden `BaseExecutor` (`base.ts`) sınıfını genişletir;
 kalan modüller sağlayıcıya özel yardımcılardır (araç şemaları, getirme/TTS adaptörleri, özel durum işleyicileri).

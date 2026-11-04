@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { contentHash } from "./count-state.mjs";
+import { readChatModelCountSnapshot } from "../../check/lib/staticChatModelMetadata.mjs";
 
 const fail = (code, file) => {
   throw Object.assign(new Error(`${code}:${file}`), { code, path: file });
@@ -69,6 +70,8 @@ export function countSourceFingerprint(root, io = fs) {
     "scripts/docs/sync-counts.mjs",
     "scripts/check/check-docs-counts-sync.mjs",
     "scripts/check/lib/staticCountMetadata.mjs",
+    "scripts/check/lib/modelMetadataReader.mjs",
+    "scripts/check/lib/staticChatModelMetadata.mjs",
     "prettier.config.mjs",
   ];
   function walk(relative) {
@@ -82,6 +85,12 @@ export function countSourceFingerprint(root, io = fs) {
   const records = names
     .sort()
     .map((name) => [name, contentHash(io.readFileSync(requireRegularFile(root, name, io)))]);
+  // Bind every public source actually traversed by the model-ID projection.
+  // Changing or adding an imported catalog changes this graph fingerprint.
+  records.push([
+    "chat-model-source-graph",
+    contentHash(JSON.stringify(readChatModelCountSnapshot(root, { io }).sources)),
+  ]);
   records.push([
     "migration-filenames",
     contentHash(

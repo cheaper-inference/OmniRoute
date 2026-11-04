@@ -444,7 +444,7 @@ Opgesplitst in doelgerichte submappen:
 
 ---
 
-## 4. `open-sse/` — Werkruimte voor streaming-engine
+## 4. `open-sse/` — Streamingengine-werkruimte
 
 Afzonderlijke npm-werkruimte die wordt gepubliceerd als `@omniroute/open-sse`. Beheert de verwerking van
 verzoeken, executors, translators, services, de transformer en de MCP-server.
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Providerregisters, headerprofielen, identiteit, …
 ├── handlers/               Verzoekhandlers (chat, embeddings, audio, afbeeldingen, …)
-├── executors/              156 provider-executormodules (executorklassen + helpers per provider)
+├── executors/              159 provider-executormodules (executorklassen + helpers per provider)
 ├── translator/             Formaatconversie (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions-streamtransformer
 ├── services/               Meer dan 80 servicemodules (combinaties, fallback, quota's, identiteit, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 executormodules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests — dit aantal
+159 executormodules op het hoogste niveau (`*.ts` minus `base.ts`, `index.ts` en tests — dit aantal
 wordt gemeten door `npm run check:docs-counts`). Elke executorklasse breidt `BaseExecutor` (`base.ts`)
 uit, rechtstreeks of via `DefaultExecutor` of een andere executor; de overige modules zijn helpers
 per provider (toolschema's, fetch-/TTS-adapters, handlers voor eigenaardigheden). Executors zijn onder andere:

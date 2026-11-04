@@ -5,21 +5,32 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getEventListeners } from "node:events";
 
-import {
-  AntigravityExecutor,
-  createCreditsExtractionTransform,
-} from "../../open-sse/executors/antigravity.ts";
-import {
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-ag-passthrough-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = "test-antigravity-passthrough";
+
+const { AntigravityExecutor, createCreditsExtractionTransform } =
+  await import("../../open-sse/executors/antigravity.ts");
+const {
   clearAntigravityVersionCaches,
   seedAntigravityIdeVersionCache,
   seedAntigravityCliVersionCache,
-} from "../../open-sse/services/antigravityVersion.ts";
-import { bindAbortLifecycle } from "../../open-sse/executors/antigravity/streamingPassthrough.ts";
-import { createByteLengthQueueStrategy } from "../../open-sse/utils/byteQueueStrategy.ts";
-import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
+} = await import("../../open-sse/services/antigravityVersion.ts");
+const { bindAbortLifecycle } =
+  await import("../../open-sse/executors/antigravity/streamingPassthrough.ts");
+const { createByteLengthQueueStrategy } = await import("../../open-sse/utils/byteQueueStrategy.ts");
+const core = await import("../../src/lib/db/core.ts");
+
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
 
 test.after(async () => {
   await closeSharedLoggerResource();
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 type ChatCompletionPayload = {
@@ -54,7 +65,7 @@ test("AntigravityExecutor.execute auto-retries short 429 responses and collects 
     if (calls.length === 1) {
       return new Response(JSON.stringify({ error: { message: "rate limited" } }), {
         status: 429,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Retry-After": "1" },
       });
     }
 
@@ -99,6 +110,7 @@ test("AntigravityExecutor.execute auto-retries short 429 responses and collects 
     assert.equal(payload.object, "chat.completion");
 
     assert.equal(calls.length, 2);
+    assert.ok(calls.every((url) => new URL(url).hostname === "daily-cloudcode-pa.googleapis.com"));
     const physicalSends = telemetry.filter((line) => line.includes("[Antigravity] PhysicalSend"));
     assert.equal(physicalSends.length, calls.length);
     assert.match(physicalSends[0] ?? "", /RequestId: prompt194-native-retry-test/);

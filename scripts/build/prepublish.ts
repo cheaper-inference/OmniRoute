@@ -27,6 +27,7 @@ import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { assembleStandalone } from "./assembleStandalone.mjs";
+import { createBuildProgress } from "./buildPhaseProgress.mjs";
 import { ensureStandaloneInput } from "./standaloneInput.mjs";
 import { buildMitmUtilities } from "./buildMitm.mjs";
 import { isNativeExecutable, resolveLocalBinEntry } from "./buildToolRunner.mjs";
@@ -34,6 +35,7 @@ import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
 import { getPrepublishDistDirRefusal } from "./prepublishPathSafety.ts";
 import {
   APP_STAGING_ALLOWED_EXACT_PATHS,
+  APP_STAGING_ALLOWED_PATH_MATCHERS,
   APP_STAGING_ALLOWED_PATH_PREFIXES,
   APP_STAGING_REMOVAL_PATHS,
   findUnexpectedArtifactPaths,
@@ -171,6 +173,8 @@ function removeEmptyDirectories(dir: string): boolean {
   return hasFiles;
 }
 
+const buildProgress = createBuildProgress({ projectRoot: ROOT, role: "cli" });
+buildProgress.record("cli", "STARTED");
 console.log("🔨 OmniRoute — Building for npm publish...\n");
 
 // ── Step 1: Clean previous dist/ directory ─────────────────
@@ -185,32 +189,37 @@ if (existsSync(DIST_DIR)) {
 // If the artifact is absent we invoke it exactly once.
 const NEXT_DIST = process.env.NEXT_DIST_DIR || ".build/next";
 const standaloneServerJs = join(ROOT, NEXT_DIST, "standalone", "server.js");
-ensureStandaloneInput({
-  serverPath: standaloneServerJs,
-  requirePrebuilt: process.env.OMNIROUTE_REQUIRE_PREBUILT_NEXT === "1",
-  build: () => {
-    console.log("  🏗️  .build/next/standalone not found — running `npm run build` once...");
-    execFileSync(process.execPath, ["scripts/build/build-next-isolated.mjs"], {
-      cwd: ROOT,
-      stdio: "inherit",
-    });
-  },
-});
+buildProgress.runSync("next-input", () =>
+  ensureStandaloneInput({
+    serverPath: standaloneServerJs,
+    requirePrebuilt: process.env.OMNIROUTE_REQUIRE_PREBUILT_NEXT === "1",
+    build: () => {
+      console.log("  🏗️  .build/next/standalone not found — running `npm run build` once...");
+      execFileSync(process.execPath, ["scripts/build/build-next-isolated.mjs"], {
+        cwd: ROOT,
+        stdio: "inherit",
+      });
+    },
+  })
+);
 console.log("  ✅ Standalone artifact present:", standaloneServerJs);
 
 // ── Step 3–7: Assemble standalone into dist/ ───────────────
 // All shared copy/sync/sanitize/chunk-patch operations are delegated to
 // assembleStandalone.  npm-UNIQUE steps (MITM, MCP, CLI, sidecars) follow.
 console.log("  📋 Assembling standalone bundle into dist/...");
-assembleStandalone({
-  distDir: join(ROOT, NEXT_DIST),
-  outDir: DIST_DIR,
-  projectRoot: ROOT,
-  sanitizePaths: true,
-  patchTurbopackChunks: true,
-  copyNatives: true,
-});
+buildProgress.runSync("pack-assembly", () =>
+  assembleStandalone({
+    distDir: join(ROOT, NEXT_DIST),
+    outDir: DIST_DIR,
+    projectRoot: ROOT,
+    sanitizePaths: true,
+    patchTurbopackChunks: true,
+    copyNatives: true,
+  })
+);
 console.log("  ✅ Standalone bundle assembled to dist/");
+buildProgress.record("cli-sidecars", "STARTED");
 
 const distServer = join(DIST_DIR, "server.js");
 const methodGuardSrc = join(ROOT, "scripts", "dev", "http-method-guard.cjs");
@@ -679,10 +688,13 @@ for (const relativePath of APP_STAGING_REMOVAL_PATHS) {
 // tarball gate, the staged dist/ legitimately contains node_modules (the
 // standalone server's runtime deps, including Turbopack-hashed packages whose
 // wasm files DB init requires). The allowlist prefixes above are the contract.
+// The path matchers keep the translated docs mirrors the /docs route reads (they arrive
+// with the standalone's docs/ copy) and drop every other docs/i18n file.
 const stagedFiles = walkFiles(DIST_DIR);
 const unexpectedStagedFiles = findUnexpectedArtifactPaths(stagedFiles, {
   exactPaths: APP_STAGING_ALLOWED_EXACT_PATHS,
   prefixPaths: APP_STAGING_ALLOWED_PATH_PREFIXES,
+  pathMatchers: APP_STAGING_ALLOWED_PATH_MATCHERS,
   neverAllowedSegments: [],
 });
 
@@ -698,6 +710,7 @@ if (unexpectedStagedFiles.length > 0) {
 const remainingUnexpectedFiles = findUnexpectedArtifactPaths(walkFiles(DIST_DIR), {
   exactPaths: APP_STAGING_ALLOWED_EXACT_PATHS,
   prefixPaths: APP_STAGING_ALLOWED_PATH_PREFIXES,
+  pathMatchers: APP_STAGING_ALLOWED_PATH_MATCHERS,
   neverAllowedSegments: [],
 });
 
@@ -748,3 +761,5 @@ if (existsSync(distPkg)) {
 }
 
 console.log("");
+buildProgress.record("cli-sidecars", "RETURNED");
+buildProgress.record("cli", "RETURNED");

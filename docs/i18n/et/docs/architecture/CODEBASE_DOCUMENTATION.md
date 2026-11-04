@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Manustatud teenuste haldus
 
 Marsruudid 9Routeri ja CLIProxyAPI installimiseks, käivitamiseks, peatamiseks ning jälgimiseks.
-Kõik teed on liigitatud **LOCAL_ONLY** (ainult tagasisideahel, range reegel nr 17), sest need
+Kõik teed on liigitatud **LOCAL_ONLY** (ainult tagasisideahel, range reegel nr #17), sest need
 võivad käivitada käsu `npm install` ja luua alamprotsesse.
 
 ```
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Teenusepakkujate registrid, päiseprofiilid, identiteet, …
 ├── handlers/               Päringutöötlejad (vestlus, vektorkujud, heli, pildid, …)
-├── executors/              156 teenusepakkuja täiturimoodulit (täituriklassid + teenusepakkujapõhised abifunktsioonid)
+├── executors/              159 teenusepakkuja täiturimoodulit (täituriklassid + teenusepakkujapõhised abifunktsioonid)
 ├── translator/             Vormingute teisendamine (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions voo teisendaja
 ├── services/               Üle 80 teenusemooduli (kombinatsioonid, varuvariandid, kvoodid, identiteet, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 tipptaseme täiturimoodulit (`*.ts`, välja arvatud `base.ts`, `index.ts` ja testid — seda arvu
+159 tipptaseme täiturimoodulit (`*.ts`, välja arvatud `base.ts`, `index.ts` ja testid — seda arvu
 mõõdab `npm run check:docs-counts`). Iga täituriklass laiendab klassi `BaseExecutor` (`base.ts`)
 kas otse või klassi `DefaultExecutor` või mõne muu täituri kaudu; ülejäänud moodulid on teenusepakkujapõhised
 abifunktsioonid (tööriistaskeemid, päringu-/TTS-adapterid, eripärade töötlejad). Täiturite hulka kuuluvad:

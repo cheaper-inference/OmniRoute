@@ -167,7 +167,7 @@ standart olaraq yoxlamanın uğursuz olmasına səbəb olur. İstisnalar silinmi
 təsdiqlərin zəiflədilməsi və digər maskalama halları müstəqil şəkildə bloklayıcı olan
 `check:test-masking` nəzarətinin əhatəsində qalır.
 
-### Tapşırıq: `lint`
+### İş: `lint`
 
 `main` budağına yönəlmiş hər PR-də icra olunur. Uğursuz olduqda birləşdirməni bloklayır.
 
@@ -203,8 +203,26 @@ təsdiqlərin zəiflədilməsi və digər maskalama halları müstəqil şəkild
 | `typecheck:core`                  | TypeScript kompilyasiyası xətasızdır (yalnız tövsiyə xarakterli xəbərdarlıqlar)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Bəli                                               |
 | `typecheck:noimplicit:core`       | Ciddi `noImplicitAny` — gələcəyə yönəlikdir; əvvəlcədən mövcud olan bir çox çağırış yerinə hələ də annotasiyalar əlavə edilməlidir                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | **Tövsiyə xarakterli** (`continue-on-error: true`) |
 | `check:dashboard-typecheck`       | `src/app/(dashboard)/**` ilə məhdudlaşdırılmış `tsc` (#7033) — `typecheck:core` üçün diqqətlə seçilmiş 27 fayllıq icazə siyahısına heç bir idarə paneli TSX faylı daxil deyil və `next build` də onu heç vaxt tip yoxlamasından keçirmir (`next.config.mjs` faylında `ignoreBuildErrors: true` təyin edilib), buna görə də oradakı sahibsiz identifikator reqressiyaları (#6625/#6909) CI üçün görünməz idi. Dondurulmuş fayl üzrə/TS kodu üzrə say bazası ilə müqayisə aparır (`config/quality/dashboard-typecheck-baseline.json`, `check:known-symbols` ilə eyni köhnəlmə yoxlaması nümunəsi) — yalnız baza sayını aşan YENİ xətalar keçidi uğursuz edir; əvvəlcədən mövcud olan xəta düzəldildikdə `--update` ilə həddi aşağı salın.                                                                                                                                                                                                                                                                                                                                                            | Bəli                                               |
+| `check:build-typecheck`           | `tsconfig.build.json` üzərindən bütün tətbiqin istehsal tip yoxlaması (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`); `typecheck:core`-un 27 fayllıq icazəli siyahısının və dashboard keçidinin əhatə etmədiyi sahə. `config/quality/build-typecheck-baseline.json` ilə müqayisə edir; yeni və ya artırılmış fayl üzrə kod sayının olması uğursuzluq yaradır, daha aşağı say isə sizdən sayın azaldılmasını tələb edir. İcra yeni və ya artırılmış cütlük ehtiva edərkən `--update` imtina edir, yalnız `--force-regressions` ötürüldükdə buna icazə verir; həmçinin yeni susdurulmuş fayl olduqda `--force-nocheck` ötürülmədən imtina edir. Beləliklə, yaşıl nəticə əldə etmək üçün bazanı genişləndirmək və daimi susdurma vermək bir-birindən ayrı, məqsədli addımlardır. Sadə `--force` rədd edilir. Həmçinin qurma sahəsini `@ts-nocheck` baxımından `config/quality/ts-nocheck-baseline.json` ilə müqayisə edir, çünki bundan istifadə edən fayl ümumiyyətlə diaqnostika bildirmir və əks halda bütün keçidlər üçün görünməz olardı.                               | Bəli                                               |
 
-### Tapşırıq: `quality-gate`
+#### İki tip yoxlama proqramı fərqli cavablar verir
+
+`typecheck:core` (`noImplicitAny: false`) / `typecheck:noimplicit:core` (`noImplicitAny: true`) və `check:build-typecheck` fərqli seçimlərlə fərqli proqramları
+kompilyasiya edir və eyni fayl birində təmiz, digərində isə xətalarla dolu ola bilər.
+
+`tsconfig.build.json` `"strict": false` təyin edir, buna görə `noImplicitAny`
+söndürülüb. Əsas konfiqurasiya daha sərt seçimlərlə seçilmiş 27 fayllıq icazəli
+siyahını kompilyasiya edir və hər girişin idxal qrafını izləyir; buna görə qurma
+proqramında heç vaxt görünməyən fayllar orada yenə də yoxlanılır.
+
+Faylın tipləndirilib-tipləndirilmədiyini qiymətləndirərkən bunun nəticəsi
+əhəmiyyətlidir: **`check:build-typecheck` altında sıfır diaqnostika sıfır demək
+deyil**. 26 fayldan `@ts-nocheck` çıxarıldıqda onların 23-nün qurma proqramında
+təmiz olduğu məlum oldu; həmin fayllardan on altısında sərt proqramda təxminən
+120 implicit-any xətası üzə çıxdı. Faylı təmiz hesab etməzdən əvvəl hər ikisini
+yoxlayın.
+
+### İş: `quality-gate`
 
 `test-coverage` tamamlandıqdan sonra işə düşür. Uğursuzluq olduqda birləşdirməni bloklayır.
 
@@ -227,7 +245,7 @@ təsdiqlərin zəiflədilməsi və digər maskalama halları müstəqil şəkild
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
 | `check:codeql-ratchet` | Xəbərdarlıq həddi yoxlanmazdan əvvəl namizədin ref/SHA-sı və bütün analiz kateqoriyaları aktual olmalıdır; çatışmayan sübut bloklayır. Ümumi inventar ayrıca qalır — aşağıdakı "CodeQL geriləməmə həddi" bölməsinə baxın | Bəli      |
 
-### Tapşırıq: `quality-extended`
+### İş: `quality-extended`
 
 Bu tapşırıq uyğun namizədləri bloklayır. Paket ölçüsü, məxfi məlumat tapıntıları, zəiflik
 tapıntıları, iş axını tapıntıları və OpenAPI dəyişiklikləri tələb olunan hədlərlə yoxlanılır.
@@ -245,7 +263,7 @@ tələb olunan skaner keçidini NATAMAM vəziyyətdə saxlayır.
 | `check:workflows`        | İş axını lint yoxlaması (actionlint + zizmor); çatışmayan/nasaz skanerlər, etibarsız hesabatlar və ya çatışmayan ratchet baza səviyyəsi INCOMPLETE kimi uğursuz olur. Etibarlı tapıntılar seçilmiş sərt/tövsiyə/ratchet siyasətinə uyğun işlənir | İcra tələb olunur; zizmor ratchet CI-də bloklayır |
 | `check:openapi-breaking` | Açıq API müqaviləsinin sabitlənmiş hadisə commit-ləri ilə müqayisəsi (PR merge-base, push before, merge-group base; planlaşdırılmış/əl ilə işə salmada checkout-un ilk valideyni); məcburi ölçmə qapalı şəkildə uğursuz olur                     | **--ratchet ilə bloklayıcı**                      |
 
-### Tapşırıq: `docs-sync-strict`
+### İş: `docs-sync-strict`
 
 `main` və ya `release/**` üçün pull request-lərdə bu iş yalnız sənədləşdirmə və ya kod dəyişikliyi kimi təsnif edilmiş, qaralama olmayan (və ya etibarlı növbədəki) namizədlər üçün işləyir. PR olmayan CI hadisələrində də işləyir; bu workflow-un push trigger-i yalnız `main`-i əhatə edir, `release/**`-i yox. Sıfırdan fərqli çıxış kodu ilə bitən addım işi bloklayır; aşağıda göstərilən yalnız hesabat xarakterli tapıntılar və sənədləşdirilmiş istisnalar isə bloklamır.
 
@@ -266,14 +284,19 @@ tələb olunan skaner keçidini NATAMAM vəziyyətdə saxlayır.
 | `check:docs-symbols`           | Əsas, güzgü olmayan sənədlərdəki daxili `/api/...` URL istinadları real marşruta və ya marşrut ailəsinə uyğun gəlir; proxy/upstream/placeholder/fayl istinadları və əsaslandırılmış `KNOWN_STALE_DOC_REFS` qeydləri istisna edilir, köhnəlmiş icazə siyahısı qeydləri isə uğursuzluğa səbəb olur                                                                                                                                                                                            | Bəli                                                                                                                                               |
 | `i18n translation drift`       | Əsas sənədlərin mənbə/hədəf heşlərini və tərcümənin mənşəyini yoxlayır. PR müqayisəsi yalnız eynilə miras qalmış xətalara icazə verir; mənbə, çatışmayan hədəf, hədəf heşi, köhnəlmiş tərcümə və ya bölmə keşi ilə bağlı yeni və ya təsdiqlənməmiş uyğunsuzluqlar bloklayır. PR müqayisəsindən kənarda mənbə/çatışmayan hədəf/hədəf heşi xətaları bloklayır, köhnəlmiş tərcümələr və uyğunsuz bölmə keşləri isə yalnız xəbərdarlıq verir. Köhnə formatlı bölmə keşinin olmaması xəta deyil. | PR-də yeni/təsdiqlənməmiş yayınma bloklayır; eynilə miras qalmış yayınma yalnız xəbərdarlıq verir; PR-dən kənar qaydalar xətanın növündən asılıdır |
 
-`docs/diagrams/` altındakı on iki README SVG-si `scripts/docs/gen-readme-<name>.mjs` vasitəsilə yaradılır; `npm run docs:readme-diagrams` onların hamısını yenidən yaradır.
-Hər birinin bayt-bayt müqayisə aparan vahid testi var (`tests/unit/docs/readme-*-svg.test.ts`, `test-unit` işi); repozitoriyada saxlanmış fayl köhnəldikdə test uğursuz olur.
-`check:docs-counts` kanonik rəqəmləri onların `<text>` düyünlərindən oxuyur, buna görə rəqəmlər heç vaxt qrafik kontur yollarına çevrilmir.
-SVG kanonik rəqəmlər yoxlaması `SVG_DIAGRAM_FILES` siyahısındakı (`scripts/check/check-docs-counts-sync.mjs`) faylları oxuyur: `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, `public/images/tier-flow-dark.svg`, `tier-flow-light.svg`.
-Daim pulsuz provayderlər, kataloq qeydləri, təkrarlanan hovuzlar və qiymətləndirmə amilləri barədə iddiaların yoxlamaları da `promise-pillars.svg`, `free-tier-budget.svg`, `strategies-grid.svg` fayllarını oxuyur.
-`free-tier-budget.svg` rəqəmlərini cari kataloq yükləyicisindən alır; buna görə `FREE_MODEL_BUDGETS` və ya provayderin göstərilən adı dəyişdikdə, həmin fayl yenidən yaradılana qədər CI uğursuz olur.
+`docs/diagrams/` daxilindəki on iki README SVG-si yaradılır (`scripts/docs/gen-readme-<name>.mjs`;
+`npm run docs:readme-diagrams` onların hamısını yenidən yaradır). Hər biri üçün bayt müqayisəsi aparan vahid testi
+(`tests/unit/docs/readme-*-svg.test.ts`, `test-unit` işi) mövcuddur; bu test saxlanılan fayl köhnəldikdə uğursuz olur və
+`check:docs-counts` kanonik rəqəmləri onların `<text>` düyünlərindən oxuyur — buna görə konturlama mərhələsi konturlanmış hər
+sətiri faylda görünməz `<text>` kimi saxlayır. SVG kanonik rəqəmlər yoxlaması
+`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) daxilində sadalanan faylları oxuyur: `docs/diagrams/readme-hero.svg`,
+`free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
+`tier-cascade.svg`, həmçinin `public/images/tier-flow-dark.svg` və `tier-flow-light.svg`; free-forever, catalog-entry,
+recurring-pool və scoring-factors iddiaları da `promise-pillars.svg`, `free-tier-budget.svg` və
+`strategies-grid.svg` fayllarını oxuyur. `free-tier-budget.svg` rəqəmlərini canlı kataloq yükləyicisindən götürür, buna görə
+`FREE_MODEL_BUDGETS` dəyişdikdə və ya provayderin göstərilən adı dəyişdikdə həmin fayl yenidən yaradılana qədər CI qırmızı olur.
 
-### Tapşırıq: `i18n-ui-coverage`
+### İş: `i18n-ui-coverage`
 
 | Skript                                 | Yoxlayır                                                                                                                                                                                              | Bloklayıcı     |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
@@ -284,7 +307,7 @@ Daim pulsuz provayderlər, kataloq qeydləri, təkrarlanan hovuzlar və qiymətl
 
 `fetch-depth: 0` tələb edir — dəyər sapması qapısı `en.json` faylını birləşdirmə bazası ilə müqayisə edir.
 
-#### `check-ui-value-drift` — köhnəlmiş tərcümə qapısı
+#### `check-ui-value-drift` — köhnə tərcümə keçidi
 
 Digər qapıların struktur baxımından görə bilmədiyi bir i18n reqressiyasını aşkarlayır: ingiliscə dəyər
 yenidən yazılır, lakin _əvvəlki_ ingiliscə mətndən yaradılmış tərcümələr saxlanılır; nəticədə

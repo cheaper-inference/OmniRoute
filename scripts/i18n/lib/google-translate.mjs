@@ -112,6 +112,10 @@ const INLINE_PATTERNS = [
   /(?<![\w-])[\w-]+\.(?:md|mdx|ts|tsx|js|mjs|cjs|json|ya?ml|sh|sql|css|html|txt|toml|env)(?![\w-])/y, // file names
   /(?<![\w-])--?[a-z][\w-]*(?![\w-])/y, // CLI flags
   /&[a-z]+;|&#\d+;/y, // literal entities in the source
+  // GitHub issue / PR references: the translator wrote `#15281` as `# 15281` (fa, fr, it, or,
+  // pt-BR, ru on #18795). Not an entity (`&#38;`) nor glued to a word (`C#7`); a URL fragment
+  // never gets here because the bare-URL pattern above takes the whole URL.
+  /(?<![\w&])#\d+(?!\d)/y,
   /[\p{Sm}\p{So}\uFE0F]+/uy, // math symbols / emoji (ko turned ∞ into a word; tests pin ∅ (∞))
   // the em dash anchors README's database-row counts (check-docs reads the text after "—");
   // de rewrote it to an en dash and the row failed the check
@@ -190,6 +194,14 @@ export const BRAND_TERMS = [
   "Docker",
   "Playwright",
   "Vitest",
+  // UI kit, palette and font names from the design-system source.
+  "Keak CI UI Kit",
+  "Switzer",
+  "Inter",
+  "Vazirmatn",
+  "Editions",
+  "Classic",
+  "Lucide",
 ];
 
 // A masked token that is a real HTML tag (not an autolink, not a whole code element). The
@@ -202,13 +214,26 @@ const BARE_TOKEN_ID = /(?<!\p{L})zq[a-z]+(?!\p{L})/u;
 const LINK = /\[([^\]\n]+)\]\(([^)\n]+)\)/y;
 const EMPHASIS = /\*\*|__|~~|\*/y;
 
+function normalizeEmphasisSpacing(text) {
+  return text.replace(/(\*\*|__|~~)([^*_~\n]+?)\1/g, (all, marker, inner, offset, whole) => {
+    const content = inner.replace(/^[ \t]+|[ \t]+$/g, "");
+    if (!content) return all;
+    // A translator can move the separating space inside either delimiter. Keep it
+    // outside when prose touches that edge; source code spans are still opaque tokens.
+    const before = /^[ \t]/.test(inner) && /[\p{L}\p{N}]/u.test(whole[offset - 1] ?? "") ? " " : "";
+    const after =
+      /[ \t]$/.test(inner) && /[\p{L}\p{N}]/u.test(whole[offset + all.length] ?? "") ? " " : "";
+    return before + marker + content + marker + after;
+  });
+}
+
 /**
  * Masks everything in one text segment that must survive verbatim and converts inline
  * emphasis / links to HTML the translator understands. Returns the HTML to send and
  * `restore(translatedHtml)`, which rebuilds markdown or returns null when the answer is
  * unusable (a token went missing, or translator markup survived).
  */
-export function maskInline(text, { protectedTerms = [] } = {}) {
+export function maskInline(text, { protectedTerms = [], pipe = "\\|" } = {}) {
   protectedTerms = [...new Set([...protectedTerms, ...BRAND_TERMS])];
   const tokens = []; // { raw, spaceBefore, spaceAfter }
   let hasProse = false; // any letter left outside the masked tokens and markup
@@ -258,6 +283,15 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
           continue;
         }
       }
+      // Recognize markup before the generic symbol token can mask a strikethrough delimiter.
+      EMPHASIS.lastIndex = pos;
+      const em = EMPHASIS.exec(src);
+      if (em && (em[0] !== "*" || /\S/.test(src[pos + 1] ?? ""))) {
+        flushPlain();
+        html += `<em data-m="${em[0]}"></em>`;
+        pos += em[0].length;
+        continue;
+      }
       for (const re of INLINE_PATTERNS) {
         re.lastIndex = pos;
         const hit = re.exec(src);
@@ -276,14 +310,6 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
           continue;
         }
       }
-      EMPHASIS.lastIndex = pos;
-      const em = EMPHASIS.exec(src);
-      if (em && (em[0] !== "*" || /\S/.test(src[pos + 1] ?? ""))) {
-        flushPlain();
-        html += `<em data-m="${em[0]}"></em>`;
-        pos += em[0].length;
-        continue;
-      }
       plain += src[pos];
       pos++;
     }
@@ -295,6 +321,9 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
 
   function restore(translated) {
     let out = String(translated);
+    // Normalize before span restoration can consume spaces next to masked UI names.
+    out = out.replace(/<em data-m=\\?"([*_~]+)\\?"\s*>\s*<\/em>/g, "$1");
+    out = normalizeEmphasisSpacing(out);
     // 1. tokens → private-use placeholders, keeping only source-side whitespace
     const seen = new Set();
     const order = []; // token indices in the order the translator returned them
@@ -328,7 +357,6 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
       const url = links[Number(k)];
       return url === undefined ? all : `[${inner.trim()}](${url})`;
     });
-    out = out.replace(/<em data-m=\\?"([*_~]+)\\?"\s*>\s*<\/em>/g, "$1");
     if (/<\/?(?:span|a|em)\b/i.test(out)) return null;
     // 3. entities, whitespace and emphasis on the translated prose only, then the originals
     out = decodeEntities(out)
@@ -337,14 +365,16 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
       .trim();
     // no space between a link / masked token and a following period or comma
     out = out.replace(/(\]\([^)\s]*\)|[\ue000-\uf8ff])[ \t]+([.,])/g, "$1$2");
-    out = out.replace(/(\*\*|__|~~)\s+([^*_~\n]+?)\s+\1/g, "$1$2$1");
+    out = normalizeEmphasisSpacing(out);
     // Every source code span is masked, so a backtick in the translated prose came from the
     // translator (hy renders its comma ՝ as `) and would open a fake code span; a bare pipe
     // would split a table cell.
     out = out.replace(/`/g, (_, offset, whole) =>
       /[԰-֏]/.test(whole[offset - 1] ?? "") ? "՝" : "'"
     );
-    out = out.replace(/(?<!\\)\|/g, "\\|");
+    // `pipe` is the replacement: an escaped pipe, or the script's own sentence mark for a
+    // locale whose terminator the endpoint writes as `|` (see TRANSLATOR_PIPE).
+    out = out.replace(/\s*(?<!\\)\|/g, (m) => (pipe === "\\|" ? m.replace("|", pipe) : pipe));
     // Two tokens the translator glued together (it may drop the comma between them, e.g.
     // ar) must not touch when either is a code span: `a``b` would parse as ONE span.
     out = out.replace(/([\ue000-\uf8ff])(?=[\ue000-\uf8ff])/g, (ch, _a, offset) => {
@@ -713,6 +743,10 @@ export function planBatches(items, { maxChars = BATCH_CHARS, maxItems = BATCH_IT
   return out;
 }
 
+// Locales whose sentence mark the endpoint answers as an ASCII pipe: `or` came back with `|` for
+// the danda (।) at every sentence end of a table cell, which then shipped as `\|` (#18795).
+const TRANSLATOR_PIPE = { or: "।" };
+
 /**
  * Translates one markdown chunk into `localeCode`. Structure (fences, table rows and
  * separators, blank lines, list/heading/quote prefixes, inline code, links, HTML) is
@@ -739,10 +773,13 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
   }
   const target = googleLangFor(localeCode);
   const parts = segmentMarkdown(markdown);
+  const pipe = TRANSLATOR_PIPE[target] ?? "\\|";
 
   const masks = new Map(); // text → mask (deduplicated)
   const want = (text) => {
-    if (hasLetters(text) && !masks.has(text)) masks.set(text, maskInline(text, { protectedTerms }));
+    if (hasLetters(text) && !masks.has(text)) {
+      masks.set(text, maskInline(text, { protectedTerms, pipe }));
+    }
   };
   for (const p of parts) {
     if (typeof p === "string") continue;

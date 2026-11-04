@@ -11,7 +11,15 @@ const INTEGER_FACTS = new Set([
   "cliTotal",
   "cliCode",
   "cliAgent",
+  "chatNamespaces",
+  "distinctProviderModelPairs",
+  "uniqueRawModelIds",
 ]);
+const GROUPED_FORMATS = Object.freeze({
+  "grouped-comma": ",",
+  "grouped-dot": ".",
+  "grouped-space": " ",
+});
 const DECIMAL_FACTS = new Set(["steadyBillions", "firstBillions", "gatedMillions"]);
 const NUMBER = "([\\p{Nd}]+(?:[.,][\\p{Nd}]+)*)";
 const fail = (code, file = "registry") => {
@@ -34,7 +42,7 @@ function digitValue(character) {
   return (point - first) % 10;
 }
 
-export function spellCount(value, sample, fact) {
+export function spellCount(value, sample, fact, format) {
   if (!INTEGER_FACTS.has(fact) && !DECIMAL_FACTS.has(fact)) fail("COUNT_UNKNOWN_FACT", fact);
   if (INTEGER_FACTS.has(fact) && (!Number.isSafeInteger(value) || value < 0))
     fail("COUNT_INVALID_FACT", fact);
@@ -46,8 +54,23 @@ export function spellCount(value, sample, fact) {
   );
   if (bases.size !== 1) fail("COUNT_MIXED_DIGIT_SCRIPT", fact);
   const zero = [...bases][0];
+  if (format !== undefined) {
+    if (!Object.hasOwn(GROUPED_FORMATS, format) || !INTEGER_FACTS.has(fact))
+      fail("COUNT_NUMBER_FORMAT", fact);
+    const separator = GROUPED_FORMATS[format];
+    const normalized = [...sample]
+      .map((character) => (/\p{Nd}/u.test(character) ? String(digitValue(character)) : character))
+      .join("");
+    const escapedSeparator = separator.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const grouped = new RegExp(`^[1-9]\\d{0,2}(?:${escapedSeparator}\\d{3})+$`);
+    if (!/^(?:0|[1-9]\d*)$/.test(normalized) && !grouped.test(normalized))
+      fail("COUNT_INTEGER_FORMAT", fact);
+    return canonical
+      .replace(/\B(?=(\d{3})+(?!\d))/g, separator)
+      .replace(/\d/g, (character) => String.fromCodePoint(zero + Number(character)));
+  }
   const separator = sample.includes(",") ? "," : ".";
-  if (INTEGER_FACTS.has(fact) && /[.,]/.test(sample)) fail("COUNT_INTEGER_FORMAT", fact);
+  if (INTEGER_FACTS.has(fact) && !/^\p{Nd}+$/u.test(sample)) fail("COUNT_INTEGER_FORMAT", fact);
   return [...canonical]
     .map((character) =>
       character === "." ? separator : String.fromCodePoint(zero + Number(character))
@@ -97,8 +120,29 @@ export function validateCountRegistry(registry) {
           fail("COUNT_REGISTRY_SLOT", doc.path);
         if (!INTEGER_FACTS.has(claim.fact) && !DECIMAL_FACTS.has(claim.fact))
           fail("COUNT_UNKNOWN_FACT", claim.fact);
+        if (
+          claim.format !== undefined &&
+          (!Object.hasOwn(GROUPED_FORMATS, claim.format) || !INTEGER_FACTS.has(claim.fact))
+        )
+          fail("COUNT_NUMBER_FORMAT", doc.path);
         slots.add(claim.slot);
       }
+    }
+  }
+  // The state planner may advance provenance only after every translated
+  // numeric surface has the same coverage as the canonical README. Missing
+  // claims cannot leave old numbers behind while accepting a new source hash.
+  if (registry.families.includes("README.md")) {
+    if (!paths.has("README.md")) fail("COUNT_README_MODEL_BINDINGS", "README.md");
+    const expected = { chatNamespaces: 1, distinctProviderModelPairs: 1, uniqueRawModelIds: 2 };
+    for (const doc of registry.documents) {
+      if (doc.path !== "README.md" && !/^docs\/i18n\/[^/]+\/README\.md$/.test(doc.path)) continue;
+      const actual = { chatNamespaces: 0, distinctProviderModelPairs: 0, uniqueRawModelIds: 0 };
+      for (const group of doc.groups)
+        for (const claim of group.claims)
+          if (Object.hasOwn(actual, claim.fact)) actual[claim.fact]++;
+      if (Object.keys(expected).some((fact) => actual[fact] !== expected[fact]))
+        fail("COUNT_README_MODEL_BINDINGS", doc.path);
     }
   }
   for (const generated of registry.generated) {
@@ -113,7 +157,15 @@ export function planDocumentCounts(doc, content, facts) {
   if (typeof content !== "string") fail("COUNT_REQUIRED_FILE_MISSING", doc.path);
   const operations = [];
   for (const group of doc.groups) {
-    const regex = new RegExp(`^${group.parts.map(literal).join(NUMBER)}\\r?$`, "dgmu");
+    const pattern = group.parts
+      .map((part, slot) => {
+        if (slot === group.parts.length - 1) return literal(part);
+        const claim = group.claims.find((row) => row.slot === slot);
+        const number = claim?.format === "grouped-space" ? "([\\p{Nd}]+(?: [\\p{Nd}]+)*)" : NUMBER;
+        return literal(part) + number;
+      })
+      .join("");
+    const regex = new RegExp(`^${pattern}\\r?$`, "dgmu");
     const matches = [...content.matchAll(regex)];
     if (matches.length !== 1)
       fail(matches.length ? "COUNT_ANCHOR_AMBIGUOUS" : "COUNT_ANCHOR_MISSING", doc.path);
@@ -122,7 +174,7 @@ export function planDocumentCounts(doc, content, facts) {
       if (!Object.hasOwn(facts, claim.fact)) fail("COUNT_FACT_UNAVAILABLE", claim.fact);
       const [start, end] = match.indices[claim.slot + 1];
       const old = content.slice(start, end);
-      const updated = spellCount(facts[claim.fact], old, claim.fact);
+      const updated = spellCount(facts[claim.fact], old, claim.fact, claim.format);
       if (old !== updated)
         operations.push({ start, end, before: old, after: updated, fact: claim.fact });
     }

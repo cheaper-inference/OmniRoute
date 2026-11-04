@@ -106,7 +106,9 @@ jobs:
           DATA_DIR: ${{ runner.temp }}/omniroute-dast-${{ github.run_id }}-${{ github.run_attempt }}
           PORT: "20128"
           INJECTION_GUARD_MODE: block
-          REQUIRE_API_KEY: "false"
+          REQUIRE_API_KEY: "true"
+          # Synthetic fixture for this isolated runner; never supplied to Schemathesis.
+          OMNIROUTE_API_KEY: ci-dast-promptfoo-local-fixture
         run: |
           mkdir -p "$DATA_DIR"
           node dist/server.js > server.log 2>&1 &
@@ -145,14 +147,14 @@ jobs:
           # /api/auth/login has brute-force rate limiting: repeated failed logins return 429,
           # which Schemathesis flags as rejection of schema-compliant requests.
           schemathesis run docs/openapi.yaml --url http://localhost:20128 \
-            --include-path-regex '^/v1/(chat/completions|models)$|^/api/(auth|keys)' \
+            --include-path-regex '^/api/v1/(chat/completions|models)$|^/api/(auth|keys)' \
             --exclude-path-regex '^/api/auth/(oidc/|login)' \
             --max-examples 8 --workers 4 --checks all --max-response-time 30 \
             --request-timeout 20 --suppress-health-check all --no-color
       - name: promptfoo injection-guard (blocking)
         env:
           OMNIROUTE_URL: http://localhost:20128
-          OMNIROUTE_API_KEY: not-needed-blocked-before-upstream
+          OMNIROUTE_API_KEY: ci-dast-promptfoo-local-fixture
         run: ./node_modules/.bin/promptfoo eval -c promptfooconfig.yaml --no-cache
       - name: Stop server
         if: always()

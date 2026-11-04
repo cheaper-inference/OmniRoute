@@ -36,6 +36,7 @@ import { parseModel } from "./model.ts";
 import { rejectRetiredAutoComboCandidates } from "./modelLifecycle.ts";
 import { createComboContext } from "./combo/context.ts";
 import { phaseComboSetup } from "./combo/comboSetup.ts";
+import { withComboServiceTier } from "./combo/comboServiceTier.ts";
 
 import { projectAccountTier, type ProviderCandidate } from "./autoCombo/scoring.ts";
 
@@ -84,6 +85,7 @@ import {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 } from "./combo/comboPredicates.ts";
@@ -92,6 +94,7 @@ export {
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
   isContextOverflow400,
+  isContextOverflowFailure,
   isParamValidation400,
   isModelScoped400,
 };
@@ -797,7 +800,7 @@ export async function handleComboChat(options: HandleComboChatOptions): Promise<
 async function handleComboChatInner({
   body,
   combo,
-  handleSingleModel,
+  handleSingleModel: dispatchSingleModel,
   isModelAvailable,
   log,
   settings,
@@ -817,6 +820,7 @@ async function handleComboChatInner({
   invocationId,
 }: HandleComboChatOptions): Promise<Response> {
   hiddenModelsByProvider ??= await getHiddenChatModels();
+  const handleSingleModel = withComboServiceTier(dispatchSingleModel, combo);
   const comboCtx = createComboContext({ body, combo, settings, relayOptions, log });
   const {
     strategy,
@@ -1204,7 +1208,8 @@ async function handleComboChatInner({
 
   const comboCooldownWaitEnabled = isComboCooldownWaitEligible(
     strategy,
-    resilienceSettings.comboCooldownWait
+    resilienceSettings.comboCooldownWait,
+    config
   );
   const comboCooldownAttempt = { current: pinnedLockWaitMs > 0 ? 1 : 0 };
   const comboCooldownBudgetLeftMs = {

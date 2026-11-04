@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provayder reyestrləri, başlıq profilləri, identiklik, …
 ├── handlers/               Sorğu işləyiciləri (çat, yerləşdirmələr, audio, təsvir, …)
-├── executors/              156 provayder icraçı modulu (icraçı sinifləri + hər provayder üçün köməkçilər)
+├── executors/              159 provayder icraçı modulu (icraçı sinifləri + hər provayder üçün köməkçilər)
 ├── translator/             Format çevrilməsi (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions axın transformatoru
 ├── services/               80-dən çox xidmət modulu (kombinasiyalar, ehtiyat mexanizmi, kvotalar, identiklik, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 yuxarı səviyyəli icraçı modulu (`*.ts` fayllarından `base.ts`, `index.ts` və testlər çıxılmaqla —
+159 yuxarı səviyyəli icraçı modulu (`*.ts` fayllarından `base.ts`, `index.ts` və testlər çıxılmaqla —
 bu say `npm run check:docs-counts` tərəfindən ölçülür). Hər icraçı sinfi birbaşa və ya
 `DefaultExecutor`, yaxud başqa bir icraçı vasitəsilə `BaseExecutor` (`base.ts`) sinfini genişləndirir;
 qalan modullar isə hər provayder üçün köməkçilərdir (alət sxemləri, fetch/TTS adapterləri,

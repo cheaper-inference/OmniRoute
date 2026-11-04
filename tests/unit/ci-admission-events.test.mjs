@@ -134,6 +134,8 @@ for (const profile of ["ci", "quality"]) {
   );
   const admission = workflow.jobs["admission-verdict"];
   const checkName = policy.profiles[profile].checkName;
+  const integrity = profile === "quality" ? workflow.jobs["merge-integrity"] : null;
+  const integrityCheckName = "Merge integrity (changelog + generated skills)";
   const required = Object.entries(policy.profiles[profile].jobs).filter(
     ([, rule]) => rule.disposition === "required"
   );
@@ -159,6 +161,7 @@ for (const profile of ["ci", "quality"]) {
           assert.equal(scheduled(workflow, id, values), false, id);
         assert.equal(expression(admission.if, values), false);
         assert.notEqual(render(admission.name, values), checkName);
+        if (integrity) assert.notEqual(render(integrity.name, values), integrityCheckName);
         assert.notEqual(
           render(workflow.concurrency.group, values),
           render(workflow.concurrency.group, valuesFor(context))
@@ -196,6 +199,7 @@ for (const profile of ["ci", "quality"]) {
         }
         assert.equal(expression(admission.if, values), true);
         assert.equal(render(admission.name, values), checkName);
+        if (integrity) assert.equal(render(integrity.name, values), integrityCheckName);
         assert.equal(
           render(workflow.concurrency.group, values),
           render(workflow.concurrency.group, valuesFor(context))
@@ -222,6 +226,7 @@ for (const profile of ["ci", "quality"]) {
         assert.equal(scheduled(workflow, id, values), false, id);
       assert.equal(expression(admission.if, values), false);
       assert.notEqual(render(admission.name, values), checkName);
+      if (integrity) assert.notEqual(render(integrity.name, values), integrityCheckName);
     }
     const needs = Object.fromEntries(
       Object.keys(policy.profiles[profile].jobs).map((id) => [id, { result: "success" }])
@@ -271,6 +276,7 @@ for (const profile of ["ci", "quality"]) {
         assert.equal(scheduled(workflow, id, values), true, `${event}: ${id} (${rule.when})`);
       assert.equal(expression(admission.if, values), true);
       assert.equal(render(admission.name, values), checkName);
+      if (integrity) assert.equal(render(integrity.name, values), integrityCheckName);
     }
   });
 }

@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Ndebanye ndị na-eweta ọrụ, profaịlụ header, njirimara, …
 ├── handlers/               Ndị njikwa arịrịọ (nkata, embeddings, ọdịyo, onyonyo, …)
-├── executors/              Modul executor 156 (klas executor + ndị enyemaka maka onye na-eweta ọrụ ọ bụla)
+├── executors/              Modul executor 159 (klas executor + ndị enyemaka maka onye na-eweta ọrụ ọ bụla)
 ├── translator/             Ntụgharị usoro (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions transformer nke stream
 ├── services/               Modul ọrụ 80+ (combos, fallback, quotas, njirimara, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Modul executor 156 dị n'elu (`*.ts` ma e wepụ `base.ts`, `index.ts` na ule — nke a bụ ọnụọgụ
+Modul executor 159 dị n'elu (`*.ts` ma e wepụ `base.ts`, `index.ts` na ule — nke a bụ ọnụọgụ
 `npm run check:docs-counts` na-atụ). Klas executor ọ bụla na-esi na `BaseExecutor` (`base.ts`) gbasaa,
 ma ọ bụ ozugbo, ma ọ bụ site na `DefaultExecutor` ma ọ bụ executor ọzọ; modul ndị fọdụrụ bụ
 ndị enyemaka maka onye na-eweta ọrụ ọ bụla (schema tool, adapter fetch/TTS, ndị njikwa àgwà pụrụ iche). Ndị executor gụnyere:

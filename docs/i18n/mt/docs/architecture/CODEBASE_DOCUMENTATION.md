@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Reġistri tal-fornituri, profili tal-headers, identità, …
 ├── handlers/               Ħandlers tat-talbiet (chat, embeddings, awdjo, immaġni, …)
-├── executors/              156 modulu ta’ eżekuturi tal-fornituri (klassijiet tal-eżekuturi + helpers għal kull fornitur)
+├── executors/              159 modulu ta’ eżekuturi tal-fornituri (klassijiet tal-eżekuturi + helpers għal kull fornitur)
 ├── translator/             Konverżjoni tal-format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer tal-istream Responses API ↔ Chat Completions
 ├── services/               Aktar minn 80 modulu ta’ servizzi (kombinazzjonijiet, fallback, kwoti, identità, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modulu tal-eżekuturi fl-ogħla livell (`*.ts` minbarra `base.ts`, `index.ts` u t-testijiet — l-għadd
+159 modulu tal-eżekuturi fl-ogħla livell (`*.ts` minbarra `base.ts`, `index.ts` u t-testijiet — l-għadd
 jitkejjel minn `npm run check:docs-counts`). Kull klassi ta’ eżekutur testendi `BaseExecutor` (`base.ts`),
 direttament jew permezz ta’ `DefaultExecutor` jew eżekutur ieħor; il-moduli l-oħra huma helpers għal kull
 fornitur (schemas tal-għodod, adapters ta’ fetch/TTS, ħandlers għal karatteristiċi partikolari). L-eżekuturi jinkludu:

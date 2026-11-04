@@ -228,6 +228,7 @@ function readCodeFacts() {
     'import {FREE_TIER_PROVIDER_SET} from "./open-sse/config/freeTierProviders.ts";',
     'import {generateProviderPluginManifestFromRegistry} from "./open-sse/config/providerPluginManifest.ts";',
     'import {readStaticCountMetadata} from "./scripts/check/lib/staticCountMetadata.mjs";',
+    'import {readChatModelCountSnapshot} from "./scripts/check/lib/staticChatModelMetadata.mjs";',
     'import fs2 from "node:fs";',
     'import path2 from "node:path";',
     'const __rtxt=fs2.readFileSync(path2.join(process.cwd(),"src/lib/freeProviderRankings.ts"),"utf8");',
@@ -249,10 +250,11 @@ function readCodeFacts() {
     // and so is every eligibility-gated row: a provider nobody can sign up for without
     // clearing a gate is not "free forever" for the reader of the headline.
     "const measured=measureCatalogCounts(PROV,t);",
+    "const chatModels=readChatModelCountSnapshot(process.cwd()).facts;",
     'console.log("@@"+JSON.stringify({freeSteady:t.steadyRecurringTokens,entries:t.perModel.length,',
     "freeFirst:t.firstMonthRealisticTokens,freeGated:t.gatedRecurringTokens,",
     "freePools:t.poolCount,engines:ENGINE_IDS.length,",
-    "cliTotal:metadata.cliTotal,cliCode:metadata.cliCode,cliAgent:metadata.cliAgent,",
+    "...chatModels,cliTotal:metadata.cliTotal,cliCode:metadata.cliCode,cliAgent:metadata.cliAgent,",
     "mcpTools:metadata.mcpTools,mcpScopes:metadata.mcpScopes,providers:measured.providers,freeForever:measured.freeForever,catalogMarkedFree:measured.catalogMarkedFree,",
     "modePacks:Object.keys(MODE_PACKS),catalogDate:__cat,sortBy:__sb,intelligentKeys:__ik,",
     "hardStop:FREE_MODEL_BUDGETS.filter(e=>e.hardStopGuaranteed===true).length,",

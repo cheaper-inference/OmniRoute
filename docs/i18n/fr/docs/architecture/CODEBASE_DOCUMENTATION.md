@@ -189,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Gestion des services intégrés
 
 Routes permettant d’installer, de démarrer, d’arrêter et de surveiller 9Router et CLIProxyAPI.
-Tous les chemins sont classés **LOCAL_ONLY** (boucle locale uniquement, règle stricte nº 17), car ils
+Tous les chemins sont classés **LOCAL_ONLY** (boucle locale uniquement, règle stricte nº #17), car ils
 peuvent exécuter `npm install` et générer des processus enfants.
 
 ```
@@ -444,7 +444,7 @@ Divisé en sous-répertoires spécialisés :
 
 ---
 
-## 4. `open-sse/` — Espace de travail du moteur de streaming
+## 4. `open-sse/` — espace de travail du moteur de streaming
 
 Espace de travail npm distinct publié sous le nom `@omniroute/open-sse`. Il regroupe le traitement
 des requêtes, les exécuteurs, les traducteurs, les services, le transformateur et le serveur MCP.
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registres de fournisseurs, profils d’en-têtes, identité, …
 ├── handlers/               Gestionnaires de requêtes (chat, embeddings, audio, image, …)
-├── executors/              156 modules d’exécution de fournisseurs (classes d’exécution + assistants par fournisseur)
+├── executors/              159 modules d’exécution de fournisseurs (classes d’exécution + assistants par fournisseur)
 ├── translator/             Conversion de formats (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformateur de flux Responses API ↔ Chat Completions
 ├── services/               Plus de 80 modules de service (combinaisons, repli, quotas, identité, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 modules d’exécution de premier niveau (`*.ts` moins `base.ts`, `index.ts` et les tests — nombre
+159 modules d’exécution de premier niveau (`*.ts` moins `base.ts`, `index.ts` et les tests — nombre
 mesuré par `npm run check:docs-counts`). Chaque classe d’exécution étend `BaseExecutor` (`base.ts`),
 directement ou par l’intermédiaire de `DefaultExecutor` ou d’un autre exécuteur ; les modules restants sont des
 assistants propres aux fournisseurs (schémas d’outils, adaptateurs fetch/TTS, gestionnaires de particularités). Les exécuteurs comprennent :
