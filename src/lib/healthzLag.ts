@@ -78,14 +78,13 @@ function maybeRecordHighHeap(
 ): void {
   if (process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED !== "1") return;
   if (nowMs - lastHeapDiagnosticAt < HEAP_DIAGNOSTIC_INTERVAL_MS) return;
-  lastHeapDiagnosticAt = nowMs;
-
   const rawThreshold = Number(process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB);
   const thresholdMb = Number.isFinite(rawThreshold) && rawThreshold > 0
     ? rawThreshold
     : DEFAULT_HEAP_DIAGNOSTIC_THRESHOLD_MB;
   const memory = process.memoryUsage();
   if (memory.heapUsed < thresholdMb * MiB) return;
+  lastHeapDiagnosticAt = nowMs;
   const oldSpace = getHeapSpaceStatistics().find((space) => space.space_name === "old_space");
   log(
     "[HEALTHZ] high V8 heap " +
