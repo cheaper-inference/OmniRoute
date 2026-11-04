@@ -394,7 +394,7 @@ async function reuseLiveZoneEntry(
   const frozenItems = previous.rawItemDigests.length;
   const liveItems = context.rawItems.slice(frozenItems);
   const frozenPrefix = cloneItems(previous.transformedPrefix);
-  if (!frozenPrefix) return compress(body);
+  if (!frozenPrefix) return fallback();
   // The latest assistant may already be frozen (including on consecutive/parallel results).
   // Carry its raw tail as engine context, but never replace its cached transformation.
   let contextStart = frozenItems;
