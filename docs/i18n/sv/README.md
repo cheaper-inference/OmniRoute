@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1,62 miljarder token / månad via tredjeparts gratisnivåer
+## 💰 ~1,62 miljarder tokens / månad över kostnadsfria tredjepartsnivåer
 
 </div>
 
-> **Ta med dina egna leverantörskonton.** Detta är en uppskattad summa över separat berättigade tredjeparts gratisnivåer, inte ett tokenbidrag från OmniRoute. Registrera dig, hämta autentiseringsuppgifter där det krävs och koppla de leverantörer du kan använda; varje leverantör styr sina egna gränser, tillgänglighet och villkor.
+> **Använd dina egna leverantörskonton.** Detta är en uppskattad totalsumma från separat kvalificerade kostnadsfria tredjepartsnivåer, inte en token-kvot från OmniRoute. Registrera dig, skaffa inloggningsuppgifter där det krävs och anslut de leverantörer du kan använda; varje leverantör styr sina gränser, sin tillgänglighet och sina villkor.
 >
-> Att stapla gratisnivåer manuellt är smärtsamt — dussintals SDK:er, dussintals hastighetsbegränsningar och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **485 gratisnivåposter över 34 återkommande poolnycklar** och beräknar tokenhuvudrubriken från de **17 pooler med publicerad positiv månatlig budget plus fem per-modell Groq-tak**, deduplicerade per delad pool. Kvoter som endast öppnas efter regional identitetskontroll (idag: ModelScope) visas separat, +~6M bakom regional identitetsverifiering, och räknas aldrig in i huvudrubriken. Resultatet är alltid synligt på instrumentpanelen (`/dashboard/free-tiers`).
+> Att stapla kostnadsfria nivåer manuellt är smärtsamt — dussintals SDK:er, dussintals hastighetsgränser och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **484 poster på kostnadsfria nivåer över 34 återkommande poolnycklar** och beräknar tokensiffran från **17 pooler med en publicerad positiv månadsbudget plus fem Groq-gränser per modell**, deduplicerade efter delad pool. Kvoter som endast blir tillgängliga efter en regional identitetskontroll (idag: ModelScope) visas separat, +~6 miljoner efter regional identitetsverifiering, och räknas aldrig in i totalsiffran. Resultatet förblir synligt på instrumentpanelen (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute gratisnivåbudgetkort: ~1,62 miljarder gratistoken per månad stabilt, upp till ~2,22 miljarder första månaden med registreringskrediter, från 34 dokumenterade återkommande poolnycklar som täcker 485 katalogiserade gratisnivåposter bakom en endpoint. Ärlig pool-deduplicerad matematik — varje delad pool räknas en gång, inklusive 17 återkommande pooler med publicerad positiv månatlig tokenbudget plus fem per-modell Groq-tak; 12 leverantörer är markerade undvik i riskkatalogen så du bestämmer. Budgetstapeln inkluderar Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem per-modell-tak) och mindre pooler, plus första månadens registreringskrediter och permanent gratis leverantörer utan token-tak visas separat så de aldrig blåser upp huvudrubriken. Live användt/kvar på /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort för budget för kostnadsfria nivåer: ~1,62 miljarder kostnadsfria tokens per månad i stadig takt, upp till ~2,22 miljarder den första månaden med registreringskrediter, från 34 dokumenterade återkommande poolnycklar som täcker 484 katalogiserade poster på kostnadsfria nivåer bakom en enda endpoint. Ärlig pooldeduplicerad beräkning — varje delad pool räknas en gång, inklusive 17 återkommande pooler med en publicerad positiv månatlig tokenbudget plus fem Groq-gränser per modell; 12 leverantörer är markerade som bör undvikas i villkorsriskkatalogen så att du kan fatta beslutet. Budgetfältet inkluderar Mistral 1 miljard, Nara 210 miljoner, LLM7 150 miljoner, xKiro 150 miljoner, Groq 30 miljoner (fem gränser per modell) och mindre pooler, plus registreringskrediter för den första månaden och leverantörer som är kostnadsfria permanent utan tokenbegränsning, vilka visas separat så att de aldrig blåser upp totalsiffran. Aktuellt använda och återstående mängder på /dashboard/free-tiers."/>
 
-> Animerad sammanfattning av den aktuella sidan `/dashboard/free-tiers`. Full metodik (pool-dedup, kreditnivåer, leverantörsvillkor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Animerad sammanfattning av den aktuella sidan `/dashboard/free-tiers`. Fullständig metodik (pooldeduplicering, kredittier, leverantörsvillkor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Dessa siffror revideras varannan vecka mot den aktuella katalogen och **kan både öka och minska** — en leverantör avslutar en gratisnivå och siffran sjunker; en ny tillkommer och den stiger. Vi publicerar vad katalogen faktiskt beräknar, aldrig ett avrundat bästa scenario.</sub>
+> <sub>Dessa siffror granskas på nytt varannan vecka mot den aktuella katalogen och **förändras åt båda hållen** — en leverantör avslutar en kostnadsfri nivå och siffran sjunker; en ny tillkommer och den stiger. Vi publicerar det som katalogen faktiskt beräknar, aldrig ett uppåtavrundat bästa scenario.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Stjärnmärk repot om OMNIROUTE hjälpte dig spara pengar och förenklade ditt arbete.
+⭐ Stjärnmärk repot om OMNIROUTE hjälpte dig att spara pengar och göra ditt arbete enklare.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Stjärnor](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Rankning i stjärnhistorik](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Gå med i communityn
 
-**👋 Följ underhållaren — få nya leverantörer, släpp och tips först:**
+**👋 Följ underhållaren — få nya leverantörer, versioner och tips först:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Följ Diego på LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Följ @diegosouzapw på GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![WhatsApp Brasilien](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![Webbplats](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Frågor, leverantörstips, roadmap & support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Frågor, leverantörstips, roadmap och support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasilien](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1300,20 +1300,20 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
 
 <table>
   <tr><th align="left">Lager</th><th align="left">Teknik</th></tr>
-  <tr><td nowrap><b>Körningstid</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Körmiljö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> i <code>src/</code> och <code>open-sse/</code> (ingen <code>any</code> i kärnan sedan v2.0)</td></tr>
   <tr><td nowrap><b>Ramverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON) — 147 domänmoduler, 221 migreringar</td></tr>
-  <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltextsökning + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
-  <tr><td nowrap><b>Schema</b></td><td>Zod 4 — validering av MCP-verktygens I/O + API-kontrakt</td></tr>
+  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (JSON-legacy) — 147 domänmoduler, 222 migreringar</td></tr>
+  <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltext + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
+  <tr><td nowrap><b>Schema</b></td><td>Zod 4 — MCP-validering av verktygs-I/O + API-kontrakt</td></tr>
   <tr><td nowrap><b>Protokoll</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Strömning</b></td><td>Server-Sent Events (SSE) + WebSocket-brygga (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Komprimering</b></td><td>Pipeline med 12 motorer — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentisering och säkerhet</b></td><td>OAuth 2.0 (PKCE) + JWT + API-nycklar + MCP-omfattningsbegränsad autentisering · AES-256-GCM vid vila · DOMPurify</td></tr>
+  <tr><td nowrap><b>Autentisering &amp; säkerhet</b></td><td>OAuth 2.0 (PKCE) + JWT + API-nycklar + MCP-omfattningsstyrd autentisering · AES-256-GCM i vila · DOMPurify</td></tr>
   <tr><td nowrap><b>Förklädnad</b></td><td>wreq-js — JA3 / JA4 TLS-fingeravtrycksimpersonering, proxy i tre nivåer</td></tr>
-  <tr><td nowrap><b>Återhämtningsförmåga</b></td><td>Kretsbrytare, exponentiell backoff, skydd mot flockbeteende, automatisk kombinationsbaserad självläkning</td></tr>
+  <tr><td nowrap><b>Robusthet</b></td><td>Kretssäkring, exponentiell backoff, skydd mot flockbeteende, självläkning med auto-combo</td></tr>
   <tr><td nowrap><b>Loggning</b></td><td>pino — strukturerade JSON-loggar med begärandekontext</td></tr>
-  <tr><td nowrap><b>Testning</b></td><td>Node.js-testkörning + Vitest — <b>60 000+ statiska testdeklarationer</b> i över 8 400 spårade testfiler (enhets-, integrations-, E2E-, säkerhets- och ekosystemtester)</td></tr>
+  <tr><td nowrap><b>Testning</b></td><td>Node.js-testkörning + Vitest — <b>över 60 000 statiska testdeklarationer</b> i över 8 400 spårade testfiler (enhets-, integrations-, E2E-, säkerhets- och ekosystemtester)</td></tr>
   <tr><td nowrap><b>Plattformar</b></td><td>Skrivbord (Electron) · Android (Termux) · PWA (valfri webbläsare)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk npm-publicering + Docker Hub vid release</td></tr>
   <tr><td nowrap><b>Länkar</b></td><td><a href="https://omniroute.online">Webbplats</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1331,26 +1331,26 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Användarhandbok</a></b></td><td>Leverantörer, kombinationer, CLI-integration, distribution</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Installationsguide</a></b></td><td>Fullständiga installationsmetoder, CLI-verktygskonfigurationer, protokollinstallation, justering av tidsgränser</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Guide till CLI-verktyg</a></b></td><td>Verktygsspecifik installation för Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Fjärrläge</a></b></td><td>Styr en fjärransluten OmniRoute (VPS) från din laptops CLI via åtkomsttoken med begränsad omfattning</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-konfiguration</a></b></td><td>Rikta Claude Code mot OmniRoute (lokalt/fjärranslutet) med <code>launch</code> + modellprofiler per modell</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Användarguide</a></b></td><td>Leverantörer, kombinationer, CLI-integration, driftsättning</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Installationsguide</a></b></td><td>Fullständiga installationsmetoder, konfigurationer av CLI-verktyg, protokollkonfiguration, justering av tidsgränser</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Guide till CLI-verktyg</a></b></td><td>Verktygsspecifik konfiguration för Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Fjärrläge</a></b></td><td>Styr en fjärransluten OmniRoute (VPS) från din bärbara dators CLI via åtkomsttoken med begränsad omfattning</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-konfiguration</a></b></td><td>Anslut Claude Code till OmniRoute (lokalt/fjärranslutet) med <code>launch</code> + profiler per modell</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">Snabbstart</a></b></td><td>Installation → anslutning → konfiguration i tre steg</td></tr>
 </table>
 
-### 🔧 Drift och distribution
+### 🔧 Drift och driftsättning
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-guide</a></b></td><td>Docker-körning, Compose-profiler, Caddy HTTPS, tunnlar, image-taggar</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-guide</a></b></td><td>Docker-körning, Compose-profiler, Caddy HTTPS, tunnlar, bildtaggar</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-guide</a></b></td><td>Quadlet-systemd-integration, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-distribution</a></b></td><td>Fullständig guide: installation av VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-distribution</a></b></td><td>Distribuera till Fly.io med beständig lagring</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-driftsättning</a></b></td><td>Fullständig guide: konfiguration av VM + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-driftsättning</a></b></td><td>Distribuera till Fly.io med beständig lagring</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-guide</a></b></td><td>Kör OmniRoute på Android via Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-guide</a></b></td><td>Installation, cachning och arkitektur för progressiva webbappar</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Avinstallationsguide</a></b></td><td>Fullständig borttagning för alla installationsmetoder</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Miljökonfiguration</a></b></td><td>Fullständig lista över <code>.env</code>-variabler och referenser</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-guide</a></b></td><td>Installation av progressiv webbapp, cachning, arkitektur</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Avinstallationsguide</a></b></td><td>Ren borttagning för alla installationsmetoder</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Miljökonfiguration</a></b></td><td>Fullständiga <code>.env</code>-variabler och referenser</td></tr>
 </table>
 
 ### 🧠 Funktioner och arkitektur
@@ -1358,16 +1358,16 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arkitektur</a></b></td><td>Systemarkitektur, dataflöde och interna funktioner</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Komprimeringsguide</a></b></td><td>Pipeline med 7 alternativ: av / lätt / standard / aggressiv / ultra / RTK / staplad</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Komprimeringsguide</a></b></td><td>Pipeline med 7 alternativ: av / lite / standard / aggressiv / ultra / RTK / staplad</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-komprimering</a></b></td><td>Komprimering av kommandoutdata, filter, tillit, verifiering, återställning av råutdata</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Komprimeringsmotorer</a></b></td><td>Caveman, RTK, staplade pipelines, gränssnitt för dashboard/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Komprimeringsmotorer</a></b></td><td>Caveman, RTK, staplade pipelines, ytor för dashboard/API/MCP</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Format för komprimeringsregler</a></b></td><td>JSON-scheman för regelpaket för Caveman- och RTK-filter</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Språkpaket för komprimering</a></b></td><td>Språkidentifiering och skapande av Caveman-regelpaket</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resiliensguide</a></b></td><td>Överbelastningsskydd, nedkylningsperioder, köer, skydd mot flockbeteende, TLS-spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Motor för automatiska kombinationer</a></b></td><td>Poängsättning med 16 faktorer, lägespaket, självläkning</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Språkpaket för komprimering</a></b></td><td>Språkidentifiering och redigering av Caveman-regelpaket</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resiliensguide</a></b></td><td>Kretsbrytare, nedkylningsperioder, kö, skydd mot överbelastning från samtidiga förfrågningar, TLS-spoofing</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Motor för automatiska kombinationer</a></b></td><td>Poängsättning utifrån 16 faktorer, lägespaket, självläkning</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyguide</a></b></td><td>Proxy-system i tre nivåer, 1proxy-marknadsplats, CRUD för register</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Konsoliderad katalog: 34 dokumenterade återkommande pooler / 485 katalogiserade poster på gratisnivå</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktionsgalleri</a></b></td><td>Visuell genomgång av dashboarden med skärmbilder</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Konsoliderad katalog: 34 dokumenterade återkommande pooler / 484 katalogförda poster på gratisnivå</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktionsgalleri</a></b></td><td>Visuell rundtur i dashboarden med skärmbilder</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentation av kodbasen</a></b></td><td>Nybörjarvänlig genomgång av kodbasen</td></tr>
 </table>
 
@@ -1388,11 +1388,11 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">Bidra</a></b></td><td>Utvecklingskonfiguration och riktlinjer</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Förgrenings- och utgåvemodell</a></b></td><td>Vart PR:er riktas (<code>release/*</code>), vad <code>main</code> och taggar betyder</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Ändringslogg</a></b></td><td>Fullständig versionsvis utgåvehistorik</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Förgrenings- och release-modell</a></b></td><td>Vart PR:er riktas (<code>release/*</code>), vad <code>main</code> och taggar betyder</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Ändringslogg</a></b></td><td>Fullständig releasehistorik per version</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Säkerhetspolicy</a></b></td><td>Rapportering av sårbarheter och säkerhetsrutiner</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-guide</a></b></td><td>Stöd för 67 språk, översättningsarbetsflöde, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Utgåvechecklista</a></b></td><td>Valideringssteg före utgåva</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-guide</a></b></td><td>Stöd för 67 språk, översättningsarbetsflöde och RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Releasechecklista</a></b></td><td>Valideringssteg före release</td></tr>
   <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Täckningsplan</a></b></td><td>Strategi för testtäckning av över 60 000 statiska testdeklarationer i över 8 400 spårade testfiler</td></tr>
 </table>
 
@@ -1402,12 +1402,12 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
 
 # ⭐ Främsta bidragsgivare
 
-> OmniRoute formas av en passionerad open source-gemenskap. Dessa personer har gjort exceptionella bidrag som direkt påverkar projektets kvalitet, stabilitet och räckvidd. **Tack.**
+> OmniRoute formas av en engagerad open source-community. Dessa personer har gjort exceptionella insatser som direkt påverkar projektets kvalitet, stabilitet och räckvidd. **Tack.**
 
-### Externa bidragsgivare efter sammanfogade pull requests
+### Externa bidragsgivare efter mergade pull requests
 
 <table>
-  <tr><th align="center">Placering</th><th align="left">Bidragsgivare</th><th align="center">Sammanfogade PR:er</th><th align="right">~Ändrade rader</th></tr>
+  <tr><th align="center">Rankning</th><th align="left">Bidragsgivare</th><th align="center">Mergade PR:er</th><th align="right">~Ändrade rader</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1430,7 +1430,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Folkräkningen genomfördes 2026-11-03 03:01:19 UTC med den aktuella <code>release/v3.8.53</code>-spetsen <code>05bc048d6c</code>. Den paginerade GitHub GraphQL-folkräkningen innehåller 9,947 sammanfogade PR:er: 4,130 av arkivägaren, 240 av Dependabot, 6 av andra botar/appar och <b>5,571 externa PR:er från 883 unika bidragsgivare</b>. ”Ändrade rader” är GitHub-tillägg + borttagningar och inkluderar genererade filer, låsfiler, kataloger, översättningar och dokumentation; det är ändringsmängd, inte författade LOC. 53 PR:er rapporterar GitHub-diffar på över 500,000 rader (till exempel #13399, ett enda tillägg av en provider, listar 2,347 ändrade filer), vilket blåser upp flera av totalsummorna ovan. Delade placeringar rangordnas tillsammans.</sub>
+<sub>Inventering utförd 2026-11-03 03:01:19 UTC med aktuell <code>release/v3.8.53</code>-spets <code>05bc048d6c</code>. Den paginerade GitHub GraphQL-inventeringen innehåller 9 947 mergade PR:er: 4 130 av repots ägare, 240 av Dependabot, 6 av andra botar/appar och <b>5 571 externa PR:er från 883 unika bidragsgivare</b>. ”Ändrade rader” är GitHubs tillägg + borttagningar och inkluderar genererade filer, låsfiler, kataloger, översättningar och dokumentation; det är ändringsvolym, inte författade LOC. 53 PR:er rapporterar GitHub-diffar på över 500 000 rader (till exempel #13399, där ett enda tillägg av en provider listar 2 347 ändrade filer), vilket blåser upp flera av totalsummorna ovan. Lika resultat rankas tillsammans.</sub>
 
 ### GitHub-attribuerade commits
 
@@ -1525,9 +1525,9 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   </tr>
 </table>
 
-<sub>Kontrollerat igen 2026-11-03 02:09:16 UTC: GitHub-attribuerade commits som rapporterats av repositoryts Contributors API för standardgrenen <code>release/v3.8.53</code>. API:et returnerade 903 identiteter (429 användare, 2 bottar, 472 anonyma); den här tabellen utesluter underhållaren, bottar och anonyma identiteter och behåller delade placeringar. Den skiljer sig från både rankningen ovan över sammanfogade PR:er och Git-metadataöversikten nedan.</sub>
+<sub>Kontrollerad igen 2026-11-03 02:09:16 UTC: GitHub-attribuerade commits rapporterade av repositoryts Contributors API för standardgrenen <code>release/v3.8.53</code>. API:et returnerade 903 identiteter (429 användare, 2 bottar, 472 anonyma); den här tabellen utesluter underhållaren, bottar och anonyma identiteter och behåller delade placeringar. Den skiljer sig från både rankningen ovan av sammanfogade pull requests och Git-metadataöversikten nedan.</sub>
 
-> 🙏 Dessa bidragsgivares funktioner, felkorrigeringar och infrastrukturella förbättringar är en **central del** av det som gör OmniRoute tillförlitligt och funktionsrikt. Varje pull request, varje testfall och varje i18n-översättningsfil spelar roll. Öppen källkod byggs av människor som dem.
+> 🙏 Dessa bidragsgivares funktioner, buggfixar och infrastrukturförbättringar är en **central del** av det som gör OmniRoute tillförlitligt och funktionsrikt. Varje pull request, varje testfall och varje i18n-översättningsfil spelar roll. Öppen källkod byggs av människor som dem.
 
 </div>
 

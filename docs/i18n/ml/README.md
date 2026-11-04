@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1.62B ടോക്കണുകൾ / മാസം മൂന്നാംകക്ഷി സൗജന്യ ടിയറുകളിലുടനീളം
+## 💰 മൂന്നാം കക്ഷി സൗജന്യ ടിയറുകളിലുടനീളം പ്രതിമാസം ~1.62B ടോക്കണുകൾ
 
 </div>
 
-> **നിങ്ങളുടെ സ്വന്തം പ്രൊവൈഡർ അക്കൗണ്ടുകൾ കൊണ്ടുവരൂ.** ഇത് വേർതിരിച്ച് അർഹതയുള്ള മൂന്നാംകക്ഷി സൗജന്യ ടിയറുകളിലുടനീളം കണക്കാക്കിയ ഏകോപിതമായ അളവാണ്, OmniRoute നൽകുന്ന ടോക്കൺ ഗ്രാന്റ് അല്ല. സൈൻ അപ്പ് ചെയ്യുക, ആവശ്യമായിടത്ത് ക്രെഡൻഷ്യലുകൾ നേടുക, നിങ്ങൾക്ക് ഉപയോഗിക്കാൻ കഴിയുന്ന പ്രൊവൈഡറുകൾ കണക്ട് ചെയ്യുക; ഓരോ പ്രൊവൈഡറും അവരുടെ പരിധികളും ലഭ്യതയും നിബന്ധനകളും നിയന്ത്രിക്കുന്നു.
+> **നിങ്ങളുടെ സ്വന്തം പ്രൊവൈഡർ അക്കൗണ്ടുകൾ ഉപയോഗിക്കുക.** വേർതിരിച്ച് യോഗ്യത നേടുന്ന മൂന്നാം കക്ഷി സൗജന്യ ടിയറുകളിലുടനീളമുള്ള കണക്കാക്കിയ മൊത്തമാണിത്; OmniRoute നൽകുന്ന ടോക്കൺ ഗ്രാന്റല്ല. സൈൻ അപ്പ് ചെയ്യുക, ആവശ്യമായിടത്ത് ക്രെഡൻഷ്യലുകൾ നേടുക, നിങ്ങൾക്ക് ഉപയോഗിക്കാനാകുന്ന പ്രൊവൈഡർമാരെ ബന്ധിപ്പിക്കുക; ഓരോ പ്രൊവൈഡറും അതിന്റെ പരിധികൾ, ലഭ്യത, നിബന്ധനകൾ എന്നിവ നിയന്ത്രിക്കുന്നു.
 >
-> സൗജന്യ ടിയറുകൾ കൈകൊണ്ട് സ്റ്റാക്ക് ചെയ്യുന്നത് ബുദ്ധിമുട്ടാണ് — പത്തിരുപതോളം SDKകൾ, പത്തിരുപതോളം നിരക്ക് പരിധികൾ, നിങ്ങൾക്ക് യഥാർത്ഥത്തിൽ എത്ര ബാക്കി ഉണ്ടെന്ന് അറിയില്ല. OmniRoute **34 ആവർത്തിച്ചുള്ള പൂളുകൾക്കായി 485 സൗജന്യ ടിയർ എൻട്രികൾ** കാറ്റലോഗ് ചെയ്യുന്നു, അതിൽനിന്ന് **പ്രസിദ്ധീകരിച്ച പോസിറ്റീവ് മാസിക ബജറ്റുള്ള 17 പൂളുകളും അഞ്ച് മോഡൽപ്രതി Groq പരിധികളും** പൂളുകൾ പങ്കിടുന്നതനുസരിച്ച് ഡിഡ്യൂപ്പ് ചെയ്ത് ടോക്കൺ ഹെഡ്ലൈൻ കണക്കാക്കുന്നു. പ്രാദേശിക ഐഡന്റിറ്റി പരിശോധന കഴിഞ്ഞാൽ മാത്രമേ തുറക്കാവുന്ന ക്വോട്ടകൾ (ഇന്ന്: ModelScope) വേർതിരിച്ച് കാണിക്കുന്നു, +~6M പ്രാദേശിക ഐഡന്റിറ്റി വെരിഫിക്കേഷനിന് പിന്നിൽ, ഹെഡ്ലൈനിൽ ഒരിക്കലും കൂട്ടിച്ചേർക്കാറില്ല. ഫലങ്ങൾ ഡാഷ്ബോർഡിൽ (`/dashboard/free-tiers`) ദൃശ്യമായിരിക്കും.
+> സൗജന്യ ടിയറുകൾ കൈകൊണ്ട് കൂട്ടിച്ചേർക്കുന്നത് ബുദ്ധിമുട്ടാണ് — ഡസൻ കണക്കിന് SDK-കൾ, ഡസൻ കണക്കിന് നിരക്ക് പരിധികൾ, യഥാർത്ഥത്തിൽ നിങ്ങൾക്കുള്ളത് എത്രയെന്ന് അറിയാനുമാകില്ല. OmniRoute **34 ആവർത്തിക്കുന്ന പൂൾ കീകളിലായി 484 സൗജന്യ-ടിയർ എൻട്രികൾ** പട്ടികപ്പെടുത്തുകയും, പങ്കിട്ട പൂളുകൾ ഒഴിവാക്കി കണക്കാക്കിക്കൊണ്ട്, **പ്രസിദ്ധീകരിച്ച പോസിറ്റീവ് പ്രതിമാസ ബജറ്റുള്ള 17 പൂളുകളും മോഡൽപ്രകാരമുള്ള അഞ്ച് Groq പരിധികളും** അടിസ്ഥാനമാക്കി ടോക്കൺ കണക്ക് തയ്യാറാക്കുകയും ചെയ്യുന്നു. പ്രാദേശിക ഐഡന്റിറ്റി പരിശോധനയ്ക്ക് ശേഷം മാത്രം തുറക്കുന്ന ക്വോട്ടകൾ (ഇന്ന്: ModelScope) വേർതിരിച്ച് കാണിക്കുന്നു; പ്രാദേശിക ഐഡന്റിറ്റി സ്ഥിരീകരണത്തിന് പിന്നിൽ +~6M എന്ന നിലയിൽ, അവ ഒരിക്കലും പ്രധാന കണക്കിൽ കൂട്ടിച്ചേർക്കുന്നില്ല. ഫലം ഡാഷ്ബോർഡിൽ (`/dashboard/free-tiers`) തുടർന്നും കാണാം.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card: ~1.62B free tokens per month steady, up to ~2.22B in the first month with signup credits, from 34 documented recurring pool keys covering 485 cataloged free-tier entries behind one endpoint. Honest pool-deduped math — each shared pool counted once, including 17 recurring pools with a published positive monthly token budget plus five per-model Groq caps; 12 providers are marked avoid in the terms-risk catalog so you decide. Budget bar includes Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (five per-model caps) and smaller pools, plus first-month signup credits and permanently-free no-token-cap providers surfaced separately so they never inflate the headline. Live used/remaining on /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute സൗജന്യ-ടിയർ ബജറ്റ് കാർഡ്: പ്രതിമാസം സ്ഥിരമായി ~1.62B സൗജന്യ ടോക്കണുകൾ, സൈൻഅപ്പ് ക്രെഡിറ്റുകളോടെ ആദ്യ മാസത്തിൽ പരമാവധി ~2.22B വരെ; ഒരൊറ്റ എൻഡ്പോയിന്റിന് കീഴിൽ 484 കാറ്റലോഗ് ചെയ്ത സൗജന്യ-ടിയർ എൻട്രികൾ ഉൾക്കൊള്ളുന്ന 34 രേഖപ്പെടുത്തിയ ആവർത്തിക്കുന്ന പൂൾ കീകളിൽ നിന്ന്. സത്യസന്ധമായ പൂൾ-ഡ്യൂപ്ലിക്കേറ്റ്-രഹിത കണക്ക് — പങ്കിട്ട ഓരോ പൂളും ഒരിക്കൽ മാത്രം എണ്ണുന്നു; പ്രസിദ്ധീകരിച്ച പോസിറ്റീവ് പ്രതിമാസ ടോക്കൺ ബജറ്റുള്ള 17 ആവർത്തിക്കുന്ന പൂളുകളും ഓരോ മോഡലിനുമുള്ള അഞ്ച് Groq പരിധികളും ഉൾപ്പെടെ; നിബന്ധനാ-അപകടസാധ്യത കാറ്റലോഗിൽ 12 പ്രൊവൈഡർമാർ ഒഴിവാക്കണമെന്ന് അടയാളപ്പെടുത്തിയിട്ടുണ്ട്, അതിനാൽ നിങ്ങൾക്ക് തീരുമാനിക്കാം. ബജറ്റ് ബാറിൽ Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ഓരോ മോഡലിനുമുള്ള അഞ്ച് പരിധികൾ), ചെറിയ പൂളുകൾ എന്നിവയും, ആദ്യ മാസത്തെ സൈൻഅപ്പ് ക്രെഡിറ്റുകളും, ടോക്കൺ പരിധിയില്ലാത്ത സ്ഥിരമായി സൗജന്യ പ്രൊവൈഡർമാരെയും വേർതിരിച്ച് കാണിക്കുന്നു; അതിനാൽ അവ ഒരിക്കലും പ്രധാന കണക്ക് വർധിപ്പിക്കില്ല. /dashboard/free-tiers-ൽ തത്സമയ ഉപയോഗിച്ച/ശേഷിക്കുന്ന കണക്ക്."/>
 
-> ലൈവ് `/dashboard/free-tiers` പേജിന്റെ ആനിമേറ്റഡ് സംഗ്രഹം. പൂർണ്ണ രീതിശാസ്ത്രം (പൂൾ ഡിഡ്യൂപ്പ്, ക്രെഡിറ്റ് ടിയറുകൾ, പ്രൊവൈഡർ നിബന്ധനകൾ): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> തത്സമയ `/dashboard/free-tiers` പേജിന്റെ ആനിമേറ്റഡ് സംഗ്രഹം. പൂർണ്ണ രീതിശാസ്ത്രം (പൂൾ ഡ്യൂപ്ലിക്കേറ്റ് നീക്കം, ക്രെഡിറ്റ് ടിയറുകൾ, പ്രൊവൈഡർ നിബന്ധനകൾ): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>ഈ കണക്കുകൾ ഓരോ രണ്ടാഴ്ചയ്ക്കും തത്സമയ കാറ്റലോഗ് അനുസരിച്ച് വീണ്ടും ഓഡിറ്റ് ചെയ്യുന്നു, **ഇരുവശത്തേക്കും മാറും** — ഒരു പ്രൊവൈഡർ സൗജന്യ ടിയർ അവസാനിപ്പിച്ചാൽ എണ്ണം കുറയും; പുതിയതൊന്ന് വന്നാൽ ഉയരും. കാറ്റലോഗ് യഥാർത്ഥത്തിൽ കണക്കാക്കുന്നതു മാത്രമേ ഞങ്ങൾ പ്രസിദ്ധീകരിക്കൂ, ഒരിക്കലും റൗണ്ടുചെയ്ത മികച്ച കണക്കുകൾ അല്ല.</sub>
+> <sub>ഈ കണക്കുകൾ തത്സമയ കാറ്റലോഗിനെ അടിസ്ഥാനമാക്കി രണ്ടാഴ്ചയ്ക്കൊരിക്കൽ വീണ്ടും ഓഡിറ്റ് ചെയ്യുന്നു, കൂടാതെ **രണ്ടു ദിശകളിലേക്കും മാറാം** — ഒരു പ്രൊവൈഡർ സൗജന്യ ടിയർ അവസാനിപ്പിച്ചാൽ കണക്ക് കുറയും; പുതിയത് വന്നാൽ കണക്ക് കൂടും. കാറ്റലോഗ് യഥാർത്ഥത്തിൽ കണക്കാക്കുന്ന വിവരങ്ങളാണ് ഞങ്ങൾ പ്രസിദ്ധീകരിക്കുന്നത്, മുകളിലേക്ക് റൗണ്ട് ചെയ്ത ഏറ്റവും മികച്ച സാഹചര്യമല്ല.</sub>
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 <h3>
 
-⭐ OMNIROUTE നിങ്ങളെ പണം ലാഭിക്കാനും നിങ്ങളുടെ ജോലി എളുപ്പമാക്കാനും സഹായിച്ചെങ്കിൽ റിപോയ്ക്ക് സ്റ്റാർ നൽകൂ.
+OMNIROUTE നിങ്ങളെ പണം ലാഭിക്കാനും ജോലി എളുപ്പമാക്കാനും സഹായിച്ചെങ്കിൽ ⭐ റിപ്പോസിറ്ററിക്ക് സ്റ്റാർ നൽകുക.
 
 </h3>
 
@@ -50,9 +50,9 @@
 [![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 കമ്മ്യൂണിറ്റിയിൽ ചേരൂ
+### 💬 കമ്മ്യൂണിറ്റിയിൽ ചേരുക
 
-**👋 മെയിന്റെയ്നറെ പിന്തുടരൂ — പുതിയ പ്രൊവൈഡറുകൾ, റിലീസുകൾ, ടിപ്പുകൾ ആദ്യം അറിയൂ:**
+**👋 മെയിന്റെയ്നറെ പിന്തുടരുക — പുതിയ പ്രൊവൈഡർമാർ, റിലീസുകൾ, ടിപ്പുകൾ എന്നിവ ആദ്യം നേടുക:**
 
 [![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -63,7 +63,7 @@
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**ചോദ്യങ്ങൾ, പ്രൊവൈഡർ ടിപ്പുകൾ, റോഡ്മാപ്പ് & പിന്തുണ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 ഗ്ലോബൽ](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 ബ്രസീൽ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [പോർട്ടൽ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**ചോദ്യങ്ങൾ, പ്രൊവൈഡർ ടിപ്പുകൾ, റോഡ്മാപ്പ്, പിന്തുണ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1290,23 +1290,23 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
 </div>
 
 <table>
-  <tr><th align="left">ലെയർ</th><th align="left">സാങ്കേതികവിദ്യ</th></tr>
+  <tr><th align="left">പാളി</th><th align="left">സാങ്കേതികവിദ്യ</th></tr>
   <tr><td nowrap><b>റൺടൈം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിൽ <b>100% TypeScript</b> (v2.0 മുതൽ core-ൽ പൂജ്യം <code>any</code>)</td></tr>
+  <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിലുടനീളം <b>100% TypeScript</b> (v2.0 മുതൽ കോറിൽ പൂജ്യം <code>any</code>)</td></tr>
   <tr><td nowrap><b>ഫ്രെയിംവർക്ക്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 ഡൊമെയ്ൻ മോഡ്യൂളുകൾ, 221 മൈഗ്രേഷനുകൾ</td></tr>
-  <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings, typed decay</td></tr>
-  <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O പരിശോധന + API കരാറുകൾ</td></tr>
+  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ, 222 മൈഗ്രേഷനുകൾ</td></tr>
+  <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 പൂർണ്ണ-ടെക്സ്റ്റ് + int8-quantized വെക്റ്റർ എംബെഡ്ഡിംഗുകൾ, ടൈപ്പ് ചെയ്ത ക്ഷയം</td></tr>
+  <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O സാധുതാ പരിശോധന + API കരാറുകൾ</td></tr>
   <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>സ്ട്രീമിംഗ്</b></td><td>Server-Sent Events (SSE) + WebSocket ബ്രിഡ്ജ് (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>കംപ്രഷൻ</b></td><td>12-എഞ്ചിൻ പൈപ്പ്ലൈൻ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>ഓത്ത് &amp; സുരക്ഷ</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
-  <tr><td nowrap><b>സ്റ്റെൽത്ത്</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation, 3-ലെവൽ പ്രോക്സി</td></tr>
-  <tr><td nowrap><b>പ്രതിരോധശേഷി</b></td><td>Circuit breaker, exponential backoff, anti-thundering-herd, auto-combo self-healing</td></tr>
-  <tr><td nowrap><b>ലോഗിംഗ്</b></td><td>pino — request context ഉള്ള ഘടനാപരമായ JSON ലോഗുകൾ</td></tr>
-  <tr><td nowrap><b>ടെസ്റ്റിംഗ്</b></td><td>Node.js test runner + Vitest — 8,400-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലായി (unit, integration, E2E, security, ecosystem) <b>60,000-ലധികം static test declarations</b></td></tr>
+  <tr><td nowrap><b>പ്രാമാണീകരണവും സുരക്ഷയും</b></td><td>OAuth 2.0 (PKCE) + JWT + API കീകൾ + MCP സ്കോപ്പ്ഡ് ഓത്ത് · വിശ്രമാവസ്ഥയിൽ AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>സ്റ്റെൽത്ത്</b></td><td>wreq-js — JA3 / JA4 TLS ഫിംഗർപ്രിന്റ് ഇംപേഴ്സണേഷൻ, 3-ലെവൽ പ്രോക്സി</td></tr>
+  <tr><td nowrap><b>പ്രതിരോധശേഷി</b></td><td>സർക്യൂട്ട് ബ്രേക്കർ, എക്സ്പോണൻഷ്യൽ ബാക്ക്ഓഫ്, ആന്റി-തണ്ടറിംഗ്-ഹെർഡ്, ഓട്ടോ-കോംബോ സ്വയം-പരിഹാരം</td></tr>
+  <tr><td nowrap><b>ലോഗിംഗ്</b></td><td>pino — റിക്വസ്റ്റ് കോൺടെക്സ്റ്റോടുകൂടിയ ഘടനാപരമായ JSON ലോഗുകൾ</td></tr>
+  <tr><td nowrap><b>ടെസ്റ്റിംഗ്</b></td><td>Node.js ടെസ്റ്റ് റണ്ണർ + Vitest — 8,400-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലായി <b>60,000-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് ഡിക്ലറേഷനുകൾ</b> (യൂണിറ്റ്, ഇന്റഗ്രേഷൻ, E2E, സുരക്ഷ, ഇക്കോസിസ്റ്റം)</td></tr>
   <tr><td nowrap><b>പ്ലാറ്റ്ഫോമുകൾ</b></td><td>ഡെസ്ക്ടോപ്പ് (Electron) · Android (Termux) · PWA (ഏത് ബ്രൗസറും)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — release സമയത്ത് സ്വയമേവ npm publish + Docker Hub</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — റിലീസിൽ സ്വയമേവ npm പ്രസിദ്ധീകരണം + Docker Hub</td></tr>
   <tr><td nowrap><b>ലിങ്കുകൾ</b></td><td><a href="https://omniroute.online">വെബ്സൈറ്റ്</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1325,19 +1325,19 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">ഉപയോക്തൃ ഗൈഡ്</a></b></td><td>Providers, combos, CLI സംയോജനം, വിന്യാസം</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">സജ്ജീകരണ ഗൈഡ്</a></b></td><td>പൂർണ്ണ ഇൻസ്റ്റാൾ രീതികൾ, CLI ടൂൾ കോൺഫിഗറേഷനുകൾ, പ്രോട്ടോക്കോൾ സജ്ജീകരണം, ടൈംഔട്ട് ക്രമീകരണം</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI ടൂൾസ് ഗൈഡ്</a></b></td><td>Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot എന്നിവയ്ക്കുള്ള ഓരോ ടൂളിന്റെയും സജ്ജീകരണം</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">റിമോട്ട് മോഡ്</a></b></td><td>സ്കോപ്പുചെയ്ത ആക്സസ് ടോക്കണുകൾ ഉപയോഗിച്ച് നിങ്ങളുടെ ലാപ്ടോപ്പിലെ CLI വഴി റിമോട്ട് OmniRoute (VPS) നിയന്ത്രിക്കുക</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code കോൺഫിഗറേഷൻ</a></b></td><td><code>launch</code> + ഓരോ മോഡലിനുമുള്ള പ്രൊഫൈലുകൾ ഉപയോഗിച്ച് Claude Code-നെ OmniRoute-ലേക്ക് (ലോക്കൽ/റിമോട്ട്) പോയിന്റ് ചെയ്യുക</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">ദ്രുത ആരംഭം</a></b></td><td>3 ഘട്ടങ്ങളുള്ള ഇൻസ്റ്റാൾ → കണക്റ്റ് → കോൺഫിഗർ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">റിമോട്ട് മോഡ്</a></b></td><td>പരിമിത ആക്സസ് ടോക്കണുകൾ ഉപയോഗിച്ച് ലാപ്ടോപ്പ് CLI വഴി റിമോട്ട് OmniRoute (VPS) നിയന്ത്രിക്കുക</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code കോൺഫിഗറേഷൻ</a></b></td><td><code>launch</code> + ഓരോ മോഡലിനുമുള്ള പ്രൊഫൈലുകൾ ഉപയോഗിച്ച് Claude Code-നെ OmniRoute-ലേക്ക് (ലോക്കൽ/റിമോട്ട്) ചൂണ്ടിക്കാണിക്കുക</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">ദ്രുത ആരംഭം</a></b></td><td>3 ഘട്ടങ്ങളിലുള്ള ഇൻസ്റ്റാൾ → കണക്റ്റ് → കോൺഫിഗർ</td></tr>
 </table>
 
 ### 🔧 പ്രവർത്തനങ്ങളും വിന്യാസവും
 
 <table>
   <tr><th align="left">ഡോക്യുമെന്റ്</th><th align="left">വിവരണം</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker ഗൈഡ്</a></b></td><td>Docker റൺ, Compose പ്രൊഫൈലുകൾ, Caddy HTTPS, ടണലുകൾ, ഇമേജ് ടാഗുകൾ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker ഗൈഡ്</a></b></td><td>Docker run, Compose പ്രൊഫൈലുകൾ, Caddy HTTPS, ടണലുകൾ, ഇമേജ് ടാഗുകൾ</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman ഗൈഡ്</a></b></td><td>Quadlet systemd സംയോജനം, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM വിന്യാസം</a></b></td><td>പൂർണ്ണ ഗൈഡ്: VM + nginx + Cloudflare സജ്ജീകരണം</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io വിന്യാസം</a></b></td><td>സ്ഥിരമായ സ്റ്റോറേജോടെ Fly.io-ലേക്ക് വിന്യസിക്കുക</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io വിന്യാസം</a></b></td><td>സ്ഥിരമായ സ്റ്റോറേജ് ഉപയോഗിച്ച് Fly.io-ലേക്ക് വിന്യസിക്കുക</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux ഗൈഡ്</a></b></td><td>Termux വഴി Android-ൽ OmniRoute പ്രവർത്തിപ്പിക്കുക</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA ഗൈഡ്</a></b></td><td>Progressive Web App ഇൻസ്റ്റാൾ, കാഷിംഗ്, ആർക്കിടെക്ചർ</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">അൺഇൻസ്റ്റാൾ ഗൈഡ്</a></b></td><td>എല്ലാ ഇൻസ്റ്റാൾ രീതികൾക്കുമുള്ള പൂർണ്ണ നീക്കം</td></tr>
@@ -1350,16 +1350,16 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
   <tr><th align="left">ഡോക്യുമെന്റ്</th><th align="left">വിവരണം</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">ആർക്കിടെക്ചർ</a></b></td><td>സിസ്റ്റം ആർക്കിടെക്ചർ, ഡാറ്റാ പ്രവാഹം, ആന്തരിക ഘടകങ്ങൾ</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">കംപ്രഷൻ ഗൈഡ്</a></b></td><td>7-ഓപ്ഷൻ പൈപ്പ്ലൈൻ: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK കംപ്രഷൻ</a></b></td><td>കമാൻഡ്-ഔട്ട്പുട്ട് കംപ്രഷൻ, ഫിൽട്ടറുകൾ, വിശ്വാസ്യത, പരിശോധന, റോ-ഔട്ട്പുട്ട് വീണ്ടെടുക്കൽ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">കംപ്രഷൻ എഞ്ചിനുകൾ</a></b></td><td>Caveman, RTK, stacked പൈപ്പ്ലൈനുകൾ, ഡാഷ്ബോർഡ്/API/MCP ഇന്റർഫേസുകൾ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">കംപ്രഷൻ റൂൾസ് ഫോർമാറ്റ്</a></b></td><td>Caveman, RTK ഫിൽട്ടറുകൾക്കായുള്ള JSON റൂൾ-പാക്ക് സ്കീമകൾ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">കംപ്രഷൻ ലാംഗ്വേജ് പാക്കുകൾ</a></b></td><td>ഭാഷാ കണ്ടെത്തലും Caveman റൂൾ-പാക്ക് രചനയും</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">റിസിലിയൻസ് ഗൈഡ്</a></b></td><td>സർക്യൂട്ട് ബ്രേക്കറുകൾ, കൂൾഡൗണുകൾ, ക്യൂ, ആന്റി-തണ്ടറിംഗ് ഹെർഡ്, TLS സ്പൂഫിംഗ്</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo എഞ്ചിൻ</a></b></td><td>16-ഘടക സ്കോറിംഗ്, മോഡ് പാക്കുകൾ, സ്വയം-പരിഹാരം</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">പ്രോക്സി ഗൈഡ്</a></b></td><td>3-തല പ്രോക്സി സിസ്റ്റം, 1proxy മാർക്കറ്റ്പ്ലേസ്, രജിസ്ട്രി CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">സൗജന്യ ടിയറുകൾ</a></b></td><td>സംയോജിത ഡയറക്ടറി: രേഖപ്പെടുത്തിയ 34 ആവർത്തിത പൂളുകൾ / കാറ്റലോഗ് ചെയ്ത 485 സൗജന്യ-ടിയർ എൻട്രികൾ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">സവിശേഷതകളുടെ ഗാലറി</a></b></td><td>സ്ക്രീൻഷോട്ടുകളോടുകൂടിയ ദൃശ്യ ഡാഷ്ബോർഡ് പര്യടനം</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">കോഡ്ബേസ് ഡോക്യുമെന്റേഷൻ</a></b></td><td>തുടക്കക്കാർക്ക് സൗഹൃദമായ കോഡ്ബേസ് അവലോകനം</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK കംപ്രഷൻ</a></b></td><td>കമാൻഡ്-ഔട്ട്പുട്ട് കംപ്രഷൻ, ഫിൽട്ടറുകൾ, വിശ്വാസ്യത, verify, raw-output വീണ്ടെടുക്കൽ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">കംപ്രഷൻ എൻജിനുകൾ</a></b></td><td>Caveman, RTK, stacked പൈപ്പ്ലൈനുകൾ, ഡാഷ്ബോർഡ്/API/MCP ഇന്റർഫേസുകൾ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">കംപ്രഷൻ നിയമങ്ങളുടെ ഫോർമാറ്റ്</a></b></td><td>Caveman, RTK ഫിൽട്ടറുകൾക്കായുള്ള JSON rule-pack സ്കീമകൾ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">കംപ്രഷൻ ഭാഷാ പാക്കുകൾ</a></b></td><td>ഭാഷാ കണ്ടെത്തലും Caveman rule-pack രചനയും</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">റെസിലിയൻസ് ഗൈഡ്</a></b></td><td>Circuit breaker-ുകൾ, cooldown-ുകൾ, ക്യൂ, anti-thundering herd, TLS spoofing</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo എൻജിൻ</a></b></td><td>16-ഘടക സ്കോറിംഗ്, മോഡ് പാക്കുകൾ, സ്വയം-പരിഹാരം</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">പ്രോക്സി ഗൈഡ്</a></b></td><td>3-തല പ്രോക്സി സിസ്റ്റം, 1proxy marketplace, registry CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">സൗജന്യ ടയറുകൾ</a></b></td><td>ഏകീകരിച്ച ഡയറക്ടറി: രേഖപ്പെടുത്തിയ 34 ആവർത്തിക്കുന്ന പൂളുകൾ / കാറ്റലോഗ് ചെയ്ത 484 സൗജന്യ-ടയർ എൻട്രികൾ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">സവിശേഷതകളുടെ ഗാലറി</a></b></td><td>സ്ക്രീൻഷോട്ടുകളോടുകൂടിയ ദൃശ്യ ഡാഷ്ബോർഡ് പരിചയം</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase ഡോക്യുമെന്റേഷൻ</a></b></td><td>തുടക്കക്കാർക്ക് സൗഹൃദമായ codebase വിശദീകരണം</td></tr>
 </table>
 
 ### 🤖 പ്രോട്ടോക്കോളുകളും API-കളും
@@ -1371,34 +1371,34 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>110 MCP ടൂളുകൾ, IDE കോൺഫിഗറേഷനുകൾ, Python/TS/Go ക്ലയന്റുകൾ</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP Server ഗൈഡ്</a></b></td><td>MCP ഇൻസ്റ്റാളേഷൻ, ട്രാൻസ്പോർട്ടുകൾ, ടൂൾ റഫറൻസ്</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A Server</a></b></td><td>JSON-RPC 2.0 പ്രോട്ടോക്കോൾ, കഴിവുകൾ, സ്ട്രീമിംഗ്, ടാസ്ക് മാനേജ്മെന്റ്</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A Server ഗൈഡ്</a></b></td><td>A2A ഏജന്റ് കാർഡ്, ടാസ്കുകൾ, കഴിവുകൾ, സ്ട്രീമിംഗ്</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A Server ഗൈഡ്</a></b></td><td>A2A ഏജന്റ് കാർഡ്, ടാസ്ക്കുകൾ, കഴിവുകൾ, സ്ട്രീമിംഗ്</td></tr>
 </table>
 
 ### 📋 പ്രോജക്റ്റും ഗുണനിലവാരവും
 
 <table>
   <tr><th align="left">രേഖ</th><th align="left">വിവരണം</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">സംഭാവന ചെയ്യൽ</a></b></td><td>വികസന സജ്ജീകരണവും മാർഗ്ഗനിർദ്ദേശങ്ങളും</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ബ്രാഞ്ചിംഗ് & റിലീസ് മാതൃക</a></b></td><td>PR-കൾ ലക്ഷ്യമിടുന്ന സ്ഥലം (<code>release/*</code>), <code>main</code>, ടാഗുകൾ എന്നിവയുടെ അർത്ഥം</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">സംഭാവന നൽകൽ</a></b></td><td>വികസന സജ്ജീകരണവും മാർഗ്ഗനിർദ്ദേശങ്ങളും</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ബ്രാഞ്ചിംഗും റിലീസ് മോഡലും</a></b></td><td>PR-കൾ ലക്ഷ്യമിടുന്ന സ്ഥലം (<code>release/*</code>), <code>main</code>-നും ടാഗുകൾക്കും ഉള്ള അർത്ഥം</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">മാറ്റങ്ങളുടെ രേഖ</a></b></td><td>ഓരോ പതിപ്പിന്റെയും പൂർണ്ണ റിലീസ് ചരിത്രം</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">സുരക്ഷാ നയം</a></b></td><td>ദുർബലതകൾ റിപ്പോർട്ട് ചെയ്യലും സുരക്ഷാ രീതികളും</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n മാർഗ്ഗനിർദ്ദേശം</a></b></td><td>67 ഭാഷകൾക്കുള്ള പിന്തുണ, വിവർത്തന പ്രവാഹം, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">റിലീസ് പരിശോധനപ്പട്ടിക</a></b></td><td>റിലീസിന് മുമ്പുള്ള സാധൂകരണ ഘട്ടങ്ങൾ</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">കവറേജ് പദ്ധതി</a></b></td><td>8,400-ലധികം പിന്തുടരുന്ന ടെസ്റ്റ് ഫയലുകളിലായി 60,000-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് പ്രഖ്യാപനങ്ങൾക്കുള്ള ടെസ്റ്റ് കവറേജ് തന്ത്രം</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ഗൈഡ്</a></b></td><td>67 ഭാഷകൾക്കുള്ള പിന്തുണ, വിവർത്തന പ്രവാഹം, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">റിലീസ് ചെക്ക്ലിസ്റ്റ്</a></b></td><td>റിലീസിന് മുമ്പുള്ള സാധൂകരണ ഘട്ടങ്ങൾ</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">കവറേജ് പ്ലാൻ</a></b></td><td>8,400-ലധികം ട്രാക്ക് ചെയ്ത ടെസ്റ്റ് ഫയലുകളിലായി 60,000-ലധികം സ്റ്റാറ്റിക് ടെസ്റ്റ് പ്രഖ്യാപനങ്ങൾക്കുള്ള ടെസ്റ്റ് കവറേജ് തന്ത്രം</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ മുൻനിര സംഭാവകർ
+# ⭐ മുൻനിര സംഭാവനകർ
 
-> ആവേശഭരിതമായ ഒരു ഓപ്പൺ-സോഴ്സ് സമൂഹമാണ് OmniRoute-നെ രൂപപ്പെടുത്തുന്നത്. പ്രോജക്റ്റിന്റെ ഗുണമേന്മ, സ്ഥിരത, വ്യാപ്തി എന്നിവയിൽ നേരിട്ട് സ്വാധീനം ചെലുത്തുന്ന അസാധാരണ സംഭാവനകൾ ഈ വ്യക്തികൾ നൽകിയിട്ടുണ്ട്. **നന്ദി.**
+> ആവേശഭരിതമായ ഒരു ഓപ്പൺ-സോഴ്സ് സമൂഹമാണ് OmniRoute-നെ രൂപപ്പെടുത്തുന്നത്. പ്രോജക്റ്റിന്റെ ഗുണനിലവാരം, സ്ഥിരത, വ്യാപ്തി എന്നിവയിൽ നേരിട്ട് നിർണായക സ്വാധീനം ചെലുത്തുന്ന അസാധാരണ സംഭാവനകൾ ഈ വ്യക്തികൾ നൽകിയിട്ടുണ്ട്. **നന്ദി.**
 
-### ലയിപ്പിച്ച pull request-ുകൾ അനുസരിച്ചുള്ള ബാഹ്യ സംഭാവകർ
+### ലയിപ്പിച്ച pull request-ുകൾ പ്രകാരമുള്ള ബാഹ്യ സംഭാവനകർ
 
 <table>
-  <tr><th align="center">റാങ്ക്</th><th align="left">സംഭാവകൻ</th><th align="center">ലയിപ്പിച്ച PR-കൾ</th><th align="right">~മാറ്റിയ വരികൾ</th></tr>
+  <tr><th align="center">റാങ്ക്</th><th align="left">സംഭാവനകർ</th><th align="center">ലയിപ്പിച്ച PR-കൾ</th><th align="right">~മാറ്റിയ വരികൾ</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1421,7 +1421,7 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>2026-11-03 03:01:19 UTC-ന്, തത്സമയ <code>release/v3.8.53</code> ടിപ്പ് <code>05bc048d6c</code> ഉപയോഗിച്ച് സെൻസസ് എടുത്തതാണ്. പേജിനേറ്റ് ചെയ്ത GitHub GraphQL സെൻസസിൽ 9,947 ലയിപ്പിച്ച PR-കൾ ഉൾപ്പെടുന്നു: റിപ്പോസിറ്ററി ഉടമയുടെ 4,130, Dependabot-ന്റെ 240, മറ്റ് ബോട്ടുകൾ/ആപ്പുകളുടെ 6, കൂടാതെ <b>883 വ്യത്യസ്ത സംഭാവകരിൽ നിന്നുള്ള 5,571 ബാഹ്യ PR-കൾ</b>. “മാറ്റിയ വരികൾ” എന്നത് GitHub additions + deletions ആണ്; ജനറേറ്റ് ചെയ്ത ഫയലുകൾ, lockfiles, catalogs, വിവർത്തനങ്ങൾ, ഡോക്യുമെന്റേഷൻ എന്നിവയും ഇതിൽ ഉൾപ്പെടുന്നു. ഇത് churn ആണ്, രചയിതാവ് എഴുതിയ LOC അല്ല. 53 PR-കൾ GitHub diffs 500,000 വരികൾക്കു മുകളിലാണെന്ന് റിപ്പോർട്ട് ചെയ്യുന്നു (ഉദാഹരണത്തിന്, ഒരൊറ്റ provider addition ആയ #13399-ൽ 2,347 മാറ്റിയ ഫയലുകൾ പട്ടികപ്പെടുത്തിയിട്ടുണ്ട്), ഇത് മുകളിലെ പല മൊത്തം കണക്കുകളും വർദ്ധിപ്പിക്കുന്നു. തുല്യ സ്ഥാനങ്ങൾ ഒരുമിച്ച് റാങ്ക് ചെയ്തിരിക്കുന്നു.</sub>
+<sub>2026-11-03 03:01:19 UTC-ന് <code>release/v3.8.53</code> ടിപ്പായ <code>05bc048d6c</code> ഉപയോഗിച്ച് സെൻസസ് എടുത്തതാണ്. പേജിനേറ്റ് ചെയ്ത GitHub GraphQL സെൻസസിൽ 9,947 ലയിപ്പിച്ച PR-കൾ ഉൾപ്പെടുന്നു: റിപോസിറ്ററി ഉടമയുടെ 4,130, Dependabot-ന്റെ 240, മറ്റ് ബോട്ടുകൾ/ആപ്പുകളുടെ 6, കൂടാതെ <b>883 വ്യത്യസ്ത സംഭാവനകരിൽ നിന്നുള്ള 5,571 ബാഹ്യ PR-കൾ</b>. “മാറ്റിയ വരികൾ” എന്നത് GitHub-ലെ കൂട്ടിച്ചേർത്ത വരികളും നീക്കം ചെയ്ത വരികളും ചേർന്നതും ജനറേറ്റ് ചെയ്ത ഫയലുകൾ, ലോക്ക്ഫയലുകൾ, കാറ്റലോഗുകൾ, വിവർത്തനങ്ങൾ, ഡോക്യുമെന്റേഷൻ എന്നിവ ഉൾപ്പെടുന്നതുമാണ്; ഇത് churn ആണ്, രചയിതാവ് എഴുതിയ LOC അല്ല. 53 PR-കൾ GitHub ഡിഫുകളിൽ 500,000-ലധികം വരികൾ റിപ്പോർട്ട് ചെയ്യുന്നു (ഉദാഹരണത്തിന്, ഒരൊറ്റ provider കൂട്ടിച്ചേർക്കലായ #13399-ൽ 2,347 മാറ്റിയ ഫയലുകൾ പട്ടികപ്പെടുത്തിയിട്ടുണ്ട്), ഇത് മുകളിലെ ചില ആകെ കണക്കുകൾ വർദ്ധിപ്പിക്കുന്നു. തുല്യ സ്ഥാനങ്ങൾ ഒരുമിച്ച് റാങ്ക് ചെയ്തിരിക്കുന്നു.</sub>
 
 ### GitHub ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ
 
@@ -1432,42 +1432,42 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-ആരോപിതമായ 418 കമ്മിറ്റുകൾ</sub>
+      <sub>🥇 418 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub-ആരോപിതമായ 294 കമ്മിറ്റുകൾ</sub>
+      <sub>🥈 294 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHub-ആരോപിതമായ 229 കമ്മിറ്റുകൾ</sub>
+      <sub>🥉 229 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 222 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 222 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 202 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 202 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 134 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 134 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
   </tr>
   <tr>
@@ -1476,49 +1476,49 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 126 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 126 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 115 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 115 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 108 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 108 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 70 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 70 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 68 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 68 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHub-ആരോപിതമായ 68 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 68 GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-11-03 02:09:16 UTC-ൽ വീണ്ടും പരിശോധിച്ചു: സ്ഥിരസ്ഥിതി <code>release/v3.8.53</code> ബ്രാഞ്ചിനായുള്ള repository Contributors API റിപ്പോർട്ട് ചെയ്ത GitHub-ആരോപിതമായ കമ്മിറ്റുകൾ. API 903 ഐഡന്റിറ്റികൾ (429 ഉപയോക്താക്കൾ, 2 ബോട്ടുകൾ, 472 അനാമികർ) തിരികെ നൽകി; ഈ പട്ടികയിൽ പരിപാലകൻ, ബോട്ടുകൾ, അനാമിക ഐഡന്റിറ്റികൾ എന്നിവ ഉൾപ്പെടുത്തിയിട്ടില്ല, മത്സരത്തിലെ സമനിലകൾ നിലനിർത്തിയിട്ടുണ്ട്. മുകളിലെ ലയിപ്പിച്ച PR റാങ്കിംഗിൽ നിന്നും താഴെയുള്ള Git-മെറ്റാഡാറ്റാ സെൻസസിൽ നിന്നും ഇത് വ്യത്യസ്തമാണ്.</sub>
+<sub>2026-11-03 02:09:16 UTC-ൽ വീണ്ടും പരിശോധിച്ചത്: സ്ഥിരസ്ഥിതി ബ്രാഞ്ചായ <code>release/v3.8.53</code>-നായി റിപ്പോസിറ്ററിയുടെ Contributors API റിപ്പോർട്ട് ചെയ്ത GitHub-അനുബന്ധിത കമ്മിറ്റുകൾ. API 903 ഐഡന്റിറ്റികൾ (429 ഉപയോക്താക്കൾ, 2 ബോട്ടുകൾ, 472 അനാമികർ) തിരികെ നൽകി; ഈ പട്ടികയിൽ പരിപാലകൻ, ബോട്ടുകൾ, അനാമിക ഐഡന്റിറ്റികൾ എന്നിവ ഒഴിവാക്കിയിട്ടുണ്ട്, കൂടാതെ മത്സരത്തിലെ സമനിലകൾ നിലനിർത്തിയിട്ടുണ്ട്. ഇത് മുകളിൽ നൽകിയ ലയിപ്പിച്ച PR-കളുടെ റാങ്കിംഗിൽ നിന്നും താഴെയുള്ള Git-മെറ്റാഡാറ്റാ കണക്കെടുപ്പിൽ നിന്നും വ്യത്യസ്തമാണ്.</sub>
 
-> 🙏 ഈ സംഭാവകരുടെ സവിശേഷതകൾ, ബഗ് പരിഹാരങ്ങൾ, ഇൻഫ്രാസ്ട്രക്ചർ മെച്ചപ്പെടുത്തലുകൾ എന്നിവ OmniRoute-നെ വിശ്വസനീയവും സവിശേഷതകളാൽ സമ്പന്നവുമാക്കുന്നതിന്റെ **കാതലായ ഭാഗമാണ്**. ഓരോ pull request-ും, ഓരോ ടെസ്റ്റ് കേസും, ഓരോ i18n വിവർത്തന ഫയലും പ്രധാനമാണ്. അവരെപ്പോലുള്ള ആളുകളാണ് ഓപ്പൺ സോഴ്സ് നിർമ്മിക്കുന്നത്.
+> 🙏 ഈ സംഭാവകരുടെ സവിശേഷതകൾ, ബഗ് പരിഹാരങ്ങൾ, ഇൻഫ്രാസ്ട്രക്ചർ മെച്ചപ്പെടുത്തലുകൾ എന്നിവ OmniRoute-നെ വിശ്വസനീയവും സവിശേഷതകളാൽ സമ്പന്നവുമാക്കുന്നതിന്റെ **കാതലായ ഘടകമാണ്**. ഓരോ പുൾ റിക്വസ്റ്റും, ഓരോ ടെസ്റ്റ് കേസും, ഓരോ i18n വിവർത്തന ഫയലും പ്രധാനമാണ്. ഇവരെപ്പോലുള്ള ആളുകളാണ് ഓപ്പൺ സോഴ്സ് നിർമ്മിക്കുന്നത്.
 
 </div>
 

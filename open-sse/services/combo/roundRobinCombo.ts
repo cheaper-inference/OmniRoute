@@ -1,4 +1,5 @@
 /** Round-robin combo dispatcher. Lift-as-is from combo.ts. @internal */
+import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
   checkFallbackError,
   decayModelFailureCount,
@@ -128,11 +129,12 @@ import {
   isEarlyEofResponse,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { isRetryAfterEligibleStatus } from "./unavailableRetryGate.ts";
 import { isRecord } from "./comboData.ts";
-import { createRRDashboardEvents } from "./rrDashboardEvents.ts";
+import { createRRDashboardEvents, selectedConnectionIdOf } from "./rrDashboardEvents.ts";
 import { attemptCompatRejectedFallback } from "./comboCompatFallback.ts";
 import { applyRequestTagRouting } from "./autoStrategy.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
@@ -154,6 +156,7 @@ import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
 /**
  * Handle round-robin combo: each request goes to the next model in circular order.
@@ -503,7 +506,11 @@ export async function handleRoundRobinCombo({
   // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): empty_content sibling retry,
   // abort-aware retry delay and the early-EOF provider-cooldown skip. Off = release path.
   const emptyStreamSiblingRecovery = isEmptyStreamSiblingRecoveryEnabled();
-  const clientGone = () => emptyStreamSiblingRecovery && signal?.aborted === true;
+  const preContentTransportRecovery =
+    clientRequestedStream && resilienceSettings.streamRecovery.enabled === true;
+  let encounteredTransportReadFailure = false;
+  const clientGone = () =>
+    (emptyStreamSiblingRecovery || preContentTransportRecovery) && signal?.aborted === true;
 
   const retryEmptyContent = ({
     response,
@@ -603,7 +610,13 @@ export async function handleRoundRobinCombo({
         fallbackCount++;
         continue;
       }
-      const rrEvents = createRRDashboardEvents(combo.name, modelIndex, provider, modelStr);
+      const rrEvents = createRRDashboardEvents(
+        combo.name,
+        modelIndex,
+        provider,
+        modelStr,
+        target.connectionId
+      );
       const profile = await getRuntimeProviderProfile(provider);
       const semaphoreKey = `combo:${combo.name}:${target.executionKey}`;
       let allowRateLimitedConnection =
@@ -765,7 +778,9 @@ export async function handleRoundRobinCombo({
               "COMBO-RR",
               `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${maxRetries + 1})`
             );
-            if (emptyStreamSiblingRecovery) {
+            if (encounteredTransportReadFailure) {
+              await waitForCooldownAwareRetry(retryDelayMs, signal);
+            } else if (emptyStreamSiblingRecovery) {
               await new Promise<void>((resolve) => {
                 const finish = () => {
                   clearTimeout(timer);
@@ -827,6 +842,8 @@ export async function handleRoundRobinCombo({
             fingerprint: resolveTargetFingerprint(target) ?? "",
           });
 
+          if (preContentTransportRecovery && signal?.aborted)
+            return errorResponse(499, "Client disconnected");
           rrEvents.attempt();
           const result = await Promise.race([
             handleSingleModel(attemptBody, modelStr, {
@@ -837,6 +854,10 @@ export async function handleRoundRobinCombo({
             }),
             rrSafetyPromise,
           ]);
+          if (preContentTransportRecovery && signal?.aborted) {
+            releaseRejectedQualityResponse(result, result);
+            return errorResponse(499, "Client disconnected");
+          }
           if (rrExpired) return result; // G4: safety timer won — stop everything
 
           // Quota-aware scheduling: reserve the estimated budget for this
@@ -860,21 +881,24 @@ export async function handleRoundRobinCombo({
 
           // Success — validate response quality before returning
           if (result.ok) {
-            let rrClone: Response;
-            try {
-              rrClone = result.clone();
-            } catch {
-              rrClone = result;
-            }
+            const rrClone = cloneForQuality(result);
             const quality = await validateResponseQuality(
               rrClone,
               clientRequestedStream,
               log,
               config.responseValidation,
-              null,
-              await isTrustedEmptyTurn(provider, result, targetForAttempt.connectionId)
+              preContentTransportRecovery ? signal : null,
+              await isTrustedEmptyTurn(provider, result, targetForAttempt.connectionId),
+              preContentTransportRecovery
             );
             releaseQualityClone(rrClone, result, quality);
+            if (preContentTransportRecovery && signal?.aborted) {
+              void quality.clonedResponse?.body?.cancel().catch(() => {});
+              releaseRejectedQualityResponse(rrClone, result);
+              return errorResponse(499, "Client disconnected");
+            }
+            encounteredTransportReadFailure ||=
+              quality.upstreamFailure?.transportReadFailure === true;
             if (!quality.valid) {
               releaseRejectedQualityResponse(rrClone, result);
               log.warn(
@@ -895,7 +919,11 @@ export async function handleRoundRobinCombo({
                   rrSelectedConnectionId || target.connectionId
                 );
               }
-              rrEvents.failed(`Quality: ${quality.reason}`, Date.now() - startTime);
+              rrEvents.failed(
+                `Quality: ${quality.reason}`,
+                Date.now() - startTime,
+                selectedConnectionIdOf(result)
+              );
               // #17049: an in-stream provider safety stop is terminal for the whole combo.
               if (isProviderSafetyStreamFailure(quality)) {
                 recordComboRequest(combo.name, modelStr, {
@@ -985,7 +1013,7 @@ export async function handleRoundRobinCombo({
               "COMBO-RR",
               `${modelStr} succeeded (${latencyMs}ms, ${fallbackCount} fallbacks)`
             );
-            rrEvents.succeeded(latencyMs);
+            rrEvents.succeeded(latencyMs, selectedConnectionIdOf(result));
             recordComboRequest(combo.name, modelStr, {
               success: true,
               latencyMs,
@@ -1119,7 +1147,11 @@ export async function handleRoundRobinCombo({
             }
           }
           if (isProviderCircuitOpenResult(result, errorText)) {
-            rrEvents.failed(errorText || `HTTP ${result.status}`, Date.now() - startTime);
+            rrEvents.failed(
+              errorText || `HTTP ${result.status}`,
+              Date.now() - startTime,
+              selectedConnectionIdOf(result)
+            );
             const refusal = recordLocalCircuitRefusal({
               comboName: combo.name,
               modelStr,
@@ -1294,7 +1326,11 @@ export async function handleRoundRobinCombo({
           }
 
           // Done with this model
-          rrEvents.failed(errorText || `HTTP ${result.status}`, Date.now() - startTime);
+          rrEvents.failed(
+            errorText || `HTTP ${result.status}`,
+            Date.now() - startTime,
+            selectedConnectionIdOf(result)
+          );
           recordComboRequest(combo.name, modelStr, {
             success: false,
             latencyMs: Date.now() - startTime,
@@ -1360,17 +1396,7 @@ export async function handleRoundRobinCombo({
               : 0;
           if ([502, 503, 504].includes(result.status) && fallbackWaitMs > 0) {
             log.debug?.("COMBO-RR", `Waiting ${fallbackWaitMs}ms before fallback to next model`);
-            await new Promise((resolve) => {
-              const timer = setTimeout(resolve, fallbackWaitMs);
-              signal?.addEventListener(
-                "abort",
-                () => {
-                  clearTimeout(timer);
-                  resolve(undefined);
-                },
-                { once: true }
-              );
-            });
+            await waitForCooldownAwareRetry(fallbackWaitMs, signal);
             if (signal?.aborted) {
               log.info("COMBO-RR", `Client disconnected during fallback wait — aborting`);
               return errorResponse(499, "Client disconnected");

@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1,62 miljardit tokenit kuus kolmandate osapoolte tasuta tasemete kaudu
+## 💰 ~1.62B tokenit kuus kolmandate osapoolte tasuta tasanditel
 
 </div>
 
-> **Too oma teenusepakkujate kontod ise.** See on hinnanguline summa, mis põhineb eraldi sobilikel kolmandate osapoolte tasuta tasemetel, mitte OmniRoute'i tokenite toetus. Registreeru, taotle vajadusel mandaadid ja ühenda teenusepakkujad, keda saad kasutada; iga teenusepakkuja määrab ise oma piirangud, kättesaadavuse ja tingimused.
+> **Kasutage oma teenusepakkujate kontosid.** See on eraldi kasutuskõlblike kolmandate osapoolte tasuta tasandite hinnanguline koondsumma, mitte OmniRoute'i antud tokenitoetus. Registreeruge, hankige vajaduse korral mandaadid ja ühendage kasutatavad teenusepakkujad; iga teenusepakkuja määrab oma piirangud, saadavuse ja tingimused.
 >
-> Tasuta tasemete käsitsi kombineerimine on valus — kümned SDK-d, kümned kiiruspiirangud ja puudub ülevaade, kui palju tegelikult kasutada saad. OmniRoute kataloogib **485 tasuta taseme kirjet 34 korduva ressursivõtme kohta** ja arvutab tokenite kogusumma **17 ressursivõtme põhjal, millel on avalik positiivne kuine eelarve, pluss viis Groq mudelipõhist limiiti**, eemaldades kattuvad ressursid. Kvoodid, mis avanevad alles pärast piirkondlikku isikutuvastust (täna: ModelScope), on näidatud eraldi, +~6M pärast piirkondlikku isikutuvastust, ja neid ei liideta kunagi kogusummasse. Tulemus on alati nähtav armatuurlaual (`/dashboard/free-tiers`).
+> Tasuta tasandite käsitsi kokkupanek on vaevarikas — kümneid SDK-sid, kümneid päringupiiranguid ja puudub ülevaade sellest, kui palju teil tegelikult kasutada on. OmniRoute kataloogib **484 tasuta tasandi kirjet 34 korduva kogumi võtme vahel** ning arvutab tokenite põhiväärtuse **17 kogumi põhjal, millel on avaldatud positiivne kuueelarve, ja viie mudelipõhise Groq'i piirangu põhjal**, eemaldades jagatud kogumite duplikaadid. Kvoodid, mis avanevad alles pärast piirkondliku identiteedikontrolli läbimist (praegu: ModelScope), kuvatakse eraldi, +~6M pärast piirkondlikku identiteedi kinnitamist, ning neid ei liideta põhiväärtusse. Tulemus on jätkuvalt nähtav juhtpaneelil (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute tasuta taseme eelarve kaart: ~1,62 miljardit tasuta tokenit kuus stabiilselt, kuni ~2,22 miljardit esimesel kuul registreerimisboonustega, 34 dokumenteeritud korduva ressursivõtme kaudu, mis katavad 485 kataloogitud tasuta taseme kirjet ühe lõpp-punkti taga. Aus ressursipõhine arvestus — iga jagatud ressurss arvestatakse üks kord, sealhulgas 17 korduvat ressurssi avaliku positiivse kuise tokeni eelarvega pluss viis Groq mudelipõhist limiiti; 12 teenusepakkujat on märgitud vältimiseks tingimuste riski kataloogis, et saaksid ise otsustada. Eelarveriba sisaldab Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (viis mudelipõhist limiiti) ja väiksemaid ressursse, lisaks esmakordse registreerimise boonused ja püsivalt tasuta, ilma tokeni limiidita teenusepakkujad on toodud eraldi, et need ei suurendaks kogusummat. Reaalajas kasutatud/järelejäänud `/dashboard/free-tiers`."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute'i tasuta tasandi eelarvekaart: ~1.62B tasuta tokenit kuus stabiilselt, esimesel kuul registreerumiskrediitidega kuni ~2.22B, 34 dokumenteeritud korduva kogumi võtme kaudu, mis hõlmavad 484 kataloogitud tasuta tasandi kirjet ühe lõpp-punkti taga. Aus, kogumite duplikaate eemaldav arvestus — iga jagatud kogum loetakse üks kord, sealhulgas 17 korduvat kogumit, millel on avaldatud positiivne kuine tokenieelarve, ning viis mudelipõhist Groq'i piirangut; 12 teenusepakkujat on tingimustega seotud riskide kataloogis märgitud vältimiseks, seega otsustate teie. Eelarveriba sisaldab Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (viis mudelipõhist piirangut) ja väiksemaid kogumeid, lisaks esimese kuu registreerumiskrediite ning püsivalt tasuta teenusepakkujaid, kellel puudub tokenipiirang ja keda kuvatakse eraldi, et need ei suurendaks põhiväärtust. Reaalajas kasutatud/järelejäänud maht lehel /dashboard/free-tiers."/>
 
-> Animaatiline kokkuvõte lehe `/dashboard/free-tiers` reaalajas seisust. Täielik metoodika (ressursside eemaldamine, krediiditasemed, teenusepakkujate tingimused): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> `/dashboard/free-tiers` lehe animeeritud kokkuvõte. Täielik metoodika (kogumite duplikaatide eemaldamine, krediiditasemed, teenusepakkujate tingimused): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Neid andmeid auditeeritakse iga kahe nädala tagant elava kataloogi põhjal ja **need muutuvad mõlemas suunas** — teenusepakkuja lõpetab tasuta taseme ja arv väheneb; uus lisandub ja arv kasvab. Avaldame ainult seda, mida kataloog tegelikult arvutab, mitte kunagi ümardatud parimat võimalikku varianti.</sub>
+> <sub>Neid näitajaid auditeeritakse iga kahe nädala järel uuesti aktiivse kataloogi põhjal ja need **liiguvad mõlemas suunas** — teenusepakkuja lõpetab tasuta tasandi ning number väheneb; lisandub uus ja see suureneb. Avaldame selle, mida kataloog tegelikult arvutab, mitte üles ümardatud parimat võimalikku tulemust.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Märgi repo tärniga, kui OMNIROUTE aitas sul raha säästa ja tööd lihtsustada.
+⭐ Märgistage repositoorium tärniga, kui OMNIROUTE aitas teil raha säästa ja töö lihtsamaks muuta.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Tähed](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Tärnide ajaloo edetabel](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Liitu kogukonnaga
 
-**👋 Jälgi haldajat — saad esimesena teada uutest teenusepakkujatest, väljalastest ja nippidest:**
+**👋 Jälgige hooldajat — saage uutest teenusepakkujatest, väljalasetest ja nõuannetest esimesena teada:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Jälgi Diegot LinkedInis](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Jälgi kasutajat @diegosouzapw GitHubis](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Veebisait](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Küsimused, teenusepakkujate soovitused, teekaart ja tugi → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Globaalne](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasiilia](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portaal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Küsimused, nõuanded teenusepakkujate kohta, tegevuskava ja tugi → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portaal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1298,27 +1298,27 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
 <br/>
 <div align="center">
 
-## 🛠️ Tehnoloogiavirn
+## 🛠️ Tehnoloogiakomplekt
 
 </div>
 
 <table>
   <tr><th align="left">Kiht</th><th align="left">Tehnoloogia</th></tr>
   <tr><td nowrap><b>Käituskeskkond</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloogides <code>src/</code> ja <code>open-sse/</code> (tuumikus pole alates versioonist v2.0 ühtki <code>any</code>-tüüpi)</td></tr>
+  <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloogides <code>src/</code> ja <code>open-sse/</code> (alates versioonist v2.0 puudub tuumas <code>any</code>)</td></tr>
   <tr><td nowrap><b>Raamistik</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-i logimine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 221 migratsiooni</td></tr>
-  <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstotsing + int8-kvantiseeritud vektormanused, tüübipõhine hääbumine</td></tr>
+  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-päevikupidamine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 222 migratsiooni</td></tr>
+  <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstiotsing + int8-kvantiseeritud vektormanused, tüübitud vananemine</td></tr>
   <tr><td nowrap><b>Skeemid</b></td><td>Zod 4 — MCP tööriistade sisendi/väljundi valideerimine + API lepingud</td></tr>
   <tr><td nowrap><b>Protokollid</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Voogedastus</b></td><td>Serveri saadetud sündmused (SSE) + WebSocketi sild (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Tihendus</b></td><td>12-mootoriline toru — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentimine &amp; turvalisus</b></td><td>OAuth 2.0 (PKCE) + JWT + API-võtmed + MCP ulatusega autentimine · AES-256-GCM puhkeseisundis · DOMPurify</td></tr>
-  <tr><td nowrap><b>Varjatus</b></td><td>wreq-js — JA3 / JA4 TLS-i sõrmejäljenduse jäljendamine, 3-tasemeline puhverserver</td></tr>
-  <tr><td nowrap><b>Vastupidavus</b></td><td>Kaitselüliti, eksponentsiaalne tagasipöördumine, tormijooksu ennetamine, automaatse kombinatsiooni eneseparandus</td></tr>
+  <tr><td nowrap><b>Tihendamine</b></td><td>12 mootori torustik — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentimine &amp; turve</b></td><td>OAuth 2.0 (PKCE) + JWT + API-võtmed + MCP ulatusega autentimine · AES-256-GCM salvestatud andmete kaitseks · DOMPurify</td></tr>
+  <tr><td nowrap><b>Varjatus</b></td><td>wreq-js — JA3 / JA4 TLS-i sõrmejälje jäljendamine, 3-tasemeline puhverserver</td></tr>
+  <tr><td nowrap><b>Töökindlus</b></td><td>Ahela katkestaja, eksponentsiaalne taandumine, massilise päringutulva vältimine, automaatse kombinatsiooni eneseparandus</td></tr>
   <tr><td nowrap><b>Logimine</b></td><td>pino — struktureeritud JSON-logid päringu kontekstiga</td></tr>
-  <tr><td nowrap><b>Testimine</b></td><td>Node.js-i testikäitaja + Vitest — <b>üle 60,000 staatilise testideklaratsiooni</b> enam kui 8,400 jälgitavas testifailis (ühik-, integratsiooni-, E2E-, turva- ja ökosüsteemitestid)</td></tr>
-  <tr><td nowrap><b>Platvormid</b></td><td>Lauaarvuti (Electron) · Android (Termux) · PWA (mis tahes brauser)</td></tr>
+  <tr><td nowrap><b>Testimine</b></td><td>Node.js-i testikäitaja + Vitest — <b>60 000+ staatilist testideklaratsiooni</b> enam kui 8400 jälgitavas testifailis (üksus-, integratsiooni-, E2E-, turbe- ja ökosüsteemitestid)</td></tr>
+  <tr><td nowrap><b>Platvormid</b></td><td>Töölaud (Electron) · Android (Termux) · PWA (mis tahes brauser)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automaatne npm-i avaldamine + Docker Hubi avaldamine väljalaske korral</td></tr>
   <tr><td nowrap><b>Lingid</b></td><td><a href="https://omniroute.online">Veebisait</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
@@ -1336,41 +1336,41 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
 <table>
   <tr><th align="left">Dokument</th><th align="left">Kirjeldus</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Kasutusjuhend</a></b></td><td>Pakkujad, kombinatsioonid, CLI-integratsioon, juurutamine</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Seadistusjuhend</a></b></td><td>Täielikud paigaldusmeetodid, CLI-tööriistade konfiguratsioonid, protokolli seadistus, ajalõpu häälestamine</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI-tööriistade juhend</a></b></td><td>Tööriistapõhine seadistus rakendustele Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Kaugrežiim</a></b></td><td>Kaug-OmniRoute’i (VPS) juhtimine sülearvuti CLI kaudu piiratud juurdepääsulubadega</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code’i konfiguratsioon</a></b></td><td>Claude Code’i suunamine OmniRoute’i (kohalik/kaug) käsuga <code>launch</code> + mudelipõhiste profiilidega</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Kiirstart</a></b></td><td>Paigaldamine → ühendamine → konfigureerimine kolme sammuna</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Seadistusjuhend</a></b></td><td>Täielikud paigaldusmeetodid, CLI-tööriistade konfiguratsioonid, protokolli seadistus, ajalõppude häälestamine</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI-tööriistade juhend</a></b></td><td>Tööriistapõhine seadistus Claude Code'i, Codexi, Cursori, Cline'i, OpenClaw', Kilo ja Copiloti jaoks</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Kaugjuhtimisrežiim</a></b></td><td>Kaug-OmniRoute'i (VPS) juhtimine sülearvuti CLI kaudu piiratud kasutusulatusega pääsutõendite abil</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code'i konfiguratsioon</a></b></td><td>Claude Code'i suunamine OmniRoute'i (kohalik või kaugjuhtimisega) kasutades <code>launch</code> + mudelipõhiseid profiile</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Kiirstart</a></b></td><td>3 sammu: paigalda → ühenda → konfigureeri</td></tr>
 </table>
 
-### 🔧 Haldus ja juurutamine
+### 🔧 Käitamine ja juurutamine
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Kirjeldus</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Dockeri juhend</a></b></td><td>Dockeri käitamine, Compose’i profiilid, Caddy HTTPS, tunnelid, tõmmiste sildid</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Dockeri juhend</a></b></td><td>Dockeri käitamine, Compose'i profiilid, Caddy HTTPS, tunnelid, pildisildid</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podmani juhend</a></b></td><td>Quadleti systemd-integratsioon, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-i juurutamine</a></b></td><td>Täielik juhend: VM-i + nginx-i + Cloudflare’i seadistus</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io juurutamine</a></b></td><td>Juurutamine Fly.io-sse püsiva salvestusruumiga</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termuxi juhend</a></b></td><td>OmniRoute’i käitamine Androidis Termuxi kaudu</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA juhend</a></b></td><td>Progressiivse veebirakenduse paigaldamine, vahemällu salvestamine, arhitektuur</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Virtuaalmasinasse juurutamine</a></b></td><td>Täielik juhend: virtuaalmasina, nginxi ja Cloudflare'i seadistus</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io juurutamine</a></b></td><td>Juurutamine Fly.io-sse püsisalvestusega</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termuxi juhend</a></b></td><td>OmniRoute'i käitamine Androidis Termuxi kaudu</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA juhend</a></b></td><td>Progressive Web Appi paigaldamine, vahemällu salvestamine, arhitektuur</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Desinstallimise juhend</a></b></td><td>Puhas eemaldamine kõigi paigaldusmeetodite korral</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Keskkonna konfiguratsioon</a></b></td><td><code>.env</code>-i muutujad ja viited täielikult</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Keskkonna konfiguratsioon</a></b></td><td>Kõik <code>.env</code>-muutujad ja viited</td></tr>
 </table>
 
 ### 🧠 Funktsioonid ja arhitektuur
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Kirjeldus</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arhitektuur</a></b></td><td>Süsteemi arhitektuur, andmevoog ja sisemus</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Tihendamise juhend</a></b></td><td>7 valikuga torustik: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-tihendamine</a></b></td><td>Käsu väljundi tihendamine, filtrid, usaldus, kontrollimine, töötlemata väljundi taastamine</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Tihendusmootorid</a></b></td><td>Caveman, RTK, virnastatud torustikud, juhtpaneeli/API/MCP-liidesed</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Tihendusreeglite vorming</a></b></td><td>JSON-reeglipakettide skeemid Cavemani ja RTK filtrite jaoks</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arhitektuur</a></b></td><td>Süsteemi arhitektuur, andmevoog ja sisemine ülesehitus</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Tihendamise juhend</a></b></td><td>7 valikuga toru: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-tihendamine</a></b></td><td>Käsuväljundi tihendamine, filtrid, usaldus, kontrollimine, töötlemata väljundi taastamine</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Tihendusmootorid</a></b></td><td>Caveman, RTK, virnastatud torud, juhtpaneeli/API/MCP-liidesed</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Tihendusreeglite vorming</a></b></td><td>Cavemani ja RTK filtrite JSON-reeglipakettide skeemid</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Tihendamise keelepaketid</a></b></td><td>Keelte tuvastamine ja Cavemani reeglipakettide koostamine</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Töökindluse juhend</a></b></td><td>Kaitselülitid, jahtumisajad, järjekord, ülekoormuse vältimine, TLS-i teesklemine</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Töökindluse juhend</a></b></td><td>Ahelkaitsed, jahtumisperioodid, järjekord, massilise päringutulva vältimine, TLS-i võltsimine</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Automaatse kombinatsiooni mootor</a></b></td><td>16 teguriga hindamine, režiimipaketid, isetaastumine</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Puhverserveri juhend</a></b></td><td>3-tasemeline puhverserverisüsteem, 1proxy turg, registri CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tasuta tasemed</a></b></td><td>Koondkataloog: 34 dokumenteeritud korduvat kogumit / 485 kataloogitud tasuta taseme kirjet</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tasuta tasemed</a></b></td><td>Koondkataloog: 34 dokumenteeritud korduvat kogumit / 484 kataloogitud tasuta taseme kirjet</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktsioonide galerii</a></b></td><td>Visuaalne juhtpaneeli tutvustus ekraanipiltidega</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Koodibaasi dokumentatsioon</a></b></td><td>Algajasõbralik koodibaasi ülevaade</td></tr>
 </table>
@@ -1384,34 +1384,34 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP-server</a></b></td><td>110 MCP-tööriista, IDE-konfiguratsioonid, Pythoni/TS-i/Go kliendid</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP-serveri juhend</a></b></td><td>MCP paigaldamine, transpordid ja tööriistade viitedokumentatsioon</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A-server</a></b></td><td>JSON-RPC 2.0 protokoll, oskused, voogedastus, ülesannete haldus</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A-serveri juhend</a></b></td><td>A2A agendikaart, ülesanded, oskused ja voogedastus</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A-serveri juhend</a></b></td><td>A2A agendi kaart, ülesanded, oskused ja voogedastus</td></tr>
 </table>
 
 ### 📋 Projekt ja kvaliteet
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Kirjeldus</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Kaastöö tegemine</a></b></td><td>Arenduskeskkonna seadistamine ja juhised</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Harude ja väljalasete mudel</a></b></td><td>Kuhu PR-id suunatakse (<code>release/*</code>) ning mida tähendavad <code>main</code> ja sildid</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Kaastööde tegemine</a></b></td><td>Arenduskeskkonna seadistamine ja juhised</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Haru- ja väljalaskemudel</a></b></td><td>Millistele harudele PR-id suunatakse (<code>release/*</code>) ning mida tähendavad <code>main</code> ja sildid</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Muudatuste logi</a></b></td><td>Täielik versioonide kaupa väljalasete ajalugu</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Turvapoliitika</a></b></td><td>Haavatavustest teatamine ja turvatavad</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-i juhend</a></b></td><td>67 keele tugi, tõlketöövoog, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Väljalaske kontroll-loend</a></b></td><td>Väljalaske-eelsed valideerimistoimingud</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Katvuse plaan</a></b></td><td>Testikatvuse strateegia enam kui 60 000 staatilise testideklaratsiooni jaoks enam kui 8 400 jälgitavas testifailis</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Turvapoliitika</a></b></td><td>Turvanõrkustest teatamine ja turvatavad</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-juhend</a></b></td><td>67 keele tugi, tõlke töövoog, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Väljalaske kontroll-loend</a></b></td><td>Väljalaskele eelnevad valideerimissammud</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Katvuse plaan</a></b></td><td>Testikatvuse strateegia enam kui 60 000 staatilise testideklaratsiooni jaoks, mis paiknevad enam kui 8 400 jälgitavas testifailis</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Parimad kaastöölised
+# ⭐ Tipptasemel kaastöötajad
 
 > OmniRoute'i kujundab pühendunud avatud lähtekoodiga kogukond. Need inimesed on andnud erakordse panuse, mis mõjutab otseselt projekti kvaliteeti, stabiilsust ja levikut. **Aitäh.**
 
-### Välised kaastöölised ühendatud pull request'ide arvu järgi
+### Välised kaastöötajad ühendatud pull request'ide arvu järgi
 
 <table>
-  <tr><th align="center">Koht</th><th align="left">Kaastööline</th><th align="center">Ühendatud PR-id</th><th align="right">~Muudetud read</th></tr>
+  <tr><th align="center">Koht</th><th align="left">Kaastöötaja</th><th align="center">Ühendatud PR-id</th><th align="right">~Muudetud read</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1434,9 +1434,9 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Loendus tehti 2026-11-03 03:01:19 UTC seisuga, kasutades aktiivset <code>release/v3.8.53</code> haru tippu <code>05bc048d6c</code>. Lehekülgede kaupa esitatud GitHub GraphQL-i loendus sisaldab 9 947 ühendatud PR-i: hoidla omanikult 4 130, Dependabotilt 240, teistelt robotitelt/rakendustelt 6 ning <b>5 571 välist PR-i 883 erinevalt kaastööliselt</b>. „Muudetud read” tähendab GitHubi lisatud ja kustutatud ridade summat ning hõlmab genereeritud faile, lukufaile, katalooge, tõlkeid ja dokumentatsiooni; see näitab muudatuste hulka, mitte autori kirjutatud LOC-i. 53 PR-i puhul on GitHubi diffĕrid suuremad kui 500 000 rida (näiteks #13399, kus ühe pakkuja lisamise käigus on muudetud 2 347 faili), mis suurendab mitut ülaltoodud kogusummat. Võrdsete tulemustega kohad on järjestatud koos.</sub>
+<sub>Loendus tehti 2026-11-03 03:01:19 UTC, kasutades aktiivset <code>release/v3.8.53</code> haru viimast versiooni <code>05bc048d6c</code>. Lehekülgedena laaditud GitHub GraphQL-i loendus sisaldab 9 947 ühendatud PR-i: hoidla omanikult 4 130, Dependabotilt 240, teistelt robotitelt/rakendustelt 6 ning <b>5 571 välist PR-i 883 erinevalt kaastöötajalt</b>. „Muudetud read” tähendab GitHubi lisamisi + kustutamisi ning hõlmab genereeritud faile, lukufaile, katalooge, tõlkeid ja dokumentatsiooni; see on muutuste hulk, mitte autori kirjutatud koodiridade arv. 53 PR-i puhul on GitHubi erinevused suuremad kui 500 000 rida (näiteks #13399, kus ühe pakkuja lisamine hõlmab 2 347 muudetud faili), mis suurendab mitut ülaltoodud kogusummat. Võrdsete tulemustega kohad on järjestatud koos.</sub>
 
-### GitHubi omistatud sissekanded
+### GitHubi omistatud committ'id
 
 <table>
   <tr>
@@ -1529,9 +1529,9 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   </tr>
 </table>
 
-<sub>Üle kontrollitud 2026-11-03 02:09:16 UTC: GitHubi omistatud commit'id, millest teatab hoidla Contributors API haru <code>release/v3.8.53</code> vaikimisi. API tagastas 903 identiteeti (429 kasutajat, 2 robotit, 472 anonüümset); see tabel jätab välja hooldaja, robotid ja anonüümsed identiteedid ning säilitab võrdsete tulemustega kohad. See erineb nii ülaltoodud ühendatud PR-ide edetabelist kui ka alltoodud Git-metaandmete loendusest.</sub>
+<sub>Üle kontrollitud 2026-11-03 02:09:16 UTC: GitHubi omistatud commit'id, millest teatas hoidla Contributors API <code>release/v3.8.53</code> vaikeharu kohta. API tagastas 903 identiteeti (429 kasutajat, 2 robotit, 472 anonüümset); see tabel välistab hooldaja, robotid ja anonüümsed identiteedid ning säilitab võistluse viigid. See erineb nii ülaltoodud ühendatud PR-ide edetabelist kui ka alltoodud Git-metaandmete loendusest.</sub>
 
-> 🙏 Nende kaasautorite funktsioonid, veaparandused ja taristu täiustused on **oluline osa** sellest, mis muudab OmniRoute'i töökindlaks ja funktsioonirohkeks. Iga pull request, iga testjuhtum ja iga i18n-tõlkefail on tähtis. Avatud lähtekoodi loovad sellised inimesed nagu nemad.
+> 🙏 Nende kaastööliste funktsioonid, veaparandused ja taristu täiustused on **oluline osa** sellest, mis muudab OmniRoute'i töökindlaks ja funktsioonirikkaks. Iga pull request, iga testjuhtum ja iga i18n-tõlkefail on oluline. Avatud lähtekoodi loovad sellised inimesed nagu nemad.
 
 </div>
 

@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1,62 mlrd. žetonų / mėn. per trečiųjų šalių nemokamus planus
+## 💰 ~1,62 mlrd. žetonų per mėnesį iš trečiųjų šalių nemokamų planų
 
 </div>
 
-> **Naudokite savo tiekėjų paskyras.** Tai yra apytikslė suma, apskaičiuota pagal atskirai taikomus trečiųjų šalių nemokamus planus, o ne OmniRoute suteikiamas žetonų kiekis. Užsiregistruokite, gaukite prisijungimo duomenis, jei reikia, ir prijunkite tiekėjus, kuriuos galite naudoti; kiekvienas tiekėjas pats nustato savo limitus, prieinamumą ir sąlygas.
+> **Naudokite savo tiekėjų paskyras.** Tai yra apskaičiuota bendra suma, sudaryta iš atskirai tinkamų naudoti trečiųjų šalių nemokamų planų, o ne „OmniRoute“ suteikiamas žetonų kreditas. Užsiregistruokite, prireikus gaukite prisijungimo duomenis ir prijunkite tiekėjus, kuriais galite naudotis; kiekvienas tiekėjas pats kontroliuoja savo limitus, prieinamumą ir sąlygas.
 >
-> Nemokamų planų derinimas rankiniu būdu yra varginantis — dešimtys SDK, dešimtys greičio limitų ir jokio supratimo, kiek iš tikrųjų turite. OmniRoute kataloguoja **485 nemokamų planų įrašus per 34 pasikartojančius baseino raktus** ir apskaičiuoja žetonų sumą pagal **17 baseinų su paskelbtu teigiamu mėnesiniu biudžetu bei penkias Groq modelio ribas**, pašalinant dubliavimą pagal bendrą baseiną. Kvitai, kurie atsidaro tik po regioninio tapatybės patvirtinimo (šiandien: ModelScope), rodomi atskirai, +~6 mln. už regioninio tapatybės patvirtinimo, ir niekada nesumuojami į pagrindinę sumą. Rezultatas visada matomas prietaisų skydelyje (`/dashboard/free-tiers`).
+> Nemokamų planų kaupimas rankiniu būdu yra varginantis — dešimtys SDK, dešimtys dažnio limitų ir jokio aiškumo, kiek iš tikrųjų turite. „OmniRoute“ kataloguoja **484 nemokamo plano įrašus pagal 34 pasikartojančius telkinio raktus** ir apskaičiuoja pagrindinį žetonų rodiklį pagal **17 telkinių, kurių mėnesio biudžetas yra paskelbtas ir teigiamas, bei penkis kiekvieno modelio „Groq“ limitus**, pašalindama dubliavimą pagal bendrą telkinį. Kvotos, kurios tampa prieinamos tik patikrinus regioninę tapatybę (šiandien: „ModelScope“), rodomos atskirai — +~6 mln. po regioninės tapatybės patvirtinimo — ir niekada neįtraukiamos į pagrindinį rodiklį. Rezultatas ir toliau matomas valdymo skydelyje (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute nemokamo plano biudžeto kortelė: ~1,62 mlrd. nemokamų žetonų per mėnesį stabiliai, iki ~2,22 mlrd. pirmą mėnesį su registracijos kreditais, iš 34 dokumentuotų pasikartojančių baseino raktų, apimančių 485 kataloguotus nemokamų planų įrašus už vieno galinio taško. Sąžininga, be dubliavimo, matematika — kiekvienas bendras baseinas skaičiuojamas tik kartą, įskaitant 17 pasikartojančių baseinų su paskelbtu teigiamu mėnesiniu žetonų biudžetu ir penkias Groq modelio ribas; 12 tiekėjų pažymėti kaip vengtini rizikos kataloge, tad sprendžiate jūs. Biudžeto juosta apima Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (penkios modelio ribos) ir mažesnius baseinus, taip pat pirmo mėnesio registracijos kreditus ir visam laikui nemokamus tiekėjus be žetonų limito, kurie rodomi atskirai, kad niekada nepadidintų pagrindinės sumos. Gyvas naudojimas/likutis per /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="„OmniRoute“ nemokamo plano biudžeto kortelė: ~1,62 mlrd. nemokamų žetonų per mėnesį įprastai, iki ~2,22 mlrd. pirmąjį mėnesį su registracijos kreditais, iš 34 dokumentuotų pasikartojančių telkinio raktų, apimančių 484 kataloguotus nemokamo plano įrašus ir pasiekiamų per vieną galinį tašką. Sąžiningas pagal telkinius pašalintas dubliavimas — kiekvienas bendras telkinys skaičiuojamas vieną kartą, įskaitant 17 pasikartojančių telkinių, kurių paskelbtas teigiamas mėnesio žetonų biudžetas, ir penkis kiekvieno modelio „Groq“ limitus; 12 tiekėjų sąlygų rizikos kataloge pažymėti kaip vengtini, todėl sprendimą priimate jūs. Biudžeto juostoje įtraukti „Mistral“ 1 mlrd., „Nara“ 210 mln., „LLM7“ 150 mln., „xKiro“ 150 mln., „Groq“ 30 mln. (penki kiekvieno modelio limitai) ir mažesni telkiniai, taip pat pirmojo mėnesio registracijos kreditai bei visiškai nemokami tiekėjai be žetonų limito, pateikiami atskirai, kad niekada neišpūstų pagrindinio rodiklio. Tiesiogiai naudojamas ir likęs kiekis svetainėje /dashboard/free-tiers."/>
 
-> Animacinė gyvo `/dashboard/free-tiers` puslapio santrauka. Visa metodologija (baseinų dubliavimo šalinimas, kreditų lygiai, tiekėjų sąlygos): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Animacinė veikiančio `/dashboard/free-tiers` puslapio santrauka. Visa metodika (telkinių dubliavimo pašalinimas, kreditų pakopos, tiekėjų sąlygos): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Šie skaičiai kas dvi savaites peržiūrimi pagal gyvą katalogą ir **gali keistis į abi puses** — tiekėjas nutraukia nemokamą planą ir skaičius sumažėja; atsiranda naujas — skaičius padidėja. Skelbiame tik tai, ką faktiškai apskaičiuoja katalogas, niekada neapvaliname į didesnę pusę.</sub>
+> <sub>Šie skaičiai kas dvi savaites iš naujo tikrinami pagal aktualų katalogą ir **gali tiek didėti, tiek mažėti** — tiekėjui nutraukus nemokamą planą, skaičius sumažėja; atsiradus naujam planui, jis padidėja. Skelbiame tai, ką iš tikrųjų apskaičiuoja katalogas, o ne suapvalintą geriausio atvejo scenarijų.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Pažymėkite repo žvaigždute, jei OMNIROUTE padėjo jums sutaupyti pinigų ir palengvino darbą.
+⭐ Pažymėkite saugyklą žvaigždute, jei OMNIROUTE padėjo sutaupyti pinigų ir palengvino jūsų darbą.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Žvaigždutės](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Žvaigždučių istorijos reitingas](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Prisijunkite prie bendruomenės
 
-**👋 Sekite palaikytoją — gaukite naujus tiekėjus, leidimus ir patarimus pirmieji:**
+**👋 Sekite kūrėją — pirmieji sužinokite apie naujus tiekėjus, leidimus ir patarimus:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Sekite Diego sistemoje „LinkedIn“](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Sekite @diegosouzapw sistemoje „GitHub“](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Svetainė](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Klausimai, tiekėjų patarimai, planai ir pagalba → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazilija](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portalas](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Klausimai, patarimai apie tiekėjus, veiksmų planas ir pagalba → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portalas](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1304,19 +1304,19 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 <table>
   <tr><th align="left">Sluoksnis</th><th align="left">Technologija</th></tr>
   <tr><td nowrap><b>Vykdymo aplinka</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> kataloguose <code>src/</code> ir <code>open-sse/</code> (branduolyje nuo v2.0 nėra <code>any</code>)</td></tr>
-  <tr><td nowrap><b>Struktūra</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalavimas) + LowDB (JSON senoji sistema) — 147 domeno modulių, 221 migracija</td></tr>
+  <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kataloguose <code>src/</code> ir <code>open-sse/</code> (branduolyje nėra <code>any</code> nuo v2.0)</td></tr>
+  <tr><td nowrap><b>Architektūra</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalų vedimas) + LowDB (JSON palikimas) — 147 domeno modulių, 222 migracijos</td></tr>
   <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 viso teksto paieška + int8 kvantuoti vektoriniai įterpiniai, tipizuotas nykimas</td></tr>
-  <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties ir išvesties tikrinimas + API sutartys</td></tr>
+  <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties ir išvesties validavimas + API sutartys</td></tr>
   <tr><td nowrap><b>Protokolai</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Srautinis perdavimas</b></td><td>Serverio siunčiami įvykiai (SSE) + WebSocket tiltas (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Suspaudimas</b></td><td>12 variklių konvejeris — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikavimas ir sauga</b></td><td>OAuth 2.0 (PKCE) + JWT + API raktai + MCP aprėpties autentifikavimas · AES-256-GCM saugant duomenis · DOMPurify</td></tr>
+  <tr><td nowrap><b>Autentifikavimas ir sauga</b></td><td>OAuth 2.0 (PKCE) + JWT + API raktai + MCP aprėpties autentifikavimas · AES-256-GCM ramybės būsenoje · DOMPurify</td></tr>
   <tr><td nowrap><b>Slaptumas</b></td><td>wreq-js — JA3 / JA4 TLS pirštų atspaudų imitavimas, 3 lygių tarpinis serveris</td></tr>
-  <tr><td nowrap><b>Atsparumas</b></td><td>Grandinės pertraukiklis, eksponentinis atsitraukimas, apsauga nuo grūsties, automatinis kombinuotas savaiminis atkūrimas</td></tr>
-  <tr><td nowrap><b>Žurnalų registravimas</b></td><td>pino — struktūrizuoti JSON žurnalai su užklausos kontekstu</td></tr>
-  <tr><td nowrap><b>Testavimas</b></td><td>Node.js testų vykdyklė + Vitest — <b>daugiau nei 60 000 statinių testų deklaracijų</b> daugiau nei 8 400 sekamų testų failų (vienetų, integraciniai, E2E, saugos, ekosistemos)</td></tr>
+  <tr><td nowrap><b>Atsparumas</b></td><td>Grandinės pertraukiklis, eksponentinis laukimo laikas, apsauga nuo vienu metu kylančių užklausų antplūdžio, automatinis derinių savaiminis atkūrimas</td></tr>
+  <tr><td nowrap><b>Žurnalų vedimas</b></td><td>pino — struktūrizuoti JSON žurnalai su užklausos kontekstu</td></tr>
+  <tr><td nowrap><b>Testavimas</b></td><td>Node.js testų vykdyklė + Vitest — <b>daugiau nei 60 000 statinių testų deklaracijų</b> daugiau nei 8 400 sekamų testų failų (vienetiniai, integraciniai, E2E, saugos, ekosistemos)</td></tr>
   <tr><td nowrap><b>Platformos</b></td><td>Staliniai kompiuteriai (Electron) · Android (Termux) · PWA (bet kuri naršyklė)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatinis publikavimas į npm + Docker Hub išleidžiant versiją</td></tr>
   <tr><td nowrap><b>Nuorodos</b></td><td><a href="https://omniroute.online">Svetainė</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1335,11 +1335,11 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Naudotojo vadovas</a></b></td><td>Teikėjai, deriniai, CLI integracija, diegimas</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Sąrankos vadovas</a></b></td><td>Visi diegimo būdai, CLI įrankių konfigūracijos, protokolo sąranka, skirtosios laiko trukmės derinimas</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI įrankių vadovas</a></b></td><td>Atskiri Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot sąrankos nurodymai</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Nuotolinis režimas</a></b></td><td>Nuotolinio OmniRoute (VPS) valdymas iš nešiojamojo kompiuterio CLI naudojant aprėpties prieigos žetonus</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code konfigūracija</a></b></td><td>Claude Code nukreipimas į OmniRoute (vietinį / nuotolinį) naudojant <code>launch</code> ir kiekvieno modelio profilius</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Greita pradžia</a></b></td><td>3 žingsniai: įdiegti → prisijungti → sukonfigūruoti</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Sąrankos vadovas</a></b></td><td>Visi diegimo būdai, CLI įrankių konfigūracijos, protokolo sąranka, skirtosios gebos derinimas</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI įrankių vadovas</a></b></td><td>Atskiri Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo ir Copilot sąrankos nurodymai</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Nuotolinis režimas</a></b></td><td>Nuotolinio OmniRoute (VPS) valdymas iš nešiojamojo kompiuterio CLI naudojant ribotos aprėpties prieigos prieigos raktus</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code konfigūracija</a></b></td><td>Claude Code prijungimas prie OmniRoute (vietinio / nuotolinio) naudojant <code>launch</code> ir kiekvieno modelio profilius</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Greita pradžia</a></b></td><td>Diegimas → prisijungimas → konfigūravimas per 3 veiksmus</td></tr>
 </table>
 
 ### 🔧 Operacijos ir diegimas
@@ -1349,10 +1349,10 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker vadovas</a></b></td><td>Docker paleidimas, Compose profiliai, Caddy HTTPS, tuneliai, atvaizdų žymos</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman vadovas</a></b></td><td>Quadlet systemd integracija, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Diegimas VM</a></b></td><td>Išsamus vadovas: VM + nginx + Cloudflare sąranka</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Diegimas į Fly.io</a></b></td><td>Diegimas į Fly.io naudojant nuolatinę saugyklą</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux vadovas</a></b></td><td>OmniRoute paleidimas sistemoje Android per Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA vadovas</a></b></td><td>Progresyviosios žiniatinklio programėlės diegimas, spartinančioji atmintinė, architektūra</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Pašalinimo vadovas</a></b></td><td>Visiškas pašalinimas naudojant visus diegimo būdus</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Diegimas Fly.io</a></b></td><td>Diegimas į Fly.io naudojant nuolatinę saugyklą</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux vadovas</a></b></td><td>OmniRoute paleidimas sistemoje Android naudojant Termux</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA vadovas</a></b></td><td>Progresyviosios žiniatinklio programos diegimas, spartinančioji talpykla, architektūra</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Pašalinimo vadovas</a></b></td><td>Švarus pašalinimas naudojant visus diegimo būdus</td></tr>
   <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Aplinkos konfigūracija</a></b></td><td>Visi <code>.env</code> kintamieji ir nuorodos</td></tr>
 </table>
 
@@ -1360,17 +1360,17 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Architektūra</a></b></td><td>Sistemos architektūra, duomenų srautas ir vidiniai komponentai</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Architektūra</a></b></td><td>Sistemos architektūra, duomenų srautas ir vidinė struktūra</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Glaudinimo vadovas</a></b></td><td>7 parinkčių konvejeris: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK glaudinimas</a></b></td><td>Komandų išvesties glaudinimas, filtrai, pasitikėjimas, tikrinimas, neapdorotos išvesties atkūrimas</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Glaudinimo varikliai</a></b></td><td>Caveman, RTK, sudėtiniai konvejeriai, skydelio / API / MCP sąsajos</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Glaudinimo taisyklių formatas</a></b></td><td>JSON taisyklių paketų schemos Caveman ir RTK filtrams</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Glaudinimo varikliai</a></b></td><td>Caveman, RTK, sujungti konvejeriai, prietaisų skydelio / API / MCP sąsajos</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Glaudinimo taisyklių formatas</a></b></td><td>JSON taisyklių paketų schemos, skirtos Caveman ir RTK filtrams</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Glaudinimo kalbų paketai</a></b></td><td>Kalbos aptikimas ir Caveman taisyklių paketų kūrimas</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Atsparumo vadovas</a></b></td><td>Grandinės pertraukikliai, atvėsimo laikotarpiai, eilė, apsauga nuo grūsties, TLS klastojimas</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Automatinio derinio variklis</a></b></td><td>16 veiksnių vertinimas, režimų paketai, savaiminis atkūrimas</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Tarpinio serverio vadovas</a></b></td><td>3 lygių tarpinių serverių sistema, 1proxy prekyvietė, registro CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Nemokami planai</a></b></td><td>Sujungtas katalogas: 34 dokumentuoti pasikartojantys telkiniai / 485 kataloge įrašyti nemokamų planų įrašai</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funkcijų galerija</a></b></td><td>Vaizdinė skydelio apžvalga su ekrano kopijomis</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Atsparumo vadovas</a></b></td><td>Grandinės pertraukikliai, atvėsimo laikotarpiai, eilė, apsauga nuo vienalaikio apkrovos šuolio, TLS klastojimas</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Automatinio derinimo variklis</a></b></td><td>16 veiksnių vertinimas, režimų paketai, savaiminis atkūrimas</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Įgaliotųjų serverių vadovas</a></b></td><td>3 lygių įgaliotųjų serverių sistema, 1proxy prekyvietė, registro CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Nemokami planai</a></b></td><td>Sujungtas katalogas: 34 dokumentuoti pasikartojantys telkiniai / 484 kataloguoti nemokamų planų įrašai</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funkcijų galerija</a></b></td><td>Vaizdinė prietaisų skydelio apžvalga su ekrano kopijomis</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Kodo bazės dokumentacija</a></b></td><td>Pradedantiesiems skirtas kodo bazės paaiškinimas</td></tr>
 </table>
 
@@ -1378,10 +1378,10 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API žinynas</a></b></td><td>Visi galiniai taškai su pavyzdžiais</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API žinynas</a></b></td><td>Visi galiniai punktai su pavyzdžiais</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI specifikacija</a></b></td><td>OpenAPI 3.0 specifikacija</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP serveris</a></b></td><td>110 MCP įrankių, IDE konfigūracijos, Python/TS/Go klientai</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP serverio vadovas</a></b></td><td>MCP diegimas, perdavimo protokolai ir įrankių žinynas</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP serverio vadovas</a></b></td><td>MCP diegimas, transportai ir įrankių žinynas</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A serveris</a></b></td><td>JSON-RPC 2.0 protokolas, gebėjimai, srautinis perdavimas, užduočių valdymas</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A serverio vadovas</a></b></td><td>A2A agento kortelė, užduotys, gebėjimai ir srautinis perdavimas</td></tr>
 </table>
@@ -1389,13 +1389,13 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 ### 📋 Projektas ir kokybė
 
 <table>
-  <tr><th align="left">Dokumentas</th><th align="left">Aprašas</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Prisidėjimas</a></b></td><td>Kūrimo aplinkos nustatymas ir gairės</td></tr>
+  <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Prisidėjimas</a></b></td><td>Kūrimo aplinkos paruošimas ir gairės</td></tr>
   <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Šakų ir leidimų modelis</a></b></td><td>Kur nukreipiami PR (<code>release/*</code>), ką reiškia <code>main</code> ir žymos</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Pakeitimų žurnalas</a></b></td><td>Visa leidimų istorija pagal versijas</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Saugumo politika</a></b></td><td>Pranešimai apie pažeidžiamumus ir saugumo praktikos</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n vadovas</a></b></td><td>67 kalbų palaikymas, vertimo eiga, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Leidimo kontrolinis sąrašas</a></b></td><td>Patikros veiksmai prieš leidimą</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Pakeitimų žurnalas</a></b></td><td>Išsami kiekvienos versijos leidimų istorija</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Saugumo politika</a></b></td><td>Pažeidžiamumų pranešimai ir saugumo praktikos</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n vadovas</a></b></td><td>67 kalbų palaikymas, vertimo procesas, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Leidimo kontrolinis sąrašas</a></b></td><td>Prieš leidimą atliekami tikrinimo veiksmai</td></tr>
   <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Aprėpties planas</a></b></td><td>Testų aprėpties strategija, skirta daugiau nei 60 000 statinių testų deklaracijų daugiau nei 8 400 sekamų testų failų</td></tr>
 </table>
 
@@ -1405,12 +1405,12 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 
 # ⭐ Pagrindiniai prisidėjusieji
 
-> „OmniRoute“ formuoja entuziastinga atvirojo kodo bendruomenė. Šie žmonės išskirtinai prisidėjo ir tiesiogiai paveikė projekto kokybę, stabilumą bei pasiekiamumą. **Ačiū.**
+> OmniRoute kuria aistringa atvirojo kodo bendruomenė. Šie žmonės išskirtinai prisidėjo prie projekto ir tiesiogiai paveikė jo kokybę, stabilumą bei pasiekiamumą. **Ačiū.**
 
-### Išoriniai prisidėjusieji pagal sulietus pull request'us
+### Išoriniai prisidėjusieji pagal sujungtus ištraukimo prašymus
 
 <table>
-  <tr><th align="center">Vieta</th><th align="left">Prisidėjusysis</th><th align="center">Sulieti PR</th><th align="right">~Pakeistos eilutės</th></tr>
+  <tr><th align="center">Vieta</th><th align="left">Prisidėjusysis</th><th align="center">Sujungti PR</th><th align="right">~Pakeistos eilutės</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1433,9 +1433,9 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Surašymas atliktas 2026-11-03 03:01:19 UTC, naudojant aktyvios <code>release/v3.8.53</code> šakos viršūnę <code>05bc048d6c</code>. Puslapiuose pateikiamame GitHub GraphQL surašyme yra 9 947 sulieti PR: 4 130 pateikė saugyklos savininkas, 240 – Dependabot, 6 – kiti robotai / programos, o <b>5 571 išorinį PR pateikė 883 skirtingi prisidėjusieji</b>. „Pakeistos eilutės“ yra GitHub pridėjimų ir ištrynimų suma, į kurią įtraukiami sugeneruoti failai, užrakinimo failai, katalogai, vertimai ir dokumentacija; tai yra pakeitimų apimtis, o ne autoriaus kodo eilučių skaičius. 53 PR nurodo daugiau nei 500 000 eilučių apimties GitHub skirtumus (pavyzdžiui, #13399, kuriame pridėtas vienas teikėjas, nurodyti 2 347 pakeisti failai), todėl keli pirmiau pateikti skaičiai yra išpūsti. Vienodos reikšmės reitinguojamos kartu.</sub>
+<sub>Surašymas atliktas 2026-11-03 03:01:19 UTC, naudojant aktyvią <code>release/v3.8.53</code> viršūnę <code>05bc048d6c</code>. Puslapiuose pateikiamame GitHub GraphQL surašyme yra 9,947 sujungti PR: 4,130 atliko saugyklos savininkas, 240 – Dependabot, 6 – kiti botai / programos, o <b>5,571 išorinį PR pateikė 883 skirtingi prisidėjusieji</b>. „Pakeistos eilutės“ reiškia GitHub pridėjimų ir pašalinimų sumą bei apima sugeneruotus failus, užrakinimo failus, katalogus, vertimus ir dokumentaciją; tai yra pakeitimų apimtis, o ne autoriaus kodo eilučių skaičius. 53 PR nurodo didesnius nei 500,000 eilučių GitHub skirtumus (pavyzdžiui, #13399, kuriame pridėtas vienas teikėjas, nurodoma 2,347 pakeisti failai), todėl keli pirmiau pateikti bendri skaičiai yra išpūsti. Esant vienodam rezultatui, vieta dalijamasi.</sub>
 
-### GitHub priskirti commit'ai
+### GitHub priskirti pakeitimai
 
 <table>
   <tr>
@@ -1444,42 +1444,42 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 418 su GitHub susietų pakeitimų</sub>
+      <sub>🥇 418 GitHub priskiriamų pakeitimų</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 294 su GitHub susieti pakeitimai</sub>
+      <sub>🥈 294 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 su GitHub susieti pakeitimai</sub>
+      <sub>🥉 229 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 222 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 222 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 202 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 202 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 134 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 134 GitHub priskiriami pakeitimai</sub>
     </td>
   </tr>
   <tr>
@@ -1488,49 +1488,49 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 126 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 126 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 115 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 115 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 108 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 108 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 su GitHub susietų pakeitimų</sub>
+      <sub>🏅 70 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 68 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 68 GitHub priskiriami pakeitimai</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 su GitHub susieti pakeitimai</sub>
+      <sub>🏅 68 GitHub priskiriami pakeitimai</sub>
     </td>
   </tr>
 </table>
 
-<sub>Patikrinta iš naujo 2026-11-03 02:09:16 UTC: su GitHub susieti pakeitimai, kuriuos numatytajai šakai <code>release/v3.8.53</code> pateikė saugyklos Contributors API. API grąžino 903 tapatybes (429 naudotojus, 2 robotus, 472 anonimines tapatybes); šioje lentelėje neįtrauktas prižiūrėtojas, robotai ir anoniminės tapatybės, o vienodi rezultatai išsaugoti. Šis sąrašas skiriasi nuo pirmiau pateikto sujungtų PR reitingo ir toliau pateikto Git metaduomenų surašymo.</sub>
+<sub>Pakartotinai patikrinta 2026-11-03 02:09:16 UTC: GitHub priskiriami pakeitimai, kuriuos pateikė saugyklos Contributors API numatytajai šakai <code>release/v3.8.53</code>. API grąžino 903 tapatybes (429 naudotojus, 2 robotus, 472 anoniminius); šioje lentelėje neįtrauktas prižiūrėtojas, robotai ir anoniminės tapatybės, tačiau išsaugoti vienodi varžybų rezultatai. Šis sąrašas skiriasi tiek nuo pirmiau pateikto sulietų PR reitingo, tiek nuo toliau pateikto Git metaduomenų surašymo.</sub>
 
-> 🙏 Šių bendraautorių funkcijos, klaidų pataisymai ir infrastruktūros patobulinimai yra **esminė dalis** to, kas daro OmniRoute patikimą ir funkcionalų. Kiekvienas pakeitimo pasiūlymas, kiekvienas testavimo atvejis ir kiekvienas i18n vertimo failas yra svarbūs. Atvirąjį kodą kuria tokie žmonės kaip jie.
+> 🙏 Šių bendraautorių funkcijos, klaidų taisymai ir infrastruktūros patobulinimai yra **pagrindinė** dalis to, kas daro OmniRoute patikimą ir turtingą funkcijomis. Kiekvienas pull request, kiekvienas bandymo atvejis ir kiekvienas i18n vertimo failas yra svarbūs. Atvirąjį kodą kuria tokie žmonės kaip jie.
 
 </div>
 
