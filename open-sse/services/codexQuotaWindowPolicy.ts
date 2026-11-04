@@ -1,4 +1,4 @@
-import { toCodexBaseQuotaWindowName } from "@omniroute/open-sse/config/codexQuotaScopes.ts";
+import { toCodexBaseQuotaWindowName } from "../config/codexQuotaScopes.ts";
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
