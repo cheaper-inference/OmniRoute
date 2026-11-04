@@ -113,10 +113,10 @@ describe("HomeSystemMetricsCards", () => {
   });
 
   it.each([
-    [64.9, "bg-emerald-500"],
-    [65, "bg-amber-500"],
-    [84.9, "bg-amber-500"],
-    [85, "bg-rose-500"],
+    [64.9, "bg-success"],
+    [65, "bg-warning"],
+    [84.9, "bg-warning"],
+    [85, "bg-error"],
   ])("colors a %s%% bar %s", async (percent, expected) => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(metricsBody(percent, percent))));
     const element = await render();

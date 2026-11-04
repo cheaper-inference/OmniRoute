@@ -39,9 +39,9 @@ function formatBytes(bytes: number = 0): string {
 }
 
 function getUsageBarColor(percent: number): string {
-  if (percent >= 85) return "bg-rose-500";
-  if (percent >= 65) return "bg-amber-500";
-  return "bg-emerald-500";
+  if (percent >= 85) return "bg-error";
+  if (percent >= 65) return "bg-warning";
+  return "bg-success";
 }
 
 const POLL_INTERVAL_MS = 3500;
@@ -92,7 +92,7 @@ function MetricCard({
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-semibold text-text-main">{title}</span>
               <span
-                className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"
+                className="size-1.5 rounded-full bg-success animate-pulse shrink-0"
                 title={activeTitle}
               />
             </div>
