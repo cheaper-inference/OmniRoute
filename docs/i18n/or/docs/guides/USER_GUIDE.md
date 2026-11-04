@@ -630,9 +630,9 @@ post_install() {
 <details>
 <summary><b>ସମସ୍ତ ଉପଲବ୍ଧ ମଡେଲ ଦେଖନ୍ତୁ</b></summary>
 
-> ନିମ୍ନୋକ୍ତ ତାଲିକାଟି v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂଗୃହୀତ। କ୍ଲାଉଡ୍ କ୍ୟାଟାଲଗ୍ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଗତିଶୀଳ ଭାବରେ ସିଙ୍କ୍ ହୁଏ — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ପାଇଁ **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ → [ପ୍ରୋଭାଇଡର୍] → ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ।
+> ନିମ୍ନଲିଖିତ ତାଲିକା v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂଗୃହୀତ ହୋଇଛି। କ୍ଲାଉଡ୍ କ୍ୟାଟାଲଗ୍ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଗତିଶୀଳ ଭାବରେ ସିଙ୍କ୍ ହୁଏ — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ପାଇଁ **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ → [provider] → ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ।
 >
-> ଯଦି କୌଣସି ପ୍ରୋଭାଇଡର୍ର ବିଲ୍ଟ-ଇନ୍ ତାଲିକାରେ ପରିବର୍ତ୍ତନ ହୋଇଥାଏ, ତେବେ ଲାଇଭ୍ ଅପ୍ଷ୍ଟ୍ରିମ୍ କ୍ୟାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **/models ରୁ ଆମଦାନି କରନ୍ତୁ** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **ସ୍ୱୟଂଚାଳିତ ସିଙ୍କ୍** ସକ୍ରିୟ କରନ୍ତୁ)। LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ v3.8.50 ରେ ଏହା ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସେହି ପରୀକ୍ଷା ପର୍ଯ୍ୟାୟରେ Pollinations ର ଅନାମିକ ପ୍ରବେଶ ଅପ୍ଷ୍ଟ୍ରିମ୍ ସୀମାବଦ୍ଧ ରହିଥିଲା।
+> ଯଦି କୌଣସି ପ୍ରୋଭାଇଡର୍ର ବିଲ୍ଟ-ଇନ୍ ତାଲିକାରେ ପରିବର୍ତ୍ତନ ହୋଇଥାଏ, ତେବେ ଲାଇଭ୍ ଅପଷ୍ଟ୍ରିମ୍ କ୍ୟାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **/models ରୁ ଇମ୍ପୋର୍ଟ କରନ୍ତୁ** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **ଅଟୋ-ସିଙ୍କ୍** ସକ୍ଷମ କରନ୍ତୁ)। ଏହା LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ v3.8.50 ରେ ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସେହି ପରୀକ୍ଷଣ ସମୟରେ Pollinations ର ଅନାମିକ ପ୍ରବେଶ ଅପଷ୍ଟ୍ରିମ୍ ସୀମାବଦ୍ଧ ରହିଥିଲା।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -648,7 +648,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ମାସିକ $9 କିମ୍ବା ବ୍ୟବହାର ଅନୁସାରେ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ମାସିକ $9 କିମ୍ବା ବ୍ୟବହାର ଅନୁଯାୟୀ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API କୀ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -658,9 +658,9 @@ post_install() {
 
 **Mistral (`mistral/`)** — EU-ହୋଷ୍ଟେଡ୍: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ସନ୍ଧାନ-ସମୃଦ୍ଧ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — ସର୍ଚ୍ଚ-ଅଗମେଣ୍ଟେଡ୍: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ମୁକ୍ତ-ସ୍ରୋତ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ମାଗଣା), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ଓପନ୍-ସୋର୍ସ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ମାଗଣା), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — ଦ୍ରୁତ ଇନ୍ଫରେନ୍ସ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -668,17 +668,17 @@ post_install() {
 
 **Cohere (`cohere/`)** — RAG-କେନ୍ଦ୍ରିତ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟର୍ପ୍ରାଇଜ୍: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟରପ୍ରାଇଜ୍: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google ଠାରୁ API କୀ ଅନୁସାରେ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ। **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ** ରେ ଏକ କୀ ସଂଯୋଗ କରନ୍ତୁ, ତାପରେ ବର୍ତ୍ତମାନର କ୍ୟାଟାଲଗ୍ ଆମଦାନି କରିବା ପାଇଁ **ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣସ୍ୱରୂପ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google ଠାରୁ API କୀ ଅନୁଯାୟୀ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ। **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ** ରେ ଏକ କୀ ସଂଯୋଗ କରନ୍ତୁ, ତାପରେ ବର୍ତ୍ତମାନର କ୍ୟାଟାଲଗ୍ ଇମ୍ପୋର୍ଟ କରିବା ପାଇଁ **ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
 
-**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ** (ଚୟନିତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍ଥ୍ରୁ କ୍ୟାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ପ୍ରତ୍ୟେକ ନିଜସ୍ୱ ମଡେଲ ତାଲିକା `providerRegistry.ts` ରେ ରଖେ ଏବଂ ପ୍ରୋଭାଇଡର୍ `/models` ଏଣ୍ଡପଏଣ୍ଟ୍ ପ୍ରଦାନ କଲେ ସ୍ୱୟଂଚାଳିତ ଭାବେ ସିଙ୍କ୍ କରାଯାଇପାରେ।
+**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ** (ଚୟନିତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍ଥ୍ରୁ କ୍ୟାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ପ୍ରତ୍ୟେକ ନିଜସ୍ୱ ମଡେଲ ତାଲିକା `providerRegistry.ts` ରେ ରଖେ ଏବଂ ପ୍ରୋଭାଇଡର୍ ଏକ `/models` ଏଣ୍ଡପଏଣ୍ଟ୍ ପ୍ରଦାନ କଲେ ଅଟୋ-ସିଙ୍କ୍ କରାଯାଇପାରେ।
 
-**ମଡେଲ୍ ID ସମ୍ପର୍କିତ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରୋଭାଇଡର୍-ନେଟିଭ୍ ID ବ୍ୟବହାର କରେ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। କିଛି ID ରେ ଡଟ୍ ସହିତ ଥିବା ସଂସ୍କରଣ ରହେ, କାରଣ ଅପ୍ଷ୍ଟ୍ରିମ୍ API ସେହି ଫର୍ମାଟ୍ରେ ଆଶା କରେ। ଯଦି କୌଣସି ମଡେଲ୍ ଉପରୋକ୍ତ ତାଲିକାରେ ନଥାଏ, ତେବେ ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବା ପାଇଁ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` ହିଟ୍ କରନ୍ତୁ।
+**ମଡେଲ ID ସମ୍ପର୍କିତ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରୋଭାଇଡର୍-ନେଟିଭ୍ ID ବ୍ୟବହାର କରେ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। କେତେକ ID ରେ ଡଟେଡ୍ ଭର୍ସନ୍ ଥାଏ, କାରଣ ଅପଷ୍ଟ୍ରିମ୍ API ସେଗୁଡ଼ିକୁ ଏହିଭଳି ଆଶା କରେ। ଯଦି କୌଣସି ମଡେଲ୍ ଉପରେ ତାଲିକାଭୁକ୍ତ ନଥାଏ, ତେବେ ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବା ପାଇଁ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` ହିଟ୍ କରନ୍ତୁ।
 
 </details>
 

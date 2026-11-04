@@ -126,6 +126,7 @@ export function mergeLoopIntoOkLeg(
 ): NonStreamingProviderLegResult & { kind: "ok" } {
   return {
     ...leg,
+    upstreamHttpSelection: loop.upstreamHttpSelection ?? null,
     response: loop.response ?? leg.response,
     responseForMemoryExtraction:
       loop.responseForMemoryExtraction ?? leg.responseForMemoryExtraction,

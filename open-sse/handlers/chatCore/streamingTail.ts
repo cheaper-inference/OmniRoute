@@ -61,7 +61,7 @@ import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { extractFacts } from "@/lib/memory/extraction";
 import { calculateCost, calculateCostDetailed } from "@/lib/usage/costCalculator";
 import { appendRequestLog, trackPendingRequest } from "@/lib/usageDb";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../../services/streamRecovery.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { resolveCredentialGate } from "@/lib/streamingCredentialTransform";
@@ -196,6 +196,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     );
   }
 
+  let upstreamHttpSelection = deps.upstreamHttpSelection ?? null;
   let streamReadiness = await ensureStreamReadiness(providerResponse, {
     timeoutMs: streamReadinessPolicy.timeoutMs,
     maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
@@ -212,6 +213,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // A stall is an upstream issue, not an account fault — the executor loop
   // already ended at headers, so this bounded retry is the only recovery left.
   const fallback = await maybeFallbackAfterReadiness({
+    upstreamHttpSelection,
     streamReadiness,
     clientAborted: streamController.signal.aborted,
     failedConnectionId: getCurrentConnectionId(),
@@ -232,6 +234,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   streamReadiness = fallback.readiness;
   providerResponse = fallback.providerResponse;
   finalBody = fallback.finalBody;
+  upstreamHttpSelection = fallback.upstreamHttpSelection ?? null;
   if (streamReadiness.ok === false) {
     const { response: failureResponse, reason } = streamReadiness;
     const { classificationReason, upstreamDiagnostic } = streamReadiness;
@@ -254,6 +257,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       status: `FAILED ${failureResponse.status}`,
     }).catch(() => {});
     persistAttemptLogs({
+      upstreamHttpSelection,
       status: failureResponse.status,
       error: reason,
       providerRequest: finalBody || translatedBody,
@@ -308,12 +312,13 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   if (stream && providerResponse.ok && providerResponse.body) {
     let flushEmptyRetryArmed = false;
     try {
-      flushEmptyRetryArmed = isFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED");
+      flushEmptyRetryArmed = isRegisteredFeatureFlagEnabled("FLUSH_EMPTY_RETRY_ENABLED");
     } catch {
       flushEmptyRetryArmed = false;
     }
     if (flushEmptyRetryArmed) {
       const retried = await runEmptyTurnRetryLoop({
+        upstreamHttpSelection,
         providerResponse,
         credentials,
         provider,
@@ -339,7 +344,10 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
         captureBody: (body) => providerRequestCapture.body(body),
       });
       providerResponse = retried.providerResponse;
-      if (retried.adopted) finalBody = retried.finalBody;
+      if (retried.adopted) {
+        finalBody = retried.finalBody;
+        upstreamHttpSelection = retried.upstreamHttpSelection ?? null;
+      }
     }
   }
 
@@ -547,6 +555,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     });
 
     persistAttemptLogs({
+      upstreamHttpSelection,
       status: normalizedStreamStatus,
       error: streamError || undefined,
       // A stream that ended early (499 / mid-stream failure) has no `usage`, but its call log

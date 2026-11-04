@@ -16,102 +16,83 @@
 > Cyrillic, Greek மற்றும் Vietnamese மொழிகளுக்கு Inter பயன்படுத்தப்படுகிறது; மேலும் `html[dir="rtl"]` என்பதன் கீழ் மட்டும் Arabic script-க்கு Vazirmatn பயன்படுத்தப்படுகிறது.
 > ஒவ்வொரு icon-உம் ஒரு Lucide glyph ஆகும்.
 
-## 1. கூறுகள் எங்கு அமைந்துள்ளன
+## 1. உள்ளடக்கங்கள் எங்கு அமைந்துள்ளன
 
 - **கிட்.** `packages/ui-kit/src` என்பது
-  `packages/ui-kit/UPSTREAM.md`-இல் நிலைநிறுத்தப்பட்ட commit-இன் upstream `src/` உடைய byte-for-byte நகலாகும்
-  (இதில் உரிம அங்கீகாரமும் பதிவுசெய்யப்பட்டுள்ளது); உள்ளூர் patches-ஐ `PATCHES.md` பட்டியலிடுகிறது
-  (எதுவுமில்லை). இது build இல்லாமல் மூலமாகவே பயன்படுத்தப்படுகிறது: `next.config.mjs` இதை transpile செய்கிறது,
-  மேலும் `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src` மற்றும் `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` என map செய்கிறது (`vitest.config.ts` மற்றும் `vitest.mcp.config.ts` ஆகியவையும் இதே
-  alias-ஐக் கொண்டுள்ளன). கிட் component ஒன்றை அதன் subpath வழியாக import செய்யவும்
-  (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), `@omniroute/ui-kit` barrel வழியாக ஒருபோதும்
-  செய்ய வேண்டாம்: அந்த barrel ஒவ்வொரு importer-க்குள்ளும் அனைத்து components-ஐயும் (date picker உட்பட)
-  இழுத்துக்கொள்கிறது. கிட் stylesheet, `src/app/globals.css` வழியாக நுழைகிறது
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **டோக்கன்கள்.** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` டோக்கன்களை அறிவிக்கிறது;
-  `src/app/globals.css` அவற்றை பழைய OmniRoute பெயர்களுடன் (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) இணைக்கிறது; இதனால் ஏற்கனவே
-  உள்ள `var(--color-*)` வாசிப்புகளும் Tailwind utilities-உம் தொடர்ந்து செயல்படுகின்றன. புதிய code,
-  Tailwind utilities (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`,
-  `bg-chart-1`…) அல்லது கிட் classes-ஐப் பயன்படுத்துகிறது — hex மதிப்பை ஒருபோதும் பயன்படுத்தாது
+  `packages/ui-kit/UPSTREAM.md`-இல் பின் செய்யப்பட்ட commit-இல் உள்ள upstream `src/`-இன் byte-for-byte நகலாகும் (உரிம அங்கீகாரமும் அதில் பதிவுசெய்யப்பட்டுள்ளது); உள்ளூர்
+  patch-களை `PATCHES.md` பட்டியலிடுகிறது (எதுவுமில்லை). இது build ஏதுமின்றி source ஆகப் பயன்படுத்தப்படுகிறது: `next.config.mjs` இதை transpile செய்கிறது, மேலும்
+  `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src` மற்றும் `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` என map செய்கிறது (`vitest.config.ts` மற்றும் `vitest.mcp.config.ts` ஆகியவையும் இதே alias-ஐக் கொண்டுள்ளன). கிட் component-ஐ அதன் subpath வழியாக import செய்யவும் (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ஒருபோதும்
+  `@omniroute/ui-kit` barrel வழியாக அல்ல: barrel ஒவ்வொரு component-ஐயும் (date picker உட்பட)
+  ஒவ்வொரு importer-க்குள்ளும் இழுத்துவரும். கிட் stylesheet, `src/app/globals.css` வழியாக நுழைகிறது
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, முழுமையான sheet: மைய `ci-ui.css` மற்றும் ஒவ்வொரு pattern family-யும்).
+- **டோக்கன்கள்.** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` டோக்கன்களை அறிவிக்கிறது; `src/app/globals.css`
+  அவற்றை legacy OmniRoute பெயர்களுடன் (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) இணைக்கிறது; இதனால் ஏற்கனவே உள்ள `var(--color-*)` வாசிப்புகளும் Tailwind
+  utility-களும் தொடர்ந்து செயல்படுகின்றன. புதிய code, Tailwind utility-களை (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) அல்லது கிட் class-களைப் பயன்படுத்தும் — ஒருபோதும் hex மதிப்பைப் பயன்படுத்தாது
   (`tests/unit/design-kit-bridge.test.ts` இந்த bridge-ஐ அமல்படுத்துகிறது). `text-primary`,
-  `--text-color-primary` வழியாக `--color-primary-ink` ஆகத் தீர்மானிக்கப்படுகிறது; எனவே primary text
-  வாசிக்கக்கூடியதாக இருக்கும்போது `bg-primary`/`border-primary` accent surface-ஐத் தக்கவைக்கின்றன:
-  Editions-இன் கீழ் இது கிட்டின் `--ci-color-accent-active` (light-இல் ஆழ்ந்த copper `#99562f`,
-  dark-இல் copper accent); Classic-இன் கீழ் light-இல் lime-800 மற்றும் dark-இல் lime accent.
-  Chart தொடர்கள் `--color-chart-1` … `--color-chart-5` ஆகியவற்றைப் பயன்படுத்துகின்றன.
-- **தீம்கள்.** `<html className="ci-theme">` (`src/app/layout.tsx`) ஆவணத்தை கிட் theme-க்குள் இணைக்கிறது.
-  விருப்பத்தேர்வு `light`, `dark` அல்லது `system` ஆகும் (`src/shared/constants/appConfig.ts`-இல்
-  `THEME_CONFIG.defaultTheme = "system"`; `system`, `prefers-color-scheme`-ஐப் பின்பற்றுகிறது).
-  `src/store/themeStore.ts`-இல் உள்ள `applyTheme()` (`src/app/layout.tsx`-இல் inline செய்யப்பட்டு hydration-க்கு
-  முன் இயங்கும் `THEME_BOOT_SCRIPT`-ஆல் பிரதிபலிக்கப்படுகிறது) `data-theme="dark"|"light"`-ஐ அமைத்து,
-  அதே நேரத்தில் `<html>`-இல் உள்ள `.dark` class-ஐ toggle செய்கிறது. கிட்டின் dark token தொகுப்பு,
-  `data-theme="dark"`-ஐ அடிப்படையாகக் கொண்டது (`packages/ui-kit/src/ci-tokens.css`); OmniRoute-இன் சொந்த dark
-  overrides (`globals.css`-இல் உள்ள `.dark` block) மற்றும் பழைய Tailwind `dark:` utilities ஆகியவை `.dark`
-  class-ஐ அடிப்படையாகக் கொண்டவை. Accent நிற presets எதுவும் இல்லை: accent எப்போதும் கிட்டிலிருந்தே வருகிறது;
-  பழைய build ஒன்றிலிருந்து persist செய்யப்பட்ட preset, store load ஆகும்போது அகற்றப்படுகிறது.
-- **நிறத்தட்டுகள்.** இரண்டும் கிட்டிலிருந்து வருகின்றன (`src/shared/constants/appearancePalette.ts`):
-  இயல்புநிலையான `editions`, மற்றும் `classic`. Editions என்பது `<html>`-இல் உள்ள கிட்டின்
-  `data-ci-appearance="editions"` attribute ஆகும்; `ci-editions.css` (`ci-ui.css`-ஆல் import செய்யப்படுகிறது)
-  இதை `data-theme` உடன் இணைக்கிறது; Classic என்பது அந்த attribute இல்லாத நிலையாகும். Root layout அந்த
-  attribute-ஐ server-render செய்கிறது; எனவே எதையும் சேமிக்காத (அல்லது JS இல்லாத) பார்வையாளருக்கு ஒவ்வொரு
-  surface-இலும் — dashboard, login, `/status`, error pages, `/docs` மற்றும் PWA — Editions கிடைக்கும்.
-  இந்தத் தேர்வு theme-க்கு அருகிலேயே அதே `theme` store-இல் (`src/store/themeStore.ts`-இல் `palette`,
-  `setPalette()`, `applyPalette()`) persist செய்யப்பட்டு, paint-க்கு முன் `THEME_BOOT_SCRIPT` மூலம்
-  செயல்படுத்தப்படுகிறது (`src/shared/utils/themeBootScript.ts`, layout-இன் `<head>`-இல் inline செய்யப்பட்டுள்ளது);
-  சேமிக்கப்பட்ட palette `"classic"` ஆக இருக்கும்போது மட்டுமே இது attribute-ஐ அகற்றுகிறது; root layout-க்கு
-  வெளியே உள்ள `src/app/global-error.tsx`, அதே store-இலிருந்து இதைப் பயன்படுத்துகிறது. வேறு எந்த element-இலும்
-  `data-ci-appearance`-ஐ வைக்க வேண்டாம்: கிட் அதை
-  `html:root:has([data-ci-appearance="editions"])` மூலம் பொருத்துவதால், ஒரே ஒரு descendant கூட முழு ஆவணத்தையும்
-  மாற்றிவிடும். Editions-இன் `data-ci-editions-variant="landing"` variant marketing pages-க்கானது,
-  dashboard-க்கானது அல்ல. Browser chrome (`viewport.themeColor`, web manifest) CSS அல்லது சேமிக்கப்பட்ட
-  தேர்வைப் படிக்க முடியாது; எனவே அது இயல்புநிலையைப் பின்பற்றுகிறது:
-  `src/shared/constants/pwaThemeColors.ts`-இல் உள்ள `PWA_THEME_COLORS` என்பது Editions
-  `--ci-color-background`-இன் (`#f3f1e9` / `#11120f`) ஒரே பிரதியாகும்; இது
-  `tests/unit/pwa-theme-colors.test.ts` மூலம் `ci-editions.css`-க்கு நிலைநிறுத்தப்பட்டுள்ளது. Monaco தனது
-  நிறங்களை probe ஒன்றிலிருந்து வாசிக்கிறது (`monacoKitTheme.ts`); Editions-இன் கீழ், probe வாசிப்பு ஒரே
-  synchronous pass-க்காக root `data-theme`-ஐ மாற்றுகிறது, ஏனெனில் கிட் Editions light/dark-ஐ root-இலிருந்து
-  தீர்மானிக்கிறது.
-- **Components (adapters).** `src/shared/components/index.tsx`, OmniRoute component API-ஐ (அதே பெயர்கள்,
-  default exports மற்றும் props) தக்கவைக்கிறது; அதன் பின்னால் உள்ள primitives, கிட்டின் மேல் அமைந்த
-  adapters ஆகும்: forms (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  overlays மற்றும் feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`,
-  `EmptyState`, `Loading`), structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`,
-  `Breadcrumbs`, `Avatar`) மற்றும் tables (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`,
-  `PresetSlider`). ஓர் adapter, கிட் component-ஐ subpath வழியாக import செய்து, பழைய props-ஐ அதனுடன் map
-  செய்கிறது — எடுத்துக்காட்டாக `Button variant="primary"` என்பது கிட்டின் `default` button
-  (`--ci-button-primary-*`: light-இல் inverse surface, dark-இல் அதன் `--ci-color-accent-foreground` ink-உடன்
-  கூடிய accent), `danger` என்பது `destructive`, மேலும் `warning` என்பது `.ci-button--warning` extension
-  உடன் கூடிய `outline`. `globals.css`-இன் இறுதியில் (`@layer components`) உள்ள `.ci-button--warning` மற்றும்
-  `.ci-badge[data-tone]` விதிகள், கிட் classes-க்கு மேல் அமைந்த OmniRoute extensions ஆகும்.
-  `tests/unit/ui/adapters/*.test.tsx` ஒவ்வொரு adapter-ஐயும் நிலைநிறுத்துகிறது.
+  `--text-color-primary` வழியாக `--color-primary-ink` ஆக resolve ஆகிறது; எனவே primary text வாசிக்கக்கூடியதாக இருக்கும் அதேவேளையில்
+  `bg-primary`/`border-primary` accent surface-ஐத் தக்கவைக்கின்றன: Editions-இல் அது கிட்டின்
+  `--ci-color-accent-active` (light-இல் ஆழமான copper `#99562f`, dark-இல் copper accent); Classic-இல்,
+  light-இல் lime-800 மற்றும் dark-இல் lime accent. Chart series,
+  `--color-chart-1` … `--color-chart-5` ஆகியவற்றைப் பயன்படுத்துகின்றன.
+- **தீம்கள்.** `<html className="ci-theme">` (`src/app/layout.tsx`) document-ஐ கிட் theme-க்குள் சேர்க்கிறது.
+  விருப்பத்தேர்வு `light`, `dark` அல்லது `system` ஆகும் (`src/shared/constants/appConfig.ts`-இல் `THEME_CONFIG.defaultTheme = "system"`; `system`, `prefers-color-scheme`-ஐப் பின்பற்றுகிறது). `src/store/themeStore.ts`-இல் உள்ள `applyTheme()` (
+  hydration-க்கு முன் இயங்கும் வகையில் `src/app/layout.tsx`-இல் inline செய்யப்பட்டுள்ள `THEME_BOOT_SCRIPT`-ஆல் பிரதிபலிக்கப்படுகிறது), `data-theme="dark"|"light"`-ஐ அமைத்து, அதே நேரத்தில் `<html>`-இல் `.dark` class-ஐ toggle செய்கிறது.
+  கிட்டின் dark token தொகுப்பு `data-theme="dark"`-ஐ அடிப்படையாகக் கொண்டது (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoute-இன் சொந்த dark override-களும் (`globals.css`-இல் உள்ள `.dark` block) legacy Tailwind `dark:`
+  utility-களும் `.dark` class-ஐ அடிப்படையாகக் கொண்டவை. Accent நிற preset-கள் எதுவுமில்லை: accent எப்போதும்
+  கிட்டிலிருந்தே வருகிறது; பழைய build ஒன்றிலிருந்து நீடித்துள்ள preset, store load ஆகும்போது நீக்கப்படுகிறது.
+- **நிறத்தட்டுகள்.** இரண்டும் கிட்டிலிருந்து பெறப்பட்ட இரண்டு நிறத்தட்டுகள் (`src/shared/constants/appearancePalette.ts`): இயல்புநிலையான `editions` மற்றும்
+  `classic`. Editions என்பது `<html>`-இல் உள்ள கிட்டின் `data-ci-appearance="editions"` attribute ஆகும்; இதை
+  `ci-editions.css` (`ci-ui.css`-ஆல் import செய்யப்படுகிறது), `data-theme` உடன் இணைக்கிறது; Classic என்பது அந்த attribute இல்லாத நிலையாகும்.
+  Root layout இந்த attribute-ஐ server-render செய்கிறது; எனவே எதையும் சேமிக்காத (அல்லது JS இல்லாத) பார்வையாளர்
+  ஒவ்வொரு surface-இலும் Editions-ஐப் பெறுவார் — dashboard, login, `/status`, error page-கள், `/docs` மற்றும் PWA. இந்தத் தேர்வு
+  அதே `theme` store-இல் theme-க்கு அருகில் persist செய்யப்படுகிறது (`src/store/themeStore.ts`-இல் `palette`, `setPalette()`, `applyPalette()`), மேலும் paint-க்கு முன் `THEME_BOOT_SCRIPT`
+  (`src/shared/utils/themeBootScript.ts`, layout-இன் `<head>`-இல் inline செய்யப்பட்டுள்ளது) மூலம் பயன்படுத்தப்படுகிறது; சேமிக்கப்பட்ட palette `"classic"` ஆக இருக்கும்போது மட்டுமே இது attribute-ஐ நீக்கும்; root layout-க்கு வெளியே உள்ள `src/app/global-error.tsx`, அதே store-இலிருந்து இதைப் பயன்படுத்துகிறது. `data-ci-appearance`-ஐ வேறு எந்த element-இலும் இட வேண்டாம்: கிட் அதை
+  `html:root:has([data-ci-appearance="editions"])` மூலம் match செய்கிறது; எனவே ஒரே ஒரு descendant கூட முழு document-ஐ மாற்றிவிடும்.
+  Editions-இன் `data-ci-editions-variant="landing"` variant marketing page-களுக்கானது, dashboard-க்கானது அல்ல.
+  Browser chrome (`viewport.themeColor`, web manifest) CSS அல்லது சேமிக்கப்பட்ட தேர்வைப் படிக்க முடியாது; எனவே அது
+  இயல்புநிலையைப் பின்பற்றுகிறது: `src/shared/constants/pwaThemeColors.ts`-இல் உள்ள `PWA_THEME_COLORS`, Editions-இன்
+  `--ci-color-background` (`#f3f1e9` / `#11120f`)-க்கான ஒரே mirror ஆகும்; இது
+  `tests/unit/pwa-theme-colors.test.ts` மூலம் `ci-editions.css`-உடன் பின் செய்யப்பட்டுள்ளது. Monaco தனது நிறங்களை ஒரு probe-இலிருந்து படிக்கிறது (`monacoKitTheme.ts`);
+  Editions-இல் probe வாசிப்பு, ஒரே ஒரு synchronous pass-க்கு root `data-theme`-ஐ மாற்றுகிறது; ஏனெனில் கிட்
+  Editions light/dark-ஐ root-இலிருந்து resolve செய்கிறது.
+- **Component-கள் (adapter-கள்).** `src/shared/components/index.tsx`, OmniRoute component API-ஐ (அதே
+  பெயர்கள், default export-கள் மற்றும் prop-கள்) தக்கவைக்கிறது; அதன் பின்னுள்ள primitive-கள் கிட் மீதான adapter-களாகும்: form-கள்
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlay-களும் feedback-உம்
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  அமைப்பு (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) மற்றும் table-கள்
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ஓர் adapter, கிட்
+  component-ஐ subpath வழியாக import செய்து, legacy prop-களை அதன்மீது map செய்கிறது — எடுத்துக்காட்டாக `Button variant="primary"` என்பது
+  கிட்டின் `default` button (`--ci-button-primary-*`: light-இல் inverse surface, dark-இல் அதன்
+  `--ci-color-accent-foreground` ink உடனான accent), `danger` என்பது `destructive`, மேலும் `warning` என்பது `outline` உடன்
+  `.ci-button--warning` extension ஆகும். `globals.css`-இன் இறுதியில் (`@layer components`) உள்ள `.ci-button--warning` மற்றும் `.ci-badge[data-tone]` விதிகள், கிட் class-களின் மீதான OmniRoute extension-களாகும்.
+  `tests/unit/ui/adapters/*.test.tsx` ஒவ்வொரு adapter-ஐயும் பின் செய்கிறது.
 - **Shell.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout`-ஐ render செய்கிறது; அது
-  `src/shared/components/layouts/DashboardShell.tsx`-ஐ render செய்கிறது: கிட்டின் `SidebarProvider` /
-  `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), மேலும் OmniRoute-இன் navigation logic
-  `src/shared/components/Sidebar.tsx`-இல் உள்ளது. `#main-content`-க்கான "உள்ளடக்கத்திற்குச் செல்க" link
-  முதல் focus செய்யக்கூடிய element ஆகும். `src/shared/components/Header.tsx`, கிட்டின் `SidebarTrigger`
-  (shell-இன் ஒரே sidebar toggle), Keak `ProductSwitcher` மற்றும் command-palette opener ஆகியவற்றைக் கொண்டுள்ளது;
-  `#main-content`-க்குள் கிட் `PageHeader` (`.ci-page-header`) mount செய்யப்படாதபோது மட்டுமே இது route title-ஐக்
-  காட்டுகிறது; எனவே தனக்கென `PageHeader` கொண்ட ஒரு page-இல் ஒரே ஒரு `h1` மட்டுமே இருக்கும்.
-  `src/shared/components/CommandPalette.tsx` என்பது கிட் `Dialog` ஆகும்.
+  `src/shared/components/layouts/DashboardShell.tsx`-ஐ render செய்கிறது: கிட்டின் `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), மேலும் OmniRoute-இன் navigation logic
+  `src/shared/components/Sidebar.tsx`-இல் உள்ளது. `#main-content`-க்கான "உள்ளடக்கத்திற்குச் செல்க" link தான் focus செய்யக்கூடிய முதல்
+  element. `src/shared/components/Header.tsx`, கிட்டின் `SidebarTrigger` (shell-இன் ஒரே sidebar
+  toggle), Keak `ProductSwitcher` மற்றும் command-palette opener ஆகியவற்றைக் கொண்டுள்ளது; `#main-content`-க்குள் கிட் `PageHeader` (`.ci-page-header`) mount செய்யப்படாதபோது மட்டுமே இது route title-ஐக் காட்டும்; எனவே தனக்கென `PageHeader` உள்ள page-இல் ஒரே ஒரு `h1` இருக்கும். `src/shared/components/CommandPalette.tsx` என்பது கிட் `Dialog` ஆகும்.
 - **ஐகான்கள்.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) பெயரை (திரைகள் பயன்படுத்தும்
   Material Symbols சொற்களஞ்சியம்) `ICON_MAP` (`src/shared/constants/iconMap.ts`) வழியாக ஒரு
-  Lucide கிளிஃபாக மாற்றுகிறது. Material Symbols எழுத்துருவும் package-உம் அகற்றப்பட்டுள்ளன: வரைபடத்தில் இல்லாத பெயர்
-  நடுநிலையான placeholder கிளிஃபை (`data-icon-missing="true"`) காட்டுவதுடன், production-க்கு வெளியே console எச்சரிக்கையைப் பதிவு செய்கிறது.
-  `npm run gen:icon-map` பயன்பாட்டில் உள்ள, ஆனால் வரைபடத்தில் இல்லாத பெயர்களை அச்சிடுகிறது
-  (Lucide ஐகான் இல்லாத எந்தப் பெயருக்கும் `tests/unit/icon-map-coverage.test.ts` தோல்வியடைகிறது;
-  lookup objects-இல் சேமிக்கப்பட்ட பெயர்களை `tests/unit/icon-map-object-values.test.ts` உள்ளடக்குகிறது);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` நேரடி மதிப்புகளைக் கொண்ட
+  Lucide கிளிஃபாகத் தீர்மானிக்கிறது. Material Symbols எழுத்துருவும் தொகுப்பும் அகற்றப்பட்டுள்ளன: மேப்பில் இல்லாத பெயர் ஒரு
+  நடுநிலையான இடநிரப்பு கிளிஃபை (`data-icon-missing="true"`) காட்சிப்படுத்தி, production-க்கு வெளியே console எச்சரிக்கையைப் பதிவு செய்கிறது.
+  `npm run gen:icon-map` பயன்பாட்டில் இருந்தும் மேப்பில் இல்லாத பெயர்களை அச்சிடுகிறது
+  (`tests/unit/icon-map-coverage.test.ts` Lucide ஐகான் இல்லாத எந்தப் பெயருக்கும் தோல்வியடைகிறது;
+  `tests/unit/icon-map-object-values.test.ts` தேடல் ஆப்ஜெக்ட்களில் சேமிக்கப்பட்ட பெயர்களை உள்ளடக்குகிறது);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` லிட்டரல்
   `<span className="material-symbols-outlined">` span-களை `<Icon>` ஆக மாற்றி எழுதுகிறது.
-- **பிராண்ட்.** `src/shared/components/OmniRouteLogo.tsx` kit-ஐச் சுற்றிப் பொதிக்கிறது: இயல்புநிலை export ஆன `OmniRouteLogo`,
-  `ProductIcon product="omniroute" variant="glyph"`-ஐ (inline SVG, `basePath`-பாதுகாப்பானது) காட்டுகிறது; மேலும்
-  `OmniRouteLockup`, `ProductLockup product="omniroute"`-ஐ (அணுகக்கூடிய பெயர் "Keak OmniRoute") அல்லது,
-  white-label இயக்குநர்களுக்கு, அவர்களுடைய சொந்த `name`/`logoSrc`-ஐக் காட்டுகிறது. Product-switcher இலக்குகள்
-  `src/shared/constants/keakProducts.ts`-இல் (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) உள்ளன. தனித்தியங்கும்
-  திரைகளான — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+- **பிராண்ட்.** `src/shared/components/OmniRouteLogo.tsx` கிட்டைச் சுற்றி அமைக்கிறது: இயல்புநிலை export ஆன `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"`-ஐ (inline SVG, `basePath`-க்கு பாதுகாப்பானது) காட்சிப்படுத்துகிறது, மேலும்
+  `OmniRouteLockup` ஆனது `ProductLockup product="omniroute"`-ஐ (அணுகல்தன்மை பெயர் "Keak OmniRoute") அல்லது,
+  white-label ஆபரேட்டர்களுக்கு, அவர்களது சொந்த `name`/`logoSrc`-ஐ காட்சிப்படுத்துகிறது. Product-switcher இலக்குகள்
+  `src/shared/constants/keakProducts.ts`-இல் உள்ளன (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). தனித்தியங்கும்
+  திரைகள் — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` மற்றும் `src/shared/components/ErrorPageScaffold.tsx`
-  — lockup-ஐக் காட்டுகின்றன; `tests/unit/brand-pages-static.test.ts` இதைப் பாதுகாக்கிறது.
+  — lockup-ஐக் காட்டுகின்றன; `tests/unit/brand-pages-static.test.ts` அதைச் சரிபார்த்துப் பாதுகாக்கிறது.
 
 ## 2. விதிகள்
 
