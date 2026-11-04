@@ -68,28 +68,14 @@ export function normalizeOpenAIToolNames(body: unknown, maxLength: number): Tool
 
   if (Array.isArray(root.tools)) {
     for (const tool of root.tools) {
-      const entry = toRecord(tool);
-      const fn = toRecord(entry?.function);
+      const fn = toRecord(toRecord(tool)?.function);
       if (fn && typeof fn.name === "string") fn.name = alias(fn.name);
-      // Responses wire declares `name` flat on the tool entry.
-      else if (entry && typeof entry.name === "string") entry.name = alias(entry.name);
     }
   }
 
   const toolChoiceFunction = toRecord(toRecord(root.tool_choice)?.function);
   if (toolChoiceFunction && typeof toolChoiceFunction.name === "string") {
     toolChoiceFunction.name = alias(toolChoiceFunction.name);
-  } else {
-    const toolChoice = toRecord(root.tool_choice);
-    if (toolChoice && typeof toolChoice.name === "string") toolChoice.name = alias(toolChoice.name);
-  }
-
-  // Responses wire replays call history in `input[]` rather than `messages[]`.
-  if (Array.isArray(root.input)) {
-    for (const item of root.input) {
-      const record = toRecord(item);
-      if (record && typeof record.name === "string") record.name = alias(record.name);
-    }
   }
 
   if (Array.isArray(root.messages)) {
