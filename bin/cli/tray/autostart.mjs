@@ -1,7 +1,14 @@
-import { existsSync, writeFileSync, unlinkSync, mkdirSync, realpathSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  mkdirSync,
+  realpathSync,
+} from "node:fs";
 import { execFileSync, execSync } from "node:child_process";
 import { homedir } from "node:os";
-import { join, dirname } from "node:path";
+import { join, dirname, win32 } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveTrayPreference, saveTrayPreference } from "./preferences.mjs";
 
@@ -10,6 +17,8 @@ const WIN_REG_VALUE = "OmniRoute";
 const WIN_STARTUP_FILE = "OmniRoute.vbs";
 const LINUX_SERVICE_NAME = "omniroute.service";
 const LINUX_DESKTOP_NAME = "omniroute.desktop";
+const INSTALLED_CLI_SUFFIX =
+  win32.sep + win32.join("node_modules", "omniroute", "bin", "omniroute.mjs");
 
 function resolveCliPath() {
   const candidates = [];
@@ -458,6 +467,96 @@ function enableWin({ tray }) {
   // a visible console window. The VBS approach is the replacement.
   cleanLegacyWinReg();
   return existsSync(vbsPath);
+}
+
+/**
+ * Swaps the CLI script in an OmniRoute.vbs written by buildWinVbsContent (any
+ * release; older ones escaped every backslash) for `cliPath`, keeping the node
+ * binary, every flag and the line endings as they are. Returns null for a VBS
+ * this module did not write.
+ */
+export function rewriteWinVbsCliPath(vbs, cliPath) {
+  const run = vbs.match(/^WshShell\.Run "(.*)", 0, False(\r?)$/m);
+  const exec = run && run[1].replace(/""/g, '"').match(/^("[^"]*"|\S+)(\s+)("[^"]*"|\S+)(.*)$/);
+  if (!exec) return null;
+  const [, node, sep, previous, rest] = exec;
+  const execLine = `${node}${sep}${quoteWindowsArg(cliPath)}${rest}`;
+  const runLine = `WshShell.Run "${execLine.replace(/"/g, '""')}", 0, False${run[2]}`;
+  return {
+    previousCliPath: win32.normalize(previous.replace(/^"|"$/g, "")),
+    content: vbs.replace(run[0], () => runLine),
+  };
+}
+
+function installedVersion(cliPath) {
+  try {
+    return JSON.parse(readFileSync(join(dirname(cliPath), "..", "package.json"), "utf8")).version;
+  } catch {
+    return null;
+  }
+}
+
+function isInstalledCli(cliPath) {
+  return win32.normalize(cliPath).toLowerCase().endsWith(INSTALLED_CLI_SUFFIX);
+}
+
+const SEMVER_RE = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/;
+
+/**
+ * Orders two release versions: -1 when `a` is older than `b`, 0 when equal, 1 when
+ * newer, null when either is not major.minor.patch[-prerelease]. A prerelease ranks
+ * below its release; two prereleases of one release compare by their tag, numbers
+ * numerically ("rc.2" < "rc.10").
+ */
+export function compareCliVersions(a, b) {
+  const [x, y] = [a, b].map((v) => (typeof v === "string" ? SEMVER_RE.exec(v.trim()) : null));
+  if (!x || !y) return null;
+  for (let i = 1; i <= 3; i++) {
+    const diff = Number(x[i]) - Number(y[i]);
+    if (diff) return Math.sign(diff);
+  }
+  if (!x[4] || !y[4]) return Math.sign(Number(!x[4]) - Number(!y[4]));
+  return Math.sign(x[4].localeCompare(y[4], "en", { numeric: true }));
+}
+
+/** True for a CLI inside an npx cache (a `_npx` path segment): a throwaway copy. */
+export function isNpxCachePath(cliPath) {
+  return win32.normalize(cliPath).toLowerCase().split(win32.sep).includes("_npx");
+}
+
+/**
+ * Stale means the VBS target is gone, or strictly older than the running install.
+ * Same version, a newer target and unparsable versions are left alone, so a
+ * downgrade or two coexisting installs can't flip the file back and forth. A
+ * removed target reads as 0.0.0. The running CLI must be a regular install, not an
+ * npx cache copy.
+ */
+function isStaleInstalledCli(previous, current) {
+  if (!isInstalledCli(previous) || !isInstalledCli(current) || isNpxCachePath(current)) {
+    return false;
+  }
+  const target = installedVersion(previous) ?? "0.0.0";
+  return compareCliVersions(target, installedVersion(current)) === -1;
+}
+
+/**
+ * #18601: the VBS pins the real path of the CLI that enabled autostart, and pnpm
+ * installs every version under its own directory, so after an upgrade each login
+ * kept booting the old version. `serve` calls this to point the VBS at the
+ * running install when it launches an older version of an installed copy, or one
+ * that is gone or unreadable, never from an npx cache. Source checkouts and VBS
+ * files we did not write are left alone.
+ * Returns true when the file was rewritten.
+ */
+export function refreshWinAutostartCliPath({
+  cliPath = resolveCliPath(),
+  vbsPath = winStartupPath(),
+} = {}) {
+  if (process.platform !== "win32" || !cliPath || !vbsPath || !existsSync(vbsPath)) return false;
+  const rewritten = rewriteWinVbsCliPath(readFileSync(vbsPath, "utf8"), cliPath);
+  if (!rewritten || !isStaleInstalledCli(rewritten.previousCliPath, cliPath)) return false;
+  writeFileSync(vbsPath, rewritten.content, { mode: 0o644 });
+  return true;
 }
 
 function disableWin() {
