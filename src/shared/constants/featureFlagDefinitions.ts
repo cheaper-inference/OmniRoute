@@ -241,6 +241,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "PROXY_REFUSAL_MODEL_SCOPE",
+    label: "Model-Scoped Quota Refusals",
+    description:
+      "Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model.",
+    descriptionI18nKey: "featureFlagProxyRefusalModelScopeDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "ROTATION_ATTRIBUTION",
     label: "Rotation Attribution Logging",
     description:
