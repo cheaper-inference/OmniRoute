@@ -12,6 +12,7 @@ import {
   mustKeepOpenCodeHistoryVerbatim,
 } from "../../../open-sse/services/compression/cachingAware.ts";
 import { selectCompressionPlan } from "../../../open-sse/services/compression/strategySelector.ts";
+import { runLiveZoneCompression } from "../../../open-sse/handlers/chatCore/liveZoneCompression.ts";
 import {
   applyLiveZoneCompression,
   resetLiveZoneCache,
@@ -193,4 +194,86 @@ test("#18787: missing session identity fails safely without changing cached hist
   );
   assert.equal(cold.body, firstBody);
   assert.equal(calls, 0);
+});
+
+test("#18787: chatCore live-zone dispatcher forwards raw-prefix policy across turns", async () => {
+  let calls = 0;
+  const compress = async (input: Record<string, unknown>): Promise<CompressionResult> => {
+    calls += 1;
+    const messages = (input.messages as Array<Record<string, unknown>>).map((message) => ({
+      ...message,
+      content: message.role === "tool" ? "processed live output" : "should not overwrite history",
+    }));
+    return { body: { ...input, messages }, compressed: true, stats: null };
+  };
+  const args = {
+    compressionInputBody: firstBody,
+    clientHeaders: null,
+    provider,
+    getCurrentConnectionId: () => "connection-1",
+    compressionPrincipalId: "synthetic-principal",
+    mode: "stacked",
+    effectiveModel: model,
+    compressionConfig: { ...config, cacheMinutes: 5 },
+    preserveRawPrefixOnMiss: true,
+    runCompression: compress,
+  };
+  const cold = await runLiveZoneCompression(args);
+  assert.deepEqual(cold.body.messages, baseMessages);
+  assert.equal(calls, 0);
+
+  const nextBody = {
+    ...firstBody,
+    messages: [
+      ...baseMessages,
+      { role: "assistant", content: "Running a tool" },
+      { role: "tool", tool_call_id: "call-2", content: "new observations ".repeat(150) },
+    ],
+  };
+  const warm = await runLiveZoneCompression({ ...args, compressionInputBody: nextBody });
+  assert.equal(calls, 1);
+  const messages = warm.body.messages as Array<Record<string, unknown>>;
+  assert.deepEqual(messages.slice(0, baseMessages.length), baseMessages);
+  assert.equal(messages[3].content, "processed live output");
+
+  // Pre- and post-translation stages use distinct variants and must not
+  // reuse each other's frozen prefix.
+  const postTranslation = await runLiveZoneCompression({
+    ...args,
+    compressionInputBody: nextBody,
+    mode: "stacked:post-translation",
+  });
+  assert.deepEqual(postTranslation.body.messages, nextBody.messages);
+  assert.equal(calls, 1);
+});
+
+test("#18787: changed raw prefixes fail closed without rewriting existing content", async () => {
+  let calls = 0;
+  const compress = async (input: Record<string, unknown>): Promise<CompressionResult> => {
+    calls += 1;
+    return { body: { ...input, messages: [] }, compressed: true, stats: null };
+  };
+  await applyLiveZoneCompression(firstBody, options, compress);
+  const changed = {
+    ...firstBody,
+    messages: [{ role: "system", content: "Different instructions" }, baseMessages[1]],
+  };
+  const result = await applyLiveZoneCompression(changed, options, compress);
+  assert.deepEqual(result.body.messages, changed.messages);
+  assert.equal(calls, 0);
+});
+
+test("#18787: an explicit hard token budget retains its existing compression precedence", async () => {
+  let calls = 0;
+  const compress = async (input: Record<string, unknown>): Promise<CompressionResult> => {
+    calls += 1;
+    return { body: { ...input, messages: [] }, compressed: true, stats: null };
+  };
+  const result = await applyLiveZoneCompression(
+    firstBody,
+    { ...options, variant: { mode: "stacked", config: { targetTokens: 100 } } },
+    compress
+  );
+  assert.equal(calls, 1);
+  assert.deepEqual(result.body.messages, []);
 });
