@@ -15,6 +15,7 @@ import { selectCompressionPlan } from "../../../open-sse/services/compression/st
 import { runLiveZoneCompression } from "../../../open-sse/handlers/chatCore/liveZoneCompression.ts";
 import {
   applyLiveZoneCompression,
+  getLiveZoneCacheStats,
   resetLiveZoneCache,
 } from "../../../open-sse/services/compression/liveZone.ts";
 import type {
