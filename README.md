@@ -244,7 +244,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 380 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 380 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 53 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 380 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 380 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 54 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -696,7 +696,7 @@ of your shell history. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **380 registered providers** across the canonical chat, media, search, local, cloud-agent and system collections, including **153 carrying `hasFree: true` discovery metadata**. The chat model registry covers **239 providers / 3,059 distinct provider-model pairs / 1,475 raw model IDs**; the separate free-budget catalog has **471 per-model rows**, **34 recurring pools** and **53 recurring/keyless free-forever providers**. These are different denominators by design; definitions and pool-deduped calculations live in the [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) and [Free Tiers](docs/reference/FREE_TIERS.md).
+> **380 registered providers** across the canonical chat, media, search, local, cloud-agent and system collections, including **153 carrying `hasFree: true` discovery metadata**. The chat model registry covers **239 providers / 3,059 distinct provider-model pairs / 1,475 raw model IDs**; the separate free-budget catalog has **471 per-model rows**, **34 recurring pools** and **54 recurring/keyless free-forever providers**. These are different denominators by design; definitions and pool-deduped calculations live in the [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) and [Free Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
