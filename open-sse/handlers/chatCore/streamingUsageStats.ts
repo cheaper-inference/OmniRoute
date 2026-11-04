@@ -30,6 +30,8 @@ export type RecordStreamingUsageStatsContext = {
   comboStrategy: string | null | undefined;
   endpoint?: string | null | undefined;
   cpaAuthIndex?: string | null | undefined;
+  /** Tokens generated before a 499 / mid-stream failure (usage is null then). */
+  partialUsage?: unknown;
 };
 
 function persistStreamingUsageRow(usage: object, ctx: RecordStreamingUsageStatsContext): void {
@@ -56,13 +58,18 @@ function persistStreamingUsageRow(usage: object, ctx: RecordStreamingUsageStatsC
   });
 }
 
-function recordStreamingBillableTokens(usage: object, ctx: RecordStreamingUsageStatsContext): void {
-  if (!ctx.apiKeyInfo?.id || ctx.streamStatus !== 200) return;
+function recordStreamingBillableTokens(
+  usage: object | null,
+  ctx: RecordStreamingUsageStatsContext
+): void {
+  if (!ctx.apiKeyInfo?.id) return;
   try {
-    const billable = computeBillableTokens(usage);
-    // Key-quota tpm/rpm counters advance on every completed stream.
+    const billable = usage ? computeBillableTokens(usage) : 0;
+    // Key-quota rpm/tpm advance on every stream, aborted or failed ones too: the
+    // provider already generated the partial tokens, and the apiKeyPolicy gate
+    // must see the request, or a key that aborts after the first token is never counted.
     recordKeyQuotaUsage(ctx.apiKeyInfo.id, billable);
-    if (billable > 0)
+    if (ctx.streamStatus === 200 && billable > 0)
       recordTokenUsage(
         ctx.apiKeyInfo.id,
         ctx.provider || "unknown",
@@ -78,7 +85,10 @@ export function recordStreamingUsageStats(
   usage: unknown,
   ctx: RecordStreamingUsageStatsContext
 ): void {
-  if (!usage || typeof usage !== "object") return;
-  persistStreamingUsageRow(usage, ctx);
-  recordStreamingBillableTokens(usage, ctx);
+  const isObject = (v: unknown): v is object => !!v && typeof v === "object";
+  // The failure finalizer already writes the 499/5xx usage row from partialUsage,
+  // so only a real `usage` persists a row here; the counters take either.
+  if (isObject(usage)) persistStreamingUsageRow(usage, ctx);
+  const counted = isObject(usage) ? usage : isObject(ctx.partialUsage) ? ctx.partialUsage : null;
+  recordStreamingBillableTokens(counted, ctx);
 }

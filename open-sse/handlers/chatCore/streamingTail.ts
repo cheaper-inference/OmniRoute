@@ -520,6 +520,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       comboStrategy,
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
+      partialUsage: streamPartialUsage,
     });
 
     // Routing event (feedback foundation) — fire-and-forget, cheap, never blocks
