@@ -81,7 +81,7 @@ function toString(value: unknown, fallback = ""): string {
 
 import { logToolCall } from "../audit.ts";
 import { normalizeQuotaResponse } from "../../../src/shared/contracts/quota.ts";
-import { toNumber } from "../../../src/shared/utils/numeric";
+import { toNumber } from "../../utils/numeric.ts";
 
 // Re-export types
 export type { TextToolResult } from "../toolResult.ts";

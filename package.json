@@ -448,7 +448,7 @@
     "@cyclonedx/cyclonedx-npm": "6.0.1",
     "@eslint/compat": "^2.1.1",
     "@modelcontextprotocol/client": "2.3.1",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "1.62.1",
     "@size-limit/file": "^14.1.0",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/tap-runner": "^10.0.0",
