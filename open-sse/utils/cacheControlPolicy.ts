@@ -245,6 +245,11 @@ export function isClaudeCodeClient(userAgent: string | null | undefined): boolea
  * 1. Provider is in the known caching providers list, OR
  * 2. Provider uses Claude protocol (detected via targetFormat)
  */
+/** Recognize the Claude protocol regardless of casing. */
+function isClaudeTargetFormat(targetFormat?: string | null): boolean {
+  return targetFormat?.toLowerCase() === "claude";
+}
+
 export function providerSupportsCaching(
   provider: string | null | undefined,
   targetFormat?: string | null,
@@ -272,12 +277,12 @@ export function providerSupportsCaching(
   // Vertex is a mixed-format provider. Only its Anthropic Claude path accepts
   // cache_control; Gemini and OpenAI-format partner models use other mechanisms.
   if (providerId === "vertex" || providerId === "vertex-partner") {
-    return targetFormat?.toLowerCase() === "claude";
+    return isClaudeTargetFormat(targetFormat);
   }
   if (isOpenCodeCacheableModel(providerId, model)) return true;
   if (CACHING_PROVIDERS.has(providerId)) return true;
   // All Claude-protocol providers support prompt caching.
-  return targetFormat?.toLowerCase() === "claude";
+  return isClaudeTargetFormat(targetFormat);
 }
 
 /** Whether a marker-free request can still participate in the provider cache.
