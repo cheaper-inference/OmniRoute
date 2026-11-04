@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "తాత్కాలిక కూల్‌డౌన్‌ను దాటవేయండి, తద్వారా రికవర్ చేయగల ఎర్రర్‌ల తర్వాత కూడా ఈ కనెక్షన్ అర్హత కలిగి ఉంటుంది (banned/expired వంటి టెర్మినల్ స్థితులు ఇప్పటికీ వర్తిస్తాయి).",
     "disableCoolingLabel": "ఈ కనెక్షన్ కోసం కూల్‌డౌన్‌ను నిలిపివేయండి",
+    "requireUserLastMessageDescription": "అసిస్టెంట్ ప్రిఫిల్ని తిరస్కరించే అప్స్ట్రీమ్ల కోసం: పంపే ముందు ట్రైలింగ్ అసిస్టెంట్ మలుపులను వదలండి (టూల్_ఉపయోగం లేదు). మోడల్ దాని మునుపటి సమాధానాన్ని పునరుద్ధరించవచ్చు.",
+    "requireUserLastMessageLabel": "వినియోగదారు సందేశంతో సంభాషణ ముగించడం అవసరం",
     "bulkPasteAdded": "{count, plural, one {1 కీ జోడించబడింది} other {# కీలు జోడించబడ్డాయి}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 నకిలీ కీ దాటవేయబడింది} other {# నకిలీ కీలు దాటవేయబడ్డాయి}}",
     "bulkPasteHint": "ఒక్కో పంక్తిలో ఒక API కీని పేస్ట్ చేయండి. ఖాళీ పంక్తులు విస్మరించబడతాయి మరియు నకిలీ కీలు దాటవేయబడతాయి.",

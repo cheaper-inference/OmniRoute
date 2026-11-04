@@ -6350,6 +6350,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "გამოტოვეთ დროებითი დაყოვნების პერიოდი, რათა ეს კავშირი აღდგენადი შეცდომების შემდეგაც ხელმისაწვდომი დარჩეს (ტერმინალური მდგომარეობები, როგორიცაა დაბლოკილი/ვადაგასული, კვლავ მოქმედებს).",
     "disableCoolingLabel": "ამ კავშირისთვის დაყოვნების პერიოდის გამორთვა",
+    "requireUserLastMessageDescription": "ზემო დინებისთვის, რომლებიც უარყოფენ ასისტენტის წინასწარ შევსებას: გაგზავნამდე ჩამოაგდეთ ასისტენტის ბოლო მოხვევები (არ არის ინსტრუმენტი_გამოყენება). მოდელმა შეიძლება განაახლოს თავისი წინა პასუხი.",
+    "requireUserLastMessageLabel": "მოითხოვეთ საუბარი მომხმარებლის შეტყობინებით",
     "bulkPasteAdded": "{count, plural, one {დამატებულია 1 გასაღები} other {დამატებულია # გასაღები}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {გამოტოვებულია 1 დუბლიკატი} other {გამოტოვებულია # დუბლიკატი}}",
     "bulkPasteHint": "თითო ხაზზე ჩასვით თითო API გასაღები. ცარიელი ხაზები უგულებელყოფილია, ხოლო დუბლირებული გასაღებები გამოტოვებულია.",

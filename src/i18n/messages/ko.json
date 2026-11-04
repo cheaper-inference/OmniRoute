@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "일시적인 쿨다운을 건너뛰어 복구 가능한 오류가 발생한 후에도 이 연결이 사용 가능한 상태로 유지되도록 합니다(차단됨/만료됨과 같은 최종 상태는 여전히 적용됨).",
     "disableCoolingLabel": "이 연결에 대한 쿨다운 비활성화",
+    "requireUserLastMessageDescription": "보조 사전 채우기를 거부하는 업스트림의 경우 전송하기 전에 후행 보조 회전(tool_use 없음)을 삭제합니다. 모델은 이전 답변을 다시 생성할 수 있습니다.",
+    "requireUserLastMessageLabel": "대화가 사용자 메시지로 끝나도록 요구",
     "bulkPasteAdded": "{count, plural, one {키 1개 추가됨} other {키 #개 추가됨}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {중복 1개 건너뜀} other {중복 #개 건너뜀}}",
     "bulkPasteHint": "한 줄에 API 키 하나씩 붙여넣으세요. 빈 줄은 무시되며 중복 키는 건너뜁니다.",

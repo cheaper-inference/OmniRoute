@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Geçici bekleme süresini atlayın; böylece bu bağlantı kurtarılabilir hatalardan sonra bile uygun kalmaya devam eder (yasaklandı/süresi doldu gibi nihai durumlar yine de geçerlidir).",
     "disableCoolingLabel": "Bu bağlantı için bekleme süresini devre dışı bırak",
+    "requireUserLastMessageDescription": "Asistan ön doldurmasını reddeden yukarı akışlar için: göndermeden önce sondaki asistan dönüşlerini bırakın (tool_use yok). Model önceki cevabını yeniden oluşturabilir.",
+    "requireUserLastMessageLabel": "Konuşmanın bir kullanıcı mesajıyla bitmesini zorunlu kıl",
     "bulkPasteAdded": "{count, plural, one {1 anahtar eklendi} other {# anahtar eklendi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 yinelenen anahtar atlandı} other {# yinelenen anahtar atlandı}}",
     "bulkPasteHint": "Her satıra bir API anahtarı yapıştırın. Boş satırlar yok sayılır ve yinelenen anahtarlar atlanır.",
