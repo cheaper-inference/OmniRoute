@@ -4,10 +4,13 @@ import assert from "node:assert/strict";
 import {
   fetchCodexQuota,
   getCodexQuotaCooldownMs,
+  getCodexQuotaFetchTimeoutMs,
   invalidateCodexQuotaCache,
   registerCodexConnection,
   registerCodexQuotaFetcher,
+  __testing,
 } from "../../open-sse/services/codexQuotaFetcher.ts";
+import { markQuotaPreflightAccountUnavailable } from "../../src/sse/services/quotaPreflightUnavailable.ts";
 import { preflightQuota } from "../../open-sse/services/quotaPreflight.ts";
 import {
   clearQuotaMonitors,
@@ -306,4 +309,67 @@ test("registerCodexQuotaFetcher exposes Codex quota to preflight and monitor flo
 
   stopQuotaMonitor("session-codex");
   assert.equal(getActiveMonitorCount(), 0);
+});
+
+test("getCodexQuotaFetchTimeoutMs defaults to 30s and respects env override", () => {
+  assert.equal(getCodexQuotaFetchTimeoutMs(), 30_000);
+  process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS = "15000";
+  try {
+    assert.equal(getCodexQuotaFetchTimeoutMs(), 15_000);
+  } finally {
+    delete process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS;
+  }
+});
+
+test("fetchCodexQuota falls back to cached quota when fresh upstream fetch fails or times out", async () => {
+  const connectionId = `codex-stale-cache-${Date.now()}`;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    if (calls === 1) {
+      return new Response(
+        JSON.stringify({
+          rate_limit: { primary_window: { used_percent: 50, reset_after_seconds: 60 } },
+          credits: {
+            has_credits: true,
+            unlimited: false,
+            overage_limit_reached: false,
+            balance: 1234,
+          },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    }
+    throw new DOMException("Simulated timeout", "TimeoutError");
+  };
+
+  const first = await fetchCodexQuota(connectionId, {
+    accessToken: "token-1",
+    providerSpecificData: { workspaceId: "ws-1" },
+  });
+  assert.equal(first?.paidCredits?.balance, 1234);
+
+  // Age the cache past CACHE_TTL_MS (60s) to force a fresh fetch attempt
+  __testing.ageCacheEntry(connectionId, 61_000);
+
+  // Second fetch throws timeout, but should return stale cached quota
+  const second = await fetchCodexQuota(connectionId, {
+    accessToken: "token-1",
+    providerSpecificData: { workspaceId: "ws-1" },
+  });
+  assert.equal(calls, 2);
+  assert.equal(second?.paidCredits?.balance, 1234);
+
+  invalidateCodexQuotaCache(connectionId);
+});
+
+test("markQuotaPreflightAccountUnavailable does not persist a cooldown when quota is unavailable", async () => {
+  const connectionId = `codex-no-cooldown-${Date.now()}`;
+  const unavailableUntil = await markQuotaPreflightAccountUnavailable(
+    "codex",
+    connectionId,
+    { reason: "quota_unavailable" },
+    "gpt-6.1-sol"
+  );
+  assert.equal(unavailableUntil, null);
 });

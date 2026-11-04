@@ -1,0 +1,1 @@
+- **quota:** A Codex quota lookup that times out or fails now leaves the account's quota unknown instead of marking it exhausted, so the paid-credit preflight fails open and upstream billing/429 decides; the fetch timeout rises from 8s to 30s and can be tuned with `CODEX_QUOTA_FETCH_TIMEOUT_MS`

@@ -44,8 +44,29 @@ export {
 // Codex usage endpoint (same as usage.ts CODEX_CONFIG)
 const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
 
-// Cache TTL — short enough to be reactive, long enough to avoid rate limits
+// Cache TTL -- short enough to be reactive, long enough to avoid rate limits
 const CACHE_TTL_MS = 60_000; // 60 seconds
+
+// Max age for reusing a stale cached quota snapshot when fresh fetch fails or times out
+const MAX_STALE_CACHE_MS = 15 * 60_000; // 15 minutes
+
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
+
+export function getCodexQuotaFetchTimeoutMs(): number {
+  const raw = process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS;
+  if (raw !== undefined && raw !== null && raw.trim() !== "") {
+    const parsed = Number(raw.trim());
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return DEFAULT_REQUEST_TIMEOUT_MS;
+}
+
+function getUsableCachedQuota(cached: CacheEntry | undefined): CodexDualWindowQuota | null {
+  if (cached?.quota && Date.now() - cached.fetchedAt < MAX_STALE_CACHE_MS) {
+    return cached.quota;
+  }
+  return null;
+}
 
 // Per-account quota window info; structural slots exist only for known durations.
 export interface CodexDualWindowQuota extends QuotaInfo {
@@ -232,9 +253,9 @@ export async function fetchCodexQuota(
     const response = await fetchWithConnectionProxy(connectionId, CODEX_USAGE_URL, {
       method: "GET",
       headers,
-      signal: AbortSignal.timeout(8_000),
+      signal: AbortSignal.timeout(getCodexQuotaFetchTimeoutMs()),
     });
-    if (!response) return null;
+    if (!response) return getUsableCachedQuota(cached);
 
     if (!response.ok) {
       // Non-2xx: could be token expired or quota API down.
@@ -243,25 +264,26 @@ export async function fetchCodexQuota(
         // Token expired — remove from cache so next call re-fetches
         deleteQuotaCacheForConnection(connectionId);
         connectionRegistry.delete(connectionId);
+        return null;
       }
-      return null;
+      return getUsableCachedQuota(cached);
     }
 
     const data = await response.json();
     const quota = parseCodexUsageResponse(data, requestedModel);
 
-    if (!quota) return null;
+    if (!quota) return getUsableCachedQuota(cached);
 
     // Store in cache
-    if (!quotaCache.has(connectionId) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
+    if (!quotaCache.has(cacheKey) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
       const oldestCacheKey = quotaCache.keys().next().value;
       if (oldestCacheKey !== undefined) quotaCache.delete(oldestCacheKey);
     }
     quotaCache.set(cacheKey, { quota, fetchedAt: Date.now() });
     return quota;
   } catch {
-    // Network error, timeout, etc. — fail open
-    return null;
+    // Network error, timeout, etc. -- prefer stale cache if available, else fail open
+    return getUsableCachedQuota(cached);
   }
 }
 
@@ -324,3 +346,13 @@ export function registerCodexQuotaFetcher(): void {
     CODEX_SPARK_QUOTA_WEEKLY,
   ]);
 }
+
+export const __testing = {
+  ageCacheEntry(connectionIdOrKey: string, ageMs: number): void {
+    for (const [key, entry] of quotaCache) {
+      if (key === connectionIdOrKey || key.startsWith(`${connectionIdOrKey}:`)) {
+        quotaCache.set(key, { ...entry, fetchedAt: Date.now() - ageMs });
+      }
+    }
+  },
+};

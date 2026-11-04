@@ -2241,7 +2241,7 @@ export async function getProviderCredentialsWithQuotaPreflight(
         Number.isFinite(preflight.quotaPercent)
           ? ` at ${Math.round((preflight.quotaPercent as number) * 100)}%`
           : ""
-      } until ${unavailableUntil}`
+      }${unavailableUntil ? ` until ${unavailableUntil}` : " (no cooldown persisted)"}`
     );
   }
 }
