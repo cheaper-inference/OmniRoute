@@ -1,0 +1,1 @@
+- **fix(docs):** the docs layout no longer mounts the Fumadocs next-themes provider, whose `theme` storage key collided with the root theme store; a light/dark switch bound to the root theme store (and the `d` hotkey) replaces the Fumadocs one, so `/docs` follows the dashboard theme (#18612, refs #18078)
