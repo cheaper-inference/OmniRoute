@@ -210,6 +210,13 @@ function store(
   prune(now);
 }
 
+/** Store an unmodified first-seen prefix so later turns can compress only newly appended tools. */
+function storeRawPrefix(body: Record<string, unknown>, ctx: LiveZoneContext): CompressionResult {
+  const result: CompressionResult = { body, compressed: false, stats: null };
+  store(ctx.key, ctx.rawItemDigests, ctx.rawStableFieldsDigest, result, ctx.field, ctx.now, ctx.ttlMs);
+  return result;
+}
+
 function hasExactRawPrefix(rawItemDigests: string[], entry: LiveZoneEntry): boolean {
   if (rawItemDigests.length < entry.rawItemDigests.length) return false;
   for (let index = 0; index < entry.rawItemDigests.length; index++) {
