@@ -118,18 +118,18 @@ Wọlé sí i nípasẹ̀: WhatsApp, Telegram, Slack, Discord, iMessage, Signal.
 
 ---
 
-## 📖 Ìṣètò Olùpèsè
+## 📖 Ṣíṣètò Olùpèsè
 
-Láti ṣàfikún ọ̀pọ̀ ìsopọ̀ kọ́kọ́rọ́ API lẹ́ẹ̀kan náà láti inú fáìlì CSV tàbí JSON, lo **Pátákó ìṣàkóso → Àwọn Olùpèsè → Gbé wọlé láti inú fáìlì**. Ipò àwọn ọ̀wọ̀n ni a fi ń dá wọn mọ̀ (`provider,name,apiKey,baseUrl,priority`); `provider` gbọ́dọ̀ ti wà tẹ́lẹ̀ gẹ́gẹ́ bí olùpèsè tí a ń ṣàkóso tàbí node tó bá a mu. Wo [Gbé àwọn olùpèsè wọlé láti inú fáìlì CSV tàbí JSON](../providers/CSV-IMPORT.md).
+Láti fi àwọn ìsopọ̀ API-key púpọ̀ kún láti inú fáìlì CSV tàbí JSON, lo **Dashboard → Providers → Import from file**. Àwọn kọ́lámù jẹ́ ti ipò (`provider,name,apiKey,baseUrl,priority`); `provider` gbọ́dọ̀ ti wà tẹ́lẹ̀ gẹ́gẹ́ bí olùpèsè tí a ń ṣàkóso tàbí node tó bá mu. Wo [Gbólóhùn àwọn olùpèsè wọlé láti inú fáìlì CSV tàbí JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Àwọn Olùpèsè Alabapin
+### 🔐 Àwọn Olùpèsè Ìforúkọsílẹ̀
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Pátákó ìṣàkóso → Àwọn Olùpèsè → So Claude Code pọ̀
-→ Wọlé pẹ̀lú OAuth → Ìmúdójúìwọ̀n token aládàáṣe
-→ Títọpinpin iye-ààlà wákàtí 5 + ti ọ̀sẹ̀
+Dashboard → Providers → Sopọ̀ Claude Code
+→ Ìwọlé OAuth → Ìtúnṣe token aládàáṣiṣẹ́
+→ Ìtọ́pin quota wákàtí 5 + ọ̀sẹ̀
 
 Àwọn àwòṣe:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Pátákó ìṣàkóso → Àwọn Olùpèsè → So Claude Code pọ̀
   cc/claude-haiku-4-5-20251001
 ```
 
-**Ìmọ̀ràn Amọ̀ṣẹ́:** Lo Opus fún àwọn iṣẹ́ tó díjú, Sonnet fún iyára. OmniRoute ń tọpinpin iye-ààlà fún àwòṣe kọ̀ọ̀kan!
+**Ìmọ̀ràn Ọ̀jọ̀gbọ́n:** Lo Opus fún àwọn iṣẹ́ tó díjú, Sonnet fún ìyára. OmniRoute ń tọ́pin quota fún àwòṣe kọ̀ọ̀kan!
 
-Kò sí aṣàwákiri lórí ẹ̀rọ tó ń gbàlejò OmniRoute? Ṣiṣe `claude setup-token` ní ibikíbi tí a ti wọlé sí Claude Code, kí o sì lẹ token ọlọ́dún kan náà mọ́ inú taabu **Token Ìṣètò**. Wo [Claude Code pẹ̀lú token ìṣètò](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Kò sí aṣàwákiri lórí host OmniRoute? Ṣe `claude setup-token` ní ibikíbi tí Claude Code bá ti wọlé sí, kí o sì lẹ̀ token ọdún kan náà sínú taabu **Setup Token**. Wo [Claude Code pẹ̀lú setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Àwọn ipa-ọ̀nà tó bá Claude àti Claude Code mu máa ń pa ìsapá ìrònú `max` mọ́ fún àwọn àwòṣe Opus àti Sonnet. Àwọn àwòṣe Haiku kò gba ipele ìsapá `max`, nítorí náà OmniRoute máa ń sọ ìbéèrè náà kalẹ̀ sí ìnáwó ìrònú gíga kí ó tó fi ránṣẹ́ sí olùpèsè òkè.
+Àwọn ọ̀nà Claude àti àwọn ọ̀nà tó bá Claude Code mu máa ń pa ìsapá ìrònú `max` mọ́ fún àwọn
+àwòṣe Opus àti Sonnet. Àwọn àwòṣe Haiku kò gba ipele ìsapá `max`, nítorí náà OmniRoute máa ń dín
+ìbéèrè náà kù sí isuna ìrònú gíga kí ó tó rán an sí òkè.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Pátákó ìṣàkóso → Àwọn Olùpèsè → So Codex pọ̀
-→ Wọlé pẹ̀lú OAuth (port 1455)
-→ Àtúntò lẹ́yìn wákàtí 5 + lọ́sọ̀ọ̀sẹ̀
+Dashboard → Providers → Sopọ̀ Codex
+→ Ìwọlé OAuth (port 1455)
+→ Àtúntò wákàtí 5 + ọ̀sẹ̀
 
 Àwọn àwòṣe:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Pátákó ìṣàkóso → Àwọn Olùpèsè → So Codex pọ̀
 #### GitHub Copilot
 
 ```bash
-Pátákó ìṣàkóso → Àwọn Olùpèsè → So GitHub pọ̀
+Dashboard → Providers → Sopọ̀ GitHub
 → OAuth nípasẹ̀ GitHub
-→ Àtúntò oṣooṣù (ọjọ́ kìíní oṣù)
+→ Àtúntò lóṣù (ọjọ́ kìíní oṣù)
 
 Àwọn àwòṣe:
   gh/gpt-5.5
@@ -172,46 +174,62 @@ Pátákó ìṣàkóso → Àwọn Olùpèsè → So GitHub pọ̀
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Àwọn Olùpèsè Olówó Pọ́ọ́kú
+**Àwọn Kirẹditi AI (ìsanwó tó dá lórí token).** Nígbà tí GitHub bá ròyìn `credits_used` fún
+àkọọ́lẹ̀ náà, káàdì Ààlà Olùpèsè máa ń fi ìlà **AI Credits** hàn pẹ̀lú iye àwọn kirẹditi
+tí a ti lò ní àkókò ìsanwó tó wà lọ́wọ́, títí kan lórí àwọn ètò àjọ tí kò ní ààlà.
 
-#### GLM-4.7 (Àtúntò ojoojúmọ́, $0.6/1M)
+**Ààlà Kirẹditi AI ti agbègbè.** Ṣàtúnṣe ìsopọ̀ GitHub kan kí o sì ṣètò **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Fífì sílẹ̀ láìkún un máa ń pa á; `0`
+máa ń fo ìsopọ̀ náà kọjá ní gbogbo ìgbà. Nígbà tí ìkàwé lílo tó kẹ́yìn bá dé ààlà tàbí ti kọjá rẹ̀,
+yíyan àkọọ́lẹ̀ máa ń fo ìsopọ̀ náà kọjá, ìtọ́sọ́nà sì máa ń padà sí àwọn ìsopọ̀ rẹ mìíràn, gẹ́gẹ́ bí
+àbájáde gige ìlànà quota. Àyẹ̀wò náà máa ń ka lílo tí ìtúnṣe quota àkókò ti kó jọ tẹ́lẹ̀ — kò
+pe GitHub rárá ní ọ̀nà ìbéèrè — ó sì máa ń gba ìsopọ̀ láyè nígbà tí ìwífún bá sọnù tàbí tí ó ti pẹ́
+(tó ti ju ìṣẹ́jú 15 lọ, tàbí tí ó wá láti àkókò ìsanwó tí ó ti tún bẹ̀rẹ̀). Èyí jẹ́ ìdábòbò agbègbè,
+**kì í ṣe ààlà inawo tí a lè fi dájú**: ìdádúró nínú ríròyìn GitHub, àárín ìtúnṣe, àwọn ìbéèrè tó ń lọ
+lọ́wọ́ àti lílo tí ó wáyé lẹ́yìn OmniRoute lè mú kí ó kọjá ààlà náà. Lo àwọn ìṣàkóso inawo GitHub
+funra rẹ fún ààlà líle.
+
+### 💰 Àwọn Olùpèsè Aláìnáwó
+
+#### GLM-4.7 (àtúntò ojoojúmọ́, $0.6/1M)
 
 1. Forúkọsílẹ̀: [Zhipu AI](https://open.bigmodel.cn)
-2. Gba kọ́kọ́rọ́ API láti Coding Plan
-3. Pátákó ìṣàkóso → Ṣàfikún Kọ́kọ́rọ́ API: Olùpèsè: `glm`, Kọ́kọ́rọ́ API: `your-key`
+2. Gba API key láti inú Coding Plan
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Lò ó:** `glm/glm-4.7` — **Ìmọ̀ràn Amọ̀ṣẹ́:** Coding Plan ń fúnni ní iye-ààlà 3× ní 1/7 iye owó! Ó máa ń tún ara rẹ̀ tò ní 10:00 àárọ̀ ojoojúmọ́.
+**Lò:** `glm/glm-4.7` — **Ìmọ̀ràn Ọ̀jọ̀gbọ́n:** Coding Plan ń fúnni ní quota 3× pẹ̀lú iye owó 1/7! Àtúntò ní gbogbo ọjọ́ ní 10:00 AM.
 
-#### MiniMax M2.1 (Àtúntò wákàtí 5, $0.20/1M)
+#### MiniMax M2.1 (àtúntò wákàtí 5, $0.20/1M)
 
 1. Forúkọsílẹ̀: [MiniMax](https://www.minimax.io)
-2. Gba kọ́kọ́rọ́ API → Pátákó ìṣàkóso → Ṣàfikún Kọ́kọ́rọ́ API
+2. Gba API key → Dashboard → Add API Key
 
-**Lò ó:** `minimax/MiniMax-M2.1` — **Ìmọ̀ràn Amọ̀ṣẹ́:** Èyí ni àṣàyàn tó din owó jù fún àyíká ọ̀rọ̀ gígùn (token mílíọ̀nù 1)!
+**Lò:** `minimax/MiniMax-M2.1` — **Ìmọ̀ràn Ọ̀jọ̀gbọ́n:** Aṣàyàn tó din jù fún àkóónú gígùn (token 1M)!
 
-#### Kimi K2 ($9/oṣù láìyípadà)
+#### Kimi K2 ($9/osù ní iye péré)
 
-1. Di alabapin: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Gba kọ́kọ́rọ́ API → Pátákó ìṣàkóso → Ṣàfikún Kọ́kọ́rọ́ API
+1. Forúkọsílẹ̀: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Gba API key → Dashboard → Add API Key
 
-**Lò ó:** `kimi/kimi-k2.5` — **Ìmọ̀ràn Amọ̀ṣẹ́:** $9/oṣù láìyípadà fún token mílíọ̀nù 10 = iye owó gidi $0.90/1M!
+**Lò:** `kimi/kimi-k2.5` — **Ìmọ̀ràn Ọ̀jọ̀gbọ́n:** $9/osù péré fún token 10M = iye tó munadoko $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Forúkọsílẹ̀: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Ṣẹ̀dá kọ́kọ́rọ́ API Qianfan → Pátákó ìṣàkóso → Ṣàfikún Kọ́kọ́rọ́ API: Olùpèsè: `qianfan`
+2. Ṣẹ̀dá Qianfan API key → Dashboard → Add API Key: Provider: `qianfan`
 
-**Lò ó:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, tàbí ID àwòṣe Qianfan mìíràn tó bá OpenAI mu.
+**Lò:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, tàbí ID àwòṣe Qianfan OpenAI-compatible mìíràn.
 
 ### 🆓 Àwọn Olùpèsè Ọ̀FẸ́
 
-Àwọn olùpèsè ọ̀fẹ́ tí kò nílò ìfàṣẹ̀sí ní bọ́tìnì ìtan-an/pípa lẹ́gbẹ̀ẹ́ **Kò nílò ìfàṣẹ̀sí** lójú-ìwé olùpèsè wọn.
-Pípa á máa mú olùpèsè náà ṣiṣẹ́ mọ́, yóò yọ ọ́ kúrò nínú àwọn ìríran olùpèsè tí a ti ṣètò/ṣókí, yóò sì yọ àwọn àwòṣe rẹ̀ kúrò ní `/v1/models`.
+Àwọn olùpèsè ọ̀fẹ́ tí kò nílò ìfọwọ́sí ní switch kan lẹ́gbẹ̀ẹ́ **No authentication required** lórí ojú-ìwé olùpèsè wọn.
+Pípà á máa ń mú olùpèsè náà ṣiṣẹ́ kúrò, ó máa ń yọ ọ́ kúrò nínú àwọn ìwòye Providers configured/compact,
+ó sì máa ń yọ àwọn àwòṣe rẹ̀ kúrò nínú `/v1/models`.
 
-#### Qoder (Àwòṣe Ọ̀FẸ́ 9)
+#### Qoder (àwòṣe Ọ̀FẸ́ 9)
 
 ```bash
-Pátákó ìṣàkóso → So Qoder pọ̀ → Wọlé pẹ̀lú OAuth → Ìráyè sinmi lórí àwọn ààlà olùpèsè lọ́wọ́lọ́wọ́
+Dashboard → Sopọ̀ Qoder → Ìwọlé OAuth → Àwọn ààlà olùpèsè tó wà lọ́wọ́ ló ń pinnu ìráyè
 
 Àwọn àwòṣe: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -219,7 +237,7 @@ Pátákó ìṣàkóso → So Qoder pọ̀ → Wọlé pẹ̀lú OAuth → Ìrá
 #### Kiro (Claude Ọ̀FẸ́)
 
 ```bash
-Pátákó ìṣàkóso → So Kiro pọ̀ → AWS Builder ID tàbí Google/GitHub → ~50 kírẹ́díìtì/oṣù
+Dashboard → Sopọ̀ Kiro → AWS Builder ID tàbí Google/GitHub → nǹkan bí kirẹditi 50/osù
 
 Àwọn àwòṣe: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

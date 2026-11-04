@@ -118,17 +118,17 @@ Ufikiaji kupitia: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Usanidi wa Watoa Huduma
+## 📖 Usanidi wa Mtoa Huduma
 
-Ili kuongeza kwa wingi miunganisho ya funguo za API kutoka kwenye faili la CSV au JSON, tumia **Dashibodi → Watoa Huduma → Leta kutoka kwenye faili**. Safu wima hufuata mpangilio maalum (`provider,name,apiKey,baseUrl,priority`); `provider` lazima iwe tayari ipo kama mtoa huduma anayesimamiwa au nodi inayooana. Tazama [Kuleta watoa huduma kutoka kwenye faili la CSV au JSON](../providers/CSV-IMPORT.md).
+Ili kuongeza kwa wingi miunganisho ya funguo za API kutoka kwenye faili la CSV au JSON, tumia **Dashboard → Providers → Import from file**. Safu wima hutegemea mpangilio (`provider,name,apiKey,baseUrl,priority`); `provider` lazima awe tayari mtoa huduma anayesimamiwa au nodi inayooana. Tazama [Leta watoa huduma kutoka kwenye faili la CSV au JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Watoa Huduma wa Usajili
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha Claude Code
-→ Kuingia kwa OAuth → Uonyeshaji upya wa tokeni kiotomatiki
+Dashboard → Providers → Connect Claude Code
+→ Kuingia kupitia OAuth → Usasishaji otomatiki wa tokeni
 → Ufuatiliaji wa mgao wa saa 5 + wa kila wiki
 
 Miundo:
@@ -137,18 +137,20 @@ Miundo:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Kidokezo cha Kitaalamu:** Tumia Opus kwa kazi changamano, na Sonnet kwa kasi. OmniRoute hufuatilia mgao kwa kila muundo!
+**Dokezo la kitaalamu:** Tumia Opus kwa kazi changamano, na Sonnet kwa kasi. OmniRoute hufuatilia mgao kwa kila modeli!
 
-Hakuna kivinjari kwenye seva pangishi ya OmniRoute? Endesha `claude setup-token` mahali popote ambapo Claude Code imeingia, kisha ubandike tokeni ya mwaka mmoja kwenye kichupo cha **Setup Token**. Tazama [Claude Code kwa kutumia tokeni ya usanidi](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Je, huna kivinjari kwenye mwenyeji wa OmniRoute? Tekeleza `claude setup-token` mahali popote Claude Code ilipoingia na ubandike tokeni ya mwaka mmoja kwenye kichupo cha **Setup Token**. Tazama [Claude Code yenye tokeni ya usanidi](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Njia zinazooana na Claude na Claude Code huhifadhi kiwango cha juhudi ya kufikiri cha `max` kwa miundo ya Opus na Sonnet. Miundo ya Haiku haikubali kiwango cha juhudi cha `max`, kwa hivyo OmniRoute hushusha ombi hilo hadi kwenye bajeti ya juu ya kufikiri kabla ya kulituma kwa mtoa huduma wa juu.
+Njia zinazooana na Claude na Claude Code huhifadhi juhudi za kufikiri za `max` kwa
+miundo ya Opus na Sonnet. Miundo ya Haiku haikubali kiwango cha juhudi cha `max`, hivyo OmniRoute hushusha
+ombi hilo hadi bajeti ya juu ya kufikiri kabla ya kulituma kwenye huduma ya juu.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha Codex
-→ Kuingia kwa OAuth (bandari 1455)
-→ Uwekaji upya baada ya saa 5 + kila wiki
+Dashboard → Providers → Connect Codex
+→ Kuingia kupitia OAuth (bandari 1455)
+→ Kuweka upya baada ya saa 5 + kila wiki
 
 Miundo:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Miundo:
 #### GitHub Copilot
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth kupitia GitHub
-→ Uwekaji upya wa kila mwezi (tarehe 1 ya mwezi)
+→ Kuweka upya kila mwezi (tarehe 1 ya mwezi)
 
 Miundo:
   gh/gpt-5.5
@@ -172,47 +174,63 @@ Miundo:
   gh/gemini-3.1-pro-preview
 ```
 
+**Mikopo ya AI (utozaji unaotegemea tokeni).** GitHub inaporipoti `credits_used` kwa
+akaunti, kadi ya Mipaka ya Mtoa Huduma huonyesha safu ya **Mikopo ya AI** yenye mikopo
+iliyotumika katika kipindi cha sasa cha utozaji, hata kwenye mipango ya mashirika isiyo na kikomo.
+
+**Kikomo cha ndani cha Mikopo ya AI.** Hariri muunganisho wa GitHub na uweke **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Kuacha wazi kunakizima; `0`
+huruka muunganisho huo kila wakati. Usomaji wa mwisho wa matumizi unapokuwa sawa na au juu ya kikomo,
+uteuzi wa akaunti huruka muunganisho huo na uelekezaji hurudi kwenye miunganisho yako mingine,
+kwa njia ileile ambayo ukomo wa sera ya mgao hufanya. Ukaguzi huu husoma matumizi ambayo
+usasishaji wa mara kwa mara wa mgao tayari hukusanya — hauiiti GitHub kwenye njia ya ombi —
+na huruhusu muunganisho endapo hakuna kizuizi: usomaji ambao haupo au umechakaa (wa zaidi ya dakika 15,
+au kutoka kwenye kipindi cha utozaji ambacho tayari kiliwekwa upya) hauzuii muunganisho. Hii ni kinga ya ndani,
+**si dari ya matumizi iliyohakikishwa**: ucheleweshaji wa ripoti za GitHub, muda wa kusasisha,
+maombi yanayoendelea na matumizi nje ya OmniRoute vinaweza kuzidi kikomo hicho. Tumia vidhibiti
+vya matumizi vya GitHub kwa kikomo kisichoweza kuzidi.
+
 ### 💰 Watoa Huduma wa Bei Nafuu
 
-#### GLM-4.7 (Uwekaji upya wa kila siku, $0.6/1M)
+#### GLM-4.7 (Hujiweka upya kila siku, $0.6/1M)
 
 1. Jisajili: [Zhipu AI](https://open.bigmodel.cn)
-2. Pata ufunguo wa API kutoka Coding Plan
-3. Dashibodi → Ongeza Ufunguo wa API: Mtoa Huduma: `glm`, Ufunguo wa API: `your-key`
+2. Pata ufunguo wa API kutoka kwenye Coding Plan
+3. Dashboard → Add API Key: Mtoa huduma: `glm`, Ufunguo wa API: `your-key`
 
-**Matumizi:** `glm/glm-4.7` — **Kidokezo cha Kitaalamu:** Coding Plan hutoa mgao mara 3 kwa gharama ya 1/7! Huwekwa upya kila siku saa 10:00 asubuhi.
+**Tumia:** `glm/glm-4.7` — **Dokezo la kitaalamu:** Coding Plan inatoa mgao mara 3 kwa 1/7 ya gharama! Hujiweka upya kila siku saa 10:00 AM.
 
-#### MiniMax M2.1 (Uwekaji upya baada ya saa 5, $0.20/1M)
+#### MiniMax M2.1 (Hujiweka upya baada ya saa 5, $0.20/1M)
 
 1. Jisajili: [MiniMax](https://www.minimax.io)
-2. Pata ufunguo wa API → Dashibodi → Ongeza Ufunguo wa API
+2. Pata ufunguo wa API → Dashboard → Add API Key
 
-**Matumizi:** `minimax/MiniMax-M2.1` — **Kidokezo cha Kitaalamu:** Chaguo la bei nafuu zaidi kwa muktadha mrefu (tokeni 1M)!
+**Tumia:** `minimax/MiniMax-M2.1` — **Dokezo la kitaalamu:** Chaguo la bei nafuu zaidi kwa muktadha mrefu (tokeni milioni 1)!
 
-#### Kimi K2 ($9/mwezi kwa kiwango kisichobadilika)
+#### Kimi K2 ($9/mwezi bila kubadilika)
 
 1. Jisajili: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Pata ufunguo wa API → Dashibodi → Ongeza Ufunguo wa API
+2. Pata ufunguo wa API → Dashboard → Add API Key
 
-**Matumizi:** `kimi/kimi-k2.5` — **Kidokezo cha Kitaalamu:** Kiwango kisichobadilika cha $9/mwezi kwa tokeni 10M = gharama halisi ya $0.90/1M!
+**Tumia:** `kimi/kimi-k2.5` — **Dokezo la kitaalamu:** $9/mwezi bila kubadilika kwa tokeni milioni 10 = gharama halisi ya $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Jisajili: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Unda ufunguo wa API wa Qianfan → Dashibodi → Ongeza Ufunguo wa API: Mtoa Huduma: `qianfan`
+2. Unda ufunguo wa API wa Qianfan → Dashboard → Add API Key: Mtoa huduma: `qianfan`
 
-**Matumizi:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, au kitambulisho kingine cha muundo wa Qianfan kinachooana na OpenAI.
+**Tumia:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, au kitambulisho kingine cha modeli kinachooana na OpenAI cha Qianfan.
 
 ### 🆓 Watoa Huduma BILA MALIPO
 
-Watoa huduma wasiolipishwa ambao hawahitaji uthibitishaji wana swichi kando ya **Hakuna uthibitishaji unaohitajika** kwenye ukurasa wao wa mtoa huduma.
-Kuizima humlemaza mtoa huduma huyo, humwondoa kwenye mionekano ya Watoa Huduma iliyosanidiwa/iliyofupishwa, na
-huondoa miundo yake kutoka `/v1/models`.
+Watoa huduma wasiolipishwa wasiohitaji uthibitishaji wana swichi iliyo kando ya **No authentication required** kwenye ukurasa wao wa mtoa huduma.
+Kuizima humlemaza mtoa huduma huyo, humwondoa kwenye mwonekano wa Watoa Huduma waliowekwa/configured na wa kubana/compact,
+na huondoa miundo yake kwenye `/v1/models`.
 
 #### Qoder (miundo 9 BILA MALIPO)
 
 ```bash
-Dashibodi → Unganisha Qoder → Kuingia kwa OAuth → Ufikiaji unategemea vikomo vya sasa vya mtoa huduma
+Dashboard → Connect Qoder → Kuingia kupitia OAuth → Ufikiaji unategemea mipaka ya sasa ya mtoa huduma
 
 Miundo: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +238,7 @@ Miundo: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/
 #### Kiro (Claude BILA MALIPO)
 
 ```bash
-Dashibodi → Unganisha Kiro → AWS Builder ID au Google/GitHub → ~salio 50/mwezi
+Dashboard → Connect Kiro → AWS Builder ID au Google/GitHub → takriban mikopo 50/mwezi
 
 Miundo: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

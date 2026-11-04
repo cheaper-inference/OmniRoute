@@ -120,15 +120,15 @@
 
 ## 📖 የአቅራቢ ማዋቀር
 
-ከCSV ወይም JSON ፋይል ብዙ API-key ግንኙነቶችን በአንድ ጊዜ ለመጨመር፣ **Dashboard → Providers → Import from file** ይጠቀሙ። ዓምዶቹ በቦታ ቅደም ተከተል ይወሰናሉ (`provider,name,apiKey,baseUrl,priority`)፤ `provider` አስቀድሞ እንደሚተዳደር አቅራቢ ወይም ተኳሃኝ ኖድ መኖር አለበት። [አቅራቢዎችን ከCSV ወይም JSON ፋይል ማስመጣት](../providers/CSV-IMPORT.md)ን ይመልከቱ።
+ከCSV ወይም JSON ፋይል የAPI ቁልፍ ግንኙነቶችን በጅምላ ለመጨመር **Dashboard → Providers → Import from file** ይጠቀሙ። ዓምዶቹ በቦታ ተመድበዋል (`provider,name,apiKey,baseUrl,priority`)፤ `provider` እንደ የሚተዳደር አቅራቢ ወይም ተኳሃኝ ኖድ አስቀድሞ መኖር አለበት። [አቅራቢዎችን ከCSV ወይም JSON ፋይል አስመጣ](../providers/CSV-IMPORT.md) ይመልከቱ።
 
-### 🔐 የደንበኝነት ምዝገባ አቅራቢዎች
+### 🔐 የምዝገባ አቅራቢዎች
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Claude Codeን ያገናኙ
-→ በOAuth ይግቡ → ቶከን በራስ-ሰር ይታደሳል
+Dashboard → Providers → Connect Claude Code
+→ የOAuth መግቢያ → ራስ-ሰር የቶከን እድሳት
 → የ5 ሰዓት + ሳምንታዊ ኮታ ክትትል
 
 ሞዴሎች:
@@ -137,19 +137,20 @@ Dashboard → Providers → Claude Codeን ያገናኙ
   cc/claude-haiku-4-5-20251001
 ```
 
-**የባለሙያ ምክር:** ለውስብስብ ተግባራት Opusን፣ ለፍጥነት Sonnetን ይጠቀሙ። OmniRoute ኮታውን በየሞዴሉ ይከታተላል!
+**የባለሙያ ምክር፦** ለውስብስብ ሥራዎች Opus፣ ለፍጥነት Sonnet ይጠቀሙ። OmniRoute ኮታን በሞዴል ይከታተላል!
 
-በOmniRoute ሆስት ላይ ብራውዘር የለም? Claude Code በገባበት በማንኛውም ቦታ `claude setup-token`ን ያስኪዱና የአንድ ዓመቱን ቶከን በ**Setup Token** ትር ውስጥ ይለጥፉ። [Claude Codeን በsetup token መጠቀም](../providers/CLAUDE_CODE_SETUP_TOKEN.md)ን ይመልከቱ።
+በOmniRoute አስተናጋጅ ላይ አሳሽ የለም? Claude Code የገባበትን ቦታ ሁሉ `claude setup-token` ያስኪዱና የአንድ ዓመት ቶከኑን ወደ **Setup Token** ትር ይለጥፉ። [Claude Code ከማዋቀሪያ ቶከን ጋር](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ይመልከቱ።
 
 ከClaude እና Claude Code ጋር ተኳሃኝ የሆኑ መስመሮች ለOpus እና Sonnet
-ሞዴሎች የ`max` የማሰብ ጥረትን እንዳለ ያቆያሉ። Haiku ሞዴሎች የ`max` ጥረት ደረጃን አይቀበሉም፤ ስለዚህ OmniRoute
-ጥያቄውን ወደ ላይኛው አቅራቢ ከመላኩ በፊት ወደ ከፍተኛ የማሰብ በጀት ዝቅ ያደርገዋል።
+ሞዴሎች `max` የአስተሳሰብ ጥረትን እንደተጠበቀ ያስቀምጣሉ። የHaiku ሞዴሎች
+የ`max` ጥረት ደረጃን አይቀበሉም፤ ስለዚህ OmniRoute ይህን ጥያቄ
+ወደ ከፍተኛ የአስተሳሰብ በጀት ዝቅ አድርጎ ወደ ላይኛው አገልግሎት ይልከዋል።
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Codexን ያገናኙ
-→ በOAuth ይግቡ (port 1455)
+Dashboard → Providers → Connect Codex
+→ የOAuth መግቢያ (ፖርት 1455)
 → የ5 ሰዓት + ሳምንታዊ ዳግም ማስጀመር
 
 ሞዴሎች:
@@ -162,9 +163,9 @@ Dashboard → Providers → Codexን ያገናኙ
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → GitHubን ያገናኙ
+Dashboard → Providers → Connect GitHub
 → በGitHub በኩል OAuth
-→ ወርሃዊ ዳግም ማስጀመር (በየወሩ 1ኛ ቀን)
+→ ወርሃዊ ዳግም ማስጀመር (በወሩ 1ኛ ቀን)
 
 ሞዴሎች:
   gh/gpt-5.5
@@ -174,55 +175,74 @@ Dashboard → Providers → GitHubን ያገናኙ
   gh/gemini-3.1-pro-preview
 ```
 
+**የAI ክሬዲቶች (በቶከን ላይ የተመሠረተ ክፍያ)።** GitHub ለመለያው
+`credits_used` ሲያሳውቅ፣ የአቅራቢ ገደቦች ካርዱ በአሁኑ የክፍያ ጊዜ ውስጥ
+የተጠቀሙትን ክሬዲቶች የሚያሳይ **የAI ክሬዲቶች** ረድፍ ያሳያል፤ ይህም
+ያልተገደቡ የድርጅት ዕቅዶችን ጨምሮ ይሠራል።
+
+**የአካባቢ የAI ክሬዲቶች ገደብ።** የGitHub ግንኙነትን ያርትዑና **በክፍያ
+ጊዜ ውስጥ የAI ክሬዲቶች ገደብ** (`providerSpecificData.githubCreditLimit`) ያዘጋጁ።
+ባዶ ከሆነ ያሰናክለዋል፤ `0` ከሆነ ግንኙነቱን ሁልጊዜ ይዘላል። የመጨረሻው
+የአጠቃቀም ንባብ ከገደቡ ጋር እኩል ወይም ከዚያ በላይ ሲሆን፣ የመለያ ምርጫ
+ይህን ግንኙነት ይዘላል፤ መስመራዊ ማድረግም ወደ ሌሎች ግንኙነቶችዎ ይመለሳል፣
+ልክ እንደ የኮታ ፖሊሲ መቁረጫ። ምርመራው በየጊዜው የኮታ እድሳት ቀድሞ
+የሚሰበስበውን አጠቃቀም ያነባል — በጥያቄ መንገድ ላይ GitHubን በፍጹም
+አይጠራም — እንዲሁም በክፍት ሁኔታ ይሰራል፦ የጎደለ ወይም ያረጀ ንባብ
+(ከ15 ደቂቃ በላይ የሆነ፣ ወይም ቀድሞ ዳግም ከተጀመረ የክፍያ ጊዜ የመጣ)
+ግንኙነቱን አይከለክልም። ይህ የአካባቢ ጥበቃ ዘዴ እንጂ **የተረጋገጠ
+የወጪ ጣሪያ አይደለም**፤ የGitHub ሪፖርት መዘግየቶች፣ የእድሳት ጊዜ ልዩነት፣
+በሂደት ላይ ያሉ ጥያቄዎች እና ከOmniRoute ውጭ ያለ አጠቃቀም ከዚህ ሊበልጡ
+ይችላሉ። ጠንካራ ገደብ ለማድረግ የGitHub የራሱን የወጪ ቁጥጥሮች ይጠቀሙ።
+
 ### 💰 ርካሽ አቅራቢዎች
 
 #### GLM-4.7 (በየቀኑ ዳግም ማስጀመር፣ $0.6/1M)
 
 1. ይመዝገቡ፦ [Zhipu AI](https://open.bigmodel.cn)
-2. ከCoding Plan API key ያግኙ
-3. Dashboard → Add API Key፦ Provider፦ `glm`፣ API Key፦ `your-key`
+2. ከCoding Plan የAPI ቁልፍ ያግኙ
+3. Dashboard → Add API Key: አቅራቢ፦ `glm`፣ API ቁልፍ፦ `your-key`
 
-**አጠቃቀም:** `glm/glm-4.7` — **የባለሙያ ምክር:** Coding Plan በ1/7 ወጪ 3× ኮታ ይሰጣል! በየቀኑ 10:00 AM ዳግም ይጀምራል።
+**አጠቃቀም፦** `glm/glm-4.7` — **የባለሙያ ምክር፦** Coding Plan በ1/7 ወጪ 3× ኮታ ያቀርባል! በየቀኑ 10:00 AM ዳግም ይጀምራል።
 
 #### MiniMax M2.1 (በ5 ሰዓት ዳግም ማስጀመር፣ $0.20/1M)
 
 1. ይመዝገቡ፦ [MiniMax](https://www.minimax.io)
-2. API key ያግኙ → Dashboard → Add API Key
+2. የAPI ቁልፍ ያግኙ → Dashboard → Add API Key
 
-**አጠቃቀም:** `minimax/MiniMax-M2.1` — **የባለሙያ ምክር:** ለረጅም አውድ (1M ቶከኖች) በጣም ርካሹ አማራጭ ነው!
+**አጠቃቀም፦** `minimax/MiniMax-M2.1` — **የባለሙያ ምክር፦** ለረጅም አውድ (1M ቶከኖች) በጣም ርካሹ አማራጭ ነው!
 
-#### Kimi K2 (ቋሚ $9/ወር)
+#### Kimi K2 ($9/ወር ቋሚ)
 
 1. ይመዝገቡ፦ [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key ያግኙ → Dashboard → Add API Key
+2. የAPI ቁልፍ ያግኙ → Dashboard → Add API Key
 
-**አጠቃቀም:** `kimi/kimi-k2.5` — **የባለሙያ ምክር:** ለ10M ቶከኖች ቋሚ $9/ወር = በተግባር $0.90/1M ወጪ!
+**አጠቃቀም፦** `kimi/kimi-k2.5` — **የባለሙያ ምክር፦** ለ10M ቶከኖች ቋሚ $9/ወር = በተግባር $0.90/1M ወጪ!
 
 #### Baidu Qianfan / ERNIE
 
 1. ይመዝገቡ፦ [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. የQianfan API key ይፍጠሩ → Dashboard → Add API Key፦ Provider፦ `qianfan`
+2. የQianfan API ቁልፍ ይፍጠሩ → Dashboard → Add API Key: አቅራቢ፦ `qianfan`
 
-**አጠቃቀም:** `qianfan/ernie-5.1`፣ `qianfan/ernie-x1.1`፣ ወይም ሌላ ከQianfan OpenAI ጋር ተኳሃኝ የሆነ የሞዴል ID።
+**አጠቃቀም፦** `qianfan/ernie-5.1`፣ `qianfan/ernie-x1.1`፣ ወይም ሌላ ከQianfan ጋር ተኳሃኝ የOpenAI ሞዴል ID።
 
 ### 🆓 ነፃ አቅራቢዎች
 
-ማረጋገጫ የማይፈልጉ ነፃ አቅራቢዎች በአቅራቢ ገጻቸው ላይ ከ**No authentication required** ጎን መቀየሪያ አላቸው።
-ማጥፋት ያንን አቅራቢ ያሰናክላል፣ ከProviders የተዋቀሩ/የታመቁ እይታዎች ያስወግደዋል፣ እንዲሁም
-ሞዴሎቹን ከ`/v1/models` ያስወግዳል።
+ማረጋገጫ የማይፈልጉ ነፃ አቅራቢዎች በአቅራቢ ገጻቸው ላይ **ማረጋገጫ አያስፈልግም** ከሚለው አጠገብ መቀያየሪያ አላቸው።
+ይህን ማጥፋት አቅራቢውን ያሰናክላል፣ ከተዋቀሩ አቅራቢዎች/አጭር እይታዎች ያስወግደዋል፣
+እንዲሁም ሞዴሎቹን ከ`/v1/models` ያስወግዳል።
 
 #### Qoder (9 ነፃ ሞዴሎች)
 
 ```bash
-Dashboard → Qoderን ያገናኙ → በOAuth ይግቡ → መዳረሻው አሁን ባሉት የአቅራቢው ገደቦች ይወሰናል
+Dashboard → Connect Qoder → የOAuth መግቢያ → መዳረሻው አሁን ባሉ የአቅራቢው ገደቦች ይወሰናል
 
 ሞዴሎች: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude በነፃ)
+#### Kiro (Claude ነፃ)
 
 ```bash
-Dashboard → Kiroን ያገናኙ → AWS Builder ID ወይም Google/GitHub → ~50 ክሬዲቶች/ወር
+Dashboard → Connect Kiro → AWS Builder ID ወይም Google/GitHub → በወር ወደ 50 ክሬዲቶች
 
 ሞዴሎች: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

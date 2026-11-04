@@ -118,17 +118,17 @@
 
 ---
 
-## 📖 제공자 설정
+## 📖 프로바이더 설정
 
-CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **대시보드 → 제공자 → 파일에서 가져오기**를 사용하세요. 열은 위치에 따라 구분됩니다(`provider,name,apiKey,baseUrl,priority`). `provider`는 관리형 제공자 또는 호환 노드로 이미 존재해야 합니다. [CSV 또는 JSON 파일에서 제공자 가져오기](../providers/CSV-IMPORT.md)를 참조하세요.
+CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **Dashboard → Providers → Import from file**을 사용하세요. 열은 위치에 따라 지정됩니다(`provider,name,apiKey,baseUrl,priority`). `provider`는 관리형 프로바이더 또는 호환 가능한 노드로 이미 존재해야 합니다. [CSV 또는 JSON 파일에서 프로바이더 가져오기](../providers/CSV-IMPORT.md)를 참조하세요.
 
-### 🔐 구독 제공자
+### 🔐 구독 프로바이더
 
 #### Claude Code (Pro/Max)
 
 ```bash
-대시보드 → 제공자 → Claude Code 연결
-→ OAuth 로그인 → 자동 토큰 갱신
+Dashboard → Providers → Connect Claude Code
+→ OAuth 로그인 → 토큰 자동 갱신
 → 5시간 + 주간 할당량 추적
 
 모델:
@@ -137,17 +137,20 @@ CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **대시�
   cc/claude-haiku-4-5-20251001
 ```
 
-**전문가 팁:** 복잡한 작업에는 Opus를, 속도가 중요할 때는 Sonnet을 사용하세요. OmniRoute는 모델별 할당량을 추적합니다!
+**Pro 팁:** 복잡한 작업에는 Opus를, 속도에는 Sonnet을 사용하세요. OmniRoute는 모델별로 할당량을 추적합니다!
 
-OmniRoute 호스트에 브라우저가 없나요? Claude Code에 로그인된 환경 어디에서든 `claude setup-token`을 실행하고 1년 유효 토큰을 **설정 토큰** 탭에 붙여 넣으세요. [설정 토큰으로 Claude Code 사용하기](../providers/CLAUDE_CODE_SETUP_TOKEN.md)를 참조하세요.
+OmniRoute 호스트에 브라우저가 없나요? Claude Code가 로그인된 어느 곳에서든 `claude setup-token`을 실행한 다음, 1년 토큰을 **Setup Token** 탭에 붙여넣으세요. [설정 토큰으로 Claude Code 사용하기](../providers/CLAUDE_CODE_SETUP_TOKEN.md)를 참조하세요.
 
-Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 노력을 유지합니다. Haiku 모델은 `max` 노력 단계를 허용하지 않으므로 OmniRoute는 요청을 업스트림으로 보내기 전에 높은 사고 예산으로 하향 조정합니다.
+Claude 및 Claude Code 호환 라우트는 Opus 및 Sonnet
+모델에 대해 `max` 사고 노력을 유지합니다. Haiku 모델은 `max` 노력 단계를
+허용하지 않으므로 OmniRoute는 업스트림으로 전송하기 전에 해당 요청을 높은 사고
+예산으로 낮춥니다.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-대시보드 → 제공자 → Codex 연결
-→ OAuth 로그인(포트 1455)
+Dashboard → Providers → Connect Codex
+→ OAuth 로그인 (포트 1455)
 → 5시간 + 주간 초기화
 
 모델:
@@ -160,9 +163,9 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
 #### GitHub Copilot
 
 ```bash
-대시보드 → 제공자 → GitHub 연결
+Dashboard → Providers → Connect GitHub
 → GitHub를 통한 OAuth
-→ 매월 초기화(매월 1일)
+→ 월간 초기화 (매월 1일)
 
 모델:
   gh/gpt-5.5
@@ -172,47 +175,49 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 저렴한 제공자
+**AI Credits(토큰 기반 청구).** GitHub가 계정에 대해 `credits_used`를 보고하면 Provider Limits 카드에 현재 청구 기간 동안 사용한 크레딧을 표시하는 **AI Credits** 행이 나타납니다. 무제한 조직 요금제에서도 표시됩니다.
+
+**로컬 AI Credits 한도.** GitHub 연결을 편집하고 **청구 기간별 AI Credits 한도**(`providerSpecificData.githubCreditLimit`)를 설정하세요. 비워 두면 비활성화되며, `0`으로 설정하면 항상 해당 연결을 건너뜁니다. 마지막 사용량 측정값이 한도 이상이면 계정 선택에서 해당 연결을 건너뛰고, 할당량 정책 차단과 동일하게 라우팅이 다른 연결로 대체됩니다. 이 확인은 주기적인 할당량 새로 고침에서 이미 수집하는 사용량을 읽으므로 요청 경로에서 GitHub를 호출하지 않습니다. 또한 fail-open 방식으로 동작합니다. 즉, 측정값이 없거나 오래된 경우(15분 초과 또는 이미 초기화된 청구 기간의 측정값)에는 연결을 차단하지 않습니다. 이는 로컬 안전장치이며, **지출 한도를 보장하는 기능이 아닙니다**. GitHub의 보고 지연, 새로 고침 간격, 진행 중인 요청 및 OmniRoute 외부에서 발생한 사용량으로 인해 한도를 초과할 수 있습니다. 확실한 상한이 필요하면 GitHub 자체 지출 제어 기능을 사용하세요.
+
+### 💰 저렴한 프로바이더
 
 #### GLM-4.7 (매일 초기화, $0.6/1M)
 
 1. 가입: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan에서 API 키 발급
-3. 대시보드 → API 키 추가: 제공자: `glm`, API 키: `your-key`
+2. Coding Plan에서 API 키 받기
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**사용:** `glm/glm-4.7` — **전문가 팁:** Coding Plan은 1/7의 비용으로 3배의 할당량을 제공합니다! 매일 오전 10시에 초기화됩니다.
+**사용:** `glm/glm-4.7` — **Pro 팁:** Coding Plan은 비용의 1/7로 3배의 할당량을 제공합니다! 매일 오전 10:00에 초기화됩니다.
 
-#### MiniMax M2.1 (5시간마다 초기화, $0.20/1M)
+#### MiniMax M2.1 (5시간 초기화, $0.20/1M)
 
 1. 가입: [MiniMax](https://www.minimax.io)
-2. API 키 발급 → 대시보드 → API 키 추가
+2. API 키 받기 → Dashboard → Add API Key
 
-**사용:** `minimax/MiniMax-M2.1` — **전문가 팁:** 긴 컨텍스트(1M 토큰)를 위한 가장 저렴한 옵션입니다!
+**사용:** `minimax/MiniMax-M2.1` — **Pro 팁:** 긴 컨텍스트(100만 토큰)에 가장 저렴한 옵션입니다!
 
 #### Kimi K2 (월 $9 정액)
 
 1. 구독: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API 키 발급 → 대시보드 → API 키 추가
+2. API 키 받기 → Dashboard → Add API Key
 
-**사용:** `kimi/kimi-k2.5` — **전문가 팁:** 10M 토큰에 월 $9 정액이므로 실질 비용은 $0.90/1M입니다!
+**사용:** `kimi/kimi-k2.5` — **Pro 팁:** 1,000만 토큰에 월 $9 정액이므로 실질 비용은 $0.90/1M입니다!
 
 #### Baidu Qianfan / ERNIE
 
 1. 가입: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API 키 생성 → 대시보드 → API 키 추가: 제공자: `qianfan`
+2. Qianfan API 키 생성 → Dashboard → Add API Key: Provider: `qianfan`
 
 **사용:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` 또는 다른 Qianfan OpenAI 호환 모델 ID.
 
-### 🆓 무료 제공자
+### 🆓 무료 프로바이더
 
-인증이 필요 없는 무료 제공자의 제공자 페이지에는 **인증 필요 없음** 옆에 스위치가 있습니다.
-스위치를 끄면 해당 제공자가 비활성화되고, 제공자 구성됨/축약 보기에서 제거되며,
-해당 모델도 `/v1/models`에서 제거됩니다.
+인증이 필요 없는 무료 프로바이더에는 프로바이더 페이지의 **No authentication required** 옆에 전환 스위치가 있습니다. 이 스위치를 끄면 해당 프로바이더가 비활성화되고, Providers 구성/간단 보기에서 제거되며, `/v1/models`에서 해당 모델이 제거됩니다.
 
 #### Qoder (무료 모델 9개)
 
 ```bash
-대시보드 → Qoder 연결 → OAuth 로그인 → 액세스에는 현재 제공자 제한이 적용됨
+Dashboard → Connect Qoder → OAuth 로그인 → 현재 프로바이더 한도에 따라 액세스 가능
 
 모델: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +225,7 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
 #### Kiro (Claude 무료)
 
 ```bash
-대시보드 → Kiro 연결 → AWS Builder ID 또는 Google/GitHub → 월 약 50크레딧
+Dashboard → Connect Kiro → AWS Builder ID 또는 Google/GitHub → 월 약 50크레딧
 
 모델: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -1279,11 +1284,11 @@ OmniRoute는 클라우드 코딩 에이전트(**OpenAI Codex Cloud**, **Devin**,
 
 ---
 
-## 🛠️ 프로그래밍 방식으로 관리
+## 🛠️ 프로그래밍 방식 관리
 
-**`manage` 스코프가 포함된 Bearer 키**를 사용하여 HTTP를 통해 모든 OmniRoute 리소스(providers, combos, keys, settings)를 관리할 수 있습니다.
+**`manage` 스코프가 포함된 Bearer 키를 사용하여** 모든 OmniRoute 리소스(프로바이더, 콤보, 키, 설정)를 HTTP를 통해 관리할 수 있습니다.
 
-**Dashboard → API Keys → New Key → Scope: manage**에서 키를 생성한 다음:
+**대시보드 → API 키 → 새 키 → 스코프: manage**에서 키를 생성한 다음:
 
 ```bash
 # 프로바이더 목록 조회

@@ -120,37 +120,39 @@
 
 ## 📖 પ્રોવાઇડર સેટઅપ
 
-CSV અથવા JSON ફાઇલમાંથી API-key કનેક્શનો સામૂહિક રીતે ઉમેરવા માટે, **ડૅશબોર્ડ → પ્રોવાઇડર્સ → ફાઇલમાંથી ઇમ્પોર્ટ કરો** નો ઉપયોગ કરો. કૉલમ્સનું સ્થાન નિશ્ચિત છે (`provider,name,apiKey,baseUrl,priority`); `provider` પહેલેથી જ મેનેજ્ડ પ્રોવાઇડર અથવા સુસંગત નોડ તરીકે અસ્તિત્વમાં હોવું આવશ્યક છે. [CSV અથવા JSON ફાઇલમાંથી પ્રોવાઇડર્સ ઇમ્પોર્ટ કરો](../providers/CSV-IMPORT.md) જુઓ.
+CSV અથવા JSON ફાઇલમાંથી API-કી કનેક્શનોને બલ્કમાં ઉમેરવા માટે **Dashboard → Providers → Import from file** નો ઉપયોગ કરો. કૉલમ્સ ક્રમબદ્ધ છે (`provider,name,apiKey,baseUrl,priority`); `provider` પહેલેથી જ મેનેજ્ડ પ્રોવાઇડર અથવા સુસંગત નોડ તરીકે અસ્તિત્વમાં હોવો આવશ્યક છે. જુઓ [CSV અથવા JSON ફાઇલમાંથી પ્રોવાઇડર્સ ઇમ્પોર્ટ કરો](../providers/CSV-IMPORT.md).
 
 ### 🔐 સબ્સ્ક્રિપ્શન પ્રોવાઇડર્સ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-ડૅશબોર્ડ → પ્રોવાઇડર્સ → Claude Code કનેક્ટ કરો
-→ OAuth લૉગિન → ઑટોમૅટિક ટોકન રિફ્રેશ
-→ 5-કલાકના + સાપ્તાહિક ક્વોટાનું ટ્રૅકિંગ
+Dashboard → Providers → Claude Code સાથે કનેક્ટ કરો
+→ OAuth લૉગિન → ટોકનનું સ્વચાલિત રિફ્રેશ
+→ 5-કલાક + સાપ્તાહિક ક્વોટા ટ્રેકિંગ
 
-મોડલ્સ:
+મૉડલ્સ:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**પ્રો ટિપ:** જટિલ કાર્યો માટે Opus અને ઝડપ માટે Sonnet નો ઉપયોગ કરો. OmniRoute દરેક મોડલ માટે ક્વોટા ટ્રૅક કરે છે!
+**પ્રો ટિપ:** જટિલ કાર્યો માટે Opus અને ઝડપ માટે Sonnet નો ઉપયોગ કરો. OmniRoute દરેક મૉડલ માટે ક્વોટા ટ્રૅક કરે છે!
 
-OmniRoute હોસ્ટ પર બ્રાઉઝર નથી? Claude Code જ્યાં પણ લૉગિન થયેલું હોય ત્યાં `claude setup-token` ચલાવો અને એક વર્ષ માટેનું ટોકન **Setup Token** ટૅબમાં પેસ્ટ કરો. [સેટઅપ ટોકન સાથે Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) જુઓ.
+OmniRoute હોસ્ટ પર બ્રાઉઝર ન હોય? Claude Code જ્યાં લૉગિન થયેલું હોય ત્યાં `claude setup-token` ચલાવો અને એક વર્ષ માટેના ટોકનને **Setup Token** ટૅબમાં પેસ્ટ કરો. જુઓ [સેટઅપ ટોકન સાથે Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude અને Claude Code-સુસંગત રૂટ્સ Opus અને Sonnet મોડલ્સ માટે `max` વિચાર-પ્રયત્ન જાળવી રાખે છે. Haiku મોડલ્સ `max` પ્રયત્ન સ્તર સ્વીકારતા નથી, તેથી OmniRoute તે વિનંતીને અપસ્ટ્રીમ મોકલતા પહેલાં ઉચ્ચ વિચાર-બજેટ પર ડાઉનગ્રેડ કરે છે.
+Claude અને Claude Code સાથે સુસંગત રૂટ્સ Opus અને Sonnet
+મૉડલ્સ માટે `max` થિંકિંગ પ્રયાસ જાળવી રાખે છે. Haiku મૉડલ્સ `max` પ્રયાસ સ્તર સ્વીકારતા નથી, તેથી OmniRoute
+આ વિનંતીને અપસ્ટ્રીમ મોકલતા પહેલાં હાઇ થિંકિંગ બજેટમાં ડાઉનગ્રેડ કરે છે.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-ડૅશબોર્ડ → પ્રોવાઇડર્સ → Codex કનેક્ટ કરો
+Dashboard → Providers → Codex સાથે કનેક્ટ કરો
 → OAuth લૉગિન (પોર્ટ 1455)
-→ 5-કલાકનું + સાપ્તાહિક રીસેટ
+→ 5-કલાક + સાપ્તાહિક રીસેટ
 
-મોડલ્સ:
+મૉડલ્સ:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +162,11 @@ Claude અને Claude Code-સુસંગત રૂટ્સ Opus અને S
 #### GitHub Copilot
 
 ```bash
-ડૅશબોર્ડ → પ્રોવાઇડર્સ → GitHub કનેક્ટ કરો
-→ GitHub મારફતે OAuth
+Dashboard → Providers → GitHub સાથે કનેક્ટ કરો
+→ GitHub દ્વારા OAuth
 → માસિક રીસેટ (મહિનાની 1લી તારીખે)
 
-મોડલ્સ:
+મૉડલ્સ:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +174,70 @@ Claude અને Claude Code-સુસંગત રૂટ્સ Opus અને S
   gh/gemini-3.1-pro-preview
 ```
 
+**AI ક્રેડિટ્સ (ટોકન-આધારિત બિલિંગ).** જ્યારે GitHub એકાઉન્ટ માટે `credits_used`ની જાણ કરે છે, ત્યારે Provider Limits કાર્ડ વર્તમાન બિલિંગ અવધિમાં વપરાયેલા ક્રેડિટ્સ સાથે **AI Credits** પંક્તિ દર્શાવે છે, જેમાં અનલિમિટેડ ઑર્ગેનાઇઝેશન પ્લાન્સ પણ સામેલ છે.
+
+**સ્થાનિક AI Credits મર્યાદા.** GitHub કનેક્શનને સંપાદિત કરો અને **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`) સેટ કરો. ખાલી રાખવાથી તે અક્ષમ થાય છે; `0`
+હંમેશા કનેક્શનને સ્કિપ કરે છે. જ્યારે છેલ્લું વપરાશ રીડિંગ મર્યાદા જેટલું અથવા તેનાથી વધુ હોય,
+ત્યારે એકાઉન્ટ પસંદગી તે કનેક્શનને સ્કિપ કરે છે અને રૂટિંગ તમારા અન્ય કનેક્શન્સ પર ફૉલબૅક થાય છે,
+જેમ ક્વોટા-પૉલિસી કટઓફ વખતે થાય છે. આ ચેક પિરિયોડિક ક્વોટા રિફ્રેશ દ્વારા પહેલેથી એકત્રિત કરાયેલા
+વપરાશને વાંચે છે — તે રિક્વેસ્ટ પાથ પર ક્યારેય GitHub ને કૉલ કરતું નથી — અને તે ફેલ-ઓપન છે:
+ગુમ અથવા જૂનું રીડિંગ (15 મિનિટથી વધુ જૂનું, અથવા પહેલેથી રીસેટ થયેલી બિલિંગ અવધિનું)
+કનેક્શનને બ્લૉક કરતું નથી. આ એક સ્થાનિક સુરક્ષા ઉપાય છે, **ખર્ચની ખાતરીપૂર્વકની મર્યાદા નથી**:
+GitHub તરફથી રિપોર્ટિંગમાં વિલંબ, રિફ્રેશ અંતરાલ, પ્રક્રિયામાં રહેલી વિનંતીઓ અને OmniRouteની બહારનો
+વપરાશ તેની મર્યાદા વટાવી શકે છે. કડક મર્યાદા માટે GitHubના પોતાના ખર્ચ નિયંત્રણોનો ઉપયોગ કરો.
+
 ### 💰 સસ્તા પ્રોવાઇડર્સ
 
 #### GLM-4.7 (દૈનિક રીસેટ, $0.6/1M)
 
 1. સાઇન અપ કરો: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan માંથી API key મેળવો
-3. ડૅશબોર્ડ → API Key ઉમેરો: પ્રોવાઇડર: `glm`, API Key: `your-key`
+2. Coding Planમાંથી API કી મેળવો
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
 **ઉપયોગ:** `glm/glm-4.7` — **પ્રો ટિપ:** Coding Plan 1/7 ખર્ચે 3× ક્વોટા આપે છે! દરરોજ સવારે 10:00 વાગ્યે રીસેટ થાય છે.
 
-#### MiniMax M2.1 (5 કલાકે રીસેટ, $0.20/1M)
+#### MiniMax M2.1 (5-કલાક રીસેટ, $0.20/1M)
 
 1. સાઇન અપ કરો: [MiniMax](https://www.minimax.io)
-2. API key મેળવો → ડૅશબોર્ડ → API Key ઉમેરો
+2. API કી મેળવો → Dashboard → Add API Key
 
-**ઉપયોગ:** `minimax/MiniMax-M2.1` — **પ્રો ટિપ:** લાંબા કોન્ટેક્સ્ટ (1M ટોકન્સ) માટેનો સૌથી સસ્તો વિકલ્પ!
+**ઉપયોગ:** `minimax/MiniMax-M2.1` — **પ્રો ટિપ:** લાંબા કૉન્ટેક્સ્ટ (1M ટોકન્સ) માટે સૌથી સસ્તો વિકલ્પ!
 
-#### Kimi K2 (દર મહિને નિશ્ચિત $9)
+#### Kimi K2 ($9/મહિનો નિશ્ચિત)
 
 1. સબ્સ્ક્રાઇબ કરો: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key મેળવો → ડૅશબોર્ડ → API Key ઉમેરો
+2. API કી મેળવો → Dashboard → Add API Key
 
-**ઉપયોગ:** `kimi/kimi-k2.5` — **પ્રો ટિપ:** 10M ટોકન્સ માટે દર મહિને નિશ્ચિત $9 = $0.90/1M નો અસરકારક ખર્ચ!
+**ઉપયોગ:** `kimi/kimi-k2.5` — **પ્રો ટિપ:** 10M ટોકન્સ માટે નિશ્ચિત $9/મહિનો = અસરકારક રીતે $0.90/1M ખર્ચ!
 
 #### Baidu Qianfan / ERNIE
 
 1. સાઇન અપ કરો: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API key બનાવો → ડૅશબોર્ડ → API Key ઉમેરો: પ્રોવાઇડર: `qianfan`
+2. Qianfan API કી બનાવો → Dashboard → Add API Key: Provider: `qianfan`
 
-**ઉપયોગ:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, અથવા અન્ય Qianfan OpenAI-સુસંગત મોડલ ID.
+**ઉપયોગ:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, અથવા અન્ય Qianfan OpenAI-સુસંગત મૉડલ ID.
 
 ### 🆓 મફત પ્રોવાઇડર્સ
 
-ઑથેન્ટિકેશનની જરૂર ન હોય તેવા મફત પ્રોવાઇડર્સના પ્રોવાઇડર પેજ પર **ઑથેન્ટિકેશન જરૂરી નથી** ની બાજુમાં એક સ્વિચ હોય છે.
-તેને બંધ કરવાથી તે પ્રોવાઇડર નિષ્ક્રિય થાય છે, પ્રોવાઇડર્સના કૉન્ફિગર કરેલા/કોમ્પેક્ટ વ્યૂઝમાંથી દૂર થાય છે અને
-તેના મોડલ્સ `/v1/models` માંથી દૂર થાય છે.
+ઑથેન્ટિકેશન વિનાના મફત પ્રોવાઇડર્સના પ્રોવાઇડર પેજ પર **No authentication required**ની બાજુમાં એક સ્વિચ હોય છે.
+તેને બંધ કરવાથી તે પ્રોવાઇડર અક્ષમ થાય છે, Providers configured/compact વ્યૂમાંથી દૂર થાય છે અને
+તેના મૉડલ્સ `/v1/models`માંથી દૂર થાય છે.
 
-#### Qoder (9 મફત મોડલ્સ)
+#### Qoder (9 મફત મૉડલ્સ)
 
 ```bash
-ડૅશબોર્ડ → Qoder કનેક્ટ કરો → OAuth લૉગિન → ઍક્સેસ વર્તમાન પ્રોવાઇડર મર્યાદાઓને આધીન છે
+Dashboard → Qoder સાથે કનેક્ટ કરો → OAuth લૉગિન → ઍક્સેસ વર્તમાન પ્રોવાઇડર મર્યાદાઓને આધીન છે
 
-મોડલ્સ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+મૉડલ્સ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude મફત)
 
 ```bash
-ડૅશબોર્ડ → Kiro કનેક્ટ કરો → AWS Builder ID અથવા Google/GitHub → દર મહિને ~50 ક્રેડિટ્સ
+Dashboard → Kiro સાથે કનેક્ટ કરો → AWS Builder ID અથવા Google/GitHub → ~50 ક્રેડિટ્સ/મહિનો
 
-મોડલ્સ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+મૉડલ્સ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

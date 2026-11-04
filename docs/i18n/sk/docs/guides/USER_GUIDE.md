@@ -120,16 +120,16 @@ Prístup cez: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Nastavenie poskytovateľov
 
-Ak chcete hromadne pridať pripojenia s API kľúčmi zo súboru CSV alebo JSON, použite **Dashboard → Providers → Import from file**. Stĺpce sú pozičné (`provider,name,apiKey,baseUrl,priority`); `provider` už musí existovať ako spravovaný poskytovateľ alebo kompatibilný uzol. Pozrite si [Import poskytovateľov zo súboru CSV alebo JSON](../providers/CSV-IMPORT.md).
+Ak chcete hromadne pridať pripojenia pomocou kľúča API zo súboru CSV alebo JSON, použite **Ovládací panel → Poskytovatelia → Importovať zo súboru**. Stĺpce sú pozičné (`provider,name,apiKey,baseUrl,priority`); `provider` už musí existovať ako spravovaný poskytovateľ alebo kompatibilný uzol. Pozrite si [Import poskytovateľov zo súboru CSV alebo JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Poskytovatelia s predplatným
+### 🔐 Poskytovatelia predplatného
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Connect Claude Code
-→ Prihlásenie cez OAuth → Automatické obnovenie tokenu
-→ Sledovanie 5-hodinovej a týždennej kvóty
+Ovládací panel → Poskytovatelia → Pripojiť Claude Code
+→ Prihlásenie OAuth → Automatické obnovovanie tokenu
+→ Sledovanie 5-hodinového a týždenného limitu
 
 Modely:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modely:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionálny tip:** Opus používajte na komplexné úlohy a Sonnet na rýchlosť. OmniRoute sleduje kvótu pre každý model!
+**Tip:** Opus používajte na zložité úlohy, Sonnet na rýchlosť. OmniRoute sleduje limit pre každý model!
 
-Na hostiteľovi OmniRoute nie je prehliadač? Spustite `claude setup-token` kdekoľvek, kde ste prihlásení do Claude Code, a vložte jednoročný token na kartu **Setup Token**. Pozrite si [Claude Code s nastavovacím tokenom](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nemáte na hostiteľovi OmniRoute prehliadač? Spustite `claude setup-token` kdekoľvek, kde ste prihlásení do Claude Code, a jednoročný token vložte na kartu **Setup Token**. Pozrite si [Claude Code s tokenom nastavenia](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Trasy kompatibilné s Claude a Claude Code zachovávajú úroveň úsilia pri uvažovaní `max` pre modely Opus a Sonnet. Modely Haiku nepodporujú úroveň úsilia `max`, preto OmniRoute pred odoslaním požiadavky nadradenému poskytovateľovi zmení túto požiadavku na vysoký rozpočet na uvažovanie.
+Trasy kompatibilné s Claude a Claude Code zachovávajú úroveň premýšľania `max` pre
+modely Opus a Sonnet. Modely Haiku úroveň úsilia `max` neprijímajú, takže OmniRoute túto
+požiadavku pred odoslaním upstreamu zníži na vysoký rozpočet premýšľania.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Connect Codex
-→ Prihlásenie cez OAuth (port 1455)
-→ Obnovenie po 5 hodinách a po týždni
+Ovládací panel → Poskytovatelia → Pripojiť Codex
+→ Prihlásenie OAuth (port 1455)
+→ 5-hodinový a týždenný reset
 
 Modely:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Modely:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Connect GitHub
+Ovládací panel → Poskytovatelia → Pripojiť GitHub
 → OAuth cez GitHub
-→ Mesačné obnovenie (1. deň v mesiaci)
+→ Mesačný reset (1. deň v mesiaci)
 
 Modely:
   gh/gpt-5.5
@@ -172,55 +174,71 @@ Modely:
   gh/gemini-3.1-pro-preview
 ```
 
+**Kredity AI (účtovanie podľa tokenov).** Keď GitHub nahlási pre účet `credits_used`,
+karta Limitov poskytovateľa zobrazí riadok **Kredity AI** s počtom kreditov
+spotrebovaných v aktuálnom fakturačnom období vrátane neobmedzených organizačných plánov.
+
+**Lokálny limit kreditov AI.** Upravte pripojenie GitHub a nastavte **Limit kreditov AI na
+fakturačné obdobie** (`providerSpecificData.githubCreditLimit`). Prázdna hodnota ho deaktivuje; `0`
+pripojenie vždy preskočí. Keď je posledná hodnota využitia rovná limitu alebo ho prekročí,
+výber účtu toto pripojenie preskočí a smerovanie prejde na vaše ostatné
+pripojenia, rovnako ako pri prerušení podľa pravidiel limitu. Kontrola používa údaje o využití,
+ktoré už zhromažďuje pravidelné obnovovanie limitu — na ceste požiadavky nikdy nevolá GitHub —
+a pri chýbajúcich alebo neaktuálnych údajoch sa vykoná bez blokovania: chýbajúca alebo neaktuálna
+hodnota (staršia než 15 minút alebo z fakturačného obdobia, ktoré sa už resetovalo) pripojenie
+nezablokuje. Ide o lokálnu ochranu, **nie o zaručený strop výdavkov**: oneskorenie pri
+nahlasovaní GitHubom, interval obnovovania, prebiehajúce požiadavky a využitie mimo OmniRoute
+môžu spôsobiť prekročenie limitu. Na pevný strop používajte vlastné ovládacie prvky výdavkov GitHubu.
+
 ### 💰 Lacní poskytovatelia
 
-#### GLM-4.7 (denné obnovenie, $0.6/1M)
+#### GLM-4.7 (denný reset, $0.6/1M)
 
 1. Zaregistrujte sa: [Zhipu AI](https://open.bigmodel.cn)
-2. Získajte API kľúč z plánu Coding Plan
-3. Dashboard → Add API Key: Poskytovateľ: `glm`, API kľúč: `your-key`
+2. Získajte kľúč API z Coding Plan
+3. Ovládací panel → Pridať kľúč API: Poskytovateľ: `glm`, Kľúč API: `your-key`
 
-**Použitie:** `glm/glm-4.7` — **Profesionálny tip:** Coding Plan ponúka 3-násobnú kvótu za 1/7 ceny! Obnovuje sa denne o 10:00.
+**Použitie:** `glm/glm-4.7` — **Tip:** Coding Plan ponúka 3× väčší limit za 1/7 ceny! Reset každý deň o 10:00.
 
-#### MiniMax M2.1 (obnovenie po 5 h, $0.20/1M)
+#### MiniMax M2.1 (5-hodinový reset, $0.20/1M)
 
 1. Zaregistrujte sa: [MiniMax](https://www.minimax.io)
-2. Získajte API kľúč → Dashboard → Add API Key
+2. Získajte kľúč API → Ovládací panel → Pridať kľúč API
 
-**Použitie:** `minimax/MiniMax-M2.1` — **Profesionálny tip:** Najlacnejšia možnosť pre dlhý kontext (1M tokenov)!
+**Použitie:** `minimax/MiniMax-M2.1` — **Tip:** Najlacnejšia možnosť pre dlhý kontext (1M tokenov)!
 
-#### Kimi K2 (pevne $9/mesiac)
+#### Kimi K2 (paušálne $9/mesiac)
 
-1. Predplaťte si službu: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Získajte API kľúč → Dashboard → Add API Key
+1. Predplaťte si: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Získajte kľúč API → Ovládací panel → Pridať kľúč API
 
-**Použitie:** `kimi/kimi-k2.5` — **Profesionálny tip:** Pevných $9/mesiac za 10M tokenov = efektívna cena $0.90/1M!
+**Použitie:** `kimi/kimi-k2.5` — **Tip:** Pevná cena $9/mesiac za 10M tokenov = efektívna cena $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Zaregistrujte sa: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Vytvorte API kľúč Qianfan → Dashboard → Add API Key: Poskytovateľ: `qianfan`
+2. Vytvorte kľúč API Qianfan → Ovládací panel → Pridať kľúč API: Poskytovateľ: `qianfan`
 
-**Použitie:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` alebo iné ID modelu Qianfan kompatibilného s OpenAI.
+**Použitie:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` alebo iný identifikátor modelu kompatibilný s OpenAI od Qianfan.
 
 ### 🆓 BEZPLATNÍ poskytovatelia
 
-Bezplatní poskytovatelia bez overenia majú na svojej stránke prepínač vedľa položky **No authentication required**.
-Jeho vypnutím daného poskytovateľa deaktivujete, odstránite ho z nakonfigurovaného/kompaktného zobrazenia poskytovateľov
-a jeho modely odstránite z `/v1/models`.
+Bezplatní poskytovatelia bez autentifikácie majú na stránke poskytovateľa prepínač vedľa možnosti **Autentifikácia nie je potrebná**.
+Jeho vypnutím poskytovateľa deaktivujete, odstránite ho zo zobrazení nakonfigurovaných poskytovateľov/kompaktných zobrazení
+a odstránite jeho modely z `/v1/models`.
 
-#### Qoder (9 BEZPLATNÝCH modelov)
+#### Qoder (9 bezplatných modelov)
 
 ```bash
-Dashboard → Connect Qoder → Prihlásenie cez OAuth → Prístup podlieha aktuálnym limitom poskytovateľa
+Ovládací panel → Pripojiť Qoder → Prihlásenie OAuth → Prístup podlieha aktuálnym limitom poskytovateľa
 
 Modely: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude BEZPLATNE)
+#### Kiro (BEZPLATNÝ Claude)
 
 ```bash
-Dashboard → Connect Kiro → AWS Builder ID alebo Google/GitHub → ~50 kreditov/mesiac
+Ovládací panel → Pripojiť Kiro → AWS Builder ID alebo Google/GitHub → približne 50 kreditov/mesiac
 
 Modely: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

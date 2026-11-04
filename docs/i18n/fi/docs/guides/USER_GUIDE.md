@@ -118,18 +118,18 @@ Käyttö seuraavien kautta: WhatsApp, Telegram, Slack, Discord, iMessage, Signal
 
 ---
 
-## 📖 Palveluntarjoajien määritys
+## 📖 Palveluntarjoajan määritys
 
-Voit lisätä API-avainyhteyksiä joukkona CSV- tai JSON-tiedostosta valitsemalla **Hallintapaneeli → Palveluntarjoajat → Tuo tiedostosta**. Sarakkeet ovat paikkasidonnaisia (`provider,name,apiKey,baseUrl,priority`); `provider`-arvon on jo oltava hallittu palveluntarjoaja tai yhteensopiva solmu. Katso [Palveluntarjoajien tuominen CSV- tai JSON-tiedostosta](../providers/CSV-IMPORT.md).
+Voit lisätä API-avaimia käyttävät yhteydet joukkona CSV- tai JSON-tiedostosta valitsemalla **Dashboard → Providers → Import from file**. Sarakkeet ovat sijaintiperusteisia (`provider,name,apiKey,baseUrl,priority`); `provider`-arvon on oltava jo olemassa oleva hallittu palveluntarjoaja tai yhteensopiva solmu. Katso [Palveluntarjoajien tuominen CSV- tai JSON-tiedostosta](../providers/CSV-IMPORT.md).
 
-### 🔐 Tilauspohjaiset palveluntarjoajat
+### 🔐 Tilauspalveluntarjoajat
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä Claude Code
-→ OAuth-kirjautuminen → Tunnuksen automaattinen päivitys
-→ 5 tunnin ja viikoittaisen kiintiön seuranta
+Dashboard → Providers → Connect Claude Code
+→ OAuth-kirjautuminen → Tunnisteen automaattinen päivitys
+→ 5 tunnin + viikoittaisen kiintiön seuranta
 
 Mallit:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Mallit:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Ammattilaisen vinkki:** Käytä Opusta monimutkaisiin tehtäviin ja Sonnetia nopeutta vaativiin tehtäviin. OmniRoute seuraa kunkin mallin kiintiötä!
+**Vinkki:** Käytä Opusta monimutkaisiin tehtäviin ja Sonnetia nopeuteen. OmniRoute seuraa kiintiötä mallikohtaisesti!
 
-Eikö OmniRoute-isännällä ole selainta? Suorita `claude setup-token` missä tahansa, missä Claude Codeen on kirjauduttu, ja liitä vuoden voimassa oleva tunnus **Setup Token** -välilehdelle. Katso [Claude Coden käyttäminen asetustunnuksella](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Eikö OmniRoute-isännässä ole selainta? Suorita `claude setup-token` missä tahansa, missä Claude Code on kirjautuneena, ja liitä yhden vuoden tunniste **Setup Token** -välilehdelle. Katso [Claude Code määritystunnisteella](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude- ja Claude Code -yhteensopivat reitit säilyttävät Opus- ja Sonnet-mallien `max`-päättelytason. Haiku-mallit eivät hyväksy `max`-tasoa, joten OmniRoute alentaa pyynnön korkeaan päättelybudjettiin ennen sen lähettämistä ylävirran palveluun.
+Claude- ja Claude Code -yhteensopivat reitit säilyttävät Opus- ja Sonnet-malleille `max`-ajattelupanostuksen.
+Haiku-mallit eivät hyväksy `max`-panostustasoa, joten OmniRoute pienentää kyseisen
+pyynnön suureksi ajattelubudjetiksi ennen sen lähettämistä palveluntarjoajalle.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä Codex
+Dashboard → Providers → Connect Codex
 → OAuth-kirjautuminen (portti 1455)
-→ Nollaus 5 tunnin välein ja viikoittain
+→ 5 tunnin + viikoittainen nollaus
 
 Mallit:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Mallit:
 #### GitHub Copilot
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth GitHubin kautta
-→ Kuukausittainen nollaus (kuukauden 1. päivänä)
+→ Kuukausittainen nollaus (kuukauden 1. päivä)
 
 Mallit:
   gh/gpt-5.5
@@ -172,55 +174,72 @@ Mallit:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-hyvitykset (tunnisteisiin perustuva laskutus).** Kun GitHub ilmoittaa tilille
+`credits_used`-arvon, Palveluntarjoajan rajoitukset -kortissa näkyy **AI-hyvitykset**-rivi,
+joka näyttää kuluvan laskutuskauden aikana käytetyt hyvitykset myös rajattomissa organisaatiopaketeissa.
+
+**Paikallinen AI-hyvitysten rajoitus.** Muokkaa GitHub-yhteyttä ja määritä **AI-hyvitysten
+rajoitus laskutuskautta kohden** (`providerSpecificData.githubCreditLimit`). Tyhjä arvo poistaa
+rajoituksen käytöstä; `0` ohittaa yhteyden aina. Kun viimeisin käyttöarvo on yhtä suuri tai
+suurempi kuin rajoitus, tilin valinta ohittaa kyseisen yhteyden ja reititys siirtyy muihin
+yhteyksiisi samalla tavalla kuin kiintiökäytännön rajoituksen kohdalla. Tarkistus käyttää
+käyttötietoa, jonka jaksottainen kiintiön päivitys kerää jo valmiiksi — GitHubiin ei koskaan
+soiteta pyynnön käsittelypolulla — ja se sallii toiminnan puuttuvan tai vanhentuneen tiedon
+tapauksessa: puuttuva tai vanhentunut lukema (yli 15 minuuttia vanha tai jo nollautuneelta
+laskutuskaudelta peräisin oleva) ei estä yhteyttä. Tämä on paikallinen suojatoiminto, **ei
+taattu kulutuskatto**: GitHubin raportointiviiveet, päivitysväli, käynnissä olevat pyynnöt ja
+OmniRouten ulkopuolinen käyttö voivat ylittää rajan. Käytä kiinteään kattoon GitHubin omia
+kulutusrajoituksia.
+
 ### 💰 Edulliset palveluntarjoajat
 
-#### GLM-4.7 (Päivittäinen nollaus, $0.6/1M)
+#### GLM-4.7 (päivittäinen nollaus, 0,6 $/1 M)
 
 1. Rekisteröidy: [Zhipu AI](https://open.bigmodel.cn)
-2. Hanki API-avain Coding Plan -tilauksesta
-3. Hallintapaneeli → Lisää API-avain: Palveluntarjoaja: `glm`, API-avain: `your-key`
+2. Hanki API-avain Coding Planista
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Käyttö:** `glm/glm-4.7` — **Ammattilaisen vinkki:** Coding Plan tarjoaa kolminkertaisen kiintiön seitsemäsosalla hinnasta! Nollaus päivittäin klo 10.00.
+**Käyttö:** `glm/glm-4.7` — **Vinkki:** Coding Plan tarjoaa kolminkertaisen kiintiön seitsemäsosalla hinnasta! Nollaus päivittäin klo 10.00.
 
-#### MiniMax M2.1 (Nollaus 5 tunnin välein, $0.20/1M)
+#### MiniMax M2.1 (5 tunnin nollaus, 0,20 $/1 M)
 
 1. Rekisteröidy: [MiniMax](https://www.minimax.io)
-2. Hanki API-avain → Hallintapaneeli → Lisää API-avain
+2. Hanki API-avain → Dashboard → Add API Key
 
-**Käyttö:** `minimax/MiniMax-M2.1` — **Ammattilaisen vinkki:** Edullisin vaihtoehto pitkälle kontekstille (1M tunnistetta)!
+**Käyttö:** `minimax/MiniMax-M2.1` — **Vinkki:** Edullisin vaihtoehto pitkälle kontekstille (1 M tokenia)!
 
-#### Kimi K2 (Kiinteästi $9/kuukausi)
+#### Kimi K2 (9 $/kuukausi kiinteä hinta)
 
 1. Tilaa: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hanki API-avain → Hallintapaneeli → Lisää API-avain
+2. Hanki API-avain → Dashboard → Add API Key
 
-**Käyttö:** `kimi/kimi-k2.5` — **Ammattilaisen vinkki:** Kiinteä $9/kuukausi 10 miljoonasta tunnisteesta = todellinen kustannus $0.90/1M!
+**Käyttö:** `kimi/kimi-k2.5` — **Vinkki:** Kiinteä 9 $/kuukausi 10 miljoonalle tokenille = todellinen hinta 0,90 $/1 M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Rekisteröidy: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Luo Qianfan API-avain → Hallintapaneeli → Lisää API-avain: Palveluntarjoaja: `qianfan`
+2. Luo Qianfan API-avain → Dashboard → Add API Key: Provider: `qianfan`
 
-**Käyttö:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` tai jokin muu Qianfanin OpenAI-yhteensopiva mallitunnus.
+**Käyttö:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` tai jokin muu Qianfanin OpenAI-yhteensopiva mallitunniste.
 
 ### 🆓 ILMAISET palveluntarjoajat
 
-Todennusta edellyttämättömillä ilmaisilla palveluntarjoajilla on kytkin **Todennusta ei vaadita** -kohdan vieressä niiden palveluntarjoajasivulla.
-Sen poistaminen käytöstä poistaa kyseisen palveluntarjoajan käytöstä ja Palveluntarjoajien määritetyistä ja tiiviistä näkymistä sekä
-poistaa sen mallit `/v1/models`-luettelosta.
+Todennusta vaatimattomilla ilmaisilla palveluntarjoajilla on palveluntarjoajan sivulla **Todennusta ei tarvita** -kohdan vieressä oleva kytkin.
+Sen poistaminen käytöstä poistaa palveluntarjoajan käytöstä, poistaa sen Määritetyt palveluntarjoajat- ja Tiivis-näkymistä
+sekä poistaa sen mallit kohteesta `/v1/models`.
 
 #### Qoder (9 ILMAISTA mallia)
 
 ```bash
-Hallintapaneeli → Yhdistä Qoder → OAuth-kirjautuminen → Käyttöön sovelletaan palveluntarjoajan nykyisiä rajoituksia
+Dashboard → Connect Qoder → OAuth-kirjautuminen → Käyttö määräytyy palveluntarjoajan voimassa olevien rajoitusten mukaan
 
 Mallit: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ILMAISEKSI)
+#### Kiro (ILMAINEN Claude)
 
 ```bash
-Hallintapaneeli → Yhdistä Kiro → AWS Builder ID tai Google/GitHub → ~50 krediittiä kuukaudessa
+Dashboard → Connect Kiro → AWS Builder ID tai Google/GitHub → noin 50 hyvitystä/kuukausi
 
 Mallit: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

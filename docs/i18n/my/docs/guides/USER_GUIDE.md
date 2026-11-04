@@ -120,39 +120,40 @@ $20 ပေးပြီး ကန့်သတ်ချက်များနှင
 
 ## 📖 Provider စနစ်ထည့်သွင်းခြင်း
 
-CSV သို့မဟုတ် JSON ဖိုင်တစ်ခုမှ API-key ချိတ်ဆက်မှုများကို အစုလိုက်ထည့်ရန် **Dashboard → Providers → Import from file** ကို အသုံးပြုပါ။ ကော်လံများကို အစဉ်လိုက် သတ်မှတ်ထားသည် (`provider,name,apiKey,baseUrl,priority`)။ `provider` သည် စီမံခန့်ခွဲထားသော provider သို့မဟုတ် ကိုက်ညီမှုရှိသော node တစ်ခုအဖြစ် ရှိနှင့်ပြီးသား ဖြစ်ရမည်။ [CSV သို့မဟုတ် JSON ဖိုင်မှ provider များ ထည့်သွင်းခြင်း](../providers/CSV-IMPORT.md) ကို ကြည့်ပါ။
+CSV သို့မဟုတ် JSON ဖိုင်မှ API key ချိတ်ဆက်မှုများကို အစုလိုက်ထည့်ရန် **Dashboard → Providers → Import from file** ကို အသုံးပြုပါ။ ကော်လံများသည် အစဉ်လိုက်ဖြစ်သည် (`provider,name,apiKey,baseUrl,priority`)။ `provider` သည် စီမံခန့်ခွဲထားသော provider တစ်ခု သို့မဟုတ် ကိုက်ညီသည့် node တစ်ခုအဖြစ် ကြိုတင်ရှိရမည်။ [Import providers from a CSV or JSON file](../providers/CSV-IMPORT.md) ကို ကြည့်ပါ။
 
-### 🔐 စာရင်းသွင်းမှုအခြေပြု Provider များ
+### 🔐 Subscription Provider များ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Claude Code ကို ချိတ်ဆက်ပါ
-→ OAuth ဖြင့် ဝင်ရောက်ပါ → Token အလိုအလျောက် ပြန်လည်စတင်ခြင်း
-→ ၅ နာရီစာ + အပတ်စဉ် quota စောင့်ကြည့်ခြင်း
+Dashboard → Providers → Claude Code ချိတ်ဆက်ရန်
+→ OAuth login → Token အလိုအလျောက် refresh
+→ ၅ နာရီ + အပတ်စဉ် quota ခြေရာခံခြင်း
 
-မော်ဒယ်များ:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**ကျွမ်းကျင်သူ အကြံပြုချက်:** ရှုပ်ထွေးသော လုပ်ငန်းများအတွက် Opus ကို အသုံးပြုပြီး မြန်နှုန်းအတွက် Sonnet ကို အသုံးပြုပါ။ OmniRoute သည် မော်ဒယ်တစ်ခုချင်းစီအလိုက် quota ကို စောင့်ကြည့်ပေးသည်!
+**အသုံးဝင်သော အကြံပြုချက်:** ရှုပ်ထွေးသောလုပ်ငန်းများအတွက် Opus၊ မြန်ဆန်မှုအတွက် Sonnet ကို အသုံးပြုပါ။ OmniRoute သည် model တစ်ခုချင်းစီအလိုက် quota ကို ခြေရာခံပေးသည်။
 
-OmniRoute host ပေါ်တွင် browser မရှိပါသလား။ Claude Code ဖြင့် ဝင်ရောက်ထားသည့် မည်သည့်နေရာတွင်မဆို `claude setup-token` ကို လုပ်ဆောင်ပြီး တစ်နှစ်သက်တမ်းရှိ token ကို **Setup Token** tab ထဲသို့ ကူးထည့်ပါ။ [Setup token ဖြင့် Claude Code အသုံးပြုခြင်း](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ကို ကြည့်ပါ။
+OmniRoute host တွင် browser မရှိပါက Claude Code login ဝင်ထားသည့် မည်သည့်နေရာတွင်မဆို `claude setup-token` ကို run ပြီး တစ်နှစ်သက်တမ်းရှိ token ကို **Setup Token** tab ထဲသို့ paste လုပ်ပါ။ [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ကို ကြည့်ပါ။
 
-Claude နှင့် Claude Code နှင့် ကိုက်ညီသော route များသည် Opus နှင့် Sonnet
-မော်ဒယ်များအတွက် `max` thinking effort ကို ဆက်လက်ထိန်းသိမ်းထားသည်။ Haiku မော်ဒယ်များသည် `max` effort အဆင့်ကို လက်မခံသောကြောင့် OmniRoute သည်
-ထို request ကို upstream သို့ မပို့မီ high thinking budget အဖြစ် လျှော့ချပေးသည်။
+Claude နှင့် Claude Code-compatible route များသည် Opus နှင့် Sonnet
+model များအတွက် `max` thinking effort ကို ထိန်းသိမ်းပေးသည်။ Haiku model များသည် `max`
+effort tier ကို လက်မခံသောကြောင့် OmniRoute သည် အဆိုပါ request ကို upstream သို့ မပို့မီ
+မြင့်မားသော thinking budget သို့ လျှော့ချပြောင်းလဲပေးသည်။
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Codex ကို ချိတ်ဆက်ပါ
-→ OAuth ဖြင့် ဝင်ရောက်ပါ (port 1455)
-→ ၅ နာရီစာ + အပတ်စဉ် ပြန်လည်သတ်မှတ်ခြင်း
+Dashboard → Providers → Codex ချိတ်ဆက်ရန်
+→ OAuth login (port 1455)
+→ ၅ နာရီ + အပတ်စဉ် reset
 
-မော်ဒယ်များ:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,11 +163,11 @@ Dashboard → Providers → Codex ကို ချိတ်ဆက်ပါ
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → GitHub ကို ချိတ်ဆက်ပါ
+Dashboard → Providers → GitHub ချိတ်ဆက်ရန်
 → GitHub မှတစ်ဆင့် OAuth
-→ လစဉ် ပြန်လည်သတ်မှတ်ခြင်း (လတိုင်း၏ ၁ ရက်နေ့)
+→ လစဉ် reset (လ၏ ၁ ရက်နေ့)
 
-မော်ဒယ်များ:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -174,57 +175,63 @@ Dashboard → Providers → GitHub ကို ချိတ်ဆက်ပါ
   gh/gemini-3.1-pro-preview
 ```
 
+**AI Credits (token အခြေပြု ငွေတောင်းခံခြင်း)။** GitHub မှ account အတွက်
+`credits_used` ကို report လုပ်သောအခါ Provider Limits card တွင် **AI Credits** row ကို
+ပြသပြီး လက်ရှိငွေတောင်းခံကာလအတွင်း အသုံးပြုထားသည့် credits ကို ဖော်ပြသည်။ unlimited
+organization plan များတွင်လည်း အလားတူဖြစ်သည်။
+
+**Local AI Credits limit။** GitHub connection ကို edit လုပ်ပြီး billing period တစ်ခုလျှင်
+**AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`) ကို သတ်မှတ်ပါ။ ဗလာထားပါက ပိတ်ထားမည်ဖြစ်ပြီး `0` ဖြစ်ပါက အဆိုပါ connection ကို အမြဲကျော်သွားမည်။ နောက်ဆုံး usage reading သည် limit နှင့် တူညီခြင်း သို့မဟုတ် ကျော်လွန်ခြင်းရှိပါက account ရွေးချယ်မှုသည် ထို connection ကို ကျော်သွားပြီး quota-policy cutoff ကဲ့သို့ပင် routing သည် သင့်အခြား connection များသို့ fallback လုပ်မည်။ ဤစစ်ဆေးမှုသည် ပုံမှန် quota refresh က စုဆောင်းထားပြီးသား usage ကိုသာ ဖတ်ရှုသည် — request path တွင် GitHub ကို မည်သည့်အခါမျှ မခေါ်ပါ — ထို့အပြင် fail open လုပ်သည်။ ဆိုလိုသည်မှာ usage reading ပျောက်ဆုံးနေခြင်း သို့မဟုတ် ဟောင်းနွမ်းနေခြင်း (၁၅ မိနစ်ထက်ပိုဟောင်းခြင်း၊ သို့မဟုတ် reset ပြုလုပ်ပြီးသည့် billing period မှ ဖြစ်ခြင်း) သည် connection ကို ပိတ်ဆို့မည်မဟုတ်ပါ။ ဤသည်မှာ local safeguard တစ်ခုသာဖြစ်ပြီး **အသုံးစရိတ်ကို အာမခံကန့်သတ်ပေးသည့် ceiling မဟုတ်ပါ**။ GitHub ၏ reporting နှောင့်နှေးမှု၊ refresh interval၊ လက်ရှိလုပ်ဆောင်နေသော request များနှင့် OmniRoute ပြင်ပအသုံးပြုမှုများကြောင့် သတ်မှတ်ချက်ကို ကျော်လွန်နိုင်သည်။ တိကျသော အမြင့်ဆုံးကန့်သတ်ချက်အတွက် GitHub ၏ ကိုယ်ပိုင် spending controls များကို အသုံးပြုပါ။
+
 ### 💰 စျေးသက်သာသော Provider များ
 
-#### GLM-4.7 (နေ့စဉ် ပြန်လည်သတ်မှတ်ခြင်း၊ $0.6/1M)
+#### GLM-4.7 (နေ့စဉ် reset၊ $0.6/1M)
 
 1. စာရင်းသွင်းရန်: [Zhipu AI](https://open.bigmodel.cn)
 2. Coding Plan မှ API key ရယူပါ
 3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**အသုံးပြုရန်:** `glm/glm-4.7` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** Coding Plan သည် ကုန်ကျစရိတ် 1/7 ဖြင့် quota 3× ပေးသည်! နေ့စဉ် နံနက် 10:00 တွင် ပြန်လည်သတ်မှတ်သည်။
+**အသုံးပြုရန်:** `glm/glm-4.7` — **အသုံးဝင်သော အကြံပြုချက်:** Coding Plan သည် ကုန်ကျစရိတ် 1/7 ဖြင့် quota ၃ ဆ ပေးသည်။ နေ့စဉ် မနက် ၁၀:၀၀ နာရီတွင် reset လုပ်သည်။
 
-#### MiniMax M2.1 (၅ နာရီတိုင်း ပြန်လည်သတ်မှတ်ခြင်း၊ $0.20/1M)
+#### MiniMax M2.1 (၅ နာရီ reset၊ $0.20/1M)
 
 1. စာရင်းသွင်းရန်: [MiniMax](https://www.minimax.io)
-2. API key ရယူပါ → Dashboard → Add API Key
+2. API key ရယူရန် → Dashboard → Add API Key
 
-**အသုံးပြုရန်:** `minimax/MiniMax-M2.1` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** ရှည်လျားသော context (1M tokens) အတွက် စျေးအသက်သာဆုံး ရွေးချယ်မှုဖြစ်သည်!
+**အသုံးပြုရန်:** `minimax/MiniMax-M2.1` — **အသုံးဝင်သော အကြံပြုချက်:** context ရှည်လျားသော လုပ်ငန်းများအတွက် စျေးအသက်သာဆုံး ရွေးချယ်မှု (tokens 1M) ဖြစ်သည်။
 
-#### Kimi K2 (တစ်လလျှင် ပုံသေ $9)
+#### Kimi K2 ($9/month flat)
 
 1. စာရင်းသွင်းရန်: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key ရယူပါ → Dashboard → Add API Key
+2. API key ရယူရန် → Dashboard → Add API Key
 
-**အသုံးပြုရန်:** `kimi/kimi-k2.5` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** 10M tokens အတွက် တစ်လလျှင် ပုံသေ $9 ဖြစ်သဖြင့် ထိရောက်သော ကုန်ကျစရိတ်မှာ $0.90/1M ဖြစ်သည်!
+**အသုံးပြုရန်:** `kimi/kimi-k2.5` — **အသုံးဝင်သော အကြံပြုချက်:** tokens 10M အတွက် တစ်လလျှင် ပုံသေ $9 ဖြစ်သောကြောင့် ထိရောက်သောကုန်ကျစရိတ်မှာ $0.90/1M ဖြစ်သည်။
 
 #### Baidu Qianfan / ERNIE
 
 1. စာရင်းသွင်းရန်: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API key တစ်ခု ဖန်တီးပါ → Dashboard → Add API Key: Provider: `qianfan`
+2. Qianfan API key ဖန်တီးရန် → Dashboard → Add API Key: Provider: `qianfan`
 
 **အသုံးပြုရန်:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` သို့မဟုတ် အခြား Qianfan OpenAI-compatible model ID တစ်ခု။
 
 ### 🆓 အခမဲ့ Provider များ
 
-Authentication မလိုအပ်သော အခမဲ့ provider များ၏ provider စာမျက်နှာတွင် **No authentication required** ဘေး၌ ခလုတ်တစ်ခု ရှိသည်။
-၎င်းကို ပိတ်လိုက်ပါက ထို provider ကို ပိတ်ထားမည်ဖြစ်ပြီး Providers configured/compact view များမှ ဖယ်ရှားကာ
-၎င်း၏ မော်ဒယ်များကိုလည်း `/v1/models` မှ ဖယ်ရှားမည်ဖြစ်သည်။
+Authentication မလိုအပ်သော အခမဲ့ provider များတွင် ၎င်းတို့၏ provider စာမျက်နှာရှိ **No authentication required** ဘေးတွင် switch တစ်ခု ပါရှိသည်။ ၎င်းကို ပိတ်လိုက်ပါက ထို provider ကို disable လုပ်မည်၊ Providers configured/compact view များမှ ဖယ်ရှားမည်၊ ထို့အပြင် ၎င်း၏ model များကို `/v1/models` မှ ဖယ်ရှားမည်။
 
-#### Qoder (အခမဲ့ မော်ဒယ် ၉ ခု)
+#### Qoder (အခမဲ့ model ၉ ခု)
 
 ```bash
-Dashboard → Qoder ကို ချိတ်ဆက်ပါ → OAuth ဖြင့် ဝင်ရောက်ပါ → အသုံးပြုခွင့်သည် provider ၏ လက်ရှိ ကန့်သတ်ချက်များအပေါ် မူတည်သည်
+Dashboard → Qoder ချိတ်ဆက်ရန် → OAuth login → လက်ရှိ provider limits များအပေါ် မူတည်၍ အသုံးပြုခွင့်ရှိသည်
 
-မော်ဒယ်များ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude အခမဲ့)
 
 ```bash
-Dashboard → Kiro ကို ချိတ်ဆက်ပါ → AWS Builder ID သို့မဟုတ် Google/GitHub → တစ်လလျှင် credit ~50
+Dashboard → Kiro ချိတ်ဆက်ရန် → AWS Builder ID သို့မဟုတ် Google/GitHub → တစ်လလျှင် credits ~၅၀
 
-မော်ဒယ်များ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

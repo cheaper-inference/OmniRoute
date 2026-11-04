@@ -116,7 +116,7 @@ Rochtain trí: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Socrú Soláthraithe
 
-Chun naisc eochracha API a chur leis ar an mórchóir ó chomhad CSV nó JSON, úsáid **Deais → Soláthraithe → Iompórtáil ó chomhad**. Tá na colúin de réir suímh (`provider,name,apiKey,baseUrl,priority`); ní mór do `provider` a bheith ann cheana mar sholáthraí bainistithe nó mar nód comhoiriúnach. Féach [Soláthraithe a iompórtáil ó chomhad CSV nó JSON](../providers/CSV-IMPORT.md).
+Chun naisc eochracha API a chur leis ar an mórchóir ó chomhad CSV nó JSON, úsáid **Deais → Soláthraithe → Iompórtáil ó chomhad**. Tá na colúin suite de réir a suímh (`provider,name,apiKey,baseUrl,priority`); ní mór do `provider` a bheith ann cheana mar sholáthraí bainistithe nó mar nód comhoiriúnach. Féach [Iompórtáil soláthraithe ó chomhad CSV nó JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Soláthraithe Síntiúis
 
@@ -124,31 +124,31 @@ Chun naisc eochracha API a chur leis ar an mórchóir ó chomhad CSV nó JSON, �
 
 ```bash
 Deais → Soláthraithe → Ceangail Claude Code
-→ Logáil isteach OAuth → Athnuachan uathoibríoch comhartha
-→ Rianú cuóta 5 huaire + seachtainiúil
+→ Logáil isteach le OAuth → Athnuachan uathoibríoch comhartha
+→ Rianú cuóta 5 uair an chloig + seachtainiúil
 
-Samhlacha:
+Múnlaí:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Leid Ghairmiúil:** Úsáid Opus le haghaidh tascanna casta, agus Sonnet le haghaidh luais. Rianaíonn OmniRoute an cuóta de réir samhla!
+**Leid Pro:** Úsáid Opus le haghaidh tascanna casta, agus Sonnet ar mhaithe le luas. Rianaíonn OmniRoute an cuóta de réir an mhúnla!
 
-Nach bhfuil brabhsálaí ar óstach OmniRoute? Rith `claude setup-token` áit ar bith a bhfuil Claude Code logáilte isteach agus greamaigh an comhartha bliana sa chluaisín **Comhartha Socraithe**. Féach [Claude Code le comhartha socraithe](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Níl brabhsálaí ar óstach OmniRoute? Rith `claude setup-token` áit ar bith ina bhfuil Claude Code logáilte isteach agus greamaigh an comhartha bliana amháin sa chluaisín **Comhartha Socraithe**. Féach [Claude Code le comhartha socraithe](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Caomhnaíonn bealaí atá comhoiriúnach le Claude agus Claude Code an iarracht smaointeoireachta `max` do shamhlacha Opus agus Sonnet.
-Ní ghlacann samhlacha Haiku leis an tsraith iarrachta `max`, mar sin íslíonn OmniRoute an t-iarratas sin
-go buiséad ard smaointeoireachta sula seoltar ar aghaidh é.
+Caomhnaíonn bealaí atá comhoiriúnach le Claude agus Claude Code an iarracht smaointeoireachta `max` do mhúnlaí
+Opus agus Sonnet. Ní ghlacann múnlaí Haiku leis an tsraith iarrachta `max`, mar sin íslíonn OmniRoute an
+t-iarratas sin go buiséad ard smaointeoireachta sula seoltar ar aghaidh é.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Deais → Soláthraithe → Ceangail Codex
-→ Logáil isteach OAuth (port 1455)
-→ Athshocrú 5 huaire + seachtainiúil
+→ Logáil isteach le OAuth (port 1455)
+→ Athshocrú 5 uair an chloig + seachtainiúil
 
-Samhlacha:
+Múnlaí:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,9 +160,9 @@ Samhlacha:
 ```bash
 Deais → Soláthraithe → Ceangail GitHub
 → OAuth trí GitHub
-→ Athshocrú míosúil (1ú lá den mhí)
+→ Athshocrú míosúil (an 1ú lá den mhí)
 
-Samhlacha:
+Múnlaí:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -170,57 +170,72 @@ Samhlacha:
   gh/gemini-3.1-pro-preview
 ```
 
+**Creidmheasanna AI (billeáil bunaithe ar chomharthaí).** Nuair a thuairiscíonn GitHub `credits_used` don
+chuntas, taispeánann an cárta Teorainneacha Soláthraí sraith **Creidmheasanna AI** leis na creidmheasanna
+a úsáideadh sa tréimhse bhilleála reatha, lena n-áirítear ar phleananna eagraíochta neamhtheoranta.
+
+**Teorainn áitiúil Creidmheasanna AI.** Cuir nasc GitHub in eagar agus socraigh **teorainn Creidmheasanna AI in aghaidh
+na tréimhse billeála** (`providerSpecificData.githubCreditLimit`). Díchumasaíonn réimse folamh é; scipeálann `0`
+an nasc i gcónaí. Nuair atá an léamh úsáide is déanaí cothrom leis an teorainn nó os a cionn, ní roghnaíonn
+an cuntas an nasc sin agus filleann an ródú ar do naisc eile, ar an mbealach céanna le scoith bheartais
+cuóta. Léann an tseiceáil an úsáid a bhailíonn an t-athnuachan thréimhsiúil cuóta cheana féin — ní ghlaonn
+sé ar GitHub ar chosán na hiarrata riamh — agus fágann sé oscailte é i gcás teipe: ní chuireann léamh atá
+ar iarraidh nó seanléamh (níos sine ná 15 nóiméad, nó ó thréimhse bhilleála a athshocraíodh cheana) bac ar
+an nasc. Is cosaint áitiúil é seo, **ní uasteorainn chaiteachais ráthaithe**: d’fhéadfadh moilleanna i
+dtuairisciú GitHub, an t-eatramh athnuachana, iarratais atá ar siúl agus úsáid lasmuigh de OmniRoute dul
+thar an teorainn. Úsáid rialuithe caiteachais GitHub féin le haghaidh teorainn chrua.
+
 ### 💰 Soláthraithe Saora
 
 #### GLM-4.7 (Athshocrú laethúil, $0.6/1M)
 
 1. Cláraigh: [Zhipu AI](https://open.bigmodel.cn)
-2. Faigh eochair API ó Coding Plan
-3. Deais → Cuir Eochair API Leis: Soláthraí: `glm`, Eochair API: `your-key`
+2. Faigh eochair API ón bPlean Códaithe
+3. Deais → Cuir Eochair API leis: Soláthraí: `glm`, Eochair API: `your-key`
 
-**Úsáid:** `glm/glm-4.7` — **Leid Ghairmiúil:** Cuireann Coding Plan cuóta 3× ar fáil ar 1/7 den chostas! Athshocraítear go laethúil ag 10:00 AM.
+**Úsáid:** `glm/glm-4.7` — **Leid Pro:** Cuireann an Plean Códaithe cuóta 3× ar fáil ar 1/7 den chostas! Athshocraítear go laethúil é ag 10:00 AM.
 
-#### MiniMax M2.1 (Athshocrú 5 uair, $0.20/1M)
+#### MiniMax M2.1 (Athshocrú 5 uair an chloig, $0.20/1M)
 
 1. Cláraigh: [MiniMax](https://www.minimax.io)
-2. Faigh eochair API → Deais → Cuir Eochair API Leis
+2. Faigh eochair API → Deais → Cuir Eochair API leis
 
-**Úsáid:** `minimax/MiniMax-M2.1` — **Leid Ghairmiúil:** An rogha is saoire do chomhthéacs fada (1M comhartha)!
+**Úsáid:** `minimax/MiniMax-M2.1` — **Leid Pro:** An rogha is saoire le haghaidh comhthéacs fada (1M comhartha)!
 
-#### Kimi K2 ($9/mí ar ráta seasta)
+#### Kimi K2 ($9/mí ar ráta comhréidh)
 
 1. Liostáil: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Faigh eochair API → Deais → Cuir Eochair API Leis
+2. Faigh eochair API → Deais → Cuir Eochair API leis
 
-**Úsáid:** `kimi/kimi-k2.5` — **Leid Ghairmiúil:** $9/mí seasta ar 10M comhartha = costas éifeachtach $0.90/1M!
+**Úsáid:** `kimi/kimi-k2.5` — **Leid Pro:** $9/mí seasta le haghaidh 10M comhartha = costas éifeachtach $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Cláraigh: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Cruthaigh eochair API Qianfan → Deais → Cuir Eochair API Leis: Soláthraí: `qianfan`
+2. Cruthaigh eochair API Qianfan → Deais → Cuir Eochair API leis: Soláthraí: `qianfan`
 
-**Úsáid:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, nó ID samhla eile Qianfan atá comhoiriúnach le OpenAI.
+**Úsáid:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, nó aitheantas samhla eile atá comhoiriúnach le OpenAI Qianfan.
 
 ### 🆓 Soláthraithe SAOR IN AISCE
 
-Tá lasc taobh le **Ní theastaíonn fíordheimhniú** ag soláthraithe saor in aisce nach dteastaíonn fíordheimhniú uathu ar leathanach a soláthraí.
-Má mhúchtar é, díchumasaítear an soláthraí sin, baintear é de na hamhairc chumraithe/dhlútha Soláthraithe, agus
-baintear a shamhlacha ó `/v1/models`.
+Tá lasc in aice le **Níl fíordheimhniú riachtanach** ag soláthraithe saor in aisce gan fíordheimhniú ar a leathanach soláthraí.
+Má mhúchtar é, díchumasaítear an soláthraí sin, baintear é de na hamhairc Soláthraithe cumraithe/dhlúth, agus
+baintear a mhúnlaí de `/v1/models`.
 
-#### Qoder (9 samhail SAOR IN AISCE)
+#### Qoder (9 múnla SAOR IN AISCE)
 
 ```bash
-Deais → Ceangail Qoder → Logáil isteach OAuth → Tá rochtain faoi réir theorainneacha reatha an tsoláthraí
+Deais → Ceangail Qoder → Logáil isteach le OAuth → Tá rochtain faoi réir theorainneacha reatha an tsoláthraí
 
-Samhlacha: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Múnlaí: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude SAOR IN AISCE)
 
 ```bash
-Deais → Ceangail Kiro → AWS Builder ID nó Google/GitHub → ~50 creidiúint/mí
+Deais → Ceangail Kiro → AWS Builder ID nó Google/GitHub → ~50 creidmheas/mí
 
-Samhlacha: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Múnlaí: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

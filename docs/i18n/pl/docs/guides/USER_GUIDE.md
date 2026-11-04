@@ -120,16 +120,16 @@ Dostęp przez: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Konfiguracja dostawców
 
-Aby zbiorczo dodać połączenia z kluczami API z pliku CSV lub JSON, użyj opcji **Panel → Dostawcy → Importuj z pliku**. Kolumny są pozycyjne (`provider,name,apiKey,baseUrl,priority`); `provider` musi już istnieć jako zarządzany dostawca lub zgodny węzeł. Zobacz [Importowanie dostawców z pliku CSV lub JSON](../providers/CSV-IMPORT.md).
+Aby masowo dodać połączenia z kluczami API z pliku CSV lub JSON, użyj opcji **Panel → Dostawcy → Importuj z pliku**. Kolumny są pozycyjne (`provider,name,apiKey,baseUrl,priority`); `provider` musi już istnieć jako zarządzany dostawca lub kompatybilny węzeł. Zobacz [Importowanie dostawców z pliku CSV lub JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Dostawcy subskrypcyjni
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Panel → Dostawcy → Połącz Claude Code
+Panel → Dostawcy → Połącz z Claude Code
 → Logowanie OAuth → Automatyczne odświeżanie tokenu
-→ Śledzenie limitów 5-godzinnych i tygodniowych
+→ Śledzenie limitu 5-godzinnego + tygodniowego
 
 Modele:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modele:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Wskazówka:** Używaj Opus do złożonych zadań, a Sonnet, gdy liczy się szybkość. OmniRoute śledzi limit osobno dla każdego modelu!
+**Wskazówka:** Używaj Opus do złożonych zadań, a Sonnet, gdy liczy się szybkość. OmniRoute śledzi limity dla każdego modelu!
 
-Brak przeglądarki na hoście OmniRoute? Uruchom `claude setup-token` w dowolnym miejscu, w którym użytkownik jest zalogowany do Claude Code, i wklej roczny token na karcie **Token konfiguracji**. Zobacz [Claude Code z tokenem konfiguracji](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nie masz przeglądarki na hoście OmniRoute? Uruchom `claude setup-token` w dowolnym miejscu, gdzie jesteś zalogowany w Claude Code, i wklej roczny token do karty **Token konfiguracji**. Zobacz [Claude Code z tokenem konfiguracji](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Trasy zgodne z Claude i Claude Code zachowują poziom intensywności rozumowania `max` dla modeli Opus i Sonnet. Modele Haiku nie obsługują poziomu intensywności `max`, dlatego przed wysłaniem żądania do dostawcy nadrzędnego OmniRoute obniża je do wysokiego budżetu rozumowania.
+Trasy zgodne z Claude i Claude Code zachowują maksymalny poziom nakładu na rozumowanie `max` dla
+modeli Opus i Sonnet. Modele Haiku nie akceptują poziomu nakładu `max`, dlatego OmniRoute obniża to
+żądanie do wysokiego budżetu na rozumowanie przed wysłaniem go do dostawcy nadrzędnego.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Panel → Dostawcy → Połącz Codex
+Panel → Dostawcy → Połącz z Codex
 → Logowanie OAuth (port 1455)
-→ Reset co 5 godzin + reset tygodniowy
+→ Resetowanie co 5 godzin + reset tygodniowy
 
 Modele:
   cx/gpt-5.5
@@ -160,7 +162,7 @@ Modele:
 #### GitHub Copilot
 
 ```bash
-Panel → Dostawcy → Połącz GitHub
+Panel → Dostawcy → Połącz z GitHub
 → OAuth przez GitHub
 → Reset miesięczny (1. dzień miesiąca)
 
@@ -172,55 +174,71 @@ Modele:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Tani dostawcy
+**Kredyty AI (rozliczanie na podstawie tokenów).** Gdy GitHub zgłasza dla konta wartość `credits_used`,
+karta Limitów dostawcy wyświetla wiersz **Kredyty AI** z liczbą kredytów
+zużytych w bieżącym okresie rozliczeniowym, także w przypadku nielimitowanych planów organizacji.
 
-#### GLM-4.7 (reset codzienny, $0.6/1M)
+**Lokalny limit kredytów AI.** Edytuj połączenie z GitHub i ustaw **Limit kredytów AI na
+okres rozliczeniowy** (`providerSpecificData.githubCreditLimit`). Pusta wartość wyłącza limit; `0`
+zawsze pomija połączenie. Gdy ostatni odczyt użycia jest równy limitowi lub go przekracza,
+wybór konta pomija to połączenie, a routing przełącza się na inne połączenia — tak samo jak w
+przypadku odcięcia przez zasady limitu. Sprawdzane jest użycie zebrane już podczas okresowego
+odświeżania limitu — GitHub nigdy nie jest wywoływany na ścieżce żądania — a mechanizm działa
+w trybie fail-open: brak odczytu lub nieaktualny odczyt (starszy niż 15 minut albo pochodzący z
+okresu rozliczeniowego, który już się zresetował) nie blokuje połączenia. To lokalne zabezpieczenie,
+**a nie gwarantowany limit wydatków**: opóźnienia w raportowaniu przez GitHub, interwał odświeżania,
+żądania będące w toku oraz użycie poza OmniRoute mogą spowodować przekroczenie limitu. Aby
+ustawić twardy limit, użyj własnych mechanizmów kontroli wydatków GitHub.
+
+### 💰 Niedrodzy dostawcy
+
+#### GLM-4.7 (reset dzienny, 0,6 USD/1 mln)
 
 1. Zarejestruj się: [Zhipu AI](https://open.bigmodel.cn)
 2. Uzyskaj klucz API z Coding Plan
 3. Panel → Dodaj klucz API: Dostawca: `glm`, Klucz API: `your-key`
 
-**Użycie:** `glm/glm-4.7` — **Wskazówka:** Coding Plan oferuje 3-krotnie większy limit za 1/7 ceny! Reset codziennie o 10:00.
+**Użycie:** `glm/glm-4.7` — **Wskazówka:** Coding Plan oferuje 3× większy limit przy koszcie 1/7! Reset codziennie o 10:00.
 
-#### MiniMax M2.1 (reset co 5 godz., $0.20/1M)
+#### MiniMax M2.1 (reset co 5 godzin, 0,20 USD/1 mln)
 
 1. Zarejestruj się: [MiniMax](https://www.minimax.io)
 2. Uzyskaj klucz API → Panel → Dodaj klucz API
 
-**Użycie:** `minimax/MiniMax-M2.1` — **Wskazówka:** Najtańsza opcja dla długiego kontekstu (1M tokenów)!
+**Użycie:** `minimax/MiniMax-M2.1` — **Wskazówka:** Najtańsza opcja dla długiego kontekstu (1 mln tokenów)!
 
-#### Kimi K2 (stała opłata $9/miesiąc)
+#### Kimi K2 (stała opłata 9 USD/miesiąc)
 
 1. Wykup subskrypcję: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Uzyskaj klucz API → Panel → Dodaj klucz API
 
-**Użycie:** `kimi/kimi-k2.5` — **Wskazówka:** Stałe $9/miesiąc za 10M tokenów oznacza efektywny koszt $0.90/1M!
+**Użycie:** `kimi/kimi-k2.5` — **Wskazówka:** Stała opłata 9 USD/miesiąc za 10 mln tokenów = efektywny koszt 0,90 USD/1 mln!
 
 #### Baidu Qianfan / ERNIE
 
 1. Zarejestruj się: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Utwórz klucz API Qianfan → Panel → Dodaj klucz API: Dostawca: `qianfan`
 
-**Użycie:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` lub inny identyfikator modelu Qianfan zgodnego z OpenAI.
+**Użycie:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` lub inny identyfikator modelu Qianfan zgodny z OpenAI.
 
 ### 🆓 DARMOWI dostawcy
 
-Dostawcy niewymagający uwierzytelniania mają przełącznik obok opcji **Uwierzytelnianie nie jest wymagane** na swojej stronie.
-Wyłączenie go dezaktywuje danego dostawcę, usuwa go ze skonfigurowanych i kompaktowych widoków dostawców oraz
-usuwa jego modele z `/v1/models`.
+Darmowi dostawcy niewymagający uwierzytelniania mają przełącznik obok opcji **Uwierzytelnianie niewymagane** na stronie dostawcy.
+Wyłączenie go dezaktywuje dostawcę, usuwa go z widoków skonfigurowanych dostawców i widoku kompaktowego,
+a także usuwa jego modele z `/v1/models`.
 
 #### Qoder (9 DARMOWYCH modeli)
 
 ```bash
-Panel → Połącz Qoder → Logowanie OAuth → Dostęp podlega aktualnym limitom dostawcy
+Panel → Połącz z Qoder → Logowanie OAuth → Dostęp zależy od bieżących limitów dostawcy
 
 Modele: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ZA DARMO)
+#### Kiro (DARMOWY Claude)
 
 ```bash
-Panel → Połącz Kiro → AWS Builder ID lub Google/GitHub → ~50 kredytów/miesiąc
+Panel → Połącz z Kiro → AWS Builder ID lub Google/GitHub → około 50 kredytów/miesiąc
 
 Modele: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

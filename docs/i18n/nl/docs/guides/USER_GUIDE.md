@@ -118,9 +118,9 @@ Toegang via: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Providerconfiguratie
+## 📖 Provider instellen
 
-Om API-sleutelverbindingen in bulk toe te voegen vanuit een CSV- of JSON-bestand, gebruikt u **Dashboard → Providers → Import from file**. De kolommen zijn positioneel (`provider,name,apiKey,baseUrl,priority`); `provider` moet al bestaan als een beheerde provider of compatibele node. Zie [Providers importeren vanuit een CSV- of JSON-bestand](../providers/CSV-IMPORT.md).
+Gebruik **Dashboard → Providers → Import from file** om verbindingen met API-sleutels in bulk toe te voegen vanuit een CSV- of JSON-bestand. Kolommen zijn positioneel (`provider,name,apiKey,baseUrl,priority`); `provider` moet al bestaan als beheerde provider of als compatibel knooppunt. Zie [Providers importeren vanuit een CSV- of JSON-bestand](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abonnementsproviders
 
@@ -128,10 +128,10 @@ Om API-sleutelverbindingen in bulk toe te voegen vanuit een CSV- of JSON-bestand
 
 ```bash
 Dashboard → Providers → Connect Claude Code
-→ OAuth-aanmelding → Automatische tokenvernieuwing
-→ Quotumbewaking per 5 uur + per week
+→ OAuth login → Auto token refresh
+→ 5-hour + weekly quota tracking
 
-Modellen:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
@@ -139,18 +139,20 @@ Modellen:
 
 **Pro-tip:** Gebruik Opus voor complexe taken en Sonnet voor snelheid. OmniRoute houdt het quotum per model bij!
 
-Geen browser op de OmniRoute-host? Voer `claude setup-token` uit op een apparaat waarop Claude Code is aangemeld en plak het één jaar geldige token in het tabblad **Setup Token**. Zie [Claude Code met een setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Geen browser op de OmniRoute-host? Voer `claude setup-token` uit op een willekeurige plek waar Claude Code is ingelogd en plak het token met een geldigheidsduur van één jaar in het tabblad **Setup Token**. Zie [Claude Code met een setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Routes die compatibel zijn met Claude en Claude Code behouden de denkinspanning `max` voor Opus- en Sonnet-modellen. Haiku-modellen accepteren het inspanningsniveau `max` niet, dus verlaagt OmniRoute dat verzoek naar een hoog denkbudget voordat het upstream wordt verzonden.
+Claude- en Claude Code-compatibele routes behouden de `max`-denkintensiteit voor Opus- en Sonnet-
+modellen. Haiku-modellen accepteren de `max`-intensiteitslaag niet, dus verlaagt OmniRoute dat
+verzoek naar een hoog denkbudget voordat het upstream wordt verzonden.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Dashboard → Providers → Connect Codex
-→ OAuth-aanmelding (poort 1455)
-→ Reset per 5 uur + per week
+→ OAuth login (port 1455)
+→ 5-hour + weekly reset
 
-Modellen:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,9 +164,9 @@ Modellen:
 ```bash
 Dashboard → Providers → Connect GitHub
 → OAuth via GitHub
-→ Maandelijkse reset (1e van de maand)
+→ Monthly reset (1st of month)
 
-Modellen:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +174,74 @@ Modellen:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Voordelige providers
+**AI-tegoed (facturering op basis van tokens).** Wanneer GitHub `credits_used` voor het
+account rapporteert, toont de kaart Provider Limits een rij **AI Credits** met het verbruikte
+tegoed in de huidige factureringsperiode, ook bij onbeperkte organisatieabonnementen.
+
+**Lokale limiet voor AI-tegoed.** Bewerk een GitHub-verbinding en stel **AI Credits limit per
+billing period** in (`providerSpecificData.githubCreditLimit`). Als dit veld leeg is, is de
+limiet uitgeschakeld; `0` slaat de verbinding altijd over. Wanneer de laatste gebruiksmeting
+gelijk is aan of hoger is dan de limiet, wordt deze verbinding overgeslagen bij het selecteren
+van een account en valt de routering terug op je andere verbindingen, op dezelfde manier als
+bij een afkapgrens op basis van quotumbeleid. De controle leest het gebruik dat al door de
+periodieke quotumvernieuwing wordt verzameld — er wordt nooit een GitHub-aanroep uitgevoerd op
+het aanvraagpad — en werkt fail-open: een ontbrekende of verouderde meting (ouder dan 15 minuten
+of afkomstig uit een factureringsperiode die al is gereset) blokkeert de verbinding niet. Dit is
+een lokale beveiliging, **geen gegarandeerde bestedingslimiet**: vertragingen in GitHub-
+rapportages, het vernieuwingsinterval, lopende aanvragen en gebruik buiten OmniRoute kunnen de
+limiet overschrijden. Gebruik de eigen bestedingscontroles van GitHub voor een harde limiet.
+
+### 💰 Goedkope providers
 
 #### GLM-4.7 (dagelijkse reset, $0.6/1M)
 
-1. Meld u aan: [Zhipu AI](https://open.bigmodel.cn)
-2. Verkrijg een API-sleutel via Coding Plan
+1. Registreer je: [Zhipu AI](https://open.bigmodel.cn)
+2. Haal een API-sleutel op via Coding Plan
 3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Gebruik:** `glm/glm-4.7` — **Pro-tip:** Coding Plan biedt 3× zoveel quotum tegen 1/7 van de kosten! Dagelijkse reset om 10:00 uur.
+**Gebruik:** `glm/glm-4.7` — **Pro-tip:** Coding Plan biedt 3× zoveel quotum voor 1/7 van de kosten! Dagelijkse reset om 10:00 uur.
 
-#### MiniMax M2.1 (reset per 5 uur, $0.20/1M)
+#### MiniMax M2.1 (reset na 5 uur, $0.20/1M)
 
-1. Meld u aan: [MiniMax](https://www.minimax.io)
-2. Verkrijg een API-sleutel → Dashboard → Add API Key
+1. Registreer je: [MiniMax](https://www.minimax.io)
+2. Haal een API-sleutel op → Dashboard → Add API Key
 
-**Gebruik:** `minimax/MiniMax-M2.1` — **Pro-tip:** De goedkoopste optie voor een lange context (1M tokens)!
+**Gebruik:** `minimax/MiniMax-M2.1` — **Pro-tip:** De goedkoopste optie voor lange contexten (1M tokens)!
 
-#### Kimi K2 ($9/maand, vast tarief)
+#### Kimi K2 ($9/maand vast)
 
-1. Neem een abonnement: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Verkrijg een API-sleutel → Dashboard → Add API Key
+1. Abonneer je: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Haal een API-sleutel op → Dashboard → Add API Key
 
-**Gebruik:** `kimi/kimi-k2.5` — **Pro-tip:** Een vaste prijs van $9/maand voor 10M tokens = effectief $0.90/1M!
+**Gebruik:** `kimi/kimi-k2.5` — **Pro-tip:** Vaste prijs van $9/maand voor 10M tokens = effectieve kosten van $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. Meld u aan: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Maak een Qianfan-API-sleutel aan → Dashboard → Add API Key: Provider: `qianfan`
+1. Registreer je: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. Maak een Qianfan API-sleutel aan → Dashboard → Add API Key: Provider: `qianfan`
 
-**Gebruik:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` of een andere OpenAI-compatibele model-ID van Qianfan.
+**Gebruik:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` of een andere Qianfan OpenAI-compatibele model-ID.
 
 ### 🆓 GRATIS providers
 
-Providers zonder authenticatie hebben op hun providerpagina een schakelaar naast **No authentication required**.
-Als u deze uitschakelt, wordt die provider uitgeschakeld, uit de geconfigureerde/compacte weergaven van Providers verwijderd en
-worden de bijbehorende modellen uit `/v1/models` verwijderd.
+Gratis providers zonder authenticatie hebben een schakelaar naast **No authentication required** op hun providerpagina.
+Als je deze uitschakelt, wordt die provider gedeactiveerd, verwijderd uit de weergaven Providers configured/compact
+en worden de modellen ervan verwijderd uit `/v1/models`.
 
 #### Qoder (9 GRATIS modellen)
 
 ```bash
-Dashboard → Connect Qoder → OAuth-aanmelding → Toegang is onderhevig aan de huidige providerlimieten
+Dashboard → Connect Qoder → OAuth login → Access is subject to current provider limits
 
-Modellen: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude GRATIS)
+#### Kiro (GRATIS Claude)
 
 ```bash
-Dashboard → Connect Kiro → AWS Builder ID of Google/GitHub → ~50 credits/maand
+Dashboard → Connect Kiro → AWS Builder ID or Google/GitHub → ~50 credits/month
 
-Modellen: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

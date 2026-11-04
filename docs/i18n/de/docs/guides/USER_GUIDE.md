@@ -118,18 +118,18 @@ Zugriff über: WhatsApp, Telegram, Slack, Discord, iMessage, Signal ...
 
 ---
 
-## 📖 Anbieter einrichten
+## 📖 Anbietereinrichtung
 
-Um API-Schlüssel-Verbindungen gesammelt aus einer CSV- oder JSON-Datei hinzuzufügen, verwenden Sie **Dashboard → Anbieter → Aus Datei importieren**. Die Spalten sind positionsabhängig (`provider,name,apiKey,baseUrl,priority`); `provider` muss bereits als verwalteter Anbieter oder kompatibler Knoten vorhanden sein. Siehe [Anbieter aus einer CSV- oder JSON-Datei importieren](../providers/CSV-IMPORT.md).
+Um API-Schlüssel-Verbindungen gesammelt aus einer CSV- oder JSON-Datei hinzuzufügen, verwenden Sie **Dashboard → Providers → Import from file**. Die Spalten sind positionsabhängig (`provider,name,apiKey,baseUrl,priority`); `provider` muss bereits als verwalteter Anbieter oder kompatibler Knoten vorhanden sein. Siehe [Anbieter aus einer CSV- oder JSON-Datei importieren](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abonnementanbieter
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Anbieter → Claude Code verbinden
+Dashboard → Providers → Connect Claude Code
 → OAuth-Anmeldung → Automatische Token-Aktualisierung
-→ Kontingentüberwachung über 5 Stunden + wöchentlich
+→ Verfolgung des 5-Stunden- und Wochenkontingents
 
 Modelle:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modelle:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profi-Tipp:** Verwenden Sie Opus für komplexe Aufgaben und Sonnet für Geschwindigkeit. OmniRoute überwacht das Kontingent pro Modell!
+**Profi-Tipp:** Verwenden Sie Opus für komplexe Aufgaben und Sonnet für Geschwindigkeit. OmniRoute verfolgt das Kontingent pro Modell!
 
-Kein Browser auf dem OmniRoute-Host? Führen Sie `claude setup-token` an einem beliebigen Ort aus, an dem Claude Code angemeldet ist, und fügen Sie das ein Jahr gültige Token in den Tab **Setup-Token** ein. Siehe [Claude Code mit einem Setup-Token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Kein Browser auf dem OmniRoute-Host? Führen Sie `claude setup-token` an einem beliebigen Ort aus, an dem Claude Code angemeldet ist, und fügen Sie das einjährige Token in den Tab **Setup Token** ein. Siehe [Claude Code mit einem Setup-Token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude- und Claude-Code-kompatible Routen behalten für Opus- und Sonnet-Modelle den Denkaufwand `max` bei. Haiku-Modelle unterstützen die Aufwandsstufe `max` nicht. Daher stuft OmniRoute diese Anfrage auf ein hohes Denkbudget herab, bevor sie an den Upstream-Anbieter gesendet wird.
+Claude- und Claude-Code-kompatible Routen bewahren den Denkaufwand `max` für Opus- und Sonnet-
+Modelle. Haiku-Modelle akzeptieren die Aufwandsstufe `max` nicht, daher stuft OmniRoute diese
+Anfrage vor dem Weiterleiten an den Upstream auf ein hohes Denkbudget zurück.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Anbieter → Codex verbinden
+Dashboard → Providers → Connect Codex
 → OAuth-Anmeldung (Port 1455)
-→ Zurücksetzung nach 5 Stunden + wöchentlich
+→ Zurücksetzung nach 5 Stunden und wöchentlich
 
 Modelle:
   cx/gpt-5.5
@@ -160,7 +162,7 @@ Modelle:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Anbieter → GitHub verbinden
+Dashboard → Providers → Connect GitHub
 → OAuth über GitHub
 → Monatliche Zurücksetzung (am 1. des Monats)
 
@@ -172,46 +174,55 @@ Modelle:
   gh/gemini-3.1-pro-preview
 ```
 
+**KI-Guthaben (tokenbasierte Abrechnung).** Wenn GitHub für das Konto `credits_used` meldet, zeigt die Karte „Anbieterlimits“ eine Zeile **AI Credits** mit dem im aktuellen Abrechnungszeitraum verbrauchten Guthaben an, auch bei unbegrenzten Organisationsplänen.
+
+**Lokales Limit für KI-Guthaben.** Bearbeiten Sie eine GitHub-Verbindung und legen Sie **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`) fest. Ein leeres Feld deaktiviert das Limit; `0`
+überspringt die Verbindung immer. Wenn der letzte Nutzungswert mindestens dem Limit entspricht,
+überspringt die Kontenauswahl diese Verbindung, und das Routing greift auf Ihre anderen
+Verbindungen zurück – genauso wie bei einer Abschaltung durch eine Kontingentrichtlinie. Die Prüfung verwendet die Nutzung, die die regelmäßige Kontingentaktualisierung bereits erfasst – sie ruft GitHub niemals im Anfragepfad auf – und lässt die Verbindung bei Fehlern zu: Ein fehlender oder veralteter Messwert (älter als 15 Minuten oder aus einem bereits zurückgesetzten Abrechnungszeitraum) blockiert die Verbindung nicht. Dies ist eine lokale Schutzmaßnahme, **keine garantierte Ausgabenobergrenze**: Verzögerungen bei der Meldung durch GitHub, das Aktualisierungsintervall, laufende Anfragen und die Nutzung außerhalb von OmniRoute können dazu führen, dass das Limit überschritten wird. Verwenden Sie für eine harte Obergrenze die eigenen Ausgabenkontrollen von GitHub.
+
 ### 💰 Günstige Anbieter
 
-#### GLM-4.7 (tägliche Zurücksetzung, 0,6 $/1 Mio.)
+#### GLM-4.7 (Tägliche Zurücksetzung, 0,6 $/1 Mio.)
 
-1. Registrieren: [Zhipu AI](https://open.bigmodel.cn)
-2. API-Schlüssel aus dem Coding Plan abrufen
-3. Dashboard → API-Schlüssel hinzufügen: Anbieter: `glm`, API-Schlüssel: `your-key`
+1. Registrieren Sie sich bei: [Zhipu AI](https://open.bigmodel.cn)
+2. Fordern Sie einen API-Schlüssel aus dem Coding Plan an
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Verwendung:** `glm/glm-4.7` — **Profi-Tipp:** Der Coding Plan bietet das dreifache Kontingent zu einem Siebtel der Kosten! Tägliche Zurücksetzung um 10:00 Uhr.
+**Verwendung:** `glm/glm-4.7` — **Profi-Tipp:** Der Coding Plan bietet das 3-fache Kontingent zu 1/7 der Kosten! Tägliche Zurücksetzung um 10:00 Uhr.
 
-#### MiniMax M2.1 (Zurücksetzung nach 5 Std., 0,20 $/1 Mio.)
+#### MiniMax M2.1 (Zurücksetzung nach 5 Stunden, 0,20 $/1 Mio.)
 
-1. Registrieren: [MiniMax](https://www.minimax.io)
-2. API-Schlüssel abrufen → Dashboard → API-Schlüssel hinzufügen
+1. Registrieren Sie sich bei: [MiniMax](https://www.minimax.io)
+2. Fordern Sie einen API-Schlüssel an → Dashboard → Add API Key
 
 **Verwendung:** `minimax/MiniMax-M2.1` — **Profi-Tipp:** Günstigste Option für lange Kontexte (1 Mio. Token)!
 
-#### Kimi K2 (Pauschalpreis von 9 $/Monat)
+#### Kimi K2 (9 $/Monat pauschal)
 
-1. Abonnieren: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API-Schlüssel abrufen → Dashboard → API-Schlüssel hinzufügen
+1. Abonnieren Sie: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Fordern Sie einen API-Schlüssel an → Dashboard → Add API Key
 
-**Verwendung:** `kimi/kimi-k2.5` — **Profi-Tipp:** Feste 9 $/Monat für 10 Mio. Token = effektive Kosten von 0,90 $/1 Mio.!
+**Verwendung:** `kimi/kimi-k2.5` — **Profi-Tipp:** Pauschal 9 $/Monat für 10 Mio. Token = effektive Kosten von 0,90 $/1 Mio.!
 
 #### Baidu Qianfan / ERNIE
 
-1. Registrieren: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Einen Qianfan-API-Schlüssel erstellen → Dashboard → API-Schlüssel hinzufügen: Anbieter: `qianfan`
+1. Registrieren Sie sich bei: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. Erstellen Sie einen Qianfan-API-Schlüssel → Dashboard → Add API Key: Provider: `qianfan`
 
-**Verwendung:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` oder eine andere OpenAI-kompatible Qianfan-Modell-ID.
+**Verwendung:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` oder eine andere mit Qianfan OpenAI kompatible Modell-ID.
 
 ### 🆓 KOSTENLOSE Anbieter
 
-Anbieter ohne Authentifizierung verfügen auf ihrer Anbieterseite über einen Schalter neben **Keine Authentifizierung erforderlich**.
-Wenn Sie ihn ausschalten, wird der betreffende Anbieter deaktiviert, aus den konfigurierten und kompakten Anbieteransichten entfernt und seine Modelle werden aus `/v1/models` entfernt.
+Kostenlose Anbieter ohne Authentifizierung verfügen auf ihrer Anbieterseite neben **No authentication required** über einen Schalter.
+Wenn Sie ihn deaktivieren, wird der Anbieter deaktiviert, aus den Ansichten „Providers configured“ und „compact“ entfernt und
+seine Modelle werden aus `/v1/models` entfernt.
 
 #### Qoder (9 KOSTENLOSE Modelle)
 
 ```bash
-Dashboard → Qoder verbinden → OAuth-Anmeldung → Der Zugriff unterliegt den aktuellen Anbieterbeschränkungen
+Dashboard → Connect Qoder → OAuth-Anmeldung → Der Zugriff unterliegt den aktuellen Anbieterlimits
 
 Modelle: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -219,7 +230,7 @@ Modelle: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if
 #### Kiro (Claude KOSTENLOS)
 
 ```bash
-Dashboard → Kiro verbinden → AWS Builder ID oder Google/GitHub → ~50 Guthabenpunkte/Monat
+Dashboard → Connect Kiro → AWS Builder ID oder Google/GitHub → ca. 50 Guthaben/Monat
 
 Modelle: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

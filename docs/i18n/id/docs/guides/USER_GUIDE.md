@@ -118,16 +118,16 @@ Akses melalui: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Penyiapan Penyedia
+## 📖 Penyiapan Provider
 
-Untuk menambahkan koneksi kunci API secara massal dari file CSV atau JSON, gunakan **Dasbor → Penyedia → Impor dari file**. Kolom bersifat posisional (`provider,name,apiKey,baseUrl,priority`); `provider` harus sudah tersedia sebagai penyedia terkelola atau node yang kompatibel. Lihat [Mengimpor penyedia dari file CSV atau JSON](../providers/CSV-IMPORT.md).
+Untuk menambahkan koneksi kunci API secara massal dari file CSV atau JSON, gunakan **Dasbor → Provider → Impor dari file**. Kolom bersifat posisional (`provider,name,apiKey,baseUrl,priority`); `provider` harus sudah ada sebagai provider terkelola atau node yang kompatibel. Lihat [Mengimpor provider dari file CSV atau JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Penyedia Langganan
+### 🔐 Provider Langganan
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dasbor → Penyedia → Hubungkan Claude Code
+Dasbor → Provider → Hubungkan Claude Code
 → Login OAuth → Penyegaran token otomatis
 → Pelacakan kuota 5 jam + mingguan
 
@@ -137,16 +137,18 @@ Model:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Kiat Pro:** Gunakan Opus untuk tugas kompleks, Sonnet untuk kecepatan. OmniRoute melacak kuota per model!
+**Tips Pro:** Gunakan Opus untuk tugas kompleks, Sonnet untuk kecepatan. OmniRoute melacak kuota per model!
 
-Tidak ada browser pada host OmniRoute? Jalankan `claude setup-token` di mana pun Claude Code sudah login, lalu tempelkan token satu tahun ke tab **Token Penyiapan**. Lihat [Claude Code dengan token penyiapan](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Tidak ada browser di host OmniRoute? Jalankan `claude setup-token` di mana saja Claude Code telah login, lalu tempelkan token satu tahun tersebut ke tab **Token Penyiapan**. Lihat [Claude Code dengan token penyiapan](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Rute Claude dan yang kompatibel dengan Claude Code mempertahankan upaya penalaran `max` untuk model Opus dan Sonnet. Model Haiku tidak menerima tingkat upaya `max`, sehingga OmniRoute menurunkan permintaan tersebut ke anggaran penalaran tinggi sebelum mengirimkannya ke upstream.
+Rute yang kompatibel dengan Claude dan Claude Code mempertahankan upaya berpikir `max` untuk
+model Opus dan Sonnet. Model Haiku tidak menerima tingkat upaya `max`, jadi OmniRoute menurunkan
+permintaan tersebut ke anggaran berpikir tinggi sebelum mengirimkannya ke upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dasbor → Penyedia → Hubungkan Codex
+Dasbor → Provider → Hubungkan Codex
 → Login OAuth (port 1455)
 → Reset 5 jam + mingguan
 
@@ -160,7 +162,7 @@ Model:
 #### GitHub Copilot
 
 ```bash
-Dasbor → Penyedia → Hubungkan GitHub
+Dasbor → Provider → Hubungkan GitHub
 → OAuth melalui GitHub
 → Reset bulanan (tanggal 1 setiap bulan)
 
@@ -172,47 +174,63 @@ Model:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Penyedia Murah
+**Kredit AI (penagihan berbasis token).** Jika GitHub melaporkan `credits_used` untuk
+akun tersebut, kartu Batas Provider menampilkan baris **Kredit AI** dengan kredit
+yang digunakan dalam periode penagihan saat ini, termasuk pada paket organisasi tanpa batas.
 
-#### GLM-4.7 (Reset harian, $0.6/1M)
+**Batas Kredit AI lokal.** Edit koneksi GitHub dan tetapkan **Batas Kredit AI per
+periode penagihan** (`providerSpecificData.githubCreditLimit`). Kosongkan untuk menonaktifkannya; `0`
+akan selalu melewati koneksi tersebut. Saat pembacaan penggunaan terakhir berada pada atau di atas batas,
+pemilihan akun akan melewati koneksi tersebut dan perutean beralih ke koneksi lain, sama seperti
+pemotongan kebijakan kuota. Pemeriksaan ini membaca penggunaan yang sudah dikumpulkan oleh
+penyegaran kuota berkala — pemeriksaan ini tidak pernah memanggil GitHub pada jalur permintaan — dan
+menggunakan pendekatan fail-open: pembacaan yang hilang atau kedaluwarsa (lebih lama dari 15 menit, atau dari
+periode penagihan yang sudah di-reset) tidak memblokir koneksi. Ini adalah perlindungan lokal, **bukan batas
+pengeluaran yang dijamin**: keterlambatan pelaporan GitHub, interval penyegaran, permintaan yang sedang
+berjalan, dan penggunaan di luar OmniRoute dapat membuat batas ini terlampaui. Gunakan kontrol
+pengeluaran milik GitHub untuk batas maksimum yang ketat.
+
+### 💰 Provider Murah
+
+#### GLM-4.7 (reset harian, $0.6/1M)
 
 1. Daftar: [Zhipu AI](https://open.bigmodel.cn)
 2. Dapatkan kunci API dari Coding Plan
-3. Dasbor → Tambahkan Kunci API: Penyedia: `glm`, Kunci API: `your-key`
+3. Dasbor → Tambahkan Kunci API: Provider: `glm`, Kunci API: `your-key`
 
-**Gunakan:** `glm/glm-4.7` — **Kiat Pro:** Coding Plan menawarkan kuota 3× dengan biaya 1/7! Reset setiap hari pukul 10.00.
+**Gunakan:** `glm/glm-4.7` — **Tips Pro:** Coding Plan menawarkan kuota 3× dengan biaya 1/7! Reset setiap hari pukul 10.00.
 
-#### MiniMax M2.1 (Reset 5 jam, $0.20/1M)
+#### MiniMax M2.1 (reset 5 jam, $0.20/1M)
 
 1. Daftar: [MiniMax](https://www.minimax.io)
 2. Dapatkan kunci API → Dasbor → Tambahkan Kunci API
 
-**Gunakan:** `minimax/MiniMax-M2.1` — **Kiat Pro:** Opsi termurah untuk konteks panjang (1 juta token)!
+**Gunakan:** `minimax/MiniMax-M2.1` — **Tips Pro:** Opsi termurah untuk konteks panjang (1 juta token)!
 
-#### Kimi K2 (Tarif tetap $9/bulan)
+#### Kimi K2 ($9/bulan tetap)
 
 1. Berlangganan: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Dapatkan kunci API → Dasbor → Tambahkan Kunci API
 
-**Gunakan:** `kimi/kimi-k2.5` — **Kiat Pro:** Tarif tetap $9/bulan untuk 10 juta token = biaya efektif $0.90/1M!
+**Gunakan:** `kimi/kimi-k2.5` — **Tips Pro:** $9/bulan tetap untuk 10 juta token = biaya efektif $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Daftar: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Buat kunci API Qianfan → Dasbor → Tambahkan Kunci API: Penyedia: `qianfan`
+2. Buat kunci API Qianfan → Dasbor → Tambahkan Kunci API: Provider: `qianfan`
 
-**Gunakan:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, atau ID model Qianfan lain yang kompatibel dengan OpenAI.
+**Gunakan:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, atau ID model lain yang kompatibel dengan OpenAI milik Qianfan.
 
-### 🆓 Penyedia GRATIS
+### 🆓 Provider GRATIS
 
-Penyedia gratis tanpa autentikasi memiliki sakelar di samping **Tidak memerlukan autentikasi** pada halaman penyedianya.
-Menonaktifkannya akan menonaktifkan penyedia tersebut, menghapusnya dari tampilan Penyedia yang dikonfigurasi/ringkas, dan
+Provider gratis tanpa autentikasi memiliki tombol di samping **Tidak diperlukan autentikasi** pada halaman provider.
+Menonaktifkannya akan menonaktifkan provider tersebut, menghapusnya dari tampilan Provider yang dikonfigurasi/ringkas, dan
 menghapus modelnya dari `/v1/models`.
 
 #### Qoder (9 model GRATIS)
 
 ```bash
-Dasbor → Hubungkan Qoder → Login OAuth → Akses tunduk pada batas penyedia saat ini
+Dasbor → Hubungkan Qoder → Login OAuth → Akses bergantung pada batas provider saat ini
 
 Model: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
