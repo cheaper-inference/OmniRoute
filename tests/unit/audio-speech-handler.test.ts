@@ -656,7 +656,10 @@ test("handleAudioSpeech routes HuggingFace TTS providers to model-specific endpo
       credentials: { apiKey: "hf-key" },
     });
 
-    assert.equal(captured.url, "https://api-inference.huggingface.co/models/facebook/mms-tts-eng");
+    assert.equal(
+      captured.url,
+      "https://router.huggingface.co/hf-inference/models/facebook/mms-tts-eng"
+    );
     assert.equal(captured.headers.Authorization, "Bearer hf-key");
     assert.deepEqual(captured.body, { inputs: "hf text" });
     assert.equal(response.status, 200);
