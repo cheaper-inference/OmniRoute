@@ -66,7 +66,8 @@ const {
 // takes it to 116.
 // ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection
 // keepMidConversationSystem opt-in) takes it back to 115.
-// PROXY_STRICT_POST_REPLAY_ENABLED and RESPONSES_TRANSPORT_KEEPALIVE_ENABLED (#18312, default off) take it to 117.
+// The two #18312 transport flags (PROXY_STRICT_POST_REPLAY_ENABLED, RESPONSES_TRANSPORT_KEEPALIVE_ENABLED,
+// both default off) take it to 117.
 // OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) takes it to 118.
 // PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) takes it to 119.
 const EXPECTED_FEATURE_FLAG_COUNT = 119;

@@ -38,7 +38,7 @@ import {
 } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import { selectAntigravityQuotaWindowNames } from "@omniroute/open-sse/services/antigravityQuotaFamily.ts";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
-import { filterCodexQuotaWindows } from "@/lib/providers/codexQuotaWindowPolicy";
+import { filterCodexQuotaWindows } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
