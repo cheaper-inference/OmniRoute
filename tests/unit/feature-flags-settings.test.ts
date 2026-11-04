@@ -64,14 +64,18 @@ const {
 // audit rows, default off) takes it to 115.
 // CLAUDE_CACHE_TAIL_TTL_1H (1h TTL for the Claude cache conversation tail, default off)
 // takes it to 116.
-const EXPECTED_FEATURE_FLAG_COUNT = 116;
+// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection
+// keepMidConversationSystem opt-in) takes it back to 115.
+// The two #18312 transport flags (PROXY_STRICT_POST_REPLAY_ENABLED, RESPONSES_TRANSPORT_KEEPALIVE_ENABLED,
+// both default off) take it to 117.
+const EXPECTED_FEATURE_FLAG_COUNT = 117;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
 // (#17003, lets Claude OAuth drop the redact-thinking beta for summarized thinking,
 // default off) to 87.
 // MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED (#16929/#16956, default off) takes it to 88.
-// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, default off) takes it to 88.
+// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection keepMidConversationSystem opt-in) — 115 back to 114.
 // MODELS_DEV_EFFORT_TIERS_ENABLED (#15944, default off) takes it to 88.
 // default off) to 87; AUTO_REQUEST_RESOLVED_CAPABILITIES (#16419, resolved-capability
 // scoring inputs on the auto/* request path, default off) to 88.

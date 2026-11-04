@@ -43,6 +43,7 @@ import {
 } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import { selectAntigravityQuotaWindowNames } from "@omniroute/open-sse/services/antigravityQuotaFamily.ts";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
+import { filterCodexQuotaWindows } from "@omniroute/open-sse/services/codexQuotaWindowPolicy.ts";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
@@ -460,15 +461,19 @@ export function hydrateCodexQuotaCacheForRequest(
 function isCodexQuotaExhausted(
   connectionId: string,
   entry: QuotaCacheEntry,
-  requestedModel: string | null
+  requestedModel: string | null,
+  // Optional: callers without the connection's settings keep the default (all windows tracked).
+  providerSpecificData?: unknown
 ): boolean {
   const quotaNames = Object.keys(entry.quotas || {});
   if (quotaNames.length === 0) {
     const age = Date.now() - entry.fetchedAt;
     return entry.exhausted && age >= 0 && age < EXHAUSTED_TTL_MS;
   }
+  // Windows the operator switched off for this connection never count toward exhaustion.
+  const windows = filterCodexQuotaWindows(entry.quotas, providerSpecificData);
   const filterWindow = requestedModel ? getCodexQuotaWindowFilterForModel(requestedModel) : null;
-  const statuses = quotaNames
+  const statuses = Object.keys(windows)
     .filter((windowName) => !requestedModel || filterWindow?.(windowName))
     // Exhaustion is distinct from the operator-configured early quota cutoff.
     .map((windowName) => getQuotaWindowStatus(connectionId, windowName, 100))
@@ -760,7 +765,7 @@ export function isQuotaExhaustedForRequest(
 
   // Codex releases stale windows independently; another scope's reset cannot clear this one.
   if (provider === "codex") {
-    return isCodexQuotaExhausted(connectionId, entry, requestedModel);
+    return isCodexQuotaExhausted(connectionId, entry, requestedModel, providerSpecificData);
   }
 
   const now = Date.now();
