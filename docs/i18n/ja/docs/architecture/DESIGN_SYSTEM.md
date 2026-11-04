@@ -4,17 +4,43 @@
 
 ---
 
-> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
+> **ステータス:** ダッシュボードは **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）を基盤としており、
+> ワークスペース `packages/ui-kit`（`@omniroute/ui-kit`）としてベンダリングされています（アップストリームのスナップショットは
+> `packages/ui-kit/UPSTREAM.md` に固定され、`npm run check:ui-kit-snapshot` によって保護されています）。Light が標準
+> テーマであり、デフォルト設定は `system` です。デフォルトのパレットは、このキットの **Editions** アピアランス
+> （温かみのある紙のようなニュートラルカラーと、カッパーのアクセント `#e5ac82`、`packages/ui-kit/src/ci-editions.css`）です。Settings →
+> Appearance → Color palette では、ライムのアクセントを持つキットの基本トークンである **Classic** を選択できます。Switzer は
+> UI、ディスプレイ、コードテキストのすべてに使用される唯一のフォントファミリーです（`--ci-font-ui`。`--ci-font-display` と
+> `--ci-font-mono` もこれに解決されます）。フォントはキット自体によってセルフホストされています（`packages/ui-kit/src/ci-fonts.css`。
+> `ci-tokens.css` からインポートされます）。Switzer に含まれない文字体系は、グリフ単位でフォールバックされます（`src/app/globals.css`）。
+> キリル文字、ギリシャ文字、ベトナム語には Inter が使用され、アラビア文字には `html[dir="rtl"]` の場合に限り Vazirmatn が使用されます。
+> すべてのアイコンは Lucide のグリフです。
 
-## 1. どこに何があるか
+## 1. 各要素の配置場所
 
-- **Kit.** `packages/ui-kit/src` は、`packages/ui-kit/UPSTREAM.md` でピン留めされたコミット時点の上流の `src/` をバイト単位でそのままコピーしたものです(このファイルにはライセンスの許諾も記録されています)。`PATCHES.md` にはローカルパッチの一覧があります(現在はなし)。ビルドなしでソースとして利用され、`next.config.mjs` がトランスパイルし、`tsconfig.json` が `@omniroute/ui-kit` → `packages/ui-kit/src`、`@omniroute/ui-kit/*` → `packages/ui-kit/src/*` へとマッピングします(`vitest.config.ts` と `vitest.mcp.config.ts` も同じエイリアスを持ちます)。kit コンポーネントはサブパス(`@omniroute/ui-kit/table`、`@omniroute/ui-kit/page-header`…)でインポートし、`@omniroute/ui-kit` のバレル経由では決してインポートしないでください。バレルはすべてのコンポーネント(デートピッカーを含む)を各インポーターに引き込みます。kit のスタイルシートは `src/app/globals.css` から読み込まれます(`@import "../../packages/ui-kit/src/ci-ui.css"`)。
-- **トークン。** `packages/ui-kit/src/ci-tokens.css` が `--ci-*` トークンを宣言し、`src/app/globals.css` がそれらをレガシーの OmniRoute の名前(`--color-*`、`--radius-*`、`--font-sans`/`--font-mono`、`--table-*`、`--orch-status-*`、`--color-fd-*`)へ橋渡しします。これにより、既存の `var(--color-*)` の参照と Tailwind ユーティリティはそのまま動作し続けます。新しいコードでは Tailwind ユーティリティ(`bg-surface`、`text-text-muted`、`border-border`、`text-success`、`bg-success-bg`、`bg-chart-1`…)または kit のクラスを使用し、16 進数の色値は決して使いません(`tests/unit/design-kit-bridge.test.ts` がこのブリッジを強制します)。`text-primary` は `--text-color-primary` を介して `--color-primary-ink` に解決されるため(ライトモードでは lime-800、ダークモードではライムのアクセント)、`bg-primary`/`border-primary` がライムのサーフェスを保ちながら、プライマリテキストは読みやすさを維持します。チャート系列は `--color-chart-1` … `--color-chart-5` を使用します。
-- **テーマ。** `<html className="ci-theme">`(`src/app/layout.tsx`)がドキュメントを kit テーマにオプトインします。設定値は `light`、`dark`、`system` のいずれかです(`src/shared/constants/appConfig.ts` の `THEME_CONFIG.defaultTheme = "system"`。`system` は `prefers-color-scheme` に従います)。`src/store/themeStore.ts` の `applyTheme()`(`src/app/layout.tsx` 内のインラインブートストラップスクリプトがこれをミラーしており、ハイドレーション前に実行されます)は、`data-theme="dark"|"light"` の設定と `<html>` 上の `.dark` クラスの切り替えを同時に行います。kit のダークトークンセットは `data-theme="dark"` をキーとし(`packages/ui-kit/src/ci-tokens.css`)、OmniRoute 独自のダーク上書き(`globals.css` の `.dark` ブロック)とレガシーの Tailwind `dark:` ユーティリティは `.dark` クラスをキーとします。アクセントカラーのプリセットはありません。アクセントは常に kit から供給され、古いビルドで永続化されたプリセットはストアの読み込み時に破棄されます。
-- **コンポーネント(アダプター)。** `src/shared/components/index.tsx` は OmniRoute のコンポーネント API(同じ名前、デフォルトエクスポート、props)を維持し、その背後にあるプリミティブは kit 上のアダプターです: フォーム(`Button`、`Input`、`Textarea`、`Checkbox`、`Select`、`Toggle`、`Badge`、`Card`)、オーバーレイとフィードバック(`Modal`/`ConfirmModal`、`Tooltip`/`InfoTooltip`、`NotificationToast`、`EmptyState`、`Loading`)、構造(`Collapsible`、`CollapsibleSection`、`SegmentedControl`、`Breadcrumbs`、`Avatar`)、テーブル(`DataTable`、`FilterBar`、`ColumnToggle`、`FilterPills`、`PresetSlider`)。アダプターは kit コンポーネントをサブパスでインポートし、レガシー props をそれにマッピングします。たとえば `Button variant="primary"` は kit の `default` ボタン(`--ci-button-primary-*`: ライトでは反転サーフェス、ダークでは `--ci-color-accent-foreground` のインクを持つアクセント)、`danger` は `destructive`、`warning` は `outline` に `.ci-button--warning` 拡張を加えたものです。`globals.css` の末尾(`@layer components`)にある `.ci-button--warning` と `.ci-badge[data-tone]` のルールは、kit のクラス上に OmniRoute が追加した拡張です。`tests/unit/ui/adapters/*.test.tsx` が各アダプターをピン留めしています。
-- **シェル。** `src/app/(dashboard)/layout.tsx` は `DashboardLayout` をレンダリングし、それが `src/shared/components/layouts/DashboardShell.tsx` をレンダリングします: kit の `SidebarProvider` / `Sidebar` / `SidebarInset`(`packages/ui-kit/src/sidebar.tsx`)で、OmniRoute のナビゲーションロジックは `src/shared/components/Sidebar.tsx` にあります。`#main-content` への「コンテンツへスキップ」リンクが最初のフォーカス可能要素です。`src/shared/components/Header.tsx` には kit の `SidebarTrigger`(シェルで唯一のサイドバートグル)、Keak の `ProductSwitcher`、コマンドパレットを開くボタンがあります。`#main-content` 内に kit の `PageHeader`(`.ci-page-header`)がマウントされていない間だけルートタイトルを表示するため、独自の `PageHeader` を持つページでは `h1` が 1 つだけになります。`src/shared/components/CommandPalette.tsx` は kit の `Dialog` です。
-- **アイコン。** `<Icon name="material_name">`(`src/shared/components/Icon.tsx`)は、名前(画面で使われる Material Symbols の語彙)を `ICON_MAP`(`src/shared/constants/iconMap.ts`)を通じて Lucide のグリフに解決します。Material Symbols のフォントとパッケージは廃止されました。マップに存在しない名前は中立のプレースホルダーグリフ(`data-icon-missing="true"`)をレンダリングし、本番環境以外ではコンソール警告を記録します。`npm run gen:icon-map` は、使用中でマップに欠けている名前を出力します(`tests/unit/icon-map-coverage.test.ts` は Lucide アイコンのない名前があると失敗します。`tests/unit/icon-map-object-values.test.ts` はルックアップオブジェクトに格納された名前をカバーします)。`scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` は、リテラルの `<span className="material-symbols-outlined">` span を `<Icon>` に書き換えます。
-- **ブランド。** `src/shared/components/OmniRouteLogo.tsx` は kit をラップします: デフォルトエクスポートの `OmniRouteLogo` は `ProductIcon product="omniroute" variant="glyph"`(インライン SVG、`basePath` 対応)をレンダリングし、`OmniRouteLockup` は `ProductLockup product="omniroute"`(アクセシブル名「Keak OmniRoute」)をレンダリングするか、ホワイトラベル運用者向けに独自の `name`/`logoSrc` をレンダリングします。プロダクトスイッチャーの遷移先は `src/shared/constants/keakProducts.ts`(`KEAK_PRODUCT_LINKS`、`KEAK_ACTIVE_PRODUCT`)にあります。スタンドアロン画面 — `src/app/login/page.tsx`、`src/app/status/page.tsx`、`src/app/maintenance/page.tsx`、`src/app/offline/page.tsx`、`src/app/not-found.tsx`、`src/shared/components/ErrorPageScaffold.tsx` — はロックアップを表示し、`tests/unit/brand-pages-static.test.ts` がそれを保護しています。
+- **キット。** `packages/ui-kit/src` は、`packages/ui-kit/UPSTREAM.md` に固定されているコミット時点のアップストリームの `src/` をバイト単位で完全にコピーしたものです（同ファイルにはライセンス許諾も記録されています）。`PATCHES.md` にはローカルパッチが列挙されています（現在はありません）。ビルドせずにソースとして利用されます。`next.config.mjs` がこれをトランスパイルし、`tsconfig.json` が `@omniroute/ui-kit` → `packages/ui-kit/src`、`@omniroute/ui-kit/*` → `packages/ui-kit/src/*` とマッピングします（`vitest.config.ts` と `vitest.mcp.config.ts` にも同じエイリアスがあります）。キットのコンポーネントは、そのサブパス（`@omniroute/ui-kit/table`、`@omniroute/ui-kit/page-header`…）からインポートし、`@omniroute/ui-kit` バレル経由では決してインポートしないでください。バレルを使用すると、すべてのコンポーネント（日付ピッカーを含む）が各インポーターに取り込まれます。キットのスタイルシートは `src/app/globals.css` を介して導入されます（`@import "../../packages/ui-kit/src/ci-styles.css"`。コアの `ci-ui.css` とすべてのパターンファミリーを含む完全なスタイルシートです）。
+- **トークン。** `packages/ui-kit/src/ci-tokens.css` は `--ci-*` トークンを宣言します。`src/app/globals.css` は、それらを従来の OmniRoute 名（`--color-*`、`--radius-*`、`--font-sans`/`--font-mono`、`--table-*`、`--orch-status-*`、`--color-fd-*`）に橋渡しするため、既存の `var(--color-*)` 参照と Tailwind ユーティリティは引き続き機能します。新しいコードでは、Tailwind ユーティリティ（`bg-surface`、`text-text-muted`、`border-border`、`text-success`、`bg-success-bg`、`bg-chart-1`…）またはキットのクラスを使用し、16 進数値は決して使用しません（`tests/unit/design-kit-bridge.test.ts` がこの橋渡しを強制します）。`text-primary` は `--text-color-primary` を介して `--color-primary-ink` に解決されるため、プライマリテキストの可読性を維持しつつ、`bg-primary`/`border-primary` はアクセントサーフェスを保持します。Editions ではキットの `--ci-color-accent-active`（ライトでは深みのあるカッパー `#99562f`、ダークではカッパーのアクセント）になり、Classic ではライトで lime-800、ダークでライムのアクセントになります。チャート系列には `--color-chart-1` … `--color-chart-5` を使用します。
+- **テーマ。** `<html className="ci-theme">`（`src/app/layout.tsx`）により、ドキュメントでキットテーマが有効になります。設定値は `light`、`dark`、`system` のいずれかです（`src/shared/constants/appConfig.ts` の `THEME_CONFIG.defaultTheme = "system"`。`system` は `prefers-color-scheme` に従います）。`src/store/themeStore.ts` の `applyTheme()`（ハイドレーション前に実行されるよう `src/app/layout.tsx` にインライン化された `THEME_BOOT_SCRIPT` にも同じ処理があります）は、`data-theme="dark"|"light"` を設定すると同時に、`<html>` の `.dark` クラスを切り替えます。キットのダークトークンセットは `data-theme="dark"` をキーとします（`packages/ui-kit/src/ci-tokens.css`）。OmniRoute 独自のダークオーバーライド（`globals.css` の `.dark` ブロック）と従来の Tailwind `dark:` ユーティリティは、`.dark` クラスをキーとします。アクセントカラーのプリセットはありません。アクセントは常にキットから取得され、古いビルドで永続化されたプリセットはストアのロード時に破棄されます。
+- **パレット。** どちらもキット由来の 2 種類（`src/shared/constants/appearancePalette.ts`）があります。デフォルトの `editions` と `classic` です。Editions は `<html>` 上のキットの `data-ci-appearance="editions"` 属性であり、`ci-ui.css` からインポートされる `ci-editions.css` がこれを `data-theme` と組み合わせます。Classic は、この属性がない状態です。ルートレイアウトがこの属性をサーバーレンダリングするため、何も保存されていない訪問者（または JS が無効な訪問者）にも、ダッシュボード、ログイン、`/status`、エラーページ、`/docs`、PWA のすべてのサーフェスで Editions が適用されます。この選択は、同じ `theme` ストア内でテーマとともに永続化され（`src/store/themeStore.ts` の `palette`、`setPalette()`、`applyPalette()`）、描画前に `THEME_BOOT_SCRIPT`（`src/shared/utils/themeBootScript.ts`、レイアウトの `<head>` にインライン化）によって適用されます。保存されているパレットが `"classic"` の場合にのみ、このスクリプトが属性を削除します。ルートレイアウトの外側にある `src/app/global-error.tsx` は、同じストアからパレットを適用します。`data-ci-appearance` を他の要素に付けないでください。キットは `html:root:has([data-ci-appearance="editions"])` でこれを照合するため、子孫要素が 1 つでも属性を持つと、ドキュメント全体が切り替わります。Editions の `data-ci-editions-variant="landing"` バリアントはマーケティングページ用であり、ダッシュボード用ではありません。ブラウザーのクローム（`viewport.themeColor`、Web マニフェスト）は CSS や保存された選択を読み取れないため、デフォルトに従います。`src/shared/constants/pwaThemeColors.ts` の `PWA_THEME_COLORS` は、Editions の `--ci-color-background`（`#f3f1e9` / `#11120f`）を反映する唯一のミラーであり、`tests/unit/pwa-theme-colors.test.ts` によって `ci-editions.css` と一致するよう固定されています。Monaco はプローブから色を読み取ります（`monacoKitTheme.ts`）。Editions ではキットがルートから Editions のライト／ダークを解決するため、プローブの読み取り時に、同期的な 1 回の処理の間だけルートの `data-theme` を切り替えます。
+- **コンポーネント（アダプター）。** `src/shared/components/index.tsx` は OmniRoute のコンポーネント API（同じ名前、デフォルトエクスポート、props）を維持し、その背後にあるプリミティブはキット上のアダプターです。対象はフォーム（`Button`、`Input`、`Textarea`、`Checkbox`、`Select`、`Toggle`、`Badge`、`Card`）、オーバーレイとフィードバック（`Modal`/`ConfirmModal`、`Tooltip`/`InfoTooltip`、`NotificationToast`、`EmptyState`、`Loading`）、構造（`Collapsible`、`CollapsibleSection`、`SegmentedControl`、`Breadcrumbs`、`Avatar`）、テーブル（`DataTable`、`FilterBar`、`ColumnToggle`、`FilterPills`、`PresetSlider`）です。アダプターはキットのコンポーネントをサブパスからインポートし、従来の props をそれにマッピングします。たとえば、`Button variant="primary"` はキットの `default` ボタン（`--ci-button-primary-*`。ライトでは反転サーフェス、ダークでは `--ci-color-accent-foreground` のインクを伴うアクセント）に対応し、`danger` は `destructive`、`warning` は `outline` に `.ci-button--warning` 拡張を加えたものに対応します。`globals.css` の末尾（`@layer components`）にある `.ci-button--warning` と `.ci-badge[data-tone]` のルールは、キットのクラスに追加された OmniRoute の拡張です。`tests/unit/ui/adapters/*.test.tsx` が各アダプターを固定します。
+- **シェル。** `src/app/(dashboard)/layout.tsx` は `DashboardLayout` をレンダリングし、そこから `src/shared/components/layouts/DashboardShell.tsx` がレンダリングされます。これは、キットの `SidebarProvider` / `Sidebar` / `SidebarInset`（`packages/ui-kit/src/sidebar.tsx`）に、`src/shared/components/Sidebar.tsx` の OmniRoute ナビゲーションロジックを組み合わせたものです。`#main-content` への「コンテンツへスキップ」リンクが、最初にフォーカス可能な要素です。`src/shared/components/Header.tsx` には、キットの `SidebarTrigger`（シェル内で唯一のサイドバー切り替え）、Keak `ProductSwitcher`、コマンドパレットを開くボタンがあります。`#main-content` 内にキットの `PageHeader`（`.ci-page-header`）がマウントされていない場合にのみルートタイトルを表示するため、独自の `PageHeader` を持つページには `h1` が 1 つだけ存在します。`src/shared/components/CommandPalette.tsx` はキットの `Dialog` です。
+- **アイコン。** `<Icon name="material_name">`（`src/shared/components/Icon.tsx`）は、画面で使用される
+  Material Symbols の語彙である名前を `ICON_MAP`（`src/shared/constants/iconMap.ts`）経由で
+  Lucide グリフへ解決します。Material Symbols のフォントとパッケージは削除されています。マップにない名前の場合は、
+  ニュートラルなプレースホルダーグリフ（`data-icon-missing="true"`）をレンダリングし、本番環境以外ではコンソール警告を記録します。
+  `npm run gen:icon-map` は、使用中でマップに存在しない名前を出力します
+  （`tests/unit/icon-map-coverage.test.ts` は Lucide アイコンがない名前があると失敗し、
+  `tests/unit/icon-map-object-values.test.ts` はルックアップオブジェクトに保存された名前を対象とします）。
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` は、リテラルの
+  `<span className="material-symbols-outlined">` span を `<Icon>` に書き換えます。
+- **ブランド。** `src/shared/components/OmniRouteLogo.tsx` はキットをラップします。デフォルトエクスポートの `OmniRouteLogo`
+  は `ProductIcon product="omniroute" variant="glyph"`（インライン SVG、`basePath` 対応）をレンダリングし、
+  `OmniRouteLockup` は `ProductLockup product="omniroute"`（アクセシブル名は「Keak OmniRoute」）をレンダリングします。ホワイトラベル事業者の場合は、
+  事業者独自の `name`/`logoSrc` をレンダリングします。プロダクトスイッチャーの遷移先は
+  `src/shared/constants/keakProducts.ts`（`KEAK_PRODUCT_LINKS`、`KEAK_ACTIVE_PRODUCT`）に定義されています。スタンドアロン
+  画面 — `src/app/login/page.tsx`、`src/app/status/page.tsx`、`src/app/maintenance/page.tsx`、
+  `src/app/offline/page.tsx`、`src/app/not-found.tsx`、`src/shared/components/ErrorPageScaffold.tsx`
+  — にはロックアップが表示され、`tests/unit/brand-pages-static.test.ts` によって保護されています。
 
 ## 2. ルール
 
@@ -61,32 +87,57 @@
 
 ## 5. キットのアップデート
 
-`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。毎週の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行し、ピンが遅れている間 1 つの追跡問題を未解決のままにします。アップストリーム リポジトリはプライベートであるため、ワークフローは`UI_KIT_READ_TOKEN`シークレットに読み取り専用トークンを必要とし、それがないと不活性なままになります。
+`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。
+
+毎日の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行します。ピンが後ろにある間、 `scripts/ci/ui-kit-sync-pr.sh`ローリング ブランチ`chore/ui-kit-sync-latest`上の最上位の`release/vX.Y.Z`ブランチに対して 1 つの同期PRを開いたままにします。マージは決して行われません。すべてのキット リリースでは、引き続きローカルVPSでの視覚的なチェックが必要です。新しいリリースがリリースされるとブランチは再構築され、それ以外の場合はそのまま残されます。手動でコミットがプッシュされたオープンなPR上書きされず、メンテナがマージされずに閉じたバージョンのPR 、新しいリリースまで閉じられたままになります。
+
+PRを開くことができない場合 (ターゲット リリースがフリーズしている、 PR手動でプッシュされたコミットがある、 PRが閉じられている、またはPRトークンが設定されていない)、ワークフローはその理由を示す 1 つの追跡問題を未解決のままにします。
+
+ワークフローでは 2 つのシークレットを使用します。
+
+- `secrets.UI_KIT_READ_TOKEN`: プライベート アップストリーム リポジトリの読み取り専用トークン。ワークフローがアップストリームを読み取ることができない場合 (トークンがない、トークンが機能を停止している、またはGitHubに到達できない)、実行は緑色のままですが、警告が書き込まれ、別の 1 つの問題が開いたままになります。後の実行で再びアップストリームを読み取ることができると、問題は自動的に閉じられます。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: コンテンツおよびプルリクエストの書き込みアクセスを持つ、このリポジトリ上のきめ細かいトークン。デフォルトの`GITHUB_TOKEN`ここでPRsを作成できず、開かれたPR CIをトリガーしません。このトークンがないと、ワークフローはブランチをプッシュするだけです。
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`そのコミット時に上流の`src/` (`latest` =最新の`v*`タグ) を`packages/ui-kit/src`にコピーし、単一の許可された変換を適用し (相対インポートから`.js`サフィックスを削除します)、 `packages/ui-kit/package.json`および`package-lock.json`のワークスペースのバージョンを上流のバージョンに設定します。次に、 `git diff packages/ui-kit`を確認し、両方のテーマでプロバイダー、設定、コンボ、使用法、およびエンドポイントのビジュアルパスを実行し、 `npm run check:ui-kit-snapshot`と`npm run test:vitest:ui`を実行して、アップストリームの変更ログでPR開きます。
 
-## 6. README図
+## 6. README の図
 
-ルート`README.md`が埋め込む 12 個のダイアグラム (`docs/diagrams/*.svg`) は、静的イメージに適用されるキットであり、手作業で描画されるのではなく生成されます。 `scripts/docs/gen-readme-*.mjs`に 13 個のジェネレーター ファイル (12 個のダイアグラムと`gen-readme-diagrams.mjs`ドライバー) および`tests/unit/docs/readme-*-svg.test.ts`にある 12 個の失効性テスト (ダイアグラムごとに 1 つ) があり、それぞれコミットされたファイルとジェネレーターの出力 (ジョブ`test-unit`) をバイト比較します。
+ルートの `README.md` に埋め込まれている 12 個の図（`docs/diagrams/*.svg`）は、静的画像にキットを適用したものであり、手作業で描かれたものではなく生成されています。`scripts/docs/gen-readme-*.mjs` に 13 個のジェネレーターファイル
+（12 個の図に加えて `gen-readme-diagrams.mjs` ドライバー）があり、
+`tests/unit/docs/readme-*-svg.test.ts` には図ごとに 1 つ、合計 12 個の陳腐化テストがあります。各テストは、コミット済みファイルと対応する
+ジェネレーターの出力をバイト単位で比較します（ジョブ `test-unit`）。
 
-- **トークン。** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` ( `tests/unit/docs/readme-diagram-theme.test.ts`によってそのファイルに対して固定) からパレットをコピーし、キットの以前の面のテキストの役割 (表示用の Instrument Serif、 UIテキスト用の Inter、図とコード用のIBM Plex Mono) を`@fontsource`パッケージから定義します (ダッシュボード自体はキット 0.0.66 以降、キットの Switzer を使用します)。ファイル内の明るい値は`:root`に、暗い値は`prefers-color-scheme: dark`後ろにあるため、各画像はGitHub上のビューアのスキームに従います。
-- **フォント。** `scripts/docs/readme-fonts.mjs`これらの woff2 ファイルを各図が描画するグリフにサブセット化し、 `@font-face` `data:` URIsとして埋め込みます。zqf Markdown GitHubはCSSが含まれておらず、迷彩プロキシがすべての外部フェッチをブロックするため、キット タイポグラフィがREADMEイメージに到達する唯一の方法です。サブセットはラテン語のみです。システム スタックにフォールバックするシンボル グリフは`SYMBOL_FALLBACKS`で 1 つずつ許可され、その他のカバーされていないグリフはスローされます。
-- **再生します。** `npm run docs:readme-diagrams` 12 個すべてをREADME順序で書き換え、ファイルごとに 1 行とそのサイズを出力します。単一のジェネレーターも単独で実行されます (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`は`node --import tsx/esm`が必要です。その数値は`open-sse/config/freeModelCatalog.ts`のライブ カタログ ローダーから取得されるためです。カタログ変更のCI結果は`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`にあります)。ジェネレーターとSVG一緒にコミットします。
-- **証拠。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub提供する方法 ( `<img>`タグ、迷彩の`Content-Security-Policy`、 `image/svg+xml`) でファイルをレンダリングし、明るいフレームと暗いフレームをキャプチャし、ページが作成した外部フォント リクエストを報告します (0 である必要があります)。
-- **予算。**ファイルあたり 200 KB未満 (各ファイルの古さテストで確認されます)。 500 KBは、 READMEイメージのハード キャップです ( SVG Studio バリデーターのルール)。
-- **コピーは変更せず、ゲートからカウントします。**ブランド変更により、単語ではなくタイプとパレットが変更されました。各ジェネレーターは、描画テキストとフォント サブセット入力の両方である`*_COPY`定数で図のコピーを保持します (またはライブ カタログから構築します)。正準数値は`<text>`ノードに残り、 `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) によって読み取られます。ゲートが読み取る図の古さテストでは、生成されたファイルに対してバリデーターも実行されるため、コードから逸脱した図はテストに失敗します。ジェネレーター内の数値ではなく、ゲートが読み取るソースを修正してください。
+- **トークン。** `scripts/docs/readme-diagram-theme.mjs` は Editions パレット（デフォルトの外観）を
+  `packages/ui-kit/src/ci-editions.css` からコピーします（
+  `tests/unit/docs/readme-diagram-theme.test.ts` によりそのファイルに固定されています。このテストは、両方の配色におけるすべてのサーフェス上の各テキスト色について WCAG AA への準拠も確認します。唯一の例外であるライトテーマの `warn` は、キットの値がキャンバス上で 4.46:1 であるため、キットの警告色を 10 % 暗くしたものです）。また、キットのタイプスケール（`ci-tokens.css`）に基づいてテキストの役割を定義します。コード用の役割（`.cmd`、`.term`、`.term-lg`、`.mono`、`.mono-sm`、`.mono-xs`）を除き、すべてにキットのウェイト（400/500/600、ディスプレイは 500）とトラッキングを使用した Switzer が適用されます。コード用の役割には IBM Plex Mono が使われ、コマンド、URL、識別子、ターミナル画面にのみ使用されます。
+  ライトテーマの値は `:root` に、ダークテーマの値はファイル内の `prefers-color-scheme: dark` の後ろに配置されているため、各画像は GitHub 上で閲覧者の配色に従います。
+- **フォント。** GitHub Markdown には CSS が含まれず、camo プロキシはすべての外部フェッチをブロックするため、キットの書体をファイル内に含める必要があります。各ジェネレーターの最終ステップである `scripts/docs/readme-outline.mjs` は、HarfBuzz を使用して Switzer の各役割をシェーピングし、ベクターアウトライン（`<defs>` のパスと `<use>`）として描画します。Switzer にない矢印と幾何学記号は、Switzer 独自のメトリクスに基づいて描画されます。埋め込みフォントではなく、必ずアウトラインを使用してください。Switzer のライセンス（`packages/ui-kit/src/fonts/FFL.txt`）では、書面による同意なしでのサブセット化と形式変換を禁止する一方、ベクター描画は許可されています。そのため、Switzer の `@font-face` や `data:` URI を再導入しないでください。ファイル内に残る唯一のフォントは、実際のコードテキストとして残る部分に使用される OFL ライセンスの IBM Plex Mono サブセット
+  （`scripts/docs/readme-fonts.mjs`）で、該当する文字から構築されます。埋め込めないグリフがある場合は例外が発生します。
+- **再生成。** `npm run docs:readme-diagrams` は、README の順序ですべての 12 ファイルを書き換え、ファイルごとにサイズを 1 行出力します。個別のジェネレーターを単独で実行することもできます（`node scripts/docs/gen-readme-<name>.mjs`）。
+  `free-tier-budget` の数値は
+  `open-sse/config/freeModelCatalog.ts` のライブカタログローダーから取得されるため、`node --import tsx/esm` が必要です。カタログ変更による CI への影響については、
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` を参照してください。ジェネレーターと SVG は一緒にコミットしてください。
+- **検証。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` は、GitHub が配信する方法
+  （`<img>` タグ、camo の `Content-Security-Policy`、`image/svg+xml`）でファイルをレンダリングし、ライトテーマとダークテーマのフレームをキャプチャして、ページが行った外部フォントリクエスト数を報告します（0 でなければなりません）。
+- **容量。** 1 ファイルあたり 200 KB 未満です（各陳腐化テストでアサートされます）。README
+  画像のハード上限は 500 KB です（SVG studio バリデーターのルール）。
+- **文言は変更せず、数値はゲートから取得。** リブランドで変更されたのは書体とパレットであり、文言ではありません。各ジェネレーターは図の文言を `*_COPY` 定数として保持するか、ライブカタログから構築します。この文言は、描画されるテキストであると同時に、アウトライン化ステップへの入力でもあります。正式な数値は `<text>` ノード内に保持され（アウトライン化後は不可視、`fill-opacity:0`）、`check:docs-counts`
+  （`scripts/check/check-docs-counts-sync.mjs`）によって読み取られます。そのゲートが読み取る図の陳腐化テストでは、生成されたファイルに対してゲートのバリデーターも実行されるため、数値がコードから乖離するとテストが失敗します。ジェネレーター内の数値ではなく、必ずゲートが読み取るソースを修正してください。
 
 ## 7. リファレンス索引
 
-- `src/app/globals.css` — トークンブリッジ、`.dark` のオーバーライド、OmniRoute の `@layer components` 拡張
-- `packages/ui-kit/UPSTREAM.md` — ピン留めされたアップストリームコミットとライセンス認可。`packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`、`packages/ui-kit/src/ci-ui.css`、`packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` とその隣にあるアダプター群。`src/shared/components/layouts/DashboardShell.tsx`、
+- `src/app/globals.css` — トークンブリッジ、`.dark` オーバーライド、OmniRoute の `@layer components` 拡張
+- `packages/ui-kit/UPSTREAM.md` — 固定されたアップストリームコミットとライセンス許諾、`packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`、`packages/ui-kit/src/ci-editions.css`、`packages/ui-kit/src/ci-ui.css`、
+  `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` とその隣にあるアダプター、`src/shared/components/layouts/DashboardShell.tsx`、
   `src/shared/components/Sidebar.tsx`、`src/shared/components/Header.tsx`、`src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`、`src/shared/constants/iconMap.ts`、`scripts/dev/gen-icon-map.mjs`、
   `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`、`src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`、`src/shared/constants/appConfig.ts`、`src/shared/constants/statusColors.ts`
+- `src/store/themeStore.ts`、`src/shared/utils/themeBootScript.ts`、`src/shared/constants/appearancePalette.ts`、
+  `src/shared/constants/pwaThemeColors.ts`、`src/shared/constants/appConfig.ts`、
+  `src/shared/constants/statusColors.ts`
 - `tests/unit/design-kit-bridge.test.ts`、`tests/unit/dashboard-kit-sweep.test.ts`、
   `tests/unit/icon-map-coverage.test.ts`、`tests/unit/icon-map-object-values.test.ts`、
   `tests/unit/brand-pages-static.test.ts`、`tests/unit/ui/adapters/*.test.tsx`

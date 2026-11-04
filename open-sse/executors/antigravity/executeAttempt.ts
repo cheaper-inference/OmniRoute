@@ -14,6 +14,7 @@ import {
 import { awaitReactiveModelSync } from "@/lib/providerModels/reactiveModelSync.ts";
 import {
   HTTP_STATUS,
+  FETCH_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
 } from "../../config/constants.ts";
@@ -31,6 +32,7 @@ import {
   bindAbortLifecycle,
   type SsePassthroughResult,
 } from "./streamingPassthrough.ts";
+import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import type { AntigravityCredentials } from "../antigravity.ts";
 
 const LONG_RETRY_THRESHOLD_MS = 60_000;
@@ -91,7 +93,7 @@ export function markCreditsExhausted(accountId: string): void {
   creditsExhaustedUntil.set(accountId, Date.now() + CREDITS_EXHAUSTED_TTL_MS);
 }
 
-class AntigravityPreResponseTimeoutError extends Error {
+export class AntigravityPreResponseTimeoutError extends Error {
   code = ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
   status = HTTP_STATUS.GATEWAY_TIMEOUT;
 
@@ -99,6 +101,29 @@ class AntigravityPreResponseTimeoutError extends Error {
     super(`Antigravity upstream did not return response headers within ${timeoutMs}ms: ${url}`);
     this.name = "TimeoutError";
   }
+}
+
+/**
+ * Silent-body watchdog (#13125): the headers arrived but no first SSE event
+ * did within the readiness budget. It keeps the pre-response 504 code, so the
+ * account layer treats it like the header deadline, but that budget is spent
+ * per base URL: executeOnce may still fail over to the next host.
+ */
+export class AntigravityFirstEventTimeoutError extends AntigravityPreResponseTimeoutError {
+  constructor(timeoutMs: number, url: string) {
+    super(timeoutMs, url);
+    this.message = `Antigravity upstream sent no SSE event within ${timeoutMs}ms: ${url}`;
+  }
+}
+
+/**
+ * True only for the exhausted response-header deadline (#18052), which must
+ * not be spent again on another host; the silent-body watchdog is excluded.
+ */
+export function isAntigravityHeaderDeadlineTimeout(error: unknown): boolean {
+  return (
+    isAntigravityPreResponseTimeout(error) && !(error instanceof AntigravityFirstEventTimeoutError)
+  );
 }
 
 function getAbortErrorCode(error: unknown): string | null {
@@ -120,14 +145,14 @@ export function isAbortError(error: unknown): boolean {
 
 /**
  * `fetch()` wrapper that aborts if the upstream never returns response headers
- * within `timeoutMs` (default STREAM_READINESS_TIMEOUT_MS) — distinct from the
- * overall FETCH_TIMEOUT_MS, which bounds the whole request including body streaming.
+ * within `timeoutMs` (default FETCH_TIMEOUT_MS, the global startup budget).
+ * SSE readiness is checked separately after headers arrive.
  * Shared by every fetch attempt in executeOnce() (initial, 403-retry, credits-retry).
  */
 export async function fetchAntigravityWithReadinessTimeout(
   url: string,
   init: RequestInit,
-  timeoutMs = STREAM_READINESS_TIMEOUT_MS
+  timeoutMs = FETCH_TIMEOUT_MS
 ): Promise<Response> {
   const boundedTimeoutMs = Math.max(0, Math.floor(timeoutMs));
   if (boundedTimeoutMs <= 0) {
@@ -439,7 +464,40 @@ export async function sendAntigravityRequest(
     }
   }
 
+  // A 403 VALIDATION_REQUIRED carries Google's "verify your account" link. The client error
+  // envelope built from this response drops it (the link holds a continuation token), so it
+  // has to be stored here, while the raw body is still in hand (#16532 follow-up).
+  if (response.status === HTTP_STATUS.FORBIDDEN && credentials.connectionId) {
+    await rememberVerificationLink(provider, credentials.connectionId, response, log);
+  }
+
   return { response, finalHeaders };
+}
+
+async function rememberVerificationLink(
+  provider: string,
+  connectionId: string,
+  response: Response,
+  log: SafeAntigravityLog
+): Promise<void> {
+  try {
+    const rawBody = await response.clone().text();
+    // Lazy import: keeps the DB-backed recorder out of this module's static graph (same
+    // async ESM init-cycle concern as the ../antigravity.ts import above).
+    const { recordAntigravityVerificationUrl } =
+      await import("../../handlers/chatCore/antigravityVerificationState.ts");
+    await recordAntigravityVerificationUrl({
+      provider,
+      connectionId,
+      upstreamErrorBody: rawBody,
+      message: "",
+    });
+  } catch (err) {
+    log.warn(
+      "VERIFY",
+      `[Antigravity] Could not store the verification link: ${err instanceof Error ? err.name : "unknown error"}`
+    );
+  }
 }
 
 /**
@@ -611,6 +669,32 @@ async function buildUpstreamErrorResult(
  * had an artificial timeout (now the standard FETCH_BODY_TIMEOUT_MS
  * of 10 min applies).
  */
+export async function peekFirstAntigravitySseEvent(
+  response: Response,
+  url: string,
+  timeoutMs: number = STREAM_READINESS_TIMEOUT_MS,
+  signal?: AbortSignal | null
+): Promise<Response> {
+  if (!response.body || !response.ok) {
+    return response;
+  }
+
+  if (signal?.aborted) {
+    response.body.cancel().catch(() => {});
+    throw signal.reason;
+  }
+
+  const readiness = await ensureStreamReadiness(response, {
+    timeoutMs,
+    provider: "antigravity",
+  });
+
+  if (!readiness.ok) {
+    throw new AntigravityFirstEventTimeoutError(timeoutMs, url);
+  }
+
+  return readiness.response;
+}
 async function buildNonStreamingExecuteOnceResult(
   response: Response,
   url: string,
@@ -715,11 +799,19 @@ export async function buildFinalAntigravityResult(
   transformedBody: Record<string, unknown>,
   accountId: string,
   signal: AbortSignal | null | undefined,
-  onCreditsUpdate: OnAntigravityCreditsUpdate
+  onCreditsUpdate: OnAntigravityCreditsUpdate,
+  readinessTimeoutMs: number = STREAM_READINESS_TIMEOUT_MS
 ): Promise<SsePassthroughResult> {
+  const peekedResponse = await peekFirstAntigravitySseEvent(
+    response,
+    url,
+    readinessTimeoutMs,
+    signal
+  );
+
   if (!stream) {
     return buildNonStreamingExecuteOnceResult(
-      response,
+      peekedResponse,
       url,
       finalHeaders,
       transformedBody,
@@ -729,7 +821,7 @@ export async function buildFinalAntigravityResult(
     );
   }
   return buildStreamingExecuteOnceResult(
-    response,
+    peekedResponse,
     url,
     finalHeaders,
     transformedBody,

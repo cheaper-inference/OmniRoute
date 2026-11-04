@@ -405,6 +405,21 @@ test("parseSSEToGeminiResponse preserves usage fields from a partial late snapsh
   });
 });
 
+test("parseSSEToGeminiResponse ignores malformed previous usage counters", () => {
+  const rawSSE = [
+    'data: {"response":{"candidates":[{"content":{"parts":[{"text":"Hello"}]}}],"usageMetadata":{"promptTokenCount":"bad","candidatesTokenCount":"worse","totalTokenCount":12}}}',
+    'data: {"response":{"candidates":[{"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":10,"candidatesTokenCount":3,"totalTokenCount":13}}}',
+  ].join("\n");
+
+  const parsed = parseSSEToGeminiResponse(rawSSE, "gemini-3.7-flash");
+
+  assert.deepEqual(parsed?.usage, {
+    prompt_tokens: 10,
+    completion_tokens: 3,
+    total_tokens: 13,
+  });
+});
+
 test("parseSSEToGeminiResponse clears an earlier hit for an invalid count", () => {
   const rawSSE = [
     'data: {"response":{"candidates":[{"content":{"parts":[{"text":"Hello"}]}}],"usageMetadata":{"promptTokenCount":10,"candidatesTokenCount":2,"totalTokenCount":12,"cachedContentTokenCount":4}}}',

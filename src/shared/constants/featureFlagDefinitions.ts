@@ -48,6 +48,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
   {
+    key: "API_KEY_AUDIT_CLIENT_DETAILS_ENABLED",
+    label: "API Key Audit: Record Client IP and User-Agent",
+    description:
+      "Record the caller's IP address and user-agent on the audit-log rows written for successful API-key metadata and discovery reads (action api_key.auth.touch). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent.",
+    descriptionI18nKey: "featureFlagApiKeyAuditClientDetailsEnabledDescription",
+    category: "security",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "PII_REDACTION_ENABLED",
     label: "PII Redaction",
     description: "Redact personally identifiable information from requests",
@@ -1236,6 +1248,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "CLAUDE_CACHE_TAIL_TTL_1H",
+    label: "Claude Cache Tail 1h TTL",
+    description:
+      "Mark the conversation tail OmniRoute anchors for Claude prompt caching (the second-to-last user turn and the last assistant turn) with the same 1h TTL already used for system and tools, so a pause longer than five minutes does not rewrite the cached prefix. Vertex keeps the 5m TTL. Off by default: the tail keeps the 5m TTL exactly as before. A 1h cache write costs 2x the input price instead of 1.25x, so fast agent loops that never idle past five minutes pay more with this on. Client-managed (passthrough) cache markers are never changed.",
+    descriptionI18nKey: "featureFlagClaudeCacheTailTtl1hDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
+  {
     key: "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED",
     label: "DB Health Check: Defer Startup Scan",
     description:
@@ -1366,5 +1390,17 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     type: "boolean",
     requiresRestart: false,
     warningLevel: "caution",
+  },
+  {
+    key: "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE",
+    label: "Compression Cache Stats: Automatic-Prefix Eligibility",
+    description:
+      "In the compression cache stats, count a compressed request to an automatic-prefix-caching provider (OpenAI, Codex, Azure, or a custom connection that declares prompt caching with marker stripping) as an estimated cache hit even without cache_control markers. The estimate is a cache-eligibility signal, not an observed hit, so the reported hit rate for those providers trends toward 100%. Off by default: only a request carrying cache_control markers to a caching provider counts as an estimated hit, so automatic-prefix providers keep reporting 0.",
+    descriptionI18nKey: "featureFlagCompressionCacheAutomaticPrefixEstimateDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
   },
 ];

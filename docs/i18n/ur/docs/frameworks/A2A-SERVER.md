@@ -163,7 +163,7 @@ OmniRoute نے `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` میں وائ�
 | صحت کی رپورٹ          | `health-report`      | مجموعی طور پر سرکٹ بریکر، کولڈاؤن، لاک آؤٹ اسٹیٹ فی فراہم کنندہ                                                                                        | صحت، لچک                | "تمام فراہم کنندگان کی صحت کی حیثیت دکھائیں" |
 | فہرست کی صلاحیتیں     | `list-capabilities`  | سیاق و سباق کے انجیکشن کے لیے خام SKILL.md URLs کے ساتھ مارک ڈاؤن ٹیبل کے بطور مکمل 45-انٹری ایجنٹ سکلز کیٹلاگ (23 API + 21 CLI + 1 config) لوٹاتا ہے۔ | کیٹلاگ، دریافت، مہارت   | "تمام OmniRoute صلاحیتوں کی فہرست بنائیں"    |
 
-> ایجنٹ کارڈ کو لائیو 377 فراہم کرنے والے کیٹلاگ کے ساتھ منسلک رکھا جانا چاہیے۔ فراہم کنندہ شمار اور free/no-auth میٹا ڈیٹا رن ٹائم رجسٹری سے حاصل کیا جاتا ہے۔
+> ایجنٹ کارڈ کو لائیو 380 فراہم کرنے والے کیٹلاگ کے ساتھ منسلک رکھا جانا چاہیے۔ فراہم کنندہ شمار اور free/no-auth میٹا ڈیٹا رن ٹائم رجسٹری سے حاصل کیا جاتا ہے۔
 
 ### `list-capabilities` مہارت کی تفصیل
 
@@ -197,17 +197,17 @@ JSON-RPC اینڈ پوائنٹ `/a2a` مستند A2A نقطۂ داخلہ ہے۔ 
 
 ---
 
-## نئی مہارت شامل کرنا
+## ایک نیا ہنر شامل کرنا
 
 1. **مہارت کی فائل بنائیں:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ایک async فنکشن `(task: A2ATask) => Promise<{ artifacts, metadata }>` ایکسپورٹ کریں۔ `smartRouting.ts` جیسی موجودہ مہارتوں کی ساخت پر عمل کریں۔
+   ایک async فنکشن `(task: A2ATask) => Promise<{ artifacts, metadata }>` برآمد کریں۔ موجودہ مہارتوں کی شکل پر عمل کریں جیسے `smartRouting.ts`۔
 
-2. **ہینڈلر رجسٹر کریں:** `src/lib/a2a/taskExecution.ts` میں، `A2A_SKILL_HANDLERS` میں ایک اندراج شامل کریں:
+2. **رجسٹر ہینڈلر:** `src/lib/a2a/taskExecution.ts` میں، `A2A_SKILL_HANDLERS` میں ایک اندراج شامل کریں:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...موجودہ مہارتیں
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC اینڈ پوائنٹ `/a2a` مستند A2A نقطۂ داخلہ ہے۔ 
    };
    ```
 
-3. **ایجنٹ کارڈ میں ظاہر کریں:** `src/app/.well-known/agent.json/route.ts` میں، `skills` ارے میں شامل کریں:
+3. **ایجنٹ کارڈ میں ظاہر کریں:** `src/lib/a2a/agentCardMetadata.ts` میں ( `/.well-known/agent.json` اور `/.well-known/agent-card.json` کے ذریعے اشتراک کردہ)، `skills` صف میں شامل کریں:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC اینڈ پوائنٹ `/a2a` مستند A2A نقطۂ داخلہ ہے۔ 
    }
    ```
 
-4. **ٹیسٹس لکھیں:** `tests/unit/a2a-<your-skill>.test.ts`۔ کامیاب راستے + خرابی کے راستے کا احاطہ کریں۔
+4. **ٹیسٹ لکھیں:** `tests/unit/a2a-<your-skill>.test.ts` کور ہیپی پاتھ + ایرر پاتھ۔
 
-5. اس فائل کے `Available Skills` ٹیبل میں نئی مہارت کو **دستاویزی شکل دیں**۔
+5. **دستاویز** اس فائل کے `Available Skills` ٹیبل میں نئی مہارت۔
 
 ---
 
