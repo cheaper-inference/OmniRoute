@@ -1,1 +1,0 @@
-- **fix(sse):** OmniGlyph request compression no longer drops the internal tool-name maps, so namespaced MCP tools (`mcp__server__tool`) and sanitized tool names keep round-tripping correctly on compressed requests.
