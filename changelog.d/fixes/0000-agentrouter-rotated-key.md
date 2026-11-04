@@ -1,1 +1,0 @@
-- **fix(sse):** agentrouter requests with extra API keys now send the rotated key in `x-api-key`. Before, every request sent the primary key (or an empty key when the primary was blank), and key health was charged to a key that did not carry the request.
