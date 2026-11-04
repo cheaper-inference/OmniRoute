@@ -122,13 +122,13 @@
 
 За групово добавяне на връзки с API ключове от CSV или JSON файл използвайте **Табло → Доставчици → Импортиране от файл**. Колоните са позиционни (`provider,name,apiKey,baseUrl,priority`); `provider` трябва вече да съществува като управляван доставчик или съвместим възел. Вижте [Импортиране на доставчици от CSV или JSON файл](../providers/CSV-IMPORT.md).
 
-### 🔐 Доставчици с абонамент
+### 🔐 Доставчици на абонаменти
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Табло → Доставчици → Свързване на Claude Code
-→ Вход чрез OAuth → Автоматично опресняване на токена
+Табло → Доставчици → Свързване с Claude Code
+→ OAuth вход → Автоматично обновяване на токена
 → Проследяване на 5-часовата и седмичната квота
 
 Модели:
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**Професионален съвет:** Използвайте Opus за сложни задачи, а Sonnet — за бързина. OmniRoute проследява квотата за всеки модел!
+**Професионален съвет:** Използвайте Opus за сложни задачи, а Sonnet за бързина. OmniRoute проследява квотата за всеки модел!
 
-Няма браузър на хоста на OmniRoute? Изпълнете `claude setup-token` навсякъде, където сте влезли в Claude Code, и поставете едногодишния токен в раздела **Токен за настройване**. Вижте [Claude Code с токен за настройване](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Няма браузър на хоста на OmniRoute? Изпълнете `claude setup-token` навсякъде, където сте влезли в Claude Code, и поставете едногодишния токен в раздела **Setup Token**. Вижте [Claude Code с setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Маршрутите, съвместими с Claude и Claude Code, запазват нивото на усилие за разсъждение `max` за моделите Opus и Sonnet. Моделите Haiku не приемат нивото на усилие `max`, затова OmniRoute понижава тази заявка до висок бюджет за разсъждение, преди да я изпрати към доставчика.
+Маршрутите, съвместими с Claude и Claude Code, запазват усилието за мислене `max` за
+моделите Opus и Sonnet. Моделите Haiku не приемат нивото на усилие `max`, затова OmniRoute понижава
+тази заявка до висок бюджет за мислене, преди да я изпрати към upstream доставчика.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Табло → Доставчици → Свързване на Codex
-→ Вход чрез OAuth (порт 1455)
-→ Нулиране на всеки 5 часа и всяка седмица
+Табло → Доставчици → Свързване с Codex
+→ OAuth вход (порт 1455)
+→ 5-часово и седмично нулиране
 
 Модели:
   cx/gpt-5.5
@@ -160,9 +162,9 @@
 #### GitHub Copilot
 
 ```bash
-Табло → Доставчици → Свързване на GitHub
+Табло → Доставчици → Свързване с GitHub
 → OAuth чрез GitHub
-→ Месечно нулиране (на 1-во число от месеца)
+→ Месечно нулиране (на 1-во число)
 
 Модели:
   gh/gpt-5.5
@@ -172,55 +174,70 @@
   gh/gemini-3.1-pro-preview
 ```
 
+**AI кредити (таксуване въз основа на токени).** Когато GitHub отчете `credits_used` за
+акаунта, картата с ограниченията на доставчика показва ред **AI кредити** с
+изразходваните кредити през текущия разплащателен период, включително при неограничени планове за организации.
+
+**Локално ограничение за AI кредити.** Редактирайте връзка с GitHub и задайте **Лимит на AI кредитите за
+разплащателен период** (`providerSpecificData.githubCreditLimit`). Празната стойност го деактивира; `0`
+винаги пропуска връзката. Когато последното отчитане на използването е равно или надвишава лимита,
+изборът на акаунт пропуска тази връзка и маршрутизирането преминава към другите ви
+връзки, по същия начин като прекъсване съгласно политика за квоти. Проверката използва данните за използване,
+които периодичното обновяване на квотата вече събира — тя никога не извиква GitHub по пътя на заявката —
+и прилага отказоустойчив режим: липсващо или остаряло отчитане (по-старо от 15 минути или от
+вече нулиран разплащателен период) не блокира връзката. Това е локална защита, **а не гарантиран таван на разходите**:
+забавянията при отчитане от GitHub, интервалът на обновяване, заявките в процес на изпълнение и използването
+извън OmniRoute могат да го надхвърлят. За твърд лимит използвайте собствените контроли за разходи на GitHub.
+
 ### 💰 Евтини доставчици
 
-#### GLM-4.7 (Ежедневно нулиране, $0.6/1M)
+#### GLM-4.7 (ежедневно нулиране, $0.6/1M)
 
 1. Регистрирайте се: [Zhipu AI](https://open.bigmodel.cn)
-2. Вземете API ключ от Coding Plan
+2. Получете API ключ от Coding Plan
 3. Табло → Добавяне на API ключ: Доставчик: `glm`, API ключ: `your-key`
 
-**Използване:** `glm/glm-4.7` — **Професионален съвет:** Coding Plan предлага 3× по-голяма квота на 1/7 от цената! Нулира се ежедневно в 10:00 ч.
+**Използване:** `glm/glm-4.7` — **Професионален съвет:** Coding Plan предлага 3× по-голяма квота на 1/7 от цената! Нулиране всеки ден в 10:00 ч.
 
-#### MiniMax M2.1 (Нулиране на всеки 5 часа, $0.20/1M)
+#### MiniMax M2.1 (5-часово нулиране, $0.20/1M)
 
 1. Регистрирайте се: [MiniMax](https://www.minimax.io)
-2. Вземете API ключ → Табло → Добавяне на API ключ
+2. Получете API ключ → Табло → Добавяне на API ключ
 
 **Използване:** `minimax/MiniMax-M2.1` — **Професионален съвет:** Най-евтината опция за дълъг контекст (1M токена)!
 
-#### Kimi K2 ($9/месец фиксирана цена)
+#### Kimi K2 ($9/месец фиксирано)
 
 1. Абонирайте се: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Вземете API ключ → Табло → Добавяне на API ключ
+2. Получете API ключ → Табло → Добавяне на API ключ
 
-**Използване:** `kimi/kimi-k2.5` — **Професионален съвет:** Фиксирани $9/месец за 10M токена = ефективна цена от $0.90/1M!
+**Използване:** `kimi/kimi-k2.5` — **Професионален съвет:** Фиксирани $9/месец за 10M токена = ефективна цена $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Регистрирайте се: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Създайте API ключ за Qianfan → Табло → Добавяне на API ключ: Доставчик: `qianfan`
+2. Създайте Qianfan API ключ → Табло → Добавяне на API ключ: Доставчик: `qianfan`
 
-**Използване:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` или друг идентификатор на модел на Qianfan, съвместим с OpenAI.
+**Използване:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` или друг OpenAI-съвместим идентификатор на модел на Qianfan.
 
 ### 🆓 БЕЗПЛАТНИ доставчици
 
-Безплатните доставчици без удостоверяване имат превключвател до **Не се изисква удостоверяване** на страницата си.
-Изключването му деактивира съответния доставчик, премахва го от конфигурирания и компактния изглед на „Доставчици“ и
+Безплатните доставчици без удостоверяване имат превключвател до **Не се изисква удостоверяване** на страницата си на доставчика.
+Изключването му деактивира доставчика, премахва го от изгледите „Конфигурирани доставчици“/„Компактен изглед“ и
 премахва моделите му от `/v1/models`.
 
 #### Qoder (9 БЕЗПЛАТНИ модела)
 
 ```bash
-Табло → Свързване на Qoder → Вход чрез OAuth → Достъпът зависи от текущите ограничения на доставчика
+Табло → Свързване с Qoder → OAuth вход → Достъпът зависи от текущите ограничения на доставчика
 
 Модели: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude БЕЗПЛАТНО)
+#### Kiro (БЕЗПЛАТЕН Claude)
 
 ```bash
-Табло → Свързване на Kiro → AWS Builder ID или Google/GitHub → ~50 кредита/месец
+Табло → Свързване с Kiro → AWS Builder ID или Google/GitHub → ~50 кредита/месец
 
 Модели: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -610,19 +627,19 @@ post_install() {
 ## 📊 Налични модели
 
 <details>
-<summary><b>Вижте всички налични модели</b></summary>
+<summary><b>Преглед на всички налични модели</b></summary>
 
 > Списъкът по-долу е подбран от `open-sse/config/providerRegistry.ts` за v3.8.0. Облачните каталози (Gemini, OpenRouter и др.) се синхронизират динамично — за пълния актуален каталог отворете **Табло → Доставчици → [доставчик] → Налични модели** или извикайте `GET /api/models/catalog`.
 >
-> Ако вграденият списък на даден доставчик е остарял, използвайте **Импортиране от /models** на тази страница (или активирайте **Автоматична синхронизация**), за да изтеглите актуалния upstream каталог. Това беше потвърдено във v3.8.50 за LLM7.io (`gemini-3.1-flash-lite`) и UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонимният достъп до Pollinations остана ограничен от upstream по време на същия тестов цикъл.
+> Ако вграденият списък на даден доставчик е остарял, използвайте **Импортиране от /models** на тази страница (или активирайте **Автоматична синхронизация**), за да изтеглите актуалния каталог от upstream. Това беше потвърдено във v3.8.50 за LLM7.io (`gemini-3.1-flash-lite`) и UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонимният достъп до Pollinations остана ограничен от upstream по време на същия тестови цикъл.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth за Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ нива на effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth за Plus/Pro: `cx/gpt-5.5` (+ нива на усилие: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — БЕЗПЛАТЕН OAuth: използвайте актуалния каталог, показан под **Табло → Доставчици → Kiro → Налични модели**. Наличността зависи от акаунта и плана.
+**Kiro (`kr/`)** — БЕЗПЛАТЕН OAuth: използвайте актуалния каталог, показан в **Табло → Доставчици → Kiro → Налични модели**. Наличността зависи от акаунта и плана.
 
 **Qoder (`if/`)** — БЕЗПЛАТЕН OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +647,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/мес. фиксирана цена или според потреблението: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — фиксирана цена $9/мес. или заплащане според употребата: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API ключ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Изключително бърз: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ултрабърз: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Нативен Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Хостван в ЕС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Хостван в ЕС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — С обогатено търсене: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — С разширяване чрез търсене: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — С отворен код: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (безплатен), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Бърз inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Бързо извеждане: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — В мащаб на пластина: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Фокусиран върху RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Корпоративен: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — За предприятия: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Синхронизира се на живо за всеки API ключ от Google — няма статичен списък. Свържете ключ в **Табло → Доставчици**, след което използвайте **Налични модели**, за да импортирате актуалния каталог (напр. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Синхронизира се в реално време според API ключа от Google — няма статичен списък. Свържете ключ в **Табло → Доставчици**, след което използвайте **Налични модели**, за да импортирате актуалния каталог (напр. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Други съвместими доставчици** (подбрани): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (чрез `aws-bedrock`), `azure-ai`, `openrouter` (passthrough каталог), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Всеки поддържа собствен списък с модели в `providerRegistry.ts` и може да се синхронизира автоматично, когато доставчикът предоставя `/models` endpoint.
+**Други съвместими доставчици** (избрани): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (чрез `aws-bedrock`), `azure-ai`, `openrouter` (каталог с passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Всеки поддържа собствен списък с модели в `providerRegistry.ts` и може да бъде синхронизиран автоматично, когато доставчикът предоставя крайна точка `/models`.
 
-**Забележка относно ID-тата на моделите:** OmniRoute използва родните за доставчика ID-та (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Някои ID-та включват версии с точки, защото upstream API ги очаква точно в този вид. Ако даден модел не е посочен по-горе, изпълнете `omniroute models --search <term>` или отправете заявка към `GET /api/models/catalog`, за да потвърдите наличността.
+**Бележка относно идентификаторите на моделите:** OmniRoute използва собствени за доставчика идентификатори (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Някои идентификатори включват версии с точка, тъй като така ги очаква upstream API. Ако даден модел не е посочен по-горе, изпълнете `omniroute models --search <term>` или извикайте `GET /api/models/catalog`, за да потвърдите наличността.
 
 </details>
 
