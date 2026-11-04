@@ -269,12 +269,22 @@ export function buildTargetTimeoutRunner(deps: {
     const parentHedgeSignal = target?.modelAbortSignal ?? null;
     let onParentHedgeAbort: (() => void) | null = null;
     if (parentHedgeSignal) {
+      // Forward the parent's actual abort reason. The combo loop stamps
+      // hedge/winner supersessions with COMBO_HEDGE_CANCELLED_REASON while a
+      // client disconnect aborts bare (DOMException) — re-stamping every
+      // parent abort as a hedge cancellation makes downstream classification
+      // (fetch rejection → attempt logging) mistake real client disconnects
+      // for internal supersessions. The hedge reason remains the fallback for
+      // a reasonless abort.
+      const abortFromParent = () => {
+        timeoutController.abort(
+          parentHedgeSignal.reason ?? new Error(COMBO_HEDGE_CANCELLED_REASON)
+        );
+      };
       if (parentHedgeSignal.aborted) {
-        timeoutController.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
+        abortFromParent();
       } else {
-        onParentHedgeAbort = () => {
-          timeoutController.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
-        };
+        onParentHedgeAbort = abortFromParent;
         parentHedgeSignal.addEventListener("abort", onParentHedgeAbort, { once: true });
       }
     }
