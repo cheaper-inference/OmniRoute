@@ -274,13 +274,10 @@ export function providerSupportsCaching(
   if (providerId === "vertex" || providerId === "vertex-partner") {
     return targetFormat?.toLowerCase() === "claude";
   }
-  if (OPENCODE_LANES.has(providerId)) {
-    return isOpenCodeCacheableModel(providerId, model) || targetFormat?.toLowerCase() === "claude";
-  }
+  if (isOpenCodeCacheableModel(providerId, model)) return true;
   if (CACHING_PROVIDERS.has(providerId)) return true;
-  // All Claude-protocol providers support prompt caching
-  if (targetFormat === "claude") return true;
-  return false;
+  // All Claude-protocol providers support prompt caching.
+  return targetFormat?.toLowerCase() === "claude";
 }
 
 /** Whether a marker-free request can still participate in the provider cache.
