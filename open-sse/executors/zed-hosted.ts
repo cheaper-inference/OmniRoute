@@ -88,7 +88,8 @@ function asMutableRecord(value: unknown): Record<string, unknown> | null {
 
 // Zed's Google proxy enums are narrower than Google's own (#13363): the safety
 // threshold only accepts BLOCK_NONE (not "OFF"), and FunctionCallingMode is
-// lowercase auto/any/none (no VALIDATED).
+// lowercase auto/any/none (no VALIDATED). Its thinkingLevel Rust enum is also
+// uppercase-only (MINIMAL/LOW/MEDIUM/HIGH), unlike Google's lowercase (#18910).
 const ZED_FUNCTION_CALLING_MODES: Record<string, string> = {
   VALIDATED: "auto",
   AUTO: "auto",
@@ -110,6 +111,10 @@ function adaptGeminiRequestForZed(request: unknown): unknown {
     ? ZED_FUNCTION_CALLING_MODES[String(callingConfig.mode || "").toUpperCase()]
     : undefined;
   if (callingConfig && mappedMode) callingConfig.mode = mappedMode;
+  const thinkingConfig = asMutableRecord(asMutableRecord(record.generationConfig)?.thinkingConfig);
+  if (typeof thinkingConfig?.thinkingLevel === "string") {
+    thinkingConfig.thinkingLevel = thinkingConfig.thinkingLevel.toUpperCase();
+  }
   return request;
 }
 
