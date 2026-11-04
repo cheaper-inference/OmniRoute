@@ -2,3 +2,4 @@
 - Complete Burmese and Yoruba Fal controls, refresh changed documentation mirrors, and keep the receipt-storage label out of credential-pattern false positives without changing its persisted value. (@KiaroSama)
 - Give the keyboard chart tooltip its required series identity and scope CLI-version browser assertions to their explanatory hint and version card. (@KiaroSama)
 - Keep the Codex pipeline fingerprint regression aligned with native wire fidelity: explicitly supplied instructions/include retain their values and canonical order, while omitted fields stay absent. (@KiaroSama)
+- Keep Fal transport and compatibility helpers inside the engine, inject app-owned schema storage from routes, and translate the native controls across all supported locales. (@KiaroSama)

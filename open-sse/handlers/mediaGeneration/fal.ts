@@ -1,5 +1,5 @@
 import { canonicalFalEndpoint } from "../../config/falEndpoint.ts";
-import { prepareFalCompatibility } from "@/lib/fal/compatibility";
+import { prepareFalCompatibility, type PrepareFalInput } from "../fal/compatibility.ts";
 import { falTrackingUrl, normalizeFalOutput } from "../fal/client.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import {
@@ -454,6 +454,7 @@ export async function handleFalVideoGeneration(args: {
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
   signal?: AbortSignal | null;
+  prepareFalInput?: PrepareFalInput;
 }) {
   try {
     return await runFalQueue({
@@ -464,7 +465,7 @@ export async function handleFalVideoGeneration(args: {
         (!["veo3.1/lite", "fal-ai/veo3.1/lite"].includes(args.model) &&
           !args.model.startsWith("xai/grok-imagine-video/") &&
           !args.model.startsWith("google/gemini-omni-flash"))
-          ? await prepareFalCompatibility(
+          ? await (args.prepareFalInput ?? prepareFalCompatibility)(
               canonicalFalEndpoint(args.model),
               args.body,
               args.credentials ?? {},
@@ -486,13 +487,14 @@ export async function handleFalMusicGeneration(args: {
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
   signal?: AbortSignal | null;
+  prepareFalInput?: PrepareFalInput;
 }) {
   try {
     return await runFalQueue({
       ...args,
       body:
         args.body.fal_input !== undefined || !["ace-step", "fal-ai/ace-step"].includes(args.model)
-          ? await prepareFalCompatibility(
+          ? await (args.prepareFalInput ?? prepareFalCompatibility)(
               canonicalFalEndpoint(args.model),
               args.body,
               args.credentials ?? {},

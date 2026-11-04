@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
+import { fetchWithTimeout } from "../../../utils/fetchTimeout.ts";
 import type { ExecutorLog, ProviderCredentials } from "../../../executors/base.ts";
 import {
   mapFalImageSize,
@@ -9,7 +9,7 @@ import {
 } from "../../imageGeneration.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 import { canonicalFalEndpoint, falEditEndpoint } from "../../../config/falEndpoint.ts";
-import { prepareFalCompatibility } from "@/lib/fal/compatibility";
+import { prepareFalCompatibility, type PrepareFalInput } from "../../fal/compatibility.ts";
 
 export const FAL_IMAGE_EDIT_MODELS = new Set([
   "fal-ai/flux-2-flex",
@@ -38,6 +38,7 @@ type FalAIImageEditOptions = {
   credentials: ProviderCredentials;
   log: ExecutorLog | null | undefined;
   signal?: AbortSignal;
+  prepareFalInput?: PrepareFalInput;
 };
 
 export async function handleFalAIImageEdit({
@@ -49,6 +50,7 @@ export async function handleFalAIImageEdit({
   credentials,
   log,
   signal,
+  prepareFalInput = prepareFalCompatibility,
 }: FalAIImageEditOptions) {
   const startTime = Date.now();
   const editModel = falEditEndpoint(model);
@@ -60,7 +62,10 @@ export async function handleFalAIImageEdit({
   }
 
   try {
-    upstreamBody = await prepareEditInput({ model, body, images, credentials }, editModel);
+    upstreamBody = await prepareEditInput(
+      { model, body, images, credentials, signal, prepareFalInput },
+      editModel
+    );
     const token = credentials.apiKey || credentials.accessToken;
     const response = await fetchWithTimeout(
       `${providerConfig.baseUrl.replace(/\/$/, "")}/${editModel}`,
@@ -105,7 +110,12 @@ async function prepareEditInput(
     body,
     images,
     credentials,
-  }: Pick<FalAIImageEditOptions, "model" | "body" | "images" | "credentials">,
+    signal,
+    prepareFalInput = prepareFalCompatibility,
+  }: Pick<
+    FalAIImageEditOptions,
+    "model" | "body" | "images" | "credentials" | "signal" | "prepareFalInput"
+  >,
   editModel: string
 ) {
   const outputFormat = normalizeRequestedImageFormat(body, "png", ["jpeg", "png"]);
@@ -123,7 +133,7 @@ async function prepareEditInput(
   if (body.seed !== undefined) upstreamBody.seed = body.seed;
 
   if (!FAL_IMAGE_EDIT_MODELS.has(canonicalFalEndpoint(model))) {
-    upstreamBody = await prepareFalCompatibility(
+    upstreamBody = await prepareFalInput(
       editModel,
       {
         ...body,
@@ -131,7 +141,8 @@ async function prepareEditInput(
           ({ bytes, mime }) => `data:${mime || "image/png"};base64,${bytes.toString("base64")}`
         ),
       },
-      credentials
+      credentials,
+      signal
     );
   } else {
     // Legacy FLUX aliases retain their defaults but no longer discard native options.
@@ -141,10 +152,11 @@ async function prepareEditInput(
     }
     if (body.mask !== undefined) upstreamBody.mask_url = body.mask;
     if (body.fal_input && typeof body.fal_input === "object") {
-      upstreamBody = await prepareFalCompatibility(
+      upstreamBody = await prepareFalInput(
         editModel,
         { fal_input: { ...upstreamBody, ...body.fal_input } },
-        credentials
+        credentials,
+        signal
       );
     }
   }

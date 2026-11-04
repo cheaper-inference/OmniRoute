@@ -32,6 +32,7 @@ import {
   parseKieResultJson,
 } from "../utils/kieTask.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { prepareFalCompatibility } from "./fal/compatibility.ts";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
 import { handleMinimaxMusicGeneration } from "./mediaGeneration/minimaxMusic.ts";
@@ -85,7 +86,13 @@ function normalizeKieMusicTracks(recordData: unknown): Array<Record<string, unkn
 /**
  * Handle music generation request
  */
-export async function handleMusicGeneration({ body, credentials, log, signal = null }) {
+export async function handleMusicGeneration({
+  body,
+  credentials,
+  log,
+  signal = null,
+  prepareFalInput = prepareFalCompatibility,
+}) {
   const { provider, model } = parseMusicModel(body.model);
 
   if (!provider) {
@@ -130,6 +137,7 @@ export async function handleMusicGeneration({ body, credentials, log, signal = n
 
   if (providerConfig.format === "fal-ai-music") {
     return handleFalMusicGeneration({
+      prepareFalInput,
       model,
       provider,
       providerConfig,

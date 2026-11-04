@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { canonicalFalEndpoint, isLegacyFalEndpoint } from "../config/falEndpoint.ts";
-import { prepareFalCompatibility } from "@/lib/fal/compatibility";
+import { prepareFalCompatibility } from "./fal/compatibility.ts";
 /** Image generation handler for POST /v1/images/generations (OpenAI-compatible). */
 
 import {
@@ -414,6 +414,7 @@ export async function handleImageGeneration({
   // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
   // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
   longJobs = null,
+  prepareFalInput = prepareFalCompatibility,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -533,6 +534,7 @@ export async function handleImageGeneration({
       signal,
       generateOne: (taskBody) =>
         handleImageGeneration({
+          prepareFalInput,
           body: taskBody,
           credentials,
           log,
@@ -648,6 +650,7 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "fal-ai") {
     return handleFalAIImageGeneration({
+      prepareFalInput,
       model,
       provider,
       providerConfig,
@@ -1745,6 +1748,7 @@ export async function handleOpenRouterImageEdit({
 }
 
 async function handleFalAIImageGeneration({
+  prepareFalInput,
   model,
   provider,
   providerConfig,
@@ -1802,7 +1806,7 @@ async function handleFalAIImageGeneration({
 
   try {
     if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
-      upstreamBody = await prepareFalCompatibility(falModel, body, credentials, signal);
+      upstreamBody = await prepareFalInput(falModel, body, credentials, signal);
     }
     const response = await fetchWithTimeout(
       `${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`,

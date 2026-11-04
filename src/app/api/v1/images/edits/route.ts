@@ -1,3 +1,4 @@
+import { prepareFalCompatibility } from "@/lib/fal/compatibility";
 import {
   handleAdobeFireflyImageGeneration,
   handleCodexImageEdit,
@@ -345,6 +346,7 @@ async function dispatchImageEditTarget(
 
   if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)) {
     return (await handleFalAIImageEdit({
+      prepareFalInput: prepareFalCompatibility,
       provider: parsed.provider,
       model: parsed.model,
       providerConfig,
@@ -835,6 +837,7 @@ async function postHandler(request: Request, _context?: unknown) {
       editAccounting(accounting, parsed.provider, parsed.model, credentials),
       () =>
         handleFalAIImageEdit({
+          prepareFalInput: prepareFalCompatibility,
           provider: parsed.provider,
           model: parsed.model,
           providerConfig,
@@ -1001,6 +1004,7 @@ async function postHandler(request: Request, _context?: unknown) {
       allowedConnections,
       execute: (creds) =>
         handleImageGeneration({
+          prepareFalInput: prepareFalCompatibility,
           body: {
             model: resolvedModel,
             prompt,

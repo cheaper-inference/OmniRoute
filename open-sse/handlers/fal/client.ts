@@ -1,6 +1,6 @@
 import { canonicalFalEndpoint } from "../../config/falEndpoint.ts";
 import { falCapabilities, falRecord, type FalDefinition, type FalRecord } from "./schema.ts";
-import { getConfiguredTimeout } from "../../../src/shared/utils/fetchTimeout.ts";
+import { getConfiguredTimeout } from "../../utils/fetchTimeout.ts";
 
 export class FalError extends Error {
   constructor(

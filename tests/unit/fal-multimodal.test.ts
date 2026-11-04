@@ -376,3 +376,86 @@ test("uncertain queue submissions are sent once and never retried", async () => 
   await assert.rejects(client.execute("publisher/app/nested", { enabled: false }, "queue"));
   assert.equal(calls, 1);
 });
+
+for (const kind of ["image", "edit", "video", "music"] as const) {
+  test(`${kind} dispatch preserves the route-injected Fal schema preparer`, async () => {
+    const original = globalThis.fetch;
+    const controller = new AbortController();
+    const credentials = { apiKey: "scoped-key", connectionId: "selected-connection" };
+    const nativeInput = { prompt: "from the selected connection's override" };
+    let prepared = 0;
+    let dispatched = 0;
+    const prepareFalInput = async (
+      endpoint: string,
+      _body: Record<string, unknown>,
+      selectedCredentials: { connectionId?: unknown },
+      signal?: AbortSignal
+    ) => {
+      prepared++;
+      assert.equal(selectedCredentials, credentials);
+      assert.equal(signal, controller.signal);
+      assert.equal(
+        endpoint,
+        kind === "video"
+          ? "fal-ai/veo3.1/lite"
+          : kind === "music"
+            ? "fal-ai/ace-step"
+            : kind === "edit"
+              ? "fal-ai/flux-2-pro/edit"
+              : "fal-ai/flux-2-pro"
+      );
+      return nativeInput;
+    };
+    globalThis.fetch = async (url, init) => {
+      dispatched++;
+      assert.doesNotMatch(String(url), /api\.fal\.ai/);
+      assert.deepEqual(JSON.parse(String(init?.body)), nativeInput);
+      return Response.json({
+        images: [{ url: "data:image/png;base64,AQID" }],
+        video: { url: "https://example.com/video.mp4" },
+        audio: { url: "https://example.com/audio.wav" },
+      });
+    };
+    try {
+      const options = {
+        credentials,
+        log: null,
+        signal: controller.signal,
+        prepareFalInput,
+        body: { prompt: "test", fal_input: {} },
+      };
+      const result =
+        kind === "image"
+          ? await handleImageGeneration({
+              ...options,
+              body: { ...options.body, model: "fal-ai/flux-2-pro" },
+            })
+          : kind === "edit"
+            ? await handleFalAIImageEdit({
+                ...options,
+                provider: "fal-ai",
+                providerConfig: { baseUrl: "https://fal.run" },
+                model: "flux-2-pro",
+                images: [{ bytes: Buffer.from([1, 2]), mime: "image/png" }],
+              })
+            : kind === "video"
+              ? await (
+                  await import("../../open-sse/handlers/videoGeneration.ts")
+                ).handleVideoGeneration({
+                  ...options,
+                  body: { ...options.body, model: "fal-ai/veo3.1/lite" },
+                })
+              : await (
+                  await import("../../open-sse/handlers/musicGeneration.ts")
+                ).handleMusicGeneration({
+                  ...options,
+                  body: { ...options.body, model: "fal-ai/ace-step" },
+                });
+      assert.equal(result.success, true, JSON.stringify(result));
+      assert.equal(prepared, 1);
+      assert.equal(dispatched, 1);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+}
