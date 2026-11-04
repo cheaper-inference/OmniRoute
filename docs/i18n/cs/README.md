@@ -1300,20 +1300,20 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
 
 <table>
   <tr><th align="left">Vrstva</th><th align="left">Technologie</th></tr>
-  <tr><td nowrap><b>Běhové prostředí</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> v <code>src/</code> a <code>open-sse/</code> (v jádře od v2.0 žádné <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> v <code>src/</code> a <code>open-sse/</code> (od v2.0 žádné <code>any</code> v jádře)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší JSON) — 147 doménových modulů, 221 migrací</td></tr>
-  <tr><td nowrap><b>Paměť</b></td><td>fulltextové vyhledávání SQLite FTS5 + vektorové embeddingy kvantizované na int8, typovaný útlum</td></tr>
-  <tr><td nowrap><b>Schémata</b></td><td>Zod 4 — validace I/O nástrojů MCP + kontrakty API</td></tr>
+  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší JSON) — 147 doménových modulů, 222 migrací</td></tr>
+  <tr><td nowrap><b>Paměť</b></td><td>Fulltextové vyhledávání SQLite FTS5 + vektorové embeddingy kvantizované na int8, typovaný útlum</td></tr>
+  <tr><td nowrap><b>Schémata</b></td><td>Zod 4 — validace I/O nástrojů MCP + smlouvy API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Streamování</b></td><td>Server-Sent Events (SSE) + most WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Komprese</b></td><td>12modulový pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentizace a zabezpečení</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + rozsahová autentizace MCP · AES-256-GCM v klidu · DOMPurify</td></tr>
-  <tr><td nowrap><b>Skrytí</b></td><td>wreq-js — impersonace TLS otisků JA3 / JA4, tříúrovňový proxy</td></tr>
-  <tr><td nowrap><b>Odolnost</b></td><td>Obvodový jistič, exponenciální zpětné čekání, ochrana proti náporu požadavků, automatické kombinované samoopravování</td></tr>
-  <tr><td nowrap><b>Protokolování</b></td><td>pino — strukturované protokoly JSON s kontextem požadavku</td></tr>
-  <tr><td nowrap><b>Testování</b></td><td>Spouštěč testů Node.js + Vitest — <b>60 000+ statických deklarací testů</b> ve více než 8 400 sledovaných testovacích souborech (jednotkové, integrační, E2E, bezpečnostní, ekosystémové)</td></tr>
+  <tr><td nowrap><b>Komprese</b></td><td>Pipeline s 12 enginy — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentizace a zabezpečení</b></td><td>OAuth 2.0 (PKCE) + JWT + klíče API + autentizace MCP s omezeným rozsahem · AES-256-GCM v klidovém stavu · DOMPurify</td></tr>
+  <tr><td nowrap><b>Utajení</b></td><td>wreq-js — impersonace otisků TLS JA3 / JA4, proxy se 3 úrovněmi</td></tr>
+  <tr><td nowrap><b>Odolnost</b></td><td>Ochrana proti přetížení, exponenciální prodleva, ochrana proti hromadnému opakování požadavků, automatické kombinované samoopravování</td></tr>
+  <tr><td nowrap><b>Protokolování</b></td><td>pino — strukturované JSON protokoly s kontextem požadavku</td></tr>
+  <tr><td nowrap><b>Testování</b></td><td>Test runner Node.js + Vitest — <b>60 000+ statických deklarací testů</b> ve více než 8 400 sledovaných testovacích souborech (unit, integrační, E2E, bezpečnostní, ekosystémové)</td></tr>
   <tr><td nowrap><b>Platformy</b></td><td>Desktop (Electron) · Android (Termux) · PWA (libovolný prohlížeč)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatické publikování do npm + Docker Hub při vydání</td></tr>
   <tr><td nowrap><b>Odkazy</b></td><td><a href="https://omniroute.online">Web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>

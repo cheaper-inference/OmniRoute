@@ -985,7 +985,8 @@ test("chatCore integration: modular compression records analytics row best-effor
 
     assert.equal(summary.totalRequests, 1);
     assert.ok(summary.totalTokensSaved > 0, "Analytics should record token savings");
-    assert.equal(summary.byMode.lite.count, 1);
+    // Without a lossy opt-in, Lite runs as a stacked lossless-Lite pipeline (#18818).
+    assert.equal(summary.byMode.stacked?.count, 1);
     assert.equal(summary.byProvider.openai.count, 1);
     assert.equal(summary.realUsage.requestsWithReceipts, 1);
     assert.equal(summary.realUsage.totalTokens, 15);

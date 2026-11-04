@@ -1294,19 +1294,19 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
   <tr><td nowrap><b>የማስኬጃ አካባቢ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ቋንቋ</b></td><td>TypeScript 6.0 — በ<code>src/</code> እና <code>open-sse/</code> ውስጥ <b>100% TypeScript</b> (ከv2.0 ጀምሮ በዋናው ኮድ ውስጥ ዜሮ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ፍሬምወርክ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ዳታቤዝ</b></td><td>better-sqlite3 (SQLite፣ WAL መዝገብ) + LowDB (የJSON ውርስ) — 147 የድርጅት ሞጁሎች፣ 221 ማሻሻያዎች</td></tr>
-  <tr><td nowrap><b>ማስታወሻ</b></td><td>SQLite FTS5 ሙሉ ጽሑፍ + int8-quantized የቬክተር ኢምቤዲንጎች፣ በአይነት የተወሰነ መቀነስ</td></tr>
+  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL መዝገብ) + LowDB (የJSON ውርስ) — 147 የዶሜይን ሞጁሎች፣ 222 ማይግሬሽኖች</td></tr>
+  <tr><td nowrap><b>ማህደረ ትውስታ</b></td><td>SQLite FTS5 ሙሉ-ጽሑፍ + int8-quantized የቬክተር ኢምቤዲንጎች፣ አይነት-የተገለጸ መቀነስ</td></tr>
   <tr><td nowrap><b>ስኪማዎች</b></td><td>Zod 4 — የMCP መሣሪያ I/O ማረጋገጫ + የAPI ውሎች</td></tr>
   <tr><td nowrap><b>ፕሮቶኮሎች</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>ዥረት ማስተላለፍ</b></td><td>በአገልጋይ የሚላኩ ክስተቶች (SSE) + WebSocket ድልድይ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>መጭመቂያ</b></td><td>12-ሞተር ቧንቧ — RTK፣ Caveman፣ LLMLingua-2 (MobileBERT ONNX)፣ GCF፣ OmniGlyph</td></tr>
-  <tr><td nowrap><b>ማረጋገጫ እና ደህንነት</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + የMCP የተወሰነ ማረጋገጫ · AES-256-GCM በማከማቻ ላይ · DOMPurify</td></tr>
-  <tr><td nowrap><b>ስውርነት</b></td><td>wreq-js — JA3 / JA4 TLS የአሻራ ማስመሰል፣ ባለ3-ደረጃ ፕሮክሲ</td></tr>
-  <tr><td nowrap><b>ጽናት</b></td><td>የወረዳ ማቋረጫ፣ የሚጨምር የመጠበቂያ ጊዜ፣ ፀረ-መጨናነቅ፣ በራስ-ሰር ጥምር ራስን መጠገን</td></tr>
-  <tr><td nowrap><b>መዝገብ ማድረግ</b></td><td>pino — የተዋቀሩ የJSON መዝገቦች ከጥያቄ አውድ ጋር</td></tr>
-  <tr><td nowrap><b>ሙከራ</b></td><td>የNode.js ሙከራ አስኬጂ + Vitest — በ8,400+ ተከታትለው በተመዘገቡ የሙከራ ፋይሎች ላይ <b>60,000+ የማይንቀሳቀሱ የሙከራ መግለጫዎች</b> (ዩኒት፣ ውህደት፣ E2E፣ ደህንነት፣ ኢኮሲስተም)</td></tr>
+  <tr><td nowrap><b>ዥረት ማስተላለፍ</b></td><td>Server-Sent Events (SSE) + WebSocket ድልድይ (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>መጭመቂያ</b></td><td>12-ሞተር የሂደት ቀጥል — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>ማረጋገጫ እና ደህንነት</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP የተወሰነ ማረጋገጫ · AES-256-GCM በማከማቻ ላይ · DOMPurify</td></tr>
+  <tr><td nowrap><b>ድብቅነት</b></td><td>wreq-js — JA3 / JA4 TLS የአሻራ ማስመሰል፣ 3-ደረጃ ፕሮክሲ</td></tr>
+  <tr><td nowrap><b>ጽናት</b></td><td>የሰርኪዩት ማቋረጫ፣ በኤክስፖኔንሻል የሚጨምር የመልሶ ሙከራ መዘግየት፣ የተመሳሳይ ጊዜ ጥያቄዎችን መከላከል፣ ራስ-ሰር የጥምረት ራስ-መፈወስ</td></tr>
+  <tr><td nowrap><b>መዝገብ አያያዝ</b></td><td>pino — የጥያቄ አውድ ያላቸው የተዋቀሩ የJSON መዝገቦች</td></tr>
+  <tr><td nowrap><b>ሙከራ</b></td><td>Node.js test runner + Vitest — በ8,400+ የተከታተሉ የሙከራ ፋይሎች (unit፣ integration፣ E2E፣ security፣ ecosystem) ላይ <b>60,000+ የማይንቀሳቀሱ የሙከራ መግለጫዎች</b></td></tr>
   <tr><td nowrap><b>መድረኮች</b></td><td>ዴስክቶፕ (Electron) · Android (Termux) · PWA (ማንኛውም አሳሽ)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — በልቀት ጊዜ በራስ-ሰር npm ማተም + Docker Hub</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — በልቀት ጊዜ ራስ-ሰር npm ህትመት + Docker Hub</td></tr>
   <tr><td nowrap><b>አገናኞች</b></td><td><a href="https://omniroute.online">ድረ-ገጽ</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

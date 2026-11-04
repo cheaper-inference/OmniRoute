@@ -1292,23 +1292,23 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 بھی اسے چ�
 </div>
 
 <table>
-  <tr><th align="left">تہہ</th><th align="left">ٹیکنالوجی</th></tr>
+  <tr><th align="left">پرت</th><th align="left">ٹیکنالوجی</th></tr>
   <tr><td nowrap><b>رن ٹائم</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> اور <code>open-sse/</code> میں (v2.0 سے کور میں صفر <code>any</code>)</td></tr>
+  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <code>src/</code> اور <code>open-sse/</code> میں <b>100% TypeScript</b> (v2.0 سے کور میں صفر <code>any</code>)</td></tr>
   <tr><td nowrap><b>فریم ورک</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ڈیٹابیس</b></td><td>better-sqlite3 (SQLite، WAL جرنلنگ) + LowDB (JSON لیگیسی) — 147 ڈومین ماڈیولز، 221 مائیگریشنز</td></tr>
-  <tr><td nowrap><b>میموری</b></td><td>SQLite FTS5 مکمل متن + int8-quantized ویکٹر ایمبیڈنگز، ٹائپڈ ڈے</td></tr>
-  <tr><td nowrap><b>اسکیماز</b></td><td>Zod 4 — MCP ٹول I/O توثیق + API معاہدے</td></tr>
+  <tr><td nowrap><b>ڈیٹابیس</b></td><td>better-sqlite3 (SQLite، WAL جرنلنگ) + LowDB (JSON لیگیسی) — 147 ڈومین ماڈیولز، 222 مائیگریشنز</td></tr>
+  <tr><td nowrap><b>میموری</b></td><td>SQLite FTS5 مکمل متن + int8-quantized ویکٹر ایمبیڈنگز، ٹائپ شدہ زوال</td></tr>
+  <tr><td nowrap><b>اسکیماز</b></td><td>Zod 4 — MCP ٹول I/O کی توثیق + API معاہدے</td></tr>
   <tr><td nowrap><b>پروٹوکولز</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>اسٹریمنگ</b></td><td>Server-Sent Events (SSE) + WebSocket برج (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>کمپریشن</b></td><td>12-انجن پائپ لائن — RTK، Caveman، LLMLingua-2 (MobileBERT ONNX)، GCF، OmniGlyph</td></tr>
-  <tr><td nowrap><b>تصدیق اور سیکیورٹی</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP محدود دائرۂ اختیار کی تصدیق · AES-256-GCM ذخیرہ شدہ ڈیٹا پر · DOMPurify</td></tr>
-  <tr><td nowrap><b>خفیہ کاری</b></td><td>wreq-js — JA3 / JA4 TLS فنگرپرنٹ کی نقل، 3-سطحی پراکسی</td></tr>
-  <tr><td nowrap><b>لچک پذیری</b></td><td>سرکٹ بریکر، ایکسپونینشل بیک آف، anti-thundering-herd، خودکار کومبو سیلف ہیلنگ</td></tr>
-  <tr><td nowrap><b>لاگنگ</b></td><td>pino — درخواست کے سیاق و سباق کے ساتھ ساخت یافتہ JSON لاگز</td></tr>
-  <tr><td nowrap><b>ٹیسٹنگ</b></td><td>Node.js ٹیسٹ رنر + Vitest — 8,400+ ٹریک شدہ ٹیسٹ فائلز (یونٹ، انٹیگریشن، E2E، سیکیورٹی، ایکوسسٹم) میں <b>60,000+ جامد ٹیسٹ اعلانات</b></td></tr>
+  <tr><td nowrap><b>تصدیق &amp; سیکیورٹی</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP محدود دائرۂ اختیار کی تصدیق · AES-256-GCM at rest · DOMPurify</td></tr>
+  <tr><td nowrap><b>خفیہ کاری</b></td><td>wreq-js — JA3 / JA4 TLS فنگرپرنٹ امپرسونیشن، 3-سطحی پراکسی</td></tr>
+  <tr><td nowrap><b>لچک پذیری</b></td><td>Circuit breaker، ایکسپونینشل بیک آف، anti-thundering-herd، خودکار کومبو خود بحالی</td></tr>
+  <tr><td nowrap><b>لاگنگ</b></td><td>pino — درخواست کے سیاق و سباق کے ساتھ منظم JSON لاگز</td></tr>
+  <tr><td nowrap><b>ٹیسٹنگ</b></td><td>Node.js ٹیسٹ رنر + Vitest — 8,400+ ٹریک شدہ ٹیسٹ فائلوں میں <b>60,000+ جامد ٹیسٹ اعلانات</b> (یونٹ، انٹیگریشن، E2E، سیکیورٹی، ایکوسسٹم)</td></tr>
   <tr><td nowrap><b>پلیٹ فارمز</b></td><td>ڈیسک ٹاپ (Electron) · Android (Termux) · PWA (کوئی بھی براؤزر)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ریلیز پر خودکار npm پبلش + Docker Hub</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ریلیز کے وقت خودکار npm پبلش + Docker Hub</td></tr>
   <tr><td nowrap><b>روابط</b></td><td><a href="https://omniroute.online">ویب سائٹ</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

@@ -1300,21 +1300,21 @@ Kanonske metrike na dan 2026-10-18: **1.976 jedinstvenih videozapisa** · **20.2
 <table>
   <tr><th align="left">Sloj</th><th align="left">Tehnologija</th></tr>
   <tr><td nowrap><b>Izvršno okruženje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> u direktorijima <code>src/</code> i <code>open-sse/</code> (nula <code>any</code> u jezgri od v2.0)</td></tr>
+  <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> u <code>src/</code> i <code>open-sse/</code> (nula <code>any</code> u jezgri od v2.0)</td></tr>
   <tr><td nowrap><b>Okvir</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL evidentiranje) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 221 migracija</td></tr>
-  <tr><td nowrap><b>Memorija</b></td><td>SQLite FTS5 pretraživanje punog teksta + vektorska ugrađivanja kvantizovana na int8, tipizirano opadanje</td></tr>
-  <tr><td nowrap><b>Šeme</b></td><td>Zod 4 — validacija ulaza/izlaza MCP alata + API ugovori</td></tr>
+  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL evidentiranje) + LowDB (naslijeđeni JSON) — 147 domenskih modula, 222 migracije</td></tr>
+  <tr><td nowrap><b>Memorija</b></td><td>SQLite FTS5 pretraga punog teksta + vektorska ugrađivanja kvantizovana na int8, tipizirano opadanje</td></tr>
+  <tr><td nowrap><b>Šeme</b></td><td>Zod 4 — validacija MCP ulaza/izlaza alata + API ugovori</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Strimovanje</b></td><td>Server-Sent Events (SSE) + WebSocket most (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Kompresija</b></td><td>Cjevovod sa 12 mehanizama — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikacija i sigurnost</b></td><td>OAuth 2.0 (PKCE) + JWT + API ključevi + MCP autentifikacija ograničena opsegom · AES-256-GCM u mirovanju · DOMPurify</td></tr>
-  <tr><td nowrap><b>Skrivenost</b></td><td>wreq-js — oponašanje JA3 / JA4 TLS otiska, proxy sa 3 nivoa</td></tr>
-  <tr><td nowrap><b>Otpornost</b></td><td>Prekidač kola, eksponencijalno povlačenje, zaštita od istovremenog naleta zahtjeva, automatsko kombinovano samostalno popravljanje</td></tr>
+  <tr><td nowrap><b>Autentifikacija i sigurnost</b></td><td>OAuth 2.0 (PKCE) + JWT + API ključevi + MCP autentifikacija ograničenog opsega · AES-256-GCM u mirovanju · DOMPurify</td></tr>
+  <tr><td nowrap><b>Prikrivanje</b></td><td>wreq-js — oponašanje JA3 / JA4 TLS otiska, proksi sa 3 nivoa</td></tr>
+  <tr><td nowrap><b>Otpornost</b></td><td>Prekidač strujnog kola, eksponencijalno čekanje, zaštita od stampeda, automatsko kombinovano samopopravljanje</td></tr>
   <tr><td nowrap><b>Evidentiranje</b></td><td>pino — strukturirani JSON dnevnici s kontekstom zahtjeva</td></tr>
-  <tr><td nowrap><b>Testiranje</b></td><td>Node.js test runner + Vitest — <b>60.000+ statičkih deklaracija testova</b> u više od 8.400 praćenih datoteka testova (jedinični, integracijski, E2E, sigurnosni, ekosistemski)</td></tr>
+  <tr><td nowrap><b>Testiranje</b></td><td>Node.js pokretač testova + Vitest — <b>60.000+ statičkih deklaracija testova</b> u više od 8.400 praćenih testnih datoteka (jedinični, integracijski, E2E, sigurnosni testovi i testovi ekosistema)</td></tr>
   <tr><td nowrap><b>Platforme</b></td><td>Desktop (Electron) · Android (Termux) · PWA (bilo koji preglednik)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatska npm objava + Docker Hub pri izdanju</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatska npm objava + Docker Hub pri objavljivanju izdanja</td></tr>
   <tr><td nowrap><b>Veze</b></td><td><a href="https://omniroute.online">Web-stranica</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

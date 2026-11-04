@@ -1292,21 +1292,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 <table>
   <tr><th align="left">ფენა</th><th align="left">ტექნოლოგია</th></tr>
   <tr><td nowrap><b>გაშვების გარემო</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ენა</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-სა და <code>open-sse/</code>-ში (v2.0-დან ბირთვში არც ერთი <code>any</code>)</td></tr>
+  <tr><td nowrap><b>ენა</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-სა და <code>open-sse/</code>-ში (v2.0-დან ბირთვში ნულოვანი <code>any</code>)</td></tr>
   <tr><td nowrap><b>ფრეიმვორკი</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL ჟურნალირება) + LowDB (JSON-ის ლეგასი) — 147 დომენური მოდული, 221 მიგრაცია</td></tr>
-  <tr><td nowrap><b>მეხსიერება</b></td><td>SQLite FTS5 სრული ტექსტის ძიება + int8-კვანტიზებული ვექტორული ემბედინგები, ტიპიზებული დეგრადაცია</td></tr>
-  <tr><td nowrap><b>სქემები</b></td><td>Zod 4 — MCP ხელსაწყოების I/O ვალიდაცია + API კონტრაქტები</td></tr>
+  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL ჟურნალირება) + LowDB (JSON-ის მოძველებული ვერსია) — დომენის 147 მოდული, 222 მიგრაცია</td></tr>
+  <tr><td nowrap><b>მეხსიერება</b></td><td>SQLite FTS5 სრული ტექსტის ძიება + int8-quantized ვექტორული ემბედინგები, ტიპიზებული დაქვეითება</td></tr>
+  <tr><td nowrap><b>სქემები</b></td><td>Zod 4 — MCP ინსტრუმენტების I/O ვალიდაცია + API კონტრაქტები</td></tr>
   <tr><td nowrap><b>პროტოკოლები</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>სტრიმინგი</b></td><td>სერვერის მიერ გაგზავნილი მოვლენები (SSE) + WebSocket ხიდი (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>სტრიმინგი</b></td><td>Server-Sent Events (SSE) + WebSocket ხიდი (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>კომპრესია</b></td><td>12-ძრავიანი მილსადენი — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>ავტორიზაცია და უსაფრთხოება</b></td><td>OAuth 2.0 (PKCE) + JWT + API გასაღებები + MCP-ის შეზღუდული ავტორიზაცია · AES-256-GCM შენახული მონაცემებისთვის · DOMPurify</td></tr>
-  <tr><td nowrap><b>ფარულობა</b></td><td>wreq-js — JA3 / JA4 TLS-ანაბეჭდის იმიტაცია, 3-დონიანი პროქსი</td></tr>
-  <tr><td nowrap><b>მედეგობა</b></td><td>წრიული ამომრთველი, ექსპონენციალური უკანდახევა, ერთდროული მოთხოვნებისგან დაცვა, auto-combo თვითაღდგენა</td></tr>
-  <tr><td nowrap><b>ჟურნალირება</b></td><td>pino — სტრუქტურირებული JSON ჟურნალები მოთხოვნის კონტექსტით</td></tr>
-  <tr><td nowrap><b>ტესტირება</b></td><td>Node.js ტესტების გამშვები + Vitest — <b>60,000+-ზე მეტი სტატიკური ტესტის დეკლარაცია</b> 8,400+-ზე მეტ თვალყურის დევნებულ სატესტო ფაილში (ერთეულური, ინტეგრაციული, E2E, უსაფრთხოების, ეკოსისტემის)</td></tr>
+  <tr><td nowrap><b>ავთენტიკაცია და უსაფრთხოება</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP-ის შეზღუდული არეალის ავტორიზაცია · AES-256-GCM შენახულ მონაცემებზე · DOMPurify</td></tr>
+  <tr><td nowrap><b>ფარულობა</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint იმიტაცია, 3-დონიანი პროქსი</td></tr>
+  <tr><td nowrap><b>მედეგობა</b></td><td>ამომრთველი, ექსპონენციალური უკანდახევა, ერთდროულად მოთხოვნების მკვეთრი ზრდისგან დაცვა, ავტომატური კომბინაციებით თვითაღდგენა</td></tr>
+  <tr><td nowrap><b>ლოგირება</b></td><td>pino — სტრუქტურირებული JSON ლოგები მოთხოვნის კონტექსტით</td></tr>
+  <tr><td nowrap><b>ტესტირება</b></td><td>Node.js ტესტების გამშვები + Vitest — <b>60,000+ სტატიკური ტესტის დეკლარაცია</b> 8,400+ თვალყურის დევნებად სატესტო ფაილში (ერთეულოვანი, ინტეგრაციული, E2E, უსაფრთხოების, ეკოსისტემის)</td></tr>
   <tr><td nowrap><b>პლატფორმები</b></td><td>დესკტოპი (Electron) · Android (Termux) · PWA (ნებისმიერი ბრაუზერი)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ავტომატური npm-გამოქვეყნება + Docker Hub-ზე ატვირთვა რელიზისას</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — გამოშვებისას npm-ის ავტომატური გამოქვეყნება + Docker Hub-ზე ავტომატური ატვირთვა</td></tr>
   <tr><td nowrap><b>ბმულები</b></td><td><a href="https://omniroute.online">ვებსაიტი</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1679,7 +1679,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute?theme=dark" />
     <source media="(prefers-color-scheme: light)" srcset="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute?theme=light" />
-    <img alt="StarMapper" src="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute" />
+    <img alt="ვარსკვლავების რუკა" src="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute" />
   </picture>
 </a>
 </div>

@@ -1301,19 +1301,19 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   <tr><td nowrap><b>Kjøretid</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> i <code>src/</code> og <code>open-sse/</code> (ingen <code>any</code> i kjernen siden v2.0)</td></tr>
   <tr><td nowrap><b>Rammeverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (eldre JSON) — 147 domenemoduler, 221 migreringer</td></tr>
-  <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltekstsøk + int8-kvantisert vektorembedding, typet henfall</td></tr>
-  <tr><td nowrap><b>Skjemaer</b></td><td>Zod 4 — validering av MCP-verktøyets I/O + API-kontrakter</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (eldre JSON) — 147 domenemoduler, 222 migreringer</td></tr>
+  <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltekstsøk + int8-kvantisert vektorinnebygging, typet forfall</td></tr>
+  <tr><td nowrap><b>Skjemaer</b></td><td>Zod 4 — validering av MCP-verktøy-I/O + API-kontrakter</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Strømming</b></td><td>Server-Sent Events (SSE) + WebSocket-bro (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Komprimering</b></td><td>12-motors pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentisering og sikkerhet</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP-autentisering med omfang · AES-256-GCM i hvile · DOMPurify</td></tr>
-  <tr><td nowrap><b>Skjult modus</b></td><td>wreq-js — JA3- / JA4-fingeravtrykksimitasjon for TLS, proxy på 3 nivåer</td></tr>
-  <tr><td nowrap><b>Robusthet</b></td><td>Kretsbryter, eksponentiell backoff, beskyttelse mot «thundering herd», automatisk selvreparasjon med kombinasjoner</td></tr>
+  <tr><td nowrap><b>Komprimering</b></td><td>Pipeline med 12 motorer — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentisering &amp; sikkerhet</b></td><td>OAuth 2.0 (PKCE) + JWT + API-nøkler + MCP-autentisering med begrenset omfang · AES-256-GCM i hvile · DOMPurify</td></tr>
+  <tr><td nowrap><b>Usynlighet</b></td><td>wreq-js — JA3- / JA4-TLS-fingeravtrykkimitasjon, proxy på 3 nivåer</td></tr>
+  <tr><td nowrap><b>Robusthet</b></td><td>Kretsbryter, eksponentiell tilbakestrategi, beskyttelse mot «thundering herd», automatisk selvreparasjon med kombinasjoner</td></tr>
   <tr><td nowrap><b>Logging</b></td><td>pino — strukturerte JSON-logger med forespørselskontekst</td></tr>
-  <tr><td nowrap><b>Testing</b></td><td>Node.js-testkjører + Vitest — <b>over 60 000 statiske testdeklarasjoner</b> fordelt på over 8 400 sporede testfiler (enhet, integrasjon, E2E, sikkerhet, økosystem)</td></tr>
+  <tr><td nowrap><b>Testing</b></td><td>Node.js-testkjører + Vitest — <b>over 60 000 statiske testdeklarasjoner</b> fordelt på over 8 400 registrerte testfiler (enhet, integrasjon, E2E, sikkerhet, økosystem)</td></tr>
   <tr><td nowrap><b>Plattformer</b></td><td>Skrivebord (Electron) · Android (Termux) · PWA (alle nettlesere)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk npm-publisering + Docker Hub ved utgivelse</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk publisering til npm + Docker Hub ved utgivelse</td></tr>
   <tr><td nowrap><b>Lenker</b></td><td><a href="https://omniroute.online">Nettsted</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

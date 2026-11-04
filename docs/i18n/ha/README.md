@@ -1290,24 +1290,24 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
 </div>
 
 <table>
-  <tr><th align="left">Layer</th><th align="left">Fasaha</th></tr>
-  <tr><td nowrap><b>Lokacin gudu</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Harshen shirye-shirye</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> a cikin <code>src/</code> da <code>open-sse/</code> (babu <code>any</code> ko ɗaya a cikin ginshiƙi tun v2.0)</td></tr>
+  <tr><th align="left">Mataki</th><th align="left">Fasaha</th></tr>
+  <tr><td nowrap><b>Lokacin gudana</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Harshe</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> a faɗin <code>src/</code> da <code>open-sse/</code> (babu <code>any</code> ko ɗaya a cikin core tun v2.0)</td></tr>
   <tr><td nowrap><b>Tsarin aiki</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’ajiyar bayanai</b></td><td>better-sqlite3 (SQLite, rajistar WAL) + LowDB (JSON na gado) — kayayyakin yanki 147, ƙaura 221</td></tr>
-  <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>Cikakken rubutu na SQLite FTS5 + embeddings na vector da aka ƙididdige su zuwa int8, lalacewa mai nau’i</td></tr>
-  <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — ingantaccen MCP tool I/O + kwangilolin API</td></tr>
+  <tr><td nowrap><b>Ma’adanar bayanai</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON na gado) — modules 147 na yanki, migrations 222</td></tr>
+  <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>Cikakken rubutu na SQLite FTS5 + vector embeddings masu int8-quantized, tare da raguwar da aka tsara da nau’i</td></tr>
+  <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — ingancin MCP tool I/O + kwangilolin API</td></tr>
   <tr><td nowrap><b>Ka’idoji</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Yawo</b></td><td>Abubuwan da uwar garke ke aika (SSE) + gadar WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Matsewa</b></td><td>Bututun injuna 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Tabbatarwa &amp; tsaro</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ingantaccen MCP mai iyakantaccen yanki · AES-256-GCM a lokacin ajiya · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ɓoyewa</b></td><td>wreq-js — kwaikwayon tambarin yatsar TLS na JA3 / JA4, wakili mai matakai 3</td></tr>
-  <tr><td nowrap><b>Juriya</b></td><td>Mai katse da’ira, koma-baya mai ƙaruwa a hankali, rigakafin cunkoson buƙatu, gyaran-kai ta auto-combo</td></tr>
-  <tr><td nowrap><b>Rajista</b></td><td>pino — rajistan JSON tsararre tare da mahallin buƙata</td></tr>
-  <tr><td nowrap><b>Gwaji</b></td><td>Mai gudanar da gwajin Node.js + Vitest — <b>sanarwar gwaji ta tsaye sama da 60,000</b> a cikin fayilolin gwaji sama da 8,400 da aka bi diddigi (naúra, haɗewa, E2E, tsaro, tsarin muhalli)</td></tr>
+  <tr><td nowrap><b>Yawo</b></td><td>Server-Sent Events (SSE) + gadar WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Matse bayanai</b></td><td>Bututun injuna 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Tantancewa &amp; tsaro</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ingantaccen MCP mai iyakantaccen faɗi · AES-256-GCM yayin ajiya · DOMPurify</td></tr>
+  <tr><td nowrap><b>ɓoyewa</b></td><td>wreq-js — kwaikwayon sawun yatsa na JA3 / JA4 TLS, wakili mai matakai 3</td></tr>
+  <tr><td nowrap><b>Juriya</b></td><td>Mai katse da’ira, jinkirin exponential, kariya daga cunkoson buƙatu, gyaran kai ta atomatik na auto-combo</td></tr>
+  <tr><td nowrap><b>Rajista</b></td><td>pino — rajistar JSON mai tsari tare da mahallin buƙata</td></tr>
+  <tr><td nowrap><b>Gwaji</b></td><td>Mai gudanar da gwajin Node.js + Vitest — <b>bayyanannun sanarwar gwaji sama da 60,000</b> a cikin fayilolin gwaji sama da 8,400 da aka bi diddigi (unit, integration, E2E, tsaro, ecosystem)</td></tr>
   <tr><td nowrap><b>Dandamali</b></td><td>Kwamfuta (Electron) · Android (Termux) · PWA (kowane burauza)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — wallafa npm ta atomatik + Docker Hub yayin fitarwa</td></tr>
-  <tr><td nowrap><b>Hanyoyin haɗi</b></td><td><a href="https://omniroute.online">Yanar gizo</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Hanyoyi</b></td><td><a href="https://omniroute.online">Gidan yanar gizo</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
