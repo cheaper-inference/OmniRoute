@@ -26,9 +26,15 @@ test("heap diagnostics are opt-in, thresholded, and limited to one sample per mi
     assert.equal(logs.length, 0, "disabled diagnostics must not sample");
 
     process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED = "1";
+    process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB = "10000000";
     timeMs += 1_000;
     tickEventLoopStallRecorderForTests();
-    assert.equal(logs.length, 1);
+    assert.equal(logs.length, 0, "enabled samples below the threshold must stay silent");
+
+    process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB = "1";
+    timeMs += 1_000;
+    tickEventLoopStallRecorderForTests();
+    assert.equal(logs.length, 1, "crossing the threshold logs immediately");
     assert.match(logs[0], /high V8 heap heapUsedMb=\d+ heapTotalMb=\d+ rssMb=\d+/);
     assert.match(logs[0], /oldSpaceUsedMb=\d+ inflight=3/);
 
