@@ -1624,7 +1624,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Prepisujte zvukové súbory pomocou ľubovoľného nakonfigurovaného poskytovateľa STT. Prvý segment cesty vyberá natívneho poskytovateľa (`openai/…`, `deepgram/…`). Brány, ktoré znovu poskytujú model iného dodávateľa, používajú kvalifikovaný identifikátor
+Prepisujte zvukové súbory pomocou ľubovoľného nakonfigurovaného poskytovateľa STT. Prvý segment cesty
+vyberá natívneho poskytovateľa (`openai/…`, `deepgram/…`). Brány, ktoré
+znovu exportujú model iného dodávateľa, používajú kvalifikovaný identifikátor
 (`openrouter/deepgram/nova-3`).
 
 **Požiadavka:**
@@ -1653,6 +1655,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` **nepoužíva OpenRouter**.
 
 **Podporované formáty:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** prepis v režime súboru cez WebSocket
+Gemini Live (vyžaduje kľúč API Gemini). Nahraný súbor sa skonvertuje na 16 kHz mono PCM pomocou `ffmpeg`
+(`ffmpeg` musí byť v premennej `PATH`, pokiaľ súbor už nie je vo formáte 16 kHz mono PCM WAV), odošle sa
+do relácie a finalizovaný text sa vráti ako `{ "text": "..." }`. Voliteľné polia formulára `language` a `prompt`
+sa preposielajú ďalej. Limity: pri nahraných súboroch väčších ako 25 MiB alebo dekódovanom zvuku dlhšom než 10 minút sa vráti
+`413`; konverzia, ktorá trvá dlhšie než 60 s, sa ukončí a vráti sa
+`504`. Kľúč API sa odosiela iba v hlavičke `x-goog-api-key`, nikdy nie v URL WebSocketu.
 
 ---
 

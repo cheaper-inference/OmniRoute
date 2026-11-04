@@ -1463,7 +1463,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-構成済みの任意の STT プロバイダーを使用して音声ファイルを文字起こしします。パスの最初のセグメントでネイティブプロバイダー（`openai/…`、`deepgram/…`）を選択します。別のベンダーのモデルを再エクスポートするゲートウェイでは、修飾 ID（`openrouter/deepgram/nova-3`）を使用します。
+設定されている任意の STT プロバイダーを使用して音声ファイルを文字起こしします。パスの最初の
+セグメントでネイティブプロバイダー（`openai/…`、`deepgram/…`）を選択します。別のベンダーのモデルを
+再エクスポートするゲートウェイでは、修飾 ID（`openrouter/deepgram/nova-3`）を使用します。
 
 **リクエスト:**
 
@@ -1491,6 +1493,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` リクエストでは OpenRouter は使用されません。
 
 **サポートされている形式:** `mp3`、`wav`、`m4a`、`flac`、`ogg`、`webm`。
+
+**Gemini Live（`gemini/gemini-3.5-transcribe-live`）:** Gemini Live
+WebSocket 経由でファイルモードの文字起こしを行います（Gemini API キーが必要）。アップロードされたファイルは
+`ffmpeg`（ファイルがすでに 16 kHz モノラル PCM WAV である場合を除き、`PATH` に存在している必要があります）を使用して
+16 kHz モノラル PCM に変換され、セッションにストリーミングされた後、確定したテキストが `{ "text": "..." }` として返されます。オプションの `language` および `prompt` フォームフィールドは転送されます。
+制限事項: 25 MiB を超えるアップロード、またはデコード後の音声が 10 分を超える場合は
+`413` が返されます。変換に 60 秒を超えて実行時間がかかった場合は強制終了され、`504` が返されます。API キーは
+`x-goog-api-key` ヘッダーでのみ送信され、WebSocket URL に含まれることはありません。
 
 ---
 
@@ -1566,7 +1576,7 @@ GET /api/telemetry/summary
 ## 予算
 
 ```bash
-# すべての API キーの予算状況を取得
+# すべての API キーの予算ステータスを取得
 GET /api/usage/budget
 
 # 予算を設定または更新
@@ -1583,7 +1593,7 @@ Content-Type: application/json
 }
 ```
 
-> **スキーマに関する注記**（`setBudgetSchema`）: `apiKeyId` は必須です。`dailyLimitUsd`、`weeklyLimitUsd`、`monthlyLimitUsd` のいずれか 1 つ以上が 0 より大きい値である必要があります。オプションフィールド: `warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。従来の `{keyId, limit, period}` 形式では `400 Bad Request` が返されます。
+> **スキーマに関する注意**（`setBudgetSchema`）: `apiKeyId` は必須です。`dailyLimitUsd`、`weeklyLimitUsd`、`monthlyLimitUsd` のいずれか少なくとも 1 つは 0 より大きい値でなければなりません。オプションフィールド: `warningThreshold`（0～1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。従来の `{keyId, limit, period}` 形式では `400 Bad Request` が返されます。
 
 ## トークン制限
 
