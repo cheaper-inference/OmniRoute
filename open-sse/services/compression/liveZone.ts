@@ -438,8 +438,20 @@ async function reuseLiveZoneEntry(
 
   const frozenItems = previous.rawItemDigests.length;
   const liveItems = context.rawItems.slice(frozenItems);
-  const frozenPrefix = cloneItems(previous.transformedPrefix);
+  const frozenPrefix = cloneItems(
+    previous.rawPrefixPatches
+      ? context.rawItems.slice(0, frozenItems)
+      : previous.transformedPrefix
+  );
   if (!frozenPrefix) return fallback();
+  // Only restore patched tool outputs; all unchanged (potentially multi-MB)
+  // prefix items come from the authenticated, digest-matched request itself.
+  for (const patch of previous.rawPrefixPatches ?? []) {
+    if (patch.index >= frozenPrefix.length) return fallback();
+    const value = cloneValue(patch.value);
+    if (value === null) return fallback();
+    frozenPrefix[patch.index] = value;
+  }
   // The latest assistant may already be frozen (including on consecutive/parallel results).
   // Carry its raw tail as engine context, but never replace its cached transformation.
   let contextStart = frozenItems;
