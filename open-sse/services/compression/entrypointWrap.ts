@@ -39,6 +39,9 @@ export function withCompressionEntrypointGuardsAsync<T extends CompressionEntryp
   options: T | undefined,
   run: (body: Record<string, unknown>) => Promise<CompressionResult>
 ): Promise<CompressionResult> {
+  if (mustKeepOpenCodeHistoryVerbatim(body, options?.cachingContext ?? { model: options?.model })) {
+    return Promise.resolve({ body, compressed: false, stats: null });
+  }
   return withQuantumLockAsync(
     body,
     resolveQuantumLock(options),
