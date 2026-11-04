@@ -14,6 +14,7 @@ import {
 import { awaitReactiveModelSync } from "@/lib/providerModels/reactiveModelSync.ts";
 import {
   HTTP_STATUS,
+  FETCH_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
 } from "../../config/constants.ts";
@@ -144,14 +145,14 @@ export function isAbortError(error: unknown): boolean {
 
 /**
  * `fetch()` wrapper that aborts if the upstream never returns response headers
- * within `timeoutMs` (default STREAM_READINESS_TIMEOUT_MS) — distinct from the
- * overall FETCH_TIMEOUT_MS, which bounds the whole request including body streaming.
+ * within `timeoutMs` (default FETCH_TIMEOUT_MS, the global startup budget).
+ * SSE readiness is checked separately after headers arrive.
  * Shared by every fetch attempt in executeOnce() (initial, 403-retry, credits-retry).
  */
 export async function fetchAntigravityWithReadinessTimeout(
   url: string,
   init: RequestInit,
-  timeoutMs = STREAM_READINESS_TIMEOUT_MS
+  timeoutMs = FETCH_TIMEOUT_MS
 ): Promise<Response> {
   const boundedTimeoutMs = Math.max(0, Math.floor(timeoutMs));
   if (boundedTimeoutMs <= 0) {
