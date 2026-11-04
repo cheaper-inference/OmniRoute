@@ -4,80 +4,18 @@
 
 ---
 
-> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Asẹnti naa ni Keak orombo wewe (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Awọn iwe afọwọkọ Switzer ko ṣubu nipasẹ glyph nipasẹ glyph (`src/app/globals.css`): Inter fun Cyrillic, Greek ati Vietnamese ati, labẹ `html[dir="rtl"]` nikan, Vazirmatn fun iwe afọwọkọ Larubawa. Gbogbo aami jẹ glyph Lucide kan.
+> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Paleti aiyipada jẹ ti kit** Awọn ẹda** irisi (awọn didoju iwe gbigbona ati asẹnti bàbà `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Eto → Irisi → Awọ paleti ipese** Alailẹgbẹ** , awọn ami ipilẹ kit pẹlu ohun orombo wewe. Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo funrararẹ nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Awọn iwe afọwọkọ Switzer ko kuna nipasẹ glyph nipasẹ glyph (`src/app/globals.css`): Inter fun Cyrillic, Greek ati Vietnamese ati, labẹ `html[dir="rtl"]` nikan, Vazirmatn fun iwe afọwọkọ Larubawa. Gbogbo aami jẹ glyph Lucide kan.
 
-## 1. Ibi tí àwọn ohun wà
+## 1. Nibiti ohun gbe
 
-- **Kit.** `packages/ui-kit/src` jẹ́ àwòpọ̀ báìtì-fún-báìtì ti `src/` upstream ní commit tí a dì mọ́lẹ̀ nínú
-  `packages/ui-kit/UPSTREAM.md` (tí ó tún ṣàkọsílẹ̀ àṣẹ láìsẹ́nsì náà); `PATCHES.md` ṣàkàtà àwọn patch
-  abínrin (kò sí ohun kankan). A ń lo ó gẹ́gẹ́ bí kóòdù orísun, láìsí build: `next.config.mjs` ń ṣe
-  transpile rẹ̀, àti `tsconfig.json` ń maapu `@omniroute/ui-kit` → `packages/ui-kit/src` àti
-  `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` àti `vitest.mcp.config.ts` gbé
-  alias kannáà). Ṣe import ohun èlò kit kan pẹ̀lú subpath rẹ̀ (`@omniroute/ui-kit/table`,
-  `@omniroute/ui-kit/page-header`…), kò burúkù sì nípasẹ̀ barrel `@omniroute/ui-kit`: barrel náà ń fa
-  gbogbo ohun èlò (pẹ̀lú ohun ìyán ọjọ́ — date picker) wọlé sínú olùkọ̀wọlé kọ̀ọ̀kan. Stylesheet kit ń
-  wọlé nípasẹ̀ `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Àwọn tókùn.** `packages/ui-kit/src/ci-tokens.css` ń kéde àwọn tókùn `--ci-*`; `src/app/globals.css`
-  ń so wọ́n pọ̀ mọ́ àwọn orúkọ OmniRoute àtijọ́ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), nítorí náà àwọn kíkà `var(--color-*)` tó wà tẹ́lẹ̀
-  àti àwọn ohun èlò Tailwind máa tẹ̀síwájú láti ṣiṣẹ́. Kóòdù tuntun ń lo àwọn ohun èlò Tailwind
-  (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…)
-  tàbí àwọn kíláàsì kit — kò burúkù sì lo iye hex kan (`tests/unit/design-kit-bridge.test.ts` ń fi
-  ìsopọ̀ náà múlẹ̀). `text-primary` ń yanjú sí `--color-primary-ink` nípasẹ̀ `--text-color-primary`
-  (lime-800 ní ìmọ́lẹ̀, àwọ̀ àkíyèsí lime ní òkùnkùn), nítorí náà ọ̀rọ̀ àkọ́kọ́ máa wà ní bí a ṣe lè
-  ka, nígbà tí `bg-primary`/`border-primary` ń pa ojú-ìwò lime náà mọ́. Àwọn ẹ̀yà shátì ń lo
-  `--color-chart-1` … `--color-chart-5`.
-- **Àwọn theme.** `<html className="ci-theme">` (`src/app/layout.tsx`) ń mú kí document náà wọlé sínú
-  theme kit. Ohun ìfẹ́ràn náà ni `light`, `dark` tàbí `system` (`THEME_CONFIG.defaultTheme = "system"`
-  nínú `src/shared/constants/appConfig.ts`; `system` ń tẹ̀lé `prefers-color-scheme`). `applyTheme()`
-  nínú `src/store/themeStore.ts` (tí script bootstrap inú-ìlà nínú `src/app/layout.tsx` ń ṣe àwòsí rẹ̀,
-  èyí tó ń ṣiṣẹ́ ṣáájú hydration) ń ṣètò `data-theme="dark"|"light"` ó sì ń yi kíláàsì `.dark` lórí
-  `<html>` padà lẹ́ẹ̀kan náà. Àkópọ̀ tókùn òkùnkùn ti kit dá lórí `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); àwọn àtúnṣe òkùnkùn ti OmniRoute fúnra rẹ̀ (búlọ́ọ̀kù `.dark`
-  nínú `globals.css`) àti àwọn ohun èlò Tailwind `dark:` àtijọ́ dá lórí kíláàsì `.dark`. Kò sí àwọn
-  preset àwọ̀ àkíyèsí: àwọ̀ àkíyèsí máa ń wá láti inú kit nígbà gbogbo, àti preset tí a fipamọ́ láti
-  build àtijọ́ kan ni a ń dà lẹ́sẹ̀ nígbà tí store bá ń ṣe load.
-- **Àwọn ohun èlò (adapters).** `src/shared/components/index.tsx` ń pa API ohun èlò OmniRoute mọ́
-  (àwọn orúkọ kannáà, default exports àti props), àti pé àwọn primitive tó wà lẹ́yìn rẹ̀ jẹ́ àwọn
-  adapter lórí kit: àwọn fọ́ọ̀mù (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
-  `Badge`, `Card`), àwọn overlay àti ìdáhùn (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), ìṣètò (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`) àti àwọn tábìlì (`DataTable`, `FilterBar`,
-  `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter kan ń ṣe import ohun èlò kit pẹ̀lú subpath
-  rẹ̀ ó sì ń maapu àwọn props àtijọ́ sórí rẹ̀ — fún àpẹẹrẹ, `Button variant="primary"` ni bọ́tìnnì
-  `default` ti kit (`--ci-button-primary-*`: ojú-ìwò tó yí padà ní ìmọ́lẹ̀, àwọ̀ àkíyèsí pẹ̀lú àwọ̀
-  ìkọwe `--ci-color-accent-foreground` rẹ̀ ní òkùnkùn), `danger` ni `destructive`, àti `warning` ni
-  `outline` àti àfikún `.ci-button--warning`. Àwọn òfin `.ci-button--warning` àti
-  `.ci-badge[data-tone]` ní òpin `globals.css` (`@layer components`) jẹ́ àwọn àfikún OmniRoute lórí
-  àwọn kíláàsì kit. `tests/unit/ui/adapters/*.test.tsx` ń dì adapter kọ̀ọ̀kan mọ́lẹ̀.
-- **Shell.** `src/app/(dashboard)/layout.tsx` ń fi `DashboardLayout` hàn, èyí tó tún ń fi
-  `src/shared/components/layouts/DashboardShell.tsx` hàn: `SidebarProvider` / `Sidebar` /
-  `SidebarInset` ti kit (`packages/ui-kit/src/sidebar.tsx`), pẹ̀lú ìlànà ìṣàtọ́nílò ti OmniRoute nínú
-  `src/shared/components/Sidebar.tsx`. Ọ̀nà ìsopọ̀ "skip to content" sí `#main-content` ni ohun èlò
-  àkọ́kọ́ tí a lè fi fọ́kùsù lórí. `src/shared/components/Header.tsx` ní `SidebarTrigger` ti kit
-  (toggle sidebar kan ṣoṣo ti shell), `ProductSwitcher` ti Keak àti ohun tí ń ṣí command palette; ó ń
-  fi àkọlé route hàn nígbà tí kò bá sí `PageHeader` kit (`.ci-page-header`) kankan tí a gbé sórí inú
-  `#main-content` nìkan, nítorí náà ojú-ìwè tó ní `PageHeader` tirẹ̀ ní `h1` kan ṣoṣo.
-  `src/shared/components/CommandPalette.tsx` jẹ́ `Dialog` ti kit.
-- **Àwọn àwòrán.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ń yanjú orúkọ náà
-  (ìṣọ́rọ̀ Material Symbols tí àwọn ojú-ìwò ń lo) nípasẹ̀ `ICON_MAP`
-  (`src/shared/constants/iconMap.ts`) sí glyph Lucide kan. Fọ́ọ̀tì àti package Material Symbols ti
-  kúrò: orúkọ tí kò sí nínú maapu náà ń fi glyph aàmì-ìdúró aláìgbéyàwó kan hàn
-  (`data-icon-missing="true"`) ó sì ń kọ ìkìlọ̀ console sílẹ̀ ní òde production.
-  `npm run gen:icon-map` ń tẹ àwọn orúkọ tí wọ́n ń lo tí kò sí nínú maapu náà jáde
-  (`tests/unit/icon-map-coverage.test.ts` ń kùnà lórí orúkọ kankan láìsí àwòrán Lucide;
-  `tests/unit/icon-map-object-values.test.ts` ń bo àwọn orúkọ tí a fipamọ́ sínú àwọn ohun-èlò
-  ìwádìí); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ń tún àwọn span gangan
-  `<span className="material-symbols-outlined">` kọ sí `<Icon>`.
-- **Àmì ìdílé.** `src/shared/components/OmniRouteLogo.tsx` ń bo kit: default export `OmniRouteLogo`
-  ń fi `ProductIcon product="omniroute" variant="glyph"` hàn (SVG inú-ìlà, tó ní ààbò `basePath`) àti
-  `OmniRouteLockup` ń fi `ProductLockup product="omniroute"` hàn (orúkọ ìwọ̀pọ̀ "Keak OmniRoute")
-  tàbí, fún àwọn oníṣòwò white-label, `name`/`logoSrc` tirẹ̀. Àwọn ibi tí product-switcher ń lọ wà
-  nínú `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Àwọn
-  ojú-ìwò adáṣe — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
-  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` àti
-  `src/shared/components/ErrorPageScaffold.tsx` — ń fi lockup náà hàn;
-  `tests/unit/brand-pages-static.test.ts` ń ṣọ́ọ́ ò.
+- **Kit.** `packages/ui-kit/src` jẹ ẹda baiti-fun-baiti ti `src/` ti o wa ni oke ni ṣiṣe pinned ni `packages/ui-kit/UPSTREAM.md` (eyiti o tun ṣe igbasilẹ aṣẹ aṣẹ); `PATCHES.md` ṣe atokọ awọn abulẹ agbegbe (ko si). O jẹ orisun bi orisun, ti ko si kikọ: `next.config.mjs` yi i pada, ati awọn maapu `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` ati `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` ati `vitest.mcp.config.ts` gbe inagijẹ kan naa). Ṣe agbewọle paati ohun elo nipasẹ ọna abẹlẹ rẹ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), rara nipasẹ agba `@omniroute/ui-kit` : agba naa fa gbogbo paati (pẹlu oluyan ọjọ) sinu agbewọle kọọkan. Iwe aṣa ohun elo naa nwọle nipasẹ `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, iwe pipe: `ci-ui.css` mojuto pẹlu gbogbo idile apẹrẹ).
+- **Awọn ami-ami.** `packages/ui-kit/src/ci-tokens.css` kede awọn ami `--ci-*` ; `src/app/globals.css` ṣe afara wọn si awọn orukọ OmniRoute julọ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), nitorina `var(--color-*)` ti o wa tẹlẹ ati awọn ohun elo Tailwind tẹsiwaju ṣiṣẹ. Koodu titun nlo awọn ohun elo Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) tabi kit kilasi — rara iye hex kan (`tests/unit/design-kit-bridge.test.ts` fi agbara mu afara). `text-primary` pinnu lati `--color-primary-ink` nipasẹ `--text-color-primary`, nitorina ọrọ akọkọ duro ni kika nigba ti `bg-primary`/`border-primary` tọju dada asẹnti: labẹ Awọn ikede o jẹ `--ci-color-accent-active` kit naa ( `#99562f` ti o jinlẹ ninu ina, asẹnti bàbà ni dudu); labẹ Alailẹgbẹ, lime-800 ni imọlẹ ati orombo wewe ni dudu. Ẹya aworan atọka lo `--color-chart-1` … `--color-chart-5`.
+- **Awọn akori.** `<html className="ci-theme">` (`src/app/layout.tsx`) yan iwe-ipamọ sinu akori kit. Iyanfẹ jẹ `light`, `dark` tabi `system` (`THEME_CONFIG.defaultTheme = "system"` ni `src/shared/constants/appConfig.ts`; `system` tẹle `prefers-color-scheme`). `applyTheme()` in `src/store/themeStore.ts` (digi nipasẹ `THEME_BOOT_SCRIPT`, inlined in `src/app/layout.tsx`, eyi ti o nṣiṣẹ ṣaaju ki o to hydration) ṣeto `data-theme="dark"|"light"` ati ki o yipo `.dark` kilasi lori `<html>` papo. Eto aami dudu ti kit naa jẹ bọtini lori `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute's ti ara dudu yi danu (awọn `.dark` Àkọsílẹ ni `globals.css`) ati awọn julọ Tailwind `dark:` awọn ohun elo bọtini lori `.dark` kilasi. Ko si awọn tito tẹlẹ awọ asẹnti: asẹnti nigbagbogbo wa lati inu ohun elo naa, ati pe tito tẹlẹ lati inu kikọ agbalagba ti lọ silẹ nigbati ile itaja ba di ẹru.
+- **Awọn paleti.** Meji, mejeeji lati ohun elo (`src/shared/constants/appearancePalette.ts`): `editions`, aiyipada, ati `classic`. Awọn atẹjade jẹ ẹya `data-ci-appearance="editions"` kit lori `<html>`, eyiti `ci-editions.css` (ti a gbe wọle nipasẹ `ci-ui.css`) darapọ pẹlu `data-theme`; Alailẹgbẹ jẹ isansa ti abuda naa. Olupin ipalẹmọ gbongbo jẹ ẹya-ara, nitorinaa alejo ti ko ni nkan ti o fipamọ (tabi ko si JS) gba Awọn ẹda lori gbogbo dasibodu — dada, buwolu wọle, `/status`, awọn oju-iwe aṣiṣe, `/docs` ati PWA naa. Yiyan naa duro lẹgbẹẹ akori ni ile itaja `theme` kanna (`palette`, `setPalette()`, `applyPalette()` ni `src/store/themeStore.ts`) ati lo ṣaaju ki o to kun nipasẹ `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, inlined in the layout's `<head>`), eyiti o yọ ẹda naa kuro nikan nigbati paleti ti o fipamọ jẹ `"classic"`; `src/app/global-error.tsx`, ni ita ipilẹ ipilẹ, lo lati ile itaja kanna. Maṣe fi `data-ci-appearance` sori nkan miiran: kit naa baamu rẹ pẹlu `html:root:has([data-ci-appearance="editions"])`, nitorinaa iru-ọmọ kan yoo yi gbogbo iwe naa pada. Iyatọ `data-ci-editions-variant="landing"` Awọn ẹda jẹ fun awọn oju-iwe titaja, kii ṣe dasibodu naa. chrome ẹrọ aṣawakiri (`viewport.themeColor`, ifihan oju opo wẹẹbu) ko le ka CSS tabi yiyan ti o fipamọ, nitorinaa o tẹle aiyipada: `PWA_THEME_COLORS` ni `src/shared/constants/pwaThemeColors.ts` jẹ digi kan ti Awọn ikede `--ci-color-background` (`#f3f1e9` / `#11120f`), ti a fi si `ci-editions.css` nipasẹ `tests/unit/pwa-theme-colors.test.ts`. Monaco ka awọn oniwe-awọ pa a ibere (`monacoKitTheme.ts`); labẹ Awọn ẹya, iwadii kika yoo tan root `data-theme` fun igbasilẹ amuṣiṣẹpọ kan, nitori ohun elo naa ṣe ipinnu Awọn ikede light/dark lati gbongbo.
+- **Awọn paati (awọn alamuuṣẹ).** `src/shared/components/index.tsx` tọju paati OmniRoute API (awọn orukọ kanna, awọn okeere okeere ati awọn atilẹyin), ati awọn ipilẹṣẹ ti o wa lẹhin rẹ jẹ awọn oluyipada lori ohun elo: awọn fọọmu (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays ati esi (`Modal`/`ConfirmModal`, `Tooltip`/ `EmptyState`), `NotificationToast` `InfoTooltip` zq (`Collapsible`, `CollapsibleSection`, `Loading`, `SegmentedControl`, `Avatar`) ati tabili (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider` `Breadcrumbs`. Ohun ti nmu badọgba ṣe agbewọle paati ohun elo nipasẹ ọna abẹ-ọna ati ṣe maapu awọn atilẹyin ohun-ini sori rẹ — fun apẹẹrẹ `Button variant="primary"` jẹ bọtini `default` kit (`--ci-button-primary-*`: dada onidakeji ninu ina, asẹnti pẹlu inki `--ci-color-accent-foreground` rẹ ninu okunkun), `danger` jẹ `destructive`, ati `warning` jẹ `outline` pẹlu itẹsiwaju `.ci-button--warning`. Awọn ofin `.ci-button--warning` ati `.ci-badge[data-tone]` ni opin `globals.css` (`@layer components`) jẹ awọn amugbooro OmniRoute lori oke awọn kilasi kit naa. `tests/unit/ui/adapters/*.test.tsx` pin kọọkan ohun ti nmu badọgba.
+- **Ikarahun.** `src/app/(dashboard)/layout.tsx` ṣe `DashboardLayout`, eyiti o tumọ `src/shared/components/layouts/DashboardShell.tsx`: kit `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), pẹlu ọgbọn lilọ kiri OmniRoute ni `src/shared/components/Sidebar.tsx`. Ọna asopọ “fo si akoonu” si `#main-content` jẹ ipin akọkọ ti a le fojusi. `src/shared/components/Header.tsx` di ohun elo `SidebarTrigger` mu (ayipada ikarahun nikan ti ikarahun), Keak `ProductSwitcher` ati ṣiṣi paleti-paleti; o ṣe afihan akọle ipa ọna nikan nigbati ko si kit `PageHeader` (`.ci-page-header`) ti o wa ninu `#main-content`, nitorina oju-iwe ti o ni `PageHeader` tirẹ ni `h1` kan. `src/shared/components/CommandPalette.tsx` jẹ ohun elo `Dialog`.
+- **Awọn aami.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) pinnu orukọ naa (awọn ọrọ Awọn aami Ohun elo ti awọn iboju lo) nipasẹ `ICON_MAP` (`src/shared/constants/iconMap.ts`) si glyph Lucide kan. Fọọmu Awọn aami Ohun elo ati idii ti lọ: orukọ ti o padanu lati maapu naa ṣe afihan glyph ibi didoju didoju (`data-icon-missing="true"`) ati ṣe igbasilẹ ikilọ console ni ita iṣelọpọ. `npm run gen:icon-map` ṣe atẹjade awọn orukọ ti o wa ni lilo ti o nsọnu lati maapu (`tests/unit/icon-map-coverage.test.ts` kuna lori eyikeyi orukọ laisi aami Lucide; `tests/unit/icon-map-object-values.test.ts` bo awọn orukọ ti o fipamọ sinu awọn nkan wiwa); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ṣe atunko awọn aaye gangan `<span className="material-symbols-outlined">` si `<Icon>`.
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` fi ipari si ohun elo naa: okeere okeere `OmniRouteLogo` ṣe afihan `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) ati `OmniRouteLockup` n ṣe `ProductLockup product="omniroute"` (orukọ wiwọle "Keak OmniRoute") tabi, fun awọn oniṣẹ aami funfun, `name`/`logoSrc` tiwọn. Awọn ibi-iyipada ọja n gbe ni `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Awọn iboju imurasilẹ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ati `src/shared/components/ErrorPageScaffold.tsx` — fihan titiipa; `tests/unit/brand-pages-static.test.ts` ṣọ rẹ.
 
 ## 2. Awọn ofin
 
@@ -135,24 +73,20 @@ Nigbati ko ba si PR ti o le ṣii (itusilẹ ibi-afẹde ti di didi, PR ti ṣe 
 
 Awọn aworan atọka mejila ti root `README.md` embeds (`docs/diagrams/*.svg`) jẹ ohun elo ti a lo si aworan aimi, ati pe wọn jẹ ipilẹṣẹ, kii ṣe pẹlu ọwọ: awọn faili monomono 13 ni `scripts/docs/gen-readme-*.mjs` (awọn aworan mejila pẹlu awakọ `gen-readme-diagrams.mjs` ) ati awọn idanwo iduroṣinṣin 12 ni `tests/unit/docs/readme-*-svg.test.ts`, ọkan fun aworan atọka, kọọkan baiti-ifarawe pẹlu olupilẹṣẹ faili `test-unit`.
 
-- **Awọn ami-ami.** `scripts/docs/readme-diagram-theme.mjs` daakọ paleti lati `packages/ui-kit/src/ci-tokens.css` (ti a fi si faili yẹn nipasẹ `tests/unit/docs/readme-diagram-theme.test.ts`) ati asọye awọn ipa ọrọ lori iwọn iru ohun elo: Switzer ni awọn iwọn kit (400/500/600, ifihan ni 500) ati ipasẹ fun ohun gbogbo, ayafi awọn ipa koodu (`.cmd`, `.term`, `.term-lg`, `.mono` `.mono-sm`, `.mono-xs`), eyiti o jẹ fun IBM ati Pjk nikan. awọn aṣẹ, URLs, awọn idamọ ati awọn iboju ebute. Awọn iye ina joko lori `:root`, awọn iye dudu lẹhin `prefers-color-scheme: dark`, inu faili naa, nitorinaa aworan kọọkan tẹle ero oluwo lori GitHub.
+- **Awọn ami-ami.** `scripts/docs/readme-diagram-theme.mjs` daakọ paleti Awọn ikede (iwo aiyipada) lati `packages/ui-kit/src/ci-editions.css` (ti a fi si faili yẹn nipasẹ `tests/unit/docs/readme-diagram-theme.test.ts`, eyiti o tun ṣe ayẹwo WCAG AA fun gbogbo awọ ọrọ lori gbogbo oju ni awọn ero mejeeji; iyasọtọ kan, ina `warn`, jẹ ikilọ kit ṣokunkun 10% nitori iye kit jẹ 4.46:1 lori kanfasi) ati asọye ọrọ `ci-tokens.css` ni iwọn kanfasi): awọn iwuwo kit (400/500/600, ifihan ni 500) ati ipasẹ fun ohun gbogbo, ayafi awọn ipa koodu (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), eyiti o jẹ IBM Plex Mono ati pe o wa fun awọn aṣẹ nikan, URLs, awọn idanimọ ati awọn iboju ebute. Awọn iye ina joko lori `:root`, awọn iye dudu lẹhin `prefers-color-scheme: dark`, inu faili naa, nitorinaa aworan kọọkan tẹle ero oluwo lori GitHub.
 - **Awọn nkọwe.** GitHub Markdown ko gbe CSS ko si ati pe camo proxy dina gbogbo bulọọki ita, nitorinaa iru ohun elo ni lati rin irin-ajo sinu faili naa. `scripts/docs/readme-outline.mjs`, igbesẹ ti o kẹhin ti gbogbo olupilẹṣẹ, ṣe apẹrẹ awọn ipa Switzer pẹlu HarfBuzz ati fa wọn gẹgẹbi awọn ilana vector ( awọn ọna `<defs>` ati `<use>`), pẹlu awọn itọka ati awọn aami jiometirika Switzer ko ni iyaworan lori awọn metiriki tirẹ. Awọn ilana, kii ṣe fonti ti a fi sinu: Iwe-aṣẹ Switzer (`packages/ui-kit/src/fonts/FFL.txt`) ṣe idiwọ isọdọtun ati iyipada ọna kika laisi aṣẹ kikọ ati gba awọn iyaworan fekito laaye, nitorinaa ma ṣe tun Switzer `@font-face` tabi `data:` URI bẹrẹ. Fọọmu kan ti o ku ninu faili ni OFL IBM Plex Mono subset fun ohun ti o duro ọrọ koodu gidi (`scripts/docs/readme-fonts.mjs`), ti a ṣe lati awọn ohun kikọ wọnyẹn; eyikeyi glyph ko le fi sabe jiju.
 - **Tuntun-pada.** `npm run docs:readme-diagrams` tun kọ gbogbo awọn mejila ni aṣẹ README ati tẹ laini kan fun faili pẹlu iwọn rẹ. Olupilẹṣẹ ẹyọkan tun nṣiṣẹ lori tirẹ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` nilo `node --import tsx/esm` nitori awọn eeka rẹ wa lati agberu katalogi laaye ni `open-sse/config/freeModelCatalog.ts`; abajade CI ti iyipada katalogi kan wa ni `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Fi monomono ati SVG naa papọ.
 - **Ẹri.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ṣe agbekalẹ faili kan ni ọna ti GitHub ṣe nṣe iranṣẹ rẹ ( tag `<img>` kan, camo's `Content-Security-Policy`, `image/svg+xml`), gba ina ati fireemu dudu kan ati ijabọ awọn ibeere fonti ita ti oju-iwe ti o ṣe (gbọdọ jẹ 0).
 - **Isuna.** Labẹ 200 KB fun faili kan (idanwo staleness kọọkan jẹri rẹ); 500 KB jẹ fila lile fun aworan README eyikeyi (ofin SVG isise afọwọsi).
 - **Daakọ ko yipada, awọn iṣiro lati ẹnu-bode.** Atunkọ yi pada iru ati paleti, kii ṣe awọn ọrọ: olupilẹṣẹ kọọkan n gbe ẹda aworan rẹ ni igbagbogbo `*_COPY` (tabi kọ ọ lati inu katalogi laaye) ti o jẹ mejeeji ọrọ ti o ya ati titẹ sii ti igbesẹ itọka. Awọn isiro Canonical duro ni awọn apa `<text>` (airi ti a ṣe alaye lẹkan, `fill-opacity:0`), kika nipasẹ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); awọn idanwo iduroṣinṣin ti awọn aworan atọka ti ẹnu-ọna kika tun ṣiṣe awọn olufọwọsi rẹ lori faili ti ipilẹṣẹ, nitorinaa eeya kan ti o yọ kuro lati koodu naa kuna idanwo — ṣe atunṣe orisun ti ẹnu-ọna kika, kii ṣe nọmba ninu monomono.
 
-## 7. Atọ́ka ìtọ́kasi
+## 7. Atọka itọkasi
 
-- `src/app/globals.css` — àfàrà token, àwọn àtúnjúwe `.dark`, àwọn àfikún `@layer components` ti OmniRoute
-- `packages/ui-kit/UPSTREAM.md` — commit upstream tí a pín lé àti ìfàṣẹsí iwe-aṣẹ; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` àti àwọn adapter tó wà lẹ́gbẹ̀ẹ́ rẹ̀; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+- `src/app/globals.css` — àmi afara, `.dark` danu, OmniRoute `@layer components` awọn amugbooro
+- `packages/ui-kit/UPSTREAM.md` — pinned upstream ṣẹ ati aṣẹ iwe-aṣẹ; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` ati awọn oluyipada lẹgbẹẹ rẹ; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

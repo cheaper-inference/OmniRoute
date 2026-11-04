@@ -1,5 +1,6 @@
 import { getAntigravityContentHeaders } from "../services/antigravityHeaders.ts";
 import type { AntigravityClientProfile } from "@/shared/constants/antigravityClientProfile";
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
 
 // GitHub Copilot request identity. Ported to match the GitHub Copilot CLI
 // (`copilot` npm package) wire identity that Hermes captured live, NOT the
@@ -125,7 +126,12 @@ export function getGitHubCopilotCliVersion(): string {
     SAFE_COPILOT_VERSION_PATTERN
   );
   if (override) return override;
-  if (!process.env.NODE_TEST_CONTEXT && !readFreshCopilotVersionCache() && !copilotVersionInFlight)
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !readFreshCopilotVersionCache() &&
+    !copilotVersionInFlight
+  )
     void resolveGitHubCopilotCliVersion();
   return pickCopilotVersionAtLeastPin(readFreshCopilotVersionCache());
 }
@@ -263,7 +269,7 @@ function readFreshVersionCache(
 }
 
 function shouldAutoRefreshCliVersion(): boolean {
-  if (typeof process === "undefined") return false;
+  if (!canStartBackgroundRefresh()) return false;
   return !process.env.NODE_TEST_CONTEXT;
 }
 

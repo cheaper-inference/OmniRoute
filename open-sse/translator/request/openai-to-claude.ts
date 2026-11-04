@@ -7,6 +7,7 @@ import { normalizeClaudeToolInputSchema, sanitizeToolId } from "../helpers/schem
 import { safeParseJSON } from "../helpers/jsonUtil.ts";
 import {
   applyKimiCodingThinking,
+  createClaudeTailCacheControl,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
 import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
@@ -459,7 +460,7 @@ export function openaiToClaudeRequest(
       ) {
         const lastBlock = message.content[message.content.length - 1];
         if (lastBlock) {
-          lastBlock.cache_control = { type: "ephemeral" };
+          lastBlock.cache_control = createClaudeTailCacheControl(routedProvider);
           break;
         }
       }

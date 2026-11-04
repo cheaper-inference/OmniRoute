@@ -169,7 +169,7 @@ export default function ProviderRetryDelaySelect({ providerId }: ProviderRetryDe
         <Select
           aria-label={title}
           compact
-          className="shrink-0"
+          className="w-auto shrink-0"
           value={selected}
           disabled={!loaded || saving}
           options={[

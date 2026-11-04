@@ -1,0 +1,1 @@
+- **feat(sse):** add Kimi K3.1 Pro and Highspeed support across Moonshot and Kimi Coding, including 1M context/output, multimodal capabilities, and low/high/max reasoning-effort normalization ([#18038](https://github.com/cheaper-inference/OmniRoute/pull/18038)) — thanks @ysntony
