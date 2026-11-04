@@ -610,19 +610,19 @@ Du finner en fullstendig oversikt over miljøvariabler i [README](../README.md).
 ## 📊 Tilgjengelige modeller
 
 <details>
-<summary><b>Se alle tilgjengelige modeller</b></summary>
+<summary><b>Vis alle tilgjengelige modeller</b></summary>
 
-> Listen nedenfor er kuratert fra `open-sse/config/providerRegistry.ts` for v3.8.0. Skykataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — for hele sanntidskatalogen åpne **Dashbord → Leverandører → [leverandør] → Tilgjengelige modeller** eller kall `GET /api/models/catalog`.
+> Listen nedenfor er kuratert fra `open-sse/config/providerRegistry.ts` for v3.8.0. Skykataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — åpne **Dashboard → Providers → [provider] → Available Models** eller kall `GET /api/models/catalog` for å se hele den aktive katalogen.
 >
-> Hvis en leverandørs innebygde liste har avveket, bruk **Importer fra /models** på den siden (eller aktiver **Automatisk synkronisering**) for å hente oppstrømskatalogen i sanntid. Dette ble verifisert i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym tilgang til Pollinations forble oppstrømsbegrenset under samme testrunde.
+> Hvis en innebygd leverandørliste har avviket, kan du bruke **Import from /models** på den siden (eller aktivere **Auto-Sync**) for å hente den aktive oppstrømskatalogen. Dette ble bekreftet i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym tilgang til Pollinations var fortsatt begrenset av oppstrømsleverandøren under samme testrunde.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ innsatsnivåer: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ytelsesnivåer: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — GRATIS OAuth: bruk sanntidskatalogen vist under **Dashbord → Leverandører → Kiro → Tilgjengelige modeller**. Tilgjengelighet avhenger av kontoen og abonnementet.
+**Kiro (`kr/`)** — GRATIS OAuth: bruk den aktive katalogen som vises under **Dashboard → Providers → Kiro → Available Models**. Tilgjengeligheten avhenger av kontoen og abonnementet.
 
 **Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -638,9 +638,9 @@ Du finner en fullstendig oversikt over miljøvariabler i [README](../README.md).
 
 **xAI (`xai/`)** — Grok-native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-hostet: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Driftet i EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Søkeforsterket: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Utvidet med søk: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Åpen kildekode: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -650,17 +650,17 @@ Du finner en fullstendig oversikt over miljøvariabler i [README](../README.md).
 
 **Cohere (`cohere/`)** — RAG-fokusert: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — For virksomheter: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkronisert i sanntid per API-nøkkel fra Google — ingen statisk liste. Koble til en nøkkel i **Dashbord → Leverandører** og bruk deretter **Tilgjengelige modeller** for å importere gjeldende katalog (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkroniseres aktivt per API-nøkkel fra Google — ingen statisk liste. Koble til en nøkkel under **Dashboard → Providers**, og bruk deretter **Available Models** for å importere den gjeldende katalogen (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andre kompatible leverandører** (utvalg): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (gjennomgangskatalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver vedlikeholder sin egen modelliste i `providerRegistry.ts` og kan autosynkroniseres når leverandøren eksponerer et `/models`-endepunkt.
+**Andre kompatible leverandører** (utvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (viderekoblet katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver av dem vedlikeholder sin egen modelliste i `providerRegistry.ts` og kan synkroniseres automatisk når leverandøren tilbyr et `/models`-endepunkt.
 
-**Merk om modell-ID-er:** OmniRoute bruker leverandørens egne ID-er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Noen ID-er inneholder versjoner med punktum fordi det er slik oppstrøms-API-et forventer dem. Hvis en modell ikke er oppført ovenfor, kjør `omniroute models --search <term>` eller kall `GET /api/models/catalog` for å bekrefte tilgjengelighet.
+**Merknad om modell-ID-er:** OmniRoute bruker leverandørens opprinnelige ID-er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Noen ID-er inneholder versjoner med punktum fordi det er slik API-et oppstrøms forventer dem. Hvis en modell ikke er oppført ovenfor, kan du kjøre `omniroute models --search <term>` eller kalle `GET /api/models/catalog` for å bekrefte tilgjengeligheten.
 
 </details>
 
