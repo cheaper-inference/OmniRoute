@@ -6,74 +6,15 @@
 
 > **Holati:** asboblar paneli ustiga qurilgan** Keak CI UI to'plami** (`@keak/cheaper-inference-ui-kit`), ish maydoni `packages/ui-kit` (`@omniroute/ui-kit`; yuqori oqim snapshoti `packages/ui-kit/UPSTREAM.md` ga mahkamlanadi va `npm run check:ui-kit-snapshot` tomonidan himoyalanadi) sifatida sotiladi. Nur - kanonik mavzu; standart afzallik `system`. Urg'u - Keak ohak (`--ci-color-accent`). Switzer UI, displey va kod matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun yagona oila bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Shveytsariya skriptlarida glif bo'yicha glif (`src/app/globals.css`) yo'q: kirill, yunon va vetnam uchun Inter va arab yozuvi uchun faqat `html[dir="rtl"]` ostida Vazirmatn. Har bir belgi Lucid glifidir.
 
-## 1. Narsalar qayerda joylashgani
+## 1. Narsalar yashaydigan joy
 
-- **Kit.** `packages/ui-kit/src` — `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan commitdagi upstream `src/`
-  ning baytma-bayt nusxasi (u fayl litsenziya ruxsatini ham qayd etadi); `PATCHES.md` mahalliy
-  patch'larni sanab o'tadi (yo'q). U build'siz, manba sifatida ishlatiladi: `next.config.mjs` uni transpile
-  qiladi, `tsconfig.json` esa `@omniroute/ui-kit` ni `packages/ui-kit/src` ga va `@omniroute/ui-kit/*` ni
-  `packages/ui-kit/src/*` ga xaritalaydi (`vitest.config.ts` va `vitest.mcp.config.ts` ham xuddi shu alias'ni
-  o'z ichiga oladi). Kit komponentini subpath orqali import qiling (`@omniroute/ui-kit/table`,
-  `@omniroute/ui-kit/page-header`…), hech qachon `@omniroute/ui-kit` barrel'i orqali emas: barrel har bir
-  import qiluvchiga barcha komponentlarni (jumladan, date picker'ni) tortib kiradi. Kit stylesheet'i
-  `src/app/globals.css` orqali kiradi (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokenlar.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokenlarini e'lon qiladi; `src/app/globals.css`
-  ularni eski OmniRoute nomlariga (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) bog'laydi, shuning uchun mavjud `var(--color-*)`
-  o'qishlari va Tailwind utility'lari ishlashda davom etadi. Yangi kod Tailwind utility'laridan (`bg-surface`,
-  `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) yoki kit klasslaridan
-  foydalanadi — hech qachon hex qiymatdan emas (`tests/unit/design-kit-bridge.test.ts` bridge'ni majburlaydi).
-  `text-primary` `--text-color-primary` orqali `--color-primary-ink` ga yechiladi (light rejimda lime-800,
-  dark rejimda esa lime accent), shuning uchun primary matn o'qiladigan bo'lib qoladi,
-  `bg-primary`/`border-primary` esa lime sirtini saqlaydi. Grafik seriyalari
-  `--color-chart-1` … `--color-chart-5` dan foydalanadi.
-- **Mavzular.** `<html className="ci-theme">` (`src/app/layout.tsx`) hujjatni kit mavzusiga kiritadi.
-  Tanlov — `light`, `dark` yoki `system` (`src/shared/constants/appConfig.ts` da
-  `THEME_CONFIG.defaultTheme = "system"`; `system` `prefers-color-scheme` ga ergashadi).
-  `src/store/themeStore.ts` dagi `applyTheme()` (`src/app/layout.tsx` dagi inline bootstrap skripti bilan bir
-  xil ishlaydi, u hydration'dan oldin bajariladi) `data-theme="dark"|"light"` ni o'rnatadi va `<html>` dagi
-  `.dark` klassini birgalikda almashtiradi. Kit'ning dark token to'plami `data-theme="dark"` ga bog'langan
-  (`packages/ui-kit/src/ci-tokens.css`); OmniRoute'ning o'z dark override'lari (`globals.css` dagi `.dark`
-  bloki) va eski Tailwind `dark:` utility'lari esa `.dark` klassiga bog'langan. Accent rang preset'lari yo'q:
-  accent har doim kit'dan keladi va eski build'dan saqlangan preset store yuklanganda tashlab yuboriladi.
-- **Komponentlar (adapterlar).** `src/shared/components/index.tsx` OmniRoute komponent API'sini saqlaydi
-  (xuddi shu nomlar, default eksportlar va props'lar), uning ortidagi primitivlar esa kit ustidagi
-  adapterlardir: formalar (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  overlay'lar va feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`,
-  `Loading`), struktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) va
-  jadvallar (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter kit
-  komponentini subpath orqali import qiladi va legacy props'larni unga xaritalaydi — masalan,
-  `Button variant="primary"` kit'ning `default` tugmasidir (`--ci-button-primary-*`: light rejimda invers
-  sirt, dark rejimda esa o'zining `--ci-color-accent-foreground` siyohiga ega accent), `danger` —
-  `destructive`, `warning` esa `outline` va `.ci-button--warning` kengaytmasidir. `globals.css` oxiridagi
-  (`@layer components`) `.ci-button--warning` va `.ci-badge[data-tone]` qoidalari kit klasslari ustidagi
-  OmniRoute kengaytmalaridir. `tests/unit/ui/adapters/*.test.tsx` har bir adapterni mahkamlaydi.
-- **Shell.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ni render qiladi, u esa
-  `src/shared/components/layouts/DashboardShell.tsx` ni render qiladi: kit `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute'ning navigatsiya mantiq'i esa
-  `src/shared/components/Sidebar.tsx` da. `#main-content` ga o'tuvchi "kontentga o'tish" havolasi birinchi
-  fokuslanadigan elementdir. `src/shared/components/Header.tsx` kit `SidebarTrigger` ni (shell'ning yagona
-  sidebar toggle'i), Keak `ProductSwitcher` ni va buyruq palitrasini ochuvchini o'z ichiga oladi; u marshrut
-  sarlavhasini faqat `#main-content` ichida kit `PageHeader` (`.ci-page-header`) mount qilinmaganida
-  ko'rsatadi, shuning uchun o'z `PageHeader`iga ega sahifada yagona `h1` bo'ladi.
-  `src/shared/components/CommandPalette.tsx` — kit `Dialog` idir.
-- **Ikonkalar.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) nomni (ekranlar
-  ishlatadigan Material Symbols lug'atini) `ICON_MAP` (`src/shared/constants/iconMap.ts`) orqali Lucide
-  glifiga yechadi. Material Symbols shrifti va paketi endi yo'q: xaritada topilmagan nom neytral placeholder
-  glifini render qiladi (`data-icon-missing="true"`) va production'dan tashqarida konsolga ogohlantirish
-  yozadi. `npm run gen:icon-map` ishlatilayotgan, lekin xaritada yo'q nomlarni chop etadi
-  (`tests/unit/icon-map-coverage.test.ts` Lucide ikonkasiga ega bo'lmagan har qanday nomda muvaffaqiyatsiz
-  bo'ladi; `tests/unit/icon-map-object-values.test.ts` lookup obyektlarida saqlanadigan nomlarni qamraydi);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal
-  `<span className="material-symbols-outlined">` span'larni `<Icon>` ga qayta yozadi.
-- **Brend.** `src/shared/components/OmniRouteLogo.tsx` kit'ni o'raydi: default eksport `OmniRouteLogo`
-  `ProductIcon product="omniroute" variant="glyph"` ni render qiladi (inline SVG, `basePath`-xavfsiz),
-  `OmniRouteLockup` esa `ProductLockup product="omniroute"` ni (accessible nomi "Keak OmniRoute") yoki
-  white-label operatorlar uchun ularning o'z `name`/`logoSrc` ini render qiladi. Product-switcher manzillari
-  `src/shared/constants/keakProducts.ts` da joylashgan (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`).
-  Mustaqil ekranlar — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` va `src/shared/components/ErrorPageScaffold.tsx` —
-  lockup'ni ko'rsatadi; `tests/unit/brand-pages-static.test.ts` uni nazorat qiladi.
+- **To'plam.** `packages/ui-kit/src` `packages/ui-kit/UPSTREAM.md` -da qadalgan commitdagi yuqori oqim `src/` ning bayt-bayt nusxasi (bu litsenziya avtorizatsiyasini ham qayd etadi); `PATCHES.md` mahalliy yamoqlarni ro'yxatga oladi (yo'q). U manba sifatida iste'mol qilinadi, hech qanday tuzilmasiz: `next.config.mjs` uni transpilyatsiya qiladi va `tsconfig.json` xaritalari `@omniroute/ui-kit` → `packages/ui-kit/src` va `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` va `vitest.mcp.config.ts` bir xil taxallusga ega). To'plam komponentini pastki yo'li (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) bo'yicha import qiling, hech qachon `@omniroute/ui-kit` barrelidan o'tmang: barrel har bir komponentni (jumladan, sana tanlagichni) har bir importerga tortadi. To'plam uslublar jadvali `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, to'liq varaq: yadro `ci-ui.css` plus har bir naqsh oilasi) orqali kiradi.
+- **Tokenlar.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokenlarini e'lon qiladi; `src/app/globals.css` ularni eski OmniRoute nomlariga (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) bog‘laydi, shuning uchun mavjud `var(--color-*)` o‘qiydi va Tailwind yordam dasturlari ishlashda davom etadi. Yangi kod Tailwind utilitalaridan (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) yoki to'plam sinflaridan — hech qachon hex qiymatidan foydalanmaydi (`tests/unit/design-kit-bridge.test.ts` ko'prikni amalga oshiradi). `text-primary` `--color-primary-ink` orqali `--text-color-primary` (yorug'likda lime-800, qorong'ida ohak urg'usi) ga o'tadi, shuning uchun asosiy matn o'qilishi mumkin bo'lib qoladi, `bg-primary`/`border-primary` esa ohak yuzasini saqlaydi. Grafik seriyalari `--color-chart-1` … `--color-chart-5` dan foydalanadi.
+- **Mavzular.** `<html className="ci-theme">` (`src/app/layout.tsx`) hujjatni to'plam mavzusiga tanlaydi. Afzallik `light`, `dark` yoki `system` (`THEME_CONFIG.defaultTheme = "system"` in `src/shared/constants/appConfig.ts`; `system` `prefers-color-scheme` dan keyin keladi). `src/store/themeStore.ts` dagi `applyTheme()` (hidratsiyadan oldin ishlaydigan `src/app/layout.tsx` da inline bootstrap skripti bilan aks ettirilgan) `data-theme="dark"|"light"` o‘rnatadi va `<html>` dagi `.dark` sinfini birgalikda almashtiradi. To'plamning qorong'u tokenlar to'plami `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ga o'rnatilgan; OmniRoute ning o'ziga xos qorong'u bekor qilishlari ( `globals.css` dagi `.dark` bloki) va `.dark` sinfidagi eski Tailwind `dark:` yordamchi dasturlari kaliti. Urg'u ranglarini oldindan sozlash mavjud emas: aksan har doim to'plamdan keladi va do'kon yuklanganda eski tuzilishdagi doimiy oldindan o'rnatilgan sozlamalar o'chiriladi.
+- **Komponentlar (adapterlar).** `src/shared/components/index.tsx` OmniRoute komponentini API (xuddi shu nomlar, standart eksport va rekvizitlar) saqlaydi va uning orqasidagi ibtidoiylar to‘plam ustidagi adapterlardir: shakllar (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),`Modal`,`ConfirmModal`/ teskari aloqa `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState`), struktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) va jadvallar (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter to'plam komponentini pastki yo'l bo'yicha import qiladi va unga eski rekvizitlarni xaritalaydi — masalan `Button variant="primary"` - to'plam `default` tugmasi (`--ci-button-primary-*`: yorug'likdagi teskari sirt, qorong'uda `--ci-color-accent-foreground` siyoh bilan urg'u), `danger` - `destructive` `outline` `warning` - `.ci-button--warning` kengaytmasi. `globals.css` (`@layer components`) oxiridagi `.ci-button--warning` va `.ci-badge[data-tone]` qoidalari to'plam sinflarining tepasida joylashgan OmniRoute kengaytmalaridir. `tests/unit/ui/adapters/*.test.tsx` pin har bir adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` `src/shared/components/layouts/DashboardShell.tsx` ni ko'rsatadigan `DashboardLayout` beradi: `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) to'plami OmniRoute ning `src/shared/components/Sidebar.tsx` navigatsiya mantig'i bilan. `#main-content` ga "kontentga o'tish" havolasi birinchi diqqatni qaratadigan elementdir. `src/shared/components/Header.tsx` `SidebarTrigger` to'plamini (qobiqning yagona yon panelini almashtirish), Keak `ProductSwitcher` va buyruqlar palitrasini ochish vositasini o'z ichiga oladi; `#main-content` ichida hech qanday to'plam `PageHeader` (`.ci-page-header`) o'rnatilmaganda faqat marshrut sarlavhasini ko'rsatadi, shuning uchun o'z `PageHeader` ega sahifa bitta `h1` ega bo'ladi. `src/shared/components/CommandPalette.tsx` - bu `Dialog` to'plami.
+- **Belgilar.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) `ICON_MAP` (`src/shared/constants/iconMap.ts`) orqali ismni (ekranlar ishlatadigan moddiy belgilar lug‘ati) Lucide glifiga o‘zgartiradi. Material Symbols shrifti va paketi yo‘q bo‘lib ketdi: xaritada etishmayotgan nom neytral to‘ldiruvchi glifini (`data-icon-missing="true"`) ko‘rsatadi va ishlab chiqarishdan tashqarida konsol ogohlantirishini qayd qiladi. `npm run gen:icon-map` ishlatilayotgan va xaritada etishmayotgan nomlarni chop etadi (`tests/unit/icon-map-coverage.test.ts` Lucide belgisisiz istalgan nomda bajarilmaydi; `tests/unit/icon-map-object-values.test.ts` qidiruv obyektlarida saqlangan nomlarni qamrab oladi); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal `<span className="material-symbols-outlined">` oralig'ini `<Icon>` ga qayta yozadi.
+- **Brend.** `src/shared/components/OmniRouteLogo.tsx` to'plamni o'rab oladi: standart eksport `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) va `OmniRouteLockup` `ProductLockup product="omniroute"` ("Keak OmniRoute" kirish mumkin) yoki oq yorliqli operatorlar uchun o'z `name`/`logoSrc` ni ko'rsatadi. Mahsulot-switcher manzillari `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) da yashaydi. — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` va `src/shared/components/ErrorPageScaffold.tsx` — mustaqil ekranlari blokirovkani ko'rsatadi; `tests/unit/brand-pages-static.test.ts` uni qo'riqlaydi.
 
 ## 2. Qoidalar
 

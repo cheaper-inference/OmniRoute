@@ -6,72 +6,15 @@
 
 > **Статус:** таблото е изградено върху** Комплект Keak CI UI** (`@keak/cheaper-inference-ui-kit`), предлаган като работно пространство `packages/ui-kit` (`@omniroute/ui-kit`; моментната снимка нагоре по веригата е фиксирана в `packages/ui-kit/UPSTREAM.md` и се пази от `npm run check:ui-kit-snapshot`). Светлината е каноничната тема; предпочитанието по подразбиране е `system`. Акцентът е Keak lime (`--ci-color-accent`). Switzer е единствената фамилия за UI, дисплей и кодов текст (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешават това), самостоятелно хостван от самия комплект (`packages/ui-kit/src/ci-fonts.css`, импортиран от `ci-tokens.css`). Писмена, липсващи на Switzer, преминават през глиф по глиф (`src/app/globals.css`): Inter за кирилица, гръцки и виетнамски и, само под `html[dir="rtl"]`, Vazirmatn за арабски шрифт. Всяка икона е Lucide глиф.
 
-## 1. Къде се намират нещата
+## 1. Къде живеят нещата
 
-- **Kit.** `packages/ui-kit/src` е побайтово копие на upstream `src/` при commit-а, фиксиран в
-  `packages/ui-kit/UPSTREAM.md` (който също записва лицензионното разрешение); `PATCHES.md` изброява локалните
-  пачове (няма такива). Използва се като изходен код, без build: `next.config.mjs` го транспилира, а
-  `tsconfig.json` съпоставя `@omniroute/ui-kit` → `packages/ui-kit/src` и `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` и `vitest.mcp.config.ts` носят същия alias). Импортирайте
-  компонент от kit-а по неговия подпът (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), никога
-  през barrel-а `@omniroute/ui-kit`: barrel-ът издърпва всички компоненти (включително date picker-а)
-  във всеки импортьор. Стиловата таблица на kit-а влиза през `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Токени.** `packages/ui-kit/src/ci-tokens.css` декларира `--ci-*` токените; `src/app/globals.css`
-  ги свързва със старите имена на OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), така че съществуващите четения на `var(--color-*)` и Tailwind
-  помощните класове продължават да работят. Новият код използва Tailwind помощните класове (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) или класове на kit-а — никога hex стойност
-  (`tests/unit/design-kit-bridge.test.ts` налага моста). `text-primary` се разрешава към
-  `--color-primary-ink` чрез `--text-color-primary` (lime-800 в светла тема, lime акцентът в тъмна), така че
-  основният текст остава четим, докато `bg-primary`/`border-primary` запазват lime повърхността. Серията на графиките използват
-  `--color-chart-1` … `--color-chart-5`.
-- **Теми.** `<html className="ci-theme">` (`src/app/layout.tsx`) включва документа в темата на kit-а.
-  Предпочитанието е `light`, `dark` или `system` (`THEME_CONFIG.defaultTheme = "system"` в
-  `src/shared/constants/appConfig.ts`; `system` следва `prefers-color-scheme`). `applyTheme()` в
-  `src/store/themeStore.ts` (огледално повторен от inline bootstrap скрипта в `src/app/layout.tsx`, който се изпълнява
-  преди хидратация) задава `data-theme="dark"|"light"` и превключва класа `.dark` върху `<html>` едновременно.
-  Тъмният набор от токени на kit-а е ключиран по `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  собствените тъмни презаписвания на OmniRoute (блокът `.dark` в `globals.css`) и старите Tailwind `dark:`
-  помощни класове се ключират по класа `.dark`. Няма предустановени акцентни цветове: акцентът винаги идва от
-  kit-а, а запазен предустановен акцент от по-стар build се отхвърля при зареждане на store-а.
-- **Компоненти (адаптери).** `src/shared/components/index.tsx` запазва компонентното API на OmniRoute (същите
-  имена, default exports и props), а примитивите зад него са адаптери върху kit-а: форми
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), наслоения и обратна връзка
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  структура (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) и таблици
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Адаптерът импортира компонента
-  на kit-а по подпът и съпоставя старите props върху него — например `Button variant="primary"` е
-  `default` бутонът на kit-а (`--ci-button-primary-*`: инверсната повърхност в светла тема, акцентът с неговия
-  `--ci-color-accent-foreground` мастилен цвят в тъмна), `danger` е `destructive`, а `warning` е `outline` плюс
-  разширението `.ci-button--warning`. Правилата `.ci-button--warning` и `.ci-badge[data-tone]` в
-  края на `globals.css` (`@layer components`) са разширения на OmniRoute върху класовете на kit-а.
-  `tests/unit/ui/adapters/*.test.tsx` фиксират всеки адаптер.
-- **Shell.** `src/app/(dashboard)/layout.tsx` рендерира `DashboardLayout`, който рендерира
-  `src/shared/components/layouts/DashboardShell.tsx`: kit-овите `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), с навигационната логика на OmniRoute в
-  `src/shared/components/Sidebar.tsx`. Връзка „пропусни към съдържанието" към `#main-content` е първият фокусируем
-  елемент. `src/shared/components/Header.tsx` съдържа kit-овия `SidebarTrigger` (единственият превключвател на страничната лента
-  в shell-а), Keak `ProductSwitcher` и отварящия бутон на командната палитра; той показва заглавието на маршрута само докато
-  няма монтиран kit-ов `PageHeader` (`.ci-page-header`) вътре в `#main-content`, така че страница със собствен
-  `PageHeader` има един-единствен `h1`. `src/shared/components/CommandPalette.tsx` е kit-ов `Dialog`.
-- **Икони.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) разрешава името (речникът на
-  Material Symbols, който екраните използват) чрез `ICON_MAP` (`src/shared/constants/iconMap.ts`) към
-  Lucide глиф. Шрифтът и пакетът на Material Symbols са премахнати: име, липсващо от картата, рендерира
-  неутрален заместващ глиф (`data-icon-missing="true"`) и записва предупреждение в конзолата извън production.
-  `npm run gen:icon-map` отпечатва използваните имена, които липсват от картата
-  (`tests/unit/icon-map-coverage.test.ts` се проваля при всяко име без Lucide икона;
-  `tests/unit/icon-map-object-values.test.ts` покрива имена, съхранени в lookup обекти);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` пренаписва буквални
-  `<span className="material-symbols-outlined">` span-ове към `<Icon>`.
-- **Бранд.** `src/shared/components/OmniRouteLogo.tsx` обвива kit-а: default export-ът `OmniRouteLogo`
-  рендерира `ProductIcon product="omniroute" variant="glyph"` (inline SVG, безопасен за `basePath`), а
-  `OmniRouteLockup` рендерира `ProductLockup product="omniroute"` (достъпно име „Keak OmniRoute") или, за
-  white-label оператори, техните собствени `name`/`logoSrc`. Дестинациите на product switcher-а се намират в
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Самостоятелните
-  екрани — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` и `src/shared/components/ErrorPageScaffold.tsx`
-  — показват lockup-а; `tests/unit/brand-pages-static.test.ts` го пази.
+- **Комплект.** `packages/ui-kit/src` е копие байт по байт на `src/` нагоре в ангажимента, закрепен в `packages/ui-kit/UPSTREAM.md` (което също записва разрешението за лиценз); `PATCHES.md` изброява локални корекции (няма). Консумира се като източник, без изграждане: `next.config.mjs` го транспилира, а `tsconfig.json` преобразува `@omniroute/ui-kit` → `packages/ui-kit/src` и `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` и `vitest.mcp.config.ts` носят един и същ псевдоним). Импортирайте компонент на комплекта по неговия подпът (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), никога през `@omniroute/ui-kit` цевта: цевта изтегля всеки компонент (включително инструмента за избор на дата) във всеки вносител. Стиловата таблица на комплекта влиза чрез `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, пълният лист: основният `ci-ui.css` плюс всяко семейство модели).
+- **Токени.** `packages/ui-kit/src/ci-tokens.css` декларира `--ci-*` токените; `src/app/globals.css` ги свързва към наследените OmniRoute имена (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), така че съществуващите помощни програми `var(--color-*)` четат и Tailwind продължават да работят. Новият код използва помощните програми Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) или класове комплекти — никога шестнадесетична стойност (`tests/unit/design-kit-bridge.test.ts` налага моста). `text-primary` се преобразува в `--color-primary-ink` до `--text-color-primary` (lime-800 в светло, лайм акцентът в тъмно), така че основният текст остава четим, докато `bg-primary`/`border-primary` запазват лайм повърхността. Сериите от диаграми използват `--color-chart-1` … `--color-chart-5`.
+- **Теми.** `<html className="ci-theme">` (`src/app/layout.tsx`) включва документа в темата на комплекта. Предпочитанието е `light`, `dark` или `system` (`THEME_CONFIG.defaultTheme = "system"` в `src/shared/constants/appConfig.ts`; `system` следва `prefers-color-scheme`). `applyTheme()` в `src/store/themeStore.ts` (огледален от вградения първоначален скрипт в `src/app/layout.tsx`, който се изпълнява преди хидратиране) задава `data-theme="dark"|"light"` и превключва класа `.dark` на `<html>` заедно. Наборът от тъмни символи на комплекта е ключ на `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); собствените тъмни замени на OmniRoute(блокът `.dark` в `globals.css`) и наследеният ключ за помощни програми Tailwind `dark:` в класа `.dark`. Няма предварително зададени цветове на акцента: акцентът винаги идва от комплекта, а постоянна настройка от по-стара компилация се премахва, когато магазинът се зареди.
+- **Компоненти (адаптери).** `src/shared/components/index.tsx` запазва OmniRoute компонента API (същите имена, експорти по подразбиране и подпори), а примитивите зад него са адаптери над комплекта: формуляри (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), наслагвания и обратна връзка (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), структура (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) и таблици (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Адаптер импортира компонента на комплекта по подпът и картографира наследените подпори върху него — например `Button variant="primary"` е бутонът `default` на комплекта (`--ci-button-primary-*`: обратната повърхност в светло, акцентът с мастилото `--ci-color-accent-foreground` в тъмно), `danger` е `destructive`, а `warning` е `outline` плюс разширението `.ci-button--warning`. Правилата `.ci-button--warning` и `.ci-badge[data-tone]` в края на `globals.css` (`@layer components`) са OmniRoute разширения върху класовете на комплекта. `tests/unit/ui/adapters/*.test.tsx` щифт всеки адаптер.
+- **Черупка.** `src/app/(dashboard)/layout.tsx` изобразява `DashboardLayout`, което изобразява `src/shared/components/layouts/DashboardShell.tsx`: комплектът `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), с навигационната логика на OmniRoute в `src/shared/components/Sidebar.tsx`. Връзка „прескачане към съдържанието“ към `#main-content` е първият фокусируем елемент. `src/shared/components/Header.tsx` съдържа комплекта `SidebarTrigger` (единственият превключвател на страничната лента на обвивката), Keak `ProductSwitcher` и инструмента за отваряне на командна палитра; показва само заглавието на маршрута, докато в `#main-content` не е монтиран комплект `PageHeader` (`.ci-page-header`), така че страница със собствен `PageHeader` има един `h1`. `src/shared/components/CommandPalette.tsx` е комплект `Dialog`.
+- **Икони.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) разрешава името (речника на материалните символи, който екраните използват) чрез `ICON_MAP` (`src/shared/constants/iconMap.ts`) до глиф Lucide. Шрифтът и пакетът Material Symbols са изчезнали: липсващо име от картата изобразява неутрален глиф за контейнер (`data-icon-missing="true"`) и регистрира предупреждение на конзолата извън производството. `npm run gen:icon-map` отпечатва използваните имена, които липсват от картата (`tests/unit/icon-map-coverage.test.ts` не успява при всяко име без икона Lucide; `tests/unit/icon-map-object-values.test.ts` покрива имена, съхранени в обекти за търсене); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` пренаписва литерала `<span className="material-symbols-outlined">` обхваща в `<Icon>`.
+- **Марка.** `src/shared/components/OmniRouteLogo.tsx` обвива комплекта: експортирането по подразбиране `OmniRouteLogo` изобразява `ProductIcon product="omniroute" variant="glyph"` (вграден SVG, `basePath` -safe) и `OmniRouteLockup` изобразява `ProductLockup product="omniroute"` (достъпно име „Keak OmniRoute“) или, за операторите с бял етикет, техния собствен `name`/`logoSrc`. Дестинациите за превключване на продукти живеят в `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Самостоятелните екрани — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` и `src/shared/components/ErrorPageScaffold.tsx` — показват блокирането; `tests/unit/brand-pages-static.test.ts` го пази.
 
 ## 2. Правила
 

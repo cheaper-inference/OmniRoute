@@ -6,73 +6,15 @@
 
 > **অবস্থা:** ড্যাশবোর্ড নির্মিত হয়** Keak CI UI কিট** (`@keak/cheaper-inference-ui-kit`), ওয়ার্কস্পেস `packages/ui-kit` হিসাবে বিক্রীত (`@omniroute/ui-kit`; আপস্ট্রিম স্ন্যাপশট `packages/ui-kit/UPSTREAM.md` এ পিন করা হয় এবং `npm run check:ui-kit-snapshot` দ্বারা সুরক্ষিত)। আলো ক্যানোনিকাল থিম; ডিফল্ট পছন্দ `system`. উচ্চারণ হল Keak চুন (`--ci-color-accent`)। সুইজার হল UI, ডিসপ্লে এবং কোড টেক্সটের জন্য একক পরিবার (`--ci-font-ui`; `--ci-font-display` এবং `--ci-font-mono` এর সমাধান), কিট নিজেই দ্বারা স্ব-হোস্ট করা (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` দ্বারা আমদানি করা)। স্ক্রিপ্ট সুইজারে গ্লাইফ দ্বারা গ্লাইফের মাধ্যমে পড়ার অভাব রয়েছে (`src/app/globals.css`): সিরিলিক, গ্রীক এবং ভিয়েতনামের জন্য ইন্টার এবং আরবি লিপির জন্য শুধুমাত্র `html[dir="rtl"]`, Vazirmatn এর অধীনে। প্রতিটি আইকন একটি লুসাইড গ্লিফ।
 
-## ১. জিনিসগুলো কোথায় থাকে
+## 1. জিনিস যেখানে বাস
 
-- **কিট।** `packages/ui-kit/src` হলো `packages/ui-kit/UPSTREAM.md`-এ পিন করা কমিটে আপস্ট্রিম `src/`-এর
-  বাইট-ফর-বাইট অনুলিপি (যা লাইসেন্স অনুমোদনটিও রেকর্ড করে); `PATCHES.md` লোকাল প্যাচের তালিকা দেয়
-  (কোনোটি নেই)। এটি সোর্স হিসেবে ব্যবহৃত হয়, কোনো বিল্ড ছাড়াই: `next.config.mjs` এটি ট্রান্সপাইল করে, এবং
-  `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` এবং `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` ম্যাপ করে (`vitest.config.ts` এবং `vitest.mcp.config.ts` একই অ্যালিয়াস বহন করে)। কিট
-  কম্পোনেন্ট তার সাবপাথ দিয়ে ইমপোর্ট করুন (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), কখনোই
-  `@omniroute/ui-kit` ব্যারেলের মাধ্যমে নয়: ব্যারেল প্রতিটি ইমপোর্টারে সব কম্পোনেন্ট (ডেট পিকারসহ) টেনে
-  আনে। কিট স্টাইলশীট `src/app/globals.css` এর মাধ্যমে প্রবেশ করে
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`)।
-- **টোকেন।** `packages/ui-kit/src/ci-tokens.css` `--ci-*` টোকেনগুলো ডিক্লেয়ার করে; `src/app/globals.css`
-  সেগুলোকে লিগ্যাসি OmniRoute নামগুলোর সাথে ব্রিজ করে (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), যাতে বিদ্যমান `var(--color-*)` রিড এবং Tailwind
-  ইউটিলিটিগুলো কাজ করতে থাকে। নতুন কোড Tailwind ইউটিলিটি (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) বা কিট ক্লাস ব্যবহার করে — কখনোই হেক্স
-  ভ্যালু নয় (`tests/unit/design-kit-bridge.test.ts` ব্রিজটি এনফোর্স করে)। `text-primary`
-  `--text-color-primary` এর মাধ্যমে `--color-primary-ink`-এ রিজলভ হয় (লাইটে lime-800, ডার্কে লাইম
-  অ্যাকসেন্ট), তাই প্রাইমারি টেক্সট পঠনযোগ্য থাকে অপরদিকে `bg-primary`/`border-primary` লাইম সারফেস বজায়
-  রাখে। চার্ট সিরিজ `--color-chart-1` … `--color-chart-5` ব্যবহার করে।
-- **থিম।** `<html className="ci-theme">` (`src/app/layout.tsx`) ডকুমেন্টকে কিট থিমে অপ্ট-ইন করে।
-  পছন্দটি হলো `light`, `dark` অথবা `system` (`src/shared/constants/appConfig.ts`-এ
-  `THEME_CONFIG.defaultTheme = "system"`; `system` `prefers-color-scheme` অনুসরণ করে)।
-  `src/store/themeStore.ts`-এ `applyTheme()` (`src/app/layout.tsx`-এ ইনলাইন বুটস্ট্র্যাপ স্ক্রিপ্ট দ্বারা মিররকৃত,
-  যা হাইড্রেশনের আগে চলে) `data-theme="dark"|"light"` সেট করে এবং `<html>`-এ `.dark` ক্লাস একসঙ্গে টগল
-  করে। কিটের ডার্ক টোকেন সেট `data-theme="dark"`-এর উপর কী করা (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute-এর নিজস্ব ডার্ক ওভাররাইড (`globals.css`-এ `.dark` ব্লক) এবং লিগ্যাসি Tailwind `dark:`
-  ইউটিলিটিগুলো `.dark` ক্লাসের উপর কী করা। কোনো অ্যাকসেন্ট কালার প্রিসেট নেই: অ্যাকসেন্ট সবসময়
-  কিট থেকে আসে, এবং পুরোনো বিল্ডের পার্সিস্ট করা প্রিসেট স্টোর লোড হওয়ার সময় বাদ দেওয়া হয়।
-- **কম্পোনেন্ট (অ্যাডাপ্টার)।** `src/shared/components/index.tsx` OmniRoute কম্পোনেন্ট API বজায় রাখে (একই
-  নাম, ডিফল্ট এক্সপোর্ট এবং প্রপস), এবং এর পেছনের প্রিমিটিভগুলো কিটের উপর অ্যাডাপ্টার: ফর্ম
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ওভারলে ও ফিডব্যাক
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  স্ট্রাকচার (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) এবং টেবিল
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)। একটি অ্যাডাপ্টার কিট
-  কম্পোনেন্ট সাবপাথ দিয়ে ইমপোর্ট করে এবং লিগ্যাসি প্রপসগুলো তার উপর ম্যাপ করে — উদাহরণস্বরূপ
-  `Button variant="primary"` হলো কিট `default` বাটন (`--ci-button-primary-*`: লাইটে ইনভার্স সারফেস, ডার্কে
-  `--ci-color-accent-foreground` ইঙ্কসহ অ্যাকসেন্ট), `danger` হলো `destructive`, এবং `warning` হলো `outline`
-  প্লাস `.ci-button--warning` এক্সটেনশন। `globals.css`-এর শেষে `.ci-button--warning` এবং
-  `.ci-badge[data-tone]` রুলগুলো (`@layer components`) কিট ক্লাসের উপরে OmniRoute এক্সটেনশন।
-  `tests/unit/ui/adapters/*.test.tsx` প্রতিটি অ্যাডাপ্টার পিন করে।
-- **শেল।** `src/app/(dashboard)/layout.tsx` `DashboardLayout` রেন্ডার করে, যা
-  `src/shared/components/layouts/DashboardShell.tsx` রেন্ডার করে: কিট `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), সাথে `src/shared/components/Sidebar.tsx`-এ OmniRoute-এর
-  নেভিগেশন লজিক। `#main-content`-এ যাওয়ার একটি "কনটেন্টে যান" লিংক প্রথম ফোকাসযোগ্য
-  এলিমেন্ট। `src/shared/components/Header.tsx` কিট `SidebarTrigger` (শেলের একমাত্র সাইডবার
-  টগল), Keak `ProductSwitcher` এবং কমান্ড-প্যালেট ওপেনার ধারণ করে; এটি রুট টাইটেল শুধুমাত্র তখনই দেখায়
-  যখন `#main-content`-এর ভিতরে কোনো কিট `PageHeader` (`.ci-page-header`) মাউন্ট করা থাকে না, যাতে নিজস্ব
-  `PageHeader`-যুক্ত পেজে একটি মাত্র `h1` থাকে। `src/shared/components/CommandPalette.tsx` একটি কিট
-  `Dialog`।
-- **আইকন।** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) নামটি (স্ক্রিনগুলোর ব্যবহৃত
-  Material Symbols ভোকাবুলারি) `ICON_MAP` (`src/shared/constants/iconMap.ts`) এর মাধ্যমে একটি
-  Lucide গ্লিফে রিজলভ করে। Material Symbols ফন্ট এবং প্যাকেজ আর নেই: ম্যাপে অনুপস্থিত একটি নাম
-  একটি নিরপেক্ষ প্লেসহোল্ডার গ্লিফ রেন্ডার করে (`data-icon-missing="true"`) এবং প্রোডাকশনের বাইরে
-  কনসোল ওয়ার্নিং লগ করে। `npm run gen:icon-map` ব্যবহৃত নামগুলোর মধ্যে ম্যাপে অনুপস্থিতগুলো প্রিন্ট
-  করে (`tests/unit/icon-map-coverage.test.ts` Lucide আইকন ছাড়া যেকোনো নামে ফেইল করে;
-  `tests/unit/icon-map-object-values.test.ts` লুকআপ অবজেক্টে সংরক্ষিত নামগুলো কভার করে);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` লিটারেল
-  `<span className="material-symbols-outlined">` স্প্যানগুলোকে `<Icon>`-এ রিরাইট করে।
-- **ব্র্যান্ড।** `src/shared/components/OmniRouteLogo.tsx` কিটকে র্যাপ করে: ডিফল্ট এক্সপোর্ট `OmniRouteLogo`
-  `ProductIcon product="omniroute" variant="glyph"` রেন্ডার করে (ইনলাইন SVG, `basePath`-নিরাপদ) এবং
-  `OmniRouteLockup` `ProductLockup product="omniroute"` রেন্ডার করে (অ্যাক্সেসিবল নাম "Keak OmniRoute") অথবা,
-  হোয়াইট-লেবেল অপারেটরদের জন্য, তাদের নিজস্ব `name`/`logoSrc`। প্রোডাক্ট-সুইচার গন্তব্যগুলো
-  `src/shared/constants/keakProducts.ts`-এ থাকে (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)। স্ট্যান্ডঅ্যালোন
-  স্ক্রিনগুলো — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` এবং `src/shared/components/ErrorPageScaffold.tsx`
-  — লকআপ দেখায়; `tests/unit/brand-pages-static.test.ts` এটি সুরক্ষা দেয়।
+- **কিট।** `packages/ui-kit/src` হল `packages/ui-kit/UPSTREAM.md` এ পিন করা কমিট এ আপস্ট্রিম `src/` এর একটি বাইট-ফর-বাইট কপি (যা লাইসেন্স অনুমোদনও রেকর্ড করে); `PATCHES.md` স্থানীয় প্যাচ তালিকাভুক্ত করে (কোনটিই নয়)। এটি উৎস হিসেবে ব্যবহার করা হয়, কোনো নির্মাণ ছাড়াই: `next.config.mjs` এটিকে ট্রান্সপিল করে, এবং `tsconfig.json` ম্যাপ `@omniroute/ui-kit` → `packages/ui-kit/src` এবং `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` এবং `vitest.mcp.config.ts` একই উপনাম বহন করে)। একটি কিট কম্পোনেন্ট এর সাবপথ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) দ্বারা আমদানি করুন, `@omniroute/ui-kit` ব্যারেলের মাধ্যমে কখনই নয়: ব্যারেল প্রতিটি আমদানিকারকের মধ্যে প্রতিটি উপাদান (তারিখ পিকার সহ) টেনে আনে। কিট স্টাইলশীট `src/app/globals.css` এর মাধ্যমে প্রবেশ করে (`@import "../../packages/ui-kit/src/ci-styles.css"`, সম্পূর্ণ শীট: মূল `ci-ui.css` প্লাস প্রতিটি প্যাটার্ন পরিবার)।
+- **টোকেন।** `packages/ui-kit/src/ci-tokens.css` `--ci-*` টোকেন ঘোষণা করে; `src/app/globals.css` তাদের লিগ্যাসি OmniRoute নামের (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) এর সাথে যুক্ত করে, তাই বিদ্যমান `var(--color-*)` রিডস এবং Tailwind ইউটিলিটিগুলি কাজ করতে থাকে। নতুন কোড Tailwind ইউটিলিটি ব্যবহার করে (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) বা কিট ক্লাস — কখনই হেক্স মান নয় (`tests/unit/design-kit-bridge.test.ts` সেতু প্রয়োগ করে)। `text-primary` `--text-color-primary` (আলোতেlime-800, অন্ধকারে চুনের উচ্চারণ) এর মাধ্যমে `--color-primary-ink` এর সমাধান করে, তাই প্রাথমিক পাঠ্য পঠনযোগ্য থাকে যখন `bg-primary`/`border-primary` চুন পৃষ্ঠ বজায় রাখে। চার্ট সিরিজ ব্যবহার করুন `--color-chart-1` … `--color-chart-5`।
+- **থিম।** `<html className="ci-theme">` (`src/app/layout.tsx`) নথিটিকে কিট থিমের মধ্যে বেছে নেয়। পছন্দ হল `light`, `dark` বা `system` (`THEME_CONFIG.defaultTheme = "system"` তে `src/shared/constants/appConfig.ts`; `system` `prefers-color-scheme` অনুসরণ করে)। `src/store/themeStore.ts` এ `applyTheme()` ( `src/app/layout.tsx` এ ইনলাইন বুটস্ট্র্যাপ স্ক্রিপ্ট দ্বারা মিরর করা হয়, যা হাইড্রেশনের আগে চলে) `data-theme="dark"|"light"` সেট করে এবং `<html>` তে `.dark` ক্লাসকে টগল করে। কিটের ডার্ক টোকেন সেটটি `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute এর নিজস্ব ডার্ক ওভাররাইড ( `globals.css` এ `.dark` ব্লক) এবং `.dark` ক্লাসে লিগ্যাসি Tailwind `dark:` ইউটিলিটি কী। কোনো অ্যাকসেন্ট রঙের প্রিসেট নেই: অ্যাকসেন্ট সবসময় কিট থেকে আসে এবং স্টোর লোড হয়ে গেলে পুরনো বিল্ড থেকে একটি স্থায়ী প্রিসেট বাদ দেওয়া হয়।
+- **উপাদান (অ্যাডাপ্টার)।** `src/shared/components/index.tsx` OmniRoute কম্পোনেন্ট API (একই নাম, ডিফল্ট রপ্তানি এবং প্রপস) রাখে, এবং এর পিছনের আদিম জিনিসগুলি কিটের উপর অ্যাডাপ্টার: ফর্মগুলি (`Button` `Loading` `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge` `Card` এবং ফিডব্যাক),`Modal`,`ConfirmModal`/ `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState`), গঠন (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) এবং টেবিল (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)। একটি অ্যাডাপ্টার সাবপাথের মাধ্যমে কিট উপাদান আমদানি করে এবং এটিতে — এ লিগ্যাসি প্রপস ম্যাপ করে উদাহরণস্বরূপ `Button variant="primary"` হল কিট `default` বোতাম (`--ci-button-primary-*`: আলোতে বিপরীত পৃষ্ঠ, অন্ধকারে এর `--ci-color-accent-foreground` কালি সহ উচ্চারণ), `danger` হল `destructive`, `outline` `warning` প্লাস `.ci-button--warning` প্লাস। `globals.css` (`@layer components`) এর শেষে `.ci-button--warning` এবং `.ci-badge[data-tone]` নিয়মগুলি কিট ক্লাসের উপরে OmniRoute এক্সটেনশন। `tests/unit/ui/adapters/*.test.tsx` প্রতিটি অ্যাডাপ্টার পিন করুন।
+- **শেল.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` রেন্ডার করে, যা `src/shared/components/layouts/DashboardShell.tsx` রেন্ডার করে: কিট `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), `src/shared/components/Sidebar.tsx` তে OmniRoute এর নেভিগেশন লজিক সহ। `#main-content` এর একটি "কন্টেন্টে এড়িয়ে যান" লিঙ্ক হল প্রথম ফোকাসযোগ্য উপাদান। `src/shared/components/Header.tsx` কিট `SidebarTrigger` (শেলের একমাত্র সাইডবার টগল), Keak `ProductSwitcher` এবং কমান্ড-প্যালেট ওপেনার ধারণ করে; এটি শুধুমাত্র রুট শিরোনাম দেখায় যখন কোন কিট `PageHeader` (`.ci-page-header`) `#main-content` ভিতরে মাউন্ট করা হয় না, তাই নিজস্ব `PageHeader` সহ একটি পৃষ্ঠায় একটি একক `h1` থাকে। `src/shared/components/CommandPalette.tsx` একটি কিট `Dialog`।
+- **আইকন।** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) `ICON_MAP` (`src/shared/constants/iconMap.ts`) এর মাধ্যমে একটি লুসাইড গ্লিফে নাম (বস্তুর প্রতীক শব্দভাণ্ডার যা স্ক্রীন ব্যবহার করে) সমাধান করে। উপাদান চিহ্ন ফন্ট এবং প্যাকেজ চলে গেছে: মানচিত্র থেকে একটি নাম অনুপস্থিত একটি নিরপেক্ষ স্থানধারক গ্লিফ (`data-icon-missing="true"`) রেন্ডার করে এবং উত্পাদনের বাইরে একটি কনসোল সতর্কতা লগ করে৷ `npm run gen:icon-map` ব্যবহার করা নামগুলিকে প্রিন্ট করে যা মানচিত্র থেকে অনুপস্থিত রয়েছে (`tests/unit/icon-map-coverage.test.ts` লুসাইড আইকন ব্যতীত যেকোনো নামে ব্যর্থ হয়; `tests/unit/icon-map-object-values.test.ts` লুকআপ অবজেক্টে সংরক্ষিত নামগুলি কভার করে); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` আক্ষরিক `<span className="material-symbols-outlined">` আবার `<Icon>` পর্যন্ত স্প্যান করে।
+- **ব্র্যান্ড** `src/shared/components/OmniRouteLogo.tsx` কিটটি মুড়ে দেয়: ডিফল্ট এক্সপোর্ট `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` রেন্ডার করে (ইনলাইন SVG, `basePath` -safe) এবং `OmniRouteLockup` রেন্ডার করে `ProductLockup product="omniroute"` (অ্যাক্সেসযোগ্য নাম "Keak OmniRoute") অথবা, হোয়াইট-লেবেল অপারেটরদের জন্য, তাদের নিজস্ব `name`/`logoSrc`। পণ্য-সুইচার গন্তব্যগুলি `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) এ থাকে। স্বতন্ত্র পর্দা — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` এবং `src/shared/components/ErrorPageScaffold.tsx` — লকআপ দেখায়; `tests/unit/brand-pages-static.test.ts` এটা রক্ষা করে।
 
 ## 2. নিয়ম
 

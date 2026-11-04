@@ -6,15 +6,70 @@
 
 > **ಸ್ಥಿತಿ:** ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು ನಿರ್ಮಿಸಲಾಗಿದೆ** Keak CI UI ಕಿಟ್** (`@keak/cheaper-inference-ui-kit`), ವರ್ಕ್ಸ್ಪೇಸ್ `packages/ui-kit` (`@omniroute/ui-kit`; ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ಅನ್ನು `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಪಿನ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು `npm run check:ui-kit-snapshot` ನಿಂದ ರಕ್ಷಿಸಲಾಗಿದೆ) ಎಂದು ಮಾರಾಟ ಮಾಡಲಾಗಿದೆ. ಬೆಳಕು ಅಂಗೀಕೃತ ವಿಷಯವಾಗಿದೆ; ಪೂರ್ವನಿಯೋಜಿತ ಆದ್ಯತೆಯು `system` ಆಗಿದೆ. ಉಚ್ಚಾರಣೆಯು ಕೀಕ್ ಲೈಮ್ (`--ci-color-accent`) ಆಗಿದೆ. ಸ್ವಿಟ್ಜರ್ ಎಂಬುದು UI, ಪ್ರದರ್ಶನ ಮತ್ತು ಕೋಡ್ ಪಠ್ಯಕ್ಕಾಗಿ (`--ci-font-ui`; `--ci-font-display` ಮತ್ತು `--ci-font-mono` ಪರಿಹರಿಸಲು) ಒಂದೇ ಕುಟುಂಬವಾಗಿದೆ, ಕಿಟ್ನಿಂದ ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಲಾಗಿದೆ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ನಿಂದ ಆಮದು ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ). ಸ್ಕ್ರಿಪ್ಟ್ಗಳು ಸ್ವಿಟ್ಜರ್ನಲ್ಲಿ ಗ್ಲಿಫ್ ಮೂಲಕ ಗ್ಲಿಫ್ ಕೊರತೆಯಿದೆ (`src/app/globals.css`): ಸಿರಿಲಿಕ್, ಗ್ರೀಕ್ ಮತ್ತು ವಿಯೆಟ್ನಾಮೀಸ್ಗೆ ಇಂಟರ್ ಮತ್ತು, `html[dir="rtl"]` ಅಡಿಯಲ್ಲಿ ಮಾತ್ರ, ಅರೇಬಿಕ್ ಲಿಪಿಗಾಗಿ ವಝಿರ್ಮಟ್ನ್. ಪ್ರತಿಯೊಂದು ಐಕಾನ್ ಲೂಸಿಡ್ ಗ್ಲಿಫ್ ಆಗಿದೆ.
 
-## 1. ವಸ್ತುಗಳು ಎಲ್ಲಿವೆ
+## 1. ವಿಷಯಗಳು ಎಲ್ಲಿವೆ
 
-- **ಕಿಟ್.** `packages/ui-kit/src` ಎಂಬುದು `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಪಿನ್ ಮಾಡಲಾದ ಕಮಿಟ್ನಲ್ಲಿರುವ ಅಪ್ಸ್ಟ್ರೀಮ್ `src/` ನ ಬೈಟ್ಗೆ-ಬೈಟ್ ನಕಲಾಗಿದೆ (ಇದು ಪರವಾನಗಿ ಅಧಿಕೃತೀಕರಣವನ್ನೂ ದಾಖಲಿಸುತ್ತದೆ); `PATCHES.md` ಸ್ಥಳೀಯ ಪ್ಯಾಚ್ಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ (ಯಾವುದೂ ಇಲ್ಲ). ಇದನ್ನು ಬಿಲ್ಡ್ ಇಲ್ಲದೆ ಸೋರ್ಸ್ ಆಗಿ ಬಳಸಲಾಗುತ್ತದೆ: `next.config.mjs` ಅದನ್ನು ಟ್ರಾನ್ಸ್ಪೈಲ್ ಮಾಡುತ್ತದೆ, ಮತ್ತು `tsconfig.json` `@omniroute/ui-kit` ಅನ್ನು `packages/ui-kit/src` ಗೆ ಮತ್ತು `@omniroute/ui-kit/*` ಅನ್ನು `packages/ui-kit/src/*` ಗೆ ಮ್ಯಾಪ್ ಮಾಡುತ್ತದೆ (`vitest.config.ts` ಮತ್ತು `vitest.mcp.config.ts` ಅದೇ ಅಲಿಯಾಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತವೆ). ಕಿಟ್ ಕಾಂಪೋನೆಂಟ್ ಅನ್ನು ಅದರ ಸಬ್ಪಾತ್ ಮೂಲಕ ಇಂಪೋರ್ಟ್ ಮಾಡಿ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ಎಂದಿಗೂ `@omniroute/ui-kit` ಬ್ಯಾರೆಲ್ ಮೂಲಕ ಅಲ್ಲ: ಬ್ಯಾರೆಲ್ ಪ್ರತಿ ಕಾಂಪೋನೆಂಟ್ ಅನ್ನು (ಡೇಟ್ ಪಿಕರ್ ಸೇರಿದಂತೆ) ಪ್ರತಿ ಇಂಪೋರ್ಟರ್ಗೆ ಎಳೆದುಕೊಂಡು ಬರುತ್ತದೆ. ಕಿಟ್ ಸ್ಟೈಲ್ಶೀಟ್ `src/app/globals.css` ಮೂಲಕ (`@import "../../packages/ui-kit/src/ci-ui.css"`) ಪ್ರವೇಶಿಸುತ್ತದೆ.
-- **ಟೋಕನ್ಗಳು.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ಟೋಕನ್ಗಳನ್ನು ಘೋಷಿಸುತ್ತದೆ; `src/app/globals.css` ಅವುಗಳನ್ನು ಲೆಗಸಿ OmniRoute ಹೆಸರುಗಳಿಗೆ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) ಬ್ರಿಜ್ ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ `var(--color-*)` ಓದುವಿಕೆಗಳು ಮತ್ತು Tailwind ಯುಟಿಲಿಟಿಗಳು ಮುಂದುವರಿಯುತ್ತವೆ. ಹೊಸ ಕೋಡ್ Tailwind ಯುಟಿಲಿಟಿಗಳನ್ನು (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ಅಥವಾ ಕಿಟ್ ಕ್ಲಾಸ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ — ಎಂದಿಗೂ ಹೆಕ್ಸ್ ಮೌಲ್ಯವನ್ನು ಅಲ್ಲ (`tests/unit/design-kit-bridge.test.ts` ಬ್ರಿಜ್ ಅನ್ನು ಜಾರಿಗೊಳಿಸುತ್ತದೆ). `text-primary` `--text-color-primary` ಮೂಲಕ `--color-primary-ink` ಗೆ ಪರಿಹರಿಸುತ್ತದೆ (ಲೈಟ್ನಲ್ಲಿ lime-800, ಡಾರ್ಕ್ನಲ್ಲಿ lime ಆಕ್ಸೆಂಟ್), ಆದ್ದರಿಂದ ಪ್ರೈಮರಿ ಟೆಕ್ಸ್ಟ್ ಓದಲು ಯೋಗ್ಯವಾಗಿರುತ್ತದೆ, ಆದರೆ `bg-primary`/`border-primary` lime ಸರ್ಫೇಸ್ ಅನ್ನು ಕಾಪಾಡುತ್ತವೆ. ಚಾರ್ಟ್ ಸರಣಿಗಳು `--color-chart-1` … `--color-chart-5` ಅನ್ನು ಬಳಸುತ್ತವೆ.
-- **ಥೀಮ್ಗಳು.** `<html className="ci-theme">` (`src/app/layout.tsx`) ಡಾಕ್ಯುಮೆಂಟ್ ಅನ್ನು ಕಿಟ್ ಥೀಮ್ಗೆ ಆಪ್ಟ್-ಇನ್ ಮಾಡುತ್ತದೆ. ಆದ್ಯತೆಯು `light`, `dark` ಅಥವಾ `system` ಆಗಿದೆ (`src/shared/constants/appConfig.ts` ನಲ್ಲಿ `THEME_CONFIG.defaultTheme = "system"`; `system` ಎಂಬುದು `prefers-color-scheme` ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ). `src/store/themeStore.ts` ನಲ್ಲಿನ `applyTheme()` (`src/app/layout.tsx` ನಲ್ಲಿನ ಇನ್ಲೈನ್ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ಸ್ಕ್ರಿಪ್ಟ್ನಿಂದ ಪ್ರತಿಬಿಂಬಿತವಾಗಿದೆ, ಅದು ಹೈಡ್ರೇಶನ್ಗೆ ಮೊದಲು ರನ್ ಆಗುತ್ತದೆ) `data-theme="dark"|"light"` ಅನ್ನು ಸೆಟ್ ಮಾಡುತ್ತದೆ ಮತ್ತು `<html>` ಮೇಲಿನ `.dark` ಕ್ಲಾಸ್ ಅನ್ನು ಒಟ್ಟಿಗೆ ಟಾಗಲ್ ಮಾಡುತ್ತದೆ. ಕಿಟ್ನ ಡಾರ್ಕ್ ಟೋಕನ್ ಸೆಟ್ `data-theme="dark"` ಅನ್ನು ಆಧರಿಸಿದೆ (`packages/ui-kit/src/ci-tokens.css`); OmniRoute ನ ಸ್ವಂತ ಡಾರ್ಕ್ ಓವರ್ರೈಡ್ಗಳು (`globals.css` ನಲ್ಲಿನ `.dark` ಬ್ಲಾಕ್) ಮತ್ತು ಲೆಗಸಿ Tailwind `dark:` ಯುಟಿಲಿಟಿಗಳು `.dark` ಕ್ಲಾಸ್ ಅನ್ನು ಆಧರಿಸಿವೆ. ಆಕ್ಸೆಂಟ್ ಬಣ್ಣದ ಪ್ರೀಸೆಟ್ಗಳಿಲ್ಲ: ಆಕ್ಸೆಂಟ್ ಯಾವಾಗಲೂ ಕಿಟ್ನಿಂದ ಬರುತ್ತದೆ, ಮತ್ತು ಹಳೆಯ ಬಿಲ್ಡ್ನಿಂದ ಸಂಗ್ರಹಿತವಾದ ಪ್ರೀಸೆಟ್ ಅನ್ನು ಸ್ಟೋರ್ ಲೋಡ್ ಆದಾಗ ಕೈಬಿಡಲಾಗುತ್ತದೆ.
-- **ಕಾಂಪೋನೆಂಟ್ಗಳು (ಅಡ್ಯಾಪ್ಟರ್ಗಳು).** `src/shared/components/index.tsx` OmniRoute ಕಾಂಪೋನೆಂಟ್ API ಅನ್ನು ಕಾಪಾಡುತ್ತದೆ (ಅದೇ ಹೆಸರುಗಳು, ಡೀಫಾಲ್ಟ್ ಎಕ್ಸ್ಪೋರ್ಟ್ಗಳು ಮತ್ತು ಪ್ರಾಪ್ಗಳು), ಮತ್ತು ಅದರ ಹಿಂದಿನ ಪ್ರಿಮಿಟಿವ್ಗಳು ಕಿಟ್ ಮೇಲಿನ ಅಡ್ಯಾಪ್ಟರ್ಗಳಾಗಿವೆ: ಫಾರ್ಮ್ಗಳು (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ಓವರ್ಲೇಗಳು ಮತ್ತು ಫೀಡ್ಬ್ಯಾಕ್ (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), ಸ್ಟ್ರಕ್ಚರ್ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ಮತ್ತು ಟೇಬಲ್ಗಳು (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ಒಂದು ಅಡ್ಯಾಪ್ಟರ್ ಕಿಟ್ ಕಾಂಪೋನೆಂಟ್ ಅನ್ನು ಸಬ್ಪಾತ್ ಮೂಲಕ ಇಂಪೋರ್ಟ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಲೆಗಸಿ ಪ್ರಾಪ್ಗಳನ್ನು ಅದರ ಮೇಲೆ ಮ್ಯಾಪ್ ಮಾಡುತ್ತದೆ — ಉದಾಹರಣೆಗೆ `Button variant="primary"` ಎಂಬುದು ಕಿಟ್ನ `default` ಬಟನ್ (`--ci-button-primary-*`: ಲೈಟ್ನಲ್ಲಿ ವಿಲೋಮ ಸರ್ಫೇಸ್, ಡಾರ್ಕ್ನಲ್ಲಿ ತನ್ನ `--ci-color-accent-foreground` ಇಂಕ್ ಸಹಿತ ಆಕ್ಸೆಂಟ್), `danger` ಎಂಬುದು `destructive`, ಮತ್ತು `warning` ಎಂಬುದು `outline` ಜೊತೆಗೆ `.ci-button--warning` ವಿಸ್ತರಣೆ. `globals.css` ನ ಕೊನೆಯಲ್ಲಿರುವ `.ci-button--warning` ಮತ್ತು `.ci-badge[data-tone]` ನಿಯಮಗಳು (`@layer components`) ಕಿಟ್ ಕ್ಲಾಸ್ಗಳ ಮೇಲಿನ OmniRoute ವಿಸ್ತರಣೆಗಳಾಗಿವೆ. `tests/unit/ui/adapters/*.test.tsx` ಪ್ರತಿ ಅಡ್ಯಾಪ್ಟರ್ ಅನ್ನು ಪಿನ್ ಮಾಡುತ್ತದೆ.
-- **ಶೆಲ್.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ, ಅದು `src/shared/components/layouts/DashboardShell.tsx` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ: ಕಿಟ್ `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ಜೊತೆಗೆ `src/shared/components/Sidebar.tsx` ನಲ್ಲಿ OmniRoute ನ ನ್ಯಾವಿಗೇಶನ್ ಲಾಜಿಕ್. `#main-content` ಗೆ ಹೋಗುವ "ವಿಷಯಕ್ಕೆ ಹೋಗಿ" ಲಿಂಕ್ ಮೊದಲ ಫೋಕಸ್ ಮಾಡಬಹುದಾದ ಎಲಿಮೆಂಟ್ ಆಗಿದೆ. `src/shared/components/Header.tsx` ಕಿಟ್ `SidebarTrigger` (ಶೆಲ್ನ ಏಕೈಕ ಸೈಡ್ಬಾರ್ ಟಾಗಲ್), Keak `ProductSwitcher` ಮತ್ತು ಕಮ್ಯಾಂಡ್-ಪ್ಯಾಲೆಟ್ ಓಪನರ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ; `#main-content` ಒಳಗೆ ಯಾವುದೇ ಕಿಟ್ `PageHeader` (`.ci-page-header`) ಮೌಂಟ್ ಆಗದಿದ್ದಾಗ ಮಾತ್ರ ಅದು ರೂಟ್ ಶೀರ್ಷಿಕೆಯನ್ನು ತೋರಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ತನ್ನ ಸ್ವಂತ `PageHeader` ಹೊಂದಿರುವ ಪೇಜ್ ಒಂದೇ `h1` ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. `src/shared/components/CommandPalette.tsx` ಒಂದು ಕಿಟ್ `Dialog` ಆಗಿದೆ.
-- **ಐಕಾನ್ಗಳು.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ಹೆಸರನ್ನು (ಸ್ಕ್ರೀನ್ಗಳು ಬಳಸುವ Material Symbols ಶಬ್ದಕೋಶ) `ICON_MAP` (`src/shared/constants/iconMap.ts`) ಮೂಲಕ Lucide ಗ್ಲಿಫ್ಗೆ ಪರಿಹರಿಸುತ್ತದೆ. Material Symbols ಫಾಂಟ್ ಮತ್ತು ಪ್ಯಾಕೇಜ್ ಈಗ ಇಲ್ಲ: ಮ್ಯಾಪ್ನಲ್ಲಿ ಇಲ್ಲದ ಹೆಸರು ತಟಸ್ಥ ಪ್ಲೇಸ್ಹೋಲ್ಡರ್ ಗ್ಲಿಫ್ ಅನ್ನು (`data-icon-missing="true"`) ರೆಂಡರ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಪ್ರೊಡಕ್ಷನ್ ಹೊರಗೆ ಕನ್ಸೋಲ್ ಎಚ್ಚರಿಕೆಯನ್ನು ಲಾಗ್ ಮಾಡುತ್ತದೆ. `npm run gen:icon-map` ಬಳಕೆಯಲ್ಲಿರುವ ಆದರೆ ಮ್ಯಾಪ್ನಲ್ಲಿ ಇಲ್ಲದ ಹೆಸರುಗಳನ್ನು ಪ್ರಿಂಟ್ ಮಾಡುತ್ತದೆ (`tests/unit/icon-map-coverage.test.ts` Lucide ಐಕಾನ್ ಇಲ್ಲದ ಯಾವುದೇ ಹೆಸರಿನಲ್ಲಿ ಫೇಲ್ ಆಗುತ್ತದೆ; `tests/unit/icon-map-object-values.test.ts` ಲುಕಪ್ ಆಬ್ಜೆಕ್ಟ್ಗಳಲ್ಲಿ ಸಂಗ್ರಹಿತವಾದ ಹೆಸರುಗಳನ್ನು ಕವರ್ ಮಾಡುತ್ತದೆ); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ಲಿಟರಲ್ `<span className="material-symbols-outlined">` ಸ್ಪಾನ್ಗಳನ್ನು `<Icon>` ಗೆ ಪುನಃ ಬರೆಯುತ್ತದೆ.
-- **ಬ್ರಾಂಡ್.** `src/shared/components/OmniRouteLogo.tsx` ಕಿಟ್ ಅನ್ನು ರ್ಯಾಪ್ ಮಾಡುತ್ತದೆ: ಡೀಫಾಲ್ಟ್ ಎಕ್ಸ್ಪೋರ್ಟ್ `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ (ಇನ್ಲೈನ್ SVG, `basePath`-ಸೇಫ್) ಮತ್ತು `OmniRouteLockup` `ProductLockup product="omniroute"` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ (ಆಕ್ಸೆಸಿಬಲ್ ಹೆಸರು "Keak OmniRoute") ಅಥವಾ, ವೈಟ್-ಲೇಬಲ್ ಆಪರೇಟರ್ಗಳಿಗಾಗಿ, ಅವರ ಸ್ವಂತ `name`/`logoSrc`. ಪ್ರೊಡಕ್ಟ್-ಸ್ವಿಚರ್ ಗಮ್ಯಸ್ಥಾನಗಳು `src/shared/constants/keakProducts.ts` ನಲ್ಲಿ ಇವೆ (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). ಸ್ಟ್ಯಾಂಡ್ಎಲೋನ್ ಸ್ಕ್ರೀನ್ಗಳು — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ಮತ್ತು `src/shared/components/ErrorPageScaffold.tsx` — ಲಾಕಪ್ ಅನ್ನು ತೋರಿಸುತ್ತವೆ; `tests/unit/brand-pages-static.test.ts` ಅದನ್ನು ಕಾಪಾಡುತ್ತದೆ.
+- **ಕಿಟ್.** `packages/ui-kit/src` ಎಂಬುದು
+  `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಪಿನ್ ಮಾಡಲಾದ ಕಮಿಟ್ನ ಅಪ್ಸ್ಟ್ರೀಮ್ `src/` ನ ಬೈಟ್-ಫಾರ್-ಬೈಟ್ ನಕಲು (ಇದು ಪರವಾನಗಿ ಅನುಮತಿಯನ್ನೂ ದಾಖಲಿಸುತ್ತದೆ); `PATCHES.md` ಸ್ಥಳೀಯ
+  ಪ್ಯಾಚ್ಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ (ಯಾವುದೂ ಇಲ್ಲ). ಇದನ್ನು ಯಾವುದೇ ಬಿಲ್ಡ್ ಇಲ್ಲದೆ ಮೂಲವಾಗಿಯೇ ಬಳಸಲಾಗುತ್ತದೆ: `next.config.mjs` ಅದನ್ನು ಟ್ರಾನ್ಸ್ಪೈಲ್ ಮಾಡುತ್ತದೆ ಮತ್ತು
+  `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src` ಹಾಗೂ `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` ಎಂದು ಮ್ಯಾಪ್ ಮಾಡುತ್ತದೆ (`vitest.config.ts` ಮತ್ತು `vitest.mcp.config.ts` ಸಹ ಅದೇ ಅಲಿಯಾಸ್ ಅನ್ನು ಹೊಂದಿವೆ). ಕಿಟ್ ಕಾಂಪೊನೆಂಟ್ ಅನ್ನು ಅದರ
+  ಉಪಪಥದ ಮೂಲಕ ಆಮದು ಮಾಡಿ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ಎಂದಿಗೂ
+  `@omniroute/ui-kit` ಬ್ಯಾರೆಲ್ ಮೂಲಕ ಅಲ್ಲ: ಬ್ಯಾರೆಲ್ ಪ್ರತಿಯೊಂದು ಕಾಂಪೊನೆಂಟ್ನನ್ನೂ (ದಿನಾಂಕ ಆಯ್ಕೆಯ ಸಾಧನವನ್ನು ಒಳಗೊಂಡಂತೆ)
+  ಪ್ರತಿ ಆಮದುಗಾರನೊಳಗೆ ಎಳೆಯುತ್ತದೆ. ಕಿಟ್ ಸ್ಟೈಲ್ಶೀಟ್ `src/app/globals.css` ಮೂಲಕ ಪ್ರವೇಶಿಸುತ್ತದೆ
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, ಸಂಪೂರ್ಣ ಶೀಟ್: ಮೂಲ `ci-ui.css` ಜೊತೆಗೆ ಪ್ರತಿಯೊಂದು ಪ್ಯಾಟರ್ನ್ ಕುಟುಂಬ).
+- **ಟೋಕನ್ಗಳು.** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` ಟೋಕನ್ಗಳನ್ನು ಘೋಷಿಸುತ್ತದೆ; `src/app/globals.css`
+  ಅವುಗಳನ್ನು ಹಳೆಯ OmniRoute ಹೆಸರುಗಳಿಗೆ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) ಸಂಪರ್ಕಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಈಗಿರುವ `var(--color-*)` ಓದುವಿಕೆಗಳು ಮತ್ತು Tailwind
+  ಯುಟಿಲಿಟಿಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಲೇ ಇರುತ್ತವೆ. ಹೊಸ ಕೋಡ್ Tailwind ಯುಟಿಲಿಟಿಗಳನ್ನು (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ಅಥವಾ ಕಿಟ್ ಕ್ಲಾಸ್ಗಳನ್ನು ಬಳಸುತ್ತದೆ — ಎಂದಿಗೂ ಹೆಕ್ಸ್ ಮೌಲ್ಯವನ್ನಲ್ಲ
+  (`tests/unit/design-kit-bridge.test.ts` ಈ ಸಂಪರ್ಕವನ್ನು ಜಾರಿಗೊಳಿಸುತ್ತದೆ). `text-primary`,
+  `--text-color-primary` ಮೂಲಕ `--color-primary-ink` ಗೆ ರಿಸಲ್ವ್ ಆಗುತ್ತದೆ (ಲೈಟ್ನಲ್ಲಿ lime-800, ಡಾರ್ಕ್ನಲ್ಲಿ ಲೈಮ್ ಆಕ್ಸೆಂಟ್), ಆದ್ದರಿಂದ
+  `bg-primary`/`border-primary` ಲೈಮ್ ಸರ್ಫೇಸ್ ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುವಾಗ ಪ್ರಾಥಮಿಕ ಪಠ್ಯ ಓದಲು ಸುಲಭವಾಗಿರುತ್ತದೆ. ಚಾರ್ಟ್ ಸರಣಿಗಳು
+  `--color-chart-1` … `--color-chart-5` ಅನ್ನು ಬಳಸುತ್ತವೆ.
+- **ಥೀಮ್ಗಳು.** `<html className="ci-theme">` (`src/app/layout.tsx`) ಡಾಕ್ಯುಮೆಂಟ್ಗೆ ಕಿಟ್ ಥೀಮ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.
+  ಆದ್ಯತೆಯು `light`, `dark` ಅಥವಾ `system` ಆಗಿರುತ್ತದೆ (`src/shared/constants/appConfig.ts` ನಲ್ಲಿ `THEME_CONFIG.defaultTheme = "system"`;
+  `system`, `prefers-color-scheme` ಅನ್ನು ಅನುಸರಿಸುತ್ತದೆ). `src/store/themeStore.ts` ನಲ್ಲಿರುವ `applyTheme()` (ಹೈಡ್ರೇಶನ್ಗೂ ಮೊದಲು ರನ್ ಆಗುವ
+  `src/app/layout.tsx` ನ ಇನ್ಲೈನ್ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ಸ್ಕ್ರಿಪ್ಟ್ನಲ್ಲಿಯೂ ಇದೇ ರೀತಿಯಾಗಿ ಪ್ರತಿಬಿಂಬಿತವಾಗಿದೆ) `data-theme="dark"|"light"` ಅನ್ನು ಹೊಂದಿಸುತ್ತದೆ ಮತ್ತು `<html>` ನಲ್ಲಿನ `.dark` ಕ್ಲಾಸ್ ಅನ್ನು ಜೊತೆಯಲ್ಲೇ ಟಾಗಲ್ ಮಾಡುತ್ತದೆ.
+  ಕಿಟ್ನ ಡಾರ್ಕ್ ಟೋಕನ್ ಸೆಟ್ `data-theme="dark"` ಅನ್ನು ಆಧರಿಸಿದೆ (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoute ನ ಸ್ವಂತ ಡಾರ್ಕ್ ಓವರ್ರೈಡ್ಗಳು (`globals.css` ನಲ್ಲಿನ `.dark` ಬ್ಲಾಕ್) ಮತ್ತು ಹಳೆಯ Tailwind `dark:`
+  ಯುಟಿಲಿಟಿಗಳು `.dark` ಕ್ಲಾಸ್ ಅನ್ನು ಆಧರಿಸಿವೆ. ಯಾವುದೇ ಆಕ್ಸೆಂಟ್ ಬಣ್ಣದ ಪೂರ್ವನಿಗದಿಗಳು ಇಲ್ಲ: ಆಕ್ಸೆಂಟ್ ಯಾವಾಗಲೂ
+  ಕಿಟ್ನಿಂದ ಬರುತ್ತದೆ ಮತ್ತು ಹಳೆಯ ಬಿಲ್ಡ್ನಿಂದ ಉಳಿಸಲಾದ ಪೂರ್ವನಿಗದಿಯನ್ನು ಸ್ಟೋರ್ ಲೋಡ್ ಆಗುವಾಗ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ.
+- **ಕಾಂಪೊನೆಂಟ್ಗಳು (ಅಡಾಪ್ಟರ್ಗಳು).** `src/shared/components/index.tsx`, OmniRoute ಕಾಂಪೊನೆಂಟ್ API ಅನ್ನು (ಅದೇ
+  ಹೆಸರುಗಳು, ಡೀಫಾಲ್ಟ್ ಎಕ್ಸ್ಪೋರ್ಟ್ಗಳು ಮತ್ತು ಪ್ರಾಪ್ಗಳು) ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ಅದರ ಹಿಂದಿರುವ ಪ್ರಿಮಿಟಿವ್ಗಳು ಕಿಟ್ ಮೇಲಿನ ಅಡಾಪ್ಟರ್ಗಳಾಗಿವೆ: ಫಾರ್ಮ್ಗಳು
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ಓವರ್ಲೇಗಳು ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  ರಚನೆ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ಮತ್ತು ಟೇಬಲ್ಗಳು
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ಅಡಾಪ್ಟರ್ ಕಿಟ್
+  ಕಾಂಪೊನೆಂಟ್ ಅನ್ನು ಉಪಪಥದ ಮೂಲಕ ಆಮದು ಮಾಡಿ, ಹಳೆಯ ಪ್ರಾಪ್ಗಳನ್ನು ಅದಕ್ಕೆ ಮ್ಯಾಪ್ ಮಾಡುತ್ತದೆ — ಉದಾಹರಣೆಗೆ `Button variant="primary"` ಎಂಬುದು
+  ಕಿಟ್ನ `default` ಬಟನ್ (`--ci-button-primary-*`: ಲೈಟ್ನಲ್ಲಿ ಇನ್ವರ್ಸ್ ಸರ್ಫೇಸ್, ಡಾರ್ಕ್ನಲ್ಲಿ ಅದರ
+  `--ci-color-accent-foreground` ಇಂಕ್ನೊಂದಿಗಿನ ಆಕ್ಸೆಂಟ್), `danger` ಎಂಬುದು `destructive` ಮತ್ತು `warning` ಎಂಬುದು `outline` ಜೊತೆಗೆ
+  `.ci-button--warning` ವಿಸ್ತರಣೆ. `globals.css` ನ ಕೊನೆಯಲ್ಲಿರುವ (`@layer components`) `.ci-button--warning` ಮತ್ತು `.ci-badge[data-tone]` ನಿಯಮಗಳು
+  ಕಿಟ್ ಕ್ಲಾಸ್ಗಳ ಮೇಲಿನ OmniRoute ವಿಸ್ತರಣೆಗಳಾಗಿವೆ.
+  `tests/unit/ui/adapters/*.test.tsx` ಪ್ರತಿಯೊಂದು ಅಡಾಪ್ಟರ್ ಅನ್ನು ಸ್ಥಿರಗೊಳಿಸುತ್ತದೆ.
+- **ಶೆಲ್.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ; ಅದು
+  `src/shared/components/layouts/DashboardShell.tsx` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ: ಕಿಟ್ನ `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ಜೊತೆಗೆ `src/shared/components/Sidebar.tsx` ನಲ್ಲಿ OmniRoute ನ ನ್ಯಾವಿಗೇಷನ್ ಲಾಜಿಕ್.
+  `#main-content` ಗೆ ಕರೆದೊಯ್ಯುವ "ವಿಷಯಕ್ಕೆ ತೆರಳಿ" ಲಿಂಕ್ ಮೊದಲ ಫೋಕಸ್ ಮಾಡಬಹುದಾದ
+  ಎಲಿಮೆಂಟ್ ಆಗಿದೆ. `src/shared/components/Header.tsx`, ಕಿಟ್ನ `SidebarTrigger` (ಶೆಲ್ನ ಏಕೈಕ ಸೈಡ್ಬಾರ್
+  ಟಾಗಲ್), Keak `ProductSwitcher` ಮತ್ತು ಕಮಾಂಡ್-ಪ್ಯಾಲೆಟ್ ಓಪನರ್ ಅನ್ನು ಹೊಂದಿದೆ; `#main-content` ಒಳಗೆ ಯಾವುದೇ ಕಿಟ್ `PageHeader` (`.ci-page-header`) ಮೌಂಟ್ ಆಗಿಲ್ಲದಾಗ ಮಾತ್ರ
+  ಇದು ರೂಟ್ ಶೀರ್ಷಿಕೆಯನ್ನು ತೋರಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ತನ್ನದೇ ಆದ
+  `PageHeader` ಹೊಂದಿರುವ ಪುಟವು ಒಂದೇ `h1` ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. `src/shared/components/CommandPalette.tsx` ಒಂದು ಕಿಟ್ `Dialog` ಆಗಿದೆ.
+- **ಐಕಾನ್ಗಳು.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`), ಪರದೆಯು ಬಳಸುವ Material Symbols ಶಬ್ದಕೋಶದಲ್ಲಿನ ಹೆಸರನ್ನು
+  `ICON_MAP` (`src/shared/constants/iconMap.ts`) ಮೂಲಕ Lucide ಗ್ಲಿಫ್ಗೆ ರಿಸಲ್ವ್ ಮಾಡುತ್ತದೆ. Material Symbols ಫಾಂಟ್ ಮತ್ತು ಪ್ಯಾಕೇಜ್ ಅನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ: ಮ್ಯಾಪ್ನಲ್ಲಿ ಇಲ್ಲದ ಹೆಸರು
+  ತಟಸ್ಥ ಪ್ಲೇಸ್ಹೋಲ್ಡರ್ ಗ್ಲಿಫ್ ಅನ್ನು (`data-icon-missing="true"`) ರೆಂಡರ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಪ್ರೊಡಕ್ಷನ್ ಹೊರಗೆ ಕನ್ಸೋಲ್ ಎಚ್ಚರಿಕೆಯನ್ನು ಲಾಗ್ ಮಾಡುತ್ತದೆ.
+  `npm run gen:icon-map`, ಮ್ಯಾಪ್ನಲ್ಲಿ ಇಲ್ಲದ ಬಳಕೆಯಲ್ಲಿರುವ ಹೆಸರುಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
+  (`tests/unit/icon-map-coverage.test.ts`, Lucide ಐಕಾನ್ ಇಲ್ಲದ ಯಾವುದೇ ಹೆಸರಿನ ಮೇಲೆ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ;
+  `tests/unit/icon-map-object-values.test.ts`, ಲುಕ್ಅಪ್ ಆಬ್ಜೆಕ್ಟ್ಗಳಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ ಹೆಸರುಗಳನ್ನು ಪರೀಕ್ಷಿಸುತ್ತದೆ);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`, ಲಿಟರಲ್
+  `<span className="material-symbols-outlined">` ಸ್ಪ್ಯಾನ್ಗಳನ್ನು `<Icon>` ಆಗಿ ಮರುಬರೆಯುತ್ತದೆ.
+- **ಬ್ರ್ಯಾಂಡ್.** `src/shared/components/OmniRouteLogo.tsx` ಕಿಟ್ ಅನ್ನು ಸುತ್ತುವರೆಯುತ್ತದೆ: ಡೀಫಾಲ್ಟ್ ಎಕ್ಸ್ಪೋರ್ಟ್ `OmniRouteLogo`,
+  `ProductIcon product="omniroute" variant="glyph"` ಅನ್ನು (ಇನ್ಲೈನ್ SVG, `basePath`-ಸುರಕ್ಷಿತ) ರೆಂಡರ್ ಮಾಡುತ್ತದೆ ಮತ್ತು
+  `OmniRouteLockup`, `ProductLockup product="omniroute"` ಅನ್ನು (ಆಕ್ಸೆಸಿಬಲ್ ಹೆಸರು "Keak OmniRoute") ಅಥವಾ ವೈಟ್-ಲೇಬಲ್ ಆಪರೇಟರ್ಗಳಿಗಾಗಿ
+  ಅವರದೇ ಆದ `name`/`logoSrc` ಅನ್ನು ರೆಂಡರ್ ಮಾಡುತ್ತದೆ. ಪ್ರಾಡಕ್ಟ್-ಸ್ವಿಚರ್ ಗಮ್ಯಸ್ಥಾನಗಳು
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ನಲ್ಲಿ ಇವೆ. ಸ್ವತಂತ್ರ
+  ಪರದೆಗಳು — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` ಮತ್ತು `src/shared/components/ErrorPageScaffold.tsx`
+  — ಲಾಕ್ಅಪ್ ಅನ್ನು ತೋರಿಸುತ್ತವೆ; `tests/unit/brand-pages-static.test.ts` ಇದನ್ನು ರಕ್ಷಿಸುತ್ತದೆ.
 
 ## 2. ನಿಯಮಗಳು
 

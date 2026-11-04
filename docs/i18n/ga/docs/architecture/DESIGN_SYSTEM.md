@@ -8,13 +8,71 @@
 
 ## 1. Cá bhfuil rudaí suite
 
-- **Kit.** Is cóip ghiotán-ar-ghiotán de `src/` an upstream é `packages/ui-kit/src` ag an gcommit atá pionnaithe i `packages/ui-kit/UPSTREAM.md` (a thaifeadann údarú an cheadúnais freisin); liostaíonn `PATCHES.md` na paistí áitiúla (neamhní). Ídítear é mar fhoinse, gan tógáil ar bith: traschuireann `next.config.mjs` é, agus mapeálann `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` agus `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (iompraíonn `vitest.config.ts` agus `vitest.mcp.config.ts` an t-ailias céanna). Iompórtáil comhpháirt den kit trína fochonair (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), riamh trí bhairille `@omniroute/ui-kit`: tarraingíonn an bairille gach comhpháirt (an roghnóir dáta san áireamh) isteach i ngach iompórtálaí. Tagann stílbhileog an kit isteach trí `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Comharthaí.** Fógraíonn `packages/ui-kit/src/ci-tokens.css` na comharthaí `--ci-*`; déanann `src/app/globals.css` iad a dhroicheadú chuig seanainmneacha OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), ionas go leanann na léamha reatha `var(--color-*)` agus fóntais Tailwind ag obair. Úsáideann cód nua fóntais Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) nó ranganna an kit — riamh luach hex (forfheidhmíonn `tests/unit/design-kit-bridge.test.ts` an droichead). Réitíonn `text-primary` go `--color-primary-ink` trí `--text-color-primary` (lime-800 sa téama geal, an t-aiceant lime sa téama dorcha), ionas go bhfanann an príomhthéacs inléite fad is a choinníonn `bg-primary`/`border-primary` an dromchla lime. Úsáideann sraitheanna na gcairteacha `--color-chart-1` … `--color-chart-5`.
-- **Téamaí.** Roghaíonn `<html className="ci-theme">` (`src/app/layout.tsx`) an doiciméad isteach i dtéama an kit. Is í an rogha ná `light`, `dark` nó `system` (`THEME_CONFIG.defaultTheme = "system"` i `src/shared/constants/appConfig.ts`; leanann `system` `prefers-color-scheme`). Socraíonn `applyTheme()` i `src/store/themeStore.ts` (a bhfuil scáthán aici sa script tosaithe inlíne i `src/app/layout.tsx`, a ritheann roimh an hiodráitiú) `data-theme="dark"|"light"` agus scoránaíonn sí an rang `.dark` ar `<html>` san am céanna. Tá tacar comharthaí dorcha an kit eochairthe ar `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); tá sárúcháin dhorcha OmniRoute féin (an bloc `.dark` i `globals.css`) agus seanfhóntais `dark:` Tailwind eochairthe ar an rang `.dark`. Níl réamhshocruithe dath aiceant ar bith ann: tagann an t-aiceant ón kit i gcónaí, agus scartáiltear réamhshocrú buanaithe ó thógáil níos sine nuair a lódálann an stóras.
-- **Comhpháirteanna (oiriúntóirí).** Coinníonn `src/shared/components/index.tsx` API comhpháirte OmniRoute (na hainmneacha céanna, na heaspórtálacha réamhshocraithe agus na props céanna), agus is oiriúntóirí os cionn an kit iad na bunghnéithe atá taobh thiar de: foirmeacha (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), forleaganacha agus aiseolas (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), struchtúr (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) agus táblaí (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Iompórtálann oiriúntóir comhpháirt an kit trí fhochonair agus mapeálann sé na sean-props uirthi — mar shampla, is é `Button variant="primary"` cnaipe `default` an kit (`--ci-button-primary-*`: an dromchla inbhéartach sa téama geal, an t-aiceant lena dhúch `--ci-color-accent-foreground` sa téama dorcha), is `destructive` é `danger`, agus is é `warning` ná `outline` móide an síneadh `.ci-button--warning`. Is síntí OmniRoute os cionn ranganna an kit iad na rialacha `.ci-button--warning` agus `.ci-badge[data-tone]` ag deireadh `globals.css` (`@layer components`). Pionnálaíonn `tests/unit/ui/adapters/*.test.tsx` gach oiriúntóir.
-- **Blaosc.** Rindreálann `src/app/(dashboard)/layout.tsx` `DashboardLayout`, a rindreálann `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` / `SidebarInset` an kit (`packages/ui-kit/src/sidebar.tsx`), le loighic nascleanúna OmniRoute i `src/shared/components/Sidebar.tsx`. Is é nasc "léim go dtí an t-ábhar" chuig `#main-content` an chéad eilimint infhócasaithe. Tá `SidebarTrigger` an kit (an t-aon scoránaí barra taoibh atá sa bhlaosc), `ProductSwitcher` Keak agus oscailtóir na hordphailéide i `src/shared/components/Header.tsx`; ní thaispeánann sé teideal an róid ach nuair nach bhfuil `PageHeader` (`.ci-page-header`) ar bith den kit feistithe taobh istigh de `#main-content`, ionas go mbeidh `h1` amháin ag leathanach a bhfuil a `PageHeader` féin aige. Is `Dialog` den kit é `src/shared/components/CommandPalette.tsx`.
-- **Deilbhíní.** Réitíonn `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) an t-ainm (an foclóir Material Symbols a úsáideann na scáileáin) trí `ICON_MAP` (`src/shared/constants/iconMap.ts`) go glif Lucide. Tá cló Material Symbols agus a phacáiste imithe: rindreálann ainm atá ar iarraidh ón mapa glif ionaid neodrach (`data-icon-missing="true"`) agus logálann sé rabhadh consóil lasmuigh den táirgeadh. Priontálann `npm run gen:icon-map` na hainmneacha atá in úsáid ach ar iarraidh ón mapa (teipeann ar `tests/unit/icon-map-coverage.test.ts` má tá ainm ar bith ann gan deilbhín Lucide; clúdaíonn `tests/unit/icon-map-object-values.test.ts` ainmneacha atá stóráilte i réada cuardaigh); athscríobhann `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` na spanna litriúla `<span className="material-symbols-outlined">` go `<Icon>`.
-- **Branda.** Timfhilleann `src/shared/components/OmniRouteLogo.tsx` an kit: rindreálann an t-easpórtáil réamhshocraithe `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (SVG inlíne, sábháilte ó thaobh `basePath` de) agus rindreálann `OmniRouteLockup` `ProductLockup product="omniroute"` (ainm inrochtana "Keak OmniRoute") nó, d'oibreoirí lipéad bháin, a `name`/`logoSrc` féin. Tá ceann scríbe an aistritheora táirgí le fáil i `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Taispeánann na scáileáin neamhspleácha — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` agus `src/shared/components/ErrorPageScaffold.tsx` — an lockup; déanann `tests/unit/brand-pages-static.test.ts` é a chosaint.
+- **Trealamh.** Is cóip beart ar bheart é `packages/ui-kit/src` den `src/` réamhtheachtach ag an gcur i bhfeidhm atá pionnáilte in
+  `packages/ui-kit/UPSTREAM.md` (ina dtaifeadtar údarú an cheadúnais freisin); liostaíonn `PATCHES.md` paistí áitiúla
+  (níl aon cheann ann). Úsáidtear é mar chód foinseach, gan tógáil: déanann `next.config.mjs` é a thras-tiúomsú, agus
+  mapálann `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` agus `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (tá an t-ailias céanna in `vitest.config.ts` agus `vitest.mcp.config.ts`). Iompórtáil
+  comhpháirt trealaimh trína fochonair (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), agus ná déan
+  é riamh trí bhairille `@omniroute/ui-kit`: tarraingíonn an bairille gach comhpháirt (an roghnóir dáta san áireamh)
+  isteach i ngach iompórtálaí. Tagann stílbhileog an trealaimh isteach trí `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, an bhileog iomlán: an croí-`ci-ui.css` móide gach fine patrún).
+- **Teaghráin.** Fógraíonn `packages/ui-kit/src/ci-tokens.css` na teaghráin `--ci-*`; déanann `src/app/globals.css`
+  iad a nascadh le seanainmneacha OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), ionas go leanfaidh na léamha `var(--color-*)` agus fóntais Tailwind
+  de bheith ag obair. Úsáideann cód nua fóntais Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) nó aicmí trealaimh — agus ní úsáideann sé luach heicsidheachúlach riamh
+  (cuireann `tests/unit/design-kit-bridge.test.ts` an nasc i bhfeidhm). Réitíonn `text-primary` go
+  `--color-primary-ink` trí `--text-color-primary` (aol-800 sa téama geal, an bhéim aoil sa téama dorcha), ionas
+  go bhfanann téacs príomhúil soléite agus go gcoinníonn `bg-primary`/`border-primary` an dromchla aoil. Úsáideann sraitheanna cairte
+  `--color-chart-1` … `--color-chart-5`.
+- **Téamaí.** Cuireann `<html className="ci-theme">` (`src/app/layout.tsx`) an cháipéis isteach i dtéama an trealaimh.
+  Is é `light`, `dark` nó `system` an sainrogha (`THEME_CONFIG.defaultTheme = "system"` in
+  `src/shared/constants/appConfig.ts`; leanann `system` `prefers-color-scheme`). Socraíonn `applyTheme()` in
+  `src/store/themeStore.ts` (agus macasamhail de sa script tosaithe inlíne in `src/app/layout.tsx`, a ritheann
+  roimh hiodráitiú) `data-theme="dark"|"light"` agus scoránaíonn sé an aicme `.dark` ar `<html>` ag an am céanna.
+  Tá tacar teaghrán dorcha an trealaimh eochraithe ar `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  tá sáruithe dorcha OmniRoute féin (an bloc `.dark` in `globals.css`) agus seanfhóntais Tailwind `dark:`
+  eochraithe ar an aicme `.dark`. Níl aon réamhshocruithe datha béime ann: tagann an bhéim ón
+  trealamh i gcónaí, agus baintear réamhshocrú marthanach ó leagan níos sine nuair a lódálann an stór é.
+- **Comhpháirteanna (cuibheoirí).** Coinníonn `src/shared/components/index.tsx` API comhpháirte OmniRoute (na
+  hainmneacha, easpórtálacha réamhshocraithe agus airíonna céanna), agus is cuibheoirí thar an trealamh iad na primitíbheanna taobh thiar de: foirmeacha
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), forleagain agus aiseolas
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  struchtúr (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) agus táblaí
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Iompórtálann cuibheoir comhpháirt an trealaimh
+  trí fhochonair agus mapálann sé na seanairíonna uirthi — mar shampla, is é `Button variant="primary"` cnaipe
+  `default` an trealaimh (`--ci-button-primary-*`: an dromchla inbhéartach sa téama geal, an bhéim lena
+  dhúch `--ci-color-accent-foreground` sa téama dorcha), is é `danger` `destructive`, agus is é `warning` `outline` móide
+  an iarmhír `.ci-button--warning`. Is iarmhíreanna OmniRoute iad na rialacha `.ci-button--warning` agus `.ci-badge[data-tone]`
+  ag deireadh `globals.css` (`@layer components`) ar bharr aicmí an trealaimh.
+  Pionnálann `tests/unit/ui/adapters/*.test.tsx` gach cuibheoir.
+- **Blaosc.** Rindreálann `src/app/(dashboard)/layout.tsx` `DashboardLayout`, a rindreálann
+  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
+  `SidebarInset` an trealaimh (`packages/ui-kit/src/sidebar.tsx`), agus loighic nascleanúna OmniRoute in
+  `src/shared/components/Sidebar.tsx`. Is é nasc "léim chuig an inneachar" chuig `#main-content` an chéad eilimint
+  ar féidir fócas a chur uirthi. Tá `SidebarTrigger` an trealaimh (an t-aon scorán barra taoibh sa bhlaosc),
+  `ProductSwitcher` Keak agus oscailteoir phailéad na n-orduithe in `src/shared/components/Header.tsx`; ní thaispeánann sé
+  teideal an bhealaigh ach amháin nuair nach bhfuil aon `PageHeader` (`.ci-page-header`) de chuid an trealaimh feistithe taobh istigh de
+  `#main-content`, ionas nach mbeidh ach `h1` amháin ar leathanach a bhfuil a `PageHeader` féin aige.
+  Is `Dialog` de chuid an trealaimh é `src/shared/components/CommandPalette.tsx`.
+- **Deilbhíní.** Réitíonn `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) an t-ainm (stór focal
+  Material Symbols a úsáideann na scáileáin) trí `ICON_MAP` (`src/shared/constants/iconMap.ts`) go glife
+  Lucide. Tá cló agus pacáiste Material Symbols bainte: rindreálann ainm atá ar iarraidh ón mapa glife ionadchoinneála
+  neodrach (`data-icon-missing="true"`) agus logálann sé rabhadh consóil lasmuigh den táirgeadh.
+  Priontálann `npm run gen:icon-map` na hainmneacha atá in úsáid ach atá ar iarraidh ón mapa
+  (teipeann `tests/unit/icon-map-coverage.test.ts` ar aon ainm gan deilbhín Lucide;
+  clúdaíonn `tests/unit/icon-map-object-values.test.ts` ainmneacha atá stóráilte i réada cuardaigh);
+  athscríobhann `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` réisí litriúla
+  `<span className="material-symbols-outlined">` mar `<Icon>`.
+- **Branda.** Timfhilleann `src/shared/components/OmniRouteLogo.tsx` an trealamh: rindreálann an t-easpórtáil réamhshocraithe `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"` (SVG inlíne, sábháilte do `basePath`) agus
+  rindreálann `OmniRouteLockup` `ProductLockup product="omniroute"` (ainm inrochtana "Keak OmniRoute") nó, d'oibreoirí
+  lipéid bháin, a `name`/`logoSrc` féin. Tá cinn scríbe an lascaire táirge in
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Taispeánann na scáileáin
+  neamhspleácha — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` agus `src/shared/components/ErrorPageScaffold.tsx`
+  — an glasáil; cosnaíonn `tests/unit/brand-pages-static.test.ts` í.
 
 ## 2. Rialacha
 

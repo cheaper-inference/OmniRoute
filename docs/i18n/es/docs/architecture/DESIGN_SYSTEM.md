@@ -6,78 +6,15 @@
 
 > **Estado:** El tablero está construido sobre el** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), suministrado como el espacio de trabajo `packages/ui-kit` (`@omniroute/ui-kit`; la instantánea ascendente está fijada en `packages/ui-kit/UPSTREAM.md` y protegida por `npm run check:ui-kit-snapshot`). La luz es el tema canónico; la preferencia predeterminada es `system`. El acento es lima Keak (`--ci-color-accent`). Switzer es la única familia para UI, texto de visualización y código (`--ci-font-ui`; `--ci-font-display` y `--ci-font-mono` lo resuelven), autohospedado por el propio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Las escrituras suizas carecen de clasificación glifo por glifo (`src/app/globals.css`): Inter para cirílico, griego y vietnamita y, sólo bajo `html[dir="rtl"]`, Vazirmatn para escritura árabe. Cada ícono es un glifo Lucide.
 
-## 1. Dónde se encuentran las cosas
+## 1. Donde viven las cosas
 
-- **Kit.** `packages/ui-kit/src` es una copia byte a byte del `src/` upstream en el commit fijado en
-  `packages/ui-kit/UPSTREAM.md` (que también registra la autorización de licencia); `PATCHES.md` enumera
-  los parches locales (ninguno). Se consume como fuente, sin compilación: `next.config.mjs` lo transpila, y
-  `tsconfig.json` mapea `@omniroute/ui-kit` → `packages/ui-kit/src` y `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` y `vitest.mcp.config.ts` llevan el mismo alias). Importa un
-  componente del kit por su subruta (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nunca a
-  través del barrel `@omniroute/ui-kit`: el barrel arrastra todos los componentes (incluido el selector de
-  fecha) a cada importador. La hoja de estilos del kit entra a través de `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokens.** `packages/ui-kit/src/ci-tokens.css` declara los tokens `--ci-*`; `src/app/globals.css`
-  hace de puente hacia los nombres heredados de OmniRoute (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), de modo que las lecturas
-  existentes de `var(--color-*)` y las utilidades de Tailwind sigan funcionando. El código nuevo usa las
-  utilidades de Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`,
-  `bg-success-bg`, `bg-chart-1`…) o clases del kit — nunca un valor hexadecimal
-  (`tests/unit/design-kit-bridge.test.ts` hace cumplir el puente). `text-primary` resuelve a
-  `--color-primary-ink` a través de `--text-color-primary` (lime-800 en claro, el acento lima en oscuro),
-  por lo que el texto primario sigue siendo legible mientras `bg-primary`/`border-primary` mantienen la
-  superficie lima. Las series de gráficos usan `--color-chart-1` … `--color-chart-5`.
-- **Temas.** `<html className="ci-theme">` (`src/app/layout.tsx`) hace que el documento adopte el tema del
-  kit. La preferencia es `light`, `dark` o `system` (`THEME_CONFIG.defaultTheme = "system"` en
-  `src/shared/constants/appConfig.ts`; `system` sigue a `prefers-color-scheme`). `applyTheme()` en
-  `src/store/themeStore.ts` (reflejado por el script de arranque en línea en `src/app/layout.tsx`, que se
-  ejecuta antes de la hidratación) establece `data-theme="dark"|"light"` y alterna la clase `.dark` en
-  `<html>` a la vez. El conjunto de tokens oscuros del kit se activa con `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); las sobreescrituras oscuras propias de OmniRoute (el bloque
-  `.dark` en `globals.css`) y las utilidades heredadas de Tailwind `dark:` se activan con la clase
-  `.dark`. No existen preajustes de color de acento: el acento siempre proviene del kit, y un preajuste
-  persistido de una compilación anterior se descarta cuando se carga el store.
-- **Componentes (adaptadores).** `src/shared/components/index.tsx` mantiene la API de componentes de
-  OmniRoute (mismos nombres, exportaciones por defecto y props), y las primitivas detrás de ella son
-  adaptadores sobre el kit: formularios (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
-  `Badge`, `Card`), superposiciones y retroalimentación (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), estructura (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`) y tablas (`DataTable`, `FilterBar`, `ColumnToggle`,
-  `FilterPills`, `PresetSlider`). Un adaptador importa el componente del kit por subruta y mapea las props
-  heredadas sobre él — por ejemplo, `Button variant="primary"` es el botón `default` del kit
-  (`--ci-button-primary-*`: la superficie inversa en claro, el acento con su tinta
-  `--ci-color-accent-foreground` en oscuro), `danger` es `destructive`, y `warning` es `outline` más la
-  extensión `.ci-button--warning`. Las reglas `.ci-button--warning` y `.ci-badge[data-tone]` al final de
-  `globals.css` (`@layer components`) son extensiones de OmniRoute sobre las clases del kit.
-  `tests/unit/ui/adapters/*.test.tsx` fija cada adaptador.
-- **Shell.** `src/app/(dashboard)/layout.tsx` renderiza `DashboardLayout`, que renderiza
-  `src/shared/components/layouts/DashboardShell.tsx`: el `SidebarProvider` / `Sidebar` / `SidebarInset`
-  del kit (`packages/ui-kit/src/sidebar.tsx`), con la lógica de navegación de OmniRoute en
-  `src/shared/components/Sidebar.tsx`. Un enlace "saltar al contenido" hacia `#main-content` es el primer
-  elemento enfocable. `src/shared/components/Header.tsx` contiene el `SidebarTrigger` del kit (el único
-  conmutador de la barra lateral del shell), el `ProductSwitcher` de Keak y el abridor de la paleta de
-  comandos; muestra el título de la ruta solo mientras no haya ningún `PageHeader` del kit
-  (`.ci-page-header`) montado dentro de `#main-content`, de modo que una página con su propio
-  `PageHeader` tiene un único `h1`. `src/shared/components/CommandPalette.tsx` es un `Dialog` del kit.
-- **Iconos.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resuelve el nombre (el
-  vocabulario de Material Symbols que usan las pantallas) a través de `ICON_MAP`
-  (`src/shared/constants/iconMap.ts`) a un glifo de Lucide. La fuente y el paquete de Material Symbols han
-  desaparecido: un nombre que falte en el mapa renderiza un glifo neutral de marcador de posición
-  (`data-icon-missing="true"`) y registra una advertencia en la consola fuera de producción.
-  `npm run gen:icon-map` imprime los nombres en uso que faltan en el mapa
-  (`tests/unit/icon-map-coverage.test.ts` falla ante cualquier nombre sin un icono de Lucide;
-  `tests/unit/icon-map-object-values.test.ts` cubre los nombres almacenados en objetos de búsqueda);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` reescribe los spans literales
-  `<span className="material-symbols-outlined">` a `<Icon>`.
-- **Marca.** `src/shared/components/OmniRouteLogo.tsx` envuelve el kit: la exportación por defecto
-  `OmniRouteLogo` renderiza `ProductIcon product="omniroute" variant="glyph"` (SVG en línea, seguro con
-  `basePath`) y `OmniRouteLockup` renderiza `ProductLockup product="omniroute"` (nombre accesible "Keak
-  OmniRoute") o, para operadores de marca blanca, su propio `name`/`logoSrc`. Los destinos del conmutador
-  de productos residen en `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`,
-  `KEAK_ACTIVE_PRODUCT`). Las pantallas independientes — `src/app/login/page.tsx`,
-  `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`,
-  `src/app/not-found.tsx` y `src/shared/components/ErrorPageScaffold.tsx` — muestran el lockup;
-  `tests/unit/brand-pages-static.test.ts` lo protege.
+- **Equipo.** `packages/ui-kit/src` es una copia byte por byte del `src/` ascendente en la confirmación fijada en `packages/ui-kit/UPSTREAM.md` (que también registra la autorización de la licencia); `PATCHES.md` enumera parches locales (ninguno). Se consume como fuente, sin compilación: `next.config.mjs` lo transpila y `tsconfig.json` asigna `@omniroute/ui-kit` → `packages/ui-kit/src` y `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` y `vitest.mcp.config.ts` llevan el mismo alias). Importe un componente del kit por su subruta (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nunca a través del barril `@omniroute/ui-kit` : el barril introduce todos los componentes (incluido el selector de fecha) en cada importador. La hoja de estilo del kit ingresa a través de `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, la hoja completa: el `ci-ui.css` principal más cada familia de patrones).
+- **Fichas.** `packages/ui-kit/src/ci-tokens.css` declara los tokens `--ci-*` ; `src/app/globals.css` los une a los nombres OmniRoute heredados (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), por lo que las utilidades `var(--color-*)` reads y Tailwind existentes siguen funcionando. El nuevo código utiliza las utilidades Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) o clases de kit — nunca un valor hexadecimal (`tests/unit/design-kit-bridge.test.ts` impone el puente). `text-primary` se resuelve de `--color-primary-ink` a `--text-color-primary` (lime-800 en claro, el acento lima en oscuro), por lo que el texto principal permanece legible mientras `bg-primary`/`border-primary` mantiene la superficie lima. Las series de gráficos utilizan `--color-chart-1` … `--color-chart-5`.
+- **Temas.** `<html className="ci-theme">` (`src/app/layout.tsx`) opta por el documento en el tema del kit. La preferencia es `light`, `dark` o `system` (`THEME_CONFIG.defaultTheme = "system"` en `src/shared/constants/appConfig.ts`; `system` sigue `prefers-color-scheme`). `applyTheme()` en `src/store/themeStore.ts` (reflejado por el script de arranque en línea en `src/app/layout.tsx`, que se ejecuta antes de la hidratación) establece `data-theme="dark"|"light"` y alterna la clase `.dark` en `<html>`. El conjunto de fichas oscuras del kit está codificado en `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); Las propias anulaciones oscuras de OmniRoute(el bloque `.dark` en `globals.css`) y la clave de utilidades Tailwind `dark:` heredada en la clase `.dark`. No hay ajustes preestablecidos de color de acento: el acento siempre proviene del kit, y un ajuste preestablecido persistente de una versión anterior se elimina cuando se carga la tienda.
+- **Componentes (adaptadores).** `src/shared/components/index.tsx` mantiene el componente OmniRoute API (los mismos nombres, exportaciones y accesorios predeterminados), y las primitivas detrás de él son adaptadores sobre el kit: formularios (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), superposiciones y retroalimentación (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), estructura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) y tablas (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Un adaptador importa el componente del kit por ruta secundaria y asigna los accesorios heredados en él — por ejemplo, `Button variant="primary"` es el botón `default` del kit (`--ci-button-primary-*`: la superficie inversa en luz, el acento con su tinta `--ci-color-accent-foreground` en oscuro), `danger` es `destructive` y `warning` es `outline` más la extensión `.ci-button--warning`. Las reglas `.ci-button--warning` y `.ci-badge[data-tone]` al final de `globals.css` (`@layer components`) son extensiones OmniRoute además de las clases del kit. pin `tests/unit/ui/adapters/*.test.tsx` en cada adaptador.
+- **Caparazón.** `src/app/(dashboard)/layout.tsx` representa `DashboardLayout`, que representa `src/shared/components/layouts/DashboardShell.tsx`: el kit `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), con la lógica de navegación de OmniRoute en `src/shared/components/Sidebar.tsx`. Un enlace "saltar al contenido" a `#main-content` es el primer elemento enfocable. `src/shared/components/Header.tsx` contiene el kit `SidebarTrigger` (el único conmutador de barra lateral del shell), el Keak `ProductSwitcher` y el abridor de paleta de comandos; muestra el título de la ruta sólo mientras no hay ningún kit `PageHeader` (`.ci-page-header`) montado dentro de `#main-content`, por lo que una página con su propio `PageHeader` tiene un único `h1`. `src/shared/components/CommandPalette.tsx` es un kit `Dialog`.
+- **Iconos.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resuelve el nombre (el vocabulario de símbolos materiales que usan las pantallas) a través de `ICON_MAP` (`src/shared/constants/iconMap.ts`) en un glifo de Lucide. La fuente y el paquete Material Symbols desaparecieron: un nombre que falta en el mapa representa un glifo de marcador de posición neutral (`data-icon-missing="true"`) y registra una advertencia en la consola fuera de producción. `npm run gen:icon-map` imprime los nombres en uso que faltan en el mapa (`tests/unit/icon-map-coverage.test.ts` falla en cualquier nombre sin un ícono de Lucide; `tests/unit/icon-map-object-values.test.ts` cubre los nombres almacenados en objetos de búsqueda); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` reescribe los tramos `<span className="material-symbols-outlined">` literales a `<Icon>`.
+- **Marca.** `src/shared/components/OmniRouteLogo.tsx` envuelve el kit: la exportación predeterminada `OmniRouteLogo` representa `ProductIcon product="omniroute" variant="glyph"` ( SVG en línea, `basePath` -safe) y `OmniRouteLockup` representa `ProductLockup product="omniroute"` (nombre accesible "Keak OmniRoute") o, para operadores de marca blanca, su propio `name`/`logoSrc`. Los destinos de cambio de productos se encuentran en `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Las pantallas independientes — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` y `src/shared/components/ErrorPageScaffold.tsx` — muestran el bloqueo; `tests/unit/brand-pages-static.test.ts` lo guarda.
 
 ## 2. Reglas
 

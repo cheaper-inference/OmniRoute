@@ -10,7 +10,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./styles.css": "./src/ci-ui.css",
+    "./styles.css": "./src/ci-styles.css",
     "./tokens.css": "./src/ci-tokens.css",
     "./brand": "./src/keak-brand.tsx",
     "./tokens": "./src/tokens.ts"

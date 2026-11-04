@@ -6,74 +6,15 @@
 
 > **حالة:** لوحة القيادة مبنية على** طقم كيك CI UI** (`@keak/cheaper-inference-ui-kit`) ، يتم بيعها كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ يتم تثبيت اللقطة الأولية في `packages/ui-kit/UPSTREAM.md` وحمايتها بواسطة `npm run check:ui-kit-snapshot`). الضوء هو الموضوع الأساسي. التفضيل الافتراضي هو `system`. اللهجة هي كيك الجير (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). مخطوطات سويتزر تفتقر إلى الحروف الرسومية التي تتخللها (`src/app/globals.css`): Inter للسيريلية واليونانية والفيتنامية، وتحت `html[dir="rtl"]` فقط، Vazirmatn للنص العربي. كل أيقونة عبارة عن حرف رسومي من Lucide.
 
-## 1. أين توجد الأشياء
+## 1. أين تعيش الأشياء
 
-- **المجموعة (Kit).** `packages/ui-kit/src` هي نسخة مطابقة بايتًا ببايت من `src/` الأصلية عند الالتزام المثبَّت في
-  `packages/ui-kit/UPSTREAM.md` (الذي يسجّل أيضًا تفويض الترخيص)؛ ويسرد `PATCHES.md` التصحيحات المحلية
-  (لا يوجد أي منها). تُستهلك كمصدر، دون أي خطوة بناء: `next.config.mjs` يُحوّلها ترجمةً (transpile)،
-  و`tsconfig.json` يعيّن `@omniroute/ui-kit` → `packages/ui-kit/src` و`@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (و`vitest.config.ts` و`vitest.mcp.config.ts` يحملان الاسم المستعار نفسه). استورد
-  مكوّن المجموعة عبر مساره الفرعي (`@omniroute/ui-kit/table`، `@omniroute/ui-kit/page-header`…)، ولا
-  تستورده أبدًا عبر ملف التجميع (barrel) `@omniroute/ui-kit`: فملف التجميع يسحب كل المكوّنات (بما فيها
-  منتقي التاريخ) إلى كل مستورِد. تدخل ورقة أنماط المجموعة عبر `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **الرموز (Tokens).** يُعلن `packages/ui-kit/src/ci-tokens.css` عن الرموز `--ci-*`؛ ويربطها
-  `src/app/globals.css` بأسماء OmniRoute القديمة (`--color-*`، `--radius-*`، `--font-sans`/`--font-mono`،
-  `--table-*`، `--orch-status-*`، `--color-fd-*`)، بحيث تستمر قراءات `var(--color-*)` الحالية وأدوات
-  Tailwind المساعدة في العمل. تستخدم الشيفرة الجديدة أدوات Tailwind المساعدة (`bg-surface`،
-  `text-text-muted`، `border-border`، `text-success`، `bg-success-bg`، `bg-chart-1`…) أو أصناف المجموعة —
-  وليس قيمة hex أبدًا (يفرض `tests/unit/design-kit-bridge.test.ts` هذا الربط). يتحوّل `text-primary` إلى
-  `--color-primary-ink` عبر `--text-color-primary` (lime-800 في الوضع الفاتح، ولون lime المميِّز في
-  الوضع الداكن)، بحيث يبقى النص الأساسي مقروءًا بينما يحتفظ `bg-primary`/`border-primary` بسطح lime.
-  تستخدم سلاسل المخططات `--color-chart-1` … `--color-chart-5`.
-- **السمات.** يُشرِك `<html className="ci-theme">` (`src/app/layout.tsx`) المستندَ في سمة المجموعة.
-  التفضيل هو `light` أو `dark` أو `system` (`THEME_CONFIG.defaultTheme = "system"` في
-  `src/shared/constants/appConfig.ts`؛ و`system` يتبع `prefers-color-scheme`). تضبط `applyTheme()` في
-  `src/store/themeStore.ts` (ويعكسها سكربت التهيئة المضمّن في `src/app/layout.tsx`، الذي يعمل قبل
-  الترطيب) القيمةَ `data-theme="dark"|"light"` وتبدّل الصنف `.dark` على `<html>` معًا. تُربط مجموعة
-  رموز الوضع الداكن في المجموعة بـ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`)؛ أما
-  تجاوزات OmniRoute الداكنة الخاصة (كتلة `.dark` في `globals.css`) وأدوات Tailwind القديمة `dark:`
-  فتُربط بالصنف `.dark`. لا توجد إعدادات مسبقة للون المميِّز: فاللون المميِّز يأتي دائمًا من
-  المجموعة، ويُهمَل أي إعداد مسبق محفوظ من بناء أقدم عند تحميل المخزن.
-- **المكوّنات (المحوّلات).** يحافظ `src/shared/components/index.tsx` على واجهة برمجة مكوّنات OmniRoute
-  (الأسماء نفسها والتصديرات الافتراضية والخصائص)، والعناصر الأساسية خلفها هي محوّلات فوق المجموعة:
-  النماذج (`Button`، `Input`، `Textarea`، `Checkbox`، `Select`، `Toggle`، `Badge`، `Card`)، والطبقات
-  المتراكبة والتغذية الراجعة (`Modal`/`ConfirmModal`، `Tooltip`/`InfoTooltip`، `NotificationToast`،
-  `EmptyState`، `Loading`)، والبنية (`Collapsible`، `CollapsibleSection`، `SegmentedControl`،
-  `Breadcrumbs`، `Avatar`) والجداول (`DataTable`، `FilterBar`، `ColumnToggle`، `FilterPills`،
-  `PresetSlider`). يستورد المحوّل مكوّن المجموعة عبر مساره الفرعي ويعيّن الخصائص القديمة عليه — فمثلًا
-  `Button variant="primary"` هو زر `default` في المجموعة (`--ci-button-primary-*`: السطح المعكوس في
-  الوضع الفاتح، واللون المميِّز مع حبره `--ci-color-accent-foreground` في الوضع الداكن)، و`danger` هو
-  `destructive`، و`warning` هو `outline` مضافًا إليه امتداد `.ci-button--warning`. إن قاعدتي
-  `.ci-button--warning` و`.ci-badge[data-tone]` في نهاية `globals.css` (`@layer components`) هما
-  امتدادان من OmniRoute فوق أصناف المجموعة. تُثبّت `tests/unit/ui/adapters/*.test.tsx` سلوكَ كل محوّل.
-- **الهيكل.** يعرض `src/app/(dashboard)/layout.tsx` المكوّن `DashboardLayout`، الذي يعرض بدوره
-  `src/shared/components/layouts/DashboardShell.tsx`: مكوّنات المجموعة `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)، مع منطق التنقل الخاص بـ OmniRoute في
-  `src/shared/components/Sidebar.tsx`. يكون رابط "تخطَّ إلى المحتوى" المؤدّي إلى `#main-content` أولَ
-  عنصر قابل للتركيز. يحتوي `src/shared/components/Header.tsx` على `SidebarTrigger` الخاص بالمجموعة
-  (المبدِّل الوحيد للشريط الجانبي في الهيكل)، وعلى `ProductSwitcher` من Keak وعلى زر فتح لوحة الأوامر؛
-  ويعرض عنوان المسار فقط ما دام لم يُركَّب أي `PageHeader` من المجموعة (`.ci-page-header`) داخل
-  `#main-content`، بحيث تحتوي الصفحة التي لها `PageHeader` خاص بها على `h1` واحد فقط.
-  و`src/shared/components/CommandPalette.tsx` هو `Dialog` من المجموعة.
-- **الأيقونات.** يحلّ `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) الاسمَ (مفردات
-  Material Symbols التي تستخدمها الشاشات) عبر `ICON_MAP` (`src/shared/constants/iconMap.ts`) إلى رمز من
-  Lucide. لقد أُزيل خط Material Symbols وحزمتُه: فالاسم غير الموجود في الخريطة يعرض رمزًا مؤقتًا
-  محايدًا (`data-icon-missing="true"`) ويسجّل تحذيرًا في وحدة التحكم خارج بيئة الإنتاج. يطبع
-  `npm run gen:icon-map` الأسماء المستخدمة غير الموجودة في الخريطة (يفشل
-  `tests/unit/icon-map-coverage.test.ts` عند أي اسم بلا أيقونة Lucide؛ ويغطي
-  `tests/unit/icon-map-object-values.test.ts` الأسماء المخزّنة في كائنات البحث)؛ ويعيد
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` كتابةَ عناصر
-  `<span className="material-symbols-outlined">` الحرفية إلى `<Icon>`.
-- **العلامة التجارية.** يغلّف `src/shared/components/OmniRouteLogo.tsx` المجموعة: التصدير الافتراضي
-  `OmniRouteLogo` يعرض `ProductIcon product="omniroute" variant="glyph"` (SVG مضمّن، آمن مع
-  `basePath`)، ويعرض `OmniRouteLockup` المكوّنَ `ProductLockup product="omniroute"` (بالاسم الميسَّر
-  للوصول "Keak OmniRoute") أو، لمشغّلي العلامة البيضاء، `name`/`logoSrc` الخاصة بهم. توجد وجهات
-  مبدِّل المنتجات في `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`،
-  `KEAK_ACTIVE_PRODUCT`). تعرض الشاشات المستقلة — `src/app/login/page.tsx`، `src/app/status/page.tsx`،
-  `src/app/maintenance/page.tsx`، `src/app/offline/page.tsx`، `src/app/not-found.tsx`
-  و`src/shared/components/ErrorPageScaffold.tsx` — الشعارَ المركّب؛ ويحرسه
-  `tests/unit/brand-pages-static.test.ts`.
+- **عدة.** `packages/ui-kit/src` هي نسخة بايت مقابل بايت من `src/` المنبع عند الالتزام المثبت في `packages/ui-kit/UPSTREAM.md` (الذي يسجل أيضًا ترخيص الترخيص)؛ يسرد `PATCHES.md` التصحيحات المحلية (لا شيء). يتم استهلاكه كمصدر، بدون إنشاء: يقوم `next.config.mjs` بنقله، وخرائط `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` و `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (يحمل `vitest.config.ts` و `vitest.mcp.config.ts` نفس الاسم المستعار). قم باستيراد مكون مجموعة من خلال المسار الفرعي الخاص به (`@omniroute/ui-kit/table`، `@omniroute/ui-kit/page-header`…)، وليس من خلال برميل `@omniroute/ui-kit` أبدًا: يسحب البرميل كل مكون (بما في ذلك منتقي التاريخ) إلى كل مستورد. تدخل ورقة أنماط المجموعة من خلال `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`، الورقة الكاملة: `ci-ui.css` الأساسية بالإضافة إلى كل عائلة نمط).
+- **الرموز.** `packages/ui-kit/src/ci-tokens.css` تعلن عن رموز `--ci-*` ؛ تقوم `src/app/globals.css` بتوصيلها بأسماء OmniRoute القديمة (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) ، بحيث تستمر قراءات `var(--color-*)` الحالية وأدوات Tailwind في العمل. يستخدم الكود الجديد الأدوات المساعدة Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) أو فئات kit — لا تحتوي أبدًا على قيمة سداسية عشرية (`tests/unit/design-kit-bridge.test.ts` يفرض الجسر). يتحول `text-primary` إلى `--color-primary-ink` حتى `--text-color-primary` (lime-800 في الضوء، واللكنة الليمونية في الظلام)، لذلك يظل النص الأساسي قابلاً للقراءة بينما يحتفظ `bg-primary`/`border-primary` بالسطح الليموني. تستخدم سلسلة الرسم البياني `--color-chart-1` … `--color-chart-5`.
+- **المواضيع.** `<html className="ci-theme">` (`src/app/layout.tsx`) يختار المستند في سمة المجموعة. التفضيل هو `light` أو `dark` أو `system` (`THEME_CONFIG.defaultTheme = "system"` في `src/shared/constants/appConfig.ts`؛ `system` يتبع `prefers-color-scheme`). `applyTheme()` في `src/store/themeStore.ts` (يعكسه البرنامج النصي المضمن bootstrap في `src/app/layout.tsx`، والذي يعمل قبل الترطيب) يقوم بتعيين `data-theme="dark"|"light"` وتبديل فئة `.dark` على `<html>` معًا. مجموعة الرموز الداكنة الخاصة بالمجموعة مرتبطة بـ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ؛ التجاوزات المظلمة الخاصة بـ OmniRoute(كتلة `.dark` في `globals.css`) ومفتاح الأدوات المساعدة Tailwind `dark:` القديم في فئة `.dark`. لا توجد إعدادات مسبقة للألوان المميزة: تأتي التمييزات دائمًا من المجموعة، ويتم إسقاط الإعداد المسبق المستمر من إصدار أقدم عند تحميل المتجر.
+- **المكونات (المحولات).** يحتفظ `src/shared/components/index.tsx` بمكون OmniRoute API (نفس الأسماء والصادرات الافتراضية والدعائم)، والأوليات الموجودة خلفه هي محولات فوق المجموعة: النماذج (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`)، والتراكبات والتعليقات (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`)، الهيكل (`Collapsible`، `CollapsibleSection`، `SegmentedControl`، `Breadcrumbs`، `Avatar`) والجداول (`DataTable`، `FilterBar`، `ColumnToggle`، `FilterPills`، `PresetSlider`). يستورد المحول مكون المجموعة عن طريق المسار الفرعي ويعين الدعائم القديمة عليه — على سبيل المثال `Button variant="primary"` هو زر المجموعة `default` (`--ci-button-primary-*`: السطح المعكوس في الضوء، والتمييز بحبر `--ci-color-accent-foreground` الخاص به باللون الداكن)، `danger` هو `destructive`، و `warning` هو `outline` بالإضافة إلى الامتداد `.ci-button--warning`. قواعد `.ci-button--warning` و `.ci-badge[data-tone]` في نهاية `globals.css` (`@layer components`) هي امتدادات OmniRoute أعلى فئات المجموعة. `tests/unit/ui/adapters/*.test.tsx` دبوس كل محول.
+- **صدَفَة.** `src/app/(dashboard)/layout.tsx` يعرض `DashboardLayout`، الذي يعرض `src/shared/components/layouts/DashboardShell.tsx`: المجموعة `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)، مع منطق التنقل الخاص بـ OmniRoute في `src/shared/components/Sidebar.tsx`. يعد رابط "الانتقال إلى المحتوى" إلى `#main-content` هو العنصر الأول الذي يمكن التركيز عليه. يحمل `src/shared/components/Header.tsx` مجموعة `SidebarTrigger` (تبديل الشريط الجانبي الوحيد للصدفة)، وKeak `ProductSwitcher` وفتاحة لوحة الأوامر؛ فهو يعرض عنوان المسار فقط بينما لا يتم تثبيت أي مجموعة `PageHeader` (`.ci-page-header`) داخل `#main-content`، لذا فإن الصفحة التي تحتوي على `PageHeader` الخاصة بها تحتوي على `h1` واحد. `src/shared/components/CommandPalette.tsx` عبارة عن مجموعة `Dialog`.
+- **أيقونات.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) يحل الاسم (مفردات رموز المواد التي تستخدمها الشاشات) من خلال `ICON_MAP` (`src/shared/constants/iconMap.ts`) إلى حرف رسومي Lucide. اختفى خط وحزمة رموز المواد: يعرض الاسم المفقود من الخريطة رمزًا رمزيًا لعنصر نائب محايد (`data-icon-missing="true"`) ويسجل تحذير وحدة التحكم خارج الإنتاج. يقوم `npm run gen:icon-map` بطباعة الأسماء المستخدمة والمفقودة من الخريطة (يفشل `tests/unit/icon-map-coverage.test.ts` في أي اسم بدون أيقونة Lucide؛ ويغطي `tests/unit/icon-map-object-values.test.ts` الأسماء المخزنة في كائنات البحث)؛ يقوم `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` بإعادة كتابة امتدادات `<span className="material-symbols-outlined">` الحرفية إلى `<Icon>`.
+- **ماركة.** `src/shared/components/OmniRouteLogo.tsx` يغلف المجموعة: التصدير الافتراضي `OmniRouteLogo` يعرض `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) و `OmniRouteLockup` يعرض `ProductLockup product="omniroute"` (الاسم الذي يمكن الوصول إليه "Keak OmniRoute") أو، بالنسبة لمشغلي العلامة البيضاء، `name`/`logoSrc` الخاص بهم. توجد وجهات تبديل المنتجات في `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). تُظهر الشاشات المستقلة — `src/app/login/page.tsx` و `src/app/status/page.tsx` و `src/app/maintenance/page.tsx` و `src/app/offline/page.tsx` و `src/app/not-found.tsx` و `src/shared/components/ErrorPageScaffold.tsx` — القفل؛ `tests/unit/brand-pages-static.test.ts` يحرسها.
 
 ## 2. القواعد
 

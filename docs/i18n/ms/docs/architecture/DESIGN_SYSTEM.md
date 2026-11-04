@@ -6,74 +6,15 @@
 
 > **Status:** papan pemuka dibina di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; syot kilat hulu disematkan dalam `packages/ui-kit/UPSTREAM.md` dan dikawal oleh `npm run check:ui-kit-snapshot`). Cahaya ialah tema kanonik; keutamaan lalai ialah `system`. Loghatnya ialah limau keak (`--ci-color-accent`). Switzer ialah keluarga tunggal untuk UI, paparan dan teks kod (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Skrip Switzer kekurangan jatuh melalui glif demi glif (`src/app/globals.css`): Inter untuk Cyrillic, Greek dan Vietnam dan, hanya di bawah `html[dir="rtl"]`, Vazirmatn untuk skrip Arab. Setiap ikon ialah glif Lucide.
 
-## 1. Di mana semuanya berada
+## 1. Di mana benda hidup
 
-- **Kit.** `packages/ui-kit/src` ialah salinan bait-demi-bait `src/` hulu pada commit yang disematkan dalam
-  `packages/ui-kit/UPSTREAM.md` (yang turut merekodkan kebenaran lesen); `PATCHES.md` menyenaraikan
-  tampalan tempatan (tiada). Ia digunakan sebagai sumber, tanpa binaan: `next.config.mjs` mentranspilasinya,
-  dan `tsconfig.json` memetakan `@omniroute/ui-kit` → `packages/ui-kit/src` dan `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` dan `vitest.mcp.config.ts` membawa alias yang sama). Import
-  komponen kit melalui sublaluannya (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), jangan
-  sekali-kali melalui barrel `@omniroute/ui-kit`: barrel menarik setiap komponen (termasuk pemilih tarikh)
-  ke dalam setiap pengimport. Helaian gaya kit masuk melalui `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Token.** `packages/ui-kit/src/ci-tokens.css` mengisytiharkan token `--ci-*`; `src/app/globals.css`
-  menjambatankannya kepada nama legasi OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), supaya bacaan `var(--color-*)` sedia ada dan utiliti
-  Tailwind terus berfungsi. Kod baharu menggunakan utiliti Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) atau kelas kit — jangan sekali-kali
-  nilai heks (`tests/unit/design-kit-bridge.test.ts` menguatkuasakan jambatan tersebut). `text-primary`
-  diselesaikan kepada `--color-primary-ink` melalui `--text-color-primary` (lime-800 dalam mod cerah, aksen
-  lime dalam mod gelap), jadi teks utama kekal boleh dibaca manakala `bg-primary`/`border-primary`
-  mengekalkan permukaan lime. Siri carta menggunakan `--color-chart-1` … `--color-chart-5`.
-- **Tema.** `<html className="ci-theme">` (`src/app/layout.tsx`) menyertakan dokumen ke dalam tema kit.
-  Keutamaannya ialah `light`, `dark` atau `system` (`THEME_CONFIG.defaultTheme = "system"` dalam
-  `src/shared/constants/appConfig.ts`; `system` mengikut `prefers-color-scheme`). `applyTheme()` dalam
-  `src/store/themeStore.ts` (dicerminkan oleh skrip bootstrap sebaris dalam `src/app/layout.tsx`, yang
-  berjalan sebelum penghidratan) menetapkan `data-theme="dark"|"light"` dan menogol kelas `.dark` pada
-  `<html>` serentak. Set token gelap kit dikuncikan pada `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); pengatasan gelap OmniRoute sendiri (blok `.dark` dalam
-  `globals.css`) dan utiliti legasi Tailwind `dark:` dikuncikan pada kelas `.dark`. Tiada praset warna
-  aksen: aksen sentiasa datang daripada kit, dan praset berterusan daripada binaan lama digugurkan apabila
-  stor dimuatkan.
-- **Komponen (penyesuai).** `src/shared/components/index.tsx` mengekalkan API komponen OmniRoute (nama yang
-  sama, eksport lalai dan props), dan primitif di belakangnya ialah penyesuai di atas kit: borang
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), tindihan dan maklum
-  balas (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) dan jadual
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Penyesuai mengimport komponen
-  kit mengikut sublaluan dan memetakan props legasi ke atasnya — contohnya `Button variant="primary"` ialah
-  butang `default` kit (`--ci-button-primary-*`: permukaan songsang dalam mod cerah, aksen dengan dakwat
-  `--ci-color-accent-foreground`nya dalam mod gelap), `danger` ialah `destructive`, dan `warning` ialah
-  `outline` ditambah sambungan `.ci-button--warning`. Peraturan `.ci-button--warning` dan
-  `.ci-badge[data-tone]` di hujung `globals.css` (`@layer components`) ialah sambungan OmniRoute di atas
-  kelas kit. `tests/unit/ui/adapters/*.test.tsx` menyematkan setiap penyesuai.
-- **Shell.** `src/app/(dashboard)/layout.tsx` memaparkan `DashboardLayout`, yang memaparkan
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` / `SidebarInset` kit
-  (`packages/ui-kit/src/sidebar.tsx`), dengan logik navigasi OmniRoute dalam
-  `src/shared/components/Sidebar.tsx`. Pautan "langkau ke kandungan" ke `#main-content` ialah elemen boleh
-  fokus pertama. `src/shared/components/Header.tsx` memegang `SidebarTrigger` kit (satu-satunya togol bar
-  sisi shell), `ProductSwitcher` Keak dan pembuka palet perintah; ia menunjukkan tajuk laluan hanya selagi
-  tiada `PageHeader` kit (`.ci-page-header`) dipasang di dalam `#main-content`, supaya halaman dengan
-  `PageHeader` sendiri mempunyai satu `h1` sahaja. `src/shared/components/CommandPalette.tsx` ialah
-  `Dialog` kit.
-- **Ikon.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) menyelesaikan nama (kosa kata
-  Material Symbols yang digunakan oleh skrin) melalui `ICON_MAP` (`src/shared/constants/iconMap.ts`) kepada
-  glif Lucide. Fon dan pakej Material Symbols tiada lagi: nama yang tiada dalam peta memaparkan glif
-  pemegang tempat neutral (`data-icon-missing="true"`) dan merekodkan amaran konsol di luar produksi.
-  `npm run gen:icon-map` mencetak nama-nama yang sedang digunakan tetapi tiada dalam peta
-  (`tests/unit/icon-map-coverage.test.ts` gagal pada mana-mana nama tanpa ikon Lucide;
-  `tests/unit/icon-map-object-values.test.ts` meliputi nama yang disimpan dalam objek carian);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` menulis semula span literal
-  `<span className="material-symbols-outlined">` kepada `<Icon>`.
-- **Jenama.** `src/shared/components/OmniRouteLogo.tsx` membungkus kit: eksport lalai `OmniRouteLogo`
-  memaparkan `ProductIcon product="omniroute" variant="glyph"` (SVG sebaris, selamat-`basePath`) dan
-  `OmniRouteLockup` memaparkan `ProductLockup product="omniroute"` (nama boleh akses "Keak OmniRoute")
-  atau, untuk pengendali label putih, `name`/`logoSrc` mereka sendiri. Destinasi penukar produk terletak
-  dalam `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Skrin
-  bersendirian — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` dan `src/shared/components/ErrorPageScaffold.tsx`
-  — memaparkan lockup; `tests/unit/brand-pages-static.test.ts` mengawalnya.
+- **Kit.** `packages/ui-kit/src` ialah salinan bait-untuk-bait bagi `src/` huluan pada komit yang disematkan dalam `packages/ui-kit/UPSTREAM.md` (yang turut merekodkan kebenaran lesen); `PATCHES.md` menyenaraikan patch tempatan (tiada). Ia digunakan sebagai sumber, tanpa binaan: `next.config.mjs` mengubahnya dan `tsconfig.json` memetakan `@omniroute/ui-kit` → `packages/ui-kit/src` dan `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` dan `vitest.mcp.config.ts` membawa alias yang sama). Import komponen kit mengikut laluan kecilnya (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), tidak sekali-kali melalui laras `@omniroute/ui-kit` : tong menarik setiap komponen (termasuk pemilih tarikh) ke dalam setiap pengimport. Lembaran gaya kit masuk melalui `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, helaian lengkap: `ci-ui.css` teras ditambah setiap keluarga corak).
+- **Token.** `packages/ui-kit/src/ci-tokens.css` mengisytiharkan token `--ci-*` ; `src/app/globals.css` merapatkan mereka kepada nama OmniRoute warisan (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), jadi `var(--color-*)` sedia ada dibaca dan utiliti Tailwind terus berfungsi. Kod baharu menggunakan utiliti Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) atau kelas kit — tidak pernah nilai hex (`tests/unit/design-kit-bridge.test.ts` menguatkuasakan jambatan). `text-primary` memutuskan untuk `--color-primary-ink` melalui `--text-color-primary` (lime-800 dalam cahaya, loghat kapur dalam gelap), jadi teks utama kekal boleh dibaca manakala `bg-primary`/`border-primary` mengekalkan permukaan kapur. Siri carta gunakan `--color-chart-1` … `--color-chart-5`.
+- **Tema.** `<html className="ci-theme">` (`src/app/layout.tsx`) memilih dokumen ke dalam tema kit. Keutamaan ialah `light`, `dark` atau `system` (`THEME_CONFIG.defaultTheme = "system"` dalam `src/shared/constants/appConfig.ts`; `system` mengikut `prefers-color-scheme`). `applyTheme()` dalam `src/store/themeStore.ts` (dicerminkan oleh skrip bootstrap sebaris dalam `src/app/layout.tsx`, yang berjalan sebelum penghidratan) menetapkan `data-theme="dark"|"light"` dan togol kelas `.dark` pada `<html>` bersama-sama. Set token gelap kit dikunci pada `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute sendiri menggantikan gelap (blok `.dark` dalam `globals.css`) dan kunci utiliti Tailwind `dark:` legasi pada kelas `.dark`. Tiada pratetap warna aksen: aksen sentiasa datang daripada kit, dan pratetap berterusan daripada binaan lama digugurkan apabila kedai dimuatkan.
+- **Komponen (penyesuai).** `src/shared/components/index.tsx` mengekalkan komponen OmniRoute API (nama yang sama, eksport lalai dan prop), dan primitif di belakangnya ialah penyesuai pada kit: borang (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), tindanan dan maklum balas (`Modal`/`ConfirmModal`, `Tooltip` `NotificationToast` `InfoTooltip` `EmptyState`), struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) dan jadual (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Penyesuai mengimport komponen kit melalui subpath dan memetakan props warisan padanya — contohnya `Button variant="primary"` ialah butang `default` kit (`--ci-button-primary-*`: permukaan songsang dalam cahaya, aksen dengan dakwat `--ci-color-accent-foreground` dalam gelap), `danger` ialah `destructive`, dan `warning` ialah `outline` ditambah sambungan `.ci-button--warning`. Peraturan `.ci-button--warning` dan `.ci-badge[data-tone]` pada penghujung `globals.css` (`@layer components`) ialah sambungan OmniRoute di atas kelas kit. `tests/unit/ui/adapters/*.test.tsx` pin setiap penyesuai.
+- **Shell.** `src/app/(dashboard)/layout.tsx` menghasilkan `DashboardLayout`, yang menjadikan `src/shared/components/layouts/DashboardShell.tsx`: kit `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), dengan logik navigasi OmniRoute dalam `src/shared/components/Sidebar.tsx`. Pautan "langkau ke kandungan" ke `#main-content` ialah elemen pertama yang boleh difokuskan. `src/shared/components/Header.tsx` memegang kit `SidebarTrigger` (togol bar sisi shell sahaja), `ProductSwitcher` Keak dan pembuka palet arahan; ia menunjukkan tajuk laluan sahaja manakala tiada kit `PageHeader` (`.ci-page-header`) dipasang di dalam `#main-content`, jadi halaman dengan `PageHeader` sendiri mempunyai satu `h1`. `src/shared/components/CommandPalette.tsx` ialah kit `Dialog`.
+- **ikon.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) menyelesaikan nama (perbendaharaan kata Simbol Bahan yang digunakan oleh skrin) melalui `ICON_MAP` (`src/shared/constants/iconMap.ts`) kepada glif Lucide. Fon dan pakej Simbol Bahan telah hilang: nama yang tiada dalam peta menjadikan glif pemegang tempat neutral (`data-icon-missing="true"`) dan merekodkan amaran konsol di luar pengeluaran. `npm run gen:icon-map` mencetak nama yang sedang digunakan yang tiada daripada peta (`tests/unit/icon-map-coverage.test.ts` gagal pada sebarang nama tanpa ikon Lucide; `tests/unit/icon-map-object-values.test.ts` meliputi nama yang disimpan dalam objek carian); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` menulis semula `<span className="material-symbols-outlined">` literal merentang kepada `<Icon>`.
+- **Jenama.** `src/shared/components/OmniRouteLogo.tsx` membalut kit: eksport lalai `OmniRouteLogo` menjadikan `ProductIcon product="omniroute" variant="glyph"` ( SVG sebaris , `basePath` -safe) dan `OmniRouteLockup` menjadikan `ProductLockup product="omniroute"` (nama boleh diakses "Keak OmniRoute") atau, untuk pengendali label putih, `name`/`logoSrc` mereka sendiri. Destinasi penukar produk hidup dalam `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Skrin kendiri — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` dan `src/shared/components/ErrorPageScaffold.tsx` — menunjukkan lokap; `tests/unit/brand-pages-static.test.ts` menjaganya.
 
 ## 2. Peraturan
 

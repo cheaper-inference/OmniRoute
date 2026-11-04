@@ -6,70 +6,70 @@
 
 > **Ọnọdụ:** a na-ewu dashboard na** Ngwa CI UI** (`@keak/cheaper-inference-ui-kit`), nke a na-erere dị ka ebe ọrụ `packages/ui-kit` (`@omniroute/ui-kit`; ihe nlere anya elu ka etinyere na `packages/ui-kit/UPSTREAM.md` ma `npm run check:ui-kit-snapshot` na-echekwa ya). Ìhè bụ isiokwu nke akwụkwọ nsọ; mmasị ndabara bụ `system`. Asụsụ a bụ Keak lime (`--ci-color-accent`). Switzer bụ otu ezinụlọ maka UI, ngosi na ederede koodu (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` kpebisiri ike na ya), nke ngwa ahụ n'onwe ya kwadoro (`packages/ui-kit/src/ci-fonts.css`, nke `ci-tokens.css` bubata). Ederede Switzer enweghị ọdịda site na glyph site glyph (`src/app/globals.css`): Inter maka Cyrillic, Greek na Vietnamese na, naanị n'okpuru `html[dir="rtl"]`, Vazirmatn maka edemede Arabik. Akara ngosi ọ bụla bụ Lucide glyph.
 
-## 1. Ebe ihe ndị a dị
+## 1. Ebe ihe dị
 
-- **Kit.** `packages/ui-kit/src` bụ detuu byte-maka-byte nke upstream `src/` na commit a kpịrị n'ime
-  `packages/ui-kit/UPSTREAM.md` (nke na-edekọkwa ikike license ahụ); `PATCHES.md` na-edepụta ndozi
-  obodo (ọ dịghị). A na-eji ya eme ihe dị ka source, n'enweghị build: `next.config.mjs` na-atranspile ya, ma
-  `tsconfig.json` na-eduga `@omniroute/ui-kit` → `packages/ui-kit/src` na `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` na `vitest.mcp.config.ts` na-ebu otu alias ahụ). Bubata
-  component nke kit site na subpath ya (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ọ bụghị mgbe ọ bụla
-  site na `@omniroute/ui-kit` barrel: barrel na-adọpụta component ọ bụla (gụnyere ihe nhọrọ ụbọchị)
-  n'ime onye ọ bụla na-ebubata. Stylesheet nke kit na-abata site na `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokens.** `packages/ui-kit/src/ci-tokens.css` na-ekwupụta tokens `--ci-*`; `src/app/globals.css`
-  na-ejikọ ha na aha OmniRoute ndị ochie (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), ka ịgụ `var(--color-*)` ndị dị adị na Tailwind
-  utilities nọgide na-arụ ọrụ. Koodu ọhụrụ na-eji Tailwind utilities (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ma ọ bụ klas kit — ọ bụghị ọnụ ọgụgụ
-  hex (`tests/unit/design-kit-bridge.test.ts` na-amanye bridge ahụ). `text-primary` na-eduga na
-  `--color-primary-ink` site na `--text-color-primary` (lime-800 na light, lime accent ahụ na dark), ka
-  ederede primary nọgide n'ịgụtụ ebe `bg-primary`/`border-primary` na-edebe elu lime. Usoro chart na-eji
+- **Kit.** `packages/ui-kit/src` bụ oyiri byte-for-byte nke `src/` upstream na commit e kpọgidere na
+  `packages/ui-kit/UPSTREAM.md` (nke na-edekọkwa ikike akwụkwọ ikike); `PATCHES.md` depụtara patch ndị
+  mpaghara (ọ dịghị nke ọ bụla). A na-eji ya dịka source, na-enweghị build: `next.config.mjs` na-transpile ya, ebe
+  `tsconfig.json` na-map `@omniroute/ui-kit` → `packages/ui-kit/src` na `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` na `vitest.mcp.config.ts` nwekwara alias ahụ). Jiri subpath ya
+  bubata component kit (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), emela ya
+  site na barrel `@omniroute/ui-kit`: barrel ahụ na-adọta component niile (gụnyere date picker)
+  banye n'ime importer ọ bụla. Stylesheet kit na-abata site na `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, sheet zuru ezu: `ci-ui.css` bụ isi tinyere ezinụlọ pattern niile).
+- **Token.** `packages/ui-kit/src/ci-tokens.css` na-ekwupụta token `--ci-*`; `src/app/globals.css`
+  na-ejikọta ha na aha OmniRoute ochie (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), ka ịgụ `var(--color-*)` ndị dị ugbu a na utility Tailwind
+  wee nọgide na-arụ ọrụ. Koodu ọhụrụ na-eji utility Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ma ọ bụ class kit — ọ naghị eji uru hex
+  (`tests/unit/design-kit-bridge.test.ts` na-amanye bridge ahụ). `text-primary` na-resolve gaa na
+  `--color-primary-ink` site na `--text-color-primary` (lime-800 na light, accent lime na dark), ya mere
+  ederede primary na-anọgide bụrụ nke a pụrụ ịgụ mgbe `bg-primary`/`border-primary` na-edobe surface lime. Series chart na-eji
   `--color-chart-1` … `--color-chart-5`.
-- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) na-eme ka document ahụ sonye na theme nke kit.
+- **Theme.** `<html className="ci-theme">` (`src/app/layout.tsx`) na-etinye document ahụ n'ime theme kit.
   Mmasị ahụ bụ `light`, `dark` ma ọ bụ `system` (`THEME_CONFIG.defaultTheme = "system"` na
-  `src/shared/constants/appConfig.ts`; `system` na-eso `prefers-color-scheme`). `applyTheme()` na
-  `src/store/themeStore.ts` (nke inline bootstrap script na `src/app/layout.tsx` na-emegharị, nke na-agba
-  ọsọ tupu hydration) na-ede `data-theme="dark"|"light"` ma na-agbanwe klas `.dark` na `<html>` ọnụ.
-  Set token dark nke kit na-adabere na `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  ndị override dark nke OmniRoute n'onwe ya (blọkụ `.dark` na `globals.css`) na Tailwind `dark:`
-  utilities ochie na-adabere na klas `.dark`. Enweghị preset agba accent ọ bụla: accent na-esi mgbe niile
-  n'aka kit, ma a na-atụfu preset echekwara site na build ochie mgbe store na-ebugo.
-- **Components (ndị adapter).** `src/shared/components/index.tsx` na-edebe API component OmniRoute (otu
-  aha, default exports na props), ma primitives ndị dị n'azụ ya bụ ndị adapter n'elu kit: forms
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays na nzaghachi
+  `src/shared/constants/appConfig.ts`; `system` na-agbaso `prefers-color-scheme`). `applyTheme()` dị na
+  `src/store/themeStore.ts` (nke inline bootstrap script dị na `src/app/layout.tsx` na-emegharị, nke na-agba
+  tupu hydration) na-edobe `data-theme="dark"|"light"` ma na-toggle class `.dark` na `<html>` n'otu oge.
+  E ji `data-theme="dark"` mee key maka set token dark nke kit (`packages/ui-kit/src/ci-tokens.css`);
+  override dark nke OmniRoute n'onwe ya (block `.dark` dị na `globals.css`) na utility Tailwind `dark:`
+  ochie na-eji class `.dark` dịka key. Enweghị preset agba accent: accent na-abịa site na
+  kit mgbe niile, a na-ewepụkwa preset echekwara site na build ochie mgbe store na-load.
+- **Component (adapter).** `src/shared/components/index.tsx` na-edobe API component OmniRoute (otu
+  aha, default export na prop), ebe primitive ndị dị n'azụ ya bụ adapter e wuru n'elu kit: form
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlay na feedback
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  nhazi (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) na tables
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter na-ebubata
-  component nke kit site na subpath ma na-eduga props ochie n'elu ya — dị ka ọmụmaatụ, `Button variant="primary"` bụ
-  bọtịnụ `default` nke kit (`--ci-button-primary-*`: elu inverse na light, accent nke nwere ink
-  `--ci-color-accent-foreground` ya na dark), `danger` bụ `destructive`, ma `warning` bụ `outline` tinyere
-  mgbatị `.ci-button--warning`. Iwu `.ci-button--warning` na `.ci-badge[data-tone]` dị na
-  njedebe nke `globals.css` (`@layer components`) bụ mgbatị OmniRoute n'elu klas kit.
-  `tests/unit/ui/adapters/*.test.tsx` na-ekwụsi adapter ọ bụla ike.
-- **Shell.** `src/app/(dashboard)/layout.tsx` na-egosipụta `DashboardLayout`, nke na-egosipụta
-  `src/shared/components/layouts/DashboardShell.tsx`: kit `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ebe logic navigation nke OmniRoute dị na
-  `src/shared/components/Sidebar.tsx`. Njikọ "gafee gaa n'ọdịnaya" gaa `#main-content` bụ ihe mbụ a nwere ike
-  ilekwasị anya. `src/shared/components/Header.tsx` na-ejide `SidebarTrigger` nke kit (naanị ihe mgbagharị
-  sidebar nke shell ahụ), Keak `ProductSwitcher` na ihe mmepe command-palette; ọ na-egosi aha ụzọ naanị
-  mgbe ọ dịghị `PageHeader` nke kit (`.ci-page-header`) etinyere n'ime `#main-content`, ka ibe nwere
-  `PageHeader` nke ya nwee otu `h1`. `src/shared/components/CommandPalette.tsx` bụ `Dialog` nke kit.
-- **Icons.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) na-eduga aha ahụ (okwu
-  Material Symbols nke ihuenyo ndị ahụ na-eji) site na `ICON_MAP` (`src/shared/constants/iconMap.ts`) ka ọ bụrụ
-  glyph Lucide. Font na package Material Symbols adịghịzi: aha na-apụghị na map na-egosi
-  glyph placeholder nke na-enweghị agba (`data-icon-missing="true"`) ma na-ede ịdọ aka ná ntị na console n'èzí production.
-  `npm run gen:icon-map` na-ebipụta aha ndị a na-eji nke na-apụghị na map
-  (`tests/unit/icon-map-coverage.test.ts` na-ada maka aha ọ bụla na-enweghị icon Lucide;
-  `tests/unit/icon-map-object-values.test.ts` na-ekpuchi aha echekwara n'ime objects nchọpụta);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` na-edekọ spans
-  `<span className="material-symbols-outlined">` ndị literal ọzọ ka ha bụrụ `<Icon>`.
-- **Brand.** `src/shared/components/OmniRouteLogo.tsx` na-akpuchi kit: default export `OmniRouteLogo`
-  na-egosipụta `ProductIcon product="omniroute" variant="glyph"` (inline SVG, nke dị mma na `basePath`) ma
-  `OmniRouteLockup` na-egosipụta `ProductLockup product="omniroute"` (aha nnweta "Keak OmniRoute") ma ọ bụ, maka
-  ndị na-arụ ọrụ white-label, `name`/`logoSrc` nke ha. Ebe ndị product-switcher na-aga dị na
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Ihuenyo ndị kwụrụ
-  n'onwe ha — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  nhazi (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) na table
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter na-eji subpath bubata
+  component kit ma na-map prop ochie n'elu ya — dịka ọmụmaatụ `Button variant="primary"` bụ button
+  `default` nke kit (`--ci-button-primary-*`: surface inverse na light, accent nwere ink
+  `--ci-color-accent-foreground` ya na dark), `danger` bụ `destructive`, ebe `warning` bụ `outline` tinyere
+  extension `.ci-button--warning`. Rule `.ci-button--warning` na `.ci-badge[data-tone]` dị na
+  ngwụcha `globals.css` (`@layer components`) bụ extension OmniRoute dị n'elu class kit.
+  `tests/unit/ui/adapters/*.test.tsx` na-akpọgide adapter ọ bụla.
+- **Shell.** `src/app/(dashboard)/layout.tsx` na-render `DashboardLayout`, nke na-render
+  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
+  `SidebarInset` nke kit (`packages/ui-kit/src/sidebar.tsx`), yana logic navigation OmniRoute dị na
+  `src/shared/components/Sidebar.tsx`. Link “gafee gaa na ọdịnaya” nke na-aga `#main-content` bụ element mbụ
+  a pụrụ ilekwasị anya na ya. `src/shared/components/Header.tsx` nwere `SidebarTrigger` nke kit (naanị toggle
+  sidebar nke shell), `ProductSwitcher` Keak na opener command palette; ọ na-egosi title route naanị mgbe
+  enweghị `PageHeader` kit (`.ci-page-header`) e mounted n'ime `#main-content`, ya mere page nwere
+  `PageHeader` nke ya na-enwe naanị otu `h1`. `src/shared/components/CommandPalette.tsx` bụ `Dialog` kit.
+- **Akara ngosi.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) na-resolve aha ahụ
+  (okwu Material Symbols nke screen ndị ahụ na-eji) site na `ICON_MAP` (`src/shared/constants/iconMap.ts`) gaa na
+  glyph Lucide. Font na package Material Symbols apụọla: aha na-adịghị na map na-render glyph placeholder
+  na-anọpụ iche (`data-icon-missing="true"`) ma na-edekọ ịdọ aka ná ntị console n'èzí production.
+  `npm run gen:icon-map` na-ebipụta aha ndị a na-eji nke na-adịghị na map
+  (`tests/unit/icon-map-coverage.test.ts` na-ada ma ọ bụrụ na aha ọ bụla enweghị akara ngosi Lucide;
+  `tests/unit/icon-map-object-values.test.ts` na-ekpuchi aha echekwara n'ime lookup object);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` na-edegharị span literal
+  `<span className="material-symbols-outlined">` ka ọ bụrụ `<Icon>`.
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` na-ekpuchi kit: default export `OmniRouteLogo`
+  na-render `ProductIcon product="omniroute" variant="glyph"` (SVG inline, `basePath`-safe), ebe
+  `OmniRouteLockup` na-render `ProductLockup product="omniroute"` (aha a pụrụ ịnweta “Keak OmniRoute”) ma ọ bụ, maka
+  operator white-label, `name`/`logoSrc` nke ha. Destination product switcher dị na
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Screen standalone
+  — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` na `src/shared/components/ErrorPageScaffold.tsx`
   — na-egosi lockup ahụ; `tests/unit/brand-pages-static.test.ts` na-echebe ya.
 

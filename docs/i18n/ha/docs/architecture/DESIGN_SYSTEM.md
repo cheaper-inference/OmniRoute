@@ -6,76 +6,72 @@
 
 > **Matsayi:** an gina dashboard akan** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), wanda aka siyar dashi azaman filin aiki `packages/ui-kit` (`@omniroute/ui-kit`; hoton sama yana liƙa a cikin `packages/ui-kit/UPSTREAM.md` kuma `npm run check:ui-kit-snapshot` yana kiyaye shi). Haske shine taken canonical; fifikon tsoho shine `system`. Lafazin shine Keak lemun tsami (`--ci-color-accent`). Switzer shine iyali guda don UI, nuni da rubutu na lamba (`--ci-font-ui`; `--ci-font-display` da `--ci-font-mono` sun warware shi), kayan da kanta ke ɗaukar nauyinsa (`packages/ui-kit/src/ci-fonts.css`, shigo da `ci-tokens.css`). Rubutun Switzer ya rasa faɗuwa ta hanyar glyph ta glyph (`src/app/globals.css`): Inter don Cyrillic, Girkanci da Vietnamese kuma, a ƙarƙashin `html[dir="rtl"]` kawai, Vazirmatn don rubutun Larabci. Kowane gunki shine Lucide glyph.
 
-## 1. Inda abubuwa ke zaune
+## 1. Inda abubuwa suke
 
-- **Kit ɗin.** `packages/ui-kit/src` kwafi ne na byte-for-byte na `src/` na sama a commit ɗin da aka manne a
-  `packages/ui-kit/UPSTREAM.md` (wanda kuma ke rubuta izinin lasisi); `PATCHES.md` yana lissafa facin gida
-  (babu). Ana amfani da shi azaman tushe, ba tare da build ba: `next.config.mjs` yana transpile shi, kuma
-  `tsconfig.json` yana daidaita `@omniroute/ui-kit` → `packages/ui-kit/src` da `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` da `vitest.mcp.config.ts` suna ɗauke da wannan alias ɗin).
-  Shigo da wani ɓangaren kit ta subpath ɗinsa (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…),
-  kada ta hanyar barrel ɗin `@omniroute/ui-kit`: barrel ɗin yana jan kowane ɓangare (har da mai zaɓin
-  kwanan wata) zuwa cikin kowane mai shigo da shi. Takardar salo ta kit tana shiga ta `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokens ɗin.** `packages/ui-kit/src/ci-tokens.css` yana ayyana tokens ɗin `--ci-*`; `src/app/globals.css`
-  yana haɗa su da tsofaffin sunayen OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), don haka karatun `var(--color-*)` na yanzu da kayan
-  aikin Tailwind su ci gaba da aiki. Sabon code yana amfani da kayan aikin Tailwind (`bg-surface`,
-  `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ko azuzuwan kit —
-  kada a taɓa amfani da ƙimar hex (`tests/unit/design-kit-bridge.test.ts` yana tabbatar da gadar).
-  `text-primary` yana warware zuwa `--color-primary-ink` ta hanyar `--text-color-primary` (lime-800 a cikin
-  haske, ƙarar lime a cikin duhu), don haka rubutun primary yana kasancewa mai sauƙin karantawa yayin da
-  `bg-primary`/`border-primary` ke riƙe da saman lime. Jerin ginshiƙi suna amfani da `--color-chart-1` …
-  `--color-chart-5`.
-- **Jigogi.** `<html className="ci-theme">` (`src/app/layout.tsx`) yana sa daftarin ya shiga cikin jigon kit.
-  Zaɓin shine `light`, `dark` ko `system` (`THEME_CONFIG.defaultTheme = "system"` a cikin
+- **Kit.** `packages/ui-kit/src` kwafi ne da ya yi daidai byte-da-byte da `src/` na asali a commit ɗin da aka ƙayyade a
+  `packages/ui-kit/UPSTREAM.md` (wanda kuma yake adana izinin lasisi); `PATCHES.md` yana lissafa gyare-gyaren
+  gida (babu ko ɗaya). Ana amfani da shi kai tsaye a matsayin source, ba tare da build ba: `next.config.mjs` yana transpile ɗinsa, sannan
+  `tsconfig.json` yana taswirar `@omniroute/ui-kit` → `packages/ui-kit/src` da `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` da `vitest.mcp.config.ts` suna ɗauke da alias iri ɗaya). Shigo da
+  component na kit ta subpath ɗinsa (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), kada a taɓa
+  amfani da barrel na `@omniroute/ui-kit`: barrel ɗin yana jawo kowane component (har da mai zaɓar kwanan wata)
+  zuwa cikin kowane importer. Stylesheet na kit yana shiga ta `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, cikakken sheet: babban `ci-ui.css` tare da kowane rukunin pattern).
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` yana ayyana tokens na `--ci-*`; `src/app/globals.css`
+  yana haɗa su da tsoffin sunayen OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), domin karatun `var(--color-*)` da Tailwind
+  utilities da ake da su su ci gaba da aiki. Sabon code yana amfani da Tailwind utilities (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ko classes na kit — ba a taɓa amfani da hex value
+  (`tests/unit/design-kit-bridge.test.ts` yana tabbatar da bridge ɗin). `text-primary` yana komawa zuwa
+  `--color-primary-ink` ta `--text-color-primary` (lime-800 a light, lime accent a dark), don haka
+  primary text yana ci gaba da kasancewa mai sauƙin karantawa yayin da `bg-primary`/`border-primary` suke riƙe da lime surface. Chart series suna amfani da
+  `--color-chart-1` … `--color-chart-5`.
+- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) yana shigar da document cikin theme na kit.
+  Zaɓin shi ne `light`, `dark` ko `system` (`THEME_CONFIG.defaultTheme = "system"` a cikin
   `src/shared/constants/appConfig.ts`; `system` yana bin `prefers-color-scheme`). `applyTheme()` a cikin
-  `src/store/themeStore.ts` (wanda rubutun bootstrap na ciki a `src/app/layout.tsx` ke kwaikwaya, wanda ke
-  gudana kafin hydration) yana saita `data-theme="dark"|"light"` kuma yana jujjuya ajin `.dark` a kan
-  `<html>` tare. Saitin token ɗin duhu na kit an danganta shi da `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); maye gurbin duhu na OmniRoute da kansa (toshewar `.dark` a cikin
-  `globals.css`) da tsofaffin kayan aikin Tailwind `dark:` an danganta su da aji `.dark`. Babu saitattun
-  launukan accent: accent koyaushe yana zuwa daga kit ɗin, kuma duk wani saitin da aka adana daga tsohon
-  build ana watsar da shi lokacin da store ɗin ya loda.
-- **Abubuwan haɗin (masu daidaitawa).** `src/shared/components/index.tsx` yana riƙe da API ɗin ɓangaren
-  OmniRoute (sunaye ɗaya, default exports da props), kuma primitives ɗin da ke bayansa masu daidaitawa ne
-  bisa kit ɗin: forms (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  overlays da feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`,
-  `Loading`), tsari (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) da
-  tables (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adap-ta yana shigo da
-  ɓangaren kit ta subpath kuma yana daidaita tsofaffin props a kan sa — misali `Button variant="primary"`
-  shine maɓallin `default` na kit (`--ci-button-primary-*`: saman juye a cikin haske, accent tare da
-  tawadarsa `--ci-color-accent-foreground` a cikin duhu), `danger` shine `destructive`, kuma `warning` shine
-  `outline` da ƙari da tsawo `.ci-button--warning`. Dokokin `.ci-button--warning` da `.ci-badge[data-tone]`
-  a ƙarshen `globals.css` (`@layer components`) su ne tsawaitawar OmniRoute bisa azuzuwan kit.
-  `tests/unit/ui/adapters/*.test.tsx` yana manne kowane adap-ta.
-- **Shell ɗin.** `src/app/(dashboard)/layout.tsx` yana nuna `DashboardLayout`, wanda ke nuna
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` / `SidebarInset` na kit
-  (`packages/ui-kit/src/sidebar.tsx`), tare da dabarun kewayawa na OmniRoute a cikin
-  `src/shared/components/Sidebar.tsx`. Maɗaurin "tsallake zuwa abun ciki" zuwa `#main-content` shine farkon
-  abu da za a iya mayar da hankali a kai. `src/shared/components/Header.tsx` yana ɗauke da `SidebarTrigger`
-  na kit (shi kaɗai mai jujjuya sidebar a cikin shell), `ProductSwitcher` na Keak da mabudin command
-  palette; yana nuna taken hanya ne kawai yayin da babu `PageHeader` na kit (`.ci-page-header`) da aka ɗora
-  a cikin `#main-content`, don haka shafi mai nasa `PageHeader` yana da `h1` guda ɗaya.
-  `src/shared/components/CommandPalette.tsx` `Dialog` ne na kit.
-- **Ikoni.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) yana warware sunan (ƙamus ɗin
-  Material Symbols da fuskokin ke amfani da shi) ta hanyar `ICON_MAP` (`src/shared/constants/iconMap.ts`)
-  zuwa alamar Lucide. Rubutun Material Symbols da fakit ɗin sun tafi: sunan da ya ɓace daga taswirar yana
-  nuna alamar ajiya ta tsaka-tsaki (`data-icon-missing="true"`) kuma yana rubuta gargaɗi a console a wajen
-  production. `npm run gen:icon-map` yana buga sunayen da ake amfani da su waɗanda suka ɓace daga taswirar
-  (`tests/unit/icon-map-coverage.test.ts` yana faɗuwa a kan kowane sunan da ba shi da alamar Lucide;
-  `tests/unit/icon-map-object-values.test.ts` yana rufe sunayen da aka adana a cikin abubuwan bincike);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` yana sake rubuta `<span className="material-symbols-outlined">`
-  na zahiri zuwa `<Icon>`.
-- **Alama.** `src/shared/components/OmniRouteLogo.tsx` yana naɗe kit ɗin: default export ɗin
-  `OmniRouteLogo` yana nuna `ProductIcon product="omniroute" variant="glyph"` (SVG na ciki, mai aminci ga
-  `basePath`) kuma `OmniRouteLockup` yana nuna `ProductLockup product="omniroute"` (sunan da ake iya samun
-  sa "Keak OmniRoute") ko, ga masu aiki da white-label, nasu `name`/`logoSrc`. Wuraren da mai jujjuya
-  samfuri ke kaiwa suna cikin `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`,
-  `KEAK_ACTIVE_PRODUCT`). Fuskokin da ke tsaye da kansu — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
-  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` da
-  `src/shared/components/ErrorPageScaffold.tsx` — suna nuna lockup ɗin; `tests/unit/brand-pages-static.test.ts`
-  yana kiyaye shi.
+  `src/store/themeStore.ts` (wanda inline bootstrap script a cikin `src/app/layout.tsx` yake kwaikwaya, kuma yake aiki
+  kafin hydration) yana saita `data-theme="dark"|"light"` sannan yana kunna ko kashe class ɗin `.dark` a kan `<html>` tare.
+  Dark token set na kit yana dogara da `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  dark overrides na OmniRoute kansa (block ɗin `.dark` a cikin `globals.css`) da tsoffin Tailwind `dark:`
+  utilities suna dogara da class ɗin `.dark`. Babu accent color presets: accent koyaushe yana fitowa daga
+  kit, kuma persisted preset daga tsohon build ana cire shi lokacin da store ya loda.
+- **Components (adapters).** `src/shared/components/index.tsx` yana riƙe da component API na OmniRoute (sunaye,
+  default exports da props iri ɗaya), kuma primitives da ke bayansa adapters ne a kan kit: forms
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays da feedback
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) da tables
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter yana shigo da component
+  na kit ta subpath sannan ya daidaita tsoffin props zuwa gare shi — misali `Button variant="primary"` shi ne
+  button na kit na `default` (`--ci-button-primary-*`: inverse surface a light, accent tare da
+  ink ɗinsa na `--ci-color-accent-foreground` a dark), `danger` shi ne `destructive`, kuma `warning` shi ne `outline` tare da
+  extension na `.ci-button--warning`. Dokokin `.ci-button--warning` da `.ci-badge[data-tone]` a
+  ƙarshen `globals.css` (`@layer components`) extensions ne na OmniRoute a saman classes na kit.
+  `tests/unit/ui/adapters/*.test.tsx` suna tabbatar da kowane adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` yana render `DashboardLayout`, wanda yake render
+  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
+  `SidebarInset` na kit (`packages/ui-kit/src/sidebar.tsx`), tare da navigation logic na OmniRoute a cikin
+  `src/shared/components/Sidebar.tsx`. Link na "tsallake zuwa abun ciki" zuwa `#main-content` shi ne element
+  na farko da za a iya mayar da focus a kansa. `src/shared/components/Header.tsx` yana ɗauke da `SidebarTrigger` na kit (sidebar
+  toggle ɗaya tilo na shell), `ProductSwitcher` na Keak da mai buɗe command-palette; yana nuna route title ne kawai yayin da
+  babu `PageHeader` na kit (`.ci-page-header`) da aka mount a cikin `#main-content`, saboda haka page da ke da
+  nasa `PageHeader` yana da `h1` guda ɗaya. `src/shared/components/CommandPalette.tsx` `Dialog` ne na kit.
+- **Icons.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) yana warware sunan (kalmomin
+  Material Symbols da screens suke amfani da su) ta `ICON_MAP` (`src/shared/constants/iconMap.ts`) zuwa
+  glyph na Lucide. An cire font da package na Material Symbols: suna da babu a map yana render
+  neutral placeholder glyph (`data-icon-missing="true"`) sannan yana rubuta console warning a wajen production.
+  `npm run gen:icon-map` yana fitar da sunayen da ake amfani da su amma babu su a map
+  (`tests/unit/icon-map-coverage.test.ts` yana kasa idan kowane suna ba shi da Lucide icon;
+  `tests/unit/icon-map-object-values.test.ts` yana rufe sunayen da aka adana a lookup objects);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` yana sake rubuta literal
+  `<span className="material-symbols-outlined">` spans zuwa `<Icon>`.
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` yana nannade kit: default export `OmniRouteLogo`
+  yana render `ProductIcon product="omniroute" variant="glyph"` (inline SVG, mai aminci ga `basePath`) sannan
+  `OmniRouteLockup` yana render `ProductLockup product="omniroute"` (accessible name "Keak OmniRoute") ko kuma, ga
+  white-label operators, `name`/`logoSrc` nasu. Wuraren da product-switcher yake nufi suna cikin
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Standalone
+  screens — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` da `src/shared/components/ErrorPageScaffold.tsx`
+  — suna nuna lockup; `tests/unit/brand-pages-static.test.ts` yana kiyaye hakan.
 
 ## 2. Dokoki
 

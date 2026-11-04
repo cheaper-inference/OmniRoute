@@ -6,76 +6,15 @@
 
 > **Status:** dashbordet er bygget på** Keak CI UI sett** (`@keak/cheaper-inference-ui-kit`), leverandør som arbeidsområdet `packages/ui-kit` (`@omniroute/ui-kit`; oppstrøms øyeblikksbildet er festet i `packages/ui-kit/UPSTREAM.md` og beskyttet av `npm run check:ui-kit-snapshot`). Lys er det kanoniske temaet; standardpreferansen er `system`. Aksenten er Keak lime (`--ci-color-accent`). Switzer er enkeltfamilien for UI, display og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løser seg etter det), selvvertert av selve settet (`packages/ui-kit/src/ci-fonts.css`, importert av `ci-tokens.css`). Skript Switzer mangler fall gjennom glyph for glyph (`src/app/globals.css`): Inter for kyrillisk, gresk og vietnamesisk og, bare under `html[dir="rtl"]`, Vazirmatn for arabisk skrift. Hvert ikon er en Lucide-glyph.
 
-## 1. Hvor ting ligger
+## 1. Hvor ting bor
 
-- **Kit.** `packages/ui-kit/src` er en byte-for-byte-kopi av upstream-`src/` ved commit-en som er festet i
-  `packages/ui-kit/UPSTREAM.md` (som også dokumenterer lisensautorisasjonen); `PATCHES.md` lister lokale
-  patcher (ingen). Den brukes som kildekode, uten bygg: `next.config.mjs` transpilerer den, og
-  `tsconfig.json` mapper `@omniroute/ui-kit` → `packages/ui-kit/src` og `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` og `vitest.mcp.config.ts` har samme alias). Importer en
-  kit-komponent via understien dens (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), aldri
-  gjennom `@omniroute/ui-kit`-barrel-en: barrel-en drar alle komponentene (inkludert datovelgeren)
-  inn i hver importør. Kit-ets stilark tas inn via `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokens.** `packages/ui-kit/src/ci-tokens.css` deklarerer `--ci-*`-tokenene; `src/app/globals.css`
-  bygger bro til de eldre OmniRoute-navnene (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), slik at eksisterende `var(--color-*)`-oppslag og
-  Tailwind-utilities fortsetter å fungere. Ny kode bruker Tailwind-utilities (`bg-surface`,
-  `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) eller kit-klasser
-  — aldri en hex-verdi (`tests/unit/design-kit-bridge.test.ts` håndhever broen). `text-primary` løses
-  til `--color-primary-ink` via `--text-color-primary` (lime-800 i lyst tema, lime-aksenten i mørkt),
-  slik at primærteksten forblir lesbar mens `bg-primary`/`border-primary` beholder lime-overflaten.
-  Diagramserier bruker `--color-chart-1` … `--color-chart-5`.
-- **Temaer.** `<html className="ci-theme">` (`src/app/layout.tsx`) aktiverer kit-temaet for dokumentet.
-  Innstillingen er `light`, `dark` eller `system` (`THEME_CONFIG.defaultTheme = "system"` i
-  `src/shared/constants/appConfig.ts`; `system` følger `prefers-color-scheme`). `applyTheme()` i
-  `src/store/themeStore.ts` (speilet av oppstartsskriptet som ligger inline i `src/app/layout.tsx`, og
-  som kjører før hydrering) setter `data-theme="dark"|"light"` og veksler `.dark`-klassen på `<html>`
-  samtidig. Kit-ets mørke token-sett er nøkklet mot `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); OmniRoutes egne mørke overstyringer (`.dark`-blokken i
-  `globals.css`) og de eldre Tailwind `dark:`-utilities er nøkklet mot `.dark`-klassen. Det finnes
-  ingen forhåndsvalg for aksentfarge: aksenten kommer alltid fra kit-en, og et lagret forhåndsvalg fra
-  et eldre bygg forkastes når storen lastes inn.
-- **Komponenter (adaptere).** `src/shared/components/index.tsx` bevarer OmniRoutes komponent-API
-  (samme navn, standardeksporter og props), og primitivene bak er adaptere over kit-en: skjema
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlegg og
-  tilbakemelding (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`,
-  `Loading`), struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`,
-  `Avatar`) og tabeller (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). En
-  adapter importerer kit-komponenten via understi og mapper de eldre props-ene til den — for eksempel
-  er `Button variant="primary"` kit-ens `default`-knapp (`--ci-button-primary-*`: den inverse
-  overflaten i lyst tema, aksenten med sitt `--ci-color-accent-foreground`-blekk i mørkt), `danger` er
-  `destructive`, og `warning` er `outline` pluss `.ci-button--warning`-utvidelsen. Reglene
-  `.ci-button--warning` og `.ci-badge[data-tone]` nederst i `globals.css` (`@layer components`) er
-  OmniRoute-utvidelser oppå kit-klassene. `tests/unit/ui/adapters/*.test.tsx` fester hver adapter.
-- **Skall.** `src/app/(dashboard)/layout.tsx` rendrer `DashboardLayout`, som rendrer
-  `src/shared/components/layouts/DashboardShell.tsx`: kit-ens `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), med OmniRoutes navigasjonslogikk i
-  `src/shared/components/Sidebar.tsx`. En «hopp til innhold»-lenke til `#main-content` er det første
-  fokuserbare elementet. `src/shared/components/Header.tsx` inneholder kit-ens `SidebarTrigger`
-  (skallets eneste sidepanel-veksler), Keak `ProductSwitcher` og kommandopalett-åpneren; den viser
-  rutetittelen bare så lenge ingen kit-`PageHeader` (`.ci-page-header`) er montert inne i
-  `#main-content`, slik at en side med sin egen `PageHeader` har én enkelt `h1`.
-  `src/shared/components/CommandPalette.tsx` er en kit-`Dialog`.
-- **Ikoner.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) løser navnet
-  (Material Symbols-vokabularet som skjermbildene bruker) via `ICON_MAP`
-  (`src/shared/constants/iconMap.ts`) til en Lucide-glyf. Material Symbols-fonten og -pakken er borte:
-  et navn som mangler i mappingen, rendrer en nøytral plassholder-glyf (`data-icon-missing="true"`) og
-  logger en konsolladvarsel utenfor produksjon. `npm run gen:icon-map` skriver ut navnene som er i
-  bruk, men mangler i mappingen (`tests/unit/icon-map-coverage.test.ts` feiler på ethvert navn uten et
-  Lucide-ikon; `tests/unit/icon-map-object-values.test.ts` dekker navn lagret i oppslagsobjekter);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` skriver om bokstavelige
-  `<span className="material-symbols-outlined">`-span-elementer til `<Icon>`.
-- **Merkevare.** `src/shared/components/OmniRouteLogo.tsx` pakker inn kit-en: standardeksporten
-  `OmniRouteLogo` rendrer `ProductIcon product="omniroute" variant="glyph"` (inline SVG,
-  `basePath`-sikker), og `OmniRouteLockup` rendrer `ProductLockup product="omniroute"` (tilgjengelig
-  navn «Keak OmniRoute») eller, for white-label-operatører, deres egne `name`/`logoSrc`.
-  Destinasjonene i produktvelgeren ligger i `src/shared/constants/keakProducts.ts`
-  (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). De frittstående skjermbildene —
-  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` og
-  `src/shared/components/ErrorPageScaffold.tsx` — viser lockup-en;
-  `tests/unit/brand-pages-static.test.ts` vokter dette.
+- **Sett.** `packages/ui-kit/src` er en byte-for-byte-kopi av oppstrøms `src/` ved commit-festet i `packages/ui-kit/UPSTREAM.md` (som også registrerer lisensautorisasjonen); `PATCHES.md` viser lokale oppdateringer (ingen). Den forbrukes som kilde, uten build: `next.config.mjs` transpilerer den, og `tsconfig.json` kartlegger `@omniroute/ui-kit` → `packages/ui-kit/src` og `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` og `vitest.mcp.config.ts` har samme alias). Importer en settkomponent etter underbanen (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), aldri gjennom `@omniroute/ui-kit` tønnen: fatet trekker hver komponent (inkludert datovelgeren) inn i hver importør. Settet stilarket går inn gjennom `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, hele arket: kjernen `ci-ui.css` pluss hver mønsterfamilie).
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` erklærer `--ci-*` symbolene; `src/app/globals.css` kobler dem til de gamle OmniRoute navnene (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), slik at de eksisterende `var(--color-*)` -lesene og Tailwind verktøyene fortsetter å fungere. Ny kode bruker Tailwind -verktøyene (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) eller kit-klassene — aldri en hex-verdi (`tests/unit/design-kit-bridge.test.ts` håndhever broen). `text-primary` løses til `--color-primary-ink` til `--text-color-primary` (lime-800 i lys, lime-aksent i mørke), så primærteksten forblir lesbar mens `bg-primary`/`border-primary` beholder kalkoverflaten. Kartserier bruker `--color-chart-1` … `--color-chart-5`.
+- **Temaer.** `<html className="ci-theme">` (`src/app/layout.tsx`) velger dokumentet til settetemaet. Preferansen er `light`, `dark` eller `system` (`THEME_CONFIG.defaultTheme = "system"` i `src/shared/constants/appConfig.ts`; `system` følger `prefers-color-scheme`). `applyTheme()` i `src/store/themeStore.ts` (speilet av det inline bootstrap-skriptet i `src/app/layout.tsx`, som kjører før hydrering) setter `data-theme="dark"|"light"` og veksler `.dark` klassen på `<html>` sammen. Settets mørke token-sett er tastet inn på `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute egne mørke overstyringer ( `.dark` blokken i `globals.css`) og den eldre Tailwind `dark:` verktøynøkkelen på `.dark` klassen. Det er ingen forhåndsinnstillinger for aksentfarge: aksenten kommer alltid fra settet, og en vedvarende forhåndsinnstilling fra en eldre konstruksjon droppes når butikken lastes inn.
+- **Komponenter (adaptere).** `src/shared/components/index.tsx` beholder OmniRoute -komponenten API (samme navn, standard eksporter og rekvisitter), og primitivene bak den er adaptere over settet: skjemaer (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlegg og tilbakemeldinger (`Modal`, z `ConfirmModal`, zq, `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) og tabeller (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). En adapter importerer settkomponenten etter underbane og kartlegger de eldre rekvisittene på den — for eksempel er `Button variant="primary"` kit `default` knappen (`--ci-button-primary-*`: den omvendte overflaten i lys, aksenten med dens `--ci-color-accent-foreground` blekk i mørke), `danger` er `destructive`, og `warning` er `outline` pluss `.ci-button--warning` utvidelsen. `.ci-button--warning` og `.ci-badge[data-tone]` reglene på slutten av `globals.css` (`@layer components`) er OmniRoute utvidelser på toppen av kit-klassene. `tests/unit/ui/adapters/*.test.tsx` pin hver adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` gjengir `DashboardLayout`, som gjengir `src/shared/components/layouts/DashboardShell.tsx`: settet `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), med OmniRoute navigasjonslogikk i `src/shared/components/Sidebar.tsx`. En "hopp til innhold"-lenke til `#main-content` er det første fokuserbare elementet. `src/shared/components/Header.tsx` inneholder settet `SidebarTrigger` (skallets eneste sidefelt-veksling), Keak `ProductSwitcher` og kommandopalettåpneren; den viser rutetittelen bare mens ingen kit `PageHeader` (`.ci-page-header`) er montert inne i `#main-content`, så en side med sin egen `PageHeader` har en enkelt `h1`. `src/shared/components/CommandPalette.tsx` er et kit `Dialog`.
+- **Ikoner.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) løser navnet (Material Symbols-vokabularet skjermene bruker) gjennom `ICON_MAP` (`src/shared/constants/iconMap.ts`) til en Lucide-glyph. Materialsymbols-fonten og -pakken er borte: et navn som mangler på kartet gjengir en nøytral plassholderglyph (`data-icon-missing="true"`) og logger en konsolladvarsel utenfor produksjonen. `npm run gen:icon-map` skriver ut navnene i bruk som mangler på kartet (`tests/unit/icon-map-coverage.test.ts` feiler på et hvilket som helst navn uten et Lucide-ikon; `tests/unit/icon-map-object-values.test.ts` dekker navn som er lagret i oppslagsobjekter); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` omskriver bokstavelig `<span className="material-symbols-outlined">` -spenn til `<Icon>`.
+- **Merke.** `src/shared/components/OmniRouteLogo.tsx` pakker inn settet: standard eksport `OmniRouteLogo` gjengir `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) og `OmniRouteLockup` gjengir `ProductLockup product="omniroute"` (tilgjengelig navn "Keak OmniRoute") eller, for white-label-operatører, deres egne `name`/`logoSrc`. Produktbytterdestinasjoner lever i `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). De frittstående skjermene — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` og `src/shared/components/ErrorPageScaffold.tsx` — viser låsingen; `tests/unit/brand-pages-static.test.ts` vokter det.
 
 ## 2. Regler
 

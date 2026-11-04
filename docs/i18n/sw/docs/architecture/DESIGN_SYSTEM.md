@@ -6,75 +6,15 @@
 
 > **Hali:** dashibodi imejengwa juu ya** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), inauzwa kama nafasi ya kazi `packages/ui-kit` (`@omniroute/ui-kit`; picha ya juu ya mkondo imebandikwa `packages/ui-kit/UPSTREAM.md` na inalindwa na `npm run check:ui-kit-snapshot`). Nuru ni mada ya kisheria; upendeleo chaguo-msingi ni `system`. Lafudhi ni Keak chokaa (`--ci-color-accent`). Switzer ni familia moja ya UI, onyesho na maandishi ya msimbo (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoingizwa na `ci-tokens.css`). Scripts Switzer inakosa kuangukia glyph by glyph (`src/app/globals.css`): Inter kwa Kisirili, Kigiriki na Kivietinamu na, chini ya `html[dir="rtl"]`, Vazirmatn kwa hati ya Kiarabu pekee. Kila ikoni ni glyph ya Lucide.
 
-## 1. Mahali vitu vilipo
+## 1. Mahali pa kuishi
 
-- **Kit.** `packages/ui-kit/src` ni nakala ya baiti kwa baiti ya `src/` ya upstream kwenye commit iliyobandikwa katika
-  `packages/ui-kit/UPSTREAM.md` (ambayo pia hurekodi idhini ya leseni); `PATCHES.md` huorodhesha viraka vya
-  ndani (havipo). Hutumika kama msimbo wa chanzo, bila ujenzi: `next.config.mjs` huitranspile, na
-  `tsconfig.json` huweka ramani `@omniroute/ui-kit` → `packages/ui-kit/src` na `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` na `vitest.mcp.config.ts` hubeba alias hiyo hiyo). Leta
-  kipengele cha kit kwa subpath yake (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), kamwe
-  kupitia barrel ya `@omniroute/ui-kit`: barrel huvuta kila kipengele (ikiwemo kichaguzi cha tarehe) ndani
-  ya kila mletaaji. Faili ya mitindo ya kit huingia kupitia `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokeni.** `packages/ui-kit/src/ci-tokens.css` hutangaza tokeni za `--ci-*`; `src/app/globals.css`
-  huziunganisha na majina ya zamani ya OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), hivyo kusoma `var(--color-*)` kulioko na zana za
-  Tailwind huendelea kufanya kazi. Msimbo mpya hutumia zana za Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) au madarasa ya kit — kamwe si thamani
-  ya hex (`tests/unit/design-kit-bridge.test.ts` hutekeleza daraja hilo). `text-primary` hutatuliwa kuwa
-  `--color-primary-ink` kupitia `--text-color-primary` (lime-800 katika hali ya mwanga, rangi ya msisitizo
-  ya lime katika hali ya giza), hivyo maandishi ya msingi hubaki yasomeka ilhali `bg-primary`/`border-primary`
-  huhifadhi uso wa lime. Mfululizo wa chati hutumia `--color-chart-1` … `--color-chart-5`.
-- **Mandhari.** `<html className="ci-theme">` (`src/app/layout.tsx`) huwezesha hati kutumia mandhari ya kit.
-  Kipendeleo ni `light`, `dark` au `system` (`THEME_CONFIG.defaultTheme = "system"` katika
-  `src/shared/constants/appConfig.ts`; `system` hufuata `prefers-color-scheme`). `applyTheme()` katika
-  `src/store/themeStore.ts` (iliyofanana na script ya bootstrap ya inline katika `src/app/layout.tsx`,
-  inayoendeshwa kabla ya hydration) huweka `data-theme="dark"|"light"` na kubadilisha darasa `.dark`
-  kwenye `<html>` kwa pamoja. Seti ya tokeni za giza ya kit imewekwa kwa ufunguo wa `data-theme="dark"`
-  (`packages/ui-kit/src/ci-tokens.css`); marekebisho ya giza ya OmniRoute yenyewe (kizuizi cha `.dark`
-  katika `globals.css`) na zana za zamani za Tailwind `dark:` zimetegemea darasa `.dark`. Hakuna preset
-  za rangi ya msisitizo: msisitizo daima hutoka kwa kit, na preset iliyohifadhiwa kutoka ujenzi wa zamani
-  hutupwa store inapopakiwa.
-- **Vipengele (adapta).** `src/shared/components/index.tsx` huhifadhi API ya vipengele vya OmniRoute
-  (majina yaleyale, exports za default na props), na primitives zilizo nyuma yake ni adapta zilizojengwa
-  juu ya kit: fomu (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  tabaka za juu na majibu (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`,
-  `EmptyState`, `Loading`), muundo (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`,
-  `Avatar`) na majedwali (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapta
-  huleta kipengele cha kit kupitia subpath na huramani props za zamani juu yake — kwa mfano
-  `Button variant="primary"` ni kitufe cha `default` cha kit (`--ci-button-primary-*`: uso wa kinyume
-  katika hali ya mwanga, rangi ya msisitizo yenye wino wake wa `--ci-color-accent-foreground` katika hali
-  ya giza), `danger` ni `destructive`, na `warning` ni `outline` pamoja na upanuzi wa `.ci-button--warning`.
-  Kanuni za `.ci-button--warning` na `.ci-badge[data-tone]` mwishoni mwa `globals.css`
-  (`@layer components`) ni upanuzi wa OmniRoute juu ya madarasa ya kit.
-  `tests/unit/ui/adapters/*.test.tsx` hubandika kila adapta.
-- **Shell.** `src/app/(dashboard)/layout.tsx` hurender `DashboardLayout`, ambayo hurender
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` / `SidebarInset` za kit
-  (`packages/ui-kit/src/sidebar.tsx`), pamoja na mantiki ya urambazaji ya OmniRoute katika
-  `src/shared/components/Sidebar.tsx`. Kiungo cha "ruka hadi kwenye maudhui" kinachoelekea `#main-content`
-  ndicho kipengele cha kwanza kinachoweza kupokea fokasi. `src/shared/components/Header.tsx` ina
-  `SidebarTrigger` ya kit (kibadilishaji pekee cha upau wa pembeni cha shell), `ProductSwitcher` ya Keak na
-  kifunguzi cha paleti ya amri; huonyesha kichwa cha njia tu pale `PageHeader` ya kit (`.ci-page-header`)
-  haijapachikwa ndani ya `#main-content`, hivyo ukurasa wenye `PageHeader` yake mwenyewe una `h1` moja.
-  `src/shared/components/CommandPalette.tsx` ni `Dialog` ya kit.
-- **Ikoni.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) hutatua jina (msamiati wa
-  Material Symbols unaotumiwa na skrini) kupitia `ICON_MAP` (`src/shared/constants/iconMap.ts`) kuwa glifu
-  ya Lucide. Fonti na kifurushi cha Material Symbols vimeondolewa: jina lisilopo kwenye ramani hurender
-  glifu ya kishikilia nafasi isiyo na upande (`data-icon-missing="true"`) na hutoa onyo la console nje ya
-  mazingira ya uzalishaji. `npm run gen:icon-map` huchapisha majina yanayotumika lakini yasiyo kwenye ramani
-  (`tests/unit/icon-map-coverage.test.ts` hushindwa kwa jina lolote lisilo na ikoni ya Lucide;
-  `tests/unit/icon-map-object-values.test.ts` hushughulikia majina yaliyohifadhiwa katika vitu vya
-  utafutaji); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` huandika upya span halisi za
-  `<span className="material-symbols-outlined">` ziwe `<Icon>`.
-- **Chapa.** `src/shared/components/OmniRouteLogo.tsx` hufunika kit: export ya default `OmniRouteLogo`
-  hurender `ProductIcon product="omniroute" variant="glyph"` (SVG ya inline, salama kwa `basePath`) na
-  `OmniRouteLockup` hurender `ProductLockup product="omniroute"` (jina linalofikiwa "Keak OmniRoute") au,
-  kwa waendeshaji wa white-label, `name`/`logoSrc` zao wenyewe. Viungo vya kibadilishaji cha bidhaa vimo
-  katika `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Skrini za
-  kujitegemea — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` na `src/shared/components/ErrorPageScaffold.tsx`
-  — huonyesha lockup; `tests/unit/brand-pages-static.test.ts` hulinda hilo.
+- **Kiti.** `packages/ui-kit/src` ni nakala ya byte-kwa-byte ya `src/` ya juu kwenye ahadi iliyobandikwa `packages/ui-kit/UPSTREAM.md` (ambayo pia hurekodi uidhinishaji wa leseni); `PATCHES.md` huorodhesha viraka vya kawaida (hakuna). Inatumika kama chanzo, bila muundo: `next.config.mjs` huibadilisha, na ramani za `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` na `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` na `vitest.mcp.config.ts` hubeba lakabu sawa). Ingiza kijenzi cha vifaa kwa njia yake ndogo (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), kamwe kupitia kwa `@omniroute/ui-kit` pipa: pipa huvuta kila kijenzi (pamoja na kichagua tarehe) kwa kila mwagizaji. Laha ya mtindo wa seti huingia kupitia `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, laha kamili: `ci-ui.css` ya msingi pamoja na kila muundo wa familia).
+- **Ishara.** `packages/ui-kit/src/ci-tokens.css` inatangaza ishara za `--ci-*` ; `src/app/globals.css` inaziunganisha kwa majina ya OmniRoute ya urithi (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), kwa hivyo `var(--color-*)` iliyopo inasoma na huduma za Tailwind zinaendelea kufanya kazi. Msimbo mpya hutumia huduma za Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) au darasa la vifaa — kamwe thamani ya hex (`tests/unit/design-kit-bridge.test.ts` hutekeleza daraja). `text-primary` huamua kuwa `--color-primary-ink` kupitia `--text-color-primary` (lime-800 katika mwanga, lafudhi ya chokaa gizani), kwa hivyo maandishi ya msingi yanabaki kusomeka huku `bg-primary`/`border-primary` ikiweka uso wa chokaa. Mfululizo wa chati hutumia `--color-chart-1` … `--color-chart-5`.
+- **Mandhari.** `<html className="ci-theme">` (`src/app/layout.tsx`) huingiza hati katika mandhari ya vifaa. Upendeleo ni `light`, `dark` au `system` (`THEME_CONFIG.defaultTheme = "system"` katika `src/shared/constants/appConfig.ts`; `system` hufuata `prefers-color-scheme`). `applyTheme()` katika `src/store/themeStore.ts` (inayoangaziwa na hati ya ndani ya bootstrap katika `src/app/layout.tsx`, ambayo hutumika kabla ya uwekaji maji) huweka `data-theme="dark"|"light"` na kugeuza darasa la `.dark` kwenye `<html>` pamoja. Seti ya ishara ya giza ya kit imewekwa kwenye `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute yenyewe imebatilisha giza (kizuizi cha `.dark` katika `globals.css`) na ufunguo wa urithi Tailwind `dark:` wa huduma kwenye darasa la `.dark`. Hakuna mipangilio ya awali ya rangi ya lafudhi: lafudhi hutoka kila wakati kutoka kwa vifaa, na uwekaji upya unaoendelea kutoka kwa muundo wa zamani huangushwa wakati duka linapakia.
+- **Vipengele (adapta).** `src/shared/components/index.tsx` huweka kijenzi cha OmniRoute API (majina yale yale, uhamishaji nje chaguo-msingi na propu), na za awali nyuma yake ni adapta juu ya vifaa: fomu (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),`Modal`/ maoni juu ya `ConfirmModal` `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState` `Loading`, muundo (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) na majedwali (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapta huingiza kijenzi cha vifaa kwa njia ndogo na ramani ya mhimili wa urithi ndani yake — kwa mfano `Button variant="primary"` ni kitufe cha `default` (`--ci-button-primary-*`: uso ulio kinyume katika mwanga, lafudhi yenye wino wake `--ci-color-accent-foreground` gizani), `danger` ni `destructive`, na `warning` `.ci-button--warning` `outline`. Sheria za `.ci-button--warning` na `.ci-badge[data-tone]` mwishoni mwa `globals.css` (`@layer components`) ni viendelezi vya OmniRoute juu ya madarasa ya vifaa. `tests/unit/ui/adapters/*.test.tsx` bandika kila adapta.
+- **Shell.** `src/app/(dashboard)/layout.tsx` hutafsiri `DashboardLayout`, ambayo hutafsiri `src/shared/components/layouts/DashboardShell.tsx`: kifaa `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), na mantiki ya urambazaji ya OmniRoute katika `src/shared/components/Sidebar.tsx`. Kiungo cha "ruka hadi maudhui" kwa `#main-content` ndicho kipengele cha kwanza kinachoangaziwa. `src/shared/components/Header.tsx` hushikilia `SidebarTrigger` (kigeuzi pekee cha upau wa kando), Keak `ProductSwitcher` na kopo la ubao wa amri; inaonyesha kichwa cha njia pekee wakati hakuna kit `PageHeader` (`.ci-page-header`) kilichowekwa ndani ya `#main-content`, kwa hivyo ukurasa ulio na `PageHeader` yake una `h1` moja . `src/shared/components/CommandPalette.tsx` ni vifaa vya `Dialog`.
+- **Aikoni.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) hutatua jina (msamiati wa Alama Nyenzo zinazotumiwa na skrini) kupitia `ICON_MAP` (`src/shared/constants/iconMap.ts`) hadi glyph ya Lucide. Fonti ya Alama za Nyenzo na kifurushi hazipo: jina linalokosekana kwenye ramani linatoa glyph ya kishikilia nafasi isiyo na upande (`data-icon-missing="true"`) na kuweka onyo la kiweko nje ya uzalishaji. `npm run gen:icon-map` huchapisha majina yanayotumika ambayo hayapo kwenye ramani (`tests/unit/icon-map-coverage.test.ts` haifaulu kwa jina lolote bila ikoni ya Lucide; `tests/unit/icon-map-object-values.test.ts` inashughulikia majina yaliyohifadhiwa katika vitu vya kuangalia); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` huandika upya `<span className="material-symbols-outlined">` halisi hadi `<Icon>`.
+- **Chapa.** `src/shared/components/OmniRouteLogo.tsx` hufunga kifurushi: uhamishaji chaguo-msingi `OmniRouteLogo` hutafsiri `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) na `OmniRouteLockup` hutoa `ProductLockup product="omniroute"` (jina linaloweza kufikiwa "Keak OmniRoute") au, kwa waendeshaji wa lebo nyeupe, `name`/`logoSrc` zao wenyewe. Maeneo ya kubadilisha bidhaa yanaishi `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Skrini za pekee — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` na `src/shared/components/ErrorPageScaffold.tsx` — zinaonyesha kufunga; `tests/unit/brand-pages-static.test.ts` inailinda.
 
 ## 2. Kanuni
 

@@ -16,7 +16,7 @@ const block = (selector: string) => {
 test("globals.css loads the vendored kit CSS right after Tailwind, and the kit self-hosts its font", () => {
   const order = [
     '@import "tailwindcss" source(none);',
-    '@import "../../packages/ui-kit/src/ci-ui.css";',
+    '@import "../../packages/ui-kit/src/ci-styles.css";',
   ].map((needle) => css.indexOf(needle));
   assert.ok(
     order.every((i) => i >= 0),

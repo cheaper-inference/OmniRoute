@@ -6,74 +6,15 @@
 
 > **Stav:** prístrojová doska je postavená na** Súprava Keak CI UI** (`@keak/cheaper-inference-ui-kit`), dodávaný ako pracovný priestor `packages/ui-kit` (`@omniroute/ui-kit`; snímka proti prúdu je pripnutá v `packages/ui-kit/UPSTREAM.md` a chránená `npm run check:ui-kit-snapshot`). Svetlo je kanonickou témou; predvolená preferencia je `system`. Akcentom je keak limetka (`--ci-color-accent`). Switzer je jediná rodina pre UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` sa naň rozlíšia), ktorý je hostený samotnou súpravou (`packages/ui-kit/src/ci-fonts.css`, importované `ci-tokens.css`). Skriptá Switzerovi chýba možnosť prechodu glyfom po glyfu (`src/app/globals.css`): Inter pre cyriliku, gréčtinu a vietnamčinu a iba pod `html[dir="rtl"]` Vazirmatn pre arabské písmo. Každá ikona je symbolom Lucide.
 
-## 1. Kde sa čo nachádza
+## 1. Kde veci žijú
 
-- **Kit.** `packages/ui-kit/src` je bajt-po-bajte kópia upstream `src/` na commite zafixovanom v
-  `packages/ui-kit/UPSTREAM.md` (ktorý zároveň zaznamenáva licenčné oprávnenie); `PATCHES.md` uvádza lokálne
-  patche (žiadne). Používa sa ako zdroj, bez buildu: `next.config.mjs` ho transpiluje a
-  `tsconfig.json` mapuje `@omniroute/ui-kit` → `packages/ui-kit/src` a `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` a `vitest.mcp.config.ts` nesú rovnaký alias). Kit komponent
-  importujte cez jeho subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nikdy cez
-  barrel `@omniroute/ui-kit`: barrel vtiahne každý komponent (vrátane date pickeru) do každého
-  importujúceho súboru. Stylesheet kitu vstupuje cez `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokeny.** `packages/ui-kit/src/ci-tokens.css` deklaruje tokeny `--ci-*`; `src/app/globals.css`
-  ich premosťuje na staré názvy OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), takže existujúce čítania `var(--color-*)` a utility
-  Tailwindu naďalej fungujú. Nový kód používa utility Tailwindu (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) alebo triedy kitu — nikdy hex hodnotu
-  (`tests/unit/design-kit-bridge.test.ts` vynucuje premostenie). `text-primary` sa prekladá na
-  `--color-primary-ink` cez `--text-color-primary` (lime-800 vo svetlej, lime akcent v tmavej), takže
-  primárny text ostáva čitateľný, zatiaľ čo `bg-primary`/`border-primary` si ponechávajú lime povrch.
-  Grafové série používajú `--color-chart-1` … `--color-chart-5`.
-- **Témy.** `<html className="ci-theme">` (`src/app/layout.tsx`) zapína pre dokument tému kitu.
-  Preferencia je `light`, `dark` alebo `system` (`THEME_CONFIG.defaultTheme = "system"` v
-  `src/shared/constants/appConfig.ts`; `system` sa riadi `prefers-color-scheme`). `applyTheme()` v
-  `src/store/themeStore.ts` (zrkadlená inline bootstrap skriptom v `src/app/layout.tsx`, ktorý beží pred
-  hydratáciou) nastavuje `data-theme="dark"|"light"` a súčasne prepína triedu `.dark` na `<html>`.
-  Tmavá sada tokenov kitu je naviazaná na `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  vlastné tmavé prepisy OmniRoute (blok `.dark` v `globals.css`) a staré utility Tailwindu `dark:` sa
-  viažu na triedu `.dark`. Neexistujú žiadne presety akcentových farieb: akcent vždy pochádza z kitu
-  a perzistovaný preset zo staršieho buildu sa pri načítaní store zahodí.
-- **Komponenty (adaptéry).** `src/shared/components/index.tsx` zachováva komponentové API OmniRoute
-  (rovnaké názvy, default exporty a propy) a primitívy za ním sú adaptéry nad kitom: formuláre
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlaye a spätná
-  väzba (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  štruktúra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) a tabuľky
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adaptér importuje komponent
-  kitu cez subpath a mapuje na neho staré propy — napríklad `Button variant="primary"` je tlačidlo kitu
-  `default` (`--ci-button-primary-*`: inverzný povrch vo svetlej, akcent s jeho
-  `--ci-color-accent-foreground` atramentom v tmavej), `danger` je `destructive` a `warning` je `outline`
-  plus rozšírenie `.ci-button--warning`. Pravidlá `.ci-button--warning` a `.ci-badge[data-tone]` na konci
-  `globals.css` (`@layer components`) sú rozšírenia OmniRoute nad triedami kitu.
-  `tests/unit/ui/adapters/*.test.tsx` fixujú každý adaptér.
-- **Shell.** `src/app/(dashboard)/layout.tsx` renderuje `DashboardLayout`, ktorý renderuje
-  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
-  `SidebarInset` z kitu (`packages/ui-kit/src/sidebar.tsx`), s navigačnou logikou OmniRoute v
-  `src/shared/components/Sidebar.tsx`. Odkaz „preskočiť na obsah" na `#main-content` je prvý
-  fokusovateľný prvok. `src/shared/components/Header.tsx` obsahuje `SidebarTrigger` z kitu (jediný
-  prepínač sidebaru shellu), Keak `ProductSwitcher` a otvárač príkazovej palety; názov routy zobrazuje
-  len vtedy, keď vnútri `#main-content` nie je namontovaný žiadny `PageHeader` z kitu
-  (`.ci-page-header`), takže stránka s vlastným `PageHeader` má jediný `h1`.
-  `src/shared/components/CommandPalette.tsx` je `Dialog` z kitu.
-- **Ikony.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) prekladá názov (slovník
-  Material Symbols, ktorý obrazovky používajú) cez `ICON_MAP` (`src/shared/constants/iconMap.ts`) na
-  Lucide glyf. Font a balík Material Symbols sú preč: názov chýbajúci v mape renderuje neutrálny
-  zástupný glyf (`data-icon-missing="true"`) a mimo produkcie loguje varovanie do konzoly.
-  `npm run gen:icon-map` vypíše používané názvy, ktoré v mape chýbajú
-  (`tests/unit/icon-map-coverage.test.ts` zlyhá na akomkoľvek názve bez ikony Lucide;
-  `tests/unit/icon-map-object-values.test.ts` pokrýva názvy uložené vo vyhľadávacích objektoch);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` prepisuje literálne spany
-  `<span className="material-symbols-outlined">` na `<Icon>`.
-- **Značka.** `src/shared/components/OmniRouteLogo.tsx` obaluje kit: default export `OmniRouteLogo`
-  renderuje `ProductIcon product="omniroute" variant="glyph"` (inline SVG, bezpečné voči `basePath`) a
-  `OmniRouteLockup` renderuje `ProductLockup product="omniroute"` (prístupný názov „Keak OmniRoute")
-  alebo, pre white-label operátorov, ich vlastné `name`/`logoSrc`. Destinácie prepínača produktov sa
-  nachádzajú v `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`).
-  Samostatné obrazovky — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
-  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` a
-  `src/shared/components/ErrorPageScaffold.tsx` — zobrazujú lockup;
-  `tests/unit/brand-pages-static.test.ts` ho stráži.
+- **Súprava.** `packages/ui-kit/src` je bajt za bajtom kópia upstream `src/` v odovzdaní pripnutom v `packages/ui-kit/UPSTREAM.md` (ktorá tiež zaznamenáva licenčné oprávnenie); `PATCHES.md` uvádza lokálne záplaty (žiadne). Používa sa ako zdroj bez zostavy: `next.config.mjs` ho transpiluje a `tsconfig.json` mapuje `@omniroute/ui-kit` → `packages/ui-kit/src` a `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` a `vitest.mcp.config.ts` nesú rovnaký alias). Importujte komponent súpravy po jej podceste (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), nikdy nie cez valec `@omniroute/ui-kit` : valec vtiahne každý komponent (vrátane nástroja na výber dátumu) do každého dovozcu. Šablóna štýlov súpravy vstupuje cez `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, úplný list: jadro `ci-ui.css` plus každá rodina vzorov).
+- **Tokeny.** `packages/ui-kit/src/ci-tokens.css` deklaruje tokeny `--ci-*` ; `src/app/globals.css` ich spája so starými názvami OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), takže existujúce čítačky `var(--color-*)` a nástroje Tailwind naďalej fungujú. Nový kód používa nástroje Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) alebo triedy súprav — nikdy nie hexovú hodnotu (`tests/unit/design-kit-bridge.test.ts` vynucuje most). `text-primary` sa rozlíši na `--color-primary-ink` cez `--text-color-primary` (lime-800 vo svetle, limetkový akcent na tmavom), takže primárny text zostáva čitateľný, zatiaľ čo `bg-primary`/`border-primary` zachováva limetkový povrch. Séria grafov používa `--color-chart-1` … `--color-chart-5`.
+- **Témy.** `<html className="ci-theme">` (`src/app/layout.tsx`) vyberie dokument do témy súpravy. Preferuje sa `light`, `dark` alebo `system` (`THEME_CONFIG.defaultTheme = "system"` v `src/shared/constants/appConfig.ts`; `system` nasleduje `prefers-color-scheme`). `applyTheme()` v `src/store/themeStore.ts` (zrkadlené vloženým bootstrap skriptom v `src/app/layout.tsx`, ktorý sa spúšťa pred hydratáciou) nastavuje `data-theme="dark"|"light"` a prepína triedu `.dark` na `<html>` spolu. Sada tmavých žetónov súpravy je kľúčovaná na `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); Vlastné tmavé prepísania OmniRoute(blok `.dark` v `globals.css`) a starý kľúč nástrojov Tailwind `dark:` v triede `.dark`. Neexistujú žiadne predvoľby farieb zvýraznenia: zvýraznenie vždy pochádza zo súpravy a pretrvávajúca predvoľba zo staršej zostavy sa pri načítaní obchodu zruší.
+- **Komponenty (adaptéry).** `src/shared/components/index.tsx` ponecháva komponent OmniRoute API (rovnaké názvy, predvolené exporty a rekvizity) a primitívy za ním sú adaptéry nad súpravou: formuláre (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), prekrytia a spätná väzba (`Modal`,`ConfirmModal`/ `Tooltip`,`InfoTooltip`, `EmptyState`), štruktúra `NotificationToast` `Collapsible`, `CollapsibleSection`, `SegmentedControl` `Breadcrumbs` `Avatar`) a tabuľky (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adaptér importuje komponent súpravy podľa podcesty a namapuje na ňu staršie rekvizity — napríklad `Button variant="primary"` je tlačidlo `default` súpravy (`--ci-button-primary-*`: inverzná plocha vo svetle, zvýraznenie s atramentom `--ci-color-accent-foreground` v tme), `danger` je `destructive` a `warning` je `outline` plus rozšírenie `.ci-button--warning`. Pravidlá `.ci-button--warning` a `.ci-badge[data-tone]` na konci `globals.css` (`@layer components`) sú rozšíreniami OmniRoute nad triedami súpravy. `tests/unit/ui/adapters/*.test.tsx` kolík každého adaptéra.
+- **Shell.** `src/app/(dashboard)/layout.tsx` vykreslí `DashboardLayout`, čo vykreslí `src/shared/components/layouts/DashboardShell.tsx`: súprava `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), s navigačnou logikou OmniRoute v `src/shared/components/Sidebar.tsx`. Odkaz „preskočiť na obsah“ na `#main-content` je prvým zaostriteľným prvkom. `src/shared/components/Header.tsx` obsahuje súpravu `SidebarTrigger` (jediný prepínač bočného panela shellu), `ProductSwitcher` Keak a otvárač palety príkazov; zobrazuje názov trasy iba vtedy, keď vo vnútri `#main-content` nie je namontovaný žiadny kit `PageHeader` (`.ci-page-header`), takže stránka s vlastným `PageHeader` má jeden `h1`. `src/shared/components/CommandPalette.tsx` je súprava `Dialog`.
+- **ikony.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) rozloží názov (slovník symbolov materiálu, ktorý obrazovky používajú) cez `ICON_MAP` (`src/shared/constants/iconMap.ts`) na lucidný glyf. Písmo a balík Material Symbols sú preč: názov chýbajúci na mape vykreslí neutrálny zástupný symbol (`data-icon-missing="true"`) a zaznamená varovanie konzoly mimo produkcie. `npm run gen:icon-map` vytlačí používané názvy, ktoré chýbajú na mape (`tests/unit/icon-map-coverage.test.ts` zlyhá pri akomkoľvek mene bez ikony Lucide; `tests/unit/icon-map-object-values.test.ts` pokrýva názvy uložené vo vyhľadávacích objektoch); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` prepíše doslovný rozsah `<span className="material-symbols-outlined">` na `<Icon>`.
+- **Značka.** `src/shared/components/OmniRouteLogo.tsx` zabalí súpravu: predvolený export `OmniRouteLogo` vykreslí `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) a `OmniRouteLockup` vykreslí `ProductLockup product="omniroute"` (dostupný názov "Keak OmniRoute") alebo pre operátorov s bielym štítkom ich vlastné `name`/`logoSrc`. Cieľové miesta prepínania produktov žijú v `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Samostatné obrazovky — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` a `src/shared/components/ErrorPageScaffold.tsx` — zobrazujú zablokovanie; `tests/unit/brand-pages-static.test.ts` to stráži.
 
 ## 2. Pravidlá
 

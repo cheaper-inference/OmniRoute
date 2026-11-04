@@ -6,71 +6,15 @@
 
 > **Statuss:** informācijas panelis ir veidots uz** Keak CI UI komplekts** (`@keak/cheaper-inference-ui-kit`), tiek piegādāts kā darbvieta `packages/ui-kit` (`@omniroute/ui-kit`; augšējais momentuzņēmums ir piesprausts `packages/ui-kit/UPSTREAM.md` un to aizsargā `npm run check:ui-kit-snapshot`). Gaisma ir kanoniskā tēma; noklusējuma preference ir `system`. Akcents ir Keak laima (`--ci-color-accent`). Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Skripti Switzer trūkst izšķirtspējas pēc glifa (`src/app/globals.css`): Inter kirilicai, grieķu un vjetnamiešu valodai un, tikai zem `html[dir="rtl"]`, Vazirmatn arābu rakstībai. Katra ikona ir Lucide glifs.
 
-## 1. Kur kas atrodas
+## 1. Kur lietas dzīvo
 
-- **Komplekts.** `packages/ui-kit/src` ir augšupējā `src/` baits-pret-baitu kopija pie commit, kas nofiksēts
-  `packages/ui-kit/UPSTREAM.md` (kurš reģistrē arī licences autorizāciju); `PATCHES.md` uzskaita lokālos
-  labojumus (nav). Tas tiek lietots kā pirmkods, bez būvēšanas soļa: `next.config.mjs` to transpilē, un
-  `tsconfig.json` kartē `@omniroute/ui-kit` → `packages/ui-kit/src` un `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` un `vitest.mcp.config.ts` nes to pašu aliasu). Komplekta
-  komponentu importē pēc tā apakšceļa (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nekad
-  caur `@omniroute/ui-kit` barrel: barrel ierauj katrā importētājā visus komponentus (ieskaitot datuma
-  atlasītāju). Komplekta stilu lapa nonāk caur `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokeni.** `packages/ui-kit/src/ci-tokens.css` deklarē `--ci-*` tokenus; `src/app/globals.css`
-  savieno tos ar mantotajiem OmniRoute nosaukumiem (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), tāpēc esošie `var(--color-*)` nolasījumi un Tailwind
-  utilītklases turpina darboties. Jaunais kods lieto Tailwind utilītklases (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) vai komplekta klases — nekad hex vērtību
-  (`tests/unit/design-kit-bridge.test.ts` uzrauga šo tiltu). `text-primary` izšķiras uz
-  `--color-primary-ink` caur `--text-color-primary` (lime-800 gaišajā režīmā, laima akcents tumšajā), tāpēc
-  primārais teksts paliek lasāms, kamēr `bg-primary`/`border-primary` saglabā laima virsmu. Grafiku sērijas
-  lieto `--color-chart-1` … `--color-chart-5`.
-- **Tēmas.** `<html className="ci-theme">` (`src/app/layout.tsx`) ieslēdz dokumentam komplekta tēmu.
-  Šis iestatījums ir `light`, `dark` vai `system` (`THEME_CONFIG.defaultTheme = "system"` failā
-  `src/shared/constants/appConfig.ts`; `system` seko `prefers-color-scheme`). `applyTheme()` failā
-  `src/store/themeStore.ts` (ko dublē iebūvētais bootstrap skripts `src/app/layout.tsx`, kas izpildās
-  pirms hidratācijas) uzstāda `data-theme="dark"|"light"` un vienlaikus pārslēdz `.dark` klasi uz `<html>`.
-  Komplekta tumšā tokenu kopa ir piesaistīta pie `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute paša tumšā režīma pārdefinējumi (`.dark` bloks `globals.css`) un mantotās Tailwind `dark:`
-  utilītklases balstās uz `.dark` klases. Akcenta krāsu priekšiestatījumu nav: akcents vienmēr nāk no
-  komplekta, un saglabāts priekšiestatījums no vecākas versijas tiek atmests, kad krātuve ielādējas.
-- **Komponenti (adapteri).** `src/shared/components/index.tsx` saglabā OmniRoute komponentu API (tie paši
-  nosaukumi, noklusējuma eksporti un rekvizīti), un primitīvi aiz tā ir adapteri virs komplekta: formas
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), pārklājumi un
-  atgriezeniskā saite (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`,
-  `Loading`), struktūra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`)
-  un tabulas (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapters importē
-  komplekta komponentu pēc apakšceļa un kartē uz to mantotos rekvizītus — piemēram, `Button
-variant="primary"` ir komplekta `default` poga (`--ci-button-primary-*`: inversā virsma gaišajā režīmā,
-  akcents ar tā `--ci-color-accent-foreground` tinti tumšajā), `danger` ir `destructive`, un `warning` ir
-  `outline` plus `.ci-button--warning` paplašinājums. `.ci-button--warning` un `.ci-badge[data-tone]`
-  noteikumi `globals.css` beigās (`@layer components`) ir OmniRoute paplašinājumi virs komplekta klasēm.
-  `tests/unit/ui/adapters/*.test.tsx` fiksē katru adapteri.
-- **Apvalks.** `src/app/(dashboard)/layout.tsx` renderē `DashboardLayout`, kas renderē
-  `src/shared/components/layouts/DashboardShell.tsx`: komplekta `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ar OmniRoute navigācijas loģiku
-  `src/shared/components/Sidebar.tsx`. "Pāriet uz saturu" saite uz `#main-content` ir pirmais fokusējamais
-  elements. `src/shared/components/Header.tsx` satur komplekta `SidebarTrigger` (apvalka vienīgo sānjoslas
-  pārslēdzēju), Keak `ProductSwitcher` un komandpaletes atvērēju; tas rāda maršruta virsrakstu tikai tad,
-  kamēr `#main-content` nav uzmontēts komplekta `PageHeader` (`.ci-page-header`), tāpēc lapai ar savu
-  `PageHeader` ir viens `h1`. `src/shared/components/CommandPalette.tsx` ir komplekta `Dialog`.
-- **Ikonas.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) atrisina nosaukumu (Material
-  Symbols vārdnīcu, ko ekrāni lieto) caur `ICON_MAP` (`src/shared/constants/iconMap.ts`) uz Lucide glifu.
-  Material Symbols fonts un pakotne ir aizvākti: nosaukums, kura nav kartē, renderē neitrālu viettura glifu
-  (`data-icon-missing="true"`) un reģistrē konsoles brīdinājumu ārpus produkcijas vides. `npm run
-gen:icon-map` izdrukā lietotos nosaukumus, kuru kartē nav (`tests/unit/icon-map-coverage.test.ts`
-  neizdodas pie jebkura nosaukuma bez Lucide ikonas; `tests/unit/icon-map-object-values.test.ts` aptver
-  nosaukumus, kas glabājas uzmeklēšanas objektos); `scripts/dev/codemod-material-icons.mjs <dir|file>...
-[--write]` pārraksta literālos `<span className="material-symbols-outlined">` span elementus uz `<Icon>`.
-- **Zīmols.** `src/shared/components/OmniRouteLogo.tsx` iesaiņo komplektu: noklusējuma eksports
-  `OmniRouteLogo` renderē `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath`-drošs)
-  un `OmniRouteLockup` renderē `ProductLockup product="omniroute"` (pieejamais nosaukums "Keak OmniRoute")
-  vai, white-label operatoriem, viņu pašu `name`/`logoSrc`. Produktu pārslēdzēja galamērķi atrodas
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Atsevišķie ekrāni —
-  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` un `src/shared/components/ErrorPageScaffold.tsx`
-  — rāda lockup; `tests/unit/brand-pages-static.test.ts` to uzrauga.
+- **Komplekts.** `packages/ui-kit/src` ir baitu baitiem kopija no augšpuses `src/` pie `packages/ui-kit/UPSTREAM.md` piespraustās saistības (kas arī reģistrē licences autorizāciju); `PATCHES.md` uzskaita vietējos ielāpus (nav). Tas tiek patērēts kā avots, bez uzbūves: `next.config.mjs` to pārsūta, un `tsconfig.json` kartē `@omniroute/ui-kit` → `packages/ui-kit/src` un `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` un `vitest.mcp.config.ts` ir viens un tas pats aizstājvārds). Importējiet komplekta komponentu pēc tā apakšceļa (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nekad caur `@omniroute/ui-kit` stobru: muca ievelk katru komponentu (ieskaitot datuma atlasītāju) katrā importētājā. Komplekta stila lapa tiek ievadīta caur `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, visa lapa: kodols `ci-ui.css` plus katra rakstu saime).
+- **Žetoni.** `packages/ui-kit/src/ci-tokens.css` deklarē `--ci-*` žetonus; `src/app/globals.css` savieno tos ar mantotajiem OmniRoute nosaukumiem (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), tāpēc esošā `var(--color-*)` lasa un Tailwind utilītas turpina darboties. Jaunajā kodā tiek izmantotas Tailwind utilītas (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) vai komplektu klases — nekad neizmanto hex vērtību (`tests/unit/design-kit-bridge.test.ts` ievieš tiltu). `text-primary` izšķir `--color-primary-ink` līdz `--text-color-primary` (lime-800 gaišā, laima akcents tumsā), tāpēc primārais teksts paliek lasāms, bet `bg-primary`/`border-primary` saglabā kaļķa virsmu. Diagrammu sērija izmanto `--color-chart-1` … `--color-chart-5`.
+- **Tēmas.** `<html className="ci-theme">` (`src/app/layout.tsx`) izvēlas dokumentu komplekta motīvā. Priekšroka ir `light`, `dark` vai `system` (`THEME_CONFIG.defaultTheme = "system"` `src/shared/constants/appConfig.ts`; `system` seko `prefers-color-scheme`). `applyTheme()` programmā `src/store/themeStore.ts` (atspoguļo `src/app/layout.tsx` iekļautais sāknēšanas skripts, kas darbojas pirms hidratācijas) kopā iestata `data-theme="dark"|"light"` un pārslēdz `.dark` klasi uz `<html>`. Komplekta tumšā marķiera komplekts ir ievadīts `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute paša tumšā ignorēšana ( `.dark` bloks `globals.css`) un mantotā Tailwind `dark:` utilītu atslēga `.dark` klasē. Nav akcentu krāsu priekšiestatījumu: akcents vienmēr nāk no komplekta, un saglabātais priekšiestatījums no vecākas versijas tiek atmests, kad veikals tiek ielādēts.
+- **Sastāvdaļas (adapteri).** `src/shared/components/index.tsx` saglabā OmniRoute komponentu API (vienādi nosaukumi, noklusējuma eksports un rekvizīti), un aiz tā esošie primitīvie ir komplekta adapteri: formas (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), pārklājums (`Modal`/`ConfirmModal` un atgriezeniskā saite) `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState` `Loading`, struktūra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) un tabulas (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapteris importē komplekta komponentu pa apakšceļu un kartē uz tā mantotos rekvizītus, piemēram, — piemēram, `Button variant="primary"` ir `.ci-button--warning` `default` poga (`--ci-button-primary-*`: apgrieztā virsma gaismā, akcents ar `--ci-color-accent-foreground` tinti tumsā), `danger` ir `destructive` un `warning` ir `outline` paplašinājums. `.ci-button--warning` un `.ci-badge[data-tone]` noteikumi `globals.css` (`@layer components`) beigās ir OmniRoute paplašinājumi komplektu klasēm. `tests/unit/ui/adapters/*.test.tsx` pin katru adapteri.
+- **Apvalks.** `src/app/(dashboard)/layout.tsx` atveido `DashboardLayout`, kas atveido `src/shared/components/layouts/DashboardShell.tsx`: komplektu `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ar OmniRoute navigācijas loģiku `src/shared/components/Sidebar.tsx`. Saite "pāriet uz saturu" uz `#main-content` ir pirmais fokusējamais elements. `src/shared/components/Header.tsx` satur komplektu `SidebarTrigger` (apvalka vienīgais sānjoslas pārslēgs), Keak `ProductSwitcher` un komandu paletes atvērēju; tas parāda tikai maršruta nosaukumu, kamēr neviens komplekts `PageHeader` (`.ci-page-header`) nav uzstādīts `#main-content` iekšpusē, tāpēc lapai ar savu `PageHeader` ir viens `h1`. `src/shared/components/CommandPalette.tsx` ir `Dialog` komplekts.
+- **Ikonas.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) atrisina nosaukumu (materiālu simbolu vārdnīca, ko izmanto ekrāni) caur `ICON_MAP` (`src/shared/constants/iconMap.ts`) uz Lucide glifu. Materiālu simbolu fonts un pakotne vairs nav: nosaukums, kas trūkst kartē, atveido neitrālu viettura glifu (`data-icon-missing="true"`) un reģistrē konsoles brīdinājumu ārpus ražošanas. `npm run gen:icon-map` izdrukā lietotos nosaukumus, kas trūkst kartē (`tests/unit/icon-map-coverage.test.ts` neizdodas jebkuram nosaukumam bez Lucide ikonas; `tests/unit/icon-map-object-values.test.ts` aptver nosaukumus, kas saglabāti uzmeklēšanas objektos); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` pārraksta burtiskos `<span className="material-symbols-outlined">` spans uz `<Icon>`.
+- **Zīmols.** `src/shared/components/OmniRouteLogo.tsx` iesaiņo komplektu: noklusējuma eksporta `OmniRouteLogo` atveido `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) un `OmniRouteLockup` atveido `ProductLockup product="omniroute"` (pieejams nosaukums "Keak OmniRoute") vai baltās etiķetes operatoriem savu `name`/`logoSrc`. Produktu pārslēgšanas galamērķi atrodas `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Atsevišķie ekrāni — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` un `src/shared/components/ErrorPageScaffold.tsx` — parāda bloķēšanu; `tests/unit/brand-pages-static.test.ts` to sargā.
 
 ## 2. Noteikumi
 

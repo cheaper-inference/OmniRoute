@@ -6,84 +6,15 @@
 
 > **Állapot:** a műszerfal a** Keak CI UI készlet** (`@keak/cheaper-inference-ui-kit`), a `packages/ui-kit` munkaterület (`@omniroute/ui-kit`; az upstream pillanatkép rögzítve van `packages/ui-kit/UPSTREAM.md` -ben, és `npm run check:ui-kit-snapshot` védi). A fény a kanonikus téma; az alapértelmezett beállítás a `system`. Az akcentus a Keak lime (`--ci-color-accent`). A Switzer az egyetlen család UI hoz, a kijelzőhöz és a kódszöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ennek megoldása), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Scripts Switzer hiányzik a karakterjelről karakterjelre (`src/app/globals.css`): Inter a cirill, görög és vietnami, és csak `html[dir="rtl"]` alatt a Vazirmatn az arab írásra. Minden ikon egy Lucide jelkép.
 
-## 1. Hol mi található
+## 1. Ahol a dolgok élnek
 
-- **Kit.** A `packages/ui-kit/src` az upstream `src/` bájtpontos másolata a
-  `packages/ui-kit/UPSTREAM.md`-ben rögzített commitnál (amely a licencfelhatalmazást is rögzíti); a
-  `PATCHES.md` sorolja a helyi patcheket (nincsenek). Forrásként kerül felhasználásra, build nélkül: a
-  `next.config.mjs` transzpileálja, a `tsconfig.json` pedig az `@omniroute/ui-kit` →
-  `packages/ui-kit/src` és az `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` leképezést adja (a
-  `vitest.config.ts` és a `vitest.mcp.config.ts` ugyanazt az aliast hordozza). A kit komponenst az
-  alútvonalán importáld (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), soha ne az
-  `@omniroute/ui-kit` barrel-en keresztül: a barrel minden komponenst (beleértve a dátumválasztót is)
-  behúz minden importálóba. A kit stíluslapja a `src/app/globals.css`-en keresztül érkezik
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokenek.** A `packages/ui-kit/src/ci-tokens.css` deklarálja a `--ci-*` tokeneket; a
-  `src/app/globals.css` hidat képez hozzájuk a régi OmniRoute-nevekkel (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), így a meglévő
-  `var(--color-*)` kiolvasások és a Tailwind utility-k tovább működnek. Az új kód a Tailwind
-  utility-ket (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`,
-  `bg-chart-1`…) vagy a kit-osztályokat használja — soha hexadecimális értéket (a
-  `tests/unit/design-kit-bridge.test.ts` kikényszeríti a hidat). A `text-primary` a
-  `--text-color-primary`-n keresztül a `--color-primary-ink`-re oldódik fel (világos módban lime-800,
-  sötét módban a lime accent), így az elsődleges szöveg olvasható marad, miközben a
-  `bg-primary`/`border-primary` megtartja a lime felületet. A diagramsorozatok a `--color-chart-1` …
-  `--color-chart-5` tokeneket használják.
-- **Témák.** A `<html className="ci-theme">` (`src/app/layout.tsx`) a dokumentum számára engedélyezi
-  a kit témáját. A beállítás értéke `light`, `dark` vagy `system`
-  (`THEME_CONFIG.defaultTheme = "system"` a `src/shared/constants/appConfig.ts`-ben; a `system` a
-  `prefers-color-scheme`-et követi). A `src/store/themeStore.ts`-beli `applyTheme()` (amelyet a
-  `src/app/layout.tsx`-ben lévő, a hidratálás előtt futó inline bootstrap szkript tükröz) egyszerre
-  állítja be a `data-theme="dark"|"light"` attribútumot és kapcsolgatja a `<html>` elem `.dark`
-  osztályát. A kit sötét tokenkészlete a `data-theme="dark"`-hoz kötődik
-  (`packages/ui-kit/src/ci-tokens.css`); az OmniRoute saját sötét felülírásai (a `.dark` blokk a
-  `globals.css`-ben) és a régi Tailwind `dark:` utility-k a `.dark` osztályhoz kötődnek. Nincsenek
-  accent-szín presetek: az accent mindig a kitből származik, és egy régebbi buildből perzisztált
-  preset a store betöltődésekor eldobódik.
-- **Komponensek (adapterek).** A `src/shared/components/index.tsx` megtartja az OmniRoute
-  komponens-API-t (ugyanazok a nevek, default exportok és propok), a mögötte álló primitívek pedig a
-  kitre épülő adapterek: űrlapok (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
-  `Badge`, `Card`), overlay-ek és visszajelzés (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), struktúra (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`) és táblázatok (`DataTable`, `FilterBar`,
-  `ColumnToggle`, `FilterPills`, `PresetSlider`). Egy adapter alútvonalon importálja a kit
-  komponenst, és a régi propokat képezi rá — például a `Button variant="primary"` a kit `default`
-  gombja (`--ci-button-primary-*`: világos módban az inverz felület, sötét módban az accent a hozzá
-  tartozó `--ci-color-accent-foreground` tintával), a `danger` a `destructive`, a `warning` pedig az
-  `outline` plusz a `.ci-button--warning` kiterjesztés. A `globals.css` végén álló
-  `.ci-button--warning` és `.ci-badge[data-tone]` szabályok (`@layer components`) az OmniRoute saját,
-  a kit-osztályokra épülő kiterjesztései. A `tests/unit/ui/adapters/*.test.tsx` minden adaptert
-  rögzít.
-- **Shell.** A `src/app/(dashboard)/layout.tsx` a `DashboardLayout`-ot rendereli, amely a
-  `src/shared/components/layouts/DashboardShell.tsx`-et rendereli: a kit `SidebarProvider` /
-  `Sidebar` / `SidebarInset` komponenseit (`packages/ui-kit/src/sidebar.tsx`), az OmniRoute
-  navigációs logikájával a `src/shared/components/Sidebar.tsx`-ben. Egy „ugrás a tartalomra”
-  hivatkozás a `#main-content`-re az első fókuszálható elem. A
-  `src/shared/components/Header.tsx` tartalmazza a kit `SidebarTrigger`-ét (a shell egyetlen
-  oldalsávkapcsolója), a Keak `ProductSwitcher`-t és a parancspaletta megnyitóját; az útvonal címét
-  csak addig mutatja, amíg a `#main-content`-en belül nincs kit `PageHeader` (`.ci-page-header`)
-  mountolva, így a saját `PageHeader`-rel rendelkező oldalon egyetlen `h1` szerepel. A
-  `src/shared/components/CommandPalette.tsx` egy kit `Dialog`.
-- **Ikonok.** Az `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) a nevet (a
-  képernyők által használt Material Symbols szókészletet) az `ICON_MAP`-en
-  (`src/shared/constants/iconMap.ts`) keresztül egy Lucide-glifára oldja fel. A Material Symbols
-  betűtípus és csomag eltávolításra került: a térképből hiányzó név semleges helyőrző glifát renderel
-  (`data-icon-missing="true"`), és a production környezeten kívül konzolfigyelmeztetést naplóz. Az
-  `npm run gen:icon-map` kilistázza a használatban lévő, de a térképből hiányzó neveket (a
-  `tests/unit/icon-map-coverage.test.ts` minden Lucide-ikon nélküli név esetén elbukik; a
-  `tests/unit/icon-map-object-values.test.ts` a keresőobjektumokban tárolt neveket fedi le); a
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` a literális
-  `<span className="material-symbols-outlined">` spaneket `<Icon>`-ra írja át.
-- **Arculat.** A `src/shared/components/OmniRouteLogo.tsx` a kitet burkolja: a default export
-  `OmniRouteLogo` a `ProductIcon product="omniroute" variant="glyph"` komponenst rendereli (inline
-  SVG, `basePath`-biztos), az `OmniRouteLockup` pedig a `ProductLockup product="omniroute"`-ot
-  (hozzáférhető név: „Keak OmniRoute”), vagy white-label üzemeltetők esetén a saját
-  `name`/`logoSrc` értékeiket. A termékváltó céljai a `src/shared/constants/keakProducts.ts`-ben
-  találhatók (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Az önálló képernyők —
-  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` és
-  `src/shared/components/ErrorPageScaffold.tsx` — a lockupot jelenítik meg; a
-  `tests/unit/brand-pages-static.test.ts` ezt őrzi.
+- **Készlet.** `packages/ui-kit/src` az upstream `src/` bájtonkénti másolata a `packages/ui-kit/UPSTREAM.md` -ben rögzített véglegesítésnél (amely a licencjogosultságot is rögzíti); `PATCHES.md` felsorolja a helyi javításokat (nincs). Forrásként fogyasztják, felépítés nélkül: `next.config.mjs` transzpilálja, és `tsconfig.json` leképezi `@omniroute/ui-kit` → `packages/ui-kit/src` és `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` és `vitest.mcp.config.ts` ugyanazt az álnevet hordozzák). Importáljon egy készletkomponenst az alútvonala alapján (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), soha ne a `@omniroute/ui-kit` hordón keresztül: a hordó minden alkatrészt (beleértve a dátumválasztót is) minden importőrbe behúz. A kit stíluslap `src/app/globals.css` keresztül lép be (`@import "../../packages/ui-kit/src/ci-styles.css"`, a teljes lap: a mag `ci-ui.css` plusz minden mintacsalád).
+- **Tokenek.** `packages/ui-kit/src/ci-tokens.css` deklarálja a `--ci-*` tokeneket; `src/app/globals.css` áthidalja őket az örökölt OmniRoute nevekhez (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), így a meglévő `var(--color-*)` beolvasás és Tailwind segédprogramok továbbra is működnek. Az új kód a Tailwind segédprogramokat (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) vagy a — kit osztályokat használja, soha nem hexadecimális értéket (`tests/unit/design-kit-bridge.test.ts` kényszeríti a hidat). `text-primary` feloldása `--color-primary-ink` -re `--text-color-primary` keresztül (lime-800 világosban, a lime akcentus sötétben), így az elsődleges szöveg olvasható marad, míg `bg-primary`/`border-primary` megtartja a lime felületet. A diagramsorozat `--color-chart-1` … `--color-chart-5` parancsot használja.
+- **Témák.** `<html className="ci-theme">` (`src/app/layout.tsx`) beállítja a dokumentumot a kittémába. A preferencia a `light`, `dark` vagy `system` (`THEME_CONFIG.defaultTheme = "system"` `src/shared/constants/appConfig.ts`-ben; `system` `prefers-color-scheme` követi). `applyTheme()` `src/store/themeStore.ts` -ban (amelyet a `src/app/layout.tsx` ben lévő inline bootstrap szkript tükröz, amely a hidratálás előtt fut) beállítja `data-theme="dark"|"light"` és együtt váltja át a `.dark` osztályt `<html>`. A készlet sötét tokenkészlete a `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) van kulcsolva; OmniRoute saját sötét felülírásai (a `.dark` blokk `globals.css`-ben) és az örökölt Tailwind `dark:` segédprogramok kulcsa a `.dark` osztályban. Nincsenek előre beállított kiemelési színek: az ékezet mindig a készletből származik, és egy régebbi összeállításból megmaradt előbeállítás elvelik az áruház betöltésekor.
+- **Alkatrészek (adapterek).** `src/shared/components/index.tsx` megtartja a OmniRoute API komponenst (azonos nevek, alapértelmezett exportok és kellékek), a mögötte lévő primitívek pedig adapterek a készleten: forms (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlay,`Modal`/`ConfirmModal`/`InfoTooltip` `Tooltip` `NotificationToast`, `EmptyState`, `Loading`), szerkezet (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Avatar` `Breadcrumbs` és táblázatok (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Egy adapter alútvonalon importálja a kit komponenst, és leképezi rá az örökölt kellékeket — például `Button variant="primary"` a kit `default` gombja (`--ci-button-primary-*`: az inverz felület világosban, az ékezetes `--ci-color-accent-foreground` tintával sötétben), `danger` `destructive`, `warning` pedig `.ci-button--warning` `outline`. A `.ci-button--warning` és `.ci-badge[data-tone]` szabályok a `globals.css` végén (`@layer components`) OmniRoute kiterjesztések a kit osztályokon felül. `tests/unit/ui/adapters/*.test.tsx` rögzítse az egyes adaptereket.
+- **Héj.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` jeleníti meg, ami `src/shared/components/layouts/DashboardShell.tsx` t: a `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) készletet, a OmniRoute navigációs logikájával a `src/shared/components/Sidebar.tsx`. Az első fókuszálható elem `#main-content` mutató "ugrás a tartalomhoz" hivatkozás. `src/shared/components/Header.tsx` tartalmazza a `SidebarTrigger` készletet (a shell egyetlen oldalsáv kapcsolója), a Keak `ProductSwitcher` és a parancspalettanyitót; csak az útvonal címét mutatja, miközben `#main-content` belül nincs `PageHeader` (`.ci-page-header`) készlet, tehát a saját `PageHeader` rendelkező oldalnak egyetlen `h1` van. `src/shared/components/CommandPalette.tsx` egy `Dialog` készlet.
+- **Ikonok.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) a nevet (a képernyők által használt anyagszimbólumok szókincse) `ICON_MAP` (`src/shared/constants/iconMap.ts`) keresztül egy Lucide-jelre bontja. A Material Symbols betűtípus és csomag eltűnt: a térképről hiányzó név semleges helyőrző karakterjelet (`data-icon-missing="true"`) jelenít meg, és a konzolon kívüli figyelmeztetést naplóz. `npm run gen:icon-map` kiírja a használatban lévő, a térképről hiányzó neveket (`tests/unit/icon-map-coverage.test.ts` minden Lucide ikon nélküli névnél sikertelen; `tests/unit/icon-map-object-values.test.ts` a keresési objektumokban tárolt neveket takarja); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` átírja a literális `<span className="material-symbols-outlined">` íveket `<Icon>`.
+- **Márka.** `src/shared/components/OmniRouteLogo.tsx` becsomagolja a készletet: az alapértelmezett export `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe), `OmniRouteLockup` pedig `ProductLockup product="omniroute"` (elérhető név "Keak OmniRoute") vagy a fehércímkés operátorok esetében a saját `name`/`logoSrc` jeleníti meg. A termékváltó célállomások `src/shared/constants/keakProducts.ts` ben (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) élnek. A — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` és `src/shared/components/ErrorPageScaffold.tsx` — önálló képernyők a zárolást mutatják; `tests/unit/brand-pages-static.test.ts` őrzi.
 
 ## 2. Szabályok
 
