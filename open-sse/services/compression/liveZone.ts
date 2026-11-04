@@ -212,10 +212,53 @@ function store(
   prune(now);
 }
 
+/**
+ * A protected prefix never needs a complete in-memory copy. Store per-item
+ * digests and only transformed items, reconstructing unchanged items from the
+ * next request after all digests have been verified. This also works for raw
+ * baselines larger than the 2 MiB entry limit.
+ */
+function storeSparseRawPrefix(ctx: LiveZoneContext, result: CompressionResult): boolean {
+  const items = result.body[ctx.field];
+  if (!Array.isArray(items) || items.length !== ctx.rawItemDigests.length) return false;
+  const patches: Array<{ index: number; value: unknown }> = [];
+  for (let index = 0; index < items.length; index++) {
+    const itemDigest = digest(items[index]);
+    if (!itemDigest) return false;
+    if (itemDigest === ctx.rawItemDigests[index]) continue;
+    const value = cloneValue(items[index]);
+    if (value === null) return false;
+    patches.push({ index, value });
+  }
+  const stats = cloneValue(result.stats);
+  if (result.stats && !stats) return false;
+  const serialized = serialize({ patches, stats });
+  if (serialized === null) return false;
+  const bytes = Buffer.byteLength(serialized, "utf8") + ctx.rawItemDigests.length * 64 + 64;
+  if (bytes > MAX_ENTRY_BYTES) return false;
+
+  deleteEntry(ctx.key);
+  entries.set(ctx.key, {
+    rawItemDigests: ctx.rawItemDigests,
+    rawStableFieldsDigest: ctx.rawStableFieldsDigest,
+    transformedPrefix: [],
+    transformedStableFields: {},
+    stats,
+    rawPrefixPatches: patches,
+    lastAccess: ctx.now,
+    expiresAt: ctx.now + ctx.ttlMs,
+    bytes,
+  });
+  totalBytes += bytes;
+  prune(ctx.now);
+  return true;
+}
+
 /** Store an unmodified first-seen prefix so later turns can compress only newly appended tools. */
 function storeRawPrefix(body: Record<string, unknown>, ctx: LiveZoneContext): CompressionResult {
   const result: CompressionResult = { body, compressed: false, stats: null };
-  store(ctx.key, ctx.rawItemDigests, ctx.rawStableFieldsDigest, result, ctx.field, ctx.now, ctx.ttlMs);
+  // If even the digest/patch metadata exceeds the cap, still send the raw body.
+  storeSparseRawPrefix(ctx, result);
   return result;
 }
 
