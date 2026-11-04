@@ -7097,7 +7097,7 @@
     "proxySubTabsAria": "ප්රොක්සි කොටස්",
     "requestBodyLimitTitle": "ඉල්ලීම් අන්තර්ගත සීමාව",
     "requestBodyLimitDescription": "ඉල්ලීම් අන්තර්ගතය විග්රහ කිරීමට පෙර පිළිගන්නා උපරිම API දත්ත ප්රමාණය. වෙන් කළ උඩුගත කිරීමේ මාර්ග සඳහා අවම වශයෙන් ඒවායේ පෙරනිමි 100 MB සීමාව පවත්වා ගනී.",
-    "requestBodyLimitChatHint": "ඔබ මෙහි සීමාවක් සුරකින තෙක් Chat Completions සහ Responses 50 MB දක්වා පිළිගනී. සුරකින ලද සීමාව ඒවාටද අදාළ වේ, එය අඩු වුවත් වැඩි වුවත්.",
+    "requestBodyLimitChatHint": "ඔබ මෙහි සීමාවක් සුරකින තෙක් Chat Completions සහ Responses උපරිම 50 MB පිළිගනී. සුරකින ලද සීමාව අඩු හෝ වැඩි වුවද ඒවාටත් අදාළ වේ.",
     "requestBodyLimitInputLabel": "MB වලින් ඉල්ලීම් අන්තර්ගත සීමාව",
     "requestBodyLimitEmptyError": "MB වලින් සීමාවක් ඇතුළත් කරන්න",
     "requestBodyLimitWholeNumberError": "පූර්ණ සංඛ්යාවක් භාවිත කරන්න",

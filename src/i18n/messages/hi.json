@@ -7097,7 +7097,7 @@
     "proxySubTabsAria": "प्रॉक्सी अनुभाग",
     "requestBodyLimitTitle": "अनुरोध बॉडी सीमा",
     "requestBodyLimitDescription": "अनुरोध बॉडी को पार्स करने से पहले स्वीकृत अधिकतम API पेलोड आकार। समर्पित अपलोड रूट अपनी अंतर्निहित 100 MB की सीमा कम-से-कम बनाए रखते हैं।",
-    "requestBodyLimitChatHint": "जब तक आप यहाँ सीमा सहेज नहीं लेते, Chat Completions और Responses 50 MB तक स्वीकार करते हैं। सहेजी गई सीमा उन पर भी लागू होती है, चाहे वह कम हो या अधिक।",
+    "requestBodyLimitChatHint": "यहाँ सीमा सहेजने तक Chat Completions और Responses अधिकतम 50 MB स्वीकार करते हैं। सहेजी गई सीमा कम हो या अधिक, वह उन पर भी लागू होती है।",
     "requestBodyLimitInputLabel": "अनुरोध बॉडी की सीमा MB में",
     "requestBodyLimitEmptyError": "MB में सीमा दर्ज करें",
     "requestBodyLimitWholeNumberError": "पूर्णांक का उपयोग करें",

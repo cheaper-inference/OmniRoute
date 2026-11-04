@@ -7097,7 +7097,7 @@
     "proxySubTabsAria": "Proxyszakaszok",
     "requestBodyLimitTitle": "Kéréstörzs méretkorlátja",
     "requestBodyLimitDescription": "Az API-kérések kéréstörzsének a feldolgozás előtt elfogadott maximális mérete. A dedikált feltöltési útvonalak megtartják legalább a beépített 100 MB-os korlátjukat.",
-    "requestBodyLimitChatHint": "A Chat Completions és a Responses legfeljebb 50 MB-ot fogad el, amíg itt nem mentesz egy korlátot. A mentett korlát rájuk is vonatkozik, legyen alacsonyabb vagy magasabb.",
+    "requestBodyLimitChatHint": "A Chat Completions és a Responses legfeljebb 50 MB-ot fogad el, amíg itt nem mentesz egy korlátot. A mentett korlát rájuk is érvényes, akár alacsonyabb, akár magasabb.",
     "requestBodyLimitInputLabel": "Kéréstörzs méretkorlátja MB-ban",
     "requestBodyLimitEmptyError": "Adjon meg egy korlátot MB-ban",
     "requestBodyLimitWholeNumberError": "Használjon egész számot",

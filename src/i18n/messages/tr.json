@@ -7097,7 +7097,7 @@
     "proxySubTabsAria": "Proxy bölümleri",
     "requestBodyLimitTitle": "İstek Gövdesi Sınırı",
     "requestBodyLimitDescription": "Bir istek gövdesi ayrıştırılmadan önce kabul edilen maksimum API yükü boyutu. Özel yükleme rotaları, en az kendi yerleşik 100 MB sınırını korur.",
-    "requestBodyLimitChatHint": "Chat Completions ve Responses, burada bir sınır kaydedene kadar 50 MB'a kadar kabul eder. Kaydedilen sınır, daha düşük ya da daha yüksek olsun, bunlar için de geçerlidir.",
+    "requestBodyLimitChatHint": "Burada bir sınır kaydedene kadar Chat Completions ve Responses en fazla 50 MB kabul eder. Kaydedilen sınır daha düşük veya daha yüksek olsa da ikisi için de geçerlidir.",
     "requestBodyLimitInputLabel": "MB cinsinden istek gövdesi sınırı",
     "requestBodyLimitEmptyError": "MB cinsinden bir sınır girin",
     "requestBodyLimitWholeNumberError": "Tam sayı kullanın",

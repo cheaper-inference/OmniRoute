@@ -7174,7 +7174,7 @@
     "proxySubTabsAria": "ਪ੍ਰੌਕਸੀ ਭਾਗ",
     "requestBodyLimitTitle": "ਬੇਨਤੀ ਬਾਡੀ ਸੀਮਾ",
     "requestBodyLimitDescription": "ਬੇਨਤੀ ਦੀ ਬਾਡੀ ਪਾਰਸ ਕੀਤੇ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਸਵੀਕਾਰਿਆ ਜਾਣ ਵਾਲਾ ਵੱਧ ਤੋਂ ਵੱਧ API ਪੇਲੋਡ ਆਕਾਰ। ਸਮਰਪਿਤ ਅੱਪਲੋਡ ਰੂਟਾਂ ਲਈ ਘੱਟੋ-ਘੱਟ ਉਨ੍ਹਾਂ ਦੀ ਬਿਲਟ-ਇਨ 100 MB ਸੀਮਾ ਬਰਕਰਾਰ ਰਹਿੰਦੀ ਹੈ।",
-    "requestBodyLimitChatHint": "ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਇੱਥੇ ਸੀਮਾ ਸੰਭਾਲਦੇ ਨਹੀਂ, Chat Completions ਅਤੇ Responses 50 MB ਤੱਕ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ। ਸੰਭਾਲੀ ਗਈ ਸੀਮਾ ਉਨ੍ਹਾਂ ਉੱਤੇ ਵੀ ਲਾਗੂ ਹੁੰਦੀ ਹੈ, ਭਾਵੇਂ ਉਹ ਘੱਟ ਹੋਵੇ ਜਾਂ ਵੱਧ।",
+    "requestBodyLimitChatHint": "ਇੱਥੇ ਹੱਦ ਸੁਰੱਖਿਅਤ ਕਰਨ ਤੱਕ Chat Completions ਅਤੇ Responses ਵੱਧ ਤੋਂ ਵੱਧ 50 MB ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ। ਸੁਰੱਖਿਅਤ ਕੀਤੀ ਹੱਦ ਘੱਟ ਜਾਂ ਵੱਧ ਹੋਵੇ, ਉਹ ਉਨ੍ਹਾਂ ਉੱਤੇ ਵੀ ਲਾਗੂ ਹੁੰਦੀ ਹੈ।",
     "requestBodyLimitInputLabel": "MB ਵਿੱਚ ਬੇਨਤੀ ਬਾਡੀ ਸੀਮਾ",
     "requestBodyLimitEmptyError": "MB ਵਿੱਚ ਸੀਮਾ ਦਰਜ ਕਰੋ",
     "requestBodyLimitWholeNumberError": "ਪੂਰਨ ਅੰਕ ਵਰਤੋ",

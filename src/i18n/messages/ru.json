@@ -7097,7 +7097,7 @@
     "proxySubTabsAria": "Разделы прокси",
     "requestBodyLimitTitle": "Ограничение размера тела запроса",
     "requestBodyLimitDescription": "Максимальный размер данных API, принимаемых до разбора тела запроса. Для выделенных маршрутов загрузки сохраняется как минимум встроенный лимит в 100 МБ.",
-    "requestBodyLimitChatHint": "Chat Completions и Responses принимают до 50 МБ, пока вы не сохраните здесь лимит. Сохранённый лимит применяется и к ним, будь он ниже или выше.",
+    "requestBodyLimitChatHint": "Chat Completions и Responses принимают до 50 MB, пока вы не сохраните здесь лимит. Сохранённый лимит действует и для них — как меньший, так и больший.",
     "requestBodyLimitInputLabel": "Ограничение размера тела запроса в МБ",
     "requestBodyLimitEmptyError": "Введите лимит в МБ",
     "requestBodyLimitWholeNumberError": "Используйте целое число",
