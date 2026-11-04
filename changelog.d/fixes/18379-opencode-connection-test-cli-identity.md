@@ -1,0 +1,1 @@
+- **fix(api):** The opencode-zen / opencode-go connection Test now sends the same OpenCode CLI identity and `x-api-key` auth as model discovery, never falls back to a free-tier chat probe, and no longer reports a 403 free-tier/fingerprint refusal as "Invalid API key" ([#18379](https://github.com/cheaper-inference/OmniRoute/pull/18379)) — thanks @claytontavaresdan

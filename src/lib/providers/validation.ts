@@ -27,6 +27,7 @@ import {
   resolveBaseUrl,
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
+import { validateOpencodeProvider } from "./validation/opencode";
 import {
   validateDeepSeekWebProvider,
   validateGrokWebProvider,
@@ -477,6 +478,11 @@ export async function validateProviderApiKey({
     : resolveBaseUrl(validationEntry, providerSpecificData);
 
   try {
+    // OpenCode Zen/Go: probe with the discovery identity, never a free-tier chat probe.
+    if (entry.executor === "opencode") {
+      return await validateOpencodeProvider({ provider, apiKey, providerSpecificData, isLocal });
+    }
+
     if (OPENAI_LIKE_FORMATS.has(entry.format)) {
       return await validateOpenAILikeProvider({
         apiKey,
