@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isTextOnlyChatTransport } from "@/shared/constants/visionModels";
 import { parseModel } from "@omniroute/open-sse/services/model.ts";
 import { getModelInfo } from "@/sse/services/model";
 import { getModelAliases } from "@/lib/db/models";
@@ -569,7 +570,11 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
     ...capabilityFields,
   };
 
-  if (!Array.isArray(entry.input_modalities) && metadata.modalities.input.length > 0) {
+  if (isTextOnlyChatTransport(metadata.provider)) {
+    // Correct stale/synced image declarations as well as the capability flag.
+    nextEntry.input_modalities = ["text"];
+    nextEntry.output_modalities = ["text"];
+  } else if (!Array.isArray(entry.input_modalities) && metadata.modalities.input.length > 0) {
     nextEntry.input_modalities = metadata.modalities.input;
   }
 

@@ -44,7 +44,7 @@ export type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityRes
 export { createModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 export { resolveAudioCapability } from "@/lib/modelCapabilityModalities";
 export type { ModelLimitSources } from "@/lib/modelCapabilityLimits";
-import { isVisionModelId } from "@/shared/constants/visionModels";
+import { isTextOnlyChatTransport, isVisionModelId } from "@/shared/constants/visionModels";
 import { getUnsupportedParams } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
   getLearnedThinkingCap,
@@ -1024,17 +1024,22 @@ export function getResolvedModelCapabilities(
         )
       : null;
 
-  const supportsVision = resolveVisionCapability(
-    visionSpec,
-    registryModel,
-    synced,
-    modalitiesInput,
-    modalitiesOutput,
-    lookupKey,
-    customVisionOverride,
-    compatVisionOverride,
-    syncedAvailableModelVision
-  );
+  // Executor transport limits outrank model-family, synced and operator metadata:
+  // enabling a model's vision flag cannot teach a text-only wire format images.
+  const textOnlyTransport = isTextOnlyChatTransport(resolved.provider);
+  const supportsVision = textOnlyTransport
+    ? false
+    : resolveVisionCapability(
+        visionSpec,
+        registryModel,
+        synced,
+        modalitiesInput,
+        modalitiesOutput,
+        lookupKey,
+        customVisionOverride,
+        compatVisionOverride,
+        syncedAvailableModelVision
+      );
   // #17289: WorkBuddy's DeepSeek Flash endpoint was observed to accept image_url
   // (unlike other gateways serving the same upstream id). Provider-scoped, not a
   // global DeepSeek name heuristic, and only applied while the verdict is still
@@ -1045,12 +1050,16 @@ export function getResolvedModelCapabilities(
     /^(?:global:|cn:)?deepseek-v4\.1-flash$/i.test(resolved.model ?? "")
       ? true
       : supportsVision;
-  const supportsAudio = resolveAudioCapability(spec, registryModel, modalitiesInput);
-  const supportsVideo = resolveVideoCapability(spec, registryModel, modalitiesInput);
+  const supportsAudio = textOnlyTransport
+    ? false
+    : resolveAudioCapability(spec, registryModel, modalitiesInput);
+  const supportsVideo = textOnlyTransport
+    ? false
+    : resolveVideoCapability(spec, registryModel, modalitiesInput);
 
   // #8250: when resolve promoted vision over a contradictory attachment=false,
   // expose attachment=true so catalog / Vision Bridge / clients see one verdict.
-  let attachment = synced?.attachment ?? null;
+  let attachment = textOnlyTransport ? false : (synced?.attachment ?? null);
   if (supportsVision === true && attachment === false) {
     attachment = true;
   }
@@ -1090,8 +1099,8 @@ export function getResolvedModelCapabilities(
     knowledgeCutoff: synced?.knowledge_cutoff ?? null,
     releaseDate: synced?.release_date ?? null,
     lastUpdated: synced?.last_updated ?? null,
-    modalitiesInput,
-    modalitiesOutput,
+    modalitiesInput: textOnlyTransport ? ["text"] : modalitiesInput,
+    modalitiesOutput: textOnlyTransport ? ["text"] : modalitiesOutput,
     interleavedField:
       synced?.interleaved_field ??
       (typeof registryModel?.interleavedField === "string" ? registryModel.interleavedField : null),
