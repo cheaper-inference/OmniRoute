@@ -438,11 +438,9 @@ async function reuseLiveZoneEntry(
 
   const frozenItems = previous.rawItemDigests.length;
   const liveItems = context.rawItems.slice(frozenItems);
-  const frozenPrefix = cloneItems(
-    previous.rawPrefixPatches
-      ? context.rawItems.slice(0, frozenItems)
-      : previous.transformedPrefix
-  );
+  const frozenPrefix = previous.rawPrefixPatches
+    ? context.rawItems.slice(0, frozenItems)
+    : cloneItems(previous.transformedPrefix);
   if (!frozenPrefix) return fallback();
   // Only restore patched tool outputs; all unchanged (potentially multi-MB)
   // prefix items come from the authenticated, digest-matched request itself.
