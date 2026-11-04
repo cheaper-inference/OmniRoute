@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 Ìṣẹ̀ Padà Àfihàn Ọ̀nà",
         "description": "Fún ìyípadà àwọn akọ́ka OpenCode púpọ̀, lẹ́yìn 429 láti ẹlṣíṣẹ tí ó ní àwọn apá egress kan, lórí akọ́ka tí kò ní ọ̀nà ìṣàn, lábẹ́ àyíká ọ̀nà ìṣàn kọ́ọ̀kọ́, béèrè ọ̀nà ìṣàn fún ẹgbẹ́ kejì fún ìṣẹ́ kẹyìn, dípò tí a bá ṣe ìṣẹ́ padà lórí àdírẹ́ egress kan náà. Ó ń tọ́ka, kò ní àfihàn: ọ̀nà ìṣàn tí ó ìwọ̀n kún ń gbe ipin ìṣẹ̀ t’ì yà lójú jẹ́. Kò tí í ṣiṣẹ́ ní ìbẹ̀rẹ̀: 429 kọ̀ọ̀kọ́ ń yí padà sí akọ́ka kejì gẹ́gẹ́ bí i t’ì yà lójú."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Fun olupilẹṣẹ OpenCode, nigbati ibeere aṣoju kan ba dahun 403 tabi 451 FreeTierError ati awọn irinṣẹ-ṣayẹwo kuna kuna tabi ko lo, firanṣẹ ibeere naa ni ẹẹkan nipasẹ aṣoju oriṣiriṣi (aṣoju akọọlẹ miiran tabi ọmọ ẹgbẹ adagun omi miiran, rara asopọ taara). Nikan nigbati iwadii yẹn ba dahun 200 ni egress akọkọ ti a ṣeto si apakan ni iranti ijusile aṣoju ati idahun ti iwadii yoo ṣiṣẹ; nigbati mejeji kọ, awọn atilẹba kþ ti wa ni pada ati ohunkohun ti wa ni gba silẹ. Ọrọ ikọsilẹ kanna ni wiwa egress IP ti asia ati apẹrẹ ibeere ti o kọ, nitorinaa iwadii sọ fun wọn lọtọ nipasẹ ẹri. Paa nipa aiyipada: ijusile naa pada ko yipada."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint onimọrọ OpenCode v2",
         "description": "Fi fingerprint onimọrọ CLI OpenCode v2 lọ si awọn oloselu OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli ati x-opencode-client cli, onimọrọ User-Agent kan naa ti a ti fi pamọ nikan ti o ba jẹ onimọrọ OpenCode 2.x, ati lori awọn oloselu ọfẹ ti a ti sọ mọlẹ, kii ṣe x-opencode-request, siseni ti a ti ṣe alaye ni x-opencode-session-id/x-session-affinity/x-session-id, awọn ẹda CLI v2 si/iṣẹ lori awọn ọna aṣa ti a ti kunu ati tool_choice ti \"none\" ti a ti ya. Ó wà ní pípa ní àkọ́kọ́: gbogbo oloselu OpenCode maa n tẹsiwaju aṣoju, awọn oriṣi ati agbegbe nibi ti wọn ṣiṣẹ, byte fun byte."
