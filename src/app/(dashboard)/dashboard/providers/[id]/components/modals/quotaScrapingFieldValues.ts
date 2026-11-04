@@ -29,6 +29,7 @@ export type QuotaScrapingFieldValues = {
   qwenCloudSecToken: string;
   volcConsoleCookie: string;
   xiaomiMimoConsoleCookie: string;
+  billingPortalUrl: string;
 };
 
 export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
@@ -39,6 +40,7 @@ export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
   qwenCloudSecToken: "",
   volcConsoleCookie: "",
   xiaomiMimoConsoleCookie: "",
+  billingPortalUrl: "",
 };
 
 export function assignQuotaScrapingProviderData(
@@ -70,5 +72,8 @@ export function assignQuotaScrapingProviderData(
     // Optional access: callers may pass a partial form object without the newer
     // fields (same contract as the qwen branch above).
     target.xiaomiMimoConsoleCookie = values.xiaomiMimoConsoleCookie.trim();
+  } else if (provider === "zed-hosted" && values.billingPortalUrl?.trim()) {
+    // Empty/absent leaves the stored link alone on the edit round-trip.
+    target.billingPortalUrl = values.billingPortalUrl.trim();
   }
 }
