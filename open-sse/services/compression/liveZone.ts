@@ -423,6 +423,61 @@ async function compressLiveToolOutputs(
   return { liveResult, transformedLive };
 }
 
+/** Rebuild only changed tool slots; unchanged source items retain their verified bytes. */
+function restoreFrozenPrefix(rawItems: unknown[], previous: LiveZoneEntry): unknown[] | null {
+  if (rawItems.length < previous.rawItemDigests.length) return null;
+  const frozenPrefix = previous.rawPrefixPatches
+    ? rawItems.slice(0, previous.rawItemDigests.length)
+    : cloneItems(previous.transformedPrefix);
+  if (!frozenPrefix) return null;
+  for (const patch of previous.rawPrefixPatches ?? []) {
+    if (!Number.isInteger(patch.index) || patch.index < 0 || patch.index >= frozenPrefix.length) {
+      return null;
+    }
+    const value = cloneValue(patch.value);
+    if (value === null) return null;
+    frozenPrefix[patch.index] = value;
+  }
+  return frozenPrefix;
+}
+
+/** Keep the last assistant turn as read-only context for new tool outputs. */
+function findLiveContextStart(rawItems: unknown[], frozenItems: number): number {
+  for (let index = frozenItems - 1; index >= 0; index--) {
+    const item = rawItems[index];
+    if (
+      item &&
+      typeof item === "object" &&
+      (item as Record<string, unknown>).role === "assistant"
+    ) {
+      return index;
+    }
+  }
+  return frozenItems;
+}
+
+/** Only sparse patch storage can reject replay; ordinary storage is best effort. */
+function storeReusedLivePrefix(
+  context: LiveZoneContext,
+  previous: LiveZoneEntry,
+  result: CompressionResult
+): boolean {
+  if (entries.get(context.key) !== previous) return true;
+  if (previous.rawPrefixPatches) {
+    return storeSparseRawPrefix({ ...context, now: Date.now() }, result);
+  }
+  store(
+    context.key,
+    context.rawItemDigests,
+    context.rawStableFieldsDigest,
+    result,
+    context.field,
+    Date.now(),
+    context.ttlMs
+  );
+  return true;
+}
+
 async function reuseLiveZoneEntry(
   body: Record<string, unknown>,
   context: LiveZoneContext,
@@ -438,32 +493,11 @@ async function reuseLiveZoneEntry(
 
   const frozenItems = previous.rawItemDigests.length;
   const liveItems = context.rawItems.slice(frozenItems);
-  const frozenPrefix = previous.rawPrefixPatches
-    ? context.rawItems.slice(0, frozenItems)
-    : cloneItems(previous.transformedPrefix);
+  const frozenPrefix = restoreFrozenPrefix(context.rawItems, previous);
   if (!frozenPrefix) return fallback();
-  // Only restore patched tool outputs; all unchanged (potentially multi-MB)
-  // prefix items come from the authenticated, digest-matched request itself.
-  for (const patch of previous.rawPrefixPatches ?? []) {
-    if (patch.index >= frozenPrefix.length) return fallback();
-    const value = cloneValue(patch.value);
-    if (value === null) return fallback();
-    frozenPrefix[patch.index] = value;
-  }
   // The latest assistant may already be frozen (including on consecutive/parallel results).
   // Carry its raw tail as engine context, but never replace its cached transformation.
-  let contextStart = frozenItems;
-  for (let index = frozenItems - 1; index >= 0; index--) {
-    const item = context.rawItems[index];
-    if (
-      item &&
-      typeof item === "object" &&
-      (item as Record<string, unknown>).role === "assistant"
-    ) {
-      contextStart = index;
-      break;
-    }
-  }
+  const contextStart = findLiveContextStart(context.rawItems, frozenItems);
   const live = await compressLiveToolOutputs(
     body,
     context.field,
@@ -489,24 +523,8 @@ async function reuseLiveZoneEntry(
     frozenItems,
     liveItems.length
   );
-  if (entries.get(context.key) === previous) {
-    if (previous.rawPrefixPatches) {
-      // A too-large transformed patch cannot become a reusable cache entry.
-      // Fail closed to raw input instead of emitting a transform we cannot replay.
-      if (!storeSparseRawPrefix({ ...context, now: Date.now() }, combinedResult)) {
-        return storeRawPrefix(body, context);
-      }
-    } else {
-      store(
-        context.key,
-        context.rawItemDigests,
-        context.rawStableFieldsDigest,
-        combinedResult,
-        context.field,
-        Date.now(),
-        context.ttlMs
-      );
-    }
+  if (!storeReusedLivePrefix(context, previous, combinedResult)) {
+    return storeRawPrefix(body, context);
   }
   return combinedResult;
 }
