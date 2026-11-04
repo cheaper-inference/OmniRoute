@@ -440,6 +440,9 @@ function ModelModeToolbar({
         const [labelKey, hintKey] = MODEL_MODE_LABEL_KEYS[mode];
         const selected = modelMode === mode;
         return (
+          // kit-exception: compact aria-pressed toggle floating over the flow canvas, with a
+          // per-option hint tooltip; the kit SegmentedControl is a tablist (aria-selected, no
+          // per-option title) and its capsule min-height would overflow this 11px overlay.
           <button
             key={mode}
             type="button"
@@ -447,7 +450,7 @@ function ModelModeToolbar({
             title={t(hintKey)}
             onClick={() => onChange(mode)}
             className={`px-2 py-0.5 rounded font-semibold transition-colors ${
-              selected ? "bg-primary text-white" : "text-text-muted hover:bg-bg-subtle"
+              selected ? "bg-primary text-accent-foreground" : "text-text-muted hover:bg-bg-subtle"
             }`}
           >
             {t(labelKey)}
