@@ -63,7 +63,7 @@ import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 import {
   runWithCodexResponseFence,
   inheritCodexResponseFence,
-} from "@/lib/db/codexConnectionFences";
+} from "../../services/codexAccount/fences.ts";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
 
 import { storeSemanticCacheResponse } from "../chatCore/semanticCacheStore.ts";

@@ -45,7 +45,7 @@ import {
   isCodexResponseCurrent,
   runWithCodexResponseFence,
   StaleCodexOperationError,
-} from "@/lib/db/codexConnectionFences";
+} from "../../services/codexAccount/fences.ts";
 import { invalidateQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
 import {
   isRateLimitEnabled,

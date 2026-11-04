@@ -3,6 +3,7 @@
  */
 
 import { v4 as uuidv4 } from "uuid";
+import * as codexFences from "./codexConnectionFences";
 import {
   mayWriteCodexConnection,
   isCodexConnectionFenceCurrent,
@@ -1161,6 +1162,7 @@ export { mergeConnectionProviderSpecificData } from "./providers/providerSpecifi
 registerConnectionStore({
   getProviderConnectionById,
   mergeConnectionProviderSpecificData,
+  codexFences,
 });
 
 export {

@@ -28,7 +28,7 @@ import {
   bindCodexResponseCallbacks,
   runWithCodexResponseFence,
   isCodexResponseCurrent,
-} from "@/lib/db/codexConnectionFences";
+} from "../../services/codexAccount/fences.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
 
 export interface ChatCoreExecutorResult {

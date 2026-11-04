@@ -1304,7 +1304,7 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
   <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kọjá <code>src/</code> àti <code>open-sse/</code> (<code>any</code> kò sí rárá nínú mojú ìpìlẹ̀ láti v2.0)</td></tr>
   <tr><td nowrap><b>Ilé-iṣẹ́</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún) — modulu àgbègbè 147, ìyípadà 222</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún) — modulu àgbègbè 147, ìyípadà 223</td></tr>
   <tr><td nowrap><b>Ìrántí</b></td><td>Ìwádìí ọ̀rọ̀ kíkún SQLite FTS5 + àwọn embedding fekito tí a ṣe quantize sí int8, ìdíwọ̀n tí a tẹ̀</td></tr>
   <tr><td nowrap><b>Àwọn ètò àkójọpọ̀</b></td><td>Zod 4 — ìmúdájú MCP tool I/O + àwọn àdéhùn API</td></tr>
   <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

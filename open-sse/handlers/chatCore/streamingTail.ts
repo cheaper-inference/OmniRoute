@@ -67,7 +67,7 @@ import { resolveCredentialGate } from "@/lib/streamingCredentialTransform";
 import {
   runWithCodexResponseFence,
   inheritCodexResponseFence,
-} from "@/lib/db/codexConnectionFences";
+} from "../../services/codexAccount/fences.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deps bag mirrors the barrel closure
 type Loose = any;

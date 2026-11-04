@@ -1,5 +1,5 @@
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
-import { inheritCodexResponseFence } from "@/lib/db/codexConnectionFences";
+import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
 import {
   attachOmniRouteMetaHeaders,
   buildOmniRouteResponseMetaHeaders,

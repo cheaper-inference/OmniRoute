@@ -1,19 +1,28 @@
-import { AsyncLocalStorage } from "node:async_hooks";
+import { getCodexOperationScope } from "@omniroute/open-sse/services/codexAccount/fences.ts";
+import {
+  StaleCodexOperationError,
+  type CodexConnectionFence,
+} from "@omniroute/open-sse/services/codexAccount/fenceTypes.ts";
 import { getDbInstance, rowToCamel } from "./core";
 import { decryptConnectionFields } from "./encryption";
 
+export {
+  StaleCodexOperationError,
+  STALE_CODEX_OPERATION_CODE,
+  type CodexConnectionFence,
+} from "@omniroute/open-sse/services/codexAccount/fenceTypes.ts";
+
+export {
+  getCodexOperationFence,
+  runWithCodexConnectionFence,
+  bindCodexResponseFence,
+  inheritCodexResponseFence,
+  runWithCodexResponseFence,
+  bindCodexResponseCallbacks,
+  isCodexResponseCurrent,
+} from "@omniroute/open-sse/services/codexAccount/fences.ts";
+
 type RecordValue = Record<string, unknown>;
-export interface CodexConnectionFence {
-  readonly connectionId: string;
-  readonly ownerEpoch: string;
-  readonly credentialRevision: number;
-  readonly failureRevision: number;
-  readonly connectionBinding: string;
-}
-type Operation = Readonly<{ fence: CodexConnectionFence; recovery: boolean }>;
-// Immutable per-operation scopes, never a mutable connection-id -> current-owner map.
-const operations = new AsyncLocalStorage<Operation>();
-const responses = new WeakMap<Response, Operation>();
 function record(value: unknown): RecordValue {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as RecordValue) : {};
 }
@@ -38,16 +47,6 @@ function fenceFor(row: RecordValue): CodexConnectionFence {
     failureRevision: Number(row.fenceFailureRevision),
     connectionBinding: JSON.stringify([row.isActive, row.proxyEnabled, row.perKeyProxyEnabled]),
   });
-}
-export const STALE_CODEX_OPERATION_CODE = "codex_connection_changed";
-export class StaleCodexOperationError extends Error {
-  readonly status = 409;
-  readonly code = STALE_CODEX_OPERATION_CODE;
-  constructor() {
-    super(
-      "Codex connection changed while the operation was in flight; retry with current credentials."
-    );
-  }
 }
 /** Capture BEFORE any resolver/network await and compare to the credentials actually used. */
 export function captureCodexConnectionFence(
@@ -127,13 +126,9 @@ export function isCodexConnectionFenceCurrent(
     (!recovery || Number(row.fenceFailureRevision) === fence.failureRevision)
   );
 }
-export function getCodexOperationFence(id: string): CodexConnectionFence | null {
-  const operation = operations.getStore();
-  return operation?.fence.connectionId === id ? operation.fence : null;
-}
 /** Call inside the SAME synchronous DB transaction as the associated mutation. */
 export function mayWriteCodexConnection(id: string): boolean {
-  const operation = operations.getStore();
+  const operation = getCodexOperationScope();
   return (
     !operation ||
     (operation.fence.connectionId === id &&
@@ -145,47 +140,4 @@ export function withCodexConnectionWrite<T>(id: string, write: () => T): T | nul
 }
 export function assertCodexOperationCurrent(id: string): void {
   if (!mayWriteCodexConnection(id)) throw new StaleCodexOperationError();
-}
-export function runWithCodexConnectionFence<T>(
-  fence: CodexConnectionFence | null,
-  work: () => T,
-  recovery = false
-): T {
-  return fence ? operations.run(Object.freeze({ fence, recovery }), work) : work();
-}
-export function bindCodexResponseFence(
-  response: Response,
-  fence: CodexConnectionFence | null
-): void {
-  if (fence && !responses.has(response))
-    responses.set(response, Object.freeze({ fence, recovery: false }));
-}
-export function inheritCodexResponseFence(from: Response, to: Response): Response {
-  const operation = responses.get(from);
-  if (operation) responses.set(to, operation);
-  return to;
-}
-export function runWithCodexResponseFence<T>(
-  response: Response,
-  work: () => T,
-  recovery = false
-): T {
-  const operation = responses.get(response);
-  return operation ? runWithCodexConnectionFence(operation.fence, work, recovery) : work();
-}
-export function bindCodexResponseCallbacks<T extends object>(response: Response, callbacks: T): T {
-  return new Proxy(callbacks, {
-    get(target, key, receiver) {
-      const value: unknown = Reflect.get(target, key, receiver);
-      if (typeof value !== "function") return value;
-      return (...args: unknown[]) => {
-        if (!isCodexResponseCurrent(response)) return;
-        return runWithCodexResponseFence(response, () => Reflect.apply(value, target, args));
-      };
-    },
-  });
-}
-export function isCodexResponseCurrent(response: Response, recovery = false): boolean {
-  const operation = responses.get(response);
-  return !operation || isCodexConnectionFenceCurrent(operation.fence, recovery);
 }

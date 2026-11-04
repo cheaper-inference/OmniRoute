@@ -106,7 +106,7 @@ import {
   inheritCodexResponseFence,
   isCodexResponseCurrent,
   runWithCodexResponseFence,
-} from "@/lib/db/codexConnectionFences";
+} from "../../services/codexAccount/fences.ts";
 
 /**
  * Core chat handler - shared between SSE and Worker

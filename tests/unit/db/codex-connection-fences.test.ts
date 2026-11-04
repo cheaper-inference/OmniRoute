@@ -36,6 +36,23 @@ test.after(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
 });
 
+test("engine connection bridge shares the durable DB fence and operation scope", async () => {
+  const engine = await import("../../../open-sse/services/codexAccount/write.ts");
+  const c = await seed();
+  assert.equal(engine.StaleCodexOperationError, fences.StaleCodexOperationError);
+  assert.equal(engine.getCodexOperationFence(c.id), null);
+  const fence = engine.captureCodexConnectionFence(c, c.id);
+  assert.ok(fence);
+  engine.runWithCodexConnectionFence(fence, () => {
+    assert.equal(fences.getCodexOperationFence(c.id), fence);
+    assert.equal(fences.mayWriteCodexConnection(c.id), true);
+  });
+  await providers.updateProviderConnection(c.id, { accessToken: "synthetic-replaced-token" });
+  engine.runWithCodexConnectionFence(fence, () => {
+    assert.equal(fences.mayWriteCodexConnection(c.id), false);
+  });
+});
+
 for (const change of ["token", "workspace", "activation", "delete-recreate"] as const) {
   test(`immutable operation scope rejects late writes after ${change} ABA`, async () => {
     const c = await seed();

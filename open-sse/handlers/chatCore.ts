@@ -324,7 +324,7 @@ import {
   isCodexConnectionFenceCurrent,
   StaleCodexOperationError,
   type CodexConnectionFence,
-} from "@/lib/db/codexConnectionFences";
+} from "../services/codexAccount/fences.ts";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { buildClaudeCodeBridgeBody } from "./chatCore/claudeCodeBridgeBody.ts";
 import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";
