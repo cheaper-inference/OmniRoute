@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-118 flags across 6 categories. **Default** is the definition default — the value
+119 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (11)
@@ -65,7 +65,7 @@ used when neither a DB override nor an environment variable is present.
 | `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | When OIDC is enabled, disable password login so users can only authenticate via OIDC Single Sign-On. When disabled (default), both password login and OIDC are available.                                                                                                     |
 | `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`  | boolean | `false`  | Record the caller's IP address and user-agent on the `api_key.auth.touch` audit-log rows written for successful API-key metadata and discovery reads (#17982). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent. |
 
-### Network (31)
+### Network (32)
 
 | Key                                             | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ----------------------------------------------- | ------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -78,6 +78,7 @@ used when neither a DB override nor an environment variable is present.
 | `ROTATION_ATTRIBUTION`                          | boolean | `false` |         | Opencode rotation records which account served or was skipped (masked ids only, never full account ids) and links proxy log entries to their request, so the operator can tell skipped accounts apart from unused ones. Off by default.                                                                                                                                                                                                                                                                                                                                          |
 | `PROXY_SKIP_RECENTLY_FAILED`                    | boolean | `true`  |         | Proxy pools and the per-account rotation of opencode stop re-serving a proxy that just failed (refused TCP probe, or a 429 received through it) for a per-process period that doubles on each repeat, up to a cap. No proxy status is written; with every candidate set aside the choice is unchanged. On by default; `false` restores plain selection.                                                                                                                                                                                                                          |
 | `PROXY_POOL_SHARED_EGRESS_ORDER`                | boolean | `false` |         | For providers whose quota is bucketed by egress address, rank a pool member sharing a recently refused member's observed egress address just below healthy members. Order only, never excluded. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal signal it reads. Off by default.                                                                                                                                                                                                                                                                                    |
+| `PROXY_REFUSAL_MODEL_SCOPE`                     | boolean | `false` |         | Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model.                                                                                                                                                               |
 | `PROXY_STRICT_POST_REPLAY_ENABLED`              | boolean | `false` |         | For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket.                                                                          |
 | `PROXY_POOL_EGRESS_OBSERVATION`                 | boolean | `false` |         | Show, under a proxy pool in the dashboard, how many observed egress IPs served its members over the last 24 h and how many connections used them. Read-only, computed from the proxy log, never used for routing. Off by default.                                                                                                                                                                                                                                                                                                                                                |
 | `PROXY_OPERATOR_EGRESS_ENABLED`                 | boolean | `false` |         | Accept operator-pushed dated observed addresses per pool member and merge them with the journal read for display and pool order. Off by default: the push route answers 404 and pool reads behave exactly as before.                                                                                                                                                                                                                                                                                                                                                             |
@@ -269,10 +270,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 118 flags
+    // ... all 119 flags
   ],
   "summary": {
-    "total": 118,
+    "total": 119,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
