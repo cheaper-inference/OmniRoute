@@ -454,10 +454,9 @@ function isCodexQuotaExhausted(
   );
   return (
     scopedWindowNames.length > 0 &&
+    // Exhaustion is distinct from the operator-configured early quota cutoff.
     scopedWindowNames.every(
-      (windowName) =>
-        getQuotaWindowStatus(connectionId, windowName, DEFAULT_QUOTA_THRESHOLD_PERCENT)
-          ?.reachedThreshold
+      (windowName) => getQuotaWindowStatus(connectionId, windowName, 100)?.reachedThreshold
     )
   );
 }
