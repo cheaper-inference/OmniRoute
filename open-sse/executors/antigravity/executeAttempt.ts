@@ -525,9 +525,7 @@ export async function sendAntigravityRequest(
   // A 403 VALIDATION_REQUIRED carries Google's "verify your account" link. The client error
   // envelope built from this response drops it (the link holds a continuation token), so it
   // has to be stored here, while the raw body is still in hand (#16532 follow-up).
-  if (response.status === HTTP_STATUS.FORBIDDEN && credentials.connectionId) {
-    await rememberVerificationLink(provider, credentials.connectionId, response, log);
-  }
+  await rememberVerificationLink(provider, credentials.connectionId, response, log);
 
   return { response, finalHeaders, upstreamHttpSelection: selectHttpResponse(response) };
 }
@@ -538,10 +536,12 @@ function isCreditsRetryAborted(signal: AbortSignal | null | undefined, error: un
 
 async function rememberVerificationLink(
   provider: string,
-  connectionId: string,
+  connectionId: string | null | undefined,
   response: Response,
   log: SafeAntigravityLog
 ): Promise<void> {
+  // Only a 403 on a persisted connection can carry a verification link.
+  if (response.status !== HTTP_STATUS.FORBIDDEN || !connectionId) return;
   try {
     const rawBody = await response.clone().text();
     // Lazy import: keeps the DB-backed recorder out of this module's static graph (same
