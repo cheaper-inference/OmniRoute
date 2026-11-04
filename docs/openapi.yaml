@@ -1626,7 +1626,7 @@ paths:
               schema:
                 type: string
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          $ref: "#/components/responses/ClientAuthenticationRequired"
         "502":
           description: All upstream providers failed
 
@@ -2161,6 +2161,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ClientAuthenticationRequired"
 
   /api/v1/models/query:
     post:
@@ -14976,6 +14978,12 @@ components:
               error:
                 type: string
                 example: Unauthorized
+    ClientAuthenticationRequired:
+      description: Missing or invalid client API credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     ManagementAuthenticationRequired:
       description: Authentication required for management routes
       content:
