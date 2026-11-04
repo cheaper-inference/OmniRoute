@@ -1,0 +1,1 @@
+- **fix(sse):** Ollama usage now records `prompt_eval_cached_count` as cached prompt tokens, so cache reads from Ollama show up in usage and cost instead of being counted as zero.
