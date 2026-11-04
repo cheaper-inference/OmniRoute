@@ -19,6 +19,11 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 // from ../../../open-sse/mcp-server/internalFetch.ts as a value import, so the module specifier must be mocked).
 vi.mock("../../../open-sse/mcp-server/internalFetch.ts", () => ({ omniRouteFetch: vi.fn() }));
 
+// Mock audit logging so tool calls do not write to the database
+vi.mock("../../../open-sse/mcp-server/audit.ts", () => ({
+  logToolCall: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { createMcpServerV2 } from "../../../open-sse/mcp-server/v2/server.js";
 import { omniRouteFetch } from "../../../open-sse/mcp-server/internalFetch.js";
 

@@ -15,7 +15,19 @@
  * so the real transport/server path below executes end-to-end.
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, afterAll, beforeEach, vi } from "vitest";
+
+// Run before application imports: real MCP modules must never discover the
+// developer's data/plugins. Reuse the repository's trust, DNS and browser guards.
+await vi.hoisted(async () => {
+  delete process.env.DATA_DIR;
+  delete process.env.OMNIROUTE_PLUGINS_DIR;
+  process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+  await import("../../_setup/isolateDataDir.ts");
+  const { mkdirSync } = await import("node:fs");
+  mkdirSync(process.env.OMNIROUTE_PLUGINS_DIR!, { recursive: true });
+});
+const { resetDbInstance } = await import("../../../src/lib/db/core.ts");
 
 process.env.OMNIROUTE_MCP_V2 = "true";
 
@@ -45,6 +57,8 @@ vi.mock("../../../open-sse/mcp-server/internalFetch.ts", () => ({
 }));
 
 const { POST } = await import("../../../src/app/api/mcp/v2/route.ts");
+
+afterAll(() => resetDbInstance());
 
 beforeEach(() => {
   flag.enabled = true;

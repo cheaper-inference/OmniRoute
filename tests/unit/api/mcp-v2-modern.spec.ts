@@ -1,4 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
+
+// Run before application imports: real MCP modules must never discover the
+// developer's data/plugins. Reuse the repository's trust, DNS and browser guards.
+await vi.hoisted(async () => {
+  delete process.env.DATA_DIR;
+  delete process.env.OMNIROUTE_PLUGINS_DIR;
+  process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+  await import("../../_setup/isolateDataDir.ts");
+  const { mkdirSync } = await import("node:fs");
+  mkdirSync(process.env.OMNIROUTE_PLUGINS_DIR!, { recursive: true });
+});
 import { Client as LegacyClient } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport as LegacyTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import {
@@ -33,6 +44,9 @@ vi.mock("../../../src/shared/utils/featureFlags.ts", () => ({
 }));
 const { handleMcpV2Http } = await import("../../../open-sse/mcp-server/v2/server.ts");
 const { omniRouteFetch } = await import("../../../open-sse/mcp-server/internalFetch.ts");
+const { resetDbInstance } = await import("../../../src/lib/db/core.ts");
+
+afterAll(() => resetDbInstance());
 
 function request(method: string, params: Record<string, unknown> = {}, principal?: string) {
   return new Request("http://localhost/api/mcp/v2", {
