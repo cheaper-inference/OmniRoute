@@ -18,6 +18,7 @@ describe("themeStore ↔ CI UI Kit bridge", () => {
     const root = document.documentElement;
     root.className = "";
     delete root.dataset.theme;
+    root.removeAttribute("data-ci-appearance");
     root.style.colorScheme = "";
     root.style.removeProperty("--color-primary");
     root.style.removeProperty("--color-primary-hover");
@@ -62,11 +63,86 @@ describe("themeStore ↔ CI UI Kit bridge", () => {
     expect(useThemeStore.getState().theme).toBe("system");
   });
 
-  it("toggleTheme flips dark ↔ light and persists only the theme", async () => {
+  it("toggleTheme flips dark ↔ light and persists only the theme and the palette", async () => {
     const { default: useThemeStore } = await loadStore();
     useThemeStore.getState().setTheme("light");
     useThemeStore.getState().toggleTheme();
     expect(useThemeStore.getState().theme).toBe("dark");
-    expect(JSON.parse(localStorage.getItem("theme")!).state).toEqual({ theme: "dark" });
+    expect(JSON.parse(localStorage.getItem("theme")!).state).toEqual({
+      theme: "dark",
+      palette: "editions",
+    });
+  });
+});
+
+describe("themeStore palette (Editions default, Classic option)", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-ci-appearance");
+  });
+
+  it("defaults to Editions with nothing stored, and initTheme puts the kit attribute on <html>", async () => {
+    const { default: useThemeStore } = await loadStore();
+    await useThemeStore.persist.rehydrate();
+    expect(useThemeStore.getState().palette).toBe("editions");
+    useThemeStore.getState().initTheme();
+    expect(document.documentElement.getAttribute("data-ci-appearance")).toBe("editions");
+  });
+
+  it("a pre-Editions store (theme only) lands on Editions and keeps its theme", async () => {
+    localStorage.setItem("theme", JSON.stringify({ state: { theme: "light" }, version: 0 }));
+    const { default: useThemeStore } = await loadStore();
+    await useThemeStore.persist.rehydrate();
+    expect(useThemeStore.getState().theme).toBe("light");
+    expect(useThemeStore.getState().palette).toBe("editions");
+  });
+
+  it("setPalette('classic') removes the attribute live and persists the choice", async () => {
+    const { default: useThemeStore } = await loadStore();
+    const root = document.documentElement;
+    useThemeStore.getState().initTheme();
+    expect(root.getAttribute("data-ci-appearance")).toBe("editions");
+    useThemeStore.getState().setPalette("classic");
+    expect(root.hasAttribute("data-ci-appearance")).toBe(false);
+    expect(JSON.parse(localStorage.getItem("theme")!).state.palette).toBe("classic");
+    useThemeStore.getState().setPalette("editions");
+    expect(root.getAttribute("data-ci-appearance")).toBe("editions");
+    expect(JSON.parse(localStorage.getItem("theme")!).state.palette).toBe("editions");
+  });
+
+  it("a stored Classic choice survives a reload and is applied by initTheme", async () => {
+    localStorage.setItem(
+      "theme",
+      JSON.stringify({ state: { theme: "dark", palette: "classic" }, version: 0 })
+    );
+    const { default: useThemeStore } = await loadStore();
+    await useThemeStore.persist.rehydrate();
+    expect(useThemeStore.getState().palette).toBe("classic");
+    document.documentElement.setAttribute("data-ci-appearance", "editions"); // server default
+    useThemeStore.getState().initTheme();
+    expect(document.documentElement.hasAttribute("data-ci-appearance")).toBe(false);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
+
+  it("an unknown persisted or requested palette falls back to Editions", async () => {
+    localStorage.setItem("theme", JSON.stringify({ state: { palette: "violet" }, version: 0 }));
+    const { default: useThemeStore } = await loadStore();
+    await useThemeStore.persist.rehydrate();
+    expect(useThemeStore.getState().palette).toBe("editions");
+    useThemeStore.getState().setPalette("violet" as never);
+    expect(useThemeStore.getState().palette).toBe("editions");
+    expect(document.documentElement.getAttribute("data-ci-appearance")).toBe("editions");
+  });
+
+  it("applyPalette is the single DOM rule: only 'classic' drops the attribute", async () => {
+    const { applyPalette } = await loadStore();
+    const root = document.documentElement;
+    applyPalette("classic");
+    expect(root.hasAttribute("data-ci-appearance")).toBe(false);
+    applyPalette("editions");
+    expect(root.getAttribute("data-ci-appearance")).toBe("editions");
+    applyPalette("anything-else");
+    expect(root.getAttribute("data-ci-appearance")).toBe("editions");
   });
 });
