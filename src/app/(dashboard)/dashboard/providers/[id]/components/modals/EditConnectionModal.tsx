@@ -179,6 +179,8 @@ export default function EditConnectionModal({
     allowPaidCredits: connectionProviderSpecificData?.allowPaidCredits === true,
     passthroughModels: connectionProviderSpecificData?.passthroughModels === true,
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
+    requireUserLastMessage: connectionProviderSpecificData?.requireUserLastMessage === true,
+    keepMidConversationSystem: connectionProviderSpecificData?.keepMidConversationSystem === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     commandCodeZdrEnabled: connectionProviderSpecificData?.zdrEnabled === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
@@ -256,6 +258,7 @@ export default function EditConnectionModal({
   const apiKeyOptional =
     providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
   const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
+  const isPlainAnthropicCompatible = isAnthropicCompatibleProvider(provider) && !isCcCompatible;
   const isCompatible =
     isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
   const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
@@ -408,6 +411,9 @@ export default function EditConnectionModal({
         allowPaidCredits: connection.providerSpecificData?.allowPaidCredits === true,
         passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
         disableCooling: connection?.providerSpecificData?.disableCooling === true,
+        requireUserLastMessage: connection?.providerSpecificData?.requireUserLastMessage === true,
+        keepMidConversationSystem:
+          connection?.providerSpecificData?.keepMidConversationSystem === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
         commandCodeZdrEnabled: connection.providerSpecificData?.zdrEnabled === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
@@ -706,6 +712,15 @@ export default function EditConnectionModal({
       }
       if (updates.providerSpecificData) {
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+        if (isPlainAnthropicCompatible) {
+          updates.providerSpecificData.requireUserLastMessage = formData.requireUserLastMessage
+            ? true
+            : undefined;
+        }
+        if (isPlainAnthropicCompatible) {
+          updates.providerSpecificData.keepMidConversationSystem =
+            formData.keepMidConversationSystem ? true : undefined;
+        }
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
         );
@@ -766,6 +781,38 @@ export default function EditConnectionModal({
         t,
         "preserveEncryptedReasoningDescription",
         "Forward encrypted Responses reasoning items supplied by the client."
+      )}
+    />
+  ) : null;
+  const requireUserLastMessageToggle = isPlainAnthropicCompatible ? (
+    <Toggle
+      checked={formData.requireUserLastMessage}
+      onChange={(checked) => setFormData({ ...formData, requireUserLastMessage: checked })}
+      label={providerText(
+        t,
+        "requireUserLastMessageLabel",
+        "Require conversation to end with a user message"
+      )}
+      description={providerText(
+        t,
+        "requireUserLastMessageDescription",
+        "For upstreams that reject assistant prefill: drop trailing assistant turns (no tool_use) before sending. The model may regenerate its previous answer."
+      )}
+    />
+  ) : null;
+  const keepMidConversationSystemToggle = isPlainAnthropicCompatible ? (
+    <Toggle
+      checked={formData.keepMidConversationSystem}
+      onChange={(checked) => setFormData({ ...formData, keepMidConversationSystem: checked })}
+      label={providerText(
+        t,
+        "keepMidConversationSystemLabel",
+        "Keep mid-conversation system messages in place"
+      )}
+      description={providerText(
+        t,
+        "keepMidConversationSystemDescription",
+        'Leave system messages sent mid-conversation inside the message list instead of moving them into the top-level system prompt, so the prompt cache keeps hitting across turns. Enable only if this upstream accepts role "system" inside messages (otherwise it answers 400).'
       )}
     />
   ) : null;
@@ -853,6 +900,8 @@ export default function EditConnectionModal({
           )}
           {preserveEncryptedReasoningToggle}
           {openaiResponsesStoreToggle}
+          {requireUserLastMessageToggle}
+          {keepMidConversationSystemToggle}
           <CommandCodeZdrToggle
             provider={provider}
             checked={formData.commandCodeZdrEnabled}
