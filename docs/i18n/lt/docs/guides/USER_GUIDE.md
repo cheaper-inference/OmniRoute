@@ -118,9 +118,9 @@ Prieiga per: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Teikėjų konfigūravimas
+## 📖 Teikėjo sąranka
 
-Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokite **Valdymo skydas → Teikėjai → Importuoti iš failo**. Stulpeliai nustatomi pagal jų poziciją (`provider,name,apiKey,baseUrl,priority`); `provider` jau turi egzistuoti kaip valdomas teikėjas arba suderinamas mazgas. Žr. [Teikėjų importavimas iš CSV arba JSON failo](../providers/CSV-IMPORT.md).
+Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokite **Valdymo skydas → Teikėjai → Importuoti iš failo**. Stulpeliai yra poziciniai (`provider,name,apiKey,baseUrl,priority`); `provider` jau turi egzistuoti kaip valdomas teikėjas arba suderinamas mazgas. Žr. [Teikėjų importavimas iš CSV arba JSON failo](../providers/CSV-IMPORT.md).
 
 ### 🔐 Prenumeratos teikėjai
 
@@ -129,7 +129,7 @@ Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokit
 ```bash
 Valdymo skydas → Teikėjai → Prijungti Claude Code
 → OAuth prisijungimas → Automatinis prieigos rakto atnaujinimas
-→ 5 valandų ir savaitinės kvotos stebėjimas
+→ 5 valandų + savaitinės kvotos stebėjimas
 
 Modeliai:
   cc/claude-opus-4-7
@@ -137,20 +137,20 @@ Modeliai:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionalo patarimas:** sudėtingoms užduotims naudokite Opus, o kai svarbus greitis – Sonnet. OmniRoute stebi kiekvieno modelio kvotą!
+**Profesionalo patarimas:** sudėtingoms užduotims naudokite Opus, o greičiui – Sonnet. OmniRoute stebi kiekvieno modelio kvotą!
 
-OmniRoute pagrindiniame kompiuteryje nėra naršyklės? Paleiskite `claude setup-token` bet kur, kur prisijungta prie Claude Code, ir įklijuokite vienus metus galiojantį prieigos raktą skirtuke **Sąrankos prieigos raktas**. Žr. [Claude Code naudojimas su sąrankos prieigos raktu](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Neturite naršyklės OmniRoute pagrindiniame kompiuteryje? Bet kur, kur esate prisijungę prie Claude Code, paleiskite `claude setup-token` ir įklijuokite vienerius metus galiojantį prieigos raktą į **Sąrankos prieigos rakto** skirtuką. Žr. [Claude Code su sąrankos prieigos raktu](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude ir su Claude Code suderinami maršrutai išsaugo `max` samprotavimo pastangų lygį Opus ir Sonnet
-modeliams. Haiku modeliai nepriima `max` pastangų lygio, todėl prieš siųsdama užklausą pirminiam
-teikėjui OmniRoute sumažina jį iki didelio samprotavimo biudžeto.
+Su Claude ir Claude Code suderinami maršrutai išsaugo `max` mąstymo pastangų lygį Opus ir Sonnet
+modeliams. Haiku modeliai nepriima `max` pastangų lygio, todėl OmniRoute prieš siųsdama užklausą į
+aukštesnį lygį pakeičia ją į didelio mąstymo biudžetą.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Valdymo skydas → Teikėjai → Prijungti Codex
 → OAuth prisijungimas (prievadas 1455)
-→ Nustatymas iš naujo kas 5 valandas ir kas savaitę
+→ 5 valandų + savaitinis nustatymas iš naujo
 
 Modeliai:
   cx/gpt-5.5
@@ -164,7 +164,7 @@ Modeliai:
 ```bash
 Valdymo skydas → Teikėjai → Prijungti GitHub
 → OAuth per GitHub
-→ Nustatymas iš naujo kas mėnesį (1-ąją mėnesio dieną)
+→ Mėnesinis nustatymas iš naujo (kiekvieno mėnesio 1 d.)
 
 Modeliai:
   gh/gpt-5.5
@@ -174,42 +174,58 @@ Modeliai:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Pigūs teikėjai
+**AI kreditai (žetonais pagrįstas atsiskaitymas).** Kai GitHub pateikia paskyros
+`credits_used`, teikėjo apribojimų kortelėje rodoma eilutė **AI kreditai** su per
+dabartinį atsiskaitymo laikotarpį sunaudotų kreditų skaičiumi, taip pat neribotuose organizacijų planuose.
 
-#### GLM-4.7 (nustatymas iš naujo kasdien, $0.6/1M)
+**Vietinis AI kreditų limitas.** Redaguokite GitHub ryšį ir nustatykite **AI kreditų limitą vienam
+atsiskaitymo laikotarpiui** (`providerSpecificData.githubCreditLimit`). Tuščia reikšmė jį išjungia; `0`
+visada praleidžia ryšį. Kai paskutinis naudojimo rodmuo yra lygus limitui arba jį viršija,
+renkantis paskyrą šis ryšys praleidžiamas, o maršrutizavimas pereina prie kitų jūsų ryšių,
+taip pat, kaip ir pasiekus kvotos politikos ribą. Tikrinimui naudojami naudojimo duomenys,
+kuriuos jau surenka periodinis kvotos atnaujinimas — užklausos metu į GitHub niekada
+nesikreipiama — be to, taikomas saugus atsarginis elgesys: trūkstamas arba pasenęs rodmuo
+(senesnis nei 15 minučių arba iš jau iš naujo nustatyto atsiskaitymo laikotarpio) ryšio
+neblokuoja. Tai yra vietinė apsaugos priemonė, **o ne garantuota išlaidų riba**: dėl GitHub
+ataskaitų vėlavimo, atnaujinimo intervalo, vykdomų užklausų ir naudojimo ne OmniRoute aplinkoje
+ši riba gali būti viršyta. Jei reikia griežtos ribos, naudokite pačios GitHub išlaidų valdiklius.
+
+### 💰 Nebrangūs teikėjai
+
+#### GLM-4.7 (kasdienis nustatymas iš naujo, $0.6/1M)
 
 1. Užsiregistruokite: [Zhipu AI](https://open.bigmodel.cn)
 2. Gaukite API raktą iš Coding Plan
-3. Valdymo skydas → Pridėti API raktą: Teikėjas: `glm`, API raktas: `your-key`
+3. Valdymo skydas → Pridėti API raktą: teikėjas: `glm`, API raktas: `your-key`
 
-**Naudojimas:** `glm/glm-4.7` — **Profesionalo patarimas:** Coding Plan suteikia 3 kartus didesnę kvotą už 7 kartus mažesnę kainą! Kvota nustatoma iš naujo kasdien 10:00 val.
+**Naudojimas:** `glm/glm-4.7` — **Profesionalo patarimas:** Coding Plan suteikia 3× didesnę kvotą už 1/7 kainos! Nustatymas iš naujo kasdien 10:00.
 
 #### MiniMax M2.1 (nustatymas iš naujo kas 5 val., $0.20/1M)
 
 1. Užsiregistruokite: [MiniMax](https://www.minimax.io)
 2. Gaukite API raktą → Valdymo skydas → Pridėti API raktą
 
-**Naudojimas:** `minimax/MiniMax-M2.1` — **Profesionalo patarimas:** pigiausias variantas ilgam kontekstui (1M žetonų)!
+**Naudojimas:** `minimax/MiniMax-M2.1` — **Profesionalo patarimas:** pigiausias pasirinkimas ilgam kontekstui (1 mln. žetonų)!
 
-#### Kimi K2 (fiksuotas $9/mėn. mokestis)
+#### Kimi K2 ($9/mėn. fiksuota kaina)
 
 1. Užsiprenumeruokite: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Gaukite API raktą → Valdymo skydas → Pridėti API raktą
 
-**Naudojimas:** `kimi/kimi-k2.5` — **Profesionalo patarimas:** fiksuotas $9/mėn. mokestis už 10M žetonų = faktinė $0.90/1M kaina!
+**Naudojimas:** `kimi/kimi-k2.5` — **Profesionalo patarimas:** fiksuota $9/mėn. kaina už 10 mln. žetonų = $0.90/1 mln. faktinė kaina!
 
 #### Baidu Qianfan / ERNIE
 
 1. Užsiregistruokite: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Sukurkite Qianfan API raktą → Valdymo skydas → Pridėti API raktą: Teikėjas: `qianfan`
+2. Sukurkite Qianfan API raktą → Valdymo skydas → Pridėti API raktą: teikėjas: `qianfan`
 
-**Naudojimas:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` arba kitas su OpenAI suderinamas Qianfan modelio ID.
+**Naudojimas:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` arba kitas su Qianfan suderinamas OpenAI modelio ID.
 
 ### 🆓 NEMOKAMI teikėjai
 
-Teikėjų, kuriems nereikia autentifikavimo, puslapyje šalia **Autentifikavimas nereikalingas** yra jungiklis.
-Jį išjungus teikėjas išjungiamas, pašalinamas iš sukonfigūruotų ir glaustų Teikėjų rodinių, o
-jo modeliai pašalinami iš `/v1/models`.
+Teikėjų puslapyje šalia **Autentifikavimas nereikalingas** yra jungiklis, skirtas nemokamiems teikėjams be autentifikavimo.
+Jį išjungus, teikėjas išjungiamas, pašalinamas iš sukonfigūruotų / glaustų teikėjų rodinių,
+o jo modeliai pašalinami iš `/v1/models`.
 
 #### Qoder (9 NEMOKAMI modeliai)
 
@@ -219,7 +235,7 @@ Valdymo skydas → Prijungti Qoder → OAuth prisijungimas → Prieigai taikomi 
 Modeliai: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude NEMOKAMAI)
+#### Kiro (NEMOKAMAS Claude)
 
 ```bash
 Valdymo skydas → Prijungti Kiro → AWS Builder ID arba Google/GitHub → ~50 kreditų per mėnesį
@@ -609,14 +625,14 @@ Visą aplinkos kintamųjų žinyną rasite [README](../README.md).
 
 ---
 
-## 📊 Galimi modeliai
+## 📊 Prieinami modeliai
 
 <details>
-<summary><b>Peržiūrėti visus galimus modelius</b></summary>
+<summary><b>Peržiūrėti visus prieinamus modelius</b></summary>
 
-> Žemiau pateiktas sąrašas sudarytas iš `open-sse/config/providerRegistry.ts`, skirtas v3.8.0. Debesų katalogai (Gemini, OpenRouter ir kt.) sinchronizuojami dinamiškai — norėdami pamatyti visą tiesioginį katalogą, atidarykite **Valdymo skydas → Teikėjai → [teikėjas] → Galimi modeliai** arba iškvieskite `GET /api/models/catalog`.
+> Toliau pateiktas sąrašas sudarytas remiantis `open-sse/config/providerRegistry.ts`, skirtu v3.8.0. Debesijos katalogai („Gemini“, „OpenRouter“ ir kt.) sinchronizuojami dinamiškai — norėdami peržiūrėti visą tiesioginį katalogą, atidarykite **Dashboard → Providers → [provider] → Available Models** arba iškvieskite `GET /api/models/catalog`.
 >
-> Jei teikėjo integruotas sąrašas paseno, tame puslapyje naudokite **Importuoti iš /models** (arba įjunkite **Automatinį sinchronizavimą**), kad atsiųstumėte tiesioginį pirminį katalogą. Tai patvirtinta v3.8.50 versijoje su LLM7.io (`gemini-3.1-flash-lite`) ir UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations anoniminė prieiga to paties testavimo metu išliko apribota pirminio šaltinio.
+> Jei teikėjo integruotasis sąrašas paseno, naudokite **Import from /models** tame puslapyje (arba įjunkite **Auto-Sync**), kad gautumėte naujausią katalogą iš pirminio šaltinio. Tai buvo patikrinta v3.8.50 versijoje su LLM7.io (`gemini-3.1-flash-lite`) ir UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); to paties testavimo metu anoniminė Pollinations prieiga ir toliau buvo ribojama pirminio šaltinio.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -624,7 +640,7 @@ Visą aplinkos kintamųjų žinyną rasite [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — NEMOKAMAS OAuth: naudokite tiesioginį katalogą, rodomą **Valdymo skydas → Teikėjai → Kiro → Galimi modeliai**. Prieinamumas priklauso nuo paskyros ir plano.
+**Kiro (`kr/`)** — NEMOKAMAS OAuth: naudokite tiesioginį katalogą, rodomą **Dashboard → Providers → Kiro → Available Models**. Prieinamumas priklauso nuo paskyros ir plano.
 
 **Qoder (`if/`)** — NEMOKAMAS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,23 +648,23 @@ Visą aplinkos kintamųjų žinyną rasite [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mėn. fiksuota kaina arba mokėjimas pagal naudojimą: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mėn. fiksuotas mokestis arba mokestis už naudojimą: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API raktas: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ypač greitas: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Itin greitas: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok tiesiogiai: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Savieji Grok modeliai: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Talpinama ES: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Priglobta ES: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — Papildyta paieška: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Atvirojo kodo: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (nemokama), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Atvirojo kodo: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (nemokamas), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Greita inferencija: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Greita išvada: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Plokštės (wafer) mastelio: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Vafelinio masto: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Orientuota į RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
@@ -658,11 +674,11 @@ Visą aplinkos kintamųjų žinyną rasite [README](../README.md).
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sinchronizuojama tiesiogiai pagal API raktą iš Google — statinio sąrašo nėra. Prijunkite raktą **Valdymo skydas → Teikėjai**, tada naudokite **Galimi modeliai**, kad importuotumėte dabartinį katalogą (pvz., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini („Google Cloud“ `gemini/`)**: sinchronizuojama tiesiogiai pagal API raktą iš „Google“ — statinio sąrašo nėra. Prijunkite raktą skiltyje **Dashboard → Providers**, tada naudokite **Available Models**, kad importuotumėte naujausią katalogą (pvz., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Kiti suderinami teikėjai** (atrinkti): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (per `aws-bedrock`), `azure-ai`, `openrouter` (perduodamas katalogas), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kiekvienas palaiko savo modelių sąrašą faile `providerRegistry.ts` ir gali būti automatiškai sinchronizuojamas, kai teikėjas atskleidžia `/models` galinį tašką.
+**Kiti suderinami teikėjai** (atrinkti): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (per `aws-bedrock`), `azure-ai`, `openrouter` (perduodamas katalogas), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kiekvienas jų tvarko savo modelių sąrašą faile `providerRegistry.ts`; sąrašas gali būti automatiškai sinchronizuojamas, jei teikėjas pateikia `/models` galinį tašką.
 
-**Pastaba dėl modelių ID:** OmniRoute naudoja teikėjų vietinius ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Kai kuriuose ID yra taškinių versijų, nes būtent taip jų tikisi pirminė API. Jei modelio nėra aukščiau pateiktame sąraše, paleiskite `omniroute models --search <term>` arba iškvieskite `GET /api/models/catalog`, kad patvirtintumėte prieinamumą.
+**Pastaba apie modelių ID:** „OmniRoute“ naudoja savuosius teikėjų ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Kai kurie ID apima taškais atskirtus versijų numerius, nes taip jų reikalauja pirminė API. Jei modelis nepateiktas pirmiau, paleiskite `omniroute models --search <term>` arba iškvieskite `GET /api/models/catalog`, kad patvirtintumėte jo prieinamumą.
 
 </details>
 

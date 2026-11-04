@@ -1551,9 +1551,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transcrie fișiere audio folosind orice furnizor STT configurat. Primul segment
-al căii selectează furnizorul nativ (`openai/…`, `deepgram/…`). Gateway-urile care
-redistribuie modelul unui alt furnizor folosesc un identificator calificat
+Transcrie fișiere audio folosind orice furnizor STT configurat. Primul segment al
+căii selectează furnizorul nativ (`openai/…`, `deepgram/…`). Gateway-urile care
+reexportă modelul unui alt furnizor folosesc un identificator calificat
 (`openrouter/deepgram/nova-3`).
 
 **Solicitare:**
@@ -1576,12 +1576,21 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Exemple de identificatori de modele:** `openai/whisper-1` (necesită o cheie OpenAI),
-`openrouter/deepgram/nova-3` (necesită o cheie OpenRouter),
-`deepgram/nova-3` (necesită o cheie Deepgram nativă). O solicitare simplă către
+**Exemple de identificatori de modele:** `openai/whisper-1` (necesită o cheie
+OpenAI), `openrouter/deepgram/nova-3` (necesită o cheie OpenRouter),
+`deepgram/nova-3` (necesită o cheie Deepgram nativă). O solicitare simplă
 `deepgram/nova-3` **nu** utilizează OpenRouter.
 
 **Formate acceptate:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transcrierea în modul fișier prin WebSocket-ul
+Gemini Live (necesită o cheie API Gemini). Încărcarea este convertită în PCM mono la 16 kHz cu `ffmpeg`
+(`PATH` trebuie să îl includă, cu excepția cazului în care fișierul este deja un WAV PCM mono la 16 kHz),
+apoi este transmisă sesiunii, iar textul finalizat este returnat ca `{ "text": "..." }`. Câmpurile de formular
+opționale `language` și `prompt` sunt transmise mai departe. Limite: încărcările de peste 25 MiB sau
+fișierele audio decodificate cu o durată mai mare de 10 minute returnează
+`413`; o conversie care rulează mai mult de 60 s este oprită și returnează `504`. Cheia API este trimisă
+doar în antetul `x-goog-api-key`, niciodată în URL-ul WebSocket.
 
 ---
 
@@ -1637,7 +1646,7 @@ Note:
 ## Telemetrie
 
 ```bash
-# Get latency telemetry summary (p50/p95/p99 per provider)
+# Obține rezumatul telemetriei latenței (p50/p95/p99 pentru fiecare furnizor)
 GET /api/telemetry/summary
 ```
 
@@ -1657,10 +1666,10 @@ GET /api/telemetry/summary
 ## Buget
 
 ```bash
-# Get budget status for all API keys
+# Obține starea bugetului pentru toate cheile API
 GET /api/usage/budget
 
-# Set or update a budget
+# Setează sau actualizează un buget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1674,7 +1683,7 @@ Content-Type: application/json
 }
 ```
 
-> **Note privind schema** (`setBudgetSchema`): `apiKeyId` este obligatoriu; cel puțin unul dintre `dailyLimitUsd`, `weeklyLimitUsd` sau `monthlyLimitUsd` trebuie să fie mai mare decât zero. Câmpuri opționale: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Structura moștenită `{keyId, limit, period}` returnează `400 Bad Request`.
+> **Note despre schemă** (`setBudgetSchema`): `apiKeyId` este obligatoriu; cel puțin unul dintre `dailyLimitUsd`, `weeklyLimitUsd` sau `monthlyLimitUsd` trebuie să fie mai mare decât zero. Câmpuri opționale: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Forma moștenită `{keyId, limit, period}` returnează `400 Bad Request`.
 
 ## Limite de tokenuri
 

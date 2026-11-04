@@ -4,6 +4,7 @@ import {
   type FeatureFlagDefinition,
 } from "@/shared/constants/featureFlagDefinitions";
 import { registerFeatureFlagResolver } from "@/shared/utils/featureFlagResolverBridge";
+import { isRequireApiKeyValueEnabled } from "@/shared/utils/requireApiKeyValue.mjs";
 
 /**
  * Resolve the effective value of a feature flag.
@@ -66,9 +67,14 @@ export function resolveAllFeatureFlags(): Array<{
 }
 
 // Backward-compatible wrappers
+/**
+ * REQUIRE_API_KEY ignores case and surrounding whitespace, unlike the generic
+ * `isFeatureFlagEnabled`, so the gate agrees with the startup exposure warnings
+ * that read the same value (see requireApiKeyValue.mjs).
+ */
 export function isRequireApiKeyEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("REQUIRE_API_KEY");
+    return isRequireApiKeyValueEnabled(resolveFeatureFlag("REQUIRE_API_KEY"));
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve REQUIRE_API_KEY, defaulting to required:",
