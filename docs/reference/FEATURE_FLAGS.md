@@ -269,10 +269,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 116 flags
+    // ... all 118 flags
   ],
   "summary": {
-    "total": 116,
+    "total": 118,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
