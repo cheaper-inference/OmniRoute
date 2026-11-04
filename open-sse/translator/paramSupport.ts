@@ -62,6 +62,7 @@ const STRIP_RULES: StripRule[] = [
   { match: /claude/i, drop: ["diagnostics"] },
   // GitHub Copilot GPT-5.4+ and GPT-6.x: temperature unsupported.
   { provider: "github", match: isGithubTemperatureUnsupportedModel, drop: ["temperature"] },
+  { provider: "ghe-copilot", match: isGithubTemperatureUnsupportedModel, drop: ["temperature"] },
   // OpenAI GPT-5.0 family (gpt-5, gpt-5-mini, gpt-5-nano, dated snapshots) always
   // reasons and rejects sampling params with HTTP 400 "Unsupported parameter:
   // 'temperature' is not supported with this model" (same for top_p). Agent
