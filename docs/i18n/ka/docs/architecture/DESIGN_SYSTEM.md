@@ -18,92 +18,90 @@
 
 ## 1. სად რა მდებარეობს
 
-- **კომპონენტების ნაკრები.** `packages/ui-kit/src` არის ზედა დონის რეპოზიტორიის `src/`-ის ბაიტ-ბაიტად იდენტური ასლი, იმ კომიტზე, რომელიც დაფიქსირებულია
+- **კიტი.** `packages/ui-kit/src` არის ზუსტად, ბაიტიდან ბაიტამდე, upstream-ის `src/`-ის ასლი იმ კომიტზე, რომელიც დაფიქსირებულია
   `packages/ui-kit/UPSTREAM.md`-ში (სადაც ასევე ჩაწერილია ლიცენზიის ავტორიზაცია); `PATCHES.md` ჩამოთვლის ლოკალურ
-  პატჩებს (არცერთი). ის გამოიყენება როგორც საწყისი კოდი, აგების გარეშე: `next.config.mjs` ახდენს მის ტრანსპილაციას, ხოლო
-  `tsconfig.json` ასახავს `@omniroute/ui-kit` → `packages/ui-kit/src` და `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts`-სა და `vitest.mcp.config.ts`-შიც იგივე ალიასია). ნაკრების
-  კომპონენტი შემოიტანეთ მისი ქვეკონტურით (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), და არასდროს
-  `@omniroute/ui-kit` barrel-ფაილიდან: barrel ყველა კომპონენტს (თარიღის ამომრჩევლის ჩათვლით)
-  თითოეულ იმპორტიორში ტვირთავს. ნაკრების სტილების ფაილი ერთვის `src/app/globals.css`-ის მეშვეობით
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+  პატჩებს (არცერთს). ის გამოიყენება პირდაპირ საწყისი კოდის სახით, აგების გარეშე: `next.config.mjs` ახდენს მის ტრანსპილაციას, ხოლო
+  `tsconfig.json` აკავშირებს `@omniroute/ui-kit` → `packages/ui-kit/src` და `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts`-სა და `vitest.mcp.config.ts`-შიც იგივე ალიასია). კიტის კომპონენტი დააიმპორტეთ
+  მისი ქვეკავშირის გზით (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), და არასდროს
+  `@omniroute/ui-kit` barrel-ის გავლით: barrel თითოეულ იმპორტიორში ყველა კომპონენტს რთავს (თარიღის ამრჩევის ჩათვლით).
+  კიტის სტილების ფაილი ერთვის `src/app/globals.css`-ის გავლით
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, სრული სტილების ნაკრები: ძირითადი `ci-ui.css` და შაბლონების ყველა ოჯახი).
 - **ტოკენები.** `packages/ui-kit/src/ci-tokens.css` აცხადებს `--ci-*` ტოკენებს; `src/app/globals.css`
   მათ აკავშირებს OmniRoute-ის ძველ სახელებთან (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), რათა არსებული `var(--color-*)` წაკითხვები და Tailwind-ის
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), რათა არსებული `var(--color-*)` მიმართვები და Tailwind-ის
   უტილიტები კვლავ მუშაობდეს. ახალი კოდი იყენებს Tailwind-ის უტილიტებს (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ან ნაკრების კლასებს — არასდროს თექვსმეტობით
-  ფერს (`tests/unit/design-kit-bridge.test.ts` ამ კავშირს ამოწმებს). `text-primary` გარდაიქმნება
-  `--color-primary-ink`-ად `--text-color-primary`-ის მეშვეობით, ამიტომ ძირითადი ტექსტი კითხვადი რჩება, ხოლო
-  `bg-primary`/`border-primary` ინარჩუნებს აქცენტის ზედაპირს: Editions-ის პირობებში ეს არის ნაკრების
-  `--ci-color-accent-active` (ღრმა სპილენძისფერი `#99562f` ნათელ რეჟიმში და სპილენძისფერი აქცენტი მუქ რეჟიმში); Classic-ის პირობებში —
-  lime-800 ნათელ რეჟიმში და lime აქცენტი მუქ რეჟიმში. დიაგრამის სერიები იყენებს
-  `--color-chart-1` … `--color-chart-5`-ს.
-- **თემები.** `<html className="ci-theme">` (`src/app/layout.tsx`) დოკუმენტისთვის ნაკრების თემას რთავს.
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ან კიტის კლასებს — არასდროს hex-მნიშვნელობას
+  (`tests/unit/design-kit-bridge.test.ts` ამ კავშირს ამოწმებს). `text-primary` განისაზღვრება როგორც
+  `--color-primary-ink` `--text-color-primary`-ის გავლით, ამიტომ ძირითადი ტექსტი კითხვადი რჩება, ხოლო
+  `bg-primary`/`border-primary` ინარჩუნებს აქცენტურ ზედაპირს: Editions-ში ეს არის კიტის
+  `--ci-color-accent-active` (ღია რეჟიმში მუქი სპილენძისფერი `#99562f`, მუქ რეჟიმში კი სპილენძისფერი აქცენტი); Classic-ში —
+  lime-800 ღია რეჟიმში და lime აქცენტი მუქ რეჟიმში. დიაგრამების სერიები იყენებს
+  `--color-chart-1` … `--color-chart-5`.
+- **თემები.** `<html className="ci-theme">` (`src/app/layout.tsx`) დოკუმენტისთვის კიტის თემას ააქტიურებს.
   პარამეტრი არის `light`, `dark` ან `system` (`THEME_CONFIG.defaultTheme = "system"` ფაილში
-  `src/shared/constants/appConfig.ts`; `system` მიჰყვება `prefers-color-scheme`-ს). `applyTheme()` ფუნქცია
-  `src/store/themeStore.ts`-ში (რომელსაც იმეორებს `THEME_BOOT_SCRIPT`, ჩასმული `src/app/layout.tsx`-ში და
-  გაშვებული ჰიდრატაციამდე) ერთდროულად აყენებს `data-theme="dark"|"light"`-ს და გადართავს `.dark` კლასს `<html>`-ზე.
-  ნაკრების მუქი ტოკენების ნაკრები მიბმულია `data-theme="dark"`-ზე (`packages/ui-kit/src/ci-tokens.css`);
+  `src/shared/constants/appConfig.ts`; `system` მიჰყვება `prefers-color-scheme`-ს). `applyTheme()` ფაილში
+  `src/store/themeStore.ts` (მისი ანალოგია `THEME_BOOT_SCRIPT`, რომელიც პირდაპირ ჩასმულია `src/app/layout.tsx`-ში და
+  ჰიდრატაციამდე სრულდება) ერთდროულად აყენებს `data-theme="dark"|"light"`-ს და რთავს ან თიშავს `.dark` კლასს `<html>`-ზე.
+  კიტის მუქი ტოკენების ნაკრები მიბმულია `data-theme="dark"`-ზე (`packages/ui-kit/src/ci-tokens.css`);
   OmniRoute-ის საკუთარი მუქი რეჟიმის ჩანაცვლებები (`.dark` ბლოკი `globals.css`-ში) და ძველი Tailwind-ის `dark:`
-  უტილიტები მიბმულია `.dark` კლასზე. აქცენტის ფერის წინასწარი პარამეტრები არ არსებობს: აქცენტი ყოველთვის
-  ნაკრებიდან მოდის, ხოლო ძველი აგებიდან შენახული წინასწარი პარამეტრი საცავის ჩატვირთვისას იშლება.
-- **პალიტრები.** ორივე პალიტრა ნაკრებიდანაა (`src/shared/constants/appearancePalette.ts`): `editions`,
-  ნაგულისხმევი პალიტრა, და `classic`. Editions არის ნაკრების `data-ci-appearance="editions"` ატრიბუტი `<html>`-ზე, რომელსაც
-  `ci-editions.css` (`ci-ui.css`-ის მიერ იმპორტირებული) `data-theme`-თან აერთიანებს; Classic ნიშნავს ამ
-  ატრიბუტის არარსებობას. ძირეული განლაგება ატრიბუტს სერვერზე რენდერავს, ამიტომ მნახველი, რომელსაც არაფერი
-  აქვს შენახული (ან JS არ აქვს), Editions-ს ყველა ზედაპირზე იღებს — მართვის პანელზე, შესვლის გვერდზე,
-  `/status`-ზე, შეცდომის გვერდებზე, `/docs`-სა და PWA-ში. არჩევანი თემის გვერდით იმავე `theme` საცავში ინახება
-  (`palette`, `setPalette()`, `applyPalette()` ფაილში `src/store/themeStore.ts`) და გამოსახვამდე გამოიყენება
-  `THEME_BOOT_SCRIPT`-ის მიერ (`src/shared/utils/themeBootScript.ts`, ჩასმული განლაგების `<head>`-ში), რომელიც
-  ატრიბუტს მხოლოდ მაშინ შლის, როცა შენახული პალიტრა არის `"classic"`; `src/app/global-error.tsx`, რომელიც ძირეული
-  განლაგების გარეთაა, მას იმავე საცავიდან იყენებს. `data-ci-appearance` არცერთ სხვა ელემენტზე არ განათავსოთ:
-  ნაკრები მას ამოწმებს `html:root:has([data-ci-appearance="editions"])`-ით, ამიტომ ერთი შთამომავალი მთელ დოკუმენტს
-  გადართავს. Editions-ის `data-ci-editions-variant="landing"` ვარიანტი მარკეტინგული გვერდებისთვისაა და არა
-  მართვის პანელისთვის. ბრაუზერის გარსს (`viewport.themeColor`, ვებ-მანიფესტი) არ შეუძლია CSS-ის ან შენახული
-  არჩევანის წაკითხვა, ამიტომ ის ნაგულისხმევ მნიშვნელობას მიჰყვება: `PWA_THEME_COLORS` ფაილში
-  `src/shared/constants/pwaThemeColors.ts` არის Editions-ის `--ci-color-background`-ის ერთადერთი ასლი
-  (`#f3f1e9` / `#11120f`), რომელიც `ci-editions.css`-თან დაფიქსირებულია
-  `tests/unit/pwa-theme-colors.test.ts`-ით. Monaco ფერებს საცდელი ელემენტიდან კითხულობს (`monacoKitTheme.ts`);
-  Editions-ის პირობებში საცდელი წაკითხვა ერთი სინქრონული გავლისთვის ძირეულ `data-theme`-ს ცვლის, რადგან ნაკრები
-  Editions-ის ნათელ/მუქ რეჟიმს ძირეული ელემენტიდან განსაზღვრავს.
+  უტილიტები მიბმულია `.dark` კლასზე. აქცენტის ფერის წინასწარ განსაზღვრული ვარიანტები არ არსებობს: აქცენტი ყოველთვის
+  კიტიდან მოდის, ხოლო ძველი აგებიდან შენახული წინასწარი ვარიანტი საცავის ჩატვირთვისას იშლება.
+- **პალიტრები.** არსებობს ორი და ორივე კიტიდანაა (`src/shared/constants/appearancePalette.ts`): `editions`,
+  ნაგულისხმევი ვარიანტი, და `classic`. Editions არის კიტის `data-ci-appearance="editions"` ატრიბუტი `<html>`-ზე, რომელსაც
+  `ci-editions.css` (`ci-ui.css`-ის მიერ იმპორტირებული) `data-theme`-თან აერთიანებს; Classic ნიშნავს ამ ატრიბუტის
+  არარსებობას. ძირეული განლაგება ატრიბუტს სერვერზე არენდერებს, ამიტომ მომხმარებელი, რომელსაც არაფერი აქვს შენახული
+  (ან JS არ აქვს), Editions-ს ყველა ზედაპირზე მიიღებს — დაფაზე, ავტორიზაციის გვერდზე, `/status`-ზე, შეცდომის გვერდებზე,
+  `/docs`-სა და PWA-ში. არჩევანი თემის გვერდით, იმავე `theme` საცავში ინახება (`palette`, `setPalette()`, `applyPalette()`
+  ფაილში `src/store/themeStore.ts`) და გამოსახვამდე გამოიყენება `THEME_BOOT_SCRIPT`-ის მიერ
+  (`src/shared/utils/themeBootScript.ts`, პირდაპირ ჩასმული განლაგების `<head>`-ში), რომელიც ატრიბუტს მხოლოდ მაშინ შლის,
+  როდესაც შენახული პალიტრა არის `"classic"`; `src/app/global-error.tsx`, რომელიც ძირეული განლაგების გარეთაა, მას იმავე
+  საცავიდან იყენებს. `data-ci-appearance` სხვა არცერთ ელემენტზე არ განათავსოთ: კიტი მას
+  `html:root:has([data-ci-appearance="editions"])`-ით ამოწმებს, ამიტომ ერთი შთამომავალი მთელ დოკუმენტს გადართავს.
+  Editions-ის `data-ci-editions-variant="landing"` ვარიანტი მარკეტინგული გვერდებისთვისაა და არა დაფისთვის.
+  ბრაუზერის გარსს (`viewport.themeColor`, ვებ-მანიფესტი) CSS-ის ან შენახული არჩევანის წაკითხვა არ შეუძლია, ამიტომ ის
+  ნაგულისხმევ ვარიანტს მიჰყვება: `PWA_THEME_COLORS` ფაილში `src/shared/constants/pwaThemeColors.ts` არის Editions-ის
+  `--ci-color-background`-ის (`#f3f1e9` / `#11120f`) ერთადერთი ასლი, რომელიც `ci-editions.css`-თან შესაბამისობაში
+  ფიქსირდება `tests/unit/pwa-theme-colors.test.ts`-ით. Monaco ფერებს სინჯის ელემენტიდან კითხულობს
+  (`monacoKitTheme.ts`); Editions-ში სინჯის წაკითხვისას ძირეული `data-theme` ერთი სინქრონული გავლისთვის იცვლება,
+  რადგან კიტი Editions-ის ღია/მუქ რეჟიმს ძირეული ელემენტიდან განსაზღვრავს.
 - **კომპონენტები (ადაპტერები).** `src/shared/components/index.tsx` ინარჩუნებს OmniRoute-ის კომპონენტების API-ს
-  (იგივე სახელები, ნაგულისხმევი ექსპორტები და props), ხოლო მის უკან არსებული პრიმიტივები ნაკრებზე აგებული
-  ადაპტერებია: ფორმები (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
-  ზედდებები და უკუკავშირი (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  (იგივე სახელები, ნაგულისხმევი ექსპორტები და props), ხოლო მის უკან არსებული პრიმიტივები კიტზე დაფუძნებული ადაპტერებია:
+  ფორმები (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), გადაფარვები და უკუკავშირი
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
   სტრუქტურა (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) და ცხრილები
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ადაპტერს ნაკრების კომპონენტი
-  ქვეკონტურით შემოაქვს და ძველ props-ს მასზე ასახავს — მაგალითად, `Button variant="primary"` არის ნაკრების
-  `default` ღილაკი (`--ci-button-primary-*`: ინვერსიული ზედაპირი ნათელ რეჟიმში, ხოლო მუქ რეჟიმში აქცენტი თავისი
-  `--ci-color-accent-foreground` ტექსტის ფერით), `danger` არის `destructive`, ხოლო `warning` არის `outline` და
-  `.ci-button--warning` გაფართოება. `.ci-button--warning` და `.ci-badge[data-tone]` წესები
-  `globals.css`-ის ბოლოში (`@layer components`) არის OmniRoute-ის გაფართოებები ნაკრების კლასებზე.
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ადაპტერი კიტის
+  კომპონენტს ქვეკავშირის გზით აიმპორტებს და ძველ props-ს მასზე ასახავს — მაგალითად, `Button variant="primary"` არის
+  კიტის `default` ღილაკი (`--ci-button-primary-*`: ღია რეჟიმში ინვერსიული ზედაპირი, მუქ რეჟიმში კი აქცენტი თავისი
+  `--ci-color-accent-foreground` ტექსტის ფერით), `danger` არის `destructive`, ხოლო `warning` არის `outline` დამატებული
+  `.ci-button--warning` გაფართოებით. `.ci-button--warning` და `.ci-badge[data-tone]` წესები
+  `globals.css`-ის ბოლოს (`@layer components`) არის OmniRoute-ის გაფართოებები კიტის კლასებზე.
   `tests/unit/ui/adapters/*.test.tsx` თითოეულ ადაპტერს აფიქსირებს.
-- **გარსი.** `src/app/(dashboard)/layout.tsx` რენდერავს `DashboardLayout`-ს, რომელიც რენდერავს
-  `src/shared/components/layouts/DashboardShell.tsx`-ს: ნაკრების `SidebarProvider` / `Sidebar` /
+- **გარსი.** `src/app/(dashboard)/layout.tsx` არენდერებს `DashboardLayout`-ს, რომელიც თავის მხრივ არენდერებს
+  `src/shared/components/layouts/DashboardShell.tsx`-ს: კიტის `SidebarProvider` / `Sidebar` /
   `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute-ის ნავიგაციის ლოგიკით
-  `src/shared/components/Sidebar.tsx`-ში. „კონტენტზე გადასვლის“ ბმული `#main-content`-ზე არის პირველი
-  ფოკუსირებადი ელემენტი. `src/shared/components/Header.tsx` შეიცავს ნაკრების `SidebarTrigger`-ს (გარსის
-  გვერდითი ზოლის ერთადერთ გადამრთველს), Keak-ის `ProductSwitcher`-სა და ბრძანებების პალიტრის გამხსნელს; ის
-  მარშრუტის სათაურს მხოლოდ მაშინ აჩვენებს, როცა `#main-content`-ში ნაკრების `PageHeader`
-  (`.ci-page-header`) არ არის დამონტაჟებული, რათა გვერდს, რომელსაც საკუთარი `PageHeader` აქვს, მხოლოდ ერთი
-  `h1` ჰქონდეს. `src/shared/components/CommandPalette.tsx` არის ნაკრების `Dialog`.
-- **ხატულები.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) სახელს (ეკრანების მიერ
-  გამოყენებული Material Symbols-ის ლექსიკონიდან) `ICON_MAP`-ის (`src/shared/constants/iconMap.ts`) მეშვეობით
-  Lucide-ის გლიფთან აკავშირებს. Material Symbols-ის შრიფტი და პაკეტი ამოღებულია: რუკაში არარსებული სახელი
-  ნეიტრალურ ჩანაცვლებით გლიფს (`data-icon-missing="true"`) გამოსახავს და production-ის გარეთ კონსოლში
-  გაფრთხილებას წერს. `npm run gen:icon-map` ბეჭდავს გამოყენებულ სახელებს, რომლებიც რუკაში არ არის
-  (`tests/unit/icon-map-coverage.test.ts` შეცდომით სრულდება ნებისმიერი სახელისთვის, რომელსაც Lucide-ის ხატულა არ აქვს;
-  `tests/unit/icon-map-object-values.test.ts` საძიებო ობიექტებში შენახულ სახელებს ამოწმებს);
+  `src/shared/components/Sidebar.tsx`-ში. „კონტენტზე გადასვლის“ ბმული `#main-content`-ზე პირველი ფოკუსირებადი
+  ელემენტია. `src/shared/components/Header.tsx` შეიცავს კიტის `SidebarTrigger`-ს (გარსში გვერდითი ზოლის ერთადერთ
+  გადამრთველს), Keak-ის `ProductSwitcher`-სა და ბრძანებების პალიტრის გამხსნელს; ის მარშრუტის სათაურს მხოლოდ მაშინ აჩვენებს,
+  როცა `#main-content`-ში კიტის `PageHeader` (`.ci-page-header`) არ არის ჩამონტაჟებული, ამიტომ გვერდს, რომელსაც საკუთარი
+  `PageHeader` აქვს, მხოლოდ ერთი `h1` ექნება. `src/shared/components/CommandPalette.tsx` არის კიტის `Dialog`.
+- **ხატულები.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) სახელს (ეკრანებზე გამოყენებული
+  Material Symbols-ის ლექსიკონიდან) `ICON_MAP`-ის (`src/shared/constants/iconMap.ts`) მეშვეობით
+  Lucide-ის გლიფთან აკავშირებს. Material Symbols-ის შრიფტი და პაკეტი წაშლილია: თუ სახელი რუკაში არ მოიძებნა,
+  ნეიტრალური ჩანაცვლების გლიფი (`data-icon-missing="true"`) რენდერდება და production-ის გარეთ კონსოლში
+  გაფრთხილება იწერება. `npm run gen:icon-map` ბეჭდავს გამოყენებულ სახელებს, რომლებიც რუკაში არ არის
+  (`tests/unit/icon-map-coverage.test.ts` ვერ სრულდება Lucide-ის ხატულის არმქონე ნებისმიერი სახელის შემთხვევაში;
+  `tests/unit/icon-map-object-values.test.ts` ფარავს საძიებო ობიექტებში შენახულ სახელებს);
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ლიტერალურ
-  `<span className="material-symbols-outlined">` span-ებს `<Icon>`-ად გარდაქმნის.
-- **ბრენდი.** `src/shared/components/OmniRouteLogo.tsx` კომპლექტს გარს აკრავს: ნაგულისხმევი ექსპორტი `OmniRouteLogo`
-  გამოსახავს `ProductIcon product="omniroute" variant="glyph"`-ს (ჩაშენებული SVG, `basePath`-თან თავსებადი), ხოლო
-  `OmniRouteLockup` გამოსახავს `ProductLockup product="omniroute"`-ს (ხელმისაწვდომი სახელი „Keak OmniRoute“) ან,
+  `<span className="material-symbols-outlined">` span-ელემენტებს `<Icon>`-ად გარდაქმნის.
+- **ბრენდი.** `src/shared/components/OmniRouteLogo.tsx` ნაკრებს გარს არტყამს: ნაგულისხმევი ექსპორტი `OmniRouteLogo`
+  რენდერს უკეთებს `ProductIcon product="omniroute" variant="glyph"`-ს (ჩაშენებული SVG, `basePath`-თან თავსებადი), ხოლო
+  `OmniRouteLockup` რენდერს უკეთებს `ProductLockup product="omniroute"`-ს (ხელმისაწვდომი სახელი „Keak OmniRoute“) ან,
   white-label ოპერატორებისთვის, მათ საკუთარ `name`/`logoSrc`-ს. პროდუქტების გადამრთველის დანიშნულების მისამართები
-  განთავსებულია `src/shared/constants/keakProducts.ts`-ში (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). დამოუკიდებელი
-  ეკრანები — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  ინახება `src/shared/constants/keakProducts.ts`-ში (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). დამოუკიდებელ
+  ეკრანებზე — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` და `src/shared/components/ErrorPageScaffold.tsx`
-  — lockup-ს აჩვენებს; `tests/unit/brand-pages-static.test.ts` მის არსებობას აკონტროლებს.
+  — ნაჩვენებია სრული ლოგო; ამას `tests/unit/brand-pages-static.test.ts` იცავს.
 
 ## 2. წესები
 
