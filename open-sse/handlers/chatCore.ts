@@ -1669,6 +1669,7 @@ async function handleChatCoreInner({
             ));
         if (
           omniglyphSelected &&
+          !protectOpenCodePrefix &&
           (targetFormat === FORMATS.CLAUDE ||
             targetFormat === FORMATS.OPENAI ||
             targetFormat === FORMATS.OPENAI_RESPONSES) &&
