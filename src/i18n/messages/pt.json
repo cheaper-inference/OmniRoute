@@ -14315,6 +14315,10 @@
         "label": "Resseleção de Pool em 429 do OpenCode",
         "description": "Para a rotação multiconta do OpenCode, após um 429 de um fornecedor segmentado por saída numa conta sem proxy sob um contexto de pool ambiente, pede à pool de ligações outro membro para a tentativa seguinte em vez de tentar novamente o mesmo endereço de saída. Ordena, nunca exclui: uma pool esgotada mantém o comportamento atual. Desativado por predefinição: cada 429 roda para a conta seguinte exatamente como antes."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sonda de saída de nível livre OpenCode",
+        "description": "Para o executor OpenCode, quando um pedido com proxy é respondido 403 ou 451 FreeTierError e a nova tentativa das ferramentas observadas falha ou não é aplicada, envie o pedido uma vez através de um proxy diferente (outro proxy de conta ou outro membro da pool, nunca uma ligação direta). Só quando esta sonda responde 200 é que a primeira saída é reservada na memória de recusa do proxy e a resposta da sonda é servida; quando ambos recusam, a recusa original é devolvida e nada é registado. O mesmo texto de recusa cobre uma saída sinalizada IP e um formato de pedido recusado, pelo que a investigação os diferencia através de provas. Desativado por predefinição: a recusa é devolvida inalterada."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint de Cliente do OpenCode v2",
         "description": "Envia o fingerprint de cliente da CLI do OpenCode v2 em pedidos OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli e x-opencode-client cli, um User-Agent de cliente mantido apenas quando for um cliente OpenCode 2.x e, em pedidos condicionados do escalão gratuito, nenhum x-opencode-request, a sessão espelhada em x-opencode-session-id/x-session-affinity/x-session-id, os esquemas read/shell da CLI v2 em ferramentas placeholder injetadas e um tool_choice de \"none\" descartado. Desativado por predefinição: cada pedido OpenCode mantém a identidade, cabeçalhos e corpo atuais byte a byte."

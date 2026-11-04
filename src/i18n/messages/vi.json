@@ -14238,6 +14238,10 @@
         "label": "Chọn Lại Pool Mã Lỗi 429 OpenCode",
         "description": "Đối với lượt xoay vòng đa tài khoản OpenCode, sau một mã 429 từ nhà cung cấp chia theo bucket egress trên tài khoản không có proxy trong ngữ cảnh pool chung, yêu cầu pool kết nối chọn một thành viên khác cho lần thử kế tiếp thay vì thử lại cùng một địa chỉ egress. Chỉ thay đổi thứ tự, không loại trừ: một pool cạn kiệt sẽ giữ nguyên hành vi hiện tại. Mặc định tắt: mọi mã 429 sẽ xoay vòng sang tài khoản kế tiếp hoàn toàn như trước."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Đầu dò đầu ra miễn phí OpenCode",
+        "description": "Đối với người thực thi OpenCode, khi yêu cầu được ủy quyền được trả lời 403 hoặc 451 FreeTierError và việc thử lại công cụ được quan sát không thành công hoặc không áp dụng, hãy gửi yêu cầu một lần thông qua một proxy khác (proxy tài khoản khác hoặc thành viên nhóm khác, không bao giờ kết nối trực tiếp). Chỉ khi câu trả lời của thăm dò đó là 200 thì đầu ra đầu tiên mới được đặt sang một bên trong bộ nhớ từ chối proxy và phản hồi thăm dò được cung cấp; khi cả hai đều từ chối, lời từ chối ban đầu sẽ được trả lại và không có gì được ghi lại. Văn bản từ chối tương tự bao gồm một hình dạng đầu ra được gắn cờ IP và một hình dạng yêu cầu bị từ chối, do đó, cuộc điều tra sẽ phân biệt chúng bằng bằng chứng. Tắt theo mặc định: từ chối được trả về không thay đổi."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Dấu ấn khách hàng OpenCode v2",
         "description": "Gửi dấu ấn khách hàng CLI của OpenCode v2 trong các yêu cầu OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli và x-opencode-client cli, một User-Agent khách hàng chỉ được giữ lại khi là khách hàng OpenCode 2.x, và trong các yêu cầu miễn phí bị kiểm soát không có x-opencode-request, phiên được phản chiếu sang x-opencode-session-id/x-session-affinity/x-session-id, các schema đọc/vỏ của CLI v2 trên các công cụ nhận giữ chỗ và một tool_choice là \"none\" bị loại bỏ. Tắt mặc định: mọi yêu cầu OpenCode giữ nguyên danh tính, đầu và thân từng byte như hiện tại."

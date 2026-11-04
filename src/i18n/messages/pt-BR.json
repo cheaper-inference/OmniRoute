@@ -14238,6 +14238,10 @@
         "label": "Resseleção de Pool em 429 do OpenCode",
         "description": "Para a rotação multicontas do OpenCode, após um 429 de um provedor agrupado por saída em uma conta sem proxy sob um contexto de pool ambiente, solicita ao pool de conexões outro membro para a próxima tentativa em vez de tentar novamente o mesmo endereço de saída. Ordena, nunca exclui: um pool esgotado mantém o comportamento atual. Desativado por padrão: cada 429 rotaciona para a próxima conta exatamente como antes."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sondagem de Saída do Free Tier do OpenCode",
+        "description": "Para o executor do OpenCode, quando uma requisição via proxy recebe 403 ou 451 FreeTierError e a nova tentativa com ferramentas observadas falhou ou não se aplicou, envia a requisição uma vez por outro proxy (proxy de outra conta ou outro membro do pool, nunca uma conexão direta). Somente quando essa sondagem responde 200 a primeira saída é posta de lado na memória de recusa de proxy e a resposta da sondagem é servida; quando ambas recusam, a recusa original é devolvida e nada é registrado. O mesmo texto de recusa cobre um IP de saída sinalizado e um formato de requisição recusado, então a sondagem os distingue por evidência. Desligado por padrão: a recusa é devolvida sem alteração."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint de cliente do OpenCode v2",
         "description": "Envia o fingerprint de cliente da CLI do OpenCode v2 em requisições do OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli e x-opencode-client cli, um User-Agent de cliente mantido apenas quando for um cliente OpenCode 2.x e, em requisições de nível gratuito restritas, nenhum x-opencode-request, a sessão espelhada em x-opencode-session-id/x-session-affinity/x-session-id, os esquemas read/shell da CLI v2 em ferramentas de placeholder injetadas e um tool_choice de \"none\" descartado. Desativado por padrão: cada requisição do OpenCode mantém a identidade, cabeçalhos e corpo atuais byte a byte."

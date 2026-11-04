@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 Havuz Yeniden Seçimi",
         "description": "Proxy'siz bir hesapta ve ortam havuz bağlamında egress-bucket'li bir sağlayıcıdan gelen 429 için OpenCode çoklu hesap rotasyonunda, aynı egress adresini yeniden denemek yerine bir sonraki deneme için bağlantı havuzundan başka bir üye isteyin. Sıralar, asla hariç tutmaz: tükenmiş bir havuz mevcut davranışı korur. Varsayılan olarak kapalıdır: her 429, tıpkı öncekiler gibi bir sonraki hesaba rotasyona gider."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Ücretsiz Katmanlı Çıkış Probu",
+        "description": "OpenCode yürütücüsü için, proxy'li bir istek 403 veya 451 FreeTierError olarak yanıtlandığında ve gözlemlenen araçların yeniden denemesi başarısız olduğunda veya uygulanmadığında, isteği farklı bir proxy (başka bir hesap proxy'si veya başka bir havuz üyesi, asla doğrudan bağlantı değil) aracılığıyla bir kez gönderin. Yalnızca bu araştırma 200'e yanıt verdiğinde, vekil reddetme belleğinde ilk çıkış bir kenara bırakılır ve araştırma yanıtı sunulur; her ikisi de reddettiğinde, orijinal redde geri dönülür ve hiçbir şey kaydedilmez. Aynı ret metni, işaretlenmiş bir çıkış IP ve reddedilen istek şeklini kapsar, böylece araştırma bunları kanıtlarla birbirinden ayırır. Varsayılan olarak kapalı: reddetme değiştirilmeden iade edilir."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 İstemci Parmak İzi",
         "description": "OpenCode Zen/Go isteklerinde OpenCode v2 CLI istemci parmak izini gönder (#16571): User-Agent opencode/latest/<2.x>/cli ve x-opencode-client cli, yalnızca 2.x OpenCode istemcisi olduğunda korunan istemci User-Agent'ı, kapılı ücretsiz katman isteklerinde x-opencode-request yok, oturum x-opencode-session-id/x-session-affinity/x-session-id üzerine aynalanır, v2 CLI okuma/istem şemaları enjekte edilen yer tutucu araçlarda ve tool_choice'ü \"none\" olanlar kaldırılır. Varsayılan olarak kapalıdır: tüm OpenCode istekleri mevcut kimliği, başlıkları ve gövdeyi bayt bayt korur."

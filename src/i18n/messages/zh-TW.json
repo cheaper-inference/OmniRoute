@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 池重選",
         "description": "對 OpenCode 多帳戶輪換，在環境池上下文下，無代理帳戶從按出口配額的提供者收到 429 後，向連線池請求另一個成員做下次嘗試，而不是重試同一出口地址。只排序，不排除：池耗盡時保持現狀。預設關閉：每個 429 都輪換到下一帳戶，與之前一致。"
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode免費層出口探測器",
+        "description": "對於OpenCode執行器，當代理請求被回應 403 或 451 FreeTierError並且觀察到的工具重試失敗或不適用時，透過不同的代理（另一個帳戶代理或另一個池成員，從不直接連接）發送一次請求。只有當該探測回答 200 時，才是在代理拒絕記憶體中預留的第一個出口，並提供探測響應；當雙方都拒絕時，則返回最初的拒絕並且不記錄任何內容。相同的拒絕文字涵蓋了標記的出口IP和拒絕的請求形狀，因此探測器通過證據將它們區分開。預設為關閉：拒絕原樣返回。"
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 客戶端指紋",
         "description": "在 OpenCode Zen/Go 請求上傳送 OpenCode v2 CLI 客戶端指紋（#16571）：User-Agent opencode/latest/<2.x>/cli 與 x-opencode-client cli；僅當客戶端 User-Agent 是 2.x OpenCode 客戶端時才保留它；在受門控的免費層請求上不發 x-opencode-request，會話映象到 x-opencode-session-id/x-session-affinity/x-session-id，注入的佔位工具使用 v2 CLI 的 read/shell schema，丟棄 \"none\" 的 tool_choice。預設關閉：每個 OpenCode 請求逐位元組保持現有身份、頭和正文。"
