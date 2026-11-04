@@ -141,7 +141,13 @@ const OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS = new Set([
 /** Providers whose cache is populated from the longest matching prefix without
  * an explicit `cache_control` breakpoint. This is deliberately narrower than
  * CACHING_PROVIDERS, which also includes explicit-breakpoint providers. */
-const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"]);
+const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set([
+  "openai",
+  "codex",
+  "azure",
+  "opencode",
+  "opencode-go",
+]);
 
 /**
  * Per-connection override for cache behavior, resolved from the connection's
