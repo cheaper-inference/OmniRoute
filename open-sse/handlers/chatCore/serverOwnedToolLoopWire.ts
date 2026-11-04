@@ -9,10 +9,12 @@ import { executeServerOwned } from "@/lib/skills/interception";
 import { runServerOwnedToolLoop, LOOP_BUDGET_MS } from "@/lib/skills/serverOwnedToolLoop.ts";
 import { deriveToolRequestIdentity } from "@/lib/skills/stableJson.ts";
 import { getIdempotencyKey } from "@/lib/idempotencyLayer";
+import { aliasMuseToolNames } from "../../executors/museToolNameAliases.ts";
+import { FORMATS } from "../../translator/formats.ts";
 import { runNonStreamingProviderLeg } from "./nonStreamingProviderLeg.ts";
 import type { ProviderLegInput } from "./nonStreamingProviderLeg.ts";
+import { extractRequestToolMetadata, type NamespaceIdentity } from "./requestToolIdentity.ts";
 import { shouldRunServerOwnedToolLoop } from "./serverOwnedToolLoopGate.ts";
-import { FORMATS } from "../../translator/formats.ts";
 
 export function derivePostInjectionRequestIdentity(input: {
   apiKeyId: string;
@@ -27,6 +29,28 @@ export function derivePostInjectionRequestIdentity(input: {
     skillRequestId: input.skillRequestId,
     postInjectionBody: input.postInjectionBody,
   });
+}
+
+export function finalizeServerOwnedFollowUpRequest(input: {
+  translatedBody: Record<string, unknown>;
+  provider: string;
+  targetFormat: string;
+}): {
+  translatedBody: Record<string, unknown>;
+  toolNameMap: Map<string, string> | null;
+  requestToolIdentityMap: Map<string, NamespaceIdentity> | null;
+} {
+  const translatedBody =
+    input.provider === "muse-code" && input.targetFormat === FORMATS.OPENAI_RESPONSES
+      ? (aliasMuseToolNames(input.translatedBody) as Record<string, unknown>)
+      : input.translatedBody;
+  const { requestToolIdentityMap, toolNameAliasMap } = extractRequestToolMetadata(translatedBody);
+  delete translatedBody._disableToolPrefix;
+  return {
+    translatedBody,
+    toolNameMap: toolNameAliasMap,
+    requestToolIdentityMap,
+  };
 }
 
 export async function continueServerOwnedToolLoop(input: {
