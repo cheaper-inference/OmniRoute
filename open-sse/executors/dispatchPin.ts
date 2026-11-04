@@ -79,12 +79,24 @@ export function dispatchGuarded(
   init: RequestInit,
   credentials?: DispatchCredentials
 ): Promise<Response> {
+  // A caller that pinned a redirect mode (strict validation: "error") keeps it.
+  if (init.redirect) return dispatchOnce(provider, url, init, credentials, false);
+  return dispatchFollowingRedirects(provider, url, init, credentials);
+}
+
+function dispatchOnce(
+  provider: string,
+  url: string,
+  init: RequestInit,
+  credentials: DispatchCredentials | undefined,
+  isRedirectHop: boolean
+): Promise<Response> {
   const override = credentials?.providerSpecificData?.baseUrl;
   const guard = getProviderValidationGuard();
   if (
     guard === "none" ||
-    typeof override !== "string" ||
-    override.trim() === "" ||
+    // A redirect target is never a fixed registry host, so it is guarded like an override.
+    (!isRedirectHop && (typeof override !== "string" || override.trim() === "")) ||
     isLocalProvider(provider) ||
     isSelfHostedChatProvider(provider) ||
     !canGuardDirectConnection(provider, url)
@@ -92,4 +104,55 @@ export function dispatchGuarded(
     return fetch(url, init);
   }
   return fetch(url, { ...init, dispatcher: getGuardedDispatcher(guard) } as RequestInit);
+}
+
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const MAX_REDIRECTS = 5;
+const CREDENTIAL_HEADER = /^(authorization|proxy-authorization|cookie)$|key|token|secret/i;
+
+/**
+ * Follows redirects by hand (F-C4-02): an auto-followed redirect would reach a Location target
+ * that neither guard above ever saw, and on 307/308 forward the POST body and the key to it.
+ * Every hop gets the string guard and the connect-time guard; credential headers are dropped
+ * when the origin changes; method rules follow the Fetch standard.
+ */
+async function dispatchFollowingRedirects(
+  provider: string,
+  url: string,
+  init: RequestInit,
+  credentials: DispatchCredentials | undefined
+): Promise<Response> {
+  let currentUrl = url;
+  let options: RequestInit = { ...init, redirect: "manual" };
+  for (let hop = 0; ; hop++) {
+    const response = await dispatchOnce(provider, currentUrl, options, credentials, hop > 0);
+    const location = response.headers.get("location");
+    if (!REDIRECT_STATUSES.has(response.status) || !location) return response;
+    void response.body?.cancel().catch(() => {});
+    if (hop >= MAX_REDIRECTS) {
+      throw new Error(`Provider dispatch stopped after ${MAX_REDIRECTS} redirects`);
+    }
+    const nextUrl = new URL(location, currentUrl).toString();
+    assertDispatchUrlAllowed(provider, nextUrl);
+    const headers = new Headers(options.headers);
+    if (new URL(nextUrl).origin !== new URL(currentUrl).origin) {
+      for (const name of [...headers.keys()]) {
+        if (CREDENTIAL_HEADER.test(name)) headers.delete(name);
+      }
+    }
+    const method = (options.method || "GET").toUpperCase();
+    if (response.status === 303 ? method !== "HEAD" : response.status <= 302 && method === "POST") {
+      options = { ...options, method: "GET", body: undefined };
+      for (const name of [
+        "content-type",
+        "content-length",
+        "content-encoding",
+        "content-language",
+      ]) {
+        headers.delete(name);
+      }
+    }
+    options = { ...options, headers: Object.fromEntries(headers.entries()) };
+    currentUrl = nextUrl;
+  }
 }
