@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 
 // The open-sse → src boundary ratchet (quality-baseline.json) counts one edge per importing file.
@@ -10,8 +9,9 @@ import path from "node:path";
 // (DB override > env > definition default); with none registered it reads the env var alone and
 // skips the definition default, so it only matches isFeatureFlagEnabled for flags that default off.
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-engine-flags-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
+// DB isolation comes from the tests/_setup/isolateDataDir.ts preload (a per-process DATA_DIR).
+// This file must not set DATA_DIR or delete it: under `--test-isolation=none` (test:unit:fast)
+// every file shares one process and one src/lib/db/core.ts, which captures the path on first import.
 
 const core = await import("../../src/lib/db/core.ts");
 const featureFlagsDb = await import("../../src/lib/db/featureFlags.ts");
@@ -21,7 +21,6 @@ const { isRetryAfterProvenanceEnabled } = await import("../../open-sse/utils/err
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 const MOVED = [
