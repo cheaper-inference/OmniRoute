@@ -203,12 +203,11 @@ for (const model of ["deepseek-v4-pro", "kimi-k3"]) {
       "chat-to-responses",
       model
     );
-    assert.equal(result.usage.prompt_tokens ?? result.usage.input_tokens, 100_000);
-    assert.equal(result.usage.completion_tokens ?? result.usage.output_tokens, 100);
-    const details = (result.usage.input_tokens_details ??
-      result.usage.prompt_tokens_details) as Usage;
-    assert.equal(details.cached_tokens, 95_000);
-    assert.equal(result.usage.cached_tokens, undefined);
+    // Billing keeps the upstream usage that stream.ts extracted; the translator's
+    // Responses-shaped usage goes only to the client wire.
+    assert.equal(result.usage.prompt_tokens, 100_000);
+    assert.equal(result.usage.completion_tokens, 100);
+    assert.equal(result.usage.cached_tokens, 95_000);
     assert.match(result.clientWire, /"cached_tokens":95000/);
     assertCost(result.ledgerCost, 0.03);
     assertCost(result.quotaCost, 0.03);

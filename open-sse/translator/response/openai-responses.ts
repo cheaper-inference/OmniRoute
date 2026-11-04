@@ -200,33 +200,45 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
   }
 
   // Normalize usage from any chunk so response.completed has Responses token fields.
+  // Keep it in state.responsesUsage: stream.ts fills state.usage first and billing reads
+  // cost_usd and the flat cache/reasoning counters from it, so only fill state.usage when
+  // no caller did. A zero or empty usage placeholder is skipped, so the finish chunk
+  // still waits for the real trailing usage.
   if (chunk.usage) {
     const u = chunk.usage;
     const input_tokens = u.input_tokens ?? u.prompt_tokens ?? 0;
     const output_tokens = u.output_tokens ?? u.completion_tokens ?? 0;
-    const cacheFields = mergeCacheCreationFields(state.usage, u);
-    const cacheDetails = resolveResponsesCacheUsageDetails({ ...u, ...cacheFields });
-    const rawReasoning =
-      u.output_tokens_details?.reasoning_tokens ?? u.completion_tokens_details?.reasoning_tokens;
-    const reasoningTokens =
-      typeof rawReasoning === "number" && Number.isFinite(rawReasoning) ? rawReasoning : 0;
+    if (input_tokens + output_tokens > 0) {
+      const cacheFields = mergeCacheCreationFields(state.usage, u);
+      const cacheDetails = resolveResponsesCacheUsageDetails({ ...u, ...cacheFields });
+      const flatCached = u.cached_tokens ?? u.cache_read_input_tokens ?? u.prompt_cache_hit_tokens;
+      const rawReasoning =
+        u.output_tokens_details?.reasoning_tokens ??
+        u.completion_tokens_details?.reasoning_tokens ??
+        u.reasoning_tokens;
+      const reasoningTokens =
+        typeof rawReasoning === "number" && Number.isFinite(rawReasoning) ? rawReasoning : 0;
 
-    state.usage = {
-      ...cacheFields,
-      // Exact provider-reported cost and its credit provenance; billing reads them.
-      ...(u.provider_credits !== undefined && { provider_credits: u.provider_credits }),
-      ...(u.cost_in_usd_ticks !== undefined && { cost_in_usd_ticks: u.cost_in_usd_ticks }),
-      input_tokens,
-      input_tokens_details: {
-        cached_tokens: 0,
-        ...(cacheDetails || {}),
-      },
-      output_tokens,
-      output_tokens_details: {
-        reasoning_tokens: reasoningTokens,
-      },
-      total_tokens: u.total_tokens ?? input_tokens + output_tokens,
-    };
+      const ownsSharedUsage = !state.usage || state.usage === state.responsesUsage;
+      state.responsesUsage = {
+        ...cacheFields,
+        // Exact provider-reported cost and its credit provenance; billing reads them.
+        ...(u.provider_credits !== undefined && { provider_credits: u.provider_credits }),
+        ...(u.cost_in_usd_ticks !== undefined && { cost_in_usd_ticks: u.cost_in_usd_ticks }),
+        input_tokens,
+        input_tokens_details: {
+          cached_tokens:
+            typeof flatCached === "number" && Number.isFinite(flatCached) ? flatCached : 0,
+          ...(cacheDetails || {}),
+        },
+        output_tokens,
+        output_tokens_details: {
+          reasoning_tokens: reasoningTokens,
+        },
+        total_tokens: u.total_tokens ?? input_tokens + output_tokens,
+      };
+      if (ownsSharedUsage) state.usage = state.responsesUsage;
+    }
   }
 
   // OpenRouter errors can carry empty choices or a finish_reason:"error" choice.
@@ -252,7 +264,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     // #6906: a deferred finish_reason (awaitingTrailingUsage, see below) completes here —
     // the trailing usage-only chunk (choices: [], usage: {...}) is what real
     // stream_options.include_usage=true upstreams send after finish_reason (see the
-    // "READ THIS" block in stream.ts); state.usage was already captured above.
+    // "READ THIS" block in stream.ts); state.responsesUsage was already captured above.
     if (state.awaitingTrailingUsage && !state.completedSent) {
       const { events, emit } = createEventEmitter(state);
       sendCompleted(state, emit);
@@ -392,7 +404,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     for (const i in state.funcCallIds) closeToolCall(state, emit, i);
     // #6906: usage already captured (same chunk or earlier) completes now; otherwise
     // defer for a trailing usage-only chunk, handled above and in flushEvents().
-    if (state.usage) {
+    if (state.responsesUsage) {
       sendCompleted(state, emit);
     } else {
       state.awaitingTrailingUsage = true;
@@ -931,9 +943,9 @@ function sendCompleted(state, emit) {
       response.model = state.model;
     }
 
-    if (state.usage) {
+    if (state.responsesUsage) {
       // Preserve upstream accounting in state; expose the full context only to Responses clients.
-      response.usage = normalizeResponsesContextUsage(state.usage);
+      response.usage = normalizeResponsesContextUsage(state.responsesUsage);
     }
 
     const eventType = finalizeResponsesTerminalStatus(response, state.finishReason, !!upstreamErr);
