@@ -1508,7 +1508,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Unukuze faili za sauti ukitumia mtoa huduma yeyote wa STT aliyesanidiwa. Sehemu ya kwanza ya njia huchagua mtoa huduma asilia (`openai/…`, `deepgram/…`). Milango inayotoa tena modeli ya mchuuzi mwingine hutumia kitambulisho kilichohitimu
+Unukuu faili za sauti kwa kutumia mtoa huduma yeyote wa STT aliyesanidiwa. Sehemu ya kwanza ya njia
+huchagua mtoa huduma asilia (`openai/…`, `deepgram/…`). Lango linalotoa tena
+modeli ya muuzaji mwingine hutumia kitambulisho kilichohitimu
 (`openrouter/deepgram/nova-3`).
 
 **Ombi:**
@@ -1531,12 +1533,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Vitambulisho vya mfano vya modeli:** `openai/whisper-1` (inahitaji ufunguo wa OpenAI),
-`openrouter/deepgram/nova-3` (inahitaji ufunguo wa OpenRouter),
-`deepgram/nova-3` (inahitaji ufunguo asilia wa Deepgram). Ombi la
-`deepgram/nova-3` lisilo na kiambishi kingine **halitumii OpenRouter**.
+**Vitambulisho vya modeli za mfano:** `openai/whisper-1` (inahitajika API key ya OpenAI),
+`openrouter/deepgram/nova-3` (inahitajika API key ya OpenRouter),
+`deepgram/nova-3` (inahitajika API key asilia ya Deepgram). Ombi la kawaida la
+`deepgram/nova-3` **halitumii** OpenRouter.
 
 **Miundo inayotumika:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Unukuzi wa faili katika hali ya faili kupitia
+WebSocket ya Gemini Live (inahitajika API key ya Gemini). Upakiaji hubadilishwa kuwa PCM ya mono ya 16 kHz kwa kutumia `ffmpeg`
+(inapaswa kuwa kwenye `PATH`, isipokuwa faili tayari ni WAV ya PCM ya mono ya 16 kHz), hutumwa
+kwenye kipindi na maandishi yaliyokamilishwa hurejeshwa kama `{ "text": "..." }`. Sehemu za fomu za hiari za
+`language` na `prompt` hutumwa mbele. Vikomo: upakiaji unaozidi MiB 25 au sauti iliyodekodishwa yenye urefu wa zaidi ya dakika 10 hujibu
+`413`; ubadilishaji unaochukua zaidi ya sekunde 60 hukatishwa na hujibu `504`. API key hutumwa
+kwenye kichwa cha `x-goog-api-key` pekee, kamwe si kwenye URL ya WebSocket.
 
 ---
 
