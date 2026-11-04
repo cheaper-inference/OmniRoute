@@ -287,7 +287,8 @@ export function providerSupportsCaching(
  * semantic; `supportsPromptCaching` alone does not say how caching is requested. */
 export function providerUsesAutomaticPrefixCaching(
   provider: string | null | undefined,
-  connectionCacheOverride?: ConnectionCacheOverride | null
+  connectionCacheOverride?: ConnectionCacheOverride | null,
+  model?: string | null
 ): boolean {
   if (connectionCacheOverride?.supportsPromptCaching === false) return false;
   const passthrough = connectionCacheOverride?.cacheControlPassthrough;
