@@ -137,46 +137,56 @@ function escapeJsonStringValues(json: string, escapeState: JsonStringEscapeState
   return result;
 }
 
+/** Models that over-escape a tab in tool call arguments (#12831). */
+const DOUBLE_ESCAPED_TAB_MODEL = /gpt-5\.6-luna/i;
+
+/** Scan state of fixDoubleEscapedTabs for one tool call, kept across fragments. */
+interface DoubleEscapedTabState {
+  inString: boolean;
+  /** Backslashes read inside a string but not yet written ("", "\\" or "\\\\"). */
+  held: string;
+}
+
 /**
  * Collapse double-escaped tab sequences inside JSON string values.
- * Some providers (e.g. gpt-5.6-luna-xhigh, #12831) over-escape a tab when
- * emitting tool call argument JSON: instead of the single valid JSON escape
- * `\t` (backslash + t), they emit `\\t` (backslash + backslash + t) inside
- * the string value. JSON.parse then decodes that to a literal two-character
- * `\t` text (backslash followed by the letter t) instead of an actual tab
- * character, which breaks consumers (e.g. editor patches) expecting real
- * tabs. This only rewrites the over-escaped form and leaves an
- * already-correct single escape untouched.
+ * gpt-5.6-luna (#12831) sometimes writes `\\t` (an escaped backslash, then `t`) where it
+ * means the JSON tab escape `\t`. Only call this for those models: for every other model
+ * `\\t` is a valid backslash followed by `t` (Windows paths, LaTeX, regex).
+ * Arguments arrive in arbitrary fragments, so the scan state persists in `tabState` and a
+ * trailing backslash is held back until the next fragment shows what follows it.
  */
-function fixDoubleEscapedTabs(json: string): string {
+function fixDoubleEscapedTabs(json: string, tabState: DoubleEscapedTabState): string {
   let result = "";
-  let inString = false;
+  let { inString, held } = tabState;
 
-  for (let i = 0; i < json.length; i++) {
-    const ch = json[i];
-
-    if (inString && ch === "\\" && json[i + 1] === "\\" && json[i + 2] === "t") {
-      result += "\\t";
-      i += 2;
+  for (const ch of json) {
+    if (held === "\\\\") {
+      held = "";
+      if (ch === "t") {
+        result += "\\t";
+        continue;
+      }
+      result += "\\\\";
+    } else if (held === "\\") {
+      if (ch === "\\") {
+        held = "\\\\";
+      } else {
+        held = "";
+        result += "\\" + ch;
+      }
       continue;
     }
 
-    // Inside a string, leave any other escape sequence untouched.
     if (inString && ch === "\\") {
-      result += ch + (json[i + 1] ?? "");
-      i++;
+      held = "\\";
       continue;
     }
-
-    if (ch === '"') {
-      result += ch;
-      inString = !inString;
-      continue;
-    }
-
+    if (ch === '"') inString = !inString;
     result += ch;
   }
 
+  tabState.inString = inString;
+  tabState.held = held;
   return result;
 }
 
@@ -741,6 +751,7 @@ function emitToolCall(state, emit, tc) {
     delete state.funcItemAdded[tcIdx];
     delete state.funcItemDone[tcIdx];
     delete state.funcArgsEscapeState?.[tcIdx];
+    delete state.funcArgsTabState?.[tcIdx];
     lifecycle.reset(tcIdx);
   }
 
@@ -762,10 +773,14 @@ function emitToolCall(state, emit, tc) {
     if (!state.funcArgsEscapeState[tcIdx]) {
       state.funcArgsEscapeState[tcIdx] = createJsonStringEscapeState();
     }
-    const sanitized = escapeJsonStringValues(
-      fixDoubleEscapedTabs(tc.function.arguments),
-      state.funcArgsEscapeState[tcIdx]
-    );
+    let rawArgs = tc.function.arguments;
+    if (DOUBLE_ESCAPED_TAB_MODEL.test(state.model || "")) {
+      if (!state.funcArgsTabState) state.funcArgsTabState = {};
+      if (!state.funcArgsTabState[tcIdx])
+        state.funcArgsTabState[tcIdx] = { inString: false, held: "" };
+      rawArgs = fixDoubleEscapedTabs(rawArgs, state.funcArgsTabState[tcIdx]);
+    }
+    const sanitized = escapeJsonStringValues(rawArgs, state.funcArgsEscapeState[tcIdx]);
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
     const emittedDelta = nextArgs.slice(existingArgs.length);
     state.funcArgsBuf[tcIdx] = nextArgs;
@@ -785,6 +800,9 @@ function closeToolCall(state, emit, idx, recordAsCompleted = true) {
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
     const normalizedIndex = announcedToolOutputIndex(state, idx);
+    // A truncated stream can end inside an escape: write the held backslashes back.
+    const heldTab = state.funcArgsTabState?.[idx]?.held;
+    if (heldTab) state.funcArgsBuf[idx] = (state.funcArgsBuf[idx] || "") + heldTab;
     const args = state.funcArgsBuf[idx] || "{}";
     emitToolCallAdded(state, emit, idx, normalizedIndex, true);
     const selection = translatorToolCallLifecycle(state).get(idx)!;
