@@ -10,8 +10,8 @@
  *
  * This store keeps the exact signed blocks server-side, keyed by the `tool_use`
  * ids of the assistant turn that produced them (same pattern as
- * geminiThoughtSignatureStore), so the request translator can restore them in
- * front of the owning `tool_use` on the next turn.
+ * geminiThoughtSignatureStore), grouped by the `tool_use` each run preceded, so
+ * the request translator can put every block back where Claude emitted it (#18607).
  *
  * Invariants:
  * - Memory only, TTL + size bounded. Thinking text and signatures never reach the
@@ -20,12 +20,16 @@
  *   model, provider, or OAuth org/connection is a hard 400 (#6953, #17324), so a
  *   binding mismatch restores nothing.
  * - All-or-nothing: a turn is stored only when every thinking-ish block is
- *   replayable (non-empty signature / data); a partial set would reorder the turn.
+ *   replayable (non-empty signature / data) and precedes a tool_use; a partial
+ *   set would reorder the turn.
  */
 
 export type ClaudeSignedThinkingBlock =
   | { type: "thinking"; thinking: string; signature: string }
   | { type: "redacted_thinking"; data: string };
+
+/** The signed blocks Claude emitted between the turn's previous tool_use and `toolUseId`. */
+export type ClaudeThinkingSegment = { toolUseId: string; blocks: ClaudeSignedThinkingBlock[] };
 
 type Entry = {
   provider: string;
@@ -33,7 +37,7 @@ type Entry = {
   /** Serving connection id; thinking signatures are org-scoped, so a block
    *  produced by one OAuth org must never be replayed on another (#17324). */
   connectionId: string;
-  blocks: ClaudeSignedThinkingBlock[];
+  segments: ClaudeThinkingSegment[];
   size: number;
   expiresAt: number;
 };
@@ -92,8 +96,19 @@ function blockSize(block: ClaudeSignedThinkingBlock): number {
     : block.data.length;
 }
 
-function cloneBlocks(blocks: ClaudeSignedThinkingBlock[]): ClaudeSignedThinkingBlock[] {
-  return blocks.map((block) => ({ ...block }));
+function cloneSegments(segments: ClaudeThinkingSegment[]): ClaudeThinkingSegment[] {
+  return segments.map((segment) => ({
+    toolUseId: segment.toolUseId,
+    blocks: segment.blocks.map((block) => ({ ...block })),
+  }));
+}
+
+function blocksOfSegments(segments: ClaudeThinkingSegment[]): ClaudeSignedThinkingBlock[] {
+  return segments.flatMap((segment) => segment.blocks);
+}
+
+function blocksOf(entry: Entry): ClaudeSignedThinkingBlock[] {
+  return blocksOfSegments(entry.segments);
 }
 
 function deleteKey(key: string) {
@@ -117,32 +132,67 @@ function pruneExpired(now: number) {
   }
 }
 
-function collectToolUseIds(toolUseIds: unknown): string[] {
-  if (!Array.isArray(toolUseIds)) return [];
-  return toolUseIds.filter((id): id is string => typeof id === "string" && id.length > 0);
+function isThinkingBlockType(type: unknown): boolean {
+  return type === "thinking" || type === "redacted_thinking";
+}
+
+function toolUseIdOf(record: Record<string, unknown>): string | null {
+  return record.type === "tool_use" && typeof record.id === "string" && record.id
+    ? record.id
+    : null;
 }
 
 /**
- * Remember the signed thinking blocks of one assistant turn under each of its
- * tool_use ids. No-op unless the turn owns tool calls and every block is replayable.
+ * Split an ordered assistant content array into replay segments: each tool_use id
+ * owns the signed blocks emitted since the previous tool_use. Returns null unless
+ * every thinking-ish block is replayable and anchored to a following tool_use, the
+ * turn owns at least one thinking block, and its total size fits the entry bound.
+ */
+function collectThinkingSegments(
+  content: unknown
+): { segments: ClaudeThinkingSegment[]; size: number } | null {
+  if (!Array.isArray(content)) return null;
+  const segments: ClaudeThinkingSegment[] = [];
+  let pending: ClaudeSignedThinkingBlock[] = [];
+  let size = 0;
+  for (const block of content) {
+    const record = (block ?? {}) as Record<string, unknown>;
+    if (isThinkingBlockType(record.type)) {
+      const normalized = normalizeBlock(block);
+      if (!normalized) return null;
+      pending.push(normalized);
+      size += blockSize(normalized);
+      continue;
+    }
+    const toolUseId = toolUseIdOf(record);
+    if (toolUseId !== null) {
+      segments.push({ toolUseId, blocks: pending });
+      pending = [];
+    }
+  }
+  // Thinking after the last tool_use has no anchor to replay against.
+  if (size === 0 || size > MAX_CLAUDE_THINKING_ENTRY_CHARS || pending.length > 0) return null;
+  if (segments.length === 0) return null;
+  return { segments, size };
+}
+
+/**
+ * Remember the signed thinking blocks of one assistant turn, in their original
+ * layout, under each of its tool_use ids. `content` is the ordered content array
+ * (thinking / redacted_thinking / tool_use; other block types are ignored). No-op
+ * unless the turn owns tool calls and every block is replayable.
  */
 export function storeClaudeThinkingBlocks(args: {
-  toolUseIds: unknown;
-  blocks: unknown;
+  content: unknown;
   provider: unknown;
   model: unknown;
   connectionId?: unknown;
 }): boolean {
-  const toolUseIds = collectToolUseIds(args.toolUseIds);
   const model = normalizeClaudeThinkingModel(args.model);
-  if (toolUseIds.length === 0 || !model || !Array.isArray(args.blocks)) return false;
-  if (args.blocks.length === 0) return false;
-
-  const blocks = args.blocks.map(normalizeBlock);
-  if (!blocks.every(Boolean)) return false;
-  const normalizedBlocks = blocks as ClaudeSignedThinkingBlock[];
-  const size = normalizedBlocks.reduce((sum, block) => sum + blockSize(block), 0);
-  if (size > MAX_CLAUDE_THINKING_ENTRY_CHARS) return false;
+  if (!model) return false;
+  const layout = collectThinkingSegments(args.content);
+  if (!layout) return false;
+  const { segments, size } = layout;
 
   const now = Date.now();
   const provider = normalizeProvider(args.provider);
@@ -152,13 +202,13 @@ export function storeClaudeThinkingBlocks(args: {
   // the next request that is equally unbound (""==="" would match). Refuse.
   const connectionId = typeof args.connectionId === "string" ? args.connectionId : "";
   if (connectionId.length === 0) return false;
-  for (const toolUseId of toolUseIds) {
+  for (const { toolUseId } of segments) {
     deleteKey(toolUseId);
     entries.set(toolUseId, {
       provider,
       model,
       connectionId,
-      blocks: cloneBlocks(normalizedBlocks),
+      segments: cloneSegments(segments),
       size,
       expiresAt: now + CLAUDE_THINKING_MEMORY_TTL_MS,
     });
@@ -181,25 +231,23 @@ export function storeClaudeThinkingFromResponse(
     return false;
   }
   const root = responseBody as Record<string, unknown>;
-  if (!Array.isArray(root.content)) return false;
-  const blocks: unknown[] = [];
-  const toolUseIds: unknown[] = [];
-  for (const block of root.content) {
-    const type = (block as Record<string, unknown> | null)?.type;
-    if (type === "thinking" || type === "redacted_thinking") blocks.push(block);
-    else if (type === "tool_use") toolUseIds.push((block as Record<string, unknown>).id);
-  }
   return storeClaudeThinkingBlocks({
-    toolUseIds,
-    blocks,
+    content: root.content,
     provider: binding.provider,
     model: typeof root.model === "string" && root.model ? root.model : binding.model,
     connectionId: binding.connectionId,
   });
 }
 
+/** Fresh copy of a stored layout, with every block marked as server-restored. */
+function cloneRestoredSegments(stored: ClaudeThinkingSegment[]): ClaudeThinkingSegment[] {
+  const segments = cloneSegments(stored);
+  for (const block of blocksOfSegments(segments)) restoredBlocks.add(block);
+  return segments;
+}
+
 /**
- * Return fresh copies of the signed blocks stored for the first tool_use id that
+ * Return fresh copies of the turn layout stored for the first tool_use id that
  * hits with the same provider + model + connection binding, or null.
  */
 export function restoreClaudeThinkingBlocks(args: {
@@ -207,8 +255,8 @@ export function restoreClaudeThinkingBlocks(args: {
   provider: unknown;
   model: unknown;
   connectionId?: unknown;
-}): ClaudeSignedThinkingBlock[] | null {
-  const toolUseIds = collectToolUseIds(args.toolUseIds);
+}): ClaudeThinkingSegment[] | null {
+  const toolUseIds = Array.isArray(args.toolUseIds) ? args.toolUseIds : [];
   const model = normalizeClaudeThinkingModel(args.model);
   if (toolUseIds.length === 0 || !model) return null;
 
@@ -221,13 +269,11 @@ export function restoreClaudeThinkingBlocks(args: {
   // which adaptive thinking accepts).
   const connectionId = typeof args.connectionId === "string" ? args.connectionId : "";
   for (const toolUseId of toolUseIds) {
-    const entry = entries.get(toolUseId);
+    const entry = typeof toolUseId === "string" ? entries.get(toolUseId) : undefined;
     if (!entry) continue;
     if (entry.provider !== provider || entry.model !== model) return null;
     if (entry.connectionId !== connectionId) return null;
-    const blocks = cloneBlocks(entry.blocks);
-    for (const block of blocks) restoredBlocks.add(block);
-    return blocks;
+    return cloneRestoredSegments(entry.segments);
   }
   return null;
 }
@@ -243,7 +289,7 @@ function sameBlock(stored: ClaudeSignedThinkingBlock, block: unknown): boolean {
 
 function isStoredBlock(block: unknown): boolean {
   for (const entry of entries.values()) {
-    if (entry.blocks.some((stored) => sameBlock(stored, block))) return true;
+    if (blocksOf(entry).some((stored) => sameBlock(stored, block))) return true;
   }
   return false;
 }
@@ -251,7 +297,7 @@ function isStoredBlock(block: unknown): boolean {
 function forgetEntriesHolding(blocks: unknown[]) {
   const keys: string[] = [];
   for (const [key, entry] of entries) {
-    if (entry.blocks.some((stored) => blocks.some((block) => sameBlock(stored, block)))) {
+    if (blocksOf(entry).some((stored) => blocks.some((block) => sameBlock(stored, block)))) {
       keys.push(key);
     }
   }
