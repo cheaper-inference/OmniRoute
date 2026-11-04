@@ -19,62 +19,70 @@ galveno pieprasījuma plūsmu.
 
 ## Kas tiek reģistrēts
 
-### Administratīvā audita notikumi (`audit_log`)
+### Administratīvie audita notikumi (`audit_log`)
 
 Katrs `logAuditEvent({ action, actor, target, details, ... })` izsaukums izveido
 vienu rindu. Darbību virknes atbilst `domain.verb` (vai `domain.verb.outcome`)
-formātam. Avota kokā apstiprinātie darbību tipi ietver:
+šablonam. Kods apstiprina šādus darbību tipus:
 
-| Darbība                              | Avots                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Darbība                              | Avots                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Katrā ierakstā tiek saglabāti `action`, `actor` (noklusējuma vērtība ir `"system"`), `target`,
-`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
-`request_id` un `timestamp`. Sensitīvās atslēgas (`apiKey`, `accessToken`,
-`refreshToken`, `password`, viss, kas atbilst `*token`/`*secret`/`*apikey`,
-u.c.) pirms rindas ierakstīšanas tiek rekursīvi aizstātas ar `"[redacted]"`.
+Katrā ierakstā tiek saglabāti `action`, `actor` (noklusējuma vērtība ir
+`"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` un `timestamp`. Sensitīvie taustiņi (`apiKey`, `accessToken`,
+`refreshToken`, `password`, jebkas, kas atbilst `*token`/`*secret`/`*apikey`,
+u. c.) pirms rindas ierakstīšanas tiek rekursīvi aizstāti ar `"[redacted]"`.
+
+`api_key.auth.touch` rindās tiek reģistrēti veiksmīgi API atslēgu metadatu un
+atklāšanas lasīšanas pieprasījumi (GET/HEAD), kas nekad nenonāk pieprasījumu
+žurnālā: kura atslēga, kad un normalizētais ceļš; ieraksti tiek apvienoti un
+ierobežoti līdz 1 000 rindām. Atslēgas ar `noLog` un vides atslēga tiek izlaistas.
+Izsaucēja IP adrese un lietotāja aģents tiek pievienoti tikai tad, ja ir ieslēgts
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` funkcionalitātes karodziņš (pēc noklusējuma izslēgts).
 
 ### MCP rīku izsaukumi (`mcp_tool_audit`)
 
-Katrs MCP rīka izsaukums ieraksta rindu, izmantojot
-`open-sse/mcp-server/audit.ts`. Shēma (no
+Katrs MCP rīka izsaukums, izmantojot
+`open-sse/mcp-server/audit.ts`, ieraksta rindu. Shēma (no
 `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Kolonna          | Piezīmes                                          |
-| ---------------- | ------------------------------------------------- |
-| `id`             | automātiski pieaugoša vērtība                     |
-| `tool_name`      | MCP rīka identifikators                           |
-| `input_hash`     | ievades sha256 (lietderīgā slodze netiek glabāta) |
-| `output_summary` | īss, saīsināts kopsavilkums                       |
-| `duration_ms`    | kopējais izpildes laiks                           |
-| `api_key_id`     | izsaucējs (var būt nulle)                         |
-| `success`        | `1` / `0`                                         |
-| `error_code`     | beigu kļūdas kods neveiksmes gadījumā             |
-| `created_at`     | ISO laikspiedols                                  |
+| Kolonna          | Piezīmes                                            |
+| ---------------- | --------------------------------------------------- |
+| `id`             | automātiski palielināma                             |
+| `tool_name`      | MCP rīka identifikators                             |
+| `input_hash`     | ievades sha256 (lietderīgā slodze netiek saglabāta) |
+| `output_summary` | īss, saīsināts kopsavilkums                         |
+| `duration_ms`    | pagājušais laiks                                    |
+| `api_key_id`     | izsaucējs (var būt `null`)                          |
+| `success`        | `1` / `0`                                           |
+| `error_code`     | terminālais kļūdas kods kļūmes gadījumā             |
+| `created_at`     | ISO laikspiedols                                    |
 
 ### Pieprasījumu / lietojuma žurnāli
 
-Šī ir darbības telemetrija (nevis tikai administratīvais audits), taču tai tiek izmantots tas pats
-glabāšanas termiņa pārvaldības process:
+Tie ir operacionālās telemetrijas dati (nevis strikti administratīvais audits),
+taču tiem tiek izmantots tas pats glabāšanas termiņa apstrādes process:
 
-- `usage_history` — apkopots lietojums katram pieprasījumam
-- `call_logs` — pilns žurnāls katram pieprasījumam (uz to attiecas rindu skaita ierobežojums; skatiet tālāk)
-- `proxy_logs` — starpniekservera datplūsmas žurnāls (uz to attiecas rindu skaita ierobežojums)
-- `request_detail_logs` — mantotais detalizētais pieprasījumu žurnāls (joprojām tiek tīrīts, ja pastāv)
+- `usage_history` — katra pieprasījuma lietojuma apkopojums
+- `call_logs` — pilns katra pieprasījuma žurnāls (pakļauts rindu skaita ierobežojumam, skatiet tālāk)
+- `proxy_logs` — starpniekservera datplūsmas žurnāls (pakļauts rindu skaita ierobežojumam)
+- `request_detail_logs` — mantotais detalizētais pieprasījumu žurnāls (ja tas ir pieejams, tas joprojām tiek tīrīts)
 
 ## Krātuves shēma
 

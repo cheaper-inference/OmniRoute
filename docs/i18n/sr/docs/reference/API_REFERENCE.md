@@ -1593,7 +1593,7 @@ Model kanala (`latest` = v3 do GA izdanja 4.0, `next` = rc, `nightly` = verzije 
 
 ---
 
-## Транскрипција аудио записа
+## Transkripcija audio zapisa
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1601,10 +1601,10 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Транскрибујте аудио датотеке помоћу било ког конфигурисаног STT провајдера. Први сегмент путање бира матичног провајдера (`openai/…`, `deepgram/…`). Гејтвеји који поново излажу модел другог добављача користе квалификовани идентификатор
+Transkribujte audio datoteke koristeći bilo kog konfigurisanog STT provajdera. Prvi segment putanje bira nativnog provajdera (`openai/…`, `deepgram/…`). Gejtveji koji ponovo izlažu model drugog proizvođača koriste kvalifikovani ID
 (`openrouter/deepgram/nova-3`).
 
-**Захтев:**
+**Zahtev:**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1613,7 +1613,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-**Одговор:**
+**Odgovor:**
 
 ```json
 {
@@ -1624,12 +1624,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Примери идентификатора модела:** `openai/whisper-1` (захтева OpenAI кључ),
-`openrouter/deepgram/nova-3` (захтева OpenRouter кључ),
-`deepgram/nova-3` (захтева матични Deepgram кључ). Захтев за
-`deepgram/nova-3` без префикса **не** користи OpenRouter.
+**Primeri ID-jeva modela:** `openai/whisper-1` (zahteva OpenAI ključ),
+`openrouter/deepgram/nova-3` (zahteva OpenRouter ključ),
+`deepgram/nova-3` (zahteva nativni Deepgram ključ). Zahtev sa samim
+`deepgram/nova-3` **ne** koristi OpenRouter.
 
-**Подржани формати:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+**Podržani formati:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transkripcija u režimu datoteke preko Gemini Live
+WebSocket-a (zahteva Gemini API ključ). Otpremljena datoteka se konvertuje u mono PCM frekvencije 16 kHz pomoću `ffmpeg`
+(mora biti na `PATH`-u, osim ako je datoteka već WAV u mono PCM formatu frekvencije 16 kHz), prosleđuje se sesiji, a
+konačni tekst se vraća kao `{ "text": "..." }`. Opciona polja obrasca `language` i `prompt`
+prosleđuju se dalje. Ograničenja: za otpremanja veća od 25 MiB ili dekodirani audio duži od 10 minuta vraća se
+`413`; konverzija koja traje duže od 60 s se prekida i vraća `504`. API ključ se šalje samo u zaglavlju
+`x-goog-api-key`, nikada u URL-u WebSocket-a.
 
 ---
 

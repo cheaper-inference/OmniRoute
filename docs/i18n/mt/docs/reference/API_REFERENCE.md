@@ -1513,9 +1513,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Ittraskrivi fajls tal-awdjo billi tuża kwalunkwe fornitur STT ikkonfigurat. L-ewwel segment
-tal-mogħdija jagħżel il-fornitur nattiv (`openai/…`, `deepgram/…`). Gateways li
-jerġgħu jesportaw il-mudell ta’ bejjiegħ ieħor jużaw id kwalifikat
+Ittraskrivi fajls tal-awdjo billi tuża kwalunkwe fornitur STT ikkonfigurat. L-ewwel segment tal-mogħdija jagħżel il-fornitur nattiv (`openai/…`, `deepgram/…`). Gateways li jerġgħu jesportaw mudell ta’ bejjiegħ ieħor jużaw identifikatur kwalifikat
 (`openrouter/deepgram/nova-3`).
 
 **Talba:**
@@ -1538,14 +1536,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Eżempji ta’ ids tal-mudelli:** `openai/whisper-1` (jeħtieġ ċavetta ta’
-OpenAI), `openrouter/deepgram/nova-3` (jeħtieġ ċavetta ta’ OpenRouter),
+**Eżempji ta’ identifikaturi tal-mudelli:** `openai/whisper-1` (jeħtieġ ċavetta OpenAI),
+`openrouter/deepgram/nova-3` (jeħtieġ ċavetta OpenRouter),
 `deepgram/nova-3` (jeħtieġ ċavetta nattiva ta’ Deepgram). Talba sempliċi għal
 `deepgram/nova-3` **ma** tużax OpenRouter.
 
 **Formati appoġġjati:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** traskrizzjoni fil-modalità tal-fajl permezz tal-
+WebSocket Gemini Live (jeħtieġ ċavetta API ta’ Gemini). It-tlugħ jiġi kkonvertit għal PCM mono ta’ 16 kHz permezz ta’ `ffmpeg`
+(irid ikun fuq `PATH`, sakemm il-fajl ma jkunx diġà WAV PCM mono ta’ 16 kHz), jiġi trażmess lis-sessjoni u
+t-test finalizzat jiġi rritornat bħala `{ "text": "..." }`. Il-fields tal-formola `language` u `prompt` fakultattivi
+jintbagħtu. Limiti: uploads ta’ aktar minn 25 MiB jew awdjo dekodifikat itwal minn 10 minuti jirrispondu
+b’`413`; konverżjoni li ddum aktar minn 60 s tinqatel u tirrispondi b’`504`. Iċ-ċavetta API tintbagħat
+biss fil-header `x-goog-api-key`, qatt fil-URL tal-WebSocket.
 
 ## Kompatibbiltà ma’ Ollama
 
