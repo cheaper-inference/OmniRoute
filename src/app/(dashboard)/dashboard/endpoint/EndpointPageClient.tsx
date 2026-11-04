@@ -326,7 +326,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const fetchModels = async () => {
     setModelsLoading(true);
     try {
-      const res = await fetch("/v1/models");
+      const res = await fetch("/api/models/catalog");
       if (res.ok) {
         const data = await res.json();
         setAllModels(data.data || []);

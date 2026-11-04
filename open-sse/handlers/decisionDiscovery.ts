@@ -1,3 +1,4 @@
+import { OPENAI_DECISION_MODEL_IDS } from "../config/decisionCapabilities.ts";
 import { decisionHeaders, readDecisionJson } from "./decisionTransport.ts";
 import {
   DecisionError,
@@ -88,7 +89,7 @@ async function discoverDecisionRow(
       return [asModel(id, true)];
   } else if (backend.discovery === "openai") {
     // Official Decisions API currently supports this model only; ordinary OpenAI models stay chat.
-    if (id === "gpt-6-luna") return [asModel(id)];
+    if (OPENAI_DECISION_MODEL_IDS.has(id)) return [asModel(id)];
   } else if (backend.discovery === "ollama") {
     const capabilities = await ollamaDecisionCapabilities(
       backend,

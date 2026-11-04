@@ -201,6 +201,7 @@ export async function validateProviderApiKey({
   }
 
   if (
+    provider === "supersoniclabs" ||
     provider === "basal" ||
     provider === "julia-local" ||
     providerSpecificData.decision ||

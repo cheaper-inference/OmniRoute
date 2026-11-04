@@ -112,6 +112,9 @@ export function getModelEndpointDecision(
   modelId: string,
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
+  if (provider?.trim().toLowerCase() === "supersoniclabs") {
+    return { kind: "non-chat", chatSelectable: false, reason: "provider-policy" };
+  }
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
   if (provider?.trim().toLowerCase() === "openrouter") {
     // Unconditional, unlike the OpenAI branch below: there is no "batch"

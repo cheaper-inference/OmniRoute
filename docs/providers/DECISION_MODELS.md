@@ -1,7 +1,7 @@
 ---
 title: "Decision Models"
 version: 3.8.53
-lastUpdated: 2026-11-03
+lastUpdated: 2026-11-04
 ---
 
 # Decision models
@@ -128,6 +128,46 @@ The initial gateway supports the common System One question types `noul`,
 are preserved and validated by the configured upstream. Answers and refusal
 fields are never converted, rounded or synthesized.
 
+### Supersonic Labs Julia-1
+
+The **Decision Models** category follows Search in Providers and reuses the existing
+accounts for Supersonic Labs, Ollama Cloud, OpenAI, OpenRouter, Cloudflare Workers AI,
+and OrcaRouter. Its summary filter also works in compact display. Provider cards
+use the original brand assets; a card alone does not prove account/model access.
+
+Choose **Supersonic Labs** and save its API key. The native provider uses
+`https://api.supersoniclabs.ai/v1/systemone` and declares `julia-1`; call the gateway
+with `model: supersoniclabs/julia-1`. The declared catalog does not verify the key or
+server reachability. Context/output limits and pricing remain unknown until an
+upstream contract supplies them. Julia never routes through the chat executor,
+including as a combo leaf and with the optional capability gate disabled.
+
+Each new native inference attempt receives a fresh `Idempotency-Key`. This satisfies
+servers requiring that header; it does not deduplicate separate client requests.
+Ambiguous network failures are not automatically retried.
+
+### OpenRouter and OrcaRouter Jev
+
+Use the actual native model identifier `typesafe/jev-1.13`; a chat router with a
+similar name is a different model. Existing TypeSafe/OpenRouter aliases keep their
+established behavior. To explicitly configure a native connection, set its
+`providerSpecificData.decision` to:
+
+```json
+{
+  "format": "systemone",
+  "endpoint": "https://api.orcarouter.ai/v1/systemone",
+  "models": ["typesafe/jev-1.13"]
+}
+```
+
+For OpenRouter use `https://openrouter.ai/api/alpha/decisions` instead. Call the
+common System One gateway with `orcarouter/typesafe/jev-1.13` or
+`openrouter/typesafe/jev-1.13`. These explicit lists are declarations, even if the
+ordinary chat catalog does not list the model. Verify access with a scoped client
+key. See the [OrcaRouter model page](https://www.orcarouter.ai/models/typesafe/jev-1.13)
+and [OpenRouter Jev guide](https://openrouter.ai/docs/guides/community/jev-tutorial).
+
 ### Julia and other configured engines
 
 Julia-1 is a model family, not a promise of one standard HTTP server. Serve it
@@ -243,7 +283,8 @@ discovery may instead declare `providerSpecificData.decision.models` explicitly,
 with `format` and the full `endpoint`. A declaration does not prove reachability.
 
 The Endpoints page always shows `/v1/decisions`, `/v1/systemone`, and the scoped
-`/v1/systemone/models` catalog. Counts come from typed catalog metadata. Copy uses
+`/v1/systemone/models` catalog. Counts come from the management catalog with typed endpoint metadata, including when
+public model discovery is configured to expose only combos. Copy uses
 the same selected base URL as other endpoints. Matching a protocol does not grant
 access: normal model/connection/key restrictions remain mandatory.
 

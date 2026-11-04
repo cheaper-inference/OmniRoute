@@ -36,8 +36,16 @@ function decisionDefaults(base: string | null) {
       url: string;
       modelsUrl: string;
       discovery: DecisionBackend["discovery"];
+      models?: string[];
     }
   > = {
+    supersoniclabs: {
+      format: "systemone",
+      url: "https://api.supersoniclabs.ai/v1/systemone",
+      modelsUrl: "https://api.supersoniclabs.ai/v1/models",
+      discovery: "systemone",
+      models: ["julia-1"],
+    },
     openai: {
       format: "decisions",
       url: "https://api.openai.com/v1/decisions",
@@ -114,7 +122,7 @@ function buildDecisionBackend(
     url,
     modelsUrl: config.modelsEndpoint || entry?.modelsUrl || new URL("models", url).href,
     discovery: entry?.discovery || "systemone",
-    models: config.models,
+    models: config.models || entry?.models,
     fallbackModels: config.fallbackModels || [],
     timeoutMs: config.timeoutMs || 30_000,
   };

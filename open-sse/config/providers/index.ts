@@ -294,7 +294,10 @@ import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { gisooProvider } from "./registry/gisoo/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
 
+import { supersoniclabsProvider } from "./registry/supersoniclabs/index.ts";
+
 export const REGISTRY: Record<string, RegistryEntry> = {
+  supersoniclabs: supersoniclabsProvider,
   aimlapi: aimlapiProvider,
   "mlx-gemma": mlxGemmaProvider,
   "mlx-qwen": mlxQwenProvider,

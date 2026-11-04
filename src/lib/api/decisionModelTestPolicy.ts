@@ -8,6 +8,7 @@ export async function nativeDecisionTestEndpoint(
   metadata: Record<string, unknown> | null,
   nodeType: string | undefined
 ): Promise<string | null> {
+  if (provider === "supersoniclabs") return "/v1/systemone";
   const bare = model.slice(model.indexOf("/") + 1);
   const row =
     metadata ||

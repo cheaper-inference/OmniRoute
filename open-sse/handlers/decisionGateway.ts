@@ -88,7 +88,8 @@ async function runDecisionAttempt(
     const upstreamModel = backend.transport === "cloudflare" ? model.split("/").at(-1) : model;
     const upstream = await runtime.fetch(upstreamUrl, credentials, {
       method: "POST",
-      headers: decisionHeaders(credentials),
+      // Unique per outbound attempt; ambiguous failures are never retried.
+      headers: { ...decisionHeaders(credentials), "Idempotency-Key": crypto.randomUUID() },
       signal,
       body: JSON.stringify({ ...body, model: upstreamModel }),
     });

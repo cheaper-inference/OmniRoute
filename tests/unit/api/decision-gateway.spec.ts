@@ -585,3 +585,19 @@ it("normal Cloudflare import classifies native decision models before exposing t
     apiFormat: "systemone",
   });
 });
+
+it("adds a unique idempotency key to each native inference attempt", async () => {
+  const headers: string[] = [];
+  const s = setup({
+    fetch: vi.fn(async (_url, _credentials, init) => {
+      if (init.method !== "POST") return Response.json({ data: [{ id: "current" }] });
+      const key = new Headers(init.headers).get("Idempotency-Key");
+      expect(key).toMatch(/^[0-9a-f-]{36}$/);
+      headers.push(key!);
+      return Response.json(native);
+    }),
+  });
+  expect((await s.post(request(state), "systemone")).status).toBe(200);
+  expect((await s.post(request(state), "systemone")).status).toBe(200);
+  expect(new Set(headers).size).toBe(2);
+});

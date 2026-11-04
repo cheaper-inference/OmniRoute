@@ -252,7 +252,7 @@ describe("EndpointPageClient", () => {
           })
         );
       }
-      if (path === "/v1/models") return Promise.resolve(jsonResponse({ data: [] }));
+      if (path === "/api/models/catalog") return Promise.resolve(jsonResponse({ data: [] }));
       if (path === "/api/mcp/status") return Promise.resolve(jsonResponse({ online: false }));
       if (path === "/api/a2a/status") {
         return Promise.resolve(jsonResponse({ status: "ok", tasks: { activeStreams: 0 } }));
@@ -348,7 +348,7 @@ describe("EndpointPageClient", () => {
           })
         );
       }
-      if (path === "/v1/models") {
+      if (path === "/api/models/catalog") {
         return modelsDeferred.promise;
       }
       if (path === "/api/mcp/status") {
@@ -391,7 +391,7 @@ describe("EndpointPageClient", () => {
 
     await waitForText("Endpoint");
     expect(document.body.textContent).toContain("Loading available models...");
-    expect(fetchMock).toHaveBeenCalledWith("/v1/models");
+    expect(fetchMock).toHaveBeenCalledWith("/api/models/catalog");
     expect(fetchMock).not.toHaveBeenCalledWith("/api/tunnels/cloudflared", expect.anything());
     expect(fetchMock).not.toHaveBeenCalledWith("/api/tunnels/tailscale", expect.anything());
     expect(fetchMock).not.toHaveBeenCalledWith("/api/tunnels/ngrok", expect.anything());
@@ -465,7 +465,7 @@ describe("EndpointPageClient", () => {
           })
         );
       }
-      if (path === "/v1/models") {
+      if (path === "/api/models/catalog") {
         return Promise.resolve(jsonResponse({ data: [] }));
       }
       if (path === "/api/mcp/status") {

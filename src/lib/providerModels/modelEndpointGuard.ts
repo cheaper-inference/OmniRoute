@@ -1,3 +1,4 @@
+import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 /**
  * Local endpoint guard (#16929).
  *
@@ -5,10 +6,9 @@
  * defaulted chat tags remain backwards-compatible. This runs before upstream
  * credentials, health accounting and paid requests.
  *
- * Every client-visible effect (the 400 on /v1 routes, hiding from /v1/models,
- * the dashboard model-test 422) is opt-in via MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED.
- * The flag is read before any catalog lookup, so with the flag off the guard
- * costs no extra DB read per request.
+ * Catalog-derived restrictions are opt-in via MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED.
+ * Registered native transports always reject incompatible requests before dispatch;
+ * exact stored combo names retain precedence.
  */
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
 import { getComboByName } from "@/lib/db/combos";
@@ -34,6 +34,8 @@ type TaggedModel = {
 };
 const ENDPOINT_ROUTE: Record<string, string> = {
   chat: "/v1/chat/completions",
+  systemone: "/v1/systemone",
+  decisions: "/v1/decisions",
   responses: "/v1/responses",
   embeddings: "/v1/embeddings",
   rerank: "/v1/rerank",
@@ -93,7 +95,24 @@ export async function getRequestedModelEndpointMismatch(
   fullModelId: string,
   requested: RequestedEndpoint
 ): Promise<string | null> {
-  if (typeof fullModelId !== "string" || !isModelEndpointCapabilityGateEnabled()) return null;
+  if (typeof fullModelId !== "string") return null;
+  const nativeProvider = fullModelId.split("/")[0];
+  const nativeFormat = getRegistryEntry(nativeProvider)?.format;
+  if (nativeFormat === "systemone" || nativeFormat === "decisions") {
+    // A registered native transport cannot accept chat, regardless of the
+    // optional capability gate. Exact stored combo names still win.
+    try {
+      if (await getComboByName(fullModelId)) return null;
+    } catch {
+      /* fail closed for native transport */
+    }
+    return getModelEndpointMismatchMessage(
+      fullModelId,
+      { supportedEndpoints: [nativeFormat], endpointCapabilitySource: "declared" },
+      requested
+    );
+  }
+  if (!isModelEndpointCapabilityGateEnabled()) return null;
   const slash = fullModelId.indexOf("/");
   if (slash <= 0 || slash >= fullModelId.length - 1) return null;
   const provider = fullModelId.slice(0, slash);

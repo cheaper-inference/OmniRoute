@@ -24,6 +24,7 @@ export interface CompactProviderEntryOptions<TProvider> {
   videoProviderEntries: ProviderCategoryEntries<TProvider>;
   webCookieProviderEntries: ProviderCategoryEntries<TProvider>;
   searchProviderEntries: ProviderCategoryEntries<TProvider>;
+  decisionProviderEntries?: ProviderCategoryEntries<TProvider>;
   webFetchEntries: ProviderCategoryEntries<TProvider>;
   audioProviderEntries: ProviderCategoryEntries<TProvider>;
   localProviderEntries: ProviderCategoryEntries<TProvider>;
@@ -47,6 +48,7 @@ function getCompactProviderEntryGroups<TProvider>({
   videoProviderEntries,
   webCookieProviderEntries,
   searchProviderEntries,
+  decisionProviderEntries = [],
   webFetchEntries,
   audioProviderEntries,
   localProviderEntries,
@@ -74,6 +76,7 @@ function getCompactProviderEntryGroups<TProvider>({
   if (activeCategory === "apikey") return apiKeyEntries;
   if (activeCategory === "webcookie") return [webCookieProviderEntries];
   if (activeCategory === "search") return [searchProviderEntries];
+  if (activeCategory === "decisions") return [decisionProviderEntries];
   if (activeCategory === "webfetch") return [webFetchEntries];
   if (activeCategory === "audio") return [audioProviderEntries];
   if (activeCategory === "local") return [localProviderEntries];
@@ -91,6 +94,7 @@ function getCompactProviderEntryGroups<TProvider>({
     cloudAgentProviderEntries,
     localProviderEntries,
     searchProviderEntries,
+    decisionProviderEntries,
     embeddingRerankProviderEntries,
     imageProviderEntries,
     audioProviderEntries,

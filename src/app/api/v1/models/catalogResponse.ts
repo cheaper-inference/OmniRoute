@@ -1,3 +1,4 @@
+import { annotateNativeDecisionCapabilities } from "@omniroute/open-sse/config/decisionCapabilities.ts";
 /**
  * catalogResponse.ts — the tail of the /v1/models build: the post-filter chain and
  * the response envelope.
@@ -174,7 +175,7 @@ export async function applyCatalogPostFilters(
   }
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
-  let finalModels = models;
+  let finalModels = annotateNativeDecisionCapabilities(models);
   const authorizeSyntheticModel =
     ctx.authorizeSyntheticModel ?? (await resolveCatalogVariantAuthorizer(request));
 
@@ -314,7 +315,7 @@ export async function applyCatalogPostFilters(
   // pair survives. Independent of MODELS_CATALOG_PREFIX_MODE; runs as the final guard.
   finalModels = dedupeExactCatalogIds(finalModels);
 
-  return finalModels;
+  return annotateNativeDecisionCapabilities(finalModels);
 }
 
 /**
