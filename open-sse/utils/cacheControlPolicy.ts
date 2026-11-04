@@ -101,10 +101,6 @@ const CACHING_PROVIDERS = new Set([
   "openai",
   "codex",
   "azure",
-  // #18787 — OpenCode and OpenCode Go models can use upstream automatic prefix caching.
-  // Preserve their request prefix during compression; operators can opt out per connection.
-  "opencode",
-  "opencode-go",
   // #2069 — DashScope's OpenAI-compatible endpoints (Alibaba Model Studio and
   // Qwen Cloud pay-as-you-go, upstream "alicode"/"alicode-intl") natively honor
   // `cache_control: {type:"ephemeral"}` breakpoints. Without these entries
