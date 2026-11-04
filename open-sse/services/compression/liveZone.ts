@@ -492,15 +492,23 @@ async function reuseLiveZoneEntry(
     liveItems.length
   );
   if (entries.get(context.key) === previous) {
-    store(
-      context.key,
-      context.rawItemDigests,
-      context.rawStableFieldsDigest,
-      combinedResult,
-      context.field,
-      Date.now(),
-      context.ttlMs
-    );
+    if (previous.rawPrefixPatches) {
+      // A too-large transformed patch cannot become a reusable cache entry.
+      // Fail closed to raw input instead of emitting a transform we cannot replay.
+      if (!storeSparseRawPrefix({ ...context, now: Date.now() }, combinedResult)) {
+        return storeRawPrefix(body, context);
+      }
+    } else {
+      store(
+        context.key,
+        context.rawItemDigests,
+        context.rawStableFieldsDigest,
+        combinedResult,
+        context.field,
+        Date.now(),
+        context.ttlMs
+      );
+    }
   }
   return combinedResult;
 }
