@@ -17,7 +17,7 @@ const { claudeToGeminiRequest } =
 const { isGeminiFlashLiteModel, buildGeminiThinkingConfig } =
   await import("../../open-sse/translator/helpers/geminiHelper.ts");
 
-type ThinkingConfig = { thinkingBudget?: number; includeThoughts: boolean };
+type ThinkingConfig = { thinkingBudget?: number; thinkingLevel?: string; includeThoughts: boolean };
 type GeminiResult = { generationConfig: { thinkingConfig?: ThinkingConfig } };
 
 const FLASH_LITE_MODELS = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite"];
@@ -79,26 +79,43 @@ test("buildGeminiThinkingConfig only drops a zero budget for Flash-Lite", () => 
 for (const model of FLASH_LITE_MODELS) {
   test(`openai -> gemini: ${model} with reasoning_effort none omits thinkingBudget 0`, () => {
     const result = openai(model, { reasoning_effort: "none" });
-    assert.deepEqual(result.generationConfig.thinkingConfig, { includeThoughts: false });
+    assert.deepEqual(
+      result.generationConfig.thinkingConfig,
+      model === "gemini-3.5-flash-lite"
+        ? { thinkingLevel: "minimal", includeThoughts: false }
+        : { includeThoughts: false }
+    );
     assert.equal("thinkingBudget" in (result.generationConfig.thinkingConfig ?? {}), false);
   });
 
   test(`openai -> gemini: ${model} with thinking.budget_tokens 0 omits thinkingBudget 0`, () => {
     const result = openai(model, { thinking: { type: "enabled", budget_tokens: 0 } });
-    assert.deepEqual(result.generationConfig.thinkingConfig, { includeThoughts: false });
+    assert.deepEqual(
+      result.generationConfig.thinkingConfig,
+      model === "gemini-3.5-flash-lite"
+        ? { thinkingLevel: "minimal", includeThoughts: false }
+        : { includeThoughts: false }
+    );
   });
 
-  test(`openai -> gemini: ${model} with positive effort still sends thinkingBudget`, () => {
+  test(`openai -> gemini: ${model} with positive effort uses supported thinking control`, () => {
     for (const effort of ["low", "high"]) {
       const cfg = openai(model, { reasoning_effort: effort }).generationConfig.thinkingConfig;
-      assert.equal(typeof cfg?.thinkingBudget, "number", effort);
-      assert.ok((cfg?.thinkingBudget ?? 0) > 0, effort);
-      assert.equal(cfg?.includeThoughts, true, effort);
+      if (model === "gemini-3.5-flash-lite") {
+        assert.deepEqual(cfg, { thinkingLevel: effort, includeThoughts: true }, effort);
+        assert.equal(cfg?.thinkingBudget, undefined, effort);
+      } else {
+        assert.equal(typeof cfg?.thinkingBudget, "number", effort);
+        assert.ok((cfg?.thinkingBudget ?? 0) > 0, effort);
+        assert.equal(cfg?.includeThoughts, true, effort);
+      }
     }
-    assert.equal(
-      openai(model, { reasoning_effort: "low" }).generationConfig.thinkingConfig?.thinkingBudget,
-      1024
-    );
+    if (model === "gemini-flash-lite-latest") {
+      assert.equal(
+        openai(model, { reasoning_effort: "low" }).generationConfig.thinkingConfig?.thinkingBudget,
+        1024
+      );
+    }
   });
 
   test(`claude -> gemini: ${model} with thinking.budget_tokens 0 omits thinkingBudget 0`, () => {
