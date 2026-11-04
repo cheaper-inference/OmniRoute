@@ -1,1 +1,0 @@
-- **fix(sse):** Per-key token limits no longer count reasoning tokens twice. Reasoning is part of completion tokens for OpenAI, Anthropic and Gemini usage, so the billable total is now input + max(output, reasoning), the rule the cost calculator already uses (#15496). Keys with a token limit reach it later on reasoning models.
