@@ -1669,17 +1669,33 @@ async function handleChatCoreInner({
             ));
         if (
           omniglyphSelected &&
-          !protectOpenCodePrefix &&
           (targetFormat === FORMATS.CLAUDE ||
             targetFormat === FORMATS.OPENAI ||
             targetFormat === FORMATS.OPENAI_RESPONSES) &&
           !(sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE)
         ) {
-          runPostTranslationCompression = (input) =>
+          const compressTranslated = (input: Record<string, unknown>) =>
             applyCompressionAsync(input, mode, {
               ...compressionOptions,
               compressionStage: "post-translation" as const,
             });
+          // #18787: post-translation engines also need a separate frozen prefix.
+          // Keep their cache key distinct from the pre-translation live-zone entry.
+          runPostTranslationCompression = protectOpenCodePrefix
+            ? (input) =>
+                runLiveZoneCompression({
+                  compressionInputBody: input,
+                  clientHeaders: clientRawRequest?.headers,
+                  provider,
+                  getCurrentConnectionId,
+                  compressionPrincipalId,
+                  mode: `${mode}:post-translation`,
+                  effectiveModel,
+                  compressionConfig,
+                  preserveRawPrefixOnMiss: true,
+                  runCompression: compressTranslated,
+                })
+            : compressTranslated;
         }
         let result: CompressionResult;
         if (compressionConfig.liveZone?.enabled === true || protectOpenCodePrefix) {
