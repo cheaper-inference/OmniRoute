@@ -1395,17 +1395,7 @@ export async function executeTargetAttempt(
         : 0;
     if ([502, 503, 504].includes(result.status) && fallbackWaitMs > 0) {
       deps.log.debug?.("COMBO", `Waiting ${fallbackWaitMs}ms before fallback to next model`);
-      await new Promise((resolve) => {
-        const timer = setTimeout(resolve, fallbackWaitMs);
-        deps.signal?.addEventListener(
-          "abort",
-          () => {
-            clearTimeout(timer);
-            resolve(undefined);
-          },
-          { once: true }
-        );
-      });
+      await waitForCooldownAwareRetry(fallbackWaitMs, deps.signal);
       if (deps.signal?.aborted) {
         deps.log.info("COMBO", `Client disconnected during fallback wait — aborting`);
         return { ok: false, response: errorResponse(499, "Client disconnected") };
