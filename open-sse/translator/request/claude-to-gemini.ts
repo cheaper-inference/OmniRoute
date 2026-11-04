@@ -61,6 +61,31 @@ function urlImagePart(url) {
   return { fileData: { fileUri: url, mimeType: "image/*" } };
 }
 
+/**
+ * A Claude `document` block (PDF etc.) maps to Gemini the same way the Claude ->
+ * OpenAI -> Gemini route maps it: base64 -> inlineData, an HTTPS URL -> fileData
+ * (HTTPS only, same rule as isUrlImageBlock), a text source -> plain text.
+ * Without this case the block was dropped in user turns, so an attached PDF never
+ * reached the model.
+ */
+function documentPart(block) {
+  const source = block?.source;
+  if (source?.type === "base64" && typeof source.data === "string" && source.data) {
+    return {
+      inlineData: { mimeType: source.media_type || "application/pdf", data: source.data },
+    };
+  }
+  if (source?.type === "url" && typeof source.url === "string" && /^https:\/\//i.test(source.url)) {
+    return {
+      fileData: { fileUri: source.url, mimeType: source.media_type || "application/pdf" },
+    };
+  }
+  if (source?.type === "text" && typeof source.data === "string" && source.data) {
+    return { text: source.data };
+  }
+  return null;
+}
+
 function isPlainTextPart(part: { text?: unknown }): boolean {
   return Object.keys(part).length === 1 && typeof part.text === "string";
 }
@@ -334,8 +359,11 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 // A base64 image (the Read tool on a PNG, an MCP screenshot) becomes an
                 // inlineData part, as claude-to-openai.ts lifts it into an image turn
                 // (#5100); JSON.stringify would hand Gemini the base64 as text.
+                // Documents follow the same rule — a PDF inside a tool result is
+                // attached as a part, never serialized into the text.
                 const textParts = [];
                 let hasImage = false;
+                let hasDocument = false;
                 for (const c of content) {
                   if (c.type === "image" && c.source?.type === "base64") {
                     toolResultImageParts.push({
@@ -345,13 +373,27 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                   } else if (isUrlImageBlock(c)) {
                     toolResultImageParts.push(urlImagePart(c.source.url));
                     hasImage = true;
+                  } else if (c.type === "document") {
+                    const document = documentPart(c);
+                    if (document && (document.inlineData || document.fileData)) {
+                      toolResultImageParts.push(document);
+                      hasDocument = true;
+                    } else if (document?.text !== undefined) {
+                      textParts.push(document.text);
+                    } else {
+                      textParts.push(JSON.stringify(c));
+                    }
                   } else {
                     textParts.push(c.type === "text" ? c.text : JSON.stringify(c));
                   }
                 }
                 content =
                   textParts.join("\n") ||
-                  (hasImage ? "[tool returned an image; see attached]" : "");
+                  (hasImage
+                    ? "[tool returned an image; see attached]"
+                    : hasDocument
+                      ? "[tool returned a document; see attached]"
+                      : "");
               }
               const toolUseId = block.tool_use_id;
               // Pair with this id's oldest unconsumed tool_use; the id-keyed maps
@@ -399,6 +441,12 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 parts.push(urlImagePart(block.source.url));
               }
               break;
+
+            case "document": {
+              const document = documentPart(block);
+              if (document) parts.push(document);
+              break;
+            }
           }
         }
       } else if (typeof msg.content === "string" && msg.content) {

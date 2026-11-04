@@ -1,0 +1,1 @@
+- **fix(sse):** PDF and other document attachments on the direct Claude-to-Gemini route now reach the model as inline data or file references instead of being dropped, and a document inside a tool result is attached as a part instead of pasted into the conversation as raw base64 text.
