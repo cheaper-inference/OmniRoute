@@ -17,23 +17,22 @@ export const nvidiaProvider: RegistryEntry = {
   // hasPerModelQuota doc comment; matches modelscope/synthetic/kilo-gateway).
   passthroughModels: true,
   models: [
-    { id: "moonshotai/kimi-k3", name: "Kimi K3" },
-    {
-      id: "deepseek-ai/deepseek-v4-pro-0813",
-      name: "DeepSeek V4 Pro 0813",
-      supportsReasoning: true,
-    },
-    {
-      id: "deepseek-ai/deepseek-v4-flash-0731",
-      name: "DeepSeek V4 Flash 0731",
-      supportsReasoning: true,
-    },
+    // #18418: NVIDIA retired the free endpoints for moonshotai/kimi-k3 (2026-10-15),
+    // deepseek-ai/deepseek-v4-pro-0813 (2026-09-14), deepseek-ai/deepseek-v4-flash-0731
+    // (2026-09-21) and openai/gpt-oss-120b (2026-09-03); each now answers 410 "reached its
+    // end of life", so they are no longer listed here.
     { id: "meta/muse-glimmer-30b", name: "Muse Glimmer 30B" },
     { id: "poolside/laguna-xs-2.1", name: "Laguna XS 2.1" },
     { id: "google/gemma-4-31b-it", name: "Gemma 4 31B" },
     { id: "google/diffusiongemma-26b-a4b-it", name: "DiffusionGemma 26B A4B IT" },
     { id: "nvidia/nemotron-3-ultra-550b-a55b", name: "Nemotron 3 Ultra 550B A55B" },
-    { id: "nvidia/nemotron-3-super-120b-a12b", name: "Nemotron 3 Super 120B A12B" },
+    // Nemotron 3 Super 120B A12B was retired by NVIDIA on 2026-10-20 (404 "Function not found");
+    // Nemotron 3.5 Super VL is NVIDIA's announced replacement (NVIDIA/NemoClaw#13536).
+    {
+      id: "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      name: "Nemotron 3.5 Super VL 120B A12B",
+      supportsVision: true,
+    },
     {
       id: "nvidia/nemotron-3.5-lightning-30b-a3b",
       name: "Nemotron 3.5 Lightning 30B A3B",
@@ -44,6 +43,5 @@ export const nvidiaProvider: RegistryEntry = {
       supportsReasoning: true,
       supportsVision: true,
     },
-    { id: "openai/gpt-oss-120b", name: "GPT OSS 120B", toolCalling: false },
   ],
 };

@@ -13,19 +13,19 @@ OmniRoute разполага с ориентиран към маршрутите
 
 > Източник: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Два режима на удостоверяване
+## Два режима за удостоверяване
 
 ### 1. API ключ (Bearer)
 
-Използва се за клиентските API, съвместими с OpenAI/Anthropic/Gemini, и за някои маршрути за управление, когато ключът има обхват `manage`.
+Използва се за клиентските API, съвместими с OpenAI/Anthropic/Gemini, и за някои маршрути за управление, когато ключът има обхвата `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Проверява се от `isValidApiKey()` / `extractApiKey()` в `src/sse/services/auth.ts` и се реекспортира през `src/shared/utils/apiAuth.ts`. Валидаторът приема и променливите на средата `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` като постоянни ключове за пропускане (issue #1350).
+Валидира се чрез `isValidApiKey()` / `extractApiKey()` в `src/sse/services/auth.ts` и се реекспортира чрез `src/shared/utils/apiAuth.ts`. Валидаторът приема също променливите на средата `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` като постоянни ключове за директно предаване (issue #1350).
 
-### 2. Сесия в таблото за управление (бисквитка auth_token)
+### 2. Сесия на таблото за управление (бисквитка auth_token)
 
 За страниците на таблото за управление и административните операции.
 
@@ -33,64 +33,102 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Бисквитката е сесия само когато JWT се проверява **и** съдържа `authenticated: true`
+Бисквитката представлява сесия само когато JWT е успешно проверен **и** съдържа `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Всеки
-потребител на бисквитката (защитата на маршрутите на таблото (`isDashboardSessionAuthenticated()`), обновяването в конвейера authz, ръкостискането на WebSocket, live
-server, `/api/settings/require-login`, `/api/auth/status`) минава през този помощен модул.
-Съществуват и други JWT, подписани с `JWT_SECRET`: проксито на Cursor CLI издава
-токени `iss "omniroute" / aud "cursor-cli"` за притежателите на ключове и те никога не са сесии
+потребител на бисквитката (защитата на маршрутите на таблото за управление (`isDashboardSessionAuthenticated()`), опресняването в процеса за оторизация, WebSocket договарянето, сървърът за данни в реално време, `/api/settings/require-login`, `/api/auth/status`) преминава през тази помощна функция.
+Съществуват и други JWT, подписани с `JWT_SECRET` — директното предаване през Cursor CLI създава
+токени `iss "omniroute" / aud "cursor-cli"` за притежателите на ключове — и те никога не представляват сесии
 (#13298).
 
-Проверява се от `isDashboardSessionAuthenticated()` в `src/shared/utils/apiAuth.ts`. Конвейерът автоматично обновява JWT, когато до края на 30-дневния му живот остават по-малко от 7 дни.
+Проверява се чрез `isDashboardSessionAuthenticated()` в `src/shared/utils/apiAuth.ts`. Процесът автоматично опреснява JWT, когато остават по-малко от 7 дни от 30-дневния му срок на валидност.
 
-Сесия може да приключи и преди изтичането на 30-те дни, защото всеки издател минава през `mintDashboardSessionToken` (време на издаване `iat` и идентификатор `jti`), а верификаторът проверява две настройки: `sessionsValidAfter`, която се задава при смяна на паролата, така че всички сесии, издадени преди нея, спират да се проверяват (браузърът, сменил паролата, получава нова бисквитка), и `revokedDashboardSessions`, към която `POST /api/auth/logout` добавя `jti` на излезлата сесия. Сесиите, издадени от по-стара версия, нямат нито едно от тези полета и остават валидни до първата смяна на паролата. Ако настройките не могат да се прочетат, сесията не се смята за доверена.
+Сесията може да приключи и преди да изтекат 30-те дни, тъй като всяко издаване преминава през `mintDashboardSessionToken` (с време на издаване `iat` и идентификатор `jti`), а проверяващият механизъм проверява две настройки: `sessionsValidAfter`, която се задава при промяна на паролата, така че всяка сесия, издадена преди този момент, да престане да преминава проверката (браузърът, от който е променена паролата, получава нова бисквитка), и `revokedDashboardSessions`, към която `POST /api/auth/logout` добавя `jti` на прекратената сесия. Сесиите, създадени от по-стара версия, не съдържат нито една от тези декларации и остават валидни до първата промяна на паролата. Ако настройките не могат да бъдат прочетени, сесията не се счита за надеждна.
 
-Някои маршрути за управление приемат **всеки** от двата режима: бисквитка ИЛИ `Bearer <key>`, когато API ключът има обхват `manage` (или `admin`). Именно това позволява работният процес „конфигуриране чрез API извиквания“, добавен във v3.8.
+Някои маршрути за управление приемат **който и да е** от двата режима: бисквитка ИЛИ `Bearer <key>`, когато API ключът има обхват `manage` (или `admin`). Това позволява работния процес „конфигуриране чрез API извиквания“, добавен във v3.8.
 
-#### Незадължителен OIDC вход (#6973)
+#### Незадължително ограничаване на влизането чрез OIDC (#6973)
 
-Входът на администратора в таблото поддържа и **незадължителен** OIDC (OpenID Connect)
-поток, наред с обичайния вход с парола. Входът с парола никога не се премахва, а само се допълва:
+Администраторското влизане в таблото за управление поддържа също **незадължителен** поток чрез OIDC (OpenID Connect)
+наред със стандартното влизане с парола — влизането с парола никога не се премахва, а само
+се допълва:
 
-- Деактивиран, освен ако `settings.oidcEnabled === true` **и** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` са всички конфигурирани (Settings → Auth). `GET /api/auth/oidc/login` връща `400` в противен случай.
-- `GET /api/auth/oidc/login` открива `authorization_endpoint` от `/.well-known/openid-configuration` на издателя
-  (при липса се използва `<issuer>/authorize`), изгражда redirect URI от входящата заявка
-  (с отчитане на `x-forwarded-proto`) и пренасочва към IdP със случаен `state`, съхранен в `httpOnly`
-  бисквитката `oidc_state`.
-- `GET /api/auth/oidc/callback` проверява `state`, обменя кода за авторизация и проверява подписа на ID токена
-  чрез JWKS на издателя (`jose`'s `createRemoteJWKSet`, кеширан по JWKS URI) с проверки за `issuer`
-  и `audience`. Списъкът `oidcAllowedSubjects` е задължителен: той се сравнява с claim `sub` на токена или с claim
-  `email`. Claim-ът email се приема само когато `email_verified === true`, така че непотвърдена поща при IdP
-  никога не може да премине портата. Без записи callback-ът отхвърля всеки вход (`not_configured`).
-- При успех се издава **същият** 30-дневен JWT `auth_token`, който издава и входът с парола
-  (`src/app/api/auth/login/route.ts`), така че останалият конвейер на сесията на таблото (автоматично обновяване,
-  флагове на бисквитката) не се променя. OIDC сменя само начина, по който се издава бисквитката, а не какво дава тя.
-- Всяка настройка `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`,
-  `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) е в
-  `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
-  отговаря с `400 PASSWORD_REQUIRED`, освен ако тялото не съдържа паролата за управление като `currentPassword`
-  (при грешна парола отговорът е `401 PASSWORD_MISMATCH`). `oidcDisablePasswordLogin` забранява _входа_ с парола
-  (`POST /api/auth/login`), но запазва съхранения хеш на паролата, а повторното удостоверяване пак проверява
-  `currentPassword` срещу него.
-- `corsOrigins` и `bruteForceProtection` също са в `SECURITY_IMPACTING_SETTINGS_KEYS`: отслабването на което и да е
-  от тях намалява защитите при вход, затова се изисква същото повторно удостоверяване с `currentPassword`
-  (раздел Security го изисква), а импортът на JSON ги отхвърля.
-- Всеки ключ на политиката за сигурност — записите в `SECURITY_IMPACTING_SETTINGS_KEYS`, всички ключове `oidc*` и
-  състоянието на сесията на таблото — е достъпен **само за оператора** в `PATCH /api/settings`: API ключ с обхват
-  `manage` или токен за достъп `oma_` получава `403`, дори да изпрати правилния `currentPassword`, а отказът се записва
-  в одита като `settings.update_failed` с `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` в
-  `src/lib/api/operatorCredential.ts`). Обикновените настройки (тема, визуални предпочитания) остават достъпни
-  за запис за ключ `manage` или токен за достъп `admin`. Всяка промяна на самия `/api/settings` (и на
-  `/api/settings/require-login`) също изисква обхват `admin` на токен за достъп (`ADMIN_MUTATION_EXACT_PATHS` в
-  `src/server/authz/accessScopes.ts`, точно съвпадение на пътя). `GET` остава с `read`, а останалите подпътища
-  на `/api/settings/*` (прокси, стандартни настройки на комбо, псевдоними на модели, компресия, изчистване…)
-  запазват обхвата `write`, изведен от метода.
-- `POST /api/settings/import-json` пропуска това повторно удостоверяване, затова преди запис изхвърля всички ключове
-  от `IMPORT_STRIPPED_SETTINGS_KEYS` (същия файл): паролата и `currentPassword`, всеки запис от
-  `SECURITY_IMPACTING_SETTINGS_KEYS` и състоянието на сесията на таблото (`sessionsValidAfter`,
-  `revokedDashboardSessions`). Затова импортирането на по-стар архив не може да съживи сесия, която вече е
-  прекратена със смяна на паролата или с излизане.
+- Деактивирано е, освен ако `settings.oidcEnabled === true` **и** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` са конфигурирани (Настройки → Удостоверяване).
+  В противен случай `GET /api/auth/oidc/login` връща `400`.
+- `GET /api/auth/oidc/login` открива `authorization_endpoint` от
+  `/.well-known/openid-configuration` на издателя (с резервен вариант
+  `<issuer>/authorize`), съставя URI адреса за пренасочване от входящата заявка
+  (като отчита `x-forwarded-proto`) и пренасочва към IdP с произволна стойност
+  `state`, съхранена в `httpOnly` бисквитка `oidc_state`.
+- `GET /api/auth/oidc/callback` валидира `state`, обменя кода за упълномощаване
+  и проверява подписа на ID токена чрез JWKS на издателя
+  (`createRemoteJWKSet` от `jose`, кеширан за всеки JWKS URI) с проверки за
+  `issuer`/`audience`. Достъпът до таблото изисква непразен списък
+  `oidcAllowedSubjects`, политика `oidcAdmissionClaim` или и двете. Списъкът
+  със субекти съпоставя `sub` или `email` само когато `email_verified === true`.
+  Незадължителната политика за атрибут приема път до атрибут в ID токена,
+  разделен с точки (например `realm_access.roles`), и масив от приети стойности;
+  извлеченият атрибут трябва да бъде масив от низове, съдържащ поне една приета
+  стойност. Ако са конфигурирани и двете политики, и двете трябва да бъдат
+  изпълнени. При липсващи или неправилно форматирани атрибути достъпът се отказва,
+  а без нито една от политиките обратното извикване отказва влизането
+  (`not_configured`). Съществуващите конфигурации само със субекти продължават
+  да работят без промяна.
+- Keycloak обикновено съпоставя ролите в realm с токени за достъп, но не
+  непременно с ID токени. За да изисквате ролята `admin` в realm, конфигурирайте
+  протоколен mapper за този клиент, който включва `realm_access.roles` в неговия
+  **ID токен**, след което задайте `oidcAdmissionClaim` на
+  `{ "path": "realm_access.roles", "values": ["admin"] }`. Проверете реалния
+  атрибут в ID токена за този клиент, преди да активирате достъп само въз основа
+  на роля; приложението не чете роли от токена за достъп. Отказът за издаване на
+  токен от страна на IdP може да допълва тази проверка в приложението, но не я
+  заменя.
+- При успех се издава **абсолютно същият** 30-дневен JWT `auth_token`, който се
+  издава при влизане с парола (`src/app/api/auth/login/route.ts`), така че
+  останалата част от процеса за сесии на таблото (автоматично обновяване,
+  флагове на бисквитките) остава непроменена — OIDC заменя само начина, по който
+  се издава бисквитката, а не правата, които тя предоставя. Промените в ролите
+  или групите на IdP не обезсилват съществуващите сесии на OmniRoute; тяхната
+  продължителност все още се определя от излизането, смяната на паролата или
+  изтичането на сесията.
+- Всяка настройка `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) е включена в
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  връща `400 PASSWORD_REQUIRED`, освен ако тялото не съдържа паролата за
+  управление като `currentPassword` (`401 PASSWORD_MISMATCH`, когато тя е
+  грешна). `oidcDisablePasswordLogin` забранява _влизането_ с парола
+  (`POST /api/auth/login`), но запазва съхранения хеш на паролата, а повторното
+  удостоверяване продължава да проверява `currentPassword` спрямо него.
+- `corsOrigins` и `bruteForceProtection` също са включени в
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: отслабването на което и да е от двете
+  намалява защитата при влизане, затова те изискват същото повторно
+  удостоверяване с `currentPassword` (разделът „Сигурност“ го изисква), а
+  импортирането от JSON ги премахва.
+- Всеки ключ на политика за сигурност — записите в
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, всички ключове `oidc*` и състоянието на
+  сесиите на таблото — е **само за оператори** при `PATCH /api/settings`: API
+  ключ с обхват `manage` или токен за достъп `oma_` се отхвърля с `403` дори
+  когато изпраща правилната стойност за `currentPassword`, а отказът се записва
+  в одитния журнал като `settings.update_failed` с
+  `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` в
+  `src/lib/api/operatorCredential.ts`). Обикновените настройки (тема,
+  предпочитания за показване) остават достъпни за запис чрез ключ с обхват
+  `manage` или токен за достъп `admin`. Всяка промяна на самия
+  `/api/settings` (както и на `/api/settings/require-login`) изисква също
+  обхвата `admin` на токена за достъп (`ADMIN_MUTATION_EXACT_PATHS` в
+  `src/server/authz/accessScopes.ts`, точно съвпадение на пътя); `GET` остава с
+  обхват `read`, а останалите подмаршрути `/api/settings/*` (проксита,
+  стандартни настройки за комбинации, псевдоними на модели, компресиране,
+  изчиствания…) запазват изведения от метода обхват `write`.
+- `POST /api/settings/import-json` пропуска това повторно удостоверяване, затова
+  преди запис премахва всеки ключ в `IMPORT_STRIPPED_SETTINGS_KEYS` (в същия
+  файл): паролата и `currentPassword`, всеки запис в
+  `SECURITY_IMPACTING_SETTINGS_KEYS` и състоянието на сесиите на таблото
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Следователно импортирането
+  на по-старо резервно копие не може да възстанови сесия, която вече е била
+  прекратена чрез промяна на паролата или излизане.
 
 ## Класове маршрути
 
@@ -121,34 +159,34 @@ API ключовете с всякакъв обхват и токените за
 пътя за възстановяване и могат да зададат парола без нея, тъй като и двете са свързани с хоста, на който принадлежи
 директорията с данни.
 
-## Конвейер
+## Тръбопровод
 
 ```
-Входяща заявка → src/proxy.ts
-  → runAuthzPipeline() в src/server/authz/pipeline.ts
-    1. Премахване на доверените вътрешни заглавки (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Генериране на идентификатор на заявката, класифициране на маршрута чрез classifyRoute()
-    3. Ако pathname == "/" → пренасочване към /dashboard
-    4. Ако се извършва изчакване за плавно спиране и /api/* → 503
-    5. Ако методът не е GET и маршрутът е /api/* → проверка чрез защитата checkBodySize()
-    6. Ако методът е OPTIONS → CORS предварителна заявка 204
-    7. Ако options.enforce == false → пропускане със заглавки за класа на маршрута
-    8. В противен случай: POLICIES[routeClass].evaluate(ctx)
-       - разрешаване → задаване на x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - отхвърляне → JSON грешка с correlation_id (страници на таблото → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Доверените вътрешни заглавки (дефинирани в `src/server/authz/headers.ts`) се **премахват от входящите заявки** преди класифицирането — клиентите не могат предварително да задават `x-omniroute-auth-*`, за да се представят за друг субект.
+Надеждни вътрешни заглавки (дефинирани в `src/server/authz/headers.ts`) са** премахнати от входящи заявки** преди класификация — клиентите не могат да попълват предварително `x-omniroute-auth-*` за да се представят за субект.
 
-### Договори на политиките
+### Договори за полици
 
 Всеки клас маршрут има политика в `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — винаги връща `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — извлича Bearer и го валидира чрез `validateApiKey()`. Преминава към анонимен достъп само когато ефективният флаг за функционалност `REQUIRE_API_KEY` е деактивиран. Ефективният флаг се определя чрез `isRequireApiKeyEnabled()` (`замяна от флаг за функционалност в БД > process.env.REQUIRE_API_KEY > стойност по подразбиране`), така че флаговете за функционалност в таблото и променливите на средата да управляват последователно `/api/v1/*`, `/api/v1beta/*` и псевдонимите; при грешка в определянето достъпът се отказва. Разрешава заявки със сесия на таблото към клиентски API маршрути (включително `/api/v1/models`, използван от каталога с модели на таблото).
-- **`managementPolicy`** (`policies/management.ts`) — приема сесия на таблото, вътрешни заявки за синхронизиране на модели (съпоставяни с `/api/providers/[name]/(sync-models|models)`) или пропуска изцяло проверката, ако `isAuthRequired()` върне false. Връща 403 (`AUTH_001`), когато е предоставен Bearer токен, но той е невалиден, и 401 във всички останали случаи. Освен това прилага нивата за защита на маршрутите (LOCAL_ONLY / ALWAYS_PROTECTED) преди който и да е клон за автентикация — вижте [Нива за защита на маршрутите](../security/ROUTE_GUARD_TIERS.md). Пътищата LOCAL_ONLY в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (понастоящем: `/api/mcp/`) могат да бъдат достъпвани извън loopback интерфейса, когато Bearer ключът има обхват `manage`; всички останали пътища LOCAL_ONLY остават строго ограничени до loopback независимо от обхвата.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — извлича Bearer, валидира чрез `validateApiKey()`. Преминава към анонимен само когато флагът за ефективна функция `REQUIRE_API_KEY` е деактивиран. Ефективният флаг се разрешава чрез `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), така че флаговете на функциите на таблото за управление и променливите на средата управляват `/api/v1/*`, `/api/v1beta/*` и псевдонимите последователно; неуспешно затваряне на резолвера. Позволява заявки за сесия на таблото за клиентски API маршрути (включително `/api/v1/models`, използван от каталога на модела на таблото). Когато Entra ID SSO е активиран, носител, който структурно е Entra токен (три base64url сегмента, `RS*` alg, `kid`) се обработва от SSO клона** преди** `validateApiKey()` и неговата присъда е окончателна — той никога не попада в пътя на ключа на API или клона за деградиране до анонимен, така че прекъсването на доставчик на идентичност не може да стане отворен достъп. Статичните API ключове не са засегнати. Вижте [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — приема сесия на таблото за управление, вътрешни заявки за синхронизиране на модели (съвпадащи с `/api/providers/[name]/(sync-models|models)`) или пропуска изцяло, ако `isAuthRequired()` върне false. Връща 403 (`AUTH_001`), когато токенът на носител е наличен, но е невалиден, 401 в противен случай. Също така налага нивата за защита на маршрута (LOCAL_ONLY / ALWAYS_PROTECTED) преди всеки клон за удостоверяване — вижте [Нивата за защита на маршрута](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY пътеките в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (днес: `/api/mcp/`) могат да бъдат достъпни от non-loopback, когато носещият ключ носи `manage` обхвата; всички останали LOCAL_ONLY пътища остават стриктно обратно независимо от обхвата.
 
-Успешната политика връща `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Обработчиците надолу по веригата могат да го прочетат чрез `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts`, вместо да изпълняват повторно логиката за автентикация.
+Успешна политика връща `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Манипулаторите надолу по веригата могат да го прочетат чрез `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts` вместо да изпълняват повторно логиката за удостоверяване.
 
 ## Списък с публични маршрути
 
@@ -308,23 +346,23 @@ API ключовете съдържат масив `scopes` (съхранява�
 
 ## Отстраняване на грешки
 
-Конвейерът винаги добавя към отговорите:
+Тръбопроводът винаги подпечатва отговорите с:
 
 ```
-x-request-id:               <идентификатор за корелация, повтарян в телата на грешките>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-При удостоверени заявки заглавките на заявката към upstream (от страната на обработчика) включват също:
+За удостоверени заявки заглавките на заявките нагоре (от страна на манипулатора) също включват:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<последните-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (незадължително)
-x-omniroute-auth-scopes:    списък, разделен със запетаи
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Използвайте `assertAuth(req, expectedClass)` в обработчиците — тя хвърля `AuthzAssertionError` с код `AUTHZ_NOT_INITIALIZED`, ако междинният софтуер е бил заобиколен (полезно за откриване на регресии в конфигурацията при тестове).
+Използвайте `assertAuth(req, expectedClass)` вътрешни манипулатори — той хвърля `AuthzAssertionError` с код `AUTHZ_NOT_INITIALIZED` ако междинният софтуер е бил заобиколен (полезно за улавяне на регресии в конфигурацията при тестове).
 
 ## Вижте също
 

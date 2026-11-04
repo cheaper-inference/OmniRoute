@@ -21,12 +21,14 @@ import { NEWS_JSON_URL, parseActiveNewsPayload } from "@/shared/utils/releaseNot
 import {
   clearLatestVersionCache,
   isNewer,
+  isUpdateCheckDisabled,
   resolveDistTagsCached,
   resolveLatestVersionCached,
 } from "@/lib/system/versionCheck";
 import { describeReleaseChannels } from "@/lib/system/releaseChannel";
 import { resolveGlobalOmniroutePath } from "@/lib/system/globalPackagePath";
 import { restartRunningServer } from "@/lib/system/processManagerRestart";
+import { formatUpdateInstallError } from "@/lib/system/updateInstallError";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
 // #5542 — On Windows npm is `npm.cmd`; Node ≥24 refuses to execFile a `.cmd` without
 // a shell (nodejs/node#52554 → "spawn npm ENOENT"). buildNpmExecOptions enables the
@@ -79,10 +81,13 @@ export async function GET(req: NextRequest) {
     bypassCache: /(?:^|,)\s*(?:no-cache|no-store)\b/i.test(cacheControl),
     storeResult: !/(?:^|,)\s*no-store\b/i.test(cacheControl),
   };
+  // OMNIROUTE_NO_UPDATE_NOTIFIER: no npm/GitHub/news egress and no "update available" banner
+  // (offline / air-gapped / pinned installs). POST still updates on an explicit request.
+  const updateCheckDisabled = isUpdateCheckDisabled();
   const [latest, distTags, news, validation] = await Promise.all([
-    resolveLatestVersionCached(cacheOptions),
-    resolveDistTagsCached(cacheOptions),
-    getNews(),
+    updateCheckDisabled ? null : resolveLatestVersionCached(cacheOptions),
+    updateCheckDisabled ? null : resolveDistTagsCached(cacheOptions),
+    updateCheckDisabled ? null : getNews(),
     validateAutoUpdateRuntime(config),
   ]);
   // Additive (rail 3.8.54): `channel` keeps meaning the deployment mode
@@ -94,6 +99,7 @@ export async function GET(req: NextRequest) {
     current,
     latest: latest ?? "unavailable",
     updateAvailable: isNewer(latest, current),
+    updateCheckDisabled,
     channel: config.mode,
     autoUpdateSupported: validation.supported,
     autoUpdateError: validation.reason,
@@ -395,7 +401,9 @@ export async function POST(req: NextRequest) {
         });
         console.log(`[AutoUpdate] Successfully updated to v${latest}`);
       } catch (err: any) {
-        const errMsg = err?.stderr || err?.message || String(err);
+        // Windows keeps the running server's package files open, so npm fails with
+        // EBUSY/EPERM — explain the manual recovery instead of dumping npm's stderr.
+        const errMsg = formatUpdateInstallError(err, { platform: process.platform, latest });
         send({ step: "error", status: "failed", message: errMsg });
         console.error(`[AutoUpdate] Update failed:`, err);
       } finally {

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Card, ModelSelectField, Toggle } from "@/shared/components";
+import { Card, Collapsible, Input, ModelSelectField, Select, Toggle } from "@/shared/components";
 import type { ApiModel } from "@/shared/components/ModelSelectField";
 import {
   MODALITY_BRIDGE_DEFAULTS,
@@ -195,7 +195,7 @@ export default function ModalityBridgeVideoTab({
         {errorState === "save" ? (
           <div
             role="alert"
-            className="rounded-control border border-danger/30 p-3 text-sm text-danger"
+            className="rounded-control border border-error/30 p-3 text-sm text-error"
           >
             {t("modalityBridgeTestError", { message: tRoot("common.error") })}
           </div>
@@ -241,31 +241,25 @@ export default function ModalityBridgeVideoTab({
           description={t("modalityBridgeVideoEnabledDesc")}
         />
 
-        <label className="block text-sm font-medium">
-          {t("modalityBridgeMode")}
-          <select
-            data-testid="modality-bridge-video-analysis-mode"
-            aria-describedby="modality-bridge-video-analysis-mode-description"
-            value={settings.modalityBridgeVideoAnalysisMode}
-            onChange={(event) =>
-              void update({
-                modalityBridgeVideoAnalysisMode: event.currentTarget.value as VideoAnalysisMode,
-              })
-            }
-            className="mt-1 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm"
-          >
-            <option value="full">{tRoot("health.degradationFull")}</option>
-            <option value="focused">{t("modalityBridgeTaskAware")}</option>
-          </select>
-          <span
-            id="modality-bridge-video-analysis-mode-description"
-            className="mt-1 block text-xs font-normal text-text-muted"
-          >
-            {settings.modalityBridgeVideoAnalysisMode === "focused"
+        <Select
+          id="modality-bridge-video-analysis-mode"
+          data-testid="modality-bridge-video-analysis-mode"
+          label={t("modalityBridgeMode")}
+          value={settings.modalityBridgeVideoAnalysisMode}
+          onChange={(event) =>
+            void update({
+              modalityBridgeVideoAnalysisMode: event.currentTarget.value as VideoAnalysisMode,
+            })
+          }
+          hint={
+            settings.modalityBridgeVideoAnalysisMode === "focused"
               ? t("modalityBridgeTaskAwareDesc")
-              : t("modalityBridgeVideoDesc")}
-          </span>
-        </label>
+              : t("modalityBridgeVideoDesc")
+          }
+        >
+          <option value="full">{tRoot("health.degradationFull")}</option>
+          <option value="focused">{t("modalityBridgeTaskAware")}</option>
+        </Select>
 
         <ModelSelectField
           label={t("modalityBridgeVideoModel")}
@@ -277,11 +271,8 @@ export default function ModalityBridgeVideoTab({
           className="text-sm"
         />
 
-        <details className="rounded-control border border-border p-3">
-          <summary className="cursor-pointer text-sm font-medium">
-            {t("modalityBridgeAdvanced")}
-          </summary>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Collapsible title={t("modalityBridgeAdvanced")} icon="tune">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <NumberField
               testId="modality-bridge-video-frame-count"
               label={t("modalityBridgeVideoFrameCount")}
@@ -333,26 +324,22 @@ export default function ModalityBridgeVideoTab({
                 )
               }
             />
-            <label className="block text-sm font-medium">
-              {t("modalityBridgeAdvanced")}
-              <select
-                aria-label={t("modalityBridgeAdvanced")}
-                value={settings.modalityBridgeVideoSamplingPolicy}
-                onChange={(event) =>
-                  void update({
-                    modalityBridgeVideoSamplingPolicy: event.currentTarget
-                      .value as VideoSamplingPolicy,
-                  })
-                }
-                className="mt-1 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm"
-              >
-                <option value="uniform">uniform</option>
-                <option value="scene_aware">scene_aware</option>
-                <option value="segment_aware">segment_aware</option>
-              </select>
-            </label>
+            <Select
+              label={t("modalityBridgeAdvanced")}
+              value={settings.modalityBridgeVideoSamplingPolicy}
+              onChange={(event) =>
+                void update({
+                  modalityBridgeVideoSamplingPolicy: event.currentTarget
+                    .value as VideoSamplingPolicy,
+                })
+              }
+            >
+              <option value="uniform">uniform</option>
+              <option value="scene_aware">scene_aware</option>
+              <option value="segment_aware">segment_aware</option>
+            </Select>
           </div>
-        </details>
+        </Collapsible>
 
         <ModalityBridgeStatsRow kind="video" />
       </div>
@@ -372,18 +359,15 @@ interface NumberFieldProps {
 
 function NumberField({ testId, label, min, max, value, onChange, onBlur }: NumberFieldProps) {
   return (
-    <label className="block text-sm font-medium">
-      {label}
-      <input
-        type="number"
-        data-testid={testId}
-        min={min}
-        max={max}
-        value={value}
-        onChange={(event) => onChange(Number.parseInt(event.currentTarget.value, 10) || 0)}
-        onBlur={(event) => onBlur(event.currentTarget.value)}
-        className="mt-1 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm"
-      />
-    </label>
+    <Input
+      type="number"
+      label={label}
+      data-testid={testId}
+      min={min}
+      max={max}
+      value={value}
+      onChange={(event) => onChange(Number.parseInt(event.currentTarget.value, 10) || 0)}
+      onBlur={(event) => onBlur(event.currentTarget.value)}
+    />
   );
 }

@@ -26,11 +26,19 @@ vi.mock("@/store/notificationStore", () => ({
 
 vi.mock("@/shared/components", () => ({
   CapabilityBadge: ({ children, title }: any) => <span title={title}>{children}</span>,
-  Button: ({ children, onClick, disabled }: any) => (
-    <button onClick={onClick} disabled={disabled}>
+  // The row's edit control is the shared icon Button since KEA-7886, so the stand-in keeps the
+  // title the test finds it by; the editor fields render through the kit adapters, and plain
+  // native stand-ins keep the DOM contract the assertions read (input[placeholder="4096"]).
+  Button: ({ children, onClick, disabled, title }: any) => (
+    <button onClick={onClick} disabled={disabled} title={title}>
       {children}
     </button>
   ),
+  Input: ({ label: _label, inputClassName: _cls, ...props }: any) => <input {...props} />,
+  Select: ({ label: _label, selectClassName: _cls, children, ...props }: any) => (
+    <select {...props}>{children}</select>
+  ),
+  Checkbox: ({ label: _label, ...props }: any) => <input type="checkbox" {...props} />,
 }));
 
 vi.mock(

@@ -22,6 +22,7 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
 const vscodeModelsRoute = await import("../../src/app/api/v1/vscode/[token]/models/route.ts");
 const vscodeTagsRoute = await import("../../src/app/api/v1/vscode/[token]/api/tags/route.ts");
 const vscodeShowRoute = await import("../../src/app/api/v1/vscode/[token]/api/show/route.ts");
@@ -47,7 +48,11 @@ test.after(async () => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("vscode Ollama-compatible tags/show routes (token + raw) expose Codex-discovered responses-format GPT models", async () => {
+test("vscode Ollama-compatible tags/show routes (token + raw) expose Codex-discovered responses-format GPT models", async (t) => {
+  // This tests Codex listing, not live image discovery. The unified catalog also
+  // refreshes AI Horde; an unrelated slow network call can hit its 8s build deadline.
+  // Keep the image snapshot empty without changing Codex data or the production timeout.
+  t.mock.method(aiHordeImageCatalog, "ensureFresh", async () => {});
   await settingsDb.updateSettings({
     requireLogin: true,
     password: "hashed-password",
@@ -85,6 +90,7 @@ test("vscode Ollama-compatible tags/show routes (token + raw) expose Codex-disco
   const modelsResponse = await vscodeModelsRoute.GET(
     new Request(`http://localhost/api/v1/vscode/${encodeURIComponent(key.key)}/models`)
   );
+  assert.equal(modelsResponse.status, 200, "expected /models to build the seeded catalog");
   const modelsBody = (await modelsResponse.json()) as {
     data?: Array<{ id?: string; owned_by?: string; api_format?: string }>;
   };

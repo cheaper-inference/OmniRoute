@@ -27,6 +27,7 @@ import {
   resolveBaseUrl,
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
+import { validateCloudflareAiProvider } from "./validation/cloudflareAi";
 import {
   validateDeepSeekWebProvider,
   validateGrokWebProvider,
@@ -111,6 +112,8 @@ import { validateAiHordeProvider } from "./validation/aihorde";
 import { validateDifyProvider } from "./validation/dify";
 import { validateZyloApiProvider } from "./validation/zylo";
 import { validateInceptionProvider } from "./validation/inception";
+import { validateClineProvider } from "./validation/cline";
+import { validateKilocodeProvider } from "./validation/kilocode";
 import { validateAdobeFireflyProvider } from "./validation/adobeFirefly";
 import {
   validateV0VercelProvider,
@@ -227,6 +230,7 @@ export async function validateProviderApiKey({
 
   // ── Specialty provider validation ──
   const SPECIALTY_VALIDATORS = {
+    "cloudflare-ai": validateCloudflareAiProvider,
     "v0-vercel": ({ apiKey, providerSpecificData }: any) =>
       validateV0VercelProvider({ apiKey, providerSpecificData, isLocal }),
     jules: validateJulesProvider,
@@ -270,6 +274,17 @@ export async function validateProviderApiKey({
     // Inception Labs serves GET /v1/models without authentication (200 for any key), so the
     // generic OpenAI-like probe greened bogus keys. Probe the authenticated chat route instead.
     inception: validateInceptionProvider,
+    // Cline and ClinePass serve unauthenticated GET /v1/models (open catalog returning 200 for any key)
+    // and require streaming + Cline client headers on /chat/completions. Probe the authenticated route.
+    cline: validateClineProvider,
+    clinepass: (args: {
+      apiKey?: string;
+      providerSpecificData?: Record<string, unknown> | null;
+      isLocal?: boolean;
+    }) => validateClineProvider({ ...args, provider: "clinepass" }),
+    // Kilo Code serves unauthenticated GET /models (open catalog returning 200 for any key).
+    // Authenticate against /chat/completions with the required X-KILOCODE-EDITORNAME header.
+    kilocode: validateKilocodeProvider,
     deepgram: validateDeepgramProvider,
     assemblyai: validateAssemblyAIProvider,
     "rev-ai": validateRevAiProvider,

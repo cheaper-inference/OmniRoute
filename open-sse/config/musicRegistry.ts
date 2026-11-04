@@ -29,6 +29,18 @@ interface MusicProvider {
 }
 
 export const MUSIC_PROVIDERS: Record<string, MusicProvider> = {
+  elevenlabs: {
+    id: "elevenlabs",
+    baseUrl: "https://api.elevenlabs.io/v1/music",
+    authType: "apikey",
+    authHeader: "xi-api-key",
+    format: "elevenlabs-music",
+    models: [
+      { id: "music_v1", name: "Eleven Music V1" },
+      { id: "music_v2", name: "Eleven Music V2" },
+      { id: "music_v2_5", name: "Eleven Music V2.5" },
+    ],
+  },
   vertex: {
     id: "vertex",
     baseUrl: "https://us-central1-aiplatform.googleapis.com/v1",

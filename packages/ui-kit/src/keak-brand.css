@@ -1,0 +1,39 @@
+/* Additive Keak identity. Uses the existing theme without redefining CI tokens. */
+@layer components {
+  .ci-keak-mark { display: block; width: 1em; height: 1em; flex-shrink: 0; }
+  .ci-keak-logo { display: inline-flex; align-items: center; gap: .45em; color: var(--ci-color-heading); font-size: 1.75rem; }
+  .ci-keak-logo > .ci-keak-mark { width: .9em; height: 1em; }
+  .ci-keak-logo > .ci-keak-wordmark { display: block; width: 2.31em; height: .73em; flex-shrink: 0; }
+  .ci-keak-product-icon { display: block; width: 2em; height: 2em; flex-shrink: 0; }
+  .ci-keak-lockup { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .5rem; color: var(--ci-color-heading); }
+  .ci-keak-lockup > .ci-keak-product-icon { width: 2rem; height: 2rem; margin-right: .2rem; }
+  .ci-keak-lockup > .ci-keak-logo { font-size: 1.3rem; }
+  .ci-keak-product { font-family: var(--ci-font-ui); font-weight: 600; font-size: 1rem; }
+  .ci-keak-switcher { position: relative; font-family: var(--ci-font-ui); font-size: var(--ci-font-size-sm); }
+  .ci-keak-switcher summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+  .ci-keak-switcher summary::-webkit-details-marker { display: none; }
+  .ci-keak-switcher summary:focus-visible, .ci-keak-switcher a:focus-visible { outline: 2px solid var(--ci-color-focus); outline-offset: 4px; }
+  .ci-keak-switcher details[open] .ci-keak-switcher-caret { transform: rotate(45deg); }
+  .ci-keak-switcher-product { display: flex; gap: .65rem; align-items: center; }
+  .ci-keak-switcher .ci-keak-product-icon { width: 1.5rem; height: 1.5rem; }
+  .ci-keak-switcher ul { position: absolute; top: 100%; right: 0; width: min(19rem, calc(100vw - 2rem)); padding: .5rem; list-style: none; background: var(--ci-color-surface); border: 1px solid var(--ci-color-border); box-shadow: var(--ci-shadow-md); z-index: var(--ci-z-dropdown); }
+  .ci-keak-switcher a { display: flex; flex-direction: column; gap: .25rem; padding: .85rem; color: var(--ci-color-heading); text-decoration: none; }
+  .ci-keak-switcher a:hover, .ci-keak-switcher a[aria-current] { background: var(--ci-color-surface-muted); }
+  .ci-keak-switcher small { color: var(--ci-color-text-muted); }
+  .ci-editorial-section { padding-block: var(--ci-space-20); border-top: 1px solid var(--ci-color-border); }
+  .ci-editorial-label { display: flex; gap: var(--ci-space-8); font: 400 .6875rem/1.5 var(--ci-font-mono); text-transform: uppercase; margin-bottom: var(--ci-space-12); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  .ci-editorial-label > :first-child { color: var(--ci-color-text-muted); }
+  .ci-editorial-card { position: relative; display: flex; flex-direction: column; align-items: start; border-top: 1px solid var(--ci-color-border); padding: var(--ci-space-6) 0; }
+  .ci-editorial-card-eyebrow { font: 400 .6875rem/1.5 var(--ci-font-mono); color: var(--ci-color-text-muted); font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  .ci-editorial-card h3 { font: 400 2rem/1.1 var(--ci-font-display); margin: var(--ci-space-6) 0 var(--ci-space-4); font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-heading-leading); letter-spacing: var(--ci-type-heading-tracking); }
+  .ci-editorial-card h3 a { color: var(--ci-color-heading); text-decoration: none; }
+  .ci-editorial-card h3 a:hover { text-decoration: underline; text-underline-offset: .15em; }
+  .ci-editorial-card p { font-size: var(--ci-font-size-sm); color: var(--ci-color-text-muted); margin: 0 0 var(--ci-space-6); }
+  .ci-editorial-card-link { display: inline-flex; gap: var(--ci-space-8); margin-top: auto; font: 400 .75rem/1.5 var(--ci-font-ui); color: var(--ci-color-heading); text-decoration: none; font-weight: var(--ci-font-weight-medium); line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
+  .ci-editorial-card { position: relative; }
+  .ci-editorial-card::before { content: ""; position: absolute; left: 0; top: -1px; height: 2px; width: 100%; background: var(--ci-color-accent); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+  .ci-editorial-card:hover::before, .ci-editorial-card:focus-within::before { transform: scaleX(1); }
+  .ci-editorial-card-link > span { transition: transform .2s; }
+  .ci-editorial-card:hover .ci-editorial-card-link > span, .ci-editorial-card:focus-within .ci-editorial-card-link > span { transform: translate(2px, -2px); }
+  @media(prefers-reduced-motion: reduce) { .ci-editorial-card::before, .ci-editorial-card-link > span { transition: none; } }
+}

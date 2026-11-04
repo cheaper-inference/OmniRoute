@@ -157,9 +157,18 @@ function parseGeneric(data: any) {
 }
 
 function parseGithub(data: any) {
+  // The AI Credits row is an unbounded counter when no local limit is set —
+  // keep it even though it looks "unlimited & empty", and carry the figure.
   return quotaEntries(data)
-    .filter(([, quota]) => !isUnlimitedEmpty(quota))
-    .map(([name, quota]) => normalizeQuotaEntry(name, quota));
+    .filter(([, quota]) => quota?.creditsUsed !== undefined || !isUnlimitedEmpty(quota))
+    .map(([name, quota]) =>
+      quota?.creditsUsed !== undefined
+        ? normalizeQuotaEntry(name, quota, {
+            creditsUsed: Number(quota.creditsUsed) || 0,
+            unlimited: quota.unlimited === true,
+          })
+        : normalizeQuotaEntry(name, quota)
+    );
 }
 
 function parseGlmFamily(data: any) {
@@ -292,10 +301,21 @@ function parseClaude(data: any) {
     );
   const quotas = quotaEntries({
     quotas: { ...visibleQuotas(data.quotas), ...visibleQuotas(data.modelQuotas) },
-  }).map(([name, quota]) => normalizeQuotaEntry(name, quota, { isPercentageOnly: true }));
+  }).map(([name, quota]) =>
+    normalizeQuotaEntry(name, quota, {
+      isPercentageOnly: true,
+      // usage/claudeQuota.ts puts weekly_scoped into modelQuotas, not account quotas.
+      modelScoped: Object.hasOwn(data.modelQuotas ?? {}, name),
+    })
+  );
 
   if (data?.extraUsage?.is_enabled) {
     quotas.push(buildClaudeExtraUsageQuota(data.extraUsage));
+  }
+
+  const bankedResetCredits = Number(data?.bankedResetCredits);
+  if (Number.isFinite(bankedResetCredits) && bankedResetCredits > 0) {
+    quotas.push(buildBankedResetCreditsQuota(bankedResetCredits));
   }
 
   return quotas;
@@ -527,7 +547,8 @@ function parseProviderQuotas(providerId: string, data: any) {
   if (providerId === "claude") return parseClaude(data);
   if (providerId === "deepseek") return parseDeepseek(data);
   if (providerId === "kilocode") return parseKilocode(data);
-  if (providerId === "agentrouter") return parseAgentrouter(data);
+  // TokenRouter shares the `quotas.balance` USD credits-row shape (usage/tokenrouter.ts).
+  if (providerId === "agentrouter" || providerId === "tokenrouter") return parseAgentrouter(data);
   if (providerId === "ollama-cloud") return parseOllamaCloud(data);
   if (providerId === "openrouter") return parseOpenrouter(data);
   return parseGeneric(data);

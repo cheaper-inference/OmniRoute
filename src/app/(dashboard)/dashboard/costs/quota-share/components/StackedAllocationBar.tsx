@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import type { PoolAllocation } from "@/lib/quota/dimensions";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
+import { getSeriesColor } from "@/shared/components/analytics/chartColors";
+import type { JSX } from "react";
 
 export interface StackedAllocationBarProps {
   allocations: PoolAllocation[];
@@ -12,17 +14,6 @@ export interface StackedAllocationBarProps {
    *  Default: the first dimension. */
   dimensionIndex?: number;
 }
-
-const PALETTE = [
-  "#a78bfa",
-  "#60a5fa",
-  "#34d399",
-  "#fbbf24",
-  "#f87171",
-  "#22d3ee",
-  "#f472b6",
-  "#94a3b8",
-];
 
 export default function StackedAllocationBar({
   allocations,
@@ -56,7 +47,7 @@ export default function StackedAllocationBar({
       {/* Stacked bar */}
       <div className="flex h-3 rounded overflow-hidden w-full mb-2">
         {allocations.map((alloc, i) => {
-          const color = PALETTE[i % PALETTE.length];
+          const color = getSeriesColor(i);
           const keyUsage = perKeyMap[alloc.apiKeyId];
           let consumedPercent: number | null = null;
           if (keyUsage && keyUsage.fairShare > 0) {
@@ -81,7 +72,7 @@ export default function StackedAllocationBar({
       {/* Labels */}
       <div className="flex flex-wrap gap-x-3 gap-y-1">
         {allocations.map((alloc, i) => {
-          const color = PALETTE[i % PALETTE.length];
+          const color = getSeriesColor(i);
           const keyUsage = perKeyMap[alloc.apiKeyId];
           let consumedPercent: number | null = null;
           if (keyUsage && keyUsage.fairShare > 0) {

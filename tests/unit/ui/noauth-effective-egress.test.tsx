@@ -325,7 +325,7 @@ describe("NoAuthAccountCard effective egress", () => {
     );
     const shield = firstShield(el)!;
     expect(shield.getAttribute("title")).toBe("Inherits connection pool (2)");
-    expect(shield.className).toContain("text-blue-400");
+    expect(shield.className).toContain("text-info");
   });
 
   it("shows pool-empty, never direct, when the pool has no live member", async () => {
@@ -356,7 +356,7 @@ describe("NoAuthAccountCard effective egress", () => {
     expect(shield.getAttribute("title")).toBe("Configure proxy");
     expect(shield.getAttribute("title")).not.toContain("Pool empty");
     expect(shield.getAttribute("title")).not.toContain("Direct");
-    expect(shield.className).not.toContain("text-red-400");
+    expect(shield.className).not.toContain("text-error");
   });
 
   it("the empty selector option inherits the connection instead of claiming direct", async () => {
@@ -371,8 +371,10 @@ describe("NoAuthAccountCard effective egress", () => {
     act(() => {
       shield.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    await waitForCondition(() => el.textContent?.includes("Proxy for Account 1") ?? false);
-    const emptyOption = el.querySelector("select option[value='']");
+    await waitForCondition(
+      () => document.body.textContent?.includes("Proxy for Account 1") ?? false
+    );
+    const emptyOption = document.body.querySelector("[role=dialog] select option[value='']");
     expect(emptyOption?.textContent).toBe("No own proxy (inherits connection)");
   });
 });

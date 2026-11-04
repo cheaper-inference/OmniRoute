@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button, Badge, Modal, Input, ModelSelectModal } from "@/shared/components";
+import Select from "@/shared/components/Select";
 import { MITM_TOOL_HOSTS } from "@/shared/constants/mitmToolHosts";
 import { useTranslations } from "next-intl";
 
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardization";
+import { cn } from "@/shared/utils/cn";
+import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 // Reasoning-effort override per Antigravity model row (ported from upstream
 // decolua/9router#2584). Empty value ("") means "Default" — preserve whatever
@@ -272,8 +276,11 @@ export default function AntigravityToolCard({
 
   return (
     <Card padding="sm" className="overflow-hidden">
-      <div className="flex items-center justify-between hover:cursor-pointer" onClick={onToggle}>
-        <div className="flex items-center gap-3">
+      <div
+        className={cn("flex items-center justify-between hover:cursor-pointer", CARD_TOGGLE_CLASS)}
+        {...cardToggleProps(isExpanded, onToggle)}
+      >
+        <div className="flex min-w-0 items-center gap-3">
           <div className="size-8 flex items-center justify-center shrink-0">
             <ProviderIcon providerId={tool.id || "antigravity"} size={32} type="color" />
           </div>
@@ -293,11 +300,11 @@ export default function AntigravityToolCard({
             <p className="text-xs text-text-muted truncate">{t(`toolDescriptions.${tool.id}`)}</p>
           </div>
         </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="expand_more"
+          size={20}
+          className={cn("text-text-muted transition-transform", isExpanded && "rotate-180")}
+        />
       </div>
 
       {isExpanded && (
@@ -305,29 +312,26 @@ export default function AntigravityToolCard({
           {/* Start/Stop Button - always on top */}
           <div className="flex items-center gap-2">
             {isRunning ? (
-              <button
-                onClick={handleStop}
-                disabled={loading}
-                className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-500 font-medium text-sm flex items-center gap-2 hover:bg-red-500/20 transition-colors disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-[18px]">stop_circle</span>
+              <Button variant="danger" onClick={handleStop} disabled={loading} className="gap-2">
+                <Icon name="stop_circle" size={18} />
                 {t("stopMitm")}
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                variant="primary"
                 onClick={handleStart}
                 disabled={loading || !hasActiveProviders}
-                className="px-4 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary font-medium text-sm flex items-center gap-2 hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="gap-2"
               >
-                <span className="material-symbols-outlined text-[18px]">play_circle</span>
+                <Icon name="play_circle" size={18} />
                 {t("startMitm")}
-              </button>
+              </Button>
             )}
           </div>
 
           {message?.type === "error" && (
-            <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-red-500/10 text-red-600">
-              <span className="material-symbols-outlined text-[14px]">error</span>
+            <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-error/10 text-error">
+              <Icon name="error" size={14} />
               <span>{message.text}</span>
             </div>
           )}
@@ -339,21 +343,21 @@ export default function AntigravityToolCard({
                 <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                   {t("apiKey")}
                 </span>
-                <span className="material-symbols-outlined text-text-muted text-[14px]">
-                  arrow_forward
-                </span>
+                <Icon name="arrow_forward" size={14} className="text-text-muted" />
                 {apiKeys.length > 0 ? (
-                  <select
+                  <Select
                     value={effectiveApiKeyId}
                     onChange={(e) => setSelectedApiKeyId(e.target.value)}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("apiKey")}
+                    className="min-w-0 w-auto flex-1"
+                    selectClassName="text-xs"
                   >
                     {apiKeys.map((key) => (
                       <option key={key.id} value={key.id}>
                         {key.key}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 ) : (
                   <span className="flex-1 text-xs text-text-muted px-2 py-1.5">
                     {cloudEnabled ? t("noApiKeysCreateOne") : t("defaultOmnirouteKey")}
@@ -368,44 +372,49 @@ export default function AntigravityToolCard({
                     <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                       {model.name}
                     </span>
-                    <span className="material-symbols-outlined text-text-muted text-[14px]">
-                      arrow_forward
-                    </span>
-                    <input
-                      type="text"
+                    <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                    <Input
                       value={entry.model || ""}
                       onChange={(e) => handleModelMappingChange(model.alias, e.target.value)}
                       placeholder={t("modelPlaceholder")}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={model.name}
+                      className="min-w-0 w-auto flex-1"
+                      inputClassName="text-xs"
                     />
-                    <select
+                    <Select
                       value={entry.reasoningEffort || ""}
                       onChange={(e) => handleReasoningEffortChange(model.alias, e.target.value)}
                       title={t("reasoningEffortHint")}
                       aria-label={t("reasoningEffort", { model: model.name })}
-                      className="w-28 shrink-0 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      className="w-28 shrink-0"
+                      selectClassName="text-xs"
                     >
                       {REASONING_EFFORT_OPTIONS.map((tier) => (
                         <option key={tier || "default"} value={tier}>
                           {tier ? t(`reasoningEffortTier.${tier}`) : t("reasoningEffortDefault")}
                         </option>
                       ))}
-                    </select>
-                    <button
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => openModelSelector(model.alias)}
                       disabled={!hasActiveProviders}
-                      className={`px-2 py-1.5 rounded border text-xs transition-colors shrink-0 whitespace-nowrap ${hasActiveProviders ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}
+                      className="shrink-0 whitespace-nowrap text-xs"
                     >
                       {t("select")}
-                    </button>
+                    </Button>
                     {(entry.model || entry.reasoningEffort) && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => handleModelMappingChange(model.alias, "")}
-                        className="p-1 text-text-muted hover:text-red-500 rounded transition-colors"
                         title={t("clear")}
+                        aria-label={t("clear")}
+                        className="text-text-muted hover:text-error"
                       >
-                        <span className="material-symbols-outlined text-[14px]">close</span>
-                      </button>
+                        <Icon name="close" size={14} />
+                      </Button>
                     )}
                   </div>
                 );
@@ -418,7 +427,7 @@ export default function AntigravityToolCard({
                   onClick={handleSaveMappings}
                   disabled={loading || Object.keys(modelMappings).length === 0}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+                  <Icon name="save" size={14} className="mr-1" />
                   {t("saveMappings")}
                 </Button>
               </div>
@@ -470,8 +479,8 @@ export default function AntigravityToolCard({
         size="sm"
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-            <span className="material-symbols-outlined text-yellow-500 text-[20px]">warning</span>
+          <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+            <Icon name="warning" size={20} className="text-warning" />
             <p className="text-xs text-text-muted">{t("sudoPasswordHint")}</p>
           </div>
 
@@ -487,11 +496,9 @@ export default function AntigravityToolCard({
 
           {message && (
             <div
-              className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
             >
-              <span className="material-symbols-outlined text-[14px]">
-                {message.type === "success" ? "check_circle" : "error"}
-              </span>
+              <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
               <span>{message.text}</span>
             </div>
           )}
