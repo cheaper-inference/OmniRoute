@@ -1933,6 +1933,7 @@ async function handleChatCoreInner({
     if (
       reactiveContextCompactionEnabled &&
       !skipNativeCodexReactiveCompaction &&
+      !protectOpenCodePrefix &&
       estimatedTokens > threshold
     ) {
       log?.info?.(
