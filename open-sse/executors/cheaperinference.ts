@@ -3,6 +3,7 @@ import { containsMediaKind } from "../utils/mediaParts.ts";
 import { makeExecutorErrorResult } from "../utils/error.ts";
 import { ciTransportSupportsInput } from "../../src/shared/constants/cheaperInferenceInputModalities";
 import { sendCIPayload } from "../utils/ciPayloadTransport.ts";
+import { normalizeCIMixedMedia } from "../utils/ciMixedMedia.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
 
@@ -97,7 +98,7 @@ export class CheaperInferenceExecutor extends BaseExecutor {
     }
     if (!this.usesResponsesEndpoint(model)) {
       // Chat Completions rejects unknown params — never add `store` on that surface.
-      return cleanedBody;
+      return normalizeCIMixedMedia(cleanedBody as Record<string, unknown>);
     }
     return { ...(cleanedBody as Record<string, unknown>), store: false };
   }
