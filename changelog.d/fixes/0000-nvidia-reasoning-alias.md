@@ -1,0 +1,1 @@
+- **fix(sse):** NVIDIA NIM requests no longer fail as a duplicate `reasoning` field when a replayed assistant turn carries both `reasoning` and `reasoning_content`; the OpenAI-compatible spelling is kept.

@@ -17,9 +17,10 @@
 //     the same rule, the lower of the two wins.
 //   - `dropOutputConfigFields` removes keys nested under `output_config`, keeping the
 //     rest of the object and dropping `output_config` only when it ends up empty.
+//   - `renameMessageFields` renames fields on assistant messages.
 //
 // A param is removed only when it is present (!== undefined). The helper never
-// introduces new keys and never throws on null/undefined bodies — call sites
+// introduces new top-level keys and never throws on null/undefined bodies — call sites
 // can chain it without extra guards.
 
 import { getParamFilterConfig, ModelParamFilter, ProviderParamFilter } from "@/lib/db/paramFilters";
@@ -38,6 +39,9 @@ type StripRule = {
   // `type` matches the key.
   mapThinkingType?: Record<string, string>;
   dropOutputConfigFields?: string[];
+  // Rename fields on assistant messages (`from` -> `to`). The `from` value
+  // fills `to` only when `to` is missing or blank; `from` is always removed.
+  renameMessageFields?: Record<string, string>;
 };
 
 const MAX_OUTPUT_TOKEN_KEYS = ["max_tokens", "max_completion_tokens", "max_output_tokens"] as const;
@@ -111,6 +115,10 @@ const STRIP_RULES: StripRule[] = [
   // support for this field (providerSupportsCaching already treats nvidia as
   // non-cache-capable) — safe to drop provider-wide, not model-specific. #7617.
   { provider: "nvidia", match: /.*/, drop: ["prompt_cache_key"] },
+  // NVIDIA NIM treats `reasoning` and `reasoning_content` as aliases for one
+  // field, so an assistant turn that carries both fails as a duplicate field.
+  // Keep the OpenAI-compatible spelling. 9router ced0cf6e.
+  { provider: "nvidia", match: /.*/, renameMessageFields: { reasoning: "reasoning_content" } },
   // VolcEngine Ark caps the Kimi coding-plan endpoint at max_tokens <= 32768
   // server-side ("integer above maximum value, expected a value <= 32768"),
   // independent of the model's own catalog ceiling. Confirmed against two
@@ -250,6 +258,26 @@ function applyMaxOutputClamp(
 }
 
 /**
+ * When a rule requests it, rename fields on assistant messages (`from` ->
+ * `to`). `from` fills `to` only when `to` is missing or blank; `from` is
+ * always removed. No-op when there are no messages.
+ */
+function applyMessageFieldRenames(rule: StripRule, body: Record<string, unknown>): void {
+  if (!rule.renameMessageFields || !Array.isArray(body.messages)) return;
+  for (const msg of body.messages as Array<Record<string, unknown> | null>) {
+    if (!msg || msg.role !== "assistant") continue;
+    for (const [from, to] of Object.entries(rule.renameMessageFields)) {
+      if (msg[from] === undefined) continue;
+      const existing = msg[to];
+      if (existing == null || (typeof existing === "string" && !existing.trim())) {
+        msg[to] = msg[from];
+      }
+      delete msg[from];
+    }
+  }
+}
+
+/**
  * When a rule requests it, remap `body.thinking.type` from one value to
  * another (e.g. "adaptive" -> "enabled"), preserving every other key already
  * present on `thinking`. No-op when `thinking` is absent, not an object, or
@@ -312,6 +340,7 @@ export function stripUnsupportedParams<T>(
     applyMaxOutputClamp(rule, provider, model, rec);
     applyThinkingTypeMap(rule, rec);
     applyOutputConfigFieldDrops(rule, rec);
+    applyMessageFieldRenames(rule, rec);
   }
 
   // Phase 2: Config-driven rules from DB
