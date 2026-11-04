@@ -23,28 +23,33 @@ import {
 
 const INTERVAL_MS = 250;
 
+// Virtual time, so the spacing assertions do not depend on how fast the runner
+// schedules timers (#18829). `sleep` yields one macrotask before advancing:
+// concurrent callers share this clock, and the caller that already passed the
+// gate must record its start before the next caller's wait moves time forward.
 class FakeClock implements ThrottleClock {
   t = 1_000;
   now = () => this.t;
   sleep = async (ms: number) => {
+    await new Promise((resolve) => setImmediate(resolve));
     this.t += ms;
   };
 }
 
-function installSharedThrottle(clock: FakeClock | null) {
+function installSharedThrottle(clock: FakeClock) {
   const shared = new MinIntervalThrottle({
     minIntervalMs: INTERVAL_MS,
     jitterMs: 0,
-    ...(clock ? { clock } : {}),
+    clock,
   });
   setQuotaFetchThrottleForTests(shared);
   return () => resetQuotaFetchThrottle();
 }
 
-function installUsageFetch(clock: FakeClock | null) {
+function installUsageFetch(clock: FakeClock) {
   const starts: number[] = [];
   setCodexUsageFetchForTests(async () => {
-    starts.push(clock ? clock.now() : Date.now());
+    starts.push(clock.now());
     return new Response(
       JSON.stringify({
         plan_type: "plus",
@@ -63,8 +68,9 @@ function installUsageFetch(clock: FakeClock | null) {
 }
 
 test("#15172 concurrent Codex usage fetches start at least one interval apart", async () => {
-  const restoreThrottle = installSharedThrottle(null);
-  const { starts, restore } = installUsageFetch(null);
+  const clock = new FakeClock();
+  const restoreThrottle = installSharedThrottle(clock);
+  const { starts, restore } = installUsageFetch(clock);
 
   try {
     const connections = ["a", "b", "c", "d"].map((id) => ({
@@ -79,7 +85,7 @@ test("#15172 concurrent Codex usage fetches start at least one interval apart", 
     for (let i = 1; i < starts.length; i++) {
       const gap = starts[i] - starts[i - 1];
       assert.ok(
-        gap >= INTERVAL_MS - 30,
+        gap >= INTERVAL_MS,
         `gap ${gap}ms between fetch ${i - 1} and ${i} is below one interval`
       );
     }
