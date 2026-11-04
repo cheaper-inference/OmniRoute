@@ -7097,7 +7097,7 @@
     "proxySubTabsAria": "프록시 섹션",
     "requestBodyLimitTitle": "요청 본문 제한",
     "requestBodyLimitDescription": "요청 본문을 파싱하기 전에 허용되는 최대 API 페이로드 크기입니다. 전용 업로드 경로에는 최소한 기본 제공 한도인 100 MB가 유지됩니다.",
-    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
+    "requestBodyLimitChatHint": "여기에서 한도를 저장하기 전까지 Chat Completions와 Responses는 최대 50 MB를 허용합니다. 저장한 한도는 더 낮든 높든 두 API에도 적용됩니다.",
     "requestBodyLimitInputLabel": "요청 본문 제한(MB)",
     "requestBodyLimitEmptyError": "MB 단위로 제한값을 입력하세요",
     "requestBodyLimitWholeNumberError": "정수를 사용하세요",
