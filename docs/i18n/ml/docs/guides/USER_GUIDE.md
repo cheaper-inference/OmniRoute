@@ -118,42 +118,42 @@ $20 നൽകുകയും പരിധികളിൽ എത്തുകയ�
 
 ---
 
-## 📖 പ്രൊവൈഡർ സജ്ജീകരണം
+## 📖 ദാതാവ് സജ്ജീകരിക്കൽ
 
-ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽനിന്ന് API-key കണക്ഷനുകൾ കൂട്ടമായി ചേർക്കാൻ, **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → ഫയലിൽനിന്ന് ഇമ്പോർട്ട് ചെയ്യുക** ഉപയോഗിക്കുക. കോളങ്ങൾ സ്ഥാനക്രമത്തിലുള്ളവയാണ് (`provider,name,apiKey,baseUrl,priority`); `provider` ഇതിനകം ഒരു മാനേജ്ഡ് പ്രൊവൈഡറായോ അനുയോജ്യമായ നോഡായോ നിലവിലുണ്ടായിരിക്കണം. [ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽനിന്ന് പ്രൊവൈഡറുകൾ ഇമ്പോർട്ട് ചെയ്യുക](../providers/CSV-IMPORT.md) കാണുക.
+ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽ നിന്ന് API കീ കണക്ഷനുകൾ ഒരുമിച്ച് ചേർക്കാൻ **Dashboard → Providers → Import from file** ഉപയോഗിക്കുക. കോളങ്ങൾ സ്ഥാനാനുസൃതമാണ് (`provider,name,apiKey,baseUrl,priority`); `provider` ഇതിനകം മാനേജുചെയ്യുന്ന ദാതാവായോ അനുയോജ്യമായ നോഡായോ നിലവിലുണ്ടായിരിക്കണം. [ഒരു CSV അല്ലെങ്കിൽ JSON ഫയലിൽ നിന്ന് ദാതാക്കളെ ഇംപോർട്ട് ചെയ്യുക](../providers/CSV-IMPORT.md) കാണുക.
 
-### 🔐 സബ്സ്ക്രിപ്ഷൻ പ്രൊവൈഡറുകൾ
+### 🔐 സബ്സ്ക്രിപ്ഷൻ ദാതാക്കൾ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → Claude Code കണക്റ്റ് ചെയ്യുക
-→ OAuth ലോഗിൻ → സ്വയമേവയുള്ള ടോക്കൺ പുതുക്കൽ
-→ 5 മണിക്കൂർ + പ്രതിവാര ക്വോട്ട ട്രാക്കിംഗ്
+Dashboard → Providers → Connect Claude Code
+→ OAuth login → Auto token refresh
+→ 5-hour + weekly quota tracking
 
-മോഡലുകൾ:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**പ്രോ ടിപ്പ്:** സങ്കീർണ്ണമായ ടാസ്കുകൾക്ക് Opus-ഉം വേഗതയ്ക്കായി Sonnet-ഉം ഉപയോഗിക്കുക. OmniRoute ഓരോ മോഡലിന്റെയും ക്വോട്ട പ്രത്യേകം ട്രാക്ക് ചെയ്യുന്നു!
+**പ്രോ ടിപ്പ്:** സങ്കീർണ്ണമായ ജോലികൾക്ക് Opus, വേഗതയ്ക്ക് Sonnet ഉപയോഗിക്കുക. OmniRoute ഓരോ മോഡലിനും ക്വോട്ട ട്രാക്ക് ചെയ്യുന്നു!
 
-OmniRoute ഹോസ്റ്റിൽ ബ്രൗസർ ഇല്ലേ? Claude Code ലോഗിൻ ചെയ്തിട്ടുള്ള ഏത് സ്ഥലത്തും `claude setup-token` പ്രവർത്തിപ്പിച്ച്, ഒരു വർഷത്തെ ടോക്കൺ **Setup Token** ടാബിൽ പേസ്റ്റ് ചെയ്യുക. [ഒരു setup token ഉപയോഗിച്ചുള്ള Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) കാണുക.
+OmniRoute ഹോസ്റ്റിൽ ബ്രൗസർ ഇല്ലേ? Claude Code-ൽ ലോഗിൻ ചെയ്തിരിക്കുന്ന ഏതെങ്കിലും ഇടത്ത് `claude setup-token` പ്രവർത്തിപ്പിച്ച്, ഒരു വർഷത്തേക്കുള്ള ടോക്കൺ **Setup Token** ടാബിൽ പേസ്റ്റ് ചെയ്യുക. [Setup token ഉപയോഗിച്ചുള്ള Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) കാണുക.
 
 Claude, Claude Code-ന് അനുയോജ്യമായ റൂട്ടുകൾ എന്നിവ Opus, Sonnet
-മോഡലുകൾക്കുള്ള `max` thinking effort നിലനിർത്തുന്നു. Haiku മോഡലുകൾ `max` effort tier സ്വീകരിക്കാത്തതിനാൽ,
-അപ്സ്ട്രീമിലേക്ക് അയയ്ക്കുന്നതിന് മുമ്പ് OmniRoute ആ അഭ്യർത്ഥനയെ ഉയർന്ന thinking budget-ലേക്ക്
-ഡൗൺഗ്രേഡ് ചെയ്യുന്നു.
+മോഡലുകൾക്കായി `max` ചിന്താ ശ്രമം നിലനിർത്തുന്നു. Haiku മോഡലുകൾ `max` ശ്രമനില
+സ്വീകരിക്കുന്നില്ല; അതിനാൽ OmniRoute ആ അഭ്യർത്ഥന അപ്സ്ട്രീമിലേക്ക് അയയ്ക്കുന്നതിന് മുമ്പ്
+ഉയർന്ന ചിന്താ ബജറ്റിലേക്ക് താഴ്ത്തുന്നു.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → Codex കണക്റ്റ് ചെയ്യുക
-→ OAuth ലോഗിൻ (പോർട്ട് 1455)
-→ 5 മണിക്കൂർ + പ്രതിവാര റീസെറ്റ്
+Dashboard → Providers → Connect Codex
+→ OAuth login (port 1455)
+→ 5-hour + weekly reset
 
-മോഡലുകൾ:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -163,11 +163,11 @@ Claude, Claude Code-ന് അനുയോജ്യമായ റൂട്ടു�
 #### GitHub Copilot
 
 ```bash
-ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → GitHub കണക്റ്റ് ചെയ്യുക
-→ GitHub വഴിയുള്ള OAuth
-→ പ്രതിമാസ റീസെറ്റ് (മാസത്തിലെ 1-ാം തീയതി)
+Dashboard → Providers → Connect GitHub
+→ OAuth via GitHub
+→ Monthly reset (1st of month)
 
-മോഡലുകൾ:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -175,57 +175,72 @@ Claude, Claude Code-ന് അനുയോജ്യമായ റൂട്ടു�
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 കുറഞ്ഞ നിരക്കിലുള്ള പ്രൊവൈഡറുകൾ
+**AI Credits (ടോക്കൺ അടിസ്ഥാനത്തിലുള്ള ബില്ലിംഗ്).** GitHub അക്കൗണ്ടിനായി `credits_used` റിപ്പോർട്ട് ചെയ്യുമ്പോൾ,
+നിലവിലെ ബില്ലിംഗ് കാലയളവിൽ ഉപയോഗിച്ച ക്രെഡിറ്റുകൾ കാണിക്കുന്ന **AI Credits** വരി Provider Limits കാർഡിൽ
+പ്രദർശിപ്പിക്കും; പരിധിയില്ലാത്ത ഓർഗനൈസേഷൻ പ്ലാനുകളിലും ഇത് ലഭ്യമാണ്.
 
-#### GLM-4.7 (ദിവസേന റീസെറ്റ്, $0.6/1M)
+**പ്രാദേശിക AI Credits പരിധി.** ഒരു GitHub കണക്ഷൻ എഡിറ്റ് ചെയ്ത് ഓരോ ബില്ലിംഗ് കാലയളവിലുമുള്ള **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`) സജ്ജമാക്കുക. ശൂന്യമായി വിട്ടാൽ ഇത് പ്രവർത്തനരഹിതമാകും; `0`
+ആണെങ്കിൽ ആ കണക്ഷൻ എല്ലായ്പ്പോഴും ഒഴിവാക്കും. ഏറ്റവും പുതിയ ഉപയോഗ വായന പരിധിക്ക് തുല്യമോ അതിലധികമോ ആയിരിക്കുമ്പോൾ,
+അക്കൗണ്ട് തിരഞ്ഞെടുക്കൽ ആ കണക്ഷൻ ഒഴിവാക്കുകയും ക്വോട്ടാ-നയ കട്ടോഫ് സംഭവിക്കുന്നതുപോലെ റൂട്ടിംഗ് നിങ്ങളുടെ മറ്റ്
+കണക്ഷനുകളിലേക്ക് പുനഃസ്ഥാപിക്കുകയും ചെയ്യും. കാലാനുസൃതമായ ക്വോട്ടാ പുതുക്കൽ ഇതിനകം ശേഖരിക്കുന്ന ഉപയോഗ ഡാറ്റയാണ് ഈ
+പരിശോധന വായിക്കുന്നത് — അഭ്യർത്ഥനാ പാതയിൽ ഇത് ഒരിക്കലും GitHub-നെ വിളിക്കില്ല — കൂടാതെ ഇത് fail open രീതിയിലാണ്:
+നഷ്ടപ്പെട്ടതോ കാലഹരണപ്പെട്ടതോ ആയ വായന (15 മിനിറ്റിൽ കൂടുതൽ പഴക്കമുള്ളത്, അല്ലെങ്കിൽ ഇതിനകം റീസെറ്റ് ചെയ്ത ബില്ലിംഗ് കാലയളവിൽ നിന്നുള്ളത്)
+കണക്ഷനെ തടയില്ല. ഇത് ഒരു പ്രാദേശിക സുരക്ഷാ സംവിധാനമാണ്, **ഉറപ്പുള്ള ചെലവ് പരിധിയല്ല**: GitHub റിപ്പോർട്ടിംഗ് വൈകലുകൾ,
+പുതുക്കൽ ഇടവേള, പുരോഗമിക്കുന്ന അഭ്യർത്ഥനകൾ, OmniRoute-ന് പുറത്തുള്ള ഉപയോഗം എന്നിവ ഇതിനെ കവിയാം. കർശനമായ പരിധിക്കായി
+GitHub-ന്റെ സ്വന്തം ചെലവ് നിയന്ത്രണങ്ങൾ ഉപയോഗിക്കുക.
+
+### 💰 കുറഞ്ഞ ചെലവിലുള്ള ദാതാക്കൾ
+
+#### GLM-4.7 (ദൈനംദിന റീസെറ്റ്, $0.6/1M)
 
 1. സൈൻ അപ്പ് ചെയ്യുക: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan-ൽനിന്ന് API key നേടുക
-3. ഡാഷ്ബോർഡ് → API Key ചേർക്കുക: പ്രൊവൈഡർ: `glm`, API Key: `your-key`
+2. Coding Plan-ൽ നിന്ന് API കീ നേടുക
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**ഉപയോഗിക്കുക:** `glm/glm-4.7` — **പ്രോ ടിപ്പ്:** Coding Plan, 1/7 ചെലവിൽ 3× ക്വോട്ട നൽകുന്നു! ദിവസേന രാവിലെ 10:00-ന് റീസെറ്റ് ചെയ്യും.
+**ഉപയോഗം:** `glm/glm-4.7` — **പ്രോ ടിപ്പ്:** Coding Plan 1/7 ചെലവിൽ 3× ക്വോട്ട നൽകുന്നു! ദിവസവും രാവിലെ 10:00-ന് റീസെറ്റ് ചെയ്യും.
 
-#### MiniMax M2.1 (5 മണിക്കൂറിൽ റീസെറ്റ്, $0.20/1M)
+#### MiniMax M2.1 (5 മണിക്കൂർ റീസെറ്റ്, $0.20/1M)
 
 1. സൈൻ അപ്പ് ചെയ്യുക: [MiniMax](https://www.minimax.io)
-2. API key നേടുക → ഡാഷ്ബോർഡ് → API Key ചേർക്കുക
+2. API കീ നേടുക → Dashboard → Add API Key
 
-**ഉപയോഗിക്കുക:** `minimax/MiniMax-M2.1` — **പ്രോ ടിപ്പ്:** ദൈർഘ്യമേറിയ കോൺടെക്സ്റ്റിനുള്ള ഏറ്റവും ചെലവുകുറഞ്ഞ ഓപ്ഷൻ (1M ടോക്കണുകൾ)!
+**ഉപയോഗം:** `minimax/MiniMax-M2.1` — **പ്രോ ടിപ്പ്:** ദീർഘമായ കോൺടെക്സ്റ്റിന് ഏറ്റവും കുറഞ്ഞ ചെലവുള്ള ഓപ്ഷൻ (1M ടോക്കണുകൾ)!
 
-#### Kimi K2 (പ്രതിമാസം $9 എന്ന സ്ഥിരനിരക്ക്)
+#### Kimi K2 ($9/മാസം സ്ഥിരനിരക്ക്)
 
 1. സബ്സ്ക്രൈബ് ചെയ്യുക: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key നേടുക → ഡാഷ്ബോർഡ് → API Key ചേർക്കുക
+2. API കീ നേടുക → Dashboard → Add API Key
 
-**ഉപയോഗിക്കുക:** `kimi/kimi-k2.5` — **പ്രോ ടിപ്പ്:** 10M ടോക്കണുകൾക്ക് പ്രതിമാസം സ്ഥിരമായി $9 = ഫലപ്രദമായ ചെലവ് $0.90/1M!
+**ഉപയോഗം:** `kimi/kimi-k2.5` — **പ്രോ ടിപ്പ്:** 10M ടോക്കണുകൾക്ക് സ്ഥിരമായ $9/മാസം = ഫലപ്രദമായ $0.90/1M ചെലവ്!
 
 #### Baidu Qianfan / ERNIE
 
 1. സൈൻ അപ്പ് ചെയ്യുക: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. ഒരു Qianfan API key സൃഷ്ടിക്കുക → ഡാഷ്ബോർഡ് → API Key ചേർക്കുക: പ്രൊവൈഡർ: `qianfan`
+2. ഒരു Qianfan API കീ സൃഷ്ടിക്കുക → Dashboard → Add API Key: Provider: `qianfan`
 
-**ഉപയോഗിക്കുക:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, അല്ലെങ്കിൽ മറ്റൊരു Qianfan OpenAI-അനുയോജ്യ മോഡൽ ID.
+**ഉപയോഗം:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, അല്ലെങ്കിൽ മറ്റൊരു Qianfan OpenAI-അനുയോജ്യമായ മോഡൽ ID.
 
-### 🆓 സൗജന്യ പ്രൊവൈഡറുകൾ
+### 🆓 സൗജന്യ ദാതാക്കൾ
 
-ഓതന്റിക്കേഷൻ ആവശ്യമില്ലാത്ത സൗജന്യ പ്രൊവൈഡറുകളുടെ പേജിൽ **ഓതന്റിക്കേഷൻ ആവശ്യമില്ല** എന്നതിന് സമീപം ഒരു സ്വിച്ച് ഉണ്ടായിരിക്കും.
-അത് ഓഫ് ചെയ്യുന്നത് ആ പ്രൊവൈഡറെ പ്രവർത്തനരഹിതമാക്കുകയും, പ്രൊവൈഡറുകളുടെ configured/compact കാഴ്ചകളിൽനിന്ന് നീക്കം ചെയ്യുകയും,
-അതിന്റെ മോഡലുകളെ `/v1/models`-ൽനിന്ന് നീക്കം ചെയ്യുകയും ചെയ്യും.
+ഓതന്റിക്കേഷൻ ആവശ്യമില്ലാത്ത സൗജന്യ ദാതാക്കളുടെ ദാതാവ് പേജിൽ **No authentication required** എന്നതിന് സമീപം ഒരു സ്വിച്ച് ഉണ്ട്.
+ഇത് ഓഫ് ചെയ്യുന്നത് ആ ദാതാവിനെ പ്രവർത്തനരഹിതമാക്കുകയും Providers configured/compact കാഴ്ചകളിൽ നിന്ന് നീക്കം ചെയ്യുകയും
+`/v1/models`-ൽ നിന്ന് അതിന്റെ മോഡലുകൾ നീക്കം ചെയ്യുകയും ചെയ്യും.
 
 #### Qoder (9 സൗജന്യ മോഡലുകൾ)
 
 ```bash
-ഡാഷ്ബോർഡ് → Qoder കണക്റ്റ് ചെയ്യുക → OAuth ലോഗിൻ → ആക്സസ് നിലവിലെ പ്രൊവൈഡർ പരിധികൾക്ക് വിധേയമാണ്
+Dashboard → Connect Qoder → OAuth login → Access is subject to current provider limits
 
-മോഡലുകൾ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude സൗജന്യം)
 
 ```bash
-ഡാഷ്ബോർഡ് → Kiro കണക്റ്റ് ചെയ്യുക → AWS Builder ID അല്ലെങ്കിൽ Google/GitHub → പ്രതിമാസം ~50 ക്രെഡിറ്റുകൾ
+Dashboard → Connect Kiro → AWS Builder ID or Google/GitHub → ~50 credits/month
 
-മോഡലുകൾ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -615,17 +630,17 @@ post_install() {
 <details>
 <summary><b>ലഭ്യമായ എല്ലാ മോഡലുകളും കാണുക</b></summary>
 
-> താഴെയുള്ള ലിസ്റ്റ് v3.8.0-നായി `open-sse/config/providerRegistry.ts`-ൽ നിന്ന് ക്യൂറേറ്റ് ചെയ്തതാണ്. ക്ലൗഡ് കാറ്റലോഗുകൾ (Gemini, OpenRouter മുതലായവ) ഡൈനാമിക്കായി സിങ്ക് ചെയ്യപ്പെടുന്നു — പൂർണ്ണമായ ലൈവ് കാറ്റലോഗിനായി **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → [provider] → ലഭ്യമായ മോഡലുകൾ** തുറക്കുക അല്ലെങ്കിൽ `GET /api/models/catalog` വിളിക്കുക.
+> താഴെയുള്ള പട്ടിക v3.8.0-നുള്ള `open-sse/config/providerRegistry.ts`-ൽ നിന്ന് തിരഞ്ഞെടുത്തതാണ്. ക്ലൗഡ് കാറ്റലോഗുകൾ (Gemini, OpenRouter മുതലായവ) ഡൈനാമിക്കായി സമന്വയിപ്പിക്കപ്പെടുന്നു — പൂർണ്ണമായ ലൈവ് കാറ്റലോഗിനായി **Dashboard → Providers → [provider] → Available Models** തുറക്കുക, അല്ലെങ്കിൽ `GET /api/models/catalog` വിളിക്കുക.
 >
-> ഒരു പ്രൊവൈഡറുടെ ബിൽറ്റ്-ഇൻ ലിസ്റ്റിൽ മാറ്റം വന്നിട്ടുണ്ടെങ്കിൽ, ലൈവ് അപ്സ്ട്രീം കാറ്റലോഗ് നേടാൻ ആ പേജിലെ **/models-ൽ നിന്ന് ഇമ്പോർട്ട് ചെയ്യുക** ഉപയോഗിക്കുക (അല്ലെങ്കിൽ **ഓട്ടോ-സിങ്ക്** പ്രാപ്തമാക്കുക). ഇത് v3.8.50-ൽ LLM7.io (`gemini-3.1-flash-lite`), UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) എന്നിവയ്ക്കായി പരിശോധിച്ചുറപ്പിച്ചിട്ടുണ്ട്; അതേ ടെസ്റ്റ് പാസ്സിൽ Pollinations-ന്റെ അനോണിമസ് ആക്സസ് അപ്സ്ട്രീം-പരിമിതമായി തുടർന്നു.
+> ഒരു provider-ന്റെ ബിൽറ്റ്-ഇൻ പട്ടികയിൽ വ്യത്യാസം വന്നിട്ടുണ്ടെങ്കിൽ, ലൈവ് അപ്സ്ട്രീം കാറ്റലോഗ് ലഭ്യമാക്കാൻ ആ പേജിലെ **Import from /models** ഉപയോഗിക്കുക (അല്ലെങ്കിൽ **Auto-Sync** പ്രവർത്തനക്ഷമമാക്കുക). LLM7.io (`gemini-3.1-flash-lite`), UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) എന്നിവയ്ക്കായി ഇത് v3.8.50-ൽ പരിശോധിച്ചു; അതേ ടെസ്റ്റ് ഘട്ടത്തിൽ Pollinations-ന്റെ അനാമിക ആക്സസ് അപ്സ്ട്രീം പരിമിതികൾക്ക് വിധേയമായിരുന്നു.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ എഫർട്ട് ടിയറുകൾ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ശ്രമനിലകൾ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — സൗജന്യ OAuth: **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ → Kiro → ലഭ്യമായ മോഡലുകൾ** എന്നതിന് കീഴിൽ കാണിക്കുന്ന ലൈവ് കാറ്റലോഗ് ഉപയോഗിക്കുക. ലഭ്യത അക്കൗണ്ടിനെയും പ്ലാനിനെയും ആശ്രയിച്ചിരിക്കുന്നു.
+**Kiro (`kr/`)** — സൗജന്യ OAuth: **Dashboard → Providers → Kiro → Available Models** എന്നതിനു കീഴിൽ കാണുന്ന ലൈവ് കാറ്റലോഗ് ഉപയോഗിക്കുക. ലഭ്യത അക്കൗണ്ടും പ്ലാനും അനുസരിച്ചിരിക്കും.
 
 **Qoder (`if/`)** — സൗജന്യ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -633,25 +648,25 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/മാസം ഫ്ലാറ്റ് അല്ലെങ്കിൽ ഉപയോഗം അനുസരിച്ച്: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo സ്ഥിരനിരക്ക് അല്ലെങ്കിൽ ഉപയോഗാനുസരിച്ച്: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API കീ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — അൾട്രാ-ഫാസ്റ്റ്: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — അതിവേഗം: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok നേറ്റീവ്: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-ഹോസ്റ്റഡ്: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-ഹോസ്റ്റുചെയ്തത്: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — സെർച്ച്-ഓഗ്മെൻ്റഡ്: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — തിരച്ചിൽ-സഹായിതം: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ഓപ്പൺ-സോഴ്സ്: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (സൗജന്യം), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ഓപ്പൺ സോഴ്സ്: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (സൗജന്യം), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — വേഗതയേറിയ ഇൻഫറൻസ്: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — വേഗത്തിലുള്ള ഇൻഫറൻസ്: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — വേഫർ-സ്കെയിൽ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ഫോക്കസ്ഡ്: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-കേന്ദ്രീകൃതം: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
 **NVIDIA NIM (`nvidia/`)** — എന്റർപ്രൈസ്: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
@@ -659,11 +674,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-ൽ നിന്ന് API കീ അനുസരിച്ച് ലൈവായി സിങ്ക് ചെയ്യുന്നു — സ്റ്റാറ്റിക് ലിസ്റ്റ് ഇല്ല. **ഡാഷ്ബോർഡ് → പ്രൊവൈഡറുകൾ**-ൽ ഒരു കീ കണക്ട് ചെയ്ത ശേഷം നിലവിലെ കാറ്റലോഗ് ഇമ്പോർട്ട് ചെയ്യാൻ **ലഭ്യമായ മോഡലുകൾ** ഉപയോഗിക്കുക (ഉദാ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google-ൽ നിന്നുള്ള API കീ അനുസരിച്ച് ലൈവായി സമന്വയിപ്പിക്കുന്നു — സ്ഥിരമായ പട്ടികയില്ല. **Dashboard → Providers**-ൽ ഒരു കീ കണക്റ്റ് ചെയ്ത ശേഷം നിലവിലെ കാറ്റലോഗ് ഇംപോർട്ട് ചെയ്യാൻ **Available Models** ഉപയോഗിക്കുക (ഉദാ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**മറ്റ് അനുയോജ്യമായ പ്രൊവൈഡറുകൾ** (തിരഞ്ഞെടുത്തവ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` വഴി), `azure-ai`, `openrouter` (പാസ്ത്രൂ കാറ്റലോഗ്), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ഓരോന്നും `providerRegistry.ts`-ൽ സ്വന്തം മോഡൽ ലിസ്റ്റ് പരിപാലിക്കുന്നു, കൂടാതെ പ്രൊവൈഡർ ഒരു `/models` എൻഡ്പോയിന്റ് നൽകുമ്പോൾ ഓട്ടോ-സിങ്ക് ചെയ്യാനും കഴിയും.
+**മറ്റ് അനുയോജ്യമായ provider-ുകൾ** (തിരഞ്ഞെടുത്തവ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` വഴി), `azure-ai`, `openrouter` (passthrough കാറ്റലോഗ്), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ഓരോന്നും `providerRegistry.ts`-ൽ സ്വന്തം മോഡൽ പട്ടിക പരിപാലിക്കുന്നു; provider ഒരു `/models` endpoint ലഭ്യമാക്കുന്നുവെങ്കിൽ അത് ഓട്ടോ-സമന്വയിപ്പിക്കാനാകും.
 
-**മോഡൽ ID-കളെക്കുറിച്ചുള്ള കുറിപ്പ്:** OmniRoute പ്രൊവൈഡർ-നേറ്റീവ് ID-കൾ ഉപയോഗിക്കുന്നു (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ചില ID-കളിൽ ഡോട്ടഡ് വേർഷനുകൾ ഉൾപ്പെടുന്നത് അപ്സ്ട്രീം API അവയെ ആ രീതിയിലാണ് പ്രതീക്ഷിക്കുന്നത് എന്നതിനാലാണ്. ഒരു മോഡൽ മുകളിൽ ലിസ്റ്റ് ചെയ്തിട്ടില്ലെങ്കിൽ, ലഭ്യത ഉറപ്പാക്കാൻ `omniroute models --search <term>` റൺ ചെയ്യുക അല്ലെങ്കിൽ `GET /api/models/catalog` വിളിക്കുക.
+**മോഡൽ ID-കളെക്കുറിച്ചുള്ള കുറിപ്പ്:** OmniRoute provider-ന്റെ നേറ്റീവ് ID-കൾ ഉപയോഗിക്കുന്നു (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ചില ID-കളിൽ ഡോട്ട് ചേർത്ത പതിപ്പുകളുണ്ട്, കാരണം അപ്സ്ട്രീം API അവയെ അങ്ങനെ പ്രതീക്ഷിക്കുന്നു. ഒരു മോഡൽ മുകളിൽ നൽകിയ പട്ടികയിൽ ഇല്ലെങ്കിൽ, ലഭ്യത സ്ഥിരീകരിക്കാൻ `omniroute models --search <term>` പ്രവർത്തിപ്പിക്കുക അല്ലെങ്കിൽ `GET /api/models/catalog` ആക്സസ് ചെയ്യുക.
 
 </details>
 

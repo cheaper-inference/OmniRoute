@@ -1639,7 +1639,7 @@ A csatornamodellt (`latest` = v3 a 4.0 GA-ig, `next` = rc, `nightly` = `develop`
 
 ---
 
-## Hanganyagok átírása
+## Hangátirat készítése
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1647,10 +1647,8 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Hangfájlok átírása bármely konfigurált STT-szolgáltató használatával. Az első
-útvonalszegmens a natív szolgáltatót választja ki (`openai/…`, `deepgram/…`). Azok
-az átjárók, amelyek egy másik gyártó modelljét exportálják újra, minősített azonosítót
-használnak (`openrouter/deepgram/nova-3`).
+Hangfájlok átírása bármely konfigurált STT-szolgáltató használatával. Az első útvonalszegmens a natív szolgáltatót választja ki (`openai/…`, `deepgram/…`). Azok az átjárók, amelyek egy másik gyártó modelljét teszik elérhetővé, minősített azonosítót használnak
+(`openrouter/deepgram/nova-3`).
 
 **Kérés:**
 
@@ -1679,7 +1677,12 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Támogatott formátumok:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** fájlalapú átírás a Gemini Live
+WebSocketen keresztül (Gemini API-kulcs szükséges). A feltöltött fájl `ffmpeg` használatával 16 kHz-es monó PCM-re lesz átalakítva
+(`PATH`-on elérhetőnek kell lennie, kivéve, ha a fájl már eleve 16 kHz-es monó PCM WAV), majd a munkamenetbe kerül továbbításra, és
+a véglegesített szöveg `{ "text": "..." }` formátumban kerül visszaadásra. Az opcionális `language` és `prompt` űrlapmezők továbbításra kerülnek. Korlátok: a 25 MiB-nál nagyobb feltöltések, illetve a 10 percnél hosszabb dekódolt hanganyagok esetén a válasz
+`413`; a 60 másodpercnél tovább futó átalakítás leállításra kerül, és a válasz
+`504`. Az API-kulcs csak az `x-goog-api-key` fejlécben kerül elküldésre, a WebSocket URL-jében soha.
 
 ## Ollama-kompatibilitás
 

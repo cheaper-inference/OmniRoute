@@ -1600,7 +1600,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkripsikan file audio menggunakan penyedia STT apa pun yang telah dikonfigurasi. Segmen jalur pertama memilih penyedia native (`openai/…`, `deepgram/…`). Gateway yang mengekspor ulang model dari vendor lain menggunakan ID yang memenuhi syarat
+Transkripsikan file audio menggunakan penyedia STT yang dikonfigurasi. Segmen jalur pertama
+memilih penyedia native (`openai/…`, `deepgram/…`). Gateway yang
+mengekspor ulang model milik vendor lain menggunakan ID berkualifikasi
 (`openrouter/deepgram/nova-3`).
 
 **Permintaan:**
@@ -1612,7 +1614,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-**Respons:**
+**Tanggapan:**
 
 ```json
 {
@@ -1626,9 +1628,17 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 **Contoh ID model:** `openai/whisper-1` (memerlukan kunci OpenAI),
 `openrouter/deepgram/nova-3` (memerlukan kunci OpenRouter),
 `deepgram/nova-3` (memerlukan kunci native Deepgram). Permintaan
-`deepgram/nova-3` tanpa awalan tidak menggunakan OpenRouter.
+`deepgram/nova-3` tanpa kualifikasi **tidak** menggunakan OpenRouter.
 
 **Format yang didukung:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transkripsi mode file melalui WebSocket
+Gemini Live (memerlukan kunci API Gemini). Unggahan dikonversi menjadi PCM mono 16 kHz dengan `ffmpeg`
+(`ffmpeg` harus tersedia di `PATH`, kecuali file tersebut sudah berupa WAV PCM mono 16 kHz), dialirkan ke sesi, dan
+teks final dikembalikan sebagai `{ "text": "..." }`. Kolom formulir `language` dan `prompt` opsional
+diteruskan. Batasan: unggahan di atas 25 MiB atau audio yang telah didekode dengan durasi lebih dari 10 menit menghasilkan
+`413`; konversi yang berjalan lebih dari 60 dtk dihentikan dan menghasilkan `504`. Kunci API hanya dikirim
+dalam header `x-goog-api-key`, tidak pernah dalam URL WebSocket.
 
 ---
 

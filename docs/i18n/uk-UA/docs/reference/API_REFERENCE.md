@@ -1617,7 +1617,7 @@ GET /api/system/version
 
 ---
 
-## Транскрибування аудіо
+## Транскрипція аудіо
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1648,12 +1648,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Приклади ідентифікаторів моделей:** `openai/whisper-1` (потрібен ключ OpenAI),
-`openrouter/deepgram/nova-3` (потрібен ключ OpenRouter),
-`deepgram/nova-3` (потрібен нативний ключ Deepgram). Запит із простим
-`deepgram/nova-3` **не** використовує OpenRouter.
+**Приклади ідентифікаторів моделей:** `openai/whisper-1` (потребує ключ OpenAI),
+`openrouter/deepgram/nova-3` (потребує ключ OpenRouter),
+`deepgram/nova-3` (потребує нативний ключ Deepgram). Окремий
+запит `deepgram/nova-3` **не** використовує OpenRouter.
 
 **Підтримувані формати:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** транскрипція у файловому режимі через WebSocket Gemini Live
+(потребує ключ API Gemini). Завантаження перетворюється на монофонічний PCM із частотою 16 кГц за допомогою `ffmpeg`
+(`ffmpeg` має бути доступним у `PATH`, якщо файл уже не є монофонічним PCM WAV із частотою 16 кГц), передається до сеансу,
+а фіналізований текст повертається як `{ "text": "..." }`. Необов’язкові поля форми `language` і `prompt`
+передаються далі. Обмеження: для завантажень понад 25 MiB або декодованого аудіо тривалістю понад 10 хвилин повертається
+`413`; перетворення, яке триває понад 60 с, припиняється, і повертається `504`. Ключ API надсилається лише
+в заголовку `x-goog-api-key`, ніколи не додається до URL WebSocket.
 
 ---
 
