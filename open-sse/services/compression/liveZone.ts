@@ -475,7 +475,11 @@ async function reuseLiveZoneEntry(
     compress
   );
   if (!live) return fallback();
-  const restoredBody = restoreStableFields(live.liveResult.body, previous.transformedStableFields);
+  const stableFields = previous.rawPrefixPatches
+    ? pickStableFields(body)
+    : previous.transformedStableFields;
+  if (!stableFields) return fallback();
+  const restoredBody = restoreStableFields(live.liveResult.body, stableFields);
   if (!restoredBody) return fallback();
   const combinedBody = {
     ...restoredBody,
