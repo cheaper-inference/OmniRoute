@@ -7,6 +7,8 @@ export interface LiveZoneOptions {
   sessionId?: string;
   variant: unknown;
   ttlMinutes?: number;
+  /** Protect upstream implicit caches: a cold/mismatched prefix is sent unchanged. */
+  preserveRawPrefixOnMiss?: boolean;
 }
 
 interface LiveZoneEntry {
