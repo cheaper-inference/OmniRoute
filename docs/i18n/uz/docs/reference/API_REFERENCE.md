@@ -1588,7 +1588,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Har qanday sozlangan STT provayderidan foydalanib, audio fayllarni matnga aylantiring. Yo‘lning birinchi segmenti native provayderni tanlaydi (`openai/…`, `deepgram/…`). Boshqa vendor modelini qayta eksport qiluvchi gatewaylar malakali identifikatordan foydalanadi
+Sozlangan istalgan STT provayderidan foydalanib audio fayllarni transkripsiya qiling. Yo‘lning birinchi segmenti mahalliy provayderni (`openai/…`, `deepgram/…`) tanlaydi. Boshqa vendor modelini qayta eksport qiladigan gatewaylar kvalifikatsiyalangan identifikatordan foydalanadi
 (`openrouter/deepgram/nova-3`).
 
 **So‘rov:**
@@ -1613,10 +1613,19 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Model identifikatorlariga misollar:** `openai/whisper-1` (OpenAI kalitini talab qiladi),
 `openrouter/deepgram/nova-3` (OpenRouter kalitini talab qiladi),
-`deepgram/nova-3` (native Deepgram kalitini talab qiladi). Oddiy
-`deepgram/nova-3` so‘rovi **OpenRouter**dan foydalanmaydi.
+`deepgram/nova-3` (mahalliy Deepgram kalitini talab qiladi). Oddiy
+`deepgram/nova-3` so‘rovi OpenRouter’dan **foydalanmaydi**.
 
 **Qo‘llab-quvvatlanadigan formatlar:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket orqali fayl rejimida transkripsiya qilish (Gemini API kalitini talab qiladi). Yuklangan fayl
+`ffmpeg` yordamida 16 kHz mono PCM formatiga o‘tkaziladi
+(`PATH` da bo‘lishi kerak, agar fayl allaqachon 16 kHz mono PCM WAV bo‘lmasa), sessiyaga uzatiladi va
+yakuniy matn `{ "text": "..." }` ko‘rinishida qaytariladi. Ixtiyoriy `language` va `prompt` forma maydonlari
+uzatiladi. Cheklovlar: 25 MiB dan katta yuklamalar yoki dekodlangan audio davomiyligi 10 daqiqadan
+uzun bo‘lsa, `413` javobi qaytariladi; konvertatsiya 60 soniyadan ko‘proq davom etsa, jarayon
+to‘xtatiladi va `504` javobi qaytariladi. API kaliti faqat `x-goog-api-key` sarlavhasida yuboriladi, hech qachon WebSocket URL manzilida emas.
 
 ---
 

@@ -5,6 +5,7 @@ import { toNumber } from "@/shared/utils/numeric";
 import { toCodexScopedQuotaWindowName } from "@omniroute/open-sse/config/codexQuotaScopes.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { formatQuotaUsageReason } from "@omniroute/open-sse/services/quotaWindowLabel.ts";
+import { seedGitHubCreditLimitReasons } from "./githubCreditLimitPolicy.ts";
 
 type JsonRecord = Record<string, unknown>;
 export interface QuotaLimitPolicy {
@@ -62,10 +63,10 @@ export function evaluateQuotaLimitPolicy(
   if (defersQuotaCutoff(provider, connection.providerSpecificData, requestedModel))
     return { blocked: false, reasons: [], resetAt: null };
   const policy = resolveQuotaLimitPolicy(provider, connection.providerSpecificData);
+  // GitHub local AI Credits cutoff (fail-open) seeds the reasons, independent of the windows.
+  const { reasons, resetCandidates } = seedGitHubCreditLimitReasons(provider, connection);
   if (!policy.enabled || policy.windows.length === 0)
-    return { blocked: false, reasons: [], resetAt: null };
-  const reasons: string[] = [];
-  const resetCandidates: Array<string | null> = [];
+    return { blocked: reasons.length > 0, reasons, resetAt: resetCandidates[0] ?? null };
   for (const windowName of policy.windows) {
     const effectiveWindowName =
       provider === "codex" ? toCodexScopedQuotaWindowName(windowName, requestedModel) : windowName;
