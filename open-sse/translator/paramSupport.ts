@@ -119,6 +119,14 @@ const STRIP_RULES: StripRule[] = [
   // field, so an assistant turn that carries both fails as a duplicate field.
   // Keep the OpenAI-compatible spelling. 9router ced0cf6e.
   { provider: "nvidia", match: /.*/, renameMessageFields: { reasoning: "reasoning_content" } },
+  // OpenCode Go's relay rejects `response_format` for its deepseek family with
+  // a bare 400 (json_schema and json_object alike) while serving it for every
+  // other model on the same relay; the error body names neither the field nor
+  // the reason, so callers cannot classify it. Registry `unsupportedParams`
+  // cannot express this: it is keyed by bare model id across providers and
+  // would strip the field for deepseek-v4-pro on providers that serve it.
+  // 9router 468aa7d9.
+  { provider: "opencode-go", match: /^deepseek/i, drop: ["response_format"] },
   // VolcEngine Ark caps the Kimi coding-plan endpoint at max_tokens <= 32768
   // server-side ("integer above maximum value, expected a value <= 32768"),
   // independent of the model's own catalog ceiling. Confirmed against two
