@@ -1530,7 +1530,7 @@ Tá cur síos ar mhúnla na gcainéal (`latest` = v3 go dtí an GA 4.0, `next` =
 
 ---
 
-## Trascríobh Fuaime
+## Tras-scríobh Fuaime
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1538,9 +1538,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Trascríobh comhaid fuaime ag úsáid aon soláthraí STT cumraithe. Roghnaíonn an chéad
-mhír den chonair an soláthraí dúchasach (`openai/…`, `deepgram/…`). Úsáideann geataí a
-athonnmhairíonn samhail díoltóra eile aitheantas cáilithe
+Tras-scríobh comhaid fuaime ag baint úsáid as aon soláthraí STT cumraithe. Roghnaíonn an chéad mhír cosáin an soláthraí dúchasach (`openai/…`, `deepgram/…`). Úsáideann geataí a athonnmhairíonn samhail soláthraí eile aitheantóir cáilithe
 (`openrouter/deepgram/nova-3`).
 
 **Iarratas:**
@@ -1563,12 +1561,18 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Samplaí d’aitheantais samhlacha:** `openai/whisper-1` (teastaíonn eochair OpenAI),
-`openrouter/deepgram/nova-3` (teastaíonn eochair OpenRouter),
-`deepgram/nova-3` (teastaíonn eochair dhúchasach Deepgram). Ní úsáideann iarratas
-simplí `deepgram/nova-3` OpenRouter.
+**Samplaí d’aitheantóirí samhlacha:** `openai/whisper-1` (eochair OpenAI
+riachtanach), `openrouter/deepgram/nova-3` (eochair OpenRouter riachtanach),
+`deepgram/nova-3` (eochair dhúchasach Deepgram riachtanach). Ní úsáideann
+iarratas lom ar `deepgram/nova-3` OpenRouter.
 
 **Formáidí tacaithe:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** tras-scríobh i mód comhaid thar
+WebSocket Gemini Live (eochair Gemini API riachtanach). Tiontaítear an uaslódáil go PCM monai 16 kHz le `ffmpeg`
+(ní mór dó a bheith ar `PATH`, mura bhfuil an comhad ina WAV PCM monai 16 kHz cheana féin), sruthaítear chuig an seisiún é agus
+seoltar an téacs críochnaithe ar ais mar `{ "text": "..." }`. Cuirtear réimsí foirme roghnacha `language` agus `prompt` ar aghaidh. Teorainneacha: má sháraíonn uaslódálacha 25 MiB nó má mhaireann an fhuaim díchódaithe níos faide ná 10 nóiméad, freagraítear le
+`413`; má ritheann tiontú níos faide ná 60 s, cuirtear deireadh leis agus freagraítear le `504`. Seoltar an eochair API sa cheanntásc `x-goog-api-key` amháin, agus ní sheoltar riamh í san URL WebSocket.
 
 ---
 

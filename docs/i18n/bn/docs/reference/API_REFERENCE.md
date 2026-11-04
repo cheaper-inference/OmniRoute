@@ -1610,7 +1610,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-যেকোনো কনফিগার করা STT প্রদানকারী ব্যবহার করে অডিও ফাইলের ট্রান্সক্রিপশন করুন। প্রথম পাথ
+কনফিগার করা যেকোনো STT প্রদানকারী ব্যবহার করে অডিও ফাইলের ট্রান্সক্রিপশন করুন। প্রথম পাথ
 সেগমেন্টটি নেটিভ প্রদানকারী নির্বাচন করে (`openai/…`, `deepgram/…`)। অন্য কোনো
 ভেন্ডরের মডেল পুনরায় রপ্তানি করা গেটওয়েগুলো একটি qualified id ব্যবহার করে
 (`openrouter/deepgram/nova-3`)।
@@ -1637,10 +1637,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **উদাহরণ মডেল আইডি:** `openai/whisper-1` (একটি OpenAI key প্রয়োজন),
 `openrouter/deepgram/nova-3` (একটি OpenRouter key প্রয়োজন),
-`deepgram/nova-3` (একটি নেটিভ Deepgram key প্রয়োজন)। শুধু
-`deepgram/nova-3` ব্যবহার করা অনুরোধে OpenRouter ব্যবহৃত হয় **না**।
+`deepgram/nova-3` (একটি নেটিভ Deepgram key প্রয়োজন)। একটি bare
+`deepgram/nova-3` অনুরোধ OpenRouter ব্যবহার করে **না**।
 
 **সমর্থিত ফরম্যাট:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`।
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket-এর মাধ্যমে ফাইল-মোড ট্রান্সক্রিপশন (একটি Gemini API key প্রয়োজন)। আপলোডটি
+`ffmpeg` দিয়ে 16 kHz mono PCM-এ রূপান্তরিত হয় (`PATH`-এ এটি থাকতে হবে, যদি না
+ফাইলটি আগে থেকেই 16 kHz mono PCM WAV হয়), সেশনে স্ট্রিম করা হয় এবং
+চূড়ান্ত টেক্সট `{ "text": "..." }` হিসেবে ফেরত দেওয়া হয়। ঐচ্ছিক
+`language` এবং `prompt` ফর্ম ফিল্ড ফরোয়ার্ড করা হয়। সীমা: 25 MiB-এর বেশি আপলোড
+অথবা 10 মিনিটের বেশি ডিকোড করা অডিও হলে `413` উত্তর দেওয়া হয়; 60 সেকেন্ডের বেশি
+সময় ধরে চলা কোনো রূপান্তর বন্ধ করে দেওয়া হয় এবং `504` উত্তর দেওয়া হয়। API key
+শুধুমাত্র `x-goog-api-key` হেডারে পাঠানো হয়, কখনোই WebSocket URL-এ নয়।
 
 ---
 

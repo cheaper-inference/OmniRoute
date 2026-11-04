@@ -20,6 +20,7 @@ import {
 import { awaitReactiveModelSync } from "@/lib/providerModels/reactiveModelSync.ts";
 import {
   HTTP_STATUS,
+  FETCH_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
 } from "../../config/constants.ts";
@@ -150,14 +151,14 @@ export function isAbortError(error: unknown): boolean {
 
 /**
  * `fetch()` wrapper that aborts if the upstream never returns response headers
- * within `timeoutMs` (default STREAM_READINESS_TIMEOUT_MS) — distinct from the
- * overall FETCH_TIMEOUT_MS, which bounds the whole request including body streaming.
+ * within `timeoutMs` (default FETCH_TIMEOUT_MS, the global startup budget).
+ * SSE readiness is checked separately after headers arrive.
  * Shared by every fetch attempt in executeOnce() (initial, 403-retry, credits-retry).
  */
 export async function fetchAntigravityWithReadinessTimeout(
   url: string,
   init: RequestInit,
-  timeoutMs = STREAM_READINESS_TIMEOUT_MS,
+  timeoutMs = FETCH_TIMEOUT_MS,
   metadata?: HttpAttemptMetadata
 ): Promise<Response> {
   const boundedTimeoutMs = Math.max(0, Math.floor(timeoutMs));
@@ -415,7 +416,7 @@ export async function sendAntigravityRequest(
       body: serializedRequest.bodyString,
       signal,
     },
-    STREAM_READINESS_TIMEOUT_MS,
+    FETCH_TIMEOUT_MS,
     {
       provider,
       model: getRequestTargetModel(transformedBody),
@@ -442,7 +443,7 @@ export async function sendAntigravityRequest(
         body: serializedRequest.bodyString,
         signal,
       },
-      STREAM_READINESS_TIMEOUT_MS,
+      FETCH_TIMEOUT_MS,
       {
         provider,
         model: getRequestTargetModel(transformedBody),
@@ -507,7 +508,7 @@ export async function sendAntigravityRequest(
               body: reSerialized.bodyString,
               signal,
             },
-            STREAM_READINESS_TIMEOUT_MS,
+            FETCH_TIMEOUT_MS,
             {
               provider,
               model: reResolvedModel,
@@ -521,11 +522,44 @@ export async function sendAntigravityRequest(
     }
   }
 
+  // A 403 VALIDATION_REQUIRED carries Google's "verify your account" link. The client error
+  // envelope built from this response drops it (the link holds a continuation token), so it
+  // has to be stored here, while the raw body is still in hand (#16532 follow-up).
+  if (response.status === HTTP_STATUS.FORBIDDEN && credentials.connectionId) {
+    await rememberVerificationLink(provider, credentials.connectionId, response, log);
+  }
+
   return { response, finalHeaders, upstreamHttpSelection: selectHttpResponse(response) };
 }
 
 function isCreditsRetryAborted(signal: AbortSignal | null | undefined, error: unknown): boolean {
   return Boolean(signal?.aborted || isAbortError(error));
+}
+
+async function rememberVerificationLink(
+  provider: string,
+  connectionId: string,
+  response: Response,
+  log: SafeAntigravityLog
+): Promise<void> {
+  try {
+    const rawBody = await response.clone().text();
+    // Lazy import: keeps the DB-backed recorder out of this module's static graph (same
+    // async ESM init-cycle concern as the ../antigravity.ts import above).
+    const { recordAntigravityVerificationUrl } =
+      await import("../../handlers/chatCore/antigravityVerificationState.ts");
+    await recordAntigravityVerificationUrl({
+      provider,
+      connectionId,
+      upstreamErrorBody: rawBody,
+      message: "",
+    });
+  } catch (err) {
+    log.warn(
+      "VERIFY",
+      `[Antigravity] Could not store the verification link: ${err instanceof Error ? err.name : "unknown error"}`
+    );
+  }
 }
 
 /**
@@ -576,7 +610,7 @@ export async function tryCreditsRetry(
         body: serializedCreditsRequest.bodyString,
         signal,
       },
-      STREAM_READINESS_TIMEOUT_MS,
+      FETCH_TIMEOUT_MS,
       {
         provider,
         model: getRequestTargetModel(creditsBody),
