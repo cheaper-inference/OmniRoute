@@ -2016,12 +2016,12 @@
     "unpricedUsageMore": "…u {count} aktar",
     "unpricedUsageConfigure": "Ikkonfigura prezzijiet",
     "unpricedUsageDismiss": "Għalaq",
-    "systemMetricsTitle": "System metrics",
-    "systemMetricsActive": "Monitoring active",
-    "systemMetricsLoading": "Loading...",
+    "systemMetricsTitle": "Metriċi tas-sistema",
+    "systemMetricsActive": "Monitoraġġ attiv",
+    "systemMetricsLoading": "Tagħbija...",
     "systemMetricsCpu": "CPU",
-    "systemMetricsMemory": "Memory",
-    "systemMetricsHost": "VPS / Host",
+    "systemMetricsMemory": "Memorja",
+    "systemMetricsHost": "VPS / Ospitanti",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
     "systemMetricsProcessCpu": "OmniRoute (process)",
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
@@ -14260,12 +14260,12 @@
         "description": "Għal fornituri li l-kwota tagħhom hija raggruppata skont l-indirizz tal-egress, ikklassifika membru tal-pool li jikkondividi l-indirizz tal-egress osservat ta' membru miċħud riċentement eżatt taħt membri f'saħħithom. Ordni biss, qatt ma jiġi eskluż. Jeħtieġ PROXY_SKIP_RECENTLY_FAILED, li jipproduċi s-sinjal ta' rifjut li jaqra. Mitfi b'mod awtomatiku: l-ordni tal-għażla tkun eżattament ir-rotazzjoni ordinarja."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Ċaħdiet ta' kwoti b'ambitu ta' mudell",
+        "description": "Applika kwota ta opencode 429 biss fuq il-mudell li laqtuha, sabiex l-istess egress tibqa' sservi mudelli ohra, u kklerjaha biss meta dak il-mudell jirnexxi. Konsumaturi li m'għandhom l-ebda mudell (rotazzjoni tal-pool, park u replay, viżibilità tal-amministratur, trigger selettur, sweep tas-saħħa) għadhom jarawha. Bżonnijiet PROXY_SKIP_RECENTLY_FAILED, li jipproduċi r-rifjut. Mitfi b'mod awtomatiku: kwota 429 ta' mudell wieħed iwarrab il-ħruġ għal kull mudell."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proxy fetch: stretta POST replay",
+        "description": "Għal talba mhux idempotenti (POST, PUT, PATCH, DELETE), ibgħat mill-ġdid wara żball tat-trasport (socket frisk, proxy fallback, native fallback) biss meta l-iżball juri li ma ntbagħat xejn: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH jew timeout tal-konnessjoni. Żball tas-socket wara l-kitba jista 'jfisser li l-upstream aċċetta t-talba, għalhekk resend jista' jiġġenera u jħallasha darbtejn. Mitfi b'mod awtomatiku: korp replayable jiġi resent darba fuq kwalunkwe żball tat-trasport, li jirkupra wkoll socket miġbura mqassam."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging tal-Attribuzzjoni tar-Rotazzjoni",
@@ -14320,7 +14320,7 @@
         "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, wara 429 minn fornitur egress-bucketed fuq kont mingħajr proxy taħt kuntest ta' ambient pool, itlob membru ieħor mill-connection pool għat-tentattiv li jmiss minflok ma terġa' tipprova l-istess indirizz ta' egress. Tordna, qatt ma teskludi: pool eżawrita żżomm l-imġiba attwali. Mitfi b'mod awtomatiku: kull 429 iddur għall-kont li jmiss eżattament bħal qabel."
       },
       "OPENCODE_FREE_TIER_EGRESS_PROBE": {
-        "label": "OpenCode Free-Tier Egress Probe",
+        "label": "Sonda tal-egress tal-livell b'xejn ta' OpenCode",
         "description": "Għall-eżekutur OpenCode, meta talba bi prokura tiġi mwieġba 403 jew 451 FreeTierError u l-għodda osservat mill-ġdid fallew jew ma applikawx, ibgħat it-talba darba permezz ta' prokura differenti (prokura ta' kont ieħor jew membru ieħor tal-grupp, qatt konnessjoni diretta). Biss meta dik is-sonda twieġeb 200 hija l-ewwel ħruġ mwarrba fil-memorja tar-rifjut tal-prokura u r-rispons tas-sonda moqdija; meta t-tnejn jirrifjutaw, ir-rifjut oriġinali jintbagħat lura u xejn ma jiġi rreġistrat. L-istess test ta' rifjut ikopri IP ta' ħruġ b'marka u forma ta' talba miċħuda, għalhekk is-sonda tgħarrafhom b'evidenza. Mitfi b'mod awtomatiku: ir-rifjut jiġi rritornat mhux mibdul."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
@@ -14504,8 +14504,8 @@
         "description": "Meta mira ta' combo twieġeb b'rifjut eżatt tal-politika tal-kontenut (kodiċi jew tip cyber_policy / content_policy_violation), waqqaf il-combo u rritorna dak ir-rifjut anke meta l-miri li jifdal ikunu mudelli differenti, minflok ma tkompli għall-mira li jmiss. Mitfi b'mod awtomatiku: ir-rifjut qatt ma jberred il-kont u lanqas ma jattiva l-breaker tal-fornitur, u l-combo tkompli għall-mira li jmiss tagħha eżattament bħal qabel."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Tweġibiet: keepalive fuq it-trasport biss",
+        "description": "Ibgħat il-keepalives taż Responses API bħala linja vojta minflok avveniment response.in_progress, għalhekk snapshot sintetiku qatt ma jista 'jissostitwixxi r-rispons reali SDK uffiċjali. Linja vojta ma tibgħat l-ebda avveniment SSE, għalhekk watchdog tal-klijent li reset biss fuq avvenimenti ma jkunx reset matul fażi twila siekta. Mitfi b'mod awtomatiku: it-tajmers jibagħtu l-avveniment response.in_progress spec-valid."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",

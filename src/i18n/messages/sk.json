@@ -14183,12 +14183,12 @@
         "description": "Pre poskytovateľov, ktorých kvóta je rozdelená podľa odchozej adresy, zoradte člena poolu, ktorý zdieľa pozorovanú odchozú adresu nedávno odmietnutého člena, tesne pod zdravými členmi. Iba poradie, nikdy sa nevylučuje. Vyžaduje PROXY_SKIP_RECENTLY_FAILED, ktorý produkuje signál odmietnutia, ktorý sa číta. V predvolenom nastavení vypnuté: poradie výberu je presne rotácia v čistom tvare."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Modelové odmietnutia kvót",
+        "description": "Aplikujte kvótu opencode 429 iba na model, ktorý ju zasiahol, takže rovnaký výstup bude slúžiť iným modelom a zrušte ho iba vtedy, keď tento model uspeje. Spotrebitelia, ktorí nemajú žiadny model (rotácia bazéna, zaparkovanie a prehratie, viditeľnosť správcu, spúšť voliča, kontrola stavu), ho stále vidia. Potrebuje PROXY_SKIP_RECENTLY_FAILED, čo vedie k odmietnutiu. Predvolene vypnuté: kvóta jedného modelu 429 vyhradí výstup pre každý model."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Načítanie proxy: prísne prehrávanie POST",
+        "description": "V prípade neidempotentnej požiadavky (POST, PUT, PATCH, DELETE) odošlite znova po chybe prenosu (čerstvý soket, záložný server proxy, natívny záložný zdroj) iba vtedy, keď chyba preukáže, že nebolo odoslané nič: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH alebo časový limit pripojenia. Chyba soketu po zápise môže znamenať, že upstream prijal požiadavku, takže opätovné odoslanie by ju mohlo vygenerovať a účtovať dvakrát. Predvolene vypnuté: znovu sa odošle telo, ktoré možno prehrať, pri akejkoľvek chybe prenosu, čím sa obnoví aj zastaraný spoločný soket."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Logovanie atribúcie rotácie",
@@ -14427,8 +14427,8 @@
         "description": "Keď cieľ combo odpovie presným odmietnutím politiky obsahu (kód alebo typ cyber_policy / content_policy_violation), zastaviť combo a vrátiť toto odmietnutie aj vtedy, ak zvyšné ciele sú iné modely, namiesto pokračovania na ďalší cieľ. V prednastavenom stave je vypnuté: toto odmietnutie nikdy nezchladí účet ani nespadne predmetový spínač, a combo pokračuje na svoj ďalší cieľ presne ako predtým."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Odpovede: Udržujte nažive iba počas prepravy",
+        "description": "Pošlite odozvy udržiavacie ako prázdny riadok namiesto udalosti response.in_progress, takže syntetická snímka nikdy nemôže nahradiť skutočnú odpoveď v oficiálnom SDK. Prázdny riadok neodošle žiadnu udalosť SSE, takže klientsky strážny pes, ktorý sa resetuje iba pri udalostiach, by sa počas dlhej tichej fázy neresetoval. Predvolene vypnuté: časovače odosielajú udalosť response.in_progress s platnou špecifikáciou."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Odmietnutia",

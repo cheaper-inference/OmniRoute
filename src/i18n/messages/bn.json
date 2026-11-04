@@ -14260,12 +14260,12 @@
         "description": "যেসব প্রোভাইডারের কোটা ইগ্রেস অ্যাড্রেস অনুযায়ী ভাগ করা হয়, তাদের ক্ষেত্রে সম্প্রতি প্রত্যাখ্যাত কোনো মেম্বারের পর্যবেক্ষিত ইগ্রেস অ্যাড্রেস শেয়ার করা পুল মেম্বারকে সুস্থ মেম্বারদের ঠিক নিচে স্থান দেওয়া হয়। এটি কেবল ক্রম নির্ধারণ করে, কখনোই বাদ দেয় না। এর জন্য PROXY_SKIP_RECENTLY_FAILED প্রয়োজন, যা প্রত্যাখ্যানের সিগন্যাল তৈরি করে। ডিফল্টভাবে বন্ধ: নির্বাচনের ক্রম পুরোপুরি সাধারণ রোটেশনের মতো থাকে।"
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "মডেল-স্কোপড কোটা প্রত্যাখ্যান",
+        "description": "একটি opencode কোটা 429 শুধুমাত্র সেই মডেলের জন্য প্রয়োগ করুন যেটি এটিকে আঘাত করেছে, তাই একই প্রস্থান অন্যান্য মডেলগুলিকে পরিবেশন করতে থাকে, এবং শুধুমাত্র সেই মডেলটি সফল হলেই এটি পরিষ্কার করুন৷ ভোক্তারা যাদের কোন মডেল নেই (পুল রোটেশন, পার্ক এবং রিপ্লে, অ্যাডমিন ভিজিবিলিটি, সিলেক্টর ট্রিগার, হেলথ সুইপ) এখনও এটি দেখতে পান। PROXY_SKIP_RECENTLY_FAILED প্রয়োজন, যা প্রত্যাখ্যান তৈরি করে। ডিফল্টরূপে বন্ধ: একটি মডেলের কোটা 429 প্রতিটি মডেলের জন্য প্রস্থানকে একপাশে সেট করে।"
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "প্রক্সি আনা: কঠোর POST রিপ্লে",
+        "description": "একটি নন-অদম্য অনুরোধের জন্য (POST, PUT, PATCH, DELETE), একটি পরিবহন ত্রুটির পরে পুনরায় পাঠান (ফ্রেশ সকেট, প্রক্সি ফলব্যাক, নেটিভ ফলব্যাক) শুধুমাত্র যখন ত্রুটি প্রমাণ করে যে কিছুই পাঠানো হয়নি: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH বা একটি সংযোগ টাইমআউট৷ লেখার পরে একটি সকেট ত্রুটির অর্থ হতে পারে আপস্ট্রিম অনুরোধটি গ্রহণ করেছে, তাই একটি পুনঃপ্রেরণ জেনারেট করতে পারে এবং এটি দুবার বিল করতে পারে। ডিফল্টরূপে বন্ধ: যে কোনো পরিবহন ত্রুটির জন্য একটি রিপ্লেযোগ্য বডি একবার রিসেন্ট করা হয়, যা একটি বাসি পুল করা সকেটও পুনরুদ্ধার করে।"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "রোটেশন অ্যাট্রিবিউশন লগিং",
@@ -14504,8 +14504,8 @@
         "description": "কোনো কম্বো টার্গেট যখন একটি সুনির্দিষ্ট কন্টেন্ট-পলিসি প্রত্যাখ্যান দিয়ে উত্তর দেয় (কোড বা টাইপ cyber_policy / content_policy_violation), তখন পরবর্তী টার্গেটে যাওয়ার পরিবর্তে কম্বোটি থামিয়ে দিন এবং অবশিষ্ট টার্গেটগুলো ভিন্ন মডেলের হলেও সেই প্রত্যাখ্যানটি ফেরত দিন। ডিফল্টভাবে নিষ্ক্রিয়: প্রত্যাখ্যানটি কখনই অ্যাকাউন্ট কুল করে না বা প্রোভাইডার ব্রেকারকে ট্রিপ করে না, এবং কম্বো আগের মতোই তার পরবর্তী টার্গেটে অগ্রসর হয়।"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "প্রতিক্রিয়া: শুধুমাত্র পরিবহনের উপর জীবিত রাখা",
+        "description": "একটি response.in_progress ইভেন্টের পরিবর্তে একটি ফাঁকা লাইন হিসাবে রেসপন্স কিপলাইভ পাঠান, তাই একটি সিন্থেটিক স্ন্যাপশট কখনই অফিসিয়াল SDK এ প্রকৃত প্রতিক্রিয়া প্রতিস্থাপন করতে পারে না। একটি ফাঁকা লাইন কোন SSE ইভেন্ট প্রেরণ করে না, তাই একটি ক্লায়েন্ট ওয়াচডগ যেটি শুধুমাত্র ইভেন্টগুলিতে রিসেট করে একটি দীর্ঘ নীরব পর্যায়ে রিসেট করা হবে না। ডিফল্টরূপে বন্ধ: টাইমাররা বিশেষ-বৈধ response.in_progress ইভেন্ট পাঠায়।"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "কুলডাউন রিট্রাই: 403/410 প্রত্যাখ্যান এড়িয়ে যান",

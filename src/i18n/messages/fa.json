@@ -14183,12 +14183,12 @@
         "description": "برای ارائه‌دهندگانی که سهمیه آن‌ها بر اساس نشانی خروجی (egress) سهمیه‌بندی می‌شود، اولویت عضو استخری که دارای نشانی خروجی مشاهده‌شده مشترک با یک عضو اخیراً رد شده است، درست در زیر اعضای سالم قرار می‌گیرد. صرفاً تغییر ترتیب است و هرگز کنار گذاشته نمی‌شود. به PROXY_SKIP_RECENTLY_FAILED نیاز دارد که سیگنال رد را برای خواندن تولید می‌کند. به‌طور پیش‌فرض غیرفعال است: ترتیب انتخاب دقیقاً همان چرخش ساده است."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "امتناع از سهمیه بندی مدل",
+        "description": "یک سهمیه opencode 429 را فقط برای مدلی اعمال کنید که به آن ضربه زده است، بنابراین همان خروجی به مدلهای دیگر ادامه میدهد و تنها زمانی که آن مدل موفق شد، آن را پاک کنید. مصرفکنندگانی که هیچ مدلی ندارند (چرخش استخر، پارک و پخش مجدد، دید مدیر، ماشه انتخابگر، جابجایی سلامت) هنوز آن را میبینند. نیاز به PROXY_SKIP_RECENTLY_FAILED، که تولید امتناع. خاموش به طور پیش فرض: سهمیه یک مدل 429 خروجی را برای هر مدل کنار می گذارد."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "واکشی پروکسی: بازپخش دقیق POST",
+        "description": "برای یک درخواست غیرقابل قدرت (POST، PUT، PATCH، DELETE)، پس از یک خطای انتقال (سوکت تازه، بازگشت پراکسی، بازگشت اصلی) فقط زمانی که خطا ثابت میکند چیزی ارسال نشده است: ECONNREFUSED، ENOTFOUND، EAI_AGAIN، ENETUNREACH یا مهلت زمانی اتصال دوباره ارسال کنید. یک خطای سوکت بعد از نوشتن میتواند به این معنی باشد که بالادست درخواست را پذیرفته است، بنابراین ارسال مجدد میتواند آن را دو بار ایجاد و صورتحساب کند. به طور پیشفرض خاموش: یک بدنه قابل پخش مجدد یک بار در هر خطای حمل و نقل ارسال میشود، که سوکت جمعشده کهنه را نیز بازیابی میکند."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "ثبت لاگ انتساب چرخش",
@@ -14427,8 +14427,8 @@
         "description": "هنگامی که یکی از اهداف combo با یک رد صریح بر اساس خط‌مشی محتوا (کد یا نوع cyber_policy / content_policy_violation) پاسخ می‌دهد، combo متوقف شده و همان پاسخ رد بازگردانده می‌شود حتی اگر اهداف باقی‌مانده مدل‌های متفاوتی باشند، به‌جای اینکه به هدف بعدی برود. به‌طور پیش‌فرض غیرفعال است: این رد هرگز حساب را وارد دوره خنک‌سازی (cooldown) نکرده و مدارشکن ارائه‌دهنده را فعال نمی‌کند، و combo دقیقاً مانند گذشته به هدف بعدی خود پیش می‌رود."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "پاسخ ها: نگهدارنده فقط در حمل و نقل",
+        "description": "پاسخها را بهجای رویداد response.in_progress به عنوان یک خط خالی ارسال کنید، بنابراین یک عکس فوری مصنوعی هرگز نمیتواند جایگزین پاسخ واقعی در SDK رسمی شود. یک خط خالی هیچ رویداد SSE ارسال نمیکند، بنابراین یک ناظر مشتری که فقط روی رویدادها بازنشانی میکند، در طول یک فاز خاموش طولانی بازنشانی نمیشود. خاموش به طور پیشفرض: تایمرها رویداد response.in_progress معتبر را ارسال میکنند."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "تلاش مجدد در دوره خنک‌سازی: صرف‌نظر از پاسخ‌های رد 403/410",

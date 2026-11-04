@@ -14183,12 +14183,12 @@
         "description": "ان فراہم کنندوں کے لیے جن کی کوٹا ایگریس ایڈریس کے لحاظ سے ڈھلان میں تقسیم کی گئی ہے، ایک پول ممبر کو جو حال ہی میں مسترد شدہ ممبر کی مشاہدہ شدہ ایگریس ایڈریس شیئر کرتا ہے، صحت مند ممبروں کے بالکل نیچے رینک کریں۔ صرف ترتیب، کبھی استثناء نہیں۔ اسے PROXY_SKIP_RECENTLY_FAILED درکار ہے، جو اس مستردگی سیگنل کو پیدا کرتی ہے جسے یہ پڑھتا ہے۔ بطورِ ڈیفالٹ آف ہے: انتخاب کا ترتیب بالکل عام روٹیشن جیسا ہی ہے۔"
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "ماڈل کے دائرہ کار کوٹہ سے انکار",
+        "description": "opencode کوٹہ 429 صرف اس ماڈل پر لگائیں جو اسے مارتا ہے، لہذا وہی اخراج دوسرے ماڈلز کی خدمت کرتا رہے، اور اسے صرف اس وقت صاف کریں جب وہ ماڈل کامیاب ہو۔ وہ صارفین جن کے پاس کوئی ماڈل نہیں ہے (پول روٹیشن، پارک اینڈ ری پلے، ایڈمن ویزیبلٹی، سلیکٹر ٹرگر، ہیلتھ سویپ) اب بھی اسے دیکھتے ہیں۔ PROXY_SKIP_RECENTLY_FAILED کی ضرورت ہے، جو انکار پیدا کرتا ہے۔ بطور ڈیفالٹ بند: ایک ماڈل کا کوٹہ 429 ہر ماڈل کے لیے باہر نکلنے کو الگ کر دیتا ہے۔"
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "پراکسی بازیافت: سخت POST ری پلے",
+        "description": "غیر معقول درخواست کے لیے (POST, PUT, PATCH, DELETE)، نقل و حمل کی خرابی کے بعد دوبارہ بھیجیں (تازہ ساکٹ، پراکسی فال بیک، مقامی فال بیک) صرف اس صورت میں جب غلطی یہ ثابت کرتی ہے کہ کچھ نہیں بھیجا گیا تھا: ECONNREFUSED، ENOTFOUND، EAI_AGAIN، ENETUNREACH یا کنیکٹ ٹائم آؤٹ۔ لکھنے کے بعد ساکٹ کی خرابی کا مطلب یہ ہو سکتا ہے کہ اپ اسٹریم نے درخواست کو قبول کر لیا، لہذا دوبارہ بھیجنے سے اسے دو بار بنایا اور بل بھی دیا جا سکتا ہے۔ پہلے سے طے شدہ طور پر بند: نقل و حمل کی کسی بھی خرابی پر ایک بار دوبارہ چلانے کے قابل باڈی کو دوبارہ بھیج دیا جاتا ہے، جو باسی پولڈ ساکٹ کو بھی بازیافت کرتا ہے۔"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "روٹیشن ایٹری بیوشن لاگنگ",
@@ -14427,8 +14427,8 @@
         "description": "جب کوڈبو ٹارگٹ جواب میں بالکل کنٹینٹ-پولیسی رجحان (کوڈ یا ٹائپ cyber_policy / content_policy_violation) دیتا ہے، تو کوڈبو کو روک کر اس رجحان کو واپس کریں، چاہے باقی ٹارگٹس مختلف ماڈلز ہوں، اگلے ٹارگٹ پر آگے بڑھنے کے بجائے۔ بطورِ ڈیفالٹ بند: اس رجحان سے اکاؤنٹ کول یا پرووائیڈر بریکر ٹرائپ کبھی نہیں ہوتا، اور کوڈبو بالکل پہلے کی طرح اپنے اگلے ٹارگٹ پر آگے بڑھتا ہے۔"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "جوابات: صرف نقل و حمل پر زندہ رہنا",
+        "description": "response.in_progress ایونٹ کے بجائے ایک خالی لائن کے طور پر جوابات رکھیں زندہ رکھیں، لہذا ایک مصنوعی سنیپ شاٹ کبھی بھی آفیشل SDK میں حقیقی ردعمل کی جگہ نہیں لے سکتا۔ ایک خالی لائن کوئی SSE ایونٹ نہیں بھیجتی ہے، لہذا ایک کلائنٹ واچ ڈاگ جو صرف واقعات پر دوبارہ سیٹ کرتا ہے ایک طویل خاموش مرحلے کے دوران دوبارہ ترتیب نہیں دیا جائے گا۔ پہلے سے طے شدہ طور پر بند: ٹائمرز مخصوص-درست response.in_progress ایونٹ بھیجتے ہیں۔"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "کول ڈاؤن ری ٹرائی: 403/410 کی نافرمانی پر نظر انداز کریں",
