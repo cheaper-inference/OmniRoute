@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "প্রক্সি বিভাগসমূহ",
     "requestBodyLimitTitle": "অনুরোধের বডির সীমা",
     "requestBodyLimitDescription": "অনুরোধের বডি পার্স করার আগে সর্বোচ্চ যে আকারের API পেলোড গ্রহণ করা হবে। ডেডিকেটেড আপলোড রুটগুলোতে অন্তত তাদের অন্তর্নির্মিত 100 MB সীমা বজায় থাকে।",
+    "requestBodyLimitChatHint": "এখানে একটি সীমা সংরক্ষণ না করা পর্যন্ত Chat Completions এবং Responses সর্বোচ্চ 50 MB গ্রহণ করে। সংরক্ষিত সীমা কম বা বেশি যা-ই হোক, তাদের ক্ষেত্রেও প্রযোজ্য।",
     "requestBodyLimitInputLabel": "অনুরোধের বডির সীমা (MB)",
     "requestBodyLimitEmptyError": "MB-তে একটি সীমা লিখুন",
     "requestBodyLimitWholeNumberError": "একটি পূর্ণসংখ্যা ব্যবহার করুন",
