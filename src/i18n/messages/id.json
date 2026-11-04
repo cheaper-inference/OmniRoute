@@ -7091,7 +7091,7 @@
     "proxySubTabsAria": "Bagian proksi",
     "requestBodyLimitTitle": "Batas Isi Permintaan",
     "requestBodyLimitDescription": "Ukuran maksimum payload API yang diterima sebelum isi permintaan diuraikan. Rute unggahan khusus tetap memiliki setidaknya batas bawaan sebesar 100 MB.",
-    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
+    "requestBodyLimitChatHint": "Chat Completions dan Responses menerima hingga 50 MB sampai Anda menyimpan batas di sini. Batas yang disimpan juga berlaku untuk keduanya, baik lebih rendah maupun lebih tinggi.",
     "requestBodyLimitInputLabel": "Batas ukuran isi permintaan dalam MB",
     "requestBodyLimitEmptyError": "Masukkan batas dalam MB",
     "requestBodyLimitWholeNumberError": "Gunakan bilangan bulat",

@@ -7168,7 +7168,7 @@
     "proxySubTabsAria": "代理设置分区",
     "requestBodyLimitTitle": "请求体大小限制",
     "requestBodyLimitDescription": "解析请求体前允许的最大 API 载荷大小。专用上传路由仍至少保留其内置的 100 MB 限制。",
-    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
+    "requestBodyLimitChatHint": "在您于此处保存限制之前，Chat Completions 和 Responses 最多接受 50 MB。保存的限制同样适用于它们，无论更低还是更高。",
     "requestBodyLimitInputLabel": "请求体限制（MB）",
     "requestBodyLimitEmptyError": "请输入 MB 限制值",
     "requestBodyLimitWholeNumberError": "请使用整数",
