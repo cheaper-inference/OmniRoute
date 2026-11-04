@@ -23,6 +23,8 @@ vi.mock("../../../open-sse/mcp-server/httpAuthContext.ts", () => ({
       scopes: principal === "Bearer reader" ? ["read:health"] : [],
     };
   }),
+  hasMcpHttpAuthContext: () => false,
+  getMcpHttpAuthHeadersForInternalFetch: () => ({}),
   withMcpHttpAuthContext: async (_request: Request, callback: () => Promise<Response>) =>
     callback(),
 }));

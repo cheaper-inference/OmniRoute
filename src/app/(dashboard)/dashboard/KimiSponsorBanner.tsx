@@ -2,6 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
 import { shouldShowKimiSponsorBanner } from "./kimiSponsorBannerGate";
@@ -74,11 +76,15 @@ export default function KimiSponsorBanner() {
     window.dispatchEvent(new Event(DISMISS_EVENT));
   };
 
+  // Partner identity colour (#1783FF) — brand, not a semantic status tone; kept as-is.
+  // The CTA carries dark ink (#040d10, the kit's neutral-950) on the brand blue: 5.3:1 (AA);
+  // white on #1783FF is only 3.7:1 (KEA-7886 P7). The note under it uses full-strength
+  // text-muted at 12px — the old 9px at 70% opacity failed AA.
   return (
     <div
       role="complementary"
       aria-label={t("foundingFriendTitle")}
-      className="mb-4 flex flex-col gap-3 rounded-lg border border-[#1783FF]/30 bg-[#1783FF]/5 px-4 py-3 dark:bg-[#1783FF]/10 sm:flex-row sm:items-center sm:justify-between"
+      className="mb-4 flex flex-col gap-3 rounded-lg border border-[#1783FF]/30 bg-[#1783FF]/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#1783FF]/10">
@@ -97,23 +103,21 @@ export default function KimiSponsorBanner() {
             target="_blank"
             rel="noopener noreferrer"
             title={t("partnerLinkNote")}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#1783FF] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:brightness-110"
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#1783FF] px-3 py-1.5 text-xs font-semibold text-[#040d10] transition-colors hover:brightness-110"
           >
             {t("cta")}
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              open_in_new
-            </span>
+            <Icon name="open_in_new" size={14} />
           </a>
-          <span className="text-[9px] text-text-muted/70">{t("partnerLinkNote")}</span>
+          <span className="text-xs text-text-muted">{t("partnerLinkNote")}</span>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          icon="close"
           onClick={dismiss}
           aria-label={t("dismissAriaLabel")}
-          className="text-text-muted transition-colors hover:text-text-main"
-        >
-          <span className="material-symbols-outlined text-[18px]">close</span>
-        </button>
+          className="text-text-muted hover:text-text-main"
+        />
       </div>
     </div>
   );

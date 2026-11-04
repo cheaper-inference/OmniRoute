@@ -1,6 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import Select from "@/shared/components/Select";
 import type { ListFilters } from "@/mitm/inspector/types";
 import type { AgentId } from "@/mitm/types";
 import { cn } from "@/shared/utils/cn";
@@ -79,106 +84,77 @@ export function TopBarControls({
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-border bg-bg-subtle px-3 py-2">
       {/* Profile selector */}
-      <div
-        role="radiogroup"
+      <SegmentedControl
+        size="sm"
         aria-label={t("trafficProfile")}
-        className="flex items-center gap-1 rounded border border-border bg-surface p-0.5"
-      >
-        {PROFILE_IDS.map((id) => (
-          <button
-            key={id}
-            type="button"
-            role="radio"
-            aria-checked={profile === id}
-            onClick={() => onProfileChange(id)}
-            className={cn(
-              "px-2 py-0.5 text-xs rounded focus-ring",
-              profile === id ? "bg-blue-600 text-white" : "text-text-muted hover:text-text-main"
-            )}
-          >
-            {profileLabels[id]}
-          </button>
-        ))}
-      </div>
+        value={profile}
+        onChange={(next) => onProfileChange(next as Profile)}
+        options={PROFILE_IDS.map((id) => ({ value: id, label: profileLabels[id] }))}
+      />
 
       {/* Host filter */}
-      <input
+      <Input
         type="text"
         placeholder={t("filterHost")}
+        aria-label={t("filterHost")}
         defaultValue={filters.host ?? ""}
         onChange={(e) => onHostChange(e.target.value || undefined)}
-        className="rounded border border-border bg-bg-subtle px-2 py-1 text-xs text-text-main w-32 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-40"
       />
 
       {/* Status filter */}
-      <select
+      <Select
+        aria-label={t("filterStatus")}
         value={filters.status ?? ""}
         onChange={(e) => onStatusChange((e.target.value as ListFilters["status"]) || undefined)}
-        className="rounded border border-border bg-bg-subtle px-2 py-1 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-blue-500"
-      >
-        <option value="">{t("anyStatus")}</option>
-        <option value="2xx">2xx</option>
-        <option value="3xx">3xx</option>
-        <option value="4xx">4xx</option>
-        <option value="5xx">5xx</option>
-        <option value="error">error</option>
-      </select>
+        placeholderDisabled={false}
+        options={[
+          { value: "", label: t("anyStatus") },
+          { value: "2xx", label: "2xx" },
+          { value: "3xx", label: "3xx" },
+          { value: "4xx", label: "4xx" },
+          { value: "5xx", label: "5xx" },
+          { value: "error", label: "error" },
+        ]}
+        className="w-36"
+      />
 
       {/* Live (in-flight) toggle — Gap 5 */}
-      <button
-        type="button"
+      <Button
+        size="sm"
+        variant={liveOnly ? "primary" : "outline"}
+        icon="sensors"
         onClick={onToggleLive}
         aria-pressed={liveOnly}
         title={t("liveOnly")}
-        className={cn(
-          "inline-flex items-center gap-1 rounded border px-2 py-1 text-xs focus-ring",
-          liveOnly
-            ? "border-green-500/50 bg-green-500/15 text-green-500"
-            : "border-border text-text-muted hover:text-text-main"
-        )}
       >
-        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-          sensors
-        </span>
         {t("liveOnly")}
-      </button>
+      </Button>
 
       {/* Action buttons */}
-      <button
-        type="button"
+      <Button
+        size="sm"
+        variant="outline"
+        icon={paused ? "play_arrow" : "pause"}
         onClick={paused ? onResume : onPause}
-        className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-text-muted hover:text-text-main focus-ring"
         title={paused ? t("resumeBtn") : t("pauseBtn")}
       >
-        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-          {paused ? "play_arrow" : "pause"}
-        </span>
         {paused ? t("resumeBtn") : t("pauseBtn")}
-      </button>
+      </Button>
 
-      <button
-        type="button"
+      <Button
+        size="sm"
+        variant="outline"
+        icon="delete_sweep"
         onClick={onClear}
-        className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-text-muted hover:text-red-400 focus-ring"
         title={t("clearBtn")}
       >
-        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-          delete_sweep
-        </span>
         {t("clearBtn")}
-      </button>
+      </Button>
 
-      <button
-        type="button"
-        onClick={onExport}
-        className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-text-muted hover:text-text-main focus-ring"
-        title={t("exportHar")}
-      >
-        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-          download
-        </span>
+      <Button size="sm" variant="outline" icon="download" onClick={onExport} title={t("exportHar")}>
         {t("exportHar")}
-      </button>
+      </Button>
 
       {/* Session controls */}
       <div className="flex items-center gap-2 ml-auto">
@@ -197,11 +173,15 @@ export function TopBarControls({
         />
 
         {/* Live indicator */}
-        <div className="flex items-center gap-1.5 text-xs text-text-muted">
+        <div
+          data-testid="live-indicator"
+          className="flex items-center gap-1.5 text-xs text-text-muted"
+        >
           <span
+            aria-hidden="true"
             className={cn(
               "inline-block h-2 w-2 rounded-full",
-              connected ? "bg-green-400 animate-pulse" : "bg-gray-500"
+              connected ? "bg-success animate-pulse" : "bg-text-muted"
             )}
           />
           {connected ? t("liveBadge") : t("offlineBadge")}
@@ -209,9 +189,9 @@ export function TopBarControls({
             {total}/{maxSize}
           </span>
           {paused && pendingCount > 0 && (
-            <span className="inline-flex items-center rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-400 border border-yellow-500/40">
+            <Badge variant="warning" size="sm">
               {t("pausedNewBadge", { count: pendingCount })}
-            </span>
+            </Badge>
           )}
         </div>
       </div>

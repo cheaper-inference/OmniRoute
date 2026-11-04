@@ -1,8 +1,10 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Input, Modal, Select } from "@/shared/components";
+import { Button, Input, Modal, Select } from "@/shared/components";
 import {
   getDefaultAlibabaProviderRegion,
   isAlibabaRegionalProvider,
@@ -73,23 +75,21 @@ export function AlibabaProviderRegionChoices({
       </p>
 
       {choices.map((choice) => (
-        <button
+        <Button
           key={choice.value}
-          type="button"
+          variant="outline"
           data-region={choice.value}
           onClick={() => onSelect(choice.value)}
-          className="w-full rounded-lg border border-border p-4 text-left transition-colors hover:bg-sidebar"
+          className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
         >
           <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined mt-0.5 text-primary" aria-hidden="true">
-              {choice.icon}
-            </span>
+            <Icon name={choice.icon} className="mt-0.5 text-primary" />
             <div className="min-w-0 flex-1">
               <h3 className="mb-1 font-semibold">{choice.label}</h3>
               <p className="text-sm text-text-muted">{choice.description}</p>
             </div>
           </div>
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -134,23 +134,21 @@ export function XiaomiTokenPlanRegionChoices({
       </p>
 
       {choices.map((choice) => (
-        <button
+        <Button
           key={choice.value}
-          type="button"
+          variant="outline"
           data-region={choice.value}
           onClick={() => onSelect(choice.value)}
-          className="w-full rounded-lg border border-border p-4 text-left transition-colors hover:bg-sidebar"
+          className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
         >
           <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined mt-0.5 text-primary" aria-hidden="true">
-              {choice.icon}
-            </span>
+            <Icon name={choice.icon} className="mt-0.5 text-primary" />
             <div className="min-w-0 flex-1">
               <h3 className="mb-1 font-semibold">{choice.label}</h3>
               <p className="text-sm text-text-muted">{choice.description}</p>
             </div>
           </div>
-        </button>
+        </Button>
       ))}
     </div>
   );

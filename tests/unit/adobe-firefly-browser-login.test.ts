@@ -167,6 +167,12 @@ test("filterSeedCookiesForWarm drops risk cookies on force warm", () => {
 test("extractAdobeForterTimestampFromValue reads embedded ms", () => {
   const ftr = "abc_1785777856265__UDF43-mnts-ants-x";
   assert.equal(extractAdobeForterTimestampFromValue(ftr), 1785777856265);
+  assert.equal(extractAdobeForterTimestampFromValue("prefix-1785777856265-suffix"), 1785777856265);
+  assert.equal(
+    extractAdobeForterTimestampFromValue("prefix%2D1785777856265%2Dsuffix"),
+    1785777856265
+  );
+  assert.equal(extractAdobeForterTimestampFromValue("x91785777856265y"), 0);
   assert.equal(extractAdobeForterTimestampFromValue(""), 0);
 });
 
@@ -261,7 +267,11 @@ test("killProcessTree on Linux targets process group (-pid) with SIGTERM and sch
   assert.equal(killedSignals.length, 1, "expected immediate SIGTERM call to process group");
   assert.equal(killedSignals[0].pid, -54321, "Linux must target process group with negative PID");
   assert.equal(killedSignals[0].signal, "SIGTERM");
-  assert.equal(procKillCalled, false, "should not call direct child.kill when process group kill succeeds");
+  assert.equal(
+    procKillCalled,
+    false,
+    "should not call direct child.kill when process group kill succeeds"
+  );
 });
 
 test("killProcessTree falls back to child.kill on Linux when process group kill fails", () => {
@@ -347,5 +357,3 @@ test("killProcessTree handles null / undefined / pid-less gracefully without thr
   assert.doesNotThrow(() => killProcessTree({}));
   assert.doesNotThrow(() => killProcessTree({ pid: undefined }));
 });
-
-

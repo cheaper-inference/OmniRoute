@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/settings";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { updateSettingsSchema } from "@/shared/validation/settingsSchemas";
+import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
 import {
   DASHBOARD_SESSION_STATE_SETTINGS_KEYS,
   SECURITY_IMPACTING_SETTINGS_KEYS,
@@ -139,7 +140,7 @@ function computeSettingsDiff(
 
 /** 403 for API keys of any scope and `oma_` access tokens that touch a security-policy key. */
 const SECURITY_POLICY_FORBIDDEN_MESSAGE =
-  "Changing security-policy settings (login, OIDC, CORS origins, brute-force protection) requires a signed-in dashboard session or the local CLI; API keys and access tokens cannot change them.";
+  "Changing security-policy settings (login, OIDC, Entra SSO, CORS origins, brute-force protection) requires a signed-in dashboard session or the local CLI; API keys and access tokens cannot change them.";
 
 /**
  * Settings that decide who reaches the dashboard: the re-auth-gated keys, every `oidc*` key
@@ -257,6 +258,115 @@ function readCookie(request: Request, name: string): string | null {
   return null;
 }
 
+type OidcPolicyError = { code: string; message: string };
+
+/**
+ * Cross-field OIDC admission rules for a settings PATCH: when OIDC is (or becomes) enabled the
+ * admission claim policy must be well-formed, and at least one admission rule (an allowed
+ * subject/email or a claim policy) must exist. Returns the error body, or null when valid.
+ */
+async function validateOidcPolicyPatch(
+  body: Record<string, unknown>
+): Promise<OidcPolicyError | null> {
+  if (
+    body.oidcEnabled === undefined &&
+    body.oidcAllowedSubjects === undefined &&
+    body.oidcAdmissionClaim === undefined
+  ) {
+    return null;
+  }
+  const current = await getSettings();
+  const enabled = (body.oidcEnabled as boolean | undefined) ?? current.oidcEnabled === true;
+  if (!enabled) return null;
+  const subjects = Array.isArray(body.oidcAllowedSubjects)
+    ? (body.oidcAllowedSubjects as unknown[])
+    : ((current.oidcAllowedSubjects as unknown[] | undefined) ?? []);
+  const hasAtLeastOne = subjects.some((s) => typeof s === "string" && s.trim().length > 0);
+  const admissionClaim =
+    body.oidcAdmissionClaim === undefined ? current.oidcAdmissionClaim : body.oidcAdmissionClaim;
+  if (admissionClaim != null && !oidcAdmissionClaimSchema.safeParse(admissionClaim).success) {
+    return {
+      code: "OIDC_ADMISSION_CLAIM_INVALID",
+      message: "Invalid OIDC admission claim policy",
+    };
+  }
+  if (!hasAtLeastOne && !admissionClaim) {
+    return {
+      code: "OIDC_ALLOWED_SUBJECTS_REQUIRED",
+      message: "OIDC requires at least one allowed subject/email or an admission claim policy",
+    };
+  }
+  return null;
+}
+
+/** The key-group ids an Entra SSO config points at (mapping targets + the default group). */
+function collectEntraKeyGroupIds(mappings: unknown, defaultKeyGroupId: string): string[] {
+  const ids = Array.isArray(mappings)
+    ? mappings
+        .map((entry) =>
+          entry && typeof entry === "object"
+            ? String((entry as Record<string, unknown>).keyGroupId ?? "").trim()
+            : ""
+        )
+        .filter((id) => id.length > 0)
+    : [];
+  if (defaultKeyGroupId) ids.push(defaultKeyGroupId);
+  return ids;
+}
+
+/**
+ * Refuse an Entra config that cannot authenticate anyone: without tenant + audience no token
+ * verifies, and with neither a group mapping nor a default key group every user resolves to no
+ * group and gets a 403. Both present as "SSO is broken" rather than "SSO is misconfigured".
+ * Every referenced key group must also exist and be active: a typo'd id would otherwise leave
+ * SSO users in zero groups, which checkKeyModelAccess reads as "no restrictions" — the
+ * misconfiguration would widen access. Returns the error body, or null when valid.
+ */
+async function validateEntraSsoPatch(
+  body: Record<string, unknown>
+): Promise<OidcPolicyError | null> {
+  if (body.entraSsoEnabled !== true) return null;
+  const current = (await getSettings()) as Record<string, unknown>;
+  const pick = (key: string): unknown => (key in body ? body[key] : current[key]);
+
+  const tenantId = String(pick("entraTenantId") ?? "").trim();
+  const audience = String(pick("entraApiAudience") ?? "").trim();
+  if (!tenantId || !audience) {
+    return {
+      code: "ENTRA_SSO_INCOMPLETE",
+      message: "entraTenantId and entraApiAudience are required when entraSsoEnabled is true",
+    };
+  }
+
+  const mappings = pick("entraGroupMappings");
+  const defaultKeyGroupId = String(pick("entraDefaultKeyGroupId") ?? "").trim();
+  const referenced = collectEntraKeyGroupIds(mappings, defaultKeyGroupId);
+  if (referenced.length > 0) {
+    const { filterExistingActiveKeyGroupIds } = await import("@/lib/db/apiKeyGroups");
+    const live = new Set(filterExistingActiveKeyGroupIds(referenced));
+    const unknown = [...new Set(referenced)].filter((id) => !live.has(id));
+    if (unknown.length > 0) {
+      return {
+        code: "ENTRA_SSO_UNKNOWN_KEY_GROUP",
+        message:
+          "entraGroupMappings/entraDefaultKeyGroupId reference key groups that do not " +
+          `exist or are inactive: ${unknown.join(", ")}`,
+      };
+    }
+  }
+
+  const hasMapping = Array.isArray(mappings) && mappings.length > 0;
+  if (!hasMapping && !defaultKeyGroupId) {
+    return {
+      code: "ENTRA_SSO_NO_GROUP_POLICY",
+      message:
+        "Configure at least one entraGroupMappings entry or an entraDefaultKeyGroupId " +
+        "when entraSsoEnabled is true, otherwise every SSO user is denied",
+    };
+  }
+  return null;
+}
+
 export async function PATCH(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
@@ -321,26 +431,16 @@ export async function PATCH(request: Request) {
       }) as typeof body.modelLockout;
     }
 
-    if (body.oidcEnabled !== undefined || body.oidcAllowedSubjects !== undefined) {
-      const current = await getSettings();
-      const enabled = body.oidcEnabled ?? current.oidcEnabled === true;
-      const subjects = Array.isArray(body.oidcAllowedSubjects)
-        ? (body.oidcAllowedSubjects as unknown[])
-        : ((current.oidcAllowedSubjects as unknown[] | undefined) ?? []);
-      const hasAtLeastOne = subjects.some((s) => typeof s === "string" && s.trim().length > 0);
-      if (enabled && !hasAtLeastOne) {
-        emitSettingsFailureAudit(request, actor, "OIDC_ALLOWED_SUBJECTS_REQUIRED", attemptedKeys);
-        return NextResponse.json(
-          {
-            error: {
-              code: "OIDC_ALLOWED_SUBJECTS_REQUIRED",
-              message:
-                "oidcAllowedSubjects must contain at least one subject or email when oidcEnabled is true",
-            },
-          },
-          { status: 400 }
-        );
-      }
+    const oidcPolicyError = await validateOidcPolicyPatch(body);
+    if (oidcPolicyError) {
+      emitSettingsFailureAudit(request, actor, oidcPolicyError.code, attemptedKeys);
+      return NextResponse.json({ error: oidcPolicyError }, { status: 400 });
+    }
+
+    const entraPolicyError = await validateEntraSsoPatch(body);
+    if (entraPolicyError) {
+      emitSettingsFailureAudit(request, actor, entraPolicyError.code, attemptedKeys);
+      return NextResponse.json({ error: entraPolicyError }, { status: 400 });
     }
 
     // VALIDATED body so we never trip on stray unknown keys. If any security

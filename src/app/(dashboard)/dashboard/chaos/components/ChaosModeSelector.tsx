@@ -1,5 +1,8 @@
 "use client";
 
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import Icon from "@/shared/components/Icon";
+
 /**
  * Parallel / Collaborative mode selector for the Chaos Mode config page.
  * Extracted out of ChaosConfigPageClient.tsx to keep the page component under
@@ -23,38 +26,34 @@ export function ChaosModeSelector({
   collaborativeDesc: string;
 }) {
   return (
-    <div className="p-3 rounded-lg border border-border bg-surface/40">
-      <p className="text-sm font-medium text-text-main mb-2">{label}</p>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => onChange("parallel")}
-          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
-            mode === "parallel"
-              ? "bg-primary text-white"
-              : "bg-black/5 dark:bg-white/5 text-text-muted hover:bg-black/10 dark:hover:bg-white/10"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[16px] align-middle mr-1">
-            call_split
+    <RadioGroup
+      label={label}
+      orientation="horizontal"
+      value={mode}
+      onValueChange={(next) => onChange(next as "parallel" | "collaborative")}
+    >
+      <RadioGroupItem
+        card
+        value="parallel"
+        label={
+          <span className="inline-flex items-center gap-1">
+            <Icon name="call_split" size={16} />
+            {parallelLabel}
           </span>
-          {parallelLabel}
-          <p className="text-[10px] opacity-70 mt-0.5">{parallelDesc}</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange("collaborative")}
-          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
-            mode === "collaborative"
-              ? "bg-primary text-white"
-              : "bg-black/5 dark:bg-white/5 text-text-muted hover:bg-black/10 dark:hover:bg-white/10"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[16px] align-middle mr-1">merge</span>
-          {collaborativeLabel}
-          <p className="text-[10px] opacity-70 mt-0.5">{collaborativeDesc}</p>
-        </button>
-      </div>
-    </div>
+        }
+        description={parallelDesc}
+      />
+      <RadioGroupItem
+        card
+        value="collaborative"
+        label={
+          <span className="inline-flex items-center gap-1">
+            <Icon name="merge" size={16} />
+            {collaborativeLabel}
+          </span>
+        }
+        description={collaborativeDesc}
+      />
+    </RadioGroup>
   );
 }

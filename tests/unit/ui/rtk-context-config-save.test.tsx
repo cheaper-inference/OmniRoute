@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import RtkContextPageClient from "@/app/(dashboard)/dashboard/context/rtk/RtkContextPageClient";
 import { rtkConfigSchema } from "@/shared/validation/compressionConfigSchemas";
 import { useNotificationStore } from "@/store/notificationStore";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
 
 // next-intl echoes the key and any params, so labels and messages are their translation keys.
 // Keys from the settings namespace carry a "settings." prefix, so a test can tell which
@@ -312,6 +313,23 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
+describe("RTK page master-switch banner", { timeout: 20_000 }, () => {
+  it("shows while the master switch is off, with no dismiss control", async () => {
+    startServer();
+    const serverFetch = globalThis.fetch;
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) =>
+      new URL(String(input), "http://localhost").pathname === "/api/settings/compression"
+        ? new Response(JSON.stringify({ enabled: false }), { status: 200 })
+        : serverFetch(input, init)
+    );
+    await renderPage();
+
+    const banner = screen.getByText("masterSwitchOffAlert").closest('[data-slot="alert"]');
+    expect(banner).toBeTruthy();
+    expect(banner!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
+  });
+});
+
 describe("RTK page config saves", { timeout: 20_000 }, () => {
   it("typing 120 into max lines saves once, with 120, when the field loses focus", async () => {
     const server = startServer();
@@ -343,8 +361,10 @@ describe("RTK page config saves", { timeout: 20_000 }, () => {
 
     expect(inputFor("maxChars").value).toBe("20000");
     expect(pageText()).toContain("settings.saveFailed");
-    // Screen readers skip the icon's ligature text and read only the message.
-    expect(screen.getByText("error").getAttribute("aria-hidden")).toBe("true");
+    // Screen readers skip the icon and read only the message (KEA-7886: a Lucide svg via <Icon>).
+    expect(
+      document.querySelector('svg.oi-icon[data-icon="error"]')?.getAttribute("aria-hidden")
+    ).toBe("true");
     // While the page is open the message shows on the page, not as a toast.
     expect(errorToasts()).toEqual([]);
   });

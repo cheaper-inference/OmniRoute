@@ -66,7 +66,7 @@ export function DarkTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-white/10 bg-surface px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg border border-border bg-surface px-3 py-2 text-xs shadow-lg">
       {label && <div className="font-semibold text-text-main mb-1">{label}</div>}
       {payload.map((entry, i) => (
         <div key={i} className="flex items-center gap-1.5 text-text-muted">

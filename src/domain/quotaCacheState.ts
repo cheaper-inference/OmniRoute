@@ -13,6 +13,7 @@
  */
 
 import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
+import type { QuotaBurnMetrics } from "./quotaBurnMetrics.ts";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -29,6 +30,8 @@ export interface QuotaInfo {
   displayName?: string;
   windowSeconds?: number | null;
   claudeQuota?: ClaudeQuotaMetadata;
+  /** GitHub Copilot AI Credits consumed (telemetry for the local credit cutoff). */
+  creditsUsed?: number;
 }
 
 export interface QuotaCacheEntry {
@@ -40,6 +43,7 @@ export interface QuotaCacheEntry {
   exhausted: boolean;
   nextResetAt: string | null;
   windowDurationMs?: number | null; // T08: optional rolling window duration
+  burnMetrics?: QuotaBurnMetrics;
 }
 
 // #14359 — a park is trusted at most EXHAUSTED_MAX_PARK_MS past its observation; a far weekly-window reset must not block for days.

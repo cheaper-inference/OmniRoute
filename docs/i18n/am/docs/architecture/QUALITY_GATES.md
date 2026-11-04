@@ -15,211 +15,235 @@
 
 ---
 
-## የጌቶች ዝርዝር እና የአፈጻጸም መገለጫዎች
+## የGate ዝርዝር እና የአፈጻጸም መገለጫዎች
 
-### የእጩ ተቀባይነት
+### የእጩ መቀበያ
 
-የCI እና Quality Gates workflows እያንዳንዳቸው የተረጋጋ ውሳኔ ያወጣሉ፦ `Gate / CI` እና
-`Gate / Quality`። ስሪት ያለው የተቀባይነት ፖሊሲያቸው እያንዳንዱን upstream job
-አስፈላጊ ወይም አማካሪ በማለት ይዘረዝራል። ተፈጻሚ የሆነ አስፈላጊ job መሳካት
-አለበት፤ የጎደሉ፣ የተሰረዙ፣ የተዘለሉ፣ በመጠባበቅ ላይ ያሉ እና ያልታወቁ ውጤቶች PASSን ማረጋገጥ አይችሉም። ትክክለኛ የdocs-only ወይም catalog-only ምደባ code laneን ተፈጻሚ ያልሆነ ሊያደርግ ይችላል፤
-draft PR ተቀባይነት ያገኘ እጩ አይደለም። የ`hotfix` label ማስረጃን አያስቀርም።
+የCI እና የQuality Gates workflows እያንዳንዳቸው የተረጋጋ ውሳኔ ያወጣሉ፦ `Gate / CI` እና
+`Gate / Quality`። በስሪት የተቆጣጠረው የመቀበያ ፖሊሲያቸው እያንዳንዱን የላይኛ ደረጃ ስራ
+እንደ አስፈላጊ ወይም እንደ ምክረ-ሀሳብ ይዘረዝራል። ተፈጻሚ የሆነ አስፈላጊ ስራ ስኬታማ መሆን
+አለበት፦ የጎደሉ፣ የተሰረዙ፣ የተዘለሉ፣ በመጠባበቅ ላይ ያሉ እና ያልታወቁ ውጤቶች PASS ሊያረጋግጡ
+አይችሉም። ትክክለኛ የdocs-only ወይም የcatalog-only ምደባ የኮድ lane ተፈጻሚ እንዳይሆን ሊያደርግ
+ይችላል፤ draft PR ግን እንደ ተቀባይነት ያለው እጩ አይቆጠርም። `hotfix` label የማስረጃ መስፈርቱን
+አያስቀርም።
 
-ሁለቱም workflows PRsን፣ ወደ main/release branches የሚደረጉ pushesን፣ manual dispatchን እና
-merge-group eventsን ይሸፍናሉ። Push፣ dispatch እና merge-group ሙሉ ምርጫውን ያስኬዳሉ። Forks
-እና merge groups በሌላ ሁኔታ self-hosted runnersን ለሚመርጡ jobs hosted runnersን ይጠቀማሉ፤ ማስጀመሩ ከመከናወኑ በፊት በቂ hosted capacity መኖሩ መረጋገጥ አለበት።
+ሁለቱም workflows ወደ main/release branches የሚደረጉ PRs፣ ወደ `main` የሚደረጉ pushes፣ በእጅ
+የሚነሳ dispatch እና merge-group events ይሸፍናሉ። Push፣ dispatch እና merge-group ሙሉውን ምርጫ
+ያስኬዳሉ። ወደ `release/**` የሚደረጉ pushes እነሱን አያስጀምሩም (2026-10-18)፦ እያንዳንዱ
+ለውጥ በPR ላይ matrix ን አስቀድሞ አልፏል፣ እና የተዋሃደው ጥምረት የRelease-Green ሃላፊነት ነው
+(`docs/ops/RUNNER_BOX.md` → Hosted lane)። Forks እና merge groups በአብዛኛው self-hosted
+runners የሚመርጡ ስራዎች ላይ hosted runners ይጠቀማሉ፤ ከማስጀመሩ በፊት በቂ hosted capacity
+መኖሩ መረጋገጥ አለበት።
 
-እያንዳንዱ JSON receipt የተፈተሸውን SHA፣ workflow runን እና attemptን ይለያል።
-CLIው የcheckout/event SHA አለመመሳሰልን ውድቅ ያደርጋል። የWorkflow ሙከራዎች አዲስ ወይም የተወገደ lane በዝምታ እንዳይጠፋ የፖሊሲ አባልነትን
-ከውሳኔ job `needs` ዝርዝር ጋር ያስተሳስራሉ።
-receiptsዎቹ የሚሸፍኑት የራሳቸውን workflow ነው፤ publicationን፣ deploymentን ወይም የነባር
-አማካሪ scanner ውስጣዊ አሠራርን አይሸፍኑም። ሁለቱንም check names በbranch rules ውስጥ ማንቃት
-የተለየ አስተዳደራዊ ለውጥ ነው፤ እነዚህን jobs ማከል በራሱ branchን አይከላከልም።
+እያንዳንዱ JSON receipt የተፈተሸውን SHA፣ የworkflow run እና attempt ይለያል። CLI የcheckout/event SHA
+አለመመጣጠንን ውድቅ ያደርጋል። Workflow tests የፖሊሲ አባልነትን ከverdict job `needs` ዝርዝር
+ጋር ያስተሳስራሉ፤ ስለዚህ አዲስ ወይም የተወገደ lane በዝምታ ሊጠፋ አይችልም። Receipts
+የሚሸፍኑት የራሳቸውን workflow እንጂ publication፣ deployment ወይም ያለ አማካሪ scanner ውስጣዊ
+አሠራርን አይደለም። ሁለቱንም check names በbranch rules ውስጥ ማንቃት የተለየ የአስተዳደር
+ለውጥ ነው፤ እነዚህን jobs መጨመር ብቻውን branch ን አይጠብቅም።
 
 ### የStatic scan ዝርዝር
 
-ስሪት ያለው npm-alias inventory እና static-scan membership በ
-`config/quality/gate-manifest.json` ውስጥ ይገኛሉ። script namesን እና ትክክለኛ commandsን ከ`package.json` ጋር ለማረጋገጥ `npm run check:gate-manifest`ን ያስኪዱ፤ መጨመር፣ ማስወገድ እና
-የcommand ለውጥ በlocal hookም ሆነ በCI ውስጥ ባሉ change-classification jobs ላይ ውድቀት ያስከትላል።
-alias workflow job፣ matrix instance ወይም test case አይደለም፤ እነዚህ ቁጥሮች
-እርስ በርሳቸው የሚተካኩ ተደርገው መቅረብ የለባቸውም።
+በስሪት የተቆጣጠረው npm-alias ዝርዝር እና የstatic-scan አባልነት የሚገኙት
+በ`config/quality/gate-manifest.json` ውስጥ ነው። የscript ስሞችን እና ከ`package.json` ጋር የሚዛመዱ
+ትክክለኛ commands ለማረጋገጥ `npm run check:gate-manifest` ያስኪዱ፤ መጨመር፣ መወገድ
+እና የcommand መለዋወጥ የlocal hook እና በCI ውስጥ ያሉትን change-classification jobs
+ሁለቱንም እንዲወድቁ ያደርጋል። Alias የworkflow job፣ matrix instance ወይም test case አይደለም፤
+እነዚህ ቁጥሮች እንደ ተመጣጣኝ ሊቀርቡ አይገባም።
 
-የተመረጡ aliasesን ሳያስኪዱ ለመመርመር `npm run quality:scan -- --list` ወይም `npm run quality:scan:fast -- --list`ን
-ይጠቀሙ። runnerው
-የnpm entrypointን ስለሚጠራ runtimeው፣ በተዋቀረበት ቦታ Bunን ጨምሮ፣ እንዳለ ይጠበቃል።
-manifestው ከእነዚያ profiles ውጭ ያሉ aliasesን በተናጠል የሚጠሩ አድርጎ ይመዘግባል፤
-maintenance commands በread-only scan profiles ውስጥ የተከለከሉ ናቸው።
+የተመረጡትን aliases ሳያስኬዱ ለመመርመር `npm run quality:scan -- --list` ወይም
+`npm run quality:scan:fast -- --list` ይጠቀሙ። Runner የnpm entrypoint ን ይጠራል፤ ስለዚህ
+runtime እንደተዋቀረው (Bun በተዋቀረበት ቦታ ጨምሮ) ይጠበቃል። Manifest ከእነዚያ profiles
+ውጭ ያሉ aliases በተለያዩ መንገድ እንደሚጠሩ ይመዘግባል፤ የጥገና commands ደግሞ በread-only
+scan profiles ውስጥ የተከለከሉ ናቸው።
 
-እነዚህ profiles የሚሸፍኑት static scanን ብቻ ነው። product testsን፣
-coverageን፣ packagingን፣ external checksን ወይም የእጩውን ሙሉ የrelease ተቀባይነት አያረጋግጡም።
-የWorkflow ተቀባይነት የተገናኙትን `config/quality/admission-policy.json` እና
-`scripts/quality/admission-verdict.mjs` ይጠቀማል። Release-observer profiles ተለይተው ይቆያሉ፤
-ተፈጻሚ checksዎቻቸውን እና receiptsዎቻቸውን በተናጠል ይመርምሩ። ከታች ያለው የጽሑፍ
-ዝርዝር ማጣቀሻ ነው፤ gate በእርግጥ መሄዱን የሚያረጋግጥ ማስረጃ አይደለም።
+እነዚህ profiles static scan ብቻን ይሸፍናሉ። የproduct tests፣ coverage፣ packaging፣ external checks
+ወይም የእጩውን ሙሉ release acceptance አያረጋግጡም። Workflow admission የተገናኘውን
+`config/quality/admission-policy.json` እና `scripts/quality/admission-verdict.mjs` ይጠቀማል።
+Release-observer profiles ለብቻቸው ይቆያሉ፤ ተፈጻሚ የሆኑባቸውን checks እና receipts በተናጠል
+ይመርምሩ። ከዚህ በታች ያለው የጽሑፍ ዝርዝር የማጣቀሻ መረጃ እንጂ gate በእርግጥ
+መስራቱን የሚያረጋግጥ ማስረጃ አይደለም።
 
-Scripts በ`scripts/check/` (policy gates) እና `scripts/quality/` (ratchet engine) ስር ይገኛሉ።
+Scripts በ`scripts/check/` (የፖሊሲ gates) እና `scripts/quality/` (የratchet engine) ስር ይገኛሉ።
 የCI ዋና የእውነት ምንጭ `.github/workflows/ci.yml` ነው።
 
-### የRelease PR ፈጣን መንገድ (`quality.yml`)
+### የRelease PR fast-path (`quality.yml`)
 
-`.github/workflows/quality.yml` በmain/release PRs፣ protected-branch
-pushes፣ dispatch እና merge groups ላይ CIን ያሟላል። PRs በpath-filtered የተጣሩ fast checksን ይጠቀማሉ። በቋሚነት
-የተሰናከለው duplicate build ተወግዷል፤ እውነተኛዎቹ build/package/boot checks በCI ውስጥ እንዳሉ ይቆያሉ።
+`.github/workflows/quality.yml` በmain/release PRs፣ ወደ `main` በሚደረጉ pushes፣ dispatch እና
+merge groups ላይ CI ን ያጠናክራል። PRs በpath-filtered fast checks ይጠቀማሉ። በቋሚነት
+የተሰናከለው duplicate build ተወግዷል፤ እውነተኛው build/package/boot checks በCI ውስጥ ይቀራሉ።
 
-| Job                                              | ወሰን                                                                                                                                                                     | አጋጅ            |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PRs፤ API docs refs እና docs-all                                                                                                                                | አዎ             |
-| `Fast Quality Gates`                             | Code PRs፤ static checks፣ typecheck፣ dashboard typecheck፣ ተጽዕኖ ያረፈባቸው unit tests                                                                                         | አዎ             |
-| `Forgotten sibling tests`                        | Code PRs፤ የተለወጡ modules ወደ static consumers እና candidate sibling tests ይከታተላሉ፤ barrel እና dynamic-import paths እንደ አማካሪ diagnostics ይዘገባሉ፣ ከተጠቀሱ allowlist exceptions ጋር | **አማካሪ**       |
-| `Vitest (fast-path)`                             | Code PRs፤ ፈጣን vitest suite                                                                                                                                              | አዎ             |
-| `Unit Tests fast-path`                           | Code PRs፤ ባለ4-shard unit suite                                                                                                                                          | አዎ             |
-| `No new ESLint warnings`                         | Code PRs፤ suppressions-aware lint guard                                                                                                                                 | አዎ፣ forksን ጨምሮ |
-| `Merge integrity (changelog + generated skills)` | Draft ያልሆኑ PRs፤ changelog እና generated skill sync                                                                                                                       | አዎ፣ forksን ጨምሮ |
+| Job                                              | Scope                                                                                                                                                                      | Blocking        |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `Docs Gates (fast-path)`                         | የDocs/code PRs፤ የAPI docs refs እና docs-all                                                                                                                                 | Yes             |
+| `Fast Quality Gates`                             | የCode PRs፤ static checks፣ typecheck፣ dashboard typecheck፣ impacted unit tests                                                                                              | Yes             |
+| `Forgotten sibling tests`                        | የCode PRs፤ የተለወጡ modules ከstatic consumers እና candidate sibling tests ጋር የተከታተሉ፤ barrel እና dynamic-import paths እንደ አማካሪ diagnostics ይዘገባሉ፣ ከተጠቀሱ የallowlist exceptions ጋር | **አማካሪ**        |
+| `Vitest (fast-path)`                             | የCode PRs፤ fast vitest suite                                                                                                                                               | Yes             |
+| `Unit Tests fast-path`                           | የCode PRs፤ 4-shard unit suite                                                                                                                                              | Yes             |
+| `No new ESLint warnings`                         | የCode PRs፤ suppressions-aware lint guard                                                                                                                                   | Yes, forksን ጨምሮ |
+| `Merge integrity (changelog + generated skills)` | የDraft ያልሆኑ PRs፤ changelog እና generated skill sync                                                                                                                         | Yes, forksን ጨምሮ |
 
-#### የForgotten sibling tests ሪፖርት
+#### የተረሱ sibling tests ሪፖርት
 
 `npm run check:forgotten-sibling-tests` ከtest-impact map ጀርባ ያለውን import resolver እንደገና ይጠቀማል።
-ለእያንዳንዱ የተለወጠ production module፣ candidate
-test በpull-request diff ውስጥ በማይኖርበት ጊዜ ወጥ የሆኑ
-`changed module/symbol -> static consumer -> candidate sibling test` chainsን ይዘግባል። Markdown summaryው እና JSON resultው ማንኛውም አጋጅ ማስጀመር ከመከናወኑ በፊት ለcalibration እንደ
-`forgotten-sibling-tests` workflow artifact ተቀምጠው ይቆያሉ።
+ለእያንዳንዱ የተለወጠ የምርት ሞጁል፣ ተመራማሪው በpull request diff ውስጥ የሌለ እጩ
+ሙከራ ሲኖር deterministic
+`changed module/symbol -> static consumer -> candidate sibling test` ሰንሰለቶችን ያመነጫል። የMarkdown ማጠቃለያው እና የJSON ውጤቱ ከማገድ በፊት ለማስተካከያ
+እንደ `forgotten-sibling-tests` workflow artifact ይቀመጣሉ።
 
-Barrel ዳግም-ወደውጭ ላኮች እና dynamic imports የresolution ምርመራዎች ብቻ ናቸው፤ መቼም
-የማገጃ ግኝት አይፈጥሩም። የተገመገሙ ልዩ ሁኔታዎች በ
-`config/quality/forgotten-sibling-allowlist.json` ውስጥ ይገኛሉ። እያንዳንዱ ግቤት consumer-ን እና candidate
-test-ን መጥቀስ፣ የተወሰነ ምክንያት መስጠት እና GitHub issue ወይም pull request ማገናኘት አለበት። ቅርጸት የተበላሸባቸው ግቤቶች
-በዝግ ሁኔታ ይወድቃሉ። ልዩ ሁኔታዎች የተሰረዘ candidate test-ን ወይም `.skip`/`.todo` የሚጨምር diff-ን ማፈን አይችሉም፤
-የassertion ማዳከም እና ሌሎች የመሸፈን ድርጊቶች በተናጥል የሚያግደው
-`check:test-masking` gate ኃላፊነት ሆነው ይቀጥላሉ።
+የBarrel re-export እና የdynamic import ሂደቶች የresolution diagnostics ብቻ ናቸው፤ በምንም ሁኔታ
+blocking finding አያመነጩም። በግምገማ የጸደቁ ልዩ ሁኔታዎች በ
+`config/quality/forgotten-sibling-allowlist.json` ውስጥ ይቀመጣሉ። እያንዳንዱ ግቤት ሸማቹን እና እጩውን
+ሙከራ መጥቀስ፣ የተወሰነ ምክንያት መስጠት እና ወደ GitHub issue ወይም pull request አገናኝ መስጠት አለበት። በትክክል ያልተዘጋጁ ግቤቶች በነባሪ አደጋን ለማስወገድ ይሳናሉ። ልዩ ሁኔታዎች የተሰረዘ እጩ ሙከራን ወይም `.skip`/`.todo` የሚጨምር diffን ማፈን አይችሉም፤ የማረጋገጫ መዳከምና ሌሎች መሸፈኛዎች በተናጠል በሚያግደው
+`check:test-masking` gate ስር ይቆያሉ።
 
-### ሥራ፦ `lint`
+### ስራ: `lint`
 
-ወደ `main` በሚቀርብ እያንዳንዱ PR ላይ ይሰራል። ካልተሳካ ውህደትን ያግዳል።
+በእያንዳንዱ PR ወደ `main` ይሰራል። ካልተሳካ ውህደትን ያግዳል።
 
-| Script (`npm run ...`)            | የሚያረጋግጠው                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | አጋጅ                                  |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| `check:node-runtime`              | የNode.js ስሪት በሚደገፈው ክልል ውስጥ መሆኑን                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | አዎ                                   |
-| `check:cycles`                    | በመላው `src/` + `open-sse/` ውስጥ ያሉ circular imports (በAST ላይ የተመሠረተ፣ የtsconfig `paths` የተፈቱ)። Bare ማንኛውም cycle ባለ ጊዜ ሁሉ በ1 ይወጣል (ከ#15281 ጀምሮ fail-closed) እና SCCs-ን ይዘረዝራል። `check:cycles:ratchet` (CI የሚያስኬደው) ብዛቱ በ`quality-baseline.json` ውስጥ ያለውን የ`metrics.cycles` ጣሪያ ሲያልፍ ያግዳል — በአሁኑ ጊዜ 14፣ `direction: down`፣ ስለዚህ መቀነስ ብቻ ይችላል (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                  | አዎ (ratchet)                         |
-| `check:boundary`                  | `open-sse → src` coupling፦ ከengine ወደ app የሚመጡ ልዩ file-to-file imports (`scripts/quality/measure-boundary.mjs`፤ edge list-ው የv4 core/module-split remediation backlog ነው)። Bare = የምክር ሪፖርት (ከ`quality:boundary` ጋር ተመሳሳይ)። `check:boundary:ratchet` (CI የሚያስኬደው፣ እንዲሁም በ`quality.yml` fast-gates ratchet loop ውስጥ ያለው) ብዛቱ በ`quality-baseline.json` ውስጥ ያለውን የ`metrics.boundaryOpenSseToSrc` ጣሪያ ሲያልፍ ያግዳል — በተለካው 771 ላይ የተጀመረ፣ `direction: down`፤ `--update` የሚያሳንሰው ብቻ ነው፤ በPRs ላይ ከbase አንጻር (`--base-ref`፣ ከታች ይመልከቱ)                                                                                                                                                                                                                                | አዎ (ratchet)                         |
-| `check:route-validation:t06`      | በሁሉም routes ላይ Zod schemas መኖራቸውን (Tier 6 policy)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | አዎ                                   |
-| `check:any-budget:t11`            | የ`@ts-expect-error // any` ብዛት ከተፈቀደው ገደብ አያልፍም (ደረጃ 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | አዎ                                   |
-| `check:provider-consistency`      | በ`providers.ts` ውስጥ ያለው እያንዳንዱ provider በ`providerRegistry.ts` ውስጥ ተዛማጅ ግቤት አለው (እና በተቃራኒውም፣ በallowlist ውስጥ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | አዎ                                   |
-| `check:model-lifecycle`           | ሦስቱ በእጅ የሚያዙ የማዞሪያ ሰንጠረዦች በሪፖዚቶሪው ውስጥ ከተቀመጠው የሕይወት ዑደት ቅጽበተ-ፎቶ (#11503) ጋር ወጥነታቸውን ይጠብቃሉ፦ `FITNESS_TABLE` (`taskFitness.ts`)፣ `REGISTRY` ሊያዞረው ለሚችል ጡረታ የወጣ id ውጤት አይሰጥም፤ እያንዳንዱ የ`BUILT_IN_ALIASES` ዒላማ በ`REGISTRY` ውስጥ ይገኛል እና በጡረታ ከወጡ idዎች ቅጽበተ-ፎቶ ውስጥ አይገኝም፤ አሁንም በ`REGISTRY` ውስጥ ያለ እያንዳንዱ ጡረታ የወጣ id ወደ ሌላ ቦታ ይተላለፋል ወይም በ`allowedRetiredInCatalog` ውስጥ ይዘረዘራል፤ እንዲሁም ምንም የ`DEFAULT_DEGRADATION_MAP` ምንጭ ወይም ዒላማ በዚያ ቅጽበተ-ፎቶ ውስጥ ጡረታ እንደወጣ አይታይም። ይህ አንድ model በአሁኑ ጊዜ ቀጥታ በሚሰራ upstream እየቀረበ መሆኑን አያረጋግጥም። ከመስመር ውጭ — በእጅ `npm run quality:refresh-model-lifecycle` (network፤ ከCI ጋር አልተገናኘም) በመጠቀም ከሚታደሰው `config/quality/model-lifecycle.json` ጋር ያወዳድራል። `allowedRetiredInCatalog` ቀስ በቀስ የሚቀንስ ratchet ነው፦ ግቤት የሚጨመረው የመከታተያ issue ሲኖር ብቻ ነው። | አዎ                                   |
-| `check:fetch-targets`             | በclient-side `src/` ውስጥ ያለው እያንዳንዱ `fetch("/api/...")` ወደ እውነተኛ `route.ts` ይፈታል                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | አዎ                                   |
-| `check:deps`                      | በሪፖዚቶሪው ውስጥ ባሉ ሁሉም `package.json` ፋይሎች ውስጥ በ`npm install` ሊጫኑ የሚችሉ ሁሉም deps በ`dependency-allowlist.json` ውስጥ ይገኛሉ፤ አዲስ ያልተቆለፉ ወይም slopsquatted packages ምልክት ይደረግባቸዋል                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | አዎ                                   |
-| `audit:deps`                      | `npm audit` (root + electron) — ከፍተኛ/ወሳኝ advisories የሉም (ከosv `check:vuln-ratchet` ጋር ይደራረባል፤ Rationalization Backlogን ይመልከቱ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | አዎ                                   |
-| `check:lockfile`                  | የ`package-lock.json` ታማኝነት — https registry፣ የታማኝነት hashes፣ የhost overrides አለመኖር                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | አዎ                                   |
-| `check:licenses`                  | ለproduction dependencies የSPDX license allowlist                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | አዎ                                   |
-| `check:tracked-artifacts`         | የbuild artifacts / ወደ repository የገቡ `node_modules` symlinks አለመኖር (በhusky pre-commit ውስጥም ይሰራል፤ pre-push ሆን ተብሎ ቀላል ተደርጓል — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | አዎ                                   |
-| `check:ai-attribution`            | በPR commits፣ title ወይም body ውስጥ የAI/bot `Co-Authored-By` trailer ወይም የAI-generation footer አለመኖር — ጥብቅ ደንብ #16 (ለPR→`release/**` በ`quality.yml` fast-gates loop ውስጥ — የevent payloadን ያነባል፣ ከPR ውጭ ምንም አያደርግም — እና ለPR→`main` በ`ci.yml` lint ውስጥ የPR-ብቻ step፤ እንዲሁም የhusky `commit-msg` hook፤ ሰው co-authors ይፈቀዳሉ፤ #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `check:vitest-exclusions`         | እያንዳንዱ የVitest exclusion የtracking issue ይጠቅሳል እና በ`config/quality/vitest-exclusions.json` ውስጥ ይገኛል (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | አዎ                                   |
-| `check:file-size`                 | የsource files (`.ts`/`.tsx` በ`src/`፣ `open-sse/`፣ `electron/`፣ `bin/` ውስጥ) በ`cap` ገደብ ውስጥ፣ የtest files (`*.test.ts(x)`) ደግሞ በ`testCap` ገደብ ውስጥ ይቆያሉ፤ በ`file-size-baseline.json` ውስጥ የታገዱ files (`frozen` / `testFrozen`) ከተመዘገበው መጠናቸው በላይ ማደግ የለባቸውም                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | አዎ                                   |
-| `check:error-helper`              | በexecutors/handlers ውስጥ ያሉ የስህተት ምላሾች `buildErrorBody()` / `sanitizeErrorMessage()` ይጠቀማሉ (ጥብቅ ደንብ #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | አዎ                                   |
-| `check:migration-numbering`       | የMigration SQL ፋይሎች ያለ ክፍተት ወይም ድግግሞሽ በተከታታይ ቁጥር ተሰጥቷቸዋል                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | አዎ                                   |
-| `check:public-creds`              | ከ`publicCreds.ts` ውጭ ቀጥተኛ የOAuth `client_id`/`client_secret` ወይም የFirebase Web ቁልፎች የሉም (ጥብቅ ደንብ #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | አዎ                                   |
-| `check:db-rules`                  | ከ`src/lib/db/` modules ውጭ raw SQL የለም፤ ከ`localDb.ts` barrel-imports የሉም (ጥብቅ ደንቦች #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | አዎ                                   |
-| `check:known-symbols`             | በdispatch tables ውስጥ የተመዘገቡ የProvider executors፣ routing strategies እና translators በዲስክ ላይ ካሉት ፋይሎች ጋር ይዛመዳሉ — orphaned ወይም undeclared symbols የሉም                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | አዎ                                   |
-| `check:route-guard-membership`    | child process የሚጀምር እያንዳንዱ route በ`isLocalOnlyPath()` ተመድቧል (ጥብቅ ደንቦች #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | አዎ                                   |
-| `check:test-discovery`            | በማከማቻው ውስጥ ያለ እያንዳንዱ `*.test.ts` / `*.spec.ts` ፋይል ቢያንስ በአንድ የሙከራ አስኪያጅ ይሰበሰባል (ratchet፦ በ`test-discovery-baseline.json` ውስጥ ያለው የተገለሉ ፋይሎች ዝርዝር መቀነስ ብቻ ይችላል)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | አዎ                                   |
-| `check:agent-skills-sync`         | የተፈጠሩት የagent-skills አርቲፋክቶች ከምንጭ ካታሎጋቸው ጋር ይዛመዳሉ (ልዩነት የለም)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `check:provider-asset-provenance` | የአቅራቢ አርማዎች/ንብረቶች የተመዘገበ የምንጭ መረጃ ግቤት አላቸው                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `lint:json`                       | የJSON ውቅር ፋይሎች በትክክል ይተነተናሉ እና የማከማቻውን lint ደንቦች ያሟላሉ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `typecheck:core`                  | ያለስህተት የTypeScript ማጠናቀር (የምክር ማስጠንቀቂያዎች ብቻ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | አዎ                                   |
-| `typecheck:noimplicit:core`       | ጥብቅ `noImplicitAny` — ወደፊትን ያማከለ፤ ከዚህ በፊት የነበሩ ብዙ የጥሪ ቦታዎች አሁንም ማብራሪያዎች ያስፈልጋቸዋል                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | **የምክር** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `tsc` በ`src/app/(dashboard)/**` ላይ የተወሰነ (#7033) — የ`typecheck:core` በጥንቃቄ የተመረጠው ባለ27-ፋይል የፍቃድ ዝርዝር ምንም dashboard TSX አያካትትም፣ እንዲሁም `next build` ፈጽሞ የአይነት ምርመራ አያደርግለትም (`next.config.mjs` `ignoreBuildErrors: true` ያዘጋጃል)፤ ስለዚህ በዚያ ያሉ የተገለሉ-መለያ የኋሊት ተፅዕኖዎች (#6625/#6909) ለCI የማይታዩ ነበሩ። ልዩነቶች ከቀዘቀዘ በየፋይሉ/በየTS-ኮዱ የቆጠራ መነሻ መስመር (`config/quality/dashboard-typecheck-baseline.json`፣ ከ`check:known-symbols` ጋር ተመሳሳይ የጊዜ ያለፈበትን የማስገደጃ ንድፍ) አንጻር ይነጻጸራሉ — ከመነሻው ቆጠራ በላይ ያሉ አዳዲስ ስህተቶች ብቻ ጌቱን ያሳድፋሉ፤ ቀድሞ የነበረ ስህተት ሲስተካከል `--update` በመጠቀም ratchetን ወደታች ያዘምኑ።                                                                                                                                                                                        | አዎ                                   |
+| ስክሪፕት (`npm run ...`)             | የሚያረጋግጠው                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | ማገድ                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `check:node-runtime`              | የNode.js ስሪት በሚደገፈው ክልል ውስጥ መሆኑን                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | አዎ                                      |
+| `check:cycles`                    | በሁሉም `src/` + `open-sse/` ውስጥ ያሉ የክብ ማስመጣቶች (በAST ላይ የተመሠረተ፣ tsconfig `paths` የተፈታ)። መሠረታዊው ማስኬጃ ማንኛውም ዑደት በሚኖርበት ጊዜ 1 ይመልሳል (ከ #15281 ጀምሮ በስህተት ጊዜ የሚያቆም) እና SCCዎቹን ይዘረዝራል። `check:cycles:ratchet` (CI የሚያስኬደው) በ`quality-baseline.json` ውስጥ ካለው `metrics.cycles` ጣሪያ በላይ ሲሆን ያግዳል — አሁን 14 ነው፣ `direction: down` ስለሆነ ብቻ ሊቀንስ ይችላል (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                           | አዎ (ratchet)                            |
+| `check:boundary`                  | `open-sse → src` ጥገኝነት፦ ከኤንጂኑ ወደ መተግበሪያው የሚደረጉ ልዩ ከፋይል-ወደ-ፋይል ማስመጣቶች (`scripts/quality/measure-boundary.mjs`; የጠርዝ ዝርዝሩ የv4 core/module-split ማስተካከያ የሚቀረው ሥራ ዝርዝር ነው)። መሠረታዊው ማስኬጃ አማካሪ ሪፖርት ይሰጣል (ከ`quality:boundary` ጋር ተመሳሳይ)። `check:boundary:ratchet` (CI የሚያስኬደው፣ እንዲሁም በ`quality.yml` ፈጣን-መግቢያዎች ratchet ዙር ውስጥ ያለው) በ`quality-baseline.json` ውስጥ ካለው `metrics.boundaryOpenSseToSrc` ጣሪያ በላይ ሲሆን ያግዳል — በተለካው 771 ላይ ተመሥርቶ የተጀመረ፣ `direction: down` ነው፤ `--update` ዝቅ ሊያደርገው ብቻ ይችላል፤ በPRዎች ላይ ከመነሻው ጋር በአንጻራዊነት (`--base-ref`፣ ከዚህ በታች ይመልከቱ)                                                                                                                                                                                                                                            | አዎ (ratchet)                            |
+| `check:route-validation:t06`      | በሁሉም ራውቶች ላይ የZod ስኪማዎች መኖራቸውን (የTier 6 መመሪያ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | አዎ                                      |
+| `check:any-budget:t11`            | `@ts-expect-error // any` ብዛት ከተመደበው ገደብ አይበልጥም (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | አዎ                                      |
+| `check:provider-consistency`      | በ`providers.ts` ውስጥ ያለ እያንዳንዱ provider በ`providerRegistry.ts` ውስጥ ተመሳሳይ ግቤት አለው (እንዲሁም በተፈቀደው ዝርዝር ውስጥ በተቃራኒውም)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | አዎ                                      |
+| `check:model-lifecycle`           | በእጅ የሚጠበቁት ሦስቱ የrouting ሠንጠረዦች በተመዘገበው የlifecycle snapshot (#11503) ጋር ወጥነት ይኖራቸዋል፦ `FITNESS_TABLE` (`taskFitness.ts`) ማንኛውንም የተቋረጠ id እንደ `REGISTRY` ሊያስተላልፍ የሚችል ከሆነ አያስመዘግብም፤ እያንዳንዱ `BUILT_IN_ALIASES` ዒላማ በ`REGISTRY` ውስጥ ይገኛል እና ከተቋረጡ id-ዎች snapshot ውስጥ አይገኝም፤ አሁንም በ`REGISTRY` ውስጥ ያለ እያንዳንዱ የተቋረጠ id ወደ ሌላ ቦታ ይተላለፋል ወይም በ`allowedRetiredInCatalog` ውስጥ ይዘረዘራል፤ እና ምንም `DEFAULT_DEGRADATION_MAP` ምንጭ ወይም ዒላማ በዚያ snapshot ውስጥ እንደተቋረጠ አይታይም። ይህ አንድ ሞዴል በአሁኑ ጊዜ በሕያው upstream እየቀረበ መሆኑን አያረጋግጥም። ከመስመር ውጭ — ከ`config/quality/model-lifecycle.json` ጋር ያወዳድራል፤ ይህም በእጅ በ`npm run quality:refresh-model-lifecycle` ይታደሳል (ኔትወርክ፤ በ CI ውስጥ አልተገናኘም)። `allowedRetiredInCatalog` የመቀነስ መለኪያ ነው፦ ግቤት የሚጨመረው የክትትል ጉዳይ ሲኖር ብቻ ነው።                                                             | አዎ                                      |
+| `check:fetch-targets`             | በclient-side `src/` ውስጥ ያለ እያንዳንዱ `fetch("/api/...")` ወደ እውነተኛ `route.ts` ይመራል                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | አዎ                                      |
+| `check:deps`                      | በሪፖው ውስጥ ባሉ እያንዳንዱ `package.json` ላይ ሊጫኑ የሚችሉ ሁሉም `npm install`-የሚደገፉ deps በ`dependency-allowlist.json` ውስጥ አሉ፤ አዲስ ያልተሰኩ ወይም slopsquatted ፓኬጆች ምልክት ይደረግባቸዋል                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | አዎ                                      |
+| `audit:deps`                      | `npm audit` (root + electron) — ከፍተኛ ወይም አስጊ ምክረ ሐሳቦች የሉም (ከ osv `check:vuln-ratchet` ጋር ይደራረባል፤ Rationalization Backlogን ይመልከቱ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | አዎ                                      |
+| `check:lockfile`                  | `package-lock.json` ታማኝነት — HTTPS መዝገብ፣ የታማኝነት ሃሽዎች፣ ምንም የአስተናጋጅ መሻር የለም                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | አዎ                                      |
+| `check:licenses`                  | ለምርት ጥገኝነቶች የSPDX ፈቃድ የሚፈቀዱ ዝርዝር                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | አዎ                                      |
+| `check:tracked-artifacts`         | ምንም የግንባታ ቅርሶች / በኮሚት የተደረጉ `node_modules` ሲምሊንኮች የሉም (በhusky pre-commit ውስጥም ይሰራል፤ pre-push ሆን ተብሎ ቀላል ነው — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | አዎ                                      |
+| `check:ai-attribution`            | በPR ኮሚቶች፣ ርዕስ ወይም ይዘት ውስጥ ምንም የAI/ቦት `Co-Authored-By` መጨረሻ መስመር ወይም የAI ማመንጨት ግርጌ የለም — ጠንካራ ደንብ #16 (ለPR→`release/**` በ`quality.yml` ፈጣን-መግቢያዎች ዙር ውስጥ — የክስተቱን ይዘት ያነባል፣ ከPR ውጭ ምንም አያደርግም — እና ለPR ብቻ በ`ci.yml` የPR→`main` ሊንት ደረጃ፤ እንዲሁም በhusky `commit-msg` ሁክ ውስጥ፤ የሰው ተባባሪ ደራሲዎች ይፈቀዳሉ፤ #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `check:vitest-exclusions`         | እያንዳንዱ የVitest ማግለያ የክትትል ጉዳይ ስም ይጠቅሳል እና በ`config/quality/vitest-exclusions.json` ውስጥ ይታያል (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | አዎ                                      |
+| `check:file-size`                 | የምንጭ ፋይሎች (`.ts`/`.tsx` በ`src/`፣ `open-sse/`፣ `electron/`፣ `bin/` ውስጥ) በ`cap` ወሰን ውስጥ ይቆያሉ፣ እና የሙከራ ፋይሎች (`*.test.ts(x)`) በ`testCap` ውስጥ ይቆያሉ፤ በ`file-size-baseline.json` ውስጥ የቀዘቀዙ ፋይሎች (`frozen` / `testFrozen`) ከተመዘገበው መጠናቸው በላይ መጨመር የለባቸውም                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | አዎ                                      |
+| `check:error-helper`              | በአስፈጻሚዎች/አስተናጋጆች ውስጥ ያሉ የስህተት ምላሾች `buildErrorBody()` / `sanitizeErrorMessage()` ይጠቀማሉ (ጥብቅ ደንብ #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | አዎ                                      |
+| `check:migration-numbering`       | የMigration SQL ፋይሎች በተከታታይ ቁጥር ተሰይመዋል፤ ክፍተት ወይም ድግግሞሽ የለም                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | አዎ                                      |
+| `check:public-creds`              | ከ `publicCreds.ts` ውጭ ቀጥተኛ OAuth `client_id`/`client_secret` ወይም Firebase Web ቁልፎች የሉም (ጥብቅ ደንብ #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | አዎ                                      |
+| `check:db-rules`                  | ከ `src/lib/db/` ሞጁሎች ውጭ raw SQL የለም፤ ከ `localDb.ts` የbarrel-imports የሉም (ጥብቅ ደንቦች #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | አዎ                                      |
+| `check:known-symbols`             | በdispatch ሠንጠረዦቻቸው ውስጥ የተመዘገቡ የአቅራቢ አስፈጻሚዎች፣ የrouting ስልቶች እና ተርጓሚዎች በዲስክ ላይ ካሉ ፋይሎች ጋር ይዛመዳሉ — ያልተጠቀሱ ወይም ያልታወቁ ምልክቶች የሉም                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | አዎ                                      |
+| `check:route-guard-membership`    | የልጅ ሂደት የሚያስነሳ እያንዳንዱ route በ `isLocalOnlyPath()` ይመደባል (ጥብቅ ደንቦች #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | አዎ                                      |
+| `check:test-discovery`            | በሪፖው ውስጥ ያለ እያንዳንዱ `*.test.ts` / `*.spec.ts` ፋይል ቢያንስ በአንድ የሙከራ አሂድ ማስኬጃ ይሰበሰባል (ratchet፦ በ `test-discovery-baseline.json` ውስጥ ያለው የተገለሉ ፋይሎች ዝርዝር ሊቀንስ ብቻ ይችላል)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | አዎ                                      |
+| `check:test-tla-order`            | በ `tests/unit` ስር ያለ ምንም `node:test` ፋይል ሙከራ አይመዘግብም፣ ከዚያ የከፍተኛ ደረጃ `await` አይደርስበትም፣ ከዚያም ተጨማሪ ሙከራ አይመዘግብም (#18045፤ ratchet፦ `test-tla-order-allowlist.json` ሊቀንስ ብቻ ይችላል)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | አዎ                                      |
+| `check:agent-skills-sync`         | የተፈጠሩ የagent-skills ቅርሶች ከምንጫቸው ካታሎግ ጋር ይዛመዳሉ (ልዩነት የለም)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `check:provider-asset-provenance` | የአቅራቢ አርማዎች/ንብረቶች የተመዘገበ የመነሻ መዝገብ አላቸው                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `lint:json`                       | የJSON ውቅረት ፋይሎች ይተነተናሉ እና የሪፖውን የlint ደንቦች ያሟላሉ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `typecheck:core`                  | TypeScript ማጠናቀር ያለ ስህተት (የሚመከሩ ማስጠንቀቂያዎች ብቻ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | አዎ                                      |
+| `typecheck:noimplicit:core`       | ጥብቅ `noImplicitAny` — ወደፊት የሚመለከት፤ ብዙ አስቀድመው ያሉ የጥሪ ቦታዎች አሁንም ማብራሪያዎችን ይፈልጋሉ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | **ምክረ ሀሳብ** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc` በ`src/app/(dashboard)/**` ላይ ብቻ የተገደበ (#7033) — የ`typecheck:core` በእጅ የተመረጠ 27-ፋይል የመፍቀጃ ዝርዝር ምንም dashboard TSX አያካትትም፣ እንዲሁም `next build` በፍጹም የአይነት ምርመራ አያደርግም (`next.config.mjs` `ignoreBuildErrors: true` ያቀናብራል)፤ ስለዚህ በዚያ ያሉ የተነጠሉ የመለያ ስም መለያ ማመሳከሪያ መመለሻዎች (#6625/#6909) በCI አይታዩም ነበር። ልዩነቶችን ከቀዘቀዘ በፋይል/በTS-ኮድ የተከፋፈለ የቁጥር መነሻ መስመር (`config/quality/dashboard-typecheck-baseline.json`፣ ከ`check:known-symbols` ጋር ተመሳሳይ የቆየ-ማስፈጸሚያ ንድፍ) ጋር ያወዳድራል — ከመነሻ መስመሩ በላይ ያሉ አዳዲስ ስህተቶች ብቻ መግቢያውን ያሳልፉታል፤ አስቀድሞ የነበረ ስህተት ሲስተካከል `--update` በመጠቀም መነሻውን ወደታች ያስተካክሉ።                                                                                                                                                                                                                    | አዎ                                      |
+| `check:build-typecheck`           | በ`tsconfig.build.json` ላይ የሚካሄድ የመላው መተግበሪያ የምርት አይነት ምርመራ (`src`, `open-sse`, `packages`, `bin`, `scripts`, `electron/**/*.d.ts`)፤ የ`typecheck:core` 27-ፋይል የመፍቀጃ ዝርዝርና dashboard መግቢያ የማይሸፍኑትን ክልል ይሸፍናል። ልዩነቶችን ከ`config/quality/build-typecheck-baseline.json` ጋር ያወዳድራል፤ አዲስ ወይም የጨመረ በ(ፋይል፣ ኮድ) የተከፋፈለ ቁጥር ይወድቃል፣ የቀነሰ ቁጥር ግን መነሻውን ወደታች እንዲያስተካክሉ ይጠይቃል። ሩጫው አዲስ ወይም የጨመረ ጥንድ እስካለው ድረስ `--update` እምቢ ይላል፣ `--force-regressions` ካልተሰጠው በስተቀር፤ እንዲሁም አዲስ ዝም የተባለ ፋይል ካለ `--force-nocheck` ካልተሰጠ ይከለክላል። ስለዚህ አረንጓዴ ሁኔታ ለማግኘት መነሻ መስመሩን ማስፋትና ቋሚ ዝምታን መፍቀድ ሁለት የተለያዩ በሆን ብሎ የሚደረጉ ተግባራት ናቸው። ብቻውን የሚጠቀም `--force` ውድቅ ይደረጋል። እንዲሁም የግንባታ ክልሉን `@ts-nocheck` ከ`config/quality/ts-nocheck-baseline.json` ጋር ይመረምራል፤ ምክንያቱም ይህን የሚጠቀም ፋይል ምንም የምርመራ ውጤት ስለማያቀርብ በሁሉም መግቢያዎች ላይ ሳይታይ ሊቀር ይችላል። | አዎ                                      |
 
-### ስራ፦ `quality-gate`
+#### ሁለቱ የአይነት ምርመራ ፕሮግራሞች የተለያዩ መልሶችን ይሰጣሉ
 
-`test-coverage` ከተከናወነ በኋላ ይሰራል። ካልተሳካ ውህደትን ያግዳል።
+`typecheck:core` እና `check:build-typecheck` በተለያዩ አማራጮች ስር የተለያዩ
+ፕሮግራሞችን ያጠናቅራሉ፣ እና ያው ፋይል በአንዱ ንጹህ ሆኖ በሌላው
+በስህተቶች የተሞላ ሊሆን ይችላል።
 
-| ስክሪፕት                        | የሚያረጋግጠው                                                                                                                                        | አጋጅ               |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `quality:collect`            | `quality-metrics.json` ያመነጫል (የESLint ማስጠንቀቂያዎች ብዛት፣ ከተዋሃደው የሻርድ ሪፖርት የተገኘ ሽፋን)                                                                 | አዎ (ከratchet በፊት) |
-| `quality:ratchet`            | በ`quality-baseline.json` ውስጥ ያለው እያንዳንዱ መለኪያ ወደ ኋላ አለመመለሱን ያረጋግጣል (የESLint ማስጠንቀቂያዎች ≤ መነሻ መስመር፤ ሽፋን ≥ መነሻ መስመር)                                | አዎ                |
-| `check:duplication`          | የኮድ ድግግሞሽ (jscpd@4) በ`quality-baseline.json` ውስጥ ካለው መነሻ መስመር አይበልጥም                                                                            | አዎ                |
-| `check:complexity`           | በፋይል ደረጃ ያለው የሳይክሎማቲክ ውስብስብነት ከተወሰነው ከፍተኛ ገደብ አይበልጥም (ዋናው ESLint `complexity` + `max-lines-per-function`)                                       | አዎ                |
-| `check:cognitive-complexity` | የግንዛቤ ውስብስብነት ratchet (`eslint-plugin-sonarjs`) — የተለየ የESLint ማለፊያ፤ CI ሁለቱንም በአንድ `check:complexity-ratchets` ደረጃ አዋህዶ ያስኬዳል                   | አዎ                |
-| `check:dead-code`            | ጥቅም ላይ ያልዋሉ ኤክስፖርቶች / ፋይሎች ratchet (knip) ከመነሻ መስመሩ ጋር ሲነጻጸር ወደ ኋላ አይመለስም                                                                       | አዎ                |
-| `check:compression-budget`   | የማመቅ መለኪያ ሙከራ በጀት — ለእያንዳንዱ ሞተር የቶከን ቁጠባ ዝቅተኛ ገደቦች ወደ ኋላ መመለስ የለባቸውም                                                                            | አዎ                |
-| `check:type-coverage`        | በመቶኛ የተተየበ ratchet (`type-coverage`) ወደ ኋላ አይመለስም፤ በአብዛኛው `typecheck:noimplicit:core`ን ይተካል                                                     | አዎ                |
-| `check:codeql-ratchet`       | የተከፈቱ የCodeQL ማንቂያዎች ብዛት ወደ ኋላ አይመለስም (በ`gh api` በኩል ያነባል፤ ቶከን ከሌለ ችግር ሳያስከትል ይዘላል) — የማደስ ድግግሞሽ እና በእጅ ማስጀመሪያ፦ ከታች ያለውን "CodeQL ratchet" ይመልከቱ | አዎ                |
+`tsconfig.build.json` `"strict": false` ያስቀምጣል፣ ስለዚህ `noImplicitAny` ጠፍቷል። የcore
+ውቅረት በእጅ የተመረጠ 27-ፋይል የመፍቀጃ ዝርዝርን በጠንከሩ አማራጮች
+ያጠናቅራል፣ እና የእያንዳንዱን ግቤት የማስመጣት ግራፍ ይከተላል፤ ስለዚህ
+በግንባታ ፕሮግራሙ ውስጥ ፈጽሞ የማይታዩ ፋይሎች እዚያ አሁንም ይመረመራሉ።
+
+ይህ ውጤት አንድ ፋይል በአይነት የተደራጀ መሆኑን በሚገመግሙበት ጊዜ ጠቃሚ
+ነው፦ **በ`check:build-typecheck` ስር ዜሮ ምርመራዎች መኖራቸው ዜሮ ማለት አይደለም**። `@ts-nocheck`ን ከ26
+ፋይሎች ማስወገድ 23ቱ በግንባታ ፕሮግራሙ ንጹህ እንደሆኑ አሳየ፤ ከእነዚህ
+ውስጥ 16ቱ በጥብቁ ፕሮግራም ውስጥ ወደ 120 የሚጠጉ የimplicit-any ስህተቶችን
+አሳዩ። አንድ ፋይል ንጹህ ነው ከማለትዎ በፊት ሁለቱንም ይመርምሩ።
+
+### ሥራ፦ `quality-gate`
+
+ከ`test-coverage` በኋላ ይሰራል። ሲወድቅ ውህደትን ያግዳል።
+
+| ስክሪፕት                        | የሚያረጋግጠው                                                                                                                         | አጋጅ                |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `quality:collect`            | `quality-metrics.json` ያወጣል (የESLint ማስጠንቀቂያዎች ብዛት፣ ከተዋሃደው የshard ሪፖርት የተገኘ የሙከራ ሽፋን)                                            | አዎ (ከራቼቱ በፊት የሚሠራ) |
+| `quality:ratchet`            | በ`quality-baseline.json` ውስጥ ያለው እያንዳንዱ መለኪያ አልተባባሰም (የESLint ማስጠንቀቂያዎች ≤ መነሻ መለኪያ፤ ሽፋን ≥ መነሻ መለኪያ)                              | አዎ                 |
+| `check:duplication`          | የኮድ መደጋገም (jscpd@4) በ`quality-baseline.json` ውስጥ ካለው መነሻ መለኪያ አይበልጥም                                                             | አዎ                 |
+| `check:complexity`           | በፋይል ደረጃ ያለው የcyclomatic ውስብስብነት ከከፍተኛው ገደብ አይበልጥም (ዋናው ESLint `complexity` + `max-lines-per-function`)                          | አዎ                 |
+| `check:cognitive-complexity` | የግንዛቤ ውስብስብነት ራቼት (`eslint-plugin-sonarjs`) — የተለየ የESLint ማለፊያ፤ CI ሁለቱንም አዋህዶ እንደ አንድ `check:complexity-ratchets` ደረጃ ያስኬዳል     | አዎ                 |
+| `check:dead-code`            | ጥቅም ላይ ያልዋሉ exports / ፋይሎች ራቼት (knip) ከመነሻ መለኪያው ጋር ሲነጻጸር አይባባስም                                                                 | አዎ                 |
+| `check:compression-budget`   | የማመቂያ ቤንችማርክ በጀት — ለእያንዳንዱ engine የtoken ቁጠባ ዝቅተኛ ገደቦች መባባስ የለባቸውም                                                               | አዎ                 |
+| `check:type-coverage`        | በዓይነት የተገለጸው መቶኛ ራቼት (`type-coverage`) አይባባስም፤ `typecheck:noimplicit:core`ን በአብዛኛው ይሸፍናል                                         | አዎ                 |
+| `check:codeql-ratchet`       | የተከፈቱ የCodeQL ማንቂያዎች ብዛት አይባባስም (በ`gh api` በኩል ያነባል፤ token ከሌለ ያለችግር ይዘላል) — የማደሻ ድግግሞሽና በእጅ ማስጀመሪያ፦ ከታች ያለውን "CodeQL ራቼት" ይመልከቱ | አዎ                 |
 
 ### ሥራ፦ `quality-extended`
 
-ሥራው በሙሉ የምክር ባህሪ አለው (`continue-on-error: true`)። በnpm ላይ የተመሠረቱ ratchet-ዎች በእውነት
-ይሰራሉ፤ ውጫዊ ስካነሮች በ`gh release download` በኩል ይጫናሉ፣ እና ባይነሪው አሁንም ከሌለ
-በራሳቸው ይዘላሉ (exit 0)።
+ሥራው በሙሉ የምክር ደረጃ ነው (`continue-on-error: true`)። npm-ተኮር ራቼቶቹ በትክክል
+ይሰራሉ፤ ውጫዊ scanners በ`gh release download` በኩል ይጫናሉ፣ እና binary አሁንም
+ከሌለ ራሳቸውን ይዘላሉ (exit 0)።
 
-| ስክሪፕት                    | የሚያረጋግጠው                                                                                                                                                          | አጋጅ                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `check:circular-deps`    | ምንም ዑደታዊ ጥገኞች የሉም (dpdm)                                                                                                                                          | **ምክራዊ**                                    |
-| `check:bundle-size`      | የባንድሉ መጠን ከተወሰነው ከፍተኛ ገደብ አይበልጥም                                                                                                                                  | **ምክራዊ**                                    |
-| `check:secrets`          | የምስጢር መረጃ ቅኝት (gitleaks) — ባይነሪው ከሌለ ይዘላል                                                                                                                         | **ምክራዊ**                                    |
-| `check:vuln-ratchet`     | የጥገኛ ፓኬጆች ተጋላጭነቶች (osv-scanner) ወደ ኋላ አይመለሱም — ባይነሪው ከሌለ ይዘላል                                                                                                     | **ምክራዊ**                                    |
-| `check:workflows`        | የየሥራ ፍሰት ሊንት (actionlint + zizmor)፤ የጎደሉ/የተበላሹ ስካነሮች፣ ልክ ያልሆኑ ሪፖርቶች ወይም የጎደለ ratchet መነሻ መስመር እንደ INCOMPLETE ያሳክታሉ። ትክክለኛ ግኝቶች የተመረጠውን ጥብቅ/ምክራዊ/ratchet ፖሊሲ ይከተላሉ | መከናወን ያስፈልጋል፤ zizmor ratchet በCI ውስጥ አጋጅ ነው |
-| `check:openapi-breaking` | ከመሠረታዊው ቅርንጫፍ (oasdiff) ጋር ሲነጻጸር በይፋዊው API ውል (`openapi.yaml`) ላይ ያሉ ተኳኋኝነትን የሚያቋርጡ ለውጦች — `openapiBreaking=N` ያመነጫል፤ oasdiff ከሌለ ወይም የመሠረቱ ዝርዝር መፍታት ካልተቻለ ይዘላል  | **ምክራዊ**                                    |
+| ስክሪፕት                    | የሚያረጋግጠው                                                                                                                                                                          | አጋጅ                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `check:circular-deps`    | ዑደታዊ dependencies አለመኖራቸውን (dpdm)                                                                                                                                                 | **የምክር ደረጃ**                            |
+| `check:bundle-size`      | የbundle መጠኑ ከከፍተኛው ገደብ አይበልጥም                                                                                                                                                     | **የምክር ደረጃ**                            |
+| `check:secrets`          | ሚስጥሮችን መቃኘት (gitleaks) — binary ከሌለ ይዘላል                                                                                                                                          | **የምክር ደረጃ**                            |
+| `check:vuln-ratchet`     | የdependency ተጋላጭነቶች (osv-scanner) አይባባሱም — binary ከሌለ ይዘላል                                                                                                                        | **የምክር ደረጃ**                            |
+| `check:workflows`        | የworkflow lint (actionlint + zizmor)፤ የጎደሉ/የተበላሹ scanners፣ ልክ ያልሆኑ ሪፖርቶች ወይም የጎደለ የራቼት መነሻ መለኪያ እንደ INCOMPLETE እንዲወድቁ ያደርጋሉ። ትክክለኛ ግኝቶች የተመረጠውን strict/advisory/ratchet ፖሊሲ ይከተላሉ | ማስኬድ ያስፈልጋል፤ የzizmor ራቼት በCI ውስጥ አጋጅ ነው |
+| `check:openapi-breaking` | ከመነሻ branch ጋር ሲነጻጸሩ በይፋዊው API ውል (`openapi.yaml`) ላይ ያሉ ተኳኋኝነትን የሚሰብሩ ለውጦች (oasdiff) — `openapiBreaking=N` ያወጣል፤ oasdiff ከሌለ ወይም የመነሻው spec ሊፈታ ካልቻለ ይዘላል                        | **የምክር ደረጃ**                            |
 
 ### ሥራ፦ `docs-sync-strict`
 
-ወደ `main` በሚላክ እያንዳንዱ PR ላይ ይሰራል። ካልተሳካ ውህደትን ያግዳል።
+ወደ `main` በሚቀርብ እያንዳንዱ PR ላይ ይሰራል። ከወደቀ merge እንዳይደረግ ያግዳል።
 
-| ስክሪፕት                          | የሚያረጋግጠው                                                                                                                                | አጋጅ                             |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `check:docs-all`               | ከታች ያሉትን 6 ንዑስ-ጌቶች በቅደም ተከተል የሚያስኬድ ሜታ-ጌት                                                                                               | አዎ                              |
-| ↳ `check:docs-sync`            | የCHANGELOG / OpenAPI / llm.txt ስሪት ወጥነት                                                                                                 | አዎ                              |
-| ↳ `check:docs-counts`          | በጽሑፍ ውስጥ ያሉ ቁጥሮች (የአቅራቢዎች ብዛት፣ የፍልሰት ብዛት፣ ወዘተ) ከእውነተኛዎቹ ቁጥሮች የራችት ክልል ውስጥ መሆናቸውን                                                        | አዎ                              |
-| ↳ `check:env-doc-sync`         | በ`.env.example` ውስጥ ያለ እያንዳንዱ የአካባቢ ተለዋዋጭ በሰነዶች ሰንጠረዥ ውስጥ መዘገቡን፣ እንዲሁም በተቃራኒው                                                           | አዎ                              |
-| ↳ `check:deprecated-versions`  | በሰነዶች ውስጥ የተቋረጡ የስሪት ሕብረቁምፊዎች አለመኖራቸውን                                                                                                  | አዎ                              |
-| ↳ `check:doc-links`            | በሰነዶች ውስጥ ያሉ ውስጣዊ markdown አገናኞች ወደ እውነተኛ ፋይሎች መድረሳቸውን (`[text]`/`(path)` ቅርጽ)                                                          | አዎ                              |
-| ↳ `check:fabricated-docs`      | በሰነዶች የተጠቀሱ ራውቶች፣ የአካባቢ ተለዋዋጮች፣ CLI ትዕዛዞች፣ የhook ስሞች እና የፋይል መንገዶች በኮድ ማከማቻው ውስጥ መኖራቸውን። በ`--strict` አማካኝነት ጠንካራ ጌት፤ ያለ ጥቆማው ለስላሳ ውድቀት። | አዎ (በCI ውስጥ በ`--strict` አማካኝነት) |
-| `check:cli-i18n`               | የCLI ትዕዛዝ ሕብረቁምፊዎች በሁሉም የi18n አካባቢ ፋይሎች ውስጥ መኖራቸውን                                                                                      | አዎ                              |
-| `check:openapi-coverage`       | የOpenAPI ዝርዝር ቢያንስ በራችት የተቀመጠውን የእውነተኛ ራውቶች ዝቅተኛ ገደብ መሸፈኑን                                                                              | አዎ                              |
-| `check:openapi-security-tiers` | በ`openapi.yaml` ውስጥ ያሉ የደህንነት ደረጃ ማብራሪያዎች ከ`routeGuard.ts` ምደባዎች ጋር ወጥነት እንዳላቸው                                                         | **አማካሪ**                        |
-| `check:openapi-routes`         | በ`openapi.yaml` ውስጥ ያለ እያንዳንዱ መንገድ ወደ እውነተኛ `route.ts` መድረሱን (የሐሰት ፈጠራ መከላከያ)                                                           | አዎ                              |
-| `check:docs-symbols`           | በ`docs/**/*.md` ውስጥ ያለ እያንዳንዱ `/api/...` ማጣቀሻ ወደ እውነተኛ `route.ts` መድረሱን (የሐሰት ፈጠራ መከላከያ)                                                | አዎ                              |
-| `i18n translation drift`       | በi18n አካባቢ ፋይሎች ውስጥ ያልተተረጎሙ ቁልፎች — ማስጠንቀቂያ ብቻ                                                                                           | **አማካሪ**                        |
+| Script                         | የሚያረጋግጠው                                                                                                                              | ማገድ                      |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `check:docs-all`               | ከዚህ በታች ያሉትን 6 ንዑስ-ጌቶች በተከታታይ የሚያስኬድ ሜታ-ጌት                                                                                            | አዎ                       |
+| ↳ `check:docs-sync`            | የCHANGELOG / OpenAPI / llm.txt የስሪት ወጥነት                                                                                              | አዎ                       |
+| ↳ `check:docs-counts`          | በጽሑፍ ውስጥ ያሉ ቆጠራዎች (የአቅራቢዎች ብዛት፣ የማሻገሪያዎች ብዛት ወዘተ) ከእውነተኛው ቆጠራ የratchet መስኮት ውስጥ ናቸው                                                   | አዎ                       |
+| ↳ `check:env-doc-sync`         | በ`.env.example` ውስጥ ያለ እያንዳንዱ env var በሰነዶች ሰንጠረዥ ውስጥ ተመዝግቧል፣ እንዲሁም በተቃራኒው                                                            | አዎ                       |
+| ↳ `check:deprecated-versions`  | በሰነዶች ውስጥ የተቋረጡ የስሪት ሕብረቁምፊዎች የሉም                                                                                                     | አዎ                       |
+| ↳ `check:doc-links`            | በሰነዶች ውስጥ ያሉ የውስጥ markdown አገናኞች ወደ እውነተኛ ፋይሎች (`[text]`/`(path)` ቅርጽ) ይመራሉ                                                           | አዎ                       |
+| ↳ `check:fabricated-docs`      | በሰነዶች ውስጥ የተጠቀሱ መንገዶች፣ env vars፣ CLI ትዕዛዞች፣ የhook ስሞች እና የፋይል መንገዶች በኮድቤዝ ውስጥ አሉ። በ`--strict` ጠንካራ ጌት ነው፤ ያለ ባንዲራው ግን ለስላሳ-ውድቀት ይሆናል። | አዎ (በCI ውስጥ በ`--strict`) |
+| `check:cli-i18n`               | የCLI ትዕዛዝ ሕብረቁምፊዎች በሁሉም የi18n አካባቢ ፋይሎች ውስጥ አሉ                                                                                        | አዎ                       |
+| `check:openapi-coverage`       | የOpenAPI ስፔክ ቢያንስ ከእውነተኛ መንገዶች የratchet ዝቅተኛ ገደብን ይሸፍናል                                                                               | አዎ                       |
+| `check:openapi-security-tiers` | በ`openapi.yaml` ውስጥ ያሉ የደህንነት ደረጃ ማብራሪያዎች ከ`routeGuard.ts` ምደባዎች ጋር ወጥ ናቸው                                                            | **ምክረ ሀሳብ**              |
+| `check:openapi-routes`         | በ`openapi.yaml` ውስጥ ያለ እያንዳንዱ መንገድ ወደ እውነተኛ `route.ts` ይመራል (ፀረ-ቅዠት)                                                                  | አዎ                       |
+| `check:docs-symbols`           | በ`docs/**/*.md` ውስጥ ያለ እያንዳንዱ `/api/...` ማጣቀሻ ወደ እውነተኛ `route.ts` ይመራል (ፀረ-ቅዠት)                                                       | አዎ                       |
+| `i18n translation drift`       | በi18n አካባቢ ፋይሎች ውስጥ ያልተተረጎሙ ቁልፎች — ማስጠንቀቂያ ብቻ                                                                                         | **ምክረ ሀሳብ**              |
 
-### ሥራ፦ `i18n-ui-coverage`
+በ`docs/diagrams/` ስር ያሉት አሥራ ሁለት README SVGዎች የሚመነጩ ናቸው (`scripts/docs/gen-readme-<name>.mjs`;
+`npm run docs:readme-diagrams` ሁሉንም እንደገና ይመነጫል)። እያንዳንዱ የbyte-ንጽጽር ዩኒት ሙከራ አለው
+(`tests/unit/docs/readme-*-svg.test.ts`, ስራ `test-unit`)፤ ይህም በcommit የተደረገው ፋይል ያለፈበት ከሆነ ይወድቃል፣ እና `check:docs-counts` ቀኖናዊ ቁጥሮችን
+ከ`<text>` ኖዶቻቸው ያነባል — ስለዚህ የoutlining ደረጃው እያንዳንዱን የተዘረዘረ ሕብረቁምፊ በፋይሉ ውስጥ እንደማይታይ `<text>` ያስቀምጣል። የSVG ቀኖናዊ-ቁጥሮች ማረጋገጫው በ
+`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) የተዘረዘሩትን ፋይሎች ያነባል፦ `docs/diagrams/readme-hero.svg`,
+`free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
+`tier-cascade.svg`፣ እንዲሁም `public/images/tier-flow-dark.svg` እና `tier-flow-light.svg`፤
+የfree-forever፣ catalog-entry፣ recurring-pool እና scoring-factors দাবিዎችም
+`promise-pillars.svg`, `free-tier-budget.svg` እና `strategies-grid.svg` ያነባሉ። `free-tier-budget.svg`
+አሃዞቹን ከቀጥታ catalog loader ያገኛል፤ ስለዚህ በ`FREE_MODEL_BUDGETS` ወይም በአቅራቢ ማሳያ ስም ላይ የሚደረግ ለውጥ ያ ፋይል እንደገና እስኪመነጭ ድረስ CIን ቀይ ያደርገዋል።
 
-| ስክሪፕት                             | የሚያረጋግጠው                                                                                                                                                  | አጋጅ      |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| `check-ui-keys-coverage` (inline) | የUI i18n ቁልፍ ሽፋን ≥ 65% መሆኑን                                                                                                                               | አዎ       |
-| `check-ui-value-drift` (inline)   | እንደገና የተጻፈ የእንግሊዝኛ **እሴት** ከኋላው ጊዜ ያለፈበት ትርጉም እንዳይቀር                                                                                                      | አዎ       |
-| `check-new-key-coverage` (inline) | **አዲስ** የእንግሊዝኛ ቁልፍ በእያንዳንዱ አካባቢ መተርጎሙን — የ`__MISSING__:` ምልክት ውድቅ ይደረጋል                                                                                  | አዎ       |
-| `check-translation-ratio`         | በእያንዳንዱ አካባቢ ያለው የእውነተኛ ትርጉም ጥምርታ (ከእንግሊዝኛ ጋር ተመሳሳይ / ቦታ ያዥ / ከተፈቀደው ዝርዝር ውጭ የጎደሉ ቅጠሎች) `config/quality/i18n-translation-baseline.json` + ትርፍን መብለጥ የለበትም | **አማካሪ** |
+### ስራ፦ `i18n-ui-coverage`
 
-`fetch-depth: 0` ያስፈልገዋል — የእሴት-ልዩነት ጌቱ `en.json`ን ከውህደት መሠረቱ ጋር ያነጻጽራል።
+| Script                            | የሚያረጋግጠው                                                                                                                                                             | ማገድ         |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `check-ui-keys-coverage` (inline) | የUI i18n ቁልፍ ሽፋን ≥ 65% ነው                                                                                                                                            | አዎ          |
+| `check-ui-value-drift` (inline)   | እንደገና የተጻፈ የእንግሊዝኛ **እሴት** ያረጀ ትርጉም እንዳይተው                                                                                                                           | አዎ          |
+| `check-new-key-coverage` (inline) | አዲስ የእንግሊዝኛ ቁልፍ በእያንዳንዱ locale ተተርጉሟል — `__MISSING__:` ማመልከቻ ውድቅ ይደረጋል                                                                                               | አዎ          |
+| `check-translation-ratio`         | በእያንዳንዱ locale ያለው የእውነተኛ-ትርጉም መጠን (ከእንግሊዝኛ ጋር ተመሳሳይ / placeholder / የጎደለ ከallowlist ውጭ የሆነ እሴት) ከ`config/quality/i18n-translation-baseline.json` + slack መብለጥ የለበትም | **ምክረ ሀሳብ** |
 
-#### `check-ui-value-drift` — ጊዜ ያለፈበት-ትርጉም ጌት
+`fetch-depth: 0` ያስፈልጋል — የvalue-drift ጌቱ `en.json`ን ከmerge base ጋር ያነጻጽራል።
 
-ሌሎቹ ጌቶች በመዋቅራዊ ሁኔታ ማየት የማይችሉትን አንድ የi18n መመለስ ይይዛል፦ የእንግሊዝኛ እሴት
-እንደገና ሲጻፍ፣ ከ_ቀድሞው_ እንግሊዝኛ የተወሰዱ ትርጉሞች ሳይቀየሩ ይቀራሉ፤ በዚህም
-እንግሊዝኛ ያልሆኑ ተጠቃሚዎች በልበ ሙሉነት የተጻፈን፣ አሁን ግን የተሳሳተ ጽሑፍ ማንበባቸውን ይቀጥላሉ።
+#### `check-ui-value-drift` — የአረጀ ትርጉም ጌት
 
-ይህ በእውነት ለተጠቃሚዎች ተለቋል። የAntigravity
-የመግቢያ አጋዥ ሲጨመር (#5203) `oauthModal.googleOAuthWarning` እንደገና ተጻፈ፤ **ከ43 አካባቢዎች 39ኙ** ኦፕሬተሮችን "ሙሉውን URL ገልብጠው ከታች እንዲለጥፉት" የሚነግር ጽሑፍ ይዘው ቆዩ — ለዚያ አቅራቢ ሊጠናቀቅ የማይችል ፍሰት። እስከ #8463 ድረስ
-ሳይስተዋል የቆየው፦
+ሌሎች መከላከያዎች በመዋቅራዊ ሁኔታ ሊያዩት የማይችሉትን አንድ የi18n ድግግሞሽ ስህተት ይይዛል፦ የእንግሊዝኛ ዋጋ እንደገና ሲጻፍ፣ ከ _ቀድሞው_ የእንግሊዝኛ ዋጋ የተመነጩት ትርጉሞች ኋላ ይቀራሉ፤ ስለዚህ እንግሊዝኛ ያልሆኑ ተጠቃሚዎች በራስ መተማመን የተጻፈ ቢመስልም አሁን የተሳሳተ ጽሑፍ ማንበባቸውን ይቀጥላሉ።
 
-- `sync-ui-keys` የሚሞላው **የሌሉ** ቁልፎችን ብቻ ነው፤ **ጊዜ ያለፈባቸውን** ፈጽሞ አይሞላም፤
-- `check-ui-keys-coverage` የቁልፍን _መኖር_ ይቆጥራል፤ ስለዚህ ጊዜ ያለፈበት ትርጉም እንደተሸፈነ ይቆጠራል፤
-- `check-translation-drift` የ`docs/i18n/<locale>/**.md` የሰነድ መስተዋቶችን ይከታተላል —
-  `src/i18n/messages/*.json`ን ፈጽሞ አያነብም። ከ2026-09 ዳግም ማመሳሰል ጀምሮ በ`docs-sync-strict` ሥራ ውስጥ አጋጅ ነው፦ ዋና ሰነድን ያርትዑ → `npm run i18n:run -- --files=<doc>` (በክፍል ደረጃ፣ ወጪው ዝቅተኛ)።
+ይህ በእውነት ወደ ምርት ተልኳል። `oauthModal.googleOAuthWarning` የAntigravity መግቢያ አጋዥ ሲጨመር (#5203) እንደገና ተጻፈ፤ **ከ43 አካባቢዎች 39ኙ** ለኦፕሬተሮች "ሙሉውን URL ቅዳና ከታች ለጥፍ" የሚል ጽሑፍ አስቀምጠዋል — ለዚያ አቅራቢ ሊጠናቀቅ የማይችል የስራ ፍሰት። እስከ #8463 ድረስ ሳይታወቅ ቆይቷል፤ ምክንያቱም፦
 
-**ልዩነትን የሚያገናዝብ እንጂ በመነሻ መስመር ላይ የተመሠረተ አይደለም።** በውህደት መነሻው ላይ ያለውን `en.json` ከሥራ ዛፉ ጋር ያነጻጽራል፤
-የእንግሊዝኛ ዋጋው ለተቀየረ እያንዳንዱ ቁልፍ፣ ያልተነካ ትርጉም የያዘ ማንኛውም ቋንቋ
-ጊዜ ያለፈበት ነው። ይህ ሆን ብሎ **ከዚህ ቀደም የነበረውን ዕዳ ያቆማል** — አንድ ልዩነት
-ለረጅም ጊዜ የቆየ ትርጉም ከየትኛው የቀድሞ እንግሊዝኛ እንደመጣ ሊያሳይ አይችልም፣ ስለዚህ በሩ
-የሚዳኘው የአሁኑ ለውጥ የነካውን ብቻ ነው። አማራጩ (ለእያንዳንዱ ቁልፍ የሃሽ መነሻ መስመር) ወደ
-~600 KB የሚጠጋ የሚመነጭ ፋይል ይፈልጋል፣ ይህም ከነባሩ ትልቁ መነሻ መስመር 3× የሚበልጥ ሲሆን በእያንዳንዱ i18n PR ላይ ይቀያየራል።
+- `sync-ui-keys` **የሌሉ** ቁልፎችን ብቻ ይመልሳል፣ **ጊዜያቸው ያለፈ** ቁልፎችን አይመልስም፤
+- `check-ui-keys-coverage` የቁልፍ _መኖርን_ ይቆጥራል፣ ስለዚህ ጊዜው ያለፈበት ትርጉም እንደተሸፈነ ይቆጠራል፤
+- `check-translation-drift` የ`docs/i18n/<locale>/**.md` የሰነድ መስታወቶችን ይከታተላል — `src/i18n/messages/*.json` ን በጭራሽ አያነብም። ከ2026-09 ዳግም ማመሳሰል ጀምሮ በ`docs-sync-strict` ስራ ላይ ማገድ፦ ዋና ሰነድ ሲያርሙ → `npm run i18n:run -- --files=<doc>` (በክፍል ደረጃ፣ ወጪው ዝቅተኛ)።
+
+**ልዩነትን የሚያውቅ፣ በመነሻ መስመር ላይ ያልተመሠረተ።** በmerge base ላይ ያለውን `en.json` ከስራ ዛፉ ጋር ያነጻጽራል፤ የእንግሊዝኛ ዋጋው ለተቀየረበት እያንዳንዱ ቁልፍ፣ አንድ አካባቢ አሁንም ያልተነካ ትርጉም ከያዘ ጊዜው ያለፈበት ነው። ይህ አስቀድሞ የነበረውን **ዕዳ ሆን ብሎ ያቆያል** — አንድ ልዩነት የቆየ ትርጉም ከየትኛው የቀድሞ እንግሊዝኛ የመጣ እንደሆነ ሊያሳይ አይችልም፤ ስለዚህ መከላከያው የሚፈርደው የአሁኑ ለውጥ በሚነካው ላይ ብቻ ነው። አማራጩ — በእያንዳንዱ ቁልፍ የሃሽ መነሻ መስመር — ወደ ~600 KB የሚጠጋ የተፈጠረ ፋይል ያስከፍላል፤ ይህም ከአሁኑ ትልቁ መነሻ መስመር 3× ያህል ሲሆን በእያንዳንዱ i18n PR ላይ ለውጥ ያመጣል።
 
 ይህን ለማሟላት ሁለት መንገዶች አሉ፦
 
 1. የተጎዱትን ትርጉሞች ያዘምኑ፣ ወይም
-2. ወደ `__MISSING__:<new english>` ያዋቅሯቸው — ከዚያ የአሂድ ጊዜው የተስተካከለውን እንግሊዝኛ
-   (`src/i18n/request.ts::deepMergeFallback`, #7258) ያቀርባል፣ ቁልፉም ለትርጉም ወረፋ ይይዛል።
+2. ወደ `__MISSING__:<new english>` ያዘጋጇቸው — ከዚያ runtime የተስተካከለውን እንግሊዝኛ ያቀርባል
+   (`src/i18n/request.ts::deepMergeFallback`, #7258) እና ቁልፉ ለትርጉም ወረፋ ውስጥ ይገባል።
 
-የሕብረቁምፊው **ትርጉም** ከተቀየረ፣ **ቁልፉን እንደገና መሰየምን** ይምረጡ፦ አዲስ ቁልፍ
-ጊዜ ያለፈበትን ትርጉም ሊወርስ አይችልም። #8463 የተጠቀመው ንድፍ ይህ ነው።
+የሕብረቁምፊው **ትርጉም** ከተቀየረ፣ **ቁልፉን እንደገና መሰየምን** ይምረጡ፦ አዲስ ቁልፍ ጊዜው ያለፈበትን ትርጉም ሊወርስ አይችልም። #8463 የተጠቀመበት ንድፍ ይህ ነው።
 
 ```bash
 npm run i18n:check-value-drift          # ጥብቅ (CI የሚያስኬደው)
@@ -227,50 +251,49 @@ npm run i18n:check-value-drift:warn     # ሪፖርት ብቻ
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-መነሻ ካታሎጉ ሊነበብ በማይችልበት ጊዜ (የመነሻ ማጣቀሻው የሌለበት ጥልቀት የሌለው
-clone) `check-openapi-breaking`ን በመከተል፣ `SKIP reason=base-unresolved` በማሳየት በ0 ይወጣል።
+የመነሻ ካታሎጉ ሊነበብ በማይችልበት ጊዜ (የመነሻ ref የሌለው አጭር clone) ከ`SKIP reason=base-unresolved` ጋር 0 ይመልሳል፤ ይህም `check-openapi-breaking` ን ይመስላል።
 
-### ሥራ፦ `i18n`
+### ስራ፦ `i18n`
 
-ሙሉ የi18n ማረጋገጫ ማትሪክስ (ለእያንዳንዱ ቋንቋ አንድ ሥራ)። ሙሉው ሥራ አማካሪ ነው።
+ሙሉ የi18n ማረጋገጫ ማትሪክስ (ለእያንዳንዱ አካባቢ አንድ ስራ)። ሙሉው ስራ ምክረ ሃሳብ ብቻ የሚሰጥ ነው።
 
-| ስክሪፕት                           | የሚያረጋግጠው              | እገዳ                                             |
-| ------------------------------- | --------------------- | ----------------------------------------------- |
-| `validate_translation.py quick` | የእያንዳንዱ ቋንቋ ትርጉም ሙሉነት | **አማካሪ** (በሙሉው ሥራ ላይ `continue-on-error: true`) |
+| ስክሪፕት                           | የሚያረጋግጠው                | ማገድ                                                |
+| ------------------------------- | ----------------------- | -------------------------------------------------- |
+| `validate_translation.py quick` | በእያንዳንዱ አካባቢ የትርጉም ሙሉነት | **ምክረ ሃሳብ** (`continue-on-error: true` በሙሉ ስራው ላይ) |
 
-### ሥራ፦ `pr-test-policy`
+### ስራ፦ `pr-test-policy`
 
-በpull requestዎች ላይ ብቻ ይሠራል።
+በpull request ላይ ብቻ ይሰራል።
 
-| ስክሪፕት                  | የሚያረጋግጠው                                                                                                        | እገዳ |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------- | --- |
-| `check:pr-test-policy` | በ`src/`፣ `open-sse/`፣ `electron/` ወይም `bin/` ውስጥ ያለ የምርት ኮድን የሚቀይሩ PRዎች ሙከራዎችን ማካተት ወይም ማዘመን አለባቸው (ጥብቅ ደንብ #8) | አዎ  |
-| `check:test-masking`   | የተቀየሩ የሙከራ ፋይሎች የተጣራውን የማረጋገጫ ብዛት እንዳይቀንሱ ወይም `assert.ok(true)` እርግጥነቶችን እንዳይጨምሩ                                | አዎ  |
-| `check:pr-evidence`    | የPR ይዘት ለለውጡ የሙከራ/VPS ማስረጃ እንደሚጠቅስ (የPR ጽሑፍን በመፈለግ ጥብቅ ደንብ #18ን በራስ ሰር ያከናውናል — ተሰባሪ ነው፣ Backlogን ይመልከቱ)        | አዎ  |
+| ስክሪፕት                  | የሚያረጋግጠው                                                                                                       | ማገድ |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- | --- |
+| `check:pr-test-policy` | በ`src/`, `open-sse/`, `electron/`, ወይም `bin/` ውስጥ የምርት ኮድ የሚቀይሩ PRዎች ሙከራዎችን ማካተት ወይም ማዘመን እንዳለባቸው (ጠንካራ ሕግ #8) | አዎ  |
+| `check:test-masking`   | የተቀየሩ የሙከራ ፋይሎች የassert ብዛትን በአጠቃላይ እንደማይቀንሱ ወይም `assert.ok(true)` የሚሉ ተውቶሎጂዎችን እንደማይጨምሩ                       | አዎ  |
+| `check:pr-evidence`    | የPR ጽሑፍ ለለውጡ የሙከራ/VPS ማስረጃን እንደሚጠቅስ (ጠንካራ ሕግ #18ን በPR ጽሑፍ በመፈለግ የሚተገብር — ደካማ፣ Backlogን ይመልከቱ)                  | አዎ  |
 
-### ሥራ፦ `test-vitest`
+### ስራ፦ `test-vitest`
 
-ከ`build` በኋላ ይሠራል። ሲከሽፍ ውህደትን ይከለክላል።
+ከ`build` በኋላ ይሰራል። ካልተሳካ መዋሃድን ያግዳል።
 
-| ስብስብ             | የሚያረጋግጠው                                                | እገዳ                                                                                        |
-| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `test:vitest`    | MCP አገልጋይ (110 መሣሪያዎች)፣ autoCombo፣ cache — vitest አስኪያጅ | አዎ                                                                                         |
-| `test:vitest:ui` | የUI ክፍለ አካል ሙከራዎች — vitest አስኪያጅ                        | **እገዳ ያለው** — ከዚህ ቀደም የነበሩ ውድቀቶች በ`vitest.config.ts` ውስጥ በግልጽ ተገልለዋል፤ አዲስ ውድቀቶች ሥራውን ያሳክሻሉ |
+| ስብስብ             | የሚያረጋግጠው                                                 | ማገድ                                                                                  |
+| ---------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `test:vitest`    | MCP አገልጋይ (110 መሳሪያዎች)፣ autoCombo፣ cache — vitest runner | አዎ                                                                                   |
+| `test:vitest:ui` | የUI ክፍል ሙከራዎች — vitest runner                            | **ማገድ** — አስቀድሞ የነበሩ ስህተቶች በ`vitest.config.ts` ውስጥ በግልጽ ተለይተዋል፤ አዲስ ስህተቶች ስራውን ያሳጥራሉ |
 
-### የማታ የሥራ ፍሰቶች (በጊዜ ሰሌዳ የሚሠሩ፣ አማካሪ)
+### የሌሊት የስራ ፍሰቶች (በመርሐ ግብር የሚሰሩ፣ ምክረ ሃሳብ ብቻ)
 
-እነዚህ በcron የጊዜ ሰሌዳ (እና `workflow_dispatch`) ይሠራሉ፣ በPRዎች ላይ ፈጽሞ አይሠሩም። ሁሉም አማካሪ ናቸው።
+እነዚህ በcron መርሐ ግብር (እና `workflow_dispatch`) ይሰራሉ፣ በPRዎች ላይ በፍጹም አይሰሩም። ሁሉም ምክረ ሃሳብ ብቻ የሚሰጡ ናቸው።
 
-| የሥራ ፍሰት                | የሚያረጋግጠው                                                                                                                                 | እገዳ      |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| `nightly-property`     | በዘፈቀደ seed + ከፍተኛ የማስኬጃ ብዛት የሚከናወኑ fast-check የባህሪ ሙከራዎች                                                                                 | **አማካሪ** |
-| `nightly-resilience`   | የheap ዕድገት በር፣ የchaos ስህተት ማስገቢያ፣ k6 የጭነት/የረጅም ጊዜ ጭነት ሙከራ                                                                                | **አማካሪ** |
-| `nightly-llm-security` | promptfoo የማስገቢያ ጥበቃ (የማገጃ ሁነታ) + garak probes (የአቅራቢ ምስጢር ከሌለ ይዘለላል)                                                                    | **አማካሪ** |
-| `nightly-schemathesis` | `docs/openapi.yaml`ን በመጠቀም በቀጥታ በሚሠራ OmniRoute ላይ የOpenAPI ውል fuzzing (schemathesis) — የዝርዝር መግለጫ ጥሰቶችን / ያልተያዙ 500ዎችን ያጋልጣል (ደረጃ 8 B.4) | **አማካሪ** |
-| `nightly-mutation`     | በፈጣኑ unit መስመር ላይ የStryker mutation-testing ውጤት — ከጥፋት የተረፉ mutants ደካማ ማረጋገጫዎችን ያጋልጣሉ                                                   | **አማካሪ** |
-| `nightly-compat`       | በሚደገፉት `engines.node` ክልሎች ላይ የNode engine ተኳኋኝነት ማትሪክስ                                                                                  | **አማካሪ** |
+| የስራ ፍሰት                | የሚያረጋግጠው                                                                                                                              | ማገጃ      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `nightly-property`     | fast-check የንብረት ሙከራዎች በዘፈቀደ seed + ከፍተኛ የሩጫ ብዛት                                                                                      | **አማካሪ** |
+| `nightly-resilience`   | የheap እድገት መግቢያ፣ chaos የስህተት መርፌ፣ k6 ጭነት/ዘላቂነት ሙከራ                                                                                    | **አማካሪ** |
+| `nightly-llm-security` | promptfoo የመግቢያ ጥበቃ (የማገጃ ሁነታ) + garak መመርመሪያዎች (የአቅራቢ ሚስጥር ከሌለ ይዘለላሉ)                                                                | **አማካሪ** |
+| `nightly-schemathesis` | የOpenAPI ኮንትራት fuzzing (schemathesis) በ`docs/openapi.yaml` በመጠቀም በህይወት ያለ OmniRoute ላይ — የስፔክ ጥሰቶችን / ያልተያዙ 500ዎችን ያጋልጣል (Fase 8 B.4) | **አማካሪ** |
+| `nightly-mutation`     | በፈጣን የክፍል ሙከራ መስመር ላይ የStryker mutation-testing ውጤት — የተረፉ mutants ደካማ assert መግለጫዎችን ያጋልጣሉ                                           | **አማካሪ** |
+| `nightly-compat`       | በሚደገፉት `engines.node` ክልሎች ላይ የNode engine ተኳኋኝነት ማትሪክስ                                                                               | **አማካሪ** |
 
-የአፈጻጸም መነሻ መስመሮች (heap፣ TTFB፣ የbuild ጊዜ) ይመዘገባሉ እንጂ እንደ በር አያገለግሉም፦ [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`)ን ይመልከቱ።
+የአፈጻጸም መነሻ መለኪያዎች (heap፣ TTFB፣ የግንባታ ጊዜ) ይመዘገባሉ እንጂ እንደ መግቢያ መስፈርት አይወሰዱም፦ [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`) ይመልከቱ።
 
 ---
 

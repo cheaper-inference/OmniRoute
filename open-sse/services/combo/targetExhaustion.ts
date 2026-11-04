@@ -42,7 +42,7 @@ import { isAgentrouterConnectionQuotaScope } from "@/sse/services/auth";
 import { isVertexConnectionWidePermissionDenied } from "@/sse/services/vertexErrorClassifier";
 import { isSharedWalletCredits402 } from "../accountFallback/sharedWalletCredits.ts";
 import { isClaudeMinuteRateLimitText, isExplicitClaudeQuota429Text } from "../usage/claudeQuota.ts";
-import { getCachedClaudeQuotaScopeDecision } from "@/domain/quotaCache";
+import { getCachedClaudeQuotaScopeDecision } from "../claudeQuotaScopeBridge.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { LOCAL_MODEL_COOLDOWN_HEADER } from "../../utils/localCooldownHeader.ts";
 import { isExplicitModelCapacityFailure } from "../accountFallback/perModelFailureScope.ts";
@@ -151,6 +151,14 @@ export type ApplyComboTargetExhaustionOptions = {
 export type ComboTargetExhaustionResult = {
   target: ResolvedComboTarget;
   providerExhausted: boolean;
+  /**
+   * Durable exhaustion marker: the set-level key this failure wrote. Absent
+   * for transient failures (rate limit, connection error), which are replayed
+   * on the next set. `scope: "connection"` always carries `connectionId`.
+   */
+  durableExhaustion?:
+    | { scope: "provider"; provider: string }
+    | { scope: "connection"; provider: string; connectionId: string };
   isModelScopedClaudeQuota: boolean;
   isConnectionScopedClaudeQuota: boolean;
   modelScopedClaudeCooldownMs: number | null;
@@ -236,6 +244,13 @@ export function applyComboTargetExhaustion(
   // Local key policy is neither upstream credential failure nor provider exhaustion.
   if (isLocalModelPolicyResponse(result)) return { ...derived, providerExhausted: false };
   const provider = effectiveTarget.provider;
+  const durableMark = effectiveTarget.connectionId
+    ? ({
+        scope: "connection",
+        provider,
+        connectionId: effectiveTarget.connectionId,
+      } as const)
+    : ({ scope: "provider", provider } as const);
   const canonicalProvider = provider ? resolveProviderId(provider) : provider;
 
   // #10334: connection-scope account-wide quota exhaustion (agentrouter "额度不足";
@@ -286,12 +301,12 @@ export function applyComboTargetExhaustion(
   // rate-limited sibling account, which is the intended, safer outcome.
   if (isAgentrouterConnectionQuotaScope(provider, opts.fallbackResult)) {
     markAgentrouterConnectionQuotaExhaustion(effectiveTarget, { sets, log, tag });
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   if (isSharedWalletCredits402(provider, result.status, opts.errorText)) {
     markSharedWalletCreditsExhaustion(effectiveTarget, { sets, log, tag });
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   if (
@@ -311,7 +326,7 @@ export function applyComboTargetExhaustion(
       tag,
       `Native Claude quota exhausted for ${effectiveTarget.connectionId ? "connection" : "provider"}`
     );
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   // #8133/#8137: auth-level failures (401/403) mean that connection's credentials are bad.
@@ -397,7 +412,7 @@ export function applyComboTargetExhaustion(
       return { ...derived, providerExhausted: false };
     }
     markAuthLevelExhaustion(effectiveTarget, { result, sets, log, tag });
-    return { ...derived, providerExhausted: true };
+    return { ...derived, providerExhausted: true, durableExhaustion: durableMark };
   }
 
   // #1731: If the entire provider quota is exhausted, mark it so subsequent
@@ -409,9 +424,13 @@ export function applyComboTargetExhaustion(
   const providerExhausted = isProviderQuotaExhausted(provider, opts);
   if (providerExhausted) {
     markProviderQuotaExhaustion(provider as string, opts);
-  } else {
-    markTransientOrConnectionLevel(effectiveTarget, opts);
+    return {
+      ...derived,
+      providerExhausted,
+      durableExhaustion: { scope: "provider", provider: provider as string },
+    };
   }
+  markTransientOrConnectionLevel(effectiveTarget, opts);
 
   return { ...derived, providerExhausted };
 }

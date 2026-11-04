@@ -3,6 +3,7 @@ import {
   OPENROUTER_PRESET_MAX_LENGTH,
   isOpenRouterPresetValue,
 } from "@/shared/constants/openRouterPreset";
+import { isValidGitHubCreditLimit } from "@omniroute/open-sse/services/githubCreditLimit.ts";
 
 function isHttpUrl(value: string): boolean {
   try {
@@ -197,6 +198,21 @@ export function validateProviderSpecificData(
     });
   }
 
+  const toolNameMaxLength = data.toolNameMaxLength;
+  if (
+    toolNameMaxLength !== undefined &&
+    toolNameMaxLength !== null &&
+    (!Number.isInteger(toolNameMaxLength) ||
+      (toolNameMaxLength as number) < 1 ||
+      (toolNameMaxLength as number) > 1024)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.toolNameMaxLength must be an integer from 1 to 1024",
+      path: ["toolNameMaxLength"],
+    });
+  }
+
   const customUserAgent = data.customUserAgent;
   if (
     customUserAgent !== undefined &&
@@ -207,6 +223,15 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.customUserAgent must be a string up to 500 chars",
       path: ["customUserAgent"],
+    });
+  }
+
+  const githubCreditLimit = data.githubCreditLimit;
+  if (githubCreditLimit !== undefined && !isValidGitHubCreditLimit(githubCreditLimit)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.githubCreditLimit must be a non-negative number or null",
+      path: ["githubCreditLimit"],
     });
   }
 
@@ -289,6 +314,14 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.reasoningControl must be chat-template, openai, or null",
       path: ["reasoningControl"],
+    });
+  }
+
+  if (data.zdrEnabled !== undefined && typeof data.zdrEnabled !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.zdrEnabled must be a boolean",
+      path: ["zdrEnabled"],
     });
   }
 

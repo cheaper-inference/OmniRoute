@@ -13,6 +13,7 @@ import { randomUUID } from "node:crypto";
 import { createMcpServer } from "./server.ts";
 import { resolveMcpCallerAuthInfo, withMcpHttpAuthContext } from "./httpAuthContext.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { activeStreamableRequests } from "./sessionActivity.ts";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
@@ -32,10 +33,19 @@ const _streamableSessions = new Map<string, StreamableSession>();
 
 const MCP_SESSION_IDLE_MS = 5 * 60 * 1000;
 
+export function shouldReapSession(
+  session: { lastActivityAt: number; activeRequests?: number },
+  nowMs: number
+): boolean {
+  if ((session.activeRequests ?? 0) > 0) return false;
+  return nowMs - session.lastActivityAt > MCP_SESSION_IDLE_MS;
+}
+
 const _mcpSessionSweep = setInterval(() => {
   const now = Date.now();
   for (const [sessionId, session] of _streamableSessions) {
-    if (now - session.lastActivityAt > MCP_SESSION_IDLE_MS) {
+    const activeRequests = activeStreamableRequests(sessionId);
+    if (shouldReapSession({ lastActivityAt: session.lastActivityAt, activeRequests }, now)) {
       try {
         closeStreamableSession(sessionId);
       } catch {}
@@ -193,6 +203,10 @@ export function protectMcpSseResponse(request: Request, response: Response): Res
   if (!/(?:^|,)\s*no-transform(?:\s*(?:,|$))/i.test(cacheControl ?? "")) {
     headers.set("cache-control", [cacheControl, "no-transform"].filter(Boolean).join(", "));
   }
+  // Server-sent events behind a buffering reverse proxy stall tool calls for
+  // the proxy's buffer window on every event — carry the same no-buffering
+  // instruction the main chat SSE path sets.
+  headers.set("X-Accel-Buffering", "no");
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
