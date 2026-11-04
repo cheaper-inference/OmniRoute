@@ -121,6 +121,30 @@ supplemented:
   Importing an older backup therefore cannot revive a session that a password
   change or a sign-out already ended.
 
+#### Optional TOTP two-factor login (#16619)
+
+Enrolled from Settings → Security; off until the operator turns it on
+(`src/server/auth/dashboardMfa.ts`).
+
+- **What it covers:** password login (`POST /api/auth/login`, which then needs
+  `POST /api/auth/mfa/verify`) and `omniroute connect` (`POST /api/cli/connect`,
+  which refuses a password-only exchange and takes the code as `totp`).
+- **What it does not cover:** OIDC / SSO sign-in (`/api/auth/oidc/callback`) does
+  not ask for the OmniRoute TOTP. It relies on the identity provider's own second
+  factor, so enforce MFA in the IdP if OIDC is enabled.
+- **Recovery** (lost device, no recovery codes left, or a factor that can no longer
+  be verified, for example after `STORAGE_ENCRYPTION_KEY` changed):
+  1. Restart the server with `OMNIROUTE_DISABLE_MFA=true`.
+  2. On the host itself (loopback peer and loopback `Host`, such as
+     `http://localhost:20128`), sign in with the password. The second factor is
+     skipped for that origin only; every other origin still needs the code.
+  3. In Settings → Security → Disable, enter the password and leave the code
+     blank. `POST /api/auth/mfa/disable` accepts a body without `code` only while
+     the variable is set and the request comes from the host; it still requires
+     the dashboard session and the current password, and is audited as
+     `auth.mfa.disabled` with `secondFactor: "recovery_switch"`.
+  4. Unset `OMNIROUTE_DISABLE_MFA`, restart, and enroll again if needed.
+
 ## Route Classes
 
 `src/server/authz/types.ts` defines three classes; any route that cannot be classified deterministically falls back to `MANAGEMENT`.
@@ -206,6 +230,7 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
