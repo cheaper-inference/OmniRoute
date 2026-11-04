@@ -164,6 +164,13 @@ test("#18787: opt-out and unrelated providers preserve their existing compressio
   );
   assert.equal(mustKeepOpenCodeHistoryVerbatim({ ...firstBody, model: "unknown/model" }), false);
   assert.equal(
+    mustKeepOpenCodeHistoryVerbatim(
+      { ...firstBody, model: "opencode-go/uncached-model" },
+      { provider, model: "uncached-model" }
+    ),
+    false
+  );
+  assert.equal(
     selectCompressionPlan(config, null, 4096, firstBody, {
       provider,
       connectionCacheOverride: override,
