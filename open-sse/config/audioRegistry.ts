@@ -42,6 +42,12 @@ export interface AudioProvider {
    * Absent means the OpenAI stock default ("alloy").
    */
   defaultVoice?: string;
+  /**
+   * The adapter can only run the models listed in `models` (e.g. Gemini Live's
+   * BidiGenerateContent socket), not every model the provider tags with this
+   * endpoint. Endpoint-adapter evidence (#16929) is then scoped per model.
+   */
+  modelScoped?: boolean;
   models: AudioModel[];
 }
 
@@ -307,6 +313,9 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authType: "apikey",
     authHeader: "x-goog-api-key",
     format: "gemini-live",
+    // Only Live-capable models run over BidiGenerateContent; other Gemini models
+    // tagged audio-transcriptions keep having no adapter (#16929).
+    modelScoped: true,
     models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
   },
 };

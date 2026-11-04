@@ -96,6 +96,39 @@ test("audioRegistry registers gemini provider with gemini-3.5-transcribe-live mo
   );
 });
 
+test("#16929: Gemini Live adapter is scoped to its listed model, not every tagged Gemini model", async () => {
+  const { getRegisteredEndpointAdapterStatuses, hasNoRunnableEndpointAdapter } =
+    await import("../../src/lib/providerModels/endpointAdapterAvailability.ts");
+  // Provider-wide: still no general Gemini transcription adapter.
+  assert.equal(
+    getRegisteredEndpointAdapterStatuses("gemini")["audio-transcriptions"],
+    "unavailable"
+  );
+  assert.equal(
+    getRegisteredEndpointAdapterStatuses("gemini", "gemini-3.5-transcribe")["audio-transcriptions"],
+    "unavailable"
+  );
+  // The Live model the executor actually runs is available.
+  assert.equal(
+    getRegisteredEndpointAdapterStatuses("gemini", "gemini-3.5-transcribe-live")[
+      "audio-transcriptions"
+    ],
+    "available"
+  );
+  const tagged = {
+    supportedEndpoints: ["audio-transcriptions"],
+    endpointCapabilitySource: "inferred",
+  };
+  assert.equal(
+    hasNoRunnableEndpointAdapter("gemini", { id: "gemini-3.5-transcribe-live", ...tagged }),
+    false
+  );
+  assert.equal(
+    hasNoRunnableEndpointAdapter("gemini", { id: "gemini-3.5-transcribe", ...tagged }),
+    true
+  );
+});
+
 test("auto STT selection does not pre-empt existing providers when a Gemini key is usable", async () => {
   const { selectAudioBridgeModel } = await import("../../src/lib/guardrails/audioBridgeHelpers.ts");
   // A key that can reach both Gemini and Groq must keep the pre-existing
