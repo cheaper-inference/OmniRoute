@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "ప్రాక్సీ విభాగాలు",
     "requestBodyLimitTitle": "అభ్యర్థన బాడీ పరిమితి",
     "requestBodyLimitDescription": "అభ్యర్థన బాడీని పార్స్ చేయడానికి ముందు ఆమోదించబడే గరిష్ఠ API పేలోడ్ పరిమాణం. ప్రత్యేక అప్లోడ్ రూట్లు కనీసం వాటి అంతర్నిర్మిత 100 MB పరిమితిని కలిగి ఉంటాయి.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "MBలో అభ్యర్థన బాడీ పరిమితి",
     "requestBodyLimitEmptyError": "MBలో పరిమితిని నమోదు చేయండి",
     "requestBodyLimitWholeNumberError": "పూర్ణ సంఖ్యను ఉపయోగించండి",

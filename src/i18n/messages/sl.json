@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Razdelki posredniškega strežnika",
     "requestBodyLimitTitle": "Omejitev telesa zahteve",
     "requestBodyLimitDescription": "Največja velikost koristne vsebine API-ja, ki je sprejeta, preden se telo zahteve razčleni. Namenske poti za nalaganje ohranijo najmanj svojo vgrajeno omejitev 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Omejitev telesa zahteve v MB",
     "requestBodyLimitEmptyError": "Vnesite omejitev v MB",
     "requestBodyLimitWholeNumberError": "Uporabite celo število",

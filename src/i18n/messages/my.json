@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "ပရောက်စီ ကဏ္ဍများ",
     "requestBodyLimitTitle": "တောင်းဆိုချက် Body အရွယ်အစား ကန့်သတ်ချက်",
     "requestBodyLimitDescription": "တောင်းဆိုချက် body ကို ခွဲခြမ်းစိတ်ဖြာခြင်းမပြုမီ လက်ခံနိုင်သည့် အများဆုံး API payload အရွယ်အစား။ သီးသန့် အပ်လုဒ်လမ်းကြောင်းများတွင် ၎င်းတို့၏ မူလပါရှိသော 100 MB ကန့်သတ်ချက်ကို အနည်းဆုံး ဆက်လက်ထားရှိသည်။",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "တောင်းဆိုချက် body ကန့်သတ်ချက် (MB)",
     "requestBodyLimitEmptyError": "ကန့်သတ်ချက်ကို MB ဖြင့် ထည့်ပါ",
     "requestBodyLimitWholeNumberError": "ကိန်းပြည့်ကို အသုံးပြုပါ",

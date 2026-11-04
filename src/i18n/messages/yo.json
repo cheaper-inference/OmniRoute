@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Àwọn abala Proxy",
     "requestBodyLimitTitle": "Ààlà Ara Ìbéèrè",
     "requestBodyLimitDescription": "Ìwọ̀n ẹrù API tó pọ̀ jù tí a lè gba kí a tó ṣe ìtúpalẹ̀ ara ìbéèrè. Àwọn ipa ọ̀nà ìṣàgbéwọlé fáìlì pàtó yóò ṣì ní ó kéré tán ààlà 100 MB tí a kọ sínú wọn.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Ààlà ara ìbéèrè ní MB",
     "requestBodyLimitEmptyError": "Tẹ ààlà kan ní MB",
     "requestBodyLimitWholeNumberError": "Lo odidi nọ́mbà",

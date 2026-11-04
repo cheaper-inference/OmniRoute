@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Proksi boʻlimlari",
     "requestBodyLimitTitle": "Soʻrov tanasi cheklovi",
     "requestBodyLimitDescription": "Soʻrov tanasi tahlil qilinishidan oldin qabul qilinadigan API maʼlumotlarining maksimal hajmi. Maxsus yuklash marshrutlari kamida oʻzlarining ichki 100 MB cheklovini saqlab qoladi.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Soʻrov tanasi cheklovi (MB)",
     "requestBodyLimitEmptyError": "MB hisobida cheklovni kiriting",
     "requestBodyLimitWholeNumberError": "Butun sondan foydalaning",

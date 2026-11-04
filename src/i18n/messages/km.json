@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "ផ្នែកប្រូកស៊ី",
     "requestBodyLimitTitle": "ដែនកំណត់ទំហំតួសំណើ",
     "requestBodyLimitDescription": "ទំហំអតិបរមានៃបន្ទុកទិន្នន័យ API ដែលទទួលយក មុនពេលតួសំណើត្រូវបានញែក។ ផ្លូវផ្ទុកឡើងជាក់លាក់រក្សាដែនកំណត់ដែលភ្ជាប់មកជាមួយយ៉ាងហោចណាស់ 100 MB។",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "ដែនកំណត់តួសំណើជា MB",
     "requestBodyLimitEmptyError": "បញ្ចូលដែនកំណត់ជា MB",
     "requestBodyLimitWholeNumberError": "ប្រើចំនួនគត់",

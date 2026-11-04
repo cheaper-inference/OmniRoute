@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "מקטעי פרוקסי",
     "requestBodyLimitTitle": "מגבלת גוף הבקשה",
     "requestBodyLimitDescription": "הגודל המרבי של מטען API שיתקבל לפני ניתוח גוף הבקשה. נתיבי העלאה ייעודיים שומרים לפחות על המגבלה המובנית שלהם, העומדת על 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "מגבלת גוף הבקשה ב-MB",
     "requestBodyLimitEmptyError": "יש להזין מגבלה ב-MB",
     "requestBodyLimitWholeNumberError": "יש להשתמש במספר שלם",

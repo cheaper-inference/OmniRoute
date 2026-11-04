@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Одељци проксија",
     "requestBodyLimitTitle": "Ограничење величине тела захтева",
     "requestBodyLimitDescription": "Максимална величина API пакета која се прихвата пре парсирања тела захтева. За наменске руте за отпремање и даље важи њихово уграђено ограничење од најмање 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Ограничење тела захтева у MB",
     "requestBodyLimitEmptyError": "Унесите ограничење у MB",
     "requestBodyLimitWholeNumberError": "Користите цео број",

@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Ενότητες Proxy",
     "requestBodyLimitTitle": "Όριο σώματος αιτήματος",
     "requestBodyLimitDescription": "Μέγιστο μέγεθος ωφέλιμου φορτίου API που γίνεται δεκτό πριν αναλυθεί το σώμα του αιτήματος. Οι αποκλειστικές διαδρομές μεταφόρτωσης διατηρούν τουλάχιστον το ενσωματωμένο όριο των 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Όριο σώματος αιτήματος σε MB",
     "requestBodyLimitEmptyError": "Εισάγετε ένα όριο σε MB",
     "requestBodyLimitWholeNumberError": "Χρησιμοποιήστε ακέραιο αριθμό",

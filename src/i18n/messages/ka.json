@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "პროქსის სექციები",
     "requestBodyLimitTitle": "მოთხოვნის სხეულის ლიმიტი",
     "requestBodyLimitDescription": "API payload-ის მაქსიმალური ზომა, რომელიც მიიღება მოთხოვნის სხეულის გარჩევამდე. ატვირთვის სპეციალური მარშრუტები ინარჩუნებენ სულ მცირე საკუთარ ჩაშენებულ 100 MB ლიმიტს.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "მოთხოვნის სხეულის ლიმიტი MB-ში",
     "requestBodyLimitEmptyError": "შეიყვანეთ ლიმიტი MB-ში",
     "requestBodyLimitWholeNumberError": "გამოიყენეთ მთელი რიცხვი",

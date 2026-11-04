@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Sections du proxy",
     "requestBodyLimitTitle": "Limite du corps de la requête",
     "requestBodyLimitDescription": "Taille maximale de la charge utile de l’API acceptée avant l’analyse du corps d’une requête. Les routes de téléversement dédiées conservent au moins leur limite intégrée de 100 Mo.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Limite du corps de la requête en Mo",
     "requestBodyLimitEmptyError": "Saisissez une limite en Mo",
     "requestBodyLimitWholeNumberError": "Utilisez un nombre entier",

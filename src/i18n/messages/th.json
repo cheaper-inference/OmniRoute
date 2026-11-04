@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "ส่วนพร็อกซี",
     "requestBodyLimitTitle": "ขีดจำกัดเนื้อหาคำขอ",
     "requestBodyLimitDescription": "ขนาดเพย์โหลด API สูงสุดที่ยอมรับก่อนแยกวิเคราะห์เนื้อหาคำขอ เส้นทางอัปโหลดเฉพาะจะยังคงใช้ขีดจำกัดในตัวอย่างน้อย 100 MB",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "ขีดจำกัดเนื้อหาคำขอเป็น MB",
     "requestBodyLimitEmptyError": "ป้อนขีดจำกัดเป็น MB",
     "requestBodyLimitWholeNumberError": "ใช้จำนวนเต็ม",

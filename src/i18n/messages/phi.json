@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Mga seksyon ng proxy",
     "requestBodyLimitTitle": "Limitasyon sa Laki ng Katawan ng Request",
     "requestBodyLimitDescription": "Pinakamalaking laki ng API payload na tatanggapin bago i-parse ang katawan ng request. Pananatilihin ng mga nakalaang route sa pag-upload ang hindi bababa sa built-in nilang limitasyong 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Limitasyon sa katawan ng request sa MB",
     "requestBodyLimitEmptyError": "Maglagay ng limitasyon sa MB",
     "requestBodyLimitWholeNumberError": "Gumamit ng buong numero",

@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "پراکسی سیکشنز",
     "requestBodyLimitTitle": "درخواست کی باڈی کی حد",
     "requestBodyLimitDescription": "درخواست کی باڈی پارس ہونے سے پہلے قابلِ قبول API پے لوڈ کا زیادہ سے زیادہ سائز۔ مخصوص اپ لوڈ روٹس میں کم از کم ان کی پہلے سے طے شدہ 100 MB کی حد برقرار رہتی ہے۔",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "درخواست کی باڈی کی حد MB میں",
     "requestBodyLimitEmptyError": "MB میں حد درج کریں",
     "requestBodyLimitWholeNumberError": "صحیح عدد استعمال کریں",

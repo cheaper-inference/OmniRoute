@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Secțiuni proxy",
     "requestBodyLimitTitle": "Limita corpului cererii",
     "requestBodyLimitDescription": "Dimensiunea maximă acceptată a sarcinii utile API înainte ca un corp de cerere să fie analizat. Rutele dedicate pentru încărcări își păstrează cel puțin limita încorporată de 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Limita corpului cererii în MB",
     "requestBodyLimitEmptyError": "Introdu o limită în MB",
     "requestBodyLimitWholeNumberError": "Folosește un număr întreg",

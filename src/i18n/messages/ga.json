@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Rannóga seachfhreastalaí",
     "requestBodyLimitTitle": "Teorainn Chorp an Iarratais",
     "requestBodyLimitDescription": "An t-uasmhéid pálasta API a nglactar leis sula ndéantar corp iarratais a pharsáil. Coinníonn bealaí uaslódála tiomnaithe a dteorainn ionsuite 100 MB ar a laghad.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Teorainn chorp an iarratais in MB",
     "requestBodyLimitEmptyError": "Cuir isteach teorainn in MB",
     "requestBodyLimitWholeNumberError": "Úsáid slánuimhir",

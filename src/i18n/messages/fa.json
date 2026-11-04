@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "بخشهای پروکسی",
     "requestBodyLimitTitle": "محدودیت بدنه درخواست",
     "requestBodyLimitDescription": "حداکثر اندازهٔ محتوای API که پیش از تجزیهٔ بدنهٔ درخواست پذیرفته میشود. مسیرهای اختصاصی بارگذاری دستکم محدودیت داخلی 100 MB خود را حفظ میکنند.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "محدودیت بدنه درخواست بر حسب MB",
     "requestBodyLimitEmptyError": "محدودیتی بر حسب MB وارد کنید",
     "requestBodyLimitWholeNumberError": "از عدد صحیح استفاده کنید",

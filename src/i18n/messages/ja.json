@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "プロキシセクション",
     "requestBodyLimitTitle": "リクエスト本文の上限",
     "requestBodyLimitDescription": "リクエスト本文が解析される前に受け付けるAPIペイロードの最大サイズ。専用のアップロードルートでは、少なくとも組み込みの100 MBの上限が維持されます。",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "リクエスト本文の上限（MB）",
     "requestBodyLimitEmptyError": "上限をMB単位で入力",
     "requestBodyLimitWholeNumberError": "整数を使用してください",

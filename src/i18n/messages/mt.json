@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "Sezzjonijiet tal-proxy",
     "requestBodyLimitTitle": "Limitu tal-Korp tat-Talba",
     "requestBodyLimitDescription": "Id-daqs massimu tal-payload tal-API aċċettat qabel ma jiġi analizzat il-korp tat-talba. Ir-rotot dedikati għat-tlugħ tal-fajls iżommu mill-inqas il-limitu integrat tagħhom ta’ 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Limitu tal-korp tat-talba f’MB",
     "requestBodyLimitEmptyError": "Daħħal limitu f’MB",
     "requestBodyLimitWholeNumberError": "Uża numru sħiħ",

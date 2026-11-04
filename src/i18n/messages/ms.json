@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Bahagian proksi",
     "requestBodyLimitTitle": "Had Badan Permintaan",
     "requestBodyLimitDescription": "Saiz muatan API maksimum yang diterima sebelum badan permintaan dihuraikan. Laluan muat naik khusus mengekalkan sekurang-kurangnya had terbina dalam sebanyak 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Had badan permintaan dalam MB",
     "requestBodyLimitEmptyError": "Masukkan had dalam MB",
     "requestBodyLimitWholeNumberError": "Gunakan nombor bulat",

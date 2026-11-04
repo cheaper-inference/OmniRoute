@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Starpniekservera sadaļas",
     "requestBodyLimitTitle": "Pieprasījuma pamatteksta ierobežojums",
     "requestBodyLimitDescription": "Maksimālais API datu apjoms, kas tiek pieņemts pirms pieprasījuma pamatteksta parsēšanas. Atsevišķajiem augšupielādes maršrutiem joprojām ir vismaz tajos iebūvētais 100 MB ierobežojums.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Pieprasījuma pamatteksta ierobežojums (MB)",
     "requestBodyLimitEmptyError": "Ievadiet ierobežojumu MB",
     "requestBodyLimitWholeNumberError": "Izmantojiet veselu skaitli",

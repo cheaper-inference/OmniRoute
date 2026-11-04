@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Odjeljci proxyja",
     "requestBodyLimitTitle": "Ograničenje tijela zahtjeva",
     "requestBodyLimitDescription": "Maksimalna veličina korisnog tereta API-ja prihvaćena prije raščlanjivanja tijela zahtjeva. Namjenske rute za prijenos zadržavaju barem ugrađeno ograničenje od 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Ograničenje tijela zahtjeva u MB",
     "requestBodyLimitEmptyError": "Unesite ograničenje u MB",
     "requestBodyLimitWholeNumberError": "Koristite cijeli broj",

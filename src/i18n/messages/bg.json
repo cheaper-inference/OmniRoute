@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "Секции за прокси",
     "requestBodyLimitTitle": "Ограничение за тялото на заявката",
     "requestBodyLimitDescription": "Максималният размер на API данните, приеман преди анализирането на тялото на заявката. Специализираните маршрути за качване запазват поне вграденото си ограничение от 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Ограничение за тялото на заявката в MB",
     "requestBodyLimitEmptyError": "Въведете ограничение в MB",
     "requestBodyLimitWholeNumberError": "Използвайте цяло число",

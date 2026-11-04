@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Proxysecties",
     "requestBodyLimitTitle": "Limiet voor aanvraagbody",
     "requestBodyLimitDescription": "Maximale grootte van de API-payload die wordt geaccepteerd voordat een aanvraagbody wordt geparseerd. Speciale uploadroutes behouden ten minste hun ingebouwde limiet van 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Limiet voor aanvraagbody in MB",
     "requestBodyLimitEmptyError": "Voer een limiet in MB in",
     "requestBodyLimitWholeNumberError": "Gebruik een geheel getal",

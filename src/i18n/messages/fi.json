@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Välityspalvelimen osiot",
     "requestBodyLimitTitle": "Pyyntörungon kokorajoitus",
     "requestBodyLimitDescription": "API-hyötykuorman enimmäiskoko, joka hyväksytään ennen pyyntörungon jäsentämistä. Erilliset latausreitit säilyttävät vähintään sisäänrakennetun 100 Mt:n rajoituksensa.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Pyyntörungon kokorajoitus megatavuina",
     "requestBodyLimitEmptyError": "Anna raja megatavuina",
     "requestBodyLimitWholeNumberError": "Käytä kokonaislukua",

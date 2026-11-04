@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "പ്രോക്സി വിഭാഗങ്ങൾ",
     "requestBodyLimitTitle": "അഭ്യർത്ഥന ബോഡി പരിധി",
     "requestBodyLimitDescription": "അഭ്യർത്ഥന ബോഡി പാഴ്സ് ചെയ്യുന്നതിന് മുമ്പ് അനുവദിക്കുന്ന പരമാവധി API പേലോഡ് വലുപ്പം. പ്രത്യേക അപ്ലോഡ് റൂട്ടുകൾക്ക് അവയുടെ അന്തർനിർമ്മിതമായ 100 MB പരിധിയെങ്കിലും നിലനിർത്തും.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "MB-യിലുള്ള അഭ്യർത്ഥന ബോഡി പരിധി",
     "requestBodyLimitEmptyError": "MB-യിൽ ഒരു പരിധി നൽകുക",
     "requestBodyLimitWholeNumberError": "ഒരു പൂർണ്ണ സംഖ്യ ഉപയോഗിക്കുക",

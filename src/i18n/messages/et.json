@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Puhverserveri jaotised",
     "requestBodyLimitTitle": "Päringu keha mahupiirang",
     "requestBodyLimitDescription": "Maksimaalne API päringuandmete maht, mis võetakse vastu enne päringu keha sõelumist. Spetsiaalsetel üleslaadimismarsruutidel säilib vähemalt nende sisseehitatud 100 MB piirang.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Päringu keha mahupiirang MB-des",
     "requestBodyLimitEmptyError": "Sisestage piirang MB-des",
     "requestBodyLimitWholeNumberError": "Kasutage täisarvu",

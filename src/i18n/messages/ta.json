@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "ப்ராக்ஸி பிரிவுகள்",
     "requestBodyLimitTitle": "கோரிக்கை உள்ளடக்க அளவு வரம்பு",
     "requestBodyLimitDescription": "கோரிக்கையின் உள்ளடக்கம் பகுப்பாய்வு செய்யப்படுவதற்கு முன் ஏற்கப்படும் அதிகபட்ச API பேலோடு அளவு. பிரத்யேக பதிவேற்ற வழிகளுக்கு அவற்றின் உள்ளமைக்கப்பட்ட 100 MB வரம்பாவது தொடர்ந்து பொருந்தும்.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "கோரிக்கை உள்ளடக்க அளவு வரம்பு (MB-இல்)",
     "requestBodyLimitEmptyError": "MB-இல் ஒரு வரம்பை உள்ளிடவும்",
     "requestBodyLimitWholeNumberError": "முழு எண்ணைப் பயன்படுத்தவும்",

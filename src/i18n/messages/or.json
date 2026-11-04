@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "ପ୍ରକ୍ସି ବିଭାଗଗୁଡ଼ିକ",
     "requestBodyLimitTitle": "ଅନୁରୋଧ ବଡି ସୀମା",
     "requestBodyLimitDescription": "କୌଣସି ଅନୁରୋଧ ବଡିକୁ ପାର୍ସ କରାଯିବା ପୂର୍ବରୁ ଗ୍ରହଣ କରାଯାଉଥିବା ସର୍ବାଧିକ API ପେଲୋଡ୍ ଆକାର। ଉତ୍ସର୍ଗୀକୃତ ଅପଲୋଡ୍ ରୁଟ୍ଗୁଡ଼ିକ ଅତି କମରେ ସେମାନଙ୍କର ଅନ୍ତର୍ନିର୍ମିତ 100 MB ସୀମା ବଜାୟ ରଖନ୍ତି।",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "MBରେ ଅନୁରୋଧ ବଡି ସୀମା",
     "requestBodyLimitEmptyError": "MBରେ ଏକ ସୀମା ପ୍ରବେଶ କରନ୍ତୁ",
     "requestBodyLimitWholeNumberError": "ଏକ ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ବ୍ୟବହାର କରନ୍ତୁ",

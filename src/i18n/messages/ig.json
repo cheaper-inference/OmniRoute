@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Nkebi Ihe Nnọchiteanya",
     "requestBodyLimitTitle": "Oke Ahụ Arịrịọ",
     "requestBodyLimitDescription": "Oke kachasị nke ibu data API a na-anabata tupu a hazie ahụ arịrịọ. Ụzọ e wepụtara maka mbulite na-edobe opekata mpe oke 100 MB arụnyere n'ime ha.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Oke ahụ arịrịọ na MB",
     "requestBodyLimitEmptyError": "Tinye oke na MB",
     "requestBodyLimitWholeNumberError": "Jiri ọnụọgụ zuru ezu",

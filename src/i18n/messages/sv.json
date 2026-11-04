@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Proxysektioner",
     "requestBodyLimitTitle": "Gräns för begärandekropp",
     "requestBodyLimitDescription": "Den maximala storleken på API-nyttolasten som accepteras innan en begärandekropp tolkas. Dedikerade uppladdningsrutter behåller minst sin inbyggda gräns på 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Gräns för begärandekropp i MB",
     "requestBodyLimitEmptyError": "Ange en gräns i MB",
     "requestBodyLimitWholeNumberError": "Använd ett heltal",

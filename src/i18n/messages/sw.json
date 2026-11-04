@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Sehemu za proksi",
     "requestBodyLimitTitle": "Kikomo cha Mwili wa Ombi",
     "requestBodyLimitDescription": "Ukubwa wa juu zaidi wa data ya API unaokubaliwa kabla ya mwili wa ombi kuchanganuliwa. Njia maalum za upakiaji huhifadhi angalau kikomo chao cha ndani cha MB 100.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Kikomo cha mwili wa ombi kwa MB",
     "requestBodyLimitEmptyError": "Weka kikomo kwa MB",
     "requestBodyLimitWholeNumberError": "Tumia nambari kamili",

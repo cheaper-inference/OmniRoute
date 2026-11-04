@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "Proxy sekcije",
     "requestBodyLimitTitle": "Limit tijela zahtjeva",
     "requestBodyLimitDescription": "Maksimalna veličina API payload-a koja se prihvata prije parsiranja tijela zahtjeva. Namjenske rute za upload zadržavaju svoj ugrađeni limit od najmanje 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Limit tijela zahtjeva u MB",
     "requestBodyLimitEmptyError": "Unesite limit u MB",
     "requestBodyLimitWholeNumberError": "Koristite cijeli broj",

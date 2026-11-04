@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Պրոքսիի բաժիններ",
     "requestBodyLimitTitle": "Հարցման մարմնի սահմանաչափ",
     "requestBodyLimitDescription": "API-ի օգտակար բեռի առավելագույն չափը, որն ընդունվում է նախքան հարցման մարմնի վերլուծումը։ Վերբեռնման հատուկ երթուղիները պահպանում են առնվազն իրենց ներկառուցված 100 MB սահմանաչափը։",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Հարցման մարմնի սահմանաչափը՝ MB-ով",
     "requestBodyLimitEmptyError": "Մուտքագրեք սահմանաչափը՝ MB-ով",
     "requestBodyLimitWholeNumberError": "Օգտագործեք ամբողջ թիվ",

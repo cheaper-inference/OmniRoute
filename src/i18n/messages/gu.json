@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "પ્રોક્સી વિભાગો",
     "requestBodyLimitTitle": "વિનંતી બોડી મર્યાદા",
     "requestBodyLimitDescription": "વિનંતી બોડીનું વિશ્લેષણ થાય તે પહેલાં સ્વીકારવામાં આવતી મહત્તમ API પેલોડ સાઇઝ. સમર્પિત અપલોડ રૂટ્સ માટે ઓછામાં ઓછી તેમની બિલ્ટ-ઇન 100 MB મર્યાદા જળવાઈ રહે છે.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "MBમાં વિનંતી બોડી મર્યાદા",
     "requestBodyLimitEmptyError": "MBમાં મર્યાદા દાખલ કરો",
     "requestBodyLimitWholeNumberError": "પૂર્ણાંકનો ઉપયોગ કરો",

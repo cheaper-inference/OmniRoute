@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "प्रॉक्सी विभाग",
     "requestBodyLimitTitle": "विनंती बॉडी मर्यादा",
     "requestBodyLimitDescription": "विनंती बॉडी पार्स करण्यापूर्वी स्वीकारला जाणारा कमाल API पेलोड आकार. समर्पित अपलोड मार्गांसाठी त्यांची अंगभूत 100 MB मर्यादा किमान कायम राहते.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "विनंती बॉडीची मर्यादा MB मध्ये",
     "requestBodyLimitEmptyError": "MB मध्ये मर्यादा प्रविष्ट करा",
     "requestBodyLimitWholeNumberError": "पूर्णांक वापरा",

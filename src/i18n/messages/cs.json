@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "Sekce proxy",
     "requestBodyLimitTitle": "Limit těla požadavku",
     "requestBodyLimitDescription": "Maximální velikost datové části API přijatá před zpracováním těla požadavku. Vyhrazené trasy pro nahrávání si zachovávají alespoň svůj vestavěný limit 100 MB.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Limit těla požadavku v MB",
     "requestBodyLimitEmptyError": "Zadejte limit v MB",
     "requestBodyLimitWholeNumberError": "Použijte celé číslo",

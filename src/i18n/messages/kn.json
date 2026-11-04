@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "ಪ್ರಾಕ್ಸಿ ವಿಭಾಗಗಳು",
     "requestBodyLimitTitle": "ವಿನಂತಿ ಬಾಡಿ ಮಿತಿ",
     "requestBodyLimitDescription": "ವಿನಂತಿ ಬಾಡಿಯನ್ನು ಪಾರ್ಸ್ ಮಾಡುವ ಮೊದಲು ಸ್ವೀಕರಿಸಲಾಗುವ ಗರಿಷ್ಠ API ಪೇಲೋಡ್ ಗಾತ್ರ. ಮೀಸಲಾದ ಅಪ್ಲೋಡ್ ಮಾರ್ಗಗಳು ತಮ್ಮ ಅಂತರ್ನಿರ್ಮಿತ 100 MB ಮಿತಿಯನ್ನು ಕನಿಷ್ಠ ಮಟ್ಟವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ.",
+    "requestBodyLimitChatHint": "__MISSING__:Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "MB ಯಲ್ಲಿ ವಿನಂತಿ ಬಾಡಿಯ ಮಿತಿ",
     "requestBodyLimitEmptyError": "MB ಯಲ್ಲಿ ಮಿತಿಯನ್ನು ನಮೂದಿಸಿ",
     "requestBodyLimitWholeNumberError": "ಪೂರ್ಣ ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ",
