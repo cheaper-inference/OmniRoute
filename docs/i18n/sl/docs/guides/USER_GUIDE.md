@@ -120,7 +120,7 @@ Dostop prek: WhatsApp, Telegram, Slack, Discord, iMessage, Signal ...
 
 ## 📖 Nastavitev ponudnikov
 
-Za množično dodajanje povezav s ključi API iz datoteke CSV ali JSON uporabite **Nadzorna plošča → Ponudniki → Uvozi iz datoteke**. Stolpci so določeni glede na položaj (`provider,name,apiKey,baseUrl,priority`); `provider` mora že obstajati kot upravljani ponudnik ali združljivo vozlišče. Glejte [Uvoz ponudnikov iz datoteke CSV ali JSON](../providers/CSV-IMPORT.md).
+Za množično dodajanje povezav z API-ključi iz datoteke CSV ali JSON uporabite **Nadzorna plošča → Ponudniki → Uvozi iz datoteke**. Stolpci so pozicijski (`provider,name,apiKey,baseUrl,priority`); `provider` mora že obstajati kot upravljani ponudnik ali združljivo vozlišče. Glejte [Uvoz ponudnikov iz datoteke CSV ali JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Naročniški ponudniki
 
@@ -129,7 +129,7 @@ Za množično dodajanje povezav s ključi API iz datoteke CSV ali JSON uporabite
 ```bash
 Nadzorna plošča → Ponudniki → Poveži Claude Code
 → Prijava OAuth → Samodejno osveževanje žetona
-→ Spremljanje 5-urne in tedenske kvote
+→ Sledenje 5-urni in tedenski kvoti
 
 Modeli:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modeli:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionalni nasvet:** Za zapletene naloge uporabite Opus, za hitrost pa Sonnet. OmniRoute spremlja kvoto za vsak model posebej!
+**Nasvet:** Za zahtevna opravila uporabite Opus, za hitrost pa Sonnet. OmniRoute sledi kvoti za vsak model posebej!
 
-Na gostitelju OmniRoute ni brskalnika? Zaženite `claude setup-token` kjer koli, kjer ste prijavljeni v Claude Code, in enoletni žeton prilepite na zavihek **Žeton za nastavitev**. Glejte [Claude Code z žetonom za nastavitev](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nimate brskalnika v gostitelju OmniRoute? Zaženite `claude setup-token` kjer koli, kjer ste prijavljeni v Claude Code, in enoletni žeton prilepite na zavihek **Nastavitveni žeton**. Glejte [Claude Code z nastavitvenim žetonom](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Poti, združljive s Claude in Claude Code, ohranijo raven napora razmišljanja `max` za modele Opus in Sonnet. Modeli Haiku ne sprejemajo ravni napora `max`, zato OmniRoute pred pošiljanjem nadrejenemu ponudniku takšno zahtevo zniža na visok proračun za razmišljanje.
+Združljive poti Claude in Claude Code ohranijo napor razmišljanja `max` za
+modela Opus in Sonnet. Modeli Haiku ne sprejemajo ravni napora `max`, zato OmniRoute to
+zahtevo pred pošiljanjem navzgor zniža na visok proračun razmišljanja.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Nadzorna plošča → Ponudniki → Poveži Codex
 → Prijava OAuth (vrata 1455)
-→ Ponastavitev vsakih 5 ur in tedensko
+→ 5-urni in tedenski ponastavitvi
 
 Modeli:
   cx/gpt-5.5
@@ -161,7 +163,7 @@ Modeli:
 
 ```bash
 Nadzorna plošča → Ponudniki → Poveži GitHub
-→ OAuth prek GitHub
+→ OAuth prek GitHuba
 → Mesečna ponastavitev (1. dan v mesecu)
 
 Modeli:
@@ -172,40 +174,46 @@ Modeli:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Poceni ponudniki
+**Dobropisi AI (obračunavanje na podlagi žetonov).** Ko GitHub za račun sporoči `credits_used`, kartica omejitev ponudnika prikaže vrstico **Dobropisi AI** s številom porabljenih dobropisov v trenutnem obračunskem obdobju, tudi pri neomejenih organizacijskih paketih.
+
+**Lokalna omejitev dobropisov AI.** Uredite povezavo GitHub in nastavite **Omejitev dobropisov AI na obračunsko obdobje** (`providerSpecificData.githubCreditLimit`). Prazna vrednost jo onemogoči; `0` vedno preskoči povezavo. Ko je zadnji odčitek uporabe enak omejitvi ali višji od nje, izbira računa to povezavo preskoči, usmerjanje pa se preusmeri na druge povezave, enako kot pri prekinitvi zaradi pravilnika kvote. Preverjanje uporablja podatke o uporabi, ki jih že zbira periodično osveževanje kvot — na poti zahtevka nikoli ne kliče GitHuba — in je zasnovano tako, da v primeru napake omogoči nadaljevanje: manjkajoč ali zastarel odčitek (starejši od 15 minut ali iz obračunskega obdobja, ki se je že ponastavilo) povezave ne blokira. To je lokalni varnostni mehanizem, **ne zajamčena zgornja meja porabe**: zamude pri poročanju GitHuba, interval osveževanja, zahteve v obdelavi in uporaba zunaj OmniRoute lahko povzročijo prekoračitev. Za strogo omejitev uporabite GitHubove lastne nastavitve nadzora porabe.
+
+### 💰 Cenovno ugodni ponudniki
 
 #### GLM-4.7 (dnevna ponastavitev, 0,6 USD/1M)
 
 1. Registrirajte se: [Zhipu AI](https://open.bigmodel.cn)
 2. Pridobite ključ API iz paketa Coding Plan
-3. Nadzorna plošča → Dodaj ključ API: Ponudnik: `glm`, ključ API: `your-key`
+3. Nadzorna plošča → Dodaj ključ API: ponudnik: `glm`, ključ API: `your-key`
 
-**Uporaba:** `glm/glm-4.7` — **Profesionalni nasvet:** Coding Plan ponuja 3-krat večjo kvoto za 1/7 cene! Dnevna ponastavitev ob 10.00.
+**Uporaba:** `glm/glm-4.7` — **Nasvet:** Coding Plan ponuja 3-krat večjo kvoto za sedmino cene! Dnevna ponastavitev ob 10.00.
 
-#### MiniMax M2.1 (ponastavitev na 5 ur, 0,20 USD/1M)
+#### MiniMax M2.1 (5-urna ponastavitev, 0,20 USD/1M)
 
 1. Registrirajte se: [MiniMax](https://www.minimax.io)
 2. Pridobite ključ API → Nadzorna plošča → Dodaj ključ API
 
-**Uporaba:** `minimax/MiniMax-M2.1` — **Profesionalni nasvet:** Najcenejša možnost za dolg kontekst (1M žetonov)!
+**Uporaba:** `minimax/MiniMax-M2.1` — **Nasvet:** Najcenejša možnost za dolg kontekst (1M žetonov)!
 
-#### Kimi K2 (fiksno 9 USD/mesec)
+#### Kimi K2 (9 USD/mesec, pavšalno)
 
 1. Naročite se: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Pridobite ključ API → Nadzorna plošča → Dodaj ključ API
 
-**Uporaba:** `kimi/kimi-k2.5` — **Profesionalni nasvet:** Fiksnih 9 USD/mesec za 10M žetonov pomeni dejanski strošek 0,90 USD/1M!
+**Uporaba:** `kimi/kimi-k2.5` — **Nasvet:** Fiksnih 9 USD/mesec za 10M žetonov = efektivni strošek 0,90 USD/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Registrirajte se: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Ustvarite ključ API za Qianfan → Nadzorna plošča → Dodaj ključ API: Ponudnik: `qianfan`
+2. Ustvarite ključ API za Qianfan → Nadzorna plošča → Dodaj ključ API: ponudnik: `qianfan`
 
-**Uporaba:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ali drug identifikator modela Qianfan, združljivega z OpenAI.
+**Uporaba:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ali drug ID modela Qianfan, združljiv z OpenAI.
 
 ### 🆓 BREZPLAČNI ponudniki
 
-Brezplačni ponudniki brez preverjanja pristnosti imajo na svoji strani ponudnika stikalo ob možnosti **Preverjanje pristnosti ni potrebno**. Če ga izklopite, se ta ponudnik onemogoči in odstrani iz nastavljenih ter strnjenih pogledov Ponudniki, njegovi modeli pa se odstranijo iz `/v1/models`.
+Brezplačni ponudniki brez preverjanja pristnosti imajo na strani ponudnika stikalo ob možnosti **Preverjanje pristnosti ni potrebno**.
+Če ga izklopite, ponudnika onemogočite, odstranite iz pogledov Konfigurirani ponudniki/zgoščeni pogled ter
+odstranite njegove modele iz `/v1/models`.
 
 #### Qoder (9 BREZPLAČNIH modelov)
 
@@ -215,10 +223,10 @@ Nadzorna plošča → Poveži Qoder → Prijava OAuth → Dostop je odvisen od t
 Modeli: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude BREZPLAČNO)
+#### Kiro (BREZPLAČNI Claude)
 
 ```bash
-Nadzorna plošča → Poveži Kiro → AWS Builder ID ali Google/GitHub → ~50 dobroimetij/mesec
+Nadzorna plošča → Poveži Kiro → AWS Builder ID ali Google/GitHub → približno 50 dobropisov/mesec
 
 Modeli: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

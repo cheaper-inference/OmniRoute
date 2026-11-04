@@ -120,16 +120,16 @@
 
 ## 📖 プロバイダーのセットアップ
 
-CSV または JSON ファイルから API キー接続を一括追加するには、**ダッシュボード → プロバイダー → ファイルからインポート**を使用します。列は位置によって決まります（`provider,name,apiKey,baseUrl,priority`）。`provider` は、管理対象プロバイダーまたは互換性のあるノードとして既に存在している必要があります。[CSV または JSON ファイルからプロバイダーをインポートする](../providers/CSV-IMPORT.md)を参照してください。
+CSV または JSON ファイルから API キー接続を一括追加するには、**ダッシュボード → プロバイダー → ファイルからインポート**を使用します。列は位置によって解釈されます（`provider,name,apiKey,baseUrl,priority`）。`provider` は、管理対象プロバイダーまたは互換性のあるノードとして、あらかじめ存在している必要があります。[CSV または JSON ファイルからプロバイダーをインポートする](../providers/CSV-IMPORT.md)を参照してください。
 
 ### 🔐 サブスクリプションプロバイダー
 
 #### Claude Code（Pro/Max）
 
 ```bash
-ダッシュボード → プロバイダー → Claude Code に接続
-→ OAuth ログイン → トークンの自動更新
-→ 5時間および週間クォータの追跡
+ダッシュボード → プロバイダー → Claude Code を接続
+→ OAuth ログイン → トークンを自動更新
+→ 5 時間および週間クォータの追跡
 
 モデル:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ CSV または JSON ファイルから API キー接続を一括追加するに�
   cc/claude-haiku-4-5-20251001
 ```
 
-**ヒント:** 複雑なタスクには Opus、速度を重視する場合は Sonnet を使用してください。OmniRoute はモデルごとにクォータを追跡します！
+**ヒント:** 複雑なタスクには Opus、速度重視なら Sonnet を使用してください。OmniRoute はモデルごとにクォータを追跡します。
 
-OmniRoute ホストにブラウザーがありませんか？Claude Code にログインしている任意の環境で `claude setup-token` を実行し、1年間有効なトークンを **Setup Token** タブに貼り付けてください。[セットアップトークンを使用する Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)を参照してください。
+OmniRoute ホストでブラウザーを使用できない場合は、Claude Code にログイン済みの任意の環境で `claude setup-token` を実行し、1 年間有効なトークンを **セットアップトークン** タブに貼り付けます。[セットアップトークンを使用した Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)を参照してください。
 
-Claude および Claude Code 互換ルートでは、Opus および Sonnet モデルの `max` 思考強度が維持されます。Haiku モデルは `max` 強度レベルを受け付けないため、OmniRoute はそのリクエストをアップストリームに送信する前に、高い思考バジェットへダウングレードします。
+Claude および Claude Code 互換ルートでは、Opus と Sonnet
+モデルの `max` 思考エフォートが維持されます。Haiku モデルは `max` エフォート階層を受け付けないため、OmniRoute はその
+リクエストを高い思考予算に引き下げてから上流へ送信します。
 
 #### OpenAI Codex（Plus/Pro）
 
 ```bash
-ダッシュボード → プロバイダー → Codex に接続
+ダッシュボード → プロバイダー → Codex を接続
 → OAuth ログイン（ポート 1455）
-→ 5時間ごとおよび週間リセット
+→ 5 時間ごとおよび週間リセット
 
 モデル:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 #### GitHub Copilot
 
 ```bash
-ダッシュボード → プロバイダー → GitHub に接続
+ダッシュボード → プロバイダー → GitHub を接続
 → GitHub 経由の OAuth
-→ 毎月リセット（毎月1日）
+→ 毎月リセット（毎月 1 日）
 
 モデル:
   gh/gpt-5.5
@@ -172,7 +174,12 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 低価格プロバイダー
+**AI クレジット（トークンベースの課金）。** GitHub がアカウントの
+`credits_used` を報告すると、Provider Limits カードに、無制限の組織プランの場合も含め、現在の請求期間に消費されたクレジットを示す **AI クレジット** 行が表示されます。
+
+**ローカル AI クレジット制限。** GitHub 接続を編集し、**請求期間ごとの AI クレジット制限**（`providerSpecificData.githubCreditLimit`）を設定します。空欄にすると無効になり、`0` にすると常にその接続がスキップされます。最後に読み取られた使用量が制限以上の場合、アカウント選択時にその接続がスキップされ、クォータポリシーのカットオフと同様に、ルーティングは他の接続へフォールバックします。このチェックは、定期的なクォータ更新ですでに収集されている使用量を読み取るため、リクエスト処理中に GitHub を呼び出すことはありません。また、フェイルオープン方式です。読み取り値がない場合や古い場合（15 分を超えている場合、またはすでにリセットされた請求期間のものである場合）は、接続をブロックしません。これはローカルの安全策であり、**支出上限を保証するものではありません**。GitHub の報告遅延、更新間隔、処理中のリクエスト、OmniRoute 外での使用により、制限を超える可能性があります。厳格な上限には、GitHub 独自の支出管理機能を使用してください。
+
+### 💰 安価なプロバイダー
 
 #### GLM-4.7（毎日リセット、$0.6/1M）
 
@@ -180,21 +187,21 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 2. Coding Plan から API キーを取得
 3. ダッシュボード → API キーを追加: プロバイダー: `glm`、API キー: `your-key`
 
-**使用方法:** `glm/glm-4.7` — **ヒント:** Coding Plan では、7分の1のコストで3倍のクォータを利用できます！毎日午前10時にリセットされます。
+**使用方法:** `glm/glm-4.7` — **ヒント:** Coding Plan では、料金 1/7 でクォータが 3 倍になります。毎日午前 10:00 にリセットされます。
 
-#### MiniMax M2.1（5時間ごとにリセット、$0.20/1M）
+#### MiniMax M2.1（5 時間ごとにリセット、$0.20/1M）
 
 1. 登録: [MiniMax](https://www.minimax.io)
 2. API キーを取得 → ダッシュボード → API キーを追加
 
-**使用方法:** `minimax/MiniMax-M2.1` — **ヒント:** 長いコンテキスト（100万トークン）向けの最安オプションです！
+**使用方法:** `minimax/MiniMax-M2.1` — **ヒント:** 長いコンテキスト（100 万トークン）に最も安価な選択肢です。
 
-#### Kimi K2（月額 $9 の定額制）
+#### Kimi K2（定額 $9/月）
 
-1. サブスクライブ: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. 購読: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. API キーを取得 → ダッシュボード → API キーを追加
 
-**使用方法:** `kimi/kimi-k2.5` — **ヒント:** 1,000万トークンを月額固定 $9 で利用でき、実質コストは $0.90/1M です！
+**使用方法:** `kimi/kimi-k2.5` — **ヒント:** 1,000 万トークンで固定 $9/月、実質コストは $0.90/1M です。
 
 #### Baidu Qianfan / ERNIE
 
@@ -205,20 +212,20 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 
 ### 🆓 無料プロバイダー
 
-認証不要の無料プロバイダーには、そのプロバイダーページの **認証不要** の横にスイッチがあります。オフにすると、そのプロバイダーが無効になり、プロバイダーの設定済みビューおよびコンパクトビューから削除され、そのモデルも `/v1/models` から削除されます。
+認証不要の無料プロバイダーには、プロバイダーページの **認証は不要** の横にスイッチがあります。これをオフにすると、そのプロバイダーが無効になり、「設定済みプロバイダー」/コンパクトビューから削除され、`/v1/models` からもそのモデルが削除されます。
 
-#### Qoder（無料モデル9種）
+#### Qoder（無料モデル 9 種類）
 
 ```bash
-ダッシュボード → Qoder に接続 → OAuth ログイン → アクセスには現在のプロバイダー制限が適用されます
+ダッシュボード → Qoder を接続 → OAuth ログイン → 利用は現在のプロバイダー制限の対象です
 
 モデル: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro（Claude を無料で利用）
+#### Kiro（Claude 無料版）
 
 ```bash
-ダッシュボード → Kiro に接続 → AWS Builder ID または Google/GitHub → 月間約50クレジット
+ダッシュボード → Kiro を接続 → AWS Builder ID または Google/GitHub → 月約 50 クレジット
 
 モデル: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -1284,7 +1291,7 @@ OmniRoute はクラウドコーディングエージェント（**OpenAI Codex C
 キーは **Dashboard → API Keys → New Key → Scope: manage** から生成し、次のように使用します。
 
 ```bash
-# プロバイダーの一覧を表示
+# プロバイダーを一覧表示
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
@@ -1306,7 +1313,7 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-エンドポイントの一覧とリクエスト／レスポンスのスキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md) を参照してください。
+すべてのエンドポイント一覧とリクエスト／レスポンススキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md) を参照してください。
 
 ---
 

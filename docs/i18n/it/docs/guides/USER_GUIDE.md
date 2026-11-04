@@ -120,7 +120,7 @@ Accesso tramite: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configurazione dei provider
 
-Per aggiungere in blocco connessioni tramite chiave API da un file CSV o JSON, usa **Dashboard → Providers → Import from file**. Le colonne sono posizionali (`provider,name,apiKey,baseUrl,priority`); `provider` deve esistere già come provider gestito o nodo compatibile. Consulta [Importare provider da un file CSV o JSON](../providers/CSV-IMPORT.md).
+Per aggiungere in blocco connessioni con chiave API da un file CSV o JSON, usa **Dashboard → Providers → Import from file**. Le colonne sono posizionali (`provider,name,apiKey,baseUrl,priority`); `provider` deve già esistere come provider gestito o come nodo compatibile. Consulta [Importare provider da un file CSV o JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Provider in abbonamento
 
@@ -129,7 +129,7 @@ Per aggiungere in blocco connessioni tramite chiave API da un file CSV o JSON, u
 ```bash
 Dashboard → Providers → Connect Claude Code
 → Accesso OAuth → Aggiornamento automatico del token
-→ Monitoraggio delle quote di 5 ore e settimanali
+→ Monitoraggio della quota di 5 ore + settimanale
 
 Modelli:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modelli:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Suggerimento:** usa Opus per le attività complesse e Sonnet per la velocità. OmniRoute monitora la quota per ciascun modello!
+**Consiglio:** usa Opus per le attività complesse e Sonnet per la velocità. OmniRoute tiene traccia della quota per modello!
 
-Non è disponibile un browser sull'host di OmniRoute? Esegui `claude setup-token` ovunque sia stato effettuato l'accesso a Claude Code e incolla il token valido per un anno nella scheda **Setup Token**. Consulta [Claude Code con un token di configurazione](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nessun browser sull'host OmniRoute? Esegui `claude setup-token` ovunque Claude Code abbia effettuato l'accesso e incolla il token valido un anno nella scheda **Setup Token**. Consulta [Claude Code con un token di configurazione](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Le route compatibili con Claude e Claude Code mantengono il livello di ragionamento `max` per i modelli Opus e Sonnet. I modelli Haiku non accettano il livello `max`, quindi OmniRoute riduce tale richiesta a un budget di ragionamento elevato prima di inviarla al provider upstream.
+I percorsi compatibili con Claude e Claude Code mantengono il livello di ragionamento `max` per i
+modelli Opus e Sonnet. I modelli Haiku non accettano il livello di ragionamento `max`, quindi OmniRoute
+riduce la richiesta a un budget di ragionamento alto prima di inviarla al servizio upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Dashboard → Providers → Connect Codex
 → Accesso OAuth (porta 1455)
-→ Reimpostazione ogni 5 ore e settimanale
+→ Reimpostazione dopo 5 ore + settimanale
 
 Modelli:
   cx/gpt-5.5
@@ -162,7 +164,7 @@ Modelli:
 ```bash
 Dashboard → Providers → Connect GitHub
 → OAuth tramite GitHub
-→ Reimpostazione mensile (il 1° del mese)
+→ Reimpostazione mensile (il primo giorno del mese)
 
 Modelli:
   gh/gpt-5.5
@@ -172,42 +174,58 @@ Modelli:
   gh/gemini-3.1-pro-preview
 ```
 
+**Crediti AI (fatturazione basata sui token).** Quando GitHub segnala `credits_used` per
+l'account, la scheda Provider Limits mostra una riga **AI Credits** con i crediti
+consumati nel periodo di fatturazione corrente, anche nei piani organizzativi illimitati.
+
+**Limite locale dei crediti AI.** Modifica una connessione GitHub e imposta **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Un valore vuoto lo disabilita; `0`
+ignora sempre la connessione. Quando l'ultima lettura dell'utilizzo è pari o superiore al limite,
+la selezione dell'account ignora quella connessione e il routing passa alle altre
+connessioni, come avviene per un'interruzione dovuta ai criteri di quota. Il controllo legge l'utilizzo che
+l'aggiornamento periodico della quota raccoglie già — non chiama mai GitHub durante il percorso della richiesta —
+e, in caso di errore, lascia passare la connessione: una lettura mancante o obsoleta (più vecchia di 15 minuti
+o relativa a un periodo di fatturazione già reimpostato) non blocca la connessione. Si tratta di una
+protezione locale, **non di un tetto di spesa garantito**: ritardi nella segnalazione da parte di GitHub, l'intervallo
+di aggiornamento, le richieste in corso e l'utilizzo esterno a OmniRoute possono far superare il limite. Usa i
+controlli di spesa di GitHub per un limite rigido.
+
 ### 💰 Provider economici
 
-#### GLM-4.7 (Reimpostazione giornaliera, $0.6/1M)
+#### GLM-4.7 (reimpostazione giornaliera, $0.6/1M)
 
 1. Registrati: [Zhipu AI](https://open.bigmodel.cn)
 2. Ottieni la chiave API dal Coding Plan
 3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Uso:** `glm/glm-4.7` — **Suggerimento:** il Coding Plan offre una quota 3 volte superiore a 1/7 del costo! Reimpostazione giornaliera alle 10:00.
+**Utilizzo:** `glm/glm-4.7` — **Consiglio:** il Coding Plan offre una quota 3× a 1/7 del costo! Reimpostazione giornaliera alle 10:00.
 
-#### MiniMax M2.1 (Reimpostazione ogni 5 ore, $0.20/1M)
+#### MiniMax M2.1 (reimpostazione ogni 5 ore, $0.20/1M)
 
 1. Registrati: [MiniMax](https://www.minimax.io)
 2. Ottieni la chiave API → Dashboard → Add API Key
 
-**Uso:** `minimax/MiniMax-M2.1` — **Suggerimento:** l'opzione più economica per contesti lunghi (1 milione di token)!
+**Utilizzo:** `minimax/MiniMax-M2.1` — **Consiglio:** l'opzione più economica per contesti lunghi (1M di token)!
 
-#### Kimi K2 ($9/mese a tariffa fissa)
+#### Kimi K2 ($9/mese fissi)
 
 1. Abbonati: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Ottieni la chiave API → Dashboard → Add API Key
 
-**Uso:** `kimi/kimi-k2.5` — **Suggerimento:** $9/mese fissi per 10 milioni di token = costo effettivo di $0.90/1M!
+**Utilizzo:** `kimi/kimi-k2.5` — **Consiglio:** $9/mese fissi per 10M di token = costo effettivo di $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Registrati: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Crea una chiave API Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
-**Uso:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` o un altro ID modello Qianfan compatibile con OpenAI.
+**Utilizzo:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` oppure un altro ID modello compatibile con OpenAI di Qianfan.
 
 ### 🆓 Provider GRATUITI
 
-I provider gratuiti senza autenticazione dispongono di un interruttore accanto a **No authentication required** nella rispettiva pagina.
-Disattivandolo, il provider viene disabilitato e rimosso dalle viste configurata/compatta di Providers;
-inoltre, i suoi modelli vengono rimossi da `/v1/models`.
+I provider gratuiti senza autenticazione hanno un interruttore accanto a **No authentication required** nella pagina del provider.
+Disattivandolo, il provider viene disabilitato, rimosso dalle viste Providers configured/compact e
+i suoi modelli vengono rimossi da `/v1/models`.
 
 #### Qoder (9 modelli GRATUITI)
 

@@ -120,16 +120,16 @@ Přístup přes: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Nastavení poskytovatelů
 
-Chcete-li hromadně přidat připojení pomocí API klíčů ze souboru CSV nebo JSON, použijte **Ovládací panel → Poskytovatelé → Importovat ze souboru**. Sloupce jsou poziční (`provider,name,apiKey,baseUrl,priority`); `provider` již musí existovat jako spravovaný poskytovatel nebo kompatibilní uzel. Viz [Import poskytovatelů ze souboru CSV nebo JSON](../providers/CSV-IMPORT.md).
+Pro hromadné přidání připojení s klíčem API ze souboru CSV nebo JSON použijte **Přehled → Poskytovatelé → Importovat ze souboru**. Sloupce jsou poziční (`provider,name,apiKey,baseUrl,priority`); `provider` již musí existovat jako spravovaný poskytovatel nebo kompatibilní uzel. Viz [Import poskytovatelů ze souboru CSV nebo JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Poskytovatelé s předplatným
+### 🔐 Poskytovatelé předplatného
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Ovládací panel → Poskytovatelé → Připojit Claude Code
-→ Přihlášení přes OAuth → Automatické obnovování tokenu
-→ Sledování 5hodinové a týdenní kvóty
+Přehled → Poskytovatelé → Připojit Claude Code
+→ Přihlášení přes OAuth → Automatické obnovení tokenu
+→ Sledování 5hodinového + týdenního limitu
 
 Modely:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modely:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Tip pro profesionály:** Pro složité úlohy používejte Opus, pro rychlost Sonnet. OmniRoute sleduje kvótu pro každý model!
+**Tip:** Pro složité úlohy používejte Opus, pro rychlost Sonnet. OmniRoute sleduje limit pro každý model!
 
-Nemáte na hostiteli OmniRoute prohlížeč? Spusťte `claude setup-token` kdekoli, kde jste přihlášeni ke Claude Code, a vložte roční token na kartu **Token nastavení**. Viz [Claude Code s tokenem nastavení](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nemáte na hostiteli OmniRoute prohlížeč? Spusťte `claude setup-token` kdekoli, kde jste přihlášeni ke Claude Code, a vložte jednoletý token na kartu **Nastavovací token**. Viz [Claude Code s nastavovacím tokenem](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Trasy kompatibilní s Claude a Claude Code zachovávají pro modely Opus a Sonnet úroveň intenzity přemýšlení `max`. Modely Haiku úroveň intenzity `max` nepřijímají, takže OmniRoute před odesláním požadavku nadřazenému poskytovateli sníží tuto úroveň na vysoký rozpočet pro přemýšlení.
+Trasy kompatibilní s Claude a Claude Code zachovávají úroveň přemýšlení `max` pro
+modely Opus a Sonnet. Modely Haiku úroveň úsilí `max` nepřijímají, takže OmniRoute tento
+požadavek před odesláním upstreamu sníží na vysoký rozpočet přemýšlení.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Ovládací panel → Poskytovatelé → Připojit Codex
+Přehled → Poskytovatelé → Připojit Codex
 → Přihlášení přes OAuth (port 1455)
-→ Obnovení po 5 hodinách a každý týden
+→ 5hodinový + týdenní reset
 
 Modely:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Modely:
 #### GitHub Copilot
 
 ```bash
-Ovládací panel → Poskytovatelé → Připojit GitHub
+Přehled → Poskytovatelé → Připojit GitHub
 → OAuth přes GitHub
-→ Měsíční obnovení (1. den v měsíci)
+→ Měsíční reset (1. den v měsíci)
 
 Modely:
   gh/gpt-5.5
@@ -172,54 +174,72 @@ Modely:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI kredity (účtování podle tokenů).** Když GitHub pro účet vrátí `credits_used`,
+karta Limitů poskytovatele zobrazí řádek **AI kredity** se spotřebovanými kredity
+v aktuálním fakturačním období, a to i u neomezených organizačních plánů.
+
+**Místní limit AI kreditů.** Upravte připojení GitHub a nastavte **Limit AI kreditů na
+fakturační období** (`providerSpecificData.githubCreditLimit`). Prázdná hodnota tuto
+funkci deaktivuje; `0` připojení vždy přeskočí. Když je poslední odečet využití na
+úrovni limitu nebo nad ní, výběr účtu toto připojení přeskočí a směrování přejde na
+vaše ostatní připojení, stejně jako při dosažení limitu podle zásad kvóty. Kontrola
+čte využití, které již shromažďuje pravidelné obnovení kvóty — na cestě požadavku nikdy
+nevolá GitHub — a při chybě se připojení neblokuje: chybějící nebo zastaralý odečet
+(starší než 15 minut nebo z fakturačního období, které již bylo resetováno) připojení
+neblokuje. Jde o místní ochranu, **nikoli o zaručený strop výdajů**: zpoždění
+vykazování GitHubu, interval obnovování, probíhající požadavky a využití mimo
+OmniRoute mohou limit překročit. Pro pevný strop používejte vlastní limity výdajů
+v GitHubu.
+
 ### 💰 Levní poskytovatelé
 
-#### GLM-4.7 (Denní obnovení, $0.6/1M)
+#### GLM-4.7 (denní reset, $0.6/1M)
 
 1. Zaregistrujte se: [Zhipu AI](https://open.bigmodel.cn)
-2. Získejte API klíč z plánu Coding Plan
-3. Ovládací panel → Přidat API klíč: Poskytovatel: `glm`, API klíč: `your-key`
+2. Získejte klíč API z Coding Plan
+3. Přehled → Přidat klíč API: Poskytovatel: `glm`, Klíč API: `your-key`
 
-**Použití:** `glm/glm-4.7` — **Tip pro profesionály:** Coding Plan nabízí 3× vyšší kvótu za 1/7 ceny! Obnovuje se denně v 10:00.
+**Použití:** `glm/glm-4.7` — **Tip:** Coding Plan nabízí trojnásobnou kvótu za sedminovou cenu! Reset každý den v 10:00.
 
-#### MiniMax M2.1 (Obnovení po 5 h, $0.20/1M)
+#### MiniMax M2.1 (5hodinový reset, $0.20/1M)
 
 1. Zaregistrujte se: [MiniMax](https://www.minimax.io)
-2. Získejte API klíč → Ovládací panel → Přidat API klíč
+2. Získejte klíč API → Přehled → Přidat klíč API
 
-**Použití:** `minimax/MiniMax-M2.1` — **Tip pro profesionály:** Nejlevnější možnost pro dlouhý kontext (1M tokenů)!
+**Použití:** `minimax/MiniMax-M2.1` — **Tip:** Nejlevnější možnost pro dlouhý kontext (1M tokenů)!
 
-#### Kimi K2 (Paušálně $9/měsíc)
+#### Kimi K2 ($9/měsíc paušálně)
 
 1. Předplaťte si službu: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Získejte API klíč → Ovládací panel → Přidat API klíč
+2. Získejte klíč API → Přehled → Přidat klíč API
 
-**Použití:** `kimi/kimi-k2.5` — **Tip pro profesionály:** Pevná cena $9/měsíc za 10M tokenů = efektivní cena $0.90/1M!
+**Použití:** `kimi/kimi-k2.5` — **Tip:** Pevná cena $9/měsíc za 10M tokenů = efektivní cena $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Zaregistrujte se: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Vytvořte API klíč Qianfan → Ovládací panel → Přidat API klíč: Poskytovatel: `qianfan`
+2. Vytvořte klíč API Qianfan → Přehled → Přidat klíč API: Poskytovatel: `qianfan`
 
-**Použití:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` nebo jiné ID modelu Qianfan kompatibilního s OpenAI.
+**Použití:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` nebo jiný identifikátor modelu kompatibilního s OpenAI API v Qianfanu.
 
 ### 🆓 BEZPLATNÍ poskytovatelé
 
-Bezplatní poskytovatelé bez ověřování mají na své stránce přepínač vedle možnosti **Ověření není vyžadováno**.
-Jeho vypnutím daného poskytovatele deaktivujete, odeberete jej z nakonfigurovaného a kompaktního zobrazení Poskytovatelů a jeho modely odeberete z `/v1/models`.
+Bezplatní poskytovatelé bez ověřování mají na své stránce přepínač vedle možnosti **Není vyžadováno ověření**.
+Jeho vypnutím poskytovatele deaktivujete, odeberete ho ze zobrazení nakonfigurovaných poskytovatelů / kompaktního zobrazení
+a odeberete jeho modely z `/v1/models`.
 
 #### Qoder (9 BEZPLATNÝCH modelů)
 
 ```bash
-Ovládací panel → Připojit Qoder → Přihlášení přes OAuth → Přístup podléhá aktuálním omezením poskytovatele
+Přehled → Připojit Qoder → Přihlášení přes OAuth → Přístup podléhá aktuálním limitům poskytovatele
 
 Modely: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ZDARMA)
+#### Kiro (BEZPLATNÝ Claude)
 
 ```bash
-Ovládací panel → Připojit Kiro → AWS Builder ID nebo Google/GitHub → ~50 kreditů/měsíc
+Přehled → Připojit Kiro → AWS Builder ID nebo Google/GitHub → přibližně 50 kreditů/měsíc
 
 Modely: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

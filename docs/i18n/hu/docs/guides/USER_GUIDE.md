@@ -118,18 +118,18 @@ Elérés ezeken keresztül: WhatsApp, Telegram, Slack, Discord, iMessage, Signal
 
 ---
 
-## 📖 Szolgáltatók beállítása
+## 📖 Szolgáltató beállítása
 
-API-kulcsos kapcsolatok CSV- vagy JSON-fájlból történő tömeges hozzáadásához használja az **Irányítópult → Szolgáltatók → Importálás fájlból** lehetőséget. Az oszlopok sorrendje kötött (`provider,name,apiKey,baseUrl,priority`); a `provider` értékének már létező felügyelt szolgáltatónak vagy kompatibilis csomópontnak kell lennie. Lásd: [Szolgáltatók importálása CSV- vagy JSON-fájlból](../providers/CSV-IMPORT.md).
+API-kulcsos kapcsolatok CSV- vagy JSON-fájlból történő tömeges hozzáadásához használd a **Vezérlőpult → Szolgáltatók → Importálás fájlból** lehetőséget. Az oszlopok pozícióalapúak (`provider,name,apiKey,baseUrl,priority`); a `provider` értékének már létező kezelt szolgáltatónak vagy kompatibilis csomópontnak kell lennie. Lásd: [Szolgáltatók importálása CSV- vagy JSON-fájlból](../providers/CSV-IMPORT.md).
 
 ### 🔐 Előfizetéses szolgáltatók
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Irányítópult → Szolgáltatók → Claude Code csatlakoztatása
-→ OAuth-bejelentkezés → Token automatikus frissítése
-→ 5 órás és heti kvótakövetés
+Vezérlőpult → Szolgáltatók → Claude Code csatlakoztatása
+→ OAuth-bejelentkezés → Automatikus tokenfrissítés
+→ 5 órás + heti kvótakövetés
 
 Modellek:
   cc/claude-opus-4-7
@@ -137,20 +137,20 @@ Modellek:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profi tipp:** Összetett feladatokhoz használja az Opust, a gyorsasághoz pedig a Sonnetet. Az OmniRoute modellenként követi a kvótát!
+**Pro tipp:** Használd az Opust összetett feladatokhoz, a Sonn et a gyorsasághoz. Az OmniRoute modellenként követi a kvótát!
 
-Nincs böngésző az OmniRoute-gazdagépen? Futtassa a `claude setup-token` parancsot bárhol, ahol be van jelentkezve a Claude Code-ba, majd illessze be az egy évig érvényes tokent a **Beállítási token** lapon. Lásd: [A Claude Code használata beállítási tokennel](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nincs böngésző az OmniRoute-gépen? Futtasd a `claude setup-token` parancsot bárhol, ahol a Claude Code-ba be vagy jelentkezve, majd illeszd be az egyéves tokent a **Setup Token** lapra. Lásd: [Claude Code setup tokennel](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-A Claude- és Claude Code-kompatibilis útvonalak megőrzik a `max` gondolkodási erőfeszítési szintet az Opus és Sonnet
-modelleknél. A Haiku modellek nem fogadják el a `max` erőfeszítési szintet, ezért az OmniRoute
-a kérés továbbítása előtt magas gondolkodási keretre csökkenti azt.
+A Claude- és Claude Code-kompatibilis útvonalak megőrzik a `max` gondolkodási erőfeszítést az Opus és a Sonnet
+modellek esetén. A Haiku-modellek nem fogadják el a `max` erőfeszítési szintet, ezért az OmniRoute ezt a
+kérést magas gondolkodási költségkeretre csökkenti, mielőtt továbbítaná a szolgáltatónak.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Irányítópult → Szolgáltatók → Codex csatlakoztatása
+Vezérlőpult → Szolgáltatók → Codex csatlakoztatása
 → OAuth-bejelentkezés (1455-ös port)
-→ 5 órás és heti visszaállítás
+→ 5 órás + heti visszaállítás
 
 Modellek:
   cx/gpt-5.5
@@ -162,7 +162,7 @@ Modellek:
 #### GitHub Copilot
 
 ```bash
-Irányítópult → Szolgáltatók → GitHub csatlakoztatása
+Vezérlőpult → Szolgáltatók → GitHub csatlakoztatása
 → OAuth a GitHubon keresztül
 → Havi visszaállítás (a hónap 1. napján)
 
@@ -174,55 +174,71 @@ Modellek:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-kreditek (tokenalapú számlázás).** Amikor a GitHub `credits_used` értéket jelent a
+fiókhoz, a Szolgáltatói korlátok kártyája megjelenít egy **AI-kreditek** sort az aktuális
+számlázási időszakban felhasznált kreditekkel, korlátlan szervezeti csomagok esetén is.
+
+**Helyi AI-kreditkorlát.** Szerkessz egy GitHub-kapcsolatot, és állítsd be az **AI-kreditek
+korlátját számlázási időszakonként** értéket (`providerSpecificData.githubCreditLimit`). Az üres
+érték letiltja a korlátot; a `0` mindig kihagyja a kapcsolatot. Amikor a legutóbbi használati
+érték eléri vagy meghaladja a korlátot, a fiókválasztás kihagyja ezt a kapcsolatot, az útválasztás
+pedig a többi kapcsolatodra vált vissza, ugyanúgy, mint kvótaszabályzat szerinti leállítás esetén.
+Az ellenőrzés a használati adatot olvassa, amelyet az időszakos kvótafrissítés már begyűjtött —
+soha nem hívja meg a GitHubot a kérés útvonalán —, és engedékenyen működik: a hiányzó vagy elavult
+adat (15 percnél régebbi, illetve már visszaállított számlázási időszakból származó adat) nem
+blokkolja a kapcsolatot. Ez helyi védelmi mechanizmus, **nem garantált költési plafon**: a GitHub
+jelentési késedelmei, a frissítési időköz, a folyamatban lévő kérések és az OmniRoute-on kívüli
+használat túllépheti azt. Kemény korláthoz használd a GitHub saját költési vezérlőit.
+
 ### 💰 Olcsó szolgáltatók
 
-#### GLM-4.7 (Napi visszaállítás, $0.6/1M)
+#### GLM-4.7 (napi visszaállítás, 0,6 USD/1M)
 
-1. Regisztráljon: [Zhipu AI](https://open.bigmodel.cn)
-2. Szerezze be az API-kulcsot a Coding Planből
-3. Irányítópult → API-kulcs hozzáadása: Szolgáltató: `glm`, API-kulcs: `your-key`
+1. Regisztrálj: [Zhipu AI](https://open.bigmodel.cn)
+2. Szerezz API-kulcsot a Coding Planből
+3. Vezérlőpult → API-kulcs hozzáadása: Szolgáltató: `glm`, API-kulcs: `your-key`
 
-**Használat:** `glm/glm-4.7` — **Profi tipp:** A Coding Plan háromszoros kvótát kínál hetedannyi költségért! Naponta délelőtt 10:00-kor áll vissza.
+**Használat:** `glm/glm-4.7` — **Pro tipp:** A Coding Plan háromszoros kvótát kínál a költség hetedéért! Napi visszaállítás 10:00-kor.
 
-#### MiniMax M2.1 (5 órás visszaállítás, $0.20/1M)
+#### MiniMax M2.1 (5 órás visszaállítás, 0,20 USD/1M)
 
-1. Regisztráljon: [MiniMax](https://www.minimax.io)
-2. Szerezze be az API-kulcsot → Irányítópult → API-kulcs hozzáadása
+1. Regisztrálj: [MiniMax](https://www.minimax.io)
+2. Szerezz API-kulcsot → Vezérlőpult → API-kulcs hozzáadása
 
-**Használat:** `minimax/MiniMax-M2.1` — **Profi tipp:** A legolcsóbb lehetőség hosszú kontextushoz (1M token)!
+**Használat:** `minimax/MiniMax-M2.1` — **Pro tipp:** A legolcsóbb lehetőség hosszú kontextushoz (1M token)!
 
-#### Kimi K2 (Fix $9/hónap)
+#### Kimi K2 (fix 9 USD/hó)
 
-1. Fizessen elő: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Szerezze be az API-kulcsot → Irányítópult → API-kulcs hozzáadása
+1. Fizess elő: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Szerezz API-kulcsot → Vezérlőpult → API-kulcs hozzáadása
 
-**Használat:** `kimi/kimi-k2.5` — **Profi tipp:** Fix $9/hónap 10M tokenért = ténylegesen $0.90/1M költség!
+**Használat:** `kimi/kimi-k2.5` — **Pro tipp:** Fix 9 USD/hó 10M tokenért = ténylegesen 0,90 USD/1M költség!
 
 #### Baidu Qianfan / ERNIE
 
-1. Regisztráljon: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Hozzon létre egy Qianfan API-kulcsot → Irányítópult → API-kulcs hozzáadása: Szolgáltató: `qianfan`
+1. Regisztrálj: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. Hozz létre Qianfan API-kulcsot → Vezérlőpult → API-kulcs hozzáadása: Szolgáltató: `qianfan`
 
-**Használat:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` vagy egy másik, OpenAI-kompatibilis Qianfan-modellazonosító.
+**Használat:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, vagy egy másik Qianfan OpenAI-kompatibilis modellazonosító.
 
 ### 🆓 INGYENES szolgáltatók
 
-A hitelesítést nem igénylő ingyenes szolgáltatók oldalán egy kapcsoló található a **Nincs szükség hitelesítésre** lehetőség mellett.
-A kikapcsolása letiltja az adott szolgáltatót, eltávolítja azt a Szolgáltatók konfigurált/tömörített nézeteiből, valamint
-eltávolítja a modelljeit a `/v1/models` végpontról.
+A hitelesítést nem igénylő ingyenes szolgáltatóknál a szolgáltató oldalán található egy kapcsoló a **Nincs szükség hitelesítésre** mellett.
+Kikapcsolása letiltja az adott szolgáltatót, eltávolítja a Szolgáltatók konfigurált/kompakt nézeteiből,
+és eltávolítja a modelljeit a `/v1/models` végpontról.
 
 #### Qoder (9 INGYENES modell)
 
 ```bash
-Irányítópult → Qoder csatlakoztatása → OAuth-bejelentkezés → A hozzáférésre a szolgáltató aktuális korlátozásai vonatkoznak
+Vezérlőpult → Qoder csatlakoztatása → OAuth-bejelentkezés → A hozzáférés az aktuális szolgáltatói korlátoktól függ
 
 Modellek: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (INGYENES Claude)
+#### Kiro (Claude INGYENES)
 
 ```bash
-Irányítópult → Kiro csatlakoztatása → AWS Builder ID vagy Google/GitHub → ~50 kredit/hónap
+Vezérlőpult → Kiro csatlakoztatása → AWS Builder ID vagy Google/GitHub → ~50 kredit/hó
 
 Modellek: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

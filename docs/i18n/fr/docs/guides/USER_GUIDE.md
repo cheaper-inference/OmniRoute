@@ -120,16 +120,16 @@ Accès via : WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configuration des fournisseurs
 
-Pour ajouter en masse des connexions par clé API à partir d’un fichier CSV ou JSON, utilisez **Tableau de bord → Fournisseurs → Importer depuis un fichier**. Les colonnes sont positionnelles (`provider,name,apiKey,baseUrl,priority`) ; `provider` doit déjà exister en tant que fournisseur géré ou nœud compatible. Consultez [Importer des fournisseurs depuis un fichier CSV ou JSON](../providers/CSV-IMPORT.md).
+Pour ajouter en masse des connexions avec clé API depuis un fichier CSV ou JSON, utilisez **Tableau de bord → Fournisseurs → Importer depuis un fichier**. Les colonnes sont positionnelles (`provider,name,apiKey,baseUrl,priority`) ; `provider` doit déjà exister en tant que fournisseur géré ou nœud compatible. Consultez [Importer des fournisseurs depuis un fichier CSV ou JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Fournisseurs par abonnement
+### 🔐 Fournisseurs d’abonnement
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Tableau de bord → Fournisseurs → Connecter Claude Code
 → Connexion OAuth → Actualisation automatique du jeton
-→ Suivi des quotas sur 5 heures et hebdomadaires
+→ Suivi des quotas de 5 heures et hebdomadaires
 
 Modèles :
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modèles :
   cc/claude-haiku-4-5-20251001
 ```
 
-**Conseil de pro :** utilisez Opus pour les tâches complexes et Sonnet pour la rapidité. OmniRoute suit le quota par modèle !
+**Conseil :** utilisez Opus pour les tâches complexes et Sonnet pour la rapidité. OmniRoute suit le quota par modèle !
 
-Aucun navigateur sur l’hôte OmniRoute ? Exécutez `claude setup-token` partout où Claude Code est connecté, puis collez le jeton valable un an dans l’onglet **Jeton de configuration**. Consultez [Claude Code avec un jeton de configuration](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Pas de navigateur sur l’hôte OmniRoute ? Exécutez `claude setup-token` depuis n’importe quel endroit où Claude Code est connecté, puis collez le jeton valable un an dans l’onglet **Jeton de configuration**. Consultez [Claude Code avec un jeton de configuration](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Les routes compatibles avec Claude et Claude Code conservent l’effort de réflexion `max` pour les modèles Opus et Sonnet. Les modèles Haiku n’acceptent pas le niveau d’effort `max` ; OmniRoute abaisse donc cette requête à un budget de réflexion élevé avant de l’envoyer au fournisseur en amont.
+Les routes compatibles avec Claude et Claude Code préservent le niveau d’effort de réflexion `max` pour les
+modèles Opus et Sonnet. Les modèles Haiku n’acceptent pas le niveau d’effort `max`, donc OmniRoute
+réduit cette requête à un budget de réflexion élevé avant de l’envoyer au service en amont.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Tableau de bord → Fournisseurs → Connecter Codex
 → Connexion OAuth (port 1455)
-→ Réinitialisation toutes les 5 heures et hebdomadaire
+→ Réinitialisation toutes les 5 heures et chaque semaine
 
 Modèles :
   cx/gpt-5.5
@@ -172,42 +174,58 @@ Modèles :
   gh/gemini-3.1-pro-preview
 ```
 
+**Crédits IA (facturation basée sur les jetons).** Lorsque GitHub indique `credits_used` pour le
+compte, la carte des limites du fournisseur affiche une ligne **Crédits IA** avec les crédits
+consommés pendant la période de facturation actuelle, y compris pour les forfaits d’organisation
+illimités.
+
+**Limite locale des crédits IA.** Modifiez une connexion GitHub et définissez **Limite de crédits IA par
+période de facturation** (`providerSpecificData.githubCreditLimit`). Une valeur vide la désactive ; `0`
+ignore toujours la connexion. Lorsque la dernière mesure d’utilisation est supérieure ou égale à la limite,
+la sélection du compte ignore cette connexion et le routage bascule vers vos autres connexions, comme
+avec une coupure liée à une politique de quota. Le contrôle lit les données d’utilisation que
+l’actualisation périodique des quotas collecte déjà — il n’appelle jamais GitHub pendant le traitement de
+la requête — et adopte une stratégie de tolérance aux erreurs : une mesure manquante ou obsolète (datant
+de plus de 15 minutes ou provenant d’une période de facturation déjà réinitialisée) ne bloque pas la
+connexion. Il s’agit d’une protection locale, **et non d’un plafond de dépenses garanti** : les retards de
+rapport de GitHub, l’intervalle d’actualisation, les requêtes en cours et l’utilisation en dehors
+d’OmniRoute peuvent le dépasser. Utilisez les contrôles de dépenses propres à GitHub pour appliquer un
+plafond strict.
+
 ### 💰 Fournisseurs économiques
 
-#### GLM-4.7 (Réinitialisation quotidienne, 0,6 $/1M)
+#### GLM-4.7 (réinitialisation quotidienne, 0,6 $/1M)
 
 1. Inscrivez-vous : [Zhipu AI](https://open.bigmodel.cn)
 2. Obtenez une clé API depuis Coding Plan
 3. Tableau de bord → Ajouter une clé API : Fournisseur : `glm`, Clé API : `your-key`
 
-**Utilisation :** `glm/glm-4.7` — **Conseil de pro :** Coding Plan offre un quota 3× supérieur pour 1/7 du coût ! Réinitialisation quotidienne à 10 h 00.
+**Utilisation :** `glm/glm-4.7` — **Conseil :** Coding Plan offre 3× plus de quota pour 1/7 du coût ! Réinitialisation quotidienne à 10 h 00.
 
-#### MiniMax M2.1 (Réinitialisation toutes les 5 h, 0,20 $/1M)
+#### MiniMax M2.1 (réinitialisation toutes les 5 h, 0,20 $/1M)
 
 1. Inscrivez-vous : [MiniMax](https://www.minimax.io)
 2. Obtenez une clé API → Tableau de bord → Ajouter une clé API
 
-**Utilisation :** `minimax/MiniMax-M2.1` — **Conseil de pro :** l’option la moins chère pour les contextes longs (1M de jetons) !
+**Utilisation :** `minimax/MiniMax-M2.1` — **Conseil :** l’option la moins chère pour un long contexte (1M de jetons) !
 
-#### Kimi K2 (Forfait fixe de 9 $/mois)
+#### Kimi K2 (9 $/mois fixe)
 
 1. Abonnez-vous : [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Obtenez une clé API → Tableau de bord → Ajouter une clé API
 
-**Utilisation :** `kimi/kimi-k2.5` — **Conseil de pro :** un forfait fixe de 9 $/mois pour 10M de jetons, soit un coût effectif de 0,90 $/1M !
+**Utilisation :** `kimi/kimi-k2.5` — **Conseil :** 9 $/mois fixes pour 10M de jetons = coût effectif de 0,90 $/1M !
 
 #### Baidu Qianfan / ERNIE
 
 1. Inscrivez-vous : [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Créez une clé API Qianfan → Tableau de bord → Ajouter une clé API : Fournisseur : `qianfan`
 
-**Utilisation :** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou un autre identifiant de modèle Qianfan compatible avec OpenAI.
+**Utilisation :** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou un autre identifiant de modèle compatible avec l’API OpenAI de Qianfan.
 
 ### 🆓 Fournisseurs GRATUITS
 
-Les fournisseurs gratuits sans authentification disposent d’un interrupteur à côté de **Aucune authentification requise** sur leur page.
-Sa désactivation désactive ce fournisseur, le retire des vues configurée/compacte des fournisseurs et
-retire ses modèles de `/v1/models`.
+Les fournisseurs gratuits sans authentification possèdent un interrupteur à côté de **Aucune authentification requise** sur leur page. Le désactiver désactive ce fournisseur, le supprime des vues Fournisseurs configurés/compactes et supprime ses modèles de `/v1/models`.
 
 #### Qoder (9 modèles GRATUITS)
 
@@ -220,7 +238,7 @@ Modèles : if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, 
 #### Kiro (Claude GRATUIT)
 
 ```bash
-Tableau de bord → Connecter Kiro → AWS Builder ID ou Google/GitHub → Environ 50 crédits/mois
+Tableau de bord → Connecter Kiro → AWS Builder ID ou Google/GitHub → environ 50 crédits/mois
 
 Modèles : kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

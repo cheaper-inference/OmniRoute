@@ -118,20 +118,20 @@ Månadskostnad: $0
 
 ---
 
-## 📖 Konfiguration av leverantörer
+## 📖 Konfigurera leverantörer
 
-För att lägga till flera API-nyckelanslutningar samtidigt från en CSV- eller JSON-fil använder du **Instrumentpanel → Leverantörer → Importera från fil**. Kolumnerna är positionsbaserade (`provider,name,apiKey,baseUrl,priority`); `provider` måste redan finnas som en hanterad leverantör eller en kompatibel nod. Se [Importera leverantörer från en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
+Om du vill lägga till API-nyckelanslutningar i bulk från en CSV- eller JSON-fil använder du **Dashboard → Providers → Import from file**. Kolumnerna är positionsbaserade (`provider,name,apiKey,baseUrl,priority`); `provider` måste redan finnas som en hanterad leverantör eller en kompatibel nod. Se [Importera leverantörer från en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
 
 ### 🔐 Prenumerationsleverantörer
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Instrumentpanel → Leverantörer → Anslut Claude Code
-→ OAuth-inloggning → Automatisk uppdatering av token
-→ Kvotspårning per 5 timmar + vecka
+Dashboard → Providers → Connect Claude Code
+→ OAuth login → Auto token refresh
+→ 5-hour + weekly quota tracking
 
-Modeller:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
@@ -139,18 +139,18 @@ Modeller:
 
 **Proffstips:** Använd Opus för komplexa uppgifter och Sonnet för snabbhet. OmniRoute spårar kvoten per modell!
 
-Ingen webbläsare på OmniRoute-värden? Kör `claude setup-token` var som helst där Claude Code är inloggat och klistra in den ettåriga token på fliken **Setup Token**. Se [Claude Code med en setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Har OmniRoute-värden ingen webbläsare? Kör `claude setup-token` någonstans där du är inloggad i Claude Code och klistra in den ettåriga tokenen på fliken **Setup Token**. Se [Claude Code med en setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude- och Claude Code-kompatibla rutter bevarar tankeansträngningen `max` för Opus- och Sonnet-modeller. Haiku-modeller stöder inte ansträngningsnivån `max`, så OmniRoute nedgraderar den begäran till en hög tankebudget innan den skickas vidare uppströms.
+Claude- och Claude Code-kompatibla rutter bevarar tänkeansträngningen `max` för Opus- och Sonnet-modeller. Haiku-modeller accepterar inte `max`-nivån för ansträngning, så OmniRoute sänker den begäran till en hög tänkandebudget innan den skickas uppströms.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Instrumentpanel → Leverantörer → Anslut Codex
-→ OAuth-inloggning (port 1455)
-→ Återställning per 5 timmar + vecka
+Dashboard → Providers → Connect Codex
+→ OAuth login (port 1455)
+→ 5-hour + weekly reset
 
-Modeller:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +160,11 @@ Modeller:
 #### GitHub Copilot
 
 ```bash
-Instrumentpanel → Leverantörer → Anslut GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth via GitHub
-→ Månatlig återställning (den 1:a varje månad)
+→ Monthly reset (1st of month)
 
-Modeller:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +172,59 @@ Modeller:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-krediter (tokenbaserad debitering).** När GitHub rapporterar `credits_used` för kontot visar kortet för leverantörsgränser en rad för **AI-krediter** med antalet krediter som förbrukats under den aktuella debiteringsperioden, även för obegränsade organisationsplaner.
+
+**Lokal gräns för AI-krediter.** Redigera en GitHub-anslutning och ange **AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`). Ett tomt värde inaktiverar den; `0` hoppar alltid över anslutningen. När den senaste användningsavläsningen är lika med eller över gränsen hoppar kontovalet över den anslutningen och routningen använder dina andra anslutningar i stället, på samma sätt som när en kvotpolicy når sitt stoppvärde. Kontrollen läser den användning som den periodiska kvotuppdateringen redan samlar in – den anropar aldrig GitHub under begärans väg – och tillämpar en tillåtande princip: en avläsning som saknas eller är inaktuell (äldre än 15 minuter eller från en debiteringsperiod som redan har återställts) blockerar inte anslutningen. Detta är en lokal skyddsåtgärd, **inte ett garanterat utgiftstak**: fördröjningar i GitHubs rapportering, uppdateringsintervallet, pågående begäranden och användning utanför OmniRoute kan göra att gränsen överskrids. Använd GitHubs egna utgiftskontroller för ett hårt tak.
+
 ### 💰 Billiga leverantörer
 
-#### GLM-4.7 (daglig återställning, $0.6/1M)
+#### GLM-4.7 (daglig återställning, 0,6 USD/1M)
 
 1. Registrera dig: [Zhipu AI](https://open.bigmodel.cn)
 2. Hämta API-nyckeln från Coding Plan
-3. Instrumentpanel → Lägg till API-nyckel: Leverantör: `glm`, API-nyckel: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Använd:** `glm/glm-4.7` — **Proffstips:** Coding Plan erbjuder 3× kvot till 1/7 av kostnaden! Återställs dagligen kl. 10.00.
+**Använd:** `glm/glm-4.7` — **Proffstips:** Coding Plan erbjuder 3× kvot till 1/7 av kostnaden! Återställs dagligen kl. 10:00.
 
-#### MiniMax M2.1 (återställning efter 5 h, $0.20/1M)
+#### MiniMax M2.1 (återställning efter 5 timmar, 0,20 USD/1M)
 
 1. Registrera dig: [MiniMax](https://www.minimax.io)
-2. Hämta API-nyckeln → Instrumentpanel → Lägg till API-nyckel
+2. Hämta API-nyckeln → Dashboard → Add API Key
 
-**Använd:** `minimax/MiniMax-M2.1` — **Proffstips:** Det billigaste alternativet för långa kontexter (1M token)!
+**Använd:** `minimax/MiniMax-M2.1` — **Proffstips:** Det billigaste alternativet för lång kontext (1M tokens)!
 
-#### Kimi K2 (fast pris på $9/månad)
+#### Kimi K2 (9 USD/månad, fast pris)
 
 1. Prenumerera: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hämta API-nyckeln → Instrumentpanel → Lägg till API-nyckel
+2. Hämta API-nyckeln → Dashboard → Add API Key
 
-**Använd:** `kimi/kimi-k2.5` — **Proffstips:** Fast pris på $9/månad för 10M token = en effektiv kostnad på $0.90/1M!
+**Använd:** `kimi/kimi-k2.5` — **Proffstips:** Fast pris på 9 USD/månad för 10M tokens = effektiv kostnad på 0,90 USD/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Registrera dig: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Skapa en Qianfan API-nyckel → Instrumentpanel → Lägg till API-nyckel: Leverantör: `qianfan`
+2. Skapa en Qianfan-API-nyckel → Dashboard → Add API Key: Provider: `qianfan`
 
-**Använd:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller ett annat Qianfan-modell-ID som är kompatibelt med OpenAI.
+**Använd:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller ett annat Qianfan OpenAI-kompatibelt modell-ID.
 
-### 🆓 GRATIS leverantörer
+### 🆓 GRATIS-leverantörer
 
-Kostnadsfria leverantörer utan autentisering har ett reglage bredvid **Ingen autentisering krävs** på sin leverantörssida.
-Om du stänger av det inaktiveras leverantören, den tas bort från de konfigurerade/kompakta leverantörsvyerna och
-dess modeller tas bort från `/v1/models`.
+Gratisleverantörer utan autentisering har ett reglage bredvid **No authentication required** på leverantörssidan. Om du stänger av det inaktiveras leverantören, den tas bort från vyerna Providers configured/compact och dess modeller tas bort från `/v1/models`.
 
-#### Qoder (9 GRATIS modeller)
+#### Qoder (9 GRATIS-modeller)
 
 ```bash
-Instrumentpanel → Anslut Qoder → OAuth-inloggning → Åtkomst omfattas av leverantörens aktuella begränsningar
+Dashboard → Connect Qoder → OAuth login → Access is subject to current provider limits
 
-Modeller: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude GRATIS)
 
 ```bash
-Instrumentpanel → Anslut Kiro → AWS Builder ID eller Google/GitHub → ~50 krediter/månad
+Dashboard → Connect Kiro → AWS Builder ID or Google/GitHub → ~50 credits/month
 
-Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

@@ -118,18 +118,18 @@ Piekļuve, izmantojot: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Pakalpojumu sniedzēju iestatīšana
+## 📖 Pakalpojumu sniedzēja iestatīšana
 
-Lai masveidā pievienotu API atslēgu savienojumus no CSV vai JSON faila, izmantojiet **Informācijas panelis → Pakalpojumu sniedzēji → Importēt no faila**. Kolonnas ir pozicionālas (`provider,name,apiKey,baseUrl,priority`); laukam `provider` jau jābūt pārvaldītam pakalpojumu sniedzējam vai saderīgam mezglam. Skatiet [Pakalpojumu sniedzēju importēšana no CSV vai JSON faila](../providers/CSV-IMPORT.md).
+Lai masveidā pievienotu API atslēgu savienojumus no CSV vai JSON faila, izmantojiet **Informācijas panelis → Pakalpojumu sniedzēji → Importēt no faila**. Kolonnas ir pozicionālas (`provider,name,apiKey,baseUrl,priority`); `provider` jau ir jābūt esošam pārvaldītam pakalpojumu sniedzējam vai saderīgam mezglam. Skatiet [Pakalpojumu sniedzēju importēšana no CSV vai JSON faila](../providers/CSV-IMPORT.md).
 
-### 🔐 Abonementu pakalpojumu sniedzēji
+### 🔐 Abonēšanas pakalpojumu sniedzēji
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Informācijas panelis → Pakalpojumu sniedzēji → Savienot Claude Code
-→ OAuth pieteikšanās → Automātiska pilnvaras atsvaidzināšana
-→ 5 stundu un nedēļas kvotas uzskaite
+→ OAuth pieteikšanās → Automātiska marķiera atjaunošana
+→ 5 stundu + nedēļas kvotas uzskaite
 
 Modeļi:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modeļi:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionāļa padoms:** Sarežģītiem uzdevumiem izmantojiet Opus, bet ātrumam — Sonnet. OmniRoute uzskaita kvotu katram modelim!
+**Ieteikums:** sarežģītiem uzdevumiem izmantojiet Opus, bet ātrumam — Sonnet. OmniRoute uzskaita kvotu katram modelim!
 
-OmniRoute resursdatorā nav pārlūkprogrammas? Palaidiet `claude setup-token` jebkur, kur ir veikta pieteikšanās Claude Code, un ielīmējiet viena gada pilnvaru cilnē **Iestatīšanas pilnvara**. Skatiet [Claude Code ar iestatīšanas pilnvaru](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Vai OmniRoute resursdatorā nav pārlūkprogrammas? Palaidiet `claude setup-token` jebkur, kur esat pieteicies Claude Code, un ielīmējiet viena gada marķieri cilnē **Iestatīšanas marķieris**. Skatiet [Claude Code ar iestatīšanas marķieri](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude un ar Claude Code saderīgie maršruti Opus un Sonnet modeļiem saglabā `max` domāšanas intensitāti. Haiku modeļi nepieņem `max` intensitātes līmeni, tāpēc OmniRoute pirms pieprasījuma nosūtīšanas augšupstraumes pakalpojumam pazemina to līdz augstam domāšanas budžetam.
+Ar Claude un Claude Code saderīgie maršruti saglabā `max` domāšanas intensitāti Opus un Sonnet
+modeļiem. Haiku modeļi nepieņem `max` intensitātes līmeni, tāpēc OmniRoute pirms nosūtīšanas
+augšupielādes pakalpojumam šo pieprasījumu pazemina līdz augstam domāšanas budžetam.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Informācijas panelis → Pakalpojumu sniedzēji → Savienot Codex
 → OAuth pieteikšanās (ports 1455)
-→ Atiestatīšana ik pēc 5 stundām un reizi nedēļā
+→ 5 stundu + nedēļas atiestatīšana
 
 Modeļi:
   cx/gpt-5.5
@@ -162,7 +164,7 @@ Modeļi:
 ```bash
 Informācijas panelis → Pakalpojumu sniedzēji → Savienot GitHub
 → OAuth, izmantojot GitHub
-→ Atiestatīšana reizi mēnesī (mēneša 1. datumā)
+→ Ikmēneša atiestatīšana (mēneša 1. datumā)
 
 Modeļi:
   gh/gpt-5.5
@@ -172,41 +174,59 @@ Modeļi:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI kredīti (uz marķieriem balstīta norēķinu sistēma).** Kad GitHub kontam ziņo `credits_used`,
+pakalpojumu sniedzēja ierobežojumu kartītē tiek rādīta rinda **AI kredīti** ar pašreizējā norēķinu
+periodā izlietoto kredītu skaitu, tostarp neierobežotiem organizāciju plāniem.
+
+**Vietējais AI kredītu ierobežojums.** Rediģējiet GitHub savienojumu un iestatiet **AI kredītu
+ierobežojumu vienam norēķinu periodam** (`providerSpecificData.githubCreditLimit`). Tukša vērtība
+to atspējo; `0` vienmēr izlaiž šo savienojumu. Ja pēdējais lietojuma rādījums ir vienāds ar
+ierobežojumu vai to pārsniedz, konta atlase izlaiž šo savienojumu un maršrutēšana pāriet uz
+citiem savienojumiem, tāpat kā kvotas politikas nogriešanas gadījumā. Pārbaude nolasa lietojumu,
+ko jau apkopo periodiskā kvotas atsvaidzināšana — tā nekad neizsauc GitHub pieprasījuma ceļā —
+un darbojas pēc principa „atļaut piekļuvi kļūmes gadījumā”: trūkstošs vai novecojis rādījums
+(vecāks par 15 minūtēm vai no norēķinu perioda, kas jau ir atiestatīts) savienojumu nebloķē.
+Tas ir vietējs drošības mehānisms, **nevis garantēts tēriņu griestu ierobežojums**: GitHub
+ziņošanas aizkaves, atsvaidzināšanas intervāls, notiekošie pieprasījumi un lietojums ārpus
+OmniRoute var izraisīt ierobežojuma pārsniegšanu. Stingram ierobežojumam izmantojiet paša
+GitHub tēriņu vadīklas.
+
 ### 💰 Lēti pakalpojumu sniedzēji
 
-#### GLM-4.7 (atiestatīšana katru dienu, $0.6/1M)
+#### GLM-4.7 (ikdienas atiestatīšana, $0.6/1M)
 
 1. Reģistrējieties: [Zhipu AI](https://open.bigmodel.cn)
 2. Iegūstiet API atslēgu no Coding Plan
 3. Informācijas panelis → Pievienot API atslēgu: Pakalpojumu sniedzējs: `glm`, API atslēga: `your-key`
 
-**Lietošana:** `glm/glm-4.7` — **Profesionāļa padoms:** Coding Plan piedāvā 3× lielāku kvotu par 1/7 no izmaksām! Atiestatīšana katru dienu plkst. 10.00.
+**Izmantojiet:** `glm/glm-4.7` — **Ieteikums:** Coding Plan piedāvā 3× lielāku kvotu par 1/7 izmaksām! Atiestatīšana katru dienu plkst. 10:00.
 
-#### MiniMax M2.1 (atiestatīšana ik pēc 5 h, $0.20/1M)
+#### MiniMax M2.1 (5 stundu atiestatīšana, $0.20/1M)
 
 1. Reģistrējieties: [MiniMax](https://www.minimax.io)
 2. Iegūstiet API atslēgu → Informācijas panelis → Pievienot API atslēgu
 
-**Lietošana:** `minimax/MiniMax-M2.1` — **Profesionāļa padoms:** Lētākā iespēja garam kontekstam (1M pilnvaru)!
+**Izmantojiet:** `minimax/MiniMax-M2.1` — **Ieteikums:** lētākais variants ilgām konteksta virknēm (1M marķieru)!
 
-#### Kimi K2 (fiksēta maksa $9 mēnesī)
+#### Kimi K2 ($9 mēnesī, fiksēta maksa)
 
 1. Abonējiet: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Iegūstiet API atslēgu → Informācijas panelis → Pievienot API atslēgu
 
-**Lietošana:** `kimi/kimi-k2.5` — **Profesionāļa padoms:** Fiksēta maksa $9 mēnesī par 10M pilnvaru = faktiskās izmaksas $0.90/1M!
+**Izmantojiet:** `kimi/kimi-k2.5` — **Ieteikums:** fiksēta maksa $9 mēnesī par 10M marķieru = efektīvās izmaksas $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Reģistrējieties: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Izveidojiet Qianfan API atslēgu → Informācijas panelis → Pievienot API atslēgu: Pakalpojumu sniedzējs: `qianfan`
 
-**Lietošana:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` vai cits ar OpenAI saderīgs Qianfan modeļa ID.
+**Izmantojiet:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` vai citu ar Qianfan OpenAI saderīgu modeļa ID.
 
 ### 🆓 BEZMAKSAS pakalpojumu sniedzēji
 
-Bezmaksas pakalpojumu sniedzējiem, kuriem nav nepieciešama autentifikācija, to pakalpojumu sniedzēja lapā blakus opcijai **Autentifikācija nav nepieciešama** ir slēdzis.
-Tā izslēgšana atspējo attiecīgo pakalpojumu sniedzēju, noņem to no konfigurēto pakalpojumu sniedzēju un kompaktā skata, kā arī
+Bezmaksas pakalpojumu sniedzējiem bez autentifikācijas to pakalpojumu sniedzēja lapā blakus
+**Autentifikācija nav nepieciešama** ir pārslēdzējs.
+Tā izslēgšana atspējo šo pakalpojumu sniedzēju, noņem to no skatiem “Konfigurētie pakalpojumu sniedzēji”/kompaktais skats un
 noņem tā modeļus no `/v1/models`.
 
 #### Qoder (9 BEZMAKSAS modeļi)

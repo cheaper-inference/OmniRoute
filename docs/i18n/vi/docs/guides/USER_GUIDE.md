@@ -120,9 +120,9 @@ Truy cập qua: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Thiết lập nhà cung cấp
 
-Để thêm hàng loạt kết nối khóa API từ tệp CSV hoặc JSON, hãy sử dụng **Bảng điều khiển → Nhà cung cấp → Nhập từ tệp**. Các cột được xác định theo vị trí (`provider,name,apiKey,baseUrl,priority`); `provider` phải tồn tại sẵn dưới dạng nhà cung cấp được quản lý hoặc một nút tương thích. Xem [Nhập nhà cung cấp từ tệp CSV hoặc JSON](../providers/CSV-IMPORT.md).
+Để thêm hàng loạt kết nối khóa API từ tệp CSV hoặc JSON, hãy sử dụng **Bảng điều khiển → Nhà cung cấp → Nhập từ tệp**. Các cột được xác định theo vị trí (`provider,name,apiKey,baseUrl,priority`); `provider` phải tồn tại dưới dạng nhà cung cấp được quản lý hoặc một node tương thích. Xem [Nhập nhà cung cấp từ tệp CSV hoặc JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Nhà cung cấp theo gói đăng ký
+### 🔐 Nhà cung cấp gói đăng ký
 
 #### Claude Code (Pro/Max)
 
@@ -137,11 +137,13 @@ Mô hình:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Mẹo chuyên nghiệp:** Dùng Opus cho các tác vụ phức tạp, Sonnet khi cần tốc độ. OmniRoute theo dõi hạn mức theo từng mô hình!
+**Mẹo chuyên nghiệp:** Sử dụng Opus cho các tác vụ phức tạp, Sonnet để có tốc độ. OmniRoute theo dõi hạn mức theo từng mô hình!
 
-Không có trình duyệt trên máy chủ OmniRoute? Chạy `claude setup-token` ở bất kỳ đâu đã đăng nhập Claude Code và dán token có thời hạn một năm vào tab **Setup Token**. Xem [Claude Code với setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Không có trình duyệt trên máy chủ OmniRoute? Hãy chạy `claude setup-token` ở bất kỳ đâu Claude Code đã đăng nhập và dán token một năm vào tab **Mã thiết lập**. Xem [Claude Code với setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Các tuyến Claude và tương thích với Claude Code duy trì mức nỗ lực suy luận `max` cho các mô hình Opus và Sonnet. Các mô hình Haiku không chấp nhận mức nỗ lực `max`, vì vậy OmniRoute sẽ hạ yêu cầu đó xuống ngân sách suy luận cao trước khi gửi đến dịch vụ thượng nguồn.
+Các route tương thích với Claude và Claude Code bảo toàn mức độ suy nghĩ `max` cho
+các mô hình Opus và Sonnet. Các mô hình Haiku không chấp nhận bậc hiệu suất `max`, nên OmniRoute sẽ hạ cấp
+yêu cầu đó xuống ngân sách suy nghĩ cao trước khi gửi lên dịch vụ nguồn.
 
 #### OpenAI Codex (Plus/Pro)
 
@@ -162,7 +164,7 @@ Mô hình:
 ```bash
 Bảng điều khiển → Nhà cung cấp → Kết nối GitHub
 → OAuth qua GitHub
-→ Đặt lại hàng tháng (ngày 1 mỗi tháng)
+→ Đặt lại hàng tháng (ngày 1 hàng tháng)
 
 Mô hình:
   gh/gpt-5.5
@@ -172,9 +174,25 @@ Mô hình:
   gh/gemini-3.1-pro-preview
 ```
 
+**Tín dụng AI (tính phí theo token).** Khi GitHub báo cáo `credits_used` cho
+tài khoản, thẻ Giới hạn nhà cung cấp sẽ hiển thị một dòng **Tín dụng AI** với số tín dụng
+đã sử dụng trong kỳ thanh toán hiện tại, kể cả đối với các gói tổ chức không giới hạn.
+
+**Giới hạn Tín dụng AI cục bộ.** Chỉnh sửa một kết nối GitHub và đặt **Giới hạn Tín dụng AI mỗi
+kỳ thanh toán** (`providerSpecificData.githubCreditLimit`). Để trống sẽ tắt giới hạn này; `0`
+luôn bỏ qua kết nối. Khi số liệu sử dụng gần nhất lớn hơn hoặc bằng giới hạn,
+việc chọn tài khoản sẽ bỏ qua kết nối đó và định tuyến sẽ chuyển sang các kết nối khác,
+tương tự như khi đạt ngưỡng của chính sách hạn mức. Việc kiểm tra sử dụng số liệu mà quá trình
+làm mới hạn mức định kỳ đã thu thập — không bao giờ gọi GitHub trên đường xử lý yêu cầu —
+và có cơ chế mở khi lỗi: số liệu bị thiếu hoặc đã cũ (cũ hơn 15 phút hoặc thuộc kỳ thanh toán
+đã được đặt lại) sẽ không chặn kết nối. Đây là một biện pháp bảo vệ cục bộ, **không phải
+mức trần chi tiêu được đảm bảo**: độ trễ báo cáo của GitHub, khoảng thời gian làm mới,
+các yêu cầu đang xử lý và mức sử dụng bên ngoài OmniRoute có thể khiến giới hạn này bị vượt qua.
+Hãy sử dụng các cơ chế kiểm soát chi tiêu riêng của GitHub để đặt giới hạn cứng.
+
 ### 💰 Nhà cung cấp giá rẻ
 
-#### GLM-4.7 (Đặt lại hàng ngày, $0.6/1M)
+#### GLM-4.7 (đặt lại hàng ngày, $0.6/1M)
 
 1. Đăng ký: [Zhipu AI](https://open.bigmodel.cn)
 2. Lấy khóa API từ Coding Plan
@@ -182,37 +200,37 @@ Mô hình:
 
 **Sử dụng:** `glm/glm-4.7` — **Mẹo chuyên nghiệp:** Coding Plan cung cấp hạn mức gấp 3 lần với chi phí bằng 1/7! Đặt lại hàng ngày lúc 10:00 sáng.
 
-#### MiniMax M2.1 (Đặt lại sau 5 giờ, $0.20/1M)
+#### MiniMax M2.1 (đặt lại sau 5 giờ, $0.20/1M)
 
 1. Đăng ký: [MiniMax](https://www.minimax.io)
 2. Lấy khóa API → Bảng điều khiển → Thêm khóa API
 
 **Sử dụng:** `minimax/MiniMax-M2.1` — **Mẹo chuyên nghiệp:** Lựa chọn rẻ nhất cho ngữ cảnh dài (1M token)!
 
-#### Kimi K2 (Cố định $9/tháng)
+#### Kimi K2 ($9/tháng cố định)
 
-1. Đăng ký gói: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. Đăng ký: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Lấy khóa API → Bảng điều khiển → Thêm khóa API
 
-**Sử dụng:** `kimi/kimi-k2.5` — **Mẹo chuyên nghiệp:** Mức cố định $9/tháng cho 10M token = chi phí thực tế $0.90/1M!
+**Sử dụng:** `kimi/kimi-k2.5` — **Mẹo chuyên nghiệp:** $9/tháng cố định cho 10M token = chi phí hiệu dụng $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Đăng ký: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Tạo khóa API Qianfan → Bảng điều khiển → Thêm khóa API: Nhà cung cấp: `qianfan`
 
-**Sử dụng:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` hoặc một ID mô hình Qianfan tương thích với OpenAI khác.
+**Sử dụng:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` hoặc một ID mô hình tương thích với Qianfan OpenAI khác.
 
 ### 🆓 Nhà cung cấp MIỄN PHÍ
 
-Các nhà cung cấp miễn phí không yêu cầu xác thực có một công tắc bên cạnh **Không yêu cầu xác thực** trên trang nhà cung cấp của họ.
-Việc tắt công tắc sẽ vô hiệu hóa nhà cung cấp đó, xóa nhà cung cấp khỏi các chế độ xem nhà cung cấp đã cấu hình/thu gọn và
-xóa các mô hình của nhà cung cấp khỏi `/v1/models`.
+Các nhà cung cấp miễn phí không yêu cầu xác thực có một công tắc bên cạnh **Không yêu cầu xác thực** trên trang nhà cung cấp.
+Tắt công tắc này sẽ vô hiệu hóa nhà cung cấp đó, xóa nhà cung cấp khỏi các chế độ xem Nhà cung cấp đã cấu hình/rút gọn,
+và xóa các mô hình của nhà cung cấp khỏi `/v1/models`.
 
 #### Qoder (9 mô hình MIỄN PHÍ)
 
 ```bash
-Bảng điều khiển → Kết nối Qoder → Đăng nhập OAuth → Quyền truy cập phụ thuộc vào các giới hạn hiện tại của nhà cung cấp
+Bảng điều khiển → Kết nối Qoder → Đăng nhập OAuth → Quyền truy cập tùy thuộc vào các giới hạn hiện tại của nhà cung cấp
 
 Mô hình: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +238,7 @@ Mô hình: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, 
 #### Kiro (Claude MIỄN PHÍ)
 
 ```bash
-Bảng điều khiển → Kết nối Kiro → AWS Builder ID hoặc Google/GitHub → ~50 tín dụng/tháng
+Bảng điều khiển → Kết nối Kiro → AWS Builder ID hoặc Google/GitHub → khoảng 50 tín dụng/tháng
 
 Mô hình: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

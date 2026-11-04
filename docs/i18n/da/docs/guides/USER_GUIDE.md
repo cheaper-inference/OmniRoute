@@ -118,39 +118,39 @@ Adgang via: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Opsætning af udbydere
+## 📖 Konfiguration af udbydere
 
-Hvis du vil massetilføje forbindelser med API-nøgler fra en CSV- eller JSON-fil, skal du bruge **Kontrolpanel → Udbydere → Importér fra fil**. Kolonnerne er positionsbestemte (`provider,name,apiKey,baseUrl,priority`); `provider` skal allerede eksistere som en administreret udbyder eller en kompatibel node. Se [Importér udbydere fra en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
+Hvis du vil tilføje API-nøgleforbindelser fra en CSV- eller JSON-fil i bulk, skal du bruge **Dashboard → Providers → Import from file**. Kolonnerne er positionsbestemte (`provider,name,apiKey,baseUrl,priority`); `provider` skal allerede findes som en administreret udbyder eller en kompatibel node. Se [Importér udbydere fra en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abonnementsudbydere
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Kontrolpanel → Udbydere → Tilslut Claude Code
-→ OAuth-login → Automatisk opdatering af token
-→ Sporing af 5-timerskvote og ugentlig kvote
+Dashboard → Providers → Connect Claude Code
+→ OAuth-login → Automatisk tokenfornyelse
+→ Sporing af 5-timers- og ugentlig kvote
 
-Modeller:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Pro-tip:** Brug Opus til komplekse opgaver og Sonnet, når hastighed er vigtig. OmniRoute sporer kvoten for hver model!
+**Pro-tip:** Brug Opus til komplekse opgaver og Sonnet for hastighed. OmniRoute sporer kvoten pr. model!
 
-Ingen browser på OmniRoute-værten? Kør `claude setup-token` et hvilket som helst sted, hvor Claude Code er logget ind, og indsæt det etårige token på fanen **Setup Token**. Se [Claude Code med et setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Har OmniRoute-værten ingen browser? Kør `claude setup-token` et sted, hvor du er logget ind på Claude Code, og indsæt det ét år gyldige token i fanen **Setup Token**. Se [Claude Code med et setup-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Ruter, der er kompatible med Claude og Claude Code, bevarer tænkeindsatsen `max` for Opus- og Sonnet-modeller. Haiku-modeller accepterer ikke indsatsniveauet `max`, så OmniRoute nedgraderer denne anmodning til et højt tænkebudget, før den sendes videre til upstream-udbyderen.
+Claude- og Claude Code-kompatible ruter bevarer `max`-tænkningsniveauet for Opus- og Sonnet-modeller. Haiku-modeller accepterer ikke `max`-niveauet, så OmniRoute nedgraderer denne anmodning til et højt tænkningsbudget, før den sendes videre.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Kontrolpanel → Udbydere → Tilslut Codex
+Dashboard → Providers → Connect Codex
 → OAuth-login (port 1455)
-→ Nulstilling hver 5. time og ugentligt
+→ 5-timers- og ugentlig nulstilling
 
-Modeller:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +160,11 @@ Modeller:
 #### GitHub Copilot
 
 ```bash
-Kontrolpanel → Udbydere → Tilslut GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth via GitHub
 → Månedlig nulstilling (den 1. i måneden)
 
-Modeller:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +172,59 @@ Modeller:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-kreditter (tokenbaseret fakturering).** Når GitHub rapporterer `credits_used` for kontoen, viser kortet med udbydergrænser en række med **AI-kreditter** og de kreditter, der er forbrugt i den aktuelle faktureringsperiode, også på organisationstariffer med ubegrænset brug.
+
+**Lokal grænse for AI-kreditter.** Redigér en GitHub-forbindelse, og angiv **Grænse for AI-kreditter pr. faktureringsperiode** (`providerSpecificData.githubCreditLimit`). Et tomt felt deaktiverer den; `0` springer altid forbindelsen over. Når den seneste brugsaflæsning er lig med eller over grænsen, springes denne forbindelse over ved kontovalg, og routingen falder tilbage til dine andre forbindelser, på samme måde som ved en afskæring i henhold til en kvotepolitik. Kontrollen læser de brugsdata, som den periodiske kvoteopdatering allerede indsamler — den kalder aldrig GitHub under behandlingen af forespørgslen — og den fejler åbent: En manglende eller forældet aflæsning (ældre end 15 minutter eller fra en faktureringsperiode, der allerede er blevet nulstillet) blokerer ikke forbindelsen. Dette er en lokal sikkerhedsforanstaltning, **ikke en garanteret forbrugsgrænse**: Forsinkelser i GitHubs rapportering, opdateringsintervallet, forespørgsler under behandling og forbrug uden for OmniRoute kan overskride den. Brug GitHubs egne forbrugsbegrænsninger, hvis du har brug for et hårdt loft.
+
 ### 💰 Billige udbydere
 
-#### GLM-4.7 (Daglig nulstilling, $0.6/1M)
+#### GLM-4.7 (daglig nulstilling, $0.6/1M)
 
 1. Tilmeld dig: [Zhipu AI](https://open.bigmodel.cn)
 2. Hent en API-nøgle fra Coding Plan
-3. Kontrolpanel → Tilføj API-nøgle: Udbyder: `glm`, API-nøgle: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Brug:** `glm/glm-4.7` — **Pro-tip:** Coding Plan giver 3× kvote til 1/7 af prisen! Nulstilles dagligt kl. 10.00.
+**Brug:** `glm/glm-4.7` — **Pro-tip:** Coding Plan giver 3× så stor kvote til 1/7 af prisen! Nulstilles dagligt kl. 10.00.
 
-#### MiniMax M2.1 (Nulstilling hver 5. time, $0.20/1M)
+#### MiniMax M2.1 (5-timers nulstilling, $0.20/1M)
 
 1. Tilmeld dig: [MiniMax](https://www.minimax.io)
-2. Hent en API-nøgle → Kontrolpanel → Tilføj API-nøgle
+2. Hent en API-nøgle → Dashboard → Add API Key
 
 **Brug:** `minimax/MiniMax-M2.1` — **Pro-tip:** Den billigste mulighed til lang kontekst (1M tokens)!
 
 #### Kimi K2 ($9/måned fast pris)
 
 1. Abonnér: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hent en API-nøgle → Kontrolpanel → Tilføj API-nøgle
+2. Hent en API-nøgle → Dashboard → Add API Key
 
 **Brug:** `kimi/kimi-k2.5` — **Pro-tip:** Fast pris på $9/måned for 10M tokens = en effektiv pris på $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Tilmeld dig: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Opret en Qianfan API-nøgle → Kontrolpanel → Tilføj API-nøgle: Udbyder: `qianfan`
+2. Opret en Qianfan API-nøgle → Dashboard → Add API Key: Provider: `qianfan`
 
-**Brug:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller et andet Qianfan-model-id, der er kompatibelt med OpenAI.
+**Brug:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller et andet Qianfan OpenAI-kompatibelt model-id.
 
 ### 🆓 GRATIS udbydere
 
-Gratis udbydere uden godkendelse har en kontakt ud for **Ingen godkendelse påkrævet** på deres udbyderside.
-Hvis den slås fra, deaktiveres udbyderen, den fjernes fra de konfigurerede og kompakte visninger under Udbydere, og
-dens modeller fjernes fra `/v1/models`.
+Udbydere uden godkendelse og med gratis adgang har en kontakt ved siden af **Ingen godkendelse påkrævet** på deres udbyderside. Hvis den slås fra, deaktiveres udbyderen, den fjernes fra visningerne med konfigurerede/kompakte udbydere, og dens modeller fjernes fra `/v1/models`.
 
 #### Qoder (9 GRATIS modeller)
 
 ```bash
-Kontrolpanel → Tilslut Qoder → OAuth-login → Adgangen er underlagt udbyderens aktuelle begrænsninger
+Dashboard → Connect Qoder → OAuth-login → Adgang afhænger af de aktuelle udbydergrænser
 
-Modeller: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude GRATIS)
+#### Kiro (GRATIS Claude)
 
 ```bash
-Kontrolpanel → Tilslut Kiro → AWS Builder ID eller Google/GitHub → ~50 kreditter/måned
+Dashboard → Connect Kiro → AWS Builder ID eller Google/GitHub → ~50 kreditter/måned
 
-Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

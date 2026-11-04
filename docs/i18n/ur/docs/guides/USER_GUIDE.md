@@ -118,30 +118,33 @@
 
 ---
 
-## 📖 پرووائیڈر سیٹ اپ
+## 📖 فراہم کنندہ سیٹ اپ
 
-CSV یا JSON فائل سے API کلید کے کنکشنز بڑی تعداد میں شامل کرنے کے لیے، **Dashboard → Providers → Import from file** استعمال کریں۔ کالمز کی ترتیب مقرر ہے (`provider,name,apiKey,baseUrl,priority`)؛ `provider` کا پہلے سے ایک منظم پرووائیڈر یا ہم آہنگ نوڈ کے طور پر موجود ہونا ضروری ہے۔ [CSV یا JSON فائل سے پرووائیڈرز درآمد کریں](../providers/CSV-IMPORT.md) ملاحظہ کریں۔
+CSV یا JSON فائل سے API-key کنکشنز کو بڑی تعداد میں شامل کرنے کے لیے **Dashboard → Providers → Import from file** استعمال کریں۔ کالم پوزیشنل ہیں (`provider,name,apiKey,baseUrl,priority`)؛ `provider` پہلے سے ایک منظم فراہم کنندہ یا مطابقت رکھنے والے نوڈ کے طور پر موجود ہونا چاہیے۔ [CSV یا JSON فائل سے فراہم کنندگان درآمد کریں](../providers/CSV-IMPORT.md) دیکھیں۔
 
-### 🔐 سبسکرپشن پرووائیڈرز
+### 🔐 سبسکرپشن فراہم کنندگان
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Dashboard → Providers → Connect Claude Code
 → OAuth لاگ اِن → ٹوکن کی خودکار تجدید
-→ 5 گھنٹے + ہفتہ وار کوٹے کی ٹریکنگ
+→ 5 گھنٹے + ہفتہ وار کوٹا ٹریکنگ
 
-ماڈلز:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**ماہرانہ مشورہ:** پیچیدہ کاموں کے لیے Opus اور رفتار کے لیے Sonnet استعمال کریں۔ OmniRoute ہر ماڈل کے کوٹے کو ٹریک کرتا ہے!
+**پیشہ ورانہ مشورہ:** پیچیدہ کاموں کے لیے Opus اور رفتار کے لیے Sonnet استعمال کریں۔ OmniRoute ہر ماڈل کے حساب سے کوٹا ٹریک کرتا ہے!
 
-OmniRoute ہوسٹ پر براؤزر نہیں ہے؟ جہاں بھی Claude Code میں لاگ اِن ہوں وہاں `claude setup-token` چلائیں اور ایک سالہ ٹوکن کو **Setup Token** ٹیب میں پیسٹ کریں۔ [سیٹ اپ ٹوکن کے ساتھ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ملاحظہ کریں۔
+OmniRoute ہوسٹ پر براؤزر موجود نہیں؟ جہاں Claude Code لاگ اِن ہے، وہاں `claude setup-token` چلائیں اور ایک سالہ ٹوکن **Setup Token** ٹیب میں پیسٹ کریں۔ [Setup token کے ساتھ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) دیکھیں۔
 
-Claude اور Claude Code سے ہم آہنگ روٹس، Opus اور Sonnet ماڈلز کے لیے `max` سوچنے کی کوشش کو برقرار رکھتے ہیں۔ Haiku ماڈلز `max` کوشش کی سطح قبول نہیں کرتے، اس لیے OmniRoute اس درخواست کو اپ اسٹریم بھیجنے سے پہلے اسے زیادہ سوچنے کے بجٹ میں تبدیل کر دیتا ہے۔
+Claude اور Claude Code سے مطابقت رکھنے والے روٹس، Opus اور Sonnet
+ماڈلز کے لیے `max` سوچنے کی کوشش محفوظ رکھتے ہیں۔ Haiku ماڈلز `max`
+کوشش کی سطح قبول نہیں کرتے، اس لیے OmniRoute اس درخواست کو اوپر بھیجنے سے پہلے
+زیادہ سوچنے کے بجٹ کی سطح پر کم کر دیتا ہے۔
 
 #### OpenAI Codex (Plus/Pro)
 
@@ -150,7 +153,7 @@ Dashboard → Providers → Connect Codex
 → OAuth لاگ اِن (پورٹ 1455)
 → 5 گھنٹے + ہفتہ وار ری سیٹ
 
-ماڈلز:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,9 +165,9 @@ Dashboard → Providers → Connect Codex
 ```bash
 Dashboard → Providers → Connect GitHub
 → GitHub کے ذریعے OAuth
-→ ماہانہ ری سیٹ (مہینے کی پہلی تاریخ)
+→ ماہانہ ری سیٹ (مہینے کی 1 تاریخ)
 
-ماڈلز:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,49 +175,64 @@ Dashboard → Providers → Connect GitHub
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 سستے پرووائیڈرز
+**AI Credits (ٹوکن پر مبنی بلنگ)۔** جب GitHub اکاؤنٹ کے لیے `credits_used` رپورٹ کرتا ہے،
+تو Provider Limits کارڈ موجودہ بلنگ مدت میں استعمال کیے گئے کریڈٹس کے ساتھ **AI Credits** کی قطار دکھاتا ہے،
+بشمول لامحدود تنظیمی پلانز کے۔
+
+**مقامی AI Credits کی حد۔** GitHub کنکشن میں ترمیم کریں اور **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`) مقرر کریں۔ خالی چھوڑنے سے یہ غیر فعال ہو جاتی ہے؛ `0`
+ہمیشہ کنکشن کو چھوڑ دیتا ہے۔ جب آخری استعمال کی ریڈنگ حد کے برابر یا اس سے زیادہ ہو،
+تو اکاؤنٹ کا انتخاب اس کنکشن کو چھوڑ دیتا ہے اور روٹنگ آپ کے دیگر
+کنکشنز پر منتقل ہو جاتی ہے، بالکل اسی طرح جیسے کوٹا پالیسی کی کٹ آف کے وقت ہوتا ہے۔ یہ جانچ اس استعمال کو پڑھتی ہے جسے
+وقفے وقفے سے ہونے والی کوٹا ریفریش پہلے ہی جمع کرتی ہے — یہ ریکویسٹ کے راستے میں کبھی GitHub کو کال نہیں کرتی —
+اور یہ ناکامی کی صورت میں رسائی کھلی رکھتی ہے: غائب یا پرانی ریڈنگ (15 منٹ سے زیادہ پرانی، یا ایسی بلنگ مدت کی جس کا ری سیٹ
+پہلے ہی ہو چکا ہو) کنکشن کو نہیں روکتی۔ یہ ایک مقامی حفاظتی اقدام ہے، **خرچ کی یقینی حد نہیں**: GitHub کی رپورٹنگ میں تاخیر،
+ریفریش کا وقفہ، جاری درخواستیں اور OmniRoute سے باہر کا استعمال اس حد سے تجاوز کر سکتے ہیں۔ سخت حد کے لیے GitHub کے اپنے
+خرچ کنٹرولز استعمال کریں۔
+
+### 💰 کم لاگت والے فراہم کنندگان
 
 #### GLM-4.7 (روزانہ ری سیٹ، $0.6/1M)
 
 1. سائن اپ کریں: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan سے API کلید حاصل کریں
+2. Coding Plan سے API key حاصل کریں
 3. Dashboard → Add API Key: Provider: `glm`، API Key: `your-key`
 
-**استعمال:** `glm/glm-4.7` — **ماہرانہ مشورہ:** Coding Plan صرف 1/7 لاگت پر 3× کوٹا فراہم کرتا ہے! روزانہ صبح 10:00 بجے ری سیٹ ہوتا ہے۔
+**استعمال:** `glm/glm-4.7` — **پیشہ ورانہ مشورہ:** Coding Plan، 1/7 لاگت پر 3× کوٹا فراہم کرتا ہے! روزانہ صبح 10:00 بجے ری سیٹ ہوتا ہے۔
 
-#### MiniMax M2.1 (5 گھنٹے بعد ری سیٹ، $0.20/1M)
+#### MiniMax M2.1 (5 گھنٹے کا ری سیٹ، $0.20/1M)
 
 1. سائن اپ کریں: [MiniMax](https://www.minimax.io)
-2. API کلید حاصل کریں → Dashboard → Add API Key
+2. API key حاصل کریں → Dashboard → Add API Key
 
-**استعمال:** `minimax/MiniMax-M2.1` — **ماہرانہ مشورہ:** طویل کانٹیکسٹ (1M ٹوکنز) کے لیے سب سے سستا آپشن!
+**استعمال:** `minimax/MiniMax-M2.1` — **پیشہ ورانہ مشورہ:** طویل کانٹیکسٹ (1M ٹوکنز) کے لیے سب سے سستا انتخاب!
 
 #### Kimi K2 ($9/ماہ مقررہ)
 
 1. سبسکرائب کریں: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API کلید حاصل کریں → Dashboard → Add API Key
+2. API key حاصل کریں → Dashboard → Add API Key
 
-**استعمال:** `kimi/kimi-k2.5` — **ماہرانہ مشورہ:** 10M ٹوکنز کے لیے مقررہ $9/ماہ = $0.90/1M مؤثر لاگت!
+**استعمال:** `kimi/kimi-k2.5` — **پیشہ ورانہ مشورہ:** 10M ٹوکنز کے لیے مقررہ $9/ماہ = مؤثر لاگت $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. سائن اپ کریں: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. ایک Qianfan API کلید بنائیں → Dashboard → Add API Key: Provider: `qianfan`
+2. Qianfan API key بنائیں → Dashboard → Add API Key: Provider: `qianfan`
 
-**استعمال:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1`، یا کوئی دوسرا Qianfan OpenAI سے ہم آہنگ ماڈل ID۔
+**استعمال:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1`، یا کوئی اور Qianfan OpenAI-compatible model ID۔
 
-### 🆓 مفت پرووائیڈرز
+### 🆓 مفت فراہم کنندگان
 
-بغیر توثیق والے مفت پرووائیڈرز کے پرووائیڈر صفحے پر **No authentication required** کے ساتھ ایک سوئچ ہوتا ہے۔
-اسے بند کرنے سے وہ پرووائیڈر غیر فعال ہو جاتا ہے، Providers کے کنفیگرڈ/مختصر ویوز سے ہٹ جاتا ہے، اور
-اس کے ماڈلز `/v1/models` سے بھی ہٹ جاتے ہیں۔
+بغیر تصدیق والے مفت فراہم کنندگان کے فراہم کنندہ صفحے پر **No authentication required** کے ساتھ ایک سوئچ موجود ہوتا ہے۔
+اسے بند کرنے سے وہ فراہم کنندہ غیر فعال ہو جاتا ہے، Providers configured/compact views سے ہٹا دیا جاتا ہے، اور
+اس کے ماڈلز `/v1/models` سے ہٹا دیے جاتے ہیں۔
 
 #### Qoder (9 مفت ماڈلز)
 
 ```bash
-Dashboard → Connect Qoder → OAuth لاگ اِن → رسائی موجودہ پرووائیڈر حدود سے مشروط ہے
+Dashboard → Connect Qoder → OAuth لاگ اِن → رسائی موجودہ فراہم کنندہ کی حدود سے مشروط ہے
 
-ماڈلز: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude مفت)
@@ -222,7 +240,7 @@ Dashboard → Connect Qoder → OAuth لاگ اِن → رسائی موجودہ 
 ```bash
 Dashboard → Connect Kiro → AWS Builder ID یا Google/GitHub → تقریباً 50 کریڈٹس/ماہ
 
-ماڈلز: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

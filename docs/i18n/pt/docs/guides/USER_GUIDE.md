@@ -120,15 +120,15 @@ Acesso através de: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configuração de fornecedores
 
-Para adicionar em massa ligações com chaves de API a partir de um ficheiro CSV ou JSON, utilize **Painel → Fornecedores → Importar de ficheiro**. As colunas são posicionais (`provider,name,apiKey,baseUrl,priority`); `provider` já deve existir como fornecedor gerido ou nó compatível. Consulte [Importar fornecedores a partir de um ficheiro CSV ou JSON](../providers/CSV-IMPORT.md).
+Para adicionar em massa ligações de chaves de API a partir de um ficheiro CSV ou JSON, utilize **Painel → Fornecedores → Importar de ficheiro**. As colunas são posicionais (`provider,name,apiKey,baseUrl,priority`); `provider` tem de existir previamente como fornecedor gerido ou nó compatível. Consulte [Importar fornecedores de um ficheiro CSV ou JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Fornecedores por subscrição
+### 🔐 Fornecedores de subscrição
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Painel → Fornecedores → Ligar Claude Code
-→ Início de sessão OAuth → Renovação automática do token
+→ Início de sessão OAuth → Atualização automática do token
 → Monitorização da quota de 5 horas + semanal
 
 Modelos:
@@ -137,18 +137,21 @@ Modelos:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Dica profissional:** Utilize o Opus para tarefas complexas e o Sonnet para maior rapidez. O OmniRoute monitoriza a quota por modelo!
+**Dica profissional:** Utilize o Opus para tarefas complexas e o Sonnet para obter velocidade. O OmniRoute monitoriza a quota por modelo!
 
 Não tem um navegador no anfitrião do OmniRoute? Execute `claude setup-token` em qualquer local onde tenha sessão iniciada no Claude Code e cole o token válido por um ano no separador **Token de configuração**. Consulte [Claude Code com um token de configuração](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-As rotas compatíveis com o Claude e o Claude Code preservam o esforço de raciocínio `max` nos modelos Opus e Sonnet. Os modelos Haiku não aceitam o nível de esforço `max`, pelo que o OmniRoute reduz esse pedido para um orçamento de raciocínio elevado antes de o enviar ao fornecedor a montante.
+As rotas compatíveis com Claude e Claude Code preservam o esforço de raciocínio `max` para os
+modelos Opus e Sonnet. Os modelos Haiku não aceitam o nível de esforço `max`, pelo que o
+OmniRoute reduz esse pedido para um orçamento de raciocínio elevado antes de o enviar para o serviço
+a montante.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Painel → Fornecedores → Ligar Codex
 → Início de sessão OAuth (porta 1455)
-→ Reposição após 5 horas + semanal
+→ Reposição a cada 5 horas + semanal
 
 Modelos:
   cx/gpt-5.5
@@ -162,7 +165,7 @@ Modelos:
 ```bash
 Painel → Fornecedores → Ligar GitHub
 → OAuth através do GitHub
-→ Reposição mensal (dia 1 de cada mês)
+→ Reposição mensal (dia 1 do mês)
 
 Modelos:
   gh/gpt-5.5
@@ -172,42 +175,59 @@ Modelos:
   gh/gemini-3.1-pro-preview
 ```
 
+**Créditos de IA (faturação baseada em tokens).** Quando o GitHub comunica `credits_used` para a
+conta, o cartão Limites do fornecedor apresenta uma linha **Créditos de IA** com os créditos
+consumidos no período de faturação atual, incluindo nos planos de organização ilimitados.
+
+**Limite local de Créditos de IA.** Edite uma ligação do GitHub e defina **Limite de Créditos de IA
+por período de faturação** (`providerSpecificData.githubCreditLimit`). Deixar em branco desativa-o;
+`0` ignora sempre a ligação. Quando a última leitura de utilização for igual ou superior ao limite,
+a seleção de conta ignora essa ligação e o encaminhamento recorre às outras ligações, tal como
+acontece com um corte definido pela política de quota. A verificação utiliza os dados de utilização
+que a atualização periódica da quota já recolhe — nunca contacta o GitHub durante o processamento
+do pedido — e falha de forma permissiva: uma leitura em falta ou desatualizada (com mais de 15
+minutos ou referente a um período de faturação que já foi reposto) não bloqueia a ligação. Esta é
+uma salvaguarda local, **não um limite de despesa garantido**: atrasos na comunicação do GitHub, o
+intervalo de atualização, pedidos em curso e utilização fora do OmniRoute podem fazer com que o
+limite seja ultrapassado. Utilize os próprios controlos de despesa do GitHub para definir um limite
+rígido.
+
 ### 💰 Fornecedores económicos
 
 #### GLM-4.7 (reposição diária, $0.6/1M)
 
 1. Registe-se: [Zhipu AI](https://open.bigmodel.cn)
-2. Obtenha uma chave de API no Coding Plan
+2. Obtenha a chave de API através do Coding Plan
 3. Painel → Adicionar chave de API: Fornecedor: `glm`, Chave de API: `your-key`
 
-**Utilização:** `glm/glm-4.7` — **Dica profissional:** O Coding Plan oferece uma quota 3 vezes superior por 1/7 do custo! Reposição diária às 10:00.
+**Utilização:** `glm/glm-4.7` — **Dica profissional:** O Coding Plan oferece 3× a quota por 1/7 do custo! Reposição diária às 10:00.
 
-#### MiniMax M2.1 (reposição após 5 h, $0.20/1M)
+#### MiniMax M2.1 (reposição a cada 5 horas, $0.20/1M)
 
 1. Registe-se: [MiniMax](https://www.minimax.io)
-2. Obtenha uma chave de API → Painel → Adicionar chave de API
+2. Obtenha a chave de API → Painel → Adicionar chave de API
 
-**Utilização:** `minimax/MiniMax-M2.1` — **Dica profissional:** A opção mais barata para contextos longos (1M de tokens)!
+**Utilização:** `minimax/MiniMax-M2.1` — **Dica profissional:** A opção mais económica para contextos longos (1M de tokens)!
 
 #### Kimi K2 ($9/mês, preço fixo)
 
 1. Subscreva: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Obtenha uma chave de API → Painel → Adicionar chave de API
+2. Obtenha a chave de API → Painel → Adicionar chave de API
 
 **Utilização:** `kimi/kimi-k2.5` — **Dica profissional:** $9/mês fixos por 10M de tokens = custo efetivo de $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Registe-se: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Crie uma chave de API do Qianfan → Painel → Adicionar chave de API: Fornecedor: `qianfan`
+2. Crie uma chave de API Qianfan → Painel → Adicionar chave de API: Fornecedor: `qianfan`
 
-**Utilização:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou outro ID de modelo do Qianfan compatível com OpenAI.
+**Utilização:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou outro ID de modelo compatível com OpenAI do Qianfan.
 
 ### 🆓 Fornecedores GRATUITOS
 
-Os fornecedores gratuitos sem autenticação têm um interruptor junto a **Não é necessária autenticação** na respetiva página.
-Desativá-lo desativa esse fornecedor, remove-o das vistas configurada/compacta de Fornecedores e
-remove os respetivos modelos de `/v1/models`.
+Os fornecedores gratuitos que não requerem autenticação têm um interruptor junto a
+**Não é necessária autenticação** na respetiva página. Desativá-lo desativa o fornecedor, remove-o
+das vistas de fornecedores configurados/compactos e remove os respetivos modelos de `/v1/models`.
 
 #### Qoder (9 modelos GRATUITOS)
 

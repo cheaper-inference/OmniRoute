@@ -118,39 +118,41 @@ Samun dama ta: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Saitin Masu Samarwa
+## 📖 Saitin Mai bayarwa
 
-Don ƙara haɗin maɓallan API da yawa daga fayil ɗin CSV ko JSON, yi amfani da **Dashboard → Providers → Import from file**. Ginshiƙai suna bin matsayi (`provider,name,apiKey,baseUrl,priority`); dole ne `provider` ya riga ya kasance a matsayin mai samarwa da ake gudanarwa ko kumburi mai jituwa. Duba [Shigo da masu samarwa daga fayil ɗin CSV ko JSON](../providers/CSV-IMPORT.md).
+Don ƙara haɗin API-key da yawa daga fayil ɗin CSV ko JSON, yi amfani da **Dashboard → Providers → Import from file**. Ginshiƙai suna bin matsayi (`provider,name,apiKey,baseUrl,priority`); `provider` dole ne ya riga ya kasance a matsayin mai bayarwa da ake sarrafawa ko node mai jituwa. Duba [Import providers from a CSV or JSON file](../providers/CSV-IMPORT.md).
 
-### 🔐 Masu Samarwa ta Biyan Kuɗin Rajista
+### 🔐 Masu Bayar da Biyan Kuɗi
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Haɗa Claude Code
+Dashboard → Providers → Connect Claude Code
 → Shiga ta OAuth → Sabunta token ta atomatik
-→ Bibiyar ƙayyadadden amfani na awa 5 + mako-mako
+→ Bibiyar keɓaɓɓen kaso na awa 5 + na mako-mako
 
-Samfura:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Shawarar Ƙwararru:** Yi amfani da Opus don ayyuka masu sarƙaƙiya, Sonnet kuma don sauri. OmniRoute yana bibiyar ƙayyadadden amfani ga kowane samfuri!
+**Shawara ta ƙwararru:** Yi amfani da Opus don ayyuka masu rikitarwa, Sonnet don sauri. OmniRoute yana bibiyar kaso ga kowane model!
 
-Babu burauza a kan na'urar da ke karɓar baƙuncin OmniRoute? Gudanar da `claude setup-token` a duk inda aka shiga Claude Code sannan a liƙa token na shekara ɗaya a cikin shafin **Setup Token**. Duba [Claude Code tare da setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Babu browser a kan host ɗin OmniRoute? Gudanar da `claude setup-token` a duk inda aka shiga Claude Code, sannan liƙa token ɗin shekara ɗaya a shafin **Setup Token**. Duba [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Hanyoyin Claude da masu jituwa da Claude Code suna kiyaye matakin ƙoƙarin tunani na `max` ga samfuran Opus da Sonnet. Samfuran Haiku ba sa karɓar matakin ƙoƙarin `max`, don haka OmniRoute yana saukar da wannan buƙatar zuwa babban kasafin tunani kafin aika ta zuwa sama.
+Hanyoyin Claude da masu jituwa da Claude Code suna kiyaye ƙoƙarin tunani na `max` don
+model na Opus da Sonnet. Model na Haiku ba sa karɓar matakin ƙoƙarin `max`, don haka OmniRoute yana rage
+wannan buƙatar zuwa babban kasafin tunani kafin aika ta zuwa sama.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Haɗa Codex
+Dashboard → Providers → Connect Codex
 → Shiga ta OAuth (port 1455)
-→ Sake saiti bayan awa 5 + mako-mako
+→ Sake saita bayan awa 5 + mako-mako
 
-Samfura:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +162,11 @@ Samfura:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Haɗa GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth ta GitHub
-→ Sake saiti kowane wata (ranar 1 ga wata)
+→ Sake saita kowane wata (ranar 1 ga wata)
 
-Samfura:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,56 +174,72 @@ Samfura:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Masu Samarwa Masu Araha
+**Kiredit ɗin AI (lissafin kuɗi bisa token).** Lokacin da GitHub ya bayar da `credits_used` na
+asusun, katin Iyakokin Mai bayarwa yana nuna layin **Kiredit ɗin AI** tare da kiredit ɗin
+da aka cinye a lokacin lissafin kuɗi na yanzu, har ma a tsare-tsaren ƙungiya marasa iyaka.
 
-#### GLM-4.7 (Sake saiti kullum, $0.6/1M)
+**Iyakar Kiredit ɗin AI ta gida.** Gyara haɗin GitHub sannan saita **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Barin filin babu komai yana kashe iyakar; `0`
+koyaushe yana tsallake haɗin. Lokacin da karatun amfani na ƙarshe ya kai ko ya wuce iyakar,
+zaɓin asusu yana tsallake wannan haɗin, kuma turawa tana koma wa sauran haɗin ku, kamar yadda
+yanke hukunci bisa ƙa'idar kaso ke yi. Binciken yana karanta amfani da sabunta kaso na lokaci-lokaci
+tuni yake tattarawa — ba ya taɓa kiran GitHub yayin hanyar buƙata — kuma yana barin komai a buɗe:
+karatun da ya ɓace ko ya tsufa (fiye da mintuna 15, ko daga lokacin lissafin kuɗi da aka riga aka
+sake saita) ba zai toshe haɗin ba. Wannan kariya ce ta gida, **ba tabbatacciyar iyakar kashe kuɗi ba**:
+jinkirin rahoton GitHub, tazarar sabuntawa, buƙatun da ke gudana da amfani a wajen OmniRoute na iya
+wuce ta. Yi amfani da sarrafa kashe kuɗi na GitHub da kansa don ƙayyadadden iyaka mai tsauri.
+
+### 💰 Masu Bayarwa Masu Arha
+
+#### GLM-4.7 (Sake saita kullum, $0.6/1M)
 
 1. Yi rajista: [Zhipu AI](https://open.bigmodel.cn)
-2. Sami maɓallin API daga Coding Plan
-3. Dashboard → Ƙara Maɓallin API: Mai samarwa: `glm`, Maɓallin API: `your-key`
+2. Samu API key daga Coding Plan
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Amfani:** `glm/glm-4.7` — **Shawarar Ƙwararru:** Coding Plan yana bayar da adadin amfani sau 3 a kan 1/7 na kuɗin! Ana sake saiti kullum da ƙarfe 10:00 na safe.
+**Amfani:** `glm/glm-4.7` — **Shawara ta ƙwararru:** Coding Plan yana ba da kaso sau 3 a kan kuɗin sau 1/7! Yana sake saitawa kullum da ƙarfe 10:00 na safe.
 
-#### MiniMax M2.1 (Sake saiti bayan awa 5, $0.20/1M)
+#### MiniMax M2.1 (Sake saita bayan awa 5, $0.20/1M)
 
 1. Yi rajista: [MiniMax](https://www.minimax.io)
-2. Sami maɓallin API → Dashboard → Ƙara Maɓallin API
+2. Samu API key → Dashboard → Add API Key
 
-**Amfani:** `minimax/MiniMax-M2.1` — **Shawarar Ƙwararru:** Zaɓi mafi araha don dogon mahallin bayanai (tokens miliyan 1)!
+**Amfani:** `minimax/MiniMax-M2.1` — **Shawara ta ƙwararru:** Zaɓi mafi arha don dogon mahallin bayanai (token miliyan 1)!
 
-#### Kimi K2 ($9/wata ƙayyadadden farashi)
+#### Kimi K2 ($9/wata a tsayayyen kuɗi)
 
-1. Yi rajistar biyan kuɗi: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Sami maɓallin API → Dashboard → Ƙara Maɓallin API
+1. Yi rajista: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Samu API key → Dashboard → Add API Key
 
-**Amfani:** `kimi/kimi-k2.5` — **Shawarar Ƙwararru:** Ƙayyadadden $9/wata don tokens miliyan 10 = ingantaccen farashin $0.90/1M!
+**Amfani:** `kimi/kimi-k2.5` — **Shawara ta ƙwararru:** Tsayayyen $9/wata don token miliyan 10 = tasirin kuɗi $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Yi rajista: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Ƙirƙiri maɓallin API na Qianfan → Dashboard → Ƙara Maɓallin API: Mai samarwa: `qianfan`
+2. Ƙirƙiri Qianfan API key → Dashboard → Add API Key: Provider: `qianfan`
 
-**Amfani:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ko wani ID na samfurin Qianfan mai jituwa da OpenAI.
+**Amfani:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ko wani ID na model mai jituwa da Qianfan OpenAI.
 
-### 🆓 Masu Samarwa KYAUTA
+### 🆓 Masu Bayarwa Kyauta
 
-Masu samarwa kyauta waɗanda ba sa buƙatar tantancewa suna da maɓallin kunnawa a gefen **Ba a buƙatar tantancewa** a shafin mai samarwarsu.
-Kashe shi yana dakatar da wannan mai samarwa, yana cire shi daga jerin Masu Samarwa da aka saita/taƙaita, sannan yana cire samfuransa daga `/v1/models`.
+Masu bayarwa kyauta marasa buƙatar tantancewa suna da maɓalli kusa da **No authentication required** a shafin mai bayarwa.
+Kashe shi yana dakatar da mai bayarwar, ya cire shi daga kallon Providers configured/compact, sannan
+ya cire model ɗinsa daga `/v1/models`.
 
-#### Qoder (samfura 9 KYAUTA)
+#### Qoder (model 9 KYauta)
 
 ```bash
-Dashboard → Haɗa Qoder → Shiga ta OAuth → Samun dama yana ƙarƙashin iyakokin mai samarwa na yanzu
+Dashboard → Connect Qoder → Shiga ta OAuth → Samun dama yana ƙarƙashin iyakokin mai bayarwa na yanzu
 
-Samfura: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude KYAUTA)
 
 ```bash
-Dashboard → Haɗa Kiro → AWS Builder ID ko Google/GitHub → ~50 credits/wata
+Dashboard → Connect Kiro → AWS Builder ID ko Google/GitHub → kusan kiredit 50/wata
 
-Samfura: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---

@@ -120,15 +120,15 @@ Aylık maliyet: $0
 
 ## 📖 Sağlayıcı Kurulumu
 
-Bir CSV veya JSON dosyasından toplu olarak API anahtarı bağlantıları eklemek için **Kontrol Paneli → Sağlayıcılar → Dosyadan içe aktar** seçeneğini kullanın. Sütunlar konuma dayalıdır (`provider,name,apiKey,baseUrl,priority`); `provider`, yönetilen bir sağlayıcı veya uyumlu bir düğüm olarak zaten mevcut olmalıdır. Bkz. [Sağlayıcıları bir CSV veya JSON dosyasından içe aktarma](../providers/CSV-IMPORT.md).
+CSV veya JSON dosyasından API anahtarı bağlantılarını toplu olarak eklemek için **Dashboard → Sağlayıcılar → Dosyadan içe aktar** seçeneğini kullanın. Sütunlar konumsaldır (`provider,name,apiKey,baseUrl,priority`); `provider`, yönetilen bir sağlayıcı veya uyumlu bir düğüm olarak zaten mevcut olmalıdır. Bkz. [Sağlayıcıları CSV veya JSON dosyasından içe aktarma](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abonelik Sağlayıcıları
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Kontrol Paneli → Sağlayıcılar → Claude Code'u Bağla
-→ OAuth ile oturum açma → Otomatik token yenileme
+Dashboard → Sağlayıcılar → Claude Code'a bağlan
+→ OAuth ile giriş → Otomatik token yenileme
 → 5 saatlik + haftalık kota takibi
 
 Modeller:
@@ -137,17 +137,19 @@ Modeller:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Uzman İpucu:** Karmaşık görevler için Opus'u, hız için Sonnet'i kullanın. OmniRoute, kotayı model bazında takip eder!
+**Profesyonel İpucu:** Karmaşık görevler için Opus'u, hız için Sonnet'i kullanın. OmniRoute, kotayı model bazında takip eder!
 
-OmniRoute ana makinesinde tarayıcı yok mu? Claude Code'da oturum açılmış herhangi bir yerde `claude setup-token` komutunu çalıştırın ve bir yıllık token'ı **Kurulum Token'ı** sekmesine yapıştırın. Bkz. [Kurulum token'ıyla Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+OmniRoute ana bilgisayarında tarayıcı yok mu? Claude Code'un oturumunun açık olduğu herhangi bir yerde `claude setup-token` komutunu çalıştırın ve bir yıllık token'ı **Kurulum Token'ı** sekmesine yapıştırın. Bkz. [Kurulum token'ı ile Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude ve Claude Code uyumlu rotalar, Opus ve Sonnet modelleri için `max` düşünme eforunu korur. Haiku modelleri `max` efor düzeyini kabul etmediğinden OmniRoute, isteği üst sağlayıcıya göndermeden önce yüksek bir düşünme bütçesine düşürür.
+Claude ve Claude Code uyumlu rotalar, Opus ve Sonnet
+modelleri için `max` düşünme eforunu korur. Haiku modelleri `max` efor katmanını kabul etmez; bu nedenle OmniRoute,
+isteği üst akışa göndermeden önce yüksek bir düşünme bütçesine düşürür.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Kontrol Paneli → Sağlayıcılar → Codex'i Bağla
-→ OAuth ile oturum açma (port 1455)
+Dashboard → Sağlayıcılar → Codex'e bağlan
+→ OAuth ile giriş (port 1455)
 → 5 saatlik + haftalık sıfırlama
 
 Modeller:
@@ -160,9 +162,9 @@ Modeller:
 #### GitHub Copilot
 
 ```bash
-Kontrol Paneli → Sağlayıcılar → GitHub'ı Bağla
+Dashboard → Sağlayıcılar → GitHub'a bağlan
 → GitHub üzerinden OAuth
-→ Aylık sıfırlama (ayın 1'inde)
+→ Aylık sıfırlama (ayın 1'i)
 
 Modeller:
   gh/gpt-5.5
@@ -172,54 +174,58 @@ Modeller:
   gh/gemini-3.1-pro-preview
 ```
 
+**Yapay Zekâ Kredileri (token tabanlı faturalandırma).** GitHub hesap için `credits_used` bildirdiğinde Sağlayıcı Sınırları kartında, sınırsız kuruluş planlarında da dahil olmak üzere, mevcut faturalandırma döneminde tüketilen kredileri gösteren bir **Yapay Zekâ Kredileri** satırı görünür.
+
+**Yerel Yapay Zekâ Kredileri sınırı.** Bir GitHub bağlantısını düzenleyin ve **Faturalandırma dönemi başına Yapay Zekâ Kredileri sınırı** (`providerSpecificData.githubCreditLimit`) değerini ayarlayın. Boş bırakılması bu özelliği devre dışı bırakır; `0` bağlantının her zaman atlanmasını sağlar. Son kullanım okuması sınıra eşit veya sınırın üzerindeyse hesap seçimi bu bağlantıyı atlar ve kota politikası kesme davranışında olduğu gibi yönlendirme diğer bağlantılarınıza geri döner. Denetim, periyodik kota yenilemesinin zaten topladığı kullanım verilerini okur — istek yolunda GitHub'ı hiçbir zaman çağırmaz — ve güvenli tarafta kalır: eksik veya güncel olmayan bir okuma (15 dakikadan eski ya da zaten sıfırlanmış bir faturalandırma döneminden kalan) bağlantıyı engellemez. Bu yerel bir korumadır; **garantili bir harcama tavanı değildir**: GitHub raporlama gecikmeleri, yenileme aralığı, devam eden istekler ve OmniRoute dışındaki kullanımlar bu sınırın aşılmasına neden olabilir. Kesin bir sınır için GitHub'ın kendi harcama denetimlerini kullanın.
+
 ### 💰 Ucuz Sağlayıcılar
 
-#### GLM-4.7 (Günlük sıfırlama, $0.6/1M)
+#### GLM-4.7 (Günlük sıfırlama, 0,6 $/1M)
 
 1. Kaydolun: [Zhipu AI](https://open.bigmodel.cn)
 2. Coding Plan'den API anahtarını alın
-3. Kontrol Paneli → API Anahtarı Ekle: Sağlayıcı: `glm`, API Anahtarı: `your-key`
+3. Dashboard → API Anahtarı Ekle: Sağlayıcı: `glm`, API Anahtarı: `your-key`
 
-**Kullanım:** `glm/glm-4.7` — **Uzman İpucu:** Coding Plan, maliyetin 1/7'sine 3 kat kota sunar! Her gün saat 10:00'da sıfırlanır.
+**Kullanım:** `glm/glm-4.7` — **Profesyonel İpucu:** Coding Plan, maliyetin 1/7'sine 3 kat kota sunar! Her gün 10:00'da sıfırlanır.
 
-#### MiniMax M2.1 (5 saatte sıfırlama, $0.20/1M)
+#### MiniMax M2.1 (5 saatlik sıfırlama, 0,20 $/1M)
 
 1. Kaydolun: [MiniMax](https://www.minimax.io)
-2. API anahtarını alın → Kontrol Paneli → API Anahtarı Ekle
+2. API anahtarını alın → Dashboard → API Anahtarı Ekle
 
-**Kullanım:** `minimax/MiniMax-M2.1` — **Uzman İpucu:** Uzun bağlam (1M token) için en ucuz seçenek!
+**Kullanım:** `minimax/MiniMax-M2.1` — **Profesyonel İpucu:** Uzun bağlam için en ucuz seçenek (1 milyon token)!
 
-#### Kimi K2 (Aylık sabit $9)
+#### Kimi K2 (sabit 9 $/ay)
 
 1. Abone olun: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API anahtarını alın → Kontrol Paneli → API Anahtarı Ekle
+2. API anahtarını alın → Dashboard → API Anahtarı Ekle
 
-**Kullanım:** `kimi/kimi-k2.5` — **Uzman İpucu:** 10M token için aylık sabit $9 = etkin maliyet $0.90/1M!
+**Kullanım:** `kimi/kimi-k2.5` — **Profesyonel İpucu:** 10 milyon token için sabit 9 $/ay = etkin maliyet 0,90 $/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Kaydolun: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Bir Qianfan API anahtarı oluşturun → Kontrol Paneli → API Anahtarı Ekle: Sağlayıcı: `qianfan`
+2. Bir Qianfan API anahtarı oluşturun → Dashboard → API Anahtarı Ekle: Sağlayıcı: `qianfan`
 
-**Kullanım:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` veya OpenAI ile uyumlu başka bir Qianfan model kimliği.
+**Kullanım:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` veya başka bir Qianfan OpenAI uyumlu model kimliği.
 
 ### 🆓 ÜCRETSİZ Sağlayıcılar
 
-Kimlik doğrulaması gerektirmeyen ücretsiz sağlayıcıların sağlayıcı sayfasında **Kimlik doğrulaması gerekli değil** seçeneğinin yanında bir anahtar bulunur.
-Bu anahtarın kapatılması, ilgili sağlayıcıyı devre dışı bırakır, onu Sağlayıcılar'ın yapılandırılmış/kompakt görünümlerinden kaldırır ve modellerini `/v1/models` listesinden çıkarır.
+Kimlik doğrulama gerektirmeyen ücretsiz sağlayıcıların sağlayıcı sayfasında **Kimlik doğrulama gerekli değil** seçeneğinin yanında bir anahtar bulunur.
+Bu seçeneğin kapatılması sağlayıcıyı devre dışı bırakır, Sağlayıcılar yapılandırılmış/sıkıştırılmış görünümlerinden kaldırır ve modellerini `/v1/models` listesinden çıkarır.
 
 #### Qoder (9 ÜCRETSİZ model)
 
 ```bash
-Kontrol Paneli → Qoder'ı Bağla → OAuth ile oturum açma → Erişim, sağlayıcının mevcut sınırlarına tabidir
+Dashboard → Qoder'a bağlan → OAuth ile giriş → Erişim, mevcut sağlayıcı sınırlarına tabidir
 
 Modeller: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ÜCRETSİZ)
+#### Kiro (ÜCRETSİZ Claude)
 
 ```bash
-Kontrol Paneli → Kiro'yu Bağla → AWS Builder ID veya Google/GitHub → Ayda ~50 kredi
+Dashboard → Kiro'ya bağlan → AWS Builder ID veya Google/GitHub → yaklaşık 50 kredi/ay
 
 Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

@@ -118,9 +118,9 @@ Prieiga per: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Teikėjų konfigūravimas
+## 📖 Teikėjo sąranka
 
-Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokite **Valdymo skydas → Teikėjai → Importuoti iš failo**. Stulpeliai nustatomi pagal jų poziciją (`provider,name,apiKey,baseUrl,priority`); `provider` jau turi egzistuoti kaip valdomas teikėjas arba suderinamas mazgas. Žr. [Teikėjų importavimas iš CSV arba JSON failo](../providers/CSV-IMPORT.md).
+Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokite **Valdymo skydas → Teikėjai → Importuoti iš failo**. Stulpeliai yra poziciniai (`provider,name,apiKey,baseUrl,priority`); `provider` jau turi egzistuoti kaip valdomas teikėjas arba suderinamas mazgas. Žr. [Teikėjų importavimas iš CSV arba JSON failo](../providers/CSV-IMPORT.md).
 
 ### 🔐 Prenumeratos teikėjai
 
@@ -129,7 +129,7 @@ Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokit
 ```bash
 Valdymo skydas → Teikėjai → Prijungti Claude Code
 → OAuth prisijungimas → Automatinis prieigos rakto atnaujinimas
-→ 5 valandų ir savaitinės kvotos stebėjimas
+→ 5 valandų + savaitinės kvotos stebėjimas
 
 Modeliai:
   cc/claude-opus-4-7
@@ -137,20 +137,20 @@ Modeliai:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionalo patarimas:** sudėtingoms užduotims naudokite Opus, o kai svarbus greitis – Sonnet. OmniRoute stebi kiekvieno modelio kvotą!
+**Profesionalo patarimas:** sudėtingoms užduotims naudokite Opus, o greičiui – Sonnet. OmniRoute stebi kiekvieno modelio kvotą!
 
-OmniRoute pagrindiniame kompiuteryje nėra naršyklės? Paleiskite `claude setup-token` bet kur, kur prisijungta prie Claude Code, ir įklijuokite vienus metus galiojantį prieigos raktą skirtuke **Sąrankos prieigos raktas**. Žr. [Claude Code naudojimas su sąrankos prieigos raktu](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Neturite naršyklės OmniRoute pagrindiniame kompiuteryje? Bet kur, kur esate prisijungę prie Claude Code, paleiskite `claude setup-token` ir įklijuokite vienerius metus galiojantį prieigos raktą į **Sąrankos prieigos rakto** skirtuką. Žr. [Claude Code su sąrankos prieigos raktu](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude ir su Claude Code suderinami maršrutai išsaugo `max` samprotavimo pastangų lygį Opus ir Sonnet
-modeliams. Haiku modeliai nepriima `max` pastangų lygio, todėl prieš siųsdama užklausą pirminiam
-teikėjui OmniRoute sumažina jį iki didelio samprotavimo biudžeto.
+Su Claude ir Claude Code suderinami maršrutai išsaugo `max` mąstymo pastangų lygį Opus ir Sonnet
+modeliams. Haiku modeliai nepriima `max` pastangų lygio, todėl OmniRoute prieš siųsdama užklausą į
+aukštesnį lygį pakeičia ją į didelio mąstymo biudžetą.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Valdymo skydas → Teikėjai → Prijungti Codex
 → OAuth prisijungimas (prievadas 1455)
-→ Nustatymas iš naujo kas 5 valandas ir kas savaitę
+→ 5 valandų + savaitinis nustatymas iš naujo
 
 Modeliai:
   cx/gpt-5.5
@@ -164,7 +164,7 @@ Modeliai:
 ```bash
 Valdymo skydas → Teikėjai → Prijungti GitHub
 → OAuth per GitHub
-→ Nustatymas iš naujo kas mėnesį (1-ąją mėnesio dieną)
+→ Mėnesinis nustatymas iš naujo (kiekvieno mėnesio 1 d.)
 
 Modeliai:
   gh/gpt-5.5
@@ -174,42 +174,58 @@ Modeliai:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Pigūs teikėjai
+**AI kreditai (žetonais pagrįstas atsiskaitymas).** Kai GitHub pateikia paskyros
+`credits_used`, teikėjo apribojimų kortelėje rodoma eilutė **AI kreditai** su per
+dabartinį atsiskaitymo laikotarpį sunaudotų kreditų skaičiumi, taip pat neribotuose organizacijų planuose.
 
-#### GLM-4.7 (nustatymas iš naujo kasdien, $0.6/1M)
+**Vietinis AI kreditų limitas.** Redaguokite GitHub ryšį ir nustatykite **AI kreditų limitą vienam
+atsiskaitymo laikotarpiui** (`providerSpecificData.githubCreditLimit`). Tuščia reikšmė jį išjungia; `0`
+visada praleidžia ryšį. Kai paskutinis naudojimo rodmuo yra lygus limitui arba jį viršija,
+renkantis paskyrą šis ryšys praleidžiamas, o maršrutizavimas pereina prie kitų jūsų ryšių,
+taip pat, kaip ir pasiekus kvotos politikos ribą. Tikrinimui naudojami naudojimo duomenys,
+kuriuos jau surenka periodinis kvotos atnaujinimas — užklausos metu į GitHub niekada
+nesikreipiama — be to, taikomas saugus atsarginis elgesys: trūkstamas arba pasenęs rodmuo
+(senesnis nei 15 minučių arba iš jau iš naujo nustatyto atsiskaitymo laikotarpio) ryšio
+neblokuoja. Tai yra vietinė apsaugos priemonė, **o ne garantuota išlaidų riba**: dėl GitHub
+ataskaitų vėlavimo, atnaujinimo intervalo, vykdomų užklausų ir naudojimo ne OmniRoute aplinkoje
+ši riba gali būti viršyta. Jei reikia griežtos ribos, naudokite pačios GitHub išlaidų valdiklius.
+
+### 💰 Nebrangūs teikėjai
+
+#### GLM-4.7 (kasdienis nustatymas iš naujo, $0.6/1M)
 
 1. Užsiregistruokite: [Zhipu AI](https://open.bigmodel.cn)
 2. Gaukite API raktą iš Coding Plan
-3. Valdymo skydas → Pridėti API raktą: Teikėjas: `glm`, API raktas: `your-key`
+3. Valdymo skydas → Pridėti API raktą: teikėjas: `glm`, API raktas: `your-key`
 
-**Naudojimas:** `glm/glm-4.7` — **Profesionalo patarimas:** Coding Plan suteikia 3 kartus didesnę kvotą už 7 kartus mažesnę kainą! Kvota nustatoma iš naujo kasdien 10:00 val.
+**Naudojimas:** `glm/glm-4.7` — **Profesionalo patarimas:** Coding Plan suteikia 3× didesnę kvotą už 1/7 kainos! Nustatymas iš naujo kasdien 10:00.
 
 #### MiniMax M2.1 (nustatymas iš naujo kas 5 val., $0.20/1M)
 
 1. Užsiregistruokite: [MiniMax](https://www.minimax.io)
 2. Gaukite API raktą → Valdymo skydas → Pridėti API raktą
 
-**Naudojimas:** `minimax/MiniMax-M2.1` — **Profesionalo patarimas:** pigiausias variantas ilgam kontekstui (1M žetonų)!
+**Naudojimas:** `minimax/MiniMax-M2.1` — **Profesionalo patarimas:** pigiausias pasirinkimas ilgam kontekstui (1 mln. žetonų)!
 
-#### Kimi K2 (fiksuotas $9/mėn. mokestis)
+#### Kimi K2 ($9/mėn. fiksuota kaina)
 
 1. Užsiprenumeruokite: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Gaukite API raktą → Valdymo skydas → Pridėti API raktą
 
-**Naudojimas:** `kimi/kimi-k2.5` — **Profesionalo patarimas:** fiksuotas $9/mėn. mokestis už 10M žetonų = faktinė $0.90/1M kaina!
+**Naudojimas:** `kimi/kimi-k2.5` — **Profesionalo patarimas:** fiksuota $9/mėn. kaina už 10 mln. žetonų = $0.90/1 mln. faktinė kaina!
 
 #### Baidu Qianfan / ERNIE
 
 1. Užsiregistruokite: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Sukurkite Qianfan API raktą → Valdymo skydas → Pridėti API raktą: Teikėjas: `qianfan`
+2. Sukurkite Qianfan API raktą → Valdymo skydas → Pridėti API raktą: teikėjas: `qianfan`
 
-**Naudojimas:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` arba kitas su OpenAI suderinamas Qianfan modelio ID.
+**Naudojimas:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` arba kitas su Qianfan suderinamas OpenAI modelio ID.
 
 ### 🆓 NEMOKAMI teikėjai
 
-Teikėjų, kuriems nereikia autentifikavimo, puslapyje šalia **Autentifikavimas nereikalingas** yra jungiklis.
-Jį išjungus teikėjas išjungiamas, pašalinamas iš sukonfigūruotų ir glaustų Teikėjų rodinių, o
-jo modeliai pašalinami iš `/v1/models`.
+Teikėjų puslapyje šalia **Autentifikavimas nereikalingas** yra jungiklis, skirtas nemokamiems teikėjams be autentifikavimo.
+Jį išjungus, teikėjas išjungiamas, pašalinamas iš sukonfigūruotų / glaustų teikėjų rodinių,
+o jo modeliai pašalinami iš `/v1/models`.
 
 #### Qoder (9 NEMOKAMI modeliai)
 
@@ -219,7 +235,7 @@ Valdymo skydas → Prijungti Qoder → OAuth prisijungimas → Prieigai taikomi 
 Modeliai: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude NEMOKAMAI)
+#### Kiro (NEMOKAMAS Claude)
 
 ```bash
 Valdymo skydas → Prijungti Kiro → AWS Builder ID arba Google/GitHub → ~50 kreditų per mėnesį

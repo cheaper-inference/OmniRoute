@@ -118,18 +118,18 @@ Aċċess permezz ta': WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Konfigurazzjoni tal-Providers
+## 📖 Konfigurazzjoni tal-fornituri
 
-Biex iżżid għadd kbir ta’ konnessjonijiet b’ċavetta API minn fajl CSV jew JSON, uża **Dashboard → Providers → Import from file**. Il-kolonni huma pożizzjonali (`provider,name,apiKey,baseUrl,priority`); `provider` irid ikun diġà jeżisti bħala provider immaniġġjat jew node kompatibbli. Ara [Importazzjoni ta’ providers minn fajl CSV jew JSON](../providers/CSV-IMPORT.md).
+Biex iżżid konnessjonijiet taċ-ċwievet tal-API minn fajl CSV jew JSON, uża **Dashboard → Providers → Import from file**. Il-kolonni huma pożizzjonali (`provider,name,apiKey,baseUrl,priority`); `provider` għandu jkun diġà jeżisti bħala fornitur ġestit jew node kompatibbli. Ara [Importa fornituri minn fajl CSV jew JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Providers b’Abbonament
+### 🔐 Fornituri tal-abbonamenti
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Qabbad Claude Code
+Dashboard → Providers → Connect Claude Code
 → Login OAuth → Aġġornament awtomatiku tat-token
-→ Monitoraġġ tal-kwota ta’ 5 sigħat + ta’ kull ġimgħa
+→ Traċċar tal-kwota ta’ 5 sigħat + ta’ kull ġimgħa
 
 Mudelli:
   cc/claude-opus-4-7
@@ -137,18 +137,18 @@ Mudelli:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Parir Professjonali:** Uża Opus għal kompiti kumplessi u Sonnet għall-veloċità. OmniRoute jimmonitorja l-kwota għal kull mudell!
+**Parir professjonali:** Uża Opus għal kompiti kumplessi, u Sonnet għall-veloċità. OmniRoute isegwi l-kwota għal kull mudell!
 
-M’hemmx browser fuq il-host ta’ OmniRoute? Ħaddem `claude setup-token` kull fejn tkun illoggjat fi Claude Code u waħħal it-token ta’ sena fit-tab **Setup Token**. Ara [Claude Code b’token ta’ konfigurazzjoni](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+M’hemmx browser fuq il-host ta’ OmniRoute? Eżegwixxi `claude setup-token` kullimkien fejn Claude Code ikun illoggjat u waħħal it-token ta’ sena fit-tab **Setup Token**. Ara [Claude Code b’token ta’ setup](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Ir-rotot kompatibbli ma’ Claude u Claude Code jippreservaw il-livell ta’ sforz ta’ ħsieb `max` għall-mudelli Opus u Sonnet. Il-mudelli Haiku ma jaċċettawx il-livell ta’ sforz `max`, għalhekk OmniRoute jbaxxi dik it-talba għal baġit għoli ta’ ħsieb qabel jibgħatha lis-servizz upstream.
+Ir-rotot kompatibbli ma’ Claude u Claude Code jippreservaw l-isforz ta’ ħsieb `max` għall-mudelli Opus u Sonnet. Il-mudelli Haiku ma jaċċettawx il-livell ta’ sforz `max`, għalhekk OmniRoute ibaxxi dik it-talba għal baġit għoli ta’ ħsieb qabel jibgħatha lis-servizz upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Qabbad Codex
+Dashboard → Providers → Connect Codex
 → Login OAuth (port 1455)
-→ Irrisettjar kull 5 sigħat + kull ġimgħa
+→ Reset ta’ 5 sigħat + ta’ kull ġimgħa
 
 Mudelli:
   cx/gpt-5.5
@@ -160,9 +160,9 @@ Mudelli:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Qabbad GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth permezz ta’ GitHub
-→ Irrisettjar kull xahar (fl-1 tax-xahar)
+→ Reset kull xahar (l-1 tax-xahar)
 
 Mudelli:
   gh/gpt-5.5
@@ -172,46 +172,49 @@ Mudelli:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Providers Irħas
+**Krediti tal-AI (fatturazzjoni bbażata fuq it-tokens).** Meta GitHub jirrapporta `credits_used` għall-kont, il-karta Provider Limits turi ringiela **AI Credits** bil-krediti kkunsmati fil-perjodu ta’ fatturazzjoni attwali, inkluż fuq pjanijiet ta’ organizzazzjoni illimitati.
 
-#### GLM-4.7 (Irrisettjar kuljum, $0.6/1M)
+**Limitu lokali tal-krediti tal-AI.** Editja konnessjoni ta’ GitHub u ssettja **AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`). Jekk titħalla vojta, il-limitu jiġi diżattivat; `0` dejjem jaqbeż il-konnessjoni. Meta l-aħħar qari tal-użu jkun daqs jew ogħla mil-limitu, l-għażla tal-kont taqbeż dik il-konnessjoni u r-routing jaqa’ lura fuq il-konnessjonijiet l-oħra tiegħek, bl-istess mod bħal qtugħ ibbażat fuq politika tal-kwota. Il-kontroll jaqra l-użu li l-aġġornament perjodiku tal-kwota diġà jiġbor — qatt ma jsejjaħ lil GitHub fil-mogħdija tat-talba — u jaħdem b’mod permissiv: qari nieqes jew antik (eqdem minn 15-il minuta, jew minn perjodu ta’ fatturazzjoni li diġà ġie rrisettjat) ma jimblokkax il-konnessjoni. Din hija salvagwardja lokali, **mhux limitu garantit tal-infiq**: dewmien fir-rappurtar ta’ GitHub, l-intervall tal-aġġornament, talbiet li jkunu għaddejjin u użu barra minn OmniRoute jistgħu jaqbżuha. Uża l-kontrolli tal-infiq proprji ta’ GitHub għal limitu assolut.
+
+### 💰 Fornituri rħas
+
+#### GLM-4.7 (reset ta’ kuljum, $0.6/1M)
 
 1. Irreġistra: [Zhipu AI](https://open.bigmodel.cn)
-2. Ikseb ċavetta API minn Coding Plan
-3. Dashboard → Żid Ċavetta API: Provider: `glm`, Ċavetta API: `your-key`
+2. Ikseb iċ-ċavetta tal-API mill-Coding Plan
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Uża:** `glm/glm-4.7` — **Parir Professjonali:** Coding Plan joffri kwota 3× akbar bi 1/7 tal-ispiża! Jirrisettja kuljum fl-10:00 AM.
+**Użu:** `glm/glm-4.7` — **Parir professjonali:** Coding Plan joffri kwota 3× akbar bi spiża ta’ 1/7! Reset kuljum fl-10:00 ta’ filgħodu.
 
-#### MiniMax M2.1 (Irrisettjar kull 5 sigħat, $0.20/1M)
+#### MiniMax M2.1 (reset ta’ 5 sigħat, $0.20/1M)
 
 1. Irreġistra: [MiniMax](https://www.minimax.io)
-2. Ikseb ċavetta API → Dashboard → Żid Ċavetta API
+2. Ikseb iċ-ċavetta tal-API → Dashboard → Add API Key
 
-**Uża:** `minimax/MiniMax-M2.1` — **Parir Professjonali:** L-orħos għażla għal kuntest twil (1M tokens)!
+**Użu:** `minimax/MiniMax-M2.1` — **Parir professjonali:** L-orħos għażla għal kuntest twil (1M tokens)!
 
 #### Kimi K2 ($9/xahar b’rata fissa)
 
 1. Abbona: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Ikseb ċavetta API → Dashboard → Żid Ċavetta API
+2. Ikseb iċ-ċavetta tal-API → Dashboard → Add API Key
 
-**Uża:** `kimi/kimi-k2.5` — **Parir Professjonali:** Prezz fiss ta’ $9/xahar għal 10M tokens = spiża effettiva ta’ $0.90/1M!
+**Użu:** `kimi/kimi-k2.5` — **Parir professjonali:** $9/xahar b’rata fissa għal 10M tokens = spiża effettiva ta’ $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Irreġistra: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Oħloq ċavetta API ta’ Qianfan → Dashboard → Żid Ċavetta API: Provider: `qianfan`
+2. Oħloq ċavetta tal-API ta’ Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
-**Uża:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, jew ID ieħor ta’ mudell Qianfan kompatibbli ma’ OpenAI.
+**Użu:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, jew ID ieħor ta’ mudell kompatibbli ma’ OpenAI ta’ Qianfan.
 
-### 🆓 Providers B’XEJN
+### 🆓 Fornituri B’XEJN
 
-Il-providers b’xejn li ma jeħtiġux awtentikazzjoni għandhom swiċċ ħdejn **Ma hija meħtieġa l-ebda awtentikazzjoni** fil-paġna tal-provider tagħhom.
-Meta titfih, dak il-provider jiġi diżattivat, jitneħħa mill-veduti konfigurati/kompatti ta’ Providers, u l-mudelli tiegħu jitneħħew minn `/v1/models`.
+Il-fornituri b’xejn li ma jeħtiġux awtentikazzjoni għandhom swiċċ ħdejn **No authentication required** fil-paġna tal-fornitur tagħhom. Meta titfih, dak il-fornitur jiġi diżattivat, jitneħħa mill-veduti Providers configured/compact, u l-mudelli tiegħu jitneħħew minn `/v1/models`.
 
 #### Qoder (9 mudelli B’XEJN)
 
 ```bash
-Dashboard → Qabbad Qoder → Login OAuth → L-aċċess huwa soġġett għal-limiti attwali tal-provider
+Dashboard → Connect Qoder → Login OAuth → L-aċċess huwa soġġett għal-limiti attwali tal-fornitur
 
 Mudelli: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -219,7 +222,7 @@ Mudelli: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if
 #### Kiro (Claude B’XEJN)
 
 ```bash
-Dashboard → Qabbad Kiro → AWS Builder ID jew Google/GitHub → ~50 kreditu/xahar
+Dashboard → Connect Kiro → AWS Builder ID jew Google/GitHub → ~50 kreditu/xahar
 
 Mudelli: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

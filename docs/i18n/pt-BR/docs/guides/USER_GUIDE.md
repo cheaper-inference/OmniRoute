@@ -120,16 +120,16 @@ Acesso por meio de: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configuração de provedores
 
-Para adicionar em massa conexões de chaves de API a partir de um arquivo CSV ou JSON, use **Painel → Provedores → Importar de arquivo**. As colunas são posicionais (`provider,name,apiKey,baseUrl,priority`); `provider` já deve existir como um provedor gerenciado ou um nó compatível. Consulte [Importar provedores de um arquivo CSV ou JSON](../providers/CSV-IMPORT.md).
+Para adicionar em massa conexões de chave de API a partir de um arquivo CSV ou JSON, use **Painel → Provedores → Importar de arquivo**. As colunas são posicionais (`provider,name,apiKey,baseUrl,priority`); `provider` já deve existir como um provedor gerenciado ou um nó compatível. Consulte [Importar provedores de um arquivo CSV ou JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Provedores por assinatura
+### 🔐 Provedores de assinatura
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Painel → Provedores → Conectar Claude Code
-→ Login via OAuth → Atualização automática do token
-→ Monitoramento das cotas de 5 horas + semanal
+→ Login OAuth → Atualização automática do token
+→ Acompanhamento de cotas de 5 horas + semanais
 
 Modelos:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modelos:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Dica profissional:** Use o Opus para tarefas complexas e o Sonnet para obter mais velocidade. O OmniRoute monitora a cota por modelo!
+**Dica profissional:** use o Opus para tarefas complexas e o Sonnet para obter velocidade. O OmniRoute acompanha a cota por modelo!
 
-Não há navegador no host do OmniRoute? Execute `claude setup-token` em qualquer lugar onde o Claude Code esteja conectado e cole o token de um ano na aba **Token de configuração**. Consulte [Claude Code com um token de configuração](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Sem um navegador no host do OmniRoute? Execute `claude setup-token` em qualquer lugar onde o Claude Code esteja conectado e cole o token de um ano na aba **Setup Token**. Consulte [Claude Code com um token de configuração](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-As rotas compatíveis com Claude e Claude Code preservam o nível de esforço de raciocínio `max` para os modelos Opus e Sonnet. Os modelos Haiku não aceitam o nível de esforço `max`, portanto, o OmniRoute reduz essa solicitação para um orçamento de raciocínio alto antes de enviá-la ao provedor upstream.
+As rotas compatíveis com Claude e Claude Code preservam o esforço de raciocínio `max` para os
+modelos Opus e Sonnet. Os modelos Haiku não aceitam o nível de esforço `max`, então o OmniRoute
+reduz essa solicitação para um orçamento alto de raciocínio antes de enviá-la ao upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Painel → Provedores → Conectar Codex
-→ Login via OAuth (porta 1455)
-→ Redefinição a cada 5 horas + semanal
+→ Login OAuth (porta 1455)
+→ Redefinição de 5 horas + semanal
 
 Modelos:
   cx/gpt-5.5
@@ -162,7 +164,7 @@ Modelos:
 ```bash
 Painel → Provedores → Conectar GitHub
 → OAuth via GitHub
-→ Redefinição mensal (dia 1º de cada mês)
+→ Redefinição mensal (dia 1 do mês)
 
 Modelos:
   gh/gpt-5.5
@@ -172,45 +174,63 @@ Modelos:
   gh/gemini-3.1-pro-preview
 ```
 
+**Créditos de IA (cobrança baseada em tokens).** Quando o GitHub informa `credits_used` para a
+conta, o cartão de Limites do provedor mostra uma linha de **Créditos de IA** com os créditos
+consumidos no período de cobrança atual, inclusive em planos organizacionais ilimitados.
+
+**Limite local de Créditos de IA.** Edite uma conexão do GitHub e defina **Limite de Créditos de IA por
+período de cobrança** (`providerSpecificData.githubCreditLimit`). Deixá-lo em branco o desativa; `0`
+sempre ignora a conexão. Quando a última leitura de uso for igual ou superior ao limite,
+a seleção de contas ignora essa conexão e o roteamento recorre às outras conexões, da mesma
+forma que um corte por política de cota. A verificação lê o uso que a atualização periódica de
+cotas já coleta — ela nunca chama o GitHub no caminho da solicitação — e falha de forma permissiva:
+uma leitura ausente ou obsoleta (com mais de 15 minutos ou de um período de cobrança que já foi
+redefinido) não bloqueia a conexão. Esta é uma proteção local, **não um teto de gastos garantido**:
+atrasos nos relatórios do GitHub, o intervalo de atualização, solicitações em andamento e uso fora
+do OmniRoute podem ultrapassá-la. Use os próprios controles de gastos do GitHub para impor um
+limite rígido.
+
 ### 💰 Provedores econômicos
 
-#### GLM-4.7 (Redefinição diária, US$ 0,60/1M)
+#### GLM-4.7 (redefinição diária, US$ 0,6/1M)
 
 1. Cadastre-se: [Zhipu AI](https://open.bigmodel.cn)
 2. Obtenha a chave de API no Coding Plan
 3. Painel → Adicionar chave de API: Provedor: `glm`, Chave de API: `your-key`
 
-**Uso:** `glm/glm-4.7` — **Dica profissional:** O Coding Plan oferece 3 vezes mais cota por 1/7 do custo! Redefinição diária às 10h.
+**Uso:** `glm/glm-4.7` — **Dica profissional:** o Coding Plan oferece 3× mais cota por 1/7 do custo! Redefinição diária às 10h.
 
-#### MiniMax M2.1 (Redefinição a cada 5 horas, US$ 0,20/1M)
+#### MiniMax M2.1 (redefinição a cada 5 h, US$ 0,20/1M)
 
 1. Cadastre-se: [MiniMax](https://www.minimax.io)
 2. Obtenha a chave de API → Painel → Adicionar chave de API
 
-**Uso:** `minimax/MiniMax-M2.1` — **Dica profissional:** A opção mais barata para contextos longos (1M de tokens)!
+**Uso:** `minimax/MiniMax-M2.1` — **Dica profissional:** opção mais barata para contexto longo (1M de tokens)!
 
-#### Kimi K2 (US$ 9/mês, preço fixo)
+#### Kimi K2 (US$ 9/mês fixos)
 
 1. Assine: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Obtenha a chave de API → Painel → Adicionar chave de API
 
-**Uso:** `kimi/kimi-k2.5` — **Dica profissional:** US$ 9 fixos por mês para 10M de tokens = custo efetivo de US$ 0,90/1M!
+**Uso:** `kimi/kimi-k2.5` — **Dica profissional:** US$ 9/mês fixos por 10M de tokens = custo efetivo de US$ 0,90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Cadastre-se: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Crie uma chave de API do Qianfan → Painel → Adicionar chave de API: Provedor: `qianfan`
 
-**Uso:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou outro ID de modelo do Qianfan compatível com a OpenAI.
+**Uso:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou outro ID de modelo compatível com OpenAI do Qianfan.
 
 ### 🆓 Provedores GRATUITOS
 
-Os provedores gratuitos sem autenticação têm um botão ao lado de **Nenhuma autenticação necessária** em sua página de provedor. Desativá-lo desabilita esse provedor, remove-o das visualizações configurada/compacta de Provedores e remove seus modelos de `/v1/models`.
+Os provedores gratuitos sem autenticação têm um interruptor ao lado de **Nenhuma autenticação necessária** na página do provedor.
+Desativá-lo desabilita esse provedor, remove-o das visualizações de Provedores configurados/compacta e
+remove seus modelos de `/v1/models`.
 
 #### Qoder (9 modelos GRATUITOS)
 
 ```bash
-Painel → Conectar Qoder → Login via OAuth → O acesso está sujeito aos limites atuais do provedor
+Painel → Conectar Qoder → Login OAuth → O acesso está sujeito aos limites atuais do provedor
 
 Modelos: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -218,7 +238,7 @@ Modelos: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if
 #### Kiro (Claude GRATUITO)
 
 ```bash
-Painel → Conectar Kiro → AWS Builder ID ou Google/GitHub → Aproximadamente 50 créditos/mês
+Painel → Conectar Kiro → AWS Builder ID ou Google/GitHub → ~50 créditos/mês
 
 Modelos: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```

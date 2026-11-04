@@ -120,37 +120,39 @@ Acces prin: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configurarea furnizorilor
 
-Pentru a adăuga în bloc conexiuni cu chei API dintr-un fișier CSV sau JSON, utilizați **Panou de control → Furnizori → Importă din fișier**. Coloanele sunt poziționale (`provider,name,apiKey,baseUrl,priority`); `provider` trebuie să existe deja ca furnizor gestionat sau ca nod compatibil. Consultați [Importarea furnizorilor dintr-un fișier CSV sau JSON](../providers/CSV-IMPORT.md).
+Pentru a adăuga în bloc conexiuni cu cheie API dintr-un fișier CSV sau JSON, folosiți **Dashboard → Providers → Import from file**. Coloanele sunt poziționale (`provider,name,apiKey,baseUrl,priority`); `provider` trebuie să existe deja ca furnizor gestionat sau ca nod compatibil. Consultați [Import providers from a CSV or JSON file](../providers/CSV-IMPORT.md).
 
-### 🔐 Furnizori pe bază de abonament
+### 🔐 Furnizori de abonament
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Panou de control → Furnizori → Conectează Claude Code
+Dashboard → Providers → Connect Claude Code
 → Autentificare OAuth → Reîmprospătare automată a tokenului
-→ Monitorizarea cotei la 5 ore + săptămânale
+→ Monitorizarea cotei de 5 ore + săptămânale
 
-Modele:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Sfat util:** Utilizați Opus pentru sarcini complexe și Sonnet pentru viteză. OmniRoute monitorizează cota pentru fiecare model!
+**Sfat profesional:** Folosiți Opus pentru sarcini complexe și Sonnet pentru viteză. OmniRoute monitorizează cota pentru fiecare model!
 
-Nu aveți un browser pe gazda OmniRoute? Rulați `claude setup-token` oriunde sunteți autentificat în Claude Code și inserați tokenul valabil un an în fila **Token de configurare**. Consultați [Claude Code cu un token de configurare](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nu aveți un browser pe gazda OmniRoute? Rulați `claude setup-token` oriunde Claude Code este autentificat și inserați tokenul valabil un an în fila **Setup Token**. Consultați [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Rutele compatibile cu Claude și Claude Code păstrează nivelul `max` al efortului de raționament pentru modelele Opus și Sonnet. Modelele Haiku nu acceptă nivelul de efort `max`, astfel încât OmniRoute reduce solicitarea la un buget ridicat de raționament înainte de a o trimite serviciului din amonte.
+Rutele compatibile cu Claude și Claude Code păstrează nivelul de efort de gândire `max` pentru
+modelele Opus și Sonnet. Modelele Haiku nu acceptă nivelul de efort `max`, așa că OmniRoute
+reduce solicitarea la un buget mare de gândire înainte de a o trimite în amonte.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Panou de control → Furnizori → Conectează Codex
-→ Autentificare OAuth (portul 1455)
+Dashboard → Providers → Connect Codex
+→ Autentificare OAuth (port 1455)
 → Resetare la 5 ore + săptămânală
 
-Modele:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +162,11 @@ Modele:
 #### GitHub Copilot
 
 ```bash
-Panou de control → Furnizori → Conectează GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth prin GitHub
 → Resetare lunară (în prima zi a lunii)
 
-Modele:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +174,74 @@ Modele:
   gh/gemini-3.1-pro-preview
 ```
 
+**Credite AI (facturare bazată pe tokenuri).** Atunci când GitHub raportează `credits_used`
+pentru cont, cardul Provider Limits afișează un rând **AI Credits** cu numărul de credite
+consumate în perioada curentă de facturare, inclusiv pentru planurile de organizație nelimitate.
+
+**Limită locală pentru creditele AI.** Editați o conexiune GitHub și setați **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Dacă este necompletată, limita este
+dezactivată; `0` omite întotdeauna conexiunea. Atunci când ultima citire a utilizării este egală
+sau mai mare decât limita, selectarea contului omite conexiunea respectivă, iar rutarea revine la
+celelalte conexiuni, la fel ca în cazul unei întreruperi impuse de politica de cotă. Verificarea
+citește datele de utilizare pe care reîmprospătarea periodică a cotei le colectează deja — nu apelează
+niciodată GitHub pe calea solicitării — și se deschide în caz de eroare: o citire lipsă sau învechită
+(mai veche de 15 minute ori provenită dintr-o perioadă de facturare care s-a resetat deja) nu blochează
+conexiunea. Aceasta este o protecție locală, **nu un plafon garantat al cheltuielilor**: întârzierile
+raportării GitHub, intervalul de reîmprospătare, solicitările în curs și utilizarea din afara
+OmniRoute pot depăși această limită. Pentru un plafon strict, folosiți propriile controale de
+cheltuieli ale GitHub.
+
 ### 💰 Furnizori ieftini
 
 #### GLM-4.7 (resetare zilnică, $0.6/1M)
 
 1. Înregistrați-vă: [Zhipu AI](https://open.bigmodel.cn)
 2. Obțineți cheia API din Coding Plan
-3. Panou de control → Adaugă o cheie API: Furnizor: `glm`, Cheie API: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Utilizare:** `glm/glm-4.7` — **Sfat util:** Coding Plan oferă o cotă de 3× mai mare la 1/7 din cost! Se resetează zilnic la ora 10:00.
+**Utilizare:** `glm/glm-4.7` — **Sfat profesional:** Coding Plan oferă o cotă de 3× la 1/7 din cost! Resetare zilnică la 10:00.
 
 #### MiniMax M2.1 (resetare la 5 ore, $0.20/1M)
 
 1. Înregistrați-vă: [MiniMax](https://www.minimax.io)
-2. Obțineți cheia API → Panou de control → Adaugă o cheie API
+2. Obțineți cheia API → Dashboard → Add API Key
 
-**Utilizare:** `minimax/MiniMax-M2.1` — **Sfat util:** Cea mai ieftină opțiune pentru contexte lungi (1M tokenuri)!
+**Utilizare:** `minimax/MiniMax-M2.1` — **Sfat profesional:** Cea mai ieftină opțiune pentru context lung (1M de tokenuri)!
 
-#### Kimi K2 (tarif fix de $9/lună)
+#### Kimi K2 ($9/lună, tarif fix)
 
 1. Abonați-vă: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Obțineți cheia API → Panou de control → Adaugă o cheie API
+2. Obțineți cheia API → Dashboard → Add API Key
 
-**Utilizare:** `kimi/kimi-k2.5` — **Sfat util:** Tariful fix de $9/lună pentru 10M tokenuri înseamnă un cost efectiv de $0.90/1M!
+**Utilizare:** `kimi/kimi-k2.5` — **Sfat profesional:** $9/lună fix pentru 10M de tokenuri = cost efectiv de $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Înregistrați-vă: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Creați o cheie API Qianfan → Panou de control → Adaugă o cheie API: Furnizor: `qianfan`
+2. Creați o cheie API Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
-**Utilizare:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` sau un alt ID de model Qianfan compatibil cu OpenAI.
+**Utilizare:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` sau un alt ID de model compatibil cu OpenAI oferit de Qianfan.
 
 ### 🆓 Furnizori GRATUIȚI
 
-Furnizorii gratuiți care nu necesită autentificare au un comutator lângă **Nu este necesară autentificarea** pe pagina furnizorului.
-Dezactivarea acestuia dezactivează furnizorul, îl elimină din vizualizările configurată/compactă ale secțiunii Furnizori și
-elimină modelele sale din `/v1/models`.
+Furnizorii gratuiți fără autentificare au un comutator lângă **No authentication required** pe pagina
+furnizorului. Dezactivarea acestuia dezactivează furnizorul respectiv, îl elimină din vizualizările
+Providers configured/compact și elimină modelele sale din `/v1/models`.
 
 #### Qoder (9 modele GRATUITE)
 
 ```bash
-Panou de control → Conectează Qoder → Autentificare OAuth → Accesul este supus limitelor actuale ale furnizorului
+Dashboard → Connect Qoder → Autentificare OAuth → Accesul este supus limitelor curente ale furnizorului
 
-Modele: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude GRATUIT)
 
 ```bash
-Panou de control → Conectează Kiro → AWS Builder ID sau Google/GitHub → ~50 de credite/lună
+Dashboard → Connect Kiro → AWS Builder ID sau Google/GitHub → ~50 de credite/lună
 
-Modele: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
