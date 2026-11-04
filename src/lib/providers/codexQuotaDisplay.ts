@@ -66,12 +66,7 @@ function observedWindows(state: JsonRecord, scope: Scope): ObservedWindow[] {
   return [...result].map(([key, value]) => ({ key, value }));
 }
 
-/** Keep sparse observations, but do not let a delayed snapshot clear newer scoped state. */
-export function mergeCodexQuotaObservation(
-  previous: JsonRecord,
-  next: JsonRecord
-): JsonRecord | null {
-  if (time(next.observedAt) < time(previous.observedAt)) return null;
+function mergeWindowTimes(previous: JsonRecord, next: JsonRecord): JsonRecord {
   const observedAtByWindow = { ...record(previous.observedAtByWindow) };
   // Upgrade existing snapshots lazily, preserving the age of an omitted sibling window.
   for (const scope of ["codex", "spark"] as const) {
@@ -82,39 +77,89 @@ export function mergeCodexQuotaObservation(
       observedAtByWindow[key] = windowTime(next, key);
     }
   }
+  return observedAtByWindow;
+}
+
+function validNumericPatch(next: JsonRecord): JsonRecord {
   const safeNext = { ...next };
   for (const key of ["5h", "7d"] as const) {
     const used = next[`usage${key}`];
     const total = next[`limit${key}`];
     if (finite(used) && used >= 0 && finite(total) && total > 0) continue;
-    // Legacy consumers may supply Infinity/null defaults for an absent window.
-    // Those are absence, not evidence capable of replacing a known sibling.
+    // Legacy Infinity/null defaults mean absence, not evidence replacing a known sibling.
     for (const prefix of ["usage", "limit", "resetAt"]) delete safeNext[`${prefix}${key}`];
   }
+  return safeNext;
+}
+
+function addSignalWindows(windows: Map<WindowKey, unknown>, values: unknown): void {
+  for (const value of Array.isArray(values) ? values : []) {
+    const key = signalWindowKey(record(value));
+    if (key) windows.set(key, value);
+  }
+}
+
+function mergeSignalWindows(before: JsonRecord, after: JsonRecord, patch: JsonRecord): JsonRecord {
+  const windows = new Map<WindowKey, unknown>();
+  addSignalWindows(windows, before.windows);
+  // A fresh numeric window replaces its old percentage signal, not its sibling.
+  for (const key of ["5h", "7d"] as const) {
+    if (patch[`limit${key}`] !== undefined) windows.delete(key);
+  }
+  addSignalWindows(windows, after.windows);
+  return { ...before, ...after, windows: [...windows.values()] };
+}
+
+/** Keep sparse observations, but do not let a delayed snapshot clear newer scoped state. */
+export function mergeCodexQuotaObservation(
+  previous: JsonRecord,
+  next: JsonRecord
+): JsonRecord | null {
+  if (time(next.observedAt) < time(previous.observedAt)) return null;
+  const safeNext = validNumericPatch(next);
   const merged: JsonRecord = {
     ...previous,
     ...Object.fromEntries(Object.entries(safeNext).filter(([, value]) => value !== undefined)),
-    observedAtByWindow,
+    observedAtByWindow: mergeWindowTimes(previous, next),
   };
   const before = record(previous.quotaSignal);
   const after = record(next.quotaSignal);
   if (Array.isArray(before.windows) || Array.isArray(after.windows)) {
-    const windows = new Map<WindowKey, unknown>();
-    for (const value of Array.isArray(before.windows) ? before.windows : []) {
-      const key = signalWindowKey(record(value));
-      if (key) windows.set(key, value);
-    }
-    // A fresh numeric window replaces its old percentage signal, not its sibling.
-    for (const key of ["5h", "7d"] as const) {
-      if (safeNext[`limit${key}`] !== undefined) windows.delete(key);
-    }
-    for (const value of Array.isArray(after.windows) ? after.windows : []) {
-      const key = signalWindowKey(record(value));
-      if (key) windows.set(key, value);
-    }
-    merged.quotaSignal = { ...before, ...after, windows: [...windows.values()] };
+    merged.quotaSignal = mergeSignalWindows(before, after, safeNext);
   }
   return merged;
+}
+
+type DisplayProjection = { quotas: JsonRecord; latest: number; changed: boolean };
+function projectScopeWindows(
+  projection: DisplayProjection,
+  state: JsonRecord,
+  scope: Scope,
+  fetchedAt: string | undefined
+): void {
+  const { quotas } = projection;
+  for (const { key, value } of observedWindows(state, scope)) {
+    const name = QUOTA_KEYS[scope][key];
+    const observedAt = windowTime(state, key);
+    const observed = time(observedAt);
+    const prior = time(
+      record(quotas[name]).observedAt ?? (Object.hasOwn(quotas, name) ? fetchedAt : undefined)
+    );
+    if (!Number.isFinite(observed) || observed <= prior) continue;
+    quotas[name] = { ...value, observedAt };
+    projection.latest = Number.isFinite(projection.latest)
+      ? Math.max(projection.latest, observed)
+      : observed;
+    projection.changed = true;
+  }
+}
+
+function preserveUntouchedWindowTimes(quotas: JsonRecord, fetchedAt: string): void {
+  // A later session update must not make an untouched weekly/reserve row look younger.
+  for (const [name, raw] of Object.entries(quotas)) {
+    const value = record(raw);
+    if (!value.observedAt) quotas[name] = { ...value, observedAt: fetchedAt };
+  }
 }
 
 /** Overlay only newer known windows; polling never writes or restamps their read time. */
@@ -125,37 +170,23 @@ export function projectCodexQuotaDisplay(
   const data = record(providerSpecificData);
   const byScope = record(data.codexQuotaStateByScope);
   const legacy = record(data.codexQuotaState);
-  const quotas = { ...cached?.quotas };
-  let latest = time(cached?.fetchedAt);
-  let changed = false;
+  const projection: DisplayProjection = {
+    quotas: { ...cached?.quotas },
+    latest: time(cached?.fetchedAt),
+    changed: false,
+  };
   for (const scope of ["codex", "spark"] as const) {
     const state = record(byScope[scope] ?? (legacy.scope === scope ? legacy : undefined));
-    for (const { key, value } of observedWindows(state, scope)) {
-      const name = QUOTA_KEYS[scope][key];
-      const observedAt = windowTime(state, key);
-      const observed = time(observedAt);
-      const prior = time(
-        record(quotas[name]).observedAt ??
-          (Object.hasOwn(quotas, name) ? cached?.fetchedAt : undefined)
-      );
-      if (!Number.isFinite(observed) || observed <= prior) continue;
-      quotas[name] = { ...value, observedAt };
-      latest = Number.isFinite(latest) ? Math.max(latest, observed) : observed;
-      changed = true;
-    }
+    projectScopeWindows(projection, state, scope, cached?.fetchedAt);
   }
-  if (!changed) return cached;
-  // A later session update must not make an untouched weekly/reserve row look younger.
-  for (const [name, raw] of Object.entries(quotas)) {
-    const value = record(raw);
-    if (!value.observedAt && cached) quotas[name] = { ...value, observedAt: cached.fetchedAt };
-  }
+  if (!projection.changed) return cached;
+  if (cached) preserveUntouchedWindowTimes(projection.quotas, cached.fetchedAt);
   return {
     ...cached,
-    quotas,
+    quotas: projection.quotas,
     plan: cached?.plan ?? null,
     message: null,
-    fetchedAt: new Date(latest).toISOString(),
+    fetchedAt: new Date(projection.latest).toISOString(),
     source: "upstream-response",
   };
 }
