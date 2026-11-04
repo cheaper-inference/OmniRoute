@@ -1693,6 +1693,7 @@ async function handleChatCoreInner({
             mode,
             effectiveModel,
             compressionConfig,
+            preserveRawPrefixOnMiss: protectOpenCodePrefix,
             runCompression,
           });
         } else {
