@@ -127,8 +127,12 @@ test.describe("Advertised CLI client version card", () => {
     await expect(input).toBeVisible({ timeout: 20000 });
     await input.fill("2.1.260");
 
-    // Scope to the editor row: the provider page has other Save buttons.
-    const saveButton = input.locator("xpath=..").getByRole("button", { name: "Save" });
+    // Scope to this card: the provider page has other Save buttons. The input's parent is the
+    // kit's ci-field wrapper, which holds no button, so `input/..` found nothing.
+    const card = page
+      .locator(".ci-card")
+      .filter({ has: page.getByRole("heading", { name: "Advertised CLI client version" }) });
+    const saveButton = card.getByRole("button", { name: "Save", exact: true });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
 
