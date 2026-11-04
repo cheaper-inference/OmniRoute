@@ -10,6 +10,7 @@ import IPFilterSection from "./IPFilterSection";
 import PiiMaskingCard from "./PiiMaskingCard";
 import SessionInfoCard from "./SessionInfoCard";
 import AuthzSection from "./AuthzSection";
+import MfaSection from "./MfaSection";
 import { useTranslations } from "next-intl";
 
 export default function SecurityTab() {
@@ -310,6 +311,8 @@ export default function SecurityTab() {
           )}
         </div>
       </Card>
+
+      <MfaSection />
 
       <IPFilterSection />
 
