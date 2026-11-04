@@ -1540,9 +1540,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-구성된 모든 STT 제공자를 사용하여 오디오 파일을 전사합니다. 첫 번째 경로
-세그먼트는 네이티브 제공자를 선택합니다(`openai/…`, `deepgram/…`). 다른
-벤더의 모델을 재내보내는 게이트웨이는 정규화된 ID를 사용합니다
+구성된 STT 제공업체를 사용하여 오디오 파일을 전사합니다. 첫 번째 경로
+세그먼트는 네이티브 제공업체(`openai/…`, `deepgram/…`)를 선택합니다. 다른
+벤더의 모델을 다시 내보내는 게이트웨이는 정규화된 ID를 사용합니다
 (`openrouter/deepgram/nova-3`).
 
 **요청:**
@@ -1567,10 +1567,19 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **모델 ID 예시:** `openai/whisper-1` (OpenAI 키 필요),
 `openrouter/deepgram/nova-3` (OpenRouter 키 필요),
-`deepgram/nova-3` (네이티브 Deepgram 키 필요). 단독
-`deepgram/nova-3` 요청은 **OpenRouter를 사용하지 않습니다**.
+`deepgram/nova-3` (네이티브 Deepgram 키 필요). 단독으로 사용하는
+`deepgram/nova-3` 요청은 OpenRouter를 사용하지 않습니다.
 
 **지원 형식:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket을 통한 파일 모드 전사입니다(Gemini API 키 필요). 업로드된 파일은 `ffmpeg`를 사용하여
+16 kHz 모노 PCM으로 변환됩니다(`PATH`에 있어야 하며, 파일이 이미 16 kHz 모노 PCM WAV인 경우는
+예외). 변환된 파일은 세션으로 스트리밍되고 최종 텍스트는 `{ "text": "..." }`로 반환됩니다. 선택적
+`language` 및 `prompt` 양식 필드는 그대로 전달됩니다. 제한 사항: 25 MiB를 초과하는 업로드 또는
+디코딩된 오디오가 10분을 초과하는 경우 `413`이 반환됩니다. 변환이 60초보다 오래 실행되면
+프로세스가 종료되고 `504`가 반환됩니다. API 키는 `x-goog-api-key` 헤더로만 전송되며 WebSocket URL에는
+절대 포함되지 않습니다.
 
 ---
 
@@ -1663,7 +1672,7 @@ Content-Type: application/json
 }
 ```
 
-> **스키마 참고** (`setBudgetSchema`): `apiKeyId`는 필수이며, `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd` 중 하나 이상이 0보다 커야 합니다. 선택적 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 기존 `{keyId, limit, period}` 형식은 `400 Bad Request`를 반환합니다.
+> **스키마 참고** (`setBudgetSchema`): `apiKeyId`는 필수이며, `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd` 중 하나 이상이 0보다 커야 합니다. 선택적 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 레거시 `{keyId, limit, period}` 형식은 `400 Bad Request`를 반환합니다.
 
 ## 토큰 제한
 
