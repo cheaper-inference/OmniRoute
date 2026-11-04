@@ -238,6 +238,15 @@ jobs:
       # runs tsc scoped to the dashboard tree against a frozen baseline of
       # pre-existing errors; only NEW errors fail it.
       - run: npm run check:dashboard-typecheck
+      # The rest of the app surface — src/lib, src/shared, bin, packages and the
+      # Electron types — had no type gate: next build ignores type errors and
+      # the root tsconfig cannot finish. API routes are covered separately by
+      # api-route-typecheck.yml, so this is not "everything else was unchecked".
+      # This runs the production-only program against a frozen per-(file, code)
+      # count baseline, so a new error anywhere in that surface fails the job
+      # while the pre-existing debt stays visible and cannot grow.
+      - run: npm run check:build-typecheck
+        timeout-minutes: 5
       # typecheck:noimplicit:core dropped from this job (2026-07 optimize):
       # it was advisory (continue-on-error) and largely subsumed by the blocking
       # check:type-coverage ratchet in quality-gate. Local: npm run typecheck:noimplicit:core.
@@ -1213,6 +1222,14 @@ jobs:
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
     steps:
+      # Same disk exhaustion as the unit shards: merging the 8 raw shard JSONs filled the
+      # hosted runner disk on 2026-11-03 (job 125909618697, "No space left on device").
+      - name: Free hosted runner disk
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
