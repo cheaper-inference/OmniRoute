@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Tsallake lokacin dakatawa na wucin gadi domin wannan haɗin ya ci gaba da cancanta ko bayan kurakuran da za a iya gyarawa (har yanzu yanayin ƙarshe kamar an hana/an ƙare suna aiki).",
     "disableCoolingLabel": "Kashe lokacin dakatawa na wannan haɗin",
+    "requireUserLastMessageDescription": "Don abubuwan da ke sama waɗanda suka ƙi yarda da prefill na mataimaka: sauke mataimaki na baya (babu kayan aiki_use) kafin aikawa. Samfurin na iya sabunta amsar sa ta baya.",
+    "requireUserLastMessageLabel": "Bukatar tattaunawa don ƙare tare da saƙon mai amfani",
     "bulkPasteAdded": "{count, plural, one {An ƙara maɓalli 1} other {An ƙara maɓallai #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {An tsallake kwafi 1} other {An tsallake kwafi #}}",
     "bulkPasteHint": "Liƙa maɓallin API ɗaya a kowane layi. Ana watsi da layukan da babu komai kuma ana tsallake maɓallan da aka maimaita.",
