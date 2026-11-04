@@ -10,8 +10,9 @@ to Claude Code — operational refinements of rules already defined in `AGENTS.m
 ## Worktree isolation — Claude Code specifics
 
 The full mandatory worktree protocol (base-branch confirmation, `.claude/worktrees/` canonical
-path, `cp -al` node_modules, teardown rules) is in `AGENTS.md` → Git Workflow → "Worktree
-isolation". Claude-Code-specific points:
+path, `cp -al` node_modules, teardown rules) is in
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (summarized in `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Claude-Code-specific points:
 
 - Confirm the base branch with the operator via `AskUserQuestion` (Hard Rule #19) unless they
   already told you.

@@ -1,7 +1,22 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import Modal from "@/shared/components/Modal";
 import { PROVIDER_COLORS, getHttpStatusStyle } from "@/shared/constants/colors";
 import { formatTime } from "@/shared/utils/formatting";
 import { copyToClipboard } from "@/shared/utils/clipboard";
@@ -43,12 +58,13 @@ interface ConversationRow {
 // (RequestLoggerV2) — reused here so "in progress" reads the same way in
 // both places.
 function ActiveSpinner() {
+  const t = useTranslations("conversations");
   return (
     <span
-      className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/15 border border-amber-500/25 shrink-0"
-      title="In progress"
+      className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-warning-bg border border-warning/30 shrink-0"
+      title={t("statusInProgress")}
     >
-      <span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+      <span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-warning border-t-transparent animate-spin" />
     </span>
   );
 }
@@ -106,15 +122,17 @@ function StatusBadge({ status }: { status: number | null }) {
 // from one the content-hash tracker merely counts as multi-turn while still
 // resending full history each request.
 function ContinuationBadge({ isGenuine }: { isGenuine: boolean }) {
+  const t = useTranslations("conversations");
   if (!isGenuine) return null;
   return (
-    <span
-      title="Latest turn used previous_response_id and it resolved server-side"
-      className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/25"
+    <Badge
+      variant="success"
+      size="sm"
+      title={t("continuationGenuineTitle")}
+      icon={<Icon name="bolt" size={11} />}
     >
-      <span className="material-symbols-outlined text-[11px] leading-none">bolt</span>
-      continuation
-    </span>
+      {t("continuationBadge")}
+    </Badge>
   );
 }
 
@@ -126,15 +144,17 @@ function ContinuationBadge({ isGenuine }: { isGenuine: boolean }) {
 // grace period has actually elapsed). Server-computed so this badge never
 // disagrees with the actual persisted artifact state.
 function StalledBadge({ isStalled }: { isStalled: boolean }) {
+  const t = useTranslations("conversations");
   if (!isStalled) return null;
   return (
-    <span
-      title="Latest turn didn't end in stop and nothing has continued for 5+ minutes"
-      className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-500/15 text-red-500 border border-red-500/25"
+    <Badge
+      variant="error"
+      size="sm"
+      title={t("stalledTitle")}
+      icon={<Icon name="error" size={11} />}
     >
-      <span className="material-symbols-outlined text-[11px] leading-none">error</span>
-      stalled
-    </span>
+      {t("stalledBadge")}
+    </Badge>
   );
 }
 
@@ -163,30 +183,30 @@ function ConversationLogView({
   // comment for why), rendered as a provisional bubble below the real turns.
   livePartialText: string;
 }) {
+  const t = useTranslations("conversations");
   if (nodes.length === 0 && !livePartialText) {
-    return (
-      <div className="text-sm text-text-muted py-4">No turns recorded for this conversation.</div>
-    );
+    return <div className="text-sm text-text-muted py-4">{t("noTurns")}</div>;
   }
   return (
     <div className="flex flex-col gap-1.5 py-2 w-full min-w-0">
       {hasMore && (
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-center mb-2"
           onClick={onLoadOlder}
           disabled={loadingMore}
-          className="self-center mb-2 px-3 py-1.5 rounded-md border border-border text-xs text-text-muted hover:text-text-main hover:bg-bg-subtle transition-colors disabled:opacity-50"
         >
           {loadingMore ? "Loading…" : "Load more"}
-        </button>
+        </Button>
       )}
       {nodes.map((node) => (
         <ChatBubble key={node.id} turn={toTurn(node)} />
       ))}
       {livePartialText && (
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+          <div className="flex items-center gap-1.5 text-[10px] text-warning">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning animate-pulse" />
             Generating…
           </div>
           <ChatBubble
@@ -202,6 +222,7 @@ function ConversationLogView({
 }
 
 function ConversationsPageContent() {
+  const t = useTranslations("conversations");
   const router = useRouter();
   const searchParams = useSearchParams();
   // Read once on mount, mirroring dashboard/logs/page.tsx (#6830/#8354): re-reading the
@@ -248,8 +269,20 @@ function ConversationsPageContent() {
   });
   const initialOpenedRef = useRef(false);
   const initialConversationOpenedRef = useRef(false);
-  const conversationPanelRef = useRef<HTMLDivElement>(null);
-  const conversationContentRef = useRef<HTMLDivElement>(null);
+  const conversationPanelRef = useRef<HTMLDivElement | null>(null);
+  const conversationContentRef = useRef<HTMLDivElement | null>(null);
+  // The kit Dialog portals its content a render after `open` flips, so the panel/content
+  // nodes are tracked in state too: the observer/scroll effects re-run once they mount.
+  const [panelNode, setPanelNode] = useState<HTMLDivElement | null>(null);
+  const [contentNode, setContentNode] = useState<HTMLDivElement | null>(null);
+  const attachPanel = useCallback((el: HTMLDivElement | null) => {
+    conversationPanelRef.current = el;
+    setPanelNode(el);
+  }, []);
+  const attachContent = useCallback((el: HTMLDivElement | null) => {
+    conversationContentRef.current = el;
+    setContentNode(el);
+  }, []);
   // True right after opening a conversation (or clicking "Go to bottom"),
   // cleared once the user scrolls away from the bottom themselves. A large
   // conversation's last page can include multi-KB tool-output/context turns
@@ -444,7 +477,7 @@ function ConversationsPageContent() {
     // fields (lastCallLogId etc.) get resynced from the list poll while the
     // modal stays open (see that effect's comment), which would otherwise
     // tear down and recreate this observer on every poll tick.
-  }, [activeConversation?.id]);
+  }, [activeConversation?.id, panelNode, contentNode]);
 
   // Un-pin as soon as the user scrolls away from the bottom themselves (e.g.
   // to read earlier turns or click "Load more"), so later content growth
@@ -460,7 +493,7 @@ function ConversationsPageContent() {
     };
     panel.addEventListener("scroll", onScroll, { passive: true });
     return () => panel.removeEventListener("scroll", onScroll);
-  }, [activeConversation?.id]);
+  }, [activeConversation?.id, panelNode]);
 
   const fetchConversationPage = useCallback(
     (id: string, params: string): Promise<ConversationTurnsPage | null> =>
@@ -589,7 +622,7 @@ function ConversationsPageContent() {
   //
   // Depends on activeConversationId, NOT the whole activeConversation
   // object: activeConversation gets a fresh object reference every list-poll
-  // tick (see the resync effect above, needed so "Goto latest request"
+  // tick (see the resync effect above, needed so the "Go to latest request" button
   // doesn't go stale) — on the SAME poll cadence as this effect's own
   // interval. Depending on the object would tear down and recreate this
   // setInterval every single tick, resetting its countdown each time and
@@ -753,39 +786,33 @@ function ConversationsPageContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h2 className="text-lg font-semibold text-text-main">Conversations</h2>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-text-muted">
-            {total} conversation{total === 1 ? "" : "s"} with 2+ turns
-          </span>
-          <label
-            className="flex items-center gap-1 px-2 py-1 text-[11px] text-text-muted bg-bg-subtle rounded-md border border-border"
-            title="How often this list re-fetches from the server."
-          >
-            <span>Auto-refresh</span>
-            <input
-              type="number"
-              min={1}
-              step={1}
-              value={pollSeconds}
-              onChange={(e) => {
-                const next = Math.max(1, Number(e.target.value) || 1);
-                setPollSeconds(next);
-                try {
-                  localStorage.setItem(POLL_STORAGE_KEY, String(next));
-                } catch {}
-              }}
-              className="w-10 bg-transparent text-center font-mono focus:outline-none"
-            />
-            <span>s</span>
-          </label>
-        </div>
-      </div>
+      <SectionHeader
+        title={t("title")}
+        description={t("countSummary", { total })}
+        actions={
+          <Input
+            type="number"
+            min={1}
+            step={1}
+            label={`${t("autoRefresh")} (s)`}
+            title={t("autoRefreshTitle")}
+            className="w-36"
+            inputClassName="font-mono"
+            value={pollSeconds}
+            onChange={(e) => {
+              const next = Math.max(1, Number(e.target.value) || 1);
+              setPollSeconds(next);
+              try {
+                localStorage.setItem(POLL_STORAGE_KEY, String(next));
+              } catch {}
+            }}
+          />
+        }
+      />
 
       {loading && conversations.length === 0 && (
         <div className="flex items-center justify-center py-12 text-text-muted text-sm">
-          Loading conversations...
+          {t("loading")}
         </div>
       )}
 
@@ -841,142 +868,128 @@ function ConversationsPageContent() {
           </div>
 
           {/* Desktop/tablet: full table */}
-          <div className="hidden sm:block overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-bg-subtle text-left text-[11px] uppercase tracking-wider text-text-muted">
-                  <th className="px-3 py-2">Conversation</th>
-                  <th className="px-3 py-2 text-right">Turns</th>
-                  <th className="px-3 py-2">Continuation</th>
-                  <th className="px-3 py-2">Last Model</th>
-                  <th className="px-3 py-2">Provider</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2 text-right">Last Seen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {conversations.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b border-border/50 last:border-0 hover:bg-bg-subtle cursor-pointer transition-colors"
-                    onClick={() => openConversation(row)}
-                  >
-                    <td className="px-3 py-2 font-mono text-[11px] text-text-main">
-                      <span className="flex items-center gap-1.5">
-                        {row.isActive && <ActiveSpinner />}
-                        <span
-                          title={row.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            copyToClipboard(row.id);
-                          }}
-                          className="hover:underline"
-                        >
-                          {row.id.slice(0, 16)}…
-                        </span>
+          <Table
+            className="text-sm"
+            containerClassName="hidden sm:block"
+            scrollbarLabel={t("title")}
+          >
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("colConversation")}</TableHead>
+                <TableHead className="text-right">{t("colTurns")}</TableHead>
+                <TableHead>{t("colContinuation")}</TableHead>
+                <TableHead>{t("colLastModel")}</TableHead>
+                <TableHead>{t("colProvider")}</TableHead>
+                <TableHead>{t("colStatus")}</TableHead>
+                <TableHead className="text-right">{t("colLastSeen")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {conversations.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="cursor-pointer"
+                  onClick={() => openConversation(row)}
+                >
+                  <TableCell className="font-mono text-[11px] text-text-main">
+                    <span className="flex items-center gap-1.5">
+                      {row.isActive && <ActiveSpinner />}
+                      <span
+                        title={row.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyToClipboard(row.id);
+                        }}
+                        className="hover:underline"
+                      >
+                        {row.id.slice(0, 16)}…
                       </span>
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono text-text-main">
-                      {row.turnCount}
-                    </td>
-                    <td className="px-3 py-2">
-                      <ContinuationBadge isGenuine={row.isGenuineContinuation} />
-                      <StalledBadge isStalled={row.isStalled} />
-                    </td>
-                    <td className="px-3 py-2 text-text-main">{row.lastModel ?? "—"}</td>
-                    <td className="px-3 py-2">
-                      <ProviderBadge provider={row.lastProvider} />
-                    </td>
-                    <td className="px-3 py-2">
-                      <StatusBadge status={row.lastStatus} />
-                    </td>
-                    <td className="px-3 py-2 text-right text-text-muted">
-                      {formatTime(row.lastSeenAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-text-main">
+                    {row.turnCount}
+                  </TableCell>
+                  <TableCell>
+                    <ContinuationBadge isGenuine={row.isGenuineContinuation} />
+                    <StalledBadge isStalled={row.isStalled} />
+                  </TableCell>
+                  <TableCell className="text-text-main">{row.lastModel ?? "—"}</TableCell>
+                  <TableCell>
+                    <ProviderBadge provider={row.lastProvider} />
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={row.lastStatus} />
+                  </TableCell>
+                  <TableCell className="text-right text-text-muted">
+                    {formatTime(row.lastSeenAt)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </>
       )}
 
-      {activeConversation && (
-        <div
-          className="fixed inset-0 z-50 flex items-start justify-center px-2 pt-[5vh] sm:px-4"
-          onClick={closeConversation}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Conversation"
-        >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <Modal
+        isOpen={Boolean(activeConversation)}
+        onClose={closeConversation}
+        size="full"
+        maxWidth="48rem"
+        compactHeader
+        bodyClassName="p-0"
+        title={
+          <span className="block min-w-0">
+            <span className="block text-sm font-semibold text-text-main">{t("drawerTitle")}</span>
+            {activeConversation && (
+              <span
+                title={activeConversation.id}
+                className="block truncate font-mono text-[11px] font-normal text-text-muted"
+              >
+                {activeConversation.id.slice(0, 24)}…
+              </span>
+            )}
+          </span>
+        }
+      >
+        {activeConversation && (
           <div
-            ref={conversationPanelRef}
-            className="relative w-full max-w-3xl max-h-[90vh] overflow-x-hidden overflow-y-auto rounded-xl border border-border bg-bg-primary shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            ref={attachPanel}
+            className="max-h-[calc(90vh-5rem)] overflow-x-hidden overflow-y-auto"
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-bg-primary/95 backdrop-blur-sm rounded-t-xl sm:px-6 sm:py-4">
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-text-main">Conversation</h3>
-                <span
-                  title={activeConversation.id}
-                  className="block truncate font-mono text-[11px] text-text-muted"
-                >
-                  {activeConversation.id.slice(0, 24)}…
-                </span>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={goToPreviousConversation}
-                  disabled={!hasPreviousConversation}
-                  title="Previous conversation"
-                  aria-label="Previous conversation"
-                  className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
-                >
-                  <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={goToNextConversation}
-                  disabled={!hasNextConversation}
-                  title="Next conversation"
-                  aria-label="Next conversation"
-                  className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
-                >
-                  <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-                </button>
-                {activeConversation.lastCallLogId && (
-                  <button
-                    type="button"
-                    onClick={gotoLatestRequest}
-                    className="px-2 py-1 rounded-md border border-border text-[11px] text-text-muted hover:text-text-main hover:bg-bg-subtle transition-colors whitespace-nowrap"
-                  >
-                    Goto latest request
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={scrollToBottom}
-                  title="Go to bottom"
-                  className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-                  aria-label="Go to bottom"
-                >
-                  <span className="material-symbols-outlined text-[18px]">
-                    vertical_align_bottom
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={closeConversation}
-                  className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-                  aria-label="Close conversation"
-                >
-                  <span className="material-symbols-outlined text-[20px]">close</span>
-                </button>
-              </div>
+            <div className="sticky top-0 z-10 flex items-center justify-end gap-2 border-b border-border bg-surface px-4 py-2 sm:px-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                icon="chevron_left"
+                onClick={goToPreviousConversation}
+                disabled={!hasPreviousConversation}
+                title={t("prevConversation")}
+                aria-label={t("prevConversation")}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                icon="chevron_right"
+                onClick={goToNextConversation}
+                disabled={!hasNextConversation}
+                title={t("nextConversation")}
+                aria-label={t("nextConversation")}
+              />
+              {activeConversation.lastCallLogId && (
+                <Button variant="outline" size="sm" onClick={gotoLatestRequest}>
+                  {t("gotoLatestRequest")}
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                icon="vertical_align_bottom"
+                onClick={scrollToBottom}
+                title={t("goToBottom")}
+                aria-label={t("goToBottom")}
+              />
             </div>
-            <div ref={conversationContentRef} className="p-4 sm:p-6">
+            <div ref={attachContent} className="p-4 sm:p-6">
               {conversationLoading ? (
                 <div className="text-sm text-text-muted py-4">Loading…</div>
               ) : (
@@ -990,8 +1003,8 @@ function ConversationsPageContent() {
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {selectedLog && (
         <RequestLoggerDetail
@@ -1013,11 +1026,12 @@ function ConversationsPageContent() {
 }
 
 export default function ConversationsPage() {
+  const t = useTranslations("conversations");
   return (
     <Suspense
       fallback={
         <div className="flex items-center justify-center py-12 text-text-muted text-sm">
-          Loading conversations...
+          {t("loading")}
         </div>
       }
     >

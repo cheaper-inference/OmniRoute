@@ -3,6 +3,8 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Worker } from "node:worker_threads";
 
+import { resolveWritableDataDir } from "../dataPaths";
+
 import type { CallLogArtifact, CallLogArtifactWriteResult } from "./callLogArtifacts.ts";
 
 const MAX_QUEUED_JOBS = 128;
@@ -22,6 +24,7 @@ type QueueItem = {
     pipelineMaxSizeKb?: string;
     chatDebugFile?: string;
     appLogLevel?: string;
+    dataDir?: string;
   };
   resolve: (result: CallLogArtifactWriteResult | null) => void;
 };
@@ -69,14 +72,15 @@ export function resolveCallLogArtifactWorker(context: WorkerResolutionContext = 
   const cwdJs = path.resolve(cwd, "src/lib/usage/callLogArtifactWorker.js");
   if (exists(cwdJs)) return { workerFile: cwdJs, execArgv: [] };
 
+  // Native TypeScript workers avoid esbuild zombies when terminated.
   const moduleTs = path.join(moduleDir, "callLogArtifactWorker.ts");
   if (exists(moduleTs)) {
-    return { workerFile: moduleTs, execArgv: ["--import", "tsx/esm"] };
+    return { workerFile: moduleTs, execArgv: [] };
   }
 
   const cwdTs = path.resolve(cwd, "src/lib/usage/callLogArtifactWorker.ts");
   if (exists(cwdTs)) {
-    return { workerFile: cwdTs, execArgv: ["--import", "tsx/esm"] };
+    return { workerFile: cwdTs, execArgv: [] };
   }
 
   return { workerFile: entryJs ?? cwdJs, execArgv: [] };
@@ -105,6 +109,9 @@ function notifyCloseWaiters(): void {
 function scheduleIdleTermination(): void {
   clearIdleTimer();
   if (!worker || active || queue.length > 0) return;
+  // An idle worker must not keep the process alive for IDLE_TIMEOUT_MS after its last write
+  // (a CLI or test process would otherwise linger 30 s). pump() refs it again for the next write.
+  worker.unref();
   idleTimer = setTimeout(terminateWorker, IDLE_TIMEOUT_MS);
   idleTimer.unref?.();
 }
@@ -184,7 +191,10 @@ function pump(): void {
   active = next;
   clearIdleTimer();
   try {
-    ensureWorker().postMessage({
+    const current = ensureWorker();
+    // Hold the process open until this write's reply arrives, even if the worker was idle.
+    current.ref();
+    current.postMessage({
       id: next.id,
       artifact: next.artifact,
       environment: next.environment,
@@ -210,6 +220,8 @@ export function writeCallArtifactAsync(
         pipelineMaxSizeKb: process.env.CALL_LOG_PIPELINE_MAX_SIZE_KB,
         chatDebugFile: process.env.CHAT_DEBUG_FILE,
         appLogLevel: process.env.APP_LOG_LEVEL,
+        // Resolved, not raw: a redirected parent has no DATA_DIR in its env.
+        dataDir: resolveWritableDataDir(),
       },
       resolve,
     };

@@ -18,6 +18,9 @@ import {
 import { AI_HORDE_IMAGE_PROVIDER } from "./providers/registry/aihorde/imageModels.ts";
 import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMediaCatalog.ts";
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
+import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
+import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
+import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
 
 export interface ImageModelEntry {
   id: string;
@@ -94,10 +97,25 @@ export const XAI_API_KEY_IMAGE_PROVIDER: ImageProviderConfig = {
   supportedSizes: ["1024x1024", "2048x2048"],
 };
 
+const GROK_BUILD_IMAGE_PROVIDER: ImageProviderConfig = {
+  id: "grok-cli",
+  alias: "gc",
+  baseUrl: `${GROK_BUILD_PROXY_BASE_URL}/images/generations`,
+  authType: "oauth",
+  authHeader: "bearer",
+  format: "grok-image",
+  models: [{ id: "grok-imagine-image", name: "Grok Imagine Image (OAuth)" }],
+  supportedSizes: ["1024x1024", "2048x2048"],
+};
+
 export const XAI_SUBSCRIPTION_IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   xai: { ...XAI_IMAGE_CONFIG, id: "xai", authType: "apikey" },
   "xai-oauth": { ...XAI_IMAGE_CONFIG, id: "xai-oauth", alias: "xao", authType: "oauth" },
-  "grok-cli": { ...XAI_IMAGE_CONFIG, id: "grok-cli", alias: "gc", authType: "oauth" },
+  "grok-cli": {
+    ...GROK_BUILD_IMAGE_PROVIDER,
+    models: XAI_IMAGE_CONFIG.models,
+    supportedSizes: XAI_IMAGE_CONFIG.supportedSizes,
+  },
 };
 
 export const IMAGE_MODEL_ALIASES: Record<string, ImageModelAliasEntry> = {
@@ -183,6 +201,7 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1536x1024", "1024x1536", "1024x768", "768x1024"],
   },
   zenmux: ZENMUX_IMAGE_PROVIDER,
+  "muse-code": MUSE_CODE_IMAGE_PROVIDER,
   agnes: {
     id: "agnes",
     baseUrl: "https://apihub.agnes-ai.com/v1/images/generations",
@@ -252,39 +271,7 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1024x1792", "1792x1024"],
   },
 
-  // Codex serves images under ChatGPT OAuth two ways (handleCodexImageGeneration):
-  //  - `gpt-image-*` ids use the dedicated `/backend-api/codex/images/{generations,edits}`
-  //    routes, which take the image model as a request field (codexImages.ts);
-  //  - the GPT-5.6 ids call `/responses` with the hosted `image_generation` tool, whose
-  //    image model the backend pins to `gpt-image-2-codex`.
-  codex: {
-    id: "codex",
-    alias: "cx",
-    baseUrl: "https://chatgpt.com/backend-api/codex/responses",
-    authType: "oauth",
-    authHeader: "bearer",
-    format: "codex-responses",
-    models: [
-      {
-        id: "gpt-5.6-sol",
-        catalogId: "gpt-5.6-sol-image",
-        name: "GPT 5.6 Sol (Codex Image)",
-      },
-      {
-        id: "gpt-5.6-terra",
-        catalogId: "gpt-5.6-terra-image",
-        name: "GPT 5.6 Terra (Codex Image)",
-      },
-      {
-        id: "gpt-5.6-luna",
-        catalogId: "gpt-5.6-luna-image",
-        name: "GPT 5.6 Luna (Codex Image)",
-      },
-      { id: "gpt-image-2.5-flare", name: "GPT Image 2.5 Flare (Codex)" },
-      { id: "gpt-image-2", name: "GPT Image 2 (Codex)" },
-    ],
-    supportedSizes: ["1024x1024", "1024x1536", "1536x1024"],
-  },
+  codex: CODEX_IMAGE_PROVIDER,
 
   // Cursor plan image generation via the Agent CLI native `generateImage` tool.
   // Reuses the same OAuth/API-key connection as chat (`provider: "cursor"`).
@@ -326,6 +313,8 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   },
 
   xai: XAI_API_KEY_IMAGE_PROVIDER,
+  // grok-cli (Grok Build OAuth) images stay opt-in: they live in
+  // XAI_SUBSCRIPTION_IMAGE_PROVIDERS and only appear with GROK_SUBSCRIPTION_IMAGES_ENABLED (#15423).
 
   "vercel-ai-gateway": {
     id: "vercel-ai-gateway",
@@ -409,6 +398,27 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     authHeader: "bearer",
     format: "gemini-image", // Special format: uses Gemini generateContent API
     models: [{ id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image" }],
+    supportedSizes: ["1024x1024"],
+  },
+
+  // A Google AI Studio key can serve these models, but there was no `gemini`
+  // image provider, so they could never be image-combo targets (the combo
+  // filter requires an exact registry match). Distinct from `antigravity`
+  // above: that entry is OAuth against Cloud Code, while AI Studio keys
+  // authenticate with `x-goog-api-key` against the public endpoint, so this
+  // needs its own `gemini-ai-image` format rather than reusing `gemini-image`.
+  gemini: {
+    id: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/models",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-ai-image",
+    // The public Gemini API serves these under their `-preview` ids (the bare ids are the
+    // Antigravity/Cloud Code names, see antigravityModelAliases.ts).
+    models: [
+      { id: "gemini-3-pro-image-preview", name: "Gemini 3 Pro Image" },
+      { id: "gemini-3.1-flash-image-preview", name: "Gemini 3.1 Flash Image" },
+    ],
     supportedSizes: ["1024x1024"],
   },
 
@@ -677,6 +687,20 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
       { id: "hidream", name: "Hidream I1 Full" },
     ],
     supportedSizes: ["1024x1024", "1024x1280", "1280x1024"],
+  },
+
+  // NaN.Builders (https://nan.builders) — OpenAI-compatible /v1/images/generations.
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/images/generations",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [
+      { id: "flux-2-klein", name: "FLUX.2 Klein" },
+      { id: "qwen-image-2.1", name: "Qwen Image 2.1" },
+    ],
+    supportedSizes: ["1024x1024"],
   },
 
   // NVIDIA NIM image generation (FLUX models). Distinct from the NVIDIA *chat* entry

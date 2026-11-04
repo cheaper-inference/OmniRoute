@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
 import { parseImageModel } from "../../open-sse/config/imageRegistry.ts";
 import { IMAGE_PROVIDERS } from "../../open-sse/config/imageRegistryData.ts";
 import { NOAUTH_PROVIDERS } from "../../src/shared/constants/providers/noauth.ts";
@@ -95,11 +94,10 @@ test("unsupported parameters and request-controlled config rejected strictly", a
     assert.throws(() => parseGoogleFlowWebRequest({ ...base, ...extra }));
   }
 });
-test("legacy video registry byte-for-byte preserved", () => {
-  const current = readFileSync(new URL("../../open-sse/config/videoRegistry.ts", import.meta.url));
-  const base = execFileSync("git", [
-    "show",
-    "795c5932594fbe270faa3217f2734e0c8b6fe8a5:open-sse/config/videoRegistry.ts",
-  ]);
-  assert.deepEqual(current, base);
+test("google-flow-web stays image-only and out of the video registry", () => {
+  const videoRegistry = readFileSync(
+    new URL("../../open-sse/config/videoRegistry.ts", import.meta.url),
+    "utf8"
+  );
+  assert.equal(videoRegistry.includes("google-flow-web"), false);
 });

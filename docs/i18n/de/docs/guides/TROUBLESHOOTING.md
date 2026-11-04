@@ -39,31 +39,31 @@ Häufige Probleme und Lösungen für OmniRoute.
 
 ### Ratenbegrenzung bei kostenlosen Anbietern (429 / 400 / 401)
 
-**Symptom**: Bei der Verwendung von `model: "auto"` mit kostenlosen bzw. authentifizierungsfreien Anbietern (opencode, auggie usw.) erhalten Sie zeitweise `HTTP 429`, `400` oder `401` anstelle von Antworten. Wenn dieselbe Eingabeaufforderung wenige Augenblicke später erneut gesendet wird, sind die Anfragen erfolgreich, aber Automatisierungen (Cronjobs, Agenten, Skripte) brechen beim ersten Fehler ab.
+**Symptom**: Bei Verwendung von `model: "auto"` mit kostenlosen bzw. authentifizierungsfreien Anbietern (auggie usw.) erhalten Sie sporadisch `HTTP 429`, `400` oder `401` anstelle von Antworten. Wenn dieselbe Eingabeaufforderung wenige Augenblicke später erneut gesendet wird, sind die Anfragen erfolgreich, aber Automatisierungen (Cronjobs, Agenten, Skripte) schlagen beim ersten Fehler fehl.
 
-**Grundursache**: Drei voneinander unabhängige Fehlermodi treten gemeinsam auf:
+**Grundursache**: Drei unabhängige Fehlermodi verstärken sich gegenseitig:
 
-1. **Ratenlimit des Anbieters (`429`)**: Kostenlose Tarife können ein Kontingent pro Zeitfenster erzwingen. Eine Reihe paralleler Aufrufe schöpft es aus, sodass die nächste Anfrage abgelehnt wird, bis das Zeitfenster zurückgesetzt wird.
-2. **Defektes Modell im Passthrough (`400`/`401`)**: `auto/*`-Pools können Passthrough-Modelle von `opencode` enthalten, die im Katalog registriert sind, aber über keine gültigen Zugangsdaten verfügen (z. B. `oc/north-mini-code-free` → `401`). Der automatische Router versucht es mit einem solchen Modell, scheitert, und der Fehler wird weitergegeben, bevor der Fallback greift.
-3. **Verstärkung durch Parallelität (`429` unter Last)**: Wenn mehrere Agenten- oder Cron-Sitzungen gleichzeitig auf `auto` zugreifen, übersteigt die aggregierte Anfragerate das von kostenlosen Anbietern tolerierte Maß, sodass legitime Aufrufe als missbräuchlich eingestuft werden.
+1. **Ratenbegrenzung des Anbieters (`429`)**: Kostenlose Tarife können ein Kontingent pro Zeitfenster durchsetzen. Eine Spitze paralleler Aufrufe schöpft es aus, sodass die nächste Anfrage abgelehnt wird, bis das Zeitfenster zurückgesetzt wird.
+2. **Defektes Modell im Passthrough (`400`/`401`)**: `auto/*`-Pools können Passthrough-Modelle enthalten, die im Katalog registriert sind, aber keine gültigen Zugangsdaten besitzen (→ `401`). Der Auto-Router versucht es mit einem solchen Modell, scheitert, und der Fehler wird weitergegeben, bevor der Fallback greift.
+3. **Verstärkung durch Parallelität (`429` unter Last)**: Wenn mehrere Agenten-/Cron-Sitzungen gleichzeitig auf `auto` zugreifen, übersteigt die aggregierte Anfragerate das Maß, das kostenlose Anbieter tolerieren, sodass legitime Aufrufe als missbräuchlich eingestuft werden.
 
-**Verifizierte Lösung (von der Community gemeldet, 2026-08-10)**: Passen Sie drei Umgebungsvariablen so an, dass Rotation, Parallelität und Fallback die Schwankungen der kostenlosen Tarife abfangen, anstatt daran zu scheitern:
+**Verifizierte Lösung (von der Community gemeldet, 2026-08-10)**: Passen Sie drei Umgebungsvariablen so an, dass Rotation, Parallelität und Fallback die Schwankungen der kostenlosen Tarife auffangen, anstatt daran zu scheitern:
 
 ```bash
 export OMNIROUTE_ROTATE_ON_400=true           # bei 400/401 zu einem anderen Modell/Anbieter wechseln (überspringt defekte Passthrough-Modelle)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explizite Obergrenze für die Zulassung rechenintensiver Anfragen (standardmäßig nicht gesetzt: keine Begrenzung der Anfrageanzahl, siehe Hinweis unten)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # die begrenzte Wartezeit für langsame Upstreams über den Standardwert von RATE_LIMIT_MAX_WAIT_MS hinaus erhöhen
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explizite Zulassungsobergrenze für schwergewichtige Anfragen (standardmäßig nicht gesetzt: keine Begrenzung der Anfrageanzahl, siehe Hinweis unten)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # begrenzte Wartezeit für langsame Upstreams über den Standardwert von RATE_LIMIT_MAX_WAIT_MS hinaus erhöhen
 ```
 
-Legen Sie diese Variablen in der Prozessumgebung von OmniRoute fest (für den Daemon, z. B. über die LaunchAgent-plist oder `systemctl edit`) und starten Sie OmniRoute anschließend neu. Das Rotations-Flag bietet den größten Nutzen: Es wandelt einen endgültigen Fehler in einen transparenten Wiederholungsversuch bei einem funktionierenden Anbieter im Pool um.
+Legen Sie diese Variablen in der Prozessumgebung von OmniRoute fest (für den Daemon, z. B. über die LaunchAgent-plist oder `systemctl edit`) und starten Sie OmniRoute anschließend neu. Das Rotations-Flag hat mit Abstand die größte Hebelwirkung: Es wandelt einen endgültigen Fehler in einen transparenten Wiederholungsversuch bei einem funktionsfähigen Anbieter im Pool um.
 
-**Hinweis**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` begrenzt die Anzahl rechenintensiver Anfragen — also Anfragen mit langem Kontext —, die gleichzeitig ausgeführt werden; diese Begrenzung ist eine Zulassungsschranke und kein Ratenlimit des Anbieters. **#503-Fan-out-Aktualisierung:** Diese Variable wird nicht mehr standardmäßig gesetzt (sie greift jetzt nur, wenn sie wie oben explizit konfiguriert wird) — stattdessen wird die Zulassung rechenintensiver Anfragen über ein automatisch abgeleitetes Byte-Budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) gesteuert, das sich anhand der tatsächlichen Speicherobergrenze des Hosts skaliert. Daher sollte eine neue Bereitstellung deutlich weniger Ablehnungen des Typs `503 chat_admission_busy` verzeichnen, ohne dass diese Variable überhaupt gesetzt wird; wird sie hier explizit gesetzt, funktioniert sie weiterhin genau wie dokumentiert. Explizite Überschreibungen des Byte-Budgets werden auf 8 MiB–2 GiB begrenzt. Ein `413 body_exceeds_budget` ist nicht vorübergehend: Erhöhen Sie dieses Byte-Budget, senken Sie `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` oder erhöhen Sie die Speicherobergrenze des Prozesses. Eine Auslastungsablehnung vom Typ `inflight_bytes_budget` ist ein temporärer Engpass, bei dem ein erneuter Versuch weiterhin möglich ist. Die Ratenbegrenzung pro Anbieter (`open-sse/services/rateLimitManager.ts`) wird separat durch `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` und `RATE_LIMIT_AUTO_ENABLE` gesteuert — siehe `.env.example`.
+**Hinweis**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` begrenzt, wie viele schwergewichtige Anfragen — also Anfragen mit langem Kontext — gleichzeitig ausgeführt werden. Diese Begrenzung ist eine Zulassungsschranke und keine Ratenbegrenzung des Anbieters. **#503-Fan-out-Aktualisierung:** Diese Variable wird nicht mehr standardmäßig gesetzt (sie greift jetzt nur, wenn sie wie oben explizit konfiguriert wird) — stattdessen wird die Zulassung schwergewichtiger Anfragen durch ein automatisch abgeleitetes Byte-Budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) gesteuert, das sich anhand der tatsächlichen Speicherobergrenze des Hosts skaliert. Daher sollte eine neue Bereitstellung deutlich weniger Ablehnungen vom Typ `503 chat_admission_busy` verzeichnen, ohne dass diese Variable überhaupt gesetzt werden muss; wenn sie hier explizit gesetzt wird, funktioniert sie weiterhin genau wie dokumentiert. Explizite Überschreibungen des Byte-Budgets werden auf 8 MiB bis 2 GiB begrenzt. Ein `413 body_exceeds_budget` ist kein vorübergehender Fehler: Erhöhen Sie dieses Byte-Budget, senken Sie `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` oder erhöhen Sie die Speicherobergrenze des Prozesses. Eine Lastabweisung vom Typ `inflight_bytes_budget` entsteht durch vorübergehende Ressourcenkonkurrenz und kann weiterhin erneut versucht werden. Die Ratenbegrenzung pro Anbieter (`open-sse/services/rateLimitManager.ts`) wird separat über `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` und `RATE_LIMIT_AUTO_ENABLE` gesteuert — siehe `.env.example`.
 
-**So überprüfen Sie, ob es funktioniert hat**: Führen Sie Ihren Agenten/Cronjob zweimal kurz hintereinander aus und vergewissern Sie sich, dass beide Durchläufe erfolgreich sind. Vor der Korrektur gibt der zweite Durchlauf normalerweise einen `429`-/`401`-Fehler aus. Nach der Korrektur werden Fehler (sofern vorhanden) transparent erneut versucht und der Aufruf wird abgeschlossen. Sie können auch `curl /monitoring/health` ausführen und das Feld `rateLimitedUntil` bei den Provider-Verbindungen sowie `circuitBreakers.providerBreakers[].state` für die betroffenen Provider beobachten — der Status ist entweder `CLOSED`, `DEGRADED`, `OPEN` oder `HALF_OPEN` (siehe `src/shared/utils/circuitBreaker.ts`). Ein Provider, bei dem weiterhin Fehler auftreten, wechselt von `CLOSED → DEGRADED → OPEN`, bevor nach Ablauf des Rücksetzzeitfensters eine Testanfrage zugelassen wird (`HALF_OPEN`).
+**So überprüfen Sie, ob die Lösung funktioniert**: Führen Sie Ihren Agenten/Cronjob zweimal kurz hintereinander aus und vergewissern Sie sich, dass beide Ausführungen erfolgreich sind. Vor der Korrektur führt die zweite Ausführung typischerweise zu `429`/`401`. Nach der Korrektur werden Fehler (sofern vorhanden) transparent erneut versucht, und der Aufruf wird abgeschlossen. Sie können außerdem `curl /monitoring/health` ausführen und das Feld `rateLimitedUntil` der Anbieterverbindungen sowie `circuitBreakers.providerBreakers[].state` für die betroffenen Anbieter beobachten — der Status ist entweder `CLOSED`, `DEGRADED`, `OPEN` oder `HALF_OPEN` (siehe `src/shared/utils/circuitBreaker.ts`). Ein Anbieter, bei dem weiterhin Fehler auftreten, wechselt von `CLOSED → DEGRADED → OPEN`, bevor nach Ablauf des Rücksetzungszeitfensters eine Testanfrage zugelassen wird (`HALF_OPEN`).
 
-**Falls weiterhin 429-Fehler auftreten**: Das aktive Konto für diesen Provider hat sein _Kontingent_ tatsächlich ausgeschöpft (nicht nur das Ratenlimit erreicht). Fügen Sie im OmniRoute-Dashboard unter → Providers → Accounts ein zweites Konto für denselben Provider hinzu oder binden Sie einen weiteren kostenlosen Provider ein (z. B. `routeway`, `auggie`). Die Rotation hilft nur bei vorübergehenden Ratenlimit-/400-/401-Fehlern; bei einem vollständig ausgeschöpften Kontingent sind zweite Zugangsdaten oder ein anderer Provider erforderlich.
+**Wenn weiterhin 429 auftritt**: Das aktive Konto für diesen Anbieter hat sein _Kontingent_ tatsächlich ausgeschöpft (es handelt sich nicht nur um eine Ratenbegrenzung). Fügen Sie im OmniRoute-Dashboard unter Providers → Accounts ein zweites Konto für denselben Anbieter hinzu oder beziehen Sie einen weiteren kostenlosen Anbieter ein (z. B. `routeway`, `auggie`). Rotation hilft nur bei vorübergehenden Ratenbegrenzungs-, 400- oder 401-Fehlern; eine vollständige Ausschöpfung des Kontingents erfordert zusätzliche Zugangsdaten oder einen anderen Anbieter.
 
-**Falls bei Vision-Modellen (`auto/vision`, `bazaarlink/*`) 403-Fehler auftreten**: Für das verbundene Konto besteht kein kostenpflichtiger Tarif, der Vision-Funktionen umfasst, oder der API-Schlüssel verfügt nicht über ausreichende Berechtigungen. Überprüfen Sie im Provider-Dashboard, ob der Geltungsbereich des Schlüssels Vision/Multimodal umfasst, oder verbinden Sie ein Konto mit kostenpflichtigem Tarif und behalten Sie dieses als Vision-Ziel bei.
+**Wenn bei Vision-Modellen (`auto/vision`, `bazaarlink/*`) ein 403-Fehler auftritt**: Das verbundene Konto verfügt nicht über einen kostenpflichtigen Tarif, der Vision unterstützt, oder der API-Schlüssel hat unzureichende Berechtigungen. Überprüfen Sie im Anbieter-Dashboard, ob der Geltungsbereich des Schlüssels Vision/Multimodalität umfasst, oder verbinden Sie ein Konto mit kostenpflichtigem Tarif und verwenden Sie es weiterhin als Vision-Ziel.
 
 ---
 
@@ -97,41 +97,41 @@ Die Warnungen stammen von veralteten Peer-Abhängigkeitsbereichen in Drittanbiet
 Beim Ausführen von `npm install -g omniroute` blockieren neuere npm-Versionen (v11+ und v12+) standardmäßig Paket-Lebenszyklusskripte und zeigen eine Warnung zu Installationsskripten an:
 
 ```
-npm warn install-scripts 7 Pakete hatten blockierte Installationsskripte, da sie nicht von allowScripts abgedeckt sind:
+npm warn install-scripts Bei 7 Paketen wurden Installationsskripte blockiert, da sie nicht durch allowScripts abgedeckt sind:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Kann diese Warnung ignoriert werden?
 
-**Teilweise, aber die Ausführung ohne Skripte wird nicht empfohlen.** OmniRoute enthält robuste Rückfallmechanismen: Wenn native `better-sqlite3`-Bindungen nicht aus dem eigenständigen Bundle geladen werden können, greift die Anwendung auf alternative Treiber wie `node:sqlite` oder `sql.js` zurück (siehe [SQLite-Laufzeitauflösung](../ops/SQLITE_RUNTIME.md)). Der Server startet weiterhin, aber bei der Verwendung von WASM-Rückfalllösungen wie `sql.js` wird der SQLite-WAL-Modus (Write-Ahead Logging) deaktiviert und der Speicherbedarf sowie der Aufwand für die Datenträgersynchronisierung steigen.
+**Teilweise, aber die Ausführung ohne Skripte wird nicht empfohlen.** OmniRoute bietet zuverlässige Fallbacks: Wenn die nativen `better-sqlite3`-Bindings nicht aus dem eigenständigen Bundle geladen werden können, greift die Anwendung auf alternative Treiber wie `node:sqlite` oder `sql.js` zurück (siehe [SQLite-Laufzeitauflösung](../ops/SQLITE_RUNTIME.md)). Der Server wird weiterhin gestartet, aber die Verwendung von WASM-Fallbacks wie `sql.js` deaktiviert den SQLite-WAL-Modus (Write-Ahead Logging) und erhöht den Arbeitsspeicherbedarf sowie den Aufwand für die Festplattensynchronisierung.
 
 ### Welche Skripte sind tatsächlich erforderlich?
 
 Nicht alle blockierten Skripte sind für die Ausführung von OmniRoute erforderlich:
 
-- **Erforderlich (`omniroute`, `better-sqlite3`):** OmniRoute wird aus einem eigenständigen Next.js-Anwendungs-Bundle (`dist/`) ausgeführt. Während der Installation lädt npm den hostspezifischen nativen SQLite-Treiber in das übergeordnete Verzeichnis `node_modules/better-sqlite3/` herunter oder kompiliert ihn. Das `postinstall`-Skript von OmniRoute (`scripts/build/postinstall.mjs`) überprüft anschließend diese hostspezifischen Binärdateien und kopiert sie nach `dist/node_modules/`, damit der eigenständige Server darauf zugreifen kann. Wenn das postinstall-Skript von `omniroute` blockiert ist, wird dieser Kopierschritt übersprungen.
-- **Optional/transitiv (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Dabei handelt es sich um Build-Hilfsprogramme, Überwachungswerkzeuge oder Dienstprogramme für den System-Schlüsselbund. Ihre Zulassung verhindert Build-Warnungen, sie sind jedoch nicht für die grundlegende Routing-Funktionalität erforderlich.
-- **Ausgeschlossen (`onnxruntime-node`):** Eine optionale Abhängigkeit für lokale KI-Einbettungen, die für die Ausführung von OmniRoute **nicht** erforderlich ist. Ihr postinstall-Skript lädt etwa 300 MB an CUDA-Ressourcen von NuGet herunter; nehmen Sie sie nur dann in die Zulassungsliste auf, wenn Sie ausdrücklich beabsichtigen, lokale ONNX-Beschleunigung auf unterstützter Hardware zu verwenden.
+- **Erforderlich (`omniroute`, `better-sqlite3`):** OmniRoute wird aus einem eigenständigen Next.js-Anwendungs-Bundle (`dist/`) ausgeführt. Während der Installation lädt npm den hostspezifischen nativen SQLite-Treiber in das übergeordnete Verzeichnis `node_modules/better-sqlite3/` herunter oder kompiliert ihn dort. Das `postinstall`-Skript von OmniRoute (`scripts/build/postinstall.mjs`) überprüft und kopiert diese hostspezifischen Binärdateien anschließend nach `dist/node_modules/`, damit der eigenständige Server darauf zugreifen kann. Wenn das postinstall-Skript von `omniroute` blockiert wird, wird dieser Kopierschritt übersprungen.
+- **Optional/transitiv (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Hierbei handelt es sich um Build-Hilfsprogramme, Überwachungswerkzeuge oder Dienstprogramme für den System-Schlüsselbund. Ihre Zulassung verhindert Build-Warnungen, sie sind jedoch für die zentrale Routing-Funktionalität nicht erforderlich.
+- **Ausgeschlossen (`onnxruntime-node`):** Eine optionale Abhängigkeit für lokale KI-Embeddings, die für die Ausführung von OmniRoute **nicht** erforderlich ist. Ihr postinstall-Skript lädt etwa 300 MB an CUDA-Ressourcen von NuGet herunter; nehmen Sie sie nur dann in die Zulassungsliste auf, wenn Sie ausdrücklich beabsichtigen, die lokale ONNX-Beschleunigung auf unterstützter Hardware zu verwenden.
 
 ### Empfohlene Lösung
 
-Um die erforderlichen Installationsskripte während einer globalen Installation zuzulassen und Warnungen zu unterdrücken, übergeben Sie `--allow-scripts` für OmniRoute und seine nativen Abhängigkeiten:
+Um die erforderlichen Installationsskripte während einer globalen Installation zuzulassen und die Warnungen zu unterdrücken, übergeben Sie `--allow-scripts` für OmniRoute und seine nativen Abhängigkeiten:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Alternativ können Sie dies dauerhaft für alle globalen Installationen Ihres Benutzerkontos konfigurieren:
+Alternativ können Sie dies dauerhaft für alle globalen Installationen in Ihrem Benutzerkonto konfigurieren:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Überprüfen Ihrer Installation
+### Installation überprüfen
 
-Führen Sie nach der Installation das integrierte Diagnosewerkzeug aus, um sicherzustellen, dass die nativen Bindungen und die Laufzeitumgebung ordnungsgemäß funktionieren:
+Führen Sie nach der Installation das integrierte Diagnosewerkzeug aus, um sicherzustellen, dass die nativen Bindings und die Laufzeitumgebung ordnungsgemäß funktionieren:
 
 ```bash
 omniroute doctor

@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import Modal from "@/shared/components/Modal";
+import { cn } from "@/shared/utils/cn";
 import { matchesSearch } from "@/shared/utils/turkishText";
 
 interface ProviderModel {
@@ -26,7 +30,6 @@ export function ModelSelectorModal({
   onClose,
 }: ModelSelectorModalProps) {
   const t = useTranslations("agentBridge");
-  const tc = useTranslations("common");
   const [models, setModels] = useState<ProviderModel[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,15 +54,6 @@ export function ModelSelectorModal({
     })();
   }, [open, loadModels]);
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open, onClose]);
-
   if (!open) return null;
 
   const filtered = models.filter(
@@ -67,54 +61,48 @@ export function ModelSelectorModal({
   );
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="w-full max-w-sm rounded-xl border border-border/60 bg-card shadow-xl flex flex-col max-h-[70vh]">
-        <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-border/30">
-          <h3 className="text-sm font-semibold text-text-main">{t("modelSelectorTitle")}</h3>
-          <button type="button" onClick={onClose} aria-label={tc("close")}>
-            <span className="material-symbols-outlined text-[18px] text-text-muted hover:text-text-main">
-              close
-            </span>
-          </button>
-        </div>
+    <Modal isOpen={open} onClose={onClose} title={t("modelSelectorTitle")} size="sm">
+      <div className="flex max-h-[60vh] flex-col gap-2">
+        <Input
+          type="search"
+          icon="search"
+          autoFocus
+          aria-label={t("modelSelectorSearch")}
+          placeholder={t("modelSelectorSearch")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-        <div className="px-4 py-2">
-          <input
-            type="text"
-            autoFocus
-            className="w-full rounded-lg border border-border/50 bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            placeholder={t("modelSelectorSearch")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-1">
-          {loading && <p className="text-xs text-text-muted py-4 text-center">{t("loading")}</p>}
+        <div className="flex flex-1 flex-col gap-1 overflow-y-auto">
+          {loading && (
+            <p className="py-4 text-center text-xs text-text-muted" role="status">
+              {t("loading")}
+            </p>
+          )}
           {!loading && filtered.length === 0 && (
-            <p className="text-xs text-text-muted py-4 text-center">{t("noModelsFound")}</p>
+            <p className="py-4 text-center text-xs text-text-muted">{t("noModelsFound")}</p>
           )}
           {filtered.map((m) => (
-            <button
+            <Button
               key={m.id}
-              type="button"
+              variant="ghost"
+              size="sm"
+              fullWidth
+              aria-current={m.id === currentModel ? "true" : undefined}
+              className={cn(
+                "h-auto justify-start py-2 text-left",
+                m.id === currentModel && "bg-bg-subtle font-semibold"
+              )}
               onClick={() => onSelect(m.id)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                m.id === currentModel
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "hover:bg-surface text-text-main"
-              }`}
             >
-              <span className="font-mono text-xs">{m.id}</span>
-              {m.name !== m.id && <span className="ml-2 text-text-muted text-xs">{m.name}</span>}
-            </button>
+              <span className="truncate font-mono text-xs">{m.id}</span>
+              {m.name !== m.id && (
+                <span className="ml-2 truncate text-xs text-text-muted">{m.name}</span>
+              )}
+            </Button>
           ))}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

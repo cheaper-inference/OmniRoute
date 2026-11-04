@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-provreq-fail-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -34,7 +35,7 @@ function noopLog() {
   return { debug() {}, info() {}, warn() {}, error() {} };
 }
 
-async function waitFor(fn, timeoutMs = 1500) {
+async function waitFor(fn, timeoutMs = CALL_LOG_SETTLE_TIMEOUT_MS) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     const result = await fn();
@@ -51,7 +52,7 @@ async function waitForAsyncSideEffects() {
 
 async function getLatestCallLog() {
   const rows = await getCallLogs({ limit: 5 });
-  if (!Array.isArray(rows) || rows.length === 0) return null;
+  if (!Array.isArray(rows) || rows.length === 0 || rows[0].detailState !== "ready") return null;
   return getCallLogById(rows[0].id);
 }
 
@@ -63,10 +64,11 @@ async function resetStorage() {
   clearInflight();
   clearModelLock();
   // Call-log persistence is fire-and-forget and the first cold artifact-worker
-  // spawn can take ~2.4s, so this test's saves may still be in flight when the
-  // next test resets the DB. Drain so a late row cannot land in the next test's
-  // fresh database and get picked up by its waitFor(getLatestCallLog()) (#12780).
-  await waitForCallLogSaves(10_000);
+  // spawn takes seconds (see CALL_LOG_SETTLE_TIMEOUT_MS), so this test's saves may
+  // still be in flight when the next test resets the DB. Drain so a late row cannot
+  // land in the next test's fresh database and get picked up by its
+  // waitFor(getLatestCallLog()) (#12780).
+  await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS);
   core.resetDbInstance();
   // A full reset must also drop the settings read-cache. Otherwise the cached
   // value (e.g. call_log_pipeline_enabled=true seeded earlier) survives the DB

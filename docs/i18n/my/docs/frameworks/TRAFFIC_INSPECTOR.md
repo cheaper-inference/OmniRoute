@@ -40,86 +40,86 @@ Traffic Inspector သည် OmniRoute တွင် အသင့်ပါဝင�
 
 ## §2 ဖမ်းယူမှုမုဒ်များ
 
-Traffic Inspector သည် **တစ်ပြိုင်နက်တည်း ဖမ်းယူနိုင်သော ရင်းမြစ် 5 ခု** ကို ပံ့ပိုးပေးသည်။ တစ်ခုချင်းစီကို သီးခြားစီ ဖွင့်/ပိတ်နိုင်သည်။ `InterceptedRequest` တိုင်းရှိ `source` အကွက် (`src/mitm/inspector/types.ts`) သည် `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` သို့မဟုတ် `"tproxy"` တစ်ခုခုဖြစ်သည်။
+Traffic Inspector သည် **တစ်ပြိုင်နက်တည်း ဖမ်းယူနိုင်သော ရင်းမြစ် 5 ခု** ကို ပံ့ပိုးပေးသည်။ တစ်ခုချင်းစီကို သီးခြားစီ ဖွင့်/ပိတ်နိုင်သည်။ `InterceptedRequest` (`src/mitm/inspector/types.ts`) တိုင်းရှိ `source` ဖီးလ်သည် `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` သို့မဟုတ် `"tproxy"` တစ်ခုခု ဖြစ်သည်။
 
-### မုဒ် 1 — AgentBridge (ပုံသေ၊ အမြဲဖွင့်ထားသည်)
+### မုဒ် 1 — AgentBridge (မူလသတ်မှတ်ချက်၊ အမြဲဖွင့်ထားသည်)
 
 **ရင်းမြစ်:** AgentBridge handler များ (`src/mitm/handlers/base.ts`)
-**လုပ်ဆောင်ပုံ:** `MitmHandlerBase` ရှိ `intercept()` ခေါ်ဆိုမှုတိုင်းသည် ဆက်လက်ပေးပို့ခြင်းမပြုမီ `hookBufferStart()` ကို ခေါ်ပြီး ပြီးဆုံးချိန်တွင် `hookBufferUpdate()` ကို ခေါ်သည်။ ထပ်ဆောင်း configuration လုံးဝမလိုအပ်ဘဲ AgentBridge စတင်လည်ပတ်သည်နှင့် အလုပ်လုပ်သည်။
-**လွှမ်းခြုံမှု:** AgentBridge တွင် configure လုပ်ထားသည့် IDE agent 9 ခု
-**မှတ်ချက်:** `InterceptedRequest` ရှိ `source` အကွက် = `"agent-bridge"`
+**လုပ်ဆောင်ပုံ:** `MitmHandlerBase` ရှိ `intercept()` ခေါ်ဆိုမှုတိုင်းသည် ဆက်လက်ပို့ဆောင်ခြင်းမပြုမီ `hookBufferStart()` ကို ခေါ်ဆိုပြီး ပြီးဆုံးသည့်အခါ `hookBufferUpdate()` ကို ခေါ်ဆိုသည်။ ထပ်ဆောင်း configuration လုံးဝမလိုအပ်ပါ — AgentBridge စတင်လည်ပတ်သည်နှင့် အလုပ်လုပ်သည်။
+**လွှမ်းခြုံမှု:** AgentBridge တွင် စီစဉ်သတ်မှတ်ထားသော IDE agent 9 ခု
+**မှတ်ချက်:** `InterceptedRequest` ရှိ `source` ဖီးလ် = `"agent-bridge"`
 
-### မုဒ် 2 — စိတ်ကြိုက် Host များ (DNS redirect)
+### မုဒ် 2 — Custom Hosts (DNS လမ်းကြောင်းလွှဲခြင်း)
 
-**ရင်းမြစ်:** အသုံးပြုသူသတ်မှတ်ထားသော host စာရင်း (`inspector_custom_hosts` table)
-**လုပ်ဆောင်ပုံ:** UI မှတစ်ဆင့် host တစ်ခုထည့်ခြင်းသည် `/etc/hosts` ထဲသို့ `127.0.0.1 <host>` ကို ထည့်ပေးသည် (sudo လိုအပ်သည်)။ ရှိပြီးသား AgentBridge MITM server (port 443) သည် host အသစ်အတွက် SNI cert တစ်ခုကို အလိုအလျောက် ဖန်တီးပေးသည်။
-**လွှမ်းခြုံမှု:** ထည့်ထားသော host ကို အသုံးပြုသည့် မည်သည့် application မဆို — app configuration ပြောင်းလဲရန် မလိုအပ်ပါ
+**ရင်းမြစ်:** အသုံးပြုသူသတ်မှတ်ထားသော host စာရင်း (`inspector_custom_hosts` ဇယား)
+**လုပ်ဆောင်ပုံ:** UI မှတစ်ဆင့် host တစ်ခု ထည့်ခြင်းက `/etc/hosts` တွင် `127.0.0.1 <host>` ကို ထည့်ပေးသည် (sudo လိုအပ်သည်)။ ရှိပြီးသား AgentBridge MITM server (port 443) သည် host အသစ်အတွက် SNI cert ကို အလိုအလျောက် ဖန်တီးပေးသည်။
+**လွှမ်းခြုံမှု:** ထည့်ထားသော host ကို အသုံးပြုသည့် မည်သည့် application မဆို — app configuration ကို ပြောင်းလဲရန် မလိုအပ်ပါ
 **မှတ်ချက်:** `source` = `"custom-host"`
 
-အသုံးပြုမှုနမူနာများ-
+အသုံးပြုနိုင်သည့် နမူနာများ-
 
 - Python script များမှ `api.openai.com` ကို စောင့်ကြည့်ခြင်း
-- `my-internal-llm.company.com` ကို debug လုပ်ခြင်း
-- ကွန်ရက်တစ်ခုတည်းရှိ mobile device များမှ traffic ကို ဖမ်းယူခြင်း (ARP spoofing မှတစ်ဆင့် — အဆင့်မြင့်)
+- `my-internal-llm.company.com` ကို debug ပြုလုပ်ခြင်း
+- တူညီသော network ပေါ်ရှိ mobile device များမှ traffic ကို ဖမ်းယူခြင်း (ARP spoofing မှတစ်ဆင့် — အဆင့်မြင့်)
 
 ### မုဒ် 3 — HTTP_PROXY listener (port 8080)
 
 **ရင်းမြစ်:** `HTTP_PROXY`/`HTTPS_PROXY` environment variable များကို အသုံးပြုသည့် application များ
-**လုပ်ဆောင်ပုံ:** စံ explicit HTTP/HTTPS proxy အဖြစ် လုပ်ဆောင်သည့် port 8080 ရှိ ဒုတိယ listener (`src/mitm/inspector/httpProxyServer.ts`) ဖြစ်သည်။ `CONNECT` tunnel များ (HTTPS) နှင့် တိုက်ရိုက် HTTP request များကို လက်ခံသည်။
-**လွှမ်းခြုံမှု:** `HTTP_PROXY` environment variable ကို လိုက်နာသည့် မည်သည့် application မဆို — DNS ပြောင်းလဲရန်မလို၊ sudo မလိုပါ
+**လုပ်ဆောင်ပုံ:** စံ explicit HTTP/HTTPS proxy အဖြစ် လုပ်ဆောင်သော port 8080 ရှိ ဒုတိယ listener (`src/mitm/inspector/httpProxyServer.ts`)။ `CONNECT` tunnel များ (HTTPS) နှင့် တိုက်ရိုက် HTTP request များကို လက်ခံသည်။
+**လွှမ်းခြုံမှု:** `HTTP_PROXY` env ကို လိုက်နာသည့် မည်သည့် application မဆို — DNS ပြောင်းလဲရန် မလို၊ sudo မလို
 **မှတ်ချက်:** `source` = `"http-proxy"`
 
 ```bash
-# Command တစ်ခုတည်းအတွက် အမြန်ဖမ်းယူခြင်း-
+# Command တစ်ခုတည်းအတွက် အမြန်ဖမ်းယူရန်-
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Shell session တစ်လျှောက် အမြဲတမ်းဖမ်းယူခြင်း-
+# Shell session တစ်ခုအတွင်း အမြဲတမ်းဖမ်းယူရန်-
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS ကန့်သတ်ချက်:** HTTPS `CONNECT` tunnel များကို metadata (host, port, timing) အဖြစ်သာ ဖမ်းယူသည် — ပုံမှန်အားဖြင့် TLS body ကို decrypt မလုပ်ပါ။ Body အပြည့်အစုံကို စစ်ဆေးရန် "Proxy မုဒ်တွင် HTTPS ကို Decrypt လုပ်ရန်" toggle ကို ဖွင့်ပါ (ကိုယ်တိုင်ရွေးချယ်ဖွင့်ရပြီး AgentBridge cert ကို ယုံကြည်ထားရန် လိုအပ်သည်)။
+**TLS ကန့်သတ်ချက်:** HTTPS သည် ရိုးရိုး `CONNECT` tunnel မှတစ်ဆင့် ဖြတ်သန်းသည်။ listener သည် ကုဒ်ဝှက်ထားသော byte များကို လုံးဝမပြောင်းလဲဘဲ relay လုပ်ပြီး metadata (host၊ port၊ အချိန်အချက်အလက်) ကိုသာ မှတ်တမ်းတင်သည်။ ၎င်းသည် HTTPS ကို မည်သည့်အခါမျှ ကုဒ်ဖြည်ခြင်းမပြုသည့်အပြင် ဤမုဒ်အတွက် ကုဒ်ဖြည်ခြင်းကို ဖွင့်ပေးနိုင်သည့် setting လည်း မရှိပါ။ HTTPS body များကို ဖမ်းယူရန် host ကို မုဒ် 1 (AgentBridge)၊ မုဒ် 2 (Custom Hosts) သို့မဟုတ် မုဒ် 5 (TPROXY decrypt) မှတစ်ဆင့် လမ်းကြောင်းပေးပါ။
 
-**Port ပဋိပက္ခ:** port 8080 ကို အသုံးပြုနေပါက AgentBridge သည် ဖွဲ့စည်းထားသော error တစ်ခုနှင့်အတူ 409 ကို ပြန်ပေးသည်။ `INSPECTOR_HTTP_PROXY_PORT` environment variable မှတစ်ဆင့် port ကို ပြောင်းပါ။
+**Port ပဋိပက္ခ:** port 8080 ကို အသုံးပြုနေပြီးဖြစ်ပါက AgentBridge သည် ဖွဲ့စည်းပုံသတ်မှတ်ထားသော error နှင့်အတူ 409 ကို ပြန်ပေးသည်။ `INSPECTOR_HTTP_PROXY_PORT` env var မှတစ်ဆင့် port ကို ပြောင်းပါ။
 
-### မုဒ် 4 — စနစ်တစ်ခုလုံးသက်ရောက်သော proxy (အဆင့်မြင့်၊ ကိုယ်တိုင်ရွေးချယ်ဖွင့်ရန်)
+### မုဒ် 4 — System-wide proxy (အဆင့်မြင့်၊ ရွေးချယ်ဖွင့်ရသည်)
 
-**ရင်းမြစ်:** OS အဆင့် proxy setting များ (စက်ရှိ app အားလုံးအပေါ် သက်ရောက်သည်)
-**လုပ်ဆောင်ပုံ:** HTTP/HTTPS traffic အားလုံးကို HTTP_PROXY listener မှတစ်ဆင့် redirect လုပ်ရန် OS API များကို အသုံးပြုသည်-
+**ရင်းမြစ်:** OS အဆင့် proxy setting များ (စက်ပေါ်ရှိ app အားလုံးအတွက် သက်ရောက်သည်)
+**လုပ်ဆောင်ပုံ:** HTTP/HTTPS traffic အားလုံးကို HTTP_PROXY listener မှတစ်ဆင့် လမ်းကြောင်းပြောင်းရန် OS API များကို အသုံးပြုသည်-
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **လွှမ်းခြုံမှု:** System proxy setting များကို လိုက်နာသည့် စက်ရှိ application အားလုံး
+  **လွှမ်းခြုံမှု:** System proxy setting များကို လိုက်နာသည့် စက်ပေါ်ရှိ application အားလုံး
   **မှတ်ချက်:** `source` = `"system-proxy"`
 
-**ဘေးကင်းရေး လုပ်ဆောင်ချက်များ:**
+**ဘေးကင်းရေး ယန္တရားများ:**
 
-- အလိုအလျောက်ပိတ်ပေးသည့် timer (ပုံသေ 30 မိနစ်၊ `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` မှတစ်ဆင့် configure လုပ်နိုင်သည်)
-- ယခင် system proxy အခြေအနေကို DB တွင် သိမ်းဆည်းပြီး revert လုပ်သည့်အခါ ပြန်လည်ထားရှိပေးသည်
-- ဖွင့်ထားစဉ် အသုံးပြုသူက အခြားနေရာသို့ သွားပါက Dashboard တွင် "System proxy ကို မူလအခြေအနေသို့ ပြန်ထားနေသည်" prompt ကို ပြသသည်
-- UI တွင် `⚠ အဆင့်မြင့်` badge နှင့် အတည်ပြုချက် checkbox ကို အတိအလင်း ပြသသည်
+- အလိုအလျောက်ပိတ်သည့် timer (မူလ 30 min၊ `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` မှတစ်ဆင့် ပြင်ဆင်သတ်မှတ်နိုင်သည်)
+- ယခင် system proxy အခြေအနေကို DB တွင် သိမ်းဆည်းထားပြီး ပြန်ပြောင်းသည့်အခါ မူလအတိုင်း ပြန်ထားပေးသည်
+- အသုံးပြုနေစဉ် user က အခြားနေရာသို့ ထွက်သွားပါက Dashboard တွင် "System proxy ကို ပြန်ပြောင်းနေသည်" ဟူသော prompt ကို ပြသသည်
+- UI တွင် `⚠ အဆင့်မြင့်` badge နှင့် အတိအကျအတည်ပြုရန် checkbox ကို ပြသသည်
 
-### မုဒ် 5 — TPROXY transparent decrypt (Linux၊ root၊ ကိုယ်တိုင်ရွေးချယ်ဖွင့်ရန်)
+### မုဒ် 5 — TPROXY transparent decrypt (Linux၊ root၊ ရွေးချယ်ဖွင့်ရသည်)
 
 **ရင်းမြစ်:** Kernel TPROXY + policy routing (`src/mitm/tproxy/`)
-**လုပ်ဆောင်ပုံ:** `mangle OUTPUT` ထဲတွင် သတ်မှတ်ထားသော port (ပုံသေ `443`) သို့ အသစ်ထွက်ခွာသည့် local TCP connection များကို အမှတ်အသားပြုသည်။ `ip rule` တစ်ခုက အမှတ်အသားပြုထားသော packet များကို local delivery သို့ လမ်းကြောင်းပြောင်းပေးပြီး `mangle PREROUTING` ၏ `TPROXY` target က ၎င်းတို့ကို transparent (**IP_TRANSPARENT**) listener (ပုံသေ port `8443`) သို့ လွှဲပေးသည်။ Listener သည် dynamic CA မှ **တောင်းဆိုလာသည့်အခါ SNI hostname တစ်ခုချင်းစီအတွက်** ထုတ်ပေးသော leaf certificate ဖြင့် TLS ကို အဆုံးသတ်ပြီး၊ decrypt လုပ်ထားသော အပြန်အလှန်ဆက်သွယ်မှုကို ဖမ်းယူကာ request ကို မူလ destination သို့ ပြန်လည် encrypt လုပ်ပြီး ပေးပို့သည်။
-**လွှမ်းခြုံမှု:** သတ်မှတ်ထားသော port ရှိ **မည်သည့်** destination host မဆို — `/etc/hosts` spoof မလို၊ `HTTP_PROXY` environment variable မလို၊ system-wide proxy ကို ပြောင်းလဲရန် မလိုပါ။ Intercept လုပ်ခံရသော process တွင် configuration ပြောင်းလဲရန် မလိုသော်လည်း dynamic CA ကို ယုံကြည်ထားရမည်။
+**လုပ်ဆောင်ပုံ:** `mangle OUTPUT` တွင် သတ်မှတ်ထားသော port (မူလ `443`) သို့ ချိတ်ဆက်သည့် local outbound TCP connection အသစ်များကို အမှတ်အသားပြုသည်၊ `ip rule` တစ်ခုက အမှတ်အသားပြုထားသော packet များကို local delivery သို့ လမ်းကြောင်းပြန်ညွှန်းပြီး `mangle PREROUTING` ၏ `TPROXY` target က ၎င်းတို့ကို transparent (**IP_TRANSPARENT**) listener (မူလ port `8443`) သို့ လွှဲပေးသည်။ Listener သည် dynamic CA က **တောင်းဆိုမှုရှိသည့်အခါ SNI hostname တစ်ခုချင်းစီအတွက်** ထုတ်ပေးသော leaf certificate ဖြင့် TLS ကို အဆုံးသတ်ပြီး၊ ကုဒ်ဖြည်ထားသော အပြန်အလှန်ဆက်သွယ်မှုကို ဖမ်းယူကာ request ကို မူလ destination သို့ ပြန်လည်ကုဒ်ဝှက်၍ ပို့ဆောင်သည်။
+**လွှမ်းခြုံမှု:** သတ်မှတ်ထားသော port ပေါ်ရှိ **မည်သည့်** destination host မဆို — `/etc/hosts` spoof မလို၊ `HTTP_PROXY` env မလို၊ system-wide proxy ကို ပြင်ဆင်ပြောင်းလဲရန် မလိုပါ။ ကြားဖြတ်ဖမ်းယူခံရသော process တွင် configuration ပြောင်းလဲရန် မလိုသော်လည်း dynamic CA ကို ယုံကြည်ရန် လိုအပ်သည်။
 **မှတ်ချက်:** `source` = `"tproxy"`
 
-**လိုအပ်ချက်များ:** Linux တွင်သာ အသုံးပြုနိုင်ပြီး (**IP_TRANSPARENT** သည် Linux အတွက်သာ ဖြစ်သည်)၊ **CAP_NET_ADMIN** capability (root) နှင့် C toolchain ဖြင့် build လုပ်ရမည့် native N-API addon (`npm run build:native:tproxy`) လိုအပ်သည်။ မရရှိနိုင်ပါက dashboard toggle ကို ပိတ်ထားပြီး "TPROXY decrypt အတွက် Linux + root + native addon လိုအပ်သည်" ဟူသော tooltip ကို ပြသသည်။ Firewall rule များကို transaction ပုံစံဖြင့် apply/revert လုပ်သည် (crash ဖြစ်ပါက `mangle` rule တစ်ခုကို မည်သည့်အခါမျှ ချန်ထားမည်မဟုတ်ပါ)၊ reboot လုပ်သည့်အခါ ရှင်းလင်းပေးသည်။ SO_MARK အခြေပြု anti-loop က proxy ၏ ကိုယ်ပိုင် ပြန်လည် encrypt လုပ်ထားသော forward ကို ထပ်မံ intercept မဖြစ်စေရန် ကာကွယ်ပေးသည်။
+**လိုအပ်ချက်များ:** Linux တွင်သာ ရရှိနိုင်သည် (**IP_TRANSPARENT** သည် Linux အတွက်သာ ဖြစ်သည်)၊ **CAP_NET_ADMIN** capability (root) နှင့် C toolchain ဖြင့် build လုပ်ရမည့် native N-API addon (`npm run build:native:tproxy`) လိုအပ်သည်။ မရရှိနိုင်ပါက dashboard toggle ကို ပိတ်ထားပြီး "TPROXY decrypt အတွက် Linux + root + native addon လိုအပ်သည်" ဟူသော tooltip ကို ပြသသည်။ Firewall rule များကို transaction ပုံစံဖြင့် apply/revert လုပ်သည် (crash ဖြစ်ပါက `mangle` rule တစ်ခုကို မည်သည့်အခါမျှ ချန်ထားခဲ့မည်မဟုတ်ပါ)၊ reboot လုပ်သည့်အခါ ဖယ်ရှားသည်။ SO_MARK အခြေခံ anti-loop တစ်ခုက proxy ကိုယ်တိုင် ပြန်လည်ကုဒ်ဝှက်၍ ပို့ဆောင်မှုကို ထပ်မံကြားဖြတ်ဖမ်းယူခြင်းမှ ကာကွယ်ပေးသည်။
 
-ဤအရာသည် သီးခြား operator guide ပါရှိသော ကြီးမားသည့် subsystem တစ်ခုဖြစ်သည် — firewall recipe အပြည့်အစုံ၊ SNI တစ်ခုချင်းစီအလိုက် dynamic CA + trust-store installer၊ local-only route၊ anti-loop အသေးစိတ်အချက်များနှင့် configuration schema အတွက် `docs/security/MITM-TPROXY-DECRYPT.md` (git တွင်သာရှိပြီး `/docs` ထဲသို့ compile မလုပ်ထားပါ) ကို ကြည့်ပါ။ Toggle ကို `GET / POST / DELETE /api/tools/agent-bridge/tproxy` က ထိန်းချုပ်သည် (မှတ်ချက်- route သည် Traffic Inspector prefix အောက်တွင်မဟုတ်ဘဲ AgentBridge prefix အောက်တွင် ရှိသည်)။
+ဤသည်မှာ ကိုယ်ပိုင်သီးသန့် operator လမ်းညွှန်ပါရှိသော ကြီးမားသည့် subsystem တစ်ခုဖြစ်သည် — firewall recipe အပြည့်အစုံ၊ SNI တစ်ခုချင်းစီအတွက် dynamic CA + trust-store installer၊ local-only route၊ anti-loop အသေးစိတ်များနှင့် configuration schema တို့အတွက် `docs/security/MITM-TPROXY-DECRYPT.md` (git တွင်ရှိပြီး `/docs` အတွင်း compile မလုပ်ထားပါ) ကို ကြည့်ပါ။ Toggle ကို `GET / POST / DELETE /api/tools/agent-bridge/tproxy` က ထိန်းချုပ်သည် (မှတ်ချက်- route သည် Traffic Inspector prefix အောက်တွင် မဟုတ်ဘဲ AgentBridge prefix အောက်တွင် ရှိသည်)။
 
 ### ဖမ်းယူမှုမုဒ်များ နှိုင်းယှဉ်ချက်
 
-| မုဒ်              | စနစ်ထည့်သွင်းမှု                     |      Sudo လိုအပ်ပါသလား?       | သက်ရောက်မှုအတိုင်းအတာ                      | မှတ်ချက်များ                                                                                                                                                               |
-| ----------------- | ------------------------------------ | :---------------------------: | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge    | အလိုအလျောက်                          |     တစ်ကြိမ် (cert+hosts)     | IDE agent ၉ ခု                             | ပုံသေအားဖြင့် ဖွင့်ထားသည်                                                                                                                                                  |
-| 2. Custom Hosts   | host တစ်ခုချင်းစီအလိုက် ထည့်သွင်းမှု |    လိုအပ်သည် (hosts file)     | ထို host ကို အသုံးပြုသည့် မည်သည့် app မဆို | DB တွင် အမြဲသိမ်းဆည်းထားသည်                                                                                                                                                |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`             |           မလိုအပ်ပါ           | env ကို လိုက်နာသည့် app များ               | Port 8080၊ ပုံသေအားဖြင့် TLS ကုဒ်ဖြည်ခြင်း မရှိပါ                                                                                                                          |
-| 4. System-wide    | Toggle လုပ်ပြီး အတည်ပြုသည်           |           လိုအပ်သည်           | စက်ပေါ်ရှိ app အားလုံး                     | မိနစ် ၃၀ အကြာတွင် အလိုအလျောက် ပိတ်မည်                                                                                                                                      |
-| 5. TPROXY decrypt | Toggle (Linux + native addon)        | လိုအပ်သည် (root + CA install) | ပစ်မှတ် port ပေါ်ရှိ မည်သည့် host မဆို     | မည်သည့် host ကိုမဆို ကုဒ်ဖြည်နိုင်သည်၊ ပုံသေအားဖြင့် ပိတ်ထားသည် — `docs/security/MITM-TPROXY-DECRYPT.md` ကို ကြည့်ပါ (git ထဲတွင်ရှိပြီး `/docs` ထဲသို့ compile မလုပ်ထားပါ) |
+| မုဒ်              | စနစ်ထည့်သွင်းမှု                             |         Sudo လိုအပ်ပါသလား?         | သက်ရောက်မှုအတိုင်းအတာ                      | မှတ်ချက်များ                                                                                                                                                          |
+| ----------------- | -------------------------------------------- | :--------------------------------: | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | အလိုအလျောက်                                  |      တစ်ကြိမ် (လက်မှတ်+hosts)      | IDE agent ၉ ခု                             | ပုံသေဖွင့်ထားသည်                                                                                                                                                      |
+| 2. Custom Hosts   | host တစ်ခုချင်းစီအလိုက် ထည့်သွင်းမှု         |      လိုအပ်သည် (hosts ဖိုင်)       | ထို host ကို အသုံးပြုသည့် မည်သည့် app မဆို | DB တွင် အမြဲသိမ်းထားသည်                                                                                                                                               |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`                     |             မလိုအပ်ပါ              | env ကို လိုက်နာသည့် app များ               | Port 8080; HTTPS ကို CONNECT tunnel မှတစ်ဆင့် ပို့သည် (metadata သာဖြစ်ပြီး မည်သည့်အခါမျှ စာဝှက်ဖြည်ခြင်းမပြုပါ)                                                       |
+| 4. System-wide    | အဖွင့်အပိတ်ပြောင်းရန် + အတည်ပြုရန်           |             လိုအပ်သည်              | စက်ရှိ app အားလုံး                         | မိနစ် ၃၀ အကြာတွင် အလိုအလျောက်ပိတ်မည်                                                                                                                                  |
+| 5. TPROXY decrypt | အဖွင့်အပိတ်ပြောင်းရန် (Linux + native addon) | လိုအပ်သည် (root + CA ထည့်သွင်းမှု) | သတ်မှတ်ထားသော port ရှိ မည်သည့် host မဆို   | မည်သည့် host ကိုမဆို စာဝှက်ဖြည်သည်; ပုံသေအားဖြင့် ပိတ်ထားသည် — `docs/security/MITM-TPROXY-DECRYPT.md` ကို ကြည့်ပါ (git တွင်ရှိပြီး `/docs` ထဲသို့ compile မလုပ်ထားပါ) |
 
 ---
 
@@ -341,27 +341,27 @@ ephemeral port ကို အောက်ပါအတိုင်း PID + name �
 
 Traffic Inspector သည် authorization header များနှင့် request body များအပါအဝင် **ကြားဖြတ်ဖမ်းယူထားသော HTTPS traffic အားလုံးကို** ပြသသည်။ အောက်ပါ ထိန်းချုပ်မှုများကို အသုံးပြုထားသည်-
 
-| ထိန်းချုပ်မှု                           | အသေးစိတ်အချက်အလက်များ                                                                                                                                                                                  |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LOCAL_ONLY**                          | Route များအားလုံးနှင့် WebSocket endpoint ကို loopback မှသာ ဝင်ရောက်နိုင်သည် (`routeGuard.ts` တွင် auth မတိုင်မီ အတည်ပြုကန့်သတ်ထားသည်)                                                                 |
-| **လျှို့ဝှက်ချက် ဖုံးကွယ်ခြင်း**        | Linear `maskSecret()` scanner သည် RFC 6750 Bearer အထောက်အထားများ၊ provider prefix ပါသော key များနှင့် ရှည်လျားသော opaque token များကို `TrafficBuffer.push()` မတိုင်မီ ဖယ်ရှားဖုံးကွယ်ပေးသည်           |
-| **Body အရွယ်အစား ကန့်သတ်ချက်**          | `INSPECTOR_MAX_BODY_KB` ထက်ကြီးသော body များကို (မူလသတ်မှတ်ချက် 1024 KB) `"(စွမ်းဆောင်ရည်အတွက် ဖြတ်တောက်ထားသည်)"` အသိပေးချက်ဖြင့် ဖြတ်တောက်ထားမည်                                                      |
-| **Header သန့်စင်ခြင်း**                 | အမည်များကို စာလုံးအသေးပြောင်းထားသည်၊ framing/hop-by-hop နှင့် proxy-auth header များကို ဖယ်ရှားထားသည်၊ cookie များကို အပြည့်အဝ ဖုံးကွယ်ထားသည်၊ အထောက်အထားတန်ဖိုးများကို `maskSecret()` သို့ လွှဲပေးသည် |
-| **CSP**                                 | ထည့်သွင်းထားသော response body များမှတစ်ဆင့် XSS ဖြစ်ပေါ်ခြင်းကို ကာကွယ်ရန် Traffic Inspector စာမျက်နှာများတွင် တင်းကျပ်သော Content Security Policy ကို အသုံးပြုထားသည်                                  |
-| **မူလအားဖြင့် အမြဲတမ်းမသိမ်းဆည်းခြင်း** | `TrafficBuffer` သည် memory အတွင်း၌သာရှိပြီး server ပြန်လည်စတင်သည့်အခါ ပျောက်ဆုံးသွားသည်။ ဆက်ရှင်များကို အတိအလင်း မှတ်တမ်းတင်သည့်အခါမှသာ အမြဲတမ်း သိမ်းဆည်းထားသည်                                       |
+| ထိန်းချုပ်မှု                         | အသေးစိတ်အချက်အလက်များ                                                                                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **LOCAL_ONLY**                        | route များအားလုံးနှင့် WebSocket endpoint ကို loopback မှသာ အသုံးပြုနိုင်သည် (`routeGuard.ts` တွင် auth မတိုင်မီ အတည်ပြုကန့်သတ်ထားသည်)                                                                 |
+| **လျှို့ဝှက်အချက်အလက် ဖုံးကွယ်ခြင်း** | Linear `maskSecret()` scanner သည် RFC 6750 Bearer credential များ၊ provider prefix ပါသော key များနှင့် ရှည်လျားသော opaque token များကို `TrafficBuffer.push()` မတိုင်မီ ဖုံးကွယ်ပြင်ဆင်သည်             |
+| **Body အရွယ်အစား ကန့်သတ်ချက်**        | `INSPECTOR_MAX_BODY_KB` ထက်ကြီးသော body များကို (မူလတန်ဖိုး 1024 KB) `"(စွမ်းဆောင်ရည်အတွက် ဖြတ်တောက်ထားသည်)"` အသိပေးချက်ဖြင့် ဖြတ်တောက်ထားသည်                                                          |
+| **Header သန့်စင်ခြင်း**               | အမည်များကို စာလုံးအသေးပြောင်းထားသည်၊ framing/hop-by-hop နှင့် proxy-auth header များကို ဖယ်ရှားထားသည်၊ cookie များကို အပြည့်အဝ ဖုံးကွယ်ထားသည်၊ credential value များကို `maskSecret()` သို့ လွှဲအပ်သည် |
+| **CSP**                               | ထည့်သွင်းထားသော response body များမှတစ်ဆင့် XSS ဖြစ်ပွားခြင်းကို ကာကွယ်ရန် Traffic Inspector စာမျက်နှာများတွင် တင်းကျပ်သော Content Security Policy ကို အသုံးပြုထားသည်                                  |
+| **မူလအားဖြင့် သိမ်းဆည်းမထားခြင်း**    | `TrafficBuffer` ကို memory အတွင်းသာ ထားရှိပြီး server ပြန်လည်စတင်သည့်အခါ ပျောက်ဆုံးသွားသည်။ Session များကို အတိအလင်း record လုပ်ထားမှသာ အမြဲတမ်းသိမ်းဆည်းသည်                                           |
 
-### အသုံးချထားသော မဖြစ်မနေလိုက်နာရမည့် စည်းမျဉ်းများ
+### အသုံးချထားသော တင်းကျပ်သည့် စည်းမျဉ်းများ
 
-| စည်းမျဉ်း                         | အသုံးချပုံ                                                                                         |
+| စည်းမျဉ်း                         | အသုံးချမှု                                                                                         |
 | --------------------------------- | -------------------------------------------------------------------------------------------------- |
 | **#12** `sanitizeErrorMessage`    | Traffic Inspector route များမှ HTTP error response အားလုံးကို သန့်စင်ထားသည်                        |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` သည် LOCAL_ONLY + SPAWN_CAPABLE ဖြစ်သည် (system proxy command များ) |
 
 ### သိရှိထားသော ကန့်သတ်ချက်များ
 
-- **စနစ်တစ်ခုလုံး အကျုံးဝင်သော proxy mode** သည် VPN client များနှင့် SSO အပါအဝင် စက်ပေါ်ရှိ application အားလုံးကို သက်ရောက်စေသည်။ auto-disable timer နှင့်အတူ အမြဲတမ်း အသုံးပြုပါ။ မျှဝေသုံးစွဲသော စက်များတွင် မသုံးပါနှင့်။
-- **CONNECT tunnel HTTPS**: TLS interception ကို ဖွင့်မထားပါက Mode 3 (HTTP_PROXY) သည် HTTPS destination များအတွက် tunnel metadata ကိုသာ ဖမ်းယူသည်။ ၎င်းသည် ရည်ရွယ်ချက်ရှိရှိ ဒီဇိုင်းပြုလုပ်ထားခြင်းဖြစ်သည် — ထို app များက AgentBridge cert ကို ယုံကြည်စိတ်ချရသည်ဟု လက်မခံထားပါက transparent capture ပြုလုပ်ခြင်းသည် TLS verification ကို ပျက်စီးစေမည်ဖြစ်သည်။
-- **Component အချို့ရှိ hardcoded string များ**: UI component အချို့ (F7/F8) တွင် i18n key များဖြင့် မလွှမ်းခြုံရသေးသော hardcoded string အနည်းငယ်ရှိသည်။ ၎င်းတို့ကို i18n gap report တွင် သိရှိထားသော ကန့်သတ်ချက်အဖြစ် မှတ်တမ်းတင်ထားပြီး နောက်ဆက်တွဲ pass တစ်ခုတွင် ပြောင်းရွှေ့မည်ဖြစ်သည်။ သက်ရောက်မှုရှိသော string များသည် လုပ်ဆောင်ချက်အရ အသုံးပြုရန်အတွက် ဘာသာပြန်ရန်မလိုအပ်သော UI အလှဆင် label များဖြစ်သည်။
+- **System-wide proxy mode** သည် VPN client များနှင့် SSO အပါအဝင် စက်ပေါ်ရှိ application အားလုံးအပေါ် သက်ရောက်သည်။ auto-disable timer နှင့်အတူ အမြဲတမ်း အသုံးပြုပါ။ မျှဝေသုံးစွဲသော စက်များတွင် အသုံးမပြုပါနှင့်။
+- **CONNECT tunnel HTTPS**- Mode 3 (HTTP_PROXY) သည် HTTPS destination များအတွက် tunnel metadata ကိုသာ ဖမ်းယူပြီး ၎င်းတို့ကို မည်သည့်အခါမျှ decrypt မလုပ်ပါ။ ၎င်းသည် ရည်ရွယ်ထားသည့် ဒီဇိုင်းဖြစ်သည် — decrypt လုပ်ရန် client တိုင်းက MITM certificate ကို ယုံကြည်ရန် လိုအပ်မည်ဖြစ်သောကြောင့် listener သည် HTTPS ကို အစမှအဆုံး encrypted အဖြစ် ဆက်လက်ထားရှိသည်။ HTTPS body များ လိုအပ်ပါက AgentBridge၊ Custom Hosts သို့မဟုတ် TPROXY decrypt ကို အသုံးပြုပါ။
+- **Component အချို့ရှိ hardcoded string များ**- အချို့သော UI component များ (F7/F8) တွင် i18n key များဖြင့် မပါဝင်သေးသော hardcoded string အနည်းငယ်ရှိသည်။ ၎င်းတို့ကို i18n gap report တွင် သိရှိထားသော ကန့်သတ်ချက်အဖြစ် မှတ်တမ်းတင်ထားပြီး နောက်ဆက်တွဲ pass တစ်ခုတွင် ပြောင်းရွှေ့သွားမည်ဖြစ်သည်။ သက်ရောက်မှုရှိသော string များသည် လုပ်ဆောင်ချက်အရ အသုံးပြုရန် ဘာသာပြန်ရန် မလိုအပ်သည့် UI အလှဆင် label များဖြစ်သည်။
 
 ---
 
@@ -424,72 +424,71 @@ Buffer သည် `INSPECTOR_BUFFER_SIZE` (မူလတန်ဖိုး 1000) �
 
 ---
 
-## §8 API ကိုးကားချက်
+## §8 API အကိုးအကား
 
-Route အားလုံးသည် `LOCAL_ONLY` (loopback မှသာ ဝင်ရောက်နိုင်သည်) နှင့် `SPAWN_CAPABLE` (system proxy command များ) ဖြစ်သည်။ `src/server/authz/routeGuard.ts` ကို ကြည့်ပါ။
+Route အားလုံးသည် `LOCAL_ONLY` (loopback မှသာ) နှင့် `SPAWN_CAPABLE` (စနစ် proxy command များ) ဖြစ်သည်။ `src/server/authz/routeGuard.ts` ကို ကြည့်ပါ။
 
-အခြေခံ path- `/api/tools/traffic-inspector/`
+အခြေခံ path: `/api/tools/traffic-inspector/`
 
 ### Request စီမံခန့်ခွဲမှု
 
-| နည်းလမ်း | Path                        | ဖော်ပြချက်                                                                                                 |
-| -------- | --------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET      | `/requests`                 | Request များကို စာရင်းပြုစုခြင်း (စစ်ထုတ်နိုင်သည်- `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET      | `/requests/{id}`            | Request တစ်ခု၏ အသေးစိတ်အချက်အလက်များ                                                                       |
-| DELETE   | `/requests`                 | Memory အတွင်းရှိ buffer ကို ရှင်းလင်းခြင်း                                                                 |
-| POST     | `/requests/{id}/replay`     | တူညီသော request ကို OmniRoute router မှတစ်ဆင့် ပြန်လည်လုပ်ဆောင်ခြင်း                                       |
-| PUT      | `/requests/{id}/annotation` | Request တစ်ခုရှိ မှတ်စုကို သိမ်းဆည်းခြင်း သို့မဟုတ် အပ်ဒိတ်လုပ်ခြင်း                                       |
+| Method | Path                        | ဖော်ပြချက်                                                                                                 |
+| ------ | --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| GET    | `/requests`                 | Request များကို စာရင်းပြုစုခြင်း (စစ်ထုတ်နိုင်သည်- `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests/{id}`            | Request တစ်ခုချင်းစီ၏ အသေးစိတ်အချက်အလက်များ                                                                |
+| DELETE | `/requests`                 | Memory အတွင်းရှိ buffer ကို ရှင်းလင်းခြင်း                                                                 |
+| POST   | `/requests/{id}/replay`     | တူညီသော request ကို OmniRoute router မှတစ်ဆင့် ပြန်လည်လုပ်ဆောင်ခြင်း                                       |
+| PUT    | `/requests/{id}/annotation` | Request တစ်ခုရှိ မှတ်စုကို သိမ်းဆည်းခြင်း သို့မဟုတ် အပ်ဒိတ်လုပ်ခြင်း                                       |
 
 ### WebSocket
 
-| နည်းလမ်း | Path  | ဖော်ပြချက်                                                                                                             |
-| -------- | ----- | ---------------------------------------------------------------------------------------------------------------------- |
-| GET      | `/ws` | တိုက်ရိုက် WebSocket stream။ ချိတ်ဆက်သည့်အခါ `snapshot` ကို ပို့ပြီးနောက် `new`/`update`/`clear` event များကို ပို့သည် |
+| Method | Path  | ဖော်ပြချက်                                                                                                               |
+| ------ | ----- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/ws` | တိုက်ရိုက် WebSocket stream။ ချိတ်ဆက်ချိန်တွင် `snapshot` ကို ပို့ပြီးနောက် `new`/`update`/`clear` event များကို ပို့သည် |
 
 ### Export
 
-| နည်းလမ်း | Path          | ဖော်ပြချက်                                                  |
-| -------- | ------------- | ----------------------------------------------------------- |
-| GET      | `/export.har` | လက်ရှိစစ်ထုတ်ထားသောစာရင်းကို HAR 1.2 အဖြစ် export လုပ်ခြင်း |
+| Method | Path          | ဖော်ပြချက်                                                   |
+| ------ | ------------- | ------------------------------------------------------------ |
+| GET    | `/export.har` | လက်ရှိစစ်ထုတ်ထားသော စာရင်းကို HAR 1.2 အဖြစ် export လုပ်ခြင်း |
 
 ### စိတ်ကြိုက် host များ
 
-| နည်းလမ်း | Path            | ဖော်ပြချက်                                              |
-| -------- | --------------- | ------------------------------------------------------- |
-| GET      | `/hosts`        | စိတ်ကြိုက် host များကို စာရင်းပြုစုခြင်း                |
-| POST     | `/hosts`        | Host ထည့်ခြင်း (`/etc/hosts` ကို အလိုအလျောက်ပြင်ဆင်သည်) |
-| DELETE   | `/hosts/{host}` | Host ဖယ်ရှားခြင်း                                       |
-| PATCH    | `/hosts/{host}` | `enabled` ကို အဖွင့်/အပိတ် ပြောင်းခြင်း                 |
+| Method | Path            | ဖော်ပြချက်                                               |
+| ------ | --------------- | -------------------------------------------------------- |
+| GET    | `/hosts`        | စိတ်ကြိုက် host များကို စာရင်းပြုစုခြင်း                 |
+| POST   | `/hosts`        | Host ထည့်ခြင်း (`/etc/hosts` ကို အလိုအလျောက်တည်းဖြတ်သည်) |
+| DELETE | `/hosts/{host}` | Host ဖယ်ရှားခြင်း                                        |
+| PATCH  | `/hosts/{host}` | `enabled` ကို ဖွင့်/ပိတ် ပြောင်းလဲခြင်း                  |
 
 ### ဖမ်းယူမှု mode များ
 
-| နည်းလမ်း | Path                           | ဖော်ပြချက်                                                                                               |
-| -------- | ------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| GET      | `/capture-modes`               | AgentBridge / custom-hosts / HTTP_PROXY / system-proxy mode များ၏ အခြေအနေ + `tls-intercept` အဖွင့်/အပိတ် |
-| POST     | `/capture-modes/http-proxy`    | HTTP_PROXY listener ကို စတင်ခြင်း/ရပ်တန့်ခြင်း (`{action: "start"\|"stop"}`)                             |
-| POST     | `/capture-modes/system-proxy`  | System-wide proxy ကို အသုံးချခြင်း/မူလအခြေအနေသို့ ပြန်ထားခြင်း (`{action: "apply"\|"revert"}`)           |
-| POST     | `/capture-modes/tls-intercept` | Proxy mode တွင် HTTPS body ကို ကုဒ်ဖြည်ခြင်းအား အဖွင့်/အပိတ် ပြောင်းခြင်း (`{enabled: boolean}`)         |
+| Method | Path                          | ဖော်ပြချက်                                                                                 |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/capture-modes`              | AgentBridge / စိတ်ကြိုက် host များ / HTTP_PROXY / စနစ် proxy mode များ၏ အခြေအနေ            |
+| POST   | `/capture-modes/http-proxy`   | HTTP_PROXY listener ကို စတင်/ရပ်တန့်ခြင်း (`{action: "start"\|"stop"}`)                    |
+| POST   | `/capture-modes/system-proxy` | စနစ်တစ်ခုလုံးအတွက် proxy ကို အသုံးချ/ပြန်လည်ရုပ်သိမ်းခြင်း (`{action: "apply"\|"revert"}`) |
 
-> **TPROXY ကုဒ်ဖြည်ခြင်း** (ဖမ်းယူမှု mode 5) ကို AgentBridge prefix အောက်ရှိ
+> **TPROXY decrypt** (ဖမ်းယူမှု mode 5) ကို AgentBridge prefix အောက်ရှိ
 > **သီးခြား** route — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — က ထိန်းချုပ်ပြီး
-> `/api/tools/traffic-inspector/` အောက်တွင် မရှိပါ။
-> `docs/security/MITM-TPROXY-DECRYPT.md` ကို ကြည့်ပါ (git တွင်ရှိပြီး `/docs` ထဲသို့ compile မလုပ်ထားပါ)။
+> `/api/tools/traffic-inspector/` အောက်တွင် မရှိပါ။ `/docs` ထဲသို့ compile မလုပ်ထားသော git ရှိ
+> `docs/security/MITM-TPROXY-DECRYPT.md` ကို ကြည့်ပါ။
 
 ### Session များ
 
-| နည်းလမ်း | Path                        | ဖော်ပြချက်                                                                            |
-| -------- | --------------------------- | ------------------------------------------------------------------------------------- |
-| POST     | `/sessions`                 | မှတ်တမ်းတင်မှု စတင်ခြင်း (`{name?: string}`)                                          |
-| PATCH    | `/sessions/{id}`            | ရပ်တန့်ခြင်း သို့မဟုတ် အမည်ပြောင်းခြင်း (`{action: "stop"\|"rename", name?: string}`) |
-| GET      | `/sessions`                 | သိမ်းဆည်းထားသော session အားလုံးကို စာရင်းပြုစုခြင်း                                   |
-| GET      | `/sessions/{id}`            | Session snapshot (request အားလုံး)                                                    |
-| DELETE   | `/sessions/{id}`            | Session ဖျက်ခြင်း                                                                     |
-| GET      | `/sessions/{id}/export.har` | Session ကို HAR 1.2 အဖြစ် export လုပ်ခြင်း                                            |
+| Method | Path                        | ဖော်ပြချက်                                                                            |
+| ------ | --------------------------- | ------------------------------------------------------------------------------------- |
+| POST   | `/sessions`                 | မှတ်တမ်းတင်ခြင်းကို စတင်ခြင်း (`{name?: string}`)                                     |
+| PATCH  | `/sessions/{id}`            | ရပ်တန့်ခြင်း သို့မဟုတ် အမည်ပြောင်းခြင်း (`{action: "stop"\|"rename", name?: string}`) |
+| GET    | `/sessions`                 | သိမ်းဆည်းထားသော session အားလုံးကို စာရင်းပြုစုခြင်း                                   |
+| GET    | `/sessions/{id}`            | Session snapshot (request အားလုံး)                                                    |
+| DELETE | `/sessions/{id}`            | Session ဖျက်ခြင်း                                                                     |
+| GET    | `/sessions/{id}/export.har` | Session ကို HAR 1.2 အဖြစ် export လုပ်ခြင်း                                            |
 
 ### အတွင်းပိုင်း ingest (D4 fallback)
 
-| နည်းလမ်း | Path               | ဖော်ပြချက်                                                                                                                     |
-| -------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| POST     | `/internal/ingest` | `server.cjs` passthrough path မှ ကြားဖြတ်ဖမ်းယူထားသော request ကို လက်ခံသည်။ `INSPECTOR_INTERNAL_INGEST_TOKEN` header လိုအပ်သည် |
+| Method | Path               | ဖော်ပြချက်                                                                                                                     |
+| ------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| POST   | `/internal/ingest` | `server.cjs` passthrough path မှ ကြားဖြတ်ဖမ်းယူထားသော request ကို လက်ခံသည်၊ `INSPECTOR_INTERNAL_INGEST_TOKEN` header လိုအပ်သည် |
 
 OpenAPI schema အပြည့်အစုံ- `docs/openapi.yaml` → tag `Traffic Inspector`။

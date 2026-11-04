@@ -1,1 +1,0 @@
-- **fix(claude):** preserve signed Claude thinking across OpenAI/Responses tool turns — the exact signed blocks are kept server-side per tool call and restored before the owning `tool_use` (same provider + model only; placeholder fallback and signature recovery kept) ([#16475](https://github.com/diegosouzapw/OmniRoute/pull/16475)) — thanks @ryanngit

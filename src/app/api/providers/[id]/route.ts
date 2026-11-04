@@ -23,6 +23,7 @@ import {
 } from "@/lib/providers/claudeExtraUsage";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isApiKeyRevealEnabled, maskStoredApiKey } from "@/lib/apiKeyExposure";
+import { reconcileMaskedExtraApiKeys } from "@/shared/utils/apiKeyMask";
 import { cleanupProviderModelsAfterConnectionDelete } from "@/lib/db/models";
 import { canUpdateProviderApiKey } from "@/shared/providers/webSessionCredentials";
 import {
@@ -93,7 +94,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     delete result.idToken;
     if (result.providerSpecificData) {
       result.providerSpecificData = sanitizeProviderSpecificDataForResponse(
-        result.providerSpecificData
+        result.providerSpecificData,
+        { revealKeys }
       );
     }
 
@@ -284,6 +286,16 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         existing.providerSpecificData && typeof existing.providerSpecificData === "object"
           ? existing.providerSpecificData
           : {};
+      // The GET routes hand the client masked `extraApiKeys` placeholders (same mask as
+      // apiKey). Map them back to the stored tokens — and drop orphans — before merging,
+      // so a placeholder never reaches the database. The health-reset check below reads
+      // the resolved list.
+      if ("extraApiKeys" in incomingPsd) {
+        incomingPsd.extraApiKeys = reconcileMaskedExtraApiKeys(
+          incomingPsd.extraApiKeys,
+          (existingPsd as Record<string, unknown>).extraApiKeys
+        );
+      }
       const mergedPsd = { ...existingPsd, ...incomingPsd };
       delete mergedPsd.validationId;
       delete mergedPsd.runtimeKey;

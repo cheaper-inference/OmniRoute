@@ -33,37 +33,37 @@
 
 ---
 
-## Ìṣàwárí-àti-Àtúnṣe Alálàyé
+## Ìtọ́nisọ́nà Ìṣàwárí àti Ìṣàtúnṣe Ìṣòro ní Ẹ̀kúnrẹ́rẹ́
 
 ---
 
-### Ìdíwọ̀n Ìbéèrè Lórí Àwọn Olùpèsè Ọ̀fẹ́ (429 / 400 / 401)
+### Ìdíwọ̀n Ìwọ̀n Ìbéèrè lórí Àwọn Olùpèsè Ọ̀fẹ́ (429 / 400 / 401)
 
-**Àmì àìsàn**: Nígbà tí o bá ń lo `model: "auto"` pẹ̀lú àwọn olùpèsè ọ̀fẹ́/tí kò nílò ìjẹ́rìí ìdánimọ̀ (opencode, auggie, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ), o máa ń gba `HTTP 429`, `400`, tàbí `401` lẹ́ẹ̀kọ̀ọ̀kan dípò àwọn ìdáhùn. Àwọn ìbéèrè náà máa ń ṣàṣeyọrí nígbà tí o bá tún tọ́ka kan náà gbìyànjú ní ìṣẹ́jú díẹ̀ lẹ́yìn náà, ṣùgbọ́n àìṣọ́wọ́ṣe (àwọn iṣẹ́ cron, àwọn aṣojú, àwọn àfọwọ́kọ) máa ń dáwọ́ dúró ní ìkùnà àkọ́kọ́.
+**Àmì ìṣòro**: Nígbà tí o bá ń lo `model: "auto"` pẹ̀lú àwọn olùpèsè ọ̀fẹ́/tí kò nílò ìfàṣẹ̀sí (auggie, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ), lẹ́ẹ̀kọ̀ọ̀kan o máa ń rí `HTTP 429`, `400`, tàbí `401` dípò àwọn ìdáhùn. Àwọn ìbéèrè náà máa ń ṣàṣeyọrí nígbà tí o bá tún ìbéèrè kan náà gbìyànjú lẹ́yìn ìṣẹ́jú díẹ̀, ṣùgbọ́n adaṣiṣẹ́ (àwọn iṣẹ́ cron, àwọn agent, àwọn script) máa ń dáwọ́ dúró ní ìkùnà àkọ́kọ́.
 
-**Okùnfà pàtàkì**: Ọ̀nà ìkùnà mẹ́ta ọ̀tọ̀ọ̀tọ̀ ń kóra jọ:
+**Ohun tó fa ìṣòro náà gan-an**: Àwọn ọ̀nà ìkùnà mẹ́ta tí kò gbára lé ara wọn ń kóra jọ:
 
-1. **Ìdíwọ̀n ìbéèrè olùpèsè (`429`)**: Àwọn ìpele ọ̀fẹ́ lè fi ìpín kan múlẹ̀ fún sáà kọ̀ọ̀kan. Ìrọ̀wọ́rọ̀ àwọn ìpè tó ń lọ ní àkókò kan náà máa ń parí rẹ̀, nítorí náà a ó kọ ìbéèrè tó kàn títí sáà náà yóò fi tún bẹ̀rẹ̀.
-2. **Módẹ́lì tó bàjẹ́ nínú ìfiránṣẹ́-taara (`400`/`401`)**: Àwọn àkójọpọ̀ `auto/*` lè ní àwọn módẹ́lì ìfiránṣẹ́-taara láti `opencode` tí a forúkọ wọn sílẹ̀ nínú àkójọ ṣùgbọ́n tí kò ní ẹ̀rí ìdánimọ̀ tó ń ṣiṣẹ́ (fún àpẹẹrẹ, `oc/north-mini-code-free` → `401`). Olùdarí-ọ̀nà aládàáṣiṣẹ́ máa ń gbìyànjú ọ̀kan, ó máa ń kùnà, aṣìṣe náà sì máa ń tàn kálẹ̀ kí yíyípadà tó bẹ̀rẹ̀.
-3. **Ìmúgbòòrò ìṣiṣẹ́pọ̀-lẹ́ẹ̀kan-náà (`429` lábẹ́ ẹrù iṣẹ́)**: Nígbà tí ọ̀pọ̀ ìgbà aṣojú/cron bá pe `auto` lẹ́ẹ̀kan náà, àpapọ̀ ìwọ̀n ìbéèrè máa ń kọjá ohun tí àwọn olùpèsè ọ̀fẹ́ lè gbà, nítorí náà a máa ń sàmì sí àwọn ìpè tó bófin mu gẹ́gẹ́ bí ìlòkulò.
+1. **Ìdíwọ̀n ìwọ̀n ìbéèrè olùpèsè (`429`)**: Àwọn ìpele ọ̀fẹ́ lè fi ààlà kótà kan múlẹ̀ fún fèrèsé àkókò kọ̀ọ̀kan. Ìṣàn ńlá àwọn ìpè tó ń lọ ní ìgbà kan náà máa ń lo gbogbo rẹ̀ tán, nítorí náà a ó kọ ìbéèrè tó tẹ̀ lé e títí fèrèsé náà yóò fi tún bẹ̀rẹ̀.
+2. **Àwòṣe tó ti bàjẹ́ nínú ìkọjá-taara (`400`/`401`)**: Àwọn àkójọpọ̀ `auto/*` lè ní àwọn àwòṣe ìkọjá-taara tí a forúkọsílẹ̀ sínú àkójọ ṣùgbọ́n tí kò ní àwọn ẹ̀rí ìfàṣẹ̀sí tó ń ṣiṣẹ́ (→ `401`). Auto-router náà yóò gbìyànjú ọ̀kan, yóò kùnà, aṣìṣe náà yóò sì tàn ká ṣáájú kí ìpadà sí ọ̀nà mìíràn tó bẹ̀rẹ̀.
+3. **Ìmúnára ìṣiṣẹ́ ní ìgbà kan náà (`429` lábẹ́ ẹrù)**: Nígbà tí ọ̀pọ̀ ìgbàṣiṣẹ́ agent/cron bá kan `auto` lẹ́ẹ̀kan náà, àpapọ̀ ìwọ̀n ìbéèrè máa ń kọjá ohun tí àwọn olùpèsè ọ̀fẹ́ lè fara dà, nítorí náà a máa ń sàmì sí àwọn ìpè tó bófin mu gẹ́gẹ́ bí ìlòkulò.
 
-**Àtúnṣe tí a ti fìdí rẹ̀ múlẹ̀ (àwùjọ ló ròyìn rẹ̀, 2026-08-10)**: ṣàtúnṣe àwọn àyípadà àyíká mẹ́ta kí yíyípo, ìṣiṣẹ́pọ̀-lẹ́ẹ̀kan-náà, àti yíyípadà lè gba ìyípadà pákáǹleke ìpele ọ̀fẹ́ dípò kí wọ́n dáwọ́ lórí rẹ̀:
+**Àtúnṣe tí a ti ṣàrídájú (gẹ́gẹ́ bí àwùjọ ṣe ròyìn, 2026-08-10)**: ṣàtúnṣe àwọn àyípadà àyíká mẹ́ta kí yíyípadà, ìṣiṣẹ́ ní ìgbà kan náà, àti ìpadà sí ọ̀nà mìíràn lè gba ìyípadà àìdúróṣinṣin ìpele ọ̀fẹ́ náà dípò kí ó kùnà lórí rẹ̀:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # lọ sí módẹ́lì/olùpèsè mìíràn lórí 400/401 (ó ń fo àwọn módẹ́lì ìfiránṣẹ́-taara tó bàjẹ́)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # òrùlé ìgbàwọlé iṣẹ́ tó wuwo tí a sọ ní pàtó (a kò ṣètò rẹ̀ lọ́nà àìmọ́: kò sí òpin iye ìbéèrè, wo àkíyèsí ní ìsàlẹ̀)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # gbé àkókò ìdúró tó ní ààlà ga ju àìmọ́ RATE_LIMIT_MAX_WAIT_MS lọ fún àwọn orísun òkè tó lọ́ra
+export OMNIROUTE_ROTATE_ON_400=true           # lọ sí àwòṣe/olùpèsè mìíràn lórí 400/401 (ó máa fo àwọn àwòṣe ìkọjá-taara tó ti bàjẹ́)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ààlà ìgbàwọlé tó ṣe kedere fún àwọn ìbéèrè tó wuwo (a kò ṣètò rẹ̀ nípa àìròtẹ́lẹ̀: kò sí ààlà iye ìbéèrè, wo àkíyèsí nísàlẹ̀)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # mú ìdúró tó ní ààlà ga ju iye àìròtẹ́lẹ̀ RATE_LIMIT_MAX_WAIT_MS lọ fún àwọn iṣẹ́ òkè tó lọ́ra
 ```
 
-Ṣètò àwọn wọ̀nyí nínú àyíká ìlànà OmniRoute (daemon náà, fún àpẹẹrẹ nípasẹ̀ LaunchAgent plist tàbí `systemctl edit`), lẹ́yìn náà tún OmniRoute bẹ̀rẹ̀. Àmì yíyípo náà ni ohun èlò kan ṣoṣo tó lágbára jù lọ: ó ń sọ ìkùnà pátápátá di àtúngbìyànjú tí kò hàn sí olùlò lòdì sí olùpèsè tó ní ìlera nínú àkójọpọ̀ náà.
+Ṣètò àwọn wọ̀nyí nínú àyíká ìlànà OmniRoute (daemon náà, fún àpẹẹrẹ nípasẹ̀ LaunchAgent plist tàbí `systemctl edit`), lẹ́yìn náà tún OmniRoute bẹ̀rẹ̀. Àṣàyàn yíyípadà náà ni ọ̀nà kan ṣoṣo tó ní ipa jù lọ: ó ń yí ìkùnà tó le padà sí àtúngbìyànjú tí kò hàn sí olumulo pẹ̀lú olùpèsè tó péye nínú àkójọpọ̀ náà.
 
-**Àkíyèsí**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ń fi òpin sí iye àwọn ìbéèrè tó wuwo — tí àyíká wọn gùn — tó lè ṣiṣẹ́ lẹ́ẹ̀kan náà; ààlà náà jẹ́ ẹnu-ọ̀nà ìgbàwọlé, kì í ṣe ohun ìdíwọ̀n ìbéèrè olùpèsè. **Ìmúdójúìwọ̀n #503-fanout:** a kò ṣètò var yìí lọ́nà àìmọ́ mọ́ (ó ń dè nìkan nígbà tí a bá ṣètò rẹ̀ ní kedere, gẹ́gẹ́ bí ó ti wà lókè) — dípò bẹ́ẹ̀, ìgbàwọlé iṣẹ́ tó wuwo ni ìnáwó báìtì tí a ń ṣàyọ láìfọwọ́sí (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ń darí, èyí tí ń ṣe ìwọ̀n ara rẹ̀ láti inú òrùlé ìrántí gidi ti agbàlejò, nítorí náà ìmúṣiṣẹ́ tuntun yẹ kí ó rí àwọn ìkọ̀sílẹ̀ `503 chat_admission_busy` tó dín kù gan-an láìṣètò var yìí rárá; ṣíṣètò rẹ̀ ní kedere níbí ṣì ń ṣiṣẹ́ gan-an gẹ́gẹ́ bí a ti ṣàkọsílẹ̀ rẹ̀. Àwọn ìkọjá ìnáwó báìtì tí a sọ ní kedere máa ń ní ààlà 8 MiB–2 GiB. `413 body_exceeds_budget` kì í ṣe ti ìgbà díẹ̀: mú ìnáwó báìtì náà pọ̀ sí i, dín `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` kù, tàbí mú òrùlé ìrántí ìlànà náà pọ̀ sí i. Ìyọkúrò `inflight_bytes_budget` jẹ́ ìjà fún ohun àmúlò fún ìgbà díẹ̀, a sì ṣì lè tún un gbìyànjú. `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, àti `RATE_LIMIT_AUTO_ENABLE` ló ń ṣàkóso ìdíwọ̀n ìbéèrè fún olùpèsè kọ̀ọ̀kan (`open-sse/services/rateLimitManager.ts`) lọ́tọ̀ — wo `.env.example`.
+**Àkíyèsí**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ń fi ààlà sí iye àwọn ìbéèrè tó wuwo — tí àyíká ọ̀rọ̀ wọn gùn — tí ó lè ṣiṣẹ́ lẹ́ẹ̀kan náà; ààlà náà jẹ́ ẹnu-ọ̀nà ìgbàwọlé, kì í ṣe ohun ìdíwọ̀n ìwọ̀n ìbéèrè olùpèsè. **Ìmúdójúìwọ̀n #503-fanout:** a kò ṣètò var yìí nípa àìròtẹ́lẹ̀ mọ́ (ní báyìí, ó máa ń ṣiṣẹ́ kìkì nígbà tí a bá ṣètò rẹ̀ ní tààrà, gẹ́gẹ́ bí òkè) — dípò èyí, ààlà iye byte tí a ṣètò láìfọwọ́ṣe (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ló ń darí ìgbàwọlé àwọn ìbéèrè tó wuwo, ó sì ń mú ara rẹ̀ bá ààlà ìrántí gidi ti host mu; nítorí náà, fífi ẹ̀yà tuntun sílò yẹ kí ó rí àwọn ìkọ̀sílẹ̀ `503 chat_admission_busy` tó kéré púpọ̀ láìṣètò var yìí rárá; ṣíṣètò rẹ̀ ní tààrà níbí ṣì ń ṣiṣẹ́ gan-an gẹ́gẹ́ bí a ti ṣàkọsílẹ̀ rẹ̀. Àwọn ìkọlélórí ààlà byte tí a ṣètò ní tààrà máa ń dúró láàárín 8 MiB–2 GiB. `413 body_exceeds_budget` kì í ṣe ìṣòro fún ìgbà díẹ̀: mú ààlà byte náà pọ̀ sí i, dín `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` kù, tàbí mú ààlà ìrántí ìlànà náà pọ̀ sí i. Ìyọkúrò `inflight_bytes_budget` jẹ́ ìjà fún ohun àmúlò fún ìgbà díẹ̀, a sì lè tún un gbìyànjú. A ń darí ìdíwọ̀n ìwọ̀n ìbéèrè fún olùpèsè kọ̀ọ̀kan (`open-sse/services/rateLimitManager.ts`) lọ́tọ̀ nípasẹ̀ `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, àti `RATE_LIMIT_AUTO_ENABLE` — wo `.env.example`.
 
-**Bí o ṣe lè ṣàyẹ̀wò pé ó ṣiṣẹ́**: ṣiṣẹ́ agent/cron rẹ lẹ́ẹ̀mejì ní kíákíá lẹ́yìn ara wọn, kí o sì jẹ́rìí pé àwọn méjèèjì ṣàṣeyọrí. Ṣáájú àtúnṣe náà, ìṣiṣẹ́ kejì sábà máa ń dá aṣìṣe `429`/`401` padà. Lẹ́yìn àtúnṣe náà, àwọn ìkùnà (bí ó bá wà) ni a ó tún gbìyànjú láìsí ohun tí olùlò yóò ṣàkíyèsí, ìpè náà yóò sì parí. O tún lè lo `curl /monitoring/health` kí o sì ṣọ́ pápá `rateLimitedUntil` lórí àwọn àsopọ̀ olùpèsè àti `circuitBreakers.providerBreakers[].state` fún àwọn olùpèsè tí ọ̀ràn náà kàn — ipò náà jẹ́ ọ̀kan lára `CLOSED`, `DEGRADED`, `OPEN`, tàbí `HALF_OPEN` (wo `src/shared/utils/circuitBreaker.ts`), olùpèsè tí ó sì ń bá a lọ láti kùnà yóò yí padà láti `CLOSED → DEGRADED → OPEN` kí àkókò ìtúnṣètò tó jẹ́ kí ìdánwò kan kọjá (`HALF_OPEN`).
+**Bí o ṣe lè ṣàrídájú pé ó ṣiṣẹ́**: ṣiṣẹ́ agent/cron rẹ lẹ́ẹ̀mejì ní kíákíá lẹ́yìn ara wọn, kí o sì jẹ́rìí pé àwọn méjèèjì ṣàṣeyọrí. Ṣáájú àtúnṣe náà, ìṣiṣẹ́ kejì sábà máa ń dá `429`/`401` jáde. Lẹ́yìn àtúnṣe náà, a ó tún àwọn ìkùnà (bí èyíkéyìí bá wà) gbìyànjú láìfi hàn sí olumulo, ìpè náà yóò sì parí. O tún lè lo `curl /monitoring/health`, kí o sì ṣàkíyèsí pápá `rateLimitedUntil` lórí àwọn àsopọ̀ olùpèsè àti `circuitBreakers.providerBreakers[].state` fún àwọn olùpèsè tó kan — ipò náà jẹ́ ọ̀kan lára `CLOSED`, `DEGRADED`, `OPEN`, tàbí `HALF_OPEN` (wo `src/shared/utils/circuitBreaker.ts`), olùpèsè tó sì ń kùnà léraléra yóò yí padà `CLOSED → DEGRADED → OPEN` kí fèrèsé ìtúnṣètò tó jẹ́ kí ìdánwò kan kọjá (`HALF_OPEN`).
 
-**Tí o bá ṣì ń rí 429**: àkọọ́lẹ̀ tó ń ṣiṣẹ́ fún olùpèsè yẹn ti lo gbogbo _quota_ rẹ̀ ní tòótọ́ (kì í ṣe òṣùwọ̀n ìbéèrè nìkan). Ṣàfikún àkọọ́lẹ̀ kejì fún olùpèsè kan náà nínú dashboard OmniRoute → Providers → Accounts, tàbí fi olùpèsè ọ̀fẹ́ mìíràn kún un (fún àpẹẹrẹ, `routeway`, `auggie`). Yíyí àkọọ́lẹ̀ padà ń ṣèrànwọ́ fún òṣùwọ̀n ìbéèrè/400/401 tí ó jẹ́ ti ìgbà díẹ̀ nìkan; lílo gbogbo quota pátápátá nílò ẹ̀rí ìwọlé kejì tàbí olùpèsè mìíràn.
+**Bí o bá ṣì ń rí 429**: àkọọ́lẹ̀ tó ń ṣiṣẹ́ fún olùpèsè náà ti lo _kótà_ rẹ̀ tán ní tòótọ́ (kì í ṣe ìwọ̀n ìbéèrè nìkan). Fi àkọọ́lẹ̀ kejì kún un fún olùpèsè kan náà nínú pátákó ìṣàkóso OmniRoute → Providers → Accounts, tàbí fi olùpèsè ọ̀fẹ́ mìíràn kún àdàpọ̀ náà (fún àpẹẹrẹ `routeway`, `auggie`). Yíyípadà ń ṣèrànwọ́ kìkì fún ìwọ̀n ìbéèrè/400/401 fún ìgbà díẹ̀; lílo kótà tán pátápátá nílò ẹ̀rí ìfàṣẹ̀sí kejì tàbí olùpèsè mìíràn.
 
-**Tí o bá rí 403 lórí àwọn àwòṣe ìran (`auto/vision`, `bazaarlink/*`)**: àkọọ́lẹ̀ tí a sopọ̀ kò ní ètò tí a sanwó fún tí ó ní ìran nínú, tàbí API key náà kò ní àṣẹ tó pé. Ṣàyẹ̀wò nínú dashboard olùpèsè pé scope kọ́kọ́rọ́ náà ní vision/multimodal nínú, tàbí so àkọọ́lẹ̀ ìpele tí a sanwó fún pọ̀, kí o sì jẹ́ kí ó wà gẹ́gẹ́ bí ibi àfojúsùn ìran.
+**Bí o bá rí 403 lórí àwọn àwòṣe ìríran (`auto/vision`, `bazaarlink/*`)**: àkọọ́lẹ̀ tó sopọ̀ kò ní ètò ìsanwó tó ní ìríran nínú, tàbí API key náà kò ní àwọn àṣẹ tó tó. Ṣàrídájú nínú pátákó ìṣàkóso olùpèsè pé scope kọ́kọ́rọ́ náà ní ìríran/multimodal nínú, tàbí so àkọọ́lẹ̀ ìpele ìsanwó pọ̀ kí o sì fi í sílẹ̀ gẹ́gẹ́ bí ibi àfojúsùn ìríran.
 
 ---
 
@@ -90,48 +90,48 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## Ìkìlọ̀ pé a Dí àwọn npm install-scripts (fífi sílẹ̀ káàkiri)
+## Ìkìlọ̀ pé a ti Dí npm install-scripts (fífìsórí ẹ̀rọ lápapọ̀)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Nígbà tí o bá ń ṣiṣẹ́ `npm install -g omniroute`, àwọn ẹ̀dà npm tuntun (v11+ àti v12+) máa ń dí àwọn script ìgbésí-ayé package ní àìyẹsẹ̀, wọ́n á sì fi ìkìlọ̀ install-scripts hàn:
+Nígbà tí o bá ń ṣiṣẹ́ `npm install -g omniroute`, àwọn ẹ̀yà npm tuntun (v11+ àti v12+) máa ń dí àwọn script àyíká-ìgbésí-ayé package láìyípadà, wọ́n sì máa ń ṣàfihàn ìkìlọ̀ install-scripts:
 
 ```
-npm warn install-scripts Àwọn package 7 ní àwọn script fífi sílẹ̀ tí a dí nítorí pé allowScripts kò bo wọ́n:
+npm warn install-scripts Àwọn package 7 ní àwọn install script tí a dí nítorí pé allowScripts kò bo wọ́n:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Ṣé a lè kọ ìkìlọ̀ yìí sílẹ̀?
+### Ṣé a lè kọ etí dídi sí ìkìlọ̀ yìí?
 
-**Ní apá kan, ṣùgbọ́n a kò dámọ̀ràn lílo láìsí àwọn script.** OmniRoute ní àwọn ọ̀nà àfirọ́pò tó ń ṣiṣẹ́ láìfa ìṣòro: bí a kò bá lè kó àwọn ìsopọ̀ abinibi `better-sqlite3` láti inú àkójọpọ̀ olómìnira, ohun èlò náà máa lo àwọn driver mìíràn bíi `node:sqlite` tàbí `sql.js` gẹ́gẹ́ bí àfirọ́pò (wo [Yíyanjú Àkókò-Ṣíṣe SQLite](../ops/SQLITE_RUNTIME.md)). Server náà yóò ṣì bẹ̀rẹ̀, ṣùgbọ́n lílo àwọn àfirọ́pò WASM bíi `sql.js` máa ń mú ipò SQLite WAL (Write-Ahead Logging) ṣiṣẹ́ mọ́, ó sì máa ń mú kí lílo memory àti àfikún iṣẹ́ ìmúdọ́gba disk pọ̀ sí i.
+**Ní apá kan, ṣùgbọ́n a kò gbani nímọ̀ràn láti ṣiṣẹ́ láìsí àwọn script.** OmniRoute ní àwọn ọ̀nà àfidípò tí kò ní fa ìdálẹ́kun: bí a kò bá lè gbé àwọn binding `better-sqlite3` abinibi láti inú bundle adádúró, application náà yóò lo àwọn driver àfidípò bíi `node:sqlite` tàbí `sql.js` (wo [Ìyanjú SQLite Nígbà Ìṣiṣẹ́](../ops/SQLITE_RUNTIME.md)). Server náà yóò ṣì bẹ̀rẹ̀, ṣùgbọ́n lílo àwọn àfidípò WASM bíi `sql.js` máa ń pa ipò SQLite WAL (Write-Ahead Logging) kí ó sì mú kí ìlò memory àti iṣẹ́ ìmúdọ́gba disk pọ̀ sí i.
 
 ### Àwọn script wo ni a nílò gan-an?
 
-Kì í ṣe gbogbo àwọn script tí a dí ni ó ṣe pàtàkì fún ṣíṣe OmniRoute:
+Kì í ṣe gbogbo àwọn script tí a dí ni ó ṣe pàtàkì fún ṣiṣiṣẹ́ OmniRoute:
 
-- **Pàtàkì (`omniroute`, `better-sqlite3`):** OmniRoute ń ṣiṣẹ́ láti inú àkójọpọ̀ ohun èlò olómìnira Next.js (`dist/`). Nígbà fífi sílẹ̀, npm máa ń gba tàbí compile driver SQLite abinibi tó bá host mu sínú `node_modules/better-sqlite3/` ní ìpele òkè. Script `postinstall` ti OmniRoute (`scripts/build/postinstall.mjs`) yóò wá ṣàyẹ̀wò, yóò sì da àwọn binary wọ̀nyí tó bá host mu kọ sínú `dist/node_modules/` kí server olómìnira lè wọlé sí wọn. Bí a bá dí script postinstall ti `omniroute`, a ó fo ìgbésẹ̀ dídàkọ yìí.
-- **Àṣàyàn/aláìtààrà (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Àwọn wọ̀nyí jẹ́ olùrànlọ́wọ́ ìkọ́lé, irinṣẹ́ àbójútó, tàbí irinṣẹ́ keychain ètò. Fífàyè gba wọn máa ń dènà àwọn ìkìlọ̀ ìkọ́lé, ṣùgbọ́n a kò nílò wọn fún iṣẹ́ ìdarí ipa-ọ̀nà pàtàkì.
-- **A yọ ọ́ kúrò (`onnxruntime-node`):** Ìgbẹ́kẹ̀lé àṣàyàn kan fún àwọn embedding AI abẹ́lẹ̀ ni, a kò sì **nílò** rẹ̀ kí OmniRoute tó lè ṣiṣẹ́. Script postinstall rẹ̀ máa ń gba nǹkan bí 300MB ti àwọn ohun èlò CUDA láti NuGet; má ṣe fi í sínú àkójọ ìyọ̀ǹda àyàfi tí o bá pinnu ní pàtó láti lo ìmúyára ONNX abẹ́lẹ̀ lórí hardware tí a ṣe àtìlẹ́yìn fún.
+- **Pàtàkì (`omniroute`, `better-sqlite3`):** OmniRoute ń ṣiṣẹ́ láti inú bundle application Next.js adádúró (`dist/`). Nígbà fífìsórí ẹ̀rọ, npm máa ń gba driver SQLite abinibi tó bá host náà mu kalẹ̀ tàbí kó ṣàkójọ rẹ̀ sínú `node_modules/better-sqlite3/` ti ìpele òkè. Lẹ́yìn náà, script `postinstall` ti OmniRoute (`scripts/build/postinstall.mjs`) máa ń ṣàyẹ̀wò àwọn binary tó bá host náà mu, ó sì máa ń da wọ́n kọ sínú `dist/node_modules/` kí server adádúró náà lè wọlé sí wọn. Bí a bá dí script postinstall ti `omniroute`, a ó fo ìgbésẹ̀ dídàkọ yìí.
+- **Àṣàyàn/alágbélégbè (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ìwọ̀nyí jẹ́ àwọn olùrànlọ́wọ́ ìkọ́lé, irinṣẹ́ àkíyèsí ìyípadà, tàbí irinṣẹ́ ibi ìpamọ́ kọ́kọ́rọ́ system. Gígbaniláyè wọn máa ń dènà àwọn ìkìlọ̀ ìkọ́lé, ṣùgbọ́n a kò nílò wọn fún iṣẹ́ ìdarí ipa-ọ̀nà pàtàkì.
+- **Tí a yọ kúrò (`onnxruntime-node`):** Èyí jẹ́ dependency àṣàyàn fún àwọn embedding AI abẹ́lẹ̀, a kò sì **nílò** rẹ̀ kí OmniRoute lè ṣiṣẹ́. Script postinstall rẹ̀ máa ń gba nǹkan bí 300MB àwọn asset CUDA láti NuGet; má ṣe fi í sínú àtòjọ ìgbaniláyè àyàfi bí o bá pinnu ní pàtó láti lo ìmúṣẹ́kánkán ONNX abẹ́lẹ̀ lórí hardware tó ṣe àtìlẹ́yìn.
 
-### Àtúnṣe tí a dámọ̀ràn
+### Àtúnṣe tí a dábàá
 
-Láti fàyè gba àwọn script fífi sílẹ̀ tí a nílò nígbà fífi sílẹ̀ káàkiri àti láti pa àwọn ìkìlọ̀ mọ́, fi `--allow-scripts` ránṣẹ́ fún OmniRoute àti àwọn ìgbẹ́kẹ̀lé abinibi rẹ̀:
+Láti gba àwọn install script tí a nílò láàyè nígbà fífìsórí ẹ̀rọ lápapọ̀ àti láti mú àwọn ìkìlọ̀ dákẹ́, fi `--allow-scripts` ránṣẹ́ fún OmniRoute àti àwọn dependency abinibi rẹ̀:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Ní ọ̀nà mìíràn, láti ṣètò èyí títí lọ fún gbogbo fífi sílẹ̀ káàkiri lórí account aṣàmúlò rẹ:
+Ní ọ̀nà míì, láti ṣètò èyí lọ́nà tó dúró ṣinṣin fún gbogbo fífìsórí ẹ̀rọ lápapọ̀ lórí account aṣàmúlò rẹ:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Ṣàyẹ̀wò fífi ètò rẹ sílẹ̀
+### Ṣàyẹ̀wò fífìsórí ẹ̀rọ rẹ
 
-Lẹ́yìn fífi sílẹ̀, ṣiṣẹ́ irinṣẹ́ àyẹ̀wò inú ètò láti rí i dájú pé àwọn ìsopọ̀ abinibi àti àyíká àkókò-ṣíṣe wà ní ipò tó dára:
+Lẹ́yìn fífìsórí ẹ̀rọ, ṣiṣẹ́ irinṣẹ́ àyẹ̀wò àìlera tí ó wà nínú rẹ̀ láti rí i dájú pé àwọn binding abinibi àti àyíká ìṣiṣẹ́ wà ní ipò tó dára:
 
 ```bash
 omniroute doctor

@@ -1,1 +1,0 @@
-- **fix(compression):** CCR `retrievalRampFactor` keeps fractional values across save and reload — the read normalizer clamps to [1, 100] without flooring, so a saved 1.5 no longer disables the retrieval ramp ([#15603](https://github.com/diegosouzapw/OmniRoute/pull/15603)) — thanks @woodsonl

@@ -1,1 +1,0 @@
-- **fix(combos):** resolve client-namespaced combo names (`<namespace>/<combo>`) to the combo when the namespace is not a known provider; explicit `provider/model` pins still reach the provider ([#16493](https://github.com/diegosouzapw/OmniRoute/pull/16493)) — thanks @Jordannst

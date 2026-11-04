@@ -31,6 +31,8 @@ type RetryCtx = {
   clientSession: string | undefined;
   borrowed: boolean | undefined;
   clientToolNames: readonly string[];
+  /** Opt-in OpenCode v2 fingerprint (#16571): the appended names carry the v2 CLI schemas. */
+  v2Fingerprint?: boolean;
 };
 
 /** Scope guards: refusal status, gated surface+model, own (non-borrowed) tools, object body. */
@@ -121,7 +123,8 @@ export async function retryFreeTierRefusalWithObservedTools(
     ctx.provider,
     model,
     ctx.clientSession,
-    configured
+    configured,
+    ctx.v2Fingerprint === true
   );
   if (merged === input.body) return null;
   if (addsNothingBeyondFirstDispatch(ctx, model, configured, merged)) return null;

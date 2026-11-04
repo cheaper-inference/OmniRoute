@@ -2,7 +2,7 @@ import {
   isUserCallableAntigravityModelId,
   toClientAntigravityModelId,
 } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
-import { isDiscoverableAgyModelId } from "@omniroute/open-sse/config/agyModels.ts";
+import { isUserVisibleAgyQuotaModelId } from "@omniroute/open-sse/config/agyModels.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -12,7 +12,8 @@ export function isRecord(value: unknown): value is JsonRecord {
 
 // Family aggregate buckets from retrieveUserQuotaSummary are not model ids. Dropping
 // them here is why Token Monitor only ever saw the 5-hour bar (#15359); the session
-// windows are the family 5-hour pools (#13739).
+// windows are the family 5-hour pools (#13739). Any other *_weekly key is a quota
+// window too, not a model id, so it is preserved alongside the family buckets.
 const ANTIGRAVITY_FAMILY_QUOTA_KEYS = new Set([
   "gemini_session",
   "gemini_weekly",
@@ -33,12 +34,12 @@ export function isUsageQuotaKeyAllowed(
   quotaKey: string,
   liveModelIds?: ReadonlySet<string>
 ): boolean {
-  if (quotaKey === "credits" || quotaKey === "models") return true;
+  if (quotaKey === "credits" || quotaKey === "models" || quotaKey.endsWith("_weekly")) return true;
   if (provider !== "antigravity" && provider !== "agy") return true;
   if (ANTIGRAVITY_FAMILY_QUOTA_KEYS.has(quotaKey)) return true;
   if (liveModelIds?.has(quotaKey)) return true;
   if (provider === "antigravity") return isUserCallableAntigravityModelId(quotaKey);
-  return isDiscoverableAgyModelId(quotaKey);
+  return isUserVisibleAgyQuotaModelId(quotaKey);
 }
 
 export function normalizeUsageQuotaKey(
@@ -46,7 +47,9 @@ export function normalizeUsageQuotaKey(
   quotaKey: string,
   liveModelIds?: ReadonlySet<string>
 ): string | null {
-  if (quotaKey === "credits" || quotaKey === "models") return quotaKey;
+  if (quotaKey === "credits" || quotaKey === "models" || quotaKey.endsWith("_weekly")) {
+    return quotaKey;
+  }
   if (
     (provider === "antigravity" || provider === "agy") &&
     ANTIGRAVITY_FAMILY_QUOTA_KEYS.has(quotaKey)

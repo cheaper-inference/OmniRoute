@@ -67,6 +67,11 @@ Options: `--port <p>` (when the host has none), `--name <ctx>` (context name),
 `--scope read|write|admin`. A full URL is honoured as-is:
 `omniroute connect https://omni.example.com`.
 
+When the server has dashboard two-factor authentication enabled (Settings →
+Security), the password alone is refused: the CLI then asks for the code from the
+authenticator app (or a recovery code). Pass it up front with `--totp <code>` for
+non-interactive use.
+
 ### With a pre-generated token
 
 Generate a scoped token in the dashboard (or with `omniroute tokens create`) and
@@ -256,10 +261,12 @@ the dashboard under **Settings → Access Tokens** (create, revoke, copy-once).
 
 A token can never be minted with more privilege than its creator holds. An
 `admin` token can only be created by the operator — the dashboard session, the
-local CLI on the server itself, `omniroute connect` with the password, or an
-instance with login disabled. Machine credentials (an `admin` access token,
-or an API key with the `manage`/`admin` scope) can mint `write` and `read`
-tokens only; asking them for `--scope admin` returns `403`.
+local CLI on the server itself, or `omniroute connect` with the password.
+Machine credentials (an `admin` access token, or an API key with the
+`manage`/`admin` scope) can mint `write` and `read` tokens only; asking them
+for `--scope admin` returns `403`. Disabling login does not open minting: an
+access token of any scope is a credential the always-authenticated routes
+accept, so an anonymous call gets `401` at any scope.
 
 ---
 
@@ -329,6 +336,7 @@ context, or `--remote <url> --api-key <key>`):
 | Cursor      | `omniroute setup-cursor`   | prints the in-app steps (Settings → Models → Override OpenAI Base URL **with** `/v1` + key + model). Cursor config is opaque SQLite — chat panel only                |
 | Roo Code    | `omniroute setup-roo`      | writes a Roo import JSON (`~/.omniroute/roo-settings.json`) + sets `roo-cline.autoImportSettingsPath` + prints UI steps (OpenAI-compatible, Base URL **with** `/v1`) |
 | Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` provider, `base_url` **with** `/v1`, key via `$OMNIROUTE_API_KEY`                                                     |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **with** `/v1`, key read by Zed from `$OMNIROUTE_API_KEY` (never written)   |
 | Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **without** `/v1` + `GOOSE_MODEL`) + env recipe                                               |
 | Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **without** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                              |
 | Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` entry + `OMNIROUTE_API_KEY` in `~/.qwen/.env`                                                                     |
@@ -472,7 +480,7 @@ omniroute contexts remove 192-168-0-15 --yes   # drop the local context (even if
 
 | Method | Route                 | Auth                | Scope                      |
 | ------ | --------------------- | ------------------- | -------------------------- |
-| POST   | `/api/cli/connect`    | management password | — (public, password-gated) |
+| POST   | `/api/cli/connect`    | password; 2FA if on | — (public, password-gated) |
 | GET    | `/api/cli/whoami`     | access token        | read                       |
 | GET    | `/api/cli/tokens`     | access token        | admin                      |
 | POST   | `/api/cli/tokens`     | access token        | admin                      |

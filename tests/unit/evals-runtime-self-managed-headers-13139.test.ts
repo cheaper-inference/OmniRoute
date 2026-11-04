@@ -41,10 +41,10 @@ test("the opt-out survives a run that carries an API key", () => {
   assert.equal(request.headers.get("Content-Type"), "application/json");
 });
 
-test("no Authorization header is sent when the run has no API key", () => {
+test("internal Authorization is sent when the run has no API key", () => {
   const request = buildEvalCaseRequest({ input: {} }, { type: "suite-default" }, null);
 
-  assert.equal(request.headers.get("Authorization"), null);
+  assert.equal(request.headers.get("Authorization")?.startsWith("Bearer "), true);
   assert.equal(request.headers.get("Content-Type"), "application/json");
 });
 

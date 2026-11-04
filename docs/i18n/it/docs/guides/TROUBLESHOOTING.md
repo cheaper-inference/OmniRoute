@@ -37,33 +37,33 @@ Problemi comuni e soluzioni per OmniRoute.
 
 ---
 
-### Limitazione delle richieste sui provider gratuiti (429 / 400 / 401)
+### Limitazione della frequenza sui provider gratuiti (429 / 400 / 401)
 
-**Sintomo**: quando usi `model: "auto"` con provider gratuiti/senza autenticazione (opencode, auggie, ecc.), ricevi in modo intermittente `HTTP 429`, `400` o `401` anziché le risposte. Le richieste vanno a buon fine riprovando lo stesso prompt pochi istanti dopo, ma l'automazione (processi cron, agenti, script) si interrompe al primo errore.
+**Sintomo**: quando si utilizza `model: "auto"` con provider gratuiti/senza autenticazione (auggie, ecc.), si ricevono in modo intermittente risposte `HTTP 429`, `400` o `401` anziché le risposte previste. Le richieste riescono riprovando lo stesso prompt pochi istanti dopo, ma l'automazione (processi cron, agenti, script) si interrompe al primo errore.
 
 **Causa principale**: si sommano tre modalità di errore indipendenti:
 
-1. **Limite di richieste del provider (`429`)**: i piani gratuiti possono imporre una quota per intervallo temporale. Un picco di chiamate parallele la esaurisce, quindi la richiesta successiva viene rifiutata finché l'intervallo non viene reimpostato.
-2. **Modello non funzionante in passthrough (`400`/`401`)**: i pool `auto/*` possono includere modelli passthrough di `opencode` registrati nel catalogo ma privi di credenziali attive (ad es. `oc/north-mini-code-free` → `401`). Il router automatico ne prova uno, non riesce e l'errore viene propagato prima che si attivi il fallback.
-3. **Amplificazione della concorrenza (`429` sotto carico)**: quando più sessioni di agenti/cron usano `auto` contemporaneamente, la frequenza complessiva delle richieste supera quella tollerata dai provider gratuiti, quindi le chiamate legittime vengono contrassegnate come abusive.
+1. **Limitazione della frequenza del provider (`429`)**: i piani gratuiti possono imporre una quota per finestra temporale. Un picco di chiamate parallele la esaurisce, quindi la richiesta successiva viene rifiutata finché la finestra non si reimposta.
+2. **Modello non funzionante in passthrough (`400`/`401`)**: i pool `auto/*` possono includere modelli passthrough registrati nel catalogo ma privi di credenziali attive (→ `401`). L'auto-router ne prova uno, fallisce e l'errore si propaga prima che entri in funzione il fallback.
+3. **Amplificazione dovuta alla concorrenza (`429` sotto carico)**: quando più sessioni agente/cron utilizzano `auto` contemporaneamente, la frequenza aggregata delle richieste supera quella tollerata dai provider gratuiti, quindi chiamate legittime vengono contrassegnate come abusive.
 
-**Soluzione verificata (segnalata dalla community, 2026-08-10)**: configura tre variabili di ambiente affinché rotazione, concorrenza e fallback assorbano l'instabilità del piano gratuito anziché interrompersi a causa di essa:
+**Correzione verificata (segnalata dalla community, 2026-08-10)**: configurare tre variabili di ambiente affinché rotazione, concorrenza e fallback assorbano l'instabilità del piano gratuito anziché interrompersi:
 
 ```bash
 export OMNIROUTE_ROTATE_ON_400=true           # passa a un altro modello/provider in caso di 400/401 (salta i modelli passthrough non funzionanti)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # limite massimo esplicito di ammissione per richieste pesanti (non impostato per impostazione predefinita: nessun limite al numero di richieste; vedi la nota sotto)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # estende l'attesa limitata oltre il valore predefinito di RATE_LIMIT_MAX_WAIT_MS per gli upstream lenti
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # limite esplicito di ammissione per richieste pesanti (non impostato per impostazione predefinita: nessun limite al numero di richieste, vedere la nota seguente)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # aumenta l'attesa limitata oltre il valore predefinito di RATE_LIMIT_MAX_WAIT_MS per gli upstream lenti
 ```
 
-Impostale nell'ambiente del processo OmniRoute (il daemon, ad es. tramite il plist LaunchAgent o `systemctl edit`), quindi riavvia OmniRoute. Il flag di rotazione è il singolo strumento con il maggiore impatto: trasforma un errore irreversibile in un nuovo tentativo trasparente con un provider funzionante del pool.
+Impostare queste variabili nell'ambiente del processo OmniRoute (il daemon, ad esempio tramite il plist LaunchAgent o `systemctl edit`), quindi riavviare OmniRoute. Il flag di rotazione è la singola leva con il maggiore impatto: trasforma un errore definitivo in un nuovo tentativo trasparente verso un provider funzionante del pool.
 
-**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` limita il numero di richieste pesanti, ossia con contesto lungo, eseguite contemporaneamente; il limite è un controllo di ammissione, non un limitatore delle richieste del provider. **Aggiornamento #503-fanout:** questa variabile non viene più impostata per impostazione predefinita (ora si applica solo quando viene configurata esplicitamente, come sopra): l'ammissione delle richieste pesanti è invece regolata da un budget in byte derivato automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), che si adatta al limite reale di memoria dell'host. Pertanto, una nuova distribuzione dovrebbe registrare molti meno rifiuti `503 chat_admission_busy` senza dover impostare affatto questa variabile; impostarla esplicitamente come mostrato qui continua comunque a funzionare esattamente come documentato. Le sostituzioni esplicite del budget in byte sono limitate all'intervallo 8 MiB–2 GiB. Un errore `413 body_exceeds_budget` non è transitorio: aumenta il budget in byte, riduci `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` oppure aumenta il limite di memoria del processo. Un rifiuto `inflight_bytes_budget` è dovuto a una contesa temporanea ed è possibile riprovare. La limitazione delle richieste per provider (`open-sse/services/rateLimitManager.ts`) è gestita separatamente da `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` e `RATE_LIMIT_AUTO_ENABLE`: consulta `.env.example`.
+**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` limita il numero di richieste pesanti, ovvero con contesto lungo, eseguite contemporaneamente; il limite è un controllo di ammissione, non un limitatore di frequenza del provider. **Aggiornamento #503-fanout:** questa variabile non è più impostata per impostazione predefinita (ora applica un limite solo quando viene configurata esplicitamente, come sopra): l'ammissione delle richieste pesanti è invece regolata da un budget di byte derivato automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), che si adatta al limite di memoria effettivo dell'host. Pertanto, una nuova installazione dovrebbe generare molti meno rifiuti `503 chat_admission_busy` senza dover impostare questa variabile; impostarla esplicitamente come mostrato continua comunque a funzionare esattamente come documentato. Le sostituzioni esplicite del budget di byte sono vincolate all'intervallo 8 MiB–2 GiB. Un errore `413 body_exceeds_budget` non è transitorio: aumentare tale budget di byte, ridurre `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` oppure aumentare il limite di memoria del processo. Un'esclusione `inflight_bytes_budget` è dovuta a una contesa temporanea e può essere ritentata. La limitazione della frequenza per provider (`open-sse/services/rateLimitManager.ts`) è gestita separatamente tramite `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` e `RATE_LIMIT_AUTO_ENABLE`: vedere `.env.example`.
 
-**Come verificare che abbia funzionato**: esegui il tuo agente/cron due volte in rapida successione e verifica che entrambe le esecuzioni vadano a buon fine. Prima della correzione, la seconda esecuzione genera in genere un errore `429`/`401`. Dopo la correzione, gli eventuali errori vengono ritentati in modo trasparente e la chiamata viene completata. Puoi anche eseguire `curl /monitoring/health` e monitorare il campo `rateLimitedUntil` nelle connessioni dei provider e `circuitBreakers.providerBreakers[].state` per i provider interessati: lo stato può essere `CLOSED`, `DEGRADED`, `OPEN` o `HALF_OPEN` (vedi `src/shared/utils/circuitBreaker.ts`), e un provider che continua a generare errori passerà da `CLOSED → DEGRADED → OPEN` prima che la finestra di ripristino consenta il passaggio di una richiesta di prova (`HALF_OPEN`).
+**Come verificare che abbia funzionato**: eseguire l'agente/cron due volte in rapida successione e verificare che entrambe le esecuzioni riescano. Prima della correzione, la seconda esecuzione genera generalmente un errore `429`/`401`. Dopo la correzione, gli errori, se presenti, vengono ritentati in modo trasparente e la chiamata viene completata. È inoltre possibile eseguire `curl /monitoring/health` e osservare il campo `rateLimitedUntil` nelle connessioni dei provider e `circuitBreakers.providerBreakers[].state` per i provider interessati: lo stato può essere `CLOSED`, `DEGRADED`, `OPEN` o `HALF_OPEN` (vedere `src/shared/utils/circuitBreaker.ts`) e un provider che continua a non rispondere correttamente passerà da `CLOSED → DEGRADED → OPEN` prima che la finestra di reimpostazione consenta il passaggio di una richiesta di prova (`HALF_OPEN`).
 
-**Se continui a ricevere un errore 429**: l'account attivo per quel provider ha effettivamente esaurito la propria _quota_ (non si tratta solo di un limite di frequenza). Aggiungi un secondo account per lo stesso provider nella dashboard di OmniRoute → Providers → Accounts, oppure includi un altro provider gratuito (ad esempio `routeway`, `auggie`). La rotazione è utile solo in caso di errori transitori relativi a limiti di frequenza/400/401; l'esaurimento totale della quota richiede una seconda credenziale o un provider diverso.
+**Se si continua a ricevere 429**: l'account attivo per quel provider ha effettivamente esaurito la propria _quota_ (non si tratta soltanto di limitazione della frequenza). Aggiungere un secondo account per lo stesso provider nella dashboard di OmniRoute → Providers → Accounts oppure includere un altro provider gratuito (ad esempio `routeway`, `auggie`). La rotazione è utile soltanto per errori transitori di frequenza/400/401; l'esaurimento definitivo della quota richiede una seconda credenziale o un provider diverso.
 
-**Se ricevi un errore 403 sui modelli di visione (`auto/vision`, `bazaarlink/*`)**: l'account connesso non dispone di un piano a pagamento che includa la visione oppure la chiave API non dispone di autorizzazioni sufficienti. Verifica nella dashboard del provider che l'ambito della chiave includa la visione/multimodale, oppure collega un account con un piano a pagamento e mantienilo come destinazione per la visione.
+**Se si riceve 403 sui modelli di visione (`auto/vision`, `bazaarlink/*`)**: l'account connesso non dispone di un piano a pagamento che includa la visione oppure la chiave API non dispone di autorizzazioni sufficienti. Verificare nella dashboard del provider che l'ambito della chiave includa le funzionalità di visione/multimodali oppure connettere un account con un piano a pagamento e mantenerlo come destinazione per la visione.
 
 ---
 
@@ -90,48 +90,48 @@ Gli avvisi derivano da intervalli obsoleti delle dipendenze peer in pacchetti di
 
 ---
 
-## Avviso di blocco degli script di npm install (installazione globale)
+## Avviso install-scripts bloccati di npm (installazione globale)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Quando si esegue `npm install -g omniroute`, le versioni più recenti di npm (v11+ e v12+) bloccano per impostazione predefinita gli script del ciclo di vita dei pacchetti e visualizzano un avviso relativo agli script di installazione:
+Quando si esegue `npm install -g omniroute`, le versioni più recenti di npm (v11+ e v12+) bloccano per impostazione predefinita gli script del ciclo di vita dei pacchetti e mostrano un avviso relativo a install-scripts:
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 pacchetti avevano script di installazione bloccati perché non inclusi in allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Questo avviso può essere ignorato?
+### È possibile ignorare questo avviso?
 
-**Parzialmente, ma l'esecuzione senza script non è consigliata.** OmniRoute include meccanismi di fallback affidabili: se i binding nativi di `better-sqlite3` non possono essere caricati dal bundle autonomo, l'applicazione ricorre a driver alternativi come `node:sqlite` o `sql.js` (consulta [Risoluzione del runtime SQLite](../ops/SQLITE_RUNTIME.md)). Il server verrà comunque avviato, ma l'esecuzione con fallback WASM come `sql.js` disabilita la modalità WAL (Write-Ahead Logging) di SQLite e aumenta il sovraccarico della memoria e della sincronizzazione su disco.
+**Parzialmente, ma l'esecuzione senza script non è consigliata.** OmniRoute include meccanismi di fallback affidabili: se non è possibile caricare dal bundle autonomo i binding nativi di `better-sqlite3`, l'applicazione utilizza driver alternativi come `node:sqlite` o `sql.js` (vedere [Risoluzione del runtime SQLite](../ops/SQLITE_RUNTIME.md)). Il server verrà comunque avviato, ma l'esecuzione con fallback WASM come `sql.js` disabilita la modalità WAL (Write-Ahead Logging) di SQLite e aumenta l'utilizzo della memoria e l'overhead di sincronizzazione su disco.
 
 ### Quali script sono effettivamente necessari?
 
-Non tutti gli script bloccati sono essenziali per l'esecuzione di OmniRoute:
+Non tutti gli script bloccati sono essenziali per eseguire OmniRoute:
 
-- **Essenziali (`omniroute`, `better-sqlite3`):** OmniRoute viene eseguito da un bundle applicativo autonomo Next.js (`dist/`). Durante l'installazione, npm scarica o compila il driver SQLite nativo specifico per l'host nella directory di primo livello `node_modules/better-sqlite3/`. Lo script `postinstall` di OmniRoute (`scripts/build/postinstall.mjs`) verifica e copia quindi questi binari specifici per l'host in `dist/node_modules/`, affinché il server autonomo possa accedervi. Se lo script postinstall di `omniroute` viene bloccato, questo passaggio di copia viene ignorato.
-- **Opzionali/transitivi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Sono helper di compilazione, strumenti di monitoraggio o utilità per il portachiavi di sistema. Consentirne l'esecuzione evita gli avvisi di compilazione, ma non sono necessari per le funzionalità di routing principali.
-- **Escluso (`onnxruntime-node`):** È una dipendenza opzionale per gli embedding IA locali e **non** è necessaria per l'esecuzione di OmniRoute. Il suo script postinstall scarica circa 300 MB di risorse CUDA da NuGet; non includerlo nell'elenco delle autorizzazioni, a meno che tu non intenda esplicitamente utilizzare l'accelerazione ONNX locale su hardware supportato.
+- **Essenziali (`omniroute`, `better-sqlite3`):** OmniRoute viene eseguito da un bundle applicativo autonomo di Next.js (`dist/`). Durante l'installazione, npm scarica o compila il driver SQLite nativo specifico dell'host nella directory principale `node_modules/better-sqlite3/`. Lo script `postinstall` di OmniRoute (`scripts/build/postinstall.mjs`) verifica e copia quindi questi file binari specifici dell'host in `dist/node_modules/`, affinché il server autonomo possa accedervi. Se lo script postinstall di `omniroute` viene bloccato, questo passaggio di copia viene ignorato.
+- **Opzionali/transitivi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Si tratta di strumenti ausiliari per la compilazione, strumenti di monitoraggio o utilità per il portachiavi di sistema. Consentirne l'esecuzione evita gli avvisi di compilazione, ma non sono necessari per le funzionalità di routing principali.
+- **Escluso (`onnxruntime-node`):** È una dipendenza opzionale per gli embedding IA locali e **non** è necessaria per eseguire OmniRoute. Il relativo script postinstall scarica da NuGet circa 300 MB di risorse CUDA; non includerlo nell'elenco delle autorizzazioni, a meno che non si intenda esplicitamente utilizzare l'accelerazione ONNX locale su hardware supportato.
 
-### Soluzione consigliata
+### Correzione consigliata
 
-Per consentire gli script di installazione richiesti durante un'installazione globale ed eliminare gli avvisi, specifica `--allow-scripts` per OmniRoute e le relative dipendenze native:
+Per consentire gli script di installazione necessari durante un'installazione globale ed eliminare gli avvisi, specificare `--allow-scripts` per OmniRoute e le relative dipendenze native:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-In alternativa, per configurare questa impostazione in modo permanente per tutte le installazioni globali del tuo account utente:
+In alternativa, per configurare questa impostazione in modo permanente per tutte le installazioni globali del proprio account utente:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Verifica l'installazione
+### Verificare l'installazione
 
-Dopo l'installazione, esegui lo strumento diagnostico integrato per assicurarti che i binding nativi e l'ambiente di runtime funzionino correttamente:
+Dopo l'installazione, eseguire lo strumento diagnostico integrato per assicurarsi che i binding nativi e l'ambiente di runtime funzionino correttamente:
 
 ```bash
 omniroute doctor

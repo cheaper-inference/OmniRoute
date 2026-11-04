@@ -1,3 +1,5 @@
+import { credentialRejectionCorsHeaders } from "@/server/cors/origins";
+
 /**
  * Static CORS headers for route handlers.
  *
@@ -11,7 +13,7 @@
 export const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, x-api-key, anthropic-version, x-omniroute-connection, X-OmniRoute-Lease-Owner, X-OmniRoute-Lease-Generation, x-internal-test, accept",
+    "Content-Type, Authorization, x-api-key, anthropic-version, x-omniroute-connection, x-omniroute-allow-cross-version-fallback, X-OmniRoute-Lease-Owner, X-OmniRoute-Lease-Generation, x-internal-test, accept",
 } as const;
 
 /**
@@ -21,4 +23,14 @@ export const CORS_HEADERS = {
  */
 export function handleCorsOptions(): Response {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
+/**
+ * Headers for a route-level 401 that refuses a presented API key: the static
+ * `CORS_HEADERS` plus the Origin echo from `credentialRejectionCorsHeaders()`,
+ * so browser/Electron clients can read the rejection (#5242) even when the
+ * middleware served the request as anonymous (`REQUIRE_API_KEY=false`).
+ */
+export function credentialRejectionHeaders(request: Request): Record<string, string> {
+  return { ...CORS_HEADERS, ...credentialRejectionCorsHeaders(request) };
 }

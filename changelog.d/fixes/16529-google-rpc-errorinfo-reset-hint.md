@@ -1,1 +1,0 @@
-- **fix(sse):** honor Google RPC `ErrorInfo` `quotaResetDelay`/`quotaResetTimeStamp` as an upstream retry hint and accept compound durations (`151h58m18s`) in retry-delay parsing ([#16529](https://github.com/diegosouzapw/OmniRoute/pull/16529)) — thanks @fasilu

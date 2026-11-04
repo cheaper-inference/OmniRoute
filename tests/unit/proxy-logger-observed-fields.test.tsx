@@ -2,10 +2,23 @@
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  // The family label is a single parameterized key ("IPv{version}"): the mock
+  // renders the key and its argument so the assertion can pin both.
+  useTranslations: () => (key: string, args?: Record<string, unknown>) =>
+    args ? key + Object.values(args).join("") : key,
 }));
 
 const TRAFFIC = {
@@ -141,7 +154,8 @@ describe("ProxyLogger observed fields", () => {
       await act(async () => {
         root.render(<ProxyLogDetail log={log} onClose={() => {}} />);
       });
-      const text = container.textContent ?? "";
+      // The detail is a kit Dialog (Modal adapter): its content is portaled to document.body.
+      const text = document.body.textContent ?? "";
       await act(async () => root.unmount());
       container.remove();
       return text;
@@ -164,5 +178,62 @@ describe("ProxyLogger observed fields", () => {
     rows = container.querySelectorAll("tbody tr");
     expect(rows.length).toBe(2);
     container.remove();
+  }, 15000);
+
+  it("labels the family of the egress address and shows the other observed address", async () => {
+    const { default: ProxyLogDetail } = await import("@/shared/components/ProxyLogDetail");
+    const renderEgressField = async (log: Record<string, unknown>) => {
+      const container = makeContainer();
+      const root = createRoot(container);
+      await act(async () => {
+        root.render(<ProxyLogDetail log={log} onClose={() => {}} />);
+      });
+      // The detail is a kit Dialog (Modal adapter): its content is portaled to document.body.
+      const label = Array.from(document.body.querySelectorAll("div")).find(
+        (element) => element.textContent === "egressIp" && element.className.includes("uppercase")
+      );
+      expect(label, "the egress field label").toBeDefined();
+      const value = label!.nextElementSibling as HTMLElement | null;
+      const text = value?.textContent ?? "";
+      await act(async () => root.unmount());
+      container.remove();
+      return text;
+    };
+
+    // Both families observed: the reported address with its family, the other
+    // observed address below it — both masked.
+    const both = await renderEgressField({
+      ...TRAFFIC,
+      egressIp: "2001:db8::1",
+      egressIpv4: "203.0.113.7",
+      egressIpv6: "2001:db8::1",
+    });
+    expect(both).toContain("20***:1");
+    expect(both).toContain("egressIpFamily6");
+    expect(both).toContain("20***.7");
+    expect(both).toContain("egressIpFamily4");
+    expect(both).not.toContain("2001:db8::1");
+    expect(both).not.toContain("203.0.113.7");
+
+    // No reported address but one observed family: that address alone, with
+    // its family, and no dash line.
+    const familyOnly = await renderEgressField({
+      ...TRAFFIC,
+      egressIp: null,
+      egressIpv4: "203.0.113.7",
+      egressIpv6: null,
+    });
+    expect(familyOnly).toContain("20***.7");
+    expect(familyOnly).toContain("egressIpFamily4");
+    expect(familyOnly).not.toContain("—");
+
+    // No address known: the dash alone, without a family.
+    const none = await renderEgressField({
+      ...TRAFFIC,
+      egressIp: null,
+      egressIpv4: null,
+      egressIpv6: null,
+    });
+    expect(none).toBe("—");
   }, 15000);
 });

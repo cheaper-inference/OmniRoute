@@ -8,6 +8,7 @@ export const duckduckgo_webProvider: RegistryEntry = {
   baseUrl: "https://duck.ai/duckchat/v1/chat",
   authType: "none",
   authHeader: "none",
+  toolCalling: "emulated",
   poolConfig: {
     minSessions: 2,
     maxSessions: 5,

@@ -54,7 +54,7 @@ function buildAuthHeader(providerConfig, token) {
       model: body.model,
       query: { text: body.query },
       passages: (body.documents || []).map((doc) => ({
-        text: typeof doc === "string" ? doc : doc.text || "",
+        text: typeof doc === "string" ? doc : doc?.text || "",
       })),
       top_n: body.top_n,
     };
@@ -65,7 +65,7 @@ function buildAuthHeader(providerConfig, token) {
     return {
       queries: [body.query],
       documents: (body.documents || []).map((doc) =>
-        typeof doc === "string" ? doc : doc.text || ""
+        typeof doc === "string" ? doc : doc?.text || ""
       ),
     };
   }
@@ -225,6 +225,8 @@ function transformAlibabaQwen3Response(data, options: RerankResponseOptions) {
  * @param {string} [options.connectionId] - Connection ID for per-connection proxy resolution
  * @param {Object} [options.resolvedProvider] - Runtime provider config for dynamic endpoints
  * @param {string} [options.resolvedModel] - Model ID after removing a dynamic provider prefix
+ * @param {function} [options.onPricedCall] - Receives `{ provider, model, costUsd }` after a
+ *   successful priced call so the caller can charge the key's budget
  * @returns {Response}
  */
 /** @returns {Promise<unknown>} */
@@ -240,6 +242,9 @@ export async function handleRerank({
   apiKeyName = null,
   resolvedProvider = null,
   resolvedModel = null,
+  onPricedCall = null,
+  requestedModel = null,
+  comboName = null,
 }) {
   const startTime = Date.now();
   if (!model) return errorResponse(400, "model is required");
@@ -327,6 +332,8 @@ export async function handleRerank({
         error: errorMessage,
         apiKeyId: apiKeyId || undefined,
         apiKeyName: apiKeyName || undefined,
+        requestedModel: requestedModel || model,
+        comboName: comboName || undefined,
       }).catch(() => {});
       return errorResponse(res.status, errorMessage);
     }
@@ -342,6 +349,8 @@ export async function handleRerank({
     const costUsd = await calculateModalCost("rerank", effectiveProviderId, modelId, {
       searchUnits,
     });
+    // The caller charges the priced call to the key's budget (injected: no open-sse → src edge).
+    onPricedCall?.({ provider: effectiveProviderId, model: modelId, costUsd });
 
     saveCallLog({
       method: "POST",
@@ -356,6 +365,8 @@ export async function handleRerank({
       responseBody: result,
       apiKeyId: apiKeyId || undefined,
       apiKeyName: apiKeyName || undefined,
+      requestedModel: requestedModel || model,
+      comboName: comboName || undefined,
     }).catch(() => {});
 
     const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
@@ -368,6 +379,21 @@ export async function handleRerank({
     });
     return new Response(JSON.stringify(result), { status: 200, headers });
   } catch (err) {
+    saveCallLog({
+      method: "POST",
+      path: "/v1/rerank",
+      status: 500,
+      model: `${effectiveProviderId}/${modelId}`,
+      provider: effectiveProviderId,
+      connectionId: connectionId || undefined,
+      duration: Date.now() - startTime,
+      error: err instanceof Error ? err.message : String(err),
+      requestBody,
+      apiKeyId: apiKeyId || undefined,
+      apiKeyName: apiKeyName || undefined,
+      requestedModel: requestedModel || model,
+      comboName: comboName || undefined,
+    }).catch(() => {});
     return errorResponse(500, `Rerank request failed: ${err.message}`);
   }
 }

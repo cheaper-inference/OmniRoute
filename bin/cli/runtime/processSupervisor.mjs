@@ -2,7 +2,14 @@ import { spawn } from "node:child_process";
 import { mkdirSync, appendFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { writePidFile, cleanupPidFile, killAllSubprocesses, isPidRunning } from "../utils/pid.mjs";
+import {
+  writePidFile,
+  cleanupPidFile,
+  killAllSubprocesses,
+  isPidRunning,
+  clearShutdownIntent,
+  consumeShutdownIntent,
+} from "../utils/pid.mjs";
 import { resolveDataDir } from "../data-dir.mjs";
 import {
   RESTART_RESET_MS,
@@ -26,6 +33,45 @@ const CRASH_LOG_LINES = 50;
 // `<DATA_DIR>/server/...` convention from bin/cli/utils/pid.mjs.
 export function getCrashLogPath() {
   return join(resolveDataDir(), "server", "crash.log");
+}
+
+function persistCrashRecord(summary, lines = []) {
+  try {
+    const crashLogPath = getCrashLogPath();
+    mkdirSync(dirname(crashLogPath), { recursive: true });
+    const timestamp = new Date().toISOString();
+    const body = [`[${timestamp}] ${summary}`, ...lines, ""].join("\n");
+    appendFileSync(crashLogPath, body, "utf8");
+  } catch {
+    // Best-effort only — diagnostic writes must not prevent shutdown.
+  }
+}
+
+const TRAY_FAILURE_PHASES = new Set(["import", "constructor", "install"]);
+const TRAY_FAILURE_CODES = new Set([
+  "ERR_MODULE_NOT_FOUND",
+  "MODULE_NOT_FOUND",
+  "ERR_UNSUPPORTED_DIR_IMPORT",
+  "ERR_DLOPEN_FAILED",
+  "EACCES",
+  "EPERM",
+  "ENOENT",
+]);
+
+// Detached workers discard stderr. Use the same durable record doctor already
+// reads, with fixed categories only: upstream error messages may contain secrets.
+export function persistTrayFailure(phase, error) {
+  let category = "Error";
+  try {
+    const code = error?.code;
+    if (TRAY_FAILURE_CODES.has(code)) category = code;
+    else if (error instanceof TypeError) category = "TypeError";
+    else if (error instanceof SyntaxError) category = "SyntaxError";
+  } catch {
+    // Even hostile error getters must not break an optional tray startup.
+  }
+  const safePhase = TRAY_FAILURE_PHASES.has(phase) ? phase : "startup";
+  persistCrashRecord(`Tray startup failed during ${safePhase} (${category}).`);
 }
 
 const PACKAGE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -58,6 +104,7 @@ export class ServerSupervisor {
     this.env = env;
     this.maxRestarts = maxRestarts;
     this.memoryLimit = memoryLimit;
+    this.lastChildPid = null;
     this.onCrashCallback = onCrashCallback;
     this.restartCount = 0;
     this.startedAt = 0;
@@ -96,6 +143,10 @@ export class ServerSupervisor {
       windowsHide: true,
     });
 
+    this.lastChildPid = this.child?.pid ?? null;
+    // #16030: drop any intent marker left by a previous run so only THIS child's
+    // deliberate exit is honored below in handleExit().
+    clearShutdownIntent();
     writePidFile("server", this.child.pid);
 
     const bufferOutput = (data) => {
@@ -173,6 +224,17 @@ export class ServerSupervisor {
       return;
     }
 
+    // #16030: the child asked to shut down (dashboard Shutdown button) and wrote an
+    // intent marker before exiting — the portable path for platforms where the
+    // child cannot verify the supervisor's identity (macOS has no /proc). Honor it
+    // and exit instead of restarting. Exits without a marker are spontaneous and
+    // still follow the restart budget below.
+    if (consumeShutdownIntent(this.lastChildPid)) {
+      console.error("\nServer requested shutdown. Exiting.");
+      process.exit(exitCode ?? 0);
+      return;
+    }
+
     const aliveMs = Date.now() - this.startedAt;
     if (aliveMs >= RESTART_RESET_MS) this.restartCount = 0;
 
@@ -234,15 +296,7 @@ export class ServerSupervisor {
   // write must NEVER block or fail shutdown (the give-up branch always calls
   // process.exit() right after this).
   persistCrashLog(summary) {
-    try {
-      const crashLogPath = getCrashLogPath();
-      mkdirSync(dirname(crashLogPath), { recursive: true });
-      const timestamp = new Date().toISOString();
-      const body = [`[${timestamp}] ${summary}`, ...this.crashLog, ""].join("\n");
-      appendFileSync(crashLogPath, body, "utf8");
-    } catch {
-      // Best-effort only — a diagnostic write failure must not prevent shutdown.
-    }
+    persistCrashRecord(summary, this.crashLog);
   }
 
   stop() {

@@ -1,1 +1,0 @@
-- **fix(providers):** Groq catalog no longer advertises decommissioned models (llama-4-scout, llama-3.3-70b-versatile, qwen3-32b); the retired Llama ids stay reasoning-denied for keys that can still reach them ([#16530](https://github.com/diegosouzapw/OmniRoute/pull/16530)) — thanks @andikadevs

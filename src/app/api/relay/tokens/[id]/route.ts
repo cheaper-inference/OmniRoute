@@ -9,6 +9,7 @@ import {
   getRelayUsage,
 } from "@/lib/db/relayProxies";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
 const relayTokenPatchSchema = z
   .object({
@@ -24,7 +25,12 @@ const relayTokenPatchSchema = z
   })
   .refine((value) => Object.keys(value).length > 0, "At least one update field is required");
 
+// Relay tokens are credentials: reading, editing, toggling or revoking one stays
+// authenticated even when the dashboard runs with login disabled (mirrors the
+// ALWAYS_PROTECTED tier that covers this route's prefix).
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
   const { id } = await params;
   const token = getRelayToken(id);
   if (!token) return NextResponse.json({ error: "Token not found" }, { status: 404 });
@@ -43,8 +49,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
   const { id } = await params;
-  const rawBody = await request.json();
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const validation = validateBody(relayTokenPatchSchema, rawBody);
   if (isValidationFailure(validation)) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
@@ -73,6 +86,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
   const { id } = await params;
   deleteRelayToken(id);
   return NextResponse.json({ success: true });

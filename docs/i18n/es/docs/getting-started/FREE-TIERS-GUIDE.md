@@ -16,43 +16,42 @@ OmniRoute **agrega** las conexiones configuradas en un único endpoint. Aun así
 
 ---
 
-## Proveedores representativos con acceso gratuito
+## Proveedores representativos de acceso gratuito
 
-### Acceso recurrente, sin clave o sin límite publicado
+### Acceso recurrente, sin clave o sin límites
 
-Estos proveedores cuentan con una modalidad de acceso gratuito recurrente, sin clave o sin límite publicado en el catálogo auditado. «Sin límite publicado» significa que no existe un límite de tokens publicado; aun así, pueden aplicarse límites de frecuencia, concurrencia, cuenta, región y políticas:
+Estos proveedores ofrecen una modalidad de acceso gratuito recurrente, sin clave o sin límites en el catálogo auditado. «Sin límites» significa que no hay un límite de tokens publicado; aun así, pueden aplicarse límites de velocidad, concurrencia, cuenta, región y políticas:
 
-| Proveedor         | Modelos                                                                                                 | Cuota                                                                                                                                                               | Cómo conectarse                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 y otros                                                     | El catálogo auditado estima un fondo mensual compartido de 25K tokens                                                                                               | Flujo de OAuth/cuenta; los ToS están marcados como `avoid` en el catálogo                       |
-| **OpenCode Free** | Conjunto actual de modelos `*-free` en el registro del proveedor                                        | Sin clave; sin límite de tokens publicado                                                                                                                           | Sin credenciales del proveedor; los ToS están marcados como `avoid`                             |
-| **Pollinations**  | Conjunto actual de modelos sin clave; algunos modelos anteriores están descontinuados o requieren clave | Sin clave; sin límite de tokens publicado                                                                                                                           | Sin credenciales del proveedor para los modelos sin clave                                       |
-| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 y más                                       | Clave de API gratuita (sin límites de frecuencia ni tarjeta); **se registra cada solicitud** con fines de investigación (opción de exclusión en logfare.ai/consent) | Clave instantánea en logfare.ai/register; ToS/privacidad en logfare.ai/tos y logfare.ai/privacy |
-| **Cloudflare AI** | Catálogo de Workers AI                                                                                  | El fondo auditado estima ~30M tokens/mes a partir de las unidades de uso publicadas                                                                                 | Cuenta de Cloudflare y credenciales de API                                                      |
-| **Gemini**        | Familia Gemini Flash                                                                                    | Límites variables de frecuencia por proyecto/modelo; la cifra principal no incluye una asignación mensual fija de tokens                                            | Clave de API de Google AI Studio; consulta los límites activos del proyecto                     |
-| **Groq**          | Modelos Llama, GPT-OSS y Qwen                                                                           | El fondo auditado estima ~15M tokens/mes                                                                                                                            | Clave de API de Groq; se aplican límites de frecuencia                                          |
+| Proveedor         | Modelos                                                                                                 | Cuota                                                                                                                                                              | Cómo conectarse                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 y otros                                                     | El catálogo auditado estima un fondo mensual compartido de 25K tokens                                                                                              | Flujo de OAuth/cuenta; las condiciones del servicio están marcadas como `avoid` en el catálogo                         |
+| **Pollinations**  | Conjunto actual de modelos sin clave; algunos modelos anteriores se han descontinuado o requieren clave | Sin clave; no hay un límite de tokens publicado                                                                                                                    | No se requieren credenciales del proveedor para los modelos sin clave                                                  |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 y más                                       | Clave de API gratuita (sin límites de velocidad ni tarjeta); **se registra cada solicitud** con fines de investigación (opción de exclusión en logfare.ai/consent) | Clave instantánea en logfare.ai/register; condiciones del servicio y privacidad en logfare.ai/tos y logfare.ai/privacy |
+| **Cloudflare AI** | Catálogo de Workers AI                                                                                  | El fondo auditado estima ~30M tokens/mes a partir de las unidades de uso publicadas                                                                                | Cuenta de Cloudflare y credenciales de API                                                                             |
+| **Gemini**        | Familia Gemini Flash                                                                                    | Límites de velocidad variables según el proyecto/modelo; la cifra destacada no incluye una asignación mensual fija de tokens                                       | Clave de API de Google AI Studio; consulta los límites activos del proyecto                                            |
+| **Groq**          | Modelos Llama, GPT-OSS y Qwen                                                                           | El fondo auditado estima ~15M tokens/mes                                                                                                                           | Clave de API de Groq; se aplican límites de velocidad                                                                  |
 
-### Asignaciones de registro y créditos específicos del proveedor
+### Bonificaciones de registro y créditos específicos del proveedor
 
-Estos proveedores ofrecen asignaciones de registro o créditos promocionales, sujetos a sus reglas de elegibilidad. Según se verificó el 2026-10-08, los [precios de Cerebras](https://www.cerebras.ai/pricing) requieren un método de pago para obtener un crédito único de $5 que vence después de 30 días; no se trata de una cuota recurrente de tokens. Los [límites de frecuencia de Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) varían según el proyecto, el modelo y el nivel, por lo que no se convierten en una asignación mensual garantizada de tokens.
+Estos proveedores ofrecen bonificaciones de registro o créditos promocionales sujetos a sus reglas de elegibilidad. Según lo verificado el 2026-10-08, los [precios de Cerebras](https://www.cerebras.ai/pricing) requieren un método de pago para obtener un crédito único de $5 que vence después de 30 días; no se trata de una cuota recurrente de tokens. Los [límites de velocidad de Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) varían según el proyecto, el modelo y el nivel, por lo que no se convierten en una asignación mensual garantizada de tokens.
 
 | Proveedor     | Créditos gratuitos                                                                      | Modelos                       | Cómo obtenerlos                                                         |
 | ------------- | --------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------- |
 | **Cerebras**  | Crédito promocional único de $5; vence después de 30 días                               | Catálogo de inferencia actual | Cuenta y método de pago válido                                          |
 | **DeepSeek**  | 5M tokens gratuitos                                                                     | DeepSeek V4                   | Regístrate en platform.deepseek.com                                     |
-| **LongCat**   | Asignación única de 10M tokens                                                          | LongCat 2.0                   | Clave de API + KYC; pago por uso después de agotar la asignación        |
+| **LongCat**   | Bonificación única de 10M tokens                                                        | LongCat 2.0                   | Clave de API + KYC; pago por uso después de la bonificación             |
 | **Vertex AI** | Crédito de registro de $300, representado como ~300M tokens en el modelo presupuestario | Gemini y modelos de socios    | Cuenta de Google Cloud; se aplican reglas de facturación y elegibilidad |
 
-### Otro acceso limitado
+### Otros accesos limitados
 
 Estos proveedores tienen **niveles gratuitos** con límites específicos:
 
-| Proveedor                  | Límite gratuito                                                                                         | Modelos                            | Ideal para |
-| -------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------- |
-| **GitHub Models**          | El fondo compartido auditado estima ~18M tokens/mes                                                     | Evaluación amplia de modelos       |
-| **Hugging Face**           | Pequeño fondo mensual recurrente                                                                        | Experimentos y variedad de modelos |
-| **OpenRouter free models** | Fondo compartido con solicitudes limitadas; una recarga única opcional aumenta la asignación recurrente | Amplio catálogo alternativo        |
-| **AI Horde**               | Capacidad comunitaria sin clave; la disponibilidad varía                                                | Inferencia distribuida oportunista |
+| Proveedor                  | Límite gratuito                                                                                        | Modelos                                      | Ideal para |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------- | ---------- |
+| **GitHub Models**          | El fondo compartido auditado estima ~18M tokens/mes                                                    | Evaluación de una amplia variedad de modelos |            |
+| **Hugging Face**           | Pequeño fondo mensual recurrente                                                                       | Experimentos y variedad de modelos           |            |
+| **OpenRouter free models** | Fondo compartido limitado por solicitudes; una recarga única opcional aumenta la asignación recurrente | Amplio catálogo alternativo                  |            |
+| **AI Horde**               | Capacidad comunitaria sin clave; la disponibilidad varía                                               | Inferencia distribuida oportunista           |            |
 
 ---
 

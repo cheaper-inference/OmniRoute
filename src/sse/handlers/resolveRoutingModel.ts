@@ -6,6 +6,11 @@
 // request body. The resolved value still flows through `enforceApiKeyPolicy`, so
 // it cannot bypass per-key model/combo allowlists. See PR #4863.
 //
+// A per-key enforced model (`forcedModel`, see resolveApiKeyForcedModel) wins over
+// both: precedence is key pin > X-Route-Model > body.model. The pin is set by the
+// operator, the header by the client, so the client cannot steer around the pin.
+// It also supplies the model when the client omits it.
+//
 // IMPORTANT: callers MUST then align `body.model` with the resolved value via
 // `alignBodyModelWithRouting` (or equivalent). Otherwise the post-guardrail
 // "body.model !== modelStr → adopt body.model" path silently undoes the header
@@ -16,8 +21,11 @@ type HeaderCarrier = { headers: { get(name: string): string | null } };
 
 export function resolveRoutingModel(
   request: HeaderCarrier,
-  body: { model?: string | null }
+  body: { model?: string | null },
+  keyForcedModel?: string | null
 ): string | null | undefined {
+  const forcedModel = keyForcedModel?.trim();
+  if (forcedModel) return forcedModel;
   const headerModel = request.headers.get("x-route-model")?.trim();
   return headerModel || body.model;
 }

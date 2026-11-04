@@ -4,6 +4,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
+import { Progress } from "@omniroute/ui-kit/progress";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderDisplayName } from "@/lib/display/names";
@@ -43,16 +47,32 @@ function formatRelativeTime(timestamp) {
 }
 
 const CB_STYLES = {
-  CLOSED: { bg: "bg-green-500/10", text: "text-green-500", labelKey: "healthy" },
-  OPEN: { bg: "bg-red-500/10", text: "text-red-500", labelKey: "down" },
-  HALF_OPEN: { bg: "bg-amber-500/10", text: "text-amber-500", labelKey: "recovering" },
+  CLOSED: { bg: "bg-success/10", text: "text-success", labelKey: "healthy" },
+  OPEN: { bg: "bg-error/10", text: "text-error", labelKey: "down" },
+  HALF_OPEN: { bg: "bg-warning/10", text: "text-warning", labelKey: "recovering" },
 };
 
 export default function HealthPage() {
+  return <HealthSnapshot />;
+}
+
+/**
+ * Page frame: the verdict header (once the snapshot has loaded) stays on top, then the queue
+ * card, then the snapshot body. Every HealthSnapshot branch returns this same component, so the
+ * queue card keeps its slot and state (it polls on its own, independently of /api/monitoring/health).
+ */
+function HealthLayout({
+  header,
+  children,
+}: {
+  header?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-6">
+      {header ?? null}
       <ConcurrencyQueuesCard />
-      <HealthSnapshot />
+      {children}
     </div>
   );
 }
@@ -207,29 +227,30 @@ function HealthSnapshot() {
 
   if (!data && !error) {
     return (
-      <div className="flex items-center justify-center min-h-100">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="text-text-muted mt-4">{t("loadingHealth")}</p>
+      <HealthLayout>
+        <div className="flex items-center justify-center min-h-100">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <p className="text-text-muted mt-4">{t("loadingHealth")}</p>
+          </div>
         </div>
-      </div>
+      </HealthLayout>
     );
   }
 
   if (error && !data) {
     return (
-      <div>
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-          <span className="material-symbols-outlined text-red-500 text-[32px] mb-2">error</span>
-          <p className="text-red-400">{t("failedToLoad", { error })}</p>
-          <button
-            onClick={fetchHealth}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
-          >
-            {t("retry")}
-          </button>
+      <HealthLayout>
+        <div>
+          <div className="bg-error/10 border border-error/30 rounded-xl p-6 text-center">
+            <Icon name="error" size={32} className="text-error mb-2" />
+            <p className="text-error">{t("failedToLoad", { error })}</p>
+            <Button variant="secondary" size="sm" onClick={fetchHealth} className="mt-4">
+              {t("retry")}
+            </Button>
+          </div>
         </div>
-      </div>
+      </HealthLayout>
     );
   }
 
@@ -247,72 +268,78 @@ function HealthSnapshot() {
   const lockoutEntries = Object.entries(lockouts || {});
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-end gap-3">
-        {lastRefresh && (
-          <span className="text-xs text-text-muted">
-            {t("updatedAt", { time: lastRefresh.toLocaleTimeString(locale) })}
-          </span>
-        )}
-        <button
-          onClick={() => {
-            fetchHealth();
-            fetchExtras();
-            fetchDbHealth();
-          }}
-          className="p-2 rounded-lg bg-surface hover:bg-surface/80 text-text-muted hover:text-text-main transition-colors"
-          title={tc("refresh")}
-        >
-          <span className="material-symbols-outlined text-[18px]">refresh</span>
-        </button>
-      </div>
-
-      {/* Status Banner */}
-      {/* Verdict Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          {data.status === "healthy"
-            ? t("healthVerdictReady")
-            : data.status === "cooling"
-              ? t("healthVerdictCoolingDown")
-              : t("healthVerdictActionRequired")}
-        </h1>
-        <p className="text-text-muted text-lg">{t("healthSubtitle")}</p>
-      </div>
-
+    <HealthLayout
+      header={
+        <PageHeader
+          compact
+          title={
+            data.status === "healthy"
+              ? t("healthVerdictReady")
+              : data.status === "cooling"
+                ? t("healthVerdictCoolingDown")
+                : t("healthVerdictActionRequired")
+          }
+          description={t("healthSubtitle")}
+          actions={
+            <>
+              {lastRefresh && (
+                <span className="text-xs text-text-muted">
+                  {t("updatedAt", { time: lastRefresh.toLocaleTimeString(locale) })}
+                </span>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                icon="refresh"
+                onClick={() => {
+                  fetchHealth();
+                  fetchExtras();
+                  fetchDbHealth();
+                }}
+                title={tc("refresh")}
+                aria-label={tc("refresh")}
+              />
+            </>
+          }
+        />
+      }
+    >
       {/* Status Details */}
       <div
         role="status"
         aria-live="polite"
         className={`rounded-xl p-4 flex items-center gap-3 ${
           data.status === "healthy"
-            ? "bg-green-500/10 border border-green-500/20"
-            : "bg-red-500/10 border border-red-500/20"
+            ? "bg-success/10 border border-success/20"
+            : "bg-error/10 border border-error/20"
         }`}
       >
-        <span
-          className={`material-symbols-outlined text-[24px] ${
-            data.status === "healthy" ? "text-green-500" : "text-red-500"
-          }`}
-        >
-          {data.status === "healthy" ? "check_circle" : "error"}
-        </span>
-        <span className={data.status === "healthy" ? "text-green-400" : "text-red-400"}>
+        <Icon
+          name={data.status === "healthy" ? "check_circle" : "error"}
+          size={24}
+          className={data.status === "healthy" ? "text-success" : "text-error"}
+        />
+        <span className={data.status === "healthy" ? "text-success" : "text-error"}>
           {data.status === "healthy" ? t("allOperational") : t("issuesDetected")}
         </span>
       </div>
 
       {/* Advanced Diagnostics Section */}
       <div className="mt-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">{t("advancedDiagnosticsTitle")}</h2>
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-primary hover:underline"
-          >
-            {showAdvanced ? t("hide") : t("show")}
-          </button>
-        </div>
+        <SectionHeader
+          className="mb-4"
+          title={t("advancedDiagnosticsTitle")}
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-expanded={showAdvanced}
+              onClick={() => setShowAdvanced(!showAdvanced)}
+            >
+              {showAdvanced ? t("hide") : t("show")}
+            </Button>
+          }
+        />
         <div className={showAdvanced ? "block" : "hidden"}>
           <TelemetryCard />
           <ProviderHealthAutopilotCard />
@@ -326,12 +353,10 @@ function HealthSnapshot() {
             <div className="flex items-center gap-3 mb-2">
               <div
                 className={`flex items-center justify-center size-9 rounded-lg ${
-                  dbHealth?.isHealthy
-                    ? "bg-green-500/10 text-green-500"
-                    : "bg-amber-500/10 text-amber-500"
+                  dbHealth?.isHealthy ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
                 }`}
               >
-                <span className="material-symbols-outlined text-[18px]">database</span>
+                <Icon name="database" size={18} />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-text-main">{t("databaseHealth")}</h2>
@@ -343,7 +368,7 @@ function HealthSnapshot() {
                 <p className="text-xs uppercase tracking-wide text-text-muted">{t("status")}</p>
                 <p
                   className={`mt-1 text-sm font-medium ${
-                    dbHealth?.isHealthy ? "text-green-400" : "text-amber-400"
+                    dbHealth?.isHealthy ? "text-success" : "text-warning"
                   }`}
                 >
                   {dbHealth?.isHealthy ? t("healthy") : t("attentionNeeded")}
@@ -364,17 +389,13 @@ function HealthSnapshot() {
             </div>
           </div>
           <div className="flex flex-col items-stretch gap-2 min-w-45">
-            <button
-              onClick={handleRepairDb}
-              disabled={repairingDb}
-              className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+            <Button variant="secondary" size="sm" onClick={handleRepairDb} loading={repairingDb}>
               {repairingDb ? t("repairing") : t("runAutoRepair")}
-            </button>
+            </Button>
             {dbHealth?.backupCreated && (
               <p className="text-xs text-text-muted">{t("repairBackupCreated")}</p>
             )}
-            {dbHealthError && <p className="text-xs text-red-400">{dbHealthError}</p>}
+            {dbHealthError && <p className="text-xs text-error">{dbHealthError}</p>}
           </div>
         </div>
         {Array.isArray(dbHealth?.issues) && dbHealth.issues.length > 0 && (
@@ -382,11 +403,11 @@ function HealthSnapshot() {
             {dbHealth.issues.map((issue, index) => (
               <div
                 key={`${issue.table}-${issue.type}-${index}`}
-                className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2"
+                className="rounded-xl border border-warning/20 bg-warning/5 px-3 py-2"
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm text-text-main">{issue.description}</p>
-                  <span className="text-xs text-amber-400">{issue.count}</span>
+                  <span className="text-xs text-warning">{issue.count}</span>
                 </div>
                 <p className="text-xs text-text-muted mt-1">
                   {issue.table} · {issue.type}
@@ -402,7 +423,7 @@ function HealthSnapshot() {
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary">
-              <span className="material-symbols-outlined text-[18px]">timer</span>
+              <Icon name="timer" size={18} />
             </div>
             <span className="text-sm text-text-muted">{t("uptime")}</span>
           </div>
@@ -411,8 +432,8 @@ function HealthSnapshot() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-blue-500/10 text-blue-500">
-              <span className="material-symbols-outlined text-[18px]">info</span>
+            <div className="flex items-center justify-center size-8 rounded-lg bg-info/10 text-info">
+              <Icon name="info" size={18} />
             </div>
             <span className="text-sm text-text-muted">{t("version")}</span>
           </div>
@@ -424,8 +445,8 @@ function HealthSnapshot() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-purple-500/10 text-purple-500">
-              <span className="material-symbols-outlined text-[18px]">memory</span>
+            <div className="flex items-center justify-center size-8 rounded-lg bg-chart-3/10 text-chart-3">
+              <Icon name="memory" size={18} />
             </div>
             <span className="text-sm text-text-muted">{t("memoryRss")}</span>
           </div>
@@ -440,8 +461,8 @@ function HealthSnapshot() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-amber-500/10 text-amber-500">
-              <span className="material-symbols-outlined text-[18px]">dns</span>
+            <div className="flex items-center justify-center size-8 rounded-lg bg-warning/10 text-warning">
+              <Icon name="dns" size={18} />
             </div>
             <span className="text-sm text-text-muted">{t("providers")}</span>
           </div>
@@ -453,18 +474,14 @@ function HealthSnapshot() {
             title={t("configuredProvidersHint")}
           >
             {t("configuredProvidersLabel")}
-            <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-              help
-            </span>
+            <Icon name="help" size={12} />
           </p>
           <p
             className="text-xs text-text-muted inline-flex items-center gap-1"
             title={t("activeProvidersHint")}
           >
             {t("activeProviders", { count: providerSummary?.activeCount ?? 0 })}
-            <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-              info
-            </span>
+            <Icon name="info" size={12} />
           </p>
           <p
             className="text-xs text-text-muted inline-flex items-center gap-1"
@@ -473,9 +490,7 @@ function HealthSnapshot() {
             {t("monitoredProviders", {
               count: providerSummary?.monitoredCount ?? cbEntries.length,
             })}
-            <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-              info
-            </span>
+            <Icon name="info" size={12} />
           </p>
         </Card>
       </div>
@@ -485,7 +500,7 @@ function HealthSnapshot() {
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-primary">groups</span>
+              <Icon name="groups" size={20} className="text-primary" />
               {t("sessionActivity")}
             </h2>
             <span className="text-xs text-text-muted">
@@ -539,7 +554,7 @@ function HealthSnapshot() {
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-primary">radar</span>
+              <Icon name="radar" size={20} className="text-primary" />
               {t("quotaMonitors")}
             </h2>
             <span className="text-xs text-text-muted">
@@ -549,19 +564,19 @@ function HealthSnapshot() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
               <div className="text-xs text-text-muted">{t("alerting")}</div>
-              <div className="text-2xl font-semibold text-amber-400 mt-1">
+              <div className="text-2xl font-semibold text-warning mt-1">
                 {quotaMonitor?.alerting ?? 0}
               </div>
             </div>
             <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
               <div className="text-xs text-text-muted">{t("limitExhausted")}</div>
-              <div className="text-2xl font-semibold text-red-400 mt-1">
+              <div className="text-2xl font-semibold text-error mt-1">
                 {quotaMonitor?.exhausted ?? 0}
               </div>
             </div>
             <div className="rounded-xl border border-border/40 bg-surface/30 p-3">
               <div className="text-xs text-text-muted">{t("errors")}</div>
-              <div className="text-2xl font-semibold text-orange-400 mt-1">
+              <div className="text-2xl font-semibold text-warning mt-1">
                 {quotaMonitor?.errors ?? 0}
               </div>
             </div>
@@ -591,11 +606,11 @@ function HealthSnapshot() {
                     <div
                       className={
                         monitor.status === "exhausted"
-                          ? "text-red-400"
+                          ? "text-error"
                           : monitor.status === "warning"
-                            ? "text-amber-400"
+                            ? "text-warning"
                             : monitor.status === "error"
-                              ? "text-orange-400"
+                              ? "text-warning"
                               : "text-text-main"
                       }
                     >
@@ -623,20 +638,20 @@ function HealthSnapshot() {
         <Card className="p-5" role="region" aria-label={t("gracefulDegradationStatus")}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-primary">healing</span>
+              <Icon name="healing" size={20} className="text-primary" />
               {t("gracefulDegradationStatus")}
             </h2>
             <div className="flex items-center gap-3 text-xs text-text-muted font-medium">
-              <span className="px-2 py-0.5 rounded bg-green-500/10 text-green-400">
+              <span className="px-2 py-0.5 rounded bg-success/10 text-success">
                 {t("degradationFull")}: {degradation.summary.full}
               </span>
-              <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-500">
+              <span className="px-2 py-0.5 rounded bg-warning/10 text-warning">
                 {t("degradationReduced")}: {degradation.summary.reduced}
               </span>
-              <span className="px-2 py-0.5 rounded bg-orange-500/10 text-orange-500">
+              <span className="px-2 py-0.5 rounded bg-warning/10 text-warning">
                 {t("degradationMinimal")}: {degradation.summary.minimal}
               </span>
-              <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-500">
+              <span className="px-2 py-0.5 rounded bg-error/10 text-error">
                 {t("degradationDefault")}: {degradation.summary.default}
               </span>
             </div>
@@ -645,27 +660,27 @@ function HealthSnapshot() {
             {degradation.features.map((feat: any) => {
               const bg =
                 feat.level === "full"
-                  ? "bg-green-500/5 border-green-500/10"
+                  ? "bg-success/5 border-success/10"
                   : feat.level === "reduced"
-                    ? "bg-amber-500/5 border-amber-500/20"
+                    ? "bg-warning/5 border-warning/20"
                     : feat.level === "minimal"
-                      ? "bg-orange-500/5 border-orange-500/20"
-                      : "bg-red-500/5 border-red-500/20";
+                      ? "bg-warning/5 border-warning/20"
+                      : "bg-error/5 border-error/20";
               const dot =
                 feat.level === "full"
-                  ? "bg-green-500"
+                  ? "bg-success"
                   : feat.level === "reduced"
-                    ? "bg-amber-500"
+                    ? "bg-warning"
                     : feat.level === "minimal"
-                      ? "bg-orange-500"
-                      : "bg-red-500";
+                      ? "bg-warning"
+                      : "bg-error";
               return (
                 <div
                   key={feat.feature}
                   className={`rounded-lg p-3 border ${bg} flex flex-col gap-2`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold capitalize flex items-center gap-2 text-(--text-primary,#fff)">
+                    <span className="text-sm font-semibold capitalize flex items-center gap-2 text-text-main">
                       <span className={`w-2 h-2 rounded-full ${dot}`}></span>
                       {feat.feature}
                     </span>
@@ -673,16 +688,16 @@ function HealthSnapshot() {
                       {feat.level}
                     </span>
                   </div>
-                  <div className="text-xs text-(--text-secondary,#aaa)">{feat.capability}</div>
+                  <div className="text-xs text-text-muted">{feat.capability}</div>
                   {feat.reason && (
                     <div
-                      className="text-[10px] text-red-300 mt-1 bg-red-900/20 p-1.5 rounded"
+                      className="text-[10px] text-error mt-1 bg-error/20 p-1.5 rounded"
                       title={feat.reason}
                     >
                       {feat.reason.length > 80 ? feat.reason.substring(0, 80) + "..." : feat.reason}
                     </div>
                   )}
-                  <div className="text-[10px] text-(--text-muted,#666) text-right mt-1">
+                  <div className="text-[10px] text-text-muted text-right mt-1">
                     {t("sinceTime", {
                       time: new Date(feat.since).toLocaleTimeString(locale),
                     })}
@@ -699,7 +714,7 @@ function HealthSnapshot() {
         {/* Prompt Cache Card */}
         <Card className="p-4">
           <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">cached</span>
+            <Icon name="cached" size={18} />
             {t("promptCache")}
           </h3>
           {cache ? (
@@ -729,7 +744,7 @@ function HealthSnapshot() {
         {/* Signature Cache Card */}
         <Card className="p-4">
           <h3 className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">database</span>
+            <Icon name="database" size={18} />
             {t("signatureCache")}
           </h3>
           {signatureCache ? (
@@ -743,17 +758,17 @@ function HealthSnapshot() {
                 {
                   label: t("signatureTool"),
                   value: `${signatureCache.tool.entries}/${signatureCache.tool.patterns}`,
-                  color: "text-blue-400",
+                  color: "text-info",
                 },
                 {
                   label: t("signatureFamily"),
                   value: `${signatureCache.family.entries}/${signatureCache.family.patterns}`,
-                  color: "text-purple-400",
+                  color: "text-chart-3",
                 },
                 {
                   label: t("signatureSession"),
                   value: `${signatureCache.session.entries}/${signatureCache.session.patterns}`,
-                  color: "text-cyan-400",
+                  color: "text-info",
                 },
               ].map(({ label, value, color }) => (
                 <div
@@ -775,48 +790,33 @@ function HealthSnapshot() {
       <Card className="p-5" role="region" aria-label={t("providerHealthStatusAria")}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-            <span className="material-symbols-outlined text-[20px] text-primary">
-              health_and_safety
-            </span>
+            <Icon name="health_and_safety" size={20} className="text-primary" />
             {t("providerHealth")}
           </h2>
           <div className="flex items-center gap-3">
             {cbEntries.some(([, cb]: [string, any]) => cb.state !== "CLOSED") && (
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={handleResetHealth}
-                disabled={resetting}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  resetting
-                    ? "bg-surface/50 text-text-muted cursor-wait"
-                    : "bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 border border-red-500/20"
-                }`}
+                loading={resetting}
+                icon="restart_alt"
                 title={t("resetAllTitle")}
+                className="text-xs"
               >
-                {resetting ? (
-                  <>
-                    <span className="material-symbols-outlined text-[14px] animate-spin">
-                      progress_activity
-                    </span>
-                    {t("resetting")}
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-                    {t("resetAll")}
-                  </>
-                )}
-              </button>
+                {resetting ? t("resetting") : t("resetAll")}
+              </Button>
             )}
             {cbEntries.length > 0 && (
               <div className="flex items-center gap-3 text-xs text-text-muted">
                 <span className="flex items-center gap-1">
-                  <span className="size-2 rounded-full bg-green-500" /> {t("healthy")}
+                  <span className="size-2 rounded-full bg-success" /> {t("healthy")}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="size-2 rounded-full bg-amber-500" /> {t("recovering")}
+                  <span className="size-2 rounded-full bg-warning" /> {t("recovering")}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="size-2 rounded-full bg-red-500" /> {t("down")}
+                  <span className="size-2 rounded-full bg-error" /> {t("down")}
                 </span>
               </div>
             )}
@@ -833,7 +833,7 @@ function HealthSnapshot() {
                 {/* Unhealthy providers first */}
                 {unhealthy.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-red-400 uppercase tracking-wide">
+                    <p className="text-xs font-medium text-error uppercase tracking-wide">
                       {t("issuesLabel")}
                     </p>
                     {unhealthy.map(([provider, cb]: [string, any]) => {
@@ -846,13 +846,13 @@ function HealthSnapshot() {
                       return (
                         <div
                           key={provider}
-                          className={`rounded-lg p-3 ${style.bg} border border-white/5 flex items-center gap-3`}
+                          className={`rounded-lg p-3 ${style.bg} border border-border flex items-center gap-3`}
                         >
                           <div
                             className="size-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold"
                             style={{
-                              backgroundColor: `${providerInfo?.color || "#888"}15`,
-                              color: providerInfo?.color || "#888",
+                              backgroundColor: `color-mix(in srgb, ${providerInfo?.color || "var(--color-text-muted)"} 8%, transparent)`,
+                              color: providerInfo?.color || "var(--color-text-muted)",
                             }}
                           >
                             {providerInfo?.textIcon || provider.slice(0, 2).toUpperCase()}
@@ -895,7 +895,7 @@ function HealthSnapshot() {
                 {healthy.length > 0 && (
                   <div>
                     {unhealthy.length > 0 && (
-                      <p className="text-xs font-medium text-green-400 uppercase tracking-wide mb-2">
+                      <p className="text-xs font-medium text-success uppercase tracking-wide mb-2">
                         {t("operational")}
                       </p>
                     )}
@@ -909,9 +909,9 @@ function HealthSnapshot() {
                         return (
                           <div
                             key={provider}
-                            className="rounded-lg p-2.5 bg-green-500/5 border border-white/5 flex items-center gap-2"
+                            className="rounded-lg p-2.5 bg-success/5 border border-border flex items-center gap-2"
                           >
-                            <span className="size-2 rounded-full bg-green-500 shrink-0" />
+                            <span className="size-2 rounded-full bg-success shrink-0" />
                             <span
                               className="text-xs font-medium text-text-main truncate"
                               title={displayName}
@@ -967,9 +967,7 @@ function HealthSnapshot() {
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[20px] text-amber-500">
-                    speed
-                  </span>
+                  <Icon name="speed" size={20} className="text-warning" />
                   {t("rateLimitStatus")}
                 </h2>
                 <span className="text-xs text-text-muted">
@@ -1010,12 +1008,12 @@ function HealthSnapshot() {
                         key={key}
                         className={`rounded-lg p-3 border transition-colors ${
                           exhausted
-                            ? "bg-red-500/5 border-red-500/20"
+                            ? "bg-error/5 border-error/20"
                             : isQueued || lowRemaining
-                              ? "bg-amber-500/5 border-amber-500/20"
+                              ? "bg-warning/5 border-warning/20"
                               : isActive
-                                ? "bg-blue-500/5 border-blue-500/15"
-                                : "bg-surface/30 border-white/5"
+                                ? "bg-info/5 border-info/15"
+                                : "bg-surface/30 border-border"
                         }`}
                         title={key}
                       >
@@ -1023,8 +1021,8 @@ function HealthSnapshot() {
                           <div
                             className="size-7 rounded-md flex items-center justify-center shrink-0 text-[10px] font-bold"
                             style={{
-                              backgroundColor: `${providerInfo?.color || "#888"}15`,
-                              color: providerInfo?.color || "#888",
+                              backgroundColor: `color-mix(in srgb, ${providerInfo?.color || "var(--color-text-muted)"} 8%, transparent)`,
+                              color: providerInfo?.color || "var(--color-text-muted)",
                             }}
                           >
                             {providerInfo?.textIcon || displayName.slice(0, 2).toUpperCase()}
@@ -1047,12 +1045,12 @@ function HealthSnapshot() {
                           <span
                             className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                               exhausted
-                                ? "bg-red-500/15 text-red-400"
+                                ? "bg-error/15 text-error"
                                 : isQueued || lowRemaining
-                                  ? "bg-amber-500/15 text-amber-400"
+                                  ? "bg-warning/15 text-warning"
                                   : isActive
-                                    ? "bg-blue-500/15 text-blue-400"
-                                    : "bg-green-500/10 text-green-400"
+                                    ? "bg-info/15 text-info"
+                                    : "bg-success/10 text-success"
                             }`}
                           >
                             {exhausted
@@ -1075,29 +1073,32 @@ function HealthSnapshot() {
                                 })}
                               </span>
                             </div>
-                            <div className="h-2 overflow-hidden rounded-full bg-surface/70">
-                              <div
-                                className={`h-full rounded-full ${
+                            {/* Kit Progress, decorative: the kit spreads aria-* onto its outer div and
+                                never names the inner role="progressbar" (no label forwarding), so the
+                                bar is hidden from assistive tech — the remaining/limit text above
+                                carries the value. No tone prop either: status colour on the indicator. */}
+                            <div aria-hidden="true" data-testid="health-pool-bar">
+                              <Progress
+                                value={quotaProgress}
+                                animate={false}
+                                className={
                                   exhausted
-                                    ? "bg-red-500"
+                                    ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-error"
                                     : lowRemaining
-                                      ? "bg-amber-500"
-                                      : "bg-emerald-500"
-                                }`}
-                                style={{ width: `${quotaProgress}%` }}
+                                      ? "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-warning"
+                                      : "[&_.ci-progress__indicator]:bg-none [&_.ci-progress__indicator]:bg-success"
+                                }
                               />
                             </div>
                           </div>
                         )}
                         <div className="flex items-center gap-3 text-[11px] text-text-muted">
                           <span className="flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[12px]">schedule</span>
+                            <Icon name="schedule" size={12} />
                             {t("queuedCount", { count: status.queued || 0 })}
                           </span>
                           <span className="flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[12px]">
-                              play_arrow
-                            </span>
+                            <Icon name="play_arrow" size={12} />
                             {t("runningCount", { count: status.running || 0 })}
                           </span>
                         </div>
@@ -1129,21 +1130,19 @@ function HealthSnapshot() {
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-red-500">lock</span>
+              <Icon name="lock" size={20} className="text-error" />
               {t("activeLockouts")}
             </h2>
-            <button
+            <Button
+              variant="warning"
+              size="sm"
+              icon="lock_open"
               onClick={handleUnblockAll}
               disabled={unblocking}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
-                bg-amber-500/10 border border-amber-500/30 text-amber-600
-                hover:bg-amber-500/15 hover:border-amber-500/50
-                dark:text-amber-400 transition-all duration-200
-                disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-xs"
             >
-              <span className="material-symbols-outlined text-[16px]">lock_open</span>
               {unblocking ? "Unblocking..." : "Unblock all"}
-            </button>
+            </Button>
           </div>
           <div className="space-y-2">
             {lockoutEntries.map(([key, lockout]: [string, any]) => {
@@ -1153,7 +1152,7 @@ function HealthSnapshot() {
               return (
                 <div
                   key={key}
-                  className="rounded-lg p-3 bg-red-500/5 border border-red-500/10 flex items-center justify-between"
+                  className="rounded-lg p-3 bg-error/5 border border-error/10 flex items-center justify-between"
                 >
                   <div className="min-w-0">
                     <span className="text-sm font-medium text-text-main">
@@ -1163,29 +1162,27 @@ function HealthSnapshot() {
                       <span className="text-xs text-text-muted ml-2">({lockout.reason})</span>
                     )}
                     {lockout.until && (
-                      <span className="text-xs text-red-400 ml-2">
+                      <span className="text-xs text-error ml-2">
                         until {new Date(lockout.until).toLocaleTimeString()}
                       </span>
                     )}
                   </div>
-                  <button
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    icon="lock_open"
                     onClick={() => handleUnblockOne(lockProvider, lockModel)}
                     disabled={unblockingKey === lockKey}
-                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg
-                      bg-amber-500/10 border border-amber-500/20 text-amber-600
-                      hover:bg-amber-500/15 hover:border-amber-500/40
-                      dark:text-amber-400 transition-all duration-200
-                      disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    className="h-7 min-h-7 shrink-0 px-2.5 text-xs"
                   >
-                    <span className="material-symbols-outlined text-[14px]">lock_open</span>
                     {unblockingKey === lockKey ? "..." : "Unblock"}
-                  </button>
+                  </Button>
                 </div>
               );
             })}
           </div>
         </Card>
       )}
-    </div>
+    </HealthLayout>
   );
 }

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  buildMacPlistContent,
   parseAgentSelfFromLaunchctl,
   isLaunchdAgentLoaded,
 } from "../../../bin/cli/tray/autostart.mjs";
@@ -93,7 +94,7 @@ test("enable/disable macOS skip launchctl when the current process is the agent"
 });
 
 test("macOS autostart starts detached tray mode without a dashboard window", () => {
-  const source = readFileSync(join(process.cwd(), "bin/cli/tray/autostart.mjs"), "utf8");
+  const source = buildMacPlistContent("/opt/omniroute/omniroute.mjs");
   const programArguments = source.match(/<key>ProgramArguments<\/key><array>([\s\S]*?)<\/array>/);
 
   assert.ok(programArguments);

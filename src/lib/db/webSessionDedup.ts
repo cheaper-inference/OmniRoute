@@ -37,6 +37,19 @@ const PREFERRED_CREDENTIAL_KEYS = [
   "sso",
   "access_token",
   "accessToken",
+  // Nonstandard provider console cookies used for web-session imports.
+  // They must precede the generic alphabetical fallback: baseUrl, username
+  // or workspaceId identifies a host/account display, NOT its session.
+  // Without these, two cookies from the same host can overwrite each other.
+  "authCookie",
+  "qwenCloudCookie",
+  "volcConsoleCookie",
+  "alibabaConsoleCookie",
+  "xiaomiMimoConsoleCookie",
+  "ollamaCloudCookie",
+  "ollamaCloudUsageCookie",
+  "ollamaUsageCookie",
+  "usageCookie",
 ];
 
 /** First trimmed non-empty string value among `keys` of `rec`, else null. */

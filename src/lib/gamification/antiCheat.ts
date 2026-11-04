@@ -51,6 +51,11 @@ export async function validateScoreChange(
   _action: string,
   amount: number
 ): Promise<ScoreValidation> {
+  // A non-finite or negative amount would slip past (or offset) the window total.
+  if (!Number.isFinite(amount) || amount < 0) {
+    return { allowed: false, reason: "Invalid XP amount" };
+  }
+
   // Rate limiting: max XP per window
   const recentXp = await getRecentXp(apiKeyId, RATE_LIMIT_WINDOW_MS);
   if (recentXp + amount > MAX_XP_PER_WINDOW) {

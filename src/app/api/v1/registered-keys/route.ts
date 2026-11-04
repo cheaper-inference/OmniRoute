@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { issueRegisteredKey, checkQuota, listRegisteredKeys } from "@/lib/db/registeredKeys";
+
+// Registered keys are provider credentials the operator manages, so this surface is
+// management-only like /api/keys: dashboard session, local CLI token, or an API key with
+// `manage`/`admin` scope. The /api/v1/ prefix is otherwise the inference surface, where any
+// active API key passes — that is why the guard is explicit here instead of isAuthenticated().
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
@@ -23,9 +28,8 @@ const issueKeySchema = z.object({
  * Optional query params: ?provider=&accountId=
  */
 export async function GET(request: Request) {
-  if (!(await isAuthenticated(request))) {
-    return NextResponse.json({ error: { message: "Authentication required" } }, { status: 401 });
-  }
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
 
   const { searchParams } = new URL(request.url);
   const provider = searchParams.get("provider") ?? undefined;
@@ -50,9 +54,8 @@ export async function GET(request: Request) {
  * Subsequent fetches will only return the masked prefix.
  */
 export async function POST(request: Request) {
-  if (!(await isAuthenticated(request))) {
-    return NextResponse.json({ error: { message: "Authentication required" } }, { status: 401 });
-  }
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
 
   let rawBody: unknown;
   try {

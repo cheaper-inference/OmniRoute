@@ -125,22 +125,31 @@ not use OAuth refresh, so it avoids shared OIDC session invalidation.
 
 1. Open **Dashboard -> Providers -> Kiro**.
 2. Choose **API Key**.
-3. Paste the API key and optional AWS region (`us-east-1` by default).
-4. OmniRoute validates the key and saves the connection.
+3. Paste the API key and pick the AWS region: **Auto-detect** (default), **US East
+   (N. Virginia)** or **Europe (Frankfurt)**.
+4. OmniRoute validates the key and saves the connection pinned to the region where the
+   key works.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` accepts `auto` (default), `us-east-1` or `eu-central-1`; any other value is
+rejected with HTTP 400.
 
 ### Internal Contract
 
 The API route validates the key by calling `KiroService.validateApiKey()`, which
-uses `ListAvailableProfiles` against the region-matched CodeWhisperer/Amazon Q
-endpoint and resolves a `profileArn`.
+calls `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(the Amazon Q surface API-key inference uses) with a 10 s timeout per region. In
+`auto` mode it tries `us-east-1`, then `eu-central-1`, and stores the first region
+that accepts the key. A key rejected in every candidate region fails the import with
+HTTP 400. `ListAvailableProfiles` is then called best-effort to discover an optional
+`profileArn` (AWS denies it for most API keys).
 
 The saved connection uses:
 
@@ -158,7 +167,10 @@ The saved connection uses:
 At runtime, `KiroExecutor.buildHeaders()` sends the key as
 `Authorization: Bearer <key>` and adds `tokentype: API_KEY`. Quota/profile calls
 use the same marker so AWS treats the bearer as a long-lived API key rather than
-an OIDC or social access token.
+an OIDC or social access token. `KiroExecutor.execute()` sends API-key inference only
+to `https://q.<region>.amazonaws.com/generateAssistantResponse` — `us-east-1`
+included — because the Kiro IDE gateway rejects `TokenType=API_KEY` and
+`codewhisperer.us-east-1` rejects API-key payloads as an invalid request body (HTTP 400).
 
 ---
 

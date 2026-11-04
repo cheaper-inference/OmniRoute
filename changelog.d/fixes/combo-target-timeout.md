@@ -1,1 +1,0 @@
-- **fix(sse):** honor an explicit combo target timeout when it is longer than the upstream request timeout ([#16309](https://github.com/diegosouzapw/OmniRoute/pull/16309)) — thanks @jacobsparts

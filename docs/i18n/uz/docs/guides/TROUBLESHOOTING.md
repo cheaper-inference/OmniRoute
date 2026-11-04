@@ -33,37 +33,37 @@ OmniRoute uchun keng tarqalgan muammolar va ularning yechimlari.
 
 ---
 
-## Batafsil nosozliklarni bartaraf etish
+## Muammolarni batafsil bartaraf etish
 
 ---
 
 ### Bepul provayderlarda soʻrovlar tezligini cheklash (429 / 400 / 401)
 
-**Alomat**: Bepul/autentifikatsiyasiz provayderlar (opencode, auggie va boshqalar) bilan `model: "auto"`dan foydalanganda, vaqti-vaqti bilan javoblar oʻrniga `HTTP 429`, `400` yoki `401` xatolarini olasiz. Birozdan keyin ayni soʻrovni qayta yuborsangiz, u muvaffaqiyatli bajariladi, ammo avtomatlashtirish vositalari (cron vazifalari, agentlar, skriptlar) birinchi xatolikdayoq toʻxtab qoladi.
+**Alomat**: Bepul/autentifikatsiyasiz provayderlar (auggie va boshqalar) bilan `model: "auto"` ishlatilganda, vaqti-vaqti bilan javoblar oʻrniga `HTTP 429`, `400` yoki `401` olinadi. Bir necha lahzadan keyin ayni soʻrov qayta yuborilsa, u muvaffaqiyatli bajariladi, ammo avtomatlashtirish vositalari (cron vazifalari, agentlar, skriptlar) birinchi xatolikdayoq toʻxtaydi.
 
-**Asosiy sabab**: Uchta mustaqil xatolik holati bir-birining ustiga qoʻshiladi:
+**Asosiy sabab**: Uchta mustaqil xatolik holati bir-birining ustiga tushadi:
 
-1. **Provayderning soʻrovlar tezligi cheklovi (`429`)**: Bepul tariflarda muayyan vaqt oraligʻi uchun kvota qoʻllanishi mumkin. Parallel chaqiruvlar oqimi uni tugatadi, shuning uchun vaqt oynasi qayta tiklanmaguncha keyingi soʻrov rad etiladi.
-2. **Toʻgʻridan-toʻgʻri uzatishdagi ishlamaydigan model (`400`/`401`)**: `auto/*` havzalari `opencode` katalogida roʻyxatdan oʻtgan, ammo amaldagi hisob maʼlumotlariga ega boʻlmagan toʻgʻridan-toʻgʻri uzatish modellarini oʻz ichiga olishi mumkin (masalan, `oc/north-mini-code-free` → `401`). Avtomatik marshrutizator ulardan birini sinaydi, muvaffaqiyatsizlikka uchraydi va zaxira variant ishga tushishidan oldin xatolik uzatiladi.
-3. **Parallellikning kuchayishi (yuklama ostida `429`)**: Bir nechta agent/cron seansi bir vaqtning oʻzida `auto`ga murojaat qilganda, umumiy soʻrov tezligi bepul provayderlar bardosh bera oladigan chegaradan oshadi, natijada haqiqiy chaqiruvlar zararli deb belgilanadi.
+1. **Provayder tezlik cheklovi (`429`)**: Bepul tariflar muayyan vaqt oraligʻi uchun kvota belgilashi mumkin. Parallel chaqiruvlar oqimi uni tugatib qoʻyadi, shuning uchun vaqt oraligʻi yangilanguncha keyingi soʻrov rad etiladi.
+2. **Toʻgʻridan-toʻgʻri uzatishdagi ishlamaydigan model (`400`/`401`)**: `auto/*` pullari katalogda roʻyxatdan oʻtgan, ammo amaldagi hisob maʼlumotlariga ega boʻlmagan toʻgʻridan-toʻgʻri uzatish modellarini oʻz ichiga olishi mumkin (→ `401`). Avtomatik yoʻnaltirgich ulardan birini sinab koʻradi, muvaffaqiyatsizlikka uchraydi va zaxira variant ishga tushishidan oldin xatolik uzatiladi.
+3. **Parallel bajarish tufayli kuchayish (yuklama ostida `429`)**: Bir nechta agent/cron seanslari bir vaqtda `auto`ga murojaat qilganda, umumiy soʻrov tezligi bepul provayderlar bardosh bera oladigan darajadan oshadi va shu sababli qonuniy chaqiruvlar suiisteʼmol sifatida belgilanadi.
 
-**Tasdiqlangan yechim (hamjamiyat xabari, 2026-08-10)**: rotatsiya, parallellik va zaxira variantiga oʻtish bepul tarifdagi beqarorlikni xatolik bilan yakunlash oʻrniga oʻzlashtirishi uchun uchta muhit oʻzgaruvchisini sozlang:
+**Tasdiqlangan yechim (hamjamiyat xabariga koʻra, 2026-08-10)**: rotatsiya, parallel bajarish va zaxira mexanizmi bepul tarifdagi beqarorlikni xatolik bilan yakunlash oʻrniga oʻzlashtirishi uchun uchta muhit oʻzgaruvchisini sozlang:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 holatida boshqa model/provayderga oʻtadi (ishlamaydigan toʻgʻridan-toʻgʻri uzatish modellarini chetlab oʻtadi)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ogʻir soʻrovlarni qabul qilishning aniq yuqori chegarasi (birlamchi holatda oʻrnatilmagan: soʻrovlar soniga cheklov yoʻq, quyidagi izohga qarang)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # sekin yuqori oqimlar uchun cheklangan kutish vaqtini RATE_LIMIT_MAX_WAIT_MS standart qiymatidan oshiradi
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 yuz berganda boshqa model/provayderga oʻtish (ishlamaydigan toʻgʻridan-toʻgʻri uzatish modellarini chetlab oʻtadi)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ogʻir soʻrovlarni qabul qilishning aniq yuqori chegarasi (standart holatda oʻrnatilmagan: soʻrovlar soni cheklanmaydi, quyidagi izohga qarang)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # sekin yuqori oqimlar uchun cheklangan kutish vaqtini standart RATE_LIMIT_MAX_WAIT_MS qiymatidan oshirish
 ```
 
-Bularni OmniRoute jarayoni muhitida (demon uchun, masalan, LaunchAgent plist yoki `systemctl edit` orqali) oʻrnating, soʻng OmniRoute xizmatini qayta ishga tushiring. Rotatsiya bayrogʻi eng katta samara beradigan yagona vositadir: u jiddiy xatolikni havzadagi sogʻlom provayder orqali shaffof qayta urinishga aylantiradi.
+Bularni OmniRoute jarayoni muhitida (demon uchun, masalan, LaunchAgent plist yoki `systemctl edit` orqali) oʻrnating, soʻng OmniRouteʼni qayta ishga tushiring. Rotatsiya bayrogʻi eng katta taʼsirga ega vositadir: u jiddiy xatolikni puldagi sogʻlom provayder orqali shaffof tarzda qayta urinishga aylantiradi.
 
-**Izoh**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` bir vaqtda bajariladigan ogʻir — uzun kontekstli — soʻrovlar sonini cheklaydi; bu chegara provayder soʻrovlari tezligini cheklovchi vosita emas, balki qabul qilish shlyuzidir. **#503-fanout yangilanishi:** endi bu oʻzgaruvchi birlamchi holatda oʻrnatilmaydi (endi u faqat yuqoridagi kabi aniq sozlanganda kuchga kiradi) — ogʻir soʻrovlarni qabul qilish oʻrniga xostning haqiqiy xotira chegarasiga qarab avtomatik miqyoslanadigan, avtomatik hosil qilingan bayt budjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) orqali boshqariladi. Shu sababli yangi oʻrnatilgan tizim bu oʻzgaruvchini umuman sozlamasdan ham ancha kamroq `503 chat_admission_busy` rad etishlarini koʻrishi kerak; uni bu yerda aniq oʻrnatish ham hujjatlarda koʻrsatilganidek ishlashda davom etadi. Bayt budjetining aniq qayta belgilangan qiymatlari 8 MiB–2 GiB oraligʻi bilan cheklanadi. `413 body_exceeds_budget` vaqtinchalik emas: ushbu bayt budjetini oshiring, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` qiymatini kamaytiring yoki jarayon xotirasi chegarasini oshiring. `inflight_bytes_budget` sababli yuklamani kamaytirish vaqtinchalik resurs raqobati boʻlib, qayta urinish mumkin. Har bir provayder uchun soʻrovlar tezligini cheklash (`open-sse/services/rateLimitManager.ts`) alohida ravishda `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` va `RATE_LIMIT_AUTO_ENABLE` orqali boshqariladi — `.env.example` fayliga qarang.
+**Izoh**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` bir vaqtda qancha ogʻir — uzun kontekstli — soʻrov bajarilishini cheklaydi; bu chegara provayderning tezlik cheklovchisi emas, balki qabul qilish toʻsigʻidir. **#503-fanout yangilanishi:** bu oʻzgaruvchi endi standart holatda oʻrnatilmaydi (endi u faqat yuqoridagidek aniq sozlanganda amal qiladi) — ogʻir soʻrovlarni qabul qilish buning oʻrniga xostning haqiqiy xotira chegarasiga qarab avtomatik miqyoslanadigan, avtomatik aniqlangan bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) bilan boshqariladi. Shu sababli yangi joylashtirishda bu oʻzgaruvchi umuman oʻrnatilmasa ham `503 chat_admission_busy` rad etishlari ancha kamayishi kerak; uni bu yerda aniq oʻrnatish hali ham hujjatlashtirilganidek ishlaydi. Bayt byudjetining aniq qayta belgilangan qiymatlari 8 MiB–2 GiB oraligʻida cheklanadi. `413 body_exceeds_budget` vaqtinchalik emas: ushbu bayt byudjetini oshiring, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` qiymatini kamaytiring yoki jarayon xotirasi chegarasini oshiring. `inflight_bytes_budget` tufayli yuklamani kamaytirish vaqtinchalik resurs talashuvidir va qayta urinish mumkin boʻlib qoladi. Har bir provayder uchun tezlik cheklovi (`open-sse/services/rateLimitManager.ts`) `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` va `RATE_LIMIT_AUTO_ENABLE` orqali alohida boshqariladi — `.env.example` fayliga qarang.
 
-**Ishlaganini qanday tekshirish mumkin**: agent/cron’ingizni ketma-ket ikki marta tezda ishga tushiring va har ikkala ishga tushirish ham muvaffaqiyatli yakunlanganini tasdiqlang. Tuzatishdan oldin ikkinchi ishga tushirish odatda `429`/`401` xatosini chiqaradi. Tuzatishdan keyin xatolar (agar yuz bersa) avtomatik tarzda qayta urinib ko‘riladi va chaqiruv yakunlanadi. Shuningdek, `curl /monitoring/health` buyrug‘ini bajarib, provayder ulanishlaridagi `rateLimitedUntil` maydonini va ta’sirlangan provayderlar uchun `circuitBreakers.providerBreakers[].state` qiymatini kuzatishingiz mumkin — holat `CLOSED`, `DEGRADED`, `OPEN` yoki `HALF_OPEN` qiymatlaridan biri bo‘ladi (`src/shared/utils/circuitBreaker.ts` fayliga qarang); xato berishda davom etayotgan provayder tiklash oralig‘i sinov so‘rovini o‘tkazishga imkon bermaguncha (`HALF_OPEN`) `CLOSED → DEGRADED → OPEN` holatlariga o‘tadi.
+**Ishlaganini tekshirish usuli**: agent/cronʼni ketma-ket ikki marta tezda ishga tushiring va ikkalasi ham muvaffaqiyatli bajarilganini tasdiqlang. Tuzatishdan oldin ikkinchi ishga tushirish odatda `429`/`401` xatoligini chiqaradi. Tuzatishdan keyin xatoliklar (agar boʻlsa) shaffof tarzda qayta uriniladi va chaqiruv yakunlanadi. Shuningdek, `curl /monitoring/health` buyrugʻini bajarib, provayder ulanishlaridagi `rateLimitedUntil` maydonini hamda muammoga duch kelgan provayderlar uchun `circuitBreakers.providerBreakers[].state` qiymatini kuzatishingiz mumkin — holat `CLOSED`, `DEGRADED`, `OPEN` yoki `HALF_OPEN` qiymatlaridan biri boʻladi (`src/shared/utils/circuitBreaker.ts` fayliga qarang). Xatolik berishda davom etadigan provayder uchun holat tiklash oraligʻi sinov soʻrovini oʻtkazishga ruxsat berishidan (`HALF_OPEN`) oldin `CLOSED → DEGRADED → OPEN` tartibida oʻzgaradi.
 
-**Agar hali ham 429 xatosini ko‘rsangiz**: ushbu provayder uchun faol hisob o‘z _kvotasini_ (faqat so‘rov tezligi cheklovini emas) amalda tugatgan. OmniRoute boshqaruv panelidagi Providers → Accounts bo‘limida ayni provayder uchun ikkinchi hisobni qo‘shing yoki boshqa bepul provayderni (masalan, `routeway`, `auggie`) ham ishlating. Almashtirib ishlatish faqat vaqtinchalik tezlik cheklovi/400/401 xatolarida yordam beradi; kvota butunlay tugagan bo‘lsa, ikkinchi hisob ma’lumotlari yoki boshqa provayder talab qilinadi.
+**Agar hali ham 429 koʻrsangiz**: ushbu provayderning faol hisobi haqiqatan ham oʻz _kvotasini_ tugatgan (faqat tezlik chegarasiga yetmagan). OmniRoute boshqaruv paneli → Providers → Accounts boʻlimida ayni provayder uchun ikkinchi hisobni qoʻshing yoki boshqa bepul provayderni (masalan, `routeway`, `auggie`) ham qoʻshing. Rotatsiya faqat vaqtinchalik tezlik/400/401 muammolarida yordam beradi; kvotaning toʻliq tugashi ikkinchi hisob maʼlumoti yoki boshqa provayderni talab qiladi.
 
-**Agar ko‘rish modellarida (`auto/vision`, `bazaarlink/*`) 403 xatosini ko‘rsangiz**: ulangan hisobda ko‘rish imkoniyatini o‘z ichiga oluvchi pulli tarif yo‘q yoki API kalitining ruxsatlari yetarli emas. Provayder boshqaruv panelida kalit doirasi ko‘rish/multimodal imkoniyatlarini o‘z ichiga olishini tekshiring yoki pulli tarifdagi hisobni ulang va uni ko‘rish uchun maqsadli hisob sifatida saqlang.
+**Agar koʻrish modellarida (`auto/vision`, `bazaarlink/*`) 403 koʻrsangiz**: ulangan hisob koʻrish imkoniyatini oʻz ichiga oluvchi pulli tarifga ega emas yoki API kalitining ruxsatlari yetarli emas. Provayder boshqaruv panelida kalit doirasi koʻrish/multimodal imkoniyatlarini oʻz ichiga olishini tekshiring yoki pulli tarifdagi hisobni ulang va uni koʻrish uchun maqsad sifatida saqlang.
 
 ---
 
@@ -90,48 +90,48 @@ Ogohlantirishlar OmniRoute nazorat qilmaydigan uchinchi tomon paketlaridagi eski
 
 ---
 
-## npm install-scripts bloklanganligi haqidagi ogohlantirish (global oʻrnatish)
+## npm install-scripts bloklangani haqidagi ogohlantirish (global o‘rnatish)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` buyrugʻi ishga tushirilganda, npm'ning yangi versiyalari (v11+ va v12+) paketning hayot sikli skriptlarini standart holatda bloklaydi va install-scripts ogohlantirishini koʻrsatadi:
+`npm install -g omniroute` buyrug‘i ishga tushirilganda, npm’ning yangi versiyalari (v11+ va v12+) paketning hayot sikli skriptlarini sukut bo‘yicha bloklaydi va install-scripts ogohlantirishini ko‘rsatadi:
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 ta paketning o‘rnatish skriptlari allowScripts tomonidan qamrab olinmagani sababli bloklandi:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Bu ogohlantirishni eʼtiborsiz qoldirish mumkinmi?
+### Bu ogohlantirishni e’tiborsiz qoldirish mumkinmi?
 
-**Qisman, ammo skriptlarsiz ishga tushirish tavsiya etilmaydi.** OmniRoute muqobil variantlarga muammosiz oʻtish imkoniyatini oʻz ichiga oladi: agar mahalliy `better-sqlite3` bogʻlanishlarini mustaqil toʻplamdan yuklab boʻlmasa, ilova `node:sqlite` yoki `sql.js` kabi muqobil drayverlarga oʻtadi ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) boʻlimiga qarang). Server baribir ishga tushadi, ammo `sql.js` kabi WASM muqobil variantlarida ishlash SQLite WAL (Write-Ahead Logging) rejimini oʻchiradi hamda xotira va diskni sinxronlash xarajatlarini oshiradi.
+**Qisman, ammo skriptlarsiz ishga tushirish tavsiya etilmaydi.** OmniRoute muqobil yechimlarga silliq o‘tishni qo‘llab-quvvatlaydi: agar mustaqil to‘plamdan mahalliy `better-sqlite3` bog‘lanishlarini yuklab bo‘lmasa, ilova `node:sqlite` yoki `sql.js` kabi muqobil drayverlarga o‘tadi ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) bo‘limiga qarang). Server baribir ishga tushadi, ammo `sql.js` kabi WASM muqobil yechimlaridan foydalanish SQLite WAL (oldindan yozib borish jurnali) rejimini o‘chiradi hamda xotira sarfi va disk bilan sinxronlash yuklamasini oshiradi.
 
-### Qaysi skriptlar haqiqatan ham talab qilinadi?
+### Qaysi skriptlar amalda talab qilinadi?
 
-Bloklangan skriptlarning hammasi ham OmniRoute'ni ishga tushirish uchun zarur emas:
+Bloklangan skriptlarning barchasi ham OmniRoute’ni ishga tushirish uchun zarur emas:
 
-- **Zarur (`omniroute`, `better-sqlite3`):** OmniRoute Next.js mustaqil ilova toʻplamidan (`dist/`) ishlaydi. Oʻrnatish vaqtida npm yuqori darajadagi `node_modules/better-sqlite3/` ichiga xostga xos mahalliy SQLite drayverini yuklab oladi yoki kompilyatsiya qiladi. Keyin OmniRoute'ning `postinstall` skripti (`scripts/build/postinstall.mjs`) ushbu xostga xos ikkilik fayllarni tekshiradi va mustaqil server ularga kira olishi uchun `dist/node_modules/` ichiga nusxalaydi. Agar `omniroute` paketining postinstall skripti bloklansa, bu nusxalash bosqichi oʻtkazib yuboriladi.
-- **Ixtiyoriy/tranzitiv (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bular yigʻish yordamchilari, kuzatuv vositalari yoki tizim kalitlar zanjiri yordamchi dasturlaridir. Ularga ruxsat berish yigʻish ogohlantirishlarining oldini oladi, ammo ular asosiy marshrutlash funksiyasi uchun talab qilinmaydi.
-- **Chiqarib tashlangan (`onnxruntime-node`):** Mahalliy AI embeddinglari uchun ixtiyoriy bogʻliqlik boʻlib, OmniRoute ishlashi uchun **talab qilinmaydi**. Uning postinstall skripti NuGet'dan taxminan 300MB hajmdagi CUDA resurslarini yuklab oladi; qoʻllab-quvvatlanadigan uskunada mahalliy ONNX tezlashtirishidan foydalanishni aniq rejalashtirmasangiz, uni ruxsat etilganlar roʻyxatiga kiritmang.
+- **Zarur (`omniroute`, `better-sqlite3`):** OmniRoute Next.js’ning mustaqil ilova to‘plamidan (`dist/`) ishlaydi. O‘rnatish vaqtida npm xostga xos mahalliy SQLite drayverini yuqori darajadagi `node_modules/better-sqlite3/` ichiga yuklab oladi yoki kompilyatsiya qiladi. Shundan so‘ng OmniRoute’ning `postinstall` skripti (`scripts/build/postinstall.mjs`) ushbu xostga xos ikkilik fayllarni tekshiradi va mustaqil server ulardan foydalana olishi uchun `dist/node_modules/` ichiga nusxalaydi. Agar `omniroute` paketining postinstall skripti bloklansa, ushbu nusxalash bosqichi bajarilmaydi.
+- **Ixtiyoriy/tranzitiv (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bular yig‘ish yordamchilari, kuzatuv vositalari yoki tizim kalitlar zanjiri yordamchi dasturlaridir. Ularga ruxsat berish yig‘ish ogohlantirishlarining oldini oladi, ammo ular asosiy marshrutlash funksiyasi uchun talab qilinmaydi.
+- **Istisno qilingan (`onnxruntime-node`):** Mahalliy AI embeddinglari uchun ixtiyoriy bog‘liqlik bo‘lib, OmniRoute ishlashi uchun **talab qilinmaydi**. Uning postinstall skripti NuGet’dan taxminan 300 MB hajmdagi CUDA resurslarini yuklab oladi; qo‘llab-quvvatlanadigan qurilmada mahalliy ONNX tezlashtirishidan foydalanishni aniq rejalashtirmagan bo‘lsangiz, uni ruxsat etilganlar ro‘yxatiga kiritmang.
 
-### Tavsiya etilgan tuzatish
+### Tavsiya etilgan yechim
 
-Global oʻrnatish vaqtida talab qilinadigan oʻrnatish skriptlariga ruxsat berish va ogohlantirishlarni yashirish uchun OmniRoute hamda uning mahalliy bogʻliqliklariga `--allow-scripts` parametrini uzating:
+Global o‘rnatish vaqtida kerakli o‘rnatish skriptlariga ruxsat berish va ogohlantirishlarni o‘chirish uchun OmniRoute hamda uning mahalliy bog‘liqliklari uchun `--allow-scripts` parametrini kiriting:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Yoki buni foydalanuvchi hisobingizdagi barcha global oʻrnatishlar uchun doimiy sozlash maqsadida:
+Shu bilan bir qatorda, buni foydalanuvchi hisobingizdagi barcha global o‘rnatishlar uchun doimiy ravishda sozlashingiz mumkin:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Oʻrnatishni tekshirish
+### O‘rnatishni tekshirish
 
-Oʻrnatishdan soʻng mahalliy bogʻlanishlar va bajarilish muhiti soz holatda ekanini tekshirish uchun ichki diagnostika vositasini ishga tushiring:
+O‘rnatishdan so‘ng mahalliy bog‘lanishlar va bajarilish muhiti to‘g‘ri ishlayotganiga ishonch hosil qilish uchun ichki diagnostika vositasini ishga tushiring:
 
 ```bash
 omniroute doctor

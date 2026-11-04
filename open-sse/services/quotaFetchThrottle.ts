@@ -15,8 +15,9 @@
  */
 
 const DEFAULT_MIN_INTERVAL_MS = 250;
-const MAX_MIN_INTERVAL_MS = 5000;
+const MAX_MIN_INTERVAL_MS = 60_000;
 const DEFAULT_JITTER_MS = 120;
+const MAX_JITTER_MS = 60_000;
 
 export interface ThrottleClock {
   now: () => number;
@@ -46,7 +47,7 @@ export class MinIntervalThrottle {
   private readonly jitterMs: number;
   private readonly clock: ThrottleClock;
   private readonly rand: () => number;
-  private lastStart = 0;
+  private lastStart: number | null = null;
   private chain: Promise<void> = Promise.resolve();
 
   constructor(options: MinIntervalThrottleOptions) {
@@ -67,8 +68,13 @@ export class MinIntervalThrottle {
       await prev;
       // The chain is single-file here, so this read cannot race another acquire.
       const now = this.clock.now();
+      // After an idle period, restart the spacing window at the actual
+      // acquisition time. Otherwise a stale scheduled timestamp permits the
+      // next burst of requests to pass without the configured interval.
       const startAt =
-        this.lastStart === 0 ? now : this.lastStart + this.minIntervalMs + this.nextJitter();
+        this.lastStart === null
+          ? now
+          : Math.max(now, this.lastStart + this.minIntervalMs + this.nextJitter());
       this.lastStart = startAt;
       const wait = startAt - now;
       if (wait > 0) await this.clock.sleep(wait);
@@ -96,6 +102,17 @@ export function resolveQuotaFetchMinIntervalMs(
   return Math.min(Math.round(n), MAX_MIN_INTERVAL_MS);
 }
 
+/** Configure additional 0..60s random spacing without altering the default. */
+export function resolveQuotaFetchJitterMs(
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = env.OMNIROUTE_QUOTA_FETCH_JITTER_MS;
+  if (raw === undefined || raw.trim() === "") return DEFAULT_JITTER_MS;
+  const n = Number(raw.trim());
+  if (!Number.isFinite(n) || n < 0) return DEFAULT_JITTER_MS;
+  return Math.min(Math.round(n), MAX_JITTER_MS);
+}
+
 // ─── Shared process-wide instance (used by the provider quota fetchers) ───────
 
 let _sharedThrottle: MinIntervalThrottle | null = null;
@@ -105,7 +122,7 @@ export function getQuotaFetchThrottle(): MinIntervalThrottle {
   if (!_sharedThrottle) {
     _sharedThrottle = new MinIntervalThrottle({
       minIntervalMs: resolveQuotaFetchMinIntervalMs(),
-      jitterMs: DEFAULT_JITTER_MS,
+      jitterMs: resolveQuotaFetchJitterMs(),
     });
   }
   return _sharedThrottle;

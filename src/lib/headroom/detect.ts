@@ -86,6 +86,23 @@ export interface HeadroomStatus {
   python: string | null;
   localUrl: boolean;
   canStart: boolean;
+  /**
+   * Present (and `false`) only when the host-side binary probes were skipped for a
+   * remote caller — `installed`/`path`/`python` are then "not checked", not "absent".
+   * A probed status omits the field so the local response shape is unchanged.
+   */
+  probed?: false;
+}
+
+export interface HeadroomStatusOptions {
+  /**
+   * Whether the caller may run the host-side probes (`which headroom`, `python --version`).
+   * Route handlers pass the trusted peer-locality verdict (loopback/LAN only); a remote
+   * caller gets the unprobed status built from the /health check alone
+   * (GHSA-35fw-cv32-2373 class, GHSA-jmq6-8j86-8xqj call-site gate). Defaults to true
+   * for in-process callers.
+   */
+  allowLocalProbe?: boolean;
 }
 
 export interface BuildHeadroomStatusInput {
@@ -206,7 +223,19 @@ export async function probeProxyRunning(url: string): Promise<boolean> {
  * Aggregated dashboard status. Composes the three probes above with the
  * pure builder so the I/O happens in one place.
  */
-export async function getHeadroomStatus(url: string): Promise<HeadroomStatus> {
+export async function getHeadroomStatus(
+  url: string,
+  { allowLocalProbe = true }: HeadroomStatusOptions = {}
+): Promise<HeadroomStatus> {
+  if (!allowLocalProbe) {
+    // No child process for a remote caller: /health reachability is an HTTP probe of
+    // the operator-configured URL, everything else stays "not checked".
+    const proxyReachable = await probeProxyRunning(url);
+    return {
+      ...buildHeadroomStatus({ url, binaryPath: null, python: null, proxyReachable }),
+      probed: false,
+    };
+  }
   const binaryPath = findHeadroomBinary();
   const python = findPython310();
   const proxyReachable = await probeProxyRunning(url);

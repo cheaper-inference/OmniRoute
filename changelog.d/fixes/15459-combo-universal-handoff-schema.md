@@ -1,1 +1,0 @@
-- **fix(combo):** persist and clear per-combo universal handoff config ([#15459](https://github.com/diegosouzapw/OmniRoute/pull/15459)) — thanks @skygunner

@@ -37,33 +37,33 @@ Uobičajeni problemi i rješenja za OmniRoute.
 
 ---
 
-### Ograničenje učestalosti zahtjeva kod besplatnih pružalaca (429 / 400 / 401)
+### Ograničavanje broja zahtjeva kod besplatnih pružalaca (429 / 400 / 401)
 
-**Simptom**: Kada koristite `model: "auto"` s besplatnim pružaocima ili pružaocima koji ne zahtijevaju autentifikaciju (opencode, auggie itd.), povremeno dobijate `HTTP 429`, `400` ili `401` umjesto odgovora. Zahtjevi uspijevaju kada nekoliko trenutaka kasnije ponovite isti upit, ali automatizacija (cron poslovi, agenti, skripte) prekida se pri prvom neuspjehu.
+**Simptom**: Kada koristite `model: "auto"` s besplatnim pružaocima/pružaocima bez autentifikacije (auggie itd.), povremeno dobijate `HTTP 429`, `400` ili `401` umjesto odgovora. Zahtjevi uspijevaju kada nekoliko trenutaka kasnije ponovite isti upit, ali automatizacija (cron poslovi, agenti, skripte) prekida se pri prvom neuspjehu.
 
-**Osnovni uzrok**: Tri nezavisna načina otkaza se preklapaju:
+**Osnovni uzrok**: Tri nezavisna načina kvara međusobno se nadovezuju:
 
-1. **Ograničenje učestalosti zahtjeva pružaoca (`429`)**: Besplatni nivoi mogu nametnuti kvotu po vremenskom intervalu. Niz paralelnih poziva je iscrpljuje, pa se sljedeći zahtjev odbija dok se vremenski interval ne resetuje.
-2. **Neispravan model u direktnom prosljeđivanju (`400`/`401`)**: `auto/*` grupe mogu uključivati modele za direktno prosljeđivanje iz `opencode` koji su registrirani u katalogu, ali nemaju važeće pristupne podatke (npr. `oc/north-mini-code-free` → `401`). Automatski usmjerivač pokušava koristiti jedan od njih, ne uspijeva, a greška se prosljeđuje prije nego što se aktivira rezervna opcija.
-3. **Pojačavanje konkurentnosti (`429` pod opterećenjem)**: Kada više agentskih/cron sesija istovremeno koristi `auto`, ukupna učestalost zahtjeva premašuje ono što besplatni pružaoci mogu podnijeti, pa se legitimni pozivi označavaju kao zloupotreba.
+1. **Ograničenje broja zahtjeva pružaoca (`429`)**: Besplatni paketi mogu nametnuti kvotu po vremenskom periodu. Niz paralelnih poziva je iscrpljuje, pa se sljedeći zahtjev odbija dok se vremenski period ne resetuje.
+2. **Neispravan model u direktnom prosljeđivanju (`400`/`401`)**: `auto/*` skupovi mogu sadržavati modele za direktno prosljeđivanje koji su registrirani u katalogu, ali nemaju aktivne pristupne podatke (→ `401`). Automatski usmjerivač isproba jedan, ne uspije, a greška se proslijedi prije nego što se aktivira rezervna opcija.
+3. **Pojačavanje zbog konkurentnosti (`429` pod opterećenjem)**: Kada više agent/cron sesija istovremeno pristupa opciji `auto`, ukupna stopa zahtjeva premašuje ono što besplatni pružaoci toleriraju, pa se legitimni pozivi označavaju kao zloupotreba.
 
-**Provjereno rješenje (prema izvještajima zajednice, 2026-08-10)**: podesite tri varijable okruženja tako da rotacija, konkurentnost i rezervna opcija apsorbiraju nestabilnost besplatnog nivoa umjesto da zbog nje prestanu raditi:
+**Potvrđeno rješenje (prema izvještajima zajednice, 2026-08-10)**: podesite tri varijable okruženja tako da rotacija, konkurentnost i rezervne opcije apsorbiraju nestabilnost besplatnog paketa umjesto da zbog nje prestanu raditi:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # pređi na drugi model/pružaoca pri 400/401 (preskače neispravne modele za direktno prosljeđivanje)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # eksplicitna gornja granica prihvata zahtjevnih zahtjeva (zadano nije postavljena: nema ograničenja broja zahtjeva, pogledajte napomenu ispod)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # povećaj ograničeno čekanje iznad zadane vrijednosti RATE_LIMIT_MAX_WAIT_MS za spore uzvodne servise
+export OMNIROUTE_ROTATE_ON_400=true           # prebacuje se na drugi model/pružaoca pri 400/401 (preskače neispravne modele za direktno prosljeđivanje)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # izričito ograničenje prihvata zahtjevnih zahtjeva (zadano nije postavljeno: nema ograničenja broja zahtjeva, pogledajte napomenu ispod)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # povećava ograničeno čekanje iznad zadane vrijednosti RATE_LIMIT_MAX_WAIT_MS za spore nadređene servise
 ```
 
-Postavite ih u okruženju OmniRoute procesa (demona, npr. putem LaunchAgent plist datoteke ili `systemctl edit`), a zatim ponovo pokrenite OmniRoute. Zastavica za rotaciju je pojedinačno najutjecajnija postavka: pretvara potpuni neuspjeh u transparentan ponovni pokušaj kod ispravnog pružaoca u grupi.
+Postavite ih u okruženju OmniRoute procesa (daemon, npr. putem LaunchAgent plist datoteke ili `systemctl edit`), a zatim ponovo pokrenite OmniRoute. Oznaka za rotaciju pojedinačno je najdjelotvornija postavka: pretvara potpuni neuspjeh u neprimjetan ponovni pokušaj kod dostupnog pružaoca iz skupa.
 
-**Napomena**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ograničava koliko se zahtjevnih zahtjeva — onih s dugim kontekstom — izvršava istovremeno; ovo ograničenje predstavlja ulaznu kontrolu, a ne ograničenje učestalosti zahtjeva pružaoca. **Ažuriranje za #503-fanout:** ova varijabla više nije zadano postavljena (sada se primjenjuje samo kada je eksplicitno konfigurirana, kao iznad) — prihvat zahtjevnih zahtjeva umjesto toga kontroliše automatski izveden budžet bajtova (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) koji se sam prilagođava stvarnom memorijskom ograničenju hosta, pa bi nova implementacija trebala imati znatno manje odbijanja `503 chat_admission_busy` bez ikakvog postavljanja ove varijable; njeno eksplicitno postavljanje ovdje i dalje radi tačno kako je dokumentirano. Eksplicitno zadane vrijednosti budžeta bajtova ograničavaju se na raspon od 8 MiB do 2 GiB. Greška `413 body_exceeds_budget` nije privremena: povećajte taj budžet bajtova, smanjite `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ili povećajte memorijsko ograničenje procesa. Odbacivanje `inflight_bytes_budget` predstavlja privremeno zagušenje i zahtjev se može ponoviti. Ograničenje učestalosti zahtjeva po pružaocu (`open-sse/services/rateLimitManager.ts`) zasebno je regulirano varijablama `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` i `RATE_LIMIT_AUTO_ENABLE` — pogledajte `.env.example`.
+**Napomena**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ograničava koliko se zahtjevnih zahtjeva — onih s dugim kontekstom — izvršava istovremeno; ograničenje je kontrola prihvata, a ne ograničivač broja zahtjeva pružaoca. **Ažuriranje za #503-fanout:** ova varijabla više nije zadano postavljena (sada se primjenjuje samo kada je izričito konfigurirana, kao iznad) — prihvat zahtjevnih zahtjeva umjesto toga kontrolira automatski izveden budžet bajtova (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) koji se samostalno prilagođava stvarnom memorijskom ograničenju hosta, pa bi nova implementacija trebala imati znatno manje odbijanja `503 chat_admission_busy` bez ikakvog postavljanja ove varijable; njeno izričito postavljanje ovdje i dalje radi tačno kako je dokumentirano. Izričito zadane vrijednosti budžeta bajtova ograničavaju se na 8 MiB–2 GiB. `413 body_exceeds_budget` nije privremena greška: povećajte taj budžet bajtova, smanjite `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ili povećajte memorijsko ograničenje procesa. Odbacivanje `inflight_bytes_budget` predstavlja privremeno nadmetanje za resurse i zahtjev se i dalje može ponoviti. Ograničavanje broja zahtjeva po pružaocu (`open-sse/services/rateLimitManager.ts`) zasebno je kontrolirano varijablama `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` i `RATE_LIMIT_AUTO_ENABLE` — pogledajte `.env.example`.
 
-**Kako provjeriti da li radi**: pokrenite svoj agent/cron dvaput uzastopno u kratkom razmaku i potvrdite da su oba pokretanja uspješna. Prije ispravke, drugo pokretanje obično prijavljuje `429`/`401`. Nakon ispravke, neuspjeli pokušaji (ako ih ima) automatski se ponavljaju i poziv se dovršava. Također možete pokrenuti `curl /monitoring/health` i pratiti polje `rateLimitedUntil` na konekcijama pružatelja usluga te `circuitBreakers.providerBreakers[].state` za pogođene pružatelje — stanje može biti `CLOSED`, `DEGRADED`, `OPEN` ili `HALF_OPEN` (pogledajte `src/shared/utils/circuitBreaker.ts`), a pružatelj koji nastavlja prijavljivati greške prelazit će kroz stanja `CLOSED → DEGRADED → OPEN` prije nego što prozor za resetiranje omogući probni zahtjev (`HALF_OPEN`).
+**Kako provjeriti da je uspjelo**: pokrenite svog agenta/cron dvaput u kratkom razmaku i potvrdite da oba pokretanja uspijevaju. Prije primjene rješenja drugo pokretanje obično vraća `429`/`401`. Nakon primjene rješenja, neuspjeli pokušaji (ako ih bude) neprimjetno se ponavljaju i poziv se dovršava. Također možete izvršiti `curl /monitoring/health` i pratiti polje `rateLimitedUntil` na vezama s pružaocima te `circuitBreakers.providerBreakers[].state` za pogođene pružaoce — stanje je jedno od `CLOSED`, `DEGRADED`, `OPEN` ili `HALF_OPEN` (pogledajte `src/shared/utils/circuitBreaker.ts`), a pružalac koji nastavlja vraćati greške prelazi iz `CLOSED → DEGRADED → OPEN` prije nego što period resetovanja omogući prolazak probnog zahtjeva (`HALF_OPEN`).
 
-**Ako i dalje vidite 429**: aktivni račun za tog pružatelja zaista je iscrpio svoju _kvotu_ (nije riječ samo o ograničenju učestalosti zahtjeva). Dodajte drugi račun za istog pružatelja na OmniRoute kontrolnoj ploči → Providers → Accounts ili uključite drugog besplatnog pružatelja (npr. `routeway`, `auggie`). Rotacija pomaže samo kod privremenih grešaka ograničenja učestalosti/400/401; potpuno iscrpljivanje kvote zahtijeva druge pristupne podatke ili drugog pružatelja.
+**Ako i dalje vidite 429**: aktivni račun kod tog pružaoca zaista je iscrpio svoju _kvotu_ (ne samo ograničenje stope zahtjeva). Dodajte drugi račun za istog pružaoca na OmniRoute kontrolnoj ploči → Providers → Accounts ili uključite drugog besplatnog pružaoca (npr. `routeway`, `auggie`). Rotacija pomaže samo kod privremenih ograničenja stope/grešaka 400/401; potpuno iscrpljivanje kvote zahtijeva druge pristupne podatke ili drugog pružaoca.
 
-**Ako vidite 403 na modelima za obradu slike (`auto/vision`, `bazaarlink/*`)**: povezani račun nema plaćeni paket koji uključuje obradu slike ili API ključ nema dovoljne dozvole. Na kontrolnoj ploči pružatelja provjerite uključuje li opseg ključa obradu slike/multimodalne mogućnosti ili povežite račun s plaćenim paketom i zadržite ga kao cilj za obradu slike.
+**Ako vidite 403 na modelima za obradu slika (`auto/vision`, `bazaarlink/*`)**: povezani račun nema plaćeni paket koji uključuje obradu slika ili API ključ nema dovoljna ovlaštenja. Na kontrolnoj ploči pružaoca provjerite da opseg ključa uključuje obradu slika/multimodalne funkcije ili povežite račun s plaćenim paketom i zadržite ga kao cilj za obradu slika.
 
 ---
 
@@ -90,11 +90,11 @@ Upozorenja dolaze iz zastarjelih raspona peer zavisnosti u paketima trećih stra
 
 ---
 
-## Upozorenje o blokiranim npm instalacijskim skriptama (globalna instalacija)
+## Upozorenje o blokiranim npm install-scripts skriptama (globalna instalacija)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Prilikom pokretanja `npm install -g omniroute`, novije verzije npm-a (v11+ i v12+) podrazumijevano blokiraju skripte životnog ciklusa paketa i prikazuju upozorenje o instalacijskim skriptama:
+Prilikom pokretanja naredbe `npm install -g omniroute`, novije verzije npm-a (v11+ i v12+) prema zadanim postavkama blokiraju skripte životnog ciklusa paketa i prikazuju upozorenje o install-scripts skriptama:
 
 ```
 npm warn install-scripts 7 paketa imalo je blokirane instalacijske skripte jer nisu obuhvaćeni postavkom allowScripts:
@@ -104,19 +104,19 @@ npm warn install-scripts 7 paketa imalo je blokirane instalacijske skripte jer n
 
 ### Može li se ovo upozorenje zanemariti?
 
-**Djelimično, ali pokretanje bez skripti se ne preporučuje.** OmniRoute uključuje pouzdane rezervne opcije: ako se nativne sprege `better-sqlite3` ne mogu učitati iz samostalnog paketa, aplikacija prelazi na alternativne upravljačke programe kao što su `node:sqlite` ili `sql.js` (pogledajte [Razrješavanje SQLite okruženja za izvršavanje](../ops/SQLITE_RUNTIME.md)). Server će se i dalje pokrenuti, ali korištenje WASM rezervnih opcija kao što je `sql.js` onemogućava SQLite WAL (Write-Ahead Logging) režim i povećava opterećenje memorije i sinhronizacije diska.
+**Djelimično, ali pokretanje bez skripti se ne preporučuje.** OmniRoute uključuje pouzdane rezervne opcije: ako se nativni `better-sqlite3` binarni moduli ne mogu učitati iz samostalnog paketa, aplikacija prelazi na alternativne upravljačke programe kao što su `node:sqlite` ili `sql.js` (pogledajte [Određivanje SQLite izvršnog okruženja](../ops/SQLITE_RUNTIME.md)). Server će se i dalje pokrenuti, ali korištenje WASM rezervnih opcija kao što je `sql.js` onemogućava SQLite WAL (Write-Ahead Logging) režim i povećava opterećenje memorije i sinhronizacije diska.
 
 ### Koje su skripte zaista potrebne?
 
 Nisu sve blokirane skripte neophodne za pokretanje OmniRoutea:
 
-- **Neophodne (`omniroute`, `better-sqlite3`):** OmniRoute se pokreće iz samostalnog paketa Next.js aplikacije (`dist/`). Tokom instalacije npm preuzima ili kompajlira nativni SQLite upravljački program specifičan za sistem u direktoriju najvišeg nivoa `node_modules/better-sqlite3/`. OmniRouteova skripta `postinstall` (`scripts/build/postinstall.mjs`) zatim provjerava i kopira te binarne datoteke specifične za sistem u `dist/node_modules/` kako bi im samostalni server mogao pristupiti. Ako je OmniRouteova skripta `postinstall` blokirana, ovaj korak kopiranja se preskače.
-- **Opcionalne/tranzitivne (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** To su pomoćni alati za izgradnju, alati za praćenje promjena ili alati za sistemski privjesak ključeva. Njihovo dopuštanje sprečava upozorenja pri izgradnji, ali nisu potrebni za osnovnu funkcionalnost usmjeravanja.
-- **Isključena (`onnxruntime-node`):** Opcionalna zavisnost za lokalna AI ugrađivanja i **nije** potrebna za pokretanje OmniRoutea. Njena skripta `postinstall` preuzima približno 300 MB CUDA resursa s NuGeta; nemojte je uključivati u listu dopuštenih paketa osim ako izričito namjeravate koristiti lokalno ONNX ubrzanje na podržanom hardveru.
+- **Neophodne (`omniroute`, `better-sqlite3`):** OmniRoute se pokreće iz samostalnog paketa Next.js aplikacije (`dist/`). Tokom instalacije npm preuzima ili kompajlira nativni SQLite upravljački program specifičan za host u direktoriju najvišeg nivoa `node_modules/better-sqlite3/`. OmniRouteova `postinstall` skripta (`scripts/build/postinstall.mjs`) zatim provjerava i kopira ove binarne datoteke specifične za host u `dist/node_modules/` kako bi im samostalni server mogao pristupiti. Ako je OmniRouteova postinstall skripta blokirana, ovaj korak kopiranja se preskače.
+- **Opcionalne/tranzitivne (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ovo su pomoćni alati za izgradnju, alati za praćenje promjena ili uslužni programi sistemskog spremišta ključeva. Njihovo dopuštanje sprečava upozorenja pri izgradnji, ali nisu potrebni za osnovnu funkcionalnost usmjeravanja.
+- **Isključena (`onnxruntime-node`):** Opcionalna zavisnost za lokalne AI ugradnje i **nije** potrebna za pokretanje OmniRoutea. Njena postinstall skripta preuzima približno 300 MB CUDA resursa s NuGet-a; nemojte je uključivati na listu dopuštenih paketa osim ako izričito namjeravate koristiti lokalno ONNX ubrzanje na podržanom hardveru.
 
 ### Preporučeno rješenje
 
-Da biste dopustili potrebne instalacijske skripte tokom globalne instalacije i utišali upozorenja, proslijedite `--allow-scripts` za OmniRoute i njegove nativne zavisnosti:
+Da biste dopustili potrebne instalacijske skripte tokom globalne instalacije i uklonili upozorenja, proslijedite `--allow-scripts` za OmniRoute i njegove nativne zavisnosti:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
@@ -129,9 +129,9 @@ npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@sw
 npm install -g omniroute
 ```
 
-### Provjerite svoju instalaciju
+### Provjerite instalaciju
 
-Nakon instalacije pokrenite ugrađeni dijagnostički alat kako biste provjerili jesu li nativne sprege i okruženje za izvršavanje ispravni:
+Nakon instalacije pokrenite ugrađeni dijagnostički alat kako biste provjerili jesu li nativni binarni moduli i izvršno okruženje ispravni:
 
 ```bash
 omniroute doctor

@@ -33,37 +33,37 @@ Matatizo ya kawaida na suluhisho zake kwa OmniRoute.
 
 ---
 
-## Utatuzi wa Kina
+## Utatuzi wa Kina wa Matatizo
 
 ---
 
-### Uwekaji Kikomo cha Kasi kwa Watoa Huduma wa Bila Malipo (429 / 400 / 401)
+### Uzuiaji wa Kasi kwa Watoa Huduma wa Bure (429 / 400 / 401)
 
-**Dalili**: Unapotumia `model: "auto"` pamoja na watoa huduma wa bila malipo/wasiohitaji uthibitishaji (opencode, auggie, n.k.), mara kwa mara unapata `HTTP 429`, `400`, au `401` badala ya majibu. Maombi hufaulu unapojaribu tena kidokezo kilekile muda mfupi baadaye, lakini uendeshaji wa kiotomatiki (kazi za cron, mawakala, hati) huvurugika inaposhindwa mara ya kwanza.
+**Dalili**: Unapotumia `model: "auto"` pamoja na watoa huduma wa bure/wasiohitaji uthibitishaji (auggie, n.k.), mara kwa mara unapata `HTTP 429`, `400`, au `401` badala ya majibu. Maombi hufaulu unapojaribu tena kidokezo kilekile muda mfupi baadaye, lakini michakato ya kiotomatiki (kazi za cron, mawakala, hati) huharibika mara tu hitilafu ya kwanza inapotokea.
 
-**Chanzo kikuu**: Hali tatu huru za hitilafu hujikusanya:
+**Sababu kuu**: Aina tatu huru za hitilafu hujikusanya:
 
-1. **Kikomo cha kasi cha mtoa huduma (`429`)**: Viwango vya bila malipo vinaweza kutekeleza kikomo cha matumizi kwa kila kipindi. Wimbi la miito sambamba hukimaliza, hivyo ombi linalofuata hukataliwa hadi kipindi hicho kiwekwe upya.
-2. **Muundo wenye hitilafu katika upitishaji wa moja kwa moja (`400`/`401`)**: Makundi ya `auto/*` yanaweza kujumuisha miundo ya upitishaji wa moja kwa moja kutoka `opencode` iliyosajiliwa kwenye katalogi lakini haina vitambulisho hai (k.m. `oc/north-mini-code-free` → `401`). Kipanga-njia kiotomatiki hujaribu mmoja, hushindwa, na hitilafu husambazwa kabla ya ubadilishaji mbadala kuanza.
-3. **Ukuzaji wa uendeshaji sawia (`429` chini ya mzigo)**: Vipindi vingi vya wakala/cron vinapotumia `auto` kwa wakati mmoja, jumla ya kasi ya maombi huzidi kiwango kinachovumiliwa na watoa huduma wa bila malipo, hivyo miito halali huainishwa kuwa matumizi mabaya.
+1. **Kikomo cha kasi cha mtoa huduma (`429`)**: Viwango vya bure vinaweza kuweka kiwango cha juu cha matumizi kwa kila kipindi. Msururu wa maombi sambamba hukimaliza, hivyo ombi linalofuata hukataliwa hadi kipindi hicho kiwekwe upya.
+2. **Muundo wenye hitilafu katika upitishaji wa moja kwa moja (`400`/`401`)**: Mikusanyiko ya `auto/*` inaweza kujumuisha miundo ya upitishaji wa moja kwa moja iliyosajiliwa katika katalogi lakini isiyo na vitambulisho halali (→ `401`). Kipanga-njia kiotomatiki hujaribu mmoja, hushindwa, na hitilafu husambazwa kabla ya urejeaji mbadala kuanza.
+3. **Kuongezeka kwa athari za utekelezaji sambamba (`429` chini ya mzigo)**: Vipindi vingi vya wakala/cron vinapofikia `auto` kwa wakati mmoja, jumla ya kasi ya maombi huzidi kiwango ambacho watoa huduma wa bure wanaweza kustahimili, hivyo miito halali huwekewa alama kuwa ya matumizi mabaya.
 
-**Suluhisho lililothibitishwa (limeripotiwa na jumuiya, 2026-08-10)**: sanidi vigeu vitatu vya mazingira ili mzunguko, uendeshaji sawia na ubadilishaji mbadala viweze kufyonza misukosuko ya kiwango cha bila malipo badala ya kusitishwa nayo:
+**Suluhisho lililothibitishwa (limeripotiwa na jumuiya, 2026-08-10)**: rekebisha vigeu vitatu vya mazingira ili mzunguko, utekelezaji sambamba, na urejeaji mbadala vihimili mabadiliko ya kiwango cha bure badala ya kushindwa kutokana nayo:
 
 ```bash
 export OMNIROUTE_ROTATE_ON_400=true           # hamia kwenye muundo/mtoa huduma mwingine kwa 400/401 (huruka miundo yenye hitilafu ya upitishaji wa moja kwa moja)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # kiwango bayana cha juu cha kukubali kazi nzito (hakijawekwa kwa chaguo-msingi: hakuna kikomo cha idadi ya maombi, tazama dokezo hapa chini)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ongeza muda wa kusubiri wenye kikomo uzidi chaguo-msingi la RATE_LIMIT_MAX_WAIT_MS kwa huduma za chanzo zenye kasi ndogo
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # kiwango bayana cha juu cha kuruhusu maombi mazito (hakijawekwa kwa chaguo-msingi: hakuna kikomo cha idadi ya maombi, tazama dokezo hapa chini)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ongeza muda wa kusubiri wenye kikomo uzidi chaguo-msingi la RATE_LIMIT_MAX_WAIT_MS kwa huduma za juu zenye kasi ndogo
 ```
 
-Weka hivi katika mazingira ya mchakato wa OmniRoute (daemoni, k.m. kupitia plist ya LaunchAgent au `systemctl edit`), kisha uanzishe upya OmniRoute. Alama ya mzunguko ndiyo nyenzo moja yenye athari kubwa zaidi: hubadilisha hitilafu kamili kuwa jaribio la upya lisiloonekana dhidi ya mtoa huduma mwenye afya katika kundi.
+Weka hivi katika mazingira ya mchakato wa OmniRoute (daemoni, kwa mfano kupitia plist ya LaunchAgent au `systemctl edit`), kisha uanzishe OmniRoute upya. Alama ya mzunguko ndiyo nyenzo moja yenye athari kubwa zaidi: hubadilisha hitilafu isiyoweza kuendelea kuwa jaribio la ulangaji upya lisiloonekana dhidi ya mtoa huduma anayefanya kazi vizuri katika mkusanyiko.
 
-**Dokezo**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` huweka kikomo cha idadi ya maombi mazito — yenye muktadha mrefu — yanayoendeshwa kwa wakati mmoja; mpaka huu ni lango la kukubali maombi, si kikomo cha kasi cha mtoa huduma. **Sasisho la #503-fanout:** kigeu hiki hakiwekwi tena kwa chaguo-msingi (sasa hutumika tu kinaposanidiwa bayana, kama hapo juu) — badala yake, ukubalishaji wa kazi nzito hudhibitiwa na bajeti ya baiti inayotolewa kiotomatiki (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), ambayo hujirekebisha kulingana na kiwango halisi cha juu cha kumbukumbu ya mfumo mwenyeji, hivyo usakinishaji mpya unapaswa kuona makato machache sana ya `503 chat_admission_busy` bila hata kuweka kigeu hiki; kukiweka bayana hapa bado hufanya kazi kama ilivyoelezwa. Ubatilishaji bayana wa bajeti ya baiti huwekewa mipaka ya MiB 8–GiB 2. `413 body_exceeds_budget` si hali ya muda mfupi: ongeza bajeti hiyo ya baiti, punguza `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, au ongeza kiwango cha juu cha kumbukumbu ya mchakato. Uondoaji wa mzigo wa `inflight_bytes_budget` ni msongamano wa muda mfupi na bado unaweza kujaribiwa tena. Uwekaji kikomo cha kasi kwa kila mtoa huduma (`open-sse/services/rateLimitManager.ts`) hudhibitiwa kando na `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, na `RATE_LIMIT_AUTO_ENABLE` — tazama `.env.example`.
+**Dokezo**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` huweka kikomo cha idadi ya maombi mazito — yenye muktadha mrefu — yanayotekelezwa kwa wakati mmoja; kikomo hiki ni lango la kuruhusu maombi, si kizuia kasi cha mtoa huduma. **Sasisho la #503-fanout:** kigeu hiki hakiwekwi tena kwa chaguo-msingi (sasa hutumika tu kinaposanidiwa waziwazi, kama ilivyo hapo juu) — badala yake, uruhusuji wa maombi mazito hudhibitiwa na bajeti ya baiti inayokokotolewa kiotomatiki (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ambayo hujirekebisha kulingana na kikomo halisi cha kumbukumbu cha mwenyeji, hivyo usakinishaji mpya unapaswa kupata makatalio machache zaidi ya `503 chat_admission_busy` bila kuweka kigeu hiki kabisa; kukiweka waziwazi hapa bado hufanya kazi sawasawa na ilivyoandikwa. Ubatilishaji bayana wa bajeti ya baiti huwekewa mipaka ya MiB 8–GiB 2. `413 body_exceeds_budget` si ya muda mfupi: ongeza bajeti hiyo ya baiti, punguza `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, au ongeza kikomo cha kumbukumbu cha mchakato. Upunguzaji wa mzigo wa `inflight_bytes_budget` ni msongamano wa muda na bado unaweza kujaribiwa tena. Uzuiaji wa kasi kwa kila mtoa huduma (`open-sse/services/rateLimitManager.ts`) hudhibitiwa kando na `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, na `RATE_LIMIT_AUTO_ENABLE` — tazama `.env.example`.
 
-**Jinsi ya kuthibitisha kuwa ilifanya kazi**: endesha agent/cron yako mara mbili kwa mfululizo wa haraka na uthibitishe kuwa zote zinafanikiwa. Kabla ya marekebisho, uendeshaji wa pili kwa kawaida hutoa hitilafu ya `429`/`401`. Baada ya marekebisho, kushindwa (ikiwa kutatokea) kunajaribiwa tena bila mtumiaji kutambua na mwito unakamilika. Unaweza pia kutumia `curl /monitoring/health` na kufuatilia uga wa `rateLimitedUntil` kwenye miunganisho ya watoa huduma pamoja na `circuitBreakers.providerBreakers[].state` kwa watoa huduma walioathirika — hali huwa mojawapo ya `CLOSED`, `DEGRADED`, `OPEN`, au `HALF_OPEN` (angalia `src/shared/utils/circuitBreaker.ts`), na mtoa huduma anayeendelea kushindwa atabadilika kutoka `CLOSED → DEGRADED → OPEN` kabla ya kipindi cha uwekaji upya kuruhusu jaribio kupita (`HALF_OPEN`).
+**Jinsi ya kuthibitisha kuwa ilifanya kazi**: endesha wakala/cron yako mara mbili kwa mfululizo wa haraka na uthibitishe kuwa zote mbili zimefaulu. Kabla ya suluhisho hili, utekelezaji wa pili kwa kawaida hutoa `429`/`401`. Baada ya suluhisho, hitilafu (ikiwa zipo) hujaribiwa tena bila kuonekana na mwito hukamilika. Unaweza pia kutumia `curl /monitoring/health` na kufuatilia sehemu ya `rateLimitedUntil` kwenye miunganisho ya watoa huduma na `circuitBreakers.providerBreakers[].state` kwa watoa huduma walioathirika — hali huwa mojawapo ya `CLOSED`, `DEGRADED`, `OPEN`, au `HALF_OPEN` (tazama `src/shared/utils/circuitBreaker.ts`), na mtoa huduma anayeendelea kushindwa atabadilika kutoka `CLOSED → DEGRADED → OPEN` kabla ya kipindi cha uwekaji upya kuruhusu jaribio lipite (`HALF_OPEN`).
 
-**Ikiwa bado unaona 429**: akaunti inayotumika ya mtoa huduma huyo imemaliza kabisa _kiasi chake kilichoruhusiwa_ (si kikomo cha kasi tu). Ongeza akaunti ya pili ya mtoa huduma huyo huyo katika dashibodi ya OmniRoute → Providers → Accounts, au jumuisha mtoa huduma mwingine wa bila malipo (k.m. `routeway`, `auggie`). Mzunguko wa akaunti husaidia tu kwa hitilafu za muda za kikomo cha kasi/400/401; kuisha kabisa kwa kiasi kilichoruhusiwa kunahitaji kitambulisho cha pili au mtoa huduma tofauti.
+**Ikiwa bado unaona 429**: akaunti inayotumika ya mtoa huduma huyo kwa hakika imemaliza _kiasi chake cha matumizi_ (si kasi tu). Ongeza akaunti ya pili ya mtoa huduma huyo katika dashibodi ya OmniRoute → Providers → Accounts, au changanya na mtoa huduma mwingine wa bure (kwa mfano `routeway`, `auggie`). Mzunguko husaidia tu kwa kikomo cha kasi/hitilafu za 400/401 za muda mfupi; kuisha kabisa kwa kiasi cha matumizi kunahitaji kitambulisho cha pili au mtoa huduma tofauti.
 
-**Ikiwa unaona 403 kwenye modeli za kuona (`auto/vision`, `bazaarlink/*`)**: akaunti iliyounganishwa haina mpango wa kulipia unaojumuisha uwezo wa kuona, au ufunguo wa API hauna ruhusa za kutosha. Thibitisha katika dashibodi ya mtoa huduma kuwa wigo wa ufunguo unajumuisha uwezo wa kuona/modi nyingi, au unganisha akaunti ya kiwango cha kulipia na uiweke kama lengo la modeli za kuona.
+**Ikiwa unaona 403 kwenye miundo ya maono (`auto/vision`, `bazaarlink/*`)**: akaunti iliyounganishwa haina mpango wa kulipia unaojumuisha maono, au ufunguo wa API hauna ruhusa za kutosha. Thibitisha katika dashibodi ya mtoa huduma kuwa wigo wa ufunguo unajumuisha maono/njia nyingi za mawasiliano, au unganisha akaunti ya kiwango cha kulipia na uiweke kama lengo la maono.
 
 ---
 
@@ -90,11 +90,11 @@ Maonyo hayo yanatokana na masafa yaliyopitwa na wakati ya utegemezi-rika katika 
 
 ---
 
-## Onyo la Kuzuiwa kwa Hati za npm install (usakinishaji wa kimataifa)
+## Onyo la npm Kuhusu install-scripts Zilizozuiwa (usakinishaji wa kimataifa)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Unapoendesha `npm install -g omniroute`, matoleo mapya zaidi ya npm (v11+ na v12+) huzuia hati za mzunguko wa maisha wa kifurushi kwa chaguo-msingi na kuonyesha onyo la hati za usakinishaji:
+Unapoendesha `npm install -g omniroute`, matoleo mapya zaidi ya npm (v11+ na v12+) huzuia hati za mzunguko wa maisha wa kifurushi kwa chaguo-msingi na kuonyesha onyo la install-scripts:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,19 +104,19 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Je, onyo hili linaweza kupuuzwa?
 
-**Kwa kiasi fulani, lakini kuendesha bila hati hakupendekezwi.** OmniRoute inajumuisha mbinu mbadala zinazofanya kazi vizuri: ikiwa viunganishi asilia vya `better-sqlite3` haviwezi kupakiwa kutoka kwenye kifurushi huru, programu hutumia viendeshi mbadala kama `node:sqlite` au `sql.js` (angalia [Utatuzi wa SQLite Wakati wa Uendeshaji](../ops/SQLITE_RUNTIME.md)). Seva bado itaanza, lakini kutumia mbinu mbadala za WASM kama `sql.js` huzima hali ya SQLite WAL (Write-Ahead Logging) na huongeza matumizi ya kumbukumbu pamoja na gharama ya ulandanishaji wa diski.
+**Kwa kiasi fulani, lakini kuendesha bila hati hakupendekezwi.** OmniRoute inajumuisha mbinu mbadala zinazotumika kwa urahisi: ikiwa bindings asilia za `better-sqlite3` haziwezi kupakiwa kutoka kwenye bundle inayojitegemea, programu hubadilika na kutumia viendeshi mbadala kama vile `node:sqlite` au `sql.js` (angalia [Utatuzi wa SQLite Wakati wa Uendeshaji](../ops/SQLITE_RUNTIME.md)). Seva bado itaanza, lakini kutumia mbinu mbadala za WASM kama `sql.js` huzima hali ya SQLite WAL (Write-Ahead Logging) na huongeza matumizi ya kumbukumbu pamoja na gharama za ulandanishaji wa diski.
 
 ### Ni hati zipi zinazohitajika hasa?
 
 Si hati zote zilizozuiwa ambazo ni muhimu ili kuendesha OmniRoute:
 
-- **Muhimu (`omniroute`, `better-sqlite3`):** OmniRoute huendeshwa kutoka kwenye kifurushi huru cha programu ya Next.js (`dist/`). Wakati wa usakinishaji, npm hupakua au hukusanya kiendeshi asilia cha SQLite kinacholingana na mfumo mwenyeji katika `node_modules/better-sqlite3/` ya kiwango cha juu. Kisha hati ya `postinstall` ya OmniRoute (`scripts/build/postinstall.mjs`) huthibitisha na kunakili faili hizi asilia za jozi zinazolingana na mfumo mwenyeji hadi `dist/node_modules/` ili seva huru iweze kuzifikia. Ikiwa hati ya postinstall ya `omniroute` imezuiwa, hatua hii ya kunakili inarukwa.
-- **Si za lazima/zinazotegemewa kwa njia isiyo ya moja kwa moja (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Hizi ni zana-saidizi za uundaji, zana za ufuatiliaji, au huduma za hifadhi ya funguo ya mfumo. Kuziruhusu huzuia maonyo ya uundaji, lakini hazihitajiki kwa utendaji msingi wa uelekezaji.
-- **Imeondolewa (`onnxruntime-node`):** Utegemezi wa hiari wa upachikaji wa AI wa ndani ambao **hauhitajiki** ili OmniRoute ifanye kazi. Hati yake ya postinstall hupakua rasilimali za CUDA za takribani ~300MB kutoka NuGet; usiiweke kwenye orodha ya zinazoruhusiwa isipokuwa ikiwa unakusudia waziwazi kutumia uongezaji kasi wa ONNX wa ndani kwenye maunzi yanayotumika.
+- **Muhimu (`omniroute`, `better-sqlite3`):** OmniRoute huendeshwa kutoka kwenye bundle ya programu inayojitegemea ya Next.js (`dist/`). Wakati wa usakinishaji, npm hupakua au hukusanya kiendeshi asilia cha SQLite kinacholingana na mfumo mwenyeji katika `node_modules/better-sqlite3/` ya kiwango cha juu. Kisha hati ya `postinstall` ya OmniRoute (`scripts/build/postinstall.mjs`) huthibitisha na kunakili faili hizi asilia zinazolingana na mfumo mwenyeji kwenda `dist/node_modules/` ili seva inayojitegemea iweze kuzifikia. Ikiwa hati ya postinstall ya `omniroute` imezuiwa, hatua hii ya kunakili inarukwa.
+- **Za hiari/tegemezi zisizo za moja kwa moja (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Hizi ni nyenzo saidizi za ujenzi, zana za ufuatiliaji, au huduma za hifadhi ya funguo za mfumo. Kuziruhusu huzuia maonyo ya ujenzi, lakini hazihitajiki kwa utendaji msingi wa uelekezaji.
+- **Iliyoondolewa (`onnxruntime-node`):** Tegemezi la hiari kwa embeddings za AI za ndani na **halihitajiki** ili OmniRoute iendesheke. Hati yake ya postinstall hupakua takribani 300MB za rasilimali za CUDA kutoka NuGet; usiijumuishe katika orodha ya ruhusa isipokuwa unakusudia waziwazi kutumia uongezaji kasi wa ONNX wa ndani kwenye maunzi yanayotumika.
 
 ### Suluhisho linalopendekezwa
 
-Ili kuruhusu hati zinazohitajika za usakinishaji wakati wa usakinishaji wa kimataifa na kunyamazisha maonyo, tumia `--allow-scripts` kwa OmniRoute na vitegemezi vyake asilia:
+Ili kuruhusu hati zinazohitajika za usakinishaji wakati wa usakinishaji wa kimataifa na kuondoa maonyo, tumia `--allow-scripts` kwa OmniRoute na tegemezi zake asilia:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Thibitisha usakinishaji wako
 
-Baada ya usakinishaji, endesha zana ya uchunguzi iliyojengewa ndani ili kuhakikisha kuwa viunganishi asilia na mazingira ya wakati wa uendeshaji vinafanya kazi ipasavyo:
+Baada ya usakinishaji, endesha zana jumuishi ya uchunguzi ili kuhakikisha kuwa bindings asilia na mazingira ya wakati wa uendeshaji yako katika hali nzuri:
 
 ```bash
 omniroute doctor

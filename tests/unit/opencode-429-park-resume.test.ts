@@ -7,9 +7,18 @@ import path from "node:path";
 import { OpencodeExecutor } from "../../open-sse/executors/opencode.ts";
 import type { ExecutorLog, ProviderCredentials } from "../../open-sse/executors/base.ts";
 import { resolveProxyForRequest } from "../../open-sse/utils/proxyFetch.ts";
-import { BURST_PARK_THRESHOLD } from "../../open-sse/executors/opencodeParkResume.ts";
+import {
+  BURST_PARK_THRESHOLD,
+  PARK_WAIT_MS,
+  setAsideParkWaitMs,
+} from "../../open-sse/executors/opencodeParkResume.ts";
 import * as throttle from "../../open-sse/executors/opencodeEgressThrottle.ts";
-import { __resetProxyRefusalMemoryForTesting } from "../../open-sse/utils/proxyRefusalMemory.ts";
+import {
+  __resetProxyRefusalMemoryForTesting,
+  noteProxyRefusal,
+  proxyEgressKey,
+  proxySetAsideStatus,
+} from "../../open-sse/utils/proxyRefusalMemory.ts";
 
 const FLAG = "OPENCODE_PARK_AND_RESUME";
 const MARKER_ENV = "OPENCODE_POOL_STRAIN_MARKER_PATH";
@@ -254,5 +263,242 @@ describe("opencode 429 park-and-resume", () => {
     void result;
     assert.strictEqual(observed.length, BURST_PARK_THRESHOLD, "no route call after abort");
     void callsBefore;
+  });
+
+  function egressKeys(count: number): string[] {
+    return Array.from({ length: count }, (_, i) => {
+      const key = proxyEgressKey({ type: "http", host: "127.0.0.1", port: ports[i] });
+      assert.ok(key !== null, "dedicated proxy key for the test account");
+      return key as string;
+    });
+  }
+
+  describe("set-aside reader", () => {
+    it("reports quota-only set-aside with the real end", () => {
+      const nowMs = Date.now();
+      const [key] = egressKeys(1);
+      noteProxyRefusal(key, "ip_quota_429", nowMs - (300_000 - 30_000));
+      const status = proxySetAsideStatus(key, nowMs);
+      assert.strictEqual(status.setAside, true);
+      assert.strictEqual(status.quotaOnly, true);
+      assert.ok(
+        status.endsAt !== null && Math.abs(status.endsAt - (nowMs + 30_000)) < 5_000,
+        `real end near now+30s (saw ${status.endsAt})`
+      );
+      assert.strictEqual(setAsideParkWaitMs([key], nowMs) !== null, true);
+    });
+
+    it("reports mixed motives on one key as not quota-only, with the real end", () => {
+      for (const order of [0, 1]) {
+        __resetProxyRefusalMemoryForTesting();
+        const nowMs = Date.now();
+        const [key] = egressKeys(1);
+        // Both writes land in force (quota 300s, slow 60s); only the write
+        // order differs, proving the verdict follows the rule, not recency.
+        if (order === 0) {
+          noteProxyRefusal(key, "ip_quota_429", nowMs);
+          noteProxyRefusal(key, "slow", nowMs);
+        } else {
+          noteProxyRefusal(key, "slow", nowMs);
+          noteProxyRefusal(key, "ip_quota_429", nowMs);
+        }
+        const status = proxySetAsideStatus(key, nowMs);
+        assert.strictEqual(status.setAside, true);
+        assert.strictEqual(status.quotaOnly, false);
+        assert.ok(
+          status.endsAt !== null && status.endsAt > nowMs,
+          `real end in the future (saw ${status.endsAt})`
+        );
+        assert.strictEqual(setAsideParkWaitMs([key], nowMs), null);
+      }
+    });
+
+    it("reports an unknown key and empty memory as not set aside", () => {
+      const nowMs = Date.now();
+      const [key] = egressKeys(1);
+      assert.deepStrictEqual(proxySetAsideStatus(key, nowMs), {
+        setAside: false,
+        quotaOnly: false,
+        endsAt: null,
+      });
+      assert.deepStrictEqual(proxySetAsideStatus(null, nowMs), {
+        setAside: false,
+        quotaOnly: false,
+        endsAt: null,
+      });
+      assert.strictEqual(setAsideParkWaitMs([], nowMs), null);
+      assert.strictEqual(setAsideParkWaitMs([null], nowMs), null);
+      assert.strictEqual(setAsideParkWaitMs([key], nowMs), null);
+    });
+
+    it("waits for the nearest real end of quota-only keys, bounded by the park window", () => {
+      const nowMs = Date.now();
+      const [first, second] = egressKeys(2);
+      noteProxyRefusal(first, "ip_quota_429", nowMs - (300_000 - 30_000));
+      noteProxyRefusal(second, "ip_quota_429", nowMs - (300_000 - 60_000));
+      const wait = setAsideParkWaitMs([first, second], nowMs);
+      assert.ok(wait !== null && Math.abs(wait - 30_000) < 5_000, `nearest wait (saw ${wait})`);
+    });
+
+    it("returns no wait outside the park window or across mixed motives", () => {
+      const nowMs = Date.now();
+      const [first, second] = egressKeys(2);
+      noteProxyRefusal(first, "ip_quota_429", nowMs - 300_000);
+      noteProxyRefusal(second, "slow", nowMs - (60_000 - 30_000));
+      assert.strictEqual(setAsideParkWaitMs([first], nowMs - 300_000), null);
+      assert.strictEqual(setAsideParkWaitMs([first, second], nowMs), null);
+    });
+  });
+
+  describe("set-aside park trigger", () => {
+    it("parks when every egress is set aside for quota with a release inside the window", async () => {
+      const nowMs = Date.now();
+      const [first, second] = egressKeys(2);
+      const setAsideAt = nowMs - (300_000 - 30_000);
+      noteProxyRefusal(first, "ip_quota_429", setAsideAt);
+      noteProxyRefusal(second, "ip_quota_429", setAsideAt);
+      installFetch([
+        { status: 429, body: BURST_BODY },
+        { status: 429, body: BURST_BODY },
+        { status: 200 },
+      ]);
+      const exec = new OpencodeExecutor("opencode-zen");
+      let waitedMs = 0;
+      exec.parkSleep = async (ms) => {
+        waitedMs += ms;
+        return true;
+      };
+      const result = await exec.execute({
+        model: "muse-spark-1.3-contributor-free",
+        body: { messages: [{ role: "user", content: "hi" }], stream: false },
+        stream: true,
+        signal: null,
+        credentials: credentialsFor(2),
+        log,
+      });
+      const text = await (result as { response: Response }).response.text();
+      assert.ok(text.includes(":ping"), "set-aside park emits the heartbeat");
+      assert.ok(
+        waitedMs > 0 && waitedMs <= PARK_WAIT_MS,
+        `park waits within the window (saw ${waitedMs})`
+      );
+    });
+
+    it("returns 429 untouched when slow-only set-asides hold every egress", async () => {
+      const nowMs = Date.now();
+      const [first, second] = egressKeys(2);
+      const setAsideAt = nowMs - (60_000 - 30_000);
+      noteProxyRefusal(first, "slow", setAsideAt);
+      noteProxyRefusal(second, "slow", setAsideAt);
+      installFetch([
+        { status: 429, body: BURST_BODY },
+        { status: 429, body: BURST_BODY },
+      ]);
+      const result = await run(2, true);
+      assert.strictEqual((result as { response: Response }).response.status, 429);
+      const text = await (result as { response: Response }).response.text();
+      assert.ok(!text.includes(":ping"), "slow set-asides never park on this path");
+    });
+
+    it("returns 429 untouched when mixed motives share one egress", async () => {
+      for (const order of [0, 1]) {
+        __resetProxyRefusalMemoryForTesting();
+        const nowMs = Date.now();
+        const [first, second] = egressKeys(2);
+        const quotaAt = nowMs - (300_000 - 30_000);
+        const slowAt = nowMs - (60_000 - 90_000);
+        if (order === 0) {
+          noteProxyRefusal(first, "ip_quota_429", quotaAt);
+          noteProxyRefusal(first, "slow", slowAt);
+        } else {
+          noteProxyRefusal(first, "slow", slowAt);
+          noteProxyRefusal(first, "ip_quota_429", quotaAt);
+        }
+        noteProxyRefusal(second, "ip_quota_429", quotaAt);
+        installFetch([
+          { status: 429, body: BURST_BODY },
+          { status: 429, body: BURST_BODY },
+        ]);
+        const result = await run(2, true);
+        assert.strictEqual((result as { response: Response }).response.status, 429);
+        const text = await (result as { response: Response }).response.text();
+        assert.ok(!text.includes(":ping"), `mixed motives never park (order ${order})`);
+      }
+    });
+
+    it("returns 429 untouched when no set-aside ends inside the window", async () => {
+      for (const expired of [true, false]) {
+        __resetProxyRefusalMemoryForTesting();
+        const nowMs = Date.now();
+        const [first, second] = egressKeys(2);
+        const setAsideAt = expired ? nowMs - 300_000 : nowMs;
+        noteProxyRefusal(first, "ip_quota_429", setAsideAt);
+        noteProxyRefusal(second, "ip_quota_429", setAsideAt);
+        installFetch([
+          { status: 429, body: BURST_BODY },
+          { status: 429, body: BURST_BODY },
+        ]);
+        const result = await run(2, true);
+        assert.strictEqual((result as { response: Response }).response.status, 429);
+        const text = await (result as { response: Response }).response.text();
+        assert.ok(!text.includes(":ping"), `no park outside the window (expired=${expired})`);
+      }
+    });
+
+    it("keeps the current rotation when the park flag is off, even with set-asides", async () => {
+      delete process.env[FLAG];
+      const nowMs = Date.now();
+      const [first, second] = egressKeys(2);
+      const setAsideAt = nowMs - (300_000 - 30_000);
+      noteProxyRefusal(first, "ip_quota_429", setAsideAt);
+      noteProxyRefusal(second, "ip_quota_429", setAsideAt);
+      installFetch([
+        { status: 429, body: BURST_BODY },
+        { status: 429, body: BURST_BODY },
+      ]);
+      const result = await run(2, true);
+      assert.strictEqual((result as { response: Response }).response.status, 429);
+      const text = await (result as { response: Response }).response.text();
+      assert.ok(!text.includes(":ping"), "no park when the flag is off");
+    });
+
+    it("parks, then the replay path stays covered by the threshold case", async () => {
+      // 1b (weakened per review m2): a real 1s sleep would prove the replay
+      // leg serves a fresh dispatch, but module-load periods (min 1000ms)
+      // forbid a fast in-process replay. This asserts the park envelope on
+      // the set-aside path (heartbeat + bounded wait); the served replay
+      // itself stays covered by the threshold case above plus the unchanged
+      // replayCandidates unit suite.
+      const exec = new OpencodeExecutor("opencode-zen");
+      let waitedMs = 0;
+      exec.parkSleep = async (ms) => {
+        waitedMs += ms;
+        return true;
+      };
+      const nowMs = Date.now();
+      const [first, second] = egressKeys(2);
+      const setAsideAt = nowMs - (300_000 - 30_000);
+      noteProxyRefusal(first, "ip_quota_429", setAsideAt);
+      noteProxyRefusal(second, "ip_quota_429", setAsideAt);
+      installFetch([
+        { status: 429, body: BURST_BODY },
+        { status: 429, body: BURST_BODY },
+        { status: 200, body: JSON.stringify({ ok: true }) },
+      ]);
+      const result = await exec.execute({
+        model: "muse-spark-1.3-contributor-free",
+        body: { messages: [{ role: "user", content: "hi" }], stream: false },
+        stream: true,
+        signal: null,
+        credentials: credentialsFor(2),
+        log,
+      });
+      const text = await (result as { response: Response }).response.text();
+      assert.ok(text.includes(":ping"), "set-aside park emits the heartbeat");
+      assert.ok(
+        Math.abs(waitedMs - 30_000) < 5_000,
+        `park waits until the nearest set-aside end (saw ${waitedMs})`
+      );
+    });
   });
 });

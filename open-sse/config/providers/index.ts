@@ -104,6 +104,7 @@ import { modelscopeProvider } from "./registry/modelscope/index.ts";
 import { sensenovaProvider } from "./registry/sensenova/index.ts";
 import { hyperbolicProvider } from "./registry/hyperbolic/index.ts";
 import { lambda_aiProvider } from "./registry/lambda-ai/index.ts";
+import { runcrateProvider } from "./registry/runcrate/index.ts";
 import { t3_webProvider } from "./registry/t3-web/index.ts";
 import { conol_webProvider } from "./registry/conol-web/index.ts";
 import { chatplaygroundProvider } from "./registry/chatplayground/index.ts";
@@ -161,6 +162,7 @@ import { devin_desktopProvider } from "./registry/devin-desktop/index.ts";
 import { zcodeProvider } from "./registry/zcode/index.ts";
 import { zed_hostedProvider } from "./registry/zed-hosted/index.ts";
 import { nanogptProvider } from "./registry/nanogpt/index.ts";
+import { nanProvider } from "./registry/nan/index.ts";
 import { apmixProvider } from "./registry/apmix/index.ts";
 import { scalewayProvider } from "./registry/scaleway/index.ts";
 import { agentrouterProvider } from "./registry/agentrouter/index.ts";
@@ -201,7 +203,6 @@ import { vercel_ai_gatewayProvider } from "./registry/vercel-ai-gateway/index.ts
 import { v0_vercelProvider } from "./registry/v0-vercel/index.ts";
 import { opencode_zenProvider } from "./registry/opencode/zen/index.ts";
 import { opencode_goProvider } from "./registry/opencode/go/index.ts";
-import { opencodeProvider } from "./registry/opencode/index.ts";
 import { dahlProvider } from "./registry/dahl/index.ts";
 import { maritalkProvider } from "./registry/maritalk/index.ts";
 import { basetenProvider } from "./registry/baseten/index.ts";
@@ -258,6 +259,7 @@ import { lyceumProvider } from "./registry/lyceum/index.ts";
 import { llmKiwiProvider } from "./registry/llm-kiwi/index.ts";
 import { literouterProvider } from "./registry/literouter/index.ts";
 import { greenptProvider } from "./registry/greenpt/index.ts";
+import { ainetcafeProvider } from "./registry/ainetcafe/index.ts";
 import { onomeoProvider } from "./registry/onomeo/index.ts";
 import { eurouterProvider } from "./registry/eurouter/index.ts";
 import { unificallyProvider } from "./registry/unifically/index.ts";
@@ -285,8 +287,12 @@ import { tabitokenProvider } from "./registry/tabitoken/index.ts";
 import { logfareProvider } from "./registry/logfare/index.ts";
 import { seekaiProvider } from "./registry/seekai/index.ts";
 import { tokenmarketProvider } from "./registry/tokenmarket/index.ts";
+import { tokenharborProvider } from "./registry/tokenharbor/index.ts";
 import { twinmindProvider } from "./registry/twinmind/index.ts";
 import { syntxProvider } from "./registry/syntx/index.ts";
+import { daoxeProvider } from "./registry/daoxe/index.ts";
+import { gisooProvider } from "./registry/gisoo/index.ts";
+import { demonrouteProvider } from "./registry/demonroute/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
   aimlapi: aimlapiProvider,
@@ -389,6 +395,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   sensenova: sensenovaProvider,
   hyperbolic: hyperbolicProvider,
   "lambda-ai": lambda_aiProvider,
+  runcrate: runcrateProvider,
   "t3-web": t3_webProvider,
   "conol-web": conol_webProvider,
   chatplayground: chatplaygroundProvider,
@@ -448,6 +455,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   zcode: zcodeProvider,
   "zed-hosted": zed_hostedProvider,
   nanogpt: nanogptProvider,
+  nan: nanProvider,
   apmix: apmixProvider,
   scaleway: scalewayProvider,
   agentrouter: agentrouterProvider,
@@ -489,7 +497,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "v0-vercel": v0_vercelProvider,
   "opencode-zen": opencode_zenProvider,
   "opencode-go": opencode_goProvider,
-  opencode: opencodeProvider,
   dahl: dahlProvider,
   maritalk: maritalkProvider,
   baseten: basetenProvider,
@@ -549,6 +556,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "llm-kiwi": llmKiwiProvider,
   literouter: literouterProvider,
   greenpt: greenptProvider,
+  ainetcafe: ainetcafeProvider,
   onomeo: onomeoProvider,
   eurouter: eurouterProvider,
   unifically: unificallyProvider,
@@ -576,6 +584,10 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   logfare: logfareProvider,
   seekai: seekaiProvider,
   tokenmarket: tokenmarketProvider,
+  tokenharbor: tokenharborProvider,
   twinmind: twinmindProvider,
   syntx: syntxProvider,
+  daoxe: daoxeProvider,
+  gisoo: gisooProvider,
+  demonroute: demonrouteProvider,
 };

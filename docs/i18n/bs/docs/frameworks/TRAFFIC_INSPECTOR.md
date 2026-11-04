@@ -42,86 +42,86 @@ Traffic Inspector je OmniRoute-ov ugrađeni HTTPS debugger saobraćaja — alat 
 
 ## §2 Načini snimanja
 
-Traffic Inspector podržava **5 istovremenih izvora snimanja**. Svaki se može nezavisno uključiti/isključiti. Polje `source` u svakom `InterceptedRequest` (`src/mitm/inspector/types.ts`) je jedno od `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` ili `"tproxy"`.
+Traffic Inspector podržava **5 istovremenih izvora snimanja**. Svaki se može nezavisno uključiti ili isključiti. Polje `source` u svakom objektu `InterceptedRequest` (`src/mitm/inspector/types.ts`) ima jednu od vrijednosti `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` ili `"tproxy"`.
 
-### Način 1 — AgentBridge (podrazumevano, uvek uključeno)
+### Način 1 — AgentBridge (zadani, uvijek uključen)
 
-**Izvor:** AgentBridge rukovaoci (`src/mitm/handlers/base.ts`)
-**Mehanizam:** Svaki `intercept()` poziv u `MitmHandlerBase` poziva `hookBufferStart()` pre prosleđivanja i `hookBufferUpdate()` po završetku. Nije potrebna dodatna konfiguracija — radi čim se AgentBridge pokrene.
-**Doseg:** 9 IDE agenata konfigurisanih u AgentBridge-u
-**Napomena:** polje `source` u `InterceptedRequest` = `"agent-bridge"`
+**Izvor:** AgentBridge obrađivači (`src/mitm/handlers/base.ts`)
+**Mehanizam:** Svaki poziv `intercept()` u `MitmHandlerBase` poziva `hookBufferStart()` prije prosljeđivanja i `hookBufferUpdate()` po završetku. Nije potrebna nikakva dodatna konfiguracija — radi čim se AgentBridge pokrene.
+**Domet:** 9 IDE agenata konfigurisanih u AgentBridgeu
+**Napomena:** Polje `source` u objektu `InterceptedRequest` = `"agent-bridge"`
 
-### Način 2 — Prilagođeni hostovi (DNS preusmeravanje)
+### Način 2 — Prilagođeni hostovi (DNS preusmjeravanje)
 
-**Izvor:** Lista hostova definisana od strane korisnika (`inspector_custom_hosts` tabela)
-**Mehanizam:** Dodavanje hosta putem korisničkog interfejsa dodaje `127.0.0.1 <host>` u `/etc/hosts` (zahteva sudo). Postojeći AgentBridge MITM server (port 443) dinamički generiše SNI sertifikat za novi host.
-**Doseg:** Bilo koja aplikacija koja koristi dodati host — nije potrebna promena konfiguracije aplikacije
+**Izvor:** Korisnički definirana lista hostova (tabela `inspector_custom_hosts`)
+**Mehanizam:** Dodavanje hosta putem korisničkog interfejsa dodaje `127.0.0.1 <host>` u `/etc/hosts` (zahtijeva sudo). Postojeći AgentBridge MITM server (port 443) dinamički generiše SNI certifikat za novi host.
+**Domet:** Svaka aplikacija koja koristi dodani host — nije potrebna promjena konfiguracije aplikacije
 **Napomena:** `source` = `"custom-host"`
 
-Primeri upotrebe:
+Primjeri upotrebe:
 
-- Nadgledanje `api.openai.com` iz Python skripti
-- Otklanjanje grešaka (debug) za `my-internal-llm.company.com`
-- Snimanje saobraćaja sa mobilnih uređaja na istoj mreži (putem ARP spoofinga — napredno)
+- Praćenje `api.openai.com` iz Python skripti
+- Otklanjanje grešaka za `my-internal-llm.company.com`
+- Snimanje saobraćaja s mobilnih uređaja na istoj mreži (putem ARP lažiranja — napredno)
 
-### Način 3 — HTTP_PROXY slušač (port 8080)
+### Način 3 — HTTP_PROXY osluškivač (port 8080)
 
-**Izvor:** Aplikacije koje koriste `HTTP_PROXY`/`HTTPS_PROXY` varijable okruženja
-**Mehanizam:** Sekundarni slušač na portu 8080 (`src/mitm/inspector/httpProxyServer.ts`) koji deluje kao standardni eksplicitni HTTP/HTTPS proxy. Prihvata `CONNECT` tunele (HTTPS) i direktne HTTP zahteve.
-**Doseg:** Bilo koja aplikacija koja poštuje `HTTP_PROXY` varijablu okruženja — bez promene DNS-a, bez sudo-a
+**Izvor:** Aplikacije koje koriste varijable okruženja `HTTP_PROXY`/`HTTPS_PROXY`
+**Mehanizam:** Sekundarni osluškivač na portu 8080 (`src/mitm/inspector/httpProxyServer.ts`) koji djeluje kao standardni eksplicitni HTTP/HTTPS proxy. Prihvata `CONNECT` tunele (HTTPS) i direktne HTTP zahtjeve.
+**Domet:** Svaka aplikacija koja poštuje varijablu okruženja `HTTP_PROXY` — bez promjene DNS-a i bez sudo pristupa
 **Napomena:** `source` = `"http-proxy"`
 
 ```bash
-# Brzo snimanje za jednu komandu:
+# Brzo snimanje za jednu naredbu:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Trajno snimanje u shell sesiji:
+# Trajno snimanje tokom sesije ljuske:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS ograničenje:** HTTPS `CONNECT` tuneli se snimaju samo kao metapodaci (host, port, vreme) — TLS telo se podrazumevano ne dekriptuje. Omogućite "Decrypt HTTPS in proxy mode" prekidač (opciono, zahteva da AgentBridge sertifikat bude poverljiv) za potpunu inspekciju tela.
+**TLS ograničenje:** HTTPS prolazi kroz obični `CONNECT` tunel: osluškivač prosljeđuje šifrirane bajtove bez izmjena i bilježi samo metapodatke (host, port, vrijeme). Nikada ne dešifrira HTTPS i ne postoji postavka koja uključuje dešifriranje za ovaj način rada. Za snimanje tijela HTTPS poruka usmjerite host kroz Način 1 (AgentBridge), Način 2 (Prilagođeni hostovi) ili Način 5 (TPROXY dešifriranje).
 
-**Konflikt portova:** Ako je port 8080 u upotrebi, AgentBridge vraća 409 sa strukturiranom greškom. Promenite port putem `INSPECTOR_HTTP_PROXY_PORT` varijable okruženja.
+**Sukob porta:** Ako se port 8080 već koristi, AgentBridge vraća 409 sa strukturiranom greškom. Promijenite port putem varijable okruženja `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Način 4 — Sistemski proxy (napredno, opciono)
+### Način 4 — Sistemski proxy (napredno, uz izričito uključivanje)
 
-**Izvor:** Proxy postavke na nivou operativnog sistema (primenjuje se na sve aplikacije na mašini)
-**Mehanizam:** Koristi OS API-je za preusmeravanje celokupnog HTTP/HTTPS saobraćaja kroz HTTP_PROXY slušač:
+**Izvor:** Postavke proxyja na nivou operativnog sistema (primjenjuju se na sve aplikacije na računaru)
+**Mehanizam:** Koristi API-je operativnog sistema za preusmjeravanje cjelokupnog HTTP/HTTPS saobraćaja kroz HTTP_PROXY osluškivač:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Doseg:** Svaka aplikacija na mašini koja poštuje sistemske proxy postavke
+  **Domet:** Svaka aplikacija na računaru koja poštuje sistemske postavke proxyja
   **Napomena:** `source` = `"system-proxy"`
 
 **Sigurnosni mehanizmi:**
 
-- Tajmer za automatsko isključivanje (podrazumevano 30 min, podesivo putem `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Prethodno stanje sistemskog proxy-ja se čuva u bazi podataka i vraća prilikom poništavanja
-- Kontrolna tabla prikazuje "Reverting system proxy" upit ako korisnik ode sa stranice dok je aktivan
-- Korisnički interfejs prikazuje `⚠ Advanced` oznaku + polje za potvrdu
+- Tajmer za automatsko isključivanje (zadano 30 min, može se konfigurirati putem `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Prethodno stanje sistemskog proxyja čuva se u bazi podataka i vraća pri poništavanju
+- Kontrolna ploča prikazuje upit „Poništavanje sistemskog proxyja“ ako korisnik napusti stranicu dok je proxy aktivan
+- Korisnički interfejs prikazuje oznaku `⚠ Napredno` + kontrolno polje za izričitu potvrdu
 
-### Način 5 — TPROXY transparentna dekripcija (Linux, root, opciono)
+### Način 5 — TPROXY transparentno dešifriranje (Linux, root, uz izričito uključivanje)
 
-**Izvor:** Kernel TPROXY + usmeravanje politika (`src/mitm/tproxy/`)
-**Mehanizam:** Označava nove lokalne odlazne TCP konekcije ka ciljnom portu (podrazumevano `443`) u `mangle OUTPUT`, `ip rule` preusmerava označene pakete na lokalnu isporuku, a `mangle PREROUTING` `TPROXY` cilj ih predaje transparentnom (**IP_TRANSPARENT**) slušaču (podrazumevani port `8443`). Slušač prekida TLS sa list sertifikatom izdatim **po SNI nazivu hosta na zahtev** od strane dinamičkog CA, snima dekriptovanu razmenu i prosleđuje zahtev ponovo enkriptovan na originalno odredište.
-**Doseg:** **Proizvoljni** odredišni hostovi na ciljnom portu — bez `/etc/hosts` spoofinga, bez `HTTP_PROXY` varijable okruženja, bez mutacije sistemskog proxy-ja. Presretnuti proces ne zahteva promenu konfiguracije, ali mora verovati dinamičkom CA.
+**Izvor:** TPROXY jezgre + usmjeravanje zasnovano na pravilima (`src/mitm/tproxy/`)
+**Mehanizam:** Označava nove lokalne izlazne TCP veze prema ciljnom portu (zadano `443`) u lancu `mangle OUTPUT`, pravilo `ip rule` preusmjerava označene pakete na lokalnu isporuku, a cilj `TPROXY` lanca `mangle PREROUTING` predaje ih transparentnom (**IP_TRANSPARENT**) osluškivaču (zadani port `8443`). Osluškivač prekida TLS pomoću krajnjeg certifikata koji dinamički CA izdaje **za svaki SNI naziv hosta na zahtjev**, snima dešifriranu razmjenu i prosljeđuje ponovo šifriran zahtjev izvornom odredištu.
+**Domet:** **Proizvoljni** odredišni hostovi na ciljnom portu — bez lažiranja putem `/etc/hosts`, bez varijable okruženja `HTTP_PROXY` i bez promjene sistemskog proxyja. Presretnutom procesu nije potrebna promjena konfiguracije, ali mora vjerovati dinamičkom CA-u.
 **Napomena:** `source` = `"tproxy"`
 
-**Zahtevi:** Samo Linux (**IP_TRANSPARENT** je samo za Linux), **CAP_NET_ADMIN** privilegija (root) i izvorni N-API dodatak koji se mora izgraditi pomoću C alata (`npm run build:native:tproxy`). Kada nije dostupan, prekidač na kontrolnoj tabli je onemogućen sa opisom "TPROXY decrypt requires Linux + root + the native addon". Firewall pravila se primenjuju/poništavaju transakciono (pad sistema nikada ne ostavlja `mangle` pravilo) i brišu se pri ponovnom pokretanju. Anti-loop mehanizam zasnovan na SO_MARK sprečava da se proxy-jevo sopstveno ponovno enkriptovano prosleđivanje ponovo presretne.
+**Zahtjevi:** Samo Linux (**IP_TRANSPARENT** je dostupan samo na Linuxu), mogućnost **CAP_NET_ADMIN** (root) i izvorni N-API dodatak koji se mora izgraditi pomoću C lanca alata (`npm run build:native:tproxy`). Kada nije dostupan, prekidač na kontrolnoj ploči je onemogućen uz opis „TPROXY dešifriranje zahtijeva Linux + root + izvorni dodatak“. Pravila vatrozida primjenjuju se i poništavaju transakcijski (pad sistema nikada ne ostavlja `mangle` pravilo aktivnim) i brišu se pri ponovnom pokretanju. Mehanizam protiv petlje zasnovan na SO_MARK-u sprečava ponovno presretanje vlastitog, ponovo šifriranog prosljeđivanja proxyja.
 
-Ovo je značajan podsistem sa sopstvenim namenskim vodičem za operatera — pogledajte `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije kompajlirano u `/docs`) za kompletan recept za firewall, instalater za per-SNI dinamički CA + trust-store, rutu samo za lokalni saobraćaj, detalje o anti-loop mehanizmu i konfiguracionu šemu. Prekidač se pokreće putem `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (napomena: ruta se nalazi pod AgentBridge prefiksom, a ne pod Traffic Inspector prefiksom).
+Ovo je značajan podsistem s vlastitim namjenskim vodičem za operatere — pogledajte `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije uključen u `/docs`) za potpuni recept vatrozida, dinamički CA za svaki SNI + instalacijski program za spremište pouzdanih certifikata, lokalnu rutu, detalje mehanizma protiv petlje i konfiguracijsku shemu. Prekidačem upravljaju `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (napomena: ruta se nalazi pod prefiksom AgentBridge, a ne pod prefiksom Traffic Inspector).
 
 ### Poređenje načina snimanja
 
-| Način rada             | Postavljanje                       |           Sudo?            | Doseg                                      | Napomene                                                                                                                                               |
-| ---------------------- | ---------------------------------- | :------------------------: | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. AgentBridge         | Automatski                         |    Jednom (cert+hosts)     | 9 IDE agenata                              | Uključeno po zadanim postavkama                                                                                                                        |
-| 2. Prilagođeni hostovi | Unos po hostu                      |    Da (hosts datoteka)     | Bilo koja aplikacija koja koristi taj host | Trajno pohranjeno u bazi podataka                                                                                                                      |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`           |             Ne             | Aplikacije koje poštuju env                | Port 8080, bez TLS dešifriranja po zadanim postavkama                                                                                                  |
-| 4. Na razini sistema   | Prekidač + potvrda                 |             Da             | Sve aplikacije na mašini                   | Automatsko isključivanje za 30 min                                                                                                                     |
-| 5. TPROXY dešifriranje | Prekidač (Linux + izvorni dodatak) | Da (root + CA instalacija) | Bilo koji host na ciljnom portu            | Dešifrira proizvoljne hostove; isključeno po zadanim postavkama — pogledajte `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije kompajlirano u `/docs`) |
+| Način rada        | Postavljanje                       |                 Sudo?                  | Doseg                                       | Napomene                                                                                                                                     |
+| ----------------- | ---------------------------------- | :------------------------------------: | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Automatsko                         |       Jednom (certifikat+hosts)        | 9 IDE agenata                               | Podrazumijevano uključeno                                                                                                                    |
+| 2. Custom Hosts   | Unos za svaki host                 |          Da (hosts datoteka)           | Svaka aplikacija koja koristi taj host      | Sačuvano u bazi podataka                                                                                                                     |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`           |                   Ne                   | Aplikacije koje poštuju varijable okruženja | Port 8080; HTTPS se tunelira putem CONNECT-a (samo metapodaci, nikada se ne dešifruje)                                                       |
+| 4. System-wide    | Prekidač + potvrda                 |                   Da                   | Sve aplikacije na računaru                  | Automatski se onemogućava nakon 30 min                                                                                                       |
+| 5. TPROXY decrypt | Prekidač (Linux + izvorni dodatak) | Da (root + instalacija CA certifikata) | Svaki host na ciljnom portu                 | Dešifruje proizvoljne hostove; podrazumijevano isključeno — pogledajte `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije ugrađeno u `/docs`) |
 
 ---
 
@@ -340,29 +340,29 @@ Izvezite putem `GET /api/tools/traffic-inspector/sessions/{id}/export.har` ili d
 
 ## §6 Sigurnost
 
-Traffic Inspector prikazuje **sav presretnuti HTTPS saobraćaj**, uključujući autorizacijska zaglavlja i tijela zahtjeva. Na snazi su sljedeće kontrole:
+Traffic Inspector prikazuje **sav presretnuti HTTPS saobraćaj**, uključujući autorizacijska zaglavlja i tijela zahtjeva. Primjenjuju se sljedeće kontrole:
 
-| Kontrola                            | Detalji                                                                                                                                                                              |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LOCAL_ONLY**                      | Sve rute i WebSocket krajnja tačka su samo za loopback (primijenjeno u `routeGuard.ts` prije autorizacije)                                                                           |
-| **Maskiranje tajni**                | Linearni `maskSecret()` skener rediguje RFC 6750 Bearer akreditive, ključeve sa prefiksom provajdera i dugačke neprozirne tokene prije `TrafficBuffer.push()`                        |
-| **Ograničenje veličine tijela**     | Tijela > `INSPECTOR_MAX_BODY_KB` (podrazumijevano 1024 KB) se skraćuju uz obavještenje `"(truncated for performance)"`                                                               |
-| **Sanitizacija zaglavlja**          | Imena su pretvorena u mala slova; framing/hop-by-hop i proxy-auth zaglavlja su odbačena; kolačići su u potpunosti redigovani; vrijednosti akreditiva se delegiraju na `maskSecret()` |
-| **CSP**                             | Stroga politika sigurnosti sadržaja (Content Security Policy) na Traffic Inspector stranicama radi sprječavanja XSS-a putem umetnutih tijela odgovora                                |
-| **Bez trajnog čuvanja po defaultu** | `TrafficBuffer` je u memoriji i gubi se pri ponovnom pokretanju servera. Sesije se trajno čuvaju samo kada se eksplicitno snime                                                      |
+| Kontrola                                        | Detalji                                                                                                                                                                                                          |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                                  | Sve rute i WebSocket krajnja tačka dostupne su samo putem povratne petlje (provodi se u `routeGuard.ts` prije autentifikacije)                                                                                   |
+| **Maskiranje tajni**                            | Linearni skener `maskSecret()` rediguje RFC 6750 Bearer vjerodajnice, ključeve s prefiksom pružaoca i duge neprozirne tokene prije `TrafficBuffer.push()`                                                        |
+| **Ograničenje veličine tijela**                 | Tijela > `INSPECTOR_MAX_BODY_KB` (zadano 1024 KB) skraćuju se uz obavijest `"(skraćeno radi performansi)"`                                                                                                       |
+| **Sanitizacija zaglavlja**                      | Nazivi se pretvaraju u mala slova; zaglavlja za uokvirivanje/pojedinačni skok i proxy autentifikaciju se odbacuju; kolačići se potpuno rediguju; vrijednosti vjerodajnica prosljeđuju se funkciji `maskSecret()` |
+| **CSP**                                         | Stroga politika sigurnosti sadržaja na stranicama Traffic Inspectora radi sprečavanja XSS-a putem umetnutih tijela odgovora                                                                                      |
+| **Bez trajne pohrane prema zadanim postavkama** | `TrafficBuffer` se nalazi u memoriji i gubi se pri ponovnom pokretanju servera. Sesije se trajno pohranjuju samo kada se izričito snimaju                                                                        |
 
 ### Primijenjena stroga pravila
 
-| Pravilo                           | Primjena                                                                                |
-| --------------------------------- | --------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Svi HTTP odgovori o grešci sa Traffic Inspector ruta su sanitizovani                    |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` je LOCAL_ONLY + SPAWN_CAPABLE (sistemske proxy komande) |
+| Pravilo                           | Primjena                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
+| **#12** `sanitizeErrorMessage`    | Svi HTTP odgovori s greškom iz ruta Traffic Inspectora se sanitiziraju                     |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` je LOCAL_ONLY + SPAWN_CAPABLE (naredbe sistemskog proxyja) |
 
 ### Poznata ograničenja
 
-- **System-wide proxy mode**: utiče na sve aplikacije na mašini, uključujući VPN klijente i SSO. Uvijek koristite sa tajmerom za automatsko isključivanje. Ne koristite na dijeljenim mašinama.
-- **CONNECT tunnel HTTPS**: Režim 3 (HTTP_PROXY) hvata samo metapodatke tunela za HTTPS odredišta osim ako nije omogućeno TLS presretanje. Ovo je namjerno — transparentno hvatanje bez povjerenja u AgentBridge certifikat bi prekinulo TLS verifikaciju za te aplikacije.
-- **Hardkodirani stringovi u nekim komponentama**: Neke UI komponente (F7/F8) imaju mali broj hardkodiranih stringova koji još nisu pokriveni i18n ključevima. Oni su dokumentovani kao poznato ograničenje u izvještaju o i18n nedostacima; biće migrirani u naknadnom prolazu. Pogođeni stringovi su dekorativne UI oznake koje ne zahtijevaju prevod za funkcionalnu upotrebu.
+- **Način rada proxyja na nivou cijelog sistema** utiče na sve aplikacije na računaru, uključujući VPN klijente i SSO. Uvijek ga koristite s tajmerom za automatsko onemogućavanje. Nemojte ga koristiti na dijeljenim računarima.
+- **HTTPS kroz CONNECT tunel**: Način rada 3 (HTTP_PROXY) bilježi samo metapodatke tunela za HTTPS odredišta i nikada ih ne dešifruje. To je namjerno — dešifrovanje bi zahtijevalo da svaki klijent vjeruje MITM certifikatu, pa slušač zadržava HTTPS šifrovanim od kraja do kraja. Koristite AgentBridge, Custom Hosts ili TPROXY decrypt kada su vam potrebna HTTPS tijela.
+- **Fiksno upisani tekstualni nizovi u nekim komponentama**: Neke UI komponente (F7/F8) imaju mali broj fiksno upisanih tekstualnih nizova koji još nisu obuhvaćeni i18n ključevima. Oni su dokumentovani kao poznato ograničenje u izvještaju o nedostacima i18n-a; bit će migrirani u narednom prolazu. Obuhvaćeni tekstualni nizovi ukrasne su UI oznake koje ne zahtijevaju prijevod za funkcionalnu upotrebu.
 
 ---
 
@@ -425,9 +425,9 @@ Kada bafer dostigne `INSPECTOR_BUFFER_SIZE` (podrazumijevano 1000), novi unosi z
 
 ---
 
-## §8 API referenca
+## §8 Referenca API-ja
 
-Sve rute su `LOCAL_ONLY` (samo loopback) i `SPAWN_CAPABLE` (komande sistemskog proxyja). Pogledajte `src/server/authz/routeGuard.ts`.
+Sve rute su `LOCAL_ONLY` (samo povratna petlja) i `SPAWN_CAPABLE` (komande sistemskog proxyja). Pogledajte `src/server/authz/routeGuard.ts`.
 
 Osnovna putanja: `/api/tools/traffic-inspector/`
 
@@ -435,62 +435,61 @@ Osnovna putanja: `/api/tools/traffic-inspector/`
 
 | Metoda | Putanja                     | Opis                                                                                           |
 | ------ | --------------------------- | ---------------------------------------------------------------------------------------------- |
-| GET    | `/requests`                 | Izlistaj zahtjeve (moguće filtriranje: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests`                 | Prikazuje zahtjeve (moguće filtrirati: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET    | `/requests/{id}`            | Detalji pojedinačnog zahtjeva                                                                  |
-| DELETE | `/requests`                 | Očisti memorijski bafer                                                                        |
-| POST   | `/requests/{id}/replay`     | Ponovo izvrši isti zahtjev kroz OmniRoute ruter                                                |
-| PUT    | `/requests/{id}/annotation` | Sačuvaj ili ažuriraj bilješku o zahtjevu                                                       |
+| DELETE | `/requests`                 | Briše međuspremnik u memoriji                                                                  |
+| POST   | `/requests/{id}/replay`     | Ponovno izvršava isti zahtjev putem OmniRoute usmjerivača                                      |
+| PUT    | `/requests/{id}/annotation` | Sprema ili ažurira bilješku o zahtjevu                                                         |
 
 ### WebSocket
 
-| Metoda | Putanja | Opis                                                                                            |
-| ------ | ------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/ws`   | WebSocket stream uživo. Šalje `snapshot` pri povezivanju, zatim `new`/`update`/`clear` događaje |
+| Metoda | Putanja | Opis                                                                                           |
+| ------ | ------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/ws`   | WebSocket tok uživo. Šalje `snapshot` pri povezivanju, a zatim događaje `new`/`update`/`clear` |
 
 ### Izvoz
 
 | Metoda | Putanja       | Opis                                         |
 | ------ | ------------- | -------------------------------------------- |
-| GET    | `/export.har` | Izvezi trenutnu filtriranu listu kao HAR 1.2 |
+| GET    | `/export.har` | Izvozi trenutno filtriranu listu kao HAR 1.2 |
 
 ### Prilagođeni hostovi
 
-| Metoda | Putanja         | Opis                                         |
-| ------ | --------------- | -------------------------------------------- |
-| GET    | `/hosts`        | Izlistaj prilagođene hostove                 |
-| POST   | `/hosts`        | Dodaj host (automatski uređuje `/etc/hosts`) |
-| DELETE | `/hosts/{host}` | Ukloni host                                  |
-| PATCH  | `/hosts/{host}` | Prebaci status `enabled`                     |
+| Metoda | Putanja         | Opis                                          |
+| ------ | --------------- | --------------------------------------------- |
+| GET    | `/hosts`        | Prikazuje prilagođene hostove                 |
+| POST   | `/hosts`        | Dodaje host (automatski uređuje `/etc/hosts`) |
+| DELETE | `/hosts/{host}` | Uklanja host                                  |
+| PATCH  | `/hosts/{host}` | Uključuje ili isključuje `enabled`            |
 
-### Režimi snimanja (Capture modes)
+### Režimi snimanja
 
-| Metoda | Putanja                        | Opis                                                                                            |
-| ------ | ------------------------------ | ----------------------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`               | Stanje AgentBridge / custom-hosts / HTTP_PROXY / system-proxy režima + `tls-intercept` prekidač |
-| POST   | `/capture-modes/http-proxy`    | Pokreni/zaustavi HTTP_PROXY osluškivač (`{action: "start"\|"stop"}`)                            |
-| POST   | `/capture-modes/system-proxy`  | Primijeni/vrati sistemski proxy (`{action: "apply"\|"revert"}`)                                 |
-| POST   | `/capture-modes/tls-intercept` | Uključi/isključi dekripciju HTTPS tijela u proxy režimu (`{enabled: boolean}`)                  |
+| Metoda | Putanja                       | Opis                                                                           |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| GET    | `/capture-modes`              | Stanje režima AgentBridge / prilagođeni hostovi / HTTP_PROXY / sistemski proxy |
+| POST   | `/capture-modes/http-proxy`   | Pokreće/zaustavlja HTTP_PROXY osluškivač (`{action: "start"\|"stop"}`)         |
+| POST   | `/capture-modes/system-proxy` | Primjenjuje/poništava sistemski proxy (`{action: "apply"\|"revert"}`)          |
 
-> **TPROXY dekripcija** (capture mode 5) se pokreće putem zasebne rute pod
-> AgentBridge prefiksom — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — ne
+> **TPROXY dešifriranje** (režim snimanja 5) pokreće se putem **zasebne** rute pod
+> prefiksom AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — a ne
 > pod `/api/tools/traffic-inspector/`. Pogledajte
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije kompajlirano u `/docs`).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije kompilirano u `/docs`).
 
 ### Sesije
 
-| Metoda | Putanja                     | Opis                                                                 |
-| ------ | --------------------------- | -------------------------------------------------------------------- |
-| POST   | `/sessions`                 | Započni snimanje (`{name?: string}`)                                 |
-| PATCH  | `/sessions/{id}`            | Zaustavi ili preimenuj (`{action: "stop"\|"rename", name?: string}`) |
-| GET    | `/sessions`                 | Izlistaj sve sačuvane sesije                                         |
-| GET    | `/sessions/{id}`            | Snimak sesije (svi zahtjevi)                                         |
-| DELETE | `/sessions/{id}`            | Obriši sesiju                                                        |
-| GET    | `/sessions/{id}/export.har` | Izvezi sesiju kao HAR 1.2                                            |
+| Metoda | Putanja                     | Opis                                                                    |
+| ------ | --------------------------- | ----------------------------------------------------------------------- |
+| POST   | `/sessions`                 | Pokreće snimanje (`{name?: string}`)                                    |
+| PATCH  | `/sessions/{id}`            | Zaustavlja ili preimenuje (`{action: "stop"\|"rename", name?: string}`) |
+| GET    | `/sessions`                 | Prikazuje sve spremljene sesije                                         |
+| GET    | `/sessions/{id}`            | Snimak sesije (svi zahtjevi)                                            |
+| DELETE | `/sessions/{id}`            | Briše sesiju                                                            |
+| GET    | `/sessions/{id}/export.har` | Izvozi sesiju kao HAR 1.2                                               |
 
-### Interni unos (D4 fallback)
+### Interni prijem (D4 rezervni mehanizam)
 
 | Metoda | Putanja            | Opis                                                                                                                 |
 | ------ | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/internal/ingest` | Prihvata presretnuti zahtjev sa `server.cjs` prolazne putanje; zahtijeva `INSPECTOR_INTERNAL_INGEST_TOKEN` zaglavlje |
+| POST   | `/internal/ingest` | Prihvata presretnuti zahtjev iz prolazne putanje `server.cjs`; zahtijeva zaglavlje `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
-Kompletne OpenAPI šeme: `docs/openapi.yaml` → tag `Traffic Inspector`.
+Potpune OpenAPI sheme: `docs/openapi.yaml` → oznaka `Traffic Inspector`.

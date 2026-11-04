@@ -1,3 +1,5 @@
+import { isProviderSafetyStopsEnabled } from "./providerSafety.ts";
+
 // Tencent / CodeBuddy wrap errors as {Response.Error}, {data.Response.Error},
 // or {code, msg}. Detect and unwrap; other shapes pass through as empty fields.
 // Callers must still route the message through sanitizeErrorMessage / buildErrorBody.
@@ -63,7 +65,12 @@ export function extractJsonErrorFields(
 ): { message: unknown; errorCode: unknown; errorType: unknown } {
   const record = asRecord(json) ?? {};
   const tencent = unwrapTencentEnvelope(record);
-  const errorObj = asRecord(record.error);
+  const rootError = asRecord(record.error);
+  // PROVIDER_SAFETY_STOPS_TERMINAL (#17049): also read a Responses failure's response.error.
+  const errorObj =
+    (rootError && Object.keys(rootError).length > 0) || !isProviderSafetyStopsEnabled()
+      ? rootError
+      : asRecord(asRecord(record.response)?.error);
   return {
     message:
       envelopeMessage ||

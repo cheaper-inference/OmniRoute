@@ -1,3 +1,5 @@
+import Icon from "@/shared/components/Icon";
+import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -37,16 +39,14 @@ export default function ErrorPageScaffold({
     >
       <section className="w-full max-w-2xl rounded-2xl border border-border bg-surface p-8 sm:p-10 shadow-soft">
         <header className="text-center">
-          <span className="material-symbols-outlined text-4xl text-primary mb-3" aria-hidden="true">
-            {icon}
-          </span>
-          <p
-            className="text-6xl sm:text-7xl font-bold leading-none bg-gradient-to-br from-primary to-primary-hover bg-clip-text text-transparent"
-            aria-hidden="true"
-          >
+          <div className="mb-4 flex justify-center">
+            <OmniRouteLockup />
+          </div>
+          <Icon name={icon} size={40} className="mx-auto mb-3 text-text-muted" />
+          <p className="ci-dashboard-display text-6xl sm:text-7xl" aria-hidden="true">
             {code}
           </p>
-          <h1 id="error-page-title" className="mt-4 text-2xl sm:text-3xl font-semibold">
+          <h1 id="error-page-title" className="ci-heading mt-4 text-2xl sm:text-3xl">
             {title}
           </h1>
           <p className="mt-3 text-text-muted leading-relaxed">{description}</p>
@@ -59,12 +59,7 @@ export default function ErrorPageScaffold({
           >
             {suggestions.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <span
-                  className="material-symbols-outlined text-base text-primary mt-0.5"
-                  aria-hidden="true"
-                >
-                  check_circle
-                </span>
+                <Icon name="check_circle" size={16} className="text-text-muted mt-0.5" />
                 <span>{item}</span>
               </li>
             ))}
@@ -74,7 +69,7 @@ export default function ErrorPageScaffold({
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
           <Link
             href={resolvedPrimary.href}
-            className="inline-flex items-center justify-center px-6 py-3 rounded-lg text-white text-sm font-semibold bg-gradient-to-br from-primary to-primary-hover hover:shadow-elevated transition-all duration-200 motion-reduce:transition-none"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-lg text-sm font-semibold bg-primary text-accent-foreground hover:bg-primary-hover hover:shadow-elevated transition-all duration-200 motion-reduce:transition-none"
           >
             {resolvedPrimary.label}
           </Link>

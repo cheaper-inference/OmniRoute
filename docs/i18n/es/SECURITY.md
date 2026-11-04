@@ -29,23 +29,24 @@ Si descubre una vulnerabilidad de seguridad en OmniRoute, notifíquela de forma 
 | 3.7.x   | ✅ Seguridad                                             |
 | < 3.7.0 | ❌ No compatible                                         |
 
-## Periodo de soporte LTS (v3.9.x)
+## Período de soporte LTS (v3.9.x)
 
-Después de 3.8.59, la siguiente versión es **3.9.0**, que inaugura la línea de soporte a largo plazo en la
-rama `stable/v3` (consulte [`ROADMAP.md`](ROADMAP.md) → «Fase 3 — v3.9.0 LTS»).
+Después de 3.8.59, la siguiente versión es **3.9.0**, que inicia la línea de soporte a largo plazo en la
+rama `stable/v3` (consulta [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
 - **Qué recibe `stable/v3`:** correcciones de errores, parches de seguridad y actualizaciones de proveedores. Las nuevas
   funcionalidades se incorporan al canal v4; la línea LTS prioriza la estabilidad. `npm install omniroute`
   (la etiqueta de distribución `latest`) permanece en v3 durante todo el ciclo de v4.
-- **Duración del periodo:** `<T-GAP-3: decisión del responsable pendiente — consulte ROADMAP.md>`. La duración del
-  periodo posterior a la disponibilidad general de v4.0 (cuando `latest` cambie a v4) **aún no se ha decidido**; esta
-  sección se actualizará cuando el mantenedor la anuncie. Hasta entonces, no dé por supuesta una fecha de finalización.
-- **Notificación de una vulnerabilidad en la línea LTS:** utilice el mismo canal que para cualquier otra versión:
-  un [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privado,
-  nunca una incidencia pública. Indique qué versión probó (por ejemplo, `3.9.2`); las correcciones se incorporan a
-  `stable/v3` y se trasladan posteriormente a v4.
-- **Referencia de seguridad en el punto de inicio de LTS:** el estado medido del escáner, el mecanismo de protección de rutas y
-  las pruebas de credenciales públicas se registran en
+- **Duración del período:** `stable/v3` recibe **correcciones de seguridad y de regresiones críticas durante
+  12 meses después del lanzamiento de 3.9.0, o hasta 90 días después de que v4.0.0 se publique como `latest` —
+  lo que ocurra más tarde**. La fecha de finalización resultante se registra en las notas de la versión 3.9.0 y en
+  [`ROADMAP.md`](ROADMAP.md) cuando se realiza el lanzamiento.
+- **Cómo informar de una vulnerabilidad en la línea LTS:** utiliza el mismo canal que para cualquier otra versión:
+  un [aviso de seguridad de GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privado,
+  nunca una incidencia pública. Indica qué versión probaste (por ejemplo, `3.9.2`); las correcciones se incorporan a
+  `stable/v3` y se trasladan a v4.
+- **Referencia de seguridad en el lanzamiento de LTS:** el estado medido del escáner, las pruebas del protector de rutas y
+  de credenciales públicas se registran en
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

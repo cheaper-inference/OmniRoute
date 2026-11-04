@@ -99,31 +99,40 @@ Jei laukas `region` praleistas, numatytoji jo reikšmė yra `us-east-1`.
 
 ---
 
-## Importavimo naudojant API raktą srautas
+## API rakto importavimo procesas
 
-Autentifikavimas API raktu skirtas ilgai galiojantiems Kiro / AWS CodeWhisperer perdavimo prieigos duomenims. Jis
-nenaudoja OAuth atnaujinimo, todėl išvengiama bendrinamo OIDC seanso panaikinimo.
+Autentifikavimas API raktu skirtas ilgalaikiams Kiro / AWS CodeWhisperer „Bearer“ kredencialams. Jis
+nenaudoja OAuth atnaujinimo, todėl išvengiama bendrinamos OIDC sesijos panaikinimo.
 
 ### Valdymo skydas
 
 1. Atidarykite **Valdymo skydas -> Teikėjai -> Kiro**.
 2. Pasirinkite **API raktas**.
-3. Įklijuokite API raktą ir, jei reikia, AWS regioną (numatytasis – `us-east-1`).
-4. OmniRoute patikrina raktą ir išsaugo ryšį.
+3. Įklijuokite API raktą ir pasirinkite AWS regioną: **Aptikti automatiškai** (numatytasis), **JAV rytai
+   (Šiaurės Virdžinija)** arba **Europa (Frankfurtas)**.
+4. OmniRoute patikrina raktą ir išsaugo ryšį, susietą su regionu, kuriame
+   raktas veikia.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` priima `auto` (numatytasis), `us-east-1` arba `eu-central-1`; bet kuri kita reikšmė
+atmetama su HTTP 400.
 
 ### Vidinė sutartis
 
-API maršrutas patikrina raktą iškviesdamas `KiroService.validateApiKey()`, kuri
-naudoja `ListAvailableProfiles` su regioną atitinkančiu CodeWhisperer/Amazon Q
-galiniu tašku ir nustato `profileArn`.
+API maršrutas patikrina raktą iškviesdamas `KiroService.validateApiKey()`, kuris
+iškviečia `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(API rakto išvadoms naudojamą Amazon Q sąsają), kiekvienam regionui taikydamas 10 s skirtąjį laiką. Veikdamas
+`auto` režimu, jis pirmiausia bando `us-east-1`, tada `eu-central-1`, ir išsaugo pirmąjį regioną,
+kuris priima raktą. Jei raktas atmetamas visuose galimuose regionuose, importavimas nepavyksta ir grąžinamas
+HTTP 400. Tada, dedant visas pastangas, iškviečiamas `ListAvailableProfiles`, kad būtų aptiktas pasirinktinis
+`profileArn` (AWS jį atmeta daugumai API raktų).
 
 Išsaugotam ryšiui naudojama:
 
@@ -139,9 +148,12 @@ Išsaugotam ryšiui naudojama:
 ```
 
 Vykdymo metu `KiroExecutor.buildHeaders()` siunčia raktą kaip
-`Authorization: Bearer <key>` ir prideda `tokentype: API_KEY`. Kvotos / profilio užklausos
-naudoja tą patį žymeklį, todėl AWS perdavimo reikšmę traktuoja kaip ilgai galiojantį API raktą, o ne
-OIDC ar socialinės paskyros prieigos atpažinimo ženklą.
+`Authorization: Bearer <key>` ir prideda `tokentype: API_KEY`. Kvotos ir profilio iškvietimai
+naudoja tą pačią žymą, todėl AWS traktuoja „Bearer“ kredencialą kaip ilgalaikį API raktą, o ne
+OIDC ar socialinės prieigos žetoną. `KiroExecutor.execute()` siunčia API rakto išvadų užklausas tik
+į `https://q.<region>.amazonaws.com/generateAssistantResponse` — įskaitant `us-east-1`
+— nes Kiro IDE tinklų sietuvas atmeta `TokenType=API_KEY`, o
+`codewhisperer.us-east-1` atmeta API rakto naudingąją apkrovą kaip netinkamą užklausos turinį (HTTP 400).
 
 ---
 

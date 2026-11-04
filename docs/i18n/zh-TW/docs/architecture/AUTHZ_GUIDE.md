@@ -17,98 +17,141 @@ OmniRoute 具有一個路由感知授權管道，用於把關每個 API 請求�
 
 ### 1. API 金鑰（Bearer）
 
-用於與 OpenAI/Anthropic/Gemini 相容的用戶端 API，以及 API 金鑰具有 `manage` 範圍時的少數管理路由。
+用於與 OpenAI/Anthropic/Gemini 相容的用戶端 API，以及少數管理路由（當金鑰具有 `manage` 範圍時）。
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-由 `src/sse/services/auth.ts` 中的 `isValidApiKey()` / `extractApiKey()` 驗證，並透過 `src/shared/utils/apiAuth.ts` 重新匯出。驗證器也接受 `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 環境變數作為永久的直通金鑰（議題 #1350）。
+由 `src/sse/services/auth.ts` 中的 `isValidApiKey()` / `extractApiKey()` 驗證，並透過 `src/shared/utils/apiAuth.ts` 重新匯出。驗證器也接受 `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 環境變數作為持久性的直通金鑰（議題 #1350）。
 
 ### 2. 儀表板工作階段（auth_token Cookie）
 
-用於儀表板頁面和管理操作。
+用於儀表板頁面與管理員操作。
 
 ```
-Cookie: auth_token=<使用 JWT_SECRET 簽署的 JWT>
+Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-只有在 JWT 驗證成功**且**帶有 `authenticated: true` 時，Cookie 才會被視為工作階段
-（`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`）。每個
-Cookie 使用者（儀表板路由守衛（`isDashboardSessionAuthenticated()`）、授權管線重新整理、WebSocket 交握、即時
-伺服器、`/api/settings/require-login`、`/api/auth/status`）都會透過該輔助函式處理。
-也存在其他使用 `JWT_SECRET` 簽署的 JWT——Cursor CLI 直通功能會為金鑰持有者簽發
-`iss "omniroute" / aud "cursor-cli"` 權杖——而這些權杖絕不會被視為工作階段
+只有在 JWT 驗證通過且帶有 `authenticated: true` 時，Cookie 才會被視為工作階段
+（`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`）。所有
+使用此 Cookie 的元件（儀表板路由守衛（`isDashboardSessionAuthenticated()`）、授權管線重新整理、WebSocket 交握、即時
+伺服器、`/api/settings/require-login`、`/api/auth/status`）都會經過該輔助函式。
+此外也存在其他以 `JWT_SECRET` 簽署的 JWT——Cursor CLI 直通機制會為金鑰持有者簽發
+`iss "omniroute" / aud "cursor-cli"` 權杖——但它們絕不會被視為工作階段
 （#13298）。
 
-由 `src/shared/utils/apiAuth.ts` 中的 `isDashboardSessionAuthenticated()` 驗證。當 JWT 在其 30 天有效期內剩餘不到 7 天時，管線會自動重新整理 JWT。
+由 `src/shared/utils/apiAuth.ts` 中的 `isDashboardSessionAuthenticated()` 驗證。當 JWT 的 30 天有效期剩餘不到 7 天時，管線會自動重新整理 JWT。
 
-工作階段也可能在 30 天到期之前結束，因為每個簽發器都會透過 `mintDashboardSessionToken`（包含簽發時間 `iat` 和 ID `jti`），且驗證器會檢查兩項設定：`sessionsValidAfter`，它會在變更密碼時設定，使在該時間之前簽發的所有工作階段都無法再通過驗證（變更密碼的瀏覽器會取得新的 Cookie）；以及 `revokedDashboardSessions`，`POST /api/auth/logout` 會將已登出工作階段的 `jti` 加入其中。由舊版簽發的工作階段不帶有這兩項宣告，並會持續有效至首次變更密碼為止。如果無法讀取設定，則不信任該工作階段。
+工作階段也可能在 30 天有效期結束前終止，因為每個簽發器都會經過 `mintDashboardSessionToken`（包含簽發時間 `iat` 和識別碼 `jti`），而驗證器會檢查兩項設定：`sessionsValidAfter`，此設定會在密碼變更時更新，使此前簽發的所有工作階段都無法再通過驗證（變更密碼的瀏覽器會取得新的 Cookie）；以及 `revokedDashboardSessions`，`POST /api/auth/logout` 會將已登出工作階段的 `jti` 加入其中。由較舊版本簽發的工作階段不包含這兩項宣告，且在第一次變更密碼前仍維持有效。若無法讀取設定，則不信任該工作階段。
 
-部分管理路由接受**任一**模式：Cookie，或在 API 金鑰具有 `manage`（或 `admin`）範圍時接受 `Bearer <key>`。這使得 v3.8 中新增的「可透過 API 呼叫進行設定」工作流程得以實現。
+部分管理路由接受**任一**模式：Cookie，或當 API 金鑰具有 `manage`（或 `admin`）範圍時使用 `Bearer <key>`。這使 v3.8 中新增的「可透過 API 呼叫進行設定」工作流程得以實現。
 
-#### 選用的 OIDC 登入閘道（#6973）
+#### 選用的 OIDC 登入閘門（#6973）
 
-儀表板管理員登入除了預設的密碼登入之外，也支援**選擇啟用**的 OIDC（OpenID Connect）流程——密碼登入永遠不會移除，只會由 OIDC 加以補充：
+儀表板管理員登入除了預設的密碼登入外，也支援**選擇啟用**的 OIDC（OpenID Connect）流程——密碼登入永遠不會被移除，只會增加另一種登入方式：
 
-- 除非 `settings.oidcEnabled === true`，**且** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` 均已設定（設定 → 驗證），否則此功能會停用。
-  否則，`GET /api/auth/oidc/login` 會傳回 `400`。
-- `GET /api/auth/oidc/login` 會從簽發者的
-  `/.well-known/openid-configuration` 探索 `authorization_endpoint`（備援至
-  `<issuer>/authorize`），根據傳入的請求建構重新導向 URI
-  （可感知 `x-forwarded-proto`），並重新導向至 IdP，同時將隨機 `state`
-  儲存在 `httpOnly` 的 `oidc_state` Cookie 中。
-- `GET /api/auth/oidc/callback` 會驗證 `state`、交換授權
-  碼，並透過簽發者的 JWKS 驗證 ID 權杖的簽章
-  （`jose` 的 `createRemoteJWKSet`，依每個 JWKS URI 快取），同時執行 `issuer`/`audience`
-  檢查。選用的 `oidcAllowedSubjects` 允許清單會比對權杖的
-  `sub` 宣告或其 `email` 宣告——只有在
-  `email_verified === true` 時才會採納電子郵件宣告，因此 IdP 中未經驗證的電子郵件永遠無法通過
-  此閘道。
-- 成功後，它會簽發與密碼登入所簽發的**完全相同**、有效期為 30 天的 `auth_token` JWT
-  （`src/app/api/auth/login/route.ts`），因此儀表板工作階段管線的其餘部分
-  （自動重新整理、Cookie 旗標）保持不變——OIDC 只會取代 Cookie 的簽發方式，
-  而不會改變它所授予的權限。
+- 除非 `settings.oidcEnabled === true` **且** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` 均已設定（設定 → 驗證），否則停用。
+  若不符合條件，`GET /api/auth/oidc/login` 會回傳 `400`。
+- `GET /api/auth/oidc/login` 會從發行者的
+  `/.well-known/openid-configuration` 探索 `authorization_endpoint`（若無法取得，
+  則退回使用 `<issuer>/authorize`），根據傳入的請求建立重新導向 URI
+  （支援 `x-forwarded-proto`），然後將使用者重新導向至 IdP，並把隨機產生的
+  `state` 儲存在 `httpOnly` 的 `oidc_state` Cookie 中。
+- `GET /api/auth/oidc/callback` 會驗證 `state`、交換授權碼，並透過發行者的
+  JWKS 驗證 ID 權杖的簽章（使用 `jose` 的 `createRemoteJWKSet`，依每個 JWKS URI
+  快取），同時檢查 `issuer`/`audience`。若要獲准進入儀表板，必須設定非空的
+  `oidcAllowedSubjects` 清單、`oidcAdmissionClaim` 原則，或兩者皆設定。只有在
+  `email_verified === true` 時，主體清單才會比對 `sub` 或 `email`。選用的宣告
+  原則會採用以點號分隔的 ID 權杖宣告路徑（例如 `realm_access.roles`）以及一組
+  可接受值的陣列；解析出的宣告必須是字串陣列，且至少包含一個可接受值。若同時
+  設定兩種原則，則兩者都必須通過。缺少宣告或宣告格式錯誤時會採取封閉式失敗，
+  而且若兩種原則皆未設定，回呼會拒絕登入（`not_configured`）。現有僅設定主體
+  的組態會繼續維持原有行為。
+- Keycloak 通常會將領域角色對應至存取權杖，而不一定是 ID 權杖。若要要求領域角色
+  `admin`，請為此用戶端設定通訊協定對應程式，將 `realm_access.roles` 包含在其
+  **ID 權杖**中，然後將 `oidcAdmissionClaim` 設定為
+  `{ "path": "realm_access.roles", "values": ["admin"] }`。啟用僅限角色的准入機制
+  之前，請先檢查此用戶端實際的 ID 權杖宣告；應用程式不會讀取存取權杖中的角色。
+  IdP 端的權杖拒絕機制可以作為補充，但不能取代此應用程式端的檢查。
+- 成功後，它會簽發與密碼登入所簽發的 **完全相同**、有效期為 30 天的
+  `auth_token` JWT（`src/app/api/auth/login/route.ts`），因此儀表板工作階段流程
+  的其餘部分（自動重新整理、Cookie 旗標）維持不變——OIDC 只會取代 Cookie 的
+  簽發方式，不會改變其授予的權限。IdP 角色／群組的變更不會使現有 OmniRoute
+  工作階段失效；其生命週期仍由登出、密碼輪替或工作階段到期所控制。
+- 每個 `oidc*` 設定（`oidcEnabled`、`oidcDisablePasswordLogin`、
+  `oidcIssuer`、`oidcClientId`、`oidcClientSecret`、`oidcAllowedSubjects`、
+  `oidcAdmissionClaim`、`oidcRedirectPath`、`oidcScopes`）都位於
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  （`src/shared/constants/securityImpactingSettings.ts`）中：除非要求本文攜帶
+  管理密碼作為 `currentPassword`，否則 `PATCH /api/settings` 會回應
+  `400 PASSWORD_REQUIRED`（密碼錯誤時則為 `401 PASSWORD_MISMATCH`）。
+  `oidcDisablePasswordLogin` 會拒絕密碼_登入_（`POST /api/auth/login`），
+  但仍會保留已儲存的密碼雜湊，而且重新驗證仍會以該雜湊檢查
+  `currentPassword`。
+- `corsOrigins` 和 `bruteForceProtection` 也位於
+  `SECURITY_IMPACTING_SETTINGS_KEYS` 中：放寬任一設定都會削弱登入防禦，因此
+  它們需要使用相同的 `currentPassword` 重新驗證（「安全性」分頁會要求輸入），
+  而 JSON 匯入會移除這些設定。
+- 每個安全性原則鍵——`SECURITY_IMPACTING_SETTINGS_KEYS` 中的項目、
+  每個 `oidc*` 鍵以及儀表板工作階段狀態——在 `PATCH /api/settings` 上都
+  **僅限操作員**：具有 `manage` 範圍的 API 金鑰或 `oma_` 存取權杖，即使傳送正確的
+  `currentPassword` 也會遭到 `403` 拒絕，而且拒絕事件會以
+  `settings.update_failed` 進行稽核，並包含 `reason: OPERATOR_REQUIRED`
+  （`src/lib/api/operatorCredential.ts` 中的 `requireOperatorCredential()`）。
+  一般設定（佈景主題、顯示偏好設定）仍可由 `manage` 金鑰或 `admin` 存取權杖寫入。
+  `/api/settings` 本身（以及 `/api/settings/require-login`）的每次變更也都需要
+  `admin` 存取權杖範圍（`src/server/authz/accessScopes.ts` 中的
+  `ADMIN_MUTATION_EXACT_PATHS`，採用完全路徑比對）；`GET` 仍使用 `read`，而其他
+  `/api/settings/*` 子路由（代理、組合預設值、模型別名、壓縮、清除等）則保留
+  依方法推斷的 `write` 範圍。
+- `POST /api/settings/import-json` 會略過該重新驗證，因此在寫入之前，會移除
+  `IMPORT_STRIPPED_SETTINGS_KEYS`（同一檔案）中的每個鍵：密碼和
+  `currentPassword`、`SECURITY_IMPACTING_SETTINGS_KEYS` 中的每個項目，以及
+  儀表板工作階段狀態（`sessionsValidAfter`、`revokedDashboardSessions`）。
+  因此，匯入較舊的備份無法恢復已因密碼變更或登出而終止的工作階段。
 
 ## 路由類別
 
-`src/server/authz/types.ts` 定義了三種類別；任何無法明確分類的路由都會回退至 `MANAGEMENT`。
+`src/server/authz/types.ts` 定義了三種類別；任何無法被確定性分類的路由都會退回為 `MANAGEMENT`。
 
-| 類別         | 說明                                                                                                                                  | 所需驗證                                                |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `PUBLIC`     | 明確安全的路由——登入、登出、狀態、初始化、健康檢查、初始設定引導。                                                                    | 無                                                      |
-| `CLIENT_API` | 模型服務端點——`/api/v1/*`、`/api/v1beta/*`，以及別名 `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 有效的 `REQUIRE_API_KEY` 功能旗標啟用時需要 Bearer 金鑰 |
-| `MANAGEMENT` | 儀表板頁面、設定、提供者、金鑰、管理及診斷端點。                                                                                      | 儀表板工作階段，或具有 `manage` 範圍的 Bearer           |
+| 類別         | 說明                                                                                                                                  | 所需認證                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `PUBLIC`     | 明確安全的路由：登入、登出、狀態、初始化、健康檢查、新手引導啟動。                                                                    | 無                                                        |
+| `CLIENT_API` | 模型服務端點：`/api/v1/*`、`/api/v1beta/*`，以及別名 `/v1/*`、`/v1beta/*`、`/chat/completions`、`/responses`、`/models`、`/codex/*`。 | 當有效的 `REQUIRE_API_KEY` 功能旗標啟用時需要 Bearer 金鑰 |
+| `MANAGEMENT` | 儀表板頁面、設定、提供者、金鑰、管理與診斷端點。                                                                                      | 儀表板工作階段，或具有 `manage` 範圍的 Bearer             |
 
-## 管線
+部分 `MANAGEMENT` 操作是**僅限操作員**的：只有 `manage` 金鑰是不夠的。匯出已儲存的憑證（`GET /api/settings/export-json`、`GET /api/db-backups/export`、`GET /api/db-backups/exportAll`）、將備份還原到現有資料之上（`POST /api/db-backups/import`，包括 `dryRun=true`；依 id 進行的 `POST /api/db-backups` 還原；`POST /api/settings/import-json`）、銷毀還原點（`DELETE /api/db-backups` 的清理，以及 `PATCH /api/db-backups`，因為它持久化的保留策略會驅動每次備份後的自動修剪）時，需要儀表板工作階段、本機 CLI 主體，或已停用登入。核發同步權杖（`POST /api/sync/tokens`）以及核發 `admin` CLI 存取權杖（`POST /api/cli/tokens`）在所有登入模式下都需要儀表板工作階段或本機 CLI 主體。任何範圍的 API 金鑰與 `oma_` 存取權杖都不是操作員憑證：在需要操作員憑證的地方，它們會收到 `403`。檢查邏輯位於 `src/lib/api/operatorCredential.ts`（`resolveOperatorCredential()` / `requireOperatorCredential()`）。變更登入設定同樣僅限操作員：一旦存在密碼，`POST /api/settings/require-login`（設定管理密碼 / 切換 `requireLogin`）只接受這些憑證。首次執行的引導視窗（尚無密碼）維持不變；儀表板工作階段必須傳送 `currentPassword` 才能取代密碼（缺少或錯誤時回傳 `403`，並記錄為 `settings.update_failed`）。本機 CLI 以及已停用登入的執行個體保留復原路徑，可以在不提供密碼的情況下設定密碼，因為兩者都綁定到擁有資料目錄的主機。
+
+## 管道
 
 ```
-傳入請求 → src/proxy.ts
-  → src/server/authz/pipeline.ts 中的 runAuthzPipeline()
-    1. 移除受信任的內部標頭（x-omniroute-auth-*、x-omniroute-route-class）
-    2. 產生請求 ID，透過 classifyRoute() 分類路由
-    3. 若 pathname == "/" → 重新導向至 /dashboard
-    4. 若正在排空（優雅關閉）且為 /api/* → 503
-    5. 若為非 GET 的 /api/* → 執行 checkBodySize() 防護檢查
-    6. 若為 OPTIONS → CORS 預檢回應 204
-    7. 若 options.enforce == false → 附帶路由類別標頭直接放行
-    8. 否則：POLICIES[routeClass].evaluate(ctx)
-       - allow  → 加入 x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → 回傳包含 correlation_id 的 JSON 錯誤（儀表板頁面 → 302 /login）
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-受信任的內部標頭（定義於 `src/server/authz/headers.ts`）會在分類前**從傳入請求中移除**——用戶端無法預先填入 `x-omniroute-auth-*` 來冒充主體。
+可信內部標頭（在`src/server/authz/headers.ts`中定義）是**從傳入請求中剝離**分類之前—客戶端無法預先填入`x-omniroute-auth-*`來模擬主題。
 
-### 原則契約
+### 保單合約
 
-每個路由類別在 `src/server/authz/policies/` 中都有一項原則：
+每個路由類別在`src/server/authz/policies/`中都有一個策略：
 
-- **`publicPolicy`**（`policies/public.ts`）——一律回傳 `allow({ kind: "anonymous", id: "anonymous" })`。
-- **`clientApiPolicy`**（`policies/clientApi.ts`）——擷取 Bearer，並透過 `validateApiKey()` 驗證。只有在有效的 `REQUIRE_API_KEY` 功能旗標停用時，才會回退至匿名存取。有效旗標透過 `isRequireApiKeyEnabled()`（`DB 功能旗標覆寫 > process.env.REQUIRE_API_KEY > 預設值`）解析，因此儀表板功能旗標和環境變數會一致地管理 `/api/v1/*`、`/api/v1beta/*` 及其別名；解析器失敗時會採取拒絕存取的安全預設。允許具有儀表板工作階段的請求存取用戶端 API 路由（包括儀表板模型目錄所使用的 `/api/v1/models`）。
-- **`managementPolicy`**（`policies/management.ts`）——接受儀表板工作階段、內部模型同步請求（比對 `/api/providers/[name]/(sync-models|models)`），或在 `isAuthRequired()` 回傳 false 時完全略過驗證。當存在 Bearer 權杖但無效時回傳 403（`AUTH_001`），否則回傳 401。此原則也會在任何驗證分支之前強制執行路由防護層級（LOCAL_ONLY / ALWAYS_PROTECTED）——請參閱[路由防護層級](../security/ROUTE_GUARD_TIERS.md)。`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 中的 LOCAL_ONLY 路徑（目前為 `/api/mcp/`），可在 Bearer 金鑰具有 `manage` 範圍時從非迴路位址存取；無論範圍為何，所有其他 LOCAL_ONLY 路徑仍嚴格限制為僅能從迴路位址存取。
+- **`publicPolicy`** (`policies/public.ts`) —總是回傳`allow({ kind: "anonymous", id: "anonymous" })`。
+- **`clientApiPolicy`** (`policies/clientApi.ts`) —提取 Bearer，透過`validateApiKey()`進行驗證。只有當有效`REQUIRE_API_KEY`功能標誌被停用時才會轉為匿名。有效標誌透過`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) 解析，因此儀表板功能標誌和環境變數一致地管理`/api/v1/*`、 `/api/v1beta/*`和別名；解析器故障無法關閉。允許客戶端API路由（包括儀表板模型目錄使用的`/api/v1/models`）上的儀表板會話請求。當啟用 Entra ID SSO時，結構上是 Entra 令牌的 Bearer（三個 base64url 段、 `RS*` alg、 `kid`）由SSO分支處理**前**`validateApiKey()`及其判決是最終的—它永遠不會落入 API 金鑰路徑或降級為匿名分支，因此身分提供者中斷不能成為開放存取。靜態API密鑰不受影響。參見[Entra ID SSO](../security/ENTRA_SSO.md) 。
+- **`managementPolicy`** (`policies/management.ts`) —接受儀表板會話、內部模型同步請求（與`/api/providers/[name]/(sync-models|models)`匹配），或者如果`isAuthRequired()`返回 false，則完全跳過。當不記名令牌存在但無效時傳回 403 (`AUTH_001`)，否則傳回 401。在任何 auth 分支—也查看[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)之前強制執行路由保護層 (LOCAL_ONLY / ALWAYS_PROTECTED)。當 Bearer key 攜帶`manage`範圍時，可以從非環回訪問`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`中的LOCAL_ONLY路徑（今天： `/api/mcp/`）；無論範圍如何，所有其他LOCAL_ONLY路徑都保持嚴格環回。
 
-成功的原則會回傳 `AuthSubject`，其 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`。下游處理常式可透過 `src/server/authz/assertAuth.ts` 中的 `assertAuth(request, "CLIENT_API")` 讀取該主體，而無須重新執行驗證邏輯。
+成功的策略會回到`AuthSubject`和`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`。下游處理程序可以透過`src/server/authz/assertAuth.ts`中的`assertAuth(request, "CLIENT_API")`讀取它，而不是重新運行身份驗證邏輯。
 
 ## 公開路由清單
 
@@ -228,15 +271,15 @@ API 金鑰帶有一個 `scopes` 陣列（以 JSON 格式儲存在 `api_keys.scop
 （`src/lib/accessTokens/scopes.ts`）。此排序僅適用於存取權杖憑證。請參閱
 [管理驗證](../guides/MANAGEMENT-AUTH.md)。
 
-## 必須驗證切換選項
+## 認證需求開關
 
-`src/shared/utils/apiAuth.ts` 中的 `isAuthRequired()` 會決定是否對請求強制執行**任何**驗證：
+`src/shared/utils/apiAuth.ts` 中的 `isAuthRequired()` 決定某個請求是否需要**任何**認證：
 
-- `settings.requireLogin === false` → 全域停用驗證。
-- 未設定密碼，**且**沒有 `INITIAL_PASSWORD` 環境變數 → 啟動模式允許使用初始設定精靈與迴路位址請求，但暴露於網路的請求仍需要憑證。
-- 任何資料庫錯誤 → 以拒絕存取作為失敗處理方式（預設安全）。
+- `settings.requireLogin === false` → 全域停用認證，但以下情況除外：始終受保護的層級（參見 [路由守衛層級](../security/ROUTE_GUARD_TIERS.md)），以及核發其所接受憑證的呼叫。這些呼叫需要與開啟登入時相同的憑證：核發同步權杖、以任何範圍核發 CLI 存取權杖、建立具有 `manage`/`admin` 範圍的 API 金鑰、把該範圍授予某個金鑰，或重新產生、顯示此類金鑰（`src/lib/api/requireManagementAuth.ts` 中的 `requireCredentialForManagementScopedKey()`）。僅用於推論的金鑰仍保持開放。
+- 未設定密碼**且**未設定 `INITIAL_PASSWORD` 環境變數 → 引導模式允許使用新手引導精靈與回送（loopback）請求，但暴露在網路上的請求仍需要憑證。
+- 任何資料庫錯誤 → 失敗時預設拒絕（fail closed，即預設安全）。
 
-用戶端 API 金鑰的強制執行使用 `src/shared/utils/featureFlags.ts` 中的 `isRequireApiKeyEnabled()`，而非直接讀取 `process.env.REQUIRE_API_KEY`。這對已部署的執行個體很重要：在 Dashboard → Feature Flags 中切換 `REQUIRE_API_KEY` 會儲存資料庫覆寫值，並立即影響 `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*`，以及共用此輔助函式的其他用戶端 API 驗證檢查。若無法讀取功能旗標儲存區，用戶端 API 驗證會以拒絕存取作為失敗處理方式，並要求提供金鑰。
+用戶端 API 金鑰的強制執行使用 `src/shared/utils/featureFlags.ts` 中的 `isRequireApiKeyEnabled()`，而非直接讀取 `process.env.REQUIRE_API_KEY`。這對已部署的執行個體很重要：在儀表板 → 功能旗標中切換 `REQUIRE_API_KEY` 會儲存一個資料庫覆寫值，並立即影響 `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*` 以及其他共用此輔助函式的用戶端 API 認證檢查。若無法讀取功能旗標儲存區，用戶端 API 認證會失敗時預設拒絕，並要求提供金鑰。
 
 ## 破壞性變更 — v3.8.0
 
@@ -254,23 +297,23 @@ API 金鑰帶有一個 `scopes` 陣列（以 JSON 格式儲存在 `api_keys.scop
 
 ## 偵錯
 
-管線一律會在回應中加上：
+管道始終使用以下標記標記回應：
 
 ```
-x-request-id:               <關聯 ID，也會回傳於錯誤回應本文中>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-對於已驗證的請求，上游（處理常式端）的請求標頭還會包含：
+對於經過身份驗證的請求，上游（處理程序端）請求標頭還包括：
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<末 4 碼> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     （選用）
-x-omniroute-auth-scopes:    以逗號分隔的清單
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-請在處理常式內使用 `assertAuth(req, expectedClass)`——若中介軟體遭到繞過，它會擲出代碼為 `AUTHZ_NOT_INITIALIZED` 的 `AuthzAssertionError`（有助於在測試中發現設定退步問題）。
+在處理程序—中使用`assertAuth(req, expectedClass)`如果中間件被繞過，它會拋出帶有代碼`AUTHZ_NOT_INITIALIZED`的`AuthzAssertionError` （有助於在測試中捕獲配置回歸）。
 
 ## 參閱
 

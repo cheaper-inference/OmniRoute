@@ -21,6 +21,52 @@ import {
 } from "../../open-sse/utils/flattenToolHistory.ts";
 
 describe("flattenToolHistory", () => {
+  it("groups mixed blocks in text/calls/results order and preserves message metadata", () => {
+    const msg = {
+      role: "user",
+      id: "keep",
+      content: [
+        { type: "tool_result", content: 0 },
+        { type: "text", text: "first" },
+        { type: "tool_use" },
+        { type: "image_url", image_url: "ignored" },
+        { type: "text", text: "" },
+        { type: "tool_result", content: null },
+        { type: "text", text: "last" },
+      ],
+    };
+    const snapshot = structuredClone(msg);
+    assert.deepEqual(flattenToolHistory([msg]), [
+      {
+        role: "user",
+        id: "keep",
+        content: "first\n\nlast\n[Called tools: tool]\n[Tool result: 0\n]",
+      },
+    ]);
+    assert.deepEqual(msg, snapshot);
+  });
+
+  it("keeps untouched messages by reference and prioritizes OpenAI tool calls", () => {
+    const plain = { role: "user", content: [{ type: "text", text: "hello" }] };
+    assert.equal(flattenToolHistory([plain])[0], plain);
+    const mixed = {
+      role: "assistant",
+      id: "keep",
+      content: [{ type: "tool_use", name: "anthropic" }],
+      tool_calls: [{ name: "fallback" }, {}, { function: { name: "primary" }, name: "ignored" }],
+    };
+    assert.deepEqual(flattenToolHistory([mixed]), [
+      {
+        role: "assistant",
+        id: "keep",
+        content: "[Called tools: fallback, tool, primary]",
+      },
+    ]);
+    assert.deepEqual(flattenToolHistory([{ role: "assistant", tool_calls: [] }]), [
+      { role: "assistant", content: "[Called tools: ]" },
+    ]);
+  });
+
   it("flattens OpenAI tool role messages into assistant prose", () => {
     const msgs = [
       { role: "user", content: "find files" },

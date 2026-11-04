@@ -525,6 +525,27 @@ export const v1SegmentSchema = z
   })
   .catchall(z.unknown());
 
+// POST /v1/systemone — System One typed decisions (#13987). One `state` plus
+// typed `questions` (noul / choice / score); the backend is selected by the model id — `typesafe/…` or a bare `jev-*` alias
+// routes to native api.typesafe.ai, an `openrouter/…` prefix routes to
+// OpenRouter's alpha decisions endpoint.
+export const v1SystemOneSchema = z
+  .object({
+    model: modelIdSchema.optional(),
+    state: z.union([nonEmptyStringSchema, z.record(z.string(), z.unknown())]),
+    questions: z.record(z.string().min(1), z.unknown()),
+  })
+  .catchall(z.unknown())
+  .superRefine((value, ctx) => {
+    if (Object.keys(value.questions).length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "questions must contain at least one question",
+        path: ["questions"],
+      });
+    }
+  });
+
 export const providerChatCompletionSchema = z
   .object({
     model: modelIdSchema,
@@ -611,11 +632,11 @@ export const v1SearchSchema = z.preprocess(
       // exa-search, tavily-search, firecrawl, google-pse-search, linkup-search, ollama-search,
       // searchapi-search, youcom-search, searxng-search, zai-search, jina-search, jina-ai,
       // jina, duckduckgo-free, x-search, x_search, xquik-search, xquik, anysearch-search,
-      // anysearch (plus short aliases resolved by
+      // anysearch, parallel-search, parallel (plus short aliases resolved by
       // SEARCH_PROVIDER_ALIASES).
       provider: z.string().min(1).optional(),
       max_results: z.coerce.number().int().min(1).max(100).default(5),
-      search_type: z.enum(["web", "news", "x"]).default("web"),
+      search_type: z.enum(["web", "news", "x", "finance"]).default("web"),
       offset: z.coerce.number().int().min(0).default(0),
 
       // Locale
@@ -726,6 +747,7 @@ export const v1WebFetchSchema = z.object({
       "context7",
       "nimble-search",
       "anysearch-search",
+      "parallel-search",
     ])
     .optional(),
   format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),

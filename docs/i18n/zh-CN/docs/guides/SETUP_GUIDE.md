@@ -140,32 +140,32 @@ omniroute providers validate
 
 ### 1) 连接提供者并创建 API 密钥
 
-1. 打开控制面板 → `Providers`，并连接至少一个提供者（使用 OAuth 或 API 密钥）。
-2. 打开控制面板 → `Endpoints`，并创建一个 API 密钥。
-3. （可选）打开控制面板 → `Combos`，并设置回退链。
+1. 打开仪表板 → `Providers`，并连接至少一个提供者（OAuth 或 API 密钥）。
+2. 打开仪表板 → `Endpoints`，并创建一个 API 密钥。
+3. （可选）打开仪表板 → `Combos`，并设置你的回退链。
 
 ### 2) 配置你的编码工具
 
 ```txt
-Base URL: http://localhost:20128/v1
-API Key:  [从 Endpoint 页面复制]
-Model:    if/qwen3.8-max-preview（或任意提供者/模型前缀）
+基础 URL: http://localhost:20128/v1
+API 密钥:  [从 Endpoint 页面复制]
+模型:      if/qwen3.8-max-preview（或任意提供者/模型前缀）
 ```
 
 如果你的编辑器无法发送 `Authorization: Bearer ...`，请改用包含令牌的兼容基础地址：
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+基础 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+模型 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+聊天 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama 标签 URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-支持 Claude Code、Codex CLI、Cursor、Cline、OpenClaw、OpenCode 以及兼容 OpenAI 的 SDK。
+适用于 Claude Code、Codex CLI、Cursor、Cline、OpenClaw、OpenCode 和兼容 OpenAI 的 SDK。
 
 #### 使用 `setup-*` 自动配置
 
-无需手动粘贴基础 URL 和密钥，让 OmniRoute 根据实时模型目录写入每个工具自己的配置。每个工具对应一条命令：
+无需手动粘贴基础 URL 和密钥，可让 OmniRoute 根据实时模型目录写入每个工具自己的配置。每个工具使用一条命令：
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml 配置文件
@@ -177,14 +177,15 @@ omniroute setup-continue     # ~/.continue/config.yaml（Continue / cn）
 omniroute setup-cursor       # 输出 Cursor 的应用内操作步骤
 omniroute setup-roo          # Roo Code 导入 + autoImport 指针
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json（openai_compatible）
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-每条命令都接受 `--remote <url> --api-key <key>`，用于配置本地工具以连接**远程** OmniRoute，并支持使用 `--dry-run` 进行预览。若要在注入正确环境变量的情况下启动 CLI，且完全不写入任何配置，请使用通用启动器 `omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）；旧版的各工具专用启动器 `omniroute launch`（Claude Code）和 `omniroute launch-codex`（Codex）仍然可用。
+每条命令都接受 `--remote <url> --api-key <key>`，用于配置本地工具以连接**远程** OmniRoute；还支持使用 `--dry-run` 进行预览。若要在注入正确环境变量的情况下启动 CLI，同时完全不写入任何配置，请使用通用启动器 `omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）；旧版的各工具专用启动器 `omniroute launch`（Claude Code）和 `omniroute launch-codex`（Codex）仍然可用。
 
-如需查看完整表格（包括每条命令写入的内容、所有标志、本地与远程模式，以及基础 URL 的 `/v1` 约定），请参阅 **[CLI 集成](./CLI-INTEGRATIONS.md)**。
+有关完整表格（每条命令写入的内容、所有标志、本地与远程模式、基础 URL 的 `/v1` 约定），请参阅 **[CLI 集成](./CLI-INTEGRATIONS.md)**。
 
 有关各工具的详细配置（Claude Code、Codex CLI、Cursor、Cline、OpenClaw、Kilo Code、Copilot 等），请参阅专门的 **[CLI 工具指南](../reference/CLI-TOOLS.md)**。
 
@@ -317,7 +318,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Void Linux (xbps-src) 模板
 
-对于 Void Linux 用户，可以使用 `xbps-src` 构建原生软件包。将以下代码块保存为 `srcpkgs/omniroute/template`：
+对于 Void Linux 用户，可以使用 `xbps-src` 构建原生软件包。将此代码块保存为 `srcpkgs/omniroute/template`：
 
 ```bash
 # 'omniroute' 的模板文件
@@ -326,12 +327,12 @@ version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="支持多个 LLM 提供者智能路由的通用 AI 网关"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# 每个版本发布时使用以下命令重新生成校验和：
+# 每次发布时，使用以下命令重新生成校验和：
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -33,37 +33,37 @@
 
 ---
 
-## ዝርዝር መላ ፍለጋ
+## ዝርዝር የችግር መፍቻ
 
 ---
 
 ### በነፃ አቅራቢዎች ላይ የጥያቄ መጠን ገደብ (429 / 400 / 401)
 
-**ምልክት**፦ `model: "auto"`ን ከነፃ/ማረጋገጫ ከማይጠይቁ አቅራቢዎች (opencode, auggie, ወዘተ) ጋር ሲጠቀሙ፣ ከመልሶች ይልቅ አልፎ አልፎ `HTTP 429`፣ `400` ወይም `401` ያገኛሉ። ተመሳሳዩን መጠየቂያ ከጥቂት ጊዜ በኋላ እንደገና ሲሞክሩ ጥያቄዎቹ ይሳካሉ፣ ነገር ግን አውቶሜሽን (cron ስራዎች፣ ወኪሎች፣ ስክሪፕቶች) በመጀመሪያው ውድቀት ይቋረጣል።
+**ምልክት**፦ `model: "auto"`ን ከነፃ/ማረጋገጫ-አልባ አቅራቢዎች (auggie፣ ወዘተ) ጋር ሲጠቀሙ፣ ከመልሶች ይልቅ አልፎ አልፎ `HTTP 429`፣ `400` ወይም `401` ያገኛሉ። ተመሳሳዩን ጥያቄ ከጥቂት ጊዜ በኋላ እንደገና ሲሞክሩ ጥያቄዎቹ ይሳካሉ፣ ነገር ግን አውቶሜሽን (cron ሥራዎች፣ ወኪሎች፣ ስክሪፕቶች) በመጀመሪያው ውድቀት ላይ ይቋረጣል።
 
-**ዋና መንስኤ**፦ ሦስት እርስ በርሳቸው ገለልተኛ የውድቀት ዓይነቶች ተደራርበው ይከሰታሉ፦
+**ዋና ምክንያት**፦ ሦስት እርስ በርሳቸው ገለልተኛ የውድቀት ሁነቶች ተደራርበው ይከሰታሉ፦
 
-1. **የአቅራቢ የጥያቄ መጠን ገደብ (`429`)**፦ ነፃ ደረጃዎች በእያንዳንዱ የጊዜ መስኮት የኮታ ገደብ ሊያስፈጽሙ ይችላሉ። ብዙ ትይዩ ጥሪዎች በአንድ ጊዜ ሲላኩ ኮታውን ያሟጥጣሉ፤ ስለዚህ የጊዜ መስኮቱ ዳግም እስኪጀመር ድረስ ቀጣዩ ጥያቄ ውድቅ ይደረጋል።
-2. **በቀጥታ ማሳለፊያ ውስጥ የተበላሸ ሞዴል (`400`/`401`)**፦ `auto/*` ስብስቦች በካታሎጉ ውስጥ የተመዘገቡ ነገር ግን ንቁ የመግቢያ ማረጋገጫ የሌላቸውን የ`opencode` ቀጥታ ማሳለፊያ ሞዴሎች ሊያካትቱ ይችላሉ (ለምሳሌ `oc/north-mini-code-free` → `401`)። ራስ-ሰር ራውተሩ አንዱን ይሞክራል፣ ይወድቃል፣ እና ወደ አማራጭ መቀየሩ ከመጀመሩ በፊት ስህተቱ ወደ ላይ ይተላለፋል።
-3. **የትይዩነት ማጉላት (ጫና ሲኖር `429`)**፦ በርካታ የወኪል/cron ክፍለ ጊዜዎች `auto`ን በአንድ ጊዜ ሲጠቀሙ፣ ጠቅላላ የጥያቄ መጠኑ ነፃ አቅራቢዎች ሊቋቋሙት ከሚችሉት ይበልጣል፤ በዚህም ምክንያት ትክክለኛ ጥሪዎች እንደ አላግባብ አጠቃቀም ምልክት ይደረግባቸዋል።
+1. **የአቅራቢ የጥያቄ መጠን ገደብ (`429`)**፦ ነፃ ደረጃዎች በእያንዳንዱ የጊዜ መስኮት ኮታ ሊያስገድዱ ይችላሉ። በአንድ ጊዜ የሚላኩ በርካታ ትይዩ ጥሪዎች ኮታውን ስለሚጨርሱት፣ የጊዜ መስኮቱ ዳግም እስኪጀመር ድረስ ቀጣዩ ጥያቄ ውድቅ ይደረጋል።
+2. **በቀጥታ ማስተላለፊያ ውስጥ የተበላሸ ሞዴል (`400`/`401`)**፦ የ`auto/*` ስብስቦች በካታሎጉ ውስጥ የተመዘገቡ ነገር ግን የሚሰሩ የመግቢያ ማረጋገጫዎች የሌሏቸውን በቀጥታ የሚያስተላልፉ ሞዴሎችን ሊያካትቱ ይችላሉ (→ `401`)። ራስ-ሰር ራውተሩ አንዱን ይሞክራል፣ ይወድቃል፣ እና ወደ ተለዋጭ አማራጭ ከመሸጋገሩ በፊት ስህተቱ ይተላለፋል።
+3. **የትይዩነት ማጉላት (በጭነት ወቅት `429`)**፦ በርካታ የወኪል/cron ክፍለ ጊዜዎች `auto`ን በአንድ ጊዜ ሲጠቀሙ፣ አጠቃላይ የጥያቄ መጠኑ ነፃ አቅራቢዎች ሊቋቋሙት ከሚችሉት በላይ ይሆናል፤ በዚህም ምክንያት ትክክለኛ ጥሪዎች እንደ አላግባብ አጠቃቀም ምልክት ይደረግባቸዋል።
 
-**የተረጋገጠ መፍትሔ (በማህበረሰቡ የተዘገበ፣ 2026-08-10)**፦ ማዞር፣ ትይዩነት እና ወደ አማራጭ መቀየር በነፃው ደረጃ ላይ ያለውን መለዋወጥ ከውድቀት ይልቅ እንዲቋቋሙ ሦስት የአካባቢ ተለዋዋጮችን ያስተካክሉ፦
+**የተረጋገጠ መፍትሔ (በማህበረሰቡ የተዘገበ፣ 2026-08-10)**፦ በነፃ ደረጃው ላይ የሚከሰተውን መለዋወጥ የሞዴል ሽክርክር፣ ትይዩነት እና ተለዋጭ ማስተላለፍ ከመቋረጥ ይልቅ እንዲቋቋሙት ሦስት የአካባቢ ተለዋዋጮችን ያስተካክሉ፦
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # በ400/401 ጊዜ ወደ ሌላ ሞዴል/አቅራቢ ይዝለሉ (የተበላሹ የቀጥታ ማሳለፊያ ሞዴሎችን ይዘላል)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ለከባድ ስራዎች ግልጽ ከፍተኛ የመቀበያ ገደብ (በነባሪ አልተዋቀረም፦ የጥያቄ ብዛት ገደብ የለም፣ ከታች ያለውን ማስታወሻ ይመልከቱ)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ለዝግተኛ የላይኛው ፍሰት አቅራቢዎች የተገደበውን መጠበቂያ ከRATE_LIMIT_MAX_WAIT_MS ነባሪ በላይ ያሳድጉ
+export OMNIROUTE_ROTATE_ON_400=true           # በ400/401 ጊዜ ወደ ሌላ ሞዴል/አቅራቢ ይሻገሩ (የተበላሹ በቀጥታ የሚያስተላልፉ ሞዴሎችን ይዘላል)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ግልጽ የከባድ ጥያቄዎች መቀበያ ከፍተኛ ገደብ (በነባሪ አልተወሰነም፦ የጥያቄ-ብዛት ገደብ የለም፣ ከታች ያለውን ማስታወሻ ይመልከቱ)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ለዘገዩ የላይኛው ዥረት አገልግሎቶች የተገደበውን የጥበቃ ጊዜ ከRATE_LIMIT_MAX_WAIT_MS ነባሪ በላይ ያሳድጉ
 ```
 
-እነዚህን በOmniRoute የሂደት አካባቢ ውስጥ (daemon፣ ለምሳሌ በLaunchAgent plist ወይም `systemctl edit`) ያዋቅሩ፣ ከዚያ OmniRouteን ዳግም ያስጀምሩ። የማዞሪያ ጠቋሚው ከሁሉ የበለጠ ተጽዕኖ ያለው መቆጣጠሪያ ነው፦ ከባድ ውድቀትን በስብስቡ ውስጥ ባለ ጤናማ አቅራቢ ላይ ወደሚደረግ ግልጽነት ያለው ዳግም ሙከራ ይቀይረዋል።
+እነዚህን በOmniRoute ሂደት አካባቢ ውስጥ (daemon፣ ለምሳሌ በLaunchAgent plist ወይም `systemctl edit`) ያቀናብሩ፣ ከዚያ OmniRouteን ዳግም ያስጀምሩ። የሽክርክር ባንዲራው በጣም ከፍተኛ ተጽዕኖ ያለው ማስተካከያ ነው፦ ከባድ ውድቀትን በስብስቡ ውስጥ ባለ ጤናማ አቅራቢ ላይ ወደሚደረግ ግልጽ ዳግም ሙከራ ይለውጠዋል።
 
-**ማስታወሻ**፦ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ምን ያህል ከባድ — ረጅም አውድ ያላቸው — ጥያቄዎች በአንድ ጊዜ እንደሚሰሩ ይገድባል፤ ገደቡ የመቀበያ በር እንጂ የአቅራቢ የጥያቄ መጠን ገዳቢ አይደለም። **#503-fanout ማሻሻያ፦** ይህ var ከአሁን በኋላ በነባሪ አይዋቀርም (አሁን የሚተገበረው ከላይ እንደተገለጸው በግልጽ ሲዋቀር ብቻ ነው) — በምትኩ የከባድ ስራዎች መቀበያ ከአስተናጋጁ ትክክለኛ የማህደረ ትውስታ ገደብ ጋር ራሱን በሚመጥን፣ በራስ-ሰር በሚወጣ የባይት በጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ይገደባል፤ ስለዚህ አዲስ ጭነት ይህን var ምንም ሳያዋቅር በጣም ያነሱ `503 chat_admission_busy` ውድቅ ማድረጎችን ማየት ይገባዋል፤ እዚህ በግልጽ ማዋቀሩ አሁንም በሰነዱ እንደተገለጸው በትክክል ይሰራል። ግልጽ የባይት በጀት ለውጦች ከ8 MiB–2 GiB ባለው ክልል ውስጥ ይገደባሉ። `413 body_exceeds_budget` ጊዜያዊ አይደለም፦ ያንን የባይት በጀት ያሳድጉ፣ `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`ን ይቀንሱ፣ ወይም የሂደቱን የማህደረ ትውስታ ገደብ ያሳድጉ። የ`inflight_bytes_budget` ጫና መቀነስ ጊዜያዊ የሀብት ፉክክር ሲሆን እንደገና ሊሞከር ይችላል። በእያንዳንዱ አቅራቢ ላይ ያለው የጥያቄ መጠን ገደብ (`open-sse/services/rateLimitManager.ts`) በተናጠል በ`RATE_LIMIT_MAX_WAIT_MS`፣ `RATE_LIMIT_MAX_QUEUE_DEPTH` እና `RATE_LIMIT_AUTO_ENABLE` ይተዳደራል — `.env.example`ን ይመልከቱ።
+**ማስታወሻ**፦ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` በአንድ ጊዜ የሚሰሩ ከባድ — ረጅም-አውድ — ጥያቄዎችን ብዛት ይገድባል፤ ይህ ገደብ የመቀበያ በር እንጂ የአቅራቢ የጥያቄ መጠን ገደብ አይደለም። **የ#503-fanout ማሻሻያ፦** ይህ ተለዋዋጭ ከእንግዲህ በነባሪ አይዋቀርም (አሁን የሚተገበረው ከላይ እንደተገለጸው በግልጽ ሲዋቀር ብቻ ነው) — በምትኩ የከባድ ጥያቄዎች መቀበያ ከአስተናጋጁ ትክክለኛ የማህደረ ትውስታ ከፍተኛ ገደብ በመነሳት ራሱን በሚያመጣጥን፣ በራስ-ሰር በሚመነጭ የባይት በጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ይገደባል። ስለዚህ አዲስ ስምሪት ይህን ተለዋዋጭ ሳያቀናብር እንኳን በጣም ያነሱ `503 chat_admission_busy` ውድቅ ማድረጎችን ማየት አለበት፤ እዚህ በግልጽ ማቀናበሩ አሁንም ልክ በተመዘገበው መንገድ ይሰራል። ግልጽ የባይት-በጀት መሻሮች ከ8 MiB–2 GiB ውስጥ ይገደባሉ። `413 body_exceeds_budget` ጊዜያዊ አይደለም፦ የባይት በጀቱን ይጨምሩ፣ `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`ን ይቀንሱ፣ ወይም የሂደቱን የማህደረ ትውስታ ከፍተኛ ገደብ ይጨምሩ። የ`inflight_bytes_budget` ጭነት መቀነስ ጊዜያዊ የሀብት ፉክክር ሲሆን እንደገና ሊሞከር ይችላል። የእያንዳንዱ አቅራቢ የጥያቄ መጠን ገደብ (`open-sse/services/rateLimitManager.ts`) በተናጠል በ`RATE_LIMIT_MAX_WAIT_MS`፣ `RATE_LIMIT_MAX_QUEUE_DEPTH` እና `RATE_LIMIT_AUTO_ENABLE` ይተዳደራል — `.env.example`ን ይመልከቱ።
 
-**መስራቱን እንዴት ማረጋገጥ እንደሚቻል**፦ agent/cronዎን በፈጣን ቅደም ተከተል ሁለት ጊዜ ያስኪዱትና ሁለቱም በተሳካ ሁኔታ መጠናቀቃቸውን ያረጋግጡ። ከማስተካከያው በፊት፣ ሁለተኛው ማስኬድ በተለምዶ `429`/`401` ስህተት ይፈጥራል። ከማስተካከያው በኋላ፣ ውድቀቶች (ካሉ) ተጠቃሚው ሳያስተውል እንደገና ይሞከራሉ፣ ጥሪውም ይጠናቀቃል። እንዲሁም `curl /monitoring/health` በማስኬድ በአቅራቢ ግንኙነቶች ላይ ያለውን `rateLimitedUntil` መስክ እና ለተጎዱት አቅራቢዎች `circuitBreakers.providerBreakers[].state`ን መከታተል ይችላሉ — ሁኔታው ከ`CLOSED`፣ `DEGRADED`፣ `OPEN` ወይም `HALF_OPEN` አንዱ ነው (`src/shared/utils/circuitBreaker.ts`ን ይመልከቱ)፤ ደጋግሞ የሚወድቅ አቅራቢ፣ ዳግም ማስጀመሪያ ጊዜው የሙከራ ጥሪን እስኪፈቅድ (`HALF_OPEN`) ድረስ፣ ከ`CLOSED → DEGRADED → OPEN` ይሸጋገራል።
+**መፍትሔው መሥራቱን እንዴት ማረጋገጥ እንደሚቻል**፦ ወኪልዎን/cronን በፍጥነት ተከታትሎ ሁለት ጊዜ ያስኪዱ እና ሁለቱም መሳካታቸውን ያረጋግጡ። ከመፍትሔው በፊት፣ ሁለተኛው ሙከራ በተለምዶ `429`/`401` ያስከትላል። ከመፍትሔው በኋላ፣ ውድቀቶች (ካሉ) በግልጽነት እንደገና ይሞከራሉ እና ጥሪው ይጠናቀቃል። እንዲሁም `curl /monitoring/health`ን ማስኬድ እና በአቅራቢ ግንኙነቶች ላይ ያለውን `rateLimitedUntil` መስክ እንዲሁም ለተጎዱት አቅራቢዎች `circuitBreakers.providerBreakers[].state`ን መከታተል ይችላሉ — ሁኔታው ከ`CLOSED`፣ `DEGRADED`፣ `OPEN` ወይም `HALF_OPEN` አንዱ ነው (`src/shared/utils/circuitBreaker.ts`ን ይመልከቱ)፣ እና ደጋግሞ የሚወድቅ አቅራቢ የዳግም ማስጀመሪያ መስኮቱ የሙከራ ጥያቄን ከማሳለፉ (`HALF_OPEN`) በፊት `CLOSED → DEGRADED → OPEN` ብሎ ይቀየራል።
 
-**አሁንም 429 ካዩ**፦ ለዚያ አቅራቢ ገቢር የሆነው መለያ _ኮታውን_ በእውነት አሟጧል (የጥያቄ ፍጥነት ገደቡን ብቻ አይደለም)። በOmniRoute ዳሽቦርድ → Providers → Accounts ውስጥ ለተመሳሳዩ አቅራቢ ሁለተኛ መለያ ያክሉ፣ ወይም ሌላ ነፃ አቅራቢን (ለምሳሌ `routeway`፣ `auggie`) ይቀላቅሉ። ማዞር የሚረዳው ጊዜያዊ የጥያቄ ፍጥነት/400/401 ስህተቶችን ለመቋቋም ብቻ ነው፤ የኮታ ሙሉ በሙሉ መሟጠጥ ሁለተኛ ማረጋገጫ ወይም የተለየ አቅራቢ ይፈልጋል።
+**አሁንም 429 ካዩ**፦ ለዚያ አቅራቢ ንቁ የሆነው መለያ በእውነት _ኮታውን_ ጨርሷል (የጥያቄ መጠን ብቻ አይደለም)። በOmniRoute ዳሽቦርድ → Providers → Accounts ውስጥ ለተመሳሳዩ አቅራቢ ሁለተኛ መለያ ያክሉ፣ ወይም ሌላ ነፃ አቅራቢን (ለምሳሌ `routeway`፣ `auggie`) ያቀላቅሉ። ሽክርክር የሚረዳው ለጊዜያዊ የጥያቄ መጠን/400/401 ብቻ ነው፤ ኮታው ሙሉ በሙሉ ካለቀ ሁለተኛ የመግቢያ ማረጋገጫ ወይም የተለየ አቅራቢ ያስፈልጋል።
 
-**በምስል ሞዴሎች (`auto/vision`፣ `bazaarlink/*`) ላይ 403 ካዩ**፦ የተገናኘው መለያ ምስልን የሚያካትት የሚከፈልበት ዕቅድ የለውም፣ ወይም API keyው በቂ ፈቃዶች የሉትም። በአቅራቢው ዳሽቦርድ ውስጥ የkeyው ወሰን ምስል/መልቲሞዳልን እንደሚያካትት ያረጋግጡ፣ ወይም የሚከፈልበት ደረጃ ያለው መለያ ያገናኙና የምስል መድረሻ አድርገው ያቆዩት።
+**በምስል ሞዴሎች (`auto/vision`፣ `bazaarlink/*`) ላይ 403 ካዩ**፦ የተገናኘው መለያ ምስልን የሚያካትት የሚከፈልበት ዕቅድ የለውም፣ ወይም API keyው በቂ ፈቃዶች የሉትም። በአቅራቢው ዳሽቦርድ ውስጥ የkeyው ወሰን ምስል/ባለብዙ-ሞዳሊቲን ማካተቱን ያረጋግጡ፣ ወይም የሚከፈልበት ደረጃ መለያን ያገናኙ እና እንደ ምስል ዒላማ ያቆዩት።
 
 ---
 
@@ -90,33 +90,33 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## የታገዱ npm install-scripts ማስጠንቀቂያ (ዓለም አቀፍ ጭነት)
+## npm install-scripts የመታገድ ማስጠንቀቂያ (ዓለም አቀፍ ጭነት)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` ሲያስኬዱ፣ አዳዲስ የ npm ስሪቶች (v11+ እና v12+) የፓኬጅ lifecycle scriptsን በነባሪነት ያግዳሉ፣ እንዲሁም የ install-scripts ማስጠንቀቂያ ያሳያሉ፦
+`npm install -g omniroute`ን ሲያስኬዱ፣ አዲሶቹ የnpm ስሪቶች (v11+ እና v12+) የጥቅል የሕይወት ዑደት ስክሪፕቶችን በነባሪነት በማገድ የinstall-scripts ማስጠንቀቂያ ያሳያሉ፦
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 ጥቅሎች በallowScripts ውስጥ ስላልተካተቱ የመጫኛ ስክሪፕቶቻቸው ታግደዋል፦
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### ይህን ማስጠንቀቂያ ችላ ማለት ይቻላል?
 
-**በከፊል፣ ነገር ግን scripts ሳይኖሩ ማስኬድ አይመከርም።** OmniRoute ችግርን በሰላም የሚቋቋሙ አማራጮችን ያካትታል፦ native `better-sqlite3` bindings ከ standalone bundle መጫን ካልቻሉ፣ መተግበሪያው እንደ `node:sqlite` ወይም `sql.js` ያሉ አማራጭ driversን ይጠቀማል ([የ SQLite Runtime መፍትሔ](../ops/SQLITE_RUNTIME.md)ን ይመልከቱ)። server አሁንም ይጀምራል፣ ነገር ግን እንደ `sql.js` ባሉ የ WASM አማራጮች ላይ ማስኬድ የ SQLite WAL (Write-Ahead Logging) ሁነታን ያሰናክላል፣ እንዲሁም የማህደረ ትውስታ እና የ disk-sync ተጨማሪ ወጪን ይጨምራል።
+**በከፊል ይቻላል፣ ነገር ግን ያለ ስክሪፕቶች ማስኬድ አይመከርም።** OmniRoute ችግርን በለሆሳስ የሚቋቋሙ አማራጭ ዘዴዎችን ያካትታል፦ ቤተኛ የ`better-sqlite3` ማያያዣዎች ከብቻውን ከሚሠራው ጥቅል መጫን ካልቻሉ፣ መተግበሪያው እንደ `node:sqlite` ወይም `sql.js` ባሉ አማራጭ ነጂዎች ይቀጥላል ([የSQLite የአሂድ ጊዜ መፍትሔ](../ops/SQLITE_RUNTIME.md)ን ይመልከቱ)። አገልጋዩ አሁንም ይጀምራል፣ ነገር ግን እንደ `sql.js` ባሉ የWASM አማራጭ ዘዴዎች ላይ ማስኬድ የSQLite WAL (Write-Ahead Logging) ሁነታን ያሰናክላል፣ እንዲሁም የማህደረ ትውስታ እና የዲስክ ማመሳሰል ተጨማሪ ወጪን ይጨምራል።
 
-### በእርግጥ የሚያስፈልጉት scripts የትኞቹ ናቸው?
+### በእርግጥ የሚያስፈልጉት የትኞቹ ስክሪፕቶች ናቸው?
 
-ሁሉም የታገዱ scripts OmniRouteን ለማስኬድ አስፈላጊ አይደሉም፦
+የታገዱት ስክሪፕቶች በሙሉ OmniRouteን ለማስኬድ አስፈላጊ አይደሉም፦
 
-- **አስፈላጊ (`omniroute`፣ `better-sqlite3`)፦** OmniRoute ከ Next.js standalone application bundle (`dist/`) ይሠራል። በጭነት ጊዜ፣ npm ከ host ጋር የሚስማማውን native SQLite driver ወደ ከፍተኛ ደረጃው `node_modules/better-sqlite3/` ያወርዳል ወይም ያጠናቅራል። ከዚያም የ OmniRoute `postinstall` script (`scripts/build/postinstall.mjs`) እነዚህን ከ host ጋር የሚስማሙ binaries ያረጋግጣል እና standalone server ሊደርስባቸው እንዲችል ወደ `dist/node_modules/` ይቀዳቸዋል። የ `omniroute` postinstall script ከታገደ፣ ይህ የመቅዳት ደረጃ ይዘለላል።
-- **አማራጭ/ተዘዋዋሪ (`keytar`፣ `@parcel/watcher`፣ `@swc/core`፣ `protobufjs`፣ `esbuild`)፦** እነዚህ የ build ረዳቶች፣ watcher መሣሪያዎች ወይም የስርዓት keychain መገልገያዎች ናቸው። መፍቀድ የ build ማስጠንቀቂያዎችን ይከላከላል፣ ነገር ግን ለዋናው የ routing ተግባር አያስፈልጉም።
-- **የተገለለ (`onnxruntime-node`)፦** ለአካባቢያዊ AI embeddings አማራጭ dependency ሲሆን OmniRoute እንዲሠራ **አያስፈልግም**። የእሱ postinstall script ከ NuGet ወደ ~300MB የሚሆኑ የ CUDA ግብዓቶችን ያወርዳል፤ በሚደገፍ hardware ላይ አካባቢያዊ ONNX accelerationን ለመጠቀም በግልጽ ካላሰቡ በ allow-list ውስጥ አያካትቱት።
+- **አስፈላጊ (`omniroute`፣ `better-sqlite3`)፦** OmniRoute ከNext.js ብቻውን የሚሠራ የመተግበሪያ ጥቅል (`dist/`) ውስጥ ይሠራል። በጭነት ወቅት npm ከአስተናጋጁ ጋር የሚዛመደውን ቤተኛ የSQLite ነጂ ከከፍተኛ ደረጃው `node_modules/better-sqlite3/` ውስጥ ያወርዳል ወይም ያጠናቅራል። ከዚያም የOmniRoute `postinstall` ስክሪፕት (`scripts/build/postinstall.mjs`) ብቻውን የሚሠራው አገልጋይ ሊደርስባቸው እንዲችል እነዚህን ከአስተናጋጁ ጋር የሚዛመዱ ሁለትዮሽ ፋይሎች አረጋግጦ ወደ `dist/node_modules/` ይቀዳል። የ`omniroute` postinstall ስክሪፕት ከታገደ፣ ይህ የመቅዳት ደረጃ ይዘለላል።
+- **አማራጭ/ተዘዋዋሪ (`keytar`፣ `@parcel/watcher`፣ `@swc/core`፣ `protobufjs`፣ `esbuild`)፦** እነዚህ የግንባታ አጋዦች፣ የክትትል መሣሪያዎች ወይም የስርዓት ቁልፍ ማከማቻ መገልገያዎች ናቸው። እንዲሠሩ መፍቀድ የግንባታ ማስጠንቀቂያዎችን ይከላከላል፣ ነገር ግን ለዋናው የማዞሪያ ተግባር አያስፈልጉም።
+- **የተገለለ (`onnxruntime-node`)፦** ለአካባቢያዊ የAI ውክልናዎች የሚያገለግል አማራጭ ጥገኝነት ሲሆን OmniRoute እንዲሠራ **አያስፈልግም**። የእሱ postinstall ስክሪፕት ከNuGet በግምት 300MB የCUDA ሀብቶችን ያወርዳል፤ በሚደገፍ ሃርድዌር ላይ አካባቢያዊ የONNX ማፋጠንን ለመጠቀም በግልጽ ካላሰቡ በስተቀር በፍቃድ ዝርዝሩ ውስጥ አያካትቱት።
 
 ### የሚመከር መፍትሔ
 
-በዓለም አቀፍ ጭነት ወቅት አስፈላጊዎቹን install scripts ለመፍቀድ እና ማስጠንቀቂያዎችን ለማስቀረት፣ ለ OmniRoute እና ለ native dependenciesዎቹ `--allow-scripts`ን ያስተላልፉ፦
+በዓለም አቀፍ ጭነት ወቅት አስፈላጊዎቹን የመጫኛ ስክሪፕቶች ለመፍቀድ እና ማስጠንቀቂያዎቹን ለማጥፋት፣ ለOmniRoute እና ለቤተኛ ጥገኞቹ `--allow-scripts`ን ያስተላልፉ፦
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### ጭነትዎን ያረጋግጡ
 
-ከጭነት በኋላ native bindings እና runtime environment ጤናማ መሆናቸውን ለማረጋገጥ አብሮገነብ diagnostic toolን ያስኪዱ፦
+ከጭነቱ በኋላ፣ ቤተኛ ማያያዣዎች እና የአሂድ ጊዜ አካባቢው ጤናማ መሆናቸውን ለማረጋገጥ አብሮ የተካተተውን የምርመራ መሣሪያ ያስኪዱ፦
 
 ```bash
 omniroute doctor

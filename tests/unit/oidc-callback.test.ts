@@ -103,10 +103,13 @@ test("OIDC callback happy path: exchanges code, validates ID token, mints identi
     aud: "client-oidc-test",
     sub: "user-123",
     email: "admin@example.com",
+    nonce: "nonce-happy-path",
   });
 
   const testState = "test-oidc-state-xyz";
   capturedCookies["oidc_state"] = { value: testState };
+  capturedCookies["oidc_nonce"] = { value: "nonce-happy-path" };
+  capturedCookies["oidc_pkce_verifier"] = { value: "verifier-happy-path" };
 
   const originalFetch = globalThis.fetch;
 
@@ -166,6 +169,16 @@ test("OIDC callback happy path: exchanges code, validates ID token, mints identi
     assert.equal(clearedState.value, "", "oidc_state must be cleared (empty value + maxAge 0)");
     assert.equal(clearedState.options?.maxAge, 0);
 
+    // Single-use PKCE material is cleared once the session is minted.
+    const clearedVerifier = capturedCookies["oidc_pkce_verifier"];
+    assert.ok(clearedVerifier, "oidc_pkce_verifier should have been touched");
+    assert.equal(clearedVerifier.value, "", "oidc_pkce_verifier must be cleared");
+    assert.equal(clearedVerifier.options?.maxAge, 0);
+    const clearedNonce = capturedCookies["oidc_nonce"];
+    assert.ok(clearedNonce, "oidc_nonce should have been touched");
+    assert.equal(clearedNonce.value, "", "oidc_nonce must be cleared");
+    assert.equal(clearedNonce.options?.maxAge, 0);
+
     // Pure OIDC bootstrap: setupComplete must be marked true so login page
     // does not show "no password / onboarding" screens.
     const { getSettings } = await import("../../src/lib/db/settings.ts");
@@ -206,10 +219,12 @@ test("OIDC callback rejects subject not in allowed list (subject_not_allowed)", 
     aud: "client-oidc-test",
     sub: "evil-999",
     email: "attacker@evil.com",
+    nonce: "nonce-whitelist",
   });
 
   const testState = "state-for-whitelist-test";
   capturedCookies["oidc_state"] = { value: testState };
+  capturedCookies["oidc_nonce"] = { value: "nonce-whitelist" };
 
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async (input: RequestInfo | URL) => {
@@ -267,10 +282,12 @@ test("OIDC callback rejects allowlisted email when email_verified is not asserte
     sub: "attacker-sub",
     email: "admin@example.com",
     // email_verified intentionally omitted
+    nonce: "nonce-unverified-email",
   });
 
   const testState = "state-for-unverified-email";
   capturedCookies["oidc_state"] = { value: testState };
+  capturedCookies["oidc_nonce"] = { value: "nonce-unverified-email" };
 
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async (input: RequestInfo | URL) => {
@@ -440,10 +457,12 @@ test("OIDC callback rejects missing JWT_SECRET at mint time (server_misconfigure
     iss: "https://idp.test",
     aud: "client-oidc-test",
     sub: "user-123",
+    nonce: "nonce-no-secret",
   });
 
   const testState = "state-no-jwt-secret";
   capturedCookies["oidc_state"] = { value: testState };
+  capturedCookies["oidc_nonce"] = { value: "nonce-no-secret" };
 
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async (input: RequestInfo | URL) => {
@@ -526,10 +545,12 @@ test("OIDC callback handles issuer with trailing slash in settings and token (#1
     aud: "client-oidc-authentik",
     sub: "authentik-user-1",
     email: "user@authentik.test",
+    nonce: "nonce-authentik",
   });
 
   const testState = "state-authentik-trailing-slash";
   capturedCookies["oidc_state"] = { value: testState };
+  capturedCookies["oidc_nonce"] = { value: "nonce-authentik" };
 
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async (input: RequestInfo | URL) => {
@@ -591,10 +612,12 @@ test("OIDC callback handles issuer mismatch on trailing slash between settings a
     iss: issuerWithSlash,
     aud: "client-oidc-authentik-mismatch",
     sub: "authentik-user-2",
+    nonce: "nonce-authentik-mismatch",
   });
 
   const testState = "state-authentik-mismatch";
   capturedCookies["oidc_state"] = { value: testState };
+  capturedCookies["oidc_nonce"] = { value: "nonce-authentik-mismatch" };
 
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async (input: RequestInfo | URL) => {
@@ -666,3 +689,237 @@ for (const [label, subjects] of [
     }
   });
 }
+
+test("OIDC callback refuses an id_token when the oidc_nonce cookie is absent (id_token_invalid)", async () => {
+  await setupFullOidcSettings();
+
+  const { idToken, jwks } = await createSignedIdToken({
+    iss: "https://idp.test",
+    aud: "client-oidc-test",
+    sub: "user-123",
+    nonce: "nonce-cookie-purged",
+  });
+
+  const testState = "state-missing-nonce-cookie";
+  capturedCookies["oidc_state"] = { value: testState };
+  // No oidc_nonce cookie: a purged single-use cookie must fail closed.
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : (input as URL).toString();
+    if (url.includes("/.well-known/openid-configuration")) {
+      return new Response(
+        JSON.stringify({
+          token_endpoint: "https://idp.test/token",
+          jwks_uri: "https://idp.test/jwks",
+        }),
+        { status: 200 }
+      );
+    }
+    if (url.includes("/token")) {
+      return new Response(JSON.stringify({ id_token: idToken }), { status: 200 });
+    }
+    if (url.includes("/jwks")) {
+      return new Response(JSON.stringify(jwks), { status: 200 });
+    }
+    return new Response("not mocked", { status: 404 });
+  }) as unknown as typeof fetch;
+
+  try {
+    const reqUrl = `http://localhost/api/auth/oidc/callback?code=code-no-nonce-cookie&state=${testState}`;
+    const response = await callbackRoute.GET(
+      new Request(reqUrl, { headers: { "x-forwarded-proto": "http" } })
+    );
+
+    assert.equal(response.status, 307);
+    const loc = response.headers.get("location") || "";
+    assert.ok(loc.includes("id_token_invalid"));
+    assert.equal(capturedCookies["auth_token"], undefined, "no session without the nonce");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("OIDC callback refuses an id_token whose nonce is missing, foreign or not a string (id_token_invalid)", async () => {
+  await setupFullOidcSettings();
+
+  const testState = "state-nonce-mismatch";
+  capturedCookies["oidc_nonce"] = { value: "cookie-nonce-1" };
+
+  // One key pair for every case: the route caches the JWKS client per URL, so a
+  // fresh key per case would fail signature verification and mask the nonce path.
+  const { privateKey, publicKey } = await generateKeyPair("RS256");
+  const jwks = { keys: [{ ...(await exportJWK(publicKey)), kid: "test-key-1" }] };
+
+  const cases: ReadonlyArray<readonly [string, unknown]> = [
+    ["missing", undefined],
+    ["foreign", "token-nonce-2"],
+    ["not-a-string", 42],
+  ];
+
+  let currentIdToken = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : (input as URL).toString();
+    if (url.includes("/.well-known/openid-configuration")) {
+      return new Response(
+        JSON.stringify({
+          token_endpoint: "https://idp.test/token",
+          jwks_uri: "https://idp.test/jwks",
+        }),
+        { status: 200 }
+      );
+    }
+    if (url.includes("/token")) {
+      return new Response(JSON.stringify({ id_token: currentIdToken }), { status: 200 });
+    }
+    if (url.includes("/jwks")) {
+      return new Response(JSON.stringify(jwks), { status: 200 });
+    }
+    return new Response("not mocked", { status: 404 });
+  }) as unknown as typeof fetch;
+
+  try {
+    for (const [label, tokenNonce] of cases) {
+      const claims: Record<string, unknown> = {
+        iss: "https://idp.test",
+        aud: "client-oidc-test",
+        sub: "user-123",
+      };
+      if (tokenNonce !== undefined) claims.nonce = tokenNonce;
+      currentIdToken = await new SignJWT(claims)
+        .setProtectedHeader({ alg: "RS256" })
+        .setIssuedAt()
+        .setExpirationTime("5m")
+        .sign(privateKey);
+
+      // The state cookie is consumed by every request: set it for each case.
+      capturedCookies["oidc_state"] = { value: testState };
+
+      const reqUrl = `http://localhost/api/auth/oidc/callback?code=code-nonce-${label}&state=${testState}`;
+      const response = await callbackRoute.GET(
+        new Request(reqUrl, { headers: { "x-forwarded-proto": "http" } })
+      );
+
+      assert.equal(response.status, 307, `${label} nonce must redirect`);
+      const loc = response.headers.get("location") || "";
+      assert.ok(loc.includes("id_token_invalid"), `${label} nonce must be refused`);
+      assert.equal(
+        capturedCookies["auth_token"],
+        undefined,
+        `${label} nonce must not mint a session`
+      );
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("OIDC callback sends the code_verifier when the oidc_pkce_verifier cookie is set", async () => {
+  await setupFullOidcSettings();
+
+  const testNonce = "nonce-pkce-roundtrip";
+  const testVerifier = "verifier-abc-123-abcdefghijklmnopqrstuvwxyz";
+  const { idToken, jwks } = await createSignedIdToken({
+    iss: "https://idp.test",
+    aud: "client-oidc-test",
+    sub: "user-123",
+    nonce: testNonce,
+  });
+
+  const testState = "state-pkce-verifier";
+  capturedCookies["oidc_state"] = { value: testState };
+  capturedCookies["oidc_nonce"] = { value: testNonce };
+  capturedCookies["oidc_pkce_verifier"] = { value: testVerifier };
+
+  let tokenRequestBody = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : (input as URL).toString();
+    if (url.includes("/.well-known/openid-configuration")) {
+      return new Response(
+        JSON.stringify({
+          token_endpoint: "https://idp.test/token",
+          jwks_uri: "https://idp.test/jwks",
+        }),
+        { status: 200 }
+      );
+    }
+    if (url.includes("/token")) {
+      tokenRequestBody = String(init?.body ?? "");
+      return new Response(JSON.stringify({ id_token: idToken }), { status: 200 });
+    }
+    if (url.includes("/jwks")) {
+      return new Response(JSON.stringify(jwks), { status: 200 });
+    }
+    return new Response("not mocked", { status: 404 });
+  }) as unknown as typeof fetch;
+
+  try {
+    const reqUrl = `http://localhost/api/auth/oidc/callback?code=code-pkce-verifier&state=${testState}`;
+    const response = await callbackRoute.GET(
+      new Request(reqUrl, { headers: { "x-forwarded-proto": "http" } })
+    );
+
+    const sentParams = new URLSearchParams(tokenRequestBody);
+    assert.equal(sentParams.get("code_verifier"), testVerifier);
+    assert.equal(response.status, 307);
+    const location = response.headers.get("location");
+    assert.ok(location && location.endsWith("/dashboard"));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("OIDC callback sends no code_verifier without its cookie and refuses the legacy callback (id_token_invalid)", async () => {
+  await setupFullOidcSettings();
+
+  const { idToken, jwks } = await createSignedIdToken({
+    iss: "https://idp.test",
+    aud: "client-oidc-test",
+    sub: "user-123",
+  });
+
+  const testState = "state-legacy-callback";
+  capturedCookies["oidc_state"] = { value: testState };
+  // No oidc_pkce_verifier and no oidc_nonce: the pre-hardening callback shape.
+
+  let tokenRequestBody = "";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : (input as URL).toString();
+    if (url.includes("/.well-known/openid-configuration")) {
+      return new Response(
+        JSON.stringify({
+          token_endpoint: "https://idp.test/token",
+          jwks_uri: "https://idp.test/jwks",
+        }),
+        { status: 200 }
+      );
+    }
+    if (url.includes("/token")) {
+      tokenRequestBody = String(init?.body ?? "");
+      return new Response(JSON.stringify({ id_token: idToken }), { status: 200 });
+    }
+    if (url.includes("/jwks")) {
+      return new Response(JSON.stringify(jwks), { status: 200 });
+    }
+    return new Response("not mocked", { status: 404 });
+  }) as unknown as typeof fetch;
+
+  try {
+    const reqUrl = `http://localhost/api/auth/oidc/callback?code=code-legacy&state=${testState}`;
+    const response = await callbackRoute.GET(
+      new Request(reqUrl, { headers: { "x-forwarded-proto": "http" } })
+    );
+
+    const sentParams = new URLSearchParams(tokenRequestBody);
+    assert.equal(sentParams.get("code_verifier"), null);
+    assert.equal(response.status, 307);
+    const loc = response.headers.get("location") || "";
+    assert.ok(loc.includes("id_token_invalid"));
+    assert.equal(capturedCookies["auth_token"], undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

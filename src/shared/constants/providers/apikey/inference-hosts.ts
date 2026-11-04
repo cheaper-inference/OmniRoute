@@ -61,9 +61,9 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     website: "https://poolside.ai",
     hasFree: true,
     freeNote:
-      "Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published.",
+      "Preview ending: direct Poolside Platform inference shuts down on 2026-10-31. Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published.",
     apiHint:
-      "Create a free developer API key, then use https://inference.poolside.ai/v1 as the OpenAI-compatible base URL.",
+      "Direct Poolside Platform inference shuts down on 2026-10-31; see https://platform.poolside.ai/ for the announcement and self-hosting option. Existing keys use https://inference.poolside.ai/v1.",
   },
   fireworks: {
     id: "fireworks",
@@ -202,6 +202,18 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#7C3AED",
     textIcon: "LA",
     website: "https://lambda.ai",
+  },
+  runcrate: {
+    id: "runcrate",
+    serviceKinds: ["llm"],
+    alias: "runcrate",
+    name: "Runcrate",
+    icon: "terminal",
+    color: "#1A2B79",
+    textIcon: "RC",
+    website: "https://www.runcrate.ai",
+    hasFree: true,
+    freeNote: "Open models are free with your GitHub account",
   },
   sambanova: {
     id: "sambanova",

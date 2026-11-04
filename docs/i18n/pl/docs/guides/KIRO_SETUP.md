@@ -1,4 +1,9 @@
+# Kiro Setup Guide (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/KIRO_SETUP.md) · 🇪🇹 [am](../../../am/docs/guides/KIRO_SETUP.md) · 🇸🇦 [ar](../../../ar/docs/guides/KIRO_SETUP.md) · 🇦🇿 [az](../../../az/docs/guides/KIRO_SETUP.md) · 🇧🇬 [bg](../../../bg/docs/guides/KIRO_SETUP.md) · 🇧🇩 [bn](../../../bn/docs/guides/KIRO_SETUP.md) · 🇧🇦 [bs](../../../bs/docs/guides/KIRO_SETUP.md) · 🇨🇿 [cs](../../../cs/docs/guides/KIRO_SETUP.md) · 🇩🇰 [da](../../../da/docs/guides/KIRO_SETUP.md) · 🇩🇪 [de](../../../de/docs/guides/KIRO_SETUP.md) · 🇬🇷 [el](../../../el/docs/guides/KIRO_SETUP.md) · 🇪🇸 [es](../../../es/docs/guides/KIRO_SETUP.md) · 🇪🇪 [et](../../../et/docs/guides/KIRO_SETUP.md) · 🇮🇷 [fa](../../../fa/docs/guides/KIRO_SETUP.md) · 🇫🇮 [fi](../../../fi/docs/guides/KIRO_SETUP.md) · 🇫🇷 [fr](../../../fr/docs/guides/KIRO_SETUP.md) · 🇮🇪 [ga](../../../ga/docs/guides/KIRO_SETUP.md) · 🇮🇳 [gu](../../../gu/docs/guides/KIRO_SETUP.md) · 🇳🇬 [ha](../../../ha/docs/guides/KIRO_SETUP.md) · 🇮🇱 [he](../../../he/docs/guides/KIRO_SETUP.md) · 🇮🇳 [hi](../../../hi/docs/guides/KIRO_SETUP.md) · 🇭🇷 [hr](../../../hr/docs/guides/KIRO_SETUP.md) · 🇭🇺 [hu](../../../hu/docs/guides/KIRO_SETUP.md) · 🇦🇲 [hy](../../../hy/docs/guides/KIRO_SETUP.md) · 🇮🇩 [id](../../../id/docs/guides/KIRO_SETUP.md) · 🇳🇬 [ig](../../../ig/docs/guides/KIRO_SETUP.md) · 🇮🇹 [it](../../../it/docs/guides/KIRO_SETUP.md) · 🇯🇵 [ja](../../../ja/docs/guides/KIRO_SETUP.md) · 🇬🇪 [ka](../../../ka/docs/guides/KIRO_SETUP.md) · 🇰🇭 [km](../../../km/docs/guides/KIRO_SETUP.md) · 🇮🇳 [kn](../../../kn/docs/guides/KIRO_SETUP.md) · 🇰🇷 [ko](../../../ko/docs/guides/KIRO_SETUP.md) · 🇱🇹 [lt](../../../lt/docs/guides/KIRO_SETUP.md) · 🇱🇻 [lv](../../../lv/docs/guides/KIRO_SETUP.md) · 🇮🇳 [ml](../../../ml/docs/guides/KIRO_SETUP.md) · 🇮🇳 [mr](../../../mr/docs/guides/KIRO_SETUP.md) · 🇲🇾 [ms](../../../ms/docs/guides/KIRO_SETUP.md) · 🇲🇹 [mt](../../../mt/docs/guides/KIRO_SETUP.md) · 🇲🇲 [my](../../../my/docs/guides/KIRO_SETUP.md) · 🇳🇵 [ne](../../../ne/docs/guides/KIRO_SETUP.md) · 🇳🇱 [nl](../../../nl/docs/guides/KIRO_SETUP.md) · 🇳🇴 [no](../../../no/docs/guides/KIRO_SETUP.md) · 🇮🇳 [or](../../../or/docs/guides/KIRO_SETUP.md) · 🇮🇳 [pa](../../../pa/docs/guides/KIRO_SETUP.md) · 🇵🇭 [phi](../../../phi/docs/guides/KIRO_SETUP.md) · 🇵🇹 [pt](../../../pt/docs/guides/KIRO_SETUP.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/KIRO_SETUP.md) · 🇷🇴 [ro](../../../ro/docs/guides/KIRO_SETUP.md) · 🇷🇺 [ru](../../../ru/docs/guides/KIRO_SETUP.md) · 🇱🇰 [si](../../../si/docs/guides/KIRO_SETUP.md) · 🇸🇰 [sk](../../../sk/docs/guides/KIRO_SETUP.md) · 🇸🇮 [sl](../../../sl/docs/guides/KIRO_SETUP.md) · 🇷🇸 [sr](../../../sr/docs/guides/KIRO_SETUP.md) · 🇸🇪 [sv](../../../sv/docs/guides/KIRO_SETUP.md) · 🇰🇪 [sw](../../../sw/docs/guides/KIRO_SETUP.md) · 🇮🇳 [ta](../../../ta/docs/guides/KIRO_SETUP.md) · 🇮🇳 [te](../../../te/docs/guides/KIRO_SETUP.md) · 🇹🇭 [th](../../../th/docs/guides/KIRO_SETUP.md) · 🇹🇷 [tr](../../../tr/docs/guides/KIRO_SETUP.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/KIRO_SETUP.md) · 🇵🇰 [ur](../../../ur/docs/guides/KIRO_SETUP.md) · 🇺🇿 [uz](../../../uz/docs/guides/KIRO_SETUP.md) · 🇻🇳 [vi](../../../vi/docs/guides/KIRO_SETUP.md) · 🇳🇬 [yo](../../../yo/docs/guides/KIRO_SETUP.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/KIRO_SETUP.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/KIRO_SETUP.md)
+
 ---
+
 title: "Przewodnik konfiguracji Kiro"
 ---
 
@@ -117,32 +122,40 @@ Pole `region` domyślnie ma wartość `us-east-1`, gdy zostanie pominięte.
 
 ---
 
-## Flow importu klucza API
+## Przepływ importowania klucza API
 
-Autoryzacja kluczem API jest przeznaczona dla długoterminowych poświadczeń bearer
-Kiro / AWS CodeWhisperer. Nie używa odświeżania OAuth, więc unika unieważniania
-współdzielonych sesji OIDC.
+Uwierzytelnianie za pomocą klucza API jest przeznaczone dla długoterminowych danych uwierzytelniających typu bearer usługi Kiro / AWS CodeWhisperer. Nie korzysta ono
+z odświeżania OAuth, dzięki czemu pozwala uniknąć unieważniania współdzielonej sesji OIDC.
 
-### Dashboard
+### Panel
 
-1. Otwórz **Dashboard -> Providers -> Kiro**.
-2. Wybierz **API Key**.
-3. Wklej klucz API oraz opcjonalnie region AWS (`us-east-1` domyślnie).
-4. OmniRoute waliduje klucz i zapisuje połączenie.
+1. Otwórz **Panel -> Dostawcy -> Kiro**.
+2. Wybierz **Klucz API**.
+3. Wklej klucz API i wybierz region AWS: **Automatyczne wykrywanie** (domyślnie), **Wschodnie
+   stany USA (Północna Wirginia)** lub **Europa (Frankfurt)**.
+4. OmniRoute weryfikuje klucz i zapisuje połączenie przypisane do regionu, w którym
+   klucz działa.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` akceptuje `auto` (domyślnie), `us-east-1` lub `eu-central-1`; każda inna wartość
+jest odrzucana z kodem HTTP 400.
 
 ### Kontrakt wewnętrzny
 
-Trasa API waliduje klucz, wywołując `KiroService.validateApiKey()`, które
-używa `ListAvailableProfiles` względem endpointu CodeWhisperer/Amazon Q
-dopasowanego do regionu i rozwiązuje `profileArn`.
+Trasa API weryfikuje klucz, wywołując `KiroService.validateApiKey()`, która
+wywołuje `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(interfejs Amazon Q używany do wnioskowania za pomocą klucza API) z limitem czasu 10 s dla każdego regionu. W
+trybie `auto` najpierw sprawdzany jest `us-east-1`, a następnie `eu-central-1`; zapisywany jest pierwszy region,
+który zaakceptuje klucz. Jeśli klucz zostanie odrzucony we wszystkich regionach kandydujących, import kończy się
+niepowodzeniem z kodem HTTP 400. Następnie podejmowana jest opcjonalna próba wywołania `ListAvailableProfiles`
+w celu wykrycia opcjonalnego `profileArn` (AWS odmawia dostępu w przypadku większości kluczy API).
 
 Zapisane połączenie używa:
 
@@ -157,10 +170,13 @@ Zapisane połączenie używa:
 }
 ```
 
-W czasie działania `KiroExecutor.buildHeaders()` wysyła klucz jako
-`Authorization: Bearer <key>` i dodaje `tokentype: API_KEY`. Wywołania
-quota/profile używają tego samego znacznika, dzięki czemu AWS traktuje bearer
-jako długoterminowy klucz API, a nie jako token dostępu OIDC lub social.
+W czasie wykonywania `KiroExecutor.buildHeaders()` wysyła klucz jako
+`Authorization: Bearer <key>` i dodaje `tokentype: API_KEY`. Wywołania dotyczące limitów/profili
+używają tego samego znacznika, dzięki czemu AWS traktuje dane typu bearer jako długoterminowy klucz API, a nie
+token dostępu OIDC lub społecznościowy. `KiroExecutor.execute()` wysyła żądania wnioskowania za pomocą klucza API wyłącznie
+do `https://q.<region>.amazonaws.com/generateAssistantResponse` — w tym do `us-east-1`
+— ponieważ brama IDE Kiro odrzuca `TokenType=API_KEY`, a
+`codewhisperer.us-east-1` odrzuca ładunki klucza API jako nieprawidłową treść żądania (HTTP 400).
 
 ---
 

@@ -30,7 +30,7 @@ async function resetStorage() {
 
 test.beforeEach(async () => {
   await resetStorage();
-  // #15059: excludeTosAvoid defaults to true and every opencode model is tos:avoid;
+  // #15059: excludeTosAvoid defaults to true and every duckduckgo-web model is tos:avoid;
   // these tests exercise the no-auth pool builder, so opt out of the ToS filter.
   await settingsDb.updateSettings({ excludeTosAvoid: false });
 });
@@ -48,10 +48,10 @@ test.after(async () => {
 
 test("#7622: a no-auth model excluded via providerSpecificData.excludedModels is ABSENT from the auto-combo candidate pool", async () => {
   const conn = await providersDb.createProviderConnection({
-    provider: "opencode",
+    provider: "duckduckgo-web",
     authType: "no-auth",
-    name: "OpenCode Free Account 1",
-    providerSpecificData: { excludedModels: "mimo-v2.5-free" },
+    name: "DuckDuckGo Account 1",
+    providerSpecificData: { excludedModels: "gpt-5.4-mini" },
   });
   assert.ok(conn.id, "connection must be created");
 
@@ -59,34 +59,34 @@ test("#7622: a no-auth model excluded via providerSpecificData.excludedModels is
 
   const modelStrings = combo.models.map((m: { model: string }) => m.model);
   assert.ok(
-    !modelStrings.some((model: string) => model.endsWith("/mimo-v2.5-free")),
-    "BUG #7622: the excluded model 'mimo-v2.5-free' must not appear in the auto-combo " +
+    !modelStrings.some((model: string) => model === "ddgw/gpt-5.4-mini"),
+    "BUG #7622: the excluded model 'gpt-5.4-mini' must not appear in the auto-combo " +
       `candidate pool, but it did. Pool: ${JSON.stringify(modelStrings)}`
   );
 });
 
 test("#7622: a non-excluded no-auth model from the same connection remains in the auto-combo candidate pool", async () => {
   await providersDb.createProviderConnection({
-    provider: "opencode",
+    provider: "duckduckgo-web",
     authType: "no-auth",
-    name: "OpenCode Free Account 1",
-    providerSpecificData: { excludedModels: "mimo-v2.5-free" },
+    name: "DuckDuckGo Account 1",
+    providerSpecificData: { excludedModels: "gpt-5.4-mini" },
   });
 
   const combo = await virtualFactory.createVirtualAutoCombo(undefined);
 
   const modelStrings = combo.models.map((m: { model: string }) => m.model);
   assert.ok(
-    modelStrings.some((model: string) => model.endsWith("/big-pickle")),
-    `a non-excluded model ("big-pickle") must remain in the pool. Pool: ${JSON.stringify(modelStrings)}`
+    modelStrings.some((model: string) => model === "ddgw/gpt-5.6-luna"),
+    `a non-excluded model ("gpt-5.6-luna") must remain in the pool. Pool: ${JSON.stringify(modelStrings)}`
   );
 });
 
-test("#7622 regression guard: with no excludedModels set, all opencode models remain in the pool (baseline unchanged)", async () => {
+test("#7622 regression guard: with no excludedModels set, all duckduckgo-web models remain in the pool (baseline unchanged)", async () => {
   await providersDb.createProviderConnection({
-    provider: "opencode",
+    provider: "duckduckgo-web",
     authType: "no-auth",
-    name: "OpenCode Free Account 1",
+    name: "DuckDuckGo Account 1",
     providerSpecificData: { fingerprints: ["11111111111111111111111111111111"] },
   });
 
@@ -94,7 +94,7 @@ test("#7622 regression guard: with no excludedModels set, all opencode models re
 
   const modelStrings = combo.models.map((m: { model: string }) => m.model);
   assert.ok(
-    modelStrings.some((model: string) => model.endsWith("/mimo-v2.5-free")),
-    `baseline: no exclusion set, mimo-v2.5-free must still be present. Pool: ${JSON.stringify(modelStrings)}`
+    modelStrings.some((model: string) => model === "ddgw/gpt-5.4-mini"),
+    `baseline: no exclusion set, gpt-5.4-mini must still be present. Pool: ${JSON.stringify(modelStrings)}`
   );
 });

@@ -1,1 +1,0 @@
-- **fix(executors):** strip per-message fields an upstream 400 names as unsupported (Groq `reasoning_content`, pydantic `extra_forbidden`) and retry once; Groq requests now drop per-message `reasoning_content` pre-send ([#16513](https://github.com/diegosouzapw/OmniRoute/pull/16513)) — thanks @rusak47

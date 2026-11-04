@@ -1,1 +1,0 @@
-- **fix(ci):** `validate-release-green` parses `ci.yml` with the already-declared `js-yaml` dependency instead of the undeclared `yaml` package, so a main-green nightly crash no longer posts an empty verdict on the tracker.

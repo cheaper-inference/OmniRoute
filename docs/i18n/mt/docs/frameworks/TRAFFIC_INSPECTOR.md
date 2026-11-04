@@ -38,35 +38,35 @@ It-`TrafficBuffer` (`src/mitm/inspector/buffer.ts`) huwa buffer ċirkolari kondi
 
 ---
 
-## §2 Modi tal-qbid
+## §2 Modi ta’ qbid
 
-Traffic Inspector jappoġġja **5 sorsi simultanji tal-qbid**. Kull wieħed jista’ jiġi attivat jew diżattivat b’mod indipendenti. Il-kamp `source` fuq kull `InterceptedRequest` (`src/mitm/inspector/types.ts`) ikun wieħed minn `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, jew `"tproxy"`.
+Traffic Inspector jappoġġja **5 sorsi ta’ qbid simultanji**. Kull wieħed jista’ jiġi attivat jew diżattivat indipendentement. Il-kamp `source` fuq kull `InterceptedRequest` (`src/mitm/inspector/types.ts`) ikun wieħed minn `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, jew `"tproxy"`.
 
 ### Modalità 1 — AgentBridge (predefinita, dejjem attiva)
 
-**Sors:** Handlers ta’ AgentBridge (`src/mitm/handlers/base.ts`)
-**Mekkaniżmu:** Kull sejħa `intercept()` f’`MitmHandlerBase` issejjaħ `hookBufferStart()` qabel it-trażmissjoni u `hookBufferUpdate()` meta titlesta. Ma teħtieġ ebda konfigurazzjoni addizzjonali — taħdem malli AgentBridge ikun qed jaħdem.
+**Sors:** Ħandlers ta’ AgentBridge (`src/mitm/handlers/base.ts`)
+**Mekkaniżmu:** Kull sejħa lil `intercept()` f’`MitmHandlerBase` issejjaħ `hookBufferStart()` qabel ma tibgħat it-talba u `hookBufferUpdate()` mat-tlestija. L-ebda konfigurazzjoni addizzjonali — taħdem malli AgentBridge ikun qed jaħdem.
 **Kopertura:** Id-9 aġenti tal-IDE kkonfigurati f’AgentBridge
 **Nota:** Il-kamp `source` f’`InterceptedRequest` = `"agent-bridge"`
 
 ### Modalità 2 — Hosts personalizzati (ridirezzjoni tad-DNS)
 
-**Sors:** Lista ta’ hosts definita mill-utent (tabella `inspector_custom_hosts`)
-**Mekkaniżmu:** Iż-żieda ta’ host permezz tal-UI żżid `127.0.0.1 <host>` ma’ `/etc/hosts` (teħtieġ sudo). Is-server MITM eżistenti ta’ AgentBridge (port 443) jiġġenera ċertifikat SNI b’mod dinamiku għall-host il-ġdid.
-**Kopertura:** Kwalunkwe applikazzjoni li tuża l-host miżjud — ma hija meħtieġa ebda bidla fil-konfigurazzjoni tal-applikazzjoni
+**Sors:** Lista ta’ hosts iddefinita mill-utent (tabella `inspector_custom_hosts`)
+**Mekkaniżmu:** Meta żżid host permezz tal-UI, jiżdied `127.0.0.1 <host>` ma’ `/etc/hosts` (jeħtieġ sudo). Is-server MITM eżistenti ta’ AgentBridge (port 443) jiġġenera b’mod dinamiku ċertifikat SNI għall-host il-ġdid.
+**Kopertura:** Kwalunkwe applikazzjoni li tuża l-host miżjud — mhi meħtieġa l-ebda bidla fil-konfigurazzjoni tal-applikazzjoni
 **Nota:** `source` = `"custom-host"`
 
 Eżempji ta’ każijiet ta’ użu:
 
 - Immonitorja `api.openai.com` minn skripts Python
 - Iddibaggja `my-internal-llm.company.com`
-- Aqbad traffiku minn apparati mobbli fuq l-istess netwerk (permezz ta’ ARP spoofing — avvanzat)
+- Aqbad traffiku minn apparati mobbli fuq l-istess network (permezz ta’ spoofing ARP — avvanzat)
 
 ### Modalità 3 — Listener HTTP_PROXY (port 8080)
 
 **Sors:** Applikazzjonijiet li jużaw il-varjabbli tal-ambjent `HTTP_PROXY`/`HTTPS_PROXY`
-**Mekkaniżmu:** Listener sekondarju fuq il-port 8080 (`src/mitm/inspector/httpProxyServer.ts`) li jaġixxi bħala proxy HTTP/HTTPS espliċitu standard. Jaċċetta mini `CONNECT` (HTTPS) u talbiet HTTP diretti.
-**Kopertura:** Kwalunkwe applikazzjoni li tirrispetta l-varjabbli tal-ambjent `HTTP_PROXY` — ebda bidla fid-DNS, ebda sudo
+**Mekkaniżmu:** Listener sekondarju fil-port 8080 (`src/mitm/inspector/httpProxyServer.ts`) li jaġixxi bħala proxy HTTP/HTTPS espliċitu standard. Jaċċetta mini `CONNECT` (HTTPS) u talbiet HTTP diretti.
+**Kopertura:** Kwalunkwe applikazzjoni li tirrispetta l-varjabbli tal-ambjent `HTTP_PROXY` — l-ebda bidla fid-DNS, l-ebda sudo
 **Nota:** `source` = `"http-proxy"`
 
 ```bash
@@ -78,11 +78,11 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Limitazzjoni tat-TLS:** Il-mini HTTPS `CONNECT` jinqabdu bħala metadata biss (host, port, ħinijiet) — il-korp TLS ma jiġix deċifrat b’mod predefinit. Attiva l-għażla "Iddeċifra HTTPS fil-modalità proxy" (teħtieġ attivazzjoni espliċita u li ċ-ċertifikat ta’ AgentBridge ikun fdat) biex tispezzjona l-korp kollu.
+**Limitazzjoni tat-TLS:** L-HTTPS jgħaddi minn mina `CONNECT` sempliċi: il-listener jgħaddi l-bytes kriptati mingħajr ma jimmodifikahom u jirreġistra biss il-metadata (host, port, ħinijiet). Qatt ma jiddekripta l-HTTPS, u m’hemm l-ebda setting li jattiva d-dekriptaġġ għal din il-modalità. Biex taqbad il-bodies tal-HTTPS, irrotta l-host permezz tal-Modalità 1 (AgentBridge), il-Modalità 2 (Hosts personalizzati) jew il-Modalità 5 (dekriptaġġ TPROXY).
 
 **Kunflitt tal-port:** Jekk il-port 8080 ikun qed jintuża, AgentBridge jirritorna 409 bi żball strutturat. Ibdel il-port permezz tal-varjabbli tal-ambjent `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Modalità 4 — Proxy għas-sistema kollha (avvanzata, teħtieġ attivazzjoni espliċita)
+### Modalità 4 — Proxy għas-sistema kollha (avvanzata, b’attivazzjoni volontarja)
 
 **Sors:** Settings tal-proxy fil-livell tas-sistema operattiva (japplikaw għall-applikazzjonijiet kollha fuq il-magna)
 **Mekkaniżmu:** Juża APIs tas-sistema operattiva biex jirridirezzjona t-traffiku HTTP/HTTPS kollu permezz tal-listener HTTP_PROXY:
@@ -93,33 +93,33 @@ export HTTPS_PROXY=http://127.0.0.1:8080
   **Kopertura:** Kull applikazzjoni fuq il-magna li tirrispetta s-settings tal-proxy tas-sistema
   **Nota:** `source` = `"system-proxy"`
 
-**Mekkaniżmi tas-sikurezza:**
+**Mekkaniżmi ta’ sikurezza:**
 
-- Timer għad-diżattivazzjoni awtomatika (30 minuta b’mod predefinit, konfigurabbli permezz ta’ `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Timer ta’ diżattivazzjoni awtomatika (predefinit għal 30 minuta, konfigurabbli permezz ta’ `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
 - L-istat preċedenti tal-proxy tas-sistema jiġi ssejvjat fid-DB u rrestawrat meta l-bidla titreġġa’ lura
 - Id-dashboard juri l-messaġġ "Qed jitreġġa’ lura l-proxy tas-sistema" jekk l-utent jinnaviga ’l bogħod waqt li jkun attiv
-- L-UI turi badge `⚠ Avvanzat` + kaxxa ta’ kontroll għal konferma espliċita
+- L-UI turi l-badge `⚠ Avvanzat` + checkbox ta’ konferma espliċita
 
-### Modalità 5 — Deċifrar trasparenti TPROXY (Linux, root, teħtieġ attivazzjoni espliċita)
+### Modalità 5 — Dekriptaġġ trasparenti TPROXY (Linux, root, b’attivazzjoni volontarja)
 
-**Sors:** TPROXY tal-kernel + routing ibbażat fuq policies (`src/mitm/tproxy/`)
-**Mekkaniżmu:** Jimmarka konnessjonijiet TCP lokali ġodda li joħorġu lejn port fil-mira (b’mod predefinit `443`) f’`mangle OUTPUT`; `ip rule` jerġa’ jidderieġi l-pakketti mmarkati lejn il-konsenja lokali, u l-mira `TPROXY` ta’ `mangle PREROUTING` tgħaddihom lil listener trasparenti (**IP_TRANSPARENT**) (b’mod predefinit fuq il-port `8443`). Il-listener itemm it-TLS b’ċertifikat leaf maħruġ **għal kull hostname SNI meta jintalab** minn CA dinamika, jaqbad l-iskambju ddeċifrat, u jittrażmetti t-talba, ikkriptata mill-ġdid, lejn id-destinazzjoni oriġinali.
-**Kopertura:** Hosts ta’ destinazzjoni **arbitrarji** fuq il-port fil-mira — ebda spoof ta’ `/etc/hosts`, ebda varjabbli tal-ambjent `HTTP_PROXY`, u ebda bidla fil-proxy tas-sistema kollha. Il-proċess interċettat ma jeħtieġ ebda bidla fil-konfigurazzjoni, iżda jrid jafda lis-CA dinamika.
+**Sors:** TPROXY tal-kernel + routing skont il-politika (`src/mitm/tproxy/`)
+**Mekkaniżmu:** Jimmarka konnessjonijiet TCP lokali ħerġin ġodda lejn port fil-mira (predefinit `443`) f’`mangle OUTPUT`, regola `ip rule` terġa’ tirrotta l-pakketti mmarkati lejn destinazzjoni lokali, u t-target `TPROXY` ta’ `mangle PREROUTING` jgħaddihom lil listener trasparenti (**IP_TRANSPARENT**) (port predefinit `8443`). Il-listener itemm it-TLS b’ċertifikat finali maħruġ **għal kull hostname SNI meta jintalab** minn CA dinamika, jaqbad l-iskambju ddekriptat, u jibgħat it-talba kriptata mill-ġdid lejn id-destinazzjoni oriġinali.
+**Kopertura:** Hosts ta’ destinazzjoni **arbitrarji** fuq il-port fil-mira — l-ebda spoof ta’ `/etc/hosts`, l-ebda varjabbli tal-ambjent `HTTP_PROXY`, u l-ebda modifika tal-proxy għas-sistema kollha. Il-proċess interċettat ma jeħtieġ l-ebda bidla fil-konfigurazzjoni, iżda jrid jafda lis-CA dinamika.
 **Nota:** `source` = `"tproxy"`
 
-**Rekwiżiti:** Linux biss (**IP_TRANSPARENT** huwa disponibbli fuq Linux biss), il-kapaċità **CAP_NET_ADMIN** (root), u addon N-API nattiv li jrid jinbena b’toolchain C (`npm run build:native:tproxy`). Meta ma jkunx disponibbli, l-għażla fid-dashboard tkun diżattivata bit-tooltip "Id-deċifrar TPROXY jeħtieġ Linux + root + l-addon nattiv". Ir-regoli tal-firewall jiġu applikati jew imreġġgħin lura b’mod tranżazzjonali (crash qatt ma jħalli warajh regola `mangle`) u jitneħħew meta s-sistema terġa’ tinbeda. Mekkaniżmu kontra l-loops ibbażat fuq SO_MARK jipprevjeni li t-trażmissjoni tal-proxy stess, ikkriptata mill-ġdid, terġa’ tiġi interċettata.
+**Rekwiżiti:** Linux biss (**IP_TRANSPARENT** huwa disponibbli biss fuq Linux), il-kapaċità **CAP_NET_ADMIN** (root), u addon nattiv N-API li jrid jinbena b’toolchain tas-C (`npm run build:native:tproxy`). Meta ma jkunx disponibbli, it-toggle fid-dashboard ikun diżattivat bit-tooltip "Id-dekriptaġġ TPROXY jeħtieġ Linux + root + l-addon nattiv". Ir-regoli tal-firewall jiġu applikati/jitreġġgħu lura b’mod tranżazzjonali (crash qatt ma jħalli regola `mangle` warajh) u jitneħħew mar-reboot. Mekkaniżmu anti-loop ibbażat fuq SO_MARK jipprevjeni li t-trażmissjoni kriptata mill-ġdid tal-proxy terġa’ tiġi interċettata.
 
-Din hija sottosistema sostanzjali bil-gwida ddedikata tagħha għall-operaturi — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkumpilata f’`/docs`) għar-riċetta sħiħa tal-firewall, is-CA dinamika għal kull SNI + l-installatur tal-maħżen taċ-ċertifikati fdati, ir-rotta lokali biss, id-dettalji kontra l-loops, u l-iskema tal-konfigurazzjoni. L-għażla hija kkontrollata minn `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (nota: ir-rotta tinsab taħt il-prefiss ta’ AgentBridge, mhux taħt il-prefiss ta’ Traffic Inspector).
+Din hija subsistema sostanzjali bil-gwida ddedikata tagħha għall-operaturi — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f’`/docs`) għar-riċetta sħiħa tal-firewall, is-CA dinamika għal kull SNI + l-installatur tat-trust store, ir-rotta lokali biss, id-dettalji tal-anti-loop, u l-iskema tal-konfigurazzjoni. It-toggle huwa kkontrollat minn `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (nota: ir-rotta tinsab taħt il-prefiss ta’ AgentBridge, mhux il-prefiss ta’ Traffic Inspector).
 
-### Tqabbil tal-modi tal-qbid
+### Tqabbil tal-modi ta’ qbid
 
-| Modalità                | Konfigurazzjoni              |               Sudo?                | Firxa                               | Noti                                                                                                                                   |
+| Modalità                | Konfigurazzjoni              |               Sudo?                | Kopertura                           | Noti                                                                                                                                   |
 | ----------------------- | ---------------------------- | :--------------------------------: | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge          | Awtomatika                   |      Darba (ċertifikat+hosts)      | 9 aġenti tal-IDE                    | Attiva b'mod awtomatiku                                                                                                                |
-| 2. Hosts Personalizzati | Input għal kull host         |          Iva (fajl hosts)          | Kwalunkwe app li tuża dak il-host   | Persistit fid-DB                                                                                                                       |
-| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`     |                 Le                 | Apps li jirrispettaw l-env          | Port 8080, mingħajr deċifrar TLS b'mod awtomatiku                                                                                      |
-| 4. Għas-sistema kollha  | Aqleb + ikkonferma           |                Iva                 | L-apps kollha fuq il-magna          | Jiġi diżattivat awtomatikament fi żmien 30 minuta                                                                                      |
-| 5. Deċifrar TPROXY      | Aqleb (Linux + addon nattiv) | Iva (root + installazzjoni tas-CA) | Kwalunkwe host fuq il-port fil-mira | Jiddeċifra hosts arbitrarji; diżattivat b'mod awtomatiku — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f'`/docs`) |
+| 1. AgentBridge          | Awtomatika                   |      Darba (ċertifikat+hosts)      | 9 aġenti tal-IDE                    | Attiva b’mod awtomatiku                                                                                                                |
+| 2. Hosts Personalizzati | Input għal kull host         |          Iva (fajl hosts)          | Kwalunkwe app li tuża dak il-host   | Issejvjata fid-DB                                                                                                                      |
+| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`     |                 Le                 | Apps li jirrispettaw l-env          | Port 8080; HTTPS jgħaddi minn mina CONNECT (metadata biss, qatt ma jiġi deċifrat)                                                      |
+| 4. Għas-sistema kollha  | Aqleb + ikkonferma           |                Iva                 | L-apps kollha fuq il-magna          | Jiġi diżattivat awtomatikament wara 30 minuta                                                                                          |
+| 5. Deċifrar TPROXY      | Aqleb (Linux + addon nattiv) | Iva (root + installazzjoni tas-CA) | Kwalunkwe host fuq il-port fil-mira | Jiddeċifra hosts arbitrarji; diżattivat b’mod awtomatiku — ara `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f’`/docs`) |
 
 ---
 
@@ -341,29 +341,29 @@ Esporta permezz ta' `GET /api/tools/traffic-inspector/sessions/{id}/export.har` 
 
 ## §6 Sigurtà
 
-Traffic Inspector juri **t-traffiku HTTPS interċettat kollu**, inklużi l-headers tal-awtorizzazzjoni u l-bodies tat-talbiet. Hemm dawn il-kontrolli fis-seħħ:
+Traffic Inspector juri **t-traffiku HTTPS interċettat kollu**, inklużi l-headers tal-awtorizzazzjoni u l-bodies tat-talbiet. Il-kontrolli li ġejjin huma implimentati:
 
-| Kontroll                              | Dettalji                                                                                                                                                                                                        |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                        | Ir-rotot kollha u l-endpoint tal-WebSocket huma aċċessibbli biss permezz tal-loopback (infurzat f'`routeGuard.ts` qabel l-awtentikazzjoni)                                                                      |
-| **Maskra tas-sigrieti**               | L-iskaner lineari `maskSecret()` jaħbi l-kredenzjali Bearer ta' RFC 6750, iċ-ċwievet bi prefiss tal-fornitur u t-tokens opaki twal qabel `TrafficBuffer.push()`                                                 |
-| **Limitu tad-daqs tal-body**          | Il-bodies > `INSPECTOR_MAX_BODY_KB` (default 1024 KB) jitqassru b'avviż `"(imqassar għall-prestazzjoni)"`                                                                                                       |
-| **Sanitizzazzjoni tal-headers**       | L-ismijiet jinbidlu għal ittri żgħar; il-headers tal-framing/hop-by-hop u tal-awtentikazzjoni tal-proxy jitneħħew; il-cookies jinħbew kompletament; il-valuri tal-kredenzjali jiġu ddelegati lil `maskSecret()` |
-| **CSP**                               | Politika stretta tas-Sigurtà tal-Kontenut fuq il-paġni ta' Traffic Inspector biex tipprevjeni XSS permezz ta' bodies tar-risposti injettati                                                                     |
-| **Ebda persistenza b'mod awtomatiku** | It-`TrafficBuffer` jinżamm fil-memorja u jintilef meta jerġa' jinbeda s-server. Is-sessjonijiet jinżammu b'mod persistenti biss meta jiġu rreġistrati espliċitament                                             |
+| Kontroll                              | Dettalji                                                                                                                                                                                                             |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                        | Ir-routes kollha u l-endpoint WebSocket huma aċċessibbli biss permezz tal-loopback (infurzat f’`routeGuard.ts` qabel l-awtentikazzjoni)                                                                              |
+| **Maskra tas-sigrieti**               | L-iskaner lineari `maskSecret()` jaħbi l-kredenzjali Bearer ta’ RFC 6750, iċ-ċwievet bi prefiss tal-fornitur u t-tokens opaki twal qabel `TrafficBuffer.push()`                                                      |
+| **Limitu tad-daqs tal-body**          | Il-bodies > `INSPECTOR_MAX_BODY_KB` (valur predefinit 1024 KB) jiġu maqtugħa b’avviż `"(maqtugħ għall-prestazzjoni)"`                                                                                                |
+| **Sanitizzazzjoni tal-headers**       | L-ismijiet jiġu kkonvertiti f’ittri żgħar; il-headers tal-framing/hop-by-hop u tal-awtentikazzjoni tal-proxy jitneħħew; il-cookies jinħbew kompletament; il-valuri tal-kredenzjali jiġu ddelegati lil `maskSecret()` |
+| **CSP**                               | Politika stretta tas-Sigurtà tal-Kontenut fuq il-paġni ta’ Traffic Inspector biex tipprevjeni XSS permezz ta’ bodies tar-rispons injettati                                                                           |
+| **Ebda persistenza b’mod predefinit** | It-`TrafficBuffer` jinżamm fil-memorja u jintilef meta jerġa’ jinbeda s-server. Is-sessjonijiet jinżammu b’mod persistenti biss meta jiġu rreġistrati espliċitament                                                  |
 
-### Regoli stretti applikati
+### Regoli Stretti applikati
 
 | Regola                            | Applikazzjoni                                                                                  |
 | --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Ir-risposti kollha ta' żball HTTP mir-rotot ta' Traffic Inspector jiġu sanitizzati             |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` hija LOCAL_ONLY + SPAWN_CAPABLE (kmandi tal-proxy tas-sistema) |
+| **#12** `sanitizeErrorMessage`    | Ir-risponsi kollha ta’ żball HTTP mir-routes ta’ Traffic Inspector jiġu sanitizzati            |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` huwa LOCAL_ONLY + SPAWN_CAPABLE (kmandi tal-proxy tas-sistema) |
 
 ### Limitazzjonijiet magħrufa
 
-- **Il-modalità tal-proxy għas-sistema kollha** taffettwa l-applikazzjonijiet kollha fuq il-magna, inklużi l-klijenti VPN u SSO. Dejjem użaha bit-tajmer tad-diżattivazzjoni awtomatika. Tużahiex fuq magni kondiviżi.
-- **HTTPS permezz ta' mina CONNECT**: Il-Modalità 3 (HTTP_PROXY) taqbad biss il-metadata tal-mina għal destinazzjonijiet HTTPS sakemm ma tkunx attivata l-interċettazzjoni TLS. Dan huwa intenzjonat — il-qbid trasparenti mingħajr ma ċ-ċertifikat ta' AgentBridge ikun fdat jikser il-verifika TLS għal dawk l-apps.
-- **Strings hardcoded f'xi komponenti**: Xi komponenti tal-UI (F7/F8) għandhom għadd żgħir ta' strings hardcoded li għadhom mhumiex koperti minn ċwievet i18n. Dawn huma ddokumentati bħala Limitazzjoni Magħrufa fir-rapport tal-lakuni tal-i18n; se jiġu migrati f'fażi sussegwenti. L-strings affettwati huma tikketti dekorattivi tal-UI li ma jeħtiġux traduzzjoni għall-użu funzjonali.
+- **Il-modalità tal-proxy għas-sistema kollha** taffettwa l-applikazzjonijiet kollha fuq il-magna, inklużi l-klijenti VPN u SSO. Dejjem użaha bit-tajmer ta’ diżattivazzjoni awtomatika. Tużahiex fuq magni kondiviżi.
+- **HTTPS f’mina CONNECT**: Il-Modalità 3 (HTTP_PROXY) taqbad biss il-metadata tal-mina għad-destinazzjonijiet HTTPS u qatt ma tiddekriptahom. Dan huwa intenzjonat — id-dekriptar ikun jeħtieġ li kull klijent jafda ċertifikat MITM, għalhekk il-listener iżomm HTTPS ikkriptat minn tarf sa tarf. Uża AgentBridge, Custom Hosts jew id-dekriptar TPROXY meta jkollok bżonn il-bodies HTTPS.
+- **Strings hardcoded f’xi komponenti**: Xi komponenti tal-UI (F7/F8) għandhom għadd żgħir ta’ strings hardcoded li għadhom mhumiex koperti minn ċwievet i18n. Dawn huma ddokumentati bħala Limitazzjoni Magħrufa fir-rapport tan-nuqqasijiet tal-i18n; se jiġu migrati f’pass sussegwenti. L-strings affettwati huma tikketti dekorattivi tal-UI li ma jeħtiġux traduzzjoni għall-użu funzjonali.
 
 ---
 
@@ -428,7 +428,7 @@ Meta l-buffer jilħaq `INSPECTOR_BUFFER_SIZE` (il-valur predefinit huwa 1000), l
 
 ## §8 Referenza tal-API
 
-Ir-rotot kollha huma `LOCAL_ONLY` (għal-loopback biss) u `SPAWN_CAPABLE` (kmandi tal-proxy tas-sistema). Ara `src/server/authz/routeGuard.ts`.
+Ir-rotot kollha huma `LOCAL_ONLY` (loopback biss) u `SPAWN_CAPABLE` (kmandi tal-proxy tas-sistema). Ara `src/server/authz/routeGuard.ts`.
 
 Mogħdija bażi: `/api/tools/traffic-inspector/`
 
@@ -437,45 +437,44 @@ Mogħdija bażi: `/api/tools/traffic-inspector/`
 | Metodu | Mogħdija                    | Deskrizzjoni                                                                                      |
 | ------ | --------------------------- | ------------------------------------------------------------------------------------------------- |
 | GET    | `/requests`                 | Elenka t-talbiet (jistgħu jiġu ffiltrati: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET    | `/requests/{id}`            | Dettalji ta' talba waħda                                                                          |
-| DELETE | `/requests`                 | Ħassar il-buffer fil-memorja                                                                      |
-| POST   | `/requests/{id}/replay`     | Eżegwixxi mill-ġdid l-istess talba permezz tar-router ta' OmniRoute                               |
-| PUT    | `/requests/{id}/annotation` | Issejvja jew aġġorna nota dwar talba                                                              |
+| GET    | `/requests/{id}`            | Dettalji ta’ talba waħda                                                                          |
+| DELETE | `/requests`                 | Battal il-buffer fil-memorja                                                                      |
+| POST   | `/requests/{id}/replay`     | Eżegwixxi mill-ġdid l-istess talba permezz tar-router OmniRoute                                   |
+| PUT    | `/requests/{id}/annotation` | Issejvja jew aġġorna nota fuq talba                                                               |
 
 ### WebSocket
 
 | Metodu | Mogħdija | Deskrizzjoni                                                                                                |
 | ------ | -------- | ----------------------------------------------------------------------------------------------------------- |
-| GET    | `/ws`    | Fluss dirett tal-WebSocket. Jibgħat `snapshot` mal-konnessjoni, imbagħad avvenimenti `new`/`update`/`clear` |
+| GET    | `/ws`    | Fluss dirett ta’ WebSocket. Jibgħat `snapshot` mal-konnessjoni, imbagħad avvenimenti `new`/`update`/`clear` |
 
 ### Esportazzjoni
 
 | Metodu | Mogħdija      | Deskrizzjoni                                    |
 | ------ | ------------- | ----------------------------------------------- |
-| GET    | `/export.har` | Esporta l-lista attwali ffiltrata bħala HAR 1.2 |
+| GET    | `/export.har` | Esporta l-lista ffiltrata attwali bħala HAR 1.2 |
 
 ### Hosts personalizzati
 
-| Metodu | Mogħdija        | Deskrizzjoni                                       |
-| ------ | --------------- | -------------------------------------------------- |
-| GET    | `/hosts`        | Elenka l-hosts personalizzati                      |
-| POST   | `/hosts`        | Żid host (jimmodifika `/etc/hosts` awtomatikament) |
-| DELETE | `/hosts/{host}` | Neħħi host                                         |
-| PATCH  | `/hosts/{host}` | Aqleb `enabled`                                    |
+| Metodu | Mogħdija        | Deskrizzjoni                                   |
+| ------ | --------------- | ---------------------------------------------- |
+| GET    | `/hosts`        | Elenka l-hosts personalizzati                  |
+| POST   | `/hosts`        | Żid host (jeditja `/etc/hosts` awtomatikament) |
+| DELETE | `/hosts/{host}` | Neħħi host                                     |
+| PATCH  | `/hosts/{host}` | Aqleb `enabled`                                |
 
-### Modalitajiet tal-qbid
+### Modi tal-qbid
 
-| Metodu | Mogħdija                       | Deskrizzjoni                                                                                                               |
-| ------ | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`               | L-istat tal-modalitajiet AgentBridge / hosts personalizzati / HTTP_PROXY / proxy tas-sistema + il-kontroll `tls-intercept` |
-| POST   | `/capture-modes/http-proxy`    | Ibda/waqqaf il-listener ta' HTTP_PROXY (`{action: "start"\|"stop"}`)                                                       |
-| POST   | `/capture-modes/system-proxy`  | Applika/irriversja l-proxy tas-sistema kollha (`{action: "apply"\|"revert"}`)                                              |
-| POST   | `/capture-modes/tls-intercept` | Aqleb id-deċifrar tal-korp HTTPS fil-modalità proxy (`{enabled: boolean}`)                                                 |
+| Metodu | Mogħdija                      | Deskrizzjoni                                                                      |
+| ------ | ----------------------------- | --------------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | Stat tal-modi AgentBridge / hosts personalizzati / HTTP_PROXY / proxy tas-sistema |
+| POST   | `/capture-modes/http-proxy`   | Ibda/waqqaf il-listener HTTP_PROXY (`{action: "start"\|"stop"}`)                  |
+| POST   | `/capture-modes/system-proxy` | Applika/reġġa’ lura l-proxy tas-sistema kollha (`{action: "apply"\|"revert"}`)    |
 
-> Id-**deċifrar TPROXY** (modalità ta' qbid 5) jitħaddem minn rotta **separata** taħt il-
+> Id-**deċifrar TPROXY** (mod ta’ qbid 5) huwa mħaddem minn rotta **separata** taħt il-
 > prefiss AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — mhux
 > taħt `/api/tools/traffic-inspector/`. Ara
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f'`/docs`).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; mhux ikkompilat f’`/docs`).
 
 ### Sessjonijiet
 
@@ -483,15 +482,15 @@ Mogħdija bażi: `/api/tools/traffic-inspector/`
 | ------ | --------------------------- | ------------------------------------------------------------------------ |
 | POST   | `/sessions`                 | Ibda r-reġistrazzjoni (`{name?: string}`)                                |
 | PATCH  | `/sessions/{id}`            | Waqqaf jew semmi mill-ġdid (`{action: "stop"\|"rename", name?: string}`) |
-| GET    | `/sessions`                 | Elenka s-sessjonijiet kollha ssejvjati                                   |
-| GET    | `/sessions/{id}`            | Stampa tas-sessjoni (it-talbiet kollha)                                  |
+| GET    | `/sessions`                 | Elenka s-sessjonijiet issejvjati kollha                                  |
+| GET    | `/sessions/{id}`            | Snapshot tas-sessjoni (it-talbiet kollha)                                |
 | DELETE | `/sessions/{id}`            | Ħassar is-sessjoni                                                       |
 | GET    | `/sessions/{id}/export.har` | Esporta s-sessjoni bħala HAR 1.2                                         |
 
-### Inġestjoni interna (alternattiva D4)
+### Inġestjoni interna (riżerva D4)
 
-| Metodu | Mogħdija           | Deskrizzjoni                                                                                                                  |
-| ------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/internal/ingest` | Jaċċetta talba interċettata mill-mogħdija passthrough ta' `server.cjs`; jirrikjedi l-header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Metodu | Mogħdija           | Deskrizzjoni                                                                                                                |
+| ------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/internal/ingest` | Jaċċetta talba interċettata mill-mogħdija passthrough ta’ `server.cjs`; jeħtieġ il-header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
-Skemi OpenAPI sħaħ: `docs/openapi.yaml` → tag `Traffic Inspector`.
+Skemi OpenAPI sħaħ: `docs/openapi.yaml` → tikketta `Traffic Inspector`.

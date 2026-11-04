@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
 import Modal from "./Modal";
 import Button from "./Button";
 import Input from "./Input";
+import Textarea from "./Textarea";
 import { requestTraeAuthorizeState } from "@/shared/utils/traeAuthorizeState";
 
 const TRAE_CLIENT_ID = "en1oxy7wnw8j9n";
@@ -80,6 +82,7 @@ export default function TraeAuthModal({
 }: TraeAuthModalProps) {
   const t = useTranslations("traeAuthModal");
   const [accessToken, setAccessToken] = useState("");
+  const accessTokenId = useId();
   const [webId, setWebId] = useState("");
   const [bizUserId, setBizUserId] = useState("");
   const [userUniqueId, setUserUniqueId] = useState("");
@@ -217,13 +220,13 @@ export default function TraeAuthModal({
     <Modal isOpen={isOpen} title={t("title")} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {/* Primary path: browser-based OAuth via trae.ai/authorization */}
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800">
-          <p className="text-sm text-emerald-900 dark:text-emerald-200 mb-2">
+        <div className="bg-success/10 p-4 rounded-lg border border-success/30">
+          <p className="text-sm text-success mb-2">
             {t.rich("authorizeDescription", {
               code: (chunks) => <span className="font-mono">{chunks}</span>,
             })}
           </p>
-          <p className="text-xs text-emerald-800 dark:text-emerald-300 mb-3">
+          <p className="text-xs text-success mb-3">
             {t.rich("authorizeImportant", {
               strong: (chunks) => <strong>{chunks}</strong>,
               code: (chunks) => <span className="font-mono">{chunks}</span>,
@@ -250,8 +253,8 @@ export default function TraeAuthModal({
           <span className="flex-1 border-t border-border" />
         </div>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
+        <div className="bg-info/10 p-3 rounded-lg border border-info/30">
+          <p className="text-sm text-info">
             {t.rich("manualInstructions", {
               code: (chunks) => <span className="font-mono">{chunks}</span>,
               tokenPlaceholder: "<token>",
@@ -259,70 +262,69 @@ export default function TraeAuthModal({
           </p>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            {t("accessTokenLabel")} <span className="text-red-500">*</span>
-          </label>
-          <textarea
+        <Field
+          htmlFor={accessTokenId}
+          label={
+            <>
+              {t("accessTokenLabel")}
+              <span className="ci-field__required" aria-hidden="true">
+                *
+              </span>
+            </>
+          }
+        >
+          <Textarea
+            id={accessTokenId}
             value={accessToken}
             onChange={(e) => setAccessToken(e.target.value)}
             placeholder="eyJhbGciOiJSUzI1NiIs..."
             rows={3}
-            className="w-full px-3 py-2 text-sm font-mono border border-border rounded-lg bg-background focus:outline-none focus:border-primary resize-none"
+            className="resize-none font-mono text-sm"
           />
-        </div>
+        </Field>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {t("webId")} <span className="text-text-muted text-xs">{t("optional")}</span>
-            </label>
-            <Input
-              value={webId}
-              onChange={(e) => setWebId(e.target.value)}
-              placeholder="76428..."
-              className="font-mono text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {t("bizUserId")} <span className="text-text-muted text-xs">{t("optional")}</span>
-            </label>
-            <Input
-              value={bizUserId}
-              onChange={(e) => setBizUserId(e.target.value)}
-              placeholder="76428..."
-              className="font-mono text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {t("userUniqueId")} <span className="text-text-muted text-xs">{t("optional")}</span>
-            </label>
-            <Input
-              value={userUniqueId}
-              onChange={(e) => setUserUniqueId(e.target.value)}
-              placeholder="76428..."
-              className="font-mono text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("scope")}</label>
-            <Input value={scope} onChange={(e) => setScope(e.target.value)} className="text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("tenant")}</label>
-            <Input value={tenant} onChange={(e) => setTenant(e.target.value)} className="text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">{t("region")}</label>
-            <Input value={region} onChange={(e) => setRegion(e.target.value)} className="text-sm" />
-          </div>
+          <Input
+            label={
+              <>
+                {t("webId")} <span className="text-text-muted text-xs">{t("optional")}</span>
+              </>
+            }
+            value={webId}
+            onChange={(e) => setWebId(e.target.value)}
+            placeholder="76428..."
+            inputClassName="font-mono text-sm"
+          />
+          <Input
+            label={
+              <>
+                {t("bizUserId")} <span className="text-text-muted text-xs">{t("optional")}</span>
+              </>
+            }
+            value={bizUserId}
+            onChange={(e) => setBizUserId(e.target.value)}
+            placeholder="76428..."
+            inputClassName="font-mono text-sm"
+          />
+          <Input
+            label={
+              <>
+                {t("userUniqueId")} <span className="text-text-muted text-xs">{t("optional")}</span>
+              </>
+            }
+            value={userUniqueId}
+            onChange={(e) => setUserUniqueId(e.target.value)}
+            placeholder="76428..."
+            inputClassName="font-mono text-sm"
+          />
+          <Input label={t("scope")} value={scope} onChange={(e) => setScope(e.target.value)} />
+          <Input label={t("tenant")} value={tenant} onChange={(e) => setTenant(e.target.value)} />
+          <Input label={t("region")} value={region} onChange={(e) => setRegion(e.target.value)} />
         </div>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="bg-error/10 p-3 rounded-lg border border-error/30">
+            <p className="text-sm text-error">{error}</p>
           </div>
         )}
 

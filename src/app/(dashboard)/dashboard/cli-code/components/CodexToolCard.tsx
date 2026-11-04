@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
 
@@ -9,6 +12,9 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import { normalizeCodexBaseUrl } from "@/shared/utils/codexBaseUrl";
 import { isApplyDisabled, isResetDisabled } from "./codexButtonState";
 import { CODEX_DEFAULT_MODELS } from "./codexToolOptions";
+import { cn } from "@/shared/utils/cn";
+import Checkbox from "@/shared/components/Checkbox";
+import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 export default function CodexToolCard({
   tool,
@@ -33,6 +39,8 @@ export default function CodexToolCard({
   const [modelMappings, setModelMappings] = useState<Record<string, string>>({});
   const [reasoningEffort, setReasoningEffort] = useState("xhigh");
   const [wireApi, setWireApi] = useState("responses");
+  // Opt-in: the catalog file is ~60 KB per model (MBs with a large catalog) in ~/.codex.
+  const [writeModelCatalog, setWriteModelCatalog] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTarget, setModalTarget] = useState<string | null>(null); // null = default model, string = mapping key
   const [modelAliases, setModelAliases] = useState({});
@@ -190,11 +198,16 @@ export default function CodexToolCard({
           reasoningEffort,
           wireApi,
           modelMappings,
+          modelCatalog: writeModelCatalog,
         }),
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage({ type: "success", text: t("settingsApplied") });
+        setMessage(
+          data.catalogWarning
+            ? { type: "warning", text: `${t("settingsApplied")} ${t("codexCatalogWarning")}` }
+            : { type: "success", text: t("settingsApplied") }
+        );
         checkCodexStatus();
       } else {
         setMessage({
@@ -402,8 +415,11 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
   return (
     <Card padding="sm" className="overflow-hidden">
-      <div className="flex items-center justify-between hover:cursor-pointer" onClick={onToggle}>
-        <div className="flex items-center gap-3">
+      <div
+        className={cn("flex items-center justify-between hover:cursor-pointer", CARD_TOGGLE_CLASS)}
+        {...cardToggleProps(isExpanded, onToggle)}
+      >
+        <div className="flex min-w-0 items-center gap-3">
           <div className="size-8 flex items-center justify-center shrink-0">
             <ProviderIcon providerId="codex" size={32} type="color" />
           </div>
@@ -419,28 +435,28 @@ openai_base_url = "${getEffectiveBaseUrl()}"
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.codex")}</p>
           </div>
         </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="expand_more"
+          size={20}
+          className={cn("text-text-muted transition-transform", isExpanded && "rotate-180")}
+        />
       </div>
 
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
           {checkingCodex && (
             <div className="flex items-center gap-2 text-text-muted">
-              <span className="material-symbols-outlined animate-spin">progress_activity</span>
+              <Icon name="progress_activity" className="animate-spin" />
               <span>{t("checkingCli", { tool: "Codex" })}</span>
             </div>
           )}
 
           {!checkingCodex && codexStatus && !cliReady && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <span className="material-symbols-outlined text-yellow-500">warning</span>
+              <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+                <Icon name="warning" className="text-warning" />
                 <div className="flex-1">
-                  <p className="font-medium text-yellow-600 dark:text-yellow-400">
+                  <p className="font-medium text-warning">
                     {codexStatus.installed
                       ? t("cliNotRunnable", { tool: "Codex" })
                       : t("cliNotInstalled", { tool: "Codex" })}
@@ -459,9 +475,11 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   size="sm"
                   onClick={() => setShowInstallGuide(!showInstallGuide)}
                 >
-                  <span className="material-symbols-outlined text-[18px] mr-1">
-                    {showInstallGuide ? "expand_less" : "help"}
-                  </span>
+                  <Icon
+                    name={showInstallGuide ? "expand_less" : "help"}
+                    size={18}
+                    className="mr-1"
+                  />
                   {showInstallGuide ? t("hide") : t("howToInstall")}
                 </Button>
               </div>
@@ -471,26 +489,21 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-text-muted mb-1">{t("platforms")}</p>
-                      <code className="block px-3 py-2 bg-black/5 dark:bg-white/5 rounded font-mono text-xs">
+                      <code className="block px-3 py-2 bg-bg-subtle rounded font-mono text-xs">
                         npm install -g @openai/codex
                       </code>
                     </div>
                     <p className="text-text-muted">
                       {t("afterInstallationRun")}{" "}
-                      <code className="px-1 bg-black/5 dark:bg-white/5 rounded">codex</code>{" "}
-                      {t("toVerify")}
+                      <code className="px-1 bg-bg-subtle rounded">codex</code> {t("toVerify")}
                     </p>
                     <div className="pt-2 border-t border-border">
                       <p className="text-text-muted text-xs">
                         {t("codexAuthNotePrefix")}{" "}
-                        <code className="px-1 bg-black/5 dark:bg-white/5 rounded">
-                          ~/.codex/auth.json
-                        </code>{" "}
+                        <code className="px-1 bg-bg-subtle rounded">~/.codex/auth.json</code>{" "}
                         {t("codexAuthNoteMiddle")}{" "}
-                        <code className="px-1 bg-black/5 dark:bg-white/5 rounded">
-                          OPENAI_API_KEY
-                        </code>
-                        . {t("codexAuthNoteSuffix")}
+                        <code className="px-1 bg-bg-subtle rounded">OPENAI_API_KEY</code>.{" "}
+                        {t("codexAuthNoteSuffix")}
                       </p>
                     </div>
                   </div>
@@ -512,9 +525,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                         <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                           {t("current")}
                         </span>
-                        <span className="material-symbols-outlined text-text-muted text-[14px]">
-                          arrow_forward
-                        </span>
+                        <Icon name="arrow_forward" size={14} className="text-text-muted" />
                         <span className="flex-1 px-2 py-1.5 text-xs text-text-muted truncate">
                           {currentBaseUrl}
                         </span>
@@ -527,24 +538,26 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("baseUrl")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <input
-                    type="text"
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Input
                     value={getDisplayUrl()}
                     onChange={(e) => setCustomBaseUrl(e.target.value)}
                     placeholder={t("baseUrlPlaceholder")}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("baseUrl")}
+                    className="min-w-0 w-auto flex-1"
+                    inputClassName="text-xs"
                   />
                   {customBaseUrl && getDisplayUrl() !== normalizeCodexBaseUrl(baseUrl, wireApi) && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => setCustomBaseUrl("")}
-                      className="p-1 text-text-muted hover:text-primary rounded transition-colors"
                       title={t("resetToDefault")}
+                      aria-label={t("resetToDefault")}
+                      className="text-text-muted hover:text-primary"
                     >
-                      <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-                    </button>
+                      <Icon name="restart_alt" size={14} />
+                    </Button>
                   )}
                 </div>
 
@@ -553,21 +566,21 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("apiKey")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
                   {apiKeys.length > 0 ? (
-                    <select
+                    <Select
                       value={effectiveApiKey}
                       onChange={(e) => setSelectedApiKey(e.target.value)}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={t("apiKey")}
+                      className="min-w-0 w-auto flex-1"
+                      selectClassName="text-xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
                           {key.key}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   ) : (
                     <span className="flex-1 text-xs text-text-muted px-2 py-1.5">
                       {cloudEnabled ? t("noApiKeysCreateOne") : t("defaultOmnirouteKey")}
@@ -580,34 +593,38 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("model")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <button
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => {
                       setModalTarget(null);
                       setModalOpen(true);
                     }}
                     disabled={!activeProviders?.length}
-                    className={`px-2 py-1.5 rounded border text-xs transition-colors shrink-0 whitespace-nowrap ${activeProviders?.length ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}
+                    className="shrink-0 whitespace-nowrap text-xs"
                   >
                     {t("selectModel")}
-                  </button>
-                  <input
-                    type="text"
+                  </Button>
+                  <Input
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
                     placeholder="gpt-5.6-sol"
-                    className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("model")}
+                    className="min-w-0 w-auto flex-1"
+                    inputClassName="text-xs"
                   />
                   {selectedModel && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => setSelectedModel("")}
-                      className="p-1 text-text-muted hover:text-red-500 rounded transition-colors"
                       title={t("clear")}
+                      aria-label={t("clear")}
+                      className="text-text-muted hover:text-error"
                     >
-                      <span className="material-symbols-outlined text-[14px]">close</span>
-                    </button>
+                      <Icon name="close" size={14} />
+                    </Button>
                   )}
                 </div>
 
@@ -616,13 +633,13 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("reasoningEffort")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <select
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Select
                     value={reasoningEffort}
                     onChange={(e) => setReasoningEffort(e.target.value)}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("reasoningEffort")}
+                    className="min-w-0 w-auto flex-1"
+                    selectClassName="text-xs"
                   >
                     <option value="none">{t("effortNone")}</option>
                     <option value="low">{t("effortLow")}</option>
@@ -631,7 +648,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     <option value="xhigh">{t("effortExtraHigh")}</option>
                     <option value="max">{t("effortMax")}</option>
                     <option value="ultra">{t("effortUltra")}</option>
-                  </select>
+                  </Select>
                 </div>
 
                 {/* Wire API */}
@@ -639,18 +656,26 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("wireApi")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <select
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Select
                     value={wireApi}
                     onChange={(e) => setWireApi(e.target.value)}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("wireApi")}
+                    className="min-w-0 w-auto flex-1"
+                    selectClassName="text-xs"
                   >
                     <option value="chat">{t("wireApiChatCompletions")}</option>
                     <option value="responses">{t("wireApiResponses")}</option>
-                  </select>
+                  </Select>
                 </div>
+
+                <Checkbox
+                  checked={writeModelCatalog}
+                  onChange={(e) => setWriteModelCatalog(e.target.checked)}
+                  title={t("codexModelCatalogHint")}
+                  className="pl-[8.5rem]"
+                  label={<span className="text-xs text-text-main">{t("codexModelCatalog")}</span>}
+                />
 
                 <div className="h-px bg-border/50 my-2"></div>
 
@@ -662,40 +687,49 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     <span className="w-32 shrink-0 text-[11px] font-mono text-text-main text-right truncate opacity-70 group-hover:opacity-100 transition-opacity">
                       {defaultModel}
                     </span>
-                    <span className="material-symbols-outlined text-border group-hover:text-primary transition-colors text-[14px]">
-                      arrow_forward
-                    </span>
-                    <button
+                    <Icon
+                      name="arrow_forward"
+                      size={14}
+                      className="text-border group-hover:text-primary transition-colors"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => {
                         setModalTarget(defaultModel);
                         setModalOpen(true);
                       }}
                       disabled={!activeProviders?.length}
-                      className={`px-2 py-1.5 rounded border text-xs transition-colors shrink-0 whitespace-nowrap ${activeProviders?.length ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}
+                      className="shrink-0 whitespace-nowrap text-xs"
                     >
                       {t("selectModel")}
-                    </button>
-                    <input
+                    </Button>
+                    <Input
                       type="text"
                       value={modelMappings[defaultModel] || ""}
                       onChange={(e) =>
                         setModelMappings({ ...modelMappings, [defaultModel]: e.target.value })
                       }
                       placeholder={t("routeModelPlaceholder", { model: defaultModel })}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={defaultModel}
+                      className="min-w-0 w-auto flex-1"
+                      inputClassName="text-xs"
                     />
                     {modelMappings[defaultModel] && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => {
                           const next = { ...modelMappings };
                           delete next[defaultModel];
                           setModelMappings(next);
                         }}
-                        className="p-1 text-text-muted hover:text-red-500 rounded transition-colors"
                         title={t("clear")}
+                        aria-label={t("clear")}
+                        className="text-text-muted hover:text-error"
                       >
-                        <span className="material-symbols-outlined text-[14px]">close</span>
-                      </button>
+                        <Icon name="close" size={14} />
+                      </Button>
                     )}
                   </div>
                 ))}
@@ -703,11 +737,18 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
               {message && (
                 <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : message.type === "warning" ? "bg-warning/10 text-warning" : "bg-error/10 text-error"}`}
                 >
-                  <span className="material-symbols-outlined text-[14px]">
-                    {message.type === "success" ? "check_circle" : "error"}
-                  </span>
+                  <Icon
+                    name={
+                      message.type === "success"
+                        ? "check_circle"
+                        : message.type === "warning"
+                          ? "warning"
+                          : "error"
+                    }
+                    size={14}
+                  />
                   <span>{message.text}</span>
                 </div>
               )}
@@ -725,7 +766,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   })}
                   loading={applying}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+                  <Icon name="save" size={14} className="mr-1" />
                   {t("apply")}
                 </Button>
                 <Button
@@ -735,11 +776,11 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   disabled={isResetDisabled({ restoring })}
                   loading={restoring}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">restore</span>
+                  <Icon name="restore" size={14} className="mr-1" />
                   {t("reset")}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                  <span className="material-symbols-outlined text-[14px] mr-1">content_copy</span>
+                  <Icon name="content_copy" size={14} className="mr-1" />
                   {t("manualConfig")}
                 </Button>
                 <div className="flex-1" />
@@ -751,9 +792,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     if (!showProfiles) fetchProfiles();
                   }}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">
-                    manage_accounts
-                  </span>
+                  <Icon name="manage_accounts" size={14} className="mr-1" />
                   {t("profiles")}
                 </Button>
                 <Button
@@ -764,7 +803,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     if (!showBackups) fetchBackups();
                   }}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">history</span>
+                  <Icon name="history" size={14} className="mr-1" />
                   {t("backups")}
                   {backups.length > 0 && ` (${backups.length})`}
                 </Button>
@@ -774,7 +813,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
               {showProfiles && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
                   <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">manage_accounts</span>
+                    <Icon name="manage_accounts" size={14} />
                     {t("savedProfiles")}
                   </h4>
                   {profiles.length === 0 ? (
@@ -784,11 +823,9 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       {profiles.map((p) => (
                         <div
                           key={p.id}
-                          className="flex items-center gap-2 px-2 py-1.5 bg-black/5 dark:bg-white/5 rounded text-xs"
+                          className="flex items-center gap-2 px-2 py-1.5 bg-bg-subtle rounded text-xs"
                         >
-                          <span className="material-symbols-outlined text-[14px] text-text-muted">
-                            person
-                          </span>
+                          <Icon name="person" size={14} className="text-text-muted" />
                           <span className="font-medium flex-1 truncate">{p.name}</span>
                           <span
                             className="text-text-muted truncate max-w-[140px]"
@@ -796,31 +833,38 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                           >
                             {p.authLabel}
                           </span>
-                          <button
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleActivateProfile(p.id)}
                             disabled={activatingProfile === p.id}
-                            className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            className="h-6 px-2 text-[10px]"
                           >
                             {activatingProfile === p.id ? "..." : t("activate")}
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => handleDeleteProfile(p.id)}
-                            className="p-0.5 text-text-muted hover:text-red-500 transition-colors"
                             title={t("deleteProfile")}
+                            aria-label={t("deleteProfile")}
+                            className="text-text-muted hover:text-error"
                           >
-                            <span className="material-symbols-outlined text-[14px]">delete</span>
-                          </button>
+                            <Icon name="delete" size={14} />
+                          </Button>
                         </div>
                       ))}
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    <input
+                    <Input
                       type="text"
                       value={newProfileName}
                       onChange={(e) => setNewProfileName(e.target.value)}
                       placeholder={t("profileNamePlaceholder")}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={t("profileNamePlaceholder")}
+                      className="min-w-0 w-auto flex-1"
+                      inputClassName="text-xs"
                       onKeyDown={(e) => e.key === "Enter" && handleSaveProfile()}
                     />
                     <Button
@@ -830,7 +874,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       disabled={!newProfileName.trim()}
                       loading={savingProfile}
                     >
-                      <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+                      <Icon name="save" size={14} className="mr-1" />
                       {t("saveCurrent")}
                     </Button>
                   </div>
@@ -841,7 +885,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
               {showBackups && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
                   <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">history</span>
+                    <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>
                   {backups.length === 0 ? (
@@ -851,24 +895,24 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       {backups.map((b) => (
                         <div
                           key={b.id}
-                          className="flex items-center gap-2 px-2 py-1.5 bg-black/5 dark:bg-white/5 rounded text-xs"
+                          className="flex items-center gap-2 px-2 py-1.5 bg-bg-subtle rounded text-xs"
                         >
-                          <span className="material-symbols-outlined text-[14px] text-text-muted">
-                            description
-                          </span>
+                          <Icon name="description" size={14} className="text-text-muted" />
                           <span className="flex-1 truncate font-mono" title={b.id}>
                             {b.id}
                           </span>
                           <span className="text-text-muted whitespace-nowrap">
                             {new Date(b.createdAt).toLocaleString()}
                           </span>
-                          <button
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleRestoreBackup(b.id)}
                             disabled={restoringBackup === b.id}
-                            className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            className="h-6 px-2 text-[10px]"
                           >
                             {restoringBackup === b.id ? "..." : t("restore")}
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>

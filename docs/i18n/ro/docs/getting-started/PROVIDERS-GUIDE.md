@@ -10,50 +10,49 @@
 
 ## Ce este un furnizor?
 
-Gândiți-vă la un furnizor ca la un **operator de telefonie**. Așa cum aveți nevoie de un operator de telefonie pentru a efectua apeluri, aveți nevoie de un furnizor de inteligență artificială pentru a utiliza modele AI. OmniRoute este ca un telefon care funcționează cu **toți operatorii** — puteți comuta automat între aceștia.
+Gândiți-vă la un furnizor ca la un **operator de telefonie**. La fel cum aveți nevoie de un operator de telefonie pentru a efectua apeluri, aveți nevoie de un furnizor AI pentru a utiliza modele AI. OmniRoute este ca un telefon care funcționează cu **toți operatorii** — puteți comuta automat între aceștia.
 
 ### Tipuri de furnizori
 
-| Tip            | Ce reprezintă                        | Exemple                           | Cost                          |
-| -------------- | ------------------------------------ | --------------------------------- | ----------------------------- |
-| **Gratuit**    | Nu este necesară nicio plată         | Kiro, OpenCode Free, Pollinations | $0                            |
-| **Cheie API**  | Aveți nevoie de o cheie API          | OpenAI, Anthropic, Google         | Plată în funcție de utilizare |
-| **OAuth**      | Autentificare folosind contul dvs.   | Claude Code, GitHub Copilot       | Abonament                     |
-| **Cookie web** | Utilizează sesiunea dvs. din browser | ChatGPT Web (Codex), Gemini Web   | $0 (utilizează contul dvs.)   |
+| Tip            | Ce reprezintă                         | Exemple                         | Cost                                 |
+| -------------- | ------------------------------------- | ------------------------------- | ------------------------------------ |
+| **Gratuit**    | Nu este necesară nicio plată          | Kiro, Pollinations              | $0                                   |
+| **Cheie API**  | Aveți nevoie de o cheie API           | OpenAI, Anthropic, Google       | Plată în funcție de utilizare        |
+| **OAuth**      | Autentificare cu contul dumneavoastră | Claude Code, GitHub Copilot     | Abonament                            |
+| **Cookie web** | Utilizează sesiunea din browser       | ChatGPT Web (Codex), Gemini Web | $0 (utilizează contul dumneavoastră) |
 
-### Furnizori bazați pe cookie-uri web
+### Furnizori cu cookie-uri web
 
 Consultați **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** pentru instrucțiuni generale de configurare, limitări, depanare și îndrumări de autentificare specifice fiecărui furnizor.
 ---
 
 ## Pornire rapidă: conectați primul furnizor
 
-### Configurare opțională la prima rulare pentru furnizorii gratuiți
+### Configurare opțională la prima pornire a furnizorilor gratuiți
 
-Expertul pentru prima rulare oferă un card explicit **Configurați furnizorii gratuiți**. Acesta generează lista curentă
-de furnizori eligibili din registrul OmniRoute al furnizorilor care nu necesită autentificare, apoi vă permite să examinați și să deselectați fiecare
+Expertul de la prima pornire oferă un card explicit **Configurați furnizorii gratuiți**. Acesta obține lista curentă
+de furnizori eligibili din registrul OmniRoute de furnizori fără autentificare, apoi vă permite să verificați și să deselectați fiecare
 furnizor înainte de confirmare. OmniRoute afișează avertismentul furnizorului și un link către site-ul acestuia,
-astfel încât să puteți consulta mai întâi termenii, politica de confidențialitate, disponibilitatea și limitele de utilizare ale terțului.
+astfel încât să puteți consulta mai întâi condițiile terței părți, politica de confidențialitate, disponibilitatea și limitele de utilizare.
 
-Această acțiune este opțională: finalizarea expertului nu creează niciodată în mod automat conexiuni la furnizori gratuiți.
-Sunt creați numai furnizorii care încă lipsesc, conexiunile existente personalizate
-rămân nemodificate, iar furnizorii creați, deja configurați și eșuați sunt raportați individual. Puteți
-reîncerca în siguranță doar conexiunile eșuate după un rezultat parțial.
+Această acțiune este opțională: finalizarea expertului nu creează niciodată în mod implicit conexiuni la furnizorii gratuiți.
+Sunt creați doar furnizorii care încă lipsesc, conexiunile existente personalizate rămân
+nemodificate, iar furnizorii creați, deja configurați și cei pentru care configurarea a eșuat sunt raportați individual. După un rezultat parțial, puteți
+reîncerca în siguranță doar configurările eșuate.
 
 ### Opțiunea A: furnizor gratuit (fără card de credit)
 
 1. Deschideți panoul de control la `http://localhost:20128`
 2. Accesați **Furnizori** → **Adăugați un furnizor**
 3. Selectați unul dintre acești furnizori gratuiți:
-   - **Kiro AI** — Modele Claude gratuite (nu este necesară autentificarea)
-   - **OpenCode Free** — Modele GPT gratuite (nu este necesară autentificarea)
-   - **Pollinations** — GPT-5, Claude și Gemini gratuite (nu este necesară nicio cheie)
-   - **LongCat** — 10 milioane de tokenuri gratuite (acordare unică, necesită cont + KYC)
-   - **Cloudflare AI** — Peste 50 de modele, 10.000 de neuroni/zi
-   - **MLX Gemma 26B** — Model local pentru Apple Silicon (~38,5 tokenuri/s, ~15,9 GB RAM)
-   - **MLX Qwen 3.8 27B** — Model local pentru Apple Silicon (~9,1 tokenuri/s, ~13,1 GB RAM)
-4. Faceți clic pe **Conectare**
-5. Gata! Acum aveți acces gratuit la inteligență artificială.
+   - **Kiro AI** — Modele Claude gratuite (nu necesită autentificare)
+   - **Pollinations** — GPT-5, Claude și Gemini gratuite (nu necesită cheie)
+   - **LongCat** — 10M de tokenuri gratuite (ofertă unică, necesită cont + KYC)
+   - **Cloudflare AI** — Peste 50 de modele, 10K neuroni/zi
+   - **MLX Gemma 26B** — Model local pentru Apple Silicon (~38.5 tok/s, ~15.9GB RAM)
+   - **MLX Qwen 3.8 27B** — Model local pentru Apple Silicon (~9.1 tok/s, ~13.1GB RAM)
+4. Faceți clic pe **Conectați**
+5. Gata! Acum aveți acces gratuit la AI.
 
 ### Opțiunea B: furnizor cu cheie API (contra cost)
 
@@ -67,7 +66,7 @@ reîncerca în siguranță doar conexiunile eșuate după un rezultat parțial.
 3. Accesați **Furnizori** → **Adăugați un furnizor**
 4. Selectați furnizorul
 5. Inserați cheia API
-6. Faceți clic pe **Conectare**
+6. Faceți clic pe **Conectați**
 7. Gata! Acum aveți acces la modelele furnizorului respectiv.
 
 ### Opțiunea C: furnizor OAuth (abonament)
@@ -75,17 +74,17 @@ reîncerca în siguranță doar conexiunile eșuate după un rezultat parțial.
 1. Deschideți panoul de control la `http://localhost:20128`
 2. Accesați **Furnizori** → **Adăugați un furnizor**
 3. Selectați furnizorul (de exemplu, Claude Code, GitHub Copilot)
-4. Faceți clic pe **Conectare cu OAuth**
-5. Autentificați-vă folosind contul dvs.
+4. Faceți clic pe **Conectați-vă cu OAuth**
+5. Autentificați-vă cu contul dvs.
 6. Gata! Acum aveți acces la modelele incluse în abonamentul dvs.
 
 ### Opțiunea D: modele MLX locale (Apple Silicon)
 
-Pentru computerele Mac cu Apple Silicon și memorie unificată, OmniRoute permite conectarea la modele MLX locale care rulează prin `mlx-lm.server` ca furnizori locali obișnuiți, compatibili cu OpenAI.
+Pentru computerele Mac cu Apple Silicon și memorie unificată, OmniRoute acceptă conectarea la modele MLX locale care rulează prin `mlx-lm.server`, ca furnizori locali obișnuiți compatibili cu OpenAI.
 
 #### Cerințe preliminare
 
-- **Mac cu Apple Silicon** (M1/M2/M3/M4), fiind recomandată o memorie unificată de cel puțin 24 GB
+- **Mac cu Apple Silicon** (M1/M2/M3/M4), cu minimum 24GB de memorie unificată recomandată
 - Managerul de pachete **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -111,10 +110,10 @@ Pentru computerele Mac cu Apple Silicon și memorie unificată, OmniRoute permit
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Conectați-vă din panoul de control OmniRoute**:
+3. **Conectați-vă în panoul de control OmniRoute**:
    - Accesați **Furnizori** → **Adăugați un furnizor**
    - Selectați **MLX Gemma 26B** sau **MLX Qwen 3.8 27B**
-   - Faceți clic pe **Conectare** (nu este necesară nicio cheie API)
+   - Faceți clic pe **Conectați** (nu este necesară nicio cheie API)
 
 4. **Utilizați cu OpenCode**:
    ```bash
@@ -129,22 +128,22 @@ Pentru computerele Mac cu Apple Silicon și memorie unificată, OmniRoute permit
 
 #### Gestionarea memoriei
 
-**Important**: Cu 24 GB de memorie unificată, poate rula doar **un singur model MLX mare simultan**.
+**Important**: Cu 24GB de memorie unificată, poate rula simultan doar **un singur model MLX mare**.
 
-- Gemma 26B: ~15,9 GB de memorie maximă
-- Qwen 3.8 27B: ~13,1 GB de memorie maximă
+- Gemma 26B: ~15.9GB memorie maximă
+- Qwen 3.8 27B: ~13.1GB memorie maximă
 
 Trebuie să gestionați manual acest lucru:
 
-- Rulați doar un singur server MLX simultan sau
-- Rulați-le pe ambele pe computere separate sau
+- Rulați doar un singur server MLX odată sau
+- Rulați-le pe amândouă pe computere separate sau
 - Opriți unul înainte de a-l porni pe celălalt
 
-OmniRoute nu gestionează automat procesele serverelor MLX — acesta doar direcționează solicitările către endpointurile compatibile cu OpenAI pe care le configurați.
+OmniRoute nu gestionează automat procesele serverelor MLX — doar direcționează solicitările către endpointurile compatibile cu OpenAI pe care le configurați.
 
 #### Compatibilitate cu apelarea instrumentelor
 
-Ambele modele acceptă apelarea instrumentelor într-un format compatibil cu OpenAI. Testați cu:
+Ambele modele acceptă apelarea instrumentelor în format compatibil cu OpenAI. Testați folosind:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -152,8 +151,8 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Cât este 2+2? Folosește instrumentul de calcul."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculează", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
@@ -161,8 +160,8 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 | Problemă                        | Soluție                                                                                               |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Serverul nu pornește            | Verificați `uv run mlx_lm.server --help` și validați ID-urile modelelor                               |
-| Memorie insuficientă            | Asigurați-vă că rulează un singur model; închideți celelalte aplicații; verificați Activity Monitor   |
+| Serverul nu pornește            | Verificați `uv run mlx_lm.server --help` și confirmați identificatorii modelelor                      |
+| Memorie insuficientă            | Asigurați-vă că rulează un singur model; închideți alte aplicații; verificați Activity Monitor        |
 | Conexiune refuzată              | Verificați dacă serverul rulează pe portul corect (11435/11436)                                       |
 | Răspunsuri lente                | Prima solicitare încarcă modelul în memorie (~30-60s); solicitările ulterioare sunt rapide            |
 | Apelarea instrumentelor eșuează | Asigurați-vă că modelul acceptă instrumente; verificați jurnalele OmniRoute pentru erori de traducere |
@@ -171,19 +170,18 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 ## Cei mai buni furnizori gratuiți
 
-Acești furnizori oferă **acces gratuit**, fără card de credit:
+Acești furnizori oferă **acces gratuit** fără card de credit:
 
-| Furnizor          | Cotă gratuită                | Modele                                   | Cum vă conectați          |
-| ----------------- | ---------------------------- | ---------------------------------------- | ------------------------- |
-| **Kiro AI**       | 50 de credite/lună           | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Nu necesită autentificare |
-| **OpenCode Free** | Nelimitat                    | GPT-4o, Claude, Gemini                   | Nu necesită autentificare |
-| **Pollinations**  | Nu necesită cheie            | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Nu necesită autentificare |
-| **LongCat**       | 10M, o singură dată          | LongCat-2.0                              | Cheie API + KYC           |
-| **Cloudflare AI** | 10K neuroni/zi               | Peste 50 de modele                       | Nu necesită autentificare |
-| **NVIDIA NIM**    | ~40 RPM                      | 129 de modele                            | Necesită cheie API        |
-| **Cerebras**      | Credit de $5 la înregistrare | GLM 4.7, GPT-OSS 120B                    | Cheie API + card          |
+| Furnizor          | Cotă gratuită             | Modele                                   | Cum vă conectați          |
+| ----------------- | ------------------------- | ---------------------------------------- | ------------------------- |
+| **Kiro AI**       | 50 de credite/lună        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Nu necesită autentificare |
+| **Pollinations**  | Nu necesită cheie         | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Nu necesită autentificare |
+| **LongCat**       | 10M, o singură dată       | LongCat-2.0                              | Cheie API + KYC           |
+| **Cloudflare AI** | 10K neuroni/zi            | Peste 50 de modele                       | Nu necesită autentificare |
+| **NVIDIA NIM**    | ~40 RPM                   | 129 de modele                            | Necesită cheie API        |
+| **Cerebras**      | Credit de $5 la înscriere | GLM 4.7, GPT-OSS 120B                    | Cheie API + card          |
 
-**Sfat**: Conectați mai mulți furnizori gratuiți pentru acces **gratuit și nelimitat la AI**, cu comutare automată la un furnizor alternativ!
+**Sfat**: Conectați mai mulți furnizori gratuiți pentru **AI gratuit nelimitat**, cu comutare automată în caz de indisponibilitate!
 
 ---
 
@@ -240,20 +238,20 @@ Furnizorul este acum conectat. Îl puteți utiliza cu `model: "auto"` sau puteț
 
 OmniRoute funcționează cel mai bine cu **mai mulți furnizori**. Acest lucru vă oferă:
 
-- **Trecere automată la o alternativă** — Dacă un furnizor eșuează, OmniRoute îl încearcă pe următorul
-- **Optimizarea costurilor** — OmniRoute alege cel mai ieftin furnizor pentru fiecare cerere
-- **Optimizarea vitezei** — OmniRoute alege cel mai rapid furnizor pentru fiecare cerere
+- **Comutare automată la un furnizor de rezervă** — Dacă un furnizor eșuează, OmniRoute îl încearcă pe următorul
+- **Optimizarea costurilor** — OmniRoute alege cel mai ieftin furnizor pentru fiecare solicitare
+- **Optimizarea vitezei** — OmniRoute alege cel mai rapid furnizor pentru fiecare solicitare
 - **Optimizarea calității** — OmniRoute alege cel mai bun furnizor pentru fiecare sarcină
 
 ### Configurare recomandată
 
 Conectați cel puțin **3 furnizori** pentru cea mai bună experiență:
 
-1. **Un furnizor gratuit** (Kiro, OpenCode Free sau Pollinations) — Disponibil permanent
+1. **Un furnizor gratuit** (Kiro sau Pollinations) — Disponibil permanent
 2. **Un furnizor rapid** (Groq, Cerebras) — Pentru răspunsuri rapide
-3. **Un furnizor de calitate** (OpenAI, Anthropic, Google) — Pentru sarcini complexe
+3. **Un furnizor de înaltă calitate** (OpenAI, Anthropic, Google) — Pentru sarcini complexe
 
-Apoi utilizați `model: "auto"`, iar OmniRoute îl va alege automat pe cel mai bun pentru fiecare cerere.
+Apoi utilizați `model: "auto"`, iar OmniRoute îl va alege automat pe cel mai potrivit pentru fiecare solicitare.
 
 ---
 
@@ -335,27 +333,27 @@ Referințe de implementare: [executorul Qoder](../../open-sse/executors/qoder.ts
 
 ### „Trebuie să plătesc pentru a utiliza OmniRoute?”
 
-**Nu!** OmniRoute este gratuit și open-source. Puteți utiliza furnizori gratuiți (Kiro, OpenCode Free, Pollinations) fără să plătiți nimic. Plătiți doar dacă alegeți să utilizați furnizori cu plată.
+**Nu!** OmniRoute este gratuit și open-source. Puteți utiliza furnizori gratuiți (Kiro, Pollinations) fără să plătiți nimic. Plătiți doar dacă alegeți să utilizați furnizori contra cost.
 
 ### „Cu ce furnizor ar trebui să încep?”
 
-Începeți cu **Kiro AI** — este gratuit, nu necesită cheie API și vă oferă acces la modelele Claude. Apoi adăugați alți furnizori după cum este necesar.
+Începeți cu **Kiro AI** — este gratuit, nu necesită nicio cheie API și vă oferă acces la modelele Claude. Apoi adăugați alți furnizori, după cum este necesar.
 
 ### „Pot utiliza mai mulți furnizori simultan?”
 
-**Da!** Acesta este principalul scop al OmniRoute. Conectați mai mulți furnizori și utilizați `model: "auto"` pentru a permite OmniRoute să îl aleagă pe cel mai bun pentru fiecare solicitare.
+**Da!** Acesta este scopul principal al OmniRoute. Conectați mai mulți furnizori și utilizați `model: "auto"` pentru a permite OmniRoute să îl aleagă pe cel mai bun pentru fiecare solicitare.
 
-### „Ce se întâmplă dacă un furnizor devine indisponibil?”
+### „Ce se întâmplă dacă un furnizor nu mai este disponibil?”
 
-OmniRoute omite automat furnizorii care nu funcționează și îl încearcă pe următorul. Nu trebuie să faceți nimic.
+OmniRoute omite automat furnizorii care au eșuat și îl încearcă pe următorul. Nu trebuie să faceți nimic.
 
 ### „Cum deconectez un furnizor?”
 
 Accesați Furnizori → faceți clic pe furnizor → faceți clic pe **Deconectare**.
 
-### „Pot utiliza cheile API pe care le am deja?”
+### „Pot utiliza cheile API pe care le dețin deja?”
 
-**Da!** Dacă aveți deja chei API pentru OpenAI, Anthropic, Google etc., le puteți utiliza în OmniRoute. Trebuie doar să le lipiți atunci când conectați furnizorul.
+**Da!** Dacă aveți deja chei API pentru OpenAI, Anthropic, Google etc., le puteți utiliza în OmniRoute. Trebuie doar să le inserați atunci când conectați furnizorul.
 
 ---
 

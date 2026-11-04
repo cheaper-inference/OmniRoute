@@ -1,1 +1,0 @@
-- **fix(chat):** the two local pre-dispatch 429s, `TOKEN_LIMIT_EXCEEDED` and `GEMINI_TPM_EXHAUSTED`, now carry `X-OmniRoute-Provider` and `X-OmniRoute-Model` like every routed response, so a client can tell which provider and model was throttled; status, body and error codes are unchanged ([#16456](https://github.com/diegosouzapw/OmniRoute/pull/16456))

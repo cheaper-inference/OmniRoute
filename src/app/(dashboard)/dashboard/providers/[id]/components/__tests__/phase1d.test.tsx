@@ -17,6 +17,8 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("next-intl", () => ({
   useTranslations: () => (k: string) => k,
+  // ConnectionRow formats timestamps with the active locale since #16947.
+  useLocale: () => "en",
 }));
 
 // Minimal store stubs

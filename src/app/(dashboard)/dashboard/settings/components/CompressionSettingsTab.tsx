@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card, Button } from "@/shared/components";
+// Direct adapter imports (not the barrel): the tab's tests stub the barrel with Card/Button only.
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
+import Toggle from "@/shared/components/Toggle";
 import { useTranslations } from "next-intl";
 import CompressionTokenSaverCard, {
   type CompressionTokenSaverConfig,
@@ -361,7 +367,7 @@ export default function CompressionSettingsTab() {
     return (
       <Card className="p-6">
         <div className="flex items-center justify-between gap-4">
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-error">
             {t("compressionTitle")}: {tCommon("failedToLoad")}
           </p>
           <Button
@@ -382,23 +388,21 @@ export default function CompressionSettingsTab() {
   return (
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            compress
-          </span>
+        <div className="p-2 rounded-lg bg-info/10 text-info">
+          <Icon name="compress" size={20} />
         </div>
         <div>
           <h3 className="text-lg font-semibold">{t("compressionTitle")}</h3>
           <p className="text-sm text-text-muted">{t("compressionDesc")}</p>
         </div>
         {status === "saved" && (
-          <span className="ml-auto text-xs font-medium text-emerald-500 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[14px]">check_circle</span> {t("saved")}
+          <span className="ms-auto text-xs font-medium text-success flex items-center gap-1">
+            <Icon name="check_circle" size={14} /> {t("saved")}
           </span>
         )}
         {status === "error" && (
-          <span className="ml-auto text-xs font-medium text-red-500 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[14px]">error</span> {t("saveFailed")}
+          <span className="ms-auto text-xs font-medium text-error flex items-center gap-1">
+            <Icon name="error" size={14} /> {t("saveFailed")}
           </span>
         )}
       </div>
@@ -410,36 +414,39 @@ export default function CompressionSettingsTab() {
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-text-main">{t("compressionMode")}</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7 gap-2">
-              {MODES.map((m) => (
-                <button
-                  key={m.value}
-                  onClick={() => save({ defaultMode: m.value })}
-                  disabled={saving}
-                  className={`flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
-                    config.defaultMode === m.value
-                      ? "border-blue-500/50 bg-blue-500/5 ring-1 ring-blue-500/20"
-                      : "border-border/50 hover:border-border hover:bg-surface/30"
-                  }`}
-                >
-                  <span
-                    className={`material-symbols-outlined text-[20px] mt-0.5 ${
-                      config.defaultMode === m.value ? "text-blue-500" : "text-text-muted"
+              {MODES.map((m) => {
+                const active = config.defaultMode === m.value;
+                return (
+                  // kit-exception: a two-line mode tile (icon, title, description); the kit
+                  // Button is a single-line pill. Kit tokens + the global :focus-visible ring.
+                  <button
+                    key={m.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => save({ defaultMode: m.value })}
+                    disabled={saving}
+                    className={`flex items-start gap-3 p-3 rounded-lg border text-start transition-all disabled:opacity-60 ${
+                      active
+                        ? "border-info/50 bg-info/5 ring-1 ring-info/20"
+                        : "border-border/50 hover:border-border hover:bg-surface/30"
                     }`}
                   >
-                    {m.icon}
-                  </span>
-                  <div className="min-w-0">
-                    <p
-                      className={`text-sm font-medium ${
-                        config.defaultMode === m.value ? "text-blue-400" : ""
-                      }`}
-                    >
-                      {t(m.labelKey)}
-                    </p>
-                    <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{t(m.descKey)}</p>
-                  </div>
-                </button>
-              ))}
+                    <Icon
+                      name={m.icon}
+                      size={20}
+                      className={`mt-0.5 ${active ? "text-info" : "text-text-muted"}`}
+                    />
+                    <div className="min-w-0">
+                      <p className={`text-sm font-medium ${active ? "text-info" : ""}`}>
+                        {t(m.labelKey)}
+                      </p>
+                      <p className="text-xs text-text-muted mt-0.5 leading-relaxed">
+                        {t(m.descKey)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -448,56 +455,38 @@ export default function CompressionSettingsTab() {
           <div className="space-y-3 pt-4 border-t border-border/30">
             <h4 className="text-sm font-medium text-text-main">{t("compressionGeneral")}</h4>
 
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionAutoTrigger")}</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  max={100000}
-                  value={config.autoTriggerTokens}
-                  onChange={(e) => save({ autoTriggerTokens: parseInt(e.target.value) || 0 })}
-                  className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
-                />
-                <span className="text-xs text-text-muted">{t("tokens")}</span>
-              </div>
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">
-                {t("compressionSettingsAutoTriggerMode")}
-              </span>
-              <select
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={t("compressionAutoTrigger")}
+                hint={t("tokens")}
+                type="number"
+                min={0}
+                max={100000}
+                value={config.autoTriggerTokens}
+                onChange={(e) => save({ autoTriggerTokens: parseInt(e.target.value) || 0 })}
+              />
+              <Select
+                label={t("compressionSettingsAutoTriggerMode")}
                 value={config.autoTriggerMode ?? "lite"}
                 onChange={(e) => save({ autoTriggerMode: e.target.value as CompressionMode })}
-                className="w-36 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
               >
                 {MODES.filter((mode) => mode.value !== "off").map((mode) => (
                   <option key={mode.value} value={mode.value}>
                     {mode.value}
                   </option>
                 ))}
-              </select>
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionCacheTTL")}</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={1}
-                  max={60}
-                  value={config.cacheMinutes}
-                  onChange={(e) => save({ cacheMinutes: parseInt(e.target.value) || 5 })}
-                  className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
-                />
-                <span className="text-xs text-text-muted">{t("minutes")}</span>
-              </div>
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionPreserveSystem")}</span>
-              <select
+              </Select>
+              <Input
+                label={t("compressionCacheTTL")}
+                hint={t("minutes")}
+                type="number"
+                min={1}
+                max={60}
+                value={config.cacheMinutes}
+                onChange={(e) => save({ cacheMinutes: parseInt(e.target.value) || 5 })}
+              />
+              <Select
+                label={t("compressionPreserveSystem")}
                 value={
                   config.preserveSystemPromptMode ??
                   (config.preserveSystemPrompt === false ? "whenNoCache" : "always")
@@ -507,37 +496,24 @@ export default function CompressionSettingsTab() {
                     preserveSystemPromptMode: e.target.value as "always" | "whenNoCache" | "never",
                   })
                 }
-                className="w-36 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
                 data-testid="preserve-system-mode-select"
               >
                 <option value="always">{t("compressionPreserveSystemAlways")}</option>
                 <option value="whenNoCache">{t("compressionPreserveSystemWhenNoCache")}</option>
                 <option value="never">{t("compressionPreserveSystemNever")}</option>
-              </select>
-            </label>
+              </Select>
+            </div>
 
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">
-                {t("compressionSettingsMcpDescriptionCompression")}
-              </span>
-              <button
-                onClick={() =>
-                  save({
-                    mcpDescriptionCompressionEnabled:
-                      config.mcpDescriptionCompressionEnabled === false,
-                  })
-                }
-                className={`relative w-10 h-5 rounded-full transition-colors ${
-                  config.mcpDescriptionCompressionEnabled !== false ? "bg-green-500" : "bg-border"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                    config.mcpDescriptionCompressionEnabled !== false ? "left-5" : "left-0.5"
-                  }`}
-                />
-              </button>
-            </label>
+            <Toggle
+              label={t("compressionSettingsMcpDescriptionCompression")}
+              checked={config.mcpDescriptionCompressionEnabled !== false}
+              onChange={() =>
+                save({
+                  mcpDescriptionCompressionEnabled:
+                    config.mcpDescriptionCompressionEnabled === false,
+                })
+              }
+            />
           </div>
         )}
 
@@ -563,39 +539,38 @@ export default function CompressionSettingsTab() {
                 <div className="space-y-2">
                   <p className="text-sm text-text-muted">{t("compressionRoles")}</p>
                   <div className="flex flex-wrap gap-2">
-                    {ROLE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => toggleCavemanRole(opt.value)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                          config.cavemanConfig!.compressRoles.includes(opt.value)
-                            ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
-                            : "border-border/50 text-text-muted hover:border-border"
-                        }`}
-                      >
-                        {t(opt.labelKey)}
-                      </button>
-                    ))}
+                    {ROLE_OPTIONS.map((opt) => {
+                      const on = config.cavemanConfig!.compressRoles.includes(opt.value);
+                      return (
+                        <Button
+                          key={opt.value}
+                          size="sm"
+                          variant={on ? "secondary" : "ghost"}
+                          aria-pressed={on}
+                          onClick={() => toggleCavemanRole(opt.value)}
+                        >
+                          {t(opt.labelKey)}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <label className="flex items-center justify-between">
-                  <span className="text-sm text-text-muted">{t("compressionMinLength")}</span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100000}
-                    value={config.cavemanConfig.minMessageLength}
-                    onChange={(e) =>
-                      save({
-                        cavemanConfig: {
-                          minMessageLength: parseInt(e.target.value) || 50,
-                        },
-                      })
-                    }
-                    className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
-                  />
-                </label>
+                <Input
+                  label={t("compressionMinLength")}
+                  type="number"
+                  min={0}
+                  max={100000}
+                  value={config.cavemanConfig.minMessageLength}
+                  onChange={(e) =>
+                    save({
+                      cavemanConfig: {
+                        minMessageLength: parseInt(e.target.value) || 50,
+                      },
+                    })
+                  }
+                  className="sm:max-w-xs"
+                />
 
                 {/* Caveman intensity (level) is set in the panel
                       (/dashboard/context/settings); kept out of this tab to avoid a
@@ -605,27 +580,30 @@ export default function CompressionSettingsTab() {
                   <p className="text-sm text-text-muted">{t("compressionSkipRules")}</p>
                   <p className="text-xs text-text-muted">{t("compressionSkipRulesDesc")}</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                    {ruleMetadata.map((rule) => (
-                      <button
-                        key={rule.name}
-                        onClick={() => toggleCavemanRule(rule.name)}
-                        title={`${rule.category} · ${rule.context} · ${(rule.intensities ?? [rule.minIntensity]).join("/")}`}
-                        className={`px-2 py-1 rounded text-xs border transition-all ${
-                          config.cavemanConfig!.skipRules.includes(rule.name)
-                            ? "border-red-500/50 bg-red-500/10 text-red-400 line-through"
-                            : "border-border/50 text-text-muted hover:border-border"
-                        }`}
-                      >
-                        {rule.name.replace(/_/g, " ")}
-                      </button>
-                    ))}
+                    {ruleMetadata.map((rule) => {
+                      const skipped = config.cavemanConfig!.skipRules.includes(rule.name);
+                      return (
+                        <Button
+                          key={rule.name}
+                          size="sm"
+                          variant={skipped ? "outline" : "ghost"}
+                          aria-pressed={skipped}
+                          onClick={() => toggleCavemanRule(rule.name)}
+                          title={`${rule.category} · ${rule.context} · ${(rule.intensities ?? [rule.minIntensity]).join("/")}`}
+                          className={skipped ? "text-error line-through" : undefined}
+                        >
+                          {rule.name.replace(/_/g, " ")}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <p className="text-sm text-text-muted">{t("compressionPreservePatterns")}</p>
                   <p className="text-xs text-text-muted">{t("compressionPreservePatternsDesc")}</p>
-                  <textarea
+                  <Textarea
+                    aria-label={t("compressionPreservePatterns")}
                     value={(config.cavemanConfig.preservePatterns ?? []).join("\n")}
                     onChange={(e) => {
                       const patterns = e.target.value
@@ -639,7 +617,7 @@ export default function CompressionSettingsTab() {
                       });
                     }}
                     placeholder="https?://\S+\n```[\s\S]*?```"
-                    className="w-full min-h-[80px] px-3 py-2 text-sm rounded-lg border border-border bg-surface text-text-main font-mono resize-y"
+                    className="w-full min-h-[80px] font-mono resize-y"
                   />
                 </div>
               </>
@@ -648,81 +626,60 @@ export default function CompressionSettingsTab() {
 
         {config.enabled && config.defaultMode === "aggressive" && config.aggressive && (
           <div className="space-y-3 pt-4 border-t border-border/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-medium text-text-main">
-                  {t("compressionAggressiveConfig")}
-                </h4>
-                <p className="text-xs text-text-muted mt-0.5">
-                  {t("compressionAggressiveConfigDesc")}
-                </p>
-              </div>
+            <div>
+              <h4 className="text-sm font-medium text-text-main">
+                {t("compressionAggressiveConfig")}
+              </h4>
+              <p className="text-xs text-text-muted mt-0.5">
+                {t("compressionAggressiveConfigDesc")}
+              </p>
             </div>
 
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionSummarizerEnabled")}</span>
-              <button
-                onClick={() =>
+            <Toggle
+              label={t("compressionSummarizerEnabled")}
+              checked={config.aggressive.summarizerEnabled}
+              onChange={() =>
+                save({
+                  aggressive: {
+                    summarizerEnabled: !config.aggressive!.summarizerEnabled,
+                  },
+                })
+              }
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={t("compressionMaxTokensPerMessage")}
+                hint={t("tokens")}
+                type="number"
+                min={256}
+                max={32768}
+                value={config.aggressive.maxTokensPerMessage}
+                onChange={(e) =>
                   save({
                     aggressive: {
-                      summarizerEnabled: !config.aggressive!.summarizerEnabled,
+                      maxTokensPerMessage: parseInt(e.target.value) || 2048,
                     },
                   })
                 }
-                className={`relative w-10 h-5 rounded-full transition-colors ${
-                  config.aggressive.summarizerEnabled ? "bg-green-500" : "bg-border"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                    config.aggressive.summarizerEnabled ? "left-5" : "left-0.5"
-                  }`}
-                />
-              </button>
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionMaxTokensPerMessage")}</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={256}
-                  max={32768}
-                  value={config.aggressive.maxTokensPerMessage}
-                  onChange={(e) =>
-                    save({
-                      aggressive: {
-                        maxTokensPerMessage: parseInt(e.target.value) || 2048,
-                      },
-                    })
-                  }
-                  className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
-                />
-                <span className="text-xs text-text-muted">{t("tokens")}</span>
-              </div>
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionMinSavings")}</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={config.aggressive.minSavingsThreshold}
-                  onChange={(e) =>
-                    save({
-                      aggressive: {
-                        minSavingsThreshold: parseFloat(e.target.value) || 0.05,
-                      },
-                    })
-                  }
-                  className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
-                />
-                <span className="text-xs text-text-muted">%</span>
-              </div>
-            </label>
+              />
+              <Input
+                label={t("compressionMinSavings")}
+                hint="%"
+                type="number"
+                min={0}
+                max={1}
+                step={0.01}
+                value={config.aggressive.minSavingsThreshold}
+                onChange={(e) =>
+                  save({
+                    aggressive: {
+                      minSavingsThreshold: parseFloat(e.target.value) || 0.05,
+                    },
+                  })
+                }
+              />
+            </div>
 
             <div className="space-y-2 pt-2">
               <p className="text-sm font-medium text-text-main">
@@ -731,30 +688,24 @@ export default function CompressionSettingsTab() {
               <p className="text-xs text-text-muted">{t("compressionAgingThresholdsDesc")}</p>
               <div className="grid grid-cols-2 gap-2">
                 {(["fullSummary", "moderate", "light", "verbatim"] as const).map((tier) => (
-                  <label
+                  <Input
                     key={tier}
-                    className="flex items-center justify-between p-2 rounded border border-border/50"
-                  >
-                    <span className="text-xs text-text-muted capitalize">
-                      {tier.replace(/([A-Z])/g, " $1").trim()}
-                    </span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={config.aggressive!.thresholds[tier]}
-                      onChange={(e) =>
-                        save({
-                          aggressive: {
-                            thresholds: {
-                              [tier]: parseInt(e.target.value) || 2,
-                            },
+                    label={tier.replace(/([A-Z])/g, " $1").trim()}
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={config.aggressive!.thresholds[tier]}
+                    onChange={(e) =>
+                      save({
+                        aggressive: {
+                          thresholds: {
+                            [tier]: parseInt(e.target.value) || 2,
                           },
-                        })
-                      }
-                      className="w-16 px-2 py-1 text-xs rounded border border-border bg-surface text-text-main"
-                    />
-                  </label>
+                        },
+                      })
+                    }
+                    className="rounded border border-border/50 p-2 capitalize"
+                  />
                 ))}
               </div>
             </div>
@@ -765,27 +716,28 @@ export default function CompressionSettingsTab() {
               <div className="flex flex-wrap gap-2">
                 {(
                   ["fileContent", "grepSearch", "shellOutput", "json", "errorMessage"] as const
-                ).map((strategy) => (
-                  <button
-                    key={strategy}
-                    onClick={() =>
-                      save({
-                        aggressive: {
-                          toolStrategies: {
-                            [strategy]: !config.aggressive!.toolStrategies[strategy],
+                ).map((strategy) => {
+                  const on = config.aggressive!.toolStrategies[strategy];
+                  return (
+                    <Button
+                      key={strategy}
+                      size="sm"
+                      variant={on ? "secondary" : "ghost"}
+                      aria-pressed={on}
+                      onClick={() =>
+                        save({
+                          aggressive: {
+                            toolStrategies: {
+                              [strategy]: !config.aggressive!.toolStrategies[strategy],
+                            },
                           },
-                        },
-                      })
-                    }
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                      config.aggressive!.toolStrategies[strategy]
-                        ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
-                        : "border-border/50 text-text-muted hover:border-border"
-                    }`}
-                  >
-                    {strategy.replace(/([A-Z])/g, " $1").trim()}
-                  </button>
-                ))}
+                        })
+                      }
+                    >
+                      {strategy.replace(/([A-Z])/g, " $1").trim()}
+                    </Button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -798,31 +750,21 @@ export default function CompressionSettingsTab() {
               <p className="text-xs text-text-muted mt-0.5">{t("compressionUltraConfigDesc")}</p>
             </div>
 
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("enabled")}</span>
-              <button
-                onClick={() =>
-                  save({
-                    ultra: {
-                      enabled: !config.ultra!.enabled,
-                    },
-                  })
-                }
-                className={`relative w-10 h-5 rounded-full transition-colors ${
-                  config.ultra.enabled ? "bg-green-500" : "bg-border"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                    config.ultra.enabled ? "left-5" : "left-0.5"
-                  }`}
-                />
-              </button>
-            </label>
+            <Toggle
+              label={t("enabled")}
+              checked={config.ultra.enabled}
+              onChange={() =>
+                save({
+                  ultra: {
+                    enabled: !config.ultra!.enabled,
+                  },
+                })
+              }
+            />
 
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionUltraRate")}</span>
-              <input
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={t("compressionUltraRate")}
                 type="number"
                 min={0}
                 max={1}
@@ -835,13 +777,9 @@ export default function CompressionSettingsTab() {
                     },
                   })
                 }
-                className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
               />
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionUltraMinScore")}</span>
-              <input
+              <Input
+                label={t("compressionUltraMinScore")}
                 type="number"
                 min={0}
                 max={1}
@@ -854,69 +792,50 @@ export default function CompressionSettingsTab() {
                     },
                   })
                 }
-                className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
               />
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionMaxTokensPerMessage")}</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  max={32768}
-                  value={config.ultra.maxTokensPerMessage}
-                  onChange={(e) =>
-                    save({
-                      ultra: {
-                        maxTokensPerMessage: parseInt(e.target.value) || 0,
-                      },
-                    })
-                  }
-                  className="w-24 px-2 py-1 text-sm rounded border border-border bg-surface text-text-main"
-                />
-                <span className="text-xs text-text-muted">{t("tokens")}</span>
-              </div>
-            </label>
-
-            <label className="flex items-center justify-between">
-              <span className="text-sm text-text-muted">{t("compressionUltraSlmFallback")}</span>
-              <button
-                onClick={() =>
-                  save({
-                    ultra: {
-                      slmFallbackToAggressive: !config.ultra!.slmFallbackToAggressive,
-                    },
-                  })
-                }
-                className={`relative w-10 h-5 rounded-full transition-colors ${
-                  config.ultra.slmFallbackToAggressive ? "bg-green-500" : "bg-border"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                    config.ultra.slmFallbackToAggressive ? "left-5" : "left-0.5"
-                  }`}
-                />
-              </button>
-            </label>
-
-            <label className="block space-y-1">
-              <span className="text-sm text-text-muted">{t("compressionUltraModelPath")}</span>
-              <input
-                type="text"
-                value={config.ultra.modelPath ?? ""}
+              <Input
+                label={t("compressionMaxTokensPerMessage")}
+                hint={t("tokens")}
+                type="number"
+                min={0}
+                max={32768}
+                value={config.ultra.maxTokensPerMessage}
                 onChange={(e) =>
                   save({
                     ultra: {
-                      modelPath: e.target.value.trim() || undefined,
+                      maxTokensPerMessage: parseInt(e.target.value) || 0,
                     },
                   })
                 }
-                placeholder="/path/to/model.onnx"
-                className="w-full px-2 py-1 text-sm rounded border border-border bg-surface text-text-main font-mono"
               />
-            </label>
+            </div>
+
+            <Toggle
+              label={t("compressionUltraSlmFallback")}
+              checked={config.ultra.slmFallbackToAggressive}
+              onChange={() =>
+                save({
+                  ultra: {
+                    slmFallbackToAggressive: !config.ultra!.slmFallbackToAggressive,
+                  },
+                })
+              }
+            />
+
+            <Input
+              label={t("compressionUltraModelPath")}
+              type="text"
+              value={config.ultra.modelPath ?? ""}
+              onChange={(e) =>
+                save({
+                  ultra: {
+                    modelPath: e.target.value.trim() || undefined,
+                  },
+                })
+              }
+              placeholder="/path/to/model.onnx"
+              inputClassName="font-mono"
+            />
           </div>
         )}
       </div>

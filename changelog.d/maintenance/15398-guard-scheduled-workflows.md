@@ -1,1 +1,0 @@
-- **ci:** scheduled workflows now run only in the upstream repository, so forks with Actions enabled skip the inherited crons ([#15398](https://github.com/diegosouzapw/OmniRoute/pull/15398)) — thanks @maxmad64bis

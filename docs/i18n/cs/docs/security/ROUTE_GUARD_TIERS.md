@@ -14,171 +14,252 @@ a vyhodnocuje se před spuštěním jakékoli jiné větve ověřování.
 
 ### Úroveň 1 — LOCAL_ONLY
 
-**Vynuceno pomocí:** `isLocalOnlyPath(path)` → kontrola loopback hostitele
-**Obejít:** Ve výchozím nastavení žádné. Úzká výjimka pro cesty v
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, pokud požadavek obsahuje platný
+**Vynucováno pomocí:** `isLocalOnlyPath(path)` → kontrola loopback hostitele
+**Obejití:** Ve výchozím nastavení žádné. Úzká výjimka pro cesty v
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, pokud požadavek nese platný
 API klíč s rozsahem `manage` (viz [Výjimka pro rozsah manage](#manage-scope-carve-out)).
 
-Tyto trasy spouštějí podřízené procesy nebo vykonávají runtime kód. Vystavení těchto tras
-ne-loopback provozu by útočníkovi, který získal platný JWT (např.
-přes Cloudflared/Ngrok tunel), umožnilo spustit vytváření procesů — známou třídu CVE
+Tyto routy spouštějí podřízené procesy nebo vykonávají kód za běhu. Jejich
+vystavení provozu mimo loopback by útočníkovi, který získal platný JWT (např.
+prostřednictvím tunelu Cloudflared/Ngrok), umožnilo vyvolat spouštění procesů —
+známá třída CVE
 ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**Co je GHSA-fhh6-4qxv-rpqj (třída útoku):** server pro správu/agenta
-vystavuje koncový bod, který spouští podproces (`npm install`, `node`, prohlížeč,
-proxy, `git`, `tar`, …). Pokud je tento koncový bod dosažitelný z mimo hostitele — protože
-operátor umístil OmniRoute za tunel nginx/Cloudflare/Tailscale a unikl JWT,
-nebo byla chybně nakonfigurována autentizace — útočník změní „volání API“ na „spuštění
-příkazu na hostiteli“ (vzdálené spuštění kódu). OmniRoute tomu zabraňuje vynucením
-**bezpodmínečné kontroly loopback hostitele, před jakoukoli kontrolou autentizace**, na každé
-trase schopné spouštění: uniklý token přes tunel stále nemůže dosáhnout spuštění.
+**Co je GHSA-fhh6-4qxv-rpqj (třída útoku):** správcovský/agentní server
+vystavuje endpoint, který spouští podproces (`npm install`, `node`, prohlížeč,
+proxy, `git`, `tar`, …). Pokud je tento endpoint dosažitelný zvenčí — protože
+provozovatel umístil OmniRoute za tunel nginx/Cloudflare/Tailscale a unikl JWT,
+nebo byla autentizace špatně nakonfigurována — útočník promění „zavolat API" ve
+„spustit příkaz na hostiteli" (vzdálené spuštění kódu). OmniRoute toto uzavírá
+tím, že vynucuje **kontrolu loopback hostitele bezpodmínečně, před jakoukoli
+kontrolou autentizace**, na každé routě schopné spouštění procesů: uniklý token
+přes tunel stále nemůže dosáhnout na spuštění procesu.
 
-**Kompletní sada LOCAL_ONLY.** Autoritativním zdrojem jsou
+**Úplná množina LOCAL_ONLY.** Autoritativním zdrojem je
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` v
-`src/server/authz/routeGuard.ts`; tabulka níže odráží aktuální stav.
-Brána `check-route-guard-membership` vypočítává každý `route.ts` pod
-prefixy schopnými spouštění a selže CI, pokud některý není klasifikován jako pouze lokální.
+`src/server/authz/routeGuard.ts`; níže uvedená tabulka odráží aktuální stav.
+Gate `check-route-guard-membership` vytvoří výčet každého `route.ts` pod
+prefixy schopnými spouštění procesů a způsobí selhání CI, pokud některý z nich
+není klasifikován jako local-only.
 
-| Prefix / pattern                                                                                         | Proč je pouze lokální                                                                                             |
-| :------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP server — spouští stdio bridge a SSE handlery                                                                  |
-| `/api/cli-tools/runtime/`                                                                                | Runtime CLI nástroje — spouští libovolný kód pluginu                                                              |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Zapisovače nastavení pro jednotlivé nástroje, které mohou měnit binární soubory/konfiguraci nástrojů na hostiteli |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Stejné spuštění `getCliRuntimeStatus()` jako u šesti výše uvedených (GHSA-35fw-cv32-2373)                         |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Proby inventáře CLI — spouští `command -v` / `--version` pro každý nástroj (GHSA-35fw-cv32-2373)                  |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Ovládání Antigravity MITM proxy (spouští/ukazuje na systémovou proxy)                                             |
-| `/api/modality-bridge/video/`                                                                            | Přísná trusted-loopback runtime sonda Video Bridge a interní extrakční bridge                                     |
-| `/api/services/`                                                                                         | Vestavěné služby (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spuštění                          |
-| `/dashboard/providers/services/`                                                                         | Reverzní proxy k uživatelským rozhraním vestavěných služeb                                                        |
-| `/api/tunnels/cloudflared`                                                                               | Instaluje/spouští binární soubor cloudflared                                                                      |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Instaluje/ovládá tailscaled na hostiteli                                                                          |
-| `/api/copilot/`                                                                                          | Neověřený ovladač LLM — ve výchozím nastavení pouze CLI                                                           |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — spouští MITM server + úpravy DNS                                                                    |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — posluchač http-proxy + systémová proxy                                                        |
-| `/api/settings/mitm`                                                                                     | Povoluje MITM zachycení (stav proxy na úrovni systému)                                                            |
-| `/api/issue-agent/`                                                                                      | Agent pro problémy — spouští lokální nástroje proti repozitáři                                                    |
-| `/api/plugins/`, `/api/plugins`                                                                          | Pluginy — načítání/spouštění přes `worker_threads` + `child_process`                                              |
-| `/api/middleware/`                                                                                       | Uživatelský middleware — načítá/spouští kód operátora v rámci procesu                                             |
-| `/api/system/version`                                                                                    | Automatická aktualizace (pouze POST; GET/HEAD/OPTIONS vyňato) — spouští `git checkout` + `npm install`            |
-| `/api/db-backups/exportAll`                                                                              | Spouští `tar` pro exportní archiv                                                                                 |
-| `/api/local/`                                                                                            | Lokální spouštěče na jedno kliknutí (dnes Redis) — spouští podman/docker                                          |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Životní cyklus Headroom proxy — spouští python CLI / signalizuje PID                                              |
-| `/api/jobs`, `/api/jobs/`                                                                                | Ovládání spouštěče úloh — provádí plánovanou práci na straně hostitele                                            |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` před importem pověření                                                            |
-| `/api/oauth/kiro/auto-import`                                                                            | Čte soubory pověření Kiro CLI z hostitele                                                                         |
-| `/api/skills/collect/`                                                                                   | Sbírka dovedností — detekuje/instaluje lokální nástroje                                                           |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Registrace a spouštění obsluhy dovedností — dosáhne spuštění kontejneru sandboxu (GHSA-jx89)                      |
-| `/api/discovery/`                                                                                        | Proby pro zjišťování lokální sítě/poskytovatele                                                                   |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Spouští prohlížeč s GUI + VNC relaci pro interaktivní přihlášení                                                  |
-| `/api/acp/agents`                                                                                        | ACP — objevuje a spouští lokální binární soubory agentů CLI                                                       |
-| `/api/resilience/connections`                                                                            | JSON odolnosti pro každý účet (cooldown, breaker, lockout). HTML dashboardu není pouze lokální.                   |
-| `/api/providers/cursor/agent-availability`                                                               | Kontrola instalace dashboardu — spouští `cursor-agent status --format json`                                       |
-| `/api/providers/{id}/login` (regex)                                                                      | Spouští Playwright Chromium s GUI pro přihlášení pomocí webových cookies                                          |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Ruční tok s GUI + automatické přihlášení telefonem/SMS na základě relace (spouští Playwright)                     |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Ruční obnovení relace Cursor — vyzve `cursor-agent`                                                               |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnostikuje lokální instalaci Codex CLI (spouští binární soubor)                                                |
+| Prefix / vzor                                                                                            | Proč je pouze lokální                                                                                      |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP server — spouští stdio mosty + SSE handlery                                                            |
+| `/api/cli-tools/runtime/`                                                                                | Runtime CLI nástrojů — spouští libovolný kód pluginů                                                       |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Zapisovače nastavení jednotlivých nástrojů, které mohou sahat na binárky/konfiguraci nástrojů na hostiteli |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Stejné spouštění `getCliRuntimeStatus()` jako u šesti výše uvedených sourozenců (GHSA-35fw-cv32-2373)      |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Sondy inventáře CLI — spouštějí `command -v` / `--version` pro každý nástroj (GHSA-35fw-cv32-2373)         |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Ovládání Antigravity MITM proxy (spouští/nasměrovává systémovou proxy)                                     |
+| `/api/modality-bridge/video/`                                                                            | Přísná sonda runtime Video Bridge na důvěryhodném loopbacku a interní extrakční most                       |
+| `/api/services/`                                                                                         | Vestavěné služby (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spouštění                  |
+| `/dashboard/providers/services/`                                                                         | Reverzní proxy k UI vestavěných služeb                                                                     |
+| `/api/tunnels/cloudflared`                                                                               | Instaluje/spouští binárku cloudflared                                                                      |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Instaluje/ovládá tailscaled na hostiteli                                                                   |
+| `/api/copilot/`                                                                                          | Neautentizovaný LLM ovladač — ve výchozím nastavení pouze CLI                                              |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — spouští MITM server + úpravy DNS                                                             |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + systémová proxy                                                  |
+| `/api/settings/mitm`                                                                                     | Povoluje MITM odposlech (stav proxy na úrovni systému)                                                     |
+| `/api/issue-agent/`                                                                                      | Issue agent — spouští lokální nástroje proti repozitáři                                                    |
+| `/api/plugins/`, `/api/plugins`                                                                          | Pluginy — načítání/spouštění přes `worker_threads` + `child_process`                                       |
+| `/api/middleware/`                                                                                       | Uživatelský middleware — načítá/spouští kód operátora v rámci procesu                                      |
+| `/api/system/version`                                                                                    | Automatická aktualizace (pouze POST; GET/HEAD/OPTIONS vyjmuty) — spouští `git checkout` + `npm install`    |
+| `/api/db-backups/exportAll`                                                                              | Spouští `tar` pro exportní archiv                                                                          |
+| `/api/local/`                                                                                            | Lokální spouštěče na 1 klik (dnes Redis) — spouštějí podman/docker                                         |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Životní cyklus Headroom proxy — spouští python CLI / signalizuje PID                                       |
+| `/api/jobs`, `/api/jobs/`                                                                                | Ovládání job runneru — spouští naplánovanou práci na straně hostitele                                      |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` před importem přihlašovacích údajů                                         |
+| `/api/oauth/kiro/auto-import`                                                                            | Čte soubory s přihlašovacími údaji Kiro CLI z hostitele                                                    |
+| `/api/skills/collect/`                                                                                   | Sběr skillů — detekuje/instaluje lokální nástroje                                                          |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Registrace a spouštění handlerů skillů — sahají až ke spawnu sandboxového kontejneru (GHSA-jx89)           |
+| `/api/discovery/`                                                                                        | Sondy pro detekci lokální sítě/poskytovatelů                                                               |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Spouští prohlížeč s GUI + VNC relaci pro interaktivní přihlašování                                         |
+| `/api/acp/agents`                                                                                        | ACP — detekuje a spouští lokální binárky CLI agentů                                                        |
+| `/api/resilience/connections`                                                                            | Resilience JSON pro jednotlivé účty (cooldown, breaker, lockout). HTML dashboardu není pouze lokální.      |
+| `/api/providers/cursor/agent-availability`                                                               | Kontrola instalačního upozornění dashboardu — spouští `cursor-agent status --format json`                  |
+| `/api/providers/{id}/login` (regex)                                                                      | Spouští Playwright Chromium s GUI pro přihlášení pomocí webových cookies                                   |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Manuální tok s GUI + automatické přihlášení přes telefon/SMS na bázi relace (spouští Playwright)           |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Manuální obnovení relace Cursor — aktivuje `cursor-agent`                                                  |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnostikuje lokální instalaci Codex CLI (spouští binárku)                                                |
 
-**Odpověď na porušení:** `403 LOCAL_ONLY`
+**Odpověď při porušení:** `403 LOCAL_ONLY`
 
-#### Výjimka pro rozsah správy
+#### Výjimka pro scope manage
 
-Podmnožina cest LOCAL_ONLY MŮŽE být také přístupná z neloopbacku, pokud a
-pouze pokud požadavek nese `Authorization: Bearer <api-key>`, jehož
-metadata zahrnují rozsah `manage` (nebo `admin`). Tato výjimka je explicitně
-řízena pro každou cestu pomocí `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`,
-takže výchozí nastavení pro jakoukoli novou cestu LOCAL_ONLY zůstává
-strict-loopback. Neautentizované požadavky a požadavky s klíči bez rozsahu
-`manage` jsou stále odmítnuty s `403 LOCAL_ONLY`.
+Podmnožina cest LOCAL_ONLY MŮŽE být přístupná i z non-loopback adres, pokud
+a pouze pokud požadavek nese hlavičku `Authorization: Bearer <api-key>`, jejíž
+metadata obsahují scope `manage` (nebo `admin`). Výjimka je explicitně řízena
+pro každou cestu pomocí `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, takže
+výchozí nastavení pro každou novou cestu LOCAL_ONLY zůstává strict-loopback.
+Neautentizované požadavky a požadavky s klíči bez scope manage jsou i nadále
+zamítány s `403 LOCAL_ONLY`.
 
-Dnes je jediným obejitelným prefixem `/api/mcp/`. `/api/cli-tools/runtime/` a
-`/api/services/` jsou záměrně vyloučeny, protože mohou spouštět libovolné
-podprocesy (`npm install`, `node`), což je přesně ta třída CVE, které má
-úroveň LOCAL_ONLY zabránit.
+V současnosti je jediným obcházitelným prefixem `/api/mcp/`. `/api/cli-tools/runtime/`
+a `/api/services/` jsou záměrně vyloučeny, protože mohou spouštět libovolné
+podprocesy (`npm install`, `node`), což je přesně ta třída CVE, jejímuž
+zabránění úroveň LOCAL_ONLY existuje.
 
-**#7895 — úzký rozsah `mcp:connect`:** výjimka `/api/mcp/` TAKÉ přijímá
-Bearer klíč s úzkým rozsahem `mcp:connect`
+**#7895 — úzký scope `mcp:connect`:** výjimka pro `/api/mcp/` TAKÉ přijímá
+Bearer klíč s úzkým scopem `mcp:connect`
 (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), kontrolovaný
 pomocí `hasMcpConnectOrManageScope()` v `src/server/authz/policies/management.ts`.
-Toto je omezeno POUZE na `/api/mcp/` — `mcp:connect` neuděluje nic na žádné
-jiné správní cestě (včetně všech ostatních prefixů pro obejití LOCAL_ONLY,
-pokud by někdy byly přidány), a je záměrně vyloučen z
-`MANAGEMENT_API_KEY_SCOPES`. Klíč s `manage`/`admin` stále prochází výjimkou
-přesně jako dříve; `mcp:connect` je alternativa s nižšími oprávněními pro
-vzdálené volající pouze pro MCP, kteří by neměli potřebovat široký přístup
-ke správě.
+Platí POUZE pro `/api/mcp/` — `mcp:connect` neuděluje žádná oprávnění na žádné
+jiné management route (včetně jakéhokoli dalšího bypass prefixu LOCAL_ONLY,
+pokud by někdy byl přidán) a je záměrně vyloučen z
+`MANAGEMENT_API_KEY_SCOPES`. Klíč se scopem `manage`/`admin` stále projde
+výjimkou přesně jako dříve; `mcp:connect` je alternativa s nižšími oprávněními
+pro vzdálené volající pouze pro MCP, kteří by neměli potřebovat široký
+management přístup.
 
-| Požadavek                                           | Cesta                      | Výsledek                |
-| :-------------------------------------------------- | :------------------------- | :---------------------- |
-| Non-loopback, no Bearer                             | `/api/mcp/*`               | `403 LOCAL_ONLY`        |
-| Non-loopback, Bearer with `manage` scope            | `/api/mcp/*`               | Povoleno                |
-| Non-loopback, Bearer with `mcp:connect` scope       | `/api/mcp/*`               | Povoleno                |
-| Non-loopback, Bearer without `manage`/`mcp:connect` | `/api/mcp/*`               | `403 LOCAL_ONLY`        |
-| Non-loopback, Bearer with `mcp:connect` scope       | `/api/cli-tools/runtime/*` | `403 LOCAL_ONLY`        |
-| Non-loopback, Bearer with `manage` scope            | `/api/cli-tools/runtime/*` | `403 LOCAL_ONLY`        |
-| Loopback, any/no Bearer                             | any LOCAL_ONLY             | Povoleno (brána projde) |
+| Požadavek                                       | Cesta                      | Výsledek               |
+| ----------------------------------------------- | -------------------------- | ---------------------- |
+| Non-loopback, bez Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY         |
+| Non-loopback, Bearer se scopem `manage`         | `/api/mcp/*`               | Povolit                |
+| Non-loopback, Bearer se scopem `mcp:connect`    | `/api/mcp/*`               | Povolit                |
+| Non-loopback, Bearer bez `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY         |
+| Non-loopback, Bearer se scopem `mcp:connect`    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY         |
+| Non-loopback, Bearer se scopem `manage`         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY         |
+| Loopback, jakýkoli/žádný Bearer                 | jakákoli LOCAL_ONLY        | Povolit (brána projde) |
 
-#### Pokyny pro operátory a audit
+#### Pokyny pro operátory a auditování
 
 Pokud provozujete OmniRoute za reverzní proxy nebo tunelem (nginx, Caddy,
-Cloudflare Tunnel, Tailscale, Ngrok), kontrola loopbacku stále chrání výše
-uvedené cesty schopné spouštění — požadavek, jehož klientská adresa není
-loopback, je odmítnut s `403 LOCAL_ONLY` **před spuštěním autentizace**,
-takže uniklý JWT nemůže dosáhnout spuštění. Zůstávají dvě odpovědnosti
+Cloudflare Tunnel, Tailscale, Ngrok), loopback kontrola stále chrání výše
+uvedené routy schopné spawnování — požadavek, jehož klientská adresa je
+non-loopback, je zamítnut s `403 LOCAL_ONLY` **ještě před spuštěním
+autentizace**, takže uniklé JWT se ke spawnu nedostane. Zbývají dvě povinnosti
 operátora:
 
-- **"Neopravujte" chybu 403 falšováním klientské IP adresy jako loopback.**
-  Nastavení `X-Forwarded-For: 127.0.0.1` nebo proxy, která přepisuje zdrojovou
-  adresu na loopback, znovu otevírá přesně tu třídu RCE, kterou tato úroveň
-  uzavírá. Zpřístupněte dashboard/API přes proxy — nikdy ne cesty schopné
-  spouštění.
-- **Udržujte obejití rozsahu správy minimální.** Pouze `/api/mcp/` je
-  obejitelný, a to pouze s API klíčem s rozsahem `manage`.
-  `SPAWN_CAPABLE_PREFIXES` nikdy nemohou být přidány do seznamu pro obejití —
-  zod schema je odmítá a `isLocalOnlyBypassableByManageScope` je zamítá za
-  běhu (obrana do hloubky), což dashboard myslí "nelze učinit obejitelným".
-  Cesty schopné spouštění s dynamickými segmenty a statickými cestami pod
-  `/api/providers/` (např. `/login`, `/refresh-cursor`) jsou pokryty
-  doprovodnými regexovými `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` v
-  `src/shared/constants/spawnCapablePrefixes.ts`, nikoli plochým polem
-  `SPAWN_CAPABLE_PREFIXES` — ploché pole by muselo pokrýt celý prefix
-  `/api/providers/`, aby je zachytilo, čímž by se příliš rozšířil strom cest,
-  které vzdálené dashboardy legitimně používají pro CRUD poskytovatelů.
+- **„Neopravujte“ chybu 403 paděláváním IP adresy klienta na loopback.** Nastavení
+  `X-Forwarded-For: 127.0.0.1` nebo proxy, která přepisuje zdrojovou adresu na
+  loopback, znovu otevírá přesně tu třídu RCE, kterou tato úroveň uzavírá.
+  Dashboard/API vystavujte přes proxy — nikdy spawn-capable trasy.
+- **Udržujte bypass manage-scope minimální.** Obejít lze pouze `/api/mcp/`, a to
+  pouze s API klíčem s rozsahem `manage`. Položky `SPAWN_CAPABLE_PREFIXES` nelze
+  nikdy přidat na seznam bypassů — zod schéma je odmítne a
+  `isLocalOnlyBypassableByManageScope` je zamítne za běhu (obrana do hloubky),
+  což je přesně to, co dashboard myslí pod „cannot be made bypassable“. Stejný
+  deny-list obsahuje také několik tras LOCAL_ONLY, které procesy nespouštějí, ale
+  nesmějí být rovněž nikdy vzdáleně dosažitelné — `/api/oauth/kiro/auto-import`
+  (čte místní soubory s přihlašovacími údaji Kiro na hostiteli), `/api/discovery/`
+  a `/api/issue-agent/`. Načítač snapshotů za běhu také takové položky zahazuje
+  z uloženého řádku nastavení a starší import JSON (`/api/settings/import-json`)
+  klíče bypassu nikdy nezapisuje. Každá položka `LOCAL_ONLY_API_PREFIXES` musí být
+  buď na deny-listu, nebo posouzena jako způsobilá pro bypass
+  (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Spawn-capable
+  trasy s dynamickými segmenty a statickými cestami pod `/api/providers/`
+  (např. `/login`, `/refresh-cursor`) pokrývá doplněk založený na regulárních
+  výrazech `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` v
+  `src/shared/constants/spawnCapablePrefixes.ts`, nikoli ploché pole
+  `SPAWN_CAPABLE_PREFIXES` — ploché pole by k jejich zachycení muselo pokrývat
+  celý prefix `/api/providers/`, čímž by nadměrně rozšířilo strom tras, který
+  vzdálené dashboardy legitimně používají pro CRUD poskytovatelů.
 
-**Audit přístupu** — pro ověření, že se k těmto cestám nedostává nic mimo hostitele:
+**Auditování přístupu** — pro ověření, že se k těmto trasám nedostane nic mimo hostitele:
 
-- Otevřete **Inventář autorizací** na `/dashboard/settings/security`: zobrazuje živý seznam prefixů LOCAL_ONLY, které prefixy lze obejít, a sadu kompilace schopnou spuštění ("nelze obejít").
-- Prohledejte své reverzní proxy / přístupové logy pro výše uvedené prefixy spárované s klientskou adresou, která není loopback. Jakýkoli takový zásah, který vrátil `200` namísto `403 LOCAL_ONLY`, znamená, že proxy maskuje skutečnou IP klienta – opravte proxy.
-- `403 LOCAL_ONLY` v logech OmniRoute pro jednu z těchto cest znamená, že ochrana funguje podle očekávání, nikoli chybu, kterou je třeba potlačit.
+- Otevřete **Authorization Inventory** na `/dashboard/settings/security`: zobrazuje
+  živý seznam prefixů LOCAL_ONLY, které prefixy lze obcházet, a množinu spawn-capable
+  tras definovanou v době kompilace („cannot be made bypassable“).
+- Prohledejte (grep) logy své reverzní proxy / přístupové logy na výše uvedené
+  prefixy spárované s non-loopback adresou klienta. Jakýkoli takový zásah, který
+  vrátil `200` místo `403 LOCAL_ONLY`, znamená, že proxy maskuje skutečnou IP
+  adresu klienta — opravte proxy.
+- `403 LOCAL_ONLY` v logách OmniRoute pro jednu z těchto cest znamená, že ochranný
+  mechanismus funguje tak, jak má — není to chyba, kterou byste měli potlačit.
 
-### Úroveň 2 — VŽDY_CHRÁNĚNO
+#### Vzdáleně dosažitelné trasy s bránou sondy v místě volání
 
-**Vynuceno:** `isAlwaysProtectedPath(path)` → přeskočit obejití `requireLogin=false`
-**Obejití:** Žádné, pokud `requireLogin=false`; JWT je vždy vyžadováno
+Některé trasy musí zůstat dosažitelné ze vzdáleného dashboardu, ale pro místní
+volající spouštějí sondu na straně hostitele (`which <binary>`, `<binary> --version`,
+`tailscale status --json`). Pro `GET` nejsou LOCAL_ONLY; handler místo toho čte
+důvěryhodný verdikt o protistraně pomocí `getRequestPeerLocality()`
+(`src/shared/utils/apiAuth.ts`) a sondu spustí pouze pro volající `loopback` /
+`lan`. Volající `remote` obdrží stejný tvar odpovědi sestavený ze zdrojů, které
+procesy nespouštějí (trvalý stav, nastavení, kontroly souborového systému),
+označený `probed: false`.
 
-Tyto cesty jsou destruktivní nebo nevratné. Povolení v instalaci „bez hesla“ by znamenalo, že kdokoli ve stejné LAN by mohl vymazat databázi nebo ukončit proces serveru.
+| Trasa                                                            | Sonda přeskočená pro vzdálené volající                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Sonda runtime CLI (`allowLocalRuntimeProbe`) a spawn záložního CLI |
+| `GET /api/headroom/status`                                       | `which headroom` a python sondy `--version`                        |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`  |
+| `GET /api/tunnels/cloudflared` (GET vyjmut z LOCAL_ONLY)         | Vyhledání `which cloudflared` v PATH                               |
 
-| Cesta                                     | Důvod                                                                   |
-| :---------------------------------------- | :---------------------------------------------------------------------- |
-| `/api/shutdown`                           | Ukončuje proces serveru                                                 |
-| `/api/settings/database`                  | Export, import a vymazání databáze                                      |
-| `/api/db-backups`                         | Přístup k archivu úplné zálohy databáze                                 |
-| `/api/settings/export-json`               | Exportuje celý blob nastavení (včetně tajných údajů)                    |
-| `/api/settings/import-json`               | Nahrazuje celý blob nastavení                                           |
-| `/api/providers/health-autopilot/actions` | Provádí nápravné akce autopilota                                        |
-| `/api/settings/obsidian`                  | Vytváří opakovaně použitelné WebDAV pověření pro jakýkoli kořen trezoru |
+Nová trasa pro čtení, která sondí hostitele, se řídí stejným vzorem, nebo je rovnou
+klasifikována jako LOCAL_ONLY.
+
+### Úroveň 2 — ALWAYS_PROTECTED
+
+**Vynucuje:** `isAlwaysProtectedPath(path)` → přeskočí bypass `requireLogin=false`
+**Bypass:** Při `requireLogin=false` žádný; JWT je vždy vyžadován
+
+Tyto trasy jsou destruktivní nebo nevratné. Jejich povolení v instalaci „bez hesla“
+by znamenalo, že kdokoli ve stejné síti LAN by mohl vymazat databázi nebo ukončit
+proces serveru.
+
+| Cesta                                     | Důvod                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| `/api/shutdown`                           | Ukončí proces serveru                                               |
+| `/api/settings/database`                  | Export, import a vymazání databáze                                  |
+| `/api/db-backups`                         | Přístup k archivu úplných záloh databáze                            |
+| `/api/settings/export-json`               | Exportuje celý blob nastavení (včetně tajemství)                    |
+| `/api/settings/import-json`               | Nahradí celý blob nastavení                                         |
+| `/api/providers/health-autopilot/actions` | Spouští nápravné akce autopilota                                    |
+| `/api/settings/obsidian`                  | Vydává opakovaně použitelné WebDAV údaje pro libovolný kořen vaultu |
+| `/api/relay/tokens`                       | Vydává, vypisuje, upravuje a odvolává relay tokeny                  |
+| `/api/cli-tools/apply`                    | Přepisuje konfiguraci hostitelského CLI operátora                   |
+| `/api/cli-tools/guide-settings`           | Zapisuje konfigurační soubory CLI na základě průvodce               |
+| `/api/cli-tools/hermes-agent-settings`    | Zapisuje konfiguraci agenta Hermes                                  |
+| `/api/cli-tools/backups`                  | Obnovuje a maže zálohy konfigurace CLI                              |
+| `/api/log-export`                         | Odesílá logy volání do nakonfigurovaného cíle                       |
+| `/api/restart`                            | Restartuje proces serveru                                           |
 
 **Odpověď při porušení:** `401 Authentication required`
 
-`/api/settings/obsidian` pokrývá svého potomka `/webdav`: `POST` nasměruje službu souborů WebDAV – obsluhovanou vlastní vrstvou Node před Next.js, mimo tuto pipeline – na kořen zvolený volajícím a vrací čerstvě vytvořené Basic pověření, `DELETE` je rotuje a rodičovský `POST` ukládá token Obsidian REST API. GHSA-62vw pouze maskovalo odhalení hesla `GET`; vydávání bylo stále na úrovni fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` navíc odmítá trezor, který je, nachází se uvnitř nebo obsahuje datový adresář.
+`/api/settings/obsidian` zahrnuje svůj podřízený `/webdav`: `POST` směřuje souborovou službu WebDAV —
+obsluhovanou vlastní vrstvou Node před Next.js, mimo tuto pipeline — na kořen zvolený volajícím
+a vrací čerstvě vygenerované přihlašovací údaje Basic, `DELETE` je rotuje a nadřazený `POST` ukládá
+token Obsidian REST API. GHSA-62vw pouze maskovalo odhalení hesla přes `GET`; vydávání zůstávalo
+nadále ve vrstvě typu fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` navíc
+odmítne trezor, který je datovým adresářem, leží uvnitř něj, nebo jej obsahuje.
 
-### Bootstrap čerstvé instalace je pouze loopback – skutečným peerem, nikoli `Host`
+#### Exporty a obnovy přihlašovacích údajů jsou vyhrazeny pouze operátorovi
 
-Pokud není nakonfigurováno žádné heslo pro správu (a žádné `INITIAL_PASSWORD`), `isAuthRequired()` v `src/shared/utils/apiAuth.ts` udržuje anonymní bootstrap otevřený **pouze pro loopback peery**. Loopback je určen z důvěryhodných signálů peerů, v pořadí: skutečný TCP peer s tokenem (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, co vidí politika), vlastní verdikt pipeline `AUTHZ_HEADER_PEER_LOCALITY` (co vidí obsluhy cest, důvěryhodné pouze, když je nastaven `OMNIROUTE_PEER_STAMP_TOKEN`), nebo skutečný socket peer pro přímé volající. `Host` / `nextUrl.hostname` se nikdy nekonsultují a zápis prvního hesla (`POST /api/settings/require-login`) podléhá stejnému omezení, spíše než aby byl otevřen každému síťovému peeru (GHSA-7pq4-8pvv-rx7r). `managementPolicy` explicitně předává svůj vlastní verdikt `peerContext`, takže hlavičky PŮVODNÍHO (před odstraněním) požadavku o tom nikdy nerozhodují.
+Výše uvedená vrstva pouze rozhoduje, zda je vyžadován _nějaký_ přihlašovací údaj. Trasy, které stahují
+uložené přihlašovací údaje, přidávají druhou kontrolu v handleru: `GET /api/settings/export-json`
+(dešifrovaná připojení poskytovatelů a syrové klíče API), `GET /api/db-backups/export` (soubor SQLite)
+a `GET /api/db-backups/exportAll` (úplný archiv) volají `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`). Ta přijímá relaci dashboardu, místní subjekt CLI nebo
+instanci s vypnutým přihlašováním a klíčům API libovolného rozsahu (včetně `manage`
+a `admin`) i přístupovým tokenům `oma_` odpovídá `403`. Destruktivní protějšky drží stejnou hranici:
+`POST /api/db-backups/import` (nahraný `.sqlite`, včetně `dryRun=true`), `POST /api/db-backups`
+(obnovení uložené zálohy podle id) a `POST /api/settings/import-json` (obnova ze staršího JSON)
+nahrazují živou databázi nebo celou sadu nastavení/připojení/klíčů API, takže je strojový
+přihlašovací údaj rovněž nemůže spustit. Stejnou hranici drží i ničení bodů obnovy:
+`DELETE /api/db-backups` (úklid — ponechat posledních N / zahodit starší než D dnů) a
+`PATCH /api/db-backups` (nastavení retence), protože trvale uložená retence je přesně to,
+co `cleanupDbBackups()` uplatňuje po každé automatické záloze (`src/lib/db/backup.ts`), takže strojový
+přihlašovací údaj, který by mohl uložit `keepLatest: 1`, by při příštím snímku všechno prořídl. Výpis
+a vytváření záloh (`GET`/`PUT /api/db-backups`) zachovávají běžné ověřování správy. Vydávání
+synchronizačních tokenů (`POST /api/sync/tokens`) používá stejnou pomocnou funkci, navíc s důvěryhodným
+loopback tokenem interní služby.
 
-### Úroveň 3 — SPRÁVA (výchozí)
+### Bootstrap čisté instalace je pouze pro loopback — podle skutečného peeru, nikoli `Host`
 
-Všechny ostatní cesty správy. Vyžadována autentizace, pokud není nakonfigurováno `requireLogin=false`. CLI tokeny mohou tyto cesty autentizovat (loopback + platný HMAC).
+Pokud není nakonfigurováno žádné heslo správy (ani `INITIAL_PASSWORD`), `isAuthRequired()` v
+`src/shared/utils/apiAuth.ts` ponechává anonymní bootstrap otevřený **pouze pro loopback peery**.
+O loopbacku se rozhoduje z důvěryhodných signálů peeru, v tomto pořadí: skutečný TCP peer označený tokenem
+(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, což vidí politika), vlastní verdikt pipeline
+`AUTHZ_HEADER_PEER_LOCALITY` (což vidí handlery tras; důvěryhodný pouze tehdy, když je nastaven
+`OMNIROUTE_PEER_STAMP_TOKEN`), nebo skutečný peer socketu pro přímé volající. `Host` /
+`nextUrl.hostname` se nikdy neberou v úvahu a zápis prvního hesla
+(`POST /api/settings/require-login`) podléhá stejnému omezení — není otevřen každému
+síťovému peerovi (GHSA-7pq4-8pvv-rx7r). `managementPolicy` předává svůj vlastní verdikt `peerContext`
+dolů explicitně, takže o něm nikdy nerozhodují hlavičky PŮVODNÍHO požadavku (před odstraněním).
+
+### Vrstva 3 — MANAGEMENT (výchozí)
+
+Všechny ostatní trasy správy. Ověřování je vyžadováno, pokud není
+nakonfigurováno `requireLogin=false`. Tokeny CLI mohou tyto trasy ověřovat (loopback + platný HMAC).
 
 ## Pořadí vyhodnocování
 

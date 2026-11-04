@@ -1,1 +1,0 @@
-- **feat(i18n):** translate up to N locales per request with `--locales-per-request` in `sync-ui-keys` ([#PRNUM](https://github.com/diegosouzapw/OmniRoute/pull/PRNUM)) — thanks @maxmad64bis

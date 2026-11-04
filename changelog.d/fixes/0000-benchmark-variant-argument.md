@@ -1,1 +1,0 @@
-- **fix(perf):** pass the parse-model benchmark variant as a child-process argument so the internal A/B selector is no longer mistaken for an undocumented public environment variable by the docs contract gate; preserves the benchmark introduced in #16355 (thanks @opensource-elearning).

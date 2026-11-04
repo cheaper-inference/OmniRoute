@@ -1,1 +1,0 @@
-- Standalone images now retain the source CLI's `tsx` loader, `esbuild` compiler and installed platform binaries, preventing the missing-loader failure before CLI commands can start.

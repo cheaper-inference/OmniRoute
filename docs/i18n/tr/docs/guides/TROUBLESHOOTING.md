@@ -37,33 +37,33 @@ OmniRoute için yaygın sorunlar ve çözümleri.
 
 ---
 
-### Ücretsiz Sağlayıcılarda Hız Sınırlama (429 / 400 / 401)
+### Ücretsiz Sağlayıcılarda Hız Sınırlaması (429 / 400 / 401)
 
-**Belirti**: Ücretsiz/kimlik doğrulaması gerektirmeyen sağlayıcılarla (opencode, auggie vb.) `model: "auto"` kullanırken yanıtlar yerine zaman zaman `HTTP 429`, `400` veya `401` alırsınız. Aynı istem kısa süre sonra yeniden denendiğinde istekler başarılı olur, ancak otomasyonlar (cron görevleri, aracılar, betikler) ilk hatada bozulur.
+**Belirti**: Ücretsiz/kimlik doğrulamasız sağlayıcılarla (auggie vb.) `model: "auto"` kullanırken yanıtlar yerine aralıklı olarak `HTTP 429`, `400` veya `401` hataları alırsınız. Aynı istem kısa süre sonra yeniden denendiğinde istekler başarılı olur, ancak otomasyon (cron görevleri, ajanlar, betikler) ilk hatada kesintiye uğrar.
 
 **Temel neden**: Birbirinden bağımsız üç hata modu üst üste gelir:
 
-1. **Sağlayıcı hız sınırı (`429`)**: Ücretsiz katmanlar, belirli bir zaman aralığı başına kota uygulayabilir. Paralel çağrı patlaması bu kotayı tüketir; dolayısıyla pencere sıfırlanana kadar sonraki istek reddedilir.
-2. **Doğrudan geçişte bozuk model (`400`/`401`)**: `auto/*` havuzları, `opencode` kaynaklı, katalogda kayıtlı ancak etkin kimlik bilgilerine sahip olmayan doğrudan geçişli modelleri içerebilir (ör. `oc/north-mini-code-free` → `401`). Otomatik yönlendirici bunlardan birini dener, başarısız olur ve geri dönüş devreye girmeden önce hata yayılır.
-3. **Eşzamanlılık yükseltmesi (yük altında `429`)**: Birden fazla aracı/cron oturumu aynı anda `auto` kullandığında toplam istek hızı ücretsiz sağlayıcıların tolere edebileceği düzeyi aşar ve geçerli çağrılar kötüye kullanım olarak işaretlenir.
+1. **Sağlayıcı hız sınırı (`429`)**: Ücretsiz katmanlar, belirli bir zaman aralığı için kota uygulayabilir. Yoğun bir paralel çağrı dalgası bu kotayı tüketir; dolayısıyla zaman aralığı sıfırlanana kadar sonraki istek reddedilir.
+2. **Doğrudan geçişte bozuk model (`400`/`401`)**: `auto/*` havuzları, katalogda kayıtlı olduğu hâlde etkin kimlik bilgilerine sahip olmayan doğrudan geçişli modeller içerebilir (→ `401`). Otomatik yönlendirici bunlardan birini dener, başarısız olur ve geri dönüş devreye girmeden önce hata yayılır.
+3. **Eşzamanlılık kaynaklı artış (yük altında `429`)**: Birden fazla ajan/cron oturumu aynı anda `auto` kullandığında toplam istek hızı, ücretsiz sağlayıcıların tolere edebileceği düzeyi aşar; bunun sonucunda geçerli çağrılar kötüye kullanım olarak işaretlenir.
 
-**Doğrulanmış çözüm (topluluk tarafından bildirildi, 2026-08-10)**: Ücretsiz katmandaki dalgalanmaların hata vermek yerine rotasyon, eşzamanlılık ve geri dönüş mekanizmaları tarafından karşılanması için üç ortam değişkenini ayarlayın:
+**Doğrulanmış çözüm (topluluk tarafından bildirildi, 2026-08-10)**: Rotasyon, eşzamanlılık ve geri dönüş mekanizmalarının ücretsiz katmandaki dalgalanmaları hata vererek durmak yerine karşılaması için üç ortam değişkenini ayarlayın:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 durumunda başka bir modele/sağlayıcıya geç (bozuk doğrudan geçişli modelleri atlar)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # açık ağır iş kabul tavanı (varsayılan olarak ayarlanmamıştır: istek sayısı sınırı yoktur, aşağıdaki nota bakın)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # sınırlı bekleme süresini yavaş üst sağlayıcılar için RATE_LIMIT_MAX_WAIT_MS varsayılanının üzerine çıkar
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 durumunda başka bir modele/sağlayıcıya geçer (bozuk doğrudan geçişli modelleri atlar)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ağır istekler için açık kabul üst sınırı (varsayılan olarak ayarlanmamıştır: istek sayısı sınırı yoktur, aşağıdaki nota bakın)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # sınırlı bekleme süresini, yavaş üst akışlar için varsayılan RATE_LIMIT_MAX_WAIT_MS değerinin üzerine çıkarır
 ```
 
-Bunları OmniRoute işlem ortamında (daemon'da; ör. LaunchAgent plist veya `systemctl edit` aracılığıyla) ayarlayın, ardından OmniRoute'u yeniden başlatın. Rotasyon bayrağı tek başına en yüksek etkiye sahip ayardır: kesin bir hatayı, havuzdaki sağlıklı bir sağlayıcı üzerinden yapılan şeffaf bir yeniden denemeye dönüştürür.
+Bunları OmniRoute işlem ortamında (daemon; ör. LaunchAgent plist veya `systemctl edit` aracılığıyla) ayarlayın, ardından OmniRoute'u yeniden başlatın. Rotasyon bayrağı, tek başına en yüksek etkiye sahip ayardır: Kesin bir hatayı, havuzdaki sağlıklı bir sağlayıcı üzerinden şeffaf bir yeniden denemeye dönüştürür.
 
-**Not**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`, aynı anda kaç ağır — uzun bağlamlı — isteğin çalışacağını sınırlar; bu sınır bir kabul kapısıdır, sağlayıcı hız sınırlayıcısı değildir. **#503-fanout güncellemesi:** Bu değişken artık varsayılan olarak ayarlanmamaktadır (artık yalnızca yukarıdaki gibi açıkça yapılandırıldığında geçerli olur) — bunun yerine ağır iş kabulü, ana makinenin gerçek bellek sınırına göre kendisini ölçeklendiren, otomatik türetilmiş bir bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) tarafından kontrol edilir. Bu nedenle yeni bir dağıtımda, bu değişken hiç ayarlanmadan çok daha az `503 chat_admission_busy` reddi görülmelidir; değişkeni burada açıkça ayarlamak yine tam olarak belgelendiği şekilde çalışır. Açık bayt bütçesi geçersiz kılmaları 8 MiB–2 GiB aralığıyla sınırlandırılır. `413 body_exceeds_budget` geçici değildir: bu bayt bütçesini artırın, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` değerini düşürün veya işlemin bellek sınırını artırın. `inflight_bytes_budget` nedeniyle yük azaltma, geçici bir kaynak çekişmesidir ve yeniden denenebilir. Sağlayıcı başına hız sınırlama (`open-sse/services/rateLimitManager.ts`) ise `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ve `RATE_LIMIT_AUTO_ENABLE` tarafından ayrı olarak yönetilir — `.env.example` dosyasına bakın.
+**Not**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`, aynı anda kaç ağır — uzun bağlamlı — isteğin çalışacağını sınırlar; bu sınır bir kabul kapısıdır, sağlayıcı hız sınırlayıcısı değildir. **#503-fanout güncellemesi:** Bu değişken artık varsayılan olarak ayarlanmamaktadır (artık yalnızca yukarıdaki gibi açıkça yapılandırıldığında sınır uygular) — bunun yerine ağır isteklerin kabulü, ana makinenin gerçek bellek üst sınırına göre kendini ölçeklendiren, otomatik türetilmiş bir bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) tarafından denetlenir. Bu nedenle yeni bir dağıtımda, bu değişken hiç ayarlanmadan çok daha az `503 chat_admission_busy` reddi görülmelidir; burada açıkça ayarlanması da tam olarak belgelendiği şekilde çalışmaya devam eder. Açık bayt bütçesi geçersiz kılmaları 8 MiB–2 GiB aralığıyla sınırlandırılır. `413 body_exceeds_budget` geçici değildir: Bu bayt bütçesini artırın, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` değerini düşürün veya işlemin bellek üst sınırını artırın. `inflight_bytes_budget` nedeniyle yük atma, geçici bir çekişme durumudur ve yeniden denenebilir olmaya devam eder. Sağlayıcı başına hız sınırlaması (`open-sse/services/rateLimitManager.ts`) ayrı olarak `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ve `RATE_LIMIT_AUTO_ENABLE` tarafından yönetilir — `.env.example` dosyasına bakın.
 
-**Çalıştığını doğrulama**: agent/cron işleminizi art arda iki kez hızlıca çalıştırın ve ikisinin de başarıyla tamamlandığını doğrulayın. Düzeltmeden önce ikinci çalıştırma genellikle `429`/`401` hatası verir. Düzeltmeden sonra hatalar (varsa) şeffaf biçimde yeniden denenir ve çağrı tamamlanır. Ayrıca `curl /monitoring/health` komutunu çalıştırabilir ve sağlayıcı bağlantılarındaki `rateLimitedUntil` alanını ve etkilenen sağlayıcılar için `circuitBreakers.providerBreakers[].state` değerini izleyebilirsiniz — durum `CLOSED`, `DEGRADED`, `OPEN` veya `HALF_OPEN` değerlerinden biridir (bkz. `src/shared/utils/circuitBreaker.ts`) ve hata vermeye devam eden bir sağlayıcı, sıfırlama penceresi bir deneme isteğinin geçmesine izin vermeden önce `CLOSED → DEGRADED → OPEN` durumlarına geçer (`HALF_OPEN`).
+**Çalıştığı nasıl doğrulanır**: Ajanınızı/cron görevinizi hızlı bir şekilde art arda iki kez çalıştırın ve ikisinin de başarılı olduğunu doğrulayın. Düzeltmeden önce ikinci çalıştırma genellikle `429`/`401` hatası verir. Düzeltmeden sonra hatalar (varsa) şeffaf şekilde yeniden denenir ve çağrı tamamlanır. Ayrıca `curl /monitoring/health` komutunu çalıştırarak sağlayıcı bağlantılarındaki `rateLimitedUntil` alanını ve etkilenen sağlayıcılar için `circuitBreakers.providerBreakers[].state` değerini izleyebilirsiniz — durum `CLOSED`, `DEGRADED`, `OPEN` veya `HALF_OPEN` değerlerinden biridir (bkz. `src/shared/utils/circuitBreaker.ts`) ve hata vermeye devam eden bir sağlayıcı, sıfırlama aralığı bir yoklama isteğine izin vermeden (`HALF_OPEN`) önce `CLOSED → DEGRADED → OPEN` durumlarına geçer.
 
-**Hâlâ 429 görüyorsanız**: ilgili sağlayıcının etkin hesabı gerçekten _kotasını_ tüketmiştir (yalnızca hız sınırına ulaşmış değildir). OmniRoute kontrol paneli → Providers → Accounts bölümünden aynı sağlayıcı için ikinci bir hesap ekleyin veya başka bir ücretsiz sağlayıcıyı (ör. `routeway`, `auggie`) kullanıma dahil edin. Rotasyon yalnızca geçici hız sınırı/400/401 hatalarında yardımcı olur; kotanın tamamen tükenmesi ikinci bir kimlik bilgisi veya farklı bir sağlayıcı gerektirir.
+**Hâlâ 429 görüyorsanız**: İlgili sağlayıcının etkin hesabı yalnızca hız sınırına değil, gerçekten _kota_ sınırına ulaşmıştır. OmniRoute panosu → Providers → Accounts bölümünden aynı sağlayıcı için ikinci bir hesap ekleyin veya başka bir ücretsiz sağlayıcıyı (ör. `routeway`, `auggie`) kullanıma dâhil edin. Rotasyon yalnızca geçici hız sınırı/400/401 durumlarında yardımcı olur; kotanın tamamen tükenmesi ikinci bir kimlik bilgisi veya farklı bir sağlayıcı gerektirir.
 
-**Görüntü modellerinde (`auto/vision`, `bazaarlink/*`) 403 görüyorsanız**: bağlı hesabın görüntü özelliğini içeren ücretli bir planı yoktur veya API anahtarının izinleri yetersizdir. Sağlayıcı kontrol panelinde anahtar kapsamının görüntü/multimodal özelliğini içerdiğini doğrulayın veya ücretli katmana sahip bir hesap bağlayıp bunu görüntü hedefi olarak kullanmaya devam edin.
+**Görüntü modellerinde (`auto/vision`, `bazaarlink/*`) 403 görüyorsanız**: Bağlı hesap, görüntü desteğini içeren ücretli bir plana sahip değildir veya API anahtarının izinleri yetersizdir. Sağlayıcı panosunda anahtar kapsamının görüntü/çok modlu erişimi içerdiğini doğrulayın ya da ücretli katmana ait bir hesap bağlayıp bunu görüntü hedefi olarak kullanmaya devam edin.
 
 ---
 
@@ -90,39 +90,39 @@ Uyarılar, OmniRoute'un denetiminde olmayan üçüncü taraf paketlerdeki günce
 
 ---
 
-## Engellenen npm Kurulum Betikleri Uyarısı (genel kurulum)
+## npm install-scripts Engellendi Uyarısı (global kurulum)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` çalıştırılırken yeni npm sürümleri (v11+ ve v12+), paket yaşam döngüsü betiklerini varsayılan olarak engeller ve bir kurulum betikleri uyarısı görüntüler:
+`npm install -g omniroute` çalıştırıldığında, daha yeni npm sürümleri (v11+ ve v12+) paket yaşam döngüsü betiklerini varsayılan olarak engeller ve bir install-scripts uyarısı görüntüler:
 
 ```
-npm warn install-scripts 7 paket, allowScripts kapsamında olmadıkları için kurulum betikleri engellendi:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Bu uyarı göz ardı edilebilir mi?
 
-**Kısmen, ancak betikler olmadan çalıştırılması önerilmez.** OmniRoute, sorunsuz geri dönüş seçenekleri içerir: yerel `better-sqlite3` bağlamaları bağımsız paketten yüklenemezse uygulama, `node:sqlite` veya `sql.js` gibi alternatif sürücülere geri döner (bkz. [SQLite Çalışma Zamanı Çözümlemesi](../ops/SQLITE_RUNTIME.md)). Sunucu yine de başlatılır ancak `sql.js` gibi WASM geri dönüş seçeneklerinin kullanılması SQLite WAL (Önden Yazmalı Günlükleme) modunu devre dışı bırakır ve bellek ile disk eşitleme yükünü artırır.
+**Kısmen, ancak betikler olmadan çalıştırılması önerilmez.** OmniRoute sorunsuz geri dönüş mekanizmaları içerir: yerel `better-sqlite3` bağlamaları bağımsız paketten yüklenemezse uygulama, `node:sqlite` veya `sql.js` gibi alternatif sürücülere geçer (bkz. [SQLite Çalışma Zamanı Çözümlemesi](../ops/SQLITE_RUNTIME.md)). Sunucu yine de başlatılır, ancak `sql.js` gibi WASM geri dönüşleriyle çalıştırmak SQLite WAL (Önden Yazmalı Günlükleme) modunu devre dışı bırakır ve bellek ile disk eşitleme yükünü artırır.
 
 ### Gerçekte hangi betikler gereklidir?
 
 Engellenen betiklerin tümü OmniRoute'u çalıştırmak için gerekli değildir:
 
-- **Temel (`omniroute`, `better-sqlite3`):** OmniRoute, bir Next.js bağımsız uygulama paketinden (`dist/`) çalışır. Kurulum sırasında npm, ana bilgisayara özgü yerel SQLite sürücüsünü en üst düzey `node_modules/better-sqlite3/` dizinine indirir veya derler. Ardından OmniRoute'un `postinstall` betiği (`scripts/build/postinstall.mjs`), bağımsız sunucunun bunlara erişebilmesi için ana bilgisayara özgü bu ikili dosyaları doğrular ve `dist/node_modules/` dizinine kopyalar. `omniroute` paketinin postinstall betiği engellenirse bu kopyalama adımı atlanır.
-- **İsteğe bağlı/geçişli (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bunlar derleme yardımcıları, izleyici araçları veya sistem anahtar zinciri yardımcı programlarıdır. Bunlara izin verilmesi derleme uyarılarını önler ancak temel yönlendirme işlevi için gerekli değildir.
-- **Hariç tutulan (`onnxruntime-node`):** Yerel yapay zekâ gömmeleri için isteğe bağlı bir bağımlılıktır ve OmniRoute'un çalışması için **gerekli değildir**. Bunun postinstall betiği NuGet'ten yaklaşık 300 MB boyutunda CUDA varlığı indirir; desteklenen donanımda yerel ONNX hızlandırmasını açıkça kullanmayı amaçlamıyorsanız bunu izin listesine eklemeyin.
+- **Temel (`omniroute`, `better-sqlite3`):** OmniRoute, bir Next.js bağımsız uygulama paketinden (`dist/`) çalışır. Kurulum sırasında npm, ana sisteme özgü yerel SQLite sürücüsünü üst düzey `node_modules/better-sqlite3/` dizinine indirir veya derler. Ardından OmniRoute'un `postinstall` betiği (`scripts/build/postinstall.mjs`), bağımsız sunucunun bunlara erişebilmesi için ana sisteme özgü bu ikili dosyaları doğrular ve `dist/node_modules/` dizinine kopyalar. `omniroute` paketinin postinstall betiği engellenirse bu kopyalama adımı atlanır.
+- **İsteğe bağlı/geçişli (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bunlar derleme yardımcıları, izleme araçları veya sistem anahtarlığı yardımcı programlarıdır. Bunlara izin verilmesi derleme uyarılarını önler, ancak temel yönlendirme işlevi için gerekli değildirler.
+- **Hariç tutulan (`onnxruntime-node`):** Yerel AI gömmeleri için isteğe bağlı bir bağımlılıktır ve OmniRoute'un çalışması için **gerekli değildir**. Bunun postinstall betiği NuGet üzerinden yaklaşık 300 MB boyutunda CUDA varlıkları indirir; desteklenen donanımda yerel ONNX hızlandırmasını kullanmayı açıkça amaçlamıyorsanız bunu izin verilenler listesine eklemeyin.
 
-### Önerilen çözüm
+### Önerilen düzeltme
 
-Genel kurulum sırasında gerekli kurulum betiklerine izin vermek ve uyarıları susturmak için OmniRoute ve yerel bağımlılıkları adına `--allow-scripts` seçeneğini belirtin:
+Global kurulum sırasında gerekli kurulum betiklerine izin vermek ve uyarıları susturmak için OmniRoute ile yerel bağımlılıkları adına `--allow-scripts` seçeneğini iletin:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Alternatif olarak, bunu kullanıcı hesabınızdaki tüm genel kurulumlar için kalıcı olarak yapılandırmak üzere:
+Alternatif olarak, bunu kullanıcı hesabınızdaki tüm global kurulumlar için kalıcı olarak yapılandırabilirsiniz:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Kurulumunuzu doğrulayın
 
-Kurulumdan sonra yerel bağlamaların ve çalışma zamanı ortamının sağlıklı olduğundan emin olmak için yerleşik tanılama aracını çalıştırın:
+Kurulumdan sonra, yerel bağlamaların ve çalışma zamanı ortamının sağlıklı olduğundan emin olmak için yerleşik tanılama aracını çalıştırın:
 
 ```bash
 omniroute doctor

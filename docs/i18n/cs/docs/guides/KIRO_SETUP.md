@@ -117,31 +117,40 @@ Pokud je pole `region` vynecháno, použije se výchozí hodnota `us-east-1`.
 
 ---
 
-## Postup importu klíče API
+## Tok importu klíče API
 
-Ověřování pomocí klíče API je určeno pro dlouhodobě platné přihlašovací údaje typu bearer služby Kiro / AWS CodeWhisperer. Nepoužívá
-obnovení OAuth, takže se vyhýbá zneplatnění sdílené relace OIDC.
+Ověřování pomocí klíče API je určeno pro dlouhodobé bearer přihlašovací údaje Kiro / AWS CodeWhisperer. Nepoužívá
+obnovování OAuth, takže se vyhne zneplatnění sdílené relace OIDC.
 
-### Ovládací panel
+### Řídicí panel
 
-1. Otevřete **Dashboard -> Providers -> Kiro**.
-2. Vyberte **API Key**.
-3. Vložte klíč API a volitelně region AWS (výchozí je `us-east-1`).
-4. OmniRoute klíč ověří a připojení uloží.
+1. Otevřete **Řídicí panel -> Poskytovatelé -> Kiro**.
+2. Vyberte **Klíč API**.
+3. Vložte klíč API a zvolte oblast AWS: **Automatická detekce** (výchozí), **Východ USA
+   (S. Virginie)** nebo **Evropa (Frankfurt)**.
+4. OmniRoute ověří klíč a uloží připojení pevně svázané s oblastí, ve které
+   klíč funguje.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` přijímá hodnoty `auto` (výchozí), `us-east-1` nebo `eu-central-1`; jakákoli jiná hodnota je
+odmítnuta s HTTP 400.
 
 ### Interní kontrakt
 
 Trasa API ověřuje klíč voláním `KiroService.validateApiKey()`, které
-používá `ListAvailableProfiles` vůči koncovému bodu CodeWhisperer/Amazon Q odpovídajícímu regionu
-a získá hodnotu `profileArn`.
+volá `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(rozhraní Amazon Q používané pro inferenci pomocí klíče API) s časovým limitem 10 s pro každou oblast. V
+režimu `auto` nejprve vyzkouší `us-east-1`, poté `eu-central-1`, a uloží první oblast,
+která klíč přijme. Pokud je klíč odmítnut ve všech kandidátních oblastech, import selže s
+HTTP 400. Následně je bez záruky úspěchu voláno `ListAvailableProfiles`, aby se zjistil volitelný
+`profileArn` (AWS jej pro většinu klíčů API nepovoluje).
 
 Uložené připojení používá:
 
@@ -157,9 +166,12 @@ Uložené připojení používá:
 ```
 
 Za běhu odesílá `KiroExecutor.buildHeaders()` klíč jako
-`Authorization: Bearer <key>` a přidává `tokentype: API_KEY`. Volání týkající se kvót/profilů
-používají stejný identifikátor, takže AWS považuje hodnotu bearer za dlouhodobě platný klíč API, nikoli
-za přístupový token OIDC nebo sociálního přihlášení.
+`Authorization: Bearer <key>` a přidává `tokentype: API_KEY`. Volání kvóty/profilu
+používají stejný příznak, takže AWS považuje bearer token za dlouhodobý klíč API namísto
+přístupového tokenu OIDC nebo sociální sítě. `KiroExecutor.execute()` odesílá inferenci pomocí klíče API pouze
+na `https://q.<region>.amazonaws.com/generateAssistantResponse` — včetně `us-east-1`
+— protože brána Kiro IDE odmítá `TokenType=API_KEY` a
+`codewhisperer.us-east-1` odmítá datové části požadavků s klíčem API jako neplatné tělo požadavku (HTTP 400).
 
 ---
 

@@ -37,33 +37,33 @@ Mga karaniwang problema at solusyon para sa OmniRoute.
 
 ---
 
-### Paglilimita sa Rate sa Mga Libreng Provider (429 / 400 / 401)
+### Paglilimita ng Rate sa mga Libreng Provider (429 / 400 / 401)
 
-**Sintomas**: Kapag ginagamit ang `model: "auto"` kasama ng mga libre/walang-auth na provider (opencode, auggie, atbp.), paminsan-minsan kang nakakakuha ng `HTTP 429`, `400`, o `401` sa halip na mga sagot. Nagtatagumpay ang mga request kapag muling sinusubukan ang parehong prompt makalipas ang ilang sandali, ngunit humihinto ang automation (mga cron job, agent, script) sa unang pagkabigo.
+**Sintomas**: Kapag gumagamit ng `model: "auto"` kasama ang mga libre/walang-auth na provider (auggie, atbp.), paminsan-minsan kang makakatanggap ng `HTTP 429`, `400`, o `401` sa halip na mga sagot. Nagtatagumpay ang mga request kapag muling sinusubukan ang parehong prompt makalipas ang ilang sandali, ngunit humihinto ang automation (mga cron job, agent, script) sa unang pagkabigo.
 
-**Pangunahing sanhi**: Nagsasama-sama ang tatlong magkakahiwalay na uri ng pagkabigo:
+**Ugat ng problema**: Nagsasabay-sabay ang tatlong magkakahiwalay na mode ng pagkabigo:
 
-1. **Rate limit ng provider (`429`)**: Maaaring magpatupad ang mga libreng tier ng quota sa bawat takdang panahon. Nauubos ito ng biglaang pagdami ng magkakasabay na call, kaya tinatanggihan ang susunod na request hanggang sa mag-reset ang takdang panahon.
-2. **Sirang model sa passthrough (`400`/`401`)**: Maaaring magsama ang mga `auto/*` pool ng mga passthrough model mula sa `opencode` na nakarehistro sa catalog ngunit walang aktibong kredensyal (hal. `oc/north-mini-code-free` → `401`). Susubukan ng auto-router ang isa, mabibigo ito, at maipapasa ang error bago pa gumana ang fallback.
-3. **Pagpapalakas dahil sa concurrency (`429` kapag mataas ang load)**: Kapag sabay-sabay na gumagamit ng `auto` ang maraming agent/cron session, lumalampas ang pinagsama-samang rate ng request sa kayang tanggapin ng mga libreng provider, kaya namamarkahang mapang-abuso ang mga lehitimong call.
+1. **Rate limit ng provider (`429`)**: Maaaring magpatupad ang mga libreng tier ng quota sa bawat window. Nauubos ito ng bugso ng magkakasabay na call, kaya tinatanggihan ang susunod na request hanggang sa mag-reset ang window.
+2. **Sirang model sa passthrough (`400`/`401`)**: Maaaring may kasamang mga passthrough model ang mga `auto/*` pool na nakarehistro sa catalog ngunit walang aktibong credential (→ `401`). Susubukan ng auto-router ang isa, mabibigo, at maipapasa ang error bago gumana ang fallback.
+3. **Paglaki dahil sa concurrency (`429` kapag mataas ang load)**: Kapag sabay-sabay na gumagamit ng `auto` ang maraming agent/cron session, lumalampas ang kabuuang rate ng request sa kayang tanggapin ng mga libreng provider, kaya natutukoy bilang mapang-abuso ang mga lehitimong call.
 
-**Napatunayang pag-aayos (iniulat ng komunidad, 2026-08-10)**: isaayos ang tatlong environment variable upang masalo ng rotation, concurrency, at fallback ang pabago-bagong kondisyon ng libreng tier sa halip na tuluyang huminto dahil dito:
+**Napatunayang pag-aayos (iniulat ng komunidad, 2026-08-10)**: isaayos ang tatlong environment variable upang masalo ng rotation, concurrency, at fallback ang pabagu-bagong libreng tier sa halip na tuluyang mabigo dahil dito:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # lumipat sa ibang model/provider kapag 400/401 (nilalaktawan ang mga sirang passthrough model)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # tahasang maximum ng admission para sa heavyweight (bilang default, hindi nakatakda: walang limitasyon sa bilang ng request, tingnan ang tala sa ibaba)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # taasan ang limitadong paghihintay nang lampas sa default ng RATE_LIMIT_MAX_WAIT_MS para sa mababagal na upstream
+export OMNIROUTE_ROTATE_ON_400=true           # lumipat sa ibang model/provider kapag may 400/401 (nilalaktawan ang mga sirang passthrough model)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # tahasang pinakamataas na bilang ng sabay-sabay na heavyweight admission (hindi nakatakda bilang default: walang limitasyon sa bilang ng request, tingnan ang tala sa ibaba)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # taasan ang limitadong paghihintay nang lampas sa default na RATE_LIMIT_MAX_WAIT_MS para sa mababagal na upstream
 ```
 
-Itakda ang mga ito sa process environment ng OmniRoute (ang daemon, hal. sa pamamagitan ng LaunchAgent plist o `systemctl edit`), pagkatapos ay i-restart ang OmniRoute. Ang rotation flag ang nag-iisang hakbang na may pinakamalaking epekto: ginagawa nitong transparent na muling pagsubok sa isang gumaganang provider sa pool ang isang ganap na pagkabigo.
+Itakda ang mga ito sa process environment ng OmniRoute (ang daemon, hal. sa pamamagitan ng LaunchAgent plist o `systemctl edit`), pagkatapos ay i-restart ang OmniRoute. Ang rotation flag ang nag-iisang may pinakamalaking epekto: ginagawa nitong transparent na retry laban sa isang maayos na provider sa pool ang isang ganap na pagkabigo.
 
-**Tala**: Nililimitahan ng `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` kung ilang heavyweight — long-context — na request ang sabay-sabay na tatakbo; ang limitasyong ito ay isang admission gate, hindi isang rate limiter ng provider. **Update sa #503-fanout:** hindi na nakatakda bilang default ang var na ito (umiiral na lamang ito kapag tahasang na-configure, gaya sa itaas) — sa halip, ang heavyweight admission ay kinokontrol ng awtomatikong kinukuwentang byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) na awtomatikong umaayon sa aktuwal na limitasyon ng memory ng host, kaya dapat makakita ang isang bagong deployment ng mas kaunting pagtanggi na `503 chat_admission_busy` nang hindi kailangang itakda ang var na ito; gagana pa rin nang eksakto ayon sa dokumentasyon ang tahasang pagtatakda nito rito. Ang mga tahasang override sa byte budget ay nililimitahan sa 8 MiB–2 GiB. Hindi pansamantala ang isang `413 body_exceeds_budget`: taasan ang byte budget na iyon, babaan ang `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, o taasan ang limitasyon ng memory ng process. Ang isang `inflight_bytes_budget` shed ay pansamantalang contention at maaari pa ring subukang muli. Hiwalay na pinamamahalaan ang paglilimita sa rate para sa bawat provider (`open-sse/services/rateLimitManager.ts`) ng `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, at `RATE_LIMIT_AUTO_ENABLE` — tingnan ang `.env.example`.
+**Tala**: Nililimitahan ng `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` kung ilang heavyweight — long-context — request ang maaaring tumakbo nang sabay-sabay; ang hangganan ay isang admission gate, hindi rate limiter ng provider. **Update sa #503-fanout:** hindi na itinatakda bilang default ang variable na ito (gagana lamang ito ngayon kapag tahasang na-configure, tulad sa itaas) — sa halip, kinokontrol ang heavyweight admission ng awtomatikong kinuhang byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) na kusang umaangkop batay sa aktuwal na memory ceiling ng host, kaya dapat makakita ang bagong deployment ng mas kaunting `503 chat_admission_busy` na pagtanggi kahit hindi itakda ang variable na ito; gagana pa rin nang eksakto tulad ng nakadokumento ang tahasang pagtatakda nito rito. Ang mga tahasang override sa byte budget ay nililimitahan sa 8 MiB–2 GiB. Hindi pansamantala ang `413 body_exceeds_budget`: taasan ang byte budget na iyon, babaan ang `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, o taasan ang process memory ceiling. Pansamantalang contention ang isang `inflight_bytes_budget` shed at maaari pa ring subukang muli. Hiwalay na pinamamahalaan ng `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, at `RATE_LIMIT_AUTO_ENABLE` ang paglilimita ng rate sa bawat provider (`open-sse/services/rateLimitManager.ts`) — tingnan ang `.env.example`.
 
-**Paano tiyaking gumana ito**: patakbuhin ang iyong agent/cron nang dalawang beses nang magkasunod at tiyaking parehong matagumpay. Bago ang pag-aayos, karaniwang naghahagis ng `429`/`401` ang pangalawang pagtakbo. Pagkatapos ng pag-aayos, ang mga pagkabigo (kung mayroon man) ay awtomatikong sinusubukang muli at nakukumpleto ang tawag. Maaari mo ring patakbuhin ang `curl /monitoring/health` at subaybayan ang field na `rateLimitedUntil` sa mga koneksyon ng provider at ang `circuitBreakers.providerBreakers[].state` para sa mga apektadong provider — ang state ay isa sa `CLOSED`, `DEGRADED`, `OPEN`, o `HALF_OPEN` (tingnan ang `src/shared/utils/circuitBreaker.ts`), at ang provider na patuloy na nabibigo ay lilipat mula `CLOSED → DEGRADED → OPEN` bago magpahintulot ang reset window na makalusot ang isang probe (`HALF_OPEN`).
+**Paano tiyaking gumana ito**: patakbuhin ang iyong agent/cron nang dalawang beses nang mabilis na magkasunod at tiyaking parehong nagtagumpay. Bago ang pag-aayos, karaniwang naglalabas ng `429`/`401` ang pangalawang pagpapatakbo. Pagkatapos ng pag-aayos, ang mga pagkabigo (kung mayroon man) ay transparent na muling sinusubukan at natatapos ang call. Maaari mo ring gamitin ang `curl /monitoring/health` at subaybayan ang field na `rateLimitedUntil` sa mga koneksyon ng provider at ang `circuitBreakers.providerBreakers[].state` para sa mga apektadong provider — isa sa `CLOSED`, `DEGRADED`, `OPEN`, o `HALF_OPEN` ang state (tingnan ang `src/shared/utils/circuitBreaker.ts`), at ang provider na patuloy na nabibigo ay lilipat mula `CLOSED → DEGRADED → OPEN` bago magpadaan ng probe ang reset window (`HALF_OPEN`).
 
-**Kung nakikita mo pa rin ang 429**: talagang naubos na ng aktibong account para sa provider na iyon ang _quota_ nito (hindi lang ang rate). Magdagdag ng pangalawang account para sa parehong provider sa OmniRoute dashboard → Providers → Accounts, o magsama ng isa pang libreng provider (hal. `routeway`, `auggie`). Nakakatulong lamang ang rotation sa pansamantalang rate/400/401; kapag ganap nang naubos ang quota, kailangan ng pangalawang credential o ibang provider.
+**Kung nakakakita ka pa rin ng 429**: tunay nang naubos ng aktibong account para sa provider na iyon ang _quota_ nito (hindi lamang ang rate). Magdagdag ng pangalawang account para sa parehong provider sa OmniRoute dashboard → Providers → Accounts, o magsama ng isa pang libreng provider (hal. `routeway`, `auggie`). Nakakatulong lamang ang rotation sa pansamantalang rate/400/401; nangangailangan ang ganap na pagkaubos ng quota ng pangalawang credential o ibang provider.
 
-**Kung nakikita mo ang 403 sa mga vision model (`auto/vision`, `bazaarlink/*`)**: walang bayad na plan ang nakakonektang account na may kasamang vision, o hindi sapat ang mga pahintulot ng API key. Tiyakin sa provider dashboard na kasama sa scope ng key ang vision/multimodal, o magkonekta ng paid tier account at panatilihin itong target para sa vision.
+**Kung nakakakita ka ng 403 sa mga vision model (`auto/vision`, `bazaarlink/*`)**: walang bayad na plan ang nakakonektang account na may kasamang vision, o kulang ang mga pahintulot ng API key. Tiyakin sa dashboard ng provider na kasama sa scope ng key ang vision/multimodal, o magkonekta ng paid tier account at panatilihin ito bilang vision target.
 
 ---
 
@@ -90,11 +90,11 @@ Nagmumula ang mga babala sa mga lipas na saklaw ng peer dependency sa mga third-
 
 ---
 
-## Babala sa Na-block na npm install-scripts (pangkalahatang pag-install)
+## Babala sa Na-block na npm install-scripts (pandaigdigang pag-install)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Kapag pinapatakbo ang `npm install -g omniroute`, bina-block ng mga mas bagong bersyon ng npm (v11+ at v12+) ang mga package lifecycle script bilang default at nagpapakita ng babala tungkol sa install-scripts:
+Kapag pinapatakbo ang `npm install -g omniroute`, bina-block bilang default ng mga mas bagong bersyon ng npm (v11+ at v12+) ang mga package lifecycle script at nagpapakita ng babala tungkol sa install-scripts:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,25 +104,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Maaari bang balewalain ang babalang ito?
 
-**Bahagya, ngunit hindi inirerekomenda ang pagpapatakbo nang walang mga script.** May kasamang maayos na mga fallback ang OmniRoute: kung hindi ma-load ang mga native na `better-sqlite3` binding mula sa standalone bundle, lilipat ang application sa mga alternatibong driver gaya ng `node:sqlite` o `sql.js` (tingnan ang [Paglutas sa SQLite Runtime](../ops/SQLITE_RUNTIME.md)). Magsisimula pa rin ang server, ngunit kapag tumatakbo sa mga WASM fallback gaya ng `sql.js`, hindi magagamit ang SQLite WAL (Write-Ahead Logging) mode at tataas ang overhead sa memory at pag-sync sa disk.
+**Bahagya, ngunit hindi inirerekomenda ang pagpapatakbo nang walang mga script.** May mga maayos na fallback ang OmniRoute: kung hindi ma-load ang mga native na binding ng `better-sqlite3` mula sa standalone bundle, gagamit ang application ng mga alternatibong driver gaya ng `node:sqlite` o `sql.js` (tingnan ang [Pagresolba sa SQLite Runtime](../ops/SQLITE_RUNTIME.md)). Magsisimula pa rin ang server, ngunit idi-disable ng pagpapatakbo sa mga WASM fallback gaya ng `sql.js` ang SQLite WAL (Write-Ahead Logging) mode at patataasin ang overhead sa memory at pag-sync sa disk.
 
 ### Aling mga script ang talagang kinakailangan?
 
 Hindi lahat ng na-block na script ay mahalaga upang mapatakbo ang OmniRoute:
 
-- **Mahalaga (`omniroute`, `better-sqlite3`):** Tumatakbo ang OmniRoute mula sa isang Next.js standalone application bundle (`dist/`). Sa panahon ng pag-install, dina-download o kino-compile ng npm ang native na SQLite driver na partikular sa host sa pinakamataas na antas na `node_modules/better-sqlite3/`. Pagkatapos, vine-verify at kinokopya ng `postinstall` script (`scripts/build/postinstall.mjs`) ng OmniRoute ang mga binary na ito na partikular sa host papunta sa `dist/node_modules/` upang ma-access ng standalone server ang mga ito. Kung na-block ang postinstall script ng `omniroute`, lalaktawan ang hakbang na ito ng pagkopya.
-- **Opsyonal/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Mga build helper, watcher tool, o system keychain utility ang mga ito. Kapag pinahintulutan ang mga ito, maiiwasan ang mga babala sa build, ngunit hindi kailangan ang mga ito para sa pangunahing functionality ng routing.
-- **Hindi kasama (`onnxruntime-node`):** Isang opsyonal na dependency para sa mga lokal na AI embedding at **hindi** kinakailangan upang mapatakbo ang OmniRoute. Nagda-download ang postinstall script nito ng humigit-kumulang 300MB na CUDA asset mula sa NuGet; huwag itong isama sa allow-list maliban kung tahasan mong nilalayong gumamit ng lokal na ONNX acceleration sa sinusuportahang hardware.
+- **Mahalaga (`omniroute`, `better-sqlite3`):** Tumatakbo ang OmniRoute mula sa isang Next.js standalone application bundle (`dist/`). Sa panahon ng pag-install, dina-download o kino-compile ng npm ang host-specific na native SQLite driver sa pinakamataas na antas na `node_modules/better-sqlite3/`. Pagkatapos, bine-verify at kinokopya ng `postinstall` script ng OmniRoute (`scripts/build/postinstall.mjs`) ang mga host-specific na binary na ito papunta sa `dist/node_modules/` upang ma-access ng standalone server ang mga ito. Kung na-block ang postinstall script ng `omniroute`, lalaktawan ang hakbang na ito sa pagkopya.
+- **Opsyonal/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ang mga ito ay mga build helper, watcher tool, o system keychain utility. Kapag pinahintulutan ang mga ito, maiiwasan ang mga babala sa pag-build, ngunit hindi kinakailangan ang mga ito para sa pangunahing functionality ng routing.
+- **Hindi kasama (`onnxruntime-node`):** Isa itong opsyonal na dependency para sa mga lokal na AI embedding at **hindi** kinakailangan upang mapatakbo ang OmniRoute. Dina-download ng postinstall script nito ang humigit-kumulang 300MB na CUDA asset mula sa NuGet; huwag itong isama sa allow-list maliban kung tahasan mong nilalayong gumamit ng lokal na ONNX acceleration sa suportadong hardware.
 
-### Inirerekomendang solusyon
+### Inirerekomendang pag-aayos
 
-Upang payagan ang mga kinakailangang install script sa panahon ng isang pangkalahatang pag-install at alisin ang mga babala, ipasa ang `--allow-scripts` para sa OmniRoute at mga native dependency nito:
+Upang pahintulutan ang mga kinakailangang install script sa panahon ng pandaigdigang pag-install at alisin ang mga babala, ipasa ang `--allow-scripts` para sa OmniRoute at sa mga native dependency nito:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Bilang alternatibo, upang permanenteng i-configure ito para sa lahat ng pangkalahatang pag-install sa iyong user account:
+Bilang alternatibo, upang permanenteng i-configure ito para sa lahat ng pandaigdigang pag-install sa iyong user account:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user

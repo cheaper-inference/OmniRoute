@@ -37,33 +37,33 @@ Az OmniRoute gyakori problémái és azok megoldásai.
 
 ---
 
-### Kérésgyakoriság-korlátozás ingyenes szolgáltatóknál (429 / 400 / 401)
+### Sebességkorlátozás ingyenes szolgáltatóknál (429 / 400 / 401)
 
-**Tünet**: Amikor a `model: "auto"` beállítást ingyenes vagy hitelesítést nem igénylő szolgáltatókkal (opencode, auggie stb.) használod, időnként válasz helyett `HTTP 429`, `400` vagy `401` hibát kapsz. Ha néhány pillanattal később ugyanazzal a bemenettel újrapróbálkozol, a kérések sikeresek, de az automatizálás (cron-feladatok, ügynökök, szkriptek) már az első hibánál megszakad.
+**Tünet**: Ha a `model: "auto"` beállítást ingyenes, hitelesítést nem igénylő szolgáltatókkal (auggie stb.) használja, időnként válaszok helyett `HTTP 429`, `400` vagy `401` hibát kap. Ha röviddel később újrapróbálja ugyanazt a promptot, a kérés sikeres lesz, de az automatizálás (cron-feladatok, ügynökök, szkriptek) már az első hibánál leáll.
 
 **Kiváltó ok**: Három egymástól független hibamód hatása adódik össze:
 
-1. **Szolgáltatói kérésgyakoriság-korlát (`429`)**: Az ingyenes csomagok időablakonkénti kvótát írhatnak elő. A párhuzamos hívások hirtelen megugrása kimeríti ezt, ezért a következő kérést a rendszer az időablak visszaállásáig elutasítja.
-2. **Hibás modell közvetlen átadáskor (`400`/`401`)**: Az `auto/*` készletek tartalmazhatnak olyan, közvetlenül átadott modelleket az `opencode` szolgáltatótól, amelyek regisztrálva vannak a katalógusban, de nem rendelkeznek működő hitelesítő adatokkal (például `oc/north-mini-code-free` → `401`). Az automatikus útválasztó megpróbálja használni az egyiket, az sikertelen lesz, és a hiba még a tartalékútvonal aktiválása előtt továbbterjed.
-3. **A párhuzamosság felerősítő hatása (`429` terhelés alatt)**: Amikor több ügynök- vagy cron-munkamenet éri el egyszerre az `auto` útvonalat, az összesített kérési gyakoriság meghaladja az ingyenes szolgáltatók által tolerált szintet, ezért a rendszer a szabályos hívásokat is visszaélésszerűként jelöli meg.
+1. **Szolgáltatói sebességkorlátozás (`429`)**: Az ingyenes csomagok időablakonkénti kvótát írhatnak elő. A párhuzamos hívások hirtelen megugrása kimeríti ezt, ezért a következő kérést a rendszer az időablak visszaállításáig elutasítja.
+2. **Hibás modell a közvetlen továbbításban (`400`/`401`)**: Az `auto/*` készletek tartalmazhatnak olyan közvetlenül továbbított modelleket, amelyek regisztrálva vannak a katalógusban, de nem rendelkeznek működő hitelesítő adatokkal (→ `401`). Az automatikus útválasztó megpróbál egy ilyet használni, hibát kap, majd a hiba még azelőtt továbbterjed, hogy a tartalék útvonal aktiválódna.
+3. **A párhuzamosság felerősítő hatása (`429` terhelés alatt)**: Ha több ügynök- vagy cron-munkamenet egyszerre használja az `auto` útvonalat, az összesített kérési sebesség meghaladja az ingyenes szolgáltatók által tolerált szintet, ezért a szabályos hívásokat is visszaélésként jelölhetik meg.
 
-**Ellenőrzött javítás (közösségi jelentés alapján, 2026-08-10)**: hangolj be három környezeti változót, hogy a rotáció, a párhuzamosság és a tartalékútvonal kezelje az ingyenes csomagok ingadozásait ahelyett, hogy a folyamat hibával leállna:
+**Ellenőrzött javítás (közösségi jelentés, 2026-08-10)**: hangoljon be három környezeti változót, hogy a rotáció, a párhuzamosság és a tartalék útvonal kezelje az ingyenes csomagok ingadozásait ahelyett, hogy a folyamat hibával leállna:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 esetén váltás másik modellre/szolgáltatóra (kihagyja a hibás, közvetlenül átadott modelleket)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicit felső befogadási korlát a nagy erőforrás-igényű kérésekhez (alapértelmezetten nincs beállítva: nincs kérésszámkorlát, lásd az alábbi megjegyzést)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # a korlátozott várakozás növelése a RATE_LIMIT_MAX_WAIT_MS alapértelmezésén túl a lassú upstream szolgáltatásokhoz
+export OMNIROUTE_ROTATE_ON_400=true           # váltás másik modellre/szolgáltatóra 400/401 esetén (kihagyja a hibás közvetlen továbbítású modelleket)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicit felső korlát a nagy erőforrás-igényű kérések befogadásához (alapértelmezés szerint nincs beállítva: nincs kérésszámkorlát, lásd az alábbi megjegyzést)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # a korlátozott várakozás növelése a RATE_LIMIT_MAX_WAIT_MS alapértelmezett értéke fölé lassú upstream szolgáltatások esetén
 ```
 
-Állítsd be ezeket az OmniRoute-folyamat környezetében (a démonnál, például a LaunchAgent plist fájlon vagy a `systemctl edit` parancson keresztül), majd indítsd újra az OmniRoute-ot. A rotációs jelző önmagában a leghatékonyabb beállítás: a végleges hibát átlátható újrapróbálkozássá alakítja a készlet egyik megfelelően működő szolgáltatójánál.
+Állítsa be ezeket az OmniRoute-folyamat környezetében (a démonnál, például a LaunchAgent plist fájlon vagy a `systemctl edit` parancson keresztül), majd indítsa újra az OmniRoute-ot. A rotációs jelző önmagában a leghatékonyabb beállítás: a végleges hibát átlátható újrapróbálkozássá alakítja a készlet egy működő szolgáltatójánál.
 
-**Megjegyzés**: Az `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` korlátozza, hogy egyszerre hány nagy erőforrás-igényű — hosszú kontextusú — kérés futhat; ez a korlát egy befogadási kapu, nem pedig szolgáltatói kérésgyakoriság-korlátozó. **#503-fanout frissítés:** ez a változó alapértelmezetten már nincs beállítva (mostantól csak explicit konfigurálás esetén lép érvénybe, ahogyan fent látható) — a nagy erőforrás-igényű kérések befogadását ehelyett egy automatikusan meghatározott bájtkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) szabályozza, amely a gazdagép tényleges memóriakorlátjához igazodik. Emiatt egy friss telepítésnek jóval kevesebb `503 chat_admission_busy` elutasítást kell produkálnia anélkül, hogy ezt a változót egyáltalán be kellene állítani; az itt látható explicit beállítás továbbra is pontosan a dokumentált módon működik. Az explicit bájtkeret-felülbírálások 8 MiB és 2 GiB közé korlátozódnak. A `413 body_exceeds_budget` nem átmeneti hiba: növeld ezt a bájtkeretet, csökkentsd az `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` értékét, vagy növeld a folyamat memóriakorlátját. Az `inflight_bytes_budget` miatti tehermentesítés átmeneti erőforrás-versengést jelez, ezért továbbra is érdemes újrapróbálkozni. A szolgáltatónkénti kérésgyakoriság-korlátozást (`open-sse/services/rateLimitManager.ts`) külön a `RATE_LIMIT_MAX_WAIT_MS`, a `RATE_LIMIT_MAX_QUEUE_DEPTH` és a `RATE_LIMIT_AUTO_ENABLE` szabályozza — lásd: `.env.example`.
+**Megjegyzés**: Az `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` azt korlátozza, hogy egyszerre hány nagy erőforrás-igényű — hosszú kontextusú — kérés futhat; ez a korlát befogadási kapu, nem pedig szolgáltatói sebességkorlátozó. **#503-fanout frissítés:** ez a változó alapértelmezés szerint már nincs beállítva (mostantól csak akkor érvényesül, ha explicit módon konfigurálják, mint fent) — a nagy erőforrás-igényű kérések befogadását ehelyett egy automatikusan származtatott bájtkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) szabályozza, amely a gazdagép tényleges memóriakorlátjához igazodik. Emiatt egy friss telepítésnél e változó beállítása nélkül is jóval kevesebb `503 chat_admission_busy` elutasításnak kell jelentkeznie; az itt bemutatott explicit beállítás továbbra is pontosan a dokumentált módon működik. Az explicit bájtkeret-felülbírálások 8 MiB és 2 GiB közé vannak korlátozva. A `413 body_exceeds_budget` nem átmeneti hiba: növelje ezt a bájtkeretet, csökkentse az `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` értékét, vagy növelje a folyamat memóriakorlátját. Az `inflight_bytes_budget` miatti terheléscsökkentés átmeneti erőforrás-ütközés, ezért továbbra is újrapróbálható. A szolgáltatónkénti sebességkorlátozást (`open-sse/services/rateLimitManager.ts`) külön a `RATE_LIMIT_MAX_WAIT_MS`, a `RATE_LIMIT_MAX_QUEUE_DEPTH` és a `RATE_LIMIT_AUTO_ENABLE` szabályozza — lásd: `.env.example`.
 
-**Hogyan ellenőrizhető, hogy működött-e**: futtasd gyors egymásutánban kétszer az agentet/cron feladatot, és ellenőrizd, hogy mindkettő sikeresen lefut-e. A javítás előtt a második futtatás jellemzően `429`/`401` hibát ad. A javítás után a hibás kérések újrapróbálása (ha van ilyen) automatikusan, észrevétlenül történik, és a hívás befejeződik. A `curl /monitoring/health` paranccsal is lekérdezheted az állapotot, és figyelheted a szolgáltatói kapcsolatok `rateLimitedUntil` mezőjét, valamint a `circuitBreakers.providerBreakers[].state` értékét az érintett szolgáltatóknál — az állapot a következők egyike lehet: `CLOSED`, `DEGRADED`, `OPEN` vagy `HALF_OPEN` (lásd: `src/shared/utils/circuitBreaker.ts`), és egy folyamatosan hibázó szolgáltató állapota `CLOSED → DEGRADED → OPEN` sorrendben változik, mielőtt a visszaállítási időablak engedélyezne egy próbakérést (`HALF_OPEN`).
+**A javítás ellenőrzése**: futtassa az ügynököt vagy a cron-feladatot kétszer, rövid időn belül, és ellenőrizze, hogy mindkét futtatás sikeres-e. A javítás előtt a második futtatás jellemzően `429`/`401` hibát ad. A javítás után az esetleges hibákat a rendszer átlátható módon újrapróbálja, és a hívás befejeződik. A `curl /monitoring/health` paranccsal megfigyelheti továbbá a szolgáltatói kapcsolatok `rateLimitedUntil` mezőjét, valamint az érintett szolgáltatókhoz tartozó `circuitBreakers.providerBreakers[].state` értékét — az állapot a `CLOSED`, `DEGRADED`, `OPEN` vagy `HALF_OPEN` értékek egyike lehet (lásd: `src/shared/utils/circuitBreaker.ts`), és egy folyamatosan hibázó szolgáltató állapota `CLOSED → DEGRADED → OPEN` sorrendben változik, mielőtt a visszaállítási időablak engedélyezne egy tesztkérést (`HALF_OPEN`).
 
-**Ha továbbra is 429-et látsz**: az adott szolgáltató aktív fiókja valóban kimerítette a _kvótáját_ (nem csupán az időszakos sebességkorlátot érte el). Adj hozzá egy második fiókot ugyanahhoz a szolgáltatóhoz az OmniRoute irányítópultján a Providers → Accounts menüpontban, vagy vonj be egy másik ingyenes szolgáltatót (például `routeway`, `auggie`). A rotáció csak az átmeneti sebességkorlátozási/400/401 hibák esetén segít; a kvóta teljes kimerüléséhez második hitelesítő adat vagy másik szolgáltató szükséges.
+**Ha továbbra is 429 hibát lát**: az adott szolgáltató aktív fiókja ténylegesen kimerítette a _kvótáját_ (nem csupán a sebességkorlátot érte el). Adjon hozzá egy második fiókot ugyanahhoz a szolgáltatóhoz az OmniRoute irányítópultján a Providers → Accounts menüpontban, vagy vegyen fel egy másik ingyenes szolgáltatót is (például `routeway`, `auggie`). A rotáció csak az átmeneti sebességkorlátozási, 400-as és 401-es hibákon segít; a kvóta teljes kimerüléséhez egy második hitelesítő adat vagy egy másik szolgáltató szükséges.
 
-**Ha 403-at látsz a vision modelleknél (`auto/vision`, `bazaarlink/*`)**: a csatlakoztatott fiókhoz nem tartozik vision funkciót tartalmazó fizetős csomag, vagy az API-kulcs nem rendelkezik elegendő jogosultsággal. Ellenőrizd a szolgáltató irányítópultján, hogy a kulcs hatóköre tartalmazza-e a vision/multimodális funkciókat, vagy csatlakoztass egy fizetős csomaggal rendelkező fiókot, és tartsd meg azt vision célfiókként.
+**Ha 403 hibát lát vizuális modelleknél (`auto/vision`, `bazaarlink/*`)**: a csatlakoztatott fiók nem rendelkezik vizuális funkciókat tartalmazó fizetős csomaggal, vagy az API-kulcs jogosultságai nem megfelelőek. Ellenőrizze a szolgáltató irányítópultján, hogy a kulcs hatóköre tartalmazza-e a vizuális/multimodális funkciókat, vagy csatlakoztasson egy fizetős csomaghoz tartozó fiókot, és tartsa meg azt a vizuális kérések céljaként.
 
 ---
 
@@ -90,39 +90,39 @@ A figyelmeztetéseket olyan, külső féltől származó csomagok elavult peerf�
 
 ---
 
-## Blokkolt npm telepítési szkriptekre vonatkozó figyelmeztetés (globális telepítés)
+## Blokkolt npm install-szkriptekre vonatkozó figyelmeztetés (globális telepítés)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Az `npm install -g omniroute` futtatásakor az újabb npm-verziók (v11+ és v12+) alapértelmezés szerint blokkolják a csomagok életciklus-szkriptjeit, és a telepítési szkriptekre vonatkozó figyelmeztetést jelenítenek meg:
+Az `npm install -g omniroute` futtatásakor az npm újabb verziói (v11+ és v12+) alapértelmezés szerint blokkolják a csomagok életciklus-szkriptjeit, és az install-szkriptekre vonatkozó figyelmeztetést jelenítenek meg:
 
 ```
-npm warn install-scripts 7 csomag telepítési szkriptjei blokkolva lettek, mert nem szerepelnek az allowScripts beállításban:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Figyelmen kívül hagyható ez a figyelmeztetés?
 
-**Részben, de a szkriptek nélküli futtatás nem ajánlott.** Az OmniRoute szabályosan kezelt tartalék megoldásokat tartalmaz: ha a natív `better-sqlite3` kötések nem tölthetők be az önálló csomagból, az alkalmazás alternatív illesztőprogramokra, például a `node:sqlite` vagy a `sql.js` használatára tér át (lásd: [SQLite futásidejű feloldása](../ops/SQLITE_RUNTIME.md)). A kiszolgáló továbbra is elindul, de a WASM-alapú tartalék megoldások, például a `sql.js` használata letiltja az SQLite WAL (Write-Ahead Logging) módját, valamint növeli a memóriahasználatot és a lemezszinkronizálás többletterhelését.
+**Részben igen, de a szkriptek nélküli futtatás nem ajánlott.** Az OmniRoute biztonságos tartalékmegoldásokat tartalmaz: ha a natív `better-sqlite3` kötések nem tölthetők be az önálló csomagból, az alkalmazás alternatív illesztőprogramokra, például a `node:sqlite` vagy a `sql.js` használatára áll át (lásd: [SQLite futtatókörnyezet feloldása](../ops/SQLITE_RUNTIME.md)). A kiszolgáló továbbra is elindul, de a WASM-alapú tartalékmegoldások, például a `sql.js` használata letiltja az SQLite WAL (Write-Ahead Logging, előreíró naplózás) módját, és növeli a memóriahasználatot, valamint a lemezszinkronizálás többletterhelését.
 
 ### Mely szkriptek szükségesek ténylegesen?
 
-Nem minden blokkolt szkript nélkülözhetetlen az OmniRoute futtatásához:
+Nem minden blokkolt szkript elengedhetetlen az OmniRoute futtatásához:
 
-- **Nélkülözhetetlen (`omniroute`, `better-sqlite3`):** Az OmniRoute egy önálló Next.js-alkalmazáscsomagból (`dist/`) fut. A telepítés során az npm letölti vagy lefordítja a gazdagépre jellemző natív SQLite-illesztőprogramot a legfelső szintű `node_modules/better-sqlite3/` könyvtárban. Ezután az OmniRoute `postinstall` szkriptje (`scripts/build/postinstall.mjs`) ellenőrzi és a `dist/node_modules/` könyvtárba másolja ezeket a gazdagépre jellemző binárisokat, hogy az önálló kiszolgáló hozzáférhessen hozzájuk. Ha az `omniroute` postinstall szkriptje blokkolva van, ez a másolási lépés kimarad.
-- **Opcionális/tranzitív (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ezek buildelési segédprogramok, fájlváltozás-figyelő eszközök vagy rendszerkulcstartó-segédprogramok. Engedélyezésük megakadályozza a buildelési figyelmeztetéseket, de az alapvető útválasztási funkciókhoz nem szükségesek.
-- **Kizárt (`onnxruntime-node`):** Opcionális függőség helyi MI-beágyazásokhoz, és **nem** szükséges az OmniRoute futtatásához. A postinstall szkriptje körülbelül 300 MB méretű CUDA-erőforrást tölt le a NuGet szolgáltatásból; ne vegye fel az engedélyezési listára, hacsak nem kíván kifejezetten helyi ONNX-gyorsítást használni támogatott hardveren.
+- **Elengedhetetlen (`omniroute`, `better-sqlite3`):** Az OmniRoute egy önálló Next.js-alkalmazáscsomagból (`dist/`) fut. A telepítés során az npm letölti vagy lefordítja a gazdarendszerhez tartozó natív SQLite-illesztőprogramot a legfelső szintű `node_modules/better-sqlite3/` könyvtárban. Az OmniRoute `postinstall` szkriptje (`scripts/build/postinstall.mjs`) ezután ellenőrzi és a `dist/node_modules/` könyvtárba másolja ezeket a gazdarendszer-specifikus bináris fájlokat, hogy az önálló kiszolgáló hozzáférhessen hozzájuk. Ha az `omniroute` postinstall szkriptje blokkolva van, ez a másolási lépés kimarad.
+- **Opcionális/tranzitív (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ezek fordítási segédeszközök, fájlfigyelő eszközök vagy rendszerkulcstár-segédprogramok. Engedélyezésük megszünteti a fordítási figyelmeztetéseket, de az alapvető útválasztási funkciókhoz nem szükségesek.
+- **Kizárt (`onnxruntime-node`):** Ez a helyi MI-beágyazások opcionális függősége, és **nem** szükséges az OmniRoute futtatásához. A postinstall szkriptje körülbelül 300 MB-nyi CUDA-erőforrást tölt le a NuGet szolgáltatásból; ne vegye fel az engedélyezési listára, hacsak nem kíván kifejezetten helyi ONNX-gyorsítást használni támogatott hardveren.
 
 ### Ajánlott megoldás
 
-A szükséges telepítési szkriptek globális telepítés során történő engedélyezéséhez és a figyelmeztetések elrejtéséhez adja át az `--allow-scripts` kapcsolót az OmniRoute és natív függőségei számára:
+A szükséges telepítési szkriptek globális telepítés közbeni engedélyezéséhez és a figyelmeztetések megszüntetéséhez adja meg a `--allow-scripts` kapcsolót az OmniRoute és natív függőségei számára:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Másik lehetőségként, ha ezt véglegesen szeretné beállítani a felhasználói fiókjához tartozó összes globális telepítéshez:
+Másik lehetőségként ezt tartósan is beállíthatja a felhasználói fiókja alatt végzett összes globális telepítéshez:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### A telepítés ellenőrzése
 
-A telepítés után futtassa a beépített diagnosztikai eszközt annak ellenőrzéséhez, hogy a natív kötések és a futtatókörnyezet megfelelő állapotban vannak-e:
+A telepítés után futtassa a beépített diagnosztikai eszközt annak ellenőrzéséhez, hogy a natív kötések és a futtatókörnyezet megfelelően működnek-e:
 
 ```bash
 omniroute doctor

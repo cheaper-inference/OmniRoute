@@ -31,21 +31,22 @@
 
 ## Obdobje podpore LTS (v3.9.x)
 
-Po različici 3.8.59 bo naslednja različica **3.9.0**, ki odpira vejo dolgoročne podpore
-`stable/v3` (glejte [`ROADMAP.md`](ROADMAP.md) → »Phase 3 — v3.9.0 LTS«).
+Po različici 3.8.59 je naslednja različica **3.9.0**, ki na veji
+`stable/v3` uvaja linijo dolgoročne podpore (glejte [`ROADMAP.md`](ROADMAP.md) → »3. faza — v3.9.0 LTS«).
 
 - **Kaj prejema `stable/v3`:** popravke napak, varnostne popravke in posodobitve ponudnikov. Nove
-  funkcije so namenjene kanalu v4; veja LTS daje prednost stabilnosti. `npm install omniroute`
-  (distribucijska oznaka `latest`) ostane na v3 med celotnim ciklom v4.
-- **Trajanje obdobja:** `<T-GAP-3: odločitev lastnika še ni sprejeta — glejte ROADMAP.md>`. Dolžina
-  obdobja po splošni razpoložljivosti v4.0 (ko `latest` preklopi na v4) **še ni določena**; ta
-  razdelek bo posodobljen, ko jo vzdrževalec objavi. Do takrat ne predvidevajte končnega datuma.
-- **Prijava ranljivosti v veji LTS:** uporabite isti kanal kot za katero koli drugo različico —
-  zasebno [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nikoli javne težave. Navedite, katero različico ste preizkusili (na primer `3.9.2`); popravki se vključijo v
+  funkcionalnosti so namenjene kanalu v4; pri liniji LTS ima stabilnost prednost. `npm install omniroute`
+  (distribucijska oznaka `latest`) ostane na v3 skozi celoten cikel v4.
+- **Trajanje obdobja:** `stable/v3` prejema **varnostne popravke in popravke kritičnih regresij
+  12 mesecev po izdaji različice 3.9.0 oziroma do 90 dni po objavi različice v4.0.0 z oznako `latest` —
+  kar koli nastopi pozneje**. Končni datum bo ob izdaji zabeležen v opombah ob izdaji različice 3.9.0 in v
+  [`ROADMAP.md`](ROADMAP.md).
+- **Prijava ranljivosti v liniji LTS:** uporabite isti kanal kot za katero koli drugo različico —
+  zasebno [GitHubovo varnostno obvestilo](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  nikoli javne prijave težave. Navedite, katero različico ste preizkusili (na primer `3.9.2`); popravki se dodajo v
   `stable/v3` in se prenesejo naprej v v4.
-- **Varnostno izhodišče ob začetku LTS:** izmerjeno stanje pregledovalnika, dokazila o varovanju poti in
-  javnih poverilnicah so zabeležena v
+- **Varnostno izhodišče ob izdaji LTS:** izmerjeno stanje pregledovalnika, preverjanja varoval poti in
+  dokazila o javnih poverilnicah so zabeleženi v
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

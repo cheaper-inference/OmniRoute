@@ -56,8 +56,11 @@ export const FREE_MODELS: FreeModelSpec[] = [
     displayName: "Gemini 3.1 Flash-Lite",
   },
   { provider: "gemini", model: "gemini/gemma-4-31b-it", displayName: "Gemma 4 31B (Gemini)" },
-  { provider: "nvidia", model: "nvidia/openai/gpt-oss-120b", displayName: "GPT OSS 120B (NVIDIA)" },
-  { provider: "nvidia", model: "nvidia/moonshotai/kimi-k3", displayName: "Kimi K3 (NVIDIA)" },
+  {
+    provider: "nvidia",
+    model: "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b",
+    displayName: "Nemotron 3.5 Super VL (NVIDIA)",
+  },
   {
     provider: "nvidia",
     model: "nvidia/google/gemma-4-31b-it",
@@ -87,8 +90,8 @@ export const FREE_MODELS: FreeModelSpec[] = [
   },
   {
     provider: "opencode",
-    model: "opencode/deepseek-v4-flash-free",
-    displayName: "DeepSeek V4 Flash Free (OpenCode)",
+    model: "opencode/deepseek-v4.1-flash-free",
+    displayName: "DeepSeek V4.1 Flash Free (OpenCode)",
   },
   {
     provider: "duckduckgo-web",
@@ -178,8 +181,8 @@ export const FREE_MODELS: FreeModelSpec[] = [
   { provider: "opencode", model: "opencode/big-pickle", displayName: "Big Pickle (OpenCode)" },
   {
     provider: "opencode",
-    model: "opencode/mimo-v2.5-free",
-    displayName: "MiMo V2.5 Free (OpenCode)",
+    model: "opencode/mimo-v2.6-flash-free",
+    displayName: "MiMo V2.6 Flash Free (OpenCode)",
   },
 ];
 
@@ -209,7 +212,7 @@ export const NEWLY_ENABLED_MODELS: FreeModelSpec[] = FREE_MODELS.filter((m) =>
     "opencode/north-mini-code-free",
     "opencode/laguna-s-2.1-free",
     "opencode/big-pickle",
-    "opencode/mimo-v2.5-free",
+    "opencode/mimo-v2.6-flash-free",
   ].includes(m.model)
 );
 

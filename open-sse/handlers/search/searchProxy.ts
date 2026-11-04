@@ -16,6 +16,7 @@ import { isSubscriptionQuotaText } from "../../services/quotaTextCooldowns.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 import type { SearchResult } from "../search.ts";
 import {
+  computeSearchCostUsd,
   isReportedCostTrusted,
   recordReportedErrorCost,
   resolveSearchUsage,
@@ -311,7 +312,13 @@ export async function executeProviderFetch(
         query,
         results,
         answer: null,
-        usage: resolveSearchUsage(config, data, costTrusted, log),
+        usage: resolveSearchUsage(
+          config,
+          data,
+          costTrusted,
+          log,
+          computeSearchCostUsd(config, init.body, normalized.results.length)
+        ),
         metrics: {
           response_time_ms: duration,
           upstream_latency_ms: duration,

@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) חיבור ספקים ויצירת מפתח API
 
-1. פתחו את לוח הבקרה → `Providers` וחברו לפחות ספק אחד (OAuth או מפתח API).
+1. פתחו את לוח הבקרה → `Providers` וחברו ספק אחד לפחות (OAuth או מפתח API).
 2. פתחו את לוח הבקרה → `Endpoints` וצרו מפתח API.
 3. (אופציונלי) פתחו את לוח הבקרה → `Combos` והגדירו את שרשרת הגיבוי שלכם.
 
@@ -149,10 +149,10 @@ omniroute providers validate
 ```txt
 כתובת URL בסיסית: http://localhost:20128/v1
 מפתח API:          [העתיקו מדף ה-Endpoint]
-מודל:              if/qwen3.8-max-preview (או כל קידומת ספק/מודל)
+מודל:              if/qwen3.8-max-preview (או כל קידומת provider/model)
 ```
 
-אם העורך שלכם אינו יכול לשלוח `Authorization: Bearer ...`, השתמשו במקום זאת בכתובת הבסיס התואמת הכוללת את האסימון:
+אם העורך שלכם אינו יכול לשלוח `Authorization: Bearer ...`, השתמשו במקום זאת בכתובת הבסיס התואמת הכוללת טוקן:
 
 ```txt
 כתובת URL בסיסית: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -161,39 +161,40 @@ omniroute providers validate
 כתובת URL לתגיות Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-עובד עם Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode וערכות SDK תואמות OpenAI.
+פועל עם Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode וערכות SDK תואמות OpenAI.
 
 #### הגדרה אוטומטית באמצעות `setup-*`
 
-במקום להדביק ידנית את כתובת הבסיס ואת המפתח, אפשרו ל-OmniRoute לכתוב את התצורה
-הייעודית של כל כלי מתוך קטלוג המודלים הפעיל. פקודה אחת לכל כלי:
+במקום להדביק ידנית את כתובת הבסיס ואת המפתח, אפשרו ל-OmniRoute לכתוב את קובץ התצורה
+הייחודי של כל כלי מתוך קטלוג המודלים הפעיל. פקודה אחת לכל כלי:
 
 ```bash
-omniroute setup-codex        # פרופילים תחת ~/.codex/<name>.config.toml
+omniroute setup-codex        # פרופילים ב-~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (תואם OpenAI)
-omniroute setup-cline        # הגדרות Cline CLI והרחבת VS Code
+omniroute setup-cline        # הגדרות Cline CLI ותוסף VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # מציג את שלבי ההגדרה בתוך Cursor
+omniroute setup-cursor       # מדפיס את שלבי ההגדרה בתוך Cursor
 omniroute setup-roo          # ייבוא ל-Roo Code ומצביע autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-כל פקודה מקבלת `--remote <url> --api-key <key>` כדי להגדיר כלי מקומי מול
-OmniRoute **מרוחק**, וכן `--dry-run` לתצוגה מקדימה. כדי להפעיל CLI עם משתני
-הסביבה המתאימים מוזרקים, מבלי לכתוב תצורה כלל, השתמשו במפעיל הכללי
+כל פקודה מקבלת את `--remote <url> --api-key <key>` כדי להגדיר כלי מקומי מול OmniRoute
+**מרוחק**, וכן את `--dry-run` לתצוגה מקדימה. כדי להפעיל CLI עם משתני הסביבה המתאימים
+מוזרקים, מבלי לכתוב כלל קובץ תצורה, השתמשו במפעיל הכללי
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
 המפעילים הישנים הייעודיים לכל כלי, `omniroute launch` (Claude Code) ו-
 `omniroute launch-codex` (Codex), עדיין זמינים.
 
-לטבלה המלאה (מה כל פקודה כותבת, כל הדגלים, מקומי לעומת מרוחק ומוסכמות `/v1`
-לכתובת URL בסיסית), ראו **[שילובי CLI](./CLI-INTEGRATIONS.md)**.
+לטבלה המלאה (מה כל פקודה כותבת, כל הדגלים, מקומי לעומת מרוחק, והמוסכמות של
+`/v1` בכתובת הבסיס), ראו **[שילובי CLI](./CLI-INTEGRATIONS.md)**.
 
-להגדרות מפורטות עבור כל כלי (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ועוד), ראו את **[המדריך לכלי CLI](../reference/CLI-TOOLS.md)** הייעודי.
+להגדרה מפורטת עבור כל כלי בנפרד (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ועוד), ראו את **[המדריך לכלי CLI](../reference/CLI-TOOLS.md)** הייעודי.
 
 ---
 
@@ -322,9 +323,9 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## תבנית Void Linux ‏(xbps-src)
+## תבנית עבור Void Linux‏ (xbps-src)
 
-משתמשי Void Linux יכולים לבנות חבילה מקורית באמצעות `xbps-src`. שמרו בלוק זה בתור `srcpkgs/omniroute/template`:
+משתמשי Void Linux יכולים לבנות חבילה מקורית באמצעות `xbps-src`. שמרו את הבלוק הזה בשם `srcpkgs/omniroute/template`:
 
 ```bash
 # קובץ תבנית עבור 'omniroute'
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# צרו מחדש את סכום הביקורת עבור כל גרסה באמצעות:
+# צרו מחדש את סכום הביקורת עבור כל מהדורה באמצעות:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

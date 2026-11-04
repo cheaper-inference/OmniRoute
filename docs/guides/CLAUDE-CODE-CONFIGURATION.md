@@ -44,6 +44,17 @@ endpoint with environment variables (it has no `--base-url` flag):
 
 > Env vars are read **once at startup** — restart Claude Code after changing them.
 
+For a credential that rotates instead of a fixed string, set `apiKeyHelper` in
+`~/.claude/settings.json` to a command that prints the current credential to
+stdout. Claude Code caches its output for five minutes by default
+(`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` overrides that) and sends the value in both
+`Authorization: Bearer` and `x-api-key`. The script must print the credential
+and nothing else — a banner alongside it fails the helper on v2.1.227+.
+
+This is how Entra ID SSO works: `scripts/cli/omniroute-sso.mjs token` prints a
+short-lived Entra access token that OmniRoute verifies instead of an API key.
+See [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` sets all of these for you: it resolves the base URL + token
 from the active context (so `omniroute connect <vps>` then `omniroute launch`
 just works), health-checks the server, and execs `claude`.
@@ -69,6 +80,14 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 When you pick one of these in Claude Code, OmniRoute strips the `claude/` wrapper
 back to the real id before routing — a genuine `claude/<real-claude-model>` id
 (the actual Claude OAuth provider) is always left untouched.
+
+By default only base ids are mirrored. With the opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` feature flag on, reasoning-effort variants that
+the catalog already lists (e.g. `codex/gpt-6-sol-high`) are mirrored like any other
+id, so Claude Code can pick an explicit effort level, and built-in `auto/*` ids the
+request path cannot materialize are not mirrored. Whether effort variants are
+listed at all is still governed by `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — the
+mirror never adds a variant the base catalog doesn't have.
 
 **This is off by default** and controlled by a three-level gate (most specific
 wins), so a plain OmniRoute never doubles its catalog for clients that don't use
@@ -122,6 +141,20 @@ can emit it directly.
 
 Source: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (pure
 builder, unit-tested) rendered by `ClaudeGatewayOnboardingBlock`.
+
+### Pin one account (optional)
+
+To send every Claude Code request through one specific provider account, add the
+`x-omniroute-connection` header through `ANTHROPIC_CUSTOM_HEADERS` in the same `env` block:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copy the id from the `xxxxxxxx…` chip on the connection row of the provider page. The pin only
+applies to single-model ids (`provider/model`), not to combos. See
+[Account pinning per request](../reference/API_REFERENCE.md#account-pinning-per-request) for the
+exact fallback behavior.
 
 ---
 

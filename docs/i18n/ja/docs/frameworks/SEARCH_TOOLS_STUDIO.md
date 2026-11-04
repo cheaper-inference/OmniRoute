@@ -38,12 +38,12 @@ Web 検索、Web スクレイピング、プロバイダーの並列比較を統
 
 ### 検索タブ
 
-既存の `SearchForm` + `ResultsPanel` + `RerankPanel` を 1 つのタブへと進化させます。
+既存の `SearchForm` + `ResultsPanel` + `RerankPanel` をタブ形式に発展させます。
 
 - クエリ → 結果（タイトル、URL、スニペット、関連度スコア）。
-- 設定ペインにプロバイダーのメタデータ（コスト、クォータ、ステータス）を表示。
-- リランクセクション: リランクモデルを選択し、結果を並べ替え、`positionDelta` を表示。
-- 検索プロバイダーが設定されていない場合は、CTA 付きの空状態を表示。
+- Config ペインにプロバイダーのメタデータ（コスト、クォータ、ステータス）を表示。
+- リランクセクション：リランクモデルを選択し、結果を並べ替え、`positionDelta` を表示。
+- 検索プロバイダーが設定されていない場合、CTA を含む空の状態を表示。
 - `SearchHistory.tsx` による検索履歴。
 - `POST /v1/search` を呼び出します（既存のエンドポイント、変更なし）。
 
@@ -51,20 +51,20 @@ Web 検索、Web スクレイピング、プロバイダーの並列比較を統
 
 `POST /v1/web/fetch`（プラン 05 で作成）を使用して URL からコンテンツを抽出する新しいタブです。
 
-- 入力: URL + ページ全体トグル + 形式セレクター（Markdown / テキスト / HTML）。
+- 入力：URL + ページ全体の切り替え + 形式セレクター（markdown / text / HTML）。
 - 送信 → 取得 → `ScrapeResult.tsx` でレンダリング。
-- `ScrapeResult` は Markdown プレビューと RAW 表示切り替えをレンダリング。
-- 上限: レスポンス本文が **256 KB** を超える場合、UI に `(切り詰められました。RAW を表示)` と表示し、RAW コンテンツを Monaco モーダルで開きます（D21）。
-- メタデータパネル: プロバイダー（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search）、レイテンシー、コスト、レスポンスサイズ、リンク数。
+- `ScrapeResult` は markdown プレビューと raw 表示の切り替えを提供。
+- 上限：レスポンス本文が **256 KB** を超える場合、UI に `(切り詰められました。raw を表示)` と表示し、raw コンテンツを Monaco モーダル（D21）で開きます。
+- メタデータパネル：プロバイダー（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search）、レイテンシ、コスト、レスポンスサイズ、リンク数。
 - `useScrapeFetch.ts` フックを使用。
 
 ### 比較タブ
 
-最大 **4 つのプロバイダーで、同じクエリまたは URL を並列実行**します（D22）。
+最大 **4 つのプロバイダーで同じクエリ／URLを並列実行**します（D22）。
 
-- プロバイダーごとの列を横並びで表示。
-- メトリクス: レイテンシー、コスト、結果数、レスポンスサイズ。
-- 検索時の URL 重複率を計算（初期結果に対する共有 URL 数）。
+- プロバイダーごとに横並びのカラムを表示。
+- 指標：レイテンシ、コスト、結果件数、レスポンスサイズ。
+- 検索時の URL 重複率を計算（初期結果に対する共有 URL の数）。
 - プロバイダーごとに `POST /v1/search`（検索）または `POST /v1/web/fetch`（スクレイプ）を呼び出します。
 
 ---
@@ -100,13 +100,13 @@ Web 検索、Web スクレイピング、プロバイダーの並列比較を統
 
 ## プロバイダーカタログ
 
-`ProviderCatalog.tsx` は、`GET /api/search/providers` から取得した完全なプロバイダー一覧を公開します
-（F4で取得プロバイダーを含むよう拡張）。
+`ProviderCatalog.tsx` は、`GET /api/search/providers` から取得したプロバイダーの完全な一覧を公開します
+（F4 で取得プロバイダーも含むように拡張）：
 
-| `kind` | `"search"`（20プロバイダー）または `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search） |
+| `kind` | `"search"`（20 プロバイダー）または `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search） |
 
-ステータスは、認証情報が存在するか、および
-すべてのキーが現在クールダウン中かを確認することで、**リクエスト時に導出**されます。
+ステータスは、認証情報が存在するかどうか、および
+すべてのキーが現在クールダウン中かどうかを確認することで、**リクエスト時に算出**されます。
 
 ---
 
@@ -122,14 +122,14 @@ APIキープレースホルダーは常に `$OMNIROUTE_API_KEY` です（D11、P
 
 この機能に必要だったバックエンドの変更は1つだけです。
 
-### 拡張された `GET /api/search/providers`
+### `GET /api/search/providers` の拡張
 
 `src/app/api/search/providers/route.ts` は、以下のように拡張されました。
 
-- 6つの取得プロバイダー（`firecrawl`、`jina-reader`、`tavily-search`、`tinyfish`、`nimble-search`、`anysearch-search`）をすべて配列に追加。
-- すべての項目に `kind: "search" | "fetch"` を追加。
-- リアルタイムの認証情報の状態から導出される `status: "configured" | "missing" | "rate_limited"` を追加。
-- 後方互換性を維持 — 既存のフィールド（`id`、`name` など）は変更なし。
+- すべての取得プロバイダー（`firecrawl`、`jina-reader`、`tavily-search`、`tinyfish`、`nimble-search`、`anysearch-search`、`parallel-search`）を配列に含める。
+- すべての項目に `kind: "search" | "fetch"` を追加する。
+- 実際の認証情報の状態から導出される `status: "configured" | "missing" | "rate_limited"` を追加する。
+- 後方互換性を維持する — 既存のフィールド（`id`、`name` など）は変更しない。
 
 ---
 
