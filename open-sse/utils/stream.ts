@@ -303,6 +303,24 @@ function addRestoredResponsesToolSchemas(
   return schemas;
 }
 
+function asResponsesAliasLedger(value: unknown): ReadonlyMap<string, string> | null {
+  return value instanceof Map ? (value as ReadonlyMap<string, string>) : null;
+}
+
+function resolveStreamToolSchemas(
+  body: unknown,
+  targetFormat: string | undefined,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, { namespace: string; name: string }> | null | undefined
+): Map<string, JsonRecord> | null {
+  const restoresResponses = targetFormat === FORMATS.OPENAI_RESPONSES;
+  return addRestoredResponsesToolSchemas(
+    extractToolSchemaMap(body),
+    restoresResponses ? aliases : null,
+    restoresResponses ? (identities ?? null) : null
+  );
+}
+
 // #7936/#18600 — passthrough Responses call items are restored through the
 // shared shape-safe `restoreResponsesToolNames` helper (see the import above):
 // it resolves both the string alias ledger and the `{namespace, name}` identity
@@ -348,37 +366,46 @@ function containsMalformedTextualToolCall(
   return false;
 }
 
+function asPlainRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
+
+function declaredToolItemName(item: JsonRecord): string {
+  const directName = typeof item.name === "string" ? item.name.trim() : "";
+  const fn = asPlainRecord(item.function);
+  const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
+  return functionName || directName;
+}
+
+// Namespace children without a discriminator follow the established function
+// convention; explicit custom/server children stay excluded.
+function isFunctionLikeNamespaceChild(child: JsonRecord): boolean {
+  return child.type === undefined || child.type === "function";
+}
+
+function addNamespaceChildNames(names: Set<string>, children: unknown[]): void {
+  for (const child of children) {
+    const childRecord = asPlainRecord(child);
+    if (!childRecord || !isFunctionLikeNamespaceChild(childRecord)) continue;
+    const name = declaredToolItemName(childRecord);
+    if (name) names.add(name);
+  }
+}
+
 function extractAllowedToolNames(body: unknown): Set<string> | null {
   const record = asRecord(body);
   const tools = record.tools;
   if (!Array.isArray(tools)) return null;
   const names = new Set<string>();
-  const addName = (item: JsonRecord) => {
-    const directName = typeof item.name === "string" ? item.name.trim() : "";
-    const fn =
-      item.function && typeof item.function === "object" && !Array.isArray(item.function)
-        ? (item.function as JsonRecord)
-        : null;
-    const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
-    const name = functionName || directName;
-    if (name) names.add(name);
-  };
   for (const tool of tools) {
-    if (!tool || typeof tool !== "object" || Array.isArray(tool)) continue;
-    const item = tool as JsonRecord;
+    const item = asPlainRecord(tool);
+    if (!item) continue;
     if (item.type === "namespace" && Array.isArray(item.tools)) {
-      for (const child of item.tools) {
-        if (!child || typeof child !== "object" || Array.isArray(child)) continue;
-        const childRecord = child as JsonRecord;
-        // Namespace children without a discriminator follow the established
-        // function convention; explicit custom/server children stay excluded.
-        if (childRecord.type === undefined || childRecord.type === "function") {
-          addName(childRecord);
-        }
-      }
+      addNamespaceChildNames(names, item.tools);
       continue;
     }
-    addName(item);
+    const name = declaredToolItemName(item);
+    if (name) names.add(name);
   }
   return names.size > 0 ? names : null;
 }
@@ -817,8 +844,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     dropResponsesCommentary ?? isFeatureFlagEnabled("RESPONSES_PASSTHROUGH_DROP_COMMENTARY");
   // #18600 — the alias ledger arrives as `unknown` (cross-workspace plumbing);
   // normalize once per stream for the Responses name-restoration seams below.
-  const responsesToolAliasMap: ReadonlyMap<string, string> | null =
-    toolNameMap instanceof Map ? (toolNameMap as ReadonlyMap<string, string>) : null;
+  const responsesToolAliasMap = asResponsesAliasLedger(toolNameMap);
   const clientExpectsResponsesStream =
     (mode === STREAM_MODE.PASSTHROUGH
       ? clientResponseFormat === FORMATS.OPENAI_RESPONSES
@@ -908,10 +934,11 @@ export function createSSEStream(options: StreamOptions = {}) {
           // Responses events are restored to the client identity before response
           // translation. Keep the same schema reachable under that restored name,
           // while retaining the provider wire key for untouched event shapes.
-          toolSchemas: addRestoredResponsesToolSchemas(
-            extractToolSchemaMap(body),
-            targetFormat === FORMATS.OPENAI_RESPONSES ? responsesToolAliasMap : null,
-            targetFormat === FORMATS.OPENAI_RESPONSES ? requestToolIdentityMap : null
+          toolSchemas: resolveStreamToolSchemas(
+            body,
+            targetFormat,
+            responsesToolAliasMap,
+            requestToolIdentityMap
           ),
           declaredToolNames: collectDeclaredToolNames(body),
           clientTools,

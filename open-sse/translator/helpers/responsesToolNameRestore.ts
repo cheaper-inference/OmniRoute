@@ -31,24 +31,39 @@ function toToolIdentity(value: unknown): ToolIdentity | null {
   return { namespace: identity.namespace, name: identity.name };
 }
 
+function toCallItem(value: unknown): JsonRecord | null {
+  const item = toRecord(value);
+  if (!item) return null;
+  if (item.type !== "function_call" && item.type !== "custom_tool_call") return null;
+  if (typeof item.name !== "string" || item.name.length === 0) return null;
+  return item;
+}
+
+function restoreNamespace(item: JsonRecord, identity: ToolIdentity | null): boolean {
+  if (identity?.namespace) {
+    if (item.namespace === identity.namespace) return false;
+    item.namespace = identity.namespace;
+    return true;
+  }
+  // Empty namespace is explicit evidence that this client identity is flat.
+  if (identity && Object.prototype.hasOwnProperty.call(item, "namespace")) {
+    delete item.namespace;
+    return true;
+  }
+  return false;
+}
+
 function restoreCallItem(
   value: unknown,
   aliases: ReadonlyMap<string, string> | null,
   identities: ReadonlyMap<string, unknown> | null
 ): boolean {
-  const item = toRecord(value);
-  if (
-    !item ||
-    (item.type !== "function_call" && item.type !== "custom_tool_call") ||
-    typeof item.name !== "string" ||
-    item.name.length === 0
-  ) {
-    return false;
-  }
+  const item = toCallItem(value);
+  if (!item) return false;
 
   // Both ledgers are keyed by the emitted provider wire name. Resolve them before
   // replacing item.name: an alias value is a client name, not an identity-map key.
-  const wireName = item.name;
+  const wireName = item.name as string;
   const identity = identities ? toToolIdentity(identities.get(wireName)) : null;
   const alias = aliases?.get(wireName);
   const restoredName = identity?.name ?? (typeof alias === "string" && alias ? alias : null);
@@ -59,19 +74,7 @@ function restoreCallItem(
     item.name = restoredName;
     changed = true;
   }
-
-  if (identity?.namespace) {
-    if (item.namespace !== identity.namespace) {
-      item.namespace = identity.namespace;
-      changed = true;
-    }
-  } else if (identity && Object.prototype.hasOwnProperty.call(item, "namespace")) {
-    // Empty namespace is explicit evidence that this client identity is flat.
-    delete item.namespace;
-    changed = true;
-  }
-
-  return changed;
+  return restoreNamespace(item, identity) || changed;
 }
 
 function restoreOutput(
@@ -83,6 +86,30 @@ function restoreOutput(
   for (const item of output) {
     changed = restoreCallItem(item, aliases, identities) || changed;
   }
+  return changed;
+}
+
+function restoreEnvelope(
+  root: JsonRecord,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): boolean {
+  let changed = Array.isArray(root.output)
+    ? restoreOutput(root.output, aliases, identities)
+    : false;
+  if (typeof root.type !== "string") return changed;
+
+  if (OUTPUT_ITEM_EVENT_TYPES.has(root.type)) {
+    changed = restoreCallItem(root.item, aliases, identities) || changed;
+  }
+
+  if (TERMINAL_EVENT_TYPES.has(root.type)) {
+    const response = toRecord(root.response);
+    if (response && Array.isArray(response.output)) {
+      changed = restoreOutput(response.output, aliases, identities) || changed;
+    }
+  }
+
   return changed;
 }
 
@@ -104,24 +131,5 @@ export function restoreResponsesToolNames(
   if (Array.isArray(payload)) return restoreOutput(payload, validAliases, validIdentities);
 
   const root = toRecord(payload);
-  if (!root) return false;
-
-  let changed = Array.isArray(root.output)
-    ? restoreOutput(root.output, validAliases, validIdentities)
-    : false;
-
-  if (typeof root.type !== "string") return changed;
-
-  if (OUTPUT_ITEM_EVENT_TYPES.has(root.type)) {
-    changed = restoreCallItem(root.item, validAliases, validIdentities) || changed;
-  }
-
-  if (TERMINAL_EVENT_TYPES.has(root.type)) {
-    const response = toRecord(root.response);
-    if (response && Array.isArray(response.output)) {
-      changed = restoreOutput(response.output, validAliases, validIdentities) || changed;
-    }
-  }
-
-  return changed;
+  return root ? restoreEnvelope(root, validAliases, validIdentities) : false;
 }

@@ -61,6 +61,29 @@ function runtimeLedger(value: unknown): ReadonlyMap<unknown, unknown> | null {
   return value instanceof Map ? value : null;
 }
 
+function addFlatAliasNames(
+  names: Set<string>,
+  aliasLedger: ReadonlyMap<unknown, unknown>,
+  identityLedger: ReadonlyMap<unknown, unknown> | null
+): void {
+  for (const [wireName, alias] of aliasLedger) {
+    if (typeof wireName !== "string" || typeof alias !== "string" || !alias) continue;
+    const identity = toResponsesToolIdentity(identityLedger?.get(wireName));
+    if (!identity || identity.namespace === "") names.add(identity?.name ?? alias);
+  }
+}
+
+function addFlatIdentityNames(
+  names: Set<string>,
+  identityLedger: ReadonlyMap<unknown, unknown>
+): void {
+  for (const [wireName, value] of identityLedger) {
+    if (typeof wireName !== "string") continue;
+    const identity = toResponsesToolIdentity(value);
+    if (identity?.namespace === "") names.add(identity.name);
+  }
+}
+
 function collectExplicitFlatResponsesToolNames(
   schemas: ToolSchemaMap | null,
   aliases: ReadonlyMap<string, string> | null,
@@ -70,20 +93,8 @@ function collectExplicitFlatResponsesToolNames(
   const aliasLedger = runtimeLedger(aliases);
   const identityLedger = runtimeLedger(identities);
 
-  if (aliasLedger) {
-    for (const [wireName, alias] of aliasLedger) {
-      if (typeof wireName !== "string" || typeof alias !== "string" || !alias) continue;
-      const identity = toResponsesToolIdentity(identityLedger?.get(wireName));
-      if (!identity || identity.namespace === "") names.add(identity?.name ?? alias);
-    }
-  }
-  if (identityLedger) {
-    for (const [wireName, value] of identityLedger) {
-      if (typeof wireName !== "string") continue;
-      const identity = toResponsesToolIdentity(value);
-      if (identity?.namespace === "") names.add(identity.name);
-    }
-  }
+  if (aliasLedger) addFlatAliasNames(names, aliasLedger, identityLedger);
+  if (identityLedger) addFlatIdentityNames(names, identityLedger);
   return names;
 }
 

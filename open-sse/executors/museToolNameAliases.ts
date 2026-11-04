@@ -176,6 +176,223 @@ function publishLedger(body: JsonRecord, key: string, value: Map<string, unknown
   });
 }
 
+type Ledgers = ReturnType<typeof readLedgers>;
+type DeclarationIndex = {
+  declared: Map<string, Map<string, ToolIdentity>>;
+  wireOwners: Map<string, Set<string>>;
+  reusable: Map<string, Set<string>>;
+};
+type IdentityResolver = (position: NamePosition) => ToolIdentity | null;
+
+function collectPositions(body: JsonRecord, reserved: Set<string>): NamePosition[] {
+  const positions: NamePosition[] = [];
+  visitRequest(body, (position) => {
+    const { record } = position;
+    if (typeof record.name === "string") reserved.add(record.name);
+    const nested = record.function;
+    if (isRecord(nested) && typeof nested.name === "string") reserved.add(nested.name);
+    if (position.isFunction && typeof record.name === "string") positions.push(position);
+    return record;
+  });
+  return positions;
+}
+
+function previousIdentity(prior: Ledgers, position: NamePosition): ToolIdentity | undefined {
+  let wire = position.record.name as string;
+  const seen = new Set<string>();
+  while (!seen.has(wire)) {
+    seen.add(wire);
+    const existing = prior.identities.get(wire);
+    if (existing && (!position.namespace || position.namespace === existing.namespace)) {
+      return existing;
+    }
+    const original = prior.aliases.get(wire);
+    if (!original) break;
+    wire = original;
+  }
+  return undefined;
+}
+
+function directIdentity(prior: Ledgers, position: NamePosition): ToolIdentity {
+  return (
+    previousIdentity(prior, position) ?? {
+      namespace: position.namespace ?? "",
+      name: clientName(position.record.name as string, prior.aliases),
+    }
+  );
+}
+
+function addToSetMap(map: Map<string, Set<string>>, key: string, value: string): void {
+  const set = map.get(key) ?? new Set<string>();
+  set.add(value);
+  map.set(key, set);
+}
+
+function isReusableWire(prior: Ledgers, position: NamePosition, wire: string): boolean {
+  return (
+    !COLLIDING_NAMES.has(wire) &&
+    /^[A-Za-z0-9_-]{1,64}$/.test(wire) &&
+    (prior.aliases.has(wire) || previousIdentity(prior, position) !== undefined)
+  );
+}
+
+function indexDeclarations(prior: Ledgers, positions: NamePosition[]): DeclarationIndex {
+  const index: DeclarationIndex = {
+    declared: new Map(),
+    wireOwners: new Map(),
+    reusable: new Map(),
+  };
+  for (const position of positions) {
+    if (!position.isDeclaration) continue;
+    const identity = directIdentity(prior, position);
+    const wire = position.record.name as string;
+    const key = identityKey(identity);
+    addToSetMap(index.wireOwners, wire, key);
+    if (isReusableWire(prior, position, wire)) addToSetMap(index.reusable, key, wire);
+    // Also index client leaves: a still-ambiguous reference must stay ambiguous on redispatch.
+    for (const name of new Set([wire, identity.name])) {
+      const entries = index.declared.get(name) ?? new Map<string, ToolIdentity>();
+      entries.set(key, identity);
+      index.declared.set(name, entries);
+    }
+  }
+  return index;
+}
+
+function pickDeclaredIdentity(entries: Map<string, ToolIdentity>): ToolIdentity | null {
+  const candidates = [...entries.values()];
+  const native = candidates.find((identity) => identity.namespace === "");
+  const defaults = candidates.find((identity) => identity.namespace === "functions");
+  return native ?? defaults ?? (candidates.length === 1 ? candidates[0] : null);
+}
+
+function resolveIdentity(
+  prior: Ledgers,
+  declared: DeclarationIndex["declared"],
+  position: NamePosition
+): ToolIdentity | null {
+  if (position.isDeclaration || position.namespace) return directIdentity(prior, position);
+  const name = position.record.name as string;
+  const existing = previousIdentity(prior, position);
+  if (existing) return existing;
+  // Intermediate aliases may name a declaration only by its composed client original.
+  const entries = declared.get(name) ?? declared.get(clientName(name, prior.aliases));
+  if (!entries?.size) return directIdentity(prior, position); // History-only means an explicit flat call.
+  return pickDeclaredIdentity(entries);
+}
+
+function collectTargets(
+  prior: Ledgers,
+  positions: NamePosition[],
+  resolve: IdentityResolver
+): Map<string, AliasTarget> {
+  const targets = new Map<string, AliasTarget>();
+  for (const position of positions) {
+    const name = position.record.name as string;
+    if (!COLLIDING_NAMES.has(name)) continue;
+    const identity = resolve(position);
+    if (!identity) continue;
+    const key = identityKey(identity);
+    const target = targets.get(key) ?? {
+      identity,
+      wireNames: new Set<string>(),
+      hasIdentity: false,
+    };
+    target.wireNames.add(name);
+    target.hasIdentity ||= previousIdentity(prior, position) !== undefined;
+    targets.set(key, target);
+  }
+  return targets;
+}
+
+function pickCandidate(
+  key: string,
+  target: AliasTarget,
+  reserved: Set<string>,
+  index: DeclarationIndex
+): string {
+  // Reuse only a valid declared FUNCTION wire with this one proven actual identity.
+  const existingWire = [...(index.reusable.get(key) ?? [])]
+    .filter((wire) => index.wireOwners.get(wire)?.size === 1)
+    .sort()[0];
+  if (existingWire) return existingWire;
+  let candidate = candidateName(target.identity, "");
+  let counter = 0;
+  while (reserved.has(candidate)) candidate = candidateName(target.identity, `_${++counter}`);
+  return candidate;
+}
+
+function moveIdentityGuard(
+  identities: Map<string, ToolIdentity>,
+  key: string,
+  target: AliasTarget,
+  candidate: string
+): void {
+  // Keep existing explicit-flat guards, but never synthesize them for ordinary flat tools.
+  if (!target.identity.namespace && !target.hasIdentity) return;
+  for (const wire of target.wireNames) {
+    const existing = identities.get(wire);
+    if (existing && identityKey(existing) === key) identities.delete(wire);
+  }
+  identities.set(candidate, { ...target.identity });
+}
+
+function allocateAliases(
+  prior: Ledgers,
+  reserved: Set<string>,
+  index: DeclarationIndex,
+  targets: Map<string, AliasTarget>
+): {
+  aliases: Map<string, string>;
+  identities: Map<string, ToolIdentity>;
+  allocated: Map<string, string>;
+} {
+  const aliases = new Map<string, string>();
+  for (const [name] of prior.aliases) aliases.set(name, clientName(name, prior.aliases));
+  const identities = new Map(prior.identities);
+  const allocated = new Map<string, string>();
+  for (const key of [...targets.keys()].sort()) {
+    const target = targets.get(key) as AliasTarget;
+    const candidate = pickCandidate(key, target, reserved, index);
+    reserved.add(candidate);
+    allocated.set(key, candidate);
+    aliases.set(candidate, target.identity.name);
+    moveIdentityGuard(identities, key, target, candidate);
+  }
+  return { aliases, identities, allocated };
+}
+
+function rewriteCollidingNames(
+  body: JsonRecord,
+  resolve: IdentityResolver,
+  allocated: ReadonlyMap<string, string>
+): JsonRecord {
+  return visitRequest(body, (position) => {
+    const name = position.record.name;
+    if (!position.isFunction || typeof name !== "string" || !COLLIDING_NAMES.has(name)) {
+      return position.record;
+    }
+    const identity = resolve(position);
+    const alias = identity ? allocated.get(identityKey(identity)) : undefined;
+    return alias ? { ...position.record, name: alias } : position.record;
+  });
+}
+
+function publishLedgers(
+  body: JsonRecord,
+  rewritten: JsonRecord,
+  aliases: Map<string, string>,
+  identities: Map<string, ToolIdentity>
+): JsonRecord {
+  const keepAliases = aliases.size > 0 || body._toolNameMap !== undefined;
+  const keepIdentities = identities.size > 0 || body._namespaceToolIdentityMap !== undefined;
+  if (rewritten === body && !keepAliases && !keepIdentities) return body;
+  const next = rewritten === body ? { ...body } : rewritten;
+  if (keepAliases) publishLedger(next, "_toolNameMap", aliases);
+  if (keepIdentities) publishLedger(next, "_namespaceToolIdentityMap", identities);
+  return next;
+}
+
 /**
  * Pure, inactive request helper for #18600. Alias only exact Muse-reserved FUNCTION names
  * on Responses declarations, additional_tools, function_call history, and function choices.
@@ -187,134 +404,11 @@ export function aliasMuseToolNames(body: unknown): unknown {
   if (!isRecord(body)) return body;
   const reserved = new Set<string>();
   const prior = readLedgers(body, reserved);
-  const positions: NamePosition[] = [];
-  visitRequest(body, (position) => {
-    if (typeof position.record.name === "string") reserved.add(position.record.name);
-    const nested = position.record.function;
-    if (isRecord(nested) && typeof nested.name === "string") reserved.add(nested.name);
-    if (position.isFunction && typeof position.record.name === "string") positions.push(position);
-    return position.record;
-  });
-
-  const declared = new Map<string, Map<string, ToolIdentity>>();
-  const wireOwners = new Map<string, Set<string>>();
-  const reusable = new Map<string, Set<string>>();
-  const previousIdentity = (position: NamePosition): ToolIdentity | undefined => {
-    let wire = position.record.name as string;
-    const seen = new Set<string>();
-    while (!seen.has(wire)) {
-      seen.add(wire);
-      const existing = prior.identities.get(wire);
-      if (existing && (!position.namespace || position.namespace === existing.namespace)) {
-        return existing;
-      }
-      const original = prior.aliases.get(wire);
-      if (!original) break;
-      wire = original;
-    }
-    return undefined;
-  };
-  const directIdentity = (position: NamePosition): ToolIdentity =>
-    previousIdentity(position) ?? {
-      namespace: position.namespace ?? "",
-      name: clientName(position.record.name as string, prior.aliases),
-    };
-  for (const position of positions) {
-    if (!position.isDeclaration) continue;
-    const identity = directIdentity(position);
-    const wire = position.record.name as string;
-    const key = identityKey(identity);
-    const owners = wireOwners.get(wire) ?? new Set<string>();
-    owners.add(key);
-    wireOwners.set(wire, owners);
-    if (
-      !COLLIDING_NAMES.has(wire) &&
-      /^[A-Za-z0-9_-]{1,64}$/.test(wire) &&
-      (prior.aliases.has(wire) || previousIdentity(position))
-    ) {
-      const names = reusable.get(key) ?? new Set<string>();
-      names.add(wire);
-      reusable.set(key, names);
-    }
-    // Also index client leaves: a still-ambiguous reference must stay ambiguous on redispatch.
-    for (const name of new Set([position.record.name as string, identity.name])) {
-      const entries = declared.get(name) ?? new Map<string, ToolIdentity>();
-      entries.set(identityKey(identity), identity);
-      declared.set(name, entries);
-    }
-  }
-  const resolveIdentity = (position: NamePosition): ToolIdentity | null => {
-    if (position.isDeclaration || position.namespace) return directIdentity(position);
-    const name = position.record.name as string;
-    const existing = previousIdentity(position);
-    if (existing) return existing;
-    // Intermediate aliases may name a declaration only by its composed client original.
-    const entries = declared.get(name) ?? declared.get(clientName(name, prior.aliases));
-    if (!entries?.size) return directIdentity(position); // History-only means an explicit flat call.
-    const candidates = [...entries.values()];
-    const native = candidates.find((identity) => identity.namespace === "");
-    const defaults = candidates.find((identity) => identity.namespace === "functions");
-    return native ?? defaults ?? (candidates.length === 1 ? candidates[0] : null);
-  };
-
-  const targets = new Map<string, AliasTarget>();
-  for (const position of positions) {
-    const name = position.record.name as string;
-    if (!COLLIDING_NAMES.has(name)) continue;
-    const identity = resolveIdentity(position);
-    if (!identity) continue;
-    const key = identityKey(identity);
-    const target = targets.get(key) ?? {
-      identity,
-      wireNames: new Set<string>(),
-      hasIdentity: false,
-    };
-    target.wireNames.add(name);
-    target.hasIdentity ||= previousIdentity(position) !== undefined;
-    targets.set(key, target);
-  }
-  const aliases = new Map<string, string>();
-  for (const [name] of prior.aliases) aliases.set(name, clientName(name, prior.aliases));
-  const identities = new Map(prior.identities);
-  const allocated = new Map<string, string>();
-  for (const key of [...targets.keys()].sort()) {
-    const target = targets.get(key) as AliasTarget;
-    // Reuse only a valid declared FUNCTION wire with this one proven actual identity.
-    const existingWire = [...(reusable.get(key) ?? [])]
-      .filter((wire) => wireOwners.get(wire)?.size === 1)
-      .sort()[0];
-    let candidate = existingWire ?? candidateName(target.identity, "");
-    if (!existingWire) {
-      let counter = 0;
-      while (reserved.has(candidate)) candidate = candidateName(target.identity, `_${++counter}`);
-    }
-    reserved.add(candidate);
-    allocated.set(key, candidate);
-    aliases.set(candidate, target.identity.name);
-    // Keep existing explicit-flat guards, but never synthesize them for ordinary flat tools.
-    if (target.identity.namespace || target.hasIdentity) {
-      for (const wire of target.wireNames) {
-        const existing = identities.get(wire);
-        if (existing && identityKey(existing) === key) identities.delete(wire);
-      }
-      identities.set(candidate, { ...target.identity });
-    }
-  }
-
-  const rewritten = visitRequest(body, (position) => {
-    const name = position.record.name;
-    if (!position.isFunction || typeof name !== "string" || !COLLIDING_NAMES.has(name)) {
-      return position.record;
-    }
-    const identity = resolveIdentity(position);
-    const alias = identity ? allocated.get(identityKey(identity)) : undefined;
-    return alias ? { ...position.record, name: alias } : position.record;
-  });
-  const keepAliases = aliases.size > 0 || body._toolNameMap !== undefined;
-  const keepIdentities = identities.size > 0 || body._namespaceToolIdentityMap !== undefined;
-  if (rewritten === body && !keepAliases && !keepIdentities) return body;
-  const next = rewritten === body ? { ...body } : rewritten;
-  if (keepAliases) publishLedger(next, "_toolNameMap", aliases);
-  if (keepIdentities) publishLedger(next, "_namespaceToolIdentityMap", identities);
-  return next;
+  const positions = collectPositions(body, reserved);
+  const index = indexDeclarations(prior, positions);
+  const resolve: IdentityResolver = (position) => resolveIdentity(prior, index.declared, position);
+  const targets = collectTargets(prior, positions, resolve);
+  const { aliases, identities, allocated } = allocateAliases(prior, reserved, index, targets);
+  const rewritten = rewriteCollidingNames(body, resolve, allocated);
+  return publishLedgers(body, rewritten, aliases, identities);
 }
