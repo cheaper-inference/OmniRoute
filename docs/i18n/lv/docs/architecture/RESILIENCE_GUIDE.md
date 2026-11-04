@@ -281,27 +281,26 @@ bloķēšanas _stāvoklis_ ir īslaicīgs.
 
 ---
 
-## 4. Quota-share režīma vienlaicīguma kontrole (v3.8.36)
+## 4. Kvotas koplietojoša vienlaicīguma kontrole (v3.8.36)
 
-Abonementa konti (GLM, MiniMax u.c.) bieži pieņem tikai ~1–3 vienlaicīgus
-pieprasījumus; to pārsniegšana izraisa 429 kļūdas un atdzišanas periodus. Tas
-ir īpaši aktuāli **quota-share** (`qtSd/…`) kombinācijās, kurās vairākas API
-atslēgas koplieto vienu upstream kontu. Trīs slāņi pasargā koplietoto kontu no
-pārplūdināšanas.
+Abonementa konti (GLM, MiniMax u. c.) bieži pieņem tikai ~1–3 vienlaicīgus
+pieprasījumus; pārsniedzot šo skaitu, tiek aktivizētas 429 kļūdas un
+atdzišanas periodi. Tas īpaši izteikti notiek ar **kvotas koplietošanas**
+(`qtSd/…`) kombinācijām, kur vairāki API atslēgu pāri izmanto vienu augšupējo
+kontu. Trīs slāņi neļauj koplietotajam kontam tikt pārslogotam.
 
-### Vienlaicīguma griesti katram savienojumam (`max_concurrent`)
+### Viena savienojuma vienlaicīguma ierobežojums (`max_concurrent`)
 
-Katrs sniedzēja savienojums var deklarēt `max_concurrent` griestus
-(`provider_connections.max_concurrent`, iestatāms savienojuma modālajā logā /
-API / datubāzē). Atstājiet to tukšu, ja ierobežojums nav vajadzīgs. Šis ir
-vienīgais regulators, kas darbina zemāk aprakstīto serializācijas slāni —
-iestatiet to atbilstoši konta reālajam vienlaicīgumam (piem., GLM ~1,
-MiniMax ~2).
+Katrs nodrošinātāja savienojums var deklarēt `max_concurrent` augšējo robežu
+(`provider_connections.max_concurrent`, kas iestatīta savienojuma modālajā logā / API / DB).
+Atstājiet lauku tukšu, lai neiestatītu ierobežojumu. Šis ir vienīgais parametrs,
+kas vada tālāk aprakstīto serializācijas slāni — iestatiet to atbilstoši konta
+faktiskajam vienlaicīguma līmenim (piem., GLM ~1, MiniMax ~2).
 
-### Vienlaicīguma griesti katram modelim (`modelConcurrency`)
+### Viena modeļa vienlaicīguma ierobežojumi (`modelConcurrency`)
 
-Savienojums papildus var deklarēt precīzus vienlaicīguma griestus katram
-modelim savā `rateLimitOverrides` kartē:
+Savienojums var papildus deklarēt precīzas viena modeļa vienlaicīguma augšējās
+robežas savā `rateLimitOverrides` kartē:
 
 ```json
 {
@@ -312,78 +311,92 @@ modelim savā `rateLimitOverrides` kartē:
 }
 ```
 
-Iestatiet to savienojuma modālajā logā (**Pieprasījumu biežuma
-pārdefinējumi → Vienlaicīguma griesti pa modeļiem**, viens `model=cap` katrā
-rindā) vai ar `PATCH /api/providers/[id]`, izmantojot tādu pašu JSON struktūru.
-Galvenā semantika:
+Iestatiet to savienojuma modālajā logā (**Rate limit overrides → Per-model
+concurrency caps**, vienu `model=cap` katrā rindā) vai, izmantojot
+`PATCH /api/providers/[id]`, ar tādu pašu JSON struktūru. Galvenie darbības principi:
 
-- **Visam savienojumam pret konkrētu modeli:** `maxConcurrent` paliek kopīgie
-  visa savienojuma griesti. Ja abi ir spēkā, abi vārti tiek iegūti atomiski
-  vienā un tajā pašā saliktajā vārtu ķēdē
-  (`global → provider → account → model`); faktiskā uzvedība atbilst
-  stingrākajam piemērojamajam ierobežojumam.
+- **Savienojuma mēroga un modeļa specifiskais ierobežojums:** `maxConcurrent` joprojām
+  ir kopīgā savienojuma mēroga augšējā robeža. Ja tiek piemēroti abi, abi vārti
+  tiek iegūti atomiski vienā kombinētajā vārtā
+  (`global → provider → account → model`); faktiskā darbība atbilst stingrākajam
+  piemērojamajam ierobežojumam.
 - **Precīza modeļa atslēgas atbilstība:** atslēga ir modeļa virkne, kas pēc
-  maršrutēšanas izšķiršanas tiek nodota izpildītājam — parasti tīrs upstream
-  modeļa identifikators (`glm-5`), nevis klientpuses `provider/model`
-  aizstājējnosaukums (`zai/glm-5` neatbilst `glm-5`). Vērtības ir pozitīvi
-  veseli skaitļi — vienlaicīgo pieprasījumu griesti.
-- **Lokāla rindēšana, bez automātiskas noteikšanas:** liekie pieprasījumi tiek
-  rindoti lokāli ar esošo rindas/noilguma semantiku (tipizētas
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` uzņemšanas kļūdas). OmniRoute
-  neatklāj un neizsecina upstream politiku — tas īsteno tieši tos griestus,
-  kurus konfigurējis operators. Piesātināti modeļa vārti nekad neatspējo
-  sniedzēju un neizveido pastāvīgu modeļa bloķēšanu; upstream
-  429/atdzišanas/fallback uzvedība paliek kļūdu pēdējais aizsargmehānisms.
-- **Darbības joma — pa savienojumiem un procesiem:** griesti ir definēti
-  katram datubāzes savienojumam un tiek glabāti atmiņā, tāpēc divi
-  savienojumi, kas izmanto vienu un to pašu upstream API atslēgu, savstarpēji
-  nekoordinējas.
-- **Nekonfigurēts nozīmē nemainītu:** ja karte nav norādīta (vai paneļa lauks
-  atstāts tukšs), modeļa vārti netiek pievienoti. Konfigurācijas piemērs bez
-  jebkāda universāla sniedzēja ierobežojuma deklarēšanas:
+  maršrutēšanas atrisināšanas tiek nodota izpildītājam — parasti neapstrādātais
+  augšupējā modeļa identifikators (`glm-5`), nevis klienta puses
+  `provider/model` aizstājvārds (`zai/glm-5` neatbilst `glm-5`). Vērtībām jābūt
+  pozitīvām veselām skaitliskām vienlaicīgo pieprasījumu augšējām robežām.
+- **Lokāla ievietošana rindā, bez atklāšanas:** pārsniegtie pieprasījumi tiek
+  ievietoti lokālajā rindā, izmantojot esošo rindas/noklusējuma laika semantiku
+  (tipizētas `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` pieņemšanas kļūdas).
+  OmniRoute neatklāj un neizsecina augšupējā pakalpojuma politiku — tas piemēro
+  tieši operatora konfigurētās augšējās robežas. Piesātināts modeļa vārts nekad
+  neatspējo nodrošinātāju un nerada pastāvīgu modeļa bloķēšanu; augšupējās
+  429 kļūdas/atdzišanas periodi/rezerves izvēles darbība joprojām ir kļūdu
+  rezerves mehānisms.
+- **Viena savienojuma, viena procesa tvērums:** ierobežojumi attiecas uz katru
+  datubāzes savienojumu un tiek glabāti atmiņā, tāpēc divi savienojumi, kas
+  atkārtoti izmanto vienu un to pašu augšupējā pakalpojuma API atslēgu,
+  savā starpā nesaskaņo darbību.
+- **Nekonfigurēts nozīmē nemainītu darbību:** kartes izlaišana (vai paneļa lauka
+  atstāšana tukša) nepievieno modeļa vārtus. Konfigurācijas piemērs, kurā netiek
+  deklarēts universāls nodrošinātāja ierobežojums:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Pieprasījumu serializācija quota-share režīmā
+### Kvotas koplietošanas pieprasījumu serializācija
 
-Kad quota-share nosūtīšana ir vērsta uz savienojumu, kurā deklarēts pozitīvs
-`max_concurrent`, vienlaicīgie pieprasījumi uz šo **kontu** tiek serializēti,
-izmantojot katra savienojuma semaforu (atslēga `qsconn:<connectionId>`): liekie
-pieprasījumi **gaida rindā**, nevis pārpludina kontu. Tas darbojas **fail-open**
-režīmā — piesātināta rinda vai noilgums turpina izpildi bez slota, nevis jebkad
-noraida nosūtāmu pieprasījumu. Pārslēdzams sadaļā **Iestatījumi → Noturība →
-Quota-share vienlaicīgums pa savienojumiem**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, pēc noklusējuma
-ieslēgts). Ja `max_concurrent` griesti nav iestatīti, uzvedība paliek nemainīta.
+Ja kvotas koplietošanas nosūtīšana ir vērsta uz savienojumu, kuram deklarēts
+pozitīvs `max_concurrent`, vienlaicīgie pieprasījumi uz šo **kontu** tiek
+serializēti, izmantojot katram savienojumam paredzētu semaforu (atslēga
+`qsconn:<connectionId>`): pārsniegtie pieprasījumi **gaida rindā**, nevis pārpludina
+kontu. Tas ir **atteikumnoturīgs** — piesātināta rinda vai noildze turpina
+darbību bez vietas, nevis jebkad noraida nosūtāmu pieprasījumu. Ieslēdziet to
+sadaļā **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, pēc
+noklusējuma ieslēgts). Ja `max_concurrent` ierobežojums nav iestatīts, darbība
+nemainās.
 
-> Quota-share maršrutēšanas vārti (`selectQuotaShareTarget`, DRR + P2C) paši ir
-> fail-open un tikai _deprioritizē_ savienojumu, kas sasniedzis griestus — ar
-> viena savienojuma kopu tie nespēj stingri ierobežot, tāpēc tieši šis semafors
-> faktiski aptur plūdus.
+> Kvotas koplietošanas maršrutēšanas vārti (`selectQuotaShareTarget`, DRR + P2C)
+> paši ir atteikumnoturīgi un tikai _samazina prioritāti_ savienojumam, kas
+> sasniedzis ierobežojumu — ja kopā ir tikai viens savienojums, tie nevar
+> piemērot stingru ierobežojumu, tāpēc tieši šis semafors faktiski ierobežo
+> pārpludināšanu.
 
-### Kombināciju atkārtošana, ņemot vērā atdzišanas periodus
+### Kombinācijas atdzišanas periodam pielāgota atkārtota mēģināšana
 
-Katrā kombinācijas stratēģijā (ja tā ieslēgta) pieprasījums, kas ĪSA pārejoša
-atdzišanas perioda dēļ izraisītu 429 kļūdu, to izgaida un tiek nosūtīts
-atkārtoti, nevis atgriež 429 — tas attiecas uz Gemini klases TPM/RPM logiem
-(~60 s retry-after) vairāku modeļu kombinācijās, piemēram, ja abi 2 modeļu
-kombinācijas mērķi trāpa modeļa līmeņa biežuma ierobežojumā. To ierobežo
-`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) sadaļā
-**Iestatījumi → Noturība**. Tas nekad negaida `quota_exhausted` gadījumā
-(bloķēts līdz pusnaktij) vai autentifikācijas/nav-atrasts iemeslu dēļ.
+Katrai kombinācijas stratēģijai (ja tā ir ieslēgta), ja pieprasījums izraisītu
+429 kļūdu ar ĪSU pārejošu atdzišanas periodu, tas nogaida šo periodu un tiek
+nosūtīts atkārtoti, nevis atgriež 429 kļūdu — tas attiecas arī uz Gemini klases
+TPM/RPM logiem (~60 s `retry-after`) vairāku modeļu kombinācijās, piemēram, kad
+abi 2 modeļu kombinācijas mērķi sasniedz katram modelim noteiktu ātruma
+ierobežojumu. To ierobežo `comboCooldownWait` (`enabled`, `maxWaitMs`,
+`maxAttempts`, `budgetMs`) sadaļā **Settings → Resilience**. Tas nekad negaida
+`quota_exhausted` gadījumā (bloķēts līdz pusnaktij) vai autentifikācijas/“nav
+atrasts” iemeslu dēļ.
 
-Tie paši vārti sedz pirmsnosūtīšanas gadījumu (#16319): kad visi kombinācijas
-mērķi tiek izlaisti pirms jebkāda mēģinājuma, jo to modelis atrodas īsā
-pārejošā bloķēšanā, nulles mēģinājumu ceļš izgaida bloķēšanu tajos pašos
-griestos un nosūta atkārtoti, nevis atbild ar `503 ALL_TARGETS_SKIPPED` bez
-papildu norāžu. Ja gaidīšana nav atļauta (izsmelti griesti, mēģinājumi vai
-budžets, vai arī funkcija ir izslēgta), galīgā atbilde kļūst par
-`429 rate_limit_error`, nesot `retry_after` / `reset_at` no agrākā pārejošās
-bloķēšanas beigu brīža; kvotas, autentifikācijas un nav-atrasts bloķēšanas
-saglabā 503 bez papildu norāžu.
+Kombinācija var atteikties no šīs darbības, izmantojot
+`config.comboCooldownWaitEnabled: false`. Tikai burtiskā vērtība `false`
+atspējo šos kopīgās kombinācijas gaidīšanas gadījumus (pēc nosūtīšanas
+notiekošu atdzišanu un pirms nosūtīšanas notiekošu ķēdes pārtraucēja atvērtas
+ķēdes/modeļa bloķēšanas gaidīšanu), kā arī to gaidīšanas budžeta noildzes
+grīdas pagarinājumu. Ja vērtība nav norādīta vai ir `true`, globālā politika
+tiek saglabāta; `true` nevar ieslēgt globāli atspējotu gaidīšanu. Skaidri
+iestatīts `targetTimeoutMs` joprojām ir prioritārs. Šī atteikšanās nemaina
+atsevišķo native-Codex gājiena piesaistes pirmsnosūtīšanas gaidīšanu.
+
+Tas pats vārts aptver arī pirmsnosūtīšanas gadījumu (#16319): ja katrs
+kombinācijas mērķis tiek izlaists, pirms tiek veikts jebkāds mēģinājums, jo tā
+modelis atrodas īsā pārejošā bloķēšanas periodā, nulles mēģinājumu ceļš nogaida
+bloķēšanas perioda beigas saskaņā ar tiem pašiem ierobežojumiem un nosūta
+pieprasījumu atkārtoti, nevis atgriež norādi nesaturošu
+`503 ALL_TARGETS_SKIPPED`. Ja gaidīšana nav atļauta (sasniegti griesti,
+izsmelts mēģinājumu vai budžeta limits vai funkcija ir izslēgta), terminālā
+atbilde tiek paaugstināta uz `429 rate_limit_error`, ietverot
+`retry_after` / `reset_at` no agrākās pārejošās bloķēšanas beigām; kvotas,
+autentifikācijas un “nav atrasts” bloķējumi saglabā norādi nesaturošu 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

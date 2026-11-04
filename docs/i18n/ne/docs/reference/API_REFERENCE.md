@@ -1593,7 +1593,7 @@ GET /api/system/version
 
 ---
 
-## अडियो ट्रान्सक्रिप्सन
+## अडियो ट्रान्स्क्रिप्सन
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1601,10 +1601,10 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-कन्फिगर गरिएका कुनै पनि STT प्रदायक प्रयोग गरी अडियो फाइलहरूलाई ट्रान्सक्राइब गर्नुहोस्। पहिलो path
-segment ले native प्रदायक चयन गर्छ (`openai/…`, `deepgram/…`)। अर्को vendor को
-मोडल पुनः-निर्यात गर्ने gateway हरूले qualified id प्रयोग गर्छन्
-(`openrouter/deepgram/nova-3`)।
+कन्फिगर गरिएका कुनै पनि STT प्रदायक प्रयोग गरेर अडियो फाइलहरू ट्रान्स्क्राइब गर्नुहोस्। पहिलो path
+segment ले native प्रदायक (`openai/…`, `deepgram/…`) चयन गर्छ। अर्को vendor को model
+पुनः निर्यात गर्ने gateway हरूले qualified id
+(`openrouter/deepgram/nova-3`) प्रयोग गर्छन्।
 
 **अनुरोध:**
 
@@ -1626,14 +1626,21 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**उदाहरण मोडल id हरू:** `openai/whisper-1` (OpenAI key आवश्यक),
+**उदाहरण model ids:** `openai/whisper-1` (OpenAI key आवश्यक),
 `openrouter/deepgram/nova-3` (OpenRouter key आवश्यक),
-`deepgram/nova-3` (native Deepgram key आवश्यक)। केवल
-`deepgram/nova-3` को अनुरोधले **OpenRouter** प्रयोग गर्दैन।
+`deepgram/nova-3` (native Deepgram key आवश्यक)। bare
+`deepgram/nova-3` अनुरोधले **OpenRouter प्रयोग गर्दैन**।
 
-**समर्थित फर्म्याटहरू:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`।
+**समर्थित formats:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`।
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket मार्फत file-mode ट्रान्स्क्रिप्सन (Gemini API key आवश्यक)। upload लाई `ffmpeg`
+द्वारा 16 kHz mono PCM मा रूपान्तरण गरिन्छ
+(`PATH` मा हुनुपर्छ, फाइल पहिले नै 16 kHz mono PCM WAV नभएसम्म), session मा
+stream गरिन्छ र अन्तिम text `{ "text": "..." }` को रूपमा फर्काइन्छ। वैकल्पिक `language` र `prompt` form fields
+forward गरिन्छ। सीमाहरू: 25 MiB भन्दा ठूला upload वा 10 मिनेटभन्दा लामो decoded audio ले
+`413` प्रतिक्रिया दिन्छ; 60 s भन्दा लामो समय चल्ने conversion लाई समाप्त गरिन्छ र `504` प्रतिक्रिया
+दिइन्छ। API key `x-goog-api-key` header मा मात्र पठाइन्छ, WebSocket URL मा कहिल्यै पठाइँदैन।
 
 ## Ollama अनुकूलता
 

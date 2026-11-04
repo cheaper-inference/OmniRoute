@@ -1619,7 +1619,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkribējiet audio failus, izmantojot jebkuru konfigurētu STT nodrošinātāju. Pirmais ceļa segments atlasa vietējo nodrošinātāju (`openai/…`, `deepgram/…`). Vārtejas, kas atkārtoti publicē cita piegādātāja modeli, izmanto kvalificētu identifikatoru
+Transkribējiet audio failus, izmantojot jebkuru konfigurētu STT pakalpojumu sniedzēju. Pirmais ceļa
+segments atlasa vietējo pakalpojumu sniedzēju (`openai/…`, `deepgram/…`). Vārtejas, kas
+atkārtoti eksportē cita piegādātāja modeli, izmanto kvalificētu ID
 (`openrouter/deepgram/nova-3`).
 
 **Pieprasījums:**
@@ -1642,14 +1644,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Modeļu ID piemēri:** `openai/whisper-1` (nepieciešama OpenAI atslēga),
+**Piemēru modeļu ID:** `openai/whisper-1` (nepieciešama OpenAI atslēga),
 `openrouter/deepgram/nova-3` (nepieciešama OpenRouter atslēga),
-`deepgram/nova-3` (nepieciešama vietējā Deepgram atslēga). Neapzīmēts
-`deepgram/nova-3` pieprasījums **neizmanto** OpenRouter.
+`deepgram/nova-3` (nepieciešama vietējā Deepgram atslēga). Pieprasījums ar vienkāršu
+`deepgram/nova-3` **neizmanto** OpenRouter.
 
 **Atbalstītie formāti:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** failu režīma transkripcija, izmantojot Gemini Live
+WebSocket (nepieciešama Gemini API atslēga). Augšupielāde tiek pārveidota par 16 kHz mono PCM, izmantojot `ffmpeg`
+(jābūt pieejamam mainīgajā `PATH`, ja vien fails jau nav 16 kHz mono PCM WAV formātā), straumēta uz sesiju, un
+pabeigtais teksts tiek atgriezts kā `{ "text": "..." }`. Neobligātie `language` un `prompt` veidlapas lauki tiek
+pārsūtīti. Ierobežojumi: augšupielādes, kas pārsniedz 25 MiB, vai dekodētais audio, kas ir garāks par 10 minūtēm,
+saņem atbildi `413`; ja pārveidošana ilgst vairāk nekā 60 s, process tiek pārtraukts un tiek atgriezta atbilde
+`504`. API atslēga tiek nosūtīta tikai `x-goog-api-key` galvenē, nekad WebSocket URL.
 
 ## Ollama saderība
 

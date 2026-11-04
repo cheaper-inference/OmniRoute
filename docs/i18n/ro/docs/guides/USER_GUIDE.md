@@ -120,37 +120,39 @@ Acces prin: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configurarea furnizorilor
 
-Pentru a adăuga în bloc conexiuni cu chei API dintr-un fișier CSV sau JSON, utilizați **Panou de control → Furnizori → Importă din fișier**. Coloanele sunt poziționale (`provider,name,apiKey,baseUrl,priority`); `provider` trebuie să existe deja ca furnizor gestionat sau ca nod compatibil. Consultați [Importarea furnizorilor dintr-un fișier CSV sau JSON](../providers/CSV-IMPORT.md).
+Pentru a adăuga în bloc conexiuni cu cheie API dintr-un fișier CSV sau JSON, folosiți **Dashboard → Providers → Import from file**. Coloanele sunt poziționale (`provider,name,apiKey,baseUrl,priority`); `provider` trebuie să existe deja ca furnizor gestionat sau ca nod compatibil. Consultați [Import providers from a CSV or JSON file](../providers/CSV-IMPORT.md).
 
-### 🔐 Furnizori pe bază de abonament
+### 🔐 Furnizori de abonament
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Panou de control → Furnizori → Conectează Claude Code
+Dashboard → Providers → Connect Claude Code
 → Autentificare OAuth → Reîmprospătare automată a tokenului
-→ Monitorizarea cotei la 5 ore + săptămânale
+→ Monitorizarea cotei de 5 ore + săptămânale
 
-Modele:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Sfat util:** Utilizați Opus pentru sarcini complexe și Sonnet pentru viteză. OmniRoute monitorizează cota pentru fiecare model!
+**Sfat profesional:** Folosiți Opus pentru sarcini complexe și Sonnet pentru viteză. OmniRoute monitorizează cota pentru fiecare model!
 
-Nu aveți un browser pe gazda OmniRoute? Rulați `claude setup-token` oriunde sunteți autentificat în Claude Code și inserați tokenul valabil un an în fila **Token de configurare**. Consultați [Claude Code cu un token de configurare](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nu aveți un browser pe gazda OmniRoute? Rulați `claude setup-token` oriunde Claude Code este autentificat și inserați tokenul valabil un an în fila **Setup Token**. Consultați [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Rutele compatibile cu Claude și Claude Code păstrează nivelul `max` al efortului de raționament pentru modelele Opus și Sonnet. Modelele Haiku nu acceptă nivelul de efort `max`, astfel încât OmniRoute reduce solicitarea la un buget ridicat de raționament înainte de a o trimite serviciului din amonte.
+Rutele compatibile cu Claude și Claude Code păstrează nivelul de efort de gândire `max` pentru
+modelele Opus și Sonnet. Modelele Haiku nu acceptă nivelul de efort `max`, așa că OmniRoute
+reduce solicitarea la un buget mare de gândire înainte de a o trimite în amonte.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Panou de control → Furnizori → Conectează Codex
-→ Autentificare OAuth (portul 1455)
+Dashboard → Providers → Connect Codex
+→ Autentificare OAuth (port 1455)
 → Resetare la 5 ore + săptămânală
 
-Modele:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +162,11 @@ Modele:
 #### GitHub Copilot
 
 ```bash
-Panou de control → Furnizori → Conectează GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth prin GitHub
 → Resetare lunară (în prima zi a lunii)
 
-Modele:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,57 +174,74 @@ Modele:
   gh/gemini-3.1-pro-preview
 ```
 
+**Credite AI (facturare bazată pe tokenuri).** Atunci când GitHub raportează `credits_used`
+pentru cont, cardul Provider Limits afișează un rând **AI Credits** cu numărul de credite
+consumate în perioada curentă de facturare, inclusiv pentru planurile de organizație nelimitate.
+
+**Limită locală pentru creditele AI.** Editați o conexiune GitHub și setați **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Dacă este necompletată, limita este
+dezactivată; `0` omite întotdeauna conexiunea. Atunci când ultima citire a utilizării este egală
+sau mai mare decât limita, selectarea contului omite conexiunea respectivă, iar rutarea revine la
+celelalte conexiuni, la fel ca în cazul unei întreruperi impuse de politica de cotă. Verificarea
+citește datele de utilizare pe care reîmprospătarea periodică a cotei le colectează deja — nu apelează
+niciodată GitHub pe calea solicitării — și se deschide în caz de eroare: o citire lipsă sau învechită
+(mai veche de 15 minute ori provenită dintr-o perioadă de facturare care s-a resetat deja) nu blochează
+conexiunea. Aceasta este o protecție locală, **nu un plafon garantat al cheltuielilor**: întârzierile
+raportării GitHub, intervalul de reîmprospătare, solicitările în curs și utilizarea din afara
+OmniRoute pot depăși această limită. Pentru un plafon strict, folosiți propriile controale de
+cheltuieli ale GitHub.
+
 ### 💰 Furnizori ieftini
 
 #### GLM-4.7 (resetare zilnică, $0.6/1M)
 
 1. Înregistrați-vă: [Zhipu AI](https://open.bigmodel.cn)
 2. Obțineți cheia API din Coding Plan
-3. Panou de control → Adaugă o cheie API: Furnizor: `glm`, Cheie API: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Utilizare:** `glm/glm-4.7` — **Sfat util:** Coding Plan oferă o cotă de 3× mai mare la 1/7 din cost! Se resetează zilnic la ora 10:00.
+**Utilizare:** `glm/glm-4.7` — **Sfat profesional:** Coding Plan oferă o cotă de 3× la 1/7 din cost! Resetare zilnică la 10:00.
 
 #### MiniMax M2.1 (resetare la 5 ore, $0.20/1M)
 
 1. Înregistrați-vă: [MiniMax](https://www.minimax.io)
-2. Obțineți cheia API → Panou de control → Adaugă o cheie API
+2. Obțineți cheia API → Dashboard → Add API Key
 
-**Utilizare:** `minimax/MiniMax-M2.1` — **Sfat util:** Cea mai ieftină opțiune pentru contexte lungi (1M tokenuri)!
+**Utilizare:** `minimax/MiniMax-M2.1` — **Sfat profesional:** Cea mai ieftină opțiune pentru context lung (1M de tokenuri)!
 
-#### Kimi K2 (tarif fix de $9/lună)
+#### Kimi K2 ($9/lună, tarif fix)
 
 1. Abonați-vă: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Obțineți cheia API → Panou de control → Adaugă o cheie API
+2. Obțineți cheia API → Dashboard → Add API Key
 
-**Utilizare:** `kimi/kimi-k2.5` — **Sfat util:** Tariful fix de $9/lună pentru 10M tokenuri înseamnă un cost efectiv de $0.90/1M!
+**Utilizare:** `kimi/kimi-k2.5` — **Sfat profesional:** $9/lună fix pentru 10M de tokenuri = cost efectiv de $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Înregistrați-vă: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Creați o cheie API Qianfan → Panou de control → Adaugă o cheie API: Furnizor: `qianfan`
+2. Creați o cheie API Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
-**Utilizare:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` sau un alt ID de model Qianfan compatibil cu OpenAI.
+**Utilizare:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` sau un alt ID de model compatibil cu OpenAI oferit de Qianfan.
 
 ### 🆓 Furnizori GRATUIȚI
 
-Furnizorii gratuiți care nu necesită autentificare au un comutator lângă **Nu este necesară autentificarea** pe pagina furnizorului.
-Dezactivarea acestuia dezactivează furnizorul, îl elimină din vizualizările configurată/compactă ale secțiunii Furnizori și
-elimină modelele sale din `/v1/models`.
+Furnizorii gratuiți fără autentificare au un comutator lângă **No authentication required** pe pagina
+furnizorului. Dezactivarea acestuia dezactivează furnizorul respectiv, îl elimină din vizualizările
+Providers configured/compact și elimină modelele sale din `/v1/models`.
 
 #### Qoder (9 modele GRATUITE)
 
 ```bash
-Panou de control → Conectează Qoder → Autentificare OAuth → Accesul este supus limitelor actuale ale furnizorului
+Dashboard → Connect Qoder → Autentificare OAuth → Accesul este supus limitelor curente ale furnizorului
 
-Modele: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude GRATUIT)
 
 ```bash
-Panou de control → Conectează Kiro → AWS Builder ID sau Google/GitHub → ~50 de credite/lună
+Dashboard → Connect Kiro → AWS Builder ID sau Google/GitHub → ~50 de credite/lună
 
-Modele: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -610,11 +629,11 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 ## 📊 Modele disponibile
 
 <details>
-<summary><b>Vezi toate modelele disponibile</b></summary>
+<summary><b>Afișați toate modelele disponibile</b></summary>
 
-> Lista de mai jos este întocmită pe baza `open-sse/config/providerRegistry.ts` pentru v3.8.0. Cataloagele cloud (Gemini, OpenRouter etc.) sunt sincronizate dinamic — pentru catalogul complet, actualizat live, deschide **Tablou de bord → Furnizori → [furnizor] → Modele disponibile** sau apelează `GET /api/models/catalog`.
+> Lista de mai jos este selectată din `open-sse/config/providerRegistry.ts` pentru v3.8.0. Cataloagele cloud (Gemini, OpenRouter etc.) sunt sincronizate dinamic — pentru catalogul live complet, deschideți **Dashboard → Providers → [provider] → Available Models** sau apelați `GET /api/models/catalog`.
 >
-> Dacă lista integrată a unui furnizor a rămas în urmă, folosește **Importare din /models** pe acea pagină (sau activează **Sincronizare automată**) pentru a prelua catalogul upstream actualizat. Acest lucru a fost verificat în v3.8.50 pentru LLM7.io (`gemini-3.1-flash-lite`) și UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); accesul anonim la Pollinations a rămas limitat din partea upstream în timpul aceleiași runde de testare.
+> Dacă lista încorporată a unui furnizor nu mai este actualizată, utilizați **Import from /models** pe pagina respectivă (sau activați **Auto-Sync**) pentru a prelua catalogul live din sursa upstream. Acest lucru a fost verificat în v3.8.50 pentru LLM7.io (`gemini-3.1-flash-lite`) și UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); accesul anonim Pollinations a rămas limitat de sursa upstream în timpul aceleiași serii de teste.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,15 +641,15 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth GRATUIT: folosește catalogul live afișat în **Tablou de bord → Furnizori → Kiro → Modele disponibile**. Disponibilitatea depinde de cont și de plan.
+**Kiro (`kr/`)** — OAuth GRATUIT: utilizați catalogul live afișat în **Dashboard → Providers → Kiro → Available Models**. Disponibilitatea depinde de cont și de plan.
 
 **Qoder (`if/`)** — OAuth GRATUIT: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 USD/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 USD/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/lună tarif fix sau per utilizare: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 USD/lună, tarif fix sau per utilizare: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Cheie API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -638,29 +657,29 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 
 **xAI (`xai/`)** — Grok nativ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Găzduit în UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Găzduit în UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Îmbogățit cu căutare: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Cu căutare augmentată: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuit), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuit), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Inferență rapidă: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — La scară de wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — La scară de plăcuță: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Axat pe RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Pentru companii: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sincronizat live per cheie API de la Google — fără listă statică. Conectează o cheie în **Tablou de bord → Furnizori**, apoi folosește **Modele disponibile** pentru a importa catalogul curent (de ex. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Sincronizat live pentru fiecare cheie API de la Google — fără listă statică. Conectați o cheie în **Dashboard → Providers**, apoi utilizați **Available Models** pentru a importa catalogul actual (de exemplu, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Alți furnizori compatibili** (selecție): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prin `aws-bedrock`), `azure-ai`, `openrouter` (catalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Fiecare își menține propria listă de modele în `providerRegistry.ts` și poate fi sincronizat automat atunci când furnizorul expune un endpoint `/models`.
+**Alți furnizori compatibili** (selectați): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prin `aws-bedrock`), `azure-ai`, `openrouter` (catalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Fiecare își menține propria listă de modele în `providerRegistry.ts` și poate fi sincronizat automat atunci când furnizorul expune un endpoint `/models`.
 
-**Notă despre ID-urile modelelor:** OmniRoute folosește ID-uri native ale furnizorilor (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Unele ID-uri includ versiuni cu puncte, deoarece așa le așteaptă API-ul upstream. Dacă un model nu este listat mai sus, rulează `omniroute models --search <term>` sau apelează `GET /api/models/catalog` pentru a confirma disponibilitatea.
+**Notă privind ID-urile modelelor:** OmniRoute utilizează ID-uri native furnizorilor (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Unele ID-uri includ versiuni cu punct, deoarece acesta este formatul așteptat de API-ul upstream. Dacă un model nu este listat mai sus, rulați `omniroute models --search <term>` sau accesați `GET /api/models/catalog` pentru a confirma disponibilitatea.
 
 </details>
 
