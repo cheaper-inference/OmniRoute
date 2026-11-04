@@ -1,0 +1,1 @@
+- **fix(db):** Deleting a compatible provider node now also deletes its custom model list, so no orphaned model rows are left behind.
