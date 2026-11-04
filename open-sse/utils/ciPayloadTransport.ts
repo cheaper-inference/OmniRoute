@@ -59,7 +59,7 @@ async function uploadAndDispatch(
   path: string,
   headers: Headers,
   bytes: Buffer,
-  compressed: Buffer
+  compressed: Buffer<ArrayBuffer>
 ): Promise<Response> {
   // Upload traffic stays on the same origin/base path and the same guarded transport.
   // Only an opaque id returned by CI is used; never follow a returned upload URL.
