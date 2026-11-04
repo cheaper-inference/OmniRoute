@@ -15,7 +15,7 @@ const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-attempt-logging-
 process.env.DATA_DIR = testDataDir;
 
 const coreDb = await import("../../src/lib/db/core.ts");
-const { getCallLogById, getCallLogs } = await import("../../src/lib/usage/callLogs.ts");
+const { getCallLogById, getCallLogs, waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { persistAttemptLogs } = await import("../../open-sse/handlers/chatCore/attemptLogging.ts");
 const { getAuditLog } = await import("../../src/lib/compliance/index.ts");
 
@@ -314,4 +314,25 @@ test("combo attempts that share pendingRequestId both land, keyed independently 
   assert.notEqual(row2.id, row.id);
   assert.equal(row2.correlationId, traceId2);
   assert.equal(row2.comboStepId, "my-combo-model-3");
+});
+
+test("no-log attempt skips traversing request and response bodies while retaining usage counters", async () => {
+  const traceId = "no-log-heap-protection";
+  const body: Record<string, unknown> = {};
+  Object.defineProperty(body, "expensive", {
+    enumerable: true,
+    get() {
+      throw new Error("no-log body must not be cloned");
+    },
+  });
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 125_000, output: 2 }, responseBody: { choices: [] } },
+    baseCtx({ pendingRequestId: traceId, body, noLogEnabled: true })
+  );
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+  const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0]?.status, 200);
+  assert.equal(rows[0]?.detailState, "none");
+  assert.equal(rows[0]?.tokensIn, 125_000);
 });
