@@ -273,6 +273,9 @@ export function providerSupportsCaching(
   if (providerId === "vertex" || providerId === "vertex-partner") {
     return targetFormat?.toLowerCase() === "claude";
   }
+  if (OPENCODE_LANES.has(providerId)) {
+    return isOpenCodeCacheableModel(providerId, model) || targetFormat?.toLowerCase() === "claude";
+  }
   if (CACHING_PROVIDERS.has(providerId)) return true;
   // All Claude-protocol providers support prompt caching
   if (targetFormat === "claude") return true;
