@@ -1,0 +1,1 @@
+- #18997: fix(executors): add first-byte readiness gate to base executor for anthropic-com
