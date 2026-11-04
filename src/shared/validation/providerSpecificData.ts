@@ -355,6 +355,15 @@ export function validateProviderSpecificData(
     });
   }
 
+  const requireUserLastMessage = data.requireUserLastMessage;
+  if (requireUserLastMessage !== undefined && typeof requireUserLastMessage !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.requireUserLastMessage must be a boolean",
+      path: ["requireUserLastMessage"],
+    });
+  }
+
   const keepMidConversationSystem = data.keepMidConversationSystem;
   if (keepMidConversationSystem !== undefined && typeof keepMidConversationSystem !== "boolean") {
     ctx.addIssue({

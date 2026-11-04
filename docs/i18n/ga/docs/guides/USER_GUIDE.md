@@ -621,11 +621,11 @@ Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../
 ## 📊 Múnlaí atá ar fáil
 
 <details>
-<summary><b>Féach ar na múnlaí uile atá ar fáil</b></summary>
+<summary><b>Féach ar na múnlaí go léir atá ar fáil</b></summary>
 
-> Tá an liosta thíos coimeádta ó `open-sse/config/providerRegistry.ts` do v3.8.0. Déantar catalóga néil (Gemini, OpenRouter, etc.) a shioncronú go dinimiciúil — chun an chatalóg bheo iomlán a fheiceáil, oscail **Dashboard → Providers → [provider] → Available Models** nó glaoigh ar `GET /api/models/catalog`.
+> Tiomsaíodh an liosta thíos ó `open-sse/config/providerRegistry.ts` do v3.8.0. Déantar catalóga néil (Gemini, OpenRouter, srl.) a shioncronú go dinimiciúil — chun an catalóg bheo iomlán a fheiceáil, oscail **Deaischlár → Soláthraithe → [provider] → Múnlaí atá ar fáil** nó glaoigh ar `GET /api/models/catalog`.
 >
-> Má tá liosta ionsuite soláthraí as sioncronú, úsáid **Import from /models** ar an leathanach sin (nó cumasaigh **Auto-Sync**) chun catalóg bheo an tsoláthraí réamhtheachtach a fháil. Fíoraíodh é seo in v3.8.50 do LLM7.io (`gemini-3.1-flash-lite`) agus UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); bhí rochtain anaithnid Pollinations fós teoranta ag an soláthraí réamhtheachtach le linn an bhabhta tástála chéanna.
+> Má tá liosta ionsuite soláthraí imithe as sioncronú, úsáid **Iompórtáil ó /models** ar an leathanach sin (nó cumasaigh **Uath-Shioncronú**) chun catalóg bheo an fhoinseacháin réamhtheachtach a fháil. Fíoraíodh é seo i v3.8.50 le LLM7.io (`gemini-3.1-flash-lite`) agus UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); bhí rochtain anaithnid Pollinations teoranta ag an bhfoinseachán réamhtheachtach le linn an bhabhta tástála chéanna.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -633,7 +633,7 @@ Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth SAOR IN AISCE: úsáid an chatalóg bheo a thaispeántar faoi **Dashboard → Providers → Kiro → Available Models**. Braitheann an infhaighteacht ar an gcuntas agus ar an bplean.
+**Kiro (`kr/`)** — OAuth SAOR IN AISCE: bain úsáid as an gcatalóg bheo a thaispeántar faoi **Deaischlár → Soláthraithe → Kiro → Múnlaí atá ar fáil**. Braitheann an infhaighteacht ar an gcuntas agus ar an bplean.
 
 **Qoder (`if/`)** — OAuth SAOR IN AISCE: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -651,27 +651,27 @@ Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../
 
 **Mistral (`mistral/`)** — Óstáilte san AE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Cuardach méadaithe: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Cuardach feabhsaithe: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Foinse oscailte: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (saor in aisce), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Tátal tapa: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Scála sliseog: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Ar scála sliseog: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Dírithe ar RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Fiontraíocht: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Fiontraíoch: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Déantar sioncronú beo in aghaidh na heochrach API ó Google — níl aon liosta statach ann. Ceangail eochair in **Dashboard → Providers**, ansin úsáid **Available Models** chun an chatalóg reatha a iompórtáil (e.g. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Déantar é a shioncronú beo de réir eochair API ó Google — níl aon liosta statach ann. Ceangail eochair faoi **Deaischlár → Soláthraithe** agus ansin úsáid **Múnlaí atá ar fáil** chun an chatalóg reatha a iompórtáil (e.g. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Soláthraithe comhoiriúnacha eile** (roghnaithe): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (trí `aws-bedrock`), `azure-ai`, `openrouter` (pasáiste catalóige), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Coinníonn gach ceann acu a liosta múnlaí féin in `providerRegistry.ts` agus is féidir iad a shioncronú go huathoibríoch nuair a chuireann an soláthraí críochphointe `/models` ar fáil.
+**Soláthraithe comhoiriúnacha eile** (roghnaithe): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (trí `aws-bedrock`), `azure-ai`, `openrouter` (catalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Coinníonn gach ceann acu a liosta múnlaí féin in `providerRegistry.ts` agus is féidir é a shioncronú go huathoibríoch nuair a chuireann an soláthraí críochphointe `/models` ar fáil.
 
-**Nóta faoi aitheantóirí múnlaí:** Úsáideann OmniRoute aitheantóirí dúchasacha soláthraithe (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Tá leaganacha poncaithe i gcuid de na haitheantóirí toisc gurb é sin an fhormáid a bhfuil súil leis ag an API réamhtheachtach. Mura bhfuil múnla liostaithe thuas, rith `omniroute models --search <term>` nó glaoigh ar `GET /api/models/catalog` chun an infhaighteacht a dheimhniú.
+**Nóta faoi aitheantóirí na múnlaí:** Úsáideann OmniRoute aitheantóirí dúchasacha soláthraithe (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Tá leaganacha poncaithe i roinnt aitheantóirí toisc gurb é sin an fhormáid a bhfuil súil ag an API réamhtheachtach leis. Mura bhfuil múnla liostaithe thuas, rith `omniroute models --search <term>` nó buail `GET /api/models/catalog` chun a dheimhniú an bhfuil sé ar fáil.
 
 </details>
 

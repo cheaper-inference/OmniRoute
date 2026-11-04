@@ -255,6 +255,14 @@ export function normalizeProviderSpecificData(
     delete normalized.disableCooling;
   }
 
+  // Assistant-prefill ban opt-in (open-sse/services/assistantPrefill.ts) — real booleans only.
+  if (
+    "requireUserLastMessage" in normalized &&
+    typeof normalized.requireUserLastMessage !== "boolean"
+  ) {
+    delete normalized.requireUserLastMessage;
+  }
+
   // Mid-conversation system turns in place (open-sse/services/claudeMidConversationSystem.ts).
   if (
     "keepMidConversationSystem" in normalized &&

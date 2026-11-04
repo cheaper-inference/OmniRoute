@@ -1,6 +1,6 @@
 {
   "name": "@omniroute/ui-kit",
-  "version": "0.0.84",
+  "version": "0.0.87",
   "private": true,
   "license": "UNLICENSED",
   "description": "Vendored snapshot of @keak/cheaper-inference-ui-kit (see UPSTREAM.md). Source is consumed directly; no build.",
@@ -10,7 +10,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./styles.css": "./src/ci-ui.css",
+    "./styles.css": "./src/ci-styles.css",
     "./tokens.css": "./src/ci-tokens.css",
     "./brand": "./src/keak-brand.tsx",
     "./tokens": "./src/tokens.ts"
