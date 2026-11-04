@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
-import { existsSync, lstatSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -16,6 +16,7 @@ const CONTRACTS = [
   "i18n-waves/SKILL.md",
   "i18n-waves/scripts/bootstrap.sh",
   "i18n-waves/scripts/wave.sh",
+  "i18n-waves/scripts/resolve_state_merge.py",
   "_shared/merge-gates.md",
   "_shared/validation-gate.md",
   "_shared/protected-surfaces.md",
@@ -113,16 +114,96 @@ export function inspectSkillCallers(root, policyPath = CALLER_POLICY) {
   return { ok, status: ok ? "MATCH" : "INCOMPLETE", files };
 }
 
+const RELEASE_CALLER_POLICY = fileURLToPath(
+  new URL("../../config/quality/release-skill-callers.json", import.meta.url)
+);
+const RELEASE_CALLERS = [
+  "generate-release/SKILL.md",
+  "generate-release/phases/candidate-admission.md",
+  "generate-release/phases/phase-0a-reconciliation.md",
+  "generate-release/phases/phase-5-next-cycle.md",
+  "version-bump/SKILL.md",
+];
+const RELEASE_OVERLAY_PATH = "skill-caller-overlays/release-cut-bump.patch";
+
+// Exact reviewed bytes detect instruction drift. MATCH does not certify GitHub
+// admission, authorize publication, or review the unchanged legacy skill text.
+export function inspectReleaseSkillCallers(root, policyPath = RELEASE_CALLER_POLICY) {
+  if (!existsSync(root)) return { ok: false, status: "NOT_INSTALLED", files: [] };
+  let policy;
+  try {
+    policy = JSON.parse(readFileSync(policyPath, "utf8"));
+    if (
+      policy?.schemaVersion !== 1 ||
+      policy.scope !== "release-cut-bump-admission-callers" ||
+      !Array.isArray(policy.files) ||
+      policy.files.length !== RELEASE_CALLERS.length ||
+      new Set(policy.files.map((file) => file?.path)).size !== RELEASE_CALLERS.length ||
+      policy.files.some(
+        (file) =>
+          !RELEASE_CALLERS.includes(file?.path) ||
+          !(
+            validHash(file.beforeSha256) ||
+            (file.path === "generate-release/phases/candidate-admission.md" &&
+              file.beforeSha256 === null)
+          ) ||
+          !validHash(file.afterSha256)
+      ) ||
+      policy.overlay?.path !== RELEASE_OVERLAY_PATH ||
+      !validHash(policy.overlay.sha256) ||
+      sha256(readFileSync(resolve(dirname(policyPath), RELEASE_OVERLAY_PATH))) !==
+        policy.overlay.sha256
+    ) {
+      throw new Error("Invalid release caller contract");
+    }
+  } catch {
+    return {
+      ok: false,
+      status: "INCOMPLETE",
+      reason: "Invalid or unavailable release caller contract/overlay",
+      files: [],
+    };
+  }
+  const files = policy.files.map(({ path, afterSha256 }) => {
+    let status;
+    try {
+      let cursor = resolve(root);
+      const rootStat = lstatSync(cursor);
+      if (!rootStat.isDirectory() || rootStat.isSymbolicLink() || realpathSync(cursor) !== cursor) {
+        throw new Error("Physical installation root required");
+      }
+      const parts = path.split("/");
+      for (let index = 0; index < parts.length; index++) {
+        cursor = resolve(cursor, parts[index]);
+        const stat = lstatSync(cursor);
+        if (
+          stat.isSymbolicLink() ||
+          !(index === parts.length - 1 ? stat.isFile() : stat.isDirectory())
+        ) {
+          throw new Error("Invalid installed release caller");
+        }
+      }
+      status = sha256(readFileSync(cursor)) === afterSha256 ? "MATCH" : "DRIFT";
+    } catch (error) {
+      status = error.code === "ENOENT" ? "MISSING" : "INVALID";
+    }
+    return { path, status, contract: "reviewed-release-overlay" };
+  });
+  const ok = files.every((file) => file.status === "MATCH");
+  return { ok, status: ok ? "MATCH" : "INCOMPLETE", files };
+}
+
 export function inspectInstalledSkillContracts(root) {
   const templates = inspectSkillContracts(root);
   const callers = inspectSkillCallers(root);
-  const ok = templates.ok && callers.ok;
+  const releaseCallers = inspectReleaseSkillCallers(root);
+  const ok = templates.ok && callers.ok && releaseCallers.ok;
   return {
     ok,
     status: ok ? "MATCH" : templates.status === "NOT_INSTALLED" ? "NOT_INSTALLED" : "INCOMPLETE",
     installedRoot: resolve(root),
-    files: [...templates.files, ...callers.files],
-    scopes: { templates, callers },
+    files: [...templates.files, ...callers.files, ...releaseCallers.files],
+    scopes: { templates, callers, releaseCallers },
   };
 }
 

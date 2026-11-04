@@ -3,7 +3,7 @@
   "scope": "i18n-explicit-comparison-callers",
   "overlay": {
     "path": "skill-caller-overlays/i18n-explicit-base.patch",
-    "sha256": "50249506183d6bc13eb569f189b3f948e6fd13dd1214cfbd529f44db3a22aa36"
+    "sha256": "677456a21f8807f7b15f1f06f368ea5f124b8e5a450925163c5e61ab34199d4b"
   },
   "files": [
     {
@@ -14,7 +14,7 @@
     {
       "path": "i18n-waves/references/scope-map.md",
       "beforeSha256": "fdd5280c7330a6fd2e8b36953f312fde608b71e7bbeeba166e136d66639c0966",
-      "afterSha256": "dc5216bf7a05114cb859fb9e012170f9ac2c628dc1c7d8993312cfb92e0a5fef"
+      "afterSha256": "a9c8be788d8298e9c0259ffea2d4189e6a02f41a4b1528d4d298c0ac1acaad94"
     },
     {
       "path": "implement-features/SKILL.md",
