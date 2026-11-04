@@ -4,9 +4,9 @@
 
 ---
 
-> **स्थिती:** स्वीकारलेले · **संदर्भ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **करार:** `domain/routing/routerBackends.ts`
-> (टाइप केलेली रजिस्ट्री — कोड [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) सोबत समाविष्ट होतो)
+> **स्थिती:** स्वीकारलेले · **संदर्भ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **करार:** `domain/routing/routerBackends.ts`
+> (टाइप केलेली रजिस्ट्री — कोड [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) सोबत समाविष्ट होतो)
 
 हा ADR `ts` (नेटिव्ह), `bifrost`, `cliproxy`, `9router`, आणि
 VibeProxy-सुसंगत इंजिने एकमेकांशी कशी संबंधित आहेत हे निश्चित करतो, जेणेकरून योगदानकर्ते
@@ -38,7 +38,7 @@ VibeProxy-सुसंगत इंजिने एकमेकांशी क�
 
 ## रजिस्ट्री — सत्याचा एकमेव स्रोत
 
-`domain/routing/routerBackends.ts` करार ([#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)
+`domain/routing/routerBackends.ts` करार ([#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)
 सोबत कोड समाविष्ट होतो) प्रत्येक इंजिनचे जीवनचक्र, क्षमता, सेवा ओळख, डीफॉल्ट पोर्ट,
 आरोग्य कॉन्फिगरेशन आणि टेलिमेट्री समर्थनासह एकदाच वर्णन करतो. प्रत्येक साइडकारसाठी
 विशेष प्रकरणे हाताळण्याऐवजी वापरकर्ते `getRouterBackend(id)`,
@@ -54,7 +54,7 @@ VibeProxy-सुसंगत इंजिने एकमेकांशी क�
 
 ¹ Bifrost ला `supervised` एम्बेडेड सेवा म्हणून बढती देणे (`/api/services/bifrost/`
 मधून इंस्टॉल/सुरू करता येणारी) हे
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) मध्ये ट्रॅक केले जाते; ते मर्ज होईपर्यंत,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) मध्ये ट्रॅक केले जाते; ते मर्ज होईपर्यंत,
 Bifrost केवळ `external` आहे (फक्त `BIFROST_BASE_URL` द्वारे पोहोचण्यायोग्य).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Bifrost केवळ `external` आहे (फक्त `BIFROST_BASE_URL` द�
 आजच्या स्थितीत रिले स्तरावरील निवड **सर्व-किंवा-काहीही-नाही** अशा स्वरूपाची आहे —
 `release/v3.8.43` वर प्रत्येक प्रोव्हायडर किंवा प्रत्येक विनंतीनुसार इंजिन बदलण्याची सुविधा नाही.
 प्रत्येक विनंतीसाठीचा गेट साइडकार-मॅनिफेस्ट कार्याद्वारे जोडला जात आहे
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) मॅनिफेस्ट +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) मॅनिफेस्ट +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ज्यामुळे `auto` केवळ मॅनिफेस्ट-पात्र प्रोव्हायडरना Bifrost द्वारे रूट करू शकते.
 
 ## डॅशबोर्ड एकत्रीकरण

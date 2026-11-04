@@ -482,7 +482,7 @@ Hai giá trị mặc định của OmniRoute có thể âm thầm phá hỏng c�
 | Phiên liên tục chuyển đổi tài khoản / tính liên tục của bộ nhớ đệm prompt bị mất giữa các lượt | TTL liên kết phiên là `0` (đã tắt)                                                | `sessionAffinityTtlMs`   |
 | Kết nối bị ngắt giữa lúc suy luận mà phía máy khách không nhận được thông báo                  | Cơ chế giám sát stream nhàn rỗi kích hoạt sau 10 phút không có chunk thượng nguồn | `STREAM_IDLE_TIMEOUT_MS` |
 
-Các thảo luận liên quan: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (tác vụ dài bị ngắt), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (lý do liên kết mặc định bị tắt). Theo dõi: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Các thảo luận liên quan: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (tác vụ dài bị ngắt), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (lý do liên kết mặc định bị tắt). Theo dõi: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Liên kết phiên — ghim một cuộc hội thoại vào một tài khoản
 

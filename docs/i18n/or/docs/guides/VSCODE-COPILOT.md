@@ -110,7 +110,7 @@ npm start
 ଏମ୍ବେଡ୍-ସକ୍ଷମ ବିଲ୍ଡ ବିନା ପୃଷ୍ଠାଟି ଫ୍ରେମ୍ରେ ଦେଖାଯିବାକୁ ଅସ୍ୱୀକାର କରେ, ଏକ୍ସଟେନ୍ସନ୍ ପ୍ରତିକ୍ରିୟା
 ହେଡର୍ଗୁଡ଼ିକରୁ ତାହା ଚିହ୍ନଟ କରି ବାହ୍ୟ ବ୍ରାଉଜର୍କୁ ଫଲ୍ବ୍ୟାକ୍ କରେ — କିଛି ଭାଙ୍ଗେ ନାହିଁ ଏବଂ ଏହା ଥରେ ସେହି କଥା ଜଣାଏ।
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ଏବଂ ଇସ୍ୟୁ
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) ଦେଖନ୍ତୁ।
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) ଦେଖନ୍ତୁ।
 
 ---
 

@@ -5,7 +5,7 @@
 ---
 
 - **Ipò:** Àbá — ó nílò ìfọwọ́sí olùtọ́jú kí iṣẹ́ runtime tó bẹ̀rẹ̀
-- **Ọ̀ràn ìtọ́pa:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Ọ̀ràn ìtọ́pa:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Ààlà:** Ìṣètò-ìkọ́lé ìtọ́jú-dátà nìkan; ìpinnu yìí kò fi ibi-ipamọ́ dátà ìta kún un tàbí yan ọ̀kan
 
 ## Àyíká

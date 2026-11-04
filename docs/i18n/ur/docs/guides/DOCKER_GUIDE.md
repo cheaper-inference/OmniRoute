@@ -323,7 +323,7 @@ Docker میں میموری کا طرزِ عمل:
 
 ### کوڈنگ ایجنٹس کے لیے رن ٹائم RAM
 
-1 GiB کا Docker ڈیفالٹ، dashboard/ہلکی chat کے لیے کم از کم حد ہے، production کے لیے مناسب سائز نہیں۔ طویل `POST /v1/responses` باڈیز (سینکڑوں پیغامات، درجنوں ٹولز) compression کے دوران متعدد in-memory graphs برقرار رکھتی ہیں۔ بیک وقت چلنے والی تقریباً 3 MiB / تقریباً 750k-token کی دو درخواستوں نے **12 GiB** old-space پر V8 کو abort کر دیا ہے (`FATAL ERROR: Reached heap limit`) اور 16 GiB cgroup OOM سے بھی ٹکرا چکی ہیں۔ [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) دیکھیں۔
+1 GiB کا Docker ڈیفالٹ، dashboard/ہلکی chat کے لیے کم از کم حد ہے، production کے لیے مناسب سائز نہیں۔ طویل `POST /v1/responses` باڈیز (سینکڑوں پیغامات، درجنوں ٹولز) compression کے دوران متعدد in-memory graphs برقرار رکھتی ہیں۔ بیک وقت چلنے والی تقریباً 3 MiB / تقریباً 750k-token کی دو درخواستوں نے **12 GiB** old-space پر V8 کو abort کر دیا ہے (`FATAL ERROR: Reached heap limit`) اور 16 GiB cgroup OOM سے بھی ٹکرا چکی ہیں۔ [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) دیکھیں۔
 
 **cgroup `--memory` کو heap سے زیادہ رکھیں** — native buffers، SQLite، اور compression intermediates، V8 سے باہر موجود ہوتے ہیں۔
 
@@ -692,7 +692,7 @@ spec:
 
 `preStop` سلیپ کیوب کو SIGTERM سے پہلے سروس اینڈ پوائنٹس چھوڑنے دیتا ہے۔** نیا** ٹریفک موت کے عمل کو مارنا بند کر دیتی ہے۔ پرواز میں `/v1/responses` SSE ہیوی ویٹ داخلہ لیز (#11015) کے ذریعے `SHUTDOWN_TIMEOUT_MS` (پہلے سے طے شدہ 30s) تک نکالا جاتا ہے۔ نئی درخواستیں جو ابھی تک عمل تک پہنچتی ہیں `503` + `Retry-After: 5` حاصل کرتی ہیں۔ ریکریٹ ایمپٹی اینڈ پوائنٹ گیپ اس وقت تک جب تک کہ متبادل تیار نہ ہو ایک مشکل بندش رہتا ہے - یہ SQLite ٹوپولوجی ہے، تحقیقات کی غلط تشکیل نہیں۔
 
-خارجی Postgres / کثیر مصنف HA ہے** نہیں** ایک دستاویزی اسٹاک کا راستہ۔ اگر آپ کو HA کی ضرورت ہے تو، ایک ہی نقل رکھیں یا ایک ٹوپولوجی چلائیں جس نے پروجیکٹ کا تجربہ کیا ہے اور الگ سے دستاویز کیا ہے۔ Postgres/MySQL کام [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) میں رہتا ہے۔ جب تک کہ بحری جہاز، ضرب کرنے کا واحد سہارا راستہ** بڑا** `/v1/responses` صلاحیت N آزاد عمل (اگلا حصہ) ہے، ایک حجم پر `replicas > 1` نہیں ہے۔
+خارجی Postgres / کثیر مصنف HA ہے** نہیں** ایک دستاویزی اسٹاک کا راستہ۔ اگر آپ کو HA کی ضرورت ہے تو، ایک ہی نقل رکھیں یا ایک ٹوپولوجی چلائیں جس نے پروجیکٹ کا تجربہ کیا ہے اور الگ سے دستاویز کیا ہے۔ Postgres/MySQL کام [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) میں رہتا ہے۔ جب تک کہ بحری جہاز، ضرب کرنے کا واحد سہارا راستہ** بڑا** `/v1/responses` صلاحیت N آزاد عمل (اگلا حصہ) ہے، ایک حجم پر `replicas > 1` نہیں ہے۔
 
 ## اسکیل آؤٹ: N آزاد عمل
 
@@ -702,11 +702,11 @@ spec:
 
 غیر فعال مثال کنکشن کو دوبارہ پڑھتی ہے جب ریفریش کی ضرورت ہوتی ہے اور صرف ایک مختلف، غیر ختم شدہ رسائی ٹوکن کو اپناتا ہے۔ بصورت دیگر کنکشن کی میعاد ختم یا غیر فعال کیے بغیر یا ریفریش بریکر کی ناکامی کو شمار کیے بغیر ریفریش کو غیر فعال کردیا جاتا ہے۔ حقیقی اپ اسٹریم تصدیق کی ناکامیاں اب بھی عام ناکامی اکاؤنٹنگ، ایکسپونینشل کولڈاؤن اور عام کلائنٹ کی غلطی کا استعمال کرتی ہیں۔ اکاؤنٹ کو غیر فعال کرنا مستقل رہتا ہے۔ رسائی ٹوکنز کی میعاد ختم ہونے سے پہلے مالک کے گھمائے ہوئے ٹوکنز کو سنکرونائز کریں (پہلے سے طے شدہ پروایکٹو ریفریش لیڈ پانچ منٹ ہے) یا Codex auth فائل کو دوبارہ درآمد کریں۔ غیر فعال درآمدات فراہم کردہ ٹوکنز کو ٹوکن اینڈ پوائنٹ پر توثیق کیے بغیر اسٹور کرتی ہیں۔ دستی dashboard/API ریفریش `409 refresh_disabled` واپس کرتا ہے؛ نئے OAuth لاگ ان میں کوئی تبدیلی نہیں ہے۔ [ماحولیاتی حوالہ](../reference/ENVIRONMENT.md#passive-codex-token-refresh) دیکھیں۔
 
-ایک نوڈ عمل ہے۔** ایک V8 ڈھیر** . دو اوور لیپنگ ~ 3 MiB / ~ 750k-token کوڈنگ ایجنٹ `POST /v1/responses` (RTK + Caveman) اس ہیپ کو ~ 12 Gi (`FATAL ERROR: Reached heap limit`) پر روک دیتے ہیں اور 16 Gi cgroup کو OOM کر سکتے ہیں۔ ملاحظہ کریں [نمبر #7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) وہ پیمائش ہے a** میموری بجٹ** انتباہ، دو کنکرنٹ لمبے `/v1/responses` کی پروڈکٹ ہارڈ میکس نہیں۔ ہیوی ویٹ چیٹ میں داخلہ ایک خود کار طریقے سے حاصل کردہ انجسٹ بائٹ بجٹ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) کے ذریعہ کیا جاتا ہے جس کا سائز اسی V8/cgroup سیلنگ — سے ہوتا ہے جو پہلے سے ہی سائز کے عمل پر اسے اوپر کی طرف بڑھاتا ہے (یا میراثی `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` کی درخواست کی گنتی کیپ کو ترتیب دیتا ہے) اسقاط کو دوبارہ پیش کرتا ہے۔ چھوٹی چیٹس، `/healthz`، `/v1/models`، اور MCP ہیں۔** نہیں** اس ٹوپی میں.
+ایک نوڈ عمل ہے۔** ایک V8 ڈھیر** . دو اوور لیپنگ ~ 3 MiB / ~ 750k-token کوڈنگ ایجنٹ `POST /v1/responses` (RTK + Caveman) اس ہیپ کو ~ 12 Gi (`FATAL ERROR: Reached heap limit`) پر روک دیتے ہیں اور 16 Gi cgroup کو OOM کر سکتے ہیں۔ ملاحظہ کریں [نمبر #7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) وہ پیمائش ہے a** میموری بجٹ** انتباہ، دو کنکرنٹ لمبے `/v1/responses` کی پروڈکٹ ہارڈ میکس نہیں۔ ہیوی ویٹ چیٹ میں داخلہ ایک خود کار طریقے سے حاصل کردہ انجسٹ بائٹ بجٹ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) کے ذریعہ کیا جاتا ہے جس کا سائز اسی V8/cgroup سیلنگ — سے ہوتا ہے جو پہلے سے ہی سائز کے عمل پر اسے اوپر کی طرف بڑھاتا ہے (یا میراثی `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` کی درخواست کی گنتی کیپ کو ترتیب دیتا ہے) اسقاط کو دوبارہ پیش کرتا ہے۔ چھوٹی چیٹس، `/healthz`، `/v1/models`، اور MCP ہیں۔** نہیں** اس ٹوپی میں.
 
 ### ایک عمل: دو سے زیادہ طویل `/v1/responses`
 
-اے** صحت مند** عمل ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` کے نیچے ڈھیر، ڈیفالٹ `0.75`)** ہو سکتا ہے** جب پروسیس وائیڈ انفلائٹ بائٹ بجٹ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) میں اب بھی گنجائش موجود ہو تو دو سے زیادہ کنکرنٹ لانگ `POST /v1/responses` چلائیں۔ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (پہلے سے طے شدہ 256 KiB) پر یا اس سے اوپر کی باڈیز وہی ہیوی ویٹ لیز لیتی ہیں جیسا کہ سٹرکچر ہیوی درخواستیں ہوتی ہیں اور وہی [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) استعمال کرتی ہیں۔ دسیوں ایک ساتھ طویل SSE کلائنٹس (آپریٹرز کو اکثر 40-50 کی ضرورت ہوتی ہے) a** میموری بجٹ** سوال — سائز کا ڈھیر + primary/headroom سلاٹس + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ایک مشکل "زیادہ سے زیادہ 2" مصنوعات کی حد نہیں ہے۔ ایک دباؤ والا ڈھیر اب بھی دوبارہ قابل کوشش `503` کے ساتھ بہہ جاتا ہے لہذا #7849 واپس نہیں آتا ہے۔
+اے** صحت مند** عمل ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` کے نیچے ڈھیر، ڈیفالٹ `0.75`)** ہو سکتا ہے** جب پروسیس وائیڈ انفلائٹ بائٹ بجٹ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) میں اب بھی گنجائش موجود ہو تو دو سے زیادہ کنکرنٹ لانگ `POST /v1/responses` چلائیں۔ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (پہلے سے طے شدہ 256 KiB) پر یا اس سے اوپر کی باڈیز وہی ہیوی ویٹ لیز لیتی ہیں جیسا کہ سٹرکچر ہیوی درخواستیں ہوتی ہیں اور وہی [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) استعمال کرتی ہیں۔ دسیوں ایک ساتھ طویل SSE کلائنٹس (آپریٹرز کو اکثر 40-50 کی ضرورت ہوتی ہے) a** میموری بجٹ** سوال — سائز کا ڈھیر + primary/headroom سلاٹس + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ایک مشکل "زیادہ سے زیادہ 2" مصنوعات کی حد نہیں ہے۔ ایک دباؤ والا ڈھیر اب بھی دوبارہ قابل کوشش `503` کے ساتھ بہہ جاتا ہے لہذا #7849 واپس نہیں آتا ہے۔
 
 کو** ڈھیروں کو ضرب دیں** (آزاد V8 پرانی جگہیں)** آج** :
 
@@ -749,7 +749,7 @@ volumes:
   omniroute-b-data:
 ```
 
-عمل میں ہونے والی کثافت ( HTTP الگ تھلگ سے کمپریشن) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) ہے۔ مشترکہ پائیدار حالت پر ایک منطقی کلسٹر [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ہے۔
+عمل میں ہونے والی کثافت ( HTTP الگ تھلگ سے کمپریشن) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) ہے۔ مشترکہ پائیدار حالت پر ایک منطقی کلسٹر [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ہے۔
 
 ## Docker کے اندر Gemini کی علاقائی خرابیاں
 
@@ -791,7 +791,7 @@ HTTP جواب اس پروب کے لیے کنیکٹیویٹی ثابت کرتا �
 
 ### ہوسٹ کی سطح کا متبادل: فعال IPv6 اور ریزولوَر پالیسی
 
-[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) کے رپورٹ کنندہ نے
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) کے رپورٹ کنندہ نے
 اپنے ماحول میں کنٹینر IPv6 فعال کر کے اور glibc ایڈریس انتخاب تبدیل کر کے رسائی بحال
 کی۔ اسے ماحول کے لیے مخصوص متبادل سمجھیں۔ ریزولوَر کی ترجیحات تبدیل کرنے سے پہلے
 فعال ہوسٹ IPv6، کنٹینر ایگریس/روٹنگ اور فائر وال قواعد کی تصدیق کریں۔ صرف ایک نجی

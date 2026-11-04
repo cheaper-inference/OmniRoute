@@ -406,7 +406,7 @@ toteutus odottaa).
 ### CodeQL-ratchet: päivitysväli ja manuaalinen käynnistys
 
 `check:codeql-ratchet` lukee **repositoriotilaa, joka päivitetään ajastetusti — ei PR-kohtaisesti.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` ilmoittaa
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ilmoittaa
 `state: configured`, `schedule: weekly`: kyseessä on GitHubin oletusasetuksen tarkistus, ei jokaisen
 pushin yhteydessä suoritettava analyysi. Tästä seuraa, että kun hälytyksiä KORJAAVA PR on yhdistetty,
 ratchet lukee edelleen vanhaa, suurempaa määrää seuraavan ajastetun tarkistuksen suorittamiseen asti —

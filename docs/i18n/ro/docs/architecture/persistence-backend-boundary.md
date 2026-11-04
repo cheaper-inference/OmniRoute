@@ -5,7 +5,7 @@
 ---
 
 - **Stare:** Propus — necesită aprobarea responsabilului de mentenanță înainte de începerea lucrului asupra runtime-ului
-- **Problemă de urmărire:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Problemă de urmărire:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Domeniu de aplicare:** Doar arhitectura de persistență; această decizie nu adaugă și nu selectează o bază de date externă
 
 ## Context

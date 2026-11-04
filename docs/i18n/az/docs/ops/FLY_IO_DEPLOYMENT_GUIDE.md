@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Kodu Klonlayın və Qovluğa Keçin
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly avtomatik olaraq maşınların mərhələli yenilənməsini həyata keçirə
 
 ### 9.1 Forkunuzun `fly.toml` Faylını Qoruyaraq İlkin Repozitoriyanın Yeniləmələrini İzləmək
 
-Cari repozitoriya forkdursa və `https://github.com/cheaper-inference/OmniRoute` ilkin repozitoriyasındakı yeniləmələri sinxronlaşdırmaq istəyirsinizsə, aşağıdakı iş axınını izləyin.
+Cari repozitoriya forkdursa və `https://github.com/diegosouzapw/OmniRoute` ilkin repozitoriyasındakı yeniləmələri sinxronlaşdırmaq istəyirsinizsə, aşağıdakı iş axınını izləyin.
 
 Əvvəlcə uzaq repozitoriyalarınızı yoxlayın:
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` konfiqurasiya edilməyibsə, onu əlavə edin:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 `upstream` ilə sinxronlaşdırmadan əvvəl ən son commitləri və teqləri əldə edin:

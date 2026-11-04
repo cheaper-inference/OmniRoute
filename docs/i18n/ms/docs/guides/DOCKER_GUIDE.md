@@ -324,7 +324,7 @@ Gelagat memori dalam Docker:
 
 ### RAM masa jalan untuk ejen pengekodan
 
-Nilai lalai Docker 1 GiB ialah paras minimum untuk papan pemuka/sembang ringan, bukan saiz untuk penggunaan pengeluaran. Kandungan `POST /v1/responses` yang panjang (ratusan mesej, puluhan alat) mengekalkan berbilang graf dalam memori semasa pemampatan. Dua permintaan bertindih bersaiz ~3 MiB / ~750k token telah menyebabkan V8 terhenti pada ruang lama **12 GiB** (`FATAL ERROR: Reached heap limit`) dan turut mencapai OOM cgroup 16 GiB. Lihat [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+Nilai lalai Docker 1 GiB ialah paras minimum untuk papan pemuka/sembang ringan, bukan saiz untuk penggunaan pengeluaran. Kandungan `POST /v1/responses` yang panjang (ratusan mesej, puluhan alat) mengekalkan berbilang graf dalam memori semasa pemampatan. Dua permintaan bertindih bersaiz ~3 MiB / ~750k token telah menyebabkan V8 terhenti pada ruang lama **12 GiB** (`FATAL ERROR: Reached heap limit`) dan turut mencapai OOM cgroup 16 GiB. Lihat [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Tetapkan saiz **cgroup `--memory` melebihi heap** — penimbal natif, SQLite dan perantaraan pemampatan berada di luar V8.
 
@@ -699,7 +699,7 @@ spec:
 
 `preStop` sleep membolehkan kube menggugurkan titik akhir Perkhidmatan sebelum SIGTERM jadi** baru** lalu lintas berhenti melanda proses mati. `/v1/responses` SSE dalam penerbangan disalirkan sehingga `SHUTDOWN_TIMEOUT_MS` (lalai 30s) melalui pajakan kemasukan kelas berat (#11015). Permintaan baharu yang masih mencapai proses dapatkan `503` + `Retry-After: 5`. Cipta semula jurang titik akhir kosong sehingga penggantian Sedia kekal sebagai gangguan yang teruk — iaitu topologi SQLite, bukan misconfig probe.
 
-Postgres luaran / HA berbilang penulis ialah** bukan** laluan stok yang didokumenkan. Jika anda memerlukan HA, simpan satu replika atau jalankan topologi yang telah diuji dan didokumenkan oleh projek secara berasingan. Kerja Postgres/MySQL tinggal di [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Sehingga kapal itu, satu-satunya cara yang disokong untuk membiak** besar** kapasiti `/v1/responses` ialah N proses bebas (bahagian seterusnya), bukan `replicas > 1` pada satu volum.
+Postgres luaran / HA berbilang penulis ialah** bukan** laluan stok yang didokumenkan. Jika anda memerlukan HA, simpan satu replika atau jalankan topologi yang telah diuji dan didokumenkan oleh projek secara berasingan. Kerja Postgres/MySQL tinggal di [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Sehingga kapal itu, satu-satunya cara yang disokong untuk membiak** besar** kapasiti `/v1/responses` ialah N proses bebas (bahagian seterusnya), bukan `replicas > 1` pada satu volum.
 
 ## Skala keluar: N proses bebas
 
@@ -709,11 +709,11 @@ Salinan satu akaun Codex tidak boleh menggunakan token muat semula sekali gunany
 
 Contoh pasif membaca semula sambungan apabila muat semula diperlukan dan hanya menggunakan token akses yang berbeza dan belum tamat tempoh. Jika tidak, muat semula dinyahdayakan tanpa tamat tempoh atau menyahaktifkan sambungan atau mengira kegagalan pemutus semula. Kegagalan pengesahan huluan sebenar masih menggunakan perakaunan kegagalan biasa, penyejukan eksponen dan ralat pelanggan biasa; penyahaktifan akaun kekal kekal. Segerakkan token yang diputar oleh pemilik sebelum token akses tamat tempoh (panduan muat semula proaktif lalai ialah lima minit), atau import semula fail Codex auth. Import pasif menyimpan token yang dibekalkan tanpa mengesahkannya di titik akhir token. Muat semula dashboard/API manual mengembalikan `409 refresh_disabled`; log masuk OAuth baharu tidak berubah. Lihat [rujukan persekitaran](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Satu proses Nod ialah** satu timbunan V8** . Dua pertindihan ~ 3 MiB / ~ 750k-token pengekodan-ejen `POST /v1/responses` (RTK + Caveman) membatalkan timbunan itu pada ~ 12 Gi (`FATAL ERROR: Reached heap limit`) dan boleh OOM a 16 Gi cgroup. Lihat [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Pengukuran itu ialah a** bajet ingatan** amaran, bukan produk maksimum keras dua `/v1/responses` panjang serentak . Kemasukan sembang heavyweight dikawal oleh belanjawan bait sedutan terbitan automatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) bersaiz daripada siling V8/cgroup yang sama — mengatasinya ke atas (atau menetapkan had kiraan permintaan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` lama) pada proses yang sudah bersaiz memperkenalkan semula pengguguran. Sembang kecil, `/healthz`, `/v1/models` dan MCP adalah** bukan** dalam topi itu.
+Satu proses Nod ialah** satu timbunan V8** . Dua pertindihan ~ 3 MiB / ~ 750k-token pengekodan-ejen `POST /v1/responses` (RTK + Caveman) membatalkan timbunan itu pada ~ 12 Gi (`FATAL ERROR: Reached heap limit`) dan boleh OOM a 16 Gi cgroup. Lihat [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Pengukuran itu ialah a** bajet ingatan** amaran, bukan produk maksimum keras dua `/v1/responses` panjang serentak . Kemasukan sembang heavyweight dikawal oleh belanjawan bait sedutan terbitan automatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) bersaiz daripada siling V8/cgroup yang sama — mengatasinya ke atas (atau menetapkan had kiraan permintaan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` lama) pada proses yang sudah bersaiz memperkenalkan semula pengguguran. Sembang kecil, `/healthz`, `/v1/models` dan MCP adalah** bukan** dalam topi itu.
 
 ### Satu proses: lebih daripada dua `/v1/responses` panjang
 
-A** sihat** proses (timbunan di bawah `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, lalai `0.75`)** boleh** jalankan lebih daripada dua `POST /v1/responses` panjang serentak apabila belanjawan bait dalam penerbangan seluruh proses (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) masih mempunyai ruang. Badan pada `OMNIROUTE_CHAT_LARGE_BODY_BYTES` atau lebih tinggi (lalai 256 KiB) mengambil pajakan wajaran berat yang sama seperti permintaan berat struktur dan menggunakan [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape yang sama (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Berpuluh-puluh pelanggan SSE panjang serentak (pengendali selalunya memerlukan 40–50) ialah a** bajet ingatan** soalan timbunan saiz — + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — bukan had produk "maks 2" yang keras. Timbunan bertekanan masih hilang dengan `503` yang boleh dicuba semula jadi #7849 tidak kembali.
+A** sihat** proses (timbunan di bawah `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, lalai `0.75`)** boleh** jalankan lebih daripada dua `POST /v1/responses` panjang serentak apabila belanjawan bait dalam penerbangan seluruh proses (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) masih mempunyai ruang. Badan pada `OMNIROUTE_CHAT_LARGE_BODY_BYTES` atau lebih tinggi (lalai 256 KiB) mengambil pajakan wajaran berat yang sama seperti permintaan berat struktur dan menggunakan [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape yang sama (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Berpuluh-puluh pelanggan SSE panjang serentak (pengendali selalunya memerlukan 40–50) ialah a** bajet ingatan** soalan timbunan saiz — + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — bukan had produk "maks 2" yang keras. Timbunan bertekanan masih hilang dengan `503` yang boleh dicuba semula jadi #7849 tidak kembali.
 
 Kepada** membiak timbunan** (ruang lama V8 bebas)** hari ini** :
 
@@ -756,7 +756,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Ketumpatan dalam proses (mampatan daripada pengasingan HTTP ) ialah [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Satu kelompok logik pada keadaan tahan lama yang dikongsi ialah [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+Ketumpatan dalam proses (mampatan daripada pengasingan HTTP ) ialah [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Satu kelompok logik pada keadaan tahan lama yang dikongsi ialah [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Ralat serantau Gemini di dalam Docker
 
@@ -797,7 +797,7 @@ hanya permintaan model yang disahkan dapat menguji kelayakan Gemini.
 
 ### Alternatif peringkat hos: IPv6 yang berfungsi dan dasar penyelesai
 
-Pelapor [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) memulihkan
+Pelapor [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) memulihkan
 akses dalam persekitaran mereka dengan mendayakan IPv6 bekas dan mengubah pemilihan
 alamat glibc. Anggap ini sebagai alternatif khusus persekitaran. Sahkan IPv6 hos
 yang berfungsi, laluan trafik keluar/penghalaan bekas dan peraturan tembok api sebelum melaraskan keutamaan penyelesai.

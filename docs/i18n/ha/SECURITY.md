@@ -9,7 +9,7 @@
 Idan ka gano wani raunin tsaro a OmniRoute, da fatan za ka bayar da rahotonsa cikin alhaki:
 
 1. **KADA KA** buɗe batun GitHub na jama'a
-2. Yi amfani da [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Yi amfani da [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Haɗa da: bayani, matakan sake haifar da matsalar, da tasirin da ka iya faruwa
 
 ## Jadawalin Amsa
@@ -42,7 +42,7 @@ Bayan 3.8.59, sigar da ke biye ita ce **3.9.0**, wadda ke buɗe layin tallafi na
   duk wanda ya fi zuwa daga baya**. Za a rubuta ranar ƙarshe da aka samu a bayanan fitarwar 3.9.0 da kuma a cikin
   [`ROADMAP.md`](ROADMAP.md) lokacin da fitarwar ta gudana.
 - **Kai rahoton raunin tsaro a layin LTS:** a yi amfani da tasha ɗaya da kowace siga —
-  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) na sirri,
+  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) na sirri,
   ba batun jama’a ba. Faɗi sigar da ka gwada (misali `3.9.2`); gyare-gyaren suna shiga
   `stable/v3` sannan a tura su gaba zuwa v4.
 - **Matsayin tushen tsaro lokacin fitar da LTS:** ana rubuta yanayin na’urar bincike da aka auna, da hujjojin

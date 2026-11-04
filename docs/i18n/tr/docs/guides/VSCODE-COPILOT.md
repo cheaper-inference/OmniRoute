@@ -106,7 +106,7 @@ npm start
 | Docker imajı               | ✅ `docker build --build-arg DASHBOARD_ALLOW_EMBED=vscode -t omniroute:embed .` — Docker Hub'daki önceden derlenmiş imajda gömme etkin değildir |
 
 Gömme özelliği etkinleştirilmiş bir derleme olmadığında sayfa çerçeve içinde görüntülenmeyi reddeder; uzantı bunu yanıt üstbilgilerinden algılar ve harici tarayıcıya geri döner — hiçbir şey bozulmaz ve bu durumu bir kez bildirir. Bkz. [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ve sorun
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

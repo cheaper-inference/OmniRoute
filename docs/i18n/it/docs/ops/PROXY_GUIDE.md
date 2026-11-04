@@ -260,7 +260,7 @@ Questa operazione viene eseguita una sola volta al primo avvio dopo l'aggiorname
 
 ## Marketplace di proxy gratuiti 1proxy
 
-> 🆕 **Contributo di [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Contributo di [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute si integra con la piattaforma della community **[1proxy](https://1proxy-api.aitradepulse.com)** per fornire accesso a **centinaia di proxy gratuiti e convalidati** provenienti da tutto il mondo. È la soluzione ideale per gli utenti che non dispongono di una propria infrastruttura proxy.
 

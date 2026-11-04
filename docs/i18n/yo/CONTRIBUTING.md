@@ -35,7 +35,7 @@ UI/UX, i18n, CLI, ibi ìpamọ́ dátà, àti ìkọ́/ìmúṣiṣẹ́ pọ̀ 
 ### Kíkọ́ Àfọ̀mọ́ & Fífì Sílò
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -441,4 +441,4 @@ Lẹ́yìn náà, lo àwọn skill `/deploy-vps-*-cc` tí ó máa ń lo rsync l�
 - **Ìtọ́kasí API**: Wo [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Àwọn àkọsílẹ̀ ààbò**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Àwọn àkọsílẹ̀ iṣẹ́ ìṣàkóso**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Àwọn ìṣòro**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Àwọn ìṣòro**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

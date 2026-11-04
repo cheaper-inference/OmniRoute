@@ -5,7 +5,7 @@
 ---
 
 - **Hali:** Imependekezwa — inahitaji idhini ya mtunzaji kabla ya kazi ya runtime kuanza
-- **Suala la ufuatiliaji:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Suala la ufuatiliaji:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Upeo:** Usanifu wa uhifadhi pekee; uamuzi huu hauongezi wala kuchagua hifadhidata ya nje
 
 ## Muktadha

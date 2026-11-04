@@ -57,7 +57,7 @@ To **nie wstrzymuje rozwoju**:
 Sprawdź, czy jest otwarte zamrożenie, zanim założysz, że wybrana gałąź jest gotowa do merge:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Mechanika merge (etykieta właściciela `queue` → Mergify) jest opisana w

@@ -113,8 +113,8 @@ OmniRoute ले Chathub WebSocket URL का लागि HAR स्क्य�
 
 ## सन्दर्भहरू
 
-- मुद्दा: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- छलफल: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- मुद्दा: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- छलफल: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - स्रोत: `src/shared/constants/providers/web-cookie.ts` (प्रदायकको परिभाषा)
 - HAR आयात: `src/shared/utils/m365HarImport.ts`
 - Credential का फिल्डहरू: `src/shared/providers/webSessionCredentials.ts`

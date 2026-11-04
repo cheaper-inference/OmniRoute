@@ -136,8 +136,8 @@ olla oletusarvoisesti piilotettu joillakin tilaustasoilla.
 
 ## Viitteet
 
-- Ongelma: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Keskustelu: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Ongelma: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Keskustelu: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Lähde: `src/shared/constants/providers/web-cookie.ts` (palveluntarjoajan määritys)
 - HAR-tuonti: `src/shared/utils/m365HarImport.ts`
 - Tunnistetietokentät: `src/shared/providers/webSessionCredentials.ts`

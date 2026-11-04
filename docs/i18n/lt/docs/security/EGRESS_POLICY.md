@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Kodėl tai reikalinga
 
-Pristatyta PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Pagrindinės problemos, paskatinusios tai įgyvendinti:
+Pristatyta PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Pagrindinės problemos, paskatinusios tai įgyvendinti:
 
 | Problema                                               | Ką išsprendžia direktyva                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -198,7 +198,7 @@ Jarayon muhiti ilova ishga tushganda yozib olinadi, shuning uchun ilova ishlayot
 
 ## Avtomatik yangilash
 
-GitHub provayderi (`cheaper-inference/OmniRoute`) bilan `electron-updater` foydalanadi.
+GitHub provayderi (`diegosouzapw/OmniRoute`) bilan `electron-updater` foydalanadi.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Voqealar `update-status` IPC orqali rendererga yoʻnaltirildi: `checking`, `available`, `not-available`, `downloading` ( `percent` bilan), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefaktlar `electron/dist-electron/` tushadi:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Relizlar GitHub Releases (`cheaper-inference/OmniRoute`) da chop etiladi, bu yerda `electron-updater` yangi versiyalarni tekshiradi.
+Relizlar GitHub Releases (`diegosouzapw/OmniRoute`) da chop etiladi, bu yerda `electron-updater` yangi versiyalarni tekshiradi.
 
 ## Muammolarni bartaraf qilish; nosozliklarni TUZATISH
 

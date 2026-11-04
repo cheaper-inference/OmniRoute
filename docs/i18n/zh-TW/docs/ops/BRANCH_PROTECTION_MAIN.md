@@ -7,7 +7,7 @@
 擁有者操作。請透過「設定」→「分支」→「新增規則」套用，或執行：
 
 ```bash
-gh api -X PUT repos/cheaper-inference/OmniRoute/branches/main/protection \
+gh api -X PUT repos/diegosouzapw/OmniRoute/branches/main/protection \
   --input - <<'JSON'
 { "required_status_checks": { "strict": true, "contexts": ["Quality Ratchet", "Quality Gates (Extended)", "Fast Quality Gates"] },
   "enforce_admins": false,

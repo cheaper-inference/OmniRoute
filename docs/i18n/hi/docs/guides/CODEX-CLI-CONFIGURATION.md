@@ -478,7 +478,7 @@ OmniRoute के दो डिफ़ॉल्ट कई घंटों तक �
 | सत्र बार-बार अकाउंट बदलता है / टर्न के बीच प्रॉम्प्ट-कैश निरंतरता खो जाती है    | सत्र एफ़िनिटी TTL `0` (अक्षम) है                                              | `sessionAffinityTtlMs`   |
 | क्लाइंट को कोई प्रॉम्प्ट दिखे बिना रीजनिंग के बीच में कनेक्शन समाप्त हो जाता है | 10 मिनट तक कोई अपस्ट्रीम चंक न मिलने पर स्ट्रीम निष्क्रियता वॉचडॉग सक्रिय हुआ | `STREAM_IDLE_TIMEOUT_MS` |
 
-संबंधित चर्चाएँ: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (लंबे कार्य का बाधित होना), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (एफ़िनिटी डिफ़ॉल्ट रूप से बंद क्यों है)। ट्रैकिंग: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)।
+संबंधित चर्चाएँ: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (लंबे कार्य का बाधित होना), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (एफ़िनिटी डिफ़ॉल्ट रूप से बंद क्यों है)। ट्रैकिंग: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)।
 
 ### 1. सत्र एफ़िनिटी — एक वार्तालाप को एक अकाउंट से पिन करें
 

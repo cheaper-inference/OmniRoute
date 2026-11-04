@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy मोफत प्रॉक्सी मार्केटप्लेस
 
-> 🆕 **योगदानकर्ता [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (समस्या [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **योगदानकर्ता [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (समस्या [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 ज्या वापरकर्त्यांकडे स्वतःची प्रॉक्सी पायाभूत सुविधा नाही, त्यांना जगभरातील **शेकडो मोफत, सत्यापित प्रॉक्सींचा** वापर करता यावा यासाठी OmniRoute हे **[1proxy](https://1proxy-api.aitradepulse.com)** समुदाय प्लॅटफॉर्मसोबत एकत्रित केले आहे.
 

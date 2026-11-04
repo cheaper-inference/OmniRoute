@@ -5,7 +5,7 @@
 ---
 
 တမ်းပလိတ်: xquik #11370 (release/v3.8.51 တွင် ပေါင်းစည်းထားသည်)။ အနေအထား: `fallbackOnly`။
-Upstream အဆိုပြုချက်: issue cheaper-inference/OmniRoute#11637။
+Upstream အဆိုပြုချက်: issue diegosouzapw/OmniRoute#11637။
 
 ## 1. ဝန်ဆောင်မှု၏ အတည်ပြုထားသော အချက်အလက်များ (တရားဝင်စာရွက်စာတမ်းများဖြင့် အပြန်အလှန်စစ်ဆေးထားသည်)
 

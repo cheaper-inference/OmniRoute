@@ -56,7 +56,7 @@ To **ne ustavi razvoja**:
 Preden domnevate, da je želeno vejo mogoče združevati, preverite, ali obstaja odprta zamrznitev:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Mehanika združevanja (lastnik doda oznako `queue` → Mergify) je dokumentirana v

@@ -179,7 +179,7 @@ Dodirne točke:
 
 - `open-sse/executors/antigravity.ts` — čita `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — prosljeđivanje vjerodajnica
-- Izvorna prijava incidenta: rasprava [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Izvorna prijava incidenta: rasprava [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

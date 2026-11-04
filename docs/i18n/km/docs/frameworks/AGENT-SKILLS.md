@@ -18,7 +18,7 @@ Agent Skills គឺជាឯកសារ SKILL.md ដែលមានរចនា
 - **ID ផ្លូវការ** មួយ (`omni-auth`, `cli-serve` ជាដើម)
 - ឯកសារ **SKILL.md** មួយនៅក្នុង `skills/{id}/SKILL.md` ដែលមាន YAML frontmatter (`name`, `description`) + ខ្លឹមសារ markdown លម្អិត
 - **REST endpoints** (សម្រាប់ជំនាញ API) ឬ **CLI subcommands** (សម្រាប់ជំនាញ CLI) ដែលទាញយកពី OpenAPI spec និង CLI registry
-- **GitHub raw URL** មួយសម្រាប់ទាញយកដោយផ្ទាល់៖ `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHub raw URL** មួយសម្រាប់ទាញយកដោយផ្ទាល់៖ `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. ការទាញយកឯកសារ raw ពី GitHub ដោយផ្ទាល់ (មិនត្រូវការ server)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -5,7 +5,7 @@
 ---
 
 Akwụkwọ a na-edekọ mkpebi mmejuputa maka
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). A na-anọchi anya ngwaahịa ọha dịka ezinụlọ ndị na-eweta ọrụ anọ. Mpaghara bụ data njikọ, ọ bụghị ngwaahịa dị iche.
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). A na-anọchi anya ngwaahịa ọha dịka ezinụlọ ndị na-eweta ọrụ anọ. Mpaghara bụ data njikọ, ọ bụghị ngwaahịa dị iche.
 
 ## Mkpebi
 

@@ -94,7 +94,7 @@ oleh sistem 1 tanpa syarat dan oleh sistem 2 setelah pilihan penyertaan didayaka
 
 ## 4. `/v1/responses` berpanjangan dalam satu proses (ruang lebihan sihat)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) menambahkan
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) menambahkan
 `tryAcquireHealthyHeadroom` supaya permintaan kedua yang berat dari segi struktur
 diterima apabila timbunan berada di bawah `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`.
 Laluan BYTE yang digunakan oleh `admitChatRequest` (badan ≥

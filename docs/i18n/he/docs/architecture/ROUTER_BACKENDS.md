@@ -4,9 +4,9 @@
 
 ---
 
-> **סטטוס:** התקבל · **הקשר:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **חוזה:** `domain/routing/routerBackends.ts`
-> (רג'יסטר טיפוסים — הקוד נוסף במסגרת [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **סטטוס:** התקבל · **הקשר:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **חוזה:** `domain/routing/routerBackends.ts`
+> (רג'יסטר טיפוסים — הקוד נוסף במסגרת [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 ADR זה מגדיר במדויק כיצד המנועים `ts` (מקורי), `bifrost`, `cliproxy`, `9router`
 והמנועים התואמים ל-VibeProxy קשורים זה לזה, כדי שתורמים יפסיקו לערבב בין שני
@@ -37,7 +37,7 @@ ADR זה מגדיר במדויק כיצד המנועים `ts` (מקורי), `bif
 ## הרג'יסטר — מקור אמת יחיד
 
 החוזה `domain/routing/routerBackends.ts` (הקוד נוסף במסגרת
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) מצהיר על כל מנוע פעם אחת, יחד עם
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) מצהיר על כל מנוע פעם אחת, יחד עם
 מחזור החיים, היכולות, זהות השירות, פורט ברירת המחדל, תצורת בדיקת התקינות
 והתמיכה בטלמטריה שלו. צרכנים מאתרים מנועים באמצעות `getRouterBackend(id)`,
 ‏`listRouterBackends()` ו-`listRouterBackendsByCapability(cap)`, במקום
@@ -53,7 +53,7 @@ ADR זה מגדיר במדויק כיצד המנועים `ts` (מקורי), `bif
 
 ¹ הקידום של Bifrost לשירות מוטמע מסוג `supervised` (שניתן להתקנה/הפעלה
 מתוך `/api/services/bifrost/`) נמצא במעקב במסגרת
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); עד למיזוגו,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); עד למיזוגו,
 Bifrost הוא `external` בלבד (נגיש אך ורק באמצעות `BIFROST_BASE_URL`).
 
 `capabilities` ‏(`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -121,8 +121,8 @@ Bifrost הוא `external` בלבד (נגיש אך ורק באמצעות `BIFROST
 כיום הבחירה היא **הכול או כלום ברמת הממסר** — אין החלפת מנוע לפי ספק
 או לפי בקשה ב-`release/v3.8.43`. שער הבחירה לפי בקשה נוסף במסגרת עבודת
 מניפסט ה-sidecar
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) מניפסט +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) מניפסט +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 המאפשרת ל-`auto` לנתב דרך Bifrost רק ספקים שעומדים בתנאי המניפסט.
 
 ## שילוב בלוח הבקרה

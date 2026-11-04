@@ -56,7 +56,7 @@ Det **stoppar inte utvecklingen**:
 Kontrollera om det finns en aktiv frysning innan du antar att grenen du vill använda kan slås samman:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Sammanslagningsmekaniken (ägarens `queue`-etikett → Mergify) dokumenteras i

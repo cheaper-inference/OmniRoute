@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## De ce există
 
-Introdusă în PR-ul [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Problemele care au motivat introducerea sa:
+Introdusă în PR-ul [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Problemele care au motivat introducerea sa:
 
 | Problemă                                                    | Ce rezolvă directiva                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

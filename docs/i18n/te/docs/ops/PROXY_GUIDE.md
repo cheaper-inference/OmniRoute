@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy ఉచిత ప్రాక్సీ మార్కెట్ప్లేస్
 
-> 🆕 **[@oyi77](https://github.com/oyi77) ద్వారా అందించబడింది** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (సమస్య [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) ద్వారా అందించబడింది** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (సమస్య [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 ప్రపంచవ్యాప్తంగా ఉన్న **వందలాది ఉచిత, ధృవీకరించబడిన ప్రాక్సీలకు** యాక్సెస్ అందించడానికి OmniRoute, **[1proxy](https://1proxy-api.aitradepulse.com)** కమ్యూనిటీ ప్లాట్ఫారమ్తో అనుసంధానమవుతుంది. సొంత ప్రాక్సీ మౌలిక సదుపాయాలు లేని వినియోగదారులకు ఇది చక్కగా సరిపోతుంది.
 

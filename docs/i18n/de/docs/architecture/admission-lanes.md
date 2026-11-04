@@ -129,7 +129,7 @@ für eine andere“) wird von System 1 bedingungslos und von System 2 nach Aktiv
 
 ## 4. Lange `/v1/responses` in einem Prozess (gesunde Heap-Reserve)
 
-Mit [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) wurde
+Mit [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) wurde
 `tryAcquireHealthyHeadroom` hinzugefügt, sodass eine zweite strukturell aufwendige Anfrage zugelassen wird,
 wenn die Heap-Auslastung unter `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` liegt. Der von
 `admitChatRequest` verwendete BYTE-Pfad (Bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

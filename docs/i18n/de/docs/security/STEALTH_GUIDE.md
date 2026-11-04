@@ -173,7 +173,7 @@ Berührungspunkte:
 
 - `open-sse/executors/antigravity.ts` — liest `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — Anmeldedaten-Weiterleitung
-- Ursprünglicher Vorfallbericht: Diskussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Ursprünglicher Vorfallbericht: Diskussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

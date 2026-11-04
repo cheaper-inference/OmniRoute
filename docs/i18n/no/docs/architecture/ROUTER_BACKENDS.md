@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Godkjent · **Kontekst:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
-> (typet register — koden kommer med [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Status:** Godkjent · **Kontekst:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
+> (typet register — koden kommer med [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Denne ADR-en fastsetter hvordan `ts` (integrert), `bifrost`, `cliproxy`, `9router` og
 VibeProxy-kompatible motorer forholder seg til hverandre, slik at bidragsytere ikke
@@ -39,7 +39,7 @@ kun var `external`.
 ## Registeret — eneste sannhetskilde
 
 Kontrakten `domain/routing/routerBackends.ts` (koden kommer med
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) deklarerer hver motor én gang, med dens
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) deklarerer hver motor én gang, med dens
 livssyklus, funksjoner, tjenesteidentitet, standardport, helsesjekkonfigurasjon og
 telemetristøtte. Konsumenter slår opp motorer via `getRouterBackend(id)`,
 `listRouterBackends()` og `listRouterBackendsByCapability(cap)` i stedet for å
@@ -55,7 +55,7 @@ spesialbehandle hver sideprosess.
 
 ¹ Promoteringen av Bifrost til en `supervised` innebygd tjeneste (som kan installeres/startes
 fra `/api/services/bifrost/`) spores i
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); frem til den er slått sammen,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); frem til den er slått sammen,
 er Bifrost kun `external` (utelukkende tilgjengelig via `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ hovedgrensesnittet `/api/v1/chat/completions` bruker aldri
 Valget er **alt eller ingenting på relénivå i dag** — det finnes ikke noe motorbytte per
 leverandør eller per forespørsel i `release/v3.8.43`. Porten per forespørsel legges til
 av arbeidet med sidecar-manifestet
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 som lar `auto` rute bare manifestkvalifiserte leverandører gjennom Bifrost.
 
 ## Integrasjon med kontrollpanelet

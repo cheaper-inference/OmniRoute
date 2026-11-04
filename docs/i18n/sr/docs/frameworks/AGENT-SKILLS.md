@@ -18,7 +18,7 @@ Agent Skills су структуриране SKILL.md датотеке које 
 - **Канонски ID** (`omni-auth`, `cli-serve` итд.)
 - **SKILL.md** датотеку у `skills/{id}/SKILL.md` са YAML уводним метаподацима (`name`, `description`) + богатим markdown садржајем
 - **REST крајње тачке** (API вештине) или **CLI поткоманде** (CLI вештине), изведене из OpenAPI спецификације и CLI регистра
-- **GitHub raw URL** за преузимање уживо: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHub raw URL** за преузимање уживо: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Директно преузимање необрађеног садржаја са GitHub-а (сервер није потребан)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **Stádas:** Glactha · **Comhthéacs:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Conradh:** `domain/routing/routerBackends.ts`
-> (clárlann chlóscríofa — cuirfear an cód ar fáil le [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Stádas:** Glactha · **Comhthéacs:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Conradh:** `domain/routing/routerBackends.ts`
+> (clárlann chlóscríofa — cuirfear an cód ar fáil le [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Leagann an ADR seo síos go beacht an gaol atá idir `ts` (dúchasach), `bifrost`, `cliproxy`, `9router`, agus innill atá comhoiriúnach le VibeProxy, ionas nach meascfaidh rannpháirtithe dhá rud atá éagsúil ó thaobh na hailtireachta de. Déanann sé doiciméadú ar an gclárlann chlóscríofa a tugadh isteach leis an obair router-backend-registry mar an t-aon fhoinse fírinne don tsamhail sin.
 
@@ -27,7 +27,7 @@ An botún atá le seachaint: caitheamh le “seirbhís leabaithe” agus “inne
 
 ## An chlárlann — an t-aon fhoinse fírinne
 
-Dearbhaíonn an conradh `domain/routing/routerBackends.ts` (cuirfear an cód ar fáil le [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) gach inneall uair amháin, mar aon lena shaolré, a chumais, a aitheantas seirbhíse, a phort réamhshocraithe, a chumraíocht sláinte, agus a thacaíocht teiliméadrachta. Déanann tomhaltóirí innill a chuardach trí `getRouterBackend(id)`, `listRouterBackends()`, agus `listRouterBackendsByCapability(cap)` seachas caitheamh le gach taobhcharr mar chás speisialta.
+Dearbhaíonn an conradh `domain/routing/routerBackends.ts` (cuirfear an cód ar fáil le [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) gach inneall uair amháin, mar aon lena shaolré, a chumais, a aitheantas seirbhíse, a phort réamhshocraithe, a chumraíocht sláinte, agus a thacaíocht teiliméadrachta. Déanann tomhaltóirí innill a chuardach trí `getRouterBackend(id)`, `listRouterBackends()`, agus `listRouterBackendsByCapability(cap)` seachas caitheamh le gach taobhcharr mar chás speisialta.
 
 | Inneall     | Saolré       | Seirbhís (ais A) | Inneall athsheachadáin (ais B) | Sláinte       | Port réamhshocraithe |
 | ----------- | ------------ | ---------------- | ------------------------------ | ------------- | -------------------- |
@@ -37,7 +37,7 @@ Dearbhaíonn an conradh `domain/routing/routerBackends.ts` (cuirfear an cód ar 
 | `9router`   | `supervised` | `9router`        | — (soláthraí)                  | `/api/health` | 20130                |
 | `vibeproxy` | `external`   | —                | — (cuibheoir soláthraí)        | `/v1/models`  | —                    |
 
-¹ Tá ardú céime Bifrost go seirbhís leabaithe `supervised` (is féidir a shuiteáil/a thosú ó `/api/services/bifrost/`) á rianú in [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); go dtí go gcumascfar é, is seirbhís `external` amháin é Bifrost (nach féidir a rochtain ach trí `BIFROST_BASE_URL`).
+¹ Tá ardú céime Bifrost go seirbhís leabaithe `supervised` (is féidir a shuiteáil/a thosú ó `/api/services/bifrost/`) á rianú in [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); go dtí go gcumascfar é, is seirbhís `external` amháin é Bifrost (nach féidir a rochtain ach trí `BIFROST_BASE_URL`).
 
 Ligeann `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) do ghlaoiteoirí scagadh a dhéanamh de réir a bhfuil inneall in ann a dhéanamh i ndáiríre, seachas craobhacha de réir aitheantais a chódú go dolúbtha.
 
@@ -102,8 +102,8 @@ seolta; ní théann príomhdhromchla `/api/v1/chat/completions` i gcomhairle le
 Tá an roghnú **uile-nó-neamhní ar leibhéal an athsheachadáin faoi láthair** — níl aon mhalartú innill
 de réir soláthraí ná de réir iarratais ar `release/v3.8.43`. Tá an geata de réir iarratais á chur leis
 ag obair an lastliosta taobhphróisis
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) lastliosta +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) lastliosta +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 rud a ligeann do `auto` gan ach soláthraithe atá incháilithe de réir an lastliosta a ródú trí Bifrost.
 
 ## Comhtháthú na deaise

@@ -9,7 +9,7 @@
 如果您在 OmniRoute 中發現安全漏洞，請以負責任的方式回報：
 
 1. **請勿**建立公開的 GitHub issue
-2. 使用 [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. 使用 [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. 請包含：說明、重現步驟及潛在影響
 
 ## 回應時程
@@ -42,7 +42,7 @@
   以較晚者為準**。最終的結束日期會在 3.9.0 發布時記錄於其版本資訊及
   [`ROADMAP.md`](ROADMAP.md) 中。
 - **回報 LTS 產品線中的漏洞：**使用與其他版本相同的管道——
-  私密的 [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)，
+  私密的 [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)，
   絕不可使用公開 issue。請註明您測試的版本（例如 `3.9.2`）；修正會套用至
   `stable/v3`，並向前移植至 v4。
 - **LTS 發布時的安全性基準：**經量測的掃描器狀態、路由防護及

@@ -173,7 +173,7 @@ Točke stika:
 
 - `open-sse/executors/antigravity.ts` — bere `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — upravljanje poverilnic
-- Izvirno poročilo o incidentu: razprava [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Izvirno poročilo o incidentu: razprava [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

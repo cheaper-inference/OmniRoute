@@ -138,8 +138,8 @@ være skjult som standard i nogle niveauer.
 
 ## Referencer
 
-- Problem: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Diskussion: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Problem: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Diskussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Kilde: `src/shared/constants/providers/web-cookie.ts` (udbyderdefinition)
 - HAR-import: `src/shared/utils/m365HarImport.ts`
 - Legitimationsfelter: `src/shared/providers/webSessionCredentials.ts`

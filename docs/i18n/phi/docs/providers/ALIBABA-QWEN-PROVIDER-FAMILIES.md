@@ -5,7 +5,7 @@
 ---
 
 Itinatala ng dokumentong ito ang desisyon sa pagpapatupad para sa
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Kinakatawan ang mga pampublikong produkto
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Kinakatawan ang mga pampublikong produkto
 bilang apat na pamilya ng provider. Ang rehiyon ay datos ng koneksyon, hindi isang hiwalay na produkto.
 
 ## Desisyon

@@ -130,8 +130,8 @@ Upewnij się, że `copilot-m365-web` jest włączony w sekcji **Panel → Dostaw
 
 ## Materiały referencyjne
 
-- Zgłoszenie: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Dyskusja: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Zgłoszenie: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Dyskusja: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Źródło: `src/shared/constants/providers/web-cookie.ts` (definicja dostawcy)
 - Import HAR: `src/shared/utils/m365HarImport.ts`
 - Pola danych uwierzytelniających: `src/shared/providers/webSessionCredentials.ts`

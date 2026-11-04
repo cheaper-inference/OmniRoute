@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy ಉಚಿತ ಪ್ರಾಕ್ಸಿ ಮಾರುಕಟ್ಟೆ
 
-> 🆕 **[@oyi77](https://github.com/oyi77) ಅವರ ಕೊಡುಗೆ** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ಸಮಸ್ಯೆ [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) ಅವರ ಕೊಡುಗೆ** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ಸಮಸ್ಯೆ [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 ವಿಶ್ವದಾದ್ಯಂತ ಲಭ್ಯವಿರುವ **ನೂರಾರು ಉಚಿತ, ಮೌಲ್ಯೀಕರಿಸಿದ ಪ್ರಾಕ್ಸಿಗಳಿಗೆ** ಪ್ರವೇಶ ಒದಗಿಸಲು OmniRoute, **[1proxy](https://1proxy-api.aitradepulse.com)** ಸಮುದಾಯ ವೇದಿಕೆಯೊಂದಿಗೆ ಸಂಯೋಜನೆಗೊಳ್ಳುತ್ತದೆ. ಸ್ವಂತ ಪ್ರಾಕ್ಸಿ ಮೂಲಸೌಕರ್ಯವನ್ನು ಹೊಂದಿರದ ಬಳಕೆದಾರರಿಗೆ ಇದು ಅತ್ಯುತ್ತಮವಾಗಿದೆ.
 

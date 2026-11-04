@@ -56,7 +56,7 @@ flowchart LR
 Перш ніж вважати потрібну гілку доступною для злиття, перевірте, чи немає відкритого заморожування:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Механіку злиття (мітка власника `queue` → Mergify) описано в

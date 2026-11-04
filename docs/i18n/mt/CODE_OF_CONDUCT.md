@@ -65,7 +65,7 @@ rappreżentant maħtur f’avveniment online jew offline.
 Każijiet ta’ mġiba abbużiva, ta’ fastidju, jew inkella inaċċettabbli jistgħu jiġu
 rrappurtati lill-mexxejja tal-komunità responsabbli mill-infurzar billi tinfetaħ
 twissija privata dwar is-sigurtà fuq
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 jew billi tintbagħat email lill-mantenitur fuq diegosouza.pw@outlook.com.
 Għal inċidenti sensittivi għas-sigurtà, ara [`SECURITY.md`](SECURITY.md).
 L-ilmenti kollha se jiġu eżaminati u investigati fil-pront u b’mod ġust.

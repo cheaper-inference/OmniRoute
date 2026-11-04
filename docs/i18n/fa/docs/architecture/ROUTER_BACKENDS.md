@@ -4,9 +4,9 @@
 
 ---
 
-> **وضعیت:** پذیرفتهشده · **زمینه:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670)،
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **قرارداد:** `domain/routing/routerBackends.ts`
-> (رجیستری نوعدار — کد در [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ادغام میشود)
+> **وضعیت:** پذیرفتهشده · **زمینه:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670)،
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **قرارداد:** `domain/routing/routerBackends.ts`
+> (رجیستری نوعدار — کد در [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ادغام میشود)
 
 این ADR مشخص میکند که موتورهای `ts` (بومی)، `bifrost`، `cliproxy`، `9router` و
 موتورهای سازگار با VibeProxy چگونه با یکدیگر ارتباط دارند، تا مشارکتکنندگان
@@ -40,7 +40,7 @@
 ## رجیستری — تنها منبع حقیقت
 
 قرارداد `domain/routing/routerBackends.ts` (کد در
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ادغام میشود) هر موتور را دقیقاً یکبار،
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ادغام میشود) هر موتور را دقیقاً یکبار،
 همراه با چرخهٔ حیات، قابلیتها، هویت سرویس، پورت پیشفرض، پیکربندی سلامت و
 پشتیبانی تلهمتری آن تعریف میکند. مصرفکنندگان بهجای پیادهسازی منطق ویژه
 برای هر sidecar، موتورهای موردنظر را از طریق `getRouterBackend(id)`،
@@ -56,7 +56,7 @@
 
 ¹ ارتقای Bifrost به یک سرویس تعبیهشدهٔ `supervised` (قابل نصب/راهاندازی
 از `/api/services/bifrost/`) در
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) پیگیری میشود؛ تا زمانی که ادغام نشود،
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) پیگیری میشود؛ تا زمانی که ادغام نشود،
 Bifrost فقط `external` است (و صرفاً از طریق `BIFROST_BASE_URL` قابل دسترسی است).
 
 `capabilities` (`chat`، `responses`، `streaming`، `tools`، `vision`،
@@ -125,8 +125,8 @@ Bifrost فقط `external` است (و صرفاً از طریق `BIFROST_BASE_URL`
 انتخاب در حال حاضر **در سطح رله همهیاهیچ است** — در `release/v3.8.43` هیچ جابهجایی موتور
 بهازای ارائهدهنده یا بهازای درخواست وجود ندارد. دروازهٔ بهازای درخواست توسط
 کار مربوط به مانیفست سایدکار در حال اضافهشدن است
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) مانیفست +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)،
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) مانیفست +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)،
 که به `auto` اجازه میدهد فقط ارائهدهندگان واجد شرایط در مانیفست را از طریق Bifrost مسیریابی کند.
 
 ## یکپارچهسازی داشبورد

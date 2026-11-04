@@ -132,13 +132,13 @@ Automatisk poängsättning väljer bästa leverantör/modell per begäran
 En combo vars `name` är identiskt med ett fristående modell-id (t.ex. en combo med namnet
 `gpt-5.5`) är ett **avsiktligt mönster som stöds**, inte ett fel: det är
 mekanismen för reservleverantörer per modell-id som dokumenteras i
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Eftersom combo-
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Eftersom combo-
 matchning kontrolleras före matchning av fristående modell-id
 (`getComboForModel()` i `src/sse/services/model.ts`) dirigeras en begäran för det fristående
 id:t `gpt-5.5` genom combons mål (t.ex.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) i stället för direkt till
 en enda leverantör — detta återanvänder prioriteringen combo före omskrivning som skapades för
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) och
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) och
 regressionstestas av `tests/unit/responses-combo-resolution-3227.test.ts` och
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Två vanliga fallgropar:
 - **`auto` använder inte dina combos.** `auto`/`auto/*` bygger sin egen kandidatpool utan konfiguration och använder endast beständiga combos om en combo bokstavligen heter `auto` (rekommenderas inte). För att dirigera genom en combo ska du skicka dess exakta namn — inte `auto`.
 - **`openrouter/auto` är en verklig betald OpenRouter-produkt** ("Auto Best Available"), inte ett OmniRoute-alias. Det är den enda statiska modellposten i OpenRouter-registret (`open-sse/config/providers/registry/openrouter/index.ts`) och faktureras separat. Använd Inställningar → Dirigering → Dölj betalda modeller för att utesluta den från `auto`-pooler.
 
-Se [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) och [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) för den ursprungliga förvirring som detta dokumenterar.
+Se [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) och [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) för den ursprungliga förvirring som detta dokumenterar.
 
 ## Så fungerar det (beständiga Auto-Combos)
 

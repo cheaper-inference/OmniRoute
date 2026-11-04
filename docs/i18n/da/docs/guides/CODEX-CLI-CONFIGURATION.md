@@ -487,7 +487,7 @@ To standardindstillinger i OmniRoute kan i det skjulte sabotere flere timer lang
 | Sessionen bliver ved med at skifte konto / kontinuiteten i promptcachen går tabt mellem turene | TTL for sessionstilknytning er `0` (deaktiveret)                                      | `sessionAffinityTtlMs`   |
 | Forbindelsen afbrydes midt i ræsonneringen uden en prompt, der er synlig for klienten          | Vagthunden for inaktiv stream blev udløst efter 10 minutter uden en upstream-datablok | `STREAM_IDLE_TIMEOUT_MS` |
 
-Relaterede diskussioner: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (afbrydelser af lange opgaver), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (hvorfor tilknytning som standard er slået fra). Sporing: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Relaterede diskussioner: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (afbrydelser af lange opgaver), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (hvorfor tilknytning som standard er slået fra). Sporing: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Sessionstilknytning — fasthold én samtale til én konto
 

@@ -115,7 +115,7 @@ npm start
 Bez būvējuma, kurā iespējota iegulšana, lapa atsakās tikt parādīta rāmī; paplašinājums to konstatē pēc
 atbildes galvenēm un pārslēdzas uz ārējo pārlūkprogrammu — nekas netiek sabojāts, un par to vienreiz tiek paziņots.
 Skatiet [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) un problēmu
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

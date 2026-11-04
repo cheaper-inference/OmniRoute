@@ -35,7 +35,7 @@ agus céimeanna réitigh.
 ### Clónáil agus Suiteáil
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -434,4 +434,4 @@ Ansin úsáid na scileanna `/deploy-vps-*-cc`, a dhéanann `dist/` a rsyncáil c
 - **Tagairt API**: Féach [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Doiciméid slándála**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Doiciméid oibríochtaí**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Fadhbanna**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Fadhbanna**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

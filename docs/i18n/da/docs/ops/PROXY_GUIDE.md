@@ -260,7 +260,7 @@ Dette sker én gang ved den første opstart efter opgraderingen. Brug `migrateLe
 
 ## 1proxy-markedsplads for gratis proxyer
 
-> 🆕 **Bidraget af [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Bidraget af [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute integrerer med fællesskabsplatformen **[1proxy](https://1proxy-api.aitradepulse.com)** for at give adgang til **hundredvis af gratis, validerede proxyer** fra hele verden. Dette er perfekt til brugere, der ikke har deres egen proxyinfrastruktur.
 

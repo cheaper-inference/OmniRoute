@@ -18,7 +18,7 @@ Agent Skills-ը կառուցվածքավորված SKILL.md ֆայլեր են, �
 - **Կանոնական ID** (`omni-auth`, `cli-serve` և այլն)
 - **SKILL.md** ֆայլ՝ `skills/{id}/SKILL.md`-ում, YAML frontmatter-ով (`name`, `description`) + բովանդակությամբ հարուստ markdown մարմին
 - OpenAPI սպեցիֆիկացիայից և CLI ռեեստրից ստացված **REST վերջնակետեր** (API skills) կամ **CLI ենթահրամաններ** (CLI skills)
-- Ուղիղ ներբեռնման համար նախատեսված **GitHub raw URL**՝ `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Ուղիղ ներբեռնման համար նախատեսված **GitHub raw URL**՝ `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Անմիջապես GitHub-ից չմշակված բովանդակության ստացում (սերվեր չի պահանջվում)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

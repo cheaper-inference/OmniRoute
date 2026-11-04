@@ -478,7 +478,7 @@ Zwei OmniRoute-Standardeinstellungen können mehrstündige Codex-CLI-Sitzungen u
 | Sitzung wechselt ständig die Konten / Prompt-Cache-Kontinuität geht zwischen Zügen verloren | TTL der Sitzungsaffinität ist `0` (deaktiviert)                                | `sessionAffinityTtlMs`   |
 | Verbindung bricht mitten im Schlussfolgern ohne clientseitige Meldung ab                    | Stream-Leerlaufüberwachung wurde nach 10 Minuten ohne Upstream-Chunk ausgelöst | `STREAM_IDLE_TIMEOUT_MS` |
 
-Zugehörige Diskussionen: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (Abbrüche bei langen Aufgaben), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (warum Affinität standardmäßig deaktiviert ist). Nachverfolgung: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Zugehörige Diskussionen: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (Abbrüche bei langen Aufgaben), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (warum Affinität standardmäßig deaktiviert ist). Nachverfolgung: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Sitzungsaffinität — eine Konversation einem Konto fest zuordnen
 

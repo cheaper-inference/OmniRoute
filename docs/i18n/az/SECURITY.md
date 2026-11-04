@@ -9,7 +9,7 @@
 OmniRoute-da təhlükəsizlik zəifliyi aşkar etsəniz, lütfən, onu məsuliyyətli şəkildə bildirin:
 
 1. İctimai GitHub problemi **AÇMAYIN**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) xidmətindən istifadə edin
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) xidmətindən istifadə edin
 3. Bunları daxil edin: təsvir, təkrarlama addımları və potensial təsir
 
 ## Cavab Müddəti
@@ -35,7 +35,7 @@ OmniRoute-da təhlükəsizlik zəifliyi aşkar etsəniz, lütfən, onu məsuliyy
 
 - **`stable/v3` nələri qəbul edir:** xəta düzəlişləri, təhlükəsizlik yamaqları və provayder yeniləmələri. Yeni funksiyalar v4 kanalına daxil edilir; LTS xəttində sabitlik prioritetdir. `npm install omniroute` (`latest` dist-teqi) bütün v4 dövrü ərzində v3-də qalır.
 - **Dəstək müddəti:** `stable/v3` **3.9.0 buraxılışından sonra 12 ay ərzində və ya v4.0.0 `latest` kimi dərc edildikdən sonrakı 90 gün ərzində — bunlardan hansı daha gec başa çatarsa, həmin tarixədək təhlükəsizlik düzəlişləri və kritik reqressiya düzəlişləri** alır. Nəticədə müəyyən edilən bitmə tarixi 3.9.0 buraxılış qeydlərində və buraxılış həyata keçirildikdə [`ROADMAP.md`](ROADMAP.md) faylında qeyd olunur.
-- **LTS xəttində zəifliyin bildirilməsi:** digər versiyalarda olduğu kimi eyni kanaldan — məxfi [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) vasitəsilə bildirilməli, heç vaxt açıq məsələ yaradılmamalıdır. Hansı versiyanı sınaqdan keçirdiyinizi qeyd edin (məsələn, `3.9.2`); düzəlişlər `stable/v3` budağına daxil edilir və v4-ə ötürülür.
+- **LTS xəttində zəifliyin bildirilməsi:** digər versiyalarda olduğu kimi eyni kanaldan — məxfi [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) vasitəsilə bildirilməli, heç vaxt açıq məsələ yaradılmamalıdır. Hansı versiyanı sınaqdan keçirdiyinizi qeyd edin (məsələn, `3.9.2`); düzəlişlər `stable/v3` budağına daxil edilir və v4-ə ötürülür.
 - **LTS buraxılışı zamanı təhlükəsizlik baza səviyyəsi:** skanerin ölçülmüş vəziyyəti, marşrut qoruyucusu və açıq etimadnamələrə dair sübutlar [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) faylında qeydə alınır.
 
 ---

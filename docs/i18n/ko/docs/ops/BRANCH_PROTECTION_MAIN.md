@@ -7,7 +7,7 @@
 소유자 작업입니다. Settings → Branches → Add rule에서 적용하거나 다음을 실행하세요.
 
 ```bash
-gh api -X PUT repos/cheaper-inference/OmniRoute/branches/main/protection \
+gh api -X PUT repos/diegosouzapw/OmniRoute/branches/main/protection \
   --input - <<'JSON'
 { "required_status_checks": { "strict": true, "contexts": ["Quality Ratchet", "Quality Gates (Extended)", "Fast Quality Gates"] },
   "enforce_admins": false,

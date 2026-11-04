@@ -4,9 +4,9 @@
 
 ---
 
-> **સ્થિતિ:** સ્વીકૃત · **સંદર્ભ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **કરાર:** `domain/routing/routerBackends.ts`
-> (ટાઇપ્ડ રજિસ્ટ્રી — કોડ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) સાથે આવે છે)
+> **સ્થિતિ:** સ્વીકૃત · **સંદર્ભ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **કરાર:** `domain/routing/routerBackends.ts`
+> (ટાઇપ્ડ રજિસ્ટ્રી — કોડ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) સાથે આવે છે)
 
 આ ADR `ts` (નેટિવ), `bifrost`, `cliproxy`, `9router`, અને
 VibeProxy-સુસંગત એન્જિનો એકબીજા સાથે કેવી રીતે સંબંધિત છે તે નિશ્ચિત કરે છે, જેથી યોગદાનકર્તાઓ
@@ -37,7 +37,7 @@ VibeProxy-સુસંગત એન્જિનો એકબીજા સાથ�
 ## રજિસ્ટ્રી — સત્યનો એકમાત્ર સ્રોત
 
 `domain/routing/routerBackends.ts` કરાર (કોડ
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) સાથે આવે છે) દરેક એન્જિનને તેના
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) સાથે આવે છે) દરેક એન્જિનને તેના
 લાઇફસાઇકલ, ક્ષમતાઓ, સર્વિસ ઓળખ, ડિફૉલ્ટ પોર્ટ, હેલ્થ કૉન્ફિગરેશન અને
 ટેલિમેટ્રી સપોર્ટ સાથે એક જ વાર જાહેર કરે છે. દરેક સાઇડકાર માટે અલગ વિશિષ્ટ શરતો લખવાને બદલે, ઉપભોક્તાઓ `getRouterBackend(id)`,
 `listRouterBackends()`, અને `listRouterBackendsByCapability(cap)` મારફતે
@@ -53,7 +53,7 @@ VibeProxy-સુસંગત એન્જિનો એકબીજા સાથ�
 
 ¹ Bifrostને `supervised` એમ્બેડેડ સર્વિસ તરીકે પ્રમોટ કરવાનું (જેને
 `/api/services/bifrost/`માંથી ઇન્સ્ટોલ/શરૂ કરી શકાય) કાર્ય
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)માં ટ્રૅક કરવામાં આવ્યું છે; તે મર્જ થાય ત્યાં સુધી,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)માં ટ્રૅક કરવામાં આવ્યું છે; તે મર્જ થાય ત્યાં સુધી,
 Bifrost માત્ર `external` છે (માત્ર `BIFROST_BASE_URL` મારફતે ઍક્સેસ કરી શકાય છે).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -122,8 +122,8 @@ Bifrost માત્ર `external` છે (માત્ર `BIFROST_BASE_URL` �
 હાલમાં રિલે સ્તરે પસંદગી **સંપૂર્ણપણે એક અથવા બીજું છે** — `release/v3.8.43` પર
 પ્રતિ-પ્રોવાઇડર અથવા પ્રતિ-રિક્વેસ્ટ એન્જિન સ્વૅપ ઉપલબ્ધ નથી. પ્રતિ-રિક્વેસ્ટ ગેટ
 સાઇડકાર-મૅનિફેસ્ટ કાર્ય દ્વારા ઉમેરવામાં આવી રહ્યો છે
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) મૅનિફેસ્ટ +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) મૅનિફેસ્ટ +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 જેના કારણે `auto` માત્ર મૅનિફેસ્ટ-પાત્ર પ્રોવાઇડર્સને Bifrost મારફતે રૂટ કરી શકે છે.
 
 ## ડૅશબોર્ડ એકીકરણ

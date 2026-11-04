@@ -222,7 +222,7 @@ livenessProbe:
 
 **Nie** kieruj sondy **żywotności** kubeleta na `/api/monitoring/health`. Ta ścieżka wykonuje rzeczywiste operacje na bazie danych i związane z monitorowaniem, dlatego pod obciążeniem będzie generować wyniki fałszywie dodatnie.
 
-Powiązane: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondy, gdy pętla zdarzeń jest zajęta), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (wycena katalogu monopolizująca zasoby), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (zliczanie tokenów kompresji monopolizujące zasoby).
+Powiązane: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondy, gdy pętla zdarzeń jest zajęta), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (wycena katalogu monopolizująca zasoby), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (zliczanie tokenów kompresji monopolizujące zasoby).
 
 ### Watchdog systemd (zamrożona pętla zdarzeń)
 

@@ -6,7 +6,7 @@
 
 **狀態：** 提案（等待 @diegosouzapw 審查）
 **日期：** 2026-06-20
-**參考：** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932)、PR #4381
+**參考：** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932)、PR #4381
 
 ## TL;DR
 

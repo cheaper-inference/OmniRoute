@@ -5,7 +5,7 @@
 ---
 
 - **Holat:** Taklif qilingan — bajarilish muhiti bo‘yicha ishlar boshlanishidan oldin maintainer tasdig‘i talab etiladi
-- **Kuzatuv muammosi:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Kuzatuv muammosi:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Qamrov:** Faqat saqlash arxitekturasi; bu qaror tashqi ma’lumotlar bazasini qo‘shmaydi yoki tanlamaydi
 
 ## Kontekst

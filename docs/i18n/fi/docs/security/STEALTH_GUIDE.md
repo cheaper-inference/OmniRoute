@@ -185,7 +185,7 @@ Liittyvät kohdat:
 
 - `open-sse/executors/antigravity.ts` — lukee arvon `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — tunnistetietojen välitys
-- Alkuperäinen tapahtumaraportti: keskustelu [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Alkuperäinen tapahtumaraportti: keskustelu [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

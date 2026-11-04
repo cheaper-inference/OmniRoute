@@ -139,8 +139,8 @@ esté oculto de forma predeterminada en algunos niveles.
 
 ## Referencias
 
-- Incidencia: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Discusión: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Incidencia: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Discusión: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Código fuente: `src/shared/constants/providers/web-cookie.ts` (definición del proveedor)
 - Importación HAR: `src/shared/utils/m365HarImport.ts`
 - Campos de credenciales: `src/shared/providers/webSessionCredentials.ts`

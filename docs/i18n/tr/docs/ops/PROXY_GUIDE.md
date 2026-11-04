@@ -261,7 +261,7 @@ Bu işlem, yükseltmeden sonraki ilk başlatmada bir kez gerçekleşir. Yeniden 
 
 ## 1proxy Ücretsiz Proxy Pazarı
 
-> 🆕 **[@oyi77](https://github.com/oyi77) tarafından katkıda bulunulmuştur** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Sorun [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) tarafından katkıda bulunulmuştur** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Sorun [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute, dünyanın dört bir yanından **yüzlerce ücretsiz, doğrulanmış proxy'ye** erişim sağlamak için **[1proxy](https://1proxy-api.aitradepulse.com)** topluluk platformuyla entegre olur. Bu, kendi proxy altyapısına sahip olmayan kullanıcılar için idealdir.
 

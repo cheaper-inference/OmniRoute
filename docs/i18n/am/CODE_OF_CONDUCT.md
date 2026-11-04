@@ -67,7 +67,7 @@
 የስድብ፣ የትንኮሳ ወይም በሌላ መንገድ ተቀባይነት የሌላቸው ባህሪያት ክስተቶችን
 የግል የደህንነት ምክር በመክፈት ለማስፈጸም ኃላፊነት ላለባቸው
 የማኅበረሰብ መሪዎች ሪፖርት ማድረግ ይቻላል፦
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 ወይም ለጠባቂው በ diegosouza.pw@outlook.com ኢሜይል በመላክ።
 ደህንነትን ለሚመለከቱ ክስተቶች፣ [`SECURITY.md`](SECURITY.md)ን ይመልከቱ።
 ሁሉም ቅሬታዎች በፍጥነትና በፍትሐዊነት ይገመገማሉ እንዲሁም ይመረመራሉ።

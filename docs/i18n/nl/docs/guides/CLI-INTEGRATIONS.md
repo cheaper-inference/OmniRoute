@@ -199,7 +199,7 @@ de uitvoer van `ps` verschijnt.
 Door het profiel naar een OmniRoute-**combo** te laten verwijzen in plaats van naar één model,
 krijgt de providervloot failover: toen het primaire eindpunt halverwege een beurt volledig uitviel
 tijdens de uitvoering die is vastgelegd in
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), voltooide de agent
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), voltooide de agent
 de resterende stappen via de fallback zonder de storing ooit zichtbaar te maken.
 
 ---

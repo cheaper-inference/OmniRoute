@@ -4,9 +4,9 @@
 
 ---
 
-> **स्थिति:** स्वीकृत · **संदर्भ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **अनुबंध:** `domain/routing/routerBackends.ts`
-> (टाइप्ड रजिस्ट्री — कोड [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) के साथ आएगा)
+> **स्थिति:** स्वीकृत · **संदर्भ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **अनुबंध:** `domain/routing/routerBackends.ts`
+> (टाइप्ड रजिस्ट्री — कोड [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) के साथ आएगा)
 
 यह ADR स्पष्ट करता है कि `ts` (नेटिव), `bifrost`, `cliproxy`, `9router`, और
 VibeProxy-संगत इंजन एक-दूसरे से किस प्रकार संबंधित हैं, ताकि योगदानकर्ता
@@ -39,7 +39,7 @@ VibeProxy-संगत इंजन एक-दूसरे से किस प�
 ## रजिस्ट्री — सत्य का एकल स्रोत
 
 `domain/routing/routerBackends.ts` अनुबंध (कोड
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) के साथ आएगा) प्रत्येक इंजन को उसके
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) के साथ आएगा) प्रत्येक इंजन को उसके
 जीवनचक्र, क्षमताओं, सेवा पहचान, डिफ़ॉल्ट पोर्ट, स्वास्थ्य कॉन्फ़िगरेशन और
 टेलीमेट्री समर्थन सहित केवल एक बार घोषित करता है। प्रत्येक साइडकार के लिए
 विशेष स्थिति बनाने के बजाय उपभोक्ता `getRouterBackend(id)`,
@@ -56,7 +56,7 @@ VibeProxy-संगत इंजन एक-दूसरे से किस प�
 
 ¹ Bifrost को एक `supervised` एम्बेडेड सेवा के रूप में उन्नत करना (जिसे
 `/api/services/bifrost/` से इंस्टॉल/प्रारंभ किया जा सकता है)
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) में ट्रैक किया जा रहा है; इसके मर्ज होने तक,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) में ट्रैक किया जा रहा है; इसके मर्ज होने तक,
 Bifrost केवल `external` है (और केवल `BIFROST_BASE_URL` के माध्यम से पहुँच योग्य है)।
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -125,8 +125,8 @@ Bifrost केवल `external` है (और केवल `BIFROST_BASE_URL` �
 वर्तमान में रिले स्तर पर चयन **पूर्णतः एक या दूसरा है** — `release/v3.8.43` पर
 प्रति-प्रोवाइडर या प्रति-अनुरोध इंजन स्वैप उपलब्ध नहीं है। प्रति-अनुरोध गेट को
 साइडकार-मैनिफ़ेस्ट कार्य द्वारा जोड़ा जा रहा है
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) मैनिफ़ेस्ट +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) मैनिफ़ेस्ट +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 जिससे `auto` केवल मैनिफ़ेस्ट-पात्र प्रोवाइडरों को Bifrost के माध्यम से रूट कर सकता है।
 
 ## डैशबोर्ड एकीकरण

@@ -115,7 +115,7 @@ npm start
 Kung walang build na naka-enable ang pag-embed, tatanggi ang page na ma-frame, matutukoy iyon ng extension mula sa mga
 response header at babalik ito sa external na browser — walang masisira, at isang beses nitong ipapaalam iyon.
 Tingnan ang [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) at issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

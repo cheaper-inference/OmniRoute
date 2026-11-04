@@ -58,8 +58,8 @@ aucune récupération automatique), tandis que l’opérateur peut résoudre une
 Le maintien de cette phrase dans la liste de bannissement rendait également inaccessible, pour cette formulation, la branche récupérable des erreurs 403 de cloud-code dans
 `classifyProviderError`, car `accountDeactivated` est
 évalué en premier — la récupération de la route de projet ajoutée pour Gemini Code Assist dans
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) et
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) ne pouvait donc jamais s’exécuter.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) et
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) ne pouvait donc jamais s’exécuter.
 
 Trois tables de signaux adjacentes et **distinctes** ne font _pas_ partie de la détection des mots-clés de bannissement :
 

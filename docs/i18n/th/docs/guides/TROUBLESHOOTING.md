@@ -221,7 +221,7 @@ localhost ไม่สามารถใช้ `https` ได้โดยไม�
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   ผลลัพธ์ต้องตรงกับ `latest.yml` → `sha512` หากไม่ตรงกัน ให้ลบไฟล์และดาวน์โหลดใหม่เฉพาะจาก[หน้าเผยแพร่ของ GitHub](https://github.com/cheaper-inference/OmniRoute/releases)
+   ผลลัพธ์ต้องตรงกับ `latest.yml` → `sha512` หากไม่ตรงกัน ให้ลบไฟล์และดาวน์โหลดใหม่เฉพาะจาก[หน้าเผยแพร่ของ GitHub](https://github.com/diegosouzapw/OmniRoute/releases)
 2. **กู้คืน + เพิ่มข้อยกเว้น** — กู้คืนรายการที่ถูกย้อนกลับจากพื้นที่กักกัน และเพิ่มข้อยกเว้นสำหรับ
    `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions)
    จากนั้นติดตั้งใหม่
@@ -811,7 +811,7 @@ omniroute serve --ready-timeout 180000
 
 ## ยังติดปัญหาอยู่หรือไม่?
 
-- **ปัญหาบน GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **ปัญหาบน GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **สถาปัตยกรรม**: ดูรายละเอียดภายในได้ที่ [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **เอกสารอ้างอิง API**: ดู endpoint ทั้งหมดได้ที่ [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **แดชบอร์ดสถานะระบบ**: ตรวจสอบ **Dashboard → Health** เพื่อดูสถานะระบบแบบเรียลไทม์

@@ -18,7 +18,7 @@
 - Ένα **κανονικό ID** (`omni-auth`, `cli-serve` κ.λπ.)
 - Ένα αρχείο **SKILL.md** στο `skills/{id}/SKILL.md` με YAML frontmatter (`name`, `description`) + εμπλουτισμένο σώμα markdown
 - **Τερματικά σημεία REST** (API skills) ή **υποεντολές CLI** (CLI skills) που προκύπτουν από την προδιαγραφή OpenAPI και το μητρώο CLI
-- Ένα **ακατέργαστο URL του GitHub** για δυναμική ανάκτηση: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Ένα **ακατέργαστο URL του GitHub** για δυναμική ανάκτηση: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Απευθείας ανάκτηση raw αρχείου από το GitHub (δεν απαιτείται διακομιστής)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

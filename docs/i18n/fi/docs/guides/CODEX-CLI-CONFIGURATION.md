@@ -482,7 +482,7 @@ Kaksi OmniRouten oletusasetusta voi huomaamatta sabotoida useita tunteja kestäv
 | Istunto vaihtaa jatkuvasti tiliä / kehotevälimuistin jatkuvuus katoaa vuorojen välillä | Istunnon affiniteetin TTL on `0` (poistettu käytöstä)                             | `sessionAffinityTtlMs`   |
 | Yhteys katkeaa kesken päättelyn ilman asiakkaalle näkyvää kehotetta                    | Virran joutokäynnin valvonta laukesi, kun ylävirrasta ei saatu osaa 10 minuuttiin | `STREAM_IDLE_TIMEOUT_MS` |
 
-Aiheeseen liittyviä keskusteluja: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (pitkän tehtävän katkeamiset), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (miksi affiniteetti on oletusarvoisesti poissa käytöstä). Seuranta: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Aiheeseen liittyviä keskusteluja: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (pitkän tehtävän katkeamiset), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (miksi affiniteetti on oletusarvoisesti poissa käytöstä). Seuranta: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Istunnon affiniteetti — kiinnitä yksi keskustelu yhteen tiliin
 

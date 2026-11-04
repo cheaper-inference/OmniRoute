@@ -327,7 +327,7 @@ Docker-এ মেমোরির আচরণ:
 
 ### coding agent-এর জন্য runtime RAM
 
-1 GiB Docker default হলো dashboard/light-chat-এর ন্যূনতম সীমা, production-এর উপযুক্ত আকার নয়। দীর্ঘ `POST /v1/responses` body (শত শত message, কয়েক ডজন tool) compression-এর সময় একাধিক in-memory graph ধরে রাখে। একই সময়ে চলা ~3 MiB / ~750k-token-এর দুটি request **12 GiB** old-space-এ V8 বন্ধ করে দিয়েছে (`FATAL ERROR: Reached heap limit`) এবং 16 GiB cgroup OOM-ও ঘটিয়েছে। [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) দেখুন।
+1 GiB Docker default হলো dashboard/light-chat-এর ন্যূনতম সীমা, production-এর উপযুক্ত আকার নয়। দীর্ঘ `POST /v1/responses` body (শত শত message, কয়েক ডজন tool) compression-এর সময় একাধিক in-memory graph ধরে রাখে। একই সময়ে চলা ~3 MiB / ~750k-token-এর দুটি request **12 GiB** old-space-এ V8 বন্ধ করে দিয়েছে (`FATAL ERROR: Reached heap limit`) এবং 16 GiB cgroup OOM-ও ঘটিয়েছে। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) দেখুন।
 
 cgroup `--memory`-এর আকার **heap-এর চেয়ে বেশি রাখুন** — native buffer, SQLite এবং compression-এর মধ্যবর্তী data V8-এর বাইরে থাকে।
 
@@ -674,7 +674,7 @@ spec:
 
 `preStop` sleep kube কে SIGTERM এর আগে সার্ভিস এন্ডপয়েন্ট ড্রপ করতে দেয়** নতুন** ট্রাফিক মৃত্যু প্রক্রিয়া আঘাত স্টপ. ইন-ফ্লাইট `/v1/responses` SSE হেভিওয়েট অ্যাডমিশন লিজ (#11015) এর মাধ্যমে `SHUTDOWN_TIMEOUT_MS` (ডিফল্ট 30s) পর্যন্ত নিষ্কাশন করা হয়। যে নতুন অনুরোধগুলি এখনও প্রক্রিয়ায় পৌঁছায় তারা `503` + `Retry-After: 5` পায়। রিক্রিয়েট খালি-এন্ডপয়েন্ট গ্যাপ যতক্ষণ না প্রতিস্থাপন প্রস্তুত না হয় তা একটি কঠিন বিভ্রাট থেকে যায় — এটি SQLite টপোলজি, একটি প্রোব মিসকনফিগিং নয়।
 
-বাহ্যিক Postgres / বহু-লেখক HA হয়** না** একটি নথিভুক্ত স্টক পথ। আপনার যদি HA প্রয়োজন হয়, একটি একক প্রতিলিপি রাখুন বা একটি টপোলজি চালান যা প্রকল্পটি পরীক্ষা করেছে এবং আলাদাভাবে নথিভুক্ত করেছে। Postgres/MySQL কাজটি [#8075-](https://github.com/cheaper-inference/OmniRoute/issues/8075) এ থাকে। যে জাহাজ পর্যন্ত, সংখ্যাবৃদ্ধি একমাত্র সমর্থিত উপায়** বড়** `/v1/responses` ক্ষমতা হল N স্বাধীন প্রক্রিয়া (পরবর্তী বিভাগ), এক ভলিউমে `replicas > 1` নয়।
+বাহ্যিক Postgres / বহু-লেখক HA হয়** না** একটি নথিভুক্ত স্টক পথ। আপনার যদি HA প্রয়োজন হয়, একটি একক প্রতিলিপি রাখুন বা একটি টপোলজি চালান যা প্রকল্পটি পরীক্ষা করেছে এবং আলাদাভাবে নথিভুক্ত করেছে। Postgres/MySQL কাজটি [#8075-](https://github.com/diegosouzapw/OmniRoute/issues/8075) এ থাকে। যে জাহাজ পর্যন্ত, সংখ্যাবৃদ্ধি একমাত্র সমর্থিত উপায়** বড়** `/v1/responses` ক্ষমতা হল N স্বাধীন প্রক্রিয়া (পরবর্তী বিভাগ), এক ভলিউমে `replicas > 1` নয়।
 
 ## স্কেল-আউট: এন স্বাধীন প্রক্রিয়া
 
@@ -684,11 +684,11 @@ spec:
 
 একটি রিফ্রেশের প্রয়োজন হলে প্যাসিভ ইনস্ট্যান্স সংযোগটি পুনরায় পাঠ করে এবং শুধুমাত্র একটি ভিন্ন, অপ্রয়োজনীয় অ্যাক্সেস টোকেন গ্রহণ করে। অন্যথায় সংযোগের মেয়াদ শেষ বা নিষ্ক্রিয় না করে বা রিফ্রেশ-ব্রেকার ব্যর্থতা গণনা না করে রিফ্রেশ অক্ষম করা হয়। বাস্তব আপস্ট্রিম প্রমাণীকরণ ব্যর্থতা এখনও স্বাভাবিক ব্যর্থতা অ্যাকাউন্টিং, সূচকীয় কুলডাউন এবং সাধারণ ক্লায়েন্ট ত্রুটি ব্যবহার করে; অ্যাকাউন্ট নিষ্ক্রিয়করণ স্থায়ী থাকে। অ্যাক্সেস টোকেনগুলির মেয়াদ শেষ হওয়ার আগে মালিকের ঘোরানো টোকেনগুলি সিঙ্ক্রোনাইজ করুন (ডিফল্ট প্রোঅ্যাকটিভ রিফ্রেশ লিড পাঁচ মিনিট), বা Codex প্রমাণীকরণ ফাইলটি পুনরায় আমদানি করুন৷ প্যাসিভ ইম্পোর্ট সরবরাহকৃত টোকেনগুলিকে টোকেন এন্ডপয়েন্টে যাচাই না করেই সংরক্ষণ করে। ম্যানুয়াল dashboard/API রিফ্রেশ `409 refresh_disabled` প্রদান করে; নতুন OAuth লগইন অপরিবর্তিত। [পরিবেশের রেফারেন্স](../reference/ENVIRONMENT.md#passive-codex-token-refresh) দেখুন।
 
-এক নোড প্রক্রিয়া হয়** একটি V8 গাদা** . দুটি ওভারল্যাপ করা ~ 3 MiB / ~ 750k-টোকেন কোডিং-এজেন্ট `POST /v1/responses` (RTK + Caveman) সেই হিপটিকে ~ 12 Gi (`FATAL ERROR: Reached heap limit`) এ বাতিল করে এবং একটি 16 Gi cgroup OOM করতে পারে। [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) দেখুন। সেই পরিমাপ ক** মেমরি-বাজেট** সতর্কতা, দুটি সমসাময়িক দীর্ঘ `/v1/responses` এর একটি পণ্য হার্ড-ম্যাক্স নয়। হেভিওয়েট চ্যাট ভর্তি একটি স্বয়ংক্রিয়ভাবে প্রাপ্ত ইনজেস্ট বাইট বাজেট (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) দ্বারা গেট করা হয় যে একই V8/cgroup সিলিং — থেকে এটিকে ঊর্ধ্বমুখী করে (অথবা লিগ্যাসি `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` অনুরোধ-গণনা ক্যাপ সেট করা) একটি ইতিমধ্যে-আকারের প্রক্রিয়ায় গর্ভপাতের পুনরায় প্রবর্তন করে৷ ছোট চ্যাট, `/healthz`, `/v1/models` এবং MCP হল** না** সেই টুপিতে
+এক নোড প্রক্রিয়া হয়** একটি V8 গাদা** . দুটি ওভারল্যাপ করা ~ 3 MiB / ~ 750k-টোকেন কোডিং-এজেন্ট `POST /v1/responses` (RTK + Caveman) সেই হিপটিকে ~ 12 Gi (`FATAL ERROR: Reached heap limit`) এ বাতিল করে এবং একটি 16 Gi cgroup OOM করতে পারে। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) দেখুন। সেই পরিমাপ ক** মেমরি-বাজেট** সতর্কতা, দুটি সমসাময়িক দীর্ঘ `/v1/responses` এর একটি পণ্য হার্ড-ম্যাক্স নয়। হেভিওয়েট চ্যাট ভর্তি একটি স্বয়ংক্রিয়ভাবে প্রাপ্ত ইনজেস্ট বাইট বাজেট (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) দ্বারা গেট করা হয় যে একই V8/cgroup সিলিং — থেকে এটিকে ঊর্ধ্বমুখী করে (অথবা লিগ্যাসি `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` অনুরোধ-গণনা ক্যাপ সেট করা) একটি ইতিমধ্যে-আকারের প্রক্রিয়ায় গর্ভপাতের পুনরায় প্রবর্তন করে৷ ছোট চ্যাট, `/healthz`, `/v1/models` এবং MCP হল** না** সেই টুপিতে
 
 ### এক-প্রক্রিয়া: দুইটির বেশি দীর্ঘ `/v1/responses`
 
-ক** সুস্থ** প্রক্রিয়া ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` নীচে গাদা, ডিফল্ট `0.75`)** হতে পারে** যখন প্রক্রিয়া-ওয়াইড ইনফ্লাইট-বাইট বাজেট (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) এখনও জায়গা থাকে তখন দুইটির বেশি সমবর্তী দীর্ঘ `POST /v1/responses` চালান। `OMNIROUTE_CHAT_LARGE_BODY_BYTES` বা তার উপরে সংস্থাগুলি (ডিফল্ট 256 KiB) কাঠামো-ভারী অনুরোধের মতো একই হেভিওয়েট লিজ নেয় এবং একই [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` এস্কেপ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ব্যবহার করে। যুগান্তকারী দীর্ঘ SSE ক্লায়েন্টের দশটি (অপারেটরদের প্রায়ই 40-50 লাগে) হল একটি** মেমরি-বাজেট** প্রশ্ন — আকারের স্তূপ + primary/headroom স্লট + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — একটি কঠিন "সর্বোচ্চ 2" পণ্য সীমা নয়। একটি চাপযুক্ত স্তূপ এখনও পুনরায় চেষ্টাযোগ্য `503` দিয়ে সেড করে তাই #7849 ফিরে আসে না।
+ক** সুস্থ** প্রক্রিয়া ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` নীচে গাদা, ডিফল্ট `0.75`)** হতে পারে** যখন প্রক্রিয়া-ওয়াইড ইনফ্লাইট-বাইট বাজেট (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) এখনও জায়গা থাকে তখন দুইটির বেশি সমবর্তী দীর্ঘ `POST /v1/responses` চালান। `OMNIROUTE_CHAT_LARGE_BODY_BYTES` বা তার উপরে সংস্থাগুলি (ডিফল্ট 256 KiB) কাঠামো-ভারী অনুরোধের মতো একই হেভিওয়েট লিজ নেয় এবং একই [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` এস্কেপ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ব্যবহার করে। যুগান্তকারী দীর্ঘ SSE ক্লায়েন্টের দশটি (অপারেটরদের প্রায়ই 40-50 লাগে) হল একটি** মেমরি-বাজেট** প্রশ্ন — আকারের স্তূপ + primary/headroom স্লট + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — একটি কঠিন "সর্বোচ্চ 2" পণ্য সীমা নয়। একটি চাপযুক্ত স্তূপ এখনও পুনরায় চেষ্টাযোগ্য `503` দিয়ে সেড করে তাই #7849 ফিরে আসে না।
 
 প্রতি** গুন স্তূপ** (স্বাধীন V8 পুরানো স্থান)** আজ** :
 
@@ -731,7 +731,7 @@ volumes:
   omniroute-b-data:
 ```
 
-ইন-প্রসেস ঘনত্ব ( HTTP আইসোলেট বন্ধ কম্প্রেশন) হল [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) । ভাগ করা টেকসই অবস্থার একটি লজিক্যাল ক্লাস্টার হল [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ।
+ইন-প্রসেস ঘনত্ব ( HTTP আইসোলেট বন্ধ কম্প্রেশন) হল [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) । ভাগ করা টেকসই অবস্থার একটি লজিক্যাল ক্লাস্টার হল [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ।
 
 ## Docker-এর ভিতরে Gemini-এর আঞ্চলিক ত্রুটি
 
@@ -774,7 +774,7 @@ command-গুলো শংসাপত্র বা IP address ছাড়া�
 
 ### হোস্ট-স্তরের বিকল্প: কার্যকর IPv6 এবং resolver policy
 
-[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762)-এর প্রতিবেদক
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762)-এর প্রতিবেদক
 container IPv6 সক্রিয় করে এবং glibc address selection পরিবর্তন করে তাঁদের environment-এ
 access পুনরুদ্ধার করেছিলেন। এটিকে environment-নির্দিষ্ট বিকল্প হিসেবে বিবেচনা করুন।
 resolver preference সমন্বয় করার আগে কার্যকর host IPv6, container egress/routing এবং

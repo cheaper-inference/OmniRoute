@@ -132,13 +132,13 @@ handleComboChat (เอนจินเดียวกับคอมโบที
 คอมโบที่มี `name` เหมือนกับรหัสโมเดลเปล่าทุกประการ (เช่น คอมโบชื่อ
 `gpt-5.5`) เป็น **รูปแบบที่ตั้งใจให้ใช้งานและรองรับอย่างเป็นทางการ** ไม่ใช่ข้อบกพร่อง โดยเป็น
 กลไกสำหรับการสลับไปใช้ผู้ให้บริการสำรองตามรหัสโมเดลตามที่บันทึกไว้ใน
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) เนื่องจากระบบตรวจสอบการ
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) เนื่องจากระบบตรวจสอบการ
 แก้ไขคอมโบก่อนการแก้ไขรหัสโมเดลเปล่า
 (`getComboForModel()` ใน `src/sse/services/model.ts`) คำขอสำหรับรหัสเปล่า
 `gpt-5.5` จึงถูกกำหนดเส้นทางผ่านเป้าหมายของคอมโบ (เช่น
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) แทนที่จะส่งตรงไปยัง
 ผู้ให้บริการรายเดียว ซึ่งเป็นการนำลำดับความสำคัญแบบคอมโบก่อนการเขียนใหม่ที่สร้างขึ้นสำหรับ
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) มาใช้ซ้ำ และมี
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) มาใช้ซ้ำ และมี
 การทดสอบการถดถอยโดย `tests/unit/responses-combo-resolution-3227.test.ts` และ
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`
 
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` ไม่ได้ใช้คอมโบของคุณ** `auto`/`auto/*` จะสร้างกลุ่มตัวเลือกแบบไม่ต้องตั้งค่าของตัวเอง และจะตรวจสอบคอมโบที่บันทึกไว้ก็ต่อเมื่อมีคอมโบชื่อ `auto` จริง ๆ เท่านั้น (ไม่แนะนำ) หากต้องการกำหนดเส้นทางผ่านคอมโบ ให้ส่งชื่อที่ตรงกันทุกประการ ไม่ใช่ `auto`
 - **`openrouter/auto` เป็นผลิตภัณฑ์ OpenRouter แบบชำระเงินจริง** ("Auto Best Available") ไม่ใช่นามแฝงของ OmniRoute โดยเป็นรายการโมเดลแบบคงที่เพียงรายการเดียวในรีจิสทรี OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) และมีการเรียกเก็บเงินแยกต่างหาก ใช้ การตั้งค่า → การกำหนดเส้นทาง → ซ่อนโมเดลแบบชำระเงิน เพื่อยกเว้นรายการนี้ออกจากกลุ่ม `auto`
 
-ดู [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) และ [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) สำหรับความสับสนเดิมที่เอกสารนี้จัดทำขึ้นเพื่ออธิบาย
+ดู [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) และ [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) สำหรับความสับสนเดิมที่เอกสารนี้จัดทำขึ้นเพื่ออธิบาย
 
 ## วิธีการทำงาน (Auto-Combo ที่บันทึกถาวร)
 

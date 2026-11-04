@@ -114,7 +114,7 @@ npm start
 Brez gradnje z omogočeno vdelavo stran zavrne prikaz v okvirju, razširitev to zazna iz
 glav odgovora in uporabi zunanji brskalnik — nič se ne pokvari, o tem pa vas enkrat obvesti.
 Glejte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) in težavo
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

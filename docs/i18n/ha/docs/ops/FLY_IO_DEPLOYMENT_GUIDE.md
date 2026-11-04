@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Kwafi Lambar kuma Shiga Kundin
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly zai gudanar da sabuntawar injuna a jere ta atomatik.
 
 ### 9.1 Bibiyar Sabuntawar Ma'ajiyar Asali Yayin Kiyaye `fly.toml` na Fork ɗinka
 
-Idan ma'ajiyar yanzu fork ce kuma kana son daidaita sabuntawa daga ma'ajiyar asali ta `https://github.com/cheaper-inference/OmniRoute`, bi tsarin aikin da ke ƙasa.
+Idan ma'ajiyar yanzu fork ce kuma kana son daidaita sabuntawa daga ma'ajiyar asali ta `https://github.com/diegosouzapw/OmniRoute`, bi tsarin aikin da ke ƙasa.
 
 Da farko, tabbatar da ma'ajiyoyin nesa naka:
 
@@ -309,7 +309,7 @@ Ya kamata ka ga aƙalla:
 Idan ba a saita `upstream` ba, ƙara shi:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 Kafin daidaitawa da upstream, ɗauko sabbin commits da tags:

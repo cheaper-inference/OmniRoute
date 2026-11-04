@@ -35,7 +35,7 @@ coverage, र reconciliation चरणहरूसँग नक्साङ्�
 ### क्लोन र स्थापना
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -440,4 +440,4 @@ VPS डिप्लोयका लागि, `npm run build` होइन, `npm
 - **API सन्दर्भ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) हेर्नुहोस्
 - **सुरक्षा कागजातहरू**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **सञ्चालनसम्बन्धी कागजातहरू**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **समस्याहरू**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **समस्याहरू**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

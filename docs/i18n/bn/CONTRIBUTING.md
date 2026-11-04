@@ -29,7 +29,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### ক্লোন ও ইনস্টল
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -432,4 +432,4 @@ VPS ডিপ্লয়ের জন্য `npm run build:release` ব্য�
 - **API রেফারেন্স**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) দেখুন
 - **নিরাপত্তা-সংক্রান্ত ডকুমেন্টেশন**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **অপারেশন-সংক্রান্ত ডকুমেন্টেশন**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **সমস্যাসমূহ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **সমস্যাসমূহ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

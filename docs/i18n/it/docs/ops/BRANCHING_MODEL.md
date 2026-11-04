@@ -56,7 +56,7 @@ l'etichetta `release-freeze`. Questo **non interrompe lo sviluppo**:
 Verifica la presenza di un congelamento aperto prima di presumere che il branch desiderato accetti merge:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Le meccaniche di merge (etichetta `queue` del proprietario → Mergify) sono documentate in

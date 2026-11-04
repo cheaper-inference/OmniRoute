@@ -260,7 +260,7 @@ Proses ini hanya terjadi sekali saat startup pertama setelah upgrade. Gunakan `m
 
 ## Marketplace Proxy Gratis 1proxy
 
-> 🆕 **Dikontribusikan oleh [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Isu [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Dikontribusikan oleh [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Isu [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute terintegrasi dengan platform komunitas **[1proxy](https://1proxy-api.aitradepulse.com)** untuk menyediakan akses ke **ratusan proxy gratis yang telah divalidasi** dari seluruh dunia. Fitur ini sangat cocok bagi pengguna yang tidak memiliki infrastruktur proxy sendiri.
 

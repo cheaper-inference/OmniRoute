@@ -5,7 +5,7 @@
 ---
 
 Կաղապար՝ xquik #11370 (միավորված է release/v3.8.51-ում)։ Ռեժիմ՝ `fallbackOnly`։
-Վերին հոսքի առաջարկ՝ issue cheaper-inference/OmniRoute#11637։
+Վերին հոսքի առաջարկ՝ issue diegosouzapw/OmniRoute#11637։
 
 ## 1. Ծառայության փաստացի տվյալները (պաշտոնական փաստաթղթեր, խաչաձև ստուգված)
 

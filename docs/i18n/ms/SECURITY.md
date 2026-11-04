@@ -9,7 +9,7 @@
 Jika anda menemui kerentanan keselamatan dalam OmniRoute, sila laporkannya secara bertanggungjawab:
 
 1. **JANGAN** buka isu GitHub awam
-2. Gunakan [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Gunakan [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Sertakan: penerangan, langkah penghasilan semula dan potensi impak
 
 ## Garis Masa Respons
@@ -42,7 +42,7 @@ Selepas 3.8.59, versi seterusnya ialah **3.9.0**, yang memulakan siri sokongan j
   yang mana lebih lewat**. Tarikh tamat yang terhasil direkodkan dalam nota keluaran 3.9.0 dan dalam
   [`ROADMAP.md`](ROADMAP.md) apabila keluaran tersebut dibuat.
 - **Melaporkan kerentanan dalam siri LTS:** gunakan saluran yang sama seperti mana-mana versi lain —
-  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) peribadi,
+  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) peribadi,
   bukan isu awam. Nyatakan versi yang anda uji (contohnya `3.9.2`); pembetulan dimasukkan ke dalam
   `stable/v3` dan dipindahkan ke hadapan ke v4.
 - **Garis dasar keselamatan semasa keluaran LTS:** keadaan pengimbas yang diukur, bukti pengadang laluan dan

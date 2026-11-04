@@ -5,7 +5,7 @@
 ---
 
 Templat: xquik #11370 (digabungkan dalam release/v3.8.51). Postur: `fallbackOnly`.
-Proposal upstream: isu cheaper-inference/OmniRoute#11637.
+Proposal upstream: isu diegosouzapw/OmniRoute#11637.
 
 ## 1. Fakta acuan layanan (dokumentasi resmi, diverifikasi silang)
 

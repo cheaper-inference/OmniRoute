@@ -223,7 +223,7 @@ livenessProbe:
 
 **Tippuntax** il-**liveness** tal-kubelet lejn `/api/monitoring/health`. Dik il-mogħdija twettaq xogħol reali fuq id-DB/il-monitoraġġ u taħt tagħbija tagħti pożittivi foloz.
 
-Relatat: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondi waqt li l-event loop ikun okkupat), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (il-prezzijiet tal-katalgu jaħtfu r-riżorsi), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (l-għadd tat-tokens tal-kompressjoni jaħtaf ir-riżorsi).
+Relatat: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondi waqt li l-event loop ikun okkupat), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (il-prezzijiet tal-katalgu jaħtfu r-riżorsi), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (l-għadd tat-tokens tal-kompressjoni jaħtaf ir-riżorsi).
 
 ### watchdog ta’ systemd (event loop iffriżat)
 

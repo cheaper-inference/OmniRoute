@@ -7,7 +7,7 @@
 ഉടമയുടെ നടപടി ആവശ്യമാണ്. Settings → Branches → Add rule വഴി പ്രയോഗിക്കുക, അല്ലെങ്കിൽ:
 
 ```bash
-gh api -X PUT repos/cheaper-inference/OmniRoute/branches/main/protection \
+gh api -X PUT repos/diegosouzapw/OmniRoute/branches/main/protection \
   --input - <<'JSON'
 { "required_status_checks": { "strict": true, "contexts": ["Quality Ratchet", "Quality Gates (Extended)", "Fast Quality Gates"] },
   "enforce_admins": false,

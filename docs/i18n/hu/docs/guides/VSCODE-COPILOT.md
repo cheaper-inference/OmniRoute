@@ -108,7 +108,7 @@ npm start
 
 Beágyazást támogató összeállítás nélkül az oldal megtagadja a keretben való megjelenítést. A bővítmény ezt észleli a válaszfejlécekből, és visszavált a külső böngészőre — semmi sem romlik el, és erről egyszer értesítést is küld.
 Lásd az [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) dokumentumot és a
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273). számú hibajegyet.
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273). számú hibajegyet.
 
 ---
 

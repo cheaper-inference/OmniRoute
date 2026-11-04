@@ -92,7 +92,7 @@ povolení této možnosti.
 
 ## 4. Dlouhé `/v1/responses` v jednom procesu (rezerva při zdravém stavu)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) přidal
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) přidal
 `tryAcquireHealthyHeadroom`, aby byl přijat druhý strukturálně náročný požadavek,
 pokud je využití haldy pod hodnotou `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Cesta BYTE
 používaná funkcí `admitChatRequest` (těla ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

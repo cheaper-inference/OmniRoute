@@ -95,7 +95,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — Compression
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## Overview
 
@@ -219,5 +219,4 @@ curl -X PUT $OMNIROUTE_URL/api/settings/compression \
 
 - `400 invalid mode` → use `off`, `lite`, `standard`, `aggressive`, `ultra`, `rtk`, or `stacked`
 - `400 invalid stackedPipeline` → array must contain valid engine ids (`rtk`, `caveman`)
-
 <!-- skill:custom-end -->

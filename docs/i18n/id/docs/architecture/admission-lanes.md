@@ -97,7 +97,7 @@ opt-in diaktifkan.
 
 ## 4. `/v1/responses` berdurasi panjang dalam satu proses (healthy-headroom)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) menambahkan
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) menambahkan
 `tryAcquireHealthyHeadroom` agar permintaan kedua yang berat secara struktural dapat diterima
 ketika heap berada di bawah `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Jalur BYTE
 yang digunakan oleh `admitChatRequest` (body ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

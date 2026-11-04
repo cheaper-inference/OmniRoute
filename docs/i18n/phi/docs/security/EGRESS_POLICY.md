@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Bakit Ito Umiiral
 
-Ipinakilala sa PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Ang mga problemang nag-udyok dito:
+Ipinakilala sa PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Ang mga problemang nag-udyok dito:
 
 | Problema                                               | Ano ang inaayos ng direktiba                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

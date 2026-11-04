@@ -453,7 +453,7 @@ PR ପୂର୍ବରୁ ଖୋଲାଯାଏ। ସ୍କ୍ରିପ୍ଟ �
 gh workflow run preview-artifact.yml -f pr_number=<N>   # କିମ୍ବା `preview-artifact` ଲେବଲ୍ ଯୋଡ଼ନ୍ତୁ
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # ପ୍ରିଭ୍ୟୁ ଇନ୍ଷ୍ଟଲ୍
 ```
 

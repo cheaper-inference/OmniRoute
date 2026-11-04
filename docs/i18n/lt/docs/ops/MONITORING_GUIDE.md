@@ -223,7 +223,7 @@ livenessProbe:
 
 **Nenukreipkite** kubelet **gyvybingumo** patikros į `/api/monitoring/health`. Šis kelias iš tikrųjų vykdo DB / stebėsenos operacijas ir esant apkrovai gali klaidingai pranešti apie gedimą.
 
-Susiję klausimai: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (patikros, kai įvykių ciklas užimtas), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalogo kainodaros operacija monopolizuoja išteklius), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (glaudinimo leksemų skaičiavimo operacija monopolizuoja išteklius).
+Susiję klausimai: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (patikros, kai įvykių ciklas užimtas), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (katalogo kainodaros operacija monopolizuoja išteklius), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (glaudinimo leksemų skaičiavimo operacija monopolizuoja išteklius).
 
 ### systemd priežiūros mechanizmas (užstrigęs įvykių ciklas)
 

@@ -478,7 +478,7 @@ codex debug models --bundled       # አብሮ የታሸገውን የሞዴል �
 | ክፍለ ጊዜው መለያዎችን መቀያየሩን ይቀጥላል / በዙሮች መካከል የprompt-cache ቀጣይነት ይጠፋል | የክፍለ ጊዜ ቁርኝት TTL `0` ነው (ተሰናክሏል)                           | `sessionAffinityTtlMs`   |
 | ለደንበኛው የሚታይ ማሳወቂያ ሳይኖር ግንኙነቱ በማመዛዘን መሃል ይቋረጣል                    | ከላይኛው ዥረት ምንም ቁራጭ ሳይመጣ ከ10 ደቂቃ በኋላ የዥረት ስራ-ፈት ተቆጣጣሪው ተነስቷል | `STREAM_IDLE_TIMEOUT_MS` |
 
-ተዛማጅ ውይይቶች፦ [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (የረጅም ተግባር መቋረጦች)፣ [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ቁርኝት በነባሪ የሚጠፋበት ምክንያት)። ክትትል፦ [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)።
+ተዛማጅ ውይይቶች፦ [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (የረጅም ተግባር መቋረጦች)፣ [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ቁርኝት በነባሪ የሚጠፋበት ምክንያት)። ክትትል፦ [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)።
 
 ### 1. የክፍለ ጊዜ ቁርኝት — አንድን ውይይት ከአንድ መለያ ጋር ማጣበቅ
 

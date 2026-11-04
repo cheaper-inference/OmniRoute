@@ -453,7 +453,7 @@ pontosan ezt a buildet ellenőrzi (#8084, (a) rész). Csak azonos tárolóból s
 gh workflow run preview-artifact.yml -f pr_number=<N>   # vagy adja hozzá a `preview-artifact` címkét
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # előnézeti telepítés
 ```
 

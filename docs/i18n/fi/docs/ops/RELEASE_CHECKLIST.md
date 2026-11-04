@@ -455,7 +455,7 @@ validoi täsmälleen kyseisen koosteen (#8084:n osa (a)). Vain saman repon PR:t;
 gh workflow run preview-artifact.yml -f pr_number=<N>   # tai lisää `preview-artifact`-tunniste
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # esikatseluasennus
 ```
 

@@ -5,7 +5,7 @@
 ---
 
 - **Matsayi:** An gabatar — yana buƙatar amincewar mai kula kafin a fara aikin lokacin gudana
-- **Batun sa ido:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Batun sa ido:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Iyaka:** Tsarin gine-ginen adana bayanai kawai; wannan shawarar ba ta ƙara ko zaɓar ma’ajiyar bayanai ta waje ba
 
 ## Yanayi

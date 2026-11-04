@@ -18,7 +18,7 @@ A katalógus **45 Agent Skillt** tartalmaz (23 REST API + 21 CLI + 1 konfigurác
 - Egy **kanonikus azonosító** (`omni-auth`, `cli-serve` stb.)
 - Egy **SKILL.md** fájl a `skills/{id}/SKILL.md` helyen, YAML frontmatterrel (`name`, `description`) és részletes markdown-törzzsel
 - Az OpenAPI-specifikációból és a CLI-nyilvántartásból származtatott **REST-végpontok** (API-skillek) vagy **CLI-alparancsok** (CLI-skillek)
-- Egy **nyers GitHub-URL** az élő lekéréshez: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Egy **nyers GitHub-URL** az élő lekéréshez: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Közvetlen nyers GitHub-lekérés (nincs szükség szerverre)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -223,7 +223,7 @@ livenessProbe:
 
 **No** apunte la comprobación de **actividad** de kubelet a `/api/monitoring/health`. Esa ruta realiza trabajo real de base de datos y monitorización y producirá falsos positivos bajo carga.
 
-Relacionado: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondas mientras el bucle de eventos está ocupado), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (acaparamiento de recursos por el cálculo de precios del catálogo), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (acaparamiento de recursos por el recuento de tokens de compresión).
+Relacionado: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondas mientras el bucle de eventos está ocupado), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (acaparamiento de recursos por el cálculo de precios del catálogo), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (acaparamiento de recursos por el recuento de tokens de compresión).
 
 ### Watchdog de systemd (bucle de eventos bloqueado)
 

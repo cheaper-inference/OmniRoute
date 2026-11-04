@@ -396,7 +396,7 @@ git add quality-baseline.json
 ### CodeQL ratchet: ပြန်လည်ဆန်းသစ်သည့် အကြိမ်နှုန်းနှင့် ကိုယ်တိုင်အစပျိုးခြင်း
 
 `check:codeql-ratchet` သည် **အချိန်ဇယားအတိုင်း ပြန်လည်ဆန်းသစ်ထားသော repo အခြေအနေကို ဖတ်သည် — PR တစ်ခုချင်းအလိုက် မဟုတ်ပါ။**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` သည်
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` သည်
 `state: configured`, `schedule: weekly` ဟု အစီရင်ခံသည်- ၎င်းသည် GitHub ၏ default-setup scan ဖြစ်ပြီး push တစ်ခုချင်းအလိုက်
 လုပ်ဆောင်သော analysis မဟုတ်ပါ။ အကျိုးဆက်အနေဖြင့် alert များကို ပြင်ဆင်ထားသော PR တစ်ခု merge ဖြစ်ပြီးနောက်တွင်
 ratchet သည် နောက်တစ်ကြိမ် အချိန်ဇယားအတိုင်း scan မလုပ်ဆောင်မချင်း အဟောင်းဖြစ်သည့် ပိုများသော အရေအတွက်ကို ဆက်လက်ဖတ်နေမည် —

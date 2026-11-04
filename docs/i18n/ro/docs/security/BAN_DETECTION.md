@@ -58,8 +58,8 @@ fără recuperare automată), în timp ce operatorul poate rezolva o solicitare 
 Păstrarea expresiei în lista de blocări făcea, de asemenea, inaccesibilă ramura recuperabilă pentru răspunsurile 403 cloud-code din
 `classifyProviderError` în cazul acestei formulări, deoarece `accountDeactivated` este
 evaluat primul — astfel încât recuperarea rutei de proiect adăugată pentru Gemini Code Assist în
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) și
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) nu putea fi executată niciodată.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) și
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) nu putea fi executată niciodată.
 
 Trei tabele de semnale alăturate, dar **separate**, _nu_ fac parte din detectarea cuvintelor-cheie de blocare:
 

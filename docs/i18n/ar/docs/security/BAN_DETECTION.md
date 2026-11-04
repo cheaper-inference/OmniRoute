@@ -57,8 +57,8 @@ this service has been disabled in this account                  (Antigravity)
 كما أن إبقاء العبارة في قائمة الحظر جعل فرع الخطأ 403 القابل للاسترداد الخاص بـ cloud-code في
 `classifyProviderError` غير قابل للوصول لهذه الصياغة، لأن `accountDeactivated`
 يُقيَّم أولًا — ولذلك لم يكن من الممكن مطلقًا تشغيل استرداد مسار المشروع المضاف لـ Gemini Code Assist في
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) و
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452).
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) و
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452).
 
 جداول الإشارات الثلاثة المتجاورة و**المنفصلة** التالية ليست جزءًا من اكتشاف الكلمات المفتاحية للحظر:
 

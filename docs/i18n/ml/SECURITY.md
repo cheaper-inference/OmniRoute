@@ -9,7 +9,7 @@
 OmniRoute-ൽ ഒരു സുരക്ഷാ ദുർബലത കണ്ടെത്തിയാൽ, അത് ഉത്തരവാദിത്തത്തോടെ റിപ്പോർട്ട് ചെയ്യുക:
 
 1. ഒരു പൊതു GitHub issue **തുറക്കരുത്**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) ഉപയോഗിക്കുക
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) ഉപയോഗിക്കുക
 3. ഇവ ഉൾപ്പെടുത്തുക: വിവരണം, പുനരാവിഷ്കരണ ഘട്ടങ്ങൾ, സാധ്യതയുള്ള ആഘാതം
 
 ## പ്രതികരണ സമയക്രമം
@@ -42,7 +42,7 @@ OmniRoute-ൽ ഒരു സുരക്ഷാ ദുർബലത കണ്ടെ
   റിഗ്രഷൻ പരിഹാരങ്ങളും ലഭിക്കും**. ലഭിക്കുന്ന അവസാന തീയതി 3.9.0 റിലീസ് നോട്ടുകളിലും
   റിലീസ് നടക്കുമ്പോൾ [`ROADMAP.md`](ROADMAP.md)-ലും രേഖപ്പെടുത്തും.
 - **LTS ലൈനിലെ ഒരു ദുർബലത റിപ്പോർട്ട് ചെയ്യുന്നത്:** മറ്റേതൊരു പതിപ്പിനും ഉപയോഗിക്കുന്ന അതേ ചാനൽ —
-  ഒരു സ്വകാര്യ [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new);
+  ഒരു സ്വകാര്യ [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new);
   ഒരിക്കലും ഒരു പൊതു issue ഉപയോഗിക്കരുത്. നിങ്ങൾ പരിശോധിച്ച പതിപ്പ് ഏതാണെന്ന് വ്യക്തമാക്കുക (ഉദാഹരണത്തിന് `3.9.2`);
   പരിഹാരങ്ങൾ `stable/v3`-ൽ ഉൾപ്പെടുത്തുകയും v4-ലേക്ക് forward-port ചെയ്യുകയും ചെയ്യും.
 - **LTS റിലീസിലെ സുരക്ഷാ അടിസ്ഥാനനില:** അളന്ന സ്കാനർ നില, റൂട്ട്-ഗാർഡ്, പൊതു ക്രെഡൻഷ്യൽ

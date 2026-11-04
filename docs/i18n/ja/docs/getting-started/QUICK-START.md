@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### オプション C: ソースから
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute は、障害が発生したプロバイダーを自動的にスキッ�
 
 - **[トラブルシューティング](../guides/TROUBLESHOOTING.md)** — よくある問題と解決方法
 - **[Discord](https://discord.gg/U47eFqAXCn)** — コミュニティサポート
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — バグを報告する
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — バグを報告する

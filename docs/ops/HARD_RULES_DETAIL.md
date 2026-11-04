@@ -102,7 +102,7 @@ Before merging **any** PR, every campaign workflow (`/review-prs`, `/review-grou
 `/implement-features`, `/green-prs`, `/port-upstream-*`) **MUST** check:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 If a freeze is active: **NEVER merge into the frozen `release/vX.Y.Z` named in the freeze

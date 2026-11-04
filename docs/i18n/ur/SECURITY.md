@@ -9,7 +9,7 @@
 اگر آپ کو OmniRoute میں کوئی سیکیورٹی کمزوری ملے، تو براہِ کرم ذمہ دارانہ انداز میں اس کی اطلاع دیں:
 
 1. عوامی GitHub مسئلہ **ہرگز نہ کھولیں**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) استعمال کریں
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) استعمال کریں
 3. یہ معلومات شامل کریں: تفصیل، دوبارہ پیدا کرنے کے مراحل، اور ممکنہ اثرات
 
 ## جوابی کارروائی کی مدت
@@ -42,7 +42,7 @@
   ختم ہو**۔ اس کے نتیجے میں طے ہونے والی اختتامی تاریخ 3.9.0 کے ریلیز نوٹس اور
   [`ROADMAP.md`](ROADMAP.md) میں ریلیز کے وقت درج کی جاتی ہے۔
 - **LTS لائن میں کمزوری کی اطلاع دینا:** وہی چینل استعمال کریں جو کسی بھی دوسرے ورژن کے لیے ہے —
-  ایک نجی [GitHub سیکیورٹی ایڈوائزری](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)،
+  ایک نجی [GitHub سیکیورٹی ایڈوائزری](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)،
   کبھی بھی عوامی مسئلہ نہیں۔ بتائیں کہ آپ نے کون سا ورژن آزمایا (مثلاً `3.9.2`)؛ اصلاحات
   `stable/v3` میں شامل ہوتی ہیں اور پھر v4 میں فارورڈ پورٹ کی جاتی ہیں۔
 - **LTS ریلیز کے وقت سیکیورٹی کی بنیادی حالت:** اسکینر کی پیمائش شدہ حالت، روٹ گارڈ اور

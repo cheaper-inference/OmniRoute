@@ -143,8 +143,8 @@ bazı katmanlarda varsayılan olarak gizli olabilir.
 
 ## Referanslar
 
-- Sorun: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Tartışma: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Sorun: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Tartışma: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Kaynak: `src/shared/constants/providers/web-cookie.ts` (sağlayıcı tanımı)
 - HAR içe aktarma: `src/shared/utils/m365HarImport.ts`
 - Kimlik bilgisi alanları: `src/shared/providers/webSessionCredentials.ts`

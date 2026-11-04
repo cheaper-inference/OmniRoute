@@ -5,7 +5,7 @@
 ---
 
 템플릿: xquik #11370 (release/v3.8.51에 병합됨). 포스처: `fallbackOnly`.
-업스트림 제안: 이슈 cheaper-inference/OmniRoute#11637.
+업스트림 제안: 이슈 diegosouzapw/OmniRoute#11637.
 
 ## 1. 서비스 기준 정보(공식 문서, 교차 확인 완료)
 

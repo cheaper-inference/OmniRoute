@@ -48,8 +48,8 @@ Google Cloud Code / Antigravity 会将其作为 `403 VALIDATION_REQUIRED` 返回
 且永远不会自动恢复），而运维人员可以在浏览器中处理并消除验证提示。
 将该短语保留在封禁列表中，还会导致 `classifyProviderError` 中可恢复的 cloud-code
 403 分支对于此措辞永远无法到达，因为会优先评估 `accountDeactivated`——因此，在
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) 和
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) 中为 Gemini Code Assist
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) 和
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) 中为 Gemini Code Assist
 添加的项目路由恢复逻辑永远无法运行。
 
 以下三个相邻但**彼此独立**的信号表并不属于封禁关键字检测：

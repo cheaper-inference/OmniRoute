@@ -92,7 +92,7 @@ Combo (प्राथमिकता / राउंड-रॉबिन) और 
 
 ## 4. एक-प्रोसेस में लंबे `/v1/responses` (स्वस्थ हेडरूम)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ने
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ने
 `tryAcquireHealthyHeadroom` जोड़ा, ताकि heap के
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` से नीचे होने पर दूसरी संरचनात्मक रूप से भारी request को प्रवेश दिया जा सके। `admitChatRequest` द्वारा उपयोग किया जाने वाला BYTE
 पथ (ऐसी bodies जिनका आकार ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` हो,

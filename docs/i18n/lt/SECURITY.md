@@ -9,7 +9,7 @@
 Jei aptikote „OmniRoute“ saugumo pažeidžiamumą, praneškite apie jį atsakingai:
 
 1. **NEKURKITE** viešos „GitHub“ problemos
-2. Naudokite [„GitHub“ saugumo įspėjimus](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Naudokite [„GitHub“ saugumo įspėjimus](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Įtraukite: aprašymą, atkūrimo veiksmus ir galimą poveikį
 
 ## Reagavimo terminai
@@ -42,7 +42,7 @@ palaikymo linija (žr. [`ROADMAP.md`](ROADMAP.md) → „3 etapas — v3.9.0 LTS
   atsižvelgiant į tai, kuri data yra vėlesnė**. Galutinė pabaigos data įrašoma 3.9.0 laidos pastabose ir
   [`ROADMAP.md`](ROADMAP.md), kai ši versija išleidžiama.
 - **Pranešimas apie LTS linijos pažeidžiamumą:** naudojamas tas pats kanalas kaip ir bet kuriai kitai versijai —
-  privatus [GitHub saugos pranešimas](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  privatus [GitHub saugos pranešimas](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   niekada ne viešas problemos įrašas. Nurodykite, kurią versiją išbandėte (pavyzdžiui, `3.9.2`); pataisos įtraukiamos į
   `stable/v3` ir perkeliamos į v4.
 - **Saugos atskaitos taškas LTS išleidimo metu:** užfiksuota skaitytuvo būsena, maršrutų apsaugos ir

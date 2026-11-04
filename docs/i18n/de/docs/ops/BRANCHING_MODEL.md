@@ -56,7 +56,7 @@ geöffnet. Das **hält die Entwicklung nicht auf**:
 Prüfe, ob ein offener Freeze besteht, bevor du davon ausgehst, dass der gewünschte Branch zusammengeführt werden kann:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Die Merge-Mechanik (`queue`-Label des Owners → Mergify) ist in

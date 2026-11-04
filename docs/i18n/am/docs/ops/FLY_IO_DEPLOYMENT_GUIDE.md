@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 ኮዱን መቅዳት እና ወደ ማውጫው መግባት
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly በማሽኖቹ ላይ ተከታታይ ማዘመኛን በራስ-ሰር ያ�
 
 ### 9.1 የፎርክዎን `fly.toml` በመጠበቅ የዋናውን ማከማቻ ማዘመኛዎች መከታተል
 
-የአሁኑ ማከማቻ ፎርክ ከሆነ እና ከዋናው `https://github.com/cheaper-inference/OmniRoute` ማዘመኛዎችን ማመሳሰል ከፈለጉ፣ ከታች ያለውን የሥራ ፍሰት ይከተሉ።
+የአሁኑ ማከማቻ ፎርክ ከሆነ እና ከዋናው `https://github.com/diegosouzapw/OmniRoute` ማዘመኛዎችን ማመሳሰል ከፈለጉ፣ ከታች ያለውን የሥራ ፍሰት ይከተሉ።
 
 በመጀመሪያ፣ የርቀት ማከማቻዎችዎን ያረጋግጡ፦
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` ካልተዋቀረ፣ ያክሉት፦
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 ከ`upstream` ጋር ከማመሳሰልዎ በፊት፣ የቅርብ ጊዜዎቹን ኮሚቶች እና መለያዎች ያምጡ፦

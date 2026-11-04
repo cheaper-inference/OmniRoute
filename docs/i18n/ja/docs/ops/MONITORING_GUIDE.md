@@ -222,7 +222,7 @@ livenessProbe:
 
 kubelet の **liveness** に `/api/monitoring/health` を指定しては**いけません**。このパスでは実際の DB／監視処理が実行されるため、高負荷時に誤検知します。
 
-関連：[№10052](https://github.com/cheaper-inference/OmniRoute/issues/10052)（イベントループがビジーな間のプローブ）、[#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055)（カタログ価格処理による占有）、[#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117)（圧縮処理のトークン数計算による占有）。
+関連：[№10052](https://github.com/diegosouzapw/OmniRoute/issues/10052)（イベントループがビジーな間のプローブ）、[#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055)（カタログ価格処理による占有）、[#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117)（圧縮処理のトークン数計算による占有）。
 
 ### systemd ウォッチドッグ（イベントループのフリーズ）
 

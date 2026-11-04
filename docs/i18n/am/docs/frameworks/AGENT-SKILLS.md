@@ -18,7 +18,7 @@ Agent Skills ውጫዊ ኤጀንቶችን፣ MCP ደንበኞችን እና A2A �
 - **መደበኛ ID** (`omni-auth`፣ `cli-serve`፣ ወዘተ)
 - በ`skills/{id}/SKILL.md` ውስጥ YAML frontmatter (`name`፣ `description`) + ዝርዝር markdown ይዘት ያለው **SKILL.md** ፋይል
 - ከOpenAPI ዝርዝር መግለጫ እና ከCLI መዝገብ የተወሰዱ **REST መጨረሻ ነጥቦች** (የAPI ክህሎቶች) ወይም **CLI ንዑስ ትዕዛዞች** (የCLI ክህሎቶች)
-- በቀጥታ ለማምጣት **GitHub raw URL**፦ `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- በቀጥታ ለማምጣት **GitHub raw URL**፦ `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. በቀጥታ ከ GitHub raw ማምጣት (ሰርቨር አያስፈልግም)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

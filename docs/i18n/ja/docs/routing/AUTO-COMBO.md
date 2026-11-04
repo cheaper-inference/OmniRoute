@@ -117,10 +117,10 @@ handleComboChat（永続化された combo と同じエンジン）
 
 ## 実在するモデルIDと一致するコンボ名
 
-`name` がベアモデルIDと同一であるコンボ（例: `gpt-5.5` という名前のコンボ）は、バグではなく、**意図的にサポートされているパターン**です。これは、[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) で説明されている、モデルIDごとのプロバイダーフォールバックを実現する仕組みです。コンボの解決はベアモデルIDの解決より先に確認されるため
+`name` がベアモデルIDと同一であるコンボ（例: `gpt-5.5` という名前のコンボ）は、バグではなく、**意図的にサポートされているパターン**です。これは、[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) で説明されている、モデルIDごとのプロバイダーフォールバックを実現する仕組みです。コンボの解決はベアモデルIDの解決より先に確認されるため
 （`src/sse/services/model.ts` の `getComboForModel()`）、ベアID `gpt-5.5` に対するリクエストは、単一のプロバイダーに直接送られるのではなく、コンボのターゲット（例:
 `acme-responses/gpt-5.5`、`backup-responses/gpt-5.5`）を経由してルーティングされます。これは
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) のために実装された、書き換えよりコンボを優先する仕組みを再利用しており、
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) のために実装された、書き換えよりコンボを優先する仕組みを再利用しており、
 `tests/unit/responses-combo-resolution-3227.test.ts` および
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` によってリグレッションテストされています。
 
@@ -162,7 +162,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` はユーザーのコンボを使用しません。** `auto`/`auto/*` は独自のゼロコンフィグ候補プールを構築し、コンボの名前が文字どおり `auto` である場合にのみ保存済みコンボを参照します（非推奨）。コンボ経由でルーティングするには、`auto` ではなく、その完全に一致する名前を送信してください。
 - **`openrouter/auto` は実在する有料のOpenRouter製品**（「Auto Best Available」）であり、OmniRouteのエイリアスではありません。これはOpenRouterレジストリ（`open-sse/config/providers/registry/openrouter/index.ts`）の単一の静的モデルエントリであり、料金も別途請求されます。`auto` プールから除外するには、設定 → ルーティング → 有料モデルを非表示を使用してください。
 
-ここで説明した混乱の経緯については、[#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) および [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) を参照してください。
+ここで説明した混乱の経緯については、[#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) および [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) を参照してください。
 
 ## 仕組み（永続化された Auto-Combo）
 

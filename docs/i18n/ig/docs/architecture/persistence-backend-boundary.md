@@ -5,7 +5,7 @@
 ---
 
 - **Ọnọdụ:** Atụpụtara — ọ chọrọ nkwado onye na-elekọta tupu ọrụ runtime amalite
-- **Okwu nleba anya:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Okwu nleba anya:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Oke:** Naanị nhazi persistence; mkpebi a anaghị atụkwasị ma ọ bụ họrọ database mpụga
 
 ## Ọnọdụ gbara ya gburugburu

@@ -198,7 +198,7 @@ Ayika ilana naa ti mu nigbati ohun elo ba bẹrẹ, nitorinaa eto tabi oluyipada
 
 ## Imudojuiwọn laifọwọyi
 
-Nlo `electron-updater` pẹlu olupese GitHub (`cheaper-inference/OmniRoute`).
+Nlo `electron-updater` pẹlu olupese GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Awọn iṣẹlẹ ti a firanṣẹ siwaju si oluṣe nipasẹ `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (pẹlu `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Awọn ohun-ọṣọ ilẹ ni `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Awọn idasilẹ ti wa ni atẹjade si awọn idasilẹ GitHub (`cheaper-inference/OmniRoute`), eyiti o tun wa nibiti `electron-updater` n ṣayẹwo fun awọn ẹya tuntun.
+Awọn idasilẹ ti wa ni atẹjade si awọn idasilẹ GitHub (`diegosouzapw/OmniRoute`), eyiti o tun wa nibiti `electron-updater` n ṣayẹwo fun awọn ẹya tuntun.
 
 ## Laasigbotitusita
 

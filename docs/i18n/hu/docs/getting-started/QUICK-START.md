@@ -29,7 +29,7 @@ A `:latest` a legmagasabb **közzétett**, stabil SemVer-verzió. Nem követi a 
 ### C lehetőség: Forráskódból
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ Az OmniRoute automatikusan kihagyja a hibás szolgáltatókat, és megpróbálko
 
 - **[Hibaelhárítás](../guides/TROUBLESHOOTING.md)** — Gyakori problémák és javítások
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Közösségi támogatás
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Hibák bejelentése
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Hibák bejelentése

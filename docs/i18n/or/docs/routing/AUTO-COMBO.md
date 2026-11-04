@@ -130,14 +130,14 @@ handleComboChat (ସ୍ଥାୟୀ ଭାବେ ସଂରକ୍ଷିତ କମ
 
 ଯେଉଁ comboର `name` ଏକ bare model id ସହ ସମାନ (ଉଦାହରଣ ସ୍ୱରୂପ, ନାମ
 `gpt-5.5` ଥିବା ଏକ combo), ତାହା ଏକ **ଉଦ୍ଦେଶ୍ୟମୂଳକ, ସମର୍ଥିତ ପ୍ୟାଟର୍ନ**, bug ନୁହେଁ: ଏହା
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)ରେ ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଥିବା
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)ରେ ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଥିବା
 ପ୍ରତ୍ୟେକ model-id ପାଇଁ provider fallback ବ୍ୟବସ୍ଥା। କାରଣ bare-model-id resolution ପୂର୍ବରୁ
 combo resolution ଯାଞ୍ଚ କରାଯାଏ
 (`src/sse/services/model.ts`ରେ `getComboForModel()`), ତେଣୁ bare
 id `gpt-5.5` ପାଇଁ ଏକ requestକୁ ସିଧାସଳଖ ଗୋଟିଏ providerକୁ ପଠାଇବା ପରିବର୍ତ୍ତେ
 comboର targets (ଉଦାହରଣ ସ୍ୱରୂପ,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) ମାଧ୍ୟମରେ route କରାଯାଏ
-— ଏହା [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) ପାଇଁ
+— ଏହା [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) ପାଇଁ
 ନିର୍ମିତ combo-before-rewrite precedenceକୁ ପୁନଃବ୍ୟବହାର କରେ ଏବଂ
 `tests/unit/responses-combo-resolution-3227.test.ts` ଓ
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` ଦ୍ୱାରା regression-test କରାଯାଇଛି।
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` ଆପଣଙ୍କ combos ବ୍ୟବହାର କରେ ନାହିଁ।** `auto`/`auto/*` ନିଜର zero-config candidate pool ନିର୍ମାଣ କରେ ଏବଂ କେବଳ ଯଦି କୌଣସି comboର ନାମ ଆକ୍ଷରିକ ଭାବରେ `auto` ଥାଏ, ତେବେ persisted combosକୁ ବିଚାର କରେ (ଏହା ସୁପାରିସ କରାଯାଏ ନାହିଁ)। ଏକ combo ମାଧ୍ୟମରେ route କରିବାକୁ, ଏହାର ଅବିକଳ ନାମ ପଠାନ୍ତୁ — `auto` ନୁହେଁ।
 - **`openrouter/auto` ହେଉଛି ଏକ ପ୍ରକୃତ paid OpenRouter product** ("Auto Best Available"), OmniRoute alias ନୁହେଁ। ଏହା OpenRouter registry (`open-sse/config/providers/registry/openrouter/index.ts`)ର ଏକମାତ୍ର static model entry ଏବଂ ଏଥିପାଇଁ ପୃଥକ ଭାବରେ bill କରାଯାଏ। ଏହାକୁ `auto` poolsରୁ ବାଦ ଦେବା ପାଇଁ Settings → Routing → Hide paid models ବ୍ୟବହାର କରନ୍ତୁ।
 
-ଏଠାରେ ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଥିବା ମୂଳ ଦ୍ୱନ୍ଦ୍ୱ ପାଇଁ [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ଏବଂ [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) ଦେଖନ୍ତୁ।
+ଏଠାରେ ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଥିବା ମୂଳ ଦ୍ୱନ୍ଦ୍ୱ ପାଇଁ [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ଏବଂ [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) ଦେଖନ୍ତୁ।
 
 ## ଏହା କିପରି କାମ କରେ (ସ୍ଥାୟୀ Auto-Combos)
 

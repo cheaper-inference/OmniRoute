@@ -115,7 +115,7 @@ npm start
 Zonder een build waarin insluiten is ingeschakeld, weigert de pagina om in een frame te worden weergegeven. De extensie detecteert dit aan de hand van de
 responseheaders en valt terug op de externe browser — er gaat niets stuk en dit wordt eenmalig gemeld.
 Zie [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) en issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

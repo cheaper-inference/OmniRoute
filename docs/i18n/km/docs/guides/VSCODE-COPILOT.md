@@ -114,7 +114,7 @@ npm start
 បើគ្មាន build ដែលបានបើកការបង្កប់ទេ ទំព័រនឹងបដិសេធការបង្ហាញក្នុង frame ហើយ extension នឹងរកឃើញវាពី
 បឋមកថាឆ្លើយតប រួចត្រឡប់ទៅប្រើកម្មវិធីរុករកខាងក្រៅវិញ — គ្មានអ្វីខូចទេ ហើយវានឹងជូនដំណឹងអំពីរឿងនេះម្តង។
 សូមមើល [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) និង issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273)។
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273)។
 
 ---
 

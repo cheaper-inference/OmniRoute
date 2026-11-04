@@ -221,7 +221,7 @@ Các tệp bị gắn cờ là những thành phần tiêu chuẩn thuộc các 
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Kết quả đầu ra phải khớp với `latest.yml` → `sha512`. Nếu không khớp, hãy xóa tệp và chỉ tải xuống lại từ [trang phát hành trên GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   Kết quả đầu ra phải khớp với `latest.yml` → `sha512`. Nếu không khớp, hãy xóa tệp và chỉ tải xuống lại từ [trang phát hành trên GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Khôi phục + loại trừ** — khôi phục các mục đã bị hoàn tác từ vùng cách ly và thêm ngoại lệ cho `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions), sau đó cài đặt lại.
 3. **Báo cáo trường hợp nhận diện nhầm** — <https://opentip.kaspersky.com/>. Các báo cáo nhận diện nhầm do người dùng gửi thực sự giúp đẩy nhanh quá trình đưa ứng dụng vào danh sách cho phép.
 
@@ -811,7 +811,7 @@ chi tiết về `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Vẫn gặp sự cố?
 
-- **Vấn đề trên GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Vấn đề trên GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Kiến trúc**: Xem [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) để biết chi tiết nội bộ
 - **Tài liệu tham khảo API**: Xem [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) để biết tất cả các endpoint
 - **Bảng điều khiển tình trạng**: Kiểm tra **Dashboard → Health** để xem trạng thái hệ thống theo thời gian thực

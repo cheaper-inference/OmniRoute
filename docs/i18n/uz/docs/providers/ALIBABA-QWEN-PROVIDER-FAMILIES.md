@@ -5,7 +5,7 @@
 ---
 
 Ushbu hujjatda
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) uchun amalga oshirish qarori qayd etilgan. Ommaviy mahsulotlar
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) uchun amalga oshirish qarori qayd etilgan. Ommaviy mahsulotlar
 toʻrtta provayder oilasi sifatida taqdim etiladi. Mintaqa alohida mahsulot emas, balki ulanish maʼlumotidir.
 
 ## Qaror

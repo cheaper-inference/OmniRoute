@@ -134,13 +134,13 @@ Auto-scoring selects best provider/model per request
 A combo whose `name` is identical to a bare model id (e.g. a combo named
 `gpt-5.5`) is an **intentional, supported pattern**, not a bug: it is the
 mechanism for per-model-id provider fallback documented in
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Because combo
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Because combo
 resolution is checked before bare-model-id resolution
 (`getComboForModel()` in `src/sse/services/model.ts`), a request for the bare
 id `gpt-5.5` is routed through the combo's targets (e.g.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) instead of straight to
 a single provider — this reuses the combo-before-rewrite precedence built for
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) and is
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) and is
 regression-tested by `tests/unit/responses-combo-resolution-3227.test.ts` and
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -180,7 +180,7 @@ Two common pitfalls:
 - **`auto` does not use your combos.** `auto`/`auto/*` builds its own zero-config candidate pool and only consults persisted combos if a combo is literally named `auto` (not recommended). To route through a combo, send its exact name — not `auto`.
 - **`openrouter/auto` is a real paid OpenRouter product** ("Auto Best Available"), not an OmniRoute alias. It is the single static model entry of the OpenRouter registry (`open-sse/config/providers/registry/openrouter/index.ts`) and is billed separately. Use Settings → Routing → Hide paid models to exclude it from `auto` pools.
 
-See [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) and [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) for the original confusion this documents.
+See [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) and [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) for the original confusion this documents.
 
 ## How It Works (Persisted Auto-Combos)
 

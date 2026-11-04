@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## Ավտոմատ թարմացում
 
-Օգտագործում է `electron-updater` GitHub մատակարարի հետ (`cheaper-inference/OmniRoute`):
+Օգտագործում է `electron-updater` GitHub մատակարարի հետ (`diegosouzapw/OmniRoute`):
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Իրադարձությունները վերահասցեավորվել են մատուցողին `update-status` IPC միջոցով՝ `checking`, `available`, `not-available`, `downloading` ( `percent` ով), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage ստորագրումը կամընտիր է — սահմանված `LINU
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Թողարկումները հրապարակվում են GitHub Releases (`cheaper-inference/OmniRoute`), որտեղ նաև `electron-updater` ստուգում է նոր տարբերակները:
+Թողարկումները հրապարակվում են GitHub Releases (`diegosouzapw/OmniRoute`), որտեղ նաև `electron-updater` ստուգում է նոր տարբերակները:
 
 ## Անսարքությունների վերացում
 

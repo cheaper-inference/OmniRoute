@@ -198,7 +198,7 @@ Beállítás `session.defaultSession.webRequest.onHeadersReceived` keresztül. F
 
 ## Automatikus frissítés
 
-`electron-updater` használja a GitHub szolgáltatóval (`cheaper-inference/OmniRoute`).
+`electron-updater` használja a GitHub szolgáltatóval (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC keresztül a megjelenítőhöz továbbított események: `checking`, `available`, `not-available`, `downloading` ( `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Leletek landolnak `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-A kiadásokat GitHub Releases (`cheaper-inference/OmniRoute`) közzéteszi, ahol `electron-updater` is keresi az új verziókat.
+A kiadásokat GitHub Releases (`diegosouzapw/OmniRoute`) közzéteszi, ahol `electron-updater` is keresi az új verziókat.
 
 ## Hibaelhárítás
 

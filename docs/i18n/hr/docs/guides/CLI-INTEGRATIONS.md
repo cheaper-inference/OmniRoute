@@ -198,7 +198,7 @@ ispisu `ps`.
 Usmjeravanje profila na OmniRoute **kombinaciju** umjesto na jedan model ono je što
 osigurava prebacivanje pružatelja usluge za flotu: kada je primarna krajnja točka potpuno pala usred poteza
 u snimljenom izvođenju na
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agent je završio
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agent je završio
 preostale korake na rezervnoj krajnjoj točki i nikada nije izložio prekid rada.
 
 ---

@@ -58,8 +58,8 @@ brez samodejne obnovitve), medtem ko lahko upravljavec poziv za preverjanje razr
 Če bi izraz ostal na seznamu prepovedi, bi bila obnovljiva veja za napako cloud-code 403 v
 `classifyProviderError` za to besedilo prav tako nedosegljiva, ker se `accountDeactivated`
 ovrednoti najprej — zato se obnovitev projektne poti, dodana za Gemini Code Assist v
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) in
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452), ne bi mogla nikoli izvesti.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) in
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452), ne bi mogla nikoli izvesti.
 
 Tri sosednje, **ločene** tabele signalov _niso_ del zaznavanja prepovedanih ključnih besed:
 

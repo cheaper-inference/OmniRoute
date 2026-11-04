@@ -139,8 +139,8 @@ BizChat ରାଉଟିଂ ଏବଂ ମଡେଲ୍ ଆକ୍ସେସ୍କୁ
 
 ## ସନ୍ଦର୍ଭଗୁଡ଼ିକ
 
-- ସମସ୍ୟା: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- ଆଲୋଚନା: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- ସମସ୍ୟା: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- ଆଲୋଚନା: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - ଉତ୍ସ: `src/shared/constants/providers/web-cookie.ts` (ପ୍ରଦାନକାରୀ ସଂଜ୍ଞା)
 - HAR ଇମ୍ପୋର୍ଟ: `src/shared/utils/m365HarImport.ts`
 - ପ୍ରମାଣପତ୍ର ଫିଲ୍ଡଗୁଡ଼ିକ: `src/shared/providers/webSessionCredentials.ts`

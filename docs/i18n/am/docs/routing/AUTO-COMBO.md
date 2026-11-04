@@ -131,13 +131,13 @@ handleComboChat (በቋሚነት ከተቀመጡ ኮምቦዎች ጋር ተመ�
 
 `name`-ው ከባዶ የሞዴል መታወቂያ ጋር ተመሳሳይ የሆነ ኮምቦ (ለምሳሌ፣
 `gpt-5.5` የተሰኘ ኮምቦ) ስህተት ሳይሆን **ሆን ተብሎ የተዘጋጀና የሚደገፍ ንድፍ** ነው፦ ይህም በ
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) የተመዘገበውን በእያንዳንዱ የሞዴል መታወቂያ ደረጃ የአቅራቢ ተተኪ ማዘዋወሪያ የሚያስችል ስልት ነው። የኮምቦ
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) የተመዘገበውን በእያንዳንዱ የሞዴል መታወቂያ ደረጃ የአቅራቢ ተተኪ ማዘዋወሪያ የሚያስችል ስልት ነው። የኮምቦ
 መፍታት ከባዶ የሞዴል መታወቂያ መፍታት በፊት ስለሚመረመር
 (`getComboForModel()` በ `src/sse/services/model.ts` ውስጥ)፣ ለባዶው
 መታወቂያ `gpt-5.5` የሚላክ ጥያቄ በቀጥታ ወደ አንድ
 አቅራቢ ከመሄድ ይልቅ በኮምቦው ዒላማዎች (ለምሳሌ፣
 `acme-responses/gpt-5.5`፣ `backup-responses/gpt-5.5`) በኩል ይዘዋወራል — ይህም ለ
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) የተገነባውን ኮምቦ-ከዳግም-መጻፍ-በፊት ቅድሚያ እንደገና ይጠቀማል፤ እንዲሁም በ
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) የተገነባውን ኮምቦ-ከዳግም-መጻፍ-በፊት ቅድሚያ እንደገና ይጠቀማል፤ እንዲሁም በ
 `tests/unit/responses-combo-resolution-3227.test.ts` እና
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` የድጋሜ ስህተት ሙከራ ተደርጎበታል።
 
@@ -181,7 +181,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` የእርስዎን ኮምቦዎች አይጠቀምም።** `auto`/`auto/*` የራሱን ውቅር የማያስፈልገው የዕጩዎች ስብስብ ይገነባል፤ እንዲሁም አንድ ኮምቦ ቃል በቃል `auto` ተብሎ ካልተሰየመ በስተቀር ቋሚ ተደርገው የተቀመጡ ኮምቦዎችን አያማክርም (አይመከርም)። በኮምቦ በኩል ለማዘዋወር፣ ትክክለኛውን ስሙን ይላኩ — `auto` አይደለም።
 - **`openrouter/auto` እውነተኛ ክፍያ የሚጠይቅ የOpenRouter ምርት** ("Auto Best Available") ነው፣ የOmniRoute ተለዋጭ ስም አይደለም። ይህ የOpenRouter መዝገብ (`open-sse/config/providers/registry/openrouter/index.ts`) ብቸኛው ቋሚ የሞዴል ግቤት ሲሆን ክፍያውም ለብቻው ይሰላል። ከ `auto` ስብስቦች ለማስወገድ Settings → Routing → Hide paid models የሚለውን ይጠቀሙ።
 
-ይህ ሰነድ ስለሚያብራራው የመጀመሪያ ግራ መጋባት [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) እና [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111)ን ይመልከቱ።
+ይህ ሰነድ ስለሚያብራራው የመጀመሪያ ግራ መጋባት [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) እና [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)ን ይመልከቱ።
 
 ## እንዴት እንደሚሠራ (Persisted Auto-Combos)
 

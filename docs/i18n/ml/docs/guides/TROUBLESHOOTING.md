@@ -239,7 +239,7 @@ Kaspersky-യുടെ `PDM:` പ്രിഫിക്സ് അർത്ഥമ�
    [Convert]::ToBase64String($b)
    ```
    ഔട്ട്പുട്ട് `latest.yml` → `sha512` എന്നതുമായി പൊരുത്തപ്പെടണം. പൊരുത്തപ്പെടുന്നില്ലെങ്കിൽ ഫയൽ
-   ഇല്ലാതാക്കി [GitHub റിലീസ് പേജിൽ](https://github.com/cheaper-inference/OmniRoute/releases) നിന്ന്
+   ഇല്ലാതാക്കി [GitHub റിലീസ് പേജിൽ](https://github.com/diegosouzapw/OmniRoute/releases) നിന്ന്
    മാത്രം വീണ്ടും ഡൗൺലോഡ് ചെയ്യുക.
 2. **പുനഃസ്ഥാപിക്കുക + ഒഴിവാക്കുക** — റോൾ ബാക്ക് ചെയ്ത ഇനങ്ങൾ ക്വാറന്റൈനിൽ നിന്ന് പുനഃസ്ഥാപിച്ച്
    `%LOCALAPPDATA%\Programs\OmniRoute`-ന് ഒരു ഒഴിവാക്കൽ ചേർക്കുക (Kaspersky → Settings → Threats and Exclusions),
@@ -834,7 +834,7 @@ omniroute serve --ready-timeout 180000
 
 ## ഇപ്പോഴും പരിഹാരമായില്ലേ?
 
-- **GitHub പ്രശ്നങ്ങൾ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub പ്രശ്നങ്ങൾ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **ആർക്കിടെക്ചർ**: ആന്തരിക വിവരങ്ങൾക്ക് [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) കാണുക
 - **API റഫറൻസ്**: എല്ലാ എൻഡ്പോയിന്റുകൾക്കും [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) കാണുക
 - **ആരോഗ്യ ഡാഷ്ബോർഡ്**: തത്സമയ സിസ്റ്റം നിലയ്ക്കായി **Dashboard → Health** പരിശോധിക്കുക

@@ -58,8 +58,8 @@ ei palaudu koskaan automaattisesti), kun taas ylläpitäjä voi kuitata vahvistu
 Lauseen pitäminen estoluettelossa teki myös `classifyProviderError`-toiminnon palautuvan cloud-code 403 -haaran
 saavuttamattomaksi tämän sanamuodon tapauksessa, koska `accountDeactivated` arvioidaan
 ensin — joten Gemini Code Assistia varten lisätty projektireitin palautus muutoksissa
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) ja
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) ei voinut koskaan käynnistyä.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) ja
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) ei voinut koskaan käynnistyä.
 
 Kolme vierekkäistä, **erillistä** signaalitaulukkoa _eivät_ kuulu estettyjen avainsanojen tunnistukseen:
 

@@ -251,7 +251,7 @@ NSIS ઇન્સ્ટોલરની કોઈ પ્રતિષ્ઠા હ
    [Convert]::ToBase64String($b)
    ```
    આઉટપુટ `latest.yml` → `sha512` સાથે મેળ ખાતું હોવું જોઈએ. જો તેમ ન હોય, તો ફાઇલ કાઢી નાખો અને
-   ફક્ત [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases) પરથી ફરી ડાઉનલોડ કરો.
+   ફક્ત [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) પરથી ફરી ડાઉનલોડ કરો.
 2. **પુનઃસ્થાપિત કરો + બાકાત રાખો** — રોલ બૅક કરેલી આઇટમ્સને ક્વોરન્ટાઇનમાંથી પુનઃસ્થાપિત કરો અને
    `%LOCALAPPDATA%\Programs\OmniRoute` માટે એક્સક્લૂઝન ઉમેરો (Kaspersky → Settings → Threats and Exclusions),
    પછી ફરીથી ઇન્સ્ટોલ કરો.
@@ -844,7 +844,7 @@ omniroute serve --ready-timeout 180000
 
 ## હજુ પણ અટવાયેલા છો?
 
-- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **આર્કિટેક્ચર**: આંતરિક વિગતો માટે [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) જુઓ
 - **API સંદર્ભ**: બધા એન્ડપૉઇન્ટ્સ માટે [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) જુઓ
 - **હેલ્થ ડૅશબોર્ડ**: રીઅલ-ટાઇમ સિસ્ટમ સ્થિતિ માટે **Dashboard → Health** તપાસો

@@ -9,7 +9,7 @@
 Kui avastate OmniRoute'is turvanõrkuse, teatage sellest vastutustundlikult:
 
 1. **ÄRGE** avage avalikku GitHubi probleemi
-2. Kasutage [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Kasutage [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Lisage: kirjeldus, reprodutseerimise sammud ja võimalik mõju
 
 ## Reageerimise ajakava
@@ -42,7 +42,7 @@ Pärast versiooni 3.8.59 on järgmine versioon **3.9.0**, mis avab pikaajalise t
   olenevalt sellest, kumb kuupäev on hilisem**. Selle tulemusel saadud lõppkuupäev märgitakse versiooni 3.9.0 väljalaskemärkmetesse ja
   faili [`ROADMAP.md`](ROADMAP.md), kui väljalase toimub.
 - **LTS-i haru haavatavusest teatamine:** kasutage sama kanalit nagu kõigi teiste versioonide puhul —
-  privaatset [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) teadet,
+  privaatset [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) teadet,
   mitte kunagi avalikku probleemi. Märkige, millist versiooni testisite (näiteks `3.9.2`); parandused lisatakse
   harusse `stable/v3` ja porditakse edasi v4-le.
 - **Turvalisuse lähtepunkt LTS-i väljalaske ajal:** skanneri mõõdetud olek ning marsruudikaitse ja

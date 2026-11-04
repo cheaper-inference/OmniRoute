@@ -198,7 +198,7 @@ API raktas 5dive perduodamas per **stdin** (`--api-key=-`), todėl jis niekada n
 
 Profilį nukreipus į OmniRoute **kombinaciją**, o ne į vieną modelį, parkas gauna
 teikėjo atsarginio perjungimo funkciją: kai vykdant
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) užfiksuotą procesą pagrindinis galinis taškas visiškai nustojo veikti veiksmo viduryje,
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) užfiksuotą procesą pagrindinis galinis taškas visiškai nustojo veikti veiksmo viduryje,
 agentas likusius veiksmus užbaigė naudodamas atsarginį galinį tašką ir naudotojui apie sutrikimą nepranešė.
 
 ---

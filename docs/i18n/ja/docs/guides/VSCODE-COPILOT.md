@@ -106,7 +106,7 @@ npm start
 
 埋め込み対応ビルドでない場合、ページはフレーム内での表示を拒否します。拡張機能はレスポンスヘッダーからそれを検出し、外部ブラウザーにフォールバックします。機能が壊れることはなく、その旨が一度だけ通知されます。
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) および Issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) を参照してください。
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) を参照してください。
 
 ---
 

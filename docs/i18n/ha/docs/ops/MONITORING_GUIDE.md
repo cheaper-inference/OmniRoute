@@ -215,7 +215,7 @@ livenessProbe:
 
 **Kar a** saita **liveness** na kubelet zuwa `/api/monitoring/health`. Wannan hanyar tana aiwatar da ainihin aikin DB/monitoring kuma za ta bayar da sakamakon ƙarya ƙarƙashin nauyi.
 
-Mai alaƙa: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (bincike yayin da event loop yake aiki sosai), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (catalog pricing da ke mamaye albarkatu), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (ƙididdigar token ta compression da ke mamaye albarkatu).
+Mai alaƙa: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (bincike yayin da event loop yake aiki sosai), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (catalog pricing da ke mamaye albarkatu), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (ƙididdigar token ta compression da ke mamaye albarkatu).
 
 ### systemd watchdog (event loop da ya daskare)
 

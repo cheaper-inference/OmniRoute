@@ -132,13 +132,13 @@ Evaluarea automată selectează cel mai bun furnizor/model pentru fiecare cerere
 Un combo al cărui `name` este identic cu un ID simplu de model (de exemplu, un combo numit
 `gpt-5.5`) este un **tipar intenționat și acceptat**, nu o eroare: acesta este
 mecanismul pentru fallback-ul furnizorilor per ID de model, documentat în
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Deoarece rezoluția
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Deoarece rezoluția
 combo-urilor este verificată înaintea rezoluției ID-ului simplu de model
 (`getComboForModel()` în `src/sse/services/model.ts`), o cerere pentru ID-ul simplu
 `gpt-5.5` este direcționată prin țintele combo-ului (de exemplu,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`), în loc să ajungă direct la
 un singur furnizor — astfel este reutilizată precedența combo-înainte-de-rescriere construită pentru
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), iar
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), iar
 comportamentul este testat împotriva regresiilor prin `tests/unit/responses-combo-resolution-3227.test.ts` și
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Două capcane frecvente:
 - **`auto` nu utilizează combo-urile dvs.** `auto`/`auto/*` își construiește propriul grup de candidați fără configurare și consultă combo-urile persistente numai dacă un combo este numit literalmente `auto` (nerecomandat). Pentru a direcționa printr-un combo, trimiteți numele exact al acestuia — nu `auto`.
 - **`openrouter/auto` este un produs OpenRouter real și contra cost** („Auto Best Available”), nu un alias OmniRoute. Este singura intrare statică de model din registrul OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) și este facturată separat. Utilizați Setări → Rutare → Ascunde modelele contra cost pentru a-l exclude din grupurile `auto`.
 
-Consultați [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) și [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) pentru confuzia inițială documentată aici.
+Consultați [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) și [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) pentru confuzia inițială documentată aici.
 
 ## Cum funcționează (combinații automate persistente)
 

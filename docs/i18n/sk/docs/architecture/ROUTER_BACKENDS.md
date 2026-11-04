@@ -4,9 +4,9 @@
 
 ---
 
-> **Stav:** Prijaté · **Kontext:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
-> (typovaný register — kód bude začlenený prostredníctvom [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Stav:** Prijaté · **Kontext:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
+> (typovaný register — kód bude začlenený prostredníctvom [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Toto ADR presne určuje, ako spolu súvisia enginy `ts` (natívny), `bifrost`, `cliproxy`, `9router` a enginy kompatibilné s VibeProxy, aby prispievatelia prestali zamieňať dve architektonicky odlišné veci. Dokumentuje typovaný register zavedený v rámci práce na registri smerovacích backendov ako jediný zdroj pravdy pre tento model.
 
@@ -28,7 +28,7 @@ Chyba, ktorej sa treba vyhnúť: považovať „vloženú službu“ a „smerov
 ## Register — jediný zdroj pravdy
 
 Kontrakt `domain/routing/routerBackends.ts` (kód bude začlenený prostredníctvom
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) deklaruje každý engine presne raz spolu s jeho životným cyklom, funkciami, identitou služby, predvoleným portom, konfiguráciou kontroly stavu a podporou telemetrie. Spotrebitelia vyhľadávajú enginy prostredníctvom `getRouterBackend(id)`, `listRouterBackends()` a `listRouterBackendsByCapability(cap)` namiesto osobitného spracovania každého sprievodného procesu.
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) deklaruje každý engine presne raz spolu s jeho životným cyklom, funkciami, identitou služby, predvoleným portom, konfiguráciou kontroly stavu a podporou telemetrie. Spotrebitelia vyhľadávajú enginy prostredníctvom `getRouterBackend(id)`, `listRouterBackends()` a `listRouterBackendsByCapability(cap)` namiesto osobitného spracovania každého sprievodného procesu.
 
 | Backend     | Životný cyklus | Služba (os A) | Backend sprostredkovateľa (os B) | Kontrola stavu | Predvolený port |
 | ----------- | -------------- | ------------- | -------------------------------- | -------------- | --------------- |
@@ -39,7 +39,7 @@ Kontrakt `domain/routing/routerBackends.ts` (kód bude začlenený prostredníct
 | `vibeproxy` | `external`     | —             | — (adaptér poskytovateľa)        | `/v1/models`   | —               |
 
 ¹ Povýšenie Bifrostu na vloženú službu typu `supervised` (inštalovateľnú a spustiteľnú z `/api/services/bifrost/`) je sledované v
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); kým nebude táto zmena začlenená, Bifrost je dostupný iba ako `external` (výhradne prostredníctvom `BIFROST_BASE_URL`).
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); kým nebude táto zmena začlenená, Bifrost je dostupný iba ako `external` (výhradne prostredníctvom `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) umožňujú volajúcim filtrovať podľa toho, čo engine skutočne dokáže, namiesto pevne zakódovaných vetiev pre jednotlivé identifikátory.
@@ -111,8 +111,8 @@ Výber je dnes **na úrovni relé typu všetko alebo nič** — vo verzii
 `release/v3.8.43` neexistuje prepínanie mechanizmu podľa poskytovateľa ani podľa
 požiadavky. Brána pre jednotlivé požiadavky sa pridáva v rámci práce na manifeste
 sidecarov
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 čo režimu `auto` umožní smerovať cez Bifrost iba poskytovateľov vyhovujúcich
 manifestu.
 

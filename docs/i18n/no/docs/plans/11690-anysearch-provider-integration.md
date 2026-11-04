@@ -5,7 +5,7 @@
 ---
 
 Mal: xquik #11370 (slått sammen i release/v3.8.51). Holdning: `fallbackOnly`.
-Oppstrømsforslag: problem cheaper-inference/OmniRoute#11637.
+Oppstrømsforslag: problem diegosouzapw/OmniRoute#11637.
 
 ## 1. Tjenestens fasit (offisiell dokumentasjon, kryssjekket)
 

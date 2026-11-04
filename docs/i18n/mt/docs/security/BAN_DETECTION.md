@@ -50,8 +50,8 @@ u qatt ma jirkupra awtomatikament), filwaqt li l-operatur jista’ jneħħi talb
 Iż-żamma tal-frażi fil-lista tal-projbizzjonijiet kienet ukoll tagħmel il-fergħa 403 ta’ cloud-code li tista’
 tiġi rkuprata f’`classifyProviderError` inaċċessibbli għal din il-formulazzjoni, għaliex `accountDeactivated`
 jiġi evalwat l-ewwel — għalhekk l-irkupru tar-rotta tal-proġett miżjud għal Gemini Code Assist f’
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) u
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) qatt ma seta’ jitħaddem.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) u
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) qatt ma seta’ jitħaddem.
 
 Tliet tabelli tas-sinjali biswit xulxin, iżda **separati**, _mhumiex_ parti mill-identifikazzjoni tal-kliem ewlieni tal-projbizzjoni:
 

@@ -9,7 +9,7 @@
 OmniRoute තුළ ආරක්ෂක අවදානමක් ඔබ සොයාගතහොත්, කරුණාකර එය වගකීමෙන් යුතුව වාර්තා කරන්න:
 
 1. පොදු GitHub ගැටලුවක් **විවෘත නොකරන්න**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) භාවිත කරන්න
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) භාවිත කරන්න
 3. ඇතුළත් කළ යුතු දෑ: විස්තරය, ප්රතිනිෂ්පාදන පියවර සහ ඇතිවිය හැකි බලපෑම
 
 ## ප්රතිචාර කාලරාමුව
@@ -42,7 +42,7 @@ OmniRoute තුළ ආරක්ෂක අවදානමක් ඔබ සොය
   ආරක්ෂක නිවැරදි කිරීම් සහ තීරණාත්මක ප්රතිගමන සඳහා විසඳුම්** ලැබේ. එමඟින් තීරණය වන අවසන් දිනය 3.9.0 නිකුතු සටහන්වල සහ
   නිකුතුව සිදු වන විට [`ROADMAP.md`](ROADMAP.md) තුළ සටහන් කරනු ලැබේ.
 - **LTS පෙළෙහි අවදානමක් වාර්තා කිරීම:** වෙනත් ඕනෑම අනුවාදයක් සඳහා භාවිත කරන නාලිකාවම භාවිත කරන්න —
-  පුද්ගලික [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) එකක්,
+  පුද්ගලික [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) එකක්,
   කිසිවිටෙක පොදු issue එකක් නොවේ. ඔබ පරීක්ෂා කළ අනුවාදය සඳහන් කරන්න (උදාහරණයක් ලෙස `3.9.2`); නිවැරදි කිරීම්
   `stable/v3` වෙත එක් කර පසුව v4 වෙත ඉදිරියට port කරනු ලැබේ.
 - **LTS නිකුතුවේ ආරක්ෂක මූලික මට්ටම:** මනින ලද scanner තත්ත්වය, route-guard සහ

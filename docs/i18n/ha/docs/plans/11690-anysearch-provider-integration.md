@@ -5,7 +5,7 @@
 ---
 
 Template: xquik #11370 (an haɗa shi a release/v3.8.51). Matsayi: `fallbackOnly`.
-Shawarar upstream: issue cheaper-inference/OmniRoute#11637.
+Shawarar upstream: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Haƙiƙanin bayanan sabis (takardun hukuma, an sake tabbatarwa)
 

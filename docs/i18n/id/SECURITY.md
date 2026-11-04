@@ -9,7 +9,7 @@
 Jika Anda menemukan kerentanan keamanan di OmniRoute, harap laporkan secara bertanggung jawab:
 
 1. **JANGAN** membuka issue GitHub publik
-2. Gunakan [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Gunakan [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Sertakan: deskripsi, langkah-langkah reproduksi, dan potensi dampak
 
 ## Linimasa Respons
@@ -42,7 +42,7 @@ Setelah 3.8.59, versi berikutnya adalah **3.9.0**, yang membuka jalur dukungan j
   mana pun yang lebih akhir**. Tanggal berakhir yang dihasilkan dicatat dalam catatan rilis 3.9.0 dan di
   [`ROADMAP.md`](ROADMAP.md) saat rilis dilakukan.
 - **Melaporkan kerentanan di jalur LTS:** gunakan kanal yang sama seperti versi lainnya —
-  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) privat,
+  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
   jangan pernah menggunakan issue publik. Sebutkan versi yang Anda uji (misalnya `3.9.2`); perbaikan diterapkan pada
   `stable/v3` dan di-porting ke depan ke v4.
 - **Baseline keamanan saat rilis LTS:** status pemindai yang diukur, bukti penjaga rute, dan

@@ -5,7 +5,7 @@
 ---
 
 - **상태:** 제안됨 — 런타임 작업을 시작하기 전에 메인테이너 승인이 필요함
-- **추적 이슈:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **추적 이슈:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **범위:** 영속성 아키텍처만 해당하며, 이 결정은 외부 데이터베이스를 추가하거나 선택하지 않음
 
 ## 배경

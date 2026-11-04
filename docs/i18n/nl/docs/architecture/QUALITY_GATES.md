@@ -436,7 +436,7 @@ implementatie in behandeling).
 ### CodeQL-ratchet: vernieuwingsfrequentie en handmatige trigger
 
 `check:codeql-ratchet` leest **de status van de repository, die volgens een schema wordt vernieuwd — niet per PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` rapporteert
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` rapporteert
 `state: configured`, `schedule: weekly`: de standaardconfiguratiescan van GitHub, niet een
 analyse per push. Gevolg: nadat een PR die waarschuwingen OPLOST is gemerged, blijft de ratchet
 het oude, hogere aantal lezen totdat de volgende geplande scan wordt uitgevoerd — waardoor deze

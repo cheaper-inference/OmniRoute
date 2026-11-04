@@ -250,7 +250,7 @@ sehingga ia dilaksanakan, keluaran baharu mungkin mengulangi perkara ini.
    [Convert]::ToBase64String($b)
    ```
    Output mesti sepadan dengan `latest.yml` → `sha512`. Jika tidak sepadan, padamkan fail tersebut dan
-   muat turun semula hanya daripada [halaman keluaran GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   muat turun semula hanya daripada [halaman keluaran GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Pulihkan + kecualikan** — pulihkan item yang dikembalikan daripada kuarantin dan tambahkan pengecualian
    untuk `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    kemudian pasang semula.
@@ -845,7 +845,7 @@ penuh tentang `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Masih Tersekat?
 
-- **Isu GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Isu GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Seni Bina**: Lihat [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) untuk butiran dalaman
 - **Rujukan API**: Lihat [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) untuk semua titik akhir
 - **Papan Pemuka Kesihatan**: Semak **Papan Pemuka → Kesihatan** untuk status sistem masa nyata

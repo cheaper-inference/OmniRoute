@@ -54,7 +54,7 @@ flowchart LR
 आफूले चाहेको ब्रान्च मर्ज गर्न मिल्छ भनी मान्नुअघि कुनै खुला फ्रिज छ कि छैन जाँच्नुहोस्:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 मर्ज गर्ने प्रक्रिया (मालिकको `queue` लेबल → Mergify) को दस्तावेज

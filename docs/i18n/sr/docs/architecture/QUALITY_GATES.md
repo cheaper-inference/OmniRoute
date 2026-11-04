@@ -427,7 +427,7 @@ git add quality-baseline.json
 ### CodeQL чегртаљка: учесталост освежавања и ручно покретање
 
 `check:codeql-ratchet` чита **стање репозиторијума које се освежава по распореду — не за сваки PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` пријављује
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` пријављује
 `state: configured`, `schedule: weekly`: GitHub скенирање са подразумеваним подешавањем, а не анализу
 при сваком слању измена. Последица: након спајања PR-а који ИСПРАВЉА упозорења, чегртаљка наставља да чита
 стари, већи број све док се не покрене следеће заказано скенирање — па пријављује назадовање

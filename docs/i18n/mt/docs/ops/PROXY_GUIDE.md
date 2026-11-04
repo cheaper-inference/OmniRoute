@@ -261,7 +261,7 @@ Dan iseħħ darba biss mal-ewwel tnedija wara l-aġġornament. Uża `migrateLega
 
 ## Suq ta' Proxies Bla Ħlas ta' 1proxy
 
-> 🆕 **Kontribut minn [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Kwistjoni [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Kontribut minn [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Kwistjoni [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute jintegra mal-pjattaforma tal-komunità **[1proxy](https://1proxy-api.aitradepulse.com)** biex jipprovdi aċċess għal **mijiet ta' proxies bla ħlas u vvalidati** minn madwar id-dinja. Dan huwa ideali għal utenti li m'għandhomx l-infrastruttura tal-proxy tagħhom stess.
 

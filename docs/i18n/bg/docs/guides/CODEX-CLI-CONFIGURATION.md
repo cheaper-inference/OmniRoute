@@ -483,7 +483,7 @@ codex debug models --bundled       # показване на вградения 
 | Сесията продължава да сменя акаунти / непрекъснатостта на кеша на подканите се губи между ходовете | TTL на афинитета на сесията е `0` (деактивиран)                                                                  | `sessionAffinityTtlMs`   |
 | Връзката прекъсва по време на разсъждение без видима за клиента подкана                            | Наблюдателят за неактивност на потока се е задействал след 10 минути без фрагмент от услугата нагоре по веригата | `STREAM_IDLE_TIMEOUT_MS` |
 
-Свързани дискусии: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (прекъсвания на продължителни задачи), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (защо афинитетът е деактивиран по подразбиране). Проследяване: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Свързани дискусии: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (прекъсвания на продължителни задачи), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (защо афинитетът е деактивиран по подразбиране). Проследяване: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Афинитет на сесията — фиксиране на един разговор към един акаунт
 

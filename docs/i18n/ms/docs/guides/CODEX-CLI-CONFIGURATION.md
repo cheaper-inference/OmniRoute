@@ -478,7 +478,7 @@ Dua tetapan lalai OmniRoute boleh menjejaskan sesi Codex CLI berbilang jam secar
 | Sesi terus bertukar akaun / kesinambungan cache gesaan hilang antara giliran      | TTL afiniti sesi ialah `0` (dinyahaktifkan)                            | `sessionAffinityTtlMs`   |
 | Sambungan terputus ketika penaakulan tanpa gesaan yang kelihatan pada pihak klien | Pemantau melahu strim dicetuskan selepas 10 minit tanpa cebisan huluan | `STREAM_IDLE_TIMEOUT_MS` |
 
-Perbincangan berkaitan: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (tugas panjang terputus), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (sebab afiniti dinyahaktifkan secara lalai). Penjejakan: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Perbincangan berkaitan: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (tugas panjang terputus), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (sebab afiniti dinyahaktifkan secara lalai). Penjejakan: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Afiniti sesi — tetapkan satu perbualan kepada satu akaun
 

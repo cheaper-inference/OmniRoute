@@ -175,7 +175,7 @@ Touch points:
 
 - `open-sse/executors/antigravity.ts` — reads `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — credential plumbing
-- Original incident report: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Original incident report: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -246,14 +246,14 @@ All MITM endpoints require management auth (`requireCliToolsAuth`). The sudo pas
 
 ## User-Agent Overrides — env vars (`.env.example` section 12)
 
-| Variable            | Default                                       |
-| ------------------- | --------------------------------------------- |
-| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
-| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
-| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
-| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
-| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
-| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
+| Variable                 | Default                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
+| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
+| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
+| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
+| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
+| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
 
 Consumed by `open-sse/executors/base.ts::buildHeaders()` via dynamic lookup. **Bump these when providers release new CLI versions** — stale UA strings start getting rejected as outdated clients.
 

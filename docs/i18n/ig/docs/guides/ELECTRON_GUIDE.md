@@ -198,7 +198,7 @@ Tọọ site na `session.defaultSession.webRequest.onHeadersReceived`. Ntuziaka 
 
 ## Melite onwe ya
 
-Na-eji `electron-updater` na onye na-eweta GitHub (`cheaper-inference/OmniRoute`).
+Na-eji `electron-updater` na onye na-eweta GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Ihe omume ezigara onye nrụpụta site na `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (ya na `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Ihe eji eme ihe na `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-A na-ebipụta mwepụta na GitHub Releases (`cheaper-inference/OmniRoute`), nke bụkwa ebe `electron-updater` na-enyocha nsụgharị ọhụrụ.
+A na-ebipụta mwepụta na GitHub Releases (`diegosouzapw/OmniRoute`), nke bụkwa ebe `electron-updater` na-enyocha nsụgharị ọhụrụ.
 
 ## Nchọpụta nsogbu
 

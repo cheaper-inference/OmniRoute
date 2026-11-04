@@ -117,7 +117,7 @@ npm start
 Without an embed-enabled build the page refuses to frame, the extension detects that from the
 response headers and falls back to the external browser — nothing breaks, and it says so once.
 See [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) and issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

@@ -324,7 +324,7 @@ docker build --target runner-base \
 
 ### זיכרון RAM בזמן ריצה עבור סוכני תכנות
 
-ברירת המחדל של 1 GiB ב-Docker היא רף מינימלי ללוח מחוונים/צ'אט קל, ולא גודל המתאים לסביבת ייצור. גופי בקשה ארוכים של `POST /v1/responses` (מאות הודעות, עשרות כלים) שומרים מספר גרפים בזיכרון במהלך הדחיסה. שתי בקשות חופפות בגודל של כ-3 MiB / כ-750k טוקנים גרמו ל-V8 להפסיק לפעול עם מרחב אובייקטים ישנים של **12 GiB** (`FATAL ERROR: Reached heap limit`), וגם הגיעו למצב OOM של cgroup בנפח 16 GiB. ראו [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+ברירת המחדל של 1 GiB ב-Docker היא רף מינימלי ללוח מחוונים/צ'אט קל, ולא גודל המתאים לסביבת ייצור. גופי בקשה ארוכים של `POST /v1/responses` (מאות הודעות, עשרות כלים) שומרים מספר גרפים בזיכרון במהלך הדחיסה. שתי בקשות חופפות בגודל של כ-3 MiB / כ-750k טוקנים גרמו ל-V8 להפסיק לפעול עם מרחב אובייקטים ישנים של **12 GiB** (`FATAL ERROR: Reached heap limit`), וגם הגיעו למצב OOM של cgroup בנפח 16 GiB. ראו [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 הגדירו את **`--memory` של cgroup לערך גבוה מגודל הערימה** — מאגרים מקומיים, SQLite ותוצרי ביניים של דחיסה נמצאים מחוץ ל-V8.
 
@@ -696,7 +696,7 @@ spec:
 
 `preStop` sleep מאפשר ל-kube להוריד את נקודות הקצה של השירות לפני SIGTERM** חָדָשׁ** התנועה מפסיקה לפגוע בתהליך הגוסס. `/v1/responses` SSE בטיסה מתנקז עד ל- `SHUTDOWN_TIMEOUT_MS` (ברירת מחדל של 30s) באמצעות חוזי קבלה במשקל כבד (#11015). בקשות חדשות שעדיין מגיעות לתהליך מקבלות `503` + `Retry-After: 5`. הפער מחדש של נקודת הקצה הריקה עד שההחלפה תהיה מוכנה נותרה הפסקה קשה - כלומר טופולוגיית SQLite, לא תצורת בדיקה שגויה.
 
-Postgres חיצוני / multi-writer HA הוא** לֹא** נתיב מלאי מתועד. אם אתה צריך HA, שמור העתק בודד או הפעל טופולוגיה שהפרויקט נבדק ותיעד בנפרד. עבודת Postgres/MySQL גרה ב- [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). עד שזה יישלח, הדרך הנתמכת היחידה להתרבות** גָדוֹל** קיבולת `/v1/responses` היא N תהליכים עצמאיים (הסעיף הבא), לא `replicas > 1` על כרך אחד.
+Postgres חיצוני / multi-writer HA הוא** לֹא** נתיב מלאי מתועד. אם אתה צריך HA, שמור העתק בודד או הפעל טופולוגיה שהפרויקט נבדק ותיעד בנפרד. עבודת Postgres/MySQL גרה ב- [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). עד שזה יישלח, הדרך הנתמכת היחידה להתרבות** גָדוֹל** קיבולת `/v1/responses` היא N תהליכים עצמאיים (הסעיף הבא), לא `replicas > 1` על כרך אחד.
 
 ## קנה מידה: N תהליכים עצמאיים
 
@@ -706,11 +706,11 @@ Postgres חיצוני / multi-writer HA הוא** לֹא** נתיב מלאי מת
 
 המופע הפסיבי קורא מחדש את החיבור כאשר יש צורך ברענון ומאמץ רק אסימון גישה אחר שלא פג. אחרת, הרענון מושבת מבלי לפוג או לבטל את החיבור או לספור כשל מפסק הרענון. כשלי אימות אמיתיים במעלה הזרם עדיין משתמשים בחשבונאות כשלים רגילה, צינון אקספוננציאלי ובשגיאת הלקוח הרגילה; השבתת החשבון נשארת לצמיתות. סנכרן את האסימונים המסובבים של הבעלים לפני שפג תוקפם של אסימוני הגישה (ברירת המחדל של הפקת הרענון הפרואקטיבית היא חמש דקות), או ייבא מחדש את קובץ Codex Auth. יבוא פסיבי מאחסן את האסימונים שסופקו מבלי לאמת אותם בנקודת הקצה של האסימון. רענון dashboard/API ידני מחזיר את `409 refresh_disabled`; כניסות OAuth חדשות לא השתנו. ראה [התייחסות לסביבה](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-תהליך צומת אחד הוא** ערימת V8 אחת** . שניים חופפים ~ 3 MiB / ~ 750k-token-coding agent `POST /v1/responses` (RTK + Caveman) מבטלים את הערימה הזו ב- ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ויכולים OOM ל-16 Gi cgroup. ראה [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). המדידה הזו היא א** זיכרון-תקציב** אזהרה, לא מוצר hard-max של שניים בו-זמניים ארוך `/v1/responses`. כניסת צ'אט במשקל כבד מסודרת על ידי תקציב בייט אינטגרציה הנגזר אוטומטית (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) בגודל מאותה תקרת V8/cgroup — עוקף אותו כלפי מעלה (או הגדרת מכסת ספירת הבקשות `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` מדור קודם) בתהליך בגודל כבר מפעיל מחדש את ההפסקה. צ'אטים קטנים, `/healthz`, `/v1/models` ו- MCP הם** לֹא** בכובע הזה.
+תהליך צומת אחד הוא** ערימת V8 אחת** . שניים חופפים ~ 3 MiB / ~ 750k-token-coding agent `POST /v1/responses` (RTK + Caveman) מבטלים את הערימה הזו ב- ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ויכולים OOM ל-16 Gi cgroup. ראה [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). המדידה הזו היא א** זיכרון-תקציב** אזהרה, לא מוצר hard-max של שניים בו-זמניים ארוך `/v1/responses`. כניסת צ'אט במשקל כבד מסודרת על ידי תקציב בייט אינטגרציה הנגזר אוטומטית (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) בגודל מאותה תקרת V8/cgroup — עוקף אותו כלפי מעלה (או הגדרת מכסת ספירת הבקשות `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` מדור קודם) בתהליך בגודל כבר מפעיל מחדש את ההפסקה. צ'אטים קטנים, `/healthz`, `/v1/models` ו- MCP הם** לֹא** בכובע הזה.
 
 ### תהליך אחד: יותר משני `/v1/responses` ארוכים
 
-א** בָּרִיא** תהליך (ערימה מתחת ל- `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, ברירת המחדל `0.75`)** מַאִי** להפעיל יותר משני `POST /v1/responses` ארוכים בו-זמנית כאשר עדיין יש מקום לתקציב בתים בטיסה (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) הכולל את התהליך. גופים ב- `OMNIROUTE_CHAT_LARGE_BODY_BYTES` או מעליו (ברירת מחדל 256 KiB) לוקחים את אותה חוזה שכירות כבד כמו בקשות כבדות מבנה ומשתמשים באותו [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). עשרות לקוחות SSE ארוכים במקביל (המפעילים צריכים לעתים קרובות 40–50) הוא א** זיכרון-תקציב** שאלה — size heap + primary/headroom חריצים + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — לא מגבלת מוצר "מקסימום 2" קשה. ערימה בלחץ עדיין נשירה עם `503` שניתן לנסות שוב כך ש-#7849 לא חוזר.
+א** בָּרִיא** תהליך (ערימה מתחת ל- `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, ברירת המחדל `0.75`)** מַאִי** להפעיל יותר משני `POST /v1/responses` ארוכים בו-זמנית כאשר עדיין יש מקום לתקציב בתים בטיסה (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) הכולל את התהליך. גופים ב- `OMNIROUTE_CHAT_LARGE_BODY_BYTES` או מעליו (ברירת מחדל 256 KiB) לוקחים את אותה חוזה שכירות כבד כמו בקשות כבדות מבנה ומשתמשים באותו [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). עשרות לקוחות SSE ארוכים במקביל (המפעילים צריכים לעתים קרובות 40–50) הוא א** זיכרון-תקציב** שאלה — size heap + primary/headroom חריצים + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — לא מגבלת מוצר "מקסימום 2" קשה. ערימה בלחץ עדיין נשירה עם `503` שניתן לנסות שוב כך ש-#7849 לא חוזר.
 
 אֶל** להרבות ערימות** (חללי V8 עצמאיים)** הַיוֹם** :
 
@@ -753,7 +753,7 @@ volumes:
   omniroute-b-data:
 ```
 
-צפיפות בתהליך (דחיסה מחוץ ל- HTTP isolate) היא [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). אשכול לוגי אחד במצב עמיד משותף הוא [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+צפיפות בתהליך (דחיסה מחוץ ל- HTTP isolate) היא [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). אשכול לוגי אחד במצב עמיד משותף הוא [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## שגיאות אזוריות של Gemini בתוך Docker
 
@@ -794,7 +794,7 @@ docker compose exec omniroute node -e 'require("node:dns").lookup("generativelan
 
 ### חלופה ברמת המארח: IPv6 פעיל ומדיניות פותר השמות
 
-המדווח על [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) החזיר
+המדווח על [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) החזיר
 את הגישה בסביבה שלו באמצעות הפעלת IPv6 בקונטיינר ושינוי
 בחירת הכתובות של glibc. התייחסו לכך כאל חלופה התלויה בסביבה. ודאו ש-IPv6
 פועל במארח, ושניתוב היציאה של הקונטיינר וכללי חומת האש תקינים, לפני שינוי העדפות פותר השמות.

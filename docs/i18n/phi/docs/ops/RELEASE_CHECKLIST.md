@@ -453,7 +453,7 @@ vina-validate ang eksaktong build na iyon (#8084 slice (a)). Para lamang sa mga 
 gh workflow run preview-artifact.yml -f pr_number=<N>   # o idagdag ang label na `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

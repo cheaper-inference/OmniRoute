@@ -259,7 +259,7 @@ Dit gebeurt eenmalig bij de eerste keer opstarten na de upgrade. Gebruik `migrat
 
 ## 1proxy-marktplaats voor gratis proxy's
 
-> 🆕 **Bijgedragen door [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Bijgedragen door [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute integreert met het **[1proxy](https://1proxy-api.aitradepulse.com)**-communityplatform om toegang te bieden tot **honderden gratis, gevalideerde proxy's** van over de hele wereld. Dit is ideaal voor gebruikers die geen eigen proxy-infrastructuur hebben.
 

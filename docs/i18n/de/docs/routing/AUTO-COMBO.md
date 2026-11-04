@@ -131,12 +131,12 @@ Automatische Bewertung wählt pro Anfrage den besten Anbieter/das beste Modell a
 
 Eine Combo, deren `name` mit einer reinen Modell-ID identisch ist (z. B. eine Combo namens
 `gpt-5.5`), ist ein **beabsichtigtes und unterstütztes Muster** und kein Fehler: Es handelt sich um den
-in [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) dokumentierten Mechanismus für einen Provider-Fallback pro Modell-ID. Da die Combo-Auflösung vor der Auflösung reiner Modell-IDs geprüft wird
+in [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) dokumentierten Mechanismus für einen Provider-Fallback pro Modell-ID. Da die Combo-Auflösung vor der Auflösung reiner Modell-IDs geprüft wird
 (`getComboForModel()` in `src/sse/services/model.ts`), wird eine Anfrage für die reine
 ID `gpt-5.5` über die Ziele der Combo (z. B.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) geleitet, anstatt direkt an
 einen einzelnen Provider zu gehen — dabei wird die für
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) implementierte Priorität „Combo vor Umschreibung“ wiederverwendet und durch `tests/unit/responses-combo-resolution-3227.test.ts` sowie
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) implementierte Priorität „Combo vor Umschreibung“ wiederverwendet und durch `tests/unit/responses-combo-resolution-3227.test.ts` sowie
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` auf Regressionen getestet.
 
 Das Erstellen oder Umbenennen einer Combo auf einen Namen, der eine echte Modell-ID überschattet, wird
@@ -180,7 +180,7 @@ Zwei häufige Stolperfallen:
 - **`auto` verwendet Ihre Combos nicht.** `auto`/`auto/*` erstellt einen eigenen konfigurationsfreien Kandidatenpool und berücksichtigt persistierte Combos nur dann, wenn eine Combo tatsächlich `auto` heißt (nicht empfohlen). Um über eine Combo zu routen, senden Sie deren exakten Namen — nicht `auto`.
 - **`openrouter/auto` ist ein echtes kostenpflichtiges OpenRouter-Produkt** („Auto Best Available“) und kein OmniRoute-Alias. Es ist der einzige statische Modelleintrag der OpenRouter-Registry (`open-sse/config/providers/registry/openrouter/index.ts`) und wird separat abgerechnet. Verwenden Sie Einstellungen → Routing → Kostenpflichtige Modelle ausblenden, um es aus `auto`-Pools auszuschließen.
 
-Siehe [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) und [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) zu den ursprünglichen Missverständnissen, die hier dokumentiert werden.
+Siehe [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) und [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) zu den ursprünglichen Missverständnissen, die hier dokumentiert werden.
 
 ## Funktionsweise (persistierte Auto-Combos)
 

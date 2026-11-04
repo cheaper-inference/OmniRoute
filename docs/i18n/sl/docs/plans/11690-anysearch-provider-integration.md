@@ -5,7 +5,7 @@
 ---
 
 Predloga: xquik #11370 (združeno v release/v3.8.51). Način delovanja: `fallbackOnly`.
-Predlog v izvornem projektu: težava cheaper-inference/OmniRoute#11637.
+Predlog v izvornem projektu: težava diegosouzapw/OmniRoute#11637.
 
 ## 1. Referenčni podatki storitve (uradna dokumentacija, navzkrižno preverjena)
 

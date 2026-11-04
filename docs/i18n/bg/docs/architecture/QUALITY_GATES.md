@@ -394,7 +394,7 @@ git add quality-baseline.json
 ### Храпов механизъм за CodeQL: честота на опресняване и ръчно задействане
 
 `check:codeql-ratchet` прочита **състоянието на хранилището, опреснявано по график — не за всеки PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` отчита
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` отчита
 `state: configured`, `schedule: weekly`: сканиране чрез настройката по подразбиране на GitHub, а не анализ при всяко изпращане.
 Следствие: след сливане на PR, който ПОПРАВЯ предупреждения, храповият механизъм продължава да отчита
 стария, по-висок брой, докато не се изпълни следващото планирано сканиране — затова отчита регресия

@@ -222,7 +222,7 @@ livenessProbe:
 
 kubelet ਦੀ **ਜੀਵੰਤਤਾ** ਜਾਂਚ ਨੂੰ `/api/monitoring/health` ਵੱਲ **ਨਾ** ਭੇਜੋ। ਉਹ ਪਾਥ ਅਸਲ DB/ਮਾਨੀਟਰਿੰਗ ਕੰਮ ਕਰਦਾ ਹੈ ਅਤੇ ਲੋਡ ਹੇਠ ਗਲਤ ਸਕਾਰਾਤਮਕ ਨਤੀਜਾ ਦੇਵੇਗਾ।
 
-ਸੰਬੰਧਿਤ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (event loop ਵਿਅਸਤ ਹੋਣ ਦੌਰਾਨ ਜਾਂਚਾਂ), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (ਕੈਟਾਲਾਗ ਕੀਮਤ-ਨਿਰਧਾਰਨ ਵੱਲੋਂ ਸਰੋਤਾਂ ਦੀ ਅਤਿ ਵਰਤੋਂ), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (ਕੰਪ੍ਰੈਸ਼ਨ ਟੋਕਨ-ਗਿਣਤੀ ਵੱਲੋਂ ਸਰੋਤਾਂ ਦੀ ਅਤਿ ਵਰਤੋਂ)।
+ਸੰਬੰਧਿਤ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (event loop ਵਿਅਸਤ ਹੋਣ ਦੌਰਾਨ ਜਾਂਚਾਂ), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (ਕੈਟਾਲਾਗ ਕੀਮਤ-ਨਿਰਧਾਰਨ ਵੱਲੋਂ ਸਰੋਤਾਂ ਦੀ ਅਤਿ ਵਰਤੋਂ), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (ਕੰਪ੍ਰੈਸ਼ਨ ਟੋਕਨ-ਗਿਣਤੀ ਵੱਲੋਂ ਸਰੋਤਾਂ ਦੀ ਅਤਿ ਵਰਤੋਂ)।
 
 ### systemd watchdog (ਜਾਮ ਹੋਇਆ event loop)
 

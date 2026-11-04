@@ -5,7 +5,7 @@
 ---
 
 - **Stav:** Navrhované — pred začatím prác na runtime sa vyžaduje schválenie správcom
-- **Sledovací problém:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Sledovací problém:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Rozsah:** Iba architektúra perzistencie; toto rozhodnutie nepridáva ani nevyberá externú databázu
 
 ## Kontext

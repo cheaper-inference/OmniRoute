@@ -394,7 +394,7 @@ git add quality-baseline.json
 ### CodeQL 래칫: 갱신 주기 및 수동 트리거
 
 `check:codeql-ratchet`은 **PR마다가 아니라 일정에 따라 갱신되는 저장소 상태를 읽습니다.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup`은
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`은
 `state: configured`, `schedule: weekly`를 보고합니다. 이는 푸시마다 수행되는
 분석이 아니라 GitHub의 기본 설정 검사입니다. 따라서 경고를 수정한 PR이 병합된 후에도
 다음 예약 검사가 실행될 때까지 래칫은 이전의 더 높은 개수를 계속 읽습니다. 그 결과

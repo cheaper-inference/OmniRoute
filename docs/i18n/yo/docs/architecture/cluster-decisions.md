@@ -6,7 +6,7 @@
 
 **Ipò:** àbá (ń dúró de àyẹ̀wò @diegosouzapw)
 **Ọjọ́:** 2026-06-20
-**Àwọn ìtọ́kasí:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**Àwọn ìtọ́kasí:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## TL;DR
 

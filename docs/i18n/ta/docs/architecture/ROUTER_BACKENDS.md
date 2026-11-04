@@ -4,9 +4,9 @@
 
 ---
 
-> **நிலை:** ஏற்கப்பட்டது · **சூழல்:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **ஒப்பந்தம்:** `domain/routing/routerBackends.ts`
-> (வகையிடப்பட்ட பதிவகம் — குறியீடு [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) உடன் சேர்க்கப்படும்)
+> **நிலை:** ஏற்கப்பட்டது · **சூழல்:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **ஒப்பந்தம்:** `domain/routing/routerBackends.ts`
+> (வகையிடப்பட்ட பதிவகம் — குறியீடு [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) உடன் சேர்க்கப்படும்)
 
 `ts` (சொந்தச் செயலாக்கம்), `bifrost`, `cliproxy`, `9router`, மற்றும்
 VibeProxy-இணக்கமான எஞ்சின்கள் ஒன்றுக்கொன்று எவ்வாறு தொடர்புடையவை என்பதை இந்த ADR
@@ -40,7 +40,7 @@ VibeProxy-இணக்கமான எஞ்சின்கள் ஒன்ற�
 ## பதிவகம் — ஒரே அதிகாரப்பூர்வ தகவல் மூலம்
 
 `domain/routing/routerBackends.ts` ஒப்பந்தம் (குறியீடு
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) உடன் சேர்க்கப்படும்) ஒவ்வோர் எஞ்சினையும் அதன்
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) உடன் சேர்க்கப்படும்) ஒவ்வோர் எஞ்சினையும் அதன்
 வாழ்க்கைச் சுழற்சி, திறன்கள், சேவை அடையாளம், இயல்புநிலை முனையம், நிலைச் சரிபார்ப்பு
 உள்ளமைவு மற்றும் தொலைஅளவீட்டு ஆதரவுடன் ஒரே முறை அறிவிக்கிறது. ஒவ்வொரு sidecar-க்கும்
 தனித்தனி சிறப்புக் கையாளுதலைச் செய்வதற்குப் பதிலாக, நுகர்வோர்
@@ -57,7 +57,7 @@ VibeProxy-இணக்கமான எஞ்சின்கள் ஒன்ற�
 
 ¹ Bifrost-ஐ `/api/services/bifrost/` இலிருந்து நிறுவக்கூடிய/தொடங்கக்கூடிய ஒரு
 `supervised` உட்பொதிக்கப்பட்ட சேவையாக மேம்படுத்துவது
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)-இல் கண்காணிக்கப்படுகிறது; அது ஒன்றிணைக்கப்படும் வரை,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)-இல் கண்காணிக்கப்படுகிறது; அது ஒன்றிணைக்கப்படும் வரை,
 Bifrost `external`-மட்டுமேயானது (`BIFROST_BASE_URL` வழியாக மட்டுமே அணுகக்கூடியது).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -125,8 +125,8 @@ backend-ஐத் தேர்ந்தெடுக்கிறது; பிர
 
 தற்போது relay நிலையில் தேர்வு **முழுமையாக-அல்லது-எதுவுமில்லை** — `release/v3.8.43`-இல் ஒவ்வொரு provider-க்கும்
 அல்லது ஒவ்வொரு request-க்கும் தனியான engine மாற்றம் இல்லை. ஒவ்வொரு request-க்குமான gate, sidecar-manifest பணியின் மூலம் சேர்க்கப்பட்டு வருகிறது
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
 இதன் மூலம் manifest-க்கு தகுதியான provider-களை மட்டும் Bifrost வழியாக route செய்ய `auto`-க்கு முடியும்.
 
 ## டாஷ்போர்டு ஒருங்கிணைப்பு

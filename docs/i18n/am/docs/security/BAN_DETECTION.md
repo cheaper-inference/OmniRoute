@@ -50,8 +50,8 @@ Google Cloud Code / Antigravity ይህንን እንደ `403 VALIDATION_REQUIRED`
 ሐረጉን በእገዳ ዝርዝሩ ውስጥ ማቆየት፣ `accountDeactivated` በቅድሚያ ስለሚገመገም፣
 በ`classifyProviderError` ውስጥ ያለውን ሊስተካከል የሚችል የcloud-code 403 ቅርንጫፍ ለዚህ አገላለጽ
 የማይደረስ አድርጎት ነበር — ስለዚህ ለGemini Code Assist በ
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) እና
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) የተጨመረው የፕሮጀክት-መስመር ማገገሚያ ፈጽሞ ሊሠራ አይችልም ነበር።
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) እና
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) የተጨመረው የፕሮጀክት-መስመር ማገገሚያ ፈጽሞ ሊሠራ አይችልም ነበር።
 
 ሦስት ተጎራባች፣ **የተለያዩ** የምልክት ሰንጠረዦች የታገዱ ቁልፍ ቃላትን የመለየት አካል _አይደሉም_፦
 

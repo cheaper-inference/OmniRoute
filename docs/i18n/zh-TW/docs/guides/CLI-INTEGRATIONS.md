@@ -181,7 +181,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 API 金鑰會透過 **stdin**（`--api-key=-`）交給 5dive，因此絕不會出現在 `ps` 輸出中。
 
 將設定檔指向 OmniRoute **組合**而非單一模型，即可讓叢集獲得提供者容錯移轉能力：在
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) 所記錄的執行過程中，主要端點在互動途中完全中斷後，代理程式仍透過備援端點完成其餘步驟，且未將中斷情況呈現給使用者。
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) 所記錄的執行過程中，主要端點在互動途中完全中斷後，代理程式仍透過備援端點完成其餘步驟，且未將中斷情況呈現給使用者。
 
 ---
 

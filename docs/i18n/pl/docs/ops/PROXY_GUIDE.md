@@ -261,7 +261,7 @@ Dzieje się to jednorazowo przy pierwszym uruchomieniu po aktualizacji. Użyj `m
 
 ## Rynek darmowych serwerów proxy 1proxy
 
-> 🆕 **Wkład od [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (zgłoszenie [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Wkład od [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (zgłoszenie [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute integruje się z platformą społecznościową **[1proxy](https://1proxy-api.aitradepulse.com)**, zapewniając dostęp do **setek darmowych, zweryfikowanych serwerów proxy** z całego świata. Jest to idealne rozwiązanie dla użytkowników, którzy nie mają własnej infrastruktury proxy.
 

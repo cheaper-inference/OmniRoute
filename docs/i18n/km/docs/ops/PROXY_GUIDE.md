@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## ទីផ្សារប្រូកស៊ីឥតគិតថ្លៃ 1proxy
 
-> 🆕 **រួមចំណែកដោយ [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (បញ្ហា [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **រួមចំណែកដោយ [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (បញ្ហា [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute រួមបញ្ចូលជាមួយវេទិកាសហគមន៍ **[1proxy](https://1proxy-api.aitradepulse.com)** ដើម្បីផ្តល់សិទ្ធិចូលប្រើ **ប្រូកស៊ីឥតគិតថ្លៃដែលបានផ្ទៀងផ្ទាត់រាប់រយ** ពីជុំវិញពិភពលោក។ វាស័ក្តិសមបំផុតសម្រាប់អ្នកប្រើប្រាស់ដែលមិនមានហេដ្ឋារចនាសម្ព័ន្ធប្រូកស៊ីផ្ទាល់ខ្លួន។
 

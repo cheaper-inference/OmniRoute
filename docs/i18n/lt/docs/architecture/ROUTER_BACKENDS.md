@@ -4,9 +4,9 @@
 
 ---
 
-> **Būsena:** Priimta · **Kontekstas:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Sutartis:** `domain/routing/routerBackends.ts`
-> (tipizuotas registras — kodas pateikiamas su [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Būsena:** Priimta · **Kontekstas:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Sutartis:** `domain/routing/routerBackends.ts`
+> (tipizuotas registras — kodas pateikiamas su [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Šiame ADR tiksliai apibrėžiama, kaip `ts` (savasis), `bifrost`, `cliproxy`, `9router` ir
 su VibeProxy suderinami varikliai yra susiję tarpusavyje, kad bendraautoriai
@@ -41,7 +41,7 @@ nukreipimo posistemė, kuri (istoriškai) buvo tik `external`.
 ## Registras — vienintelis patikimas informacijos šaltinis
 
 `domain/routing/routerBackends.ts` sutartyje (kodas pateikiamas su
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) kiekvienas variklis deklaruojamas vieną kartą,
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) kiekvienas variklis deklaruojamas vieną kartą,
 nurodant jo gyvavimo ciklą, galimybes, paslaugos tapatybę, numatytąjį prievadą,
 būklės tikrinimo konfigūraciją ir telemetrijos palaikymą. Naudotojai variklių ieško
 naudodami `getRouterBackend(id)`, `listRouterBackends()` ir
@@ -58,7 +58,7 @@ atskiras specialiąsias sąlygas.
 
 ¹ Bifrost perkėlimas į `supervised` įterptąją paslaugą (kurią galima įdiegti ir
 paleisti iš `/api/services/bifrost/`) stebimas
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); kol šis pakeitimas nebus sujungtas,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); kol šis pakeitimas nebus sujungtas,
 Bifrost veikia tik kaip `external` (pasiekiamas tik per `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -130,8 +130,8 @@ paskirstymo posistemę; pagrindinė `/api/v1/chat/completions` sąsaja niekada n
 Šiuo metu pasirinkimas retransliavimo lygmeniu yra **viskas arba nieko** — `release/v3.8.43`
 nėra galimybės keisti variklio pagal tiekėją ar užklausą. Užklausos lygmens valdiklis pridedamas
 atliekant šalutinio proceso aprašo darbus
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) aprašas +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) aprašas +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 todėl `auto` per Bifrost galės nukreipti tik aprašo reikalavimus atitinkančių tiekėjų užklausas.
 
 ## Integravimas į valdymo skydelį

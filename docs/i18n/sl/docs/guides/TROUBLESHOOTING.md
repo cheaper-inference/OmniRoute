@@ -249,7 +249,7 @@ dokler ne bo uvedeno, se lahko to pri novih izdajah ponavlja.
    [Convert]::ToBase64String($b)
    ```
    Izhod se mora ujemati z `latest.yml` → `sha512`. Če se ne ujema, izbrišite datoteko in
-   jo znova prenesite izključno s [strani z izdajami na GitHubu](https://github.com/cheaper-inference/OmniRoute/releases).
+   jo znova prenesite izključno s [strani z izdajami na GitHubu](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Obnovite + izključite** — povrnjene elemente obnovite iz karantene in dodajte izjemo
    za `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Nastavitve → Grožnje in izjeme),
    nato znova izvedite namestitev.
@@ -848,7 +848,7 @@ podrobnosti o `OMNIROUTE_READY_TIMEOUT_MS` glejte [`docs/reference/ENVIRONMENT.m
 
 ## Še vedno ne deluje?
 
-- **Težave na GitHubu**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Težave na GitHubu**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Arhitektura**: Za notranje podrobnosti glejte [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **Referenca API-ja**: Za vse končne točke glejte [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Nadzorna plošča zdravja sistema**: Stanje sistema v realnem času preverite v razdelku **Nadzorna plošča → Zdravje sistema**

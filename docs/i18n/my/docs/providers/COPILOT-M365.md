@@ -129,8 +129,8 @@ BizChat လမ်းကြောင်းရွေးချယ်မှုနှ
 
 ## ကိုးကားချက်များ
 
-- Issue: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Discussion: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Discussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Source: `src/shared/constants/providers/web-cookie.ts` (provider အဓိပ္ပာယ်သတ်မှတ်ချက်)
 - HAR import: `src/shared/utils/m365HarImport.ts`
 - အထောက်အထား field များ: `src/shared/providers/webSessionCredentials.ts`

@@ -451,7 +451,7 @@ develop 版本提升提交使用 git 底層命令建立（不會觸碰工作目�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # 或新增 `preview-artifact` 標籤
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # 安裝預覽版本
 ```
 

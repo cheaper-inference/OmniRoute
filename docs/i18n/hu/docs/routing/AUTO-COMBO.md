@@ -132,13 +132,13 @@ Az automatikus pontozás kérésenként kiválasztja a legjobb szolgáltatót/mo
 Az olyan kombó, amelynek `name` mezője megegyezik egy önálló modellazonosítóval (például egy
 `gpt-5.5` nevű kombó), **szándékos és támogatott minta**, nem hiba: ez biztosítja
 a modellazonosítónkénti szolgáltatói tartalékútvonalat, amelyet a
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) dokumentál. Mivel a kombók
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) dokumentál. Mivel a kombók
 feloldásának ellenőrzése megelőzi az önálló modellazonosítók feloldását
 (`getComboForModel()` a `src/sse/services/model.ts` fájlban), az önálló
 `gpt-5.5` azonosítóra irányuló kérés a kombó céljain (például
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) keresztül lesz átirányítva ahelyett, hogy
 közvetlenül egyetlen szolgáltatóhoz kerülne — ez újra felhasználja a
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) számára kialakított,
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) számára kialakított,
 átírás előtti kombóelsőbbséget, és regressziós tesztelését a
 `tests/unit/responses-combo-resolution-3227.test.ts` és a
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` végzi.
@@ -185,7 +185,7 @@ Két gyakori buktató:
 - **Az `auto` nem használja a kombóit.** Az `auto`/`auto/*` saját, konfigurációt nem igénylő jelöltkészletet épít fel, és csak akkor veszi figyelembe a tartósan mentett kombókat, ha egy kombó neve szó szerint `auto` (nem ajánlott). Kombón keresztüli útválasztáshoz annak pontos nevét küldje el — ne az `auto` értéket.
 - **Az `openrouter/auto` egy valódi, fizetős OpenRouter-termék** („Auto Best Available”), nem OmniRoute-alias. Ez az OpenRouter-nyilvántartás (`open-sse/config/providers/registry/openrouter/index.ts`) egyetlen statikus modellbejegyzése, és külön számlázzák. Az `auto` készletekből való kizárásához használja a Beállítások → Útválasztás → Fizetős modellek elrejtése lehetőséget.
 
-A dokumentált eredeti félreértéseket lásd itt: [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) és [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
+A dokumentált eredeti félreértéseket lásd itt: [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) és [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
 ## Működés (tartós automatikus kombinációk)
 

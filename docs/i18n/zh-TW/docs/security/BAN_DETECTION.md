@@ -56,8 +56,8 @@ Google Cloud Code / Antigravity 會以 `403 VALIDATION_REQUIRED` 傳回此訊息
 也會使 `classifyProviderError` 裡可復原的 cloud-code 403 分支無法針對此措辭
 執行，因為系統會先評估 `accountDeactivated`——因此，為 Gemini Code Assist 新增的
 專案路由復原機制
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) 和
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) 永遠無法執行。
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) 和
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) 永遠無法執行。
 
 以下三個相鄰但**彼此獨立**的訊號表，_不_屬於封禁關鍵字偵測的一部分：
 

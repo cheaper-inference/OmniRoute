@@ -18,7 +18,7 @@ Agent Skills ହେଉଛି ସଂରଚିତ SKILL.md ଫାଇଲ୍, ଯା
 - ଏକ **କ୍ୟାନୋନିକାଲ୍ ID** (`omni-auth`, `cli-serve`, ଇତ୍ୟାଦି)
 - `skills/{id}/SKILL.md`ରେ ଏକ **SKILL.md** ଫାଇଲ୍, ଯେଉଁଥିରେ YAML ଫ୍ରଣ୍ଟମ୍ୟାଟର୍ (`name`, `description`) + ସମୃଦ୍ଧ markdown ବଡି ରହିଛି
 - OpenAPI ସ୍ପେକ୍ ଏବଂ CLI ରେଜିଷ୍ଟ୍ରିରୁ ବ୍ୟୁତ୍ପନ୍ନ **REST ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକ** (API ସ୍କିଲ୍) କିମ୍ବା **CLI ସବ୍କମାଣ୍ଡଗୁଡ଼ିକ** (CLI ସ୍କିଲ୍)
-- ଲାଇଭ୍ ଫେଚ୍ ପାଇଁ ଏକ **GitHub raw URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ଲାଇଭ୍ ଫେଚ୍ ପାଇଁ ଏକ **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. ସିଧାସଳଖ GitHub raw ଫେଚ୍ (ସର୍ଭର୍ ଆବଶ୍ୟକ ନାହିଁ)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

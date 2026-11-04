@@ -169,7 +169,7 @@ Antigravity অনুরোধগুলো কলারের টেক্সট
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` পড়ে
 - `src/lib/oauth/providers/antigravity.ts` — ক্রেডেনশিয়াল সংযোগব্যবস্থা
-- মূল ঘটনা প্রতিবেদন: আলোচনা [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- মূল ঘটনা প্রতিবেদন: আলোচনা [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

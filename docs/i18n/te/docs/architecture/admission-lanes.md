@@ -91,7 +91,7 @@ OmniRouteలో విభిన్న పరిధులు గల **రెం�
 
 ## 4. ఒకే ప్రాసెస్లో దీర్ఘ `/v1/responses` (ఆరోగ్యకరమైన-హెడ్రూమ్)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ద్వారా
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ద్వారా
 `tryAcquireHealthyHeadroom` జోడించబడింది, తద్వారా హీప్
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` కంటే తక్కువగా ఉన్నప్పుడు నిర్మాణపరంగా భారమైన రెండవ రిక్వెస్ట్ అనుమతించబడుతుంది.
 `admitChatRequest` ఉపయోగించే BYTE పాత్ (`OMNIROUTE_CHAT_LARGE_BODY_BYTES`కు సమానమైన లేదా అంతకంటే పెద్ద బాడీలు,

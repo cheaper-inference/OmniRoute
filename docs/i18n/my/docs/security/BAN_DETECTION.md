@@ -51,8 +51,8 @@ Terminal match တစ်ခုသည် `permanent: true` ဖြစ်ပြီ�
 `classifyProviderError` ရှိ ပြန်လည်ရယူနိုင်သော cloud-code 403 branch ကိုလည်း ဤအသုံးအနှုန်းအတွက်
 ရောက်ရှိ၍မရအောင် ဖြစ်စေခဲ့သည်။ အကြောင်းမှာ `accountDeactivated` ကို ဦးစွာ စစ်ဆေးသောကြောင့်ဖြစ်ပြီး —
 ထို့ကြောင့် Gemini Code Assist အတွက်
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) နှင့်
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) တို့တွင် ထည့်သွင်းခဲ့သော project-route
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) နှင့်
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) တို့တွင် ထည့်သွင်းခဲ့သော project-route
 ပြန်လည်ရယူရေး logic သည် မည်သည့်အခါမျှ အလုပ်လုပ်နိုင်မည်မဟုတ်ပါ။
 
 အနီးကပ်တည်ရှိသော်လည်း **သီးခြားစီဖြစ်သော** အောက်ပါ signal table သုံးခုသည် banned-keyword

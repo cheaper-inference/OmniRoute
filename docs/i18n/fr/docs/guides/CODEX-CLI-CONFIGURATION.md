@@ -478,7 +478,7 @@ Deux paramètres par défaut d’OmniRoute peuvent compromettre silencieusement 
 | La session change constamment de compte / la continuité du cache des prompts est perdue entre les tours | Le TTL d’affinité de session est `0` (désactivé)                                                                  | `sessionAffinityTtlMs`   |
 | La connexion s’interrompt en plein raisonnement sans message visible côté client                        | Le mécanisme de surveillance de l’inactivité du flux s’est déclenché après 10 minutes sans fragment reçu en amont | `STREAM_IDLE_TIMEOUT_MS` |
 
-Discussions connexes : [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (interruptions des tâches longues), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (pourquoi l’affinité est désactivée par défaut). Suivi : [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Discussions connexes : [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (interruptions des tâches longues), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (pourquoi l’affinité est désactivée par défaut). Suivi : [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Affinité de session — épingler une conversation à un seul compte
 

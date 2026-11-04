@@ -164,7 +164,7 @@ Google-ന്റെ ഫ്രീ-ടയർ ക്വാട്ട കാര്യ
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` വായിക്കുന്നു
 - `src/lib/oauth/providers/antigravity.ts` — ക്രെഡൻഷ്യൽ പ്ലംബിംഗ്
-- യഥാർത്ഥ സംഭവ റിപ്പോർട്ട്: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- യഥാർത്ഥ സംഭവ റിപ്പോർട്ട്: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

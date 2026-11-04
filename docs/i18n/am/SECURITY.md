@@ -9,7 +9,7 @@
 በOmniRoute ውስጥ የደህንነት ተጋላጭነት ካገኙ፣ እባክዎ በኃላፊነት ሪፖርት ያድርጉት፦
 
 1. ይፋዊ የGitHub ጉዳይ **አይክፈቱ**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)ን ይጠቀሙ
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)ን ይጠቀሙ
 3. የሚከተሉትን ያካትቱ፦ መግለጫ፣ እንደገና ለማሳየት የሚያስችሉ ደረጃዎች እና ሊኖር የሚችል ተፅዕኖ
 
 ## የምላሽ ጊዜ ሰሌዳ
@@ -42,7 +42,7 @@
   የደህንነት ማስተካከያዎችን እና ወሳኝ የተግባር መቀልበሶችን ይቀበላል**። የሚገኘው የማብቂያ ቀን ስሪቱ ሲለቀቅ በ3.9.0 የልቀት ማስታወሻዎች እና በ
   [`ROADMAP.md`](ROADMAP.md) ውስጥ ይመዘገባል።
 - **በLTS መስመር ውስጥ ያለ ተጋላጭነትን ማሳወቅ፦** ከሌሎች ስሪቶች ጋር ተመሳሳይ ቻናል —
-  የግል [GitHub የደህንነት ማሳሰቢያ](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) ይጠቀሙ፤
+  የግል [GitHub የደህንነት ማሳሰቢያ](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) ይጠቀሙ፤
   በፍጹም ይፋዊ ጉዳይ አይክፈቱ። የሞከሩትን ስሪት (ለምሳሌ `3.9.2`) ይግለጹ፤ ማስተካከያዎች
   በ`stable/v3` ላይ ይገባሉ እና ወደ v4 ይተላለፋሉ።
 - **LTS በሚለቀቅበት ጊዜ ያለው የደህንነት መነሻ መስፈርት፦** የተለካው የስካነር ሁኔታ፣ የመንገድ ጥበቃ እና

@@ -51,8 +51,8 @@ tidak pernah pulih secara otomatis), sedangkan operator dapat menyelesaikan perm
 Mempertahankan frasa tersebut dalam daftar pemblokiran juga membuat cabang 403 cloud-code yang dapat dipulihkan dalam
 `classifyProviderError` tidak dapat dijangkau untuk redaksi ini, karena `accountDeactivated`
 dievaluasi terlebih dahulu — sehingga pemulihan rute proyek yang ditambahkan untuk Gemini Code Assist dalam
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) dan
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) tidak pernah dapat dijalankan.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) dan
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) tidak pernah dapat dijalankan.
 
 Tiga tabel sinyal yang berdekatan dan **terpisah** berikut _bukan_ bagian dari deteksi kata kunci pemblokiran:
 

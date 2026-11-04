@@ -222,7 +222,7 @@ livenessProbe:
 
 kubelet **생존 상태** 검사가 `/api/monitoring/health`를 가리키게 하지 **마세요**. 이 경로는 실제 DB/모니터링 작업을 수행하며 부하가 높을 때 오탐이 발생합니다.
 
-관련 항목: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052)(이벤트 루프가 사용 중일 때의 프로브), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055)(카탈로그 가격 책정으로 인한 리소스 독점), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117)(압축 토큰 수 계산으로 인한 리소스 독점).
+관련 항목: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052)(이벤트 루프가 사용 중일 때의 프로브), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055)(카탈로그 가격 책정으로 인한 리소스 독점), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117)(압축 토큰 수 계산으로 인한 리소스 독점).
 
 ### systemd watchdog(멈춘 이벤트 루프)
 

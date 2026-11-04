@@ -5,7 +5,7 @@
 ---
 
 Šablon: xquik #11370 (spojeno u izdanju release/v3.8.51). Stav: `fallbackOnly`.
-Prijedlog uzvodno (upstream): issue cheaper-inference/OmniRoute#11637.
+Prijedlog uzvodno (upstream): issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Osnovne činjenice o servisu (zvanična dokumentacija, provjereno)
 

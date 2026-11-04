@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ಸ್ವಯಂ-ನವೀಕರಣ
 
-GitHub ಪೂರೈಕೆದಾರರೊಂದಿಗೆ (`cheaper-inference/OmniRoute`) `electron-updater` ಬಳಸುತ್ತದೆ.
+GitHub ಪೂರೈಕೆದಾರರೊಂದಿಗೆ (`diegosouzapw/OmniRoute`) `electron-updater` ಬಳಸುತ್ತದೆ.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ಈವೆಂಟ್ಗಳನ್ನು `update-status` IPC ಮೂಲಕ ರೆಂಡರರ್ಗೆ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿದೆ: `checking`, `available`, `not-available`, `downloading` ( `percent` ನೊಂದಿಗೆ), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ಬಿಡುಗಡೆಗಳನ್ನು GitHub ಬಿಡುಗಡೆಗಳಿಗೆ ಪ್ರಕಟಿಸಲಾಗಿದೆ (`cheaper-inference/OmniRoute`), ಇದು `electron-updater` ಹೊಸ ಆವೃತ್ತಿಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ.
+ಬಿಡುಗಡೆಗಳನ್ನು GitHub ಬಿಡುಗಡೆಗಳಿಗೆ ಪ್ರಕಟಿಸಲಾಗಿದೆ (`diegosouzapw/OmniRoute`), ಇದು `electron-updater` ಹೊಸ ಆವೃತ್ತಿಗಳಿಗಾಗಿ ಪರಿಶೀಲಿಸುತ್ತದೆ.
 
 ## ದೋಷನಿವಾರಣೆ
 

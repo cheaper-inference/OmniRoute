@@ -7,7 +7,7 @@
 Hatua ya mmiliki. Tekeleza kupitia Mipangilio → Matawi → Ongeza sheria, au:
 
 ```bash
-gh api -X PUT repos/cheaper-inference/OmniRoute/branches/main/protection \
+gh api -X PUT repos/diegosouzapw/OmniRoute/branches/main/protection \
   --input - <<'JSON'
 { "required_status_checks": { "strict": true, "contexts": ["Quality Ratchet", "Quality Gates (Extended)", "Fast Quality Gates"] },
   "enforce_admins": false,

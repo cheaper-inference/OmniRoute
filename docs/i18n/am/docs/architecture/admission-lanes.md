@@ -124,7 +124,7 @@ Combo (ቅድሚያ / ተራ-በ-ተራ) እና fusion በአንድ ዋና
 
 ## 4. ባለአንድ-ሂደት ረጅም `/v1/responses` (healthy-headroom)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)
 heap ከ`OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` በታች ሲሆን ሁለተኛ ከባድ መዋቅር ያለው ጥያቄ
 እንዲፈቀድ `tryAcquireHealthyHeadroom`ን ጨምሯል። `admitChatRequest` የሚጠቀምበት BYTE
 መንገድ (bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`፣

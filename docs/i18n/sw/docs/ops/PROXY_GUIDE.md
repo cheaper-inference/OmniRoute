@@ -261,7 +261,7 @@ Hili hutokea mara moja wakati wa uanzishaji wa kwanza baada ya kusasisha. Tumia 
 
 ## Soko la Proksi Bila Malipo la 1proxy
 
-> 🆕 **Imechangiwa na [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Suala [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Imechangiwa na [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Suala [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute huunganishwa na jukwaa la jumuiya la **[1proxy](https://1proxy-api.aitradepulse.com)** ili kutoa ufikiaji wa **mamia ya proksi zisizolipishwa na zilizothibitishwa** kutoka kote ulimwenguni. Hii ni bora kwa watumiaji ambao hawana miundombinu yao wenyewe ya proksi.
 

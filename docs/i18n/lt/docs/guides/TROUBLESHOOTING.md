@@ -254,7 +254,7 @@ planuojama pasirašyti; kol tai neįgyvendinta, naujose laidose problema gali pa
    [Convert]::ToBase64String($b)
    ```
    Išvestis turi sutapti su `latest.yml` → `sha512`. Jei nesutampa, ištrinkite failą ir
-   atsisiųskite jį iš naujo tik iš [GitHub laidų puslapio](https://github.com/cheaper-inference/OmniRoute/releases).
+   atsisiųskite jį iš naujo tik iš [GitHub laidų puslapio](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Atkurkite + pridėkite išimtį** — atkurkite iš karantino atšaukiant diegimą pašalintus
    elementus ir pridėkite išimtį katalogui `%LOCALAPPDATA%\Programs\OmniRoute`
    (Kaspersky → Settings → Threats and Exclusions), tada įdiekite iš naujo.
@@ -846,7 +846,7 @@ Išsamią informaciją apie `OMNIROUTE_READY_TIMEOUT_MS` žr.
 
 ## Vis dar nepavyksta?
 
-- **GitHub problemos**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub problemos**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Architektūra**: Vidinę informaciją žr. [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API žinynas**: Visų galinių taškų sąrašą žr. [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Būklės skydelis**: Norėdami realiuoju laiku peržiūrėti sistemos būseną, atverkite **Skydelis → Būklė**

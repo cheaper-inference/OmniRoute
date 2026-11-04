@@ -329,7 +329,7 @@ Docker'daki bellek davranışı:
 
 ### Kodlama ajanları için çalışma zamanı RAM'i
 
-1 GiB'lık varsayılan Docker değeri, üretim boyutu değil; gösterge paneli/hafif sohbet için alt sınırdır. Uzun `POST /v1/responses` gövdeleri (yüzlerce mesaj, onlarca araç), sıkıştırma sırasında birden fazla bellek içi grafiği tutar. Birbiriyle çakışan yaklaşık 3 MiB / yaklaşık 750 bin token'lık iki istek, **12 GiB** old-space değerinde V8'i durdurmuş (`FATAL ERROR: Reached heap limit`) ve ayrıca 16 GiB'lık cgroup OOM sınırına ulaşmıştır. Bkz. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+1 GiB'lık varsayılan Docker değeri, üretim boyutu değil; gösterge paneli/hafif sohbet için alt sınırdır. Uzun `POST /v1/responses` gövdeleri (yüzlerce mesaj, onlarca araç), sıkıştırma sırasında birden fazla bellek içi grafiği tutar. Birbiriyle çakışan yaklaşık 3 MiB / yaklaşık 750 bin token'lık iki istek, **12 GiB** old-space değerinde V8'i durdurmuş (`FATAL ERROR: Reached heap limit`) ve ayrıca 16 GiB'lık cgroup OOM sınırına ulaşmıştır. Bkz. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 **cgroup `--memory` değerini heap'in üzerinde** boyutlandırın — yerel tamponlar, SQLite ve sıkıştırma ara verileri V8'in dışında bulunur.
 
@@ -705,7 +705,7 @@ spec:
 
 `preStop` uyku, kube'nin SIGTERM önce Hizmet uç noktalarını bırakmasına izin verir, böylece** yeni** trafik ölme sürecine çarpmayı bırakır. Uçuş sırasındaki `/v1/responses` SSE ağır giriş kiralamaları (#11015) aracılığıyla `SHUTDOWN_TIMEOUT_MS` (varsayılan 30 saniye) kadar boşaltılır. Hala sürece ulaşan yeni istekler `503` + `Retry-After: 5` alır. Değiştirme Hazır olana kadar boş uç nokta boşluğunu yeniden oluştur, ciddi bir kesinti olmaya devam eder; bu, bir prob yanlış yapılandırması değil, SQLite topolojisidir.
 
-Harici Postgres / çoklu yazarlı HA** Olumsuz** belgelenmiş bir stok yolu. HA ihtiyacınız varsa tek bir kopya tutun veya projenin ayrı olarak test ettiği ve belgelediği bir topolojiyi çalıştırın. Postgres/MySQL çalışması [#8075'te](https://github.com/cheaper-inference/OmniRoute/issues/8075) yaşıyor. O gemiye kadar çoğalmanın desteklenen tek yolu** büyük** `/v1/responses` kapasitesi, tek bir birimdeki `replicas > 1` değil, N bağımsız süreçtir (sonraki bölüm).
+Harici Postgres / çoklu yazarlı HA** Olumsuz** belgelenmiş bir stok yolu. HA ihtiyacınız varsa tek bir kopya tutun veya projenin ayrı olarak test ettiği ve belgelediği bir topolojiyi çalıştırın. Postgres/MySQL çalışması [#8075'te](https://github.com/diegosouzapw/OmniRoute/issues/8075) yaşıyor. O gemiye kadar çoğalmanın desteklenen tek yolu** büyük** `/v1/responses` kapasitesi, tek bir birimdeki `replicas > 1` değil, N bağımsız süreçtir (sonraki bölüm).
 
 ## Ölçeklendirme: N bağımsız süreç
 
@@ -715,11 +715,11 @@ Bir Codex hesabının kopyaları, tek kullanımlık yenileme jetonunu bağımsı
 
 Pasif örnek, yenileme gerektiğinde bağlantıyı yeniden okur ve yalnızca farklı, süresi dolmamış bir erişim belirtecini benimser. Aksi takdirde yenileme, bağlantının süresi dolmadan veya devre dışı bırakılmadan veya bir yenileme kesici hatası sayılmadan devre dışı bırakılır. Gerçek yukarı akış kimlik doğrulama hataları hala normal hata hesaplamasını, üstel bekleme süresini ve normal istemci hatasını kullanıyor; Hesabın devre dışı bırakılması kalıcı olarak kalır. Erişim belirteçlerinin süresi dolmadan önce sahibinin döndürülen belirteçlerini senkronize edin (varsayılan proaktif yenileme süresi beş dakikadır) veya Codex kimlik doğrulama dosyasını yeniden içe aktarın. Pasif içe aktarmalar, sağlanan belirteçleri, belirteç uç noktasında doğrulamadan saklar. Manuel dashboard/API yenileme `409 refresh_disabled` değerini döndürür; yeni OAuth oturum açma bilgileri değişmedi. Bkz. [ortam referansı](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Bir Düğüm süreci** bir V8 yığını** . Üst üste binen iki ~ 3 MiB / ~ 750k-token kodlama aracısı `POST /v1/responses` (RTK + Caveman), ~ 12 Gi (`FATAL ERROR: Reached heap limit`)'deki yığını iptal eder ve 16 Gi cgroup'u OOM edebilir. Bkz. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Bu ölçüm bir** bellek bütçesi** uyarı, hard-max iki eşzamanlı uzun `/v1/responses` ürünü değil. Ağır sohbet kabulü, aynı V8/cgroup tavanından boyutlandırılmış otomatik olarak türetilmiş bir besleme bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) tarafından engellenir — zaten boyutlandırılmış bir süreçte bunu yukarı doğru geçersiz kılar (veya eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` istek sayısı sınırını ayarlayarak) iptali yeniden başlatır. Küçük sohbetler, `/healthz`, `/v1/models` ve MCP** Olumsuz** o şapkanın içinde.
+Bir Düğüm süreci** bir V8 yığını** . Üst üste binen iki ~ 3 MiB / ~ 750k-token kodlama aracısı `POST /v1/responses` (RTK + Caveman), ~ 12 Gi (`FATAL ERROR: Reached heap limit`)'deki yığını iptal eder ve 16 Gi cgroup'u OOM edebilir. Bkz. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Bu ölçüm bir** bellek bütçesi** uyarı, hard-max iki eşzamanlı uzun `/v1/responses` ürünü değil. Ağır sohbet kabulü, aynı V8/cgroup tavanından boyutlandırılmış otomatik olarak türetilmiş bir besleme bayt bütçesi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) tarafından engellenir — zaten boyutlandırılmış bir süreçte bunu yukarı doğru geçersiz kılar (veya eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` istek sayısı sınırını ayarlayarak) iptali yeniden başlatır. Küçük sohbetler, `/healthz`, `/v1/models` ve MCP** Olumsuz** o şapkanın içinde.
 
 ### Tek işlem: ikiden fazla uzun `/v1/responses`
 
-A** sağlıklı** süreç ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` altındaki yığın, varsayılan `0.75`)** mayıs** süreç genelindeki uçuş bayt bütçesinde (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hala yer olduğunda ikiden fazla eşzamanlı uzun `POST /v1/responses` çalıştırın. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (varsayılan 256 KiB) veya üzerindeki gövdeler, yapı ağırlıklı isteklerle aynı ağır kiralamayı alır ve aynı [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` kaçışını (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) kullanır. Onlarca eşzamanlı uzun SSE istemcisi (operatörler genellikle 40-50'ye ihtiyaç duyar)** bellek bütçesi** soru — boyutu yığın + primary/headroom yuvaları + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — zor bir “maksimum 2” ürün sınırı değildir. Baskılı bir yığın yeniden denenebilir `503` ile hala tutuluyor, dolayısıyla #7849 geri dönmüyor.
+A** sağlıklı** süreç ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` altındaki yığın, varsayılan `0.75`)** mayıs** süreç genelindeki uçuş bayt bütçesinde (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hala yer olduğunda ikiden fazla eşzamanlı uzun `POST /v1/responses` çalıştırın. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (varsayılan 256 KiB) veya üzerindeki gövdeler, yapı ağırlıklı isteklerle aynı ağır kiralamayı alır ve aynı [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` kaçışını (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) kullanır. Onlarca eşzamanlı uzun SSE istemcisi (operatörler genellikle 40-50'ye ihtiyaç duyar)** bellek bütçesi** soru — boyutu yığın + primary/headroom yuvaları + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — zor bir “maksimum 2” ürün sınırı değildir. Baskılı bir yığın yeniden denenebilir `503` ile hala tutuluyor, dolayısıyla #7849 geri dönmüyor.
 
 İle** yığınları çoğalt** (bağımsız V8 eski alanları)** Bugün** :
 
@@ -762,7 +762,7 @@ volumes:
   omniroute-b-data:
 ```
 
-İşlem içi yoğunluk ( HTTP izolatının sıkıştırılması) [#11023'tür](https://github.com/cheaper-inference/OmniRoute/issues/11023). Paylaşılan dayanıklı durumdaki mantıksal kümelerden biri [#8075'tir](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+İşlem içi yoğunluk ( HTTP izolatının sıkıştırılması) [#11023'tür](https://github.com/diegosouzapw/OmniRoute/issues/11023). Paylaşılan dayanıklı durumdaki mantıksal kümelerden biri [#8075'tir](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Docker içindeki Gemini bölgesel hataları
 
@@ -805,7 +805,7 @@ kanıtlar; Gemini uygunluğunu yalnızca kimliği doğrulanmış model isteği s
 
 ### Ana makine düzeyinde alternatif: çalışan IPv6 ve çözümleyici politikası
 
-[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) sorununu bildiren kişi,
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) sorununu bildiren kişi,
 kendi ortamında konteyner IPv6'sını etkinleştirerek ve glibc adres seçimini değiştirerek
 erişimi yeniden sağladı. Bunu ortama özgü bir alternatif olarak değerlendirin. Çözümleyici
 tercihlerini ayarlamadan önce ana makine IPv6'sının çalıştığını, konteyner çıkışını/yönlendirmesini

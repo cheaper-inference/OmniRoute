@@ -198,7 +198,7 @@ API açarı 5dive-a **stdin** (`--api-key=-`) vasitəsilə verilir, buna görə 
 `ps` çıxışında görünmür.
 
 Profili tək model əvəzinə OmniRoute **kombinasiyasına** yönəltmək donanma provayderi
-üçün nasazlıq zamanı keçidi təmin edir: [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578)
+üçün nasazlıq zamanı keçidi təmin edir: [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578)
 üzərində qeydə alınmış icra zamanı əsas son nöqtə gedişin ortasında tamamilə sıradan
 çıxdıqda, agent qalan addımlarını ehtiyat variantda tamamladı və nasazlığı heç vaxt
 istifadəçiyə göstərmədi.

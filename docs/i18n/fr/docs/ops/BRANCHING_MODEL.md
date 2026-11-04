@@ -56,7 +56,7 @@ ouverte. Cela **n’interrompt pas le développement** :
 Vérifiez s’il existe un gel en cours avant de supposer que la branche souhaitée accepte les fusions :
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Les mécanismes de fusion (label `queue` du propriétaire → Mergify) sont documentés dans

@@ -421,7 +421,7 @@ git add quality-baseline.json
 ### Храповик CodeQL: частота оновлення та ручний запуск
 
 `check:codeql-ratchet` зчитує **стан репозиторію, що оновлюється за розкладом, а не для кожного PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` повідомляє
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` повідомляє
 `state: configured`, `schedule: weekly`: це сканування стандартного налаштування GitHub, а не аналіз
 для кожного надсилання змін. Наслідок: після злиття PR, який ВИПРАВЛЯЄ сповіщення, храповик продовжує
 зчитувати стару, більшу кількість до наступного запланованого сканування — тому він повідомляє про

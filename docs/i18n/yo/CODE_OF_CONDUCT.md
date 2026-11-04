@@ -66,7 +66,7 @@ aṣojú tí a yàn ní ìṣẹ̀lẹ̀ orí ayélujára tàbí níbi tí kì �
 A lè fi àwọn ìṣẹ̀lẹ̀ ìwà ìkà, ìdáláàmú, tàbí ìwà mìíràn tí kò ṣe ìtẹ́wọ́gbà
 ròyìn fún àwọn aṣáájú àwùjọ tí wọ́n ní ojúṣe ìmúlò nípa ṣíṣí
 ìmọ̀ràn ààbò àdáni ní
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 tàbí nípa fífi ímeèlì ránṣẹ́ sí olùtọ́jú ní diegosouza.pw@outlook.com.
 Fún àwọn ìṣẹ̀lẹ̀ tí ó ní í ṣe pẹ̀lú ààbò, wo [`SECURITY.md`](SECURITY.md).
 A ó ṣàyẹ̀wò àti ṣe ìwádìí gbogbo ẹ̀sùn ní kíákíá àti lọ́nà tó dọ́gba.

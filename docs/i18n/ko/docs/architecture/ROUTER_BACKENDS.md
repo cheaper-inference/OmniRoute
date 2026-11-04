@@ -4,9 +4,9 @@
 
 ---
 
-> **상태:** 승인됨 · **맥락:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **계약:** `domain/routing/routerBackends.ts`
-> (타입이 지정된 레지스트리 — 코드는 [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)과 함께 반영됨)
+> **상태:** 승인됨 · **맥락:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **계약:** `domain/routing/routerBackends.ts`
+> (타입이 지정된 레지스트리 — 코드는 [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)과 함께 반영됨)
 
 이 ADR은 기여자들이 아키텍처상 서로 구별되는 두 개념을 혼동하지 않도록 `ts`(네이티브), `bifrost`, `cliproxy`, `9router` 및 VibeProxy 호환 엔진 간의 관계를 명확히 규정합니다. 또한 라우터 백엔드 레지스트리 작업에서 도입된 타입이 지정된 레지스트리를 해당 모델의 단일 진실 공급원으로 문서화합니다.
 
@@ -27,7 +27,7 @@
 
 ## 레지스트리 — 단일 진실 공급원
 
-`domain/routing/routerBackends.ts` 계약(코드는 [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)과 함께 반영됨)은 각 엔진을 수명 주기, 기능, 서비스 ID, 기본 포트, 상태 확인 구성 및 텔레메트리 지원과 함께 한 번씩 선언합니다. 소비자는 각 사이드카를 개별적으로 특수 처리하는 대신 `getRouterBackend(id)`, `listRouterBackends()`, `listRouterBackendsByCapability(cap)`을 통해 엔진을 조회합니다.
+`domain/routing/routerBackends.ts` 계약(코드는 [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)과 함께 반영됨)은 각 엔진을 수명 주기, 기능, 서비스 ID, 기본 포트, 상태 확인 구성 및 텔레메트리 지원과 함께 한 번씩 선언합니다. 소비자는 각 사이드카를 개별적으로 특수 처리하는 대신 `getRouterBackend(id)`, `listRouterBackends()`, `listRouterBackendsByCapability(cap)`을 통해 엔진을 조회합니다.
 
 | 백엔드      | 수명 주기    | 서비스(축 A) | 릴레이 백엔드(축 B) | 상태 확인     | 기본 포트 |
 | ----------- | ------------ | ------------ | ------------------- | ------------- | --------- |
@@ -37,7 +37,7 @@
 | `9router`   | `supervised` | `9router`    | — (공급자)          | `/api/health` | 20130     |
 | `vibeproxy` | `external`   | —            | — (공급자 어댑터)   | `/v1/models`  | —         |
 
-¹ Bifrost를 `/api/services/bifrost/`에서 설치/시작할 수 있는 `supervised` 임베디드 서비스로 승격하는 작업은 [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)에서 추적됩니다. 이 변경이 병합되기 전까지 Bifrost는 `external` 전용입니다(`BIFROST_BASE_URL`을 통해서만 접근 가능).
+¹ Bifrost를 `/api/services/bifrost/`에서 설치/시작할 수 있는 `supervised` 임베디드 서비스로 승격하는 작업은 [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)에서 추적됩니다. 이 변경이 병합되기 전까지 Bifrost는 `external` 전용입니다(`BIFROST_BASE_URL`을 통해서만 접근 가능).
 
 `capabilities`(`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`)를 사용하면 호출자가 ID별 분기를 하드 코딩하지 않고 엔진이 실제로 수행할 수 있는 기능을 기준으로 필터링할 수 있습니다.
 
@@ -101,8 +101,8 @@
 
 현재 선택은 **릴레이 수준에서 전부 아니면 전무 방식**입니다. `release/v3.8.43`에는 공급자별
 또는 요청별 엔진 전환이 없습니다. 요청별 게이트는 사이드카 매니페스트 작업을 통해 추가되고 있습니다
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) 매니페스트 +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`).
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) 매니페스트 +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`).
 이를 통해 `auto`는 매니페스트에서 적격으로 지정된 공급자만 Bifrost를 통해 라우팅할 수 있습니다.
 
 ## 대시보드 통합

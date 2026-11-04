@@ -6,7 +6,7 @@
 
 **Status:** cadangan (menunggu semakan @diegosouzapw)
 **Tarikh:** 2026-06-20
-**Rujukan:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**Rujukan:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## Ringkasan
 

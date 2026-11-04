@@ -4,9 +4,9 @@
 
 ---
 
-> **Stanje:** Sprejeto · **Kontekst:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Pogodba:** `domain/routing/routerBackends.ts`
-> (tipiziran register — koda bo vključena z [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Stanje:** Sprejeto · **Kontekst:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Pogodba:** `domain/routing/routerBackends.ts`
+> (tipiziran register — koda bo vključena z [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Ta ADR natančno določa medsebojna razmerja med `ts` (izvorni), `bifrost`, `cliproxy`, `9router` in pogoni, združljivimi z VibeProxy, da sodelavci ne bi več zamenjevali dveh arhitekturno ločenih stvari. Dokumentira tipiziran register, uveden v okviru dela na registru usmerjevalnih zaledij, kot edini vir resnice za ta model.
 
@@ -30,7 +30,7 @@ Napaka, ki se ji je treba izogniti: obravnavanje »vgrajene storitve« in »usme
 ## Register — edini vir resnice
 
 Pogodba `domain/routing/routerBackends.ts` (koda bo vključena z
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) vsak pogon deklarira enkrat, skupaj z njegovim
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) vsak pogon deklarira enkrat, skupaj z njegovim
 življenjskim ciklom, zmogljivostmi, identiteto storitve, privzetimi vrati, konfiguracijo preverjanja stanja in
 podporo za telemetrijo. Odjemalci pogone poiščejo prek `getRouterBackend(id)`,
 `listRouterBackends()` in `listRouterBackendsByCapability(cap)`, namesto da bi
@@ -46,7 +46,7 @@ posebej obravnavali vsako spremljevalno storitev.
 
 ¹ Napredovanje Bifrosta v vgrajeno storitev `supervised` (ki jo je mogoče namestiti/zagnati
 iz `/api/services/bifrost/`) se spremlja v
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); dokler ta sprememba ni združena,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); dokler ta sprememba ni združena,
 je Bifrost omejen na `external` (dosegljiv izključno prek `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -117,8 +117,8 @@ ne uporablja `routingBackend.ts`.
 Izbira je **trenutno na ravni posredovanja vse ali nič** — v `release/v3.8.43` ni
 preklopa mehanizma za posameznega ponudnika ali posamezno zahtevo. Prehod za
 posamezno zahtevo se dodaja v okviru dela na manifestu pomožnih procesov
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 kar načinu `auto` omogoča, da prek storitve Bifrost usmerja samo ponudnike,
 ki izpolnjujejo pogoje manifesta.
 

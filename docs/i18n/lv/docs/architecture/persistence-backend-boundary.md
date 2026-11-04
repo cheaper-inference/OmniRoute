@@ -5,7 +5,7 @@
 ---
 
 - **Statuss:** Ierosināts — pirms izpildlaika izstrādes sākšanas nepieciešams uzturētāja apstiprinājums
-- **Izsekošanas problēma:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Izsekošanas problēma:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Tvērums:** Tikai persistences arhitektūra; šis lēmums nepievieno un neizvēlas ārēju datubāzi
 
 ## Konteksts

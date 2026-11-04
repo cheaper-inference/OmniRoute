@@ -49,7 +49,7 @@ Combo（優先順序／循環）和 fusion 會在一個父請求下扇出至 N �
 
 ## 4. 單一處理程序中的長時間 `/v1/responses`（健康餘裕）
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) 新增了 `tryAcquireHealthyHeadroom`，使堆積記憶體低於 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 時，能夠接受第二個結構複雜度較高的請求。`admitChatRequest` 所使用的 BYTE 路徑（主體大小 ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`，預設為 256 KiB，包括 `POST /v1/responses`）會使用**相同的**例外機制。
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) 新增了 `tryAcquireHealthyHeadroom`，使堆積記憶體低於 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 時，能夠接受第二個結構複雜度較高的請求。`admitChatRequest` 所使用的 BYTE 路徑（主體大小 ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`，預設為 256 KiB，包括 `POST /v1/responses`）會使用**相同的**例外機制。
 
 這是讓單一處理程序支援兩個以上並行長時間 SSE `/v1/responses` 的建議作法：僅在堆積記憶體與處理程序範圍內的傳輸中位元組預算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110）所允許的範圍內，提高主要容量與健康餘裕。數十個長時間 SSE 用戶端（40–50 個）屬於記憶體預算問題，而不是產品設有「最多 2 個」的硬性限制。堆積記憶體承受壓力時，仍會以可重試的 `503` 拒絕請求，以免 #7849 的問題再次出現。
 

@@ -104,7 +104,7 @@ npm start
 | `npm install -g omniroute` | ❌ 發佈的套件隨附預先建置的套件——請改為從原始碼建置                                                                          |
 | Docker 映像                | ✅ `docker build --build-arg DASHBOARD_ALLOW_EMBED=vscode -t omniroute:embed .`——Docker Hub 上的預先建置映像並未啟用嵌入功能 |
 
-如果建置時未啟用嵌入功能，頁面會拒絕在框架中顯示；擴充功能會從回應標頭偵測到此情況，並改用外部瀏覽器——不會造成任何功能損壞，而且它只會提示一次。請參閱 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) 和議題 [#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273)。
+如果建置時未啟用嵌入功能，頁面會拒絕在框架中顯示；擴充功能會從回應標頭偵測到此情況，並改用外部瀏覽器——不會造成任何功能損壞，而且它只會提示一次。請參閱 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) 和議題 [#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273)。
 
 ---
 

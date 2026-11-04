@@ -18,7 +18,7 @@ Catalogul conține **45 de Agent Skills** (23 pentru API-ul REST + 21 pentru CLI
 - Un **ID canonic** (`omni-auth`, `cli-serve` etc.)
 - Un fișier **SKILL.md** în `skills/{id}/SKILL.md`, cu frontmatter YAML (`name`, `description`) + un corp markdown detaliat
 - **Endpointuri REST** (skill-uri API) sau **subcomenzi CLI** (skill-uri CLI), derivate din specificația OpenAPI și registrul CLI
-- Un **URL GitHub raw** pentru preluare în timp real: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Un **URL GitHub raw** pentru preluare în timp real: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Preluare directă din GitHub raw (nu este necesar un server)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

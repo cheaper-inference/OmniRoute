@@ -125,7 +125,7 @@ Combo (приоритетни / кружни) и fusion прослеђују з�
 
 ## 4. Дуги `/v1/responses` у једном процесу (резерва при здравом стању)
 
-У [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) додат је
+У [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) додат је
 `tryAcquireHealthyHeadroom`, тако да се други структурно захтеван захтев прихвата
 када је заузеће heap меморије испод `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`.
 BYTE путања коју користи `admitChatRequest` (тела ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

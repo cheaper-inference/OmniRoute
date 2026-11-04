@@ -51,8 +51,8 @@ ba ta taɓa farfaɗowa kai tsaye), alhali mai gudanarwa yana iya warware buƙata
 Barin jimlar a cikin jerin dakatarwa kuma ya sa reshen cloud-code 403 mai yiwuwa a farfaɗo daga gare shi a cikin
 `classifyProviderError` ya zama ba za a iya isa gare shi da wannan lafazi ba, domin ana tantance `accountDeactivated`
 da farko — saboda haka tsarin farfaɗo da hanyar aikin da aka ƙara wa Gemini Code Assist a cikin
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) da
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) ba zai taɓa iya aiki ba.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) da
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) ba zai taɓa iya aiki ba.
 
 Teburan sigina guda uku da ke kusa, amma **dabam-dabam**, _ba_ sa cikin gano muhimman kalmomin dakatarwa:
 

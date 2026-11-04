@@ -324,7 +324,7 @@ L-imġiba tal-memorja f’Docker:
 
 ### RAM waqt it-tħaddim għall-aġenti tal-kodifikazzjoni
 
-Il-valur predefinit ta’ 1 GiB f’Docker huwa l-minimu għal dashboard/chat ħafif, mhux daqs għall-produzzjoni. Bodies twal ta’ `POST /v1/responses` (mijiet ta’ messaġġi, għexieren ta’ għodod) iżommu diversi graffs fil-memorja waqt il-kompressjoni. Żewġ talbiet li jikkoinċidu ta’ madwar 3 MiB / 750k token waqqfu V8 b’old-space ta’ **12 GiB** (`FATAL ERROR: Reached heap limit`) u laħqu wkoll OOM ta’ cgroup ta’ 16 GiB. Ara [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+Il-valur predefinit ta’ 1 GiB f’Docker huwa l-minimu għal dashboard/chat ħafif, mhux daqs għall-produzzjoni. Bodies twal ta’ `POST /v1/responses` (mijiet ta’ messaġġi, għexieren ta’ għodod) iżommu diversi graffs fil-memorja waqt il-kompressjoni. Żewġ talbiet li jikkoinċidu ta’ madwar 3 MiB / 750k token waqqfu V8 b’old-space ta’ **12 GiB** (`FATAL ERROR: Reached heap limit`) u laħqu wkoll OOM ta’ cgroup ta’ 16 GiB. Ara [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Issettja d-daqs ta’ **cgroup `--memory` ogħla mill-heap** — buffers nattivi, SQLite, u riżultati intermedji tal-kompressjoni jinsabu barra minn V8.
 
@@ -696,7 +696,7 @@ spec:
 
 `preStop` sleep tikri kube qatra l-endpoints tas-Servizz qabel SIGTERM hekk** ġdid** it-traffiku jieqaf jolqot il-proċess tal-mewt. Matul it-titjira `/v1/responses` SSE jitbattal sa `SHUTDOWN_TIMEOUT_MS` (default 30s) permezz ta 'kirjiet ta' ammissjoni heavyweight (#11015). Talbiet ġodda li għadhom jilħqu l-proċess jiksbu `503` + `Retry-After: 5`. Id-distakk tar-Recreate vojt-endpoint sakemm is-sostituzzjoni tkun Lesta tibqa' qtugħ iebes - jiġifieri t-topoloġija SQLite, mhux sonda ħażina.
 
-Esterni Postgres / multi-writer HA is** le** mogħdija tal-istokk dokumentata. Jekk għandek bżonn HA, żomm replika waħda jew mexxi topoloġija li l-proġett ikun ittestja u ddokumenta separatament. Ix-xogħol Postgres/MySQL jgħix [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Sakemm il-vapuri, l-uniku mod appoġġjat biex timmultiplika** kbar** Il-kapaċità `/v1/responses` hija N proċessi indipendenti (sezzjoni li jmiss), mhux `replicas > 1` fuq volum wieħed.
+Esterni Postgres / multi-writer HA is** le** mogħdija tal-istokk dokumentata. Jekk għandek bżonn HA, żomm replika waħda jew mexxi topoloġija li l-proġett ikun ittestja u ddokumenta separatament. Ix-xogħol Postgres/MySQL jgħix [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Sakemm il-vapuri, l-uniku mod appoġġjat biex timmultiplika** kbar** Il-kapaċità `/v1/responses` hija N proċessi indipendenti (sezzjoni li jmiss), mhux `replicas > 1` fuq volum wieħed.
 
 ## Skala-out: N proċessi indipendenti
 
@@ -706,11 +706,11 @@ Kopji ta' kont Codex wieħed m'għandhomx jikkunsmaw b'mod indipendenti t-token 
 
 L-istanza passiva terġa’ taqra l-konnessjoni meta jkun hemm bżonn ta’ aġġornament u tadotta biss token ta’ aċċess differenti u mhux skadut. Inkella, l-aġġornament jiġi diżattivat mingħajr ma tiskadi jew tiġi diżattivata l-konnessjoni jew jingħaddu falliment ta' refresh-breaker. Fallimenti reali ta 'awtentikazzjoni upstream għadhom jużaw kontabilità ta' falliment normali, cooldown esponenzjali u l-iżball normali tal-klijent; id-diżattivazzjoni tal-kont tibqa' permanenti. Issinkronizza t-tokens imdawra tas-sid qabel ma jiskadu t-tokens tal-aċċess (il-ċomb ta' aġġornar proattiv default huwa ħames minuti), jew erġa' jimporta l-fajl ta' awtentikazzjoni Codex. L-importazzjonijiet passivi jaħżnu t-tokens forniti mingħajr ma jivvalidawhom fil-punt tat-tmiem tat-token. Manwal dashboard/API refresh jirritorna `409 refresh_disabled`; logins ġodda OAuth mhumiex mibdula. Ara [referenza dwar l-ambjent](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Wieħed proċess Node huwa** borġ wieħed V8** . Żewġ li jikkoinċidu ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman ) abort dak il-borġ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) u jistgħu OOM a 16 Gi cgroup. Ara [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Dak il-kejl huwa a** memorja-baġit** twissija, mhux prodott hard-max ta 'żewġ `/v1/responses` twal konkorrenti . Ammissjoni ta 'chat ta' piż tqil hija mgħaġġla minn baġit ta 'byte ta' inġest awto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) imqassam minn dak l-istess limitu ta V8/cgroup — li jegħlebha 'l fuq (jew li jistabbilixxi l-limitu tal-għadd ta' rikjesti `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` tal-legat) fuq proċess li diġà d-daqs jerġa' jintroduċi l-abort. Chats żgħar, `/healthz`, `/v1/models`, u MCP huma** le** f'dak il-kap.
+Wieħed proċess Node huwa** borġ wieħed V8** . Żewġ li jikkoinċidu ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman ) abort dak il-borġ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) u jistgħu OOM a 16 Gi cgroup. Ara [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Dak il-kejl huwa a** memorja-baġit** twissija, mhux prodott hard-max ta 'żewġ `/v1/responses` twal konkorrenti . Ammissjoni ta 'chat ta' piż tqil hija mgħaġġla minn baġit ta 'byte ta' inġest awto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) imqassam minn dak l-istess limitu ta V8/cgroup — li jegħlebha 'l fuq (jew li jistabbilixxi l-limitu tal-għadd ta' rikjesti `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` tal-legat) fuq proċess li diġà d-daqs jerġa' jintroduċi l-abort. Chats żgħar, `/healthz`, `/v1/models`, u MCP huma** le** f'dak il-kap.
 
 ### Proċess wieħed: aktar minn żewġ `/v1/responses` twal
 
-A** b'saħħithom** proċess (heap taħt `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** jista** mexxi aktar minn żewġ `POST /v1/responses` twal konkorrenti meta l-baġit tal-inflight-byte mal-proċess kollu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) għad ikollu spazju. Korpi `OMNIROUTE_CHAT_LARGE_BODY_BYTES` jew 'il fuq (default 256 KiB) jieħdu l-istess kirja heavyweight bħat-talbiet ta' strutturi tqal u jużaw l-istess [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Għexieren ta 'klijenti SSE twal konkorrenti (l-operaturi ħafna drabi jeħtieġu 40-50) huwa a** memorja-baġit** mistoqsija — daqs borġ + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — mhux limitu iebes tal-prodott "max 2". Borġ taħt pressjoni għadu jitfa' `503` li jista' jerġa' jipprova sabiex #7849 ma jerġax lura.
+A** b'saħħithom** proċess (heap taħt `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** jista** mexxi aktar minn żewġ `POST /v1/responses` twal konkorrenti meta l-baġit tal-inflight-byte mal-proċess kollu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) għad ikollu spazju. Korpi `OMNIROUTE_CHAT_LARGE_BODY_BYTES` jew 'il fuq (default 256 KiB) jieħdu l-istess kirja heavyweight bħat-talbiet ta' strutturi tqal u jużaw l-istess [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Għexieren ta 'klijenti SSE twal konkorrenti (l-operaturi ħafna drabi jeħtieġu 40-50) huwa a** memorja-baġit** mistoqsija — daqs borġ + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — mhux limitu iebes tal-prodott "max 2". Borġ taħt pressjoni għadu jitfa' `503` li jista' jerġa' jipprova sabiex #7849 ma jerġax lura.
 
 Biex** immoltiplika munzelli** (spazji antiki V8 indipendenti)** illum** :
 
@@ -753,7 +753,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Id-densità fil-proċess (kompressjoni barra mill-iżolat HTTP ) hija [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Raggruppament loġiku wieħed fuq stat durabbli kondiviż huwa [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+Id-densità fil-proċess (kompressjoni barra mill-iżolat HTTP ) hija [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Raggruppament loġiku wieħed fuq stat durabbli kondiviż huwa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Żbalji reġjonali ta' Gemini ġewwa Docker
 
@@ -794,7 +794,7 @@ it-talba awtentikata tal-mudell biss tittestja l-eliġibbiltà għal Gemini.
 
 ### Alternattiva fil-livell tal-host: IPv6 li jaħdem u politika tar-resolver
 
-Min irrapporta [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) irrestawra
+Min irrapporta [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) irrestawra
 l-aċċess fl-ambjent tiegħu billi attiva IPv6 għall-container u biddel l-għażla tal-indirizzi
 ta' glibc. Ittratta dan bħala alternattiva speċifika għall-ambjent. Ikkonferma IPv6 li jaħdem fuq il-host,
 il-ħruġ/routing tal-container u r-regoli tal-firewall qabel taġġusta l-preferenzi tar-resolver.

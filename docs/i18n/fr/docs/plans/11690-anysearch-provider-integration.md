@@ -5,7 +5,7 @@
 ---
 
 Modèle : xquik #11370 (fusionné dans release/v3.8.51). Posture : `fallbackOnly`.
-Proposition en amont : ticket cheaper-inference/OmniRoute#11637.
+Proposition en amont : ticket diegosouzapw/OmniRoute#11637.
 
 ## 1. Source de vérité du service (documentation officielle, vérifiée par recoupement)
 

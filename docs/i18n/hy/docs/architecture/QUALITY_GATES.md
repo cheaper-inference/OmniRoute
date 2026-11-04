@@ -402,7 +402,7 @@ Commit արեք այս ֆայլը չափիչը բարելաված փոփոխու
 ### CodeQL ratchet. թարմացման հաճախականությունը և ձեռքով գործարկումը
 
 `check:codeql-ratchet`-ը կարդում է **պահոցի վիճակը, որը թարմացվում է ժամանակացույցով, այլ ոչ թե յուրաքանչյուր PR-ի համար։**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup`-ը հաղորդում է
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`-ը հաղորդում է
 `state: configured`, `schedule: weekly`՝ GitHub-ի լռելյայն կարգավորմամբ սկանավորում, այլ ոչ թե յուրաքանչյուր push-ի
 վերլուծություն։ Հետևանքը՝ ահազանգերը ՇՏԿՈՂ PR-ի միաձուլումից հետո ratchet-ը շարունակում է կարդալ
 հին՝ ավելի մեծ քանակը, մինչև հաջորդ ժամանակացուցային սկանավորումը գործարկվի, ուստի այն հետընթաց է արձանագրում

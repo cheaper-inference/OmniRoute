@@ -118,7 +118,7 @@ mingħajr kundizzjonijiet mis-sistema 1 u mis-sistema 2 ladarba l-opt-in jiġi a
 
 ## 4. `/v1/responses` twal fi proċess wieħed (marġni b’saħħtu)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) żiedet
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) żiedet
 `tryAcquireHealthyHeadroom` sabiex it-tieni request strutturalment tqila tiġi aċċettata
 meta l-heap tkun taħt `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Il-passaġġ BYTE
 użat minn `admitChatRequest` (bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

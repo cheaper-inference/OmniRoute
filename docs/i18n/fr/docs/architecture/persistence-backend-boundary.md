@@ -5,7 +5,7 @@
 ---
 
 - **Statut :** Proposé — nécessite l’approbation d’un mainteneur avant le début des travaux sur l’environnement d’exécution
-- **Ticket de suivi :** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Ticket de suivi :** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Périmètre :** Architecture de persistance uniquement ; cette décision n’ajoute ni ne sélectionne de base de données externe
 
 ## Contexte

@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Għażla C: Mill-Kodiċi Sors
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute awtomatikament jaqbeż lill-fornituri li ma jaħdmux u jipprova lil da
 
 - **[Soluzzjoni tal-Problemi](../guides/TROUBLESHOOTING.md)** — Problemi komuni u soluzzjonijiet
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Appoġġ mill-komunità
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Irrapporta bugs
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Irrapporta bugs

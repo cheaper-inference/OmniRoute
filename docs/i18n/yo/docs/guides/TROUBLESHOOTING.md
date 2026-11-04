@@ -249,7 +249,7 @@ títí tí a ó fi ṣe é, àwọn release tuntun lè tún fa èyí.
    [Convert]::ToBase64String($b)
    ```
    Output náà gbọ́dọ̀ bá `latest.yml` → `sha512` mu. Bí kò bá bá a mu, pa fáìlì náà rẹ́, kí o sì
-   tún ṣe download láti [ojú-ìwé àwọn release GitHub](https://github.com/cheaper-inference/OmniRoute/releases) nìkan.
+   tún ṣe download láti [ojú-ìwé àwọn release GitHub](https://github.com/diegosouzapw/OmniRoute/releases) nìkan.
 2. **Dá a padà + yọ ọ́ kúrò nínú ìṣàyẹ̀wò** — dá àwọn ohun tí a yí padà sẹ́yìn padà láti quarantine, kí o sì fi exclusion kan
    fún `%LOCALAPPDATA%\Programs\OmniRoute` kún un (Kaspersky → Settings → Threats and Exclusions),
    lẹ́yìn náà tún fi í sọ́pọ̀.
@@ -845,7 +845,7 @@ kíkún nípa `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Ṣé O Ṣì Dìmọ́lẹ̀?
 
-- **Àwọn Ọ̀ràn GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Àwọn Ọ̀ràn GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Ìṣètò Ẹ̀rọ**: Wo [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) fún àlàyé inú
 - **Ìtọ́kasí API**: Wo [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) fún gbogbo àwọn endpoint
 - **Pánẹ́ẹ̀lì Ìlera**: Ṣàyẹ̀wò **Dashboard → Health** fún ipò ètò ní àkókò gidi

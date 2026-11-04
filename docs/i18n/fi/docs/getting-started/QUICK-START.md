@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Vaihtoehto C: Lähdekoodista
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute ohittaa epäonnistuneet palveluntarjoajat automaattisesti ja kokeilee 
 
 - **[Vianmääritys](../guides/TROUBLESHOOTING.md)** — Yleisiä ongelmia ja niiden ratkaisuja
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Yhteisön tuki
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Ilmoita ohjelmistovirheistä
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Ilmoita ohjelmistovirheistä

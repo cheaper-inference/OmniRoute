@@ -480,7 +480,7 @@ Dve predvolené nastavenia OmniRoute môžu nenápadne narušiť viachodinové r
 | Relácia neustále prepína účty / medzi jednotlivými kolami sa stráca kontinuita vyrovnávacej pamäte promptov | TTL afinity relácie je `0` (vypnutá)                                      | `sessionAffinityTtlMs`   |
 | Pripojenie sa preruší uprostred uvažovania bez výzvy zobrazenej klientovi                                   | Kontrola nečinnosti streamu sa spustila po 10 minútach bez upstream časti | `STREAM_IDLE_TIMEOUT_MS` |
 
-Súvisiace diskusie: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (prerušenia dlhých úloh), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (prečo je afinita predvolene vypnutá). Sledovanie: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Súvisiace diskusie: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (prerušenia dlhých úloh), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (prečo je afinita predvolene vypnutá). Sledovanie: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Afinita relácie — priradenie jednej konverzácie k jednému účtu
 

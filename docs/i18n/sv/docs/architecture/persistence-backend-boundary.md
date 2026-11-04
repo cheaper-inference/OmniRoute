@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Föreslagen — kräver godkännande av ansvariga innan arbetet med körningen påbörjas
-- **Spårningsärende:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Spårningsärende:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Omfattning:** Endast persistensarkitektur; detta beslut lägger inte till eller väljer en extern databas
 
 ## Kontext

@@ -324,7 +324,7 @@ process worker kan, ọ̀kọ̀ọ̀kan sì ń tẹ̀lé `OMNIROUTE_BUILD_MEMORY
 
 ### RAM àsìkò-ṣiṣe fún àwọn aṣojú kóòdù
 
-Àìpé Docker 1 GiB jẹ́ ìwọ̀n tó kéré jù fún dashboard/ìfọ̀rọ̀wérọ̀ fẹ́ẹ́rẹ́, kì í ṣe ìwọ̀n fún production. Àwọn body `POST /v1/responses` gígùn (ọgọ́rọ̀ọ̀rún messages, ọ̀pọ̀ mẹ́wàá tools) máa ń dá ọ̀pọ̀ graph inú-memory dúró nígbà compression. Àwọn request méjì tó ń ṣiṣẹ́ papọ̀, tí ọ̀kọ̀ọ̀kan jẹ́ ~3 MiB / ~750k-token, ti mú kí V8 dáwọ́ dúró ní old-space **12 GiB** (`FATAL ERROR: Reached heap limit`), wọ́n sì tún ti dé OOM cgroup 16 GiB. Wo [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+Àìpé Docker 1 GiB jẹ́ ìwọ̀n tó kéré jù fún dashboard/ìfọ̀rọ̀wérọ̀ fẹ́ẹ́rẹ́, kì í ṣe ìwọ̀n fún production. Àwọn body `POST /v1/responses` gígùn (ọgọ́rọ̀ọ̀rún messages, ọ̀pọ̀ mẹ́wàá tools) máa ń dá ọ̀pọ̀ graph inú-memory dúró nígbà compression. Àwọn request méjì tó ń ṣiṣẹ́ papọ̀, tí ọ̀kọ̀ọ̀kan jẹ́ ~3 MiB / ~750k-token, ti mú kí V8 dáwọ́ dúró ní old-space **12 GiB** (`FATAL ERROR: Reached heap limit`), wọ́n sì tún ti dé OOM cgroup 16 GiB. Wo [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Ṣètò **cgroup `--memory` sí iye tó ga ju heap lọ** — native buffers, SQLite, àti àwọn intermediate compression wà níta V8.
 
@@ -696,7 +696,7 @@ spec:
 
 `preStop` sun jẹ ki kube ju awọn aaye ipari Iṣẹ silẹ ṣaaju SIGTERM bẹ** titun** ijabọ duro kọlu ilana ti o ku. Ninu ọkọ ofurufu `/v1/responses` SSE ti wa ni imugbẹ to `SHUTDOWN_TIMEOUT_MS` (aiyipada 30s) nipasẹ awọn iyalo gbigba iwuwo iwuwo (#11015). Awọn ibeere titun ti o tun de ilana naa gba `503` + `Retry-After: 5`. Tun aafo opin-ofo ti o ṣofo titi di igba ti rirọpo yoo Ti ṣetan wa ni ijade lile kan - iyẹn ni SQLite topology, kii ṣe ṣiṣapẹrẹ aṣiṣe.
 
-Ita Postgres / olona-onkqwe HA ni** kii ṣe** ọna iṣura ti o ni akọsilẹ. Ti o ba nilo HA, tọju ajọra ẹyọkan tabi ṣiṣẹ topology ti iṣẹ akanṣe ti ni idanwo ati ti ṣe akọsilẹ lọtọ. Iṣẹ Postgres/MySQL n gbe ni [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Titi di awọn ọkọ oju omi yẹn, ọna atilẹyin nikan lati pọ si** nla** agbara `/v1/responses` jẹ awọn ilana ominira N (apakan atẹle), kii ṣe `replicas > 1` lori iwọn didun kan.
+Ita Postgres / olona-onkqwe HA ni** kii ṣe** ọna iṣura ti o ni akọsilẹ. Ti o ba nilo HA, tọju ajọra ẹyọkan tabi ṣiṣẹ topology ti iṣẹ akanṣe ti ni idanwo ati ti ṣe akọsilẹ lọtọ. Iṣẹ Postgres/MySQL n gbe ni [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Titi di awọn ọkọ oju omi yẹn, ọna atilẹyin nikan lati pọ si** nla** agbara `/v1/responses` jẹ awọn ilana ominira N (apakan atẹle), kii ṣe `replicas > 1` lori iwọn didun kan.
 
 ## Asekale-jade: N ominira lakọkọ
 
@@ -706,11 +706,11 @@ Awọn ẹda ti akọọlẹ Codex kan ko gbọdọ jẹ ni ominira lilo aami is
 
 Apeere palolo naa tun ka asopọ naa nigbati o nilo isọdọtun ati gba iyatọ nikan, ami iwọle ti ko pari. Bibẹẹkọ isọdọtun jẹ alaabo laisi ipari tabi mu asopọ ṣiṣẹ tabi kika ikuna isọdọtun. Awọn ikuna ifitonileti oke gidi tun lo iṣiro ikuna deede, itutu agbaiye ati aṣiṣe alabara deede; deactivation iroyin si maa wa yẹ. Muṣiṣẹpọ awọn ami yiyi ti oniwun ṣaaju ki awọn ami iraye si pari (asiwaju isọdọtun alafaramo aiyipada jẹ iṣẹju marun), tabi tun gbe faili Codex auth wọle. Awọn agbewọle agbewọle palolo tọju awọn ami ti a pese laisi ifọwọsi wọn ni aaye ipari ami. Afọwọṣe dashboard/API sọtun pada `409 refresh_disabled`; titun OAuth wiwọle ko yipada. Wo [itọkasi ayika](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Ilana Node kan jẹ** òkiti V8 kan** . Meji agbekọja ~ 3 MiB / ~ 750k-token ifaminsi-aṣoju `POST /v1/responses` (RTK + Caveman) abort ti okiti ni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ati ki o le OOM a 16 Gi akojọpọ. Wo [# #7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Wiwọn yẹn jẹ a** iranti-isuna** ikilọ, kii ṣe ọja lile-max ti meji ni igbakanna `/v1/responses`. Gbigbawọle iwiregbe iwuwo iwuwo jẹ titọ nipasẹ isuna-isuna ingest baiti ti a ṣe jade laifọwọyi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ti o ni iwọn lati oke V8/cgroup aja — ti o bori rẹ si oke (tabi ṣeto eto-ipamọ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ibeere-ka fila) lori ilana ti o ni iwọn tẹlẹ yoo tun bẹrẹ iṣẹyun naa. Awọn ibaraẹnisọrọ kekere, `/healthz`, `/v1/models`, ati MCP jẹ** kii ṣe** ninu fila yẹn.
+Ilana Node kan jẹ** òkiti V8 kan** . Meji agbekọja ~ 3 MiB / ~ 750k-token ifaminsi-aṣoju `POST /v1/responses` (RTK + Caveman) abort ti okiti ni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ati ki o le OOM a 16 Gi akojọpọ. Wo [# #7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Wiwọn yẹn jẹ a** iranti-isuna** ikilọ, kii ṣe ọja lile-max ti meji ni igbakanna `/v1/responses`. Gbigbawọle iwiregbe iwuwo iwuwo jẹ titọ nipasẹ isuna-isuna ingest baiti ti a ṣe jade laifọwọyi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ti o ni iwọn lati oke V8/cgroup aja — ti o bori rẹ si oke (tabi ṣeto eto-ipamọ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ibeere-ka fila) lori ilana ti o ni iwọn tẹlẹ yoo tun bẹrẹ iṣẹyun naa. Awọn ibaraẹnisọrọ kekere, `/healthz`, `/v1/models`, ati MCP jẹ** kii ṣe** ninu fila yẹn.
 
 ### Ọkan-ilana: diẹ ẹ sii ju meji gun `/v1/responses`
 
-A** ni ilera** ilana (òkiti ni isalẹ `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, aiyipada `0.75`)** le** ṣiṣe diẹ sii ju meji nigbakanna `POST /v1/responses` nigba ti ilana-jakejado inflight-baiti isuna (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) si tun ni yara. Awọn ara ni tabi loke `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (aiyipada 256 KiB) gba iyalo iwuwo iwuwo kanna gẹgẹbi awọn ibeere eto-eru ati lo ọna abayọ [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` kanna (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Awọn mewa ti awọn onibara SSE gigun nigbakanna (awọn oniṣẹ nigbagbogbo nilo 40-50) jẹ a** iranti-isuna** ibeere — iwọn òkiti + primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ko kan lile "max 2" ọja iye to. Okiti titẹ si tun ta silẹ pẹlu `503` ti a tun gbiyanju ki #7849 ko pada.
+A** ni ilera** ilana (òkiti ni isalẹ `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, aiyipada `0.75`)** le** ṣiṣe diẹ sii ju meji nigbakanna `POST /v1/responses` nigba ti ilana-jakejado inflight-baiti isuna (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) si tun ni yara. Awọn ara ni tabi loke `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (aiyipada 256 KiB) gba iyalo iwuwo iwuwo kanna gẹgẹbi awọn ibeere eto-eru ati lo ọna abayọ [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` kanna (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Awọn mewa ti awọn onibara SSE gigun nigbakanna (awọn oniṣẹ nigbagbogbo nilo 40-50) jẹ a** iranti-isuna** ibeere — iwọn òkiti + primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ko kan lile "max 2" ọja iye to. Okiti titẹ si tun ta silẹ pẹlu `503` ti a tun gbiyanju ki #7849 ko pada.
 
 Si** isodipupo òkiti** (awọn aye atijọ V8 ominira)** loni** :
 
@@ -753,7 +753,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Ni-ilana iwuwo (funmorawon pa HTTP sọtọ) ni [# #11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Iṣupọ ọgbọn kan lori ipinlẹ ti o tọ pinpin jẹ [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+Ni-ilana iwuwo (funmorawon pa HTTP sọtọ) ni [# #11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Iṣupọ ọgbọn kan lori ipinlẹ ti o tọ pinpin jẹ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Àwọn àṣìṣe ẹkùn Gemini nínú Docker
 
@@ -794,7 +794,7 @@ tí a kò fi ìdánimọ̀ múlẹ̀; ìbéèrè model tí a fi ìdánimọ̀ m�
 
 ### Àṣàyàn ìpele host: IPv6 tó ń ṣiṣẹ́ àti ìlànà resolver
 
-Ẹni tó jabo [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) mú
+Ẹni tó jabo [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) mú
 ìráyè padà bọ̀ sípò nínú àyíká wọn nípa ṣíṣe IPv6 container ṣiṣẹ́ àti yíyí bí glibc
 ṣe ń yan address padà. Ka èyí sí àṣàyàn tó jẹ́ pàtó fún àyíká náà. Ṣàrídájú IPv6 host
 tó ń ṣiṣẹ́, àbájáde/ìtọ́sọ́nà container àti àwọn òfin firewall kí o tó ṣàtúnṣe àwọn ààyò resolver.

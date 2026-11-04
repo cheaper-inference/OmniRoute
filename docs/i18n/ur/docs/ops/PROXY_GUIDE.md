@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy مفت پراکسی مارکیٹ پلیس
 
-> 🆕 **تعاون کنندہ: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (مسئلہ [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **تعاون کنندہ: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (مسئلہ [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute، **[1proxy](https://1proxy-api.aitradepulse.com)** کمیونٹی پلیٹ فارم کے ساتھ انضمام کرتا ہے تاکہ دنیا بھر سے **سینکڑوں مفت، تصدیق شدہ پراکسیز** تک رسائی فراہم کی جا سکے۔ یہ ان صارفین کے لیے بہترین ہے جن کے پاس اپنا پراکسی انفراسٹرکچر موجود نہیں ہے۔
 

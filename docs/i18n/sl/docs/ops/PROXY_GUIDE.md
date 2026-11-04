@@ -261,7 +261,7 @@ To se izvede enkrat ob prvem zagonu po nadgradnji. Za ponovni zagon uporabite `m
 
 ## Tržnica brezplačnih posredniških strežnikov 1proxy
 
-> 🆕 **Prispeval [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (težava [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Prispeval [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (težava [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute se integrira s skupnostno platformo **[1proxy](https://1proxy-api.aitradepulse.com)** in tako omogoča dostop do **več sto brezplačnih, preverjenih posredniških strežnikov** z vsega sveta. To je popolno za uporabnike, ki nimajo lastne infrastrukture posredniških strežnikov.
 

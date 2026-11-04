@@ -115,7 +115,7 @@ npm start
 Láìsí àkójọpọ̀ tí a mú ìfìmọ́ra ṣiṣẹ́ fún, ojú-ewé náà máa kọ̀ láti wọ inú férémù, àfikún náà máa ṣàwárí èyí láti inú
 àwọn àkọlé ìdáhùn, yóò sì padà sí aṣàwákiri òde — kò sí ohun tí yóò bàjẹ́, yóò sì sọ èyí lẹ́ẹ̀kan.
 Wo [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) àti ọ̀ràn
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

@@ -223,7 +223,7 @@ livenessProbe:
 
 kubeletની **જીવંતતા**ને `/api/monitoring/health` તરફ નિર્દેશિત **ન કરો**. તે પાથ વાસ્તવિક DB/મૉનિટરિંગ કાર્ય કરે છે અને લોડ હેઠળ ખોટું પૉઝિટિવ પરિણામ આપશે.
 
-સંબંધિત: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ઇવેન્ટ લૂપ વ્યસ્ત હોય ત્યારે પ્રોબ્સ), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (કૅટલૉગ પ્રાઇસિંગ દ્વારા વધુ પડતા સંસાધનોનો ઉપયોગ), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (કમ્પ્રેશન ટોકન-ગણતરી દ્વારા વધુ પડતા સંસાધનોનો ઉપયોગ).
+સંબંધિત: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ઇવેન્ટ લૂપ વ્યસ્ત હોય ત્યારે પ્રોબ્સ), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (કૅટલૉગ પ્રાઇસિંગ દ્વારા વધુ પડતા સંસાધનોનો ઉપયોગ), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (કમ્પ્રેશન ટોકન-ગણતરી દ્વારા વધુ પડતા સંસાધનોનો ઉપયોગ).
 
 ### systemd વૉચડૉગ (સ્થગિત ઇવેન્ટ લૂપ)
 

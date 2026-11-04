@@ -9,7 +9,7 @@
 OmniRoute-এ কোনো নিরাপত্তা দুর্বলতা আবিষ্কার করলে, অনুগ্রহ করে দায়িত্বশীলভাবে সেটি রিপোর্ট করুন:
 
 1. কোনো পাবলিক GitHub issue **খুলবেন না**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) ব্যবহার করুন
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) ব্যবহার করুন
 3. অন্তর্ভুক্ত করুন: বিবরণ, পুনরুৎপাদনের ধাপ এবং সম্ভাব্য প্রভাব
 
 ## প্রতিক্রিয়ার সময়সীমা
@@ -42,7 +42,7 @@ OmniRoute-এ কোনো নিরাপত্তা দুর্বলতা 
   সংশোধন পাবে**। প্রকাশের সময় নির্ধারিত শেষ তারিখটি 3.9.0-এর রিলিজ নোটে এবং
   [`ROADMAP.md`](ROADMAP.md)-এ নথিভুক্ত করা হয়।
 - **LTS ধারায় কোনো দুর্বলতা রিপোর্ট করা:** অন্য যেকোনো সংস্করণের মতো একই চ্যানেল ব্যবহার করুন—
-  একটি ব্যক্তিগত [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  একটি ব্যক্তিগত [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   কখনোই কোনো পাবলিক ইস্যু নয়। আপনি কোন সংস্করণ পরীক্ষা করেছেন তা উল্লেখ করুন (উদাহরণস্বরূপ `3.9.2`);
   সংশোধনগুলো `stable/v3`-এ যুক্ত হয় এবং v4-এ ফরওয়ার্ড-পোর্ট করা হয়।
 - **LTS প্রকাশের সময় নিরাপত্তার ভিত্তিরেখা:** পরিমাপকৃত স্ক্যানার অবস্থা, রুট-গার্ড এবং

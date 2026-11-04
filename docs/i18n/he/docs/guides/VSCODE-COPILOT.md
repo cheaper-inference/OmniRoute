@@ -115,7 +115,7 @@ npm start
 ללא גרסה שנבנתה עם תמיכה בהטמעה, הדף מסרב להיטען במסגרת, התוסף מזהה זאת מכותרות
 התגובה וחוזר לדפדפן החיצוני — דבר אינו נשבר, ומוצגת על כך הודעה פעם אחת.
 ראו [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ואת הבעיה
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

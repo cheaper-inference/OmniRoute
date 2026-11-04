@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy ମାଗଣା ପ୍ରକ୍ସି ମାର୍କେଟପ୍ଲେସ୍
 
-> 🆕 **[@oyi77](https://github.com/oyi77)ଙ୍କ ଦ୍ୱାରା ଅବଦାନ** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ଇସ୍ୟୁ [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77)ଙ୍କ ଦ୍ୱାରା ଅବଦାନ** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ଇସ୍ୟୁ [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute ସାରା ବିଶ୍ୱରୁ **ଶହ ଶହ ମାଗଣା, ବୈଧୀକୃତ ପ୍ରକ୍ସି**ର ଆକ୍ସେସ୍ ପ୍ରଦାନ କରିବା ପାଇଁ **[1proxy](https://1proxy-api.aitradepulse.com)** କମ୍ୟୁନିଟି ପ୍ଲାଟଫର୍ମ ସହିତ ଏକୀକୃତ ହୁଏ। ଯେଉଁ ଉପଭୋକ୍ତାଙ୍କର ନିଜସ୍ୱ ପ୍ରକ୍ସି ଭିତ୍ତିଭୂମି ନାହିଁ, ସେମାନଙ୍କ ପାଇଁ ଏହା ଉପଯୁକ୍ତ।
 

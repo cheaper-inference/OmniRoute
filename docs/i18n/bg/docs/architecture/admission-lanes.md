@@ -91,7 +91,7 @@ Combo (приоритетно / циклично) и fusion разгъват N �
 
 ## 4. Продължителни `/v1/responses` в един процес (резерв при добро състояние)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) добави
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) добави
 `tryAcquireHealthyHeadroom`, така че да бъде допусната втора заявка с високо структурно
 натоварване, когато heap паметта е под `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Пътят
 BYTE, използван от `admitChatRequest` (тела ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

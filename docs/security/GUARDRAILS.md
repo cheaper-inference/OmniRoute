@@ -909,8 +909,8 @@ request. There are five channels, read in this order and merged into one list
 All five channels are merged, the two headers included: sending both
 `x-omniroute-disabled-guardrails` and `x-disabled-guardrails` skips the union of
 their lists, and an empty modern header no longer hides the legacy one
-([#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412), fixed in
-[#16805](https://github.com/cheaper-inference/OmniRoute/pull/16805)).
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), fixed in
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
 
 Values may be arrays of strings or a comma-separated string; names are trimmed
 and normalized to lowercase kebab-case (`pii_masker` → `pii-masker`), and empty
@@ -922,16 +922,16 @@ a mandatory boundary: the injection-guard middleware
 (`src/middleware/promptInjectionGuard.ts`) calls `evaluatePromptInjection()`
 without any caller-controlled disable list (the dead
 `resolveDisabledGuardrails({ body })` call it used to make was removed in
-[#16934](https://github.com/cheaper-inference/OmniRoute/pull/16934)), so a request
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), so a request
 that disables `prompt-injection` is still rejected in `block` mode. This is by
 design. The disable channels are caller-controlled (request body,
 metadata, headers), and a caller must not be able to switch off a security
 control the operator set
-([#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413)). The header
-union from [#16412](https://github.com/cheaper-inference/OmniRoute/issues/16412)
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). The header
+union from [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
 changes only which registry guardrails are skipped; it does not let a client
 bypass the middleware. Mandatory per-key and per-group guardrail policies are
-tracked in the v4 RFC [#16417](https://github.com/cheaper-inference/OmniRoute/issues/16417).
+tracked in the v4 RFC [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
 See [Coverage and limits](#coverage-and-limits).
 
 ## Execution Order
@@ -988,7 +988,7 @@ deliberately when the behavior changes.
   prompt injection with its own call to `evaluatePromptInjection()`, without
   passing any caller-controlled disable list. `block` mode is a mandatory
   boundary that caller-controlled disables cannot bypass, including on chat-family routes
-  ([#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413)). Disabling
+  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Disabling
   `prompt-injection` only skips the registry guardrail.
 
 ### What sees a response before post-call
@@ -998,7 +998,7 @@ execution → post-call guardrails → post-call block exit → semantic-cache s
 
 - **Memory extraction** and **tool execution** see the response before post-call
   guardrails can rewrite or block it. Since
-  [#16401](https://github.com/cheaper-inference/OmniRoute/pull/16401), memory
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), memory
   extraction runs the extracted text through `sanitizePII` when
   `PII_RESPONSE_SANITIZATION` is on (both streaming and non-streaming), but a
   response that post-call later blocks has still been offered to memory and
@@ -1119,7 +1119,7 @@ Text extraction (`extractMessageContents`) covers `messages`/`input`/`prompt`/`q
 the OWASP-LLM corpus in `INJECTION_GUARD_MODE=block`; garak runs probes (skips without secret).
 `moderations` is included for consistency. Block mode is a mandatory boundary: `evaluatePromptInjection()`
 ignores the per-request disable list the middleware passes it, so `disabledGuardrails` does
-**not** exempt a route from it ([#16413](https://github.com/cheaper-inference/OmniRoute/issues/16413)).
+**not** exempt a route from it ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
 The nightly workflow (`.github/workflows/nightly-llm-security.yml`, cron + manual
 dispatch) has two jobs:

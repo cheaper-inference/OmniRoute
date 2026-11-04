@@ -242,7 +242,7 @@ Avast এবং AVG এমন একটি হিউরিস্টিক চা
    [Convert]::ToBase64String($b)
    ```
    আউটপুটটি অবশ্যই `latest.yml` → `sha512`-এর সঙ্গে মিলতে হবে। না মিললে ফাইলটি মুছে দিন এবং
-   শুধু [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases) থেকে পুনরায় ডাউনলোড করুন।
+   শুধু [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) থেকে পুনরায় ডাউনলোড করুন।
 2. **পুনরুদ্ধার + বাদ দিন** — কোয়ারেন্টাইন থেকে রোল-ব্যাক হওয়া আইটেমগুলো পুনরুদ্ধার করুন এবং
    `%LOCALAPPDATA%\Programs\OmniRoute`-এর জন্য একটি এক্সক্লুশন যোগ করুন (Kaspersky → Settings → Threats and Exclusions),
    তারপর পুনরায় ইনস্টল করুন।
@@ -832,7 +832,7 @@ omniroute serve --ready-timeout 180000
 
 ## এখনও আটকে আছেন?
 
-- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **আর্কিটেকচার**: অভ্যন্তরীণ বিবরণের জন্য [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) দেখুন
 - **API রেফারেন্স**: সব এন্ডপয়েন্টের জন্য [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) দেখুন
 - **হেলথ ড্যাশবোর্ড**: সিস্টেমের রিয়েল-টাইম অবস্থা দেখতে **Dashboard → Health** পরীক্ষা করুন

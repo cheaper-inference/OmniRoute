@@ -59,8 +59,8 @@ Google Cloud Code / Antigravity-ն այն վերադարձնում են որպե
 403 ճյուղը `classifyProviderError`-ում այս ձևակերպման համար, քանի որ նախ գնահատվում է
 `accountDeactivated`-ը․ հետևաբար Gemini Code Assist-ի համար ավելացված նախագծային երթուղու
 վերականգնումը՝
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868)-ում և
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452)-ում, երբեք չէր կարող գործարկվել։
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868)-ում և
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452)-ում, երբեք չէր կարող գործարկվել։
 
 Հարակից երեք **առանձին** ազդանշանային աղյուսակները արգելված հիմնաբառերի հայտնաբերման մաս _չեն_․
 

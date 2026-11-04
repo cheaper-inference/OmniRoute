@@ -9,7 +9,7 @@
 ଯଦି ଆପଣ OmniRouteରେ କୌଣସି ସୁରକ୍ଷା ଦୁର୍ବଳତା ଆବିଷ୍କାର କରନ୍ତି, ଦୟାକରି ଦାୟିତ୍ୱପୂର୍ଣ୍ଣ ଭାବରେ ଏହାକୁ ରିପୋର୍ଟ କରନ୍ତୁ:
 
 1. କୌଣସି ସାର୍ବଜନୀନ GitHub issue ଖୋଲନ୍ତୁ **ନାହିଁ**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) ବ୍ୟବହାର କରନ୍ତୁ
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) ବ୍ୟବହାର କରନ୍ତୁ
 3. ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ: ବର୍ଣ୍ଣନା, ପୁନଃଉତ୍ପାଦନ ପଦକ୍ଷେପ ଏବଂ ସମ୍ଭାବ୍ୟ ପ୍ରଭାବ
 
 ## ପ୍ରତିକ୍ରିୟା ସମୟସୀମା
@@ -41,7 +41,7 @@
   ଯେଉଁଟି ପରେ ହେବ ସେହି ଅନୁଯାୟୀ**, ସୁରକ୍ଷା ସମାଧାନ ଏବଂ ଗୁରୁତର ରିଗ୍ରେସନ୍ର ସମାଧାନ ପାଇବ। କଟ୍ ହେବା ସମୟରେ ଫଳସ୍ୱରୂପ ନିର୍ଦ୍ଧାରିତ ଶେଷ ତାରିଖଟି 3.9.0 ରିଲିଜ୍ ନୋଟ୍ରେ ଏବଂ
   [`ROADMAP.md`](ROADMAP.md)-ରେ ରେକର୍ଡ କରାଯାଏ।
 - **LTS ଧାରାରେ ଏକ ଦୁର୍ବଳତା ରିପୋର୍ଟ କରିବା:** ଅନ୍ୟ ଯେକୌଣସି ସଂସ୍କରଣ ପରି ସମାନ ଚ୍ୟାନେଲ୍ —
-  ଏକ ବ୍ୟକ୍ତିଗତ [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  ଏକ ବ୍ୟକ୍ତିଗତ [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   କେବେ ମଧ୍ୟ ସାର୍ବଜନୀନ issue ନୁହେଁ। ଆପଣ କେଉଁ ସଂସ୍କରଣ ପରୀକ୍ଷା କରିଛନ୍ତି ତାହା ଉଲ୍ଲେଖ କରନ୍ତୁ (ଉଦାହରଣ ସ୍ୱରୂପ `3.9.2`); ସମାଧାନଗୁଡ଼ିକ
   `stable/v3`-ରେ ଯୋଡ଼ାଯାଏ ଏବଂ v4-କୁ ଫରୱାର୍ଡ-ପୋର୍ଟ କରାଯାଏ।
 - **LTS କଟ୍ ସମୟରେ ସୁରକ୍ଷା ବେସ୍ଲାଇନ୍:** ପରିମାପିତ ସ୍କାନର୍ ଅବସ୍ଥା, ରୁଟ୍-ଗାର୍ଡ ଏବଂ

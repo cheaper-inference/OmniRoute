@@ -478,7 +478,7 @@ OmniRoute کی دو ڈیفالٹ ترتیبات کئی گھنٹوں پر محی�
 | سیشن مسلسل اکاؤنٹس تبدیل کرتا ہے / ٹرنز کے درمیان پرامپٹ کیش کا تسلسل ختم ہو جاتا ہے | سیشن افینیٹی TTL، `0` ہے (غیر فعال)                                 | `sessionAffinityTtlMs`   |
 | کلائنٹ کو کوئی پرامپٹ دکھائے بغیر دورانِ استدلال کنکشن منقطع ہو جاتا ہے              | اپ اسٹریم چنک نہ آنے پر 10 منٹ بعد اسٹریم آئیڈل واچ ڈاگ فعال ہو گیا | `STREAM_IDLE_TIMEOUT_MS` |
 
-متعلقہ مباحث: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (طویل کام کا منقطع ہونا)، [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (افینیٹی ڈیفالٹ طور پر غیر فعال کیوں ہے)۔ ٹریکنگ: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)۔
+متعلقہ مباحث: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (طویل کام کا منقطع ہونا)، [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (افینیٹی ڈیفالٹ طور پر غیر فعال کیوں ہے)۔ ٹریکنگ: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)۔
 
 ### 1. سیشن افینیٹی — ایک گفتگو کو ایک اکاؤنٹ کے ساتھ پِن کریں
 

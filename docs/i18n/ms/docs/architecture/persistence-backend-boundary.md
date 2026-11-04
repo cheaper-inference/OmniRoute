@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Dicadangkan — memerlukan kelulusan penyelenggara sebelum kerja masa jalan bermula
-- **Isu penjejakan:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Isu penjejakan:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Skop:** Seni bina pengekalan sahaja; keputusan ini tidak menambah atau memilih pangkalan data luaran
 
 ## Konteks

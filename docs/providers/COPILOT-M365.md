@@ -77,10 +77,10 @@ reports a connection error and you must re-capture the credential.
 To avoid manual re-capture, you can store a Microsoft refresh token in the connection's
 **Advanced Settings → providerSpecificData**:
 
-| Field          | Description                                                           |
-| -------------- | --------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token for `substrate.office.com/sydney` scope |
-| `tier`         | `individual` (default), `edu`, or `enterprise`                        |
+| Field          | Description                                                                |
+| -------------- | -------------------------------------------------------------------------- |
+| `refreshToken` | Microsoft OAuth refresh token for `substrate.office.com/sydney` scope      |
+| `tier`         | `individual` (default), `edu`, or `enterprise`                             |
 
 Obtain the refresh token from a Microsoft device-code or authorization-code flow
 scoped to `substrate.office.com/sydney`. With `refreshToken` set, OmniRoute
@@ -92,11 +92,11 @@ after each expiry.
 
 ### Tier selection
 
-| Tier         | Alias       | Surface                |
-| ------------ | ----------- | ---------------------- |
-| `individual` | _(default)_ | Consumer M365 Copilot  |
-| `edu`        | `included`  | Education M365 Copilot |
-| `enterprise` | `work`      | M365 Copilot for Work  |
+| Tier          | Alias        | Surface                         |
+| ------------- | ------------ | ------------------------------- |
+| `individual`  | _(default)_  | Consumer M365 Copilot           |
+| `edu`         | `included`   | Education M365 Copilot          |
+| `enterprise`  | `work`       | M365 Copilot for Work           |
 
 Set the tier in **Advanced Settings → providerSpecificData → tier**. The tier affects
 the BizChat routing and model access.
@@ -141,8 +141,8 @@ be hidden by default in some tiers.
 
 ## References
 
-- Issue: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Discussion: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Discussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Source: `src/shared/constants/providers/web-cookie.ts` (provider definition)
 - HAR import: `src/shared/utils/m365HarImport.ts`
 - Credential fields: `src/shared/providers/webSessionCredentials.ts`

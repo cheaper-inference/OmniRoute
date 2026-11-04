@@ -7,7 +7,7 @@
 মালিকের করণীয়। সেটিংস → ব্রাঞ্চসমূহ → নিয়ম যোগ করুন-এর মাধ্যমে প্রয়োগ করুন, অথবা:
 
 ```bash
-gh api -X PUT repos/cheaper-inference/OmniRoute/branches/main/protection \
+gh api -X PUT repos/diegosouzapw/OmniRoute/branches/main/protection \
   --input - <<'JSON'
 { "required_status_checks": { "strict": true, "contexts": ["Quality Ratchet", "Quality Gates (Extended)", "Fast Quality Gates"] },
   "enforce_admins": false,

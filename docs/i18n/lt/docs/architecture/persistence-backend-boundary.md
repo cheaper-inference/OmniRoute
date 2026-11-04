@@ -5,7 +5,7 @@
 ---
 
 - **Būsena:** Siūloma — prieš pradedant vykdymo aplinkos darbus reikalingas prižiūrėtojo patvirtinimas
-- **Sekimo užduotis:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Sekimo užduotis:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Apimtis:** Tik išliekamumo architektūra; šiuo sprendimu nepridedama ir nepasirenkama išorinė duomenų bazė
 
 ## Kontekstas

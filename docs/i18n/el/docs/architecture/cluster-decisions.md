@@ -6,7 +6,7 @@
 
 **Κατάσταση:** πρόταση (αναμένεται αξιολόγηση από τον @diegosouzapw)
 **Ημερομηνία:** 2026-06-20
-**Αναφορές:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**Αναφορές:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## TL;DR
 

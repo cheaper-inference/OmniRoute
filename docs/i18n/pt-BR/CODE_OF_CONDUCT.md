@@ -65,7 +65,7 @@ designado em um evento online ou presencial.
 Casos de comportamento abusivo, assediador ou de outra forma inaceitável podem ser
 denunciados aos líderes da comunidade responsáveis pela aplicação por meio da abertura de um
 aviso de segurança privado em
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 ou enviando um e-mail ao mantenedor em diegosouza.pw@outlook.com.
 Para incidentes sensíveis relacionados à segurança, consulte [`SECURITY.md`](SECURITY.md).
 Todas as denúncias serão analisadas e investigadas de maneira rápida e justa.

@@ -40,7 +40,7 @@ Ovaj Kodeks ponašanja primjenjuje se u svim prostorima zajednice, te se takođe
 
 ## Provođenje
 
-Slučajevi zlostavljanja, mobinga ili drugog neprihvatljivog ponašanja mogu se prijaviti vođama zajednice odgovornim za provođenje otvaranjem privatne sigurnosne preporuke na <https://github.com/cheaper-inference/OmniRoute/security/advisories/new> ili slanjem e-maila održavaocu na diegosouza.pw@outlook.com. Za sigurnosno osjetljive incidente, pogledajte [`SECURITY.md`](SECURITY.md). Sve prijave će se pregledati i istražiti brzo i pošteno.
+Slučajevi zlostavljanja, mobinga ili drugog neprihvatljivog ponašanja mogu se prijaviti vođama zajednice odgovornim za provođenje otvaranjem privatne sigurnosne preporuke na <https://github.com/diegosouzapw/OmniRoute/security/advisories/new> ili slanjem e-maila održavaocu na diegosouza.pw@outlook.com. Za sigurnosno osjetljive incidente, pogledajte [`SECURITY.md`](SECURITY.md). Sve prijave će se pregledati i istražiti brzo i pošteno.
 
 Svi vođe zajednice su dužni poštovati privatnost i sigurnost izvodioca bilo kojeg incidenta.
 

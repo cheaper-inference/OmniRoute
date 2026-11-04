@@ -260,7 +260,7 @@ Dies erfolgt einmalig beim ersten Start nach dem Upgrade. Verwenden Sie `migrate
 
 ## 1proxy – kostenloser Proxy-Marktplatz
 
-> 🆕 **Beigetragen von [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Beigetragen von [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute ist in die Community-Plattform **[1proxy](https://1proxy-api.aitradepulse.com)** integriert und bietet Zugriff auf **Hunderte kostenlose, validierte Proxys** aus aller Welt. Dies ist ideal für Benutzer, die keine eigene Proxy-Infrastruktur besitzen.
 

@@ -115,7 +115,7 @@ npm start
 Senza una build che consenta l'incorporamento, la pagina rifiuta di essere visualizzata in un frame; l'estensione lo rileva dagli
 header della risposta e torna al browser esterno: non si verifica alcun malfunzionamento e viene mostrato un solo avviso.
 Consulta [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) e l'issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

@@ -250,7 +250,7 @@ HTTP/SSE ଏଣ୍ଡପଏଣ୍ଟ୍ଗୁଡ଼ିକ, A2A `.well-known` URL
    [Convert]::ToBase64String($b)
    ```
    ଆଉଟପୁଟ୍ଟି `latest.yml` → `sha512` ସହ ମେଳ ଖାଇବା ଆବଶ୍ୟକ। ଯଦି ଏହା ମେଳ ଖାଏ ନାହିଁ, ଫାଇଲ୍ଟି ବିଲୋପ କରନ୍ତୁ ଏବଂ
-   କେବଳ [GitHub ରିଲିଜ୍ ପୃଷ୍ଠା](https://github.com/cheaper-inference/OmniRoute/releases)ରୁ ପୁନଃ ଡାଉନଲୋଡ୍ କରନ୍ତୁ।
+   କେବଳ [GitHub ରିଲିଜ୍ ପୃଷ୍ଠା](https://github.com/diegosouzapw/OmniRoute/releases)ରୁ ପୁନଃ ଡାଉନଲୋଡ୍ କରନ୍ତୁ।
 2. **ପୁନଃସ୍ଥାପନ + ବାଦ ଦିଅନ୍ତୁ** — ରୋଲ୍ ବ୍ୟାକ୍ ହୋଇଥିବା ଆଇଟମ୍ଗୁଡ଼ିକୁ କ୍ୱାରାଣ୍ଟାଇନ୍ରୁ ପୁନଃସ୍ଥାପନ କରନ୍ତୁ ଏବଂ
    `%LOCALAPPDATA%\Programs\OmniRoute` ପାଇଁ ଏକ ବାଦ ଯୋଡ଼ନ୍ତୁ (Kaspersky → Settings → Threats and Exclusions),
    ତା’ପରେ ପୁନଃ ଇନ୍ଷ୍ଟଲ୍ କରନ୍ତୁ।
@@ -845,7 +845,7 @@ omniroute serve --ready-timeout 180000
 
 ## ଏବେ ମଧ୍ୟ ଅଟକି ଯାଇଛନ୍ତି କି?
 
-- **GitHub ସମସ୍ୟାଗୁଡ଼ିକ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub ସମସ୍ୟାଗୁଡ଼ିକ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **ଆର୍କିଟେକ୍ଚର୍**: ଆଭ୍ୟନ୍ତରୀଣ ବିବରଣୀ ପାଇଁ [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ଦେଖନ୍ତୁ
 - **API ସନ୍ଦର୍ଭ**: ସମସ୍ତ ଏଣ୍ଡପଏଣ୍ଟ ପାଇଁ [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ଦେଖନ୍ତୁ
 - **ସ୍ୱାସ୍ଥ୍ୟ ଡ୍ୟାସ୍ବୋର୍ଡ**: ରିଅଲ୍-ଟାଇମ୍ ସିଷ୍ଟମ୍ ସ୍ଥିତି ପାଇଁ **ଡ୍ୟାସ୍ବୋର୍ଡ → ସ୍ୱାସ୍ଥ୍ୟ** ଯାଞ୍ଚ କରନ୍ତୁ

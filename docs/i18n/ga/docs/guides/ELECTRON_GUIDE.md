@@ -198,7 +198,7 @@ Socraigh trí `session.defaultSession.webRequest.onHeadersReceived`. Treoracha s
 
 ## Nuashonrú uathoibríoch
 
-Úsáideann sé `electron-updater` leis an soláthraí GitHub (`cheaper-inference/OmniRoute`).
+Úsáideann sé `electron-updater` leis an soláthraí GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Imeachtaí curtha ar aghaidh chuig rindreálaí trí `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (le `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artifacts i dtír i `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Foilsítear eisiúintí chuig GitHub Releases (`cheaper-inference/OmniRoute`), agus is é sin freisin an áit a seiceálann `electron-updater` le haghaidh leaganacha nua.
+Foilsítear eisiúintí chuig GitHub Releases (`diegosouzapw/OmniRoute`), agus is é sin freisin an áit a seiceálann `electron-updater` le haghaidh leaganacha nua.
 
 ## Fabhtcheartú
 

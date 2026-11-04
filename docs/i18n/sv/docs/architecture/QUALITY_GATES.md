@@ -428,7 +428,7 @@ implementering återstår).
 ### CodeQL-ratchet: uppdateringsintervall och manuell utlösning
 
 `check:codeql-ratchet` läser **lagringsplatsens tillstånd, som uppdateras enligt ett schema — inte för varje PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` rapporterar
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` rapporterar
 `state: configured`, `schedule: weekly`: GitHubs standardskanning, inte en analys för
 varje push. Konsekvens: efter att en PR som ÅTGÄRDAR aviseringar har slagits samman fortsätter ratchet-motorn att läsa
 det gamla, högre antalet tills nästa schemalagda skanning körs — därför rapporteras en regression

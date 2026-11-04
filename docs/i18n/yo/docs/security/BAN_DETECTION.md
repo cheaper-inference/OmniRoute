@@ -58,8 +58,8 @@ kì í gba ara rẹ̀ padà láìfọwọ́sí), nígbà tí olùdarí lè yanj�
 Fífi gbólóhùn náà sílẹ̀ nínú àkójọ ìdènà tún mú kí ẹ̀ka cloud-code 403 tí a lè gba padà nínú
 `classifyProviderError` má ṣeé dé fún ọ̀rọ̀ yìí, nítorí pé `accountDeactivated` ni
 a kọ́kọ́ ṣàyẹ̀wò — nítorí náà, ìmúpadàbọ̀sípò ipa-ọ̀nà iṣẹ́-àkànṣe tí a ṣàfikún fún Gemini Code Assist nínú
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) àti
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) kò lè ṣiṣẹ́ láé.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) àti
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) kò lè ṣiṣẹ́ láé.
 
 Àwọn tábìlì àmì mẹ́ta tó wà lẹ́gbẹ̀ẹ́ ara wọn, tí wọ́n sì jẹ́ **ọ̀tọ̀ọ̀tọ̀**, kì í ṣe apá kan ìṣàwárí ọ̀rọ̀-pàtàkì ìdènà:
 

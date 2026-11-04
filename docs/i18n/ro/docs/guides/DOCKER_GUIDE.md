@@ -324,7 +324,7 @@ Comportamentul memoriei în Docker:
 
 ### RAM necesar în timpul execuției pentru agenții de programare
 
-Valoarea implicită Docker de 1 GiB reprezintă un minimum pentru panoul de control și conversații ușoare, nu o configurație pentru producție. Corpurile lungi ale solicitărilor `POST /v1/responses` (sute de mesaje, zeci de instrumente) păstrează în memorie mai multe grafuri în timpul comprimării. Două solicitări suprapuse de aproximativ 3 MiB / 750.000 de tokenuri au provocat oprirea V8 cu un spațiu vechi de **12 GiB** (`FATAL ERROR: Reached heap limit`) și au declanșat, de asemenea, o eroare OOM pentru un cgroup de 16 GiB. Consultați [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+Valoarea implicită Docker de 1 GiB reprezintă un minimum pentru panoul de control și conversații ușoare, nu o configurație pentru producție. Corpurile lungi ale solicitărilor `POST /v1/responses` (sute de mesaje, zeci de instrumente) păstrează în memorie mai multe grafuri în timpul comprimării. Două solicitări suprapuse de aproximativ 3 MiB / 750.000 de tokenuri au provocat oprirea V8 cu un spațiu vechi de **12 GiB** (`FATAL ERROR: Reached heap limit`) și au declanșat, de asemenea, o eroare OOM pentru un cgroup de 16 GiB. Consultați [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Configurați **`--memory` pentru cgroup peste dimensiunea heap-ului** — bufferele native, SQLite și datele intermediare de comprimare se află în afara V8.
 
@@ -696,7 +696,7 @@ spec:
 
 `preStop` sleep permite lui Kube să renunțe la punctele finale ale serviciului înainte de SIGTERM așadar** nou** traficul încetează să lovească procesul de moarte. `/v1/responses` SSE în timpul zborului este scurs până la `SHUTDOWN_TIMEOUT_MS` (implicit 30s) prin contracte de închiriere de admitere grele (#11015). Solicitările noi care ajung încă în proces devin `503` + `Retry-After: 5`. Decalajul Recreează punctul final gol până când înlocuirea este gata rămâne o întrerupere gravă - adică topologia SQLite, nu o config greșită a sondei.
 
-Postgres extern / multi-writer HA este** nu** o cale de stoc documentată. Dacă aveți nevoie HA, păstrați o singură replică sau rulați o topologie pe care proiectul a testat-o și documentată separat. Lucrarea Postgres/MySQL locuiește în [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Până la livrare, singura modalitate acceptată de a se înmulți** mare** Capacitatea `/v1/responses` este N procese independente (secțiunea următoare), nu `replicas > 1` pe un volum.
+Postgres extern / multi-writer HA este** nu** o cale de stoc documentată. Dacă aveți nevoie HA, păstrați o singură replică sau rulați o topologie pe care proiectul a testat-o și documentată separat. Lucrarea Postgres/MySQL locuiește în [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Până la livrare, singura modalitate acceptată de a se înmulți** mare** Capacitatea `/v1/responses` este N procese independente (secțiunea următoare), nu `replicas > 1` pe un volum.
 
 ## Scale-out: N procese independente
 
@@ -706,11 +706,11 @@ Copiile unui cont Codex nu trebuie să consume în mod independent indicativul d
 
 Instanța pasivă recitește conexiunea atunci când este necesară o reîmprospătare și adoptă doar un simbol de acces diferit, neexpirat. În caz contrar, reîmprospătarea este dezactivată fără a expira sau a dezactiva conexiunea sau a număra o eroare a întrerupătorului de reîmprospătare. Eșecurile reale de autentificare din amonte folosesc încă contabilizarea eșecului normal, răcirea exponențială și eroarea normală a clientului; dezactivarea contului rămâne permanentă. Sincronizați jetoanele rotite ale proprietarului înainte ca jetoanele de acces să expire (proiectul implicit de reîmprospătare proactivă este de cinci minute) sau reimportați fișierul de autentificare Codex. Importurile pasive stochează token-urile furnizate fără a le valida la punctul final al token-ului. Reîmprospătarea manuală dashboard/API returnează `409 refresh_disabled`; noile autentificări OAuth sunt neschimbate. Consultați [referința de mediu](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Procesul One Node este** o grămadă V8** . Două suprapuse ~ 3 MiB / ~ 750k-token-coding-agent `POST /v1/responses` (RTK + Caveman) anulează acel heap la ~ 12 Gi (`FATAL ERROR: Reached heap limit`) și pot OOM un cgroup de 16 Gi. Vezi [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Această măsurătoare este a** memorie-buget** avertisment, nu un produs hard-max de două `/v1/responses` lungi simultane. Admiterea de chat grea este blocată de un buget de octeți de asimilare auto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionat din același plafon V8/cgroup — suprascriind-o în sus (sau setarea limitei de număr de cereri `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` moștenite) pe un proces deja dimensionat reintroduce anularea. Chaturile mici, `/healthz`, `/v1/models`, și MCP sunt** nu** in acel capac.
+Procesul One Node este** o grămadă V8** . Două suprapuse ~ 3 MiB / ~ 750k-token-coding-agent `POST /v1/responses` (RTK + Caveman) anulează acel heap la ~ 12 Gi (`FATAL ERROR: Reached heap limit`) și pot OOM un cgroup de 16 Gi. Vezi [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Această măsurătoare este a** memorie-buget** avertisment, nu un produs hard-max de două `/v1/responses` lungi simultane. Admiterea de chat grea este blocată de un buget de octeți de asimilare auto-derivat (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionat din același plafon V8/cgroup — suprascriind-o în sus (sau setarea limitei de număr de cereri `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` moștenite) pe un proces deja dimensionat reintroduce anularea. Chaturile mici, `/healthz`, `/v1/models`, și MCP sunt** nu** in acel capac.
 
 ### Un singur proces: mai mult de două `/v1/responses` lungi
 
-O** sănătos** proces (heap sub `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, implicit `0.75`)** mai** rulați mai mult de două `POST /v1/responses` lungi simultane atunci când bugetul de octeți de zbor la nivelul întregului proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) mai are spațiu. Corpurile la sau peste `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (implicit 256 KiB) acceptă aceeași închiriere grea ca și solicitările cu structură grea și folosesc aceeași evadare `tryAcquireHealthyHeadroom` [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Zeci de clienți SSE lungi concurenți (operatorii au adesea nevoie de 40–50) este a** memorie-buget** întrebare — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nu este o limită de produs „max. 2”. O grămadă sub presiune se pierde în continuare cu `503` reîncercat, astfel încât #7849 nu revine.
+O** sănătos** proces (heap sub `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, implicit `0.75`)** mai** rulați mai mult de două `POST /v1/responses` lungi simultane atunci când bugetul de octeți de zbor la nivelul întregului proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) mai are spațiu. Corpurile la sau peste `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (implicit 256 KiB) acceptă aceeași închiriere grea ca și solicitările cu structură grea și folosesc aceeași evadare `tryAcquireHealthyHeadroom` [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Zeci de clienți SSE lungi concurenți (operatorii au adesea nevoie de 40–50) este a** memorie-buget** întrebare — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nu este o limită de produs „max. 2”. O grămadă sub presiune se pierde în continuare cu `503` reîncercat, astfel încât #7849 nu revine.
 
 La** înmulți grămezi** (spații vechi V8 independente)** astăzi** :
 
@@ -753,7 +753,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Densitatea în proces (compresia de pe izolatul HTTP ) este [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Un cluster logic pe starea durabilă partajată este [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+Densitatea în proces (compresia de pe izolatul HTTP ) este [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Un cluster logic pe starea durabilă partajată este [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Erori regionale Gemini în Docker
 
@@ -794,7 +794,7 @@ neautentificată; numai solicitarea autentificată către model testează eligib
 
 ### Alternativă la nivelul gazdei: IPv6 funcțional și politica resolverului
 
-Persoana care a raportat [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) a restabilit
+Persoana care a raportat [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) a restabilit
 accesul în mediul său activând IPv6 pentru containere și modificând selecția adreselor în glibc.
 Tratați aceasta ca pe o alternativă specifică mediului. Confirmați că IPv6 funcționează pe gazdă,
 precum și rutarea/ieșirea containerului și regulile firewallului, înainte de a ajusta preferințele resolverului.

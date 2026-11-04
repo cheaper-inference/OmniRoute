@@ -173,7 +173,7 @@ Antigravity विनंत्या कॉलरचा मजकूर बा�
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` वाचते
 - `src/lib/oauth/providers/antigravity.ts` — क्रेडेन्शियल प्लंबिंग
-- मूळ घटना अहवाल: चर्चा [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- मूळ घटना अहवाल: चर्चा [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

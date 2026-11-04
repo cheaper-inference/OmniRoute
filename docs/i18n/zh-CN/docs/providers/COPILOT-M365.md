@@ -136,8 +136,8 @@ BizChat 的路由和模型访问权限。
 
 ## 参考资料
 
-- 问题：[#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- 讨论：[#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- 问题：[#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- 讨论：[#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - 源代码：`src/shared/constants/providers/web-cookie.ts`（供应商定义）
 - HAR 导入：`src/shared/utils/m365HarImport.ts`
 - 凭据字段：`src/shared/providers/webSessionCredentials.ts`

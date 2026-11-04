@@ -261,7 +261,7 @@ Ovo se dešava jednom pri prvom pokretanju nakon nadogradnje. Koristite `migrate
 
 ## 1proxy besplatno tržište proxyja
 
-> 🆕 **Doprinio [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Problem [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Doprinio [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Problem [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute se integriše sa **[1proxy](https://1proxy-api.aitradepulse.com)** platformom zajednice kako bi omogućio pristup **stotinama besplatnih, validiranih proxyja** iz cijelog svijeta. Ovo je savršeno za korisnike koji nemaju vlastitu proxy infrastrukturu.
 

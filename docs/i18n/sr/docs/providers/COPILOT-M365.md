@@ -139,8 +139,8 @@ BizChat усмеравање и приступ моделима.
 
 ## Референце
 
-- Проблем: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Дискусија: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Проблем: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Дискусија: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Извор: `src/shared/constants/providers/web-cookie.ts` (дефиниција добављача)
 - Увоз HAR-а: `src/shared/utils/m365HarImport.ts`
 - Поља акредитива: `src/shared/providers/webSessionCredentials.ts`

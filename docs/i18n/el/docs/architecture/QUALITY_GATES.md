@@ -410,7 +410,7 @@ git add quality-baseline.json
 ### Καστάνια CodeQL: συχνότητα ανανέωσης και χειροκίνητη ενεργοποίηση
 
 Το `check:codeql-ratchet` διαβάζει **την κατάσταση του αποθετηρίου, η οποία ανανεώνεται βάσει χρονοδιαγράμματος — όχι ανά PR.**
-Το `gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` αναφέρει
+Το `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` αναφέρει
 `state: configured`, `schedule: weekly`: πρόκειται για τη σάρωση προεπιλεγμένης διαμόρφωσης του GitHub και όχι για
 ανάλυση ανά push. Συνέπεια: αφού συγχωνευτεί ένα PR που ΔΙΟΡΘΩΝΕΙ ειδοποιήσεις, η καστάνια συνεχίζει να διαβάζει
 τον παλιό, υψηλότερο αριθμό μέχρι να εκτελεστεί η επόμενη προγραμματισμένη σάρωση — επομένως αναφέρει υποχώρηση

@@ -325,7 +325,7 @@ Minneatferd i Docker:
 
 ### Kjøretids-RAM for kodeagenter
 
-Docker-standarden på 1 GiB er et minimum for kontrollpanelet og enkel chatting, ikke en størrelse for produksjon. Lange `POST /v1/responses`-forespørsler (hundrevis av meldinger, titalls verktøy) beholder flere grafer i minnet under komprimering. To overlappende forespørsler på ~3 MiB / ~750k tokener har fått V8 til å avbryte med **12 GiB** old-space (`FATAL ERROR: Reached heap limit`) og har også utløst cgroup-OOM ved 16 GiB. Se [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+Docker-standarden på 1 GiB er et minimum for kontrollpanelet og enkel chatting, ikke en størrelse for produksjon. Lange `POST /v1/responses`-forespørsler (hundrevis av meldinger, titalls verktøy) beholder flere grafer i minnet under komprimering. To overlappende forespørsler på ~3 MiB / ~750k tokener har fått V8 til å avbryte med **12 GiB** old-space (`FATAL ERROR: Reached heap limit`) og har også utløst cgroup-OOM ved 16 GiB. Se [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Dimensjoner **cgroup `--memory` høyere enn heap-størrelsen** — innebygde buffere, SQLite og mellomresultater fra komprimering befinner seg utenfor V8.
 
@@ -697,7 +697,7 @@ spec:
 
 `preStop` sleep lar kube slippe tjenesteendepunkter før SIGTERM so** ny** trafikken slutter å ramme den døende prosessen. In-flight `/v1/responses` SSE tappes opp til `SHUTDOWN_TIMEOUT_MS` (standard 30s) via tungvekts adgangsleieavtaler (#11015). Nye forespørsler som fortsatt når prosessen får `503` + `Retry-After: 5`. Gjenopprett tom-endepunktgapet til erstatningen er klar forblir et hardt avbrudd – det vil si SQLite topologien, ikke en feilkonfigurasjon av sonden.
 
-Ekstern Postgres / multi-writer HA er** ikke** en dokumentert lagerbane. Hvis du trenger HA, behold en enkelt replika eller kjør en topologi prosjektet har testet og dokumentert separat. Postgres/MySQL -verket bor i [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Inntil det sendes, den eneste støttede måten å formere seg på** stor** `/v1/responses` kapasiteten er N uavhengige prosesser (neste seksjon), ikke `replicas > 1` på ett volum.
+Ekstern Postgres / multi-writer HA er** ikke** en dokumentert lagerbane. Hvis du trenger HA, behold en enkelt replika eller kjør en topologi prosjektet har testet og dokumentert separat. Postgres/MySQL -verket bor i [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Inntil det sendes, den eneste støttede måten å formere seg på** stor** `/v1/responses` kapasiteten er N uavhengige prosesser (neste seksjon), ikke `replicas > 1` på ett volum.
 
 ## Utskalering: N uavhengige prosesser
 
@@ -707,11 +707,11 @@ Kopier av én Codex -konto må ikke uavhengig konsumere dens engangsoppdaterings
 
 Den passive forekomsten leser tilkoblingen på nytt når en oppdatering er nødvendig og bruker bare et annet, uutløpt tilgangstoken. Ellers deaktiveres oppdateringen uten å utløpe eller deaktivere tilkoblingen eller telle en oppdateringsbryterfeil. Ekte oppstrøms autentiseringsfeil bruker fortsatt normal feilregnskap, eksponentiell nedkjøling og den normale klientfeilen; kontodeaktivering forblir permanent. Synkroniser eierens roterte tokens før tilgangstokener utløper (standard proaktiv oppdateringsledd er fem minutter), eller importer Codex auth-filen på nytt. Passiv import lagrer de leverte tokenene uten å validere dem ved token-endepunktet. Manuell dashboard/API -oppdatering returnerer `409 refresh_disabled`; nye OAuth pålogginger er uendret. Se [miljøreferanse](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-En nodeprosess er** én V8-haug** . To overlappende ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) avbryter den haugen ved ~ 12 Gi (`FATAL ERROR: Reached heap limit`) og kan OOM en 16 Gi cgruppe. Se [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Den målingen er en** minne-budsjett** advarsel, ikke et produkt hard-max på to samtidige lange `/v1/responses`. Heavyweight chat-adgang er lukket av et auto-derivert ingest byte-budsjett (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) størrelse fra det samme V8/cgroup -taket — overstyrer det oppover (eller setter den eldre `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) på en prosess av allerede størrelse, gjeninnfører avbruddet. Små chatter, `/healthz`, `/v1/models` og MCP er** ikke** i den hatten.
+En nodeprosess er** én V8-haug** . To overlappende ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) avbryter den haugen ved ~ 12 Gi (`FATAL ERROR: Reached heap limit`) og kan OOM en 16 Gi cgruppe. Se [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Den målingen er en** minne-budsjett** advarsel, ikke et produkt hard-max på to samtidige lange `/v1/responses`. Heavyweight chat-adgang er lukket av et auto-derivert ingest byte-budsjett (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) størrelse fra det samme V8/cgroup -taket — overstyrer det oppover (eller setter den eldre `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) på en prosess av allerede størrelse, gjeninnfører avbruddet. Små chatter, `/healthz`, `/v1/models` og MCP er** ikke** i den hatten.
 
 ### En-prosess: mer enn to lange `/v1/responses`
 
-EN** sunn** prosess (heap under `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standard `0.75`)** mai** kjøre mer enn to samtidige lange `POST /v1/responses` når det prosessomfattende bytebudsjettet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) fortsatt har plass. Organer på eller over `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standard 256 KiB) tar den samme tungvektsleieavtalen som strukturtunge forespørsler og bruker den samme [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Titalls samtidige lange SSE klienter (operatører trenger ofte 40–50) er en** minne-budsjett** spørsmål — størrelse haug + primary/headroom spor + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ikke en hard "maks 2" produktgrense. En presset haug faller fortsatt med `503` som kan prøves på nytt, så #7849 kommer ikke tilbake.
+EN** sunn** prosess (heap under `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standard `0.75`)** mai** kjøre mer enn to samtidige lange `POST /v1/responses` når det prosessomfattende bytebudsjettet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) fortsatt har plass. Organer på eller over `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standard 256 KiB) tar den samme tungvektsleieavtalen som strukturtunge forespørsler og bruker den samme [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Titalls samtidige lange SSE klienter (operatører trenger ofte 40–50) er en** minne-budsjett** spørsmål — størrelse haug + primary/headroom spor + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ikke en hard "maks 2" produktgrense. En presset haug faller fortsatt med `503` som kan prøves på nytt, så #7849 kommer ikke tilbake.
 
 Til** multiplisere hauger** (uavhengige V8 old-spaces)** i dag** :
 
@@ -754,7 +754,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Prosesstetthet (komprimering av HTTP isolatet) er [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). En logisk klynge i delt holdbar tilstand er [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+Prosesstetthet (komprimering av HTTP isolatet) er [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). En logisk klynge i delt holdbar tilstand er [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Regionale Gemini-feil i Docker
 
@@ -795,7 +795,7 @@ feil. Bare den autentiserte modellforespørselen tester om Gemini kan brukes.
 
 ### Alternativ på vertsnivå: fungerende IPv6 og resolverpolicy
 
-Rapportøren av [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) gjenopprettet
+Rapportøren av [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) gjenopprettet
 tilgangen i sitt miljø ved å aktivere IPv6 for containere og endre adressevalget i glibc.
 Behandle dette som et miljøspesifikt alternativ. Bekreft at IPv6 fungerer på verten,
 at utgående trafikk og ruting fungerer for containeren, og at brannmurreglene er riktige før du justerer resolverinnstillingene.

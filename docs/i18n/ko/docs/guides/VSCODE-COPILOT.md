@@ -107,7 +107,7 @@ npm start
 
 임베딩이 활성화된 빌드가 아니면 페이지에서 프레임 표시를 거부합니다. 확장 프로그램은 응답 헤더에서 이를 감지하고 외부 브라우저로 대체합니다. 아무것도 중단되지 않으며, 이에 대한 안내를 한 번 표시합니다.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) 및 이슈
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273)을 참조하세요.
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273)을 참조하세요.
 
 ---
 

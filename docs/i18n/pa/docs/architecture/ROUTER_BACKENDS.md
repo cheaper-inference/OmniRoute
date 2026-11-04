@@ -4,9 +4,9 @@
 
 ---
 
-> **ਸਥਿਤੀ:** ਸਵੀਕਾਰਿਆ ਗਿਆ · **ਸੰਦਰਭ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **ਕਾਂਟ੍ਰੈਕਟ:** `domain/routing/routerBackends.ts`
-> (ਟਾਈਪਡ ਰਜਿਸਟਰੀ — ਕੋਡ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ਨਾਲ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ)
+> **ਸਥਿਤੀ:** ਸਵੀਕਾਰਿਆ ਗਿਆ · **ਸੰਦਰਭ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **ਕਾਂਟ੍ਰੈਕਟ:** `domain/routing/routerBackends.ts`
+> (ਟਾਈਪਡ ਰਜਿਸਟਰੀ — ਕੋਡ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ਨਾਲ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ)
 
 ਇਹ ADR ਸਪਸ਼ਟ ਕਰਦਾ ਹੈ ਕਿ `ts` (ਨੇਟਿਵ), `bifrost`, `cliproxy`, `9router`, ਅਤੇ
 VibeProxy-ਅਨੁਕੂਲ ਇੰਜਣਾਂ ਦਾ ਆਪਸ ਵਿੱਚ ਕੀ ਸੰਬੰਧ ਹੈ, ਤਾਂ ਜੋ ਯੋਗਦਾਨਕਾਰ ਆਰਕੀਟੈਕਚਰ ਦੇ ਪੱਖੋਂ
@@ -39,7 +39,7 @@ VibeProxy-ਅਨੁਕੂਲ ਇੰਜਣਾਂ ਦਾ ਆਪਸ ਵਿੱਚ �
 ## ਰਜਿਸਟਰੀ — ਸੱਚਾਈ ਦਾ ਇੱਕੋ-ਇੱਕ ਸਰੋਤ
 
 `domain/routing/routerBackends.ts` ਕਾਂਟ੍ਰੈਕਟ (ਕੋਡ
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ਨਾਲ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ) ਹਰੇਕ ਇੰਜਣ ਨੂੰ ਉਸਦੇ
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ਨਾਲ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ) ਹਰੇਕ ਇੰਜਣ ਨੂੰ ਉਸਦੇ
 ਜੀਵਨ-ਚੱਕਰ, ਸਮਰੱਥਾਵਾਂ, ਸਰਵਿਸ ਪਛਾਣ, ਡਿਫਾਲਟ ਪੋਰਟ, ਸਿਹਤ ਕਨਫਿਗਰੇਸ਼ਨ, ਅਤੇ
 ਟੈਲੀਮੀਟਰੀ ਸਮਰਥਨ ਸਮੇਤ ਇੱਕ ਵਾਰ ਘੋਸ਼ਿਤ ਕਰਦਾ ਹੈ। ਵਰਤੋਂਕਾਰ ਹਰੇਕ ਸਾਈਡਕਾਰ ਲਈ
 ਖਾਸ ਸ਼ਰਤਾਂ ਲਿਖਣ ਦੀ ਬਜਾਏ `getRouterBackend(id)`, `listRouterBackends()`, ਅਤੇ
@@ -55,7 +55,7 @@ VibeProxy-ਅਨੁਕੂਲ ਇੰਜਣਾਂ ਦਾ ਆਪਸ ਵਿੱਚ �
 
 ¹ Bifrost ਨੂੰ ਇੱਕ `supervised` ਐਂਬੈਡਿਡ ਸਰਵਿਸ ਵਜੋਂ ਉੱਨਤ ਕਰਨਾ (`/api/services/bifrost/`
 ਤੋਂ ਇੰਸਟਾਲ/ਸ਼ੁਰੂ ਕਰਨਯੋਗ)
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) ਵਿੱਚ ਟ੍ਰੈਕ ਕੀਤਾ ਗਿਆ ਹੈ; ਇਸਦੇ ਮਰਜ ਹੋਣ ਤੱਕ,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) ਵਿੱਚ ਟ੍ਰੈਕ ਕੀਤਾ ਗਿਆ ਹੈ; ਇਸਦੇ ਮਰਜ ਹੋਣ ਤੱਕ,
 Bifrost ਸਿਰਫ਼ `external` ਹੈ (ਕੇਵਲ `BIFROST_BASE_URL` ਰਾਹੀਂ ਪਹੁੰਚਯੋਗ)।
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Bifrost ਸਿਰਫ਼ `external` ਹੈ (ਕੇਵਲ `BIFROST_BASE_URL` ਰ�
 
 ਅੱਜ ਰੀਲੇ ਪੱਧਰ 'ਤੇ ਚੋਣ **ਪੂਰੀ ਤਰ੍ਹਾਂ ਜਾਂ ਬਿਲਕੁਲ ਨਹੀਂ** ਹੈ — `release/v3.8.43` ਉੱਤੇ ਕੋਈ ਪ੍ਰਤੀ-provider
 ਜਾਂ ਪ੍ਰਤੀ-request ਇੰਜਣ ਤਬਦੀਲੀ ਨਹੀਂ ਹੈ। ਪ੍ਰਤੀ-request ਗੇਟ ਨੂੰ sidecar-manifest ਕੰਮ ਦੁਆਰਾ ਜੋੜਿਆ ਜਾ ਰਿਹਾ ਹੈ
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ਜੋ `auto` ਨੂੰ ਕੇਵਲ manifest-ਯੋਗ providers ਨੂੰ Bifrost ਰਾਹੀਂ ਰੂਟ ਕਰਨ ਦਿੰਦਾ ਹੈ।
 
 ## ਡੈਸ਼ਬੋਰਡ ਇੰਟੀਗ੍ਰੇਸ਼ਨ

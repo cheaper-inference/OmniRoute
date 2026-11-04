@@ -223,7 +223,7 @@ livenessProbe:
 
 **Jangan** arahkan **liveness** kubelet ke `/api/monitoring/health`. Path tersebut melakukan pekerjaan DB/pemantauan yang nyata dan akan menghasilkan false positive saat berada di bawah beban.
 
-Terkait: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (probe saat event loop sibuk), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (beban berat penetapan harga katalog), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (beban berat penghitungan token kompresi).
+Terkait: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probe saat event loop sibuk), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (beban berat penetapan harga katalog), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (beban berat penghitungan token kompresi).
 
 ### Watchdog systemd (event loop yang membeku)
 

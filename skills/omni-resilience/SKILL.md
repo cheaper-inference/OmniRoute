@@ -66,7 +66,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — Monitoring & Health
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## System health
 
@@ -173,5 +173,4 @@ Returns: server status, heartbeat, recent audit activity summary.
 - `503` on health endpoint → OmniRoute is starting up; retry in 5s
 - Circuit breaker `OPEN` → provider is temporarily blocked; check `resetAt` to know when it auto-recovers
 - `429 budget_exceeded` → budget guard limit reached; raise limit or wait for reset
-
 <!-- skill:custom-end -->

@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Cén Fáth a Bhfuil Sí Ann
 
-Tugadh isteach í in PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Seo iad na fadhbanna ba chúis léi:
+Tugadh isteach í in PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Seo iad na fadhbanna ba chúis léi:
 
 | Fadhb                                                            | Cad a réitíonn an treoir                                                                                                                                                                                                                                                                                                                                                                            |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

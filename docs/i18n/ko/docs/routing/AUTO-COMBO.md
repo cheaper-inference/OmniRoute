@@ -128,7 +128,7 @@ handleComboChat(저장된 콤보와 동일한 엔진)
 
 ## 실제 모델 ID와 일치하는 콤보 이름
 
-`name`이 접두사 없는 모델 ID와 동일한 콤보(예: 이름이 `gpt-5.5`인 콤보)는 버그가 아니라 **의도적으로 지원되는 패턴**입니다. 이는 [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)에 문서화된 모델 ID별 공급자 폴백 메커니즘입니다. 접두사 없는 모델 ID를 확인하기 전에 콤보 해석을 먼저 확인하므로(`src/sse/services/model.ts`의 `getComboForModel()`), 접두사 없는 ID `gpt-5.5`에 대한 요청은 단일 공급자로 곧바로 전달되지 않고 콤보의 대상(예: `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`)을 통해 라우팅됩니다. 이는 [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227)을 위해 구현된 재작성 전 콤보 우선순위를 재사용하며, `tests/unit/responses-combo-resolution-3227.test.ts` 및 `tests/unit/combo-name-codex-responses-rewrite.test.ts`에서 회귀 테스트됩니다.
+`name`이 접두사 없는 모델 ID와 동일한 콤보(예: 이름이 `gpt-5.5`인 콤보)는 버그가 아니라 **의도적으로 지원되는 패턴**입니다. 이는 [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)에 문서화된 모델 ID별 공급자 폴백 메커니즘입니다. 접두사 없는 모델 ID를 확인하기 전에 콤보 해석을 먼저 확인하므로(`src/sse/services/model.ts`의 `getComboForModel()`), 접두사 없는 ID `gpt-5.5`에 대한 요청은 단일 공급자로 곧바로 전달되지 않고 콤보의 대상(예: `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`)을 통해 라우팅됩니다. 이는 [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227)을 위해 구현된 재작성 전 콤보 우선순위를 재사용하며, `tests/unit/responses-combo-resolution-3227.test.ts` 및 `tests/unit/combo-name-codex-responses-rewrite.test.ts`에서 회귀 테스트됩니다.
 
 실제 모델 ID를 가리는 이름으로 콤보를 생성하거나 이름을 변경하는 작업은 **절대로 거부되지 않습니다**. 이를 거부하면 문서화된 이 워크플로가 중단되기 때문입니다. 대신 (#8530), 새 이름이 실제 모델 ID와 충돌하면 `POST /api/combos`와 `PUT /api/combos/[id]`가 응답에 비차단 `warning` 필드를 추가합니다.
 
@@ -164,7 +164,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto`는 사용자의 콤보를 사용하지 않습니다.** `auto`/`auto/*`는 자체적인 무설정 후보 풀을 구성하며, 콤보 이름이 문자 그대로 `auto`인 경우에만 영구 저장된 콤보를 참조합니다(권장하지 않음). 콤보를 통해 라우팅하려면 `auto`가 아니라 해당 콤보의 정확한 이름을 전송하세요.
 - **`openrouter/auto`는 실제 유료 OpenRouter 제품**("Auto Best Available")이며 OmniRoute 별칭이 아닙니다. 이는 OpenRouter 레지스트리(`open-sse/config/providers/registry/openrouter/index.ts`)의 단일 정적 모델 항목이며 별도로 요금이 청구됩니다. `auto` 풀에서 제외하려면 Settings → Routing → Hide paid models를 사용하세요.
 
-이 문서에서 다루는 최초의 혼동에 대해서는 [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) 및 [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111)을 참조하세요.
+이 문서에서 다루는 최초의 혼동에 대해서는 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) 및 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)을 참조하세요.
 
 ## 작동 방식 (영구 저장되는 자동 조합)
 

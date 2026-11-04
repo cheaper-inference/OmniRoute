@@ -149,7 +149,7 @@ Antigravity 요청은 호출자의 텍스트를 바이트 단위로 그대로 �
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`를 읽음
 - `src/lib/oauth/providers/antigravity.ts` — 자격 증명 연결 처리
-- 최초 사고 보고서: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- 최초 사고 보고서: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

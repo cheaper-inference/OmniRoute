@@ -4,9 +4,9 @@
 
 ---
 
-> **狀態：** 已接受 · **背景：** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670)、
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **契約：** `domain/routing/routerBackends.ts`
-> （類型化登錄表——程式碼隨 [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) 合併）
+> **狀態：** 已接受 · **背景：** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670)、
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **契約：** `domain/routing/routerBackends.ts`
+> （類型化登錄表——程式碼隨 [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) 合併）
 
 本 ADR 明確界定 `ts`（原生）、`bifrost`、`cliproxy`、`9router` 與
 VibeProxy 相容引擎之間的關係，避免貢獻者繼續混淆兩個在架構上截然不同的概念。本文將由路由後端登錄表工作所引入的類型化登錄表，確立為此模型的唯一真實來源。
@@ -31,7 +31,7 @@ VibeProxy 相容引擎之間的關係，避免貢獻者繼續混淆兩個在架�
 ## 登錄表——唯一真實來源
 
 `domain/routing/routerBackends.ts` 契約（程式碼隨
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) 合併）會一次宣告每個引擎，包括其生命週期、功能、服務識別資訊、預設連接埠、健康檢查設定及遙測支援。使用者端會透過 `getRouterBackend(id)`、
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) 合併）會一次宣告每個引擎，包括其生命週期、功能、服務識別資訊、預設連接埠、健康檢查設定及遙測支援。使用者端會透過 `getRouterBackend(id)`、
 `listRouterBackends()` 與 `listRouterBackendsByCapability(cap)` 查詢引擎，而非針對每個 Sidecar 寫死特殊處理邏輯。
 
 | 後端        | 生命週期     | 服務（軸 A） | 中繼後端（軸 B）   | 健康檢查      | 預設連接埠 |
@@ -43,7 +43,7 @@ VibeProxy 相容引擎之間的關係，避免貢獻者繼續混淆兩個在架�
 | `vibeproxy` | `external`   | —            | —（提供者配接器）  | `/v1/models`  | —          |
 
 ¹ 將 Bifrost 提升為 `supervised` 嵌入式服務（可從 `/api/services/bifrost/` 安裝／啟動）的工作正在
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) 中追蹤；在其合併之前，Bifrost 僅支援 `external`（只能透過 `BIFROST_BASE_URL` 存取）。
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) 中追蹤；在其合併之前，Bifrost 僅支援 `external`（只能透過 `BIFROST_BASE_URL` 存取）。
 
 `capabilities`（`chat`、`responses`、`streaming`、`tools`、`vision`、
 `oauth-backed`、`dashboard-embed`、`model-sync`、`native-hot-path`）讓呼叫端可依引擎實際具備的功能進行篩選，而不必針對每個 ID 寫死條件分支。
@@ -108,8 +108,8 @@ VibeProxy 相容引擎之間的關係，避免貢獻者繼續混淆兩個在架�
 
 目前的選擇在中繼層級是**全有或全無** — `release/v3.8.43` 上不存在依提供者
 或依請求切換引擎的功能。sidecar manifest 工作正在加入依請求控制的閘門
-（[#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`），
+（[#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`），
 使 `auto` 僅將符合 manifest 資格的提供者透過 Bifrost 路由。
 
 ## 儀表板整合

@@ -453,7 +453,7 @@ nyochaa build ahụ kpọmkwem (#8084 slice (a)). Naanị PR ndị sitere n’ot
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ma ọ bụ tinye label `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # nrụnye nlele
 ```
 

@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 ಕೋಡ್ ಅನ್ನು ಕ್ಲೋನ್ ಮಾಡಿ ಮತ್ತು ಡೈರೆಕ್ಟರಿಯನ್ನು ತೆರೆಯಿರಿ
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಯಂತ್ರಗಳ ರೋಲ�
 
 ### 9.1 ನಿಮ್ಮ ಫೋರ್ಕ್ನ `fly.toml` ಅನ್ನು ಉಳಿಸಿಕೊಂಡು ಅಪ್ಸ್ಟ್ರೀಮ್ ರೆಪೊಸಿಟರಿ ನವೀಕರಣಗಳನ್ನು ಅನುಸರಿಸುವುದು
 
-ಪ್ರಸ್ತುತ ರೆಪೊಸಿಟರಿಯು ಫೋರ್ಕ್ ಆಗಿದ್ದರೆ ಮತ್ತು ಅಪ್ಸ್ಟ್ರೀಮ್ `https://github.com/cheaper-inference/OmniRoute` ನಿಂದ ನವೀಕರಣಗಳನ್ನು ಸಿಂಕ್ ಮಾಡಲು ನೀವು ಬಯಸಿದರೆ, ಕೆಳಗಿನ ಕಾರ್ಯಪ್ರವಾಹವನ್ನು ಅನುಸರಿಸಿ.
+ಪ್ರಸ್ತುತ ರೆಪೊಸಿಟರಿಯು ಫೋರ್ಕ್ ಆಗಿದ್ದರೆ ಮತ್ತು ಅಪ್ಸ್ಟ್ರೀಮ್ `https://github.com/diegosouzapw/OmniRoute` ನಿಂದ ನವೀಕರಣಗಳನ್ನು ಸಿಂಕ್ ಮಾಡಲು ನೀವು ಬಯಸಿದರೆ, ಕೆಳಗಿನ ಕಾರ್ಯಪ್ರವಾಹವನ್ನು ಅನುಸರಿಸಿ.
 
 ಮೊದಲು, ನಿಮ್ಮ ರಿಮೋಟ್ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ:
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡದಿದ್ದರೆ, ಅದನ್ನು ಸೇರಿಸಿ:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 ಅಪ್ಸ್ಟ್ರೀಮ್ನೊಂದಿಗೆ ಸಿಂಕ್ ಮಾಡುವ ಮೊದಲು, ಇತ್ತೀಚಿನ ಕಮಿಟ್ಗಳು ಮತ್ತು ಟ್ಯಾಗ್ಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಿ:

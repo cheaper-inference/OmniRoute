@@ -18,7 +18,7 @@ Agent Skills فایلهای ساختاریافتهٔ SKILL.md هستند که ب
 - یک **شناسهٔ متعارف** (`omni-auth`، `cli-serve` و غیره)
 - یک فایل **SKILL.md** در `skills/{id}/SKILL.md` با فرادادهٔ YAML (`name`، `description`) + بدنهٔ غنی Markdown
 - **نقاط پایانی REST** (مهارتهای API) یا **زیرفرمانهای CLI** (مهارتهای CLI) که از مشخصات OpenAPI و رجیستری CLI استخراج شدهاند
-- یک **نشانی خام GitHub** برای دریافت زنده: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- یک **نشانی خام GitHub** برای دریافت زنده: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. دریافت مستقیم فایل خام از GitHub (بدون نیاز به سرور)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

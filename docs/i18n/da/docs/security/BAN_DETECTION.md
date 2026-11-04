@@ -58,8 +58,8 @@ ingen automatisk genoprettelse), hvorimod operatøren fjerner en verificeringsan
 Hvis udtrykket beholdes på udelukkelseslisten, bliver den cloud-code-403-gren, der kan afhjælpes, i
 `classifyProviderError` også utilgængelig for denne formulering, fordi `accountDeactivated`
 evalueres først — derfor kunne projekt-rute-genoprettelsen, der blev tilføjet for Gemini Code Assist i
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) og
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452), aldrig køre.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) og
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452), aldrig køre.
 
 Tre tilstødende, **separate** signaltabeller er _ikke_ en del af registreringen af udelukkelsesnøgleord:
 

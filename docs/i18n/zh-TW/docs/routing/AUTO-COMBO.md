@@ -115,7 +115,7 @@ handleComboChat（與持久化組合使用相同的引擎）
 
 ## 與實際模型 ID 相符的組合名稱
 
-`name` 與純模型 ID 完全相同的組合（例如名為 `gpt-5.5` 的組合）是**刻意設計且受支援的模式**，而非錯誤：這是 [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) 中所記載，針對各模型 ID 進行提供者備援的機制。由於組合解析會先於純模型 ID 解析進行（`src/sse/services/model.ts` 中的 `getComboForModel()`），因此對純 ID `gpt-5.5` 的請求會透過該組合的目標（例如 `acme-responses/gpt-5.5`、`backup-responses/gpt-5.5`）路由，而不是直接傳送至單一提供者——這重用了為 [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) 建立的「組合優先於重寫」優先順序，並由 `tests/unit/responses-combo-resolution-3227.test.ts` 和 `tests/unit/combo-name-codex-responses-rewrite.test.ts` 進行迴歸測試。
+`name` 與純模型 ID 完全相同的組合（例如名為 `gpt-5.5` 的組合）是**刻意設計且受支援的模式**，而非錯誤：這是 [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) 中所記載，針對各模型 ID 進行提供者備援的機制。由於組合解析會先於純模型 ID 解析進行（`src/sse/services/model.ts` 中的 `getComboForModel()`），因此對純 ID `gpt-5.5` 的請求會透過該組合的目標（例如 `acme-responses/gpt-5.5`、`backup-responses/gpt-5.5`）路由，而不是直接傳送至單一提供者——這重用了為 [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) 建立的「組合優先於重寫」優先順序，並由 `tests/unit/responses-combo-resolution-3227.test.ts` 和 `tests/unit/combo-name-codex-responses-rewrite.test.ts` 進行迴歸測試。
 
 建立組合或重新命名組合，使其名稱遮蔽實際模型 ID，**絕不會遭到拒絕**——否則將破壞此處記載的工作流程。相反地（#8530），當（新）名稱與實際模型 ID 衝突時，`POST /api/combos` 和 `PUT /api/combos/[id]` 會在回應中附加一個非阻斷性的 `warning` 欄位：
 
@@ -151,7 +151,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` 不會使用您的組合。** `auto`/`auto/*` 會建立自己的零設定候選集，且只有在某個組合的名稱確實為 `auto` 時才會查閱持久化組合（不建議這麼做）。若要透過組合進行路由，請傳送其確切名稱，而不是 `auto`。
 - **`openrouter/auto` 是真正的付費 OpenRouter 產品**（「Auto Best Available」），而不是 OmniRoute 別名。它是 OpenRouter 登錄檔（`open-sse/config/providers/registry/openrouter/index.ts`）中唯一的靜態模型項目，且會獨立計費。請使用 Settings → Routing → Hide paid models，將其排除於 `auto` 候選集中。
 
-請參閱 [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) 和 [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111)，以瞭解本文所說明之原始混淆。
+請參閱 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) 和 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)，以瞭解本文所說明之原始混淆。
 
 ## 運作方式（持久化自動組合）
 

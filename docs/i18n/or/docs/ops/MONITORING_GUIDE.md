@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet **ସଜୀବତା** ଯାଞ୍ଚକୁ `/api/monitoring/health` ଆଡ଼କୁ ନିର୍ଦ୍ଦେଶ କରନ୍ତୁ **ନାହିଁ**। ସେହି ପଥ ପ୍ରକୃତ DB/ମନିଟରିଂ କାର୍ଯ୍ୟ କରେ ଏବଂ ଲୋଡ୍ରେ ଭୁଲ୍ ପଜିଟିଭ୍ ଦେଖାଇବ।
 
-ସମ୍ପର୍କିତ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ଇଭେଣ୍ଟ ଲୁପ୍ ବ୍ୟସ୍ତ ଥିବା ସମୟରେ ପ୍ରୋବ୍ଗୁଡ଼ିକ), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (କ୍ୟାଟାଲଗ୍ ମୂଲ୍ୟ ନିର୍ଦ୍ଧାରଣ ଦ୍ୱାରା ସମ୍ବଳର ଅତ୍ୟଧିକ ବ୍ୟବହାର), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (କମ୍ପ୍ରେସନ୍ ଟୋକନ୍ ଗଣନା ଦ୍ୱାରା ସମ୍ବଳର ଅତ୍ୟଧିକ ବ୍ୟବହାର)।
+ସମ୍ପର୍କିତ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ଇଭେଣ୍ଟ ଲୁପ୍ ବ୍ୟସ୍ତ ଥିବା ସମୟରେ ପ୍ରୋବ୍ଗୁଡ଼ିକ), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (କ୍ୟାଟାଲଗ୍ ମୂଲ୍ୟ ନିର୍ଦ୍ଧାରଣ ଦ୍ୱାରା ସମ୍ବଳର ଅତ୍ୟଧିକ ବ୍ୟବହାର), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (କମ୍ପ୍ରେସନ୍ ଟୋକନ୍ ଗଣନା ଦ୍ୱାରା ସମ୍ବଳର ଅତ୍ୟଧିକ ବ୍ୟବହାର)।
 
 ### systemd ୱାଚ୍ଡଗ୍ (ସ୍ଥଗିତ ଇଭେଣ୍ଟ ଲୁପ୍)
 

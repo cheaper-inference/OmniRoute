@@ -132,13 +132,13 @@ Samodejno točkovanje izbere najboljšega ponudnika/model za posamezno zahtevo
 Kombinacija, katere `name` je enak samostojnemu ID-ju modela (npr. kombinacija z imenom
 `gpt-5.5`), je **nameren in podprt vzorec**, ne napaka: to je
 mehanizem za nadomestnega ponudnika za posamezen ID modela, dokumentiran v
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Ker se
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Ker se
 razreševanje kombinacij preveri pred razreševanjem samostojnega ID-ja modela
 (`getComboForModel()` v `src/sse/services/model.ts`), je zahteva za samostojni
 ID `gpt-5.5` usmerjena prek ciljev kombinacije (npr.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) namesto neposredno k
 enemu ponudniku — s tem se ponovno uporabi prednost kombinacije pred prepisovanjem, uvedena za
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), delovanje pa je
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), delovanje pa je
 regresijsko preizkušeno v `tests/unit/responses-combo-resolution-3227.test.ts` in
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Dve pogosti pasti:
 - **`auto` ne uporablja vaših kombinacij.** `auto`/`auto/*` ustvari lasten nabor kandidatov brez potrebe po konfiguraciji in shranjene kombinacije upošteva samo, če je kombinacija dobesedno poimenovana `auto` (ni priporočljivo). Za usmerjanje prek kombinacije pošljite njeno točno ime — ne `auto`.
 - **`openrouter/auto` je dejanski plačljivi izdelek OpenRouter** (»Auto Best Available«), ne vzdevek OmniRoute. Je edini statični vnos modela v registru OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) in se obračunava ločeno. Če ga želite izključiti iz naborov `auto`, uporabite Nastavitve → Usmerjanje → Skrij plačljive modele.
 
-Za prvotno zmedo, ki jo ta dokumentacija pojasnjuje, glejte [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) in [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
+Za prvotno zmedo, ki jo ta dokumentacija pojasnjuje, glejte [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) in [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
 ## Kako deluje (trajno shranjene samodejne kombinacije)
 

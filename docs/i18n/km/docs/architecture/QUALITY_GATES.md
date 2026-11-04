@@ -385,7 +385,7 @@ metric ដោយមិនធ្វើបច្ចុប្បន្នភាព�
 ### CodeQL ratchet៖ វដ្តនៃការធ្វើឱ្យថ្មី និងការកេះដោយដៃ
 
 `check:codeql-ratchet` អាន **ស្ថានភាព repo ដែលត្រូវបានធ្វើឱ្យថ្មីតាមកាលវិភាគ — មិនមែនតាម PR នីមួយៗទេ។**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` រាយការណ៍
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` រាយការណ៍
 `state: configured`, `schedule: weekly`៖ ការស្កេន default-setup របស់ GitHub មិនមែនជា
 ការវិភាគសម្រាប់រាល់ push ទេ។ ផលវិបាក៖ បន្ទាប់ពី PR ដែលកែ ALERTS ត្រូវបាន merge រួច ratchet នៅតែអាន
 ចំនួនចាស់ដែលខ្ពស់ជាង រហូតដល់ការស្កេនតាមកាលវិភាគបន្ទាប់ដំណើរការ — ដូច្នេះវារាយការណ៍ពីការថយក្រោយ

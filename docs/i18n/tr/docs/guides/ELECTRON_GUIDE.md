@@ -198,7 +198,7 @@ Ana süreç yalnızca o dosyayı okur; daha sonraki adaylar birleştirilmez. Sun
 
 ## Otomatik güncelleme
 
-`electron-updater` GitHub sağlayıcısıyla (`cheaper-inference/OmniRoute`) kullanır.
+`electron-updater` GitHub sağlayıcısıyla (`diegosouzapw/OmniRoute`) kullanır.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Oluşturucuya `update-status` IPC aracılığıyla iletilen olaylar: `checking`, `available`, `not-available`, `downloading` ( `percent` ile), `downloaded`, `error`
@@ -273,7 +273,7 @@ Eserler `electron/dist-electron/` iniyor:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Sürümler, aynı zamanda `electron-updater` yeni sürümleri kontrol ettiği GitHub Sürümlerine (`cheaper-inference/OmniRoute`) yayınlanır.
+Sürümler, aynı zamanda `electron-updater` yeni sürümleri kontrol ettiği GitHub Sürümlerine (`diegosouzapw/OmniRoute`) yayınlanır.
 
 ## Sorun giderme
 

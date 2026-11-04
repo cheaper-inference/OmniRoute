@@ -453,7 +453,7 @@ məhz həmin quruluşu doğrulayır (#8084 hissə (a)). Yalnız eyni repozitoriy
 gh workflow run preview-artifact.yml -f pr_number=<N>   # yaxud `preview-artifact` etiketini əlavə edin
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # önizləmə quraşdırması
 ```
 

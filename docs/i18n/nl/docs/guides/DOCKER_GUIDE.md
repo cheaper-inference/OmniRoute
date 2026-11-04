@@ -324,7 +324,7 @@ Geheugengedrag in Docker:
 
 ### Runtime-RAM voor coding agents
 
-De Docker-standaardwaarde van 1 GiB is een ondergrens voor het dashboard en lichte chats, geen capaciteit voor productiegebruik. Lange bodies van `POST /v1/responses` (honderden berichten, tientallen tools) houden tijdens compressie meerdere grafen in het geheugen vast. Twee overlappende requests van ~3 MiB / ~750k tokens hebben V8 afgebroken bij een old-space van **12 GiB** (`FATAL ERROR: Reached heap limit`) en veroorzaakten ook een cgroup-OOM bij 16 GiB. Zie [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+De Docker-standaardwaarde van 1 GiB is een ondergrens voor het dashboard en lichte chats, geen capaciteit voor productiegebruik. Lange bodies van `POST /v1/responses` (honderden berichten, tientallen tools) houden tijdens compressie meerdere grafen in het geheugen vast. Twee overlappende requests van ~3 MiB / ~750k tokens hebben V8 afgebroken bij een old-space van **12 GiB** (`FATAL ERROR: Reached heap limit`) en veroorzaakten ook een cgroup-OOM bij 16 GiB. Zie [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Stel **cgroup `--memory` hoger in dan de heap** — native buffers, SQLite en tijdelijke compressiedata bevinden zich buiten V8.
 
@@ -695,7 +695,7 @@ spec:
 
 `preStop` sleep kan Kube service-eindpunten laten vallen vóór SIGTERM so** nieuw** het verkeer stopt met het stervensproces. `/v1/responses` SSE tijdens de vlucht wordt leeggemaakt tot `SHUTDOWN_TIMEOUT_MS` (standaard 30s) via zwaargewicht toegangsleases (#11015). Nieuwe verzoeken die het proces nog steeds bereiken, krijgen `503` + `Retry-After: 5`. Het gat tussen het lege eindpunt opnieuw maken totdat de vervanging gereed is, blijft een harde storing: dat is de SQLite topologie, en niet een foutieve configuratie van de probe.
 
-Externe Postgres / multi-writer HA is** niet** een gedocumenteerd voorraadpad. Als je HA nodig hebt, bewaar dan een enkele replica of voer een topologie uit die het project afzonderlijk heeft getest en gedocumenteerd. Het Postgres/MySQL werk staat in [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Totdat dit wordt verzonden, is dit de enige ondersteunde manier om te vermenigvuldigen** groot** `/v1/responses` capaciteit is N onafhankelijke processen (volgende sectie), niet `replicas > 1` op één volume.
+Externe Postgres / multi-writer HA is** niet** een gedocumenteerd voorraadpad. Als je HA nodig hebt, bewaar dan een enkele replica of voer een topologie uit die het project afzonderlijk heeft getest en gedocumenteerd. Het Postgres/MySQL werk staat in [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Totdat dit wordt verzonden, is dit de enige ondersteunde manier om te vermenigvuldigen** groot** `/v1/responses` capaciteit is N onafhankelijke processen (volgende sectie), niet `replicas > 1` op één volume.
 
 ## Uitschalen: N onafhankelijke processen
 
@@ -705,11 +705,11 @@ Kopieën van één Codex -account mogen niet onafhankelijk het vernieuwingstoken
 
 De passieve instantie leest de verbinding opnieuw wanneer vernieuwing nodig is en gebruikt alleen een ander, niet-verlopen toegangstoken. Anders wordt vernieuwing uitgeschakeld zonder dat de verbinding verloopt of wordt gedeactiveerd, of zonder dat er een vernieuwingsonderbrekingsfout wordt geteld. Echte upstream-authenticatiefouten maken nog steeds gebruik van normale foutaccounting, exponentiële cooldown en de normale clientfout; accountdeactivering blijft permanent. Synchroniseer de geroteerde tokens van de eigenaar voordat de toegangstokens verlopen (de standaard proactieve vernieuwingstermijn is vijf minuten), of importeer het Codex authenticatiebestand opnieuw. Bij passieve import worden de geleverde tokens opgeslagen zonder deze te valideren op het tokeneindpunt. Handmatig dashboard/API vernieuwen retourneert `409 refresh_disabled`; nieuwe OAuth logins zijn ongewijzigd. Zie [omgevingsreferentie](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Eén knooppuntproces is** één V8-hoop** . Twee overlappende ~ 3 MiB / ~ 750k-token coderingsagent `POST /v1/responses` (RTK + Caveman) breken die heap af op ~ 12 Gi (`FATAL ERROR: Reached heap limit`) en kunnen OOM een 16 Gi cgroup. Zie [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Die meting is a** geheugenbudget** waarschuwing, geen product hard-max van twee gelijktijdige lange `/v1/responses`. Toegang tot zware chats wordt afgesloten door een automatisch afgeleid ingest-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) met een grootte vanaf datzelfde V8/cgroup plafond. — overschrijft dit naar boven (of door het instellen van de oude `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -limiet voor het aantal verzoeken) op een proces dat al zo groot is, wordt het afbreken opnieuw geïntroduceerd. Kleine chats, `/healthz`, `/v1/models` en MCP zijn dat wel** niet** in dat kapje.
+Eén knooppuntproces is** één V8-hoop** . Twee overlappende ~ 3 MiB / ~ 750k-token coderingsagent `POST /v1/responses` (RTK + Caveman) breken die heap af op ~ 12 Gi (`FATAL ERROR: Reached heap limit`) en kunnen OOM een 16 Gi cgroup. Zie [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Die meting is a** geheugenbudget** waarschuwing, geen product hard-max van twee gelijktijdige lange `/v1/responses`. Toegang tot zware chats wordt afgesloten door een automatisch afgeleid ingest-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) met een grootte vanaf datzelfde V8/cgroup plafond. — overschrijft dit naar boven (of door het instellen van de oude `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -limiet voor het aantal verzoeken) op een proces dat al zo groot is, wordt het afbreken opnieuw geïntroduceerd. Kleine chats, `/healthz`, `/v1/models` en MCP zijn dat wel** niet** in dat kapje.
 
 ### Eén proces: meer dan twee lange `/v1/responses`
 
-A** gezond** proces (heap onder `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standaard `0.75`)** kunnen** voer meer dan twee gelijktijdige lange `POST /v1/responses` uit wanneer het procesbrede inflight-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) nog ruimte heeft. Lichamen op of boven `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standaard 256 KiB) nemen dezelfde zwaargewicht-lease als structuurzware verzoeken en gebruiken dezelfde [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tientallen gelijktijdige lange SSE clients (operators hebben er vaak 40-50 nodig) zijn a** geheugenbudget** vraag — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — geen harde “max 2” productlimiet. Een onder druk staande heap verliest nog steeds met opnieuw te proberen `503`, dus #7849 keert niet terug.
+A** gezond** proces (heap onder `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standaard `0.75`)** kunnen** voer meer dan twee gelijktijdige lange `POST /v1/responses` uit wanneer het procesbrede inflight-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) nog ruimte heeft. Lichamen op of boven `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standaard 256 KiB) nemen dezelfde zwaargewicht-lease als structuurzware verzoeken en gebruiken dezelfde [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tientallen gelijktijdige lange SSE clients (operators hebben er vaak 40-50 nodig) zijn a** geheugenbudget** vraag — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — geen harde “max 2” productlimiet. Een onder druk staande heap verliest nog steeds met opnieuw te proberen `503`, dus #7849 keert niet terug.
 
 Naar** hoopjes vermenigvuldigen** (onafhankelijke V8 oude ruimtes)** Vandaag** :
 
@@ -752,7 +752,7 @@ volumes:
   omniroute-b-data:
 ```
 
-De dichtheid tijdens het proces (compressie van het HTTP isolaat) is [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Eén logisch cluster met een gedeelde duurzame status is [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+De dichtheid tijdens het proces (compressie van het HTTP isolaat) is [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Eén logisch cluster met een gedeelde duurzame status is [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Regionale Gemini-fouten in Docker
 
@@ -793,7 +793,7 @@ fout is; alleen het geauthenticeerde modelverzoek test of Gemini beschikbaar is.
 
 ### Alternatief op hostniveau: werkend IPv6 en resolverbeleid
 
-De melder van [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) herstelde
+De melder van [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) herstelde
 de toegang in diens omgeving door IPv6 voor containers in te schakelen en de adresselectie
 van glibc te wijzigen. Beschouw dit als een omgevingsspecifiek alternatief. Controleer of IPv6
 op de host werkt en verifieer de uitgaande connectiviteit/routering en firewallregels van de container voordat u

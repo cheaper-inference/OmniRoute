@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 کلونکردن کد و ورود به دایرکتوری
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly بهطور خودکار بهروزرسانی تدریجی ماشینها ر�
 
 ### ۹.۱ پیگیری بهروزرسانیهای مخزن بالادستی با حفظ `fly.toml` فورک شما
 
-اگر مخزن فعلی یک فورک است و میخواهید بهروزرسانیها را از مخزن بالادستی `https://github.com/cheaper-inference/OmniRoute` همگامسازی کنید، گردش کار زیر را دنبال کنید.
+اگر مخزن فعلی یک فورک است و میخواهید بهروزرسانیها را از مخزن بالادستی `https://github.com/diegosouzapw/OmniRoute` همگامسازی کنید، گردش کار زیر را دنبال کنید.
 
 ابتدا ریموتهای خود را بررسی کنید:
 
@@ -309,7 +309,7 @@ git remote -v
 اگر `upstream` پیکربندی نشده است، آن را اضافه کنید:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 پیش از همگامسازی با مخزن بالادستی، آخرین کامیتها و تگها را دریافت کنید:

@@ -56,7 +56,7 @@ flowchart LR
 మీరు కోరుకునే బ్రాంచ్లో విలీనం చేయవచ్చని భావించే ముందు, తెరిచి ఉన్న ఫ్రీజ్ ఉందేమో తనిఖీ చేయండి:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 విలీన విధానాలు (యజమాని `queue` లేబుల్ → Mergify) గురించి

@@ -55,7 +55,7 @@ flowchart LR
 원하는 브랜치가 병합 가능한 상태라고 판단하기 전에 열려 있는 동결 이슈가 있는지 확인하세요.
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 병합 메커니즘(소유자의 `queue` 레이블 → Mergify)은

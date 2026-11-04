@@ -6,7 +6,7 @@
 
 **Stav:** návrh (čaká sa na kontrolu od @diegosouzapw)
 **Dátum:** 2026-06-20
-**Referencie:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**Referencie:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## TL;DR
 

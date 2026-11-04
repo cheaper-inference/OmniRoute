@@ -171,7 +171,7 @@ Titik terkait:
 
 - `open-sse/executors/antigravity.ts` — membaca `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — penyaluran kredensial
-- Laporan insiden asli: Diskusi [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Laporan insiden asli: Diskusi [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

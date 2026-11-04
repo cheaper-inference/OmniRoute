@@ -431,7 +431,7 @@ Implementierung ausstehend).
 ### CodeQL-Ratchet: Aktualisierungsintervall und manuelle Auslösung
 
 `check:codeql-ratchet` liest **den Repository-Status, der nach einem Zeitplan aktualisiert wird — nicht pro PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` meldet
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` meldet
 `state: configured`, `schedule: weekly`: GitHubs Scan mit Standardkonfiguration, keine Analyse
 bei jedem Push. Folge: Nachdem ein PR, der Warnungen BEHEBT, gemergt wurde, liest das Ratchet
 weiterhin die alte, höhere Anzahl, bis der nächste geplante Scan ausgeführt wird — daher meldet es

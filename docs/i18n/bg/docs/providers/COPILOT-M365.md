@@ -139,8 +139,8 @@ OmniRoute сканира HAR файла за WebSocket URL адреса на Cha
 
 ## Препратки
 
-- Проблем: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Дискусия: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Проблем: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Дискусия: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Изходен код: `src/shared/constants/providers/web-cookie.ts` (дефиниция на доставчика)
 - Импортиране на HAR: `src/shared/utils/m365HarImport.ts`
 - Полета за удостоверяване: `src/shared/providers/webSessionCredentials.ts`

@@ -324,7 +324,7 @@ Pag-uugali ng memory sa Docker:
 
 ### Runtime RAM para sa mga coding agent
 
-Ang default na 1 GiB ng Docker ay minimum para sa dashboard/light-chat, hindi sukat para sa production. Ang mahahabang body ng `POST /v1/responses` (daan-daang mensahe, sampu-sampung tool) ay nagpapanatili ng maraming in-memory graph habang nagsasagawa ng compression. Dalawang nagsasabay na request na ~3 MiB / ~750k-token ang nagpa-abort sa V8 sa **12 GiB** old-space (`FATAL ERROR: Reached heap limit`) at umabot din sa cgroup OOM na 16 GiB. Tingnan ang [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+Ang default na 1 GiB ng Docker ay minimum para sa dashboard/light-chat, hindi sukat para sa production. Ang mahahabang body ng `POST /v1/responses` (daan-daang mensahe, sampu-sampung tool) ay nagpapanatili ng maraming in-memory graph habang nagsasagawa ng compression. Dalawang nagsasabay na request na ~3 MiB / ~750k-token ang nagpa-abort sa V8 sa **12 GiB** old-space (`FATAL ERROR: Reached heap limit`) at umabot din sa cgroup OOM na 16 GiB. Tingnan ang [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Itakda ang laki ng **cgroup `--memory` nang mas mataas kaysa sa heap** — nasa labas ng V8 ang mga native buffer, SQLite, at compression intermediate.
 
@@ -693,7 +693,7 @@ spec:
 
 Hinahayaan `preStop` sleep si kube na mag-drop ng mga endpoint ng Serbisyo bago SIGTERM kaya** bago** humihinto ang trapiko sa proseso ng namamatay. In-flight `/v1/responses` SSE ay na-drain hanggang `SHUTDOWN_TIMEOUT_MS` (default 30s) sa pamamagitan ng heavyweight admission leases (#11015). Ang mga bagong kahilingan na umaabot pa rin sa proseso ay makakakuha ng `503` + `Retry-After: 5`. Ang Recreate empty-endpoint gap hanggang ang kapalit ay Ready ay nananatiling mahirap na pagkawala — iyon ay ang SQLite topology, hindi isang probe misconfig.
 
-Ang panlabas Postgres / multi-writer HA ay** hindi** isang dokumentadong stock path. Kung kailangan mo ng HA, panatilihin ang isang solong replika o magpatakbo ng topology na sinubukan at naidokumento ng proyekto nang hiwalay. Ang Postgres/MySQL work ay nakatira sa [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Hanggang sa nagpapadala iyon, ang tanging suportadong paraan upang dumami** malaki** Ang kapasidad `/v1/responses` ay N independiyenteng mga proseso (susunod na seksyon), hindi `replicas > 1` sa isang volume.
+Ang panlabas Postgres / multi-writer HA ay** hindi** isang dokumentadong stock path. Kung kailangan mo ng HA, panatilihin ang isang solong replika o magpatakbo ng topology na sinubukan at naidokumento ng proyekto nang hiwalay. Ang Postgres/MySQL work ay nakatira sa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hanggang sa nagpapadala iyon, ang tanging suportadong paraan upang dumami** malaki** Ang kapasidad `/v1/responses` ay N independiyenteng mga proseso (susunod na seksyon), hindi `replicas > 1` sa isang volume.
 
 ## Scale-out: N independiyenteng mga proseso
 
@@ -703,11 +703,11 @@ Ang mga kopya ng isang Codex account ay hindi dapat hiwalay na ubusin ang single
 
 Binabasa muli ng passive instance ang koneksyon kapag kailangan ang pag-refresh at gumagamit lang ng ibang hindi pa natatapos na access token. Kung hindi, ang pag-refresh ay hindi pinagana nang hindi nag-e-expire o nagde-deactivate ng koneksyon o nagbibilang ng pagkabigo sa pag-refresh-breaker. Ang mga tunay na upstream authentication failure ay gumagamit pa rin ng normal na failure accounting, exponential cooldown at ang normal na error ng kliyente; nananatiling permanente ang pag-deactivate ng account. I-synchronize ang mga na-rotate na token ng may-ari bago mag-expire ang mga access token (ang default na proactive na lead sa pag-refresh ay limang minuto), o muling i-import ang Codex auth file. Iniimbak ng mga passive import ang mga ibinigay na token nang hindi pinapatunayan ang mga ito sa endpoint ng token. Ang manu-manong dashboard/API refresh ay nagbabalik `409 refresh_disabled`; ang mga bagong OAuth login ay hindi nagbabago. Tingnan [ang sanggunian sa kapaligiran](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Ang isang proseso ng Node ay** isang V8 heap** . Dalawang magkakapatong ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) ang nag-abort ng heap na iyon sa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) at maaaring OOM ng 16 Gi cgroup. Tingnan ang [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Ang pagsukat na iyon ay a** memory-badyet** babala, hindi isang produkto hard-max ng dalawang magkasabay na haba `/v1/responses`. Ang mabigat na pagpasok sa chat ay may gate ng isang auto-derived na ingest byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) na may laki mula sa parehong V8/cgroup ceiling — na nag-o-override dito pataas (o ang pagtatakda ng legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) sa isang kalakihang proseso ay muling ipinakilala ang abort. Ang mga maliliit na chat, `/healthz`, `/v1/models`, at MCP ay** hindi** sa cap na iyon.
+Ang isang proseso ng Node ay** isang V8 heap** . Dalawang magkakapatong ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) ang nag-abort ng heap na iyon sa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) at maaaring OOM ng 16 Gi cgroup. Tingnan ang [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Ang pagsukat na iyon ay a** memory-badyet** babala, hindi isang produkto hard-max ng dalawang magkasabay na haba `/v1/responses`. Ang mabigat na pagpasok sa chat ay may gate ng isang auto-derived na ingest byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) na may laki mula sa parehong V8/cgroup ceiling — na nag-o-override dito pataas (o ang pagtatakda ng legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) sa isang kalakihang proseso ay muling ipinakilala ang abort. Ang mga maliliit na chat, `/healthz`, `/v1/models`, at MCP ay** hindi** sa cap na iyon.
 
 ### Isang proseso: higit sa dalawang mahabang `/v1/responses`
 
-A** malusog** proseso (bunton sa ibaba `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** maaaring** magpatakbo ng higit sa dalawang magkasabay na mahabang `POST /v1/responses` kapag ang buong proseso ng inflight-byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ay may puwang pa rin. Ang mga katawan sa o mas mataas na `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) ay tumatanggap ng parehong heavyweight na lease gaya ng mga structure-heavy na kahilingan at gumagamit ng parehong [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Sampu-sampung magkakasabay na mahahabang SSE na kliyente (madalas na kailangan ng mga operator ng 40–50) ay a** memory-badyet** tanong — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — hindi isang mahirap na "max 2" na limitasyon ng produkto. Ang isang pressured heap ay nahuhulog pa rin na may retryable `503` kaya ang #7849 ay hindi bumalik.
+A** malusog** proseso (bunton sa ibaba `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** maaaring** magpatakbo ng higit sa dalawang magkasabay na mahabang `POST /v1/responses` kapag ang buong proseso ng inflight-byte na badyet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) ay may puwang pa rin. Ang mga katawan sa o mas mataas na `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) ay tumatanggap ng parehong heavyweight na lease gaya ng mga structure-heavy na kahilingan at gumagamit ng parehong [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Sampu-sampung magkakasabay na mahahabang SSE na kliyente (madalas na kailangan ng mga operator ng 40–50) ay a** memory-badyet** tanong — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — hindi isang mahirap na "max 2" na limitasyon ng produkto. Ang isang pressured heap ay nahuhulog pa rin na may retryable `503` kaya ang #7849 ay hindi bumalik.
 
 Upang** multiply tambak** (mga independiyenteng V8 old-spaces)** ngayon** :
 
@@ -750,7 +750,7 @@ volumes:
   omniroute-b-data:
 ```
 
-In-process density (compression off ang HTTP isolate) ay [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Ang isang lohikal na cluster sa shared durable state ay [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+In-process density (compression off ang HTTP isolate) ay [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ang isang lohikal na cluster sa shared durable state ay [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Mga panrehiyong error ng Gemini sa loob ng Docker
 
@@ -791,7 +791,7 @@ error; tanging ang authenticated na kahilingan sa model ang sumusubok sa pagigin
 
 ### Alternatibo sa antas ng host: gumaganang IPv6 at patakaran ng resolver
 
-Naibalik ng nag-ulat ng [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) ang
+Naibalik ng nag-ulat ng [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ang
 access sa kanilang environment sa pamamagitan ng pag-enable ng IPv6 ng container at pagbabago sa pagpili
 ng address ng glibc. Ituring ito bilang alternatibong partikular sa environment. Kumpirmahing gumagana ang IPv6
 ng host, ang egress/pagruruta ng container, at ang mga panuntunan ng firewall bago baguhin ang mga preference ng resolver.

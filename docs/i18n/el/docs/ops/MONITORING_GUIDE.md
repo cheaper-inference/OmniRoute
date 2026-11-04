@@ -218,7 +218,7 @@ livenessProbe:
 
 **Μην** κατευθύνετε τον έλεγχο **βιωσιμότητας** του kubelet στο `/api/monitoring/health`. Αυτή η διαδρομή εκτελεί πραγματικές εργασίες βάσης δεδομένων/παρακολούθησης και θα δίνει ψευδώς θετικά αποτελέσματα υπό φορτίο.
 
-Σχετικά: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (έλεγχοι ενώ ο βρόχος συμβάντων είναι απασχολημένος), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (δέσμευση πόρων από την τιμολόγηση καταλόγου), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (δέσμευση πόρων από την καταμέτρηση token κατά τη συμπίεση).
+Σχετικά: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (έλεγχοι ενώ ο βρόχος συμβάντων είναι απασχολημένος), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (δέσμευση πόρων από την τιμολόγηση καταλόγου), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (δέσμευση πόρων από την καταμέτρηση token κατά τη συμπίεση).
 
 ### Watchdog του systemd (παγωμένος βρόχος συμβάντων)
 

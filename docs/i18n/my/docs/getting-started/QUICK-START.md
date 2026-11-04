@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### ရွေးချယ်မှု C: Source မှ
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute သည် မအောင်မြင်သော provider မျာ�
 
 - **[ပြဿနာဖြေရှင်းခြင်း](../guides/TROUBLESHOOTING.md)** — အဖြစ်များသော ပြဿနာများနှင့် ဖြေရှင်းနည်းများ
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Community အကူအညီ
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Bug များကို တင်ပြပါ
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Bug များကို တင်ပြပါ

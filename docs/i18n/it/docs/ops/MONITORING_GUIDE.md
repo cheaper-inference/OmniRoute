@@ -223,7 +223,7 @@ livenessProbe:
 
 **Non** indirizzare la verifica di **vitalità** di kubelet verso `/api/monitoring/health`. Quel percorso esegue operazioni reali sul database e di monitoraggio e produrrà falsi positivi sotto carico.
 
-Argomenti correlati: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sonde mentre l'event loop è occupato), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (carico eccessivo dei prezzi del catalogo), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (carico eccessivo del conteggio dei token di compressione).
+Argomenti correlati: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sonde mentre l'event loop è occupato), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (carico eccessivo dei prezzi del catalogo), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (carico eccessivo del conteggio dei token di compressione).
 
 ### Watchdog di systemd (event loop bloccato)
 

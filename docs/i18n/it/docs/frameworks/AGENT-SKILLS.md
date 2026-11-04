@@ -18,7 +18,7 @@ Il catalogo contiene **45 Agent Skills** (23 per l'API REST + 21 per la CLI + 1 
 - Un **ID canonico** (`omni-auth`, `cli-serve`, ecc.)
 - Un file **SKILL.md** in `skills/{id}/SKILL.md` con frontmatter YAML (`name`, `description`) + un corpo markdown dettagliato
 - **Endpoint REST** (skill API) o **sottocomandi CLI** (skill CLI) derivati dalla specifica OpenAPI e dal registro CLI
-- Un **URL raw di GitHub** per il recupero in tempo reale: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Un **URL raw di GitHub** per il recupero in tempo reale: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Recupero diretto dei dati grezzi da GitHub (nessun server richiesto)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

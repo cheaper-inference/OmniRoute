@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 โคลนโค้ดและเข้าสู่ไดเรกทอรี
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly จะดำเนินการอัปเดตเครื่องแ�
 
 ### 9.1 การติดตามการอัปเดตจากรีโพซิทอรีต้นทางโดยยังคงรักษา `fly.toml` ของฟอร์กไว้
 
-หากรีโพซิทอรีปัจจุบันเป็นฟอร์ก และคุณต้องการซิงค์การอัปเดตจากต้นทาง `https://github.com/cheaper-inference/OmniRoute` ให้ทำตามขั้นตอนด้านล่าง
+หากรีโพซิทอรีปัจจุบันเป็นฟอร์ก และคุณต้องการซิงค์การอัปเดตจากต้นทาง `https://github.com/diegosouzapw/OmniRoute` ให้ทำตามขั้นตอนด้านล่าง
 
 ขั้นแรก ให้ตรวจสอบรีโมตของคุณ:
 
@@ -309,7 +309,7 @@ git remote -v
 หากยังไม่ได้กำหนดค่า `upstream` ให้เพิ่มด้วยคำสั่งต่อไปนี้:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 ก่อนซิงค์กับต้นทาง ให้ดึงคอมมิตและแท็กล่าสุด:

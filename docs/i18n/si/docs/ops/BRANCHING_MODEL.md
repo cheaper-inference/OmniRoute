@@ -56,7 +56,7 @@ flowchart LR
 ඔබට අවශ්ය ශාඛාව ඒකාබද්ධ කළ හැකි යැයි උපකල්පනය කිරීමට පෙර විවෘත freeze එකක් තිබේදැයි පරීක්ෂා කරන්න:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 ඒකාබද්ධ කිරීමේ යාන්ත්රණය (හිමිකරුගේ `queue` ලේබලය → Mergify)

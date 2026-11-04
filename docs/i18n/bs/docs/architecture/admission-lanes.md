@@ -85,7 +85,7 @@ Trake na nivou bajtova ograničavaju putanju parsiranja/kompresije koja intenziv
 
 ## 4. Jednoprocesni dugi `/v1/responses` (healthy-headroom)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) je dodao `tryAcquireHealthyHeadroom` tako da se drugi strukturno težak zahtjev prihvata kada je heap ispod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. BYTE putanja koju koristi `admitChatRequest` (tijela ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, zadano 256 KiB, uključujući `POST /v1/responses`) koristi **istu** zaobilaznicu.
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) je dodao `tryAcquireHealthyHeadroom` tako da se drugi strukturno težak zahtjev prihvata kada je heap ispod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. BYTE putanja koju koristi `admitChatRequest` (tijela ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, zadano 256 KiB, uključujući `POST /v1/responses`) koristi **istu** zaobilaznicu.
 
 Ovo je podržani **jednoprocesni** recept za više od dva istovremena duga SSE `/v1/responses`: povećajte primarni + healthy-headroom samo onoliko koliko heap i budžet bajtova u toku za cijeli proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) dozvoljavaju. Desetine dugih SSE klijenata (40–50) je pitanje memorijskog budžeta, a ne čvrsto ograničenje proizvoda „maksimalno 2”. Opterećeni heap i dalje odbacuje sa `503` koji se može ponoviti, tako da se #7849 ne vraća.
 

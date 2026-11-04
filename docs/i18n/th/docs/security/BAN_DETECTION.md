@@ -57,8 +57,8 @@ Google Cloud Code / Antigravity ส่งข้อความนี้กลั
 การเก็บวลีนี้ไว้ในรายการแบนยังทำให้สาขา cloud-code 403 ที่กู้คืนได้ใน
 `classifyProviderError` ไม่สามารถเข้าถึงได้สำหรับถ้อยคำนี้ เนื่องจากมีการประเมิน
 `accountDeactivated` ก่อน — ดังนั้นการกู้คืนเส้นทางโปรเจกต์ที่เพิ่มสำหรับ Gemini Code Assist ใน
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) และ
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) จึงไม่สามารถทำงานได้เลย
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) และ
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) จึงไม่สามารถทำงานได้เลย
 
 ตารางสัญญาณสามตารางที่อยู่ติดกันและ **แยกจากกัน** ต่อไปนี้ _ไม่ใช่_ ส่วนหนึ่งของการตรวจจับคีย์เวิร์ดการแบน:
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **ሁኔታ:** ተቀባይነት ያገኘ · **ዐውድ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **ውል:** `domain/routing/routerBackends.ts`
-> (በዓይነት የተወሰነ መዝገብ — ኮዱ ከ[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ጋር ይገባል)
+> **ሁኔታ:** ተቀባይነት ያገኘ · **ዐውድ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **ውል:** `domain/routing/routerBackends.ts`
+> (በዓይነት የተወሰነ መዝገብ — ኮዱ ከ[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ጋር ይገባል)
 
 ይህ ADR `ts` (ቤተኛ)፣ `bifrost`፣ `cliproxy`፣ `9router` እና
 ከVibeProxy ጋር ተኳሃኝ የሆኑ ሞተሮች እርስ በርስ እንዴት እንደሚዛመዱ በግልጽ ይወስናል፤ በዚህም አስተዋጽዖ አድራጊዎች በአርክቴክቸር ደረጃ የተለዩ ሁለት ነገሮችን ማደባለቃቸውን ያቆማሉ። በrouter-backend-registry ሥራ የተዋወቀውን በዓይነት የተወሰነ
@@ -35,7 +35,7 @@ backend አይደለም። `bifrost` ደግሞ ተቃራኒው ነው — (በ�
 ## መዝገቡ — ብቸኛው የእውነት ምንጭ
 
 የ`domain/routing/routerBackends.ts` ውል (ኮዱ ከ
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ጋር ይገባል) እያንዳንዱን ሞተር ከሕይወት ዑደቱ፣ ችሎታዎቹ፣ የአገልግሎት ማንነቱ፣ ነባሪ ወደቡ፣ የጤንነት ውቅሩ እና
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ጋር ይገባል) እያንዳንዱን ሞተር ከሕይወት ዑደቱ፣ ችሎታዎቹ፣ የአገልግሎት ማንነቱ፣ ነባሪ ወደቡ፣ የጤንነት ውቅሩ እና
 የቴሌሜትሪ ድጋፉ ጋር አንድ ጊዜ ያውጃል። ተጠቃሚዎች ለእያንዳንዱ sidecar ልዩ ሁኔታ ከመጻፍ ይልቅ፣ ሞተሮችን በ`getRouterBackend(id)`፣
 `listRouterBackends()` እና `listRouterBackendsByCapability(cap)` በኩል ይፈልጋሉ።
 
@@ -48,7 +48,7 @@ backend አይደለም። `bifrost` ደግሞ ተቃራኒው ነው — (በ�
 | `vibeproxy` | `external`   | —              | — (የአቅራቢ አስማሚ)        | `/v1/models`  | —       |
 
 ¹ Bifrost ወደ `supervised` የተካተተ አገልግሎት (ከ`/api/services/bifrost/` ሊጫን/ሊጀመር የሚችል) እንዲያድግ የሚደረገው ሥራ በ
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) ይከታተላል፤ እስኪዋሃድ ድረስ፣
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) ይከታተላል፤ እስኪዋሃድ ድረስ፣
 Bifrost `external`-ብቻ ነው (በ`BIFROST_BASE_URL` በኩል ብቻ ተደራሽ ነው)።
 
 `capabilities` (`chat`፣ `responses`፣ `streaming`፣ `tools`፣ `vision`፣
@@ -115,8 +115,8 @@ dispatch backendን የሚመርጠው የrelay proxy path `/api/v1/relay/chat/c
 በአሁኑ ጊዜ ምርጫው በrelay ደረጃ **ሙሉ በሙሉ ወይም ምንም** ነው — በ`release/v3.8.43`
 ላይ ለእያንዳንዱ provider ወይም request የengine ቅያሬ የለም። የእያንዳንዱ request gate
 በsidecar-manifest ሥራ እየታከለ ነው
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)፣
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)፣
 ይህም `auto` በmanifest ብቁ የሆኑ providersን ብቻ በBifrost በኩል route እንዲያደርግ ያስችለዋል።
 
 ## የዳሽቦርድ ውህደት

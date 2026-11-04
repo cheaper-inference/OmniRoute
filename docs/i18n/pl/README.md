@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1,62 mld tokenów / miesiąc w ramach darmowych limitów zewnętrznych dostawców
+## 💰 ~1,62 mld tokenów / miesiąc w ramach bezpłatnych planów zewnętrznych dostawców
 
 </div>
 
-> **Korzystaj z własnych kont u dostawców.** To szacunkowa suma dostępna w ramach oddzielnych, kwalifikujących się darmowych limitów zewnętrznych dostawców, a nie pula tokenów od OmniRoute. Zarejestruj się, uzyskaj dane uwierzytelniające tam, gdzie to wymagane, i podłącz dostawców, z których możesz korzystać; każdy dostawca samodzielnie ustala limity, dostępność i warunki.
+> **Używaj własnych kont dostawców.** To szacunkowa suma zagregowana na podstawie oddzielnie kwalifikujących się bezpłatnych planów zewnętrznych dostawców, a nie pula tokenów przyznana przez OmniRoute. Zarejestruj się, uzyskaj dane uwierzytelniające tam, gdzie są wymagane, i połącz dostawców, z których możesz korzystać; każdy dostawca kontroluje swoje limity, dostępność i warunki.
 >
-> Ręczne łączenie darmowych limitów to udręka — dziesiątki SDK, dziesiątki limitów zapytań i brak pojęcia, ile faktycznie masz. OmniRoute kataloguje **485 wpisów darmowych limitów w 34 powtarzalnych kluczach puli** i oblicza sumę tokenów na podstawie **17 pul z opublikowanym dodatnim miesięcznym limitem oraz pięciu limitów Groq na model**, z deduplikacją po wspólnej puli. Limity dostępne dopiero po weryfikacji tożsamości regionalnej (obecnie: ModelScope) są pokazane osobno, +~6 mln po weryfikacji regionalnej, i nigdy nie są sumowane do głównej wartości. Wynik jest widoczny na pulpicie (`/dashboard/free-tiers`).
+> Ręczne łączenie bezpłatnych planów jest uciążliwe — dziesiątki SDK, dziesiątki limitów szybkości i brak informacji o tym, ile faktycznie masz do dyspozycji. OmniRoute kataloguje **484 wpisy bezpłatnych planów w ramach 34 cyklicznych kluczy puli** i oblicza główną wartość tokenów na podstawie **17 pul z opublikowanym dodatnim miesięcznym budżetem oraz pięciu limitów Groq dla poszczególnych modeli**, usuwając duplikaty na podstawie współdzielonej puli. Limity, które stają się dostępne dopiero po regionalnej weryfikacji tożsamości (obecnie: ModelScope), są prezentowane osobno — +~6 mln po regionalnej weryfikacji tożsamości — i nigdy nie są sumowane w głównej wartości. Wynik pozostaje widoczny na pulpicie (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta budżetu darmowych limitów OmniRoute: ~1,62 mld darmowych tokenów miesięcznie stabilnie, do ~2,22 mld w pierwszym miesiącu z kredytami powitalnymi, z 34 udokumentowanych powtarzalnych kluczy puli obejmujących 485 skatalogowanych wpisów darmowych limitów za jednym endpointem. Uczciwa matematyka z deduplikacją pul — każda wspólna pula liczona raz, w tym 17 powtarzalnych pul z opublikowanym dodatnim miesięcznym limitem tokenów oraz pięć limitów Groq na model; 12 dostawców oznaczonych jako unikaj w katalogu ryzyka warunków, więc decyzja należy do Ciebie. Pasek budżetu obejmuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pięć limitów na model) i mniejsze pule, plus kredyty powitalne na pierwszy miesiąc oraz stale darmowych dostawców bez limitu tokenów pokazanych osobno, by nie zawyżać głównej wartości. Na żywo zużycie/pozostało na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta bezpłatnego budżetu OmniRoute: ~1,62 mld bezpłatnych tokenów miesięcznie w sposób stały, do ~2,22 mld w pierwszym miesiącu z kredytami za rejestrację, z 34 udokumentowanych cyklicznych kluczy puli obejmujących 484 skatalogowane wpisy bezpłatnych planów dostępne za pośrednictwem jednego endpointu. Uczciwe obliczenia z usuwaniem duplikatów pul — każda współdzielona pula jest liczona raz, w tym 17 cyklicznych pul z opublikowanym dodatnim miesięcznym budżetem tokenów oraz pięć limitów Groq dla poszczególnych modeli; 12 dostawców jest oznaczonych jako wymagających unikania w katalogu ryzyka warunków, więc to Ty decydujesz. Pasek budżetu obejmuje Mistral 1 mld, Nara 210 mln, LLM7 150 mln, xKiro 150 mln, Groq 30 mln (pięć limitów dla poszczególnych modeli) oraz mniejsze pule, a także kredyty za rejestrację w pierwszym miesiącu i dostawców na stałe bezpłatnych, bez limitu tokenów, prezentowanych osobno, aby nigdy nie zawyżali głównej wartości. Aktualne zużycie i pozostały limit na stronie /dashboard/free-tiers."/>
 
-> Animowane podsumowanie strony `/dashboard/free-tiers` na żywo. Pełna metodologia (deduplikacja pul, poziomy kredytów, warunki dostawców): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Animowane podsumowanie aktualnej strony `/dashboard/free-tiers`. Pełna metodologia (usuwanie duplikatów pul, poziomy kredytów, warunki dostawców): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Te wartości są ponownie audytowane co dwa tygodnie na podstawie aktualnego katalogu i **mogą się zmieniać w obie strony** — dostawca kończy darmowy limit i liczba spada; pojawia się nowy i liczba rośnie. Publikujemy to, co faktycznie wylicza katalog, nigdy nie zaokrąglamy w górę do najlepszego przypadku.</sub>
+> <sub>Te wartości są ponownie kontrolowane co dwa tygodnie na podstawie aktualnego katalogu i **zmieniają się w obu kierunkach** — dostawca kończy oferowanie bezpłatnego planu i liczba spada; pojawia się nowy i rośnie. Publikujemy wartości faktycznie obliczane przez katalog, nigdy zaokrąglony w górę najlepszy scenariusz.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Daj gwiazdkę repozytorium, jeśli OMNIROUTE pomogło Ci zaoszczędzić pieniądze i ułatwiło pracę.
+⭐ Dodaj gwiazdkę do repozytorium, jeśli OMNIROUTE pomogło Ci zaoszczędzić pieniądze i ułatwić pracę.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
+[![Gwiazdki](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Ranking historii gwiazdek](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Dołącz do społeczności
 
-**👋 Obserwuj maintenera — bądź pierwszy z nowymi dostawcami, wydaniami i poradami:**
+**👋 Obserwuj opiekuna projektu — jako pierwszy poznawaj nowych dostawców, wydania i wskazówki:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Obserwuj Diego na LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Obserwuj @diegosouzapw na GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![WhatsApp Brazylia](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![Witryna internetowa](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Pytania, wskazówki dotyczące dostawców, roadmapa i wsparcie → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Pytania, wskazówki dotyczące dostawców, plan rozwoju i pomoc → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Globalny](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazylia](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Wszystkie **20** strategii — łącz je dowolnie na poszczególnych etapach kom
 OmniRoute jest udostępniany na licencji MIT i rozwijany w sposób otwarty. Jeśli pozwala Ci oszczędzać czas lub pieniądze, oto jak możesz pomóc zachować jego niezależność — wybierz dowolną formę wsparcia. Sponsoring nigdy nie wpływa na priorytet routingu; zapewnia widoczność, a nie wyższą pozycję.
 
 <table>
-  <tr><td nowrap>⭐ <b>Dodaj gwiazdkę do repozytorium</b></td><td>Bezpłatnie — naprawdę pomaga zwiększyć widoczność</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Dodaj gwiazdkę OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Dodaj gwiazdkę do repozytorium</b></td><td>Bezpłatnie — naprawdę pomaga zwiększyć widoczność</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Dodaj gwiazdkę OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Jednorazowo lub co miesiąc · bez opłat platformowych</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Szybki jednorazowy datek, bez konieczności rejestracji darczyńcy</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Drobny, nieformalny gest</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Kod PIX do skopiowania i wklejenia:
 
 </details>
 
-🐛 Znalazłeś błąd lub masz uwagi? Otwórz [dyskusję](https://github.com/cheaper-inference/OmniRoute/discussions).
+🐛 Znalazłeś błąd lub masz uwagi? Otwórz [dyskusję](https://github.com/diegosouzapw/OmniRoute/discussions).
 
 <br/>
 
@@ -1259,7 +1259,7 @@ sam proces na jednym porcie, dlatego obecnie nie istnieje osobny pakiet zawieraj
 
 Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znanych wyświetleń** (`v > 0`) · **1.210 kanałów/profili w poszczególnych sieciach**. Surowy panel zawiera 1.976 wierszy (YouTube 1.352 = 740 długich filmów + 612 Shorts · TikTok 334 · Instagram 290); po normalizacji według kanonicznego adresu URL, która zachowuje najwyższą liczbę wyświetleń danego filmu, nie pozostały żadne duplikaty. Zbieranie danych z YouTube zostało wstrzymane 2026-10-13 (limit API wyczerpany od 14 do 18/10), a z TikTok/Instagram od 2026-09-02 (brak środków na zbieranie danych); 76 filmów nadal nie ma danych o liczbie wyświetleń.
 
-> 🎬 **Masz film o OmniRoute?** Utwórz [zgłoszenie](https://github.com/cheaper-inference/OmniRoute/issues/new) lub rozpocznij [dyskusję](https://github.com/cheaper-inference/OmniRoute/discussions), podając link — zamieścimy go tutaj.
+> 🎬 **Masz film o OmniRoute?** Utwórz [zgłoszenie](https://github.com/diegosouzapw/OmniRoute/issues/new) lub rozpocznij [dyskusję](https://github.com/diegosouzapw/OmniRoute/discussions), podając link — zamieścimy go tutaj.
 
 <br/>
 
@@ -1269,20 +1269,20 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
 
 > Wszystko w jednym miejscu — obserwuj opiekuna projektu, rozmawiaj ze społecznością lub utwórz zgłoszenie.
 
-| Kanał                                            | Gdzie / jak                                                                                                               |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| 💼 **LinkedIn** — obserwuj opiekuna projektu     | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                 |
-| 🐙 **GitHub** — obserwuj wydania i porady        | [@diegosouzapw](https://github.com/diegosouzapw)                                                                          |
-| 💬 **Discord**                                   | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                    |
-| ✈️ **Telegram**                                  | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                    |
-| 🟢 **WhatsApp — 🌍 Globalny**                    | [dołącz do grupy](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                        |
-| 🟢 **WhatsApp — 🇧🇷 Brazylia**                    | [dołącz do grupy](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                        |
-| 🌍 **Strona internetowa**                        | [omniroute.online](https://omniroute.online)                                                                              |
-| 🌍 **🌍Społeczność StHub OmniRoute (bezpłatna)** | [portal StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                     |
-| 📦 **Kod źródłowy**                              | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                  |
-| 🐛 **Zgłoś błąd**                                | [utwórz zgłoszenie](https://github.com/cheaper-inference/OmniRoute/issues) — dołącz wynik polecenia `npm run system-info` |
-| 🤝 **Współtwórz projekt**                        | [CONTRIBUTING.md](CONTRIBUTING.md) · [Model gałęzi i wydań](docs/ops/BRANCHING_MODEL.md) · wybierz `good first issue`     |
-| 💚 **Wesprzyj projekt**                          | [Sposoby wsparcia ↑](#-support-omniroute) · [Sponsorzy GitHub](https://github.com/sponsors/diegosouzapw)                  |
+| Kanał                                            | Gdzie / jak                                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| 💼 **LinkedIn** — obserwuj opiekuna projektu     | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                             |
+| 🐙 **GitHub** — obserwuj wydania i porady        | [@diegosouzapw](https://github.com/diegosouzapw)                                                                      |
+| 💬 **Discord**                                   | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                |
+| ✈️ **Telegram**                                  | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                |
+| 🟢 **WhatsApp — 🌍 Globalny**                    | [dołącz do grupy](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                    |
+| 🟢 **WhatsApp — 🇧🇷 Brazylia**                    | [dołącz do grupy](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                    |
+| 🌍 **Strona internetowa**                        | [omniroute.online](https://omniroute.online)                                                                          |
+| 🌍 **🌍Społeczność StHub OmniRoute (bezpłatna)** | [portal StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                 |
+| 📦 **Kod źródłowy**                              | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                        |
+| 🐛 **Zgłoś błąd**                                | [utwórz zgłoszenie](https://github.com/diegosouzapw/OmniRoute/issues) — dołącz wynik polecenia `npm run system-info`  |
+| 🤝 **Współtwórz projekt**                        | [CONTRIBUTING.md](CONTRIBUTING.md) · [Model gałęzi i wydań](docs/ops/BRANCHING_MODEL.md) · wybierz `good first issue` |
+| 💚 **Wesprzyj projekt**                          | [Sposoby wsparcia ↑](#-support-omniroute) · [Sponsorzy GitHub](https://github.com/sponsors/diegosouzapw)              |
 
 </div>
 
@@ -1328,26 +1328,26 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Opis</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Przewodnik użytkownika</a></b></td><td>Dostawcy, kombinacje, integracja z CLI, wdrażanie</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Podręcznik użytkownika</a></b></td><td>Dostawcy, kombinacje, integracja z CLI, wdrażanie</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Przewodnik konfiguracji</a></b></td><td>Pełne metody instalacji, konfiguracje narzędzi CLI, konfiguracja protokołów, dostrajanie limitów czasu</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Przewodnik po narzędziach CLI</a></b></td><td>Konfiguracja poszczególnych narzędzi: Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Tryb zdalny</a></b></td><td>Obsługa zdalnego OmniRoute (VPS) z poziomu CLI na laptopie za pomocą tokenów dostępu z ograniczonym zakresem</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Konfiguracja Claude Code</a></b></td><td>Skierowanie Claude Code do OmniRoute (lokalnego/zdalnego) za pomocą <code>launch</code> + profili dla poszczególnych modeli</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Tryb zdalny</a></b></td><td>Obsługa zdalnego OmniRoute (VPS) z poziomu CLI na laptopie za pomocą tokenów dostępu o ograniczonym zakresie</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Konfiguracja Claude Code</a></b></td><td>Skierowanie Claude Code do OmniRoute (lokalnie/zdalnie) za pomocą <code>launch</code> + profili dla poszczególnych modeli</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">Szybki start</a></b></td><td>Instalacja → połączenie → konfiguracja w 3 krokach</td></tr>
 </table>
 
-### 🔧 Operacje i wdrażanie
+### 🔧 Obsługa i wdrażanie
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Opis</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Przewodnik Docker</a></b></td><td>Uruchamianie Dockera, profile Compose, Caddy HTTPS, tunele, tagi obrazów</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Przewodnik Docker</a></b></td><td>Uruchamianie Docker, profile Compose, Caddy HTTPS, tunele, tagi obrazów</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Przewodnik Podman</a></b></td><td>Integracja Quadlet z systemd, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Wdrażanie na VM</a></b></td><td>Kompletny przewodnik: konfiguracja VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Wdrażanie na Fly.io</a></b></td><td>Wdrażanie na Fly.io z trwałym magazynem danych</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Przewodnik Termux</a></b></td><td>Uruchamianie OmniRoute na Androidzie za pomocą Termux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Wdrażanie na Fly.io</a></b></td><td>Wdrażanie na Fly.io z pamięcią trwałą</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Przewodnik Termux</a></b></td><td>Uruchamianie OmniRoute na Androidzie za pośrednictwem Termux</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Przewodnik PWA</a></b></td><td>Instalacja progresywnej aplikacji webowej, buforowanie, architektura</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Przewodnik odinstalowywania</a></b></td><td>Całkowite usuwanie dla wszystkich metod instalacji</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Konfiguracja środowiska</a></b></td><td>Kompletne zmienne i odwołania <code>.env</code></td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Przewodnik dezinstalacji</a></b></td><td>Kompletne usuwanie dla wszystkich metod instalacji</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Konfiguracja środowiska</a></b></td><td>Kompletna lista zmiennych <code>.env</code> i odwołań</td></tr>
 </table>
 
 ### 🧠 Funkcje i architektura
@@ -1355,15 +1355,15 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
 <table>
   <tr><th align="left">Dokument</th><th align="left">Opis</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Architektura</a></b></td><td>Architektura systemu, przepływ danych i elementy wewnętrzne</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Przewodnik po kompresji</a></b></td><td>Potok z 7 opcjami: wyłączona / lite / standardowa / agresywna / ultra / RTK / łączona</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Przewodnik kompresji</a></b></td><td>Potok z 7 opcjami: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Kompresja RTK</a></b></td><td>Kompresja wyników poleceń, filtry, zaufanie, weryfikacja, odzyskiwanie nieprzetworzonych wyników</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Silniki kompresji</a></b></td><td>Potoki Caveman, RTK i łączone, interfejsy dashboardu/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Silniki kompresji</a></b></td><td>Caveman, RTK, potoki stacked, interfejsy dashboardu/API/MCP</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Format reguł kompresji</a></b></td><td>Schematy pakietów reguł JSON dla filtrów Caveman i RTK</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pakiety językowe kompresji</a></b></td><td>Wykrywanie języka i tworzenie pakietów reguł Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Przewodnik po odporności</a></b></td><td>Wyłączniki obwodu, czasy wychładzania, kolejka, zapobieganie efektowi stada, podszywanie się pod TLS</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Silnik Auto-Combo</a></b></td><td>Ocenianie według 16 czynników, pakiety trybów, samonaprawianie</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Przewodnik odporności</a></b></td><td>Wyłączniki automatyczne, czasy oczekiwania, kolejka, zapobieganie efektowi stada, spoofing TLS</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Silnik Auto-Combo</a></b></td><td>Ocenianie na podstawie 16 czynników, pakiety trybów, samonaprawianie</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Przewodnik po proxy</a></b></td><td>3-poziomowy system proxy, marketplace 1proxy, operacje CRUD rejestru</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Darmowe poziomy</a></b></td><td>Skonsolidowany katalog: 34 udokumentowane cykliczne pule / 485 skatalogowanych wpisów darmowych poziomów</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Darmowe poziomy</a></b></td><td>Skonsolidowany katalog: 34 udokumentowane cykliczne pule / 484 skatalogowane wpisy darmowych poziomów</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria funkcji</a></b></td><td>Wizualny przegląd dashboardu ze zrzutami ekranu</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentacja bazy kodu</a></b></td><td>Przystępny dla początkujących przewodnik po bazie kodu</td></tr>
 </table>
@@ -1384,27 +1384,27 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Opis</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Współtworzenie</a></b></td><td>Konfiguracja środowiska deweloperskiego i wytyczne</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Model rozgałęzień i wydań</a></b></td><td>Dokąd kierowane są PR-y (<code>release/*</code>) oraz co oznaczają <code>main</code> i tagi</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Współtworzenie</a></b></td><td>Konfiguracja środowiska programistycznego i wytyczne</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Model rozgałęzień i wydań</a></b></td><td>Gdzie kierowane są PR-y (<code>release/*</code>) oraz co oznaczają <code>main</code> i tagi</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Dziennik zmian</a></b></td><td>Pełna historia wydań według wersji</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Zasady bezpieczeństwa</a></b></td><td>Zgłaszanie luk w zabezpieczeniach i praktyki bezpieczeństwa</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">Przewodnik po i18n</a></b></td><td>Obsługa 67 języków, proces tłumaczenia, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Lista kontrolna wydania</a></b></td><td>Czynności walidacyjne przed wydaniem</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plan pokrycia</a></b></td><td>Strategia pokrycia testami dla ponad 60 000 deklaracji testów statycznych w ponad 8 400 śledzonych plikach testów</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Polityka bezpieczeństwa</a></b></td><td>Zgłaszanie luk w zabezpieczeniach i praktyki bezpieczeństwa</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">Przewodnik i18n</a></b></td><td>Obsługa 67 języków, proces tłumaczenia, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Lista kontrolna wydania</a></b></td><td>Kroki walidacji przed wydaniem</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plan pokrycia</a></b></td><td>Strategia pokrycia testami dla ponad 60 000 statycznych deklaracji testów w ponad 8 400 śledzonych plikach testów</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Najlepsi współtwórcy
+# ⭐ Najważniejsi współtwórcy
 
 > OmniRoute jest kształtowany przez pełną pasji społeczność open source. Te osoby wniosły wyjątkowy wkład, który bezpośrednio wpływa na jakość, stabilność i zasięg projektu. **Dziękujemy.**
 
-### Zewnętrzni współtwórcy według scalonych PR-ów
+### Zewnętrzni współtwórcy według scalonych pull requestów
 
 <table>
-  <tr><th align="center">Pozycja</th><th align="left">Współtwórca</th><th align="center">Scalone PR-y</th><th align="right">~Zmienione wiersze</th></tr>
+  <tr><th align="center">Miejsce</th><th align="left">Współtwórca</th><th align="center">Scalone PR-y</th><th align="right">~Zmienione wiersze</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1427,7 +1427,7 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Spis wykonano 2026-11-03 03:01:19 UTC z użyciem aktualnego wskaźnika <code>release/v3.8.53</code> <code>05bc048d6c</code>. Stronicowany spis GitHub GraphQL obejmuje 9 947 scalonych PR-ów: 4 130 autorstwa właściciela repozytorium, 240 autorstwa Dependabot, 6 autorstwa innych botów/aplikacji oraz <b>5 571 zewnętrznych PR-ów od 883 różnych współtwórców</b>. „Zmienione wiersze” to suma dodanych i usuniętych wierszy według GitHub; obejmuje pliki wygenerowane, pliki blokad, katalogi, tłumaczenia i dokumentację — są to zmiany, a nie autorskie LOC. 53 PR-y zgłaszają różnice GitHub obejmujące ponad 500 000 wierszy (na przykład #13399, pojedyncze dodanie dostawcy, zawiera 2 347 zmienionych plików), co zawyża kilka powyższych wartości. Remisy są klasyfikowane wspólnie.</sub>
+<sub>Spis sporządzono 2026-11-03 03:01:19 UTC na podstawie bieżącego stanu <code>release/v3.8.53</code> o identyfikatorze <code>05bc048d6c</code>. Stronicowany spis GitHub GraphQL zawiera 9,947 scalonych PR-ów: 4,130 autorstwa właściciela repozytorium, 240 autorstwa Dependabot, 6 autorstwa innych botów/aplikacji oraz <b>5,571 zewnętrznych PR-ów od 883 różnych współtwórców</b>. „Zmienione wiersze” to suma dodatków i usunięć w GitHub, obejmująca wygenerowane pliki, pliki blokad, katalogi, tłumaczenia i dokumentację; jest to skala zmian, a nie liczba wierszy kodu autorstwa. 53 PR-y zawierają różnice GitHub przekraczające 500,000 wierszy (na przykład #13399, pojedyncze dodanie dostawcy, zawiera 2,347 zmienionych plików), co zawyża kilka powyższych sum. Remisy są klasyfikowane wspólnie.</sub>
 
 ### Commity przypisane przez GitHub
 
@@ -1438,42 +1438,42 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 418 przypisanych przez GitHub commitów</sub>
+      <sub>🥇 418 commitów przypisanych przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 294 przypisane przez GitHub commity</sub>
+      <sub>🥈 294 commity przypisane przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 przypisanych przez GitHub commitów</sub>
+      <sub>🥉 229 commitów przypisanych przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 222 przypisane przez GitHub commity</sub>
+      <sub>🏅 222 commity przypisane przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 202 przypisane przez GitHub commity</sub>
+      <sub>🏅 202 commity przypisane przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 134 przypisane przez GitHub commity</sub>
+      <sub>🏅 134 commity przypisane przez GitHub</sub>
     </td>
   </tr>
   <tr>
@@ -1482,49 +1482,49 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 126 przypisanych przez GitHub commitów</sub>
+      <sub>🏅 126 commitów przypisanych przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 115 przypisanych przez GitHub commitów</sub>
+      <sub>🏅 115 commitów przypisanych przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 108 przypisanych przez GitHub commitów</sub>
+      <sub>🏅 108 commitów przypisanych przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 przypisanych przez GitHub commitów</sub>
+      <sub>🏅 70 commitów przypisanych przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 68 przypisanych przez GitHub commitów</sub>
+      <sub>🏅 68 commitów przypisanych przez GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 przypisanych przez GitHub commitów</sub>
+      <sub>🏅 68 commitów przypisanych przez GitHub</sub>
     </td>
   </tr>
 </table>
 
-<sub>Zweryfikowano ponownie 2026-11-03 02:09:16 UTC: commity przypisane przez GitHub, zgłoszone przez Contributors API repozytorium dla domyślnej gałęzi <code>release/v3.8.53</code>. API zwróciło 903 tożsamości (429 użytkowników, 2 boty, 472 anonimowe); ta tabela nie uwzględnia opiekuna projektu, botów ani anonimowych tożsamości i zachowuje remisy w rankingu. Różni się ona zarówno od powyższego rankingu scalonych PR-ów, jak i od znajdującego się poniżej spisu metadanych Git.</sub>
+<sub>Zweryfikowano ponownie 2026-11-03 02:09:16 UTC: commity przypisane przez GitHub, zgłoszone przez Contributors API repozytorium dla domyślnej gałęzi <code>release/v3.8.53</code>. API zwróciło 903 tożsamości (429 użytkowników, 2 boty, 472 anonimowe); ta tabela nie uwzględnia opiekuna projektu, botów ani anonimowych tożsamości i zachowuje remisy w rankingu. Różni się zarówno od przedstawionego powyżej rankingu scalonych PR-ów, jak i od poniższego spisu metadanych Git.</sub>
 
-> 🙏 Funkcje, poprawki błędów i usprawnienia infrastruktury tych współtwórców są **nieodłączną częścią** tego, co sprawia, że OmniRoute jest niezawodny i bogaty w funkcje. Każdy pull request, każdy przypadek testowy i każdy plik tłumaczenia i18n ma znaczenie. Oprogramowanie open source tworzą właśnie tacy ludzie.
+> 🙏 Funkcje, poprawki błędów i ulepszenia infrastruktury tych kontrybutorów stanowią **fundamentalną część** tego, co sprawia, że OmniRoute jest niezawodny i bogaty w funkcje. Każdy pull request, każdy przypadek testowy i każdy plik tłumaczenia i18n ma znaczenie. Projekty open source tworzą właśnie tacy ludzie.
 
 </div>
 
@@ -1638,7 +1638,7 @@ Serdeczne podziękowania dla osób, które finansują OmniRoute z własnej kiesz
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
 <sub>Audyt przeprowadzony 2026-11-02 na bieżącym końcu gałęzi <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7 972 zatwierdzenia): <b>1 074 znormalizowane ludzkie tożsamości Git</b> — 759 występuje jako autorzy zatwierdzeń (w tym opiekun projektu), a 315 wyłącznie w jawnych stopkach <code>Co-authored-by</code>. Spis uwzględnia plik <code>.mailmap</code>, porównuje adresy e-mail bez uwzględniania wielkości liter, łączy numeryczne i zwykłe adresy GitHub noreply tylko wtedy, gdy kodują tę samą nazwę użytkownika, wyklucza 29 tożsamości botów, agentów, usług i symboli zastępczych oraz nie scala zwykłych adresów e-mail tylko dlatego, że ich wyświetlane nazwy są takie same. Audyt z 2026-08-24 wykazał 639 osób; ponowne uruchomienie tej metody na bazie tamtego audytu <code>ac02c5b42f</code> daje 619, więc wzrost wynika z pojawienia się nowych współtwórców, a nie z zastosowania luźniejszej metody.</sub>
 
@@ -1667,11 +1667,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Gwiazdki
 
-<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Wykres historii gwiazdek" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Wykres historii gwiazdek" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

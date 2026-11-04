@@ -56,7 +56,7 @@ Isto **não interrompe o desenvolvimento**:
 Verifique se existe um congelamento aberto antes de assumir que o ramo pretendido aceita integrações:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 A mecânica de integração (etiqueta `queue` do proprietário → Mergify) está documentada em

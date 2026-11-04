@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet کی **فعالیت** کی جانچ کو `/api/monitoring/health` کی طرف **مت بھیجیں**۔ یہ پاتھ حقیقی DB/مانیٹرنگ کا کام کرتا ہے اور لوڈ کے دوران غلط مثبت نتیجہ دے گا۔
 
-متعلقہ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ایونٹ لوپ مصروف ہونے کے دوران پروبز)، [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (کیٹلاگ پرائسنگ کا وسائل پر قبضہ)، [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (کمپریشن ٹوکن گنتی کا وسائل پر قبضہ)۔
+متعلقہ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ایونٹ لوپ مصروف ہونے کے دوران پروبز)، [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (کیٹلاگ پرائسنگ کا وسائل پر قبضہ)، [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (کمپریشن ٹوکن گنتی کا وسائل پر قبضہ)۔
 
 ### systemd واچ ڈاگ (منجمد ایونٹ لوپ)
 

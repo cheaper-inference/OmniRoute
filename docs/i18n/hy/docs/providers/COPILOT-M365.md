@@ -122,8 +122,8 @@ OmniRoute-ը HAR-ում որոնում է Chathub WebSocket URL-ը, դուրս �
 
 ## Հղումներ
 
-- Խնդիր՝ [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Քննարկում՝ [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Խնդիր՝ [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Քննարկում՝ [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Աղբյուր՝ `src/shared/constants/providers/web-cookie.ts` (մատակարարի սահմանում)
 - HAR ներմուծում՝ `src/shared/utils/m365HarImport.ts`
 - Հավաստագրի դաշտեր՝ `src/shared/providers/webSessionCredentials.ts`

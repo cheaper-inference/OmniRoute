@@ -198,7 +198,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 
 הפניית הפרופיל אל **combo** של OmniRoute במקום אל מודל יחיד היא שמספקת לצי
 יתירות בעת כשל ספק: כאשר נקודת הקצה הראשית קרסה לחלוטין באמצע פנייה בהרצה שתועדה
-ב־[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), הסוכן השלים
+ב־[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), הסוכן השלים
 את שאר השלבים באמצעות החלופה ומעולם לא חשף את ההשבתה.
 
 ---

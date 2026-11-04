@@ -131,13 +131,13 @@ handleComboChat (იგივე ძრავა, რასაც შენა�
 კომბო, რომლის `name` ზუსტად ემთხვევა მოდელის მარტივ იდენტიფიკატორს (მაგ., კომბო სახელად
 `gpt-5.5`), არის **განზრახ გათვალისწინებული და მხარდაჭერილი ნიმუში** და არა შეცდომა: ეს არის
 თითოეული მოდელის იდენტიფიკატორისთვის პროვაიდერის სარეზერვო ვარიანტზე გადართვის მექანიზმი, რომელიც აღწერილია
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)-ში. რადგან კომბოს
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)-ში. რადგან კომბოს
 განსაზღვრა მოწმდება მოდელის მარტივი იდენტიფიკატორის განსაზღვრამდე
 (`getComboForModel()` ფაილში `src/sse/services/model.ts`), მარტივი
 იდენტიფიკატორისთვის `gpt-5.5` გაგზავნილი მოთხოვნა მარშრუტდება კომბოს სამიზნეების გავლით (მაგ.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) და არა პირდაპირ
 ერთი პროვაიდერისკენ — ეს ხელახლა იყენებს კომბოს გადაწერაზე წინ მდგომ პრიორიტეტს, რომელიც შეიქმნა
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227)-ისთვის და
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227)-ისთვის და
 რეგრესიულად მოწმდება `tests/unit/responses-combo-resolution-3227.test.ts`-ითა და
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`-ით.
 
@@ -183,7 +183,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` თქვენს კომბოებს არ იყენებს.** `auto`/`auto/*` ქმნის საკუთარ, ნულოვანი კონფიგურაციის მქონე კანდიდატთა ერთობლიობას და შენახულ კომბოებს მხოლოდ მაშინ ამოწმებს, თუ რომელიმე კომბოს პირდაპირ `auto` ჰქვია (არ არის რეკომენდებული). კომბოს გავლით მარშრუტიზაციისთვის გაგზავნეთ მისი ზუსტი სახელი — არა `auto`.
 - **`openrouter/auto` არის OpenRouter-ის რეალური ფასიანი პროდუქტი** („ავტომატურად საუკეთესო ხელმისაწვდომი“) და არა OmniRoute-ის ფსევდონიმი. ის OpenRouter-ის რეესტრის ერთადერთი სტატიკური მოდელის ჩანაწერია (`open-sse/config/providers/registry/openrouter/index.ts`) და მისი საფასური ცალკე ირიცხება. `auto` ერთობლიობებიდან მის გამოსარიცხად გამოიყენეთ პარამეტრები → მარშრუტიზაცია → ფასიანი მოდელების დამალვა.
 
-თავდაპირველი გაუგებრობის შესახებ, რომელსაც ეს დოკუმენტაცია განმარტავს, იხილეთ [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) და [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
+თავდაპირველი გაუგებრობის შესახებ, რომელსაც ეს დოკუმენტაცია განმარტავს, იხილეთ [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) და [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
 ## როგორ მუშაობს (შენახული Auto-Combo-ები)
 

@@ -9,7 +9,7 @@
 Dacă descoperiți o vulnerabilitate de securitate în OmniRoute, raportați-o în mod responsabil:
 
 1. **NU** deschideți o problemă publică pe GitHub
-2. Utilizați [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Utilizați [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Includeți: descrierea, pașii de reproducere și impactul potențial
 
 ## Calendarul răspunsului
@@ -42,7 +42,7 @@ După 3.8.59, următoarea versiune este **3.9.0**, care deschide linia de asiste
   oricare dintre aceste termene este mai îndepărtat**. Data de încheiere rezultată este consemnată în notele de lansare pentru 3.9.0 și în
   [`ROADMAP.md`](ROADMAP.md) atunci când are loc lansarea.
 - **Raportarea unei vulnerabilități în linia LTS:** se utilizează același canal ca pentru orice altă versiune —
-  un [Aviz de securitate GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) privat,
+  un [Aviz de securitate GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
   niciodată o problemă publică. Menționați versiunea testată (de exemplu, `3.9.2`); remedierile ajung în
   `stable/v3` și sunt portate ulterior în v4.
 - **Nivelul de referință pentru securitate la lansarea LTS:** starea măsurată a scanerului, mecanismul de protecție a rutelor și

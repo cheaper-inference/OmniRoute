@@ -177,7 +177,7 @@ Berøringspunkter:
 
 - `open-sse/executors/antigravity.ts` — læser `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — håndtering af legitimationsoplysninger
-- Oprindelig hændelsesrapport: Diskussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Oprindelig hændelsesrapport: Diskussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

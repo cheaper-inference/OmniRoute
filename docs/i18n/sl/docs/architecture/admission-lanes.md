@@ -84,7 +84,7 @@ Pasovi na ravni bajtov omejujejo pomnilniško zahtevno pot razčlenjevanja/stisk
 
 ## 4. Dolge zahteve `/v1/responses` v enem procesu (rezerva pri zdravem stanju)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) je dodal `tryAcquireHealthyHeadroom`, tako da je druga strukturno zahtevna zahteva sprejeta, ko je kopica pod pragom `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Pot BYTE, ki jo uporablja `admitChatRequest` (telesa ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, privzeto 256 KiB, vključno s `POST /v1/responses`), uporablja **isti** izhod v sili.
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) je dodal `tryAcquireHealthyHeadroom`, tako da je druga strukturno zahtevna zahteva sprejeta, ko je kopica pod pragom `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Pot BYTE, ki jo uporablja `admitChatRequest` (telesa ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, privzeto 256 KiB, vključno s `POST /v1/responses`), uporablja **isti** izhod v sili.
 
 To je podprt recept za izvajanje v **enem procesu** z več kot dvema sočasnima dolgima povezavama SSE `/v1/responses`: primarno omejitev in rezervo pri zdravem stanju povečajte le toliko, kolikor dopuščata kopica in proračun bajtov zahtev v obdelavi za celoten proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110). Več deset dolgih odjemalcev SSE (40–50) je vprašanje tega pomnilniškega proračuna, ne pa stroga omejitev izdelka na »največ 2«. Obremenjena kopica še vedno zavrača zahteve s ponovljivim odzivom `503`, da se težava #7849 ne ponovi.
 

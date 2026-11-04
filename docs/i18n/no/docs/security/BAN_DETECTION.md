@@ -58,8 +58,8 @@ gjenopprettes aldri automatisk), mens operatøren fjerner en verifiseringsforesp
 Ved å beholde frasen i utestengelseslisten ble også den gjenopprettbare cloud-code-403-grenen i
 `classifyProviderError` utilgjengelig for denne ordlyden, fordi `accountDeactivated`
 evalueres først — dermed kunne prosjektrute-gjenopprettingen som ble lagt til for Gemini Code Assist i
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) og
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) aldri kjøre.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) og
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) aldri kjøre.
 
 Tre tilgrensende, **separate** signaltabeller er _ikke_ en del av gjenkjenningen av utestengelsesnøkkelord:
 

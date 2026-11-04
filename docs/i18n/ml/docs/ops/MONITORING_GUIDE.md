@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet **liveness** പരിശോധനയെ `/api/monitoring/health`-ലേക്ക് ചൂണ്ടിക്കാണിക്കരുത്. ആ പാത്ത് യഥാർഥ DB/മോണിറ്ററിങ് പ്രവർത്തനങ്ങൾ നടത്തുന്നതിനാൽ ലോഡുള്ളപ്പോൾ തെറ്റായ പോസിറ്റീവ് ഫലം നൽകും.
 
-ബന്ധപ്പെട്ടവ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ഇവന്റ് ലൂപ്പ് തിരക്കിലായിരിക്കുമ്പോഴുള്ള പരിശോധനകൾ), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (കാറ്റലോഗ് പ്രൈസിങ് അമിതമായി വിഭവങ്ങൾ ഉപയോഗിക്കുന്നത്), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (കംപ്രഷൻ ടോക്കൺ-എണ്ണൽ അമിതമായി വിഭവങ്ങൾ ഉപയോഗിക്കുന്നത്).
+ബന്ധപ്പെട്ടവ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ഇവന്റ് ലൂപ്പ് തിരക്കിലായിരിക്കുമ്പോഴുള്ള പരിശോധനകൾ), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (കാറ്റലോഗ് പ്രൈസിങ് അമിതമായി വിഭവങ്ങൾ ഉപയോഗിക്കുന്നത്), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (കംപ്രഷൻ ടോക്കൺ-എണ്ണൽ അമിതമായി വിഭവങ്ങൾ ഉപയോഗിക്കുന്നത്).
 
 ### systemd വാച്ച്ഡോഗ് (സ്തംഭിച്ച ഇവന്റ് ലൂപ്പ്)
 

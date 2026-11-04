@@ -6,7 +6,7 @@
 
 **Matsayi:** shawara (ana jiran bitar @diegosouzapw)
 **Kwanan wata:** 2026-06-20
-**Manazarta:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**Manazarta:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## TL;DR
 

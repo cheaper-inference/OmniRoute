@@ -405,7 +405,7 @@ mẹ́tríìkì kan sunwọ̀n sí i láì ṣe ìmúdójúìwọ̀n ìpìlẹ̀
 ### Ratchet CodeQL: àkókò ìtúnṣe àti ohun ìmúṣiṣẹ́ ọlọ́wọ́
 
 `check:codeql-ratchet` máa ń ka **ipò repo, tí a ń sọ di tuntun gẹ́gẹ́ bí àkókò tí a ṣètò — kì í ṣe fún PR kọ̀ọ̀kan.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` máa ń fi
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` máa ń fi
 `state: configured`, `schedule: weekly` hàn: ìṣàyẹ̀wò default-setup ti GitHub ni, kì í ṣe ìtúpalẹ̀
 fún push kọ̀ọ̀kan. Àbájáde rẹ̀ ni pé: lẹ́yìn tí PR kan tí ó ṢÀTÚNṢE àwọn ìkìlọ̀ bá ti merge, ratchet náà ṣì máa ń ka
 iye àtijọ́ tí ó ga jù títí ìṣàyẹ̀wò tí a ṣètò tókàn yóò fi ṣiṣẹ́ — nítorí náà, ó máa ń jabo ìfàsẹ́yìn

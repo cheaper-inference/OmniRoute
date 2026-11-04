@@ -480,7 +480,7 @@ codex debug models --bundled       # παράθεση του ενσωματωμ�
 | Η συνεδρία αλλάζει συνεχώς λογαριασμούς / η συνέχεια της προσωρινής μνήμης prompt χάνεται μεταξύ γύρων | Το TTL συνάφειας συνεδρίας είναι `0` (απενεργοποιημένο)                                       | `sessionAffinityTtlMs`   |
 | Η σύνδεση διακόπτεται κατά τη διάρκεια του συλλογισμού χωρίς μήνυμα προς τον πελάτη                    | Ο επόπτης αδράνειας ροής ενεργοποιήθηκε μετά από 10 λεπτά χωρίς τμήμα από την ανάντη υπηρεσία | `STREAM_IDLE_TIMEOUT_MS` |
 
-Σχετικές συζητήσεις: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (διακοπές εργασιών μεγάλης διάρκειας), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (γιατί η συνάφεια είναι απενεργοποιημένη από προεπιλογή). Παρακολούθηση: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Σχετικές συζητήσεις: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (διακοπές εργασιών μεγάλης διάρκειας), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (γιατί η συνάφεια είναι απενεργοποιημένη από προεπιλογή). Παρακολούθηση: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Συνάφεια συνεδρίας — δέσμευση μίας συνομιλίας σε έναν λογαριασμό
 

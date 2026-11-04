@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ავტომატური განახლება
 
-იყენებს `electron-updater` GitHub პროვაიდერთან (`cheaper-inference/OmniRoute`).
+იყენებს `electron-updater` GitHub პროვაიდერთან (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - მოვლენები გადაგზავნილი რენდერისთვის `update-status` IPC მეშვეობით: `checking`, `available`, `not-available`, `downloading` ( `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage ხელმოწერა არის სურვილისამ
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-რელიზები ქვეყნდება GitHub Releases-ში (`cheaper-inference/OmniRoute`), სადაც ასევე `electron-updater` ამოწმებს ახალ ვერსიებს.
+რელიზები ქვეყნდება GitHub Releases-ში (`diegosouzapw/OmniRoute`), სადაც ასევე `electron-updater` ამოწმებს ახალ ვერსიებს.
 
 ## პრობლემების მოგვარება
 

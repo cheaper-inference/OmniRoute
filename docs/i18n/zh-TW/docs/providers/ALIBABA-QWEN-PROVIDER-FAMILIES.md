@@ -5,7 +5,7 @@
 ---
 
 本文件記錄
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) 的實作決策。公開產品以四個提供者系列表示。區域屬於連線資料，而非獨立產品。
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) 的實作決策。公開產品以四個提供者系列表示。區域屬於連線資料，而非獨立產品。
 
 ## 決策
 

@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 코드 복제 및 디렉터리 이동
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly는 머신의 롤링 업데이트를 자동으로 수행합니다.
 
 ### 9.1 포크의 `fly.toml`을 유지하면서 업스트림 저장소 업데이트 추적
 
-현재 저장소가 포크이고 업스트림 `https://github.com/cheaper-inference/OmniRoute`의 업데이트를 동기화하려면 아래 워크플로를 따르세요.
+현재 저장소가 포크이고 업스트림 `https://github.com/diegosouzapw/OmniRoute`의 업데이트를 동기화하려면 아래 워크플로를 따르세요.
 
 먼저 원격 저장소를 확인합니다.
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream`이 구성되어 있지 않다면 추가합니다.
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 업스트림과 동기화하기 전에 최신 커밋과 태그를 가져옵니다.

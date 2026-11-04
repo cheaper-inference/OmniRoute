@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### 옵션 C: 소스에서 설치
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute는 장애가 발생한 제공업체를 자동으로 건너뛰고 다�
 
 - **[문제 해결](../guides/TROUBLESHOOTING.md)** — 일반적인 문제와 해결 방법
 - **[Discord](https://discord.gg/U47eFqAXCn)** — 커뮤니티 지원
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — 버그 신고
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — 버그 신고

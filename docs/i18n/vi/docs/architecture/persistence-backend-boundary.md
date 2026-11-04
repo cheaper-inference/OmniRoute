@@ -5,7 +5,7 @@
 ---
 
 - **Trạng thái:** Đề xuất — cần được người bảo trì phê duyệt trước khi bắt đầu công việc runtime
-- **Vấn đề theo dõi:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Vấn đề theo dõi:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Phạm vi:** Chỉ kiến trúc lưu trữ bền vững; quyết định này không bổ sung hoặc lựa chọn cơ sở dữ liệu bên ngoài
 
 ## Bối cảnh

@@ -4,9 +4,9 @@
 
 ---
 
-> **స్థితి:** ఆమోదించబడింది · **సందర్భం:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **ఒప్పందం:** `domain/routing/routerBackends.ts`
-> (టైప్డ్ రిజిస్ట్రీ — కోడ్ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)తో చేరుతుంది)
+> **స్థితి:** ఆమోదించబడింది · **సందర్భం:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **ఒప్పందం:** `domain/routing/routerBackends.ts`
+> (టైప్డ్ రిజిస్ట్రీ — కోడ్ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)తో చేరుతుంది)
 
 ఈ ADR, `ts` (నేటివ్), `bifrost`, `cliproxy`, `9router`, మరియు
 VibeProxy-అనుకూల ఇంజిన్లు ఒకదానితో మరొకటి ఎలా సంబంధం కలిగి ఉంటాయో నిర్దిష్టంగా నిర్వచిస్తుంది, తద్వారా సహకారులు
@@ -37,7 +37,7 @@ VibeProxy-అనుకూల ఇంజిన్లు ఒకదానితో �
 ## రిజిస్ట్రీ — ఏకైక అధికారిక సమాచార మూలం
 
 `domain/routing/routerBackends.ts` ఒప్పందం (కోడ్
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)తో చేరుతుంది) ప్రతి ఇంజిన్ను దాని
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)తో చేరుతుంది) ప్రతి ఇంజిన్ను దాని
 లైఫ్సైకిల్, సామర్థ్యాలు, సర్వీస్ గుర్తింపు, డిఫాల్ట్ పోర్ట్, హెల్త్ కాన్ఫిగరేషన్ మరియు
 టెలిమెట్రీ మద్దతుతో ఒక్కసారి మాత్రమే ప్రకటిస్తుంది. ప్రతి సైడ్కార్కు ప్రత్యేక షరతులు రాయడానికి బదులుగా,
 వినియోగదారులు `getRouterBackend(id)`, `listRouterBackends()`, మరియు
@@ -52,7 +52,7 @@ VibeProxy-అనుకూల ఇంజిన్లు ఒకదానితో �
 | `vibeproxy` | `external`   | —                 | — (ప్రొవైడర్ అడాప్టర్)   | `/v1/models`  | —               |
 
 ¹ Bifrostను `/api/services/bifrost/` నుండి ఇన్స్టాల్/ప్రారంభించగల `supervised` ఎంబెడెడ్ సర్వీస్గా
-ప్రమోట్ చేసే పని [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)లో ట్రాక్ చేయబడుతోంది; అది మెర్జ్ అయ్యే వరకు,
+ప్రమోట్ చేసే పని [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)లో ట్రాక్ చేయబడుతోంది; అది మెర్జ్ అయ్యే వరకు,
 Bifrost `external`-మాత్రమే (`BIFROST_BASE_URL` ద్వారా మాత్రమే చేరుకోగలదు).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -120,8 +120,8 @@ Bifrost `external`-మాత్రమే (`BIFROST_BASE_URL` ద్వారా 
 ప్రస్తుతం ఎంపిక రిలే స్థాయిలో **పూర్తిగా-లేదా-అసలే-లేదు** విధానంలో ఉంటుంది — `release/v3.8.43`లో
 ప్రతి-ప్రొవైడర్ లేదా ప్రతి-రిక్వెస్ట్ ఇంజిన్ మార్పిడి లేదు. ప్రతి-రిక్వెస్ట్ గేట్ను
 సైడ్కార్-మానిఫెస్ట్ పని ద్వారా జోడిస్తున్నారు
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) మానిఫెస్ట్ +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) మానిఫెస్ట్ +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ఇది మానిఫెస్ట్కు అర్హమైన ప్రొవైడర్లను మాత్రమే Bifrost ద్వారా రూట్ చేయడానికి `auto`ను అనుమతిస్తుంది.
 
 ## డ్యాష్బోర్డ్ అనుసంధానం

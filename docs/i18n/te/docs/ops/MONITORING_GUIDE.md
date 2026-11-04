@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet **లైవ్నెస్**ను `/api/monitoring/health` వైపు **మళ్లించవద్దు**. ఆ పాత్ నిజమైన DB/మానిటరింగ్ పనిని చేస్తుంది, కాబట్టి లోడ్లో తప్పుగా పాజిటివ్ ఫలితాన్ని ఇస్తుంది.
 
-సంబంధితవి: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ఈవెంట్ లూప్ బిజీగా ఉన్నప్పుడు ప్రోబ్లు), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (కేటలాగ్ ప్రైసింగ్ అధిక వనరుల వినియోగం), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (కంప్రెషన్ టోకెన్-కౌంట్ అధిక వనరుల వినియోగం).
+సంబంధితవి: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ఈవెంట్ లూప్ బిజీగా ఉన్నప్పుడు ప్రోబ్లు), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (కేటలాగ్ ప్రైసింగ్ అధిక వనరుల వినియోగం), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (కంప్రెషన్ టోకెన్-కౌంట్ అధిక వనరుల వినియోగం).
 
 ### systemd వాచ్డాగ్ (స్తంభించిన ఈవెంట్ లూప్)
 

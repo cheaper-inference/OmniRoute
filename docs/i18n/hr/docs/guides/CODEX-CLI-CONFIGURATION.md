@@ -471,7 +471,7 @@ Dvije zadane postavke OmniRoutea mogu neprimjetno sabotirati višesatne sesije C
 | Sesija stalno mijenja račune / kontinuitet predmemorije upita gubi se između krugova | TTL afiniteta sesije iznosi `0` (onemogućeno)                                                   | `sessionAffinityTtlMs`   |
 | Veza se prekida usred zaključivanja bez obavijesti vidljive klijentu                 | Nadzornik neaktivnosti toka aktivirao se nakon 10 minuta bez segmenta s nadređenog poslužitelja | `STREAM_IDLE_TIMEOUT_MS` |
 
-Povezane rasprave: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (prekidi dugih zadataka), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (zašto je afinitet prema zadanim postavkama isključen). Praćenje: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Povezane rasprave: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (prekidi dugih zadataka), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (zašto je afinitet prema zadanim postavkama isključen). Praćenje: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Afinitet sesije — vežite jedan razgovor uz jedan račun
 

@@ -18,7 +18,7 @@ Katalogda **45 ta Agent Skill** mavjud (23 ta REST API + 21 ta CLI + 1 ta konfig
 - **Kanonik ID** (`omni-auth`, `cli-serve` va hokazo)
 - `skills/{id}/SKILL.md` ichidagi YAML frontmatter (`name`, `description`) + batafsil markdown mazmuniga ega **SKILL.md** fayli
 - OpenAPI spetsifikatsiyasi va CLI reyestridan olingan **REST endpointlari** (API skill’lari) yoki **CLI quyi buyruqlari** (CLI skill’lari)
-- Jonli yuklab olish uchun **GitHub raw URL manzili**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Jonli yuklab olish uchun **GitHub raw URL manzili**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. GitHub’dan to‘g‘ridan-to‘g‘ri raw formatida olish (server talab qilinmaydi)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

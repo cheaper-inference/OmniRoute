@@ -173,7 +173,7 @@ Susijusios vietos:
 
 - `open-sse/executors/antigravity.ts` — nuskaito `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — prisijungimo duomenų perdavimas
-- Pradinis incidento pranešimas: diskusija [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Pradinis incidento pranešimas: diskusija [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

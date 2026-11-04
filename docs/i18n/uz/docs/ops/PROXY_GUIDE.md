@@ -260,7 +260,7 @@ Bu yangilangandan keyingi ilk ishga tushirishda bir marta amalga oshadi. Qayta i
 
 ## 1proxy bepul proksi bozori
 
-> 🆕 **[@oyi77](https://github.com/oyi77) tomonidan qoʻshilgan** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Muammo [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) tomonidan qoʻshilgan** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Muammo [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute butun dunyo boʻylab **yuzlab bepul, tekshirilgan proksilardan** foydalanish imkonini berish uchun **[1proxy](https://1proxy-api.aitradepulse.com)** hamjamiyat platformasi bilan integratsiyalashadi. Bu oʻz proksi infratuzilmasiga ega boʻlmagan foydalanuvchilar uchun juda mos keladi.
 

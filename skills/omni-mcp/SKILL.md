@@ -109,7 +109,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — MCP Server
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## Transports
 
@@ -174,5 +174,5 @@ Pass scope name as `--scope` arg or via `X-Omniroute-Scope` header.
 
 ## Reference
 
-Full docs: https://github.com/cheaper-inference/OmniRoute/blob/main/docs/frameworks/MCP-SERVER.md
+Full docs: https://github.com/diegosouzapw/OmniRoute/blob/main/docs/frameworks/MCP-SERVER.md
 <!-- skill:custom-end -->

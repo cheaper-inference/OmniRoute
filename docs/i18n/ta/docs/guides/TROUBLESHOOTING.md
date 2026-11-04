@@ -221,7 +221,7 @@ HTTP கோரிக்கைகளைப் போன்ற பல இணைப
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   வெளியீடு `latest.yml` → `sha512` உடன் பொருந்த வேண்டும். பொருந்தவில்லை என்றால், கோப்பை நீக்கிவிட்டு [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases)-இலிருந்து மட்டும் மீண்டும் பதிவிறக்கவும்.
+   வெளியீடு `latest.yml` → `sha512` உடன் பொருந்த வேண்டும். பொருந்தவில்லை என்றால், கோப்பை நீக்கிவிட்டு [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases)-இலிருந்து மட்டும் மீண்டும் பதிவிறக்கவும்.
 2. **மீட்டெடுத்து + விலக்காகச் சேருங்கள்** — முந்தைய நிலைக்குத் திருப்பப்பட்ட உருப்படிகளைத் தனிமைப்படுத்தப்பட்ட இடத்திலிருந்து மீட்டெடுத்து, `%LOCALAPPDATA%\Programs\OmniRoute`-ஐ விலக்காகச் சேருங்கள் (Kaspersky → Settings → Threats and Exclusions), பின்னர் மீண்டும் நிறுவவும்.
 3. **தவறான நேர்மறை முடிவைப் புகாரளியுங்கள்** — <https://opentip.kaspersky.com/>. பயனர்கள் சமர்ப்பிக்கும் தவறான நேர்மறை முடிவு அறிக்கைகள், அனுமதிப்பட்டியலில் சேர்க்கப்படுவதை உண்மையிலேயே விரைவுபடுத்துகின்றன.
 
@@ -808,7 +808,7 @@ omniroute serve --ready-timeout 180000
 
 ## இன்னும் சிக்கியுள்ளீர்களா?
 
-- **GitHub சிக்கல்கள்**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub சிக்கல்கள்**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **கட்டமைப்பு**: உள் விவரங்களுக்கு [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)-ஐப் பார்க்கவும்
 - **API குறிப்பு**: அனைத்து முனைப்புள்ளிகளுக்கும் [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)-ஐப் பார்க்கவும்
 - **நலநிலை முகப்புப்பலகை**: நிகழ்நேரக் கணினி நிலைக்கு **Dashboard → Health**-ஐச் சரிபார்க்கவும்

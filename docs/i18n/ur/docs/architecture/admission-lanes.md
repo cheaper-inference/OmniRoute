@@ -126,7 +126,7 @@ Combo (ترجیح / راؤنڈ رابن) اور fusion ایک بنیادی در�
 
 ## 4. ایک پراسیس میں طویل `/v1/responses` (صحت مند گنجائش)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) نے
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) نے
 `tryAcquireHealthyHeadroom` شامل کیا تاکہ heap کے
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` سے کم ہونے پر دوسری ساختی طور پر بھاری درخواست کو داخلے کی اجازت دی جا سکے۔ `admitChatRequest` کے زیرِ استعمال BYTE
 پاتھ (ایسی bodies جو ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` ہوں،

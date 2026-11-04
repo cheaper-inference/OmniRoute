@@ -56,7 +56,7 @@ Dette **stopper ikke utviklingen**:
 Se etter en åpen utgivelsesfrys før du antar at grenen du ønsker, kan sammenslås:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Mekanismen for sammenslåing (eierens `queue`-etikett → Mergify) er dokumentert i

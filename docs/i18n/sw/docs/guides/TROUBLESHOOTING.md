@@ -241,7 +241,7 @@ hadi utekelezwe, matoleo mapya yanaweza kurudia hali hii.
    [Convert]::ToBase64String($b)
    ```
    Matokeo lazima yalingane na `latest.yml` → `sha512`. Ikiwa hayalingani, futa faili hiyo na
-   uipakue tena kutoka kwenye [ukurasa wa matoleo wa GitHub](https://github.com/cheaper-inference/OmniRoute/releases) pekee.
+   uipakue tena kutoka kwenye [ukurasa wa matoleo wa GitHub](https://github.com/diegosouzapw/OmniRoute/releases) pekee.
 2. **Rejesha + tenga** — rejesha vipengee vilivyoondolewa wakati wa urudishaji nyuma kutoka karantini na uongeze utengaji
    kwa `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    kisha usakinishe upya.
@@ -837,7 +837,7 @@ kamili kuhusu `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Bado Umekwama?
 
-- **Masuala ya GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Masuala ya GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Usanifu**: Tazama [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) kwa maelezo ya ndani
 - **Rejea ya API**: Tazama [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) kwa endpoints zote
 - **Dashibodi ya Afya**: Angalia **Dashboard → Health** kwa hali ya mfumo ya wakati halisi

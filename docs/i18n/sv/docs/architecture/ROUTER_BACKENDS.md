@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Godkänd · **Kontext:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
-> (typat register — koden levereras med [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Status:** Godkänd · **Kontext:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
+> (typat register — koden levereras med [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Detta ADR fastställer hur `ts` (inbyggd), `bifrost`, `cliproxy`, `9router` och
 VibeProxy-kompatibla motorer förhåller sig till varandra, så att bidragsgivare slutar
@@ -39,7 +39,7 @@ endast var `external`.
 ## Registret — den enda sanningskällan
 
 Kontraktet `domain/routing/routerBackends.ts` (koden levereras med
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) deklarerar varje motor en gång, med dess
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) deklarerar varje motor en gång, med dess
 livscykel, funktioner, tjänsteidentitet, standardport, hälsokonfiguration och
 telemetristöd. Konsumenter slår upp motorer via `getRouterBackend(id)`,
 `listRouterBackends()` och `listRouterBackendsByCapability(cap)` i stället för
@@ -55,7 +55,7 @@ att specialhantera varje sidoprocess.
 
 ¹ Bifrosts uppgradering till en `supervised` inbäddad tjänst (som kan installeras/startas
 från `/api/services/bifrost/`) följs i
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); fram till dess att den slås samman
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); fram till dess att den slås samman
 är Bifrost endast `external` (kan enbart nås via `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ dirigering; huvudytan `/api/v1/chat/completions` konsulterar aldrig
 Valet är **allt-eller-inget på relänivå i dag** — det finns inget byte av motor per leverantör
 eller per begäran i `release/v3.8.43`. Grinden per begäran läggs till
 genom arbetet med sidecar-manifestet
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 vilket gör att `auto` endast kan routa manifestberättigade leverantörer genom Bifrost.
 
 ## Dashboardintegration

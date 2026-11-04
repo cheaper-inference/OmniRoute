@@ -64,7 +64,7 @@
 
 दुर्व्यवहारपूर्ण, उत्पीडनकारी वा अन्यथा अस्वीकार्य व्यवहारका घटनाहरू
 कार्यान्वयनका लागि जिम्मेवार समुदायका नेतृत्वकर्ताहरूलाई
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 मा निजी सुरक्षा सल्लाह खोलेर वा मर्मतकर्तालाई diegosouza.pw@outlook.com मा
 इमेल गरेर रिपोर्ट गर्न सकिन्छ।
 सुरक्षा-संवेदनशील घटनाहरूका लागि [`SECURITY.md`](SECURITY.md) हेर्नुहोस्।

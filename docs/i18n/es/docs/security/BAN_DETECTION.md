@@ -58,8 +58,8 @@ nunca se recupera automáticamente), mientras que el operador resuelve una solic
 Mantener la frase en la lista de bloqueos también hacía inalcanzable la rama recuperable de errores 403 de Cloud Code en
 `classifyProviderError` para esta redacción, porque `accountDeactivated` se
 evalúa primero; por tanto, la recuperación de rutas del proyecto añadida para Gemini Code Assist en
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) y
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) nunca podía ejecutarse.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) y
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) nunca podía ejecutarse.
 
 Tres tablas de señales contiguas y **separadas** _no_ forman parte de la detección de palabras clave de bloqueo:
 

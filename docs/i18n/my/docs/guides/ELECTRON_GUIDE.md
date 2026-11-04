@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## အလိုအလျောက်မွမ်းမံခြင်း။
 
-`electron-updater` GitHub ပံ့ပိုးပေးသူ (`cheaper-inference/OmniRoute`) ဖြင့် အသုံးပြုသည်။
+`electron-updater` GitHub ပံ့ပိုးပေးသူ (`diegosouzapw/OmniRoute`) ဖြင့် အသုံးပြုသည်။
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC မှတဆင့် တင်ဆက်သူသို့ ထပ်ဆင့်ပို့သော အစီအစဉ်များ : `checking`, `available`, `not-available`, `downloading` (with `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage လက်မှတ်ထိုးခြင်းသည် လက်မ�
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ဖြန့်ချိမှုများကို GitHub Releases (`cheaper-inference/OmniRoute`) တွင် ထုတ်ဝေထားပြီး `electron-updater` ဗားရှင်းအသစ်များကို စစ်ဆေးသည့်နေရာဖြစ်သည်။
+ဖြန့်ချိမှုများကို GitHub Releases (`diegosouzapw/OmniRoute`) တွင် ထုတ်ဝေထားပြီး `electron-updater` ဗားရှင်းအသစ်များကို စစ်ဆေးသည့်နေရာဖြစ်သည်။
 
 ## ပြသာနာရှာဖွေရှင်းပေးခြင်း
 

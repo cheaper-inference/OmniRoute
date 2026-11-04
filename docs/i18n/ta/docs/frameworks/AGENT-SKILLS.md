@@ -18,7 +18,7 @@ Agent Skills என்பவை வெளிப்புற முகவர்�
 - ஒரு **அதிகாரப்பூர்வ ID** (`omni-auth`, `cli-serve` போன்றவை)
 - YAML முன்தகவல் (`name`, `description`) + செறிவான markdown உள்ளடக்கம் கொண்ட `skills/{id}/SKILL.md` என்ற **SKILL.md** கோப்பு
 - OpenAPI விவரக்குறிப்பு மற்றும் CLI பதிவகத்திலிருந்து பெறப்பட்ட **REST முனைப்புள்ளிகள்** (API திறன்கள்) அல்லது **CLI துணைக் கட்டளைகள்** (CLI திறன்கள்)
-- நேரடியாகப் பெறுவதற்கான ஒரு **GitHub மூல URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- நேரடியாகப் பெறுவதற்கான ஒரு **GitHub மூல URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. நேரடி GitHub மூலப் பெறுதல் (சர்வர் தேவையில்லை)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

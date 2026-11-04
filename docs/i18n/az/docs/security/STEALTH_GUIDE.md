@@ -150,7 +150,7 @@ Mühit arayışında hər bir kredit rejiminin hesab və xərc nəticələri sə
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` dəyərini oxuyur
 - `src/lib/oauth/providers/antigravity.ts` — etimadnamə bağlantıları
-- İlkin insident hesabatı: Müzakirə [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- İlkin insident hesabatı: Müzakirə [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

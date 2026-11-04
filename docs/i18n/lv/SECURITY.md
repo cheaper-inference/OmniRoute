@@ -9,7 +9,7 @@
 Ja atklājat drošības ievainojamību OmniRoute, lūdzu, ziņojiet par to atbildīgi:
 
 1. **NEVEIDOJIET** publisku GitHub problēmas pieteikumu
-2. Izmantojiet [GitHub drošības ieteikumus](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Izmantojiet [GitHub drošības ieteikumus](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Iekļaujiet: aprakstu, reproducēšanas darbības un iespējamo ietekmi
 
 ## Reaģēšanas termiņi
@@ -42,7 +42,7 @@ Pēc 3.8.59 nākamā versija ir **3.9.0**, ar kuru zarā
   atkarībā no tā, kurš termiņš iestājas vēlāk**. Iegūtais beigu datums tiek ierakstīts 3.9.0 laidiena piezīmēs un
   failā [`ROADMAP.md`](ROADMAP.md), kad tiek izveidots laidiens.
 - **Ievainojamības ziņošana LTS līnijā:** izmantojiet to pašu kanālu kā jebkurai citai versijai —
-  privātu [GitHub drošības ieteikumu](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  privātu [GitHub drošības ieteikumu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   nekad publisku problēmas pieteikumu. Norādiet, kuru versiju pārbaudījāt (piemēram, `3.9.2`); labojumi tiek
   iekļauti `stable/v3` un pārnesti uz priekšu uz v4.
 - **Drošības bāzes līmenis LTS izveides brīdī:** izmērītais skenera stāvoklis, maršrutu aizsardzības un

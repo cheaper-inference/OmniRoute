@@ -4,9 +4,9 @@
 
 ---
 
-> **အခြေအနေ:** လက်ခံပြီး · **ဆက်စပ်အကြောင်းအရာ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **သတ်မှတ်ချက်:** `domain/routing/routerBackends.ts`
-> (အမျိုးအစားသတ်မှတ်ထားသော registry — code ကို [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) နှင့်အတူ ထည့်သွင်းမည်)
+> **အခြေအနေ:** လက်ခံပြီး · **ဆက်စပ်အကြောင်းအရာ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **သတ်မှတ်ချက်:** `domain/routing/routerBackends.ts`
+> (အမျိုးအစားသတ်မှတ်ထားသော registry — code ကို [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) နှင့်အတူ ထည့်သွင်းမည်)
 
 ဤ ADR သည် `ts` (native), `bifrost`, `cliproxy`, `9router` နှင့်
 VibeProxy-compatible engine များ အချင်းချင်း မည်သို့ဆက်နွှယ်သည်ကို အတိအကျ သတ်မှတ်ပေးထားသဖြင့် contributor များသည် ဗိသုကာအရ သီးခြားဖြစ်သော အရာနှစ်ခုကို
@@ -37,7 +37,7 @@ backend မဟုတ်ပါ။ `bifrost` မှာမူ ပြောင်း
 ## Registry — တစ်ခုတည်းသော အမှန်တရားရင်းမြစ်
 
 `domain/routing/routerBackends.ts` သတ်မှတ်ချက် (code ကို
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) နှင့်အတူ ထည့်သွင်းမည်) သည် engine တစ်ခုစီကို ၎င်း၏
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) နှင့်အတူ ထည့်သွင်းမည်) သည် engine တစ်ခုစီကို ၎င်း၏
 lifecycle, capability များ, service identity, default port, health config နှင့်
 telemetry support တို့နှင့်အတူ တစ်ကြိမ်စီ ကြေညာသတ်မှတ်သည်။ Consumer များသည် sidecar တစ်ခုချင်းစီအတွက်
 သီးခြား case များ ရေးသားမည့်အစား `getRouterBackend(id)`,
@@ -53,7 +53,7 @@ telemetry support တို့နှင့်အတူ တစ်ကြိမ်�
 
 ¹ Bifrost ကို `/api/services/bifrost/` မှ install/start လုပ်နိုင်သော
 `supervised` embedded service အဖြစ် အဆင့်မြှင့်တင်မှုကို
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) တွင် ခြေရာခံထားသည်။ ၎င်းကို merge မလုပ်ရသေးသရွေ့
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) တွင် ခြေရာခံထားသည်။ ၎င်းကို merge မလုပ်ရသေးသရွေ့
 Bifrost ကို `external` အဖြစ်သာ ရရှိနိုင်သည် (`BIFROST_BASE_URL` မှတစ်ဆင့်သာ ချိတ်ဆက်အသုံးပြုနိုင်သည်)။
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -122,8 +122,8 @@ backend တစ်ခုကို ရွေးချယ်သည်။ အဓိ�
 လက်ရှိ relay အဆင့်ရှိ ရွေးချယ်မှုသည် **အားလုံး သို့မဟုတ် ဘာမျှမဟုတ်** ပုံစံဖြစ်သည် —
 `release/v3.8.43` တွင် provider တစ်ခုချင်း သို့မဟုတ် request တစ်ခုချင်းအလိုက် engine ပြောင်းလဲခြင်း မရှိသေးပါ။
 Request တစ်ခုချင်းအလိုက် gate ကို sidecar-manifest လုပ်ငန်းက ထည့်သွင်းနေသည်
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)။
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)။
 ၎င်းကြောင့် `auto` သည် manifest အရ အကျုံးဝင်သော provider များကိုသာ Bifrost မှတစ်ဆင့် route လုပ်နိုင်မည်။
 
 ## Dashboard ပေါင်းစည်းမှု

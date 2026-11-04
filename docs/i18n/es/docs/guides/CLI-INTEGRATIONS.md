@@ -199,7 +199,7 @@ salida de `ps`.
 Apuntar el perfil a un **combo** de OmniRoute, en lugar de a un único modelo, es lo que
 proporciona a la flota la conmutación por error entre proveedores: cuando el endpoint principal dejó de responder por completo a mitad de un turno
 en la ejecución registrada en
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), el agente completó
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), el agente completó
 los pasos restantes con el fallback y nunca expuso la interrupción.
 
 ---

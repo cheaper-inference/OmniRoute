@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 कोड क्लोन गरी डाइरेक्टरीमा प्रवेश गर्ने
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly ले स्वचालित रूपमा मेसिनहरूक�
 
 ### 9.1 तपाईंको फोर्कको `fly.toml` सुरक्षित राख्दै अपस्ट्रिम रिपोजिटरीका अद्यावधिकहरू ट्र्याक गर्ने
 
-यदि हालको रिपोजिटरी एउटा फोर्क हो र तपाईं अपस्ट्रिम `https://github.com/cheaper-inference/OmniRoute` बाट अद्यावधिकहरू सिङ्क गर्न चाहनुहुन्छ भने, तलको कार्यप्रवाह पालना गर्नुहोस्।
+यदि हालको रिपोजिटरी एउटा फोर्क हो र तपाईं अपस्ट्रिम `https://github.com/diegosouzapw/OmniRoute` बाट अद्यावधिकहरू सिङ्क गर्न चाहनुहुन्छ भने, तलको कार्यप्रवाह पालना गर्नुहोस्।
 
 पहिले, आफ्ना रिमोटहरू प्रमाणित गर्नुहोस्:
 
@@ -309,7 +309,7 @@ git remote -v
 यदि `upstream` कन्फिगर गरिएको छैन भने, यसलाई थप्नुहोस्:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 अपस्ट्रिमसँग सिङ्क गर्नुअघि, नवीनतम कमिट र ट्यागहरू फेच गर्नुहोस्:

@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Diterima · **Konteks:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrak:** `domain/routing/routerBackends.ts`
-> (registri bertipe — kode disertakan dalam [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Status:** Diterima · **Konteks:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrak:** `domain/routing/routerBackends.ts`
+> (registri bertipe — kode disertakan dalam [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 ADR ini menetapkan hubungan antara mesin `ts` (native), `bifrost`, `cliproxy`, `9router`, dan mesin yang kompatibel dengan VibeProxy, sehingga kontributor tidak lagi mencampuradukkan dua hal yang berbeda secara arsitektural. Dokumen ini menetapkan registri bertipe yang diperkenalkan oleh pekerjaan router-backend-registry sebagai satu-satunya sumber kebenaran untuk model tersebut.
 
@@ -27,7 +27,7 @@ Kesalahan yang harus dihindari: memperlakukan "layanan tertanam" dan "backend pe
 
 ## Registri — satu-satunya sumber kebenaran
 
-Kontrak `domain/routing/routerBackends.ts` (kode disertakan dalam [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) mendeklarasikan setiap mesin satu kali, beserta siklus hidup, kapabilitas, identitas layanan, port default, konfigurasi kesehatan, dan dukungan telemetrinya. Konsumen mencari mesin melalui `getRouterBackend(id)`, `listRouterBackends()`, dan `listRouterBackendsByCapability(cap)`, alih-alih menangani setiap sidecar secara khusus.
+Kontrak `domain/routing/routerBackends.ts` (kode disertakan dalam [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) mendeklarasikan setiap mesin satu kali, beserta siklus hidup, kapabilitas, identitas layanan, port default, konfigurasi kesehatan, dan dukungan telemetrinya. Konsumen mencari mesin melalui `getRouterBackend(id)`, `listRouterBackends()`, dan `listRouterBackendsByCapability(cap)`, alih-alih menangani setiap sidecar secara khusus.
 
 | Backend     | Siklus hidup | Layanan (sumbu A) | Backend relay (sumbu B) | Kesehatan     | Port default |
 | ----------- | ------------ | ----------------- | ----------------------- | ------------- | ------------ |
@@ -37,7 +37,7 @@ Kontrak `domain/routing/routerBackends.ts` (kode disertakan dalam [#5868](https:
 | `9router`   | `supervised` | `9router`         | — (penyedia)            | `/api/health` | 20130        |
 | `vibeproxy` | `external`   | —                 | — (adapter penyedia)    | `/v1/models`  | —            |
 
-¹ Promosi Bifrost menjadi layanan tertanam `supervised` (dapat diinstal/dimulai dari `/api/services/bifrost/`) dilacak dalam [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); hingga perubahan tersebut digabungkan, Bifrost hanya bersifat `external` (hanya dapat dijangkau melalui `BIFROST_BASE_URL`).
+¹ Promosi Bifrost menjadi layanan tertanam `supervised` (dapat diinstal/dimulai dari `/api/services/bifrost/`) dilacak dalam [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); hingga perubahan tersebut digabungkan, Bifrost hanya bersifat `external` (hanya dapat dijangkau melalui `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) memungkinkan pemanggil memfilter berdasarkan kemampuan aktual mesin, alih-alih mengodekan cabang per ID secara langsung.
 
@@ -102,8 +102,8 @@ dispatch; antarmuka utama `/api/v1/chat/completions` tidak pernah menggunakan
 Saat ini, pemilihan bersifat **semua-atau-tidak-sama-sekali pada tingkat relay** — tidak ada pertukaran engine
 per penyedia atau per permintaan pada `release/v3.8.43`. Gate per permintaan sedang ditambahkan
 melalui pekerjaan manifes sidecar
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifes +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifes +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 yang memungkinkan `auto` merutekan hanya penyedia yang memenuhi syarat manifes melalui Bifrost.
 
 ## Integrasi dashboard

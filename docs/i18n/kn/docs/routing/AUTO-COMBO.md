@@ -130,14 +130,14 @@ handleComboChat (ಉಳಿಸಲಾದ ಕಾಂಬೊಗಳಲ್ಲಿರು�
 
 `name` ನೈಜ ಮಾಡೆಲ್ ಐಡಿಗೆ ತದ್ರೂಪವಾಗಿರುವ ಕಾಂಬೊ (ಉದಾ. `gpt-5.5` ಎಂಬ ಹೆಸರಿನ ಕಾಂಬೊ)
 ಒಂದು **ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ ಬೆಂಬಲಿತ ಮಾದರಿ** ಆಗಿದೆಯೇ ಹೊರತು ದೋಷವಲ್ಲ: ಇದು
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) ನಲ್ಲಿ ದಾಖಲಿಸಲಾದ
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) ನಲ್ಲಿ ದಾಖಲಿಸಲಾದ
 ಪ್ರತಿ-ಮಾಡೆಲ್-ಐಡಿ ಪ್ರೊವೈಡರ್ ಫಾಲ್ಬ್ಯಾಕ್ ಕಾರ್ಯವಿಧಾನವಾಗಿದೆ. ನೇರ ಮಾಡೆಲ್-ಐಡಿ ರೆಸಲ್ಯೂಶನ್ಗಿಂತ ಮೊದಲು
 ಕಾಂಬೊ ರೆಸಲ್ಯೂಶನ್ ಪರಿಶೀಲಿಸಲ್ಪಡುವುದರಿಂದ
 (`src/sse/services/model.ts` ನಲ್ಲಿನ `getComboForModel()`), ನೇರ ಐಡಿ
 `gpt-5.5` ಗಾಗಿನ ವಿನಂತಿಯು ಒಂದೇ ಪ್ರೊವೈಡರ್ಗೆ ನೇರವಾಗಿ ಹೋಗುವ ಬದಲು ಕಾಂಬೊದ
 ಗುರಿಗಳ ಮೂಲಕ (ಉದಾ. `acme-responses/gpt-5.5`,
 `backup-responses/gpt-5.5`) ರೂಟ್ ಆಗುತ್ತದೆ — ಇದು
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) ಗಾಗಿ ನಿರ್ಮಿಸಿದ
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) ಗಾಗಿ ನಿರ್ಮಿಸಿದ
 ರೀರೈಟ್ಗಿಂತ-ಮೊದಲು-ಕಾಂಬೊ ಆದ್ಯತೆಯನ್ನು ಮರುಬಳಕೆ ಮಾಡುತ್ತದೆ ಮತ್ತು
 `tests/unit/responses-combo-resolution-3227.test.ts` ಹಾಗೂ
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` ಮೂಲಕ ರಿಗ್ರೆಷನ್ ಪರೀಕ್ಷೆಗೆ ಒಳಪಟ್ಟಿದೆ.
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` ನಿಮ್ಮ ಕಾಂಬೊಗಳನ್ನು ಬಳಸುವುದಿಲ್ಲ.** `auto`/`auto/*` ತನ್ನದೇ ಆದ ಶೂನ್ಯ-ಕಾನ್ಫಿಗರೇಶನ್ ಅಭ್ಯರ್ಥಿ ಪೂಲ್ ಅನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ ಮತ್ತು ಕಾಂಬೊಗೆ ಅಕ್ಷರಶಃ `auto` ಎಂದು ಹೆಸರಿಟ್ಟಿದ್ದರೆ ಮಾತ್ರ ಉಳಿಸಿಟ್ಟ ಕಾಂಬೊಗಳನ್ನು ಪರಿಗಣಿಸುತ್ತದೆ (ಶಿಫಾರಸು ಮಾಡುವುದಿಲ್ಲ). ಕಾಂಬೊ ಮೂಲಕ ರೂಟ್ ಮಾಡಲು, ಅದರ ನಿಖರವಾದ ಹೆಸರನ್ನು ಕಳುಹಿಸಿ — `auto` ಅಲ್ಲ.
 - **`openrouter/auto` ಒಂದು ನೈಜ ಪಾವತಿಸಬೇಕಾದ OpenRouter ಉತ್ಪನ್ನವಾಗಿದೆ** ("Auto Best Available"), OmniRoute ಅಲಿಯಾಸ್ ಅಲ್ಲ. ಇದು OpenRouter ರಿಜಿಸ್ಟ್ರಿಯ (`open-sse/config/providers/registry/openrouter/index.ts`) ಏಕೈಕ ಸ್ಥಿರ ಮಾಡೆಲ್ ನಮೂದು ಆಗಿದ್ದು, ಇದಕ್ಕಾಗಿ ಪ್ರತ್ಯೇಕವಾಗಿ ಬಿಲ್ ಮಾಡಲಾಗುತ್ತದೆ. ಇದನ್ನು `auto` ಪೂಲ್ಗಳಿಂದ ಹೊರಗಿಡಲು ಸೆಟ್ಟಿಂಗ್ಗಳು → ರೂಟಿಂಗ್ → ಪಾವತಿಸಬೇಕಾದ ಮಾಡೆಲ್ಗಳನ್ನು ಮರೆಮಾಡಿ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ.
 
-ಇಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿರುವ ಮೂಲ ಗೊಂದಲಕ್ಕಾಗಿ [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ಮತ್ತು [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) ನೋಡಿ.
+ಇಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿರುವ ಮೂಲ ಗೊಂದಲಕ್ಕಾಗಿ [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ಮತ್ತು [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) ನೋಡಿ.
 
 ## ಇದು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ (ಸ್ಥಿರವಾಗಿ ಸಂಗ್ರಹಿಸಲಾದ ಆಟೋ-ಕಾಂಬೊಗಳು)
 

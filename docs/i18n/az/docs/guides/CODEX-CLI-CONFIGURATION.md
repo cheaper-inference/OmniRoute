@@ -478,7 +478,7 @@ OmniRoute-un iki standart ayarı çoxsaatlıq Codex CLI sessiyalarını nəzər�
 | Sessiya hesablar arasında keçid etməyə davam edir / sorğu keşinin ardıcıllığı gedişlər arasında itir | Sessiya yaxınlığının TTL dəyəri `0`-dır (deaktivdir)                                                  | `sessionAffinityTtlMs`   |
 | Müştəriyə görünən heç bir sorğu olmadan əsaslandırmanın ortasında bağlantı kəsilir                   | Yuxarı axından 10 dəqiqə ərzində heç bir hissə gəlmədiyi üçün axının boşdayanma nəzarətçisi işə düşüb | `STREAM_IDLE_TIMEOUT_MS` |
 
-Əlaqəli müzakirələr: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (uzun tapşırıqların kəsilməsi), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (yaxınlığın standart olaraq niyə deaktiv olması). İzləmə: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Əlaqəli müzakirələr: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (uzun tapşırıqların kəsilməsi), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (yaxınlığın standart olaraq niyə deaktiv olması). İzləmə: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Sessiya yaxınlığı — bir söhbəti bir hesaba sabitləyin
 

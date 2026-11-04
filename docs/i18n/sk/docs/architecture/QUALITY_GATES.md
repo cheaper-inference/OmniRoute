@@ -420,7 +420,7 @@ implementácia sa pripravuje).
 ### Ratchet CodeQL: frekvencia obnovenia a manuálne spustenie
 
 `check:codeql-ratchet` načítava **stav repozitára, obnovovaný podľa plánu — nie pri každom PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` hlási
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` hlási
 `state: configured`, `schedule: weekly`: ide o kontrolu prostredníctvom predvoleného nastavenia GitHubu, nie o analýzu
 pri každom odoslaní zmien. Dôsledok: po zlúčení PR, ktorý OPRAVUJE upozornenia, ratchet naďalej načítava
 starý, vyšší počet až do spustenia ďalšej naplánovanej kontroly — preto hlási regresiu

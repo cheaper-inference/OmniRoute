@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## സ്വയമേവ അപ്ഡേറ്റ്
 
-GitHub ദാതാവിനൊപ്പം (`cheaper-inference/OmniRoute`) `electron-updater` ഉപയോഗിക്കുന്നു.
+GitHub ദാതാവിനൊപ്പം (`diegosouzapw/OmniRoute`) `electron-updater` ഉപയോഗിക്കുന്നു.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ഇവൻ്റുകൾ `update-status` IPC വഴി റെൻഡറർക്ക് കൈമാറി: `checking`, `available`, `not-available`, `downloading` ( `percent` ഉള്ളത് ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage സൈനിംഗ് എന്നത് ഓപ്ഷണൽ ആണ് �
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-റിലീസുകൾ GitHub റിലീസുകളിൽ (`cheaper-inference/OmniRoute`) പ്രസിദ്ധീകരിക്കുന്നു, അവിടെയാണ് `electron-updater` പുതിയ പതിപ്പുകൾക്കായി പരിശോധിക്കുന്നത്.
+റിലീസുകൾ GitHub റിലീസുകളിൽ (`diegosouzapw/OmniRoute`) പ്രസിദ്ധീകരിക്കുന്നു, അവിടെയാണ് `electron-updater` പുതിയ പതിപ്പുകൾക്കായി പരിശോധിക്കുന്നത്.
 
 ## ട്രബിൾഷൂട്ടിംഗ്
 

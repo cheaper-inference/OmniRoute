@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Diusulkan — memerlukan persetujuan pengelola sebelum pekerjaan runtime dimulai
-- **Isu pelacakan:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Isu pelacakan:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Cakupan:** Hanya arsitektur persistensi; keputusan ini tidak menambahkan atau memilih basis data eksternal
 
 ## Konteks

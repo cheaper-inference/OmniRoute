@@ -250,7 +250,7 @@ hingga diterapkan, rilis baru dapat kembali mengalami hal ini.
    [Convert]::ToBase64String($b)
    ```
    Output harus cocok dengan `latest.yml` → `sha512`. Jika tidak cocok, hapus file tersebut dan
-   unduh ulang hanya dari [halaman rilis GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   unduh ulang hanya dari [halaman rilis GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Pulihkan + kecualikan** — pulihkan item yang dikembalikan dari karantina dan tambahkan pengecualian
    untuk `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    lalu instal ulang.
@@ -851,7 +851,7 @@ lengkap tentang `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Masih Mengalami Kendala?
 
-- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Arsitektur**: Lihat [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) untuk detail internal
 - **Referensi API**: Lihat [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) untuk semua endpoint
 - **Dasbor Kesehatan**: Periksa **Dashboard → Health** untuk mengetahui status sistem secara real-time

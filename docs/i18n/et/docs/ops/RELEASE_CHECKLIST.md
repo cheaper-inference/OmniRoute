@@ -454,7 +454,7 @@ valideerib täpselt selle järgu (#8084 osa (a)). Ainult sama repositooriumi PR-
 gh workflow run preview-artifact.yml -f pr_number=<N>   # või lisa silt `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # eelvaate installimine
 ```
 

@@ -260,7 +260,7 @@ Isto acontece uma única vez no primeiro arranque após a atualização. Utilize
 
 ## Mercado de proxies gratuitos 1proxy
 
-> 🆕 **Contribuição de [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Contribuição de [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 O OmniRoute integra-se com a plataforma comunitária **[1proxy](https://1proxy-api.aitradepulse.com)** para fornecer acesso a **centenas de proxies gratuitos e validados** de todo o mundo. Isto é ideal para utilizadores que não possuem uma infraestrutura de proxies própria.
 

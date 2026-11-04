@@ -7,7 +7,7 @@
 # ADR: Uključiva granica perzistencije
 
 - **Status:** Predloženo — zahtijeva odobrenje održavatelja prije početka rada na runtime-u
-- **Tracking issue:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Tracking issue:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Opseg:** Samo arhitektura perzistencije; ova odluka ne dodaje niti bira vanjsku bazu podataka
 
 ## Context

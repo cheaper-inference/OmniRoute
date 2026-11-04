@@ -418,7 +418,7 @@ yaxşılaşdırıb baza səviyyəsini yeniləməyən PR `--require-tighten` tər
 ### CodeQL ratchet-i: yeniləmə tezliyi və əl ilə işə salma
 
 `check:codeql-ratchet` **hər PR üzrə deyil, cədvəl əsasında yenilənən repozitoriya vəziyyətini** oxuyur.
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` əmri
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` əmri
 `state: configured`, `schedule: weekly` bildirir: bu, hər push üçün analiz deyil,
 GitHub-un standart quraşdırma skanıdır. Nəticə etibarilə, xəbərdarlıqları ARADAN QALDIRAN
 PR birləşdirildikdən sonra ratchet növbəti planlaşdırılmış skan işə düşənədək köhnə,

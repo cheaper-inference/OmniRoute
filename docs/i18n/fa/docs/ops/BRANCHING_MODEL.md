@@ -56,7 +56,7 @@ flowchart LR
 پیش از اینکه فرض کنید شاخهٔ موردنظر شما قابل ادغام است، وجود توقف موقت باز را بررسی کنید:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 سازوکار ادغام (برچسب `queue` توسط مالک → Mergify) در

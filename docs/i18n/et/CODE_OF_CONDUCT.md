@@ -65,7 +65,7 @@ esindajana tegutsemist veebi- või füüsilisel üritusel.
 Kuritarvitava, ahistava või muul viisil vastuvõetamatu käitumise juhtumitest võib
 teatada jõustamise eest vastutavatele kogukonna juhtidele, avades
 privaatse turvanõuande aadressil
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 või saates hooldajale e-kirja aadressil diegosouza.pw@outlook.com.
 Turvalisust mõjutavate juhtumite puhul vaadake faili [`SECURITY.md`](SECURITY.md).
 Kõik kaebused vaadatakse läbi ning neid uuritakse kiiresti ja õiglaselt.

@@ -18,7 +18,7 @@ Kataloog sisaldab **45 Agent Skill'i** (23 REST API + 21 CLI + 1 konfiguratsioon
 - **Kanooniline ID** (`omni-auth`, `cli-serve` jne)
 - Fail **SKILL.md** asukohas `skills/{id}/SKILL.md`, mis sisaldab YAML-i eessisu (`name`, `description`) ja põhjalikku markdown-sisu
 - OpenAPI spetsifikatsioonist ja CLI registrist tuletatud **REST lõpp-punktid** (API oskused) või **CLI alamkäsud** (CLI oskused)
-- **GitHubi toorvaate URL** reaalajas laadimiseks: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHubi toorvaate URL** reaalajas laadimiseks: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Otsene GitHubi toorfaili päring (server pole vajalik)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

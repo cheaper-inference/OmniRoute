@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Klonējiet kodu un ieejiet direktorijā
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -291,7 +291,7 @@ Fly automātiski veiks mašīnu rotācijas atjaunināšanu.
 
 ### 9.1 Upstream repozitorija atjauninājumu izsekošana, saglabājot jūsu dakšas `fly.toml`
 
-Ja pašreizējais repozijs ir dakša un vēlaties sinhronizēt atjauninājumus no upstream `https://github.com/cheaper-inference/OmniRoute`, sekojiet zemāk aprakstītajai darbplūsmai.
+Ja pašreizējais repozijs ir dakša un vēlaties sinhronizēt atjauninājumus no upstream `https://github.com/diegosouzapw/OmniRoute`, sekojiet zemāk aprakstītajai darbplūsmai.
 
 Vispirms pārbaudiet savus attālinātos repozitorijus:
 
@@ -307,7 +307,7 @@ Jums vajadzētu redzēt vismaz:
 Ja `upstream` nav konfigurēts, pievienojiet to:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 Pirms sinhronizēšanas ar upstream, izvelciet jaunākos kommitus un tagus:

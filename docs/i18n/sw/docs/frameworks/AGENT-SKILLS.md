@@ -18,7 +18,7 @@ Katalogi ina **Agent Skills 45** (23 za REST API + 21 za CLI + 1 ya mtiririko wa
 - **Kitambulisho rasmi** (`omni-auth`, `cli-serve`, n.k.)
 - Faili ya **SKILL.md** katika `skills/{id}/SKILL.md` yenye YAML frontmatter (`name`, `description`) + maudhui ya kina ya markdown
 - **Vituo vya REST** (skills za API) au **amri ndogo za CLI** (skills za CLI) vinavyotokana na vipimo vya OpenAPI na sajili ya CLI
-- **URL ghafi ya GitHub** kwa uchukuaji wa moja kwa moja: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **URL ghafi ya GitHub** kwa uchukuaji wa moja kwa moja: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Upakuaji wa moja kwa moja wa faili ghafi kutoka GitHub (seva haihitajiki)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

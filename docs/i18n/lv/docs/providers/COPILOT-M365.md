@@ -139,8 +139,8 @@ līmeņos nodrošinātājs pēc noklusējuma var būt paslēpts.
 
 ## Atsauces
 
-- Problēma: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Diskusija: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Problēma: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Diskusija: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Avots: `src/shared/constants/providers/web-cookie.ts` (nodrošinātāja definīcija)
 - HAR importēšana: `src/shared/utils/m365HarImport.ts`
 - Akreditācijas datu lauki: `src/shared/providers/webSessionCredentials.ts`

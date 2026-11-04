@@ -4,9 +4,9 @@
 
 ---
 
-> **ಸ್ಥಿತಿ:** ಅಂಗೀಕರಿಸಲಾಗಿದೆ · **ಸಂದರ್ಭ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **ಒಪ್ಪಂದ:** `domain/routing/routerBackends.ts`
-> (ಟೈಪ್ಡ್ ರಿಜಿಸ್ಟ್ರಿ — ಕೋಡ್ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ಜೊತೆಗೆ ಲಭ್ಯವಾಗುತ್ತದೆ)
+> **ಸ್ಥಿತಿ:** ಅಂಗೀಕರಿಸಲಾಗಿದೆ · **ಸಂದರ್ಭ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **ಒಪ್ಪಂದ:** `domain/routing/routerBackends.ts`
+> (ಟೈಪ್ಡ್ ರಿಜಿಸ್ಟ್ರಿ — ಕೋಡ್ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ಜೊತೆಗೆ ಲಭ್ಯವಾಗುತ್ತದೆ)
 
 ಈ ADR, `ts` (ನೇಟಿವ್), `bifrost`, `cliproxy`, `9router`, ಮತ್ತು
 VibeProxy-ಹೊಂದಾಣಿಕೆಯ ಎಂಜಿನ್ಗಳು ಪರಸ್ಪರ ಹೇಗೆ ಸಂಬಂಧಿಸಿವೆ ಎಂಬುದನ್ನು ನಿಖರವಾಗಿ ನಿರ್ಧರಿಸುತ್ತದೆ, ಇದರಿಂದ ಕೊಡುಗೆದಾರರು
@@ -38,7 +38,7 @@ VibeProxy-ಹೊಂದಾಣಿಕೆಯ ಎಂಜಿನ್ಗಳು ಪರಸ�
 ## ರಿಜಿಸ್ಟ್ರಿ — ಏಕೈಕ ಅಧಿಕೃತ ಮೂಲ
 
 `domain/routing/routerBackends.ts` ಒಪ್ಪಂದವು (ಕೋಡ್
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ಜೊತೆಗೆ ಲಭ್ಯವಾಗುತ್ತದೆ) ಪ್ರತಿಯೊಂದು ಎಂಜಿನ್ ಅನ್ನು ಅದರ
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ಜೊತೆಗೆ ಲಭ್ಯವಾಗುತ್ತದೆ) ಪ್ರತಿಯೊಂದು ಎಂಜಿನ್ ಅನ್ನು ಅದರ
 ಜೀವನಚಕ್ರ, ಸಾಮರ್ಥ್ಯಗಳು, ಸರ್ವಿಸ್ ಗುರುತು, ಡೀಫಾಲ್ಟ್ ಪೋರ್ಟ್, ಆರೋಗ್ಯ ಕಾನ್ಫಿಗರೇಶನ್ ಮತ್ತು
 ಟೆಲಿಮೆಟ್ರಿ ಬೆಂಬಲದೊಂದಿಗೆ ಒಂದೇ ಬಾರಿ ಘೋಷಿಸುತ್ತದೆ. ಪ್ರತಿಯೊಂದು ಸೈಡ್ಕಾರ್ಗಾಗಿ
 ವಿಶೇಷ ಷರತ್ತುಗಳನ್ನು ಬರೆಯುವ ಬದಲು, ಬಳಕೆದಾರರು `getRouterBackend(id)`,
@@ -54,7 +54,7 @@ VibeProxy-ಹೊಂದಾಣಿಕೆಯ ಎಂಜಿನ್ಗಳು ಪರಸ�
 
 ¹ Bifrost ಅನ್ನು `/api/services/bifrost/` ನಿಂದ ಸ್ಥಾಪಿಸಬಹುದಾದ/ಪ್ರಾರಂಭಿಸಬಹುದಾದ
 `supervised` ಎಂಬೆಡೆಡ್ ಸರ್ವಿಸ್ ಆಗಿ ಉತ್ತೇಜಿಸುವ ಕೆಲಸವನ್ನು
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) ನಲ್ಲಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗುತ್ತಿದೆ; ಅದು ಮರ್ಜ್ ಆಗುವವರೆಗೆ,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) ನಲ್ಲಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗುತ್ತಿದೆ; ಅದು ಮರ್ಜ್ ಆಗುವವರೆಗೆ,
 Bifrost `external`-ಮಾತ್ರವಾಗಿರುತ್ತದೆ (`BIFROST_BASE_URL` ಮೂಲಕ ಮಾತ್ರ ತಲುಪಬಹುದು).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Bifrost `external`-ಮಾತ್ರವಾಗಿರುತ್ತದೆ (`BIFROST_BA
 ಪ್ರಸ್ತುತ ಆಯ್ಕೆಯು ರಿಲೇ ಮಟ್ಟದಲ್ಲಿ **ಸಂಪೂರ್ಣವಾಗಿ ಅನ್ವಯಿಸುತ್ತದೆ ಅಥವಾ ಅನ್ವಯಿಸುವುದೇ ಇಲ್ಲ** — `release/v3.8.43`ನಲ್ಲಿ
 ಪ್ರತಿ-ಪ್ರೊವೈಡರ್ ಅಥವಾ ಪ್ರತಿ-ವಿನಂತಿ ಎಂಜಿನ್ ಬದಲಾವಣೆ ಇಲ್ಲ. ಪ್ರತಿ-ವಿನಂತಿ ಗೇಟ್ ಅನ್ನು
 ಸೈಡ್ಕಾರ್-ಮ್ಯಾನಿಫೆಸ್ಟ್ ಕೆಲಸದ ಮೂಲಕ ಸೇರಿಸಲಾಗುತ್ತಿದೆ
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) ಮ್ಯಾನಿಫೆಸ್ಟ್ +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) ಮ್ಯಾನಿಫೆಸ್ಟ್ +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ಇದು ಮ್ಯಾನಿಫೆಸ್ಟ್ಗೆ ಅರ್ಹವಾಗಿರುವ ಪ್ರೊವೈಡರ್ಗಳನ್ನು ಮಾತ್ರ Bifrost ಮೂಲಕ ರೂಟ್ ಮಾಡಲು `auto`ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ.
 
 ## ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಏಕೀಕರಣ

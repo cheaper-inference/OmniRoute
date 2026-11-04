@@ -220,7 +220,7 @@ const nextConfig = {
     // can legitimately hold non-streaming chat requests open for minutes while an
     // upstream provider finishes, so reuse the existing request-timeout knobs.
     proxyTimeout: readTimeoutMs(process.env.REQUEST_TIMEOUT_MS, process.env.FETCH_TIMEOUT_MS),
-    // PR-2 of cheaper-inference/OmniRoute#3932: tree-shake barrel re-exports so
+    // PR-2 of diegosouzapw/OmniRoute#3932: tree-shake barrel re-exports so
     // route bundles don't pull in 14 locale files, every lucide-react icon,
     // or the full date-fns surface when only one helper is used.
     //
@@ -442,7 +442,7 @@ const nextConfig = {
           chunks: "all",
           priority: 20,
         },
-        // PR-2 of cheaper-inference/OmniRoute#3932: isolate the heavy long-tail
+        // PR-2 of diegosouzapw/OmniRoute#3932: isolate the heavy long-tail
         // vendor chunks that only some routes actually need, so dashboard
         // pages don't pay for the docs bundle (or vice versa).
         nextIntl: {

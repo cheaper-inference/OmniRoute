@@ -18,7 +18,7 @@ Kundin ya ƙunshi **Agent Skills 45** (REST API 23 + CLI 21 + tsarin aiki na dai
 - **ID na hukuma** (`omni-auth`, `cli-serve`, da sauransu)
 - Fayil ɗin **SKILL.md** a cikin `skills/{id}/SKILL.md` mai YAML frontmatter (`name`, `description`) + cikakken jikin markdown
 - **REST endpoints** (fasahohin API) ko **CLI subcommands** (fasahohin CLI) da aka samo daga ƙayyadaddun OpenAPI da rajistar CLI
-- **GitHub raw URL** don ɗaukowa kai tsaye: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHub raw URL** don ɗaukowa kai tsaye: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Ɗauko raw kai tsaye daga GitHub (ba a buƙatar sabar)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

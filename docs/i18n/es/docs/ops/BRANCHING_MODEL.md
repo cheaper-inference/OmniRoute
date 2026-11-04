@@ -58,7 +58,7 @@ Comprueba si hay una congelación abierta antes de asumir que la rama que deseas
 se puede integrar:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Los mecanismos de integración (etiqueta `queue` del propietario → Mergify) están

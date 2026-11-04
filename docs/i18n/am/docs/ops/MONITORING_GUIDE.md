@@ -222,7 +222,7 @@ livenessProbe:
 
 የkubelet **ሕያውነት** መመርመሪያን ወደ `/api/monitoring/health` **አታመልክቱ**። ይህ ዱካ እውነተኛ የDB/ክትትል ሥራ ያከናውናል እና በጫና ሥር በስህተት ችግር እንዳለ ይጠቁማል።
 
-ተዛማጅ፦ [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (የክስተት ሉፑ ሥራ በበዛበት ጊዜ የሚደረጉ ምርመራዎች)፣ [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (የካታሎግ ዋጋ አወጣጥ ሀብትን መቆጣጠር)፣ [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (የማመቂያ token ቆጠራ ሀብትን መቆጣጠር)።
+ተዛማጅ፦ [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (የክስተት ሉፑ ሥራ በበዛበት ጊዜ የሚደረጉ ምርመራዎች)፣ [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (የካታሎግ ዋጋ አወጣጥ ሀብትን መቆጣጠር)፣ [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (የማመቂያ token ቆጠራ ሀብትን መቆጣጠር)።
 
 ### systemd watchdog (የቀዘቀዘ የክስተት ሉፕ)
 

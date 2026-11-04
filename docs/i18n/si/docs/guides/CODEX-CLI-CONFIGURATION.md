@@ -477,7 +477,7 @@ OmniRoute හි පෙරනිමි දෙකක් පැය ගණනාව
 | සැසිය දිගින් දිගටම ගිණුම් මාරු කරයි / වාර අතර prompt-cache අඛණ්ඩතාව නැති වේ | Session affinity TTL එක `0` යි (අක්රියයි)                                    | `sessionAffinityTtlMs`   |
 | සේවාලාභියාට පෙනෙන විමසුමක් නොමැතිව තර්කනය අතරතුර සම්බන්ධතාව බිඳ වැටේ        | upstream කොටසක් නොලැබී මිනිත්තු 10කට පසු stream idle watchdog ක්රියාත්මක විය | `STREAM_IDLE_TIMEOUT_MS` |
 
-අදාළ සාකච්ඡා: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (දිගු කාර්ය බිඳ වැටීම්), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (affinity පෙරනිමියෙන් අක්රිය වන්නේ ඇයි). නිරීක්ෂණය: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+අදාළ සාකච්ඡා: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (දිගු කාර්ය බිඳ වැටීම්), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (affinity පෙරනිමියෙන් අක්රිය වන්නේ ඇයි). නිරීක්ෂණය: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Session affinity — එක් සංවාදයක් එක් ගිණුමකට ස්ථිරව බැඳ තබන්න
 

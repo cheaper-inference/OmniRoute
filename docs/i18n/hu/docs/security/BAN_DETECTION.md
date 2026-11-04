@@ -60,8 +60,8 @@ az ellenőrzési felszólításban kért műveletet. Ha a kifejezés a tiltási 
 helyreállítható cloud-code 403-as ága is elérhetetlenné válik a `classifyProviderError`
 függvényben ennél a szövegezésnél, mivel az `accountDeactivated` kiértékelése történik meg
 először — így a Gemini Code Assist számára a
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) és a
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) változtatásban hozzáadott
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) és a
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) változtatásban hozzáadott
 projektútvonal-helyreállítás soha nem tudott lefutni.
 
 A három kapcsolódó, **különálló** jelzéstábla _nem_ része a tiltási kulcsszavak észlelésének:

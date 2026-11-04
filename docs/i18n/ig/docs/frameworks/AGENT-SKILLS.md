@@ -18,7 +18,7 @@ Katalọgụ ahụ nwere **Agent Skills 45** (REST API 23 + CLI 21 + usoro nhazi
 - **ID iwu kwadoro** (`omni-auth`, `cli-serve`, wdg.)
 - Faịlụ **SKILL.md** dị na `skills/{id}/SKILL.md` nwere YAML frontmatter (`name`, `description`) + ọdịnaya markdown zuru ezu
 - **REST endpoints** (nkà API) ma ọ bụ **CLI subcommands** (nkà CLI) ndị sitere na nkọwa OpenAPI na ndekọ CLI
-- **URL raw GitHub** maka iweta ya ozugbo: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **URL raw GitHub** maka iweta ya ozugbo: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Nweta raw ozugbo na GitHub (achọghị sava)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

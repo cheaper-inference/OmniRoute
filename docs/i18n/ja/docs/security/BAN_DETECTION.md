@@ -47,8 +47,8 @@ Google Cloud Code / Antigravity は、これを `403 VALIDATION_REQUIRED` とし
 このフレーズをアカウント停止リストに残しておくと、`accountDeactivated` が先に評価されるため、
 `classifyProviderError` にある回復可能な cloud-code 403 の分岐も、この文言に対して到達不能になります。
 その結果、Gemini Code Assist 用として
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) および
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) で追加されたプロジェクトルートの回復処理が実行されなくなります。
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) および
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) で追加されたプロジェクトルートの回復処理が実行されなくなります。
 
 隣接する以下の3つの**個別の**シグナルテーブルは、禁止キーワード検出の一部ではありません。
 

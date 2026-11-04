@@ -199,7 +199,7 @@ izlazu naredbe `ps`.
 Usmjeravanje profila na OmniRoute **kombinaciju**, umjesto na pojedinačni model, omogućava
 rezervno prebacivanje pružaoca za flotu: kada je primarna krajnja tačka potpuno prestala raditi usred poteza
 tokom izvođenja zabilježenog u
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agent je dovršio
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agent je dovršio
 preostale korake koristeći rezervnu opciju, a prekid rada nikada nije postao vidljiv.
 
 ---

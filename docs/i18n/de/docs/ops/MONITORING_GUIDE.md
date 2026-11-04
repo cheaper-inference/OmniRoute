@@ -223,7 +223,7 @@ livenessProbe:
 
 Richten Sie die kubelet-**Lebendigkeitsprüfung nicht** auf `/api/monitoring/health`. Dieser Pfad führt echte Datenbank-/Überwachungsarbeit aus und meldet unter Last fälschlicherweise einen Fehler.
 
-Siehe auch: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (Probes bei ausgelasteter Event-Schleife), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (Katalogpreisberechnung als Ressourcenfresser), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (Token-Zählung bei der Komprimierung als Ressourcenfresser).
+Siehe auch: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (Probes bei ausgelasteter Event-Schleife), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (Katalogpreisberechnung als Ressourcenfresser), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (Token-Zählung bei der Komprimierung als Ressourcenfresser).
 
 ### systemd-Watchdog (eingefrorene Event-Schleife)
 

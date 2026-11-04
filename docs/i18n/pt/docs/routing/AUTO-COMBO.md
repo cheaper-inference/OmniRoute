@@ -134,13 +134,13 @@ A pontuação automática seleciona o melhor fornecedor/modelo para cada pedido
 Um combo cujo `name` é idêntico a um ID de modelo simples (por exemplo, um combo chamado
 `gpt-5.5`) é um **padrão intencional e suportado**, não um erro: é o
 mecanismo para a contingência entre fornecedores por ID de modelo documentado em
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Como a resolução de
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Como a resolução de
 combos é verificada antes da resolução de IDs de modelo simples
 (`getComboForModel()` em `src/sse/services/model.ts`), um pedido para o ID simples
 `gpt-5.5` é encaminhado através dos destinos do combo (por exemplo,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`), em vez de ser enviado diretamente
 para um único fornecedor — isto reutiliza a precedência de combo antes da reescrita criada para
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) e é
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) e é
 abrangido por testes de regressão em `tests/unit/responses-combo-resolution-3227.test.ts` e
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -186,7 +186,7 @@ Dois problemas comuns:
 - **`auto` não utiliza os seus combos.** `auto`/`auto/*` cria o seu próprio conjunto de candidatos sem necessidade de configuração e só consulta os combos persistentes se existir um combo chamado literalmente `auto` (não recomendado). Para encaminhar através de um combo, envie o respetivo nome exato — não `auto`.
 - **`openrouter/auto` é um produto pago real da OpenRouter** ("Auto Best Available"), não um alias do OmniRoute. É a única entrada de modelo estática do registo da OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) e é faturado separadamente. Utilize Definições → Encaminhamento → Ocultar modelos pagos para o excluir dos conjuntos de `auto`.
 
-Consulte [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) e [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) para conhecer a confusão original aqui documentada.
+Consulte [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) e [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) para conhecer a confusão original aqui documentada.
 
 ## Como Funciona (Auto-Combos Persistentes)
 

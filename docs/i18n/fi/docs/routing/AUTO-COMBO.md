@@ -132,13 +132,13 @@ Automaattinen pisteytys valitsee parhaan palveluntarjoajan/mallin kullekin pyynn
 Yhdistelmä, jonka `name` on sama kuin pelkkä mallitunnus (esim. yhdistelmä nimeltä
 `gpt-5.5`), on **tarkoituksellinen ja tuettu käyttötapa**, ei virhe: se on
 mekanismi mallitunnuskohtaiseen palveluntarjoajan varajärjestelyyn, joka on dokumentoitu
-kohdassa [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Koska yhdistelmän
+kohdassa [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Koska yhdistelmän
 ratkaisu tarkistetaan ennen pelkän mallitunnuksen ratkaisua
 (`getComboForModel()` tiedostossa `src/sse/services/model.ts`), pelkkää tunnusta
 `gpt-5.5` käyttävä pyyntö reititetään yhdistelmän kohteiden (esim.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) kautta eikä suoraan
 yhdelle palveluntarjoajalle — tämä hyödyntää uudelleen yhdistelmän uudelleenkirjoitusta edeltävää ensisijaisuutta, joka toteutettiin
-kohteita [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) varten ja jolle on
+kohteita [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) varten ja jolle on
 regressiotestit tiedostoissa `tests/unit/responses-combo-resolution-3227.test.ts` ja
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Kaksi yleistä sudenkuoppaa:
 - **`auto` ei käytä yhdistelmiäsi.** `auto`/`auto/*` muodostaa oman ilman määrityksiä toimivan ehdokasjoukkonsa ja käyttää tallennettuja yhdistelmiä vain, jos jonkin yhdistelmän nimi on kirjaimellisesti `auto` (ei suositella). Reititä yhdistelmän kautta lähettämällä sen täsmällinen nimi — älä `auto`.
 - **`openrouter/auto` on todellinen maksullinen OpenRouter-tuote** ("Auto Best Available"), ei OmniRoute-alias. Se on OpenRouter-rekisterin ainoa staattinen mallimerkintä (`open-sse/config/providers/registry/openrouter/index.ts`), ja siitä laskutetaan erikseen. Sulje se pois `auto`-joukoista valitsemalla Asetukset → Reititys → Piilota maksulliset mallit.
 
-Alkuperäinen tässä dokumentoitu epäselvyys on kuvattu kohdissa [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ja [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
+Alkuperäinen tässä dokumentoitu epäselvyys on kuvattu kohdissa [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ja [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
 ## Toimintaperiaate (pysyvät automaattiset yhdistelmät)
 

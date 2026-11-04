@@ -224,7 +224,7 @@ livenessProbe:
 
 Laat kubelet-**levendigheid** **niet** naar `/api/monitoring/health` verwijzen. Dat pad voert daadwerkelijk database-/monitoringwerk uit en geeft onder belasting fout-positieve resultaten.
 
-Gerelateerd: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (probes terwijl de eventloop bezig is), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (catalogusprijzen monopoliseren de processortijd), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (het tellen van compressietokens monopoliseert de processortijd).
+Gerelateerd: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probes terwijl de eventloop bezig is), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (catalogusprijzen monopoliseren de processortijd), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (het tellen van compressietokens monopoliseert de processortijd).
 
 ### systemd-watchdog (vastgelopen eventloop)
 

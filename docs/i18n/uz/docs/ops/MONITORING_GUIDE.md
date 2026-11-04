@@ -223,7 +223,7 @@ livenessProbe:
 
 Kubelet **faollik** tekshiruvini `/api/monitoring/health`ga **yo‘naltirmang**. Bu yo‘l ma’lumotlar bazasi/monitoring bilan bog‘liq haqiqiy ishlarni bajaradi va yuklama ostida noto‘g‘ri ijobiy natija beradi.
 
-Bog‘liq: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (voqealar sikli band bo‘lgan paytdagi tekshiruvlar), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalog narxlarini hisoblash resurslarni egallab olishi), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (siqish tokenlarini sanash resurslarni egallab olishi).
+Bog‘liq: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (voqealar sikli band bo‘lgan paytdagi tekshiruvlar), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (katalog narxlarini hisoblash resurslarni egallab olishi), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (siqish tokenlarini sanash resurslarni egallab olishi).
 
 ### systemd kuzatuvchisi (muzlab qolgan voqealar sikli)
 

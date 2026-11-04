@@ -125,7 +125,7 @@ teisele 503 vastust“) jõustab süsteem 1 tingimusteta ja süsteem 2 pärast v
 
 ## 4. Pikad `/v1/responses` päringud ühes protsessis (terve puhvermaht)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) lisas
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) lisas
 `tryAcquireHealthyHeadroom`, et lubada teine struktuurselt koormav päring,
 kui kuhja kasutus jääb alla `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Funktsiooni
 `admitChatRequest` kasutatav BYTE-tee (kehad ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

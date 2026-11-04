@@ -128,7 +128,7 @@ OmniRoute ਵਿੱਚ ਵੱਖ-ਵੱਖ ਦਾਇਰਿਆਂ ਵਾਲੀਆ
 
 ## 4. ਇੱਕ-ਪ੍ਰੋਸੈੱਸ ਵਾਲਾ ਲੰਮਾ `/v1/responses` (ਸਿਹਤਮੰਦ ਹੈੱਡਰੂਮ)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ਨੇ
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ਨੇ
 `tryAcquireHealthyHeadroom` ਜੋੜਿਆ, ਤਾਂ ਜੋ ਜਦੋਂ ਹੀਪ
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ਤੋਂ ਹੇਠਾਂ ਹੋਵੇ, ਇੱਕ ਦੂਜੀ ਸੰਰਚਨਾਤਮਕ ਤੌਰ 'ਤੇ ਭਾਰੀ
 ਬੇਨਤੀ ਨੂੰ ਦਾਖ਼ਲ ਕੀਤਾ ਜਾ ਸਕੇ। `admitChatRequest` ਵੱਲੋਂ ਵਰਤਿਆ ਜਾਣ ਵਾਲਾ BYTE

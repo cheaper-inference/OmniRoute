@@ -9,7 +9,7 @@
 Hvis du oppdager en sikkerhetssårbarhet i OmniRoute, ber vi deg rapportere den på en ansvarlig måte:
 
 1. **IKKE** opprett en offentlig GitHub-sak
-2. Bruk [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Bruk [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Inkluder: beskrivelse, fremgangsmåte for reproduksjon og potensiell innvirkning
 
 ## Tidslinje for respons
@@ -42,7 +42,7 @@ Etter 3.8.59 er neste versjon **3.9.0**, som åpner linjen for langsiktig støtt
   avhengig av hva som inntreffer sist**. Sluttdatoen som følger av dette, registreres i versjonsmerknadene for 3.9.0 og i
   [`ROADMAP.md`](ROADMAP.md) når lanseringen finner sted.
 - **Rapportering av et sikkerhetsproblem i LTS-linjen:** samme kanal som for alle andre versjoner —
-  en privat [GitHub-sikkerhetsrapport](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  en privat [GitHub-sikkerhetsrapport](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   aldri en offentlig sak. Oppgi hvilken versjon du testet (for eksempel `3.9.2`); rettinger legges inn på
   `stable/v3` og videreføres til v4.
 - **Sikkerhetsgrunnlag ved LTS-lanseringen:** målt skannertilstand, rutevern og

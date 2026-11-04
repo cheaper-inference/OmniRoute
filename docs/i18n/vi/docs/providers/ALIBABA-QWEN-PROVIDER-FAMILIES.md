@@ -5,7 +5,7 @@
 ---
 
 Tài liệu này ghi lại quyết định triển khai cho
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Các sản phẩm công khai được
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Các sản phẩm công khai được
 biểu diễn dưới dạng bốn nhóm nhà cung cấp. Khu vực là dữ liệu kết nối, không phải một sản phẩm riêng biệt.
 
 ## Quyết định

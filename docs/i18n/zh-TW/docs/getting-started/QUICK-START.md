@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### 選項 C：從原始碼安裝
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute 會自動略過失敗的提供者，並嘗試下一個。您不需要�
 
 - **[疑難排解](../guides/TROUBLESHOOTING.md)** — 常見問題與修正方式
 - **[Discord](https://discord.gg/U47eFqAXCn)** — 社群支援
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — 回報錯誤
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — 回報錯誤

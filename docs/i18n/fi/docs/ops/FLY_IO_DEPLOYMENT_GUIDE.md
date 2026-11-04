@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Kloonaa koodi ja siirry hakemistoon
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly suorittaa automaattisesti koneiden vaiheittaisen päivityksen.
 
 ### 9.1 Alkuperäisen tietovaraston päivitysten seuraaminen säilyttäen haarasi `fly.toml`-tiedoston
 
-Jos nykyinen tietovarasto on haara ja haluat synkronoida päivitykset alkuperäisestä tietovarastosta `https://github.com/cheaper-inference/OmniRoute`, noudata alla kuvattua työnkulkua.
+Jos nykyinen tietovarasto on haara ja haluat synkronoida päivitykset alkuperäisestä tietovarastosta `https://github.com/diegosouzapw/OmniRoute`, noudata alla kuvattua työnkulkua.
 
 Tarkista ensin etätietovarastosi:
 
@@ -309,7 +309,7 @@ Näkyvissä pitäisi olla vähintään:
 Jos `upstream`-etätietovarastoa ei ole määritetty, lisää se:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 Nouda uusimmat commitit ja tunnisteet ennen synkronointia alkuperäisen tietovaraston kanssa:

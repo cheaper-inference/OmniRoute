@@ -478,7 +478,7 @@ May dalawang default ng OmniRoute na maaaring palihim na makasira sa mga session
 | Patuloy na nagpapalit ng account ang session / nawawala ang continuity ng prompt cache sa pagitan ng mga turn | Ang session affinity TTL ay `0` (naka-disable)                                       | `sessionAffinityTtlMs`   |
 | Napuputol ang koneksyon habang nangangatuwiran nang walang prompt na nakikita ng client                       | Na-trigger ang stream idle watchdog matapos ang 10 minuto nang walang upstream chunk | `STREAM_IDLE_TIMEOUT_MS` |
 
-Mga kaugnay na talakayan: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (pagkaputol ng mahabang gawain), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kung bakit naka-off bilang default ang affinity). Pagsubaybay: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Mga kaugnay na talakayan: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (pagkaputol ng mahabang gawain), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kung bakit naka-off bilang default ang affinity). Pagsubaybay: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Session affinity — i-pin ang isang pag-uusap sa isang account
 

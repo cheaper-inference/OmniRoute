@@ -179,7 +179,7 @@ Antigravity درخواستیں کالر کے متن کو بائٹ بہ بائٹ 
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` پڑھتا ہے
 - `src/lib/oauth/providers/antigravity.ts` — اسناد کی پلمبنگ
-- اصل واقعے کی رپورٹ: مباحثہ [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- اصل واقعے کی رپورٹ: مباحثہ [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

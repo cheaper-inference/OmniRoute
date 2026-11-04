@@ -419,7 +419,7 @@ cur chun feidhme ar feitheamh).
 ### Raicín CodeQL: minicíocht athnuachana agus truicear láimhe
 
 Léann `check:codeql-ratchet` **staid an stórtha, a athnuaitear de réir sceidil — ní do gach PR.**
-Tuairiscíonn `gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup`
+Tuairiscíonn `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`
 `state: configured`, `schedule: weekly`: scanadh socraithe réamhshocraithe GitHub, ní anailís
 do gach brú. Dá thoradh sin: tar éis PR a DHEISÍONN foláirimh a chumasc, leanann an raicín air ag léamh
 an tseanchomhaireamh níos airde go dtí go ritear an chéad scanadh sceidealaithe eile — mar sin tuairiscíonn sé cúlú

@@ -105,7 +105,7 @@ npm start
 | `npm install -g omniroute`  | ❌ ဖြန့်ချိထားသော package တွင် ကြိုတင် build လုပ်ထားသည့် bundle ပါရှိသည် — ထိုအစား source မှ build လုပ်ပါ                                                                    |
 | Docker image                | ✅ `docker build --build-arg DASHBOARD_ALLOW_EMBED=vscode -t omniroute:embed .` — Docker Hub ပေါ်ရှိ ကြိုတင် build လုပ်ထားသော image တွင် ထည့်သွင်းဖော်ပြခြင်းကို ဖွင့်မထားပါ |
 
-ထည့်သွင်းဖော်ပြခြင်း ဖွင့်ထားသည့် build မရှိပါက စာမျက်နှာသည် frame အတွင်း ဖော်ပြရန် ငြင်းပယ်မည်ဖြစ်ပြီး၊ extension က response header များမှတစ်ဆင့် ၎င်းကို သိရှိကာ ပြင်ပ browser ကို အစားထိုးအသုံးပြုမည် — မည်သည့်အရာမျှ ပျက်စီးမည်မဟုတ်သကဲ့သို့ ၎င်းအကြောင်းကိုလည်း တစ်ကြိမ် အသိပေးမည်ဖြစ်သည်။ [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) နှင့် issue [#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) ကို ကြည့်ပါ။
+ထည့်သွင်းဖော်ပြခြင်း ဖွင့်ထားသည့် build မရှိပါက စာမျက်နှာသည် frame အတွင်း ဖော်ပြရန် ငြင်းပယ်မည်ဖြစ်ပြီး၊ extension က response header များမှတစ်ဆင့် ၎င်းကို သိရှိကာ ပြင်ပ browser ကို အစားထိုးအသုံးပြုမည် — မည်သည့်အရာမျှ ပျက်စီးမည်မဟုတ်သကဲ့သို့ ၎င်းအကြောင်းကိုလည်း တစ်ကြိမ် အသိပေးမည်ဖြစ်သည်။ [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) နှင့် issue [#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) ကို ကြည့်ပါ။
 
 ---
 

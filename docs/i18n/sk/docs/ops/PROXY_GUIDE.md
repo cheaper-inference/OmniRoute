@@ -260,7 +260,7 @@ Táto migrácia sa vykoná raz pri prvom spustení po inovácii. Ak ju chcete sp
 
 ## 1proxy – bezplatné trhovisko proxy serverov
 
-> 🆕 **Prispel [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (problém [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Prispel [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (problém [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute sa integruje s komunitnou platformou **[1proxy](https://1proxy-api.aitradepulse.com)** a poskytuje prístup k **stovkám bezplatných, overených proxy serverov** z celého sveta. Je to ideálne pre používateľov, ktorí nemajú vlastnú proxy infraštruktúru.
 

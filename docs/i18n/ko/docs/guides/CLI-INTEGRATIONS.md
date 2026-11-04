@@ -180,7 +180,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 
 API 키는 **stdin**을 통해 5dive에 전달되므로(`--api-key=-`) `ps` 출력에 절대 나타나지 않습니다.
 
-프로필이 단일 모델이 아닌 OmniRoute **콤보**를 가리키도록 해야 플릿 공급자 장애 조치가 적용됩니다. [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578)에 기록된 실행에서는 기본 엔드포인트가 턴 중간에 완전히 다운되었지만, 에이전트는 대체 엔드포인트에서 남은 단계를 완료했으며 장애를 외부에 노출하지 않았습니다.
+프로필이 단일 모델이 아닌 OmniRoute **콤보**를 가리키도록 해야 플릿 공급자 장애 조치가 적용됩니다. [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578)에 기록된 실행에서는 기본 엔드포인트가 턴 중간에 완전히 다운되었지만, 에이전트는 대체 엔드포인트에서 남은 단계를 완료했으며 장애를 외부에 노출하지 않았습니다.
 
 ---
 

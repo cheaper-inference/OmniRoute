@@ -54,7 +54,7 @@ ochiladi. Bu **ishlab chiqishni toʻxtatmaydi**:
 Kerakli shoxni birlashtirish mumkin deb hisoblashdan oldin ochiq muzlatish holati mavjudligini tekshiring:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Birlashtirish mexanizmlari (egasining `queue` yorligʻi → Mergify)

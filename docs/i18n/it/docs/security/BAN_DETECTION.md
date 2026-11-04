@@ -58,8 +58,8 @@ senza ripristino automatico), mentre l'operatore può risolvere una richiesta di
 Mantenere la frase nell'elenco dei ban rendeva inoltre irraggiungibile, per questa formulazione, il ramo
 recuperabile dei 403 di cloud-code in `classifyProviderError`, perché `accountDeactivated` viene
 valutato per primo; di conseguenza, il ripristino della route di progetto aggiunto per Gemini Code Assist nelle
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) e
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) non poteva mai essere eseguito.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) e
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) non poteva mai essere eseguito.
 
 Tre tabelle di segnali adiacenti e **separate** _non_ fanno parte del rilevamento delle parole chiave di ban:
 

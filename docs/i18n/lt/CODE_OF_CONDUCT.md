@@ -66,7 +66,7 @@ renginyje.
 Apie užgaulaus, priekabiaujamojo ar kitaip nepriimtino elgesio atvejus galima
 pranešti už taisyklių vykdymą atsakingiems bendruomenės vadovams sukuriant
 privatų saugumo pranešimą adresu
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 arba išsiunčiant el. laišką prižiūrėtojui adresu diegosouza.pw@outlook.com.
 Apie su saugumu susijusius incidentus žr. [`SECURITY.md`](SECURITY.md).
 Visi skundai bus nedelsiant ir sąžiningai peržiūrėti bei ištirti.

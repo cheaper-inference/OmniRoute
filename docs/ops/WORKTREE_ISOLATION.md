@@ -87,7 +87,7 @@ issue titled `🔴 Release branch not green: <branch>` (label `base-red`). One c
 local suite run for this purpose:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --state open \
+gh issue list --repo diegosouzapw/OmniRoute --state open \
   --search "Release branch not green: <base> in:title"
 ```
 

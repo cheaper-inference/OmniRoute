@@ -115,7 +115,7 @@ npm start
 Sem uma compilação que permita a incorporação, a página recusa ser apresentada numa frame, a extensão deteta-o através dos
 cabeçalhos da resposta e recorre ao browser externo — nada deixa de funcionar e a extensão informa-o uma vez.
 Consulte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) e o issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

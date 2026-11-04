@@ -380,7 +380,7 @@ git add quality-baseline.json
 ### CodeQL ラチェット: 更新頻度と手動トリガー
 
 `check:codeql-ratchet` は、**スケジュールに従って更新されるリポジトリの状態を読み取ります。PR ごとではありません。**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` は
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` は
 `state: configured`、`schedule: weekly` を返します。これは GitHub のデフォルトセットアップによるスキャンであり、
 push ごとの分析ではありません。そのため、アラートを修正する PR がマージされた後も、次回の
 スケジュール済みスキャンが実行されるまでは、ラチェットが古い高い件数を読み取り続けます。その結果、

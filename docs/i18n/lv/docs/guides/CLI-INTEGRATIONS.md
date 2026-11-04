@@ -205,7 +205,7 @@ nekad neparādās `ps` izvadē.
 Tieši norādot profilā OmniRoute **kombināciju**, nevis vienu modeli, flotes
 nodrošinātājs iegūst kļūmjpārlēci: kad primārais gala punkts pārtraukumā
 pilnībā nedarbojās izpildes laikā, kas aprakstīts
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), aģents pabeidza
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), aģents pabeidza
 atlikušās darbības, izmantojot rezerves gala punktu, un pārtraukums nekad netika
 parādīts lietotājam.
 

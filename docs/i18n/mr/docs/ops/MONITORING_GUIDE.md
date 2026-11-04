@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet ची **सक्रियता** तपासणी `/api/monitoring/health` कडे निर्देशित करू **नका**. हा मार्ग प्रत्यक्ष DB/निरीक्षणाचे काम करतो आणि लोड असताना चुकीचा सकारात्मक परिणाम देईल.
 
-संबंधित: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (इव्हेंट लूप व्यस्त असतानाच्या तपासण्या), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (कॅटलॉग किंमत-निर्धारणामुळे संसाधनांचा अतिवापर), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (कंप्रेशन टोकन मोजणीमुळे संसाधनांचा अतिवापर).
+संबंधित: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (इव्हेंट लूप व्यस्त असतानाच्या तपासण्या), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (कॅटलॉग किंमत-निर्धारणामुळे संसाधनांचा अतिवापर), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (कंप्रेशन टोकन मोजणीमुळे संसाधनांचा अतिवापर).
 
 ### systemd वॉचडॉग (गोठलेला इव्हेंट लूप)
 

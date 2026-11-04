@@ -131,7 +131,7 @@ tenant တစ်ခုစီ၏ dispatch ကုန်ကျစရိတ်ကိ
 
 ## 4. Process တစ်ခုတည်းဖြင့် ကြာရှည်လုပ်ဆောင်သော `/v1/responses` (healthy-headroom)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) တွင်
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) တွင်
 `tryAcquireHealthyHeadroom` ကို ထည့်သွင်းထားသောကြောင့် heap သည်
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ထက် နိမ့်နေချိန်တွင် ဖွဲ့စည်းပုံအရ resource အသုံးများသော ဒုတိယ request ကို လက်ခံနိုင်သည်။ `admitChatRequest` က အသုံးပြုသော BYTE
 လမ်းကြောင်း (body အရွယ်အစား ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

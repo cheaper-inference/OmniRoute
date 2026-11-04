@@ -9,7 +9,7 @@
 Jekk tiskopri vulnerabbiltà tas-sigurtà f’OmniRoute, jekk jogħġbok irrapportaha b’mod responsabbli:
 
 1. **TIFTAĦX** kwistjoni pubblika fuq GitHub
-2. Uża [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Uża [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Inkludi: deskrizzjoni, passi għar-riproduzzjoni, u l-impatt potenzjali
 
 ## Skeda ta’ Rispons
@@ -42,7 +42,7 @@ Wara 3.8.59, il-verżjoni li jmiss hija **3.9.0**, li tiftaħ il-linja ta’ app
   skont liema minnhom ikun l-aktar tard**. Id-data tat-tmiem li tirriżulta tiġi rreġistrata fin-noti tar-rilaxx ta’ 3.9.0 u
   f’[`ROADMAP.md`](ROADMAP.md) meta jsir ir-rilaxx.
 - **Kif tirrapporta vulnerabbiltà fil-linja LTS:** uża l-istess kanal bħal għal kwalunkwe verżjoni oħra —
-  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) privat,
+  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
   u qatt issue pubblika. Speċifika liema verżjoni ttestjajt (pereżempju `3.9.2`); it-tiswijiet jiddaħħlu f’
   `stable/v3` u jiġu trasferiti ’l quddiem għal v4.
 - **Linja bażi tas-sigurtà fil-mument tar-rilaxx LTS:** l-istat imkejjel tal-iskanner, il-garanziji tal-protezzjoni tar-rotot u

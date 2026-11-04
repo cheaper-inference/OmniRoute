@@ -4,9 +4,9 @@
 
 ---
 
-> **სტატუსი:** მიღებულია · **კონტექსტი:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **კონტრაქტი:** `domain/routing/routerBackends.ts`
-> (ტიპიზებული რეესტრი — კოდი დაემატება [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-თან ერთად)
+> **სტატუსი:** მიღებულია · **კონტექსტი:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **კონტრაქტი:** `domain/routing/routerBackends.ts`
+> (ტიპიზებული რეესტრი — კოდი დაემატება [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-თან ერთად)
 
 ეს ADR ზუსტად განსაზღვრავს, როგორ უკავშირდება ერთმანეთს `ts` (ნატიური), `bifrost`, `cliproxy`, `9router` და
 VibeProxy-თან თავსებადი ძრავები, რათა კონტრიბუტორებმა აღარ აურიონ ერთმანეთში
@@ -39,7 +39,7 @@ VibeProxy-თან თავსებადი ძრავები, რათ
 ## რეესტრი — ჭეშმარიტების ერთადერთი წყარო
 
 `domain/routing/routerBackends.ts` კონტრაქტი (კოდი დაემატება
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-თან ერთად) თითოეულ ძრავას ერთხელ აცხადებს — მისი
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-თან ერთად) თითოეულ ძრავას ერთხელ აცხადებს — მისი
 სიცოცხლის ციკლით, შესაძლებლობებით, სერვისის იდენტობით, ნაგულისხმევი პორტით, მდგომარეობის შემოწმების კონფიგურაციითა და
 ტელემეტრიის მხარდაჭერით. თითოეული თანმხლები პროცესისთვის ცალკეული ლოგიკის დაწერის ნაცვლად,
 მომხმარებლები ძრავებს ეძებენ `getRouterBackend(id)`, `listRouterBackends()` და
@@ -55,7 +55,7 @@ VibeProxy-თან თავსებადი ძრავები, რათ
 
 ¹ Bifrost-ის `supervised` ჩაშენებულ სერვისამდე დაწინაურება (რომლის დაყენება/გაშვება
 შესაძლებელია `/api/services/bifrost/`-იდან) აღირიცხება
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)-ში; მის გაერთიანებამდე
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)-ში; მის გაერთიანებამდე
 Bifrost მხოლოდ `external` იქნება (ხელმისაწვდომი მხოლოდ `BIFROST_BASE_URL`-ის მეშვეობით).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -132,8 +132,8 @@ Bifrost მხოლოდ `external` იქნება (ხელმისა�
 ძრავის ჩანაცვლება არც თითოეული პროვაიდერისთვის და არც თითოეული მოთხოვნისთვის არ არსებობს.
 თითოეული მოთხოვნისთვის განკუთვნილ შემზღუდველ მექანიზმს sidecar-მანიფესტზე მიმდინარე სამუშაო
 ამატებს
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) მანიფესტი +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) მანიფესტი +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 რაც `auto`-ს საშუალებას აძლევს, Bifrost-ის მეშვეობით მხოლოდ მანიფესტის კრიტერიუმების
 დამაკმაყოფილებელი პროვაიდერები მიმართოს.
 

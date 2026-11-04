@@ -478,7 +478,7 @@ OmniRoute ਦੀਆਂ ਦੋ ਡਿਫਾਲਟ ਸੈਟਿੰਗਾਂ ਕਈ
 | ਸੈਸ਼ਨ ਲਗਾਤਾਰ ਖਾਤੇ ਬਦਲਦਾ ਰਹਿੰਦਾ ਹੈ / ਵਾਰੀ-ਵਾਰੀ ਦਰਮਿਆਨ ਪ੍ਰੌਮਪਟ-ਕੈਸ਼ ਨਿਰੰਤਰਤਾ ਖਤਮ ਹੋ ਜਾਂਦੀ ਹੈ  | ਸੈਸ਼ਨ ਐਫਿਨਿਟੀ TTL `0` ਹੈ (ਅਸਮਰੱਥ)                                          | `sessionAffinityTtlMs`   |
 | ਕਲਾਇੰਟ ਨੂੰ ਦਿਖਾਈ ਦੇਣ ਵਾਲੇ ਕਿਸੇ ਪ੍ਰੌਮਪਟ ਤੋਂ ਬਿਨਾਂ ਰੀਜ਼ਨਿੰਗ ਦੇ ਵਿਚਕਾਰ ਕਨੈਕਸ਼ਨ ਬੰਦ ਹੋ ਜਾਂਦਾ ਹੈ | ਅੱਪਸਟ੍ਰੀਮ ਚੰਕ ਨਾ ਆਉਣ ਦੇ 10 ਮਿੰਟ ਬਾਅਦ ਸਟ੍ਰੀਮ ਨਿਸ਼ਕਿਰਿਆਤਾ ਵਾਚਡੌਗ ਚਾਲੂ ਹੋ ਗਿਆ | `STREAM_IDLE_TIMEOUT_MS` |
 
-ਸੰਬੰਧਿਤ ਚਰਚਾਵਾਂ: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ਲੰਬੇ ਕੰਮ ਦਾ ਡਿਸਕਨੈਕਟ ਹੋਣਾ), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ਐਫਿਨਿਟੀ ਡਿਫਾਲਟ ਰੂਪ ਵਿੱਚ ਬੰਦ ਕਿਉਂ ਹੈ)। ਟ੍ਰੈਕਿੰਗ: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)।
+ਸੰਬੰਧਿਤ ਚਰਚਾਵਾਂ: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ਲੰਬੇ ਕੰਮ ਦਾ ਡਿਸਕਨੈਕਟ ਹੋਣਾ), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ਐਫਿਨਿਟੀ ਡਿਫਾਲਟ ਰੂਪ ਵਿੱਚ ਬੰਦ ਕਿਉਂ ਹੈ)। ਟ੍ਰੈਕਿੰਗ: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)।
 
 ### 1. ਸੈਸ਼ਨ ਐਫਿਨਿਟੀ — ਇੱਕ ਗੱਲਬਾਤ ਨੂੰ ਇੱਕ ਖਾਤੇ ਨਾਲ ਪਿੰਨ ਕਰੋ
 

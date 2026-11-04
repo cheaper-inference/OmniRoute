@@ -131,13 +131,13 @@ Avtomatik qiymətləndirmə hər sorğu üçün ən yaxşı provayderi/modeli se
 
 `name` dəyəri prefikssiz model id-si ilə eyni olan combo (məsələn, `gpt-5.5`
 adlı combo) xəta deyil, **qəsdən yaradılmış və dəstəklənən nümunədir**: bu,
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)-da sənədləşdirilmiş
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)-da sənədləşdirilmiş
 hər model id-si üzrə provayderə ehtiyat keçid mexanizmidir. Combo həlli
 prefikssiz model id-sinin həllindən əvvəl yoxlanıldığına görə
 (`src/sse/services/model.ts` faylındakı `getComboForModel()`), prefikssiz
 `gpt-5.5` id-si üçün sorğu birbaşa tək provayderə deyil, combo-nun hədəfləri
 (məsələn, `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) vasitəsilə
-yönləndirilir — bu, [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227)
+yönləndirilir — bu, [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227)
 üçün yaradılmış combo-nun yenidən yazmadan əvvəl gəlməsi prioritetindən təkrar
 istifadə edir və `tests/unit/responses-combo-resolution-3227.test.ts` və
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` vasitəsilə reqressiya
@@ -198,8 +198,8 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   Settings → Routing → Hide paid models seçimindən istifadə edin.
 
 Burada sənədləşdirilən ilkin anlaşılmazlıq üçün
-[#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) və
-[#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111)-ə baxın.
+[#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) və
+[#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)-ə baxın.
 
 ## Necə İşləyir (Davamlı Saxlanılan Avtomatik Kombinasiyalar)
 

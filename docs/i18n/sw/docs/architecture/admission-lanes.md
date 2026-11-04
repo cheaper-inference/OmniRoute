@@ -125,7 +125,7 @@ linapowashwa.
 
 ## 4. `/v1/responses` ndefu katika mchakato mmoja (nafasi-salama)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) iliongeza
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) iliongeza
 `tryAcquireHealthyHeadroom` ili ombi la pili lenye muundo mzito likubaliwe
 wakati heap iko chini ya `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Mkondo wa
 BYTE unaotumiwa na `admitChatRequest` (body zenye ukubwa ≥

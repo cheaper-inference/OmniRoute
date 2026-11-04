@@ -130,8 +130,8 @@ Zorg ervoor dat `copilot-m365-web` is ingeschakeld onder **Dashboard → Provide
 
 ## Referenties
 
-- Issue: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Discussie: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Discussie: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Bron: `src/shared/constants/providers/web-cookie.ts` (providerdefinitie)
 - HAR-import: `src/shared/utils/m365HarImport.ts`
 - Referentievelden: `src/shared/providers/webSessionCredentials.ts`

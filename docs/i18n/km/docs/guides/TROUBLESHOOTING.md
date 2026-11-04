@@ -250,7 +250,7 @@ Next.js standalone build) នោះគ្រប់គ្រាន់ឱ្យក
    [Convert]::ToBase64String($b)
    ```
    លទ្ធផលត្រូវតែផ្គូផ្គងនឹង `latest.yml` → `sha512`។ ប្រសិនបើមិនផ្គូផ្គងទេ សូមលុបឯកសារ ហើយ
-   ទាញយកឡើងវិញតែពី [ទំព័រកំណែចេញផ្សាយ GitHub](https://github.com/cheaper-inference/OmniRoute/releases) ប៉ុណ្ណោះ។
+   ទាញយកឡើងវិញតែពី [ទំព័រកំណែចេញផ្សាយ GitHub](https://github.com/diegosouzapw/OmniRoute/releases) ប៉ុណ្ណោះ។
 2. **ស្ដារ + ដាក់ក្នុងបញ្ជីលើកលែង** — ស្ដារធាតុដែលត្រូវបានត្រឡប់ក្រោយពីកន្លែងដាក់ឱ្យនៅដាច់ដោយឡែក ហើយបន្ថែមការលើកលែង
    សម្រាប់ `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions)
    បន្ទាប់មកដំឡើងឡើងវិញ។
@@ -844,7 +844,7 @@ omniroute serve --ready-timeout 180000
 
 ## នៅតែជាប់គាំងមែនទេ?
 
-- **បញ្ហានៅលើ GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **បញ្ហានៅលើ GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **ស្ថាបត្យកម្ម**: សូមមើល [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) សម្រាប់ព័ត៌មានលម្អិតខាងក្នុង
 - **ឯកសារយោង API**: សូមមើល [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) សម្រាប់ endpoint ទាំងអស់
 - **ផ្ទាំងគ្រប់គ្រងសុខភាពប្រព័ន្ធ**: ពិនិត្យមើល **ផ្ទាំងគ្រប់គ្រង → សុខភាពប្រព័ន្ធ** សម្រាប់ស្ថានភាពប្រព័ន្ធក្នុងពេលជាក់ស្ដែង

@@ -5,7 +5,7 @@
 ---
 
 - **Katayuan:** Iminumungkahi — nangangailangan ng pag-apruba ng maintainer bago magsimula ang gawain sa runtime
-- **Isyung sinusubaybayan:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Isyung sinusubaybayan:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Saklaw:** Arkitektura ng persistence lamang; hindi nagdaragdag o pumipili ang desisyong ito ng panlabas na database
 
 ## Konteksto

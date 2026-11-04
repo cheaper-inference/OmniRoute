@@ -18,7 +18,7 @@ lastUpdated: 2026-10-05
 
 ```bash
 mkdir omniroute && cd omniroute
-BASE=https://raw.githubusercontent.com/cheaper-inference/OmniRoute/v3.8.51
+BASE=https://raw.githubusercontent.com/diegosouzapw/OmniRoute/v3.8.51
 curl -fsSLO "$BASE/docker-compose.selfhost.yml"
 curl -fsSLO "$BASE/.env.selfhost.example"
 cp .env.selfhost.example .env      # then edit the 2 lines marked "EDIT ME"
@@ -70,7 +70,7 @@ release tag, and create your `.env` from the template:
 
 ```bash
 mkdir omniroute && cd omniroute
-BASE=https://raw.githubusercontent.com/cheaper-inference/OmniRoute/v3.8.51
+BASE=https://raw.githubusercontent.com/diegosouzapw/OmniRoute/v3.8.51
 curl -fsSLO "$BASE/docker-compose.selfhost.yml"
 curl -fsSLO "$BASE/.env.selfhost.example"
 cp .env.selfhost.example .env
@@ -180,7 +180,7 @@ The image pins `OMNIROUTE_MEMORY_MB=1024`. That is enough for the dashboard
 and light chat. **Coding agents** (`POST /v1/responses` from Claude Code,
 Codex, Grok, …) retain multiple large context graphs during compression and
 can abort V8 at ~12 GiB old-space under two overlapping long contexts
-([#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)).
+([#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)).
 
 `.env.selfhost.example` defaults to `OMNIROUTE_MEMORY_MB=2048` — a safe floor
 for a single user running coding agents. Raise it if you fan out many models
@@ -216,7 +216,7 @@ because it bundles the exact runtime the image was tested with.
 From source (development only — not a deploy path):
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run build && npm start

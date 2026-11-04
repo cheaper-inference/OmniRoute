@@ -430,7 +430,7 @@ oczekuje na implementację).
 ### Mechanizm zapadkowy CodeQL: częstotliwość odświeżania i ręczne wyzwalanie
 
 `check:codeql-ratchet` odczytuje **stan repozytorium, odświeżany zgodnie z harmonogramem — nie dla każdego PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` raportuje
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` raportuje
 `state: configured`, `schedule: weekly`: jest to skan domyślnej konfiguracji GitHub, a nie analiza
 wykonywana przy każdym wysłaniu zmian. Konsekwencja: po scaleniu PR, który NAPRAWIA alerty, mechanizm zapadkowy nadal odczytuje
 starą, wyższą liczbę aż do uruchomienia następnego zaplanowanego skanowania — dlatego raportuje regresję

@@ -237,7 +237,7 @@ u joriy etilguniga qadar yangi relizlarda bu holat takrorlanishi mumkin.
    [Convert]::ToBase64String($b)
    ```
    Natija `latest.yml` → `sha512` qiymatiga mos kelishi kerak. Agar mos kelmasa, faylni oʻchiring va
-   faqat [GitHub relizlar sahifasi](https://github.com/cheaper-inference/OmniRoute/releases) orqali qayta yuklab oling.
+   faqat [GitHub relizlar sahifasi](https://github.com/diegosouzapw/OmniRoute/releases) orqali qayta yuklab oling.
 2. **Tiklang + istisnoga qoʻshing** — orqaga qaytarish jarayonida oʻchirilgan elementlarni karantindan tiklang va
    `%LOCALAPPDATA%\Programs\OmniRoute` uchun istisno qoʻshing (Kaspersky → Settings → Threats and Exclusions),
    soʻng qayta oʻrnating.
@@ -832,7 +832,7 @@ Standart qiymat 60 000 ms (60 s). Ogohlantirish faqat axborot uchun; server fond
 
 ## Hali ham muammo hal boʻlmadimi?
 
-- **GitHub muammolari**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub muammolari**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Arxitektura**: Ichki tafsilotlar uchun [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) fayliga qarang
 - **API maʼlumotnomasi**: Barcha endpointlar uchun [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) fayliga qarang
 - **Holat boshqaruv paneli**: Tizim holatini real vaqtda koʻrish uchun **Boshqaruv paneli → Holat** boʻlimini tekshiring

@@ -18,7 +18,7 @@
 - **معرّفًا أساسيًا** (`omni-auth`، و`cli-serve`، وما إلى ذلك)
 - ملف **SKILL.md** في `skills/{id}/SKILL.md` يتضمن ترويسة YAML (`name`، و`description`) + محتوى markdown غنيًا
 - **نقاط نهاية REST** (لمهارات API) أو **أوامر CLI فرعية** (لمهارات CLI) مشتقة من مواصفات OpenAPI وسجل CLI
-- **عنوان URL أوليًا على GitHub** للجلب المباشر: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **عنوان URL أوليًا على GitHub** للجلب المباشر: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. الجلب المباشر للبيانات الخام من GitHub (لا يتطلب خادمًا)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -479,7 +479,7 @@ OmniRoute-ի երկու լռելյայն կարգավորումներ կարող
 | Աշխատաշրջանը շարունակ փոխում է հաշիվները / հարցումների քեշի շարունակականությունը կորչում է քայլերի միջև | Աշխատաշրջանի կապակցվածության TTL-ը `0` է (անջատված)                                    | `sessionAffinityTtlMs`   |
 | Կապն ընդհատվում է դատողության ընթացքում՝ առանց հաճախորդին ցուցադրվող հուշման                            | Հոսքի անգործության հսկիչը գործարկվել է վերին մակարդակից 10 րոպե հատված չստանալուց հետո | `STREAM_IDLE_TIMEOUT_MS` |
 
-Առնչվող քննարկումներ՝ [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (երկարատև առաջադրանքների ընդհատումներ), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ինչու է կապակցվածությունը լռելյայն անջատված)։ Հետագծում՝ [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)։
+Առնչվող քննարկումներ՝ [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (երկարատև առաջադրանքների ընդհատումներ), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ինչու է կապակցվածությունը լռելյայն անջատված)։ Հետագծում՝ [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)։
 
 ### 1. Աշխատաշրջանի կապակցվածություն — մեկ խոսակցությունն ամրակցեք մեկ հաշվին
 

@@ -5,7 +5,7 @@
 ---
 
 Ez a dokumentum a(z)
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) megvalósítási döntését rögzíti. A nyilvános termékeket
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) megvalósítási döntését rögzíti. A nyilvános termékeket
 négy szolgáltatócsalád képviseli. A régió kapcsolati adat, nem különálló termék.
 
 ## Döntés

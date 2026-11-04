@@ -5,7 +5,7 @@
 ---
 
 Àdàkọ: xquik #11370 (tí a ti darapọ̀ mọ́ release/v3.8.51). Ìṣètò: `fallbackOnly`.
-Àbá láti upstream: issue cheaper-inference/OmniRoute#11637.
+Àbá láti upstream: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Òtítọ́ ìpìlẹ̀ iṣẹ́ náà (àwọn ìwé àṣẹ ìṣiṣẹ́, tí a tún ṣàyẹ̀wò)
 

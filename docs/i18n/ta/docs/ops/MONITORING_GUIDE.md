@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet **உயிர்ப்புநிலை** சோதனையை `/api/monitoring/health`-க்கு **சுட்ட வேண்டாம்**. அந்தப் பாதை உண்மையான DB/கண்காணிப்புப் பணியைச் செய்கிறது; பணிச்சுமையின்போது தவறான நேர்மறை முடிவை அளிக்கும்.
 
-தொடர்புடையவை: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (நிகழ்வு லூப் பரபரப்பாக இருக்கும்போதான சோதனைகள்), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (பட்டியல் விலை நிர்ணயப் பணி வளங்களை ஆக்கிரமித்தல்), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (சுருக்கத்தின் டோக்கன்-எண்ணிக்கைப் பணி வளங்களை ஆக்கிரமித்தல்).
+தொடர்புடையவை: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (நிகழ்வு லூப் பரபரப்பாக இருக்கும்போதான சோதனைகள்), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (பட்டியல் விலை நிர்ணயப் பணி வளங்களை ஆக்கிரமித்தல்), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (சுருக்கத்தின் டோக்கன்-எண்ணிக்கைப் பணி வளங்களை ஆக்கிரமித்தல்).
 
 ### systemd கண்காணிப்பான் (உறைந்த நிகழ்வு லூப்)
 

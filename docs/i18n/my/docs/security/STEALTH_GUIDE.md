@@ -167,7 +167,7 @@ Environment reference တွင် credits mode တစ်ခုချင်း�
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ကို ဖတ်သည်
 - `src/lib/oauth/providers/antigravity.ts` — credential ချိတ်ဆက်စီမံမှု
-- မူရင်း incident report- Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- မူရင်း incident report- Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

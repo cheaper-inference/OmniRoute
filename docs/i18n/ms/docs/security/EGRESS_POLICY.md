@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Sebab Ia Diwujudkan
 
-Diperkenalkan dalam PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Masalah yang mendorong pelaksanaannya:
+Diperkenalkan dalam PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Masalah yang mendorong pelaksanaannya:
 
 | Masalah                                                   | Perkara yang dibetulkan oleh arahan tersebut                                                                                                                                                                                                                                                                                                                                                         |
 | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

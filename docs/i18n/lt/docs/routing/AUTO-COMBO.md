@@ -133,14 +133,14 @@ Automatinis vertinimas kiekvienai užklausai parenka geriausią teikėją / mode
 Kombinacija, kurios `name` yra identiškas nepapildytam modelio ID (pvz., kombinacija, pavadinta
 `gpt-5.5`), yra **sąmoningai palaikomas naudojimo būdas**, o ne klaida: tai
 atsarginio paslaugų teikėjo parinkimo pagal modelio ID mechanizmas, aprašytas
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Kadangi kombinacijų
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Kadangi kombinacijų
 atitiktis tikrinama prieš nepapildyto modelio ID atitiktį
 (`getComboForModel()` faile `src/sse/services/model.ts`), užklausa dėl nepapildyto
 ID `gpt-5.5` nukreipiama per kombinacijos paskirties vietas (pvz.,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`), o ne tiesiai pas
 vieną paslaugų teikėją — taip pakartotinai panaudojama pirmumo taisyklė, pagal kurią
 kombinacija tikrinama prieš perrašymą, sukurta
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), o regresijos
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), o regresijos
 tikrinamos testais `tests/unit/responses-combo-resolution-3227.test.ts` ir
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -186,7 +186,7 @@ Dvi dažnos klaidos:
 - **`auto` nenaudoja jūsų kombinacijų.** `auto`/`auto/*` sukuria savo be konfigūracijos veikiančių kandidatų telkinį ir atsižvelgia į išsaugotas kombinacijas tik tuo atveju, jei kombinacija tiesiogine prasme pavadinta `auto` (nerekomenduojama). Norėdami nukreipti per kombinaciją, siųskite tikslų jos pavadinimą, o ne `auto`.
 - **`openrouter/auto` yra tikras mokamas OpenRouter produktas** („Automatiškai parenkamas geriausias prieinamas“), o ne OmniRoute alternatyvusis pavadinimas. Tai yra vienintelis statinis OpenRouter registro modelio įrašas (`open-sse/config/providers/registry/openrouter/index.ts`), už kurį atsiskaitoma atskirai. Norėdami jo neįtraukti į `auto` telkinius, naudokite Nustatymai → Maršruto parinkimas → Slėpti mokamus modelius.
 
-Pirminė painiava, kurią paaiškina šis dokumentas, aprašyta [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ir [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
+Pirminė painiava, kurią paaiškina šis dokumentas, aprašyta [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ir [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
 ## Kaip tai veikia (išsaugomi automatiniai deriniai)
 

@@ -250,7 +250,7 @@ d’ici là, ce problème peut se reproduire à chaque nouvelle version.
    [Convert]::ToBase64String($b)
    ```
    La sortie doit correspondre à `latest.yml` → `sha512`. Si ce n’est pas le cas, supprimez le fichier et
-   téléchargez-le de nouveau uniquement depuis la [page des versions GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   téléchargez-le de nouveau uniquement depuis la [page des versions GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Restaurer + exclure** — restaurez depuis la quarantaine les éléments supprimés lors de l’annulation et ajoutez une exclusion
    pour `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Paramètres → Menaces et exclusions),
    puis réinstallez l’application.
@@ -847,7 +847,7 @@ détails sur `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Toujours bloqué ?
 
-- **Problèmes GitHub** : [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Problèmes GitHub** : [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Architecture** : consultez [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) pour les détails internes
 - **Référence de l’API** : consultez [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) pour connaître tous les points de terminaison
 - **Tableau de bord d’état** : consultez **Tableau de bord → État** pour connaître l’état du système en temps réel

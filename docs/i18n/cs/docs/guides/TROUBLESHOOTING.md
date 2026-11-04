@@ -221,7 +221,7 @@ Označené soubory jsou standardními součástmi deklarovaných open-source zá
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Výstup se musí shodovat s hodnotou `latest.yml` → `sha512`. Pokud se neshoduje, soubor odstraňte a znovu jej stáhněte výhradně ze [stránky vydání na GitHubu](https://github.com/cheaper-inference/OmniRoute/releases).
+   Výstup se musí shodovat s hodnotou `latest.yml` → `sha512`. Pokud se neshoduje, soubor odstraňte a znovu jej stáhněte výhradně ze [stránky vydání na GitHubu](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Obnovte soubory a přidejte výjimku** — obnovte z karantény položky odstraněné při vrácení instalace a přidejte výjimku pro `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Nastavení → Hrozby a výjimky), poté instalaci zopakujte.
 3. **Nahlaste falešný poplach** — <https://opentip.kaspersky.com/>. Hlášení falešných poplachů zaslaná uživateli skutečně urychlují přidání na seznam povolených položek.
 
@@ -814,7 +814,7 @@ pokračuje ve spouštění na pozadí a bude dostupný po dokončení startu.
 
 ## Stále jste uvízli?
 
-- **Problémy na GitHubu**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Problémy na GitHubu**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Architektura**: Interní podrobnosti najdete v souboru [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **Referenční dokumentace API**: Všechny koncové body najdete v souboru [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Řídicí panel stavu**: Aktuální stav systému v reálném čase najdete v části **Dashboard → Health**

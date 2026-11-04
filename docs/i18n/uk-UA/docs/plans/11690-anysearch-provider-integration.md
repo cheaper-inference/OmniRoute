@@ -5,7 +5,7 @@
 ---
 
 Шаблон: xquik #11370 (об’єднано в release/v3.8.51). Режим: `fallbackOnly`.
-Пропозиція в upstream: issue cheaper-inference/OmniRoute#11637.
+Пропозиція в upstream: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Фактичні дані про сервіс (офіційна документація, перевірена за кількома джерелами)
 

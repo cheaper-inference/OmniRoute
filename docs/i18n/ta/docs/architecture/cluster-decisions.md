@@ -6,7 +6,7 @@
 
 **நிலை:** முன்மொழிவு (@diegosouzapw மதிப்பாய்வுக்காகக் காத்திருக்கிறது)
 **தேதி:** 2026-06-20
-**குறிப்புகள்:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**குறிப்புகள்:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## சுருக்கம்
 

@@ -5,7 +5,7 @@
 ---
 
 Andoza: xquik #11370 (`release/v3.8.51` versiyasiga birlashtirilgan). Holat: `fallbackOnly`.
-Yuqori oqim taklifi: cheaper-inference/OmniRoute#11637 muammosi.
+Yuqori oqim taklifi: diegosouzapw/OmniRoute#11637 muammosi.
 
 ## 1. Xizmat bo‘yicha ishonchli ma’lumotlar (rasmiy hujjatlar asosida, o‘zaro tekshirilgan)
 

@@ -478,7 +478,7 @@ OmniRoute-এর দুটি ডিফল্ট নীরবে বহু ঘ�
 | সেশন বারবার অ্যাকাউন্ট বদলায় / টার্নগুলোর মধ্যে প্রম্পট-ক্যাশের ধারাবাহিকতা হারিয়ে যায় | সেশন অ্যাফিনিটি TTL হলো `0` (নিষ্ক্রিয়)                                           | `sessionAffinityTtlMs`   |
 | ক্লায়েন্টের কাছে দৃশ্যমান কোনো প্রম্পট ছাড়াই রিজনিংয়ের মাঝপথে সংযোগ বিচ্ছিন্ন হয়      | কোনো আপস্ট্রিম চাঙ্ক না আসায় ১০ মিনিট পর স্ট্রিম নিষ্ক্রিয়তা ওয়াচডগ চালু হয়েছে | `STREAM_IDLE_TIMEOUT_MS` |
 
-সম্পর্কিত আলোচনা: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (দীর্ঘ কাজ বিচ্ছিন্ন হওয়া), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (কেন অ্যাফিনিটি ডিফল্টভাবে বন্ধ থাকে)। ট্র্যাকিং: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)।
+সম্পর্কিত আলোচনা: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (দীর্ঘ কাজ বিচ্ছিন্ন হওয়া), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (কেন অ্যাফিনিটি ডিফল্টভাবে বন্ধ থাকে)। ট্র্যাকিং: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)।
 
 ### 1. সেশন অ্যাফিনিটি — একটি কথোপকথনকে একটি অ্যাকাউন্টে পিন করুন
 

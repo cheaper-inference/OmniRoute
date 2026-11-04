@@ -139,8 +139,8 @@ v nekaterih paketih privzeto skrit.
 
 ## Viri
 
-- Težava: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Razprava: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Težava: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Razprava: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Izvorna koda: `src/shared/constants/providers/web-cookie.ts` (definicija ponudnika)
 - Uvoz HAR: `src/shared/utils/m365HarImport.ts`
 - Polja poverilnic: `src/shared/providers/webSessionCredentials.ts`

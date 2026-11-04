@@ -215,7 +215,7 @@ Fayl heç bir icra edilə bilən məzmunu olmayan passiv sənədləşdirmədir. 
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Çıxış `latest.yml` → `sha512` ilə uyğun olmalıdır. Uyğun deyilsə, faylı silin və yalnız [GitHub buraxılışları səhifəsindən](https://github.com/cheaper-inference/OmniRoute/releases) yenidən endirin.
+   Çıxış `latest.yml` → `sha512` ilə uyğun olmalıdır. Uyğun deyilsə, faylı silin və yalnız [GitHub buraxılışları səhifəsindən](https://github.com/diegosouzapw/OmniRoute/releases) yenidən endirin.
 2. **Bərpa edin + istisna əlavə edin** — geri qaytarılaraq silinmiş elementləri karantindən bərpa edin və `%LOCALAPPDATA%\Programs\OmniRoute` üçün istisna əlavə edin (Kaspersky → Settings → Threats and Exclusions), sonra yenidən quraşdırın.
 3. **Yanlış müsbət nəticəni bildirin** — <https://opentip.kaspersky.com/>. İstifadəçilərin təqdim etdiyi yanlış müsbət nəticə hesabatları icazə verilənlər siyahısına əlavə olunma prosesini həqiqətən sürətləndirir.
 
@@ -810,7 +810,7 @@ arxa planda işə düşməyə davam edir və yüklənmə tamamlandıqdan sonra �
 
 ## Hələ də ilişib qalmısınız?
 
-- **GitHub Problemləri**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub Problemləri**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Arxitektura**: Daxili təfərrüatlar üçün [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) sənədinə baxın
 - **API İstinadı**: Bütün son nöqtələr üçün [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) sənədinə baxın
 - **Sağlamlıq Paneli**: Sistemin real vaxtdakı vəziyyəti üçün **İdarəetmə paneli → Sağlamlıq** bölməsini yoxlayın

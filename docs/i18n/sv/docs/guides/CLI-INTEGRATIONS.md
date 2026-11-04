@@ -199,7 +199,7 @@ utdata från `ps`.
 Genom att rikta profilen mot en OmniRoute-**kombination** i stället för en enskild modell får
 flottan redundansväxling mellan providers: när den primära ändpunkten slutade fungera helt mitt under en tur
 i körningen som dokumenterades i
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), slutförde agenten
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), slutförde agenten
 sina återstående steg via reservlösningen utan att avbrottet någonsin blev synligt.
 
 ---

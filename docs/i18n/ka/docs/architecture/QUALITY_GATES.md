@@ -412,7 +412,7 @@ git add quality-baseline.json
 ### CodeQL ratchet: განახლების პერიოდულობა და ხელით გაშვება
 
 `check:codeql-ratchet` კითხულობს **რეპოზიტორიის მდგომარეობას, რომელიც გრაფიკის მიხედვით ახლდება — არა თითოეულ PR-ზე.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` აბრუნებს
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` აბრუნებს
 `state: configured`, `schedule: weekly`: ეს არის GitHub-ის ნაგულისხმევი კონფიგურაციის სკანირება და არა
 ყოველი push-ის ანალიზი. შედეგი: გაფრთხილებების გამომასწორებელი PR-ის გაერთიანების შემდეგ ratchet განაგრძობს
 ძველი, უფრო მაღალი რაოდენობის კითხვას მომდევნო დაგეგმილი სკანირების გაშვებამდე — ამიტომ ის რეგრესიას აფიქსირებს

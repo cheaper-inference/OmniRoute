@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy 免費代理伺服器市集
 
-> 🆕 **由 [@oyi77](https://github.com/oyi77) 貢獻** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847)（Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788)）
+> 🆕 **由 [@oyi77](https://github.com/oyi77) 貢獻** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847)（Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788)）
 
 OmniRoute 整合了 **[1proxy](https://1proxy-api.aitradepulse.com)** 社群平台，可存取來自世界各地**數百個經過驗證的免費代理伺服器**。這非常適合沒有自有代理伺服器基礎設施的使用者。
 

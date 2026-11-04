@@ -198,7 +198,7 @@ Tətbiq işə salındıqda proses mühiti ələ keçirilir, ona görə də proqr
 
 ## Avtomatik yeniləmə
 
-GitHub provayderi (`cheaper-inference/OmniRoute`) ilə `electron-updater` istifadə edir.
+GitHub provayderi (`diegosouzapw/OmniRoute`) ilə `electron-updater` istifadə edir.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Tədbirlər `update-status` IPC vasitəsilə rendererə yönləndirildi: `checking`, `available`, `not-available`, `downloading` ( `percent` ilə), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefaktlar `electron/dist-electron/` enir:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Buraxılışlar GitHub Releases (`cheaper-inference/OmniRoute`) üzərində dərc olunur, bu da `electron-updater` yeni versiyaları yoxladığı yerdir.
+Buraxılışlar GitHub Releases (`diegosouzapw/OmniRoute`) üzərində dərc olunur, bu da `electron-updater` yeni versiyaları yoxladığı yerdir.
 
 ## Problemlərin aradan qaldırılması
 

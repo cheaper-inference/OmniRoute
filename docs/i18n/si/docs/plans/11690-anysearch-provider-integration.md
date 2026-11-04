@@ -5,7 +5,7 @@
 ---
 
 අච්චුව: xquik #11370 (release/v3.8.51 තුළ ඒකාබද්ධ කර ඇත). ඉරියව්ව: `fallbackOnly`.
-Upstream යෝජනාව: cheaper-inference/OmniRoute#11637 ගැටලුව.
+Upstream යෝජනාව: diegosouzapw/OmniRoute#11637 ගැටලුව.
 
 ## 1. සේවාවේ සත්ය මූලාශ්රය (නිල ලේඛන, හරස්-පරීක්ෂා කර ඇත)
 

@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## خودکار اپ ڈیٹ
 
-`electron-updater` GitHub فراہم کنندہ (`cheaper-inference/OmniRoute`) کے ساتھ استعمال کرتا ہے۔
+`electron-updater` GitHub فراہم کنندہ (`diegosouzapw/OmniRoute`) کے ساتھ استعمال کرتا ہے۔
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - واقعات `update-status` IPC کے ذریعے پیش کنندہ کو بھیجے گئے: `checking`, `available`, `not-available`, `downloading` ( `percent` کے ساتھ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage دستخط اختیاری ہے — سیٹ `LINUX_GPG_KEY` اگر دست
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ریلیزز GitHub ریلیزز (`cheaper-inference/OmniRoute`) پر شائع کی جاتی ہیں، یہ وہ جگہ ہے جہاں `electron-updater` نئے ورژن کی جانچ کرتا ہے۔
+ریلیزز GitHub ریلیزز (`diegosouzapw/OmniRoute`) پر شائع کی جاتی ہیں، یہ وہ جگہ ہے جہاں `electron-updater` نئے ورژن کی جانچ کرتا ہے۔
 
 ## خرابی کا سراغ لگانا
 

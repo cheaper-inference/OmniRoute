@@ -9,7 +9,7 @@
 Kung makatuklas ka ng kahinaan sa seguridad ng OmniRoute, mangyaring iulat ito nang responsable:
 
 1. **HUWAG** magbukas ng pampublikong GitHub issue
-2. Gamitin ang [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Gamitin ang [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Isama ang: paglalarawan, mga hakbang sa muling paglikha, at posibleng epekto
 
 ## Takdang Panahon ng Pagtugon
@@ -42,7 +42,7 @@ branch na `stable/v3` (tingnan ang [`ROADMAP.md`](ROADMAP.md) → "Yugto 3 — v
   alinman ang mas huli**. Itatala ang magiging petsa ng pagtatapos sa mga tala sa paglabas ng 3.9.0 at sa
   [`ROADMAP.md`](ROADMAP.md) kapag naganap ang paglabas.
 - **Pag-uulat ng kahinaan sa linya ng LTS:** gamitin ang parehong channel gaya ng para sa anumang ibang bersyon —
-  isang pribadong [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  isang pribadong [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   at hindi kailanman isang pampublikong issue. Sabihin kung aling bersyon ang sinubukan mo (halimbawa, `3.9.2`); ang mga pag-aayos ay ilalapat sa
   `stable/v3` at ipa-forward-port sa v4.
 - **Baseline ng seguridad sa paglabas ng LTS:** itinatala ang nasukat na estado ng scanner, route-guard, at

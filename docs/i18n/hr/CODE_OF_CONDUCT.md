@@ -65,7 +65,7 @@ imenovani predstavnik na mrežnom ili izvanmrežnom događaju.
 Slučajevi zlostavljajućeg, uznemiravajućeg ili na drugi način neprihvatljivog
 ponašanja mogu se prijaviti voditeljima zajednice odgovornim za provedbu
 otvaranjem privatnog sigurnosnog upozorenja na
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 ili slanjem e-maila voditelju održavanja na diegosouza.pw@outlook.com.
 Za sigurnosno osjetljive incidente, pogledajte [`SECURITY.md`](SECURITY.md).
 Sve pritužbe bit će pravodobno i pravedno pregledane i istražene.

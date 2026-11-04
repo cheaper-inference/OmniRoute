@@ -171,7 +171,7 @@ Punti ta’ kuntatt:
 
 - `open-sse/executors/antigravity.ts` — jaqra `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — infrastruttura tal-kredenzjali
-- Rapport oriġinali tal-inċident: Diskussjoni [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Rapport oriġinali tal-inċident: Diskussjoni [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

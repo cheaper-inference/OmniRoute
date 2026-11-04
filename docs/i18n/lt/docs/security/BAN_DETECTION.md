@@ -59,8 +59,8 @@ pašalina naršyklėje. Palikus šią frazę blokavimo sąraše, atkuriama cloud
 esanti `classifyProviderError`, taip pat tapo nepasiekiama šiai formuluotei, nes
 `accountDeactivated` įvertinama pirmiausia — todėl Gemini Code Assist projektų maršrutų
 atkūrimas, pridėtas
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) ir
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452), niekada negalėjo būti vykdomas.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) ir
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452), niekada negalėjo būti vykdomas.
 
 Trys gretimos, **atskiros** signalų lentelės _nėra_ užblokavimo raktažodžių aptikimo dalis:
 

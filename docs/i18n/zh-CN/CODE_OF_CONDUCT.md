@@ -40,7 +40,7 @@
 
 ## 执行
 
-可通过以下方式向负责执行的社区领导者举报辱骂、骚扰或其他不可接受的行为：在 <https://github.com/cheaper-inference/OmniRoute/security/advisories/new> 创建私人安全建议，或发送电子邮件至维护者 diegosouza.pw@outlook.com。
+可通过以下方式向负责执行的社区领导者举报辱骂、骚扰或其他不可接受的行为：在 <https://github.com/diegosouzapw/OmniRoute/security/advisories/new> 创建私人安全建议，或发送电子邮件至维护者 diegosouza.pw@outlook.com。
 对于安全敏感事件，请参阅 [`SECURITY.md`](SECURITY.md)。
 所有投诉将得到及时和公正的审查和调查。
 

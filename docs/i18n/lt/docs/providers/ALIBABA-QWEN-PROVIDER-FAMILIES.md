@@ -5,7 +5,7 @@
 ---
 
 Šiame dokumente užfiksuotas įgyvendinimo sprendimas, susijęs su
-[problema #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Viešieji produktai
+[problema #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Viešieji produktai
 pateikiami kaip keturios teikėjų šeimos. Regionas yra ryšio duomenų dalis, o ne atskiras produktas.
 
 ## Sprendimas

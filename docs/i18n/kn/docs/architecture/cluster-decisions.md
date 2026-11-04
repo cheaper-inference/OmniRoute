@@ -6,7 +6,7 @@
 
 **ಸ್ಥಿತಿ:** ಪ್ರಸ್ತಾವನೆ (@diegosouzapw ಅವರ ಪರಿಶೀಲನೆಗಾಗಿ ಕಾಯುತ್ತಿದೆ)
 **ದಿನಾಂಕ:** 2026-06-20
-**ಉಲ್ಲೇಖಗಳು:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**ಉಲ್ಲೇಖಗಳು:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## ಸಂಕ್ಷಿಪ್ತವಾಗಿ
 

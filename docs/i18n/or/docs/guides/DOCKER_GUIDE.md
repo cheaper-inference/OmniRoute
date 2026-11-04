@@ -300,7 +300,7 @@ Dockerରେ ମେମୋରି ଆଚରଣ:
 
 ### coding agent-ମାନଙ୍କ ପାଇଁ runtime RAM
 
-1 GiB Docker ଡିଫଲ୍ଟ ହେଉଛି dashboard/ହାଲୁକା chat ପାଇଁ ସର୍ବନିମ୍ନ ସୀମା, production ଆକାର ନୁହେଁ। ଦୀର୍ଘ `POST /v1/responses` body-ଗୁଡ଼ିକ (ଶତାଧିକ message, ଦଶ-ଦଶଟି tool) compression ସମୟରେ ଏକାଧିକ in-memory graph ଧରି ରଖନ୍ତି। ପରସ୍ପରକୁ overlap କରୁଥିବା ପ୍ରାୟ ~3 MiB / ~750k-token ର ଦୁଇଟି request **12 GiB** old-space-ରେ V8 କୁ ବନ୍ଦ କରିଦେଇଛି (`FATAL ERROR: Reached heap limit`) ଏବଂ 16 GiB cgroup OOM ମଧ୍ୟ ସୃଷ୍ଟି କରିଛି। [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ଦେଖନ୍ତୁ।
+1 GiB Docker ଡିଫଲ୍ଟ ହେଉଛି dashboard/ହାଲୁକା chat ପାଇଁ ସର୍ବନିମ୍ନ ସୀମା, production ଆକାର ନୁହେଁ। ଦୀର୍ଘ `POST /v1/responses` body-ଗୁଡ଼ିକ (ଶତାଧିକ message, ଦଶ-ଦଶଟି tool) compression ସମୟରେ ଏକାଧିକ in-memory graph ଧରି ରଖନ୍ତି। ପରସ୍ପରକୁ overlap କରୁଥିବା ପ୍ରାୟ ~3 MiB / ~750k-token ର ଦୁଇଟି request **12 GiB** old-space-ରେ V8 କୁ ବନ୍ଦ କରିଦେଇଛି (`FATAL ERROR: Reached heap limit`) ଏବଂ 16 GiB cgroup OOM ମଧ୍ୟ ସୃଷ୍ଟି କରିଛି। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ଦେଖନ୍ତୁ।
 
 **heap ଠାରୁ ଅଧିକ cgroup `--memory` ଆକାର ନିର୍ଦ୍ଧାରଣ କରନ୍ତୁ** — native buffer, SQLite ଏବଂ compression intermediate-ଗୁଡ଼ିକ V8 ବାହାରେ ରହେ।
 
@@ -670,7 +670,7 @@ spec:
 
 `preStop` ଶୋଇବା SIGTERM ପୂର୍ବରୁ kube ଡ୍ରପ୍ ସର୍ଭିସ୍ ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକୁ ଛାଡିଦିଏ \|** ନୂତନ** ଟ୍ରାଫିକ୍ ମରିବା ପ୍ରକ୍ରିୟାକୁ ବନ୍ଦ କରିଦିଏ \| ଫ୍ଲାଇଟ୍ `/v1/responses` SSE ହେଭିୱେଟ୍ ଆଡମିଶନ ଲିଜ୍ (# 11015) ମାଧ୍ୟମରେ `SHUTDOWN_TIMEOUT_MS` (ଡିଫଲ୍ଟ 30s) ପର୍ଯ୍ୟନ୍ତ ନିଷ୍କାସିତ ହୋଇଛି \| ନୂତନ ଅନୁରୋଧ ଯାହାକି ଏପର୍ଯ୍ୟନ୍ତ ପ୍ରକ୍ରିୟାରେ ପହଞ୍ଚେ `503` + `Retry-After: 5`\| ଖାଲି-ଏଣ୍ଡପଏଣ୍ଟ ଫାଙ୍କ ସୃଷ୍ଟି କରନ୍ତୁ ଯେପର୍ଯ୍ୟନ୍ତ ପ୍ରତିସ୍ଥାପନ ପ୍ରସ୍ତୁତ ନହେବା ପର୍ଯ୍ୟନ୍ତ ଏକ କଠିନ ଅଘଟଣ ରହିଥାଏ - ତାହା ହେଉଛି SQLite ଟପୋଲୋଜି, ଏକ ଅନୁସନ୍ଧାନ ଭୁଲ୍ ନୁହେଁ \|
 
-ବାହ୍ୟ Postgres / ବହୁ-ଲେଖକ HA ହେଉଛି \|** ନୁହେଁ** ଏକ ଡକ୍ୟୁମେଣ୍ଟ୍ ଷ୍ଟକ୍ ପଥ \| ଯଦି ଆପଣ HA ଆବଶ୍ୟକ କରନ୍ତି, ଗୋଟିଏ ପ୍ରତିକୃତି ରଖନ୍ତୁ କିମ୍ବା ଏକ ଟପୋଲୋଜି ଚଲାନ୍ତୁ, ପ୍ରୋଜେକ୍ଟ ପୃଥକ ଭାବରେ ପରୀକ୍ଷଣ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଛି \| Postgres/MySQL କାର୍ଯ୍ୟ [# #8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ରେ ବାସ କରେ \| ସେହି ଜାହାଜ ପର୍ଯ୍ୟନ୍ତ, ଗୁଣନ କରିବାର ଏକମାତ୍ର ସମର୍ଥିତ ଉପାୟ \|** ବଡ** `/v1/responses` କ୍ଷମତା ହେଉଛି N ସ୍ independent ାଧୀନ ପ୍ରକ୍ରିୟା (ପରବର୍ତ୍ତୀ ବିଭାଗ), ଗୋଟିଏ ଭଲ୍ୟୁମରେ `replicas > 1` ନୁହେଁ \|
+ବାହ୍ୟ Postgres / ବହୁ-ଲେଖକ HA ହେଉଛି \|** ନୁହେଁ** ଏକ ଡକ୍ୟୁମେଣ୍ଟ୍ ଷ୍ଟକ୍ ପଥ \| ଯଦି ଆପଣ HA ଆବଶ୍ୟକ କରନ୍ତି, ଗୋଟିଏ ପ୍ରତିକୃତି ରଖନ୍ତୁ କିମ୍ବା ଏକ ଟପୋଲୋଜି ଚଲାନ୍ତୁ, ପ୍ରୋଜେକ୍ଟ ପୃଥକ ଭାବରେ ପରୀକ୍ଷଣ ଏବଂ ଡକ୍ୟୁମେଣ୍ଟ୍ ହୋଇଛି \| Postgres/MySQL କାର୍ଯ୍ୟ [# #8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ରେ ବାସ କରେ \| ସେହି ଜାହାଜ ପର୍ଯ୍ୟନ୍ତ, ଗୁଣନ କରିବାର ଏକମାତ୍ର ସମର୍ଥିତ ଉପାୟ \|** ବଡ** `/v1/responses` କ୍ଷମତା ହେଉଛି N ସ୍ independent ାଧୀନ ପ୍ରକ୍ରିୟା (ପରବର୍ତ୍ତୀ ବିଭାଗ), ଗୋଟିଏ ଭଲ୍ୟୁମରେ `replicas > 1` ନୁହେଁ \|
 
 ## ମାପକାଠି: N ସ୍ independent ାଧୀନ ପ୍ରକ୍ରିୟା \|
 
@@ -680,11 +680,11 @@ spec:
 
 ଯେତେବେଳେ ଏକ ସତେଜ ଆବଶ୍ୟକ ହୁଏ ଏବଂ କେବଳ ଏକ ଭିନ୍ନ, ଅପ୍ରତ୍ୟାଶିତ ଆକ୍ସେସ୍ ଟୋକେନ୍ ଗ୍ରହଣ କରେ, ପାସ୍ ଇନଷ୍ଟାଣ୍ଟ ସଂଯୋଗକୁ ପୁନ ere ପ ads ଼ିଥାଏ \| ଅନ୍ୟଥା ସଂଯୋଗର ଅବଧି ସମାପ୍ତ କିମ୍ବା ନିଷ୍କ୍ରିୟ ନକରି କିମ୍ବା ସତେଜ-ବ୍ରେକର୍ ବିଫଳତାକୁ ଗଣନା ନକରି ସତେଜ ଅକ୍ଷମ ହୋଇଥାଏ \| ପ୍ରକୃତ ଅପଷ୍ଟ୍ରିମ୍ ପ୍ରାମାଣିକିକରଣ ବିଫଳତା ତଥାପି ସାଧାରଣ ବିଫଳତା ଆକାଉଣ୍ଟିଂ, ଏକ୍ସପୋନ୍ସନାଲ କୁଲଡାଉନ୍ ଏବଂ ସାଧାରଣ କ୍ଲାଏଣ୍ଟ ତ୍ରୁଟି ବ୍ୟବହାର କରେ \| ଖାତା ନିଷ୍କ୍ରିୟତା ସ୍ଥାୟୀ ରହିଥାଏ \| ଆକ୍ସେସ୍ ଟୋକେନ୍ ସମାପ୍ତ ହେବା ପୂର୍ବରୁ ମାଲିକଙ୍କ ଘୂର୍ଣ୍ଣିତ ଟୋକେନ୍ଗୁଡ଼ିକୁ ସିଙ୍କ୍ରୋନାଇଜ୍ କରନ୍ତୁ (ଡିଫଲ୍ଟ ସକ୍ରିୟ ରିଫ୍ରେସ୍ ଲିଡ୍ ପାଞ୍ଚ ମିନିଟ୍), କିମ୍ବା Codex auth ଫାଇଲ୍ ପୁନ - ଆମଦାନୀ କରନ୍ତୁ \| ପାସିଭ୍ ଆମଦାନୀଗୁଡିକ ଟୋକେନ୍ ଶେଷ ପଏଣ୍ଟରେ ବ ating ଧ ନକରି ଯୋଗାଇ ଦିଆଯାଇଥିବା ଟୋକେନ୍ ଗୁଡ଼ିକୁ ଗଚ୍ଛିତ କରେ \| ମାନୁଆଲ୍ dashboard/API ସତେଜ `409 refresh_disabled` ରିଟର୍ନ କରେ \| ନୂତନ OAuth ଲଗଇନ୍ ଗୁଡିକ ଅପରିବର୍ତ୍ତିତ \| [ପରିବେଶ ସନ୍ଦର୍ଭ](../reference/ENVIRONMENT.md#passive-codex-token-refresh) ଦେଖନ୍ତୁ \|
 
-ଗୋଟିଏ ନୋଡ୍ ପ୍ରକ୍ରିୟା ହେଉଛି \|** ଗୋଟିଏ V8 ରାଶି \|** । ଦୁଇଟି ଓଭରଲିପିଂ ~ 3 MiB / ~ 750k- ଟୋକେନ୍ କୋଡିଂ-ଏଜେଣ୍ଟ `POST /v1/responses` (RTK + ଗୁମ୍ଫା) ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ରେ ଗଦା ହୋଇ ଛାଡିଦିଏ ଏବଂ OOM ଏକ 16 Gi cgroup କରିପାରିବ \| [# #7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ଦେଖନ୍ତୁ \| ସେହି ମାପ ହେଉଛି** ସ୍ମୃତି-ବଜେଟ୍** ଚେତାବନୀ, ଦୁଇଟି ସମାନ ଲମ୍ବା `/v1/responses` ର ଏକ ଉତ୍ପାଦ ହାର୍ଡ-ମ୍ୟାକ୍ସ ନୁହେଁ \| ହେଭିୱେଟ୍ ଚାଟ୍ ଆଡମିଶନ ଏକ ଅଟୋ-ଉତ୍ପାଦିତ ଇନେଜ୍ ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ଦ୍ z ାରା ସମାନ V8/cgroup ଛାତ — ରୁ ଏହାକୁ ଆକାରକୁ ଅତିକ୍ରମ କରି (କିମ୍ବା ଉତ୍ତରାଧିକାରୀ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ଅନୁରୋଧ-ଗଣନା କ୍ୟାପ୍ ସେଟିଂ) ପୂର୍ବରୁ ଆକାରର ପ୍ରକ୍ରିୟାରେ ଗର୍ଭପାତକୁ ପୁନ tr ଉତ୍ପାଦନ କରିଥାଏ \| ଛୋଟ ଚାଟ୍, `/healthz`, `/v1/models`, ଏବଂ MCP ହେଉଛି \|** ନୁହେଁ** ସେହି କ୍ୟାପ୍ ରେ \|
+ଗୋଟିଏ ନୋଡ୍ ପ୍ରକ୍ରିୟା ହେଉଛି \|** ଗୋଟିଏ V8 ରାଶି \|** । ଦୁଇଟି ଓଭରଲିପିଂ ~ 3 MiB / ~ 750k- ଟୋକେନ୍ କୋଡିଂ-ଏଜେଣ୍ଟ `POST /v1/responses` (RTK + ଗୁମ୍ଫା) ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ରେ ଗଦା ହୋଇ ଛାଡିଦିଏ ଏବଂ OOM ଏକ 16 Gi cgroup କରିପାରିବ \| [# #7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ଦେଖନ୍ତୁ \| ସେହି ମାପ ହେଉଛି** ସ୍ମୃତି-ବଜେଟ୍** ଚେତାବନୀ, ଦୁଇଟି ସମାନ ଲମ୍ବା `/v1/responses` ର ଏକ ଉତ୍ପାଦ ହାର୍ଡ-ମ୍ୟାକ୍ସ ନୁହେଁ \| ହେଭିୱେଟ୍ ଚାଟ୍ ଆଡମିଶନ ଏକ ଅଟୋ-ଉତ୍ପାଦିତ ଇନେଜ୍ ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ଦ୍ z ାରା ସମାନ V8/cgroup ଛାତ — ରୁ ଏହାକୁ ଆକାରକୁ ଅତିକ୍ରମ କରି (କିମ୍ବା ଉତ୍ତରାଧିକାରୀ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ଅନୁରୋଧ-ଗଣନା କ୍ୟାପ୍ ସେଟିଂ) ପୂର୍ବରୁ ଆକାରର ପ୍ରକ୍ରିୟାରେ ଗର୍ଭପାତକୁ ପୁନ tr ଉତ୍ପାଦନ କରିଥାଏ \| ଛୋଟ ଚାଟ୍, `/healthz`, `/v1/models`, ଏବଂ MCP ହେଉଛି \|** ନୁହେଁ** ସେହି କ୍ୟାପ୍ ରେ \|
 
 ### ଗୋଟିଏ ପ୍ରକ୍ରିୟା: ଦୁଇଟିରୁ ଅଧିକ ଲମ୍ବା `/v1/responses`
 
-କ** ସୁସ୍ଥ** ପ୍ରକ୍ରିୟା ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ତଳେ ରାଶି, ଡିଫଲ୍ଟ `0.75`)** ହୋଇପାରେ \|** ଦୁଇଟି ସମକାଳୀନ ଲମ୍ବା `POST /v1/responses` ରୁ ଅଧିକ ଚଲାନ୍ତୁ ଯେତେବେଳେ ପ୍ରକ୍ରିୟା-ପ୍ରଶସ୍ତ ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / # #10110) ରେ ରୁମ୍ ଅଛି \| `OMNIROUTE_CHAT_LARGE_BODY_BYTES` କିମ୍ବା ତା’ଠାରୁ ଅଧିକ ସଂସ୍ଥାଗୁଡ଼ିକ (ଡିଫଲ୍ଟ 256 KiB) ସଂରଚନା-ଭାରୀ ଅନୁରୋଧ ପରି ସମାନ ହେଭିୱେଟ୍ ଲିଜ୍ ନେଇଥାଏ ଏବଂ ସମାନ [# #10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ଏସ୍କେପ୍ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ବ୍ୟବହାର କରେ \| ଦଶଟି ସମନ୍ୱିତ ଲମ୍ବା SSE କ୍ଲାଏଣ୍ଟ (ଅପରେଟରମାନେ ପ୍ରାୟତ 40 40-50 ଆବଶ୍ୟକ କରନ୍ତି) ହେଉଛି a** ସ୍ମୃତି-ବଜେଟ୍** ପ୍ରଶ୍ନ — ଆକାର ହିପ୍ + primary/headroom ସ୍ଲଟ୍ + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — କଠିନ “ସର୍ବାଧିକ 2” ଉତ୍ପାଦ ସୀମା ନୁହେଁ \| ଏକ ଚାପିତ ରାଶି ପୁନ ry ଚେଷ୍ଟା ଯୋଗ୍ୟ `503` ସହିତ s ାଳିଛି ତେଣୁ # #7849 ଫେରିବ ନାହିଁ \|
+କ** ସୁସ୍ଥ** ପ୍ରକ୍ରିୟା ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ତଳେ ରାଶି, ଡିଫଲ୍ଟ `0.75`)** ହୋଇପାରେ \|** ଦୁଇଟି ସମକାଳୀନ ଲମ୍ବା `POST /v1/responses` ରୁ ଅଧିକ ଚଲାନ୍ତୁ ଯେତେବେଳେ ପ୍ରକ୍ରିୟା-ପ୍ରଶସ୍ତ ଇନଫ୍ଲାଇଟ୍-ବାଇଟ୍ ବଜେଟ୍ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / # #10110) ରେ ରୁମ୍ ଅଛି \| `OMNIROUTE_CHAT_LARGE_BODY_BYTES` କିମ୍ବା ତା’ଠାରୁ ଅଧିକ ସଂସ୍ଥାଗୁଡ଼ିକ (ଡିଫଲ୍ଟ 256 KiB) ସଂରଚନା-ଭାରୀ ଅନୁରୋଧ ପରି ସମାନ ହେଭିୱେଟ୍ ଲିଜ୍ ନେଇଥାଏ ଏବଂ ସମାନ [# #10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ଏସ୍କେପ୍ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ବ୍ୟବହାର କରେ \| ଦଶଟି ସମନ୍ୱିତ ଲମ୍ବା SSE କ୍ଲାଏଣ୍ଟ (ଅପରେଟରମାନେ ପ୍ରାୟତ 40 40-50 ଆବଶ୍ୟକ କରନ୍ତି) ହେଉଛି a** ସ୍ମୃତି-ବଜେଟ୍** ପ୍ରଶ୍ନ — ଆକାର ହିପ୍ + primary/headroom ସ୍ଲଟ୍ + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — କଠିନ “ସର୍ବାଧିକ 2” ଉତ୍ପାଦ ସୀମା ନୁହେଁ \| ଏକ ଚାପିତ ରାଶି ପୁନ ry ଚେଷ୍ଟା ଯୋଗ୍ୟ `503` ସହିତ s ାଳିଛି ତେଣୁ # #7849 ଫେରିବ ନାହିଁ \|
 
 କୁ** ଗଦା ବ ly ାନ୍ତୁ \|** (ସ୍ independent ାଧୀନ V8 ପୁରୁଣା ସ୍ଥାନଗୁଡିକ)** ଆଜି** :
 
@@ -727,7 +727,7 @@ volumes:
   omniroute-b-data:
 ```
 
-ଇନ୍-ପ୍ରୋସେସ୍ ସାନ୍ଧ୍ରତା ( HTTP ପୃଥକ ଭାବରେ ସଙ୍କୋଚନ) ହେଉଛି [# #11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) \| ଅଂଶୀଦାର ସ୍ଥାୟୀ ଅବସ୍ଥାରେ ଗୋଟିଏ ଲଜିକାଲ୍ କ୍ଲଷ୍ଟର ହେଉଛି [# #8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) \|
+ଇନ୍-ପ୍ରୋସେସ୍ ସାନ୍ଧ୍ରତା ( HTTP ପୃଥକ ଭାବରେ ସଙ୍କୋଚନ) ହେଉଛି [# #11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) \| ଅଂଶୀଦାର ସ୍ଥାୟୀ ଅବସ୍ଥାରେ ଗୋଟିଏ ଲଜିକାଲ୍ କ୍ଲଷ୍ଟର ହେଉଛି [# #8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) \|
 
 ## Docker ଭିତରେ Gemini ଆଞ୍ଚଳିକ ତ୍ରୁଟିଗୁଡ଼ିକ
 
@@ -769,7 +769,7 @@ docker compose exec omniroute node -e 'require("node:dns").lookup("generativelan
 
 ### ହୋଷ୍ଟ-ସ୍ତରୀୟ ବିକଳ୍ପ: କାର୍ଯ୍ୟକ୍ଷମ IPv6 ଏବଂ ରିଜଲ୍ଭର୍ ନୀତି
 
-[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762)ର ରିପୋର୍ଟକାରୀ
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762)ର ରିପୋର୍ଟକାରୀ
 କଣ୍ଟେନର୍ IPv6 ସକ୍ଷମ କରି ଏବଂ glibc ଆଡ୍ରେସ୍ ଚୟନ ପରିବର୍ତ୍ତନ କରି ନିଜ ପରିବେଶରେ
 ଆକ୍ସେସ୍ ପୁନଃସ୍ଥାପନ କରିଥିଲେ। ଏହାକୁ ଏକ ପରିବେଶ-ନିର୍ଦ୍ଦିଷ୍ଟ ବିକଳ୍ପ ଭାବରେ ବିବେଚନା କରନ୍ତୁ।
 ରିଜଲ୍ଭର୍ ପ୍ରାଥମିକତା ସମନ୍ୱୟ କରିବା ପୂର୍ବରୁ କାର୍ଯ୍ୟକ୍ଷମ ହୋଷ୍ଟ IPv6, କଣ୍ଟେନର୍ ଇଗ୍ରେସ୍/ରାଉଟିଂ

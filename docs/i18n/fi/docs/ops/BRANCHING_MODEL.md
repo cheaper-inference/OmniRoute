@@ -53,7 +53,7 @@ merkintäissue. Tämä **ei pysäytä kehitystä**:
 Tarkista avoin jäädytys ennen kuin oletat haluamasi haaran olevan yhdistettävissä:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Yhdistämismekaniikka (omistajan `queue`-merkintä → Mergify) on dokumentoitu tiedostossa

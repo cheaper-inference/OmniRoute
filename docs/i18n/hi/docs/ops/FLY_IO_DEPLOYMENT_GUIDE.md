@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 कोड क्लोन करें और डायरेक्टरी में जाएँ
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly स्वचालित रूप से मशीनों का रो�
 
 ### 9.1 अपने फ़ोर्क के `fly.toml` को सुरक्षित रखते हुए अपस्ट्रीम रिपॉज़िटरी अपडेट ट्रैक करना
 
-यदि वर्तमान रिपॉज़िटरी एक फ़ोर्क है और आप अपस्ट्रीम `https://github.com/cheaper-inference/OmniRoute` से अपडेट सिंक करना चाहते हैं, तो नीचे दिए गए वर्कफ़्लो का पालन करें।
+यदि वर्तमान रिपॉज़िटरी एक फ़ोर्क है और आप अपस्ट्रीम `https://github.com/diegosouzapw/OmniRoute` से अपडेट सिंक करना चाहते हैं, तो नीचे दिए गए वर्कफ़्लो का पालन करें।
 
 सबसे पहले, अपने रिमोट सत्यापित करें:
 
@@ -309,7 +309,7 @@ git remote -v
 यदि `upstream` कॉन्फ़िगर नहीं है, तो इसे जोड़ें:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 अपस्ट्रीम के साथ सिंक करने से पहले, नवीनतम कमिट और टैग फ़ेच करें:

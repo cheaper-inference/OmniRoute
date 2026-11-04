@@ -5,7 +5,7 @@
 ---
 
 Şablon: xquik #11370 (release/v3.8.51 sürümüne birleştirildi). Duruş: `fallbackOnly`.
-Upstream önerisi: issue cheaper-inference/OmniRoute#11637.
+Upstream önerisi: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Servis temel gerçekleri (resmî belgeler, çapraz kontrol edildi)
 

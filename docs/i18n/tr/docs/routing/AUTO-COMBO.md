@@ -133,14 +133,14 @@ Otomatik puanlama, istek başına en iyi sağlayıcıyı/modeli seçer
 
 `name` değeri çıplak bir model kimliğiyle aynı olan bir combo (ör. adı
 `gpt-5.5` olan bir combo), hata değil, **kasıtlı ve desteklenen bir kalıptır**:
-bu, [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) içinde belgelenen
+bu, [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) içinde belgelenen
 model kimliği başına sağlayıcı yedekleme mekanizmasıdır. Combo çözümlemesi,
 çıplak model kimliği çözümlemesinden önce kontrol edildiğinden
 (`src/sse/services/model.ts` içindeki `getComboForModel()`), çıplak
 `gpt-5.5` kimliği için yapılan bir istek doğrudan tek bir sağlayıcıya gitmek
 yerine combo'nun hedefleri (ör.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) üzerinden yönlendirilir —
-bu, [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) için
+bu, [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) için
 oluşturulan yeniden yazmadan önce combo önceliğini yeniden kullanır ve
 `tests/unit/responses-combo-resolution-3227.test.ts` ile
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` tarafından regresyon
@@ -200,8 +200,8 @@ Yaygın iki sorun:
   için Ayarlar → Yönlendirme → Ücretli modelleri gizle seçeneğini kullanın.
 
 Burada belgelenen ilk karışıklık için
-[#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ve
-[#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) bölümlerine bakın.
+[#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ve
+[#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) bölümlerine bakın.
 
 ## Nasıl Çalışır (Kalıcı Otomatik Kombolar)
 

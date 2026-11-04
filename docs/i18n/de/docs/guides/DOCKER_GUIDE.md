@@ -330,7 +330,7 @@ Speicherverhalten in Docker:
 
 ### Laufzeit-RAM für Coding-Agenten
 
-Der Docker-Standardwert von 1 GiB ist eine Untergrenze für das Dashboard und einfache Chats, keine Größe für den Produktionseinsatz. Lange `POST /v1/responses`-Bodies (Hunderte Nachrichten, Dutzende Tools) halten während der Komprimierung mehrere In-Memory-Graphen vor. Zwei sich überschneidende Anfragen mit jeweils ~3 MiB bzw. ~750k Token haben V8 bei einem Old-Space von **12 GiB** zum Abbruch gebracht (`FATAL ERROR: Reached heap limit`) und außerdem ein cgroup-OOM bei 16 GiB ausgelöst. Siehe [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
+Der Docker-Standardwert von 1 GiB ist eine Untergrenze für das Dashboard und einfache Chats, keine Größe für den Produktionseinsatz. Lange `POST /v1/responses`-Bodies (Hunderte Nachrichten, Dutzende Tools) halten während der Komprimierung mehrere In-Memory-Graphen vor. Zwei sich überschneidende Anfragen mit jeweils ~3 MiB bzw. ~750k Token haben V8 bei einem Old-Space von **12 GiB** zum Abbruch gebracht (`FATAL ERROR: Reached heap limit`) und außerdem ein cgroup-OOM bei 16 GiB ausgelöst. Siehe [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
 Dimensionieren Sie den **cgroup-Speicher mit `--memory` oberhalb des Heaps** — native Puffer, SQLite und Zwischenwerte der Komprimierung befinden sich außerhalb von V8.
 
@@ -695,7 +695,7 @@ spec:
 
 `preStop` Sleep kann Kube Service-Endpunkte vor SIGTERM löschen** neu** Der Verkehr hört auf, den sterbenden Prozess zu treffen. Während des Fluges wird `/v1/responses` SSE über Schwergewichtszulassungsverträge (#11015) auf `SHUTDOWN_TIMEOUT_MS` (Standard 30s) entleert. Neue Anfragen, die den Prozess noch erreichen, erhalten `503` + `Retry-After: 5`. Die Lücke „Leeren Endpunkt neu erstellen, bis der Ersatz bereit ist“ bleibt ein schwerer Ausfall – das ist die SQLite -Topologie und keine Probe-Fehlkonfiguration.
 
-Externes Postgres / Multi-Writer HA ist** nicht** ein dokumentierter Lagerweg. Wenn Sie HA benötigen, behalten Sie ein einzelnes Replikat bei oder führen Sie eine Topologie aus, die das Projekt separat getestet und dokumentiert hat. Das Postgres/MySQL Werk befindet sich in [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Bis dahin ist die einzige unterstützte Möglichkeit zur Vermehrung** groß** `/v1/responses` Kapazität beträgt N unabhängige Prozesse (nächster Abschnitt), nicht `replicas > 1` auf einem Volume.
+Externes Postgres / Multi-Writer HA ist** nicht** ein dokumentierter Lagerweg. Wenn Sie HA benötigen, behalten Sie ein einzelnes Replikat bei oder führen Sie eine Topologie aus, die das Projekt separat getestet und dokumentiert hat. Das Postgres/MySQL Werk befindet sich in [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Bis dahin ist die einzige unterstützte Möglichkeit zur Vermehrung** groß** `/v1/responses` Kapazität beträgt N unabhängige Prozesse (nächster Abschnitt), nicht `replicas > 1` auf einem Volume.
 
 ## Scale-out: N unabhängige Prozesse
 
@@ -705,11 +705,11 @@ Kopien eines Codex Kontos dürfen dessen Einmal-Aktualisierungstoken nicht unabh
 
 Die passive Instanz liest die Verbindung erneut, wenn eine Aktualisierung erforderlich ist, und übernimmt nur ein anderes, nicht abgelaufenes Zugriffstoken. Andernfalls wird die Aktualisierung deaktiviert, ohne dass die Verbindung abläuft oder deaktiviert wird oder ein Aktualisierungsunterbrechungsfehler gezählt wird. Echte Upstream-Authentifizierungsfehler nutzen immer noch die normale Fehlerabrechnung, die exponentielle Abklingzeit und den normalen Client-Fehler; Die Kontodeaktivierung bleibt dauerhaft. Synchronisieren Sie die rotierten Token des Eigentümers, bevor die Zugriffstoken ablaufen (der standardmäßige proaktive Aktualisierungsvorlauf beträgt fünf Minuten), oder importieren Sie die Codex Authentifizierungsdatei erneut. Passive Importe speichern die bereitgestellten Token, ohne sie am Token-Endpunkt zu validieren. Manuelle dashboard/API -Aktualisierung gibt `409 refresh_disabled` zurück; Neue OAuth Anmeldungen bleiben unverändert. Siehe [Umgebungsreferenz](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Ein Knotenprozess ist** ein V8-Haufen** . Zwei überlappende ~ 3 MiB / ~ 750k-Token Coding-Agent `POST /v1/responses` (RTK + Caveman) brechen diesen Heap bei ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ab und können eine 16 Gi cgroup OOM. Siehe [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Diese Messung ist ein** Speicherbudget** Achtung, kein Hard-Max-Produkt von zwei gleichzeitigen langen `/v1/responses`. Der Schwergewichts-Chat-Zugang wird durch ein automatisch abgeleitetes Ingest-Byte-Budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) eingeschränkt, dessen Größe von der gleichen V8/cgroup Obergrenze abhängt. Wenn — es nach oben überschreibt (oder die alte `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` Anforderungsanzahl-Obergrenze festlegt), führt dies bei einem bereits dimensionierten Prozess den Abbruch erneut ein. Kleine Chats, `/healthz`, `/v1/models` und MCP sind** nicht** in dieser Kappe.
+Ein Knotenprozess ist** ein V8-Haufen** . Zwei überlappende ~ 3 MiB / ~ 750k-Token Coding-Agent `POST /v1/responses` (RTK + Caveman) brechen diesen Heap bei ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ab und können eine 16 Gi cgroup OOM. Siehe [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Diese Messung ist ein** Speicherbudget** Achtung, kein Hard-Max-Produkt von zwei gleichzeitigen langen `/v1/responses`. Der Schwergewichts-Chat-Zugang wird durch ein automatisch abgeleitetes Ingest-Byte-Budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) eingeschränkt, dessen Größe von der gleichen V8/cgroup Obergrenze abhängt. Wenn — es nach oben überschreibt (oder die alte `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` Anforderungsanzahl-Obergrenze festlegt), führt dies bei einem bereits dimensionierten Prozess den Abbruch erneut ein. Kleine Chats, `/healthz`, `/v1/models` und MCP sind** nicht** in dieser Kappe.
 
 ### Ein Prozess: mehr als zwei lange `/v1/responses`
 
-A** gesund** Prozess (Heap unter `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, Standard `0.75`)** Mai** Führen Sie mehr als zwei lange `POST /v1/responses` gleichzeitig aus, wenn das prozessweite Inflight-Byte-Budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) noch Platz bietet. Körper mit oder über `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (Standard 256 KiB) nehmen die gleiche Schwergewichts-Lease wie strukturintensive Anfragen an und verwenden dasselbe [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` Escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dutzende gleichzeitiger langer SSE Clients (Betreiber benötigen oft 40–50) ist ein** Speicherbudget** Frage — Größe Heap + primary/headroom Slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — kein hartes Produktlimit „maximal 2“. Ein unter Druck stehender Heap bricht immer noch mit wiederholbarem `503` ab, sodass #7849 nicht zurückkehrt.
+A** gesund** Prozess (Heap unter `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, Standard `0.75`)** Mai** Führen Sie mehr als zwei lange `POST /v1/responses` gleichzeitig aus, wenn das prozessweite Inflight-Byte-Budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) noch Platz bietet. Körper mit oder über `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (Standard 256 KiB) nehmen die gleiche Schwergewichts-Lease wie strukturintensive Anfragen an und verwenden dasselbe [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` Escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dutzende gleichzeitiger langer SSE Clients (Betreiber benötigen oft 40–50) ist ein** Speicherbudget** Frage — Größe Heap + primary/headroom Slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — kein hartes Produktlimit „maximal 2“. Ein unter Druck stehender Heap bricht immer noch mit wiederholbarem `503` ab, sodass #7849 nicht zurückkehrt.
 
 Zu** Haufen vervielfachen** (unabhängige V8 Old-Spaces)** Heute** :
 
@@ -752,7 +752,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Die Dichte im Prozess (Komprimierung des HTTP Isolats) beträgt [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Ein logischer Cluster im gemeinsam genutzten dauerhaften Zustand ist [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
+Die Dichte im Prozess (Komprimierung des HTTP Isolats) beträgt [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ein logischer Cluster im gemeinsam genutzten dauerhaften Zustand ist [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
 
 ## Regionale Gemini-Fehler innerhalb von Docker
 
@@ -793,7 +793,7 @@ Fehler handelt; nur die authentifizierte Modellanfrage prüft die Gemini-Berecht
 
 ### Alternative auf Host-Ebene: funktionierendes IPv6 und Resolver-Richtlinie
 
-Der Melder von [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) stellte
+Der Melder von [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) stellte
 den Zugriff in seiner Umgebung wieder her, indem er IPv6 für Container aktivierte und die glibc-Adressauswahl
 änderte. Betrachten Sie dies als umgebungsspezifische Alternative. Vergewissern Sie sich, dass
 IPv6 auf dem Host, der ausgehende Datenverkehr bzw. das Routing des Containers und die Firewall-Regeln funktionieren, bevor Sie die Resolver-Einstellungen anpassen.

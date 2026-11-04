@@ -261,7 +261,7 @@ This happens once on first startup after upgrade. Use `migrateLegacyProxyConfigT
 
 ## 1proxy Free Proxy Marketplace
 
-> 🆕 **Contributed by [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Contributed by [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute integrates with the **[1proxy](https://1proxy-api.aitradepulse.com)** community platform to provide access to **hundreds of free, validated proxies** from around the world. This is perfect for users who don't have their own proxy infrastructure.
 

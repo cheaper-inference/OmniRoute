@@ -198,7 +198,7 @@ Diatur melalui `session.defaultSession.webRequest.onHeadersReceived`. Arahan pen
 
 ## Pembaruan otomatis
 
-Menggunakan `electron-updater` dengan penyedia GitHub (`cheaper-inference/OmniRoute`).
+Menggunakan `electron-updater` dengan penyedia GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Acara diteruskan ke penyaji melalui `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (dengan `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefak mendarat di `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Rilis dipublikasikan ke GitHub Releases (`cheaper-inference/OmniRoute`), yang juga merupakan tempat `electron-updater` memeriksa versi baru.
+Rilis dipublikasikan ke GitHub Releases (`diegosouzapw/OmniRoute`), yang juga merupakan tempat `electron-updater` memeriksa versi baru.
 
 ## Pemecahan masalah
 

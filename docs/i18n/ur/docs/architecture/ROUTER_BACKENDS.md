@@ -4,9 +4,9 @@
 
 ---
 
-> **حیثیت:** منظور شدہ · **سیاق:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670)،
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **معاہدہ:** `domain/routing/routerBackends.ts`
-> (ٹائپ شدہ رجسٹری — کوڈ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) کے ساتھ شامل ہوگا)
+> **حیثیت:** منظور شدہ · **سیاق:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670)،
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **معاہدہ:** `domain/routing/routerBackends.ts`
+> (ٹائپ شدہ رجسٹری — کوڈ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) کے ساتھ شامل ہوگا)
 
 یہ ADR واضح طور پر متعین کرتا ہے کہ `ts` (مقامی)، `bifrost`، `cliproxy`، `9router`، اور
 VibeProxy سے مطابقت رکھنے والے انجن ایک دوسرے سے کیسے متعلق ہیں، تاکہ شراکت کنندگان
@@ -39,7 +39,7 @@ VibeProxy سے مطابقت رکھنے والے انجن ایک دوسرے سے 
 ## رجسٹری — حقیقت کا واحد مستند ماخذ
 
 `domain/routing/routerBackends.ts` معاہدہ (کوڈ
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) کے ساتھ شامل ہوگا) ہر انجن کو ایک مرتبہ، اس کے
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) کے ساتھ شامل ہوگا) ہر انجن کو ایک مرتبہ، اس کے
 لائف سائیکل، صلاحیتوں، سروس کی شناخت، ڈیفالٹ پورٹ، صحت کی کنفیگریشن، اور
 ٹیلی میٹری معاونت کے ساتھ بیان کرتا ہے۔ صارفین ہر sidecar کے لیے
 خصوصی منطق لکھنے کے بجائے `getRouterBackend(id)`،
@@ -56,7 +56,7 @@ VibeProxy سے مطابقت رکھنے والے انجن ایک دوسرے سے 
 
 ¹ Bifrost کو ایک `supervised` ایمبیڈڈ سروس کے طور پر ترقی دینا (جسے
 `/api/services/bifrost/` سے انسٹال/شروع کیا جا سکے)
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) میں ٹریک کیا جا رہا ہے؛ اس کے ضم ہونے تک،
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) میں ٹریک کیا جا رہا ہے؛ اس کے ضم ہونے تک،
 Bifrost صرف `external` ہے (اور صرف `BIFROST_BASE_URL` کے ذریعے قابلِ رسائی ہے)۔
 
 `capabilities` (`chat`، `responses`، `streaming`، `tools`، `vision`،
@@ -124,8 +124,8 @@ Bifrost صرف `external` ہے (اور صرف `BIFROST_BASE_URL` کے ذریعے
 فی الحال انتخاب ریلے کی سطح پر **مکمل طور پر ایک یا دوسرا** ہے — `release/v3.8.43`
 پر فی پرووائیڈر یا فی درخواست انجن کی تبدیلی موجود نہیں۔ فی درخواست گیٹ کو
 سائیڈکار-مینی فیسٹ کے کام کے ذریعے شامل کیا جا رہا ہے
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) مینی فیسٹ +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)،
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) مینی فیسٹ +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)،
 جو `auto` کو صرف مینی فیسٹ کے اہل پرووائیڈرز کو Bifrost کے ذریعے روٹ کرنے دیتا ہے۔
 
 ## ڈیش بورڈ انضمام

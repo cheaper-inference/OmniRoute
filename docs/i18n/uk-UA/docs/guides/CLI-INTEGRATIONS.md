@@ -199,7 +199,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 Спрямування профілю на **комбінацію** OmniRoute замість окремої моделі забезпечує для парку
 аварійне перемикання між провайдерами: коли основна кінцева точка повністю відмовила посеред виконання запиту
 під час запуску, описаного в
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), агент завершив
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), агент завершив
 решту кроків через резервну кінцеву точку, не повідомивши про збій.
 
 ---

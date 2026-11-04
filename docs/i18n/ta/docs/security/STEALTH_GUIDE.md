@@ -170,7 +170,7 @@ Antigravity கோரிக்கைகள் அழைப்பாளரின�
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` என்பதைப் படிக்கிறது
 - `src/lib/oauth/providers/antigravity.ts` — நற்சான்று இணைப்பமைப்பு
-- அசல் சம்பவ அறிக்கை: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- அசல் சம்பவ அறிக்கை: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

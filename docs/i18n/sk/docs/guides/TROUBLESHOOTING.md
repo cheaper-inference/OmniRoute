@@ -253,7 +253,7 @@ pri nových vydaniach.
    [Convert]::ToBase64String($b)
    ```
    Výstup sa musí zhodovať s hodnotou `latest.yml` → `sha512`. Ak sa nezhoduje, súbor
-   odstráňte a znova ho stiahnite výhradne zo [stránky vydaní na GitHube](https://github.com/cheaper-inference/OmniRoute/releases).
+   odstráňte a znova ho stiahnite výhradne zo [stránky vydaní na GitHube](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Obnovte + pridajte výnimku** — obnovte z karantény položky odstránené pri vrátení zmien
    a pridajte výnimku pre `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Nastavenia →
    Hrozby a výnimky), potom aplikáciu znova nainštalujte.
@@ -847,7 +847,7 @@ pokračuje v spúšťaní na pozadí a po dokončení spúšťania bude dostupn�
 
 ## Stále máte problémy?
 
-- **Problémy na GitHube**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Problémy na GitHube**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Architektúra**: Interné podrobnosti nájdete v dokumente [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **Referenčná príručka API**: Všetky koncové body nájdete v dokumente [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Panel stavu**: Aktuálny stav systému skontrolujte v časti **Dashboard → Health**

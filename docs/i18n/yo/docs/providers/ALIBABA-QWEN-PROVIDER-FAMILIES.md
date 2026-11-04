@@ -5,7 +5,7 @@
 ---
 
 Ìwé yìí ṣàkọsílẹ̀ ìpinnu ìmúṣẹ fún
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Àwọn ọjà gbogbogbòò ni a
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Àwọn ọjà gbogbogbòò ni a
 ṣojú gẹ́gẹ́ bí ìdílé olùpèsè mẹ́rin. Ẹkùn jẹ́ dátà ìsopọ̀, kì í ṣe ọjà ọ̀tọ̀.
 
 ## Ìpinnu

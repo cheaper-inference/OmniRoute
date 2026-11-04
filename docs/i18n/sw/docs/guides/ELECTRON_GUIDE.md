@@ -198,7 +198,7 @@ Weka kupitia `session.defaultSession.webRequest.onHeadersReceived`. Maagizo mash
 
 ## Sasisha kiotomatiki
 
-Hutumia `electron-updater` na mtoaji GitHub (`cheaper-inference/OmniRoute`).
+Hutumia `electron-updater` na mtoaji GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Matukio yanayotumwa kwa mtoaji kupitia `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (na `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Vitu vya sanaa hutua `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Matoleo huchapishwa kwa Matoleo ya GitHub (`cheaper-inference/OmniRoute`), ambapo pia `electron-updater` hukagua matoleo mapya.
+Matoleo huchapishwa kwa Matoleo ya GitHub (`diegosouzapw/OmniRoute`), ambapo pia `electron-updater` hukagua matoleo mapya.
 
 ## Kutatua matatizo
 

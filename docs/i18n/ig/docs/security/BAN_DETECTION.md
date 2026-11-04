@@ -58,8 +58,8 @@ ihe dị iche bụ mbọ nke e mere ka sava zaa n'oge ahụ.
 Ịhapụ nkebiokwu ahụ na ndepụta mmachibido mekwara ka ngalaba cloud-code 403 enwere ike idozi dị na
 `classifyProviderError` bụrụ nke a na-apụghị iru maka mkpụrụokwu a, n'ihi na a na-enyocha `accountDeactivated`
 mbụ — ya mere mgbake ụzọ ọrụ ahụ agbakwunyere maka Gemini Code Assist na
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) na
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) enweghị ike ịrụ ọrụ ma ọlị.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) na
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) enweghị ike ịrụ ọrụ ma ọlị.
 
 Tebụl akara atọ ndị dị ya nso, ma **dị iche**, abụghị akụkụ nke nchọpụta okwu igodo mmachibido:
 

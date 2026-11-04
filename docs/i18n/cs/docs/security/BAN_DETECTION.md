@@ -58,8 +58,8 @@ použití, bez automatického obnovení), zatímco výzvu k ověření operátor
 Ponechání této fráze v seznamu zákazů také způsobovalo, že obnovitelná větev pro chybu cloud-code 403 v
 `classifyProviderError` byla pro tuto formulaci nedostupná, protože `accountDeactivated` se
 vyhodnocuje jako první — takže obnovení projektové trasy přidané pro Gemini Code Assist v
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) a
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) se nikdy nemohlo spustit.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) a
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) se nikdy nemohlo spustit.
 
 Tři sousední, **samostatné** tabulky signálů _nejsou_ součástí detekce zakázaných klíčových slov:
 

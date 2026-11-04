@@ -18,7 +18,7 @@ Agent Skills යනු OmniRoute හි REST API සහ CLI භාවිත ක�
 - **සම්මත ID එකක්** (`omni-auth`, `cli-serve`, ආදිය)
 - YAML ඉදිරි දත්ත (`name`, `description`) + සවිස්තරාත්මක markdown අන්තර්ගතයක් සහිත `skills/{id}/SKILL.md` හි **SKILL.md** ගොනුවක්
 - OpenAPI පිරිවිතරයෙන් සහ CLI ලේඛනයෙන් ව්යුත්පන්න කළ **REST අන්ත ලක්ෂ්ය** (API කුසලතා) හෝ **CLI උපවිධාන** (CLI කුසලතා)
-- සජීවීව ලබා ගැනීම සඳහා **GitHub raw URL එකක්**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- සජීවීව ලබා ගැනීම සඳහා **GitHub raw URL එකක්**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. සෘජු GitHub raw ලබාගැනීම (සේවාදායකයක් අවශ්ය නොවේ)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

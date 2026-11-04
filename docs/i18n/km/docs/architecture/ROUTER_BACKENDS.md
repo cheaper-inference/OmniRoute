@@ -4,9 +4,9 @@
 
 ---
 
-> **ស្ថានភាព:** បានទទួលយក · **បរិបទ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **កិច្ចសន្យា:** `domain/routing/routerBackends.ts`
-> (បញ្ជីចុះឈ្មោះដែលមានប្រភេទ — កូដនឹងត្រូវបានបញ្ចូលជាមួយ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **ស្ថានភាព:** បានទទួលយក · **បរិបទ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **កិច្ចសន្យា:** `domain/routing/routerBackends.ts`
+> (បញ្ជីចុះឈ្មោះដែលមានប្រភេទ — កូដនឹងត្រូវបានបញ្ចូលជាមួយ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 ADR នេះកំណត់ឱ្យច្បាស់ពីរបៀបដែលម៉ាស៊ីន `ts` (ដើម), `bifrost`, `cliproxy`, `9router` និង
 ម៉ាស៊ីនដែលឆបគ្នាជាមួយ VibeProxy ទាក់ទងគ្នា ដើម្បីឱ្យអ្នករួមចំណែកឈប់ច្រឡំរវាង
@@ -39,7 +39,7 @@ ADR នេះកំណត់ឱ្យច្បាស់ពីរបៀបដែ�
 ## បញ្ជីចុះឈ្មោះ — ប្រភពតែមួយនៃការពិត
 
 កិច្ចសន្យា `domain/routing/routerBackends.ts` (កូដនឹងត្រូវបានបញ្ចូលជាមួយ
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) ប្រកាសម៉ាស៊ីននីមួយៗម្ដងគត់ រួមជាមួយ
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) ប្រកាសម៉ាស៊ីននីមួយៗម្ដងគត់ រួមជាមួយ
 វដ្តជីវិត សមត្ថភាព អត្តសញ្ញាណសេវា ច្រកលំនាំដើម ការកំណត់រចនាសម្ព័ន្ធសុខភាព និង
 ការគាំទ្រ telemetry របស់វា។ អ្នកប្រើប្រាស់ស្វែងរកម៉ាស៊ីនតាមរយៈ `getRouterBackend(id)`,
 `listRouterBackends()` និង `listRouterBackendsByCapability(cap)` ជំនួសឱ្យ
@@ -55,7 +55,7 @@ ADR នេះកំណត់ឱ្យច្បាស់ពីរបៀបដែ�
 
 ¹ ការដំឡើងឋានៈ Bifrost ទៅជាសេវាបង្កប់ `supervised` (អាចដំឡើង/ចាប់ផ្ដើមបាន
 ពី `/api/services/bifrost/`) កំពុងត្រូវបានតាមដាននៅក្នុង
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); រហូតដល់វាត្រូវបានបញ្ចូល
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); រហូតដល់វាត្រូវបានបញ្ចូល
 Bifrost មានតែជា `external` ប៉ុណ្ណោះ (អាចចូលដំណើរការបានតែតាមរយៈ `BIFROST_BASE_URL`)។
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ backend; interface ចម្បង `/api/v1/chat/completions` មិនដែល
 ការជ្រើសរើសគឺ **ទាំងអស់ឬគ្មានទាំងអស់នៅកម្រិត relay នាពេលបច្ចុប្បន្ន** — មិនមានការប្ដូរ engine តាម provider
 ឬតាម request នៅលើ `release/v3.8.43` ទេ។ per-request gate កំពុងត្រូវបានបន្ថែម
 ដោយ sidecar-manifest work
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)
 ដែលអនុញ្ញាតឱ្យ `auto` បញ្ជូនតែ provider ដែលមានសិទ្ធិតាម manifest ប៉ុណ្ណោះតាមរយៈ Bifrost។
 
 ## ការរួមបញ្ចូលជាមួយផ្ទាំងគ្រប់គ្រង

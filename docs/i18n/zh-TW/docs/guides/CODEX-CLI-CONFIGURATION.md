@@ -476,7 +476,7 @@ OmniRoute 的兩項預設值可能會在不知不覺中破壞持續數小時的 
 | 工作階段持續切換帳號／各輪之間的提示快取連續性中斷 | 工作階段親和性 TTL 為 `0`（已停用）              | `sessionAffinityTtlMs`   |
 | 推理過程中連線中斷，且未向用戶端顯示任何提示       | 串流閒置監視器在上游 10 分鐘未傳送資料區塊後觸發 | `STREAM_IDLE_TIMEOUT_MS` |
 
-相關討論：[#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126)（長時間任務中斷）、[#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718)（親和性預設停用的原因）。追蹤議題：[#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)。
+相關討論：[#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126)（長時間任務中斷）、[#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718)（親和性預設停用的原因）。追蹤議題：[#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)。
 
 ### 1. 工作階段親和性 — 將單一對話固定至單一帳號
 

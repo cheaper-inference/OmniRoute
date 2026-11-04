@@ -105,7 +105,7 @@ npm start
 
 ማካተት የነቃበት build ከሌለ ገጹ በframe ውስጥ መታየትን ይከለክላል፤ extensionው ይህንን ከresponse headers ይለያል እና ወደ ውጫዊ browser ይመለሳል — ምንም ነገር አይበላሽም፣ እና ይህንን አንድ ጊዜ ያሳውቃል።
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md)ን እና issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273)ን ይመልከቱ።
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273)ን ይመልከቱ።
 
 ---
 

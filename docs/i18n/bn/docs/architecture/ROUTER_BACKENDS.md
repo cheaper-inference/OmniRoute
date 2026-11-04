@@ -4,9 +4,9 @@
 
 ---
 
-> **স্থিতি:** গৃহীত · **প্রসঙ্গ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **চুক্তি:** `domain/routing/routerBackends.ts`
-> (টাইপড রেজিস্ট্রি — কোডটি [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-এর সঙ্গে যুক্ত হবে)
+> **স্থিতি:** গৃহীত · **প্রসঙ্গ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **চুক্তি:** `domain/routing/routerBackends.ts`
+> (টাইপড রেজিস্ট্রি — কোডটি [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-এর সঙ্গে যুক্ত হবে)
 
 এই ADR নির্দিষ্ট করে যে `ts` (নেটিভ), `bifrost`, `cliproxy`, `9router` এবং
 VibeProxy-সামঞ্জস্যপূর্ণ ইঞ্জিনগুলো পরস্পরের সঙ্গে কীভাবে সম্পর্কিত, যাতে অবদানকারীরা
@@ -39,7 +39,7 @@ VibeProxy-সামঞ্জস্যপূর্ণ ইঞ্জিনগুল
 ## রেজিস্ট্রি — একক সত্যের উৎস
 
 `domain/routing/routerBackends.ts` চুক্তি (কোডটি
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-এর সঙ্গে যুক্ত হবে) প্রতিটি ইঞ্জিনকে তার
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-এর সঙ্গে যুক্ত হবে) প্রতিটি ইঞ্জিনকে তার
 লাইফসাইকেল, সক্ষমতা, সার্ভিস পরিচয়, ডিফল্ট পোর্ট, স্বাস্থ্য-সংক্রান্ত কনফিগারেশন এবং
 টেলিমেট্রি সমর্থনসহ একবার করে ঘোষণা করে। প্রতিটি সাইডকারের জন্য আলাদা বিশেষ শর্ত
 ব্যবহারের পরিবর্তে কনজিউমাররা `getRouterBackend(id)`,
@@ -55,7 +55,7 @@ VibeProxy-সামঞ্জস্যপূর্ণ ইঞ্জিনগুল
 | `vibeproxy` | `external`   | —                | — (প্রোভাইডার অ্যাডাপ্টার) | `/v1/models`  | —            |
 
 ¹ Bifrost-কে একটি `supervised` এমবেডেড সার্ভিসে উন্নীত করার কাজ (`/api/services/bifrost/`
-থেকে ইনস্টল/চালু করা যাবে) [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)-এ
+থেকে ইনস্টল/চালু করা যাবে) [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)-এ
 ট্র্যাক করা হচ্ছে; এটি মার্জ না হওয়া পর্যন্ত Bifrost শুধু `external`
 (কেবল `BIFROST_BASE_URL`-এর মাধ্যমে অ্যাক্সেসযোগ্য)।
 
@@ -125,8 +125,8 @@ VibeProxy-সামঞ্জস্যপূর্ণ ইঞ্জিনগুল
 বর্তমানে নির্বাচনটি রিলে স্তরে **সম্পূর্ণ অথবা কিছুই নয়** — `release/v3.8.43`-এ
 প্রতিটি provider বা প্রতিটি request অনুযায়ী ইঞ্জিন বদলানোর ব্যবস্থা নেই। প্রতিটি request-এর
 গেট সাইডকার-ম্যানিফেস্টের কাজের মাধ্যমে যোগ করা হচ্ছে
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) ম্যানিফেস্ট +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) ম্যানিফেস্ট +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 যার ফলে `auto` শুধু ম্যানিফেস্ট-যোগ্য provider-গুলোকে Bifrost-এর মাধ্যমে রাউট করতে পারে।
 
 ## ড্যাশবোর্ড ইন্টিগ্রেশন

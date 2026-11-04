@@ -179,7 +179,7 @@ Antigravity ਬੇਨਤੀਆਂ ਕਾਲਰ ਦੇ ਟੈਕਸਟ ਨੂੰ 
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ਨੂੰ ਪੜ੍ਹਦਾ ਹੈ
 - `src/lib/oauth/providers/antigravity.ts` — ਕ੍ਰੀਡੈਂਸ਼ਲ ਪਲੰਬਿੰਗ
-- ਮੂਲ ਘਟਨਾ ਰਿਪੋਰਟ: ਚਰਚਾ [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- ਮੂਲ ਘਟਨਾ ਰਿਪੋਰਟ: ਚਰਚਾ [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

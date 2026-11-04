@@ -169,7 +169,7 @@ Antigravity 请求会逐字节保留调用方文本。OmniRoute 不会在提示�
 
 - `open-sse/executors/antigravity.ts` — 读取 `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — 凭据传递
-- 原始事件报告：讨论 [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- 原始事件报告：讨论 [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

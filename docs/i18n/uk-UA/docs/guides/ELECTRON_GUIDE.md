@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## Автоматичне оновлення
 
-Використовує `electron-updater` з провайдером GitHub (`cheaper-inference/OmniRoute`).
+Використовує `electron-updater` з провайдером GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Події, що пересилаються до рендерера через `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (із `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage підпис є необов’язковим — встановити 
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Релізи публікуються в GitHub Releases (`cheaper-inference/OmniRoute`), де також `electron-updater` перевіряє наявність нових версій.
+Релізи публікуються в GitHub Releases (`diegosouzapw/OmniRoute`), де також `electron-updater` перевіряє наявність нових версій.
 
 ## Усунення несправностей
 

@@ -58,8 +58,8 @@ bez automātiskas atkopšanas), savukārt verifikācijas pieprasījumu operators
 Šīs frāzes saglabāšana bloķēšanas sarakstā arī padarīja atkopjamo cloud-code 403 zaru funkcijā
 `classifyProviderError` nesasniedzamu šim formulējumam, jo `accountDeactivated` tiek
 izvērtēts vispirms — tādēļ Gemini Code Assist paredzētā projekta maršruta atkopšana, kas pievienota
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) un
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452), nekad nevarēja tikt izpildīta.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) un
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452), nekad nevarēja tikt izpildīta.
 
 Trīs blakus esošās, **atsevišķās** signālu tabulas _neietilpst_ bloķēšanas atslēgvārdu noteikšanā:
 

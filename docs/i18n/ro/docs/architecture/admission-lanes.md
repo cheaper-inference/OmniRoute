@@ -90,7 +90,7 @@ pentru alta”) este impus necondiționat de sistemul 1 și de sistemul 2 după 
 
 ## 4. `/v1/responses` de lungă durată într-un singur proces (marjă sănătoasă)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) a adăugat
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) a adăugat
 `tryAcquireHealthyHeadroom`, astfel încât o a doua cerere cu structură complexă să fie admisă
 atunci când heap-ul este sub `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Calea BYTE
 utilizată de `admitChatRequest` (corpuri ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

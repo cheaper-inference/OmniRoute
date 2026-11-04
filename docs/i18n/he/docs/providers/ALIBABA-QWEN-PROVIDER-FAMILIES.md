@@ -5,7 +5,7 @@
 ---
 
 מסמך זה מתעד את החלטת המימוש עבור
-[סוגיה #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). המוצרים הציבוריים
+[סוגיה #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). המוצרים הציבוריים
 מיוצגים כארבע משפחות ספקים. האזור הוא נתון חיבור, ולא מוצר נפרד.
 
 ## החלטה

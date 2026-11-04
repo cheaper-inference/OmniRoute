@@ -18,7 +18,7 @@ Agent Skills הם קובצי SKILL.md מובנים, המלמדים סוכנים 
 - **מזהה קנוני** (`omni-auth`, `cli-serve` וכו')
 - קובץ **SKILL.md** בנתיב `skills/{id}/SKILL.md`, הכולל YAML frontmatter (`name`, `description`) + גוף Markdown עשיר
 - **נקודות קצה של REST** (מיומנויות API) או **פקודות משנה של CLI** (מיומנויות CLI), הנגזרות ממפרט OpenAPI וממרשם ה-CLI
-- **כתובת URL גולמית של GitHub** לאחזור בזמן אמת: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **כתובת URL גולמית של GitHub** לאחזור בזמן אמת: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. אחזור ישיר של תוכן גולמי מ-GitHub (ללא צורך בשרת)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

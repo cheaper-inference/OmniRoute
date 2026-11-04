@@ -114,7 +114,7 @@ npm start
 หากไม่ได้ใช้บิลด์ที่เปิดใช้งานการฝัง หน้าดังกล่าวจะปฏิเสธการแสดงผลในเฟรม ส่วนขยายจะตรวจพบสิ่งนี้จาก
 ส่วนหัวการตอบกลับและย้อนกลับไปใช้เบราว์เซอร์ภายนอก — ไม่มีสิ่งใดเสียหาย และจะแจ้งให้ทราบหนึ่งครั้ง
 ดู [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) และ issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273)
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273)
 
 ---
 

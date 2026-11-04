@@ -427,7 +427,7 @@ chỉ số mà không cập nhật đường cơ sở sẽ bị `--require-tight
 ### Ratchet CodeQL: tần suất làm mới và kích hoạt thủ công
 
 `check:codeql-ratchet` đọc **trạng thái repo, được làm mới theo lịch — không phải theo từng PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` báo cáo
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` báo cáo
 `state: configured`, `schedule: weekly`: đây là lượt quét theo cấu hình mặc định của GitHub, không phải
 phân tích sau mỗi lần push. Hệ quả: sau khi một PR SỬA các cảnh báo được merge, ratchet vẫn tiếp tục đọc
 số lượng cũ, cao hơn cho đến khi lượt quét theo lịch tiếp theo chạy — vì vậy, nó báo cáo một sự suy giảm

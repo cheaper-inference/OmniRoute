@@ -123,8 +123,8 @@ OmniRoute, Chathub WebSocket URL-এর জন্য HAR স্ক্যান �
 
 ## তথ্যসূত্র
 
-- ইস্যু: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- আলোচনা: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- ইস্যু: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- আলোচনা: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - সোর্স: `src/shared/constants/providers/web-cookie.ts` (প্রোভাইডারের সংজ্ঞা)
 - HAR ইমপোর্ট: `src/shared/utils/m365HarImport.ts`
 - ক্রেডেনশিয়াল ফিল্ডসমূহ: `src/shared/providers/webSessionCredentials.ts`

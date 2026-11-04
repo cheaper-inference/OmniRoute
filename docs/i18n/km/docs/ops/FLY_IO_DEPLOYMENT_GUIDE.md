@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 ក្លូនកូដ និងចូលទៅក្នុងថត
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly នឹងធ្វើបច្ចុប្បន្នភាពម៉ាស�
 
 ### 9.1 ការតាមដានបច្ចុប្បន្នភាពរបស់ឃ្លាំងដើម ខណៈពេលរក្សាទុក `fly.toml` របស់ Fork របស់អ្នក
 
-ប្រសិនបើឃ្លាំងបច្ចុប្បន្នគឺជា fork ហើយអ្នកចង់ធ្វើសមកាលកម្មបច្ចុប្បន្នភាពពីឃ្លាំងដើម `https://github.com/cheaper-inference/OmniRoute` សូមអនុវត្តតាមលំហូរការងារខាងក្រោម។
+ប្រសិនបើឃ្លាំងបច្ចុប្បន្នគឺជា fork ហើយអ្នកចង់ធ្វើសមកាលកម្មបច្ចុប្បន្នភាពពីឃ្លាំងដើម `https://github.com/diegosouzapw/OmniRoute` សូមអនុវត្តតាមលំហូរការងារខាងក្រោម។
 
 ដំបូង សូមផ្ទៀងផ្ទាត់ remote របស់អ្នក៖
 
@@ -309,7 +309,7 @@ git remote -v
 ប្រសិនបើ `upstream` មិនទាន់ត្រូវបានកំណត់រចនាសម្ព័ន្ធទេ សូមបន្ថែមវា៖
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 មុនពេលធ្វើសមកាលកម្មជាមួយ upstream សូមទាញយក commit និង tag ចុងក្រោយបំផុត៖

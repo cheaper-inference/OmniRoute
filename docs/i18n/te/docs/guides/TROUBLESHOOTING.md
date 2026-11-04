@@ -245,7 +245,7 @@ Kaspersky మొత్తం ఇన్స్టాలేషన్ను "రో�
    [Convert]::ToBase64String($b)
    ```
    అవుట్పుట్ తప్పనిసరిగా `latest.yml` → `sha512`తో సరిపోలాలి. సరిపోకపోతే, ఫైల్ను తొలగించి
-   [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases) నుండి మాత్రమే
+   [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) నుండి మాత్రమే
    మళ్లీ డౌన్లోడ్ చేయండి.
 2. **పునరుద్ధరించండి + మినహాయించండి** — రోల్ బ్యాక్ చేయబడిన అంశాలను క్వారంటైన్ నుండి పునరుద్ధరించి,
    `%LOCALAPPDATA%\Programs\OmniRoute` కోసం మినహాయింపును జోడించండి (Kaspersky → Settings →
@@ -835,7 +835,7 @@ omniroute serve --ready-timeout 180000
 
 ## ఇంకా సమస్య పరిష్కారం కాలేదా?
 
-- **GitHub సమస్యలు**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub సమస్యలు**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **ఆర్కిటెక్చర్**: అంతర్గత వివరాల కోసం [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) చూడండి
 - **API రిఫరెన్స్**: అన్ని ఎండ్పాయింట్ల కోసం [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) చూడండి
 - **హెల్త్ డాష్బోర్డ్**: నిజ-సమయ సిస్టమ్ స్థితి కోసం **Dashboard → Health** తనిఖీ చేయండి

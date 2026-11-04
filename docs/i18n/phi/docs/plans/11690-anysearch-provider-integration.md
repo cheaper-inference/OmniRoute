@@ -5,7 +5,7 @@
 ---
 
 Template: xquik #11370 (na-merge sa release/v3.8.51). Posture: `fallbackOnly`.
-Panukala sa upstream: isyu cheaper-inference/OmniRoute#11637.
+Panukala sa upstream: isyu diegosouzapw/OmniRoute#11637.
 
 ## 1. Batayang katotohanan ng serbisyo (opisyal na dokumentasyon, na-cross-check)
 

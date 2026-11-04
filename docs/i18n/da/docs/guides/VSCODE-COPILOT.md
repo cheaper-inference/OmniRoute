@@ -113,7 +113,7 @@ npm start
 Uden et build, hvor indlejring er aktiveret, afviser siden at blive vist i en frame. Udvidelsen registrerer dette ud fra
 svarheaderne og falder tilbage til den eksterne browser — intet går i stykker, og den oplyser om det én gang.
 Se [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) og issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

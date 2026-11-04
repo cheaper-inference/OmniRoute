@@ -255,7 +255,7 @@ nuove versioni.
    [Convert]::ToBase64String($b)
    ```
    L'output deve corrispondere a `latest.yml` → `sha512`. In caso contrario, eliminare il file e
-   scaricarlo nuovamente esclusivamente dalla [pagina delle release di GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   scaricarlo nuovamente esclusivamente dalla [pagina delle release di GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Ripristinare + escludere** — ripristinare dalla quarantena gli elementi eliminati durante il
    rollback e aggiungere un'esclusione per `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
    Impostazioni → Minacce ed esclusioni), quindi reinstallare.
@@ -849,7 +849,7 @@ dettagli su `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Ancora bloccato?
 
-- **Issue di GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Issue di GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Architettura**: consulta [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) per i dettagli interni
 - **Riferimento API**: consulta [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) per tutti gli endpoint
 - **Dashboard di integrità**: controlla **Dashboard → Health** per lo stato del sistema in tempo reale

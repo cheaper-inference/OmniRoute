@@ -5,7 +5,7 @@
 ---
 
 תבנית: xquik #11370 (מוזגה אל release/v3.8.51). מצב: `fallbackOnly`.
-הצעה במעלה הזרם: גיליון cheaper-inference/OmniRoute#11637.
+הצעה במעלה הזרם: גיליון diegosouzapw/OmniRoute#11637.
 
 ## 1. מקור האמת של השירות (תיעוד רשמי, נבדק בהצלבה)
 

@@ -114,7 +114,7 @@ npm start
 Без збирання з підтримкою вбудовування сторінка відмовляється відображатися у фреймі, розширення визначає це за
 заголовками відповіді та повертається до зовнішнього браузера — нічого не порушується, і воно один раз повідомляє про це.
 Див. [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) та проблему
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

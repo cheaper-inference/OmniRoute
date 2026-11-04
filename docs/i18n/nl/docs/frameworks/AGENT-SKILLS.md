@@ -18,7 +18,7 @@ De catalogus bevat **45 Agent Skills** (23 voor de REST API + 21 voor de CLI + 1
 - Een **canonieke ID** (`omni-auth`, `cli-serve`, enz.)
 - Een **SKILL.md**-bestand in `skills/{id}/SKILL.md` met YAML-frontmatter (`name`, `description`) + een uitgebreide markdown-inhoud
 - **REST-eindpunten** (API-skills) of **CLI-subcommando's** (CLI-skills), afgeleid van de OpenAPI-specificatie en het CLI-register
-- Een **onbewerkte GitHub-URL** om de actuele versie op te halen: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Een **onbewerkte GitHub-URL** om de actuele versie op te halen: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Rechtstreeks ophalen van onbewerkte GitHub-inhoud (geen server vereist)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

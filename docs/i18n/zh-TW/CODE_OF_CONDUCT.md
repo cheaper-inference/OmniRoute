@@ -42,7 +42,7 @@
 
 可向負責執行的社群領導者舉報濫用、騷擾或其他不可接受的行為，請透過以下方式聯絡：
 
-- 開啟私人安全性公告：<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+- 開啟私人安全性公告：<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 - 或發送郵件給維護者：diegosouza.pw@outlook.com
 - 針對安全敏感性事件，請參閱 [`SECURITY.md`](SECURITY.md)
 

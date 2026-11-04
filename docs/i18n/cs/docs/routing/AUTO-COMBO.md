@@ -132,13 +132,13 @@ Automatické vyhodnocení vybere pro každý požadavek nejlepšího poskytovate
 Kombinace, jejíž `name` je shodný se samotným ID modelu (např. kombinace s názvem
 `gpt-5.5`), je **záměrný a podporovaný vzor**, nikoli chyba: jde o
 mechanismus záložního poskytovatele pro jednotlivá ID modelů popsaný v
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Protože se
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Protože se
 rozlišení kombinace kontroluje před rozlišením samotného ID modelu
 (`getComboForModel()` v `src/sse/services/model.ts`), požadavek na samotné
 ID `gpt-5.5` je směrován přes cíle kombinace (např.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) namísto přímo k
 jedinému poskytovateli — tím se znovu využívá priorita kombinace před přepisem vytvořená pro
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), která je
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), která je
 regresně testována pomocí `tests/unit/responses-combo-resolution-3227.test.ts` a
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Dvě časté nástrahy:
 - **`auto` vaše kombinace nepoužívá.** `auto`/`auto/*` vytváří vlastní fond kandidátů bez nutnosti konfigurace a uložené kombinace zohlední pouze v případě, že je některá kombinace doslova pojmenována `auto` (nedoporučuje se). Chcete-li směrovat přes kombinaci, odešlete její přesný název — nikoli `auto`.
 - **`openrouter/auto` je skutečný placený produkt OpenRouter** („Auto Best Available“), nikoli alias OmniRoute. Jde o jedinou statickou položku modelu v registru OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) a je účtována samostatně. Chcete-li ji vyloučit z fondů `auto`, použijte Nastavení → Směrování → Skrýt placené modely.
 
-Původní nejasnosti, které tato dokumentace objasňuje, naleznete v [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) a [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
+Původní nejasnosti, které tato dokumentace objasňuje, naleznete v [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) a [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
 ## Jak to funguje (trvalé automatické kombinace)
 

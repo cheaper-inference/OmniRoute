@@ -131,12 +131,12 @@ handleComboChat (אותו מנוע המשמש צירופים מתמידים)
 
 קומבו שה־`name` שלו זהה למזהה מודל ללא קידומת (למשל, קומבו בשם
 `gpt-5.5`) הוא **דפוס מכוון ונתמך**, ולא באג: זהו המנגנון למעבר לגיבוי בין ספקים לפי מזהה מודל, המתועד ב־
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). מכיוון שרזולוציית קומבו נבדקת לפני רזולוציה של מזהה מודל ללא קידומת
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). מכיוון שרזולוציית קומבו נבדקת לפני רזולוציה של מזהה מודל ללא קידומת
 (`getComboForModel()` בתוך `src/sse/services/model.ts`), בקשה עבור המזהה
 `gpt-5.5` מנותבת דרך יעדי הקומבו (למשל
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) במקום ישירות אל
 ספק יחיד — כך נעשה שימוש חוזר בקדימות קומבו-לפני-שכתוב שנבנתה עבור
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), והיא
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), והיא
 נבדקת בבדיקות רגרסיה באמצעות `tests/unit/responses-combo-resolution-3227.test.ts` ו־
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -181,7 +181,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` אינו משתמש בקומבואים שלכם.** `auto`/`auto/*` בונה מאגר מועמדים משלו ללא צורך בהגדרות, ובודק קומבואים שמורים רק אם קיים קומבו ששמו המילולי הוא `auto` (לא מומלץ). כדי לנתב דרך קומבו, שלחו את שמו המדויק — לא `auto`.
 - **`openrouter/auto` הוא מוצר OpenRouter אמיתי בתשלום** ("הטוב ביותר הזמין באופן אוטומטי"), ולא כינוי של OmniRoute. זוהי רשומת המודל הסטטית היחידה ברישום של OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`), והחיוב עבורה מתבצע בנפרד. השתמשו בהגדרות ← ניתוב ← הסתרת מודלים בתשלום כדי להחריג אותה ממאגרי `auto`.
 
-ראו [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ו־[#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) לתיאור הבלבול המקורי שתיעוד זה נועד להבהיר.
+ראו [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ו־[#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) לתיאור הבלבול המקורי שתיעוד זה נועד להבהיר.
 
 ## כיצד זה עובד (שילובי Auto-Combo מתמידים)
 

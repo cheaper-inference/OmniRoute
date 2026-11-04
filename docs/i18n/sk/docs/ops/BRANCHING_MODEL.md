@@ -56,7 +56,7 @@ To **nezastavuje vývoj**:
 Predpoklad, že požadovanú vetvu možno zlučovať, si najskôr overte kontrolou otvoreného zmrazenia:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Mechanizmus zlučovania (štítok vlastníka `queue` → Mergify) je zdokumentovaný v

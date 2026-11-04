@@ -64,7 +64,7 @@ pasākumā.
 Par ļaunprātīgas, aizskarošas vai citādi nepieņemamas uzvedības gadījumiem var
 ziņot par īstenošanu atbildīgajiem kopienas vadītājiem, atverot privātu drošības
 ziņojumu vietnē
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 vai nosūtot e-pastu uzturētājam uz diegosouza.pw@outlook.com.
 Par drošības ziņā sensitīviem incidentiem skatiet
 [`SECURITY.md`](SECURITY.md).

@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1,62 miljardia tokenia / kuukausi kolmansien osapuolten ilmaiskiintiöiden kautta
+## 💰 ~1,62 mrd. tunnusta / kuukausi kolmansien osapuolten ilmaistasoilla
 
 </div>
 
-> **Tuo omat palveluntarjoajatilisi.** Tämä on arvioitu kokonaismäärä erikseen oikeutettujen kolmansien osapuolten ilmaiskiintiöistä, ei OmniRouten myöntämä token-avustus. Rekisteröidy, hanki tunnukset tarvittaessa ja yhdistä palveluntarjoajat, joita voit käyttää; jokainen palveluntarjoaja määrittää omat rajansa, saatavuutensa ja ehtonsa.
+> **Käytä omia palveluntarjoajatilejäsi.** Tämä on erikseen kelvollisten kolmansien osapuolten ilmaistasojen arvioitu yhteenlaskettu määrä, ei OmniRouten myöntämä tunnuskiintiö. Rekisteröidy, hanki tarvittavat tunnistetiedot ja yhdistä käytettävissä olevat palveluntarjoajat; kukin palveluntarjoaja hallitsee omia rajojaan, saatavuuttaan ja ehtojaan.
 >
-> Ilmaiskiintiöiden kasaaminen käsin on tuskallista — kymmeniä SDK:ita, kymmeniä nopeusrajoituksia, eikä mitään käsitystä siitä, kuinka paljon sinulla oikeasti on käytettävissä. OmniRoute kartoittaa **485 ilmaiskiintiökohdetta 34 toistuvan pool-avaimen kautta** ja laskee token-otsikon **17 poolista, joilla on julkaistu positiivinen kuukausibudjetti sekä viidestä mallikohtaisesta Groq-katosta**, deduplikoituna jaettujen poolien mukaan. Kiintiöt, jotka avautuvat vasta alueellisen henkilöllisyyden tarkistuksen jälkeen (tällä hetkellä: ModelScope), näytetään erikseen, +~6M alueellisen tunnistautumisen takana, eikä niitä koskaan lasketa otsikkoon mukaan. Lopputulos pysyy näkyvillä kojelaudalla (`/dashboard/free-tiers`).
+> Ilmaistasojen manuaalinen yhdistely on tuskallista — kymmeniä SDK:ita, kymmeniä nopeusrajoituksia eikä mitään käsitystä siitä, kuinka paljon sinulla oikeasti on käytettävissä. OmniRoute luetteloi **484 ilmaistasomerkintää 34 toistuvan pooliavaimen kautta** ja laskee tunnusmäärän **17 poolista, joilla on julkaistu positiivinen kuukausibudjetti, sekä viidestä mallikohtaisesta Groq-rajasta**, jotka deduplikoidaan jaetuilla pooleilla. Kiintiöt, jotka avautuvat vasta alueellisen henkilöllisyyden tarkistuksen jälkeen (tällä hetkellä: ModelScope), näytetään erikseen: +~6 milj. alueellisen henkilöllisyyden vahvistamisen jälkeen, eikä niitä koskaan lasketa mukaan otsikkolukuun. Tulos pysyy näkyvissä hallintapaneelissa (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ilmaiskiintiökortti: ~1,62 miljardia ilmaista tokenia kuukaudessa tasaisesti, jopa ~2,22 miljardia ensimmäisen kuukauden rekisteröitymisbonuksilla, 34 dokumentoidusta toistuvasta pool-avaimesta, jotka kattavat 485 katalogoitua ilmaiskiintiökohdetta yhden päätepisteen takana. Rehellinen pool-dedupikoitu laskenta — jokainen jaettu pool lasketaan kerran, mukaan lukien 17 toistuvaa poolia, joilla on julkaistu positiivinen kuukausittainen token-budjetti sekä viisi mallikohtaista Groq-kattoa; 12 palveluntarjoajaa on merkitty vältettäviksi ehtoriskikatalogissa, joten päätät itse. Budjettipalkki sisältää Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (viisi mallikohtaista kattoa) ja pienemmät poolit, sekä ensimmäisen kuukauden rekisteröitymisbonukset ja pysyvästi ilmaiset, ilman token-kattoa olevat palveluntarjoajat näytetään erikseen, jotta ne eivät koskaan nosta otsikkoa. Käytetty/jäljellä livenä /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRouten ilmaistasobudjettikortti: ~1,62 mrd. ilmaista tunnusta kuukaudessa jatkuvasti, ensimmäisen kuukauden aikana enintään ~2,22 mrd. rekisteröitymisbonusten ansiosta, 34 dokumentoidusta toistuvasta pooliavaimesta, jotka kattavat 484 luetteloitua ilmaistasomerkintää yhden päätepisteen takana. Rehellinen pooleihin perustuva deduplikoitu laskenta — kukin jaettu pooli lasketaan kerran, mukaan lukien 17 toistuvaa poolia, joilla on julkaistu positiivinen kuukausittainen tunnusbudjetti, sekä viisi mallikohtaista Groq-rajaa; 12 palveluntarjoajaa on merkitty vältettäviksi ehtoriskiluettelossa, joten päätös on sinun. Budjettipalkki sisältää Mistral 1B:n, Naran 210M:n, LLM7:n 150M:n, xKiron 150M:n, Groqin 30M:n (viisi mallikohtaista rajaa) ja pienempiä pooleja sekä ensimmäisen kuukauden rekisteröitymisbonukset ja pysyvästi maksuttomat palveluntarjoajat, joilla ei ole tunnusrajaa; nämä näytetään erikseen, jotta ne eivät kasvata otsikkolukua. Käytetty ja jäljellä oleva määrä reaaliajassa osoitteessa /dashboard/free-tiers."/>
 
-> Animoitu yhteenveto live-sivusta `/dashboard/free-tiers`. Koko metodologia (pool-deduplikaatio, luottoluokat, palveluntarjoajien ehdot): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Elävä yhteenveto `/dashboard/free-tiers`-sivusta. Täydellinen menetelmä (poolien deduplikointi, krediittitasot, palveluntarjoajien ehdot): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Nämä luvut tarkistetaan uudelleen kahden viikon välein live-katalogin perusteella ja **muuttuvat molempiin suuntiin** — palveluntarjoaja lopettaa ilmaiskiintiön ja luku laskee; uusi tulee ja luku nousee. Julkaisemme sen, minkä katalogi oikeasti laskee, emme koskaan pyöristettyä parasta tapausta.</sub>
+> <sub>Nämä luvut tarkistetaan uudelleen joka toinen viikko aktiivista luetteloa vasten ja ne **muuttuvat molempiin suuntiin** — palveluntarjoaja lopettaa ilmaistason ja luku pienenee; uusi palveluntarjoaja lisätään ja luku kasvaa. Julkaisemme sen, mitä luettelo tosiasiassa laskee, emme koskaan ylöspäin pyöristettyä parasta mahdollista arviota.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Anna tähti repolle, jos OMNIROUTE auttoi sinua säästämään rahaa ja helpotti työtäsi.
+⭐ Anna repositoriolle tähti, jos OMNIROUTE auttoi sinua säästämään rahaa ja helpotti työtäsi.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
+[![Tähdet](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Tähtihistorian sijoitus](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Liity yhteisöön
 
-**👋 Seuraa ylläpitäjää — saat uudet palveluntarjoajat, julkaisut & vinkit ensimmäisenä:**
+**👋 Seuraa ylläpitäjää — saat uudet palveluntarjoajat, julkaisut ja vinkit ensimmäisten joukossa:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Seuraa Diegoa LinkedInissä](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Seuraa käyttäjää @diegosouzapw GitHubissa](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Verkkosivusto](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Kysymykset, palveluntarjoajavinkit, tiekartta & tuki → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portaali](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Kysymykset, palveluntarjoajavinkit, etenemissuunnitelma ja tuki → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portaali](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Lisenssi: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker-lataukset](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron-lataukset](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron-lataukset](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Kaikki **20** strategiaa — yhdistele vapaasti yhdistelmän jokaisessa vaiheess
 OmniRoute on MIT-lisensoitu, ja sitä ylläpidetään avoimesti. Jos se säästää aikaasi tai rahaasi, voit auttaa pitämään sen riippumattomana valitsemalla sinulle sopivan tavan. Sponsorointi ei koskaan vaikuta reitityksen prioriteettiin; sillä saa näkyvyyttä, ei parempaa sijoitusta.
 
 <table>
-  <tr><td nowrap>⭐ <b>Anna repositoriolle tähti</b></td><td>Ilmaista — auttaa aidosti näkyvyydessä</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Anna OmniRoutelle tähti</a></td></tr>
+  <tr><td nowrap>⭐ <b>Anna repositoriolle tähti</b></td><td>Ilmaista — auttaa aidosti näkyvyydessä</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Anna OmniRoutelle tähti</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Kertaluonteinen tai kuukausittainen · ei alustamaksua</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Nopea kertalahjoitus, lahjoittajan ei tarvitse rekisteröityä</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Pieni, epämuodollinen ele</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix copia-e-cola:
 
 </details>
 
-🐛 Löysitkö virheen tai haluatko antaa palautetta? Avaa [keskustelu](https://github.com/cheaper-inference/OmniRoute/discussions).
+🐛 Löysitkö virheen tai haluatko antaa palautetta? Avaa [keskustelu](https://github.com/diegosouzapw/OmniRoute/discussions).
 
 <br/>
 
@@ -1260,7 +1260,7 @@ prosessin kautta yhdessä portissa, joten erillistä vain CLI:n sisältävää p
 
 Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 tunnettua katselukertaa** (`v > 0`) · **1.210 kanavaa/profiilia verkostoittain**. Raakahallintapaneelissa on 1.976 riviä (YouTube 1.352 = 740 pitkää videota + 612 Shorts-videota · TikTok 334 · Instagram 290); kanonisen URL-osoitteen perusteella tehdyn normalisoinnin jälkeen yhtään kaksoiskappaletta ei jäänyt, ja kustakin videosta säilytetään suurin katselumäärä. YouTube-tietojen keruu on jäädytetty päivämäärään 2026-10-13 (API-kiintiö loppui ajanjaksolla 14.–18.10.) ja TikTok-/Instagram-tietojen keruu päivämäärään 2026-09-02 (keräyssaldoa ei ole); 76 videolta puuttuu edelleen katselumäärä.
 
-> 🎬 **Teitkö videon OmniRoutesta?** Avaa [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) tai [discussion](https://github.com/cheaper-inference/OmniRoute/discussions) ja lisää siihen linkki — nostamme videon esiin täällä.
+> 🎬 **Teitkö videon OmniRoutesta?** Avaa [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) tai [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) ja lisää siihen linkki — nostamme videon esiin täällä.
 
 <br/>
 
@@ -1270,20 +1270,20 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
 
 > Kaikki yhdessä paikassa — seuraa ylläpitäjää, keskustele yhteisön kanssa tai avaa issue.
 
-| Kanava                                        | Missä / miten                                                                                                                        |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 💼 **LinkedIn** — seuraa ylläpitäjää          | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                            |
-| 🐙 **GitHub** — seuraa julkaisuja ja vinkkejä | [@diegosouzapw](https://github.com/diegosouzapw)                                                                                     |
-| 💬 **Discord**                                | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                               |
-| ✈️ **Telegram**                               | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                               |
-| 🟢 **WhatsApp — 🌍 Maailmanlaajuinen**        | [liity ryhmään](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                                     |
-| 🟢 **WhatsApp — 🇧🇷 Brasilia**                 | [liity ryhmään](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                     |
-| 🌍 **Verkkosivusto**                          | [omniroute.online](https://omniroute.online)                                                                                         |
-| 🌍 **🌍StHub OmniRoute -yhteisö (maksuton)**  | [StHub-portaali](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                              |
-| 📦 **Lähdekoodi**                             | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                             |
-| 🐛 **Ilmoita virheestä**                      | [avaa ongelmailmoitus](https://github.com/cheaper-inference/OmniRoute/issues) — liitä mukaan `npm run system-info` -komennon tuloste |
-| 🤝 **Osallistu kehitykseen**                  | [CONTRIBUTING.md](CONTRIBUTING.md) · [Haarautumis- ja julkaisumalli](docs/ops/BRANCHING_MODEL.md) · valitse `good first issue`       |
-| 💚 **Tue projektia**                          | [Tukitavat ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                                     |
+| Kanava                                        | Missä / miten                                                                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 💼 **LinkedIn** — seuraa ylläpitäjää          | [linkedin.com/in/diegosouzapw](https://www.linkedin.com/in/diegosouzapw/)                                                       |
+| 🐙 **GitHub** — seuraa julkaisuja ja vinkkejä | [@diegosouzapw](https://github.com/diegosouzapw)                                                                                |
+| 💬 **Discord**                                | [discord.gg/U47eFqAXCn](https://discord.gg/U47eFqAXCn)                                                                          |
+| ✈️ **Telegram**                               | [t.me/omnirouteOficial](https://t.me/omnirouteOficial)                                                                          |
+| 🟢 **WhatsApp — 🌍 Maailmanlaajuinen**        | [liity ryhmään](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)                                                |
+| 🟢 **WhatsApp — 🇧🇷 Brasilia**                 | [liity ryhmään](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                |
+| 🌍 **Verkkosivusto**                          | [omniroute.online](https://omniroute.online)                                                                                    |
+| 🌍 **🌍StHub OmniRoute -yhteisö (maksuton)**  | [StHub-portaali](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                         |
+| 📦 **Lähdekoodi**                             | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                  |
+| 🐛 **Ilmoita virheestä**                      | [avaa ongelmailmoitus](https://github.com/diegosouzapw/OmniRoute/issues) — liitä mukaan `npm run system-info` -komennon tuloste |
+| 🤝 **Osallistu kehitykseen**                  | [CONTRIBUTING.md](CONTRIBUTING.md) · [Haarautumis- ja julkaisumalli](docs/ops/BRANCHING_MODEL.md) · valitse `good first issue`  |
+| 💚 **Tue projektia**                          | [Tukitavat ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                                |
 
 </div>
 
@@ -1325,15 +1325,15 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
 
 </div>
 
-### 📘 Aloittaminen
+### 📘 Aloitus
 
 <table>
   <tr><th align="left">Dokumentti</th><th align="left">Kuvaus</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Käyttöopas</a></b></td><td>Palveluntarjoajat, yhdistelmät, CLI-integraatio, käyttöönotto</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Asennusopas</a></b></td><td>Täydelliset asennusmenetelmät, CLI-työkalujen määritykset, protokollan asetukset, aikakatkaisujen säätö</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI-työkalujen opas</a></b></td><td>Työkalukohtaiset asetukset Claude Codelle, Codexille, Cursorille, Clille, OpenClaw’lle, Kilolle ja Copilotille</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Etätila</a></b></td><td>Etäkäytössä olevan OmniRouten (VPS) hallinta kannettavan tietokoneen CLI:stä rajattujen käyttöoikeustunnusten avulla</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Coden määritykset</a></b></td><td>Claude Coden yhdistäminen OmniRouteen (paikallinen/etä) komennolla <code>launch</code> ja mallikohtaisilla profiileilla</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI-työkalujen opas</a></b></td><td>Työkalukohtaiset asetukset Claude Codelle, Codexille, Cursorille, Clinelle, OpenClaw'lle, Kilolle ja Copilotille</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Etätila</a></b></td><td>Etäisen OmniRouten (VPS) hallinta kannettavan tietokoneen CLI:stä rajattujen käyttöoikeustunnusten avulla</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Coden määritykset</a></b></td><td>Claude Coden osoittaminen OmniRouteen (paikallinen/etä) komennolla <code>launch</code> ja mallikohtaisilla profiileilla</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">Pika-aloitus</a></b></td><td>Asenna → yhdistä → määritä kolmessa vaiheessa</td></tr>
 </table>
 
@@ -1341,14 +1341,14 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
 
 <table>
   <tr><th align="left">Dokumentti</th><th align="left">Kuvaus</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-opas</a></b></td><td>Dockerin suoritus, Compose-profiilit, Caddy HTTPS, tunnelit, image-tunnisteet</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-opas</a></b></td><td>Dockerin suoritus, Compose-profiilit, Caddy HTTPS, tunnelit, näköistunnisteet</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-opas</a></b></td><td>Quadlet systemd -integraatio, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-käyttöönotto</a></b></td><td>Täydellinen opas: VM:n, nginxin ja Cloudflaren määritys</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-käyttöönotto</a></b></td><td>Käyttöönotto Fly.io-palveluun pysyvän tallennustilan kanssa</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-opas</a></b></td><td>OmniRouten suorittaminen Androidissa Termuxin kautta</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-opas</a></b></td><td>Progressiivisen verkkosovelluksen asennus, välimuisti ja arkkitehtuuri</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Käyttöönotto virtuaalikoneessa</a></b></td><td>Täydellinen opas: virtuaalikoneen, nginx:n ja Cloudflaren asetukset</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-käyttöönotto</a></b></td><td>Käyttöönotto Fly.io:ssa pysyvän tallennustilan kanssa</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-opas</a></b></td><td>OmniRouten käyttö Androidissa Termuxin avulla</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-opas</a></b></td><td>Progressive Web App -sovelluksen asennus, välimuisti ja arkkitehtuuri</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Poisto-opas</a></b></td><td>Puhdas poisto kaikilla asennusmenetelmillä</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Ympäristömääritykset</a></b></td><td>Täydelliset <code>.env</code>-muuttujat ja viitteet</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Ympäristömääritykset</a></b></td><td>Täydelliset <code>.env</code>-muuttujat ja viittaukset</td></tr>
 </table>
 
 ### 🧠 Ominaisuudet ja arkkitehtuuri
@@ -1357,26 +1357,26 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><th align="left">Dokumentti</th><th align="left">Kuvaus</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arkkitehtuuri</a></b></td><td>Järjestelmäarkkitehtuuri, tietovirta ja sisäinen toiminta</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Pakkausopas</a></b></td><td>7 vaihtoehdon putki: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-pakkaus</a></b></td><td>Komennon tulosteen pakkaus, suodattimet, luottamus, vahvistus ja raakatulosteen palautus</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Pakkausmoottorit</a></b></td><td>Caveman, RTK, pinotut putket sekä hallintapaneelin, API:n ja MCP:n rajapinnat</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-pakkaus</a></b></td><td>Komennon tulosteen pakkaus, suodattimet, luottamus, vahvistus ja raakatuotoksen palautus</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Pakkausmoottorit</a></b></td><td>Caveman-, RTK- ja pinotut putket sekä dashboard-, API- ja MCP-pinnat</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Pakkaussääntöjen muoto</a></b></td><td>JSON-sääntöpakettien skeemat Caveman- ja RTK-suodattimille</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pakkauskielipaketit</a></b></td><td>Kielen tunnistus ja Caveman-sääntöpakettien laatiminen</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Vikasietoisuusopas</a></b></td><td>Piirikatkaisimet, jäähtymisajat, jono, samanaikaisten pyyntöjen hallinta ja TLS-huijaus</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Automaattinen yhdistelmämoottori</a></b></td><td>16 tekijän pisteytys, tilapaketit ja itsekorjaus</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Välityspalvelinopas</a></b></td><td>3-tasoinen välityspalvelinjärjestelmä, 1proxy-markkinapaikka ja rekisterin CRUD-toiminnot</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Maksuttomat tasot</a></b></td><td>Koottu hakemisto: 34 dokumentoitua toistuvaa resurssijoukkoa / 485 luetteloitua maksuttoman tason merkintää</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Ominaisuusgalleria</a></b></td><td>Visuaalinen kierros hallintapaneelissa kuvakaappausten avulla</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Koodikannan dokumentaatio</a></b></td><td>Aloittelijaystävällinen tutustuminen koodikantaan</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Vikasietoisuusopas</a></b></td><td>Virtapiirin katkaisimet, jäähdytysajat, jono, thundering herd -ilmiön torjunta ja TLS:n tekeytyminen</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-moottori</a></b></td><td>16 tekijän pisteytys, tilapaketit ja itsekorjaus</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Välityspalvelinopas</a></b></td><td>Kolmitasoinen välityspalvelinjärjestelmä, 1proxy-markkinapaikka ja rekisterin CRUD-toiminnot</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ilmaiset tasot</a></b></td><td>Koottu hakemisto: 34 dokumentoitua toistuvaa poolia / 484 luetteloitua ilmaistason merkintää</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Ominaisuusgalleria</a></b></td><td>Visuaalinen kierros dashboardissa kuvakaappausten avulla</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Koodikannan dokumentaatio</a></b></td><td>Aloittelijaystävällinen katsaus koodikantaan</td></tr>
 </table>
 
 ### 🤖 Protokollat ja API:t
 
 <table>
   <tr><th align="left">Dokumentti</th><th align="left">Kuvaus</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-viite</a></b></td><td>Kaikki päätepisteet esimerkkeineen</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-viiteopas</a></b></td><td>Kaikki päätepisteet esimerkkeineen</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI-määritys</a></b></td><td>OpenAPI 3.0 -määritys</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP-palvelin</a></b></td><td>110 MCP-työkalua, IDE-määritykset sekä Python-/TS-/Go-asiakasohjelmat</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP-palvelimen opas</a></b></td><td>MCP:n asennus, siirtotavat ja työkalujen viite</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP-palvelin</a></b></td><td>110 MCP-työkalua, IDE-määritykset sekä Python-, TS- ja Go-asiakasohjelmat</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP-palvelimen opas</a></b></td><td>MCP:n asennus, siirtotavat ja työkalujen viiteopas</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A-palvelin</a></b></td><td>JSON-RPC 2.0 -protokolla, taidot, suoratoisto ja tehtävien hallinta</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A-palvelimen opas</a></b></td><td>A2A-agenttikortti, tehtävät, taidot ja suoratoisto</td></tr>
 </table>
@@ -1386,26 +1386,26 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
 <table>
   <tr><th align="left">Asiakirja</th><th align="left">Kuvaus</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">Osallistuminen</a></b></td><td>Kehitysympäristön määritys ja ohjeet</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Haarautumis- ja julkaisu­malli</a></b></td><td>Mihin PR:t kohdistetaan (<code>release/*</code>) ja mitä <code>main</code> sekä tunnisteet tarkoittavat</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Muutosloki</a></b></td><td>Täydellinen versioittainen julkaisuhistoria</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Haarautumis- ja julkaisu­malli</a></b></td><td>Mihin PR:t kohdistetaan (<code>release/*</code>) sekä mitä <code>main</code> ja tunnisteet tarkoittavat</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Muutosloki</a></b></td><td>Täydellinen julkaisu­historia versiokohtaisesti</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Tietoturvakäytäntö</a></b></td><td>Haavoittuvuuksista ilmoittaminen ja tietoturvakäytännöt</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-opas</a></b></td><td>Tuki 67 kielelle, käännösten työnkulku, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Julkaisun tarkistuslista</a></b></td><td>Julkaisua edeltävät validointivaiheet</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Kattavuussuunnitelma</a></b></td><td>Testikattavuusstrategia yli 60 000 staattiselle testimäärittelylle yli 8 400 seurattavassa testitiedostossa</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-opas</a></b></td><td>Tuki 67 kielelle, käännöstyönkulku ja RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Julkaisun tarkistuslista</a></b></td><td>Julkaisua edeltävät tarkistusvaiheet</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Kattavuussuunnitelma</a></b></td><td>Testikattavuusstrategia yli 60 000 staattiselle testimääritykselle yli 8 400 seurattavassa testitiedostossa</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Tärkeimmät osallistujat
+# ⭐ Parhaat osallistujat
 
 > OmniRoutea muovaa intohimoinen avoimen lähdekoodin yhteisö. Nämä henkilöt ovat tehneet poikkeuksellisen merkittäviä osallistumisia, jotka vaikuttavat suoraan projektin laatuun, vakauteen ja tavoittavuuteen. **Kiitos.**
 
 ### Ulkopuoliset osallistujat yhdistettyjen pull requestien mukaan
 
 <table>
-  <tr><th align="center">Sija</th><th align="left">Osallistuja</th><th align="center">Yhdistetyt PR:t</th><th align="right">~Muutetut rivit</th></tr>
+  <tr><th align="center">Sija</th><th align="left">Osallistuja</th><th align="center">Yhdistetyt PR:t</th><th align="right">~Muuttuneet rivit</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1428,9 +1428,9 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Tilasto kerättiin 2026-11-03 03:01:19 UTC, kun käytössä oli aktiivinen <code>release/v3.8.53</code>-haaran versio <code>05bc048d6c</code>. Sivutettu GitHub GraphQL -tilasto sisältää 9 947 yhdistettyä PR:ää: projektin omistajan tekemiä 4 130, Dependabotin tekemiä 240, muiden bottien/sovellusten tekemiä 6 sekä <b>5 571 ulkopuolista PR:ää 883 eri osallistujalta</b>. ”Muutetut rivit” tarkoittaa GitHubin lisäysten ja poistojen summaa, ja sisältää luodut tiedostot, lukitustiedostot, luettelot, käännökset ja dokumentaation; kyse on muutosten määrästä, ei kirjoittajan LOC-määrästä. 53 PR:ää ilmoittaa GitHubin diffien sisältävän yli 500 000 riviä (esimerkiksi #13399, jossa yksittäinen palveluntarjoajan lisäys sisältää 2 347 muutettua tiedostoa), mikä kasvattaa useita yllä olevia kokonaismääriä. Tasatulokset sijoitetaan samalle sijalle.</sub>
+<sub>Tilanne laskettu 2026-11-03 03:01:19 UTC käyttäen aktiivista <code>release/v3.8.53</code>-haaraa, jonka kärki on <code>05bc048d6c</code>. Sivutettu GitHub GraphQL -laskenta sisältää 9 947 yhdistettyä PR:ää: 4 130 tietovaraston omistajalta, 240 Dependabotilta, 6 muilta boteilta/sovelluksilta ja <b>5 571 ulkopuolista PR:ää 883 eri osallistujalta</b>. ”Muuttuneet rivit” tarkoittaa GitHubin lisäysten ja poistojen summaa ja sisältää generoidut tiedostot, lukitustiedostot, luettelot, käännökset ja dokumentaation; kyse on muutosten määrästä, ei kirjoitetuista koodiriveistä. 53 PR:ää ilmoittaa GitHubin eroissa yli 500 000 riviä (esimerkiksi #13399, jossa yksittäinen palveluntarjoajan lisäys sisältää 2 347 muuttunutta tiedostoa), mikä kasvattaa useita yllä olevia kokonaismääriä. Tasatulokset on sijoitettu samalle sijalle.</sub>
 
-### GitHubin yhdistämät toimitukset
+### GitHubin määrittämät commitit
 
 <table>
   <tr>
@@ -1439,42 +1439,42 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 418 GitHubin määrittämää committia</sub>
+      <sub>🥇 418 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 294 GitHubin määrittämää committia</sub>
+      <sub>🥈 294 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 GitHubin määrittämää committia</sub>
+      <sub>🥉 229 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 222 GitHubin määrittämää committia</sub>
+      <sub>🏅 222 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 202 GitHubin määrittämää committia</sub>
+      <sub>🏅 202 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 134 GitHubin määrittämää committia</sub>
+      <sub>🏅 134 GitHubin ansioksi luettua committia</sub>
     </td>
   </tr>
   <tr>
@@ -1483,49 +1483,49 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 126 GitHubin määrittämää committia</sub>
+      <sub>🏅 126 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 115 GitHubin määrittämää committia</sub>
+      <sub>🏅 115 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 108 GitHubin määrittämää committia</sub>
+      <sub>🏅 108 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 GitHubin määrittämää committia</sub>
+      <sub>🏅 70 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 68 GitHubin määrittämää committia</sub>
+      <sub>🏅 68 GitHubin ansioksi luettua committia</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 GitHubin määrittämää committia</sub>
+      <sub>🏅 68 GitHubin ansioksi luettua committia</sub>
     </td>
   </tr>
 </table>
 
-<sub>Tarkistettu uudelleen 2026-11-03 02:09:16 UTC: GitHubin määrittämät commitit, joista repositoryn Contributors API raportoi oletushaaralle <code>release/v3.8.53</code>. API palautti 903 identiteettiä (429 käyttäjää, 2 bottia, 472 nimetöntä); tästä taulukosta on jätetty pois ylläpitäjä, botit ja nimettömät identiteetit, ja tasatulokset kilpailussa on säilytetty. Se eroaa sekä yllä olevasta yhdistettyjen PR:ien rankingista että alla olevasta Git-metatietojen laskennasta.</sub>
+<sub>Tarkistettu uudelleen 2026-11-03 02:09:16 UTC: GitHubin ansioksi luetut commitit, jotka repositorion Contributors API ilmoitti oletushaaralle <code>release/v3.8.53</code>. API palautti 903 identiteettiä (429 käyttäjää, 2 bottia, 472 anonyymiä); tästä taulukosta on jätetty pois ylläpitäjä, botit ja anonyymit identiteetit, ja tasapelit kilpailussa on säilytetty. Tämä eroaa sekä yllä olevasta yhdistettyjen PR:ien rankingista että alla olevasta Git-metatietojen laskennasta.</sub>
 
-> 🙏 Näiden osallistujien ominaisuudet, virheenkorjaukset ja infrastruktuurin parannukset ovat **olennainen osa** sitä, mikä tekee OmniRoutesta luotettavan ja monipuolisen. Jokainen pull request, jokainen testitapaus ja jokainen i18n-käännöstiedosto on tärkeä. Avoimen lähdekoodin ohjelmistoja rakentavat heidän kaltaisensa ihmiset.
+> 🙏 Näiden osallistujien ominaisuudet, virheenkorjaukset ja infrastruktuurin parannukset ovat **olennainen osa** sitä, mikä tekee OmniRoutesta luotettavan ja monipuolisen. Jokainen pull request, jokainen testitapaus ja jokainen i18n-käännöstiedosto on tärkeä. Avoimen lähdekoodin rakentavat heidän kaltaisensa ihmiset.
 
 </div>
 
@@ -1639,7 +1639,7 @@ Sydämellinen kiitos kaikille, jotka rahoittavat OmniRoutea omasta pussistaan �
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
 <sub>Tarkastettu 2026-11-02 aktiivisen <code>release/v3.8.53</code>-haaran kärjessä <code>1c7135e0fb</code> (7 972 committia): <b>1 074 normalisoitua ihmisen Git-identiteettiä</b> — 759 esiintyy commit-tekijöinä (ylläpitäjä mukaan lukien) ja 315 ainoastaan eksplisiittisissä <code>Co-authored-by</code>-jälkiliitteissä. Laskennassa käytetään tiedostoa <code>.mailmap</code>, sähköpostiosoitteita verrataan kirjainkoosta riippumatta, numeeriset ja tavalliset GitHubin noreply-osoitteet yhdistetään vain, kun ne koodaavat saman käyttäjänimen, ja 29 botti-, agentti-, palvelu- tai paikkamerkki-identiteettiä jätetään pois. Tavallisia sähköpostiosoitteita ei yhdistetä vain siksi, että niiden näyttönimet täsmäävät. 2026-08-24 tehdyssä tarkastuksessa julkaistiin luku 639; kun tämä menetelmä suoritetaan uudelleen kyseisen tarkastuksen perustalle <code>ac02c5b42f</code>, tulokseksi saadaan 619, joten kasvu johtuu uusista osallistujista eikä väljemmästä menetelmästä.</sub>
 
@@ -1668,11 +1668,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Tähdet
 
-<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Tähtihistorian kaavio" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Tähtihistorian kaavio" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

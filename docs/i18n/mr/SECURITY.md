@@ -9,7 +9,7 @@
 OmniRoute मध्ये तुम्हाला सुरक्षा असुरक्षा आढळल्यास, कृपया ती जबाबदारीने नोंदवा:
 
 1. सार्वजनिक GitHub समस्या **उघडू नका**
-2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) वापरा
+2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) वापरा
 3. यांचा समावेश करा: वर्णन, पुनरुत्पादनाच्या पायऱ्या आणि संभाव्य परिणाम
 
 ## प्रतिसाद कालमर्यादा
@@ -42,7 +42,7 @@ OmniRoute मध्ये तुम्हाला सुरक्षा अस�
   सुरक्षा निराकरणे आणि गंभीर रिग्रेशनची निराकरणे मिळतात**. परिणामी अंतिम तारीख 3.9.0 च्या रिलीज नोट्समध्ये आणि
   रिलीजच्या वेळी [`ROADMAP.md`](ROADMAP.md) मध्ये नोंदवली जाते.
 - **LTS मालिकेतील असुरक्षिततेची तक्रार करणे:** इतर कोणत्याही आवृत्तीसाठी असलेलेच चॅनेल वापरा —
-  खाजगी [GitHub सुरक्षा सूचना](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  खाजगी [GitHub सुरक्षा सूचना](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   सार्वजनिक इश्यू कधीही वापरू नका. तुम्ही कोणती आवृत्ती तपासली ते नमूद करा (उदाहरणार्थ `3.9.2`); निराकरणे
   `stable/v3` वर समाविष्ट केली जातात आणि v4 वर फॉरवर्ड-पोर्ट केली जातात.
 - **LTS रिलीजच्या वेळी सुरक्षा आधाररेषा:** मोजलेली स्कॅनर स्थिती, रूट-गार्ड आणि

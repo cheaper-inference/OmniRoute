@@ -215,7 +215,7 @@ livenessProbe:
 
 **Nu** direcționați verificarea de **viabilitate** kubelet către `/api/monitoring/health`. Acea cale efectuează operațiuni reale asupra bazei de date și de monitorizare și va produce rezultate fals pozitive sub sarcină.
 
-Subiecte asociate: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sonde în timp ce bucla de evenimente este ocupată), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (procesarea intensivă a prețurilor catalogului), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (procesarea intensivă a numărării tokenurilor pentru compresie).
+Subiecte asociate: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sonde în timp ce bucla de evenimente este ocupată), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (procesarea intensivă a prețurilor catalogului), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (procesarea intensivă a numărării tokenurilor pentru compresie).
 
 ### Watchdog systemd (buclă de evenimente blocată)
 

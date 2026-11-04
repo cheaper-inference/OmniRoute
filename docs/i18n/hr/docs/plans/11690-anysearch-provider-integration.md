@@ -5,7 +5,7 @@
 ---
 
 Predložak: xquik #11370 (spojeno u release/v3.8.51). Postavka: `fallbackOnly`.
-Prijedlog za upstream: prijava cheaper-inference/OmniRoute#11637.
+Prijedlog za upstream: prijava diegosouzapw/OmniRoute#11637.
 
 ## 1. Stvarno stanje usluge (službena dokumentacija, unakrsno provjereno)
 

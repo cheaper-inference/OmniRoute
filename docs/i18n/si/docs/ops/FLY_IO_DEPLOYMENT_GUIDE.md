@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 කේතය ක්ලෝන කර නාමාවලියට ඇතුළු වීම
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly විසින් යන්ත්රවල ක්රමානුකූල �
 
 ### 9.1 ඔබගේ ෆෝක් එකේ `fly.toml` සුරකිමින් මූලික රෙපොසිටරියේ යාවත්කාලීන කිරීම් හඹා යාම
 
-වත්මන් රෙපොසිටරිය ෆෝක් එකක් නම් සහ ඔබට මූලික `https://github.com/cheaper-inference/OmniRoute` වෙතින් යාවත්කාලීන කිරීම් සමමුහුර්ත කිරීමට අවශ්ය නම්, පහත කාර්ය ප්රවාහය අනුගමනය කරන්න.
+වත්මන් රෙපොසිටරිය ෆෝක් එකක් නම් සහ ඔබට මූලික `https://github.com/diegosouzapw/OmniRoute` වෙතින් යාවත්කාලීන කිරීම් සමමුහුර්ත කිරීමට අවශ්ය නම්, පහත කාර්ය ප්රවාහය අනුගමනය කරන්න.
 
 පළමුව, ඔබගේ දුරස්ථ රෙපොසිටරි සම්බන්ධතා තහවුරු කරන්න:
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` වින්යාස කර නොමැති නම්, එය එක් කරන්න:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 upstream සමඟ සමමුහුර්ත කිරීමට පෙර, නවතම commits සහ tags ලබාගන්න:

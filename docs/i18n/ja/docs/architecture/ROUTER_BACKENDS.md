@@ -4,9 +4,9 @@
 
 ---
 
-> **ステータス:** 承認済み · **コンテキスト:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **コントラクト:** `domain/routing/routerBackends.ts`
-> （型付きレジストリ — コードは [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) で導入）
+> **ステータス:** 承認済み · **コンテキスト:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **コントラクト:** `domain/routing/routerBackends.ts`
+> （型付きレジストリ — コードは [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) で導入）
 
 このADRでは、`ts`（ネイティブ）、`bifrost`、`cliproxy`、`9router`、および
 VibeProxy互換エンジン間の関係を明確に定め、コントリビューターがアーキテクチャ上
@@ -39,7 +39,7 @@ VibeProxy互換エンジン間の関係を明確に定め、コントリビュ�
 ## レジストリ — 唯一の信頼できる情報源
 
 `domain/routing/routerBackends.ts`コントラクト（コードは
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) で導入）では、すべてのエンジンを
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) で導入）では、すべてのエンジンを
 一度だけ宣言し、そのライフサイクル、機能、サービスID、デフォルトポート、
 ヘルス設定、およびテレメトリサポートを定義します。コンシューマーは各サイドカーを
 個別に特別扱いする代わりに、`getRouterBackend(id)`、`listRouterBackends()`、
@@ -55,7 +55,7 @@ VibeProxy互換エンジン間の関係を明確に定め、コントリビュ�
 
 ¹ Bifrostを`supervised`の組み込みサービス（`/api/services/bifrost/`から
 インストールおよび起動可能）へ昇格させる作業は、
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) で追跡されています。マージされるまでは、
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) で追跡されています。マージされるまでは、
 Bifrostは`external`専用です（`BIFROST_BASE_URL`を介してのみアクセス可能）。
 
 `capabilities`（`chat`、`responses`、`streaming`、`tools`、`vision`、
@@ -125,8 +125,8 @@ IDごとの分岐をハードコードするのではなく、エンジンが実
 現時点では、選択は**リレーレベルで全体を一括して行う方式**であり、
 `release/v3.8.43` にはプロバイダー単位またはリクエスト単位のエンジン切り替えはない。
 リクエスト単位のゲートは、サイドカーマニフェストの作業によって追加中である
-（[#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) マニフェスト +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`）。
+（[#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) マニフェスト +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`）。
 これにより、`auto` はマニフェストで適格とされたプロバイダーのみを Bifrost 経由でルーティングできる。
 
 ## ダッシュボード統合

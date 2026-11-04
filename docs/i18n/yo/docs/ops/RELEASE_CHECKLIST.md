@@ -454,7 +454,7 @@ tí a tẹ̀ jáde.
 gh workflow run preview-artifact.yml -f pr_number=<N>   # tàbí fi àmì `preview-artifact` kún un
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # fífi àwòrán-àkọ́kọ́ sori ẹrọ
 ```
 

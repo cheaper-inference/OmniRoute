@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Neden Vardır
 
-PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777) ile kullanıma sunulmuştur. Temel gerekçeler:
+PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777) ile kullanıma sunulmuştur. Temel gerekçeler:
 
 | Sorun                                             | Yönergenin sağladığı çözüm                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

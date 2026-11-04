@@ -475,7 +475,7 @@ codex debug models --bundled       # 번들 모델 카탈로그를 JSON으로 �
 | 세션이 계속 계정을 전환함 / 턴 사이에 프롬프트 캐시 연속성이 사라짐 | 세션 선호도 TTL이 `0`임(비활성화됨)                        | `sessionAffinityTtlMs`   |
 | 클라이언트에 표시되는 안내 없이 추론 도중 연결이 끊김               | 업스트림 청크가 10분 동안 없어 스트림 유휴 감시기가 작동함 | `STREAM_IDLE_TIMEOUT_MS` |
 
-관련 논의: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (장시간 작업 중단), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (선호도가 기본적으로 비활성화된 이유). 추적: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+관련 논의: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (장시간 작업 중단), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (선호도가 기본적으로 비활성화된 이유). 추적: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. 세션 선호도 — 하나의 대화를 하나의 계정에 고정
 

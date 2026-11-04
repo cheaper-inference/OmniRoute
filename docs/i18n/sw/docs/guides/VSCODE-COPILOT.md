@@ -115,7 +115,7 @@ npm start
 Bila toleo lililojengwa huku upachikaji ukiwa umewezeshwa, ukurasa hukataa kuonyeshwa ndani ya fremu; kiendelezi hutambua hilo kupitia
 vichwa vya jibu na kurudi kutumia kivinjari cha nje — hakuna kinachoharibika, na hutoa taarifa hiyo mara moja.
 Tazama [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) na suala
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

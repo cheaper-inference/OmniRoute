@@ -103,7 +103,7 @@ npm start
 | `npm install -g omniroute` | ❌ 已发布的软件包附带预构建的软件包——请改为从源代码构建                                                                  |
 | Docker 镜像                | ✅ `docker build --build-arg DASHBOARD_ALLOW_EMBED=vscode -t omniroute:embed .`——Docker Hub 上的预构建镜像未启用嵌入功能 |
 
-如果构建时未启用嵌入，页面会拒绝被嵌入到框架中。扩展会通过响应头检测到这一情况，然后回退到外部浏览器——不会出现任何故障，并且扩展会显示一次相关提示。请参阅 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) 和 issue [#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273)。
+如果构建时未启用嵌入，页面会拒绝被嵌入到框架中。扩展会通过响应头检测到这一情况，然后回退到外部浏览器——不会出现任何故障，并且扩展会显示一次相关提示。请参阅 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) 和 issue [#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273)。
 
 ---
 

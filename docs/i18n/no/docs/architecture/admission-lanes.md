@@ -124,7 +124,7 @@ for en annen») håndheves ubetinget av system 1 og av system 2 når eksplisitt 
 
 ## 4. Langvarig `/v1/responses` i én prosess (ledig kapasitet ved sunn tilstand)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) la til
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) la til
 `tryAcquireHealthyHeadroom`, slik at en andre strukturelt tung forespørsel slippes inn
 når heapen er under `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. BYTE-banen
 som brukes av `admitChatRequest` (forespørselskropper ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

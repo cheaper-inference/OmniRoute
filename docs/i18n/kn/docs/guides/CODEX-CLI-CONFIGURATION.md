@@ -478,7 +478,7 @@ codex debug models --bundled       # ಬಂಡಲ್ ಮಾಡಲಾದ ಮಾ�
 | ಸೆಷನ್ ಖಾತೆಗಳನ್ನು ಬದಲಾಯಿಸುತ್ತಲೇ ಇರುತ್ತದೆ / ಟರ್ನ್ಗಳ ನಡುವೆ ಪ್ರಾಂಪ್ಟ್-ಕ್ಯಾಶ್ ನಿರಂತರತೆ ಕಳೆದುಹೋಗುತ್ತದೆ | ಸೆಷನ್ ಅಫಿನಿಟಿ TTL `0` ಆಗಿದೆ (ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ)                          | `sessionAffinityTtlMs`   |
 | ಕ್ಲೈಂಟ್ಗೆ ಗೋಚರಿಸುವ ಯಾವುದೇ ಸೂಚನೆಯಿಲ್ಲದೆ ತಾರ್ಕಿಕ ಪ್ರಕ್ರಿಯೆಯ ಮಧ್ಯದಲ್ಲೇ ಸಂಪರ್ಕ ಕಡಿತಗೊಳ್ಳುತ್ತದೆ       | ಅಪ್ಸ್ಟ್ರೀಮ್ ಚಂಕ್ ಇಲ್ಲದೆ 10 ನಿಮಿಷಗಳ ನಂತರ ಸ್ಟ್ರೀಮ್ ಐಡಲ್ ವಾಚ್ಡಾಗ್ ಸಕ್ರಿಯವಾಯಿತು | `STREAM_IDLE_TIMEOUT_MS` |
 
-ಸಂಬಂಧಿತ ಚರ್ಚೆಗಳು: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ದೀರ್ಘ ಕಾರ್ಯದ ಸಂಪರ್ಕ ಕಡಿತಗಳು), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ಅಫಿನಿಟಿ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಏಕೆ ನಿಷ್ಕ್ರಿಯವಾಗಿದೆ). ಟ್ರ್ಯಾಕಿಂಗ್: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+ಸಂಬಂಧಿತ ಚರ್ಚೆಗಳು: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ದೀರ್ಘ ಕಾರ್ಯದ ಸಂಪರ್ಕ ಕಡಿತಗಳು), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ಅಫಿನಿಟಿ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಏಕೆ ನಿಷ್ಕ್ರಿಯವಾಗಿದೆ). ಟ್ರ್ಯಾಕಿಂಗ್: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. ಸೆಷನ್ ಅಫಿನಿಟಿ — ಒಂದು ಸಂಭಾಷಣೆಯನ್ನು ಒಂದು ಖಾತೆಗೆ ಪಿನ್ ಮಾಡಿ
 

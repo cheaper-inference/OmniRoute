@@ -59,8 +59,8 @@ de verificação em um navegador. Manter a frase na lista de banimentos também 
 inalcançável, para essa redação, a ramificação recuperável de 403 do cloud-code em
 `classifyProviderError`, pois `accountDeactivated` é avaliado primeiro — portanto, a
 recuperação de rota do projeto adicionada para o Gemini Code Assist em
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) e
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) nunca poderia ser executada.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) e
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) nunca poderia ser executada.
 
 Três tabelas de sinais adjacentes e **separadas** _não_ fazem parte da detecção de palavras-chave de banimento:
 

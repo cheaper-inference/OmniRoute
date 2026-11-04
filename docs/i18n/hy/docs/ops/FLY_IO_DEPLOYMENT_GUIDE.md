@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Կլոնավորեք կոդը և անցեք գրացուցակ
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly-ն ավտոմատ կերպով կիրականացնի մեքենաների �
 
 ### 9.1 Վերին հոսքի շտեմարանի թարմացումներին հետևելը՝ պահպանելով ձեր ֆորքի `fly.toml`-ը
 
-Եթե ընթացիկ շտեմարանը ֆորք է, և ցանկանում եք համաժամացնել վերին հոսքի `https://github.com/cheaper-inference/OmniRoute` շտեմարանի թարմացումները, հետևեք ստորև ներկայացված աշխատանքային ընթացքին։
+Եթե ընթացիկ շտեմարանը ֆորք է, և ցանկանում եք համաժամացնել վերին հոսքի `https://github.com/diegosouzapw/OmniRoute` շտեմարանի թարմացումները, հետևեք ստորև ներկայացված աշխատանքային ընթացքին։
 
 Նախ ստուգեք հեռակա շտեմարանները՝
 
@@ -309,7 +309,7 @@ git remote -v
 Եթե `upstream`-ը կազմաձևված չէ, ավելացրեք այն՝
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 Նախքան վերին հոսքի հետ համաժամացումը՝ ստացեք վերջին կոմիթներն ու թեգերը՝

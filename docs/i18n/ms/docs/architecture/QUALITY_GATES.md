@@ -429,7 +429,7 @@ menunggu pelaksanaan).
 ### Ratchet CodeQL: kekerapan penyegaran dan pencetus manual
 
 `check:codeql-ratchet` membaca **keadaan repositori, yang disegarkan mengikut jadual — bukan bagi setiap PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` melaporkan
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` melaporkan
 `state: configured`, `schedule: weekly`: imbasan persediaan lalai GitHub, bukan analisis bagi setiap push.
 Akibatnya: selepas PR yang MEMBAIKI amaran digabungkan, ratchet terus membaca
 bilangan lama yang lebih tinggi sehingga imbasan berjadual seterusnya dijalankan — maka ia melaporkan regresi

@@ -123,8 +123,8 @@ OmniRoute は HAR 内で Chathub WebSocket URL を検索し、`access_token` と
 
 ## 参考資料
 
-- Issue: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- ディスカッション: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- ディスカッション: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - ソース: `src/shared/constants/providers/web-cookie.ts`（プロバイダー定義）
 - HAR インポート: `src/shared/utils/m365HarImport.ts`
 - 認証情報フィールド: `src/shared/providers/webSessionCredentials.ts`

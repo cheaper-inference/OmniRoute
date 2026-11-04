@@ -427,7 +427,7 @@ git add quality-baseline.json
 ### CodeQL ਰੈਚਟ: ਰਿਫ੍ਰੈਸ਼ ਦੀ ਆਵਿਰਤੀ ਅਤੇ ਮੈਨੁਅਲ ਟ੍ਰਿਗਰ
 
 `check:codeql-ratchet` **ਰਿਪੋਜ਼ਟਰੀ ਦੀ ਸਥਿਤੀ ਪੜ੍ਹਦਾ ਹੈ, ਜੋ ਇੱਕ ਸਮਾਂ-ਸੂਚੀ ਅਨੁਸਾਰ ਰਿਫ੍ਰੈਸ਼ ਹੁੰਦੀ ਹੈ — ਹਰ PR ਲਈ ਨਹੀਂ।**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` ਵੱਲੋਂ ਰਿਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ:
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ਵੱਲੋਂ ਰਿਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ:
 `state: configured`, `schedule: weekly`: ਇਹ GitHub ਦਾ ਡਿਫਾਲਟ-ਸੈੱਟਅੱਪ ਸਕੈਨ ਹੈ, ਨਾ ਕਿ ਹਰ ਪੁਸ਼
 ਲਈ ਕੀਤਾ ਜਾਣ ਵਾਲਾ ਵਿਸ਼ਲੇਸ਼ਣ। ਨਤੀਜਾ: ਅਲਰਟ ਠੀਕ ਕਰਨ ਵਾਲੀ PR ਦੇ ਮਰਜ ਹੋਣ ਤੋਂ ਬਾਅਦ, ਰੈਚਟ
 ਅਗਲਾ ਨਿਰਧਾਰਤ ਸਕੈਨ ਚੱਲਣ ਤੱਕ ਪੁਰਾਣੀ, ਵੱਧ ਗਿਣਤੀ ਹੀ ਪੜ੍ਹਦਾ ਰਹਿੰਦਾ ਹੈ — ਇਸ ਲਈ ਸਕੈਨ ਦੇ

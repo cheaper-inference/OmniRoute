@@ -128,8 +128,8 @@ Győződjön meg arról, hogy a `copilot-m365-web` engedélyezve van az **Irány
 
 ## Hivatkozások
 
-- Probléma: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Beszélgetés: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Probléma: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Beszélgetés: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Forrás: `src/shared/constants/providers/web-cookie.ts` (szolgáltatódefiníció)
 - HAR-importálás: `src/shared/utils/m365HarImport.ts`
 - Hitelesítőadat-mezők: `src/shared/providers/webSessionCredentials.ts`

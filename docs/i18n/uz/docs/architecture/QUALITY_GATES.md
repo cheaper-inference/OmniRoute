@@ -434,7 +434,7 @@ amalga oshirilishi kutilmoqda).
 ### CodeQL ratcheti: yangilash davriyligi va qo‘lda ishga tushirish
 
 `check:codeql-ratchet` **har bir PR uchun emas, jadval asosida yangilanadigan repo holatini** o‘qiydi.
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` buyrug‘i
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` buyrug‘i
 `state: configured`, `schedule: weekly` deb xabar beradi: bu har bir push uchun
 tahlil emas, GitHub’ning default-setup skanidir. Natijada: ogohlantirishlarni TUZATADIGAN PR
 merge qilingandan so‘ng ratchet keyingi rejalashtirilgan skan ishga tushguniga qadar eski,

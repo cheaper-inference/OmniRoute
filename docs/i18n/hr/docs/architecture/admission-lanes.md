@@ -125,7 +125,7 @@ sustav 1, a sustav 2 nakon što se omogući uključivanjem.
 
 ## 4. Dugi `/v1/responses` u jednom procesu (rezerva pri zdravom stanju)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) dodao je
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) dodao je
 `tryAcquireHealthyHeadroom` kako bi se prihvatio drugi strukturno zahtjevan zahtjev
 kada je zauzeće gomile ispod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Put BYTE
 koji upotrebljava `admitChatRequest` (tijela ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

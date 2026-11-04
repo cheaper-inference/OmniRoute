@@ -5,7 +5,7 @@
 ---
 
 - **Estado:** Propuesto — requiere la aprobación de los mantenedores antes de comenzar el trabajo en tiempo de ejecución
-- **Incidencia de seguimiento:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Incidencia de seguimiento:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Alcance:** Solo la arquitectura de persistencia; esta decisión no añade ni selecciona una base de datos externa
 
 ## Contexto

@@ -115,7 +115,7 @@ npm start
 Tanpa build yang mendukung penyematan, halaman akan menolak ditampilkan dalam frame. Ekstensi mendeteksi hal itu dari
 header respons dan beralih ke browser eksternal — tidak ada yang rusak, dan ekstensi akan memberitahukannya satu kali.
 Lihat [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) dan isu
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

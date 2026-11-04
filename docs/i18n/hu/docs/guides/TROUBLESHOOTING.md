@@ -257,7 +257,7 @@ kiadásoknál ismét előfordulhat.
    [Convert]::ToBase64String($b)
    ```
    A kimenetnek egyeznie kell a `latest.yml` → `sha512` értékével. Ha nem egyezik,
-   törölje a fájlt, és kizárólag a [GitHub kiadási oldaláról](https://github.com/cheaper-inference/OmniRoute/releases)
+   törölje a fájlt, és kizárólag a [GitHub kiadási oldaláról](https://github.com/diegosouzapw/OmniRoute/releases)
    töltse le újra.
 2. **Állítsa vissza és adja hozzá a kivételekhez** — állítsa vissza a visszagörgetett
    elemeket a karanténból, és adja hozzá a `%LOCALAPPDATA%\Programs\OmniRoute` helyet a
@@ -858,7 +858,7 @@ Az `OMNIROUTE_READY_TIMEOUT_MS` teljes körű ismertetését lásd a [`docs/refe
 
 ## Továbbra is elakadt?
 
-- **GitHub-problémák**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub-problémák**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Architektúra**: A belső működés részleteit lásd a [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) dokumentumban
 - **API-referencia**: Az összes végpontot lásd a [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) dokumentumban
 - **Állapot-irányítópult**: A rendszer valós idejű állapotát az **Irányítópult → Állapot** alatt ellenőrizheti

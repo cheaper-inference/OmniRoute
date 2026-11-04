@@ -121,7 +121,7 @@
 
 ## 4. طلب `/v1/responses` طويل ضمن عملية واحدة (هامش سليم)
 
-أضاف [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)
+أضاف [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)
 الدالة `tryAcquireHealthyHeadroom` للسماح بطلب ثانٍ ثقيل بنيويًا
 عندما تكون الكومة دون `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. يستخدم مسار BYTE
 الذي تستخدمه `admitChatRequest` (الأجسام ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`،

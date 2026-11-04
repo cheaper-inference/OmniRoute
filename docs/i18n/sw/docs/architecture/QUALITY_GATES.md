@@ -429,7 +429,7 @@ utekelezaji bado unasubiri).
 ### Ratchet ya CodeQL: marudio ya kuonyesha upya na kichochezi cha mikono
 
 `check:codeql-ratchet` husoma **hali ya hazina, ambayo huonyeshwa upya kwa ratiba — si kwa kila PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` huripoti
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` huripoti
 `state: configured`, `schedule: weekly`: uchanganuzi wa default-setup wa GitHub, si uchanganuzi
 wa kila push. Matokeo yake: baada ya PR INAYOREKEBISHA arifa kuunganishwa, ratchet huendelea kusoma
 idadi ya zamani, iliyo juu zaidi hadi uchanganuzi unaofuata ulioratibiwa utekelezwe — kwa hivyo huripoti kurudi nyuma

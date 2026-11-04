@@ -5,7 +5,7 @@
 ---
 
 Veidne: xquik #11370 (apvienota laidienā release/v3.8.51). Režīms: `fallbackOnly`.
-Augšupstraumes priekšlikums: problēma cheaper-inference/OmniRoute#11637.
+Augšupstraumes priekšlikums: problēma diegosouzapw/OmniRoute#11637.
 
 ## 1. Pakalpojuma faktiskā darbība (oficiālā dokumentācija, savstarpēji pārbaudīta)
 

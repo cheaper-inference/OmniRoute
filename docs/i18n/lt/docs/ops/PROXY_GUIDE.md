@@ -261,7 +261,7 @@ Tai atliekama vieną kartą, pirmą kartą paleidus po atnaujinimo. Norėdami pa
 
 ## 1proxy nemokamų tarpinių serverių prekyvietė
 
-> 🆕 **Pridėjo [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (problema [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Pridėjo [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (problema [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute integruojama su **[1proxy](https://1proxy-api.aitradepulse.com)** bendruomenės platforma ir suteikia prieigą prie **šimtų nemokamų, patikrintų tarpinių serverių** iš viso pasaulio. Tai puikiai tinka naudotojams, neturintiems nuosavos tarpinių serverių infrastruktūros.
 

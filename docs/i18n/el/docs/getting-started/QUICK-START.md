@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Επιλογή C: Από τον πηγαίο κώδικα
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ omniroute launch-codex --model auto
 
 - **[Αντιμετώπιση προβλημάτων](../guides/TROUBLESHOOTING.md)** — Συνηθισμένα προβλήματα και λύσεις
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Υποστήριξη από την κοινότητα
-- **[Ζητήματα GitHub](https://github.com/cheaper-inference/OmniRoute/issues)** — Αναφορά σφαλμάτων
+- **[Ζητήματα GitHub](https://github.com/diegosouzapw/OmniRoute/issues)** — Αναφορά σφαλμάτων

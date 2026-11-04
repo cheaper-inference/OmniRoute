@@ -423,7 +423,7 @@ implementare în așteptare).
 ### Ratchet CodeQL: frecvența reîmprospătării și declanșarea manuală
 
 `check:codeql-ratchet` citește **starea depozitului, reîmprospătată conform unei planificări — nu pentru fiecare PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` raportează
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` raportează
 `state: configured`, `schedule: weekly`: scanarea cu configurarea implicită a GitHub, nu o analiză
 la fiecare push. Consecință: după îmbinarea unui PR care REMEDIAZĂ alerte, mecanismul ratchet continuă să citească
 numărul vechi, mai mare, până când rulează următoarea scanare programată — astfel încât raportează o regresie

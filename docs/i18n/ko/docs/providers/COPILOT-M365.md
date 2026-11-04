@@ -114,8 +114,8 @@ OmniRoute는 HAR에서 Chathub WebSocket URL을 검색하고 `access_token`과 `
 
 ## 참고 자료
 
-- 이슈: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- 토론: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- 이슈: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- 토론: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - 소스: `src/shared/constants/providers/web-cookie.ts` (공급자 정의)
 - HAR 가져오기: `src/shared/utils/m365HarImport.ts`
 - 자격 증명 필드: `src/shared/providers/webSessionCredentials.ts`

@@ -222,7 +222,7 @@ livenessProbe:
 
 kubelet **සජීවී බවේ** පරීක්ෂණය `/api/monitoring/health` වෙත යොමු **නොකරන්න**. එම මාර්ගය සැබෑ DB/අධීක්ෂණ කාර්යයන් සිදු කරන අතර භාරය යටතේ ව්යාජ ධනාත්මක ප්රතිඵල ලබා දෙනු ඇත.
 
-අදාළ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (event loop එක කාර්යබහුලව තිබියදී සිදු කරන පරීක්ෂණ), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (නාමාවලි මිලකරණය සම්පත් අධික ලෙස භාවිත කිරීම), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (සම්පීඩන token ගණනය සම්පත් අධික ලෙස භාවිත කිරීම).
+අදාළ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (event loop එක කාර්යබහුලව තිබියදී සිදු කරන පරීක්ෂණ), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (නාමාවලි මිලකරණය සම්පත් අධික ලෙස භාවිත කිරීම), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (සම්පීඩන token ගණනය සම්පත් අධික ලෙස භාවිත කිරීම).
 
 ### systemd watchdog (අක්රීය වූ event loop)
 

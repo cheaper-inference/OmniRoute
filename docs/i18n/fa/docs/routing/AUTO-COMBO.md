@@ -133,14 +133,14 @@ handleComboChat (همان موتور کمبوهای ذخیرهشده)
 یک combo که `name` آن با شناسه بدون پیشوند یک مدل یکسان است (برای مثال، comboای با نام
 `gpt-5.5`)، یک **الگوی عمدی و پشتیبانیشده** است، نه یک باگ: این همان
 سازوکار بازگشت به ارائهدهنده جایگزین برای هر شناسه مدل است که در
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) مستند شده است. از آنجا که
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) مستند شده است. از آنجا که
 تفکیک combo پیش از تفکیک شناسه بدون پیشوند مدل بررسی میشود
 (`getComboForModel()` در `src/sse/services/model.ts`)، درخواست برای شناسه بدون پیشوند
 `gpt-5.5` بهجای اینکه مستقیماً به یک ارائهدهنده واحد هدایت شود، از طریق
 مقصدهای combo (برای مثال،
 `acme-responses/gpt-5.5` و `backup-responses/gpt-5.5`) مسیریابی میشود — این رفتار
 از اولویت combo پیش از بازنویسی که برای
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) ساخته شده بود
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) ساخته شده بود
 دوباره استفاده میکند و در برابر رگرسیون توسط `tests/unit/responses-combo-resolution-3227.test.ts` و
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` آزمایش میشود.
 
@@ -187,7 +187,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` از comboهای شما استفاده نمیکند.** `auto`/`auto/*` مجموعه کاندیداهای بدون نیاز به پیکربندی خودش را ایجاد میکند و تنها در صورتی comboهای ذخیرهشده را بررسی میکند که یک combo دقیقاً `auto` نام داشته باشد (توصیه نمیشود). برای مسیریابی از طریق یک combo، نام دقیق آن را ارسال کنید — نه `auto`.
 - **`openrouter/auto` یک محصول واقعی و پولی OpenRouter است** ("Auto Best Available")، نه یک نام مستعار OmniRoute. این مورد، تنها ورودی مدل ایستای رجیستری OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) است و هزینه آن جداگانه محاسبه میشود. برای حذف آن از مجموعههای `auto`، از Settings → Routing → Hide paid models استفاده کنید.
 
-برای سردرگمی اولیهای که این بخش مستند میکند، به [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) و [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) مراجعه کنید.
+برای سردرگمی اولیهای که این بخش مستند میکند، به [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) و [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) مراجعه کنید.
 
 ## نحوهٔ عملکرد (ترکیبهای خودکار ماندگار)
 

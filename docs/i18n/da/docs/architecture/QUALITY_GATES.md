@@ -421,7 +421,7 @@ afventer implementering).
 ### CodeQL-ratchet: opdateringsfrekvens og manuel udløsning
 
 `check:codeql-ratchet` læser **repositoryets tilstand, som opdateres efter en tidsplan — ikke for hver PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` rapporterer
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` rapporterer
 `state: configured`, `schedule: weekly`: GitHubs scanning med standardopsætning, ikke en analyse
 for hvert push. Konsekvens: Når en PR, der RETTER alarmer, er blevet merget, fortsætter ratcheten med at læse
 det gamle, højere antal, indtil den næste planlagte scanning køres — derfor rapporterer den en regression

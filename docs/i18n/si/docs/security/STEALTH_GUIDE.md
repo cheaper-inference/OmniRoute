@@ -161,7 +161,7 @@ Antigravity ඉල්ලීම් ඇමතුම්කරුගේ පෙළ by
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` කියවයි
 - `src/lib/oauth/providers/antigravity.ts` — අක්තපත්ර සම්බන්ධකරණය
-- මුල් සිද්ධි වාර්තාව: සාකච්ඡාව [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- මුල් සිද්ධි වාර්තාව: සාකච්ඡාව [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

@@ -478,7 +478,7 @@ Dve privzeti nastavitvi OmniRoute lahko neopazno sabotirata večurne seje Codex 
 | Seja nenehno preklaplja med računi / neprekinjenost predpomnilnika pozivov se med koraki izgubi | TTL afinitete seje je `0` (onemogočeno)                                                             | `sessionAffinityTtlMs`   |
 | Povezava se prekine sredi sklepanja brez poziva, vidnega odjemalcu                              | Nadzornik nedejavnosti toka se je sprožil po 10 minutah brez dela podatkov iz nadrejenega strežnika | `STREAM_IDLE_TIMEOUT_MS` |
 
-Povezane razprave: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (prekinitve dolgih opravil), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (zakaj je afiniteta privzeto izklopljena). Spremljanje: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Povezane razprave: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (prekinitve dolgih opravil), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (zakaj je afiniteta privzeto izklopljena). Spremljanje: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Afiniteta seje — pripnite en pogovor na en račun
 

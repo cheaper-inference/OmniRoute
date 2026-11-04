@@ -5,7 +5,7 @@
 ---
 
 Šablóna: xquik #11370 (zlúčené vo vetve release/v3.8.51). Režim: `fallbackOnly`.
-Návrh v upstream projekte: issue cheaper-inference/OmniRoute#11637.
+Návrh v upstream projekte: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Overené informácie o službe (oficiálna dokumentácia, krížovo overené)
 

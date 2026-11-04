@@ -88,7 +88,7 @@ npm start
 
 بدون یک بیلد با قابلیت جاسازی، صفحه از قرار گرفتن در فریم خودداری میکند؛ افزونه این موضوع را از روی هدرهای پاسخ تشخیص میدهد و به مرورگر خارجی برمیگردد — چیزی از کار نمیافتد و افزونه یکبار این موضوع را اطلاع میدهد.
 به [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) و ایشوی
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) مراجعه کنید.
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) مراجعه کنید.
 
 ---
 

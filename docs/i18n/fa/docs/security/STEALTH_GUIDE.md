@@ -167,7 +167,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` را میخواند
 - `src/lib/oauth/providers/antigravity.ts` — زیرساخت انتقال اعتبارنامهها
-- گزارش اولیه رخداد: گفتوگوی [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- گزارش اولیه رخداد: گفتوگوی [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

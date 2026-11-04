@@ -200,7 +200,7 @@ ní hàn nínú àbájáde `ps` láéláé.
 Dídarí prófáìlì náà sí **àkójọpọ̀** OmniRoute dípò awoṣe kan ṣoṣo ni ohun tó ń fún
 ọ̀wọ́ náà ní ìyípadà sí olùpèsè mìíràn nígbà ìkùnà: nígbà tí ibi ìbáṣepọ̀ àkọ́kọ́
 dákẹ́ pátápátá láàárín ìgbésẹ̀ kan nínú ìṣiṣẹ́ tí a ṣe àkọsílẹ̀ rẹ̀ lórí
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), aṣojú náà parí
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), aṣojú náà parí
 àwọn ìgbésẹ̀ tó kù lórí èyí àfẹ́yìntì, kò sì fi ìdádúró náà hàn rárá.
 
 ---

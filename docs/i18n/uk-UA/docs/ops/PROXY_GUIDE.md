@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## Маркетплейс безкоштовних проксі 1proxy
 
-> 🆕 **Додано [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (задача [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Додано [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (задача [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute інтегрується з платформою спільноти **[1proxy](https://1proxy-api.aitradepulse.com)**, надаючи доступ до **сотень безкоштовних перевірених проксі** з усього світу. Це ідеальний варіант для користувачів, які не мають власної проксі-інфраструктури.
 

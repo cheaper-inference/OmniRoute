@@ -5,7 +5,7 @@
 ---
 
 Plantilla: xquik #11370 (fusionada en release/v3.8.51). Postura: `fallbackOnly`.
-Propuesta upstream: incidencia cheaper-inference/OmniRoute#11637.
+Propuesta upstream: incidencia diegosouzapw/OmniRoute#11637.
 
 ## 1. Información de referencia del servicio (documentación oficial, cotejada)
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Prihvaćeno · **Kontekst:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Ugovor:** `domain/routing/routerBackends.ts`
-> (tipizirani registar — kod stiže s [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Status:** Prihvaćeno · **Kontekst:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Ugovor:** `domain/routing/routerBackends.ts`
+> (tipizirani registar — kod stiže s [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Ovaj ADR precizno definira međusobni odnos između mehanizama `ts` (izvorni), `bifrost`, `cliproxy`, `9router` i mehanizama kompatibilnih s VibeProxyjem kako bi suradnici prestali poistovjećivati dvije arhitektonski različite stvari. Dokumentira tipizirani registar uveden radom na registru pozadinskih sustava usmjerivača kao jedini izvor istine za taj model.
 
@@ -28,7 +28,7 @@ Pogreška koju treba izbjeći: tretiranje „ugrađene usluge” i „pozadinsko
 ## Registar — jedini izvor istine
 
 Ugovor `domain/routing/routerBackends.ts` (kod stiže s
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) deklarira svaki mehanizam samo jednom, zajedno s njegovim životnim ciklusom, mogućnostima, identitetom usluge, zadanim priključkom, konfiguracijom provjere stanja i podrškom za telemetriju. Potrošači dohvaćaju mehanizme putem `getRouterBackend(id)`, `listRouterBackends()` i `listRouterBackendsByCapability(cap)` umjesto da za svaki popratni proces uvode posebne slučajeve.
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) deklarira svaki mehanizam samo jednom, zajedno s njegovim životnim ciklusom, mogućnostima, identitetom usluge, zadanim priključkom, konfiguracijom provjere stanja i podrškom za telemetriju. Potrošači dohvaćaju mehanizme putem `getRouterBackend(id)`, `listRouterBackends()` i `listRouterBackendsByCapability(cap)` umjesto da za svaki popratni proces uvode posebne slučajeve.
 
 | Pozadinski sustav | Životni ciklus | Usluga (os A) | Pozadinski sustav releja (os B) | Provjera stanja | Zadani priključak |
 | ----------------- | -------------- | ------------- | ------------------------------- | --------------- | ----------------- |
@@ -39,7 +39,7 @@ Ugovor `domain/routing/routerBackends.ts` (kod stiže s
 | `vibeproxy`       | `external`     | —             | — (prilagodnik pružatelja)      | `/v1/models`    | —                 |
 
 ¹ Promicanje Bifrosta u ugrađenu uslugu s životnim ciklusom `supervised` (koju je moguće instalirati/pokrenuti putem `/api/services/bifrost/`) prati se u
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); dok se ne spoji,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); dok se ne spoji,
 Bifrost je isključivo `external` (dostupan samo putem `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -106,8 +106,8 @@ otpreme; glavna površina `/api/v1/chat/completions` nikada ne koristi
 Odabir je **trenutačno sve-ili-ništa na razini releja** — u izdanju `release/v3.8.43`
 ne postoji promjena mehanizma po pružatelju ni po zahtjevu. Kontrola po zahtjevu dodaje se
 u sklopu rada na manifestu pomoćnog procesa
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 što omogućuje da `auto` kroz Bifrost usmjerava samo pružatelje koji ispunjavaju uvjete manifesta.
 
 ## Integracija nadzorne ploče

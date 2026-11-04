@@ -192,7 +192,7 @@ omniroute test-provider test [provider] [model]
 
 # OmniRoute — CLI Providers & Keys
 
-Requires the `omniroute` CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md) for install + global flags.
+Requires the `omniroute` CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md) for install + global flags.
 
 ## Provider catalog (available providers)
 
@@ -299,7 +299,7 @@ omniroute combo delete <name>                        # Delete a combo
 omniroute combo suggest --task "code review"         # Ask OmniRoute to recommend a combo
 ```
 
-For the full REST API for combos see [omni-combos-routing skill](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-combos-routing/SKILL.md).
+For the full REST API for combos see [omni-combos-routing skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-combos-routing/SKILL.md).
 
 ## Quota & usage
 
@@ -330,5 +330,4 @@ omniroute health                                     # Detailed health: circuit 
 - `providers test <id>` fails with 401 → API key stored for that provider is wrong; use `keys remove` + `keys add` to reset it
 - `oauth login` opens but doesn't complete → the OAuth token endpoint may be firewalled; use API key auth instead
 - `combo create` fails with `strategy unknown` → use one of: `priority`, `weighted`, `round-robin`, `fill-first`, `least-used`, `cost-optimized`, `auto`, `random`, `strict-random`, `p2c`, `reset-aware`, `lkgp`, `context-optimized`, `context-relay`
-
 <!-- skill:custom-end -->

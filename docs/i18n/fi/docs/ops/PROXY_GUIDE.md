@@ -260,7 +260,7 @@ Tämä tapahtuu kerran ensimmäisen päivityksen jälkeisen käynnistyksen yhtey
 
 ## 1proxy – ilmaisten välityspalvelinten markkinapaikka
 
-> 🆕 **Tekijä: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ongelma [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Tekijä: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ongelma [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute integroituu **[1proxy](https://1proxy-api.aitradepulse.com)**-yhteisöalustaan ja tarjoaa pääsyn **satoihin ilmaisiin, validoituihin välityspalvelimiin** eri puolilta maailmaa. Tämä sopii täydellisesti käyttäjille, joilla ei ole omaa välityspalvelininfrastruktuuria.
 

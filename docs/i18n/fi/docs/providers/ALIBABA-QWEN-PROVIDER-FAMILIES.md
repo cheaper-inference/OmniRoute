@@ -5,7 +5,7 @@
 ---
 
 Tämä asiakirja dokumentoi toteutuspäätöksen, joka koskee
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854):ää. Julkiset tuotteet on
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854):ää. Julkiset tuotteet on
 esitetty neljänä palveluntarjoajaperheenä. Alue on yhteystietoa, ei erillinen tuote.
 
 ## Päätös

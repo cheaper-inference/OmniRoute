@@ -5,7 +5,7 @@
 ---
 
 Wannan takarda tana rubuta shawarar aiwatarwa don
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Ana wakiltar samfuran da ake samarwa ga jama'a
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Ana wakiltar samfuran da ake samarwa ga jama'a
 a matsayin iyalan masu samarwa guda huɗu. Yanki bayanan haɗi ne, ba wani samfuri na daban ba.
 
 ## Shawara

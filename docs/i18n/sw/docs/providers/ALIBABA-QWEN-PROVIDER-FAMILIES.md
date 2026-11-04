@@ -5,7 +5,7 @@
 ---
 
 Hati hii inarekodi uamuzi wa utekelezaji wa
-[Hoja #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Bidhaa za umma
+[Hoja #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Bidhaa za umma
 zinawakilishwa kama familia nne za watoa huduma. Eneo ni data ya muunganisho, si bidhaa tofauti.
 
 ## Uamuzi

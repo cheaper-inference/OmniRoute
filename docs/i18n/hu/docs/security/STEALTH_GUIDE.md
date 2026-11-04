@@ -171,7 +171,7 @@ A környezeti változók referenciadokumentációja ismerteti az egyes kreditmó
 
 - `open-sse/executors/antigravity.ts` — beolvassa a `process.env.ANTIGRAVITY_CREDITS` értékét
 - `src/lib/oauth/providers/antigravity.ts` — hitelesítő adatok továbbítása
-- Eredeti incidensjelentés: [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183) beszélgetés
+- Eredeti incidensjelentés: [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183) beszélgetés
 
 ---
 

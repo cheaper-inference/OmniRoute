@@ -4,9 +4,9 @@
 
 ---
 
-> **Olek:** Vastu võetud · **Kontekst:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Leping:** `domain/routing/routerBackends.ts`
-> (tüübitud register — kood lisatakse koos [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Olek:** Vastu võetud · **Kontekst:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Leping:** `domain/routing/routerBackends.ts`
+> (tüübitud register — kood lisatakse koos [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 See ADR määratleb, kuidas `ts` (natiivne), `bifrost`, `cliproxy`, `9router` ja
 VibeProxyga ühilduvad mootorid omavahel suhestuvad, et kaastöötajad ei ajaks enam
@@ -39,7 +39,7 @@ suunamise taustaprogramm, mis oli (ajalooliselt) ainult `external`.
 ## Register — ainus tõeallikas
 
 `domain/routing/routerBackends.ts`-i leping (kood lisatakse koos
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) deklareerib iga mootori üks kord koos selle
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) deklareerib iga mootori üks kord koos selle
 elutsükli, võimekuste, teenuseidentiteedi, vaikepordi, tervisekontrolli seadistuse
 ja telemeetria toega. Tarbijad otsivad mootoreid funktsioonide
 `getRouterBackend(id)`, `listRouterBackends()` ja
@@ -56,7 +56,7 @@ eraldi käsitleda.
 
 ¹ Bifrosti ülendamist `supervised`-tüüpi manustatud teenuseks (paigaldatav/käivitatav
 asukohast `/api/services/bifrost/`) jälgitakse
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); kuni see liidetakse,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); kuni see liidetakse,
 on Bifrost ainult `external` (ligipääsetav üksnes `BIFROST_BASE_URL`-i kaudu).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -125,8 +125,8 @@ taustsüsteemi; peamine `/api/v1/chat/completions` liides ei kasuta kunagi faili
 Valik on praegu relee tasandil **kõik-või-mitte-midagi** — versioonis `release/v3.8.43`
 ei saa mootorit teenusepakkuja- ega päringupõhiselt vahetada. Päringupõhine päästik lisatakse
 külgproksi manifesti töö raames
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 mis võimaldab režiimil `auto` suunata Bifrosti kaudu ainult manifesti järgi sobivad teenusepakkujad.
 
 ## Töölaua integratsioon

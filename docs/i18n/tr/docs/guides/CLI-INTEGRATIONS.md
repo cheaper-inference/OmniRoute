@@ -180,7 +180,7 @@ Her iki biçim de bir 5dive **kimlik doğrulama profili** yazar ve bu profile ba
 
 API anahtarı 5dive'a **stdin** üzerinden (`--api-key=-`) verildiği için hiçbir zaman `ps` çıktısında görünmez.
 
-Profili tek bir model yerine bir OmniRoute **kombosuna** yönlendirmek, filoya sağlayıcı yük devretme özelliğini kazandırır: [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) üzerinde kaydedilen çalıştırmada birincil uç nokta turun ortasında tamamen devre dışı kaldığında ajan, kalan adımlarını yedek uç noktada tamamladı ve kesintiyi hiçbir zaman kullanıcıya yansıtmadı.
+Profili tek bir model yerine bir OmniRoute **kombosuna** yönlendirmek, filoya sağlayıcı yük devretme özelliğini kazandırır: [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) üzerinde kaydedilen çalıştırmada birincil uç nokta turun ortasında tamamen devre dışı kaldığında ajan, kalan adımlarını yedek uç noktada tamamladı ve kesintiyi hiçbir zaman kullanıcıya yansıtmadı.
 
 ---
 

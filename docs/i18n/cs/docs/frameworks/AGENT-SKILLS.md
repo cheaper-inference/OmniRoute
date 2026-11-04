@@ -18,7 +18,7 @@ Katalog obsahuje **45 Agent Skills** (23 pro REST API + 21 pro CLI + 1 konfigura
 - **Kanonické ID** (`omni-auth`, `cli-serve` atd.)
 - Soubor **SKILL.md** v `skills/{id}/SKILL.md` s YAML frontmatterem (`name`, `description`) + obsáhlým tělem ve formátu markdown
 - **Koncové body REST** (dovednosti API) nebo **dílčí příkazy CLI** (dovednosti CLI) odvozené ze specifikace OpenAPI a registru CLI
-- **Nezpracovanou adresu URL GitHubu** pro načtení aktuální verze: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **Nezpracovanou adresu URL GitHubu** pro načtení aktuální verze: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Přímé načtení nezpracovaného souboru z GitHubu (bez nutnosti serveru)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

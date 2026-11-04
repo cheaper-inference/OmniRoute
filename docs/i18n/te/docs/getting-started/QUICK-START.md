@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### ఎంపిక C: సోర్స్ నుండి
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute విఫలమైన ప్రొవైడర్లను స్వ�
 
 - **[సమస్య పరిష్కారం](../guides/TROUBLESHOOTING.md)** — సాధారణ సమస్యలు మరియు పరిష్కారాలు
 - **[Discord](https://discord.gg/U47eFqAXCn)** — కమ్యూనిటీ మద్దతు
-- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — బగ్లను నివేదించండి
+- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — బగ్లను నివేదించండి

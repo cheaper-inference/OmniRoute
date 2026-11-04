@@ -198,7 +198,7 @@ Iestatīt, izmantojot `session.defaultSession.webRequest.onHeadersReceived`. Iev
 
 ## Automātiska atjaunināšana
 
-Izmanto `electron-updater` ar GitHub nodrošinātāju (`cheaper-inference/OmniRoute`).
+Izmanto `electron-updater` ar GitHub nodrošinātāju (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Notikumi, kas pārsūtīti renderētājam, izmantojot `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (ar `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakti nokļūst `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Laidieni tiek publicēti GitHub Releases (`cheaper-inference/OmniRoute`), kur arī `electron-updater` pārbauda jaunas versijas.
+Laidieni tiek publicēti GitHub Releases (`diegosouzapw/OmniRoute`), kur arī `electron-updater` pārbauda jaunas versijas.
 
 ## Problēmu novēršana
 

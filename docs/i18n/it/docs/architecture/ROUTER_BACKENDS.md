@@ -4,9 +4,9 @@
 
 ---
 
-> **Stato:** Accettato · **Contesto:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Contratto:** `domain/routing/routerBackends.ts`
-> (registro tipizzato — il codice arriva con [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Stato:** Accettato · **Contesto:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Contratto:** `domain/routing/routerBackends.ts`
+> (registro tipizzato — il codice arriva con [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Questo ADR definisce in modo preciso come i motori `ts` (nativo), `bifrost`, `cliproxy`, `9router` e quelli compatibili con VibeProxy si relazionano tra loro, affinché i contributori smettano di confondere due aspetti architetturalmente distinti. Documenta il registro tipizzato introdotto dal lavoro sul registro dei backend del router come unica fonte autorevole per tale modello.
 
@@ -27,7 +27,7 @@ L'errore da evitare è considerare «servizio incorporato» e «backend di routi
 
 ## Il registro — unica fonte autorevole
 
-Il contratto `domain/routing/routerBackends.ts` (il codice arriva con [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) dichiara ogni motore una sola volta, specificandone ciclo di vita, funzionalità, identità del servizio, porta predefinita, configurazione dei controlli di integrità e supporto alla telemetria. I consumer recuperano i motori tramite `getRouterBackend(id)`, `listRouterBackends()` e `listRouterBackendsByCapability(cap)`, anziché gestire ogni sidecar come caso speciale.
+Il contratto `domain/routing/routerBackends.ts` (il codice arriva con [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) dichiara ogni motore una sola volta, specificandone ciclo di vita, funzionalità, identità del servizio, porta predefinita, configurazione dei controlli di integrità e supporto alla telemetria. I consumer recuperano i motori tramite `getRouterBackend(id)`, `listRouterBackends()` e `listRouterBackendsByCapability(cap)`, anziché gestire ogni sidecar come caso speciale.
 
 | Backend     | Ciclo di vita | Servizio (asse A) | Backend del relay (asse B) | Controllo di integrità | Porta predefinita |
 | ----------- | ------------- | ----------------- | -------------------------- | ---------------------- | ----------------- |
@@ -37,7 +37,7 @@ Il contratto `domain/routing/routerBackends.ts` (il codice arriva con [#5868](ht
 | `9router`   | `supervised`  | `9router`         | — (provider)               | `/api/health`          | 20130             |
 | `vibeproxy` | `external`    | —                 | — (adattatore provider)    | `/v1/models`           | —                 |
 
-¹ La promozione di Bifrost a servizio incorporato `supervised` (installabile/avviabile da `/api/services/bifrost/`) è monitorata in [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); fino alla relativa integrazione, Bifrost è disponibile solo come `external` (raggiungibile esclusivamente tramite `BIFROST_BASE_URL`).
+¹ La promozione di Bifrost a servizio incorporato `supervised` (installabile/avviabile da `/api/services/bifrost/`) è monitorata in [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); fino alla relativa integrazione, Bifrost è disponibile solo come `external` (raggiungibile esclusivamente tramite `BIFROST_BASE_URL`).
 
 Le `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) consentono ai chiamanti di filtrare in base a ciò che un motore può effettivamente fare, anziché codificare esplicitamente diramazioni specifiche per ciascun ID.
 
@@ -102,8 +102,8 @@ dispatch; l'endpoint principale `/api/v1/chat/completions` non consulta mai
 Attualmente la selezione è **tutto o niente a livello di relay**: in `release/v3.8.43` non esiste
 alcun cambio di motore per provider o per richiesta. Il filtro per richiesta viene aggiunto
 dal lavoro sul manifest dei sidecar
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 che consente ad `auto` di instradare tramite Bifrost solo i provider idonei secondo il manifest.
 
 ## Integrazione della dashboard

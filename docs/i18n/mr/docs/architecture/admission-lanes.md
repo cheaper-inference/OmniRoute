@@ -96,7 +96,7 @@ Combo (priority / round-robin) आणि fusion एका पॅरेंट व
 
 ## 4. एकाच प्रोसेसमधील दीर्घ `/v1/responses` (निरोगी-हेडरूम)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) मध्ये
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) मध्ये
 `tryAcquireHealthyHeadroom` जोडले आहे, जेणेकरून हीप
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` पेक्षा कमी असताना संरचनात्मकदृष्ट्या जड असलेल्या दुसऱ्या विनंतीला प्रवेश दिला जाईल.
 `admitChatRequest` द्वारे वापरला जाणारा BYTE मार्ग (बॉडीज ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

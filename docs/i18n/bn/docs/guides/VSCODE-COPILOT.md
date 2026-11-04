@@ -109,7 +109,7 @@ npm start
 
 এম্বেড-সক্রিয় বিল্ড ছাড়া পেজটি ফ্রেমে প্রদর্শিত হতে অস্বীকার করে; এক্সটেনশনটি রেসপন্স হেডার থেকে তা শনাক্ত করে এবং বাহ্যিক ব্রাউজারে ফিরে যায় — কিছুই নষ্ট হয় না, এবং এটি একবার সে কথা জানায়।
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) এবং ইস্যু
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) দেখুন।
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) দেখুন।
 
 ---
 

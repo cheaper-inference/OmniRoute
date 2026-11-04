@@ -256,7 +256,7 @@ uygulanana kadar yeni sürümlerde bu durum tekrarlanabilir.
    [Convert]::ToBase64String($b)
    ```
    Çıktı, `latest.yml` → `sha512` değeriyle eşleşmelidir. Eşleşmiyorsa dosyayı silin ve
-   yalnızca [GitHub sürümleri sayfasından](https://github.com/cheaper-inference/OmniRoute/releases)
+   yalnızca [GitHub sürümleri sayfasından](https://github.com/diegosouzapw/OmniRoute/releases)
    yeniden indirin.
 2. **Geri yükleyin + hariç tutun** — geri alınan öğeleri karantinadan geri yükleyin,
    `%LOCALAPPDATA%\Programs\OmniRoute` için bir hariç tutma kuralı ekleyin (Kaspersky →
@@ -856,7 +856,7 @@ sunucu arka planda başlatılmaya devam eder ve önyükleme tamamlandığında e
 
 ## Hâlâ Takıldınız mı?
 
-- **GitHub Sorunları**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub Sorunları**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Mimari**: Dahili ayrıntılar için [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) belgesine bakın
 - **API Referansı**: Tüm uç noktalar için [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) belgesine bakın
 - **Sistem Durumu Panosu**: Gerçek zamanlı sistem durumu için **Pano → Sistem Durumu** bölümünü kontrol edin

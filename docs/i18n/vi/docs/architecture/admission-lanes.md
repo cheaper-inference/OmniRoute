@@ -91,7 +91,7 @@ và được hệ thống 2 thực thi sau khi tính năng tùy chọn này đư
 
 ## 4. `/v1/responses` kéo dài trong một tiến trình (dư địa lành mạnh)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) đã bổ sung
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) đã bổ sung
 `tryAcquireHealthyHeadroom` để một yêu cầu thứ hai có cấu trúc nặng được chấp nhận
 khi heap thấp hơn `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Đường dẫn BYTE
 được `admitChatRequest` sử dụng (các body ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

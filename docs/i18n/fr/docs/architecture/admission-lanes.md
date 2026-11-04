@@ -93,7 +93,7 @@ systématiquement par le système 1, et par le système 2 une fois celui-ci acti
 
 ## 4. `/v1/responses` long dans un seul processus (marge de capacité saine)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) a ajouté
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) a ajouté
 `tryAcquireHealthyHeadroom` afin qu’une deuxième requête structurellement lourde soit admise
 lorsque le tas se situe sous `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Le chemin BYTE
 utilisé par `admitChatRequest` (corps ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

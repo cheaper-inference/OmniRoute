@@ -478,7 +478,7 @@ codex debug models --bundled       # הצגת קטלוג המודלים המוב
 | ההפעלה ממשיכה להחליף חשבונות / רציפות מטמון ההנחיות אובדת בין תורים | ה-TTL של שיוך ההפעלה הוא `0` (מושבת)                                    | `sessionAffinityTtlMs`   |
 | החיבור מתנתק באמצע ההסקה ללא הודעה המוצגת ללקוח                     | מנגנון הפיקוח על חוסר פעילות בזרם הופעל לאחר 10 דקות ללא מקטע מצד המקור | `STREAM_IDLE_TIMEOUT_MS` |
 
-דיונים קשורים: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ניתוקים במשימות ממושכות), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (מדוע השיוך מושבת כברירת מחדל). מעקב: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+דיונים קשורים: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ניתוקים במשימות ממושכות), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (מדוע השיוך מושבת כברירת מחדל). מעקב: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. שיוך הפעלה — קיבוע שיחה אחת לחשבון אחד
 

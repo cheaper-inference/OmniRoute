@@ -56,7 +56,7 @@ Nuair a bhíonn eisiúint á réiteach, osclaítear saincheist mharcála ar a bh
 Seiceáil an bhfuil reo oscailte ann sula nglacann tú leis gur féidir an brainse atá uait a chumasc:
 
 ```bash
-gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
+gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
 Tá na meicnicí cumaisc (lipéad `queue` an úinéara → Mergify) doiciméadaithe in

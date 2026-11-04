@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Klonuokite kodą ir pereikite į katalogą
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ flyctl secrets set KEY=value -a omniroute
 
 ### 9.1 Pagrindinės saugyklos naujinimų sekimas išsaugant jūsų atšakos `fly.toml`
 
-Jei dabartinė saugykla yra atšaka ir norite sinchronizuoti naujinimus iš pagrindinės saugyklos `https://github.com/cheaper-inference/OmniRoute`, atlikite toliau nurodytus veiksmus.
+Jei dabartinė saugykla yra atšaka ir norite sinchronizuoti naujinimus iš pagrindinės saugyklos `https://github.com/diegosouzapw/OmniRoute`, atlikite toliau nurodytus veiksmus.
 
 Pirmiausia patikrinkite nuotolines saugyklas:
 
@@ -309,7 +309,7 @@ Turėtumėte matyti bent:
 Jei `upstream` nesukonfigūruota, pridėkite ją:
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 Prieš sinchronizuodami su pagrindine saugykla, gaukite naujausius pakeitimus ir žymas:

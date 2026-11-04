@@ -249,7 +249,7 @@ Next.js самосталне верзије), то је довољно да ак
    [Convert]::ToBase64String($b)
    ```
    Излаз мора да се подудара са `latest.yml` → `sha512`. Ако се не подудара, избришите датотеку и
-   поново је преузмите искључиво са [GitHub странице издања](https://github.com/cheaper-inference/OmniRoute/releases).
+   поново је преузмите искључиво са [GitHub странице издања](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Вратите + изузмите** — вратите поништене ставке из карантина и додајте изузеће
    за `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    а затим поново инсталирајте апликацију.
@@ -841,7 +841,7 @@ Za potpune detalje o `OMNIROUTE_READY_TIMEOUT_MS` pogledajte [`docs/reference/EN
 
 ## I dalje ne radi?
 
-- **GitHub problemi**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub problemi**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Arhitektura**: Za interne detalje pogledajte [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API referenca**: Za sve krajnje tačke pogledajte [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Kontrolna tabla stanja**: Proverite **Kontrolna tabla → Stanje** za status sistema u realnom vremenu

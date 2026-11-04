@@ -215,7 +215,7 @@ livenessProbe:
 
 Kubeletove sonde **živosti ne usmerite** na `/api/monitoring/health`. Ta pot dejansko izvaja opravila zbirke podatkov/nadzora in bo pod obremenitvijo sprožala lažno pozitivne rezultate.
 
-Povezano: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sonde, medtem ko je dogodkovna zanka zasedena), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (obremenjevanje zaradi določanja cen kataloga), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (obremenjevanje zaradi štetja žetonov pri stiskanju).
+Povezano: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sonde, medtem ko je dogodkovna zanka zasedena), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (obremenjevanje zaradi določanja cen kataloga), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (obremenjevanje zaradi štetja žetonov pri stiskanju).
 
 ### Čuvaj systemd (zamrznjena dogodkovna zanka)
 

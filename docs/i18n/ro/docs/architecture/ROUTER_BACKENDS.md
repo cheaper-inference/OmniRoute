@@ -4,9 +4,9 @@
 
 ---
 
-> **Stare:** Acceptată · **Context:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Contract:** `domain/routing/routerBackends.ts`
-> (registru tipizat — codul este livrat odată cu [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Stare:** Acceptată · **Context:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Contract:** `domain/routing/routerBackends.ts`
+> (registru tipizat — codul este livrat odată cu [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Acest ADR stabilește modul în care motoarele `ts` (nativ), `bifrost`, `cliproxy`, `9router` și
 cele compatibile cu VibeProxy se raportează unele la altele, astfel încât contribuitorii să nu mai
@@ -39,7 +39,7 @@ era exclusiv `external`.
 ## Registrul — sursa unică de adevăr
 
 Contractul `domain/routing/routerBackends.ts` (codul este livrat odată cu
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) declară fiecare motor o singură dată, împreună cu
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) declară fiecare motor o singură dată, împreună cu
 ciclul său de viață, capabilitățile, identitatea serviciului, portul implicit, configurația
 stării de sănătate și suportul pentru telemetrie. Consumatorii caută motoarele prin `getRouterBackend(id)`,
 `listRouterBackends()` și `listRouterBackendsByCapability(cap)`, în loc să
@@ -55,7 +55,7 @@ trateze separat fiecare serviciu auxiliar.
 
 ¹ Promovarea Bifrost la statutul de serviciu încorporat `supervised` (care poate fi instalat/pornit
 din `/api/services/bifrost/`) este urmărită în
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); până la integrarea acesteia,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); până la integrarea acesteia,
 Bifrost rămâne exclusiv `external` (accesibil numai prin `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ de expediere; suprafața principală `/api/v1/chat/completions` nu consultă nic
 În prezent, selecția este **totul-sau-nimic la nivelul releului** — nu există schimbare de motor per furnizor
 sau per cerere în `release/v3.8.43`. Mecanismul de control per cerere este adăugat
 prin lucrările la manifestul sidecar
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ceea ce permite modului `auto` să direcționeze prin Bifrost doar furnizorii eligibili conform manifestului.
 
 ## Integrarea cu tabloul de bord

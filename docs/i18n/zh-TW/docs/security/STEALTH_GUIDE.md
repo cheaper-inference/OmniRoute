@@ -168,7 +168,7 @@ Antigravity 請求會逐位元組保留呼叫端文字。OmniRoute 不會在提�
 
 - `open-sse/executors/antigravity.ts` — 讀取 `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — 憑證處理
-- 原始事件報告：討論 [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- 原始事件報告：討論 [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

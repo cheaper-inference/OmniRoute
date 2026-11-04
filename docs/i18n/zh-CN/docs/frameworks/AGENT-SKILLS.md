@@ -18,7 +18,7 @@ Agent Skills 是结构化的 SKILL.md 文件，用于指导外部智能体、MCP
 - 一个**规范 ID**（`omni-auth`、`cli-serve` 等）
 - 位于 `skills/{id}/SKILL.md` 的 **SKILL.md** 文件，其中包含 YAML 前置元数据（`name`、`description`）和内容丰富的 Markdown 正文
 - 从 OpenAPI 规范和 CLI 注册表派生的 **REST 端点**（API 技能）或 **CLI 子命令**（CLI 技能）
-- 用于实时获取的 **GitHub 原始文件 URL**：`https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- 用于实时获取的 **GitHub 原始文件 URL**：`https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. 直接获取 GitHub 原始文件（无需服务器）
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

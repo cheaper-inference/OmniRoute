@@ -5,7 +5,7 @@
 ---
 
 Dit document legt de implementatiebeslissing vast voor
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). De openbare producten worden
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). De openbare producten worden
 weergegeven als vier providerfamilies. De regio bestaat uit verbindingsgegevens en is geen afzonderlijk product.
 
 ## Beslissing

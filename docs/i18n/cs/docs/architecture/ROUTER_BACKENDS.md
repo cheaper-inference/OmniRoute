@@ -4,9 +4,9 @@
 
 ---
 
-> **Stav:** Přijato · **Kontext:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
-> (typovaný registr — kód bude začleněn v rámci [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Stav:** Přijato · **Kontext:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
+> (typovaný registr — kód bude začleněn v rámci [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Tento ADR přesně vymezuje vzájemné vztahy mezi enginy `ts` (nativní), `bifrost`, `cliproxy`, `9router` a enginy kompatibilními s VibeProxy, aby přispěvatelé přestali zaměňovat dvě architektonicky odlišné věci. Dokumentuje typovaný registr zavedený v rámci implementace registru backendů routeru jako jediný zdroj pravdy pro tento model.
 
@@ -27,7 +27,7 @@ Je třeba se vyvarovat chyby, kdy se „vestavěná služba“ a „backend smě
 
 ## Registr — jediný zdroj pravdy
 
-Kontrakt `domain/routing/routerBackends.ts` (kód bude začleněn v rámci [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) deklaruje každý engine právě jednou, včetně jeho životního cyklu, funkcí, identity služby, výchozího portu, konfigurace kontroly stavu a podpory telemetrie. Spotřebitelé vyhledávají enginy prostřednictvím `getRouterBackend(id)`, `listRouterBackends()` a `listRouterBackendsByCapability(cap)` namísto přidávání speciálních podmínek pro jednotlivé postranní služby.
+Kontrakt `domain/routing/routerBackends.ts` (kód bude začleněn v rámci [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) deklaruje každý engine právě jednou, včetně jeho životního cyklu, funkcí, identity služby, výchozího portu, konfigurace kontroly stavu a podpory telemetrie. Spotřebitelé vyhledávají enginy prostřednictvím `getRouterBackend(id)`, `listRouterBackends()` a `listRouterBackendsByCapability(cap)` namísto přidávání speciálních podmínek pro jednotlivé postranní služby.
 
 | Backend     | Životní cyklus | Služba (osa A) | Backend přenosu (osa B)   | Kontrola stavu | Výchozí port |
 | ----------- | -------------- | -------------- | ------------------------- | -------------- | ------------ |
@@ -37,7 +37,7 @@ Kontrakt `domain/routing/routerBackends.ts` (kód bude začleněn v rámci [#586
 | `9router`   | `supervised`   | `9router`      | — (poskytovatel)          | `/api/health`  | 20130        |
 | `vibeproxy` | `external`     | —              | — (adaptér poskytovatele) | `/v1/models`   | —            |
 
-¹ Povýšení Bifrostu na vestavěnou službu typu `supervised` (kterou lze nainstalovat/spustit z `/api/services/bifrost/`) se sleduje v [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); dokud nebude začleněno, je Bifrost pouze typu `external` (dostupný výhradně prostřednictvím `BIFROST_BASE_URL`).
+¹ Povýšení Bifrostu na vestavěnou službu typu `supervised` (kterou lze nainstalovat/spustit z `/api/services/bifrost/`) se sleduje v [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); dokud nebude začleněno, je Bifrost pouze typu `external` (dostupný výhradně prostřednictvím `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) umožňují volajícím filtrovat podle toho, co daný engine skutečně umí, namísto pevně zakódovaných větví pro jednotlivé identifikátory.
 
@@ -102,8 +102,8 @@ hlavní rozhraní `/api/v1/chat/completions` nikdy nepoužívá
 Výběr se dnes na úrovni relay řídí principem **všechno, nebo nic** — ve verzi
 `release/v3.8.43` neexistuje přepínání enginu podle poskytovatele ani jednotlivého požadavku. Brána pro jednotlivé požadavky je doplňována
 v rámci práce na manifestu sidecaru
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 která umožní režimu `auto` směrovat přes Bifrost pouze poskytovatele vyhovující manifestu.
 
 ## Integrace dashboardu

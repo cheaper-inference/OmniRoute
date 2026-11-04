@@ -415,7 +415,7 @@ Når du ikke længere har brug for OmniRoute, tilbyder vi to hurtige scripts til
 ### VPS-implementering
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="din-sikre-hemmelighed-skift-denne"
@@ -497,8 +497,8 @@ depends="openssl"
 short_desc="Universel AI-gateway med intelligent routing til flere LLM-udbydere"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/cheaper-inference/OmniRoute"
-distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/diegosouzapw/OmniRoute"
+distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"

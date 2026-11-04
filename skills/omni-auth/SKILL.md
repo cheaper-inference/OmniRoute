@@ -205,30 +205,30 @@ Use `data[].id` as `model` field in requests. Combos appear with `owned_by:"comb
 
 ## Capability skills
 
-| Capability             | Raw URL                                                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| Chat / code-gen        | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Image generation       | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Text-to-speech         | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Speech-to-text         | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Embeddings             | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Web search             | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| Web fetch              | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-inference/SKILL.md      |
-| MCP server (110 tools) | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-mcp/SKILL.md            |
-| A2A protocol           | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-agents-a2a/SKILL.md     |
-| Routing & combos       | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-combos-routing/SKILL.md |
-| Token compression      | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-compression/SKILL.md    |
-| Monitoring & health    | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-resilience/SKILL.md     |
+| Capability             | Raw URL                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| Chat / code-gen        | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Image generation       | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Text-to-speech         | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Speech-to-text         | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Embeddings             | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Web search             | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| Web fetch              | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-inference/SKILL.md      |
+| MCP server (110 tools) | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-mcp/SKILL.md            |
+| A2A protocol           | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-agents-a2a/SKILL.md     |
+| Routing & combos       | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-combos-routing/SKILL.md |
+| Token compression      | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-compression/SKILL.md    |
+| Monitoring & health    | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-resilience/SKILL.md     |
 
 ## CLI skills (omniroute binary)
 
-| Capability                             | Raw URL                                                                                            |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| CLI entry point                        | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md       |
-| CLI admin & lifecycle                  | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md       |
-| CLI providers & keys                   | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-providers/SKILL.md   |
-| CLI cloud agents (`omniroute cloud …`) | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-backup-sync/SKILL.md |
-| CLI evals & benchmarks                 | https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-eval/SKILL.md        |
+| Capability                             | Raw URL                                                                                       |
+| -------------------------------------- | --------------------------------------------------------------------------------------------- |
+| CLI entry point                        | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md       |
+| CLI admin & lifecycle                  | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md       |
+| CLI providers & keys                   | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-providers/SKILL.md   |
+| CLI cloud agents (`omniroute cloud …`) | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-backup-sync/SKILL.md |
+| CLI evals & benchmarks                 | https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-eval/SKILL.md        |
 
 ## Errors
 
@@ -245,5 +245,4 @@ Use `data[].id` as `model` field in requests. Combos appear with `owned_by:"comb
 - **MCP + A2A** servers built-in (this is the only AI router that exposes both protocols)
 - **Memory** with FTS5 + Qdrant for persistent agent context
 - **Guardrails** for PII masking, prompt injection detection, vision policies
-
 <!-- skill:custom-end -->

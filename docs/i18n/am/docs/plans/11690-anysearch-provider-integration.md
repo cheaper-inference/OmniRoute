@@ -5,7 +5,7 @@
 ---
 
 አብነት፦ xquik #11370 (በ release/v3.8.51 ውስጥ ተዋህዷል)። አቋም፦ `fallbackOnly`።
-የላይኛው ምንጭ ሀሳብ፦ issue cheaper-inference/OmniRoute#11637።
+የላይኛው ምንጭ ሀሳብ፦ issue diegosouzapw/OmniRoute#11637።
 
 ## 1. የአገልግሎቱ ትክክለኛ መረጃ (ኦፊሴላዊ ሰነዶች፣ በሌሎች ምንጮች የተረጋገጠ)
 

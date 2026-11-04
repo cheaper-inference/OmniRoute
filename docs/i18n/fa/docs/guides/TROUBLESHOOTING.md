@@ -227,7 +227,7 @@ Avast و AVG از یک روش اکتشافی استفاده میکنند که ف
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   خروجی باید با `latest.yml` ← `sha512` مطابقت داشته باشد. اگر مطابقت ندارد، فایل را حذف کنید و آن را فقط از [صفحه انتشارهای GitHub](https://github.com/cheaper-inference/OmniRoute/releases) دوباره دانلود کنید.
+   خروجی باید با `latest.yml` ← `sha512` مطابقت داشته باشد. اگر مطابقت ندارد، فایل را حذف کنید و آن را فقط از [صفحه انتشارهای GitHub](https://github.com/diegosouzapw/OmniRoute/releases) دوباره دانلود کنید.
 2. **بازیابی + مستثناکردن** — موارد برگرداندهشده را از قرنطینه بازیابی کنید و برای
    `%LOCALAPPDATA%\Programs\OmniRoute` یک استثنا اضافه کنید (Kaspersky ← Settings ← Threats and Exclusions)،
    سپس دوباره نصب کنید.
@@ -816,7 +816,7 @@ omniroute serve --ready-timeout 180000
 
 ## هنوز مشکل دارید؟
 
-- **مشکلات GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **مشکلات GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **معماری**: برای جزئیات داخلی، به [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) مراجعه کنید
 - **مرجع API**: برای مشاهدهٔ همهٔ نقاط پایانی، به [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) مراجعه کنید
 - **داشبورد سلامت**: برای مشاهدهٔ وضعیت لحظهای سیستم، بخش **Dashboard → Health** را بررسی کنید

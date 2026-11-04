@@ -34,7 +34,7 @@ UI/UX, i18n, CLI, ഡാറ്റാബേസ്, ബിൽഡ്/ഡിപ്�
 ### ക്ലോൺ ചെയ്ത് ഇൻസ്റ്റാൾ ചെയ്യുക
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -435,4 +435,4 @@ VPS വിന്യാസങ്ങൾക്കായി, `npm run build` എന�
 - **API റഫറൻസ്**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) കാണുക
 - **സുരക്ഷാ ഡോക്യുമെന്റേഷൻ**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **ഓപ്പറേഷൻസ് ഡോക്യുമെന്റേഷൻ**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **പ്രശ്നങ്ങൾ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **പ്രശ്നങ്ങൾ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

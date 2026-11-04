@@ -198,7 +198,7 @@ Nastavit přes `session.defaultSession.webRequest.onHeadersReceived`. Pozoruhodn
 
 ## Automatická aktualizace
 
-Používá `electron-updater` s poskytovatelem GitHub (`cheaper-inference/OmniRoute`).
+Používá `electron-updater` s poskytovatelem GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Události předávané do vykreslovače prostřednictvím `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (se `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakty přistávají v `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Vydání jsou publikována do GitHub Releases (`cheaper-inference/OmniRoute`), kde také `electron-updater` kontroluje nové verze.
+Vydání jsou publikována do GitHub Releases (`diegosouzapw/OmniRoute`), kde také `electron-updater` kontroluje nové verze.
 
 ## Odstraňování problémů
 

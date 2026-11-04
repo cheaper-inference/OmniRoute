@@ -129,7 +129,7 @@ Automaatne hindamine valib iga päringu jaoks parima pakkuja/mudeli
 
 ## Kombo nimed, mis vastavad tegelikule mudeli ID-le
 
-Kombo, mille `name` on identne alasti mudeli ID-ga (nt kombo nimeks on `gpt-5.5`), on **tahtlik ja toetatud muster**, mitte viga: see on mehhanism per-mudeli-ID pakkuja varundamiseks, mida kirjeldatakse [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Kuna kombo lahendamine kontrollitakse enne alasti mudeli ID lahendamist (`getComboForModel()` `src/sse/services/model.ts`), suunatakse alasti ID `gpt-5.5` päringud läbi kombo sihtmärkide (nt `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) asemel otse ühele pakkujale – see kasutab ära kombo-enne-ümbertöötlemise eelistust, mis ehitati [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) jaoks ning mida testitakse regressioonina `tests/unit/responses-combo-resolution-3227.test.ts` ja `tests/unit/combo-name-codex-responses-rewrite.test.ts` abil.
+Kombo, mille `name` on identne alasti mudeli ID-ga (nt kombo nimeks on `gpt-5.5`), on **tahtlik ja toetatud muster**, mitte viga: see on mehhanism per-mudeli-ID pakkuja varundamiseks, mida kirjeldatakse [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Kuna kombo lahendamine kontrollitakse enne alasti mudeli ID lahendamist (`getComboForModel()` `src/sse/services/model.ts`), suunatakse alasti ID `gpt-5.5` päringud läbi kombo sihtmärkide (nt `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) asemel otse ühele pakkujale – see kasutab ära kombo-enne-ümbertöötlemise eelistust, mis ehitati [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) jaoks ning mida testitakse regressioonina `tests/unit/responses-combo-resolution-3227.test.ts` ja `tests/unit/combo-name-codex-responses-rewrite.test.ts` abil.
 
 Kombo loomine või ümbernimetamine nimeks, mis varjutab tegeliku mudeli ID, **ei ole kunasi keelatud** – selline tegevus rikuks seda dokumenteeritud töövoogu. Selle asemel (#8530) lisavad `POST /api/combos` ja `PUT /api/combos/[id]` vastusele mitteblokeeriva `warning` välja, kui (uus) nimi kattub tegeliku mudeli ID-ga:
 
@@ -165,7 +165,7 @@ Kaks tavalist komistuskivi:
 - **`auto` ei kasuta teie kombosid.** `auto`/`auto/*` loob oma null-konfiguratsiooniga kandidaatide kogumi ja konsulteerib salvestatud kombodega ainult siis, kui kombo on sõna-sõnalt nimetatud `auto` (pole soovitatav). Kombo kaudu suunamiseks saatke selle täpne nimi – mitte `auto`.
 - **`openrouter/auto` on reaalne tasuline OpenRouter toode** ("Auto Best Available"), mitte OmniRoute alias. See on OpenRouter registri (`open-sse/config/providers/registry/openrouter/index.ts`) ainus staatiline mudeli kanded ja seda arveldatakse eraldi. Kasutage Seaded → Suunamine → Peida tasulised mudelid, et see `auto` kogumitest välja jätta.
 
-Vaata [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ja [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) selle algse segaduse kohta, mida see dokumenteerib.
+Vaata [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ja [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) selle algse segaduse kohta, mida see dokumenteerib.
 
 ## Kuidas see töötab (püsivad automaatkombod)
 

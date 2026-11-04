@@ -244,7 +244,7 @@ Nakaplano ang code signing; hangga't hindi pa ito naipatutupad, maaaring maulit 
    [Convert]::ToBase64String($b)
    ```
    Dapat tumugma ang output sa `latest.yml` → `sha512`. Kung hindi ito tumutugma, burahin ang file at
-   muling i-download ito mula lamang sa [pahina ng mga release sa GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   muling i-download ito mula lamang sa [pahina ng mga release sa GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Ibalik + ibukod** — ibalik mula sa quarantine ang mga item na na-rollback at magdagdag ng exclusion
    para sa `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    pagkatapos ay muling mag-install.
@@ -839,7 +839,7 @@ detalye tungkol sa `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Hindi Pa Rin Umuusad?
 
-- **Mga Isyu sa GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Mga Isyu sa GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Arkitektura**: Tingnan ang [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) para sa mga panloob na detalye
 - **Sanggunian ng API**: Tingnan ang [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) para sa lahat ng endpoint
 - **Dashboard ng Kalagayan**: Tingnan ang **Dashboard → Health** para sa real-time na katayuan ng system

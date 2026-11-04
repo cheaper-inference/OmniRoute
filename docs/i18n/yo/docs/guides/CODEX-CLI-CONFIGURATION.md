@@ -467,7 +467,7 @@ Nínú session ìbánisọ̀rọ̀:
 | Session ń yí account padà / ìtẹ̀síwájú prompt-cache ń sọnù láàárín àwọn turn | TTL ìbámu session jẹ́ `0` (a ti mú un má ṣiṣẹ́)                    | `sessionAffinityTtlMs`   |
 | Ìsopọ̀ kú láàárín ìrònú láìsí prompt kankan tó dé ọ̀dọ̀ client                 | Alábojútó àìṣiṣẹ́ stream ṣiṣẹ́ lẹ́yìn ìṣẹ́jú 10 láìsí chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
 
-Àwọn ìjíròrò tó jẹmọ́: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (àwọn iṣẹ́ gígùn ń jábọ̀), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ìdí tí affinity fi jẹ́ pípa ní àìyípadà). Ìtọ́pa: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Àwọn ìjíròrò tó jẹmọ́: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (àwọn iṣẹ́ gígùn ń jábọ̀), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ìdí tí affinity fi jẹ́ pípa ní àìyípadà). Ìtọ́pa: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Ìbámu session — di ìjíròrò kan mọ́ account kan
 

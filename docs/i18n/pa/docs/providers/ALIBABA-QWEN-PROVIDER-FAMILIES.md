@@ -5,7 +5,7 @@
 ---
 
 本文档记录了针对
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) 的实现决策。面向公众的产品被划分为四个提供商系列。区域属于连接数据，而不是独立产品。
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) 的实现决策。面向公众的产品被划分为四个提供商系列。区域属于连接数据，而不是独立产品。
 
 ## 决策
 

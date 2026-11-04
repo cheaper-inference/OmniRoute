@@ -4,9 +4,9 @@
 
 ---
 
-> **Statuss:** Pieņemts · **Konteksts:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Līgums:** `domain/routing/routerBackends.ts`
-> (tipizēts reģistrs — kods tiek ieviests ar [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Statuss:** Pieņemts · **Konteksts:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Līgums:** `domain/routing/routerBackends.ts`
+> (tipizēts reģistrs — kods tiek ieviests ar [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Šis ADR precīzi nosaka, kā `ts` (vietējais), `bifrost`, `cliproxy`, `9router` un ar
 VibeProxy saderīgi dzinēji ir savstarpēji saistīti, lai līdzautori vairs
@@ -39,7 +39,7 @@ bija tikai `external`.
 ## Reģistrs — vienīgais patiesības avots
 
 `domain/routing/routerBackends.ts` līgumā (kods tiek ieviests ar
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) katrs dzinējs ir deklarēts vienu reizi, norādot tā
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) katrs dzinējs ir deklarēts vienu reizi, norādot tā
 dzīves ciklu, iespējas, pakalpojuma identitāti, noklusējuma portu, darbspējas pārbaudes konfigurāciju un
 telemetrijas atbalstu. Patērētāji dzinējus uzmeklē, izmantojot `getRouterBackend(id)`,
 `listRouterBackends()` un `listRouterBackendsByCapability(cap)`, nevis katram
@@ -55,7 +55,7 @@ blakusprocesam veidojot īpašu apstrādi.
 
 ¹ Bifrost paaugstināšana par `supervised` iegulto pakalpojumu (instalējamu/palaižamu
 no `/api/services/bifrost/`) tiek izsekota
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); līdz tā apvienošanai
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); līdz tā apvienošanai
 Bifrost darbojas tikai kā `external` (sasniedzams tikai, izmantojot `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ aizmugursistēmu; galvenā `/api/v1/chat/completions` virsma nekad neizmanto
 Pašlaik atlase releja līmenī ir **“viss vai nekas”** — versijā `release/v3.8.43` nav iespējams
 mainīt dzini atsevišķam nodrošinātājam vai pieprasījumam. Katra pieprasījuma vārteja tiek pievienota
 blakusprocesa manifesta darbā
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifests +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifests +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 kas ļauj `auto` caur Bifrost maršrutēt tikai manifestam atbilstošus nodrošinātājus.
 
 ## Informācijas paneļa integrācija

@@ -250,7 +250,7 @@ HTTP/SSE для MCP, URL `.well-known` для A2A и фрагменты с `curl
    [Convert]::ToBase64String($b)
    ```
    Вывод должен совпадать с `latest.yml` → `sha512`. Если значения не совпадают, удалите файл и
-   загрузите его повторно только со [страницы выпусков GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   загрузите его повторно только со [страницы выпусков GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Восстановите и добавьте в исключения** — восстановите удалённые при откате элементы из карантина и добавьте исключение
    для `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Настройки → Угрозы и исключения),
    затем выполните повторную установку.
@@ -855,7 +855,7 @@ omniroute serve --ready-timeout 180000
 
 ## Всё ещё не работает?
 
-- **Проблемы на GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Проблемы на GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Архитектура**: внутреннее устройство описано в [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **Справочник API**: все конечные точки описаны в [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Панель мониторинга состояния**: актуальное состояние системы см. в разделе **Панель управления → Состояние**

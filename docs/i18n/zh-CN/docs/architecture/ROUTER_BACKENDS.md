@@ -4,9 +4,9 @@
 
 ---
 
-> **状态：** 已接受 · **上下文：** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670)、
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **契约：** `domain/routing/routerBackends.ts`
-> （类型化注册表——代码随 [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) 合入）
+> **状态：** 已接受 · **上下文：** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670)、
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **契约：** `domain/routing/routerBackends.ts`
+> （类型化注册表——代码随 [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) 合入）
 
 此 ADR 明确了 `ts`（原生）、`bifrost`、`cliproxy`、`9router` 和
 VibeProxy 兼容引擎之间的关系，避免贡献者继续混淆两个在架构上相互独立的概念。它将路由后端注册表工作引入的类型化
@@ -35,7 +35,7 @@ VibeProxy 兼容引擎之间的关系，避免贡献者继续混淆两个在架�
 ## 注册表——唯一事实来源
 
 `domain/routing/routerBackends.ts` 契约（代码随
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) 合入）对每个引擎仅声明一次，其中包含其
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) 合入）对每个引擎仅声明一次，其中包含其
 生命周期、能力、服务标识、默认端口、健康检查配置和
 遥测支持。使用方通过 `getRouterBackend(id)`、
 `listRouterBackends()` 和 `listRouterBackendsByCapability(cap)` 查找引擎，而不是
@@ -51,7 +51,7 @@ VibeProxy 兼容引擎之间的关系，避免贡献者继续混淆两个在架�
 
 ¹ 将 Bifrost 提升为 `supervised` 嵌入式服务（可从
 `/api/services/bifrost/` 安装/启动）的工作在
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) 中跟踪；在其合并之前，
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) 中跟踪；在其合并之前，
 Bifrost 仅为 `external`（只能通过 `BIFROST_BASE_URL` 访问）。
 
 `capabilities`（`chat`、`responses`、`streaming`、`tools`、`vision`、
@@ -115,8 +115,8 @@ Bifrost 仅为 `external`（只能通过 `BIFROST_BASE_URL` 访问）。
 
 目前在中继层级，选择是**全有或全无的** — `release/v3.8.43` 上不存在按提供者
 或按请求切换引擎的机制。sidecar 清单工作正在添加按请求控制的门控机制
-（[#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) 清单 +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`），
+（[#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) 清单 +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`），
 使 `auto` 仅将清单中符合条件的提供者通过 Bifrost 路由。
 
 ## 仪表盘集成

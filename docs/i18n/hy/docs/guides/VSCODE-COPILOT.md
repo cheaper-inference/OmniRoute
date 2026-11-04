@@ -112,7 +112,7 @@ npm start
 
 Առանց ներդրումը թույլատրող կառուցման՝ էջը հրաժարվում է շրջանակում ցուցադրվել, ընդլայնումը դա հայտնաբերում է պատասխանի վերնագրերից և անցնում արտաքին դիտարկիչին․ ոչինչ չի խափանվում, և այդ մասին մեկ անգամ հաղորդվում է։
 Տե՛ս [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) և
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) խնդիրը։
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) խնդիրը։
 
 ---
 

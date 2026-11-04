@@ -225,7 +225,7 @@ livenessProbe:
 
 **Не** спрямовуйте перевірку **живучості** kubelet на `/api/monitoring/health`. Цей шлях виконує реальну роботу з БД/моніторингом і даватиме хибні спрацювання під навантаженням.
 
-Пов’язані матеріали: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (перевірки, коли цикл подій зайнятий), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (надмірне споживання ресурсів під час розрахунку цін каталогу), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (надмірне споживання ресурсів під час підрахунку токенів для стиснення).
+Пов’язані матеріали: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (перевірки, коли цикл подій зайнятий), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (надмірне споживання ресурсів під час розрахунку цін каталогу), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (надмірне споживання ресурсів під час підрахунку токенів для стиснення).
 
 ### Сторожовий таймер systemd (завислий цикл подій)
 

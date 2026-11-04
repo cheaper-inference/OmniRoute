@@ -5,7 +5,7 @@
 ---
 
 - **Durum:** Önerildi — çalışma zamanı çalışmalarına başlanmadan önce bakım sorumlusu onayı gerektirir
-- **Takip kaydı:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **Takip kaydı:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **Kapsam:** Yalnızca kalıcılık mimarisi; bu karar harici bir veritabanı eklemez veya seçmez
 
 ## Bağlam

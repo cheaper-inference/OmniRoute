@@ -223,7 +223,7 @@ livenessProbe:
 
 پروب **زندهبودن** kubelet را به `/api/monitoring/health` هدایت **نکنید**. آن مسیر عملیات واقعی DB/نظارت را انجام میدهد و زیر بار، مثبت کاذب ایجاد خواهد کرد.
 
-موارد مرتبط: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (پروبها هنگام مشغولبودن حلقهٔ رویداد)، [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (مصرف انحصاری منابع توسط قیمتگذاری کاتالوگ)، [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (مصرف انحصاری منابع توسط شمارش توکن فشردهسازی).
+موارد مرتبط: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (پروبها هنگام مشغولبودن حلقهٔ رویداد)، [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (مصرف انحصاری منابع توسط قیمتگذاری کاتالوگ)، [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (مصرف انحصاری منابع توسط شمارش توکن فشردهسازی).
 
 ### نگهبان systemd (حلقهٔ رویداد منجمد)
 

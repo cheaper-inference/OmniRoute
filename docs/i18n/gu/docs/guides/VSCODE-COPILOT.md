@@ -110,7 +110,7 @@ npm start
 
 embed-enabled build વિના પેજ frame થવાનો ઇનકાર કરે છે, extension response headersમાંથી તે શોધી કાઢે છે અને બાહ્ય બ્રાઉઝરનો fallback તરીકે ઉપયોગ કરે છે — કંઈ બગડતું નથી અને તે આ વિશે એક વાર જાણ કરે છે.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) અને issue
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) જુઓ.
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) જુઓ.
 
 ---
 

@@ -9,7 +9,7 @@
 ប្រសិនបើអ្នករកឃើញភាពងាយរងគ្រោះផ្នែកសុវត្ថិភាពនៅក្នុង OmniRoute សូមរាយការណ៍ដោយការទទួលខុសត្រូវ៖
 
 1. **កុំ** បើក GitHub issue ជាសាធារណៈ
-2. ប្រើ [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. ប្រើ [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. រួមបញ្ចូល៖ សេចក្ដីពិពណ៌នា ជំហានសម្រាប់បង្កើតបញ្ហាឡើងវិញ និងផលប៉ះពាល់ដែលអាចកើតមាន
 
 ## កាលវិភាគឆ្លើយតប
@@ -42,7 +42,7 @@
   យកកាលបរិច្ឆេទណាដែលមកដល់ក្រោយ**។ កាលបរិច្ឆេទបញ្ចប់ដែលទទួលបាននឹងត្រូវកត់ត្រាក្នុងកំណត់សម្គាល់ការចេញផ្សាយ 3.9.0 និងក្នុង
   [`ROADMAP.md`](ROADMAP.md) នៅពេលការចេញកំណែនោះកើតឡើង។
 - **ការរាយការណ៍ភាពងាយរងគ្រោះក្នុងខ្សែ LTS៖** ប្រើឆានែលដូចគ្នានឹងកំណែផ្សេងទៀត —
-  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) ឯកជន
+  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) ឯកជន
   មិនត្រូវប្រើ issue សាធារណៈឡើយ។ បញ្ជាក់កំណែដែលអ្នកបានសាកល្បង (ឧទាហរណ៍ `3.9.2`)؛ ការកែតម្រូវនឹងដាក់ចូល
   `stable/v3` ហើយត្រូវបាន forward-port ទៅ v4។
 - **ខ្សែមូលដ្ឋានសុវត្ថិភាពនៅពេលចេញ LTS៖** ស្ថានភាព scanner ដែលបានវាស់វែង ភស្តុតាង route-guard និង

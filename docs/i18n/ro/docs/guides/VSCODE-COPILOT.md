@@ -115,7 +115,7 @@ npm start
 Fără un pachet compilat cu încorporarea activată, pagina refuză să fie afișată într-un cadru, extensia detectează acest lucru din
 antetele răspunsului și revine la browserul extern — nimic nu se defectează, iar extensia vă informează o singură dată.
 Consultați [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) și problema
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

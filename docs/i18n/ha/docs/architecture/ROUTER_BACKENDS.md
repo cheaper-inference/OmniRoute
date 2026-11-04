@@ -4,9 +4,9 @@
 
 ---
 
-> **Matsayi:** An amince · **Mahallin magana:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kwangila:** `domain/routing/routerBackends.ts`
-> (rijista mai nau'i — lambar za ta zo tare da [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Matsayi:** An amince · **Mahallin magana:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kwangila:** `domain/routing/routerBackends.ts`
+> (rijista mai nau'i — lambar za ta zo tare da [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Wannan ADR yana fayyace yadda injunan `ts` (na asali), `bifrost`, `cliproxy`, `9router`, da
 injunan da suka dace da VibeProxy suke da alaƙa da juna, domin masu ba da gudummawa su daina
@@ -39,7 +39,7 @@ ya kasance `external` kawai.
 ## Rijistar — tushen gaskiya guda ɗaya
 
 Kwangilar `domain/routing/routerBackends.ts` (lambar za ta zo tare da
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) tana ayyana kowane injin sau ɗaya, tare da
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) tana ayyana kowane injin sau ɗaya, tare da
 zagayowar rayuwarsa, ƙarfinsa, shaidar sabis, tashar tsoho, saitin lafiya, da
 tallafin telemetri. Masu amfani suna nemo injuna ta hanyar `getRouterBackend(id)`,
 `listRouterBackends()`, da `listRouterBackendsByCapability(cap)` maimakon
@@ -55,7 +55,7 @@ rubuta keɓantacciyar dabara ga kowane sidecar.
 
 ¹ Ɗaukaka Bifrost zuwa sabis ɗin `supervised` da aka saka ciki (wanda za a iya girkawa/farawa
 daga `/api/services/bifrost/`) ana bibiyarsa a
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); har sai an haɗa shi,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); har sai an haɗa shi,
 Bifrost yana kasancewa `external` kawai (ana iya isa gare shi ta `BIFROST_BASE_URL` kaɗai).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ backend; babban surface na `/api/v1/chat/completions` ba ya taɓa duba
 Zaɓin **duk ko babu ne a matakin relay a halin yanzu** — babu sauya engine ga kowane provider
 ko kowace request a `release/v3.8.43`. Ana ƙara gate na kowace request
 ta aikin sidecar-manifest
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 wanda ke ba `auto` damar tura providers da manifest ya amince da su kaɗai ta Bifrost.
 
 ## Haɗawa da dashboard

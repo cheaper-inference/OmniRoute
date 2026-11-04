@@ -114,7 +114,7 @@
 
 ## 4. Παρατεταμένα `/v1/responses` σε μία διεργασία (υγιές περιθώριο)
 
-Το [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) πρόσθεσε το
+Το [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) πρόσθεσε το
 `tryAcquireHealthyHeadroom`, ώστε να γίνεται αποδεκτό ένα δεύτερο αίτημα υψηλής δομικής πολυπλοκότητας
 όταν το heap βρίσκεται κάτω από το `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Η διαδρομή BYTE
 που χρησιμοποιείται από το `admitChatRequest` (σώματα ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

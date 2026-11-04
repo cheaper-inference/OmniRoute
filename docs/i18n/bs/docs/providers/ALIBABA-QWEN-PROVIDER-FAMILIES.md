@@ -6,7 +6,7 @@
 
 # Alibaba i Qwen porodice provajdera
 
-Ovaj dokument bilježi odluku o implementaciji za [Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Javni proizvodi su predstavljeni kao četiri porodice provajdera. Regija je podatak o konekciji, a ne poseban proizvod.
+Ovaj dokument bilježi odluku o implementaciji za [Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Javni proizvodi su predstavljeni kao četiri porodice provajdera. Regija je podatak o konekciji, a ne poseban proizvod.
 
 ## Odluka
 

@@ -58,8 +58,8 @@ Google Cloud Code / Antigravity მას აბრუნებს, როგო
 ფრაზის დაბლოკვის სიაში დატოვება ასევე მიუწვდომელს ხდიდა cloud-code-ის აღდგენადი 403-ის განშტოებას
 `classifyProviderError`-ში ამ ფორმულირებისთვის, რადგან `accountDeactivated` პირველად
 ფასდება — ამიტომ Gemini Code Assist-ისთვის დამატებული პროექტის მარშრუტის აღდგენა
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868)-სა და
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452)-ში ვერასდროს გაეშვებოდა.
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868)-სა და
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452)-ში ვერასდროს გაეშვებოდა.
 
 სამი მომიჯნავე, **ცალკეული** სიგნალების ცხრილი აკრძალული საკვანძო სიტყვების აღმოჩენის ნაწილი _არ არის_:
 

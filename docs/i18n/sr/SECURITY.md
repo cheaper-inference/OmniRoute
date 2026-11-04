@@ -9,7 +9,7 @@
 Ако откријете безбедносну рањивост у OmniRoute-у, пријавите је на одговоран начин:
 
 1. **НЕМОЈТЕ** отварати јавно GitHub питање
-2. Користите [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+2. Користите [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
 3. Укључите: опис, кораке за репродукцију и потенцијални утицај
 
 ## Рокови за одговор
@@ -42,7 +42,7 @@
   шта год наступи касније**. Добијени крајњи датум бележи се у напоменама уз издање 3.9.0 и у
   [`ROADMAP.md`](ROADMAP.md) када дође до издавања.
 - **Пријављивање рањивости у LTS линији:** користите исти канал као и за било коју другу верзију —
-  приватни [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
+  приватни [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
   никада јавну пријаву проблема. Наведите коју сте верзију тестирали (на пример `3.9.2`); исправке се уносе у
   `stable/v3` и преносе унапред у v4.
 - **Безбедносна основа у тренутку LTS издавања:** измерено стање скенера, докази о заштити рута и

@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy 無料プロキシマーケットプレイス
 
-> 🆕 **[@oyi77](https://github.com/oyi77) によるコントリビューション** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847)（Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788)）
+> 🆕 **[@oyi77](https://github.com/oyi77) によるコントリビューション** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847)（Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788)）
 
 OmniRoute は **[1proxy](https://1proxy-api.aitradepulse.com)** コミュニティプラットフォームと統合されており、世界中の**検証済み無料プロキシ数百件**を利用できます。独自のプロキシインフラストラクチャを持たないユーザーに最適です。
 

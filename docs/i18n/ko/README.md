@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 월간 약 16억 2천만 토큰 / 서드파티 무료 티어 전체 합산
+## 💰 제3자 무료 티어 전체에서 월 ~1.62B 토큰
 
 </div>
 
-> **직접 보유한 공급자 계정을 연결하세요.** 이는 OmniRoute에서 토큰을 제공하는 것이 아니라, 별도로 이용 가능한 서드파티 무료 티어 전체의 추정 합계입니다. 각 공급자에 가입하고, 필요 시 자격 증명을 받아, 사용할 수 있는 공급자를 연결하세요. 각 공급자는 자체 한도, 가용성, 약관을 관리합니다.
+> **사용자 본인의 provider 계정을 사용하세요.** 이는 각각 별도로 이용 자격이 있는 제3자 무료 티어를 합산해 추정한 수치이며, OmniRoute가 제공하는 토큰 지급량이 아닙니다. 가입하고, 필요한 경우 자격 증명을 발급받은 다음, 사용할 수 있는 provider를 연결하세요. 각 provider가 한도, 이용 가능 여부 및 약관을 관리합니다.
 >
-> 무료 티어를 직접 쌓아 쓰는 일은 번거롭습니다 — 수십 개의 SDK, 수십 개의 속도 제한, 실제로 얼마나 남았는지 알 수 없습니다. OmniRoute는 **34개의 반복 사용 풀 키에 걸친 485개의 무료 티어 항목**을 카탈로그화하고, **월간 토큰 예산이 공개된 17개 풀과 모델별 5개 Groq 한도**에서 중복된 풀을 하나로 계산해 토큰 총량을 산출합니다. 지역 신원 확인 후에만 열리는 쿼터(현재: ModelScope)는 별도로 표시되며, 지역 신원 확인 뒤 약 600만 토큰이 추가되지만 총량에는 포함되지 않습니다. 결과는 대시보드(`/dashboard/free-tiers`)에서 항상 확인할 수 있습니다.
+> 무료 티어를 수동으로 조합하는 일은 번거롭습니다 — 수십 개의 SDK, 수십 개의 rate limit, 그리고 실제로 얼마나 사용할 수 있는지 알 수 없습니다. OmniRoute는 **34개의 반복 풀 키에 걸쳐 484개의 무료 티어 항목**을 분류하고, 공유 풀을 중복 집계하지 않은 상태에서 **공개된 양의 월간 예산이 있는 17개 풀과 모델별 Groq 한도 5개**를 기반으로 토큰 헤드라인을 계산합니다. 지역 신원 확인 후에만 열리는 할당량(현재: ModelScope)은 별도로 표시되며, 지역 신원 확인 뒤 +~6M이 추가되지만 헤드라인에는 절대 합산되지 않습니다. 결과는 대시보드(`/dashboard/free-tiers`)에서 계속 확인할 수 있습니다.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 무료 티어 예산 카드: 월간 약 16억 2천만 개의 무료 토큰이 꾸준히 제공되며, 첫 달 가입 크레딧 포함 최대 약 22억 2천만 개까지. 34개의 문서화된 반복 풀 키가 485개의 카탈로그 무료 티어 항목을 하나의 엔드포인트 뒤에 통합. 정직한 풀 중복 제거 산출 — 공유 풀은 한 번만 계산, 월간 토큰 예산이 공개된 17개 반복 풀과 모델별 5개 Groq 한도 포함. 12개 공급자는 약관 위험 카탈로그에서 '피해야 할'로 표시되어 있으니 직접 판단하세요. 예산 바에는 Mistral 1B, Nara 2억 1천만, LLM7 1억 5천만, xKiro 1억 5천만, Groq 3천만(모델별 5개 한도) 및 소규모 풀, 첫 달 가입 크레딧, 영구 무료 무제한 공급자가 별도 표시되어 총량에 부풀려지지 않습니다. 실시간 사용/잔여량은 /dashboard/free-tiers에서 확인."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 무료 티어 예산 카드: 월 ~1.62B 무료 토큰을 안정적으로 제공하며, 가입 크레딧을 포함하면 첫 달 최대 ~2.22B입니다. 하나의 엔드포인트 뒤에서 484개의 카탈로그화된 무료 티어 항목을 포함하는 34개의 문서화된 반복 풀 키를 제공합니다. 정직한 풀 중복 제거 방식으로 계산되며 — 공유 풀은 각각 한 번만 집계되고, 공개된 양의 월간 토큰 예산이 있는 17개의 반복 풀과 모델별 Groq 한도 5개가 포함됩니다. 약관 위험 카탈로그에서는 12개 provider가 주의 대상으로 표시되므로 직접 결정할 수 있습니다. 예산 막대에는 Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M(모델별 한도 5개) 및 더 작은 풀이 포함되며, 첫 달 가입 크레딧과 영구 무료이면서 토큰 한도가 없는 provider는 별도로 표시되어 헤드라인을 부풀리지 않습니다. /dashboard/free-tiers에서 실시간 사용량/잔여량을 확인할 수 있습니다."/>
 
-> 실시간 `/dashboard/free-tiers` 페이지의 애니메이션 요약입니다. 전체 산출 방식(풀 중복 제거, 크레딧 티어, 공급자 약관): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> 실시간 `/dashboard/free-tiers` 페이지의 애니메이션 요약입니다. 전체 방법론(풀 중복 제거, 크레딧 등급, provider 약관): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>이 수치는 2주마다 실시간 카탈로그와 대조해 재감사되며 **양방향으로 변동**합니다 — 공급자가 무료 티어를 종료하면 수치가 내려가고, 새 공급자가 추가되면 올라갑니다. 카탈로그가 실제로 산출한 값만 공개하며, 절대 부풀리거나 반올림하지 않습니다.</sub>
+> <sub>이 수치는 2주마다 실시간 카탈로그를 기준으로 재감사되며 **양방향으로 변동합니다** — provider가 무료 티어를 종료하면 수치가 내려가고, 새로운 provider가 추가되면 올라갑니다. 반올림한 최상의 경우가 아니라 카탈로그가 실제로 계산하는 값을 공개합니다.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ OMNIROUTE가 비용을 절감하고 업무를 쉽게 해줬다면 저장소에 스타를 남겨주세요.
+⭐ OMNIROUTE가 비용을 절약하고 작업을 더 쉽게 만드는 데 도움이 되었다면 저장소에 Star를 남겨 주세요.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History 순위](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 커뮤니티에 참여하세요
 
-**👋 메인테이너를 팔로우하고 신규 공급자, 릴리즈, 팁을 가장 먼저 받아보세요:**
+**👋 유지 관리자 팔로우 — 새로운 provider, 릴리스 및 팁을 가장 먼저 받아보세요:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![LinkedIn에서 Diego 팔로우](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![GitHub에서 @diegosouzapw 팔로우](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![WhatsApp 글로벌](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp 브라질](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![웹사이트](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**질문, 공급자 제보, 로드맵 및 지원 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 글로벌](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 브라질](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [포털](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**질문, provider 팁, 로드맵 및 지원 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 글로벌](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 브라질](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [포털](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute는 MIT 라이선스로 공개적으로 유지·관리됩니다. 시간이나 비용을 절약하는 데 도움이 되었다면, 독립성을 유지할 수 있도록 자신에게 맞는 방법으로 후원해 주세요. 후원은 라우팅 우선순위에 절대 영향을 주지 않습니다. 후원으로 얻는 것은 노출이지 순위가 아닙니다.
 
 <table>
-  <tr><td nowrap>⭐ <b>저장소에 별표 표시</b></td><td>무료 — 인지도를 높이는 데 실질적으로 도움이 됩니다</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRoute에 별표 표시</a></td></tr>
+  <tr><td nowrap>⭐ <b>저장소에 별표 표시</b></td><td>무료 — 인지도를 높이는 데 실질적으로 도움이 됩니다</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute에 별표 표시</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>일회성 또는 월간 후원 · 플랫폼 수수료 없음</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>빠른 일회성 후원, 후원자는 가입 불필요</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>소소하고 편안한 방식의 후원</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix 복사 및 붙여넣기:
 
 </details>
 
-🐛 버그를 발견했거나 의견이 있으신가요? [토론](https://github.com/cheaper-inference/OmniRoute/discussions)을 시작해 주세요.
+🐛 버그를 발견했거나 의견이 있으신가요? [토론](https://github.com/diegosouzapw/OmniRoute/discussions)을 시작해 주세요.
 
 <br/>
 
@@ -1251,7 +1251,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 
 2026-10-18 기준 정규 지표: **고유 동영상 1.976개** · **확인된 조회수 20.220.289회** (`v > 0`) · **네트워크별 채널/프로필 1.210개**. 원시 대시보드에는 1.976개 행(YouTube 1.352개 = 긴 형식 740개 + Shorts 612개 · TikTok 334개 · Instagram 290개)이 포함되어 있습니다. 동영상별로 가장 높은 조회수를 유지하는 정규 URL 기반 정규화 이후 중복 항목은 남아 있지 않습니다. YouTube 데이터 수집은 2026-10-13에 중단되었으며(14일부터 18/10까지 API 할당량 소진), TikTok/Instagram 데이터 수집은 2026-09-02부터 중단되었습니다(수집 크레딧 없음). 아직 조회수가 집계되지 않은 동영상은 76개입니다.
 
-> 🎬 **OmniRoute에 관한 동영상을 만드셨나요?** 링크와 함께 [이슈](https://github.com/cheaper-inference/OmniRoute/issues/new) 또는 [토론](https://github.com/cheaper-inference/OmniRoute/discussions)을 등록해 주세요. 여기에 소개해 드리겠습니다.
+> 🎬 **OmniRoute에 관한 동영상을 만드셨나요?** 링크와 함께 [이슈](https://github.com/diegosouzapw/OmniRoute/issues/new) 또는 [토론](https://github.com/diegosouzapw/OmniRoute/discussions)을 등록해 주세요. 여기에 소개해 드리겠습니다.
 
 <br/>
 
@@ -1271,8 +1271,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 | 🟢 **WhatsApp — 🇧🇷 브라질**                    | [그룹 참여](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                        |
 | 🌍 **웹사이트**                                | [omniroute.online](https://omniroute.online)                                                                        |
 | 🌍 **🌍StHub OmniRoute 커뮤니티(무료)**        | [StHub 포털](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                 |
-| 📦 **소스 코드**                               | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                            |
-| 🐛 **버그 신고**                               | [이슈 등록](https://github.com/cheaper-inference/OmniRoute/issues) — `npm run system-info` 출력 첨부                |
+| 📦 **소스 코드**                               | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                      |
+| 🐛 **버그 신고**                               | [이슈 등록](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info` 출력 첨부                     |
 | 🤝 **기여**                                    | [CONTRIBUTING.md](CONTRIBUTING.md) · [브랜치 및 릴리스 모델](docs/ops/BRANCHING_MODEL.md) · `good first issue` 선택 |
 | 💚 **프로젝트 후원**                           | [후원 방법 ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                    |
 
@@ -1321,11 +1321,11 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 <table>
   <tr><th align="left">문서</th><th align="left">설명</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">사용자 가이드</a></b></td><td>Provider, 조합, CLI 통합, 배포</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">설정 가이드</a></b></td><td>전체 설치 방법, CLI 도구 설정, 프로토콜 설정, 타임아웃 조정</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">설정 가이드</a></b></td><td>전체 설치 방법, CLI 도구 구성, 프로토콜 설정, 시간 제한 조정</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI 도구 가이드</a></b></td><td>Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot의 도구별 설정</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">원격 모드</a></b></td><td>범위가 지정된 액세스 토큰을 사용하여 노트북 CLI에서 원격 OmniRoute (VPS) 제어</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code 설정</a></b></td><td><code>launch</code> + 모델별 프로필을 사용하여 Claude Code를 OmniRoute (로컬/원격)에 연결</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">빠른 시작</a></b></td><td>3단계 설치 → 연결 → 설정</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">원격 모드</a></b></td><td>범위가 지정된 액세스 토큰을 사용하여 노트북 CLI에서 원격 OmniRoute(VPS) 구동</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code 구성</a></b></td><td><code>launch</code> + 모델별 프로필을 사용하여 Claude Code를 OmniRoute(로컬/원격)에 연결</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">빠른 시작</a></b></td><td>3단계 설치 → 연결 → 구성</td></tr>
 </table>
 
 ### 🔧 운영 및 배포
@@ -1334,12 +1334,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   <tr><th align="left">문서</th><th align="left">설명</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker 가이드</a></b></td><td>Docker 실행, Compose 프로필, Caddy HTTPS, 터널, 이미지 태그</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman 가이드</a></b></td><td>Quadlet systemd 통합, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM 배포</a></b></td><td>완전한 가이드: VM + nginx + Cloudflare 설정</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM 배포</a></b></td><td>전체 가이드: VM + nginx + Cloudflare 설정</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io 배포</a></b></td><td>영구 스토리지를 사용하여 Fly.io에 배포</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux 가이드</a></b></td><td>Termux를 통해 Android에서 OmniRoute 실행</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA 가이드</a></b></td><td>프로그레시브 웹 앱 설치, 캐싱, 아키텍처</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA 가이드</a></b></td><td>Progressive Web App 설치, 캐싱, 아키텍처</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">제거 가이드</a></b></td><td>모든 설치 방법에 대한 완전한 제거</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">환경 설정</a></b></td><td>전체 <code>.env</code> 변수 및 참조</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">환경 구성</a></b></td><td>전체 <code>.env</code> 변수 및 참조</td></tr>
 </table>
 
 ### 🧠 기능 및 아키텍처
@@ -1349,14 +1349,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">아키텍처</a></b></td><td>시스템 아키텍처, 데이터 흐름 및 내부 구조</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">압축 가이드</a></b></td><td>7가지 옵션 파이프라인: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK 압축</a></b></td><td>명령 출력 압축, 필터, 신뢰, 검증, 원시 출력 복구</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">압축 엔진</a></b></td><td>Caveman, RTK, 스택형 파이프라인, 대시보드/API/MCP 인터페이스</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">압축 엔진</a></b></td><td>Caveman, RTK, stacked 파이프라인, 대시보드/API/MCP 표면</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">압축 규칙 형식</a></b></td><td>Caveman 및 RTK 필터용 JSON 규칙 팩 스키마</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">압축 언어 팩</a></b></td><td>언어 감지 및 Caveman 규칙 팩 작성</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">복원력 가이드</a></b></td><td>회로 차단기, 쿨다운, 큐, 동시 요청 폭주 방지, TLS 스푸핑</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">자동 조합 엔진</a></b></td><td>16개 요소 점수화, 모드 팩, 자동 복구</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">복원력 가이드</a></b></td><td>서킷 브레이커, 쿨다운, 큐, 동시 요청 폭주 방지, TLS 스푸핑</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">자동 조합 엔진</a></b></td><td>16개 요소 점수화, 모드 팩, 자체 복구</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">프록시 가이드</a></b></td><td>3단계 프록시 시스템, 1proxy 마켓플레이스, 레지스트리 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">무료 티어</a></b></td><td>통합 디렉터리: 문서화된 반복 풀 34개 / 목록화된 무료 티어 항목 485개</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">기능 갤러리</a></b></td><td>스크린샷을 포함한 시각적 대시보드 둘러보기</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">무료 티어</a></b></td><td>통합 디렉터리: 문서화된 반복 사용 풀 34개 / 카탈로그에 등록된 무료 티어 항목 484개</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">기능 갤러리</a></b></td><td>스크린샷과 함께 제공되는 시각적 대시보드 둘러보기</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">코드베이스 문서</a></b></td><td>초보자에게 친화적인 코드베이스 둘러보기</td></tr>
 </table>
 
@@ -1364,9 +1364,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 
 <table>
   <tr><th align="left">문서</th><th align="left">설명</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API 레퍼런스</a></b></td><td>예제를 포함한 모든 엔드포인트</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API 레퍼런스</a></b></td><td>예제가 포함된 모든 엔드포인트</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI 사양</a></b></td><td>OpenAPI 3.0 사양</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP 서버</a></b></td><td>110개의 MCP 도구, IDE 설정, Python/TS/Go 클라이언트</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP 서버</a></b></td><td>110개의 MCP 도구, IDE 구성, Python/TS/Go 클라이언트</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP 서버 가이드</a></b></td><td>MCP 설치, 전송 방식 및 도구 레퍼런스</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A 서버</a></b></td><td>JSON-RPC 2.0 프로토콜, 스킬, 스트리밍, 작업 관리</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A 서버 가이드</a></b></td><td>A2A 에이전트 카드, 작업, 스킬 및 스트리밍</td></tr>
@@ -1377,12 +1377,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 <table>
   <tr><th align="left">문서</th><th align="left">설명</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">기여</a></b></td><td>개발 환경 설정 및 가이드라인</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">브랜치 및 릴리스 모델</a></b></td><td>PR 대상 위치(<code>release/*</code>), <code>main</code>과 태그의 의미</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">변경 로그</a></b></td><td>버전별 전체 릴리스 이력</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">브랜칭 및 릴리스 모델</a></b></td><td>PR의 대상(<code>release/*</code>), <code>main</code>과 태그의 의미</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">변경 로그</a></b></td><td>버전별 전체 릴리스 기록</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">보안 정책</a></b></td><td>취약점 보고 및 보안 관행</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n 가이드</a></b></td><td>67개 언어 지원, 번역 워크플로, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">릴리스 체크리스트</a></b></td><td>릴리스 전 검증 단계</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">커버리지 계획</a></b></td><td>8,400개 이상의 추적된 테스트 파일에 걸친 60,000개 이상의 정적 테스트 선언을 위한 테스트 커버리지 전략</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">커버리지 계획</a></b></td><td>8,400개 이상의 추적된 테스트 파일에 걸쳐 60,000개 이상의 정적 테스트 선언을 대상으로 하는 테스트 커버리지 전략</td></tr>
 </table>
 
 <br/>
@@ -1391,7 +1391,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 
 # ⭐ 주요 기여자
 
-> OmniRoute는 열정적인 오픈 소스 커뮤니티가 만들어 갑니다. 이분들은 프로젝트의 품질, 안정성 및 도달 범위에 직접적인 영향을 미치는 뛰어난 기여를 해 주셨습니다. **감사합니다.**
+> OmniRoute는 열정적인 오픈 소스 커뮤니티가 함께 만들어 갑니다. 이들은 프로젝트의 품질, 안정성 및 도달 범위에 직접적인 영향을 미치는 탁월한 기여를 해 왔습니다. **감사합니다.**
 
 ### 병합된 풀 리퀘스트 기준 외부 기여자
 
@@ -1419,7 +1419,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>2026-11-03 03:01:19 UTC에 라이브 <code>release/v3.8.53</code> 팁 <code>05bc048d6c</code>을 기준으로 집계했습니다. 페이지가 매겨진 GitHub GraphQL 집계에는 병합된 PR이 9,947개 포함되어 있습니다. 저장소 소유자가 4,130개, Dependabot이 240개, 기타 봇/앱이 6개, 그리고 <b>883명의 개별 기여자가 제출한 외부 PR이 5,571개</b>입니다. “변경된 줄”은 GitHub의 추가 및 삭제 줄을 의미하며 생성된 파일, 잠금 파일, 카탈로그, 번역 및 문서를 포함합니다. 이는 작성된 LOC가 아니라 변경량입니다. 53개의 PR에서 GitHub diff가 500,000줄을 초과한다고 보고되었습니다(예: 단일 공급자 추가인 #13399에는 변경된 파일이 2,347개로 표시됨). 이로 인해 위의 일부 합계가 부풀려졌습니다. 동률은 함께 순위를 매깁니다.</sub>
+<sub>2026-11-03 03:01:19 UTC에 <code>release/v3.8.53</code>의 최신 커밋 <code>05bc048d6c</code>을 기준으로 집계했습니다. 페이지로 구분된 GitHub GraphQL 집계에는 병합된 PR이 9,947개 포함되어 있습니다. 이 중 저장소 소유자가 작성한 PR은 4,130개, Dependabot이 작성한 PR은 240개, 기타 봇/앱이 작성한 PR은 6개이며, <b>883명의 서로 다른 기여자가 작성한 외부 PR은 5,571개</b>입니다. “변경된 줄”은 GitHub의 추가 및 삭제 줄 수이며 생성된 파일, 잠금 파일, 카탈로그, 번역 및 문서를 포함합니다. 이는 작성된 LOC가 아니라 변경량입니다. 53개의 PR은 GitHub diff에서 500,000줄을 초과하는 것으로 보고되었습니다(예: 단일 provider 추가인 #13399에는 변경된 파일이 2,347개로 표시됨). 이로 인해 위의 일부 합계가 부풀려졌습니다. 동률은 함께 순위를 매겼습니다.</sub>
 
 ### GitHub에서 귀속된 커밋
 
@@ -1430,42 +1430,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub 기여 커밋 418개</sub>
+      <sub>🥇 GitHub 기여로 집계된 커밋 418개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub 기여 커밋 294개</sub>
+      <sub>🥈 GitHub 기여로 집계된 커밋 294개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHub 기여 커밋 229개</sub>
+      <sub>🥉 GitHub 기여로 집계된 커밋 229개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 222개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 222개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 202개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 202개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 134개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 134개</sub>
     </td>
   </tr>
   <tr>
@@ -1474,49 +1474,49 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 126개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 126개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 115개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 115개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 108개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 108개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 70개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 70개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 68개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 68개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHub 기여 커밋 68개</sub>
+      <sub>🏅 GitHub 기여로 집계된 커밋 68개</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-11-03 02:09:16 UTC에 재확인: <code>release/v3.8.53</code> 기본 브랜치에 대해 저장소 Contributors API가 보고한 GitHub 기여 커밋입니다. API는 903개의 ID(사용자 429명, 봇 2개, 익명 472개)를 반환했습니다. 이 표에서는 메인테이너, 봇 및 익명 ID를 제외하고 공동 순위를 유지합니다. 이 순위는 위의 병합된 PR 순위 및 아래의 Git 메타데이터 집계와는 별개입니다.</sub>
+<sub>2026-11-03 02:09:16 UTC에 재확인: <code>release/v3.8.53</code> 기본 브랜치에 대해 저장소 Contributors API가 보고한 GitHub 기여 커밋입니다. API는 903개의 ID(사용자 429명, 봇 2개, 익명 472개)를 반환했으며, 이 표에서는 관리자, 봇 및 익명 ID를 제외하고 공동 순위를 유지합니다. 이는 위의 병합된 PR 순위 및 아래의 Git 메타데이터 조사와는 별개입니다.</sub>
 
-> 🙏 이러한 기여자들의 기능, 버그 수정 및 인프라 개선은 OmniRoute를 안정적이고 기능이 풍부하게 만드는 **핵심 요소**입니다. 모든 풀 리퀘스트, 모든 테스트 케이스, 모든 i18n 번역 파일이 중요합니다. 오픈 소스는 이러한 사람들에 의해 만들어집니다.
+> 🙏 이러한 기여자들의 기능, 버그 수정 및 인프라 개선은 OmniRoute를 안정적이고 풍부한 기능을 갖춘 프로젝트로 만드는 **핵심 요소**입니다. 모든 풀 리퀘스트, 모든 테스트 케이스, 모든 i18n 번역 파일이 중요합니다. 오픈 소스는 이들과 같은 사람들이 만들어 갑니다.
 
 </div>
 
@@ -1630,7 +1630,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
 <sub>2026-11-02에 라이브 <code>release/v3.8.53</code> 팁 <code>1c7135e0fb</code>(7,972개 커밋)을 기준으로 감사되었습니다: <b>정규화된 인간 Git ID 1,074개</b> — 759개는 커밋 작성자로 표시되고(메인테이너 포함), 315개는 명시적인 <code>Co-authored-by</code> 트레일러에만 표시됩니다. 이 집계에는 <code>.mailmap</code>이 적용되며, 이메일 주소는 대소문자를 구분하지 않고 비교합니다. 숫자 형식과 일반 GitHub noreply 주소는 동일한 핸들을 인코딩하는 경우에만 통합하고, 봇/에이전트/서비스/자리 표시자 ID 29개는 제외하며, 표시 이름이 일치한다는 이유만으로 일반 이메일 주소를 통합하지 않습니다. 2026-08-24 감사에서는 639명이 게시되었으며, 해당 감사의 기준 <code>ac02c5b42f</code>에 이 방법을 다시 실행하면 619명이므로, 증가는 느슨해진 방법이 아니라 새로운 기여자들에 의한 것입니다.</sub>
 
@@ -1659,11 +1659,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 스타
 
-<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="스타 기록 차트" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="스타 기록 차트" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

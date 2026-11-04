@@ -260,7 +260,7 @@ Quá trình này diễn ra một lần trong lần khởi động đầu tiên s
 
 ## Chợ Proxy Miễn phí 1proxy
 
-> 🆕 **Được đóng góp bởi [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Vấn đề [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Được đóng góp bởi [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Vấn đề [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute tích hợp với nền tảng cộng đồng **[1proxy](https://1proxy-api.aitradepulse.com)** để cung cấp quyền truy cập vào **hàng trăm proxy miễn phí đã được xác thực** từ khắp nơi trên thế giới. Đây là lựa chọn hoàn hảo cho những người dùng không có hạ tầng proxy riêng.
 

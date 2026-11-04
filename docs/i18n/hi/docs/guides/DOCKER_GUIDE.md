@@ -326,7 +326,7 @@ Docker में मेमोरी का व्यवहार:
 
 ### coding agents के लिए runtime RAM
 
-1 GiB का Docker डिफ़ॉल्ट dashboard/light-chat के लिए न्यूनतम स्तर है, production आकार नहीं। लंबे `POST /v1/responses` bodies (सैकड़ों messages, दर्जनों tools) compression के दौरान कई in-memory graphs बनाए रखते हैं। एक-दूसरे के साथ चल रहे ~3 MiB / ~750k-token के दो requests ने **12 GiB** old-space पर V8 को बंद कर दिया है (`FATAL ERROR: Reached heap limit`) और 16 GiB cgroup OOM भी उत्पन्न किया है। [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) देखें।
+1 GiB का Docker डिफ़ॉल्ट dashboard/light-chat के लिए न्यूनतम स्तर है, production आकार नहीं। लंबे `POST /v1/responses` bodies (सैकड़ों messages, दर्जनों tools) compression के दौरान कई in-memory graphs बनाए रखते हैं। एक-दूसरे के साथ चल रहे ~3 MiB / ~750k-token के दो requests ने **12 GiB** old-space पर V8 को बंद कर दिया है (`FATAL ERROR: Reached heap limit`) और 16 GiB cgroup OOM भी उत्पन्न किया है। [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) देखें।
 
 **cgroup `--memory` को heap से अधिक रखें** — native buffers, SQLite और compression intermediates V8 के बाहर रहते हैं।
 
@@ -683,7 +683,7 @@ spec:
 
 `preStop` स्लीप क्यूब को सेवा समापनबिंदु को SIGTERM से पहले छोड़ने देता है** नया** मरने की प्रक्रिया को प्रभावित करने वाला यातायात रुक जाता है। इन-फ़्लाइट `/v1/responses` SSE हेवीवेट प्रवेश पट्टों (#11015) के माध्यम से `SHUTDOWN_TIMEOUT_MS` (डिफ़ॉल्ट 30s) तक सूखा दिया जाता है। नए अनुरोध जो अभी भी प्रक्रिया तक पहुंचते हैं उन्हें `503` + `Retry-After: 5` मिलता है। जब तक प्रतिस्थापन तैयार नहीं हो जाता, तब तक रीक्रिएट खाली-एंडपॉइंट गैप एक कठिन आउटेज बना रहता है - यह SQLite टोपोलॉजी है, जांच मिसकॉन्फिग नहीं।
 
-बाहरी Postgres /बहु-लेखक HA है** नहीं** एक प्रलेखित स्टॉक पथ. यदि आपको HA की आवश्यकता है, तो एक एकल प्रतिकृति रखें या एक टोपोलॉजी चलाएं जिसे परियोजना ने अलग से परीक्षण और दस्तावेजित किया है। Postgres/MySQL कार्य [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) में रहता है। जब तक कि जहाज, गुणा करने का एकमात्र समर्थित तरीका नहीं है** बड़ा** `/v1/responses` क्षमता N स्वतंत्र प्रक्रियाएँ (अगला भाग) है, एक वॉल्यूम पर `replicas > 1` नहीं।
+बाहरी Postgres /बहु-लेखक HA है** नहीं** एक प्रलेखित स्टॉक पथ. यदि आपको HA की आवश्यकता है, तो एक एकल प्रतिकृति रखें या एक टोपोलॉजी चलाएं जिसे परियोजना ने अलग से परीक्षण और दस्तावेजित किया है। Postgres/MySQL कार्य [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) में रहता है। जब तक कि जहाज, गुणा करने का एकमात्र समर्थित तरीका नहीं है** बड़ा** `/v1/responses` क्षमता N स्वतंत्र प्रक्रियाएँ (अगला भाग) है, एक वॉल्यूम पर `replicas > 1` नहीं।
 
 ## स्केल-आउट: एन स्वतंत्र प्रक्रियाएं
 
@@ -693,11 +693,11 @@ spec:
 
 जब रिफ्रेश की आवश्यकता होती है तो निष्क्रिय उदाहरण कनेक्शन को दोबारा पढ़ता है और केवल एक अलग, असमाप्त एक्सेस टोकन को अपनाता है। अन्यथा कनेक्शन समाप्त होने या निष्क्रिय किए बिना या रिफ्रेश-ब्रेकर विफलता की गणना किए बिना रिफ्रेश अक्षम कर दिया जाता है। वास्तविक अपस्ट्रीम प्रमाणीकरण विफलताएँ अभी भी सामान्य विफलता लेखांकन, घातीय कूलडाउन और सामान्य क्लाइंट त्रुटि का उपयोग करती हैं; खाता निष्क्रियकरण स्थायी रहता है. एक्सेस टोकन समाप्त होने से पहले मालिक के घुमाए गए टोकन को सिंक्रोनाइज़ करें (डिफ़ॉल्ट प्रोएक्टिव रिफ्रेश लीड पांच मिनट है), या Codex ऑथ फ़ाइल को फिर से आयात करें। निष्क्रिय आयात आपूर्ति किए गए टोकन को टोकन समापन बिंदु पर सत्यापित किए बिना संग्रहीत करते हैं। मैनुअल dashboard/API ताज़ा रिटर्न `409 refresh_disabled`; नए OAuth लॉगिन अपरिवर्तित हैं। [पर्यावरण संदर्भ](../reference/ENVIRONMENT.md#passive-codex-token-refresh) देखें.
 
-One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
+One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
 
 ### एक-प्रक्रिया: दो से अधिक लंबी `/v1/responses`
 
-ए** स्वस्थ** प्रक्रिया ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` के नीचे ढेर, डिफ़ॉल्ट `0.75`)** मई** जब प्रक्रिया-व्यापी इनफ़्लाइट-बाइट बजट (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) में अभी भी जगह हो तो दो से अधिक समवर्ती लंबे `POST /v1/responses` चलाएँ। `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (डिफ़ॉल्ट 256 KiB) पर या उससे ऊपर के निकाय संरचना-भारी अनुरोधों के समान हेवीवेट लीज़ लेते हैं और उसी [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` एस्केप (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) का उपयोग करते हैं। दसियों समवर्ती लंबे SSE क्लाइंट (ऑपरेटरों को अक्सर 40-50 की आवश्यकता होती है) एक है** स्मृति-बजट** प्रश्न — आकार ढेर + primary/headroom स्लॉट + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — कोई कठिन "अधिकतम 2" उत्पाद सीमा नहीं है। एक दबावयुक्त ढेर अभी भी पुनः प्रयास योग्य `503` के साथ बहाया जाता है इसलिए #7849 वापस नहीं आता है।
+ए** स्वस्थ** प्रक्रिया ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` के नीचे ढेर, डिफ़ॉल्ट `0.75`)** मई** जब प्रक्रिया-व्यापी इनफ़्लाइट-बाइट बजट (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) में अभी भी जगह हो तो दो से अधिक समवर्ती लंबे `POST /v1/responses` चलाएँ। `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (डिफ़ॉल्ट 256 KiB) पर या उससे ऊपर के निकाय संरचना-भारी अनुरोधों के समान हेवीवेट लीज़ लेते हैं और उसी [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` एस्केप (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) का उपयोग करते हैं। दसियों समवर्ती लंबे SSE क्लाइंट (ऑपरेटरों को अक्सर 40-50 की आवश्यकता होती है) एक है** स्मृति-बजट** प्रश्न — आकार ढेर + primary/headroom स्लॉट + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — कोई कठिन "अधिकतम 2" उत्पाद सीमा नहीं है। एक दबावयुक्त ढेर अभी भी पुनः प्रयास योग्य `503` के साथ बहाया जाता है इसलिए #7849 वापस नहीं आता है।
 
 को** ढेरों को गुणा करो** (स्वतंत्र V8 पुराने-स्थान)** आज** :
 
@@ -740,7 +740,7 @@ volumes:
   omniroute-b-data:
 ```
 
-इन-प्रोसेस घनत्व ( HTTP आइसोलेट से संपीड़न) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) है। साझा टिकाऊ स्थिति पर एक तार्किक क्लस्टर [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) है।
+इन-प्रोसेस घनत्व ( HTTP आइसोलेट से संपीड़न) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) है। साझा टिकाऊ स्थिति पर एक तार्किक क्लस्टर [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) है।
 
 ## Docker के अंदर Gemini की क्षेत्रीय त्रुटियाँ
 
@@ -783,7 +783,7 @@ docker compose exec omniroute node -e 'require("node:dns").lookup("generativelan
 
 ### होस्ट-स्तरीय विकल्प: कार्यरत IPv6 और रिज़ॉल्वर नीति
 
-[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) के रिपोर्टर ने अपने
+[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) के रिपोर्टर ने अपने
 परिवेश में कंटेनर IPv6 सक्षम करके और glibc एड्रेस चयन बदलकर एक्सेस पुनर्स्थापित किया।
 इसे परिवेश-विशिष्ट विकल्प मानें। रिज़ॉल्वर प्राथमिकताएँ समायोजित करने से पहले कार्यरत
 होस्ट IPv6, कंटेनर इग्रेस/रूटिंग और फ़ायरवॉल नियमों की पुष्टि करें। केवल एक निजी ULA

@@ -201,7 +201,7 @@ xuất hiện trong đầu ra của `ps`.
 Việc trỏ profile đến một **combo** OmniRoute thay vì một model đơn lẻ chính là cách
 đội agent có được khả năng chuyển đổi dự phòng giữa các provider: khi endpoint
 chính ngừng hoạt động hoàn toàn giữa chừng trong lượt chạy được ghi lại tại
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agent đã hoàn tất
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agent đã hoàn tất
 các bước còn lại trên phương án dự phòng mà không để sự cố gián đoạn lộ ra ngoài.
 
 ---

@@ -4,9 +4,9 @@
 
 ---
 
-> **الحالة:** مقبول · **السياق:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670)،
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **العقد:** `domain/routing/routerBackends.ts`
-> (سجلّ ذو أنواع محددة — سيصل الكود مع [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **الحالة:** مقبول · **السياق:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670)،
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **العقد:** `domain/routing/routerBackends.ts`
+> (سجلّ ذو أنواع محددة — سيصل الكود مع [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 يثبّت سجل قرار البنية (ADR) هذا كيفية ارتباط المحركات `ts` (الأصلي) و`bifrost` و`cliproxy` و`9router` والمحركات المتوافقة مع VibeProxy بعضها ببعض، كي يتوقف المساهمون عن الخلط بين مفهومين مختلفين معماريًا. كما يوثّق السجل ذا الأنواع المحددة، الذي قدّمه العمل على سجل واجهات التوجيه الخلفية، بوصفه المصدر الوحيد للحقيقة لهذا النموذج.
 
@@ -27,7 +27,7 @@
 
 ## السجل — المصدر الوحيد للحقيقة
 
-يُصرّح عقد `domain/routing/routerBackends.ts` (سيصل الكود مع [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) بكل محرك مرة واحدة، مع دورة حياته وإمكاناته وهوية خدمته ومنفذه الافتراضي وإعدادات التحقق من السلامة ودعم القياس عن بُعد. يبحث المستهلكون عن المحركات عبر `getRouterBackend(id)` و`listRouterBackends()` و`listRouterBackendsByCapability(cap)` بدلًا من إضافة معالجة خاصة لكل عملية جانبية.
+يُصرّح عقد `domain/routing/routerBackends.ts` (سيصل الكود مع [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) بكل محرك مرة واحدة، مع دورة حياته وإمكاناته وهوية خدمته ومنفذه الافتراضي وإعدادات التحقق من السلامة ودعم القياس عن بُعد. يبحث المستهلكون عن المحركات عبر `getRouterBackend(id)` و`listRouterBackends()` و`listRouterBackendsByCapability(cap)` بدلًا من إضافة معالجة خاصة لكل عملية جانبية.
 
 | الواجهة الخلفية | دورة الحياة  | الخدمة (المحور A) | واجهة الترحيل الخلفية (المحور B) | التحقق من السلامة | المنفذ الافتراضي |
 | --------------- | ------------ | ----------------- | -------------------------------- | ----------------- | ---------------- |
@@ -37,7 +37,7 @@
 | `9router`       | `supervised` | `9router`         | — (موفّر)                        | `/api/health`     | 20130            |
 | `vibeproxy`     | `external`   | —                 | — (مهايئ موفّر)                  | `/v1/models`      | —                |
 
-¹ تجري متابعة ترقية Bifrost إلى خدمة مضمّنة من النوع `supervised` (قابلة للتثبيت والتشغيل من `/api/services/bifrost/`) في [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)؛ وحتى دمجه، يظل Bifrost من النوع `external` فقط (ولا يمكن الوصول إليه إلا عبر `BIFROST_BASE_URL`).
+¹ تجري متابعة ترقية Bifrost إلى خدمة مضمّنة من النوع `supervised` (قابلة للتثبيت والتشغيل من `/api/services/bifrost/`) في [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)؛ وحتى دمجه، يظل Bifrost من النوع `external` فقط (ولا يمكن الوصول إليه إلا عبر `BIFROST_BASE_URL`).
 
 تتيح `capabilities` (`chat` و`responses` و`streaming` و`tools` و`vision` و`oauth-backed` و`dashboard-embed` و`model-sync` و`native-hot-path`) للجهات المستدعية التصفية استنادًا إلى ما يستطيع المحرك فعله فعليًا، بدلًا من الترميز الثابت لفروع خاصة بكل معرّف.
 
@@ -102,8 +102,8 @@
 التحديد اليوم **إما شامل بالكامل أو غير مطبق على مستوى الترحيل** — لا يوجد تبديل للمحرك
 لكل موفّر أو لكل طلب في `release/v3.8.43`. تجري إضافة بوابة لكل طلب
 من خلال عمل بيان العملية الجانبية
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) البيان +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) ‏`shouldTryBifrostForRequest`)،
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) البيان +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) ‏`shouldTryBifrostForRequest`)،
 ما يتيح لـ`auto` توجيه الموفّرين المؤهلين وفق البيان فقط عبر Bifrost.
 
 ## تكامل لوحة المعلومات

@@ -228,7 +228,7 @@ livenessProbe:
 
 kubelet-ի **կենսունակության** ստուգումը **մի՛** ուղղեք դեպի `/api/monitoring/health`։ Այդ ուղին իրական աշխատանք է կատարում ՏԲ-ի/մոնիթորինգի հետ և ծանրաբեռնվածության ներքո կեղծ դրական արդյունք կտա։
 
-Առնչվող նյութեր՝ [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ստուգումներ, երբ իրադարձությունների ցիկլը զբաղված է), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (կատալոգի գնագոյացման կողմից ռեսուրսների զավթում), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (սեղմման նշանների հաշվարկի կողմից ռեսուրսների զավթում)։
+Առնչվող նյութեր՝ [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ստուգումներ, երբ իրադարձությունների ցիկլը զբաղված է), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (կատալոգի գնագոյացման կողմից ռեսուրսների զավթում), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (սեղմման նշանների հաշվարկի կողմից ռեսուրսների զավթում)։
 
 ### systemd-ի հսկիչ (սառեցված իրադարձությունների ցիկլ)
 

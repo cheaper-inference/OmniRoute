@@ -179,7 +179,7 @@ Temas noktaları:
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` değerini okur
 - `src/lib/oauth/providers/antigravity.ts` — kimlik bilgisi altyapısı
-- İlk olay bildirimi: Tartışma [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- İlk olay bildirimi: Tartışma [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

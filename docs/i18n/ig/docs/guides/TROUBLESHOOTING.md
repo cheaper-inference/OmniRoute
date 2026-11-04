@@ -245,7 +245,7 @@ ime ka nke a mee ọzọ.
    [Convert]::ToBase64String($b)
    ```
    Nsonaazụ ahụ ga-adabarịrị na `latest.yml` → `sha512`. Ọ bụrụ na ọ dabaraghị, hichapụ faịlụ
-   ahụ ma budata ya ọzọ naanị site na [ibe mwepụta GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   ahụ ma budata ya ọzọ naanị site na [ibe mwepụta GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Weghachi + wepụ n'ihe a na-enyocha** — weghachi ihe ndị a weghachiri azụ site na
    kwarantaini ma gbakwunye mwepu maka `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
    Settings → Threats and Exclusions), wee wụnye ya ọzọ.
@@ -840,7 +840,7 @@ zuru ezu banyere `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Ị Ka Nọgidesiri Ike?
 
-- **Nsogbu GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Nsogbu GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Nhazi Sistemụ**: Lee [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) maka nkọwa dị n'ime
 - **Ntụaka API**: Lee [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) maka endpoints niile
 - **Dashboard Ahụike**: Lelee **Dashboard → Health** maka ọnọdụ sistemụ ozugbo

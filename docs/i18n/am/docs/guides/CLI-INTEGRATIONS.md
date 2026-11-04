@@ -180,7 +180,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 
 API ቁልፉ ለ5dive በ**stdin** (`--api-key=-`) ላይ ይሰጣል፣ ስለዚህ በ`ps` ውጤት ውስጥ ፈጽሞ አይታይም።
 
-ፕሮፋይሉን ከአንድ ሞዴል ይልቅ ወደ OmniRoute **ጥምር** ማመልከት ለመንጋው የአቅራቢ መቀያየሪያን የሚያስገኘው ነው፦ በ[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) ላይ በተመዘገበው አሂድ ወቅት ዋናው መጨረሻ ነጥብ በዙሩ መካከል ሙሉ በሙሉ ሲቋረጥ፣ ወኪሉ ቀሪ ደረጃዎቹን በመጠባበቂያው ላይ አጠናቀቀ እና መቋረጡን ለተጠቃሚው ፈጽሞ አላሳየም።
+ፕሮፋይሉን ከአንድ ሞዴል ይልቅ ወደ OmniRoute **ጥምር** ማመልከት ለመንጋው የአቅራቢ መቀያየሪያን የሚያስገኘው ነው፦ በ[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) ላይ በተመዘገበው አሂድ ወቅት ዋናው መጨረሻ ነጥብ በዙሩ መካከል ሙሉ በሙሉ ሲቋረጥ፣ ወኪሉ ቀሪ ደረጃዎቹን በመጠባበቂያው ላይ አጠናቀቀ እና መቋረጡን ለተጠቃሚው ፈጽሞ አላሳየም።
 
 ---
 

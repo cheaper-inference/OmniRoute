@@ -260,7 +260,7 @@ Tarlaíonn sé seo uair amháin ar an gcéad tosú tar éis uasghrádaithe. Ús�
 
 ## Margadh Saor-Ionadaithe Saor in Aisce 1proxy
 
-> 🆕 **Arna chur leis ag [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Saincheist [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Arna chur leis ag [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Saincheist [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 Comhtháthaíonn OmniRoute le hardán pobail **[1proxy](https://1proxy-api.aitradepulse.com)** chun rochtain a sholáthar ar **na céadta seachfhreastalaí saor in aisce atá bailíochtaithe** ó gach cearn den domhan. Tá sé seo foirfe d’úsáideoirí nach bhfuil a mbonneagar seachfhreastalaí féin acu.
 

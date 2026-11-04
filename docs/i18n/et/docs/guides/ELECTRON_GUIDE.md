@@ -198,7 +198,7 @@ Seadista `session.defaultSession.webRequest.onHeadersReceived` kaudu. Märkimisv
 
 ## Automaatne värskendus
 
-Kasutab `electron-updater` koos GitHub pakkujaga (`cheaper-inference/OmniRoute`).
+Kasutab `electron-updater` koos GitHub pakkujaga (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC kaudu renderdajale edastatud sündmused: `checking`, `available`, `not-available`, `downloading` (koos `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefaktid maanduvad `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Väljalasked avaldatakse GitHub Releases (`cheaper-inference/OmniRoute`), kus `electron-updater` kontrollib ka uusi versioone.
+Väljalasked avaldatakse GitHub Releases (`diegosouzapw/OmniRoute`), kus `electron-updater` kontrollib ka uusi versioone.
 
 ## Veaotsing
 

@@ -224,7 +224,7 @@ livenessProbe:
 
 kubelet **canlılıq** yoxlamasını `/api/monitoring/health` ünvanına **yönəltməyin**. Bu yol real DB/monitorinq işi görür və yük altında yanlış müsbət nəticə verəcək.
 
-Əlaqəli: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (hadisə dövrəsi məşğul olarkən yoxlamalar), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (kataloq qiymətləndirməsinin resursları zəbt etməsi), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (sıxılma üçün token sayımının resursları zəbt etməsi).
+Əlaqəli: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (hadisə dövrəsi məşğul olarkən yoxlamalar), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (kataloq qiymətləndirməsinin resursları zəbt etməsi), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (sıxılma üçün token sayımının resursları zəbt etməsi).
 
 ### systemd nəzarətçisi (donmuş hadisə dövrəsi)
 

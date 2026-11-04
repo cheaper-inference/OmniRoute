@@ -437,7 +437,7 @@ megvalósításra vár).
 ### CodeQL-ratchet: frissítési gyakoriság és kézi indítás
 
 A `check:codeql-ratchet` a **tároló ütemezetten frissített állapotát olvassa — nem PR-enként.**
-A `gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` a következőt jelenti:
+A `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` a következőt jelenti:
 `state: configured`, `schedule: weekly`: ez a GitHub alapértelmezett beállítású vizsgálata,
 nem pedig pushonkénti elemzés. Következmény: egy riasztásokat JAVÍTÓ PR egyesítése után a
 ratchet továbbra is a régi, magasabb számot olvassa a következő ütemezett vizsgálat

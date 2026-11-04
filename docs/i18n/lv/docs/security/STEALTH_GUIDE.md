@@ -169,7 +169,7 @@ Saskares punkti:
 
 - `open-sse/executors/antigravity.ts` — nolasa `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — akreditācijas datu savienošana
-- Sākotnējais incidenta ziņojums: diskusija [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- Sākotnējais incidenta ziņojums: diskusija [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

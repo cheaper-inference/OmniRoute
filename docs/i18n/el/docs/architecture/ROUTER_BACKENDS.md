@@ -4,9 +4,9 @@
 
 ---
 
-> **Κατάσταση:** Εγκρίθηκε · **Πλαίσιο:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Σύμβαση:** `domain/routing/routerBackends.ts`
-> (μητρώο με τύπους — ο κώδικας ενσωματώνεται με το [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Κατάσταση:** Εγκρίθηκε · **Πλαίσιο:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Σύμβαση:** `domain/routing/routerBackends.ts`
+> (μητρώο με τύπους — ο κώδικας ενσωματώνεται με το [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Αυτό το ADR καθορίζει τον τρόπο με τον οποίο οι μηχανές `ts` (εγγενής), `bifrost`, `cliproxy`, `9router` και οι συμβατές με το VibeProxy σχετίζονται μεταξύ τους, ώστε οι συνεισφέροντες να σταματήσουν να συγχέουν δύο πράγματα που είναι αρχιτεκτονικά διακριτά. Τεκμηριώνει το μητρώο με τύπους που εισήχθη από την εργασία router-backend-registry ως τη μοναδική πηγή αλήθειας για αυτό το μοντέλο.
 
@@ -27,7 +27,7 @@
 
 ## Το μητρώο — μοναδική πηγή αλήθειας
 
-Η σύμβαση `domain/routing/routerBackends.ts` (ο κώδικας ενσωματώνεται με το [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) δηλώνει κάθε μηχανή μία φορά, μαζί με τον κύκλο ζωής, τις δυνατότητες, την ταυτότητα υπηρεσίας, την προεπιλεγμένη θύρα, τη διαμόρφωση ελέγχου εύρυθμης λειτουργίας και την υποστήριξη τηλεμετρίας της. Οι καταναλωτές αναζητούν μηχανές μέσω των `getRouterBackend(id)`, `listRouterBackends()` και `listRouterBackendsByCapability(cap)`, αντί να χειρίζονται κάθε sidecar ως ειδική περίπτωση.
+Η σύμβαση `domain/routing/routerBackends.ts` (ο κώδικας ενσωματώνεται με το [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) δηλώνει κάθε μηχανή μία φορά, μαζί με τον κύκλο ζωής, τις δυνατότητες, την ταυτότητα υπηρεσίας, την προεπιλεγμένη θύρα, τη διαμόρφωση ελέγχου εύρυθμης λειτουργίας και την υποστήριξη τηλεμετρίας της. Οι καταναλωτές αναζητούν μηχανές μέσω των `getRouterBackend(id)`, `listRouterBackends()` και `listRouterBackendsByCapability(cap)`, αντί να χειρίζονται κάθε sidecar ως ειδική περίπτωση.
 
 | Backend     | Κύκλος ζωής  | Υπηρεσία (άξονας A) | Backend relay (άξονας B) | Έλεγχος εύρυθμης λειτουργίας | Προεπιλεγμένη θύρα |
 | ----------- | ------------ | ------------------- | ------------------------ | ---------------------------- | ------------------ |
@@ -37,7 +37,7 @@
 | `9router`   | `supervised` | `9router`           | — (πάροχος)              | `/api/health`                | 20130              |
 | `vibeproxy` | `external`   | —                   | — (προσαρμογέας παρόχου) | `/v1/models`                 | —                  |
 
-¹ Η προαγωγή του Bifrost σε μια `supervised` ενσωματωμένη υπηρεσία (με δυνατότητα εγκατάστασης/εκκίνησης από το `/api/services/bifrost/`) παρακολουθείται στο [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)· μέχρι να συγχωνευθεί, το Bifrost είναι αποκλειστικά `external` (προσβάσιμο μόνο μέσω του `BIFROST_BASE_URL`).
+¹ Η προαγωγή του Bifrost σε μια `supervised` ενσωματωμένη υπηρεσία (με δυνατότητα εγκατάστασης/εκκίνησης από το `/api/services/bifrost/`) παρακολουθείται στο [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)· μέχρι να συγχωνευθεί, το Bifrost είναι αποκλειστικά `external` (προσβάσιμο μόνο μέσω του `BIFROST_BASE_URL`).
 
 Οι `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) επιτρέπουν στους καλούντες να φιλτράρουν με βάση όσα μπορεί πράγματι να κάνει μια μηχανή, αντί να κωδικοποιούν άκαμπτα διακλαδώσεις ανά αναγνωριστικό.
 
@@ -102,8 +102,8 @@
 Η επιλογή είναι **προς το παρόν καθολική σε επίπεδο αναμετάδοσης** — δεν υπάρχει εναλλαγή μηχανής ανά πάροχο
 ή ανά αίτημα στο `release/v3.8.43`. Ο έλεγχος ανά αίτημα προστίθεται
 μέσω της εργασίας για το manifest της βοηθητικής διεργασίας
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 η οποία επιτρέπει στο `auto` να δρομολογεί μέσω του Bifrost μόνο παρόχους που είναι επιλέξιμοι βάσει του manifest.
 
 ## Ενσωμάτωση στον πίνακα ελέγχου

@@ -5,7 +5,7 @@
 ---
 
 Dieses Dokument hält die Implementierungsentscheidung für
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) fest. Die öffentlichen Produkte werden
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) fest. Die öffentlichen Produkte werden
 als vier Anbieterfamilien dargestellt. Die Region gehört zu den Verbindungsdaten und ist kein eigenständiges Produkt.
 
 ## Entscheidung

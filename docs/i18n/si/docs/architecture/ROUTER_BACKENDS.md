@@ -4,9 +4,9 @@
 
 ---
 
-> **තත්ත්වය:** පිළිගෙන ඇත · **සන්දර්භය:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **ගිවිසුම:** `domain/routing/routerBackends.ts`
-> (ටයිප් කළ රෙජිස්ට්රිය — කේතය [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) සමඟ එක් වේ)
+> **තත්ත්වය:** පිළිගෙන ඇත · **සන්දර්භය:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **ගිවිසුම:** `domain/routing/routerBackends.ts`
+> (ටයිප් කළ රෙජිස්ට්රිය — කේතය [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) සමඟ එක් වේ)
 
 මෙම ADR මඟින් `ts` (ස්වදේශීය), `bifrost`, `cliproxy`, `9router`, සහ
 VibeProxy-අනුකූල එන්ජින් එකිනෙකට සම්බන්ධ වන ආකාරය නිශ්චිතව දක්වයි, එමඟින් දායකයන්
@@ -38,7 +38,7 @@ backend එකක් නොවේ. `bifrost` එහි ප්රතිවිර�
 
 ## රෙජිස්ට්රිය — සත්යයේ එකම මූලාශ්රය
 
-`domain/routing/routerBackends.ts` ගිවිසුම ([#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) සමඟ කේතය එක් වේ) සෑම එන්ජිමක්ම එහි
+`domain/routing/routerBackends.ts` ගිවිසුම ([#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) සමඟ කේතය එක් වේ) සෑම එන්ජිමක්ම එහි
 ජීවන චක්රය, හැකියාවන්, සේවා අනන්යතාව, පෙරනිමි port එක, සෞඛ්ය වින්යාසය සහ
 telemetry සහාය සමඟ එක් වරක් ප්රකාශ කරයි. එක් එක් sidecar සඳහා වෙන වෙනම විශේෂ අවස්ථා
 යෙදීම වෙනුවට, භාවිත කරන්නන් `getRouterBackend(id)`,
@@ -55,7 +55,7 @@ telemetry සහාය සමඟ එක් වරක් ප්රකාශ ක�
 
 ¹ Bifrost, `supervised` කාවැද්දූ සේවාවක් ලෙස උසස් කිරීම (`/api/services/bifrost/`
 වෙතින් ස්ථාපනය/ආරම්භ කළ හැකි වීම)
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) තුළ නිරීක්ෂණය කරයි; එය ඒකාබද්ධ වන තුරු,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) තුළ නිරීක්ෂණය කරයි; එය ඒකාබද්ධ වන තුරු,
 Bifrost `external`-පමණි (`BIFROST_BASE_URL` හරහා පමණක් ළඟා විය හැක).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ dispatch backend එකක් තෝරන්නේ relay proxy path එක ව�
 
 අද වන විට තේරීම relay මට්ටමේදී **සියල්ල-හෝ-කිසිවක්-නැත** ආකාරයේය —
 `release/v3.8.43` මත එක් එක් provider හෝ එක් එක් request සඳහා engine මාරු කිරීමක් නොමැත. එක් එක් request සඳහා වන gate එක sidecar-manifest කාර්යය මඟින් එක් කෙරෙමින් පවතී
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
 එමඟින් `auto` හට manifest-සුදුසුකම් ඇති providers පමණක් Bifrost හරහා route කිරීමට ඉඩ ලැබේ.
 
 ## උපකරණ පුවරු ඒකාබද්ධ කිරීම

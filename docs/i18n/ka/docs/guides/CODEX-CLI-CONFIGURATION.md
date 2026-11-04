@@ -480,7 +480,7 @@ OmniRoute-ის ორ ნაგულისხმევ პარამეტ�
 | სესია გამუდმებით ცვლის ანგარიშებს / მოთხოვნებს შორის prompt-cache-ის უწყვეტობა იკარგება | სესიის მიბმის TTL არის `0` (გამორთულია)                                                           | `sessionAffinityTtlMs`   |
 | კავშირი მსჯელობის შუაში წყდება კლიენტისთვის ხილული მოთხოვნის გარეშე                     | ნაკადის უმოქმედობის კონტროლი ამოქმედდა ზედა დონიდან ბლოკის 10 წუთის განმავლობაში მიუღებლობის გამო | `STREAM_IDLE_TIMEOUT_MS` |
 
-დაკავშირებული განხილვები: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ხანგრძლივი ამოცანების გაწყვეტა), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (რატომ არის მიბმა ნაგულისხმევად გამორთული). თვალყურის დევნება: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+დაკავშირებული განხილვები: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ხანგრძლივი ამოცანების გაწყვეტა), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (რატომ არის მიბმა ნაგულისხმევად გამორთული). თვალყურის დევნება: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. სესიის მიბმა — ერთი საუბრის ერთ ანგარიშზე მიმაგრება
 

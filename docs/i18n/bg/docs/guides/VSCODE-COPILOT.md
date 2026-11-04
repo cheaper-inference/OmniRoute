@@ -114,7 +114,7 @@ npm start
 Без компилация с активирано вграждане страницата отказва да бъде показана в рамка, разширението открива това от
 заглавките на отговора и се връща към външния браузър — нищо не се поврежда и то уведомява за това веднъж.
 Вижте [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) и проблем
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

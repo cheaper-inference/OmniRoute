@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Aċċettat · **Kuntest:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kuntratt:** `domain/routing/routerBackends.ts`
-> (reġistru tipizzat — il-kodiċi jasal ma’ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Status:** Aċċettat · **Kuntest:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kuntratt:** `domain/routing/routerBackends.ts`
+> (reġistru tipizzat — il-kodiċi jasal ma’ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Dan l-ADR jistabbilixxi kif `ts` (nattiv), `bifrost`, `cliproxy`, `9router`, u
 magni kompatibbli ma’ VibeProxy jirrelataw ma’ xulxin, sabiex il-kontributuri ma
@@ -39,7 +39,7 @@ kien `external` biss.
 ## Ir-reġistru — sors uniku tal-verità
 
 Il-kuntratt `domain/routing/routerBackends.ts` (il-kodiċi jasal ma’
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) jiddikjara kull magna darba waħda, biċ-ċiklu
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) jiddikjara kull magna darba waħda, biċ-ċiklu
 tal-ħajja, il-kapaċitajiet, l-identità tas-servizz, il-port default, il-konfigurazzjoni
 tas-saħħa, u l-appoġġ għat-telemetrija tagħha. Il-konsumaturi jfittxu l-magni permezz ta’
 `getRouterBackend(id)`, `listRouterBackends()`, u `listRouterBackendsByCapability(cap)` minflok
@@ -55,7 +55,7 @@ ma jimmaniġġjaw kull sidecar b’każijiet speċjali.
 
 ¹ Il-promozzjoni ta’ Bifrost għal servizz inkorporat `supervised` (li jista’ jiġi installat/jinbeda
 minn `/api/services/bifrost/`) hija segwita f’
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); sakemm din tingħaqad,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); sakemm din tingħaqad,
 Bifrost huwa `external` biss (aċċessibbli esklussivament permezz ta’ `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -127,8 +127,8 @@ tad-dispaċċ; is-superfiċje ewlenija `/api/v1/chat/completions` qatt ma tikkon
 Bħalissa l-għażla hija **kollox jew xejn fil-livell tar-relay** — ma hemm ebda bidla
 tal-engine għal kull provider jew għal kull request fuq `release/v3.8.43`. Il-gate
 għal kull request qiegħed jiżdied permezz tax-xogħol fuq is-sidecar manifest
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 li jippermetti lil `auto` jgħaddi minn Bifrost biss il-providers eliġibbli skont
 il-manifest.
 

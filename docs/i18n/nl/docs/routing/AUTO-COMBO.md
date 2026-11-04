@@ -133,13 +133,13 @@ Automatische scoring selecteert per request de beste provider/het beste model
 Een combo waarvan de `name` identiek is aan een kale model-id (bijvoorbeeld een combo met de naam
 `gpt-5.5`) is een **opzettelijk, ondersteund patroon**, geen bug: dit is het
 mechanisme voor providerfallback per model-id dat wordt beschreven in
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Omdat combo-
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Omdat combo-
 resolutie vóór de resolutie van kale model-id's wordt gecontroleerd
 (`getComboForModel()` in `src/sse/services/model.ts`), wordt een verzoek voor de kale
 id `gpt-5.5` via de doelen van de combo gerouteerd (bijvoorbeeld
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) in plaats van rechtstreeks naar
 één provider — dit hergebruikt de prioriteit van combo vóór herschrijving die is gebouwd voor
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) en wordt met regressietests getest door `tests/unit/responses-combo-resolution-3227.test.ts` en
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) en wordt met regressietests getest door `tests/unit/responses-combo-resolution-3227.test.ts` en
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
 Het maken of hernoemen van een combo naar een naam die een echte model-id overschaduwt, wordt
@@ -184,7 +184,7 @@ Twee veelvoorkomende valkuilen:
 - **`auto` gebruikt uw combo's niet.** `auto`/`auto/*` bouwt een eigen kandidaatpool zonder configuratie en raadpleegt opgeslagen combo's alleen als een combo letterlijk `auto` heet (niet aanbevolen). Om via een combo te routeren, verzendt u de exacte naam ervan — niet `auto`.
 - **`openrouter/auto` is een echt betaald OpenRouter-product** ("Auto Best Available"), geen OmniRoute-alias. Het is de enige statische modelvermelding in het OpenRouter-register (`open-sse/config/providers/registry/openrouter/index.ts`) en wordt afzonderlijk gefactureerd. Gebruik Instellingen → Routering → Betaalde modellen verbergen om het uit `auto`-pools uit te sluiten.
 
-Zie [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) en [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) voor de oorspronkelijke verwarring die hiermee wordt gedocumenteerd.
+Zie [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) en [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) voor de oorspronkelijke verwarring die hiermee wordt gedocumenteerd.
 
 ## Hoe het werkt (opgeslagen Auto-Combo's)
 

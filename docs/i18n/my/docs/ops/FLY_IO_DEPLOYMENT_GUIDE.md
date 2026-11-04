@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 ကုဒ်ကို Clone လုပ်ပြီး Directory ထဲသို့ ဝင်ရောက်ခြင်း
 
 ```powershell
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly သည် machines များကို rolling update အလိုအလ�
 
 ### 9.1 သင့် Fork ၏ `fly.toml` ကို ထိန်းသိမ်းထားစဉ် Upstream Repository အပ်ဒိတ်များကို လိုက်လံရယူခြင်း
 
-လက်ရှိ repository သည် fork တစ်ခုဖြစ်ပြီး upstream `https://github.com/cheaper-inference/OmniRoute` မှ အပ်ဒိတ်များကို sync လုပ်လိုပါက အောက်ပါ workflow ကို လိုက်နာပါ။
+လက်ရှိ repository သည် fork တစ်ခုဖြစ်ပြီး upstream `https://github.com/diegosouzapw/OmniRoute` မှ အပ်ဒိတ်များကို sync လုပ်လိုပါက အောက်ပါ workflow ကို လိုက်နာပါ။
 
 ဦးစွာ သင့် remotes များကို အတည်ပြုပါ-
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` ကို မသတ်မှတ်ရသေးပါက ထည့်သွင်းပါ-
 
 ```powershell
-git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
+git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
 ```
 
 Upstream နှင့် sync မလုပ်မီ နောက်ဆုံး commits နှင့် tags များကို ရယူပါ-

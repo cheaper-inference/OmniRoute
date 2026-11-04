@@ -137,8 +137,8 @@ HAR จะถอดรหัสเวลาหมดอายุของ JWT �
 
 ## เอกสารอ้างอิง
 
-- ปัญหา: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- การสนทนา: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- ปัญหา: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- การสนทนา: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - ซอร์ส: `src/shared/constants/providers/web-cookie.ts` (คำจำกัดความของผู้ให้บริการ)
 - การนำเข้า HAR: `src/shared/utils/m365HarImport.ts`
 - ฟิลด์ข้อมูลประจำตัว: `src/shared/providers/webSessionCredentials.ts`

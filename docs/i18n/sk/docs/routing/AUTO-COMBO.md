@@ -132,13 +132,13 @@ Automatické vyhodnocovanie vyberie pre každú požiadavku najlepšieho poskyto
 Kombinácia, ktorej `name` je zhodný s holým identifikátorom modelu (napr. kombinácia s názvom
 `gpt-5.5`), je **zámerný a podporovaný vzor**, nie chyba: ide o
 mechanizmus záložného prepínania poskytovateľov pre jednotlivé identifikátory modelov, zdokumentovaný v
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Keďže rozlíšenie
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Keďže rozlíšenie
 kombinácie sa kontroluje pred rozlíšením holého identifikátora modelu
 (`getComboForModel()` v `src/sse/services/model.ts`), požiadavka na holý
 identifikátor `gpt-5.5` je smerovaná cez ciele kombinácie (napr.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) namiesto priameho smerovania
 k jedinému poskytovateľovi — opätovne sa tým využíva priorita kombinácie pred prepisovaním, vytvorená pre
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), a regresne sa testuje pomocou `tests/unit/responses-combo-resolution-3227.test.ts` a
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), a regresne sa testuje pomocou `tests/unit/responses-combo-resolution-3227.test.ts` a
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
 Vytvorenie alebo premenovanie kombinácie na názov, ktorý prekrýva skutočný identifikátor modelu,
@@ -183,7 +183,7 @@ Dve bežné nástrahy:
 - **`auto` nepoužíva vaše kombinácie.** `auto`/`auto/*` vytvára vlastnú množinu kandidátov bez potreby konfigurácie a uložené kombinácie zohľadní iba vtedy, ak má niektorá kombinácia doslova názov `auto` (neodporúča sa). Ak chcete smerovať cez kombináciu, odošlite jej presný názov — nie `auto`.
 - **`openrouter/auto` je skutočný platený produkt OpenRouter** („Auto Best Available“), nie alias OmniRoute. Ide o jedinú statickú položku modelu v registri OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) a účtuje sa samostatne. Ak ho chcete vylúčiť z množín `auto`, použite Nastavenia → Smerovanie → Skryť platené modely.
 
-Pôvodné nejasnosti, ktoré táto dokumentácia objasňuje, nájdete v [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) a [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111).
+Pôvodné nejasnosti, ktoré táto dokumentácia objasňuje, nájdete v [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) a [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111).
 
 ## Ako to funguje (perzistentné automatické kombinácie)
 

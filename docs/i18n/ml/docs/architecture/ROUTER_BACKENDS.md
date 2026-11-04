@@ -4,9 +4,9 @@
 
 ---
 
-> **നില:** അംഗീകരിച്ചു · **സന്ദർഭം:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **കരാർ:** `domain/routing/routerBackends.ts`
-> (ടൈപ്പ് ചെയ്ത രജിസ്ട്രി — കോഡ് [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-നോടൊപ്പം ലഭ്യമാകും)
+> **നില:** അംഗീകരിച്ചു · **സന്ദർഭം:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **കരാർ:** `domain/routing/routerBackends.ts`
+> (ടൈപ്പ് ചെയ്ത രജിസ്ട്രി — കോഡ് [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-നോടൊപ്പം ലഭ്യമാകും)
 
 `ts` (നേറ്റീവ്), `bifrost`, `cliproxy`, `9router`, കൂടാതെ
 VibeProxy-അനുയോജ്യമായ എഞ്ചിനുകൾ പരസ്പരം എങ്ങനെ ബന്ധപ്പെട്ടിരിക്കുന്നു എന്ന് ഈ ADR കൃത്യമായി നിർവചിക്കുന്നു; ഇതിലൂടെ വാസ്തുവിദ്യാപരമായി വ്യത്യസ്തമായ രണ്ട് കാര്യങ്ങൾ സംഭാവകർ കൂട്ടിക്കുഴയ്ക്കുന്നത് ഒഴിവാക്കാം. router-backend-registry പ്രവർത്തനത്തിലൂടെ അവതരിപ്പിച്ച ടൈപ്പ് ചെയ്ത
@@ -36,7 +36,7 @@ VibeProxy-അനുയോജ്യമായ എഞ്ചിനുകൾ പര�
 ## രജിസ്ട്രി — ഏക ആധികാരിക സ്രോതസ്സ്
 
 `domain/routing/routerBackends.ts` കരാർ (കോഡ്
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-നോടൊപ്പം ലഭ്യമാകും) ഓരോ എഞ്ചിനെയും അതിന്റെ
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-നോടൊപ്പം ലഭ്യമാകും) ഓരോ എഞ്ചിനെയും അതിന്റെ
 ലൈഫ്സൈക്കിൾ, ശേഷികൾ, സർവീസ് ഐഡന്റിറ്റി, ഡിഫോൾട്ട് പോർട്ട്, ആരോഗ്യനില കോൺഫിഗറേഷൻ,
 ടെലിമെട്രി പിന്തുണ എന്നിവ സഹിതം ഒരിക്കൽ മാത്രം പ്രഖ്യാപിക്കുന്നു. ഓരോ സൈഡ്കാറിനും പ്രത്യേകം വ്യവസ്ഥകൾ
 നൽകുന്നതിനുപകരം, ഉപഭോക്താക്കൾ `getRouterBackend(id)`,
@@ -52,7 +52,7 @@ VibeProxy-അനുയോജ്യമായ എഞ്ചിനുകൾ പര�
 
 ¹ Bifrost-നെ `supervised` എംബെഡഡ് സർവീസായി (`/api/services/bifrost/`-ൽ നിന്ന്
 ഇൻസ്റ്റാൾ/ആരംഭിക്കാവുന്ന വിധത്തിൽ) ഉയർത്തുന്ന പ്രവർത്തനം
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)-ൽ ട്രാക്ക് ചെയ്യുന്നു; അത് മെർജ് ചെയ്യുന്നതുവരെ,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)-ൽ ട്രാക്ക് ചെയ്യുന്നു; അത് മെർജ് ചെയ്യുന്നതുവരെ,
 Bifrost `external` മാത്രമാണ് (`BIFROST_BASE_URL` വഴി മാത്രം ലഭ്യമാകുന്നത്).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -126,8 +126,8 @@ Relay proxy path ആയ `/api/v1/relay/chat/completions` മാത്രമാ�
 എന്ന രീതിയിലാണ് — `release/v3.8.43`-ൽ ഓരോ provider-നോ ഓരോ request-നോ അടിസ്ഥാനമാക്കിയുള്ള
 engine swap ഇല്ല. ഓരോ request-നുമുള്ള gate sidecar-manifest പ്രവർത്തനത്തിലൂടെ
 ചേർക്കപ്പെടുകയാണ്
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ഇത് manifest-eligible provider-കളെ മാത്രം Bifrost വഴി route ചെയ്യാൻ `auto`-യെ
 അനുവദിക്കുന്നു.
 

@@ -29,7 +29,7 @@ Is é `:latest` an leagan cobhsaí SemVer **foilsithe** is airde. Ní leanann s�
 ### Rogha C: Ón gCód Foinseach
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ Scipeálann OmniRoute soláthraithe ar theip orthu go huathoibríoch agus bainea
 
 - **[Fabhtcheartú](../guides/TROUBLESHOOTING.md)** — Fadhbanna coitianta agus réitigh
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Tacaíocht ón bpobal
-- **[Fadhbanna GitHub](https://github.com/cheaper-inference/OmniRoute/issues)** — Tuairiscigh fabhtanna
+- **[Fadhbanna GitHub](https://github.com/diegosouzapw/OmniRoute/issues)** — Tuairiscigh fabhtanna

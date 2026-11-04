@@ -136,7 +136,7 @@ sistem 2 tərəfindən isə seçim əsasında aktivləşdirildikdən sonra təmi
 
 ## 4. Bir prosesdə uzun `/v1/responses` (sağlam ehtiyat)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437), yığın
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437), yığın
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` həddindən aşağı olduqda struktur baxımından
 ağır ikinci sorğunun qəbul edilməsi üçün `tryAcquireHealthyHeadroom` əlavə etdi.
 `admitChatRequest` tərəfindən istifadə edilən BYTE yolu (həcmi

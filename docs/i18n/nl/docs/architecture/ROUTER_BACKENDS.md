@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Geaccepteerd · **Context:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Contract:** `domain/routing/routerBackends.ts`
-> (getypeerd register — code wordt toegevoegd met [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
+> **Status:** Geaccepteerd · **Context:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Contract:** `domain/routing/routerBackends.ts`
+> (getypeerd register — code wordt toegevoegd met [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
 
 Deze ADR legt vast hoe `ts` (native), `bifrost`, `cliproxy`, `9router` en
 VibeProxy-compatibele engines zich tot elkaar verhouden, zodat bijdragers niet
@@ -39,7 +39,7 @@ uitsluitend `external` was.
 ## Het register — de enige bron van waarheid
 
 Het contract `domain/routing/routerBackends.ts` (code wordt toegevoegd met
-[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) declareert elke engine één keer, met diens
+[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) declareert elke engine één keer, met diens
 levenscyclus, mogelijkheden, service-identiteit, standaardpoort, gezondheidsconfiguratie en
 ondersteuning voor telemetrie. Consumers zoeken engines op via `getRouterBackend(id)`,
 `listRouterBackends()` en `listRouterBackendsByCapability(cap)`, in plaats van
@@ -55,7 +55,7 @@ speciale logica voor elke sidecar te gebruiken.
 
 ¹ De promotie van Bifrost tot een `supervised` ingebedde service (installeerbaar/startbaar
 vanuit `/api/services/bifrost/`) wordt bijgehouden in
-[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); totdat deze wordt samengevoegd,
+[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); totdat deze wordt samengevoegd,
 is Bifrost uitsluitend `external` (alleen bereikbaar via `BIFROST_BASE_URL`).
 
 Met `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ het hoofdoppervlak `/api/v1/chat/completions` raadpleegt
 De selectie is momenteel **alles-of-niets op relayniveau** — er is geen enginewissel per provider
 of per verzoek op `release/v3.8.43`. De gate per verzoek wordt toegevoegd
 door het sidecar-manifestwerk
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 waardoor `auto` alleen providers die volgens het manifest in aanmerking komen via Bifrost kan routeren.
 
 ## Dashboardintegratie

@@ -92,7 +92,7 @@ OmniRoute ವಿಭಿನ್ನ ವ್ಯಾಪ್ತಿಗಳನ್ನು ಹ�
 
 ## 4. ಒಂದೇ-processನ ದೀರ್ಘ `/v1/responses` (healthy-headroom)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ನಲ್ಲಿ
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ನಲ್ಲಿ
 `tryAcquireHealthyHeadroom` ಅನ್ನು ಸೇರಿಸಲಾಗಿದೆ; ಇದರಿಂದ heap
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`ಗಿಂತ ಕೆಳಗಿರುವಾಗ ರಚನಾತ್ಮಕವಾಗಿ ಭಾರವಾದ
 ಎರಡನೇ request ಅನ್ನು ಅನುಮತಿಸಲಾಗುತ್ತದೆ. `admitChatRequest` ಬಳಸುವ BYTE

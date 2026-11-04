@@ -5,7 +5,7 @@
 ---
 
 เทมเพลต: xquik #11370 (ผสานแล้วใน release/v3.8.51) รูปแบบการทำงาน: `fallbackOnly`
-ข้อเสนอต้นทาง: issue cheaper-inference/OmniRoute#11637
+ข้อเสนอต้นทาง: issue diegosouzapw/OmniRoute#11637
 
 ## 1. ข้อเท็จจริงพื้นฐานของบริการ (เอกสารอย่างเป็นทางการ, ตรวจสอบเทียบเคียงแล้ว)
 

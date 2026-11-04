@@ -113,7 +113,7 @@ npm start
 Utan ett bygge med aktiverad inbäddning vägrar sidan att visas i en ram. Tillägget upptäcker detta via
 svarsrubrikerna och återgår till den externa webbläsaren – ingenting slutar fungera, och ett meddelande om detta visas en gång.
 Se [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) och ärende
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

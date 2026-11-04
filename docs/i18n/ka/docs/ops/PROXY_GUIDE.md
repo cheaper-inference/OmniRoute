@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy-ის უფასო პროქსი-მარკეტპლეისი
 
-> 🆕 **წვლილი შეიტანა [@oyi77](https://github.com/oyi77)-მა** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **წვლილი შეიტანა [@oyi77](https://github.com/oyi77)-მა** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute ინტეგრირებულია **[1proxy](https://1proxy-api.aitradepulse.com)** საზოგადოებრივ პლატფორმასთან, რათა უზრუნველყოს წვდომა მთელი მსოფლიოდან მიღებულ **ასობით უფასო, გადამოწმებულ პროქსიზე**. ეს იდეალურია მომხმარებლებისთვის, რომლებსაც საკუთარი პროქსი-ინფრასტრუქტურა არ აქვთ.
 

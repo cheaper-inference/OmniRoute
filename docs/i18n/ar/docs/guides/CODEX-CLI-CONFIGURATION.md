@@ -478,7 +478,7 @@ codex debug models --bundled       # سرد كتالوج النماذج المض
 | تستمر الجلسة في تبديل الحسابات / تُفقد استمرارية ذاكرة المطالبات المؤقتة بين الأدوار | قيمة TTL لتقارب الجلسة هي `0` (معطّل)                              | `sessionAffinityTtlMs`   |
 | ينقطع الاتصال أثناء الاستدلال دون مطالبة ظاهرة للعميل                                | فُعّلت آلية مراقبة خمول التدفق بعد 10 دقائق دون جزء وارد من المنبع | `STREAM_IDLE_TIMEOUT_MS` |
 
-مناقشات ذات صلة: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (انقطاع المهام الطويلة)، [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (سبب تعطيل التقارب افتراضيًا). التتبع: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+مناقشات ذات صلة: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (انقطاع المهام الطويلة)، [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (سبب تعطيل التقارب افتراضيًا). التتبع: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. تقارب الجلسة — تثبيت محادثة واحدة على حساب واحد
 

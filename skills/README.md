@@ -22,7 +22,7 @@ See [`docs/frameworks/AGENT-SKILLS.md`](../docs/frameworks/AGENT-SKILLS.md) for 
 ## API Skills (23)
 
 Each manifest URL follows the pattern:
-`https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/<id>/SKILL.md`
+`https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/<id>/SKILL.md`
 
 | ID                     | Name                          | Description                                                                                                                                                                                    |
 | ---------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -91,13 +91,13 @@ Each manifest URL follows the pattern:
 All manifests are publicly accessible:
 
 ```
-https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/<id>/SKILL.md
+https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/<id>/SKILL.md
 ```
 
 Examples:
 
-- API entry: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md`
-- CLI entry: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md`
+- API entry: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md`
+- CLI entry: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md`
 
 ---
 

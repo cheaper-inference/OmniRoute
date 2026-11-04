@@ -41,7 +41,7 @@ Bu Davranış Kuralları tüm topluluk alanlarında geçerlidir ve ayrıca bir b
 ## Yaptırım
 
 İstismar edici, taciz edici veya başka bir şekilde kabul edilemez davranış durumları, yaptırımdan sorumlu topluluk liderlerine şu adresten özel bir güvenlik bildirimi (security advisory) açılarak bildirilebilir:
-<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
+<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
 veya proje yöneticisine diegosouza.pw@outlook.com adresinden e-posta gönderilebilir.
 Güvenlikle ilgili hassas olaylar için bkz. [`SECURITY.md`](SECURITY.md).
 Tüm şikayetler derhal ve adil bir şekilde incelenecek ve araştırılacaktır.

@@ -5,7 +5,7 @@
 ---
 
 Modello: xquik #11370 (integrato in release/v3.8.51). Assetto: `fallbackOnly`.
-Proposta upstream: issue cheaper-inference/OmniRoute#11637.
+Proposta upstream: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Dati di riferimento del servizio (documentazione ufficiale, sottoposta a verifica incrociata)
 

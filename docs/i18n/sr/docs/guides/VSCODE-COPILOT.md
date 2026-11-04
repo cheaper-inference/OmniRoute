@@ -115,7 +115,7 @@ npm start
 Без верзије изграђене са омогућеним уграђивањем, страница одбија приказивање у оквиру, екстензија то
 открива из заглавља одговора и прелази на спољни прегледач — ништа се не квари, а обавештење о томе
 приказује се једном. Погледајте [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) и проблем
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
 
 ---
 

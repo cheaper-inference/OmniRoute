@@ -244,7 +244,7 @@ Kaspersky-ის `PDM:` პრეფიქსი ნიშნავს, რო�
    [Convert]::ToBase64String($b)
    ```
    შედეგი უნდა ემთხვეოდეს `latest.yml` → `sha512`-ს. თუ არ ემთხვევა, წაშალეთ ფაილი და
-   ხელახლა ჩამოტვირთეთ მხოლოდ [GitHub-ის გამოშვებების გვერდიდან](https://github.com/cheaper-inference/OmniRoute/releases).
+   ხელახლა ჩამოტვირთეთ მხოლოდ [GitHub-ის გამოშვებების გვერდიდან](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **აღადგინეთ + დაამატეთ გამონაკლისი** — აღადგინეთ უკუაქცეული ელემენტები კარანტინიდან და დაამატეთ
    გამონაკლისი `%LOCALAPPDATA%\Programs\OmniRoute`-ისთვის (Kaspersky → Settings → Threats and Exclusions),
    შემდეგ ხელახლა დააინსტალირეთ.
@@ -839,7 +839,7 @@ omniroute serve --ready-timeout 180000
 
 ## ისევ შეფერხებულია?
 
-- **GitHub-ის პრობლემები**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **GitHub-ის პრობლემები**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **არქიტექტურა**: შიდა დეტალებისთვის იხილეთ [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API-ის ცნობარი**: ყველა საბოლოო წერტილისთვის იხილეთ [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **მდგომარეობის დაფა**: სისტემის რეალურ დროში მდგომარეობის სანახავად შეამოწმეთ **Dashboard → Health**

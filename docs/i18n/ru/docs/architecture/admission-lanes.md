@@ -128,7 +128,7 @@ Combo (приоритет / циклический перебор) и fusion р�
 
 ## 4. Длительные `/v1/responses` в одном процессе (healthy-headroom)
 
-В [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) была добавлена
+В [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) была добавлена
 `tryAcquireHealthyHeadroom`, благодаря чему второй структурно тяжёлый запрос допускается,
 когда использование кучи ниже `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Путь BYTE,
 используемый `admitChatRequest` (тела размером ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

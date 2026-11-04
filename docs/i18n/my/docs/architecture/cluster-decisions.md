@@ -6,7 +6,7 @@
 
 **အခြေအနေ:** အဆိုပြုချက် (@diegosouzapw ၏ သုံးသပ်ချက်ကို စောင့်ဆိုင်းနေသည်)
 **ရက်စွဲ:** 2026-06-20
-**ကိုးကားချက်များ:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
+**ကိုးကားချက်များ:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
 
 ## အကျဉ်းချုပ်
 

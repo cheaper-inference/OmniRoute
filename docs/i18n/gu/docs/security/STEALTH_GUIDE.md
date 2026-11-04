@@ -173,7 +173,7 @@ Antigravity વિનંતીઓ કૉલરના ટેક્સ્ટને
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` વાંચે છે
 - `src/lib/oauth/providers/antigravity.ts` — ક્રેડેન્શિયલ પ્લમ્બિંગ
-- મૂળ ઘટનાનો અહેવાલ: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- મૂળ ઘટનાનો અહેવાલ: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

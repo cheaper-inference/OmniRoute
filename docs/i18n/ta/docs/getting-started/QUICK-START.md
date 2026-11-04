@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### விருப்பம் C: மூலக் குறியீட்டிலிருந்து
 
 ```bash
-git clone https://github.com/cheaper-inference/OmniRoute.git
+git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute தானாகவே **இலவசமானதும் திறந
 
 - **[பிழைத்திருத்தம்](../guides/TROUBLESHOOTING.md)** — பொதுவான சிக்கல்களும் தீர்வுகளும்
 - **[Discord](https://discord.gg/U47eFqAXCn)** — சமூக ஆதரவு
-- **[GitHub சிக்கல்கள்](https://github.com/cheaper-inference/OmniRoute/issues)** — பிழைகளைப் புகாரளிக்கவும்
+- **[GitHub சிக்கல்கள்](https://github.com/diegosouzapw/OmniRoute/issues)** — பிழைகளைப் புகாரளிக்கவும்

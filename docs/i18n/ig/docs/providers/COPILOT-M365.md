@@ -138,8 +138,8 @@ izobe onye na-eweta ọrụ ahụ na ndabara n'ọkwa ụfọdụ.
 
 ## Ntụaka
 
-- Nsogbu: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Mkparịta ụka: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Nsogbu: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Mkparịta ụka: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Isi mmalite: `src/shared/constants/providers/web-cookie.ts` (nkọwa onye na-eweta ọrụ)
 - Mbubata HAR: `src/shared/utils/m365HarImport.ts`
 - Oghere nzere: `src/shared/providers/webSessionCredentials.ts`

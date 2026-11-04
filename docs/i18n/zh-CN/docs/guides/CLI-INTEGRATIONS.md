@@ -180,7 +180,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 
 API 密钥通过 **stdin**（`--api-key=-`）传递给 5dive，因此绝不会出现在 `ps` 输出中。
 
-将配置指向 OmniRoute **组合**而非单一模型，才能让集群获得提供者故障转移能力：在 [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) 记录的运行中，主要端点在交互中途完全宕机后，智能体通过后备端点完成了剩余步骤，且未向外暴露此次中断。
+将配置指向 OmniRoute **组合**而非单一模型，才能让集群获得提供者故障转移能力：在 [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) 记录的运行中，主要端点在交互中途完全宕机后，智能体通过后备端点完成了剩余步骤，且未向外暴露此次中断。
 
 ---
 

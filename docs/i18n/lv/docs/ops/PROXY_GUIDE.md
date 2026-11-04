@@ -261,7 +261,7 @@ Tas notiek vienreiz, veicot pirmo palaišanu pēc jaunināšanas. Lai migrāciju
 
 ## 1proxy bezmaksas starpniekserveru tirgus
 
-> 🆕 **Pievienoja [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (problēma [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
+> 🆕 **Pievienoja [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (problēma [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
 
 OmniRoute integrējas ar **[1proxy](https://1proxy-api.aitradepulse.com)** kopienas platformu, lai nodrošinātu piekļuvi **simtiem bezmaksas, pārbaudītu starpniekserveru** no visas pasaules. Tas ir lieliski piemērots lietotājiem, kuriem nav savas starpniekserveru infrastruktūras.
 

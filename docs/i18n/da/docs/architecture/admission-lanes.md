@@ -127,7 +127,7 @@ for en anden") håndhæves ubetinget af system 1 og af system 2, når tilvalg er
 
 ## 4. Langvarig `/v1/responses` i én proces (sund reservekapacitet)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) tilføjede
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) tilføjede
 `tryAcquireHealthyHeadroom`, så endnu en strukturelt tung request tillades,
 når heapen er under `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. BYTE-stien,
 som bruges af `admitChatRequest` (request bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

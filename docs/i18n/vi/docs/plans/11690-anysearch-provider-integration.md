@@ -5,7 +5,7 @@
 ---
 
 Template: xquik #11370 (đã hợp nhất vào release/v3.8.51). Posture: `fallbackOnly`.
-Đề xuất upstream: issue cheaper-inference/OmniRoute#11637.
+Đề xuất upstream: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Thông tin chuẩn xác về dịch vụ (tài liệu chính thức, đã kiểm tra chéo)
 

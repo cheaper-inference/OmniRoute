@@ -198,7 +198,7 @@ Postavljeno preko `session.defaultSession.webRequest.onHeadersReceived`. Značaj
 
 ## Automatsko ažuriranje
 
-Koristi `electron-updater` sa GitHub provajderom (`cheaper-inference/OmniRoute`).
+Koristi `electron-updater` sa GitHub provajderom (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Događaji se prosljeđuju rendereru preko `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (sa `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakti slijeću u `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Izdanja se objavljuju u GitHub izdanjima (`cheaper-inference/OmniRoute`), gdje `electron-updater` također provjerava nove verzije.
+Izdanja se objavljuju u GitHub izdanjima (`diegosouzapw/OmniRoute`), gdje `electron-updater` također provjerava nove verzije.
 
 ## Rješavanje problema
 

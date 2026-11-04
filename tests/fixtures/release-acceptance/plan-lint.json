@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "identity": {
-    "repository": "cheaper-inference/OmniRoute",
+    "repository": "diegosouzapw/OmniRoute",
     "run_id": "1",
     "run_attempt": 1,
     "workflow": "release-acceptance.yml",

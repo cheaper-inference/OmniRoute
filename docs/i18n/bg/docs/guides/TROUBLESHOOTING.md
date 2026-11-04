@@ -250,7 +250,7 @@ localhost не може да използва `https` без усложнени�
    [Convert]::ToBase64String($b)
    ```
    Резултатът трябва да съвпада с `latest.yml` → `sha512`. Ако не съвпада, изтрийте файла и
-   го изтеглете отново само от [страницата с версии в GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
+   го изтеглете отново само от [страницата с версии в GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
 2. **Възстановете + изключете** — възстановете премахнатите елементи от карантината и добавете изключение
    за `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    след което преинсталирайте.
@@ -846,7 +846,7 @@ omniroute serve --ready-timeout 180000
 
 ## Все още не работи?
 
-- **Проблеми в GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
+- **Проблеми в GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
 - **Архитектура**: Вижте [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) за подробности относно вътрешната структура
 - **Справочник за API**: Вижте [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) за всички крайни точки
 - **Табло за състоянието**: Проверете **Табло → Състояние** за състоянието на системата в реално време

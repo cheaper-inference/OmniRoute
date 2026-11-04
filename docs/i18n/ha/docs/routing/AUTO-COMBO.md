@@ -132,13 +132,13 @@ handleComboChat (inji iri ɗaya da na combo da aka adana)
 Combo wanda `name` ɗinsa yake daidai da ainihin model id kai tsaye (misali, combo mai suna
 `gpt-5.5`) wani **tsari ne da aka yi da gangan kuma ake tallafawa**, ba bug ba ne: shi ne
 hanyar komawa ga wani provider daban bisa kowane model id da aka rubuta a
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Saboda ana duba warware combo
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Saboda ana duba warware combo
 kafin warware model id kai tsaye
 (`getComboForModel()` a cikin `src/sse/services/model.ts`), buƙatar ainihin
 id `gpt-5.5` za ta bi ta cikin targets na combo (misali,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) maimakon a tura ta kai tsaye zuwa
 provider guda ɗaya — wannan yana sake amfani da fifikon combo-kafin-rewrite da aka gina domin
-[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), kuma ana yi masa
+[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), kuma ana yi masa
 gwajin regression ta `tests/unit/responses-combo-resolution-3227.test.ts` da
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Kurakurai biyu da aka fi yi:
 - **`auto` ba ya amfani da combos ɗinka.** `auto`/`auto/*` yana gina nasa candidate pool na zero-config kuma yana duba persisted combos ne kawai idan akwai combo da ainihin sunansa yake `auto` (ba a ba da shawarar hakan). Domin a yi routing ta combo, aika ainihin sunansa — ba `auto` ba.
 - **`openrouter/auto` ainihin samfurin OpenRouter ne mai kuɗi** ("Auto Best Available"), ba alias na OmniRoute ba ne. Shi ne model entry guda ɗaya tak na OpenRouter registry (`open-sse/config/providers/registry/openrouter/index.ts`) kuma ana cajinsa daban. Yi amfani da Saituna → Routing → Ɓoye models masu kuɗi domin cire shi daga `auto` pools.
 
-Duba [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) da [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) domin ruɗanin farko da wannan rubutun ke fayyacewa.
+Duba [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) da [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) domin ruɗanin farko da wannan rubutun ke fayyacewa.
 
 ## Yadda Yake Aiki (Auto-Combos Masu Dorewa)
 

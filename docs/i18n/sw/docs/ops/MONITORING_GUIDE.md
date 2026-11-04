@@ -223,7 +223,7 @@ livenessProbe:
 
 **Usielekeze** **liveness** ya kubelet kwenye `/api/monitoring/health`. Njia hiyo hufanya kazi halisi ya DB/ufuatiliaji na itatoa matokeo chanya ya uongo chini ya mzigo.
 
-Yanayohusiana: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (uchunguzi wakati kitanzi cha matukio kina shughuli nyingi), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (ukokotoaji wa bei wa katalogi unaotawala rasilimali), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (uhesabuji wa tokeni za ufinyazaji unaotawala rasilimali).
+Yanayohusiana: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (uchunguzi wakati kitanzi cha matukio kina shughuli nyingi), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (ukokotoaji wa bei wa katalogi unaotawala rasilimali), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (uhesabuji wa tokeni za ufinyazaji unaotawala rasilimali).
 
 ### watchdog ya systemd (kitanzi cha matukio kilichoganda)
 

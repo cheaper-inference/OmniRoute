@@ -5,7 +5,7 @@
 ---
 
 - **အခြေအနေ:** အဆိုပြုထားသည် — runtime လုပ်ငန်းမစတင်မီ ထိန်းသိမ်းသူ၏ အတည်ပြုချက် လိုအပ်သည်
-- **ခြေရာခံ issue:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
+- **ခြေရာခံ issue:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
 - **နယ်ပယ်:** Persistence ဗိသုကာတစ်ခုတည်းသာ၊ ဤဆုံးဖြတ်ချက်သည် ပြင်ပ database တစ်ခုကို ထည့်သွင်းခြင်း သို့မဟုတ် ရွေးချယ်ခြင်း မပြုပါ
 
 ## အခြေအနေအရပ်ရပ်

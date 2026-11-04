@@ -155,7 +155,7 @@ omniroute simulate [prompt]
 
 # OmniRoute — CLI Evals
 
-Requires the `omniroute` CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md) for install + global flags.
+Requires the `omniroute` CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md) for install + global flags.
 
 ## What are evals?
 
@@ -261,5 +261,4 @@ python3 -c "import sys; score=float('$SCORE'); sys.exit(0 if score >= 0.90 else 
 - `suites run` returns `model not found` → verify model ID with `omniroute models --search <name>`
 - `eval get` shows `status: failed` → check `omniroute logs --search eval` for error details
 - `scorecard` returns empty results → the run may still be `running`; poll `omniroute eval get <runId>` until `status` is `completed`
-
 <!-- skill:custom-end -->

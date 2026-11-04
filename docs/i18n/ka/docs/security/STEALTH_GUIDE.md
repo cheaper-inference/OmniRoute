@@ -181,7 +181,7 @@ Antigravity-ის მოთხოვნები გამომძახებ
 
 - `open-sse/executors/antigravity.ts` — კითხულობს `process.env.ANTIGRAVITY_CREDITS`-ს
 - `src/lib/oauth/providers/antigravity.ts` — ავტორიზაციის მონაცემების დამუშავება
-- ინციდენტის თავდაპირველი ანგარიში: განხილვა [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
+- ინციდენტის თავდაპირველი ანგარიში: განხილვა [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

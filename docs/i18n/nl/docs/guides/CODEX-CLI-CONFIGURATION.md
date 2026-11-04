@@ -480,7 +480,7 @@ Twee standaardinstellingen van OmniRoute kunnen urenlange Codex CLI-sessies onge
 | Sessie blijft van account wisselen / continuïteit van de promptcache gaat tussen beurten verloren | TTL voor sessieaffiniteit is `0` (uitgeschakeld)                                           | `sessionAffinityTtlMs`   |
 | Verbinding wordt tijdens het redeneren verbroken zonder prompt aan de clientzijde                 | Watchdog voor inactieve streams is geactiveerd nadat er 10 minuten geen upstream-chunk was | `STREAM_IDLE_TIMEOUT_MS` |
 
-Gerelateerde discussies: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (langlopende taken worden afgebroken), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (waarom affiniteit standaard is uitgeschakeld). Tracking: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
+Gerelateerde discussies: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (langlopende taken worden afgebroken), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (waarom affiniteit standaard is uitgeschakeld). Tracking: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
 
 ### 1. Sessieaffiniteit — zet één gesprek vast op één account
 

@@ -424,7 +424,7 @@ implementace se připravuje).
 ### Ráčna CodeQL: četnost aktualizace a ruční spuštění
 
 `check:codeql-ratchet` načítá **stav repozitáře, který se aktualizuje podle plánu — nikoli pro každý PR.**
-Příkaz `gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` hlásí
+Příkaz `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` hlásí
 `state: configured`, `schedule: weekly`: jedná se o kontrolu výchozího nastavení GitHubu, nikoli o analýzu
 při každém pushi. Důsledek: po sloučení PR, který OPRAVUJE výstrahy, ráčna nadále načítá
 starý, vyšší počet až do spuštění následující plánované kontroly — takže hlásí regresi

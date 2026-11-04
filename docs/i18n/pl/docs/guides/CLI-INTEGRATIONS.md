@@ -199,7 +199,7 @@ w wynikach polecenia `ps`.
 Skierowanie profilu do **kombinacji** OmniRoute zamiast do pojedynczego modelu zapewnia
 flocie przełączanie awaryjne między dostawcami: gdy główny punkt końcowy przestał całkowicie działać w trakcie tury
 podczas przebiegu zarejestrowanego w
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agent ukończył
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agent ukończył
 pozostałe kroki przy użyciu dostawcy zapasowego, nie ujawniając awarii.
 
 ---

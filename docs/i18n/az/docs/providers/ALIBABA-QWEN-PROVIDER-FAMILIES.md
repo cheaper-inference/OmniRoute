@@ -5,7 +5,7 @@
 ---
 
 Bu sənəd
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) üçün implementasiya qərarını qeydə alır. İctimai məhsullar dörd provayder ailəsi kimi təqdim olunur. Region ayrıca məhsul deyil, bağlantı məlumatıdır.
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) üçün implementasiya qərarını qeydə alır. İctimai məhsullar dörd provayder ailəsi kimi təqdim olunur. Region ayrıca məhsul deyil, bağlantı məlumatıdır.
 
 ## Qərar
 

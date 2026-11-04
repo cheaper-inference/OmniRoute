@@ -181,7 +181,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 API key ត្រូវបានបញ្ជូនទៅ 5dive តាម **stdin** (`--api-key=-`) ដូច្នេះវាមិនដែលបង្ហាញក្នុងលទ្ធផលរបស់ `ps` ឡើយ។
 
 ការតម្រង់ប្រូហ្វាល់ទៅកាន់ **combo** របស់ OmniRoute ជំនួសឱ្យម៉ូដែលតែមួយ គឺជាអ្វីដែលផ្តល់ failover របស់ provider ដល់ fleet៖ នៅពេល endpoint ចម្បងដាច់ទាំងស្រុងនៅពាក់កណ្តាល turn ក្នុងការដំណើរការដែលបានកត់ត្រានៅ
-[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) agent បានបញ្ចប់ជំហានដែលនៅសល់របស់វាលើ fallback ហើយមិនបានបង្ហាញការដាច់សេវានោះឡើយ។
+[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) agent បានបញ្ចប់ជំហានដែលនៅសល់របស់វាលើ fallback ហើយមិនបានបង្ហាញការដាច់សេវានោះឡើយ។
 
 ---
 

@@ -62,8 +62,8 @@ Antigravity вернуло 33 таких ответа 403 за 10 минут и 
 `classifyProviderError` недостижимой для этой формулировки, поскольку
 `accountDeactivated` проверяется первой — поэтому восстановление маршрута проекта,
 добавленное для Gemini Code Assist в
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) и
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452), никогда не могло
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) и
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452), никогда не могло
 выполниться.
 
 Три расположенные рядом, но **отдельные** таблицы сигналов _не_ относятся к обнаружению

@@ -51,8 +51,8 @@ Razlika je važna jer terminalno podudaranje ima `permanent: true` (razdoblje č
 pregledniku. Zadržavanje fraze na popisu zabrana također je činilo oporavljivu granu za
 cloud-code 403 u `classifyProviderError` nedostupnom za ovu formulaciju jer se
 `accountDeactivated` provjerava prvi — stoga se oporavak projektne rute dodan za Gemini
-Code Assist u [#868](https://github.com/cheaper-inference/OmniRoute/pull/868) i
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) nikada nije mogao izvršiti.
+Code Assist u [#868](https://github.com/diegosouzapw/OmniRoute/pull/868) i
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) nikada nije mogao izvršiti.
 
 Tri susjedne, **zasebne** tablice signala _nisu_ dio otkrivanja zabranjenih ključnih riječi:
 

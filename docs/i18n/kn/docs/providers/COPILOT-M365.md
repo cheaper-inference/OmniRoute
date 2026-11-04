@@ -127,8 +127,8 @@ OmniRoute, Chathub WebSocket URL ಗಾಗಿ HAR ಅನ್ನು ಸ್ಕ್�
 
 ## ಉಲ್ಲೇಖಗಳು
 
-- ಸಮಸ್ಯೆ: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- ಚರ್ಚೆ: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- ಸಮಸ್ಯೆ: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- ಚರ್ಚೆ: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - ಮೂಲ: `src/shared/constants/providers/web-cookie.ts` (ಪೂರೈಕೆದಾರರ ವ್ಯಾಖ್ಯಾನ)
 - HAR ಆಮದು: `src/shared/utils/m365HarImport.ts`
 - ರುಜುವಾತು ಕ್ಷೇತ್ರಗಳು: `src/shared/providers/webSessionCredentials.ts`

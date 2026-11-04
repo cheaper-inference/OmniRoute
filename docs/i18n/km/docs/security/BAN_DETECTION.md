@@ -58,8 +58,8 @@ Google Cloud Code / Antigravity ត្រឡប់វាមកជា `403 VALIDA
 ការរក្សាឃ្លានេះក្នុងបញ្ជីហាមឃាត់ក៏បានធ្វើឱ្យសាខា cloud-code 403 ដែលអាចស្ដារឡើងវិញបាននៅក្នុង
 `classifyProviderError` មិនអាចចូលដំណើរការបានសម្រាប់ពាក្យពេចន៍នេះ ពីព្រោះ `accountDeactivated` ត្រូវបាន
 វាយតម្លៃមុន — ដូច្នេះ ការស្ដារផ្លូវគម្រោងដែលបានបន្ថែមសម្រាប់ Gemini Code Assist នៅក្នុង
-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) និង
-[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) មិនអាចដំណើរការបានឡើយ។
+[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) និង
+[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) មិនអាចដំណើរការបានឡើយ។
 
 តារាងសញ្ញាចំនួនបីដែលនៅជាប់គ្នា និង **ដាច់ដោយឡែកពីគ្នា** ខាងក្រោម _មិនមែន_ ជាផ្នែកនៃការរកឃើញពាក្យគន្លឹះហាមឃាត់ទេ៖
 

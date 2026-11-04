@@ -5,7 +5,7 @@
 ---
 
 Template: xquik #11370 (e jikọtara ya na release/v3.8.51). Ọnọdụ: `fallbackOnly`.
-Atụmatụ upstream: issue cheaper-inference/OmniRoute#11637.
+Atụmatụ upstream: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Eziokwu ntọala nke ọrụ ahụ (akwụkwọ ntụaka gọọmentị, enyochakwara ya n'akụkụ ndị ọzọ)
 

@@ -420,7 +420,7 @@ rodiklį neatnaujindamas bazinės reikšmės, bus aptiktas naudojant `--require-
 ### CodeQL reketas: atnaujinimo dažnis ir rankinis paleidimas
 
 `check:codeql-ratchet` nuskaito **saugyklos būseną, atnaujinamą pagal tvarkaraštį, o ne kiekvienam PR.**
-`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` pateikia
+`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` pateikia
 `state: configured`, `schedule: weekly`: tai GitHub numatytojo nustatymo nuskaitymas, o ne
 kiekvieno išsiuntimo analizė. Pasekmė: sujungus įspėjimus IŠTAISANTĮ PR, reketas toliau
 nuskaito seną, didesnį skaičių, kol bus paleistas kitas suplanuotas nuskaitymas, todėl

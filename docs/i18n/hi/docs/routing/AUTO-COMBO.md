@@ -132,12 +132,12 @@ handleComboChat (पर्सिस्टेड कॉम्बो वाला 
 जिस कॉम्बो का `name` किसी मूल मॉडल id के समान होता है (उदाहरण के लिए, `gpt-5.5`
 नाम वाला कॉम्बो), वह बग नहीं, बल्कि एक **जानबूझकर बनाया गया, समर्थित पैटर्न** है:
 यह प्रत्येक मॉडल id के लिए प्रोवाइडर फ़ॉलबैक का तंत्र है, जिसका दस्तावेज़ीकरण
-[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) में किया गया है। चूँकि मूल मॉडल id के समाधान से पहले कॉम्बो
+[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) में किया गया है। चूँकि मूल मॉडल id के समाधान से पहले कॉम्बो
 समाधान की जाँच की जाती है
 (`src/sse/services/model.ts` में `getComboForModel()`), इसलिए मूल
 id `gpt-5.5` के लिए अनुरोध को सीधे किसी एक प्रोवाइडर को भेजने के बजाय कॉम्बो के लक्ष्यों (जैसे
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) के माध्यम से रूट किया जाता है
-— यह [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) के लिए बनाई गई
+— यह [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) के लिए बनाई गई
 कॉम्बो-से-पहले-पुनर्लेखन प्राथमिकता का पुनः उपयोग करता है और इसका रिग्रेशन परीक्षण
 `tests/unit/responses-combo-resolution-3227.test.ts` तथा
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` द्वारा किया जाता है।
@@ -183,7 +183,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` आपके कॉम्बो का उपयोग नहीं करता।** `auto`/`auto/*` अपना स्वयं का शून्य-कॉन्फ़िगरेशन उम्मीदवार पूल बनाता है और स्थायी कॉम्बो का उपयोग केवल तभी करता है, जब किसी कॉम्बो का नाम वास्तव में `auto` हो (अनुशंसित नहीं)। किसी कॉम्बो के माध्यम से रूट करने के लिए उसका सटीक नाम भेजें — `auto` नहीं।
 - **`openrouter/auto` एक वास्तविक सशुल्क OpenRouter उत्पाद** ("Auto Best Available") **है**, OmniRoute उपनाम नहीं। यह OpenRouter रजिस्ट्री (`open-sse/config/providers/registry/openrouter/index.ts`) की एकल स्थिर मॉडल प्रविष्टि है और इसका बिल अलग से लिया जाता है। इसे `auto` पूल से बाहर रखने के लिए Settings → Routing → Hide paid models का उपयोग करें।
 
-मूल भ्रम, जिसका यह दस्तावेज़ीकरण करता है, उसके लिए [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) और [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) देखें।
+मूल भ्रम, जिसका यह दस्तावेज़ीकरण करता है, उसके लिए [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) और [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) देखें।
 
 ## यह कैसे काम करता है (स्थायी Auto-Combos)
 

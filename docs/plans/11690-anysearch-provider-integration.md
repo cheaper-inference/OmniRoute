@@ -1,7 +1,7 @@
 # AnySearch provider integration (PR #11690)
 
 Template: xquik #11370 (merged in release/v3.8.51). Posture: `fallbackOnly`.
-Upstream proposal: issue cheaper-inference/OmniRoute#11637.
+Upstream proposal: issue diegosouzapw/OmniRoute#11637.
 
 ## 1. Service ground truth (official docs, cross-checked)
 

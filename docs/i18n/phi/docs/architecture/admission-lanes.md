@@ -94,7 +94,7 @@ opt-in.
 
 ## 4. Mahabang `/v1/responses` sa iisang proseso (healthy-headroom)
 
-Idinagdag ng [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ang
+Idinagdag ng [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ang
 `tryAcquireHealthyHeadroom` upang tanggapin ang pangalawang request na mabigat sa
 estruktura kapag mas mababa ang heap sa `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`.
 Ginagamit ng BYTE path na ginagamit ng `admitChatRequest` (mga body na ≥

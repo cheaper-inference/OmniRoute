@@ -220,7 +220,7 @@ livenessProbe:
 
 **لا** توجّه فحص **الحيوية** في kubelet إلى `/api/monitoring/health`. ينفّذ هذا المسار عملًا فعليًا على قاعدة البيانات/المراقبة، وسينتج عنه تشخيص إيجابي زائف تحت الحمل.
 
-ذو صلة: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (المسابير عندما تكون حلقة الأحداث مشغولة)، [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (استحواذ تسعير الفهرس على الموارد)، [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (استحواذ عدّ الرموز أثناء الضغط على الموارد).
+ذو صلة: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (المسابير عندما تكون حلقة الأحداث مشغولة)، [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (استحواذ تسعير الفهرس على الموارد)، [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (استحواذ عدّ الرموز أثناء الضغط على الموارد).
 
 ### مراقب systemd (حلقة أحداث متجمدة)
 

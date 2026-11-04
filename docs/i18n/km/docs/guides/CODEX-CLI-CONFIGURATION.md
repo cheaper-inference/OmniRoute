@@ -478,7 +478,7 @@ codex debug models --bundled       # រាយកាតាឡុកម៉ូដ�
 | សម័យបន្តប្តូរគណនី / ភាពបន្តរបស់ឃ្លាំងសម្ងាត់ប្រូមត្រូវបានបាត់បង់រវាងវេន  | TTL នៃភាពស្និទ្ធសម័យគឺ `0` (បានបិទ)                                                        | `sessionAffinityTtlMs`   |
 | ការតភ្ជាប់ដាច់នៅពាក់កណ្តាលការវិភាគ ដោយគ្មានប្រូមបង្ហាញដល់កម្មវិធីអតិថិជន | ឧបករណ៍ឃ្លាំមើលភាពទំនេររបស់ស្ទ្រីមបានដំណើរការបន្ទាប់ពី 10 នាទី ដោយគ្មានបំណែកទិន្នន័យពីខាងលើ | `STREAM_IDLE_TIMEOUT_MS` |
 
-ការពិភាក្សាដែលពាក់ព័ន្ធ៖ [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (កិច្ចការយូរត្រូវបានផ្តាច់), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ហេតុអ្វីភាពស្និទ្ធត្រូវបានបិទជាលំនាំដើម)។ ការតាមដាន៖ [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)។
+ការពិភាក្សាដែលពាក់ព័ន្ធ៖ [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (កិច្ចការយូរត្រូវបានផ្តាច់), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ហេតុអ្វីភាពស្និទ្ធត្រូវបានបិទជាលំនាំដើម)។ ការតាមដាន៖ [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)។
 
 ### 1. ភាពស្និទ្ធសម័យ — ភ្ជាប់ការសន្ទនាមួយទៅគណនីមួយជាអចិន្ត្រៃយ៍
 

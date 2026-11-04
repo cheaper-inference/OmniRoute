@@ -118,7 +118,7 @@ Le corsie a livello di byte limitano il percorso di parsing/compressione ad alto
 
 ## 4. `/v1/responses` di lunga durata in un singolo processo (margine di capacità in condizioni normali)
 
-[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ha aggiunto `tryAcquireHealthyHeadroom`, affinché una seconda richiesta strutturalmente pesante venga accettata quando l'heap è al di sotto di `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Il percorso BYTE utilizzato da `admitChatRequest` (corpi ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, valore predefinito 256 KiB, incluso `POST /v1/responses`) usa lo **stesso** meccanismo di deroga.
+[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ha aggiunto `tryAcquireHealthyHeadroom`, affinché una seconda richiesta strutturalmente pesante venga accettata quando l'heap è al di sotto di `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Il percorso BYTE utilizzato da `admitChatRequest` (corpi ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, valore predefinito 256 KiB, incluso `POST /v1/responses`) usa lo **stesso** meccanismo di deroga.
 
 Questa è la procedura supportata per un **singolo processo** per gestire più di due connessioni SSE `/v1/responses` di lunga durata simultanee: aumentare il limite primario e il margine di capacità in condizioni normali solo nella misura consentita dall'heap e dal budget dei byte in transito a livello di processo (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110). La gestione di decine di client SSE di lunga durata (40–50) dipende da tale budget di memoria, non da un limite rigido del prodotto pari a “massimo 2”. Un heap sotto pressione continua a rifiutare richieste con un errore `503` ritentabile, impedendo il ripresentarsi di #7849.
 

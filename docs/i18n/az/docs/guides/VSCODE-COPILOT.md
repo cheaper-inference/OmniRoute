@@ -108,7 +108,7 @@ npm start
 
 Daxiletmənin aktiv olduğu yığma olmadan səhifə çərçivədə göstərilməkdən imtina edir. Genişləndirmə bunu cavab başlıqlarından aşkarlayır və xarici brauzerə keçir — heç nə pozulmur və bu barədə bir dəfə məlumat verilir.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) sənədinə və
-[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) məsələsinə baxın.
+[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) məsələsinə baxın.
 
 ---
 

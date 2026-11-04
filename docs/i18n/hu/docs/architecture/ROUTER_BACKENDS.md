@@ -4,9 +4,9 @@
 
 ---
 
-> **Állapot:** Elfogadva · **Kontextus:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
-> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Szerződés:** `domain/routing/routerBackends.ts`
-> (típusos nyilvántartás — a kód a [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) keretében érkezik)
+> **Állapot:** Elfogadva · **Kontextus:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
+> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Szerződés:** `domain/routing/routerBackends.ts`
+> (típusos nyilvántartás — a kód a [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) keretében érkezik)
 
 Ez az ADR pontosan meghatározza, hogyan viszonyul egymáshoz a `ts` (natív), a `bifrost`, a `cliproxy`, a `9router`, valamint a VibeProxy-kompatibilis motorok, hogy a közreműködők ne mossanak össze két, architekturálisan különálló fogalmat. Az útválasztási háttérrendszer nyilvántartásával bevezetett típusos nyilvántartást dokumentálja e modell igazságának egyetlen forrásaként.
 
@@ -27,7 +27,7 @@ Az elkerülendő hiba: a „beágyazott szolgáltatást” és az „útválaszt
 
 ## A nyilvántartás — az igazság egyetlen forrása
 
-A `domain/routing/routerBackends.ts` szerződés (a kód a [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) keretében érkezik) minden motort egyszer deklarál, annak életciklusával, képességeivel, szolgáltatásazonosítójával, alapértelmezett portjával, állapotellenőrzési konfigurációjával és telemetriai támogatásával együtt. A felhasználók a motorokat a `getRouterBackend(id)`, `listRouterBackends()` és `listRouterBackendsByCapability(cap)` segítségével keresik meg ahelyett, hogy minden kísérőfolyamathoz külön esetkezelést alkalmaznának.
+A `domain/routing/routerBackends.ts` szerződés (a kód a [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) keretében érkezik) minden motort egyszer deklarál, annak életciklusával, képességeivel, szolgáltatásazonosítójával, alapértelmezett portjával, állapotellenőrzési konfigurációjával és telemetriai támogatásával együtt. A felhasználók a motorokat a `getRouterBackend(id)`, `listRouterBackends()` és `listRouterBackendsByCapability(cap)` segítségével keresik meg ahelyett, hogy minden kísérőfolyamathoz külön esetkezelést alkalmaznának.
 
 | Háttérrendszer | Életciklus   | Szolgáltatás (A tengely) | Relay-háttérrendszer (B tengely) | Állapotellenőrzés | Alapértelmezett port |
 | -------------- | ------------ | ------------------------ | -------------------------------- | ----------------- | -------------------- |
@@ -37,7 +37,7 @@ A `domain/routing/routerBackends.ts` szerződés (a kód a [#5868](https://githu
 | `9router`      | `supervised` | `9router`                | — (szolgáltató)                  | `/api/health`     | 20130                |
 | `vibeproxy`    | `external`   | —                        | — (szolgáltatói adapter)         | `/v1/models`      | —                    |
 
-¹ A Bifrost `supervised` beágyazott szolgáltatássá történő előléptetését (amely a `/api/services/bifrost/` útvonalról telepíthető és indítható) a [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) követi nyomon; annak egyesítéséig a Bifrost kizárólag `external` (csak a `BIFROST_BASE_URL` címen keresztül érhető el).
+¹ A Bifrost `supervised` beágyazott szolgáltatássá történő előléptetését (amely a `/api/services/bifrost/` útvonalról telepíthető és indítható) a [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) követi nyomon; annak egyesítéséig a Bifrost kizárólag `external` (csak a `BIFROST_BASE_URL` címen keresztül érhető el).
 
 A `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) lehetővé teszi, hogy a hívók az alapján szűrjenek, mire képes ténylegesen egy motor, ahelyett, hogy az egyes azonosítókhoz külön ágakat kódolnának.
 
@@ -102,8 +102,8 @@ háttérrendszert; a fő `/api/v1/chat/completions` felület soha nem használja
 A kiválasztás **jelenleg a relay szintjén mindent vagy semmit alapon történik** — a `release/v3.8.43` verzióban nincs
 szolgáltatónkénti vagy kérésenkénti motorváltás. A kérésenkénti kaput a
 sidecar-manifeszt munkálatai adják hozzá
-([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifeszt +
-[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifeszt +
+[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ami lehetővé teszi, hogy az `auto` csak a manifeszt alapján jogosult szolgáltatókat irányítsa át a Bifroston.
 
 ## Integráció az irányítópulttal

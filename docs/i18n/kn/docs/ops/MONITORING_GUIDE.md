@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet **ಜೀವಂತಿಕೆ**ಯನ್ನು `/api/monitoring/health`ಗೆ ನಿರ್ದೇಶಿಸ**ಬೇಡಿ**. ಆ ಪಥವು ನೈಜ DB/ಮಾನಿಟರಿಂಗ್ ಕೆಲಸವನ್ನು ಮಾಡುತ್ತದೆ ಮತ್ತು ಲೋಡ್ನಡಿ ತಪ್ಪಾದ ಪಾಸಿಟಿವ್ ಫಲಿತಾಂಶಗಳನ್ನು ನೀಡುತ್ತದೆ.
 
-ಸಂಬಂಧಿತ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ಈವೆಂಟ್ ಲೂಪ್ ಕಾರ್ಯನಿರತವಾಗಿರುವಾಗ ಪ್ರೋಬ್ಗಳು), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (ಕ್ಯಾಟಲಾಗ್ ಬೆಲೆನಿರ್ಣಯವು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಅತಿಯಾಗಿ ಬಳಸುವುದು), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (ಕಂಪ್ರೆಶನ್ ಟೋಕನ್-ಎಣಿಕೆಯು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಅತಿಯಾಗಿ ಬಳಸುವುದು).
+ಸಂಬಂಧಿತ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ಈವೆಂಟ್ ಲೂಪ್ ಕಾರ್ಯನಿರತವಾಗಿರುವಾಗ ಪ್ರೋಬ್ಗಳು), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (ಕ್ಯಾಟಲಾಗ್ ಬೆಲೆನಿರ್ಣಯವು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಅತಿಯಾಗಿ ಬಳಸುವುದು), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (ಕಂಪ್ರೆಶನ್ ಟೋಕನ್-ಎಣಿಕೆಯು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಅತಿಯಾಗಿ ಬಳಸುವುದು).
 
 ### systemd ವಾಚ್ಡಾಗ್ (ಸ್ಥಗಿತಗೊಂಡ ಈವೆಂಟ್ ಲೂಪ್)
 

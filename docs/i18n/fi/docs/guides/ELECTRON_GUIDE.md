@@ -198,7 +198,7 @@ Aseta `session.defaultSession.webRequest.onHeadersReceived` kautta. Huomattavia 
 
 ## Automaattinen päivitys
 
-Käyttää `electron-updater` GitHub -palveluntarjoajan (`cheaper-inference/OmniRoute`) kanssa.
+Käyttää `electron-updater` GitHub -palveluntarjoajan (`diegosouzapw/OmniRoute`) kanssa.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Tapahtumat, jotka on välitetty renderöijälle `update-status` IPC kautta: `checking`, `available`, `not-available`, `downloading` (ja `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefaktit laskeutuvat `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Julkaisut julkaistaan GitHub Releases (`cheaper-inference/OmniRoute`) -sivustolle, josta `electron-updater` myös tarkistaa uudet versiot.
+Julkaisut julkaistaan GitHub Releases (`diegosouzapw/OmniRoute`) -sivustolle, josta `electron-updater` myös tarkistaa uudet versiot.
 
 ## Vianetsintä
 

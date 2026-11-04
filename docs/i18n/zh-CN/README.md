@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 每月跨第三方免费层级合计约 1.62B 令牌
+## 💰 每月来自第三方免费层的约 16.2 亿 Tokens
 
 </div>
 
-> **使用您自己的提供者账户。** 这是对分别符合条件的第三方免费层级进行的估算汇总，并非 OmniRoute 提供的令牌赠款。请注册，并在需要时获取凭据，然后连接您可以使用的提供者；每个提供者自行决定其限制、可用性和条款。
+> **使用您自己的提供者账户。** 这是对分别符合条件的第三方免费层进行的估算汇总，并非 OmniRoute 提供的 Token 额度。请注册，并在需要时获取凭据，然后连接您可以使用的提供者；每个提供者自行决定其限额、可用性和条款。
 >
-> 手动叠加免费层级非常痛苦——几十个 SDK、几十种速率限制，而且不知道自己实际拥有多少额度。OmniRoute 汇总了 **34 个周期性池键中的 485 个免费层级条目**，并根据 **17 个已公布正值月度预算的池，以及 Groq 的五个按模型计算的上限**计算令牌总量，按照共享池去重。只有在完成区域身份验证后才会开放的配额（目前为 ModelScope）会单独显示，在区域身份验证后额外增加约 600 万，并且永远不会计入标题总量。结果会持续显示在控制面板（`/dashboard/free-tiers`）上。
+> 手动叠加免费层非常痛苦——几十个 SDK、几十种速率限制，而且完全不知道自己实际拥有多少额度。OmniRoute 汇总了 **34 个周期性池键中的 484 个免费层条目**，并根据 **17 个已公布正数月度预算的池，加上 Groq 的五个按模型计算的上限**，通过共享池去重后计算 Token 总量。只有完成区域身份验证后才开放的额度（目前为 ModelScope）会单独显示，区域身份验证后额外增加约 600 万，并且绝不会计入总标题。结果会持续显示在控制面板（`/dashboard/free-tiers`）上。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免费层级预算卡：每月稳定提供约 1.62B 个免费令牌，首月注册赠金最高可达约 2.22B，来自 34 个已记录的周期性池键，涵盖 485 个目录中的免费层级条目，并通过一个端点接入。诚实的池去重计算——每个共享池只计算一次，其中包括 17 个已公布正值月度令牌预算的周期性池，以及 Groq 的五个按模型计算的上限；条款风险目录中有 12 个提供者被标记为应避免使用，由您自行决定。预算条包括 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五个按模型计算的上限）和其他较小的池，还包括首月注册赠金，以及单独展示的永久免费、无令牌上限提供者，因此它们永远不会抬高标题总量。/dashboard/free-tiers 上显示实时已用/剩余额度。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免费层预算卡：每月稳定提供约 16.2 亿免费 Tokens；首月包含注册额度时，最高可达约 22.2 亿，来自 34 个已记录的周期性池键，覆盖 484 个已编入目录的免费层条目，并统一通过一个端点提供。基于诚实的池去重计算——每个共享池只计算一次，包括 17 个已公布正数月度 Token 预算的周期性池，以及 Groq 的五个按模型计算的上限；条款风险目录中有 12 个提供者被标记为建议避开，由您自行决定。预算栏包含 Mistral 10 亿、Nara 2.1 亿、LLM7 1.5 亿、xKiro 1.5 亿、Groq 3000 万（五个按模型计算的上限）及其他较小的池，还包含首月注册额度，以及单独列出的永久免费且无 Token 上限的提供者，因此它们不会抬高总标题。/dashboard/free-tiers 上显示实时已使用/剩余额度。"/>
 
-> `/dashboard/free-tiers` 实时页面的动态摘要。完整方法说明（池去重、赠金额度层级、提供者条款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
+> `/dashboard/free-tiers` 实时页面的动画摘要。完整方法（池去重、额度层级、提供者条款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
-> <sub>这些数据每两周根据实时目录重新审计一次，并且**可能上下波动**——某个提供者结束免费层级，数字就会下降；新增一个提供者，数字就会上升。我们公布的是目录实际计算出的结果，绝不会向上取整为最佳情况。</sub>
+> <sub>这些数据每两周根据实时目录重新审核，并且**可能上下波动**——提供者终止免费层，数字就会下降；新增提供者，数字就会上升。我们发布的是目录实际计算出的结果，绝不会向上取整为最佳情况。</sub>
 
 <br/>
 
@@ -41,13 +41,13 @@
 
 <h3>
 
-⭐ 如果 OMNIROUTE 帮您省钱并让工作更加轻松，请为仓库点个 Star。
+⭐ 如果 OMNIROUTE 帮助您节省开支并让工作更轻松，请为仓库点个 Star。
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
+[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 加入社区
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![许可证：MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker 拉取次数](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron 下载量](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron 下载量](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute 采用 MIT 许可证，并以开放方式维护。如果它为你节省了时间或金钱，可以通过以下方式帮助其保持独立——选择适合你的即可。赞助绝不会影响路由优先级；它购买的是曝光度，而不是排名。
 
 <table>
-  <tr><td nowrap>⭐ <b>为仓库加星</b></td><td>免费——确实有助于提升曝光度</td><td><a href="https://github.com/cheaper-inference/OmniRoute">为 OmniRoute 加星</a></td></tr>
+  <tr><td nowrap>⭐ <b>为仓库加星</b></td><td>免费——确实有助于提升曝光度</td><td><a href="https://github.com/diegosouzapw/OmniRoute">为 OmniRoute 加星</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>一次性或每月赞助 · 平台零手续费</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>快速的一次性打赏，捐助者无需注册</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>小额、非正式的支持</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix 复制粘贴代码：
 
 </details>
 
-🐛 发现错误或有反馈？请发起一个 [Discussion](https://github.com/cheaper-inference/OmniRoute/discussions)。
+🐛 发现错误或有反馈？请发起一个 [Discussion](https://github.com/diegosouzapw/OmniRoute/discussions)。
 
 <br/>
 
@@ -1251,7 +1251,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 
 截至 2026-10-18 的规范指标：**1.976 个独立视频** · **20.220.289 次已知观看**（`v > 0`）· **1.210 个各平台频道/账号**。原始面板包含 1.976 行（YouTube 1.352 = 740 个长视频 + 612 个 Shorts · TikTok 334 · Instagram 290）；按规范 URL 标准化后未留下任何重复项，并为每个视频保留最高观看次数。YouTube 数据采集冻结于 2026-10-13（API 配额在 14 至 18/10 期间耗尽），TikTok/Instagram 数据采集自 2026-09-02 起冻结（无采集额度）；仍有 76 个视频没有观看次数数据。
 
-> 🎬 **制作了关于 OmniRoute 的视频？** 请提交一个 [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) 或发起一项 [discussion](https://github.com/cheaper-inference/OmniRoute/discussions)，并附上链接——我们会在这里推荐它。
+> 🎬 **制作了关于 OmniRoute 的视频？** 请提交一个 [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) 或发起一项 [discussion](https://github.com/diegosouzapw/OmniRoute/discussions)，并附上链接——我们会在这里推荐它。
 
 <br/>
 
@@ -1271,8 +1271,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 | 🟢 **WhatsApp — 🇧🇷 巴西**                | [加入群组](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                      |
 | 🌍 **网站**                              | [omniroute.online](https://omniroute.online)                                                                     |
 | 🌍 **🌍StHub OmniRoute 社区（免费）**    | [StHub 门户](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)              |
-| 📦 **源代码**                            | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                         |
-| 🐛 **报告错误**                          | [提交问题](https://github.com/cheaper-inference/OmniRoute/issues) — 请附上 `npm run system-info` 的输出          |
+| 📦 **源代码**                            | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                   |
+| 🐛 **报告错误**                          | [提交问题](https://github.com/diegosouzapw/OmniRoute/issues) — 请附上 `npm run system-info` 的输出               |
 | 🤝 **参与贡献**                          | [CONTRIBUTING.md](CONTRIBUTING.md) · [分支与发布模型](docs/ops/BRANCHING_MODEL.md) · 选择一个 `good first issue` |
 | 💚 **支持本项目**                        | [支持方式 ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                  |
 
@@ -1323,9 +1323,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">用户指南</a></b></td><td>Provider、组合、CLI 集成、部署</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">设置指南</a></b></td><td>完整安装方式、CLI 工具配置、协议设置、超时调优</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI 工具指南</a></b></td><td>Claude Code、Codex、Cursor、Cline、OpenClaw、Kilo、Copilot 的逐工具设置</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">远程模式</a></b></td><td>通过限定范围的访问令牌，从笔记本电脑 CLI 驱动远程 OmniRoute（VPS）</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code 配置</a></b></td><td>通过 <code>launch</code> 和按模型配置文件，将 Claude Code 指向 OmniRoute（本地/远程）</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">快速开始</a></b></td><td>3 步：安装 → 连接 → 配置</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">远程模式</a></b></td><td>通过受限访问令牌，使用笔记本电脑上的 CLI 驱动远程 OmniRoute（VPS）</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code 配置</a></b></td><td>通过 <code>launch</code> + 每个模型的配置文件，将 Claude Code 指向 OmniRoute（本地/远程）</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">快速开始</a></b></td><td>3 步完成安装 → 连接 → 配置</td></tr>
 </table>
 
 ### 🔧 运维与部署
@@ -1338,8 +1338,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io 部署</a></b></td><td>使用持久化存储部署到 Fly.io</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux 指南</a></b></td><td>通过 Termux 在 Android 上运行 OmniRoute</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA 指南</a></b></td><td>渐进式 Web 应用安装、缓存、架构</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">卸载指南</a></b></td><td>适用于所有安装方式的彻底移除</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">环境配置</a></b></td><td>完整的 <code>.env</code> 变量及其参考信息</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">卸载指南</a></b></td><td>适用于所有安装方式的彻底移除方法</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">环境配置</a></b></td><td>完整的 <code>.env</code> 变量及其参考</td></tr>
 </table>
 
 ### 🧠 功能与架构
@@ -1347,15 +1347,15 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 <table>
   <tr><th align="left">文档</th><th align="left">描述</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">架构</a></b></td><td>系统架构、数据流和内部机制</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">压缩指南</a></b></td><td>7 种选项的管道：off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">压缩指南</a></b></td><td>7 种选项的流水线：off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK 压缩</a></b></td><td>命令输出压缩、过滤器、信任、验证、原始输出恢复</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">压缩引擎</a></b></td><td>Caveman、RTK、堆叠管道、仪表板/API/MCP 界面</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">压缩引擎</a></b></td><td>Caveman、RTK、堆叠流水线、仪表板/API/MCP 界面</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">压缩规则格式</a></b></td><td>Caveman 和 RTK 过滤器的 JSON 规则包架构</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">压缩语言包</a></b></td><td>语言检测和 Caveman 规则包编写</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">弹性指南</a></b></td><td>熔断器、冷却时间、队列、防惊群、TLS 欺骗</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">弹性指南</a></b></td><td>熔断器、冷却时间、队列、防止惊群效应、TLS 欺骗</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自动组合引擎</a></b></td><td>16 因素评分、模式包、自我修复</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">代理指南</a></b></td><td>三级代理系统、1proxy 市场、注册表 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免费层级</a></b></td><td>整合目录：34 个有文档记录的周期性池 / 485 个已编目的免费层级条目</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">代理指南</a></b></td><td>3 级代理系统、1proxy 市场、注册表 CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免费层级</a></b></td><td>整合目录：34 个已记录的周期性资源池 / 484 个已编目的免费层级条目</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>带截图的可视化仪表板导览</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">代码库文档</a></b></td><td>适合初学者的代码库导览</td></tr>
 </table>
@@ -1376,13 +1376,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 
 <table>
   <tr><th align="left">文档</th><th align="left">描述</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">贡献指南</a></b></td><td>开发环境设置和指南</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">参与贡献</a></b></td><td>开发环境设置与指南</td></tr>
   <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">分支与发布模型</a></b></td><td>PR 的目标位置（<code>release/*</code>），以及 <code>main</code> 和标签的含义</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">变更日志</a></b></td><td>完整的逐版本发布历史</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">安全策略</a></b></td><td>漏洞报告和安全实践</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">国际化指南</a></b></td><td>支持 67 种语言、翻译流程和 RTL</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">安全策略</a></b></td><td>漏洞报告与安全实践</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">国际化指南</a></b></td><td>支持 67 种语言、翻译流程与 RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">发布检查清单</a></b></td><td>发布前验证步骤</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">覆盖率计划</a></b></td><td>针对 8,400 多个受跟踪测试文件中 60,000 多个静态测试声明的测试覆盖率策略</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">覆盖率计划</a></b></td><td>针对 8,400 多个已跟踪测试文件中 60,000 多个静态测试声明的测试覆盖率策略</td></tr>
 </table>
 
 <br/>
@@ -1391,7 +1391,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 
 # ⭐ 顶级贡献者
 
-> OmniRoute 由充满热情的开源社区共同塑造。这些贡献者做出了卓越贡献，直接影响了项目的质量、稳定性和影响力。**感谢大家。**
+> OmniRoute 由充满热情的开源社区共同塑造。这些个人做出了卓越贡献，直接影响了项目的质量、稳定性和覆盖范围。**感谢你们。**
 
 ### 按已合并拉取请求统计的外部贡献者
 
@@ -1419,7 +1419,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>统计时间为 2026-11-03 03:01:19 UTC，使用实时的 <code>release/v3.8.53</code> 提交 <code>05bc048d6c</code>。分页的 GitHub GraphQL 统计包含 9,947 个已合并 PR：仓库所有者提交 4,130 个，Dependabot 提交 240 个，其他机器人/应用提交 6 个，以及来自 883 位不同贡献者的 <b>5,571 个外部 PR</b>。“更改行数”是 GitHub 新增行数与删除行数之和，其中包括生成文件、锁定文件、目录、翻译和文档；它表示变更量，而不是作者编写的代码行数。有 53 个 PR 报告的 GitHub 差异超过 500,000 行（例如 #13399，这是一次单独的提供程序添加，列出了 2,347 个更改文件），这使上面的若干总数有所膨胀。并列项使用相同排名。</sub>
+<sub>统计时间为 2026-11-03 03:01:19 UTC，使用实时的 <code>release/v3.8.53</code> 提交 <code>05bc048d6c</code>。分页后的 GitHub GraphQL 统计包含 9,947 个已合并 PR：其中 4,130 个由仓库所有者提交，240 个由 Dependabot 提交，6 个由其他机器人/应用提交，另有<b>来自 883 位不同贡献者的 5,571 个外部 PR</b>。“更改行数”是 GitHub 新增行数与删除行数之和，其中包括生成文件、锁定文件、目录、翻译和文档；它表示变更量，而不是作者编写的代码行数。有 53 个 PR 报告的 GitHub 差异超过 500,000 行（例如 #13399，这是一次单独的提供者添加，列出了 2,347 个已更改文件），因此大幅抬高了上面的若干总数。并列排名。</sub>
 
 ### GitHub 归属的提交
 
@@ -1430,42 +1430,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 418 个 GitHub 归属提交</sub>
+      <sub>🥇 418 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 294 个 GitHub 归属提交</sub>
+      <sub>🥈 294 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 个 GitHub 归属提交</sub>
+      <sub>🥉 229 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 222 个 GitHub 归属提交</sub>
+      <sub>🏅 222 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 202 个 GitHub 归属提交</sub>
+      <sub>🏅 202 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 134 个 GitHub 归属提交</sub>
+      <sub>🏅 134 个 GitHub 归属的提交</sub>
     </td>
   </tr>
   <tr>
@@ -1474,49 +1474,49 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 126 个 GitHub 归属提交</sub>
+      <sub>🏅 126 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 115 个 GitHub 归属提交</sub>
+      <sub>🏅 115 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 108 个 GitHub 归属提交</sub>
+      <sub>🏅 108 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 个 GitHub 归属提交</sub>
+      <sub>🏅 70 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 68 个 GitHub 归属提交</sub>
+      <sub>🏅 68 个 GitHub 归属的提交</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 个 GitHub 归属提交</sub>
+      <sub>🏅 68 个 GitHub 归属的提交</sub>
     </td>
   </tr>
 </table>
 
-<sub>于 2026-11-03 02:09:16 UTC 重新核查：GitHub Contributors API 针对 <code>release/v3.8.53</code> 默认分支报告的 GitHub 归属提交。该 API 返回了 903 个身份（429 位用户、2 个机器人、472 个匿名身份）；此表排除了维护者、机器人和匿名身份，并保留并列名次。它不同于上方的已合并 PR 排名以及下方的 Git 元数据普查。</sub>
+<sub>于 2026-11-03 02:09:16 UTC 重新检查：GitHub 归属的提交由仓库 Contributors API 针对 <code>release/v3.8.53</code> 默认分支报告。API 返回了 903 个身份（429 位用户、2 个机器人、472 个匿名身份）；此表排除了维护者、机器人和匿名身份，并保留并列排名。此表与上方的已合并 PR 排名以及下方的 Git 元数据统计均不相同。</sub>
 
-> 🙏 这些贡献者贡献的功能、错误修复和基础设施改进，是 OmniRoute 可靠且功能丰富的**核心组成部分**。每个拉取请求、每个测试用例以及每个 i18n 翻译文件都至关重要。开源项目由像他们这样的人共同构建。
+> 🙏 这些贡献者的功能、错误修复和基础设施改进，是 OmniRoute 可靠且功能丰富的**核心组成部分**。每个拉取请求、每个测试用例以及每个 i18n 翻译文件都至关重要。开源项目由他们这样的人共同构建。
 
 </div>
 
@@ -1630,7 +1630,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过
 
 </div>
 
-[![贡献者](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
+[![贡献者](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
 <sub>审计时间：2026-11-02，基于实时 <code>release/v3.8.53</code> 提交 <code>1c7135e0fb</code>（7,972 次提交）：<b>1,074 个规范化的人类 Git 身份</b>——其中 759 个显示为提交作者（包括维护者），315 个仅出现在显式的 <code>Co-authored-by</code> 尾注中。统计应用了 <code>.mailmap</code>，以不区分大小写的方式比较电子邮件地址，仅当数字形式和普通形式的 GitHub noreply 地址编码相同用户名时才将它们合并，排除了 29 个机器人/代理/服务/占位符身份，并不会仅因为显示名称匹配就合并普通电子邮件地址。2026-08-24 的审计公布了 639；使用该审计基准 <code>ac02c5b42f</code> 重新运行此方法得到 619，因此增长来自新贡献者，而不是方法变得宽松。</sub>
 
@@ -1659,11 +1659,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 星标
 
-<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="星标历史图表" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="星标历史图表" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 
@@ -1677,7 +1677,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute?theme=dark" />
     <source media="(prefers-color-scheme: light)" srcset="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute?theme=light" />
-    <img alt="StarMapper" src="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute" />
+    <img alt="星图映射器" src="https://starmapper.bruniaux.com/api/map-image/diegosouzapw/omniroute" />
   </picture>
 </a>
 </div>

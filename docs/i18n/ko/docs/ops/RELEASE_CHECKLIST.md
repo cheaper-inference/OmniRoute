@@ -456,7 +456,7 @@ npm dist-tag를 절대 변경하지 않습니다. 해당 작업은 임시 패키
 gh workflow run preview-artifact.yml -f pr_number=<N>   # 또는 `preview-artifact` 레이블 추가
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
+gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # 미리 보기 설치
 ```
 

@@ -489,7 +489,7 @@ diagnostics) plus **memory**, **skill**, **agentSkill**, **githubSkill**, **pool
 
 ## Links
 
-- Repository: https://github.com/cheaper-inference/OmniRoute
+- Repository: https://github.com/diegosouzapw/OmniRoute
 - Website: https://omniroute.online
 - npm: https://www.npmjs.com/package/omniroute
 - Docker Hub: https://hub.docker.com/r/diegosouzapw/omniroute

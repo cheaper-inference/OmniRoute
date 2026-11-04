@@ -5,7 +5,7 @@
 ---
 
 Bu belge,
-[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) için alınan uygulama kararını kaydeder. Herkese açık ürünler dört sağlayıcı ailesi olarak temsil edilir. Bölge, ayrı bir ürün değil, bağlantı verisidir.
+[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) için alınan uygulama kararını kaydeder. Herkese açık ürünler dört sağlayıcı ailesi olarak temsil edilir. Bölge, ayrı bir ürün değil, bağlantı verisidir.
 
 ## Karar
 

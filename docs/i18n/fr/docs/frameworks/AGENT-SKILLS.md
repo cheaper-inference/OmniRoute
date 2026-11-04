@@ -18,7 +18,7 @@ Le catalogue contient **45 compétences d’agent** (23 pour l’API REST + 21 p
 - Un **ID canonique** (`omni-auth`, `cli-serve`, etc.)
 - Un fichier **SKILL.md** dans `skills/{id}/SKILL.md`, avec un frontmatter YAML (`name`, `description`) et un corps markdown détaillé
 - Des **endpoints REST** (compétences API) ou des **sous-commandes CLI** (compétences CLI) dérivés de la spécification OpenAPI et du registre CLI
-- Une **URL GitHub brute** permettant une récupération en direct : `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Une **URL GitHub brute** permettant une récupération en direct : `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Récupération directe du contenu brut depuis GitHub (aucun serveur requis)
 
 ```bash
-BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -129,8 +129,8 @@ Rí i dájú pé `copilot-m365-web` ti ṣiṣẹ́ nínú **Dashboard → Provi
 
 ## Àwọn ìtọ́kasí
 
-- Ọ̀ràn: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
-- Ìjíròrò: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
+- Ọ̀ràn: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
+- Ìjíròrò: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
 - Orísun: `src/shared/constants/providers/web-cookie.ts` (ìtumọ̀ olùpèsè)
 - Àgbéwọlé HAR: `src/shared/utils/m365HarImport.ts`
 - Àwọn pápá ẹ̀rí ìwọlé: `src/shared/providers/webSessionCredentials.ts`
