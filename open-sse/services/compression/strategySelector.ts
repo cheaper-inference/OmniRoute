@@ -43,6 +43,7 @@ import { adaptBodyForCompression } from "./bodyAdapter.ts";
 import {
   detectCachingContext,
   getCacheAwareStrategy,
+  mustKeepOpenCodeHistoryVerbatim,
   type CachingDetectionContext,
 } from "./cachingAware.ts";
 import { resolveCompressionPlan } from "./resolveCompressionPlan.ts";
