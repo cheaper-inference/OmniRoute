@@ -16,6 +16,7 @@ import { emit } from "@/lib/events/eventBus";
 import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
 import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
 import { saveCallLog } from "@/lib/usageDb";
+import { captureReasoningSnapshotMeta } from "@/lib/usage/callLogs";
 import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
 import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import { FORMATS } from "../../translator/formats.ts";
@@ -476,6 +477,9 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     ? { _omniroute_omitted: "video-transcript" }
     : (responseBody ?? (status >= 400 ? providerResponse : undefined));
   const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
+  // Keep reasoning observability even though no-log policy discards all
+  // request/response payloads. Only source and character-count scalars survive.
+  const noLogReasoningSnapshot = noLogEnabled ? captureReasoningSnapshotMeta(retainedResponse) : null;
 
   const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
   if (providerWarnings.length > 0) {
@@ -598,7 +602,9 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     // Encrypted-reasoning observation: stream-side flag plus duration, and
     // the two request bodies so the sink can read effort values
     // (requested from the client body, upstream from the post-strip body).
-    reasoningMeta: args.reasoningMeta ?? null,
+    reasoningMeta: noLogReasoningSnapshot
+      ? { ...(args.reasoningMeta ?? {}), ...noLogReasoningSnapshot }
+      : (args.reasoningMeta ?? null),
     clientRequestBody: body ?? null,
     upstreamRequestBody: providerRequest ?? null,
     requestBody: noLogEnabled ? null : cloneBoundedChatLogPayload(
