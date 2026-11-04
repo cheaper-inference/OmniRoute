@@ -23,7 +23,7 @@
       "throws": true
     },
     "codex-search": {
-      "message": "Provider \"codex-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"codex-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
