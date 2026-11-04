@@ -140,11 +140,13 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     }
 
     // 1. Claude format: one correctly typed delta per held-back field, per content block.
-    // A content_block_stop drains only its own block; any other stop signal or the end of
-    // the stream drains every block still holding a tail, in block order.
+    // Every stop signal (and the end of the stream) drains every block still holding a
+    // tail, in block order. A trailing `ping` is still a Claude stream.
     if (
       typeof lastJson.type === "string" &&
-      (lastJson.type.startsWith("message") || lastJson.type.startsWith("content_block"))
+      (lastJson.type.startsWith("message") ||
+        lastJson.type.startsWith("content_block") ||
+        lastJson.type === "ping")
     ) {
       const frames: any[] = [];
       const drainBlock = (index: number, buffers: TextBuffers) => {

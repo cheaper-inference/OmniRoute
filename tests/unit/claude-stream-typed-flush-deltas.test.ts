@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { cleanupTempDataDir } from "../_setup/tempDataDir.ts";
 
 // Follow-up to #18006: held-back tails of an Anthropic Messages stream must come back as the
 // delta type of their block (text_delta / thinking_delta / input_json_delta) on the block's
@@ -11,9 +12,22 @@ import path from "node:path";
 // or of a tool input was silently lost; usage/signature metadata must pass through untouched.
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-test-claude-stream-"));
+const savedEnv = {
+  DATA_DIR: process.env.DATA_DIR,
+  PII_RESPONSE_SANITIZATION: process.env.PII_RESPONSE_SANITIZATION,
+  PII_TEST_BYPASS_MIN_WINDOW: process.env.PII_TEST_BYPASS_MIN_WINDOW,
+};
 process.env.DATA_DIR = tmpDir;
 process.env.PII_RESPONSE_SANITIZATION = "true";
 process.env.PII_TEST_BYPASS_MIN_WINDOW = "true";
+
+test.after(async () => {
+  await cleanupTempDataDir(tmpDir);
+  for (const [key, value] of Object.entries(savedEnv)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+});
 
 const { createCredentialSseTransform } =
   await import("../../src/lib/streamingCredentialTransform.ts");
@@ -270,3 +284,48 @@ test("PII transform: Claude thinking tail comes back as thinking_delta, text as 
   assert.deepEqual(acc.wrongEvent, []);
   assert.deepEqual(acc.lateDeltas, []);
 });
+
+// A `ping` right before message_delta must not hide the Claude shape from the flush: the
+// tails of blocks that never got their own content_block_stop still come back typed, each
+// on its own block, instead of one generic clone of the last content frame.
+const THINKING_TAIL = "c".repeat(1302);
+const TEXT_TAIL = "b".repeat(1302);
+function pingBeforeMessageDelta(): string[] {
+  return [
+    messageStart,
+    ev("content_block_start", { index: 0, content_block: { type: "thinking", thinking: "" } }),
+    ev("content_block_delta", {
+      index: 0,
+      delta: { type: "thinking_delta", thinking: THINKING_TAIL },
+    }),
+    ev("content_block_start", { index: 1, content_block: { type: "text", text: "" } }),
+    ev("content_block_delta", { index: 1, delta: { type: "text_delta", text: TEXT_TAIL } }),
+    ev("ping", {}),
+    messageEnd,
+  ];
+}
+
+for (const [name, make] of [
+  ["credential", () => createCredentialSseTransform()],
+  ["PII", () => createPiiSseTransform({ windowSize: 8 })],
+] as const) {
+  test(`${name} transform: ping right before message_delta still flushes typed deltas`, async () => {
+    const output = await runTransform(make(), pingBeforeMessageDelta());
+    const frames = parseFrames(output);
+    const acc = accumulate(frames);
+    assert.equal(acc.thinking.get(0), THINKING_TAIL, "the whole thinking of block 0 must arrive");
+    assert.equal(acc.text.get(1), TEXT_TAIL, "the whole text of block 1 must arrive");
+    assert.deepEqual(acc.wrongType, []);
+    assert.deepEqual(acc.wrongEvent, []);
+    assert.deepEqual(acc.lateDeltas, []);
+    assert.ok(
+      !frames.some((f) => f.data.type === "ping" && f.data.delta),
+      "no delta is grafted onto the ping frame"
+    );
+    const order = frames.map((f) => f.data.type);
+    assert.ok(
+      order.lastIndexOf("content_block_delta") < order.indexOf("message_delta"),
+      "drained before message_delta"
+    );
+  });
+}

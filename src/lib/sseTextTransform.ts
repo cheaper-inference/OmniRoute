@@ -363,10 +363,11 @@ export function createSseTextTransform(
           }
 
           if (isStopSignal && onFlush && !flushed) {
-            // A Claude content_block_stop drains only its own block, so the flush helper
-            // gets the stop frame itself (it carries the block index). Other stop signals
-            // keep the last frame as the envelope template, as before.
-            const flushBase = json.type === "content_block_stop" ? json : lastJson || json;
+            // A Claude stop signal passes its own frame: the flush helper drains every block
+            // that still holds a tail, and the last frame may be a `ping`, which would send
+            // the flush down the generic path. Other stop signals keep the last frame as the
+            // envelope template, as before.
+            const flushBase = claudeEvent ? json : lastJson || json;
             emitFlushed(
               onFlush(flushBase, isJsonStream, lastContentJson || lastJson || json),
               controller,
