@@ -469,9 +469,11 @@ export async function applyLiveZoneCompression(
     previous.rawStableFieldsDigest !== context.rawStableFieldsDigest ||
     !hasExactRawPrefix(context.rawItemDigests, previous)
   ) {
-    return compressAndStore(body, context, compress);
+    return options.preserveRawPrefixOnMiss
+      ? storeRawPrefix(body, context)
+      : compressAndStore(body, context, compress);
   }
-  return reuseLiveZoneEntry(body, context, previous, compress);
+  return reuseLiveZoneEntry(body, context, previous, compress, options.preserveRawPrefixOnMiss);
 }
 
 export function resetLiveZoneCache(): void {
