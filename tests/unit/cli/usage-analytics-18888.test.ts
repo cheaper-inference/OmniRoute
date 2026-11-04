@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import test from "node:test";
 
+/** Runs the actual CLI against an isolated local HTTP fixture and captures its output. */
 async function captureUsageAnalytics(
   byProvider: unknown[],
   output: "json" | "table" = "json"
@@ -78,6 +79,13 @@ test("usage analytics maps current byProvider token fields and keeps legacy fall
       totalTokensOut: 7,
       totalCost: 0.05,
     },
+    {
+      provider: "provider-alias",
+      requests: 1,
+      tokensIn: 12,
+      tokensOut: 5,
+      cost: 0,
+    },
   ]);
   assert.equal(result.code, 0, result.stderr);
   assert.deepEqual(result.requests, ["/api/usage/analytics?range=7d"]);
@@ -96,6 +104,13 @@ test("usage analytics maps current byProvider token fields and keeps legacy fall
       tokensOut: 7,
       costUsd: 0.05,
     },
+    {
+      provider: "provider-alias",
+      requests: 1,
+      tokensIn: 12,
+      tokensOut: 5,
+      costUsd: 0,
+    },
   ]);
 });
 
@@ -108,6 +123,7 @@ test("usage analytics table displays token totals from the current API", async (
   assert.match(result.stdout, /Tokens In/);
   assert.match(result.stdout, /Tokens Out/);
   assert.match(result.stdout, /2\.0K/);
+  assert.match(result.stdout, /\b3\b/);
   assert.match(result.stdout, /provider-current/);
 });
 
