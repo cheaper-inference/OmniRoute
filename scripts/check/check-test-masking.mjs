@@ -14,7 +14,7 @@ import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
-const TEST_RE = /\.(test|spec)\.(ts|tsx)$/;
+const TEST_RE = /\.(test|spec)\.(ts|tsx|js|mjs)$/;
 // Production TypeScript sources (excludes test files, handled separately via TEST_RE).
 const PROD_SRC_RE = /\.(ts|tsx|mts|cts)$/;
 
@@ -389,7 +389,7 @@ export function partitionDeletedRenamed(nameStatusOutput) {
  * `check-test-masking-selfref-6634.test.ts`, which likewise embed tautology-pattern
  * literals as fixtures/documentation to prove this gate's own behavior.
  */
-const SELF_TEST_FIXTURE_RE = /(^|\/)check-test-masking(-[\w-]+)?\.test\.tsx?$/;
+const SELF_TEST_FIXTURE_RE = /(^|\/)check-test-masking(-[\w-]+)?\.test\.(ts|tsx|js|mjs)$/;
 function isSelfTestFixtureFile(file) {
   return SELF_TEST_FIXTURE_RE.test(file);
 }
@@ -476,7 +476,7 @@ function git(args) {
   }
 }
 
-/** All git-tracked test files (`.test.ts(x)`/`.spec.ts(x)`), repo-wide — used by the
+/** All tracked TS/TSX/JS/MJS test/spec files, repo-wide — used by the
  * absolute floor scan so it also covers files untouched by the current diff/PR. */
 function listTrackedTestFiles() {
   return git(["ls-files"])
