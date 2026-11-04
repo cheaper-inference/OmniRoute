@@ -152,7 +152,8 @@ function makeKey(options: LiveZoneOptions, field: string): string | null {
   const session = options.sessionId?.trim();
   const variant = digest(options.variant);
   if (!principal || !session || !variant) return null;
-  return `${principal}:${session}:${field}:${variant}`;
+  // A raw-prefix baseline must never reuse an older entry that transformed its prefix.
+  return `${principal}:${session}:${field}:${variant}${options.preserveRawPrefixOnMiss ? ":raw-prefix" : ""}`;
 }
 
 function deleteEntry(key: string): void {
