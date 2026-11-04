@@ -1228,6 +1228,9 @@ async function handleChatCoreInner({
   // reactive and last-resort compaction passes. Otherwise an operator selecting
   // "off" still has large histories rewritten by trim_tools/purify_history.
   let reactiveContextCompactionEnabled = false;
+  // Keep automatic-prefix-cached OpenCode history intact during the proactive pass.
+  // Last-resort compaction at the concrete context ceiling remains enabled.
+  let protectOpenCodePrefix = false;
   // Native Codex history stays out of reactive/last-resort compaction unless the default-off
   // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED flag opts in (#16632; fails closed).
   const skipNativeCodexReactiveCompaction = shouldSkipNativeCodexReactiveCompaction(
