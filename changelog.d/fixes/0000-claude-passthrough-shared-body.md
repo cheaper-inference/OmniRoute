@@ -1,1 +1,0 @@
-- **fix(sse):** combo legs no longer strip `output_config.format` from the shared request body (leg 1 to a third-party Claude endpoint could remove structured output for leg 2 to Anthropic), and Claude->Claude passthrough no longer silently drops native user blocks such as `search_result` and `container_upload`.
