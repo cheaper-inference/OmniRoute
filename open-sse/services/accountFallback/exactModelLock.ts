@@ -10,6 +10,15 @@
  */
 
 import type { ModelLockoutEntry, ModelFailureState } from "../accountFallback.ts";
+import { resolveAntigravityModelId } from "../../config/antigravityModelAliases.ts";
+
+function canonicalizeExactModel(provider: string, model: string): string {
+  const normalized = model.trim().toLowerCase().replace(/^(?:antigravity|ag|agy)\//, "");
+  if (provider === "antigravity" || provider === "agy" || provider === "ag") {
+    return resolveAntigravityModelId(normalized).trim().toLowerCase();
+  }
+  return normalized;
+}
 
 /** Build the "exact" scoped lockout key — a distinct namespace from the quota-family key. */
 export function buildExactModelLockKey(
@@ -17,7 +26,7 @@ export function buildExactModelLockKey(
   connectionId: string,
   model: string
 ): string {
-  return `${canonicalProvider}:${connectionId}:exact:${model.trim().toLowerCase()}`;
+  return `${canonicalProvider}:${connectionId}:exact:${canonicalizeExactModel(canonicalProvider, model)}`;
 }
 
 /** Dedupe the 3 lockout key shapes callers must check: quota-family, #8050 not_found, exact. */
