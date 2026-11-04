@@ -10658,6 +10658,7 @@
       "refreshFailures": "Tokenin uusimisen epäonnistumisia havaittu",
       "unknown": "Terveystila tuntematon"
     },
+    "tokenHealthRefreshResult": "{refreshed} päivitetty, {failed} epäonnistui, {skipped} ohitettu",
     "systemMonitor": {
       "metricsAriaLabel": "Järjestelmän mittarit",
       "memory": "Muisti",

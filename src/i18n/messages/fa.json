@@ -10658,6 +10658,7 @@
       "refreshFailures": "خطاهای تازه‌سازی توکن شناسایی شدند",
       "unknown": "وضعیت سلامتی ناشناخته است"
     },
+    "tokenHealthRefreshResult": "{refreshed} تازه‌سازی شد، {failed} ناموفق، {skipped} نادیده گرفته شد",
     "systemMonitor": {
       "metricsAriaLabel": "معیارهای سیستم",
       "memory": "حافظه",

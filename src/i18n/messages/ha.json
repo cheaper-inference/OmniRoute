@@ -10658,6 +10658,7 @@
       "refreshFailures": "An gano gazawar sabunta token",
       "unknown": "Ba a san halin lafiyar ba"
     },
+    "tokenHealthRefreshResult": "{refreshed} an sabunta, {failed} an gaza, {skipped} an wuce",
     "systemMonitor": {
       "metricsAriaLabel": "Ma'aunan tsarin",
       "memory": "Ƙwaƙwalwa",

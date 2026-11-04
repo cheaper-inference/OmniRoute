@@ -10735,6 +10735,7 @@
       "refreshFailures": "ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼ ਅਸਫਲਤਾਵਾਂ ਮਿਲੀਆਂ",
       "unknown": "ਸਿਹਤ ਸਥਿਤੀ ਅਣਜਾਣ ਹੈ"
     },
+    "tokenHealthRefreshResult": "{refreshed} ਤਾਜ਼ਾ ਕੀਤੇ, {failed} ਅਸਫਲ, {skipped} ਛੱਡੇ",
     "systemMonitor": {
       "metricsAriaLabel": "ਸਿਸਟਮ ਮੈਟ੍ਰਿਕਸ",
       "memory": "ਮੈਮੋਰੀ",

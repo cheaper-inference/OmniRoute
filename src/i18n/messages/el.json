@@ -10658,6 +10658,7 @@
       "refreshFailures": "Εντοπίστηκαν αποτυχίες ανανέωσης διακριτικών",
       "unknown": "Η κατάσταση των διακριτικών είναι άγνωστη"
     },
+    "tokenHealthRefreshResult": "{refreshed} ανανεώθηκαν, {failed} απέτυχαν, {skipped} παραλείφθηκαν",
     "systemMonitor": {
       "metricsAriaLabel": "Μετρικά συστήματος",
       "memory": "Μνήμη",

@@ -10658,6 +10658,7 @@
       "refreshFailures": "Обнаружены ошибки обновления токена",
       "unknown": "Статус здоровья неизвестен"
     },
+    "tokenHealthRefreshResult": "{refreshed} обновлено, {failed} не удалось, {skipped} пропущено",
     "systemMonitor": {
       "metricsAriaLabel": "Системные метрики",
       "memory": "Память",

@@ -10658,6 +10658,7 @@
       "refreshFailures": "Đã phát hiện lỗi làm mới token",
       "unknown": "Không rõ trạng thái sức khỏe"
     },
+    "tokenHealthRefreshResult": "{refreshed} đã làm mới, {failed} thất bại, {skipped} đã bỏ qua",
     "systemMonitor": {
       "metricsAriaLabel": "Các chỉ số hệ thống",
       "memory": "Bộ nhớ",

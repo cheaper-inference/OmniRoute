@@ -10658,6 +10658,7 @@
       "refreshFailures": "Token-Aktualisierungsfehler erkannt",
       "unknown": "Gesundheitsstatus unbekannt"
     },
+    "tokenHealthRefreshResult": "{refreshed} aktualisiert, {failed} fehlgeschlagen, {skipped} übersprungen",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmetriken",
       "memory": "Speicher",

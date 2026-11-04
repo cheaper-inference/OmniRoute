@@ -10658,6 +10658,7 @@
       "refreshFailures": "Konstatētas tokenu atjaunošanas kļūmes",
       "unknown": "Stāvoklis nav zināms"
     },
+    "tokenHealthRefreshResult": "{refreshed} atjaunināti, {failed} neizdevušies, {skipped} izlaisti",
     "systemMonitor": {
       "metricsAriaLabel": "Sistēmas rādītāji",
       "memory": "Atmiņa",

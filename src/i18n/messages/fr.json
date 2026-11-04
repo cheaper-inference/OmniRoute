@@ -10658,6 +10658,7 @@
       "refreshFailures": "Échecs d’actualisation des jetons détectés",
       "unknown": "État de santé inconnu"
     },
+    "tokenHealthRefreshResult": "{refreshed} actualisés, {failed} échoués, {skipped} ignorés",
     "systemMonitor": {
       "metricsAriaLabel": "Métriques système",
       "memory": "Mémoire",
