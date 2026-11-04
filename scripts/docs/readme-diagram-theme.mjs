@@ -1,6 +1,7 @@
-// The Cheaper Inference UI Kit, as the README diagrams see it. Palette copied from
-// packages/ui-kit/src/ci-tokens.css (tests/unit/docs/readme-diagram-theme.test.ts pins the hex
-// codes against that file), text roles on the kit's type scale.
+// The Cheaper Inference UI Kit, as the README diagrams see it. Palette: the kit's Editions
+// appearance, OmniRoute's default look — copied from packages/ui-kit/src/ci-editions.css
+// (tests/unit/docs/readme-diagram-theme.test.ts pins every value against that file), text roles
+// on the kit's type scale (ci-tokens.css).
 // One self-themed file per diagram: light values on :root, dark values behind
 // prefers-color-scheme, evaluated by the viewer's browser even through GitHub's camo proxy.
 //
@@ -34,15 +35,22 @@
 //   .mono-sm   mono  500  11px  --body          small code, ids
 //   .mono-xs   mono  500   9px  --muted         (letter-spacing 0.08em)
 //
-// Status / surface tokens resolve the kit's var() chains inside each block of ci-tokens.css:
-// surfaceSubtle/surfaceMuted are --ci-neutral-50/100 in light and --ci-neutral-800/700 in dark;
-// inverseBg is --ci-neutral-950 in BOTH blocks (the kit keeps technical inverse panels dark, so
-// in dark mode an inverse surface equals the canvas — give it a border); accentSoft is the kit's
-// --ci-color-accent-surface-range, which the dark block lowers to 0.12 alpha.
+// Every value is the literal an Editions token holds in its block of ci-editions.css: the light
+// block, and the `data-theme="dark"` block, which falls back to the light block for what it does
+// not redeclare. So inverseBg (--ci-color-surface-inverse, #11120f) is the same in BOTH schemes
+// (the kit keeps technical inverse panels dark, so in dark mode an inverse surface equals the
+// canvas — give it a border), and so are accent, accentInk (--ci-color-accent-foreground, the ink
+// that sits ON the copper) and accentSoft (--ci-color-accent-surface-range, 0.18 alpha).
+// `ink` is --ci-color-heading and `body` is --ci-color-text: Editions uses one ink for both.
 //
-// `border` is the kit's --ci-color-border in both blocks (light rgb(4 13 16 / 0.24), dark
-// rgb(241 247 247 / 0.24), pinned by the test); `grid` is the one value that is not a kit token —
+// `border` is the kit's --ci-color-border in both blocks (light rgb(32 33 28 / .22), dark
+// rgb(242 240 232 / .22), pinned by the test); `grid` is the one value that is not a kit token —
 // a lighter tint of the border for the canvas pattern.
+//
+// One measured exception: light `warn` is the kit's Editions --ci-color-warning (#99631f) scaled
+// to 90 % per channel (same hue), #8a591c. The kit value is 4.46:1 on the canvas and 4.09:1 on
+// warnBg, below WCAG AA for the warn text the diagrams draw; #8a591c is ≥ 4.5:1 on every light
+// background (bg, surface, warnBg, surfaceSubtle, surfaceMuted). The test pins the derivation.
 //
 // extraCss naming: diagram-local classes and custom properties passed through svgOpen's
 // `extraCss` carry the diagram's abbreviation as a prefix (`rl-…`, `cmp-…`, `--inv-*`…), never a
@@ -52,54 +60,54 @@ import { measureText } from "./readme-outline.mjs";
 
 export const KIT = {
   light: {
-    bg: "#fbfbf8",
-    surface: "#ffffff",
-    ink: "#040d10",
-    body: "#031a1b",
-    muted: "#575f5f",
-    border: "rgba(4,13,16,0.24)",
-    grid: "rgba(4,13,16,0.06)",
-    accent: "#d8ff00",
-    accentInk: "#040d10",
-    ok: "#087a4f",
-    okBg: "#e8f7f0",
-    warn: "#a75a00",
-    warnBg: "#fff3df",
-    err: "#bf3636",
-    errBg: "#ffeded",
-    info: "#2869d8",
-    infoBg: "#edf4ff",
-    surfaceSubtle: "#f7f7f2",
-    surfaceMuted: "#eeeee8",
-    inverseBg: "#040d10",
-    inverseText: "#f1f7f7",
-    track: "rgba(4,13,16,0.14)",
-    accentSoft: "rgba(216,255,0,0.22)",
+    bg: "#f3f1e9",
+    surface: "#faf9f4",
+    ink: "#20211c",
+    body: "#20211c",
+    muted: "#626459",
+    border: "rgba(32,33,28,0.22)",
+    grid: "rgba(32,33,28,0.06)",
+    accent: "#e5ac82",
+    accentInk: "#241b15",
+    ok: "#3c735b",
+    okBg: "#e4ece3",
+    warn: "#8a591c",
+    warnBg: "#f3e6cf",
+    err: "#ae4340",
+    errBg: "#f5e2dc",
+    info: "#526b80",
+    infoBg: "#e4e9ed",
+    surfaceSubtle: "#eae8df",
+    surfaceMuted: "#e3e1d7",
+    inverseBg: "#11120f",
+    inverseText: "#f2f0e8",
+    track: "rgba(32,33,28,0.18)",
+    accentSoft: "rgba(229,172,130,0.18)",
   },
   dark: {
-    bg: "#040d10",
-    surface: "#0d191c",
-    ink: "#ffffff",
-    body: "#f1f7f7",
-    muted: "#c7cbc5",
-    border: "rgba(241,247,247,0.24)",
-    grid: "rgba(241,247,247,0.05)",
-    accent: "#d8ff00",
-    accentInk: "#040d10",
-    ok: "#5dd6a5",
-    okBg: "#0f3328",
-    warn: "#f4cf8b",
-    warnBg: "#38280f",
-    err: "#ff8f8f",
-    errBg: "#3b1919",
-    info: "#8fbaff",
-    infoBg: "#142b4f",
-    surfaceSubtle: "#1e2c2f",
-    surfaceMuted: "#394446",
-    inverseBg: "#040d10",
-    inverseText: "#f1f7f7",
-    track: "rgba(241,247,247,0.2)",
-    accentSoft: "rgba(216,255,0,0.12)",
+    bg: "#11120f",
+    surface: "#191a16",
+    ink: "#f2f0e8",
+    body: "#f2f0e8",
+    muted: "#a5a69b",
+    border: "rgba(242,240,232,0.22)",
+    grid: "rgba(242,240,232,0.05)",
+    accent: "#e5ac82",
+    accentInk: "#241b15",
+    ok: "#9ecbbb",
+    okBg: "#1c3028",
+    warn: "#e5c28c",
+    warnBg: "#352c1c",
+    err: "#edaaa1",
+    errBg: "#382421",
+    info: "#a6bfd0",
+    infoBg: "#212e37",
+    surfaceSubtle: "#22231d",
+    surfaceMuted: "#292a23",
+    inverseBg: "#11120f",
+    inverseText: "#f2f0e8",
+    track: "rgba(242,240,232,0.18)",
+    accentSoft: "rgba(229,172,130,0.18)",
   },
 };
 

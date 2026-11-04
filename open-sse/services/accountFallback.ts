@@ -26,6 +26,7 @@ import {
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
+import { isRequestScopedMisalignmentRefusal } from "../utils/providerSafety.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
 import { getProviderCategory, isLocalProvider } from "../config/providerRegistry.ts";
 import {
@@ -966,6 +967,11 @@ export function hasPerModelQuota(
   if (getCanonicalLockProvider(canonicalId) === "codex") return true;
   if (canonicalId === "gemini" || canonicalId === "github") return true;
   if (canonicalId === "antigravity" || canonicalId === "agy") return true;
+  // #18572: Qoder multiplexes every model behind one connection and answers a queued
+  // request with `503 upstream_busy` naming the model that was queued. Treating that as a
+  // connection cooldown parks every sibling model of the account, so it belongs on the
+  // per-model allowlist instead.
+  if (canonicalId === "qoder") return true;
   // #11071: getPassthroughProviders() reads the open-sse REGISTRY. A provider can declare
   // passthroughModels:true in the SHARED registry (src/shared/constants/providers/) and be
   // absent from that set — 40 of them are, and they are neither local nor self-hosted, so the
@@ -1021,10 +1027,39 @@ export function shouldMarkAccountExhaustedFrom429(
   );
 }
 
-export function classifyLockoutReason(status: number): string {
+export function classifyLockoutReason(status: number, errorText?: string): string {
   if (status === 429) return "rate_limit";
-  if (status === 403) return "quota_exhausted";
+  if (status === 403) {
+    // Check if errorText contains quota exhaustion signal
+    if (errorText && looksLikeQuotaExhausted(errorText)) {
+      return "quota_exhausted";
+    }
+    return "auth_error";
+  }
   return "unknown";
+}
+
+/**
+ * Lockout SCOPE override for a 403 that carries no quota proof.
+ *
+ * `resolveLockoutScope(status)` maps every 403 to the quota-family key, which
+ * parks every sibling model of the connection for the cooldown. That is the
+ * right scope when the body proves the account's quota is exhausted, but a 403
+ * without that proof (restricted key, forbidden route, unauthorized model) is
+ * about one model endpoint, not the account's quota — it should lock the exact
+ * provider/connection/model tuple only. This returns `"exact"` in that case and
+ * `undefined` otherwise, leaving the default status-based scope untouched.
+ *
+ * Mirrors `classifyLockoutReason`: the same quota-proof signal (`looksLikeQuotaExhausted`)
+ * that decides between `quota_exhausted` and `auth_error` decides the scope.
+ */
+export function classifyLockoutScope(
+  status: number,
+  errorText?: string
+): exactModelLock.LockoutScope | undefined {
+  if (status !== 403) return undefined;
+  if (errorText && looksLikeQuotaExhausted(errorText)) return undefined;
+  return "exact";
 }
 
 export type DecayResult = { cleared: boolean; newFailureCount: number };
@@ -1769,7 +1804,10 @@ export function checkFallbackError(
   }
   // A policy refusal belongs to this input, even when relayed with a 403/5xx.
   // Preserve the refusal; rotating accounts or cooling them down cannot repair it.
-  if (isContentPolicyRefusal(structuredError)) {
+  if (
+    isContentPolicyRefusal(structuredError) ||
+    isRequestScopedMisalignmentRefusal({ status, code: structuredError?.code })
+  ) {
     return {
       shouldFallback: false,
       cooldownMs: 0,

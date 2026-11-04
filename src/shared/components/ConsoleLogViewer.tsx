@@ -12,7 +12,7 @@ import Select from "./Select";
  * Console Log Viewer — Real-time application log viewer.
  *
  * Displays structured application logs from the server with a terminal-like UI.
- * Polls the backend API every 5 seconds. Shows logs from the last 1 hour.
+ * Polls the newest retained page every 5 seconds. Older pages and pause freeze updates.
  * Supports level filtering, text search, auto-scroll, and copy-to-clipboard.
  */
 
@@ -52,16 +52,260 @@ const LEVEL_BG: Record<string, string> = {
 };
 
 const POLL_INTERVAL = 5000; // 5 seconds
+const PAGE_LIMIT = 2000;
+
+const stringifyValue = (value: unknown): string => {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
+const getText = (entry: LogEntry) => stringifyValue(entry.msg || entry.message || "");
+const getComponent = (entry: LogEntry) => stringifyValue(entry.component || entry.module || "");
+const getCorrelationId = (entry: LogEntry) => stringifyValue(entry.correlationId);
+
+function formatLogTime(ts: string, locale: string, range: string): string {
+  try {
+    const d = new Date(ts);
+    return d.toLocaleString(locale, {
+      ...(range !== "1h" ? ({ year: "numeric", month: "2-digit", day: "2-digit" } as const) : {}),
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      fractionalSecondDigits: 3,
+    });
+  } catch {
+    return ts;
+  }
+}
+
+/** Polling never replaces a paused snapshot or a history page the reader is browsing. */
+function shouldSkipFetch(
+  paused: boolean,
+  viewingHistory: boolean,
+  cursor: string | undefined,
+  refresh: boolean
+): boolean {
+  return paused || (!cursor && viewingHistory && !refresh);
+}
+
+const errorText = (err: unknown, fallback: string): string =>
+  err instanceof Error ? err.message : fallback;
+
+/** `/api/logs/console` query string for one page (newest page when `cursor` is absent). */
+function buildLogQuery(levelFilter: string, range: string, cursor?: string): string {
+  const params = new URLSearchParams();
+  if (levelFilter !== "all") params.set("level", levelFilter);
+  params.set("limit", "500");
+  params.set("range", range);
+  if (cursor) params.set("cursor", cursor);
+  return params.toString();
+}
+
+/** Bound browser memory independently of the retained files. Keep the older
+ * end while paging so every retained page stays reachable. */
+function mergeLogPage(previous: LogEntry[], data: LogEntry[], cursor?: string): LogEntry[] {
+  return cursor ? [...data, ...previous].slice(0, PAGE_LIMIT) : data;
+}
+
+function readPageMeta(res: Response): { nextCursor: string | null; scanLimited: boolean } {
+  return {
+    nextCursor: res.headers?.get("x-console-next-cursor") || null,
+    scanLimited: res.headers?.get("x-console-truncated") === "true",
+  };
+}
+
+type ViewerTranslator = ReturnType<typeof useTranslations>;
+
+function rangeLabel(
+  range: string,
+  tv: ViewerTranslator,
+  tc: ViewerTranslator,
+  tl: ViewerTranslator
+) {
+  if (range === "all") return tc("all");
+  if (range === "1h") return tv("lastHour");
+  return tl("lastNHours", { hours: range === "24h" ? "24h" : "168h" });
+}
+
+function ConsoleStatus({
+  paused,
+  viewingHistory,
+  scanLimited,
+  count,
+  range,
+  lastUpdated,
+  locale,
+}: {
+  paused: boolean;
+  viewingHistory: boolean;
+  scanLimited: boolean;
+  count: number;
+  range: string;
+  lastUpdated: Date | null;
+  locale: string;
+}) {
+  const tv = useTranslations("logs.consoleViewer");
+  const tc = useTranslations("common");
+  const tl = useTranslations("logs");
+  const frozen = paused || viewingHistory;
+  return (
+    <div className="ml-auto flex items-center gap-2 self-center text-xs text-text-muted">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "inline-block size-2 rounded-full",
+          frozen ? "bg-warning" : "animate-pulse bg-success"
+        )}
+      />
+      {frozen && <span>{tv("paused")}</span>}
+      {scanLimited && <span>{tv("scanLimited")}</span>}
+      <span>{tv("entryCount", { count })}</span>
+      <span className="text-text-muted/50">•</span>
+      <span>{rangeLabel(range, tv, tc, tl)}</span>
+      {lastUpdated && (
+        <>
+          <span className="text-text-muted/50">•</span>
+          <span>{tv("updatedAt", { time: lastUpdated.toLocaleTimeString(locale) })}</span>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LogRow({
+  entry,
+  idx,
+  copied,
+  locale,
+  range,
+  onCopy,
+}: {
+  entry: LogEntry;
+  idx: number;
+  copied: boolean;
+  locale: string;
+  range: string;
+  onCopy: (entry: LogEntry, idx: number) => void;
+}) {
+  const tv = useTranslations("logs.consoleViewer");
+  const tc = useTranslations("common");
+  const level = stringifyValue(entry.level || "info").toLowerCase();
+  const colorClass = LEVEL_COLORS[level] || LEVEL_COLORS.info;
+  const bgClass = LEVEL_BG[level] || "";
+  const comp = getComponent(entry);
+  const msg = getText(entry);
+  const correlationId = getCorrelationId(entry);
+
+  return (
+    <div
+      className={`group flex flex-wrap sm:flex-nowrap items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
+        level === "error" || level === "fatal" ? "bg-[#ff7b72]/5" : ""
+      }`}
+    >
+      {/* Timestamp */}
+      <span className="text-[#8b949e] whitespace-nowrap shrink-0 select-none">
+        {formatLogTime(entry.timestamp, locale, range)}
+      </span>
+
+      {/* Level badge */}
+      <span
+        className={`inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border shrink-0 ${colorClass} ${bgClass}`}
+      >
+        {level.padEnd(5)}
+      </span>
+
+      {/* Component */}
+      {comp && <span className="text-[#d2a8ff]/80 max-w-full break-all sm:shrink-0">[{comp}]</span>}
+
+      {/* Message */}
+      <span className="text-[#c9d1d9] flex-1 min-w-0 basis-full order-last sm:basis-auto sm:order-none break-all">
+        {msg}
+        {/* Extra meta */}
+        {correlationId && (
+          <span className="text-[#8b949e] ml-2">cid:{correlationId.slice(0, 8)}</span>
+        )}
+      </span>
+
+      {/* Copy button */}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => onCopy(entry, idx)}
+        title={tv("copyLogEntry")}
+        aria-label={tv("copyLogEntry")}
+        className="size-6 min-h-6 shrink-0 text-[#8b949e] opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
+      >
+        <Icon name={copied ? "check" : "content_copy"} size={14} />
+      </Button>
+      {copied && (
+        <span className="sr-only" role="status" aria-live="polite">
+          {tc("copied")}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function PauseButton({ paused, onToggle }: { paused: boolean; onToggle: () => void }) {
+  const tv = useTranslations("logs.consoleViewer");
+  return (
+    <Button
+      variant="outline"
+      onClick={onToggle}
+      aria-label={tv(paused ? "resumeLogs" : "pauseLogs")}
+      aria-pressed={paused}
+    >
+      <Icon name={paused ? "play_arrow" : "pause"} size={16} />
+      {tv(paused ? "resumeLogs" : "pauseLogs")}
+    </Button>
+  );
+}
+
+function AutoScrollButton({ autoScroll, onToggle }: { autoScroll: boolean; onToggle: () => void }) {
+  const tv = useTranslations("logs.consoleViewer");
+  return (
+    <Button
+      variant="outline"
+      aria-pressed={autoScroll}
+      onClick={onToggle}
+      title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
+      className={cn(autoScroll && "border-info/30 bg-info/15 text-info")}
+    >
+      <Icon name={autoScroll ? "vertical_align_bottom" : "lock"} size={16} />
+      {tv("autoScroll")}
+    </Button>
+  );
+}
 
 export default function ConsoleLogViewer() {
   const locale = useLocale();
   const t = useTranslations("loggers");
   const tv = useTranslations("logs.consoleViewer");
   const tc = useTranslations("common");
+  const tl = useTranslations("logs");
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState("all");
+  const [range, setRange] = useState("all");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [viewingHistory, setViewingHistory] = useState(false);
+  const [scanLimited, setScanLimited] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const historyRef = useRef(false);
+  const pausedRef = useRef(false);
+  const requestVersionRef = useRef(0);
+  const fetchAbortRef = useRef<AbortController | null>(null);
   const [searchText, setSearchText] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -73,35 +317,82 @@ export default function ConsoleLogViewer() {
   const followTailRef = useRef(true);
   const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchLogs = useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      if (levelFilter !== "all") params.set("level", levelFilter);
-      params.set("limit", "500");
+  const invalidateFetch = useCallback(() => {
+    requestVersionRef.current++;
+    fetchAbortRef.current?.abort();
+    fetchAbortRef.current = null;
+  }, []);
 
-      const res = await fetch(`/api/logs/console?${params.toString()}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: LogEntry[] = await res.json();
+  const fetchLogs = useCallback(
+    async (cursor?: string, refresh = false) => {
+      if (shouldSkipFetch(pausedRef.current, historyRef.current, cursor, refresh)) return;
+      if (cursor || refresh) {
+        historyRef.current = Boolean(cursor);
+        setViewingHistory(Boolean(cursor));
+      }
+      setLoading(true);
+      const version = ++requestVersionRef.current;
+      fetchAbortRef.current?.abort();
+      const controller = new AbortController();
+      fetchAbortRef.current = controller;
+      const isCurrent = () => !pausedRef.current && version === requestVersionRef.current;
+      try {
+        const res = await fetch(`/api/logs/console?${buildLogQuery(levelFilter, range, cursor)}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: LogEntry[] = await res.json();
+        if (!isCurrent()) return;
+        if (!Array.isArray(data)) throw new Error(tv("fetchFailed"));
+        const meta = readPageMeta(res);
+        setLogs((previous) => mergeLogPage(previous, data, cursor));
+        setNextCursor(meta.nextCursor);
+        setScanLimited(meta.scanLimited);
+        setLastUpdated(new Date());
+        setError(null);
+      } catch (err: unknown) {
+        if (isCurrent() && !controller.signal.aborted) setError(errorText(err, tv("fetchFailed")));
+      } finally {
+        if (isCurrent()) {
+          fetchAbortRef.current = null;
+          setLoading(false);
+        }
+      }
+    },
+    [levelFilter, range, tv]
+  );
 
-      setLogs(data);
-      setLastUpdated(new Date());
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || tv("fetchFailed"));
-    } finally {
-      setLoading(false);
+  const togglePause = () => {
+    // Invalidate synchronously: even a response already decoding must not
+    // replace selected text, including after a quick pause/resume.
+    pausedRef.current = !pausedRef.current;
+    invalidateFetch();
+    setLoading(false);
+    setPaused(pausedRef.current);
+    if (!pausedRef.current) {
+      historyRef.current = false;
+      setViewingHistory(false);
     }
-  }, [levelFilter, tv]);
+  };
+  const resetHistory = () => {
+    invalidateFetch();
+    historyRef.current = false;
+    setViewingHistory(false);
+    setNextCursor(null);
+  };
 
-  // Initial fetch + polling
+  // Pause freezes the displayed snapshot, not the server's log writer.
   useEffect(() => {
+    if (paused) return;
     const initialFetch = setTimeout(() => void fetchLogs(), 0);
-    const interval = setInterval(fetchLogs, POLL_INTERVAL);
+    const interval = setInterval(() => void fetchLogs(), POLL_INTERVAL);
     return () => {
       clearTimeout(initialFetch);
       clearInterval(interval);
+      invalidateFetch();
     };
-  }, [fetchLogs]);
+  }, [fetchLogs, paused, invalidateFetch]);
 
   useEffect(
     () => () => {
@@ -112,10 +403,10 @@ export default function ConsoleLogViewer() {
 
   // Auto-scroll to bottom on new logs, but only while the reader is already at the bottom
   useEffect(() => {
-    if (autoScroll && followTailRef.current && scrollRef.current) {
+    if (autoScroll && !paused && !viewingHistory && followTailRef.current && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [logs, autoScroll]);
+  }, [logs, autoScroll, paused, viewingHistory]);
 
   const handleCopy = async (entry: LogEntry, idx: number) => {
     const text = JSON.stringify(entry, null, 2);
@@ -134,39 +425,6 @@ export default function ConsoleLogViewer() {
     }, 2000);
   };
 
-  const formatTime = (ts: string) => {
-    try {
-      const d = new Date(ts);
-      return d.toLocaleTimeString(locale, {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        fractionalSecondDigits: 3,
-      });
-    } catch {
-      return ts;
-    }
-  };
-
-  const stringifyValue = (value: unknown) => {
-    if (value === undefined || value === null) return "";
-    if (typeof value === "string") return value;
-    if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
-      return String(value);
-    }
-
-    try {
-      return JSON.stringify(value);
-    } catch {
-      return String(value);
-    }
-  };
-
-  const getText = (entry: LogEntry) => stringifyValue(entry.msg || entry.message || "");
-  const getComponent = (entry: LogEntry) => stringifyValue(entry.component || entry.module || "");
-  const getCorrelationId = (entry: LogEntry) => stringifyValue(entry.correlationId);
-
   // Apply text search filter
   const filteredLogs = searchText
     ? logs.filter((entry) => {
@@ -182,7 +440,11 @@ export default function ConsoleLogViewer() {
         {/* Level filter */}
         <Select
           value={levelFilter}
-          onChange={(e) => setLevelFilter(e.target.value)}
+          onChange={(e) => {
+            resetHistory();
+            setLevelFilter(e.target.value);
+          }}
+          disabled={paused}
           aria-label={tv("filterByLevel")}
         >
           <option value="all">{t("allLevels")}</option>
@@ -191,6 +453,32 @@ export default function ConsoleLogViewer() {
           <option value="warn">Warn+</option>
           <option value="error">Error+</option>
         </Select>
+
+        <Select
+          data-console-history="range"
+          aria-label={tl("timeRange")}
+          value={range}
+          disabled={paused}
+          onChange={(e) => {
+            resetHistory();
+            setRange(e.target.value);
+          }}
+        >
+          <option value="all">{tc("all")}</option>
+          <option value="1h">{tv("lastHour")}</option>
+          <option value="24h">{tl("lastNHours", { hours: "24h" })}</option>
+          <option value="7d">{tl("lastNHours", { hours: "168h" })}</option>
+        </Select>
+        <Button
+          variant="outline"
+          data-console-history="older"
+          onClick={() => {
+            if (nextCursor) void fetchLogs(nextCursor);
+          }}
+          disabled={!nextCursor || loading || paused}
+        >
+          {tc("loadMore")}
+        </Button>
 
         {/* Search */}
         <Input
@@ -203,28 +491,24 @@ export default function ConsoleLogViewer() {
           className="min-w-[200px] flex-1"
         />
 
+        <PauseButton paused={paused} onToggle={togglePause} />
+
         {/* Auto-scroll toggle */}
-        <Button
-          variant="outline"
-          aria-pressed={autoScroll}
-          onClick={() => {
+        <AutoScrollButton
+          autoScroll={autoScroll}
+          onToggle={() => {
             // Switching auto-scroll back on is an explicit "take me to the newest line".
             if (!autoScroll) followTailRef.current = true;
             setAutoScroll(!autoScroll);
           }}
-          title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
-          className={cn(autoScroll && "border-info/30 bg-info/15 text-info")}
-        >
-          <Icon name={autoScroll ? "vertical_align_bottom" : "lock"} size={16} />
-          {tv("autoScroll")}
-        </Button>
+        />
 
         {/* Refresh */}
         <Button
           variant="outline"
           size="icon"
-          onClick={fetchLogs}
-          disabled={loading}
+          onClick={() => void fetchLogs(undefined, true)}
+          disabled={loading || paused}
           aria-label={tc("refresh")}
           title={tc("refresh")}
         >
@@ -232,21 +516,15 @@ export default function ConsoleLogViewer() {
         </Button>
 
         {/* Status */}
-        <div className="ml-auto flex items-center gap-2 self-center text-xs text-text-muted">
-          <span
-            aria-hidden="true"
-            className="inline-block size-2 animate-pulse rounded-full bg-success"
-          />
-          <span>{tv("entryCount", { count: filteredLogs.length })}</span>
-          <span className="text-text-muted/50">•</span>
-          <span>{tv("lastHour")}</span>
-          {lastUpdated && (
-            <>
-              <span className="text-text-muted/50">•</span>
-              <span>{tv("updatedAt", { time: lastUpdated.toLocaleTimeString(locale) })}</span>
-            </>
-          )}
-        </div>
+        <ConsoleStatus
+          paused={paused}
+          viewingHistory={viewingHistory}
+          scanLimited={scanLimited}
+          count={filteredLogs.length}
+          range={range}
+          lastUpdated={lastUpdated}
+          locale={locale}
+        />
       </div>
 
       {/* Error */}
@@ -275,7 +553,7 @@ export default function ConsoleLogViewer() {
         style={{ maxHeight: "calc(100vh - 340px)", minHeight: "400px" }}
         role="log"
         aria-label={tv("consoleAria")}
-        aria-live="polite"
+        aria-live={paused || viewingHistory ? "off" : "polite"}
       >
         {/* Header bar */}
         <div className="sticky top-0 z-10 px-4 py-2 bg-[#161b22] border-b border-[#30363d] flex items-center gap-2">
@@ -296,64 +574,17 @@ export default function ConsoleLogViewer() {
               <p className="text-[10px] mt-1">{tv("emptyFileLoggingHint")}</p>
             </div>
           ) : (
-            filteredLogs.map((entry, idx) => {
-              const level = stringifyValue(entry.level || "info").toLowerCase();
-              const colorClass = LEVEL_COLORS[level] || LEVEL_COLORS.info;
-              const bgClass = LEVEL_BG[level] || "";
-              const comp = getComponent(entry);
-              const msg = getText(entry);
-              const correlationId = getCorrelationId(entry);
-
-              return (
-                <div
-                  key={idx}
-                  className={`group flex items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
-                    level === "error" || level === "fatal" ? "bg-[#ff7b72]/5" : ""
-                  }`}
-                >
-                  {/* Timestamp */}
-                  <span className="text-[#8b949e] whitespace-nowrap shrink-0 select-none">
-                    {formatTime(entry.timestamp)}
-                  </span>
-
-                  {/* Level badge */}
-                  <span
-                    className={`inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border shrink-0 ${colorClass} ${bgClass}`}
-                  >
-                    {level.padEnd(5)}
-                  </span>
-
-                  {/* Component */}
-                  {comp && <span className="text-[#d2a8ff]/80 shrink-0">[{comp}]</span>}
-
-                  {/* Message */}
-                  <span className="text-[#c9d1d9] flex-1 break-all">
-                    {msg}
-                    {/* Extra meta */}
-                    {correlationId && (
-                      <span className="text-[#8b949e] ml-2">cid:{correlationId.slice(0, 8)}</span>
-                    )}
-                  </span>
-
-                  {/* Copy button */}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleCopy(entry, idx)}
-                    title={tv("copyLogEntry")}
-                    aria-label={tv("copyLogEntry")}
-                    className="size-6 min-h-6 shrink-0 text-[#8b949e] opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
-                  >
-                    <Icon name={copiedIdx === idx ? "check" : "content_copy"} size={14} />
-                  </Button>
-                  {copiedIdx === idx && (
-                    <span className="sr-only" role="status" aria-live="polite">
-                      {tc("copied")}
-                    </span>
-                  )}
-                </div>
-              );
-            })
+            filteredLogs.map((entry, idx) => (
+              <LogRow
+                key={idx}
+                entry={entry}
+                idx={idx}
+                copied={copiedIdx === idx}
+                locale={locale}
+                range={range}
+                onCopy={handleCopy}
+              />
+            ))
           )}
 
           {loading && filteredLogs.length === 0 && (
