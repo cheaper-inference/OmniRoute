@@ -1571,8 +1571,8 @@ Content-Type: multipart/form-data
 ```
 
 Yapılandırılmış herhangi bir STT sağlayıcısını kullanarak ses dosyalarının transkripsiyonunu gerçekleştirin. İlk yol
-segmenti, yerel sağlayıcıyı seçer (`openai/…`, `deepgram/…`). Başka bir satıcının modelini
-yeniden sunan ağ geçitleri, nitelikli bir kimlik kullanır
+segmenti yerel sağlayıcıyı seçer (`openai/…`, `deepgram/…`). Başka bir satıcının modelini
+yeniden dışa aktaran ağ geçitleri nitelikli bir kimlik kullanır
 (`openrouter/deepgram/nova-3`).
 
 **İstek:**
@@ -1595,14 +1595,22 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Örnek model kimlikleri:** `openai/whisper-1` (bir OpenAI anahtarı
-gerektirir), `openrouter/deepgram/nova-3` (bir OpenRouter anahtarı gerektirir),
-`deepgram/nova-3` (yerel bir Deepgram anahtarı gerektirir). Tek başına bir
-`deepgram/nova-3` isteği OpenRouter kullanmaz.
+**Örnek model kimlikleri:** `openai/whisper-1` (bir OpenAI anahtarı gerektirir),
+`openrouter/deepgram/nova-3` (bir OpenRouter anahtarı gerektirir),
+`deepgram/nova-3` (yerel bir Deepgram anahtarı gerektirir). Yalın bir
+`deepgram/nova-3` isteği **OpenRouter kullanmaz**.
 
 **Desteklenen biçimler:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket üzerinden dosya modunda transkripsiyon (bir Gemini API anahtarı gerektirir). Yükleme,
+`ffmpeg` ile 16 kHz mono PCM'ye dönüştürülür (`PATH` üzerinde bulunmalıdır; dosya zaten
+16 kHz mono PCM WAV ise bu gerekli değildir), oturuma aktarılır ve sonlandırılmış metin
+`{ "text": "..." }` olarak döndürülür. İsteğe bağlı `language` ve `prompt` form alanları
+iletilir. Sınırlar: 25 MiB üzerindeki yüklemeler veya kodu çözülmüş ses uzunluğu 10 dakikadan
+fazla olan dosyalar `413` yanıtı alır; 60 saniyeden uzun süren bir dönüştürme sonlandırılır ve
+`504` yanıtı döndürülür. API anahtarı yalnızca `x-goog-api-key` üstbilgisinde gönderilir,
+WebSocket URL'sinde asla gönderilmez.
 
 ## Ollama Uyumluluğu
 

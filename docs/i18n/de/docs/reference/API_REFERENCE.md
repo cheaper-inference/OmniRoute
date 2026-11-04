@@ -1620,7 +1620,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkribieren Sie Audiodateien mit einem beliebigen konfigurierten STT-Anbieter. Das erste Pfadsegment wählt den nativen Anbieter aus (`openai/…`, `deepgram/…`). Gateways, die das Modell eines anderen Anbieters erneut exportieren, verwenden eine qualifizierte ID
+Transkribieren Sie Audiodateien mithilfe eines beliebigen konfigurierten STT-Anbieters. Das erste Pfadsegment
+wählt den nativen Anbieter aus (`openai/…`, `deepgram/…`). Gateways, die das Modell eines anderen
+Anbieters erneut bereitstellen, verwenden eine qualifizierte ID
 (`openrouter/deepgram/nova-3`).
 
 **Anfrage:**
@@ -1643,12 +1645,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Beispiel für Modell-IDs:** `openai/whisper-1` (erfordert einen OpenAI-Schlüssel),
+**Beispielmodell-IDs:** `openai/whisper-1` (erfordert einen OpenAI-Schlüssel),
 `openrouter/deepgram/nova-3` (erfordert einen OpenRouter-Schlüssel),
 `deepgram/nova-3` (erfordert einen nativen Deepgram-Schlüssel). Eine Anfrage mit
 `deepgram/nova-3` verwendet **nicht** OpenRouter.
 
 **Unterstützte Formate:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Audiotranskription im Dateimodus über den Gemini-Live-
+WebSocket (erfordert einen Gemini-API-Schlüssel). Der Upload wird mit `ffmpeg`
+(in `PATH`, sofern die Datei nicht bereits eine 16-kHz-Mono-PCM-WAV-Datei ist) in 16-kHz-Mono-PCM konvertiert, an die Sitzung
+gestreamt und der finalisierte Text als `{ "text": "..." }` zurückgegeben. Optionale
+`language`- und `prompt`-Formularfelder werden weitergeleitet. Beschränkungen: Uploads über 25 MiB oder dekodierte Audiodateien mit einer Länge von mehr als 10 Minuten
+geben `413` zurück; eine Konvertierung, die länger als 60 s läuft, wird beendet und gibt `504` zurück. Der API-Schlüssel wird
+nur im Header `x-goog-api-key` und niemals in der WebSocket-URL gesendet.
 
 ---
 

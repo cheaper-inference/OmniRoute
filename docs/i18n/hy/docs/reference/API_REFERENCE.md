@@ -1575,7 +1575,7 @@ GET /api/system/version
 
 ---
 
-## Աուդիոյի տրանսկրիպցիա
+## Աուդիոյի տառադարձում
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1583,7 +1583,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Տրանսկրիպցիայի ենթարկեք աուդիո ֆայլերը՝ օգտագործելով կազմաձևված STT մատակարարներից ցանկացածը։ Ճանապարհի առաջին հատվածը ընտրում է բնիկ մատակարարին (`openai/…`, `deepgram/…`)։ Մեկ այլ վաճառողի մոդելը վերաարտահանող gateway-ներն օգտագործում են որակավորված նույնացուցիչ
+Տառադարձեք աուդիոֆայլերը ցանկացած կարգավորված STT մատակարարի միջոցով։ Ուղու առաջին հատվածը ընտրում է բնիկ մատակարարին (`openai/…`, `deepgram/…`)։ Այլ մատակարարի մոդելը վերաարտահանող gateway-ներն օգտագործում են որակավորված նույնացուցիչ
 (`openrouter/deepgram/nova-3`)։
 
 **Հարցում՝**
@@ -1606,12 +1606,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Մոդելի նույնացուցիչների օրինակներ՝** `openai/whisper-1` (պահանջվում է OpenAI բանալի),
-`openrouter/deepgram/nova-3` (պահանջվում է OpenRouter բանալի),
-`deepgram/nova-3` (պահանջվում է բնիկ Deepgram բանալի)։ Առանձին
-`deepgram/nova-3` հարցումը **չի** օգտագործում OpenRouter։
+**Մոդելների նույնացուցիչների օրինակներ՝** `openai/whisper-1` (պահանջում է OpenAI բանալի),
+`openrouter/deepgram/nova-3` (պահանջում է OpenRouter բանալի),
+`deepgram/nova-3` (պահանջում է բնիկ Deepgram բանալի)։ Առանց նախածանցի
+`deepgram/nova-3` հարցումը **չի օգտագործում OpenRouter**։
 
 **Աջակցվող ձևաչափեր՝** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`։
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`)․** ֆայլային ռեժիմով տառադարձում Gemini Live-ի
+WebSocket-ի միջոցով (պահանջում է Gemini API բանալի)։ Վերբեռնված ֆայլը `ffmpeg`-ի միջոցով փոխարկվում է 16 kHz մոնո PCM-ի
+(`ffmpeg`-ը պետք է հասանելի լինի `PATH`-ում, եթե ֆայլն արդեն 16 kHz մոնո PCM WAV չէ), փոխանցվում է
+սեսիային, և վերջնականացված տեքստը վերադարձվում է որպես `{ "text": "..." }`։ Ընտրովի `language` և `prompt` ձևի դաշտերը
+փոխանցվում են հետագա մշակման համար։ Սահմանափակումներ՝ 25 MiB-ից մեծ վերբեռնումները կամ 10 րոպեից երկար վերծանված աուդիոն վերադարձնում են
+`413`․ 60 վայրկյանից երկար տևող փոխարկումը դադարեցվում է և վերադարձնում է `504`։ API բանալին ուղարկվում է միայն
+`x-goog-api-key` վերնագրում, երբեք՝ WebSocket URL-ում։
 
 ---
 
@@ -1664,14 +1672,14 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
 
 ---
 
-## Հեռաչափություն
+## Հեռաչափում
 
 ```bash
-# Get latency telemetry summary (p50/p95/p99 per provider)
+# Ստանալ ուշացման հեռաչափության ամփոփում (p50/p95/p99 յուրաքանչյուր մատակարարի համար)
 GET /api/telemetry/summary
 ```
 
-**Պատասխան՝**
+**Պատասխան․**
 
 ```json
 {
@@ -1687,10 +1695,10 @@ GET /api/telemetry/summary
 ## Բյուջե
 
 ```bash
-# Get budget status for all API keys
+# Ստանալ բյուջեի կարգավիճակը բոլոր API բանալիների համար
 GET /api/usage/budget
 
-# Set or update a budget
+# Սահմանել կամ թարմացնել բյուջեն
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1704,7 +1712,7 @@ Content-Type: application/json
 }
 ```
 
-> **Schema notes** (`setBudgetSchema`)՝ `apiKeyId`-ը պարտադիր է․ `dailyLimitUsd`, `weeklyLimitUsd` կամ `monthlyLimitUsd` դաշտերից առնվազն մեկը պետք է զրոյից մեծ լինի։ Ընտրովի դաշտեր՝ `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`)։ Ժառանգական `{keyId, limit, period}` կառուցվածքը վերադարձնում է `400 Bad Request`։
+> **Սխեմայի նշումներ** (`setBudgetSchema`). `apiKeyId`-ը պարտադիր է. `dailyLimitUsd`, `weeklyLimitUsd` կամ `monthlyLimitUsd` դաշտերից առնվազն մեկը պետք է զրոյից մեծ լինի։ Ընտրովի դաշտեր՝ `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`)։ Հին `{keyId, limit, period}` ձևաչափը վերադարձնում է `400 Bad Request`։
 
 ## Տոկենների սահմանաչափեր
 
