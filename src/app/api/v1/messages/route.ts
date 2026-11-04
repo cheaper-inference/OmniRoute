@@ -208,6 +208,7 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
         thresholdMs: resolveKeepaliveThreshold(body?.model),
         keepaliveFrame: ANTHROPIC_PING_FRAME,
         correlationId,
+        extraHeaders: { "X-Correlation-Id": correlationId },
         deadlineController,
       })
     );
