@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 Pool Återval",
         "description": "För OpenCode-flera-kontor rotation, efter en 429 från en utgångs-bucketad leverantör på ett proxyfritt konto under ett omgivande poolkontext, bea ansökningspoolen om en annan medlem för nästa försök i stället för att återförsöka samma utgångsadress. Ordning, exkluderar aldrig: en uttömd pool bibehåller det nuvarande beteendet. Av som standard: varje 429 roterar till nästa konto exakt som tidigare."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Leer Egress Probe",
+        "description": "För OpenCode exekutorn, när en fullmaktsbegäran besvaras 403 eller 451 FreeTierError och de observerade verktygen misslyckades eller inte användes, skicka begäran en gång via en annan proxy (en annan kontoproxy eller en annan poolmedlem, aldrig en direkt anslutning). Först när den sonden svarar 200 sätts den första utgången åt sidan i proxyavvisningsminnet och sondsvaret serveras; när båda vägrar, returneras det ursprungliga avslaget och ingenting registreras. Samma avslagstext täcker en flaggad egress IP och en form av nekad begäran, så sonden skiljer dem åt genom bevis. Av som standard: avslaget returneras oförändrat."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-klientfingerprint",
         "description": "Skicka OpenCode v2 CLI-klientfingerver på OpenCode Zen/Go-begäranden (#16571): User-Agent opencode/latest/<2.x>/cli och x-opencode-client cli, en klient User-Agent som sparas endast när det är en 2.x OpenCode-klient, och på begränsade gratisschema-begäranden inget x-opencode-request, sessionen speglas på x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell-scheman på injicerade placehållare-tools och ett tool_choice på \"none\" togs bort. Avstängt som standard: varje OpenCode-begärande behåller den nuvarande identiteten, behoven och kroppen byte för byte."

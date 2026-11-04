@@ -14315,6 +14315,10 @@
         "label": "OpenCode 429 ponovni odabir bazena",
         "description": "Za OpenCode rotaciju s više računa, nakon 429 odgovora od egress-bucketed provajdera na računu bez proxyja pod kontekstom ambijentalnog bazena, zatraži od bazena konekcija drugog člana za sljedeći pokušaj umjesto ponovnog pokušaja na istoj egress adresi. Raspoređuje, nikada ne isključuje: iscrpljeni bazen zadržava trenutno ponašanje. Podrazumijevano isključeno: svaki 429 rotira na sljedeći račun tačno kao i ranije."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode izlazna sonda slobodnog nivoa",
+        "description": "Za OpenCode executor, kada se na proxy zahtjev odgovori 403 ili 451 FreeTierError i pokušaj ponovnog pokušaja promatranih alata nije uspio ili se ne primjenjuje, pošaljite zahtjev jednom preko drugog proxy servera (drugi proxy naloga ili drugi član skupa, nikad direktna veza). Tek kada ta sonda odgovori na 200, prvi izlaz se ostavlja po strani u memoriji odbijanja proxy servera i služi odgovor sonde; kada oboje odbiju, originalno odbijanje se vraća i ništa se ne evidentira. Isti tekst odbijanja pokriva označeni izlazni IP i odbijeni oblik zahtjeva, tako da ih sonda razlikuje dokazima. Podrazumevano isključeno: odbijanje se vraća nepromenjeno."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otisak OpenCode v2 klijenta",
         "description": "Šalji otisak OpenCode v2 CLI klijenta pri OpenCode Zen/Go zahtjevima (#16571): User-Agent opencode/latest/<2.x>/cli i x-opencode-client cli, klijentski User-Agent zadržan samo kada je u pitanju 2.x OpenCode klijent, a na ograničenim besplatnim zahtjevima bez x-opencode-request, sesija preslikana na x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell sheme na umetnutim placeholder alatima i odbačen tool_choice od \"none\". Podrazumijevano isključeno: svaki OpenCode zahtjev zadržava trenutni identitet, zaglavlja i tijelo bajt po bajt."

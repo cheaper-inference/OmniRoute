@@ -14238,6 +14238,10 @@
         "label": "Sake Zaɓar Pool na 429 a OpenCode",
         "description": "Domin jujjuyawar asusu da yawa ta OpenCode, bayan samun 429 daga mai ba da sabis na egress-bucketed a kan asusun da ba shi da proxy a ƙarƙashin mahallin ambient pool, nemi wani memba daga connection pool domin ƙoƙari na gaba maimakon sake gwada adireshin egress iri ɗaya. Yana tsara jeri ne, ba ya cirewa: pool ɗin da ya ƙare yana ci gaba da aiki kamar yadda yake a yanzu. A kashe yake bisa asali: kowane 429 yana jujjuyawa zuwa asusu na gaba daidai kamar yadda yake a baya."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Ga mai zartar da OpenCode, lokacin da aka amsa buƙatun wakili 403 ko 451 FreeTierError kuma kayan aikin da aka lura sun yi nasara ko ba a yi amfani da su ba, aika buƙatar sau ɗaya ta hanyar wakili na daban (wani wakili na asusu ko wani memba na tafkin, ba za a taɓa haɗa kai tsaye ba). Sai kawai lokacin da wannan binciken ya amsa 200 shine farkon fitowar da aka keɓe a cikin ƙwaƙwalwar ƙin wakili da amsawar binciken; idan duka biyun sun ƙi, a mayar da ainihin ƙi kuma ba a rubuta kome ba. Rubutun ƙin yarda iri ɗaya ya ƙunshi tutocin egress IP da sifar buƙatun da aka ƙi, don haka binciken ya raba su da shaida. Kashe ta tsohuwa: an dawo da ƙi ba canzawa."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint na Abokin Ciniki na OpenCode v2",
         "description": "Aika fingerprint na abokin ciniki na OpenCode v2 CLI a kan buƙatun OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli da x-opencode-client cli, User-Agent na abokin ciniki da ake adanawa kawai idan abokin ciniki ne na OpenCode 2.x, kuma a buƙatun rukunin kyauta (free-tier) masu iyaka babu x-opencode-request, an nuna zaman a kan x-opencode-session-id/x-session-affinity/x-session-id, an cire schemas na karantawa/shell na v2 CLI a kan kayan aikin placeholder da aka saka sannan aka cire tool_choice na \"none\". A kashe take bisa asali: kowace buƙatar OpenCode tana riƙe da ainihin shaidarta, headers da body byte for byte."

@@ -14315,6 +14315,10 @@
         "label": "Opětovný výběr fondu OpenCode při 429",
         "description": "U rotace více účtů OpenCode po chybě 429 od poskytovatele s rozdělením podle odchozího provozu (egress-bucketed) na účtu bez proxy v kontextu ambientního fondu požádejte fond připojení o jiného člena pro další pokus, místo opakování se stejnou odchozí adresou. Určuje pořadí, nikdy nevylučuje: vyčerpaný fond zachovává stávající chování. Ve výchozím nastavení vypnuto: každá chyba 429 rotuje na další účet přesně jako dříve."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Volná výstupní sonda",
+        "description": "V případě spouštěče OpenCode, když je na požadavek přes proxy odpovězeno 403 nebo 451 FreeTierError a opakovaný pokus sledovaných nástrojů selhal nebo nebyl použit, odešlete požadavek jednou prostřednictvím jiného proxy (jiného proxy účtu nebo jiného člena fondu, nikdy přímého připojení). Pouze když tato sonda odpoví 200, je první výstup odložen stranou v proxy odmítnutí paměti a je doručena odpověď sondy; když oba odmítnou, vrátí se původní odmítnutí a nic se nezaznamená. Stejný text odmítnutí pokrývá označený výstupní IP a tvar odmítnutého požadavku, takže je sonda odliší podle důkazů. Ve výchozím nastavení vypnuto: odmítnutí je vráceno beze změny."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otisk klienta OpenCode v2",
         "description": "Odesílat otisk klienta OpenCode v2 CLI u požadavků na OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli a x-opencode-client cli, User-Agent klienta zachován pouze v případě, že se jedná o klienta OpenCode 2.x, u požadavků v gated bezplatném tarifu žádný x-opencode-request, relace zrcadlená do x-opencode-session-id/x-session-affinity/x-session-id, schémata read/shell z v2 CLI u vložených zástupných nástrojů a vynechání tool_choice s hodnotou \"none\". Ve výchozím stavu vypnuto: každý požadavek OpenCode zachovává stávající identitu, hlavičky i tělo bajt po bajtu."

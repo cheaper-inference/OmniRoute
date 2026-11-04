@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 풀 재선택",
         "description": "OpenCode 다중 계정 로테이션 시, 앰비언트 풀 컨텍스트의 프록시 없는 계정에서 egress 버킷 제공자로부터 429를 수신한 후 동일한 egress 주소로 재시도하는 대신 다음 시도를 위해 커넥션 풀에 다른 멤버를 요청합니다. 순서만 지정하며 제외하지는 않습니다: 풀이 소진되면 기존 동작을 유지합니다. 기본값은 꺼짐: 이전과 동일하게 모든 429가 다음 계정으로 로테이션됩니다."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode 프리 티어 이그레스 프로브",
+        "description": "OpenCode 실행기의 경우 프록시 요청이 403 또는 451 FreeTierError 로 응답되고 관찰 도구 재시도가 실패하거나 적용되지 않은 경우 다른 프록시(다른 계정 프록시 또는 다른 풀 멤버, 직접 연결은 절대 아님)를 통해 요청을 한 번 보냅니다. 해당 프로브가 200으로 응답할 때만 프록시 거부 메모리에 첫 번째 송신이 설정되고 프로브 응답이 제공됩니다. 둘 다 거부하면 원래 거부가 반환되고 아무것도 기록되지 않습니다. 동일한 거부 텍스트에는 플래그가 지정된 송신 IP 와 거부된 요청 형태가 포함되어 있으므로 프로브는 증거를 통해 이를 구분합니다. 기본적으로 꺼짐: 거부가 변경되지 않고 반환됩니다."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 클라이언트 핑거프린트",
         "description": "OpenCode Zen/Go 요청 시 OpenCode v2 CLI 클라이언트 핑거프린트 전송(#16571): User-Agent opencode/latest/<2.x>/cli 및 x-opencode-client cli 사용, 2.x OpenCode 클라이언트인 경우에만 클라이언트 User-Agent 유지, 제한된 무료 티어 요청 시 x-opencode-request 제외, 세션을 x-opencode-session-id/x-session-affinity/x-session-id로 미러링, 주입된 플레이스홀더 도구에 v2 CLI read/shell 스키마 적용 및 \"none\" 설정의 tool_choice 제거. 기본값은 꺼짐: 모든 OpenCode 요청은 현재 신원, 헤더 및 본문을 바이트 단위까지 그대로 유지합니다."
