@@ -104,7 +104,7 @@ function transition(x, label, keyTimes) {
   );
 }
 
-// The reroute: one lime dot hands the request to the next tier along the cascade arrow.
+// The reroute: one accent dot hands the request to the next tier along the cascade arrow.
 function handoff(pathId, a, b) {
   return (
     `  <circle r="3.5" class="accent stroke-ink" stroke-width="1">` +
@@ -230,7 +230,7 @@ export async function renderTierCascade() {
       transition(304, C.transitions[0], "0;0.21;0.23;0.29;0.32;1") +
       transition(596, C.transitions[1], "0;0.46;0.48;0.54;0.57;1") +
       transition(888, C.transitions[1], "0;0.71;0.73;0.79;0.82;1") +
-      // hand-off dots riding the cascade arrows at each transition (the lime moment)
+      // hand-off dots riding the cascade arrows at each transition (the accent moment)
       handoff("tc-pC1", 0.235, 0.27) +
       handoff("tc-pC2", 0.485, 0.52) +
       handoff("tc-pC3", 0.735, 0.77) +

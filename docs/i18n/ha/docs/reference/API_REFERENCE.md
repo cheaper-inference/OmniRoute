@@ -1560,7 +1560,7 @@ An bayyana tsarin tashoshi (`latest` = v3 har zuwa GA na 4.0, `next` = rc, `nigh
 
 ---
 
-## Rubutun Sauti
+## Canza Sauti zuwa Rubutu
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1568,7 +1568,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Yi rubutun fayilolin sauti ta amfani da kowane mai samar da STT da aka saita. Sashen farko na hanyar yana zaɓar mai samarwa na asali (`openai/…`, `deepgram/…`). Ƙofofin sadarwa da ke sake fitar da samfurin wani mai samarwa suna amfani da id mai cikakken bayani
+Canza fayilolin sauti zuwa rubutu ta amfani da duk wani mai samar da STT da aka tsara. Sashen farko na hanyar URL yana zaɓar mai samarwa na asali (`openai/…`, `deepgram/…`). Ƙofofin da suke sake fitar da samfurin wani mai samarwa suna amfani da ƙayyadadden ID
 (`openrouter/deepgram/nova-3`).
 
 **Buƙata:**
@@ -1591,14 +1591,19 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Misalan id na samfurai:** `openai/whisper-1` (yana buƙatar mabuɗin OpenAI),
-`openrouter/deepgram/nova-3` (yana buƙatar mabuɗin OpenRouter),
-`deepgram/nova-3` (yana buƙatar mabuɗin Deepgram na asali). Buƙatar
+**Misalan ID na samfurai:** `openai/whisper-1` (yana buƙatar maɓallin OpenAI),
+`openrouter/deepgram/nova-3` (yana buƙatar maɓallin OpenRouter),
+`deepgram/nova-3` (yana buƙatar maɓallin Deepgram na asali). Buƙatar
 `deepgram/nova-3` kai tsaye **ba** ta amfani da OpenRouter.
 
 **Tsarukan da ake tallafawa:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** canza sauti zuwa rubutu cikin yanayin fayil ta hanyar
+WebSocket na Gemini Live (yana buƙatar maɓallin Gemini API). Ana canza abin da aka ɗora zuwa PCM mono mai 16 kHz ta amfani da `ffmpeg`
+(`ffmpeg` dole ne ya kasance a kan `PATH`, sai dai idan fayil ɗin ya riga ya kasance WAV PCM mono mai 16 kHz), sannan a
+watsa shi zuwa zaman kuma a dawo da rubutun da aka kammala a matsayin `{ "text": "..." }`. Ana tura filayen fom na `language` da `prompt` na zaɓi. Iyakoki: idan abubuwan da aka ɗora sun wuce 25 MiB ko tsawon sautin da aka warware ya wuce mintuna 10, ana amsa da
+`413`; idan juyawar ta ɗauki fiye da daƙiƙu 60, ana dakatar da ita kuma a amsa da
+`504`. Ana aika maɓallin API a cikin taken `x-goog-api-key` kawai, ba a cikin URL ɗin WebSocket ba.
 
 ## Daidaituwar Ollama
 

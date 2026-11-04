@@ -20,6 +20,7 @@ import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { normalizeArrayContentChunk } from "../utils/arrayContentDelta.ts";
 import { assignAliasCacheWrite } from "../utils/pickCacheCreationTokens.ts";
 import { findBalancedJsonEnd } from "./responseSanitizer/balancedJson.ts";
+import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 export {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -561,7 +562,7 @@ function sanitizeResponsesUsage(usage: unknown): unknown {
   sanitized.output_tokens = outputTokens;
   sanitized.total_tokens = totalTokens;
 
-  return sanitized;
+  return normalizeResponsesContextUsage(sanitized);
 }
 
 /**
@@ -772,6 +773,10 @@ function sanitizeResponsesStreamingEvent(parsedRecord: JsonRecord): JsonRecord {
       sanitizedResponse.output_text = responseOutputText;
     } else {
       delete sanitizedResponse.output_text;
+    }
+    const responseUsage = toRecord(responseRecord.usage);
+    if (responseUsage) {
+      sanitizedResponse.usage = normalizeResponsesContextUsage(responseUsage);
     }
     sanitized.response = sanitizedResponse;
   }

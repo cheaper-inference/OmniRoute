@@ -1592,7 +1592,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transcribeer audiobestanden met elke geconfigureerde STT-provider. Het eerste padsegment selecteert de native provider (`openai/…`, `deepgram/…`). Gateways die het model van een andere leverancier opnieuw aanbieden, gebruiken een gekwalificeerde id
+Transcribeer audiobestanden met een geconfigureerde STT-provider. Het eerste padsegment selecteert de native provider (`openai/…`, `deepgram/…`). Gateways die het model van een andere leverancier opnieuw beschikbaar maken, gebruiken een gekwalificeerde id
 (`openrouter/deepgram/nova-3`).
 
 **Verzoek:**
@@ -1615,12 +1615,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Voorbeelden van model-id's:** `openai/whisper-1` (vereist een OpenAI-sleutel),
+**Voorbeeld-id's van modellen:** `openai/whisper-1` (vereist een OpenAI-sleutel),
 `openrouter/deepgram/nova-3` (vereist een OpenRouter-sleutel),
-`deepgram/nova-3` (vereist een native DeepGram-sleutel). Een verzoek met
-alleen `deepgram/nova-3` gebruikt **niet** OpenRouter.
+`deepgram/nova-3` (vereist een native Deepgram-sleutel). Een verzoek met alleen
+`deepgram/nova-3` gebruikt **niet** OpenRouter.
 
 **Ondersteunde indelingen:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transcriptie in bestandsmodus via de Gemini Live
+WebSocket (vereist een Gemini API-sleutel). De upload wordt geconverteerd naar 16 kHz mono PCM met `ffmpeg`
+(`PATH` moet dit bevatten, tenzij het bestand al een 16 kHz mono PCM WAV-bestand is), gestreamd naar de sessie en
+de definitieve tekst wordt geretourneerd als `{ "text": "..." }`. Optionele formuliervelden `language` en `prompt`
+worden doorgestuurd. Limieten: uploads groter dan 25 MiB of gedecodeerde audio langer dan 10 minuten geven als antwoord
+`413`; een conversie die langer dan 60 s duurt, wordt beëindigd en geeft als antwoord `504`. De API-sleutel wordt
+alleen in de header `x-goog-api-key` verzonden, nooit in de WebSocket-URL.
 
 ---
 
