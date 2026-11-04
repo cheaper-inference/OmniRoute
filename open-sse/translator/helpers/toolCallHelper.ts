@@ -392,6 +392,42 @@ export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
 }
 
 /**
+ * Scan forward from `from` for response messages that resolve the turn's remaining calls,
+ * stopping at the next assistant message. Returns their indexes and removes the resolved ids
+ * from `openIds` (mutated in place — callers rely on that to know what is still open).
+ */
+function collectDisplacedResultIndexes(
+  messages: ToolMessage[],
+  from: number,
+  openIds: Set<string>
+): number[] {
+  const ahead: number[] = [];
+  for (let j = from; j < messages.length; j++) {
+    const later = messages[j];
+    if (later.role === "assistant") break;
+    const resolved = respondedToolIds(later).filter((id) => openIds.has(id));
+    if (resolved.length === 0) continue;
+    ahead.push(j);
+    for (const id of resolved) openIds.delete(id);
+    if (openIds.size === 0) break;
+  }
+  return ahead;
+}
+
+/** Move the messages at `indexes` (ascending, all after `target`) directly above `target`, in place. */
+function hoistMessagesAbove(messages: ToolMessage[], indexes: number[], target: number): void {
+  const hoisted = indexes.map((idx) => messages[idx]);
+  const hoistedSet = new Set(indexes);
+  const rebuilt: ToolMessage[] = [];
+  for (let j = 0; j < messages.length; j++) {
+    if (j === target) rebuilt.push(...hoisted);
+    if (!hoistedSet.has(j)) rebuilt.push(messages[j]);
+  }
+  messages.length = 0;
+  messages.push(...rebuilt);
+}
+
+/**
  * Hoist displaced tool results back into their assistant turn's result run.
  *
  * Clients that steer mid-turn (queued user messages, task notifications) can
@@ -429,38 +465,17 @@ export function repairDisplacedToolResults<T extends ToolCallBody>(body: T): T {
       // Contiguous member of the run — still fine where it is.
       continue;
     }
-    // Non-tool message inside the turn's window: scan ahead for response
-    // messages that resolve the turn's remaining calls and hoist them above
-    // this message.
-    const ahead: number[] = [];
-    for (let j = i + 1; j < messages.length; j++) {
-      const later = messages[j];
-      if (later.role === "assistant") break;
-      const resolved = respondedToolIds(later).filter((id) => openIds.has(id));
-      if (resolved.length > 0) {
-        ahead.push(j);
-        for (const id of resolved) openIds.delete(id);
-        if (openIds.size === 0) break;
-      }
-    }
-    if (ahead.length > 0) {
-      const hoisted = ahead.map((idx) => messages[idx]);
-      const aheadSet = new Set(ahead);
-      const rebuilt: ToolMessage[] = [];
-      for (let j = 0; j < messages.length; j++) {
-        if (j === i) {
-          rebuilt.push(...hoisted);
-        }
-        if (!aheadSet.has(j)) rebuilt.push(messages[j]);
-      }
-      messages.length = 0;
-      messages.push(...rebuilt);
-      // Re-scan from the same index: the hoisted results now precede msg.
-      i -= 1;
-    } else {
+    // Non-tool message inside the turn's window: hoist the later response messages that
+    // resolve the turn's remaining calls above this message.
+    const ahead = collectDisplacedResultIndexes(messages, i + 1, openIds);
+    if (ahead.length === 0) {
       // Nothing ahead belongs to this turn; close the window at this boundary.
       turnIds = null;
+      continue;
     }
+    hoistMessagesAbove(messages, ahead, i);
+    // Re-scan from the same index: the hoisted results now precede msg.
+    i -= 1;
   }
 
   return body;
