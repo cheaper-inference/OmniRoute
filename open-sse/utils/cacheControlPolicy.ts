@@ -145,6 +145,7 @@ const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"])
 const OPENCODE_LANES = new Set(["opencode", "opencode-go"]);
 const OPENCODE_PREFIX_CACHED_MODEL = /^deepseek-v4\.1-flash(?:$|-[a-z0-9]+$)/i;
 
+/** Restrict OpenCode's cache-aligned lane to models verified to use automatic prefixes. */
 function isOpenCodeCacheableModel(provider: string, model?: string | null): boolean {
   if (!OPENCODE_LANES.has(provider) || !model) return false;
   const modelId = model.toLowerCase().split("/").filter(Boolean).at(-1) ?? "";
