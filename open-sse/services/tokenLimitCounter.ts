@@ -47,13 +47,14 @@ export function seedWindowUsageFromHistory(limit: TokenLimit, now = Date.now()):
   const lowerBound = new Date(periodStartAt).toISOString();
   const db = getDbInstance();
 
-  // Canonical billable total = input + output + reasoning. tokens_cache_read and
+  // Canonical billable total = input + max(output, reasoning). tokens_cache_read and
   // tokens_cache_creation are a BREAKDOWN already inside tokens_input (see migration
-  // 012_fix_token_input_cache_tokens.sql) — summing them again would double-count.
+  // 012_fix_token_input_cache_tokens.sql) — summing them again would double-count. Reasoning is
+  // a subset of tokens_output unless the provider reported it as a separate bucket (#15496).
   // This must mirror computeBillableTokens() in chatCore/upstreamTimeouts.ts.
   const tokenSum = `COALESCE(SUM(
-      COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0)
-      + COALESCE(tokens_reasoning, 0)
+      COALESCE(tokens_input, 0)
+      + MAX(COALESCE(tokens_output, 0), COALESCE(tokens_reasoning, 0))
     ), 0) AS total`;
 
   let row: unknown;
