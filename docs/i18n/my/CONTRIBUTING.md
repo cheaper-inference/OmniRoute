@@ -13,21 +13,25 @@ UI/UX၊ i18n၊ CLI၊ database နှင့် build/deploy ပြောင်
 
 ---
 
-## ဖွံ့ဖြိုးတိုးတက်ရေး စနစ်ပြင်ဆင်ခြင်း
+## ဖွံ့ဖြိုးတိုးတက်ရေး စနစ်ပြင်ဆင်မှု
 
-### ကြိုတင်လိုအပ်ချက်များ
+### လိုအပ်ချက်များ
 
-- **Node.js** `>=22.22.2 <23` သို့မဟုတ် `>=24.0.0 <27` (အကြံပြုချက်: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, သို့မဟုတ် `>=24.0.0 <27` (အကြံပြုချက်: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ အသုံးပြုသူများ (Node 24+):** `npm install` ပြုလုပ်ပြီးနောက် native module များ ထည့်သွင်းထားကြောင်း အတည်ပြုပါ:
-> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` ဖြင့် မအောင်မြင်ပါက
-> `npm approve-scripts better-sqlite3 && npm install` ကို လုပ်ဆောင်ပါ။ အသေးစိတ်ကို
-> [ပြဿနာဖြေရှင်းခြင်း](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) တွင် ကြည့်ပါ။
+> **Node 24 အသုံးပြုသည့် Windows:** လက်ရှိ 24 LTS patch release (အနည်းဆုံး 24.20.0) ကို အသုံးပြုပါ။
+> အစောပိုင်း release များတွင် `--test-force-exit` က process ကိုပိတ်ပြီးနောက် စမ်းသပ်မှုများအောင်မြင်သော်လည်း ရပ်တန့်သွားနိုင်သည်။
+> Node ၏ [Windows libuv ပြင်ဆင်ချက်](https://github.com/nodejs/node/pull/61999) သည်
+> ဤ runtime crash ကို ဖြေရှင်းပေးသည်။ test assertions နှင့် runner exit checks များကို ဖွင့်ထားပါ။
+
+> **npm v11+ အသုံးပြုသူများ (Node 24+):** `npm install` ပြီးနောက် native modules များ ထည့်သွင်းပြီးကြောင်း အတည်ပြုပါ:
+> `node -e "require('better-sqlite3')"`. ၎င်းသည် `MODULE_NOT_FOUND` ဖြင့် မအောင်မြင်ပါက
+> `npm approve-scripts better-sqlite3 && npm install` ကို လုပ်ဆောင်ပါ။ [ပြဿနာဖြေရှင်းခြင်း](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) တွင် ကြည့်ပါ။
 
 - **Git**
 
-### Clone ပြုလုပ်ခြင်းနှင့် ထည့်သွင်းခြင်း
+### Clone လုပ်ခြင်းနှင့် ထည့်သွင်းခြင်း
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,92 +39,93 @@ cd OmniRoute
 npm install
 ```
 
-### ပတ်ဝန်းကျင် Variable များ
+### Environment Variables
 
 ```bash
-# နမူနာဖိုင်မှ သင့် .env ကို ဖန်တီးပါ
+# သင်၏ .env ကို template မှ ဖန်တီးပါ
 cp .env.example .env
 
-# လိုအပ်သော secret များကို ထုတ်လုပ်ပါ
+# လိုအပ်သော secrets များကို ထုတ်လုပ်ပါ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ဖွံ့ဖြိုးတိုးတက်ရေးအတွက် အဓိက variable များ:
+ဖွံ့ဖြိုးတိုးတက်ရေးအတွက် အဓိက variables များ:
 
-| Variable               | ဖွံ့ဖြိုးတိုးတက်ရေး ပုံသေတန်ဖိုး | ဖော်ပြချက်                   |
-| ---------------------- | -------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                          | ဆာဗာ port                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | frontend အတွက် အခြေခံ URL    |
-| `JWT_SECRET`           | (အထက်ပါအတိုင်း ထုတ်လုပ်ပါ)       | JWT လက်မှတ်ရေးထိုးမှု secret |
-| `INITIAL_PASSWORD`     | `CHANGEME`                       | ပထမဆုံး login စကားဝှက်       |
-| `APP_LOG_LEVEL`        | `info`                           | Log အသေးစိတ်အဆင့်            |
+| Variable               | Development Default      | ဖော်ပြချက်                 |
+| ---------------------- | ------------------------ | -------------------------- |
+| `PORT`                 | `20128`                  | Server port                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Frontend အတွက် Base URL    |
+| `JWT_SECRET`           | (အထက်တွင် ထုတ်လုပ်ပါ)    | JWT signing secret         |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ပထမဆုံး login password     |
+| `APP_LOG_LEVEL`        | `info`                   | Log အသေးစိတ်ဖော်ပြမှုအဆင့် |
 
-### Dashboard ဆက်တင်များ
+### Dashboard Settings
 
-Dashboard တွင် ပတ်ဝန်းကျင် variable များမှတစ်ဆင့်လည်း စီစဉ်သတ်မှတ်နိုင်သည့် လုပ်ဆောင်ချက်များအတွက် UI toggle များ ပါရှိသည်:
+Dashboard တွင် environment variables များမှတစ်ဆင့်လည်း ပြင်ဆင်နိုင်သော feature များအတွက် UI toggles များ ပါဝင်သည်:
 
-| ဆက်တင်တည်နေရာ       | Toggle             | ဖော်ပြချက်                              |
-| ------------------- | ------------------ | --------------------------------------- |
-| Settings → Advanced | Debug Mode         | Debug request log များကို ဖွင့်ရန် (UI) |
-| Settings → General  | Sidebar Visibility | Sidebar အပိုင်းများကို ပြရန်/ဖျောက်ရန်  |
+| Setting Location    | Toggle             | ဖော်ပြချက်                           |
+| ------------------- | ------------------ | ------------------------------------ |
+| Settings → Advanced | Debug Mode         | Debug request logs (UI) ကို ဖွင့်ပါ  |
+| Settings → General  | Sidebar Visibility | Sidebar sections များကို ပြ/ဖျောက်ပါ |
 
-ဤဆက်တင်များကို database တွင် သိမ်းဆည်းထားပြီး restart ပြုလုပ်ပြီးနောက်တွင်လည်း ဆက်လက်တည်ရှိသည်။ ဆက်တင်တန်ဖိုး သတ်မှတ်ထားပါက env var ပုံသေတန်ဖိုးများကို အစားထိုးအသုံးပြုသည်။
+ဤ settings များကို database တွင် သိမ်းဆည်းထားပြီး restart လုပ်ပြီးနောက်တွင်လည်း ဆက်လက်တည်ရှိသည်။ သတ်မှတ်ထားပါက env var defaults များကို အစားထိုးသည်။
 
 ### Local တွင် လုပ်ဆောင်ခြင်း
 
 ```bash
-# ဖွံ့ဖြိုးတိုးတက်ရေး mode (အလိုအလျောက် ပြန်လည်တင်ခြင်း)
+# Development mode (hot reload)
 npm run dev
 
 # Production build
-npm run build    # next build → .build/next/၊ ထို့နောက် assembleStandalone → dist/
+npm run build    # next build → .build/next/ ထို့နောက် assembleStandalone → dist/
 npm run start
 
-# Contributor ပြောင်းလဲမှုများအတွက် လျင်မြန်သော backend/API သီးသန့် compile
+# Contributor ပြင်ဆင်မှုများအတွက် အမြန် backend/API-only compile
 npm run build:contributor
 
-# Release build (အစမှ ပြန်လည် build လုပ်ခြင်း + HEAD sentinel — deploy အတွက် မဖြစ်မနေလိုအပ်သည်)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ကို ရေးသားသည်
+# Release build (သန့်ရှင်းသော rebuild + HEAD sentinel — deploy အတွက် လိုအပ်သည်)
+npm run build:release   # rm -rf .build dist ပြီးနောက် build + dist/BUILD_SHA ကို ရေးသားသည်
 
-# အသုံးများသော port ဖွဲ့စည်းသတ်မှတ်မှု
+# အသုံးများသော port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build သည် compile သီးသန့် စစ်ဆေးအတည်ပြုမှုကို လုပ်ဆောင်သည်။ ၎င်းသည် standalone
-ဖြန့်ချိမှုကို စုစည်းခြင်း သို့မဟုတ် ရွေးချယ်နိုင်သော native packaging asset များကို build လုပ်ခြင်း မပြုပါ။ ဖြန့်ချိနိုင်သည့်
-bundle ကို စစ်ဆေးအတည်ပြုရန် လိုအပ်သည့်အခါ ပုံမှန် production build ကို အသုံးပြုပါ။
+Contributor build သည် compile-only validation ကို လုပ်ဆောင်သည်: standalone
+distribution ကို assemble လုပ်ခြင်း သို့မဟုတ် optional native packaging assets များကို build လုပ်ခြင်း မရှိပါ။
+ဖြန့်ချိနိုင်သော bundle ကို အတည်ပြုရန်လိုအပ်ပါက ပုံမှန် production build ကို အသုံးပြုပါ။
 
-### Build Output ဖွဲ့စည်းပုံ
+### Build Output Layout
 
-| Directory | ပါဝင်သည့်အရာများ                                                                         | ခြေရာခံထားမှု |
-| --------- | ---------------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Application source (TypeScript / TSX)                                                    | ရှိသည်        |
-| `.build/` | ကြားခံဖိုင်များ — `next build` output (gitignore လုပ်ထားသည်၊ `distDir = .build/next`)    | မရှိပါ        |
-| `dist/`   | ဖြန့်ချိနိုင်သော bundle — `assembleStandalone` ဖြင့် စုစည်းထားသည် (gitignore လုပ်ထားသည်) | မရှိပါ        |
+| Directory | Contents                                                                              | Tracked |
+| --------- | ------------------------------------------------------------------------------------- | ------- |
+| `src/`    | Application source (TypeScript / TSX)                                                 | Yes     |
+| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`)             | No      |
+| `dist/`   | ဖြန့်ချိနိုင်သော bundle — `assembleStandalone` ဖြင့် assemble လုပ်ထားသည် (gitignored) | No      |
 
-Build pipeline သည် တစ်ကြိမ်တည်းဖြင့် လုပ်ဆောင်သည်:
+Build pipeline သည် single pass ဖြစ်သည်:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js output)
-  └─ assembleStandalone()                 (standalone + static + public + native asset များကို ကူးယူသည်)
+  └─ assembleStandalone()                 (standalone + static + public + native assets များကို ကူးယူသည်)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` သည် directory နှစ်ခုစလုံးကို ဦးစွာ ရှင်းလင်းပြီး deploy ပြည့်စုံမှန်ကန်မှု စစ်ဆေးရေး sentinel အဖြစ်
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ကို ထပ်မံရေးသားသည်။
+`npm run build:release` သည် ထို့အပြင် directory နှစ်ခုလုံးကို အရင်ရှင်းလင်းပြီး
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ကို deploy integrity sentinel အဖြစ် ရေးသားသည်။
 
-`npm run build:contributor` သည် backend သီးသန့် build profile ကို အသုံးပြုသည်။ Build လုပ်နေစဉ်
-dashboard UI ဖိုင်များကို ယာယီ stub ပြုလုပ်ပြီး API route handler များကို ဆက်လက်ထားရှိကာ build ပြီးနောက် မူရင်းဖိုင်များကို
-ပြန်လည်ထားရှိသည်။ Dashboard UI ကို သက်ရောက်စေသော ပြောင်းလဲမှုများ သို့မဟုတ် release အပြည့်အစုံ
-စစ်ဆေးအတည်ပြုမှုအတွက် `npm run build` ကို အသုံးပြုပါ။ Contributor profile သည် release build ကို အစားထိုး၍ မရပါ။
+`npm run build:contributor` သည် backend-only build profile ကို အသုံးပြုသည်။ Build လုပ်နေစဉ်
+dashboard UI files များကို ယာယီ stub ပြုလုပ်ပြီး API route handlers များကို ထိန်းသိမ်းထားကာ
+build ပြီးနောက် မူလ files များကို ပြန်လည်ထားရှိသည်။ Dashboard UI ကို သက်ရောက်မှုရှိသော
+ပြင်ဆင်မှုများအတွက် သို့မဟုတ် release validation အပြည့်အစုံအတွက် `npm run build` ကို အသုံးပြုပါ။
+Contributor profile သည် release build ကို အစားထိုးရန် မဟုတ်ပါ။
 
-> **VPS deploy မှတ်ချက်:** Remote image directory `/usr/lib/node_modules/omniroute/app/`
-> သည် ပြောင်းလဲခြင်းမရှိပါ။ Deploy skill များသည် `dist/` ၏ အကြောင်းအရာများကို ၎င်းထဲသို့ rsync လုပ်သည်။
-> Repository အတွင်းရှိ build output path သာ ပြောင်းလဲသွားသည် (`app/` → `dist/`)။
+> **VPS deploy မှတ်ချက်:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> သည် မပြောင်းလဲပါ။ Deploy skills များသည် `dist/` ၏ contents များကို ၎င်းထဲသို့ rsync လုပ်သည်။
+> Repository အတွင်းရှိ build output path သာ ပြောင်းလဲထားသည် (`app/` → `dist/`)။
 
-ပုံသေ URL များ:
+ပုံမှန် URLs:
 
 - **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`

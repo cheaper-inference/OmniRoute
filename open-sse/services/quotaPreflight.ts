@@ -21,7 +21,6 @@
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
-import { filterCodexQuotaWindows } from "@/lib/providers/codexQuotaWindowPolicy";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 // #14359 — import the leaf, NOT "@/domain/quotaCache": quotaCache → usage.ts → usage/openrouter.ts →
 // openrouterQuotaFetcher.ts → this file, so importing quotaCache here closes an ESM init cycle
@@ -32,6 +31,7 @@ import {
   isCodexPaidCreditsEnabled,
   type CodexPaidCredits,
 } from "@/lib/providers/codexPaidCredits";
+import { filterCodexQuotaWindows } from "./codexQuotaWindowPolicy.ts";
 import {
   fetchNewApiAggregatorQuota,
   invalidateNewApiAggregatorQuotaCache,

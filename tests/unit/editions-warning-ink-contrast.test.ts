@@ -68,3 +68,16 @@ test("warning badge, warning button and text-warning read the warning ink", () =
   );
   assert.match(globals, /\.ci-button--warning\s*\{\s*color:\s*var\(--color-warning-ink\);/);
 });
+
+test("without data-theme, a dark system preference keeps the kit's dark warning ink", () => {
+  // The kit picks dark Editions from prefers-color-scheme when <html> has no data-theme (before
+  // the boot script, or without JS); the light override must not paint #8c5a1b on that.
+  assert.match(
+    editions,
+    /@media \(prefers-color-scheme: dark\)\s*\{\s*:is\(html:root:not\(\[data-theme\]\)/
+  );
+  assert.match(
+    globals,
+    /@media \(prefers-color-scheme: dark\)\s*\{\s*html:root\[data-ci-appearance="editions"\]:not\(\[data-theme\]\)\s*\{\s*--color-warning-ink:\s*var\(--ci-color-warning\);/
+  );
+});
