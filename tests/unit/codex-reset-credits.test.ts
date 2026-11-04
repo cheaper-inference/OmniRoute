@@ -99,8 +99,8 @@ function mockResetThenUsage(opts: {
           opts.usageBody ?? {
             plan_type: "plus",
             rate_limit: {
-              primary_window: { used_percent: 0 },
-              secondary_window: { used_percent: 0 },
+              primary_window: { used_percent: 0, limit_window_seconds: 18000 },
+              secondary_window: { used_percent: 0, limit_window_seconds: 604800 },
             },
           }
         ),
@@ -152,8 +152,8 @@ test("consumeCodexResetCredit fetches a credit id, posts it, then refreshes usag
         JSON.stringify({
           plan_type: "plus",
           rate_limit: {
-            primary_window: { used_percent: 0 },
-            secondary_window: { used_percent: 40 },
+            primary_window: { used_percent: 0, limit_window_seconds: 18000 },
+            secondary_window: { used_percent: 40, limit_window_seconds: 604800 },
           },
           rate_limit_reset_credits: { available_count: 1 },
         }),

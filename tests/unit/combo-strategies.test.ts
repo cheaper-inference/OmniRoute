@@ -117,10 +117,12 @@ function codexQuota({
   return {
     rate_limit: {
       primary_window: {
+        limit_window_seconds: 18000,
         used_percent: used5h,
         reset_after_seconds: reset5hSeconds,
       },
       secondary_window: {
+        limit_window_seconds: 604800,
         used_percent: used7d,
         reset_after_seconds: reset7dSeconds,
       },
