@@ -627,17 +627,17 @@ post_install() {
 <details>
 <summary><b>ਸਾਰੇ ਉਪਲਬਧ ਮਾਡਲ ਵੇਖੋ</b></summary>
 
-> ਹੇਠਾਂ ਦਿੱਤੀ ਸੂਚੀ v3.8.0 ਲਈ `open-sse/config/providerRegistry.ts` ਤੋਂ ਤਿਆਰ ਕੀਤੀ ਗਈ ਹੈ। ਕਲਾਉਡ ਕੈਟਾਲਾਗ (Gemini, OpenRouter ਆਦਿ) ਗਤੀਸ਼ੀਲ ਤੌਰ ‘ਤੇ ਸਿੰਕ ਕੀਤੇ ਜਾਂਦੇ ਹਨ — ਪੂਰੇ ਲਾਈਵ ਕੈਟਾਲਾਗ ਲਈ **Dashboard → Providers → [provider] → Available Models** ਖੋਲ੍ਹੋ ਜਾਂ `GET /api/models/catalog` ਕਾਲ ਕਰੋ।
+> ਹੇਠਾਂ ਦਿੱਤੀ ਸੂਚੀ v3.8.0 ਲਈ `open-sse/config/providerRegistry.ts` ਤੋਂ ਤਿਆਰ ਕੀਤੀ ਗਈ ਹੈ। ਕਲਾਉਡ ਕੈਟਾਲਾਗ (Gemini, OpenRouter ਆਦਿ) ਗਤੀਸ਼ੀਲ ਤੌਰ ’ਤੇ ਸਿੰਕ ਕੀਤੇ ਜਾਂਦੇ ਹਨ — ਪੂਰਾ ਲਾਈਵ ਕੈਟਾਲਾਗ ਖੋਲ੍ਹਣ ਲਈ **Dashboard → Providers → [provider] → Available Models** ’ਤੇ ਜਾਓ ਜਾਂ `GET /api/models/catalog` ਕਾਲ ਕਰੋ।
 >
-> ਜੇ ਕਿਸੇ ਪ੍ਰੋਵਾਈਡਰ ਦੀ ਬਿਲਟ-ਇਨ ਸੂਚੀ ਵਿੱਚ ਅੰਤਰ ਆ ਗਿਆ ਹੋਵੇ, ਤਾਂ ਲਾਈਵ ਅੱਪਸਟ੍ਰੀਮ ਕੈਟਾਲਾਗ ਲਿਆਉਣ ਲਈ ਉਸ ਪੰਨੇ ‘ਤੇ **Import from /models** ਵਰਤੋ (ਜਾਂ **Auto-Sync** ਚਾਲੂ ਕਰੋ)। ਇਹ v3.8.50 ਵਿੱਚ LLM7.io (`gemini-3.1-flash-lite`) ਅਤੇ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ਲਈ ਤਸਦੀਕ ਕੀਤਾ ਗਿਆ ਸੀ; ਉਸੇ ਟੈਸਟ ਦੌਰਾਨ Pollinations ਦੀ ਬੇਨਾਮ ਪਹੁੰਚ ਅੱਪਸਟ੍ਰੀਮ ਸੀਮਾਵਾਂ ਅਧੀਨ ਰਹੀ।
+> ਜੇ ਕਿਸੇ ਪ੍ਰੋਵਾਈਡਰ ਦੀ ਅੰਦਰੂਨੀ ਸੂਚੀ ਵਿੱਚ ਅੰਤਰ ਆ ਗਿਆ ਹੋਵੇ, ਤਾਂ ਲਾਈਵ ਅੱਪਸਟ੍ਰੀਮ ਕੈਟਾਲਾਗ ਲਿਆਉਣ ਲਈ ਉਸ ਪੰਨੇ ’ਤੇ **Import from /models** ਵਰਤੋ (ਜਾਂ **Auto-Sync** ਚਾਲੂ ਕਰੋ)। ਇਸ ਦੀ ਪੁਸ਼ਟੀ v3.8.50 ਵਿੱਚ LLM7.io (`gemini-3.1-flash-lite`) ਅਤੇ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ਲਈ ਕੀਤੀ ਗਈ ਸੀ; ਉਸੇ ਟੈਸਟ ਦੌਰਾਨ Pollinations ਦੀ ਬਿਨਾਂ-ਪਛਾਣ ਪਹੁੰਚ ਅੱਪਸਟ੍ਰੀਮ ਸੀਮਾਵਾਂ ਅਧੀਨ ਰਹੀ।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ਯਤਨ ਪੱਧਰ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort tiers: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ਮੁਫ਼ਤ OAuth: **Dashboard → Providers → Kiro → Available Models** ਦੇ ਹੇਠਾਂ ਦਿਖਾਇਆ ਗਿਆ ਲਾਈਵ ਕੈਟਾਲਾਗ ਵਰਤੋ। ਉਪਲਬਧਤਾ ਖਾਤੇ ਅਤੇ ਪਲਾਨ ‘ਤੇ ਨਿਰਭਰ ਕਰਦੀ ਹੈ।
+**Kiro (`kr/`)** — ਮੁਫ਼ਤ OAuth: **Dashboard → Providers → Kiro → Available Models** ਦੇ ਅਧੀਨ ਦਿਖਾਏ ਲਾਈਵ ਕੈਟਾਲਾਗ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਉਪਲਬਧਤਾ ਖਾਤੇ ਅਤੇ ਪਲਾਨ ’ਤੇ ਨਿਰਭਰ ਕਰਦੀ ਹੈ।
 
 **Qoder (`if/`)** — ਮੁਫ਼ਤ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -645,7 +645,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ਮਹੀਨਾ ਫਲੈਟ ਜਾਂ ਵਰਤੋਂ ਅਨੁਸਾਰ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ਮਹੀਨਾ ਨਿਰਧਾਰਤ ਦਰ ਜਾਂ ਪ੍ਰਤੀ-ਵਰਤੋਂ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API ਕੁੰਜੀ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -655,7 +655,7 @@ post_install() {
 
 **Mistral (`mistral/`)** — EU-ਹੋਸਟਡ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ਖੋਜ-ਸੰਵਰਧਿਤ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — ਖੋਜ-ਵਧਾਇਆ ਹੋਇਆ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — ਓਪਨ-ਸੋਰਸ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ਮੁਫ਼ਤ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -663,19 +663,19 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — ਵੇਫ਼ਰ-ਸਕੇਲ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ਕੇਂਦ੍ਰਿਤ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-ਕੇਂਦਰਿਤ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ਐਂਟਰਪ੍ਰਾਈਜ਼: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ਐਂਟਰਪ੍ਰਾਈਜ਼: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google ਤੋਂ API ਕੁੰਜੀ ਅਨੁਸਾਰ ਲਾਈਵ ਸਿੰਕ ਕੀਤਾ ਜਾਂਦਾ ਹੈ — ਕੋਈ ਸਥਿਰ ਸੂਚੀ ਨਹੀਂ। **Dashboard → Providers** ਵਿੱਚ ਕੁੰਜੀ ਕਨੈਕਟ ਕਰੋ, ਫਿਰ ਮੌਜੂਦਾ ਕੈਟਾਲਾਗ ਇੰਪੋਰਟ ਕਰਨ ਲਈ **Available Models** ਵਰਤੋ (ਉਦਾਹਰਨ ਵਜੋਂ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google ਤੋਂ API ਕੁੰਜੀ ਦੇ ਆਧਾਰ ’ਤੇ ਲਾਈਵ ਸਿੰਕ ਕੀਤਾ ਜਾਂਦਾ ਹੈ — ਕੋਈ ਸਥਿਰ ਸੂਚੀ ਨਹੀਂ। **Dashboard → Providers** ਵਿੱਚ ਕੁੰਜੀ ਕਨੈਕਟ ਕਰੋ, ਫਿਰ ਮੌਜੂਦਾ ਕੈਟਾਲਾਗ ਇੰਪੋਰਟ ਕਰਨ ਲਈ **Available Models** ਵਰਤੋ (ਉਦਾਹਰਨ ਲਈ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
 
-**ਹੋਰ ਅਨੁਕੂਲ ਪ੍ਰੋਵਾਈਡਰ** (ਚੁਣੇ ਹੋਏ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ਰਾਹੀਂ), `azure-ai`, `openrouter` (passthrough ਕੈਟਾਲਾਗ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ਹਰ ਇੱਕ `providerRegistry.ts` ਵਿੱਚ ਆਪਣੀ ਮਾਡਲ ਸੂਚੀ ਰੱਖਦਾ ਹੈ ਅਤੇ ਜਦੋਂ ਪ੍ਰੋਵਾਈਡਰ `/models` ਐਂਡਪੌਇੰਟ ਉਪਲਬਧ ਕਰਵਾਉਂਦਾ ਹੈ ਤਾਂ ਇਸਨੂੰ ਆਟੋ-ਸਿੰਕ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।
+**ਹੋਰ ਅਨੁਕੂਲ ਪ੍ਰੋਵਾਈਡਰ** (ਚੁਣੇ ਹੋਏ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ਰਾਹੀਂ), `azure-ai`, `openrouter` (ਪਾਸਥਰੂ ਕੈਟਾਲਾਗ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ਹਰ ਇੱਕ `providerRegistry.ts` ਵਿੱਚ ਆਪਣੀ ਮਾਡਲ ਸੂਚੀ ਰੱਖਦਾ ਹੈ ਅਤੇ ਜਦੋਂ ਪ੍ਰੋਵਾਈਡਰ `/models` ਐਂਡਪੌਇੰਟ ਉਪਲਬਧ ਕਰਵਾਉਂਦਾ ਹੈ, ਤਾਂ ਇਸਨੂੰ ਆਪਣੇ-ਆਪ ਸਿੰਕ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।
 
-**ਮਾਡਲ ID ਬਾਰੇ ਨੋਟ:** OmniRoute ਪ੍ਰੋਵਾਈਡਰ-ਨੇਟਿਵ ID ਵਰਤਦਾ ਹੈ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। ਕੁਝ ID ਵਿੱਚ ਡੌਟ ਵਾਲੇ ਵਰਜਨ ਸ਼ਾਮਲ ਹਨ ਕਿਉਂਕਿ ਅੱਪਸਟ੍ਰੀਮ API ਉਨ੍ਹਾਂ ਨੂੰ ਇਸੇ ਤਰ੍ਹਾਂ ਉਮੀਦ ਕਰਦੀ ਹੈ। ਜੇ ਕੋਈ ਮਾਡਲ ਉੱਪਰ ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੈ, ਤਾਂ ਉਪਲਬਧਤਾ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ `omniroute models --search <term>` ਚਲਾਓ ਜਾਂ `GET /api/models/catalog` ਹਿੱਟ ਕਰੋ।
+**ਮਾਡਲ ID ਬਾਰੇ ਨੋਟ:** OmniRoute ਪ੍ਰੋਵਾਈਡਰ-ਨੇਟਿਵ ID ਵਰਤਦਾ ਹੈ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। ਕੁਝ ID ਵਿੱਚ ਡਾਟ ਵਾਲੇ ਵਰਜਨ ਹੁੰਦੇ ਹਨ ਕਿਉਂਕਿ ਅੱਪਸਟ੍ਰੀਮ API ਉਹਨਾਂ ਨੂੰ ਇਸੇ ਤਰ੍ਹਾਂ ਉਮੀਦ ਕਰਦੀ ਹੈ। ਜੇ ਕੋਈ ਮਾਡਲ ਉੱਪਰ ਸੂਚੀਬੱਧ ਨਹੀਂ ਹੈ, ਤਾਂ ਉਪਲਬਧਤਾ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ `omniroute models --search <term>` ਚਲਾਓ ਜਾਂ `GET /api/models/catalog` ’ਤੇ ਹਿੱਟ ਕਰੋ।
 
 </details>
 
