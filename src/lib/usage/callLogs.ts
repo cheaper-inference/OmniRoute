@@ -336,47 +336,19 @@ function snapshotHasOpaqueReasoningItem(body: unknown): boolean {
 function resolveReasoningObservation(
   usageReasoning: number | null,
   responseBody: unknown,
-  streamMeta?: {
-    encryptedSeen?: boolean;
-    snapshotSource?: string | null;
-    snapshotChars?: number | null;
-  } | null
+  streamMeta?: { encryptedSeen?: boolean } | null
 ): { source: string | null; chars: number | null } {
-  if (
-    streamMeta?.encryptedSeen === true ||
-    streamMeta?.snapshotSource === "encrypted" ||
-    snapshotHasOpaqueReasoningItem(responseBody)
-  ) {
+  if (streamMeta?.encryptedSeen === true || snapshotHasOpaqueReasoningItem(responseBody)) {
     return { source: "encrypted", chars: null };
   }
   if (usageReasoning != null && usageReasoning > 0) {
     return { source: "usage", chars: null };
-  }
-  // A no-log request keeps only scalars from its live response, not a cloned body.
-  if (
-    (streamMeta?.snapshotSource === "content" || streamMeta?.snapshotSource === "think") &&
-    typeof streamMeta.snapshotChars === "number" &&
-    streamMeta.snapshotChars > 0
-  ) {
-    return { source: streamMeta.snapshotSource, chars: streamMeta.snapshotChars };
   }
   const observed = getObservedReasoning(extractAssistantMessage(responseBody));
   if (observed.chars > 0) {
     return { source: observed.source, chars: observed.chars };
   }
   return { source: null, chars: null };
-}
-
-/**
- * Read numerical reasoning observations from the live response before a no-log
- * attempt drops its payload. Never retain content or encrypted reasoning blobs.
- */
-export function captureReasoningSnapshotMeta(responseBody: unknown): {
-  snapshotSource: string | null;
-  snapshotChars: number | null;
-} {
-  const { source, chars } = resolveReasoningObservation(null, responseBody);
-  return { snapshotSource: source, snapshotChars: chars };
 }
 
 function hasCallLogsColumn(columnName: string): boolean {
@@ -503,8 +475,8 @@ async function saveCallLogOperation(entry: any): Promise<void> {
     logCallLogSaveFailure(error);
   }
   } finally {
-    // The bridge is only needed while the asynchronous save is outstanding.
-    // Release it also on failed INSERT, exhausted retries, and artifact errors.
+    // Always drop the temporary bridge after this write settles (including
+    // failed row insertions, exhausted retries and artifact write failures).
     if (typeof entry?.responseId === "string" && entry.responseId.length > 0) {
       clearPendingContinuationState(entry.responseId);
     }
