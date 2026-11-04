@@ -2572,6 +2572,9 @@ export async function markAccountUnavailable(
     const disableCooling = connProviderSpecificData.disableCooling === true;
     const claudeQuotaScope = readClaudeScope({ connectionId, provider, status, errorText, model });
     const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
+    // #18296: headroom-scoped decisions carry no cached reset, so they use the 429's own hint
+    // under the operator's maxCooldownMs instead of an uncapped "upstream reset".
+    const hasClaudeScopedReset = isModelScopedClaudeQuota && claudeQuotaScope.cooldownMs !== null;
     const isPerModelQuotaProvider =
       hasPerModelQuota(provider, model, connectionPassthroughModels) || isModelScopedClaudeQuota;
     // #10334 — connection-scope branch: the matched provider rule declared scope
@@ -2815,9 +2818,12 @@ export async function markAccountUnavailable(
         status === 429
           ? ANTIGRAVITY_FAMILY_INFERRED_BASE_COOLDOWN_MS
           : null;
-      const upstreamCooldownMs = isModelScopedClaudeQuota
+      // #18296: a headroom-scoped decision carries no cached reset, so it falls back to the
+      // 429's own hint (operator-capped) instead of an uncapped "upstream reset".
+      const upstreamCooldownMs = hasClaudeScopedReset
         ? claudeQuotaScope.cooldownMs
-        : resolveUpstreamResetMs(fallbackResult);
+        : (resolveUpstreamResetMs(fallbackResult) ??
+          (isModelScopedClaudeQuota ? (fallbackResult.cooldownMs ?? null) : null));
       const exactCooldownMs = options.isAvalancheRisk
         ? resolveAvalancheCooldownMs(options.avalancheCooldownMs, upstreamCooldownMs)
         : upstreamCooldownMs;
@@ -2846,7 +2852,7 @@ export async function markAccountUnavailable(
           exactCooldownIsUpstreamReset:
             exactCooldownMs === upstreamCooldownMs &&
             (retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
-              isModelScopedClaudeQuota),
+              hasClaudeScopedReset),
         }
       );
       // Update last error for observability (without changing terminal status)
