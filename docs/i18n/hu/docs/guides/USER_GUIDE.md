@@ -630,9 +630,9 @@ A környezeti változók teljes referenciáját lásd a [README](../README.md) f
 <details>
 <summary><b>Az összes elérhető modell megtekintése</b></summary>
 
-> Az alábbi lista az `open-sse/config/providerRegistry.ts` fájlból származik a v3.8.0-s verzióhoz. A felhőkatalógusok (Gemini, OpenRouter stb.) dinamikusan szinkronizálódnak — a teljes, aktuális katalógushoz nyissa meg a **Dashboard → Providers → [provider] → Available Models** oldalt, vagy hívja meg a `GET /api/models/catalog` végpontot.
+> Az alábbi lista az `open-sse/config/providerRegistry.ts` fájlból származik a v3.8.0 verzióhoz. A felhőkatalógusok (Gemini, OpenRouter stb.) dinamikusan szinkronizálódnak — a teljes aktuális katalógus megnyitásához lépjen az **Irányítópult → Szolgáltatók → [szolgáltató] → Elérhető modellek** menüpontra, vagy hívja meg a `GET /api/models/catalog` végpontot.
 >
-> Ha egy szolgáltató beépített listája eltérővé vált, használja az **Import from /models** lehetőséget azon az oldalon (vagy engedélyezze az **Auto-Sync** funkciót) az aktuális upstream-katalógus lekéréséhez. Ezt a v3.8.50 verzióban ellenőriztük az LLM7.io (`gemini-3.1-flash-lite`) és az UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) esetében; a Pollinations névtelen hozzáférése ugyanazon tesztelési kör során továbbra is upstream-korlátozott maradt.
+> Ha egy szolgáltató beépített listája eltérővé vált, használja az adott oldalon az **Importálás a /models útvonalról** lehetőséget (vagy engedélyezze az **Automatikus szinkronizálást**) az aktuális upstream-katalógus betöltéséhez. Ezt a v3.8.50 verzióban ellenőriztük az LLM7.io (`gemini-3.1-flash-lite`) és az UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) esetében; a Pollinations névtelen hozzáférése ugyanazon tesztelési ciklus alatt továbbra is upstream-korlátozott maradt.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -640,7 +640,7 @@ A környezeti változók teljes referenciáját lásd a [README](../README.md) f
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — INGYENES OAuth: használja a **Dashboard → Providers → Kiro → Available Models** alatt megjelenő aktuális katalógust. Az elérhetőség a fióktól és a csomagtól függ.
+**Kiro (`kr/`)** — INGYENES OAuth: használja az **Irányítópult → Szolgáltatók → Kiro → Elérhető modellek** alatt megjelenő aktuális katalógust. Az elérhetőség a fióktól és a csomagtól függ.
 
 **Qoder (`if/`)** — INGYENES OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -652,7 +652,7 @@ A környezeti változók teljes referenciáját lásd a [README](../README.md) f
 
 **DeepSeek (`ds/`)** — API-kulcs: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Rendkívül gyors: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultragyors: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Natív Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
@@ -668,17 +668,17 @@ A környezeti változók teljes referenciáját lásd a [README](../README.md) f
 
 **Cohere (`cohere/`)** — RAG-központú: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Vállalati: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Vállalati: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Élő szinkronizálás API-kulcsonként a Google-től — nincs statikus lista. Csatlakoztasson egy kulcsot a **Dashboard → Providers** oldalon, majd használja az **Available Models** lehetőséget az aktuális katalógus importálásához (például: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: API-kulcsonként élőben szinkronizálva a Google-től — nincs statikus lista. Csatlakoztasson egy kulcsot az **Irányítópult → Szolgáltatók** menüben, majd az aktuális katalógus importálásához használja az **Elérhető modellek** lehetőséget (például: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Egyéb kompatibilis szolgáltatók** (válogatás): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` használatával), `azure-ai`, `openrouter` (átengedett katalógus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mindegyik saját modelllistát tart fenn a `providerRegistry.ts` fájlban, és automatikusan szinkronizálható, ha a szolgáltató `/models` végpontot biztosít.
+**Egyéb kompatibilis szolgáltatók** (válogatás): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (az `aws-bedrock` segítségével), `azure-ai`, `openrouter` (továbbított katalógus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mindegyik saját modell-listát tart fenn a `providerRegistry.ts` fájlban, és automatikusan szinkronizálható, ha a szolgáltató `/models` végpontot biztosít.
 
-**Megjegyzés a modellazonosítókról:** Az OmniRoute szolgáltatónatív azonosítókat használ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Egyes azonosítók pontozott verziókat tartalmaznak, mivel az upstream API ilyen formában várja őket. Ha egy modell nem szerepel a fenti listában, futtassa az `omniroute models --search <term>` parancsot, vagy hívja meg a `GET /api/models/catalog` végpontot az elérhetőség megerősítéséhez.
+**Megjegyzés a modellazonosítókról:** Az OmniRoute a szolgáltatók natív azonosítóit használja (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Egyes azonosítók pontozott verziókat tartalmaznak, mivel az upstream API ezeket a formátumokat várja. Ha egy modell nem szerepel a fenti listán, futtassa az `omniroute models --search <term>` parancsot, vagy hívja meg a `GET /api/models/catalog` végpontot az elérhetőség megerősítéséhez.
 
 </details>
 
