@@ -582,7 +582,12 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
     // Correct stale/synced image declarations as well as the capability flag.
     nextEntry.input_modalities = ["text"];
     nextEntry.output_modalities = ["text"];
-  } else if (!Array.isArray(entry.input_modalities) && metadata.modalities.input.length > 0) {
+  } else if (
+    (!Array.isArray(entry.input_modalities) ||
+      metadata.provider === "cheaperinference" ||
+      metadata.provider === "cinf") &&
+    metadata.modalities.input.length > 0
+  ) {
     nextEntry.input_modalities = metadata.modalities.input;
   }
 

@@ -1,6 +1,7 @@
 import { containsMediaKind, type MediaKind } from "../../utils/mediaParts.ts";
 import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
 import { getInputModalities } from "../../../src/lib/db/models/inputModalities";
+import { ciTransportSupportsInput } from "../../../src/shared/constants/cheaperInferenceInputModalities";
 import { isTextOnlyChatTransport } from "../../../src/shared/constants/visionModels";
 import type { ResolvedComboTarget } from "./types.ts";
 import type { RequestCompatibilityRequirements } from "./comboStructure.ts";
@@ -11,6 +12,7 @@ export type MediaRequirements = {
   requiresPdf?: boolean;
   requiresFiles?: boolean;
 };
+
 export function requestMediaRequirements(
   body: Record<string, unknown>
 ): Required<MediaRequirements> {
@@ -54,6 +56,7 @@ export function nonImageMediaFailures(
   const textOnly = isTextOnlyChatTransport(caps.provider);
   const supports = (kind: string, fallback: boolean | null | undefined) =>
     !textOnly &&
+    ciTransportSupportsInput(caps.provider ?? "", caps.model ?? "", kind) &&
     (declared
       ? declared.includes(kind) || (kind === "pdf" && declared.includes("file"))
       : fallback === true);

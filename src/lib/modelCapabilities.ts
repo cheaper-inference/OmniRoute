@@ -16,6 +16,7 @@ import {
   type ModelSpec,
 } from "@/shared/constants/modelSpecs";
 import { getSyncedCapability } from "@/lib/modelsDevSync";
+import { ciTransportSupportsInput } from "@/shared/constants/cheaperInferenceInputModalities";
 import { knownReasoningEffortTiers, MODELS_DEV_PROVIDER_MAP } from "@/lib/modelsDevSync/transform";
 import { isModelsDevEffortTiersEnabled } from "@/shared/utils/featureFlags";
 import { getModelContextOverride } from "@/lib/db/modelContextOverrides";
@@ -1063,11 +1064,13 @@ export function getResolvedModelCapabilities(
     : inputDeclarations
       ? inputDeclarations.includes("audio")
       : resolveAudioCapability(spec, registryModel, modalitiesInput);
-  const supportsVideo = textOnlyTransport
-    ? false
-    : inputDeclarations
-      ? inputDeclarations.includes("video")
-      : resolveVideoCapability(spec, registryModel, modalitiesInput);
+  const supportsVideo =
+    textOnlyTransport ||
+    !ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", "video")
+      ? false
+      : inputDeclarations
+        ? inputDeclarations.includes("video")
+        : resolveVideoCapability(spec, registryModel, modalitiesInput);
   const supportsFiles = textOnlyTransport
     ? false
     : inputDeclarations
@@ -1075,16 +1078,20 @@ export function getResolvedModelCapabilities(
       : modalitiesInput.includes("file")
         ? true
         : null;
-  const supportsPdf = textOnlyTransport
-    ? false
-    : inputDeclarations
-      ? inputDeclarations.includes("pdf") || inputDeclarations.includes("file")
-      : modalitiesInput.includes("pdf") || modalitiesInput.includes("application/pdf")
-        ? true
-        : supportsVision === true &&
-            ["openai", "claude", "anthropic", "gemini", "vertex"].includes(resolved.provider ?? "")
+  const supportsPdf =
+    textOnlyTransport ||
+    !ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", "pdf")
+      ? false
+      : inputDeclarations
+        ? inputDeclarations.includes("pdf") || inputDeclarations.includes("file")
+        : modalitiesInput.includes("pdf") || modalitiesInput.includes("application/pdf")
           ? true
-          : null;
+          : supportsVision === true &&
+              ["openai", "claude", "anthropic", "gemini", "vertex"].includes(
+                resolved.provider ?? ""
+              )
+            ? true
+            : null;
 
   // #8250: when resolve promoted vision over a contradictory attachment=false,
   // expose attachment=true so catalog / Vision Bridge / clients see one verdict.
@@ -1133,8 +1140,12 @@ export function getResolvedModelCapabilities(
     modalitiesInput: textOnlyTransport
       ? ["text"]
       : inputDeclarations
-        ? [...inputDeclarations]
-        : modalitiesInput,
+        ? inputDeclarations.filter((kind) =>
+            ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", kind)
+          )
+        : modalitiesInput.filter((kind) =>
+            ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", kind)
+          ),
     modalitiesOutput: textOnlyTransport ? ["text"] : modalitiesOutput,
     interleavedField:
       synced?.interleaved_field ??

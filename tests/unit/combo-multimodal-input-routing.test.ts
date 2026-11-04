@@ -23,6 +23,9 @@ const { buildTargetTimeoutRunner } =
 const { tryPinnedModelDispatch } = await import("../../open-sse/services/combo/dispatchPrelude.ts");
 const { resolveComboSetupConfig } = await import("../../open-sse/services/comboConfig.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+const { resolveAutoStrategyOrder } =
+  await import("../../open-sse/services/combo/resolveAutoStrategy.ts");
+const { DEFAULT_RESILIENCE_SETTINGS } = await import("../../src/lib/resilience/settings.ts");
 test.after(() => {
   core.resetDbInstance();
   rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -41,6 +44,28 @@ const target = (modelStr: string) => ({
 });
 const blind = target("cfp/moonshotai/kimi-k2.7-code");
 const capable = target("cinf/gemini-4-argon");
+test("PDF/video require proven CI transports despite advertisements, including fail-open", () => {
+  const advertised = target("cheaperinference/gpt-4o-mini");
+  const oldVideo = target("cheaperinference/gemini-2.5-flash");
+  for (const fixture of [fixtures[1], fixtures[2]]) {
+    assert.deepEqual(
+      filterTargetsByRequestCompatibility([advertised, oldVideo, capable], body(fixture.part), log),
+      [capable]
+    );
+    assert.deepEqual(
+      filterTargetsByRequestCompatibility([advertised, oldVideo], body(fixture.part), log, "test", {
+        failOpen: true,
+      }),
+      []
+    );
+    assert.deepEqual(
+      computeCompatRejectedTargets([advertised, oldVideo], [], body(fixture.part)),
+      []
+    );
+  }
+  assert.equal(getResolvedModelCapabilities(advertised.modelStr).supportsPdf, false);
+  assert.equal(getResolvedModelCapabilities(oldVideo.modelStr).supportsVideo, false);
+});
 const body = (part: unknown) => ({
   messages: [
     { role: "user", content: [part] },
@@ -108,6 +133,26 @@ test("mixed media requires every capability; image-only models cannot take video
     filterTargetsByRequestCompatibility([target("cinf/gpt-5.6-sol"), blind, capable], request, log),
     [capable]
   );
+});
+test("Auto rechecks media after expansion and cannot restore rejected routes without telemetry", async () => {
+  const advertised = target("cinf/gpt-4o-mini");
+  const run = async (targets: ReturnType<typeof target>[]) =>
+    resolveAutoStrategyOrder({
+      orderedTargets: targets,
+      body: body(fixtures[2].part),
+      combo: { name: "media-auto", models: targets.map((t) => t.modelStr), strategy: "auto" },
+      settings: null,
+      config: { compatFilterFailOpen: true },
+      resilienceSettings: DEFAULT_RESILIENCE_SETTINGS,
+      log,
+      buildAutoCandidates: async () => [],
+    });
+  const rejected = await run([advertised]);
+  assert.ok("earlyResponse" in rejected);
+  if ("earlyResponse" in rejected) assert.equal(rejected.earlyResponse.status, 400);
+  const accepted = await run([advertised, capable]);
+  assert.ok("orderedTargets" in accepted);
+  if ("orderedTargets" in accepted) assert.deepEqual(accepted.orderedTargets, [capable]);
 });
 test("PDF and generic files are distinct from image vision and extracted plain text", () => {
   assert.equal(getResolvedModelCapabilities("cinf/gemini-4-argon").supportsVideo, true);

@@ -11,6 +11,29 @@ import { CheaperInferenceExecutor } from "@omniroute/open-sse/executors/cheaperi
 
 const CREDENTIALS = { apiKey: "ir_live_test" } as never;
 
+test("direct PDF/video requests cannot silently enter unverified CI transports", async () => {
+  const executor = new CheaperInferenceExecutor();
+  for (const [model, part] of [
+    [
+      "gpt-4o-mini",
+      {
+        type: "file",
+        file: { filename: "test.pdf", file_data: "data:application/pdf;base64,JVBER" },
+      },
+    ],
+    ["gemini-2.5-flash", { type: "video_url", video_url: { url: "https://example.com/test.mp4" } }],
+  ] as const) {
+    const result = await executor.execute({
+      model,
+      body: { messages: [{ role: "user", content: [part] }] },
+      stream: false,
+      credentials: CREDENTIALS,
+    });
+    assert.equal(result.response.status, 400);
+    assert.match(await result.response.text(), /verified .* input transport/);
+  }
+});
+
 test("injects store:false on a Responses-tagged model", () => {
   const executor = new CheaperInferenceExecutor();
   // gpt-5.5 is tagged targetFormat:"openai-responses" in the registry.

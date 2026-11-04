@@ -1,4 +1,7 @@
-import { BaseExecutor, type ProviderCredentials } from "./base.ts";
+import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
+import { containsMediaKind } from "../utils/mediaParts.ts";
+import { makeExecutorErrorResult } from "../utils/error.ts";
+import { ciTransportSupportsInput } from "../../src/shared/constants/cheaperInferenceInputModalities";
 import { sendCIPayload } from "../utils/ciPayloadTransport.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
@@ -26,6 +29,27 @@ import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerMo
 export class CheaperInferenceExecutor extends BaseExecutor {
   constructor(provider = "cheaperinference") {
     super(provider, PROVIDERS[provider]);
+  }
+
+  async execute(input: ExecuteInput) {
+    const body = (input.body || {}) as Record<string, unknown>;
+    for (const [kind, partKind] of [
+      ["pdf", "document"],
+      ["video", "video"],
+    ] as const) {
+      if (
+        !ciTransportSupportsInput(this.provider, input.model, kind) &&
+        containsMediaKind([{ content: [body.messages, body.input, body.contents] }], partKind)
+      ) {
+        return makeExecutorErrorResult(
+          400,
+          `This Cheaper Inference model has no verified ${kind} input transport. Select a supported model such as gemini-4-argon.`,
+          input.body,
+          this.buildUrl(input.model, input.stream, 0, input.credentials)
+        );
+      }
+    }
+    return super.execute(input);
   }
 
   protected dispatchRequest(
