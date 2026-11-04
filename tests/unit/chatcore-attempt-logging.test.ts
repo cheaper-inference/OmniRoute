@@ -334,5 +334,25 @@ test("no-log attempt skips traversing request and response bodies while retainin
   assert.equal(rows.length, 1);
   assert.equal(rows[0]?.status, 200);
   assert.equal(rows[0]?.detailState, "none");
-  assert.equal(rows[0]?.tokensIn, 125_000);
+  assert.equal(rows[0]?.tokens.in, 125_000);
+});
+
+test("no-log responses preserve scalar reasoning observations without storing response bodies", async () => {
+  for (const [suffix, responseBody, expectedSource, expectedChars] of [
+    ["content", { choices: [{ message: { reasoning_content: "private thoughts" } }] }, "content", 16],
+    ["encrypted", { output: [{ type: "reasoning", encrypted_content: "private opaque blob" }] }, "encrypted", null],
+  ] as const) {
+    const id = `no-log-reasoning-${suffix}`;
+    persistAttemptLogs(
+      { status: 200, tokens: { input: 4, output: 2 }, responseBody },
+      baseCtx({ pendingRequestId: id, noLogEnabled: true })
+    );
+    assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+    const rows = await getCallLogs({ correlationId: id, limit: 5 });
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]?.detailState, "none");
+    assert.equal(rows[0]?.hasResponseBody, false);
+    assert.equal(rows[0]?.reasoningSource, expectedSource);
+    assert.equal(rows[0]?.reasoningChars, expectedChars);
+  }
 });
