@@ -114,6 +114,7 @@ export function registerUsage(program) {
     .action(runUsageProxyLogs);
 }
 
+/** Fetches provider usage analytics and maps current API token totals, retaining legacy aliases. */
 export async function runUsageAnalytics(opts, cmd) {
   const globalOpts = cmd.optsWithGlobals();
   const p = new URLSearchParams({ range: opts.period ?? "30d" });
