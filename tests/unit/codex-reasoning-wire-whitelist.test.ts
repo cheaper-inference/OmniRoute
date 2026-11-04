@@ -178,7 +178,11 @@ const unusableEfforts: Array<[string, unknown]> = [
   ["null", null],
   ["empty", ""],
   ["blank", "   "],
-  ["number", 42],
+  // Only non-budget numbers are unusable: a safe non-negative integer is a valid custom
+  // effort budget on the Codex wire (#18329) and is restored as the caller's own choice.
+  ["negative number", -1],
+  ["fractional number", 1.5],
+  ["NaN", Number.NaN],
   ["object", {}],
   ["array", []],
 ];
