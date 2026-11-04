@@ -18,90 +18,96 @@
 
 ## 1. Hol találhatók a dolgok
 
-- **Készlet.** A `packages/ui-kit/src` bájtról bájtra megegyezik a külső forrás `src/` könyvtárával a
-  `packages/ui-kit/UPSTREAM.md` fájlban rögzített commitnál (amely a licencengedélyt is dokumentálja); a `PATCHES.md` sorolja fel a helyi
-  javításokat (nincs ilyen). Forrásként van felhasználva, buildelés nélkül: a `next.config.mjs` transzpilálja, a
+- **Készlet.** A `packages/ui-kit/src` bájtról bájtra megegyező másolata a felsőbb szintű projekt `src/` könyvtárának, a
+  `packages/ui-kit/UPSTREAM.md` fájlban rögzített commit állapotában (ez a fájl a licencengedélyt is dokumentálja); a `PATCHES.md` sorolja fel a helyi
+  javításokat (jelenleg nincs ilyen). Közvetlenül forrásként használjuk, buildelés nélkül: a `next.config.mjs` transzpilálja, a
   `tsconfig.json` pedig az `@omniroute/ui-kit` → `packages/ui-kit/src` és az `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` leképezést adja meg (a `vitest.config.ts` és a `vitest.mcp.config.ts` ugyanezeket az aliasokat tartalmazza). A készlet
-  komponenseit az alútvonalukon keresztül importáld (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), soha ne
-  az `@omniroute/ui-kit` gyűjtőmodulon keresztül: a gyűjtőmodul minden komponenst (köztük a dátumválasztót is)
-  behúz minden importálóba. A készlet stíluslapja a `src/app/globals.css` fájlon keresztül kerül be
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, a teljes stíluslap: az alapvető `ci-ui.css` és minden mintacsalád).
-- **Tokenek.** A `packages/ui-kit/src/ci-tokens.css` deklarálja a `--ci-*` tokeneket; a `src/app/globals.css`
-  összekapcsolja őket a régi OmniRoute-nevekkel (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `packages/ui-kit/src/*` leképezéseket tartalmazza (a `vitest.config.ts` és a `vitest.mcp.config.ts` ugyanezeket az aliasokat használja). A készlet
+  komponenseit az alútvonalukon importáld (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), soha ne az
+  `@omniroute/ui-kit` gyűjtőmodulon keresztül: a gyűjtőmodul minden komponenst (a dátumválasztót is beleértve)
+  behúz minden importálóba. A készlet stíluslapja az `src/app/globals.css` fájlon keresztül kerül be
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, a teljes stíluslap: az alapvető `ci-ui.css`, valamint minden mintacsalád).
+- **Tokenek.** A `packages/ui-kit/src/ci-tokens.css` deklarálja a `--ci-*` tokeneket; az `src/app/globals.css`
+  összeköti ezeket a régi OmniRoute-nevekkel (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
   `--table-*`, `--orch-status-*`, `--color-fd-*`), így a meglévő `var(--color-*)` hivatkozások és Tailwind
   segédosztályok továbbra is működnek. Az új kód a Tailwind segédosztályait (`bg-surface`, `text-text-muted`,
   `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) vagy a készlet osztályait használja — hexadecimális értéket
-  soha (`tests/unit/design-kit-bridge.test.ts` kényszeríti ki az összekapcsolást). A `text-primary` a
-  `--color-primary-ink` értékre oldódik fel a `--text-color-primary` közvetítésével, így az elsődleges szöveg olvasható marad, miközben a
-  `bg-primary`/`border-primary` megtartja a kiemelő felületet: Editions alatt ez a készlet
-  `--ci-color-accent-active` értéke (világos módban a mély rézszínű `#99562f`, sötét módban pedig a réz kiemelőszín); Classic alatt
-  világos módban lime-800, sötét módban pedig a lime kiemelőszín. A diagramsorozatok a
-  `--color-chart-1` … `--color-chart-5` értékeket használják.
-- **Témák.** A `<html className="ci-theme">` (`src/app/layout.tsx`) bevonja a dokumentumot a készlet témájába.
-  A beállítás `light`, `dark` vagy `system` lehet (`THEME_CONFIG.defaultTheme = "system"` a
-  `src/shared/constants/appConfig.ts` fájlban; a `system` a `prefers-color-scheme` értékét követi). A
-  `src/store/themeStore.ts` fájlban lévő `applyTheme()` (amelyet a `THEME_BOOT_SCRIPT` tükröz a
-  `src/app/layout.tsx` fájlba beágyazva, és amely a hidratálás előtt fut le) beállítja a `data-theme="dark"|"light"` attribútumot, és ezzel együtt
-  kapcsolja a `.dark` osztályt a `<html>` elemen. A készlet sötét tokenkészletének kulcsa a
-  `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); az OmniRoute saját sötét felülírásai (a `globals.css` `.dark` blokkja) és a régi Tailwind `dark:`
-  segédosztályok a `.dark` osztályt használják kulcsként. Nincsenek kiemelőszín-beállítások: a kiemelőszín mindig a
-  készletből származik, és a tároló betöltésekor törlődik a régebbi buildből megőrzött beállítás.
-- **Paletták.** Kettő van, mindkettő a készletből (`src/shared/constants/appearancePalette.ts`): az alapértelmezett
+  soha (`tests/unit/design-kit-bridge.test.ts` kényszeríti ki az összekötést). A `text-primary` feloldása
+  `--color-primary-ink` lesz a `--text-color-primary` változón keresztül, így az elsődleges szöveg olvasható marad, miközben a
+  `bg-primary`/`border-primary` megtartja a kiemelőfelületet: Editions alatt ez a készlet
+  `--ci-color-accent-active` értéke (világos módban a mély rézszínű `#99562f`, sötét módban pedig a rézszínű kiemelés); Classic alatt
+  világos módban lime-800, sötét módban pedig a lime kiemelés. A diagramsorozatok a
+  `--color-chart-1` … `--color-chart-5` változókat használják.
+- **Témák.** A `<html className="ci-theme">` (`src/app/layout.tsx`) bekapcsolja a dokumentum számára a készlet témáját.
+  A beállítás értéke `light`, `dark` vagy `system` (`THEME_CONFIG.defaultTheme = "system"` az
+  `src/shared/constants/appConfig.ts` fájlban; a `system` a `prefers-color-scheme` beállítását követi). Az
+  `src/store/themeStore.ts` fájlban található `applyTheme()` (amelynek megfelelője az `src/app/layout.tsx` fájlba beágyazott,
+  hidratálás előtt lefutó `THEME_BOOT_SCRIPT`) együtt állítja be a `data-theme="dark"|"light"` attribútumot és kapcsolja a `.dark` osztályt a `<html>` elemen.
+  A készlet sötét tokenkészletét a `data-theme="dark"` aktiválja (`packages/ui-kit/src/ci-tokens.css`);
+  az OmniRoute saját sötét felülírásait (a `globals.css` `.dark` blokkja) és a régi Tailwind `dark:`
+  segédosztályait a `.dark` osztály aktiválja. Nincsenek előre beállított kiemelőszínek: a kiemelés mindig a
+  készletből származik, és a tároló betöltésekor törlődik egy régebbi buildből megőrzött előbeállítás.
+- **Paletták.** Kettő van, mindkettő a készletből származik (`src/shared/constants/appearancePalette.ts`): az alapértelmezett
   `editions` és a `classic`. Az Editions a készlet `data-ci-appearance="editions"` attribútuma a `<html>` elemen, amelyet
-  a `ci-editions.css` (a `ci-ui.css` importálja) a `data-theme` attribútummal együtt kezel; a Classic az attribútum
-  hiánya. A gyökér-elrendezés szerveroldalon rendereli az attribútumot, így a tárolt érték nélküli (vagy JS nélküli) látogató
-  minden felületen Editions megjelenést kap — az irányítópulton, a bejelentkezési oldalon, a `/status` oldalon, a hibaoldalakon, a `/docs` oldalon és a PWA-ban. A választás
-  a témával együtt ugyanabban a `theme` tárolóban marad meg (`palette`, `setPalette()`, `applyPalette()` a
-  `src/store/themeStore.ts` fájlban), és a `THEME_BOOT_SCRIPT` még a megjelenítés előtt alkalmazza
-  (`src/shared/utils/themeBootScript.ts`, beágyazva az elrendezés `<head>` elemébe); ez csak akkor távolítja el az attribútumot,
-  ha a tárolt paletta `"classic"`; a gyökér-elrendezésen kívüli `src/app/global-error.tsx` ugyanezen tárolóból alkalmazza
-  azt. Ne helyezd a `data-ci-appearance` attribútumot más elemre: a készlet a
-  `html:root:has([data-ci-appearance="editions"])` szelektorral keresi, így akár egyetlen leszármazott is átváltaná az egész dokumentumot.
-  Az Editions `data-ci-editions-variant="landing"` változata marketingoldalakhoz való, nem az irányítópulthoz.
-  A böngésző kerete (`viewport.themeColor`, a webes manifest) nem tudja olvasni a CSS-t vagy a tárolt választást, ezért az
-  alapértelmezést követi: a `src/shared/constants/pwaThemeColors.ts` fájlban lévő `PWA_THEME_COLORS` az Editions
-  `--ci-color-background` egyetlen tükörpéldánya (`#f3f1e9` / `#11120f`), amelyet a
-  `tests/unit/pwa-theme-colors.test.ts` rögzít a `ci-editions.css` fájlhoz. A Monaco egy vizsgálóelemről olvassa le a színeit (`monacoKitTheme.ts`);
-  Editions alatt a vizsgálóelem kiolvasása egy szinkron menet erejéig megfordítja a gyökér `data-theme` értékét, mert a készlet
-  a gyökérelemből oldja fel az Editions világos/sötét módját.
-- **Komponensek (adapterek).** A `src/shared/components/index.tsx` megtartja az OmniRoute komponens-API-ját (azonos
-  nevek, alapértelmezett exportok és propok), a mögötte lévő primitívek pedig a készlet adapterei: űrlapok
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), átfedő elemek és visszajelzések
+  a `ci-editions.css` (a `ci-ui.css` importálja) a `data-theme` attribútummal kombinál; a Classic az attribútum
+  hiánya. A gyökérszintű elrendezés szerveroldalon rendereli az attribútumot, így a tárolt beállítás nélkül (vagy JavaScript nélkül) érkező látogató
+  minden felületen az Editions megjelenést kapja — az irányítópulton, a bejelentkezési oldalon, a `/status` oldalon, a hibaoldalakon, a `/docs` oldalon és a PWA-ban.
+  A választás a témával együtt ugyanabban a `theme` tárolóban marad meg (`palette`, `setPalette()`, `applyPalette()` az
+  `src/store/themeStore.ts` fájlban), és a `THEME_BOOT_SCRIPT` még a kirajzolás előtt alkalmazza
+  (`src/shared/utils/themeBootScript.ts`, az elrendezés `<head>` elemébe ágyazva); az attribútumot csak akkor távolítja el,
+  ha a tárolt paletta `"classic"`; a gyökérszintű elrendezésen kívüli `src/app/global-error.tsx` ugyanezen tárolóból alkalmazza.
+  Ne helyezd el a `data-ci-appearance` attribútumot semmilyen más elemen: a készlet a
+  `html:root:has([data-ci-appearance="editions"])` szelektorral illeszti, ezért már egyetlen leszármazott is átváltaná az egész dokumentumot.
+  Az Editions `data-ci-editions-variant="landing"` változata marketingoldalakhoz készült, nem az irányítópulthoz.
+  Böngészőfelület: a szerver az alapértelmezett Editions értéket rendereli a `viewport.themeColor` beállításban (egy címke
+  `prefers-color-scheme` sémánként) és a webes jegyzékben — ez a
+  `src/shared/constants/pwaThemeColors.ts` fájlban található `PWA_THEME_COLORS`, az Editions `--ci-color-background`
+  (`#f3f1e9` / `#11120f`) egyetlen tükörpéldánya, amelyet a `tests/unit/pwa-theme-colors.test.ts` a `ci-editions.css` fájlhoz rögzít. Az élő
+  `<meta name="theme-color">` ezután a tárolt palettát és módot követi: a `THEME_BOOT_SCRIPT` még a kirajzolás előtt átírja a
+  címkéket, a tématároló műveletei pedig minden változtatáskor megteszik ugyanezt (`resolveThemeColor()` /
+  `applyThemeColor()` az `src/shared/utils/themeColorMeta.ts` fájlban, ahol a `CLASSIC_PAGE_BACKGROUND` értékét a
+  készlet `ciTokens` eleméből olvassa). Egy explicit világos/sötét téma minden címkét az adott módra állít; a `system` sémánként egy
+  színt tart meg. A jegyzék Editions marad: telepítésenként egyszer töltődik le, a
+  beállítás nélkül. A Monaco egy mérőelemről olvassa le a színeit (`monacoKitTheme.ts`);
+  Editions alatt a mérőelem leolvasása egy szinkron feldolgozási menet erejéig átváltja a gyökérelem `data-theme` attribútumát, mert a készlet
+  a gyökérelem alapján oldja fel az Editions világos/sötét módját.
+- **Komponensek (adapterek).** Az `src/shared/components/index.tsx` megtartja az OmniRoute komponens-API-ját (azonos
+  nevek, alapértelmezett exportok és propok), a mögötte lévő primitívek pedig a készletre épülő adapterek: űrlapok
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), átfedések és visszajelzés
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
   struktúra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) és táblázatok
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Az adapter az alútvonalán keresztül importálja a készlet
-  komponensét, és arra képezi le a régi propokat — például a `Button variant="primary"` a készlet
-  `default` gombja (`--ci-button-primary-*`: világos módban az inverz felület, sötét módban pedig a kiemelőszín a hozzá tartozó
-  `--ci-color-accent-foreground` szövegszínnel), a `danger` a `destructive`, a `warning` pedig az `outline` és
-  a `.ci-button--warning` kiterjesztés együttese. A `globals.css` végén (`@layer components`) található
-  `.ci-button--warning` és `.ci-badge[data-tone]` szabályok OmniRoute-kiterjesztések a készlet osztályai fölött.
-  A `tests/unit/ui/adapters/*.test.tsx` tesztek rögzítik az egyes adaptereket.
-- **Alkalmazásváz.** A `src/app/(dashboard)/layout.tsx` rendereli a `DashboardLayout` komponenst, amely a
-  `src/shared/components/layouts/DashboardShell.tsx` fájlt rendereli: a készlet `SidebarProvider` / `Sidebar` /
-  `SidebarInset` komponenseit (`packages/ui-kit/src/sidebar.tsx`), az OmniRoute navigációs logikájával a
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Az adapter az alútvonalán importálja a készlet
+  komponensét, és leképezi rá a régi propokat — például a `Button variant="primary"` a készlet
+  `default` gombja (`--ci-button-primary-*`: világos módban az invertált felület, sötét módban pedig a kiemelés a hozzá tartozó
+  `--ci-color-accent-foreground` szövegszínnel), a `danger` leképezése `destructive`, a `warning` pedig `outline` a
+  `.ci-button--warning` kiegészítéssel. A `globals.css` végén (`@layer components`) található
+  `.ci-button--warning` és `.ci-badge[data-tone]` szabályok OmniRoute-kiegészítések a készlet osztályai fölött.
+  A `tests/unit/ui/adapters/*.test.tsx` tesztjei rögzítik az egyes adapterek működését.
+- **Alkalmazáskeret.** A `src/app/(dashboard)/layout.tsx` rendereli a `DashboardLayout` komponenst, amely a
+  `src/shared/components/layouts/DashboardShell.tsx` komponenst rendereli: a készlet `SidebarProvider` / `Sidebar` /
+  `SidebarInset` elemeit (`packages/ui-kit/src/sidebar.tsx`), az OmniRoute navigációs logikájával a
   `src/shared/components/Sidebar.tsx` fájlban. A `#main-content` elemre mutató „ugrás a tartalomhoz” hivatkozás az első fókuszálható
-  elem. A `src/shared/components/Header.tsx` tartalmazza a készlet `SidebarTrigger` komponensét (az alkalmazásváz egyetlen oldalsávkapcsolóját),
-  a Keak `ProductSwitcher` komponensét és a parancspaletta megnyitóját; csak addig jeleníti meg az útvonal címét, amíg nincs a készletből származó
-  `PageHeader` (`.ci-page-header`) csatolva a `#main-content` elemen belül, így a saját
-  `PageHeader` komponenssel rendelkező oldalon csak egyetlen `h1` található. A `src/shared/components/CommandPalette.tsx` a készlet egyik `Dialog` komponense.
-- **Ikonok.** Az `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) a nevet (a képernyők által
+  elem. A `src/shared/components/Header.tsx` tartalmazza a készlet `SidebarTrigger` elemét (az alkalmazáskeret egyetlen oldalsáv-
+  kapcsolóját), a Keak `ProductSwitcher` komponensét és a parancspaletta megnyitóját; csak akkor jeleníti meg az útvonal címét, ha
+  nincs a készletből származó `PageHeader` (`.ci-page-header`) csatlakoztatva a `#main-content` elemen belül, így a saját
+  `PageHeader` elemmel rendelkező oldalon egyetlen `h1` található. A `src/shared/components/CommandPalette.tsx` a készlet egy `Dialog` eleme.
+- **Ikonok.** Az `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) az adott nevet (a képernyők által
   használt Material Symbols szókészletből) az `ICON_MAP` (`src/shared/constants/iconMap.ts`) segítségével egy
-  Lucide karakterjelhez rendeli. A Material Symbols betűkészlet és csomag már nincs használatban: ha egy név hiányzik a leképezésből, egy
+  Lucide-karakterjelre oldja fel. A Material Symbols betűkészletet és csomagot eltávolítottuk: ha egy név hiányzik a leképezésből, egy
   semleges helyőrző karakterjel (`data-icon-missing="true"`) jelenik meg, és éles környezeten kívül figyelmeztetés kerül a konzolra.
-  Az `npm run gen:icon-map` kilistázza a használatban lévő, de a leképezésből hiányzó neveket
-  (a `tests/unit/icon-map-coverage.test.ts` minden Lucide ikon nélküli név esetén sikertelen;
+  Az `npm run gen:icon-map` kiírja a használatban lévő, de a leképezésből hiányzó neveket
+  (a `tests/unit/icon-map-coverage.test.ts` minden Lucide-ikonnal nem rendelkező név esetén sikertelen;
   a `tests/unit/icon-map-object-values.test.ts` a keresési objektumokban tárolt neveket fedi le);
   a `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` a literális
   `<span className="material-symbols-outlined">` elemeket `<Icon>` elemekké írja át.
-- **Márka.** A `src/shared/components/OmniRouteLogo.tsx` becsomagolja a készletet: az alapértelmezett export, az `OmniRouteLogo`
-  a `ProductIcon product="omniroute" variant="glyph"` elemet jeleníti meg (beágyazott SVG, `basePath`-biztos), az
-  `OmniRouteLockup` pedig a `ProductLockup product="omniroute"` elemet (akadálymentes név: "Keak OmniRoute"), vagy
-  saját márkás üzemeltetők esetén a saját `name`/`logoSrc` értékeiket jeleníti meg. A termékváltó célhelyei a
+- **Márka.** A `src/shared/components/OmniRouteLogo.tsx` körülveszi a készletet: az alapértelmezett export, az `OmniRouteLogo`,
+  a `ProductIcon product="omniroute" variant="glyph"` elemet rendereli (beágyazott SVG, `basePath`-kompatibilis), az
+  `OmniRouteLockup` pedig a `ProductLockup product="omniroute"` elemet rendereli („Keak OmniRoute” akadálymentes névvel), illetve
+  saját márkás üzemeltetők esetén azok saját `name`/`logoSrc` értékeit. A termékváltó célhelyei a
   `src/shared/constants/keakProducts.ts` fájlban találhatók (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Az önálló
   képernyők — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` és `src/shared/components/ErrorPageScaffold.tsx`
-  — a teljes logót jelenítik meg; ezt a `tests/unit/brand-pages-static.test.ts` ellenőrzi.
+  — megjelenítik a logózárat; ezt a `tests/unit/brand-pages-static.test.ts` védi.
 
 ## 2. Szabályok
 
