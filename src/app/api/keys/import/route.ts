@@ -20,6 +20,7 @@ const POLICY_FIELDS = [
   "blockedModels",
   "allowedCombos",
   "allowedConnections",
+  "preferredConnections",
   "allowedQuotas",
   "scopes",
   "noLog",
@@ -48,6 +49,7 @@ const POLICY_FIELDS = [
   "chaosModeEnabled",
   "compressionEnabled",
   "allowAutoCombos",
+  "allowCcDiscoveryAliases",
   "catalogScope",
   "forcedModel",
 ] as const;

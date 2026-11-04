@@ -290,6 +290,8 @@ const invalid = [
   { scopes: Array(33).fill("x") },
   { allowedConnections: [] },
   { allowedConnections: ["bad"] },
+  { preferredConnections: ["bad"] },
+  { allowedConnections: [randomUUID()], preferredConnections: [randomUUID()] },
   { allowedModels: Array(1001).fill("m") },
   { allowedCombos: Array(501).fill("c") },
 ];
@@ -328,6 +330,32 @@ test("maximum create-policy boundaries and exclusive-lease refinement are preser
   assert.equal(value.allowedConnections.length, 100);
   assert.equal(value.allowedModels.length, 1000);
   assert.equal(value.allowedCombos.length, 500);
+});
+
+test("imports keep create parity for ordered connection preference and discovery-alias default", async () => {
+  const allowed = [randomUUID(), randomUUID()];
+  const preferred = [allowed[1]];
+  const response = await send({
+    key: secret(),
+    name: "preference-parity",
+    allowedConnections: allowed,
+    preferredConnections: preferred,
+  });
+  assert.equal(response.status, 201, await response.clone().text());
+  const value = await response.json();
+  assert.equal(validateResponse(value), true, JSON.stringify(validateResponse.errors));
+  assert.deepEqual(value.preferredConnections, preferred);
+  assert.equal(value.allowCcDiscoveryAliases, true);
+  const stored = row(value.id) as Record<string, unknown>;
+  assert.equal(stored.preferred_connections, JSON.stringify(preferred));
+  assert.equal(stored.allow_cc_discovery_aliases, 1);
+  const created = await keys.createApiKey("create-parity", "synthetic-machine", [], {
+    allowedConnections: allowed,
+    preferredConnections: preferred,
+  });
+  const createdRow = row(created.id) as Record<string, unknown>;
+  assert.equal(createdRow.preferred_connections, stored.preferred_connections);
+  assert.equal(createdRow.allow_cc_discovery_aliases, stored.allow_cc_discovery_aliases);
 });
 
 test("route storage failures are sanitized and leave no partially configured key", async () => {

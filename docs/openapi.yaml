@@ -2992,6 +2992,11 @@ paths:
                   minItems: 1
                   maxItems: 100
                   items: { type: string, format: uuid }
+                preferredConnections:
+                  type: array
+                  maxItems: 100
+                  description: Ordered preference; must be a subset of allowedConnections when both are set
+                  items: { type: string, format: uuid }
                 scopes:
                   type: array
                   maxItems: 32
@@ -16479,6 +16484,7 @@ components:
         blockedModels: { type: array, items: { type: string } }
         allowedCombos: { type: array, items: { type: string } }
         allowedConnections: { type: array, items: { type: string } }
+        preferredConnections: { type: array, items: { type: string } }
         allowedQuotas: { type: array, items: { type: string } }
         scopes: { type: array, items: { type: string } }
         noLog: { type: boolean }
@@ -16510,6 +16516,7 @@ components:
         chaosModeEnabled: { type: boolean }
         compressionEnabled: { type: boolean }
         allowAutoCombos: { type: boolean }
+        allowCcDiscoveryAliases: { type: boolean }
         catalogScope: { type: string, enum: [all, combos, models] }
         forcedModel: { type: [string, "null"] }
     CliVersionStatus:
