@@ -1580,7 +1580,7 @@ Inilalarawan ang modelo ng channel (`latest` = v3 hanggang sa 4.0 GA, `next` = r
 
 ---
 
-## Transkripsyon ng Audio
+## Transkripsiyon ng Audio
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1591,7 +1591,7 @@ Content-Type: multipart/form-data
 Mag-transcribe ng mga audio file gamit ang anumang naka-configure na STT provider. Pinipili ng unang segment ng path ang native provider (`openai/…`, `deepgram/…`). Gumagamit ang mga gateway na muling nag-e-export ng modelo ng ibang vendor ng qualified id
 (`openrouter/deepgram/nova-3`).
 
-**Kahilingan:**
+**Request:**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1600,7 +1600,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-**Tugon:**
+**Response:**
 
 ```json
 {
@@ -1611,12 +1611,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Mga halimbawang model id:** `openai/whisper-1` (nangangailangan ng OpenAI key),
+**Mga halimbawa ng model id:** `openai/whisper-1` (nangangailangan ng OpenAI key),
 `openrouter/deepgram/nova-3` (nangangailangan ng OpenRouter key),
 `deepgram/nova-3` (nangangailangan ng native Deepgram key). Ang isang bare
-na kahilingang `deepgram/nova-3` ay **hindi** gumagamit ng OpenRouter.
+`deepgram/nova-3` request ay **hindi** gumagamit ng OpenRouter.
 
 **Mga sinusuportahang format:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transkripsiyon sa file mode sa pamamagitan ng Gemini Live
+WebSocket (nangangailangan ng Gemini API key). Kino-convert ang upload sa 16 kHz mono PCM gamit ang `ffmpeg`
+(na dapat nasa `PATH`, maliban kung ang file ay isa nang 16 kHz mono PCM WAV), ini-stream sa session, at
+ibinabalik ang pinal na text bilang `{ "text": "..." }`. Ipinapasa ang mga opsyonal na `language` at `prompt`
+form field. Mga limitasyon: ang mga upload na lampas sa 25 MiB o ang na-decode na audio na mas mahaba sa 10 minuto ay
+tumutugon ng `413`; kapag ang conversion ay tumakbo nang lampas sa 60 s, ihihinto ito at tutugon ng `504`. Ipinapadala ang API key
+sa `x-goog-api-key` header lamang, at hindi kailanman sa WebSocket URL.
 
 ---
 
