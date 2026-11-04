@@ -30,3 +30,14 @@ test("Gemini: ordinary rate limiting and transient failures stay transient", () 
   assert.equal(classifyGeminiProjectBlock("antigravity", 403,
     "The Gemini API free tier is not available for this project"), null);
 });
+
+test("Gemini: terminal account deactivation is not downgraded to a project cooldown", () => {
+  assert.equal(
+    classifyGeminiProjectBlock(
+      "gemini",
+      403,
+      "Your project has been denied access because your account has been deactivated."
+    ),
+    null
+  );
+});

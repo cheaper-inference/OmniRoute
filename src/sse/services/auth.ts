@@ -2443,6 +2443,32 @@ export async function markAccountUnavailable(
       return { shouldFallback: true, cooldownMs: 0 };
     }
 
+    // A project-level billing refusal must extend an earlier, shorter cooldown.
+    // Handle it before the concurrent-failure guard, which otherwise returns
+    // without persisting the six-hour block. Probe-origin failures still leave
+    // account routing state untouched.
+    const geminiProjectBlock = classifyGeminiProjectBlock(provider, status, errorText);
+    if (geminiProjectBlock && !(await shouldIsolateProbeFailures())) {
+      const projectCooldownMs = 6 * 60 * 60 * 1000;
+      const priorUntilMs = conn?.rateLimitedUntil
+        ? cooldownUntilMs(conn.rateLimitedUntil)
+        : NaN;
+      const cooldownMs = Math.max(
+        projectCooldownMs,
+        Number.isFinite(priorUntilMs) ? priorUntilMs - Date.now() : 0
+      );
+      await updateProviderConnection(connectionId, {
+        lastErrorType: geminiProjectBlock,
+        lastError: geminiProjectBlock,
+        lastErrorAt: new Date().toISOString(),
+        errorCode: status,
+        backoffLevel: 0,
+        rateLimitedUntil: getUnavailableUntil(cooldownMs),
+        testStatus: "unavailable",
+      });
+      return { shouldFallback: true, cooldownMs };
+    }
+
     // ─── Anti-Thundering Herd Guard ─────────────────────────────────
     // If this connection was ALREADY marked unavailable by a prior concurrent
     // request (within the mutex window), skip re-marking to avoid resetting
@@ -2575,23 +2601,6 @@ export async function markAccountUnavailable(
     const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
     const isPerModelQuotaProvider =
       hasPerModelQuota(provider, model, connectionPassthroughModels) || isModelScopedClaudeQuota;
-    // Project-wide billing/free-tier failures affect every Gemini model under
-    // these credentials. Park the connection before any per-model quota logic.
-    const geminiProjectBlock = classifyGeminiProjectBlock(provider, status, errorText);
-    if (geminiProjectBlock) {
-      const cooldownMs = 6 * 60 * 60 * 1000;
-      await updateProviderConnection(connectionId, {
-        lastErrorType: geminiProjectBlock,
-        lastError: geminiProjectBlock,
-        lastErrorAt: new Date().toISOString(),
-        errorCode: status,
-        backoffLevel: 0,
-        rateLimitedUntil: getUnavailableUntil(cooldownMs),
-        testStatus: "unavailable",
-      });
-      return { shouldFallback: true, cooldownMs };
-    }
-
     // #10334 — connection-scope branch: the matched provider rule declared scope
     // "connection" for account-wide quota exhaustion (agentrouter "额度不足";
     // exclusive in practice — no opencode-family rule matches 403 today).
