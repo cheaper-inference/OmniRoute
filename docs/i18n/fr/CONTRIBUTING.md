@@ -15,8 +15,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, ou `>=24.0.0 <27` (recommandé : 24 LTS)
 - **npm** 10+
 
-> **Utilisateurs de npm v11+ (Node 24+) :** Après `npm install`, vérifiez que les modules natifs ont été installés :
-> `node -e "require('better-sqlite3')"`. Si la commande échoue avec `MODULE_NOT_FOUND`,
+> **Windows avec Node 24 :** utilisez la version corrective 24 LTS actuelle (au moins 24.20.0).
+> Les versions antérieures peuvent s’interrompre après la réussite des tests lorsque `--test-force-exit` ferme le
+> processus. Le [correctif libuv pour Windows](https://github.com/nodejs/node/pull/61999) de Node résout
+> ce plantage à l’exécution ; laissez activées les assertions des tests et les vérifications de sortie de l’exécuteur.
+
+> **Utilisateurs de npm v11+ (Node 24+) :** après `npm install`, vérifiez que les modules natifs ont été installés :
+> `node -e "require('better-sqlite3')"`. Si cette commande échoue avec `MODULE_NOT_FOUND`,
 > exécutez `npm approve-scripts better-sqlite3 && npm install`. Consultez
 > [Dépannage](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -43,76 +48,76 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Variables principales pour le développement :
 
-| Variable               | Valeur par défaut en développement | Description                         |
-| ---------------------- | ---------------------------------- | ----------------------------------- |
-| `PORT`                 | `20128`                            | Port du serveur                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL de base de l’interface frontend |
-| `JWT_SECRET`           | (à générer ci-dessus)              | Secret de signature JWT             |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Mot de passe de première connexion  |
-| `APP_LOG_LEVEL`        | `info`                             | Niveau de verbosité des journaux    |
+| Variable               | Valeur par défaut en développement | Description                           |
+| ---------------------- | ---------------------------------- | ------------------------------------- |
+| `PORT`                 | `20128`                            | Port du serveur                       |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL de base de l’interface            |
+| `JWT_SECRET`           | (généré ci-dessus)                 | Secret de signature JWT               |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Mot de passe de la première connexion |
+| `APP_LOG_LEVEL`        | `info`                             | Niveau de verbosité des journaux      |
 
 ### Paramètres du tableau de bord
 
 Le tableau de bord fournit des options d’interface pour les fonctionnalités qui peuvent également être configurées au moyen de variables d’environnement :
 
-| Emplacement du paramètre | Option                          | Description                                              |
-| ------------------------ | ------------------------------- | -------------------------------------------------------- |
-| Paramètres → Avancé      | Mode de débogage                | Activer les journaux de requêtes de débogage (interface) |
-| Paramètres → Général     | Visibilité de la barre latérale | Afficher/masquer les sections de la barre latérale       |
+| Emplacement du paramètre | Option                          | Description                                             |
+| ------------------------ | ------------------------------- | ------------------------------------------------------- |
+| Paramètres → Avancé      | Mode débogage                   | Active les journaux de requêtes de débogage (interface) |
+| Paramètres → Général     | Visibilité de la barre latérale | Affiche/masque les sections de la barre latérale        |
 
-Ces paramètres sont stockés dans la base de données et persistent après les redémarrages, remplaçant les valeurs par défaut des variables d’environnement lorsqu’ils sont définis.
+Ces paramètres sont stockés dans la base de données et persistent après les redémarrages. Lorsqu’ils sont définis, ils remplacent les valeurs par défaut des variables d’environnement.
 
-### Exécution en local
+### Exécution locale
 
 ```bash
 # Mode développement (rechargement à chaud)
 npm run dev
 
 # Build de production
-npm run build    # next build → .build/next/ puis assembleStandalone → dist/
+npm run build    # next build → .build/next/, puis assembleStandalone → dist/
 npm run start
 
 # Compilation rapide du backend/de l’API uniquement pour les modifications des contributeurs
 npm run build:contributor
 
-# Build de publication (reconstruction propre + sentinelle HEAD — requis pour le déploiement)
-npm run build:release   # rm -rf .build dist && build + écrit dist/BUILD_SHA
+# Build de publication (reconstruction complète + sentinelle HEAD — requis pour le déploiement)
+npm run build:release   # rm -rf .build dist, puis build + écriture de dist/BUILD_SHA
 
 # Configuration courante du port
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Le build destiné aux contributeurs effectue uniquement une validation de la compilation : il n’assemble pas la
-distribution autonome et ne génère pas les ressources facultatives de paquetage natif. Utilisez le build de production standard lorsque
-vous devez valider le bundle distribuable.
+Le build pour les contributeurs effectue uniquement une validation de la compilation : il n’assemble pas la
+distribution autonome et ne génère pas les ressources facultatives de packaging natif. Utilisez le build de production standard lorsque
+vous devez valider le paquet livrable.
 
-### Structure des fichiers générés par le build
+### Structure des sorties du build
 
 | Répertoire | Contenu                                                                                     | Suivi par Git |
 | ---------- | ------------------------------------------------------------------------------------------- | ------------- |
 | `src/`     | Code source de l’application (TypeScript / TSX)                                             | Oui           |
 | `.build/`  | Fichiers intermédiaires — sortie de `next build` (ignorée par Git, `distDir = .build/next`) | Non           |
-| `dist/`    | Bundle distribuable — assemblé par `assembleStandalone` (ignoré par Git)                    | Non           |
+| `dist/`    | Paquet livrable — assemblé par `assembleStandalone` (ignoré par Git)                        | Non           |
 
-Le pipeline de build s’effectue en une seule passe :
+Le pipeline de build s’effectue en un seul passage :
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (sortie Next.js)
-  └─ assembleStandalone()                 (copie les ressources autonomes, statiques, publiques et natives)
-       └─ sortie : dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (copie les fichiers autonomes + statiques + publics + les ressources natives)
+       └─ sortie : dist/                  (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` nettoie également les deux répertoires au préalable et écrit
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) comme sentinelle d’intégrité du déploiement.
 
-`npm run build:contributor` utilise le profil de build du backend uniquement. Il remplace temporairement par des stubs
-les fichiers de l’interface du tableau de bord pendant le build, conserve les gestionnaires des routes de l’API et restaure les fichiers d’origine
-après le build. Utilisez `npm run build` pour les modifications qui affectent l’interface du tableau de bord ou pour une validation complète
-de la publication ; le profil destiné aux contributeurs ne remplace pas le build de publication.
+`npm run build:contributor` utilise le profil de build réservé au backend. Il remplace temporairement par des stubs
+les fichiers de l’interface du tableau de bord pendant le build, conserve les gestionnaires de routes de l’API et restaure les fichiers d’origine
+après le build. Utilisez `npm run build` pour les modifications qui affectent l’interface du tableau de bord ou pour une
+validation complète de la publication ; le profil pour les contributeurs ne remplace pas le build de publication.
 
-> **Remarque sur le déploiement sur VPS :** le répertoire distant de l’image `/usr/lib/node_modules/omniroute/app/`
-> reste inchangé. Les outils de déploiement synchronisent le contenu de `dist/` dans celui-ci avec rsync.
+> **Remarque concernant le déploiement sur VPS :** le répertoire distant de l’image `/usr/lib/node_modules/omniroute/app/`
+> reste inchangé. Les outils de déploiement synchronisent le contenu de `dist/` dans ce répertoire avec rsync.
 > Seul le chemin de sortie du build dans le dépôt a changé (`app/` → `dist/`).
 
 URL par défaut :

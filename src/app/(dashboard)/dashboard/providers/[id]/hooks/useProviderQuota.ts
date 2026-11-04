@@ -5,7 +5,7 @@
  * local-only and visible-tab-only; only the explicit refresh button probes upstream.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { startVisiblePolling } from "@/shared/utils/visiblePolling";
+import { startVisibleCachePolling } from "@/shared/utils/visiblePolling";
 
 export interface ProviderQuotaCacheEntry {
   quotas?: Record<string, unknown> | null;
@@ -23,12 +23,12 @@ export function useProviderQuota() {
   >({});
   const [quotaLoading, setQuotaLoading] = useState(true);
   const [refreshingIds, setRefreshingIds] = useState<ReadonlySet<string>>(new Set());
-  const polling = useRef<ReturnType<typeof startVisiblePolling> | null>(null);
+  const polling = useRef<ReturnType<typeof startVisibleCachePolling> | null>(null);
   const manualReads = useRef(new Map<string, AbortController>());
 
   useEffect(() => {
     let alive = true;
-    const reader = startVisiblePolling(async (signal) => {
+    const reader = startVisibleCachePolling(async (signal) => {
       if (manualReads.current.size > 0) return;
       try {
         const res = await fetch("/api/usage/provider-limits", { cache: "no-store", signal });

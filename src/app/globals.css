@@ -8,7 +8,7 @@
    `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
    legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
    wins over the preflight because of selector specificity. */
-@import "../../packages/ui-kit/src/ci-ui.css";
+@import "../../packages/ui-kit/src/ci-styles.css";
 /* Script fallback for Switzer, which ships Latin only (no Cyrillic, Greek or Vietnamese glyphs,
    no "ə"): fontsource declares one Inter @font-face per subset with a unicode-range, so a browser
    fetches an Inter subset only for a glyph Switzer lacks and Latin text keeps Switzer. */
@@ -180,6 +180,13 @@ html:root[data-ci-appearance="editions"] {
 }
 html:root[data-ci-appearance="editions"]:not([data-theme="dark"]) {
   --color-warning-ink: #8c5a1b;
+}
+/* Before the boot script runs (or without JS) <html> has no data-theme, and the kit then follows
+   the system preference: keep the kit's own (dark) warning ink there, as ci-editions.css does. */
+@media (prefers-color-scheme: dark) {
+  html:root[data-ci-appearance="editions"]:not([data-theme]) {
+    --color-warning-ink: var(--ci-color-warning);
+  }
 }
 
 /* Dark: the kit flips every --ci-* value on `data-theme="dark"` (themeStore sets it with the

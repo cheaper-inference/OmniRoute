@@ -632,17 +632,17 @@ post_install() {
 <details>
 <summary><b>అందుబాటులో ఉన్న అన్ని మోడళ్లను చూడండి</b></summary>
 
-> దిగువ జాబితా v3.8.0 కోసం `open-sse/config/providerRegistry.ts` నుండి ఎంపిక చేయబడింది. క్లౌడ్ కేటలాగ్లు (Gemini, OpenRouter మొదలైనవి) డైనమిక్గా సమకాలీకరించబడతాయి — పూర్తి ప్రత్యక్ష కేటలాగ్ కోసం **Dashboard → Providers → [provider] → Available Models** తెరవండి లేదా `GET /api/models/catalog` ను కాల్ చేయండి.
+> దిగువ జాబితా v3.8.0 కోసం `open-sse/config/providerRegistry.ts` నుండి ఎంపిక చేయబడింది. క్లౌడ్ కేటలాగ్లు (Gemini, OpenRouter మొదలైనవి) డైనమిక్గా సమకాలీకరించబడతాయి — పూర్తి లైవ్ కేటలాగ్ కోసం **డ్యాష్బోర్డ్ → ప్రొవైడర్లు → [ప్రొవైడర్] → అందుబాటులో ఉన్న మోడళ్లు** తెరవండి లేదా `GET /api/models/catalog` ను కాల్ చేయండి.
 >
-> ప్రొవైడర్లోని అంతర్నిర్మిత జాబితా మారిపోయి ఉంటే, ప్రత్యక్ష అప్స్ట్రీమ్ కేటలాగ్ను పొందడానికి ఆ పేజీలో **Import from /models** ఉపయోగించండి (లేదా **Auto-Sync** ప్రారంభించండి). ఇది LLM7.io (`gemini-3.1-flash-lite`) మరియు UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) కోసం v3.8.50లో ధృవీకరించబడింది; అదే పరీక్షా దశలో Pollinations అనామక యాక్సెస్ అప్స్ట్రీమ్ పరిమితుల్లోనే ఉంది.
+> ఒక ప్రొవైడర్లోని అంతర్నిర్మిత జాబితా మారిపోయి ఉంటే, లైవ్ అప్స్ట్రీమ్ కేటలాగ్ను పొందడానికి ఆ పేజీలోని **/models నుండి దిగుమతి చేయి** ఉపయోగించండి (లేదా **ఆటో-సింక్** ప్రారంభించండి). ఇది LLM7.io (`gemini-3.1-flash-lite`) మరియు UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) కోసం v3.8.50లో ధృవీకరించబడింది; అదే పరీక్షా దశలో Pollinations అనామక యాక్సెస్ అప్స్ట్రీమ్ పరిమితుల్లోనే కొనసాగింది.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ సామర్థ్య స్థాయిలు: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ప్రయత్న స్థాయిలు: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ఉచిత OAuth: **Dashboard → Providers → Kiro → Available Models** కింద చూపిన ప్రత్యక్ష కేటలాగ్ను ఉపయోగించండి. అందుబాటులో ఉండటం ఖాతా మరియు ప్లాన్పై ఆధారపడి ఉంటుంది.
+**Kiro (`kr/`)** — ఉచిత OAuth: **డ్యాష్బోర్డ్ → ప్రొవైడర్లు → Kiro → అందుబాటులో ఉన్న మోడళ్లు** కింద చూపిన లైవ్ కేటలాగ్ను ఉపయోగించండి. అందుబాటు ఖాతా మరియు ప్లాన్పై ఆధారపడి ఉంటుంది.
 
 **Qoder (`if/`)** — ఉచిత OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -650,37 +650,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — నెలకు $9 స్థిర రుసుము లేదా వినియోగం ఆధారంగా: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — నెలకు $9 స్థిర రుసుము లేదా వినియోగానుసారం: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API కీ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — అత్యంత వేగవంతమైనది: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — అతి వేగవంతమైనది: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok స్థానికం: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok స్థానిక మద్దతు: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EUలో హోస్ట్ చేయబడింది: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EUలో హోస్ట్ చేయబడినది: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — శోధన-ఆధారిత: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — శోధనతో మెరుగుపరచబడినది: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ఓపెన్-సోర్స్: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ఉచితం), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ఓపెన్ సోర్స్: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ఉచితం), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — వేగవంతమైన ఇన్ఫరెన్స్: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — వేఫర్-స్కేల్: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — వేఫర్-స్థాయి: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAGపై దృష్టి: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ఎంటర్ప్రైజ్: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ఎంటర్ప్రైజ్: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google నుండి API కీ ఆధారంగా ప్రత్యక్షంగా సమకాలీకరించబడుతుంది — స్థిర జాబితా లేదు. **Dashboard → Providers** లో ఒక కీని కనెక్ట్ చేసి, ప్రస్తుత కేటలాగ్ను దిగుమతి చేసుకోవడానికి **Available Models** ఉపయోగించండి (ఉదా. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google నుండి API కీ ఆధారంగా లైవ్గా సమకాలీకరించబడుతుంది — స్థిరమైన జాబితా లేదు. **డ్యాష్బోర్డ్ → ప్రొవైడర్లు** లో ఒక కీని కనెక్ట్ చేసి, ప్రస్తుత కేటలాగ్ను దిగుమతి చేసుకోవడానికి **అందుబాటులో ఉన్న మోడళ్లు** ఉపయోగించండి (ఉదా. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**ఇతర అనుకూల ప్రొవైడర్లు** (ఎంపిక): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ద్వారా), `azure-ai`, `openrouter` (పాస్త్రూ కేటలాగ్), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ప్రతి ఒక్కటి `providerRegistry.ts` లో తన స్వంత మోడల్ జాబితాను నిర్వహిస్తుంది. ప్రొవైడర్ `/models` ఎండ్పాయింట్ను అందించినప్పుడు దాన్ని ఆటో-సింక్ చేయవచ్చు.
+**ఇతర అనుకూల ప్రొవైడర్లు** (ఎంపిక): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ద్వారా), `azure-ai`, `openrouter` (పాస్త్రూ కేటలాగ్), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ప్రతి ఒక్కటి `providerRegistry.ts` లో స్వంత మోడల్ జాబితాను నిర్వహిస్తుంది; ప్రొవైడర్ `/models` ఎండ్పాయింట్ను అందించినప్పుడు ఆటో-సింక్ చేయవచ్చు.
 
-**మోడల్ IDలపై గమనిక:** OmniRoute ప్రొవైడర్-స్థానిక IDలను ఉపయోగిస్తుంది (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). కొన్ని IDలలో చుక్కలతో కూడిన వెర్షన్లు ఉంటాయి, ఎందుకంటే అప్స్ట్రీమ్ API వాటిని ఆ విధంగానే ఆశిస్తుంది. ఒక మోడల్ పైన జాబితా చేయబడకపోతే, అందుబాటును నిర్ధారించడానికి `omniroute models --search <term>` ను అమలు చేయండి లేదా `GET /api/models/catalog` ను ఉపయోగించండి.
+**మోడల్ IDల గురించి గమనిక:** OmniRoute ప్రొవైడర్-స్థానిక IDలను ఉపయోగిస్తుంది (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). కొన్ని IDలలో డాట్తో కూడిన సంస్కరణలు ఉంటాయి, ఎందుకంటే అప్స్ట్రీమ్ API వాటిని ఆ విధంగానే ఆశిస్తుంది. ఒక మోడల్ పై జాబితాలో లేకపోతే, అందుబాటును నిర్ధారించడానికి `omniroute models --search <term>` ను అమలు చేయండి లేదా `GET /api/models/catalog` ను ఉపయోగించండి.
 
 </details>
 

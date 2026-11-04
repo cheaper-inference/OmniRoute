@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test, { type TestContext } from "node:test";
-import { startVisiblePolling } from "../../src/shared/utils/visiblePolling.ts";
+import { startVisibleCachePolling } from "../../src/shared/utils/visiblePolling.ts";
 
 function mockDocument(t: TestContext, page: EventTarget & { visibilityState: string }) {
   const previous = Object.getOwnPropertyDescriptor(globalThis, "document");
@@ -27,7 +27,7 @@ for (const visible of [true, false]) {
     });
     mockDocument(t, page);
     let reads = 0;
-    const polling = startVisiblePolling(async () => {
+    const polling = startVisibleCachePolling(async () => {
       reads++;
     });
     assert.equal(reads, visible ? 1 : 0);
@@ -50,7 +50,7 @@ test("replacement and cleanup abort old reads, without overlapping background re
   mockDocument(t, Object.assign(new EventTarget(), { visibilityState: "visible" }));
   const pending = deferred();
   const signals: AbortSignal[] = [];
-  const polling = startVisiblePolling(async (signal) => {
+  const polling = startVisibleCachePolling(async (signal) => {
     signals.push(signal);
     await pending.promise;
   });
@@ -70,7 +70,7 @@ test("a stalled cache read is aborted at its deadline and later polling can reco
   mockDocument(t, Object.assign(new EventTarget(), { visibilityState: "visible" }));
   const pending = deferred();
   const signals: AbortSignal[] = [];
-  const polling = startVisiblePolling(async (signal) => {
+  const polling = startVisibleCachePolling(async (signal) => {
     signals.push(signal);
     if (signals.length === 1) await pending.promise;
   });

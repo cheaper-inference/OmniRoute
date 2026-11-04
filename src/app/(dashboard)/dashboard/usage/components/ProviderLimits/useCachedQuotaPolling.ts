@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { startVisiblePolling } from "@/shared/utils/visiblePolling";
+import { startVisibleCachePolling } from "@/shared/utils/visiblePolling";
 
 /** Re-read only server caches. Never call the live per-account or POST refresh paths. */
 export function useCachedQuotaPolling<T>(
@@ -12,7 +12,7 @@ export function useCachedQuotaPolling<T>(
   useEffect(() => {
     let connections: T[] | null = null;
     let nextConnectionRead = 0;
-    const polling = startVisiblePolling(async (signal) => {
+    const polling = startVisibleCachePolling(async (signal) => {
       // Quotas change during generation. The expensive account list need not be
       // re-scanned at the same cadence; retain its existing five-minute interval.
       const refreshConnections = !connections || Date.now() >= nextConnectionRead;
