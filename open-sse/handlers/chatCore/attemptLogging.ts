@@ -601,14 +601,14 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     reasoningMeta: args.reasoningMeta ?? null,
     clientRequestBody: body ?? null,
     upstreamRequestBody: providerRequest ?? null,
-    requestBody: cloneBoundedChatLogPayload(
+    requestBody: noLogEnabled ? null : cloneBoundedChatLogPayload(
       attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
         ...accountRotationMeta,
         claudePromptCache: claudeCacheMeta,
         geminiPromptCache,
       })
     ),
-    responseBody: cloneBoundedChatLogPayload(
+    responseBody: noLogEnabled ? null : cloneBoundedChatLogPayload(
       attachLogMeta(truncateForLog(retainedResponse as Record<string, unknown>), {
         ...accountRotationMeta,
         claudePromptCache: claudeCacheMeta
