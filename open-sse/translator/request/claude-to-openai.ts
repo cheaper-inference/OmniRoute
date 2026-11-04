@@ -122,6 +122,9 @@ function resolveOpenAIServiceTier(tier: unknown, credentials: unknown): string |
 
 // Convert Claude request to OpenAI format
 export function claudeToOpenAIRequest(model, body, stream, credentials: unknown = null) {
+  const routedProvider =
+    credentials && typeof credentials === "object" ? (credentials as JsonRecord)._provider : null;
+  const preserveDocumentUrls = routedProvider === "cheaperinference" || routedProvider === "cinf";
   // #2069 — when the routed provider honors OpenAI-format cache_control breakpoints
   // (DashScope/alibaba, etc.) and the upstream caller requested preservation, keep
   // the client's cache_control markers on system + message text blocks instead of
@@ -225,7 +228,7 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
   if (body.messages && Array.isArray(body.messages)) {
     for (let i = 0; i < body.messages.length; i++) {
       const msg = body.messages[i];
-      const converted = convertClaudeMessage(msg, preserveCacheControl);
+      const converted = convertClaudeMessage(msg, preserveCacheControl, preserveDocumentUrls);
       if (converted) {
         // Claude Code hook contexts (SessionStart/PreToolUse) arrive as
         // role:"system" mid-array — strictly valid for the Anthropic Messages
@@ -471,7 +474,11 @@ function fixMissingToolResponses(messages) {
 // (Claude Code sends PDFs this way) becomes the Chat Completions `file` part, which
 // OpenAI accepts natively and geminiHelper turns into `inlineData`. Plain-text and URL
 // documents become text, because OpenAI `file` parts only carry base64 data.
-function convertClaudeDocumentBlock(block, preserveCacheControl = false): JsonRecord | null {
+function convertClaudeDocumentBlock(
+  block,
+  preserveCacheControl = false,
+  preserveDocumentUrls = false
+): JsonRecord | null {
   const source = block?.source;
   const title = typeof block?.title === "string" && block.title ? block.title : null;
   let part: JsonRecord | null = null;
@@ -484,7 +491,15 @@ function convertClaudeDocumentBlock(block, preserveCacheControl = false): JsonRe
   } else if (source?.type === "text" && typeof source.data === "string" && source.data) {
     part = { type: "text", text: title ? `[${title}]\n${source.data}` : source.data };
   } else if (source?.type === "url" && typeof source.url === "string" && source.url) {
-    part = { type: "text", text: `[Document${title ? `: ${title}` : ""}] ${source.url}` };
+    part = preserveDocumentUrls
+      ? {
+          type: "file",
+          file: {
+            file_data: source.url,
+            filename: title ? (/\.pdf$/i.test(title) ? title : `${title}.pdf`) : "attachment.pdf",
+          },
+        }
+      : { type: "text", text: `[Document${title ? `: ${title}` : ""}] ${source.url}` };
   }
 
   if (part && preserveCacheControl && block.cache_control !== undefined) {
@@ -509,7 +524,7 @@ function buildOmittedBlocksNotice(types: string[]): string {
 }
 
 // Convert single Claude message - returns single message or array of messages
-function convertClaudeMessage(msg, preserveCacheControl = false) {
+function convertClaudeMessage(msg, preserveCacheControl = false, preserveDocumentUrls = false) {
   // Preserve system role for mid-conversation system turns (#6954).
   // Previously any role that wasn't "user" or "tool" was mapped to "assistant",
   // which misattributed system messages as assistant output.
@@ -565,7 +580,11 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
           break;
 
         case "document": {
-          const documentPart = convertClaudeDocumentBlock(block, preserveCacheControl);
+          const documentPart = convertClaudeDocumentBlock(
+            block,
+            preserveCacheControl,
+            preserveDocumentUrls
+          );
           if (documentPart) parts.push(documentPart);
           break;
         }
@@ -624,7 +643,7 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
                 hasImage = true;
               } else if (c.type === "document") {
                 // Same lift for documents: a `tool` message cannot carry a file part.
-                const documentPart = convertClaudeDocumentBlock(c);
+                const documentPart = convertClaudeDocumentBlock(c, false, preserveDocumentUrls);
                 if (documentPart?.type === "text") {
                   textParts.push(documentPart.text as string);
                 } else if (documentPart) {

@@ -24,7 +24,23 @@ const id = "10000000-0000-4000-8000-000000000001";
 const largeBody = () =>
   JSON.stringify({
     model: "test",
-    input: randomBytes(6 * 1024 * 1024).toString("base64"),
+    input: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_file",
+            filename: "report.pdf",
+            file_data:
+              "data:application/pdf;base64," + randomBytes(6 * 1024 * 1024).toString("base64"),
+          },
+          { type: "input_image", image_url: "data:image/png;base64,fixture" },
+          { type: "input_audio", input_audio: { data: "audio-fixture", format: "wav" } },
+          { type: "input_video", video_url: "https://media.example/clip.mp4?signature=preserve" },
+          { type: "input_text", text: "Keep all media and tool history intact. 你好 🦉" },
+        ],
+      },
+    ],
     stream: true,
   });
 

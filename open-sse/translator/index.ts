@@ -34,6 +34,7 @@ import { applyThinkingBudget } from "../services/thinkingBudget.ts";
 import { applyReasoningRuleDirective } from "@/lib/reasoningRouting/policy";
 import { getModelPreserveVideoUrl } from "@/lib/db/models/modelPreserveVideoUrl";
 import { getResolvedModelCapabilities, supportsReasoning } from "../services/modelCapabilities.ts";
+import { requestMediaRefs, assertCIMediaPreserved } from "./helpers/mediaIntegrity.ts";
 import { normalizeRoles, resolvePreserveDeveloperRole } from "../services/roleNormalizer.ts";
 import { hoistLeadingSystemMessage } from "./helpers/strictSystemHoist.ts";
 import { ensurePoeUserTurnHasText } from "./helpers/poeImageOnlyUserTurn.ts";
@@ -372,6 +373,8 @@ export function translateRequest(
   }
 ) {
   // Claude Code inline-tools `tool_addition` blocks only reach Anthropic-native targets;
+  const originalCIMedia =
+    provider === "cheaperinference" || provider === "cinf" ? requestMediaRefs(body) : null;
   // everywhere else their definitions move into tools[] (copy-on-write).
   const hoistDeferredTools =
     sourceFormat === FORMATS.CLAUDE &&
@@ -670,6 +673,7 @@ export function translateRequest(
     // honor explicit OpenAI-format markers (DashScope/alibaba, Xiaomi MiMo) when
     // requested upstream; generic/implicit-cache OpenAI providers stay stripped.
     result = filterToOpenAIFormat(result, {
+      normalizeFileUrls: normalizedProvider === "cheaperinference" || normalizedProvider === "cinf",
       preserveCacheControl:
         options?.preserveCacheControl === true &&
         providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride),
@@ -680,7 +684,10 @@ export function translateRequest(
       // Falls back to true for moonshot/kimi when unset (legacy behavior).
       preserveVideoUrl:
         getModelPreserveVideoUrl(normalizedProvider, normalizedModel) ??
-        (normalizedProvider === "moonshot" || normalizedProvider === "kimi"),
+        (normalizedProvider === "moonshot" ||
+          normalizedProvider === "kimi" ||
+          normalizedProvider === "cheaperinference" ||
+          normalizedProvider === "cinf"),
       // Same decision normalizeRoles made above — never undo it here.
       preserveDeveloperRole: resolvePreserveDeveloperRole(preserveDeveloperRole, provider),
     });
@@ -935,6 +942,7 @@ export function translateRequest(
     result.messages = ensurePoeUserTurnHasText(result.messages, provider);
   }
 
+  assertCIMediaPreserved(originalCIMedia, result);
   return result;
 }
 

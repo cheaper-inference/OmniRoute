@@ -35,6 +35,7 @@
  */
 import { randomUUID } from "crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import { containsMediaKind } from "../utils/mediaParts.ts";
 import { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
 import { makeExecutorErrorResult as makeErrorResult } from "../utils/error.ts";
 import { connectObscuraBrowser } from "../services/obscura.ts";
@@ -514,6 +515,21 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       );
     }
     const rawModel = (bodyObj.model as string) || DEFAULT_MODEL;
+    if (
+      ["audio", "video", "document", "file"].some((kind) =>
+        containsMediaKind(
+          [{ content: [bodyObj.messages, bodyObj.input, bodyObj.contents] }],
+          kind as "audio" | "video" | "document" | "file"
+        )
+      )
+    ) {
+      return makeErrorResult(
+        400,
+        "Cloudflare Playground accepts text-only chat. Audio, video and file inputs are not supported.",
+        body,
+        PLAYGROUND_URL
+      );
+    }
     const model = rawModel.startsWith(MODEL_PREFIX) ? rawModel : MODEL_PREFIX + rawModel;
     const temperature =
       typeof bodyObj.temperature === "number" ? bodyObj.temperature : DEFAULT_TEMPERATURE;

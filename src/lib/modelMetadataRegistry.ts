@@ -568,6 +568,14 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
   nextEntry.capabilities = {
     ...existingCapabilities,
     ...capabilityFields,
+    ...(metadata.modalities.input.length > 0
+      ? {
+          audio_input: metadata.modalities.input.includes("audio"),
+          video_input: metadata.modalities.input.includes("video"),
+          file_input:
+            metadata.modalities.input.includes("pdf") || metadata.modalities.input.includes("file"),
+        }
+      : {}),
   };
 
   if (isTextOnlyChatTransport(metadata.provider)) {

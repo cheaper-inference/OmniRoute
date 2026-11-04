@@ -45,6 +45,7 @@ export { createModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityRe
 export { resolveAudioCapability } from "@/lib/modelCapabilityModalities";
 export type { ModelLimitSources } from "@/lib/modelCapabilityLimits";
 import { isTextOnlyChatTransport, isVisionModelId } from "@/shared/constants/visionModels";
+import { getInputModalities } from "@/lib/db/models/inputModalities";
 import { getUnsupportedParams } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
   getLearnedThinkingCap,
@@ -155,6 +156,8 @@ export interface ResolvedModelCapabilities {
   supportsVision: boolean | null;
   supportsAudio: boolean | null;
   supportsVideo: boolean | null;
+  supportsPdf?: boolean | null;
+  supportsFiles?: boolean | null;
   supportsMaxTokens: boolean;
   attachment: boolean | null;
   structuredOutput: boolean | null;
@@ -1027,6 +1030,11 @@ export function getResolvedModelCapabilities(
   // Executor transport limits outrank model-family, synced and operator metadata:
   // enabling a model's vision flag cannot teach a text-only wire format images.
   const textOnlyTransport = isTextOnlyChatTransport(resolved.provider);
+  const inputDeclarations = getInputModalities(
+    resolved.provider,
+    resolved.model,
+    snapshot ? (snapshot.inputModalities ?? new Map()) : undefined
+  );
   const supportsVision = textOnlyTransport
     ? false
     : resolveVisionCapability(
@@ -1052,10 +1060,31 @@ export function getResolvedModelCapabilities(
       : supportsVision;
   const supportsAudio = textOnlyTransport
     ? false
-    : resolveAudioCapability(spec, registryModel, modalitiesInput);
+    : inputDeclarations
+      ? inputDeclarations.includes("audio")
+      : resolveAudioCapability(spec, registryModel, modalitiesInput);
   const supportsVideo = textOnlyTransport
     ? false
-    : resolveVideoCapability(spec, registryModel, modalitiesInput);
+    : inputDeclarations
+      ? inputDeclarations.includes("video")
+      : resolveVideoCapability(spec, registryModel, modalitiesInput);
+  const supportsFiles = textOnlyTransport
+    ? false
+    : inputDeclarations
+      ? inputDeclarations.includes("file")
+      : modalitiesInput.includes("file")
+        ? true
+        : null;
+  const supportsPdf = textOnlyTransport
+    ? false
+    : inputDeclarations
+      ? inputDeclarations.includes("pdf") || inputDeclarations.includes("file")
+      : modalitiesInput.includes("pdf") || modalitiesInput.includes("application/pdf")
+        ? true
+        : supportsVision === true &&
+            ["openai", "claude", "anthropic", "gemini", "vertex"].includes(resolved.provider ?? "")
+          ? true
+          : null;
 
   // #8250: when resolve promoted vision over a contradictory attachment=false,
   // expose attachment=true so catalog / Vision Bridge / clients see one verdict.
@@ -1080,6 +1109,8 @@ export function getResolvedModelCapabilities(
     supportsVision: effectiveSupportsVision,
     supportsAudio,
     supportsVideo,
+    supportsPdf,
+    supportsFiles,
     supportsMaxTokens: heuristicMaxTokens(lookupKey),
     attachment,
     structuredOutput: synced?.structured_output ?? null,
@@ -1099,7 +1130,11 @@ export function getResolvedModelCapabilities(
     knowledgeCutoff: synced?.knowledge_cutoff ?? null,
     releaseDate: synced?.release_date ?? null,
     lastUpdated: synced?.last_updated ?? null,
-    modalitiesInput: textOnlyTransport ? ["text"] : modalitiesInput,
+    modalitiesInput: textOnlyTransport
+      ? ["text"]
+      : inputDeclarations
+        ? [...inputDeclarations]
+        : modalitiesInput,
     modalitiesOutput: textOnlyTransport ? ["text"] : modalitiesOutput,
     interleavedField:
       synced?.interleaved_field ??
