@@ -93,6 +93,12 @@ export interface HermesAgentConfigPayload {
 // Resolved lazily at call-time so HERMES_HOME is always honoured (#3628).
 const getConfigPath = () => getHermesConfigPath();
 
+// A config.yaml that exists but cannot be read or parsed must fail the apply;
+// merging from `{}` would silently drop every setting outside the applied roles.
+const UNPARSEABLE_EXISTING_CONFIG =
+  "Hermes config.yaml exists but could not be parsed; refusing to overwrite it. " +
+  "Fix or remove the file, then apply again.";
+
 // Build a normalized base URL for Hermes (no trailing slash, no /v1 suffix on the provider entry)
 function normalizeBaseUrl(base: string): string {
   let b = base.trim();
@@ -129,14 +135,23 @@ export async function generateHermesAgentConfig(
     return { yaml: "", error: "baseUrl is required" };
   }
 
-  // Read existing config if present (non-destructive merge)
+  // Read existing config if present (non-destructive merge). Only a missing
+  // (or empty) file means "start fresh" — anything else that fails to read or
+  // parse must refuse the write instead of replacing the file.
   let existing: any = {};
   try {
     const fs = await import("node:fs/promises");
     const raw = await fs.readFile(getConfigPath(), "utf-8");
-    existing = yaml.load(raw) || {};
-  } catch {
+    // js-yaml 5 throws on an empty document; an empty file is a fresh start.
+    existing = raw.trim() === "" ? {} : yaml.load(raw) || {};
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") {
+      return { yaml: "", error: UNPARSEABLE_EXISTING_CONFIG };
+    }
     // no existing file — start fresh
+  }
+  if (typeof existing !== "object" || existing === null || Array.isArray(existing)) {
+    return { yaml: "", error: UNPARSEABLE_EXISTING_CONFIG };
   }
 
   const normalizedBase = normalizeBaseUrl(baseUrl);
