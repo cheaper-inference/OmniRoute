@@ -417,9 +417,9 @@ async function reuseLiveZoneEntry(
     previous.stats,
     compress
   );
-  if (!live) return compress(body);
+  if (!live) return fallback();
   const restoredBody = restoreStableFields(live.liveResult.body, previous.transformedStableFields);
-  if (!restoredBody) return compress(body);
+  if (!restoredBody) return fallback();
   const combinedBody = {
     ...restoredBody,
     [context.field]: [...frozenPrefix, ...live.transformedLive],
