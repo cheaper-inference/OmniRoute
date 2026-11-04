@@ -99,6 +99,13 @@ export function extractVerificationUrl(payload: unknown): string | null {
   return null;
 }
 
+const ANY_ACCOUNTS_URL = /https:\/\/accounts\.google\.com\/[^\s"'\\<>]{1,2048}/g;
+
+/** Masks every accounts.google.com link so a raw upstream body can be logged safely. */
+export function redactVerificationUrls(text: string): string {
+  return text.replace(ANY_ACCOUNTS_URL, "[verification-url]");
+}
+
 /** Reads the persisted link from a connection's providerSpecificData (validated). */
 export function readStoredVerificationUrl(providerSpecificData: unknown): string | null {
   const url = asRecord(providerSpecificData)?.verificationUrl;

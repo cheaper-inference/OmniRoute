@@ -287,11 +287,15 @@ describe("POST /api/cli-tools/apply — container guard", () => {
     assert.strictEqual(body.success, true);
     assert.strictEqual(body.configPath, OPENCODE_CONFIG);
     assert.ok(fs.existsSync(OPENCODE_CONFIG), "host write must land");
-    assert.strictEqual(
-      fs.statSync(OPENCODE_CONFIG).mode & 0o777,
-      0o600,
-      "generated CLI config must be private"
-    );
+    // NTFS does not represent POSIX owner/group/other bits. The writer's mode
+    // requests are checked on every platform in cli-helper/private-config-file.test.ts.
+    if (process.platform !== "win32") {
+      assert.strictEqual(
+        fs.statSync(OPENCODE_CONFIG).mode & 0o777,
+        0o600,
+        "generated CLI config must be private"
+      );
+    }
     const written = fs.readFileSync(OPENCODE_CONFIG, "utf-8");
     assert.ok(written.includes(catalogBaseUrl));
   });
