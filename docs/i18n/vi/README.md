@@ -13,7 +13,9 @@
 
 # 🚀 OmniRoute — Cổng AI miễn phí
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Không bao giờ ngừng viết mã. Mọi công cụ AI → 380 nhà cung cấp — hơn 150 nhà cung cấp miễn phí — thông qua một endpoint duy nhất. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity kết nối với Claude / GPT / Gemini MIỄN PHÍ cùng cơ chế tự động chuyển dự phòng. Tính năng nén xếp chồng RTK + Caveman tiết kiệm 15–95% token (~89% trung bình) — không bao giờ chạm giới hạn. 380 nhà cung cấp AI · hơn 150 gói miễn phí · ~1,62 tỷ token miễn phí/tháng · 20 chiến lược định tuyến · Bắt đầu với $0."/>
+**Được tạo bởi [Diego Souza](https://github.com/diegosouzapw)**
+
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Không bao giờ ngừng lập trình. Mọi công cụ AI → 380 nhà cung cấp — hơn 150 nhà cung cấp miễn phí — thông qua một endpoint duy nhất. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity kết nối với Claude / GPT / Gemini MIỄN PHÍ cùng cơ chế tự động chuyển dự phòng. Tính năng nén xếp chồng RTK + Caveman tiết kiệm 15–95% token (trung bình ~89%) — không bao giờ chạm giới hạn. 380 nhà cung cấp AI · hơn 150 gói miễn phí · ~1,62B token miễn phí/tháng · 20 chiến lược định tuyến · bắt đầu với $0."/>
 
 </div>
 
@@ -1290,19 +1292,19 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Môi trường chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trong <code>src/</code> và <code>open-sse/</code> (không có <code>any</code> trong lõi kể từ v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 mô-đun miền, 220 migration</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON legacy) — 147 mô-đun miền, 221 migration</td></tr>
   <tr><td nowrap><b>Bộ nhớ</b></td><td>Tìm kiếm toàn văn SQLite FTS5 + embedding vector lượng tử hóa int8, suy giảm có kiểu</td></tr>
-  <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — xác thực I/O của công cụ MCP + hợp đồng API</td></tr>
+  <tr><td nowrap><b>Schema</b></td><td>Zod 4 — xác thực I/O công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Phát trực tuyến</b></td><td>Server-Sent Events (SSE) + cầu nối WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Nén</b></td><td>Pipeline 12 công cụ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Xác thực &amp; bảo mật</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + xác thực MCP theo phạm vi · AES-256-GCM khi lưu trữ · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ngụy trang</b></td><td>wreq-js — giả lập dấu vân tay TLS JA3 / JA4, proxy 3 cấp</td></tr>
-  <tr><td nowrap><b>Khả năng phục hồi</b></td><td>Bộ ngắt mạch, exponential backoff, chống hiệu ứng đàn đám đông, tự phục hồi auto-combo</td></tr>
-  <tr><td nowrap><b>Ghi nhật ký</b></td><td>pino — nhật ký JSON có cấu trúc cùng ngữ cảnh yêu cầu</td></tr>
+  <tr><td nowrap><b>Truyền luồng</b></td><td>Server-Sent Events (SSE) + cầu nối WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Nén</b></td><td>Pipeline 12 engine — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Xác thực &amp; bảo mật</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + xác thực phạm vi MCP · AES-256-GCM khi lưu trữ · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ẩn danh</b></td><td>wreq-js — giả lập dấu vân tay TLS JA3 / JA4, proxy 3 cấp</td></tr>
+  <tr><td nowrap><b>Khả năng phục hồi</b></td><td>Circuit breaker, exponential backoff, chống hiệu ứng đàn bò, tự phục hồi auto-combo</td></tr>
+  <tr><td nowrap><b>Ghi nhật ký</b></td><td>pino — nhật ký JSON có cấu trúc với ngữ cảnh request</td></tr>
   <tr><td nowrap><b>Kiểm thử</b></td><td>Trình chạy kiểm thử Node.js + Vitest — <b>hơn 60.000 khai báo kiểm thử tĩnh</b> trong hơn 8.400 tệp kiểm thử được theo dõi (unit, tích hợp, E2E, bảo mật, hệ sinh thái)</td></tr>
-  <tr><td nowrap><b>Nền tảng</b></td><td>Máy tính để bàn (Electron) · Android (Termux) · PWA (mọi trình duyệt)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — tự động phát hành npm + Docker Hub khi phát hành phiên bản</td></tr>
+  <tr><td nowrap><b>Nền tảng</b></td><td>Máy tính để bàn (Electron) · Android (Termux) · PWA (bất kỳ trình duyệt nào)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — tự động phát hành lên npm + Docker Hub khi phát hành bản release</td></tr>
   <tr><td nowrap><b>Liên kết</b></td><td><a href="https://omniroute.online">Trang web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1801,9 +1803,9 @@ Giấy phép MIT - xem [LICENSE](LICENSE) để biết chi tiết.
 
 <div align="center">
 
-**[⬆ Về đầu trang](#-omniroute)** · Được xây dựng với ❤️ cho cộng đồng AI mã nguồn mở.
+**[⬆ Quay lại đầu trang](#-omniroute)** · Được xây dựng bằng ❤️ dành cho cộng đồng AI mã nguồn mở.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Giấy phép MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Được tạo bởi <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Giấy phép MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions được bật để cộng đồng hỏi đáp -->
+<!-- GitHub Discussions đã được bật để cộng đồng hỏi đáp -->

@@ -13,40 +13,58 @@
 
 ## Τι καταγράφεται
 
-### Διαχειριστικά συμβάντα ελέγχου (`audit_log`)
+### Συμβάντα διαχειριστικού ελέγχου (`audit_log`)
 
-Κάθε κλήση της `logAuditEvent({ action, actor, target, details, ... })` παράγει μία γραμμή. Οι συμβολοσειρές ενεργειών ακολουθούν ένα μοτίβο `domain.verb` (ή `domain.verb.outcome`). Οι επιβεβαιωμένοι τύποι ενεργειών στον πηγαίο κώδικα περιλαμβάνουν:
+Κάθε κλήση της `logAuditEvent({ action, actor, target, details, ... })` παράγει
+μία γραμμή. Οι συμβολοσειρές ενεργειών ακολουθούν ένα μοτίβο
+`domain.verb` (ή `domain.verb.outcome`). Οι επιβεβαιωμένοι τύποι ενεργειών
+στο δέντρο του κώδικα περιλαμβάνουν:
 
-| Ενέργεια                             | Πηγή                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Ενέργεια                             | Πηγή                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Κάθε καταχώριση αποτυπώνει τα `action`, `actor` (προεπιλογή: `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` και `timestamp`. Τα ευαίσθητα κλειδιά (`apiKey`, `accessToken`, `refreshToken`, `password`, οτιδήποτε αντιστοιχεί στα `*token`/`*secret`/`*apikey` κ.λπ.) αποκρύπτονται αναδρομικά ως `"[redacted]"` πριν από την εγγραφή της γραμμής.
+Κάθε καταχώριση αποθηκεύει τα `action`, `actor` (η προεπιλεγμένη τιμή είναι
+`"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`,
+`status`, `request_id` και `timestamp`. Τα ευαίσθητα κλειδιά (`apiKey`, `accessToken`,
+`refreshToken`, `password`, οτιδήποτε αντιστοιχεί στα `*token`/`*secret`/`*apikey`,
+κ.λπ.) αποκρύπτονται αναδρομικά ως `"[redacted]"` πριν εγγραφεί η γραμμή.
+
+Οι γραμμές `api_key.auth.touch` καταγράφουν επιτυχείς αναγνώσεις μεταδεδομένων
+κλειδιών API και αναγνώσεις εντοπισμού (GET/HEAD) που δεν φτάνουν ποτέ στο αρχείο
+καταγραφής αιτημάτων: ποιο κλειδί χρησιμοποιήθηκε, πότε και την κανονικοποιημένη
+διαδρομή, με συγχώνευση και ανώτατο όριο 1.000 γραμμών. Παραλείπονται τα κλειδιά
+με `noLog` και το κλειδί περιβάλλοντος. Η διεύθυνση IP και ο user-agent του
+καλούντος προστίθενται μόνο όταν είναι ενεργοποιημένη η σημαία δυνατοτήτων
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` (απενεργοποιημένη από προεπιλογή).
 
 ### Κλήσεις εργαλείων MCP (`mcp_tool_audit`)
 
-Κάθε κλήση εργαλείου MCP γράφει μία γραμμή μέσω του `open-sse/mcp-server/audit.ts`. Σχήμα (από το `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Κάθε κλήση εργαλείου MCP εγγράφει μία γραμμή μέσω του
+`open-sse/mcp-server/audit.ts`. Σχήμα (από το
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | Στήλη            | Σημειώσεις                                       |
 | ---------------- | ------------------------------------------------ |
-| `id`             | αυτόματη προσαύξηση                              |
+| `id`             | αυτόματη αύξηση                                  |
 | `tool_name`      | αναγνωριστικό εργαλείου MCP                      |
 | `input_hash`     | sha256 της εισόδου (δεν αποθηκεύεται φορτίο)     |
 | `output_summary` | σύντομη, περικομμένη σύνοψη                      |
-| `duration_ms`    | πραγματικός χρόνος                               |
+| `duration_ms`    | χρόνος τοίχου                                    |
 | `api_key_id`     | καλών (με δυνατότητα null)                       |
 | `success`        | `1` / `0`                                        |
 | `error_code`     | τελικός κωδικός σφάλματος σε περίπτωση αποτυχίας |
@@ -54,12 +72,13 @@
 
 ### Αρχεία καταγραφής αιτημάτων / χρήσης
 
-Πρόκειται για λειτουργική τηλεμετρία (όχι αυστηρά για διαχειριστικό έλεγχο), αλλά χρησιμοποιούν την ίδια διοχέτευση διατήρησης:
+Αυτά είναι λειτουργικά δεδομένα τηλεμετρίας (όχι αυστηρά διαχειριστικός έλεγχος),
+αλλά χρησιμοποιούν την ίδια διοχέτευση διατήρησης:
 
 - `usage_history` — συγκεντρωτικά δεδομένα χρήσης ανά αίτημα
-- `call_logs` — πλήρες αρχείο καταγραφής ανά αίτημα (υπόκειται σε όριο γραμμών, δείτε παρακάτω)
-- `proxy_logs` — αρχείο καταγραφής κίνησης διαμεσολαβητή (υπόκειται σε όριο γραμμών)
-- `request_detail_logs` — παλαιού τύπου λεπτομερές αρχείο καταγραφής αιτημάτων (εξακολουθεί να εκκαθαρίζεται, εφόσον υπάρχει)
+- `call_logs` — πλήρες αρχείο καταγραφής ανά αίτημα (υπόκειται σε όριο γραμμών, βλ. παρακάτω)
+- `proxy_logs` — αρχείο καταγραφής κίνησης διακομιστή μεσολάβησης (υπόκειται σε όριο γραμμών)
+- `request_detail_logs` — παλαιό λεπτομερές αρχείο καταγραφής αιτημάτων (εκκαθαρίζεται επίσης, αν υπάρχει)
 
 ## Σχήμα αποθήκευσης
 
