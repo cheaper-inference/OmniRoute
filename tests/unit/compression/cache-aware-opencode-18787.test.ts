@@ -55,7 +55,7 @@ beforeEach(resetLiveZoneCache);
 test("#18787: OpenCode providers use implicit prefix caching, not explicit cache_control", () => {
   for (const providerId of ["opencode", "opencode-go"]) {
     assert.equal(providerSupportsCaching(providerId, "openai", null, model), true);
-    assert.equal(providerUsesAutomaticPrefixCaching(providerId), true);
+    assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, model), true);
     assert.equal(providerHonorsOpenAIFormatCacheControl(providerId), false);
     assert.equal(
       providerSupportsCaching(providerId, "openai", { supportsPromptCaching: false }, model),
