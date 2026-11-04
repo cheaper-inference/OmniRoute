@@ -1,4 +1,6 @@
+import { useId } from "react";
 import type { ComponentProps, ReactNode } from "react";
+import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
 import { NumberTicker } from "./number-ticker";
 
@@ -13,6 +15,10 @@ interface StatBaseProps extends ComponentProps<"div"> {
   /** Opt-in compact uppercase treatment for dashboard summary labels. */
   labelVariant?: StatLabelVariant;
   hint?: ReactNode;
+  /** Explanatory text revealed by an info icon after the label (hover or keyboard focus). */
+  info?: ReactNode;
+  /** Accessible name prefix of the info icon; the stat label is appended. Defaults to "More information". */
+  infoLabel?: string;
   suffix?: ReactNode;
   tone?: StatTone;
   currency?: string;
@@ -49,6 +55,8 @@ export function Stat({
   labelVariant = "default",
   value,
   hint,
+  info,
+  infoLabel = "More information",
   suffix,
   tone = "default",
   format = "number",
@@ -60,6 +68,11 @@ export function Stat({
   animateOnView,
   ...props
 }: StatProps) {
+  const baseId = useId();
+  const labelId = `${baseId}-label`;
+  const infoId = `${baseId}-info`;
+  // Slot rule: null, undefined, booleans and "" are absent, so `info={show && "..."}` renders nothing.
+  const hasInfo = info != null && typeof info !== "boolean" && info !== "";
   const options = { ...formatOptions(format, currency), ...numberFormatOptions };
   const rendered = value === null ? "—" : typeof value === "string" ? value : new Intl.NumberFormat(locale, options).format(value);
   return (
@@ -75,7 +88,10 @@ export function Stat({
             {icon}
           </span>
         ) : null}
-        <span className="ci-stat__label-text">{label}</span>
+        <span id={hasInfo ? labelId : undefined} className="ci-stat__label-text">{label}</span>
+        {hasInfo ? (
+          <InfoTooltip id={infoId} content={info} label={infoLabel} aria-labelledby={`${infoId} ${labelId}`} />
+        ) : null}
       </div>
       <div className="ci-stat__value">
         {value === null ? (

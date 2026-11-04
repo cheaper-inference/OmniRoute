@@ -19,87 +19,77 @@
 ## 1. అంశాలు ఎక్కడ ఉంటాయి
 
 - **కిట్.** `packages/ui-kit/src` అనేది
-  `packages/ui-kit/UPSTREAM.md`లో పిన్ చేసిన కమిట్లోని అప్స్ట్రీమ్ `src/`కు బైట్-ఫర్-బైట్ కాపీ (ఇది లైసెన్స్
-  అనుమతిని కూడా నమోదు చేస్తుంది); `PATCHES.md` స్థానిక ప్యాచ్లను జాబితా చేస్తుంది (ఏవీ లేవు). ఇది బిల్డ్
-  లేకుండా సోర్స్గా వినియోగించబడుతుంది: `next.config.mjs` దాన్ని ట్రాన్స్పైల్ చేస్తుంది, అలాగే
-  `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` మరియు `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*`గా మ్యాప్ చేస్తుంది (`vitest.config.ts` మరియు `vitest.mcp.config.ts`లో కూడా అదే
-  అలియాస్ ఉంటుంది). కిట్ కాంపోనెంట్ను దాని సబ్పాత్ ద్వారా (`@omniroute/ui-kit/table`,
-  `@omniroute/ui-kit/page-header`…) ఇంపోర్ట్ చేయండి, `@omniroute/ui-kit` బ్యారెల్ ద్వారా ఎప్పుడూ చేయవద్దు:
-  ఆ బ్యారెల్ ప్రతి కాంపోనెంట్ను (డేట్ పికర్తో సహా) ప్రతి ఇంపోర్టర్లోకి తీసుకువస్తుంది. కిట్ స్టైల్షీట్
-  `src/app/globals.css` ద్వారా ప్రవేశిస్తుంది
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **టోకెన్లు.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` టోకెన్లను ప్రకటిస్తుంది;
-  `src/app/globals.css` వాటిని లెగసీ OmniRoute పేర్లతో (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) అనుసంధానిస్తుంది, తద్వారా
-  ఇప్పటికే ఉన్న `var(--color-*)` రీడ్లు మరియు Tailwind యుటిలిటీలు పని చేస్తూనే ఉంటాయి. కొత్త కోడ్
-  Tailwind యుటిలిటీలను (`bg-surface`, `text-text-muted`, `border-border`, `text-success`,
-  `bg-success-bg`, `bg-chart-1`…) లేదా కిట్ క్లాస్లను ఉపయోగిస్తుంది — హెక్స్ విలువను ఎప్పుడూ ఉపయోగించదు
-  (`tests/unit/design-kit-bridge.test.ts` ఈ అనుసంధానాన్ని అమలు చేయిస్తుంది). `text-primary`,
-  `--text-color-primary` ద్వారా `--color-primary-ink`గా పరిష్కరించబడుతుంది, కాబట్టి ప్రైమరీ టెక్స్ట్
-  చదవగలిగేలా ఉండగా `bg-primary`/`border-primary` యాక్సెంట్ సర్ఫేస్ను కొనసాగిస్తాయి: Editions కింద ఇది
-  కిట్కు చెందిన `--ci-color-accent-active` (లైట్లో గాఢమైన కాపర్ `#99562f`, డార్క్లో కాపర్ యాక్సెంట్);
-  Classic కింద లైట్లో lime-800 మరియు డార్క్లో లైమ్ యాక్సెంట్. చార్ట్ సిరీస్లు
+  `packages/ui-kit/UPSTREAM.md`లో పిన్ చేసిన కమిట్ వద్ద ఉన్న అప్స్ట్రీమ్ `src/`కు బైట్-ఫర్-బైట్ నకలు (ఇది లైసెన్స్ అధికారాన్ని కూడా నమోదు చేస్తుంది); `PATCHES.md` స్థానిక
+  ప్యాచ్లను జాబితా చేస్తుంది (ఏవీ లేవు). ఇది బిల్డ్ లేకుండానే సోర్స్గా వినియోగించబడుతుంది: `next.config.mjs` దీన్ని ట్రాన్స్పైల్ చేస్తుంది, అలాగే
+  `tsconfig.json`లో `@omniroute/ui-kit` → `packages/ui-kit/src` మరియు `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*`గా మ్యాప్ చేయబడతాయి (`vitest.config.ts` మరియు `vitest.mcp.config.ts`లో కూడా ఇదే అలియాస్ ఉంటుంది). కిట్
+  కంపోనెంట్ను దాని సబ్పాత్ ద్వారా ఇంపోర్ట్ చేయండి (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ఎప్పుడూ
+  `@omniroute/ui-kit` బారెల్ ద్వారా చేయవద్దు: బారెల్ ప్రతి కంపోనెంట్ను (డేట్ పికర్తో సహా)
+  ప్రతి ఇంపోర్టర్లోకి తీసుకువస్తుంది. కిట్ స్టైల్షీట్ `src/app/globals.css` ద్వారా ప్రవేశిస్తుంది
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, పూర్తి షీట్: కోర్ `ci-ui.css`తో పాటు ప్రతి ప్యాటర్న్ కుటుంబం).
+- **టోకెన్లు.** `packages/ui-kit/src/ci-tokens.css`లో `--ci-*` టోకెన్లు ప్రకటించబడతాయి; `src/app/globals.css`
+  వాటిని లెగసీ OmniRoute పేర్లతో (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) అనుసంధానిస్తుంది, తద్వారా ఇప్పటికే ఉన్న `var(--color-*)` రీడ్లు మరియు Tailwind
+  యుటిలిటీలు పని చేస్తూనే ఉంటాయి. కొత్త కోడ్ Tailwind యుటిలిటీలను (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) లేదా కిట్ క్లాస్లను ఉపయోగిస్తుంది — హెక్స్ విలువను ఎప్పుడూ
+  ఉపయోగించదు (`tests/unit/design-kit-bridge.test.ts` ఈ అనుసంధానాన్ని అమలు చేయిస్తుంది). `text-primary` అనేది
+  `--text-color-primary` ద్వారా `--color-primary-ink`గా పరిష్కరించబడుతుంది, కాబట్టి ప్రైమరీ టెక్స్ట్ చదవగలిగేలా ఉండగా
+  `bg-primary`/`border-primary` యాక్సెంట్ ఉపరితలాన్ని అలాగే ఉంచుతాయి: Editionsలో ఇది కిట్కు చెందిన
+  `--ci-color-accent-active` (లైట్లో ముదురు కాపర్ `#99562f`, డార్క్లో కాపర్ యాక్సెంట్); Classicలో,
+  లైట్లో lime-800 మరియు డార్క్లో లైమ్ యాక్సెంట్. చార్ట్ సిరీస్లు
   `--color-chart-1` … `--color-chart-5`ను ఉపయోగిస్తాయి.
-- **థీమ్లు.** `<html className="ci-theme">` (`src/app/layout.tsx`) డాక్యుమెంట్ను కిట్ థీమ్లోకి
-  చేర్చుతుంది. ప్రాధాన్యత `light`, `dark` లేదా `system` (`src/shared/constants/appConfig.ts`లో
-  `THEME_CONFIG.defaultTheme = "system"`; `system`, `prefers-color-scheme`ను అనుసరిస్తుంది).
-  `src/store/themeStore.ts`లోని `applyTheme()` (హైడ్రేషన్కు ముందు రన్ అయ్యేలా
-  `src/app/layout.tsx`లో ఇన్లైన్ చేసిన `THEME_BOOT_SCRIPT`లోనూ ఇదే ప్రతిబింబించబడింది)
+- **థీమ్లు.** `<html className="ci-theme">` (`src/app/layout.tsx`) డాక్యుమెంట్ను కిట్ థీమ్లోకి చేర్చుతుంది.
+  ప్రాధాన్యత `light`, `dark` లేదా `system` (`src/shared/constants/appConfig.ts`లో `THEME_CONFIG.defaultTheme = "system"`;
+  `system` అనేది `prefers-color-scheme`ను అనుసరిస్తుంది). `src/store/themeStore.ts`లోని `applyTheme()` (హైడ్రేషన్కు
+  ముందు రన్ అయ్యేలా `src/app/layout.tsx`లో ఇన్లైన్ చేసిన `THEME_BOOT_SCRIPT`లో కూడా ఇదే ప్రతిబింబించబడుతుంది)
   `data-theme="dark"|"light"`ను సెట్ చేసి, అదే సమయంలో `<html>`పై `.dark` క్లాస్ను టాగుల్ చేస్తుంది.
-  కిట్ డార్క్ టోకెన్ సెట్ `data-theme="dark"` ఆధారంగా కీ చేయబడుతుంది
-  (`packages/ui-kit/src/ci-tokens.css`); OmniRoute సొంత డార్క్ ఓవర్రైడ్లు (`globals.css`లోని `.dark`
-  బ్లాక్) మరియు లెగసీ Tailwind `dark:` యుటిలిటీలు `.dark` క్లాస్ ఆధారంగా కీ చేయబడతాయి. యాక్సెంట్ రంగు
-  ప్రీసెట్లు లేవు: యాక్సెంట్ ఎల్లప్పుడూ కిట్ నుంచే వస్తుంది, అలాగే పాత బిల్డ్ నుంచి నిల్వ చేయబడిన
-  ప్రీసెట్ను స్టోర్ లోడ్ అయినప్పుడు తొలగిస్తారు.
-- **ప్యాలెట్లు.** రెండూ కిట్ నుంచే వస్తాయి (`src/shared/constants/appearancePalette.ts`): డిఫాల్ట్ అయిన
-  `editions`, మరియు `classic`. Editions అనేది `<html>`పై ఉండే కిట్
-  `data-ci-appearance="editions"` అట్రిబ్యూట్; `ci-editions.css` (`ci-ui.css` ద్వారా ఇంపోర్ట్ చేయబడింది)
-  దీన్ని `data-theme`తో కలుపుతుంది; Classic అంటే ఆ అట్రిబ్యూట్ లేకపోవడం. రూట్ లేఅవుట్ అట్రిబ్యూట్ను
-  సర్వర్-రెండర్ చేస్తుంది, కాబట్టి ఏదీ నిల్వ చేయని (లేదా JS లేని) సందర్శకుడికి ప్రతి సర్ఫేస్పై —
-  డ్యాష్బోర్డ్, లాగిన్, `/status`, ఎర్రర్ పేజీలు, `/docs` మరియు PWA — Editions లభిస్తుంది. ఎంపిక అదే
-  `theme` స్టోర్లో థీమ్ పక్కనే (`src/store/themeStore.ts`లోని `palette`, `setPalette()`,
-  `applyPalette()`) నిల్వ చేయబడుతుంది మరియు పెయింట్కు ముందు `THEME_BOOT_SCRIPT`
-  (`src/shared/utils/themeBootScript.ts`, లేఅవుట్ `<head>`లో ఇన్లైన్ చేయబడింది) ద్వారా వర్తింపజేయబడుతుంది;
-  నిల్వ చేసిన ప్యాలెట్ `"classic"` అయినప్పుడు మాత్రమే ఇది అట్రిబ్యూట్ను తొలగిస్తుంది; రూట్ లేఅవుట్కు
-  వెలుపల ఉన్న `src/app/global-error.tsx` కూడా అదే స్టోర్ నుంచి దాన్ని వర్తింపజేస్తుంది.
-  `data-ci-appearance`ను మరే ఇతర ఎలిమెంట్పైనా ఉంచవద్దు: కిట్ దాన్ని
-  `html:root:has([data-ci-appearance="editions"])`తో మ్యాచ్ చేస్తుంది, కాబట్టి ఒక్క డిసెండెంట్ కూడా మొత్తం
-  డాక్యుమెంట్ను మార్చేస్తుంది. Editions `data-ci-editions-variant="landing"` వేరియంట్ మార్కెటింగ్
-  పేజీల కోసం, డ్యాష్బోర్డ్ కోసం కాదు. బ్రౌజర్ క్రోమ్ (`viewport.themeColor`, వెబ్ మానిఫెస్ట్) CSSను లేదా
-  నిల్వ చేసిన ఎంపికను చదవలేదు, కాబట్టి అది డిఫాల్ట్ను అనుసరిస్తుంది:
-  `src/shared/constants/pwaThemeColors.ts`లోని `PWA_THEME_COLORS`, Editions
-  `--ci-color-background`కు (`#f3f1e9` / `#11120f`) ఏకైక ప్రతిబింబం, ఇది
-  `tests/unit/pwa-theme-colors.test.ts` ద్వారా `ci-editions.css`కు పిన్ చేయబడింది. Monaco తన రంగులను ఒక
-  ప్రోబ్ నుంచి చదువుతుంది (`monacoKitTheme.ts`); Editions కింద ప్రోబ్ రీడ్ ఒక సింక్రోనస్ పాస్ కోసం రూట్
-  `data-theme`ను తిప్పుతుంది, ఎందుకంటే కిట్ Editions లైట్/డార్క్ను రూట్ నుంచే పరిష్కరిస్తుంది.
-- **కాంపోనెంట్లు (అడాప్టర్లు).** `src/shared/components/index.tsx` OmniRoute కాంపోనెంట్ APIని (అదే
-  పేర్లు, డిఫాల్ట్ ఎక్స్పోర్ట్లు మరియు ప్రాప్లు) అలాగే ఉంచుతుంది, దాని వెనుక ఉన్న ప్రిమిటివ్లు కిట్పై
-  నిర్మించిన అడాప్టర్లు: ఫారమ్లు (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
-  `Badge`, `Card`), ఓవర్లేలు మరియు ఫీడ్బ్యాక్ (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), నిర్మాణం (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`) మరియు టేబుల్లు (`DataTable`, `FilterBar`,
-  `ColumnToggle`, `FilterPills`, `PresetSlider`). ఒక అడాప్టర్ కిట్ కాంపోనెంట్ను సబ్పాత్ ద్వారా ఇంపోర్ట్
-  చేసి, లెగసీ ప్రాప్లను దానిపై మ్యాప్ చేస్తుంది — ఉదాహరణకు `Button variant="primary"` అనేది కిట్
-  `default` బటన్ (లైట్లో ఇన్వర్స్ సర్ఫేస్, డార్క్లో దాని `--ci-color-accent-foreground` ఇంక్తో కూడిన
-  యాక్సెంట్ అయిన `--ci-button-primary-*`), `danger` అనేది `destructive`, అలాగే `warning` అనేది
-  `.ci-button--warning` ఎక్స్టెన్షన్తో కూడిన `outline`. `globals.css` చివరలోని
-  `.ci-button--warning` మరియు `.ci-badge[data-tone]` నియమాలు (`@layer components`) కిట్ క్లాస్లపై
-  OmniRoute ఎక్స్టెన్షన్లు. `tests/unit/ui/adapters/*.test.tsx` ప్రతి అడాప్టర్ను పిన్ చేస్తాయి.
-- **షెల్.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout`ను రెండర్ చేస్తుంది; అది
-  `src/shared/components/layouts/DashboardShell.tsx`ను రెండర్ చేస్తుంది: కిట్ `SidebarProvider` /
-  `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), దానితో పాటు
-  `src/shared/components/Sidebar.tsx`లో OmniRoute నావిగేషన్ లాజిక్. `#main-content`కు వెళ్లే "కంటెంట్కు
-  దాటవేయి" లింక్ ఫోకస్ చేయగల మొదటి ఎలిమెంట్. `src/shared/components/Header.tsx` కిట్
-  `SidebarTrigger`ను (షెల్లోని ఏకైక సైడ్బార్ టాగుల్), Keak `ProductSwitcher`ను మరియు కమాండ్-ప్యాలెట్
-  ఓపెనర్ను కలిగి ఉంటుంది; `#main-content`లో కిట్ `PageHeader` (`.ci-page-header`) మౌంట్ కానప్పుడు మాత్రమే
-  ఇది రూట్ శీర్షికను చూపుతుంది, కాబట్టి స్వంత `PageHeader` ఉన్న పేజీలో ఒకే `h1` ఉంటుంది.
-  `src/shared/components/CommandPalette.tsx` అనేది కిట్ `Dialog`.
-- **ఐకాన్లు.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) పేరును (స్క్రీన్లు ఉపయోగించే
-  Material Symbols పదజాలం) `ICON_MAP` (`src/shared/constants/iconMap.ts`) ద్వారా
+  కిట్ డార్క్ టోకెన్ సెట్ `data-theme="dark"`పై ఆధారపడుతుంది (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoute స్వంత డార్క్ ఓవర్రైడ్లు (`globals.css`లోని `.dark` బ్లాక్) మరియు లెగసీ Tailwind `dark:`
+  యుటిలిటీలు `.dark` క్లాస్పై ఆధారపడతాయి. యాక్సెంట్ కలర్ ప్రీసెట్లు లేవు: యాక్సెంట్ ఎల్లప్పుడూ
+  కిట్ నుంచే వస్తుంది, అలాగే పాత బిల్డ్ నుంచి నిల్వ చేయబడిన ప్రీసెట్ ఏదైనా ఉంటే స్టోర్ లోడ్ అయినప్పుడు తొలగించబడుతుంది.
+- **ప్యాలెట్లు.** రెండూ కిట్ నుంచే వస్తాయి (`src/shared/constants/appearancePalette.ts`): డిఫాల్ట్ అయిన `editions`,
+  మరియు `classic`. Editions అనేది `<html>`పై కిట్కు చెందిన `data-ci-appearance="editions"` అట్రిబ్యూట్; దీన్ని
+  `ci-editions.css` (`ci-ui.css` ద్వారా ఇంపోర్ట్ చేయబడుతుంది) `data-theme`తో కలిపి ఉపయోగిస్తుంది; Classicలో ఆ అట్రిబ్యూట్
+  ఉండదు. రూట్ లేఅవుట్ ఆ అట్రిబ్యూట్ను సర్వర్-రెండర్ చేస్తుంది, కాబట్టి ఏదీ నిల్వ చేయని సందర్శకుడికి (లేదా JS లేని
+  సందర్శకుడికి) ప్రతి ఉపరితలంపై — డాష్బోర్డ్, లాగిన్, `/status`, ఎర్రర్ పేజీలు, `/docs` మరియు PWAలో —
+  Editions లభిస్తుంది. ఈ ఎంపిక అదే `theme` స్టోర్లో థీమ్ పక్కనే నిల్వ చేయబడుతుంది (`palette`, `setPalette()`, `applyPalette()`;
+  `src/store/themeStore.ts`) మరియు పెయింట్కు ముందు `THEME_BOOT_SCRIPT` ద్వారా వర్తింపజేయబడుతుంది
+  (`src/shared/utils/themeBootScript.ts`, లేఅవుట్ `<head>`లో ఇన్లైన్ చేయబడుతుంది); నిల్వ చేసిన ప్యాలెట్
+  `"classic"` అయినప్పుడు మాత్రమే ఇది అట్రిబ్యూట్ను తొలగిస్తుంది; రూట్ లేఅవుట్ వెలుపల ఉన్న `src/app/global-error.tsx`
+  అదే స్టోర్ నుంచి దాన్ని వర్తింపజేస్తుంది. `data-ci-appearance`ను మరే ఇతర ఎలిమెంట్పైనా ఉంచవద్దు: కిట్ దీన్ని
+  `html:root:has([data-ci-appearance="editions"])`తో మ్యాచ్ చేస్తుంది, కాబట్టి ఒక డిసెండెంట్ మొత్తం డాక్యుమెంట్ను మార్చేస్తుంది.
+  Editionsకు చెందిన `data-ci-editions-variant="landing"` వేరియంట్ మార్కెటింగ్ పేజీల కోసం, డాష్బోర్డ్ కోసం కాదు.
+  బ్రౌజర్ క్రోమ్ (`viewport.themeColor`, వెబ్ మానిఫెస్ట్) CSSను లేదా నిల్వ చేసిన ఎంపికను చదవలేదు, కాబట్టి అది
+  డిఫాల్ట్ను అనుసరిస్తుంది: `src/shared/constants/pwaThemeColors.ts`లోని `PWA_THEME_COLORS` అనేది Editions
+  `--ci-color-background`కు (`#f3f1e9` / `#11120f`) ఉన్న ఏకైక ప్రతిరూపం; ఇది
+  `tests/unit/pwa-theme-colors.test.ts` ద్వారా `ci-editions.css`కు పిన్ చేయబడింది. Monaco తన రంగులను ఒక ప్రోబ్
+  నుంచి చదువుతుంది (`monacoKitTheme.ts`); Editionsలో ప్రోబ్ రీడ్ ఒక సింక్రోనస్ పాస్ కోసం రూట్ `data-theme`ను
+  తిప్పుతుంది, ఎందుకంటే కిట్ Editions లైట్/డార్క్ను రూట్ నుంచి పరిష్కరిస్తుంది.
+- **కంపోనెంట్లు (అడాప్టర్లు).** `src/shared/components/index.tsx` OmniRoute కంపోనెంట్ APIని (అదే
+  పేర్లు, డిఫాల్ట్ ఎక్స్పోర్ట్లు మరియు ప్రాప్లు) అలాగే ఉంచుతుంది, అలాగే దాని వెనుక ఉన్న ప్రిమిటివ్లు కిట్పై నిర్మించిన అడాప్టర్లు: ఫారమ్లు
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ఓవర్లేలు మరియు ఫీడ్బ్యాక్
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  నిర్మాణం (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) మరియు టేబుల్లు
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ఒక అడాప్టర్ కిట్
+  కంపోనెంట్ను సబ్పాత్ ద్వారా ఇంపోర్ట్ చేసి, లెగసీ ప్రాప్లను దానికి మ్యాప్ చేస్తుంది — ఉదాహరణకు `Button variant="primary"` అనేది
+  కిట్ `default` బటన్ (`--ci-button-primary-*`: లైట్లో ఇన్వర్స్ ఉపరితలం, డార్క్లో దాని
+  `--ci-color-accent-foreground` ఇంక్తో కూడిన యాక్సెంట్), `danger` అనేది `destructive`, అలాగే `warning` అనేది `outline`తో పాటు
+  `.ci-button--warning` ఎక్స్టెన్షన్. `globals.css` చివరలోని (`@layer components`) `.ci-button--warning` మరియు
+  `.ci-badge[data-tone]` నియమాలు కిట్ క్లాస్లపై నిర్మించిన OmniRoute ఎక్స్టెన్షన్లు.
+  `tests/unit/ui/adapters/*.test.tsx` ప్రతి అడాప్టర్ను పిన్ చేస్తాయి.
+- **షెల్.** `src/app/(dashboard)/layout.tsx` అనేది `DashboardLayout`ను రెండర్ చేస్తుంది, అది
+  `src/shared/components/layouts/DashboardShell.tsx`ను రెండర్ చేస్తుంది: కిట్ `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), అలాగే OmniRoute నావిగేషన్ లాజిక్
+  `src/shared/components/Sidebar.tsx`లో ఉంటుంది. `#main-content`కు వెళ్లే "కంటెంట్కు దాటవేయి" లింక్ మొదటి ఫోకస్ చేయగల
+  ఎలిమెంట్. `src/shared/components/Header.tsx`లో కిట్ `SidebarTrigger` (షెల్కు ఉన్న ఏకైక సైడ్బార్
+  టాగుల్), Keak `ProductSwitcher` మరియు కమాండ్-ప్యాలెట్ ఓపెనర్ ఉంటాయి; `#main-content`లో కిట్ `PageHeader`
+  (`.ci-page-header`) మౌంట్ కానప్పుడు మాత్రమే ఇది రూట్ శీర్షికను చూపుతుంది, కాబట్టి తన స్వంత
+  `PageHeader` ఉన్న పేజీలో ఒకే `h1` ఉంటుంది. `src/shared/components/CommandPalette.tsx` అనేది కిట్ `Dialog`.
+- **ఐకాన్లు.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) పేరు (స్క్రీన్లు ఉపయోగించే
+  Material Symbols పదజాలం)ను `ICON_MAP` (`src/shared/constants/iconMap.ts`) ద్వారా
   Lucide గ్లిఫ్గా పరిష్కరిస్తుంది. Material Symbols ఫాంట్ మరియు ప్యాకేజీ తొలగించబడ్డాయి: మ్యాప్లో లేని పేరు
-  తటస్థ ప్లేస్హోల్డర్ గ్లిఫ్ను (`data-icon-missing="true"`) రెండర్ చేస్తుంది మరియు ప్రొడక్షన్ వెలుపల కన్సోల్ హెచ్చరికను లాగ్ చేస్తుంది.
-  `npm run gen:icon-map` ప్రస్తుతం ఉపయోగంలో ఉండి, మ్యాప్లో లేని పేర్లను ప్రింట్ చేస్తుంది
+  తటస్థ ప్లేస్హోల్డర్ గ్లిఫ్ను (`data-icon-missing="true"`) రెండర్ చేస్తుంది మరియు production వెలుపల కన్సోల్ హెచ్చరికను లాగ్ చేస్తుంది.
+  `npm run gen:icon-map` మ్యాప్లో లేని, ప్రస్తుతం ఉపయోగంలో ఉన్న పేర్లను ప్రింట్ చేస్తుంది
   (Lucide ఐకాన్ లేని ఏ పేరుకైనా `tests/unit/icon-map-coverage.test.ts` విఫలమవుతుంది;
   లుకప్ ఆబ్జెక్ట్లలో నిల్వ చేసిన పేర్లను `tests/unit/icon-map-object-values.test.ts` కవర్ చేస్తుంది);
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` లిటరల్
@@ -111,7 +101,7 @@
   `src/shared/constants/keakProducts.ts`లో (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ఉంటాయి. స్వతంత్ర
   స్క్రీన్లు — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` మరియు `src/shared/components/ErrorPageScaffold.tsx`
-  — లాకప్ను చూపిస్తాయి; `tests/unit/brand-pages-static.test.ts` దాన్ని సంరక్షిస్తుంది.
+  — లాకప్ను చూపుతాయి; `tests/unit/brand-pages-static.test.ts` దానిని సంరక్షిస్తుంది.
 
 ## 2. నియమాలు
 
@@ -220,10 +210,10 @@ PR తెరవబడనప్పుడు (లక్ష్యం విడు�
 ## 7. సూచన సూచిక
 
 - `src/app/globals.css` — టోకెన్ బ్రిడ్జ్, `.dark` ఓవర్రైడ్లు, OmniRoute `@layer components` పొడిగింపులు
-- `packages/ui-kit/UPSTREAM.md` — పిన్ చేసిన అప్స్ట్రీమ్ కమిట్ మరియు లైసెన్స్ అనుమతి; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/UPSTREAM.md` — పిన్ చేసిన అప్స్ట్రీమ్ కమిట్ మరియు లైసెన్స్ అధీకరణ; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
   `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` మరియు దాని పక్కన ఉన్న అడాప్టర్లు; `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx` మరియు దాని పక్కనున్న అడాప్టర్లు; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`
