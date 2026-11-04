@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
 import {
+  bypassPageCSPForBridge,
   buildChatGptWebIntegrityResolutionSource,
+  ensureFirstPartyBridge,
   collectChatGptWebFirstPartyAssetCandidates,
   executeChatGptWebFirstPartyTurn,
   extractChatGptWebFirstPartyAssetReferences,
@@ -500,5 +502,201 @@ describe("ChatGPT Web integrity module resolution", () => {
     );
     assert.doesNotMatch(source, /evil\.example/);
     assert.doesNotMatch(source, /not-a-chunk\.css/);
+  });
+});
+
+
+describe("ChatGPT Web bridge CSP choreography", () => {
+  const BRIDGE_INSTALL_ASSET = "https://chatgpt.com/cdn/assets/discovery-current.js";
+  const CONTRACT_SOURCE = [
+    "async function aa(e,t){let[r,i]=await Promise.all([cc.getEnforcementToken(t,{forceSync:!0}),dd.getEnforcementToken(t)]);return[r,i]}",
+    "function ff(e=!1,t=`none`){return gg(`finalized`,e,t)}",
+    "async function hh(){return ee.safePost(`/sentinel/chat-requirements/prepare`,{})}",
+    "function ii(e,t,n,r,i,a){let o={};return e?.token?o[`OpenAI-Sentinel-Chat-Requirements-Token`]=e.token:o}",
+    "export{ff as A,cc as B,dd as C,ee as D,ii as E};",
+  ].join(";");
+  const CSP_DETAIL = "script-src-elem blocked blob:https://chatgpt.com/0a1b2c3d-0000";
+
+  interface ChoreographyOptions {
+    cdp: boolean;
+    sendFailures: number;
+  }
+
+  function createChoreographyPage(options: ChoreographyOptions) {
+    const state = {
+      reloads: 0,
+      sessions: 0,
+      bypassSends: 0,
+      injections: 0,
+    };
+    const injections: Array<"ok" | "fail"> = [];
+    const page = {
+      async evaluate(
+        pageFunction: (argument: unknown) => unknown,
+        argument: unknown,
+        _third: unknown
+      ) {
+        if (typeof argument === "string") {
+          const root = globalThis as typeof globalThis & Record<string, unknown>;
+          return typeof root[argument] === "object" && root[argument] !== null;
+        }
+        if (argument && typeof argument === "object" && "bridgeKey" in argument) {
+          const outcome = injections[state.injections] ?? "fail";
+          state.injections += 1;
+          if (outcome !== "ok") throw new Error(`csp: ${CSP_DETAIL}`);
+          const root = globalThis as typeof globalThis & Record<string, unknown>;
+          root[(argument as { bridgeKey: string }).bridgeKey] = { installed: true };
+          return undefined;
+        }
+        return { modulePreloadUrls: [BRIDGE_INSTALL_ASSET], resourceUrls: [] };
+      },
+      url: () => "https://chatgpt.com/",
+      reload: async () => {
+        state.reloads += 1;
+      },
+      waitForTimeout: async () => {},
+      on: () => {},
+      off: () => {},
+      context: () => ({
+        newCDPSession: options.cdp
+          ? () => {
+              state.sessions += 1;
+              const used = state.sessions - 1;
+              return {
+                send: async (_method: string) => {
+                  state.bypassSends += 1;
+                  if (state.bypassSends <= options.sendFailures) {
+                    throw new Error("Session closed by target");
+                  }
+                  void used;
+                },
+              };
+            }
+          : undefined,
+      }),
+    } as unknown as import("playwright").Page;
+    return {
+      page,
+      state,
+      scriptInjections: (steps: Array<"ok" | "fail">) => {
+        injections.push(...steps);
+      },
+    };
+  }
+
+  function installFakeAssetFetch(): () => void {
+    const previous = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(CONTRACT_SOURCE, { status: 200 })) as typeof fetch;
+    return () => {
+      globalThis.fetch = previous;
+    };
+  }
+
+  function cleanBridgeGlobals() {
+    const root = globalThis as typeof globalThis & Record<string, unknown>;
+    delete root[BRIDGE_KEY];
+  }
+
+  test("cold install enables the CSP bypass, reloads exactly once and installs the bridge", async () => {
+    cleanBridgeGlobals();
+    const restore = installFakeAssetFetch();
+    const { page, state, scriptInjections } = createChoreographyPage({
+      cdp: true,
+      sendFailures: 0,
+    });
+    scriptInjections(["ok"]);
+    try {
+      await ensureFirstPartyBridge(page);
+      assert.equal(state.bypassSends, 1);
+      assert.equal(state.reloads, 1);
+      assert.equal(state.injections, 1);
+      const root = globalThis as typeof globalThis & Record<string, unknown>;
+      assert.equal(typeof root[BRIDGE_KEY] === "object" && root[BRIDGE_KEY] !== null, true);
+    } finally {
+      restore();
+      cleanBridgeGlobals();
+    }
+  });
+
+  test("without a CDP surface the bypass is skipped and the page is never reloaded", async () => {
+    cleanBridgeGlobals();
+    const restore = installFakeAssetFetch();
+    const { page, state, scriptInjections } = createChoreographyPage({
+      cdp: false,
+      sendFailures: 0,
+    });
+    scriptInjections(["ok"]);
+    try {
+      await ensureFirstPartyBridge(page);
+      assert.equal(state.sessions, 0);
+      assert.equal(state.bypassSends, 0);
+      assert.equal(state.reloads, 0);
+      assert.equal(state.injections, 1);
+      const root = globalThis as typeof globalThis & Record<string, unknown>;
+      assert.equal(typeof root[BRIDGE_KEY] === "object" && root[BRIDGE_KEY] !== null, true);
+    } finally {
+      restore();
+      cleanBridgeGlobals();
+    }
+  });
+
+  test("a failed installation forces exactly one extra bypass+reload and retries once", async () => {
+    cleanBridgeGlobals();
+    const restore = installFakeAssetFetch();
+    const { page, state, scriptInjections } = createChoreographyPage({
+      cdp: true,
+      sendFailures: 0,
+    });
+    scriptInjections(["fail", "ok"]);
+    try {
+      await ensureFirstPartyBridge(page);
+      assert.equal(state.injections, 2);
+      assert.equal(state.sessions, 1, "the same cached CDP session is re-asserted");
+      assert.equal(state.bypassSends, 2);
+      assert.equal(state.reloads, 2, "cold install + one forced bypass");
+    } finally {
+      restore();
+      cleanBridgeGlobals();
+    }
+  });
+
+  test("a failed retry throws with the retry failure as its cause", async () => {
+    cleanBridgeGlobals();
+    const restore = installFakeAssetFetch();
+    const { page, scriptInjections } = createChoreographyPage({
+      cdp: true,
+      sendFailures: 0,
+    });
+    scriptInjections(["fail", "fail"]);
+    try {
+      await assert.rejects(ensureFirstPartyBridge(page), (thrown: unknown) => {
+        const error = thrown as Error & { cause?: unknown };
+        assert.match(error.message, /first-party bridge module failed to load/);
+        assert.match(error.message, /csp/);
+        assert.ok(error.cause instanceof Error);
+        assert.match((error.cause as Error).message, new RegExp(CSP_DETAIL));
+        return true;
+      });
+    } finally {
+      restore();
+      cleanBridgeGlobals();
+    }
+  });
+
+  test("a rejected Page.setBypassCSP evicts the cached session and retries on a fresh one", async () => {
+    cleanBridgeGlobals();
+    const { page, state } = createChoreographyPage({
+      cdp: true,
+      sendFailures: 1,
+    });
+    try {
+      assert.equal(await bypassPageCSPForBridge(page, "probe: stale session"), true);
+      assert.equal(state.sessions, 2, "stale session replaced exactly once");
+      assert.equal(state.bypassSends, 2);
+      assert.equal(state.reloads, 1);
+    } finally {
+      cleanBridgeGlobals();
+    }
   });
 });

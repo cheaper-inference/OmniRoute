@@ -652,18 +652,24 @@ async function bridgeCdpSessionForPage(page: Page): Promise<BridgeCdpSession | n
  * when the engine offers no CDP surface: the bridge then keeps the previous
  * failure mode.
  */
-async function bypassPageCSPForBridge(page: Page, reason: string): Promise<boolean> {
+/** Exported for tests: one bypass = one fresh-session attempt plus one reload. */
+export async function bypassPageCSPForBridge(page: Page, reason: string): Promise<boolean> {
   const session = await bridgeCdpSessionForPage(page);
   if (!session) return false;
   try {
     await session.send("Page.setBypassCSP", { enabled: true });
   } catch {
-    // A stale session (closed underneath us) is retried once with a fresh one.
+    // A stale session (closed underneath us) is retried once with a fresh one:
+    // evict the cached entry first, so the retry cannot reuse the same session.
+    bridgeCdpSessions.delete(page);
     const retry = await bridgeCdpSessionForPage(page);
     if (!retry) return false;
     try {
       await retry.send("Page.setBypassCSP", { enabled: true });
     } catch (retryError) {
+      // The failed retry also drops out of the cache: later bypass attempts
+      // must build their own session instead of replaying this one.
+      bridgeCdpSessions.delete(page);
       bridgeLog(
         `Page.setBypassCSP rejected: ${retryError instanceof Error ? retryError.message : String(retryError)}`
       );
@@ -759,7 +765,8 @@ async function injectFirstPartyBridge(page: Page): Promise<BridgeInjectAttempt> 
   }
 }
 
-async function ensureFirstPartyBridge(page: Page): Promise<void> {
+/** Exported for tests: the cold-install / forced-retry choreography is policy. */
+export async function ensureFirstPartyBridge(page: Page): Promise<void> {
   const ready = await page.evaluate((key) => {
     const root = globalThis as typeof globalThis & Record<string, unknown>;
     return typeof root[key] === "object" && root[key] !== null;
