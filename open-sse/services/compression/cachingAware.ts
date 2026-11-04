@@ -113,7 +113,7 @@ export function detectCachingContext(
             provider,
             targetFormat,
             context.connectionCacheOverride,
-            context.model
+            resolvedModel
           ),
     usesAutomaticPrefixCaching: providerUsesAutomaticPrefixCaching(
       provider,
