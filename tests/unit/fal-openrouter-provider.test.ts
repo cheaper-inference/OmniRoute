@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { REGISTRY } from "../../open-sse/config/providers/index.ts";
+import { getDiscoveryClass } from "../../src/lib/providerModels/discoveryClass.ts";
 import { parseModel } from "../../open-sse/services/model.ts";
 import { resolveProviderAlias } from "../../open-sse/services/providerAlias.ts";
 import {
@@ -59,11 +60,28 @@ describe("fal-openrouter provider", () => {
     assert.equal(headers.authorization, undefined);
   });
 
-  it("keeps the built-in OpenRouter discovery authenticated", () => {
+  it("never forwards fal connection custom headers to openrouter.ai", () => {
+    const config = PROVIDER_MODELS_CONFIG["fal-openrouter"];
+    const headers = assembleProviderModelsHeaders(config, "fal-secret-key", {
+      providerSpecificData: {
+        customHeaders: { "X-Auth-Token": "fal-routing-secret", "X-Fal-Workspace": "ws_1" },
+      },
+    });
+    assert.deepEqual(Object.keys(headers).sort(), ["Content-Type"]);
+    assert.ok(!Object.keys(headers).some((k) => k.toLowerCase() === "x-auth-token"));
+  });
+
+  it("classifies fal-openrouter as an openai-compat discovery provider", () => {
+    assert.equal(getDiscoveryClass("fal-openrouter"), "openai-compat");
+  });
+
+  it("keeps the built-in OpenRouter discovery authenticated and customizable", () => {
     const headers = assembleProviderModelsHeaders(
       PROVIDER_MODELS_CONFIG["openrouter"],
-      "openrouter-key"
+      "openrouter-key",
+      { providerSpecificData: { customHeaders: { "X-Title": "omniroute" } } }
     );
     assert.equal(headers.Authorization, "Bearer openrouter-key");
+    assert.equal(headers["X-Title"], "omniroute");
   });
 });

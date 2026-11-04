@@ -158,6 +158,13 @@ export type ProviderModelsConfigEntry = {
    * one, or null on the last page. Without it only `nextPageToken` is followed.
    */
   nextPageUrl?: (data: any, currentUrl: string) => string | null;
+  /**
+   * Do not forward `providerSpecificData.customHeaders` on this discovery
+   * request. Set when the catalog URL belongs to a third party that must never
+   * receive the connection's headers (e.g. `fal-openrouter` reading OpenRouter's
+   * public catalog: those headers were configured for fal, not openrouter.ai).
+   */
+  skipConnectionCustomHeaders?: boolean;
 };
 
 export function assembleProviderModelsHeaders(
@@ -169,7 +176,9 @@ export function assembleProviderModelsHeaders(
   if (!config.buildHeaders && config.authHeader && !config.authQuery) {
     headers[config.authHeader] = (config.authPrefix || "") + token;
   }
-  applyConnectionCustomHeaders(headers, context?.providerSpecificData);
+  if (!config.skipConnectionCustomHeaders) {
+    applyConnectionCustomHeaders(headers, context?.providerSpecificData);
+  }
   return headers;
 }
 
@@ -701,9 +710,12 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     authPrefix: "Bearer ",
   },
   // fal's router serves the OpenRouter catalog but has no /models endpoint of
-  // its own. Deliberately no authHeader: the connection's fal key must never be
-  // sent to openrouter.ai.
-  "fal-openrouter": { ...OPENROUTER_PUBLIC_MODELS_CONFIG },
+  // its own. Deliberately no authHeader, and no connection custom headers
+  // either: the connection's fal key and headers must never reach openrouter.ai.
+  "fal-openrouter": {
+    ...OPENROUTER_PUBLIC_MODELS_CONFIG,
+    skipConnectionCustomHeaders: true,
+  },
   aimlapi: {
     // #5570: AI/ML API's live catalog lives at the public, auth-free /models
     // database endpoint (NOT /v1/models). The registry has no modelsUrl, so
