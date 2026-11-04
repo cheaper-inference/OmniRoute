@@ -16,7 +16,7 @@
  * The cut response is held, not discarded: when no later target succeeds, the combo
  * returns the last partial result (`length`), exactly what a single target returns.
  */
-import { emit } from "./rrDashboardEvents.ts";
+import { emit, selectedConnectionIdOf } from "./rrDashboardEvents.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { isTruncatedStreamResponse } from "../../utils/truncatedStreamPolicy.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./attemptLoopTypes.ts";
@@ -65,6 +65,7 @@ export function recordHeldAttemptFailure(
   opts: HeldAttemptFailure & { reason: string; code: string; kind: ComboOutcomeKind }
 ): void {
   const { result, modelStr, target, state, deps, reason, code, kind } = opts;
+  const connectionId = selectedConnectionIdOf(result) || target.connectionId;
   state.lastError = reason;
   state.lastStatus = 502;
   state.comboErrors.push({ model: modelStr, status: 502, error: reason, kind, code });
@@ -85,6 +86,7 @@ export function recordHeldAttemptFailure(
     model: modelStr,
     error: reason,
     latencyMs: Date.now() - deps.startTime,
+    ...(connectionId ? { connectionId } : {}),
   });
   holdAttemptResponse(state, result);
 }

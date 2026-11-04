@@ -66,13 +66,15 @@
   --desktop-safe-bottom: 0px;
   color-scheme: light;
 
-  /* Brand accent (lime) — the only accent; presets were retired (spec D4). */
+  /* Brand accent — the active palette's (Editions copper by default, Classic lime as the
+     option; src/shared/constants/appearancePalette.ts). Presets were retired (spec D4). */
   --color-primary: var(--ci-color-accent);
   --color-primary-hover: var(--ci-color-accent-hover);
-  /* Primary as TEXT (`text-primary` via @theme's --text-color-primary): lime is a surface that
-     carries dark ink, never ink on light (lime-400 on the background ≈ 1.1:1). The kit has no
-     accent-ink token yet (pendência), so light uses its lime-800 (≈ 7.1:1); dark flips back
-     to the lime below. */
+  /* Primary as TEXT (`text-primary` via @theme's --text-color-primary): the accent is a
+     surface that carries dark ink, never ink on light (Classic lime-400 on the background
+     ≈ 1.1:1, Editions copper ≈ 1.8:1). The kit has no accent-ink token yet (pendência), so
+     Classic light uses its lime-800 (≈ 7.1:1) and dark flips back to the lime below; Editions
+     reads its own accent-active (block after the dark one). */
   --color-primary-ink: var(--ci-lime-800);
   --color-accent: var(--ci-color-accent);
   --color-accent-light: var(--ci-color-accent-surface-strong);
@@ -155,10 +157,29 @@
   --table-header-bg: var(--ci-color-surface-muted);
 }
 
-/* Dark: lime reads on the dark background (≈ 17:1), so the primary ink is the accent itself.
-   Same `data-theme="dark"` hook the kit flips on. */
+/* Classic dark: lime reads on the dark background (≈ 17:1), so the primary ink is the accent
+   itself. Same `data-theme="dark"` hook the kit flips on. */
 :root[data-theme="dark"] {
   --color-primary-ink: var(--ci-color-accent);
+}
+
+/* Editions (default palette, packages/ui-kit/src/ci-editions.css): the primary ink is the kit's
+   --ci-color-accent-active — the deep copper #99562f in light (≈ 5.0:1 on the background) and
+   the copper accent #e5ac82 in dark (≈ 9.5:1), both flipped by the kit itself. `html:root[…]`
+   outranks the `:root[data-theme="dark"]` rule above, so Classic keeps its two values. */
+html:root[data-ci-appearance="editions"] {
+  --color-primary-ink: var(--ci-color-accent-active);
+}
+
+/* Warning text. The kit's light Editions warning #99631f reads only ≈ 4.1:1 on its own
+   --ci-color-warning-bg and ≈ 4.5:1 on the canvas, short of AA for small badge/button text, so
+   light Editions uses the same hue darkened (≈ 4.7:1 on the tinted background). Classic and both
+   dark palettes keep the kit value. Upstream fix requested; drop this when the kit ships it. */
+:root {
+  --color-warning-ink: var(--ci-color-warning);
+}
+html:root[data-ci-appearance="editions"]:not([data-theme="dark"]) {
+  --color-warning-ink: #8c5a1b;
 }
 
 /* Dark: the kit flips every --ci-* value on `data-theme="dark"` (themeStore sets it with the
@@ -175,10 +196,12 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   /* `text-*` reads --text-color-* before --color-*: text-primary → readable ink, while
-     bg-/border-/ring-primary keep the lime above. */
+     bg-/border-/ring-primary keep the accent above. */
   --text-color-primary: var(--color-primary-ink);
-  /* --color-accent is the same kit lime (var(--ci-color-accent)), so text-accent gets the ink. */
+  /* --color-accent is the same kit accent (var(--ci-color-accent)), so text-accent gets the ink. */
   --text-color-accent: var(--color-primary-ink);
+  /* text-warning gets the readable warning ink; bg-/border-warning keep the kit colour. */
+  --text-color-warning: var(--color-warning-ink);
 
   /* Accent */
   --color-accent: var(--color-accent);
@@ -846,7 +869,7 @@ html[dir="rtl"] :where(.react-flow) {
 @layer components {
   /* Button variant="warning" (spec §3.6): kit has no warning button; outline + warning ink. */
   .ci-button--warning {
-    color: var(--ci-color-warning);
+    color: var(--color-warning-ink);
     border-color: var(--ci-color-warning);
     background: var(--ci-color-warning-bg);
   }
@@ -861,7 +884,7 @@ html[dir="rtl"] :where(.react-flow) {
     border-color: transparent;
   }
   .ci-badge[data-tone="warning"] {
-    color: var(--ci-color-warning);
+    color: var(--color-warning-ink);
     background: var(--ci-color-warning-bg);
     border-color: transparent;
   }
@@ -880,8 +903,9 @@ html[dir="rtl"] :where(.react-flow) {
     background: var(--ci-color-accent-surface-strong);
     border-color: transparent;
   }
-  /* Dark: the surface is a 14 % lime tint over the dark background, so the near-black accent
-     foreground vanished ("8 features" on the translator, F4); the lime itself is the ink. */
+  /* Dark: the surface is a 14–22 % accent tint over the dark background, so the near-black
+     accent foreground vanished ("8 features" on the translator, F4); the accent itself is the
+     ink (Classic lime, Editions copper). */
   :root[data-theme="dark"] .ci-badge[data-tone="primary"] {
     color: var(--ci-color-accent);
   }
